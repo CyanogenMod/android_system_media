@@ -210,8 +210,8 @@ static struct class Engine_class = {
     Engine_interfaces,
     sizeof(Engine_interfaces)/sizeof(Engine_interfaces[0]),
     "Engine",
-    0,
-    sizeof(struct Engine_class)
+    sizeof(struct Engine_class),
+    0
 };
 
 static const struct iid_vtable OutputMix_interfaces[] = {
@@ -225,8 +225,8 @@ static struct class OutputMix_class = {
     OutputMix_interfaces,
     sizeof(OutputMix_interfaces)/sizeof(OutputMix_interfaces[0]),
     "OutputMix",
-    0,
-    sizeof(struct OutputMix_class)
+    sizeof(struct OutputMix_class),
+    0
 };
 
 static const struct iid_vtable AudioPlayer_interfaces[] = {
@@ -241,8 +241,8 @@ static struct class AudioPlayer_class = {
     AudioPlayer_interfaces,
     sizeof(AudioPlayer_interfaces)/sizeof(AudioPlayer_interfaces[0]),
     "AudioPlayer",
-    0,
-    sizeof(struct AudioPlayer_class)
+    sizeof(struct AudioPlayer_class),
+    0
 };
 
 /* Object implementation */
@@ -293,6 +293,9 @@ static SLresult Object_GetInterface(SLObjectItf self, const SLInterfaceID iid,
     for (i = 0; i < class->interfaceCount; ++i) {
         if (iid == *class->interfaces[i].iid ||
             !memcmp(iid, *class->interfaces[i].iid, sizeof(struct SLInterfaceID_))) {
+// FIXME code review on 2010/04/16
+// I think it is "this->this" instead of "this" at line 296 :
+// *(void **)pInterface = (char *) this + class->interfaces[i].offset;
             *(void **)pInterface = (char *) this + class->interfaces[i].offset;
             return SL_RESULT_SUCCESS;
         }
