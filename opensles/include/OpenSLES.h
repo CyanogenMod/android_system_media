@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 The Khronos Group Inc.
+ * Copyright (c) 2007-2009 The Khronos Group Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and /or associated documentation files (the "Materials "), to
@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE MATERIALS OR THE USE OR OTHER DEALINGS IN THE
  * MATERIALS.
  *
- * OpenSLES.h - OpenSL ES version 1.0
+ * OpenSLES.h - OpenSL ES version 1.0.1
  *
  */
 
@@ -349,6 +349,7 @@ typedef struct SLDataFormat_MIME_ {
 #define SL_CONTAINERTYPE_DMF		((SLuint32) 0x0000001A)
 #define SL_CONTAINERTYPE_SMF		((SLuint32) 0x0000001B)
 #define SL_CONTAINERTYPE_MOBILE_DLS	((SLuint32) 0x0000001C)
+#define SL_CONTAINERTYPE_OGG	((SLuint32) 0x0000001D)
 
 
 /** PCM-type-based data format definition where formatType must be SL_DATAFORMAT_PCM*/
@@ -456,16 +457,18 @@ struct SLObjectItf_ {
 #define SL_DEFAULTDEVICEID_RESERVED1    ((SLuint32) 0xFFFFFFFB)
 
 
-#define SL_DEVCONNECTION_INTEGRATED         ((SLuint16) 0x0001)
-#define SL_DEVCONNECTION_ATTACHED_WIRED     ((SLuint16) 0x0100)
-#define SL_DEVCONNECTION_ATTACHED_WIRELESS  ((SLuint16) 0x0200)
-#define SL_DEVCONNECTION_NETWORK 		    ((SLuint16) 0x0400)
+#define SL_DEVCONNECTION_INTEGRATED         ((SLint16) 0x0001)
+#define SL_DEVCONNECTION_ATTACHED_WIRED     ((SLint16) 0x0100)
+#define SL_DEVCONNECTION_ATTACHED_WIRELESS  ((SLint16) 0x0200)
+#define SL_DEVCONNECTION_NETWORK 		    ((SLint16) 0x0400)
 
 
 #define SL_DEVLOCATION_HANDSET 	((SLuint16) 0x0001)
 #define SL_DEVLOCATION_HEADSET 	((SLuint16) 0x0002)
 #define SL_DEVLOCATION_CARKIT 	((SLuint16) 0x0003)
 #define SL_DEVLOCATION_DOCK 	((SLuint16) 0x0004)
+#define SL_DEVLOCATION_REMOTE 	((SLuint16) 0x0005)
+/* Note: SL_DEVLOCATION_RESLTE is deprecated, use SL_DEVLOCATION_REMOTE instead. */
 #define SL_DEVLOCATION_RESLTE 	((SLuint16) 0x0005)
 
 
@@ -913,7 +916,7 @@ struct SLOutputMixItf_ {
 #define SL_PLAYEVENT_HEADATMARKER	((SLuint32) 0x00000002)
 #define SL_PLAYEVENT_HEADATNEWPOS	((SLuint32) 0x00000004)
 #define SL_PLAYEVENT_HEADMOVING		((SLuint32) 0x00000008)
-#define SL_PLAYEVENT_HEADSTALLED		((SLuint32) 0x00000010)
+#define SL_PLAYEVENT_HEADSTALLED	((SLuint32) 0x00000010)
 
 #define SL_TIME_UNKNOWN	((SLuint32) 0xFFFFFFFF)
 
@@ -1093,8 +1096,8 @@ struct SLPlaybackRateItf_ {
 /* Seek Interface                                                            */
 /*---------------------------------------------------------------------------*/
 
-#define SL_SEEKMODE_FAST		((SLuint16) 0x0001)
-#define SL_SEEKMODE_ACCURATE	((SLuint16) 0x0002)
+#define SL_SEEKMODE_FAST		((SLuint32) 0x0001)
+#define SL_SEEKMODE_ACCURATE	((SLuint32) 0x0002)
 
 extern const SLInterfaceID SL_IID_SEEK;
 
@@ -1137,6 +1140,9 @@ struct SLSeekItf_ {
 #define SL_RECORDEVENT_HEADATNEWPOS	((SLuint32) 0x00000004)
 #define SL_RECORDEVENT_HEADMOVING	((SLuint32) 0x00000008)
 #define SL_RECORDEVENT_HEADSTALLED 	((SLuint32) 0x00000010)
+/* Note: SL_RECORDEVENT_BUFFER_INSUFFICIENT is deprecated, use SL_RECORDEVENT_BUFFER_FULL instead. */
+#define SL_RECORDEVENT_BUFFER_INSUFFICIENT      ((SLuint32) 0x00000020)
+#define SL_RECORDEVENT_BUFFER_FULL	((SLuint32) 0x00000020)
 
 
 extern const SLInterfaceID SL_IID_RECORD;
