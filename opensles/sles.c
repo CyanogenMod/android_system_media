@@ -20,6 +20,13 @@
 #include <SDL/SDL_audio.h>
 #endif // USE_SDL
 
+#ifdef USE_ANDROID
+#include <pthread.h>
+#include <unistd.h>
+#include "media/AudioSystem.h"
+#include "media/AudioTrack.h"
+#endif
+
 #ifdef USE_OUTPUTMIXEXT
 #include "OutputMixExt.h"
 #endif
@@ -84,6 +91,8 @@ struct class_ {
     VoidHook mDestroy;
 };
 
+#ifdef USE_OUTPUTMIXEXT
+
 // Track describes each input to OutputMixer
 // FIXME not for Android
 
@@ -94,6 +103,8 @@ struct Track {
     const void *mReader;    // pointer to next frame in BufferHeader.mBuffer
     SLuint32 mAvail;        // number of available bytes
 };
+
+#endif
 
 // BufferHeader describes each element of a BufferQueue, other than the data
 
@@ -367,8 +378,10 @@ struct Object_interface {
 struct OutputMix_interface {
     const struct SLOutputMixItf_ *mItf;
     void *this;
+#ifdef USE_OUTPUTMIXEXT
     unsigned mActiveMask;   // 1 bit per active track
     struct Track mTracks[32];
+#endif
 };
 
 #ifdef USE_OUTPUTMIXEXT
@@ -509,7 +522,11 @@ struct AudioPlayer_class {
 #ifdef USE_SNDFILE
     struct SndFile mSndFile;
 #endif // USE_SNDFILE
+#ifdef USE_ANDROID
     // FIXME union per kind of AudioPlayer: MediaPlayer, AudioTrack, etc.
+    android::AudioTrack *mAudioTrack;
+    pthread_t mThread;
+#endif
 };
 
 struct AudioRecorder_class {
@@ -706,9 +723,10 @@ static SLresult checkInterfaces(const struct class_ *class__,
 
 /* Interface initialization hooks */
 
+extern const struct SL3DCommitItf_ _3DCommit_3DCommitItf;
+
 static void _3DCommit_init(void *self)
 {
-    extern const struct SL3DCommitItf_ _3DCommit_3DCommitItf;
     struct _3DCommit_interface *this = (struct _3DCommit_interface *) self;
     this->mItf = &_3DCommit_3DCommitItf;
 #ifndef NDEBUG
@@ -746,19 +764,21 @@ static void _3DSource_init(void *self)
         // (struct _3DSource_interface *) self;
 }
 
+extern const struct SLAudioDecoderCapabilitiesItf_
+    AudioDecoderCapabilities_AudioDecoderCapabilitiesItf;
+
 static void AudioDecoderCapabilities_init(void *self)
 {
-    extern const struct SLAudioDecoderCapabilitiesItf_
-        AudioDecoderCapabilities_AudioDecoderCapabilitiesItf;
     struct AudioDecoderCapabilities_interface *this =
         (struct AudioDecoderCapabilities_interface *) self;
     this->mItf = &AudioDecoderCapabilities_AudioDecoderCapabilitiesItf;
 }
 
+extern const struct SLAudioEncoderCapabilitiesItf_
+    AudioEncoderCapabilities_AudioEncoderCapabilitiesItf;
+
 static void AudioEncoderCapabilities_init(void *self)
 {
-    extern const struct SLAudioEncoderCapabilitiesItf_
-        AudioEncoderCapabilities_AudioEncoderCapabilitiesItf;
     struct AudioEncoderCapabilities_interface *this =
         (struct AudioEncoderCapabilities_interface *) self;
     this->mItf = &AudioEncoderCapabilities_AudioEncoderCapabilitiesItf;
@@ -770,10 +790,11 @@ static void AudioEncoder_init(void *self)
         // (struct AudioEncoder_interface *) self;
 }
 
+extern const struct SLAudioIODeviceCapabilitiesItf_
+    AudioIODeviceCapabilities_AudioIODeviceCapabilitiesItf;
+
 static void AudioIODeviceCapabilities_init(void *self)
 {
-    extern const struct SLAudioIODeviceCapabilitiesItf_
-        AudioIODeviceCapabilities_AudioIODeviceCapabilitiesItf;
     struct AudioIODeviceCapabilities_interface *this =
         (struct AudioIODeviceCapabilities_interface *) self;
     this->mItf = &AudioIODeviceCapabilities_AudioIODeviceCapabilitiesItf;
@@ -785,9 +806,10 @@ static void BassBoost_init(void *self)
         // (struct BassBoost_interface *) self;
 }
 
+extern const struct SLBufferQueueItf_ BufferQueue_BufferQueueItf;
+
 static void BufferQueue_init(void *self)
 {
-    extern const struct SLBufferQueueItf_ BufferQueue_BufferQueueItf;
     struct BufferQueue_interface *this = (struct BufferQueue_interface *) self;
     this->mItf = &BufferQueue_BufferQueueItf;
 #ifndef NDEBUG
@@ -802,18 +824,20 @@ static void BufferQueue_init(void *self)
 #endif
 }
 
+extern const struct SLDeviceVolumeItf_ DeviceVolume_DeviceVolumeItf;
+
 static void DeviceVolume_init(void *self)
 {
-    extern const struct SLDeviceVolumeItf_ DeviceVolume_DeviceVolumeItf;
     struct DeviceVolume_interface *this =
         (struct DeviceVolume_interface *) self;
     this->mItf = &DeviceVolume_DeviceVolumeItf;
 }
 
+extern const struct SLDynamicInterfaceManagementItf_
+    DynamicInterfaceManagement_DynamicInterfaceManagementItf;
+
 static void DynamicInterfaceManagement_init(void *self)
 {
-    extern const struct SLDynamicInterfaceManagementItf_
-        DynamicInterfaceManagement_DynamicInterfaceManagementItf;
     struct DynamicInterfaceManagement_interface *this =
         (struct DynamicInterfaceManagement_interface *) self;
     this->mItf =
@@ -837,17 +861,19 @@ static void EffectSend_init(void *self)
         // (struct EffectSend_interface *) self;
 }
 
+extern const struct SLEngineItf_ Engine_EngineItf;
+
 static void Engine_init(void *self)
 {
-    extern const struct SLEngineItf_ Engine_EngineItf;
     struct Engine_interface *this = (struct Engine_interface *) self;
     this->mItf = &Engine_EngineItf;
 }
 
+extern const struct SLEngineCapabilitiesItf_
+    EngineCapabilities_EngineCapabilitiesItf;
+
 static void EngineCapabilities_init(void *self)
 {
-    extern const struct SLEngineCapabilitiesItf_
-        EngineCapabilities_EngineCapabilitiesItf;
     struct EngineCapabilities_interface *this =
         (struct EngineCapabilities_interface *) self;
     this->mItf = &EngineCapabilities_EngineCapabilitiesItf;
@@ -865,9 +891,10 @@ static void Equalizer_init(void *self)
         // (struct Equalizer_interface *) self;
 }
 
+extern const struct SLLEDArrayItf_ LEDArray_LEDArrayItf;
+
 static void LEDArray_init(void *self)
 {
-    extern const struct SLLEDArrayItf_ LEDArray_LEDArrayItf;
     struct LEDArray_interface *this = (struct LEDArray_interface *) self;
     this->mItf = &LEDArray_LEDArrayItf;
 }
@@ -920,9 +947,10 @@ static void PrefetchStatus_init(void *self)
         // (struct PrefetchStatus_interface *) self;
 }
 
+extern const struct SLObjectItf_ Object_ObjectItf;
+
 static void Object_init(void *self)
 {
-    extern const struct SLObjectItf_ Object_ObjectItf;
     struct Object_interface *this = (struct Object_interface *) self;
     this->mItf = &Object_ObjectItf;
     this->mState = SL_OBJECT_STATE_UNREALIZED;
@@ -934,9 +962,10 @@ static void Object_init(void *self)
 #endif
 }
 
+extern const struct SLOutputMixItf_ OutputMix_OutputMixItf;
+
 static void OutputMix_init(void *self)
 {
-    extern const struct SLOutputMixItf_ OutputMix_OutputMixItf;
     struct OutputMix_interface *this = (struct OutputMix_interface *) self;
     this->mItf = &OutputMix_OutputMixItf;
 #ifndef NDEBUG
@@ -951,9 +980,10 @@ static void OutputMix_init(void *self)
 }
 
 #ifdef USE_OUTPUTMIXEXT
+extern const struct SLOutputMixExtItf_ OutputMixExt_OutputMixExtItf;
+
 static void OutputMixExt_init(void *self)
 {
-    extern const struct SLOutputMixExtItf_ OutputMixExt_OutputMixExtItf;
     struct OutputMixExt_interface *this =
         (struct OutputMixExt_interface *) self;
     this->mItf = &OutputMixExt_OutputMixExtItf;
@@ -966,9 +996,10 @@ static void Pitch_init(void *self)
         // (struct Pitch_interface *) self;
 }
 
+extern const struct SLPlayItf_ Play_PlayItf;
+
 static void Play_init(void *self)
 {
-    extern const struct SLPlayItf_ Play_PlayItf;
     struct Play_interface *this = (struct Play_interface *) self;
     this->mItf = &Play_PlayItf;
     this->mState = SL_PLAYSTATE_STOPPED;
@@ -1007,9 +1038,10 @@ static void Record_init(void *self)
     //struct Record_interface *this = (struct Record_interface *) self;
 }
 
+extern const struct SLSeekItf_ Seek_SeekItf;
+
 static void Seek_init(void *self)
 {
-    extern const struct SLSeekItf_ Seek_SeekItf;
     struct Seek_interface *this = (struct Seek_interface *) self;
     this->mItf = &Seek_SeekItf;
     this->mPos = (SLmillisecond) -1;
@@ -1020,9 +1052,10 @@ static void Seek_init(void *self)
 #endif
 }
 
+extern const struct SLThreadSyncItf_ ThreadSync_ThreadSyncItf;
+
 static void ThreadSync_init(void *self)
 {
-    extern const struct SLThreadSyncItf_ ThreadSync_ThreadSyncItf;
     struct ThreadSync_interface *this =
         (struct ThreadSync_interface *) self;
     this->mItf = &ThreadSync_ThreadSyncItf;
@@ -1034,16 +1067,18 @@ static void Virtualizer_init(void *self)
         // (struct Virtualizer_interface *) self;
 }
 
+extern const struct SLVibraItf_ Vibra_VibraItf;
+
 static void Vibra_init(void *self)
 {
-    extern const struct SLVibraItf_ Vibra_VibraItf;
     struct Vibra_interface *this = (struct Vibra_interface *) self;
     this->mItf = &Vibra_VibraItf;
 }
 
+extern const struct SLVisualizationItf_ Visualization_VisualizationItf;
+
 static void Visualization_init(void *self)
 {
-    extern const struct SLVisualizationItf_ Visualization_VisualizationItf;
     struct Visualization_interface *this =
         (struct Visualization_interface *) self;
     this->mItf = &Visualization_VisualizationItf;
@@ -1054,9 +1089,10 @@ static void Visualization_init(void *self)
 #endif
 }
 
+extern const struct SLVolumeItf_ Volume_VolumeItf;
+
 static void Volume_init(void *self)
 {
-    extern const struct SLVolumeItf_ Volume_VolumeItf;
     struct Volume_interface *this = (struct Volume_interface *) self;
     this->mItf = &Volume_VolumeItf;
 #ifndef NDEBUG
@@ -1226,21 +1262,6 @@ static SLboolean SndFile_IsSupported(const SF_INFO *sfinfo)
 }
 
 #endif // USE_SNDFILE
-
-#if 0
-/*static*/ const struct SLObjectItf_ AudioPlayer_ObjectItf = {
-    Object_Realize,
-    Object_Resume,
-    Object_GetState,
-    Object_GetInterface,
-    Object_RegisterCallback,
-    Object_AbortAsyncOperation,
-    Object_Destroy,
-    Object_SetPriority,
-    Object_GetPriority,
-    Object_SetLossOfControlInterfaces,
-};
-#endif
 
 static SLresult AudioPlayer_Realize(void *self)
 {
@@ -2281,6 +2302,46 @@ static SLresult Engine_CreateVibraDevice(SLEngineItf self,
     return SL_RESULT_SUCCESS;
 }
 
+#ifdef USE_ANDROID
+static void *thread_body(void *arg)
+{
+    struct AudioPlayer_class *this = (struct AudioPlayer_class *) arg;
+    android::AudioTrack *at = this->mAudioTrack;
+#if 1
+    at->start();
+#endif
+    struct BufferQueue_interface *bufferQueue = &this->mBufferQueue;
+    for (;;) {
+        // FIXME replace unsafe polling by a mutex and condition variable
+        struct BufferHeader *oldFront = bufferQueue->mFront;
+        struct BufferHeader *rear = bufferQueue->mRear;
+        if (oldFront == rear) {
+            usleep(10000);
+            continue;
+        }
+        struct BufferHeader *newFront = &oldFront[1];
+        if (newFront == &bufferQueue->mArray[bufferQueue->mNumBuffers])
+            newFront = bufferQueue->mArray;
+        at->write(oldFront->mBuffer, oldFront->mSize);
+        assert(mState.count > 0);
+        --bufferQueue->mState.count;
+        ++bufferQueue->mState.playIndex;
+        bufferQueue->mFront = newFront;
+        slBufferQueueCallback callback = bufferQueue->mCallback;
+        if (NULL != callback) {
+            (*callback)((SLBufferQueueItf) bufferQueue,
+                bufferQueue->mContext);
+        }
+    }
+    // unreachable
+    return NULL;
+}
+
+void my_handler(int x, void*y, void*z)
+{
+}
+#endif
+
 static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     SLDataSource *pAudioSrc, SLDataSink *pAudioSnk, SLuint32 numInterfaces,
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
@@ -2302,7 +2363,9 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
     SLuint32 numBuffers = 0;
     SLDataFormat_PCM *df_pcm = NULL;
+#ifdef USE_OUTPUTMIXEXT
     struct Track *track = NULL;
+#endif
 #ifdef USE_SNDFILE
     SLchar *pathname = NULL;
 #endif // USE_SNDFILE
@@ -2438,6 +2501,7 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         if ((NULL == outputMix) || (&OutputMix_class !=
             ((struct Object_interface *) outputMix)->mClass))
             return SL_RESULT_PARAMETER_INVALID;
+#ifdef USE_OUTPUTMIXEXT
         struct OutputMix_interface *om =
             &((struct OutputMix_class *) outputMix)->mOutputMix;
         // allocate an entry within OutputMix for this track
@@ -2454,6 +2518,7 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
             return SL_RESULT_MEMORY_FAILURE;
         }
         // FIXME replace the above for Android - do not use our own mixer!
+#endif
         }
         break;
     case SL_DATALOCATOR_BUFFERQUEUE:
@@ -2472,9 +2537,6 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         (struct AudioPlayer_class *) construct(&AudioPlayer_class, exposedMask);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
-#if 0
-    this->mObject.mItf = &AudioPlayer_ObjectItf; // take note!
-#endif
     // FIXME numBuffers is unavailable for URL, must make a default !
     assert(0 < numBuffers);
     this->mBufferQueue.mNumBuffers = numBuffers;
@@ -2501,6 +2563,7 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     this->mSndFile.mRetrySize = 0;
 #endif
 #endif // USE_SNDFILE
+#ifdef USE_OUTPUTMIXEXT
     // link track to player (NOT for Android!!)
     track->mDfPcm = df_pcm;
     track->mBufferQueue = &this->mBufferQueue;
@@ -2508,6 +2571,27 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     // next 2 fields must be initialized explicitly (not part of this)
     track->mReader = NULL;
     track->mAvail = 0;
+#endif
+#ifdef USE_ANDROID
+    this->mAudioTrack = new android::AudioTrack(
+        android::AudioSystem::MUSIC, // streamType
+        44100,                       // sampleRate
+        android::AudioSystem::PCM_16_BIT,    // format
+        // FIXME should be stereo, but mono gives more audio output for testing
+        android::AudioSystem::CHANNEL_OUT_MONO,                           // channels
+        256 * 20,                         // frameCount
+        0,                           // flags
+        /*NULL*/ my_handler,                        // cbf (callback)
+        (void *) self,               // user
+        256 * 20);                        // notificationFrame
+    assert(this->mAudioTrack != NULL);
+    // FIXME should call checkStatus after new
+    int ok;
+    // should happen at Realize, not now
+    ok = pthread_create(&this->mThread, (const pthread_attr_t *) NULL,
+        thread_body, this);
+    assert(ok == 0);
+#endif
     // return the new audio player object
     *pPlayer = &this->mObject.mItf;
     return SL_RESULT_SUCCESS;
@@ -4453,8 +4537,6 @@ static SLresult Virtualizer_IsStrengthSupported(SLVirtualizerItf self,
 
 /* Initial entry points */
 
-#ifndef __cplusplus
-
 SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     const SLEngineOption *pEngineOptions, SLuint32 numInterfaces,
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
@@ -4515,8 +4597,6 @@ SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index,
     *pInterfaceId = &SL_IID_array[Engine_interfaces[index].mMPH];
     return SL_RESULT_SUCCESS;
 }
-
-#endif // !__cplusplus
 
 #ifdef USE_OUTPUTMIXEXT
 

@@ -1,11 +1,10 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:=                 \
-        OpenSLES_IID.c                    \
-        sles.c \
-        android.cpp \
-        MPH_to.c \
+LOCAL_SRC_FILES:=      \
+        OpenSLES_IID.c \
+        android.cpp    \
+        MPH_to.c       \
         sles_cpp.cpp
 
 LOCAL_C_INCLUDES:= \
