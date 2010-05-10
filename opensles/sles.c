@@ -8,6 +8,7 @@
 #include <string.h> // memcmp
 #include <stdio.h>  // debugging
 #include <assert.h> // debugging
+#include <pthread.h>
 
 #include "MPH.h"
 #include "MPH_to.h"
@@ -21,7 +22,6 @@
 #endif // USE_SDL
 
 #ifdef USE_ANDROID
-#include <pthread.h>
 #include <unistd.h>
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
@@ -67,7 +67,7 @@ typedef SLresult (*StatusHook)(void *self);
 
 struct iid_vtable {
     unsigned char mMPH;
-    unsigned char mInterface;
+    unsigned char mInterface;   // relationship
     /*size_t*/ unsigned short mOffset;
 };
 
@@ -82,13 +82,10 @@ struct class_ {
     //const char * const mName;
     size_t mSize;
     SLuint32 mObjectID;
-    // Non-const here and below should be moved to separate struct,
-    // as each engine is its own universe.
-    // FIXME not yet used, actually should be per engine, no?
-    // SLuint32 mInstanceCount;
-    // append per-class data here
     StatusHook mRealize;
+    StatusHook mResume;
     VoidHook mDestroy;
+    // append per-class data here
 };
 
 #ifdef USE_OUTPUTMIXEXT
@@ -175,17 +172,28 @@ static const SLAudioOutputDescriptor AudioOutputDescriptor_handsfree = {
     2
 };
 
+
+#if 0
+static const SLLEDDescriptor SLLEDDescriptor_default = {
+    8,  // ledCount
+    2,  // primaryLED
+    12  // colorMask
+};
+
+static const SLuint32 LED_ids[] = {SL_DEFAULTDEVICEID_LED};
+#endif
+
 /* Interface structures */
 
 struct _3DCommit_interface {
     const struct SL3DCommitItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     SLboolean mDeferred;
 };
 
 struct _3DDoppler_interface {
     const struct SL3DDopplerItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     union Cartesian_Spherical1 {
         SLVec3D mCartesian;
         struct {
@@ -199,13 +207,13 @@ struct _3DDoppler_interface {
 
 struct _3DGrouping_interface {
     const struct SL3DGroupingItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     SLObjectItf mGroup;
 };
 
 struct _3DLocation_interface {
     const struct SL3DLocationItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     union Cartesian_Spherical2 {
         SLVec3D mCartesian;
         struct {
@@ -224,45 +232,45 @@ struct _3DLocation_interface {
 
 struct _3DMacroscopic_interface {
     const struct SL3DMacroscopicItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct _3DSource_interface {
     const struct SL3DSourceItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct AudioDecoderCapabilities_interface {
     const struct SLAudioDecoderCapabilitiesItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct AudioEncoder_interface {
     const struct SLAudioEncoderItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     SLAudioEncoderSettings mSettings;
 };
 
 struct AudioEncoderCapabilities_interface {
     const struct SLAudioEncoderCapabilitiesItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct AudioIODeviceCapabilities_interface {
     const struct SLAudioIODeviceCapabilitiesItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct BassBoost_interface {
     const struct SLBassBoostItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     SLboolean mEnabled;
     SLpermille mStrength;
 };
 
 struct BufferQueue_interface {
     const struct SLBufferQueueItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     volatile SLBufferQueueState mState;
     slBufferQueueCallback mCallback;
     void *mContext;
@@ -276,13 +284,13 @@ struct BufferQueue_interface {
 
 struct DeviceVolume_interface {
     const struct SLDeviceVolumeItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     SLint32 mVolume;     // FIXME should be per-device
 };
 
 struct DynamicInterfaceManagement_interface {
     const struct SLDynamicInterfaceManagementItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     unsigned mAddedMask;    // added interfaces, a subset of exposed interfaces
     slDynamicInterfaceManagementCallback mCallback;
     void *mContext;
@@ -290,94 +298,101 @@ struct DynamicInterfaceManagement_interface {
 
 struct DynamicSource_interface {
     const struct SLDynamicSourceItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct EffectSend_interface {
     const struct SLEffectSendItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct Engine_interface {
     const struct SLEngineItf_ *mItf;
-    void *this;
-    // FIXME Per-class non-const data such as vector of created objects
+    struct Object_interface *mThis;
+    SLboolean mLossOfControlGlobal;
+    // FIXME Per-class non-const data such as vector of created objects.
+    // Each engine is its own universe.
+    // SLuint32 mInstanceCount;
+    // Vector<Type> instances;
 };
 
 struct EngineCapabilities_interface {
     const struct SLEngineCapabilitiesItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct EnvironmentalReverb_interface {
     const struct SLEnvironmentalReverbItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct Equalizer_interface {
     const struct SLEqualizerItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct LEDArray_interface {
     const struct SLLEDArrayItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
+    // SLHSL *mHSL;
 };
 
 struct MetaDataExtraction_interface {
     const struct SLMetaDataExractionItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct MetaDataTraversal_interface {
     const struct SLMetaDataTraversalItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct MIDIMessage_interface {
     const struct SLMIDIMessageItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct MIDIMuteSolo_interface {
     const struct SLMIDIMuteSoloItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct MIDITempo_interface {
     const struct SLMIDITempoItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct MIDITime_interface {
     const struct SLMIDITimeItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct MuteSolo_interface {
     const struct SLMuteSoloItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct Object_interface {
     const struct SLObjectItf_ *mItf;
-    // probably not needed for an Object, as it is always first
-    void *this;
+    // FIXME probably not needed for an Object, as it is always first,
+    // but look for lingering code that assumes it is here before deleting
+    struct Object_interface *mThis;
     const struct class_ *mClass;
     volatile SLuint32 mState;
     slObjectCallback mCallback;
     void *mContext;
     unsigned mExposedMask;  // exposed interfaces
+    unsigned mLossOfControlMask;    // interfaces with loss of control enabled
     SLint32 mPriority;
     SLboolean mPreemptable;
-    // FIXME a thread lock would go here
+    pthread_mutex_t mMutex;
     // FIXME also an object ID for RPC
     // FIXME and a human-readable name for debugging
 };
 
 struct OutputMix_interface {
     const struct SLOutputMixItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 #ifdef USE_OUTPUTMIXEXT
     unsigned mActiveMask;   // 1 bit per active track
     struct Track mTracks[32];
@@ -387,18 +402,18 @@ struct OutputMix_interface {
 #ifdef USE_OUTPUTMIXEXT
 struct OutputMixExt_interface {
     const struct SLOutputMixExtItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 #endif
 
 struct Pitch_interface {
     const struct SLPitchItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct Play_interface {
     const struct SLPlayItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     volatile SLuint32 mState;
     SLmillisecond mDuration;
     SLmillisecond mPosition;
@@ -412,33 +427,33 @@ struct Play_interface {
 
 struct PlaybackRate_interface {
     const struct SLPlaybackRateItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct PrefetchStatus_interface {
     const struct SLPrefetchStatusItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct PresetReverb_interface {
     const struct SLPresetReverbItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     SLuint16 mPreset;
 };
 
 struct RatePitch_interface {
     const struct SLRatePitchItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct Record_interface {
     const struct SLRecordItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct Seek_interface {
     const struct SLSeekItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     SLmillisecond mPos;
     SLboolean mLoopEnabled;
     SLmillisecond mStartPos;
@@ -447,24 +462,24 @@ struct Seek_interface {
 
 struct ThreadSync_interface {
     const struct SLThreadSyncItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct Vibra_interface {
     const struct SLVibraItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
 };
 
 struct Virtualizer_interface {
     const struct SLVirtualizerItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     SLboolean mEnabled;
     SLpermille mStrength;
 };
 
 struct Visualization_interface {
     const struct SLVisualizationItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     slVisualizationCallback mCallback;
     void *mContext;
     SLmilliHertz mRate;
@@ -472,7 +487,7 @@ struct Visualization_interface {
 
 struct Volume_interface {
     const struct SLVolumeItf_ *mItf;
-    void *this;
+    struct Object_interface *mThis;
     SLmillibel mLevel;
     SLboolean mMute;
     SLboolean mEnableStereoPosition;
@@ -559,7 +574,6 @@ struct Engine_class {
     struct DeviceVolume_interface mDeviceVolume;
     // additional fields not associated with interfaces
     SLboolean mThreadSafe;
-    SLboolean mLossOfControl;
 };
 
 struct LEDDevice_class {
@@ -651,6 +665,39 @@ struct VibraDevice_class {
 
 /* Private functions */
 
+static void object_lock_exclusive(struct Object_interface *this)
+{
+    int ok;
+    ok = pthread_mutex_lock(&this->mMutex);
+    assert(0 == ok);
+}
+
+static void object_unlock_exclusive(struct Object_interface *this)
+{
+    int ok;
+    ok = pthread_mutex_unlock(&this->mMutex);
+    assert(0 == ok);
+}
+
+// Currently shared locks are implemented as exclusive, but don't count on it
+
+#define object_lock_shared(this)   object_lock_exclusive(this)
+#define object_unlock_shared(this) object_unlock_exclusive(this)
+
+// Currently interface locks are actually on whole object, but don't count on it
+
+#define interface_lock_exclusive(this)   object_lock_exclusive((this)->mThis)
+#define interface_unlock_exclusive(this) object_unlock_exclusive((this)->mThis)
+#define interface_lock_shared(this)      object_lock_shared((this)->mThis)
+#define interface_unlock_shared(this)    object_unlock_shared((this)->mThis)
+
+// Peek and poke are an optimization for small atomic fields that don't "matter"
+
+#define interface_lock_poke(this)   /* interface_lock_exclusive(this) */
+#define interface_unlock_poke(this) /* interface_unlock_exclusive(this) */
+#define interface_lock_peek(this)   /* interface_lock_shared(this) */
+#define interface_unlock_peek(this) /* interface_unlock_shared(this) */
+
 // Map SLInterfaceID to its minimal perfect hash (MPH), or -1 if unknown
 
 static int IID_to_MPH(const SLInterfaceID iid)
@@ -667,6 +714,8 @@ static int IID_to_MPH(const SLInterfaceID iid)
     }
     return -1;
 }
+
+// Check the interface IDs passed into a Create operation
 
 static SLresult checkInterfaces(const struct class_ *class__,
     SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
@@ -694,27 +743,19 @@ static SLresult checkInterfaces(const struct class_ *class__,
             SLInterfaceID iid = pInterfaceIds[i];
             if (NULL == iid)
                 return SL_RESULT_PARAMETER_INVALID;
-            int mph = IID_to_MPH(iid);
-            if (mph < 0) {
+            int MPH, index;
+            if ((0 > (MPH = IID_to_MPH(iid))) ||
+                (0 > (index = class__->mMPH_to_index[MPH]))) {
                 if (pInterfaceRequired[i])
                     return SL_RESULT_FEATURE_UNSUPPORTED;
                 continue;
             }
-            int interfaceIndex = class__->mMPH_to_index[mph];
-            if (interfaceIndex < 0) {
-                if (pInterfaceRequired[i])
-                    return SL_RESULT_FEATURE_UNSUPPORTED;
-                continue;
-            }
-            if (exposedMask & (1 << interfaceIndex))
-#if 0 // FIXME this seems a bit strong? what is correct logic?
-// we are requesting a duplicate explicit interface,
-// or we are requesting one which is already implicit ?
-                return SL_RESULT_PARAMETER_INVALID;
-#else
-                continue;
-#endif
-            exposedMask |= (1 << interfaceIndex);
+            // FIXME this seems a bit strong? what is correct logic?
+            // we are requesting a duplicate explicit interface,
+            // or we are requesting one which is already implicit ?
+            // if (exposedMask & (1 << index))
+            //    return SL_RESULT_PARAMETER_INVALID;
+            exposedMask |= (1 << index);
         }
     }
     *pExposedMask = exposedMask;
@@ -960,6 +1001,9 @@ static void Object_init(void *self)
     this->mPriority = 0;
     this->mPreemptable = SL_BOOLEAN_FALSE;
 #endif
+    int ok;
+    ok = pthread_mutex_init(&this->mMutex, (const pthread_mutexattr_t *) NULL);
+    assert(0 == ok);
 }
 
 extern const struct SLOutputMixItf_ OutputMix_OutputMixItf;
@@ -968,6 +1012,7 @@ static void OutputMix_init(void *self)
 {
     struct OutputMix_interface *this = (struct OutputMix_interface *) self;
     this->mItf = &OutputMix_OutputMixItf;
+#ifdef USE_OUTPUTMIXEXT
 #ifndef NDEBUG
     this->mActiveMask = 0;
     struct Track *track = &this->mTracks[0];
@@ -976,6 +1021,7 @@ static void OutputMix_init(void *self)
     unsigned i;
     for (i = 0; i < 32; ++i, ++track)
         track->mPlay = NULL;
+#endif
 #endif
 }
 
@@ -1281,12 +1327,21 @@ static SLresult AudioPlayer_Realize(void *self)
             this->mSndFile.mSNDFILE = NULL;
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         } else {
+            // FIXME how do we know this interface is exposed?
             SLBufferQueueItf bufferQueue = &this->mBufferQueue.mItf;
             // FIXME should use a private internal API, and disallow
             // application to have access to our buffer queue
             // FIXME if we had an internal API, could call this directly
-            result = (*bufferQueue)->RegisterCallback(bufferQueue,
-                SndFile_Callback, &this->mSndFile);
+            // FIXME can't call this directly as we get a double lock
+            // result = (*bufferQueue)->RegisterCallback(bufferQueue,
+            //    SndFile_Callback, &this->mSndFile);
+            // FIXME so let's inline the code, but this is maintenance risk
+            // we know we are called by Object_Realize, which holds a lock,
+            // but if interface lock != object lock, need to rewrite this
+            struct BufferQueue_interface *thisBQ =
+                (struct BufferQueue_interface *) bufferQueue;
+            thisBQ->mCallback = SndFile_Callback;
+            thisBQ->mContext = &this->mSndFile;
         }
     }
 #endif // USE_SNDFILE
@@ -1375,6 +1430,7 @@ static const struct class_ AudioPlayer_class = {
     sizeof(struct AudioPlayer_class),
     SL_OBJECTID_AUDIOPLAYER,
     AudioPlayer_Realize,
+    NULL /*AudioPlayer_Resume*/,
     AudioPlayer_Destroy
 };
 
@@ -1408,6 +1464,7 @@ static const struct class_ AudioRecorder_class = {
     //"AudioRecorder",
     sizeof(struct AudioRecorder_class),
     SL_OBJECTID_AUDIORECORDER,
+    NULL,
     NULL,
     NULL
 };
@@ -1445,6 +1502,7 @@ static const struct class_ Engine_class = {
     sizeof(struct Engine_class),
     SL_OBJECTID_ENGINE,
     NULL,
+    NULL,
     NULL
 };
 
@@ -1466,6 +1524,7 @@ static const struct class_ LEDDevice_class = {
     //"LEDDevice",
     sizeof(struct LEDDevice_class),
     SL_OBJECTID_LEDDEVICE,
+    NULL,
     NULL,
     NULL
 };
@@ -1490,6 +1549,7 @@ static const struct class_ Listener_class = {
     //"Listener",
     sizeof(struct Listener_class),
     SL_OBJECTID_LISTENER,
+    NULL,
     NULL,
     NULL
 };
@@ -1517,6 +1577,7 @@ static const struct class_ MetadataExtractor_class = {
     //"MetadataExtractor",
     sizeof(struct MetadataExtractor_class),
     SL_OBJECTID_METADATAEXTRACTOR,
+    NULL,
     NULL,
     NULL
 };
@@ -1592,6 +1653,7 @@ static const struct class_ MidiPlayer_class = {
     sizeof(struct MidiPlayer_class),
     SL_OBJECTID_MIDIPLAYER,
     NULL,
+    NULL,
     NULL
 };
 
@@ -1634,6 +1696,7 @@ static const struct class_ OutputMix_class = {
     sizeof(struct OutputMix_class),
     SL_OBJECTID_OUTPUTMIX,
     NULL,
+    NULL,
     NULL
 };
 
@@ -1655,6 +1718,7 @@ static const struct class_ VibraDevice_class = {
     //"VibraDevice",
     sizeof(struct VibraDevice_class),
     SL_OBJECTID_VIBRADEVICE,
+    NULL,
     NULL,
     NULL
 };
@@ -1686,21 +1750,26 @@ static const struct class_ *objectIDtoClass(SLuint32 objectID)
 
 // Construct a new instance of the specified class, exposing selected interfaces
 
-static void *construct(const struct class_ *class__, unsigned exposedMask)
+static struct Object_interface *construct(const struct class_ *class__,
+    unsigned exposedMask, SLEngineItf engine)
 {
-    void *this;
+    struct Object_interface *this;
 #ifndef NDEBUG
-    this = malloc(class__->mSize);
+    this = (struct Object_interface *) malloc(class__->mSize);
 #else
-    this = calloc(1, class__->mSize);
+    this = (struct Object_interface *) calloc(1, class__->mSize);
 #endif
     if (NULL != this) {
 #ifndef NDEBUG
         // for debugging, to detect uninitialized fields
         memset(this, 0x55, class__->mSize);
 #endif
-        ((struct Object_interface *) this)->mClass = class__;
-        ((struct Object_interface *) this)->mExposedMask = exposedMask;
+        this->mClass = class__;
+        this->mExposedMask = exposedMask;
+        struct Engine_interface *thisEngine =
+            (struct Engine_interface *) engine;
+        this->mLossOfControlMask = (NULL == thisEngine) ? 0 :
+            (thisEngine->mLossOfControlGlobal ? ~0 : 0);
         const struct iid_vtable *x = class__->mInterfaces;
         unsigned i;
         for (i = 0; exposedMask; ++i, ++x, exposedMask >>= 1) {
@@ -1727,26 +1796,49 @@ static void *construct(const struct class_ *class__, unsigned exposedMask)
 static SLresult Object_Realize(SLObjectItf self, SLboolean async)
 {
     struct Object_interface *this = (struct Object_interface *) self;
-    // FIXME locking needed here in case two threads call Realize at once
-    if (SL_OBJECT_STATE_UNREALIZED != this->mState)
-        return SL_RESULT_PRECONDITIONS_VIOLATED;
     const struct class_ *class__ = this->mClass;
     StatusHook realize = class__->mRealize;
-    SLresult result;
-    // FIXME This should be done asynchronously if requested
-    result = NULL != realize ?  (*realize)(this) : SL_RESULT_SUCCESS;
-    if (SL_RESULT_SUCCESS == result)
-        this->mState = SL_OBJECT_STATE_REALIZED;
-    if (async && NULL != this->mCallback)
-        (*this->mCallback)(self, this->mContext,
-        SL_OBJECT_EVENT_ASYNC_TERMINATION, result, this->mState, NULL);
+    SLresult result = SL_RESULT_SUCCESS;
+    object_lock_exclusive(this);
+    // FIXME The realize hook and callback should be asynchronous if requested
+    if (SL_OBJECT_STATE_UNREALIZED != this->mState) {
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    } else {
+        if (NULL != realize)
+            result = (*realize)(this);
+        if (SL_RESULT_SUCCESS == result)
+            this->mState = SL_OBJECT_STATE_REALIZED;
+        // FIXME callback should not run with mutex lock
+        if (async && (NULL != this->mCallback))
+            (*this->mCallback)(self, this->mContext,
+            SL_OBJECT_EVENT_ASYNC_TERMINATION, result, this->mState, NULL);
+    }
+    object_unlock_exclusive(this);
     return result;
 }
 
 static SLresult Object_Resume(SLObjectItf self, SLboolean async)
 {
-    // FIXME process async callback
-    return SL_RESULT_SUCCESS;
+    struct Object_interface *this = (struct Object_interface *) self;
+    const struct class_ *class__ = this->mClass;
+    StatusHook resume = class__->mResume;
+    SLresult result = SL_RESULT_SUCCESS;
+    object_lock_exclusive(this);
+    // FIXME The resume hook and callback should be asynchronous if requested
+    if (SL_OBJECT_STATE_SUSPENDED != this->mState) {
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    } else {
+        if (NULL != resume)
+            result = (*resume)(this);
+        if (SL_RESULT_SUCCESS == result)
+            this->mState = SL_OBJECT_STATE_REALIZED;
+        // FIXME callback should not run with mutex lock
+        if (async && (NULL != this->mCallback))
+            (*this->mCallback)(self, this->mContext,
+            SL_OBJECT_EVENT_ASYNC_TERMINATION, result, this->mState, NULL);
+    }
+    object_unlock_exclusive(this);
+    return result;
 }
 
 static SLresult Object_GetState(SLObjectItf self, SLuint32 *pState)
@@ -1754,34 +1846,48 @@ static SLresult Object_GetState(SLObjectItf self, SLuint32 *pState)
     if (NULL == pState)
         return SL_RESULT_PARAMETER_INVALID;
     struct Object_interface *this = (struct Object_interface *) self;
-    *pState = this->mState;
+    // FIXME Investigate what it would take to change to a peek lock
+    object_lock_shared(this);
+    SLuint32 state = this->mState;
+    object_unlock_shared(this);
+    *pState = state;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Object_GetInterface(SLObjectItf self, const SLInterfaceID iid,
     void *pInterface)
 {
-    if (NULL == iid || NULL == pInterface)
+    if (NULL == pInterface)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Object_interface *this = (struct Object_interface *) self;
-    if (SL_OBJECT_STATE_REALIZED != this->mState)
-        return SL_RESULT_PRECONDITIONS_VIOLATED;
-    const struct class_ *class__ = this->mClass;
-    int MPH = IID_to_MPH(iid);
-    if (0 > MPH)
-        return SL_RESULT_FEATURE_UNSUPPORTED;
-    int index = class__->mMPH_to_index[MPH];
-    if (0 > index)
-        return SL_RESULT_FEATURE_UNSUPPORTED;
-    unsigned mask = 1 << index;
-    if (!(this->mExposedMask & mask))
-        return SL_RESULT_FEATURE_UNSUPPORTED;
-// FIXME code review on 2010/04/16
-// I think it is "this->this" instead of "this" at line ### :
-// *(void **)pInterface = (char *) this + class__->mInterfaces[index].offset;
-    *(void **)pInterface = (char *) this + class__->mInterfaces[index].mOffset;
-    // FIXME Should note that interface has been gotten,
-    // and detect use of ill-gotten interfaces
+    SLresult result;
+    void *interface = NULL;
+    if (NULL == iid)
+        result = SL_RESULT_PARAMETER_INVALID;
+    else {
+        struct Object_interface *this = (struct Object_interface *) self;
+        const struct class_ *class__ = this->mClass;
+        int MPH, index;
+        if ((0 > (MPH = IID_to_MPH(iid))) ||
+            (0 > (index = class__->mMPH_to_index[MPH])))
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        else {
+            unsigned mask = 1 << index;
+            object_lock_shared(this);
+            if (SL_OBJECT_STATE_REALIZED != this->mState)
+                result = SL_RESULT_PRECONDITIONS_VIOLATED;
+            else if (!(this->mExposedMask & mask))
+                result = SL_RESULT_FEATURE_UNSUPPORTED;
+            else {
+                // FIXME Should note that interface has been gotten,
+                // so as to detect use of ill-gotten interfaces; be sure
+                // to change the lock to exclusive if that is done
+                interface = (char *) this + class__->mInterfaces[index].mOffset;
+                result = SL_RESULT_SUCCESS;
+            }
+            object_unlock_shared(this);
+        }
+    }
+    *(void **)pInterface = interface;
     return SL_RESULT_SUCCESS;
 }
 
@@ -1789,13 +1895,17 @@ static SLresult Object_RegisterCallback(SLObjectItf self,
     slObjectCallback callback, void *pContext)
 {
     struct Object_interface *this = (struct Object_interface *) self;
+    // FIXME This could be a poke lock, if we had atomic double-word load/store
+    object_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
+    object_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static void Object_AbortAsyncOperation(SLObjectItf self)
 {
+    // FIXME Asynchronous operations are not yet implemented
 }
 
 static void Object_Destroy(SLObjectItf self)
@@ -1804,14 +1914,25 @@ static void Object_Destroy(SLObjectItf self)
     struct Object_interface *this = (struct Object_interface *) self;
     const struct class_ *class__ = this->mClass;
     VoidHook destroy = class__->mDestroy;
+    const struct iid_vtable *x = class__->mInterfaces;
+    object_lock_exclusive(this);
+    // Call the deinitializer for each currently exposed interface,
+    // whether it is implicit, explicit, optional, or dynamically added.
+    unsigned exposedMask = this->mExposedMask;
+    for ( ; exposedMask; exposedMask >>= 1, ++x) {
+        if (exposedMask & 1) {
+            VoidHook deinit = MPH_init_table[x->mMPH].mDeinit;
+            if (NULL != deinit)
+                (*deinit)((char *) this + x->mOffset);
+        }
+    }
     if (NULL != destroy)
         (*destroy)(this);
-    // FIXME call the deinitializer for each currently exposed interface,
-    // whether it is implicit, explicit, optional, or dynamically added
-#ifndef NDEBUG
-    memset(this, 0x55, this->mClass->mSize);
-#endif
     // redundant: this->mState = SL_OBJECT_STATE_UNREALIZED;
+    object_unlock_exclusive(this);
+#ifndef NDEBUG
+    memset(this, 0x55, class__->mSize);
+#endif
     free(this);
 }
 
@@ -1819,8 +1940,10 @@ static SLresult Object_SetPriority(SLObjectItf self, SLint32 priority,
     SLboolean preemptable)
 {
     struct Object_interface *this = (struct Object_interface *) self;
+    object_lock_exclusive(this);
     this->mPriority = priority;
     this->mPreemptable = preemptable;
+    object_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -1830,14 +1953,42 @@ static SLresult Object_GetPriority(SLObjectItf self, SLint32 *pPriority,
     if (NULL == pPriority || NULL == pPreemptable)
         return SL_RESULT_PARAMETER_INVALID;
     struct Object_interface *this = (struct Object_interface *) self;
-    *pPriority = this->mPriority;
-    *pPreemptable = this->mPreemptable;
+    object_lock_shared(this);
+    SLint32 priority = this->mPriority;
+    SLboolean preemptable = this->mPreemptable;
+    object_unlock_shared(this);
+    *pPriority = priority;
+    *pPreemptable = preemptable;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Object_SetLossOfControlInterfaces(SLObjectItf self,
     SLint16 numInterfaces, SLInterfaceID *pInterfaceIDs, SLboolean enabled)
 {
+    if (0 < numInterfaces) {
+        SLuint32 i;
+        if (NULL == pInterfaceIDs)
+            return SL_RESULT_PARAMETER_INVALID;
+        struct Object_interface *this = (struct Object_interface *) self;
+        const struct class_ *class__ = this->mClass;
+        unsigned lossOfControlMask = 0;
+        // FIXME The cast is due to a typo in the spec
+        for (i = 0; i < (SLuint32) numInterfaces; ++i) {
+            SLInterfaceID iid = pInterfaceIDs[i];
+            if (NULL == iid)
+                return SL_RESULT_PARAMETER_INVALID;
+            int MPH, index;
+            if (0 <= (MPH = IID_to_MPH(iid)) &&
+                (0 <= (index = class__->mMPH_to_index[MPH])))
+                lossOfControlMask |= (1 << index);
+        }
+        object_lock_exclusive(this);
+        if (enabled)
+            this->mLossOfControlMask |= lossOfControlMask;
+        else
+            this->mLossOfControlMask &= ~lossOfControlMask;
+        object_unlock_exclusive(this);
+    }
     return SL_RESULT_SUCCESS;
 }
 
@@ -1864,42 +2015,47 @@ static SLresult DynamicInterfaceManagement_AddInterface(
         return SL_RESULT_PARAMETER_INVALID;
     struct DynamicInterfaceManagement_interface *this =
         (struct DynamicInterfaceManagement_interface *) self;
-    struct Object_interface *thisObject =
-        (struct Object_interface *) this->this;
+    struct Object_interface *thisObject = this->mThis;
     const struct class_ *class__ = thisObject->mClass;
-    int MPH = IID_to_MPH(iid);
-    if (0 > MPH)
+    int MPH, index;
+    if ((0 > (MPH = IID_to_MPH(iid))) ||
+        (0 > (index = class__->mMPH_to_index[MPH])))
         return SL_RESULT_FEATURE_UNSUPPORTED;
-    int index = class__->mMPH_to_index[MPH];
-    if (0 > index)
-        return SL_RESULT_FEATURE_UNSUPPORTED;
-    unsigned mask = 1 << index;
-    if (thisObject->mExposedMask & mask)
-        return SL_RESULT_PRECONDITIONS_VIOLATED;
-    // FIXME Currently do initialization here, but might be asynchronous
+    SLresult result;
+    VoidHook init = MPH_init_table[MPH].mInit;
     const struct iid_vtable *x = &class__->mInterfaces[index];
     size_t offset = x->mOffset;
     void *thisItf = (char *) thisObject + offset;
     size_t size = ((SLuint32) (index + 1) == class__->mInterfaceCount ?
         class__->mSize : x[1].mOffset) - offset;
+    unsigned mask = 1 << index;
+    // Lock the object rather than the DIM interface, because
+    // we modify both the object (exposed) and interface (added)
+    object_lock_exclusive(thisObject);
+    if (thisObject->mExposedMask & mask) {
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    } else {
+        // FIXME Currently do initialization here, but might be asynchronous
 #ifndef NDEBUG
 // for debugging, to detect uninitialized fields
 #define FILLER 0x55
 #else
 #define FILLER 0
 #endif
-    memset(thisItf, FILLER, size);
-    ((void **) thisItf)[1] = thisObject;
-    VoidHook init = MPH_init_table[MPH].mInit;
-    if (NULL != init)
-        (*init)(thisItf);
-    thisObject->mExposedMask |= mask;
-    this->mAddedMask |= mask;
-    SLresult result = SL_RESULT_SUCCESS;
-    if (async && NULL != this->mCallback) {
-        (*this->mCallback)(self, this->mContext,
-            SL_DYNAMIC_ITF_EVENT_RESOURCES_AVAILABLE, result, iid);
+        memset(thisItf, FILLER, size);
+        ((void **) thisItf)[1] = thisObject;
+        if (NULL != init)
+            (*init)(thisItf);
+        thisObject->mExposedMask |= mask;
+        this->mAddedMask |= mask;
+        result = SL_RESULT_SUCCESS;
+        if (async && (NULL != this->mCallback)) {
+            // FIXME Callback runs with mutex locked
+            (*this->mCallback)(self, this->mContext,
+                SL_DYNAMIC_ITF_EVENT_RESOURCES_AVAILABLE, result, iid);
+        }
     }
+    object_unlock_exclusive(thisObject);
     return result;
 }
 
@@ -1911,40 +2067,67 @@ static SLresult DynamicInterfaceManagement_RemoveInterface(
     struct DynamicInterfaceManagement_interface *this =
         (struct DynamicInterfaceManagement_interface *) self;
     struct Object_interface *thisObject =
-        (struct Object_interface *) this->this;
+        (struct Object_interface *) this->mThis;
     const struct class_ *class__ = thisObject->mClass;
     int MPH = IID_to_MPH(iid);
-    if (MPH < 0)
+    if (0 > MPH)
         return SL_RESULT_PRECONDITIONS_VIOLATED;
     int index = class__->mMPH_to_index[MPH];
-    if (index < 0)
+    if (0 > index)
         return SL_RESULT_PRECONDITIONS_VIOLATED;
-    unsigned mask = 1 << index;
-    // disallow removal of non-dynamic interfaces
-    if (!(this->mAddedMask & mask))
-        return SL_RESULT_PRECONDITIONS_VIOLATED;
-    // FIXME Currently do de-initialization here, but might be asynchronous
+    SLresult result = SL_RESULT_SUCCESS;
+    VoidHook deinit = MPH_init_table[MPH].mDeinit;
     const struct iid_vtable *x = &class__->mInterfaces[index];
     size_t offset = x->mOffset;
     void *thisItf = (char *) thisObject + offset;
-    VoidHook deinit = MPH_init_table[MPH].mDeinit;
-    if (NULL != deinit)
-        (*deinit)(thisItf);
     size_t size = ((SLuint32) (index + 1) == class__->mInterfaceCount ?
         class__->mSize : x[1].mOffset) - offset;
+    unsigned mask = 1 << index;
+    // Lock the object rather than the DIM interface, because
+    // we modify both the object (exposed) and interface (added)
+    object_lock_exclusive(thisObject);
+    // disallow removal of non-dynamic interfaces
+    if (!(this->mAddedMask & mask)) {
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    } else {
+        if (NULL != deinit)
+            (*deinit)(thisItf);
 #ifndef NDEBUG
-    memset(thisItf, 0x55, size);
+        memset(thisItf, 0x55, size);
 #endif
-    thisObject->mExposedMask &= ~mask;
-    this->mAddedMask &= ~mask;
-    return SL_RESULT_SUCCESS;
+        thisObject->mExposedMask &= ~mask;
+        this->mAddedMask &= ~mask;
+    }
+    object_unlock_exclusive(thisObject);
+    return result;
 }
 
 static SLresult DynamicInterfaceManagement_ResumeInterface(
     SLDynamicInterfaceManagementItf self,
     const SLInterfaceID iid, SLboolean async)
 {
-    return SL_RESULT_SUCCESS;
+    if (NULL == iid)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct DynamicInterfaceManagement_interface *this =
+        (struct DynamicInterfaceManagement_interface *) self;
+    struct Object_interface *thisObject =
+        (struct Object_interface *) this->mThis;
+    const struct class_ *class__ = thisObject->mClass;
+    int MPH = IID_to_MPH(iid);
+    if (0 > MPH)
+        return SL_RESULT_PRECONDITIONS_VIOLATED;
+    int index = class__->mMPH_to_index[MPH];
+    if (0 > index)
+        return SL_RESULT_PRECONDITIONS_VIOLATED;
+    SLresult result = SL_RESULT_SUCCESS;
+    unsigned mask = 1 << index;
+    // FIXME Change to exclusive when resume hook implemented
+    object_lock_shared(thisObject);
+    if (!(this->mAddedMask & mask))
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    // FIXME Call a resume hook on the interface, if suspended
+    object_unlock_shared(thisObject);
+    return result;
 }
 
 static SLresult DynamicInterfaceManagement_RegisterCallback(
@@ -1953,8 +2136,12 @@ static SLresult DynamicInterfaceManagement_RegisterCallback(
 {
     struct DynamicInterfaceManagement_interface *this =
         (struct DynamicInterfaceManagement_interface *) self;
+    struct Object_interface *thisObject = this->mThis;
+    // FIXME This could be a poke lock, if we had atomic double-word load/store
+    object_lock_exclusive(thisObject);
     this->mCallback = callback;
     this->mContext = pContext;
+    object_unlock_exclusive(thisObject);
     return SL_RESULT_SUCCESS;
 }
 
@@ -1979,11 +2166,13 @@ static SLresult Play_SetPlayState(SLPlayItf self, SLuint32 state)
         return SL_RESULT_PARAMETER_INVALID;
     }
     struct Play_interface *this = (struct Play_interface *) self;
+    interface_lock_exclusive(this);
     this->mState = state;
     if (SL_PLAYSTATE_STOPPED == state) {
         this->mPosition = (SLmillisecond) 0;
         // this->mPositionSamples = 0;
     }
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -1992,7 +2181,10 @@ static SLresult Play_GetPlayState(SLPlayItf self, SLuint32 *pState)
     if (NULL == pState)
         return SL_RESULT_PARAMETER_INVALID;
     struct Play_interface *this = (struct Play_interface *) self;
-    *pState = this->mState;
+    interface_lock_peek(this);
+    SLuint32 state = this->mState;
+    interface_unlock_peek(this);
+    *pState = state;
     return SL_RESULT_SUCCESS;
 }
 
@@ -2005,7 +2197,10 @@ static SLresult Play_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
     struct Play_interface *this = (struct Play_interface *) self;
-    *pMsec = this->mDuration;
+    interface_lock_peek(this);
+    SLmillisecond duration = this->mDuration;
+    interface_unlock_peek(this);
+    *pMsec = duration;
     return SL_RESULT_SUCCESS;
 }
 
@@ -2014,9 +2209,12 @@ static SLresult Play_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
     struct Play_interface *this = (struct Play_interface *) self;
-    *pMsec = this->mPosition;
+    interface_lock_peek(this);
+    SLmillisecond position = this->mPosition;
+    interface_unlock_peek(this);
+    *pMsec = position;
     // FIXME convert sample units to time units
-    // SL_TIME_UNKNOWN == this->mPlay.mPosition = SL_TIME_UNKNOWN;
+    // FIXME handle SL_TIME_UNKNOWN
     return SL_RESULT_SUCCESS;
 }
 
@@ -2024,15 +2222,20 @@ static SLresult Play_RegisterCallback(SLPlayItf self, slPlayCallback callback,
     void *pContext)
 {
     struct Play_interface *this = (struct Play_interface *) self;
+    // FIXME This could be a poke lock, if we had atomic double-word load/store
+    interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Play_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
 {
     struct Play_interface *this = (struct Play_interface *) self;
+    interface_lock_poke(this);
     this->mEventFlags = eventFlags;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2042,21 +2245,28 @@ static SLresult Play_GetCallbackEventsMask(SLPlayItf self,
     if (NULL == pEventFlags)
         return SL_RESULT_PARAMETER_INVALID;
     struct Play_interface *this = (struct Play_interface *) self;
-    *pEventFlags = this->mEventFlags;
+    interface_lock_peek(this);
+    SLuint32 eventFlags = this->mEventFlags;
+    interface_unlock_peek(this);
+    *pEventFlags = eventFlags;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Play_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
 {
     struct Play_interface *this = (struct Play_interface *) self;
+    interface_lock_poke(this);
     this->mMarkerPosition = mSec;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Play_ClearMarkerPosition(SLPlayItf self)
 {
     struct Play_interface *this = (struct Play_interface *) self;
+    interface_lock_poke(this);
     this->mMarkerPosition = 0;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2065,14 +2275,19 @@ static SLresult Play_GetMarkerPosition(SLPlayItf self, SLmillisecond *pMsec)
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
     struct Play_interface *this = (struct Play_interface *) self;
-    *pMsec = this->mMarkerPosition;
+    interface_lock_peek(this);
+    SLmillisecond markerPosition = this->mMarkerPosition;
+    interface_unlock_peek(this);
+    *pMsec = markerPosition;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Play_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec)
 {
     struct Play_interface *this = (struct Play_interface *) self;
+    interface_lock_poke(this);
     this->mPositionUpdatePeriod = mSec;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2082,7 +2297,10 @@ static SLresult Play_GetPositionUpdatePeriod(SLPlayItf self,
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
     struct Play_interface *this = (struct Play_interface *) self;
-    *pMsec = this->mPositionUpdatePeriod;
+    interface_lock_peek(this);
+    SLmillisecond positionUpdatePeriod = this->mPositionUpdatePeriod;
+    interface_unlock_peek(this);
+    *pMsec = positionUpdatePeriod;
     return SL_RESULT_SUCCESS;
 }
 
@@ -2109,25 +2327,32 @@ static SLresult BufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
     if (NULL == pBuffer)
         return SL_RESULT_PARAMETER_INVALID;
     struct BufferQueue_interface *this = (struct BufferQueue_interface *) self;
-    // FIXME race condition need mutex
-    struct BufferHeader *oldRear = this->mRear;
-    struct BufferHeader *newRear = oldRear;
-    if (++newRear == &this->mArray[this->mNumBuffers])
+    SLresult result;
+    interface_lock_exclusive(this);
+    struct BufferHeader *oldRear = this->mRear, *newRear;
+    if ((newRear = oldRear + 1) == &this->mArray[this->mNumBuffers])
         newRear = this->mArray;
-    if (newRear == this->mFront)
-        return SL_RESULT_BUFFER_INSUFFICIENT;
-    oldRear->mBuffer = pBuffer;
-    oldRear->mSize = size;
-    this->mRear = newRear;
-    ++this->mState.count;
-    return SL_RESULT_SUCCESS;
+    if (newRear == this->mFront) {
+        result = SL_RESULT_BUFFER_INSUFFICIENT;
+    } else {
+        oldRear->mBuffer = pBuffer;
+        oldRear->mSize = size;
+        this->mRear = newRear;
+        ++this->mState.count;
+        result = SL_RESULT_SUCCESS;
+    }
+    interface_unlock_exclusive(this);
+    return result;
 }
 
 static SLresult BufferQueue_Clear(SLBufferQueueItf self)
 {
     struct BufferQueue_interface *this = (struct BufferQueue_interface *) self;
+    interface_lock_exclusive(this);
     this->mFront = &this->mArray[0];
     this->mRear = &this->mArray[0];
+    this->mState.count = 0;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2137,11 +2362,20 @@ static SLresult BufferQueue_GetState(SLBufferQueueItf self,
     if (NULL == pState)
         return SL_RESULT_PARAMETER_INVALID;
     struct BufferQueue_interface *this = (struct BufferQueue_interface *) self;
-#ifdef __cplusplus
-    pState->count = this->mState.count;
-    pState->playIndex = this->mState.playIndex;
+    SLBufferQueueState state;
+    interface_lock_shared(this);
+#ifdef __cplusplus // FIXME Is this a compiler bug?
+    state.count = this->mState.count;
+    state.playIndex = this->mState.playIndex;
 #else
-    *pState = this->mState;
+    state = this->mState;
+#endif
+    interface_unlock_shared(this);
+#ifdef __cplusplus // FIXME Is this a compiler bug?
+    pState->count = state.count;
+    pState->playIndex = state.playIndex;
+#else
+    *pState = state;
 #endif
     return SL_RESULT_SUCCESS;
 }
@@ -2150,8 +2384,11 @@ static SLresult BufferQueue_RegisterCallback(SLBufferQueueItf self,
     slBufferQueueCallback callback, void *pContext)
 {
     struct BufferQueue_interface *this = (struct BufferQueue_interface *) self;
+    // FIXME This could be a poke lock, if we had atomic double-word load/store
+    interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2171,7 +2408,9 @@ static SLresult Volume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
     if (!((SL_MILLIBEL_MIN <= level) && (SL_MILLIBEL_MAX >= level)))
         return SL_RESULT_PARAMETER_INVALID;
     struct Volume_interface *this = (struct Volume_interface *) self;
+    interface_lock_poke(this);
     this->mLevel = level;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2180,7 +2419,10 @@ static SLresult Volume_GetVolumeLevel(SLVolumeItf self, SLmillibel *pLevel)
     if (NULL == pLevel)
         return SL_RESULT_PARAMETER_INVALID;
     struct Volume_interface *this = (struct Volume_interface *) self;
-    *pLevel = this->mLevel;
+    interface_lock_peek(this);
+    SLmillibel level = this->mLevel;
+    interface_unlock_peek(this);
+    *pLevel = level;
     return SL_RESULT_SUCCESS;
 }
 
@@ -2196,7 +2438,9 @@ static SLresult Volume_GetMaxVolumeLevel(SLVolumeItf self,
 static SLresult Volume_SetMute(SLVolumeItf self, SLboolean mute)
 {
     struct Volume_interface *this = (struct Volume_interface *) self;
+    interface_lock_poke(this);
     this->mMute = mute;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2205,14 +2449,19 @@ static SLresult Volume_GetMute(SLVolumeItf self, SLboolean *pMute)
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
     struct Volume_interface *this = (struct Volume_interface *) self;
-    *pMute = this->mMute;
+    interface_lock_peek(this);
+    SLboolean mute = this->mMute;
+    interface_unlock_peek(this);
+    *pMute = mute;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Volume_EnableStereoPosition(SLVolumeItf self, SLboolean enable)
 {
     struct Volume_interface *this = (struct Volume_interface *) self;
+    interface_lock_poke(this);
     this->mEnableStereoPosition = enable;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2222,17 +2471,22 @@ static SLresult Volume_IsEnabledStereoPosition(SLVolumeItf self,
     if (NULL == pEnable)
         return SL_RESULT_PARAMETER_INVALID;
     struct Volume_interface *this = (struct Volume_interface *) self;
-    *pEnable = this->mEnableStereoPosition;
+    interface_lock_peek(this);
+    SLboolean enable = this->mEnableStereoPosition;
+    interface_unlock_peek(this);
+    *pEnable = enable;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Volume_SetStereoPosition(SLVolumeItf self,
     SLpermille stereoPosition)
 {
-    struct Volume_interface *this = (struct Volume_interface *) self;
     if (!((-1000 <= stereoPosition) && (1000 >= stereoPosition)))
         return SL_RESULT_PARAMETER_INVALID;
+    struct Volume_interface *this = (struct Volume_interface *) self;
+    interface_lock_poke(this);
     this->mStereoPosition = stereoPosition;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2242,7 +2496,10 @@ static SLresult Volume_GetStereoPosition(SLVolumeItf self,
     if (NULL == pStereoPosition)
         return SL_RESULT_PARAMETER_INVALID;
     struct Volume_interface *this = (struct Volume_interface *) self;
-    *pStereoPosition = this->mStereoPosition;
+    interface_lock_peek(this);
+    SLpermille stereoPosition = this->mStereoPosition;
+    interface_unlock_peek(this);
+    *pStereoPosition = stereoPosition;
     return SL_RESULT_SUCCESS;
 }
 
@@ -2272,8 +2529,8 @@ static SLresult Engine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    struct LEDDevice_class *this =
-        (struct LEDDevice_class *) construct(&LEDDevice_class, exposedMask);
+    struct LEDDevice_class *this = (struct LEDDevice_class *)
+        construct(&LEDDevice_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     this->mDeviceID = deviceID;
@@ -2293,8 +2550,8 @@ static SLresult Engine_CreateVibraDevice(SLEngineItf self,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    struct VibraDevice_class *this =
-        (struct VibraDevice_class *) construct(&VibraDevice_class, exposedMask);
+    struct VibraDevice_class *this = (struct VibraDevice_class *)
+        construct(&VibraDevice_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     this->mDeviceID = deviceID;
@@ -2533,8 +2790,8 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         return SL_RESULT_PARAMETER_INVALID;
     }
     // Construct our new instance
-    struct AudioPlayer_class *this =
-        (struct AudioPlayer_class *) construct(&AudioPlayer_class, exposedMask);
+    struct AudioPlayer_class *this = (struct AudioPlayer_class *)
+        construct(&AudioPlayer_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     // FIXME numBuffers is unavailable for URL, must make a default !
@@ -2574,16 +2831,16 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
 #endif
 #ifdef USE_ANDROID
     this->mAudioTrack = new android::AudioTrack(
-        android::AudioSystem::MUSIC, // streamType
-        44100,                       // sampleRate
-        android::AudioSystem::PCM_16_BIT,    // format
+        android::AudioSystem::MUSIC,            // streamType
+        44100,                                  // sampleRate
+        android::AudioSystem::PCM_16_BIT,       // format
         // FIXME should be stereo, but mono gives more audio output for testing
-        android::AudioSystem::CHANNEL_OUT_MONO,                           // channels
-        256 * 20,                         // frameCount
-        0,                           // flags
-        /*NULL*/ my_handler,                        // cbf (callback)
-        (void *) self,               // user
-        256 * 20);                        // notificationFrame
+        android::AudioSystem::CHANNEL_OUT_MONO, // channels
+        256 * 20,                               // frameCount
+        0,                                      // flags
+        /*NULL*/ my_handler,                    // cbf (callback)
+        (void *) self,                          // user
+        256 * 20);                              // notificationFrame
     assert(this->mAudioTrack != NULL);
     // FIXME should call checkStatus after new
     int ok;
@@ -2628,8 +2885,8 @@ static SLresult Engine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         return result;
     if (NULL == pMIDISrc || NULL == pAudioOutput)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MidiPlayer_class *this =
-        (struct MidiPlayer_class *) construct(&MidiPlayer_class, exposedMask);
+    struct MidiPlayer_class *this = (struct MidiPlayer_class *)
+        construct(&MidiPlayer_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     // return the new MIDI player object
@@ -2679,8 +2936,8 @@ static SLresult Engine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    struct OutputMix_class *this =
-        (struct OutputMix_class *) construct(&OutputMix_class, exposedMask);
+    struct OutputMix_class *this = (struct OutputMix_class *)
+        construct(&OutputMix_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     *pMix = &this->mObject.mItf;
@@ -2701,7 +2958,7 @@ static SLresult Engine_CreateMetadataExtractor(SLEngineItf self,
     if (SL_RESULT_SUCCESS != result)
         return result;
     struct MetadataExtractor_class *this = (struct MetadataExtractor_class *)
-        construct(&MetadataExtractor_class, exposedMask);
+        construct(&MetadataExtractor_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     *pMetadataExtractor = &this->mObject.mItf;
@@ -4546,7 +4803,7 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     *pEngine = NULL;
     // default values
     SLboolean threadSafe = SL_BOOLEAN_TRUE;
-    SLboolean lossOfControl = SL_BOOLEAN_FALSE;
+    SLboolean lossOfControlGlobal = SL_BOOLEAN_FALSE;
     if (NULL != pEngineOptions) {
         SLuint32 i;
 		const SLEngineOption *option = pEngineOptions;
@@ -4556,7 +4813,7 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
                 threadSafe = (SLboolean) option->data;
                 break;
             case SL_ENGINEOPTION_LOSSOFCONTROL:
-                lossOfControl = (SLboolean) option->data;
+                lossOfControlGlobal = (SLboolean) option->data;
                 break;
             default:
                 return SL_RESULT_PARAMETER_INVALID;
@@ -4568,12 +4825,13 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    struct Engine_class *this =
-        (struct Engine_class *) construct(&Engine_class, exposedMask);
+    struct Engine_class *this = (struct Engine_class *)
+        construct(&Engine_class, exposedMask, NULL);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
+    this->mObject.mLossOfControlMask = lossOfControlGlobal ? ~0 : 0;
+    this->mEngine.mLossOfControlGlobal = lossOfControlGlobal;
     this->mThreadSafe = threadSafe;
-    this->mLossOfControl = lossOfControl;
     *pEngine = &this->mObject.mItf;
     return SL_RESULT_SUCCESS;
 }
@@ -4611,8 +4869,9 @@ static void OutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer,
     size &= ~3;
     struct OutputMixExt_interface *thisExt =
         (struct OutputMixExt_interface *) self;
+    // FIXME Finding one interface from another, but is it exposed?
     struct OutputMix_interface *this =
-        &((struct OutputMix_class *) thisExt->this)->mOutputMix;
+        &((struct OutputMix_class *) thisExt->mThis)->mOutputMix;
     unsigned activeMask = this->mActiveMask;
     struct Track *track = &this->mTracks[0];
     unsigned i;
