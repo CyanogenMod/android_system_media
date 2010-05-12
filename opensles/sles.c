@@ -172,16 +172,32 @@ static const SLAudioOutputDescriptor AudioOutputDescriptor_handsfree = {
     2
 };
 
-
-#if 0
 static const SLLEDDescriptor SLLEDDescriptor_default = {
-    8,  // ledCount
-    2,  // primaryLED
-    12  // colorMask
+    32, // ledCount
+    0,  // primaryLED
+    ~0  // colorMask
 };
 
-static const SLuint32 LED_ids[] = {SL_DEFAULTDEVICEID_LED};
-#endif
+static const struct LED_id_descriptor {
+    SLuint32 id;
+    const SLLEDDescriptor *descriptor;
+} LED_id_descriptors[] = {
+    {SL_DEFAULTDEVICEID_LED, &SLLEDDescriptor_default}
+};
+
+static const SLVibraDescriptor SLVibraDescriptor_default = {
+    SL_BOOLEAN_TRUE, // supportsFrequency
+    SL_BOOLEAN_TRUE, // supportsIntensity
+    20000,           // minFrequency
+    100000           // maxFrequency
+};
+
+static const struct Vibra_id_descriptor {
+    SLuint32 id;
+    const SLVibraDescriptor *descriptor;
+} Vibra_id_descriptors[] = {
+    {SL_DEFAULTDEVICEID_VIBRA, &SLVibraDescriptor_default}
+};
 
 /* Interface structures */
 
@@ -285,7 +301,7 @@ struct BufferQueue_interface {
 struct DeviceVolume_interface {
     const struct SLDeviceVolumeItf_ *mItf;
     struct Object_interface *mThis;
-    SLint32 mVolume;     // FIXME should be per-device
+    SLint32 mVolume[2]; // FIXME Hard-coded for default in/out
 };
 
 struct DynamicInterfaceManagement_interface {
@@ -301,9 +317,32 @@ struct DynamicSource_interface {
     struct Object_interface *mThis;
 };
 
+// FIXME Move this elsewhere
+
+#define AUX_ENVIRONMENTALREVERB 0
+#define AUX_PRESETREVERB        1
+#define AUX_MAX                 2
+
+#if 0
+static const unsigned char AUX_to_MPH[AUX_MAX] = {
+    MPH_ENVIRONMENTALREVERB,
+    MPH_PRESETREVERB
+};
+#endif
+
+// private
+
+struct EnableLevel {
+    SLboolean mEnable;
+    SLmillibel mSendLevel;
+};
+
 struct EffectSend_interface {
     const struct SLEffectSendItf_ *mItf;
     struct Object_interface *mThis;
+    struct OutputMix_class *mOutputMix;
+    SLmillibel mDirectLevel;
+    struct EnableLevel mEnableLevels[AUX_MAX];
 };
 
 struct Engine_interface {
@@ -319,6 +358,7 @@ struct Engine_interface {
 struct EngineCapabilities_interface {
     const struct SLEngineCapabilitiesItf_ *mItf;
     struct Object_interface *mThis;
+    SLboolean mThreadSafe;
 };
 
 struct EnvironmentalReverb_interface {
@@ -572,8 +612,6 @@ struct Engine_class {
     struct _3DCommit_interface m3DCommit;
     // optional interfaces
     struct DeviceVolume_interface mDeviceVolume;
-    // additional fields not associated with interfaces
-    SLboolean mThreadSafe;
 };
 
 struct LEDDevice_class {
@@ -1774,11 +1812,9 @@ static struct Object_interface *construct(const struct class_ *class__,
         unsigned i;
         for (i = 0; exposedMask; ++i, ++x, exposedMask >>= 1) {
             if (exposedMask & 1) {
-                unsigned MPH = x->mMPH;
-                size_t offset = x->mOffset;
-                void *self = (char *) this + offset;
-                ((void **) self)[1] = this;
-                VoidHook init = MPH_init_table[MPH].mInit;
+                void *self = (char *) this + x->mOffset;
+                ((struct Object_interface **) self)[1] = this;
+                VoidHook init = MPH_init_table[x->mMPH].mInit;
                 if (NULL != init)
                     (*init)(self);
             }
@@ -3573,9 +3609,18 @@ static SLresult DeviceVolume_GetVolumeScale(SLDeviceVolumeItf self,
 static SLresult DeviceVolume_SetVolume(SLDeviceVolumeItf self,
     SLuint32 deviceID, SLint32 volume)
 {
+    switch (deviceID) {
+    case SL_DEFAULTDEVICEID_AUDIOINPUT:
+    case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
+        break;
+    default:
+        return SL_RESULT_PARAMETER_INVALID;
+    }
     struct DeviceVolume_interface *this =
         (struct DeviceVolume_interface *) self;
-    this->mVolume = volume;
+    interface_lock_exclusive(this);
+    this->mVolume[~deviceID] = volume;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3584,9 +3629,19 @@ static SLresult DeviceVolume_GetVolume(SLDeviceVolumeItf self,
 {
     if (NULL == pVolume)
         return SL_RESULT_PARAMETER_INVALID;
+    switch (deviceID) {
+    case SL_DEFAULTDEVICEID_AUDIOINPUT:
+    case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
+        break;
+    default:
+        return SL_RESULT_PARAMETER_INVALID;
+    }
     struct DeviceVolume_interface *this =
         (struct DeviceVolume_interface *) self;
-    *pVolume = this->mVolume;
+    interface_lock_shared(this);
+    SLint32 volume = this->mVolume[~deviceID];
+    interface_unlock_shared(this);
+    *pVolume = volume;
     return SL_RESULT_SUCCESS;
 }
 
@@ -3601,6 +3656,7 @@ static SLresult DeviceVolume_GetVolume(SLDeviceVolumeItf self,
 static SLresult DynamicSource_SetSource(SLDynamicSourceItf self,
     SLDataSource *pDataSource)
 {
+    // FIXME
     return SL_RESULT_SUCCESS;
 }
 
@@ -3610,39 +3666,106 @@ static SLresult DynamicSource_SetSource(SLDynamicSourceItf self,
 
 /* EffectSend implementation */
 
+static struct EnableLevel *getEnableLevel(struct EffectSend_interface *this,
+    const void *pAuxEffect)
+{
+    struct OutputMix_class *outputMix = this->mOutputMix;
+    // Make sure the sink for this player is an output mix
+#if 0 // not necessary
+    if (NULL == outputMix)
+        return NULL;
+#endif
+    if (pAuxEffect == &outputMix->mEnvironmentalReverb)
+        return &this->mEnableLevels[AUX_ENVIRONMENTALREVERB];
+    if (pAuxEffect == &outputMix->mPresetReverb)
+        return &this->mEnableLevels[AUX_PRESETREVERB];
+    return NULL;
+#if 0 // App couldn't have an interface for effect without exposure
+    unsigned interfaceMask = 1 << MPH_to_OutputMix[AUX_to_MPH[aux]];
+    if (outputMix->mExposedMask & interfaceMask)
+        result = SL_RESULT_PARAMETER_INVALID;
+#endif
+}
+
 static SLresult EffectSend_EnableEffectSend(SLEffectSendItf self,
     const void *pAuxEffect, SLboolean enable, SLmillibel initialLevel)
 {
+    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
+    if (NULL == enableLevel)
+        return SL_RESULT_PARAMETER_INVALID;
+    interface_lock_exclusive(this);
+    enableLevel->mEnable = enable;
+    enableLevel->mSendLevel = initialLevel;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EffectSend_IsEnabled(SLEffectSendItf self,
     const void *pAuxEffect, SLboolean *pEnable)
 {
+    if (NULL == pEnable)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
+    if (NULL == enableLevel)
+        return SL_RESULT_PARAMETER_INVALID;
+    interface_lock_shared(this);
+    SLboolean enable = enableLevel->mEnable;
+    interface_unlock_shared(this);
+    *pEnable = enable;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EffectSend_SetDirectLevel(SLEffectSendItf self,
     SLmillibel directLevel)
 {
+    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    interface_lock_exclusive(this);
+    this->mDirectLevel = directLevel;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EffectSend_GetDirectLevel(SLEffectSendItf self,
     SLmillibel *pDirectLevel)
 {
+    if (NULL == pDirectLevel)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    interface_lock_shared(this);
+    SLmillibel directLevel = this->mDirectLevel;
+    interface_unlock_shared(this);
+    *pDirectLevel = directLevel;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EffectSend_SetSendLevel(SLEffectSendItf self,
     const void *pAuxEffect, SLmillibel sendLevel)
 {
+    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
+    if (NULL == enableLevel)
+        return SL_RESULT_PARAMETER_INVALID;
+    interface_lock_exclusive(this);
+    enableLevel->mSendLevel = sendLevel;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EffectSend_GetSendLevel(SLEffectSendItf self,
     const void *pAuxEffect, SLmillibel *pSendLevel)
 {
+    if (NULL == pSendLevel)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
+    if (NULL == enableLevel)
+        return SL_RESULT_PARAMETER_INVALID;
+    interface_lock_shared(this);
+    SLmillibel sendLevel = enableLevel->mSendLevel;
+    interface_unlock_shared(this);
+    *pSendLevel = sendLevel;
     return SL_RESULT_SUCCESS;
 }
 
@@ -3662,9 +3785,9 @@ static SLresult EngineCapabilities_QuerySupportedProfiles(
 {
     if (NULL == pProfilesSupported)
         return SL_RESULT_PARAMETER_INVALID;
-    // FIXME This is pessimistic as it omits the unofficial driver profile
-    // SL_PROFILES_PHONE | SL_PROFILES_MUSIC | SL_PROFILES_GAME
-    *pProfilesSupported = 0;
+    // This omits the unofficial driver profile
+    *pProfilesSupported =
+        SL_PROFILES_PHONE | SL_PROFILES_MUSIC | SL_PROFILES_GAME;
     return SL_RESULT_SUCCESS;
 }
 
@@ -3682,11 +3805,11 @@ static SLresult EngineCapabilities_QueryAvailableVoices(
         return SL_RESULT_PARAMETER_INVALID;
     }
     if (NULL != pNumMaxVoices)
-        *pNumMaxVoices = 0;
+        *pNumMaxVoices = 32;
     if (NULL != pIsAbsoluteMax)
         *pIsAbsoluteMax = SL_BOOLEAN_TRUE;
     if (NULL != pNumFreeVoices)
-        *pNumFreeVoices = 0;
+        *pNumFreeVoices = 32;
     return SL_RESULT_SUCCESS;
 }
 
@@ -3695,7 +3818,7 @@ static SLresult EngineCapabilities_QueryNumberOfMIDISynthesizers(
 {
     if (NULL == pNum)
         return SL_RESULT_PARAMETER_INVALID;
-    *pNum = 0;
+    *pNum = 1;
     return SL_RESULT_SUCCESS;
 }
 
@@ -3714,13 +3837,74 @@ static SLresult EngineCapabilities_QueryLEDCapabilities(
     SLEngineCapabilitiesItf self, SLuint32 *pIndex, SLuint32 *pLEDDeviceID,
     SLLEDDescriptor *pDescriptor)
 {
-    return SL_RESULT_SUCCESS;
+    SLuint32 maxIndex = sizeof(LED_id_descriptors) /
+        sizeof(LED_id_descriptors[0]);
+    const struct LED_id_descriptor *id_descriptor;
+    SLuint32 index;
+    if (NULL != pIndex) {
+        if (NULL != pLEDDeviceID || NULL != pDescriptor) {
+            index = *pIndex;
+            if (index >= maxIndex)
+                return SL_RESULT_PARAMETER_INVALID;
+            id_descriptor = &LED_id_descriptors[index];
+            if (NULL != pLEDDeviceID)
+                *pLEDDeviceID = id_descriptor->id;
+            if (NULL != pDescriptor)
+                *pDescriptor = *id_descriptor->descriptor;
+        }
+        /* FIXME else? */
+        *pIndex = maxIndex;
+        return SL_RESULT_SUCCESS;
+    } else {
+        if (NULL != pLEDDeviceID && NULL != pDescriptor) {
+            SLuint32 id = *pLEDDeviceID;
+            for (index = 0; index < maxIndex; ++index) {
+                id_descriptor = &LED_id_descriptors[index];
+                if (id == id_descriptor->id) {
+                    *pDescriptor = *id_descriptor->descriptor;
+                    return SL_RESULT_SUCCESS;
+                }
+            }
+        }
+        return SL_RESULT_PARAMETER_INVALID;
+    }
 }
 
 static SLresult EngineCapabilities_QueryVibraCapabilities(
     SLEngineCapabilitiesItf self, SLuint32 *pIndex, SLuint32 *pVibraDeviceID,
     SLVibraDescriptor *pDescriptor)
 {
+    SLuint32 maxIndex = sizeof(Vibra_id_descriptors) /
+        sizeof(Vibra_id_descriptors[0]);
+    const struct Vibra_id_descriptor *id_descriptor;
+    SLuint32 index;
+    if (NULL != pIndex) {
+        if (NULL != pVibraDeviceID || NULL != pDescriptor) {
+            index = *pIndex;
+            if (index >= maxIndex)
+                return SL_RESULT_PARAMETER_INVALID;
+            id_descriptor = &Vibra_id_descriptors[index];
+            if (NULL != pVibraDeviceID)
+                *pVibraDeviceID = id_descriptor->id;
+            if (NULL != pDescriptor)
+                *pDescriptor = *id_descriptor->descriptor;
+        }
+        /* FIXME else? */
+        *pIndex = maxIndex;
+        return SL_RESULT_SUCCESS;
+    } else {
+        if (NULL != pVibraDeviceID && NULL != pDescriptor) {
+            SLuint32 id = *pVibraDeviceID;
+            for (index = 0; index < maxIndex; ++index) {
+                id_descriptor = &Vibra_id_descriptors[index];
+                if (id == id_descriptor->id) {
+                    *pDescriptor = *id_descriptor->descriptor;
+                    return SL_RESULT_SUCCESS;
+                }
+            }
+        }
+        return SL_RESULT_PARAMETER_INVALID;
+    }
     return SL_RESULT_SUCCESS;
 }
 
@@ -3729,8 +3913,9 @@ static SLresult EngineCapabilities_IsThreadSafe(SLEngineCapabilitiesItf self,
 {
     if (NULL == pIsThreadSafe)
         return SL_RESULT_PARAMETER_INVALID;
-    // FIXME For now
-    *pIsThreadSafe = SL_BOOLEAN_FALSE;
+    struct EngineCapabilities_interface *this =
+        (struct EngineCapabilities_interface *) self;
+    *pIsThreadSafe = this->mThreadSafe;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4831,7 +5016,7 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         return SL_RESULT_MEMORY_FAILURE;
     this->mObject.mLossOfControlMask = lossOfControlGlobal ? ~0 : 0;
     this->mEngine.mLossOfControlGlobal = lossOfControlGlobal;
-    this->mThreadSafe = threadSafe;
+    this->mEngineCapabilities.mThreadSafe = threadSafe;
     *pEngine = &this->mObject.mItf;
     return SL_RESULT_SUCCESS;
 }
