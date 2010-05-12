@@ -426,6 +426,7 @@ struct Object_interface {
     SLint32 mPriority;
     SLboolean mPreemptable;
     pthread_mutex_t mMutex;
+    pthread_cond_t mCond;
     // FIXME also an object ID for RPC
     // FIXME and a human-readable name for debugging
 };
@@ -503,11 +504,17 @@ struct Seek_interface {
 struct ThreadSync_interface {
     const struct SLThreadSyncItf_ *mItf;
     struct Object_interface *mThis;
+    SLboolean mInCriticalSection;
+    SLboolean mWaiting;
+    pthread_t mOwner;
 };
 
 struct Vibra_interface {
     const struct SLVibraItf_ *mItf;
     struct Object_interface *mThis;
+    SLboolean mVibrate;
+    SLmilliHertz mFrequency;
+    SLpermille mIntensity;
 };
 
 struct Virtualizer_interface {
@@ -717,6 +724,20 @@ static void object_unlock_exclusive(struct Object_interface *this)
     assert(0 == ok);
 }
 
+static void object_cond_wait(struct Object_interface *this)
+{
+    int ok;
+    ok = pthread_cond_wait(&this->mCond, &this->mMutex);
+    assert(0 == ok);
+}
+
+static void object_cond_signal(struct Object_interface *this)
+{
+    int ok;
+    ok = pthread_cond_signal(&this->mCond);
+    assert(0 == ok);
+}
+
 // Currently shared locks are implemented as exclusive, but don't count on it
 
 #define object_lock_shared(this)   object_lock_exclusive(this)
@@ -728,6 +749,8 @@ static void object_unlock_exclusive(struct Object_interface *this)
 #define interface_unlock_exclusive(this) object_unlock_exclusive((this)->mThis)
 #define interface_lock_shared(this)      object_lock_shared((this)->mThis)
 #define interface_unlock_shared(this)    object_unlock_shared((this)->mThis)
+#define interface_cond_wait(this)        object_cond_wait((this)->mThis)
+#define interface_cond_signal(this)      object_cond_signal((this)->mThis)
 
 // Peek and poke are an optimization for small atomic fields that don't "matter"
 
@@ -1042,6 +1065,8 @@ static void Object_init(void *self)
     int ok;
     ok = pthread_mutex_init(&this->mMutex, (const pthread_mutexattr_t *) NULL);
     assert(0 == ok);
+    ok = pthread_cond_init(&this->mCond, (const pthread_condattr_t *) NULL);
+    assert(0 == ok);
 }
 
 extern const struct SLOutputMixItf_ OutputMix_OutputMixItf;
@@ -1143,12 +1168,23 @@ static void ThreadSync_init(void *self)
     struct ThreadSync_interface *this =
         (struct ThreadSync_interface *) self;
     this->mItf = &ThreadSync_ThreadSyncItf;
+#ifndef NDEBUG
+    this->mInCriticalSection = SL_BOOLEAN_FALSE;
+    this->mWaiting = SL_BOOLEAN_FALSE;
+    this->mOwner = (pthread_t) NULL;
+#endif
 }
+
+extern const struct SLVirtualizerItf_ Virtualizer_VirtualizerItf;
 
 static void Virtualizer_init(void *self)
 {
-    //struct Virtualizer_interface *this =
-        // (struct Virtualizer_interface *) self;
+    struct Virtualizer_interface *this = (struct Virtualizer_interface *) self;
+    this->mItf = &Virtualizer_VirtualizerItf;
+#ifndef NDEBUG
+    this->mEnabled = SL_BOOLEAN_FALSE;
+    this->mStrength = 0;
+#endif
 }
 
 extern const struct SLVibraItf_ Vibra_VibraItf;
@@ -1157,6 +1193,11 @@ static void Vibra_init(void *self)
 {
     struct Vibra_interface *this = (struct Vibra_interface *) self;
     this->mItf = &Vibra_VibraItf;
+#ifndef NDEBUG
+    this->mVibrate = SL_BOOLEAN_FALSE;
+    this->mFrequency = 0;
+    this->mIntensity = 0;
+#endif
 }
 
 extern const struct SLVisualizationItf_ Visualization_VisualizationItf;
@@ -2439,10 +2480,12 @@ static SLresult BufferQueue_RegisterCallback(SLBufferQueueItf self,
 
 static SLresult Volume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
 {
-    // stet despite warning because MIN and MAX might change, and because
-    // some compilers allow a wider int type to be passed as a parameter
+#if 0
+    // some compilers allow a wider int type to be passed as a parameter,
+    // but that will be truncated during the field assignment
     if (!((SL_MILLIBEL_MIN <= level) && (SL_MILLIBEL_MAX >= level)))
         return SL_RESULT_PARAMETER_INVALID;
+#endif
     struct Volume_interface *this = (struct Volume_interface *) self;
     interface_lock_poke(this);
     this->mLevel = level;
@@ -3027,8 +3070,16 @@ static SLresult Engine_QueryNumSupportedInterfaces(SLEngineItf self,
 static SLresult Engine_QuerySupportedInterfaces(SLEngineItf self,
     SLuint32 objectID, SLuint32 index, SLInterfaceID *pInterfaceId)
 {
+    if (NULL == pInterfaceId)
+        return SL_RESULT_PARAMETER_INVALID;
+    const struct class_ *class__ = objectIDtoClass(objectID);
+    if (NULL == class__)
+        return SL_RESULT_FEATURE_UNSUPPORTED;
+    if (index >= class__->mInterfaceCount)
+        return SL_RESULT_PARAMETER_INVALID;
+    *pInterfaceId = &SL_IID_array[class__->mInterfaces[index].mMPH];
     return SL_RESULT_SUCCESS;
-}
+};
 
 static SLresult Engine_QueryNumSupportedExtensions(SLEngineItf self,
     SLuint32 *pNumExtensions)
@@ -3438,8 +3489,12 @@ static SLresult _3DLocation_GetOrientationVectors(SL3DLocationItf self,
 
 /* AudioDecoderCapabilities implementation */
 
+// These are not in 1.0.1 header file
+#define SL_AUDIOCODEC_NULL   0
+#define SL_AUDIOCODEC_VORBIS 9
+
 // FIXME should build this table from Caps table below
-static const SLuint32 Our_Decoder_IDs[] = {
+static const SLuint32 Decoder_IDs[] = {
     SL_AUDIOCODEC_PCM,
     SL_AUDIOCODEC_MP3,
     SL_AUDIOCODEC_AMR,
@@ -3448,32 +3503,15 @@ static const SLuint32 Our_Decoder_IDs[] = {
     SL_AUDIOCODEC_AAC,
     SL_AUDIOCODEC_WMA,
     SL_AUDIOCODEC_REAL,
-// FIXME not in 1.0.1 header file
-#define SL_AUDIOCODEC_VORBIS   ((SLuint32) 0x00000009)
     SL_AUDIOCODEC_VORBIS
 };
-#define MAX_DECODERS (sizeof(Our_Decoder_IDs) / sizeof(Our_Decoder_IDs[0]))
+#define MAX_DECODERS (sizeof(Decoder_IDs) / sizeof(Decoder_IDs[0]))
 
-static SLresult AudioDecoderCapabilities_GetAudioDecoders(
-    SLAudioDecoderCapabilitiesItf self, SLuint32 *pNumDecoders,
-    SLuint32 *pDecoderIds)
-{
-    if (NULL == pNumDecoders)
-        return SL_RESULT_PARAMETER_INVALID;
-    if (NULL == pDecoderIds)
-        *pNumDecoders = MAX_DECODERS;
-    else {
-        SLuint32 numDecoders = *pNumDecoders;
-        if (MAX_DECODERS < numDecoders) {
-            numDecoders = MAX_DECODERS;
-            *pNumDecoders = MAX_DECODERS;
-        }
-        memcpy(pDecoderIds, Our_Decoder_IDs, numDecoders * sizeof(SLuint32));
-    }
-    return SL_RESULT_SUCCESS;
-}
+// For now, but encoders might be different than decoders later
+#define Encoder_IDs Decoder_IDs
+#define MAX_ENCODERS (sizeof(Encoder_IDs) / sizeof(Encoder_IDs[0]))
 
-static const SLmilliHertz Sample_Rates_PCM[] = {
+static const SLmilliHertz SamplingRates_A[] = {
     SL_SAMPLINGRATE_8,
     SL_SAMPLINGRATE_11_025,
     SL_SAMPLINGRATE_12,
@@ -3485,17 +3523,16 @@ static const SLmilliHertz Sample_Rates_PCM[] = {
     SL_SAMPLINGRATE_48
 };
 
-static const SLAudioCodecDescriptor Caps_PCM[] = {
-    {
+static const SLAudioCodecDescriptor CodecDescriptor_A = {
     2,                   // maxChannels
     8,                   // minBitsPerSample
     16,                  // maxBitsPerSample
     SL_SAMPLINGRATE_8,   // minSampleRate
     SL_SAMPLINGRATE_48,  // maxSampleRate
     SL_BOOLEAN_FALSE,    // isFreqRangeContinuous
-    (SLmilliHertz *) Sample_Rates_PCM,
+    (SLmilliHertz *) SamplingRates_A,
                          // pSampleRatesSupported;
-    sizeof(Sample_Rates_PCM)/sizeof(Sample_Rates_PCM[0]),
+    sizeof(SamplingRates_A) / sizeof(SamplingRates_A[0]),
                          // numSampleRatesSupported
     1,                   // minBitRate
     ~0,                  // maxBitRate
@@ -3504,34 +3541,71 @@ static const SLAudioCodecDescriptor Caps_PCM[] = {
     0,                   // numBitratesSupported
     SL_AUDIOPROFILE_PCM, // profileSetting
     0                    // modeSetting
-    }
 };
 
-static const struct AudioDecoderCapabilities {
-    SLuint32 mDecoderID;
-    SLuint32 mNumCapabilities;
-    const SLAudioCodecDescriptor *mDescriptors;
-} Our_Decoder_Capabilities[] = {
-#define ENTRY(x) \
-    {SL_AUDIOCODEC_##x, sizeof(Caps_##x)/sizeof(Caps_##x[0]), Caps_##x}
-    ENTRY(PCM)
-#if 0
-    ENTRY(MP3),
-    ENTRY(AMR),
-    ENTRY(AMRWB),
-    ENTRY(AMRWBPLUS),
-    ENTRY(AAC),
-    ENTRY(WMA),
-    ENTRY(REAL),
-    ENTRY(VORBIS)
-#endif
+static const struct CodecDescriptor {
+    SLuint32 mCodecID;
+    const SLAudioCodecDescriptor *mDescriptor;
+} DecoderDescriptors[] = {
+    {SL_AUDIOCODEC_PCM, &CodecDescriptor_A},
+    {SL_AUDIOCODEC_NULL, NULL}
+}, EncoderDescriptors[] = {
+    {SL_AUDIOCODEC_PCM, &CodecDescriptor_A},
+    {SL_AUDIOCODEC_NULL, NULL}
 };
+
+static SLresult AudioDecoderCapabilities_GetAudioDecoders(
+    SLAudioDecoderCapabilitiesItf self, SLuint32 *pNumDecoders,
+    SLuint32 *pDecoderIds)
+{
+    if (NULL == pNumDecoders)
+        return SL_RESULT_PARAMETER_INVALID;
+    if (NULL == pDecoderIds) {
+        *pNumDecoders = MAX_DECODERS;
+    } else {
+        SLuint32 numDecoders = *pNumDecoders;
+        if (MAX_DECODERS <= numDecoders)
+            *pNumDecoders = numDecoders = MAX_DECODERS;
+        memcpy(pDecoderIds, Decoder_IDs, numDecoders * sizeof(SLuint32));
+    }
+    return SL_RESULT_SUCCESS;
+}
+
+// private helper shared by decoder and encoder
+static SLresult GetCodecCapabilities(SLuint32 decoderId, SLuint32 *pIndex,
+    SLAudioCodecDescriptor *pDescriptor,
+    const struct CodecDescriptor *codecDescriptors)
+{
+    if (NULL == pIndex)
+        return SL_RESULT_PARAMETER_INVALID;
+    const struct CodecDescriptor *cd = codecDescriptors;
+    SLuint32 index;
+    if (NULL == pDescriptor) {
+        for (index = 0 ; NULL != cd->mDescriptor; ++cd)
+            if (cd->mCodecID == decoderId)
+                ++index;
+        *pIndex = index;
+        return SL_RESULT_SUCCESS;
+    }
+    index = *pIndex;
+    for ( ; NULL != cd->mDescriptor; ++cd) {
+        if (cd->mCodecID == decoderId) {
+            if (0 == index) {
+                *pDescriptor = *cd->mDescriptor;
+                return SL_RESULT_SUCCESS;
+            }
+            --index;
+        }
+    }
+    return SL_RESULT_PARAMETER_INVALID;
+}
 
 static SLresult AudioDecoderCapabilities_GetAudioDecoderCapabilities(
     SLAudioDecoderCapabilitiesItf self, SLuint32 decoderId, SLuint32 *pIndex,
     SLAudioCodecDescriptor *pDescriptor)
 {
-    return SL_RESULT_SUCCESS;
+    return GetCodecCapabilities(decoderId, pIndex, pDescriptor,
+        DecoderDescriptors);
 }
 
 /*static*/ const struct SLAudioDecoderCapabilitiesItf_
@@ -3549,7 +3623,10 @@ static SLresult AudioEncoder_SetEncoderSettings(SLAudioEncoderItf self,
         return SL_RESULT_PARAMETER_INVALID;
     struct AudioEncoder_interface *this =
         (struct AudioEncoder_interface *) self;
-    this->mSettings = *pSettings;
+    SLAudioEncoderSettings settings = *pSettings;
+    interface_lock_exclusive(this);
+    this->mSettings = settings;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3560,7 +3637,10 @@ static SLresult AudioEncoder_GetEncoderSettings(SLAudioEncoderItf self,
         return SL_RESULT_PARAMETER_INVALID;
     struct AudioEncoder_interface *this =
         (struct AudioEncoder_interface *) self;
-    *pSettings = this->mSettings;
+    interface_lock_shared(this);
+    SLAudioEncoderSettings settings = this->mSettings;
+    interface_unlock_shared(this);
+    *pSettings = settings;
     return SL_RESULT_SUCCESS;
 }
 
@@ -3575,6 +3655,16 @@ static SLresult AudioEncoderCapabilities_GetAudioEncoders(
     SLAudioEncoderCapabilitiesItf self, SLuint32 *pNumEncoders,
     SLuint32 *pEncoderIds)
 {
+    if (NULL == pNumEncoders)
+        return SL_RESULT_PARAMETER_INVALID;
+    if (NULL == pEncoderIds) {
+        *pNumEncoders = MAX_ENCODERS;
+    } else {
+        SLuint32 numEncoders = *pNumEncoders;
+        if (MAX_ENCODERS <= numEncoders)
+            *pNumEncoders = numEncoders = MAX_ENCODERS;
+        memcpy(pEncoderIds, Encoder_IDs, numEncoders * sizeof(SLuint32));
+    }
     return SL_RESULT_SUCCESS;
 }
 
@@ -3582,7 +3672,8 @@ static SLresult AudioEncoderCapabilities_GetAudioEncoderCapabilities(
     SLAudioEncoderCapabilitiesItf self, SLuint32 encoderId, SLuint32 *pIndex,
     SLAudioCodecDescriptor *pDescriptor)
 {
-    return SL_RESULT_SUCCESS;
+    return GetCodecCapabilities(encoderId, pIndex, pDescriptor,
+        EncoderDescriptors);
 }
 
 /*static*/ const struct SLAudioEncoderCapabilitiesItf_
@@ -4335,12 +4426,46 @@ static SLresult Record_GetPositionUpdatePeriod(SLRecordItf self,
 
 static SLresult ThreadSync_EnterCriticalSection(SLThreadSyncItf self)
 {
-    return SL_RESULT_SUCCESS;
+    struct ThreadSync_interface *this = (struct ThreadSync_interface *) self;
+    SLresult result;
+    interface_lock_exclusive(this);
+    for (;;) {
+        if (this->mInCriticalSection) {
+            if (this->mOwner != pthread_self()) {
+                this->mWaiting = SL_BOOLEAN_TRUE;
+                interface_cond_wait(this);
+                continue;
+            }
+            result = SL_RESULT_PRECONDITIONS_VIOLATED;
+            break;
+        }
+        this->mInCriticalSection = SL_BOOLEAN_TRUE;
+        this->mOwner = pthread_self();
+        result = SL_RESULT_SUCCESS;
+        break;
+    }
+    interface_unlock_exclusive(this);
+    return result;
 }
 
 static SLresult ThreadSync_ExitCriticalSection(SLThreadSyncItf self)
 {
-    return SL_RESULT_SUCCESS;
+    struct ThreadSync_interface *this = (struct ThreadSync_interface *) self;
+    SLresult result;
+    interface_lock_exclusive(this);
+    if (!this->mInCriticalSection || this->mOwner != pthread_self()) {
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    } else {
+        this->mInCriticalSection = SL_BOOLEAN_FALSE;
+        this->mOwner = NULL;
+        result = SL_RESULT_SUCCESS;
+        if (this->mWaiting) {
+            this->mWaiting = SL_BOOLEAN_FALSE;
+            interface_cond_signal(this);
+        }
+    }
+    interface_unlock_exclusive(this);
+    return result;
 }
 
 /*static*/ const struct SLThreadSyncItf_ ThreadSync_ThreadSyncItf = {
@@ -4352,31 +4477,64 @@ static SLresult ThreadSync_ExitCriticalSection(SLThreadSyncItf self)
 
 static SLresult Vibra_Vibrate(SLVibraItf self, SLboolean vibrate)
 {
+    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    interface_lock_poke(this);
+    this->mVibrate = vibrate;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Vibra_IsVibrating(SLVibraItf self, SLboolean *pVibrating)
 {
+    if (NULL == pVibrating)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    interface_lock_peek(this);
+    SLboolean vibrate = this->mVibrate;
+    interface_unlock_peek(this);
+    *pVibrating = vibrate;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Vibra_SetFrequency(SLVibraItf self, SLmilliHertz frequency)
 {
+    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    interface_lock_poke(this);
+    this->mFrequency = frequency;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Vibra_GetFrequency(SLVibraItf self, SLmilliHertz *pFrequency)
 {
+    if (NULL == pFrequency)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    interface_lock_peek(this);
+    SLmilliHertz frequency = this->mFrequency;
+    interface_unlock_peek(this);
+    *pFrequency = frequency;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Vibra_SetIntensity(SLVibraItf self, SLpermille intensity)
 {
+    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    interface_lock_poke(this);
+    this->mIntensity = intensity;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Vibra_GetIntensity(SLVibraItf self, SLpermille *pIntensity)
 {
+    if (NULL == pIntensity)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    interface_lock_peek(this);
+    SLpermille intensity = this->mIntensity;
+    interface_unlock_peek(this);
+    *pIntensity = intensity;
     return SL_RESULT_SUCCESS;
 }
 
