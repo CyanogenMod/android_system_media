@@ -249,11 +249,39 @@ struct _3DLocation_interface {
 struct _3DMacroscopic_interface {
     const struct SL3DMacroscopicItf_ *mItf;
     struct Object_interface *mThis;
+    struct {
+        SLmillimeter mWidth;
+        SLmillimeter mHeight;
+        SLmillimeter mDepth;
+    } mSize;
+    struct {
+        SLmillimeter mHeading;
+        SLmillimeter mPitch;
+        SLmillimeter mRoll;
+    } mOrientationAngles;
+    struct {
+        SLVec3D mFront;
+        SLVec3D mUp;
+    } mOrientationVectors;
+    // for optimization
+    SLuint32 mGeneration;
 };
 
 struct _3DSource_interface {
     const struct SL3DSourceItf_ *mItf;
     struct Object_interface *mThis;
+    SLboolean mHeadRelative;
+    SLboolean mRolloffMaxDistanceMute;
+    SLmillimeter mMaxDistance;
+    SLmillimeter mMinDistance;
+    struct {
+        SLmillidegree mInner;
+        SLmillidegree mOuter;
+    } mConeAngles;
+    SLmillibel mConeOuterLevel;
+    SLpermille mRolloffFactor;
+    SLpermille mRoomRolloffFactor;
+    SLuint8 mDistanceModel;
 };
 
 struct AudioDecoderCapabilities_interface {
@@ -315,6 +343,7 @@ struct DynamicInterfaceManagement_interface {
 struct DynamicSource_interface {
     const struct SLDynamicSourceItf_ *mItf;
     struct Object_interface *mThis;
+    SLDataSource *mDataSource;
 };
 
 // FIXME Move this elsewhere
@@ -364,52 +393,108 @@ struct EngineCapabilities_interface {
 struct EnvironmentalReverb_interface {
     const struct SLEnvironmentalReverbItf_ *mItf;
     struct Object_interface *mThis;
+    SLEnvironmentalReverbSettings mProperties;
+};
+
+// FIXME move
+struct EqualizerBand {
+    SLmilliHertz mMin;
+    SLmilliHertz mMax;
+    SLmilliHertz mCenter;
+    /*TBD*/ int mLevel;
 };
 
 struct Equalizer_interface {
     const struct SLEqualizerItf_ *mItf;
     struct Object_interface *mThis;
+    SLboolean mEnabled;
+    SLmillibel *mLevels;
+    SLuint16 mPreset;
+    // const
+    SLuint16 mNumPresets;
+    SLuint16 mNumBands;
+    SLmillibel mMin;
+    SLmillibel mMax;
+    struct EqualizerBand *mBands;
+    const SLchar * const *mPresetNames;
+    /*TBD*/ int mBandLevelRangeMin;
+    /*TBD*/ int mBandLevelRangeMax;
 };
 
 struct LEDArray_interface {
     const struct SLLEDArrayItf_ *mItf;
     struct Object_interface *mThis;
-    // SLHSL *mHSL;
+    SLuint32 mLightMask;
+    SLHSL *mColor;
+    // const
+    SLuint8 mCount;
 };
 
-struct MetaDataExtraction_interface {
-    const struct SLMetaDataExractionItf_ *mItf;
+struct MetadataExtraction_interface {
+    const struct SLMetadataExtractionItf_ *mItf;
     struct Object_interface *mThis;
+    SLuint32 mKeySize;
+    const void *mKey;
+    SLuint32 mKeyEncoding;
+    const SLchar *mValueLangCountry;
+    SLuint32 mValueEncoding;
+    SLuint8 mFilterMask;
+    /*FIXME*/ int mKeyFilter;
 };
 
-struct MetaDataTraversal_interface {
-    const struct SLMetaDataTraversalItf_ *mItf;
+struct MetadataTraversal_interface {
+    const struct SLMetadataTraversalItf_ *mItf;
     struct Object_interface *mThis;
+    SLuint32 mIndex;
+    SLuint32 mMode;
+    SLuint32 mCount;
+    SLuint32 mSize;
 };
 
 struct MIDIMessage_interface {
     const struct SLMIDIMessageItf_ *mItf;
     struct Object_interface *mThis;
+    slMetaEventCallback mMetaEventCallback;
+    void *mMetaEventContext;
+    slMIDIMessageCallback mMessageCallback;
+    void *mMessageContext;
+    int /*TBD*/ mMessageTypes;
 };
 
 struct MIDIMuteSolo_interface {
     const struct SLMIDIMuteSoloItf_ *mItf;
     struct Object_interface *mThis;
+    SLuint16 mChannelMuteMask;
+    SLuint16 mChannelSoloMask;
+    SLuint32 mTrackMuteMask;
+    SLuint32 mTrackSoloMask;
+    // const ?
+    SLuint16 mTrackCount;
 };
 
 struct MIDITempo_interface {
     const struct SLMIDITempoItf_ *mItf;
     struct Object_interface *mThis;
+    SLuint32 mTicksPerQuarterNote;
+    SLuint32 mMicrosecondsPerQuarterNote;
 };
 
 struct MIDITime_interface {
     const struct SLMIDITimeItf_ *mItf;
     struct Object_interface *mThis;
+    SLuint32 mDuration;
+    SLuint32 mPosition;
+    SLuint32 mStartTick;
+    SLuint32 mNumTicks;
 };
 
 struct MuteSolo_interface {
     const struct SLMuteSoloItf_ *mItf;
     struct Object_interface *mThis;
+    SLuint32 mMuteMask;
+    SLuint32 mSoloMask;
+    // const
+    SLuint8 mNumChannels;
 };
 
 struct Object_interface {
@@ -450,6 +535,10 @@ struct OutputMixExt_interface {
 struct Pitch_interface {
     const struct SLPitchItf_ *mItf;
     struct Object_interface *mThis;
+    SLpermille mPitch;
+    // const
+    SLpermille mMinPitch;
+    SLpermille mMaxPitch;
 };
 
 struct Play_interface {
@@ -469,11 +558,24 @@ struct Play_interface {
 struct PlaybackRate_interface {
     const struct SLPlaybackRateItf_ *mItf;
     struct Object_interface *mThis;
+    SLpermille mRate;
+    SLuint32 mPropertyConstraints;
+    SLuint32 mProperties;
+    SLpermille mMinRate;
+    SLpermille mMaxRate;
+    SLpermille mStepSize;
+    SLuint32 mCapabilities;
 };
 
 struct PrefetchStatus_interface {
     const struct SLPrefetchStatusItf_ *mItf;
     struct Object_interface *mThis;
+    SLuint32 mStatus;
+    SLpermille mLevel;
+    slPrefetchCallback mCallback;
+    void *mContext;
+    SLuint32 mCallbackEventsMask;
+    SLpermille mFillUpdatePeriod;
 };
 
 struct PresetReverb_interface {
@@ -485,11 +587,22 @@ struct PresetReverb_interface {
 struct RatePitch_interface {
     const struct SLRatePitchItf_ *mItf;
     struct Object_interface *mThis;
+    SLpermille mRate;
+    SLpermille mMinRate;
+    SLpermille mMaxRate;
 };
 
 struct Record_interface {
     const struct SLRecordItf_ *mItf;
     struct Object_interface *mThis;
+    SLuint32 mState;
+    SLmillisecond mDurationLimit;
+    SLmillisecond mPosition;
+    slRecordCallback mCallback;
+    void *mContext;
+    SLuint32 mCallbackEventsMask;
+    SLmillisecond mMarkerPosition;
+    SLmillisecond mPositionUpdatePeriod;
 };
 
 struct Seek_interface {
@@ -563,8 +676,8 @@ struct AudioPlayer_class {
     struct BufferQueue_interface mBufferQueue;
     struct EffectSend_interface mEffectSend;
     struct MuteSolo_interface mMuteSolo;
-    struct MetaDataExtraction_interface mMetaDataExtraction;
-    struct MetaDataTraversal_interface mMetaDataTraversal;
+    struct MetadataExtraction_interface mMetadataExtraction;
+    struct MetadataTraversal_interface mMetadataTraversal;
     struct PrefetchStatus_interface mPrefetchStatus;
     struct RatePitch_interface mRatePitch;
     struct Seek_interface mSeek;
@@ -625,8 +738,7 @@ struct LEDDevice_class {
     // mandated interfaces
     struct Object_interface mObject;
     struct DynamicInterfaceManagement_interface mDynamicInterfaceManagement;
-    struct LEDArray_interface mLED;
-    //
+    struct LEDArray_interface mLEDArray;
     SLuint32 mDeviceID;
 };
 
@@ -643,8 +755,8 @@ struct MetadataExtractor_class {
     struct Object_interface mObject;
     struct DynamicInterfaceManagement_interface mDynamicInterfaceManagement;
     struct DynamicSource_interface mDynamicSource;
-    struct MetaDataExtraction_interface mMetaDataExtraction;
-    struct MetaDataTraversal_interface mMetaDataTraversal;
+    struct MetadataExtraction_interface mMetadataExtraction;
+    struct MetadataTraversal_interface mMetadataTraversal;
 };
 
 struct MidiPlayer_class {
@@ -659,8 +771,8 @@ struct MidiPlayer_class {
     struct BufferQueue_interface mBufferQueue;
     struct EffectSend_interface mEffectSend;
     struct MuteSolo_interface mMuteSolo;
-    struct MetaDataExtraction_interface mMetaDataExtraction;
-    struct MetaDataTraversal_interface mMetaDataTraversal;
+    struct MetadataExtraction_interface mMetadataExtraction;
+    struct MetadataTraversal_interface mMetadataTraversal;
     struct MIDIMessage_interface mMIDIMessage;
     struct MIDITime_interface mMIDITime;
     struct MIDITempo_interface mMIDITempo;
@@ -836,34 +948,85 @@ static void _3DCommit_init(void *self)
 #endif
 }
 
+extern const struct SL3DDopplerItf_ _3DDoppler_3DDopplerItf;
+
 static void _3DDoppler_init(void *self)
 {
-    //struct _3DDoppler_interface *this =
-        // (struct _3DDoppler_interface *) self;
+    struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
+    this->mItf = &_3DDoppler_3DDopplerItf;
+#ifndef NDEBUG
+    this->mVelocity.mCartesian.x = 0;
+    this->mVelocity.mCartesian.y = 0;
+    this->mVelocity.mCartesian.z = 0;
+#endif
+    this->mDopplerFactor = 1000;
 }
+
+extern const struct SL3DGroupingItf_ _3DGrouping_3DGroupingItf;
 
 static void _3DGrouping_init(void *self)
 {
-    //struct _3DGrouping_interface *this =
-        // (struct _3DGrouping_interface *) self;
+    struct _3DGrouping_interface *this = (struct _3DGrouping_interface *) self;
+    this->mItf = &_3DGrouping_3DGroupingItf;
+#ifndef NDEBUG
+    this->mGroup = NULL;
+#endif
 }
+
+extern const struct SL3DLocationItf_ _3DLocation_3DLocationItf;
 
 static void _3DLocation_init(void *self)
 {
-    //struct _3DLocation_interface *this =
-        // (struct _3DLocation_interface *) self;
+    struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
+    this->mItf = &_3DLocation_3DLocationItf;
+#ifndef NDEBUG
+    this->mLocation.mCartesian.x = 0;
+    this->mLocation.mCartesian.y = 0;
+    this->mLocation.mCartesian.z = 0;
+    this->mFront.x = 0;
+    this->mFront.y = 0;
+    this->mUp.x = 0;
+    this->mUp.z = 0;
+#endif
+    this->mFront.z = -1000;
+    this->mUp.y = 1000;
 }
+
+extern const struct SL3DMacroscopicItf_ _3DMacroscopic_3DMacroscopicItf;
 
 static void _3DMacroscopic_init(void *self)
 {
-    //struct _3DMacroscopic_interface *this =
-        // (struct _3DMacroscopic_interface *) self;
+    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    this->mItf = &_3DMacroscopic_3DMacroscopicItf;
+#ifndef NDEBUG
+    this->mSize.mWidth = 0;
+    this->mSize.mHeight = 0;
+    this->mSize.mDepth = 0;
+    this->mOrientationVectors.mFront.x = 0;
+    this->mOrientationVectors.mFront.y = 0;
+    this->mOrientationVectors.mUp.x = 0;
+    this->mOrientationVectors.mUp.z = 0;
+#endif
+    this->mOrientationVectors.mFront.z = -1000;
+    this->mOrientationVectors.mUp.y = 1000;
 }
+
+extern const struct SL3DSourceItf_ _3DSource_3DSourceItf;
 
 static void _3DSource_init(void *self)
 {
-    //struct _3DSource_interface *this =
-        // (struct _3DSource_interface *) self;
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    this->mItf = &_3DSource_3DSourceItf;
+    this->mHeadRelative = SL_BOOLEAN_FALSE;
+    this->mRolloffMaxDistanceMute = SL_BOOLEAN_FALSE;
+    this->mMaxDistance = SL_MILLIMETER_MAX;
+    this->mMinDistance = 1000;
+    this->mConeAngles.mInner = 360000;
+    this->mConeAngles.mOuter = 360000;
+    this->mConeOuterLevel = 0;
+    this->mRolloffFactor = 1000;
+    this->mRoomRolloffFactor = 0;
+    this->mDistanceModel = SL_ROLLOFFMODEL_EXPONENTIAL;
 }
 
 extern const struct SLAudioDecoderCapabilitiesItf_
@@ -876,6 +1039,17 @@ static void AudioDecoderCapabilities_init(void *self)
     this->mItf = &AudioDecoderCapabilities_AudioDecoderCapabilitiesItf;
 }
 
+extern const struct SLAudioEncoderItf_ AudioEncoder_AudioEncoderItf;
+
+static void AudioEncoder_init(void *self)
+{
+    struct AudioEncoder_interface *this = (struct AudioEncoder_interface *) self;
+    this->mItf = &AudioEncoder_AudioEncoderItf;
+#ifndef NDEBUG
+    memset(&this->mSettings, 0, sizeof(SLAudioEncoderSettings));
+#endif
+}
+
 extern const struct SLAudioEncoderCapabilitiesItf_
     AudioEncoderCapabilities_AudioEncoderCapabilitiesItf;
 
@@ -884,12 +1058,6 @@ static void AudioEncoderCapabilities_init(void *self)
     struct AudioEncoderCapabilities_interface *this =
         (struct AudioEncoderCapabilities_interface *) self;
     this->mItf = &AudioEncoderCapabilities_AudioEncoderCapabilitiesItf;
-}
-
-static void AudioEncoder_init(void *self)
-{
-    //struct AudioEncoder_interface *this =
-        // (struct AudioEncoder_interface *) self;
 }
 
 extern const struct SLAudioIODeviceCapabilitiesItf_
@@ -902,10 +1070,16 @@ static void AudioIODeviceCapabilities_init(void *self)
     this->mItf = &AudioIODeviceCapabilities_AudioIODeviceCapabilitiesItf;
 }
 
+extern const struct SLBassBoostItf_ BassBoost_BassBoostItf;
+
 static void BassBoost_init(void *self)
 {
-    //struct BassBoost_interface *this =
-        // (struct BassBoost_interface *) self;
+    struct BassBoost_interface *this = (struct BassBoost_interface *) self;
+    this->mItf = &BassBoost_BassBoostItf;
+#ifndef NDEBUG
+    this->mEnabled = SL_BOOLEAN_FALSE;
+#endif
+    this->mStrength = 1000;
 }
 
 extern const struct SLBufferQueueItf_ BufferQueue_BufferQueueItf;
@@ -923,6 +1097,12 @@ static void BufferQueue_init(void *self)
     this->mArray = NULL;
     this->mFront = NULL;
     this->mRear = NULL;
+    struct BufferHeader *bufferHeader = this->mTypical;
+    unsigned i;
+    for (i = 0; i < BUFFER_HEADER_TYPICAL+1; ++i, ++bufferHeader) {
+        bufferHeader->mBuffer = NULL;
+        bufferHeader->mSize = 0;
+    }
 #endif
 }
 
@@ -933,6 +1113,8 @@ static void DeviceVolume_init(void *self)
     struct DeviceVolume_interface *this =
         (struct DeviceVolume_interface *) self;
     this->mItf = &DeviceVolume_DeviceVolumeItf;
+    this->mVolume[0] = 10;
+    this->mVolume[1] = 10;
 }
 
 extern const struct SLDynamicInterfaceManagementItf_
@@ -951,16 +1133,29 @@ static void DynamicInterfaceManagement_init(void *self)
 #endif
 }
 
+extern const struct SLDynamicSourceItf_ DynamicSource_DynamicSourceItf;
+
 static void DynamicSource_init(void *self)
 {
-    //struct DynamicSource_interface *this =
-        // (struct DynamicSource_interface *) self;
+    struct DynamicSource_interface *this = (struct DynamicSource_interface *) self;
+    this->mItf = &DynamicSource_DynamicSourceItf;
+    // mDataSource will be initialized later in CreateAudioPlayer etc.
 }
+
+extern const struct SLEffectSendItf_ EffectSend_EffectSendItf;
 
 static void EffectSend_init(void *self)
 {
-    //struct EffectSend_interface *this =
-        // (struct EffectSend_interface *) self;
+    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    this->mItf = &EffectSend_EffectSendItf;
+#ifndef NDEBUG
+    this->mOutputMix = NULL; // FIXME wrong
+    this->mDirectLevel = 0;
+    this->mEnableLevels[AUX_ENVIRONMENTALREVERB].mEnable = SL_BOOLEAN_FALSE;
+    this->mEnableLevels[AUX_ENVIRONMENTALREVERB].mSendLevel = 0;
+    this->mEnableLevels[AUX_PRESETREVERB].mEnable = SL_BOOLEAN_FALSE;
+    this->mEnableLevels[AUX_PRESETREVERB].mSendLevel = 0;
+#endif
 }
 
 extern const struct SLEngineItf_ Engine_EngineItf;
@@ -969,6 +1164,7 @@ static void Engine_init(void *self)
 {
     struct Engine_interface *this = (struct Engine_interface *) self;
     this->mItf = &Engine_EngineItf;
+    // mLossOfControlGlobal is initialized in CreateEngine
 }
 
 extern const struct SLEngineCapabilitiesItf_
@@ -981,16 +1177,48 @@ static void EngineCapabilities_init(void *self)
     this->mItf = &EngineCapabilities_EngineCapabilitiesItf;
 }
 
+// FIXME move
+static const SLEnvironmentalReverbSettings EnvironmentalReverb_default = {
+    SL_MILLIBEL_MIN, // roomLevel
+    0,               // roomHFLevel
+    1000,            // decayTime
+    500,             // decayHFRatio
+    SL_MILLIBEL_MIN, // reflectionsLevel
+    20,              // reflectionsDelay
+    SL_MILLIBEL_MIN, // reverbLevel
+    40,              // reverbDelay
+    1000,            // diffusion
+    1000             // density
+};
+
+extern const struct SLEnvironmentalReverbItf_ EnvironmentalReverb_EnvironmentalReverbItf;
+
 static void EnvironmentalReverb_init(void *self)
 {
-    //struct EnvironmentalReverb_interface *this =
-        //(struct EnvironmentalReverb_interface *) self;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    this->mItf = &EnvironmentalReverb_EnvironmentalReverbItf;
+    this->mProperties = EnvironmentalReverb_default;
 }
+
+extern const struct SLEqualizerItf_ Equalizer_EqualizerItf;
 
 static void Equalizer_init(void *self)
 {
-    //struct Equalizer_interface *this =
-        // (struct Equalizer_interface *) self;
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    this->mItf = &Equalizer_EqualizerItf;
+    this->mEnabled = SL_BOOLEAN_FALSE;
+    this->mNumBands = 4;
+    this->mBandLevelRangeMin = 0;
+    this->mBandLevelRangeMax = 1000;
+    struct EqualizerBand *band = this->mBands;
+    unsigned i;
+    for (i = 0; i < this->mNumBands; ++i, ++band) {
+        this->mBands[i].mLevel = 0;
+        this->mBands[i].mCenter = 0;
+        this->mBands[i].mMin = 0;
+        this->mBands[i].mMax = 0;
+    }
+    this->mPreset = 0;
 }
 
 extern const struct SLLEDArrayItf_ LEDArray_LEDArrayItf;
@@ -999,54 +1227,91 @@ static void LEDArray_init(void *self)
 {
     struct LEDArray_interface *this = (struct LEDArray_interface *) self;
     this->mItf = &LEDArray_LEDArrayItf;
+#ifndef NDEBUG
+    this->mLightMask = 0;
+    this->mColor = NULL;
+#endif
+    this->mCount = 8;   // FIXME wrong place
 }
 
-static void MetaDataExtraction_init(void *self)
+extern const struct SLMetadataExtractionItf_ MetadataExtraction_MetadataExtractionItf;
+
+static void MetadataExtraction_init(void *self)
 {
-    //struct MetaDataExtraction_interface *this =
-        // (struct MetaDataExtraction_interface *) self;
+    struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    this->mItf = &MetadataExtraction_MetadataExtractionItf;
+    this->mKeySize = 0;
+    this->mKey = NULL;
+    this->mKeyEncoding = 0 /*TBD*/;
+    this->mValueLangCountry = 0 /*TBD*/;
+    this->mValueEncoding = 0 /*TBD*/;
+    this->mFilterMask = 0 /*TBD*/;
 }
 
-static void MetaDataTraversal_init(void *self)
+extern const struct SLMetadataTraversalItf_ MetadataTraversal_MetadataTraversalItf;
+
+static void MetadataTraversal_init(void *self)
 {
-    //struct MetaDataTraversal_interface *this =
-        // (struct MetaDataTraversal_interface *) self;
+    struct MetadataTraversal_interface *this = (struct MetadataTraversal_interface *) self;
+    this->mItf = &MetadataTraversal_MetadataTraversalItf;
+#ifndef NDEBUG
+    this->mIndex = 0;
+#endif
 }
+
+extern const struct SLMIDIMessageItf_ MIDIMessage_MIDIMessageItf;
 
 static void MIDIMessage_init(void *self)
 {
-    //struct MIDIMessage_interface *this =
-        // (struct MIDIMessage_interface *) self;
+    struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    this->mItf = &MIDIMessage_MIDIMessageItf;
+#ifndef NDEBUG
+    this->mMetaEventCallback = NULL;
+    this->mMetaEventContext = NULL;
+    this->mMessageCallback = NULL;
+    this->mMessageContext = NULL;
+    this->mMessageTypes = 0 /*TBD*/;
+#endif
 }
+
+extern const struct SLMIDIMuteSoloItf_ MIDIMuteSolo_MIDIMuteSoloItf;
 
 static void MIDIMuteSolo_init(void *self)
 {
-    //struct MIDIMuteSolo_interface *this =
-        // (struct MIDIMuteSolo_interface *) self;
+    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    this->mItf = &MIDIMuteSolo_MIDIMuteSoloItf;
 }
+
+extern const struct SLMIDITempoItf_ MIDITempo_MIDITempoItf;
 
 static void MIDITempo_init(void *self)
 {
-    //struct MIDITempo_interface *this =
-        // (struct MIDITempo_interface *) self;
+    struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    this->mItf = &MIDITempo_MIDITempoItf;
 }
+
+extern const struct SLMIDITimeItf_ MIDITime_MIDITimeItf;
 
 static void MIDITime_init(void *self)
 {
-    //struct MIDITime_interface *this =
-        // (struct MIDITime_interface *) self;
+    struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    this->mItf = &MIDITime_MIDITimeItf;
 }
+
+extern const struct SLMuteSoloItf_ MuteSolo_MuteSoloItf;
 
 static void MuteSolo_init(void *self)
 {
-    //struct MuteSolo_interface *this =
-        // (struct MuteSolo_interface *) self;
+    struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
+    this->mItf = &MuteSolo_MuteSoloItf;
 }
+
+extern const struct SLPrefetchStatusItf_ PrefetchStatus_PrefetchStatusItf;
 
 static void PrefetchStatus_init(void *self)
 {
-    //struct PrefetchStatus_interface *this =
-        // (struct PrefetchStatus_interface *) self;
+    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    this->mItf = &PrefetchStatus_PrefetchStatusItf;
 }
 
 extern const struct SLObjectItf_ Object_ObjectItf;
@@ -1099,10 +1364,12 @@ static void OutputMixExt_init(void *self)
 }
 #endif // USE_OUTPUTMIXEXT
 
+extern const struct SLPitchItf_ Pitch_PitchItf;
+
 static void Pitch_init(void *self)
 {
-    //struct Pitch_interface *this =
-        // (struct Pitch_interface *) self;
+    struct Pitch_interface *this = (struct Pitch_interface *) self;
+    this->mItf = &Pitch_PitchItf;
 }
 
 extern const struct SLPlayItf_ Play_PlayItf;
@@ -1124,27 +1391,36 @@ static void Play_init(void *self)
 #endif
 }
 
+extern const struct SLPlaybackRateItf_ PlaybackRate_PlaybackRateItf;
+
 static void PlaybackRate_init(void *self)
 {
-    //struct PlaybackRate_interface *this =
-        // (struct PlaybackRate_interface *) self;
+    struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    this->mItf = &PlaybackRate_PlaybackRateItf;
 }
+
+extern const struct SLPresetReverbItf_ PresetReverb_PresetReverbItf;
 
 static void PresetReverb_init(void *self)
 {
-    //struct PresetReverb_interface *this =
-        //(struct PresetReverb_interface *) self;
+    struct PresetReverb_interface *this = (struct PresetReverb_interface *) self;
+    this->mItf = &PresetReverb_PresetReverbItf;
 }
+
+extern const struct SLRatePitchItf_ RatePitch_RatePitchItf;
 
 static void RatePitch_init(void *self)
 {
-    //struct RatePitch_interface *this =
-        // (struct RatePitch_interface *) self;
+    struct RatePitch_interface *this = (struct RatePitch_interface *) self;
+    this->mItf = &RatePitch_RatePitchItf;
 }
+
+extern const struct SLRecordItf_ Record_RecordItf;
 
 static void Record_init(void *self)
 {
-    //struct Record_interface *this = (struct Record_interface *) self;
+    struct Record_interface *this = (struct Record_interface *) self;
+    this->mItf = &Record_RecordItf;
 }
 
 extern const struct SLSeekItf_ Seek_SeekItf;
@@ -1195,9 +1471,9 @@ static void Vibra_init(void *self)
     this->mItf = &Vibra_VibraItf;
 #ifndef NDEBUG
     this->mVibrate = SL_BOOLEAN_FALSE;
-    this->mFrequency = 0;
-    this->mIntensity = 0;
 #endif
+    this->mFrequency = SLVibraDescriptor_default.minFrequency;
+    this->mIntensity = 1000;
 }
 
 extern const struct SLVisualizationItf_ Visualization_VisualizationItf;
@@ -1210,8 +1486,8 @@ static void Visualization_init(void *self)
 #ifndef NDEBUG
     this->mCallback = NULL;
     this->mContext = NULL;
-    this->mRate = 0;
 #endif
+    this->mRate = 20000;
 }
 
 extern const struct SLVolumeItf_ Volume_VolumeItf;
@@ -1221,7 +1497,7 @@ static void Volume_init(void *self)
     struct Volume_interface *this = (struct Volume_interface *) self;
     this->mItf = &Volume_VolumeItf;
 #ifndef NDEBUG
-    this->mLevel = 0; // FIXME correct ?
+    this->mLevel = 0;
     this->mMute = SL_BOOLEAN_FALSE;
     this->mEnableStereoPosition = SL_BOOLEAN_FALSE;
     this->mStereoPosition = 0;
@@ -1256,8 +1532,8 @@ static const struct MPH_init {
     { /* MPH_ENVIRONMENTALREVERB, */ EnvironmentalReverb_init, NULL },
     { /* MPH_EQUALIZER, */ Equalizer_init, NULL },
     { /* MPH_LED, */ LEDArray_init, NULL },
-    { /* MPH_METADATAEXTRACTION, */ MetaDataExtraction_init, NULL },
-    { /* MPH_METADATATRAVERSAL, */ MetaDataTraversal_init, NULL },
+    { /* MPH_METADATAEXTRACTION, */ MetadataExtraction_init, NULL },
+    { /* MPH_METADATATRAVERSAL, */ MetadataTraversal_init, NULL },
     { /* MPH_MIDIMESSAGE, */ MIDIMessage_init, NULL },
     { /* MPH_MIDITIME, */ MIDITime_init, NULL },
     { /* MPH_MIDITEMPO, */ MIDITempo_init, NULL },
@@ -1468,9 +1744,9 @@ static const struct iid_vtable AudioPlayer_interfaces[] = {
     {MPH_MUTESOLO, INTERFACE_GAME,
         offsetof(struct AudioPlayer_class, mMuteSolo)},
     {MPH_METADATAEXTRACTION, INTERFACE_MUSIC_GAME,
-        offsetof(struct AudioPlayer_class, mMetaDataExtraction)},
+        offsetof(struct AudioPlayer_class, mMetadataExtraction)},
     {MPH_METADATATRAVERSAL, INTERFACE_MUSIC_GAME,
-        offsetof(struct AudioPlayer_class, mMetaDataTraversal)},
+        offsetof(struct AudioPlayer_class, mMetadataTraversal)},
     {MPH_PREFETCHSTATUS, INTERFACE_TBD,
         offsetof(struct AudioPlayer_class, mPrefetchStatus)},
     {MPH_RATEPITCH, INTERFACE_DYNAMIC_GAME,
@@ -1593,7 +1869,7 @@ static const struct iid_vtable LEDDevice_interfaces[] = {
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(struct LEDDevice_class, mDynamicInterfaceManagement)},
     {MPH_LED, INTERFACE_IMPLICIT,
-        offsetof(struct LEDDevice_class, mLED)}
+        offsetof(struct LEDDevice_class, mLEDArray)}
 };
 
 static const struct class_ LEDDevice_class = {
@@ -1643,9 +1919,9 @@ static const struct iid_vtable MetadataExtractor_interfaces[] = {
     {MPH_DYNAMICSOURCE, INTERFACE_IMPLICIT,
         offsetof(struct MetadataExtractor_class, mDynamicSource)},
     {MPH_METADATAEXTRACTION, INTERFACE_IMPLICIT,
-        offsetof(struct MetadataExtractor_class, mMetaDataExtraction)},
+        offsetof(struct MetadataExtractor_class, mMetadataExtraction)},
     {MPH_METADATATRAVERSAL, INTERFACE_IMPLICIT,
-        offsetof(struct MetadataExtractor_class, mMetaDataTraversal)}
+        offsetof(struct MetadataExtractor_class, mMetadataTraversal)}
 };
 
 static const struct class_ MetadataExtractor_class = {
@@ -1685,9 +1961,9 @@ static const struct iid_vtable MidiPlayer_interfaces[] = {
     {MPH_MUTESOLO, INTERFACE_GAME,
         offsetof(struct MidiPlayer_class, mMuteSolo)},
     {MPH_METADATAEXTRACTION, INTERFACE_GAME,
-        offsetof(struct MidiPlayer_class, mMetaDataExtraction)},
+        offsetof(struct MidiPlayer_class, mMetadataExtraction)},
     {MPH_METADATATRAVERSAL, INTERFACE_GAME,
-        offsetof(struct MidiPlayer_class, mMetaDataTraversal)},
+        offsetof(struct MidiPlayer_class, mMetadataTraversal)},
     {MPH_MIDIMESSAGE, INTERFACE_PHONE_GAME,
         offsetof(struct MidiPlayer_class, mMIDIMessage)},
     {MPH_MIDITIME, INTERFACE_PHONE_GAME,
@@ -2612,6 +2888,17 @@ static SLresult Engine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice,
         construct(&LEDDevice_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
+    SLHSL *color = (SLHSL *) malloc(sizeof(SLHSL) * this->mLEDArray.mCount);
+    // FIXME
+    assert(NULL != this->mLEDArray.mColor);
+    this->mLEDArray.mColor = color;
+    unsigned i;
+    for (i = 0; i < this->mLEDArray.mCount; ++i) {
+        // per specification 1.0.1 pg. 259: "Default color is undefined."
+        color->hue = 0;
+        color->saturation = 1000;
+        color->lightness = 1000;
+    }
     this->mDeviceID = deviceID;
     *pDevice = &this->mObject.mItf;
     return SL_RESULT_SUCCESS;
@@ -2890,6 +3177,7 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     }
     this->mBufferQueue.mFront = this->mBufferQueue.mArray;
     this->mBufferQueue.mRear = this->mBufferQueue.mArray;
+    this->mDynamicSource.mDataSource = pAudioSrc;
 #ifdef USE_SNDFILE
     this->mSndFile.mPathname = pathname;
     this->mSndFile.mIs0 = SL_BOOLEAN_TRUE;
@@ -3747,7 +4035,15 @@ static SLresult DeviceVolume_GetVolume(SLDeviceVolumeItf self,
 static SLresult DynamicSource_SetSource(SLDynamicSourceItf self,
     SLDataSource *pDataSource)
 {
-    // FIXME
+    if (NULL == pDataSource)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct DynamicSource_interface *this = (struct DynamicSource_interface *) self;
+    // need to lock the object, as a change to source can impact most of object
+    struct Object_interface *thisObject = this->mThis;
+    object_lock_exclusive(thisObject);
+    // FIXME a bit of a simplification to say the least!
+    this->mDataSource = pDataSource;
+    object_unlock_exclusive(thisObject);
     return SL_RESULT_SUCCESS;
 }
 
@@ -4026,24 +4322,41 @@ static SLresult EngineCapabilities_IsThreadSafe(SLEngineCapabilitiesItf self,
 static SLresult LEDArray_ActivateLEDArray(SLLEDArrayItf self,
     SLuint32 lightMask)
 {
+    struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    this->mLightMask = lightMask;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult LEDArray_IsLEDArrayActivated(SLLEDArrayItf self,
-    SLuint32 *lightMask)
+    SLuint32 *pLightMask)
 {
+    if (NULL == pLightMask)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    SLuint32 lightMask = this->mLightMask;
+    *pLightMask = lightMask;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult LEDArray_SetColor(SLLEDArrayItf self, SLuint8 index,
-    const SLHSL *color)
+    const SLHSL *pColor)
 {
+    if (NULL == pColor)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    SLHSL color = *pColor;
+    this->mColor[index] = color;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult LEDArray_GetColor(SLLEDArrayItf self, SLuint8 index,
-    SLHSL *color)
+    SLHSL *pColor)
 {
+    if (NULL == pColor)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    SLHSL color = this->mColor[index];
+    *pColor = color;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4059,30 +4372,52 @@ static SLresult LEDArray_GetColor(SLLEDArrayItf self, SLuint8 index,
 static SLresult MetadataExtraction_GetItemCount(SLMetadataExtractionItf self,
     SLuint32 *pItemCount)
 {
+    //struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    if (NULL == pItemCount)
+        return SL_RESULT_PARAMETER_INVALID;
+    *pItemCount = 0;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MetadataExtraction_GetKeySize(SLMetadataExtractionItf self,
     SLuint32 index, SLuint32 *pKeySize)
 {
+    //struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    if (NULL == pKeySize)
+        return SL_RESULT_PARAMETER_INVALID;
+    *pKeySize = 0;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MetadataExtraction_GetKey(SLMetadataExtractionItf self,
     SLuint32 index, SLuint32 keySize, SLMetadataInfo *pKey)
 {
+    //struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    if (NULL == pKey)
+        return SL_RESULT_PARAMETER_INVALID;
+    SLMetadataInfo metadataInfo;
+    *pKey = metadataInfo;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MetadataExtraction_GetValueSize(SLMetadataExtractionItf self,
     SLuint32 index, SLuint32 *pValueSize)
 {
+    //struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    if (NULL == pValueSize)
+        return SL_RESULT_PARAMETER_INVALID;
+    *pValueSize = 0;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MetadataExtraction_GetValue(SLMetadataExtractionItf self,
     SLuint32 index, SLuint32 valueSize, SLMetadataInfo *pValue)
 {
+    //struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    if (NULL == pValue)
+        return SL_RESULT_PARAMETER_INVALID;
+    SLMetadataInfo value;
+    *pValue = value;;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4090,11 +4425,24 @@ static SLresult MetadataExtraction_AddKeyFilter(SLMetadataExtractionItf self,
     SLuint32 keySize, const void *pKey, SLuint32 keyEncoding,
     const SLchar *pValueLangCountry, SLuint32 valueEncoding, SLuint8 filterMask)
 {
+    if (NULL == pKey || NULL == pValueLangCountry)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    interface_lock_exclusive(this);
+    this->mKeySize = keySize;
+    this->mKey = pKey;
+    this->mKeyEncoding = keyEncoding;
+    this->mValueLangCountry = pValueLangCountry; // FIXME local copy?
+    this->mValueEncoding = valueEncoding;
+    this->mFilterMask = filterMask;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MetadataExtraction_ClearKeyFilter(SLMetadataExtractionItf self)
 {
+    struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    this->mKeyFilter = 0;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4114,18 +4462,28 @@ static SLresult MetadataExtraction_ClearKeyFilter(SLMetadataExtractionItf self)
 static SLresult MetadataTraversal_SetMode(SLMetadataTraversalItf self,
     SLuint32 mode)
 {
+    struct MetadataTraversal_interface *this = (struct MetadataTraversal_interface *) self;
+    this->mMode = mode;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MetadataTraversal_GetChildCount(SLMetadataTraversalItf self,
     SLuint32 *pCount)
 {
+    if (NULL == pCount)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MetadataTraversal_interface *this = (struct MetadataTraversal_interface *) self;
+    *pCount = this->mCount;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MetadataTraversal_GetChildMIMETypeSize(
     SLMetadataTraversalItf self, SLuint32 index, SLuint32 *pSize)
 {
+    if (NULL == pSize)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MetadataTraversal_interface *this = (struct MetadataTraversal_interface *) self;
+    *pSize = this->mSize;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4133,12 +4491,15 @@ static SLresult MetadataTraversal_GetChildInfo(SLMetadataTraversalItf self,
     SLuint32 index, SLint32 *pNodeID, SLuint32 *pType, SLuint32 size,
     SLchar *pMimeType)
 {
+    //struct MetadataTraversal_interface *this = (struct MetadataTraversal_interface *) self;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MetadataTraversal_SetActiveNode(SLMetadataTraversalItf self,
     SLuint32 index)
 {
+    struct MetadataTraversal_interface *this = (struct MetadataTraversal_interface *) self;
+    this->mIndex = index;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4156,30 +4517,58 @@ static SLresult MetadataTraversal_SetActiveNode(SLMetadataTraversalItf self,
 static SLresult MuteSolo_SetChannelMute(SLMuteSoloItf self, SLuint8 chan,
    SLboolean mute)
 {
+    struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
+    SLuint32 mask = 1 << chan;
+    if (mute)
+        this->mMuteMask |= mask;
+    else
+        this->mMuteMask &= ~mask;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MuteSolo_GetChannelMute(SLMuteSoloItf self, SLuint8 chan,
     SLboolean *pMute)
 {
+    if (NULL == pMute)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
+    SLboolean mute = (this->mMuteMask >> chan) & 1;
+    *pMute = mute;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MuteSolo_SetChannelSolo(SLMuteSoloItf self, SLuint8 chan,
     SLboolean solo)
 {
+    struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
+    SLuint32 mask;
+    if (solo)
+        this->mSoloMask |= mask;
+    else
+        this->mSoloMask &= ~mask;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MuteSolo_GetChannelSolo(SLMuteSoloItf self, SLuint8 chan,
     SLboolean *pSolo)
 {
+    if (NULL == pSolo)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
+    SLboolean solo = (this->mSoloMask >> chan) & 1;
+    *pSolo = solo;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MuteSolo_GetNumChannels(SLMuteSoloItf self,
     SLuint8 *pNumChannels)
 {
+    if (NULL == pNumChannels)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
+    // FIXME const
+    SLuint32 numChannels = this->mNumChannels;
+    *pNumChannels = numChannels;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4195,17 +4584,31 @@ static SLresult MuteSolo_GetNumChannels(SLMuteSoloItf self,
 
 static SLresult Pitch_SetPitch(SLPitchItf self, SLpermille pitch)
 {
+    struct Pitch_interface *this = (struct Pitch_interface *) self;
+    this->mPitch = pitch;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Pitch_GetPitch(SLPitchItf self, SLpermille *pPitch)
 {
+    if (NULL == pPitch)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Pitch_interface *this = (struct Pitch_interface *) self;
+    SLpermille pitch = this->mPitch;
+    *pPitch = pitch;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Pitch_GetPitchCapabilities(SLPitchItf self,
     SLpermille *pMinPitch, SLpermille *pMaxPitch)
 {
+    if (NULL == pMinPitch || NULL == pMaxPitch)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Pitch_interface *this = (struct Pitch_interface *) self;
+    SLpermille minPitch = this->mMinPitch;
+    SLpermille maxPitch = this->mMaxPitch;
+    *pMinPitch = minPitch;
+    *pMaxPitch = maxPitch;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4219,29 +4622,49 @@ static SLresult Pitch_GetPitchCapabilities(SLPitchItf self,
 
 static SLresult PlaybackRate_SetRate(SLPlaybackRateItf self, SLpermille rate)
 {
+    struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    this->mRate = rate;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult PlaybackRate_GetRate(SLPlaybackRateItf self, SLpermille *pRate)
 {
+    if (NULL == pRate)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    SLpermille rate = this->mRate;
+    *pRate = rate;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult PlaybackRate_SetPropertyConstraints(SLPlaybackRateItf self,
     SLuint32 constraints)
 {
+    struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    // FIXME are properties and property constraints the same thing?
+    this->mProperties = constraints;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult PlaybackRate_GetProperties(SLPlaybackRateItf self,
     SLuint32 *pProperties)
 {
+    if (NULL == pProperties)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    SLuint32 properties = this->mProperties;
+    *pProperties = properties;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult PlaybackRate_GetCapabilitiesOfRate(SLPlaybackRateItf self,
     SLpermille rate, SLuint32 *pCapabilities)
 {
+    if (NULL == pCapabilities)
+        return SL_RESULT_PARAMETER_INVALID;
+    // struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    SLuint32 capabilities;
+    *pCapabilities = capabilities;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4249,6 +4672,19 @@ static SLresult PlaybackRate_GetRateRange(SLPlaybackRateItf self, SLuint8 index,
     SLpermille *pMinRate, SLpermille *pMaxRate, SLpermille *pStepSize,
     SLuint32 *pCapabilities)
 {
+    if (NULL == pMinRate || NULL == pMaxRate || NULL == pStepSize || NULL == pCapabilities)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    interface_lock_shared(this);
+    SLpermille minRate = this->mMinRate;
+    SLpermille maxRate = this->mMaxRate;
+    SLpermille stepSize = this->mStepSize;
+    SLuint32 capabilities = this->mCapabilities;
+    interface_unlock_shared(this);
+    *pMinRate = minRate;
+    *pMaxRate = maxRate;
+    *pStepSize = stepSize;
+    *pCapabilities = capabilities;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4266,42 +4702,83 @@ static SLresult PlaybackRate_GetRateRange(SLPlaybackRateItf self, SLuint8 index,
 static SLresult PrefetchStatus_GetPrefetchStatus(SLPrefetchStatusItf self,
     SLuint32 *pStatus)
 {
+    if (NULL == pStatus)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    interface_lock_peek(this);
+    SLuint32 status = this->mStatus;
+    interface_unlock_peek(this);
+    *pStatus = status;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult PrefetchStatus_GetFillLevel(SLPrefetchStatusItf self,
     SLpermille *pLevel)
 {
+    if (NULL == pLevel)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    interface_lock_peek(this);
+    SLpermille level = this->mLevel;
+    interface_unlock_peek(this);
+    *pLevel = level;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult PrefetchStatus_RegisterCallback(SLPrefetchStatusItf self,
     slPrefetchCallback callback, void *pContext)
 {
+    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    interface_lock_exclusive(this);
+    this->mCallback = callback;
+    this->mContext = pContext;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult PrefetchStatus_SetCallbackEventsMask(SLPrefetchStatusItf self,
     SLuint32 eventFlags)
 {
+    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    interface_lock_poke(this);
+    this->mCallbackEventsMask = eventFlags;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult PrefetchStatus_GetCallbackEventsMask(SLPrefetchStatusItf self,
     SLuint32 *pEventFlags)
 {
+    if (NULL == pEventFlags)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    interface_lock_peek(this);
+    SLuint32 callbackEventsMask = this->mCallbackEventsMask;
+    interface_unlock_peek(this);
+    *pEventFlags = callbackEventsMask;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult PrefetchStatus_SetFillUpdatePeriod(SLPrefetchStatusItf self,
     SLpermille period)
 {
+    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    interface_lock_poke(this);
+    this->mFillUpdatePeriod = period;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult PrefetchStatus_GetFillUpdatePeriod(SLPrefetchStatusItf self,
     SLpermille *pPeriod)
 {
+    if (NULL == pPeriod)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    interface_lock_peek(this);
+    SLpermille fillUpdatePeriod = this->mFillUpdatePeriod;
+    interface_unlock_peek(this);
+    *pPeriod = fillUpdatePeriod;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4320,17 +4797,36 @@ PrefetchStatus_PrefetchStatusItf = {
 
 static SLresult RatePitch_SetRate(SLRatePitchItf self, SLpermille rate)
 {
+    struct RatePitch_interface *this = (struct RatePitch_interface *) self;
+    interface_lock_poke(this);
+    this->mRate = rate;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult RatePitch_GetRate(SLRatePitchItf self, SLpermille *pRate)
 {
+    if (NULL == pRate)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct RatePitch_interface *this = (struct RatePitch_interface *) self;
+    interface_lock_peek(this);
+    SLpermille rate = this->mRate;
+    interface_unlock_peek(this);
+    *pRate = rate;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult RatePitch_GetRatePitchCapabilities(SLRatePitchItf self,
     SLpermille *pMinRate, SLpermille *pMaxRate)
 {
+    if (NULL == pMinRate || NULL == pMaxRate)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct RatePitch_interface *this = (struct RatePitch_interface *) self;
+    // FIXME const, direct access?
+    SLpermille minRate = this->mMinRate;
+    SLpermille maxRate = this->mMaxRate;
+    *pMinRate = minRate;
+    *pMaxRate = maxRate;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4344,66 +4840,130 @@ static SLresult RatePitch_GetRatePitchCapabilities(SLRatePitchItf self,
 
 static SLresult Record_SetRecordState(SLRecordItf self, SLuint32 state)
 {
+    struct Record_interface *this = (struct Record_interface *) self;
+    interface_lock_poke(this);
+    this->mState = state;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Record_GetRecordState(SLRecordItf self, SLuint32 *pState)
 {
+    struct Record_interface *this = (struct Record_interface *) self;
+    if (NULL == pState)
+        return SL_RESULT_PARAMETER_INVALID;
+    interface_lock_peek(this);
+    SLuint32 state = this->mState;
+    interface_unlock_peek(this);
+    *pState = state;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Record_SetDurationLimit(SLRecordItf self, SLmillisecond msec)
 {
+    struct Record_interface *this = (struct Record_interface *) self;
+    interface_lock_poke(this);
+    this->mDurationLimit = msec;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Record_GetPosition(SLRecordItf self, SLmillisecond *pMsec)
 {
+    if (NULL == pMsec)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Record_interface *this = (struct Record_interface *) self;
+    interface_lock_peek(this);
+    SLmillisecond position = this->mPosition;
+    interface_unlock_peek(this);
+    *pMsec = position;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Record_RegisterCallback(SLRecordItf self,
     slRecordCallback callback, void *pContext)
 {
+    struct Record_interface *this = (struct Record_interface *) self;
+    interface_lock_exclusive(this);
+    this->mCallback = callback;
+    this->mContext = pContext;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Record_SetCallbackEventsMask(SLRecordItf self,
     SLuint32 eventFlags)
 {
+    struct Record_interface *this = (struct Record_interface *) self;
+    interface_lock_poke(this);
+    this->mCallbackEventsMask = eventFlags;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Record_GetCallbackEventsMask(SLRecordItf self,
     SLuint32 *pEventFlags)
 {
+    if (NULL == pEventFlags)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Record_interface *this = (struct Record_interface *) self;
+    interface_lock_peek(this);
+    SLuint32 callbackEventsMask = this->mCallbackEventsMask;
+    interface_unlock_peek(this);
+    *pEventFlags = callbackEventsMask;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Record_SetMarkerPosition(SLRecordItf self, SLmillisecond mSec)
 {
+    struct Record_interface *this = (struct Record_interface *) self;
+    interface_lock_poke(this);
+    this->mMarkerPosition = mSec;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Record_ClearMarkerPosition(SLRecordItf self)
 {
+    struct Record_interface *this = (struct Record_interface *) self;
+    interface_lock_poke(this);
+    this->mMarkerPosition = 0;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Record_GetMarkerPosition(SLRecordItf self, SLmillisecond *pMsec)
 {
+    if (NULL == pMsec)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Record_interface *this = (struct Record_interface *) self;
+    interface_lock_peek(this);
+    SLmillisecond markerPosition = this->mMarkerPosition;
+    interface_unlock_peek(this);
+    *pMsec = markerPosition;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Record_SetPositionUpdatePeriod(SLRecordItf self,
     SLmillisecond mSec)
 {
+    struct Record_interface *this = (struct Record_interface *) self;
+    interface_lock_poke(this);
+    this->mPositionUpdatePeriod = mSec;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Record_GetPositionUpdatePeriod(SLRecordItf self,
     SLmillisecond *pMsec)
 {
+    if (NULL == pMsec)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Record_interface *this = (struct Record_interface *) self;
+    interface_lock_peek(this);
+    SLmillisecond positionUpdatePeriod = this->mPositionUpdatePeriod;
+    interface_unlock_peek(this);
+    *pMsec = positionUpdatePeriod;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4566,7 +5126,7 @@ static SLresult Visualization_GetMaxRate(SLVisualizationItf self,
 {
     if (NULL == pRate)
         return SL_RESULT_PARAMETER_INVALID;
-    *pRate = 0;
+    *pRate = 20000;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4656,36 +5216,96 @@ static SLresult _3DGrouping_Get3DGroup(SL3DGroupingItf self,
 static SLresult _3DMacroscopic_SetSize(SL3DMacroscopicItf self,
     SLmillimeter width, SLmillimeter height, SLmillimeter depth)
 {
+    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    interface_lock_exclusive(this);
+    this->mSize.mWidth = width;
+    this->mSize.mHeight = height;
+    this->mSize.mDepth = depth;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DMacroscopic_GetSize(SL3DMacroscopicItf self,
     SLmillimeter *pWidth, SLmillimeter *pHeight, SLmillimeter *pDepth)
 {
+    if (NULL == pWidth || NULL == pHeight || NULL == pDepth)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    interface_lock_shared(this);
+    SLmillimeter width = this->mSize.mWidth;
+    SLmillimeter height = this->mSize.mHeight;
+    SLmillimeter depth = this->mSize.mDepth;
+    interface_unlock_shared(this);
+    *pWidth = width;
+    *pHeight = height;
+    *pDepth = depth;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DMacroscopic_SetOrientationAngles(SL3DMacroscopicItf self,
     SLmillidegree heading, SLmillidegree pitch, SLmillidegree roll)
 {
+    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    // FIXME Compute as SLVec3D also
+    interface_lock_exclusive(this);
+    // this->mFront = ...
+    // this->mUp = ...
+    this->mOrientationAngles.mHeading = heading;
+    this->mOrientationAngles.mPitch = pitch;
+    this->mOrientationAngles.mRoll = roll;
+    ++this->mGeneration;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DMacroscopic_SetOrientationVectors(SL3DMacroscopicItf self,
     const SLVec3D *pFront, const SLVec3D *pAbove)
 {
+    if (NULL == pFront || NULL == pAbove)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    SLVec3D front = *pFront;
+    SLVec3D above = *pAbove;
+    interface_lock_exclusive(this);
+    this->mOrientationVectors.mFront = front;
+    this->mOrientationVectors.mUp = above;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DMacroscopic_Rotate(SL3DMacroscopicItf self,
     SLmillidegree theta, const SLVec3D *pAxis)
 {
+    if (NULL == pAxis)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    SLVec3D axis = *pAxis;
+    (void) (axis.x + axis.y + axis.z);
+    // FIXME Do the rotate here:
+    interface_lock_shared(this);
+    // read old values and generation
+    interface_unlock_shared(this);
+    // compute new position
+    interface_lock_exclusive(this);
+    // compare generation with saved value
+    // if equal, store new position and increment generation
+    // if unequal, discard new position
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DMacroscopic_GetOrientationVectors(SL3DMacroscopicItf self,
     SLVec3D *pFront, SLVec3D *pUp)
 {
+    if (NULL == pFront || NULL == pUp)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    interface_lock_shared(this);
+    SLVec3D front = this->mOrientationVectors.mFront;
+    SLVec3D up = this->mOrientationVectors.mUp;
+    interface_unlock_shared(this);
+    *pFront = front;
+    *pUp = up;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4703,76 +5323,145 @@ static SLresult _3DMacroscopic_GetOrientationVectors(SL3DMacroscopicItf self,
 static SLresult _3DSource_SetHeadRelative(SL3DSourceItf self,
     SLboolean headRelative)
 {
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_poke(this);
+    this->mHeadRelative = headRelative;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DSource_GetHeadRelative(SL3DSourceItf self,
     SLboolean *pHeadRelative)
 {
+    if (NULL == pHeadRelative)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_peek(this);
+    SLboolean headRelative = this->mHeadRelative;
+    interface_unlock_peek(this);
+    *pHeadRelative = headRelative;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DSource_SetRolloffDistances(SL3DSourceItf self,
     SLmillimeter minDistance, SLmillimeter maxDistance)
 {
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_exclusive(this);
+    this->mMinDistance = minDistance;
+    this->mMaxDistance = maxDistance;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DSource_GetRolloffDistances(SL3DSourceItf self,
     SLmillimeter *pMinDistance, SLmillimeter *pMaxDistance)
 {
+    if (NULL == pMinDistance || NULL == pMaxDistance)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_shared(this);
+    SLmillimeter minDistance = this->mMinDistance;
+    SLmillimeter maxDistance = this->mMaxDistance;
+    interface_unlock_shared(this);
+    *pMinDistance = minDistance;
+    *pMaxDistance = maxDistance;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DSource_SetRolloffMaxDistanceMute(SL3DSourceItf self,
     SLboolean mute)
 {
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_poke(this);
+    this->mRolloffMaxDistanceMute = mute;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DSource_GetRolloffMaxDistanceMute(SL3DSourceItf self,
     SLboolean *pMute)
 {
+    if (NULL == pMute)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_peek(this);
+    SLboolean mute = this->mRolloffMaxDistanceMute;
+    interface_unlock_peek(this);
+    *pMute = mute;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DSource_SetRolloffFactor(SL3DSourceItf self,
     SLpermille rolloffFactor)
 {
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_poke(this);
+    this->mRolloffFactor = rolloffFactor;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DSource_GetRolloffFactor(SL3DSourceItf self,
     SLpermille *pRolloffFactor)
 {
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_peek(this);
+    SLpermille rolloffFactor = this->mRolloffFactor;
+    interface_unlock_peek(this);
+    *pRolloffFactor = rolloffFactor;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DSource_SetRoomRolloffFactor(SL3DSourceItf self,
     SLpermille roomRolloffFactor)
 {
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_poke(this);
+    this->mRoomRolloffFactor = roomRolloffFactor;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DSource_GetRoomRolloffFactor(SL3DSourceItf self,
     SLpermille *pRoomRolloffFactor)
 {
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_peek(this);
+    SLpermille roomRolloffFactor = this->mRoomRolloffFactor;
+    interface_unlock_peek(this);
+    *pRoomRolloffFactor = roomRolloffFactor;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DSource_SetRolloffModel(SL3DSourceItf self, SLuint8 model)
 {
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_poke(this);
+    this->mDistanceModel = model;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DSource_GetRolloffModel(SL3DSourceItf self, SLuint8 *pModel)
 {
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_peek(this);
+    SLuint8 model = this->mDistanceModel;
+    interface_unlock_peek(this);
+    *pModel = model;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DSource_SetCone(SL3DSourceItf self, SLmillidegree innerAngle,
     SLmillidegree outerAngle, SLmillibel outerLevel)
 {
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_exclusive(this);
+    this->mConeAngles.mInner = innerAngle;
+    this->mConeAngles.mOuter = outerAngle;
+    this->mConeOuterLevel = outerLevel;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -4780,6 +5469,17 @@ static SLresult _3DSource_GetCone(SL3DSourceItf self,
     SLmillidegree *pInnerAngle, SLmillidegree *pOuterAngle,
     SLmillibel *pOuterLevel)
 {
+    if (NULL == pInnerAngle || NULL == pOuterAngle || NULL == pOuterLevel)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    interface_lock_shared(this);
+    SLmillidegree innerAngle = this->mConeAngles.mInner;
+    SLmillidegree outerAngle = this->mConeAngles.mOuter;
+    SLmillibel outerLevel = this->mConeOuterLevel;
+    interface_unlock_shared(this);
+    *pInnerAngle = innerAngle;
+    *pOuterAngle = outerAngle;
+    *pOuterLevel = outerLevel;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4804,76 +5504,179 @@ static SLresult _3DSource_GetCone(SL3DSourceItf self,
 
 static SLresult Equalizer_SetEnabled(SLEqualizerItf self, SLboolean enabled)
 {
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    interface_lock_poke(this);
+    this->mEnabled = enabled;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Equalizer_IsEnabled(SLEqualizerItf self, SLboolean *pEnabled)
 {
+    if (NULL == pEnabled)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    interface_lock_peek(this);
+    SLboolean enabled = this->mEnabled;
+    interface_unlock_peek(this);
+    *pEnabled = enabled;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Equalizer_GetNumberOfBands(SLEqualizerItf self,
     SLuint16 *pNumBands)
 {
+    if (NULL == pNumBands)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    // Note: no lock, but OK because it is const
+    *pNumBands = this->mNumBands;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Equalizer_GetBandLevelRange(SLEqualizerItf self,
     SLmillibel *pMin, SLmillibel *pMax)
 {
+    if (NULL == pMin && NULL == pMax)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    // Note: no lock, but OK because it is const
+    if (NULL != pMin)
+        *pMin = this->mMin;
+    if (NULL != pMax)
+        *pMax = this->mMax;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Equalizer_SetBandLevel(SLEqualizerItf self, SLuint16 band,
     SLmillibel level)
 {
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    if (band >= this->mNumBands)
+        return SL_RESULT_PARAMETER_INVALID;
+    interface_lock_poke(this);
+    this->mLevels[band] = level;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Equalizer_GetBandLevel(SLEqualizerItf self, SLuint16 band,
     SLmillibel *pLevel)
 {
+    if (NULL == pLevel)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    if (band >= this->mNumBands)
+        return SL_RESULT_PARAMETER_INVALID;
+    interface_lock_peek(this);
+    SLmillibel level = this->mLevels[band];
+    interface_unlock_peek(this);
+    *pLevel = level;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Equalizer_GetCenterFreq(SLEqualizerItf self, SLuint16 band,
     SLmilliHertz *pCenter)
 {
+    if (NULL == pCenter)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    if (band >= this->mNumBands)
+        return SL_RESULT_PARAMETER_INVALID;
+    // Note: no lock, but OK because it is const
+    *pCenter = this->mBands[band].mCenter;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Equalizer_GetBandFreqRange(SLEqualizerItf self, SLuint16 band,
     SLmilliHertz *pMin, SLmilliHertz *pMax)
 {
+    if (NULL == pMin && NULL == pMax)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    if (band >= this->mNumBands)
+        return SL_RESULT_PARAMETER_INVALID;
+    // Note: no lock, but OK because it is const
+    if (NULL != pMin)
+        *pMin = this->mBands[band].mMin;
+    if (NULL != pMax)
+        *pMax = this->mBands[band].mMax;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Equalizer_GetBand(SLEqualizerItf self, SLmilliHertz frequency,
     SLuint16 *pBand)
 {
+    if (NULL == pBand)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    // search for band whose center frequency has the closest ratio to 1.0
+    // assumes bands are unsorted (a pessimistic assumption)
+    // assumes bands can overlap (a pessimistic assumption)
+    // assumes a small number of bands, so no need for a fancier algorithm
+    const struct EqualizerBand *band;
+    float floatFreq = (float) frequency;
+    float bestRatio = 0.0;
+    SLuint16 bestBand = SL_EQUALIZER_UNDEFINED;
+    for (band = this->mBands; band < &this->mBands[this->mNumBands]; ++band) {
+        if (!(band->mMin <= frequency && frequency <= band->mMax))
+            continue;
+        assert(band->mMin <= band->mCenter && band->mCenter <= band->mMax);
+        assert(band->mCenter != 0);
+        float ratio = frequency <= band->mCenter ?
+            floatFreq / band->mCenter : band->mCenter / floatFreq;
+        if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestBand = band - this->mBands;
+        }
+    }
+    *pBand = band - this->mBands;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Equalizer_GetCurrentPreset(SLEqualizerItf self,
     SLuint16 *pPreset)
 {
+    if (NULL == pPreset)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    interface_lock_peek(this);
+    *pPreset = this->mPreset;
+    interface_unlock_peek(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Equalizer_UsePreset(SLEqualizerItf self, SLuint16 index)
 {
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    if (index >= this->mNumPresets)
+        return SL_RESULT_PARAMETER_INVALID;
+    interface_lock_poke(this);
+    this->mPreset = index;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Equalizer_GetNumberOfPresets(SLEqualizerItf self,
     SLuint16 *pNumPresets)
 {
+    if (NULL == pNumPresets)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    // Note: no lock, but OK because it is const
+    *pNumPresets = this->mNumPresets;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult Equalizer_GetPresetName(SLEqualizerItf self, SLuint16 index,
     const SLchar ** ppName)
 {
+    if (NULL == ppName)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    if (index >= this->mNumPresets)
+        return SL_RESULT_PARAMETER_INVALID;
+    *ppName = this->mPresetNames[index];
     return SL_RESULT_SUCCESS;
 }
 
@@ -4925,120 +5728,190 @@ static SLresult PresetReverb_GetPreset(SLPresetReverbItf self,
 static SLresult EnvironmentalReverb_SetRoomLevel(SLEnvironmentalReverbItf self,
     SLmillibel room)
 {
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    this->mProperties.roomLevel = room;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self,
     SLmillibel *pRoom)
 {
+    if (NULL == pRoom)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    SLmillibel roomLevel = this->mProperties.roomLevel;
+    *pRoom = roomLevel;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_SetRoomHFLevel(
     SLEnvironmentalReverbItf self, SLmillibel roomHF)
 {
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    this->mProperties.roomHFLevel = roomHF;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_GetRoomHFLevel(
     SLEnvironmentalReverbItf self, SLmillibel *pRoomHF)
 {
+    if (NULL == pRoomHF)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    SLmillibel roomHFLevel = this->mProperties.roomHFLevel;
+    *pRoomHF = roomHFLevel;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_SetDecayTime(
     SLEnvironmentalReverbItf self, SLmillisecond decayTime)
 {
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    this->mProperties.decayTime = decayTime;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_GetDecayTime(
     SLEnvironmentalReverbItf self, SLmillisecond *pDecayTime)
 {
+    if (NULL == pDecayTime)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    SLmillisecond decayTime = this->mProperties.decayTime;
+    *pDecayTime = decayTime;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_SetDecayHFRatio(
     SLEnvironmentalReverbItf self, SLpermille decayHFRatio)
 {
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    this->mProperties.decayHFRatio = decayHFRatio;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_GetDecayHFRatio(
     SLEnvironmentalReverbItf self, SLpermille *pDecayHFRatio)
 {
+    if (NULL == pDecayHFRatio)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    SLpermille decayHFRatio = this->mProperties.decayHFRatio;
+    *pDecayHFRatio = decayHFRatio;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_SetReflectionsLevel(
     SLEnvironmentalReverbItf self, SLmillibel reflectionsLevel)
 {
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    this->mProperties.reflectionsLevel = reflectionsLevel;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_GetReflectionsLevel(
     SLEnvironmentalReverbItf self, SLmillibel *pReflectionsLevel)
 {
+    if (NULL == pReflectionsLevel)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    SLmillibel reflectionsLevel = this->mProperties.reflectionsLevel;
+    *pReflectionsLevel = reflectionsLevel;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_SetReflectionsDelay(
     SLEnvironmentalReverbItf self, SLmillisecond reflectionsDelay)
 {
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    this->mProperties.reflectionsDelay = reflectionsDelay;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_GetReflectionsDelay(
     SLEnvironmentalReverbItf self, SLmillisecond *pReflectionsDelay)
 {
+    if (NULL == pReflectionsDelay)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    SLmillisecond reflectionsDelay = this->mProperties.reflectionsDelay;
+    *pReflectionsDelay = reflectionsDelay;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_SetReverbLevel(
     SLEnvironmentalReverbItf self, SLmillibel reverbLevel)
 {
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    this->mProperties.reverbLevel = reverbLevel;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_GetReverbLevel(
     SLEnvironmentalReverbItf self, SLmillibel *pReverbLevel)
 {
+    if (NULL == pReverbLevel)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    SLmillibel reverbLevel = this->mProperties.reverbLevel;
+    *pReverbLevel = reverbLevel;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_SetReverbDelay(
     SLEnvironmentalReverbItf self, SLmillisecond reverbDelay)
 {
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    this->mProperties.reverbDelay = reverbDelay;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_GetReverbDelay(
     SLEnvironmentalReverbItf self, SLmillisecond *pReverbDelay)
 {
+    if (NULL == pReverbDelay)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    SLmillisecond reverbDelay = this->mProperties.reverbDelay;
+    *pReverbDelay = reverbDelay;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_SetDiffusion(
     SLEnvironmentalReverbItf self, SLpermille diffusion)
 {
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    this->mProperties.diffusion = diffusion;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_GetDiffusion(SLEnvironmentalReverbItf self,
      SLpermille *pDiffusion)
 {
+    if (NULL == pDiffusion)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    SLpermille diffusion = this->mProperties.diffusion;
+    *pDiffusion = diffusion;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_SetDensity(SLEnvironmentalReverbItf self,
     SLpermille density)
 {
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    this->mProperties.density = density;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_GetDensity(SLEnvironmentalReverbItf self,
     SLpermille *pDensity)
 {
+    if (NULL == pDensity)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    SLpermille density = this->mProperties.density;
+    *pDensity = density;
     return SL_RESULT_SUCCESS;
 }
 
@@ -5046,12 +5919,26 @@ static SLresult EnvironmentalReverb_SetEnvironmentalReverbProperties(
     SLEnvironmentalReverbItf self,
     const SLEnvironmentalReverbSettings *pProperties)
 {
+    if (NULL == pProperties)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    SLEnvironmentalReverbSettings properties = *pProperties;
+    interface_lock_exclusive(this);
+    this->mProperties = properties;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult EnvironmentalReverb_GetEnvironmentalReverbProperties(
     SLEnvironmentalReverbItf self, SLEnvironmentalReverbSettings *pProperties)
 {
+    if (NULL == pProperties)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_shared(this);
+    SLEnvironmentalReverbSettings properties = this->mProperties;
+    interface_unlock_shared(this);
+    *pProperties = properties;
     return SL_RESULT_SUCCESS;
 }
 
@@ -5135,6 +6022,266 @@ static SLresult Virtualizer_IsStrengthSupported(SLVirtualizerItf self,
     Virtualizer_IsStrengthSupported
 };
 
+// MIDIMessage implementation
+
+static SLresult MIDIMessage_SendMessage(SLMIDIMessageItf self, const SLuint8 *data, SLuint32 length)
+{
+    if (NULL == data)
+        return SL_RESULT_PARAMETER_INVALID;
+    //struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDIMessage_RegisterMetaEventCallback(SLMIDIMessageItf self,
+    slMetaEventCallback callback, void *pContext)
+{
+    struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    this->mMetaEventCallback = callback;
+    this->mMetaEventContext = pContext;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDIMessage_RegisterMIDIMessageCallback(SLMIDIMessageItf self,
+    slMIDIMessageCallback callback, void *pContext)
+{
+    struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    this->mMessageCallback = callback;
+    this->mMessageContext = pContext;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDIMessage_AddMIDIMessageCallbackFilter(SLMIDIMessageItf self,
+    SLuint32 messageType)
+{
+    //struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDIMessage_ClearMIDIMessageCallbackFilter(SLMIDIMessageItf self)
+{
+    //struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    return SL_RESULT_SUCCESS;
+}
+
+/*static*/ const struct SLMIDIMessageItf_ MIDIMessage_MIDIMessageItf = {
+    MIDIMessage_SendMessage,
+    MIDIMessage_RegisterMetaEventCallback,
+    MIDIMessage_RegisterMIDIMessageCallback,
+    MIDIMessage_AddMIDIMessageCallbackFilter,
+    MIDIMessage_ClearMIDIMessageCallbackFilter
+};
+
+// MIDIMuteSolo implementation
+
+static SLresult MIDIMuteSolo_SetChannelMute(SLMIDIMuteSoloItf self, SLuint8 channel, SLboolean mute)
+{
+    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    SLuint16 mask = 1 << channel;
+    if (mute)
+        this->mChannelMuteMask |= mask;
+    else
+        this->mChannelMuteMask &= ~mask;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDIMuteSolo_GetChannelMute(SLMIDIMuteSoloItf self, SLuint8 channel,
+    SLboolean *pMute)
+{
+    if (NULL == pMute)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    SLboolean mute = (this->mChannelMuteMask >> channel) & 1;
+    *pMute = mute;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDIMuteSolo_SetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 channel, SLboolean solo)
+{
+    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    SLuint16 mask = 1 << channel;
+    if (solo)
+        this->mChannelSoloMask |= mask;
+    else
+        this->mChannelSoloMask &= ~mask;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDIMuteSolo_GetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 channel,
+    SLboolean *pSolo)
+{
+    if (NULL == pSolo)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    SLboolean solo = (this->mChannelSoloMask >> channel) & 1;
+    *pSolo = solo;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDIMuteSolo_GetTrackCount(SLMIDIMuteSoloItf self, SLuint16 *pCount)
+{
+    if (NULL == pCount)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    SLuint16 trackCount = this->mTrackCount;
+    *pCount = trackCount;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDIMuteSolo_SetTrackMute(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean mute)
+{
+    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    SLuint16 mask = 1 << track;
+    if (mute)
+        this->mTrackMuteMask |= mask;
+    else
+        this->mTrackMuteMask &= ~mask;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDIMuteSolo_GetTrackMute(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean *pMute)
+{
+    if (NULL == pMute)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    SLboolean mute = (this->mTrackMuteMask >> track) & 1;
+    *pMute = mute;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDIMuteSolo_SetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean solo)
+{
+    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    SLuint16 mask = 1 << track;
+    if (solo)
+        this->mTrackSoloMask |= mask;
+    else
+        this->mTrackSoloMask &= ~mask;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDIMuteSolo_GetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean *pSolo)
+{
+    if (NULL == pSolo)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    SLboolean solo = (this->mTrackSoloMask >> track) & 1;
+    *pSolo = solo;
+    return SL_RESULT_SUCCESS;
+}
+
+/*static*/ const struct SLMIDIMuteSoloItf_ MIDIMuteSolo_MIDIMuteSoloItf = {
+    MIDIMuteSolo_SetChannelMute,
+    MIDIMuteSolo_GetChannelMute,
+    MIDIMuteSolo_SetChannelSolo,
+    MIDIMuteSolo_GetChannelSolo,
+    MIDIMuteSolo_GetTrackCount,
+    MIDIMuteSolo_SetTrackMute,
+    MIDIMuteSolo_GetTrackMute,
+    MIDIMuteSolo_SetTrackSolo,
+    MIDIMuteSolo_GetTrackSolo
+};
+
+// MIDITempo implementation
+
+static SLresult MIDITempo_SetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 tpqn)
+{
+    struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    this->mTicksPerQuarterNote = tpqn;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDITempo_GetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 *pTpqn)
+{
+    if (NULL == pTpqn)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    SLuint32 ticksPerQuarterNote = this->mTicksPerQuarterNote;
+    *pTpqn = ticksPerQuarterNote;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDITempo_SetMicrosecondsPerQuarterNote(SLMIDITempoItf self, SLmicrosecond uspqn)
+{
+    struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    this->mMicrosecondsPerQuarterNote = uspqn;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDITempo_GetMicrosecondsPerQuarterNote(SLMIDITempoItf self, SLmicrosecond *uspqn)
+{
+    if (NULL == uspqn)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    SLuint32 microsecondsPerQuarterNote = this->mMicrosecondsPerQuarterNote;
+    *uspqn = microsecondsPerQuarterNote;
+    return SL_RESULT_SUCCESS;
+}
+
+/*static*/ const struct SLMIDITempoItf_ MIDITempo_MIDITempoItf = {
+    MIDITempo_SetTicksPerQuarterNote,
+    MIDITempo_GetTicksPerQuarterNote,
+    MIDITempo_SetMicrosecondsPerQuarterNote,
+    MIDITempo_GetMicrosecondsPerQuarterNote
+};
+
+// MIDITime implementation
+
+static SLresult MIDITime_GetDuration(SLMIDITimeItf self, SLuint32 *pDuration)
+{
+    if (NULL == pDuration)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    SLuint32 duration = this->mDuration;
+    *pDuration = duration;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDITime_SetPosition(SLMIDITimeItf self, SLuint32 position)
+{
+    struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    this->mPosition = position;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDITime_GetPosition(SLMIDITimeItf self, SLuint32 *pPosition)
+{
+    if (NULL == pPosition)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    SLuint32 position = this->mPosition;
+    *pPosition = position;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDITime_SetLoopPoints(SLMIDITimeItf self, SLuint32 startTick, SLuint32 numTicks)
+{
+    struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    this->mStartTick = startTick;
+    this->mNumTicks = numTicks;
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult MIDITime_GetLoopPoints(SLMIDITimeItf self, SLuint32 *pStartTick,
+    SLuint32 *pNumTicks)
+{
+    if (NULL == pStartTick || NULL == pNumTicks)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    SLuint32 startTick = this->mStartTick;
+    SLuint32 numTicks = this->mNumTicks;
+    *pStartTick = startTick;
+    *pNumTicks = numTicks;
+    return SL_RESULT_SUCCESS;
+}
+
+/*static */ const struct SLMIDITimeItf_ MIDITime_MIDITimeItf = {
+    MIDITime_GetDuration,
+    MIDITime_SetPosition,
+    MIDITime_GetPosition,
+    MIDITime_SetLoopPoints,
+    MIDITime_GetLoopPoints
+};
+
 /* Initial entry points */
 
 SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
@@ -5149,7 +6296,7 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     SLboolean lossOfControlGlobal = SL_BOOLEAN_FALSE;
     if (NULL != pEngineOptions) {
         SLuint32 i;
-		const SLEngineOption *option = pEngineOptions;
+        const SLEngineOption *option = pEngineOptions;
         for (i = 0; i < numOptions; ++i, ++option) {
             switch (option->feature) {
             case SL_ENGINEOPTION_THREADSAFE:
