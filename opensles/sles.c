@@ -219,6 +219,7 @@ static void _3DCommit_init(void *self)
     this->mItf = &_3DCommit_3DCommitItf;
 #ifndef NDEBUG
     this->mDeferred = SL_BOOLEAN_FALSE;
+    this->mGeneration = 0;
 #endif
 }
 
@@ -229,9 +230,12 @@ static void _3DDoppler_init(void *self)
     struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
     this->mItf = &_3DDoppler_3DDopplerItf;
 #ifndef NDEBUG
-    this->mVelocity.mCartesian.x = 0;
-    this->mVelocity.mCartesian.y = 0;
-    this->mVelocity.mCartesian.z = 0;
+    this->mCartesianVelocity.x = 0;
+    this->mCartesianVelocity.y = 0;
+    this->mCartesianVelocity.z = 0;
+    memset(&this->mSphericalVelocity, 0x55, sizeof(this->mSphericalVelocity));
+    this->mSphericalWasSet = SL_BOOLEAN_FALSE;
+
 #endif
     this->mDopplerFactor = 1000;
 }
@@ -2883,13 +2887,26 @@ static SLresult Seek_GetLoop(SLSeekItf self, SLboolean *pLoopEnabled,
 
 static SLresult _3DCommit_Commit(SL3DCommitItf self)
 {
+    struct _3DCommit_interface *this = (struct _3DCommit_interface *) self;
+    struct Object_interface *thisObject = this->mThis;
+    object_lock_exclusive(thisObject);
+    if (this->mDeferred) {
+        SLuint32 myGeneration = this->mGeneration;
+        do
+            object_cond_wait(thisObject);
+        while (this->mGeneration == myGeneration);
+    }
+    object_unlock_exclusive(thisObject);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult _3DCommit_SetDeferred(SL3DCommitItf self, SLboolean deferred)
 {
     struct _3DCommit_interface *this = (struct _3DCommit_interface *) self;
+    struct Object_interface *thisObject = this->mThis;
+    object_lock_exclusive(thisObject);
     this->mDeferred = deferred;
+    object_unlock_exclusive(thisObject);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2906,7 +2923,11 @@ static SLresult _3DDoppler_SetVelocityCartesian(SL3DDopplerItf self,
     if (NULL == pVelocity)
         return SL_RESULT_PARAMETER_INVALID;
     struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
-    this->mVelocity.mCartesian = *pVelocity;
+    SLVec3D cartesianVelocity = *pVelocity;
+    interface_lock_exclusive(this);
+    this->mCartesianVelocity = cartesianVelocity;
+    this->mSphericalWasSet = SL_BOOLEAN_FALSE;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2914,9 +2935,12 @@ static SLresult _3DDoppler_SetVelocitySpherical(SL3DDopplerItf self,
     SLmillidegree azimuth, SLmillidegree elevation, SLmillimeter speed)
 {
     struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
-    this->mVelocity.mSpherical.mAzimuth = azimuth;
-    this->mVelocity.mSpherical.mElevation = elevation;
-    this->mVelocity.mSpherical.mSpeed = speed;
+    interface_lock_exclusive(this);
+    this->mSphericalVelocity.mAzimuth = azimuth;
+    this->mSphericalVelocity.mElevation = elevation;
+    this->mSphericalVelocity.mSpeed = speed;
+    this->mSphericalWasSet = SL_BOOLEAN_TRUE;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2926,7 +2950,18 @@ static SLresult _3DDoppler_GetVelocityCartesian(SL3DDopplerItf self,
     if (NULL == pVelocity)
         return SL_RESULT_PARAMETER_INVALID;
     struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
-    *pVelocity = this->mVelocity.mCartesian;
+    SLVec3D cartesianVelocity;
+    for (;;) {
+        interface_lock_shared(this);
+        cartesianVelocity = this->mCartesianVelocity;
+        SLboolean sphericalWasSet = this->mSphericalWasSet;
+        interface_unlock_shared(this);
+        if (!sphericalWasSet)
+            break;
+        // FIXME
+        usleep(10000);
+    }
+    *pVelocity = cartesianVelocity;
     return SL_RESULT_SUCCESS;
 }
 
@@ -2934,7 +2969,9 @@ static SLresult _3DDoppler_SetDopplerFactor(SL3DDopplerItf self,
     SLpermille dopplerFactor)
 {
     struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
+    interface_lock_poke(this);
     this->mDopplerFactor = dopplerFactor;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2944,7 +2981,10 @@ static SLresult _3DDoppler_GetDopplerFactor(SL3DDopplerItf self,
     if (NULL == pDopplerFactor)
         return SL_RESULT_PARAMETER_INVALID;
     struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
-    *pDopplerFactor = this->mDopplerFactor;
+    interface_lock_peek(this);
+    SLpermille dopplerFactor = this->mDopplerFactor;
+    interface_unlock_peek(this);
+    *pDopplerFactor = dopplerFactor;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4467,7 +4507,18 @@ static SLresult BassBoost_IsStrengthSupported(SLBassBoostItf self,
 static SLresult _3DGrouping_Set3DGroup(SL3DGroupingItf self, SLObjectItf group)
 {
     struct _3DGrouping_interface *this = (struct _3DGrouping_interface *) self;
+    if (NULL == group)
+        return SL_RESULT_PARAMETER_INVALID;
+    struct Object_interface *thisGroup = (struct Object_interface *) group;
+    if (&_3DGroup_class != thisGroup->mClass)
+        return SL_RESULT_PARAMETER_INVALID;
+    // FIXME race possible if group unrealized immediately after, should lock
+    if (SL_OBJECT_STATE_REALIZED != thisGroup->mState)
+        return SL_RESULT_PRECONDITIONS_VIOLATED;
+    interface_lock_exclusive(this);
     this->mGroup = group;
+    // FIXME add this object to the group's bag of objects
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -4477,7 +4528,9 @@ static SLresult _3DGrouping_Get3DGroup(SL3DGroupingItf self,
     if (NULL == pGroup)
         return SL_RESULT_PARAMETER_INVALID;
     struct _3DGrouping_interface *this = (struct _3DGrouping_interface *) self;
+    interface_lock_peek(this);
     *pGroup = this->mGroup;
+    interface_unlock_peek(this);
     return SL_RESULT_SUCCESS;
 }
 

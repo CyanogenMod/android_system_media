@@ -21,6 +21,7 @@
 #include <stdio.h>  // debugging
 #include <assert.h> // debugging
 #include <pthread.h>
+#include <unistd.h> // usleep
 
 #include "MPH.h"
 #include "MPH_to.h"
@@ -148,19 +149,23 @@ struct _3DCommit_interface {
     const struct SL3DCommitItf_ *mItf;
     struct Object_interface *mThis;
     SLboolean mDeferred;
+    SLuint32 mGeneration;   // incremented each master clock cycle
 };
 
 struct _3DDoppler_interface {
     const struct SL3DDopplerItf_ *mItf;
     struct Object_interface *mThis;
-    union Cartesian_Spherical1 {
-        SLVec3D mCartesian;
-        struct {
-            SLmillidegree mAzimuth;
-            SLmillidegree mElevation;
-            SLmillidegree mSpeed;
-        } mSpherical;
-    } mVelocity;
+    // Only the Cartesian velocity is maintained for the long term, but there are
+    // brief periods when the spherical velocity has the most recent value.
+    // Though only one of these is active at a time, a union is not appropriate
+    // due to multi-threading concerns. So we keep both, with an active flag.
+    SLVec3D mCartesianVelocity;
+    struct {
+        SLmillidegree mAzimuth;
+        SLmillidegree mElevation;
+        SLmillidegree mSpeed;
+    } mSphericalVelocity;
+    SLboolean mSphericalWasSet;
     SLpermille mDopplerFactor;
 };
 
@@ -606,6 +611,7 @@ struct _3DGroup_class {
     struct _3DDoppler_interface m3DDoppler;
     struct _3DSource_interface m3DSource;
     struct _3DMacroscopic_interface m3DMacroscopic;
+    // FIXME bag of objects
 };
 
 #ifdef USE_ANDROID
