@@ -16,15 +16,24 @@
 
 #include "sles_allinclusive.h"
 
-#ifdef USE_ANDROID
-
+/*
+ * Checks that the combination of source and sink parameters is supported in this implementation.
+ * Return
+ *     SL_RESULT_SUCCESS
+ *     SL_PARAMETER_INVALID
+ */
+SLresult sles_to_android_CheckAudioPlayerSourceSink(SLDataSource *pAudioSrc,
+        SLDataSink *pAudioSnk);
 
 /*
  * Create the Android media framework object that maps to the given audio source and sink,
- * and initialize the AudioPlayer_class accordingly
+ * and initialize the AudioPlayer_class accordingly.
+ * Return
+ *     SL_RESULT_SUCCESS if the Android resources were successfully created
+ *     SL_PARAMETER_INVALID if the Android resources couldn't be created due to an invalid or
+ *         unsupported parameter or value
+ *     SL_RESULT_CONTENT_UNSUPPORTED if a format is not supported (e.g. sample rate too high)
  */
-void sles_to_android_CreateAudioPlayer(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk,
+SLresult sles_to_android_CreateAudioPlayer(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk,
         AudioPlayer_class *pAudioPlayer);
 
-
-#endif // #ifdef USE_ANDROID

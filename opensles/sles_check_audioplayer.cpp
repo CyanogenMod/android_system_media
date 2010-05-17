@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
+#include "sles_allinclusive.h"
 
-extern SLresult sles_to_android_CheckAudioPlayerSourceSink(SLDataSource *pAudioSrc,
-        SLDataSink *pAudioSnk);
+SLresult sles_checkSourceSink(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk) {
 
-extern SLresult sles_to_android_CreateAudioPlayer(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk,
-        AudioPlayer_class *pAudioPlayer);
+    // DataSource checks
+    if ((NULL == pAudioSrc) || (NULL == (SLuint32 *) pAudioSrc->pLocator) ||
+            (NULL == pAudioSrc->pFormat)) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
 
+    // DataSink checks
+    if (NULL == pAudioSnk || (NULL == (SLuint32 *) pAudioSnk->pLocator)) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+
+    // Success
+    return SL_RESULT_SUCCESS;
+
+}

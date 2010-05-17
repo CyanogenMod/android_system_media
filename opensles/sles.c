@@ -17,6 +17,7 @@
 /* OpenSL ES prototype */
 
 #include "sles_allinclusive.h"
+#include "sles_check_audioplayer_ext.h"
 
 #ifdef USE_ANDROID
 #include "sles_to_android_ext.h"
@@ -2329,6 +2330,8 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     SLDataSource *pAudioSrc, SLDataSink *pAudioSnk, SLuint32 numInterfaces,
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
+    fprintf(stderr, "entering Engine_CreateAudioPlayer()\n");
+
     if (NULL == pPlayer)
         return SL_RESULT_PARAMETER_INVALID;
     *pPlayer = NULL;
@@ -2338,10 +2341,22 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     if (SL_RESULT_SUCCESS != result)
         return result;
     // check the audio source and sinks
-    // FIXME move this to a separate function: check source, check locator, etc.
-    if ((NULL == pAudioSrc) || (NULL == (SLuint32 *) pAudioSrc->pLocator) ||
-        (NULL == pAudioSrc->pFormat))
-        return SL_RESULT_PARAMETER_INVALID;
+    result = sles_checkSourceSink(pAudioSrc, pAudioSnk);
+    if (result != SL_RESULT_SUCCESS) {
+        return result;
+    }
+    fprintf(stderr, "\t after sles_checkSourceSink()\n");
+    // check the audio source and sink parameters against platform support
+#ifdef USE_ANDROID
+    result = sles_to_android_CheckAudioPlayerSourceSink(pAudioSrc, pAudioSnk);
+    if (result != SL_RESULT_SUCCESS) {
+            return result;
+    }
+    fprintf(stderr, "\t after sles_to_android_CheckAudioPlayerSourceSink()\n");
+#endif
+#ifdef USE_SNDFILE
+#endif
+
     SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
     SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
     SLuint32 numBuffers = 0;
@@ -2470,9 +2485,7 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }
-    // check sink, again this should be a separate function
-    if (NULL == pAudioSnk || (NULL == (SLuint32 *) pAudioSnk->pLocator))
-        return SL_RESULT_PARAMETER_INVALID;
+
     switch (*(SLuint32 *)pAudioSnk->pLocator) {
     case SL_DATALOCATOR_OUTPUTMIX:
         {
@@ -2557,8 +2570,9 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     track->mAvail = 0;
 #endif
 #ifdef USE_ANDROID
-    //sles_to_android_CreateAudioPlayer(pAudioSrc, pAudioSnk, this);
-    this->mAudioTrack = new android::AudioTrack(
+    // FIXME configure callback and user
+    sles_to_android_CreateAudioPlayer(pAudioSrc, pAudioSnk, this);
+    /*this->mAudioTrack = new android::AudioTrack(
         android::AudioSystem::MUSIC,            // streamType
         44100,                                  // sampleRate
         android::AudioSystem::PCM_16_BIT,       // format
@@ -2566,10 +2580,10 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         android::AudioSystem::CHANNEL_OUT_MONO, // channels
         256 * 20,                               // frameCount
         0,                                      // flags
-        /*NULL*/ my_handler,                    // cbf (callback)
+        my_handler,  // NULL,                   // cbf (callback)
         (void *) self,                          // user
         256 * 20);                              // notificationFrame
-    assert(this->mAudioTrack != NULL);
+    assert(this->mAudioTrack != NULL);*/
     // FIXME should call checkStatus after new
     int ok;
     // should happen at Realize, not now

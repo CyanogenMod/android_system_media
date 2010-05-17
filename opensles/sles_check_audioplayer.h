@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+#include "sles_allinclusive.h"
 
-extern SLresult sles_to_android_CheckAudioPlayerSourceSink(SLDataSource *pAudioSrc,
-        SLDataSink *pAudioSnk);
-
-extern SLresult sles_to_android_CreateAudioPlayer(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk,
-        AudioPlayer_class *pAudioPlayer);
-
+/*
+ * Platform independent check that returns
+ *    SL_RESULT_PARAMETER_INVALID if an invalid or null parameter is passed
+ *    SL_RESULT_SUCCESS if the given source and sinks can be by the audio player
+ */
+SLresult sles_checkSourceSink(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk);

@@ -666,7 +666,7 @@ struct _3DGroup_class {
  * media framework object
  */
 enum AndroidObject_type {
-    //DEFAULT          =-1,
+    INVALID_TYPE     =-1,
     MEDIAPLAYER      = 0,
     AUDIOTRACK_PUSH  = 1,
     AUDIOTRACK_PULL  = 2,
