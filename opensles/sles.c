@@ -34,6 +34,41 @@ extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
 
 /* Device table (change this when you port!) */
 
+static const SLAudioInputDescriptor AudioInputDescriptor_mic = {
+    (SLchar *) "mic",            // deviceName
+    SL_DEVCONNECTION_INTEGRATED, // deviceConnection
+    SL_DEVSCOPE_ENVIRONMENT,     // deviceScope
+    SL_DEVLOCATION_HANDSET,      // deviceLocation
+    SL_BOOLEAN_TRUE,             // isForTelephony
+    SL_SAMPLINGRATE_44_1,        // minSampleRate
+    SL_SAMPLINGRATE_44_1,        // maxSampleRate
+    SL_BOOLEAN_TRUE,             // isFreqRangeContinuous
+    NULL,                        // samplingRatesSupported
+    0,                           // numOfSamplingRatesSupported
+    1                            // maxChannels
+};
+
+static const struct AudioInput_id_descriptor {
+    SLuint32 id;
+    const SLAudioInputDescriptor *descriptor;
+} AudioInput_id_descriptors[] = {
+    {SL_DEFAULTDEVICEID_AUDIOINPUT, &AudioInputDescriptor_mic}
+};
+
+static const SLAudioOutputDescriptor AudioOutputDescriptor_speaker = {
+    (SLchar *) "speaker",        // deviceName
+    SL_DEVCONNECTION_INTEGRATED, // deviceConnection
+    SL_DEVSCOPE_USER,            // deviceScope
+    SL_DEVLOCATION_HEADSET,      // deviceLocation
+    SL_BOOLEAN_TRUE,             // isForTelephony
+    SL_SAMPLINGRATE_44_1,        // minSamplingRate
+    SL_SAMPLINGRATE_44_1,        // maxSamplingRate
+    SL_BOOLEAN_TRUE,             // isFreqRangeContinuous
+    NULL,                        // samplingRatesSupported
+    0,                           // numOfSamplingRatesSupported
+    2                            // maxChannels
+};
+
 #define DEVICE_ID_HEADSET 1
 
 static const SLAudioOutputDescriptor AudioOutputDescriptor_headset = {
@@ -64,6 +99,15 @@ static const SLAudioOutputDescriptor AudioOutputDescriptor_handsfree = {
     NULL,
     0,
     2
+};
+
+static const struct AudioOutput_id_descriptor {
+    SLuint32 id;
+    const SLAudioOutputDescriptor *descriptor;
+} AudioOutput_id_descriptors[] = {
+    {SL_DEFAULTDEVICEID_AUDIOOUTPUT, &AudioOutputDescriptor_speaker},
+    {DEVICE_ID_HEADSET, &AudioOutputDescriptor_headset},
+    {DEVICE_ID_HANDSFREE, &AudioOutputDescriptor_handsfree}
 };
 
 static const SLLEDDescriptor SLLEDDescriptor_default = {
@@ -230,14 +274,13 @@ static void _3DDoppler_init(void *self)
     struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
     this->mItf = &_3DDoppler_3DDopplerItf;
 #ifndef NDEBUG
-    this->mCartesianVelocity.x = 0;
-    this->mCartesianVelocity.y = 0;
-    this->mCartesianVelocity.z = 0;
-    memset(&this->mSphericalVelocity, 0x55, sizeof(this->mSphericalVelocity));
-    this->mSphericalWasSet = SL_BOOLEAN_FALSE;
-
+    this->mVelocityCartesian.x = 0;
+    this->mVelocityCartesian.y = 0;
+    this->mVelocityCartesian.z = 0;
+    memset(&this->mVelocitySpherical, 0x55, sizeof(this->mVelocitySpherical));
 #endif
     this->mDopplerFactor = 1000;
+    this->mVelocityActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
 }
 
 extern const struct SL3DGroupingItf_ _3DGrouping_3DGroupingItf;
@@ -249,6 +292,7 @@ static void _3DGrouping_init(void *self)
 #ifndef NDEBUG
     this->mGroup = NULL;
 #endif
+    // FIXME initialize the bag here
 }
 
 extern const struct SL3DLocationItf_ _3DLocation_3DLocationItf;
@@ -258,16 +302,30 @@ static void _3DLocation_init(void *self)
     struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
     this->mItf = &_3DLocation_3DLocationItf;
 #ifndef NDEBUG
-    this->mLocation.mCartesian.x = 0;
-    this->mLocation.mCartesian.y = 0;
-    this->mLocation.mCartesian.z = 0;
-    this->mFront.x = 0;
-    this->mFront.y = 0;
-    this->mUp.x = 0;
-    this->mUp.z = 0;
+    this->mLocationCartesian.x = 0;
+    this->mLocationCartesian.y = 0;
+    this->mLocationCartesian.z = 0;
+    memset(&this->mLocationSpherical, 0x55, sizeof(this->mLocationSpherical));
+    this->mOrientationAngles.mHeading = 0;
+    this->mOrientationAngles.mPitch = 0;
+    this->mOrientationAngles.mRoll = 0;
+    this->mOrientationVectors.mFront.x = 0;
+    this->mOrientationVectors.mFront.y = 0;
+    this->mOrientationVectors.mAbove.x = 0;
+    this->mOrientationVectors.mAbove.y = 0;
+    this->mOrientationVectors.mUp.x = 0;
+    this->mOrientationVectors.mUp.z = 0;
+    this->mTheta = 0x55555555;
+    this->mAxis.x = 0x55555555;
+    this->mAxis.y = 0x55555555;
+    this->mAxis.z = 0x55555555;
+    this->mRotatePending = SL_BOOLEAN_FALSE;
 #endif
-    this->mFront.z = -1000;
-    this->mUp.y = 1000;
+    this->mOrientationVectors.mFront.z = -1000;
+    this->mOrientationVectors.mUp.y = 1000;
+    this->mOrientationVectors.mAbove.z = -1000;
+    this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
+    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
 }
 
 extern const struct SL3DMacroscopicItf_ _3DMacroscopic_3DMacroscopicItf;
@@ -280,13 +338,23 @@ static void _3DMacroscopic_init(void *self)
     this->mSize.mWidth = 0;
     this->mSize.mHeight = 0;
     this->mSize.mDepth = 0;
+    this->mOrientationAngles.mHeading = 0;
+    this->mOrientationAngles.mPitch = 0;
+    this->mOrientationAngles.mRoll = 0;
     this->mOrientationVectors.mFront.x = 0;
     this->mOrientationVectors.mFront.y = 0;
     this->mOrientationVectors.mUp.x = 0;
     this->mOrientationVectors.mUp.z = 0;
+    // this->mGeneration = 0;
+    this->mTheta = 0x55555555;
+    this->mAxis.x = 0x55555555;
+    this->mAxis.y = 0x55555555;
+    this->mAxis.z = 0x55555555;
+    this->mRotatePending = SL_BOOLEAN_FALSE;
 #endif
     this->mOrientationVectors.mFront.z = -1000;
     this->mOrientationVectors.mUp.y = 1000;
+    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
 }
 
 extern const struct SL3DSourceItf_ _3DSource_3DSourceItf;
@@ -295,15 +363,17 @@ static void _3DSource_init(void *self)
 {
     struct _3DSource_interface *this = (struct _3DSource_interface *) self;
     this->mItf = &_3DSource_3DSourceItf;
+#ifndef NDEBUG
     this->mHeadRelative = SL_BOOLEAN_FALSE;
     this->mRolloffMaxDistanceMute = SL_BOOLEAN_FALSE;
+    this->mConeOuterLevel = 0;
+    this->mRoomRolloffFactor = 0;
+#endif
     this->mMaxDistance = SL_MILLIMETER_MAX;
     this->mMinDistance = 1000;
-    this->mConeAngles.mInner = 360000;
-    this->mConeAngles.mOuter = 360000;
-    this->mConeOuterLevel = 0;
+    this->mConeInnerAngle = 360000;
+    this->mConeOuterAngle = 360000;
     this->mRolloffFactor = 1000;
-    this->mRoomRolloffFactor = 0;
     this->mDistanceModel = SL_ROLLOFFMODEL_EXPONENTIAL;
 }
 
@@ -346,6 +416,14 @@ static void AudioIODeviceCapabilities_init(void *self)
     struct AudioIODeviceCapabilities_interface *this =
         (struct AudioIODeviceCapabilities_interface *) self;
     this->mItf = &AudioIODeviceCapabilities_AudioIODeviceCapabilitiesItf;
+#ifndef NDEBUG
+    this->mAvailableAudioInputsChangedCallback = NULL;
+    this->mAvailableAudioInputsChangedContext = NULL;
+    this->mAvailableAudioOutputsChangedCallback = NULL;
+    this->mAvailableAudioOutputsChangedContext = NULL;
+    this->mDefaultDeviceIDMapChangedCallback = NULL;
+    this->mDefaultDeviceIDMapChangedContext = NULL;
+#endif
 }
 
 extern const struct SLBassBoostItf_ BassBoost_BassBoostItf;
@@ -618,6 +696,10 @@ static void OutputMix_init(void *self)
 {
     struct OutputMix_interface *this = (struct OutputMix_interface *) self;
     this->mItf = &OutputMix_OutputMixItf;
+#ifndef NDEBUG
+    this->mCallback = NULL;
+    this->mContext = NULL;
+#endif
 #ifdef USE_OUTPUTMIXEXT
 #ifndef NDEBUG
     this->mActiveMask = 0;
@@ -2697,6 +2779,15 @@ static SLresult AudioIODeviceCapabilities_GetAvailableAudioInputs(
     SLAudioIODeviceCapabilitiesItf self, SLint32 *pNumInputs,
     SLuint32 *pInputDeviceIDs)
 {
+    if (NULL == pNumInputs)
+        return SL_RESULT_PARAMETER_INVALID;
+    if (NULL != pInputDeviceIDs) {
+        // FIXME should be OEM-configurable
+        if (1 > *pNumInputs)
+            return SL_RESULT_BUFFER_INSUFFICIENT;
+        pInputDeviceIDs[0] = SL_DEFAULTDEVICEID_AUDIOINPUT;
+    }
+    *pNumInputs = 1;
     return SL_RESULT_SUCCESS;
 }
 
@@ -2704,6 +2795,16 @@ static SLresult AudioIODeviceCapabilities_QueryAudioInputCapabilities(
     SLAudioIODeviceCapabilitiesItf self, SLuint32 deviceID,
     SLAudioInputDescriptor *pDescriptor)
 {
+    if (NULL == pDescriptor)
+        return SL_RESULT_PARAMETER_INVALID;
+    switch (deviceID) {
+    // FIXME should be OEM-configurable
+    case SL_DEFAULTDEVICEID_AUDIOINPUT:
+        *pDescriptor = AudioInputDescriptor_mic;
+        break;
+    default:
+        return SL_RESULT_IO_ERROR;
+    }
     return SL_RESULT_SUCCESS;
 }
 
@@ -2712,6 +2813,12 @@ static SLresult
     SLAudioIODeviceCapabilitiesItf self,
     slAvailableAudioInputsChangedCallback callback, void *pContext)
 {
+    struct AudioIODeviceCapabilities_interface * this =
+        (struct AudioIODeviceCapabilities_interface *) self;
+    interface_lock_exclusive(this);
+    this->mAvailableAudioInputsChangedCallback = callback;
+    this->mAvailableAudioInputsChangedContext = pContext;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2757,6 +2864,12 @@ static SLresult
     SLAudioIODeviceCapabilitiesItf self,
     slAvailableAudioOutputsChangedCallback callback, void *pContext)
 {
+    struct AudioIODeviceCapabilities_interface * this =
+        (struct AudioIODeviceCapabilities_interface *) self;
+    interface_lock_exclusive(this);
+    this->mAvailableAudioOutputsChangedCallback = callback;
+    this->mAvailableAudioOutputsChangedContext = pContext;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2765,6 +2878,12 @@ static SLresult
     SLAudioIODeviceCapabilitiesItf self,
     slDefaultDeviceIDMapChangedCallback callback, void *pContext)
 {
+    struct AudioIODeviceCapabilities_interface * this =
+        (struct AudioIODeviceCapabilities_interface *) self;
+    interface_lock_exclusive(this);
+    this->mDefaultDeviceIDMapChangedCallback = callback;
+    this->mDefaultDeviceIDMapChangedContext = pContext;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2772,6 +2891,9 @@ static SLresult AudioIODeviceCapabilities_GetAssociatedAudioInputs(
     SLAudioIODeviceCapabilitiesItf self, SLuint32 deviceID,
     SLint32 *pNumAudioInputs, SLuint32 *pAudioInputDeviceIDs)
 {
+    if (NULL == pNumAudioInputs)
+        return SL_RESULT_PARAMETER_INVALID;
+    *pNumAudioInputs = 0;
     return SL_RESULT_SUCCESS;
 }
 
@@ -2779,6 +2901,9 @@ static SLresult AudioIODeviceCapabilities_GetAssociatedAudioOutputs(
     SLAudioIODeviceCapabilitiesItf self, SLuint32 deviceID,
     SLint32 *pNumAudioOutputs, SLuint32 *pAudioOutputDeviceIDs)
 {
+    if (NULL == pNumAudioOutputs)
+        return SL_RESULT_PARAMETER_INVALID;
+    *pNumAudioOutputs = 0;
     return SL_RESULT_SUCCESS;
 }
 
@@ -2786,6 +2911,23 @@ static SLresult AudioIODeviceCapabilities_GetDefaultAudioDevices(
     SLAudioIODeviceCapabilitiesItf self, SLuint32 defaultDeviceID,
     SLint32 *pNumAudioDevices, SLuint32 *pAudioDeviceIDs)
 {
+    if (NULL == pNumAudioDevices)
+        return SL_RESULT_PARAMETER_INVALID;
+    switch (defaultDeviceID) {
+    case SL_DEFAULTDEVICEID_AUDIOINPUT:
+    case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
+        break;
+    default:
+        return SL_RESULT_IO_ERROR;
+    }
+    if (NULL != pAudioDeviceIDs) {
+        // FIXME should be OEM-configurable
+        if (2 > *pNumAudioDevices)
+            return SL_RESULT_BUFFER_INSUFFICIENT;
+        pAudioDeviceIDs[0] = DEVICE_ID_HEADSET;
+        pAudioDeviceIDs[1] = DEVICE_ID_HANDSFREE;
+    }
+    *pNumAudioDevices = 1;
     return SL_RESULT_SUCCESS;
 }
 
@@ -2794,6 +2936,27 @@ static SLresult AudioIODeviceCapabilities_QuerySampleFormatsSupported(
     SLmilliHertz samplingRate, SLint32 *pSampleFormats,
     SLint32 *pNumOfSampleFormats)
 {
+    if (NULL == pNumOfSampleFormats)
+        return SL_RESULT_PARAMETER_INVALID;
+    switch (deviceID) {
+    case SL_DEFAULTDEVICEID_AUDIOINPUT:
+    case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
+        break;
+    default:
+        return SL_RESULT_IO_ERROR;
+    }
+    switch (samplingRate) {
+    case SL_SAMPLINGRATE_44_1:
+        break;
+    default:
+        return SL_RESULT_IO_ERROR;
+    }
+    if (NULL != pSampleFormats) {
+        if (1 > *pNumOfSampleFormats)
+            return SL_RESULT_BUFFER_INSUFFICIENT;
+        pSampleFormats[0] = SL_PCMSAMPLEFORMAT_FIXED_16;
+    }
+    *pNumOfSampleFormats = 1;
     return SL_RESULT_SUCCESS;
 }
 
@@ -2817,18 +2980,43 @@ static SLresult AudioIODeviceCapabilities_QuerySampleFormatsSupported(
 static SLresult OutputMix_GetDestinationOutputDeviceIDs(SLOutputMixItf self,
    SLint32 *pNumDevices, SLuint32 *pDeviceIDs)
 {
+    if (NULL == pNumDevices)
+        return SL_RESULT_PARAMETER_INVALID;
+    if (NULL != pDeviceIDs) {
+        if (1 > *pNumDevices)
+            return SL_RESULT_BUFFER_INSUFFICIENT;
+        pDeviceIDs[0] = SL_DEFAULTDEVICEID_AUDIOOUTPUT;
+    }
+    *pNumDevices = 1;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult OutputMix_RegisterDeviceChangeCallback(SLOutputMixItf self,
     slMixDeviceChangeCallback callback, void *pContext)
 {
+    struct OutputMix_interface *this = (struct OutputMix_interface *) self;
+    interface_lock_exclusive(this);
+    this->mCallback = callback;
+    this->mContext = pContext;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult OutputMix_ReRoute(SLOutputMixItf self, SLint32 numOutputDevices,
     SLuint32 *pOutputDeviceIDs)
 {
+    if (1 > numOutputDevices)
+        return SL_RESULT_PARAMETER_INVALID;
+    if (NULL == pOutputDeviceIDs)
+        return SL_RESULT_PARAMETER_INVALID;
+    switch (pOutputDeviceIDs[0]) {
+    case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
+    case DEVICE_ID_HEADSET:
+    case DEVICE_ID_HANDSFREE:
+        break;
+    default:
+        return SL_RESULT_PARAMETER_INVALID;
+    }
     return SL_RESULT_SUCCESS;
 }
 
@@ -2851,7 +3039,9 @@ static SLresult Seek_SetPosition(SLSeekItf self, SLmillisecond pos,
         return SL_RESULT_PARAMETER_INVALID;
     }
     struct Seek_interface *this = (struct Seek_interface *) self;
+    interface_lock_poke(this);
     this->mPos = pos;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2859,9 +3049,11 @@ static SLresult Seek_SetLoop(SLSeekItf self, SLboolean loopEnable,
     SLmillisecond startPos, SLmillisecond endPos)
 {
     struct Seek_interface *this = (struct Seek_interface *) self;
+    interface_lock_exclusive(this);
     this->mLoopEnabled = loopEnable;
     this->mStartPos = startPos;
     this->mEndPos = endPos;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -2871,9 +3063,14 @@ static SLresult Seek_GetLoop(SLSeekItf self, SLboolean *pLoopEnabled,
     if (NULL == pLoopEnabled || NULL == pStartPos || NULL == pEndPos)
         return SL_RESULT_PARAMETER_INVALID;
     struct Seek_interface *this = (struct Seek_interface *) self;
-    *pLoopEnabled = this->mLoopEnabled;
-    *pStartPos = this->mStartPos;
-    *pEndPos = this->mEndPos;
+    interface_lock_shared(this);
+    SLboolean loopEnabled = this->mLoopEnabled;
+    SLmillisecond startPos = this->mStartPos;
+    SLmillisecond endPos = this->mEndPos;
+    interface_unlock_shared(this);
+    *pLoopEnabled = loopEnabled;
+    *pStartPos = startPos;
+    *pEndPos = endPos;
     return SL_RESULT_SUCCESS;
 }
 
@@ -2923,10 +3120,10 @@ static SLresult _3DDoppler_SetVelocityCartesian(SL3DDopplerItf self,
     if (NULL == pVelocity)
         return SL_RESULT_PARAMETER_INVALID;
     struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
-    SLVec3D cartesianVelocity = *pVelocity;
+    SLVec3D velocityCartesian = *pVelocity;
     interface_lock_exclusive(this);
-    this->mCartesianVelocity = cartesianVelocity;
-    this->mSphericalWasSet = SL_BOOLEAN_FALSE;
+    this->mVelocityCartesian = velocityCartesian;
+    this->mVelocityActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
     interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
@@ -2936,10 +3133,10 @@ static SLresult _3DDoppler_SetVelocitySpherical(SL3DDopplerItf self,
 {
     struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
     interface_lock_exclusive(this);
-    this->mSphericalVelocity.mAzimuth = azimuth;
-    this->mSphericalVelocity.mElevation = elevation;
-    this->mSphericalVelocity.mSpeed = speed;
-    this->mSphericalWasSet = SL_BOOLEAN_TRUE;
+    this->mVelocitySpherical.mAzimuth = azimuth;
+    this->mVelocitySpherical.mElevation = elevation;
+    this->mVelocitySpherical.mSpeed = speed;
+    this->mVelocityActive = CARTESIAN_UNKNOWN_SPHERICAL_SET;
     interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
@@ -2950,18 +3147,36 @@ static SLresult _3DDoppler_GetVelocityCartesian(SL3DDopplerItf self,
     if (NULL == pVelocity)
         return SL_RESULT_PARAMETER_INVALID;
     struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
-    SLVec3D cartesianVelocity;
+    interface_lock_exclusive(this);
     for (;;) {
-        interface_lock_shared(this);
-        cartesianVelocity = this->mCartesianVelocity;
-        SLboolean sphericalWasSet = this->mSphericalWasSet;
-        interface_unlock_shared(this);
-        if (!sphericalWasSet)
+        enum CartesianSphericalActive velocityActive = this->mVelocityActive;
+        switch (velocityActive) {
+        case CARTESIAN_COMPUTED_SPHERICAL_SET:
+        case CARTESIAN_SET_SPHERICAL_COMPUTED:  // not in 1.0.1
+        case CARTESIAN_SET_SPHERICAL_REQUESTED: // not in 1.0.1
+        case CARTESIAN_SET_SPHERICAL_UNKNOWN:
+            {
+            SLVec3D velocityCartesian = this->mVelocityCartesian;
+            interface_unlock_exclusive(this);
+            *pVelocity = velocityCartesian;
+            }
             break;
-        // FIXME
-        usleep(10000);
+        case CARTESIAN_UNKNOWN_SPHERICAL_SET:
+            this->mVelocityActive = CARTESIAN_REQUESTED_SPHERICAL_SET;
+            // fall through
+        case CARTESIAN_REQUESTED_SPHERICAL_SET:
+            // matched by cond_broadcast in case multiple requesters
+            interface_cond_wait(this);
+            continue;
+        default:
+            assert(SL_BOOLEAN_FALSE);
+            interface_unlock_exclusive(this);
+            pVelocity->x = 0;
+            pVelocity->y = 0;
+            pVelocity->z = 0;
+            break;
+        }
     }
-    *pVelocity = cartesianVelocity;
     return SL_RESULT_SUCCESS;
 }
 
@@ -3004,7 +3219,11 @@ static SLresult _3DLocation_SetLocationCartesian(SL3DLocationItf self,
     if (NULL == pLocation)
         return SL_RESULT_PARAMETER_INVALID;
     struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
-    this->mLocation.mCartesian = *pLocation;
+    SLVec3D locationCartesian = *pLocation;
+    interface_lock_exclusive(this);
+    this->mLocationCartesian = locationCartesian;
+    this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3012,9 +3231,12 @@ static SLresult _3DLocation_SetLocationSpherical(SL3DLocationItf self,
     SLmillidegree azimuth, SLmillidegree elevation, SLmillimeter distance)
 {
     struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
-    this->mLocation.mSpherical.mAzimuth = azimuth;
-    this->mLocation.mSpherical.mElevation = elevation;
-    this->mLocation.mSpherical.mDistance = distance;
+    interface_lock_exclusive(this);
+    this->mLocationSpherical.mAzimuth = azimuth;
+    this->mLocationSpherical.mElevation = elevation;
+    this->mLocationSpherical.mDistance = distance;
+    this->mLocationActive = CARTESIAN_UNKNOWN_SPHERICAL_SET;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3023,9 +3245,34 @@ static SLresult _3DLocation_Move(SL3DLocationItf self, const SLVec3D *pMovement)
     if (NULL == pMovement)
         return SL_RESULT_PARAMETER_INVALID;
     struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
-    this->mLocation.mCartesian.x += pMovement->x;
-    this->mLocation.mCartesian.y += pMovement->y;
-    this->mLocation.mCartesian.z += pMovement->z;
+    SLVec3D movementCartesian = *pMovement;
+    interface_lock_exclusive(this);
+    for (;;) {
+        enum CartesianSphericalActive locationActive = this->mLocationActive;
+        switch (locationActive) {
+        case CARTESIAN_COMPUTED_SPHERICAL_SET:
+        case CARTESIAN_SET_SPHERICAL_COMPUTED:  // not in 1.0.1
+        case CARTESIAN_SET_SPHERICAL_REQUESTED: // not in 1.0.1
+        case CARTESIAN_SET_SPHERICAL_UNKNOWN:
+            this->mLocationCartesian.x += movementCartesian.x;
+            this->mLocationCartesian.y += movementCartesian.y;
+            this->mLocationCartesian.z += movementCartesian.z;
+            this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
+            break;
+        case CARTESIAN_UNKNOWN_SPHERICAL_SET:
+            this->mLocationActive = CARTESIAN_REQUESTED_SPHERICAL_SET;
+            // fall through
+        case CARTESIAN_REQUESTED_SPHERICAL_SET:
+            // matched by cond_broadcast in case multiple requesters
+            interface_cond_wait(this);
+            continue;
+        default:
+            assert(SL_BOOLEAN_FALSE);
+            break;
+        }
+        break;
+    }
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3035,7 +3282,36 @@ static SLresult _3DLocation_GetLocationCartesian(SL3DLocationItf self,
     if (NULL == pLocation)
         return SL_RESULT_PARAMETER_INVALID;
     struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
-    *pLocation = this->mLocation.mCartesian;
+    interface_lock_exclusive(this);
+    for (;;) {
+        enum CartesianSphericalActive locationActive = this->mLocationActive;
+        switch (locationActive) {
+        case CARTESIAN_COMPUTED_SPHERICAL_SET:
+        case CARTESIAN_SET_SPHERICAL_COMPUTED:  // not in 1.0.1
+        case CARTESIAN_SET_SPHERICAL_REQUESTED: // not in 1.0.1
+        case CARTESIAN_SET_SPHERICAL_UNKNOWN:
+            {
+            SLVec3D locationCartesian = this->mLocationCartesian;
+            interface_unlock_exclusive(this);
+            *pLocation = locationCartesian;
+            }
+            break;
+        case CARTESIAN_UNKNOWN_SPHERICAL_SET:
+            this->mLocationActive = CARTESIAN_REQUESTED_SPHERICAL_SET;
+            // fall through
+        case CARTESIAN_REQUESTED_SPHERICAL_SET:
+            // matched by cond_broadcast in case multiple requesters
+            interface_cond_wait(this);
+            continue;
+        default:
+            assert(SL_BOOLEAN_FALSE);
+            interface_unlock_exclusive(this);
+            pLocation->x = 0;
+            pLocation->y = 0;
+            pLocation->z = 0;
+            break;
+        }
+    }
     return SL_RESULT_SUCCESS;
 }
 
@@ -3044,9 +3320,15 @@ static SLresult _3DLocation_SetOrientationVectors(SL3DLocationItf self,
 {
     if (NULL == pFront || NULL == pAbove)
         return SL_RESULT_PARAMETER_INVALID;
+    SLVec3D front = *pFront;
+    SLVec3D above = *pAbove;
     struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
-    this->mFront = *pFront;
-    this->mAbove = *pAbove;
+    interface_lock_exclusive(this);
+    this->mOrientationVectors.mFront = front;
+    this->mOrientationVectors.mAbove = above;
+    this->mOrientationActive = ANGLES_UNKNOWN_VECTORS_SET;
+    this->mRotatePending = SL_BOOLEAN_FALSE;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3054,9 +3336,13 @@ static SLresult _3DLocation_SetOrientationAngles(SL3DLocationItf self,
     SLmillidegree heading, SLmillidegree pitch, SLmillidegree roll)
 {
     struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
-    this->mHeading = heading;
-    this->mPitch = pitch;
-    this->mRoll = roll;
+    interface_lock_exclusive(this);
+    this->mOrientationAngles.mHeading = heading;
+    this->mOrientationAngles.mPitch = pitch;
+    this->mOrientationAngles.mRoll = roll;
+    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
+    this->mRotatePending = SL_BOOLEAN_FALSE;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3065,6 +3351,15 @@ static SLresult _3DLocation_Rotate(SL3DLocationItf self, SLmillidegree theta,
 {
     if (NULL == pAxis)
         return SL_RESULT_PARAMETER_INVALID;
+    SLVec3D axis = *pAxis;
+    struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
+    interface_lock_exclusive(this);
+    while (this->mRotatePending)
+        interface_cond_wait(this);
+    this->mTheta = theta;
+    this->mAxis = axis;
+    this->mRotatePending = SL_BOOLEAN_TRUE;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3074,8 +3369,12 @@ static SLresult _3DLocation_GetOrientationVectors(SL3DLocationItf self,
     if (NULL == pFront || NULL == pUp)
         return SL_RESULT_PARAMETER_INVALID;
     struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
-    *pFront = this->mFront;
-    *pUp = this->mUp;
+    interface_lock_shared(this);
+    SLVec3D front = this->mOrientationVectors.mFront;
+    SLVec3D up = this->mOrientationVectors.mUp;
+    interface_unlock_shared(this);
+    *pFront = front;
+    *pUp = up;
     return SL_RESULT_SUCCESS;
 }
 
@@ -3312,9 +3611,9 @@ static SLresult DeviceVolume_SetVolume(SLDeviceVolumeItf self,
     }
     struct DeviceVolume_interface *this =
         (struct DeviceVolume_interface *) self;
-    interface_lock_exclusive(this);
+    interface_lock_poke(this);
     this->mVolume[~deviceID] = volume;
-    interface_unlock_exclusive(this);
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3332,9 +3631,9 @@ static SLresult DeviceVolume_GetVolume(SLDeviceVolumeItf self,
     }
     struct DeviceVolume_interface *this =
         (struct DeviceVolume_interface *) self;
-    interface_lock_shared(this);
+    interface_lock_peek(this);
     SLint32 volume = this->mVolume[~deviceID];
-    interface_unlock_shared(this);
+    interface_unlock_peek(this);
     *pVolume = volume;
     return SL_RESULT_SUCCESS;
 }
@@ -3412,9 +3711,9 @@ static SLresult EffectSend_IsEnabled(SLEffectSendItf self,
     struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
     if (NULL == enableLevel)
         return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_shared(this);
+    interface_lock_peek(this);
     SLboolean enable = enableLevel->mEnable;
-    interface_unlock_shared(this);
+    interface_unlock_peek(this);
     *pEnable = enable;
     return SL_RESULT_SUCCESS;
 }
@@ -3423,9 +3722,9 @@ static SLresult EffectSend_SetDirectLevel(SLEffectSendItf self,
     SLmillibel directLevel)
 {
     struct EffectSend_interface *this = (struct EffectSend_interface *) self;
-    interface_lock_exclusive(this);
+    interface_lock_poke(this);
     this->mDirectLevel = directLevel;
-    interface_unlock_exclusive(this);
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3435,9 +3734,9 @@ static SLresult EffectSend_GetDirectLevel(SLEffectSendItf self,
     if (NULL == pDirectLevel)
         return SL_RESULT_PARAMETER_INVALID;
     struct EffectSend_interface *this = (struct EffectSend_interface *) self;
-    interface_lock_shared(this);
+    interface_lock_peek(this);
     SLmillibel directLevel = this->mDirectLevel;
-    interface_unlock_shared(this);
+    interface_unlock_peek(this);
     *pDirectLevel = directLevel;
     return SL_RESULT_SUCCESS;
 }
@@ -3449,6 +3748,7 @@ static SLresult EffectSend_SetSendLevel(SLEffectSendItf self,
     struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
     if (NULL == enableLevel)
         return SL_RESULT_PARAMETER_INVALID;
+    // EnableEffectSend is exclusive, so this has to be also
     interface_lock_exclusive(this);
     enableLevel->mSendLevel = sendLevel;
     interface_unlock_exclusive(this);
@@ -3464,9 +3764,9 @@ static SLresult EffectSend_GetSendLevel(SLEffectSendItf self,
     struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
     if (NULL == enableLevel)
         return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_shared(this);
+    interface_lock_peek(this);
     SLmillibel sendLevel = enableLevel->mSendLevel;
-    interface_unlock_shared(this);
+    interface_unlock_peek(this);
     *pSendLevel = sendLevel;
     return SL_RESULT_SUCCESS;
 }
@@ -3638,7 +3938,9 @@ static SLresult LEDArray_ActivateLEDArray(SLLEDArrayItf self,
     SLuint32 lightMask)
 {
     struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    interface_lock_poke(this);
     this->mLightMask = lightMask;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3648,7 +3950,9 @@ static SLresult LEDArray_IsLEDArrayActivated(SLLEDArrayItf self,
     if (NULL == pLightMask)
         return SL_RESULT_PARAMETER_INVALID;
     struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    interface_lock_peek(this);
     SLuint32 lightMask = this->mLightMask;
+    interface_unlock_peek(this);
     *pLightMask = lightMask;
     return SL_RESULT_SUCCESS;
 }
@@ -3658,9 +3962,11 @@ static SLresult LEDArray_SetColor(SLLEDArrayItf self, SLuint8 index,
 {
     if (NULL == pColor)
         return SL_RESULT_PARAMETER_INVALID;
-    struct LEDArray_interface *this = (struct LEDArray_interface *) self;
     SLHSL color = *pColor;
+    struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    interface_lock_poke(this);
     this->mColor[index] = color;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3670,7 +3976,9 @@ static SLresult LEDArray_GetColor(SLLEDArrayItf self, SLuint8 index,
     if (NULL == pColor)
         return SL_RESULT_PARAMETER_INVALID;
     struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    interface_lock_peek(this);
     SLHSL color = this->mColor[index];
+    interface_unlock_peek(this);
     *pColor = color;
     return SL_RESULT_SUCCESS;
 }
@@ -3834,10 +4142,12 @@ static SLresult MuteSolo_SetChannelMute(SLMuteSoloItf self, SLuint8 chan,
 {
     struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
     SLuint32 mask = 1 << chan;
+    interface_lock_exclusive(this);
     if (mute)
         this->mMuteMask |= mask;
     else
         this->mMuteMask &= ~mask;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3847,8 +4157,10 @@ static SLresult MuteSolo_GetChannelMute(SLMuteSoloItf self, SLuint8 chan,
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
     struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
-    SLboolean mute = (this->mMuteMask >> chan) & 1;
-    *pMute = mute;
+    interface_lock_peek(this);
+    SLuint32 mask = this->mMuteMask;
+    interface_unlock_peek(this);
+    *pMute = (mask >> chan) & 1;
     return SL_RESULT_SUCCESS;
 }
 
@@ -3856,11 +4168,13 @@ static SLresult MuteSolo_SetChannelSolo(SLMuteSoloItf self, SLuint8 chan,
     SLboolean solo)
 {
     struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
-    SLuint32 mask;
+    SLuint32 mask = 1 << chan;
+    interface_lock_exclusive(this);
     if (solo)
         this->mSoloMask |= mask;
     else
         this->mSoloMask &= ~mask;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3870,8 +4184,10 @@ static SLresult MuteSolo_GetChannelSolo(SLMuteSoloItf self, SLuint8 chan,
     if (NULL == pSolo)
         return SL_RESULT_PARAMETER_INVALID;
     struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
-    SLboolean solo = (this->mSoloMask >> chan) & 1;
-    *pSolo = solo;
+    interface_lock_peek(this);
+    SLuint32 mask = this->mSoloMask;
+    interface_unlock_peek(this);
+    *pSolo = (mask >> chan) & 1;
     return SL_RESULT_SUCCESS;
 }
 
@@ -3900,7 +4216,9 @@ static SLresult MuteSolo_GetNumChannels(SLMuteSoloItf self,
 static SLresult Pitch_SetPitch(SLPitchItf self, SLpermille pitch)
 {
     struct Pitch_interface *this = (struct Pitch_interface *) self;
+    interface_lock_poke(this);
     this->mPitch = pitch;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3909,7 +4227,9 @@ static SLresult Pitch_GetPitch(SLPitchItf self, SLpermille *pPitch)
     if (NULL == pPitch)
         return SL_RESULT_PARAMETER_INVALID;
     struct Pitch_interface *this = (struct Pitch_interface *) self;
+    interface_lock_peek(this);
     SLpermille pitch = this->mPitch;
+    interface_unlock_peek(this);
     *pPitch = pitch;
     return SL_RESULT_SUCCESS;
 }
@@ -3938,7 +4258,9 @@ static SLresult Pitch_GetPitchCapabilities(SLPitchItf self,
 static SLresult PlaybackRate_SetRate(SLPlaybackRateItf self, SLpermille rate)
 {
     struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    interface_lock_poke(this);
     this->mRate = rate;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -3947,7 +4269,9 @@ static SLresult PlaybackRate_GetRate(SLPlaybackRateItf self, SLpermille *pRate)
     if (NULL == pRate)
         return SL_RESULT_PARAMETER_INVALID;
     struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    interface_lock_peek(this);
     SLpermille rate = this->mRate;
+    interface_unlock_peek(this);
     *pRate = rate;
     return SL_RESULT_SUCCESS;
 }
@@ -3978,7 +4302,7 @@ static SLresult PlaybackRate_GetCapabilitiesOfRate(SLPlaybackRateItf self,
     if (NULL == pCapabilities)
         return SL_RESULT_PARAMETER_INVALID;
     // struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
-    SLuint32 capabilities;
+    SLuint32 capabilities = 0; // FIXME
     *pCapabilities = capabilities;
     return SL_RESULT_SUCCESS;
 }
@@ -4430,9 +4754,11 @@ static SLresult Visualization_RegisterVisualizationCallback(
 {
     struct Visualization_interface *this =
         (struct Visualization_interface *) self;
+    interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
     this->mRate = rate;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -4455,7 +4781,9 @@ static SLresult Visualization_GetMaxRate(SLVisualizationItf self,
 static SLresult BassBoost_SetEnabled(SLBassBoostItf self, SLboolean enabled)
 {
     struct BassBoost_interface *this = (struct BassBoost_interface *) self;
+    interface_lock_poke(this);
     this->mEnabled = enabled;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -4464,14 +4792,19 @@ static SLresult BassBoost_IsEnabled(SLBassBoostItf self, SLboolean *pEnabled)
     if (NULL == pEnabled)
         return SL_RESULT_PARAMETER_INVALID;
     struct BassBoost_interface *this = (struct BassBoost_interface *) self;
-    *pEnabled = this->mEnabled;
+    interface_lock_peek(this);
+    SLboolean enabled = this->mEnabled;
+    interface_unlock_peek(this);
+    *pEnabled = enabled;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult BassBoost_SetStrength(SLBassBoostItf self, SLpermille strength)
 {
     struct BassBoost_interface *this = (struct BassBoost_interface *) self;
+    interface_lock_poke(this);
     this->mStrength = strength;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -4481,7 +4814,10 @@ static SLresult BassBoost_GetRoundedStrength(SLBassBoostItf self,
     if (NULL == pStrength)
         return SL_RESULT_PARAMETER_INVALID;
     struct BassBoost_interface *this = (struct BassBoost_interface *) self;
-    *pStrength = this->mStrength;
+    interface_lock_peek(this);
+    SLpermille strength = this->mStrength;
+    interface_unlock_peek(this);
+    *pStrength = strength;
     return SL_RESULT_SUCCESS;
 }
 
@@ -4574,14 +4910,13 @@ static SLresult _3DMacroscopic_SetOrientationAngles(SL3DMacroscopicItf self,
     SLmillidegree heading, SLmillidegree pitch, SLmillidegree roll)
 {
     struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
-    // FIXME Compute as SLVec3D also
     interface_lock_exclusive(this);
-    // this->mFront = ...
-    // this->mUp = ...
     this->mOrientationAngles.mHeading = heading;
     this->mOrientationAngles.mPitch = pitch;
     this->mOrientationAngles.mRoll = roll;
-    ++this->mGeneration;
+    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
+    this->mRotatePending = SL_BOOLEAN_FALSE;
+    // ++this->mGeneration;
     interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
@@ -4597,6 +4932,8 @@ static SLresult _3DMacroscopic_SetOrientationVectors(SL3DMacroscopicItf self,
     interface_lock_exclusive(this);
     this->mOrientationVectors.mFront = front;
     this->mOrientationVectors.mUp = above;
+    this->mOrientationActive = ANGLES_UNKNOWN_VECTORS_SET;
+    this->mRotatePending = SL_BOOLEAN_FALSE;
     interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
@@ -4606,15 +4943,19 @@ static SLresult _3DMacroscopic_Rotate(SL3DMacroscopicItf self,
 {
     if (NULL == pAxis)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
     SLVec3D axis = *pAxis;
-    (void) (axis.x + axis.y + axis.z);
+    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
     // FIXME Do the rotate here:
-    interface_lock_shared(this);
+    // interface_lock_shared(this);
     // read old values and generation
-    interface_unlock_shared(this);
+    // interface_unlock_shared(this);
     // compute new position
     interface_lock_exclusive(this);
+    while (this->mRotatePending)
+        interface_cond_wait(this);
+    this->mTheta = theta;
+    this->mAxis = axis;
+    this->mRotatePending = SL_BOOLEAN_TRUE;
     // compare generation with saved value
     // if equal, store new position and increment generation
     // if unequal, discard new position
@@ -4628,12 +4969,42 @@ static SLresult _3DMacroscopic_GetOrientationVectors(SL3DMacroscopicItf self,
     if (NULL == pFront || NULL == pUp)
         return SL_RESULT_PARAMETER_INVALID;
     struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
-    interface_lock_shared(this);
-    SLVec3D front = this->mOrientationVectors.mFront;
-    SLVec3D up = this->mOrientationVectors.mUp;
-    interface_unlock_shared(this);
-    *pFront = front;
-    *pUp = up;
+    interface_lock_exclusive(this);
+    for (;;) {
+        enum AnglesVectorsActive orientationActive = this->mOrientationActive;
+        switch (orientationActive) {
+        case ANGLES_COMPUTED_VECTORS_SET:    // not in 1.0.1
+        case ANGLES_REQUESTED_VECTORS_SET:   // not in 1.0.1
+        case ANGLES_UNKNOWN_VECTORS_SET:
+        case ANGLES_SET_VECTORS_COMPUTED:
+            {
+            SLVec3D front = this->mOrientationVectors.mFront;
+            SLVec3D up = this->mOrientationVectors.mUp;
+            interface_unlock_exclusive(this);
+            *pFront = front;
+            *pUp = up;
+            }
+            break;
+        case ANGLES_SET_VECTORS_UNKNOWN:
+            this->mOrientationActive = ANGLES_SET_VECTORS_REQUESTED;
+            // fall through
+        case ANGLES_SET_VECTORS_REQUESTED:
+            // matched by cond_broadcast in case multiple requesters
+            interface_cond_wait(this);
+            continue;
+        default:
+            interface_unlock_exclusive(this);
+            assert(SL_BOOLEAN_FALSE);
+            pFront->x = 0;
+            pFront->y = 0;
+            pFront->z = 0;
+            pUp->x = 0;
+            pUp->y = 0;
+            pUp->z = 0;
+            break;
+        }
+        break;
+    }
     return SL_RESULT_SUCCESS;
 }
 
@@ -4786,8 +5157,8 @@ static SLresult _3DSource_SetCone(SL3DSourceItf self, SLmillidegree innerAngle,
 {
     struct _3DSource_interface *this = (struct _3DSource_interface *) self;
     interface_lock_exclusive(this);
-    this->mConeAngles.mInner = innerAngle;
-    this->mConeAngles.mOuter = outerAngle;
+    this->mConeInnerAngle = innerAngle;
+    this->mConeOuterAngle = outerAngle;
     this->mConeOuterLevel = outerLevel;
     interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
@@ -4801,8 +5172,8 @@ static SLresult _3DSource_GetCone(SL3DSourceItf self,
         return SL_RESULT_PARAMETER_INVALID;
     struct _3DSource_interface *this = (struct _3DSource_interface *) self;
     interface_lock_shared(this);
-    SLmillidegree innerAngle = this->mConeAngles.mInner;
-    SLmillidegree outerAngle = this->mConeAngles.mOuter;
+    SLmillidegree innerAngle = this->mConeInnerAngle;
+    SLmillidegree outerAngle = this->mConeOuterAngle;
     SLmillibel outerLevel = this->mConeOuterLevel;
     interface_unlock_shared(this);
     *pInnerAngle = innerAngle;
@@ -5031,7 +5402,9 @@ static SLresult PresetReverb_SetPreset(SLPresetReverbItf self,
 {
     struct PresetReverb_interface *this =
         (struct PresetReverb_interface *) self;
+    interface_lock_poke(this);
     this->mPreset = preset;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5042,7 +5415,10 @@ static SLresult PresetReverb_GetPreset(SLPresetReverbItf self,
         return SL_RESULT_PARAMETER_INVALID;
     struct PresetReverb_interface *this =
         (struct PresetReverb_interface *) self;
-    *pPreset = this->mPreset;
+    interface_lock_peek(this);
+    SLuint16 preset = this->mPreset;
+    interface_unlock_peek(this);
+    *pPreset = preset;
     return SL_RESULT_SUCCESS;
 }
 
@@ -5053,11 +5429,19 @@ static SLresult PresetReverb_GetPreset(SLPresetReverbItf self,
 
 // EnvironmentalReverb implementation
 
+// Note: all Set operations use exclusive not poke,
+// because SetEnvironmentalReverbProperties is exclusive.
+// It is safe for the Get operations to use peek,
+// on the assumption that the block copy will atomically
+// replace each word of the block.
+
 static SLresult EnvironmentalReverb_SetRoomLevel(SLEnvironmentalReverbItf self,
     SLmillibel room)
 {
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_exclusive(this);
     this->mProperties.roomLevel = room;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5067,7 +5451,9 @@ static SLresult EnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self,
     if (NULL == pRoom)
         return SL_RESULT_PARAMETER_INVALID;
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_peek(this);
     SLmillibel roomLevel = this->mProperties.roomLevel;
+    interface_unlock_peek(this);
     *pRoom = roomLevel;
     return SL_RESULT_SUCCESS;
 }
@@ -5076,7 +5462,9 @@ static SLresult EnvironmentalReverb_SetRoomHFLevel(
     SLEnvironmentalReverbItf self, SLmillibel roomHF)
 {
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_exclusive(this);
     this->mProperties.roomHFLevel = roomHF;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5086,7 +5474,9 @@ static SLresult EnvironmentalReverb_GetRoomHFLevel(
     if (NULL == pRoomHF)
         return SL_RESULT_PARAMETER_INVALID;
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_peek(this);
     SLmillibel roomHFLevel = this->mProperties.roomHFLevel;
+    interface_unlock_peek(this);
     *pRoomHF = roomHFLevel;
     return SL_RESULT_SUCCESS;
 }
@@ -5095,7 +5485,9 @@ static SLresult EnvironmentalReverb_SetDecayTime(
     SLEnvironmentalReverbItf self, SLmillisecond decayTime)
 {
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_exclusive(this);
     this->mProperties.decayTime = decayTime;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5105,7 +5497,9 @@ static SLresult EnvironmentalReverb_GetDecayTime(
     if (NULL == pDecayTime)
         return SL_RESULT_PARAMETER_INVALID;
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_peek(this);
     SLmillisecond decayTime = this->mProperties.decayTime;
+    interface_unlock_peek(this);
     *pDecayTime = decayTime;
     return SL_RESULT_SUCCESS;
 }
@@ -5114,7 +5508,9 @@ static SLresult EnvironmentalReverb_SetDecayHFRatio(
     SLEnvironmentalReverbItf self, SLpermille decayHFRatio)
 {
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_exclusive(this);
     this->mProperties.decayHFRatio = decayHFRatio;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5124,7 +5520,9 @@ static SLresult EnvironmentalReverb_GetDecayHFRatio(
     if (NULL == pDecayHFRatio)
         return SL_RESULT_PARAMETER_INVALID;
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_peek(this);
     SLpermille decayHFRatio = this->mProperties.decayHFRatio;
+    interface_unlock_peek(this);
     *pDecayHFRatio = decayHFRatio;
     return SL_RESULT_SUCCESS;
 }
@@ -5133,7 +5531,9 @@ static SLresult EnvironmentalReverb_SetReflectionsLevel(
     SLEnvironmentalReverbItf self, SLmillibel reflectionsLevel)
 {
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_exclusive(this);
     this->mProperties.reflectionsLevel = reflectionsLevel;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5143,7 +5543,9 @@ static SLresult EnvironmentalReverb_GetReflectionsLevel(
     if (NULL == pReflectionsLevel)
         return SL_RESULT_PARAMETER_INVALID;
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_peek(this);
     SLmillibel reflectionsLevel = this->mProperties.reflectionsLevel;
+    interface_unlock_peek(this);
     *pReflectionsLevel = reflectionsLevel;
     return SL_RESULT_SUCCESS;
 }
@@ -5152,7 +5554,9 @@ static SLresult EnvironmentalReverb_SetReflectionsDelay(
     SLEnvironmentalReverbItf self, SLmillisecond reflectionsDelay)
 {
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_exclusive(this);
     this->mProperties.reflectionsDelay = reflectionsDelay;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5162,7 +5566,9 @@ static SLresult EnvironmentalReverb_GetReflectionsDelay(
     if (NULL == pReflectionsDelay)
         return SL_RESULT_PARAMETER_INVALID;
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_peek(this);
     SLmillisecond reflectionsDelay = this->mProperties.reflectionsDelay;
+    interface_unlock_peek(this);
     *pReflectionsDelay = reflectionsDelay;
     return SL_RESULT_SUCCESS;
 }
@@ -5171,7 +5577,9 @@ static SLresult EnvironmentalReverb_SetReverbLevel(
     SLEnvironmentalReverbItf self, SLmillibel reverbLevel)
 {
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_exclusive(this);
     this->mProperties.reverbLevel = reverbLevel;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5181,7 +5589,9 @@ static SLresult EnvironmentalReverb_GetReverbLevel(
     if (NULL == pReverbLevel)
         return SL_RESULT_PARAMETER_INVALID;
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_peek(this);
     SLmillibel reverbLevel = this->mProperties.reverbLevel;
+    interface_unlock_peek(this);
     *pReverbLevel = reverbLevel;
     return SL_RESULT_SUCCESS;
 }
@@ -5190,7 +5600,9 @@ static SLresult EnvironmentalReverb_SetReverbDelay(
     SLEnvironmentalReverbItf self, SLmillisecond reverbDelay)
 {
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_exclusive(this);
     this->mProperties.reverbDelay = reverbDelay;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5200,7 +5612,9 @@ static SLresult EnvironmentalReverb_GetReverbDelay(
     if (NULL == pReverbDelay)
         return SL_RESULT_PARAMETER_INVALID;
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_peek(this);
     SLmillisecond reverbDelay = this->mProperties.reverbDelay;
+    interface_unlock_peek(this);
     *pReverbDelay = reverbDelay;
     return SL_RESULT_SUCCESS;
 }
@@ -5209,7 +5623,9 @@ static SLresult EnvironmentalReverb_SetDiffusion(
     SLEnvironmentalReverbItf self, SLpermille diffusion)
 {
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_exclusive(this);
     this->mProperties.diffusion = diffusion;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5219,7 +5635,9 @@ static SLresult EnvironmentalReverb_GetDiffusion(SLEnvironmentalReverbItf self,
     if (NULL == pDiffusion)
         return SL_RESULT_PARAMETER_INVALID;
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_peek(this);
     SLpermille diffusion = this->mProperties.diffusion;
+    interface_unlock_peek(this);
     *pDiffusion = diffusion;
     return SL_RESULT_SUCCESS;
 }
@@ -5228,7 +5646,9 @@ static SLresult EnvironmentalReverb_SetDensity(SLEnvironmentalReverbItf self,
     SLpermille density)
 {
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_exclusive(this);
     this->mProperties.density = density;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5238,7 +5658,9 @@ static SLresult EnvironmentalReverb_GetDensity(SLEnvironmentalReverbItf self,
     if (NULL == pDensity)
         return SL_RESULT_PARAMETER_INVALID;
     struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    interface_lock_peek(this);
     SLpermille density = this->mProperties.density;
+    interface_unlock_peek(this);
     *pDensity = density;
     return SL_RESULT_SUCCESS;
 }
@@ -5301,7 +5723,9 @@ static SLresult EnvironmentalReverb_GetEnvironmentalReverbProperties(
 static SLresult Virtualizer_SetEnabled(SLVirtualizerItf self, SLboolean enabled)
 {
     struct Virtualizer_interface *this = (struct Virtualizer_interface *) self;
+    interface_lock_poke(this);
     this->mEnabled = enabled;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5311,7 +5735,10 @@ static SLresult Virtualizer_IsEnabled(SLVirtualizerItf self,
     if (NULL == pEnabled)
         return SL_RESULT_PARAMETER_INVALID;
     struct Virtualizer_interface *this = (struct Virtualizer_interface *) self;
-    *pEnabled = this->mEnabled;
+    interface_lock_peek(this);
+    SLboolean enabled = this->mEnabled;
+    interface_unlock_peek(this);
+    *pEnabled = enabled;
     return SL_RESULT_SUCCESS;
 }
 
@@ -5319,7 +5746,9 @@ static SLresult Virtualizer_SetStrength(SLVirtualizerItf self,
     SLpermille strength)
 {
     struct Virtualizer_interface *this = (struct Virtualizer_interface *) self;
+    interface_lock_poke(this);
     this->mStrength = strength;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5329,7 +5758,10 @@ static SLresult Virtualizer_GetRoundedStrength(SLVirtualizerItf self,
     if (NULL == pStrength)
         return SL_RESULT_PARAMETER_INVALID;
     struct Virtualizer_interface *this = (struct Virtualizer_interface *) self;
-    *pStrength = this->mStrength;
+    interface_lock_peek(this);
+    SLpermille strength = this->mStrength;
+    interface_unlock_peek(this);
+    *pStrength = strength;
     return SL_RESULT_SUCCESS;
 }
 
@@ -5364,8 +5796,10 @@ static SLresult MIDIMessage_RegisterMetaEventCallback(SLMIDIMessageItf self,
     slMetaEventCallback callback, void *pContext)
 {
     struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    interface_lock_exclusive(this);
     this->mMetaEventCallback = callback;
     this->mMetaEventContext = pContext;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5373,8 +5807,10 @@ static SLresult MIDIMessage_RegisterMIDIMessageCallback(SLMIDIMessageItf self,
     slMIDIMessageCallback callback, void *pContext)
 {
     struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    interface_lock_exclusive(this);
     this->mMessageCallback = callback;
     this->mMessageContext = pContext;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5405,10 +5841,12 @@ static SLresult MIDIMuteSolo_SetChannelMute(SLMIDIMuteSoloItf self, SLuint8 chan
 {
     struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
     SLuint16 mask = 1 << channel;
+    interface_lock_exclusive(this);
     if (mute)
         this->mChannelMuteMask |= mask;
     else
         this->mChannelMuteMask &= ~mask;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5418,8 +5856,10 @@ static SLresult MIDIMuteSolo_GetChannelMute(SLMIDIMuteSoloItf self, SLuint8 chan
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
     struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
-    SLboolean mute = (this->mChannelMuteMask >> channel) & 1;
-    *pMute = mute;
+    interface_lock_peek(this);
+    SLuint16 mask = this->mChannelMuteMask;
+    interface_unlock_peek(this);
+    *pMute = (mask >> channel) & 1;
     return SL_RESULT_SUCCESS;
 }
 
@@ -5427,10 +5867,12 @@ static SLresult MIDIMuteSolo_SetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 chan
 {
     struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
     SLuint16 mask = 1 << channel;
+    interface_lock_exclusive(this);
     if (solo)
         this->mChannelSoloMask |= mask;
     else
         this->mChannelSoloMask &= ~mask;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5440,8 +5882,10 @@ static SLresult MIDIMuteSolo_GetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 chan
     if (NULL == pSolo)
         return SL_RESULT_PARAMETER_INVALID;
     struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
-    SLboolean solo = (this->mChannelSoloMask >> channel) & 1;
-    *pSolo = solo;
+    interface_lock_peek(this);
+    SLuint16 mask = this->mChannelSoloMask;
+    interface_unlock_peek(this);
+    *pSolo = (mask >> channel) & 1;
     return SL_RESULT_SUCCESS;
 }
 
@@ -5450,7 +5894,10 @@ static SLresult MIDIMuteSolo_GetTrackCount(SLMIDIMuteSoloItf self, SLuint16 *pCo
     if (NULL == pCount)
         return SL_RESULT_PARAMETER_INVALID;
     struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    // FIXME is this const? if so, remove the lock
+    interface_lock_peek(this);
     SLuint16 trackCount = this->mTrackCount;
+    interface_unlock_peek(this);
     *pCount = trackCount;
     return SL_RESULT_SUCCESS;
 }
@@ -5458,11 +5905,13 @@ static SLresult MIDIMuteSolo_GetTrackCount(SLMIDIMuteSoloItf self, SLuint16 *pCo
 static SLresult MIDIMuteSolo_SetTrackMute(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean mute)
 {
     struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
-    SLuint16 mask = 1 << track;
+    SLuint32 mask = 1 << track;
+    interface_lock_exclusive(this);
     if (mute)
         this->mTrackMuteMask |= mask;
     else
         this->mTrackMuteMask &= ~mask;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5471,19 +5920,23 @@ static SLresult MIDIMuteSolo_GetTrackMute(SLMIDIMuteSoloItf self, SLuint16 track
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
     struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
-    SLboolean mute = (this->mTrackMuteMask >> track) & 1;
-    *pMute = mute;
+    interface_lock_peek(this);
+    SLuint32 mask = this->mTrackMuteMask;
+    interface_unlock_peek(this);
+    *pMute = (mask >> track) & 1;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MIDIMuteSolo_SetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean solo)
 {
     struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
-    SLuint16 mask = 1 << track;
+    SLuint32 mask = 1 << track;
+    interface_lock_exclusive(this);
     if (solo)
         this->mTrackSoloMask |= mask;
     else
         this->mTrackSoloMask &= ~mask;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5492,8 +5945,10 @@ static SLresult MIDIMuteSolo_GetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 track
     if (NULL == pSolo)
         return SL_RESULT_PARAMETER_INVALID;
     struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
-    SLboolean solo = (this->mTrackSoloMask >> track) & 1;
-    *pSolo = solo;
+    interface_lock_peek(this);
+    SLuint32 mask = this->mTrackSoloMask;
+    interface_unlock_peek(this);
+    *pSolo = (mask >> track) & 1;
     return SL_RESULT_SUCCESS;
 }
 
@@ -5514,7 +5969,9 @@ static SLresult MIDIMuteSolo_GetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 track
 static SLresult MIDITempo_SetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 tpqn)
 {
     struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    interface_lock_poke(this);
     this->mTicksPerQuarterNote = tpqn;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5523,7 +5980,9 @@ static SLresult MIDITempo_GetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 *
     if (NULL == pTpqn)
         return SL_RESULT_PARAMETER_INVALID;
     struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    interface_lock_peek(this);
     SLuint32 ticksPerQuarterNote = this->mTicksPerQuarterNote;
+    interface_unlock_peek(this);
     *pTpqn = ticksPerQuarterNote;
     return SL_RESULT_SUCCESS;
 }
@@ -5531,7 +5990,9 @@ static SLresult MIDITempo_GetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 *
 static SLresult MIDITempo_SetMicrosecondsPerQuarterNote(SLMIDITempoItf self, SLmicrosecond uspqn)
 {
     struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    interface_lock_poke(this);
     this->mMicrosecondsPerQuarterNote = uspqn;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5540,7 +6001,9 @@ static SLresult MIDITempo_GetMicrosecondsPerQuarterNote(SLMIDITempoItf self, SLm
     if (NULL == uspqn)
         return SL_RESULT_PARAMETER_INVALID;
     struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    interface_lock_peek(this);
     SLuint32 microsecondsPerQuarterNote = this->mMicrosecondsPerQuarterNote;
+    interface_unlock_peek(this);
     *uspqn = microsecondsPerQuarterNote;
     return SL_RESULT_SUCCESS;
 }
@@ -5567,7 +6030,9 @@ static SLresult MIDITime_GetDuration(SLMIDITimeItf self, SLuint32 *pDuration)
 static SLresult MIDITime_SetPosition(SLMIDITimeItf self, SLuint32 position)
 {
     struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    interface_lock_poke(this);
     this->mPosition = position;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5576,7 +6041,9 @@ static SLresult MIDITime_GetPosition(SLMIDITimeItf self, SLuint32 *pPosition)
     if (NULL == pPosition)
         return SL_RESULT_PARAMETER_INVALID;
     struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    interface_lock_peek(this);
     SLuint32 position = this->mPosition;
+    interface_unlock_peek(this);
     *pPosition = position;
     return SL_RESULT_SUCCESS;
 }
@@ -5584,8 +6051,10 @@ static SLresult MIDITime_GetPosition(SLMIDITimeItf self, SLuint32 *pPosition)
 static SLresult MIDITime_SetLoopPoints(SLMIDITimeItf self, SLuint32 startTick, SLuint32 numTicks)
 {
     struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    interface_lock_exclusive(this);
     this->mStartTick = startTick;
     this->mNumTicks = numTicks;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -5595,8 +6064,10 @@ static SLresult MIDITime_GetLoopPoints(SLMIDITimeItf self, SLuint32 *pStartTick,
     if (NULL == pStartTick || NULL == pNumTicks)
         return SL_RESULT_PARAMETER_INVALID;
     struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    interface_lock_shared(this);
     SLuint32 startTick = this->mStartTick;
     SLuint32 numTicks = this->mNumTicks;
+    interface_unlock_shared(this);
     *pStartTick = startTick;
     *pNumTicks = numTicks;
     return SL_RESULT_SUCCESS;

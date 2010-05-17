@@ -152,20 +152,37 @@ struct _3DCommit_interface {
     SLuint32 mGeneration;   // incremented each master clock cycle
 };
 
+// FIXME move
+enum CartesianSphericalActive {
+    CARTESIAN_COMPUTED_SPHERICAL_SET,
+    CARTESIAN_REQUESTED_SPHERICAL_SET,
+    CARTESIAN_UNKNOWN_SPHERICAL_SET,
+    CARTESIAN_SET_SPHERICAL_COMPUTED,   // not in 1.0.1
+    CARTESIAN_SET_SPHERICAL_REQUESTED,  // not in 1.0.1
+    CARTESIAN_SET_SPHERICAL_UNKNOWN
+};
+
 struct _3DDoppler_interface {
     const struct SL3DDopplerItf_ *mItf;
     struct Object_interface *mThis;
-    // Only the Cartesian velocity is maintained for the long term, but there are
-    // brief periods when the spherical velocity has the most recent value.
-    // Though only one of these is active at a time, a union is not appropriate
-    // due to multi-threading concerns. So we keep both, with an active flag.
-    SLVec3D mCartesianVelocity;
+    // The API allows client to specify either Cartesian and spherical velocities.
+    // But an implementation will likely prefer one or the other. So for
+    // maximum portablity, we maintain both units and an indication of which
+    // unit was set most recently. In addition, we keep a flag saying whether
+    // the other unit has been derived yet. It can take significant time
+    // to compute the other unit, so this may be deferred to another thread.
+    // For this reason we also keep an indication of whether the secondary
+    // has been computed yet, and its accuracy.
+    // Though only one unit is primary at a time, a union is inappropriate:
+    // the application might read in both units (not in 1.0.1),
+    // and due to multi-threading concerns.
+    SLVec3D mVelocityCartesian;
     struct {
         SLmillidegree mAzimuth;
         SLmillidegree mElevation;
         SLmillidegree mSpeed;
-    } mSphericalVelocity;
-    SLboolean mSphericalWasSet;
+    } mVelocitySpherical;
+    enum CartesianSphericalActive mVelocityActive;
     SLpermille mDopplerFactor;
 };
 
@@ -175,23 +192,41 @@ struct _3DGrouping_interface {
     SLObjectItf mGroup;
 };
 
+// FIXME move
+enum AnglesVectorsActive {
+    ANGLES_COMPUTED_VECTORS_SET,    // not in 1.0.1
+    ANGLES_REQUESTED_VECTORS_SET,   // not in 1.0.1
+    ANGLES_UNKNOWN_VECTORS_SET,
+    ANGLES_SET_VECTORS_COMPUTED,
+    ANGLES_SET_VECTORS_REQUESTED,
+    ANGLES_SET_VECTORS_UNKNOWN
+};
+
 struct _3DLocation_interface {
     const struct SL3DLocationItf_ *mItf;
     struct Object_interface *mThis;
-    union Cartesian_Spherical2 {
-        SLVec3D mCartesian;
-        struct {
-            SLmillidegree mAzimuth;
-            SLmillidegree mElevation;
-            SLmillidegree mDistance;
-        } mSpherical;
-    } mLocation;
-    SLmillidegree mHeading;
-    SLmillidegree mPitch;
-    SLmillidegree mRoll;
-    SLVec3D mFront;
-    SLVec3D mAbove;
-    SLVec3D mUp;
+    SLVec3D mLocationCartesian;
+    struct {
+        SLmillidegree mAzimuth;
+        SLmillidegree mElevation;
+        SLmillimeter mDistance;
+    } mLocationSpherical;
+    enum CartesianSphericalActive mLocationActive;
+    struct {
+        SLmillidegree mHeading;
+        SLmillidegree mPitch;
+        SLmillidegree mRoll;
+    } mOrientationAngles;
+    struct {
+        SLVec3D mFront;
+        SLVec3D mAbove;
+        SLVec3D mUp;
+    } mOrientationVectors;
+    enum AnglesVectorsActive mOrientationActive;
+    // Rotations can be slow, so are deferred.
+    SLmillidegree mTheta;
+    SLVec3D mAxis;
+    SLboolean mRotatePending;
 };
 
 struct _3DMacroscopic_interface {
@@ -211,8 +246,13 @@ struct _3DMacroscopic_interface {
         SLVec3D mFront;
         SLVec3D mUp;
     } mOrientationVectors;
-    // for optimization
-    SLuint32 mGeneration;
+    enum AnglesVectorsActive mOrientationActive;
+    // FIXME no longer needed? was for optimization
+    // SLuint32 mGeneration;
+    // Rotations can be slow, so are deferred.
+    SLmillidegree mTheta;
+    SLVec3D mAxis;
+    SLboolean mRotatePending;
 };
 
 struct _3DSource_interface {
@@ -222,10 +262,8 @@ struct _3DSource_interface {
     SLboolean mRolloffMaxDistanceMute;
     SLmillimeter mMaxDistance;
     SLmillimeter mMinDistance;
-    struct {
-        SLmillidegree mInner;
-        SLmillidegree mOuter;
-    } mConeAngles;
+    SLmillidegree mConeInnerAngle;
+    SLmillidegree mConeOuterAngle;
     SLmillibel mConeOuterLevel;
     SLpermille mRolloffFactor;
     SLpermille mRoomRolloffFactor;
@@ -251,6 +289,12 @@ struct AudioEncoderCapabilities_interface {
 struct AudioIODeviceCapabilities_interface {
     const struct SLAudioIODeviceCapabilitiesItf_ *mItf;
     struct Object_interface *mThis;
+    slAvailableAudioInputsChangedCallback mAvailableAudioInputsChangedCallback;
+    void *mAvailableAudioInputsChangedContext;
+    slAvailableAudioOutputsChangedCallback mAvailableAudioOutputsChangedCallback;
+    void *mAvailableAudioOutputsChangedContext;
+    slDefaultDeviceIDMapChangedCallback mDefaultDeviceIDMapChangedCallback;
+    void *mDefaultDeviceIDMapChangedContext;
 };
 
 struct BassBoost_interface {
@@ -467,6 +511,8 @@ struct Object_interface {
 struct OutputMix_interface {
     const struct SLOutputMixItf_ *mItf;
     struct Object_interface *mThis;
+    slMixDeviceChangeCallback mCallback;
+    void *mContext;
 #ifdef USE_OUTPUTMIXEXT
     unsigned mActiveMask;   // 1 bit per active track
     struct Track mTracks[32];
