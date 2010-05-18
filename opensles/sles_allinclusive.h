@@ -77,7 +77,7 @@ struct iid_vtable {
 
 // Per-class const data shared by all instances of the same class
 
-struct class_ {
+typedef struct {
     // needed by all classes (class class, the superclass of all classes)
     const struct iid_vtable *mInterfaces;
     SLuint32 mInterfaceCount;
@@ -90,7 +90,7 @@ struct class_ {
     StatusHook mResume;
     VoidHook mDestroy;
     // append per-class data here
-};
+} ClassTable;
 
 #ifdef USE_OUTPUTMIXEXT
 
@@ -145,12 +145,31 @@ struct SndFile {
 
 /* Interface structures */
 
-struct _3DCommit_interface {
-    const struct SL3DCommitItf_ *mItf;
+typedef struct Object_interface {
+    const struct SLObjectItf_ *mItf;
+    // FIXME probably not needed for an Object, as it is always first,
+    // but look for lingering code that assumes it is here before deleting
     struct Object_interface *mThis;
+    const ClassTable *mClass;
+    volatile SLuint32 mState;
+    slObjectCallback mCallback;
+    void *mContext;
+    unsigned mExposedMask;  // exposed interfaces
+    unsigned mLossOfControlMask;    // interfaces with loss of control enabled
+    SLint32 mPriority;
+    SLboolean mPreemptable;
+    pthread_mutex_t mMutex;
+    pthread_cond_t mCond;
+    // FIXME also an object ID for RPC
+    // FIXME and a human-readable name for debugging
+} IObject;
+
+typedef struct {
+    const struct SL3DCommitItf_ *mItf;
+    IObject *mThis;
     SLboolean mDeferred;
     SLuint32 mGeneration;   // incremented each master clock cycle
-};
+} I3DCommit;
 
 // FIXME move
 enum CartesianSphericalActive {
@@ -162,9 +181,9 @@ enum CartesianSphericalActive {
     CARTESIAN_SET_SPHERICAL_UNKNOWN
 };
 
-struct _3DDoppler_interface {
+typedef struct {
     const struct SL3DDopplerItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     // The API allows client to specify either Cartesian and spherical velocities.
     // But an implementation will likely prefer one or the other. So for
     // maximum portablity, we maintain both units and an indication of which
@@ -184,13 +203,13 @@ struct _3DDoppler_interface {
     } mVelocitySpherical;
     enum CartesianSphericalActive mVelocityActive;
     SLpermille mDopplerFactor;
-};
+} I3DDoppler;
 
-struct _3DGrouping_interface {
+typedef struct {
     const struct SL3DGroupingItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLObjectItf mGroup;
-};
+} I3DGrouping;
 
 // FIXME move
 enum AnglesVectorsActive {
@@ -202,9 +221,9 @@ enum AnglesVectorsActive {
     ANGLES_SET_VECTORS_UNKNOWN
 };
 
-struct _3DLocation_interface {
+typedef struct {
     const struct SL3DLocationItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLVec3D mLocationCartesian;
     struct {
         SLmillidegree mAzimuth;
@@ -227,11 +246,11 @@ struct _3DLocation_interface {
     SLmillidegree mTheta;
     SLVec3D mAxis;
     SLboolean mRotatePending;
-};
+} I3DLocation;
 
-struct _3DMacroscopic_interface {
+typedef struct {
     const struct SL3DMacroscopicItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     struct {
         SLmillimeter mWidth;
         SLmillimeter mHeight;
@@ -253,11 +272,11 @@ struct _3DMacroscopic_interface {
     SLmillidegree mTheta;
     SLVec3D mAxis;
     SLboolean mRotatePending;
-};
+} I3DMacroscopic;
 
-struct _3DSource_interface {
+typedef struct {
     const struct SL3DSourceItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLboolean mHeadRelative;
     SLboolean mRolloffMaxDistanceMute;
     SLmillimeter mMaxDistance;
@@ -268,45 +287,45 @@ struct _3DSource_interface {
     SLpermille mRolloffFactor;
     SLpermille mRoomRolloffFactor;
     SLuint8 mDistanceModel;
-};
+} I3DSource;
 
-struct AudioDecoderCapabilities_interface {
+typedef struct {
     const struct SLAudioDecoderCapabilitiesItf_ *mItf;
-    struct Object_interface *mThis;
-};
+    IObject *mThis;
+} IAudioDecoderCapabilities;
 
-struct AudioEncoder_interface {
+typedef struct {
     const struct SLAudioEncoderItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLAudioEncoderSettings mSettings;
-};
+} IAudioEncoder;
 
-struct AudioEncoderCapabilities_interface {
+typedef struct {
     const struct SLAudioEncoderCapabilitiesItf_ *mItf;
-    struct Object_interface *mThis;
-};
+    IObject *mThis;
+} IAudioEncoderCapabilities;
 
-struct AudioIODeviceCapabilities_interface {
+typedef struct {
     const struct SLAudioIODeviceCapabilitiesItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     slAvailableAudioInputsChangedCallback mAvailableAudioInputsChangedCallback;
     void *mAvailableAudioInputsChangedContext;
     slAvailableAudioOutputsChangedCallback mAvailableAudioOutputsChangedCallback;
     void *mAvailableAudioOutputsChangedContext;
     slDefaultDeviceIDMapChangedCallback mDefaultDeviceIDMapChangedCallback;
     void *mDefaultDeviceIDMapChangedContext;
-};
+} IAudioIODeviceCapabilities;
 
-struct BassBoost_interface {
+typedef struct {
     const struct SLBassBoostItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLboolean mEnabled;
     SLpermille mStrength;
-};
+} IBassBoost;
 
-struct BufferQueue_interface {
+typedef struct BufferQueue_interface {
     const struct SLBufferQueueItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     volatile SLBufferQueueState mState;
     slBufferQueueCallback mCallback;
     void *mContext;
@@ -316,27 +335,27 @@ struct BufferQueue_interface {
     // saves a malloc in the typical case
 #define BUFFER_HEADER_TYPICAL 4
     struct BufferHeader mTypical[BUFFER_HEADER_TYPICAL+1];
-};
+} IBufferQueue;
 
-struct DeviceVolume_interface {
+typedef struct {
     const struct SLDeviceVolumeItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLint32 mVolume[2]; // FIXME Hard-coded for default in/out
-};
+} IDeviceVolume;
 
-struct DynamicInterfaceManagement_interface {
+typedef struct {
     const struct SLDynamicInterfaceManagementItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     unsigned mAddedMask;    // added interfaces, a subset of exposed interfaces
     slDynamicInterfaceManagementCallback mCallback;
     void *mContext;
-};
+} IDynamicInterfaceManagement;
 
-struct DynamicSource_interface {
+typedef struct {
     const struct SLDynamicSourceItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLDataSource *mDataSource;
-};
+} IDynamicSource;
 
 // FIXME Move this elsewhere
 
@@ -358,35 +377,40 @@ struct EnableLevel {
     SLmillibel mSendLevel;
 };
 
-struct EffectSend_interface {
+typedef struct {
     const struct SLEffectSendItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     struct OutputMix_class *mOutputMix;
     SLmillibel mDirectLevel;
     struct EnableLevel mEnableLevels[AUX_MAX];
-};
+} IEffectSend;
 
-struct Engine_interface {
+// private
+
+typedef struct {
     const struct SLEngineItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLboolean mLossOfControlGlobal;
     // FIXME Per-class non-const data such as vector of created objects.
     // Each engine is its own universe.
-    // SLuint32 mInstanceCount;
+    SLuint32 mInstanceCount;
     // Vector<Type> instances;
-};
+    // FIXME set of objects
+#define INSTANCE_MAX 32 // FIXME no magic numbers
+    IObject *mInstances[INSTANCE_MAX];
+} IEngine;
 
-struct EngineCapabilities_interface {
+typedef struct {
     const struct SLEngineCapabilitiesItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLboolean mThreadSafe;
-};
+} IEngineCapabilities;
 
-struct EnvironmentalReverb_interface {
+typedef struct {
     const struct SLEnvironmentalReverbItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLEnvironmentalReverbSettings mProperties;
-};
+} IEnvironmentalReverb;
 
 // FIXME move
 struct EqualizerBand {
@@ -396,9 +420,9 @@ struct EqualizerBand {
     /*TBD*/ int mLevel;
 };
 
-struct Equalizer_interface {
+typedef struct {
     const struct SLEqualizerItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLboolean mEnabled;
     SLmillibel *mLevels;
     SLuint16 mPreset;
@@ -411,20 +435,20 @@ struct Equalizer_interface {
     const SLchar * const *mPresetNames;
     /*TBD*/ int mBandLevelRangeMin;
     /*TBD*/ int mBandLevelRangeMax;
-};
+} IEqualizer;
 
-struct LEDArray_interface {
+typedef struct {
     const struct SLLEDArrayItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLuint32 mLightMask;
     SLHSL *mColor;
     // const
     SLuint8 mCount;
-};
+} ILEDArray;
 
-struct MetadataExtraction_interface {
+typedef struct {
     const struct SLMetadataExtractionItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLuint32 mKeySize;
     const void *mKey;
     SLuint32 mKeyEncoding;
@@ -432,112 +456,93 @@ struct MetadataExtraction_interface {
     SLuint32 mValueEncoding;
     SLuint8 mFilterMask;
     /*FIXME*/ int mKeyFilter;
-};
+} IMetadataExtraction;
 
-struct MetadataTraversal_interface {
+typedef struct {
     const struct SLMetadataTraversalItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLuint32 mIndex;
     SLuint32 mMode;
     SLuint32 mCount;
     SLuint32 mSize;
-};
+} IMetadataTraversal;
 
-struct MIDIMessage_interface {
+typedef struct {
     const struct SLMIDIMessageItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     slMetaEventCallback mMetaEventCallback;
     void *mMetaEventContext;
     slMIDIMessageCallback mMessageCallback;
     void *mMessageContext;
     int /*TBD*/ mMessageTypes;
-};
+} IMIDIMessage;
 
-struct MIDIMuteSolo_interface {
+typedef struct {
     const struct SLMIDIMuteSoloItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLuint16 mChannelMuteMask;
     SLuint16 mChannelSoloMask;
     SLuint32 mTrackMuteMask;
     SLuint32 mTrackSoloMask;
     // const ?
     SLuint16 mTrackCount;
-};
+} IMIDIMuteSolo;
 
-struct MIDITempo_interface {
+typedef struct {
     const struct SLMIDITempoItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLuint32 mTicksPerQuarterNote;
     SLuint32 mMicrosecondsPerQuarterNote;
-};
+} IMIDITempo;
 
-struct MIDITime_interface {
+typedef struct {
     const struct SLMIDITimeItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLuint32 mDuration;
     SLuint32 mPosition;
     SLuint32 mStartTick;
     SLuint32 mNumTicks;
-};
+} IMIDITime;
 
-struct MuteSolo_interface {
+typedef struct {
     const struct SLMuteSoloItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLuint32 mMuteMask;
     SLuint32 mSoloMask;
     // const
     SLuint8 mNumChannels;
-};
+} IMuteSolo;
 
-struct Object_interface {
-    const struct SLObjectItf_ *mItf;
-    // FIXME probably not needed for an Object, as it is always first,
-    // but look for lingering code that assumes it is here before deleting
-    struct Object_interface *mThis;
-    const struct class_ *mClass;
-    volatile SLuint32 mState;
-    slObjectCallback mCallback;
-    void *mContext;
-    unsigned mExposedMask;  // exposed interfaces
-    unsigned mLossOfControlMask;    // interfaces with loss of control enabled
-    SLint32 mPriority;
-    SLboolean mPreemptable;
-    pthread_mutex_t mMutex;
-    pthread_cond_t mCond;
-    // FIXME also an object ID for RPC
-    // FIXME and a human-readable name for debugging
-};
-
-struct OutputMix_interface {
+typedef struct {
     const struct SLOutputMixItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     slMixDeviceChangeCallback mCallback;
     void *mContext;
 #ifdef USE_OUTPUTMIXEXT
     unsigned mActiveMask;   // 1 bit per active track
     struct Track mTracks[32];
 #endif
-};
+} IOutputMix;
 
 #ifdef USE_OUTPUTMIXEXT
-struct OutputMixExt_interface {
+typedef struct {
     const struct SLOutputMixExtItf_ *mItf;
-    struct Object_interface *mThis;
-};
+    IObject *mThis;
+} IOutputMixExt;
 #endif
 
-struct Pitch_interface {
+typedef struct {
     const struct SLPitchItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLpermille mPitch;
     // const
     SLpermille mMinPitch;
     SLpermille mMaxPitch;
-};
+} IPitch;
 
-struct Play_interface {
+typedef struct Play_interface {
     const struct SLPlayItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     volatile SLuint32 mState;
     SLmillisecond mDuration;
     SLmillisecond mPosition;
@@ -547,11 +552,11 @@ struct Play_interface {
     SLuint32 mEventFlags;
     SLmillisecond mMarkerPosition;
     SLmillisecond mPositionUpdatePeriod;
-};
+} IPlay;
 
-struct PlaybackRate_interface {
+typedef struct {
     const struct SLPlaybackRateItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLpermille mRate;
     SLuint32 mPropertyConstraints;
     SLuint32 mProperties;
@@ -559,36 +564,36 @@ struct PlaybackRate_interface {
     SLpermille mMaxRate;
     SLpermille mStepSize;
     SLuint32 mCapabilities;
-};
+} IPlaybackRate;
 
-struct PrefetchStatus_interface {
+typedef struct {
     const struct SLPrefetchStatusItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLuint32 mStatus;
     SLpermille mLevel;
     slPrefetchCallback mCallback;
     void *mContext;
     SLuint32 mCallbackEventsMask;
     SLpermille mFillUpdatePeriod;
-};
+} IPrefetchStatus;
 
-struct PresetReverb_interface {
+typedef struct {
     const struct SLPresetReverbItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLuint16 mPreset;
-};
+} IPresetReverb;
 
-struct RatePitch_interface {
+typedef struct {
     const struct SLRatePitchItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLpermille mRate;
     SLpermille mMinRate;
     SLpermille mMaxRate;
-};
+} IRatePitch;
 
-struct Record_interface {
+typedef struct {
     const struct SLRecordItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLuint32 mState;
     SLmillisecond mDurationLimit;
     SLmillisecond mPosition;
@@ -597,68 +602,68 @@ struct Record_interface {
     SLuint32 mCallbackEventsMask;
     SLmillisecond mMarkerPosition;
     SLmillisecond mPositionUpdatePeriod;
-};
+} IRecord;
 
-struct Seek_interface {
+typedef struct {
     const struct SLSeekItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLmillisecond mPos;
     SLboolean mLoopEnabled;
     SLmillisecond mStartPos;
     SLmillisecond mEndPos;
-};
+} ISeek;
 
-struct ThreadSync_interface {
+typedef struct {
     const struct SLThreadSyncItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLboolean mInCriticalSection;
     SLboolean mWaiting;
     pthread_t mOwner;
-};
+} IThreadSync;
 
-struct Vibra_interface {
+typedef struct {
     const struct SLVibraItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLboolean mVibrate;
     SLmilliHertz mFrequency;
     SLpermille mIntensity;
-};
+} IVibra;
 
-struct Virtualizer_interface {
+typedef struct {
     const struct SLVirtualizerItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLboolean mEnabled;
     SLpermille mStrength;
-};
+} IVirtualizer;
 
-struct Visualization_interface {
+typedef struct {
     const struct SLVisualizationItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     slVisualizationCallback mCallback;
     void *mContext;
     SLmilliHertz mRate;
-};
+} IVisualization;
 
-struct Volume_interface {
+typedef struct {
     const struct SLVolumeItf_ *mItf;
-    struct Object_interface *mThis;
+    IObject *mThis;
     SLmillibel mLevel;
     SLboolean mMute;
     SLboolean mEnableStereoPosition;
     SLpermille mStereoPosition;
-};
+} IVolume;
 
 /* Class structures */
 
-struct _3DGroup_class {
-    struct Object_interface mObject;
-    struct DynamicInterfaceManagement_interface mDynamicInterfaceManagement;
-    struct _3DLocation_interface m3DLocation;
-    struct _3DDoppler_interface m3DDoppler;
-    struct _3DSource_interface m3DSource;
-    struct _3DMacroscopic_interface m3DMacroscopic;
-    // FIXME bag of objects
-};
+typedef struct {
+    IObject mObject;
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    I3DLocation m3DLocation;
+    I3DDoppler m3DDoppler;
+    I3DSource m3DSource;
+    I3DMacroscopic m3DMacroscopic;
+    // FIXME set of objects
+} C3DGroup;
 
 #ifdef USE_ANDROID
 /*
@@ -674,34 +679,34 @@ enum AndroidObject_type {
 };
 #endif
 
-struct AudioPlayer_class {
-    struct Object_interface mObject;
-    struct DynamicInterfaceManagement_interface mDynamicInterfaceManagement;
-    struct Play_interface mPlay;
-    struct _3DDoppler_interface m3DDoppler;
-    struct _3DGrouping_interface m3DGrouping;
-    struct _3DLocation_interface m3DLocation;
-    struct _3DSource_interface m3DSource;
-    struct BufferQueue_interface mBufferQueue;
-    struct EffectSend_interface mEffectSend;
-    struct MuteSolo_interface mMuteSolo;
-    struct MetadataExtraction_interface mMetadataExtraction;
-    struct MetadataTraversal_interface mMetadataTraversal;
-    struct PrefetchStatus_interface mPrefetchStatus;
-    struct RatePitch_interface mRatePitch;
-    struct Seek_interface mSeek;
-    struct Volume_interface mVolume;
+typedef struct {
+    IObject mObject;
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IPlay mPlay;
+    I3DDoppler m3DDoppler;
+    I3DGrouping m3DGrouping;
+    I3DLocation m3DLocation;
+    I3DSource m3DSource;
+    IBufferQueue mBufferQueue;
+    IEffectSend mEffectSend;
+    IMuteSolo mMuteSolo;
+    IMetadataExtraction mMetadataExtraction;
+    IMetadataTraversal mMetadataTraversal;
+    IPrefetchStatus mPrefetchStatus;
+    IRatePitch mRatePitch;
+    ISeek mSeek;
+    IVolume mVolume;
     // optional interfaces
-    struct _3DMacroscopic_interface m3DMacroscopic;
-    struct BassBoost_interface mBassBoost;
-    struct DynamicSource_interface mDynamicSource;
-    struct EnvironmentalReverb_interface mEnvironmentalReverb;
-    struct Equalizer_interface mEqualizer;
-    struct Pitch_interface mPitch;
-    struct PresetReverb_interface mPresetReverb;
-    struct PlaybackRate_interface mPlaybackRate;
-    struct Virtualizer_interface mVirtualizer;
-    struct Visualization_interface mVisualization;
+    I3DMacroscopic m3DMacroscopic;
+    IBassBoost mBassBoost;
+    IDynamicSource mDynamicSource;
+    IEnvironmentalReverb mEnvironmentalReverb;
+    IEqualizer mEqualizer;
+    IPitch mPitch;
+    IPresetReverb mPresetReverb;
+    IPlaybackRate mPlaybackRate;
+    IVirtualizer mVirtualizer;
+    IVisualization mVisualization;
     // rest of fields are not related to the interfaces
 #ifdef USE_SNDFILE
     struct SndFile mSndFile;
@@ -714,120 +719,121 @@ struct AudioPlayer_class {
     };
     pthread_t mThread;
 #endif
-};
+} CAudioPlayer;
 
-struct AudioRecorder_class {
+typedef struct {
     // mandated interfaces
-    struct Object_interface mObject;
-    struct DynamicInterfaceManagement_interface mDynamicInterfaceManagement;
-    struct Record_interface mRecord;
-    struct AudioEncoder_interface mAudioEncoder;
+    IObject mObject;
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IRecord mRecord;
+    IAudioEncoder mAudioEncoder;
     // optional interfaces
-    struct BassBoost_interface mBassBoost;
-    struct DynamicSource_interface mDynamicSource;
-    struct Equalizer_interface mEqualizer;
-    struct Visualization_interface mVisualization;
-    struct Volume_interface mVolume;
-};
+    IBassBoost mBassBoost;
+    IDynamicSource mDynamicSource;
+    IEqualizer mEqualizer;
+    IVisualization mVisualization;
+    IVolume mVolume;
+} CAudioRecorder;
 
-struct Engine_class {
+typedef struct {
     // mandated implicit interfaces
-    struct Object_interface mObject;
-    struct DynamicInterfaceManagement_interface mDynamicInterfaceManagement;
-    struct Engine_interface mEngine;
-    struct EngineCapabilities_interface mEngineCapabilities;
-    struct ThreadSync_interface mThreadSync;
+    IObject mObject;
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IEngine mEngine;
+    IEngineCapabilities mEngineCapabilities;
+    IThreadSync mThreadSync;
     // mandated explicit interfaces
-    struct AudioIODeviceCapabilities_interface mAudioIODeviceCapabilities;
-    struct AudioDecoderCapabilities_interface mAudioDecoderCapabilities;
-    struct AudioEncoderCapabilities_interface mAudioEncoderCapabilities;
-    struct _3DCommit_interface m3DCommit;
+    IAudioIODeviceCapabilities mAudioIODeviceCapabilities;
+    IAudioDecoderCapabilities mAudioDecoderCapabilities;
+    IAudioEncoderCapabilities mAudioEncoderCapabilities;
+    I3DCommit m3DCommit;
     // optional interfaces
-    struct DeviceVolume_interface mDeviceVolume;
-};
+    IDeviceVolume mDeviceVolume;
+    pthread_t mFrameThread;
+} CEngine;
 
-struct LEDDevice_class {
+typedef struct {
     // mandated interfaces
-    struct Object_interface mObject;
-    struct DynamicInterfaceManagement_interface mDynamicInterfaceManagement;
-    struct LEDArray_interface mLEDArray;
+    IObject mObject;
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    ILEDArray mLEDArray;
     SLuint32 mDeviceID;
-};
+} CLEDDevice;
 
-struct Listener_class {
+typedef struct {
     // mandated interfaces
-    struct Object_interface mObject;
-    struct DynamicInterfaceManagement_interface mDynamicInterfaceManagement;
-    struct _3DDoppler_interface m3DDoppler;
-    struct _3DLocation_interface m3DLocation;
-};
+    IObject mObject;
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    I3DDoppler m3DDoppler;
+    I3DLocation m3DLocation;
+} CListener;
 
-struct MetadataExtractor_class {
+typedef struct {
     // mandated interfaces
-    struct Object_interface mObject;
-    struct DynamicInterfaceManagement_interface mDynamicInterfaceManagement;
-    struct DynamicSource_interface mDynamicSource;
-    struct MetadataExtraction_interface mMetadataExtraction;
-    struct MetadataTraversal_interface mMetadataTraversal;
-};
+    IObject mObject;
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IDynamicSource mDynamicSource;
+    IMetadataExtraction mMetadataExtraction;
+    IMetadataTraversal mMetadataTraversal;
+} CMetadataExtractor;
 
-struct MidiPlayer_class {
+typedef struct {
     // mandated interfaces
-    struct Object_interface mObject;
-    struct DynamicInterfaceManagement_interface mDynamicInterfaceManagement;
-    struct Play_interface mPlay;
-    struct _3DDoppler_interface m3DDoppler;
-    struct _3DGrouping_interface m3DGrouping;
-    struct _3DLocation_interface m3DLocation;
-    struct _3DSource_interface m3DSource;
-    struct BufferQueue_interface mBufferQueue;
-    struct EffectSend_interface mEffectSend;
-    struct MuteSolo_interface mMuteSolo;
-    struct MetadataExtraction_interface mMetadataExtraction;
-    struct MetadataTraversal_interface mMetadataTraversal;
-    struct MIDIMessage_interface mMIDIMessage;
-    struct MIDITime_interface mMIDITime;
-    struct MIDITempo_interface mMIDITempo;
-    struct MIDIMuteSolo_interface mMIDIMuteSolo;
-    struct PrefetchStatus_interface mPrefetchStatus;
-    struct Seek_interface mSeek;
-    struct Volume_interface mVolume;
+    IObject mObject;
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IPlay mPlay;
+    I3DDoppler m3DDoppler;
+    I3DGrouping m3DGrouping;
+    I3DLocation m3DLocation;
+    I3DSource m3DSource;
+    IBufferQueue mBufferQueue;
+    IEffectSend mEffectSend;
+    IMuteSolo mMuteSolo;
+    IMetadataExtraction mMetadataExtraction;
+    IMetadataTraversal mMetadataTraversal;
+    IMIDIMessage mMIDIMessage;
+    IMIDITime mMIDITime;
+    IMIDITempo mMIDITempo;
+    IMIDIMuteSolo mMIDIMuteSolo;
+    IPrefetchStatus mPrefetchStatus;
+    ISeek mSeek;
+    IVolume mVolume;
     // optional interfaces
-    struct _3DMacroscopic_interface m3DMacroscopic;
-    struct BassBoost_interface mBassBoost;
-    struct DynamicSource_interface mDynamicSource;
-    struct EnvironmentalReverb_interface mEnvironmentalReverb;
-    struct Equalizer_interface mEqualizer;
-    struct Pitch_interface mPitch;
-    struct PresetReverb_interface mPresetReverb;
-    struct PlaybackRate_interface mPlaybackRate;
-    struct Virtualizer_interface mVirtualizer;
-    struct Visualization_interface mVisualization;
-};
+    I3DMacroscopic m3DMacroscopic;
+    IBassBoost mBassBoost;
+    IDynamicSource mDynamicSource;
+    IEnvironmentalReverb mEnvironmentalReverb;
+    IEqualizer mEqualizer;
+    IPitch mPitch;
+    IPresetReverb mPresetReverb;
+    IPlaybackRate mPlaybackRate;
+    IVirtualizer mVirtualizer;
+    IVisualization mVisualization;
+} CMidiPlayer;
 
-struct OutputMix_class {
+typedef struct OutputMix_class {
     // mandated interfaces
-    struct Object_interface mObject;
-    struct DynamicInterfaceManagement_interface mDynamicInterfaceManagement;
-    struct OutputMix_interface mOutputMix;
+    IObject mObject;
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IOutputMix mOutputMix;
 #ifdef USE_OUTPUTMIXEXT
-    struct OutputMixExt_interface mOutputMixExt;
+    IOutputMixExt mOutputMixExt;
 #endif
-    struct EnvironmentalReverb_interface mEnvironmentalReverb;
-    struct Equalizer_interface mEqualizer;
-    struct PresetReverb_interface mPresetReverb;
-    struct Virtualizer_interface mVirtualizer;
-    struct Volume_interface mVolume;
+    IEnvironmentalReverb mEnvironmentalReverb;
+    IEqualizer mEqualizer;
+    IPresetReverb mPresetReverb;
+    IVirtualizer mVirtualizer;
+    IVolume mVolume;
     // optional interfaces
-    struct BassBoost_interface mBassBoost;
-    struct Visualization_interface mVisualization;
-};
+    IBassBoost mBassBoost;
+    IVisualization mVisualization;
+} COutputMix;
 
-struct VibraDevice_class {
+typedef struct {
     // mandated interfaces
-    struct Object_interface mObject;
-    struct DynamicInterfaceManagement_interface mDynamicInterfaceManagement;
-    struct Vibra_interface mVibra;
+    IObject mObject;
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IVibra mVibra;
     //
     SLuint32 mDeviceID;
-};
+} CVibraDevice;

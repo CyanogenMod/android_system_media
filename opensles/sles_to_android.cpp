@@ -76,7 +76,7 @@ int android_getMinFrameCount(uint32_t sampleRate) {
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_checkAudioPlayerSourceSink(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk)
+SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk)
 {
     //--------------------------------------
     // Sink check:
@@ -211,9 +211,9 @@ static void android_pushAudioTrackCallback(int event, void* user, void *info) {
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_createAudioPlayer(SLDataSource *pAudioSrc,
-        SLDataSink *pAudioSnk,
-        AudioPlayer_class *pAudioPlayer) {
+SLresult sles_to_android_createAudioPlayer(const SLDataSource *pAudioSrc,
+        const SLDataSink *pAudioSnk,
+        CAudioPlayer *pAudioPlayer) {
 
     SLresult result = SL_RESULT_SUCCESS;
 
@@ -247,7 +247,7 @@ SLresult sles_to_android_createAudioPlayer(SLDataSource *pAudioSrc,
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_realizeAudioPlayer(AudioPlayer_class *pAudioPlayer) {
+SLresult sles_to_android_realizeAudioPlayer(CAudioPlayer *pAudioPlayer) {
 
     SLresult result = SL_RESULT_SUCCESS;
 
@@ -293,8 +293,8 @@ SLresult sles_to_android_realizeAudioPlayer(AudioPlayer_class *pAudioPlayer) {
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_audioPlayerSetPlayState(struct Play_interface *pPlayItf, SLuint32 state) {
-    struct AudioPlayer_class *ap = (struct AudioPlayer_class *)pPlayItf->mThis;
+SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state) {
+    CAudioPlayer *ap = (CAudioPlayer *)pPlayItf->mThis;
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
         switch (state) {

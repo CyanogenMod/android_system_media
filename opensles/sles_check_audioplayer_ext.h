@@ -15,6 +15,6 @@
  */
 
 
-extern SLresult sles_checkAudioPlayerSourceSink(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk);
+extern SLresult sles_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk);
 
 

@@ -15,12 +15,12 @@
  */
 
 
-extern SLresult sles_to_android_checkAudioPlayerSourceSink(SLDataSource *pAudioSrc,
-        SLDataSink *pAudioSnk);
+extern SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc,
+        const SLDataSink *pAudioSnk);
 
-extern SLresult sles_to_android_createAudioPlayer(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk,
-        AudioPlayer_class *pAudioPlayer);
+extern SLresult sles_to_android_createAudioPlayer(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk,
+        CAudioPlayer *pAudioPlayer);
 
-extern SLresult sles_to_android_realizeAudioPlayer(AudioPlayer_class *pAudioPlayer);
+extern SLresult sles_to_android_realizeAudioPlayer(CAudioPlayer *pAudioPlayer);
 
-extern SLresult sles_to_android_audioPlayerSetPlayState(struct Play_interface *pPlayItf, SLuint32 state);
+extern SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state);

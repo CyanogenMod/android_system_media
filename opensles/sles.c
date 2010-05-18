@@ -141,28 +141,28 @@ static const struct Vibra_id_descriptor {
 
 /* Private functions */
 
-static void object_lock_exclusive(struct Object_interface *this)
+static void object_lock_exclusive(IObject *this)
 {
     int ok;
     ok = pthread_mutex_lock(&this->mMutex);
     assert(0 == ok);
 }
 
-static void object_unlock_exclusive(struct Object_interface *this)
+static void object_unlock_exclusive(IObject *this)
 {
     int ok;
     ok = pthread_mutex_unlock(&this->mMutex);
     assert(0 == ok);
 }
 
-static void object_cond_wait(struct Object_interface *this)
+static void object_cond_wait(IObject *this)
 {
     int ok;
     ok = pthread_cond_wait(&this->mCond, &this->mMutex);
     assert(0 == ok);
 }
 
-static void object_cond_signal(struct Object_interface *this)
+static void object_cond_signal(IObject *this)
 {
     int ok;
     ok = pthread_cond_signal(&this->mCond);
@@ -209,7 +209,7 @@ static int IID_to_MPH(const SLInterfaceID iid)
 
 // Check the interface IDs passed into a Create operation
 
-static SLresult checkInterfaces(const struct class_ *class__,
+static SLresult checkInterfaces(const ClassTable *class__,
     SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
     const SLboolean *pInterfaceRequired, unsigned *pExposedMask)
 {
@@ -260,7 +260,7 @@ extern const struct SL3DCommitItf_ _3DCommit_3DCommitItf;
 
 static void _3DCommit_init(void *self)
 {
-    struct _3DCommit_interface *this = (struct _3DCommit_interface *) self;
+    I3DCommit *this = (I3DCommit *) self;
     this->mItf = &_3DCommit_3DCommitItf;
 #ifndef NDEBUG
     this->mDeferred = SL_BOOLEAN_FALSE;
@@ -272,7 +272,7 @@ extern const struct SL3DDopplerItf_ _3DDoppler_3DDopplerItf;
 
 static void _3DDoppler_init(void *self)
 {
-    struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
+    I3DDoppler *this = (I3DDoppler *) self;
     this->mItf = &_3DDoppler_3DDopplerItf;
 #ifndef NDEBUG
     this->mVelocityCartesian.x = 0;
@@ -288,7 +288,7 @@ extern const struct SL3DGroupingItf_ _3DGrouping_3DGroupingItf;
 
 static void _3DGrouping_init(void *self)
 {
-    struct _3DGrouping_interface *this = (struct _3DGrouping_interface *) self;
+    I3DGrouping *this = (I3DGrouping *) self;
     this->mItf = &_3DGrouping_3DGroupingItf;
 #ifndef NDEBUG
     this->mGroup = NULL;
@@ -300,7 +300,7 @@ extern const struct SL3DLocationItf_ _3DLocation_3DLocationItf;
 
 static void _3DLocation_init(void *self)
 {
-    struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
+    I3DLocation *this = (I3DLocation *) self;
     this->mItf = &_3DLocation_3DLocationItf;
 #ifndef NDEBUG
     this->mLocationCartesian.x = 0;
@@ -333,7 +333,7 @@ extern const struct SL3DMacroscopicItf_ _3DMacroscopic_3DMacroscopicItf;
 
 static void _3DMacroscopic_init(void *self)
 {
-    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    I3DMacroscopic *this = (I3DMacroscopic *) self;
     this->mItf = &_3DMacroscopic_3DMacroscopicItf;
 #ifndef NDEBUG
     this->mSize.mWidth = 0;
@@ -362,7 +362,7 @@ extern const struct SL3DSourceItf_ _3DSource_3DSourceItf;
 
 static void _3DSource_init(void *self)
 {
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     this->mItf = &_3DSource_3DSourceItf;
 #ifndef NDEBUG
     this->mHeadRelative = SL_BOOLEAN_FALSE;
@@ -383,8 +383,8 @@ extern const struct SLAudioDecoderCapabilitiesItf_
 
 static void AudioDecoderCapabilities_init(void *self)
 {
-    struct AudioDecoderCapabilities_interface *this =
-        (struct AudioDecoderCapabilities_interface *) self;
+    IAudioDecoderCapabilities *this =
+        (IAudioDecoderCapabilities *) self;
     this->mItf = &AudioDecoderCapabilities_AudioDecoderCapabilitiesItf;
 }
 
@@ -392,7 +392,7 @@ extern const struct SLAudioEncoderItf_ AudioEncoder_AudioEncoderItf;
 
 static void AudioEncoder_init(void *self)
 {
-    struct AudioEncoder_interface *this = (struct AudioEncoder_interface *) self;
+    IAudioEncoder *this = (IAudioEncoder *) self;
     this->mItf = &AudioEncoder_AudioEncoderItf;
 #ifndef NDEBUG
     memset(&this->mSettings, 0, sizeof(SLAudioEncoderSettings));
@@ -404,8 +404,8 @@ extern const struct SLAudioEncoderCapabilitiesItf_
 
 static void AudioEncoderCapabilities_init(void *self)
 {
-    struct AudioEncoderCapabilities_interface *this =
-        (struct AudioEncoderCapabilities_interface *) self;
+    IAudioEncoderCapabilities *this =
+        (IAudioEncoderCapabilities *) self;
     this->mItf = &AudioEncoderCapabilities_AudioEncoderCapabilitiesItf;
 }
 
@@ -414,8 +414,8 @@ extern const struct SLAudioIODeviceCapabilitiesItf_
 
 static void AudioIODeviceCapabilities_init(void *self)
 {
-    struct AudioIODeviceCapabilities_interface *this =
-        (struct AudioIODeviceCapabilities_interface *) self;
+    IAudioIODeviceCapabilities *this =
+        (IAudioIODeviceCapabilities *) self;
     this->mItf = &AudioIODeviceCapabilities_AudioIODeviceCapabilitiesItf;
 #ifndef NDEBUG
     this->mAvailableAudioInputsChangedCallback = NULL;
@@ -431,7 +431,7 @@ extern const struct SLBassBoostItf_ BassBoost_BassBoostItf;
 
 static void BassBoost_init(void *self)
 {
-    struct BassBoost_interface *this = (struct BassBoost_interface *) self;
+    IBassBoost *this = (IBassBoost *) self;
     this->mItf = &BassBoost_BassBoostItf;
 #ifndef NDEBUG
     this->mEnabled = SL_BOOLEAN_FALSE;
@@ -443,7 +443,7 @@ extern const struct SLBufferQueueItf_ BufferQueue_BufferQueueItf;
 
 static void BufferQueue_init(void *self)
 {
-    struct BufferQueue_interface *this = (struct BufferQueue_interface *) self;
+    IBufferQueue *this = (IBufferQueue *) self;
     this->mItf = &BufferQueue_BufferQueueItf;
 #ifndef NDEBUG
     this->mState.count = 0;
@@ -467,8 +467,8 @@ extern const struct SLDeviceVolumeItf_ DeviceVolume_DeviceVolumeItf;
 
 static void DeviceVolume_init(void *self)
 {
-    struct DeviceVolume_interface *this =
-        (struct DeviceVolume_interface *) self;
+    IDeviceVolume *this =
+        (IDeviceVolume *) self;
     this->mItf = &DeviceVolume_DeviceVolumeItf;
     this->mVolume[0] = 10;
     this->mVolume[1] = 10;
@@ -479,8 +479,8 @@ extern const struct SLDynamicInterfaceManagementItf_
 
 static void DynamicInterfaceManagement_init(void *self)
 {
-    struct DynamicInterfaceManagement_interface *this =
-        (struct DynamicInterfaceManagement_interface *) self;
+    IDynamicInterfaceManagement *this =
+        (IDynamicInterfaceManagement *) self;
     this->mItf =
         &DynamicInterfaceManagement_DynamicInterfaceManagementItf;
 #ifndef NDEBUG
@@ -494,7 +494,7 @@ extern const struct SLDynamicSourceItf_ DynamicSource_DynamicSourceItf;
 
 static void DynamicSource_init(void *self)
 {
-    struct DynamicSource_interface *this = (struct DynamicSource_interface *) self;
+    IDynamicSource *this = (IDynamicSource *) self;
     this->mItf = &DynamicSource_DynamicSourceItf;
     // mDataSource will be initialized later in CreateAudioPlayer etc.
 }
@@ -503,7 +503,7 @@ extern const struct SLEffectSendItf_ EffectSend_EffectSendItf;
 
 static void EffectSend_init(void *self)
 {
-    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    IEffectSend *this = (IEffectSend *) self;
     this->mItf = &EffectSend_EffectSendItf;
 #ifndef NDEBUG
     this->mOutputMix = NULL; // FIXME wrong
@@ -519,9 +519,15 @@ extern const struct SLEngineItf_ Engine_EngineItf;
 
 static void Engine_init(void *self)
 {
-    struct Engine_interface *this = (struct Engine_interface *) self;
+    IEngine *this = (IEngine *) self;
     this->mItf = &Engine_EngineItf;
     // mLossOfControlGlobal is initialized in CreateEngine
+#ifndef NDEBUG
+    this->mInstanceCount = 0;
+    unsigned i;
+    for (i = 0; i < INSTANCE_MAX; ++i)
+        this->mInstances[i] = NULL;
+#endif
 }
 
 extern const struct SLEngineCapabilitiesItf_
@@ -529,8 +535,8 @@ extern const struct SLEngineCapabilitiesItf_
 
 static void EngineCapabilities_init(void *self)
 {
-    struct EngineCapabilities_interface *this =
-        (struct EngineCapabilities_interface *) self;
+    IEngineCapabilities *this =
+        (IEngineCapabilities *) self;
     this->mItf = &EngineCapabilities_EngineCapabilitiesItf;
 }
 
@@ -552,7 +558,7 @@ extern const struct SLEnvironmentalReverbItf_ EnvironmentalReverb_EnvironmentalR
 
 static void EnvironmentalReverb_init(void *self)
 {
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     this->mItf = &EnvironmentalReverb_EnvironmentalReverbItf;
     this->mProperties = EnvironmentalReverb_default;
 }
@@ -561,7 +567,7 @@ extern const struct SLEqualizerItf_ Equalizer_EqualizerItf;
 
 static void Equalizer_init(void *self)
 {
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     this->mItf = &Equalizer_EqualizerItf;
     this->mEnabled = SL_BOOLEAN_FALSE;
     this->mNumBands = 4;
@@ -582,7 +588,7 @@ extern const struct SLLEDArrayItf_ LEDArray_LEDArrayItf;
 
 static void LEDArray_init(void *self)
 {
-    struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    ILEDArray *this = (ILEDArray *) self;
     this->mItf = &LEDArray_LEDArrayItf;
 #ifndef NDEBUG
     this->mLightMask = 0;
@@ -595,7 +601,7 @@ extern const struct SLMetadataExtractionItf_ MetadataExtraction_MetadataExtracti
 
 static void MetadataExtraction_init(void *self)
 {
-    struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    IMetadataExtraction *this = (IMetadataExtraction *) self;
     this->mItf = &MetadataExtraction_MetadataExtractionItf;
     this->mKeySize = 0;
     this->mKey = NULL;
@@ -609,7 +615,7 @@ extern const struct SLMetadataTraversalItf_ MetadataTraversal_MetadataTraversalI
 
 static void MetadataTraversal_init(void *self)
 {
-    struct MetadataTraversal_interface *this = (struct MetadataTraversal_interface *) self;
+    IMetadataTraversal *this = (IMetadataTraversal *) self;
     this->mItf = &MetadataTraversal_MetadataTraversalItf;
 #ifndef NDEBUG
     this->mIndex = 0;
@@ -620,7 +626,7 @@ extern const struct SLMIDIMessageItf_ MIDIMessage_MIDIMessageItf;
 
 static void MIDIMessage_init(void *self)
 {
-    struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    IMIDIMessage *this = (IMIDIMessage *) self;
     this->mItf = &MIDIMessage_MIDIMessageItf;
 #ifndef NDEBUG
     this->mMetaEventCallback = NULL;
@@ -635,7 +641,7 @@ extern const struct SLMIDIMuteSoloItf_ MIDIMuteSolo_MIDIMuteSoloItf;
 
 static void MIDIMuteSolo_init(void *self)
 {
-    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     this->mItf = &MIDIMuteSolo_MIDIMuteSoloItf;
 }
 
@@ -643,7 +649,7 @@ extern const struct SLMIDITempoItf_ MIDITempo_MIDITempoItf;
 
 static void MIDITempo_init(void *self)
 {
-    struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    IMIDITempo *this = (IMIDITempo *) self;
     this->mItf = &MIDITempo_MIDITempoItf;
 }
 
@@ -651,7 +657,7 @@ extern const struct SLMIDITimeItf_ MIDITime_MIDITimeItf;
 
 static void MIDITime_init(void *self)
 {
-    struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    IMIDITime *this = (IMIDITime *) self;
     this->mItf = &MIDITime_MIDITimeItf;
 }
 
@@ -659,7 +665,7 @@ extern const struct SLMuteSoloItf_ MuteSolo_MuteSoloItf;
 
 static void MuteSolo_init(void *self)
 {
-    struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
+    IMuteSolo *this = (IMuteSolo *) self;
     this->mItf = &MuteSolo_MuteSoloItf;
 }
 
@@ -667,7 +673,7 @@ extern const struct SLPrefetchStatusItf_ PrefetchStatus_PrefetchStatusItf;
 
 static void PrefetchStatus_init(void *self)
 {
-    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    IPrefetchStatus *this = (IPrefetchStatus *) self;
     this->mItf = &PrefetchStatus_PrefetchStatusItf;
 }
 
@@ -675,7 +681,7 @@ extern const struct SLObjectItf_ Object_ObjectItf;
 
 static void Object_init(void *self)
 {
-    struct Object_interface *this = (struct Object_interface *) self;
+    IObject *this = (IObject *) self;
     this->mItf = &Object_ObjectItf;
     this->mState = SL_OBJECT_STATE_UNREALIZED;
 #ifndef NDEBUG
@@ -695,7 +701,7 @@ extern const struct SLOutputMixItf_ OutputMix_OutputMixItf;
 
 static void OutputMix_init(void *self)
 {
-    struct OutputMix_interface *this = (struct OutputMix_interface *) self;
+    IOutputMix *this = (IOutputMix *) self;
     this->mItf = &OutputMix_OutputMixItf;
 #ifndef NDEBUG
     this->mCallback = NULL;
@@ -719,8 +725,8 @@ extern const struct SLOutputMixExtItf_ OutputMixExt_OutputMixExtItf;
 
 static void OutputMixExt_init(void *self)
 {
-    struct OutputMixExt_interface *this =
-        (struct OutputMixExt_interface *) self;
+    IOutputMixExt *this =
+        (IOutputMixExt *) self;
     this->mItf = &OutputMixExt_OutputMixExtItf;
 }
 #endif // USE_OUTPUTMIXEXT
@@ -729,7 +735,7 @@ extern const struct SLPitchItf_ Pitch_PitchItf;
 
 static void Pitch_init(void *self)
 {
-    struct Pitch_interface *this = (struct Pitch_interface *) self;
+    IPitch *this = (IPitch *) self;
     this->mItf = &Pitch_PitchItf;
 }
 
@@ -737,7 +743,7 @@ extern const struct SLPlayItf_ Play_PlayItf;
 
 static void Play_init(void *self)
 {
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     this->mItf = &Play_PlayItf;
     this->mState = SL_PLAYSTATE_STOPPED;
     this->mDuration = SL_TIME_UNKNOWN;
@@ -756,7 +762,7 @@ extern const struct SLPlaybackRateItf_ PlaybackRate_PlaybackRateItf;
 
 static void PlaybackRate_init(void *self)
 {
-    struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    IPlaybackRate *this = (IPlaybackRate *) self;
     this->mItf = &PlaybackRate_PlaybackRateItf;
 }
 
@@ -764,7 +770,7 @@ extern const struct SLPresetReverbItf_ PresetReverb_PresetReverbItf;
 
 static void PresetReverb_init(void *self)
 {
-    struct PresetReverb_interface *this = (struct PresetReverb_interface *) self;
+    IPresetReverb *this = (IPresetReverb *) self;
     this->mItf = &PresetReverb_PresetReverbItf;
 }
 
@@ -772,7 +778,7 @@ extern const struct SLRatePitchItf_ RatePitch_RatePitchItf;
 
 static void RatePitch_init(void *self)
 {
-    struct RatePitch_interface *this = (struct RatePitch_interface *) self;
+    IRatePitch *this = (IRatePitch *) self;
     this->mItf = &RatePitch_RatePitchItf;
 }
 
@@ -780,7 +786,7 @@ extern const struct SLRecordItf_ Record_RecordItf;
 
 static void Record_init(void *self)
 {
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     this->mItf = &Record_RecordItf;
 }
 
@@ -788,7 +794,7 @@ extern const struct SLSeekItf_ Seek_SeekItf;
 
 static void Seek_init(void *self)
 {
-    struct Seek_interface *this = (struct Seek_interface *) self;
+    ISeek *this = (ISeek *) self;
     this->mItf = &Seek_SeekItf;
     this->mPos = (SLmillisecond) -1;
     this->mStartPos = (SLmillisecond) -1;
@@ -802,8 +808,8 @@ extern const struct SLThreadSyncItf_ ThreadSync_ThreadSyncItf;
 
 static void ThreadSync_init(void *self)
 {
-    struct ThreadSync_interface *this =
-        (struct ThreadSync_interface *) self;
+    IThreadSync *this =
+        (IThreadSync *) self;
     this->mItf = &ThreadSync_ThreadSyncItf;
 #ifndef NDEBUG
     this->mInCriticalSection = SL_BOOLEAN_FALSE;
@@ -816,7 +822,7 @@ extern const struct SLVirtualizerItf_ Virtualizer_VirtualizerItf;
 
 static void Virtualizer_init(void *self)
 {
-    struct Virtualizer_interface *this = (struct Virtualizer_interface *) self;
+    IVirtualizer *this = (IVirtualizer *) self;
     this->mItf = &Virtualizer_VirtualizerItf;
 #ifndef NDEBUG
     this->mEnabled = SL_BOOLEAN_FALSE;
@@ -828,7 +834,7 @@ extern const struct SLVibraItf_ Vibra_VibraItf;
 
 static void Vibra_init(void *self)
 {
-    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    IVibra *this = (IVibra *) self;
     this->mItf = &Vibra_VibraItf;
 #ifndef NDEBUG
     this->mVibrate = SL_BOOLEAN_FALSE;
@@ -841,8 +847,8 @@ extern const struct SLVisualizationItf_ Visualization_VisualizationItf;
 
 static void Visualization_init(void *self)
 {
-    struct Visualization_interface *this =
-        (struct Visualization_interface *) self;
+    IVisualization *this =
+        (IVisualization *) self;
     this->mItf = &Visualization_VisualizationItf;
 #ifndef NDEBUG
     this->mCallback = NULL;
@@ -855,7 +861,7 @@ extern const struct SLVolumeItf_ Volume_VolumeItf;
 
 static void Volume_init(void *self)
 {
-    struct Volume_interface *this = (struct Volume_interface *) self;
+    IVolume *this = (IVolume *) self;
     this->mItf = &Volume_VolumeItf;
 #ifndef NDEBUG
     this->mLevel = 0;
@@ -931,26 +937,27 @@ static const struct MPH_init {
 
 static const struct iid_vtable _3DGroup_interfaces[] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
-        offsetof(struct _3DGroup_class, mObject)},
+        offsetof(C3DGroup, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
-        offsetof(struct _3DGroup_class, mDynamicInterfaceManagement)},
+        offsetof(C3DGroup, mDynamicInterfaceManagement)},
     {MPH_3DLOCATION, INTERFACE_IMPLICIT,
-        offsetof(struct _3DGroup_class, m3DLocation)},
+        offsetof(C3DGroup, m3DLocation)},
     {MPH_3DDOPPLER, INTERFACE_DYNAMIC_GAME,
-        offsetof(struct _3DGroup_class, m3DDoppler)},
+        offsetof(C3DGroup, m3DDoppler)},
     {MPH_3DSOURCE, INTERFACE_GAME,
-        offsetof(struct _3DGroup_class, m3DSource)},
+        offsetof(C3DGroup, m3DSource)},
     {MPH_3DMACROSCOPIC, INTERFACE_OPTIONAL,
-        offsetof(struct _3DGroup_class, m3DMacroscopic)},
+        offsetof(C3DGroup, m3DMacroscopic)},
 };
 
-static const struct class_ _3DGroup_class = {
+static const ClassTable _3DGroup_class = {
     _3DGroup_interfaces,
     sizeof(_3DGroup_interfaces)/sizeof(_3DGroup_interfaces[0]),
     MPH_to_3DGroup,
     //"3DGroup",
-    sizeof(struct _3DGroup_class),
+    sizeof(C3DGroup),
     SL_OBJECTID_3DGROUP,
+    NULL,
     NULL,
     NULL
 };
@@ -1029,12 +1036,12 @@ static SLboolean SndFile_IsSupported(const SF_INFO *sfinfo)
 #ifdef USE_ANDROID
 static void *thread_body(void *arg)
 {
-    struct AudioPlayer_class *this = (struct AudioPlayer_class *) arg;
+    CAudioPlayer *this = (CAudioPlayer *) arg;
     android::AudioTrack *at = this->mAudioTrack;
 #if 1
     at->start();
 #endif
-    struct BufferQueue_interface *bufferQueue = &this->mBufferQueue;
+    IBufferQueue *bufferQueue = &this->mBufferQueue;
     for (;;) {
         // FIXME replace unsafe polling by a mutex and condition variable
         struct BufferHeader *oldFront = bufferQueue->mFront;
@@ -1064,7 +1071,7 @@ static void *thread_body(void *arg)
 
 static SLresult AudioPlayer_Realize(void *self)
 {
-    struct AudioPlayer_class *this = (struct AudioPlayer_class *) self;
+    CAudioPlayer *this = (CAudioPlayer *) self;
     SLresult result = SL_RESULT_SUCCESS;
 
 #ifdef USE_ANDROID
@@ -1099,8 +1106,8 @@ static SLresult AudioPlayer_Realize(void *self)
             // FIXME so let's inline the code, but this is maintenance risk
             // we know we are called by Object_Realize, which holds a lock,
             // but if interface lock != object lock, need to rewrite this
-            struct BufferQueue_interface *thisBQ =
-                (struct BufferQueue_interface *) bufferQueue;
+            IBufferQueue *thisBQ =
+                (IBufferQueue *) bufferQueue;
             thisBQ->mCallback = SndFile_Callback;
             thisBQ->mContext = &this->mSndFile;
         }
@@ -1111,7 +1118,7 @@ static SLresult AudioPlayer_Realize(void *self)
 
 static void AudioPlayer_Destroy(void *self)
 {
-    struct AudioPlayer_class *this = (struct AudioPlayer_class *) self;
+    CAudioPlayer *this = (CAudioPlayer *) self;
     // FIXME stop the player in a way that app can't restart it
     // Free the buffer queue, if it was larger than typical
     if (NULL != this->mBufferQueue.mArray &&
@@ -1129,66 +1136,66 @@ static void AudioPlayer_Destroy(void *self)
 
 static const struct iid_vtable AudioPlayer_interfaces[] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
-        offsetof(struct AudioPlayer_class, mObject)},
+        offsetof(CAudioPlayer, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
-        offsetof(struct AudioPlayer_class, mDynamicInterfaceManagement)},
+        offsetof(CAudioPlayer, mDynamicInterfaceManagement)},
     {MPH_PLAY, INTERFACE_IMPLICIT,
-        offsetof(struct AudioPlayer_class, mPlay)},
+        offsetof(CAudioPlayer, mPlay)},
     {MPH_3DDOPPLER, INTERFACE_DYNAMIC_GAME,
-        offsetof(struct AudioPlayer_class, m3DDoppler)},
+        offsetof(CAudioPlayer, m3DDoppler)},
     {MPH_3DGROUPING, INTERFACE_GAME,
-        offsetof(struct AudioPlayer_class, m3DGrouping)},
+        offsetof(CAudioPlayer, m3DGrouping)},
     {MPH_3DLOCATION, INTERFACE_GAME,
-        offsetof(struct AudioPlayer_class, m3DLocation)},
+        offsetof(CAudioPlayer, m3DLocation)},
     {MPH_3DSOURCE, INTERFACE_GAME,
-        offsetof(struct AudioPlayer_class, m3DSource)},
+        offsetof(CAudioPlayer, m3DSource)},
     // FIXME Currently we create an internal buffer queue for playing files
     {MPH_BUFFERQUEUE, /* INTERFACE_GAME */ INTERFACE_IMPLICIT,
-        offsetof(struct AudioPlayer_class, mBufferQueue)},
+        offsetof(CAudioPlayer, mBufferQueue)},
     {MPH_EFFECTSEND, INTERFACE_MUSIC_GAME,
-        offsetof(struct AudioPlayer_class, mEffectSend)},
+        offsetof(CAudioPlayer, mEffectSend)},
     {MPH_MUTESOLO, INTERFACE_GAME,
-        offsetof(struct AudioPlayer_class, mMuteSolo)},
+        offsetof(CAudioPlayer, mMuteSolo)},
     {MPH_METADATAEXTRACTION, INTERFACE_MUSIC_GAME,
-        offsetof(struct AudioPlayer_class, mMetadataExtraction)},
+        offsetof(CAudioPlayer, mMetadataExtraction)},
     {MPH_METADATATRAVERSAL, INTERFACE_MUSIC_GAME,
-        offsetof(struct AudioPlayer_class, mMetadataTraversal)},
+        offsetof(CAudioPlayer, mMetadataTraversal)},
     {MPH_PREFETCHSTATUS, INTERFACE_TBD,
-        offsetof(struct AudioPlayer_class, mPrefetchStatus)},
+        offsetof(CAudioPlayer, mPrefetchStatus)},
     {MPH_RATEPITCH, INTERFACE_DYNAMIC_GAME,
-        offsetof(struct AudioPlayer_class, mRatePitch)},
+        offsetof(CAudioPlayer, mRatePitch)},
     {MPH_SEEK, INTERFACE_TBD,
-        offsetof(struct AudioPlayer_class, mSeek)},
+        offsetof(CAudioPlayer, mSeek)},
     {MPH_VOLUME, INTERFACE_TBD,
-        offsetof(struct AudioPlayer_class, mVolume)},
+        offsetof(CAudioPlayer, mVolume)},
     {MPH_3DMACROSCOPIC, INTERFACE_OPTIONAL,
-        offsetof(struct AudioPlayer_class, m3DMacroscopic)},
+        offsetof(CAudioPlayer, m3DMacroscopic)},
     {MPH_BASSBOOST, INTERFACE_OPTIONAL,
-        offsetof(struct AudioPlayer_class, mBassBoost)},
+        offsetof(CAudioPlayer, mBassBoost)},
     {MPH_DYNAMICSOURCE, INTERFACE_OPTIONAL,
-        offsetof(struct AudioPlayer_class, mDynamicSource)},
+        offsetof(CAudioPlayer, mDynamicSource)},
     {MPH_ENVIRONMENTALREVERB, INTERFACE_OPTIONAL,
-        offsetof(struct AudioPlayer_class, mEnvironmentalReverb)},
+        offsetof(CAudioPlayer, mEnvironmentalReverb)},
     {MPH_EQUALIZER, INTERFACE_OPTIONAL,
-        offsetof(struct AudioPlayer_class, mEqualizer)},
+        offsetof(CAudioPlayer, mEqualizer)},
     {MPH_PITCH, INTERFACE_OPTIONAL,
-        offsetof(struct AudioPlayer_class, mPitch)},
+        offsetof(CAudioPlayer, mPitch)},
     {MPH_PRESETREVERB, INTERFACE_OPTIONAL,
-        offsetof(struct AudioPlayer_class, mPresetReverb)},
+        offsetof(CAudioPlayer, mPresetReverb)},
     {MPH_PLAYBACKRATE, INTERFACE_OPTIONAL,
-        offsetof(struct AudioPlayer_class, mPlaybackRate)},
+        offsetof(CAudioPlayer, mPlaybackRate)},
     {MPH_VIRTUALIZER, INTERFACE_OPTIONAL,
-        offsetof(struct AudioPlayer_class, mVirtualizer)},
+        offsetof(CAudioPlayer, mVirtualizer)},
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL,
-        offsetof(struct AudioPlayer_class, mVisualization)}
+        offsetof(CAudioPlayer, mVisualization)}
 };
 
-static const struct class_ AudioPlayer_class = {
+static const ClassTable AudioPlayer_class = {
     AudioPlayer_interfaces,
     sizeof(AudioPlayer_interfaces)/sizeof(AudioPlayer_interfaces[0]),
     MPH_to_AudioPlayer,
     //"AudioPlayer",
-    sizeof(struct AudioPlayer_class),
+    sizeof(CAudioPlayer),
     SL_OBJECTID_AUDIOPLAYER,
     AudioPlayer_Realize,
     NULL /*AudioPlayer_Resume*/,
@@ -1199,31 +1206,31 @@ static const struct class_ AudioPlayer_class = {
 
 static const struct iid_vtable AudioRecorder_interfaces[] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
-        offsetof(struct AudioRecorder_class, mObject)},
+        offsetof(CAudioRecorder, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
-        offsetof(struct AudioRecorder_class, mDynamicInterfaceManagement)},
+        offsetof(CAudioRecorder, mDynamicInterfaceManagement)},
     {MPH_RECORD, INTERFACE_IMPLICIT,
-        offsetof(struct AudioRecorder_class, mRecord)},
+        offsetof(CAudioRecorder, mRecord)},
     {MPH_AUDIOENCODER, INTERFACE_TBD,
-        offsetof(struct AudioRecorder_class, mAudioEncoder)},
+        offsetof(CAudioRecorder, mAudioEncoder)},
     {MPH_BASSBOOST, INTERFACE_OPTIONAL,
-        offsetof(struct AudioRecorder_class, mBassBoost)},
+        offsetof(CAudioRecorder, mBassBoost)},
     {MPH_DYNAMICSOURCE, INTERFACE_OPTIONAL,
-        offsetof(struct AudioRecorder_class, mDynamicSource)},
+        offsetof(CAudioRecorder, mDynamicSource)},
     {MPH_EQUALIZER, INTERFACE_OPTIONAL,
-        offsetof(struct AudioRecorder_class, mEqualizer)},
+        offsetof(CAudioRecorder, mEqualizer)},
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL,
-        offsetof(struct AudioRecorder_class, mVisualization)},
+        offsetof(CAudioRecorder, mVisualization)},
     {MPH_VOLUME, INTERFACE_OPTIONAL,
-        offsetof(struct AudioRecorder_class, mVolume)}
+        offsetof(CAudioRecorder, mVolume)}
 };
 
-static const struct class_ AudioRecorder_class = {
+static const ClassTable AudioRecorder_class = {
     AudioRecorder_interfaces,
     sizeof(AudioRecorder_interfaces)/sizeof(AudioRecorder_interfaces[0]),
     MPH_to_AudioRecorder,
     //"AudioRecorder",
-    sizeof(struct AudioRecorder_class),
+    sizeof(CAudioRecorder),
     SL_OBJECTID_AUDIORECORDER,
     NULL,
     NULL,
@@ -1234,33 +1241,33 @@ static const struct class_ AudioRecorder_class = {
 
 static const struct iid_vtable Engine_interfaces[] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
-        offsetof(struct Engine_class, mObject)},
+        offsetof(CEngine, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
-        offsetof(struct Engine_class, mDynamicInterfaceManagement)},
+        offsetof(CEngine, mDynamicInterfaceManagement)},
     {MPH_ENGINE, INTERFACE_IMPLICIT,
-        offsetof(struct Engine_class, mEngine)},
+        offsetof(CEngine, mEngine)},
     {MPH_ENGINECAPABILITIES, INTERFACE_IMPLICIT,
-        offsetof(struct Engine_class, mEngineCapabilities)},
+        offsetof(CEngine, mEngineCapabilities)},
     {MPH_THREADSYNC, INTERFACE_IMPLICIT,
-        offsetof(struct Engine_class, mThreadSync)},
+        offsetof(CEngine, mThreadSync)},
     {MPH_AUDIOIODEVICECAPABILITIES, INTERFACE_IMPLICIT,
-        offsetof(struct Engine_class, mAudioIODeviceCapabilities)},
+        offsetof(CEngine, mAudioIODeviceCapabilities)},
     {MPH_AUDIODECODERCAPABILITIES, INTERFACE_EXPLICIT,
-        offsetof(struct Engine_class, mAudioDecoderCapabilities)},
+        offsetof(CEngine, mAudioDecoderCapabilities)},
     {MPH_AUDIOENCODERCAPABILITIES, INTERFACE_EXPLICIT,
-        offsetof(struct Engine_class, mAudioEncoderCapabilities)},
+        offsetof(CEngine, mAudioEncoderCapabilities)},
     {MPH_3DCOMMIT, INTERFACE_EXPLICIT_GAME,
-        offsetof(struct Engine_class, m3DCommit)},
+        offsetof(CEngine, m3DCommit)},
     {MPH_DEVICEVOLUME, INTERFACE_OPTIONAL,
-        offsetof(struct Engine_class, mDeviceVolume)}
+        offsetof(CEngine, mDeviceVolume)}
 };
 
-static const struct class_ Engine_class = {
+static const ClassTable Engine_class = {
     Engine_interfaces,
     sizeof(Engine_interfaces)/sizeof(Engine_interfaces[0]),
     MPH_to_Engine,
     //"Engine",
-    sizeof(struct Engine_class),
+    sizeof(CEngine),
     SL_OBJECTID_ENGINE,
     NULL,
     NULL,
@@ -1271,19 +1278,19 @@ static const struct class_ Engine_class = {
 
 static const struct iid_vtable LEDDevice_interfaces[] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
-        offsetof(struct LEDDevice_class, mObject)},
+        offsetof(CLEDDevice, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
-        offsetof(struct LEDDevice_class, mDynamicInterfaceManagement)},
+        offsetof(CLEDDevice, mDynamicInterfaceManagement)},
     {MPH_LED, INTERFACE_IMPLICIT,
-        offsetof(struct LEDDevice_class, mLEDArray)}
+        offsetof(CLEDDevice, mLEDArray)}
 };
 
-static const struct class_ LEDDevice_class = {
+static const ClassTable LEDDevice_class = {
     LEDDevice_interfaces,
     sizeof(LEDDevice_interfaces)/sizeof(LEDDevice_interfaces[0]),
     MPH_to_LEDDevice,
     //"LEDDevice",
-    sizeof(struct LEDDevice_class),
+    sizeof(CLEDDevice),
     SL_OBJECTID_LEDDEVICE,
     NULL,
     NULL,
@@ -1294,21 +1301,21 @@ static const struct class_ LEDDevice_class = {
 
 static const struct iid_vtable Listener_interfaces[] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
-        offsetof(struct Listener_class, mObject)},
+        offsetof(CListener, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
-        offsetof(struct Listener_class, mDynamicInterfaceManagement)},
+        offsetof(CListener, mDynamicInterfaceManagement)},
     {MPH_3DDOPPLER, INTERFACE_DYNAMIC_GAME,
-        offsetof(struct _3DGroup_class, m3DDoppler)},
+        offsetof(C3DGroup, m3DDoppler)},
     {MPH_3DLOCATION, INTERFACE_EXPLICIT_GAME,
-        offsetof(struct _3DGroup_class, m3DLocation)}
+        offsetof(C3DGroup, m3DLocation)}
 };
 
-static const struct class_ Listener_class = {
+static const ClassTable Listener_class = {
     Listener_interfaces,
     sizeof(Listener_interfaces)/sizeof(Listener_interfaces[0]),
     MPH_to_Listener,
     //"Listener",
-    sizeof(struct Listener_class),
+    sizeof(CListener),
     SL_OBJECTID_LISTENER,
     NULL,
     NULL,
@@ -1319,24 +1326,24 @@ static const struct class_ Listener_class = {
 
 static const struct iid_vtable MetadataExtractor_interfaces[] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
-        offsetof(struct MetadataExtractor_class, mObject)},
+        offsetof(CMetadataExtractor, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
-        offsetof(struct MetadataExtractor_class, mDynamicInterfaceManagement)},
+        offsetof(CMetadataExtractor, mDynamicInterfaceManagement)},
     {MPH_DYNAMICSOURCE, INTERFACE_IMPLICIT,
-        offsetof(struct MetadataExtractor_class, mDynamicSource)},
+        offsetof(CMetadataExtractor, mDynamicSource)},
     {MPH_METADATAEXTRACTION, INTERFACE_IMPLICIT,
-        offsetof(struct MetadataExtractor_class, mMetadataExtraction)},
+        offsetof(CMetadataExtractor, mMetadataExtraction)},
     {MPH_METADATATRAVERSAL, INTERFACE_IMPLICIT,
-        offsetof(struct MetadataExtractor_class, mMetadataTraversal)}
+        offsetof(CMetadataExtractor, mMetadataTraversal)}
 };
 
-static const struct class_ MetadataExtractor_class = {
+static const ClassTable MetadataExtractor_class = {
     MetadataExtractor_interfaces,
     sizeof(MetadataExtractor_interfaces) /
         sizeof(MetadataExtractor_interfaces[0]),
     MPH_to_MetadataExtractor,
     //"MetadataExtractor",
-    sizeof(struct MetadataExtractor_class),
+    sizeof(CMetadataExtractor),
     SL_OBJECTID_METADATAEXTRACTOR,
     NULL,
     NULL,
@@ -1347,71 +1354,71 @@ static const struct class_ MetadataExtractor_class = {
 
 static const struct iid_vtable MidiPlayer_interfaces[] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
-        offsetof(struct MidiPlayer_class, mObject)},
+        offsetof(CMidiPlayer, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
-        offsetof(struct MidiPlayer_class, mDynamicInterfaceManagement)},
+        offsetof(CMidiPlayer, mDynamicInterfaceManagement)},
     {MPH_PLAY, INTERFACE_IMPLICIT,
-        offsetof(struct MidiPlayer_class, mPlay)},
+        offsetof(CMidiPlayer, mPlay)},
     {MPH_3DDOPPLER, INTERFACE_DYNAMIC_GAME,
-        offsetof(struct _3DGroup_class, m3DDoppler)},
+        offsetof(C3DGroup, m3DDoppler)},
     {MPH_3DGROUPING, INTERFACE_GAME,
-        offsetof(struct MidiPlayer_class, m3DGrouping)},
+        offsetof(CMidiPlayer, m3DGrouping)},
     {MPH_3DLOCATION, INTERFACE_GAME,
-        offsetof(struct MidiPlayer_class, m3DLocation)},
+        offsetof(CMidiPlayer, m3DLocation)},
     {MPH_3DSOURCE, INTERFACE_GAME,
-        offsetof(struct MidiPlayer_class, m3DSource)},
+        offsetof(CMidiPlayer, m3DSource)},
     {MPH_BUFFERQUEUE, INTERFACE_GAME,
-        offsetof(struct MidiPlayer_class, mBufferQueue)},
+        offsetof(CMidiPlayer, mBufferQueue)},
     {MPH_EFFECTSEND, INTERFACE_GAME,
-        offsetof(struct MidiPlayer_class, mEffectSend)},
+        offsetof(CMidiPlayer, mEffectSend)},
     {MPH_MUTESOLO, INTERFACE_GAME,
-        offsetof(struct MidiPlayer_class, mMuteSolo)},
+        offsetof(CMidiPlayer, mMuteSolo)},
     {MPH_METADATAEXTRACTION, INTERFACE_GAME,
-        offsetof(struct MidiPlayer_class, mMetadataExtraction)},
+        offsetof(CMidiPlayer, mMetadataExtraction)},
     {MPH_METADATATRAVERSAL, INTERFACE_GAME,
-        offsetof(struct MidiPlayer_class, mMetadataTraversal)},
+        offsetof(CMidiPlayer, mMetadataTraversal)},
     {MPH_MIDIMESSAGE, INTERFACE_PHONE_GAME,
-        offsetof(struct MidiPlayer_class, mMIDIMessage)},
+        offsetof(CMidiPlayer, mMIDIMessage)},
     {MPH_MIDITIME, INTERFACE_PHONE_GAME,
-        offsetof(struct MidiPlayer_class, mMIDITime)},
+        offsetof(CMidiPlayer, mMIDITime)},
     {MPH_MIDITEMPO, INTERFACE_PHONE_GAME,
-        offsetof(struct MidiPlayer_class, mMIDITempo)},
+        offsetof(CMidiPlayer, mMIDITempo)},
     {MPH_MIDIMUTESOLO, INTERFACE_GAME,
-        offsetof(struct MidiPlayer_class, mMIDIMuteSolo)},
+        offsetof(CMidiPlayer, mMIDIMuteSolo)},
     {MPH_PREFETCHSTATUS, INTERFACE_PHONE_GAME,
-        offsetof(struct MidiPlayer_class, mPrefetchStatus)},
+        offsetof(CMidiPlayer, mPrefetchStatus)},
     {MPH_SEEK, INTERFACE_PHONE_GAME,
-        offsetof(struct MidiPlayer_class, mSeek)},
+        offsetof(CMidiPlayer, mSeek)},
     {MPH_VOLUME, INTERFACE_PHONE_GAME,
-        offsetof(struct MidiPlayer_class, mVolume)},
+        offsetof(CMidiPlayer, mVolume)},
     {MPH_3DMACROSCOPIC, INTERFACE_OPTIONAL,
-        offsetof(struct MidiPlayer_class, m3DMacroscopic)},
+        offsetof(CMidiPlayer, m3DMacroscopic)},
     {MPH_BASSBOOST, INTERFACE_OPTIONAL,
-        offsetof(struct MidiPlayer_class, mBassBoost)},
+        offsetof(CMidiPlayer, mBassBoost)},
     {MPH_DYNAMICSOURCE, INTERFACE_OPTIONAL,
-        offsetof(struct MidiPlayer_class, mDynamicSource)},
+        offsetof(CMidiPlayer, mDynamicSource)},
     {MPH_ENVIRONMENTALREVERB, INTERFACE_OPTIONAL,
-        offsetof(struct MidiPlayer_class, mEnvironmentalReverb)},
+        offsetof(CMidiPlayer, mEnvironmentalReverb)},
     {MPH_EQUALIZER, INTERFACE_OPTIONAL,
-        offsetof(struct MidiPlayer_class, mEqualizer)},
+        offsetof(CMidiPlayer, mEqualizer)},
     {MPH_PITCH, INTERFACE_OPTIONAL,
-        offsetof(struct MidiPlayer_class, mPitch)},
+        offsetof(CMidiPlayer, mPitch)},
     {MPH_PRESETREVERB, INTERFACE_OPTIONAL,
-        offsetof(struct MidiPlayer_class, mPresetReverb)},
+        offsetof(CMidiPlayer, mPresetReverb)},
     {MPH_PLAYBACKRATE, INTERFACE_OPTIONAL,
-        offsetof(struct MidiPlayer_class, mPlaybackRate)},
+        offsetof(CMidiPlayer, mPlaybackRate)},
     {MPH_VIRTUALIZER, INTERFACE_OPTIONAL,
-        offsetof(struct MidiPlayer_class, mVirtualizer)},
+        offsetof(CMidiPlayer, mVirtualizer)},
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL,
-        offsetof(struct MidiPlayer_class, mVisualization)}
+        offsetof(CMidiPlayer, mVisualization)}
 };
 
-static const struct class_ MidiPlayer_class = {
+static const ClassTable MidiPlayer_class = {
     MidiPlayer_interfaces,
     sizeof(MidiPlayer_interfaces)/sizeof(MidiPlayer_interfaces[0]),
     MPH_to_MidiPlayer,
     //"MidiPlayer",
-    sizeof(struct MidiPlayer_class),
+    sizeof(CMidiPlayer),
     SL_OBJECTID_MIDIPLAYER,
     NULL,
     NULL,
@@ -1422,39 +1429,39 @@ static const struct class_ MidiPlayer_class = {
 
 static const struct iid_vtable OutputMix_interfaces[] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
-        offsetof(struct OutputMix_class, mObject)},
+        offsetof(COutputMix, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
-        offsetof(struct OutputMix_class, mDynamicInterfaceManagement)},
+        offsetof(COutputMix, mDynamicInterfaceManagement)},
     {MPH_OUTPUTMIX, INTERFACE_IMPLICIT,
-        offsetof(struct OutputMix_class, mOutputMix)},
+        offsetof(COutputMix, mOutputMix)},
 #ifdef USE_OUTPUTMIXEXT
     {MPH_OUTPUTMIXEXT, INTERFACE_IMPLICIT,
-        offsetof(struct OutputMix_class, mOutputMixExt)},
+        offsetof(COutputMix, mOutputMixExt)},
 #else
     {MPH_OUTPUTMIXEXT, INTERFACE_TBD /*NOT AVAIL*/, 0},
 #endif
     {MPH_ENVIRONMENTALREVERB, INTERFACE_DYNAMIC_GAME,
-        offsetof(struct OutputMix_class, mEnvironmentalReverb)},
+        offsetof(COutputMix, mEnvironmentalReverb)},
     {MPH_EQUALIZER, INTERFACE_DYNAMIC_MUSIC_GAME,
-        offsetof(struct OutputMix_class, mEqualizer)},
+        offsetof(COutputMix, mEqualizer)},
     {MPH_PRESETREVERB, INTERFACE_DYNAMIC_MUSIC,
-        offsetof(struct OutputMix_class, mPresetReverb)},
+        offsetof(COutputMix, mPresetReverb)},
     {MPH_VIRTUALIZER, INTERFACE_DYNAMIC_MUSIC_GAME,
-        offsetof(struct OutputMix_class, mVirtualizer)},
+        offsetof(COutputMix, mVirtualizer)},
     {MPH_VOLUME, INTERFACE_GAME_MUSIC,
-        offsetof(struct OutputMix_class, mVolume)},
+        offsetof(COutputMix, mVolume)},
     {MPH_BASSBOOST, INTERFACE_OPTIONAL_DYNAMIC,
-        offsetof(struct OutputMix_class, mBassBoost)},
+        offsetof(COutputMix, mBassBoost)},
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL,
-        offsetof(struct OutputMix_class, mVisualization)}
+        offsetof(COutputMix, mVisualization)}
 };
 
-static const struct class_ OutputMix_class = {
+static const ClassTable OutputMix_class = {
     OutputMix_interfaces,
     sizeof(OutputMix_interfaces)/sizeof(OutputMix_interfaces[0]),
     MPH_to_OutputMix,
     //"OutputMix",
-    sizeof(struct OutputMix_class),
+    sizeof(COutputMix),
     SL_OBJECTID_OUTPUTMIX,
     NULL,
     NULL,
@@ -1465,19 +1472,19 @@ static const struct class_ OutputMix_class = {
 
 static const struct iid_vtable VibraDevice_interfaces[] = {
     {MPH_OBJECT, INTERFACE_OPTIONAL,
-        offsetof(struct VibraDevice_class, mObject)},
+        offsetof(CVibraDevice, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_OPTIONAL,
-        offsetof(struct VibraDevice_class, mDynamicInterfaceManagement)},
+        offsetof(CVibraDevice, mDynamicInterfaceManagement)},
     {MPH_VIBRA, INTERFACE_OPTIONAL,
-        offsetof(struct VibraDevice_class, mVibra)}
+        offsetof(CVibraDevice, mVibra)}
 };
 
-static const struct class_ VibraDevice_class = {
+static const ClassTable VibraDevice_class = {
     VibraDevice_interfaces,
     sizeof(VibraDevice_interfaces)/sizeof(VibraDevice_interfaces[0]),
     MPH_to_Vibra,
     //"VibraDevice",
-    sizeof(struct VibraDevice_class),
+    sizeof(CVibraDevice),
     SL_OBJECTID_VIBRADEVICE,
     NULL,
     NULL,
@@ -1486,7 +1493,7 @@ static const struct class_ VibraDevice_class = {
 
 /* Map SL_OBJECTID to class */
 
-static const struct class_ * const classes[] = {
+static const ClassTable * const classes[] = {
     // Do not change order of these entries; they are in numerical order
     &Engine_class,
     &LEDDevice_class,
@@ -1500,7 +1507,7 @@ static const struct class_ * const classes[] = {
     &MetadataExtractor_class
 };
 
-static const struct class_ *objectIDtoClass(SLuint32 objectID)
+static const ClassTable *objectIDtoClass(SLuint32 objectID)
 {
     SLuint32 objectID0 = classes[0]->mObjectID;
     if (objectID0 <= objectID &&
@@ -1511,14 +1518,14 @@ static const struct class_ *objectIDtoClass(SLuint32 objectID)
 
 // Construct a new instance of the specified class, exposing selected interfaces
 
-static struct Object_interface *construct(const struct class_ *class__,
+static IObject *construct(const ClassTable *class__,
     unsigned exposedMask, SLEngineItf engine)
 {
-    struct Object_interface *this;
+    IObject *this;
 #ifndef NDEBUG
-    this = (struct Object_interface *) malloc(class__->mSize);
+    this = (IObject *) malloc(class__->mSize);
 #else
-    this = (struct Object_interface *) calloc(1, class__->mSize);
+    this = (IObject *) calloc(1, class__->mSize);
 #endif
     if (NULL != this) {
 #ifndef NDEBUG
@@ -1527,21 +1534,30 @@ static struct Object_interface *construct(const struct class_ *class__,
 #endif
         this->mClass = class__;
         this->mExposedMask = exposedMask;
-        struct Engine_interface *thisEngine =
-            (struct Engine_interface *) engine;
-        this->mLossOfControlMask = (NULL == thisEngine) ? 0 :
-            (thisEngine->mLossOfControlGlobal ? ~0 : 0);
+        unsigned lossOfControlMask = 0;
+        IEngine *thisEngine = (IEngine *) engine;
+        if (NULL == thisEngine)
+            thisEngine = &((CEngine *) this)->mEngine;
+        else if (thisEngine->mLossOfControlGlobal)
+            lossOfControlMask = ~0;
+        this->mLossOfControlMask = lossOfControlMask;
         const struct iid_vtable *x = class__->mInterfaces;
         unsigned i;
         for (i = 0; exposedMask; ++i, ++x, exposedMask >>= 1) {
             if (exposedMask & 1) {
                 void *self = (char *) this + x->mOffset;
-                ((struct Object_interface **) self)[1] = this;
+                ((IObject **) self)[1] = this;
                 VoidHook init = MPH_init_table[x->mMPH].mInit;
                 if (NULL != init)
                     (*init)(self);
             }
         }
+        // FIXME need a lock
+        if (INSTANCE_MAX > thisEngine->mInstanceCount) {
+            // FIXME ignores Destroy
+            thisEngine->mInstances[thisEngine->mInstanceCount++] = this;
+        }
+        // FIXME else what
     }
     return this;
 }
@@ -1554,8 +1570,8 @@ static struct Object_interface *construct(const struct class_ *class__,
 
 static SLresult Object_Realize(SLObjectItf self, SLboolean async)
 {
-    struct Object_interface *this = (struct Object_interface *) self;
-    const struct class_ *class__ = this->mClass;
+    IObject *this = (IObject *) self;
+    const ClassTable *class__ = this->mClass;
     StatusHook realize = class__->mRealize;
     SLresult result = SL_RESULT_SUCCESS;
     object_lock_exclusive(this);
@@ -1578,8 +1594,8 @@ static SLresult Object_Realize(SLObjectItf self, SLboolean async)
 
 static SLresult Object_Resume(SLObjectItf self, SLboolean async)
 {
-    struct Object_interface *this = (struct Object_interface *) self;
-    const struct class_ *class__ = this->mClass;
+    IObject *this = (IObject *) self;
+    const ClassTable *class__ = this->mClass;
     StatusHook resume = class__->mResume;
     SLresult result = SL_RESULT_SUCCESS;
     object_lock_exclusive(this);
@@ -1604,7 +1620,7 @@ static SLresult Object_GetState(SLObjectItf self, SLuint32 *pState)
 {
     if (NULL == pState)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Object_interface *this = (struct Object_interface *) self;
+    IObject *this = (IObject *) self;
     // FIXME Investigate what it would take to change to a peek lock
     object_lock_shared(this);
     SLuint32 state = this->mState;
@@ -1623,8 +1639,8 @@ static SLresult Object_GetInterface(SLObjectItf self, const SLInterfaceID iid,
     if (NULL == iid)
         result = SL_RESULT_PARAMETER_INVALID;
     else {
-        struct Object_interface *this = (struct Object_interface *) self;
-        const struct class_ *class__ = this->mClass;
+        IObject *this = (IObject *) self;
+        const ClassTable *class__ = this->mClass;
         int MPH, index;
         if ((0 > (MPH = IID_to_MPH(iid))) ||
             (0 > (index = class__->mMPH_to_index[MPH])))
@@ -1653,7 +1669,7 @@ static SLresult Object_GetInterface(SLObjectItf self, const SLInterfaceID iid,
 static SLresult Object_RegisterCallback(SLObjectItf self,
     slObjectCallback callback, void *pContext)
 {
-    struct Object_interface *this = (struct Object_interface *) self;
+    IObject *this = (IObject *) self;
     // FIXME This could be a poke lock, if we had atomic double-word load/store
     object_lock_exclusive(this);
     this->mCallback = callback;
@@ -1670,8 +1686,8 @@ static void Object_AbortAsyncOperation(SLObjectItf self)
 static void Object_Destroy(SLObjectItf self)
 {
     Object_AbortAsyncOperation(self);
-    struct Object_interface *this = (struct Object_interface *) self;
-    const struct class_ *class__ = this->mClass;
+    IObject *this = (IObject *) self;
+    const ClassTable *class__ = this->mClass;
     VoidHook destroy = class__->mDestroy;
     const struct iid_vtable *x = class__->mInterfaces;
     object_lock_exclusive(this);
@@ -1698,7 +1714,7 @@ static void Object_Destroy(SLObjectItf self)
 static SLresult Object_SetPriority(SLObjectItf self, SLint32 priority,
     SLboolean preemptable)
 {
-    struct Object_interface *this = (struct Object_interface *) self;
+    IObject *this = (IObject *) self;
     object_lock_exclusive(this);
     this->mPriority = priority;
     this->mPreemptable = preemptable;
@@ -1711,7 +1727,7 @@ static SLresult Object_GetPriority(SLObjectItf self, SLint32 *pPriority,
 {
     if (NULL == pPriority || NULL == pPreemptable)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Object_interface *this = (struct Object_interface *) self;
+    IObject *this = (IObject *) self;
     object_lock_shared(this);
     SLint32 priority = this->mPriority;
     SLboolean preemptable = this->mPreemptable;
@@ -1728,8 +1744,8 @@ static SLresult Object_SetLossOfControlInterfaces(SLObjectItf self,
         SLuint32 i;
         if (NULL == pInterfaceIDs)
             return SL_RESULT_PARAMETER_INVALID;
-        struct Object_interface *this = (struct Object_interface *) self;
-        const struct class_ *class__ = this->mClass;
+        IObject *this = (IObject *) self;
+        const ClassTable *class__ = this->mClass;
         unsigned lossOfControlMask = 0;
         // FIXME The cast is due to a typo in the spec
         for (i = 0; i < (SLuint32) numInterfaces; ++i) {
@@ -1772,10 +1788,10 @@ static SLresult DynamicInterfaceManagement_AddInterface(
 {
     if (NULL == iid)
         return SL_RESULT_PARAMETER_INVALID;
-    struct DynamicInterfaceManagement_interface *this =
-        (struct DynamicInterfaceManagement_interface *) self;
-    struct Object_interface *thisObject = this->mThis;
-    const struct class_ *class__ = thisObject->mClass;
+    IDynamicInterfaceManagement *this =
+        (IDynamicInterfaceManagement *) self;
+    IObject *thisObject = this->mThis;
+    const ClassTable *class__ = thisObject->mClass;
     int MPH, index;
     if ((0 > (MPH = IID_to_MPH(iid))) ||
         (0 > (index = class__->mMPH_to_index[MPH])))
@@ -1823,11 +1839,11 @@ static SLresult DynamicInterfaceManagement_RemoveInterface(
 {
     if (NULL == iid)
         return SL_RESULT_PARAMETER_INVALID;
-    struct DynamicInterfaceManagement_interface *this =
-        (struct DynamicInterfaceManagement_interface *) self;
-    struct Object_interface *thisObject =
-        (struct Object_interface *) this->mThis;
-    const struct class_ *class__ = thisObject->mClass;
+    IDynamicInterfaceManagement *this =
+        (IDynamicInterfaceManagement *) self;
+    IObject *thisObject =
+        (IObject *) this->mThis;
+    const ClassTable *class__ = thisObject->mClass;
     int MPH = IID_to_MPH(iid);
     if (0 > MPH)
         return SL_RESULT_PRECONDITIONS_VIOLATED;
@@ -1867,11 +1883,11 @@ static SLresult DynamicInterfaceManagement_ResumeInterface(
 {
     if (NULL == iid)
         return SL_RESULT_PARAMETER_INVALID;
-    struct DynamicInterfaceManagement_interface *this =
-        (struct DynamicInterfaceManagement_interface *) self;
-    struct Object_interface *thisObject =
-        (struct Object_interface *) this->mThis;
-    const struct class_ *class__ = thisObject->mClass;
+    IDynamicInterfaceManagement *this =
+        (IDynamicInterfaceManagement *) self;
+    IObject *thisObject =
+        (IObject *) this->mThis;
+    const ClassTable *class__ = thisObject->mClass;
     int MPH = IID_to_MPH(iid);
     if (0 > MPH)
         return SL_RESULT_PRECONDITIONS_VIOLATED;
@@ -1893,9 +1909,9 @@ static SLresult DynamicInterfaceManagement_RegisterCallback(
     SLDynamicInterfaceManagementItf self,
     slDynamicInterfaceManagementCallback callback, void *pContext)
 {
-    struct DynamicInterfaceManagement_interface *this =
-        (struct DynamicInterfaceManagement_interface *) self;
-    struct Object_interface *thisObject = this->mThis;
+    IDynamicInterfaceManagement *this =
+        (IDynamicInterfaceManagement *) self;
+    IObject *thisObject = this->mThis;
     // FIXME This could be a poke lock, if we had atomic double-word load/store
     object_lock_exclusive(thisObject);
     this->mCallback = callback;
@@ -1924,7 +1940,7 @@ static SLresult Play_SetPlayState(SLPlayItf self, SLuint32 state)
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     interface_lock_exclusive(this);
     this->mState = state;
     if (SL_PLAYSTATE_STOPPED == state) {
@@ -1943,7 +1959,7 @@ static SLresult Play_GetPlayState(SLPlayItf self, SLuint32 *pState)
 {
     if (NULL == pState)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     interface_lock_peek(this);
     SLuint32 state = this->mState;
     interface_unlock_peek(this);
@@ -1959,7 +1975,7 @@ static SLresult Play_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
     // use sample rate to compute duration, then seek back to current position
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     interface_lock_peek(this);
     SLmillisecond duration = this->mDuration;
     interface_unlock_peek(this);
@@ -1971,7 +1987,7 @@ static SLresult Play_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
 {
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     interface_lock_peek(this);
     SLmillisecond position = this->mPosition;
     interface_unlock_peek(this);
@@ -1984,7 +2000,7 @@ static SLresult Play_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
 static SLresult Play_RegisterCallback(SLPlayItf self, slPlayCallback callback,
     void *pContext)
 {
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     // FIXME This could be a poke lock, if we had atomic double-word load/store
     interface_lock_exclusive(this);
     this->mCallback = callback;
@@ -1995,7 +2011,7 @@ static SLresult Play_RegisterCallback(SLPlayItf self, slPlayCallback callback,
 
 static SLresult Play_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
 {
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     interface_lock_poke(this);
     this->mEventFlags = eventFlags;
     interface_unlock_poke(this);
@@ -2007,7 +2023,7 @@ static SLresult Play_GetCallbackEventsMask(SLPlayItf self,
 {
     if (NULL == pEventFlags)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     interface_lock_peek(this);
     SLuint32 eventFlags = this->mEventFlags;
     interface_unlock_peek(this);
@@ -2017,7 +2033,7 @@ static SLresult Play_GetCallbackEventsMask(SLPlayItf self,
 
 static SLresult Play_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
 {
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     interface_lock_poke(this);
     this->mMarkerPosition = mSec;
     interface_unlock_poke(this);
@@ -2026,7 +2042,7 @@ static SLresult Play_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
 
 static SLresult Play_ClearMarkerPosition(SLPlayItf self)
 {
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     interface_lock_poke(this);
     this->mMarkerPosition = 0;
     interface_unlock_poke(this);
@@ -2037,7 +2053,7 @@ static SLresult Play_GetMarkerPosition(SLPlayItf self, SLmillisecond *pMsec)
 {
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     interface_lock_peek(this);
     SLmillisecond markerPosition = this->mMarkerPosition;
     interface_unlock_peek(this);
@@ -2047,7 +2063,7 @@ static SLresult Play_GetMarkerPosition(SLPlayItf self, SLmillisecond *pMsec)
 
 static SLresult Play_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec)
 {
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     interface_lock_poke(this);
     this->mPositionUpdatePeriod = mSec;
     interface_unlock_poke(this);
@@ -2059,7 +2075,7 @@ static SLresult Play_GetPositionUpdatePeriod(SLPlayItf self,
 {
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Play_interface *this = (struct Play_interface *) self;
+    IPlay *this = (IPlay *) self;
     interface_lock_peek(this);
     SLmillisecond positionUpdatePeriod = this->mPositionUpdatePeriod;
     interface_unlock_peek(this);
@@ -2091,7 +2107,7 @@ static SLresult BufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
     // set it to SL_PLAYSTATE_PLAYING (and start playing)
     if (NULL == pBuffer)
         return SL_RESULT_PARAMETER_INVALID;
-    struct BufferQueue_interface *this = (struct BufferQueue_interface *) self;
+    IBufferQueue *this = (IBufferQueue *) self;
     SLresult result;
     interface_lock_exclusive(this);
     struct BufferHeader *oldRear = this->mRear, *newRear;
@@ -2112,7 +2128,7 @@ static SLresult BufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
 
 static SLresult BufferQueue_Clear(SLBufferQueueItf self)
 {
-    struct BufferQueue_interface *this = (struct BufferQueue_interface *) self;
+    IBufferQueue *this = (IBufferQueue *) self;
     interface_lock_exclusive(this);
     this->mFront = &this->mArray[0];
     this->mRear = &this->mArray[0];
@@ -2126,7 +2142,7 @@ static SLresult BufferQueue_GetState(SLBufferQueueItf self,
 {
     if (NULL == pState)
         return SL_RESULT_PARAMETER_INVALID;
-    struct BufferQueue_interface *this = (struct BufferQueue_interface *) self;
+    IBufferQueue *this = (IBufferQueue *) self;
     SLBufferQueueState state;
     interface_lock_shared(this);
 #ifdef __cplusplus // FIXME Is this a compiler bug?
@@ -2148,7 +2164,7 @@ static SLresult BufferQueue_GetState(SLBufferQueueItf self,
 static SLresult BufferQueue_RegisterCallback(SLBufferQueueItf self,
     slBufferQueueCallback callback, void *pContext)
 {
-    struct BufferQueue_interface *this = (struct BufferQueue_interface *) self;
+    IBufferQueue *this = (IBufferQueue *) self;
     // FIXME This could be a poke lock, if we had atomic double-word load/store
     interface_lock_exclusive(this);
     this->mCallback = callback;
@@ -2174,7 +2190,7 @@ static SLresult Volume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
     if (!((SL_MILLIBEL_MIN <= level) && (SL_MILLIBEL_MAX >= level)))
         return SL_RESULT_PARAMETER_INVALID;
 #endif
-    struct Volume_interface *this = (struct Volume_interface *) self;
+    IVolume *this = (IVolume *) self;
     interface_lock_poke(this);
     this->mLevel = level;
     interface_unlock_poke(this);
@@ -2185,7 +2201,7 @@ static SLresult Volume_GetVolumeLevel(SLVolumeItf self, SLmillibel *pLevel)
 {
     if (NULL == pLevel)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Volume_interface *this = (struct Volume_interface *) self;
+    IVolume *this = (IVolume *) self;
     interface_lock_peek(this);
     SLmillibel level = this->mLevel;
     interface_unlock_peek(this);
@@ -2204,7 +2220,7 @@ static SLresult Volume_GetMaxVolumeLevel(SLVolumeItf self,
 
 static SLresult Volume_SetMute(SLVolumeItf self, SLboolean mute)
 {
-    struct Volume_interface *this = (struct Volume_interface *) self;
+    IVolume *this = (IVolume *) self;
     interface_lock_poke(this);
     this->mMute = mute;
     interface_unlock_poke(this);
@@ -2215,7 +2231,7 @@ static SLresult Volume_GetMute(SLVolumeItf self, SLboolean *pMute)
 {
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Volume_interface *this = (struct Volume_interface *) self;
+    IVolume *this = (IVolume *) self;
     interface_lock_peek(this);
     SLboolean mute = this->mMute;
     interface_unlock_peek(this);
@@ -2225,7 +2241,7 @@ static SLresult Volume_GetMute(SLVolumeItf self, SLboolean *pMute)
 
 static SLresult Volume_EnableStereoPosition(SLVolumeItf self, SLboolean enable)
 {
-    struct Volume_interface *this = (struct Volume_interface *) self;
+    IVolume *this = (IVolume *) self;
     interface_lock_poke(this);
     this->mEnableStereoPosition = enable;
     interface_unlock_poke(this);
@@ -2237,7 +2253,7 @@ static SLresult Volume_IsEnabledStereoPosition(SLVolumeItf self,
 {
     if (NULL == pEnable)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Volume_interface *this = (struct Volume_interface *) self;
+    IVolume *this = (IVolume *) self;
     interface_lock_peek(this);
     SLboolean enable = this->mEnableStereoPosition;
     interface_unlock_peek(this);
@@ -2250,7 +2266,7 @@ static SLresult Volume_SetStereoPosition(SLVolumeItf self,
 {
     if (!((-1000 <= stereoPosition) && (1000 >= stereoPosition)))
         return SL_RESULT_PARAMETER_INVALID;
-    struct Volume_interface *this = (struct Volume_interface *) self;
+    IVolume *this = (IVolume *) self;
     interface_lock_poke(this);
     this->mStereoPosition = stereoPosition;
     interface_unlock_poke(this);
@@ -2262,7 +2278,7 @@ static SLresult Volume_GetStereoPosition(SLVolumeItf self,
 {
     if (NULL == pStereoPosition)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Volume_interface *this = (struct Volume_interface *) self;
+    IVolume *this = (IVolume *) self;
     interface_lock_peek(this);
     SLpermille stereoPosition = this->mStereoPosition;
     interface_unlock_peek(this);
@@ -2296,7 +2312,7 @@ static SLresult Engine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    struct LEDDevice_class *this = (struct LEDDevice_class *)
+    CLEDDevice *this = (CLEDDevice *)
         construct(&LEDDevice_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
@@ -2328,7 +2344,7 @@ static SLresult Engine_CreateVibraDevice(SLEngineItf self,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    struct VibraDevice_class *this = (struct VibraDevice_class *)
+    CVibraDevice *this = (CVibraDevice *)
         construct(&VibraDevice_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
@@ -2372,11 +2388,6 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
     SLuint32 numBuffers = 0;
     SLDataFormat_PCM *df_pcm = NULL;
-#endif
-#ifdef USE_OUTPUTMIXEXT
-    struct Track *track = NULL;
-#endif
-#ifdef USE_SNDFILE
     SLchar *pathname = NULL;
     switch (locatorType) {
     case SL_DATALOCATOR_BUFFERQUEUE:
@@ -2497,6 +2508,7 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
 #endif // USE_SNDFILE
 
 #ifdef USE_OUTPUTMIXEXT
+    struct Track *track = NULL;
     switch (*(SLuint32 *)pAudioSnk->pLocator) {
     case SL_DATALOCATOR_OUTPUTMIX:
         {
@@ -2506,10 +2518,10 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         SLObjectItf outputMix = dl_outmix->outputMix;
         // FIXME make this an operation on Object: GetClass
         if ((NULL == outputMix) || (&OutputMix_class !=
-            ((struct Object_interface *) outputMix)->mClass))
+            ((IObject *) outputMix)->mClass))
             return SL_RESULT_PARAMETER_INVALID;
-        struct OutputMix_interface *om =
-            &((struct OutputMix_class *) outputMix)->mOutputMix;
+        IOutputMix *om =
+            &((COutputMix *) outputMix)->mOutputMix;
         // allocate an entry within OutputMix for this track
         // FIXME O(n)
         unsigned i;
@@ -2540,13 +2552,19 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
 #endif // USE_OUTPUTMIXEXT
 
     // Construct our new AudioPlayer instance
-    struct AudioPlayer_class *this = (struct AudioPlayer_class *)
+    CAudioPlayer *this = (CAudioPlayer *)
         construct(&AudioPlayer_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
 
     // DataSource specific initializations
     switch(*(SLuint32 *)pAudioSrc->pLocator) {
+    case SL_DATALOCATOR_URI:
+#ifndef USE_OUTPUTMIXEXT // e.g. USE_ANDROID
+        break;
+#else
+        // fall through
+#endif
     case SL_DATALOCATOR_BUFFERQUEUE:
         {
         SLDataLocator_BufferQueue *dl_bq = (SLDataLocator_BufferQueue *) pAudioSrc->pLocator;
@@ -2570,8 +2588,6 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         this->mBufferQueue.mFront = this->mBufferQueue.mArray;
         this->mBufferQueue.mRear = this->mBufferQueue.mArray;
         }
-        break;
-    case SL_DATALOCATOR_URI:
         break;
     default:
         // no other init required
@@ -2637,7 +2653,7 @@ static SLresult Engine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         return result;
     if (NULL == pMIDISrc || NULL == pAudioOutput)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MidiPlayer_class *this = (struct MidiPlayer_class *)
+    CMidiPlayer *this = (CMidiPlayer *)
         construct(&MidiPlayer_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
@@ -2688,7 +2704,7 @@ static SLresult Engine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    struct OutputMix_class *this = (struct OutputMix_class *)
+    COutputMix *this = (COutputMix *)
         construct(&OutputMix_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
@@ -2709,7 +2725,7 @@ static SLresult Engine_CreateMetadataExtractor(SLEngineItf self,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    struct MetadataExtractor_class *this = (struct MetadataExtractor_class *)
+    CMetadataExtractor *this = (CMetadataExtractor *)
         construct(&MetadataExtractor_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
@@ -2733,7 +2749,7 @@ static SLresult Engine_QueryNumSupportedInterfaces(SLEngineItf self,
 {
     if (NULL == pNumSupportedInterfaces)
         return SL_RESULT_PARAMETER_INVALID;
-    const struct class_ *class__ = objectIDtoClass(objectID);
+    const ClassTable *class__ = objectIDtoClass(objectID);
     if (NULL == class__)
         return SL_RESULT_FEATURE_UNSUPPORTED;
     *pNumSupportedInterfaces = class__->mInterfaceCount;
@@ -2745,7 +2761,7 @@ static SLresult Engine_QuerySupportedInterfaces(SLEngineItf self,
 {
     if (NULL == pInterfaceId)
         return SL_RESULT_PARAMETER_INVALID;
-    const struct class_ *class__ = objectIDtoClass(objectID);
+    const ClassTable *class__ = objectIDtoClass(objectID);
     if (NULL == class__)
         return SL_RESULT_FEATURE_UNSUPPORTED;
     if (index >= class__->mInterfaceCount)
@@ -2837,8 +2853,8 @@ static SLresult
     SLAudioIODeviceCapabilitiesItf self,
     slAvailableAudioInputsChangedCallback callback, void *pContext)
 {
-    struct AudioIODeviceCapabilities_interface * this =
-        (struct AudioIODeviceCapabilities_interface *) self;
+    IAudioIODeviceCapabilities * this =
+        (IAudioIODeviceCapabilities *) self;
     interface_lock_exclusive(this);
     this->mAvailableAudioInputsChangedCallback = callback;
     this->mAvailableAudioInputsChangedContext = pContext;
@@ -2888,8 +2904,8 @@ static SLresult
     SLAudioIODeviceCapabilitiesItf self,
     slAvailableAudioOutputsChangedCallback callback, void *pContext)
 {
-    struct AudioIODeviceCapabilities_interface * this =
-        (struct AudioIODeviceCapabilities_interface *) self;
+    IAudioIODeviceCapabilities * this =
+        (IAudioIODeviceCapabilities *) self;
     interface_lock_exclusive(this);
     this->mAvailableAudioOutputsChangedCallback = callback;
     this->mAvailableAudioOutputsChangedContext = pContext;
@@ -2902,8 +2918,8 @@ static SLresult
     SLAudioIODeviceCapabilitiesItf self,
     slDefaultDeviceIDMapChangedCallback callback, void *pContext)
 {
-    struct AudioIODeviceCapabilities_interface * this =
-        (struct AudioIODeviceCapabilities_interface *) self;
+    IAudioIODeviceCapabilities * this =
+        (IAudioIODeviceCapabilities *) self;
     interface_lock_exclusive(this);
     this->mDefaultDeviceIDMapChangedCallback = callback;
     this->mDefaultDeviceIDMapChangedContext = pContext;
@@ -3018,7 +3034,7 @@ static SLresult OutputMix_GetDestinationOutputDeviceIDs(SLOutputMixItf self,
 static SLresult OutputMix_RegisterDeviceChangeCallback(SLOutputMixItf self,
     slMixDeviceChangeCallback callback, void *pContext)
 {
-    struct OutputMix_interface *this = (struct OutputMix_interface *) self;
+    IOutputMix *this = (IOutputMix *) self;
     interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
@@ -3062,7 +3078,7 @@ static SLresult Seek_SetPosition(SLSeekItf self, SLmillisecond pos,
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }
-    struct Seek_interface *this = (struct Seek_interface *) self;
+    ISeek *this = (ISeek *) self;
     interface_lock_poke(this);
     this->mPos = pos;
     interface_unlock_poke(this);
@@ -3072,7 +3088,7 @@ static SLresult Seek_SetPosition(SLSeekItf self, SLmillisecond pos,
 static SLresult Seek_SetLoop(SLSeekItf self, SLboolean loopEnable,
     SLmillisecond startPos, SLmillisecond endPos)
 {
-    struct Seek_interface *this = (struct Seek_interface *) self;
+    ISeek *this = (ISeek *) self;
     interface_lock_exclusive(this);
     this->mLoopEnabled = loopEnable;
     this->mStartPos = startPos;
@@ -3086,7 +3102,7 @@ static SLresult Seek_GetLoop(SLSeekItf self, SLboolean *pLoopEnabled,
 {
     if (NULL == pLoopEnabled || NULL == pStartPos || NULL == pEndPos)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Seek_interface *this = (struct Seek_interface *) self;
+    ISeek *this = (ISeek *) self;
     interface_lock_shared(this);
     SLboolean loopEnabled = this->mLoopEnabled;
     SLmillisecond startPos = this->mStartPos;
@@ -3108,8 +3124,8 @@ static SLresult Seek_GetLoop(SLSeekItf self, SLboolean *pLoopEnabled,
 
 static SLresult _3DCommit_Commit(SL3DCommitItf self)
 {
-    struct _3DCommit_interface *this = (struct _3DCommit_interface *) self;
-    struct Object_interface *thisObject = this->mThis;
+    I3DCommit *this = (I3DCommit *) self;
+    IObject *thisObject = this->mThis;
     object_lock_exclusive(thisObject);
     if (this->mDeferred) {
         SLuint32 myGeneration = this->mGeneration;
@@ -3123,8 +3139,8 @@ static SLresult _3DCommit_Commit(SL3DCommitItf self)
 
 static SLresult _3DCommit_SetDeferred(SL3DCommitItf self, SLboolean deferred)
 {
-    struct _3DCommit_interface *this = (struct _3DCommit_interface *) self;
-    struct Object_interface *thisObject = this->mThis;
+    I3DCommit *this = (I3DCommit *) self;
+    IObject *thisObject = this->mThis;
     object_lock_exclusive(thisObject);
     this->mDeferred = deferred;
     object_unlock_exclusive(thisObject);
@@ -3143,7 +3159,7 @@ static SLresult _3DDoppler_SetVelocityCartesian(SL3DDopplerItf self,
 {
     if (NULL == pVelocity)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
+    I3DDoppler *this = (I3DDoppler *) self;
     SLVec3D velocityCartesian = *pVelocity;
     interface_lock_exclusive(this);
     this->mVelocityCartesian = velocityCartesian;
@@ -3155,7 +3171,7 @@ static SLresult _3DDoppler_SetVelocityCartesian(SL3DDopplerItf self,
 static SLresult _3DDoppler_SetVelocitySpherical(SL3DDopplerItf self,
     SLmillidegree azimuth, SLmillidegree elevation, SLmillimeter speed)
 {
-    struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
+    I3DDoppler *this = (I3DDoppler *) self;
     interface_lock_exclusive(this);
     this->mVelocitySpherical.mAzimuth = azimuth;
     this->mVelocitySpherical.mElevation = elevation;
@@ -3170,7 +3186,7 @@ static SLresult _3DDoppler_GetVelocityCartesian(SL3DDopplerItf self,
 {
     if (NULL == pVelocity)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
+    I3DDoppler *this = (I3DDoppler *) self;
     interface_lock_exclusive(this);
     for (;;) {
         enum CartesianSphericalActive velocityActive = this->mVelocityActive;
@@ -3207,7 +3223,7 @@ static SLresult _3DDoppler_GetVelocityCartesian(SL3DDopplerItf self,
 static SLresult _3DDoppler_SetDopplerFactor(SL3DDopplerItf self,
     SLpermille dopplerFactor)
 {
-    struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
+    I3DDoppler *this = (I3DDoppler *) self;
     interface_lock_poke(this);
     this->mDopplerFactor = dopplerFactor;
     interface_unlock_poke(this);
@@ -3219,7 +3235,7 @@ static SLresult _3DDoppler_GetDopplerFactor(SL3DDopplerItf self,
 {
     if (NULL == pDopplerFactor)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DDoppler_interface *this = (struct _3DDoppler_interface *) self;
+    I3DDoppler *this = (I3DDoppler *) self;
     interface_lock_peek(this);
     SLpermille dopplerFactor = this->mDopplerFactor;
     interface_unlock_peek(this);
@@ -3242,7 +3258,7 @@ static SLresult _3DLocation_SetLocationCartesian(SL3DLocationItf self,
 {
     if (NULL == pLocation)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
+    I3DLocation *this = (I3DLocation *) self;
     SLVec3D locationCartesian = *pLocation;
     interface_lock_exclusive(this);
     this->mLocationCartesian = locationCartesian;
@@ -3254,7 +3270,7 @@ static SLresult _3DLocation_SetLocationCartesian(SL3DLocationItf self,
 static SLresult _3DLocation_SetLocationSpherical(SL3DLocationItf self,
     SLmillidegree azimuth, SLmillidegree elevation, SLmillimeter distance)
 {
-    struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
+    I3DLocation *this = (I3DLocation *) self;
     interface_lock_exclusive(this);
     this->mLocationSpherical.mAzimuth = azimuth;
     this->mLocationSpherical.mElevation = elevation;
@@ -3268,7 +3284,7 @@ static SLresult _3DLocation_Move(SL3DLocationItf self, const SLVec3D *pMovement)
 {
     if (NULL == pMovement)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
+    I3DLocation *this = (I3DLocation *) self;
     SLVec3D movementCartesian = *pMovement;
     interface_lock_exclusive(this);
     for (;;) {
@@ -3305,7 +3321,7 @@ static SLresult _3DLocation_GetLocationCartesian(SL3DLocationItf self,
 {
     if (NULL == pLocation)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
+    I3DLocation *this = (I3DLocation *) self;
     interface_lock_exclusive(this);
     for (;;) {
         enum CartesianSphericalActive locationActive = this->mLocationActive;
@@ -3346,7 +3362,7 @@ static SLresult _3DLocation_SetOrientationVectors(SL3DLocationItf self,
         return SL_RESULT_PARAMETER_INVALID;
     SLVec3D front = *pFront;
     SLVec3D above = *pAbove;
-    struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
+    I3DLocation *this = (I3DLocation *) self;
     interface_lock_exclusive(this);
     this->mOrientationVectors.mFront = front;
     this->mOrientationVectors.mAbove = above;
@@ -3359,7 +3375,7 @@ static SLresult _3DLocation_SetOrientationVectors(SL3DLocationItf self,
 static SLresult _3DLocation_SetOrientationAngles(SL3DLocationItf self,
     SLmillidegree heading, SLmillidegree pitch, SLmillidegree roll)
 {
-    struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
+    I3DLocation *this = (I3DLocation *) self;
     interface_lock_exclusive(this);
     this->mOrientationAngles.mHeading = heading;
     this->mOrientationAngles.mPitch = pitch;
@@ -3376,7 +3392,7 @@ static SLresult _3DLocation_Rotate(SL3DLocationItf self, SLmillidegree theta,
     if (NULL == pAxis)
         return SL_RESULT_PARAMETER_INVALID;
     SLVec3D axis = *pAxis;
-    struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
+    I3DLocation *this = (I3DLocation *) self;
     interface_lock_exclusive(this);
     while (this->mRotatePending)
         interface_cond_wait(this);
@@ -3392,7 +3408,7 @@ static SLresult _3DLocation_GetOrientationVectors(SL3DLocationItf self,
 {
     if (NULL == pFront || NULL == pUp)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DLocation_interface *this = (struct _3DLocation_interface *) self;
+    I3DLocation *this = (I3DLocation *) self;
     interface_lock_shared(this);
     SLVec3D front = this->mOrientationVectors.mFront;
     SLVec3D up = this->mOrientationVectors.mUp;
@@ -3547,8 +3563,8 @@ static SLresult AudioEncoder_SetEncoderSettings(SLAudioEncoderItf self,
 {
     if (NULL == pSettings)
         return SL_RESULT_PARAMETER_INVALID;
-    struct AudioEncoder_interface *this =
-        (struct AudioEncoder_interface *) self;
+    IAudioEncoder *this =
+        (IAudioEncoder *) self;
     SLAudioEncoderSettings settings = *pSettings;
     interface_lock_exclusive(this);
     this->mSettings = settings;
@@ -3561,8 +3577,8 @@ static SLresult AudioEncoder_GetEncoderSettings(SLAudioEncoderItf self,
 {
     if (NULL == pSettings)
         return SL_RESULT_PARAMETER_INVALID;
-    struct AudioEncoder_interface *this =
-        (struct AudioEncoder_interface *) self;
+    IAudioEncoder *this =
+        (IAudioEncoder *) self;
     interface_lock_shared(this);
     SLAudioEncoderSettings settings = this->mSettings;
     interface_unlock_shared(this);
@@ -3633,8 +3649,8 @@ static SLresult DeviceVolume_SetVolume(SLDeviceVolumeItf self,
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }
-    struct DeviceVolume_interface *this =
-        (struct DeviceVolume_interface *) self;
+    IDeviceVolume *this =
+        (IDeviceVolume *) self;
     interface_lock_poke(this);
     this->mVolume[~deviceID] = volume;
     interface_unlock_poke(this);
@@ -3653,8 +3669,8 @@ static SLresult DeviceVolume_GetVolume(SLDeviceVolumeItf self,
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }
-    struct DeviceVolume_interface *this =
-        (struct DeviceVolume_interface *) self;
+    IDeviceVolume *this =
+        (IDeviceVolume *) self;
     interface_lock_peek(this);
     SLint32 volume = this->mVolume[~deviceID];
     interface_unlock_peek(this);
@@ -3675,9 +3691,9 @@ static SLresult DynamicSource_SetSource(SLDynamicSourceItf self,
 {
     if (NULL == pDataSource)
         return SL_RESULT_PARAMETER_INVALID;
-    struct DynamicSource_interface *this = (struct DynamicSource_interface *) self;
+    IDynamicSource *this = (IDynamicSource *) self;
     // need to lock the object, as a change to source can impact most of object
-    struct Object_interface *thisObject = this->mThis;
+    IObject *thisObject = this->mThis;
     object_lock_exclusive(thisObject);
     // FIXME a bit of a simplification to say the least!
     this->mDataSource = pDataSource;
@@ -3691,10 +3707,10 @@ static SLresult DynamicSource_SetSource(SLDynamicSourceItf self,
 
 /* EffectSend implementation */
 
-static struct EnableLevel *getEnableLevel(struct EffectSend_interface *this,
+static struct EnableLevel *getEnableLevel(IEffectSend *this,
     const void *pAuxEffect)
 {
-    struct OutputMix_class *outputMix = this->mOutputMix;
+    COutputMix *outputMix = this->mOutputMix;
     // Make sure the sink for this player is an output mix
 #if 0 // not necessary
     if (NULL == outputMix)
@@ -3715,7 +3731,7 @@ static struct EnableLevel *getEnableLevel(struct EffectSend_interface *this,
 static SLresult EffectSend_EnableEffectSend(SLEffectSendItf self,
     const void *pAuxEffect, SLboolean enable, SLmillibel initialLevel)
 {
-    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    IEffectSend *this = (IEffectSend *) self;
     struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
     if (NULL == enableLevel)
         return SL_RESULT_PARAMETER_INVALID;
@@ -3731,7 +3747,7 @@ static SLresult EffectSend_IsEnabled(SLEffectSendItf self,
 {
     if (NULL == pEnable)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    IEffectSend *this = (IEffectSend *) self;
     struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
     if (NULL == enableLevel)
         return SL_RESULT_PARAMETER_INVALID;
@@ -3745,7 +3761,7 @@ static SLresult EffectSend_IsEnabled(SLEffectSendItf self,
 static SLresult EffectSend_SetDirectLevel(SLEffectSendItf self,
     SLmillibel directLevel)
 {
-    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    IEffectSend *this = (IEffectSend *) self;
     interface_lock_poke(this);
     this->mDirectLevel = directLevel;
     interface_unlock_poke(this);
@@ -3757,7 +3773,7 @@ static SLresult EffectSend_GetDirectLevel(SLEffectSendItf self,
 {
     if (NULL == pDirectLevel)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    IEffectSend *this = (IEffectSend *) self;
     interface_lock_peek(this);
     SLmillibel directLevel = this->mDirectLevel;
     interface_unlock_peek(this);
@@ -3768,7 +3784,7 @@ static SLresult EffectSend_GetDirectLevel(SLEffectSendItf self,
 static SLresult EffectSend_SetSendLevel(SLEffectSendItf self,
     const void *pAuxEffect, SLmillibel sendLevel)
 {
-    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    IEffectSend *this = (IEffectSend *) self;
     struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
     if (NULL == enableLevel)
         return SL_RESULT_PARAMETER_INVALID;
@@ -3784,7 +3800,7 @@ static SLresult EffectSend_GetSendLevel(SLEffectSendItf self,
 {
     if (NULL == pSendLevel)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EffectSend_interface *this = (struct EffectSend_interface *) self;
+    IEffectSend *this = (IEffectSend *) self;
     struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
     if (NULL == enableLevel)
         return SL_RESULT_PARAMETER_INVALID;
@@ -3939,8 +3955,8 @@ static SLresult EngineCapabilities_IsThreadSafe(SLEngineCapabilitiesItf self,
 {
     if (NULL == pIsThreadSafe)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EngineCapabilities_interface *this =
-        (struct EngineCapabilities_interface *) self;
+    IEngineCapabilities *this =
+        (IEngineCapabilities *) self;
     *pIsThreadSafe = this->mThreadSafe;
     return SL_RESULT_SUCCESS;
 }
@@ -3961,7 +3977,7 @@ static SLresult EngineCapabilities_IsThreadSafe(SLEngineCapabilitiesItf self,
 static SLresult LEDArray_ActivateLEDArray(SLLEDArrayItf self,
     SLuint32 lightMask)
 {
-    struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    ILEDArray *this = (ILEDArray *) self;
     interface_lock_poke(this);
     this->mLightMask = lightMask;
     interface_unlock_poke(this);
@@ -3973,7 +3989,7 @@ static SLresult LEDArray_IsLEDArrayActivated(SLLEDArrayItf self,
 {
     if (NULL == pLightMask)
         return SL_RESULT_PARAMETER_INVALID;
-    struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    ILEDArray *this = (ILEDArray *) self;
     interface_lock_peek(this);
     SLuint32 lightMask = this->mLightMask;
     interface_unlock_peek(this);
@@ -3987,7 +4003,7 @@ static SLresult LEDArray_SetColor(SLLEDArrayItf self, SLuint8 index,
     if (NULL == pColor)
         return SL_RESULT_PARAMETER_INVALID;
     SLHSL color = *pColor;
-    struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    ILEDArray *this = (ILEDArray *) self;
     interface_lock_poke(this);
     this->mColor[index] = color;
     interface_unlock_poke(this);
@@ -3999,7 +4015,7 @@ static SLresult LEDArray_GetColor(SLLEDArrayItf self, SLuint8 index,
 {
     if (NULL == pColor)
         return SL_RESULT_PARAMETER_INVALID;
-    struct LEDArray_interface *this = (struct LEDArray_interface *) self;
+    ILEDArray *this = (ILEDArray *) self;
     interface_lock_peek(this);
     SLHSL color = this->mColor[index];
     interface_unlock_peek(this);
@@ -4019,7 +4035,7 @@ static SLresult LEDArray_GetColor(SLLEDArrayItf self, SLuint8 index,
 static SLresult MetadataExtraction_GetItemCount(SLMetadataExtractionItf self,
     SLuint32 *pItemCount)
 {
-    //struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    //IMetadataExtraction *this = (IMetadataExtraction *) self;
     if (NULL == pItemCount)
         return SL_RESULT_PARAMETER_INVALID;
     *pItemCount = 0;
@@ -4029,7 +4045,7 @@ static SLresult MetadataExtraction_GetItemCount(SLMetadataExtractionItf self,
 static SLresult MetadataExtraction_GetKeySize(SLMetadataExtractionItf self,
     SLuint32 index, SLuint32 *pKeySize)
 {
-    //struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    //IMetadataExtraction *this = (IMetadataExtraction *) self;
     if (NULL == pKeySize)
         return SL_RESULT_PARAMETER_INVALID;
     *pKeySize = 0;
@@ -4039,18 +4055,22 @@ static SLresult MetadataExtraction_GetKeySize(SLMetadataExtractionItf self,
 static SLresult MetadataExtraction_GetKey(SLMetadataExtractionItf self,
     SLuint32 index, SLuint32 keySize, SLMetadataInfo *pKey)
 {
-    //struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    //IMetadataExtraction *this = (IMetadataExtraction *) self;
     if (NULL == pKey)
         return SL_RESULT_PARAMETER_INVALID;
-    SLMetadataInfo metadataInfo;
-    *pKey = metadataInfo;
+    SLMetadataInfo key;
+    key.size = 0;
+    key.encoding = 0;
+    key.langCountry[-0] = '\0';
+    key.data[0] = 0;
+    *pKey = key;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MetadataExtraction_GetValueSize(SLMetadataExtractionItf self,
     SLuint32 index, SLuint32 *pValueSize)
 {
-    //struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    //IMetadataExtraction *this = (IMetadataExtraction *) self;
     if (NULL == pValueSize)
         return SL_RESULT_PARAMETER_INVALID;
     *pValueSize = 0;
@@ -4060,10 +4080,14 @@ static SLresult MetadataExtraction_GetValueSize(SLMetadataExtractionItf self,
 static SLresult MetadataExtraction_GetValue(SLMetadataExtractionItf self,
     SLuint32 index, SLuint32 valueSize, SLMetadataInfo *pValue)
 {
-    //struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    //IMetadataExtraction *this = (IMetadataExtraction *) self;
     if (NULL == pValue)
         return SL_RESULT_PARAMETER_INVALID;
     SLMetadataInfo value;
+    value.size = 0;
+    value.encoding = 0;
+    value.langCountry[-0] = '\0';
+    value.data[0] = 0;
     *pValue = value;;
     return SL_RESULT_SUCCESS;
 }
@@ -4074,7 +4098,7 @@ static SLresult MetadataExtraction_AddKeyFilter(SLMetadataExtractionItf self,
 {
     if (NULL == pKey || NULL == pValueLangCountry)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    IMetadataExtraction *this = (IMetadataExtraction *) self;
     interface_lock_exclusive(this);
     this->mKeySize = keySize;
     this->mKey = pKey;
@@ -4088,7 +4112,7 @@ static SLresult MetadataExtraction_AddKeyFilter(SLMetadataExtractionItf self,
 
 static SLresult MetadataExtraction_ClearKeyFilter(SLMetadataExtractionItf self)
 {
-    struct MetadataExtraction_interface *this = (struct MetadataExtraction_interface *) self;
+    IMetadataExtraction *this = (IMetadataExtraction *) self;
     this->mKeyFilter = 0;
     return SL_RESULT_SUCCESS;
 }
@@ -4109,7 +4133,7 @@ static SLresult MetadataExtraction_ClearKeyFilter(SLMetadataExtractionItf self)
 static SLresult MetadataTraversal_SetMode(SLMetadataTraversalItf self,
     SLuint32 mode)
 {
-    struct MetadataTraversal_interface *this = (struct MetadataTraversal_interface *) self;
+    IMetadataTraversal *this = (IMetadataTraversal *) self;
     this->mMode = mode;
     return SL_RESULT_SUCCESS;
 }
@@ -4119,7 +4143,7 @@ static SLresult MetadataTraversal_GetChildCount(SLMetadataTraversalItf self,
 {
     if (NULL == pCount)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MetadataTraversal_interface *this = (struct MetadataTraversal_interface *) self;
+    IMetadataTraversal *this = (IMetadataTraversal *) self;
     *pCount = this->mCount;
     return SL_RESULT_SUCCESS;
 }
@@ -4129,7 +4153,7 @@ static SLresult MetadataTraversal_GetChildMIMETypeSize(
 {
     if (NULL == pSize)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MetadataTraversal_interface *this = (struct MetadataTraversal_interface *) self;
+    IMetadataTraversal *this = (IMetadataTraversal *) self;
     *pSize = this->mSize;
     return SL_RESULT_SUCCESS;
 }
@@ -4138,14 +4162,14 @@ static SLresult MetadataTraversal_GetChildInfo(SLMetadataTraversalItf self,
     SLuint32 index, SLint32 *pNodeID, SLuint32 *pType, SLuint32 size,
     SLchar *pMimeType)
 {
-    //struct MetadataTraversal_interface *this = (struct MetadataTraversal_interface *) self;
+    //IMetadataTraversal *this = (IMetadataTraversal *) self;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MetadataTraversal_SetActiveNode(SLMetadataTraversalItf self,
     SLuint32 index)
 {
-    struct MetadataTraversal_interface *this = (struct MetadataTraversal_interface *) self;
+    IMetadataTraversal *this = (IMetadataTraversal *) self;
     this->mIndex = index;
     return SL_RESULT_SUCCESS;
 }
@@ -4164,7 +4188,7 @@ static SLresult MetadataTraversal_SetActiveNode(SLMetadataTraversalItf self,
 static SLresult MuteSolo_SetChannelMute(SLMuteSoloItf self, SLuint8 chan,
    SLboolean mute)
 {
-    struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
+    IMuteSolo *this = (IMuteSolo *) self;
     SLuint32 mask = 1 << chan;
     interface_lock_exclusive(this);
     if (mute)
@@ -4180,7 +4204,7 @@ static SLresult MuteSolo_GetChannelMute(SLMuteSoloItf self, SLuint8 chan,
 {
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
+    IMuteSolo *this = (IMuteSolo *) self;
     interface_lock_peek(this);
     SLuint32 mask = this->mMuteMask;
     interface_unlock_peek(this);
@@ -4191,7 +4215,7 @@ static SLresult MuteSolo_GetChannelMute(SLMuteSoloItf self, SLuint8 chan,
 static SLresult MuteSolo_SetChannelSolo(SLMuteSoloItf self, SLuint8 chan,
     SLboolean solo)
 {
-    struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
+    IMuteSolo *this = (IMuteSolo *) self;
     SLuint32 mask = 1 << chan;
     interface_lock_exclusive(this);
     if (solo)
@@ -4207,7 +4231,7 @@ static SLresult MuteSolo_GetChannelSolo(SLMuteSoloItf self, SLuint8 chan,
 {
     if (NULL == pSolo)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
+    IMuteSolo *this = (IMuteSolo *) self;
     interface_lock_peek(this);
     SLuint32 mask = this->mSoloMask;
     interface_unlock_peek(this);
@@ -4220,7 +4244,7 @@ static SLresult MuteSolo_GetNumChannels(SLMuteSoloItf self,
 {
     if (NULL == pNumChannels)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MuteSolo_interface *this = (struct MuteSolo_interface *) self;
+    IMuteSolo *this = (IMuteSolo *) self;
     // FIXME const
     SLuint32 numChannels = this->mNumChannels;
     *pNumChannels = numChannels;
@@ -4239,7 +4263,7 @@ static SLresult MuteSolo_GetNumChannels(SLMuteSoloItf self,
 
 static SLresult Pitch_SetPitch(SLPitchItf self, SLpermille pitch)
 {
-    struct Pitch_interface *this = (struct Pitch_interface *) self;
+    IPitch *this = (IPitch *) self;
     interface_lock_poke(this);
     this->mPitch = pitch;
     interface_unlock_poke(this);
@@ -4250,7 +4274,7 @@ static SLresult Pitch_GetPitch(SLPitchItf self, SLpermille *pPitch)
 {
     if (NULL == pPitch)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Pitch_interface *this = (struct Pitch_interface *) self;
+    IPitch *this = (IPitch *) self;
     interface_lock_peek(this);
     SLpermille pitch = this->mPitch;
     interface_unlock_peek(this);
@@ -4263,7 +4287,7 @@ static SLresult Pitch_GetPitchCapabilities(SLPitchItf self,
 {
     if (NULL == pMinPitch || NULL == pMaxPitch)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Pitch_interface *this = (struct Pitch_interface *) self;
+    IPitch *this = (IPitch *) self;
     SLpermille minPitch = this->mMinPitch;
     SLpermille maxPitch = this->mMaxPitch;
     *pMinPitch = minPitch;
@@ -4281,7 +4305,7 @@ static SLresult Pitch_GetPitchCapabilities(SLPitchItf self,
 
 static SLresult PlaybackRate_SetRate(SLPlaybackRateItf self, SLpermille rate)
 {
-    struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    IPlaybackRate *this = (IPlaybackRate *) self;
     interface_lock_poke(this);
     this->mRate = rate;
     interface_unlock_poke(this);
@@ -4292,7 +4316,7 @@ static SLresult PlaybackRate_GetRate(SLPlaybackRateItf self, SLpermille *pRate)
 {
     if (NULL == pRate)
         return SL_RESULT_PARAMETER_INVALID;
-    struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    IPlaybackRate *this = (IPlaybackRate *) self;
     interface_lock_peek(this);
     SLpermille rate = this->mRate;
     interface_unlock_peek(this);
@@ -4303,7 +4327,7 @@ static SLresult PlaybackRate_GetRate(SLPlaybackRateItf self, SLpermille *pRate)
 static SLresult PlaybackRate_SetPropertyConstraints(SLPlaybackRateItf self,
     SLuint32 constraints)
 {
-    struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    IPlaybackRate *this = (IPlaybackRate *) self;
     // FIXME are properties and property constraints the same thing?
     this->mProperties = constraints;
     return SL_RESULT_SUCCESS;
@@ -4314,7 +4338,7 @@ static SLresult PlaybackRate_GetProperties(SLPlaybackRateItf self,
 {
     if (NULL == pProperties)
         return SL_RESULT_PARAMETER_INVALID;
-    struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    IPlaybackRate *this = (IPlaybackRate *) self;
     SLuint32 properties = this->mProperties;
     *pProperties = properties;
     return SL_RESULT_SUCCESS;
@@ -4325,7 +4349,7 @@ static SLresult PlaybackRate_GetCapabilitiesOfRate(SLPlaybackRateItf self,
 {
     if (NULL == pCapabilities)
         return SL_RESULT_PARAMETER_INVALID;
-    // struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    // IPlaybackRate *this = (IPlaybackRate *) self;
     SLuint32 capabilities = 0; // FIXME
     *pCapabilities = capabilities;
     return SL_RESULT_SUCCESS;
@@ -4337,7 +4361,7 @@ static SLresult PlaybackRate_GetRateRange(SLPlaybackRateItf self, SLuint8 index,
 {
     if (NULL == pMinRate || NULL == pMaxRate || NULL == pStepSize || NULL == pCapabilities)
         return SL_RESULT_PARAMETER_INVALID;
-    struct PlaybackRate_interface *this = (struct PlaybackRate_interface *) self;
+    IPlaybackRate *this = (IPlaybackRate *) self;
     interface_lock_shared(this);
     SLpermille minRate = this->mMinRate;
     SLpermille maxRate = this->mMaxRate;
@@ -4367,7 +4391,7 @@ static SLresult PrefetchStatus_GetPrefetchStatus(SLPrefetchStatusItf self,
 {
     if (NULL == pStatus)
         return SL_RESULT_PARAMETER_INVALID;
-    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    IPrefetchStatus *this = (IPrefetchStatus *) self;
     interface_lock_peek(this);
     SLuint32 status = this->mStatus;
     interface_unlock_peek(this);
@@ -4380,7 +4404,7 @@ static SLresult PrefetchStatus_GetFillLevel(SLPrefetchStatusItf self,
 {
     if (NULL == pLevel)
         return SL_RESULT_PARAMETER_INVALID;
-    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    IPrefetchStatus *this = (IPrefetchStatus *) self;
     interface_lock_peek(this);
     SLpermille level = this->mLevel;
     interface_unlock_peek(this);
@@ -4391,7 +4415,7 @@ static SLresult PrefetchStatus_GetFillLevel(SLPrefetchStatusItf self,
 static SLresult PrefetchStatus_RegisterCallback(SLPrefetchStatusItf self,
     slPrefetchCallback callback, void *pContext)
 {
-    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    IPrefetchStatus *this = (IPrefetchStatus *) self;
     interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
@@ -4402,7 +4426,7 @@ static SLresult PrefetchStatus_RegisterCallback(SLPrefetchStatusItf self,
 static SLresult PrefetchStatus_SetCallbackEventsMask(SLPrefetchStatusItf self,
     SLuint32 eventFlags)
 {
-    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    IPrefetchStatus *this = (IPrefetchStatus *) self;
     interface_lock_poke(this);
     this->mCallbackEventsMask = eventFlags;
     interface_unlock_poke(this);
@@ -4414,7 +4438,7 @@ static SLresult PrefetchStatus_GetCallbackEventsMask(SLPrefetchStatusItf self,
 {
     if (NULL == pEventFlags)
         return SL_RESULT_PARAMETER_INVALID;
-    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    IPrefetchStatus *this = (IPrefetchStatus *) self;
     interface_lock_peek(this);
     SLuint32 callbackEventsMask = this->mCallbackEventsMask;
     interface_unlock_peek(this);
@@ -4425,7 +4449,7 @@ static SLresult PrefetchStatus_GetCallbackEventsMask(SLPrefetchStatusItf self,
 static SLresult PrefetchStatus_SetFillUpdatePeriod(SLPrefetchStatusItf self,
     SLpermille period)
 {
-    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    IPrefetchStatus *this = (IPrefetchStatus *) self;
     interface_lock_poke(this);
     this->mFillUpdatePeriod = period;
     interface_unlock_poke(this);
@@ -4437,7 +4461,7 @@ static SLresult PrefetchStatus_GetFillUpdatePeriod(SLPrefetchStatusItf self,
 {
     if (NULL == pPeriod)
         return SL_RESULT_PARAMETER_INVALID;
-    struct PrefetchStatus_interface *this = (struct PrefetchStatus_interface *) self;
+    IPrefetchStatus *this = (IPrefetchStatus *) self;
     interface_lock_peek(this);
     SLpermille fillUpdatePeriod = this->mFillUpdatePeriod;
     interface_unlock_peek(this);
@@ -4460,7 +4484,7 @@ PrefetchStatus_PrefetchStatusItf = {
 
 static SLresult RatePitch_SetRate(SLRatePitchItf self, SLpermille rate)
 {
-    struct RatePitch_interface *this = (struct RatePitch_interface *) self;
+    IRatePitch *this = (IRatePitch *) self;
     interface_lock_poke(this);
     this->mRate = rate;
     interface_unlock_poke(this);
@@ -4471,7 +4495,7 @@ static SLresult RatePitch_GetRate(SLRatePitchItf self, SLpermille *pRate)
 {
     if (NULL == pRate)
         return SL_RESULT_PARAMETER_INVALID;
-    struct RatePitch_interface *this = (struct RatePitch_interface *) self;
+    IRatePitch *this = (IRatePitch *) self;
     interface_lock_peek(this);
     SLpermille rate = this->mRate;
     interface_unlock_peek(this);
@@ -4484,7 +4508,7 @@ static SLresult RatePitch_GetRatePitchCapabilities(SLRatePitchItf self,
 {
     if (NULL == pMinRate || NULL == pMaxRate)
         return SL_RESULT_PARAMETER_INVALID;
-    struct RatePitch_interface *this = (struct RatePitch_interface *) self;
+    IRatePitch *this = (IRatePitch *) self;
     // FIXME const, direct access?
     SLpermille minRate = this->mMinRate;
     SLpermille maxRate = this->mMaxRate;
@@ -4503,7 +4527,7 @@ static SLresult RatePitch_GetRatePitchCapabilities(SLRatePitchItf self,
 
 static SLresult Record_SetRecordState(SLRecordItf self, SLuint32 state)
 {
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     interface_lock_poke(this);
     this->mState = state;
     interface_unlock_poke(this);
@@ -4512,7 +4536,7 @@ static SLresult Record_SetRecordState(SLRecordItf self, SLuint32 state)
 
 static SLresult Record_GetRecordState(SLRecordItf self, SLuint32 *pState)
 {
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     if (NULL == pState)
         return SL_RESULT_PARAMETER_INVALID;
     interface_lock_peek(this);
@@ -4524,7 +4548,7 @@ static SLresult Record_GetRecordState(SLRecordItf self, SLuint32 *pState)
 
 static SLresult Record_SetDurationLimit(SLRecordItf self, SLmillisecond msec)
 {
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     interface_lock_poke(this);
     this->mDurationLimit = msec;
     interface_unlock_poke(this);
@@ -4535,7 +4559,7 @@ static SLresult Record_GetPosition(SLRecordItf self, SLmillisecond *pMsec)
 {
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     interface_lock_peek(this);
     SLmillisecond position = this->mPosition;
     interface_unlock_peek(this);
@@ -4546,7 +4570,7 @@ static SLresult Record_GetPosition(SLRecordItf self, SLmillisecond *pMsec)
 static SLresult Record_RegisterCallback(SLRecordItf self,
     slRecordCallback callback, void *pContext)
 {
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
@@ -4557,7 +4581,7 @@ static SLresult Record_RegisterCallback(SLRecordItf self,
 static SLresult Record_SetCallbackEventsMask(SLRecordItf self,
     SLuint32 eventFlags)
 {
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     interface_lock_poke(this);
     this->mCallbackEventsMask = eventFlags;
     interface_unlock_poke(this);
@@ -4569,7 +4593,7 @@ static SLresult Record_GetCallbackEventsMask(SLRecordItf self,
 {
     if (NULL == pEventFlags)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     interface_lock_peek(this);
     SLuint32 callbackEventsMask = this->mCallbackEventsMask;
     interface_unlock_peek(this);
@@ -4579,7 +4603,7 @@ static SLresult Record_GetCallbackEventsMask(SLRecordItf self,
 
 static SLresult Record_SetMarkerPosition(SLRecordItf self, SLmillisecond mSec)
 {
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     interface_lock_poke(this);
     this->mMarkerPosition = mSec;
     interface_unlock_poke(this);
@@ -4588,7 +4612,7 @@ static SLresult Record_SetMarkerPosition(SLRecordItf self, SLmillisecond mSec)
 
 static SLresult Record_ClearMarkerPosition(SLRecordItf self)
 {
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     interface_lock_poke(this);
     this->mMarkerPosition = 0;
     interface_unlock_poke(this);
@@ -4599,7 +4623,7 @@ static SLresult Record_GetMarkerPosition(SLRecordItf self, SLmillisecond *pMsec)
 {
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     interface_lock_peek(this);
     SLmillisecond markerPosition = this->mMarkerPosition;
     interface_unlock_peek(this);
@@ -4610,7 +4634,7 @@ static SLresult Record_GetMarkerPosition(SLRecordItf self, SLmillisecond *pMsec)
 static SLresult Record_SetPositionUpdatePeriod(SLRecordItf self,
     SLmillisecond mSec)
 {
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     interface_lock_poke(this);
     this->mPositionUpdatePeriod = mSec;
     interface_unlock_poke(this);
@@ -4622,7 +4646,7 @@ static SLresult Record_GetPositionUpdatePeriod(SLRecordItf self,
 {
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Record_interface *this = (struct Record_interface *) self;
+    IRecord *this = (IRecord *) self;
     interface_lock_peek(this);
     SLmillisecond positionUpdatePeriod = this->mPositionUpdatePeriod;
     interface_unlock_peek(this);
@@ -4649,7 +4673,7 @@ static SLresult Record_GetPositionUpdatePeriod(SLRecordItf self,
 
 static SLresult ThreadSync_EnterCriticalSection(SLThreadSyncItf self)
 {
-    struct ThreadSync_interface *this = (struct ThreadSync_interface *) self;
+    IThreadSync *this = (IThreadSync *) self;
     SLresult result;
     interface_lock_exclusive(this);
     for (;;) {
@@ -4673,7 +4697,7 @@ static SLresult ThreadSync_EnterCriticalSection(SLThreadSyncItf self)
 
 static SLresult ThreadSync_ExitCriticalSection(SLThreadSyncItf self)
 {
-    struct ThreadSync_interface *this = (struct ThreadSync_interface *) self;
+    IThreadSync *this = (IThreadSync *) self;
     SLresult result;
     interface_lock_exclusive(this);
     if (!this->mInCriticalSection || this->mOwner != pthread_self()) {
@@ -4700,7 +4724,7 @@ static SLresult ThreadSync_ExitCriticalSection(SLThreadSyncItf self)
 
 static SLresult Vibra_Vibrate(SLVibraItf self, SLboolean vibrate)
 {
-    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    IVibra *this = (IVibra *) self;
     interface_lock_poke(this);
     this->mVibrate = vibrate;
     interface_unlock_poke(this);
@@ -4711,7 +4735,7 @@ static SLresult Vibra_IsVibrating(SLVibraItf self, SLboolean *pVibrating)
 {
     if (NULL == pVibrating)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    IVibra *this = (IVibra *) self;
     interface_lock_peek(this);
     SLboolean vibrate = this->mVibrate;
     interface_unlock_peek(this);
@@ -4721,7 +4745,7 @@ static SLresult Vibra_IsVibrating(SLVibraItf self, SLboolean *pVibrating)
 
 static SLresult Vibra_SetFrequency(SLVibraItf self, SLmilliHertz frequency)
 {
-    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    IVibra *this = (IVibra *) self;
     interface_lock_poke(this);
     this->mFrequency = frequency;
     interface_unlock_exclusive(this);
@@ -4732,7 +4756,7 @@ static SLresult Vibra_GetFrequency(SLVibraItf self, SLmilliHertz *pFrequency)
 {
     if (NULL == pFrequency)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    IVibra *this = (IVibra *) self;
     interface_lock_peek(this);
     SLmilliHertz frequency = this->mFrequency;
     interface_unlock_peek(this);
@@ -4742,7 +4766,7 @@ static SLresult Vibra_GetFrequency(SLVibraItf self, SLmilliHertz *pFrequency)
 
 static SLresult Vibra_SetIntensity(SLVibraItf self, SLpermille intensity)
 {
-    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    IVibra *this = (IVibra *) self;
     interface_lock_poke(this);
     this->mIntensity = intensity;
     interface_unlock_poke(this);
@@ -4753,7 +4777,7 @@ static SLresult Vibra_GetIntensity(SLVibraItf self, SLpermille *pIntensity)
 {
     if (NULL == pIntensity)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Vibra_interface *this = (struct Vibra_interface *) self;
+    IVibra *this = (IVibra *) self;
     interface_lock_peek(this);
     SLpermille intensity = this->mIntensity;
     interface_unlock_peek(this);
@@ -4776,8 +4800,8 @@ static SLresult Visualization_RegisterVisualizationCallback(
     SLVisualizationItf self, slVisualizationCallback callback, void *pContext,
     SLmilliHertz rate)
 {
-    struct Visualization_interface *this =
-        (struct Visualization_interface *) self;
+    IVisualization *this =
+        (IVisualization *) self;
     interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
@@ -4804,7 +4828,7 @@ static SLresult Visualization_GetMaxRate(SLVisualizationItf self,
 
 static SLresult BassBoost_SetEnabled(SLBassBoostItf self, SLboolean enabled)
 {
-    struct BassBoost_interface *this = (struct BassBoost_interface *) self;
+    IBassBoost *this = (IBassBoost *) self;
     interface_lock_poke(this);
     this->mEnabled = enabled;
     interface_unlock_poke(this);
@@ -4815,7 +4839,7 @@ static SLresult BassBoost_IsEnabled(SLBassBoostItf self, SLboolean *pEnabled)
 {
     if (NULL == pEnabled)
         return SL_RESULT_PARAMETER_INVALID;
-    struct BassBoost_interface *this = (struct BassBoost_interface *) self;
+    IBassBoost *this = (IBassBoost *) self;
     interface_lock_peek(this);
     SLboolean enabled = this->mEnabled;
     interface_unlock_peek(this);
@@ -4825,7 +4849,7 @@ static SLresult BassBoost_IsEnabled(SLBassBoostItf self, SLboolean *pEnabled)
 
 static SLresult BassBoost_SetStrength(SLBassBoostItf self, SLpermille strength)
 {
-    struct BassBoost_interface *this = (struct BassBoost_interface *) self;
+    IBassBoost *this = (IBassBoost *) self;
     interface_lock_poke(this);
     this->mStrength = strength;
     interface_unlock_poke(this);
@@ -4837,7 +4861,7 @@ static SLresult BassBoost_GetRoundedStrength(SLBassBoostItf self,
 {
     if (NULL == pStrength)
         return SL_RESULT_PARAMETER_INVALID;
-    struct BassBoost_interface *this = (struct BassBoost_interface *) self;
+    IBassBoost *this = (IBassBoost *) self;
     interface_lock_peek(this);
     SLpermille strength = this->mStrength;
     interface_unlock_peek(this);
@@ -4866,10 +4890,10 @@ static SLresult BassBoost_IsStrengthSupported(SLBassBoostItf self,
 
 static SLresult _3DGrouping_Set3DGroup(SL3DGroupingItf self, SLObjectItf group)
 {
-    struct _3DGrouping_interface *this = (struct _3DGrouping_interface *) self;
+    I3DGrouping *this = (I3DGrouping *) self;
     if (NULL == group)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Object_interface *thisGroup = (struct Object_interface *) group;
+    IObject *thisGroup = (IObject *) group;
     if (&_3DGroup_class != thisGroup->mClass)
         return SL_RESULT_PARAMETER_INVALID;
     // FIXME race possible if group unrealized immediately after, should lock
@@ -4887,7 +4911,7 @@ static SLresult _3DGrouping_Get3DGroup(SL3DGroupingItf self,
 {
     if (NULL == pGroup)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DGrouping_interface *this = (struct _3DGrouping_interface *) self;
+    I3DGrouping *this = (I3DGrouping *) self;
     interface_lock_peek(this);
     *pGroup = this->mGroup;
     interface_unlock_peek(this);
@@ -4904,7 +4928,7 @@ static SLresult _3DGrouping_Get3DGroup(SL3DGroupingItf self,
 static SLresult _3DMacroscopic_SetSize(SL3DMacroscopicItf self,
     SLmillimeter width, SLmillimeter height, SLmillimeter depth)
 {
-    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    I3DMacroscopic *this = (I3DMacroscopic *) self;
     interface_lock_exclusive(this);
     this->mSize.mWidth = width;
     this->mSize.mHeight = height;
@@ -4918,7 +4942,7 @@ static SLresult _3DMacroscopic_GetSize(SL3DMacroscopicItf self,
 {
     if (NULL == pWidth || NULL == pHeight || NULL == pDepth)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    I3DMacroscopic *this = (I3DMacroscopic *) self;
     interface_lock_shared(this);
     SLmillimeter width = this->mSize.mWidth;
     SLmillimeter height = this->mSize.mHeight;
@@ -4933,7 +4957,7 @@ static SLresult _3DMacroscopic_GetSize(SL3DMacroscopicItf self,
 static SLresult _3DMacroscopic_SetOrientationAngles(SL3DMacroscopicItf self,
     SLmillidegree heading, SLmillidegree pitch, SLmillidegree roll)
 {
-    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    I3DMacroscopic *this = (I3DMacroscopic *) self;
     interface_lock_exclusive(this);
     this->mOrientationAngles.mHeading = heading;
     this->mOrientationAngles.mPitch = pitch;
@@ -4950,7 +4974,7 @@ static SLresult _3DMacroscopic_SetOrientationVectors(SL3DMacroscopicItf self,
 {
     if (NULL == pFront || NULL == pAbove)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    I3DMacroscopic *this = (I3DMacroscopic *) self;
     SLVec3D front = *pFront;
     SLVec3D above = *pAbove;
     interface_lock_exclusive(this);
@@ -4968,7 +4992,7 @@ static SLresult _3DMacroscopic_Rotate(SL3DMacroscopicItf self,
     if (NULL == pAxis)
         return SL_RESULT_PARAMETER_INVALID;
     SLVec3D axis = *pAxis;
-    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    I3DMacroscopic *this = (I3DMacroscopic *) self;
     // FIXME Do the rotate here:
     // interface_lock_shared(this);
     // read old values and generation
@@ -4992,7 +5016,7 @@ static SLresult _3DMacroscopic_GetOrientationVectors(SL3DMacroscopicItf self,
 {
     if (NULL == pFront || NULL == pUp)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DMacroscopic_interface *this = (struct _3DMacroscopic_interface *) self;
+    I3DMacroscopic *this = (I3DMacroscopic *) self;
     interface_lock_exclusive(this);
     for (;;) {
         enum AnglesVectorsActive orientationActive = this->mOrientationActive;
@@ -5046,7 +5070,7 @@ static SLresult _3DMacroscopic_GetOrientationVectors(SL3DMacroscopicItf self,
 static SLresult _3DSource_SetHeadRelative(SL3DSourceItf self,
     SLboolean headRelative)
 {
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_poke(this);
     this->mHeadRelative = headRelative;
     interface_unlock_poke(this);
@@ -5058,7 +5082,7 @@ static SLresult _3DSource_GetHeadRelative(SL3DSourceItf self,
 {
     if (NULL == pHeadRelative)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_peek(this);
     SLboolean headRelative = this->mHeadRelative;
     interface_unlock_peek(this);
@@ -5069,7 +5093,7 @@ static SLresult _3DSource_GetHeadRelative(SL3DSourceItf self,
 static SLresult _3DSource_SetRolloffDistances(SL3DSourceItf self,
     SLmillimeter minDistance, SLmillimeter maxDistance)
 {
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_exclusive(this);
     this->mMinDistance = minDistance;
     this->mMaxDistance = maxDistance;
@@ -5082,7 +5106,7 @@ static SLresult _3DSource_GetRolloffDistances(SL3DSourceItf self,
 {
     if (NULL == pMinDistance || NULL == pMaxDistance)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_shared(this);
     SLmillimeter minDistance = this->mMinDistance;
     SLmillimeter maxDistance = this->mMaxDistance;
@@ -5095,7 +5119,7 @@ static SLresult _3DSource_GetRolloffDistances(SL3DSourceItf self,
 static SLresult _3DSource_SetRolloffMaxDistanceMute(SL3DSourceItf self,
     SLboolean mute)
 {
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_poke(this);
     this->mRolloffMaxDistanceMute = mute;
     interface_unlock_poke(this);
@@ -5107,7 +5131,7 @@ static SLresult _3DSource_GetRolloffMaxDistanceMute(SL3DSourceItf self,
 {
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_peek(this);
     SLboolean mute = this->mRolloffMaxDistanceMute;
     interface_unlock_peek(this);
@@ -5118,7 +5142,7 @@ static SLresult _3DSource_GetRolloffMaxDistanceMute(SL3DSourceItf self,
 static SLresult _3DSource_SetRolloffFactor(SL3DSourceItf self,
     SLpermille rolloffFactor)
 {
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_poke(this);
     this->mRolloffFactor = rolloffFactor;
     interface_unlock_poke(this);
@@ -5128,7 +5152,7 @@ static SLresult _3DSource_SetRolloffFactor(SL3DSourceItf self,
 static SLresult _3DSource_GetRolloffFactor(SL3DSourceItf self,
     SLpermille *pRolloffFactor)
 {
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_peek(this);
     SLpermille rolloffFactor = this->mRolloffFactor;
     interface_unlock_peek(this);
@@ -5139,7 +5163,7 @@ static SLresult _3DSource_GetRolloffFactor(SL3DSourceItf self,
 static SLresult _3DSource_SetRoomRolloffFactor(SL3DSourceItf self,
     SLpermille roomRolloffFactor)
 {
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_poke(this);
     this->mRoomRolloffFactor = roomRolloffFactor;
     interface_unlock_poke(this);
@@ -5149,7 +5173,7 @@ static SLresult _3DSource_SetRoomRolloffFactor(SL3DSourceItf self,
 static SLresult _3DSource_GetRoomRolloffFactor(SL3DSourceItf self,
     SLpermille *pRoomRolloffFactor)
 {
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_peek(this);
     SLpermille roomRolloffFactor = this->mRoomRolloffFactor;
     interface_unlock_peek(this);
@@ -5159,7 +5183,7 @@ static SLresult _3DSource_GetRoomRolloffFactor(SL3DSourceItf self,
 
 static SLresult _3DSource_SetRolloffModel(SL3DSourceItf self, SLuint8 model)
 {
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_poke(this);
     this->mDistanceModel = model;
     interface_unlock_poke(this);
@@ -5168,7 +5192,7 @@ static SLresult _3DSource_SetRolloffModel(SL3DSourceItf self, SLuint8 model)
 
 static SLresult _3DSource_GetRolloffModel(SL3DSourceItf self, SLuint8 *pModel)
 {
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_peek(this);
     SLuint8 model = this->mDistanceModel;
     interface_unlock_peek(this);
@@ -5179,7 +5203,7 @@ static SLresult _3DSource_GetRolloffModel(SL3DSourceItf self, SLuint8 *pModel)
 static SLresult _3DSource_SetCone(SL3DSourceItf self, SLmillidegree innerAngle,
     SLmillidegree outerAngle, SLmillibel outerLevel)
 {
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_exclusive(this);
     this->mConeInnerAngle = innerAngle;
     this->mConeOuterAngle = outerAngle;
@@ -5194,7 +5218,7 @@ static SLresult _3DSource_GetCone(SL3DSourceItf self,
 {
     if (NULL == pInnerAngle || NULL == pOuterAngle || NULL == pOuterLevel)
         return SL_RESULT_PARAMETER_INVALID;
-    struct _3DSource_interface *this = (struct _3DSource_interface *) self;
+    I3DSource *this = (I3DSource *) self;
     interface_lock_shared(this);
     SLmillidegree innerAngle = this->mConeInnerAngle;
     SLmillidegree outerAngle = this->mConeOuterAngle;
@@ -5227,7 +5251,7 @@ static SLresult _3DSource_GetCone(SL3DSourceItf self,
 
 static SLresult Equalizer_SetEnabled(SLEqualizerItf self, SLboolean enabled)
 {
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     interface_lock_poke(this);
     this->mEnabled = enabled;
     interface_unlock_poke(this);
@@ -5238,7 +5262,7 @@ static SLresult Equalizer_IsEnabled(SLEqualizerItf self, SLboolean *pEnabled)
 {
     if (NULL == pEnabled)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     interface_lock_peek(this);
     SLboolean enabled = this->mEnabled;
     interface_unlock_peek(this);
@@ -5251,7 +5275,7 @@ static SLresult Equalizer_GetNumberOfBands(SLEqualizerItf self,
 {
     if (NULL == pNumBands)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     // Note: no lock, but OK because it is const
     *pNumBands = this->mNumBands;
     return SL_RESULT_SUCCESS;
@@ -5262,7 +5286,7 @@ static SLresult Equalizer_GetBandLevelRange(SLEqualizerItf self,
 {
     if (NULL == pMin && NULL == pMax)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     // Note: no lock, but OK because it is const
     if (NULL != pMin)
         *pMin = this->mMin;
@@ -5274,7 +5298,7 @@ static SLresult Equalizer_GetBandLevelRange(SLEqualizerItf self,
 static SLresult Equalizer_SetBandLevel(SLEqualizerItf self, SLuint16 band,
     SLmillibel level)
 {
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     if (band >= this->mNumBands)
         return SL_RESULT_PARAMETER_INVALID;
     interface_lock_poke(this);
@@ -5288,7 +5312,7 @@ static SLresult Equalizer_GetBandLevel(SLEqualizerItf self, SLuint16 band,
 {
     if (NULL == pLevel)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     if (band >= this->mNumBands)
         return SL_RESULT_PARAMETER_INVALID;
     interface_lock_peek(this);
@@ -5303,7 +5327,7 @@ static SLresult Equalizer_GetCenterFreq(SLEqualizerItf self, SLuint16 band,
 {
     if (NULL == pCenter)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     if (band >= this->mNumBands)
         return SL_RESULT_PARAMETER_INVALID;
     // Note: no lock, but OK because it is const
@@ -5316,7 +5340,7 @@ static SLresult Equalizer_GetBandFreqRange(SLEqualizerItf self, SLuint16 band,
 {
     if (NULL == pMin && NULL == pMax)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     if (band >= this->mNumBands)
         return SL_RESULT_PARAMETER_INVALID;
     // Note: no lock, but OK because it is const
@@ -5332,7 +5356,7 @@ static SLresult Equalizer_GetBand(SLEqualizerItf self, SLmilliHertz frequency,
 {
     if (NULL == pBand)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     // search for band whose center frequency has the closest ratio to 1.0
     // assumes bands are unsorted (a pessimistic assumption)
     // assumes bands can overlap (a pessimistic assumption)
@@ -5362,7 +5386,7 @@ static SLresult Equalizer_GetCurrentPreset(SLEqualizerItf self,
 {
     if (NULL == pPreset)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     interface_lock_peek(this);
     *pPreset = this->mPreset;
     interface_unlock_peek(this);
@@ -5371,7 +5395,7 @@ static SLresult Equalizer_GetCurrentPreset(SLEqualizerItf self,
 
 static SLresult Equalizer_UsePreset(SLEqualizerItf self, SLuint16 index)
 {
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     if (index >= this->mNumPresets)
         return SL_RESULT_PARAMETER_INVALID;
     interface_lock_poke(this);
@@ -5385,7 +5409,7 @@ static SLresult Equalizer_GetNumberOfPresets(SLEqualizerItf self,
 {
     if (NULL == pNumPresets)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     // Note: no lock, but OK because it is const
     *pNumPresets = this->mNumPresets;
     return SL_RESULT_SUCCESS;
@@ -5396,7 +5420,7 @@ static SLresult Equalizer_GetPresetName(SLEqualizerItf self, SLuint16 index,
 {
     if (NULL == ppName)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Equalizer_interface *this = (struct Equalizer_interface *) self;
+    IEqualizer *this = (IEqualizer *) self;
     if (index >= this->mNumPresets)
         return SL_RESULT_PARAMETER_INVALID;
     *ppName = this->mPresetNames[index];
@@ -5424,8 +5448,8 @@ static SLresult Equalizer_GetPresetName(SLEqualizerItf self, SLuint16 index,
 static SLresult PresetReverb_SetPreset(SLPresetReverbItf self,
     SLuint16 preset)
 {
-    struct PresetReverb_interface *this =
-        (struct PresetReverb_interface *) self;
+    IPresetReverb *this =
+        (IPresetReverb *) self;
     interface_lock_poke(this);
     this->mPreset = preset;
     interface_unlock_poke(this);
@@ -5437,8 +5461,8 @@ static SLresult PresetReverb_GetPreset(SLPresetReverbItf self,
 {
     if (NULL == pPreset)
         return SL_RESULT_PARAMETER_INVALID;
-    struct PresetReverb_interface *this =
-        (struct PresetReverb_interface *) self;
+    IPresetReverb *this =
+        (IPresetReverb *) self;
     interface_lock_peek(this);
     SLuint16 preset = this->mPreset;
     interface_unlock_peek(this);
@@ -5462,7 +5486,7 @@ static SLresult PresetReverb_GetPreset(SLPresetReverbItf self,
 static SLresult EnvironmentalReverb_SetRoomLevel(SLEnvironmentalReverbItf self,
     SLmillibel room)
 {
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.roomLevel = room;
     interface_unlock_exclusive(this);
@@ -5474,7 +5498,7 @@ static SLresult EnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self,
 {
     if (NULL == pRoom)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_peek(this);
     SLmillibel roomLevel = this->mProperties.roomLevel;
     interface_unlock_peek(this);
@@ -5485,7 +5509,7 @@ static SLresult EnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self,
 static SLresult EnvironmentalReverb_SetRoomHFLevel(
     SLEnvironmentalReverbItf self, SLmillibel roomHF)
 {
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.roomHFLevel = roomHF;
     interface_unlock_exclusive(this);
@@ -5497,7 +5521,7 @@ static SLresult EnvironmentalReverb_GetRoomHFLevel(
 {
     if (NULL == pRoomHF)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_peek(this);
     SLmillibel roomHFLevel = this->mProperties.roomHFLevel;
     interface_unlock_peek(this);
@@ -5508,7 +5532,7 @@ static SLresult EnvironmentalReverb_GetRoomHFLevel(
 static SLresult EnvironmentalReverb_SetDecayTime(
     SLEnvironmentalReverbItf self, SLmillisecond decayTime)
 {
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.decayTime = decayTime;
     interface_unlock_exclusive(this);
@@ -5520,7 +5544,7 @@ static SLresult EnvironmentalReverb_GetDecayTime(
 {
     if (NULL == pDecayTime)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_peek(this);
     SLmillisecond decayTime = this->mProperties.decayTime;
     interface_unlock_peek(this);
@@ -5531,7 +5555,7 @@ static SLresult EnvironmentalReverb_GetDecayTime(
 static SLresult EnvironmentalReverb_SetDecayHFRatio(
     SLEnvironmentalReverbItf self, SLpermille decayHFRatio)
 {
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.decayHFRatio = decayHFRatio;
     interface_unlock_exclusive(this);
@@ -5543,7 +5567,7 @@ static SLresult EnvironmentalReverb_GetDecayHFRatio(
 {
     if (NULL == pDecayHFRatio)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_peek(this);
     SLpermille decayHFRatio = this->mProperties.decayHFRatio;
     interface_unlock_peek(this);
@@ -5554,7 +5578,7 @@ static SLresult EnvironmentalReverb_GetDecayHFRatio(
 static SLresult EnvironmentalReverb_SetReflectionsLevel(
     SLEnvironmentalReverbItf self, SLmillibel reflectionsLevel)
 {
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.reflectionsLevel = reflectionsLevel;
     interface_unlock_exclusive(this);
@@ -5566,7 +5590,7 @@ static SLresult EnvironmentalReverb_GetReflectionsLevel(
 {
     if (NULL == pReflectionsLevel)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_peek(this);
     SLmillibel reflectionsLevel = this->mProperties.reflectionsLevel;
     interface_unlock_peek(this);
@@ -5577,7 +5601,7 @@ static SLresult EnvironmentalReverb_GetReflectionsLevel(
 static SLresult EnvironmentalReverb_SetReflectionsDelay(
     SLEnvironmentalReverbItf self, SLmillisecond reflectionsDelay)
 {
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.reflectionsDelay = reflectionsDelay;
     interface_unlock_exclusive(this);
@@ -5589,7 +5613,7 @@ static SLresult EnvironmentalReverb_GetReflectionsDelay(
 {
     if (NULL == pReflectionsDelay)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_peek(this);
     SLmillisecond reflectionsDelay = this->mProperties.reflectionsDelay;
     interface_unlock_peek(this);
@@ -5600,7 +5624,7 @@ static SLresult EnvironmentalReverb_GetReflectionsDelay(
 static SLresult EnvironmentalReverb_SetReverbLevel(
     SLEnvironmentalReverbItf self, SLmillibel reverbLevel)
 {
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.reverbLevel = reverbLevel;
     interface_unlock_exclusive(this);
@@ -5612,7 +5636,7 @@ static SLresult EnvironmentalReverb_GetReverbLevel(
 {
     if (NULL == pReverbLevel)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_peek(this);
     SLmillibel reverbLevel = this->mProperties.reverbLevel;
     interface_unlock_peek(this);
@@ -5623,7 +5647,7 @@ static SLresult EnvironmentalReverb_GetReverbLevel(
 static SLresult EnvironmentalReverb_SetReverbDelay(
     SLEnvironmentalReverbItf self, SLmillisecond reverbDelay)
 {
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.reverbDelay = reverbDelay;
     interface_unlock_exclusive(this);
@@ -5635,7 +5659,7 @@ static SLresult EnvironmentalReverb_GetReverbDelay(
 {
     if (NULL == pReverbDelay)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_peek(this);
     SLmillisecond reverbDelay = this->mProperties.reverbDelay;
     interface_unlock_peek(this);
@@ -5646,7 +5670,7 @@ static SLresult EnvironmentalReverb_GetReverbDelay(
 static SLresult EnvironmentalReverb_SetDiffusion(
     SLEnvironmentalReverbItf self, SLpermille diffusion)
 {
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.diffusion = diffusion;
     interface_unlock_exclusive(this);
@@ -5658,7 +5682,7 @@ static SLresult EnvironmentalReverb_GetDiffusion(SLEnvironmentalReverbItf self,
 {
     if (NULL == pDiffusion)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_peek(this);
     SLpermille diffusion = this->mProperties.diffusion;
     interface_unlock_peek(this);
@@ -5669,7 +5693,7 @@ static SLresult EnvironmentalReverb_GetDiffusion(SLEnvironmentalReverbItf self,
 static SLresult EnvironmentalReverb_SetDensity(SLEnvironmentalReverbItf self,
     SLpermille density)
 {
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.density = density;
     interface_unlock_exclusive(this);
@@ -5681,7 +5705,7 @@ static SLresult EnvironmentalReverb_GetDensity(SLEnvironmentalReverbItf self,
 {
     if (NULL == pDensity)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_peek(this);
     SLpermille density = this->mProperties.density;
     interface_unlock_peek(this);
@@ -5695,7 +5719,7 @@ static SLresult EnvironmentalReverb_SetEnvironmentalReverbProperties(
 {
     if (NULL == pProperties)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     SLEnvironmentalReverbSettings properties = *pProperties;
     interface_lock_exclusive(this);
     this->mProperties = properties;
@@ -5708,7 +5732,7 @@ static SLresult EnvironmentalReverb_GetEnvironmentalReverbProperties(
 {
     if (NULL == pProperties)
         return SL_RESULT_PARAMETER_INVALID;
-    struct EnvironmentalReverb_interface *this = (struct EnvironmentalReverb_interface *) self;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_shared(this);
     SLEnvironmentalReverbSettings properties = this->mProperties;
     interface_unlock_shared(this);
@@ -5746,7 +5770,7 @@ static SLresult EnvironmentalReverb_GetEnvironmentalReverbProperties(
 
 static SLresult Virtualizer_SetEnabled(SLVirtualizerItf self, SLboolean enabled)
 {
-    struct Virtualizer_interface *this = (struct Virtualizer_interface *) self;
+    IVirtualizer *this = (IVirtualizer *) self;
     interface_lock_poke(this);
     this->mEnabled = enabled;
     interface_unlock_poke(this);
@@ -5758,7 +5782,7 @@ static SLresult Virtualizer_IsEnabled(SLVirtualizerItf self,
 {
     if (NULL == pEnabled)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Virtualizer_interface *this = (struct Virtualizer_interface *) self;
+    IVirtualizer *this = (IVirtualizer *) self;
     interface_lock_peek(this);
     SLboolean enabled = this->mEnabled;
     interface_unlock_peek(this);
@@ -5769,7 +5793,7 @@ static SLresult Virtualizer_IsEnabled(SLVirtualizerItf self,
 static SLresult Virtualizer_SetStrength(SLVirtualizerItf self,
     SLpermille strength)
 {
-    struct Virtualizer_interface *this = (struct Virtualizer_interface *) self;
+    IVirtualizer *this = (IVirtualizer *) self;
     interface_lock_poke(this);
     this->mStrength = strength;
     interface_unlock_poke(this);
@@ -5781,7 +5805,7 @@ static SLresult Virtualizer_GetRoundedStrength(SLVirtualizerItf self,
 {
     if (NULL == pStrength)
         return SL_RESULT_PARAMETER_INVALID;
-    struct Virtualizer_interface *this = (struct Virtualizer_interface *) self;
+    IVirtualizer *this = (IVirtualizer *) self;
     interface_lock_peek(this);
     SLpermille strength = this->mStrength;
     interface_unlock_peek(this);
@@ -5812,14 +5836,14 @@ static SLresult MIDIMessage_SendMessage(SLMIDIMessageItf self, const SLuint8 *da
 {
     if (NULL == data)
         return SL_RESULT_PARAMETER_INVALID;
-    //struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    //IMIDIMessage *this = (IMIDIMessage *) self;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MIDIMessage_RegisterMetaEventCallback(SLMIDIMessageItf self,
     slMetaEventCallback callback, void *pContext)
 {
-    struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    IMIDIMessage *this = (IMIDIMessage *) self;
     interface_lock_exclusive(this);
     this->mMetaEventCallback = callback;
     this->mMetaEventContext = pContext;
@@ -5830,7 +5854,7 @@ static SLresult MIDIMessage_RegisterMetaEventCallback(SLMIDIMessageItf self,
 static SLresult MIDIMessage_RegisterMIDIMessageCallback(SLMIDIMessageItf self,
     slMIDIMessageCallback callback, void *pContext)
 {
-    struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    IMIDIMessage *this = (IMIDIMessage *) self;
     interface_lock_exclusive(this);
     this->mMessageCallback = callback;
     this->mMessageContext = pContext;
@@ -5841,13 +5865,13 @@ static SLresult MIDIMessage_RegisterMIDIMessageCallback(SLMIDIMessageItf self,
 static SLresult MIDIMessage_AddMIDIMessageCallbackFilter(SLMIDIMessageItf self,
     SLuint32 messageType)
 {
-    //struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    //IMIDIMessage *this = (IMIDIMessage *) self;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult MIDIMessage_ClearMIDIMessageCallbackFilter(SLMIDIMessageItf self)
 {
-    //struct MIDIMessage_interface *this = (struct MIDIMessage_interface *) self;
+    //IMIDIMessage *this = (IMIDIMessage *) self;
     return SL_RESULT_SUCCESS;
 }
 
@@ -5863,7 +5887,7 @@ static SLresult MIDIMessage_ClearMIDIMessageCallbackFilter(SLMIDIMessageItf self
 
 static SLresult MIDIMuteSolo_SetChannelMute(SLMIDIMuteSoloItf self, SLuint8 channel, SLboolean mute)
 {
-    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     SLuint16 mask = 1 << channel;
     interface_lock_exclusive(this);
     if (mute)
@@ -5879,7 +5903,7 @@ static SLresult MIDIMuteSolo_GetChannelMute(SLMIDIMuteSoloItf self, SLuint8 chan
 {
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     interface_lock_peek(this);
     SLuint16 mask = this->mChannelMuteMask;
     interface_unlock_peek(this);
@@ -5889,7 +5913,7 @@ static SLresult MIDIMuteSolo_GetChannelMute(SLMIDIMuteSoloItf self, SLuint8 chan
 
 static SLresult MIDIMuteSolo_SetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 channel, SLboolean solo)
 {
-    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     SLuint16 mask = 1 << channel;
     interface_lock_exclusive(this);
     if (solo)
@@ -5905,7 +5929,7 @@ static SLresult MIDIMuteSolo_GetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 chan
 {
     if (NULL == pSolo)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     interface_lock_peek(this);
     SLuint16 mask = this->mChannelSoloMask;
     interface_unlock_peek(this);
@@ -5917,7 +5941,7 @@ static SLresult MIDIMuteSolo_GetTrackCount(SLMIDIMuteSoloItf self, SLuint16 *pCo
 {
     if (NULL == pCount)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     // FIXME is this const? if so, remove the lock
     interface_lock_peek(this);
     SLuint16 trackCount = this->mTrackCount;
@@ -5928,7 +5952,7 @@ static SLresult MIDIMuteSolo_GetTrackCount(SLMIDIMuteSoloItf self, SLuint16 *pCo
 
 static SLresult MIDIMuteSolo_SetTrackMute(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean mute)
 {
-    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     SLuint32 mask = 1 << track;
     interface_lock_exclusive(this);
     if (mute)
@@ -5943,7 +5967,7 @@ static SLresult MIDIMuteSolo_GetTrackMute(SLMIDIMuteSoloItf self, SLuint16 track
 {
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     interface_lock_peek(this);
     SLuint32 mask = this->mTrackMuteMask;
     interface_unlock_peek(this);
@@ -5953,7 +5977,7 @@ static SLresult MIDIMuteSolo_GetTrackMute(SLMIDIMuteSoloItf self, SLuint16 track
 
 static SLresult MIDIMuteSolo_SetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean solo)
 {
-    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     SLuint32 mask = 1 << track;
     interface_lock_exclusive(this);
     if (solo)
@@ -5968,7 +5992,7 @@ static SLresult MIDIMuteSolo_GetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 track
 {
     if (NULL == pSolo)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MIDIMuteSolo_interface *this = (struct MIDIMuteSolo_interface *) self;
+    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     interface_lock_peek(this);
     SLuint32 mask = this->mTrackSoloMask;
     interface_unlock_peek(this);
@@ -5992,7 +6016,7 @@ static SLresult MIDIMuteSolo_GetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 track
 
 static SLresult MIDITempo_SetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 tpqn)
 {
-    struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    IMIDITempo *this = (IMIDITempo *) self;
     interface_lock_poke(this);
     this->mTicksPerQuarterNote = tpqn;
     interface_unlock_poke(this);
@@ -6003,7 +6027,7 @@ static SLresult MIDITempo_GetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 *
 {
     if (NULL == pTpqn)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    IMIDITempo *this = (IMIDITempo *) self;
     interface_lock_peek(this);
     SLuint32 ticksPerQuarterNote = this->mTicksPerQuarterNote;
     interface_unlock_peek(this);
@@ -6013,7 +6037,7 @@ static SLresult MIDITempo_GetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 *
 
 static SLresult MIDITempo_SetMicrosecondsPerQuarterNote(SLMIDITempoItf self, SLmicrosecond uspqn)
 {
-    struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    IMIDITempo *this = (IMIDITempo *) self;
     interface_lock_poke(this);
     this->mMicrosecondsPerQuarterNote = uspqn;
     interface_unlock_poke(this);
@@ -6024,7 +6048,7 @@ static SLresult MIDITempo_GetMicrosecondsPerQuarterNote(SLMIDITempoItf self, SLm
 {
     if (NULL == uspqn)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MIDITempo_interface *this = (struct MIDITempo_interface *) self;
+    IMIDITempo *this = (IMIDITempo *) self;
     interface_lock_peek(this);
     SLuint32 microsecondsPerQuarterNote = this->mMicrosecondsPerQuarterNote;
     interface_unlock_peek(this);
@@ -6045,7 +6069,7 @@ static SLresult MIDITime_GetDuration(SLMIDITimeItf self, SLuint32 *pDuration)
 {
     if (NULL == pDuration)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    IMIDITime *this = (IMIDITime *) self;
     SLuint32 duration = this->mDuration;
     *pDuration = duration;
     return SL_RESULT_SUCCESS;
@@ -6053,7 +6077,7 @@ static SLresult MIDITime_GetDuration(SLMIDITimeItf self, SLuint32 *pDuration)
 
 static SLresult MIDITime_SetPosition(SLMIDITimeItf self, SLuint32 position)
 {
-    struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    IMIDITime *this = (IMIDITime *) self;
     interface_lock_poke(this);
     this->mPosition = position;
     interface_unlock_poke(this);
@@ -6064,7 +6088,7 @@ static SLresult MIDITime_GetPosition(SLMIDITimeItf self, SLuint32 *pPosition)
 {
     if (NULL == pPosition)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    IMIDITime *this = (IMIDITime *) self;
     interface_lock_peek(this);
     SLuint32 position = this->mPosition;
     interface_unlock_peek(this);
@@ -6074,7 +6098,7 @@ static SLresult MIDITime_GetPosition(SLMIDITimeItf self, SLuint32 *pPosition)
 
 static SLresult MIDITime_SetLoopPoints(SLMIDITimeItf self, SLuint32 startTick, SLuint32 numTicks)
 {
-    struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    IMIDITime *this = (IMIDITime *) self;
     interface_lock_exclusive(this);
     this->mStartTick = startTick;
     this->mNumTicks = numTicks;
@@ -6087,7 +6111,7 @@ static SLresult MIDITime_GetLoopPoints(SLMIDITimeItf self, SLuint32 *pStartTick,
 {
     if (NULL == pStartTick || NULL == pNumTicks)
         return SL_RESULT_PARAMETER_INVALID;
-    struct MIDITime_interface *this = (struct MIDITime_interface *) self;
+    IMIDITime *this = (IMIDITime *) self;
     interface_lock_shared(this);
     SLuint32 startTick = this->mStartTick;
     SLuint32 numTicks = this->mNumTicks;
@@ -6104,6 +6128,26 @@ static SLresult MIDITime_GetLoopPoints(SLMIDITimeItf self, SLuint32 *pStartTick,
     MIDITime_SetLoopPoints,
     MIDITime_GetLoopPoints
 };
+
+// Runs every graphics frame (50 Hz) to update audio
+
+static void *frame_body(void *arg)
+{
+    CEngine *this = (CEngine *) arg;
+    for (;;) {
+        usleep(20000*50);
+        unsigned i;
+        for (i = 0; i < INSTANCE_MAX; ++i) {
+            IObject *instance = (IObject *) this->mEngine.mInstances[i];
+            if (NULL == instance)
+                continue;
+            if (instance->mClass != &AudioPlayer_class)
+                continue;
+            write(1, ".", 1);
+        }
+    }
+    return NULL;
+}
 
 /* Initial entry points */
 
@@ -6138,13 +6182,17 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    struct Engine_class *this = (struct Engine_class *)
+    CEngine *this = (CEngine *)
         construct(&Engine_class, exposedMask, NULL);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     this->mObject.mLossOfControlMask = lossOfControlGlobal ? ~0 : 0;
     this->mEngine.mLossOfControlGlobal = lossOfControlGlobal;
     this->mEngineCapabilities.mThreadSafe = threadSafe;
+    int ok;
+    ok = pthread_create(&this->mFrameThread, (const pthread_attr_t *) NULL,
+        frame_body, this);
+    assert(ok == 0);
     *pEngine = &this->mObject.mItf;
     return SL_RESULT_SUCCESS;
 }
@@ -6180,11 +6228,11 @@ static void OutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer,
 {
     // Force to be a multiple of a frame, assumes stereo 16-bit PCM
     size &= ~3;
-    struct OutputMixExt_interface *thisExt =
-        (struct OutputMixExt_interface *) self;
+    IOutputMixExt *thisExt =
+        (IOutputMixExt *) self;
     // FIXME Finding one interface from another, but is it exposed?
-    struct OutputMix_interface *this =
-        &((struct OutputMix_class *) thisExt->mThis)->mOutputMix;
+    IOutputMix *this =
+        &((COutputMix *) thisExt->mThis)->mOutputMix;
     unsigned activeMask = this->mActiveMask;
     struct Track *track = &this->mTracks[0];
     unsigned i;
@@ -6197,7 +6245,7 @@ static void OutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer,
         if (!(activeMask & 1))
             continue;
         // track is allocated
-        struct Play_interface *play = track->mPlay;
+        IPlay *play = track->mPlay;
         if (NULL == play)
             continue;
         // track is initialized
@@ -6208,7 +6256,7 @@ static void OutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer,
         unsigned desired = size;
         SLboolean trackContributedToMix = SL_BOOLEAN_FALSE;
         while (desired > 0) {
-            struct BufferQueue_interface *bufferQueue;
+            IBufferQueue *bufferQueue;
             const struct BufferHeader *oldFront, *newFront, *rear;
             unsigned actual = desired;
             if (track->mAvail < actual)
@@ -6323,7 +6371,7 @@ void SDL_start(SLObjectItf self)
 {
     //assert(self != NULL);
     // FIXME make this an operation on Object: GetClass
-    //struct Object_interface *this = (struct Object_interface *) self;
+    //IObject *this = (IObject *) self;
     //assert(&OutputMix_class == this->mClass);
     SLresult result;
     SLOutputMixExtItf OutputMixExt;
@@ -6337,7 +6385,7 @@ void SDL_start(SLObjectItf self)
     fmt.samples = 256;
     fmt.callback = SDL_callback;
     // FIXME should be a GetInterface
-    // fmt.userdata = &((struct OutputMix_class *) this)->mOutputMixExt;
+    // fmt.userdata = &((COutputMix *) this)->mOutputMixExt;
     fmt.userdata = (void *) OutputMixExt;
 
     if (SDL_OpenAudio(&fmt, NULL) < 0) {

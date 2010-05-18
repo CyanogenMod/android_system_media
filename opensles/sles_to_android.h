@@ -25,8 +25,8 @@
  *     SL_RESULT_SUCCESS
  *     SL_PARAMETER_INVALID
  */
-SLresult sles_to_android_checkAudioPlayerSourceSink(SLDataSource *pAudioSrc,
-        SLDataSink *pAudioSnk);
+SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc,
+        const SLDataSink *pAudioSnk);
 
 /*
  * Determines the Android media framework object that maps to the given audio source and sink.
@@ -36,18 +36,18 @@ SLresult sles_to_android_checkAudioPlayerSourceSink(SLDataSource *pAudioSrc,
  *         unsupported parameter or value
  *     SL_RESULT_CONTENT_UNSUPPORTED if a format is not supported (e.g. sample rate too high)
  */
-SLresult sles_to_android_createAudioPlayer(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk,
-        AudioPlayer_class *pAudioPlayer);
+SLresult sles_to_android_createAudioPlayer(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk,
+        CAudioPlayer *pAudioPlayer);
 
 /*
  * Allocates and initializes the Android media framework objects intended to be used with the
- * given AudioPlayer_class data
+ * given CAudioPlayer data
  * Return
  *     SL_RESULT_SUCCESS
  *     SL_RESULT_CONTENT_UNSUPPORTED if an error occurred during the allocation and initialization
  *         of the Android resources
  */
-SLresult sles_to_android_realizeAudioPlayer(AudioPlayer_class *pAudioPlayer);
+SLresult sles_to_android_realizeAudioPlayer(CAudioPlayer *pAudioPlayer);
 
 
-SLresult sles_to_android_audioPlayerSetPlayState(struct Play_interface *pPlayItf, SLuint32 state);
+SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state);
