@@ -43,7 +43,7 @@ void CheckErr( SLresult res )
             exit(1);
         }
     else {
-        fprintf(stdout, "%d SL success, proceeding...\n", res);
+        //fprintf(stdout, "%d SL success, proceeding...\n", res);
     }
 }
 
@@ -63,16 +63,21 @@ void BufferQueueCallback(
         SLBufferQueueItf queueItf,
         void *pContext)
 {
+    //fprintf(stdout, "BufferQueueCallback called\n");
     SLresult res;
+    //fprintf(stdout, " pContext=%p\n", pContext);
     CallbackCntxt *pCntxt = (CallbackCntxt*)pContext;
+
     if(pCntxt->pData < (pCntxt->pDataBase + pCntxt->size))
         {
+            fprintf(stdout, "callback: before enqueue\n");
             res = (*queueItf)->Enqueue(queueItf, (void*) pCntxt->pData,
                     2 * AUDIO_DATA_BUFFER_SIZE); /* Size given in bytes. */
             CheckErr(res);
             /* Increase data pointer by buffer size */
             pCntxt->pData += AUDIO_DATA_BUFFER_SIZE;
         }
+    //fprintf(stdout, "end of BufferQueueCallback()\n");
 }
 
 /* Play some music from a buffer queue  */
@@ -225,8 +230,8 @@ for (i = 0; i < sizeof(pcmData)/sizeof(pcmData[0]); ++i)
     res = (*bufferQueueItf)->GetState(bufferQueueItf, &state);
     CheckErr(res);
 
-    while (state.playIndex < 100) {
-    // while(state.count) {
+    //while (state.playIndex < 100) {
+     while(state.count) {
         usleep(10000);
         (*bufferQueueItf)->GetState(bufferQueueItf, &state);
     }

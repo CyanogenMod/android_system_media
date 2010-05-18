@@ -338,6 +338,7 @@ typedef struct BufferQueue_interface {
     SLuint32 mNumBuffers;
     struct BufferHeader *mArray;
     struct BufferHeader *mFront, *mRear;
+    SLuint32 mSizeConsumed;
     // saves a malloc in the typical case
 #define BUFFER_HEADER_TYPICAL 4
     struct BufferHeader mTypical[BUFFER_HEADER_TYPICAL+1];

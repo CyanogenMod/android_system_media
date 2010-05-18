@@ -139,6 +139,7 @@ static void BufferQueue_init(void *self)
     this->mArray = NULL;
     this->mFront = NULL;
     this->mRear = NULL;
+    this->mSizeConsumed = 0;
     struct BufferHeader *bufferHeader = this->mTypical;
     unsigned i;
     for (i = 0; i < BUFFER_HEADER_TYPICAL+1; ++i, ++bufferHeader) {
@@ -493,42 +494,6 @@ static SLboolean SndFile_IsSupported(const SF_INFO *sfinfo)
 #endif // USE_SNDFILE
 
 
-#ifdef USE_ANDROID
-static void *thread_body(void *arg)
-{
-    CAudioPlayer *this = (CAudioPlayer *) arg;
-    android::AudioTrack *at = this->mAudioTrack;
-#if 1
-    at->start();
-#endif
-    IBufferQueue *bufferQueue = &this->mBufferQueue;
-    for (;;) {
-        // FIXME replace unsafe polling by a mutex and condition variable
-        struct BufferHeader *oldFront = bufferQueue->mFront;
-        struct BufferHeader *rear = bufferQueue->mRear;
-        if (oldFront == rear) {
-            usleep(10000);
-            continue;
-        }
-        struct BufferHeader *newFront = &oldFront[1];
-        if (newFront == &bufferQueue->mArray[bufferQueue->mNumBuffers])
-            newFront = bufferQueue->mArray;
-        at->write(oldFront->mBuffer, oldFront->mSize);
-        assert(mState.count > 0);
-        --bufferQueue->mState.count;
-        ++bufferQueue->mState.playIndex;
-        bufferQueue->mFront = newFront;
-        slBufferQueueCallback callback = bufferQueue->mCallback;
-        if (NULL != callback) {
-            (*callback)((SLBufferQueueItf) bufferQueue,
-                bufferQueue->mContext);
-        }
-    }
-    // unreachable
-    return NULL;
-}
-#endif
-
 static SLresult AudioPlayer_Realize(void *self)
 {
     CAudioPlayer *this = (CAudioPlayer *) self;
@@ -537,9 +502,6 @@ static SLresult AudioPlayer_Realize(void *self)
 #ifdef USE_ANDROID
     // FIXME move this to android specific files
     result = sles_to_android_realizeAudioPlayer(this);
-    int ok;
-    ok = pthread_create(&this->mThread, (const pthread_attr_t *) NULL, thread_body, this);
-    assert(ok == 0);
 #endif
 
 #ifdef USE_SNDFILE
@@ -1220,6 +1182,7 @@ static SLresult BufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
         ++this->mState.count;
         result = SL_RESULT_SUCCESS;
     }
+    //fprintf(stderr, "Enqueue: nbBuffers in queue = %lu\n", this->mState.count);
     interface_unlock_exclusive(this);
     return result;
 }
@@ -1230,6 +1193,7 @@ static SLresult BufferQueue_Clear(SLBufferQueueItf self)
     interface_lock_exclusive(this);
     this->mFront = &this->mArray[0];
     this->mRear = &this->mArray[0];
+    this->mSizeConsumed = 0;
     this->mState.count = 0;
     interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;

@@ -7,7 +7,7 @@ LOCAL_C_INCLUDES:= \
 
 LOCAL_SRC_FILES:= \
 	bufferQueue.c \
-	playSine.cpp
+	slesTestBufferQueue.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
@@ -19,6 +19,6 @@ ifeq ($(TARGET_OS),linux)
 	#LOCAL_SHARED_LIBRARIES += librt
 endif
 
-LOCAL_MODULE:= playSine
+LOCAL_MODULE:= slesTestBufferQueue
 
 include $(BUILD_EXECUTABLE)
