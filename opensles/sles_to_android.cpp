@@ -19,11 +19,69 @@
 
 #ifdef USE_ANDROID
 
+//-----------------------------------------------------------------------------
+inline uint32_t sles_to_android_sampleRate(SLuint32 sampleRateMilliHertz) {
+    return (uint32_t)(sampleRateMilliHertz / 1000);
+}
+
+inline int sles_to_android_sampleFormat(SLuint32 pcmFormat) {
+    switch (pcmFormat) {
+        case SL_PCMSAMPLEFORMAT_FIXED_16:
+            return android::AudioSystem::PCM_16_BIT;
+            break;
+        case SL_PCMSAMPLEFORMAT_FIXED_8:
+            return android::AudioSystem::PCM_8_BIT;
+            break;
+        case SL_PCMSAMPLEFORMAT_FIXED_20:
+        case SL_PCMSAMPLEFORMAT_FIXED_24:
+        case SL_PCMSAMPLEFORMAT_FIXED_28:
+        case SL_PCMSAMPLEFORMAT_FIXED_32:
+        default:
+            return android::AudioSystem::INVALID_FORMAT;
+    }
+}
+
+
+inline int sles_to_android_channelMask(SLuint32 nbChannels, SLuint32 channelMask) {
+    // FIXME handle channel mask mapping between SL ES and Android
+    return (nbChannels == 1 ?
+            android::AudioSystem::CHANNEL_OUT_MONO :
+            android::AudioSystem::CHANNEL_OUT_STEREO);
+}
+
+
+int android_getMinFrameCount(uint32_t sampleRate) {
+    int afSampleRate;
+    if (android::AudioSystem::getOutputSamplingRate(&afSampleRate,
+            ANDROID_DEFAULT_OUTPUT_STREAM_TYPE) != android::NO_ERROR) {
+        return ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE;
+    }
+    int afFrameCount;
+    if (android::AudioSystem::getOutputFrameCount(&afFrameCount,
+            ANDROID_DEFAULT_OUTPUT_STREAM_TYPE) != android::NO_ERROR) {
+        return ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE;
+    }
+    uint32_t afLatency;
+    if (android::AudioSystem::getOutputLatency(&afLatency,
+            ANDROID_DEFAULT_OUTPUT_STREAM_TYPE) != android::NO_ERROR) {
+        return ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE;
+    }
+    // minimum nb of buffers to cover output latency, given the size of each hardware audio buffer
+    uint32_t minBufCount = afLatency / ((1000 * afFrameCount)/afSampleRate);
+    if (minBufCount < 2) minBufCount = 2;
+    // minimum number of frames to cover output latency at the sample rate of the content
+    return (afFrameCount*sampleRate*minBufCount)/afSampleRate;
+
+}
+
+
+//-----------------------------------------------------------------------------
 SLresult sles_to_android_CheckAudioPlayerSourceSink(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk)
 {
     //--------------------------------------
     // Sink check:
     //     currently only OutputMix sinks are supported, regardless of the data source
+    // FIXME verify output mix is in realized state
     if (*(SLuint32 *)pAudioSnk->pLocator != SL_DATALOCATOR_OUTPUTMIX) {
         fprintf(stderr, "Cannot create audio player: data sink is not SL_DATALOCATOR_OUTPUTMIX\n");
         return SL_RESULT_PARAMETER_INVALID;
@@ -47,6 +105,7 @@ SLresult sles_to_android_CheckAudioPlayerSourceSink(SLDataSource *pAudioSrc, SLD
         }
         // Buffer format
         switch (formatType) {
+        //     currently only PCM buffer queues are supported,
         case SL_DATAFORMAT_PCM: {
             SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *) pAudioSrc->pFormat;
             switch (df_pcm->numChannels) {
@@ -135,39 +194,47 @@ SLresult sles_to_android_CheckAudioPlayerSourceSink(SLDataSource *pAudioSrc, SLD
 }
 
 
+//-----------------------------------------------------------------------------
+static void android_pushAudioTrackCallback(int event, void* user, void *info) {
+    if (event == android::AudioTrack::EVENT_MORE_DATA) {
+        fprintf(stderr, "received event EVENT_MORE_DATA from AudioTrack\n");
+        // set size to 0 to signal we're not using the callback to write more data
+        android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
+        pBuff->size = 0;
+
+    } else if (event == android::AudioTrack::EVENT_MARKER) {
+        fprintf(stderr, "received event EVENT_MARKER from AudioTrack\n");
+    } else if (event == android::AudioTrack::EVENT_NEW_POS) {
+        fprintf(stderr, "received event EVENT_NEW_POS from AudioTrack\n");
+    }
+}
+
+
+//-----------------------------------------------------------------------------
 SLresult sles_to_android_CreateAudioPlayer(SLDataSource *pAudioSrc,
         SLDataSink *pAudioSnk,
         AudioPlayer_class *pAudioPlayer) {
 
     SLresult result = SL_RESULT_SUCCESS;
 
+    //--------------------------------------
+    // Output check:
     // currently only OutputMix sinks are supported
     // this has been verified in sles_to_android_CheckAudioPlayerSourceSink
 
     //--------------------------------------
     // Source check:
     SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
-    //SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
-    //SLuint32 numBuffers = 0;
     switch (locatorType) {
+    //   -----------------------------------
+    //   Buffer Queue to AudioTrack
     case SL_DATALOCATOR_BUFFERQUEUE:
         pAudioPlayer->mAndroidObjType = AUDIOTRACK_PUSH;
-        pAudioPlayer->mAudioTrack = //new android::AudioTrack();
-            new android::AudioTrack(
-                    android::AudioSystem::MUSIC,            // streamType
-                    44100,                                  // sampleRate
-                    android::AudioSystem::PCM_16_BIT,       // format
-                    // FIXME should be stereo, but mono gives more audio output for testing
-                    android::AudioSystem::CHANNEL_OUT_MONO, // channels
-                    256 * 20,                               // frameCount
-                    0,                                      // flags
-                    NULL,                    // cbf (callback)
-                    NULL,                          // user
-                    256 * 20);                              // notificationFrame
         break;
+    //   -----------------------------------
+    //   Address to MediaPlayer
     case SL_DATALOCATOR_ADDRESS:
         pAudioPlayer->mAndroidObjType = MEDIAPLAYER;
-        pAudioPlayer->mMediaPlayer = new android::MediaPlayer();
         break;
     default:
         pAudioPlayer->mAndroidObjType = INVALID_TYPE;
@@ -176,6 +243,52 @@ SLresult sles_to_android_CreateAudioPlayer(SLDataSource *pAudioSrc,
 
     return result;
 
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult sles_to_android_RealizeAudioPlayer(AudioPlayer_class *pAudioPlayer) {
+
+    SLresult result = SL_RESULT_SUCCESS;
+
+    switch (pAudioPlayer->mAndroidObjType) {
+    //-----------------------------------
+    // AudioTrack
+    case AUDIOTRACK_PUSH:
+        {
+        SLDataLocator_BufferQueue *dl_bq =  (SLDataLocator_BufferQueue *)
+                pAudioPlayer->mDynamicSource.mDataSource;
+        SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *)
+                pAudioPlayer->mDynamicSource.mDataSource->pFormat;
+
+        uint32_t sampleRate = sles_to_android_sampleRate(df_pcm->samplesPerSec);
+
+        pAudioPlayer->mAudioTrack = new android::AudioTrack(
+                ANDROID_DEFAULT_OUTPUT_STREAM_TYPE,                  // streamType
+                sampleRate,                                          // sampleRate
+                sles_to_android_sampleFormat(df_pcm->bitsPerSample), // format
+                sles_to_android_channelMask(df_pcm->numChannels, df_pcm->channelMask),//channel mask
+                android_getMinFrameCount(sampleRate),                // frameCount
+                0,                                                   // flags
+                android_pushAudioTrackCallback,                      // callback
+                (void *) pAudioPlayer,                               // user
+                0);                                                  // notificationFrame
+        }
+        if (pAudioPlayer->mAudioTrack->initCheck() != android::NO_ERROR) {
+            result = SL_RESULT_CONTENT_UNSUPPORTED;;
+        }
+        break;
+    //-----------------------------------
+    // MediaPlayer
+    case MEDIAPLAYER:
+        pAudioPlayer->mMediaPlayer = new android::MediaPlayer();
+        // FIXME initialize MediaPlayer
+        break;
+    default:
+        result = SL_RESULT_CONTENT_UNSUPPORTED;
+    }
+
+    return result;
 }
 
 #endif

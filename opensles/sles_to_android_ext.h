@@ -21,3 +21,4 @@ extern SLresult sles_to_android_CheckAudioPlayerSourceSink(SLDataSource *pAudioS
 extern SLresult sles_to_android_CreateAudioPlayer(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk,
         AudioPlayer_class *pAudioPlayer);
 
+extern SLresult sles_to_android_RealizeAudioPlayer(AudioPlayer_class *pAudioPlayer);

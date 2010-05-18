@@ -1025,11 +1025,55 @@ static SLboolean SndFile_IsSupported(const SF_INFO *sfinfo)
 
 #endif // USE_SNDFILE
 
+
+#ifdef USE_ANDROID
+static void *thread_body(void *arg)
+{
+    struct AudioPlayer_class *this = (struct AudioPlayer_class *) arg;
+    android::AudioTrack *at = this->mAudioTrack;
+#if 1
+    at->start();
+#endif
+    struct BufferQueue_interface *bufferQueue = &this->mBufferQueue;
+    for (;;) {
+        // FIXME replace unsafe polling by a mutex and condition variable
+        struct BufferHeader *oldFront = bufferQueue->mFront;
+        struct BufferHeader *rear = bufferQueue->mRear;
+        if (oldFront == rear) {
+            usleep(10000);
+            continue;
+        }
+        struct BufferHeader *newFront = &oldFront[1];
+        if (newFront == &bufferQueue->mArray[bufferQueue->mNumBuffers])
+            newFront = bufferQueue->mArray;
+        at->write(oldFront->mBuffer, oldFront->mSize);
+        assert(mState.count > 0);
+        --bufferQueue->mState.count;
+        ++bufferQueue->mState.playIndex;
+        bufferQueue->mFront = newFront;
+        slBufferQueueCallback callback = bufferQueue->mCallback;
+        if (NULL != callback) {
+            (*callback)((SLBufferQueueItf) bufferQueue,
+                bufferQueue->mContext);
+        }
+    }
+    // unreachable
+    return NULL;
+}
+#endif
+
 static SLresult AudioPlayer_Realize(void *self)
 {
     struct AudioPlayer_class *this = (struct AudioPlayer_class *) self;
     SLresult result = SL_RESULT_SUCCESS;
-    // for Android here is where we do setDataSource etc. for MediaPlayer
+#ifdef USE_ANDROID
+    // FIXME move this to android specific files
+    result = sles_to_android_RealizeAudioPlayer(this);
+    int ok;
+    ok = pthread_create(&this->mThread, (const pthread_attr_t *) NULL, thread_body, this);
+    assert(ok == 0);
+#endif
+
 #ifdef USE_SNDFILE
     if (NULL != this->mSndFile.mPathname) {
         SF_INFO sfinfo;
@@ -2286,45 +2330,6 @@ static SLresult Engine_CreateVibraDevice(SLEngineItf self,
     return SL_RESULT_SUCCESS;
 }
 
-#ifdef USE_ANDROID
-static void *thread_body(void *arg)
-{
-    struct AudioPlayer_class *this = (struct AudioPlayer_class *) arg;
-    android::AudioTrack *at = this->mAudioTrack;
-#if 1
-    at->start();
-#endif
-    struct BufferQueue_interface *bufferQueue = &this->mBufferQueue;
-    for (;;) {
-        // FIXME replace unsafe polling by a mutex and condition variable
-        struct BufferHeader *oldFront = bufferQueue->mFront;
-        struct BufferHeader *rear = bufferQueue->mRear;
-        if (oldFront == rear) {
-            usleep(10000);
-            continue;
-        }
-        struct BufferHeader *newFront = &oldFront[1];
-        if (newFront == &bufferQueue->mArray[bufferQueue->mNumBuffers])
-            newFront = bufferQueue->mArray;
-        at->write(oldFront->mBuffer, oldFront->mSize);
-        assert(mState.count > 0);
-        --bufferQueue->mState.count;
-        ++bufferQueue->mState.playIndex;
-        bufferQueue->mFront = newFront;
-        slBufferQueueCallback callback = bufferQueue->mCallback;
-        if (NULL != callback) {
-            (*callback)((SLBufferQueueItf) bufferQueue,
-                bufferQueue->mContext);
-        }
-    }
-    // unreachable
-    return NULL;
-}
-
-void my_handler(int x, void*y, void*z)
-{
-}
-#endif
 
 static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     SLDataSource *pAudioSrc, SLDataSink *pAudioSnk, SLuint32 numInterfaces,
@@ -2550,6 +2555,7 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     }
     this->mBufferQueue.mFront = this->mBufferQueue.mArray;
     this->mBufferQueue.mRear = this->mBufferQueue.mArray;
+    // used to store the data source of our audio player
     this->mDynamicSource.mDataSource = pAudioSrc;
 #ifdef USE_SNDFILE
     this->mSndFile.mPathname = pathname;
@@ -2570,26 +2576,7 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     track->mAvail = 0;
 #endif
 #ifdef USE_ANDROID
-    // FIXME configure callback and user
     sles_to_android_CreateAudioPlayer(pAudioSrc, pAudioSnk, this);
-    /*this->mAudioTrack = new android::AudioTrack(
-        android::AudioSystem::MUSIC,            // streamType
-        44100,                                  // sampleRate
-        android::AudioSystem::PCM_16_BIT,       // format
-        // FIXME should be stereo, but mono gives more audio output for testing
-        android::AudioSystem::CHANNEL_OUT_MONO, // channels
-        256 * 20,                               // frameCount
-        0,                                      // flags
-        my_handler,  // NULL,                   // cbf (callback)
-        (void *) self,                          // user
-        256 * 20);                              // notificationFrame
-    assert(this->mAudioTrack != NULL);*/
-    // FIXME should call checkStatus after new
-    int ok;
-    // should happen at Realize, not now
-    ok = pthread_create(&this->mThread, (const pthread_attr_t *) NULL,
-        thread_body, this);
-    assert(ok == 0);
 #endif
     // return the new audio player object
     *pPlayer = &this->mObject.mItf;

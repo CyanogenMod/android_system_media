@@ -16,6 +16,9 @@
 
 #include "sles_allinclusive.h"
 
+#define ANDROID_DEFAULT_OUTPUT_STREAM_TYPE android::AudioSystem::MUSIC
+#define ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE 4096
+
 /*
  * Checks that the combination of source and sink parameters is supported in this implementation.
  * Return

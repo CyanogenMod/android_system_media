@@ -139,11 +139,11 @@ void TestPlayMusicBufferQueue( SLObjectItf sl )
 
     /* Setup the format of the content in the buffer queue */
     pcm.formatType = SL_DATAFORMAT_PCM;
-    pcm.numChannels = 2;
+    pcm.numChannels = 1;//2;
     pcm.samplesPerSec = SL_SAMPLINGRATE_44_1;
     pcm.bitsPerSample = SL_PCMSAMPLEFORMAT_FIXED_16;
     pcm.containerSize = 16;
-    pcm.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+    pcm.channelMask = SL_SPEAKER_FRONT_LEFT;// | SL_SPEAKER_FRONT_RIGHT;
     pcm.endianness = SL_BYTEORDER_LITTLEENDIAN;
 
     audioSource.pFormat      = (void *)&pcm;
@@ -175,13 +175,16 @@ for (i = 0; i < sizeof(pcmData)/sizeof(pcmData[0]); ++i)
     /* Create the music player */
     res = (*EngineItf)->CreateAudioPlayer(EngineItf, &player,
             &audioSource, &audioSink, 1, iidArray, required); CheckErr(res);
+    fprintf(stdout, "bufferQueue example: after CreateAudioPlayer\n");
 
-            /* Realizing the player in synchronous mode. */
-            res = (*player)->Realize(player, SL_BOOLEAN_FALSE); CheckErr(res);
+    /* Realizing the player in synchronous mode. */
+    res = (*player)->Realize(player, SL_BOOLEAN_FALSE); CheckErr(res);
+    fprintf(stdout, "bufferQueue example: after Realize\n");
 
-            /* Get seek and play interfaces */
-            res = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf);
-            CheckErr(res);
+    /* Get seek and play interfaces */
+    res = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf);
+    CheckErr(res);
+    fprintf(stdout, "bufferQueue example: after GetInterface(PLAY)\n");
 
     res = (*player)->GetInterface(player, SL_IID_BUFFERQUEUE,
             (void*)&bufferQueueItf); CheckErr(res);
@@ -210,6 +213,7 @@ for (i = 0; i < sizeof(pcmData)/sizeof(pcmData[0]); ++i)
     cntxt.pData += AUDIO_DATA_BUFFER_SIZE;
 
     /* Play the PCM samples using a buffer queue */
+    fprintf(stdout, "bufferQueue example: starting to play\n");
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PLAYING );
     CheckErr(res);
 
@@ -221,10 +225,10 @@ for (i = 0; i < sizeof(pcmData)/sizeof(pcmData[0]); ++i)
     res = (*bufferQueueItf)->GetState(bufferQueueItf, &state);
     CheckErr(res);
 
-while (state.playIndex < 100) {
+    while (state.playIndex < 100) {
     // while(state.count) {
-usleep(10000);
-            (*bufferQueueItf)->GetState(bufferQueueItf, &state);
+        usleep(10000);
+        (*bufferQueueItf)->GetState(bufferQueueItf, &state);
     }
 
     /* Make sure player is stopped */
