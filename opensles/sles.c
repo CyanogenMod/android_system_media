@@ -1066,9 +1066,10 @@ static SLresult AudioPlayer_Realize(void *self)
 {
     struct AudioPlayer_class *this = (struct AudioPlayer_class *) self;
     SLresult result = SL_RESULT_SUCCESS;
+
 #ifdef USE_ANDROID
     // FIXME move this to android specific files
-    result = sles_to_android_RealizeAudioPlayer(this);
+    result = sles_to_android_realizeAudioPlayer(this);
     int ok;
     ok = pthread_create(&this->mThread, (const pthread_attr_t *) NULL, thread_body, this);
     assert(ok == 0);
@@ -1931,7 +1932,11 @@ static SLresult Play_SetPlayState(SLPlayItf self, SLuint32 state)
         // this->mPositionSamples = 0;
     }
     interface_unlock_exclusive(this);
+#ifdef USE_ANDROID
+    return sles_to_android_audioPlayerSetPlayState(this, state);
+#else
     return SL_RESULT_SUCCESS;
+#endif
 }
 
 static SLresult Play_GetPlayState(SLPlayItf self, SLuint32 *pState)
@@ -2082,6 +2087,8 @@ static SLresult Play_GetPositionUpdatePeriod(SLPlayItf self,
 static SLresult BufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
     SLuint32 size)
 {
+    //FIXME if queue is empty and associated player is not in SL_PLAYSTATE_PLAYING state,
+    // set it to SL_PLAYSTATE_PLAYING (and start playing)
     if (NULL == pBuffer)
         return SL_RESULT_PARAMETER_INVALID;
     struct BufferQueue_interface *this = (struct BufferQueue_interface *) self;
@@ -2346,32 +2353,31 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     if (SL_RESULT_SUCCESS != result)
         return result;
     // check the audio source and sinks
-    result = sles_checkSourceSink(pAudioSrc, pAudioSnk);
+    result = sles_checkAudioPlayerSourceSink(pAudioSrc, pAudioSnk);
     if (result != SL_RESULT_SUCCESS) {
         return result;
     }
     fprintf(stderr, "\t after sles_checkSourceSink()\n");
     // check the audio source and sink parameters against platform support
 #ifdef USE_ANDROID
-    result = sles_to_android_CheckAudioPlayerSourceSink(pAudioSrc, pAudioSnk);
+    result = sles_to_android_checkAudioPlayerSourceSink(pAudioSrc, pAudioSnk);
     if (result != SL_RESULT_SUCCESS) {
             return result;
     }
-    fprintf(stderr, "\t after sles_to_android_CheckAudioPlayerSourceSink()\n");
-#endif
-#ifdef USE_SNDFILE
+    fprintf(stderr, "\t after sles_to_android_checkAudioPlayerSourceSink()\n");
 #endif
 
+#ifdef USE_SNDFILE
     SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
     SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
     SLuint32 numBuffers = 0;
     SLDataFormat_PCM *df_pcm = NULL;
+#endif
 #ifdef USE_OUTPUTMIXEXT
     struct Track *track = NULL;
 #endif
 #ifdef USE_SNDFILE
     SLchar *pathname = NULL;
-#endif // USE_SNDFILE
     switch (locatorType) {
     case SL_DATALOCATOR_BUFFERQUEUE:
         {
@@ -2438,7 +2444,6 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         }
         }
         break;
-#ifdef USE_SNDFILE
     case SL_DATALOCATOR_URI:
         {
         SLDataLocator_URI *dl_uri = (SLDataLocator_URI *) pAudioSrc->pLocator;
@@ -2479,7 +2484,6 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         numBuffers = 2;
         }
         break;
-#endif // USE_SNDFILE
     case SL_DATALOCATOR_ADDRESS:
     case SL_DATALOCATOR_IODEVICE:
     case SL_DATALOCATOR_OUTPUTMIX:
@@ -2490,7 +2494,9 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }
+#endif // USE_SNDFILE
 
+#ifdef USE_OUTPUTMIXEXT
     switch (*(SLuint32 *)pAudioSnk->pLocator) {
     case SL_DATALOCATOR_OUTPUTMIX:
         {
@@ -2502,7 +2508,6 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         if ((NULL == outputMix) || (&OutputMix_class !=
             ((struct Object_interface *) outputMix)->mClass))
             return SL_RESULT_PARAMETER_INVALID;
-#ifdef USE_OUTPUTMIXEXT
         struct OutputMix_interface *om =
             &((struct OutputMix_class *) outputMix)->mOutputMix;
         // allocate an entry within OutputMix for this track
@@ -2519,7 +2524,6 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
             return SL_RESULT_MEMORY_FAILURE;
         }
         // FIXME replace the above for Android - do not use our own mixer!
-#endif
         }
         break;
     case SL_DATALOCATOR_BUFFERQUEUE:
@@ -2533,28 +2537,47 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }
-    // Construct our new instance
+#endif // USE_OUTPUTMIXEXT
+
+    // Construct our new AudioPlayer instance
     struct AudioPlayer_class *this = (struct AudioPlayer_class *)
         construct(&AudioPlayer_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
-    // FIXME numBuffers is unavailable for URL, must make a default !
-    assert(0 < numBuffers);
-    this->mBufferQueue.mNumBuffers = numBuffers;
-    // inline allocation of circular mArray, up to a typical max
-    if (BUFFER_HEADER_TYPICAL >= numBuffers) {
-        this->mBufferQueue.mArray = this->mBufferQueue.mTypical;
-    } else {
-        // FIXME integer overflow possible during multiplication
-        this->mBufferQueue.mArray = (struct BufferHeader *)
-            malloc((numBuffers + 1) * sizeof(struct BufferHeader));
-        if (NULL == this->mBufferQueue.mArray) {
-            free(this);
-            return SL_RESULT_MEMORY_FAILURE;
+
+    // DataSource specific initializations
+    switch(*(SLuint32 *)pAudioSrc->pLocator) {
+    case SL_DATALOCATOR_BUFFERQUEUE:
+        {
+        SLDataLocator_BufferQueue *dl_bq = (SLDataLocator_BufferQueue *) pAudioSrc->pLocator;
+        SLuint32 numBuffs = dl_bq->numBuffers;
+        if (0 == numBuffs) {
+            return SL_RESULT_PARAMETER_INVALID;
         }
+        this->mBufferQueue.mNumBuffers = numBuffs;
+        // inline allocation of circular mArray, up to a typical max
+        if (BUFFER_HEADER_TYPICAL >= numBuffs) {
+            this->mBufferQueue.mArray = this->mBufferQueue.mTypical;
+        } else {
+            // FIXME integer overflow possible during multiplication
+            this->mBufferQueue.mArray = (struct BufferHeader *)
+                    malloc((numBuffs + 1) * sizeof(struct BufferHeader));
+            if (NULL == this->mBufferQueue.mArray) {
+                free(this);
+                return SL_RESULT_MEMORY_FAILURE;
+            }
+        }
+        this->mBufferQueue.mFront = this->mBufferQueue.mArray;
+        this->mBufferQueue.mRear = this->mBufferQueue.mArray;
+        }
+        break;
+    case SL_DATALOCATOR_URI:
+        break;
+    default:
+        // no other init required
+        break;
     }
-    this->mBufferQueue.mFront = this->mBufferQueue.mArray;
-    this->mBufferQueue.mRear = this->mBufferQueue.mArray;
+
     // used to store the data source of our audio player
     this->mDynamicSource.mDataSource = pAudioSrc;
 #ifdef USE_SNDFILE
@@ -2576,7 +2599,7 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     track->mAvail = 0;
 #endif
 #ifdef USE_ANDROID
-    sles_to_android_CreateAudioPlayer(pAudioSrc, pAudioSnk, this);
+    sles_to_android_createAudioPlayer(pAudioSrc, pAudioSnk, this);
 #endif
     // return the new audio player object
     *pPlayer = &this->mObject.mItf;

@@ -21,4 +21,4 @@
  *    SL_RESULT_PARAMETER_INVALID if an invalid or null parameter is passed
  *    SL_RESULT_SUCCESS if the given source and sinks can be by the audio player
  */
-SLresult sles_checkSourceSink(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk);
+SLresult sles_checkAudioPlayerSourceSink(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk);

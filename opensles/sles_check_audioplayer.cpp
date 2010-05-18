@@ -16,7 +16,7 @@
 
 #include "sles_allinclusive.h"
 
-SLresult sles_checkSourceSink(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk) {
+SLresult sles_checkAudioPlayerSourceSink(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk) {
 
     // DataSource checks
     if ((NULL == pAudioSrc) || (NULL == (SLuint32 *) pAudioSrc->pLocator) ||

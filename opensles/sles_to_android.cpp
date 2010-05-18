@@ -76,7 +76,7 @@ int android_getMinFrameCount(uint32_t sampleRate) {
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_CheckAudioPlayerSourceSink(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk)
+SLresult sles_to_android_checkAudioPlayerSourceSink(SLDataSource *pAudioSrc, SLDataSink *pAudioSnk)
 {
     //--------------------------------------
     // Sink check:
@@ -211,7 +211,7 @@ static void android_pushAudioTrackCallback(int event, void* user, void *info) {
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_CreateAudioPlayer(SLDataSource *pAudioSrc,
+SLresult sles_to_android_createAudioPlayer(SLDataSource *pAudioSrc,
         SLDataSink *pAudioSnk,
         AudioPlayer_class *pAudioPlayer) {
 
@@ -247,7 +247,7 @@ SLresult sles_to_android_CreateAudioPlayer(SLDataSource *pAudioSrc,
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_RealizeAudioPlayer(AudioPlayer_class *pAudioPlayer) {
+SLresult sles_to_android_realizeAudioPlayer(AudioPlayer_class *pAudioPlayer) {
 
     SLresult result = SL_RESULT_SUCCESS;
 
@@ -289,6 +289,38 @@ SLresult sles_to_android_RealizeAudioPlayer(AudioPlayer_class *pAudioPlayer) {
     }
 
     return result;
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult sles_to_android_audioPlayerSetPlayState(struct Play_interface *pPlayItf, SLuint32 state) {
+    struct AudioPlayer_class *ap = (struct AudioPlayer_class *)pPlayItf->mThis;
+    switch(ap->mAndroidObjType) {
+    case AUDIOTRACK_PUSH:
+        switch (state) {
+        case SL_PLAYSTATE_STOPPED:
+            fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_STOPPED\n");
+            ap->mAudioTrack->stop();
+            break;
+        case SL_PLAYSTATE_PAUSED:
+            fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PAUSED\n");
+            ap->mAudioTrack->pause();
+            break;
+        case SL_PLAYSTATE_PLAYING:
+            fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PLAYING\n");
+            ap->mAudioTrack->start();
+            break;
+        default:
+            return SL_RESULT_PARAMETER_INVALID;
+        }
+        break;
+    case MEDIAPLAYER:
+        //FIXME implement
+        break;
+    default:
+        break;
+    }
+    return SL_RESULT_SUCCESS;
 }
 
 #endif
