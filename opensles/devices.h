@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-#include "sles_allinclusive.h"
+#define DEVICE_ID_HEADSET 1
+#define DEVICE_ID_HANDSFREE 2
 
-SLresult sles_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc,
-    const SLDataSink *pAudioSnk) {
+extern const struct AudioInput_id_descriptor {
+    SLuint32 id;
+    const SLAudioInputDescriptor *descriptor;
+} AudioInput_id_descriptors[];
 
-    // DataSource checks
-    if ((NULL == pAudioSrc) || (NULL == (SLuint32 *) pAudioSrc->pLocator) ||
-            (NULL == pAudioSrc->pFormat)) {
-        return SL_RESULT_PARAMETER_INVALID;
-    }
+extern const struct AudioOutput_id_descriptor {
+    SLuint32 id;
+    const SLAudioOutputDescriptor *descriptor;
+} AudioOutput_id_descriptors[];
 
-    // DataSink checks
-    if (NULL == pAudioSnk || (NULL == (SLuint32 *) pAudioSnk->pLocator)) {
-        return SL_RESULT_PARAMETER_INVALID;
-    }
+extern const struct LED_id_descriptor {
+    SLuint32 id;
+    const SLLEDDescriptor *descriptor;
+} LED_id_descriptors[];
 
-    // Success
-    return SL_RESULT_SUCCESS;
-
-}
+extern const struct Vibra_id_descriptor {
+    SLuint32 id;
+    const SLVibraDescriptor *descriptor;
+} Vibra_id_descriptors[];

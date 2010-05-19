@@ -27,168 +27,7 @@
 
 extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
 
-#ifdef __cplusplus
-#define this this_
-#endif
-
-/* Private types */
-
-/* Device table (change this when you port!) */
-
-static const SLAudioInputDescriptor AudioInputDescriptor_mic = {
-    (SLchar *) "mic",            // deviceName
-    SL_DEVCONNECTION_INTEGRATED, // deviceConnection
-    SL_DEVSCOPE_ENVIRONMENT,     // deviceScope
-    SL_DEVLOCATION_HANDSET,      // deviceLocation
-    SL_BOOLEAN_TRUE,             // isForTelephony
-    SL_SAMPLINGRATE_44_1,        // minSampleRate
-    SL_SAMPLINGRATE_44_1,        // maxSampleRate
-    SL_BOOLEAN_TRUE,             // isFreqRangeContinuous
-    NULL,                        // samplingRatesSupported
-    0,                           // numOfSamplingRatesSupported
-    1                            // maxChannels
-};
-
-static const struct AudioInput_id_descriptor {
-    SLuint32 id;
-    const SLAudioInputDescriptor *descriptor;
-} AudioInput_id_descriptors[] = {
-    {SL_DEFAULTDEVICEID_AUDIOINPUT, &AudioInputDescriptor_mic}
-};
-
-static const SLAudioOutputDescriptor AudioOutputDescriptor_speaker = {
-    (SLchar *) "speaker",        // deviceName
-    SL_DEVCONNECTION_INTEGRATED, // deviceConnection
-    SL_DEVSCOPE_USER,            // deviceScope
-    SL_DEVLOCATION_HEADSET,      // deviceLocation
-    SL_BOOLEAN_TRUE,             // isForTelephony
-    SL_SAMPLINGRATE_44_1,        // minSamplingRate
-    SL_SAMPLINGRATE_44_1,        // maxSamplingRate
-    SL_BOOLEAN_TRUE,             // isFreqRangeContinuous
-    NULL,                        // samplingRatesSupported
-    0,                           // numOfSamplingRatesSupported
-    2                            // maxChannels
-};
-
-#define DEVICE_ID_HEADSET 1
-
-static const SLAudioOutputDescriptor AudioOutputDescriptor_headset = {
-    (SLchar *) "headset",
-    SL_DEVCONNECTION_ATTACHED_WIRED,
-    SL_DEVSCOPE_USER,
-    SL_DEVLOCATION_HEADSET,
-    SL_BOOLEAN_FALSE,
-    SL_SAMPLINGRATE_44_1,
-    SL_SAMPLINGRATE_44_1,
-    SL_BOOLEAN_TRUE,
-    NULL,
-    0,
-    2
-};
-
-#define DEVICE_ID_HANDSFREE 2
-
-static const SLAudioOutputDescriptor AudioOutputDescriptor_handsfree = {
-    (SLchar *) "handsfree",
-    SL_DEVCONNECTION_INTEGRATED,
-    SL_DEVSCOPE_ENVIRONMENT,
-    SL_DEVLOCATION_HANDSET,
-    SL_BOOLEAN_FALSE,
-    SL_SAMPLINGRATE_44_1,
-    SL_SAMPLINGRATE_44_1,
-    SL_BOOLEAN_TRUE,
-    NULL,
-    0,
-    2
-};
-
-static const struct AudioOutput_id_descriptor {
-    SLuint32 id;
-    const SLAudioOutputDescriptor *descriptor;
-} AudioOutput_id_descriptors[] = {
-    {SL_DEFAULTDEVICEID_AUDIOOUTPUT, &AudioOutputDescriptor_speaker},
-    {DEVICE_ID_HEADSET, &AudioOutputDescriptor_headset},
-    {DEVICE_ID_HANDSFREE, &AudioOutputDescriptor_handsfree}
-};
-
-static const SLLEDDescriptor SLLEDDescriptor_default = {
-    32, // ledCount
-    0,  // primaryLED
-    ~0  // colorMask
-};
-
-static const struct LED_id_descriptor {
-    SLuint32 id;
-    const SLLEDDescriptor *descriptor;
-} LED_id_descriptors[] = {
-    {SL_DEFAULTDEVICEID_LED, &SLLEDDescriptor_default}
-};
-
-static const SLVibraDescriptor SLVibraDescriptor_default = {
-    SL_BOOLEAN_TRUE, // supportsFrequency
-    SL_BOOLEAN_TRUE, // supportsIntensity
-    20000,           // minFrequency
-    100000           // maxFrequency
-};
-
-static const struct Vibra_id_descriptor {
-    SLuint32 id;
-    const SLVibraDescriptor *descriptor;
-} Vibra_id_descriptors[] = {
-    {SL_DEFAULTDEVICEID_VIBRA, &SLVibraDescriptor_default}
-};
-
-
 /* Private functions */
-
-static void object_lock_exclusive(IObject *this)
-{
-    int ok;
-    ok = pthread_mutex_lock(&this->mMutex);
-    assert(0 == ok);
-}
-
-static void object_unlock_exclusive(IObject *this)
-{
-    int ok;
-    ok = pthread_mutex_unlock(&this->mMutex);
-    assert(0 == ok);
-}
-
-static void object_cond_wait(IObject *this)
-{
-    int ok;
-    ok = pthread_cond_wait(&this->mCond, &this->mMutex);
-    assert(0 == ok);
-}
-
-static void object_cond_signal(IObject *this)
-{
-    int ok;
-    ok = pthread_cond_signal(&this->mCond);
-    assert(0 == ok);
-}
-
-// Currently shared locks are implemented as exclusive, but don't count on it
-
-#define object_lock_shared(this)   object_lock_exclusive(this)
-#define object_unlock_shared(this) object_unlock_exclusive(this)
-
-// Currently interface locks are actually on whole object, but don't count on it
-
-#define interface_lock_exclusive(this)   object_lock_exclusive((this)->mThis)
-#define interface_unlock_exclusive(this) object_unlock_exclusive((this)->mThis)
-#define interface_lock_shared(this)      object_lock_shared((this)->mThis)
-#define interface_unlock_shared(this)    object_unlock_shared((this)->mThis)
-#define interface_cond_wait(this)        object_cond_wait((this)->mThis)
-#define interface_cond_signal(this)      object_cond_signal((this)->mThis)
-
-// Peek and poke are an optimization for small atomic fields that don't "matter"
-
-#define interface_lock_poke(this)   /* interface_lock_exclusive(this) */
-#define interface_unlock_poke(this) /* interface_unlock_exclusive(this) */
-#define interface_lock_peek(this)   /* interface_lock_shared(this) */
-#define interface_unlock_peek(this) /* interface_unlock_shared(this) */
 
 // Map SLInterfaceID to its minimal perfect hash (MPH), or -1 if unknown
 
@@ -256,128 +95,6 @@ static SLresult checkInterfaces(const ClassTable *class__,
 
 /* Interface initialization hooks */
 
-extern const struct SL3DCommitItf_ _3DCommit_3DCommitItf;
-
-static void _3DCommit_init(void *self)
-{
-    I3DCommit *this = (I3DCommit *) self;
-    this->mItf = &_3DCommit_3DCommitItf;
-#ifndef NDEBUG
-    this->mDeferred = SL_BOOLEAN_FALSE;
-    this->mGeneration = 0;
-#endif
-}
-
-extern const struct SL3DDopplerItf_ _3DDoppler_3DDopplerItf;
-
-static void _3DDoppler_init(void *self)
-{
-    I3DDoppler *this = (I3DDoppler *) self;
-    this->mItf = &_3DDoppler_3DDopplerItf;
-#ifndef NDEBUG
-    this->mVelocityCartesian.x = 0;
-    this->mVelocityCartesian.y = 0;
-    this->mVelocityCartesian.z = 0;
-    memset(&this->mVelocitySpherical, 0x55, sizeof(this->mVelocitySpherical));
-#endif
-    this->mDopplerFactor = 1000;
-    this->mVelocityActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
-}
-
-extern const struct SL3DGroupingItf_ _3DGrouping_3DGroupingItf;
-
-static void _3DGrouping_init(void *self)
-{
-    I3DGrouping *this = (I3DGrouping *) self;
-    this->mItf = &_3DGrouping_3DGroupingItf;
-#ifndef NDEBUG
-    this->mGroup = NULL;
-#endif
-    // FIXME initialize the bag here
-}
-
-extern const struct SL3DLocationItf_ _3DLocation_3DLocationItf;
-
-static void _3DLocation_init(void *self)
-{
-    I3DLocation *this = (I3DLocation *) self;
-    this->mItf = &_3DLocation_3DLocationItf;
-#ifndef NDEBUG
-    this->mLocationCartesian.x = 0;
-    this->mLocationCartesian.y = 0;
-    this->mLocationCartesian.z = 0;
-    memset(&this->mLocationSpherical, 0x55, sizeof(this->mLocationSpherical));
-    this->mOrientationAngles.mHeading = 0;
-    this->mOrientationAngles.mPitch = 0;
-    this->mOrientationAngles.mRoll = 0;
-    this->mOrientationVectors.mFront.x = 0;
-    this->mOrientationVectors.mFront.y = 0;
-    this->mOrientationVectors.mAbove.x = 0;
-    this->mOrientationVectors.mAbove.y = 0;
-    this->mOrientationVectors.mUp.x = 0;
-    this->mOrientationVectors.mUp.z = 0;
-    this->mTheta = 0x55555555;
-    this->mAxis.x = 0x55555555;
-    this->mAxis.y = 0x55555555;
-    this->mAxis.z = 0x55555555;
-    this->mRotatePending = SL_BOOLEAN_FALSE;
-#endif
-    this->mOrientationVectors.mFront.z = -1000;
-    this->mOrientationVectors.mUp.y = 1000;
-    this->mOrientationVectors.mAbove.z = -1000;
-    this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
-    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
-}
-
-extern const struct SL3DMacroscopicItf_ _3DMacroscopic_3DMacroscopicItf;
-
-static void _3DMacroscopic_init(void *self)
-{
-    I3DMacroscopic *this = (I3DMacroscopic *) self;
-    this->mItf = &_3DMacroscopic_3DMacroscopicItf;
-#ifndef NDEBUG
-    this->mSize.mWidth = 0;
-    this->mSize.mHeight = 0;
-    this->mSize.mDepth = 0;
-    this->mOrientationAngles.mHeading = 0;
-    this->mOrientationAngles.mPitch = 0;
-    this->mOrientationAngles.mRoll = 0;
-    this->mOrientationVectors.mFront.x = 0;
-    this->mOrientationVectors.mFront.y = 0;
-    this->mOrientationVectors.mUp.x = 0;
-    this->mOrientationVectors.mUp.z = 0;
-    // this->mGeneration = 0;
-    this->mTheta = 0x55555555;
-    this->mAxis.x = 0x55555555;
-    this->mAxis.y = 0x55555555;
-    this->mAxis.z = 0x55555555;
-    this->mRotatePending = SL_BOOLEAN_FALSE;
-#endif
-    this->mOrientationVectors.mFront.z = -1000;
-    this->mOrientationVectors.mUp.y = 1000;
-    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
-}
-
-extern const struct SL3DSourceItf_ _3DSource_3DSourceItf;
-
-static void _3DSource_init(void *self)
-{
-    I3DSource *this = (I3DSource *) self;
-    this->mItf = &_3DSource_3DSourceItf;
-#ifndef NDEBUG
-    this->mHeadRelative = SL_BOOLEAN_FALSE;
-    this->mRolloffMaxDistanceMute = SL_BOOLEAN_FALSE;
-    this->mConeOuterLevel = 0;
-    this->mRoomRolloffFactor = 0;
-#endif
-    this->mMaxDistance = SL_MILLIMETER_MAX;
-    this->mMinDistance = 1000;
-    this->mConeInnerAngle = 360000;
-    this->mConeOuterAngle = 360000;
-    this->mRolloffFactor = 1000;
-    this->mDistanceModel = SL_ROLLOFFMODEL_EXPONENTIAL;
-}
-
 extern const struct SLAudioDecoderCapabilitiesItf_
     AudioDecoderCapabilities_AudioDecoderCapabilitiesItf;
 
@@ -425,18 +142,6 @@ static void AudioIODeviceCapabilities_init(void *self)
     this->mDefaultDeviceIDMapChangedCallback = NULL;
     this->mDefaultDeviceIDMapChangedContext = NULL;
 #endif
-}
-
-extern const struct SLBassBoostItf_ BassBoost_BassBoostItf;
-
-static void BassBoost_init(void *self)
-{
-    IBassBoost *this = (IBassBoost *) self;
-    this->mItf = &BassBoost_BassBoostItf;
-#ifndef NDEBUG
-    this->mEnabled = SL_BOOLEAN_FALSE;
-#endif
-    this->mStrength = 1000;
 }
 
 extern const struct SLBufferQueueItf_ BufferQueue_BufferQueueItf;
@@ -538,50 +243,6 @@ static void EngineCapabilities_init(void *self)
     IEngineCapabilities *this =
         (IEngineCapabilities *) self;
     this->mItf = &EngineCapabilities_EngineCapabilitiesItf;
-}
-
-// FIXME move
-static const SLEnvironmentalReverbSettings EnvironmentalReverb_default = {
-    SL_MILLIBEL_MIN, // roomLevel
-    0,               // roomHFLevel
-    1000,            // decayTime
-    500,             // decayHFRatio
-    SL_MILLIBEL_MIN, // reflectionsLevel
-    20,              // reflectionsDelay
-    SL_MILLIBEL_MIN, // reverbLevel
-    40,              // reverbDelay
-    1000,            // diffusion
-    1000             // density
-};
-
-extern const struct SLEnvironmentalReverbItf_ EnvironmentalReverb_EnvironmentalReverbItf;
-
-static void EnvironmentalReverb_init(void *self)
-{
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    this->mItf = &EnvironmentalReverb_EnvironmentalReverbItf;
-    this->mProperties = EnvironmentalReverb_default;
-}
-
-extern const struct SLEqualizerItf_ Equalizer_EqualizerItf;
-
-static void Equalizer_init(void *self)
-{
-    IEqualizer *this = (IEqualizer *) self;
-    this->mItf = &Equalizer_EqualizerItf;
-    this->mEnabled = SL_BOOLEAN_FALSE;
-    this->mNumBands = 4;
-    this->mBandLevelRangeMin = 0;
-    this->mBandLevelRangeMax = 1000;
-    struct EqualizerBand *band = this->mBands;
-    unsigned i;
-    for (i = 0; i < this->mNumBands; ++i, ++band) {
-        this->mBands[i].mLevel = 0;
-        this->mBands[i].mCenter = 0;
-        this->mBands[i].mMin = 0;
-        this->mBands[i].mMax = 0;
-    }
-    this->mPreset = 0;
 }
 
 extern const struct SLLEDArrayItf_ LEDArray_LEDArrayItf;
@@ -766,14 +427,6 @@ static void PlaybackRate_init(void *self)
     this->mItf = &PlaybackRate_PlaybackRateItf;
 }
 
-extern const struct SLPresetReverbItf_ PresetReverb_PresetReverbItf;
-
-static void PresetReverb_init(void *self)
-{
-    IPresetReverb *this = (IPresetReverb *) self;
-    this->mItf = &PresetReverb_PresetReverbItf;
-}
-
 extern const struct SLRatePitchItf_ RatePitch_RatePitchItf;
 
 static void RatePitch_init(void *self)
@@ -818,18 +471,6 @@ static void ThreadSync_init(void *self)
 #endif
 }
 
-extern const struct SLVirtualizerItf_ Virtualizer_VirtualizerItf;
-
-static void Virtualizer_init(void *self)
-{
-    IVirtualizer *this = (IVirtualizer *) self;
-    this->mItf = &Virtualizer_VirtualizerItf;
-#ifndef NDEBUG
-    this->mEnabled = SL_BOOLEAN_FALSE;
-    this->mStrength = 0;
-#endif
-}
-
 extern const struct SLVibraItf_ Vibra_VibraItf;
 
 static void Vibra_init(void *self)
@@ -839,22 +480,8 @@ static void Vibra_init(void *self)
 #ifndef NDEBUG
     this->mVibrate = SL_BOOLEAN_FALSE;
 #endif
-    this->mFrequency = SLVibraDescriptor_default.minFrequency;
+    this->mFrequency = Vibra_id_descriptors[0].descriptor->minFrequency;
     this->mIntensity = 1000;
-}
-
-extern const struct SLVisualizationItf_ Visualization_VisualizationItf;
-
-static void Visualization_init(void *self)
-{
-    IVisualization *this =
-        (IVisualization *) self;
-    this->mItf = &Visualization_VisualizationItf;
-#ifndef NDEBUG
-    this->mCallback = NULL;
-    this->mContext = NULL;
-#endif
-    this->mRate = 20000;
 }
 
 extern const struct SLVolumeItf_ Volume_VolumeItf;
@@ -871,23 +498,45 @@ static void Volume_init(void *self)
 #endif
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern void
+    I3DCommit_init(void *),
+    I3DDoppler_init(void *),
+    I3DGrouping_init(void *),
+    I3DLocation_init(void *),
+    I3DMacroscopic_init(void *),
+    I3DSource_init(void *),
+    IBassBoost_init(void *),
+    IEnvironmentalReverb_init(void *),
+    IEqualizer_init(void *),
+    IPresetReverb_init(void *),
+    IVirtualizer_init(void *),
+    IVisualization_init(void *);
+
+#ifdef __cplusplus
+}
+#endif
+
 static const struct MPH_init {
     // unsigned char mMPH;
     VoidHook mInit;
     VoidHook mDeinit;
 } MPH_init_table[MPH_MAX] = {
-    { /* MPH_3DCOMMIT, */ _3DCommit_init, NULL },
-    { /* MPH_3DDOPPLER, */ _3DDoppler_init, NULL },
-    { /* MPH_3DGROUPING, */ _3DGrouping_init, NULL },
-    { /* MPH_3DLOCATION, */ _3DLocation_init, NULL },
-    { /* MPH_3DMACROSCOPIC, */ _3DMacroscopic_init, NULL },
-    { /* MPH_3DSOURCE, */ _3DSource_init, NULL },
+    { /* MPH_3DCOMMIT, */ I3DCommit_init, NULL },
+    { /* MPH_3DDOPPLER, */ I3DDoppler_init, NULL },
+    { /* MPH_3DGROUPING, */ I3DGrouping_init, NULL },
+    { /* MPH_3DLOCATION, */ I3DLocation_init, NULL },
+    { /* MPH_3DMACROSCOPIC, */ I3DMacroscopic_init, NULL },
+    { /* MPH_3DSOURCE, */ I3DSource_init, NULL },
     { /* MPH_AUDIODECODERCAPABILITIES, */ AudioDecoderCapabilities_init, NULL },
     { /* MPH_AUDIOENCODER, */ AudioEncoder_init, NULL },
     { /* MPH_AUDIOENCODERCAPABILITIES, */ AudioEncoderCapabilities_init, NULL },
     { /* MPH_AUDIOIODEVICECAPABILITIES, */ AudioIODeviceCapabilities_init,
         NULL },
-    { /* MPH_BASSBOOST, */ BassBoost_init, NULL },
+    { /* MPH_BASSBOOST, */ IBassBoost_init, NULL },
     { /* MPH_BUFFERQUEUE, */ BufferQueue_init, NULL },
     { /* MPH_DEVICEVOLUME, */ DeviceVolume_init, NULL },
     { /* MPH_DYNAMICINTERFACEMANAGEMENT, */ DynamicInterfaceManagement_init,
@@ -896,8 +545,8 @@ static const struct MPH_init {
     { /* MPH_EFFECTSEND, */ EffectSend_init, NULL },
     { /* MPH_ENGINE, */ Engine_init, NULL },
     { /* MPH_ENGINECAPABILITIES, */ EngineCapabilities_init, NULL },
-    { /* MPH_ENVIRONMENTALREVERB, */ EnvironmentalReverb_init, NULL },
-    { /* MPH_EQUALIZER, */ Equalizer_init, NULL },
+    { /* MPH_ENVIRONMENTALREVERB, */ IEnvironmentalReverb_init, NULL },
+    { /* MPH_EQUALIZER, */ IEqualizer_init, NULL },
     { /* MPH_LED, */ LEDArray_init, NULL },
     { /* MPH_METADATAEXTRACTION, */ MetadataExtraction_init, NULL },
     { /* MPH_METADATATRAVERSAL, */ MetadataTraversal_init, NULL },
@@ -913,14 +562,14 @@ static const struct MPH_init {
     { /* MPH_PLAY, */ Play_init, NULL },
     { /* MPH_PLAYBACKRATE, */ PlaybackRate_init, NULL },
     { /* MPH_PREFETCHSTATUS, */ PrefetchStatus_init, NULL },
-    { /* MPH_PRESETREVERB, */ PresetReverb_init, NULL },
+    { /* MPH_PRESETREVERB, */ IPresetReverb_init, NULL },
     { /* MPH_RATEPITCH, */ RatePitch_init, NULL },
     { /* MPH_RECORD, */ Record_init, NULL },
     { /* MPH_SEEK, */ Seek_init, NULL },
     { /* MPH_THREADSYNC, */ ThreadSync_init, NULL },
     { /* MPH_VIBRA, */ Vibra_init, NULL },
-    { /* MPH_VIRTUALIZER, */ Virtualizer_init, NULL },
-    { /* MPH_VISUALIZATION, */ Visualization_init, NULL },
+    { /* MPH_VIRTUALIZER, */ IVirtualizer_init, NULL },
+    { /* MPH_VISUALIZATION, */ IVisualization_init, NULL },
     { /* MPH_VOLUME, */ Volume_init, NULL },
     { /* MPH_OUTPUTMIXEXT, */
 #ifdef USE_OUTPUTMIXEXT
@@ -950,7 +599,7 @@ static const struct iid_vtable _3DGroup_interfaces[] = {
         offsetof(C3DGroup, m3DMacroscopic)},
 };
 
-static const ClassTable _3DGroup_class = {
+/*static*/ const ClassTable C3DGroup_class = {
     _3DGroup_interfaces,
     sizeof(_3DGroup_interfaces)/sizeof(_3DGroup_interfaces[0]),
     MPH_to_3DGroup,
@@ -1190,7 +839,7 @@ static const struct iid_vtable AudioPlayer_interfaces[] = {
         offsetof(CAudioPlayer, mVisualization)}
 };
 
-static const ClassTable AudioPlayer_class = {
+static const ClassTable CAudioPlayer_class = {
     AudioPlayer_interfaces,
     sizeof(AudioPlayer_interfaces)/sizeof(AudioPlayer_interfaces[0]),
     MPH_to_AudioPlayer,
@@ -1225,7 +874,7 @@ static const struct iid_vtable AudioRecorder_interfaces[] = {
         offsetof(CAudioRecorder, mVolume)}
 };
 
-static const ClassTable AudioRecorder_class = {
+static const ClassTable CAudioRecorder_class = {
     AudioRecorder_interfaces,
     sizeof(AudioRecorder_interfaces)/sizeof(AudioRecorder_interfaces[0]),
     MPH_to_AudioRecorder,
@@ -1262,7 +911,7 @@ static const struct iid_vtable Engine_interfaces[] = {
         offsetof(CEngine, mDeviceVolume)}
 };
 
-static const ClassTable Engine_class = {
+static const ClassTable CEngine_class = {
     Engine_interfaces,
     sizeof(Engine_interfaces)/sizeof(Engine_interfaces[0]),
     MPH_to_Engine,
@@ -1285,7 +934,7 @@ static const struct iid_vtable LEDDevice_interfaces[] = {
         offsetof(CLEDDevice, mLEDArray)}
 };
 
-static const ClassTable LEDDevice_class = {
+static const ClassTable CLEDDevice_class = {
     LEDDevice_interfaces,
     sizeof(LEDDevice_interfaces)/sizeof(LEDDevice_interfaces[0]),
     MPH_to_LEDDevice,
@@ -1310,7 +959,7 @@ static const struct iid_vtable Listener_interfaces[] = {
         offsetof(C3DGroup, m3DLocation)}
 };
 
-static const ClassTable Listener_class = {
+static const ClassTable CListener_class = {
     Listener_interfaces,
     sizeof(Listener_interfaces)/sizeof(Listener_interfaces[0]),
     MPH_to_Listener,
@@ -1337,7 +986,7 @@ static const struct iid_vtable MetadataExtractor_interfaces[] = {
         offsetof(CMetadataExtractor, mMetadataTraversal)}
 };
 
-static const ClassTable MetadataExtractor_class = {
+static const ClassTable CMetadataExtractor_class = {
     MetadataExtractor_interfaces,
     sizeof(MetadataExtractor_interfaces) /
         sizeof(MetadataExtractor_interfaces[0]),
@@ -1413,7 +1062,7 @@ static const struct iid_vtable MidiPlayer_interfaces[] = {
         offsetof(CMidiPlayer, mVisualization)}
 };
 
-static const ClassTable MidiPlayer_class = {
+static const ClassTable CMidiPlayer_class = {
     MidiPlayer_interfaces,
     sizeof(MidiPlayer_interfaces)/sizeof(MidiPlayer_interfaces[0]),
     MPH_to_MidiPlayer,
@@ -1456,7 +1105,7 @@ static const struct iid_vtable OutputMix_interfaces[] = {
         offsetof(COutputMix, mVisualization)}
 };
 
-static const ClassTable OutputMix_class = {
+static const ClassTable COutputMix_class = {
     OutputMix_interfaces,
     sizeof(OutputMix_interfaces)/sizeof(OutputMix_interfaces[0]),
     MPH_to_OutputMix,
@@ -1479,7 +1128,7 @@ static const struct iid_vtable VibraDevice_interfaces[] = {
         offsetof(CVibraDevice, mVibra)}
 };
 
-static const ClassTable VibraDevice_class = {
+static const ClassTable CVibraDevice_class = {
     VibraDevice_interfaces,
     sizeof(VibraDevice_interfaces)/sizeof(VibraDevice_interfaces[0]),
     MPH_to_Vibra,
@@ -1495,16 +1144,16 @@ static const ClassTable VibraDevice_class = {
 
 static const ClassTable * const classes[] = {
     // Do not change order of these entries; they are in numerical order
-    &Engine_class,
-    &LEDDevice_class,
-    &AudioPlayer_class,
-    &AudioRecorder_class,
-    &MidiPlayer_class,
-    &Listener_class,
-    &_3DGroup_class,
-    &VibraDevice_class,
-    &OutputMix_class,
-    &MetadataExtractor_class
+    &CEngine_class,
+    &CLEDDevice_class,
+    &CAudioPlayer_class,
+    &CAudioRecorder_class,
+    &CMidiPlayer_class,
+    &CListener_class,
+    &C3DGroup_class,
+    &CVibraDevice_class,
+    &COutputMix_class,
+    &CMetadataExtractor_class
 };
 
 static const ClassTable *objectIDtoClass(SLuint32 objectID)
@@ -2308,12 +1957,12 @@ static SLresult Engine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice,
         return SL_RESULT_PARAMETER_INVALID;
     *pDevice = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&LEDDevice_class, numInterfaces,
+    SLresult result = checkInterfaces(&CLEDDevice_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
     CLEDDevice *this = (CLEDDevice *)
-        construct(&LEDDevice_class, exposedMask, self);
+        construct(&CLEDDevice_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     SLHSL *color = (SLHSL *) malloc(sizeof(SLHSL) * this->mLEDArray.mCount);
@@ -2340,12 +1989,12 @@ static SLresult Engine_CreateVibraDevice(SLEngineItf self,
         return SL_RESULT_PARAMETER_INVALID;
     *pDevice = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&VibraDevice_class, numInterfaces,
+    SLresult result = checkInterfaces(&CVibraDevice_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
     CVibraDevice *this = (CVibraDevice *)
-        construct(&VibraDevice_class, exposedMask, self);
+        construct(&CVibraDevice_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     this->mDeviceID = deviceID;
@@ -2364,7 +2013,7 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         return SL_RESULT_PARAMETER_INVALID;
     *pPlayer = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&AudioPlayer_class, numInterfaces,
+    SLresult result = checkInterfaces(&CAudioPlayer_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
@@ -2517,7 +2166,7 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
             (SLDataLocator_OutputMix *) pAudioSnk->pLocator;
         SLObjectItf outputMix = dl_outmix->outputMix;
         // FIXME make this an operation on Object: GetClass
-        if ((NULL == outputMix) || (&OutputMix_class !=
+        if ((NULL == outputMix) || (&COutputMix_class !=
             ((IObject *) outputMix)->mClass))
             return SL_RESULT_PARAMETER_INVALID;
         IOutputMix *om =
@@ -2553,7 +2202,7 @@ static SLresult Engine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
 
     // Construct our new AudioPlayer instance
     CAudioPlayer *this = (CAudioPlayer *)
-        construct(&AudioPlayer_class, exposedMask, self);
+        construct(&CAudioPlayer_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
 
@@ -2631,7 +2280,7 @@ static SLresult Engine_CreateAudioRecorder(SLEngineItf self,
         return SL_RESULT_PARAMETER_INVALID;
     *pRecorder = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&AudioRecorder_class, numInterfaces,
+    SLresult result = checkInterfaces(&CAudioRecorder_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
@@ -2647,14 +2296,14 @@ static SLresult Engine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         return SL_RESULT_PARAMETER_INVALID;
     *pPlayer = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&MidiPlayer_class, numInterfaces,
+    SLresult result = checkInterfaces(&CMidiPlayer_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
     if (NULL == pMIDISrc || NULL == pAudioOutput)
         return SL_RESULT_PARAMETER_INVALID;
     CMidiPlayer *this = (CMidiPlayer *)
-        construct(&MidiPlayer_class, exposedMask, self);
+        construct(&CMidiPlayer_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     // return the new MIDI player object
@@ -2670,7 +2319,7 @@ static SLresult Engine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
         return SL_RESULT_PARAMETER_INVALID;
     *pListener = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&Listener_class, numInterfaces,
+    SLresult result = checkInterfaces(&CListener_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
@@ -2685,7 +2334,7 @@ static SLresult Engine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup,
         return SL_RESULT_PARAMETER_INVALID;
     *pGroup = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&_3DGroup_class, numInterfaces,
+    SLresult result = checkInterfaces(&C3DGroup_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
@@ -2700,12 +2349,12 @@ static SLresult Engine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix,
         return SL_RESULT_PARAMETER_INVALID;
     *pMix = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&OutputMix_class, numInterfaces,
+    SLresult result = checkInterfaces(&COutputMix_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
     COutputMix *this = (COutputMix *)
-        construct(&OutputMix_class, exposedMask, self);
+        construct(&COutputMix_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     *pMix = &this->mObject.mItf;
@@ -2721,12 +2370,12 @@ static SLresult Engine_CreateMetadataExtractor(SLEngineItf self,
         return SL_RESULT_PARAMETER_INVALID;
     *pMetadataExtractor = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&MetadataExtractor_class, numInterfaces,
+    SLresult result = checkInterfaces(&CMetadataExtractor_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
     CMetadataExtractor *this = (CMetadataExtractor *)
-        construct(&MetadataExtractor_class, exposedMask, self);
+        construct(&CMetadataExtractor_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     *pMetadataExtractor = &this->mObject.mItf;
@@ -2840,7 +2489,7 @@ static SLresult AudioIODeviceCapabilities_QueryAudioInputCapabilities(
     switch (deviceID) {
     // FIXME should be OEM-configurable
     case SL_DEFAULTDEVICEID_AUDIOINPUT:
-        *pDescriptor = AudioInputDescriptor_mic;
+        *pDescriptor = *AudioInput_id_descriptors[0].descriptor;
         break;
     default:
         return SL_RESULT_IO_ERROR;
@@ -2888,10 +2537,10 @@ static SLresult AudioIODeviceCapabilities_QueryAudioOutputCapabilities(
     switch (deviceID) {
     // FIXME should be OEM-configurable
     case DEVICE_ID_HEADSET:
-        *pDescriptor = AudioOutputDescriptor_headset;
+        *pDescriptor = *AudioOutput_id_descriptors[1].descriptor;
         break;
     case DEVICE_ID_HANDSFREE:
-        *pDescriptor = AudioOutputDescriptor_handsfree;
+        *pDescriptor = *AudioOutput_id_descriptors[2].descriptor;
         break;
     default:
         return SL_RESULT_IO_ERROR;
@@ -3118,315 +2767,6 @@ static SLresult Seek_GetLoop(SLSeekItf self, SLboolean *pLoopEnabled,
     Seek_SetPosition,
     Seek_SetLoop,
     Seek_GetLoop
-};
-
-/* 3DCommit implementation */
-
-static SLresult _3DCommit_Commit(SL3DCommitItf self)
-{
-    I3DCommit *this = (I3DCommit *) self;
-    IObject *thisObject = this->mThis;
-    object_lock_exclusive(thisObject);
-    if (this->mDeferred) {
-        SLuint32 myGeneration = this->mGeneration;
-        do
-            object_cond_wait(thisObject);
-        while (this->mGeneration == myGeneration);
-    }
-    object_unlock_exclusive(thisObject);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DCommit_SetDeferred(SL3DCommitItf self, SLboolean deferred)
-{
-    I3DCommit *this = (I3DCommit *) self;
-    IObject *thisObject = this->mThis;
-    object_lock_exclusive(thisObject);
-    this->mDeferred = deferred;
-    object_unlock_exclusive(thisObject);
-    return SL_RESULT_SUCCESS;
-}
-
-/*static*/ const struct SL3DCommitItf_ _3DCommit_3DCommitItf = {
-    _3DCommit_Commit,
-    _3DCommit_SetDeferred
-};
-
-/* 3DDoppler implementation */
-
-static SLresult _3DDoppler_SetVelocityCartesian(SL3DDopplerItf self,
-    const SLVec3D *pVelocity)
-{
-    if (NULL == pVelocity)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DDoppler *this = (I3DDoppler *) self;
-    SLVec3D velocityCartesian = *pVelocity;
-    interface_lock_exclusive(this);
-    this->mVelocityCartesian = velocityCartesian;
-    this->mVelocityActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DDoppler_SetVelocitySpherical(SL3DDopplerItf self,
-    SLmillidegree azimuth, SLmillidegree elevation, SLmillimeter speed)
-{
-    I3DDoppler *this = (I3DDoppler *) self;
-    interface_lock_exclusive(this);
-    this->mVelocitySpherical.mAzimuth = azimuth;
-    this->mVelocitySpherical.mElevation = elevation;
-    this->mVelocitySpherical.mSpeed = speed;
-    this->mVelocityActive = CARTESIAN_UNKNOWN_SPHERICAL_SET;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DDoppler_GetVelocityCartesian(SL3DDopplerItf self,
-    SLVec3D *pVelocity)
-{
-    if (NULL == pVelocity)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DDoppler *this = (I3DDoppler *) self;
-    interface_lock_exclusive(this);
-    for (;;) {
-        enum CartesianSphericalActive velocityActive = this->mVelocityActive;
-        switch (velocityActive) {
-        case CARTESIAN_COMPUTED_SPHERICAL_SET:
-        case CARTESIAN_SET_SPHERICAL_COMPUTED:  // not in 1.0.1
-        case CARTESIAN_SET_SPHERICAL_REQUESTED: // not in 1.0.1
-        case CARTESIAN_SET_SPHERICAL_UNKNOWN:
-            {
-            SLVec3D velocityCartesian = this->mVelocityCartesian;
-            interface_unlock_exclusive(this);
-            *pVelocity = velocityCartesian;
-            }
-            break;
-        case CARTESIAN_UNKNOWN_SPHERICAL_SET:
-            this->mVelocityActive = CARTESIAN_REQUESTED_SPHERICAL_SET;
-            // fall through
-        case CARTESIAN_REQUESTED_SPHERICAL_SET:
-            // matched by cond_broadcast in case multiple requesters
-            interface_cond_wait(this);
-            continue;
-        default:
-            assert(SL_BOOLEAN_FALSE);
-            interface_unlock_exclusive(this);
-            pVelocity->x = 0;
-            pVelocity->y = 0;
-            pVelocity->z = 0;
-            break;
-        }
-    }
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DDoppler_SetDopplerFactor(SL3DDopplerItf self,
-    SLpermille dopplerFactor)
-{
-    I3DDoppler *this = (I3DDoppler *) self;
-    interface_lock_poke(this);
-    this->mDopplerFactor = dopplerFactor;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DDoppler_GetDopplerFactor(SL3DDopplerItf self,
-    SLpermille *pDopplerFactor)
-{
-    if (NULL == pDopplerFactor)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DDoppler *this = (I3DDoppler *) self;
-    interface_lock_peek(this);
-    SLpermille dopplerFactor = this->mDopplerFactor;
-    interface_unlock_peek(this);
-    *pDopplerFactor = dopplerFactor;
-    return SL_RESULT_SUCCESS;
-}
-
-/*static*/ const struct SL3DDopplerItf_ _3DDoppler_3DDopplerItf = {
-    _3DDoppler_SetVelocityCartesian,
-    _3DDoppler_SetVelocitySpherical,
-    _3DDoppler_GetVelocityCartesian,
-    _3DDoppler_SetDopplerFactor,
-    _3DDoppler_GetDopplerFactor
-};
-
-/* 3DLocation implementation */
-
-static SLresult _3DLocation_SetLocationCartesian(SL3DLocationItf self,
-    const SLVec3D *pLocation)
-{
-    if (NULL == pLocation)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DLocation *this = (I3DLocation *) self;
-    SLVec3D locationCartesian = *pLocation;
-    interface_lock_exclusive(this);
-    this->mLocationCartesian = locationCartesian;
-    this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DLocation_SetLocationSpherical(SL3DLocationItf self,
-    SLmillidegree azimuth, SLmillidegree elevation, SLmillimeter distance)
-{
-    I3DLocation *this = (I3DLocation *) self;
-    interface_lock_exclusive(this);
-    this->mLocationSpherical.mAzimuth = azimuth;
-    this->mLocationSpherical.mElevation = elevation;
-    this->mLocationSpherical.mDistance = distance;
-    this->mLocationActive = CARTESIAN_UNKNOWN_SPHERICAL_SET;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DLocation_Move(SL3DLocationItf self, const SLVec3D *pMovement)
-{
-    if (NULL == pMovement)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DLocation *this = (I3DLocation *) self;
-    SLVec3D movementCartesian = *pMovement;
-    interface_lock_exclusive(this);
-    for (;;) {
-        enum CartesianSphericalActive locationActive = this->mLocationActive;
-        switch (locationActive) {
-        case CARTESIAN_COMPUTED_SPHERICAL_SET:
-        case CARTESIAN_SET_SPHERICAL_COMPUTED:  // not in 1.0.1
-        case CARTESIAN_SET_SPHERICAL_REQUESTED: // not in 1.0.1
-        case CARTESIAN_SET_SPHERICAL_UNKNOWN:
-            this->mLocationCartesian.x += movementCartesian.x;
-            this->mLocationCartesian.y += movementCartesian.y;
-            this->mLocationCartesian.z += movementCartesian.z;
-            this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
-            break;
-        case CARTESIAN_UNKNOWN_SPHERICAL_SET:
-            this->mLocationActive = CARTESIAN_REQUESTED_SPHERICAL_SET;
-            // fall through
-        case CARTESIAN_REQUESTED_SPHERICAL_SET:
-            // matched by cond_broadcast in case multiple requesters
-            interface_cond_wait(this);
-            continue;
-        default:
-            assert(SL_BOOLEAN_FALSE);
-            break;
-        }
-        break;
-    }
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DLocation_GetLocationCartesian(SL3DLocationItf self,
-    SLVec3D *pLocation)
-{
-    if (NULL == pLocation)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DLocation *this = (I3DLocation *) self;
-    interface_lock_exclusive(this);
-    for (;;) {
-        enum CartesianSphericalActive locationActive = this->mLocationActive;
-        switch (locationActive) {
-        case CARTESIAN_COMPUTED_SPHERICAL_SET:
-        case CARTESIAN_SET_SPHERICAL_COMPUTED:  // not in 1.0.1
-        case CARTESIAN_SET_SPHERICAL_REQUESTED: // not in 1.0.1
-        case CARTESIAN_SET_SPHERICAL_UNKNOWN:
-            {
-            SLVec3D locationCartesian = this->mLocationCartesian;
-            interface_unlock_exclusive(this);
-            *pLocation = locationCartesian;
-            }
-            break;
-        case CARTESIAN_UNKNOWN_SPHERICAL_SET:
-            this->mLocationActive = CARTESIAN_REQUESTED_SPHERICAL_SET;
-            // fall through
-        case CARTESIAN_REQUESTED_SPHERICAL_SET:
-            // matched by cond_broadcast in case multiple requesters
-            interface_cond_wait(this);
-            continue;
-        default:
-            assert(SL_BOOLEAN_FALSE);
-            interface_unlock_exclusive(this);
-            pLocation->x = 0;
-            pLocation->y = 0;
-            pLocation->z = 0;
-            break;
-        }
-    }
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DLocation_SetOrientationVectors(SL3DLocationItf self,
-    const SLVec3D *pFront, const SLVec3D *pAbove)
-{
-    if (NULL == pFront || NULL == pAbove)
-        return SL_RESULT_PARAMETER_INVALID;
-    SLVec3D front = *pFront;
-    SLVec3D above = *pAbove;
-    I3DLocation *this = (I3DLocation *) self;
-    interface_lock_exclusive(this);
-    this->mOrientationVectors.mFront = front;
-    this->mOrientationVectors.mAbove = above;
-    this->mOrientationActive = ANGLES_UNKNOWN_VECTORS_SET;
-    this->mRotatePending = SL_BOOLEAN_FALSE;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DLocation_SetOrientationAngles(SL3DLocationItf self,
-    SLmillidegree heading, SLmillidegree pitch, SLmillidegree roll)
-{
-    I3DLocation *this = (I3DLocation *) self;
-    interface_lock_exclusive(this);
-    this->mOrientationAngles.mHeading = heading;
-    this->mOrientationAngles.mPitch = pitch;
-    this->mOrientationAngles.mRoll = roll;
-    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
-    this->mRotatePending = SL_BOOLEAN_FALSE;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DLocation_Rotate(SL3DLocationItf self, SLmillidegree theta,
-    const SLVec3D *pAxis)
-{
-    if (NULL == pAxis)
-        return SL_RESULT_PARAMETER_INVALID;
-    SLVec3D axis = *pAxis;
-    I3DLocation *this = (I3DLocation *) self;
-    interface_lock_exclusive(this);
-    while (this->mRotatePending)
-        interface_cond_wait(this);
-    this->mTheta = theta;
-    this->mAxis = axis;
-    this->mRotatePending = SL_BOOLEAN_TRUE;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DLocation_GetOrientationVectors(SL3DLocationItf self,
-    SLVec3D *pFront, SLVec3D *pUp)
-{
-    if (NULL == pFront || NULL == pUp)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DLocation *this = (I3DLocation *) self;
-    interface_lock_shared(this);
-    SLVec3D front = this->mOrientationVectors.mFront;
-    SLVec3D up = this->mOrientationVectors.mUp;
-    interface_unlock_shared(this);
-    *pFront = front;
-    *pUp = up;
-    return SL_RESULT_SUCCESS;
-}
-
-/*static*/ const struct SL3DLocationItf_ _3DLocation_3DLocationItf = {
-    _3DLocation_SetLocationCartesian,
-    _3DLocation_SetLocationSpherical,
-    _3DLocation_Move,
-    _3DLocation_GetLocationCartesian,
-    _3DLocation_SetOrientationVectors,
-    _3DLocation_SetOrientationAngles,
-    _3DLocation_Rotate,
-    _3DLocation_GetOrientationVectors
 };
 
 /* AudioDecoderCapabilities implementation */
@@ -3879,9 +3219,11 @@ static SLresult EngineCapabilities_QueryLEDCapabilities(
     SLEngineCapabilitiesItf self, SLuint32 *pIndex, SLuint32 *pLEDDeviceID,
     SLLEDDescriptor *pDescriptor)
 {
-    SLuint32 maxIndex = sizeof(LED_id_descriptors) /
-        sizeof(LED_id_descriptors[0]);
-    const struct LED_id_descriptor *id_descriptor;
+    const struct LED_id_descriptor *id_descriptor = LED_id_descriptors;
+    while (NULL != id_descriptor->descriptor)
+        ++id_descriptor;
+    // FIXME should cache this value
+    SLuint32 maxIndex = id_descriptor - LED_id_descriptors;
     SLuint32 index;
     if (NULL != pIndex) {
         if (NULL != pLEDDeviceID || NULL != pDescriptor) {
@@ -3916,9 +3258,11 @@ static SLresult EngineCapabilities_QueryVibraCapabilities(
     SLEngineCapabilitiesItf self, SLuint32 *pIndex, SLuint32 *pVibraDeviceID,
     SLVibraDescriptor *pDescriptor)
 {
-    SLuint32 maxIndex = sizeof(Vibra_id_descriptors) /
-        sizeof(Vibra_id_descriptors[0]);
-    const struct Vibra_id_descriptor *id_descriptor;
+    const struct Vibra_id_descriptor *id_descriptor = Vibra_id_descriptors;
+    while (NULL != id_descriptor->descriptor)
+        ++id_descriptor;
+    // FIXME should cache this value
+    SLuint32 maxIndex = id_descriptor - Vibra_id_descriptors;
     SLuint32 index;
     if (NULL != pIndex) {
         if (NULL != pVibraDeviceID || NULL != pDescriptor) {
@@ -4794,1042 +4138,6 @@ static SLresult Vibra_GetIntensity(SLVibraItf self, SLpermille *pIntensity)
     Vibra_GetIntensity
 };
 
-/* Visualization implementation */
-
-static SLresult Visualization_RegisterVisualizationCallback(
-    SLVisualizationItf self, slVisualizationCallback callback, void *pContext,
-    SLmilliHertz rate)
-{
-    IVisualization *this =
-        (IVisualization *) self;
-    interface_lock_exclusive(this);
-    this->mCallback = callback;
-    this->mContext = pContext;
-    this->mRate = rate;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Visualization_GetMaxRate(SLVisualizationItf self,
-    SLmilliHertz *pRate)
-{
-    if (NULL == pRate)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pRate = 20000;
-    return SL_RESULT_SUCCESS;
-}
-
-/*static*/ const struct SLVisualizationItf_ Visualization_VisualizationItf = {
-    Visualization_RegisterVisualizationCallback,
-    Visualization_GetMaxRate
-};
-
-/* BassBoost implementation */
-
-static SLresult BassBoost_SetEnabled(SLBassBoostItf self, SLboolean enabled)
-{
-    IBassBoost *this = (IBassBoost *) self;
-    interface_lock_poke(this);
-    this->mEnabled = enabled;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult BassBoost_IsEnabled(SLBassBoostItf self, SLboolean *pEnabled)
-{
-    if (NULL == pEnabled)
-        return SL_RESULT_PARAMETER_INVALID;
-    IBassBoost *this = (IBassBoost *) self;
-    interface_lock_peek(this);
-    SLboolean enabled = this->mEnabled;
-    interface_unlock_peek(this);
-    *pEnabled = enabled;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult BassBoost_SetStrength(SLBassBoostItf self, SLpermille strength)
-{
-    IBassBoost *this = (IBassBoost *) self;
-    interface_lock_poke(this);
-    this->mStrength = strength;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult BassBoost_GetRoundedStrength(SLBassBoostItf self,
-    SLpermille *pStrength)
-{
-    if (NULL == pStrength)
-        return SL_RESULT_PARAMETER_INVALID;
-    IBassBoost *this = (IBassBoost *) self;
-    interface_lock_peek(this);
-    SLpermille strength = this->mStrength;
-    interface_unlock_peek(this);
-    *pStrength = strength;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult BassBoost_IsStrengthSupported(SLBassBoostItf self,
-    SLboolean *pSupported)
-{
-    if (NULL == pSupported)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pSupported = SL_BOOLEAN_TRUE;
-    return SL_RESULT_SUCCESS;
-}
-
-/*static*/ const struct SLBassBoostItf_ BassBoost_BassBoostItf = {
-    BassBoost_SetEnabled,
-    BassBoost_IsEnabled,
-    BassBoost_SetStrength,
-    BassBoost_GetRoundedStrength,
-    BassBoost_IsStrengthSupported
-};
-
-/* 3DGrouping implementation */
-
-static SLresult _3DGrouping_Set3DGroup(SL3DGroupingItf self, SLObjectItf group)
-{
-    I3DGrouping *this = (I3DGrouping *) self;
-    if (NULL == group)
-        return SL_RESULT_PARAMETER_INVALID;
-    IObject *thisGroup = (IObject *) group;
-    if (&_3DGroup_class != thisGroup->mClass)
-        return SL_RESULT_PARAMETER_INVALID;
-    // FIXME race possible if group unrealized immediately after, should lock
-    if (SL_OBJECT_STATE_REALIZED != thisGroup->mState)
-        return SL_RESULT_PRECONDITIONS_VIOLATED;
-    interface_lock_exclusive(this);
-    this->mGroup = group;
-    // FIXME add this object to the group's bag of objects
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DGrouping_Get3DGroup(SL3DGroupingItf self,
-    SLObjectItf *pGroup)
-{
-    if (NULL == pGroup)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DGrouping *this = (I3DGrouping *) self;
-    interface_lock_peek(this);
-    *pGroup = this->mGroup;
-    interface_unlock_peek(this);
-    return SL_RESULT_SUCCESS;
-}
-
-/*static*/ const struct SL3DGroupingItf_ _3DGrouping_3DGroupingItf = {
-    _3DGrouping_Set3DGroup,
-    _3DGrouping_Get3DGroup
-};
-
-/* 3DMacroscopic implementation */
-
-static SLresult _3DMacroscopic_SetSize(SL3DMacroscopicItf self,
-    SLmillimeter width, SLmillimeter height, SLmillimeter depth)
-{
-    I3DMacroscopic *this = (I3DMacroscopic *) self;
-    interface_lock_exclusive(this);
-    this->mSize.mWidth = width;
-    this->mSize.mHeight = height;
-    this->mSize.mDepth = depth;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DMacroscopic_GetSize(SL3DMacroscopicItf self,
-    SLmillimeter *pWidth, SLmillimeter *pHeight, SLmillimeter *pDepth)
-{
-    if (NULL == pWidth || NULL == pHeight || NULL == pDepth)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DMacroscopic *this = (I3DMacroscopic *) self;
-    interface_lock_shared(this);
-    SLmillimeter width = this->mSize.mWidth;
-    SLmillimeter height = this->mSize.mHeight;
-    SLmillimeter depth = this->mSize.mDepth;
-    interface_unlock_shared(this);
-    *pWidth = width;
-    *pHeight = height;
-    *pDepth = depth;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DMacroscopic_SetOrientationAngles(SL3DMacroscopicItf self,
-    SLmillidegree heading, SLmillidegree pitch, SLmillidegree roll)
-{
-    I3DMacroscopic *this = (I3DMacroscopic *) self;
-    interface_lock_exclusive(this);
-    this->mOrientationAngles.mHeading = heading;
-    this->mOrientationAngles.mPitch = pitch;
-    this->mOrientationAngles.mRoll = roll;
-    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
-    this->mRotatePending = SL_BOOLEAN_FALSE;
-    // ++this->mGeneration;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DMacroscopic_SetOrientationVectors(SL3DMacroscopicItf self,
-    const SLVec3D *pFront, const SLVec3D *pAbove)
-{
-    if (NULL == pFront || NULL == pAbove)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DMacroscopic *this = (I3DMacroscopic *) self;
-    SLVec3D front = *pFront;
-    SLVec3D above = *pAbove;
-    interface_lock_exclusive(this);
-    this->mOrientationVectors.mFront = front;
-    this->mOrientationVectors.mUp = above;
-    this->mOrientationActive = ANGLES_UNKNOWN_VECTORS_SET;
-    this->mRotatePending = SL_BOOLEAN_FALSE;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DMacroscopic_Rotate(SL3DMacroscopicItf self,
-    SLmillidegree theta, const SLVec3D *pAxis)
-{
-    if (NULL == pAxis)
-        return SL_RESULT_PARAMETER_INVALID;
-    SLVec3D axis = *pAxis;
-    I3DMacroscopic *this = (I3DMacroscopic *) self;
-    // FIXME Do the rotate here:
-    // interface_lock_shared(this);
-    // read old values and generation
-    // interface_unlock_shared(this);
-    // compute new position
-    interface_lock_exclusive(this);
-    while (this->mRotatePending)
-        interface_cond_wait(this);
-    this->mTheta = theta;
-    this->mAxis = axis;
-    this->mRotatePending = SL_BOOLEAN_TRUE;
-    // compare generation with saved value
-    // if equal, store new position and increment generation
-    // if unequal, discard new position
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DMacroscopic_GetOrientationVectors(SL3DMacroscopicItf self,
-    SLVec3D *pFront, SLVec3D *pUp)
-{
-    if (NULL == pFront || NULL == pUp)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DMacroscopic *this = (I3DMacroscopic *) self;
-    interface_lock_exclusive(this);
-    for (;;) {
-        enum AnglesVectorsActive orientationActive = this->mOrientationActive;
-        switch (orientationActive) {
-        case ANGLES_COMPUTED_VECTORS_SET:    // not in 1.0.1
-        case ANGLES_REQUESTED_VECTORS_SET:   // not in 1.0.1
-        case ANGLES_UNKNOWN_VECTORS_SET:
-        case ANGLES_SET_VECTORS_COMPUTED:
-            {
-            SLVec3D front = this->mOrientationVectors.mFront;
-            SLVec3D up = this->mOrientationVectors.mUp;
-            interface_unlock_exclusive(this);
-            *pFront = front;
-            *pUp = up;
-            }
-            break;
-        case ANGLES_SET_VECTORS_UNKNOWN:
-            this->mOrientationActive = ANGLES_SET_VECTORS_REQUESTED;
-            // fall through
-        case ANGLES_SET_VECTORS_REQUESTED:
-            // matched by cond_broadcast in case multiple requesters
-            interface_cond_wait(this);
-            continue;
-        default:
-            interface_unlock_exclusive(this);
-            assert(SL_BOOLEAN_FALSE);
-            pFront->x = 0;
-            pFront->y = 0;
-            pFront->z = 0;
-            pUp->x = 0;
-            pUp->y = 0;
-            pUp->z = 0;
-            break;
-        }
-        break;
-    }
-    return SL_RESULT_SUCCESS;
-}
-
-/*static*/ const struct SL3DMacroscopicItf_ _3DMacroscopic_3DMacroscopicItf = {
-    _3DMacroscopic_SetSize,
-    _3DMacroscopic_GetSize,
-    _3DMacroscopic_SetOrientationAngles,
-    _3DMacroscopic_SetOrientationVectors,
-    _3DMacroscopic_Rotate,
-    _3DMacroscopic_GetOrientationVectors
-};
-
-/* 3DSource implementation */
-
-static SLresult _3DSource_SetHeadRelative(SL3DSourceItf self,
-    SLboolean headRelative)
-{
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_poke(this);
-    this->mHeadRelative = headRelative;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_GetHeadRelative(SL3DSourceItf self,
-    SLboolean *pHeadRelative)
-{
-    if (NULL == pHeadRelative)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_peek(this);
-    SLboolean headRelative = this->mHeadRelative;
-    interface_unlock_peek(this);
-    *pHeadRelative = headRelative;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_SetRolloffDistances(SL3DSourceItf self,
-    SLmillimeter minDistance, SLmillimeter maxDistance)
-{
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_exclusive(this);
-    this->mMinDistance = minDistance;
-    this->mMaxDistance = maxDistance;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_GetRolloffDistances(SL3DSourceItf self,
-    SLmillimeter *pMinDistance, SLmillimeter *pMaxDistance)
-{
-    if (NULL == pMinDistance || NULL == pMaxDistance)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_shared(this);
-    SLmillimeter minDistance = this->mMinDistance;
-    SLmillimeter maxDistance = this->mMaxDistance;
-    interface_unlock_shared(this);
-    *pMinDistance = minDistance;
-    *pMaxDistance = maxDistance;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_SetRolloffMaxDistanceMute(SL3DSourceItf self,
-    SLboolean mute)
-{
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_poke(this);
-    this->mRolloffMaxDistanceMute = mute;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_GetRolloffMaxDistanceMute(SL3DSourceItf self,
-    SLboolean *pMute)
-{
-    if (NULL == pMute)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_peek(this);
-    SLboolean mute = this->mRolloffMaxDistanceMute;
-    interface_unlock_peek(this);
-    *pMute = mute;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_SetRolloffFactor(SL3DSourceItf self,
-    SLpermille rolloffFactor)
-{
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_poke(this);
-    this->mRolloffFactor = rolloffFactor;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_GetRolloffFactor(SL3DSourceItf self,
-    SLpermille *pRolloffFactor)
-{
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_peek(this);
-    SLpermille rolloffFactor = this->mRolloffFactor;
-    interface_unlock_peek(this);
-    *pRolloffFactor = rolloffFactor;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_SetRoomRolloffFactor(SL3DSourceItf self,
-    SLpermille roomRolloffFactor)
-{
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_poke(this);
-    this->mRoomRolloffFactor = roomRolloffFactor;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_GetRoomRolloffFactor(SL3DSourceItf self,
-    SLpermille *pRoomRolloffFactor)
-{
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_peek(this);
-    SLpermille roomRolloffFactor = this->mRoomRolloffFactor;
-    interface_unlock_peek(this);
-    *pRoomRolloffFactor = roomRolloffFactor;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_SetRolloffModel(SL3DSourceItf self, SLuint8 model)
-{
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_poke(this);
-    this->mDistanceModel = model;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_GetRolloffModel(SL3DSourceItf self, SLuint8 *pModel)
-{
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_peek(this);
-    SLuint8 model = this->mDistanceModel;
-    interface_unlock_peek(this);
-    *pModel = model;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_SetCone(SL3DSourceItf self, SLmillidegree innerAngle,
-    SLmillidegree outerAngle, SLmillibel outerLevel)
-{
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_exclusive(this);
-    this->mConeInnerAngle = innerAngle;
-    this->mConeOuterAngle = outerAngle;
-    this->mConeOuterLevel = outerLevel;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult _3DSource_GetCone(SL3DSourceItf self,
-    SLmillidegree *pInnerAngle, SLmillidegree *pOuterAngle,
-    SLmillibel *pOuterLevel)
-{
-    if (NULL == pInnerAngle || NULL == pOuterAngle || NULL == pOuterLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_shared(this);
-    SLmillidegree innerAngle = this->mConeInnerAngle;
-    SLmillidegree outerAngle = this->mConeOuterAngle;
-    SLmillibel outerLevel = this->mConeOuterLevel;
-    interface_unlock_shared(this);
-    *pInnerAngle = innerAngle;
-    *pOuterAngle = outerAngle;
-    *pOuterLevel = outerLevel;
-    return SL_RESULT_SUCCESS;
-}
-
-/*static*/ const struct SL3DSourceItf_ _3DSource_3DSourceItf = {
-    _3DSource_SetHeadRelative,
-    _3DSource_GetHeadRelative,
-    _3DSource_SetRolloffDistances,
-    _3DSource_GetRolloffDistances,
-    _3DSource_SetRolloffMaxDistanceMute,
-    _3DSource_GetRolloffMaxDistanceMute,
-    _3DSource_SetRolloffFactor,
-    _3DSource_GetRolloffFactor,
-    _3DSource_SetRoomRolloffFactor,
-    _3DSource_GetRoomRolloffFactor,
-    _3DSource_SetRolloffModel,
-    _3DSource_GetRolloffModel,
-    _3DSource_SetCone,
-    _3DSource_GetCone
-};
-
-/* Equalizer implementation */
-
-static SLresult Equalizer_SetEnabled(SLEqualizerItf self, SLboolean enabled)
-{
-    IEqualizer *this = (IEqualizer *) self;
-    interface_lock_poke(this);
-    this->mEnabled = enabled;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Equalizer_IsEnabled(SLEqualizerItf self, SLboolean *pEnabled)
-{
-    if (NULL == pEnabled)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEqualizer *this = (IEqualizer *) self;
-    interface_lock_peek(this);
-    SLboolean enabled = this->mEnabled;
-    interface_unlock_peek(this);
-    *pEnabled = enabled;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Equalizer_GetNumberOfBands(SLEqualizerItf self,
-    SLuint16 *pNumBands)
-{
-    if (NULL == pNumBands)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEqualizer *this = (IEqualizer *) self;
-    // Note: no lock, but OK because it is const
-    *pNumBands = this->mNumBands;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Equalizer_GetBandLevelRange(SLEqualizerItf self,
-    SLmillibel *pMin, SLmillibel *pMax)
-{
-    if (NULL == pMin && NULL == pMax)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEqualizer *this = (IEqualizer *) self;
-    // Note: no lock, but OK because it is const
-    if (NULL != pMin)
-        *pMin = this->mMin;
-    if (NULL != pMax)
-        *pMax = this->mMax;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Equalizer_SetBandLevel(SLEqualizerItf self, SLuint16 band,
-    SLmillibel level)
-{
-    IEqualizer *this = (IEqualizer *) self;
-    if (band >= this->mNumBands)
-        return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_poke(this);
-    this->mLevels[band] = level;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Equalizer_GetBandLevel(SLEqualizerItf self, SLuint16 band,
-    SLmillibel *pLevel)
-{
-    if (NULL == pLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEqualizer *this = (IEqualizer *) self;
-    if (band >= this->mNumBands)
-        return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_peek(this);
-    SLmillibel level = this->mLevels[band];
-    interface_unlock_peek(this);
-    *pLevel = level;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Equalizer_GetCenterFreq(SLEqualizerItf self, SLuint16 band,
-    SLmilliHertz *pCenter)
-{
-    if (NULL == pCenter)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEqualizer *this = (IEqualizer *) self;
-    if (band >= this->mNumBands)
-        return SL_RESULT_PARAMETER_INVALID;
-    // Note: no lock, but OK because it is const
-    *pCenter = this->mBands[band].mCenter;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Equalizer_GetBandFreqRange(SLEqualizerItf self, SLuint16 band,
-    SLmilliHertz *pMin, SLmilliHertz *pMax)
-{
-    if (NULL == pMin && NULL == pMax)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEqualizer *this = (IEqualizer *) self;
-    if (band >= this->mNumBands)
-        return SL_RESULT_PARAMETER_INVALID;
-    // Note: no lock, but OK because it is const
-    if (NULL != pMin)
-        *pMin = this->mBands[band].mMin;
-    if (NULL != pMax)
-        *pMax = this->mBands[band].mMax;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Equalizer_GetBand(SLEqualizerItf self, SLmilliHertz frequency,
-    SLuint16 *pBand)
-{
-    if (NULL == pBand)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEqualizer *this = (IEqualizer *) self;
-    // search for band whose center frequency has the closest ratio to 1.0
-    // assumes bands are unsorted (a pessimistic assumption)
-    // assumes bands can overlap (a pessimistic assumption)
-    // assumes a small number of bands, so no need for a fancier algorithm
-    const struct EqualizerBand *band;
-    float floatFreq = (float) frequency;
-    float bestRatio = 0.0;
-    SLuint16 bestBand = SL_EQUALIZER_UNDEFINED;
-    for (band = this->mBands; band < &this->mBands[this->mNumBands]; ++band) {
-        if (!(band->mMin <= frequency && frequency <= band->mMax))
-            continue;
-        assert(band->mMin <= band->mCenter && band->mCenter <= band->mMax);
-        assert(band->mCenter != 0);
-        float ratio = frequency <= band->mCenter ?
-            floatFreq / band->mCenter : band->mCenter / floatFreq;
-        if (ratio > bestRatio) {
-            bestRatio = ratio;
-            bestBand = band - this->mBands;
-        }
-    }
-    *pBand = band - this->mBands;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Equalizer_GetCurrentPreset(SLEqualizerItf self,
-    SLuint16 *pPreset)
-{
-    if (NULL == pPreset)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEqualizer *this = (IEqualizer *) self;
-    interface_lock_peek(this);
-    *pPreset = this->mPreset;
-    interface_unlock_peek(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Equalizer_UsePreset(SLEqualizerItf self, SLuint16 index)
-{
-    IEqualizer *this = (IEqualizer *) self;
-    if (index >= this->mNumPresets)
-        return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_poke(this);
-    this->mPreset = index;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Equalizer_GetNumberOfPresets(SLEqualizerItf self,
-    SLuint16 *pNumPresets)
-{
-    if (NULL == pNumPresets)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEqualizer *this = (IEqualizer *) self;
-    // Note: no lock, but OK because it is const
-    *pNumPresets = this->mNumPresets;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Equalizer_GetPresetName(SLEqualizerItf self, SLuint16 index,
-    const SLchar ** ppName)
-{
-    if (NULL == ppName)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEqualizer *this = (IEqualizer *) self;
-    if (index >= this->mNumPresets)
-        return SL_RESULT_PARAMETER_INVALID;
-    *ppName = this->mPresetNames[index];
-    return SL_RESULT_SUCCESS;
-}
-
-/*static*/ const struct SLEqualizerItf_ Equalizer_EqualizerItf = {
-    Equalizer_SetEnabled,
-    Equalizer_IsEnabled,
-    Equalizer_GetNumberOfBands,
-    Equalizer_GetBandLevelRange,
-    Equalizer_SetBandLevel,
-    Equalizer_GetBandLevel,
-    Equalizer_GetCenterFreq,
-    Equalizer_GetBandFreqRange,
-    Equalizer_GetBand,
-    Equalizer_GetCurrentPreset,
-    Equalizer_UsePreset,
-    Equalizer_GetNumberOfPresets,
-    Equalizer_GetPresetName
-};
-
-// PresetReverb implementation
-
-static SLresult PresetReverb_SetPreset(SLPresetReverbItf self,
-    SLuint16 preset)
-{
-    IPresetReverb *this =
-        (IPresetReverb *) self;
-    interface_lock_poke(this);
-    this->mPreset = preset;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult PresetReverb_GetPreset(SLPresetReverbItf self,
-    SLuint16 *pPreset)
-{
-    if (NULL == pPreset)
-        return SL_RESULT_PARAMETER_INVALID;
-    IPresetReverb *this =
-        (IPresetReverb *) self;
-    interface_lock_peek(this);
-    SLuint16 preset = this->mPreset;
-    interface_unlock_peek(this);
-    *pPreset = preset;
-    return SL_RESULT_SUCCESS;
-}
-
-/*static*/ const struct SLPresetReverbItf_ PresetReverb_PresetReverbItf = {
-    PresetReverb_SetPreset,
-    PresetReverb_GetPreset
-};
-
-// EnvironmentalReverb implementation
-
-// Note: all Set operations use exclusive not poke,
-// because SetEnvironmentalReverbProperties is exclusive.
-// It is safe for the Get operations to use peek,
-// on the assumption that the block copy will atomically
-// replace each word of the block.
-
-static SLresult EnvironmentalReverb_SetRoomLevel(SLEnvironmentalReverbItf self,
-    SLmillibel room)
-{
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.roomLevel = room;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self,
-    SLmillibel *pRoom)
-{
-    if (NULL == pRoom)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillibel roomLevel = this->mProperties.roomLevel;
-    interface_unlock_peek(this);
-    *pRoom = roomLevel;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_SetRoomHFLevel(
-    SLEnvironmentalReverbItf self, SLmillibel roomHF)
-{
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.roomHFLevel = roomHF;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_GetRoomHFLevel(
-    SLEnvironmentalReverbItf self, SLmillibel *pRoomHF)
-{
-    if (NULL == pRoomHF)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillibel roomHFLevel = this->mProperties.roomHFLevel;
-    interface_unlock_peek(this);
-    *pRoomHF = roomHFLevel;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_SetDecayTime(
-    SLEnvironmentalReverbItf self, SLmillisecond decayTime)
-{
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.decayTime = decayTime;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_GetDecayTime(
-    SLEnvironmentalReverbItf self, SLmillisecond *pDecayTime)
-{
-    if (NULL == pDecayTime)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillisecond decayTime = this->mProperties.decayTime;
-    interface_unlock_peek(this);
-    *pDecayTime = decayTime;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_SetDecayHFRatio(
-    SLEnvironmentalReverbItf self, SLpermille decayHFRatio)
-{
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.decayHFRatio = decayHFRatio;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_GetDecayHFRatio(
-    SLEnvironmentalReverbItf self, SLpermille *pDecayHFRatio)
-{
-    if (NULL == pDecayHFRatio)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLpermille decayHFRatio = this->mProperties.decayHFRatio;
-    interface_unlock_peek(this);
-    *pDecayHFRatio = decayHFRatio;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_SetReflectionsLevel(
-    SLEnvironmentalReverbItf self, SLmillibel reflectionsLevel)
-{
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.reflectionsLevel = reflectionsLevel;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_GetReflectionsLevel(
-    SLEnvironmentalReverbItf self, SLmillibel *pReflectionsLevel)
-{
-    if (NULL == pReflectionsLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillibel reflectionsLevel = this->mProperties.reflectionsLevel;
-    interface_unlock_peek(this);
-    *pReflectionsLevel = reflectionsLevel;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_SetReflectionsDelay(
-    SLEnvironmentalReverbItf self, SLmillisecond reflectionsDelay)
-{
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.reflectionsDelay = reflectionsDelay;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_GetReflectionsDelay(
-    SLEnvironmentalReverbItf self, SLmillisecond *pReflectionsDelay)
-{
-    if (NULL == pReflectionsDelay)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillisecond reflectionsDelay = this->mProperties.reflectionsDelay;
-    interface_unlock_peek(this);
-    *pReflectionsDelay = reflectionsDelay;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_SetReverbLevel(
-    SLEnvironmentalReverbItf self, SLmillibel reverbLevel)
-{
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.reverbLevel = reverbLevel;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_GetReverbLevel(
-    SLEnvironmentalReverbItf self, SLmillibel *pReverbLevel)
-{
-    if (NULL == pReverbLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillibel reverbLevel = this->mProperties.reverbLevel;
-    interface_unlock_peek(this);
-    *pReverbLevel = reverbLevel;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_SetReverbDelay(
-    SLEnvironmentalReverbItf self, SLmillisecond reverbDelay)
-{
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.reverbDelay = reverbDelay;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_GetReverbDelay(
-    SLEnvironmentalReverbItf self, SLmillisecond *pReverbDelay)
-{
-    if (NULL == pReverbDelay)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillisecond reverbDelay = this->mProperties.reverbDelay;
-    interface_unlock_peek(this);
-    *pReverbDelay = reverbDelay;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_SetDiffusion(
-    SLEnvironmentalReverbItf self, SLpermille diffusion)
-{
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.diffusion = diffusion;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_GetDiffusion(SLEnvironmentalReverbItf self,
-     SLpermille *pDiffusion)
-{
-    if (NULL == pDiffusion)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLpermille diffusion = this->mProperties.diffusion;
-    interface_unlock_peek(this);
-    *pDiffusion = diffusion;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_SetDensity(SLEnvironmentalReverbItf self,
-    SLpermille density)
-{
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.density = density;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_GetDensity(SLEnvironmentalReverbItf self,
-    SLpermille *pDensity)
-{
-    if (NULL == pDensity)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLpermille density = this->mProperties.density;
-    interface_unlock_peek(this);
-    *pDensity = density;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_SetEnvironmentalReverbProperties(
-    SLEnvironmentalReverbItf self,
-    const SLEnvironmentalReverbSettings *pProperties)
-{
-    if (NULL == pProperties)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    SLEnvironmentalReverbSettings properties = *pProperties;
-    interface_lock_exclusive(this);
-    this->mProperties = properties;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult EnvironmentalReverb_GetEnvironmentalReverbProperties(
-    SLEnvironmentalReverbItf self, SLEnvironmentalReverbSettings *pProperties)
-{
-    if (NULL == pProperties)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_shared(this);
-    SLEnvironmentalReverbSettings properties = this->mProperties;
-    interface_unlock_shared(this);
-    *pProperties = properties;
-    return SL_RESULT_SUCCESS;
-}
-
-/*static*/ const struct SLEnvironmentalReverbItf_
-    EnvironmentalReverb_EnvironmentalReverbItf = {
-    EnvironmentalReverb_SetRoomLevel,
-    EnvironmentalReverb_GetRoomLevel,
-    EnvironmentalReverb_SetRoomHFLevel,
-    EnvironmentalReverb_GetRoomHFLevel,
-    EnvironmentalReverb_SetDecayTime,
-    EnvironmentalReverb_GetDecayTime,
-    EnvironmentalReverb_SetDecayHFRatio,
-    EnvironmentalReverb_GetDecayHFRatio,
-    EnvironmentalReverb_SetReflectionsLevel,
-    EnvironmentalReverb_GetReflectionsLevel,
-    EnvironmentalReverb_SetReflectionsDelay,
-    EnvironmentalReverb_GetReflectionsDelay,
-    EnvironmentalReverb_SetReverbLevel,
-    EnvironmentalReverb_GetReverbLevel,
-    EnvironmentalReverb_SetReverbDelay,
-    EnvironmentalReverb_GetReverbDelay,
-    EnvironmentalReverb_SetDiffusion,
-    EnvironmentalReverb_GetDiffusion,
-    EnvironmentalReverb_SetDensity,
-    EnvironmentalReverb_GetDensity,
-    EnvironmentalReverb_SetEnvironmentalReverbProperties,
-    EnvironmentalReverb_GetEnvironmentalReverbProperties
-};
-
-// Virtualizer implementation
-
-static SLresult Virtualizer_SetEnabled(SLVirtualizerItf self, SLboolean enabled)
-{
-    IVirtualizer *this = (IVirtualizer *) self;
-    interface_lock_poke(this);
-    this->mEnabled = enabled;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Virtualizer_IsEnabled(SLVirtualizerItf self,
-    SLboolean *pEnabled)
-{
-    if (NULL == pEnabled)
-        return SL_RESULT_PARAMETER_INVALID;
-    IVirtualizer *this = (IVirtualizer *) self;
-    interface_lock_peek(this);
-    SLboolean enabled = this->mEnabled;
-    interface_unlock_peek(this);
-    *pEnabled = enabled;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Virtualizer_SetStrength(SLVirtualizerItf self,
-    SLpermille strength)
-{
-    IVirtualizer *this = (IVirtualizer *) self;
-    interface_lock_poke(this);
-    this->mStrength = strength;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Virtualizer_GetRoundedStrength(SLVirtualizerItf self,
-    SLpermille *pStrength)
-{
-    if (NULL == pStrength)
-        return SL_RESULT_PARAMETER_INVALID;
-    IVirtualizer *this = (IVirtualizer *) self;
-    interface_lock_peek(this);
-    SLpermille strength = this->mStrength;
-    interface_unlock_peek(this);
-    *pStrength = strength;
-    return SL_RESULT_SUCCESS;
-}
-
-static SLresult Virtualizer_IsStrengthSupported(SLVirtualizerItf self,
-    SLboolean *pSupported)
-{
-    if (NULL == pSupported)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pSupported = SL_BOOLEAN_TRUE;
-    return SL_RESULT_SUCCESS;
-}
-
-/*static*/ const struct SLVirtualizerItf_ Virtualizer_VirtualizerItf = {
-    Virtualizer_SetEnabled,
-    Virtualizer_IsEnabled,
-    Virtualizer_SetStrength,
-    Virtualizer_GetRoundedStrength,
-    Virtualizer_IsStrengthSupported
-};
-
 // MIDIMessage implementation
 
 static SLresult MIDIMessage_SendMessage(SLMIDIMessageItf self, const SLuint8 *data, SLuint32 length)
@@ -6141,7 +4449,7 @@ static void *frame_body(void *arg)
             IObject *instance = (IObject *) this->mEngine.mInstances[i];
             if (NULL == instance)
                 continue;
-            if (instance->mClass != &AudioPlayer_class)
+            if (instance->mClass != &CAudioPlayer_class)
                 continue;
             write(1, ".", 1);
         }
@@ -6178,12 +4486,12 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         }
     }
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&Engine_class, numInterfaces,
+    SLresult result = checkInterfaces(&CEngine_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
     CEngine *this = (CEngine *)
-        construct(&Engine_class, exposedMask, NULL);
+        construct(&CEngine_class, exposedMask, NULL);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     this->mObject.mLossOfControlMask = lossOfControlGlobal ? ~0 : 0;
@@ -6202,7 +4510,7 @@ SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(
 {
     if (NULL == pNumSupportedInterfaces)
         return SL_RESULT_PARAMETER_INVALID;
-    *pNumSupportedInterfaces = Engine_class.mInterfaceCount;
+    *pNumSupportedInterfaces = CEngine_class.mInterfaceCount;
     return SL_RESULT_SUCCESS;
 }
 
@@ -6372,7 +4680,7 @@ void SDL_start(SLObjectItf self)
     //assert(self != NULL);
     // FIXME make this an operation on Object: GetClass
     //IObject *this = (IObject *) self;
-    //assert(&OutputMix_class == this->mClass);
+    //assert(&COutputMix_class == this->mClass);
     SLresult result;
     SLOutputMixExtItf OutputMixExt;
     result = (*self)->GetInterface(self, SL_IID_OUTPUTMIXEXT, &OutputMixExt);

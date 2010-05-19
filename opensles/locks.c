@@ -16,21 +16,30 @@
 
 #include "sles_allinclusive.h"
 
-SLresult sles_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc,
-    const SLDataSink *pAudioSnk) {
+void object_lock_exclusive(IObject *this)
+{
+    int ok;
+    ok = pthread_mutex_lock(&this->mMutex);
+    assert(0 == ok);
+}
 
-    // DataSource checks
-    if ((NULL == pAudioSrc) || (NULL == (SLuint32 *) pAudioSrc->pLocator) ||
-            (NULL == pAudioSrc->pFormat)) {
-        return SL_RESULT_PARAMETER_INVALID;
-    }
+void object_unlock_exclusive(IObject *this)
+{
+    int ok;
+    ok = pthread_mutex_unlock(&this->mMutex);
+    assert(0 == ok);
+}
 
-    // DataSink checks
-    if (NULL == pAudioSnk || (NULL == (SLuint32 *) pAudioSnk->pLocator)) {
-        return SL_RESULT_PARAMETER_INVALID;
-    }
+void object_cond_wait(IObject *this)
+{
+    int ok;
+    ok = pthread_cond_wait(&this->mCond, &this->mMutex);
+    assert(0 == ok);
+}
 
-    // Success
-    return SL_RESULT_SUCCESS;
-
+void object_cond_signal(IObject *this)
+{
+    int ok;
+    ok = pthread_cond_signal(&this->mCond);
+    assert(0 == ok);
 }

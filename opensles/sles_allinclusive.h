@@ -25,6 +25,7 @@
 
 #include "MPH.h"
 #include "MPH_to.h"
+#include "devices.h"
 
 #ifdef USE_SNDFILE
 #include <sndfile.h>
@@ -142,6 +143,9 @@ struct SndFile {
 
 #endif // USE_SNDFILE
 
+#ifdef __cplusplus
+#define this this_
+#endif
 
 /* Interface structures */
 
@@ -163,6 +167,8 @@ typedef struct Object_interface {
     // FIXME also an object ID for RPC
     // FIXME and a human-readable name for debugging
 } IObject;
+
+#include "locks.h"
 
 typedef struct {
     const struct SL3DCommitItf_ *mItf;
@@ -837,3 +843,5 @@ typedef struct {
     //
     SLuint32 mDeviceID;
 } CVibraDevice;
+
+extern const ClassTable C3DGroup_class;
