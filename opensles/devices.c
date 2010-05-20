@@ -108,3 +108,62 @@ const struct Vibra_id_descriptor Vibra_id_descriptors[] = {
     {SL_DEFAULTDEVICEID_VIBRA, &SLVibraDescriptor_default},
     {0, NULL}
 };
+
+// FIXME should build this table from Caps table below
+
+static const SLuint32 Codec_IDs[] = {
+    SL_AUDIOCODEC_PCM,
+    SL_AUDIOCODEC_MP3,
+    SL_AUDIOCODEC_AMR,
+    SL_AUDIOCODEC_AMRWB,
+    SL_AUDIOCODEC_AMRWBPLUS,
+    SL_AUDIOCODEC_AAC,
+    SL_AUDIOCODEC_WMA,
+    SL_AUDIOCODEC_REAL,
+    SL_AUDIOCODEC_VORBIS
+};
+
+const SLuint32 *Decoder_IDs = Codec_IDs;
+const SLuint32 *Encoder_IDs = Codec_IDs;
+
+static const SLmilliHertz SamplingRates_A[] = {
+    SL_SAMPLINGRATE_8,
+    SL_SAMPLINGRATE_11_025,
+    SL_SAMPLINGRATE_12,
+    SL_SAMPLINGRATE_16,
+    SL_SAMPLINGRATE_22_05,
+    SL_SAMPLINGRATE_24,
+    SL_SAMPLINGRATE_32,
+    SL_SAMPLINGRATE_44_1,
+    SL_SAMPLINGRATE_48
+};
+
+static const SLAudioCodecDescriptor CodecDescriptor_A = {
+    2,                   // maxChannels
+    8,                   // minBitsPerSample
+    16,                  // maxBitsPerSample
+    SL_SAMPLINGRATE_8,   // minSampleRate
+    SL_SAMPLINGRATE_48,  // maxSampleRate
+    SL_BOOLEAN_FALSE,    // isFreqRangeContinuous
+    (SLmilliHertz *) SamplingRates_A,
+                         // pSampleRatesSupported;
+    sizeof(SamplingRates_A) / sizeof(SamplingRates_A[0]),
+                         // numSampleRatesSupported
+    1,                   // minBitRate
+    ~0,                  // maxBitRate
+    SL_BOOLEAN_TRUE,     // isBitrateRangeContinuous
+    NULL,                // pBitratesSupported
+    0,                   // numBitratesSupported
+    SL_AUDIOPROFILE_PCM, // profileSetting
+    0                    // modeSetting
+};
+
+const struct CodecDescriptor DecoderDescriptors[] = {
+    {SL_AUDIOCODEC_PCM, &CodecDescriptor_A},
+    {SL_AUDIOCODEC_NULL, NULL}
+};
+
+const struct CodecDescriptor EncoderDescriptors[] = {
+    {SL_AUDIOCODEC_PCM, &CodecDescriptor_A},
+    {SL_AUDIOCODEC_NULL, NULL}
+};

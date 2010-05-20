@@ -845,3 +845,20 @@ typedef struct {
 } CVibraDevice;
 
 extern const ClassTable C3DGroup_class;
+
+struct MPH_init {
+    // unsigned char mMPH;
+    VoidHook mInit;
+    VoidHook mDeinit;
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern /*static*/ int IID_to_MPH(const SLInterfaceID iid);
+extern /*static*/ const struct MPH_init MPH_init_table[MPH_MAX];
+
+#ifdef __cplusplus
+}
+#endif

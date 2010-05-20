@@ -36,3 +36,30 @@ extern const struct Vibra_id_descriptor {
     SLuint32 id;
     const SLVibraDescriptor *descriptor;
 } Vibra_id_descriptors[];
+
+// These are not in 1.0.1 header file
+#define SL_AUDIOCODEC_NULL   0
+#define SL_AUDIOCODEC_VORBIS 9
+
+struct CodecDescriptor {
+    SLuint32 mCodecID;
+    const SLAudioCodecDescriptor *mDescriptor;
+};
+
+#define MAX_DECODERS 9 // (sizeof(Decoder_IDs) / sizeof(Decoder_IDs[0]))
+#define MAX_ENCODERS 9 // (sizeof(Encoder_IDs) / sizeof(Encoder_IDs[0]))
+
+// For now, but encoders might be different than decoders later
+extern const SLuint32 *Decoder_IDs, *Encoder_IDs;
+
+extern const struct CodecDescriptor DecoderDescriptors[], EncoderDescriptors[];
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern SLresult GetCodecCapabilities(SLuint32 decoderId, SLuint32 *pIndex,
+    SLAudioCodecDescriptor *pDescriptor,
+    const struct CodecDescriptor *codecDescriptors);
+#ifdef __cplusplus
+}
+#endif
