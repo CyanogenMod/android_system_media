@@ -1,0 +1,124 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* BufferQueue implementation */
+
+#include "sles_allinclusive.h"
+
+static SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
+    SLuint32 size)
+{
+    //FIXME if queue is empty and associated player is not in SL_PLAYSTATE_PLAYING state,
+    // set it to SL_PLAYSTATE_PLAYING (and start playing)
+    if (NULL == pBuffer)
+        return SL_RESULT_PARAMETER_INVALID;
+    IBufferQueue *this = (IBufferQueue *) self;
+    SLresult result;
+    interface_lock_exclusive(this);
+    struct BufferHeader *oldRear = this->mRear, *newRear;
+    if ((newRear = oldRear + 1) == &this->mArray[this->mNumBuffers])
+        newRear = this->mArray;
+    if (newRear == this->mFront) {
+        result = SL_RESULT_BUFFER_INSUFFICIENT;
+    } else {
+        oldRear->mBuffer = pBuffer;
+        oldRear->mSize = size;
+        this->mRear = newRear;
+        ++this->mState.count;
+        result = SL_RESULT_SUCCESS;
+    }
+    //fprintf(stderr, "Enqueue: nbBuffers in queue = %lu\n", this->mState.count);
+    interface_unlock_exclusive(this);
+    return result;
+}
+
+static SLresult IBufferQueue_Clear(SLBufferQueueItf self)
+{
+    IBufferQueue *this = (IBufferQueue *) self;
+    interface_lock_exclusive(this);
+    this->mFront = &this->mArray[0];
+    this->mRear = &this->mArray[0];
+    this->mSizeConsumed = 0;
+    this->mState.count = 0;
+    interface_unlock_exclusive(this);
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult IBufferQueue_GetState(SLBufferQueueItf self,
+    SLBufferQueueState *pState)
+{
+    if (NULL == pState)
+        return SL_RESULT_PARAMETER_INVALID;
+    IBufferQueue *this = (IBufferQueue *) self;
+    SLBufferQueueState state;
+    interface_lock_shared(this);
+#ifdef __cplusplus // FIXME Is this a compiler bug?
+    state.count = this->mState.count;
+    state.playIndex = this->mState.playIndex;
+#else
+    state = this->mState;
+#endif
+    interface_unlock_shared(this);
+#ifdef __cplusplus // FIXME Is this a compiler bug?
+    pState->count = state.count;
+    pState->playIndex = state.playIndex;
+#else
+    *pState = state;
+#endif
+    return SL_RESULT_SUCCESS;
+}
+
+static SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
+    slBufferQueueCallback callback, void *pContext)
+{
+    IBufferQueue *this = (IBufferQueue *) self;
+    // FIXME This could be a poke lock, if we had atomic double-word load/store
+    interface_lock_exclusive(this);
+    this->mCallback = callback;
+    this->mContext = pContext;
+    interface_unlock_exclusive(this);
+    return SL_RESULT_SUCCESS;
+}
+
+static const struct SLBufferQueueItf_ IBufferQueue_Itf = {
+    IBufferQueue_Enqueue,
+    IBufferQueue_Clear,
+    IBufferQueue_GetState,
+    IBufferQueue_RegisterCallback
+};
+
+void IBufferQueue_init(void *self)
+{
+    IBufferQueue *this = (IBufferQueue *) self;
+    this->mItf = &IBufferQueue_Itf;
+#ifndef NDEBUG
+    this->mState.count = 0;
+    this->mState.playIndex = 0;
+    this->mCallback = NULL;
+    this->mContext = NULL;
+    this->mNumBuffers = 0;
+    this->mArray = NULL;
+    this->mFront = NULL;
+    this->mRear = NULL;
+    this->mSizeConsumed = 0;
+    struct BufferHeader *bufferHeader = this->mTypical;
+    unsigned i;
+    for (i = 0; i < BUFFER_HEADER_TYPICAL+1; ++i, ++bufferHeader) {
+        bufferHeader->mBuffer = NULL;
+        bufferHeader->mSize = 0;
+    }
+#endif
+}

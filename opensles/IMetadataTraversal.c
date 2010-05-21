@@ -21,6 +21,13 @@
 static SLresult IMetadataTraversal_SetMode(SLMetadataTraversalItf self,
     SLuint32 mode)
 {
+    switch (mode) {
+    case SL_METADATATRAVERSALMODE_ALL:
+    case SL_METADATATRAVERSALMODE_NODE:
+        break;
+    default:
+        return SL_RESULT_PARAMETER_INVALID;
+    }
     IMetadataTraversal *this = (IMetadataTraversal *) self;
     this->mMode = mode;
     return SL_RESULT_SUCCESS;
@@ -57,6 +64,8 @@ static SLresult IMetadataTraversal_GetChildInfo(SLMetadataTraversalItf self,
 static SLresult IMetadataTraversal_SetActiveNode(SLMetadataTraversalItf self,
     SLuint32 index)
 {
+    if (SL_NODE_PARENT == index)
+        ;
     IMetadataTraversal *this = (IMetadataTraversal *) self;
     this->mIndex = index;
     return SL_RESULT_SUCCESS;
@@ -77,4 +86,5 @@ void IMetadataTraversal_init(void *self)
 #ifndef NDEBUG
     this->mIndex = 0;
 #endif
+    this->mMode = SL_METADATATRAVERSALMODE_NODE;
 }

@@ -21,8 +21,19 @@
 static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self,
     SLuint16 preset)
 {
-    IPresetReverb *this =
-        (IPresetReverb *) self;
+    IPresetReverb *this = (IPresetReverb *) self;
+    switch (preset) {
+    case SL_REVERBPRESET_NONE:
+    case SL_REVERBPRESET_SMALLROOM:
+    case SL_REVERBPRESET_MEDIUMROOM:
+    case SL_REVERBPRESET_LARGEROOM:
+    case SL_REVERBPRESET_MEDIUMHALL:
+    case SL_REVERBPRESET_LARGEHALL:
+    case SL_REVERBPRESET_PLATE:
+        break;
+    default:
+        return SL_RESULT_PARAMETER_INVALID;
+    }
     interface_lock_poke(this);
     this->mPreset = preset;
     interface_unlock_poke(this);
@@ -52,4 +63,7 @@ void IPresetReverb_init(void *self)
 {
     IPresetReverb *this = (IPresetReverb *) self;
     this->mItf = &IPresetReverb_Itf;
+#ifndef NDEBUG
+    this->mPreset = SL_REVERBPRESET_NONE;
+#endif
 }

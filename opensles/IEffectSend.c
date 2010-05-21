@@ -138,6 +138,7 @@ void IEffectSend_init(void *self)
 #ifndef NDEBUG
     this->mOutputMix = NULL; // FIXME wrong
     this->mDirectLevel = 0;
+    // FIXME hard-coded array initialization should be loop on AUX_MAX
     this->mEnableLevels[AUX_ENVIRONMENTALREVERB].mEnable = SL_BOOLEAN_FALSE;
     this->mEnableLevels[AUX_ENVIRONMENTALREVERB].mSendLevel = 0;
     this->mEnableLevels[AUX_PRESETREVERB].mEnable = SL_BOOLEAN_FALSE;

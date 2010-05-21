@@ -234,6 +234,10 @@ void IObject_init(void *self)
 {
     IObject *this = (IObject *) self;
     this->mItf = &IObject_Itf;
+    // initialized in construct:
+    // mClass
+    // mExposedMask
+    // mLossOfControlMask
     this->mState = SL_OBJECT_STATE_UNREALIZED;
 #ifndef NDEBUG
     this->mCallback = NULL;

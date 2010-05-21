@@ -27,6 +27,8 @@
 static SLresult IEnvironmentalReverb_SetRoomLevel(SLEnvironmentalReverbItf self,
     SLmillibel room)
 {
+    if (!(SL_MILLIBEL_MIN <= room && room <= 0))
+        return SL_RESULT_PARAMETER_INVALID;
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.roomLevel = room;
@@ -50,6 +52,8 @@ static SLresult IEnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self,
 static SLresult IEnvironmentalReverb_SetRoomHFLevel(
     SLEnvironmentalReverbItf self, SLmillibel roomHF)
 {
+    if (!(SL_MILLIBEL_MIN <= roomHF && roomHF <= 0))
+        return SL_RESULT_PARAMETER_INVALID;
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.roomHFLevel = roomHF;
@@ -73,6 +77,8 @@ static SLresult IEnvironmentalReverb_GetRoomHFLevel(
 static SLresult IEnvironmentalReverb_SetDecayTime(
     SLEnvironmentalReverbItf self, SLmillisecond decayTime)
 {
+    if (!(100 <= decayTime && decayTime <= 20000))
+        return SL_RESULT_PARAMETER_INVALID;
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.decayTime = decayTime;
@@ -96,6 +102,8 @@ static SLresult IEnvironmentalReverb_GetDecayTime(
 static SLresult IEnvironmentalReverb_SetDecayHFRatio(
     SLEnvironmentalReverbItf self, SLpermille decayHFRatio)
 {
+    if (!(100 <= decayHFRatio && decayHFRatio <= 2000))
+        return SL_RESULT_PARAMETER_INVALID;
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.decayHFRatio = decayHFRatio;
@@ -119,6 +127,8 @@ static SLresult IEnvironmentalReverb_GetDecayHFRatio(
 static SLresult IEnvironmentalReverb_SetReflectionsLevel(
     SLEnvironmentalReverbItf self, SLmillibel reflectionsLevel)
 {
+    if (!(SL_MILLIBEL_MIN <= reflectionsLevel && reflectionsLevel <= 1000))
+        return SL_RESULT_PARAMETER_INVALID;
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.reflectionsLevel = reflectionsLevel;
@@ -142,6 +152,8 @@ static SLresult IEnvironmentalReverb_GetReflectionsLevel(
 static SLresult IEnvironmentalReverb_SetReflectionsDelay(
     SLEnvironmentalReverbItf self, SLmillisecond reflectionsDelay)
 {
+    if (!(0 <= reflectionsDelay && reflectionsDelay <= 300))
+        return SL_RESULT_PARAMETER_INVALID;
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.reflectionsDelay = reflectionsDelay;
@@ -165,6 +177,8 @@ static SLresult IEnvironmentalReverb_GetReflectionsDelay(
 static SLresult IEnvironmentalReverb_SetReverbLevel(
     SLEnvironmentalReverbItf self, SLmillibel reverbLevel)
 {
+    if (!(SL_MILLIBEL_MIN <= reverbLevel && reverbLevel <= 2000))
+        return SL_RESULT_PARAMETER_INVALID;
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.reverbLevel = reverbLevel;
@@ -188,6 +202,8 @@ static SLresult IEnvironmentalReverb_GetReverbLevel(
 static SLresult IEnvironmentalReverb_SetReverbDelay(
     SLEnvironmentalReverbItf self, SLmillisecond reverbDelay)
 {
+    if (!(0 <= reverbDelay && reverbDelay <= 100))
+        return SL_RESULT_PARAMETER_INVALID;
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.reverbDelay = reverbDelay;
@@ -211,6 +227,8 @@ static SLresult IEnvironmentalReverb_GetReverbDelay(
 static SLresult IEnvironmentalReverb_SetDiffusion(
     SLEnvironmentalReverbItf self, SLpermille diffusion)
 {
+    if (!(0 <= diffusion && diffusion <= 1000))
+        return SL_RESULT_PARAMETER_INVALID;
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.diffusion = diffusion;
@@ -234,6 +252,8 @@ static SLresult IEnvironmentalReverb_GetDiffusion(SLEnvironmentalReverbItf self,
 static SLresult IEnvironmentalReverb_SetDensity(SLEnvironmentalReverbItf self,
     SLpermille density)
 {
+    if (!(0 <= density && density <= 1000))
+        return SL_RESULT_PARAMETER_INVALID;
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties.density = density;
@@ -260,8 +280,28 @@ static SLresult IEnvironmentalReverb_SetEnvironmentalReverbProperties(
 {
     if (NULL == pProperties)
         return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     SLEnvironmentalReverbSettings properties = *pProperties;
+    if (!(SL_MILLIBEL_MIN <= properties.roomLevel && properties.roomLevel <= 0))
+        return SL_RESULT_PARAMETER_INVALID;
+    if (!(SL_MILLIBEL_MIN <= properties.roomHFLevel && properties.roomHFLevel <= 0))
+        return SL_RESULT_PARAMETER_INVALID;
+    if (!(100 <= properties.decayTime && properties.decayTime <= 20000))
+        return SL_RESULT_PARAMETER_INVALID;
+    if (!(100 <= properties.decayHFRatio && properties.decayHFRatio <= 2000))
+        return SL_RESULT_PARAMETER_INVALID;
+    if (!(SL_MILLIBEL_MIN <= properties.reflectionsLevel && properties.reflectionsLevel <= 1000))
+        return SL_RESULT_PARAMETER_INVALID;
+    if (!(0 <= properties.reflectionsDelay && properties.reflectionsDelay <= 300))
+        return SL_RESULT_PARAMETER_INVALID;
+    if (!(SL_MILLIBEL_MIN <= properties.reverbLevel && properties.reverbLevel <= 2000))
+        return SL_RESULT_PARAMETER_INVALID;
+    if (!(0 <= properties.reverbDelay && properties.reverbDelay <= 100))
+        return SL_RESULT_PARAMETER_INVALID;
+    if (!(0 <= properties.diffusion && properties.diffusion <= 1000))
+        return SL_RESULT_PARAMETER_INVALID;
+    if (!(0 <= properties.density && properties.density <= 1000))
+        return SL_RESULT_PARAMETER_INVALID;
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
     this->mProperties = properties;
     interface_unlock_exclusive(this);

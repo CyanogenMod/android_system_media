@@ -47,6 +47,12 @@ static SLresult ILEDArray_SetColor(SLLEDArrayItf self, SLuint8 index,
     if (NULL == pColor)
         return SL_RESULT_PARAMETER_INVALID;
     SLHSL color = *pColor;
+    if (!(0 <= color.hue && color.hue <= 360000))
+        return SL_RESULT_PARAMETER_INVALID;
+    if (!(0 <= color.saturation && color.saturation <= 1000))
+        return SL_RESULT_PARAMETER_INVALID;
+    if (!(0 <= color.lightness && color.lightness <= 1000))
+        return SL_RESULT_PARAMETER_INVALID;
     ILEDArray *this = (ILEDArray *) self;
     interface_lock_poke(this);
     this->mColor[index] = color;
@@ -83,4 +89,14 @@ void ILEDArray_init(void *self)
     this->mColor = NULL;
 #endif
     this->mCount = 8;   // FIXME wrong place
+    SLHSL *color;
+    color = (SLHSL *) malloc(sizeof(SLHSL) * this->mCount);
+    assert(NULL != color);
+    this->mColor = color;
+    SLuint8 index;
+    for (index = 0; index < this->mCount; ++index, ++color) {
+        color->hue = 0; // red
+        color->saturation = 1000;
+        color->lightness = 1000;
+    }
 }

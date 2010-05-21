@@ -18,6 +18,28 @@
 
 #include "sles_allinclusive.h"
 
+// FIXME move
+
+const struct EqualizerBand EqualizerBands[] = {
+    {1000, 1500, 2000},
+    {2000, 3000, 4000},
+    {4000, 5500, 7000},
+    {7000, 8000, 9000}
+};
+
+#define MAX_BANDS (sizeof(EqualizerBands)/sizeof(EqualizerBands[0]))
+
+const struct EqualizerPreset {
+    const SLchar *mName;
+    SLmillibel mLevels[MAX_BANDS];
+} EqualizerPresets[] = {
+    {(const SLchar *) "Default", {0, 0, 0, 0}},
+    {(const SLchar *) "Bass", {500, 200, 100, 0}},
+    {(const SLchar *) "Treble", {0, 100, 200, 500}}
+};
+
+#define MAX_PRESETS (sizeof(EqualizerPresets)/sizeof(EqualizerPresets[0]))
+
 static SLresult IEqualizer_SetEnabled(SLEqualizerItf self, SLboolean enabled)
 {
     IEqualizer *this = (IEqualizer *) self;
@@ -58,9 +80,9 @@ static SLresult IEqualizer_GetBandLevelRange(SLEqualizerItf self,
     IEqualizer *this = (IEqualizer *) self;
     // Note: no lock, but OK because it is const
     if (NULL != pMin)
-        *pMin = this->mMin;
+        *pMin = this->mBandLevelRangeMin;
     if (NULL != pMax)
-        *pMax = this->mMax;
+        *pMax = this->mBandLevelRangeMax;
     return SL_RESULT_SUCCESS;
 }
 
@@ -70,9 +92,10 @@ static SLresult IEqualizer_SetBandLevel(SLEqualizerItf self, SLuint16 band,
     IEqualizer *this = (IEqualizer *) self;
     if (band >= this->mNumBands)
         return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_poke(this);
+    interface_lock_exclusive(this);
     this->mLevels[band] = level;
-    interface_unlock_poke(this);
+    this->mPreset = SL_EQUALIZER_UNDEFINED;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -156,9 +179,10 @@ static SLresult IEqualizer_GetCurrentPreset(SLEqualizerItf self,
     if (NULL == pPreset)
         return SL_RESULT_PARAMETER_INVALID;
     IEqualizer *this = (IEqualizer *) self;
-    interface_lock_peek(this);
-    *pPreset = this->mPreset;
-    interface_unlock_peek(this);
+    interface_lock_shared(this);
+    SLuint16 preset = this->mPreset;
+    interface_unlock_shared(this);
+    *pPreset = preset;
     return SL_RESULT_SUCCESS;
 }
 
@@ -167,9 +191,12 @@ static SLresult IEqualizer_UsePreset(SLEqualizerItf self, SLuint16 index)
     IEqualizer *this = (IEqualizer *) self;
     if (index >= this->mNumPresets)
         return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_poke(this);
+    interface_lock_exclusive(this);
+    SLuint16 band;
+    for (band = 0; band < this->mNumBands; ++band)
+        this->mLevels[band] = EqualizerPresets[index].mLevels[band];
     this->mPreset = index;
-    interface_unlock_poke(this);
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -217,16 +244,15 @@ void IEqualizer_init(void *self)
     IEqualizer *this = (IEqualizer *) self;
     this->mItf = &IEqualizer_Itf;
     this->mEnabled = SL_BOOLEAN_FALSE;
-    this->mNumBands = 4;
+    this->mNumBands = MAX_BANDS;
     this->mBandLevelRangeMin = 0;
     this->mBandLevelRangeMax = 1000;
-    struct EqualizerBand *band = this->mBands;
-    unsigned i;
-    for (i = 0; i < this->mNumBands; ++i, ++band) {
-        this->mBands[i].mLevel = 0;
-        this->mBands[i].mCenter = 0;
-        this->mBands[i].mMin = 0;
-        this->mBands[i].mMax = 0;
-    }
-    this->mPreset = 0;
+    this->mBands = EqualizerBands;
+    SLmillibel *levels;
+    levels = (SLmillibel *) malloc(sizeof(SLmillibel) * MAX_BANDS);
+    assert(NULL != levels);
+    unsigned band;
+    for (band = 0; band < this->mNumBands; ++band)
+        this->mLevels[band] = 0;
+    this->mPreset = SL_EQUALIZER_UNDEFINED;
 }

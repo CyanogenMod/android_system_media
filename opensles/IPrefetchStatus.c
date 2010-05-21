@@ -115,4 +115,12 @@ void IPrefetchStatus_init(void *self)
 {
     IPrefetchStatus *this = (IPrefetchStatus *) self;
     this->mItf = &IPrefetchStatus_Itf;
+#ifndef NDEBUG
+    this->mStatus = 0;
+    this->mCallback = NULL;
+    this->mContext = NULL;
+    this->mCallbackEventsMask = 0;
+#endif
+    this->mLevel = 100;
+    this->mFillUpdatePeriod = 1000;
 }

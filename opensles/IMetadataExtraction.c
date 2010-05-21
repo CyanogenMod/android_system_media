@@ -45,9 +45,9 @@ static SLresult IMetadataExtraction_GetKey(SLMetadataExtractionItf self,
     if (NULL == pKey)
         return SL_RESULT_PARAMETER_INVALID;
     SLMetadataInfo key;
-    key.size = 0;
-    key.encoding = 0;
-    key.langCountry[-0] = '\0';
+    key.size = 1;
+    key.encoding = SL_CHARACTERENCODING_UTF8;
+    strcpy((char *) key.langCountry, "en");
     key.data[0] = 0;
     *pKey = key;
     return SL_RESULT_SUCCESS;
@@ -70,9 +70,9 @@ static SLresult IMetadataExtraction_GetValue(SLMetadataExtractionItf self,
     if (NULL == pValue)
         return SL_RESULT_PARAMETER_INVALID;
     SLMetadataInfo value;
-    value.size = 0;
-    value.encoding = 0;
-    value.langCountry[-0] = '\0';
+    value.size = 1;
+    value.encoding = SL_CHARACTERENCODING_UTF8;
+    strcpy((char *) value.langCountry, "en");
     value.data[0] = 0;
     *pValue = value;;
     return SL_RESULT_SUCCESS;
@@ -83,6 +83,8 @@ static SLresult IMetadataExtraction_AddKeyFilter(SLMetadataExtractionItf self,
     const SLchar *pValueLangCountry, SLuint32 valueEncoding, SLuint8 filterMask)
 {
     if (NULL == pKey || NULL == pValueLangCountry)
+        return SL_RESULT_PARAMETER_INVALID;
+    if (filterMask & ~(SL_METADATA_FILTER_KEY | SL_METADATA_FILTER_KEY | SL_METADATA_FILTER_KEY))
         return SL_RESULT_PARAMETER_INVALID;
     IMetadataExtraction *this = (IMetadataExtraction *) self;
     interface_lock_exclusive(this);

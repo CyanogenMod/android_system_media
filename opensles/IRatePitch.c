@@ -63,4 +63,9 @@ void IRatePitch_init(void *self)
 {
     IRatePitch *this = (IRatePitch *) self;
     this->mItf = &IRatePitch_Itf;
+#ifndef NDEBUG
+    this->mRate = 0;
+#endif
+    this->mMinRate = 500;
+    this->mMaxRate = 2000;
 }

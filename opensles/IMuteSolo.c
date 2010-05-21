@@ -96,4 +96,9 @@ void IMuteSolo_init(void *self)
 {
     IMuteSolo *this = (IMuteSolo *) self;
     this->mItf = &IMuteSolo_Itf;
+#ifndef NDEBUG
+    this->mMuteMask = 0;
+    this->mSoloMask = 0;
+#endif
+    this->mNumChannels = 2;
 }

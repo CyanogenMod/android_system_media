@@ -80,6 +80,7 @@ void IDeviceVolume_init(void *self)
 {
     IDeviceVolume *this = (IDeviceVolume *) self;
     this->mItf = &IDeviceVolume_Itf;
+    // FIXME hard-coded array size for default in/out
     this->mVolume[0] = 10;
     this->mVolume[1] = 10;
 }

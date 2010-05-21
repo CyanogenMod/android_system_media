@@ -62,4 +62,9 @@ void IPitch_init(void *self)
 {
     IPitch *this = (IPitch *) self;
     this->mItf = &IPitch_Itf;
+#ifndef NDEBUG
+    this->mPitch = 0;
+#endif
+    this->mMinPitch = -500;
+    this->mMaxPitch = 500;
 }

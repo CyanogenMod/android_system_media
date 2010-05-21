@@ -215,6 +215,7 @@ typedef struct {
     const struct SL3DGroupingItf_ *mItf;
     IObject *mThis;
     SLObjectItf mGroup;
+    // FIXME link to group's set
 } I3DGrouping;
 
 // FIXME move
@@ -422,26 +423,23 @@ typedef struct {
 // FIXME move
 struct EqualizerBand {
     SLmilliHertz mMin;
-    SLmilliHertz mMax;
     SLmilliHertz mCenter;
-    /*TBD*/ int mLevel;
+    SLmilliHertz mMax;
 };
 
 typedef struct {
     const struct SLEqualizerItf_ *mItf;
     IObject *mThis;
     SLboolean mEnabled;
-    SLmillibel *mLevels;
     SLuint16 mPreset;
+    SLmillibel *mLevels;
     // const
     SLuint16 mNumPresets;
     SLuint16 mNumBands;
-    SLmillibel mMin;
-    SLmillibel mMax;
-    struct EqualizerBand *mBands;
+    const struct EqualizerBand *mBands;
     const SLchar * const *mPresetNames;
-    /*TBD*/ int mBandLevelRangeMin;
-    /*TBD*/ int mBandLevelRangeMax;
+    SLmillibel mBandLevelRangeMin;
+    SLmillibel mBandLevelRangeMax;
 } IEqualizer;
 
 typedef struct {
@@ -452,6 +450,8 @@ typedef struct {
     // const
     SLuint8 mCount;
 } ILEDArray;
+
+// FIXME sort: MIDI goes here
 
 typedef struct {
     const struct SLMetadataExtractionItf_ *mItf;
@@ -481,7 +481,7 @@ typedef struct {
     void *mMetaEventContext;
     slMIDIMessageCallback mMessageCallback;
     void *mMessageContext;
-    int /*TBD*/ mMessageTypes;
+    SLuint8 mMessageTypes;
 } IMIDIMessage;
 
 typedef struct {
@@ -527,7 +527,7 @@ typedef struct {
     void *mContext;
 #ifdef USE_OUTPUTMIXEXT
     unsigned mActiveMask;   // 1 bit per active track
-    struct Track mTracks[32];
+    struct Track mTracks[32]; // FIXME magic
 #endif
 } IOutputMix;
 
@@ -565,8 +565,8 @@ typedef struct {
     const struct SLPlaybackRateItf_ *mItf;
     IObject *mThis;
     SLpermille mRate;
-    SLuint32 mPropertyConstraints;
     SLuint32 mProperties;
+    // const
     SLpermille mMinRate;
     SLpermille mMaxRate;
     SLpermille mStepSize;
@@ -594,6 +594,7 @@ typedef struct {
     const struct SLRatePitchItf_ *mItf;
     IObject *mThis;
     SLpermille mRate;
+    // const
     SLpermille mMinRate;
     SLpermille mMaxRate;
 } IRatePitch;
@@ -724,7 +725,7 @@ typedef struct {
         android::AudioTrack *mAudioTrack;
         android::MediaPlayer *mMediaPlayer;
     };
-    pthread_t mThread;
+    // pthread_t mThread;
 #endif
 } CAudioPlayer;
 

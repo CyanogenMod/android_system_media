@@ -20,27 +20,37 @@ LOCAL_SRC_FILES:=                     \
         IAudioEncoderCapabilities.c   \
         IAudioIODeviceCapabilities.c  \
         IBassBoost.c                  \
+        IBufferQueue.c                \
         IDeviceVolume.c               \
         IDynamicInterfaceManagement.c \
         IDynamicSource.c              \
         IEffectSend.c                 \
+        IEngineCapabilities.c         \
         IEnvironmentalReverb.c        \
         IEqualizer.c                  \
         ILEDArray.c                   \
+        IMIDIMessage.c                \
+        IMIDIMuteSolo.c               \
+        IMIDITempo.c                  \
+        IMIDITime.c                   \
         IMetadataExtraction.c         \
         IMetadataTraversal.c          \
         IMuteSolo.c                   \
         IObject.c                     \
+        IOutputMix.c                  \
         IPitch.c                      \
+        IPlay.c                       \
         IPlaybackRate.c               \
         IPrefetchStatus.c             \
         IPresetReverb.c               \
         IRatePitch.c                  \
         IRecord.c                     \
+        ISeek.c                       \
         IThreadSync.c                 \
         IVibra.c                      \
         IVirtualizer.c                \
-        IVisualization.c
+        IVisualization.c              \
+        IVolume.c
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \

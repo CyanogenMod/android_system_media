@@ -43,7 +43,6 @@ static SLresult IPlaybackRate_SetPropertyConstraints(SLPlaybackRateItf self,
     SLuint32 constraints)
 {
     IPlaybackRate *this = (IPlaybackRate *) self;
-    // FIXME are properties and property constraints the same thing?
     this->mProperties = constraints;
     return SL_RESULT_SUCCESS;
 }
@@ -103,4 +102,12 @@ void IPlaybackRate_init(void *self)
 {
     IPlaybackRate *this = (IPlaybackRate *) self;
     this->mItf = &IPlaybackRate_Itf;
+#ifndef NDEBUG
+    this->mProperties = 0;
+#endif
+    this->mRate = 1000;
+    this->mMinRate = 500;
+    this->mMaxRate = 2000;
+    this->mStepSize = 100;
+    this->mCapabilities = 200;
 }

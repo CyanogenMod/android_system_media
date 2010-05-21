@@ -31,7 +31,7 @@ static SLresult I3DGrouping_Set3DGroup(SL3DGroupingItf self, SLObjectItf group)
         return SL_RESULT_PRECONDITIONS_VIOLATED;
     interface_lock_exclusive(this);
     this->mGroup = group;
-    // FIXME add this object to the group's bag of objects
+    // FIXME add this object to the group's set of objects
     interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
@@ -60,5 +60,5 @@ void I3DGrouping_init(void *self)
 #ifndef NDEBUG
     this->mGroup = NULL;
 #endif
-    // FIXME initialize the bag here
+    // FIXME initialize the set here
 }

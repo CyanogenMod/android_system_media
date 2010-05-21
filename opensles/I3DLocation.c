@@ -218,9 +218,9 @@ void I3DLocation_init(void *self)
     this->mAxis.z = 0x55555555;
     this->mRotatePending = SL_BOOLEAN_FALSE;
 #endif
+    this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
     this->mOrientationVectors.mFront.z = -1000;
     this->mOrientationVectors.mUp.y = 1000;
     this->mOrientationVectors.mAbove.z = -1000;
-    this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
     this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
 }

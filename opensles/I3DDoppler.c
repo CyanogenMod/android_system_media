@@ -125,6 +125,6 @@ void I3DDoppler_init(void *self)
     this->mVelocityCartesian.z = 0;
     memset(&this->mVelocitySpherical, 0x55, sizeof(this->mVelocitySpherical));
 #endif
-    this->mDopplerFactor = 1000;
     this->mVelocityActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
+    this->mDopplerFactor = 1000;
 }

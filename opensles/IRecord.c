@@ -20,6 +20,14 @@
 
 static SLresult IRecord_SetRecordState(SLRecordItf self, SLuint32 state)
 {
+    switch (state) {
+    case SL_RECORDSTATE_STOPPED:
+    case SL_RECORDSTATE_PAUSED:
+    case SL_RECORDSTATE_RECORDING:
+        break;
+    default:
+        return SL_RESULT_PARAMETER_INVALID;
+    }
     IRecord *this = (IRecord *) self;
     interface_lock_poke(this);
     this->mState = state;
@@ -74,6 +82,14 @@ static SLresult IRecord_RegisterCallback(SLRecordItf self,
 static SLresult IRecord_SetCallbackEventsMask(SLRecordItf self,
     SLuint32 eventFlags)
 {
+    if (eventFlags & ~(
+        SL_RECORDEVENT_HEADATLIMIT  |
+        SL_RECORDEVENT_HEADATMARKER |
+        SL_RECORDEVENT_HEADATNEWPOS |
+        SL_RECORDEVENT_HEADMOVING   |
+        SL_RECORDEVENT_HEADSTALLED  |
+        SL_RECORDEVENT_BUFFER_FULL))
+        return SL_RESULT_PARAMETER_INVALID;
     IRecord *this = (IRecord *) self;
     interface_lock_poke(this);
     this->mCallbackEventsMask = eventFlags;
@@ -166,4 +182,14 @@ void IRecord_init(void *self)
 {
     IRecord *this = (IRecord *) self;
     this->mItf = &IRecord_Itf;
+#ifndef NDEBUG
+    this->mState = SL_RECORDSTATE_STOPPED;
+    this->mDurationLimit = 0;
+    this->mPosition = 0;
+    this->mCallback = NULL;
+    this->mContext = NULL;
+    this->mCallbackEventsMask = 0;
+    this->mMarkerPosition = 0;
+    this->mPositionUpdatePeriod = 0;
+#endif
 }
