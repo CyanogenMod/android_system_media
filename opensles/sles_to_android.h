@@ -19,6 +19,9 @@
 #define ANDROID_DEFAULT_OUTPUT_STREAM_TYPE android::AudioSystem::MUSIC
 #define ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE 4096
 
+// FIXME should all those functions below be inline? there are separated in different files for
+//       code clarity.
+
 /*
  * Checks that the combination of source and sink parameters is supported in this implementation.
  * Return
@@ -36,7 +39,7 @@ SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSr
  *         unsupported parameter or value
  *     SL_RESULT_CONTENT_UNSUPPORTED if a format is not supported (e.g. sample rate too high)
  */
-SLresult sles_to_android_createAudioPlayer(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk,
+SLresult sles_to_android_audioPlayerCreate(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk,
         CAudioPlayer *pAudioPlayer);
 
 /*
@@ -47,7 +50,17 @@ SLresult sles_to_android_createAudioPlayer(const SLDataSource *pAudioSrc, const 
  *     SL_RESULT_CONTENT_UNSUPPORTED if an error occurred during the allocation and initialization
  *         of the Android resources
  */
-SLresult sles_to_android_realizeAudioPlayer(CAudioPlayer *pAudioPlayer);
+SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer);
 
+SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer);
 
 SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state);
+
+SLresult sles_to_android_audioPlayerUseEventMask(IPlay *pPlayItf, SLuint32 eventFlags);
+
+SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
+
+SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf);
+
+SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute);
+

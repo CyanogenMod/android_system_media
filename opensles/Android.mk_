@@ -39,7 +39,6 @@ LOCAL_SRC_FILES:=                     \
         IObject.c                     \
         IOutputMix.c                  \
         IPitch.c                      \
-        IPlay.c                       \
         IPlaybackRate.c               \
         IPrefetchStatus.c             \
         IPresetReverb.c               \
@@ -49,8 +48,7 @@ LOCAL_SRC_FILES:=                     \
         IThreadSync.c                 \
         IVibra.c                      \
         IVirtualizer.c                \
-        IVisualization.c              \
-        IVolume.c
+        IVisualization.c
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \

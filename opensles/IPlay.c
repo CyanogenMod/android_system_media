@@ -16,10 +16,11 @@
 
 /* Play implementation */
 
-#include "sles_allinclusive.h"
+//#include "sles_allinclusive.h"
 
 static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
 {
+    SLresult result = SL_RESULT_SUCCESS;
     switch (state) {
     case SL_PLAYSTATE_STOPPED:
     case SL_PLAYSTATE_PAUSED:
@@ -35,12 +36,13 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
         this->mPosition = (SLmillisecond) 0;
         // this->mPositionSamples = 0;
     }
-    interface_unlock_exclusive(this);
 #ifdef USE_ANDROID
-    return sles_to_android_audioPlayerSetPlayState(this, state);
-#else
-    return SL_RESULT_SUCCESS;
+    if (this->mThis->mClass->mObjectID == SL_OBJECTID_AUDIOPLAYER) {
+        result = sles_to_android_audioPlayerSetPlayState(this, state);
+    }
 #endif
+    interface_unlock_exclusive(this);
+    return result;
 }
 
 static SLresult IPlay_GetPlayState(SLPlayItf self, SLuint32 *pState)
@@ -68,6 +70,9 @@ static SLresult IPlay_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
     SLmillisecond duration = this->mDuration;
     interface_unlock_peek(this);
     *pMsec = duration;
+#ifdef USE_ANDROID
+    // initialized to SL_TIME_UNKNOWN in IPlay_init
+#endif
     return SL_RESULT_SUCCESS;
 }
 
@@ -77,6 +82,11 @@ static SLresult IPlay_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
         return SL_RESULT_PARAMETER_INVALID;
     IPlay *this = (IPlay *) self;
     interface_lock_peek(this);
+#ifdef USE_ANDROID
+    if (this->mThis->mClass->mObjectID == SL_OBJECTID_AUDIOPLAYER) {
+        sles_to_android_audioPlayerGetPosition(this, &this->mPosition);
+    }
+#endif
     SLmillisecond position = this->mPosition;
     interface_unlock_peek(this);
     *pMsec = position;
@@ -99,11 +109,17 @@ static SLresult IPlay_RegisterCallback(SLPlayItf self, slPlayCallback callback,
 
 static SLresult IPlay_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
 {
+    SLresult result = SL_RESULT_SUCCESS;
     IPlay *this = (IPlay *) self;
     interface_lock_poke(this);
     this->mEventFlags = eventFlags;
+#ifdef USE_ANDROID
+    if (this->mThis->mClass->mObjectID == SL_OBJECTID_AUDIOPLAYER) {
+        result = sles_to_android_audioPlayerUseEventMask(this, eventFlags);
+    }
+#endif
     interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    return result;
 }
 
 static SLresult IPlay_GetCallbackEventsMask(SLPlayItf self,
@@ -121,11 +137,17 @@ static SLresult IPlay_GetCallbackEventsMask(SLPlayItf self,
 
 static SLresult IPlay_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
 {
+    SLresult result = SL_RESULT_SUCCESS;
     IPlay *this = (IPlay *) self;
     interface_lock_poke(this);
     this->mMarkerPosition = mSec;
+#ifdef USE_ANDROID
+    if (this->mThis->mClass->mObjectID == SL_OBJECTID_AUDIOPLAYER) {
+        result = sles_to_android_audioPlayerUseEventMask(this, this->mEventFlags);
+    }
+#endif
     interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    return result;
 }
 
 static SLresult IPlay_ClearMarkerPosition(SLPlayItf self)
@@ -133,6 +155,15 @@ static SLresult IPlay_ClearMarkerPosition(SLPlayItf self)
     IPlay *this = (IPlay *) self;
     interface_lock_poke(this);
     this->mMarkerPosition = 0;
+#ifdef USE_ANDROID
+    if (this->mThis->mClass->mObjectID == SL_OBJECTID_AUDIOPLAYER) {
+        // clearing the marker position can be simulated by using the event mask with a
+        // cleared flag for the marker
+        SLuint32 eventFlags = this->mEventFlags & (~SL_PLAYEVENT_HEADATMARKER);
+        sles_to_android_audioPlayerUseEventMask(this, eventFlags);
+        // FIXME verify this is still valid for a MediaPlayer
+    }
+#endif
     interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
@@ -151,11 +182,17 @@ static SLresult IPlay_GetMarkerPosition(SLPlayItf self, SLmillisecond *pMsec)
 
 static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec)
 {
+    SLresult result = SL_RESULT_SUCCESS;
     IPlay *this = (IPlay *) self;
     interface_lock_poke(this);
     this->mPositionUpdatePeriod = mSec;
+#ifdef USE_ANDROID
+    if (this->mThis->mClass->mObjectID == SL_OBJECTID_AUDIOPLAYER) {
+        result = sles_to_android_audioPlayerUseEventMask(this, this->mEventFlags);
+    }
+#endif
     interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    return result;
 }
 
 static SLresult IPlay_GetPositionUpdatePeriod(SLPlayItf self,

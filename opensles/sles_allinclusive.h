@@ -659,6 +659,24 @@ typedef struct {
     SLboolean mMute;
     SLboolean mEnableStereoPosition;
     SLpermille mStereoPosition;
+#ifdef USE_ANDROID
+    /**
+     * Amplification (can be attenuation) factor derived for the VolumeLevel
+     */
+    float mAmplFromVolLevel;
+    /**
+     * Left/right amplification (can be attenuations) factors derived for the StereoPosition
+     */
+    float mAmplFromStereoPos[2];
+    /**
+     * Channel mask for which channels are muted
+     */
+    int mChannelMutes;
+    /**
+     * Channel mask for which channels are solo'ed
+     */
+    int mChannelSolos;
+#endif
 } IVolume;
 
 /* Class structures */

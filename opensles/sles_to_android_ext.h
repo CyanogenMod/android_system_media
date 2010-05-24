@@ -18,9 +18,19 @@
 extern SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc,
         const SLDataSink *pAudioSnk);
 
-extern SLresult sles_to_android_createAudioPlayer(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk,
+extern SLresult sles_to_android_audioPlayerCreate(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk,
         CAudioPlayer *pAudioPlayer);
 
-extern SLresult sles_to_android_realizeAudioPlayer(CAudioPlayer *pAudioPlayer);
+extern SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer);
+
+extern SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer);
 
 extern SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state);
+
+extern SLresult sles_to_android_audioPlayerUseEventMask(IPlay *pPlayItf, SLuint32 eventFlags);
+
+extern SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
+
+extern SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf);
+
+extern SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute);

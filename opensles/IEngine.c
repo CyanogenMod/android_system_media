@@ -270,10 +270,10 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 #endif // USE_OUTPUTMIXEXT
 
     // Construct our new AudioPlayer instance
-    CAudioPlayer *this = (CAudioPlayer *)
-        construct(&CAudioPlayer_class, exposedMask, self);
-    if (NULL == this)
+    CAudioPlayer *this = (CAudioPlayer *) construct(&CAudioPlayer_class, exposedMask, self);
+    if (NULL == this) {
         return SL_RESULT_MEMORY_FAILURE;
+    }
 
     // DataSource specific initializations
     switch(*(SLuint32 *)pAudioSrc->pLocator) {
@@ -333,7 +333,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
     track->mAvail = 0;
 #endif
 #ifdef USE_ANDROID
-    sles_to_android_createAudioPlayer(pAudioSrc, pAudioSnk, this);
+    sles_to_android_audioPlayerCreate(pAudioSrc, pAudioSnk, this);
 #endif
     // return the new audio player object
     *pPlayer = &this->mObject.mItf;

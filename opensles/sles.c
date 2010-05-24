@@ -353,7 +353,7 @@ static SLresult AudioPlayer_Realize(void *self)
 
 #ifdef USE_ANDROID
     // FIXME move this to android specific files
-    result = sles_to_android_realizeAudioPlayer(this);
+    result = sles_to_android_audioPlayerRealize(this);
 #endif
 
 #ifdef USE_SNDFILE
@@ -406,6 +406,9 @@ static void AudioPlayer_Destroy(void *self)
         this->mSndFile.mSNDFILE = NULL;
     }
 #endif // USE_SNDFILE
+#ifdef USE_ANDROID
+    sles_to_android_audioPlayerDestroy(this);
+#endif
 }
 
 static const struct iid_vtable AudioPlayer_interfaces[] = {
@@ -1105,5 +1108,7 @@ void SDL_start(SLObjectItf self)
 #endif // USE_SDL
 
 #include "IEngine.c"
+#include "IPlay.c"
+#include "IVolume.c"
 
 /* End */
