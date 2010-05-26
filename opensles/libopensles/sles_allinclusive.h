@@ -35,10 +35,12 @@
 #include <SDL/SDL_audio.h>
 #endif // USE_SDL
 
-#if defined(USE_ANDROID) && defined(__cplusplus)
+#if defined(USE_ANDROID)
+#ifdef __cplusplus
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
+#endif
 #define ANDROID_SL_MILLIBEL_MAX 0
 #endif
 
