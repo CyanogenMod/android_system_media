@@ -35,8 +35,7 @@
 #include <SDL/SDL_audio.h>
 #endif // USE_SDL
 
-#ifdef USE_ANDROID
-#include <unistd.h>
+#if defined(USE_ANDROID) && defined(__cplusplus)
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
@@ -741,8 +740,12 @@ typedef struct {
 #ifdef USE_ANDROID
     enum AndroidObject_type mAndroidObjType;
     union {
+#ifdef __cplusplus
         android::AudioTrack *mAudioTrack;
         android::MediaPlayer *mMediaPlayer;
+#else
+        void *mPlaceholder;
+#endif
     };
     // pthread_t mThread;
 #endif
@@ -879,6 +882,13 @@ extern "C" {
 
 extern /*static*/ int IID_to_MPH(const SLInterfaceID iid);
 extern /*static*/ const struct MPH_init MPH_init_table[MPH_MAX];
+extern SLresult checkInterfaces(const ClassTable *class__,
+    SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
+    const SLboolean *pInterfaceRequired, unsigned *pExposedMask);
+extern IObject *construct(const ClassTable *class__,
+    unsigned exposedMask, SLEngineItf engine);
+extern const ClassTable *objectIDtoClass(SLuint32 objectID);
+extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
 
 #ifdef __cplusplus
 }

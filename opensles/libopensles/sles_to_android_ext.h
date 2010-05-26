@@ -15,6 +15,10 @@
  */
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc,
         const SLDataSink *pAudioSnk);
 
@@ -34,3 +38,7 @@ extern SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillis
 extern SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf);
 
 extern SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute);
+
+#ifdef __cplusplus
+}
+#endif

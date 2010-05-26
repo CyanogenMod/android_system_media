@@ -21,4 +21,13 @@
  *    SL_RESULT_PARAMETER_INVALID if an invalid or null parameter is passed
  *    SL_RESULT_SUCCESS if the given source and sinks can be by the audio player
  */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 SLresult sles_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk);
+
+#ifdef __cplusplus
+}
+#endif

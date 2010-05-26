@@ -15,6 +15,7 @@
  */
 
 #include "sles_allinclusive.h"
+#include "sles_check_audioplayer_ext.h"
 
 SLresult sles_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc,
     const SLDataSink *pAudioSnk) {

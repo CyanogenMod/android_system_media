@@ -16,7 +16,12 @@
 
 /* Engine implementation */
 
-//#include "sles_allinclusive.h"
+#include "sles_allinclusive.h"
+#include "sles_check_audioplayer_ext.h"
+
+#ifdef USE_ANDROID
+#include "sles_to_android_ext.h"
+#endif
 
 static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice,
     SLuint32 deviceID, SLuint32 numInterfaces,
@@ -26,12 +31,13 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice,
         return SL_RESULT_PARAMETER_INVALID;
     *pDevice = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&CLEDDevice_class, numInterfaces,
+    const ClassTable *pCLEDDevice_class = objectIDtoClass(SL_OBJECTID_LEDDEVICE);
+    SLresult result = checkInterfaces(pCLEDDevice_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
     CLEDDevice *this = (CLEDDevice *)
-        construct(&CLEDDevice_class, exposedMask, self);
+        construct(pCLEDDevice_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     SLHSL *color = (SLHSL *) malloc(sizeof(SLHSL) * this->mLEDArray.mCount);
@@ -58,12 +64,13 @@ static SLresult IEngine_CreateVibraDevice(SLEngineItf self,
         return SL_RESULT_PARAMETER_INVALID;
     *pDevice = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&CVibraDevice_class, numInterfaces,
+    const ClassTable *pCVibraDevice_class = objectIDtoClass(SL_OBJECTID_VIBRADEVICE);
+    SLresult result = checkInterfaces(pCVibraDevice_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
     CVibraDevice *this = (CVibraDevice *)
-        construct(&CVibraDevice_class, exposedMask, self);
+        construct(pCVibraDevice_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     this->mDeviceID = deviceID;
@@ -82,7 +89,8 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
         return SL_RESULT_PARAMETER_INVALID;
     *pPlayer = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&CAudioPlayer_class, numInterfaces,
+    const ClassTable *pCAudioPlayer_class = objectIDtoClass(SL_OBJECTID_AUDIOPLAYER);
+    SLresult result = checkInterfaces(pCAudioPlayer_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
@@ -270,7 +278,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 #endif // USE_OUTPUTMIXEXT
 
     // Construct our new AudioPlayer instance
-    CAudioPlayer *this = (CAudioPlayer *) construct(&CAudioPlayer_class, exposedMask, self);
+    CAudioPlayer *this = (CAudioPlayer *) construct(pCAudioPlayer_class, exposedMask, self);
     if (NULL == this) {
         return SL_RESULT_MEMORY_FAILURE;
     }
@@ -349,7 +357,8 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self,
         return SL_RESULT_PARAMETER_INVALID;
     *pRecorder = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&CAudioRecorder_class, numInterfaces,
+    const ClassTable *pCAudioRecorder_class = objectIDtoClass(SL_OBJECTID_AUDIORECORDER);
+    SLresult result = checkInterfaces(pCAudioRecorder_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
@@ -365,14 +374,15 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         return SL_RESULT_PARAMETER_INVALID;
     *pPlayer = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&CMidiPlayer_class, numInterfaces,
+    const ClassTable *pCMidiPlayer_class = objectIDtoClass(SL_OBJECTID_MIDIPLAYER);
+    SLresult result = checkInterfaces(pCMidiPlayer_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
     if (NULL == pMIDISrc || NULL == pAudioOutput)
         return SL_RESULT_PARAMETER_INVALID;
     CMidiPlayer *this = (CMidiPlayer *)
-        construct(&CMidiPlayer_class, exposedMask, self);
+        construct(pCMidiPlayer_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     // return the new MIDI player object
@@ -388,7 +398,8 @@ static SLresult IEngine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
         return SL_RESULT_PARAMETER_INVALID;
     *pListener = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&CListener_class, numInterfaces,
+    const ClassTable *pCListener_class = objectIDtoClass(SL_OBJECTID_LISTENER);
+    SLresult result = checkInterfaces(pCListener_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
@@ -403,7 +414,8 @@ static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup,
         return SL_RESULT_PARAMETER_INVALID;
     *pGroup = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&C3DGroup_class, numInterfaces,
+    const ClassTable *pC3DGroup_class = objectIDtoClass(SL_OBJECTID_3DGROUP);
+    SLresult result = checkInterfaces(pC3DGroup_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
@@ -418,12 +430,13 @@ static SLresult IEngine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix,
         return SL_RESULT_PARAMETER_INVALID;
     *pMix = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&COutputMix_class, numInterfaces,
+    const ClassTable *pCOutputMix_class = objectIDtoClass(SL_OBJECTID_OUTPUTMIX);
+    SLresult result = checkInterfaces(pCOutputMix_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
     COutputMix *this = (COutputMix *)
-        construct(&COutputMix_class, exposedMask, self);
+        construct(pCOutputMix_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     *pMix = &this->mObject.mItf;
@@ -439,12 +452,13 @@ static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self,
         return SL_RESULT_PARAMETER_INVALID;
     *pMetadataExtractor = NULL;
     unsigned exposedMask;
-    SLresult result = checkInterfaces(&CMetadataExtractor_class, numInterfaces,
+    const ClassTable *pCMetadataExtractor_class = objectIDtoClass(SL_OBJECTID_METADATAEXTRACTOR);
+    SLresult result = checkInterfaces(pCMetadataExtractor_class, numInterfaces,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
     CMetadataExtractor *this = (CMetadataExtractor *)
-        construct(&CMetadataExtractor_class, exposedMask, self);
+        construct(pCMetadataExtractor_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     *pMetadataExtractor = &this->mObject.mItf;

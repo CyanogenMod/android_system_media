@@ -25,6 +25,7 @@ LOCAL_SRC_FILES:=                     \
         IDynamicInterfaceManagement.c \
         IDynamicSource.c              \
         IEffectSend.c                 \
+        IEngine.c                     \
         IEngineCapabilities.c         \
         IEnvironmentalReverb.c        \
         IEqualizer.c                  \
@@ -39,6 +40,7 @@ LOCAL_SRC_FILES:=                     \
         IObject.c                     \
         IOutputMix.c                  \
         IPitch.c                      \
+        IPlay.c                       \
         IPlaybackRate.c               \
         IPrefetchStatus.c             \
         IPresetReverb.c               \
@@ -48,13 +50,14 @@ LOCAL_SRC_FILES:=                     \
         IThreadSync.c                 \
         IVibra.c                      \
         IVirtualizer.c                \
-        IVisualization.c
+        IVisualization.c              \
+        IVolume.c
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
 	$(TOP)/system/media/opensles/include
 
-LOCAL_CPPFLAGS += -DUSE_ANDROID
+LOCAL_CFLAGS += -DUSE_ANDROID
 
 LOCAL_SHARED_LIBRARIES := \
         libmedia          \

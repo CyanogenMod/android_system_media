@@ -16,7 +16,11 @@
 
 /* Play implementation */
 
-//#include "sles_allinclusive.h"
+#include "sles_allinclusive.h"
+
+#ifdef USE_ANDROID
+#include "sles_to_android_ext.h"
+#endif
 
 static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
 {

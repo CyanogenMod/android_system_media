@@ -64,8 +64,9 @@ static SLresult IMetadataTraversal_GetChildInfo(SLMetadataTraversalItf self,
 static SLresult IMetadataTraversal_SetActiveNode(SLMetadataTraversalItf self,
     SLuint32 index)
 {
-    if (SL_NODE_PARENT == index)
+    if (SL_NODE_PARENT == index) {
         ;
+    }
     IMetadataTraversal *this = (IMetadataTraversal *) self;
     this->mIndex = index;
     return SL_RESULT_SUCCESS;

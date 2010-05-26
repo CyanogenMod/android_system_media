@@ -23,10 +23,6 @@
 #include "sles_to_android_ext.h"
 #endif
 
-/* Forward declarations */
-
-extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
-
 /* Private functions */
 
 // Map SLInterfaceID to its minimal perfect hash (MPH), or -1 if unknown
@@ -48,7 +44,7 @@ extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
 
 // Check the interface IDs passed into a Create operation
 
-static SLresult checkInterfaces(const ClassTable *class__,
+SLresult checkInterfaces(const ClassTable *class__,
     SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
     const SLboolean *pInterfaceRequired, unsigned *pExposedMask)
 {
@@ -784,7 +780,7 @@ static const ClassTable * const classes[] = {
     &CMetadataExtractor_class
 };
 
-static const ClassTable *objectIDtoClass(SLuint32 objectID)
+const ClassTable *objectIDtoClass(SLuint32 objectID)
 {
     SLuint32 objectID0 = classes[0]->mObjectID;
     if (objectID0 <= objectID &&
@@ -795,7 +791,7 @@ static const ClassTable *objectIDtoClass(SLuint32 objectID)
 
 // Construct a new instance of the specified class, exposing selected interfaces
 
-static IObject *construct(const ClassTable *class__,
+IObject *construct(const ClassTable *class__,
     unsigned exposedMask, SLEngineItf engine)
 {
     IObject *this;
@@ -1106,9 +1102,5 @@ void SDL_start(SLObjectItf self)
 }
 
 #endif // USE_SDL
-
-#include "IEngine.c"
-#include "IPlay.c"
-#include "IVolume.c"
 
 /* End */
