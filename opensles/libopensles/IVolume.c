@@ -26,12 +26,18 @@ static SLresult IVolume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
     if (!((SL_MILLIBEL_MIN <= level) && (SL_MILLIBEL_MAX >= level)))
         return SL_RESULT_PARAMETER_INVALID;
 #endif
+#ifdef USE_ANDROID
+    if (!((SL_MILLIBEL_MIN <= level) && (ANDROID_SL_MILLIBEL_MAX >= level)))
+        return SL_RESULT_PARAMETER_INVALID;
+#endif
+
     IVolume *this = (IVolume *) self;
     interface_lock_poke(this);
     this->mLevel = level;
+    if(this->mMute == SL_BOOLEAN_FALSE) {
 #ifdef USE_ANDROID
-    // FIXME poke lock correct?
-    switch(this->mThis->mClass->mObjectID) {
+        // FIXME poke lock correct?
+        switch(this->mThis->mClass->mObjectID) {
         case SL_OBJECTID_AUDIOPLAYER:
             sles_to_android_audioPlayerVolumeUpdate(this);
             break;
@@ -41,8 +47,9 @@ static SLresult IVolume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
             break;
         default:
             break;
-    }
+        }
 #endif
+    }
     interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
@@ -65,6 +72,9 @@ static SLresult IVolume_GetMaxVolumeLevel(SLVolumeItf self,
     if (NULL == pMaxLevel)
         return SL_RESULT_PARAMETER_INVALID;
     *pMaxLevel = SL_MILLIBEL_MAX;
+#ifdef USE_ANDROID
+    *pMaxLevel = ANDROID_SL_MILLIBEL_MAX;
+#endif
     return SL_RESULT_SUCCESS;
 }
 
@@ -73,6 +83,10 @@ static SLresult IVolume_SetMute(SLVolumeItf self, SLboolean mute)
     IVolume *this = (IVolume *) self;
     interface_lock_poke(this);
     this->mMute = mute;
+    if(this->mMute == SL_BOOLEAN_FALSE) {
+        // when unmuting, reapply volume
+        IVolume_SetVolumeLevel(self, this->mLevel);
+    }
 #ifdef USE_ANDROID
     // FIXME poke lock correct?
     switch(this->mThis->mClass->mObjectID) {

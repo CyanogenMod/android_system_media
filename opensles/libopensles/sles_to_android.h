@@ -62,5 +62,12 @@ SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *
 
 SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf);
 
+/*
+ * Mutes or unmutes the Android media framework object associated with the CAudioPlayer that carries
+ * the IVolume interface.
+ * Pre-condition:
+ *   if mute is SL_BOOLEAN_FALSE, a call to this function was preceded by a call
+ *   to sles_to_android_audioPlayerVolumeUpdate()
+ */
 SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute);
 

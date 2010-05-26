@@ -593,33 +593,23 @@ SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf) {
 //-----------------------------------------------------------------------------
 SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute) {
     CAudioPlayer *ap = (CAudioPlayer *)pVolItf->mThis;
-    // muting?
-    if (pVolItf->mMute == SL_BOOLEAN_TRUE) {
-        switch(ap->mAndroidObjType) {
-        case AUDIOTRACK_PUSH:
-        case AUDIOTRACK_PULL:
-            ap->mAudioTrack->mute(true);
-            break;
-        case MEDIAPLAYER:
+    switch(ap->mAndroidObjType) {
+    case AUDIOTRACK_PUSH:
+    case AUDIOTRACK_PULL:
+        // when unmuting: volume levels have already been updated in IVolume_SetMute
+        ap->mAudioTrack->mute(mute == SL_BOOLEAN_TRUE);
+        break;
+    case MEDIAPLAYER:
+        if (mute == SL_BOOLEAN_TRUE) {
             ap->mMediaPlayer->setVolume(0.0f, 0.0f);
-            break;
-        default:
-            break;
         }
-    } else {
-        switch(ap->mAndroidObjType) {
-        case AUDIOTRACK_PUSH:
-        case AUDIOTRACK_PULL:
-            android_audioPlayerUpdateStereoVolume(pVolItf);
-            ap->mAudioTrack->mute(false);
-            break;
-        case MEDIAPLAYER:
-            android_audioPlayerUpdateStereoVolume(pVolItf);
-            break;
-        default:
-            break;
-        }
+        // when unmuting: volume levels have already been updated in IVolume_SetMute which causes
+        // the MediaPlayer to receive non 0 amplification values
+        break;
+    default:
+        break;
     }
     return SL_RESULT_SUCCESS;
 }
+
 

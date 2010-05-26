@@ -40,6 +40,7 @@
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
+#define ANDROID_SL_MILLIBEL_MAX 0
 #endif
 
 #ifdef USE_OUTPUTMIXEXT
