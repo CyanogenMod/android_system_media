@@ -36,11 +36,9 @@
 #endif // USE_SDL
 
 #if defined(USE_ANDROID)
-#ifdef __cplusplus
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
-#endif
 #define ANDROID_SL_MILLIBEL_MAX 0
 #endif
 
@@ -86,7 +84,7 @@ typedef struct {
     SLuint32 mInterfaceCount;
     const signed char *mMPH_to_index;
     // FIXME not yet used
-    //const char * const mName;
+    const char * const mName;
     size_t mSize;
     SLuint32 mObjectID;
     StatusHook mRealize;
@@ -742,12 +740,8 @@ typedef struct {
 #ifdef USE_ANDROID
     enum AndroidObject_type mAndroidObjType;
     union {
-#ifdef __cplusplus
         android::AudioTrack *mAudioTrack;
         android::MediaPlayer *mMediaPlayer;
-#else
-        void *mPlaceholder;
-#endif
     };
     // pthread_t mThread;
 #endif
@@ -878,10 +872,6 @@ struct MPH_init {
     VoidHook mDeinit;
 };
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 extern /*static*/ int IID_to_MPH(const SLInterfaceID iid);
 extern /*static*/ const struct MPH_init MPH_init_table[MPH_MAX];
 extern SLresult checkInterfaces(const ClassTable *class__,
@@ -891,7 +881,3 @@ extern IObject *construct(const ClassTable *class__,
     unsigned exposedMask, SLEngineItf engine);
 extern const ClassTable *objectIDtoClass(SLuint32 objectID);
 extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
-
-#ifdef __cplusplus
-}
-#endif

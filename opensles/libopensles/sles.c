@@ -131,10 +131,6 @@ static void OutputMixExt_init(void *self)
 }
 #endif // USE_OUTPUTMIXEXT
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 extern void
     I3DCommit_init(void *),
     I3DDoppler_init(void *),
@@ -179,10 +175,6 @@ extern void
     IVirtualizer_init(void *),
     IVisualization_init(void *),
     IVolume_init(void *);
-
-#ifdef __cplusplus
-}
-#endif
 
 /*static*/ const struct MPH_init MPH_init_table[MPH_MAX] = {
     { /* MPH_3DCOMMIT, */ I3DCommit_init, NULL },
@@ -263,7 +255,7 @@ static const struct iid_vtable _3DGroup_interfaces[] = {
     _3DGroup_interfaces,
     sizeof(_3DGroup_interfaces)/sizeof(_3DGroup_interfaces[0]),
     MPH_to_3DGroup,
-    //"3DGroup",
+    "3DGroup",
     sizeof(C3DGroup),
     SL_OBJECTID_3DGROUP,
     NULL,
@@ -467,7 +459,7 @@ static const ClassTable CAudioPlayer_class = {
     AudioPlayer_interfaces,
     sizeof(AudioPlayer_interfaces)/sizeof(AudioPlayer_interfaces[0]),
     MPH_to_AudioPlayer,
-    //"AudioPlayer",
+    "AudioPlayer",
     sizeof(CAudioPlayer),
     SL_OBJECTID_AUDIOPLAYER,
     AudioPlayer_Realize,
@@ -502,7 +494,7 @@ static const ClassTable CAudioRecorder_class = {
     AudioRecorder_interfaces,
     sizeof(AudioRecorder_interfaces)/sizeof(AudioRecorder_interfaces[0]),
     MPH_to_AudioRecorder,
-    //"AudioRecorder",
+    "AudioRecorder",
     sizeof(CAudioRecorder),
     SL_OBJECTID_AUDIORECORDER,
     NULL,
@@ -539,7 +531,7 @@ static const ClassTable CEngine_class = {
     Engine_interfaces,
     sizeof(Engine_interfaces)/sizeof(Engine_interfaces[0]),
     MPH_to_Engine,
-    //"Engine",
+    "Engine",
     sizeof(CEngine),
     SL_OBJECTID_ENGINE,
     NULL,
@@ -562,7 +554,7 @@ static const ClassTable CLEDDevice_class = {
     LEDDevice_interfaces,
     sizeof(LEDDevice_interfaces)/sizeof(LEDDevice_interfaces[0]),
     MPH_to_LEDDevice,
-    //"LEDDevice",
+    "LEDDevice",
     sizeof(CLEDDevice),
     SL_OBJECTID_LEDDEVICE,
     NULL,
@@ -587,7 +579,7 @@ static const ClassTable CListener_class = {
     Listener_interfaces,
     sizeof(Listener_interfaces)/sizeof(Listener_interfaces[0]),
     MPH_to_Listener,
-    //"Listener",
+    "Listener",
     sizeof(CListener),
     SL_OBJECTID_LISTENER,
     NULL,
@@ -615,7 +607,7 @@ static const ClassTable CMetadataExtractor_class = {
     sizeof(MetadataExtractor_interfaces) /
         sizeof(MetadataExtractor_interfaces[0]),
     MPH_to_MetadataExtractor,
-    //"MetadataExtractor",
+    "MetadataExtractor",
     sizeof(CMetadataExtractor),
     SL_OBJECTID_METADATAEXTRACTOR,
     NULL,
@@ -690,7 +682,7 @@ static const ClassTable CMidiPlayer_class = {
     MidiPlayer_interfaces,
     sizeof(MidiPlayer_interfaces)/sizeof(MidiPlayer_interfaces[0]),
     MPH_to_MidiPlayer,
-    //"MidiPlayer",
+    "MidiPlayer",
     sizeof(CMidiPlayer),
     SL_OBJECTID_MIDIPLAYER,
     NULL,
@@ -733,7 +725,7 @@ static const ClassTable COutputMix_class = {
     OutputMix_interfaces,
     sizeof(OutputMix_interfaces)/sizeof(OutputMix_interfaces[0]),
     MPH_to_OutputMix,
-    //"OutputMix",
+    "OutputMix",
     sizeof(COutputMix),
     SL_OBJECTID_OUTPUTMIX,
     NULL,
@@ -756,7 +748,7 @@ static const ClassTable CVibraDevice_class = {
     VibraDevice_interfaces,
     sizeof(VibraDevice_interfaces)/sizeof(VibraDevice_interfaces[0]),
     MPH_to_Vibra,
-    //"VibraDevice",
+    "VibraDevice",
     sizeof(CVibraDevice),
     SL_OBJECTID_VIBRADEVICE,
     NULL,
@@ -770,12 +762,12 @@ static const ClassTable * const classes[] = {
     // Do not change order of these entries; they are in numerical order
     &CEngine_class,
     &CLEDDevice_class,
+    &CVibraDevice_class,
     &CAudioPlayer_class,
     &CAudioRecorder_class,
     &CMidiPlayer_class,
     &CListener_class,
     &C3DGroup_class,
-    &CVibraDevice_class,
     &COutputMix_class,
     &CMetadataExtractor_class
 };

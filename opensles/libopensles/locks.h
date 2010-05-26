@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 extern void object_lock_exclusive(IObject *this);
 extern void object_unlock_exclusive(IObject *this);
 extern void object_cond_wait(IObject *this);
 extern void object_cond_signal(IObject *this);
-
-#ifdef __cplusplus
-}
-#endif
 
 // Currently shared locks are implemented as exclusive, but don't count on it
 

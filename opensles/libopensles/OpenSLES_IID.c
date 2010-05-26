@@ -30,12 +30,12 @@
 /****************************************************************************/
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "OpenSLES.h" /* SL Header */
 #include "MPH.h"
+
+#ifdef __cplusplus
+extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
+#endif
 
 /*****************************************************************************/
 /* Interface IDs                                                             */
@@ -192,7 +192,3 @@ const SLInterfaceID SL_IID_VISUALIZATION = &SL_IID_array[MPH_VISUALIZATION];
 const SLInterfaceID SL_IID_VOLUME = &SL_IID_array[MPH_VOLUME];
 // The lack of an ifdef is intentional
 const SLInterfaceID SL_IID_OUTPUTMIXEXT = &SL_IID_array[MPH_OUTPUTMIXEXT];
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif

@@ -76,12 +76,7 @@ static SLresult IBufferQueue_GetState(SLBufferQueueItf self,
     state = this->mState;
 #endif
     interface_unlock_shared(this);
-#ifdef __cplusplus // FIXME Is this a compiler bug?
-    pState->count = state.count;
-    pState->playIndex = state.playIndex;
-#else
     *pState = state;
-#endif
     return SL_RESULT_SUCCESS;
 }
 

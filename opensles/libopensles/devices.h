@@ -54,12 +54,6 @@ extern const SLuint32 *Decoder_IDs, *Encoder_IDs;
 
 extern const struct CodecDescriptor DecoderDescriptors[], EncoderDescriptors[];
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 extern SLresult GetCodecCapabilities(SLuint32 decoderId, SLuint32 *pIndex,
     SLAudioCodecDescriptor *pDescriptor,
     const struct CodecDescriptor *codecDescriptors);
-#ifdef __cplusplus
-}
-#endif

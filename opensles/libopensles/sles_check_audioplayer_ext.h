@@ -14,15 +14,4 @@
  * limitations under the License.
  */
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 extern SLresult sles_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk);
-
-#ifdef __cplusplus
-}
-#endif
-
-

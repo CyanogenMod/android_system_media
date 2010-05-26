@@ -1,14 +1,25 @@
 LOCAL_PATH:= $(call my-dir)
+
+include $(CLEAR_VARS)
+
+LOCAL_CFLAGS += -Wno-override-init
+
+LOCAL_SRC_FILES:=                     \
+        MPH_to.c
+
+LOCAL_MODULE:= libopensles_helper
+
+include $(BUILD_STATIC_LIBRARY)
+
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=                     \
         OpenSLES_IID.c                \
-        MPH_to.c                      \
         devices.c                     \
         locks.c                       \
-        sles_cpp.cpp                  \
+        sles.c                        \
         sles_to_android.cpp           \
-        sles_check_audioplayer.cpp    \
+        sles_check_audioplayer.c      \
         I3DCommit.c                   \
         I3DDoppler.c                  \
         I3DGrouping.c                 \
@@ -57,7 +68,10 @@ LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
 	$(TOP)/system/media/opensles/include
 
-LOCAL_CFLAGS += -DUSE_ANDROID
+LOCAL_CFLAGS += -DUSE_ANDROID -x c++
+
+LOCAL_STATIC_LIBRARIES += \
+        libopensles_helper
 
 LOCAL_SHARED_LIBRARIES := \
         libmedia          \
@@ -69,8 +83,6 @@ ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
         LOCAL_SHARED_LIBRARIES += libdvm
         LOCAL_CPPFLAGS += -DANDROID_SIMULATOR
 endif
-
-LOCAL_CFLAGS += -Wno-override-init
 
 ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libdl

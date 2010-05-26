@@ -19,8 +19,6 @@
 #define ANDROID_DEFAULT_OUTPUT_STREAM_TYPE android::AudioSystem::MUSIC
 #define ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE 4096
 
-extern "C" {
-
 // FIXME should all those functions below be inline? there are separated in different files for
 //       code clarity.
 
@@ -72,5 +70,3 @@ SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf);
  *   to sles_to_android_audioPlayerVolumeUpdate()
  */
 SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute);
-
-}
