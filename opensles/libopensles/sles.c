@@ -21,6 +21,7 @@
 
 #ifdef USE_ANDROID
 #include "sles_to_android_ext.h"
+#include <binder/ProcessState.h>
 #endif
 
 /* Private functions */
@@ -234,6 +235,7 @@ extern void
         }
 };
 
+
 // Construct a new instance of the specified class, exposing selected interfaces
 
 IObject *construct(const ClassTable *class__,
@@ -312,6 +314,9 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     const SLEngineOption *pEngineOptions, SLuint32 numInterfaces,
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
+#ifdef USE_ANDROID
+    android::ProcessState::self()->startThreadPool();
+#endif
     if (NULL == pEngine)
         return SL_RESULT_PARAMETER_INVALID;
     *pEngine = NULL;

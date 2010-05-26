@@ -136,11 +136,12 @@ SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSr
     //--------------------------------------
     // Sink check:
     //     currently only OutputMix sinks are supported, regardless of the data source
-    // FIXME verify output mix is in realized state
     if (*(SLuint32 *)pAudioSnk->pLocator != SL_DATALOCATOR_OUTPUTMIX) {
         fprintf(stderr, "Cannot create audio player: data sink is not SL_DATALOCATOR_OUTPUTMIX\n");
         return SL_RESULT_PARAMETER_INVALID;
     }
+    // FIXME verify output mix is in realized state
+    fprintf(stderr, "FIXME verify OutputMix is in Realized state\n");
 
     //--------------------------------------
     // Source check:
@@ -222,19 +223,36 @@ SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSr
             break;
         case SL_DATAFORMAT_MIME:
         case SL_DATAFORMAT_RESERVED3:
-            //FIXME add error message
+            fprintf(stderr, "Error: cannot create Audio Player with SL_DATALOCATOR_BUFFERQUEUE data source without SL_DATAFORMAT_PCM format\n");
             return SL_RESULT_CONTENT_UNSUPPORTED;
         default:
-            //FIXME add error message
+            fprintf(stderr, "Error: cannot create Audio Player with SL_DATALOCATOR_BUFFERQUEUE data source without SL_DATAFORMAT_PCM format\n");
             return SL_RESULT_PARAMETER_INVALID;
         } // switch (formatType)
         } // case SL_DATALOCATOR_BUFFERQUEUE
         break;
     //------------------
+    //   URI
+    case SL_DATALOCATOR_URI:
+        {
+            SLDataLocator_URI *dl_uri =  (SLDataLocator_URI *) pAudioSrc->pLocator;
+            if (NULL == dl_uri->URI) {
+                return SL_RESULT_PARAMETER_INVALID;
+            }
+            // URI format
+            switch (formatType) {
+            case SL_DATAFORMAT_MIME:
+                break;
+            case SL_DATAFORMAT_PCM:
+            case SL_DATAFORMAT_RESERVED3:
+                fprintf(stderr, "Error: cannot create Audio Player with SL_DATALOCATOR_URI data source without SL_DATAFORMAT_MIME format\n");
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            } // switch (formatType)
+        } // case SL_DATALOCATOR_URI
+        break;
+    //------------------
     //   Address
     case SL_DATALOCATOR_ADDRESS:
-        // FIXME add URI checks
-        break;
     case SL_DATALOCATOR_IODEVICE:
     case SL_DATALOCATOR_OUTPUTMIX:
     case SL_DATALOCATOR_RESERVED5:
@@ -395,9 +413,14 @@ SLresult sles_to_android_audioPlayerCreate(const SLDataSource *pAudioSrc,
         pAudioPlayer->mAndroidObjType = AUDIOTRACK_PULL;
         break;
     //   -----------------------------------
-    //   Address to MediaPlayer
-    case SL_DATALOCATOR_ADDRESS:
+    //   URI to MediaPlayer
+    case SL_DATALOCATOR_URI: {
         pAudioPlayer->mAndroidObjType = MEDIAPLAYER;
+        // save URI
+        SLDataLocator_URI *dl_uri =  (SLDataLocator_URI *) pAudioSrc->pLocator;
+        pAudioPlayer->mUri = (char*) malloc(1 + sizeof(SLchar)*strlen((char*)dl_uri->URI));
+        strcpy(pAudioPlayer->mUri, (char*)dl_uri->URI);
+        }
         break;
     default:
         pAudioPlayer->mAndroidObjType = INVALID_TYPE;
@@ -410,10 +433,10 @@ SLresult sles_to_android_audioPlayerCreate(const SLDataSource *pAudioSrc,
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer) {
+SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolean async) {
 
     SLresult result = SL_RESULT_SUCCESS;
-
+    //fprintf(stderr, "entering sles_to_android_audioPlayerRealize\n");
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
     // AudioTrack
@@ -444,9 +467,33 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer) {
         break;
     //-----------------------------------
     // MediaPlayer
-    case MEDIAPLAYER:
+    case MEDIAPLAYER: {
         pAudioPlayer->mMediaPlayer = new android::MediaPlayer();
-        // FIXME initialize MediaPlayer
+        if (pAudioPlayer->mMediaPlayer == NULL) {
+            result = SL_RESULT_MEMORY_FAILURE;
+            break;
+        }
+        pAudioPlayer->mMediaPlayer->setAudioStreamType(ANDROID_DEFAULT_OUTPUT_STREAM_TYPE);
+        if (pAudioPlayer->mMediaPlayer->setDataSource(android::String8(pAudioPlayer->mUri), NULL)
+                != android::NO_ERROR) {
+            result = SL_RESULT_CONTENT_UNSUPPORTED;
+            break;
+        }
+
+        // FIXME move the call to MediaPlayer::prepare() to the start of the prefetching
+        //       i.e. in SL ES: when setting the play state of the AudioPlayer to Paused.
+        if (async == SL_BOOLEAN_FALSE) {
+            if (pAudioPlayer->mMediaPlayer->prepare() != android::NO_ERROR) {
+                fprintf(stderr, "Failed to prepare() MediaPlayer in synchronous mode for %s\n",
+                        pAudioPlayer->mUri);
+                result = SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+        } else {
+            // FIXME verify whether async prepare will be handled by SL ES framework or
+            //       Android-specific code (and rely on MediaPlayer::prepareAsync() )
+            fprintf(stderr, "FIXME implement async realize for a MediaPlayer\n");
+        }
+        }
         break;
     default:
         result = SL_RESULT_CONTENT_UNSUPPORTED;
@@ -474,6 +521,15 @@ SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer) {
     // MediaPlayer
     case MEDIAPLAYER:
         // FIXME destroy MediaPlayer
+        if (pAudioPlayer->mMediaPlayer != NULL) {
+            pAudioPlayer->mMediaPlayer->stop();
+            pAudioPlayer->mMediaPlayer->setListener(0);
+            pAudioPlayer->mMediaPlayer->disconnect();
+            fprintf(stderr, "FIXME destroy MediaPlayer\n");
+            //delete pAudioPlayer->mMediaPlayer;
+            pAudioPlayer->mMediaPlayer = NULL;
+            free(pAudioPlayer->mUri);
+        }
         break;
     default:
         result = SL_RESULT_CONTENT_UNSUPPORTED;
@@ -507,7 +563,23 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
         }
         break;
     case MEDIAPLAYER:
-        //FIXME implement
+        switch (state) {
+        case SL_PLAYSTATE_STOPPED:
+            fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_STOPPED\n");
+            ap->mMediaPlayer->stop();
+            break;
+        case SL_PLAYSTATE_PAUSED:
+            fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PAUSED\n");
+            //FIXME implement start of prefetching when transitioning from stopped to paused
+            ap->mMediaPlayer->pause();
+            break;
+        case SL_PLAYSTATE_PLAYING:
+            fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PLAYING\n");
+            ap->mMediaPlayer->start();
+            break;
+        default:
+            return SL_RESULT_PARAMETER_INVALID;
+        }
         break;
     default:
         break;

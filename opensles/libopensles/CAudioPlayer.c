@@ -35,7 +35,7 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
 
 #ifdef USE_ANDROID
     // FIXME move this to android specific files
-    result = sles_to_android_audioPlayerRealize(this);
+    result = sles_to_android_audioPlayerRealize(this, async);
 #endif
 
 #ifdef USE_SNDFILE

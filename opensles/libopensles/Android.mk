@@ -78,7 +78,8 @@ LOCAL_STATIC_LIBRARIES += \
 LOCAL_SHARED_LIBRARIES := \
         libmedia          \
         libutils          \
-        libcutils
+        libcutils         \
+        libbinder
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
         LOCAL_LDLIBS += -lpthread -ldl

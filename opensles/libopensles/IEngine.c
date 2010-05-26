@@ -108,7 +108,6 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
     }
     fprintf(stderr, "\t after sles_to_android_checkAudioPlayerSourceSink()\n");
 #endif
-
 #ifdef USE_SNDFILE
     SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
     SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
@@ -285,7 +284,8 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
     // DataSource specific initializations
     switch(*(SLuint32 *)pAudioSrc->pLocator) {
     case SL_DATALOCATOR_URI:
-#ifndef USE_OUTPUTMIXEXT // e.g. USE_ANDROID
+#ifndef USE_OUTPUTMIXEXT
+
         break;
 #else
         // fall through

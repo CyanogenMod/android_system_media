@@ -20,7 +20,7 @@ extern SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *p
 extern SLresult sles_to_android_audioPlayerCreate(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk,
         CAudioPlayer *pAudioPlayer);
 
-extern SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer);
+extern SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolean async);
 
 extern SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer);
 

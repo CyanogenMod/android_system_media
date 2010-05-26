@@ -50,7 +50,7 @@ SLresult sles_to_android_audioPlayerCreate(const SLDataSource *pAudioSrc, const 
  *     SL_RESULT_CONTENT_UNSUPPORTED if an error occurred during the allocation and initialization
  *         of the Android resources
  */
-SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer);
+SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolean async);
 
 SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer);
 

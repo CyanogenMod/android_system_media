@@ -39,6 +39,7 @@
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
+#include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
 #endif
 
@@ -745,7 +746,8 @@ typedef struct {
         android::AudioTrack *mAudioTrack;
         android::MediaPlayer *mMediaPlayer;
     };
-    // pthread_t mThread;
+    char* mUri;// FIXME temporary storage before we handle that correctly
+    pthread_t mThread;
 #endif
 } CAudioPlayer;
 
