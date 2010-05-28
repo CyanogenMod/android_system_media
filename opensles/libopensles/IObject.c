@@ -22,7 +22,7 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
 {
     IObject *this = (IObject *) self;
     const ClassTable *class__ = this->mClass;
-    RealizeHook realize = class__->mRealize;
+    AsyncHook realize = class__->mRealize;
     SLresult result = SL_RESULT_SUCCESS;
     object_lock_exclusive(this);
     // FIXME The realize hook and callback should be asynchronous if requested
@@ -46,7 +46,7 @@ static SLresult IObject_Resume(SLObjectItf self, SLboolean async)
 {
     IObject *this = (IObject *) self;
     const ClassTable *class__ = this->mClass;
-    RealizeHook resume = class__->mResume;
+    AsyncHook resume = class__->mResume;
     SLresult result = SL_RESULT_SUCCESS;
     object_lock_exclusive(this);
     // FIXME The resume hook and callback should be asynchronous if requested

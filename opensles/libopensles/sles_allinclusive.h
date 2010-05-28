@@ -50,7 +50,7 @@
 
 typedef void (*VoidHook)(void *self);
 typedef SLresult (*StatusHook)(void *self);
-typedef SLresult (*RealizeHook)(void *self, SLboolean async);
+typedef SLresult (*AsyncHook)(void *self, SLboolean async);
 
 
 // Describes how an interface is related to a given class
@@ -89,8 +89,8 @@ typedef struct {
     const char * const mName;
     size_t mSize;
     SLuint32 mObjectID;
-    RealizeHook mRealize;
-    RealizeHook mResume;
+    AsyncHook mRealize;
+    AsyncHook mResume;
     VoidHook mDestroy;
     // append per-class data here
 } ClassTable;
