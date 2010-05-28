@@ -22,7 +22,7 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
 {
     IObject *this = (IObject *) self;
     const ClassTable *class__ = this->mClass;
-    StatusHook realize = class__->mRealize;
+    RealizeHook realize = class__->mRealize;
     SLresult result = SL_RESULT_SUCCESS;
     object_lock_exclusive(this);
     // FIXME The realize hook and callback should be asynchronous if requested
@@ -30,7 +30,7 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
         if (NULL != realize)
-            result = (*realize)(this);
+            result = (*realize)(this, async);
         if (SL_RESULT_SUCCESS == result)
             this->mState = SL_OBJECT_STATE_REALIZED;
         // FIXME callback should not run with mutex lock
@@ -46,7 +46,7 @@ static SLresult IObject_Resume(SLObjectItf self, SLboolean async)
 {
     IObject *this = (IObject *) self;
     const ClassTable *class__ = this->mClass;
-    StatusHook resume = class__->mResume;
+    RealizeHook resume = class__->mResume;
     SLresult result = SL_RESULT_SUCCESS;
     object_lock_exclusive(this);
     // FIXME The resume hook and callback should be asynchronous if requested
@@ -54,7 +54,7 @@ static SLresult IObject_Resume(SLObjectItf self, SLboolean async)
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
         if (NULL != resume)
-            result = (*resume)(this);
+            result = (*resume)(this, async);
         if (SL_RESULT_SUCCESS == result)
             this->mState = SL_OBJECT_STATE_REALIZED;
         // FIXME callback should not run with mutex lock

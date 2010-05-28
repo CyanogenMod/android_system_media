@@ -334,7 +334,7 @@ static SLboolean SndFile_IsSupported(const SF_INFO *sfinfo)
 #endif // USE_SNDFILE
 
 
-static SLresult AudioPlayer_Realize(void *self)
+static SLresult AudioPlayer_Realize(void *self, SLboolean async)
 {
     CAudioPlayer *this = (CAudioPlayer *) self;
     SLresult result = SL_RESULT_SUCCESS;
