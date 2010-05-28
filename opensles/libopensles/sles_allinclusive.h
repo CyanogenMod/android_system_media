@@ -777,7 +777,7 @@ typedef struct {
     I3DCommit m3DCommit;
     // optional interfaces
     IDeviceVolume mDeviceVolume;
-    pthread_t mFrameThread;
+    pthread_t mSyncThread;
 } CEngine;
 
 typedef struct {
@@ -866,8 +866,6 @@ typedef struct {
     SLuint32 mDeviceID;
 } CVibraDevice;
 
-extern const ClassTable C3DGroup_class;
-
 struct MPH_init {
     // unsigned char mMPH;
     VoidHook mInit;
@@ -883,3 +881,8 @@ extern IObject *construct(const ClassTable *class__,
     unsigned exposedMask, SLEngineItf engine);
 extern const ClassTable *objectIDtoClass(SLuint32 objectID);
 extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
+extern SLuint32 IObjectToObjectID(IObject *object);
+
+// Map an interface to it's "object ID" (which is really a class ID)
+
+#define InterfaceToObjectID(this) IObjectToObjectID((this)->mThis)

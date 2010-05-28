@@ -243,8 +243,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
             (SLDataLocator_OutputMix *) pAudioSnk->pLocator;
         SLObjectItf outputMix = dl_outmix->outputMix;
         // FIXME make this an operation on Object: GetClass
-        if ((NULL == outputMix) || (&COutputMix_class !=
-            ((IObject *) outputMix)->mClass))
+        if ((NULL == outputMix) || SL_OBJECTID_OUTPUTMIX != IObjectToObjectID((IObject *) outputMix))
             return SL_RESULT_PARAMETER_INVALID;
         IOutputMix *om =
             &((COutputMix *) outputMix)->mOutputMix;

@@ -15,11 +15,13 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=                     \
         OpenSLES_IID.c                \
+        classes.c                     \
         devices.c                     \
         locks.c                       \
         sles.c                        \
         sles_to_android.cpp           \
         sles_check_audioplayer.c      \
+        CAudioPlayer.c                \
         I3DCommit.c                   \
         I3DDoppler.c                  \
         I3DGrouping.c                 \

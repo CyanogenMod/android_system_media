@@ -24,7 +24,7 @@ static SLresult I3DGrouping_Set3DGroup(SL3DGroupingItf self, SLObjectItf group)
     if (NULL == group)
         return SL_RESULT_PARAMETER_INVALID;
     IObject *thisGroup = (IObject *) group;
-    if (&C3DGroup_class != thisGroup->mClass)
+    if (SL_OBJECTID_3DGROUP != IObjectToObjectID(thisGroup))
         return SL_RESULT_PARAMETER_INVALID;
     // FIXME race possible if group unrealized immediately after, should lock
     if (SL_OBJECT_STATE_REALIZED != thisGroup->mState)
