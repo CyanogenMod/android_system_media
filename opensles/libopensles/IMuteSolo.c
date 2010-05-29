@@ -18,10 +18,11 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IMuteSolo_SetChannelMute(SLMuteSoloItf self, SLuint8 chan,
-   SLboolean mute)
+static SLresult IMuteSolo_SetChannelMute(SLMuteSoloItf self, SLuint8 chan, SLboolean mute)
 {
     IMuteSolo *this = (IMuteSolo *) self;
+    if (this->mNumChannels <= chan)
+        return SL_RESULT_PARAMETER_INVALID;
     SLuint32 mask = 1 << chan;
     interface_lock_exclusive(this);
     if (mute)
@@ -32,12 +33,13 @@ static SLresult IMuteSolo_SetChannelMute(SLMuteSoloItf self, SLuint8 chan,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IMuteSolo_GetChannelMute(SLMuteSoloItf self, SLuint8 chan,
-    SLboolean *pMute)
+static SLresult IMuteSolo_GetChannelMute(SLMuteSoloItf self, SLuint8 chan, SLboolean *pMute)
 {
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
     IMuteSolo *this = (IMuteSolo *) self;
+    if (this->mNumChannels <= chan)
+        return SL_RESULT_PARAMETER_INVALID;
     interface_lock_peek(this);
     SLuint32 mask = this->mMuteMask;
     interface_unlock_peek(this);
@@ -45,10 +47,11 @@ static SLresult IMuteSolo_GetChannelMute(SLMuteSoloItf self, SLuint8 chan,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IMuteSolo_SetChannelSolo(SLMuteSoloItf self, SLuint8 chan,
-    SLboolean solo)
+static SLresult IMuteSolo_SetChannelSolo(SLMuteSoloItf self, SLuint8 chan, SLboolean solo)
 {
     IMuteSolo *this = (IMuteSolo *) self;
+    if (this->mNumChannels <= chan)
+        return SL_RESULT_PARAMETER_INVALID;
     SLuint32 mask = 1 << chan;
     interface_lock_exclusive(this);
     if (solo)
@@ -59,12 +62,13 @@ static SLresult IMuteSolo_SetChannelSolo(SLMuteSoloItf self, SLuint8 chan,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IMuteSolo_GetChannelSolo(SLMuteSoloItf self, SLuint8 chan,
-    SLboolean *pSolo)
+static SLresult IMuteSolo_GetChannelSolo(SLMuteSoloItf self, SLuint8 chan, SLboolean *pSolo)
 {
     if (NULL == pSolo)
         return SL_RESULT_PARAMETER_INVALID;
     IMuteSolo *this = (IMuteSolo *) self;
+    if (this->mNumChannels <= chan)
+        return SL_RESULT_PARAMETER_INVALID;
     interface_lock_peek(this);
     SLuint32 mask = this->mSoloMask;
     interface_unlock_peek(this);
@@ -72,13 +76,12 @@ static SLresult IMuteSolo_GetChannelSolo(SLMuteSoloItf self, SLuint8 chan,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IMuteSolo_GetNumChannels(SLMuteSoloItf self,
-    SLuint8 *pNumChannels)
+static SLresult IMuteSolo_GetNumChannels(SLMuteSoloItf self, SLuint8 *pNumChannels)
 {
     if (NULL == pNumChannels)
         return SL_RESULT_PARAMETER_INVALID;
     IMuteSolo *this = (IMuteSolo *) self;
-    // FIXME const
+    // no lock needed as mNumChannels is const
     SLuint32 numChannels = this->mNumChannels;
     *pNumChannels = numChannels;
     return SL_RESULT_SUCCESS;

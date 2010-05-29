@@ -26,13 +26,10 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
 {
     // Force to be a multiple of a frame, assumes stereo 16-bit PCM
     size &= ~3;
-    IOutputMixExt *thisExt =
-        (IOutputMixExt *) self;
-    // FIXME Finding one interface from another, but is it exposed?
-    IOutputMix *this =
-        &((COutputMix *) thisExt->mThis)->mOutputMix;
+    IOutputMixExt *thisExt = (IOutputMixExt *) self;
+    IOutputMix *this = &((COutputMix *) thisExt->mThis)->mOutputMix;
     unsigned activeMask = this->mActiveMask;
-    struct Track *track = &this->mTracks[0];
+    struct Track *track = this->mTracks;
     unsigned i;
     SLboolean mixBufferHasData = SL_BOOLEAN_FALSE;
     // FIXME O(32) loop even when few tracks are active.
@@ -76,6 +73,7 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                         mixBuffer->right += source->right;
                     }
                 } else {
+                    // apply gain during copy
                     memcpy(dstWriter, track->mReader, actual);
                     trackContributedToMix = SL_BOOLEAN_TRUE;
                 }
@@ -90,8 +88,7 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                         rear = bufferQueue->mRear;
                         assert(oldFront != rear);
                         newFront = oldFront;
-                        if (++newFront ==
-                            &bufferQueue->mArray[bufferQueue->mNumBuffers])
+                        if (++newFront == &bufferQueue->mArray[bufferQueue->mNumBuffers])
                             newFront = bufferQueue->mArray;
                         bufferQueue->mFront = (struct BufferHeader *) newFront;
                         assert(0 < bufferQueue->mState.count);
@@ -121,8 +118,7 @@ got_one:
                 // need data but none available, attempt a desperate callback
                 slBufferQueueCallback callback = bufferQueue->mCallback;
                 if (NULL != callback) {
-                    (*callback)((SLBufferQueueItf) bufferQueue,
-                        bufferQueue->mContext);
+                    (*callback)((SLBufferQueueItf) bufferQueue, bufferQueue->mContext);
                     // if lucky, the callback enqueued a buffer
                     if (rear != bufferQueue->mRear)
                         goto got_one;
@@ -154,6 +150,39 @@ void IOutputMixExt_init(void *self)
 {
     IOutputMixExt *this = (IOutputMixExt *) self;
     this->mItf = &IOutputMixExt_Itf;
+}
+
+SLresult IOutputMixExt_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk, struct Track **pTrack)
+{
+    assert(NULL != pTrack);
+    *pTrack = NULL;
+    struct Track *track = NULL;
+    switch (*(SLuint32 *)pAudioSnk->pLocator) {
+    case SL_DATALOCATOR_OUTPUTMIX:
+        {
+        // pAudioSnk->pFormat is ignored
+        IOutputMix *om = &((COutputMix *) ((SLDataLocator_OutputMix *) pAudioSnk->pLocator)->outputMix)->mOutputMix;
+        // allocate an entry within OutputMix for this track
+        // FIXME O(n)
+        unsigned i;
+        for (i = 0, track = &om->mTracks[0]; i < 32; ++i, ++track) {
+            if (om->mActiveMask & (1 << i))
+                continue;
+            om->mActiveMask |= 1 << i;
+            break;
+        }
+        if (32 <= i) {
+            // FIXME Need a better error code for all slots full in output mix
+            return SL_RESULT_MEMORY_FAILURE;
+        }
+        }
+        break;
+    default:
+        return SL_RESULT_CONTENT_UNSUPPORTED;
+    }
+
+    *pTrack = track;
+    return SL_RESULT_SUCCESS;
 }
 
 #endif // USE_OUTPUTMIXEXT

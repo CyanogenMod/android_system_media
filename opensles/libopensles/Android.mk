@@ -2,7 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_CFLAGS += -Wno-override-init
+LOCAL_CFLAGS += -Wno-override-init -Wno-missing-field-initializers
 
 LOCAL_SRC_FILES:=                     \
         MPH_to.c
@@ -20,7 +20,6 @@ LOCAL_SRC_FILES:=                     \
         locks.c                       \
         sles.c                        \
         sles_to_android.cpp           \
-        sles_check_audioplayer.c      \
         CAudioPlayer.c                \
         I3DCommit.c                   \
         I3DDoppler.c                  \

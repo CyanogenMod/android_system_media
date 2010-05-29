@@ -128,8 +128,8 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     uri.locatorType = SL_DATALOCATOR_URI;
     uri.URI         =  (SLchar*) path;
     mime.formatType    = SL_DATAFORMAT_MIME;
-    /*mime.mimeType      = (SLchar*)"audio/mpeg";
-    mime.containerType = SL_CONTAINERTYPE_MP3;*/
+    mime.mimeType      = (SLchar*)NULL;
+    mime.containerType = SL_CONTAINERTYPE_UNSPECIFIED;
 
     audioSource.pFormat      = (void *)&mime;
     audioSource.pLocator     = (void *)&uri;

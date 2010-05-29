@@ -16,8 +16,6 @@
 
 /* SDL platform implementation */
 
-#include <assert.h>
-
 #include "sles_allinclusive.h"
 
 #ifdef USE_SDL
@@ -45,8 +43,6 @@ void SDL_start(SLObjectItf self)
     fmt.channels = 2;
     fmt.samples = 256;
     fmt.callback = SDL_callback;
-    // FIXME should be a GetInterface
-    // fmt.userdata = &((COutputMix *) this)->mOutputMixExt;
     fmt.userdata = (void *) OutputMixExt;
 
     if (SDL_OpenAudio(&fmt, NULL) < 0) {

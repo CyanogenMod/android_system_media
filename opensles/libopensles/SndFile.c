@@ -20,8 +20,6 @@
 
 #ifdef USE_SNDFILE
 
-#include "SndFile.h"
-
 // FIXME should run this asynchronously esp. for socket fd, not on mix thread
 void SLAPIENTRY SndFile_Callback(SLBufferQueueItf caller, void *pContext)
 {
@@ -82,6 +80,62 @@ SLboolean SndFile_IsSupported(const SF_INFO *sfinfo)
         return SL_BOOLEAN_FALSE;
     }
     return SL_BOOLEAN_TRUE;
+}
+
+SLresult SndFile_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk, SLchar **pPathname, SLuint32 *pNumBuffers)
+{
+    assert(NULL != pPathname && NULL != pNumBuffers);
+    SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
+    SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
+    switch (locatorType) {
+    case SL_DATALOCATOR_BUFFERQUEUE:
+        {
+        SLDataLocator_BufferQueue *dl_bq = (SLDataLocator_BufferQueue *) pAudioSrc->pLocator;
+        *pPathname = NULL;
+        *pNumBuffers = dl_bq->numBuffers;
+        }
+        break;
+    case SL_DATALOCATOR_URI:
+        {
+        SLDataLocator_URI *dl_uri = (SLDataLocator_URI *) pAudioSrc->pLocator;
+        SLchar *uri = dl_uri->URI;
+        if (NULL == uri)
+            return SL_RESULT_PARAMETER_INVALID;
+        if (strncmp((const char *) uri, "file:///", 8))
+            return SL_RESULT_CONTENT_UNSUPPORTED;
+        switch (formatType) {
+        case SL_DATAFORMAT_MIME:
+            {
+            SLDataFormat_MIME *df_mime = (SLDataFormat_MIME *) pAudioSrc->pFormat;
+            SLchar *mimeType = df_mime->mimeType;
+            SLuint32 containerType = df_mime->containerType;
+            if (!strcmp((const char *) mimeType, "audio/x-wav"))
+                ;
+            // else if (others)
+            //    ;
+            else
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            switch (containerType) {
+            case SL_CONTAINERTYPE_WAV:
+                break;
+            // others
+            default:
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+            }
+            break;
+        default:
+            return SL_RESULT_CONTENT_UNSUPPORTED;
+        }
+        *pPathname = &uri[8];
+        // FIXME magic number, should be configurable
+        *pNumBuffers = 2;
+        }
+        break;
+    default:
+        return SL_RESULT_CONTENT_UNSUPPORTED;
+    }
+    return SL_RESULT_SUCCESS;
 }
 
 #endif // USE_SNDFILE

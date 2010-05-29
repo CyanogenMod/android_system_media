@@ -29,18 +29,20 @@
 
 #ifdef USE_SNDFILE
 #include <sndfile.h>
+#include "SndFile.h"
 #endif // USE_SNDFILE
 
 #ifdef USE_SDL
 #include <SDL/SDL_audio.h>
 #endif // USE_SDL
 
-#if defined(USE_ANDROID)
+#ifdef USE_ANDROID
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
+#include <binder/ProcessState.h>
 #endif
 
 #ifdef USE_OUTPUTMIXEXT
@@ -53,13 +55,13 @@ typedef void (*VoidHook)(void *self);
 typedef SLresult (*StatusHook)(void *self);
 typedef SLresult (*AsyncHook)(void *self, SLboolean async);
 
-
 // Describes how an interface is related to a given class
 
 #define INTERFACE_IMPLICIT           0
 #define INTERFACE_EXPLICIT           1
 #define INTERFACE_OPTIONAL           2
 #define INTERFACE_DYNAMIC            3
+#define INTERFACE_UNAVAILABLE        4
 #define INTERFACE_DYNAMIC_GAME       INTERFACE_DYNAMIC
 #define INTERFACE_DYNAMIC_MUSIC      INTERFACE_DYNAMIC
 #define INTERFACE_DYNAMIC_MUSIC_GAME INTERFACE_DYNAMIC
@@ -95,21 +97,6 @@ typedef struct {
     VoidHook mDestroy;
     // append per-class data here
 } ClassTable;
-
-#ifdef USE_OUTPUTMIXEXT
-
-// Track describes each input to OutputMixer
-// FIXME not for Android
-
-struct Track {
-    const SLDataFormat_PCM *mDfPcm;
-    struct BufferQueue_interface *mBufferQueue;
-    struct Play_interface *mPlay; // mixer examines this track if non-NULL
-    const void *mReader;    // pointer to next frame in BufferHeader.mBuffer
-    SLuint32 mAvail;        // number of available bytes
-};
-
-#endif
 
 // BufferHeader describes each element of a BufferQueue, other than the data
 
@@ -888,3 +875,32 @@ extern SLuint32 IObjectToObjectID(IObject *object);
 // Map an interface to it's "object ID" (which is really a class ID)
 
 #define InterfaceToObjectID(this) IObjectToObjectID((this)->mThis)
+
+#ifdef USE_ANDROID
+#include "sles_to_android.h"
+#endif
+
+typedef union {
+    SLuint32 mLocatorType;
+    SLDataLocator_Address mAddress;
+    SLDataLocator_BufferQueue mBufferQueue;
+    SLDataLocator_IODevice mIODevice;
+    SLDataLocator_MIDIBufferQueue mMIDIBufferQueue;
+    SLDataLocator_OutputMix mOutputMix;
+    SLDataLocator_URI mURI;
+} DataLocator;
+
+typedef union {
+    SLuint32 mFormatType;
+    SLDataFormat_PCM mPCM;
+    SLDataFormat_MIME mMIME;
+} DataFormat;
+
+typedef struct {
+    DataLocator mLocator;
+    DataFormat mFormat;
+} DataLocatorFormat;
+
+extern SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *myDataSourceLocator);
+extern SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *myDataSinkLocator);
+extern void freeDataLocatorFormat(DataLocatorFormat *dlf);

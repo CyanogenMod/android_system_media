@@ -17,15 +17,9 @@
 /* Engine implementation */
 
 #include "sles_allinclusive.h"
-#include "sles_check_audioplayer_ext.h"
 
-#ifdef USE_ANDROID
-#include "sles_to_android_ext.h"
-#endif
-
-static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice,
-    SLuint32 deviceID, SLuint32 numInterfaces,
-    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
+static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, SLuint32 deviceID,
+    SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
     if (NULL == pDevice || SL_DEFAULTDEVICEID_LED != deviceID)
         return SL_RESULT_PARAMETER_INVALID;
@@ -36,12 +30,10 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    CLEDDevice *this = (CLEDDevice *)
-        construct(pCLEDDevice_class, exposedMask, self);
+    CLEDDevice *this = (CLEDDevice *) construct(pCLEDDevice_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     SLHSL *color = (SLHSL *) malloc(sizeof(SLHSL) * this->mLEDArray.mCount);
-    // FIXME
     assert(NULL != this->mLEDArray.mColor);
     this->mLEDArray.mColor = color;
     unsigned i;
@@ -56,9 +48,8 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEngine_CreateVibraDevice(SLEngineItf self,
-    SLObjectItf *pDevice, SLuint32 deviceID, SLuint32 numInterfaces,
-    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
+static SLresult IEngine_CreateVibraDevice(SLEngineItf self, SLObjectItf *pDevice, SLuint32 deviceID,
+    SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
     if (NULL == pDevice || SL_DEFAULTDEVICEID_VIBRA != deviceID)
         return SL_RESULT_PARAMETER_INVALID;
@@ -69,15 +60,13 @@ static SLresult IEngine_CreateVibraDevice(SLEngineItf self,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    CVibraDevice *this = (CVibraDevice *)
-        construct(pCVibraDevice_class, exposedMask, self);
+    CVibraDevice *this = (CVibraDevice *) construct(pCVibraDevice_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     this->mDeviceID = deviceID;
     *pDevice = &this->mObject.mItf;
     return SL_RESULT_SUCCESS;
 }
-
 
 static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     SLDataSource *pAudioSrc, SLDataSink *pAudioSnk, SLuint32 numInterfaces,
@@ -94,186 +83,63 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    // check the audio source and sinks
-    result = sles_checkAudioPlayerSourceSink(pAudioSrc, pAudioSnk);
-    if (result != SL_RESULT_SUCCESS) {
+
+    // Check the source and sink parameters against generic constraints,
+    // and make a local copy of all parameters in case other application threads
+    // change memory concurrently.
+
+    // DataSource checks
+    DataLocatorFormat myDataSource;
+    result = checkDataSource(pAudioSrc, &myDataSource);
+    if (SL_RESULT_SUCCESS != result)
+        return result;
+
+    // DataSink checks
+    DataLocatorFormat myDataSink;
+    result = checkDataSink(pAudioSnk, &myDataSink);
+    if (SL_RESULT_SUCCESS != result) {
+        freeDataLocatorFormat(&myDataSink);
         return result;
     }
+
+    // FIXME numerous leaks are possible from here on - check each return
+    // freeDataLocatorFormat(&myDataSource);
+    // freeDataLocatorFormat(&myDataSink);
+
     fprintf(stderr, "\t after sles_checkSourceSink()\n");
+
     // check the audio source and sink parameters against platform support
+
+    SLDataSource myAudioSrc;
+    myAudioSrc.pLocator = &myDataSource.mLocator;
+    myAudioSrc.pFormat = &myDataSource.mFormat;
+    SLDataSink myAudioSnk;
+    myAudioSnk.pLocator = &myDataSink.mLocator;
+    myAudioSnk.pFormat = &myDataSink.mFormat;
+
+    SLuint32 numBuffers = 0;
+
 #ifdef USE_ANDROID
     result = sles_to_android_checkAudioPlayerSourceSink(pAudioSrc, pAudioSnk);
-    if (result != SL_RESULT_SUCCESS) {
-            return result;
-    }
+    if (SL_RESULT_SUCCESS != result)
+        return result;
     fprintf(stderr, "\t after sles_to_android_checkAudioPlayerSourceSink()\n");
+    numBuffers = 4; // FIXME
 #endif
 #ifdef USE_SNDFILE
-    SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
-    SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
-    SLuint32 numBuffers = 0;
-    SLDataFormat_PCM *df_pcm = NULL;
-    SLchar *pathname = NULL;
-    switch (locatorType) {
-    case SL_DATALOCATOR_BUFFERQUEUE:
-        {
-        SLDataLocator_BufferQueue *dl_bq =
-            (SLDataLocator_BufferQueue *) pAudioSrc->pLocator;
-        numBuffers = dl_bq->numBuffers;
-        if (0 == numBuffers)
-            return SL_RESULT_PARAMETER_INVALID;
-        switch (formatType) {
-        case SL_DATAFORMAT_PCM:
-            {
-            df_pcm = (SLDataFormat_PCM *) pAudioSrc->pFormat;
-            switch (df_pcm->numChannels) {
-            case 1:
-            case 2:
-                break;
-            default:
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
-            switch (df_pcm->samplesPerSec) {
-            case 44100:
-                break;
-#if 1 // wrong units for samplesPerSec!
-            case SL_SAMPLINGRATE_44_1:
-                break;
+    SLchar *pathname;
+    result = SndFile_checkAudioPlayerSourceSink(pAudioSrc, pAudioSnk, &pathname, &numBuffers);
+    if (SL_RESULT_SUCCESS != result)
+        return result;
 #endif
-            // others
-            default:
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
-            switch (df_pcm->bitsPerSample) {
-            case SL_PCMSAMPLEFORMAT_FIXED_16:
-                break;
-            // others
-            default:
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
-            switch (df_pcm->containerSize) {
-            case 16:
-                break;
-            // others
-            default:
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
-            switch (df_pcm->channelMask) {
-            // needs work
-            default:
-                break;
-            }
-            switch (df_pcm->endianness) {
-            case SL_BYTEORDER_LITTLEENDIAN:
-                break;
-            // others esp. big and native (new not in spec)
-            default:
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
-            }
-            break;
-        case SL_DATAFORMAT_MIME:
-        case SL_DATAFORMAT_RESERVED3:
-            return SL_RESULT_CONTENT_UNSUPPORTED;
-        default:
-            return SL_RESULT_PARAMETER_INVALID;
-        }
-        }
-        break;
-    case SL_DATALOCATOR_URI:
-        {
-        SLDataLocator_URI *dl_uri = (SLDataLocator_URI *) pAudioSrc->pLocator;
-        SLchar *uri = dl_uri->URI;
-        if (NULL == uri)
-            return SL_RESULT_PARAMETER_INVALID;
-        if (strncmp((const char *) uri, "file:///", 8))
-            return SL_RESULT_CONTENT_UNSUPPORTED;
-        pathname = &uri[8];
-        switch (formatType) {
-        case SL_DATAFORMAT_MIME:
-            {
-            SLDataFormat_MIME *df_mime =
-                (SLDataFormat_MIME *) pAudioSrc->pFormat;
-            SLchar *mimeType = df_mime->mimeType;
-            if (NULL == mimeType)
-                return SL_RESULT_PARAMETER_INVALID;
-            SLuint32 containerType = df_mime->containerType;
-            if (!strcmp((const char *) mimeType, "audio/x-wav"))
-                ;
-            // else if (others)
-            //    ;
-            else
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            switch (containerType) {
-            case SL_CONTAINERTYPE_WAV:
-                break;
-            // others
-            default:
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
-            }
-            break;
-        default:
-            return SL_RESULT_CONTENT_UNSUPPORTED;
-        }
-        // FIXME magic number, should be configurable
-        numBuffers = 2;
-        }
-        break;
-    case SL_DATALOCATOR_ADDRESS:
-    case SL_DATALOCATOR_IODEVICE:
-    case SL_DATALOCATOR_OUTPUTMIX:
-    case SL_DATALOCATOR_RESERVED5:
-    case SL_DATALOCATOR_MIDIBUFFERQUEUE:
-    case SL_DATALOCATOR_RESERVED8:
-        return SL_RESULT_CONTENT_UNSUPPORTED;
-    default:
-        return SL_RESULT_PARAMETER_INVALID;
-    }
-#endif // USE_SNDFILE
 
 #ifdef USE_OUTPUTMIXEXT
-    struct Track *track = NULL;
-    switch (*(SLuint32 *)pAudioSnk->pLocator) {
-    case SL_DATALOCATOR_OUTPUTMIX:
-        {
-        // pAudioSnk->pFormat is ignored
-        SLDataLocator_OutputMix *dl_outmix =
-            (SLDataLocator_OutputMix *) pAudioSnk->pLocator;
-        SLObjectItf outputMix = dl_outmix->outputMix;
-        // FIXME make this an operation on Object: GetClass
-        if ((NULL == outputMix) || SL_OBJECTID_OUTPUTMIX != IObjectToObjectID((IObject *) outputMix))
-            return SL_RESULT_PARAMETER_INVALID;
-        IOutputMix *om =
-            &((COutputMix *) outputMix)->mOutputMix;
-        // allocate an entry within OutputMix for this track
-        // FIXME O(n)
-        unsigned i;
-        for (i = 0, track = &om->mTracks[0]; i < 32; ++i, ++track) {
-            if (om->mActiveMask & (1 << i))
-                continue;
-            om->mActiveMask |= 1 << i;
-            break;
-        }
-        if (32 <= i) {
-            // FIXME Need a better error code for all slots full in output mix
-            return SL_RESULT_MEMORY_FAILURE;
-        }
-        // FIXME replace the above for Android - do not use our own mixer!
-        }
-        break;
-    case SL_DATALOCATOR_BUFFERQUEUE:
-    case SL_DATALOCATOR_URI:
-    case SL_DATALOCATOR_ADDRESS:
-    case SL_DATALOCATOR_IODEVICE:
-    case SL_DATALOCATOR_RESERVED5:
-    case SL_DATALOCATOR_MIDIBUFFERQUEUE:
-    case SL_DATALOCATOR_RESERVED8:
-        return SL_RESULT_CONTENT_UNSUPPORTED;
-    default:
-        return SL_RESULT_PARAMETER_INVALID;
-    }
-#endif // USE_OUTPUTMIXEXT
+    struct Track *track, *track_;
+    result = IOutputMixExt_checkAudioPlayerSourceSink(pAudioSrc, pAudioSnk, &track_);
+    if (SL_RESULT_SUCCESS != result)
+        return result;
+    track = track_;
+#endif
 
     // Construct our new AudioPlayer instance
     CAudioPlayer *this = (CAudioPlayer *) construct(pCAudioPlayer_class, exposedMask, self);
@@ -281,30 +147,16 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
         return SL_RESULT_MEMORY_FAILURE;
     }
 
-    // DataSource specific initializations
-    switch(*(SLuint32 *)pAudioSrc->pLocator) {
-    case SL_DATALOCATOR_URI:
-#ifndef USE_OUTPUTMIXEXT
-
-        break;
-#else
-        // fall through
-#endif
-    case SL_DATALOCATOR_BUFFERQUEUE:
-        {
-        SLDataLocator_BufferQueue *dl_bq = (SLDataLocator_BufferQueue *) pAudioSrc->pLocator;
-        SLuint32 numBuffs = dl_bq->numBuffers;
-        if (0 == numBuffs) {
-            return SL_RESULT_PARAMETER_INVALID;
-        }
-        this->mBufferQueue.mNumBuffers = numBuffs;
+    // Allocate memory for buffer queue
+    this->mBufferQueue.mNumBuffers = numBuffers;
+    if (0 != numBuffers) {
         // inline allocation of circular mArray, up to a typical max
-        if (BUFFER_HEADER_TYPICAL >= numBuffs) {
+        if (BUFFER_HEADER_TYPICAL >= numBuffers) {
             this->mBufferQueue.mArray = this->mBufferQueue.mTypical;
         } else {
             // FIXME integer overflow possible during multiplication
             this->mBufferQueue.mArray = (struct BufferHeader *)
-                    malloc((numBuffs + 1) * sizeof(struct BufferHeader));
+                    malloc((numBuffers + 1) * sizeof(struct BufferHeader));
             if (NULL == this->mBufferQueue.mArray) {
                 free(this);
                 return SL_RESULT_MEMORY_FAILURE;
@@ -312,36 +164,36 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
         }
         this->mBufferQueue.mFront = this->mBufferQueue.mArray;
         this->mBufferQueue.mRear = this->mBufferQueue.mArray;
-        }
-        break;
-    default:
-        // no other init required
-        break;
     }
 
-    // used to store the data source of our audio player
+    // used to store the data source of our audio player (FIXME - volatile)
     this->mDynamicSource.mDataSource = pAudioSrc;
+
+    // platform-specific initialization
+
 #ifdef USE_SNDFILE
     this->mSndFile.mPathname = pathname;
     this->mSndFile.mIs0 = SL_BOOLEAN_TRUE;
-#ifndef NDEBUG
     this->mSndFile.mSNDFILE = NULL;
     this->mSndFile.mRetryBuffer = NULL;
     this->mSndFile.mRetrySize = 0;
 #endif
-#endif // USE_SNDFILE
+
 #ifdef USE_OUTPUTMIXEXT
-    // link track to player (NOT for Android!!)
-    track->mDfPcm = df_pcm;
+    // link track to player
+    // const SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *) pAudioSrc->pFormat;
+    // track->mDfPcm = df_pcm;
     track->mBufferQueue = &this->mBufferQueue;
     track->mPlay = &this->mPlay;
     // next 2 fields must be initialized explicitly (not part of this)
     track->mReader = NULL;
     track->mAvail = 0;
 #endif
+
 #ifdef USE_ANDROID
     sles_to_android_audioPlayerCreate(pAudioSrc, pAudioSnk, this);
 #endif
+
     // return the new audio player object
     *pPlayer = &this->mObject.mItf;
     return SL_RESULT_SUCCESS;
@@ -380,8 +232,7 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         return result;
     if (NULL == pMIDISrc || NULL == pAudioOutput)
         return SL_RESULT_PARAMETER_INVALID;
-    CMidiPlayer *this = (CMidiPlayer *)
-        construct(pCMidiPlayer_class, exposedMask, self);
+    CMidiPlayer *this = (CMidiPlayer *) construct(pCMidiPlayer_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     // return the new MIDI player object
@@ -434,8 +285,7 @@ static SLresult IEngine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    COutputMix *this = (COutputMix *)
-        construct(pCOutputMix_class, exposedMask, self);
+    COutputMix *this = (COutputMix *) construct(pCOutputMix_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
     *pMix = &this->mObject.mItf;

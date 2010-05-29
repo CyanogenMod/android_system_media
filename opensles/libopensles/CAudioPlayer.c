@@ -18,14 +18,6 @@
 
 #include "sles_allinclusive.h"
 
-#ifdef USE_ANDROID
-#include "sles_to_android_ext.h"
-#endif
-
-#ifdef USE_SNDFILE
-#include "SndFile.h"
-#endif
-
 // IObject hooks
 
 SLresult CAudioPlayer_Realize(void *self, SLboolean async)

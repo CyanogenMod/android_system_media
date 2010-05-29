@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include "sles_allinclusive.h"
-
 #define ANDROID_DEFAULT_OUTPUT_STREAM_TYPE android::AudioSystem::MUSIC
 #define ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE 4096
 
@@ -28,7 +26,7 @@
  *     SL_RESULT_SUCCESS
  *     SL_PARAMETER_INVALID
  */
-SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc,
+extern SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc,
         const SLDataSink *pAudioSnk);
 
 /*
@@ -39,7 +37,7 @@ SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSr
  *         unsupported parameter or value
  *     SL_RESULT_CONTENT_UNSUPPORTED if a format is not supported (e.g. sample rate too high)
  */
-SLresult sles_to_android_audioPlayerCreate(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk,
+extern SLresult sles_to_android_audioPlayerCreate(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk,
         CAudioPlayer *pAudioPlayer);
 
 /*
@@ -50,17 +48,18 @@ SLresult sles_to_android_audioPlayerCreate(const SLDataSource *pAudioSrc, const 
  *     SL_RESULT_CONTENT_UNSUPPORTED if an error occurred during the allocation and initialization
  *         of the Android resources
  */
-SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolean async);
 
-SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer);
+extern SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolean async);
 
-SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state);
+extern SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer);
 
-SLresult sles_to_android_audioPlayerUseEventMask(IPlay *pPlayItf, SLuint32 eventFlags);
+extern SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state);
 
-SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
+extern SLresult sles_to_android_audioPlayerUseEventMask(IPlay *pPlayItf, SLuint32 eventFlags);
 
-SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf);
+extern SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
+
+extern SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf);
 
 /*
  * Mutes or unmutes the Android media framework object associated with the CAudioPlayer that carries
@@ -69,4 +68,4 @@ SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf);
  *   if mute is SL_BOOLEAN_FALSE, a call to this function was preceded by a call
  *   to sles_to_android_audioPlayerVolumeUpdate()
  */
-SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute);
+extern SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute);

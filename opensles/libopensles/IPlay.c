@@ -18,10 +18,6 @@
 
 #include "sles_allinclusive.h"
 
-#ifdef USE_ANDROID
-#include "sles_to_android_ext.h"
-#endif
-
 static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
 {
     SLresult result = SL_RESULT_SUCCESS;

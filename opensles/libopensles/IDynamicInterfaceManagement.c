@@ -24,14 +24,13 @@ static SLresult IDynamicInterfaceManagement_AddInterface(
 {
     if (NULL == iid)
         return SL_RESULT_PARAMETER_INVALID;
-    IDynamicInterfaceManagement *this =
-        (IDynamicInterfaceManagement *) self;
+    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
     IObject *thisObject = this->mThis;
     const ClassTable *class__ = thisObject->mClass;
     int MPH, index;
-    if ((0 > (MPH = IID_to_MPH(iid))) ||
-        (0 > (index = class__->mMPH_to_index[MPH])))
+    if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH])))
         return SL_RESULT_FEATURE_UNSUPPORTED;
+    // FIXME check that interface is dynamic?
     SLresult result;
     VoidHook init = MPH_init_table[MPH].mInit;
     const struct iid_vtable *x = &class__->mInterfaces[index];
@@ -75,10 +74,8 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
 {
     if (NULL == iid)
         return SL_RESULT_PARAMETER_INVALID;
-    IDynamicInterfaceManagement *this =
-        (IDynamicInterfaceManagement *) self;
-    IObject *thisObject =
-        (IObject *) this->mThis;
+    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
+    IObject *thisObject = (IObject *) this->mThis;
     const ClassTable *class__ = thisObject->mClass;
     int MPH = IID_to_MPH(iid);
     if (0 > MPH)
@@ -119,10 +116,8 @@ static SLresult IDynamicInterfaceManagement_ResumeInterface(
 {
     if (NULL == iid)
         return SL_RESULT_PARAMETER_INVALID;
-    IDynamicInterfaceManagement *this =
-        (IDynamicInterfaceManagement *) self;
-    IObject *thisObject =
-        (IObject *) this->mThis;
+    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
+    IObject *thisObject = (IObject *) this->mThis;
     const ClassTable *class__ = thisObject->mClass;
     int MPH = IID_to_MPH(iid);
     if (0 > MPH)
@@ -145,8 +140,7 @@ static SLresult IDynamicInterfaceManagement_RegisterCallback(
     SLDynamicInterfaceManagementItf self,
     slDynamicInterfaceManagementCallback callback, void *pContext)
 {
-    IDynamicInterfaceManagement *this =
-        (IDynamicInterfaceManagement *) self;
+    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
     IObject *thisObject = this->mThis;
     // FIXME This could be a poke lock, if we had atomic double-word load/store
     object_lock_exclusive(thisObject);
