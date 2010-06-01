@@ -57,6 +57,8 @@ extern SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint3
 
 extern SLresult sles_to_android_audioPlayerUseEventMask(IPlay *pPlayItf, SLuint32 eventFlags);
 
+extern SLresult sles_to_android_audioPlayerGetDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
+
 extern SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
 
 extern SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf);

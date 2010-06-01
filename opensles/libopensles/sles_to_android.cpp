@@ -640,6 +640,27 @@ SLresult sles_to_android_audioPlayerUseEventMask(IPlay *pPlayItf, SLuint32 event
 
 
 //-----------------------------------------------------------------------------
+SLresult sles_to_android_audioPlayerGetDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec) {
+    CAudioPlayer *ap = (CAudioPlayer *)pPlayItf->mThis;
+    switch(ap->mAndroidObjType) {
+    case AUDIOTRACK_PUSH:
+    case AUDIOTRACK_PULL:
+        *pDurMsec = SL_TIME_UNKNOWN;
+        // FIXME if the data source is not a buffer queue, and the audio data is saved in
+        //       shared memory with the mixer process, the duration is the size of the buffer
+        fprintf(stderr, "FIXME: sles_to_android_audioPlayerGetDuration() verify if duration can be retrieved\n");
+        break;
+    case MEDIAPLAYER:
+        ap->mMediaPlayer->getDuration((int*)pDurMsec);
+        break;
+    default:
+        break;
+    }
+    return SL_RESULT_SUCCESS;
+}
+
+
+//-----------------------------------------------------------------------------
 SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
     CAudioPlayer *ap = (CAudioPlayer *)pPlayItf->mThis;
     switch(ap->mAndroidObjType) {
@@ -650,8 +671,7 @@ SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *
         *pPosMsec = positionInFrames * 1000 / ap->mAudioTrack->getSampleRate();
         break;
     case MEDIAPLAYER:
-        //FIXME implement
-        fprintf(stderr, "FIXME: sles_to_android_audioPlayerGetPosition() mapped to a MediaPlayer to be implemented\n");
+        ap->mMediaPlayer->getCurrentPosition((int*)pPosMsec);
         break;
     default:
         break;

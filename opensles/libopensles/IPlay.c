@@ -59,6 +59,7 @@ static SLresult IPlay_GetPlayState(SLPlayItf self, SLuint32 *pState)
 
 static SLresult IPlay_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
 {
+    SLresult result = SL_RESULT_SUCCESS;
     // FIXME: for SNDFILE only, check to see if already know duration
     // if so, good, otherwise save position,
     // read quickly to end of file, counting frames,
@@ -67,13 +68,15 @@ static SLresult IPlay_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
         return SL_RESULT_PARAMETER_INVALID;
     IPlay *this = (IPlay *) self;
     interface_lock_peek(this);
+#ifdef USE_ANDROID
+    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+        result = sles_to_android_audioPlayerGetDuration(this, &this->mDuration);
+    }
+#endif
     SLmillisecond duration = this->mDuration;
     interface_unlock_peek(this);
     *pMsec = duration;
-#ifdef USE_ANDROID
-    // initialized to SL_TIME_UNKNOWN in IPlay_init
-#endif
-    return SL_RESULT_SUCCESS;
+    return result;
 }
 
 static SLresult IPlay_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
@@ -90,7 +93,6 @@ static SLresult IPlay_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
     SLmillisecond position = this->mPosition;
     interface_unlock_peek(this);
     *pMsec = position;
-    // FIXME convert sample units to time units
     // FIXME handle SL_TIME_UNKNOWN
     return SL_RESULT_SUCCESS;
 }

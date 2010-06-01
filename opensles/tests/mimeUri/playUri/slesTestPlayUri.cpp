@@ -156,6 +156,16 @@ void TestPlayUri( SLObjectItf sl, const char* path)
                 (void*)&volItf); CheckErr(res);
     CheckErr(res);
 
+    /* Display duration */
+    SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
+    res = (*playItf)->GetDuration(playItf, &durationInMsec);
+    CheckErr(res);
+    if (durationInMsec == SL_TIME_UNKNOWN) {
+        fprintf(stdout, "Content duration is unknown\n");
+    } else {
+        fprintf(stdout, "Content duration is %d ms\n", durationInMsec);
+    }
+
     /* Set the player volume */
     res = (*volItf)->SetVolumeLevel( volItf, -300);
     CheckErr(res);
@@ -165,8 +175,8 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PLAYING );
     CheckErr(res);
 
-    /* Play 10s of the URI */
-    usleep(10 * 1000 * 1000);
+    /* Wait as long as the duration of the content before stopping */
+    usleep(durationInMsec * 1000);
 
     /* Make sure player is stopped */
     fprintf(stdout, "URI example: stopping playback\n");
