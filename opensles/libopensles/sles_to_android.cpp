@@ -272,14 +272,15 @@ SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSr
 // from a buffer queue.
 static void android_pullAudioTrackCallback(int event, void* user, void *info) {
     CAudioPlayer *pAudioPlayer = (CAudioPlayer *)user;
+    void * callbackPContext = NULL;
     switch(event) {
 
     case (android::AudioTrack::EVENT_MORE_DATA) : {
         //fprintf(stdout, "received event EVENT_MORE_DATA from AudioTrack\n");
         android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
         // retrieve data from the buffer queue
-        // FIXME locks: issue of callbacks calling callbacks without reentrant locks
-        //interface_lock_exclusive(&pAudioPlayer->mBufferQueue);
+        interface_lock_exclusive(&pAudioPlayer->mBufferQueue);
+        slBufferQueueCallback callback = NULL;
         if (pAudioPlayer->mBufferQueue.mState.count != 0) {
             //fprintf(stderr, "nbBuffers in queue = %lu\n",pAudioPlayer->mBufferQueue.mState.count);
             assert(pAudioPlayer->mBufferQueue.mFront != pAudioPlayer->mBufferQueue.mRear);
@@ -316,55 +317,60 @@ static void android_pullAudioTrackCallback(int event, void* user, void *info) {
 
                 // data has been consumed, and the buffer queue state has been updated
                 // we can notify the client if applicable
-                slBufferQueueCallback callback = pAudioPlayer->mBufferQueue.mCallback;
+                callback = pAudioPlayer->mBufferQueue.mCallback;
                 if (NULL != callback) {
-                     (*callback)(&pAudioPlayer->mBufferQueue.mItf,
-                             pAudioPlayer->mBufferQueue.mContext);
-                 }
+                    // save callback data
+                    callbackPContext = pAudioPlayer->mBufferQueue.mContext;
+                }
             }
         } else {
             // no data available
             pBuff->size = 0;
         }
-        // FIXME locks: issue of callbacks calling callbacks without reentrant locks
-        //interface_unlock_exclusive(&pAudioPlayer->mBufferQueue);
+        interface_unlock_exclusive(&pAudioPlayer->mBufferQueue);
+        if (NULL != callback) {
+            (*callback)(&pAudioPlayer->mBufferQueue.mItf, callbackPContext);
+        }
     }
     break;
 
     case (android::AudioTrack::EVENT_MARKER) : {
         //fprintf(stdout, "received event EVENT_MARKER from AudioTrack\n");
-        // FIXME locks: issue of callbacks calling callbacks without reentrant locks
-        slPlayCallback callback = pAudioPlayer->mPlay.mCallback;
+        slPlayCallback callback = NULL;
+        interface_lock_shared(&pAudioPlayer->mPlay);
+        callback = pAudioPlayer->mPlay.mCallback;
+        callbackPContext = pAudioPlayer->mPlay.mContext;
+        interface_unlock_shared(&pAudioPlayer->mPlay);
         if (NULL != callback) {
             // getting this event implies SL_PLAYEVENT_HEADATMARKER was set in the event mask
-            (*callback)(&pAudioPlayer->mPlay.mItf, pAudioPlayer->mPlay.mContext,
-                    SL_PLAYEVENT_HEADATMARKER);
+            (*callback)(&pAudioPlayer->mPlay.mItf, callbackPContext, SL_PLAYEVENT_HEADATMARKER);
         }
-        // FIXME locks: issue of callbacks calling callbacks without reentrant locks
     }
     break;
 
     case (android::AudioTrack::EVENT_NEW_POS) : {
         //fprintf(stdout, "received event EVENT_NEW_POS from AudioTrack\n");
-        // FIXME locks: issue of callbacks calling callbacks without reentrant locks
-        slPlayCallback callback = pAudioPlayer->mPlay.mCallback;
+        slPlayCallback callback = NULL;
+        interface_lock_shared(&pAudioPlayer->mPlay);
+        callback = pAudioPlayer->mPlay.mCallback;
+        callbackPContext = pAudioPlayer->mPlay.mContext;
+        interface_unlock_shared(&pAudioPlayer->mPlay);
         if (NULL != callback) {
             // getting this event implies SL_PLAYEVENT_HEADATNEWPOS was set in the event mask
-            (*callback)(&pAudioPlayer->mPlay.mItf, pAudioPlayer->mPlay.mContext,
-                    SL_PLAYEVENT_HEADATNEWPOS);
+            (*callback)(&pAudioPlayer->mPlay.mItf, callbackPContext, SL_PLAYEVENT_HEADATNEWPOS);
         }
-        // FIXME locks: issue of callbacks calling callbacks without reentrant locks
     }
     break;
 
     case (android::AudioTrack::EVENT_UNDERRUN) : {
-        // FIXME locks: issue of callbacks calling callbacks without reentrant locks
-        slPlayCallback callback = pAudioPlayer->mPlay.mCallback;
+        slPlayCallback callback = NULL;
+        interface_lock_shared(&pAudioPlayer->mPlay);
+        callback = pAudioPlayer->mPlay.mCallback;
+        callbackPContext = pAudioPlayer->mPlay.mContext;
+        interface_unlock_shared(&pAudioPlayer->mPlay);
         if ((NULL != callback) && (pAudioPlayer->mPlay.mEventFlags & SL_PLAYEVENT_HEADSTALLED)) {
-            (*callback)(&pAudioPlayer->mPlay.mItf, pAudioPlayer->mPlay.mContext,
-                    SL_PLAYEVENT_HEADSTALLED);
+            (*callback)(&pAudioPlayer->mPlay.mItf, callbackPContext, SL_PLAYEVENT_HEADSTALLED);
         }
-        // FIXME locks: issue of callbacks calling callbacks without reentrant locks
     }
     break;
 
