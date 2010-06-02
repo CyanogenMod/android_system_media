@@ -77,7 +77,5 @@ void ISeek_init(void *self)
     this->mPos = (SLmillisecond) -1;
     this->mStartPos = (SLmillisecond) -1;
     this->mEndPos = (SLmillisecond) -1;
-#ifndef NDEBUG
     this->mLoopEnabled = SL_BOOLEAN_FALSE;
-#endif
 }

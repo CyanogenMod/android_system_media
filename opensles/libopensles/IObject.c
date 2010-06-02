@@ -239,12 +239,10 @@ void IObject_init(void *self)
     // mExposedMask
     // mLossOfControlMask
     this->mState = SL_OBJECT_STATE_UNREALIZED;
-#ifndef NDEBUG
     this->mCallback = NULL;
     this->mContext = NULL;
     this->mPriority = 0;
     this->mPreemptable = SL_BOOLEAN_FALSE;
-#endif
     int ok;
     ok = pthread_mutex_init(&this->mMutex, (const pthread_mutexattr_t *) NULL);
     assert(0 == ok);

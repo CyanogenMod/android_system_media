@@ -84,119 +84,87 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
     if (SL_RESULT_SUCCESS != result)
         return result;
 
-    // Check the source and sink parameters against generic constraints,
-    // and make a local copy of all parameters in case other application threads
-    // change memory concurrently.
-
-    // DataSource checks
-    DataLocatorFormat myDataSource;
-    result = checkDataSource(pAudioSrc, &myDataSource);
-    if (SL_RESULT_SUCCESS != result)
-        return result;
-
-    // DataSink checks
-    DataLocatorFormat myDataSink;
-    result = checkDataSink(pAudioSnk, &myDataSink);
-    if (SL_RESULT_SUCCESS != result) {
-        freeDataLocatorFormat(&myDataSink);
-        return result;
-    }
-
-    // FIXME numerous leaks are possible from here on - check each return
-    // freeDataLocatorFormat(&myDataSource);
-    // freeDataLocatorFormat(&myDataSink);
-
-    fprintf(stderr, "\t after sles_checkSourceSink()\n");
-
-    // check the audio source and sink parameters against platform support
-
-    SLDataSource myAudioSrc;
-    myAudioSrc.pLocator = &myDataSource.mLocator;
-    myAudioSrc.pFormat = &myDataSource.mFormat;
-    SLDataSink myAudioSnk;
-    myAudioSnk.pLocator = &myDataSink.mLocator;
-    myAudioSnk.pFormat = &myDataSink.mFormat;
-
-    SLuint32 numBuffers = 0;
-
-#ifdef USE_ANDROID
-    result = sles_to_android_checkAudioPlayerSourceSink(pAudioSrc, pAudioSnk);
-    if (SL_RESULT_SUCCESS != result)
-        return result;
-    fprintf(stderr, "\t after sles_to_android_checkAudioPlayerSourceSink()\n");
-    numBuffers = 4; // FIXME
-#endif
-#ifdef USE_SNDFILE
-    SLchar *pathname;
-    result = SndFile_checkAudioPlayerSourceSink(pAudioSrc, pAudioSnk, &pathname, &numBuffers);
-    if (SL_RESULT_SUCCESS != result)
-        return result;
-#endif
-
-#ifdef USE_OUTPUTMIXEXT
-    struct Track *track, *track_;
-    result = IOutputMixExt_checkAudioPlayerSourceSink(pAudioSrc, pAudioSnk, &track_);
-    if (SL_RESULT_SUCCESS != result)
-        return result;
-    track = track_;
-#endif
-
     // Construct our new AudioPlayer instance
     CAudioPlayer *this = (CAudioPlayer *) construct(pCAudioPlayer_class, exposedMask, self);
     if (NULL == this) {
         return SL_RESULT_MEMORY_FAILURE;
     }
 
+    // Check the source and sink parameters against generic constraints,
+    // and make a local copy of all parameters in case other application threads
+    // change memory concurrently.
+
+    result = checkDataSource(pAudioSrc, &this->mDataSource);
+    if (SL_RESULT_SUCCESS != result)
+        goto abort;
+
+    result = checkDataSink(pAudioSnk, &this->mDataSink);
+    if (SL_RESULT_SUCCESS != result)
+        goto abort;
+
+    fprintf(stderr, "\t after checkDataSource()/Sink()\n");
+
+    // check the audio source and sink parameters against platform support
+
+#ifdef USE_ANDROID
+    result = sles_to_android_checkAudioPlayerSourceSink(this);
+    if (SL_RESULT_SUCCESS != result)
+        goto abort;
+    fprintf(stderr, "\t after sles_to_android_checkAudioPlayerSourceSink()\n");
+#endif
+
+#ifdef USE_SNDFILE
+    result = SndFile_checkAudioPlayerSourceSink(this);
+    if (SL_RESULT_SUCCESS != result)
+        goto abort;
+#endif
+
+#ifdef USE_OUTPUTMIXEXT
+    result = IOutputMixExt_checkAudioPlayerSourceSink(this);
+    if (SL_RESULT_SUCCESS != result)
+        goto abort;
+#endif
+
     // Allocate memory for buffer queue
-    this->mBufferQueue.mNumBuffers = numBuffers;
-    if (0 != numBuffers) {
+    //if (0 != this->mBufferQueue.mNumBuffers) {
         // inline allocation of circular mArray, up to a typical max
-        if (BUFFER_HEADER_TYPICAL >= numBuffers) {
+        if (BUFFER_HEADER_TYPICAL >= this->mBufferQueue.mNumBuffers) {
             this->mBufferQueue.mArray = this->mBufferQueue.mTypical;
         } else {
             // FIXME integer overflow possible during multiplication
             this->mBufferQueue.mArray = (struct BufferHeader *)
-                    malloc((numBuffers + 1) * sizeof(struct BufferHeader));
+                    malloc((this->mBufferQueue.mNumBuffers + 1) * sizeof(struct BufferHeader));
             if (NULL == this->mBufferQueue.mArray) {
-                free(this);
-                return SL_RESULT_MEMORY_FAILURE;
+                result = SL_RESULT_MEMORY_FAILURE;
+                goto abort;
             }
         }
         this->mBufferQueue.mFront = this->mBufferQueue.mArray;
         this->mBufferQueue.mRear = this->mBufferQueue.mArray;
-    }
+    //}
 
-    // used to store the data source of our audio player (FIXME - volatile)
-    this->mDynamicSource.mDataSource = pAudioSrc;
+    // used to store the data source of our audio player
+    this->mDynamicSource.mDataSource = &this->mDataSource.u.mSource;
 
     // platform-specific initialization
 
-#ifdef USE_SNDFILE
-    this->mSndFile.mPathname = pathname;
-    this->mSndFile.mIs0 = SL_BOOLEAN_TRUE;
-    this->mSndFile.mSNDFILE = NULL;
-    this->mSndFile.mRetryBuffer = NULL;
-    this->mSndFile.mRetrySize = 0;
-#endif
-
-#ifdef USE_OUTPUTMIXEXT
-    // link track to player
-    // const SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *) pAudioSrc->pFormat;
-    // track->mDfPcm = df_pcm;
-    track->mBufferQueue = &this->mBufferQueue;
-    track->mPlay = &this->mPlay;
-    // next 2 fields must be initialized explicitly (not part of this)
-    track->mReader = NULL;
-    track->mAvail = 0;
-#endif
-
 #ifdef USE_ANDROID
-    sles_to_android_audioPlayerCreate(pAudioSrc, pAudioSnk, this);
+    sles_to_android_audioPlayerCreate(this);
 #endif
 
     // return the new audio player object
     *pPlayer = &this->mObject.mItf;
     return SL_RESULT_SUCCESS;
+
+abort:
+    freeDataLocatorFormat(&this->mDataSource);
+    freeDataLocatorFormat(&this->mDataSink);
+    if ((NULL != this->mBufferQueue.mArray) &&
+        (this->mBufferQueue.mTypical != this->mBufferQueue.mArray)) {
+            free(this->mBufferQueue.mArray);
+    }
+    free(this);
+    return result;
 }
 
 static SLresult IEngine_CreateAudioRecorder(SLEngineItf self,
@@ -213,6 +181,21 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
+
+    // DataSource checks
+    DataLocatorFormat myDataSource;
+    result = checkDataSource(pAudioSrc, &myDataSource);
+    if (SL_RESULT_SUCCESS != result)
+        return result;
+
+    // DataSink checks
+    DataLocatorFormat myDataSink;
+    result = checkDataSink(pAudioSnk, &myDataSink);
+    if (SL_RESULT_SUCCESS != result) {
+        freeDataLocatorFormat(&myDataSink);
+        return result;
+    }
+
     return SL_RESULT_SUCCESS;
 }
 
@@ -399,10 +382,8 @@ void IEngine_init(void *self)
     IEngine *this = (IEngine *) self;
     this->mItf = &IEngine_Itf;
     // mLossOfControlGlobal is initialized in CreateEngine
-#ifndef NDEBUG
     this->mInstanceCount = 0;
     unsigned i;
     for (i = 0; i < INSTANCE_MAX; ++i)
         this->mInstances[i] = NULL;
-#endif
 }

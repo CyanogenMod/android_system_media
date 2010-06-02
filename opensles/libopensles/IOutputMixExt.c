@@ -152,10 +152,10 @@ void IOutputMixExt_init(void *self)
     this->mItf = &IOutputMixExt_Itf;
 }
 
-SLresult IOutputMixExt_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk, struct Track **pTrack)
+SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
 {
-    assert(NULL != pTrack);
-    *pTrack = NULL;
+    //const SLDataSource *pAudioSrc = &this->mDataSource.u.mSource;
+    const SLDataSink *pAudioSnk = &this->mDataSink.u.mSink;
     struct Track *track = NULL;
     switch (*(SLuint32 *)pAudioSnk->pLocator) {
     case SL_DATALOCATOR_OUTPUTMIX:
@@ -181,7 +181,11 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc,
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
 
-    *pTrack = track;
+    track->mBufferQueue = &this->mBufferQueue;
+    track->mPlay = &this->mPlay;
+    // next 2 fields must be initialized explicitly (not part of this)
+    track->mReader = NULL;
+    track->mAvail = 0;
     return SL_RESULT_SUCCESS;
 }
 

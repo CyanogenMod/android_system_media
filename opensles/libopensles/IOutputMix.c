@@ -71,12 +71,9 @@ void IOutputMix_init(void *self)
 {
     IOutputMix *this = (IOutputMix *) self;
     this->mItf = &IOutputMix_Itf;
-#ifndef NDEBUG
     this->mCallback = NULL;
     this->mContext = NULL;
-#endif
 #ifdef USE_OUTPUTMIXEXT
-#ifndef NDEBUG
     this->mActiveMask = 0;
     struct Track *track = &this->mTracks[0];
     // FIXME O(n)
@@ -84,6 +81,5 @@ void IOutputMix_init(void *self)
     unsigned i;
     for (i = 0; i < 32; ++i, ++track)
         track->mPlay = NULL;
-#endif
 #endif
 }

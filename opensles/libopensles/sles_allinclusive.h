@@ -27,6 +27,8 @@
 #include "MPH_to.h"
 #include "devices.h"
 
+typedef struct CAudioPlayer_struct CAudioPlayer;
+
 #ifdef USE_SNDFILE
 #include <sndfile.h>
 #include "SndFile.h"
@@ -136,6 +138,37 @@ struct SndFile {
 #ifdef __cplusplus
 #define this this_
 #endif
+
+/* Our own merged version of SLDataSource and SLDataSink */
+
+typedef union {
+    SLuint32 mLocatorType;
+    SLDataLocator_Address mAddress;
+    SLDataLocator_BufferQueue mBufferQueue;
+    SLDataLocator_IODevice mIODevice;
+    SLDataLocator_MIDIBufferQueue mMIDIBufferQueue;
+    SLDataLocator_OutputMix mOutputMix;
+    SLDataLocator_URI mURI;
+} DataLocator;
+
+typedef union {
+    SLuint32 mFormatType;
+    SLDataFormat_PCM mPCM;
+    SLDataFormat_MIME mMIME;
+} DataFormat;
+
+typedef struct {
+    union {
+        SLDataSource mSource;
+        SLDataSink mSink;
+        struct {
+            DataLocator *pLocator;
+            DataFormat *pFormat;
+        } mNeutral;
+    } u;
+    DataLocator mLocator;
+    DataFormat mFormat;
+} DataLocatorFormat;
 
 /* Interface structures */
 
@@ -695,7 +728,7 @@ enum AndroidObject_type {
 };
 #endif
 
-typedef struct {
+/*typedef*/ struct CAudioPlayer_struct {
     IObject mObject;
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IPlay mPlay;
@@ -724,6 +757,8 @@ typedef struct {
     IVirtualizer mVirtualizer;
     IVisualization mVisualization;
     // rest of fields are not related to the interfaces
+    DataLocatorFormat mDataSource;
+    DataLocatorFormat mDataSink;
 #ifdef USE_SNDFILE
     struct SndFile mSndFile;
 #endif // USE_SNDFILE
@@ -736,7 +771,7 @@ typedef struct {
     char* mUri;// FIXME temporary storage before we handle that correctly
     pthread_t mThread;
 #endif
-} CAudioPlayer;
+} /*CAudioPlayer*/;
 
 typedef struct {
     // mandated interfaces
@@ -879,27 +914,6 @@ extern SLuint32 IObjectToObjectID(IObject *object);
 #ifdef USE_ANDROID
 #include "sles_to_android.h"
 #endif
-
-typedef union {
-    SLuint32 mLocatorType;
-    SLDataLocator_Address mAddress;
-    SLDataLocator_BufferQueue mBufferQueue;
-    SLDataLocator_IODevice mIODevice;
-    SLDataLocator_MIDIBufferQueue mMIDIBufferQueue;
-    SLDataLocator_OutputMix mOutputMix;
-    SLDataLocator_URI mURI;
-} DataLocator;
-
-typedef union {
-    SLuint32 mFormatType;
-    SLDataFormat_PCM mPCM;
-    SLDataFormat_MIME mMIME;
-} DataFormat;
-
-typedef struct {
-    DataLocator mLocator;
-    DataFormat mFormat;
-} DataLocatorFormat;
 
 extern SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *myDataSourceLocator);
 extern SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *myDataSinkLocator);

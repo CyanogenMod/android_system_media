@@ -231,7 +231,6 @@ void IPlay_init(void *self)
     this->mItf = &IPlay_Itf;
     this->mState = SL_PLAYSTATE_STOPPED;
     this->mDuration = SL_TIME_UNKNOWN;
-#ifndef NDEBUG
     this->mPosition = (SLmillisecond) 0;
     // this->mPlay.mPositionSamples = 0;
     this->mCallback = NULL;
@@ -239,5 +238,4 @@ void IPlay_init(void *self)
     this->mEventFlags = 0;
     this->mMarkerPosition = 0;
     this->mPositionUpdatePeriod = 0;
-#endif
 }

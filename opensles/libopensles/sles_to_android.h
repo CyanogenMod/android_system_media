@@ -26,8 +26,7 @@
  *     SL_RESULT_SUCCESS
  *     SL_PARAMETER_INVALID
  */
-extern SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc,
-        const SLDataSink *pAudioSnk);
+extern SLresult sles_to_android_checkAudioPlayerSourceSink(CAudioPlayer *pAudioPlayer);
 
 /*
  * Determines the Android media framework object that maps to the given audio source and sink.
@@ -37,8 +36,7 @@ extern SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *p
  *         unsupported parameter or value
  *     SL_RESULT_CONTENT_UNSUPPORTED if a format is not supported (e.g. sample rate too high)
  */
-extern SLresult sles_to_android_audioPlayerCreate(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk,
-        CAudioPlayer *pAudioPlayer);
+extern SLresult sles_to_android_audioPlayerCreate(CAudioPlayer *pAudioPlayer);
 
 /*
  * Allocates and initializes the Android media framework objects intended to be used with the

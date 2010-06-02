@@ -37,6 +37,6 @@ struct Track {
     SLuint32 mAvail;        // number of available bytes
 };
 
-extern SLresult IOutputMixExt_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk, struct Track **pTrack);
+extern SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this);
 
 #endif

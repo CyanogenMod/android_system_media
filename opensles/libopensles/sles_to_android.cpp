@@ -130,9 +130,10 @@ void android_audioPlayerUpdateStereoVolume(IVolume *pVolItf) {
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc,
-        const SLDataSink *pAudioSnk)
+SLresult sles_to_android_checkAudioPlayerSourceSink(CAudioPlayer *pAudioPlayer)
 {
+    const SLDataSource *pAudioSrc = &pAudioPlayer->mDataSource.u.mSource;
+    const SLDataSink *pAudioSnk = &pAudioPlayer->mDataSink.u.mSink;
     //--------------------------------------
     // Sink check:
     //     currently only OutputMix sinks are supported, regardless of the data source
@@ -229,6 +230,7 @@ SLresult sles_to_android_checkAudioPlayerSourceSink(const SLDataSource *pAudioSr
             fprintf(stderr, "Error: cannot create Audio Player with SL_DATALOCATOR_BUFFERQUEUE data source without SL_DATAFORMAT_PCM format\n");
             return SL_RESULT_PARAMETER_INVALID;
         } // switch (formatType)
+        pAudioPlayer->mBufferQueue.mNumBuffers = numBuffers;
         } // case SL_DATALOCATOR_BUFFERQUEUE
         break;
     //------------------
@@ -398,10 +400,11 @@ static void android_pushAudioTrackCallback(int event, void* user, void *info) {
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_audioPlayerCreate(const SLDataSource *pAudioSrc,
-        const SLDataSink *pAudioSnk,
+SLresult sles_to_android_audioPlayerCreate(
         CAudioPlayer *pAudioPlayer) {
 
+    const SLDataSource *pAudioSrc = &pAudioPlayer->mDataSource.u.mSource;
+    const SLDataSink *pAudioSnk = &pAudioPlayer->mDataSink.u.mSink;
     SLresult result = SL_RESULT_SUCCESS;
 
     //--------------------------------------

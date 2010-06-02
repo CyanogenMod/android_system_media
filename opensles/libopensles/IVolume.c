@@ -192,12 +192,10 @@ void IVolume_init(void *self)
 {
     IVolume *this = (IVolume *) self;
     this->mItf = &IVolume_Itf;
-#ifndef NDEBUG
     this->mLevel = 0;
     this->mMute = SL_BOOLEAN_FALSE;
     this->mEnableStereoPosition = SL_BOOLEAN_FALSE;
     this->mStereoPosition = 0;
-#endif
 #ifdef USE_ANDROID
     this->mAmplFromVolLevel = 1.0f;
     this->mAmplFromStereoPos[0] = 1.0f;

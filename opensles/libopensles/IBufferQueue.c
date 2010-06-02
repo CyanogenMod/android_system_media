@@ -23,7 +23,7 @@ static SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
 {
     //FIXME if queue is empty and associated player is not in SL_PLAYSTATE_PLAYING state,
     // set it to SL_PLAYSTATE_PLAYING (and start playing)
-    if (NULL == pBuffer)
+    if (NULL == pBuffer || 0 == size)
         return SL_RESULT_PARAMETER_INVALID;
     IBufferQueue *this = (IBufferQueue *) self;
     SLresult result;
@@ -103,7 +103,6 @@ void IBufferQueue_init(void *self)
 {
     IBufferQueue *this = (IBufferQueue *) self;
     this->mItf = &IBufferQueue_Itf;
-#ifndef NDEBUG
     this->mState.count = 0;
     this->mState.playIndex = 0;
     this->mCallback = NULL;
@@ -119,5 +118,4 @@ void IBufferQueue_init(void *self)
         bufferHeader->mBuffer = NULL;
         bufferHeader->mSize = 0;
     }
-#endif
 }

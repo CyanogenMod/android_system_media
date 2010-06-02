@@ -369,6 +369,8 @@ SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataL
         freeDataLocator(&pDataLocatorFormat->mLocator);
         return result;
     }
+    pDataLocatorFormat->u.mSource.pLocator = &pDataLocatorFormat->mLocator;
+    pDataLocatorFormat->u.mSource.pFormat = &pDataLocatorFormat->mFormat;
     return SL_RESULT_SUCCESS;
 }
 
@@ -386,6 +388,8 @@ SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLoca
         freeDataLocator(&pDataLocatorFormat->mLocator);
         return result;
     }
+    pDataLocatorFormat->u.mSink.pLocator = &pDataLocatorFormat->mLocator;
+    pDataLocatorFormat->u.mSink.pFormat = &pDataLocatorFormat->mFormat;
     return SL_RESULT_SUCCESS;
 }
 
@@ -510,16 +514,8 @@ IObject *construct(const ClassTable *class__,
     unsigned exposedMask, SLEngineItf engine)
 {
     IObject *this;
-#ifndef NDEBUG
-    this = (IObject *) malloc(class__->mSize);
-#else
     this = (IObject *) calloc(1, class__->mSize);
-#endif
     if (NULL != this) {
-#ifndef NDEBUG
-        // for debugging, to detect uninitialized fields
-        memset(this, 0x55, class__->mSize);
-#endif
         this->mClass = class__;
         this->mExposedMask = exposedMask;
         unsigned lossOfControlMask = 0;

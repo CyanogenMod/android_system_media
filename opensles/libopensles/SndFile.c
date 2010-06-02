@@ -82,18 +82,16 @@ SLboolean SndFile_IsSupported(const SF_INFO *sfinfo)
     return SL_BOOLEAN_TRUE;
 }
 
-SLresult SndFile_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc, const SLDataSink *pAudioSnk, SLchar **pPathname, SLuint32 *pNumBuffers)
+SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
 {
-    assert(NULL != pPathname && NULL != pNumBuffers);
+    const SLDataSource *pAudioSrc = &this->mDataSource.u.mSource;
+    //const SLDataSink *pAudioSnk = &this->mDataSink.u.mSink;
     SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
     SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
     switch (locatorType) {
     case SL_DATALOCATOR_BUFFERQUEUE:
-        {
-        SLDataLocator_BufferQueue *dl_bq = (SLDataLocator_BufferQueue *) pAudioSrc->pLocator;
-        *pPathname = NULL;
-        *pNumBuffers = dl_bq->numBuffers;
-        }
+        this->mBufferQueue.mNumBuffers =
+            ((SLDataLocator_BufferQueue *) pAudioSrc->pLocator)->numBuffers;
         break;
     case SL_DATALOCATOR_URI:
         {
@@ -105,36 +103,22 @@ SLresult SndFile_checkAudioPlayerSourceSink(const SLDataSource *pAudioSrc, const
             return SL_RESULT_CONTENT_UNSUPPORTED;
         switch (formatType) {
         case SL_DATAFORMAT_MIME:
-            {
-            SLDataFormat_MIME *df_mime = (SLDataFormat_MIME *) pAudioSrc->pFormat;
-            SLchar *mimeType = df_mime->mimeType;
-            SLuint32 containerType = df_mime->containerType;
-            if (!strcmp((const char *) mimeType, "audio/x-wav"))
-                ;
-            // else if (others)
-            //    ;
-            else
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            switch (containerType) {
-            case SL_CONTAINERTYPE_WAV:
-                break;
-            // others
-            default:
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
-            }
             break;
         default:
             return SL_RESULT_CONTENT_UNSUPPORTED;
         }
-        *pPathname = &uri[8];
+        this->mSndFile.mPathname = &uri[8];
         // FIXME magic number, should be configurable
-        *pNumBuffers = 2;
+        this->mBufferQueue.mNumBuffers = 2;
         }
         break;
     default:
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
+    this->mSndFile.mIs0 = SL_BOOLEAN_TRUE;
+    this->mSndFile.mSNDFILE = NULL;
+    this->mSndFile.mRetryBuffer = NULL;
+    this->mSndFile.mRetrySize = 0;
     return SL_RESULT_SUCCESS;
 }
 

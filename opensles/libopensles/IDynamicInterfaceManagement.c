@@ -46,13 +46,7 @@ static SLresult IDynamicInterfaceManagement_AddInterface(
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
         // FIXME Currently do initialization here, but might be asynchronous
-#ifndef NDEBUG
-// for debugging, to detect uninitialized fields
-#define FILLER 0x55
-#else
-#define FILLER 0
-#endif
-        memset(thisItf, FILLER, size);
+        memset(thisItf, 0, size);
         ((void **) thisItf)[1] = thisObject;
         if (NULL != init)
             (*init)(thisItf);
@@ -161,9 +155,7 @@ void IDynamicInterfaceManagement_init(void *self)
 {
     IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
     this->mItf = &IDynamicInterfaceManagement_Itf;
-#ifndef NDEBUG
     this->mAddedMask = 0;
     this->mCallback = NULL;
     this->mContext = NULL;
-#endif
 }
