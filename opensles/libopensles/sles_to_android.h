@@ -69,3 +69,4 @@ extern SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf);
  *   to sles_to_android_audioPlayerVolumeUpdate()
  */
 extern SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute);
+

@@ -731,6 +731,15 @@ enum AndroidObject_type {
     AUDIOTRACK_PULL  = 2,
     NUM_AUDIOPLAYER_MAP_TYPES
 };
+
+typedef struct {
+    android::AudioTrack *mAudioTrack;
+} AudioTrackData;
+
+typedef struct {
+    android::MediaPlayer *mMediaPlayer;
+} MediaPlayerData;
+
 #endif
 
 /*typedef*/ struct CAudioPlayer_struct {
@@ -770,8 +779,8 @@ enum AndroidObject_type {
 #ifdef USE_ANDROID
     enum AndroidObject_type mAndroidObjType;
     union {
-        android::AudioTrack *mAudioTrack;
-        android::MediaPlayer *mMediaPlayer;
+        AudioTrackData mAudioTrackData;
+        MediaPlayerData mMediaPlayerData;
     };
 #endif
 } /*CAudioPlayer*/;

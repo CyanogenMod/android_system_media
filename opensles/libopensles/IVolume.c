@@ -33,8 +33,9 @@ static SLresult IVolume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
 
     IVolume *this = (IVolume *) self;
     interface_lock_poke(this);
+    SLmillibel oldLevel = this->mLevel;
     this->mLevel = level;
-    if(this->mMute == SL_BOOLEAN_FALSE) {
+    if((this->mMute == SL_BOOLEAN_FALSE) && (oldLevel != level)) {
 #ifdef USE_ANDROID
         // FIXME poke lock correct?
         switch (InterfaceToObjectID(this)) {
@@ -82,14 +83,15 @@ static SLresult IVolume_SetMute(SLVolumeItf self, SLboolean mute)
 {
     IVolume *this = (IVolume *) self;
     interface_lock_poke(this);
-    this->mMute = mute;
-    if(this->mMute == SL_BOOLEAN_FALSE) {
-        // when unmuting, reapply volume
-        IVolume_SetVolumeLevel(self, this->mLevel);
-    }
+    if (this->mMute != mute) {
+        this->mMute = mute;
+        if (this->mMute == SL_BOOLEAN_FALSE) {
+            // when unmuting, reapply volume
+            IVolume_SetVolumeLevel(self, this->mLevel);
+        }
 #ifdef USE_ANDROID
-    // FIXME poke lock correct?
-    switch (InterfaceToObjectID(this)) {
+        // FIXME poke lock correct?
+        switch (InterfaceToObjectID(this)) {
         case SL_OBJECTID_AUDIOPLAYER:
             sles_to_android_audioPlayerSetMute(this, mute);
             break;
@@ -99,8 +101,9 @@ static SLresult IVolume_SetMute(SLVolumeItf self, SLboolean mute)
             break;
         default:
             break;
-    }
+        }
 #endif
+    }
     interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
@@ -121,19 +124,20 @@ static SLresult IVolume_EnableStereoPosition(SLVolumeItf self, SLboolean enable)
 {
     IVolume *this = (IVolume *) self;
     interface_lock_poke(this);
-    this->mEnableStereoPosition = enable;
+    if (this->mEnableStereoPosition != enable) {
+        this->mEnableStereoPosition = enable;
 #ifdef USE_ANDROID
-    // FIXME poke lock correct?
-    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-        sles_to_android_audioPlayerVolumeUpdate(this);
-    }
+        // FIXME poke lock correct?
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+            sles_to_android_audioPlayerVolumeUpdate(this);
+        }
 #endif
+    }
     interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IVolume_IsEnabledStereoPosition(SLVolumeItf self,
-    SLboolean *pEnable)
+static SLresult IVolume_IsEnabledStereoPosition(SLVolumeItf self, SLboolean *pEnable)
 {
     if (NULL == pEnable)
         return SL_RESULT_PARAMETER_INVALID;
@@ -145,20 +149,21 @@ static SLresult IVolume_IsEnabledStereoPosition(SLVolumeItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IVolume_SetStereoPosition(SLVolumeItf self,
-    SLpermille stereoPosition)
+static SLresult IVolume_SetStereoPosition(SLVolumeItf self, SLpermille stereoPosition)
 {
     if (!((-1000 <= stereoPosition) && (1000 >= stereoPosition)))
         return SL_RESULT_PARAMETER_INVALID;
     IVolume *this = (IVolume *) self;
     interface_lock_poke(this);
-    this->mStereoPosition = stereoPosition;
+    if (this->mStereoPosition != stereoPosition) {
+        this->mStereoPosition = stereoPosition;
 #ifdef USE_ANDROID
-    // FIXME poke lock correct?
-    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-        sles_to_android_audioPlayerVolumeUpdate(this);
-    }
+        // FIXME poke lock correct?
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+            sles_to_android_audioPlayerVolumeUpdate(this);
+        }
 #endif
+    }
     interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }

@@ -59,20 +59,18 @@
 /* Checks for error. If any errors exit the application! */
 void CheckErr( SLresult res )
 {
-    if ( res != SL_RESULT_SUCCESS )
-        {
-            fprintf(stdout, "%d SL failure, exiting\n", res);
-            exit(1);
-        }
-    else {
-        //fprintf(stdout, "%d SL success, proceeding...\n", res);
+    if ( res != SL_RESULT_SUCCESS )  {
+        fprintf(stdout, "%lu SL failure, exiting\n", res);
+        exit(1);
+    } else {
+        //fprintf(stdout, "%lu SL success, proceeding...\n", res);
     }
 }
 
 
 //-----------------------------------------------------------------
 
-/* Play some music from a buffer queue  */
+/* Play some music from a URI  */
 void TestPlayUri( SLObjectItf sl, const char* path)
 {
     SLEngineItf                EngineItf;
@@ -92,12 +90,8 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     SLObjectItf                player;
     SLPlayItf                  playItf;
     SLVolumeItf                volItf;
-    SLBufferQueueItf           bufferQueueItf;
-    SLBufferQueueState         state;
 
     SLObjectItf                OutputMix;
-
-    int                        i;
 
     SLboolean required[MAX_NUMBER_INTERFACES];
     SLInterfaceID iidArray[MAX_NUMBER_INTERFACES];
@@ -107,11 +101,10 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     CheckErr(res);
 
     /* Initialize arrays required[] and iidArray[] */
-    for (i=0;i<MAX_NUMBER_INTERFACES;i++)
-        {
-            required[i] = SL_BOOLEAN_FALSE;
-            iidArray[i] = SL_IID_NULL;
-        }
+    for (int i=0 ; i < MAX_NUMBER_INTERFACES ; i++) {
+        required[i] = SL_BOOLEAN_FALSE;
+        iidArray[i] = SL_IID_NULL;
+    }
 
     // Set arrays required[] and iidArray[] for VOLUME interface
     required[0] = SL_BOOLEAN_TRUE;
@@ -197,6 +190,10 @@ int main(int argc, char* const argv[])
 
     SLresult    res;
     SLObjectItf sl;
+
+    fprintf(stdout, "OpenSL ES test %s: exercises SLPlayItf, SLVolumeItf ", argv[0]);
+    fprintf(stdout, "and AudioPlayer with SLDataLocator_URI source / OutputMix sink\n");
+    fprintf(stdout, "Plays a sound and stops after its reported duration\n");
 
     if (argc == 1) {
         fprintf(stdout, "Usage: \n\t%s path \n\t%s url\n", argv[0], argv[0]);

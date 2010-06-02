@@ -190,6 +190,6 @@ void IRecord_init(void *self)
     this->mContext = NULL;
     this->mCallbackEventsMask = 0;
     this->mMarkerPosition = 0;
-    this->mPositionUpdatePeriod = 0;
+    this->mPositionUpdatePeriod = 1000;
 #endif
 }

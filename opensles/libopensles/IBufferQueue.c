@@ -83,6 +83,8 @@ static SLresult IBufferQueue_GetState(SLBufferQueueItf self,
 static SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
     slBufferQueueCallback callback, void *pContext)
 {
+    // FIXME verify conditions media object is in the SL_PLAYSTATE_STOPPED state
+    fprintf(stderr, "FIXME: verify RegisterCallback is called on a player in SL_PLAYSTATE_STOPPED state, not implemented\n");
     IBufferQueue *this = (IBufferQueue *) self;
     interface_lock_exclusive(this);
     this->mCallback = callback;

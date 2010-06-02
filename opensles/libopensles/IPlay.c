@@ -31,16 +31,18 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
     }
     IPlay *this = (IPlay *) self;
     interface_lock_exclusive(this);
-    this->mState = state;
-    if (SL_PLAYSTATE_STOPPED == state) {
-        this->mPosition = (SLmillisecond) 0;
-        // this->mPositionSamples = 0;
-    }
+    if (this->mState != state) {
+        this->mState = state;
+        if (SL_PLAYSTATE_STOPPED == state) {
+            this->mPosition = (SLmillisecond) 0;
+            // this->mPositionSamples = 0;
+        }
 #ifdef USE_ANDROID
-    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-        result = sles_to_android_audioPlayerSetPlayState(this, state);
-    }
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+            result = sles_to_android_audioPlayerSetPlayState(this, state);
+        }
 #endif
+    }
     interface_unlock_exclusive(this);
     return result;
 }
@@ -113,12 +115,14 @@ static SLresult IPlay_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
     SLresult result = SL_RESULT_SUCCESS;
     IPlay *this = (IPlay *) self;
     interface_lock_poke(this);
-    this->mEventFlags = eventFlags;
+    if (this->mEventFlags != eventFlags) {
+        this->mEventFlags = eventFlags;
 #ifdef USE_ANDROID
-    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-        result = sles_to_android_audioPlayerUseEventMask(this, eventFlags);
-    }
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+            result = sles_to_android_audioPlayerUseEventMask(this, eventFlags);
+        }
 #endif
+    }
     interface_unlock_poke(this);
     return result;
 }
@@ -141,12 +145,14 @@ static SLresult IPlay_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
     SLresult result = SL_RESULT_SUCCESS;
     IPlay *this = (IPlay *) self;
     interface_lock_poke(this);
-    this->mMarkerPosition = mSec;
+    if (this->mMarkerPosition != mSec) {
+        this->mMarkerPosition = mSec;
 #ifdef USE_ANDROID
-    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-        result = sles_to_android_audioPlayerUseEventMask(this, this->mEventFlags);
-    }
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+            result = sles_to_android_audioPlayerUseEventMask(this, this->mEventFlags);
+        }
 #endif
+    }
     interface_unlock_poke(this);
     return result;
 }
@@ -186,12 +192,14 @@ static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec
     SLresult result = SL_RESULT_SUCCESS;
     IPlay *this = (IPlay *) self;
     interface_lock_poke(this);
-    this->mPositionUpdatePeriod = mSec;
+    if (this->mPositionUpdatePeriod != mSec) {
+        this->mPositionUpdatePeriod = mSec;
 #ifdef USE_ANDROID
-    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-        result = sles_to_android_audioPlayerUseEventMask(this, this->mEventFlags);
-    }
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+            result = sles_to_android_audioPlayerUseEventMask(this, this->mEventFlags);
+        }
 #endif
+    }
     interface_unlock_poke(this);
     return result;
 }
@@ -236,5 +244,5 @@ void IPlay_init(void *self)
     this->mContext = NULL;
     this->mEventFlags = 0;
     this->mMarkerPosition = 0;
-    this->mPositionUpdatePeriod = 0;
+    this->mPositionUpdatePeriod = 1000;
 }
