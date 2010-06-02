@@ -84,7 +84,6 @@ static SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
     slBufferQueueCallback callback, void *pContext)
 {
     IBufferQueue *this = (IBufferQueue *) self;
-    // FIXME This could be a poke lock, if we had atomic double-word load/store
     interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;

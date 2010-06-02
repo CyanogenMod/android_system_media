@@ -67,12 +67,14 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
 void CAudioPlayer_Destroy(void *self)
 {
     CAudioPlayer *this = (CAudioPlayer *) self;
+    freeDataLocatorFormat(&this->mDataSource);
+    freeDataLocatorFormat(&this->mDataSink);
     // FIXME stop the player in a way that app can't restart it
     // Free the buffer queue, if it was larger than typical
     if (NULL != this->mBufferQueue.mArray &&
         this->mBufferQueue.mArray != this->mBufferQueue.mTypical) {
-        free(this->mBufferQueue.mArray);
-        this->mBufferQueue.mArray = NULL;
+            free(this->mBufferQueue.mArray);
+            this->mBufferQueue.mArray = NULL;
     }
 #ifdef USE_SNDFILE
     if (NULL != this->mSndFile.mSNDFILE) {

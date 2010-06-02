@@ -35,6 +35,8 @@ extern void object_cond_signal(IObject *this);
 
 // Peek and poke are an optimization for small atomic fields that don't "matter"
 
+#define object_lock_peek(this)      /* object_lock_shared(this) */
+#define object_unlock_peek(this)    /* object_unlock_shared(this) */
 #define interface_lock_poke(this)   /* interface_lock_exclusive(this) */
 #define interface_unlock_poke(this) /* interface_unlock_exclusive(this) */
 #define interface_lock_peek(this)   /* interface_lock_shared(this) */

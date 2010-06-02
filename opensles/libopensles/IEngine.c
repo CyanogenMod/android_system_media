@@ -33,16 +33,6 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, 
     CLEDDevice *this = (CLEDDevice *) construct(pCLEDDevice_class, exposedMask, self);
     if (NULL == this)
         return SL_RESULT_MEMORY_FAILURE;
-    SLHSL *color = (SLHSL *) malloc(sizeof(SLHSL) * this->mLEDArray.mCount);
-    assert(NULL != this->mLEDArray.mColor);
-    this->mLEDArray.mColor = color;
-    unsigned i;
-    for (i = 0; i < this->mLEDArray.mCount; ++i) {
-        // per specification 1.0.1 pg. 259: "Default color is undefined."
-        color->hue = 0;
-        color->saturation = 1000;
-        color->lightness = 1000;
-    }
     this->mDeviceID = deviceID;
     *pDevice = &this->mObject.mItf;
     return SL_RESULT_SUCCESS;
@@ -157,12 +147,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
     return SL_RESULT_SUCCESS;
 
 abort:
-    freeDataLocatorFormat(&this->mDataSource);
-    freeDataLocatorFormat(&this->mDataSink);
-    if ((NULL != this->mBufferQueue.mArray) &&
-        (this->mBufferQueue.mTypical != this->mBufferQueue.mArray)) {
-            free(this->mBufferQueue.mArray);
-    }
+    CAudioPlayer_Destroy(this);
     free(this);
     return result;
 }

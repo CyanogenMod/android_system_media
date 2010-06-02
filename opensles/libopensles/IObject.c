@@ -23,22 +23,28 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
     IObject *this = (IObject *) self;
     const ClassTable *class__ = this->mClass;
     AsyncHook realize = class__->mRealize;
-    SLresult result = SL_RESULT_SUCCESS;
+    SLresult result;
+    slObjectCallback callback = NULL;
+    void *context = NULL;
+    SLuint32 state = 0;
     object_lock_exclusive(this);
-    // FIXME The realize hook and callback should be asynchronous if requested
     if (SL_OBJECT_STATE_UNREALIZED != this->mState) {
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
-        if (NULL != realize)
-            result = (*realize)(this, async);
+        // FIXME The realize hook and callback should be asynchronous if requested
+        result = NULL != realize ? (*realize)(this, async) : SL_RESULT_SUCCESS;
         if (SL_RESULT_SUCCESS == result)
             this->mState = SL_OBJECT_STATE_REALIZED;
-        // FIXME callback should not run with mutex lock
-        if (async && (NULL != this->mCallback))
-            (*this->mCallback)(self, this->mContext,
-            SL_OBJECT_EVENT_ASYNC_TERMINATION, result, this->mState, NULL);
+        // Make a copy of these, so we can call the callback with mutex unlocked
+        if (async) {
+            callback = this->mCallback;
+            context = this->mContext;
+            state = this->mState;
+        }
     }
     object_unlock_exclusive(this);
+    if (NULL != callback)
+        (*callback)(self, context, SL_OBJECT_EVENT_ASYNC_TERMINATION, result, state, NULL);
     return result;
 }
 
@@ -46,23 +52,29 @@ static SLresult IObject_Resume(SLObjectItf self, SLboolean async)
 {
     IObject *this = (IObject *) self;
     const ClassTable *class__ = this->mClass;
-    AsyncHook resume = class__->mResume;
-    SLresult result = SL_RESULT_SUCCESS;
+    StatusHook resume = class__->mResume;
+    SLresult result;
+    slObjectCallback callback = NULL;
+    void *context = NULL;
+    SLuint32 state = 0;
     object_lock_exclusive(this);
-    // FIXME The resume hook and callback should be asynchronous if requested
     if (SL_OBJECT_STATE_SUSPENDED != this->mState) {
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
-        if (NULL != resume)
-            result = (*resume)(this, async);
+        // FIXME The resume hook and callback should be asynchronous if requested
+        result = NULL != resume ? (*resume)(this) : SL_RESULT_SUCCESS;
         if (SL_RESULT_SUCCESS == result)
             this->mState = SL_OBJECT_STATE_REALIZED;
-        // FIXME callback should not run with mutex lock
-        if (async && (NULL != this->mCallback))
-            (*this->mCallback)(self, this->mContext,
-            SL_OBJECT_EVENT_ASYNC_TERMINATION, result, this->mState, NULL);
+        // Make a copy of these, so we can call the callback with mutex unlocked
+        if (async) {
+            callback = this->mCallback;
+            context = this->mContext;
+            state = this->mState;
+        }
     }
     object_unlock_exclusive(this);
+    if (NULL != callback)
+        (*callback)(self, context, SL_OBJECT_EVENT_ASYNC_TERMINATION, result, state, NULL);
     return result;
 }
 
@@ -71,16 +83,15 @@ static SLresult IObject_GetState(SLObjectItf self, SLuint32 *pState)
     if (NULL == pState)
         return SL_RESULT_PARAMETER_INVALID;
     IObject *this = (IObject *) self;
-    // FIXME Investigate what it would take to change to a peek lock
-    object_lock_shared(this);
+    // Note that the state is immediately obsolete, so a peek lock is safe
+    object_lock_peek(this);
     SLuint32 state = this->mState;
-    object_unlock_shared(this);
+    object_unlock_peek(this);
     *pState = state;
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid,
-    void *pInterface)
+static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, void *pInterface)
 {
     if (NULL == pInterface)
         return SL_RESULT_PARAMETER_INVALID;
@@ -120,7 +131,6 @@ static SLresult IObject_RegisterCallback(SLObjectItf self,
     slObjectCallback callback, void *pContext)
 {
     IObject *this = (IObject *) self;
-    // FIXME This could be a poke lock, if we had atomic double-word load/store
     object_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
@@ -135,6 +145,7 @@ static void IObject_AbortAsyncOperation(SLObjectItf self)
 
 static void IObject_Destroy(SLObjectItf self)
 {
+    // FIXME The abort should be atomic w.r.t. destroy, so another async can't be started in window
     IObject_AbortAsyncOperation(self);
     IObject *this = (IObject *) self;
     const ClassTable *class__ = this->mClass;
@@ -161,8 +172,7 @@ static void IObject_Destroy(SLObjectItf self)
     free(this);
 }
 
-static SLresult IObject_SetPriority(SLObjectItf self, SLint32 priority,
-    SLboolean preemptable)
+static SLresult IObject_SetPriority(SLObjectItf self, SLint32 priority, SLboolean preemptable)
 {
     IObject *this = (IObject *) self;
     object_lock_exclusive(this);
@@ -172,8 +182,7 @@ static SLresult IObject_SetPriority(SLObjectItf self, SLint32 priority,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IObject_GetPriority(SLObjectItf self, SLint32 *pPriority,
-    SLboolean *pPreemptable)
+static SLresult IObject_GetPriority(SLObjectItf self, SLint32 *pPriority, SLboolean *pPreemptable)
 {
     if (NULL == pPriority || NULL == pPreemptable)
         return SL_RESULT_PARAMETER_INVALID;

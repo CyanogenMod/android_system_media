@@ -50,8 +50,8 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
         void *dstWriter = pBuffer;
         unsigned desired = size;
         SLboolean trackContributedToMix = SL_BOOLEAN_FALSE;
+        IBufferQueue *bufferQueue = track->mBufferQueue;
         while (desired > 0) {
-            IBufferQueue *bufferQueue;
             const struct BufferHeader *oldFront, *newFront, *rear;
             unsigned actual = desired;
             if (track->mAvail < actual)
@@ -82,8 +82,8 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                 track->mReader = (char *) track->mReader + actual;
                 track->mAvail -= actual;
                 if (track->mAvail == 0) {
-                    bufferQueue = track->mBufferQueue;
                     if (NULL != bufferQueue) {
+                        interface_lock_exclusive(bufferQueue);
                         oldFront = bufferQueue->mFront;
                         rear = bufferQueue->mRear;
                         assert(oldFront != rear);
@@ -95,6 +95,7 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                         --bufferQueue->mState.count;
                         // FIXME here or in Enqueue?
                         ++bufferQueue->mState.playIndex;
+                        interface_unlock_exclusive(bufferQueue);
                         // FIXME a good time to do an early warning
                         // callback depending on buffer count
                     }
@@ -102,8 +103,8 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                 continue;
             }
             // actual == 0
-            bufferQueue = track->mBufferQueue;
             if (NULL != bufferQueue) {
+                interface_lock_shared(bufferQueue);
                 oldFront = bufferQueue->mFront;
                 rear = bufferQueue->mRear;
                 if (oldFront != rear) {
@@ -111,17 +112,22 @@ got_one:
                     assert(0 < bufferQueue->mState.count);
                     track->mReader = oldFront->mBuffer;
                     track->mAvail = oldFront->mSize;
+                    interface_unlock_shared(bufferQueue);
                     continue;
                 }
                 // FIXME should be able to configure when to
                 // kick off the callback e.g. high/low water-marks etc.
                 // need data but none available, attempt a desperate callback
                 slBufferQueueCallback callback = bufferQueue->mCallback;
+                void *context = bufferQueue->mContext;
+                interface_unlock_shared(bufferQueue);
                 if (NULL != callback) {
-                    (*callback)((SLBufferQueueItf) bufferQueue, bufferQueue->mContext);
+                    (*callback)((SLBufferQueueItf) bufferQueue, context);
                     // if lucky, the callback enqueued a buffer
+                    interface_lock_shared(bufferQueue);
                     if (rear != bufferQueue->mRear)
                         goto got_one;
+                    interface_unlock_shared(bufferQueue);
                     // unlucky, queue still empty, the callback failed
                 }
                 // here on underflow due to no callback, or failed callback

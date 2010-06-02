@@ -95,7 +95,7 @@ typedef struct {
     size_t mSize;
     SLuint32 mObjectID;
     AsyncHook mRealize;
-    AsyncHook mResume;
+    StatusHook mResume;
     VoidHook mDestroy;
     // append per-class data here
 } ClassTable;
@@ -178,7 +178,7 @@ typedef struct Object_interface {
     // but look for lingering code that assumes it is here before deleting
     struct Object_interface *mThis;
     const ClassTable *mClass;
-    volatile SLuint32 mState;
+    SLuint32 mState;
     slObjectCallback mCallback;
     void *mContext;
     unsigned mExposedMask;  // exposed interfaces
@@ -356,7 +356,7 @@ typedef struct {
 typedef struct BufferQueue_interface {
     const struct SLBufferQueueItf_ *mItf;
     IObject *mThis;
-    volatile SLBufferQueueState mState;
+    SLBufferQueueState mState;
     slBufferQueueCallback mCallback;
     void *mContext;
     SLuint32 mNumBuffers;
@@ -377,7 +377,8 @@ typedef struct {
 typedef struct {
     const struct SLDynamicInterfaceManagementItf_ *mItf;
     IObject *mThis;
-    unsigned mAddedMask;    // added interfaces, a subset of exposed interfaces
+    unsigned mAddedMask;     // added interfaces, a subset of exposed interfaces
+    unsigned mSuspendedMask; // suspended interfaces, a subset of added interfaces
     slDynamicInterfaceManagementCallback mCallback;
     void *mContext;
 } IDynamicInterfaceManagement;
@@ -450,26 +451,30 @@ struct EqualizerBand {
     SLmilliHertz mMax;
 };
 
+#define MAX_EQ_BANDS 4  // compile-time limit, runtime limit may be smaller
+
 typedef struct {
     const struct SLEqualizerItf_ *mItf;
     IObject *mThis;
     SLboolean mEnabled;
     SLuint16 mPreset;
-    SLmillibel *mLevels;
-    // const
+    SLmillibel mLevels[MAX_EQ_BANDS];
+    // const to end of struct
     SLuint16 mNumPresets;
     SLuint16 mNumBands;
     const struct EqualizerBand *mBands;
-    const SLchar * const *mPresetNames;
+    const struct EqualizerPreset *mPresets;
     SLmillibel mBandLevelRangeMin;
     SLmillibel mBandLevelRangeMax;
 } IEqualizer;
+
+#define MAX_LED_COUNT 32
 
 typedef struct {
     const struct SLLEDArrayItf_ *mItf;
     IObject *mThis;
     SLuint32 mLightMask;
-    SLHSL *mColor;
+    SLHSL mColors[MAX_LED_COUNT];
     // const
     SLuint8 mCount;
 } ILEDArray;
@@ -573,7 +578,7 @@ typedef struct {
 typedef struct Play_interface {
     const struct SLPlayItf_ *mItf;
     IObject *mThis;
-    volatile SLuint32 mState;
+    SLuint32 mState;
     SLmillisecond mDuration;
     SLmillisecond mPosition;
     // unsigned mPositionSamples;  // position in sample units
@@ -768,8 +773,6 @@ enum AndroidObject_type {
         android::AudioTrack *mAudioTrack;
         android::MediaPlayer *mMediaPlayer;
     };
-    char* mUri;// FIXME temporary storage before we handle that correctly
-    pthread_t mThread;
 #endif
 } /*CAudioPlayer*/;
 
@@ -918,3 +921,5 @@ extern SLuint32 IObjectToObjectID(IObject *object);
 extern SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *myDataSourceLocator);
 extern SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *myDataSinkLocator);
 extern void freeDataLocatorFormat(DataLocatorFormat *dlf);
+extern SLresult CAudioPlayer_Realize(void *self, SLboolean async);
+extern void CAudioPlayer_Destroy(void *self);

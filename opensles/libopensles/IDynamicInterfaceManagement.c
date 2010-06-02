@@ -18,9 +18,8 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IDynamicInterfaceManagement_AddInterface(
-    SLDynamicInterfaceManagementItf self, const SLInterfaceID iid,
-    SLboolean async)
+static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManagementItf self,
+    const SLInterfaceID iid, SLboolean async)
 {
     if (NULL == iid)
         return SL_RESULT_PARAMETER_INVALID;
@@ -39,27 +38,33 @@ static SLresult IDynamicInterfaceManagement_AddInterface(
     size_t size = ((SLuint32) (index + 1) == class__->mInterfaceCount ?
         class__->mSize : x[1].mOffset) - offset;
     unsigned mask = 1 << index;
+    slDynamicInterfaceManagementCallback callback = NULL;
+    void *context = NULL;
     // Lock the object rather than the DIM interface, because
     // we modify both the object (exposed) and interface (added)
     object_lock_exclusive(thisObject);
     if (thisObject->mExposedMask & mask) {
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
-        // FIXME Currently do initialization here, but might be asynchronous
+        // FIXME Currently all initialization is done here, even if requested to be asynchronous
         memset(thisItf, 0, size);
         ((void **) thisItf)[1] = thisObject;
         if (NULL != init)
             (*init)(thisItf);
         thisObject->mExposedMask |= mask;
+        assert(!(this->mAddedMask & mask));
         this->mAddedMask |= mask;
+        assert(!(this->mSuspendedMask & mask));
         result = SL_RESULT_SUCCESS;
-        if (async && (NULL != this->mCallback)) {
-            // FIXME Callback runs with mutex locked
-            (*this->mCallback)(self, this->mContext,
-                SL_DYNAMIC_ITF_EVENT_RESOURCES_AVAILABLE, result, iid);
+        // Make a copy of these, so we can call the callback with mutex unlocked
+        if (async) {
+            callback = this->mCallback;
+            context = this->mContext;
         }
     }
     object_unlock_exclusive(thisObject);
+    if (NULL != callback)
+        (*callback)(self, context, SL_DYNAMIC_ITF_EVENT_ASYNC_TERMINATION, result, iid);
     return result;
 }
 
@@ -92,6 +97,7 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
     if (!(this->mAddedMask & mask)) {
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
+        // FIXME When async resume is implemented, a pending async resume should be cancelled
         if (NULL != deinit)
             (*deinit)(thisItf);
 #ifndef NDEBUG
@@ -99,13 +105,13 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
 #endif
         thisObject->mExposedMask &= ~mask;
         this->mAddedMask &= ~mask;
+        this->mSuspendedMask &= ~mask;
     }
     object_unlock_exclusive(thisObject);
     return result;
 }
 
-static SLresult IDynamicInterfaceManagement_ResumeInterface(
-    SLDynamicInterfaceManagementItf self,
+static SLresult IDynamicInterfaceManagement_ResumeInterface(SLDynamicInterfaceManagementItf self,
     const SLInterfaceID iid, SLboolean async)
 {
     if (NULL == iid)
@@ -119,24 +125,38 @@ static SLresult IDynamicInterfaceManagement_ResumeInterface(
     int index = class__->mMPH_to_index[MPH];
     if (0 > index)
         return SL_RESULT_PRECONDITIONS_VIOLATED;
-    SLresult result = SL_RESULT_SUCCESS;
+    SLresult result;
     unsigned mask = 1 << index;
+    slDynamicInterfaceManagementCallback callback = NULL;
+    void *context = NULL;
     // FIXME Change to exclusive when resume hook implemented
     object_lock_shared(thisObject);
-    if (!(this->mAddedMask & mask))
+    if (!(this->mSuspendedMask & mask))
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    else {
+        assert(this->mAddedMask & mask);
+        assert(thisObject->mExposedMask & mask);
+        // FIXME Currently the resume is done here, even if requested to be asynchronous
+        this->mSuspendedMask &= ~mask;
+        result = SL_RESULT_SUCCESS;
+        // Make a copy of these, so we can call the callback with mutex unlocked
+        if (async) {
+            callback = this->mCallback;
+            context = this->mContext;
+        }
+    }
     // FIXME Call a resume hook on the interface, if suspended
     object_unlock_shared(thisObject);
+    if (NULL != callback)
+        (*callback)(self, context, SL_DYNAMIC_ITF_EVENT_ASYNC_TERMINATION, result, iid);
     return result;
 }
 
-static SLresult IDynamicInterfaceManagement_RegisterCallback(
-    SLDynamicInterfaceManagementItf self,
+static SLresult IDynamicInterfaceManagement_RegisterCallback(SLDynamicInterfaceManagementItf self,
     slDynamicInterfaceManagementCallback callback, void *pContext)
 {
     IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
     IObject *thisObject = this->mThis;
-    // FIXME This could be a poke lock, if we had atomic double-word load/store
     object_lock_exclusive(thisObject);
     this->mCallback = callback;
     this->mContext = pContext;
@@ -156,6 +176,7 @@ void IDynamicInterfaceManagement_init(void *self)
     IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
     this->mItf = &IDynamicInterfaceManagement_Itf;
     this->mAddedMask = 0;
+    this->mSuspendedMask = 0;
     this->mCallback = NULL;
     this->mContext = NULL;
 }

@@ -18,8 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult ILEDArray_ActivateLEDArray(SLLEDArrayItf self,
-    SLuint32 lightMask)
+static SLresult ILEDArray_ActivateLEDArray(SLLEDArrayItf self, SLuint32 lightMask)
 {
     ILEDArray *this = (ILEDArray *) self;
     interface_lock_poke(this);
@@ -28,8 +27,7 @@ static SLresult ILEDArray_ActivateLEDArray(SLLEDArrayItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult ILEDArray_IsLEDArrayActivated(SLLEDArrayItf self,
-    SLuint32 *pLightMask)
+static SLresult ILEDArray_IsLEDArrayActivated(SLLEDArrayItf self, SLuint32 *pLightMask)
 {
     if (NULL == pLightMask)
         return SL_RESULT_PARAMETER_INVALID;
@@ -41,8 +39,7 @@ static SLresult ILEDArray_IsLEDArrayActivated(SLLEDArrayItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult ILEDArray_SetColor(SLLEDArrayItf self, SLuint8 index,
-    const SLHSL *pColor)
+static SLresult ILEDArray_SetColor(SLLEDArrayItf self, SLuint8 index, const SLHSL *pColor)
 {
     if (NULL == pColor)
         return SL_RESULT_PARAMETER_INVALID;
@@ -54,21 +51,22 @@ static SLresult ILEDArray_SetColor(SLLEDArrayItf self, SLuint8 index,
     if (!(0 <= color.lightness && color.lightness <= 1000))
         return SL_RESULT_PARAMETER_INVALID;
     ILEDArray *this = (ILEDArray *) self;
-    interface_lock_poke(this);
-    this->mColor[index] = color;
-    interface_unlock_poke(this);
+    // can't use poke because struct copy might not be atomic
+    interface_lock_exclusive(this);
+    this->mColors[index] = color;
+    interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult ILEDArray_GetColor(SLLEDArrayItf self, SLuint8 index,
-    SLHSL *pColor)
-{
+    SLHSL *pColor) {
     if (NULL == pColor)
         return SL_RESULT_PARAMETER_INVALID;
     ILEDArray *this = (ILEDArray *) self;
-    interface_lock_peek(this);
-    SLHSL color = this->mColor[index];
-    interface_unlock_peek(this);
+    // can't use peek because struct copy might not be atomic
+    interface_lock_shared(this);
+    SLHSL color = this->mColors[index];
+    interface_unlock_shared(this);
     *pColor = color;
     return SL_RESULT_SUCCESS;
 }
@@ -84,19 +82,14 @@ void ILEDArray_init(void *self)
 {
     ILEDArray *this = (ILEDArray *) self;
     this->mItf = &ILEDArray_Itf;
-#ifndef NDEBUG
     this->mLightMask = 0;
-    this->mColor = NULL;
-#endif
-    this->mCount = 8;   // FIXME wrong place
-    SLHSL *color;
-    color = (SLHSL *) malloc(sizeof(SLHSL) * this->mCount);
-    assert(NULL != color);
-    this->mColor = color;
+    SLHSL *color = this->mColors;
     SLuint8 index;
-    for (index = 0; index < this->mCount; ++index, ++color) {
-        color->hue = 0; // red
+    for (index = 0; index < MAX_LED_COUNT; ++index, ++color) {
+        color->hue = 0; // red, but per specification 1.0.1 pg. 259: "Default color is undefined."
         color->saturation = 1000;
         color->lightness = 1000;
     }
+    // const
+    this->mCount = MAX_LED_COUNT;
 }

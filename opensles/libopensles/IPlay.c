@@ -101,7 +101,6 @@ static SLresult IPlay_RegisterCallback(SLPlayItf self, slPlayCallback callback,
     void *pContext)
 {
     IPlay *this = (IPlay *) self;
-    // FIXME This could be a poke lock, if we had atomic double-word load/store
     interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;

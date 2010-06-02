@@ -18,27 +18,25 @@
 
 #include "sles_allinclusive.h"
 
-// FIXME move
+// FIXME move to platform-specific configuration
 
-const struct EqualizerBand EqualizerBands[] = {
+#define MAX_EQ_PRESETS 3
+
+static const struct EqualizerBand EqualizerBands[MAX_EQ_BANDS] = {
     {1000, 1500, 2000},
     {2000, 3000, 4000},
     {4000, 5500, 7000},
     {7000, 8000, 9000}
 };
 
-#define MAX_BANDS (sizeof(EqualizerBands)/sizeof(EqualizerBands[0]))
-
-const struct EqualizerPreset {
-    const SLchar *mName;
-    SLmillibel mLevels[MAX_BANDS];
-} EqualizerPresets[] = {
-    {(const SLchar *) "Default", {0, 0, 0, 0}},
-    {(const SLchar *) "Bass", {500, 200, 100, 0}},
-    {(const SLchar *) "Treble", {0, 100, 200, 500}}
+static const struct EqualizerPreset {
+    const char *mName;
+    SLmillibel mLevels[MAX_EQ_BANDS];
+} EqualizerPresets[MAX_EQ_PRESETS] = {
+    {"Default", {0, 0, 0, 0}},
+    {"Bass", {500, 200, 100, 0}},
+    {"Treble", {0, 100, 200, 500}}
 };
-
-#define MAX_PRESETS (sizeof(EqualizerPresets)/sizeof(EqualizerPresets[0]))
 
 static SLresult IEqualizer_SetEnabled(SLEqualizerItf self, SLboolean enabled)
 {
@@ -61,8 +59,7 @@ static SLresult IEqualizer_IsEnabled(SLEqualizerItf self, SLboolean *pEnabled)
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEqualizer_GetNumberOfBands(SLEqualizerItf self,
-    SLuint16 *pNumBands)
+static SLresult IEqualizer_GetNumberOfBands(SLEqualizerItf self, SLuint16 *pNumBands)
 {
     if (NULL == pNumBands)
         return SL_RESULT_PARAMETER_INVALID;
@@ -86,8 +83,7 @@ static SLresult IEqualizer_GetBandLevelRange(SLEqualizerItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEqualizer_SetBandLevel(SLEqualizerItf self, SLuint16 band,
-    SLmillibel level)
+static SLresult IEqualizer_SetBandLevel(SLEqualizerItf self, SLuint16 band, SLmillibel level)
 {
     IEqualizer *this = (IEqualizer *) self;
     if (band >= this->mNumBands)
@@ -114,8 +110,7 @@ static SLresult IEqualizer_GetBandLevel(SLEqualizerItf self, SLuint16 band,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEqualizer_GetCenterFreq(SLEqualizerItf self, SLuint16 band,
-    SLmilliHertz *pCenter)
+static SLresult IEqualizer_GetCenterFreq(SLEqualizerItf self, SLuint16 band, SLmilliHertz *pCenter)
 {
     if (NULL == pCenter)
         return SL_RESULT_PARAMETER_INVALID;
@@ -143,8 +138,7 @@ static SLresult IEqualizer_GetBandFreqRange(SLEqualizerItf self, SLuint16 band,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEqualizer_GetBand(SLEqualizerItf self, SLmilliHertz frequency,
-    SLuint16 *pBand)
+static SLresult IEqualizer_GetBand(SLEqualizerItf self, SLmilliHertz frequency, SLuint16 *pBand)
 {
     if (NULL == pBand)
         return SL_RESULT_PARAMETER_INVALID;
@@ -219,7 +213,7 @@ static SLresult IEqualizer_GetPresetName(SLEqualizerItf self, SLuint16 index,
     IEqualizer *this = (IEqualizer *) self;
     if (index >= this->mNumPresets)
         return SL_RESULT_PARAMETER_INVALID;
-    *ppName = this->mPresetNames[index];
+    *ppName = (SLchar *) this->mPresets[index].mName;
     return SL_RESULT_SUCCESS;
 }
 
@@ -244,15 +238,15 @@ void IEqualizer_init(void *self)
     IEqualizer *this = (IEqualizer *) self;
     this->mItf = &IEqualizer_Itf;
     this->mEnabled = SL_BOOLEAN_FALSE;
-    this->mNumBands = MAX_BANDS;
+    this->mPreset = SL_EQUALIZER_UNDEFINED;
+    unsigned band;
+    for (band = 0; band < MAX_EQ_BANDS; ++band)
+        this->mLevels[band] = 0;
+    // const fields
+    this->mNumPresets = MAX_EQ_PRESETS;
+    this->mNumBands = MAX_EQ_BANDS;
+    this->mBands = EqualizerBands;
+    this->mPresets = EqualizerPresets;
     this->mBandLevelRangeMin = 0;
     this->mBandLevelRangeMax = 1000;
-    this->mBands = EqualizerBands;
-    SLmillibel *levels;
-    levels = (SLmillibel *) malloc(sizeof(SLmillibel) * MAX_BANDS);
-    assert(NULL != levels);
-    unsigned band;
-    for (band = 0; band < this->mNumBands; ++band)
-        this->mLevels[band] = 0;
-    this->mPreset = SL_EQUALIZER_UNDEFINED;
 }

@@ -279,10 +279,10 @@ static void android_pullAudioTrackCallback(int event, void* user, void *info) {
 
     case (android::AudioTrack::EVENT_MORE_DATA) : {
         //fprintf(stdout, "received event EVENT_MORE_DATA from AudioTrack\n");
+        slBufferQueueCallback callback = NULL;
         android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
         // retrieve data from the buffer queue
         interface_lock_exclusive(&pAudioPlayer->mBufferQueue);
-        slBufferQueueCallback callback = NULL;
         if (pAudioPlayer->mBufferQueue.mState.count != 0) {
             //fprintf(stderr, "nbBuffers in queue = %lu\n",pAudioPlayer->mBufferQueue.mState.count);
             assert(pAudioPlayer->mBufferQueue.mFront != pAudioPlayer->mBufferQueue.mRear);
@@ -298,6 +298,7 @@ static void android_pullAudioTrackCallback(int event, void* user, void *info) {
                 pAudioPlayer->mBufferQueue.mSizeConsumed += pBuff->size;
                 // leave pBuff->size untouched
                 // consume data
+                // FIXME can we avoid holding the lock during the copy?
                 memcpy (pBuff->i16, pSrc, pBuff->size);
             } else {
                 // finish consuming the buffer or consume the buffer in one shot
@@ -315,15 +316,14 @@ static void android_pullAudioTrackCallback(int event, void* user, void *info) {
                 pAudioPlayer->mBufferQueue.mState.playIndex++;
 
                 // consume data
+                // FIXME can we avoid holding the lock during the copy?
                 memcpy (pBuff->i16, pSrc, pBuff->size);
 
                 // data has been consumed, and the buffer queue state has been updated
                 // we can notify the client if applicable
                 callback = pAudioPlayer->mBufferQueue.mCallback;
-                if (NULL != callback) {
-                    // save callback data
-                    callbackPContext = pAudioPlayer->mBufferQueue.mContext;
-                }
+                // save callback data
+                callbackPContext = pAudioPlayer->mBufferQueue.mContext;
             }
         } else {
             // no data available
@@ -369,8 +369,9 @@ static void android_pullAudioTrackCallback(int event, void* user, void *info) {
         interface_lock_shared(&pAudioPlayer->mPlay);
         callback = pAudioPlayer->mPlay.mCallback;
         callbackPContext = pAudioPlayer->mPlay.mContext;
+        bool headStalled = (pAudioPlayer->mPlay.mEventFlags & SL_PLAYEVENT_HEADSTALLED) != 0;
         interface_unlock_shared(&pAudioPlayer->mPlay);
-        if ((NULL != callback) && (pAudioPlayer->mPlay.mEventFlags & SL_PLAYEVENT_HEADSTALLED)) {
+        if ((NULL != callback) && headStalled) {
             (*callback)(&pAudioPlayer->mPlay.mItf, callbackPContext, SL_PLAYEVENT_HEADSTALLED);
         }
     }
@@ -423,13 +424,8 @@ SLresult sles_to_android_audioPlayerCreate(
         break;
     //   -----------------------------------
     //   URI to MediaPlayer
-    case SL_DATALOCATOR_URI: {
+    case SL_DATALOCATOR_URI:
         pAudioPlayer->mAndroidObjType = MEDIAPLAYER;
-        // save URI
-        SLDataLocator_URI *dl_uri =  (SLDataLocator_URI *) pAudioSrc->pLocator;
-        pAudioPlayer->mUri = (char*) malloc(1 + sizeof(SLchar)*strlen((char*)dl_uri->URI));
-        strcpy(pAudioPlayer->mUri, (char*)dl_uri->URI);
-        }
         break;
     default:
         pAudioPlayer->mAndroidObjType = INVALID_TYPE;
@@ -483,7 +479,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
             break;
         }
         pAudioPlayer->mMediaPlayer->setAudioStreamType(ANDROID_DEFAULT_OUTPUT_STREAM_TYPE);
-        if (pAudioPlayer->mMediaPlayer->setDataSource(android::String8(pAudioPlayer->mUri), NULL)
+        if (pAudioPlayer->mMediaPlayer->setDataSource(android::String8((const char *) pAudioPlayer->mDataSource.mLocator.mURI.URI), NULL)
                 != android::NO_ERROR) {
             result = SL_RESULT_CONTENT_UNSUPPORTED;
             break;
@@ -494,7 +490,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
         if (async == SL_BOOLEAN_FALSE) {
             if (pAudioPlayer->mMediaPlayer->prepare() != android::NO_ERROR) {
                 fprintf(stderr, "Failed to prepare() MediaPlayer in synchronous mode for %s\n",
-                        pAudioPlayer->mUri);
+                        pAudioPlayer->mDataSource.mLocator.mURI.URI);
                 result = SL_RESULT_CONTENT_UNSUPPORTED;
             }
         } else {
@@ -537,7 +533,6 @@ SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer) {
             fprintf(stderr, "FIXME destroy MediaPlayer\n");
             //delete pAudioPlayer->mMediaPlayer;
             pAudioPlayer->mMediaPlayer = NULL;
-            free(pAudioPlayer->mUri);
         }
         break;
     default:
