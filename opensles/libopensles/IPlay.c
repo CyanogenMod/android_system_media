@@ -114,7 +114,7 @@ static SLresult IPlay_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
 {
     SLresult result = SL_RESULT_SUCCESS;
     IPlay *this = (IPlay *) self;
-    interface_lock_poke(this);
+    interface_lock_exclusive(this);
     if (this->mEventFlags != eventFlags) {
         this->mEventFlags = eventFlags;
 #ifdef USE_ANDROID
@@ -123,7 +123,7 @@ static SLresult IPlay_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
         }
 #endif
     }
-    interface_unlock_poke(this);
+    interface_unlock_exclusive(this);
     return result;
 }
 
@@ -144,7 +144,7 @@ static SLresult IPlay_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
 {
     SLresult result = SL_RESULT_SUCCESS;
     IPlay *this = (IPlay *) self;
-    interface_lock_poke(this);
+    interface_lock_exclusive(this);
     if (this->mMarkerPosition != mSec) {
         this->mMarkerPosition = mSec;
 #ifdef USE_ANDROID
@@ -153,7 +153,7 @@ static SLresult IPlay_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
         }
 #endif
     }
-    interface_unlock_poke(this);
+    interface_unlock_exclusive(this);
     return result;
 }
 
@@ -191,7 +191,7 @@ static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec
 {
     SLresult result = SL_RESULT_SUCCESS;
     IPlay *this = (IPlay *) self;
-    interface_lock_poke(this);
+    interface_lock_exclusive(this);
     if (this->mPositionUpdatePeriod != mSec) {
         this->mPositionUpdatePeriod = mSec;
 #ifdef USE_ANDROID
@@ -200,7 +200,7 @@ static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec
         }
 #endif
     }
-    interface_unlock_poke(this);
+    interface_unlock_exclusive(this);
     return result;
 }
 
