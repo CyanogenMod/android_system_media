@@ -33,9 +33,7 @@
 #define MPH_MIDITEMPO                  25
 #define MPH_MIDITIME                   26
 #define MPH_MUTESOLO                   27
-#if 1 // FIXME why needed?
-#define MPH_NULL                       28
-#endif
+#define MPH_NULL                       28 // FIXME why needed?
 #define MPH_OBJECT                     29
 #define MPH_OUTPUTMIX                  30
 #define MPH_PITCH                      31
@@ -51,8 +49,7 @@
 #define MPH_VIRTUALIZER                41
 #define MPH_VISUALIZATION              42
 #define MPH_VOLUME                     43
-// The lack of an ifdef is intentional
-#define MPH_OUTPUTMIXEXT               44
+#define MPH_OUTPUTMIXEXT               44 // The lack of an ifdef is intentional
 
 #define MPH_MAX                        45
 

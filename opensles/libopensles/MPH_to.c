@@ -1,11 +1,14 @@
 /* Copyright 2010 The Android Open Source Project */
 
 // Map minimal perfect hash of an interface ID to its class index.
-// This _must_ be compiled with GNU C, not GNU C++ or non-GNU C.
 
 #include "MPH.h"
 
+// If defined, then compile with C99 such as GNU C, not GNU C++ or non-GNU C.
+//#define USE_DESIGNATED_INITIALIZERS
+
 const signed char MPH_to_3DGroup[MPH_MAX] = {
+#ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
     [MPH_OBJECT] = 0,
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
@@ -13,9 +16,23 @@ const signed char MPH_to_3DGroup[MPH_MAX] = {
     [MPH_3DDOPPLER] = 3,
     [MPH_3DSOURCE] = 4,
     [MPH_3DMACROSCOPIC] = 5
+#else
+    -1,
+    3, // MPH_3DDOPPLER
+    -1,
+    2, // MPH_3DLOCATION
+    5, // MPH_3DMACROSCOPIC
+    4, // MPH_3DSOURCE
+    -1, -1, -1, -1, -1, -1, -1,
+    1, // MPH_DYNAMICINTERFACEMANAGEMENT
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    0, // MPH_OBJECT
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+#endif
 };
 
 const signed char MPH_to_AudioPlayer[MPH_MAX] = {
+#ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
     [MPH_OBJECT] = 0,
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
@@ -43,9 +60,49 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
     [MPH_PLAYBACKRATE] = 23,
     [MPH_VIRTUALIZER] = 24,
     [MPH_VISUALIZATION] = 25
+#else
+    -1,
+    3,  // MPH_3DDOPPLER
+    4,  // MPH_3DGROUPING
+    5,  // MPH_3DLOCATION
+    16, // MPH_3DMACROSCOPIC
+    6,  // MPH_3DSOURCE
+    -1, -1, -1, -1,
+    17, // MPH_BASSBOOST
+    7,  // MPH_BUFFERQUEUE
+    -1,
+    1,  // MPH_DYNAMICINTERFACEMANAGEMENT
+    18, // MPH_DYNAMICSOURCE
+    8,  // MPH_EFFECTSEND
+    -1, -1,
+    19, // MPH_ENVIRONMENTALREVERB
+    20, // MPH_EQUALIZER
+    -1,
+    10, // MPH_METADATAEXTRACTION
+    11, // MPH_METADATATRAVERSAL
+    -1, -1, -1, -1,
+    9,  // MPH_MUTESOLO
+    -1,
+    0,  // MPH_OBJECT
+    -1,
+    21, // MPH_PITCH
+    2,  // MPH_PLAY
+    23, // MPH_PLAYBACKRATE
+    12, // MPH_PREFETCHSTATUS
+    22, // MPH_PRESETREVERB
+    13, // MPH_RATEPITCH
+    -1,
+    14, // MPH_SEEK
+    -1, -1,
+    24, // MPH_VIRTUALIZER
+    25, // MPH_VISUALIZATION
+    15, // MPH_VOLUME
+    -1
+#endif
 };
 
 const signed char MPH_to_AudioRecorder[MPH_MAX] = {
+#ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
     [MPH_OBJECT] = 0,
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
@@ -56,9 +113,29 @@ const signed char MPH_to_AudioRecorder[MPH_MAX] = {
     [MPH_EQUALIZER] = 6,
     [MPH_VISUALIZATION] = 7,
     [MPH_VOLUME] = 8
+#else
+    -1, -1, -1, -1, -1, -1, -1,
+    3, // MPH_AUDIOENCODER
+    -1, -1,
+    4, // MPH_BASSBOOST
+    -1, -1,
+    1, // MPH_DYNAMICINTERFACEMANAGEMENT
+    5, // MPH_DYNAMICSOURCE
+    -1, -1, -1, -1,
+    6, // MPH_EQUALIZER
+    -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    0, // MPH_OBJECT
+    -1, -1, -1, -1, -1, -1, -1,
+    2, // MPH_RECORD
+    -1, -1, -1, -1,
+    7, // MPH_VISUALIZATION
+    8, // MPH_VOLUME
+    -1
+#endif
 };
 
 const signed char MPH_to_Engine[MPH_MAX] = {
+#ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
     [MPH_OBJECT] = 0,
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
@@ -70,33 +147,87 @@ const signed char MPH_to_Engine[MPH_MAX] = {
     [MPH_AUDIOENCODERCAPABILITIES] = 7,
     [MPH_3DCOMMIT] = 8,
     [MPH_DEVICEVOLUME] = 9
+#else
+    8, // MPH_3DCOMMIT
+    -1, -1, -1, -1, -1,
+    6, // MPH_AUDIODECODERCAPABILITIES
+    -1,
+    7, // MPH_AUDIOENCODERCAPABILITIES
+    5, // MPH_AUDIOIODEVICECAPABILITIES
+    -1, -1,
+    9, // MPH_DEVICEVOLUME
+    1, // MPH_DYNAMICINTERFACEMANAGEMENT
+    -1, -1,
+    2, // MPH_ENGINE
+    3, // MPH_ENGINECAPABILITIES
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    0, // MPH_OBJECT
+    -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    4, // MPH_THREADSYNC
+    -1, -1, -1, -1, -1
+#endif
 };
 
 const signed char MPH_to_LEDDevice[MPH_MAX] = {
+#ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
     [MPH_OBJECT] = 0,
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
     [MPH_LED] = 2
+#else
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    1, // MPH_DYNAMICINTERFACEMANAGEMENT
+    -1, -1, -1, -1, -1, -1,
+    2, // MPH_LED
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    0, // MPH_OBJECT
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+#endif
 };
 
 const signed char MPH_to_Listener[MPH_MAX] = {
+#ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
     [MPH_OBJECT] = 0,
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
     [MPH_3DDOPPLER] = 2,
     [MPH_3DLOCATION] = 3
+#else
+    -1,
+    2, // MPH_3DDOPPLER
+    -1,
+    3, // MPH_3DLOCATION
+    -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    1, // MPH_DYNAMICINTERFACEMANAGEMENT
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    0, // MPH_OBJECT
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+#endif
 };
 
 const signed char MPH_to_MetadataExtractor[MPH_MAX] = {
+#ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
     [MPH_OBJECT] = 0,
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
     [MPH_DYNAMICSOURCE] = 2,
     [MPH_METADATAEXTRACTION] = 3,
     [MPH_METADATATRAVERSAL] = 4
+#else
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    1, // MPH_DYNAMICINTERFACEMANAGEMENT
+    2, // MPH_DYNAMICSOURCE
+    -1, -1, -1, -1, -1, -1,
+    3, // MPH_METADATAEXTRACTION
+    4, // MPH_METADATATRAVERSAL
+    -1, -1, -1, -1, -1, -1,
+    0, // MPH_OBJECT
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+#endif
 };
 
 const signed char MPH_to_MidiPlayer[MPH_MAX] = {
+#ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
     [MPH_OBJECT] = 0,
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
@@ -127,9 +258,51 @@ const signed char MPH_to_MidiPlayer[MPH_MAX] = {
     [MPH_PLAYBACKRATE] = 26,
     [MPH_VIRTUALIZER] = 27,
     [MPH_VISUALIZATION] = 28
+#else
+    -1,
+    3,  // MPH_3DDOPPLER
+    4,  // MPH_3DGROUPING
+    5,  // MPH_3DLOCATION
+    19, // MPH_3DMACROSCOPIC
+    6,  // MPH_3DSOURCE
+    -1, -1, -1, -1,
+    20, // MPH_BASSBOOST
+    7,  // MPH_BUFFERQUEUE
+    -1,
+    1,  // MPH_DYNAMICINTERFACEMANAGEMENT
+    21, // MPH_DYNAMICSOURCE
+    8,  // MPH_EFFECTSEND
+    -1, -1,
+    22, // MPH_ENVIRONMENTALREVERB
+    23, // MPH_EQUALIZER
+    -1,
+    10, // MPH_METADATAEXTRACTION
+    11, // MPH_METADATATRAVERSAL
+    12, // MPH_MIDIMESSAGE
+    15, // MPH_MIDIMUTESOLO
+    14, // MPH_MIDITEMPO
+    13, // MPH_MIDITIME
+    9,  // MPH_MUTESOLO
+    -1,
+    0,  // MPH_OBJECT
+    -1,
+    24, // MPH_PITCH
+    2,  // MPH_PLAY
+    26, // MPH_PLAYBACKRATE
+    16, // MPH_PREFETCHSTATUS
+    25, // MPH_PRESETREVERB
+    -1, -1,
+    17, // MPH_SEEK
+    -1, -1,
+    27, // MPH_VIRTUALIZER
+    28, // MPH_VISUALIZATION
+    18, // MPH_VOLUME
+    -1
+#endif
 };
 
 const signed char MPH_to_OutputMix[MPH_MAX] = {
+#ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
     [MPH_OBJECT] = 0,
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
@@ -144,11 +317,44 @@ const signed char MPH_to_OutputMix[MPH_MAX] = {
     [MPH_VOLUME] = 8,
     [MPH_BASSBOOST] = 9,
     [MPH_VISUALIZATION] = 10
+#else
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    9,  // MPH_BASSBOOST
+    -1, -1,
+    1,  // MPH_DYNAMICINTERFACEMANAGEMENT
+    -1, -1, -1, -1,
+    4,  // MPH_ENVIRONMENTALREVERB
+    5,  // MPH_EQUALIZER
+    -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    0,  // MPH_OBJECT
+    2,  // MPH_OUTPUTMIX
+    -1, -1, -1, -1,
+    6,  // MPH_PRESETREVERB
+    -1, -1, -1, -1, -1,
+    7,  // MPH_VIRTUALIZER
+    10, // MPH_VISUALIZATION
+    8,  // MPH_VOLUME
+#ifdef USE_OUTPUTMIXEXT
+    3,  // MPH_OUTPUTMIXEXT
+#else
+    -1,
+#endif
+#endif
 };
 
 const signed char MPH_to_Vibra[MPH_MAX] = {
+#ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
     [MPH_OBJECT] = 0,
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
     [MPH_VIBRA] = 2
+#else
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    1, // MPH_DYNAMICINTERFACEMANAGEMENT
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    0, // MPH_OBJECT
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    2, // MPH_VIBRA
+    -1, -1, -1, -1
+#endif
 };
