@@ -562,7 +562,8 @@ static void *sync_body(void *arg)
                 continue;
             switch (IObjectToObjectID(instance)) {
             case SL_OBJECTID_AUDIOPLAYER:
-                write(1, ".", 1);
+                putchar('.');
+                fflush(stdout);
                 break;
             default:
                 break;

@@ -82,7 +82,7 @@ static SLresult IMuteSolo_GetNumChannels(SLMuteSoloItf self, SLuint8 *pNumChanne
         return SL_RESULT_PARAMETER_INVALID;
     IMuteSolo *this = (IMuteSolo *) self;
     // no lock needed as mNumChannels is const
-    SLuint32 numChannels = this->mNumChannels;
+    SLuint8 numChannels = this->mNumChannels;
     *pNumChannels = numChannels;
     return SL_RESULT_SUCCESS;
 }
