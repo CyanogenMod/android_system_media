@@ -178,6 +178,8 @@ typedef struct Object_interface {
     // but look for lingering code that assumes it is here before deleting
     struct Object_interface *mThis;
     const ClassTable *mClass;
+    struct Engine_interface *mEngine;
+    SLuint32 mInstanceID;
     SLuint32 mState;
     slObjectCallback mCallback;
     void *mContext;
@@ -419,7 +421,7 @@ typedef struct {
 
 // private
 
-typedef struct {
+typedef struct Engine_interface {
     const struct SLEngineItf_ *mItf;
     IObject *mThis;
     SLboolean mLossOfControlGlobal;
@@ -428,6 +430,7 @@ typedef struct {
     SLuint32 mInstanceCount;
     // Vector<Type> instances;
     // FIXME set of objects
+    unsigned mInstanceMask;
 #define INSTANCE_MAX 32 // FIXME no magic numbers
     IObject *mInstances[INSTANCE_MAX];
 } IEngine;
@@ -797,6 +800,9 @@ typedef struct {
     IEqualizer mEqualizer;
     IVisualization mVisualization;
     IVolume mVolume;
+    // rest of fields are not related to the interfaces
+    DataLocatorFormat mDataSource;
+    DataLocatorFormat mDataSink;
 } CAudioRecorder;
 
 typedef struct {

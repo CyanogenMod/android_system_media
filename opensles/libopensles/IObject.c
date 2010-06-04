@@ -32,6 +32,7 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
         // FIXME The realize hook and callback should be asynchronous if requested
+        // FIXME For asynchronous, mark operation pending to prevent duplication
         result = NULL != realize ? (*realize)(this, async) : SL_RESULT_SUCCESS;
         if (SL_RESULT_SUCCESS == result)
             this->mState = SL_OBJECT_STATE_REALIZED;
@@ -62,6 +63,7 @@ static SLresult IObject_Resume(SLObjectItf self, SLboolean async)
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
         // FIXME The resume hook and callback should be asynchronous if requested
+        // FIXME For asynchronous, mark operation pending to prevent duplication
         result = NULL != resume ? (*resume)(this) : SL_RESULT_SUCCESS;
         if (SL_RESULT_SUCCESS == result)
             this->mState = SL_OBJECT_STATE_REALIZED;
@@ -145,12 +147,30 @@ static void IObject_AbortAsyncOperation(SLObjectItf self)
 
 static void IObject_Destroy(SLObjectItf self)
 {
+    // FIXME Check for dependencies, e.g. destroying an output mix with attached players,
+    //       destroying an engine with extant objects, etc.
     // FIXME The abort should be atomic w.r.t. destroy, so another async can't be started in window
+    // FIXME Destroy may need to be made asynchronous to permit safe cleanup of resources
+    // FIXME For asynchronous, mark operation pending to prevent duplication
     IObject_AbortAsyncOperation(self);
     IObject *this = (IObject *) self;
     const ClassTable *class__ = this->mClass;
     VoidHook destroy = class__->mDestroy;
     const struct iid_vtable *x = class__->mInterfaces;
+    // const, no lock needed
+    IEngine *thisEngine = this->mEngine;
+    unsigned i = this->mInstanceID;
+    assert(0 < i && i <= INSTANCE_MAX);
+    --i;
+    // remove object from exposure to sync thread
+    interface_lock_exclusive(thisEngine);
+    assert(0 < thisEngine->mInstanceCount);
+    --thisEngine->mInstanceCount;
+    assert(0 != thisEngine->mInstanceMask);
+    thisEngine->mInstanceMask &= ~(1 << i);
+    assert(thisEngine->mInstances[i] == this);
+    thisEngine->mInstances[i] = NULL;
+    interface_unlock_exclusive(thisEngine);
     object_lock_exclusive(this);
     // Call the deinitializer for each currently exposed interface,
     // whether it is implicit, explicit, optional, or dynamically added.
@@ -245,8 +265,10 @@ void IObject_init(void *self)
     this->mItf = &IObject_Itf;
     // initialized in construct:
     // mClass
+    // mInstanceID
     // mExposedMask
     // mLossOfControlMask
+    // mEngine
     this->mState = SL_OBJECT_STATE_UNREALIZED;
     this->mCallback = NULL;
     this->mContext = NULL;

@@ -507,24 +507,36 @@ extern void
         }
 };
 
-
 // Construct a new instance of the specified class, exposing selected interfaces
 
-IObject *construct(const ClassTable *class__,
-    unsigned exposedMask, SLEngineItf engine)
+IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf engine)
 {
     IObject *this;
     this = (IObject *) calloc(1, class__->mSize);
     if (NULL != this) {
-        this->mClass = class__;
-        this->mExposedMask = exposedMask;
         unsigned lossOfControlMask = 0;
+        // a NULL engine means we are constructing the engine
         IEngine *thisEngine = (IEngine *) engine;
         if (NULL == thisEngine)
             thisEngine = &((CEngine *) this)->mEngine;
-        else if (thisEngine->mLossOfControlGlobal)
-            lossOfControlMask = ~0;
+        else {
+            interface_lock_exclusive(thisEngine);
+            if (INSTANCE_MAX <= thisEngine->mInstanceCount) {
+                // too many objects
+                free(this);
+                interface_unlock_exclusive(thisEngine);
+                return NULL;
+            }
+            ++thisEngine->mInstanceCount;
+            interface_unlock_exclusive(thisEngine);
+            // const, no lock needed
+            if (thisEngine->mLossOfControlGlobal)
+                lossOfControlMask = ~0;
+        }
         this->mLossOfControlMask = lossOfControlMask;
+        this->mClass = class__;
+        this->mExposedMask = exposedMask;
+        this->mEngine = thisEngine;
         const struct iid_vtable *x = class__->mInterfaces;
         unsigned i;
         for (i = 0; exposedMask; ++i, ++x, exposedMask >>= 1) {
@@ -536,12 +548,23 @@ IObject *construct(const ClassTable *class__,
                     (*init)(self);
             }
         }
-        // FIXME need a lock
-        if (INSTANCE_MAX > thisEngine->mInstanceCount) {
-            // FIXME ignores Destroy
-            thisEngine->mInstances[thisEngine->mInstanceCount++] = this;
+        // only expose new object to sync thread after it is fully initialized
+        interface_lock_exclusive(thisEngine);
+        unsigned mask = thisEngine->mInstanceMask;
+        assert(mask != ~0);
+        // FIXME O(n)
+        for (i = 0; i < INSTANCE_MAX; ++i, mask >>= 1) {
+            if (!(mask & 1)) {
+                assert(NULL == thisEngine->mInstances[i]);
+                thisEngine->mInstances[i] = this;
+                thisEngine->mInstanceMask |= 1 << i;
+                // avoid zero as a valid instance ID
+                this->mInstanceID = i + 1;
+                break;
+            }
         }
-        // FIXME else what
+        assert(i < INSTANCE_MAX);
+        interface_unlock_exclusive(thisEngine);
     }
     return this;
 }

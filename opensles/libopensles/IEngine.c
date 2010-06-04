@@ -147,15 +147,13 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
     return SL_RESULT_SUCCESS;
 
 abort:
-    CAudioPlayer_Destroy(this);
-    free(this);
+    (*this->mObject.mItf->Destroy)(&this->mObject.mItf);
     return result;
 }
 
-static SLresult IEngine_CreateAudioRecorder(SLEngineItf self,
-    SLObjectItf *pRecorder, SLDataSource *pAudioSrc, SLDataSink *pAudioSnk,
-    SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
-    const SLboolean *pInterfaceRequired)
+static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pRecorder,
+    SLDataSource *pAudioSrc, SLDataSink *pAudioSnk, SLuint32 numInterfaces,
+    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
     if (NULL == pRecorder)
         return SL_RESULT_PARAMETER_INVALID;
@@ -167,21 +165,30 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self,
     if (SL_RESULT_SUCCESS != result)
         return result;
 
-    // DataSource checks
-    DataLocatorFormat myDataSource;
-    result = checkDataSource(pAudioSrc, &myDataSource);
+    // Construct our new AudioRecorder instance
+    CAudioRecorder *this = (CAudioRecorder *) construct(pCAudioRecorder_class, exposedMask, self);
+    if (NULL == this)
+        return SL_RESULT_MEMORY_FAILURE;
+
+    // Check the source and sink parameters, and make a local copy of all parameters.
+
+    result = checkDataSource(pAudioSrc, &this->mDataSource);
     if (SL_RESULT_SUCCESS != result)
-        return result;
+        goto abort;
 
-    // DataSink checks
-    DataLocatorFormat myDataSink;
-    result = checkDataSink(pAudioSnk, &myDataSink);
-    if (SL_RESULT_SUCCESS != result) {
-        freeDataLocatorFormat(&myDataSink);
-        return result;
-    }
+    result = checkDataSink(pAudioSnk, &this->mDataSink);
+    if (SL_RESULT_SUCCESS != result)
+        goto abort;
 
+    // FIXME This section is not yet fully implemented
+
+    // return the new audio recorder object
+    *pRecorder = &this->mObject.mItf;
     return SL_RESULT_SUCCESS;
+
+abort:
+    (*this->mObject.mItf->Destroy)(&this->mObject.mItf);
+    return result;
 }
 
 static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
@@ -319,8 +326,7 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
     return SL_RESULT_SUCCESS;
 };
 
-static SLresult IEngine_QueryNumSupportedExtensions(SLEngineItf self,
-    SLuint32 *pNumExtensions)
+static SLresult IEngine_QueryNumSupportedExtensions(SLEngineItf self, SLuint32 *pNumExtensions)
 {
     if (NULL == pNumExtensions)
         return SL_RESULT_PARAMETER_INVALID;
@@ -367,7 +373,8 @@ void IEngine_init(void *self)
     IEngine *this = (IEngine *) self;
     this->mItf = &IEngine_Itf;
     // mLossOfControlGlobal is initialized in CreateEngine
-    this->mInstanceCount = 0;
+    this->mInstanceCount = 1; // ourself
+    this->mInstanceMask = 0;
     unsigned i;
     for (i = 0; i < INSTANCE_MAX; ++i)
         this->mInstances[i] = NULL;

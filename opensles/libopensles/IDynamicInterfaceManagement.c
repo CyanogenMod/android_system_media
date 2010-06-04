@@ -47,6 +47,7 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
         // FIXME Currently all initialization is done here, even if requested to be asynchronous
+        // FIXME For asynchronous, mark operation pending to prevent duplication
         memset(thisItf, 0, size);
         ((void **) thisItf)[1] = thisObject;
         if (NULL != init)
@@ -137,6 +138,7 @@ static SLresult IDynamicInterfaceManagement_ResumeInterface(SLDynamicInterfaceMa
         assert(this->mAddedMask & mask);
         assert(thisObject->mExposedMask & mask);
         // FIXME Currently the resume is done here, even if requested to be asynchronous
+        // FIXME For asynchronous, mark operation pending to prevent duplication
         this->mSuspendedMask &= ~mask;
         result = SL_RESULT_SUCCESS;
         // Make a copy of these, so we can call the callback with mutex unlocked
