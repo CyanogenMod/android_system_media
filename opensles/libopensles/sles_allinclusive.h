@@ -744,6 +744,7 @@ typedef struct {
 
 typedef struct {
     android::MediaPlayer *mMediaPlayer;
+    bool                  mPrepared;
 } MediaPlayerData;
 
 #endif
@@ -783,10 +784,11 @@ typedef struct {
     struct SndFile mSndFile;
 #endif // USE_SNDFILE
 #ifdef USE_ANDROID
+    android::Mutex          *mpLock;
     enum AndroidObject_type mAndroidObjType;
     union {
-        AudioTrackData mAudioTrackData;
-        MediaPlayerData mMediaPlayerData;
+        AudioTrackData      mAudioTrackData;
+        MediaPlayerData     mMediaPlayerData;
     };
 #endif
 } /*CAudioPlayer*/;
