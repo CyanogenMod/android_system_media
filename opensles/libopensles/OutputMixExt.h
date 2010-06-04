@@ -18,7 +18,13 @@
 
 #ifdef USE_OUTPUTMIXEXT
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern const SLInterfaceID SL_IID_OUTPUTMIXEXT;
+#ifdef __cplusplus
+}
+#endif
 
 typedef const struct SLOutputMixExtItf_ * const * SLOutputMixExtItf;
 
@@ -37,6 +43,9 @@ struct Track {
     SLuint32 mAvail;        // number of available bytes
 };
 
+#ifndef this
+#define this this_
+#endif
 extern SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this);
 
 #endif

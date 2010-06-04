@@ -105,6 +105,9 @@ static const struct iid_vtable AudioPlayer_interfaces[] = {
         offsetof(CAudioPlayer, mVisualization)}
 };
 
+extern SLresult CAudioPlayer_Realize(void *self, SLboolean async);
+extern void CAudioPlayer_Destroy(void *self);
+
 static const ClassTable CAudioPlayer_class = {
     AudioPlayer_interfaces,
     sizeof(AudioPlayer_interfaces)/sizeof(AudioPlayer_interfaces[0]),

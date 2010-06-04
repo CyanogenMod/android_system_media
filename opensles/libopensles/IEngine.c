@@ -101,6 +101,13 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
     if (SL_RESULT_SUCCESS != result)
         goto abort;
     fprintf(stderr, "\t after sles_to_android_checkAudioPlayerSourceSink()\n");
+#else
+    {
+    // FIXME This is due to a bug where we init buffer queues in SndFile below, which is not always present
+    SLuint32 locatorType = *(SLuint32 *) pAudioSrc->pLocator;
+    if (locatorType == SL_DATALOCATOR_BUFFERQUEUE)
+        this->mBufferQueue.mNumBuffers = ((SLDataLocator_BufferQueue *) pAudioSrc->pLocator)->numBuffers;
+    }
 #endif
 
 #ifdef USE_SNDFILE
@@ -247,9 +254,8 @@ static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup,
     return SL_RESULT_FEATURE_UNSUPPORTED;
 }
 
-static SLresult IEngine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix,
-    SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
-    const SLboolean *pInterfaceRequired)
+static SLresult IEngine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix, SLuint32 numInterfaces,
+    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
     if (NULL == pMix)
         return SL_RESULT_PARAMETER_INVALID;
@@ -373,6 +379,9 @@ void IEngine_init(void *self)
     IEngine *this = (IEngine *) self;
     this->mItf = &IEngine_Itf;
     // mLossOfControlGlobal is initialized in CreateEngine
+#ifdef USE_SDL
+    this->mOutputMix = NULL;
+#endif
     this->mInstanceCount = 1; // ourself
     this->mInstanceMask = 0;
     unsigned i;

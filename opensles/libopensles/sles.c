@@ -226,6 +226,7 @@ static void freeDataLocator(DataLocator *pDataLocator)
     switch (pDataLocator->mLocatorType) {
     case SL_DATALOCATOR_URI:
         free(pDataLocator->mURI.URI);
+        pDataLocator->mURI.URI = NULL;
         break;
     default:
         break;
@@ -349,6 +350,7 @@ static void freeDataFormat(DataFormat *pDataFormat)
     switch (pDataFormat->mFormatType) {
     case SL_DATAFORMAT_MIME:
         free(pDataFormat->mMIME.mimeType);
+        pDataFormat->mMIME.mimeType = NULL;
         break;
     default:
         break;
@@ -564,7 +566,18 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
             }
         }
         assert(i < INSTANCE_MAX);
+#ifdef USE_SDL
+        SLboolean unpause = SL_BOOLEAN_FALSE;
+        if (SL_OBJECTID_OUTPUTMIX == class__->mObjectID && NULL == thisEngine->mOutputMix) {
+            thisEngine->mOutputMix = (COutputMix *) this;
+            unpause = SL_BOOLEAN_TRUE;
+        }
+#endif
         interface_unlock_exclusive(thisEngine);
+#ifdef USE_SDL
+        if (unpause)
+            SDL_PauseAudio(0);
+#endif
     }
     return this;
 }
@@ -643,6 +656,9 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     ok = pthread_create(&this->mSyncThread, (const pthread_attr_t *) NULL, sync_body, this);
     assert(ok == 0);
     *pEngine = &this->mObject.mItf;
+#ifdef USE_SDL
+    SDL_start(&this->mEngine);
+#endif
     return SL_RESULT_SUCCESS;
 }
 

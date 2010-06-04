@@ -425,6 +425,9 @@ typedef struct Engine_interface {
     const struct SLEngineItf_ *mItf;
     IObject *mThis;
     SLboolean mLossOfControlGlobal;
+#ifdef USE_SDL
+    struct OutputMix_class *mOutputMix; // SDL pulls PCM from an arbitrary OutputMixExt
+#endif
     // FIXME Per-class non-const data such as vector of created objects.
     // Each engine is its own universe.
     SLuint32 mInstanceCount;
@@ -938,3 +941,6 @@ extern SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *my
 extern void freeDataLocatorFormat(DataLocatorFormat *dlf);
 extern SLresult CAudioPlayer_Realize(void *self, SLboolean async);
 extern void CAudioPlayer_Destroy(void *self);
+#ifdef USE_SDL
+extern void SDL_start(IEngine *thisEngine);
+#endif

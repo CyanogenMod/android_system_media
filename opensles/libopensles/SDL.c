@@ -23,33 +23,33 @@
 static void SDLCALL SDL_callback(void *context, Uint8 *stream, int len)
 {
     assert(len > 0);
-    SLOutputMixExtItf OutputMixExt = (SLOutputMixExtItf) context;
-    (*OutputMixExt)->FillBuffer(OutputMixExt, stream, (SLuint32) len);
+    IEngine *thisEngine = (IEngine *) context;
+    // A peek would be risky if output mixes are dynamic, so we pause during switch and use shared
+    interface_lock_shared(thisEngine);
+    COutputMix *outputMix = thisEngine->mOutputMix;
+    interface_unlock_shared(thisEngine);
+    if (NULL != outputMix) {
+        SLOutputMixExtItf OutputMixExt = &outputMix->mOutputMixExt.mItf;
+        (*OutputMixExt)->FillBuffer(OutputMixExt, stream, (SLuint32) len);
+    } else {
+        memset(stream, 0, (size_t) len);
+    }
 }
 
-void SDL_start(SLObjectItf self)
+void SDL_start(IEngine *thisEngine)
 {
-    assert(self != NULL);
-    IObject *this = (IObject *) self;
-    assert(SL_OBJECTID_OUTPUTMIX == IObjectToObjectID(this));
-    SLresult result;
-    SLOutputMixExtItf OutputMixExt;
-    result = (*self)->GetInterface(self, SL_IID_OUTPUTMIXEXT, &OutputMixExt);
-    assert(SL_RESULT_SUCCESS == result);
-
     SDL_AudioSpec fmt;
     fmt.freq = 44100;
     fmt.format = AUDIO_S16;
     fmt.channels = 2;
     fmt.samples = 256;
     fmt.callback = SDL_callback;
-    fmt.userdata = (void *) OutputMixExt;
+    fmt.userdata = (void *) thisEngine;
 
     if (SDL_OpenAudio(&fmt, NULL) < 0) {
         fprintf(stderr, "Unable to open audio: %s\n", SDL_GetError());
         exit(1);
     }
-    SDL_PauseAudio(0);
 }
 
 #endif // USE_SDL

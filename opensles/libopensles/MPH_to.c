@@ -3,6 +3,7 @@
 // Map minimal perfect hash of an interface ID to its class index.
 
 #include "MPH.h"
+#include "MPH_to.h"
 
 // If defined, then compile with C99 such as GNU C, not GNU C++ or non-GNU C.
 //#define USE_DESIGNATED_INITIALIZERS

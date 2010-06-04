@@ -170,6 +170,13 @@ static void IObject_Destroy(SLObjectItf self)
     thisEngine->mInstanceMask &= ~(1 << i);
     assert(thisEngine->mInstances[i] == this);
     thisEngine->mInstances[i] = NULL;
+#ifdef USE_SDL
+    if (SL_OBJECTID_OUTPUTMIX == class__->mObjectID && (COutputMix *) this == thisEngine->mOutputMix) {
+        SDL_PauseAudio(1);
+        thisEngine->mOutputMix = NULL;
+        // Note we don't attempt to connect another output mix to SDL
+    }
+#endif
     interface_unlock_exclusive(thisEngine);
     object_lock_exclusive(this);
     // Call the deinitializer for each currently exposed interface,
