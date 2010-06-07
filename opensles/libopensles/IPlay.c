@@ -99,8 +99,7 @@ static SLresult IPlay_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IPlay_RegisterCallback(SLPlayItf self, slPlayCallback callback,
-    void *pContext)
+static SLresult IPlay_RegisterCallback(SLPlayItf self, slPlayCallback callback, void *pContext)
 {
     IPlay *this = (IPlay *) self;
     interface_lock_exclusive(this);
@@ -127,8 +126,7 @@ static SLresult IPlay_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
     return result;
 }
 
-static SLresult IPlay_GetCallbackEventsMask(SLPlayItf self,
-    SLuint32 *pEventFlags)
+static SLresult IPlay_GetCallbackEventsMask(SLPlayItf self, SLuint32 *pEventFlags)
 {
     if (NULL == pEventFlags)
         return SL_RESULT_PARAMETER_INVALID;
@@ -189,6 +187,8 @@ static SLresult IPlay_GetMarkerPosition(SLPlayItf self, SLmillisecond *pMsec)
 
 static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec)
 {
+    if (0 == mSec)
+        return SL_RESULT_PARAMETER_INVALID;
     SLresult result = SL_RESULT_SUCCESS;
     IPlay *this = (IPlay *) self;
     interface_lock_exclusive(this);
@@ -204,8 +204,7 @@ static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec
     return result;
 }
 
-static SLresult IPlay_GetPositionUpdatePeriod(SLPlayItf self,
-    SLmillisecond *pMsec)
+static SLresult IPlay_GetPositionUpdatePeriod(SLPlayItf self, SLmillisecond *pMsec)
 {
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;

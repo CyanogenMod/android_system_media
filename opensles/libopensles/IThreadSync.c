@@ -72,9 +72,7 @@ void IThreadSync_init(void *self)
     IThreadSync *this =
         (IThreadSync *) self;
     this->mItf = &IThreadSync_Itf;
-#ifndef NDEBUG
     this->mInCriticalSection = SL_BOOLEAN_FALSE;
     this->mWaiting = SL_BOOLEAN_FALSE;
     this->mOwner = (pthread_t) NULL;
-#endif
 }

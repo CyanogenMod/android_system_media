@@ -23,7 +23,7 @@ static SLresult IMIDIMessage_SendMessage(SLMIDIMessageItf self, const SLuint8 *d
     if (NULL == data)
         return SL_RESULT_PARAMETER_INVALID;
     //IMIDIMessage *this = (IMIDIMessage *) self;
-    return SL_RESULT_SUCCESS;
+    return SL_RESULT_FEATURE_UNSUPPORTED;
 }
 
 static SLresult IMIDIMessage_RegisterMetaEventCallback(SLMIDIMessageItf self,
@@ -92,11 +92,9 @@ void IMIDIMessage_init(void *self)
 {
     IMIDIMessage *this = (IMIDIMessage *) self;
     this->mItf = &IMIDIMessage_Itf;
-#ifndef NDEBUG
     this->mMetaEventCallback = NULL;
     this->mMetaEventContext = NULL;
     this->mMessageCallback = NULL;
     this->mMessageContext = NULL;
     this->mMessageTypes = 0;
-#endif
 }

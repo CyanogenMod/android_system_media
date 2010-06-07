@@ -21,6 +21,8 @@
 static SLresult IRatePitch_SetRate(SLRatePitchItf self, SLpermille rate)
 {
     IRatePitch *this = (IRatePitch *) self;
+    if (!(this->mMinRate <= rate && rate <= this->mMaxRate))
+        return SL_RESULT_PARAMETER_INVALID;
     interface_lock_poke(this);
     this->mRate = rate;
     interface_unlock_poke(this);
@@ -42,14 +44,19 @@ static SLresult IRatePitch_GetRate(SLRatePitchItf self, SLpermille *pRate)
 static SLresult IRatePitch_GetRatePitchCapabilities(SLRatePitchItf self,
     SLpermille *pMinRate, SLpermille *pMaxRate)
 {
-    if (NULL == pMinRate || NULL == pMaxRate)
+    // per spec, each is optional, and does not require that at least one must be non-NULL
+#if 0
+    if (NULL == pMinRate && NULL == pMaxRate)
         return SL_RESULT_PARAMETER_INVALID;
+#endif
     IRatePitch *this = (IRatePitch *) self;
-    // FIXME const, direct access?
+    // const, so no lock required
     SLpermille minRate = this->mMinRate;
     SLpermille maxRate = this->mMaxRate;
-    *pMinRate = minRate;
-    *pMaxRate = maxRate;
+    if (NULL != pMinRate)
+        *pMinRate = minRate;
+    if (NULL != pMaxRate)
+        *pMaxRate = maxRate;
     return SL_RESULT_SUCCESS;
 }
 
@@ -63,9 +70,8 @@ void IRatePitch_init(void *self)
 {
     IRatePitch *this = (IRatePitch *) self;
     this->mItf = &IRatePitch_Itf;
-#ifndef NDEBUG
     this->mRate = 0;
-#endif
+    // const
     this->mMinRate = 500;
     this->mMaxRate = 2000;
 }

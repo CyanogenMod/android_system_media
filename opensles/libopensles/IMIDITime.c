@@ -31,6 +31,9 @@ static SLresult IMIDITime_GetDuration(SLMIDITimeItf self, SLuint32 *pDuration)
 static SLresult IMIDITime_SetPosition(SLMIDITimeItf self, SLuint32 position)
 {
     IMIDITime *this = (IMIDITime *) self;
+    // const, no lock needed
+    if (!(position < this->mDuration))
+        return SL_RESULT_PARAMETER_INVALID;
     interface_lock_poke(this);
     this->mPosition = position;
     interface_unlock_poke(this);
@@ -52,6 +55,10 @@ static SLresult IMIDITime_GetPosition(SLMIDITimeItf self, SLuint32 *pPosition)
 static SLresult IMIDITime_SetLoopPoints(SLMIDITimeItf self, SLuint32 startTick, SLuint32 numTicks)
 {
     IMIDITime *this = (IMIDITime *) self;
+    // const, no lock needed
+    SLuint32 duration = this->mDuration;
+    if (!((startTick < duration) && (numTicks <= duration - startTick)))
+        return SL_RESULT_PARAMETER_INVALID;
     interface_lock_exclusive(this);
     this->mStartTick = startTick;
     this->mNumTicks = numTicks;
@@ -86,10 +93,8 @@ void IMIDITime_init(void *self)
 {
     IMIDITime *this = (IMIDITime *) self;
     this->mItf = &IMIDITime_Itf;
-#ifndef NDEBUG
     this->mDuration = 0;
     this->mPosition = 0;
     this->mStartTick = 0;
     this->mNumTicks = 0;
-#endif
 }

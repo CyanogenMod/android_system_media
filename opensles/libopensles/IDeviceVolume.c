@@ -18,10 +18,19 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IDeviceVolume_GetVolumeScale(SLDeviceVolumeItf self,
-    SLuint32 deviceID, SLint32 *pMinValue, SLint32 *pMaxValue,
-    SLboolean *pIsMillibelScale)
+static SLresult IDeviceVolume_GetVolumeScale(SLDeviceVolumeItf self, SLuint32 deviceID,
+    SLint32 *pMinValue, SLint32 *pMaxValue, SLboolean *pIsMillibelScale)
 {
+    switch (deviceID) {
+    case SL_DEFAULTDEVICEID_AUDIOINPUT:
+    case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
+    // FIXME move these to device-specific or platform-specific file
+    case DEVICE_ID_HEADSET:
+    case DEVICE_ID_HANDSFREE:
+        break;
+    default:
+        return SL_RESULT_PARAMETER_INVALID;
+    }
     if (NULL != pMinValue)
         *pMinValue = 0;
     if (NULL != pMaxValue)
@@ -31,18 +40,19 @@ static SLresult IDeviceVolume_GetVolumeScale(SLDeviceVolumeItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IDeviceVolume_SetVolume(SLDeviceVolumeItf self,
-    SLuint32 deviceID, SLint32 volume)
+static SLresult IDeviceVolume_SetVolume(SLDeviceVolumeItf self, SLuint32 deviceID, SLint32 volume)
 {
     switch (deviceID) {
     case SL_DEFAULTDEVICEID_AUDIOINPUT:
     case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
         break;
+    // FIXME These don't work yet
+    case DEVICE_ID_HEADSET:
+    case DEVICE_ID_HANDSFREE:
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }
-    IDeviceVolume *this =
-        (IDeviceVolume *) self;
+    IDeviceVolume *this = (IDeviceVolume *) self;
     interface_lock_poke(this);
     this->mVolume[~deviceID] = volume;
     interface_unlock_poke(this);
@@ -58,11 +68,13 @@ static SLresult IDeviceVolume_GetVolume(SLDeviceVolumeItf self,
     case SL_DEFAULTDEVICEID_AUDIOINPUT:
     case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
         break;
+    // FIXME These don't work yet
+    case DEVICE_ID_HEADSET:
+    case DEVICE_ID_HANDSFREE:
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }
-    IDeviceVolume *this =
-        (IDeviceVolume *) self;
+    IDeviceVolume *this = (IDeviceVolume *) self;
     interface_lock_peek(this);
     SLint32 volume = this->mVolume[~deviceID];
     interface_unlock_peek(this);

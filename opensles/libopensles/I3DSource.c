@@ -18,18 +18,16 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult I3DSource_SetHeadRelative(SL3DSourceItf self,
-    SLboolean headRelative)
+static SLresult I3DSource_SetHeadRelative(SL3DSourceItf self, SLboolean headRelative)
 {
     I3DSource *this = (I3DSource *) self;
     interface_lock_poke(this);
-    this->mHeadRelative = headRelative;
+    this->mHeadRelative = SL_BOOLEAN_FALSE != headRelative; // normalize
     interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DSource_GetHeadRelative(SL3DSourceItf self,
-    SLboolean *pHeadRelative)
+static SLresult I3DSource_GetHeadRelative(SL3DSourceItf self, SLboolean *pHeadRelative)
 {
     if (NULL == pHeadRelative)
         return SL_RESULT_PARAMETER_INVALID;
@@ -44,6 +42,9 @@ static SLresult I3DSource_GetHeadRelative(SL3DSourceItf self,
 static SLresult I3DSource_SetRolloffDistances(SL3DSourceItf self,
     SLmillimeter minDistance, SLmillimeter maxDistance)
 {
+    if (!((0 < minDistance) && (minDistance <= SL_MILLIMETER_MAX) &&
+        (minDistance <= maxDistance) && (maxDistance <= SL_MILLIMETER_MAX)))
+        return SL_RESULT_PARAMETER_INVALID;
     I3DSource *this = (I3DSource *) self;
     interface_lock_exclusive(this);
     this->mMinDistance = minDistance;
@@ -67,18 +68,16 @@ static SLresult I3DSource_GetRolloffDistances(SL3DSourceItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DSource_SetRolloffMaxDistanceMute(SL3DSourceItf self,
-    SLboolean mute)
+static SLresult I3DSource_SetRolloffMaxDistanceMute(SL3DSourceItf self, SLboolean mute)
 {
     I3DSource *this = (I3DSource *) self;
     interface_lock_poke(this);
-    this->mRolloffMaxDistanceMute = mute;
+    this->mRolloffMaxDistanceMute = SL_BOOLEAN_FALSE != mute; // normalize
     interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DSource_GetRolloffMaxDistanceMute(SL3DSourceItf self,
-    SLboolean *pMute)
+static SLresult I3DSource_GetRolloffMaxDistanceMute(SL3DSourceItf self, SLboolean *pMute)
 {
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
@@ -90,9 +89,10 @@ static SLresult I3DSource_GetRolloffMaxDistanceMute(SL3DSourceItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DSource_SetRolloffFactor(SL3DSourceItf self,
-    SLpermille rolloffFactor)
+static SLresult I3DSource_SetRolloffFactor(SL3DSourceItf self, SLpermille rolloffFactor)
 {
+    if (!((0 <= rolloffFactor) && (rolloffFactor <= 10000)))
+        return SL_RESULT_PARAMETER_INVALID;
     I3DSource *this = (I3DSource *) self;
     interface_lock_poke(this);
     this->mRolloffFactor = rolloffFactor;
@@ -100,8 +100,7 @@ static SLresult I3DSource_SetRolloffFactor(SL3DSourceItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DSource_GetRolloffFactor(SL3DSourceItf self,
-    SLpermille *pRolloffFactor)
+static SLresult I3DSource_GetRolloffFactor(SL3DSourceItf self, SLpermille *pRolloffFactor)
 {
     I3DSource *this = (I3DSource *) self;
     interface_lock_peek(this);
@@ -111,9 +110,10 @@ static SLresult I3DSource_GetRolloffFactor(SL3DSourceItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DSource_SetRoomRolloffFactor(SL3DSourceItf self,
-    SLpermille roomRolloffFactor)
+static SLresult I3DSource_SetRoomRolloffFactor(SL3DSourceItf self, SLpermille roomRolloffFactor)
 {
+    if (!((0 <= roomRolloffFactor) && (roomRolloffFactor <= 10000)))
+        return SL_RESULT_PARAMETER_INVALID;
     I3DSource *this = (I3DSource *) self;
     interface_lock_poke(this);
     this->mRoomRolloffFactor = roomRolloffFactor;
@@ -121,8 +121,7 @@ static SLresult I3DSource_SetRoomRolloffFactor(SL3DSourceItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DSource_GetRoomRolloffFactor(SL3DSourceItf self,
-    SLpermille *pRoomRolloffFactor)
+static SLresult I3DSource_GetRoomRolloffFactor(SL3DSourceItf self, SLpermille *pRoomRolloffFactor)
 {
     I3DSource *this = (I3DSource *) self;
     interface_lock_peek(this);
@@ -134,6 +133,13 @@ static SLresult I3DSource_GetRoomRolloffFactor(SL3DSourceItf self,
 
 static SLresult I3DSource_SetRolloffModel(SL3DSourceItf self, SLuint8 model)
 {
+    switch (model) {
+    case SL_ROLLOFFMODEL_LINEAR:
+    case SL_ROLLOFFMODEL_EXPONENTIAL:
+        break;
+    default:
+        return SL_RESULT_PARAMETER_INVALID;
+    }
     I3DSource *this = (I3DSource *) self;
     interface_lock_poke(this);
     this->mDistanceModel = model;
@@ -154,6 +160,11 @@ static SLresult I3DSource_GetRolloffModel(SL3DSourceItf self, SLuint8 *pModel)
 static SLresult I3DSource_SetCone(SL3DSourceItf self, SLmillidegree innerAngle,
     SLmillidegree outerAngle, SLmillibel outerLevel)
 {
+    // FIXME spec does not say anything about relationship between innerAngle and outerAngle
+    if (!((0 <= innerAngle) && (innerAngle <= 360000) &&
+        (0 <= outerAngle) && (outerAngle <= 360000) &&
+        (SL_MILLIBEL_MIN <= outerLevel) && (outerLevel <= 0)))
+        return SL_RESULT_PARAMETER_INVALID;
     I3DSource *this = (I3DSource *) self;
     interface_lock_exclusive(this);
     this->mConeInnerAngle = innerAngle;
@@ -163,9 +174,8 @@ static SLresult I3DSource_SetCone(SL3DSourceItf self, SLmillidegree innerAngle,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DSource_GetCone(SL3DSourceItf self,
-    SLmillidegree *pInnerAngle, SLmillidegree *pOuterAngle,
-    SLmillibel *pOuterLevel)
+static SLresult I3DSource_GetCone(SL3DSourceItf self, SLmillidegree *pInnerAngle,
+    SLmillidegree *pOuterAngle, SLmillibel *pOuterLevel)
 {
     if (NULL == pInnerAngle || NULL == pOuterAngle || NULL == pOuterLevel)
         return SL_RESULT_PARAMETER_INVALID;
@@ -202,16 +212,14 @@ void I3DSource_init(void *self)
 {
     I3DSource *this = (I3DSource *) self;
     this->mItf = &I3DSource_Itf;
-#ifndef NDEBUG
     this->mHeadRelative = SL_BOOLEAN_FALSE;
     this->mRolloffMaxDistanceMute = SL_BOOLEAN_FALSE;
-    this->mConeOuterLevel = 0;
-    this->mRoomRolloffFactor = 0;
-#endif
     this->mMaxDistance = SL_MILLIMETER_MAX;
     this->mMinDistance = 1000;
     this->mConeInnerAngle = 360000;
     this->mConeOuterAngle = 360000;
+    this->mConeOuterLevel = 0;
     this->mRolloffFactor = 1000;
+    this->mRoomRolloffFactor = 0;
     this->mDistanceModel = SL_ROLLOFFMODEL_EXPONENTIAL;
 }

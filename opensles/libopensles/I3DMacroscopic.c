@@ -21,6 +21,10 @@
 static SLresult I3DMacroscopic_SetSize(SL3DMacroscopicItf self,
     SLmillimeter width, SLmillimeter height, SLmillimeter depth)
 {
+    if (!((0 <= width) && (width <= SL_MILLIMETER_MAX) &&
+        (0 <= height) && (height <= SL_MILLIMETER_MAX) &&
+        (0 <= depth) && (depth <= SL_MILLIMETER_MAX)))
+        return SL_RESULT_PARAMETER_INVALID;
     I3DMacroscopic *this = (I3DMacroscopic *) self;
     interface_lock_exclusive(this);
     this->mSize.mWidth = width;
@@ -50,6 +54,10 @@ static SLresult I3DMacroscopic_GetSize(SL3DMacroscopicItf self,
 static SLresult I3DMacroscopic_SetOrientationAngles(SL3DMacroscopicItf self,
     SLmillidegree heading, SLmillidegree pitch, SLmillidegree roll)
 {
+    if (!((-360000 <= heading) && (heading <= 360000) &&
+        (-90000 <= pitch) && (pitch <= 90000) &&
+        (-360000 <= roll) && (roll <= 360000)))
+        return SL_RESULT_PARAMETER_INVALID;
     I3DMacroscopic *this = (I3DMacroscopic *) self;
     interface_lock_exclusive(this);
     this->mOrientationAngles.mHeading = heading;
@@ -70,6 +78,7 @@ static SLresult I3DMacroscopic_SetOrientationVectors(SL3DMacroscopicItf self,
     I3DMacroscopic *this = (I3DMacroscopic *) self;
     SLVec3D front = *pFront;
     SLVec3D above = *pAbove;
+    // FIXME Check for vectors close to zero or close to parallel
     interface_lock_exclusive(this);
     this->mOrientationVectors.mFront = front;
     this->mOrientationVectors.mUp = above;
@@ -82,9 +91,13 @@ static SLresult I3DMacroscopic_SetOrientationVectors(SL3DMacroscopicItf self,
 static SLresult I3DMacroscopic_Rotate(SL3DMacroscopicItf self,
     SLmillidegree theta, const SLVec3D *pAxis)
 {
+    // FIXME spec does not specify a range on theta
+    if (!((-360000 <= theta) && (theta <= 360000)))
+        return SL_RESULT_PARAMETER_INVALID;
     if (NULL == pAxis)
         return SL_RESULT_PARAMETER_INVALID;
     SLVec3D axis = *pAxis;
+    // FIXME Check that axis is not (close to) zero vector, length does not matter
     I3DMacroscopic *this = (I3DMacroscopic *) self;
     // FIXME Do the rotate here:
     // interface_lock_shared(this);
@@ -162,25 +175,17 @@ void I3DMacroscopic_init(void *self)
 {
     I3DMacroscopic *this = (I3DMacroscopic *) self;
     this->mItf = &I3DMacroscopic_Itf;
-#ifndef NDEBUG
     this->mSize.mWidth = 0;
     this->mSize.mHeight = 0;
     this->mSize.mDepth = 0;
     this->mOrientationAngles.mHeading = 0;
     this->mOrientationAngles.mPitch = 0;
     this->mOrientationAngles.mRoll = 0;
-    this->mOrientationVectors.mFront.x = 0;
-    this->mOrientationVectors.mFront.y = 0;
-    this->mOrientationVectors.mUp.x = 0;
-    this->mOrientationVectors.mUp.z = 0;
-    // this->mGeneration = 0;
+    memset(&this->mOrientationVectors, 0x55, sizeof(this->mOrientationVectors));
+    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
     this->mTheta = 0x55555555;
     this->mAxis.x = 0x55555555;
     this->mAxis.y = 0x55555555;
     this->mAxis.z = 0x55555555;
     this->mRotatePending = SL_BOOLEAN_FALSE;
-#endif
-    this->mOrientationVectors.mFront.z = -1000;
-    this->mOrientationVectors.mUp.y = 1000;
-    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
 }

@@ -18,8 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IMetadataExtraction_GetItemCount(SLMetadataExtractionItf self,
-    SLuint32 *pItemCount)
+static SLresult IMetadataExtraction_GetItemCount(SLMetadataExtractionItf self, SLuint32 *pItemCount)
 {
     //IMetadataExtraction *this = (IMetadataExtraction *) self;
     if (NULL == pItemCount)

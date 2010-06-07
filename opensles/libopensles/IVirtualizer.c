@@ -22,13 +22,12 @@ static SLresult IVirtualizer_SetEnabled(SLVirtualizerItf self, SLboolean enabled
 {
     IVirtualizer *this = (IVirtualizer *) self;
     interface_lock_poke(this);
-    this->mEnabled = enabled;
+    this->mEnabled = SL_BOOLEAN_FALSE != enabled; // normalize
     interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IVirtualizer_IsEnabled(SLVirtualizerItf self,
-    SLboolean *pEnabled)
+static SLresult IVirtualizer_IsEnabled(SLVirtualizerItf self, SLboolean *pEnabled)
 {
     if (NULL == pEnabled)
         return SL_RESULT_PARAMETER_INVALID;
@@ -40,9 +39,10 @@ static SLresult IVirtualizer_IsEnabled(SLVirtualizerItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IVirtualizer_SetStrength(SLVirtualizerItf self,
-    SLpermille strength)
+static SLresult IVirtualizer_SetStrength(SLVirtualizerItf self, SLpermille strength)
 {
+    if (!(0 <= strength && strength <= 1000))
+        return SL_RESULT_PARAMETER_INVALID;
     IVirtualizer *this = (IVirtualizer *) self;
     interface_lock_poke(this);
     this->mStrength = strength;
@@ -50,8 +50,7 @@ static SLresult IVirtualizer_SetStrength(SLVirtualizerItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IVirtualizer_GetRoundedStrength(SLVirtualizerItf self,
-    SLpermille *pStrength)
+static SLresult IVirtualizer_GetRoundedStrength(SLVirtualizerItf self, SLpermille *pStrength)
 {
     if (NULL == pStrength)
         return SL_RESULT_PARAMETER_INVALID;
@@ -63,8 +62,7 @@ static SLresult IVirtualizer_GetRoundedStrength(SLVirtualizerItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IVirtualizer_IsStrengthSupported(SLVirtualizerItf self,
-    SLboolean *pSupported)
+static SLresult IVirtualizer_IsStrengthSupported(SLVirtualizerItf self, SLboolean *pSupported)
 {
     if (NULL == pSupported)
         return SL_RESULT_PARAMETER_INVALID;
@@ -84,8 +82,6 @@ void IVirtualizer_init(void *self)
 {
     IVirtualizer *this = (IVirtualizer *) self;
     this->mItf = &IVirtualizer_Itf;
-#ifndef NDEBUG
     this->mEnabled = SL_BOOLEAN_FALSE;
     this->mStrength = 0;
-#endif
 }

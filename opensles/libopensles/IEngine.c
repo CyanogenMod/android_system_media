@@ -129,8 +129,8 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
             this->mBufferQueue.mArray = this->mBufferQueue.mTypical;
         } else {
             // FIXME integer overflow possible during multiplication
-            this->mBufferQueue.mArray = (struct BufferHeader *)
-                    malloc((this->mBufferQueue.mNumBuffers + 1) * sizeof(struct BufferHeader));
+            this->mBufferQueue.mArray = (BufferHeader *)
+                    malloc((this->mBufferQueue.mNumBuffers + 1) * sizeof(BufferHeader));
             if (NULL == this->mBufferQueue.mArray) {
                 result = SL_RESULT_MEMORY_FAILURE;
                 goto abort;
@@ -223,8 +223,7 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
 }
 
 static SLresult IEngine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
-    SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
-    const SLboolean *pInterfaceRequired)
+    SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
     if (NULL == pListener)
         return SL_RESULT_PARAMETER_INVALID;
@@ -238,9 +237,8 @@ static SLresult IEngine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
     return SL_RESULT_FEATURE_UNSUPPORTED;
 }
 
-static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup,
-    SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
-    const SLboolean *pInterfaceRequired)
+static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup, SLuint32 numInterfaces,
+    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
     if (NULL == pGroup)
         return SL_RESULT_PARAMETER_INVALID;
@@ -273,9 +271,8 @@ static SLresult IEngine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix, SLu
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self,
-    SLObjectItf *pMetadataExtractor, SLDataSource *pDataSource,
-    SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
+static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self, SLObjectItf *pMetadataExtractor,
+    SLDataSource *pDataSource, SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
     const SLboolean *pInterfaceRequired)
 {
     if (NULL == pMetadataExtractor)
@@ -295,10 +292,9 @@ static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEngine_CreateExtensionObject(SLEngineItf self,
-    SLObjectItf *pObject, void *pParameters, SLuint32 objectID,
-    SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
-    const SLboolean *pInterfaceRequired)
+static SLresult IEngine_CreateExtensionObject(SLEngineItf self, SLObjectItf *pObject,
+    void *pParameters, SLuint32 objectID, SLuint32 numInterfaces,
+    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
     if (NULL == pObject)
         return SL_RESULT_PARAMETER_INVALID;
@@ -387,4 +383,5 @@ void IEngine_init(void *self)
     unsigned i;
     for (i = 0; i < INSTANCE_MAX; ++i)
         this->mInstances[i] = NULL;
+    this->mShutdown = SL_BOOLEAN_FALSE;
 }

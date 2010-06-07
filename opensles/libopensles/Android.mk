@@ -20,7 +20,10 @@ LOCAL_SRC_FILES:=                     \
         locks.c                       \
         sles.c                        \
         sles_to_android.cpp           \
+        sync.c                        \
+        ThreadPool.c                  \
         CAudioPlayer.c                \
+        CEngine.c                     \
         I3DCommit.c                   \
         I3DDoppler.c                  \
         I3DGrouping.c                 \

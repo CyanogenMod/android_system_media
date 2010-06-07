@@ -21,6 +21,9 @@
 static SLresult IPitch_SetPitch(SLPitchItf self, SLpermille pitch)
 {
     IPitch *this = (IPitch *) self;
+    // const, so no lock needed
+    if (!(this->mMinPitch <= pitch && pitch <= this->mMaxPitch))
+        return SL_RESULT_PARAMETER_INVALID;
     interface_lock_poke(this);
     this->mPitch = pitch;
     interface_unlock_poke(this);
@@ -42,13 +45,19 @@ static SLresult IPitch_GetPitch(SLPitchItf self, SLpermille *pPitch)
 static SLresult IPitch_GetPitchCapabilities(SLPitchItf self,
     SLpermille *pMinPitch, SLpermille *pMaxPitch)
 {
-    if (NULL == pMinPitch || NULL == pMaxPitch)
+    // per spec, each is optional, and does not require that at least one must be non-NULL
+#if 0
+    if (NULL == pMinPitch && NULL == pMaxPitch)
         return SL_RESULT_PARAMETER_INVALID;
+#endif
     IPitch *this = (IPitch *) self;
+    // const, so no lock needed
     SLpermille minPitch = this->mMinPitch;
     SLpermille maxPitch = this->mMaxPitch;
-    *pMinPitch = minPitch;
-    *pMaxPitch = maxPitch;
+    if (NULL != pMinPitch)
+        *pMinPitch = minPitch;
+    if (NULL != pMaxPitch)
+        *pMaxPitch = maxPitch;
     return SL_RESULT_SUCCESS;
 }
 
@@ -62,9 +71,8 @@ void IPitch_init(void *self)
 {
     IPitch *this = (IPitch *) self;
     this->mItf = &IPitch_Itf;
-#ifndef NDEBUG
-    this->mPitch = 0;
-#endif
+    this->mPitch = 1000;
+    // const
     this->mMinPitch = -500;
-    this->mMaxPitch = 500;
+    this->mMaxPitch = 2000;
 }

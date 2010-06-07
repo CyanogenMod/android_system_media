@@ -19,8 +19,7 @@
 /* AudioIODeviceCapabilities implementation */
 
 static SLresult IAudioIODeviceCapabilities_GetAvailableAudioInputs(
-    SLAudioIODeviceCapabilitiesItf self, SLint32 *pNumInputs,
-    SLuint32 *pInputDeviceIDs)
+    SLAudioIODeviceCapabilitiesItf self, SLint32 *pNumInputs, SLuint32 *pInputDeviceIDs)
 {
     if (NULL == pNumInputs)
         return SL_RESULT_PARAMETER_INVALID;
@@ -35,8 +34,7 @@ static SLresult IAudioIODeviceCapabilities_GetAvailableAudioInputs(
 }
 
 static SLresult IAudioIODeviceCapabilities_QueryAudioInputCapabilities(
-    SLAudioIODeviceCapabilitiesItf self, SLuint32 deviceID,
-    SLAudioInputDescriptor *pDescriptor)
+    SLAudioIODeviceCapabilitiesItf self, SLuint32 deviceID, SLAudioInputDescriptor *pDescriptor)
 {
     if (NULL == pDescriptor)
         return SL_RESULT_PARAMETER_INVALID;
@@ -51,13 +49,11 @@ static SLresult IAudioIODeviceCapabilities_QueryAudioInputCapabilities(
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult
-    IAudioIODeviceCapabilities_RegisterAvailableAudioInputsChangedCallback(
-    SLAudioIODeviceCapabilitiesItf self,
-    slAvailableAudioInputsChangedCallback callback, void *pContext)
+static SLresult IAudioIODeviceCapabilities_RegisterAvailableAudioInputsChangedCallback(
+    SLAudioIODeviceCapabilitiesItf self, slAvailableAudioInputsChangedCallback callback,
+    void *pContext)
 {
-    IAudioIODeviceCapabilities * this =
-        (IAudioIODeviceCapabilities *) self;
+    IAudioIODeviceCapabilities * this = (IAudioIODeviceCapabilities *) self;
     interface_lock_exclusive(this);
     this->mAvailableAudioInputsChangedCallback = callback;
     this->mAvailableAudioInputsChangedContext = pContext;
@@ -66,8 +62,7 @@ static SLresult
 }
 
 static SLresult IAudioIODeviceCapabilities_GetAvailableAudioOutputs(
-    SLAudioIODeviceCapabilitiesItf self, SLint32 *pNumOutputs,
-    SLuint32 *pOutputDeviceIDs)
+    SLAudioIODeviceCapabilitiesItf self, SLint32 *pNumOutputs, SLuint32 *pOutputDeviceIDs)
 {
     if (NULL == pNumOutputs)
         return SL_RESULT_PARAMETER_INVALID;
@@ -77,14 +72,14 @@ static SLresult IAudioIODeviceCapabilities_GetAvailableAudioOutputs(
             return SL_RESULT_BUFFER_INSUFFICIENT;
         pOutputDeviceIDs[0] = DEVICE_ID_HEADSET;
         pOutputDeviceIDs[1] = DEVICE_ID_HANDSFREE;
+        // FIXME SL_DEFAULTDEVICEID_AUDIOOUTPUT?
     }
     *pNumOutputs = 2;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult IAudioIODeviceCapabilities_QueryAudioOutputCapabilities(
-    SLAudioIODeviceCapabilitiesItf self, SLuint32 deviceID,
-    SLAudioOutputDescriptor *pDescriptor)
+    SLAudioIODeviceCapabilitiesItf self, SLuint32 deviceID, SLAudioOutputDescriptor *pDescriptor)
 {
     if (NULL == pDescriptor)
         return SL_RESULT_PARAMETER_INVALID;
@@ -96,19 +91,18 @@ static SLresult IAudioIODeviceCapabilities_QueryAudioOutputCapabilities(
     case DEVICE_ID_HANDSFREE:
         *pDescriptor = *AudioOutput_id_descriptors[2].descriptor;
         break;
+    // FIXME SL_DEFAULTDEVICEID_AUDIOOUTPUT?
     default:
         return SL_RESULT_IO_ERROR;
     }
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult
-    IAudioIODeviceCapabilities_RegisterAvailableAudioOutputsChangedCallback(
-    SLAudioIODeviceCapabilitiesItf self,
-    slAvailableAudioOutputsChangedCallback callback, void *pContext)
+static SLresult IAudioIODeviceCapabilities_RegisterAvailableAudioOutputsChangedCallback(
+    SLAudioIODeviceCapabilitiesItf self, slAvailableAudioOutputsChangedCallback callback,
+    void *pContext)
 {
-    IAudioIODeviceCapabilities * this =
-        (IAudioIODeviceCapabilities *) self;
+    IAudioIODeviceCapabilities * this = (IAudioIODeviceCapabilities *) self;
     interface_lock_exclusive(this);
     this->mAvailableAudioOutputsChangedCallback = callback;
     this->mAvailableAudioOutputsChangedContext = pContext;
@@ -116,13 +110,11 @@ static SLresult
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult
-    IAudioIODeviceCapabilities_RegisterDefaultDeviceIDMapChangedCallback(
-    SLAudioIODeviceCapabilitiesItf self,
-    slDefaultDeviceIDMapChangedCallback callback, void *pContext)
+static SLresult IAudioIODeviceCapabilities_RegisterDefaultDeviceIDMapChangedCallback(
+    SLAudioIODeviceCapabilitiesItf self, slDefaultDeviceIDMapChangedCallback callback,
+    void *pContext)
 {
-    IAudioIODeviceCapabilities * this =
-        (IAudioIODeviceCapabilities *) self;
+    IAudioIODeviceCapabilities * this = (IAudioIODeviceCapabilities *) self;
     interface_lock_exclusive(this);
     this->mDefaultDeviceIDMapChangedCallback = callback;
     this->mDefaultDeviceIDMapChangedContext = pContext;
@@ -136,6 +128,7 @@ static SLresult IAudioIODeviceCapabilities_GetAssociatedAudioInputs(
 {
     if (NULL == pNumAudioInputs)
         return SL_RESULT_PARAMETER_INVALID;
+    // FIXME Incomplete
     *pNumAudioInputs = 0;
     return SL_RESULT_SUCCESS;
 }
@@ -146,6 +139,7 @@ static SLresult IAudioIODeviceCapabilities_GetAssociatedAudioOutputs(
 {
     if (NULL == pNumAudioOutputs)
         return SL_RESULT_PARAMETER_INVALID;
+    // FIXME Incomplete
     *pNumAudioOutputs = 0;
     return SL_RESULT_SUCCESS;
 }
@@ -175,9 +169,8 @@ static SLresult IAudioIODeviceCapabilities_GetDefaultAudioDevices(
 }
 
 static SLresult IAudioIODeviceCapabilities_QuerySampleFormatsSupported(
-    SLAudioIODeviceCapabilitiesItf self, SLuint32 deviceID,
-    SLmilliHertz samplingRate, SLint32 *pSampleFormats,
-    SLint32 *pNumOfSampleFormats)
+    SLAudioIODeviceCapabilitiesItf self, SLuint32 deviceID, SLmilliHertz samplingRate,
+    SLint32 *pSampleFormats, SLint32 *pNumOfSampleFormats)
 {
     if (NULL == pNumOfSampleFormats)
         return SL_RESULT_PARAMETER_INVALID;
@@ -188,6 +181,7 @@ static SLresult IAudioIODeviceCapabilities_QuerySampleFormatsSupported(
     default:
         return SL_RESULT_IO_ERROR;
     }
+    // FIXME incomplete
     switch (samplingRate) {
     case SL_SAMPLINGRATE_44_1:
         break;
@@ -221,13 +215,10 @@ void IAudioIODeviceCapabilities_init(void *self)
 {
     IAudioIODeviceCapabilities *this = (IAudioIODeviceCapabilities *) self;
     this->mItf = &IAudioIODeviceCapabilities_Itf;
-#ifndef NDEBUG
     this->mAvailableAudioInputsChangedCallback = NULL;
     this->mAvailableAudioInputsChangedContext = NULL;
     this->mAvailableAudioOutputsChangedCallback = NULL;
     this->mAvailableAudioOutputsChangedContext = NULL;
     this->mDefaultDeviceIDMapChangedCallback = NULL;
     this->mDefaultDeviceIDMapChangedContext = NULL;
-#endif
 }
-

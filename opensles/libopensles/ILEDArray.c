@@ -41,7 +41,7 @@ static SLresult ILEDArray_IsLEDArrayActivated(SLLEDArrayItf self, SLuint32 *pLig
 
 static SLresult ILEDArray_SetColor(SLLEDArrayItf self, SLuint8 index, const SLHSL *pColor)
 {
-    if (NULL == pColor)
+    if (!(index < MAX_LED_COUNT) || NULL == pColor)
         return SL_RESULT_PARAMETER_INVALID;
     SLHSL color = *pColor;
     if (!(0 <= color.hue && color.hue <= 360000))
@@ -58,9 +58,8 @@ static SLresult ILEDArray_SetColor(SLLEDArrayItf self, SLuint8 index, const SLHS
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult ILEDArray_GetColor(SLLEDArrayItf self, SLuint8 index,
-    SLHSL *pColor) {
-    if (NULL == pColor)
+static SLresult ILEDArray_GetColor(SLLEDArrayItf self, SLuint8 index, SLHSL *pColor) {
+    if (!(index < MAX_LED_COUNT) || NULL == pColor)
         return SL_RESULT_PARAMETER_INVALID;
     ILEDArray *this = (ILEDArray *) self;
     // can't use peek because struct copy might not be atomic

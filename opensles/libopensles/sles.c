@@ -45,6 +45,17 @@ SLuint32 IObjectToObjectID(IObject *this)
     return -1;
 }
 
+// Convert POSIX pthread error code to OpenSL ES result code
+
+SLresult err_to_result(int err)
+{
+    if (EAGAIN == err || ENOMEM == err)
+        return SL_RESULT_RESOURCE_ERROR;
+    if (0 != err)
+        return SL_RESULT_INTERNAL_ERROR;
+    return SL_RESULT_SUCCESS;
+}
+
 // Check the interface IDs passed into a Create operation
 
 SLresult checkInterfaces(const ClassTable *class__,
@@ -553,7 +564,7 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
         // only expose new object to sync thread after it is fully initialized
         interface_lock_exclusive(thisEngine);
         unsigned mask = thisEngine->mInstanceMask;
-        assert(mask != ~0);
+        assert(mask != (unsigned) ~0);
         // FIXME O(n)
         for (i = 0; i < INSTANCE_MAX; ++i, mask >>= 1) {
             if (!(mask & 1)) {
@@ -580,33 +591,6 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
 #endif
     }
     return this;
-}
-
-// The sync thread runs periodically to synchronize audio state between
-// the application and platform-specific device driver; for best results
-// it should run about every graphics frame (e.g. 20 Hz to 50 Hz).
-
-static void *sync_body(void *arg)
-{
-    CEngine *this = (CEngine *) arg;
-    for (;;) {
-        usleep(20000*50);
-        unsigned i;
-        for (i = 0; i < INSTANCE_MAX; ++i) {
-            IObject *instance = (IObject *) this->mEngine.mInstances[i];
-            if (NULL == instance)
-                continue;
-            switch (IObjectToObjectID(instance)) {
-            case SL_OBJECTID_AUDIOPLAYER:
-                putchar('.');
-                fflush(stdout);
-                break;
-            default:
-                break;
-            }
-        }
-    }
-    return NULL;
 }
 
 /* Initial entry points */
@@ -652,13 +636,7 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     this->mObject.mLossOfControlMask = lossOfControlGlobal ? ~0 : 0;
     this->mEngine.mLossOfControlGlobal = lossOfControlGlobal;
     this->mEngineCapabilities.mThreadSafe = threadSafe;
-    int ok;
-    ok = pthread_create(&this->mSyncThread, (const pthread_attr_t *) NULL, sync_body, this);
-    assert(ok == 0);
     *pEngine = &this->mObject.mItf;
-#ifdef USE_SDL
-    SDL_start(&this->mEngine);
-#endif
     return SL_RESULT_SUCCESS;
 }
 

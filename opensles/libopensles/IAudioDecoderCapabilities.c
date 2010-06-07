@@ -18,9 +18,8 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IAudioDecoderCapabilities_GetAudioDecoders(
-    SLAudioDecoderCapabilitiesItf self, SLuint32 *pNumDecoders,
-    SLuint32 *pDecoderIds)
+static SLresult IAudioDecoderCapabilities_GetAudioDecoders( SLAudioDecoderCapabilitiesItf self,
+    SLuint32 *pNumDecoders, SLuint32 *pDecoderIds)
 {
     if (NULL == pNumDecoders)
         return SL_RESULT_PARAMETER_INVALID;
