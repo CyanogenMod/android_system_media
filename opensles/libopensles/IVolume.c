@@ -66,8 +66,7 @@ static SLresult IVolume_GetVolumeLevel(SLVolumeItf self, SLmillibel *pLevel)
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IVolume_GetMaxVolumeLevel(SLVolumeItf self,
-    SLmillibel *pMaxLevel)
+static SLresult IVolume_GetMaxVolumeLevel(SLVolumeItf self, SLmillibel *pMaxLevel)
 {
     if (NULL == pMaxLevel)
         return SL_RESULT_PARAMETER_INVALID;
@@ -81,6 +80,7 @@ static SLresult IVolume_GetMaxVolumeLevel(SLVolumeItf self,
 static SLresult IVolume_SetMute(SLVolumeItf self, SLboolean mute)
 {
     IVolume *this = (IVolume *) self;
+    mute = SL_BOOLEAN_FALSE != mute; // normalize
     interface_lock_exclusive(this);
     if (this->mMute != mute) {
         this->mMute = mute;
@@ -121,6 +121,7 @@ static SLresult IVolume_GetMute(SLVolumeItf self, SLboolean *pMute)
 static SLresult IVolume_EnableStereoPosition(SLVolumeItf self, SLboolean enable)
 {
     IVolume *this = (IVolume *) self;
+    enable = SL_BOOLEAN_FALSE != enable; // normalize
     interface_lock_exclusive(this);
     if (this->mEnableStereoPosition != enable) {
         this->mEnableStereoPosition = enable;
@@ -164,8 +165,7 @@ static SLresult IVolume_SetStereoPosition(SLVolumeItf self, SLpermille stereoPos
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IVolume_GetStereoPosition(SLVolumeItf self,
-    SLpermille *pStereoPosition)
+static SLresult IVolume_GetStereoPosition(SLVolumeItf self, SLpermille *pStereoPosition)
 {
     if (NULL == pStereoPosition)
         return SL_RESULT_PARAMETER_INVALID;

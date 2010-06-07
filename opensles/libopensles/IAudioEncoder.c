@@ -23,9 +23,9 @@ static SLresult IAudioEncoder_SetEncoderSettings(SLAudioEncoderItf self,
 {
     if (NULL == pSettings)
         return SL_RESULT_PARAMETER_INVALID;
-    IAudioEncoder *this =
-        (IAudioEncoder *) self;
+    IAudioEncoder *this = (IAudioEncoder *) self;
     SLAudioEncoderSettings settings = *pSettings;
+    // FIXME Validate the settings
     interface_lock_exclusive(this);
     this->mSettings = settings;
     interface_unlock_exclusive(this);
@@ -37,8 +37,7 @@ static SLresult IAudioEncoder_GetEncoderSettings(SLAudioEncoderItf self,
 {
     if (NULL == pSettings)
         return SL_RESULT_PARAMETER_INVALID;
-    IAudioEncoder *this =
-        (IAudioEncoder *) self;
+    IAudioEncoder *this = (IAudioEncoder *) self;
     interface_lock_shared(this);
     SLAudioEncoderSettings settings = this->mSettings;
     interface_unlock_shared(this);
@@ -55,7 +54,5 @@ void IAudioEncoder_init(void *self)
 {
     IAudioEncoder *this = (IAudioEncoder *) self;
     this->mItf = &IAudioEncoder_Itf;
-#ifndef NDEBUG
     memset(&this->mSettings, 0, sizeof(SLAudioEncoderSettings));
-#endif
 }

@@ -41,7 +41,7 @@ static SLresult IDynamicSource_SetSource(SLDynamicSourceItf self, SLDataSource *
     // FIXME a bit of a simplification to say the least!
     this->mDataSource = pDataSource;
     object_unlock_exclusive(thisObject);
-    return SL_RESULT_SUCCESS;
+    return SL_RESULT_FEATURE_UNSUPPORTED;
 }
 
 static const struct SLDynamicSourceItf_ IDynamicSource_Itf = {

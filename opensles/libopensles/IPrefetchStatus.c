@@ -18,8 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IPrefetchStatus_GetPrefetchStatus(SLPrefetchStatusItf self,
-    SLuint32 *pStatus)
+static SLresult IPrefetchStatus_GetPrefetchStatus(SLPrefetchStatusItf self, SLuint32 *pStatus)
 {
     if (NULL == pStatus)
         return SL_RESULT_PARAMETER_INVALID;
@@ -31,8 +30,7 @@ static SLresult IPrefetchStatus_GetPrefetchStatus(SLPrefetchStatusItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IPrefetchStatus_GetFillLevel(SLPrefetchStatusItf self,
-    SLpermille *pLevel)
+static SLresult IPrefetchStatus_GetFillLevel(SLPrefetchStatusItf self, SLpermille *pLevel)
 {
     if (NULL == pLevel)
         return SL_RESULT_PARAMETER_INVALID;
@@ -55,8 +53,7 @@ static SLresult IPrefetchStatus_RegisterCallback(SLPrefetchStatusItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IPrefetchStatus_SetCallbackEventsMask(SLPrefetchStatusItf self,
-    SLuint32 eventFlags)
+static SLresult IPrefetchStatus_SetCallbackEventsMask(SLPrefetchStatusItf self, SLuint32 eventFlags)
 {
     IPrefetchStatus *this = (IPrefetchStatus *) self;
     interface_lock_poke(this);
@@ -78,9 +75,10 @@ static SLresult IPrefetchStatus_GetCallbackEventsMask(SLPrefetchStatusItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IPrefetchStatus_SetFillUpdatePeriod(SLPrefetchStatusItf self,
-    SLpermille period)
+static SLresult IPrefetchStatus_SetFillUpdatePeriod(SLPrefetchStatusItf self, SLpermille period)
 {
+    if (0 == period)
+        return SL_RESULT_PARAMETER_INVALID;
     IPrefetchStatus *this = (IPrefetchStatus *) self;
     interface_lock_poke(this);
     this->mFillUpdatePeriod = period;
@@ -88,8 +86,7 @@ static SLresult IPrefetchStatus_SetFillUpdatePeriod(SLPrefetchStatusItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IPrefetchStatus_GetFillUpdatePeriod(SLPrefetchStatusItf self,
-    SLpermille *pPeriod)
+static SLresult IPrefetchStatus_GetFillUpdatePeriod(SLPrefetchStatusItf self, SLpermille *pPeriod)
 {
     if (NULL == pPeriod)
         return SL_RESULT_PARAMETER_INVALID;
@@ -116,9 +113,9 @@ void IPrefetchStatus_init(void *self)
     IPrefetchStatus *this = (IPrefetchStatus *) self;
     this->mItf = &IPrefetchStatus_Itf;
     this->mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+    this->mLevel = 0;
     this->mCallback = NULL;
     this->mContext = NULL;
     this->mCallbackEventsMask = 0;
-    this->mLevel = 0;
-    this->mFillUpdatePeriod = 1000;
+    this->mFillUpdatePeriod = 100;
 }

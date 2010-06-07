@@ -18,8 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult I3DLocation_SetLocationCartesian(SL3DLocationItf self,
-    const SLVec3D *pLocation)
+static SLresult I3DLocation_SetLocationCartesian(SL3DLocationItf self, const SLVec3D *pLocation)
 {
     if (NULL == pLocation)
         return SL_RESULT_PARAMETER_INVALID;
@@ -35,6 +34,10 @@ static SLresult I3DLocation_SetLocationCartesian(SL3DLocationItf self,
 static SLresult I3DLocation_SetLocationSpherical(SL3DLocationItf self,
     SLmillidegree azimuth, SLmillidegree elevation, SLmillimeter distance)
 {
+    if (!((-360000 <= azimuth) && (azimuth <= 360000) &&
+        (-90000 <= elevation) && (elevation <= 90000) &&
+        (0 <= distance) && (distance <= SL_MILLIMETER_MAX)))
+        return SL_RESULT_PARAMETER_INVALID;
     I3DLocation *this = (I3DLocation *) self;
     interface_lock_exclusive(this);
     this->mLocationSpherical.mAzimuth = azimuth;
@@ -81,8 +84,7 @@ static SLresult I3DLocation_Move(SL3DLocationItf self, const SLVec3D *pMovement)
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DLocation_GetLocationCartesian(SL3DLocationItf self,
-    SLVec3D *pLocation)
+static SLresult I3DLocation_GetLocationCartesian(SL3DLocationItf self, SLVec3D *pLocation)
 {
     if (NULL == pLocation)
         return SL_RESULT_PARAMETER_INVALID;
@@ -127,6 +129,7 @@ static SLresult I3DLocation_SetOrientationVectors(SL3DLocationItf self,
         return SL_RESULT_PARAMETER_INVALID;
     SLVec3D front = *pFront;
     SLVec3D above = *pAbove;
+    // FIXME Check for vectors close to zero or close to parallel
     I3DLocation *this = (I3DLocation *) self;
     interface_lock_exclusive(this);
     this->mOrientationVectors.mFront = front;
@@ -140,6 +143,10 @@ static SLresult I3DLocation_SetOrientationVectors(SL3DLocationItf self,
 static SLresult I3DLocation_SetOrientationAngles(SL3DLocationItf self,
     SLmillidegree heading, SLmillidegree pitch, SLmillidegree roll)
 {
+    if (!((-360000 <= heading) && (heading <= 360000) &&
+        (-90000 <= pitch) && (pitch <= 90000) &&
+        (-360000 <= roll) && (roll <= 360000)))
+        return SL_RESULT_PARAMETER_INVALID;
     I3DLocation *this = (I3DLocation *) self;
     interface_lock_exclusive(this);
     this->mOrientationAngles.mHeading = heading;
@@ -151,12 +158,15 @@ static SLresult I3DLocation_SetOrientationAngles(SL3DLocationItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DLocation_Rotate(SL3DLocationItf self, SLmillidegree theta,
-    const SLVec3D *pAxis)
+static SLresult I3DLocation_Rotate(SL3DLocationItf self, SLmillidegree theta, const SLVec3D *pAxis)
 {
+    // FIXME spec does not specify a range on theta
+    if (!((-360000 <= theta) && (theta <= 360000)))
+        return SL_RESULT_PARAMETER_INVALID;
     if (NULL == pAxis)
         return SL_RESULT_PARAMETER_INVALID;
     SLVec3D axis = *pAxis;
+    // FIXME Check that axis is not (close to) zero vector, length does not matter
     I3DLocation *this = (I3DLocation *) self;
     interface_lock_exclusive(this);
     while (this->mRotatePending)
@@ -174,6 +184,7 @@ static SLresult I3DLocation_GetOrientationVectors(SL3DLocationItf self,
     if (NULL == pFront || NULL == pUp)
         return SL_RESULT_PARAMETER_INVALID;
     I3DLocation *this = (I3DLocation *) self;
+    // FIXME Should wait for a pending rotate to complete, or orientation angles to be converted
     interface_lock_shared(this);
     SLVec3D front = this->mOrientationVectors.mFront;
     SLVec3D up = this->mOrientationVectors.mUp;
@@ -198,29 +209,19 @@ void I3DLocation_init(void *self)
 {
     I3DLocation *this = (I3DLocation *) self;
     this->mItf = &I3DLocation_Itf;
-#ifndef NDEBUG
     this->mLocationCartesian.x = 0;
     this->mLocationCartesian.y = 0;
     this->mLocationCartesian.z = 0;
     memset(&this->mLocationSpherical, 0x55, sizeof(this->mLocationSpherical));
+    this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
     this->mOrientationAngles.mHeading = 0;
     this->mOrientationAngles.mPitch = 0;
     this->mOrientationAngles.mRoll = 0;
-    this->mOrientationVectors.mFront.x = 0;
-    this->mOrientationVectors.mFront.y = 0;
-    this->mOrientationVectors.mAbove.x = 0;
-    this->mOrientationVectors.mAbove.y = 0;
-    this->mOrientationVectors.mUp.x = 0;
-    this->mOrientationVectors.mUp.z = 0;
+    memset(&this->mOrientationVectors, 0x55, sizeof(this->mOrientationVectors));
+    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
     this->mTheta = 0x55555555;
     this->mAxis.x = 0x55555555;
     this->mAxis.y = 0x55555555;
     this->mAxis.z = 0x55555555;
     this->mRotatePending = SL_BOOLEAN_FALSE;
-#endif
-    this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
-    this->mOrientationVectors.mFront.z = -1000;
-    this->mOrientationVectors.mUp.y = 1000;
-    this->mOrientationVectors.mAbove.z = -1000;
-    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
 }

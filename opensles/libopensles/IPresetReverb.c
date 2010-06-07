@@ -18,8 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self,
-    SLuint16 preset)
+static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self, SLuint16 preset)
 {
     IPresetReverb *this = (IPresetReverb *) self;
     switch (preset) {
@@ -40,13 +39,11 @@ static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IPresetReverb_GetPreset(SLPresetReverbItf self,
-    SLuint16 *pPreset)
+static SLresult IPresetReverb_GetPreset(SLPresetReverbItf self, SLuint16 *pPreset)
 {
     if (NULL == pPreset)
         return SL_RESULT_PARAMETER_INVALID;
-    IPresetReverb *this =
-        (IPresetReverb *) self;
+    IPresetReverb *this = (IPresetReverb *) self;
     interface_lock_peek(this);
     SLuint16 preset = this->mPreset;
     interface_unlock_peek(this);
@@ -63,7 +60,5 @@ void IPresetReverb_init(void *self)
 {
     IPresetReverb *this = (IPresetReverb *) self;
     this->mItf = &IPresetReverb_Itf;
-#ifndef NDEBUG
     this->mPreset = SL_REVERBPRESET_NONE;
-#endif
 }

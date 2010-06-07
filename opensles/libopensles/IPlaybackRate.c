@@ -21,6 +21,9 @@
 static SLresult IPlaybackRate_SetRate(SLPlaybackRateItf self, SLpermille rate)
 {
     IPlaybackRate *this = (IPlaybackRate *) self;
+    // const, so no lock needed
+    if (!(this->mMinRate <= rate && rate <= this->mMaxRate))
+        return SL_RESULT_PARAMETER_INVALID;
     interface_lock_poke(this);
     this->mRate = rate;
     interface_unlock_poke(this);
@@ -43,8 +46,7 @@ static SLresult IPlaybackRate_GetRate(SLPlaybackRateItf self, SLpermille *pRate)
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IPlaybackRate_SetPropertyConstraints(SLPlaybackRateItf self,
-    SLuint32 constraints)
+static SLresult IPlaybackRate_SetPropertyConstraints(SLPlaybackRateItf self, SLuint32 constraints)
 {
     IPlaybackRate *this = (IPlaybackRate *) self;
     SLresult result = SL_RESULT_SUCCESS;
@@ -61,8 +63,7 @@ static SLresult IPlaybackRate_SetPropertyConstraints(SLPlaybackRateItf self,
     return result;
 }
 
-static SLresult IPlaybackRate_GetProperties(SLPlaybackRateItf self,
-    SLuint32 *pProperties)
+static SLresult IPlaybackRate_GetProperties(SLPlaybackRateItf self, SLuint32 *pProperties)
 {
     if (NULL == pProperties) {
         return SL_RESULT_PARAMETER_INVALID;
@@ -82,19 +83,26 @@ static SLresult IPlaybackRate_GetCapabilitiesOfRate(SLPlaybackRateItf self,
         return SL_RESULT_PARAMETER_INVALID;
     }
     IPlaybackRate *this = (IPlaybackRate *) self;
+    // const, so no lock needed
+    if (!(this->mMinRate <= rate && rate <= this->mMaxRate))
+        return SL_RESULT_PARAMETER_INVALID;
     SLuint32 capabilities = 0;
 #ifdef USE_ANDROID
     sles_to_android_audioPlayerGetCapabilitiesOfRate(this, &capabilities);
+#else
+    capabilities = this->mCapabilities;
 #endif
     *pCapabilities = capabilities;
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult IPlaybackRate_GetRateRange(SLPlaybackRateItf self, SLuint8 index,
-    SLpermille *pMinRate, SLpermille *pMaxRate, SLpermille *pStepSize,
-    SLuint32 *pCapabilities)
+    SLpermille *pMinRate, SLpermille *pMaxRate, SLpermille *pStepSize, SLuint32 *pCapabilities)
 {
     if (NULL == pMinRate || NULL == pMaxRate || NULL == pStepSize || NULL == pCapabilities)
+        return SL_RESULT_PARAMETER_INVALID;
+    // only one range
+    if (0 < index)
         return SL_RESULT_PARAMETER_INVALID;
     IPlaybackRate *this = (IPlaybackRate *) self;
     interface_lock_shared(this);
@@ -123,14 +131,18 @@ void IPlaybackRate_init(void *self)
 {
     IPlaybackRate *this = (IPlaybackRate *) self;
     this->mItf = &IPlaybackRate_Itf;
-    this->mProperties = 0;
+    this->mProperties = SL_RATEPROP_NOPITCHCORAUDIO;
     this->mRate = 1000;
+    // const
     this->mMinRate = 500;
     this->mMaxRate = 2000;
-    this->mStepSize = 100;
+    this->mStepSize = 0;
 #ifdef USE_ANDROID
     this->mStepSize = 0;
     // for an AudioPlayer, mCapabilities will be initialized in sles_to_android_audioPlayerCreate
 #endif
+    // The generic implementation sets no capabilities because the generic
+    // implementation alone doesn't support any.
     this->mCapabilities = 0;
+    // SL_RATEPROP_SILENTAUDIO | SL_RATEPROP_STAGGEREDAUDIO | SL_RATEPROP_NOPITCHCORAUDIO | SL_RATEPROP_PITCHCORAUDIO
 }

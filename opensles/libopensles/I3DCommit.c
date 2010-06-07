@@ -38,7 +38,7 @@ static SLresult I3DCommit_SetDeferred(SL3DCommitItf self, SLboolean deferred)
     I3DCommit *this = (I3DCommit *) self;
     IObject *thisObject = this->mThis;
     object_lock_exclusive(thisObject);
-    this->mDeferred = deferred;
+    this->mDeferred = SL_BOOLEAN_FALSE != deferred; // normalize
     object_unlock_exclusive(thisObject);
     return SL_RESULT_SUCCESS;
 }
@@ -52,8 +52,6 @@ void I3DCommit_init(void *self)
 {
     I3DCommit *this = (I3DCommit *) self;
     this->mItf = &I3DCommit_Itf;
-#ifndef NDEBUG
     this->mDeferred = SL_BOOLEAN_FALSE;
     this->mGeneration = 0;
-#endif
 }

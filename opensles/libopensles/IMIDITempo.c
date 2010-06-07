@@ -20,7 +20,7 @@
 
 static SLresult IMIDITempo_SetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 tpqn)
 {
-    if (!(0 <= tpqn && tpqn <= 32767))
+    if (!(1 <= tpqn && tpqn <= 32767))
         return SL_RESULT_PARAMETER_INVALID;
     IMIDITempo *this = (IMIDITempo *) self;
     interface_lock_poke(this);
@@ -43,6 +43,9 @@ static SLresult IMIDITempo_GetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 
 
 static SLresult IMIDITempo_SetMicrosecondsPerQuarterNote(SLMIDITempoItf self, SLmicrosecond uspqn)
 {
+    // FIXME spec says zero, is that correct?
+    if (!(1 <= uspqn && uspqn <= 16777215))
+        return SL_RESULT_PARAMETER_INVALID;
     IMIDITempo *this = (IMIDITempo *) self;
     interface_lock_poke(this);
     this->mMicrosecondsPerQuarterNote = uspqn;

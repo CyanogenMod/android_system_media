@@ -36,8 +36,7 @@ static SLresult I3DGrouping_Set3DGroup(SL3DGroupingItf self, SLObjectItf group)
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DGrouping_Get3DGroup(SL3DGroupingItf self,
-    SLObjectItf *pGroup)
+static SLresult I3DGrouping_Get3DGroup(SL3DGroupingItf self, SLObjectItf *pGroup)
 {
     if (NULL == pGroup)
         return SL_RESULT_PARAMETER_INVALID;
@@ -57,8 +56,6 @@ void I3DGrouping_init(void *self)
 {
     I3DGrouping *this = (I3DGrouping *) self;
     this->mItf = &I3DGrouping_Itf;
-#ifndef NDEBUG
     this->mGroup = NULL;
-#endif
     // FIXME initialize the set here
 }

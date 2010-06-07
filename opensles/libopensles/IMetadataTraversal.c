@@ -18,8 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IMetadataTraversal_SetMode(SLMetadataTraversalItf self,
-    SLuint32 mode)
+static SLresult IMetadataTraversal_SetMode(SLMetadataTraversalItf self, SLuint32 mode)
 {
     switch (mode) {
     case SL_METADATATRAVERSALMODE_ALL:
@@ -29,17 +28,21 @@ static SLresult IMetadataTraversal_SetMode(SLMetadataTraversalItf self,
         return SL_RESULT_PARAMETER_INVALID;
     }
     IMetadataTraversal *this = (IMetadataTraversal *) self;
+    interface_lock_poke(this);
     this->mMode = mode;
+    interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IMetadataTraversal_GetChildCount(SLMetadataTraversalItf self,
-    SLuint32 *pCount)
+static SLresult IMetadataTraversal_GetChildCount(SLMetadataTraversalItf self, SLuint32 *pCount)
 {
     if (NULL == pCount)
         return SL_RESULT_PARAMETER_INVALID;
     IMetadataTraversal *this = (IMetadataTraversal *) self;
-    *pCount = this->mCount;
+    interface_lock_peek(this);
+    SLuint32 count = this->mCount;
+    interface_unlock_peek(this);
+    *pCount = count;
     return SL_RESULT_SUCCESS;
 }
 
@@ -49,27 +52,30 @@ static SLresult IMetadataTraversal_GetChildMIMETypeSize(
     if (NULL == pSize)
         return SL_RESULT_PARAMETER_INVALID;
     IMetadataTraversal *this = (IMetadataTraversal *) self;
-    *pSize = this->mSize;
+    interface_lock_peek(this);
+    SLuint32 size = this->mSize;
+    interface_unlock_peek(this);
+    *pSize = size;
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IMetadataTraversal_GetChildInfo(SLMetadataTraversalItf self,
-    SLuint32 index, SLint32 *pNodeID, SLuint32 *pType, SLuint32 size,
-    SLchar *pMimeType)
+static SLresult IMetadataTraversal_GetChildInfo(SLMetadataTraversalItf self, SLuint32 index,
+    SLint32 *pNodeID, SLuint32 *pType, SLuint32 size, SLchar *pMimeType)
 {
     //IMetadataTraversal *this = (IMetadataTraversal *) self;
-    return SL_RESULT_SUCCESS;
+    // FIXME not implemented
+    return SL_RESULT_FEATURE_UNSUPPORTED;
 }
 
-static SLresult IMetadataTraversal_SetActiveNode(SLMetadataTraversalItf self,
-    SLuint32 index)
+static SLresult IMetadataTraversal_SetActiveNode(SLMetadataTraversalItf self, SLuint32 index)
 {
     if (SL_NODE_PARENT == index) {
         ;
     }
     IMetadataTraversal *this = (IMetadataTraversal *) self;
     this->mIndex = index;
-    return SL_RESULT_SUCCESS;
+    // FIXME not implemented
+    return SL_RESULT_FEATURE_UNSUPPORTED;
 }
 
 static const struct SLMetadataTraversalItf_ IMetadataTraversal_Itf = {
@@ -84,8 +90,8 @@ void IMetadataTraversal_init(void *self)
 {
     IMetadataTraversal *this = (IMetadataTraversal *) self;
     this->mItf = &IMetadataTraversal_Itf;
-#ifndef NDEBUG
     this->mIndex = 0;
-#endif
     this->mMode = SL_METADATATRAVERSALMODE_NODE;
+    this->mCount = 0;
+    this->mSize = 0;
 }

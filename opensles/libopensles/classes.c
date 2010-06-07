@@ -105,9 +105,6 @@ static const struct iid_vtable AudioPlayer_interfaces[] = {
         offsetof(CAudioPlayer, mVisualization)}
 };
 
-extern SLresult CAudioPlayer_Realize(void *self, SLboolean async);
-extern void CAudioPlayer_Destroy(void *self);
-
 static const ClassTable CAudioPlayer_class = {
     AudioPlayer_interfaces,
     sizeof(AudioPlayer_interfaces)/sizeof(AudioPlayer_interfaces[0]),
@@ -187,9 +184,9 @@ static const ClassTable CEngine_class = {
     "Engine",
     sizeof(CEngine),
     SL_OBJECTID_ENGINE,
+    CEngine_Realize,
     NULL,
-    NULL,
-    NULL
+    CEngine_Destroy
 };
 
 // LEDDevice class

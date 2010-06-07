@@ -18,8 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult I3DDoppler_SetVelocityCartesian(SL3DDopplerItf self,
-    const SLVec3D *pVelocity)
+static SLresult I3DDoppler_SetVelocityCartesian(SL3DDopplerItf self, const SLVec3D *pVelocity)
 {
     if (NULL == pVelocity)
         return SL_RESULT_PARAMETER_INVALID;
@@ -45,8 +44,7 @@ static SLresult I3DDoppler_SetVelocitySpherical(SL3DDopplerItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DDoppler_GetVelocityCartesian(SL3DDopplerItf self,
-    SLVec3D *pVelocity)
+static SLresult I3DDoppler_GetVelocityCartesian(SL3DDopplerItf self, SLVec3D *pVelocity)
 {
     if (NULL == pVelocity)
         return SL_RESULT_PARAMETER_INVALID;
@@ -84,8 +82,7 @@ static SLresult I3DDoppler_GetVelocityCartesian(SL3DDopplerItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DDoppler_SetDopplerFactor(SL3DDopplerItf self,
-    SLpermille dopplerFactor)
+static SLresult I3DDoppler_SetDopplerFactor(SL3DDopplerItf self, SLpermille dopplerFactor)
 {
     I3DDoppler *this = (I3DDoppler *) self;
     interface_lock_poke(this);
@@ -94,8 +91,7 @@ static SLresult I3DDoppler_SetDopplerFactor(SL3DDopplerItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult I3DDoppler_GetDopplerFactor(SL3DDopplerItf self,
-    SLpermille *pDopplerFactor)
+static SLresult I3DDoppler_GetDopplerFactor(SL3DDopplerItf self, SLpermille *pDopplerFactor)
 {
     if (NULL == pDopplerFactor)
         return SL_RESULT_PARAMETER_INVALID;
@@ -119,12 +115,10 @@ void I3DDoppler_init(void *self)
 {
     I3DDoppler *this = (I3DDoppler *) self;
     this->mItf = &I3DDoppler_Itf;
-#ifndef NDEBUG
     this->mVelocityCartesian.x = 0;
     this->mVelocityCartesian.y = 0;
     this->mVelocityCartesian.z = 0;
     memset(&this->mVelocitySpherical, 0x55, sizeof(this->mVelocitySpherical));
-#endif
     this->mVelocityActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
     this->mDopplerFactor = 1000;
 }

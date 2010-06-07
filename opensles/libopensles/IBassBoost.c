@@ -22,7 +22,7 @@ static SLresult IBassBoost_SetEnabled(SLBassBoostItf self, SLboolean enabled)
 {
     IBassBoost *this = (IBassBoost *) self;
     interface_lock_poke(this);
-    this->mEnabled = enabled;
+    this->mEnabled = SL_BOOLEAN_FALSE != enabled; // normalize
     interface_unlock_poke(this);
     return SL_RESULT_SUCCESS;
 }
@@ -41,6 +41,8 @@ static SLresult IBassBoost_IsEnabled(SLBassBoostItf self, SLboolean *pEnabled)
 
 static SLresult IBassBoost_SetStrength(SLBassBoostItf self, SLpermille strength)
 {
+    if (!(0 <= strength) && (strength <= 1000))
+        return SL_RESULT_PARAMETER_INVALID;
     IBassBoost *this = (IBassBoost *) self;
     interface_lock_poke(this);
     this->mStrength = strength;
@@ -48,8 +50,7 @@ static SLresult IBassBoost_SetStrength(SLBassBoostItf self, SLpermille strength)
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IBassBoost_GetRoundedStrength(SLBassBoostItf self,
-    SLpermille *pStrength)
+static SLresult IBassBoost_GetRoundedStrength(SLBassBoostItf self, SLpermille *pStrength)
 {
     if (NULL == pStrength)
         return SL_RESULT_PARAMETER_INVALID;
@@ -61,8 +62,7 @@ static SLresult IBassBoost_GetRoundedStrength(SLBassBoostItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IBassBoost_IsStrengthSupported(SLBassBoostItf self,
-    SLboolean *pSupported)
+static SLresult IBassBoost_IsStrengthSupported(SLBassBoostItf self, SLboolean *pSupported)
 {
     if (NULL == pSupported)
         return SL_RESULT_PARAMETER_INVALID;
@@ -82,8 +82,6 @@ void IBassBoost_init(void *self)
 {
     IBassBoost *this = (IBassBoost *) self;
     this->mItf = &IBassBoost_Itf;
-#ifndef NDEBUG
     this->mEnabled = SL_BOOLEAN_FALSE;
-#endif
     this->mStrength = 1000;
 }

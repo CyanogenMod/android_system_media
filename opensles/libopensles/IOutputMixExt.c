@@ -52,7 +52,7 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
         SLboolean trackContributedToMix = SL_BOOLEAN_FALSE;
         IBufferQueue *bufferQueue = track->mBufferQueue;
         while (desired > 0) {
-            const struct BufferHeader *oldFront, *newFront, *rear;
+            const BufferHeader *oldFront, *newFront, *rear;
             unsigned actual = desired;
             if (track->mAvail < actual)
                 actual = track->mAvail;
@@ -88,9 +88,9 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                         rear = bufferQueue->mRear;
                         assert(oldFront != rear);
                         newFront = oldFront;
-                        if (++newFront == &bufferQueue->mArray[bufferQueue->mNumBuffers])
+                        if (++newFront == &bufferQueue->mArray[bufferQueue->mNumBuffers + 1])
                             newFront = bufferQueue->mArray;
-                        bufferQueue->mFront = (struct BufferHeader *) newFront;
+                        bufferQueue->mFront = (BufferHeader *) newFront;
                         assert(0 < bufferQueue->mState.count);
                         --bufferQueue->mState.count;
                         // FIXME here or in Enqueue?

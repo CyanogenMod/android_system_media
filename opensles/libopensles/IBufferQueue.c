@@ -21,15 +21,13 @@
 static SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
     SLuint32 size)
 {
-    //FIXME if queue is empty and associated player is not in SL_PLAYSTATE_PLAYING state,
-    // set it to SL_PLAYSTATE_PLAYING (and start playing)
     if (NULL == pBuffer || 0 == size)
         return SL_RESULT_PARAMETER_INVALID;
     IBufferQueue *this = (IBufferQueue *) self;
     SLresult result;
     interface_lock_exclusive(this);
-    struct BufferHeader *oldRear = this->mRear, *newRear;
-    if ((newRear = oldRear + 1) == &this->mArray[this->mNumBuffers])
+    BufferHeader *oldRear = this->mRear, *newRear;
+    if ((newRear = oldRear + 1) == &this->mArray[this->mNumBuffers + 1])
         newRear = this->mArray;
     if (newRear == this->mFront) {
         result = SL_RESULT_BUFFER_INSUFFICIENT;
@@ -113,7 +111,7 @@ void IBufferQueue_init(void *self)
     this->mFront = NULL;
     this->mRear = NULL;
     this->mSizeConsumed = 0;
-    struct BufferHeader *bufferHeader = this->mTypical;
+    BufferHeader *bufferHeader = this->mTypical;
     unsigned i;
     for (i = 0; i < BUFFER_HEADER_TYPICAL+1; ++i, ++bufferHeader) {
         bufferHeader->mBuffer = NULL;

@@ -43,15 +43,22 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
     // Lock the object rather than the DIM interface, because
     // we modify both the object (exposed) and interface (added)
     object_lock_exclusive(thisObject);
-    if (thisObject->mExposedMask & mask) {
+    if ((thisObject->mExposedMask | this->mAddingMask) & mask) {
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
+        // Mark operation pending to prevent duplication
+        this->mAddingMask |= mask;
+        object_unlock_exclusive(thisObject);
         // FIXME Currently all initialization is done here, even if requested to be asynchronous
-        // FIXME For asynchronous, mark operation pending to prevent duplication
         memset(thisItf, 0, size);
         ((void **) thisItf)[1] = thisObject;
         if (NULL != init)
             (*init)(thisItf);
+        // Note that this was previously locked, but then unlocked for the init hook
+        object_lock_exclusive(thisObject);
+        assert(this->mAddingMask & mask);
+        this->mAddingMask &= ~mask;
+        assert(!(thisObject->mExposedMask & mask));
         thisObject->mExposedMask |= mask;
         assert(!(this->mAddedMask & mask));
         this->mAddedMask |= mask;
@@ -95,16 +102,25 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
     // we modify both the object (exposed) and interface (added)
     object_lock_exclusive(thisObject);
     // disallow removal of non-dynamic interfaces
-    if (!(this->mAddedMask & mask)) {
+    if (!(this->mAddedMask & mask) || (this->mRemovingMask & mask)) {
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
+        this->mRemovingMask |= mask;
+        object_unlock_exclusive(thisObject);
         // FIXME When async resume is implemented, a pending async resume should be cancelled
+        // The deinitialization is done with mutex unlocked
         if (NULL != deinit)
             (*deinit)(thisItf);
 #ifndef NDEBUG
         memset(thisItf, 0x55, size);
 #endif
+        // Note that this was previously locked, but then unlocked for the deinit hook
+        object_lock_exclusive(thisObject);
+        assert(this->mRemovingMask & mask);
+        this->mRemovingMask &= ~mask;
+        assert(thisObject->mExposedMask & mask);
         thisObject->mExposedMask &= ~mask;
+        assert(this->mAddedMask & mask);
         this->mAddedMask &= ~mask;
         this->mSuspendedMask &= ~mask;
     }
@@ -178,6 +194,8 @@ void IDynamicInterfaceManagement_init(void *self)
     IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
     this->mItf = &IDynamicInterfaceManagement_Itf;
     this->mAddedMask = 0;
+    this->mAddingMask = 0;
+    this->mRemovingMask = 0;
     this->mSuspendedMask = 0;
     this->mCallback = NULL;
     this->mContext = NULL;

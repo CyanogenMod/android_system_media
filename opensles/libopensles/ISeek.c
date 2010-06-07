@@ -18,8 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult ISeek_SetPosition(SLSeekItf self, SLmillisecond pos,
-    SLuint32 seekMode)
+static SLresult ISeek_SetPosition(SLSeekItf self, SLmillisecond pos, SLuint32 seekMode)
 {
     switch (seekMode) {
     case SL_SEEKMODE_FAST:
@@ -38,9 +37,11 @@ static SLresult ISeek_SetPosition(SLSeekItf self, SLmillisecond pos,
 static SLresult ISeek_SetLoop(SLSeekItf self, SLboolean loopEnable,
     SLmillisecond startPos, SLmillisecond endPos)
 {
+    if (!(startPos < endPos))
+        return SL_RESULT_PARAMETER_INVALID;
     ISeek *this = (ISeek *) self;
     interface_lock_exclusive(this);
-    this->mLoopEnabled = loopEnable;
+    this->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize
     this->mStartPos = startPos;
     this->mEndPos = endPos;
     interface_unlock_exclusive(this);

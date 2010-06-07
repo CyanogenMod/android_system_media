@@ -419,8 +419,8 @@ static void android_pullAudioTrackCallback(int event, void* user, void *info) {
             //fprintf(stderr, "nbBuffers in queue = %lu\n",pAudioPlayer->mBufferQueue.mState.count);
             assert(pAudioPlayer->mBufferQueue.mFront != pAudioPlayer->mBufferQueue.mRear);
 
-            struct BufferHeader *oldFront = pAudioPlayer->mBufferQueue.mFront;
-            struct BufferHeader *newFront = &oldFront[1];
+            BufferHeader *oldFront = pAudioPlayer->mBufferQueue.mFront;
+            BufferHeader *newFront = &oldFront[1];
 
             // FIXME handle 8bit based on buffer format
             short *pSrc = (short*)((char *)oldFront->mBuffer
@@ -438,7 +438,7 @@ static void android_pullAudioTrackCallback(int event, void* user, void *info) {
                 pAudioPlayer->mBufferQueue.mSizeConsumed = 0;
 
                 if (newFront ==
-                        &pAudioPlayer->mBufferQueue.mArray[pAudioPlayer->mBufferQueue.mNumBuffers])
+                        &pAudioPlayer->mBufferQueue.mArray[pAudioPlayer->mBufferQueue.mNumBuffers + 1])
                 {
                     newFront = pAudioPlayer->mBufferQueue.mArray;
                 }

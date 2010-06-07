@@ -24,8 +24,7 @@
 // on the assumption that the block copy will atomically
 // replace each word of the block.
 
-static SLresult IEnvironmentalReverb_SetRoomLevel(SLEnvironmentalReverbItf self,
-    SLmillibel room)
+static SLresult IEnvironmentalReverb_SetRoomLevel(SLEnvironmentalReverbItf self, SLmillibel room)
 {
     if (!(SL_MILLIBEL_MIN <= room && room <= 0))
         return SL_RESULT_PARAMETER_INVALID;
@@ -36,8 +35,7 @@ static SLresult IEnvironmentalReverb_SetRoomLevel(SLEnvironmentalReverbItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self,
-    SLmillibel *pRoom)
+static SLresult IEnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self, SLmillibel *pRoom)
 {
     if (NULL == pRoom)
         return SL_RESULT_PARAMETER_INVALID;
@@ -152,7 +150,7 @@ static SLresult IEnvironmentalReverb_GetReflectionsLevel(
 static SLresult IEnvironmentalReverb_SetReflectionsDelay(
     SLEnvironmentalReverbItf self, SLmillisecond reflectionsDelay)
 {
-    if (!(0 <= reflectionsDelay && reflectionsDelay <= 300))
+    if (!(/* 0 <= reflectionsDelay && */ reflectionsDelay <= 300))
         return SL_RESULT_PARAMETER_INVALID;
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
@@ -202,7 +200,7 @@ static SLresult IEnvironmentalReverb_GetReverbLevel(
 static SLresult IEnvironmentalReverb_SetReverbDelay(
     SLEnvironmentalReverbItf self, SLmillisecond reverbDelay)
 {
-    if (!(0 <= reverbDelay && reverbDelay <= 100))
+    if (!(/* 0 <= reverbDelay && */ reverbDelay <= 100))
         return SL_RESULT_PARAMETER_INVALID;
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     interface_lock_exclusive(this);
@@ -274,8 +272,7 @@ static SLresult IEnvironmentalReverb_GetDensity(SLEnvironmentalReverbItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEnvironmentalReverb_SetEnvironmentalReverbProperties(
-    SLEnvironmentalReverbItf self,
+static SLresult IEnvironmentalReverb_SetEnvironmentalReverbProperties(SLEnvironmentalReverbItf self,
     const SLEnvironmentalReverbSettings *pProperties)
 {
     if (NULL == pProperties)
@@ -291,11 +288,11 @@ static SLresult IEnvironmentalReverb_SetEnvironmentalReverbProperties(
         return SL_RESULT_PARAMETER_INVALID;
     if (!(SL_MILLIBEL_MIN <= properties.reflectionsLevel && properties.reflectionsLevel <= 1000))
         return SL_RESULT_PARAMETER_INVALID;
-    if (!(0 <= properties.reflectionsDelay && properties.reflectionsDelay <= 300))
+    if (!(/* 0 <= properties.reflectionsDelay && */ properties.reflectionsDelay <= 300))
         return SL_RESULT_PARAMETER_INVALID;
     if (!(SL_MILLIBEL_MIN <= properties.reverbLevel && properties.reverbLevel <= 2000))
         return SL_RESULT_PARAMETER_INVALID;
-    if (!(0 <= properties.reverbDelay && properties.reverbDelay <= 100))
+    if (!(/* 0 <= properties.reverbDelay && */ properties.reverbDelay <= 100))
         return SL_RESULT_PARAMETER_INVALID;
     if (!(0 <= properties.diffusion && properties.diffusion <= 1000))
         return SL_RESULT_PARAMETER_INVALID;

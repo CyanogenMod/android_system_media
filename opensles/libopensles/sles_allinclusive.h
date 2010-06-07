@@ -22,10 +22,12 @@
 #include <assert.h> // debugging
 #include <pthread.h>
 #include <unistd.h> // usleep
+#include <errno.h>
 
 #include "MPH.h"
 #include "MPH_to.h"
 #include "devices.h"
+#include "ThreadPool.h"
 
 typedef struct CAudioPlayer_struct CAudioPlayer;
 
@@ -102,10 +104,10 @@ typedef struct {
 
 // BufferHeader describes each element of a BufferQueue, other than the data
 
-struct BufferHeader {
+typedef struct {
     const void *mBuffer;
     SLuint32 mSize;
-};
+} BufferHeader;
 
 #ifdef USE_OUTPUTMIXEXT
 
@@ -179,7 +181,7 @@ typedef struct Object_interface {
     struct Object_interface *mThis;
     const ClassTable *mClass;
     struct Engine_interface *mEngine;
-    SLuint32 mInstanceID;
+    SLuint32 mInstanceID; // for debugger and for RPC
     SLuint32 mState;
     slObjectCallback mCallback;
     void *mContext;
@@ -189,8 +191,8 @@ typedef struct Object_interface {
     SLboolean mPreemptable;
     pthread_mutex_t mMutex;
     pthread_cond_t mCond;
-    // FIXME also an object ID for RPC
-    // FIXME and a human-readable name for debugging
+    // FIXME Human-readable name for debugging
+    Closure mClosure;
 } IObject;
 
 #include "locks.h"
@@ -298,8 +300,6 @@ typedef struct {
         SLVec3D mUp;
     } mOrientationVectors;
     enum AnglesVectorsActive mOrientationActive;
-    // FIXME no longer needed? was for optimization
-    // SLuint32 mGeneration;
     // Rotations can be slow, so are deferred.
     SLmillidegree mTheta;
     SLVec3D mAxis;
@@ -362,12 +362,12 @@ typedef struct BufferQueue_interface {
     slBufferQueueCallback mCallback;
     void *mContext;
     SLuint32 mNumBuffers;
-    struct BufferHeader *mArray;
-    struct BufferHeader *mFront, *mRear;
+    BufferHeader *mArray;
+    BufferHeader *mFront, *mRear;
     SLuint32 mSizeConsumed;
     // saves a malloc in the typical case
 #define BUFFER_HEADER_TYPICAL 4
-    struct BufferHeader mTypical[BUFFER_HEADER_TYPICAL+1];
+    BufferHeader mTypical[BUFFER_HEADER_TYPICAL+1];
 } IBufferQueue;
 
 typedef struct {
@@ -380,7 +380,9 @@ typedef struct {
     const struct SLDynamicInterfaceManagementItf_ *mItf;
     IObject *mThis;
     unsigned mAddedMask;     // added interfaces, a subset of exposed interfaces
+    unsigned mAddingMask;    // interfaces currently in the process of being added
     unsigned mSuspendedMask; // suspended interfaces, a subset of added interfaces
+    unsigned mRemovingMask;  // interfaces currently in the process of being removed
     slDynamicInterfaceManagementCallback mCallback;
     void *mContext;
 } IDynamicInterfaceManagement;
@@ -436,6 +438,8 @@ typedef struct Engine_interface {
     unsigned mInstanceMask;
 #define INSTANCE_MAX 32 // FIXME no magic numbers
     IObject *mInstances[INSTANCE_MAX];
+    SLboolean mShutdown;
+    ThreadPool mThreadPool; // for asynchronous operations
 } IEngine;
 
 typedef struct {
@@ -525,7 +529,7 @@ typedef struct {
     SLuint16 mChannelSoloMask;
     SLuint32 mTrackMuteMask;
     SLuint32 mTrackSoloMask;
-    // const ?
+    // const
     SLuint16 mTrackCount;
 } IMIDIMuteSolo;
 
@@ -943,6 +947,12 @@ extern SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *my
 extern void freeDataLocatorFormat(DataLocatorFormat *dlf);
 extern SLresult CAudioPlayer_Realize(void *self, SLboolean async);
 extern void CAudioPlayer_Destroy(void *self);
+extern SLresult CEngine_Realize(void *self, SLboolean async);
+extern void CEngine_Destroy(void *self);
 #ifdef USE_SDL
 extern void SDL_start(IEngine *thisEngine);
 #endif
+#define SL_OBJECT_STATE_REALIZING_1 ((SLuint32) 4)
+#define SL_OBJECT_STATE_REALIZING_2 ((SLuint32) 5)
+extern void *sync_start(void *arg);
+extern SLresult err_to_result(int err);

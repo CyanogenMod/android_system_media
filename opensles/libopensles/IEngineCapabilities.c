@@ -23,9 +23,9 @@ static SLresult IEngineCapabilities_QuerySupportedProfiles(
 {
     if (NULL == pProfilesSupported)
         return SL_RESULT_PARAMETER_INVALID;
-    // This omits the unofficial driver profile
-    *pProfilesSupported =
-        SL_PROFILES_PHONE | SL_PROFILES_MUSIC | SL_PROFILES_GAME;
+    // The generic implementation doesn't implement any of the profiles, they shouldn't
+    // be declared as supported. Also omits the unofficial driver profile.
+    *pProfilesSupported = 0; // SL_PROFILES_PHONE | SL_PROFILES_MUSIC | SL_PROFILES_GAME
     return SL_RESULT_SUCCESS;
 }
 
@@ -71,9 +71,8 @@ static SLresult IEngineCapabilities_QueryAPIVersion(SLEngineCapabilitiesItf self
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEngineCapabilities_QueryLEDCapabilities(
-    SLEngineCapabilitiesItf self, SLuint32 *pIndex, SLuint32 *pLEDDeviceID,
-    SLLEDDescriptor *pDescriptor)
+static SLresult IEngineCapabilities_QueryLEDCapabilities(SLEngineCapabilitiesItf self,
+    SLuint32 *pIndex, SLuint32 *pLEDDeviceID, SLLEDDescriptor *pDescriptor)
 {
     const struct LED_id_descriptor *id_descriptor = LED_id_descriptors;
     while (NULL != id_descriptor->descriptor)
@@ -110,9 +109,8 @@ static SLresult IEngineCapabilities_QueryLEDCapabilities(
     }
 }
 
-static SLresult IEngineCapabilities_QueryVibraCapabilities(
-    SLEngineCapabilitiesItf self, SLuint32 *pIndex, SLuint32 *pVibraDeviceID,
-    SLVibraDescriptor *pDescriptor)
+static SLresult IEngineCapabilities_QueryVibraCapabilities(SLEngineCapabilitiesItf self,
+    SLuint32 *pIndex, SLuint32 *pVibraDeviceID, SLVibraDescriptor *pDescriptor)
 {
     const struct Vibra_id_descriptor *id_descriptor = Vibra_id_descriptors;
     while (NULL != id_descriptor->descriptor)

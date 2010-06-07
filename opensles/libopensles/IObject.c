@@ -18,34 +18,94 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
+// Execute a closure to handle an asynchronous Object.Realize
+
+static void HandleRealize(Closure *pClosure)
 {
-    IObject *this = (IObject *) self;
+    IObject *this = (IObject *) pClosure->mContext;
     const ClassTable *class__ = this->mClass;
     AsyncHook realize = class__->mRealize;
     SLresult result;
-    slObjectCallback callback = NULL;
-    void *context = NULL;
-    SLuint32 state = 0;
+    SLuint32 state;
     object_lock_exclusive(this);
-    if (SL_OBJECT_STATE_UNREALIZED != this->mState) {
-        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    // FIXME Cancellation is possible here
+    assert(SL_OBJECT_STATE_REALIZING_1 == this->mState);
+    if (NULL != realize) {
+        this->mState = SL_OBJECT_STATE_REALIZING_2;
+        object_unlock_exclusive(this);
+        // Note that the mutex is unlocked during the realize hook
+        result = (*realize)(this, SL_BOOLEAN_TRUE);
+        object_lock_exclusive(this);
+        assert(SL_OBJECT_STATE_REALIZING_2 == this->mState);
+        state = SL_RESULT_SUCCESS == result ? SL_OBJECT_STATE_REALIZED : SL_OBJECT_STATE_UNREALIZED;
     } else {
-        // FIXME The realize hook and callback should be asynchronous if requested
-        // FIXME For asynchronous, mark operation pending to prevent duplication
-        result = NULL != realize ? (*realize)(this, async) : SL_RESULT_SUCCESS;
-        if (SL_RESULT_SUCCESS == result)
-            this->mState = SL_OBJECT_STATE_REALIZED;
-        // Make a copy of these, so we can call the callback with mutex unlocked
-        if (async) {
-            callback = this->mCallback;
-            context = this->mContext;
-            state = this->mState;
-        }
+        result = SL_RESULT_SUCCESS;
+        state = SL_OBJECT_STATE_REALIZED;
+    }
+    this->mState = state;
+    // Make a copy of these, so we can call the callback with mutex unlocked
+    slObjectCallback callback = this->mCallback;
+    void *context = this->mContext;
+    object_unlock_exclusive(this);
+    // Note that the mutex is unlocked during the callback
+    if (NULL != callback)
+        (*callback)(&this->mItf, context, SL_OBJECT_EVENT_ASYNC_TERMINATION, result, state, NULL);
+}
+
+static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
+{
+    IObject *this = (IObject *) self;
+    SLresult result = SL_RESULT_SUCCESS;
+    SLuint32 state;
+    const ClassTable *class__ = this->mClass;
+    object_lock_exclusive(this);
+    state = this->mState;
+    // Reject redundant calls to Realize
+    if (SL_OBJECT_STATE_UNREALIZED != state) {
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    // Asynchronous: mark operation pending and cancellable
+    } else if (async && (SL_OBJECTID_ENGINE != class__->mObjectID)) {
+        state = SL_OBJECT_STATE_REALIZING_1;
+        this->mState = state;
+    // Synchronous: mark operation pending and non-cancellable
+    } else {
+        state = SL_OBJECT_STATE_REALIZING_2;
+        this->mState = state;
     }
     object_unlock_exclusive(this);
-    if (NULL != callback)
-        (*callback)(self, context, SL_OBJECT_EVENT_ASYNC_TERMINATION, result, state, NULL);
+    switch (state) {
+    case SL_OBJECT_STATE_REALIZING_1: // asynchronous on non-Engine
+        assert(async);
+        // no mutex needed because the state guarantees we're the owner
+        this->mClosure.mHandler = HandleRealize;
+        this->mClosure.mContext = this;
+        if (!ThreadPool_add(&this->mEngine->mThreadPool, &this->mClosure)) {
+            // This could happen if engine is destroyed during realize
+            result = SL_RESULT_OPERATION_ABORTED;
+        }
+        break;
+    case SL_OBJECT_STATE_REALIZING_2: // synchronous, or asynchronous on Engine
+        {
+        AsyncHook realize = class__->mRealize;
+        // Note that the mutex is unlocked during the realize hook
+        if (NULL != realize)
+            result = (*realize)(this, async);
+        object_lock_exclusive(this);
+        assert(SL_OBJECT_STATE_REALIZING_2 == this->mState);
+        state = SL_RESULT_SUCCESS == result ? SL_OBJECT_STATE_REALIZED : SL_OBJECT_STATE_UNREALIZED;
+        this->mState = state;
+        slObjectCallback callback = this->mCallback;
+        void *context = this->mContext;
+        object_unlock_exclusive(this);
+        // asynchronous Realize on an Engine is actually done synchronously, but still has callback
+        // This is because there is no thread pool yet to do it asynchronously.
+        if (async && (NULL != callback))
+            (*callback)(&this->mItf, context, SL_OBJECT_EVENT_ASYNC_TERMINATION, result, state, NULL);
+        }
+        break;
+    default:                          // preconditions violated
+        break;
+    }
     return result;
 }
 
@@ -89,6 +149,15 @@ static SLresult IObject_GetState(SLObjectItf self, SLuint32 *pState)
     object_lock_peek(this);
     SLuint32 state = this->mState;
     object_unlock_peek(this);
+    // Re-map the realizing states
+    switch (state) {
+    case SL_OBJECT_STATE_REALIZING_1:
+    case SL_OBJECT_STATE_REALIZING_2:
+        state = SL_OBJECT_STATE_UNREALIZED;
+        break;
+    default:
+        break;
+    }
     *pState = state;
     return SL_RESULT_SUCCESS;
 }
@@ -179,6 +248,8 @@ static void IObject_Destroy(SLObjectItf self)
 #endif
     interface_unlock_exclusive(thisEngine);
     object_lock_exclusive(this);
+    if (NULL != destroy)
+        (*destroy)(this);
     // Call the deinitializer for each currently exposed interface,
     // whether it is implicit, explicit, optional, or dynamically added.
     unsigned exposedMask = this->mExposedMask;
@@ -189,8 +260,6 @@ static void IObject_Destroy(SLObjectItf self)
                 (*deinit)((char *) this + x->mOffset);
         }
     }
-    if (NULL != destroy)
-        (*destroy)(this);
     // redundant: this->mState = SL_OBJECT_STATE_UNREALIZED;
     object_unlock_exclusive(this);
 #ifndef NDEBUG
@@ -204,7 +273,7 @@ static SLresult IObject_SetPriority(SLObjectItf self, SLint32 priority, SLboolea
     IObject *this = (IObject *) self;
     object_lock_exclusive(this);
     this->mPriority = priority;
-    this->mPreemptable = preemptable;
+    this->mPreemptable = SL_BOOLEAN_FALSE != preemptable; // normalize
     object_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
@@ -279,7 +348,7 @@ void IObject_init(void *self)
     this->mState = SL_OBJECT_STATE_UNREALIZED;
     this->mCallback = NULL;
     this->mContext = NULL;
-    this->mPriority = 0;
+    this->mPriority = SL_PRIORITY_NORMAL;
     this->mPreemptable = SL_BOOLEAN_FALSE;
     int ok;
     ok = pthread_mutex_init(&this->mMutex, (const pthread_mutexattr_t *) NULL);

@@ -18,8 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-static struct EnableLevel *getEnableLevel(IEffectSend *this,
-    const void *pAuxEffect)
+static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEffect)
 {
     COutputMix *outputMix = this->mOutputMix;
     // Make sure the sink for this player is an output mix
@@ -42,12 +41,14 @@ static struct EnableLevel *getEnableLevel(IEffectSend *this,
 static SLresult IEffectSend_EnableEffectSend(SLEffectSendItf self,
     const void *pAuxEffect, SLboolean enable, SLmillibel initialLevel)
 {
+    if (!((SL_MILLIBEL_MIN <= initialLevel) && (initialLevel <= 0)))
+        return SL_RESULT_PARAMETER_INVALID;
     IEffectSend *this = (IEffectSend *) self;
     struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
     if (NULL == enableLevel)
         return SL_RESULT_PARAMETER_INVALID;
     interface_lock_exclusive(this);
-    enableLevel->mEnable = enable;
+    enableLevel->mEnable = SL_BOOLEAN_FALSE != enable; // normalize
     enableLevel->mSendLevel = initialLevel;
     interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
@@ -69,9 +70,10 @@ static SLresult IEffectSend_IsEnabled(SLEffectSendItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEffectSend_SetDirectLevel(SLEffectSendItf self,
-    SLmillibel directLevel)
+static SLresult IEffectSend_SetDirectLevel(SLEffectSendItf self, SLmillibel directLevel)
 {
+    if (!((SL_MILLIBEL_MIN <= directLevel) && (directLevel <= 0)))
+        return SL_RESULT_PARAMETER_INVALID;
     IEffectSend *this = (IEffectSend *) self;
     interface_lock_poke(this);
     this->mDirectLevel = directLevel;
@@ -79,8 +81,7 @@ static SLresult IEffectSend_SetDirectLevel(SLEffectSendItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEffectSend_GetDirectLevel(SLEffectSendItf self,
-    SLmillibel *pDirectLevel)
+static SLresult IEffectSend_GetDirectLevel(SLEffectSendItf self, SLmillibel *pDirectLevel)
 {
     if (NULL == pDirectLevel)
         return SL_RESULT_PARAMETER_INVALID;
@@ -92,9 +93,10 @@ static SLresult IEffectSend_GetDirectLevel(SLEffectSendItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self,
-    const void *pAuxEffect, SLmillibel sendLevel)
+static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self, const void *pAuxEffect, SLmillibel sendLevel)
 {
+    if (!((SL_MILLIBEL_MIN <= sendLevel) && (sendLevel <= 0)))
+        return SL_RESULT_PARAMETER_INVALID;
     IEffectSend *this = (IEffectSend *) self;
     struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
     if (NULL == enableLevel)
@@ -106,8 +108,7 @@ static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self,
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEffectSend_GetSendLevel(SLEffectSendItf self,
-    const void *pAuxEffect, SLmillibel *pSendLevel)
+static SLresult IEffectSend_GetSendLevel(SLEffectSendItf self, const void *pAuxEffect, SLmillibel *pSendLevel)
 {
     if (NULL == pSendLevel)
         return SL_RESULT_PARAMETER_INVALID;
@@ -135,13 +136,11 @@ void IEffectSend_init(void *self)
 {
     IEffectSend *this = (IEffectSend *) self;
     this->mItf = &IEffectSend_Itf;
-#ifndef NDEBUG
     this->mOutputMix = NULL; // FIXME wrong
     this->mDirectLevel = 0;
     // FIXME hard-coded array initialization should be loop on AUX_MAX
     this->mEnableLevels[AUX_ENVIRONMENTALREVERB].mEnable = SL_BOOLEAN_FALSE;
-    this->mEnableLevels[AUX_ENVIRONMENTALREVERB].mSendLevel = 0;
+    this->mEnableLevels[AUX_ENVIRONMENTALREVERB].mSendLevel = SL_MILLIBEL_MIN;
     this->mEnableLevels[AUX_PRESETREVERB].mEnable = SL_BOOLEAN_FALSE;
-    this->mEnableLevels[AUX_PRESETREVERB].mSendLevel = 0;
-#endif
+    this->mEnableLevels[AUX_PRESETREVERB].mSendLevel = SL_MILLIBEL_MIN;
 }

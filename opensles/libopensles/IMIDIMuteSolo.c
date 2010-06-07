@@ -20,6 +20,8 @@
 
 static SLresult IMIDIMuteSolo_SetChannelMute(SLMIDIMuteSoloItf self, SLuint8 channel, SLboolean mute)
 {
+    if (channel > 15)
+        return SL_RESULT_PARAMETER_INVALID;
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     SLuint16 mask = 1 << channel;
     interface_lock_exclusive(this);
@@ -34,7 +36,7 @@ static SLresult IMIDIMuteSolo_SetChannelMute(SLMIDIMuteSoloItf self, SLuint8 cha
 static SLresult IMIDIMuteSolo_GetChannelMute(SLMIDIMuteSoloItf self, SLuint8 channel,
     SLboolean *pMute)
 {
-    if (NULL == pMute)
+    if (channel > 15 || (NULL == pMute))
         return SL_RESULT_PARAMETER_INVALID;
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     interface_lock_peek(this);
@@ -46,6 +48,8 @@ static SLresult IMIDIMuteSolo_GetChannelMute(SLMIDIMuteSoloItf self, SLuint8 cha
 
 static SLresult IMIDIMuteSolo_SetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 channel, SLboolean solo)
 {
+    if (channel > 15)
+        return SL_RESULT_PARAMETER_INVALID;
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     SLuint16 mask = 1 << channel;
     interface_lock_exclusive(this);
@@ -60,7 +64,7 @@ static SLresult IMIDIMuteSolo_SetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 cha
 static SLresult IMIDIMuteSolo_GetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 channel,
     SLboolean *pSolo)
 {
-    if (NULL == pSolo)
+    if (channel > 15 || (NULL == pSolo))
         return SL_RESULT_PARAMETER_INVALID;
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     interface_lock_peek(this);
@@ -75,10 +79,8 @@ static SLresult IMIDIMuteSolo_GetTrackCount(SLMIDIMuteSoloItf self, SLuint16 *pC
     if (NULL == pCount)
         return SL_RESULT_PARAMETER_INVALID;
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
-    // FIXME is this const? if so, remove the lock
-    interface_lock_peek(this);
+    // const, so no lock needed
     SLuint16 trackCount = this->mTrackCount;
-    interface_unlock_peek(this);
     *pCount = trackCount;
     return SL_RESULT_SUCCESS;
 }
@@ -86,6 +88,9 @@ static SLresult IMIDIMuteSolo_GetTrackCount(SLMIDIMuteSoloItf self, SLuint16 *pC
 static SLresult IMIDIMuteSolo_SetTrackMute(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean mute)
 {
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
+    // const
+    if (!(track < this->mTrackCount))
+        return SL_RESULT_PARAMETER_INVALID;
     SLuint32 mask = 1 << track;
     interface_lock_exclusive(this);
     if (mute)
@@ -98,9 +103,10 @@ static SLresult IMIDIMuteSolo_SetTrackMute(SLMIDIMuteSoloItf self, SLuint16 trac
 
 static SLresult IMIDIMuteSolo_GetTrackMute(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean *pMute)
 {
-    if (NULL == pMute)
-        return SL_RESULT_PARAMETER_INVALID;
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
+    // const, no lock needed
+    if (!(track < this->mTrackCount) || NULL == pMute)
+        return SL_RESULT_PARAMETER_INVALID;
     interface_lock_peek(this);
     SLuint32 mask = this->mTrackMuteMask;
     interface_unlock_peek(this);
@@ -111,6 +117,9 @@ static SLresult IMIDIMuteSolo_GetTrackMute(SLMIDIMuteSoloItf self, SLuint16 trac
 static SLresult IMIDIMuteSolo_SetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean solo)
 {
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
+    // const
+    if (!(track < this->mTrackCount))
+        return SL_RESULT_PARAMETER_INVALID;
     SLuint32 mask = 1 << track;
     interface_lock_exclusive(this);
     if (solo)
@@ -123,9 +132,10 @@ static SLresult IMIDIMuteSolo_SetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 trac
 
 static SLresult IMIDIMuteSolo_GetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean *pSolo)
 {
-    if (NULL == pSolo)
-        return SL_RESULT_PARAMETER_INVALID;
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
+    // const, no lock needed
+    if (!(track < this->mTrackCount) || NULL == pSolo)
+        return SL_RESULT_PARAMETER_INVALID;
     interface_lock_peek(this);
     SLuint32 mask = this->mTrackSoloMask;
     interface_unlock_peek(this);
@@ -149,11 +159,10 @@ void IMIDIMuteSolo_init(void *self)
 {
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     this->mItf = &IMIDIMuteSolo_Itf;
-#ifndef NDEBUG
     this->mChannelMuteMask = 0;
     this->mChannelSoloMask = 0;
     this->mTrackMuteMask = 0;
     this->mTrackSoloMask = 0;
+    // const
     this->mTrackCount = 32; // FIXME
-#endif
 }

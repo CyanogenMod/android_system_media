@@ -18,12 +18,12 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IVisualization_RegisterVisualizationCallback(
-    SLVisualizationItf self, slVisualizationCallback callback, void *pContext,
-    SLmilliHertz rate)
+static SLresult IVisualization_RegisterVisualizationCallback(SLVisualizationItf self,
+    slVisualizationCallback callback, void *pContext, SLmilliHertz rate)
 {
-    IVisualization *this =
-        (IVisualization *) self;
+    if (!(0 < rate && rate <= 20000))
+        return SL_RESULT_PARAMETER_INVALID;
+    IVisualization *this = (IVisualization *) self;
     interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
@@ -50,9 +50,7 @@ void IVisualization_init(void *self)
 {
     IVisualization *this = (IVisualization *) self;
     this->mItf = &IVisualization_Itf;
-#ifndef NDEBUG
     this->mCallback = NULL;
     this->mContext = NULL;
-#endif
     this->mRate = 20000;
 }
