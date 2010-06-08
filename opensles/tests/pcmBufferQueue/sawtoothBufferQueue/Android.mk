@@ -1,6 +1,8 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
+LOCAL_MODULE_TAGS := tests
+
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
 	$(TOP)/system/media/opensles/include
