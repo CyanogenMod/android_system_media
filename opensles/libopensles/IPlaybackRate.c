@@ -24,13 +24,17 @@ static SLresult IPlaybackRate_SetRate(SLPlaybackRateItf self, SLpermille rate)
     interface_lock_poke(this);
     this->mRate = rate;
     interface_unlock_poke(this);
+#ifdef USE_ANDROID
+    return sles_to_android_audioPlayerSetPlayRate(this, rate);
+#endif
     return SL_RESULT_SUCCESS;
 }
 
 static SLresult IPlaybackRate_GetRate(SLPlaybackRateItf self, SLpermille *pRate)
 {
-    if (NULL == pRate)
+    if (NULL == pRate) {
         return SL_RESULT_PARAMETER_INVALID;
+    }
     IPlaybackRate *this = (IPlaybackRate *) self;
     interface_lock_peek(this);
     SLpermille rate = this->mRate;
@@ -43,17 +47,30 @@ static SLresult IPlaybackRate_SetPropertyConstraints(SLPlaybackRateItf self,
     SLuint32 constraints)
 {
     IPlaybackRate *this = (IPlaybackRate *) self;
+    SLresult result = SL_RESULT_SUCCESS;
     this->mProperties = constraints;
-    return SL_RESULT_SUCCESS;
+#ifdef USE_ANDROID
+    // verify property support before storing
+    result = sles_to_android_audioPlayerSetPlaybackRateBehavior(this, constraints);
+#endif
+    interface_lock_poke(this);
+    if (result == SL_RESULT_SUCCESS) {
+        this->mProperties = constraints;
+    }
+    interface_unlock_poke(this);
+    return result;
 }
 
 static SLresult IPlaybackRate_GetProperties(SLPlaybackRateItf self,
     SLuint32 *pProperties)
 {
-    if (NULL == pProperties)
+    if (NULL == pProperties) {
         return SL_RESULT_PARAMETER_INVALID;
+    }
     IPlaybackRate *this = (IPlaybackRate *) self;
+    interface_lock_peek(this);
     SLuint32 properties = this->mProperties;
+    interface_unlock_peek(this);
     *pProperties = properties;
     return SL_RESULT_SUCCESS;
 }
@@ -61,10 +78,14 @@ static SLresult IPlaybackRate_GetProperties(SLPlaybackRateItf self,
 static SLresult IPlaybackRate_GetCapabilitiesOfRate(SLPlaybackRateItf self,
     SLpermille rate, SLuint32 *pCapabilities)
 {
-    if (NULL == pCapabilities)
+    if (NULL == pCapabilities) {
         return SL_RESULT_PARAMETER_INVALID;
-    // IPlaybackRate *this = (IPlaybackRate *) self;
-    SLuint32 capabilities = 0; // FIXME
+    }
+    IPlaybackRate *this = (IPlaybackRate *) self;
+    SLuint32 capabilities = 0;
+#ifdef USE_ANDROID
+    sles_to_android_audioPlayerGetCapabilitiesOfRate(this, &capabilities);
+#endif
     *pCapabilities = capabilities;
     return SL_RESULT_SUCCESS;
 }
@@ -102,12 +123,14 @@ void IPlaybackRate_init(void *self)
 {
     IPlaybackRate *this = (IPlaybackRate *) self;
     this->mItf = &IPlaybackRate_Itf;
-#ifndef NDEBUG
     this->mProperties = 0;
-#endif
     this->mRate = 1000;
     this->mMinRate = 500;
     this->mMaxRate = 2000;
     this->mStepSize = 100;
-    this->mCapabilities = 200;
+#ifdef USE_ANDROID
+    this->mStepSize = 0;
+    // for an AudioPlayer, mCapabilities will be initialized in sles_to_android_audioPlayerCreate
+#endif
+    this->mCapabilities = 0;
 }
