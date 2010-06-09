@@ -82,8 +82,24 @@ void android_audioPlayerUpdateStereoVolume(IVolume *pVolItf) {
     }
     float leftVol = 1.0f, rightVol = 1.0f;
 
-    //int muteSoloLeft, muteSoleRight;
     CAudioPlayer *ap = (CAudioPlayer *)pVolItf->mThis;
+    //FIXME cache channel count?
+    int channelCount = 0;
+    switch (ap->mAndroidObjType) {
+        case AUDIOTRACK_PUSH:
+        case AUDIOTRACK_PULL:
+            channelCount = ap->mAudioTrackData.mAudioTrack->channelCount();
+            break;
+        case MEDIAPLAYER:
+            //FIXME add support for querying channel count from a MediaPlayer
+            fprintf(stderr, "FIXME add support for querying channel count from a MediaPlayer");
+            channelCount = 1;
+        default:
+            fprintf(stderr, "Error in android_audioPlayerUpdateStereoVolume(): shouldn't hit this");
+            channelCount = 1;
+            break;
+    }
+    //int muteSoloLeft, muteSoleRight;
     //muteSoloLeft = (mChannelMutes & CHANNEL_OUT_FRONT_LEFT) >> 2;
     //muteSoloRight = (mChannelMutes & CHANNEL_OUT_FRONT_RIGHT) >> 3;
 
@@ -98,7 +114,7 @@ void android_audioPlayerUpdateStereoVolume(IVolume *pVolItf) {
     // amplification from stereo position
     if (pVolItf->mEnableStereoPosition) {
         // panning law depends on number of channels of content: stereo panning vs 2ch. balance
-        if(ap->mAudioTrackData.mAudioTrack->channelCount() == 1) {
+        if(1 == channelCount) {
             // stereo panning
             double theta = (1000+pVolItf->mStereoPosition)*M_PI_4/1000.0f; // 0 <= theta <= Pi/2
             pVolItf->mAmplFromStereoPos[0] = cos(theta);
@@ -930,8 +946,6 @@ SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *
 
 //-----------------------------------------------------------------------------
 SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf) {
-    CAudioPlayer *ap = (CAudioPlayer *)pVolItf->mThis;
-    // FIXME use the FX Framework conversions
     android_audioPlayerUpdateStereoVolume(pVolItf);
     return SL_RESULT_SUCCESS;
 }
