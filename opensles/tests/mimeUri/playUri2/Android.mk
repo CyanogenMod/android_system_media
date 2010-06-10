@@ -12,7 +12,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
-	libopensles
+	libOpenSLES
 	
 
 ifeq ($(TARGET_OS),linux)

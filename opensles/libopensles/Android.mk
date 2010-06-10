@@ -96,7 +96,7 @@ endif
 
 LOCAL_PRELINK_MODULE:= false
 
-LOCAL_MODULE:= libopensles
+LOCAL_MODULE:= libOpenSLES
 
 include $(BUILD_SHARED_LIBRARY)
 
