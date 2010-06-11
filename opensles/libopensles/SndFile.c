@@ -26,8 +26,7 @@ void SLAPIENTRY SndFile_Callback(SLBufferQueueItf caller, void *pContext)
     struct SndFile *this = (struct SndFile *) pContext;
     SLresult result;
     if (NULL != this->mRetryBuffer && 0 < this->mRetrySize) {
-        result = (*caller)->Enqueue(caller, this->mRetryBuffer,
-            this->mRetrySize);
+        result = (*caller)->Enqueue(caller, this->mRetryBuffer, this->mRetrySize);
         if (SL_RESULT_BUFFER_INSUFFICIENT == result)
             return;     // what, again?
         assert(SL_RESULT_SUCCESS == result);
@@ -99,15 +98,16 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
         SLchar *uri = dl_uri->URI;
         if (NULL == uri)
             return SL_RESULT_PARAMETER_INVALID;
-        if (strncmp((const char *) uri, "file:///", 8))
-            return SL_RESULT_CONTENT_UNSUPPORTED;
+        // FIXME check other schemes and handle, or return SL_RESULT_CONTENT_UNSUPPORTED
+        if (!strncmp((const char *) uri, "file:///", 8))
+            uri += 8;
         switch (formatType) {
         case SL_DATAFORMAT_MIME:
             break;
         default:
             return SL_RESULT_CONTENT_UNSUPPORTED;
         }
-        this->mSndFile.mPathname = &uri[8];
+        this->mSndFile.mPathname = uri;
         // FIXME magic number, should be configurable
         this->mBufferQueue.mNumBuffers = 2;
         }
