@@ -269,8 +269,8 @@ int main(int argc, char* const argv[])
 
     if (argc == 1) {
         fprintf(stdout, "Usage: \n\t%s url1 url2 \n\t%s url\n", argv[0], argv[0]);
-        fprintf(stdout, "Example: \"%s /sdcard/my.mp3 http://blabla/my.wav\" ");
-        fprintf(stdout, "or \"%s file:///sdcard/my.mp3\"\n", argv[0], argv[0]);
+        fprintf(stdout, "Example: \"%s /sdcard/my.mp3 http://blabla/my.wav\" ", argv[0]);
+        fprintf(stdout, "or \"%s file:///sdcard/my.mp3\"\n", argv[0]);
         exit(1);
     }
 
