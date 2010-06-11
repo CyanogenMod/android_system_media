@@ -33,7 +33,7 @@ typedef struct CAudioPlayer_struct CAudioPlayer;
 
 #ifdef USE_SNDFILE
 #include <sndfile.h>
-#include "SndFile.h"
+#include "SLSndFile.h"
 #endif // USE_SNDFILE
 
 #ifdef USE_SDL
@@ -120,6 +120,10 @@ typedef struct {
 
 #endif
 
+#ifdef __cplusplus
+#define this this_
+#endif
+
 #ifdef USE_SNDFILE
 
 struct SndFile {
@@ -136,10 +140,6 @@ struct SndFile {
 };
 
 #endif // USE_SNDFILE
-
-#ifdef __cplusplus
-#define this this_
-#endif
 
 /* Our own merged version of SLDataSource and SLDataSink */
 

@@ -25,7 +25,7 @@ static SLresult IThreadSync_EnterCriticalSection(SLThreadSyncItf self)
     interface_lock_exclusive(this);
     for (;;) {
         if (this->mInCriticalSection) {
-            if (this->mOwner != pthread_self()) {
+            if (!pthread_equal(this->mOwner, pthread_self())) {
                 this->mWaiting = SL_BOOLEAN_TRUE;
                 interface_cond_wait(this);
                 continue;
@@ -47,11 +47,11 @@ static SLresult IThreadSync_ExitCriticalSection(SLThreadSyncItf self)
     IThreadSync *this = (IThreadSync *) self;
     SLresult result;
     interface_lock_exclusive(this);
-    if (!this->mInCriticalSection || this->mOwner != pthread_self()) {
+    if (!this->mInCriticalSection || !pthread_equal(this->mOwner, pthread_self())) {
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
         this->mInCriticalSection = SL_BOOLEAN_FALSE;
-        this->mOwner = (pthread_t) NULL;
+        memset(&this->mOwner, 0, sizeof(pthread_t));
         result = SL_RESULT_SUCCESS;
         if (this->mWaiting) {
             this->mWaiting = SL_BOOLEAN_FALSE;
@@ -74,5 +74,5 @@ void IThreadSync_init(void *self)
     this->mItf = &IThreadSync_Itf;
     this->mInCriticalSection = SL_BOOLEAN_FALSE;
     this->mWaiting = SL_BOOLEAN_FALSE;
-    this->mOwner = (pthread_t) NULL;
+    memset(&this->mOwner, 0, sizeof(pthread_t));
 }
