@@ -17,5 +17,5 @@
 #ifdef USE_SNDFILE
 extern void SLAPIENTRY SndFile_Callback(SLBufferQueueItf caller, void *pContext);
 extern SLboolean SndFile_IsSupported(const SF_INFO *sfinfo);
-extern SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this);
+extern SLresult SndFile_checkAudioPlayerSourceSink(struct CAudioPlayer_struct *this_);
 #endif

@@ -21,7 +21,7 @@
 #ifdef USE_SNDFILE
 
 // FIXME should run this asynchronously esp. for socket fd, not on mix thread
-void SLAPIENTRY SndFile_Callback(SLBufferQueueItf caller, void *pContext)
+void /*SLAPIENTRY*/ SndFile_Callback(SLBufferQueueItf caller, void *pContext)
 {
     struct SndFile *this = (struct SndFile *) pContext;
     SLresult result;
@@ -40,7 +40,7 @@ void SLAPIENTRY SndFile_Callback(SLBufferQueueItf caller, void *pContext)
     // FIXME magic number
     count = sf_read_short(this->mSNDFILE, pBuffer, (sf_count_t) 512);
     if (0 < count) {
-        SLuint32 size = count * sizeof(short);
+        SLuint32 size = (SLuint32) (count * sizeof(short));
         // FIXME if we had an internal API, could call this directly
         result = (*caller)->Enqueue(caller, pBuffer, size);
         if (SL_RESULT_BUFFER_INSUFFICIENT == result) {

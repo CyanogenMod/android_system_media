@@ -46,7 +46,7 @@ static SLresult IMetadataExtraction_GetKey(SLMetadataExtractionItf self,
     SLMetadataInfo key;
     key.size = 1;
     key.encoding = SL_CHARACTERENCODING_UTF8;
-    strcpy((char *) key.langCountry, "en");
+    memcpy((char *) key.langCountry, "en", 3);
     key.data[0] = 0;
     *pKey = key;
     return SL_RESULT_SUCCESS;
@@ -71,7 +71,7 @@ static SLresult IMetadataExtraction_GetValue(SLMetadataExtractionItf self,
     SLMetadataInfo value;
     value.size = 1;
     value.encoding = SL_CHARACTERENCODING_UTF8;
-    strcpy((char *) value.langCountry, "en");
+    memcpy((char *) value.langCountry, "en", 3);
     value.data[0] = 0;
     *pValue = value;;
     return SL_RESULT_SUCCESS;
