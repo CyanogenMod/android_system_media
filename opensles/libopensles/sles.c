@@ -465,57 +465,55 @@ extern void
 #endif
 
 /*static*/ const struct MPH_init MPH_init_table[MPH_MAX] = {
-    { /* MPH_3DCOMMIT, */ I3DCommit_init, NULL },
-    { /* MPH_3DDOPPLER, */ I3DDoppler_init, NULL },
-    { /* MPH_3DGROUPING, */ I3DGrouping_init, NULL },
-    { /* MPH_3DLOCATION, */ I3DLocation_init, NULL },
-    { /* MPH_3DMACROSCOPIC, */ I3DMacroscopic_init, NULL },
-    { /* MPH_3DSOURCE, */ I3DSource_init, NULL },
-    { /* MPH_AUDIODECODERCAPABILITIES, */ IAudioDecoderCapabilities_init, NULL },
-    { /* MPH_AUDIOENCODER, */ IAudioEncoder_init, NULL },
-    { /* MPH_AUDIOENCODERCAPABILITIES, */ IAudioEncoderCapabilities_init, NULL },
-    { /* MPH_AUDIOIODEVICECAPABILITIES, */ IAudioIODeviceCapabilities_init,
-        NULL },
-    { /* MPH_BASSBOOST, */ IBassBoost_init, NULL },
-    { /* MPH_BUFFERQUEUE, */ IBufferQueue_init, NULL },
-    { /* MPH_DEVICEVOLUME, */ IDeviceVolume_init, NULL },
-    { /* MPH_DYNAMICINTERFACEMANAGEMENT, */ IDynamicInterfaceManagement_init,
-        NULL },
-    { /* MPH_DYNAMICSOURCE, */ IDynamicSource_init, NULL },
-    { /* MPH_EFFECTSEND, */ IEffectSend_init, NULL },
-    { /* MPH_ENGINE, */ IEngine_init, NULL },
-    { /* MPH_ENGINECAPABILITIES, */ IEngineCapabilities_init, NULL },
-    { /* MPH_ENVIRONMENTALREVERB, */ IEnvironmentalReverb_init, NULL },
-    { /* MPH_EQUALIZER, */ IEqualizer_init, NULL },
-    { /* MPH_LED, */ ILEDArray_init, NULL },
-    { /* MPH_METADATAEXTRACTION, */ IMetadataExtraction_init, NULL },
-    { /* MPH_METADATATRAVERSAL, */ IMetadataTraversal_init, NULL },
-    { /* MPH_MIDIMESSAGE, */ IMIDIMessage_init, NULL },
-    { /* MPH_MIDITIME, */ IMIDITime_init, NULL },
-    { /* MPH_MIDITEMPO, */ IMIDITempo_init, NULL },
-    { /* MPH_MIDIMUTESOLO, */ IMIDIMuteSolo_init, NULL },
-    { /* MPH_MUTESOLO, */ IMuteSolo_init, NULL },
-    { /* MPH_NULL, */ NULL, NULL },
-    { /* MPH_OBJECT, */ IObject_init, NULL },
-    { /* MPH_OUTPUTMIX, */ IOutputMix_init, NULL },
-    { /* MPH_PITCH, */ IPitch_init, NULL },
-    { /* MPH_PLAY, */ IPlay_init, NULL },
-    { /* MPH_PLAYBACKRATE, */ IPlaybackRate_init, NULL },
-    { /* MPH_PREFETCHSTATUS, */ IPrefetchStatus_init, NULL },
-    { /* MPH_PRESETREVERB, */ IPresetReverb_init, NULL },
-    { /* MPH_RATEPITCH, */ IRatePitch_init, NULL },
-    { /* MPH_RECORD, */ IRecord_init, NULL },
-    { /* MPH_SEEK, */ ISeek_init, NULL },
-    { /* MPH_THREADSYNC, */ IThreadSync_init, NULL },
-    { /* MPH_VIBRA, */ IVibra_init, NULL },
-    { /* MPH_VIRTUALIZER, */ IVirtualizer_init, NULL },
-    { /* MPH_VISUALIZATION, */ IVisualization_init, NULL },
-    { /* MPH_VOLUME, */ IVolume_init, NULL },
+    { /* MPH_3DCOMMIT, */ I3DCommit_init, NULL, NULL },
+    { /* MPH_3DDOPPLER, */ I3DDoppler_init, NULL, NULL },
+    { /* MPH_3DGROUPING, */ I3DGrouping_init, NULL, NULL },
+    { /* MPH_3DLOCATION, */ I3DLocation_init, NULL, NULL },
+    { /* MPH_3DMACROSCOPIC, */ I3DMacroscopic_init, NULL, NULL },
+    { /* MPH_3DSOURCE, */ I3DSource_init, NULL, NULL },
+    { /* MPH_AUDIODECODERCAPABILITIES, */ IAudioDecoderCapabilities_init, NULL, NULL },
+    { /* MPH_AUDIOENCODER, */ IAudioEncoder_init, NULL, NULL },
+    { /* MPH_AUDIOENCODERCAPABILITIES, */ IAudioEncoderCapabilities_init, NULL, NULL },
+    { /* MPH_AUDIOIODEVICECAPABILITIES, */ IAudioIODeviceCapabilities_init, NULL, NULL },
+    { /* MPH_BASSBOOST, */ IBassBoost_init, NULL, NULL },
+    { /* MPH_BUFFERQUEUE, */ IBufferQueue_init, NULL, NULL },
+    { /* MPH_DEVICEVOLUME, */ IDeviceVolume_init, NULL, NULL },
+    { /* MPH_DYNAMICINTERFACEMANAGEMENT, */ IDynamicInterfaceManagement_init, NULL, NULL },
+    { /* MPH_DYNAMICSOURCE, */ IDynamicSource_init, NULL, NULL },
+    { /* MPH_EFFECTSEND, */ IEffectSend_init, NULL, NULL },
+    { /* MPH_ENGINE, */ IEngine_init, NULL, NULL },
+    { /* MPH_ENGINECAPABILITIES, */ IEngineCapabilities_init, NULL, NULL },
+    { /* MPH_ENVIRONMENTALREVERB, */ IEnvironmentalReverb_init, NULL, NULL },
+    { /* MPH_EQUALIZER, */ IEqualizer_init, NULL, NULL },
+    { /* MPH_LED, */ ILEDArray_init, NULL, NULL },
+    { /* MPH_METADATAEXTRACTION, */ IMetadataExtraction_init, NULL, NULL },
+    { /* MPH_METADATATRAVERSAL, */ IMetadataTraversal_init, NULL, NULL },
+    { /* MPH_MIDIMESSAGE, */ IMIDIMessage_init, NULL, NULL },
+    { /* MPH_MIDITIME, */ IMIDITime_init, NULL, NULL },
+    { /* MPH_MIDITEMPO, */ IMIDITempo_init, NULL, NULL },
+    { /* MPH_MIDIMUTESOLO, */ IMIDIMuteSolo_init, NULL, NULL },
+    { /* MPH_MUTESOLO, */ IMuteSolo_init, NULL, NULL },
+    { /* MPH_NULL, */ NULL, NULL, NULL },
+    { /* MPH_OBJECT, */ IObject_init, NULL, NULL },
+    { /* MPH_OUTPUTMIX, */ IOutputMix_init, NULL, NULL },
+    { /* MPH_PITCH, */ IPitch_init, NULL, NULL },
+    { /* MPH_PLAY, */ IPlay_init, NULL, NULL },
+    { /* MPH_PLAYBACKRATE, */ IPlaybackRate_init, NULL, NULL },
+    { /* MPH_PREFETCHSTATUS, */ IPrefetchStatus_init, NULL, NULL },
+    { /* MPH_PRESETREVERB, */ IPresetReverb_init, NULL, NULL },
+    { /* MPH_RATEPITCH, */ IRatePitch_init, NULL, NULL },
+    { /* MPH_RECORD, */ IRecord_init, NULL, NULL },
+    { /* MPH_SEEK, */ ISeek_init, NULL, NULL },
+    { /* MPH_THREADSYNC, */ IThreadSync_init, NULL, NULL },
+    { /* MPH_VIBRA, */ IVibra_init, NULL, NULL },
+    { /* MPH_VIRTUALIZER, */ IVirtualizer_init, NULL, NULL },
+    { /* MPH_VISUALIZATION, */ IVisualization_init, NULL, NULL },
+    { /* MPH_VOLUME, */ IVolume_init, NULL, NULL },
     { /* MPH_OUTPUTMIXEXT, */
 #ifdef USE_OUTPUTMIXEXT
-        IOutputMixExt_init, NULL
+        IOutputMixExt_init, NULL, NULL
 #else
-        NULL, NULL
+        NULL, NULL, NULL
 #endif
         }
 };
@@ -548,24 +546,29 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
         }
         this->mLossOfControlMask = lossOfControlMask;
         this->mClass = class__;
-        this->mExposedMask = exposedMask;
         this->mEngine = thisEngine;
         const struct iid_vtable *x = class__->mInterfaces;
-        unsigned i;
-        for (i = 0; exposedMask; ++i, ++x, exposedMask >>= 1) {
+        SLuint8 *interfaceStateP = this->mInterfaceStates;
+        SLuint32 index;
+        for (index = 0; index < class__->mInterfaceCount; ++index, ++x, exposedMask >>= 1) {
+            SLuint32 state;
             if (exposedMask & 1) {
                 void *self = (char *) this + x->mOffset;
                 ((IObject **) self)[1] = this;
                 VoidHook init = MPH_init_table[x->mMPH].mInit;
                 if (NULL != init)
                     (*init)(self);
-            }
+                state = INTERFACE_EXPOSED;
+            } else
+                state = INTERFACE_UNINITIALIZED;
+            *interfaceStateP++ = state;
         }
         // only expose new object to sync thread after it is fully initialized
         interface_lock_exclusive(thisEngine);
         unsigned mask = thisEngine->mInstanceMask;
         assert(mask != (unsigned) ~0);
         // FIXME O(n)
+        SLuint32 i;
         for (i = 0; i < INSTANCE_MAX; ++i, mask >>= 1) {
             if (!(mask & 1)) {
                 assert(NULL == thisEngine->mInstances[i]);

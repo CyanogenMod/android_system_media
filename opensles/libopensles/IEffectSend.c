@@ -18,24 +18,50 @@
 
 #include "sles_allinclusive.h"
 
+// Maps AUX index to OutputMix interface index
+
+static const unsigned char AUX_to_MPH[AUX_MAX] = {
+    MPH_ENVIRONMENTALREVERB,
+    MPH_PRESETREVERB
+};
+
 static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEffect)
 {
     COutputMix *outputMix = this->mOutputMix;
     // Make sure the sink for this player is an output mix
-#if 0 // not necessary
     if (NULL == outputMix)
         return NULL;
-#endif
-    if (pAuxEffect == &outputMix->mEnvironmentalReverb)
-        return &this->mEnableLevels[AUX_ENVIRONMENTALREVERB];
-    if (pAuxEffect == &outputMix->mPresetReverb)
-        return &this->mEnableLevels[AUX_PRESETREVERB];
+    unsigned aux;
+    if (pAuxEffect == &outputMix->mEnvironmentalReverb.mItf)
+        aux = AUX_ENVIRONMENTALREVERB;
+    else if (pAuxEffect == &outputMix->mPresetReverb.mItf)
+        aux = AUX_PRESETREVERB;
+    else
+        return NULL;
+    assert(aux < AUX_MAX);
+    // App couldn't have an interface for effect without exposure
+    int index = MPH_to_OutputMix[AUX_to_MPH[aux]];
+    if (0 > index)
+        return NULL;
+    unsigned mask = 1 << index;
+    object_lock_shared(&outputMix->mObject);
+    SLuint32 state = outputMix->mObject.mInterfaceStates[index];
+    mask &= outputMix->mObject.mGottenMask;
+    object_unlock_shared(&outputMix->mObject);
+    switch (state) {
+    case INTERFACE_EXPOSED:
+    case INTERFACE_ADDED:
+    case INTERFACE_SUSPENDED:
+    case INTERFACE_SUSPENDING:
+    case INTERFACE_RESUMING_1:
+    case INTERFACE_RESUMING_2:
+        if (mask)
+            return &this->mEnableLevels[aux];
+        break;
+    default:
+        break;
+    }
     return NULL;
-#if 0 // App couldn't have an interface for effect without exposure
-    unsigned interfaceMask = 1 << MPH_to_OutputMix[AUX_to_MPH[aux]];
-    if (outputMix->mExposedMask & interfaceMask)
-        result = SL_RESULT_PARAMETER_INVALID;
-#endif
 }
 
 static SLresult IEffectSend_EnableEffectSend(SLEffectSendItf self,

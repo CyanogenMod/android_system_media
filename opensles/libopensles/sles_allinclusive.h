@@ -77,6 +77,21 @@ typedef SLresult (*AsyncHook)(void *self, SLboolean async);
 #define INTERFACE_PHONE_GAME         INTERFACE_OPTIONAL
 #define INTERFACE_TBD                INTERFACE_IMPLICIT
 
+// Describes how an interface is related to a given object
+
+#define INTERFACE_UNINITIALIZED 1  // not requested at object creation time
+#define INTERFACE_EXPOSED       2  // requested at object creation time
+#define INTERFACE_ADDING_1      3  // part 1 of asynchronous AddInterface, pending
+#define INTERFACE_ADDING_2      4  // synchronous AddInterface, or part 2 of asynchronous
+#define INTERFACE_ADDED         5  // AddInterface has completed
+#define INTERFACE_REMOVING      6  // unlocked phase of (synchronous) RemoveInterface
+#define INTERFACE_SUSPENDING    7  // suspend in progress
+#define INTERFACE_SUSPENDED     8  // suspend has completed
+#define INTERFACE_RESUMING_1    9  // part 1 of asynchronous ResumeInterface, pending
+#define INTERFACE_RESUMING_2   10  // synchronous ResumeInterface, or part 2 of asynchronous
+#define INTERFACE_ADDING_1A    11  // part 1 of asynchronous AddInterface, aborted
+#define INTERFACE_RESUMING_1A  12  // part 1 of asynchronous ResumeInterface, aborted
+
 // Maps an interface ID to its offset within the class that exposes it
 
 struct iid_vtable {
@@ -88,18 +103,17 @@ struct iid_vtable {
 // Per-class const data shared by all instances of the same class
 
 typedef struct {
-    // needed by all classes (class class, the superclass of all classes)
     const struct iid_vtable *mInterfaces;
-    SLuint32 mInterfaceCount;
+    SLuint32 mInterfaceCount;  // number of possible interfaces
     const signed char *mMPH_to_index;
     // FIXME not yet used
     const char * const mName;
     size_t mSize;
     SLuint32 mObjectID;
+    // hooks
     AsyncHook mRealize;
-    StatusHook mResume;
+    AsyncHook mResume;
     VoidHook mDestroy;
-    // append per-class data here
 } ClassTable;
 
 // BufferHeader describes each element of a BufferQueue, other than the data
@@ -182,17 +196,19 @@ typedef struct Object_interface {
     const ClassTable *mClass;
     struct Engine_interface *mEngine;
     SLuint32 mInstanceID; // for debugger and for RPC
-    SLuint32 mState;
     slObjectCallback mCallback;
     void *mContext;
-    unsigned mExposedMask;  // exposed interfaces
+    unsigned mGottenMask;           // interfaces which are exposed or added, and then gotten
     unsigned mLossOfControlMask;    // interfaces with loss of control enabled
     SLint32 mPriority;
-    SLboolean mPreemptable;
     pthread_mutex_t mMutex;
     pthread_cond_t mCond;
     // FIXME Human-readable name for debugging
-    Closure mClosure;
+    SLuint8 mState;                 // really SLuint32, but SLuint8 to save space
+    SLuint8 mPreemptable;           // really SLboolean, but SLuint8 to save space
+    // for best alignment, do not add any fields here
+#define INTERFACES_Default 2
+    SLuint8 mInterfaceStates[INTERFACES_Default];    // state of each of interface
 } IObject;
 
 #include "locks.h"
@@ -379,10 +395,6 @@ typedef struct {
 typedef struct {
     const struct SLDynamicInterfaceManagementItf_ *mItf;
     IObject *mThis;
-    unsigned mAddedMask;     // added interfaces, a subset of exposed interfaces
-    unsigned mAddingMask;    // interfaces currently in the process of being added
-    unsigned mSuspendedMask; // suspended interfaces, a subset of added interfaces
-    unsigned mRemovingMask;  // interfaces currently in the process of being removed
     slDynamicInterfaceManagementCallback mCallback;
     void *mContext;
 } IDynamicInterfaceManagement;
@@ -393,25 +405,18 @@ typedef struct {
     SLDataSource *mDataSource;
 } IDynamicSource;
 
-// FIXME Move this elsewhere
-
-#define AUX_ENVIRONMENTALREVERB 0
-#define AUX_PRESETREVERB        1
-#define AUX_MAX                 2
-
-#if 0
-static const unsigned char AUX_to_MPH[AUX_MAX] = {
-    MPH_ENVIRONMENTALREVERB,
-    MPH_PRESETREVERB
-};
-#endif
-
 // private
 
 struct EnableLevel {
     SLboolean mEnable;
     SLmillibel mSendLevel;
 };
+
+// indexes into IEffectSend.mEnableLevels
+
+#define AUX_ENVIRONMENTALREVERB 0
+#define AUX_PRESETREVERB        1
+#define AUX_MAX                 2
 
 typedef struct {
     const struct SLEffectSendItf_ *mItf;
@@ -721,6 +726,8 @@ typedef struct {
 
 typedef struct {
     IObject mObject;
+#define INTERFACES_3DGroup 6 // see MPH_to_3DGroup in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_3DGroup - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     I3DLocation m3DLocation;
     I3DDoppler m3DDoppler;
@@ -755,6 +762,8 @@ typedef struct {
 
 /*typedef*/ struct CAudioPlayer_struct {
     IObject mObject;
+#define INTERFACES_AudioPlayer 26 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_AudioPlayer - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IPlay mPlay;
     I3DDoppler m3DDoppler;
@@ -800,6 +809,8 @@ typedef struct {
 typedef struct {
     // mandated interfaces
     IObject mObject;
+#define INTERFACES_AudioRecorder 9 // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceContinued[INTERFACES_AudioRecorder - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IRecord mRecord;
     IAudioEncoder mAudioEncoder;
@@ -817,6 +828,8 @@ typedef struct {
 typedef struct {
     // mandated implicit interfaces
     IObject mObject;
+#define INTERFACES_Engine 10 // see MPH_to_Engine in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_Engine - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IEngine mEngine;
     IEngineCapabilities mEngineCapabilities;
@@ -834,6 +847,8 @@ typedef struct {
 typedef struct {
     // mandated interfaces
     IObject mObject;
+#define INTERFACES_LEDDevice 3 // see MPH_to_LEDDevice in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_LEDDevice - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     ILEDArray mLEDArray;
     SLuint32 mDeviceID;
@@ -842,6 +857,8 @@ typedef struct {
 typedef struct {
     // mandated interfaces
     IObject mObject;
+#define INTERFACES_Listener 4 // see MPH_to_Listener in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_Listener - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     I3DDoppler m3DDoppler;
     I3DLocation m3DLocation;
@@ -850,6 +867,8 @@ typedef struct {
 typedef struct {
     // mandated interfaces
     IObject mObject;
+#define INTERFACES_MetadataExtractor 5 // see MPH_to_MetadataExtractor in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_MetadataExtractor - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IDynamicSource mDynamicSource;
     IMetadataExtraction mMetadataExtraction;
@@ -859,6 +878,8 @@ typedef struct {
 typedef struct {
     // mandated interfaces
     IObject mObject;
+#define INTERFACES_MidiPlayer 29 // see MPH_to_MidiPlayer in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_MidiPlayer - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IPlay mPlay;
     I3DDoppler m3DDoppler;
@@ -893,6 +914,8 @@ typedef struct {
 typedef struct OutputMix_class {
     // mandated interfaces
     IObject mObject;
+#define INTERFACES_OutputMix 11 // see MPH_to_OutputMix in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_OutputMix - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IOutputMix mOutputMix;
 #ifdef USE_OUTPUTMIXEXT
@@ -911,6 +934,8 @@ typedef struct OutputMix_class {
 typedef struct {
     // mandated interfaces
     IObject mObject;
+#define INTERFACES_VibraDevice 3 // see MPH_to_VibraDevice in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_VibraDevice - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IVibra mVibra;
     //
@@ -920,6 +945,7 @@ typedef struct {
 struct MPH_init {
     // unsigned char mMPH;
     VoidHook mInit;
+    VoidHook mResume;
     VoidHook mDeinit;
 };
 
@@ -952,7 +978,12 @@ extern void CEngine_Destroy(void *self);
 #ifdef USE_SDL
 extern void SDL_start(IEngine *thisEngine);
 #endif
-#define SL_OBJECT_STATE_REALIZING_1 ((SLuint32) 4)
-#define SL_OBJECT_STATE_REALIZING_2 ((SLuint32) 5)
+#define SL_OBJECT_STATE_REALIZING_1  ((SLuint32) 0x4) // async realize on work queue
+#define SL_OBJECT_STATE_REALIZING_2  ((SLuint32) 0x5) // sync realize, or async realize hook
+#define SL_OBJECT_STATE_RESUMING_1   ((SLuint32) 0x6) // async resume on work queue
+#define SL_OBJECT_STATE_RESUMING_2   ((SLuint32) 0x7) // sync resume, or async resume hook
+#define SL_OBJECT_STATE_SUSPENDING   ((SLuint32) 0x8) // suspend in progress
+#define SL_OBJECT_STATE_REALIZING_1A ((SLuint32) 0x9) // abort while async realize on work queue
+#define SL_OBJECT_STATE_RESUMING_1A  ((SLuint32) 0xA) // abort while async resume on work queue
 extern void *sync_start(void *arg);
 extern SLresult err_to_result(int err);
