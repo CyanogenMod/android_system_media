@@ -21,6 +21,7 @@ LOCAL_SRC_FILES:=                     \
         locks.c                       \
         sles.c                        \
         sles_to_android.cpp           \
+        android_SfPlayer.cpp          \
         sync.c                        \
         IID_to_MPH.c                  \
         ThreadPool.c                  \
@@ -70,19 +71,24 @@ LOCAL_SRC_FILES:=                     \
         IVisualization.c              \
         IVolume.c
 
-LOCAL_C_INCLUDES:= \
-	$(JNI_H_INCLUDE) \
-	$(TOP)/system/media/opensles/include
+LOCAL_C_INCLUDES:=                                                  \
+	$(JNI_H_INCLUDE)                                                \
+	system/media/opensles/include                                   \
+	frameworks/base/media/libstagefright                            \
+	frameworks/base/media/libstagefright/include                    \
+	external/opencore/extern_libs_v2/khronos/openmax/include
 
-LOCAL_CFLAGS += -x c++
+LOCAL_CFLAGS += -x c++ -Wno-multichar
 
 LOCAL_STATIC_LIBRARIES += \
         libopensles_helper
 
-LOCAL_SHARED_LIBRARIES := \
-        libmedia          \
-        libutils          \
-        libcutils         \
+LOCAL_SHARED_LIBRARIES :=         \
+        libstagefright            \
+        libstagefright_foundation \
+        libmedia                  \
+        libutils                  \
+        libcutils                 \
         libbinder
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)

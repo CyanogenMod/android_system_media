@@ -92,7 +92,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
     if (SL_RESULT_SUCCESS != result)
         goto abort;
 
-    fprintf(stderr, "\t after checkDataSource()/Sink()\n");
+    //fprintf(stderr, "\t after checkDataSource()/Sink()\n");
 
     // check the audio source and sink parameters against platform support
 
@@ -100,7 +100,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
     result = sles_to_android_checkAudioPlayerSourceSink(this);
     if (SL_RESULT_SUCCESS != result)
         goto abort;
-    fprintf(stderr, "\t after sles_to_android_checkAudioPlayerSourceSink()\n");
+    //fprintf(stderr, "\t after sles_to_android_checkAudioPlayerSourceSink()\n");
 #else
     {
     // FIXME This is due to a bug where we init buffer queues in SndFile below, which is not always present

@@ -48,6 +48,7 @@ typedef struct C3DGroup_struct C3DGroup;
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
 #include <binder/ProcessState.h>
+#include "android_SfPlayer.h"
 #endif
 
 #ifdef USE_OUTPUTMIXEXT
@@ -756,12 +757,8 @@ enum AndroidObject_state {
 };
 
 typedef struct {
-    android::AudioTrack *mAudioTrack;
+    android::AudioTrack *mAudioTrack; // FIXME unify AudioTrack between PCM buff queue and URI
 } AudioTrackData;
-
-typedef struct {
-    android::MediaPlayer *mMediaPlayer;
-} MediaPlayerData;
 
 #endif
 
@@ -805,9 +802,10 @@ typedef struct {
     android::Mutex          *mpLock;
     enum AndroidObject_type mAndroidObjType;
     enum AndroidObject_state mAndroidObjState;
+    android::sp<android::SfPlayer> mSfPlayer;
+    android::sp<android::ALooper>  mRenderLooper;
     union {
         AudioTrackData      mAudioTrackData;
-        MediaPlayerData     mMediaPlayerData;
     };
 #endif
 } /*CAudioPlayer*/;
