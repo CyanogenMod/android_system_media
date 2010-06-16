@@ -23,15 +23,13 @@
 SLresult CEngine_Realize(void *self, SLboolean async)
 {
     CEngine *this = (CEngine *) self;
-    SLresult result;
-    result = err_to_result(pthread_create(&this->mSyncThread, (const pthread_attr_t *) NULL, sync_start, this));
+    int err = pthread_create(&this->mSyncThread, (const pthread_attr_t *) NULL, sync_start, this);
+    SLresult result = err_to_result(err);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    // FIXME Use platform thread pool if available (e.g. on Android)
     // FIXME Use platform-specific engine configuration options here.
     result = ThreadPool_init(&this->mEngine.mThreadPool, 0, 0);
     if (SL_RESULT_SUCCESS != result) {
-        // FIXME Wrong
         this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
         (void) pthread_join(this->mSyncThread, (void **) NULL);
         return result;
@@ -45,9 +43,7 @@ SLresult CEngine_Realize(void *self, SLboolean async)
 void CEngine_Destroy(void *self)
 {
     CEngine *this = (CEngine *) self;
-    // FIXME Cancel pending operations
     // FIXME Verify no extant objects
-    // FIXME This is the wrong way to kill the sync thread
     this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
     (void) pthread_join(this->mSyncThread, (void **) NULL);
     ThreadPool_deinit(&this->mEngine.mThreadPool);

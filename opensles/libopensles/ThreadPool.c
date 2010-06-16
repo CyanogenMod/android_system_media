@@ -26,13 +26,16 @@ static void *ThreadPool_start(void *context)
     assert(NULL != tp);
     for (;;) {
         Closure *pClosure = ThreadPool_remove(tp);
-        // closure is NULL when engine is being destroyed
+        // closure is NULL when thread pool is being destroyed
         if (NULL == pClosure)
             break;
-        void (*handler)(Closure *);
+        void (*handler)(void *, int);
         handler = pClosure->mHandler;
+        void *context = pClosure->mContext;
+        int parameter = pClosure->mParameter;
+        free(pClosure);
         assert(NULL != handler);
-        (*handler)(pClosure);
+        (*handler)(context, parameter);
     }
     return NULL;
 }
@@ -54,21 +57,29 @@ SLresult ThreadPool_init(ThreadPool *tp, unsigned maxClosures, unsigned maxThrea
     assert(NULL != tp);
     memset(tp, 0, sizeof(ThreadPool));
     tp->mShutdown = SL_BOOLEAN_FALSE;
-    unsigned initialized = INITIALIZED_NONE;
-    unsigned nThreads = 0;
+    unsigned initialized = INITIALIZED_NONE;    // which objects were successfully initialized
+    unsigned nThreads = 0;                      // number of threads successfully created
+    int err;
     SLresult result;
-    result = err_to_result(pthread_mutex_init(&tp->mMutex, (const pthread_mutexattr_t *) NULL));
+
+    // initialize mutex and condition variables
+    err = pthread_mutex_init(&tp->mMutex, (const pthread_mutexattr_t *) NULL);
+    result = err_to_result(err);
     if (SL_RESULT_SUCCESS != result)
         goto fail;
     initialized |= INITIALIZED_MUTEX;
-    result = err_to_result(pthread_cond_init(&tp->mCondNotFull, (const pthread_condattr_t *) NULL));
+    err = pthread_cond_init(&tp->mCondNotFull, (const pthread_condattr_t *) NULL);
+    result = err_to_result(err);
     if (SL_RESULT_SUCCESS != result)
         goto fail;
     initialized |= INITIALIZED_CONDNOTFULL;
-    result = err_to_result(pthread_cond_init(&tp->mCondNotEmpty, (const pthread_condattr_t *) NULL));
+    err = pthread_cond_init(&tp->mCondNotEmpty, (const pthread_condattr_t *) NULL);
+    result = err_to_result(err);
     if (SL_RESULT_SUCCESS != result)
         goto fail;
     initialized |= INITIALIZED_CONDNOTEMPTY;
+
+    // use default values for parameters, if not specified explicitly
     tp->mWaitingNotFull = 0;
     tp->mWaitingNotEmpty = 0;
     if (0 == maxClosures)
@@ -77,6 +88,8 @@ SLresult ThreadPool_init(ThreadPool *tp, unsigned maxClosures, unsigned maxThrea
     if (0 == maxThreads)
         maxThreads = THREAD_TYPICAL;
     tp->mMaxThreads = maxThreads;
+
+    // initialize circular buffer for closures
     if (CLOSURE_TYPICAL >= maxClosures) {
         tp->mClosureArray = tp->mClosureTypical;
     } else {
@@ -88,6 +101,8 @@ SLresult ThreadPool_init(ThreadPool *tp, unsigned maxClosures, unsigned maxThrea
     }
     tp->mClosureFront = tp->mClosureArray;
     tp->mClosureRear = tp->mClosureArray;
+
+    // initialize thread pool
     if (THREAD_TYPICAL >= maxThreads) {
         tp->mThreadArray = tp->mThreadTypical;
     } else {
@@ -99,13 +114,19 @@ SLresult ThreadPool_init(ThreadPool *tp, unsigned maxClosures, unsigned maxThrea
     }
     unsigned i;
     for (i = 0; i < maxThreads; ++i) {
-        result = err_to_result(pthread_create(&tp->mThreadArray[i], (const pthread_attr_t *) NULL, ThreadPool_start, tp));
+        int err = pthread_create(&tp->mThreadArray[i], (const pthread_attr_t *) NULL,
+            ThreadPool_start, tp);
+        result = err_to_result(err);
         if (SL_RESULT_SUCCESS != result)
             goto fail;
         ++nThreads;
     }
     tp->mInitialized = initialized;
+
+    // done
     return SL_RESULT_SUCCESS;
+
+    // here on any kind of error
 fail:
     ThreadPool_deinit_internal(tp, initialized, nThreads);
     return result;
@@ -114,7 +135,6 @@ fail:
 static void ThreadPool_deinit_internal(ThreadPool *tp, unsigned initialized, unsigned nThreads)
 {
     assert(NULL != tp);
-    // FIXME Cancel all pending operations
     // Destroy all threads
     if (0 < nThreads) {
         int ok;
@@ -133,13 +153,32 @@ static void ThreadPool_deinit_internal(ThreadPool *tp, unsigned initialized, uns
             ok = pthread_join(tp->mThreadArray[i], (void **) NULL);
             assert(ok == 0);
         }
+
+        // Empty out the circular buffer of closures
         ok = pthread_mutex_lock(&tp->mMutex);
         assert(0 == ok);
         assert(0 == tp->mWaitingNotEmpty);
+        Closure **oldFront = tp->mClosureFront;
+        while (oldFront != tp->mClosureRear) {
+            Closure **newFront = oldFront;
+            if (++newFront == &tp->mClosureArray[tp->mMaxClosures + 1])
+                newFront = tp->mClosureArray;
+            Closure *pClosure = *oldFront;
+            assert(NULL != pClosure);
+            *oldFront = NULL;
+            tp->mClosureFront = newFront;
+            ok = pthread_mutex_unlock(&tp->mMutex);
+            assert(0 == ok);
+            free(pClosure);
+            ok = pthread_mutex_lock(&tp->mMutex);
+            assert(0 == ok);
+        }
         ok = pthread_mutex_unlock(&tp->mMutex);
         assert(0 == ok);
         // Note that we can't be sure when mWaitingNotFull will drop to zero
     }
+
+    // destroy the mutex and condition variables
     if (initialized & INITIALIZED_CONDNOTEMPTY)
         (void) pthread_cond_destroy(&tp->mCondNotEmpty);
     if (initialized & INITIALIZED_CONDNOTFULL)
@@ -147,14 +186,19 @@ static void ThreadPool_deinit_internal(ThreadPool *tp, unsigned initialized, uns
     if (initialized & INITIALIZED_MUTEX)
         (void) pthread_mutex_destroy(&tp->mMutex);
     tp->mInitialized = INITIALIZED_NONE;
+
+    // release the closure circular buffer
     if (tp->mClosureTypical != tp->mClosureArray && NULL != tp->mClosureArray) {
         free(tp->mClosureArray);
         tp->mClosureArray = NULL;
     }
+
+    // release the thread pool
     if (tp->mThreadTypical != tp->mThreadArray && NULL != tp->mThreadArray) {
         free(tp->mThreadArray);
         tp->mThreadArray = NULL;
     }
+
 }
 
 void ThreadPool_deinit(ThreadPool *tp)
@@ -162,33 +206,51 @@ void ThreadPool_deinit(ThreadPool *tp)
     ThreadPool_deinit_internal(tp, tp->mInitialized, tp->mMaxThreads);
 }
 
-bool ThreadPool_add(ThreadPool *tp, Closure *closure)
+// Enqueue a closure to be executed later by a worker thread
+SLresult ThreadPool_add(ThreadPool *tp, void (*handler)(void *, int), void *context, int parameter)
 {
     assert(NULL != tp);
-    assert(NULL != closure);
+    assert(NULL != handler);
+    Closure *closure = (Closure *) malloc(sizeof(Closure));
+    if (NULL == closure)
+        return SL_RESULT_RESOURCE_ERROR;
+    closure->mHandler = handler;
+    closure->mContext = context;
+    closure->mParameter = parameter;
     int ok;
     ok = pthread_mutex_lock(&tp->mMutex);
     assert(0 == ok);
+    // can't enqueue while thread pool shutting down
+    if (tp->mShutdown) {
+        ok = pthread_mutex_unlock(&tp->mMutex);
+        assert(0 == ok);
+        free(closure);
+        return SL_RESULT_PRECONDITIONS_VIOLATED;
+    }
     for (;;) {
         Closure **oldRear = tp->mClosureRear;
         Closure **newRear = oldRear;
         if (++newRear == &tp->mClosureArray[tp->mMaxClosures + 1])
             newRear = tp->mClosureArray;
+        // if closure circular buffer is full, then wait for it to become non-full
         if (newRear == tp->mClosureFront) {
             ++tp->mWaitingNotFull;
             ok = pthread_cond_wait(&tp->mCondNotFull, &tp->mMutex);
             assert(0 == ok);
+            // can't enqueue while thread pool shutting down
             if (tp->mShutdown) {
                 assert(0 < tp->mWaitingNotFull);
                 --tp->mWaitingNotFull;
                 ok = pthread_mutex_unlock(&tp->mMutex);
                 assert(0 == ok);
-                return false;
+                free(closure);
+                return SL_RESULT_PRECONDITIONS_VIOLATED;
             }
             continue;
         }
         assert(NULL == *oldRear);
         *oldRear = closure;
+        // if a worker thread was waiting to dequeue, then suggest that it try again
         if (0 < tp->mWaitingNotEmpty) {
             --tp->mWaitingNotEmpty;
             ok = pthread_cond_signal(&tp->mCondNotEmpty);
@@ -198,9 +260,10 @@ bool ThreadPool_add(ThreadPool *tp, Closure *closure)
     }
     ok = pthread_mutex_unlock(&tp->mMutex);
     assert(0 == ok);
-    return true;
+    return SL_RESULT_SUCCESS;
 }
 
+// Called by a worker thread when it is ready to accept the next closure to execute
 Closure *ThreadPool_remove(ThreadPool *tp)
 {
     Closure *pClosure;
@@ -209,23 +272,30 @@ Closure *ThreadPool_remove(ThreadPool *tp)
     assert(0 == ok);
     for (;;) {
         Closure **oldFront = tp->mClosureFront;
+        // if closure circular buffer is empty, then wait for it to become non-empty
         if (oldFront == tp->mClosureRear) {
             ++tp->mWaitingNotEmpty;
             ok = pthread_cond_wait(&tp->mCondNotEmpty, &tp->mMutex);
             assert(0 == ok);
+            // fail if thread pool is shutting down
             if (tp->mShutdown) {
                 assert(0 < tp->mWaitingNotEmpty);
                 --tp->mWaitingNotEmpty;
                 pClosure = NULL;
                 break;
             }
+            // try again
             continue;
         }
+        // dequeue the closure at front of circular buffer
         Closure **newFront = oldFront;
         if (++newFront == &tp->mClosureArray[tp->mMaxClosures + 1])
             newFront = tp->mClosureArray;
         pClosure = *oldFront;
+        assert(NULL != pClosure);
+        *oldFront = NULL;
         tp->mClosureFront = newFront;
+        // if a client thread was waiting to enqueue, then suggest that it try again
         if (0 < tp->mWaitingNotFull) {
             --tp->mWaitingNotFull;
             ok = pthread_cond_signal(&tp->mCondNotFull);

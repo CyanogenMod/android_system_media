@@ -8,6 +8,10 @@
 // If defined, then compile with C99 such as GNU C, not GNU C++ or non-GNU C.
 //#define USE_DESIGNATED_INITIALIZERS
 
+
+// Important note: if you add any interfaces here, be sure to also
+// update the #define for the corresponding INTERFACES_<Class>.
+
 const signed char MPH_to_3DGroup[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,

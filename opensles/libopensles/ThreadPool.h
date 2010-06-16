@@ -17,37 +17,33 @@
 /* ThreadPool */
 
 typedef struct Closure_struct {
-    void (*mHandler)(struct Closure_struct *);
+    void (*mHandler)(void *, int);
     void *mContext;
+    int mParameter;
 } Closure;
-
-#ifndef __cplusplus
-typedef int bool;
-#define false 0
-#define true 1
-#endif
 
 typedef struct {
     unsigned mInitialized; // indicates which of the following 3 fields are initialized
     pthread_mutex_t mMutex;
-    pthread_cond_t mCondNotFull;
-    pthread_cond_t mCondNotEmpty;
+    pthread_cond_t mCondNotFull;    // signalled when a client thread could be unblocked
+    pthread_cond_t mCondNotEmpty;   // signalled when a worker thread could be unblocked
     SLboolean mShutdown;   // whether shutdown of thread pool has been requested
-    unsigned mWaitingNotFull;
-    unsigned mWaitingNotEmpty;
-    unsigned mMaxClosures;
-    unsigned mMaxThreads;
-    Closure **mClosureArray;
+    unsigned mWaitingNotFull;   // number of client threads waiting to enqueue
+    unsigned mWaitingNotEmpty;  // number of worker threads waiting to dequeue
+    unsigned mMaxClosures;  // number of slots in circular buffer for closures, not counting spare
+    unsigned mMaxThreads;   // number of worker threads
+    Closure **mClosureArray;    // the circular buffer of closures
     Closure **mClosureFront, **mClosureRear;
     // saves a malloc in the typical case
 #define CLOSURE_TYPICAL 15
     Closure *mClosureTypical[CLOSURE_TYPICAL+1];
-    pthread_t *mThreadArray;
+    pthread_t *mThreadArray;    // the worker threads
 #define THREAD_TYPICAL 4
     pthread_t mThreadTypical[THREAD_TYPICAL];
 } ThreadPool;
 
 extern SLresult ThreadPool_init(ThreadPool *tp, unsigned maxClosures, unsigned maxThreads);
 extern void ThreadPool_deinit(ThreadPool *tp);
-extern bool ThreadPool_add(ThreadPool *tp, Closure *pClosure);
+extern SLresult ThreadPool_add(ThreadPool *tp, void (*handler)(void *, int), void *context,
+    int parameter);
 extern Closure *ThreadPool_remove(ThreadPool *tp);

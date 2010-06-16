@@ -20,7 +20,7 @@
 
 // 3DGroup class
 
-static const struct iid_vtable _3DGroup_interfaces[] = {
+static const struct iid_vtable _3DGroup_interfaces[INTERFACES_3DGroup] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
         offsetof(C3DGroup, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
@@ -37,7 +37,7 @@ static const struct iid_vtable _3DGroup_interfaces[] = {
 
 static const ClassTable C3DGroup_class = {
     _3DGroup_interfaces,
-    sizeof(_3DGroup_interfaces)/sizeof(_3DGroup_interfaces[0]),
+    INTERFACES_3DGroup,
     MPH_to_3DGroup,
     "3DGroup",
     sizeof(C3DGroup),
@@ -49,7 +49,7 @@ static const ClassTable C3DGroup_class = {
 
 // AudioPlayer class
 
-static const struct iid_vtable AudioPlayer_interfaces[] = {
+static const struct iid_vtable AudioPlayer_interfaces[INTERFACES_AudioPlayer] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
         offsetof(CAudioPlayer, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
@@ -107,7 +107,7 @@ static const struct iid_vtable AudioPlayer_interfaces[] = {
 
 static const ClassTable CAudioPlayer_class = {
     AudioPlayer_interfaces,
-    sizeof(AudioPlayer_interfaces)/sizeof(AudioPlayer_interfaces[0]),
+    INTERFACES_AudioPlayer,
     MPH_to_AudioPlayer,
     "AudioPlayer",
     sizeof(CAudioPlayer),
@@ -119,7 +119,7 @@ static const ClassTable CAudioPlayer_class = {
 
 // AudioRecorder class
 
-static const struct iid_vtable AudioRecorder_interfaces[] = {
+static const struct iid_vtable AudioRecorder_interfaces[INTERFACES_AudioRecorder] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
         offsetof(CAudioRecorder, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
@@ -142,7 +142,7 @@ static const struct iid_vtable AudioRecorder_interfaces[] = {
 
 static const ClassTable CAudioRecorder_class = {
     AudioRecorder_interfaces,
-    sizeof(AudioRecorder_interfaces)/sizeof(AudioRecorder_interfaces[0]),
+    INTERFACES_AudioRecorder,
     MPH_to_AudioRecorder,
     "AudioRecorder",
     sizeof(CAudioRecorder),
@@ -154,7 +154,7 @@ static const ClassTable CAudioRecorder_class = {
 
 // Engine class
 
-static const struct iid_vtable Engine_interfaces[] = {
+static const struct iid_vtable Engine_interfaces[INTERFACES_Engine] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
         offsetof(CEngine, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
@@ -179,7 +179,7 @@ static const struct iid_vtable Engine_interfaces[] = {
 
 static const ClassTable CEngine_class = {
     Engine_interfaces,
-    sizeof(Engine_interfaces)/sizeof(Engine_interfaces[0]),
+    INTERFACES_Engine,
     MPH_to_Engine,
     "Engine",
     sizeof(CEngine),
@@ -191,7 +191,7 @@ static const ClassTable CEngine_class = {
 
 // LEDDevice class
 
-static const struct iid_vtable LEDDevice_interfaces[] = {
+static const struct iid_vtable LEDDevice_interfaces[INTERFACES_LEDDevice] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
         offsetof(CLEDDevice, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
@@ -202,7 +202,7 @@ static const struct iid_vtable LEDDevice_interfaces[] = {
 
 static const ClassTable CLEDDevice_class = {
     LEDDevice_interfaces,
-    sizeof(LEDDevice_interfaces)/sizeof(LEDDevice_interfaces[0]),
+    INTERFACES_LEDDevice,
     MPH_to_LEDDevice,
     "LEDDevice",
     sizeof(CLEDDevice),
@@ -214,7 +214,7 @@ static const ClassTable CLEDDevice_class = {
 
 // Listener class
 
-static const struct iid_vtable Listener_interfaces[] = {
+static const struct iid_vtable Listener_interfaces[INTERFACES_Listener] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
         offsetof(CListener, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
@@ -227,7 +227,7 @@ static const struct iid_vtable Listener_interfaces[] = {
 
 static const ClassTable CListener_class = {
     Listener_interfaces,
-    sizeof(Listener_interfaces)/sizeof(Listener_interfaces[0]),
+    INTERFACES_Listener,
     MPH_to_Listener,
     "Listener",
     sizeof(CListener),
@@ -239,7 +239,7 @@ static const ClassTable CListener_class = {
 
 // MetadataExtractor class
 
-static const struct iid_vtable MetadataExtractor_interfaces[] = {
+static const struct iid_vtable MetadataExtractor_interfaces[INTERFACES_MetadataExtractor] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
         offsetof(CMetadataExtractor, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
@@ -254,8 +254,7 @@ static const struct iid_vtable MetadataExtractor_interfaces[] = {
 
 static const ClassTable CMetadataExtractor_class = {
     MetadataExtractor_interfaces,
-    sizeof(MetadataExtractor_interfaces) /
-        sizeof(MetadataExtractor_interfaces[0]),
+    INTERFACES_MetadataExtractor,
     MPH_to_MetadataExtractor,
     "MetadataExtractor",
     sizeof(CMetadataExtractor),
@@ -267,7 +266,7 @@ static const ClassTable CMetadataExtractor_class = {
 
 // MidiPlayer class
 
-static const struct iid_vtable MidiPlayer_interfaces[] = {
+static const struct iid_vtable MidiPlayer_interfaces[INTERFACES_MidiPlayer] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
         offsetof(CMidiPlayer, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
@@ -330,7 +329,7 @@ static const struct iid_vtable MidiPlayer_interfaces[] = {
 
 static const ClassTable CMidiPlayer_class = {
     MidiPlayer_interfaces,
-    sizeof(MidiPlayer_interfaces)/sizeof(MidiPlayer_interfaces[0]),
+    INTERFACES_MidiPlayer,
     MPH_to_MidiPlayer,
     "MidiPlayer",
     sizeof(CMidiPlayer),
@@ -342,7 +341,7 @@ static const ClassTable CMidiPlayer_class = {
 
 // OutputMix class
 
-static const struct iid_vtable OutputMix_interfaces[] = {
+static const struct iid_vtable OutputMix_interfaces[INTERFACES_OutputMix] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT,
         offsetof(COutputMix, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
@@ -373,7 +372,7 @@ static const struct iid_vtable OutputMix_interfaces[] = {
 
 static const ClassTable COutputMix_class = {
     OutputMix_interfaces,
-    sizeof(OutputMix_interfaces)/sizeof(OutputMix_interfaces[0]),
+    INTERFACES_OutputMix,
     MPH_to_OutputMix,
     "OutputMix",
     sizeof(COutputMix),
@@ -385,7 +384,7 @@ static const ClassTable COutputMix_class = {
 
 // Vibra class
 
-static const struct iid_vtable VibraDevice_interfaces[] = {
+static const struct iid_vtable VibraDevice_interfaces[INTERFACES_VibraDevice] = {
     {MPH_OBJECT, INTERFACE_OPTIONAL,
         offsetof(CVibraDevice, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_OPTIONAL,
@@ -396,7 +395,7 @@ static const struct iid_vtable VibraDevice_interfaces[] = {
 
 static const ClassTable CVibraDevice_class = {
     VibraDevice_interfaces,
-    sizeof(VibraDevice_interfaces)/sizeof(VibraDevice_interfaces[0]),
+    INTERFACES_VibraDevice,
     MPH_to_Vibra,
     "VibraDevice",
     sizeof(CVibraDevice),
