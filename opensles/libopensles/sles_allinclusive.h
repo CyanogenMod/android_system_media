@@ -736,7 +736,7 @@ typedef struct {
     // FIXME set of objects
 } C3DGroup;
 
-#ifdef USE_ANDROID
+#ifdef ANDROID
 /*
  * Used to define the mapping from an OpenSL ES audio player to an Android
  * media framework object
@@ -749,13 +749,21 @@ enum AndroidObject_type {
     NUM_AUDIOPLAYER_MAP_TYPES
 };
 
+enum AndroidObject_state {
+    ANDROID_UNINITIALIZED = -1,
+    ANDROID_PREPARING,
+    ANDROID_PREPARED,
+    ANDROID_PREFETCHING,
+    ANDROID_READY,
+    NUM_ANDROID_STATES
+};
+
 typedef struct {
     android::AudioTrack *mAudioTrack;
 } AudioTrackData;
 
 typedef struct {
     android::MediaPlayer *mMediaPlayer;
-    bool                  mPrepared;
 } MediaPlayerData;
 
 #endif
@@ -796,9 +804,10 @@ typedef struct {
 #ifdef USE_SNDFILE
     struct SndFile mSndFile;
 #endif // USE_SNDFILE
-#ifdef USE_ANDROID
+#ifdef ANDROID
     android::Mutex          *mpLock;
     enum AndroidObject_type mAndroidObjType;
+    enum AndroidObject_state mAndroidObjState;
     union {
         AudioTrackData      mAudioTrackData;
         MediaPlayerData     mMediaPlayerData;

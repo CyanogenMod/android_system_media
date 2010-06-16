@@ -172,12 +172,12 @@ MediaPlayerEventListener::~MediaPlayerEventListener()
 
 void MediaPlayerEventListener::notify(int msg, int ext1, int ext2)
 {
-    //fprintf(stderr, "MediaPlayerEventListener::notify(%d, %d, %d) called\n", msg, ext1, ext2);
+    fprintf(stderr, "MediaPlayerEventListener::notify(%d, %d, %d) called\n", msg, ext1, ext2);
     switch(msg) {
     case android::MEDIA_PREPARED: {
-        mPlayer->mpLock->lock();
-        mPlayer->mMediaPlayerData.mPrepared = true;
-        mPlayer->mpLock->unlock();
+        object_lock_exclusive(&mPlayer->mObject);
+        mPlayer->mAndroidObjState = ANDROID_READY;
+        object_unlock_exclusive(&mPlayer->mObject);
         slPrefetchCallback callback = NULL;
         void * callbackPContext = NULL;
         interface_lock_exclusive(&mPlayer->mPrefetchStatus);
@@ -232,9 +232,9 @@ void MediaPlayerEventListener::notify(int msg, int ext1, int ext2)
         // An error was encountered, there is no real way in the spec to signal a prefetch error.
         // Simulate this by signaling a 0 fill level, and a status change to UNDERFLOW, regardless
         // of the mask
-        mPlayer->mpLock->lock();
-        mPlayer->mMediaPlayerData.mPrepared = true;
-        mPlayer->mpLock->unlock();
+        object_lock_exclusive(&mPlayer->mObject);
+        mPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
+        object_unlock_exclusive(&mPlayer->mObject);
         slPrefetchCallback callback = NULL;
         void * callbackPContext = NULL;
         interface_lock_exclusive(&mPlayer->mPrefetchStatus);
@@ -563,7 +563,7 @@ SLresult sles_to_android_audioPlayerCreate(
     case SL_DATALOCATOR_URI:
         pAudioPlayer->mAndroidObjType = MEDIAPLAYER;
         pAudioPlayer->mpLock = new android::Mutex();
-        pAudioPlayer->mMediaPlayerData.mPrepared = false;
+        pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
         pAudioPlayer->mMediaPlayerData.mMediaPlayer = NULL;
         pAudioPlayer->mPlaybackRate.mCapabilities = 0;
         break;
@@ -615,8 +615,8 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
     //-----------------------------------
     // MediaPlayer
     case MEDIAPLAYER: {
-        pAudioPlayer->mpLock->lock();
-        pAudioPlayer->mMediaPlayerData.mPrepared = false;
+        object_lock_exclusive(&pAudioPlayer->mObject);
+        pAudioPlayer->mAndroidObjState = ANDROID_PREPARING;
         pAudioPlayer->mMediaPlayerData.mMediaPlayer = new android::MediaPlayer();
         if (pAudioPlayer->mMediaPlayerData.mMediaPlayer == NULL) {
             result = SL_RESULT_MEMORY_FAILURE;
@@ -637,7 +637,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
         android::sp<MediaPlayerEventListener> listener = new MediaPlayerEventListener(pAudioPlayer);
         pAudioPlayer->mMediaPlayerData.mMediaPlayer->setListener(listener);
 
-        pAudioPlayer->mpLock->unlock();
+        object_unlock_exclusive(&pAudioPlayer->mObject);
         }
         break;
     default:
@@ -799,12 +799,35 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_STOPPED\n");
             ap->mMediaPlayerData.mMediaPlayer->stop();
             break;
-        case SL_PLAYSTATE_PAUSED:
+        case SL_PLAYSTATE_PAUSED: {
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PAUSED\n");
-            ap->mpLock->lock();
-            if (ap->mMediaPlayerData.mPrepared) {
-                ap->mMediaPlayerData.mMediaPlayer->pause();
-            } else {
+            object_lock_peek(&ap);
+            AndroidObject_state state = ap->mAndroidObjState;
+            object_unlock_peek(&ap);
+            switch(state) {
+                case(ANDROID_UNINITIALIZED):
+                    break;
+                case(ANDROID_PREPARING):
+                    if (ap->mMediaPlayerData.mMediaPlayer->prepareAsync() != android::NO_ERROR) {
+                        fprintf(stderr, "Failed to prepareAsync() MediaPlayer for %s\n",
+                                ap->mDataSource.mLocator.mURI.URI);
+                        result = SL_RESULT_CONTENT_UNSUPPORTED;
+                        ap->mMediaPlayerData.mMediaPlayer->setListener(0);
+                        // should update state but this is going away
+                    }
+                    break;
+                case(ANDROID_PREPARED):
+                case(ANDROID_PREFETCHING):
+                case(ANDROID_READY):
+                    // FIXME pause the actual playback
+                    fprintf(stderr, "FIXME implement pause()");
+                    //ap->mMediaPlayerData.mMediaPlayer->pause();
+                    break;
+                default:
+                    break;
+            }
+
+            /*else {
                 if (ap->mMediaPlayerData.mMediaPlayer->prepareAsync() != android::NO_ERROR) {
                     fprintf(stderr, "Failed to prepareAsync() MediaPlayer for %s\n",
                             ap->mDataSource.mLocator.mURI.URI);
@@ -812,17 +835,17 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
                     ap->mMediaPlayerData.mMediaPlayer->setListener(0);
                 }
                 ap->mMediaPlayerData.mPrepared = true;
-            }
-            ap->mpLock->unlock();
-            break;
-        case SL_PLAYSTATE_PLAYING:
+                */
+            } break;
+        case SL_PLAYSTATE_PLAYING: {
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PLAYING\n");
-            ap->mpLock->lock();
-            if (ap->mMediaPlayerData.mPrepared) {
+            object_lock_peek(&ap);
+            AndroidObject_state state = ap->mAndroidObjState;
+            object_unlock_peek(&ap);
+            if (state >= ANDROID_READY) {
                 ap->mMediaPlayerData.mMediaPlayer->start();
             }
-            ap->mpLock->unlock();
-            break;
+            } break;
         default:
             result = SL_RESULT_PARAMETER_INVALID;
         }
