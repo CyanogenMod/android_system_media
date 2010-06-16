@@ -56,10 +56,10 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
             // but if interface lock != object lock, need to rewrite this
             IBufferQueue *thisBQ = (IBufferQueue *) bufferQueue;
             thisBQ->mCallback = SndFile_Callback;
-            thisBQ->mContext = &this->mSndFile;
+            thisBQ->mContext = this;
             // FIXME Intermediate overflow possible on duration computation
             this->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
-            this->mPlay.mDuration = (sfinfo.frames * 1000) / sfinfo.samplerate;
+            this->mPlay.mDuration = (SLmillisecond) ((sfinfo.frames * 1000) / sfinfo.samplerate);
         }
     }
 #endif // USE_SNDFILE

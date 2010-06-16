@@ -38,9 +38,10 @@ struct SLOutputMixExtItf_ {
 struct Track {
     // const SLDataFormat_PCM *mDfPcm;
     struct BufferQueue_interface *mBufferQueue;
-    struct Play_interface *mPlay; // mixer examines this track if non-NULL
+    CAudioPlayer *mAudioPlayer; // mixer examines this track if non-NULL
     const void *mReader;    // pointer to next frame in BufferHeader.mBuffer
     SLuint32 mAvail;        // number of available bytes
+    SLmillibel mGains[2];
 };
 
 #ifndef this

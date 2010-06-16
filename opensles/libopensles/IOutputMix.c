@@ -78,6 +78,6 @@ void IOutputMix_init(void *self)
     struct Track *track = &this->mTracks[0];
     unsigned i;
     for (i = 0; i < MAX_TRACK; ++i, ++track)
-        track->mPlay = NULL;
+        track->mAudioPlayer = NULL;
 #endif
 }

@@ -20,6 +20,8 @@
 
 #ifdef USE_OUTPUTMIXEXT
 
+#include <math.h>
+
 // Used by SDL but not specific to or dependent on SDL
 
 static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 size)
@@ -36,17 +38,23 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
         activeMask &= ~(1 << i);
         struct Track *track = &this->mTracks[i];
         // track is allocated
-        IPlay *play = track->mPlay;
-        if (NULL == play)
+        CAudioPlayer *audioPlayer = track->mAudioPlayer;
+        if (NULL == audioPlayer)
             continue;
         // track is initialized
-        if (SL_PLAYSTATE_PLAYING != play->mState)
+        if (SL_PLAYSTATE_PLAYING != audioPlayer->mPlay.mState)
             continue;
         // track is playing
         void *dstWriter = pBuffer;
         unsigned desired = size;
         SLboolean trackContributedToMix = SL_BOOLEAN_FALSE;
         IBufferQueue *bufferQueue = track->mBufferQueue;
+        // should compute elsewhere
+        track->mGains[0] = audioPlayer->mVolume.mLevel;
+        track->mGains[1] = audioPlayer->mVolume.mLevel;
+        double gains[2];
+        gains[0] = pow(10.0, track->mGains[0] / 2000.0);
+        gains[1] = pow(10.0, track->mGains[1] / 2000.0);
         while (desired > 0) {
             const BufferHeader *oldFront, *newFront, *rear;
             unsigned actual = desired;
@@ -57,20 +65,24 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                 // FIXME check for either mute or volume 0
                 // in which case skip the input buffer processing
                 assert(NULL != track->mReader);
-                // FIXME && gain == 1.0
+                stereo *mixBuffer = (stereo *) dstWriter;
+                const stereo *source = (const stereo *) track->mReader;
+                unsigned j;
                 if (mixBufferHasData) {
-                    stereo *mixBuffer = (stereo *) dstWriter;
-                    const stereo *source = (const stereo *) track->mReader;
-                    unsigned j;
-                    for (j = 0; j < actual; j += sizeof(stereo), ++mixBuffer,
-                        ++source) {
-                        // apply gain here
-                        mixBuffer->left += source->left;
-                        mixBuffer->right += source->right;
+                    for (j = 0; j < actual; j += sizeof(stereo), ++mixBuffer, ++source) {
+                        mixBuffer->left += (short) (source->left * gains[0]);
+                        mixBuffer->right += (short) (source->right * gains[1]);
                     }
+                } else if (track->mGains[0] == 0 && track->mGains[1] == 0) {
+                    // no gain adjustment needed, so do a simple copy
+                    memcpy(dstWriter, track->mReader, actual);
+                    trackContributedToMix = SL_BOOLEAN_TRUE;
                 } else {
                     // apply gain during copy
-                    memcpy(dstWriter, track->mReader, actual);
+                    for (j = 0; j < actual; j += sizeof(stereo), ++mixBuffer, ++source) {
+                        mixBuffer->left = (short) (source->left * gains[0]);
+                        mixBuffer->right = (short) (source->right * gains[1]);
+                    }
                     trackContributedToMix = SL_BOOLEAN_TRUE;
                 }
                 dstWriter = (char *) dstWriter + actual;
@@ -175,7 +187,7 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
         assert(MAX_TRACK > i);
         om->mActiveMask |= 1 << i;
         track = &om->mTracks[i];
-        track->mPlay = NULL;    // only field that is accessed before full initialization
+        track->mAudioPlayer = NULL;    // only field that is accessed before full initialization
         interface_unlock_exclusive(om);
         }
         break;
@@ -188,9 +200,11 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
     // allocation, initialize rest of track, and doubly-link track to player (currently single).
     assert(NULL != track);
     track->mBufferQueue = &this->mBufferQueue;
-    track->mPlay = &this->mPlay;
+    track->mAudioPlayer = this;
     track->mReader = NULL;
     track->mAvail = 0;
+    track->mGains[0] = 0;
+    track->mGains[1] = 0;
     return SL_RESULT_SUCCESS;
 }
 

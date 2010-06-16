@@ -553,7 +553,7 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
         SLuint8 *interfaceStateP = this->mInterfaceStates;
         SLuint32 index;
         for (index = 0; index < class__->mInterfaceCount; ++index, ++x, exposedMask >>= 1) {
-            SLuint32 state;
+            SLuint8 state;
             if (exposedMask & 1) {
                 void *self = (char *) this + x->mOffset;
                 // IObject does not have an mThis, so [1] is not always defined
