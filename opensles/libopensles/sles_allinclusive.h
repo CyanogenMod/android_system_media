@@ -30,6 +30,7 @@
 #include "ThreadPool.h"
 
 typedef struct CAudioPlayer_struct CAudioPlayer;
+typedef struct C3DGroup_struct C3DGroup;
 
 #ifdef USE_SNDFILE
 #include <sndfile.h>
@@ -140,6 +141,9 @@ typedef struct {
 
 #ifdef USE_SNDFILE
 
+#define SndFile_BUFSIZE 512     // in 16-bit samples
+#define SndFile_NUMBUFS 2
+
 struct SndFile {
     // save URI also?
     SLchar *mPathname;
@@ -147,10 +151,8 @@ struct SndFile {
     // These are used when Enqueue returns SL_RESULT_BUFFER_INSUFFICIENT
     const void *mRetryBuffer;
     SLuint32 mRetrySize;
-    SLboolean mIs0; // which buffer to use next
-    // FIXME magic numbers
-    short mBuffer0[512];
-    short mBuffer1[512];
+    SLuint32 mWhich;    // which buffer to use next
+    short mBuffer[SndFile_BUFSIZE * SndFile_NUMBUFS];
 };
 
 #endif // USE_SNDFILE
@@ -201,7 +203,6 @@ typedef struct Object_interface {
     SLint32 mPriority;
     pthread_mutex_t mMutex;
     pthread_cond_t mCond;
-    // FIXME Human-readable name for debugging
     SLuint8 mState;                 // really SLuint32, but SLuint8 to save space
     SLuint8 mPreemptable;           // really SLboolean, but SLuint8 to save space
     // for best alignment, do not add any fields here
@@ -218,7 +219,6 @@ typedef struct {
     SLuint32 mGeneration;   // incremented each master clock cycle
 } I3DCommit;
 
-// FIXME move
 enum CartesianSphericalActive {
     CARTESIAN_COMPUTED_SPHERICAL_SET,
     CARTESIAN_REQUESTED_SPHERICAL_SET,
@@ -255,11 +255,9 @@ typedef struct {
 typedef struct {
     const struct SL3DGroupingItf_ *mItf;
     IObject *mThis;
-    SLObjectItf mGroup;
-    // FIXME link to group's set
+    C3DGroup *mGroup;   // link to associated group or NULL
 } I3DGrouping;
 
-// FIXME move
 enum AnglesVectorsActive {
     ANGLES_COMPUTED_VECTORS_SET,    // not in 1.0.1
     ANGLES_REQUESTED_VECTORS_SET,   // not in 1.0.1
@@ -433,7 +431,6 @@ typedef struct Engine_interface {
 #ifdef USE_SDL
     struct OutputMix_class *mOutputMix; // SDL pulls PCM from an arbitrary OutputMixExt
 #endif
-    // FIXME Per-class non-const data such as vector of created objects.
     // Each engine is its own universe.
     SLuint32 mInstanceCount;
     unsigned mInstanceMask; // 1 bit per active object
@@ -455,7 +452,6 @@ typedef struct {
     SLEnvironmentalReverbSettings mProperties;
 } IEnvironmentalReverb;
 
-// FIXME move
 struct EqualizerBand {
     SLmilliHertz mMin;
     SLmilliHertz mCenter;
@@ -490,8 +486,6 @@ typedef struct {
     SLuint8 mCount;
 } ILEDArray;
 
-// FIXME sort: MIDI goes here
-
 typedef struct {
     const struct SLMetadataExtractionItf_ *mItf;
     IObject *mThis;
@@ -501,7 +495,7 @@ typedef struct {
     const SLchar *mValueLangCountry;
     SLuint32 mValueEncoding;
     SLuint8 mFilterMask;
-    /*FIXME*/ int mKeyFilter;
+    int mKeyFilter;
 } IMetadataExtraction;
 
 typedef struct {
@@ -722,7 +716,7 @@ typedef struct {
 
 /* Class structures */
 
-typedef struct {
+/*typedef*/ struct C3DGroup_struct {
     IObject mObject;
 #define INTERFACES_3DGroup 6 // see MPH_to_3DGroup in MPH_to.c for list of interfaces
     SLuint8 mInterfaceStates2[INTERFACES_3DGroup - INTERFACES_Default];
@@ -731,8 +725,8 @@ typedef struct {
     I3DDoppler m3DDoppler;
     I3DSource m3DSource;
     I3DMacroscopic m3DMacroscopic;
-    // FIXME set of objects
-} C3DGroup;
+    unsigned mMemberMask;   // set of member objects
+} /*C3DGroup*/;
 
 #ifdef ANDROID
 /*

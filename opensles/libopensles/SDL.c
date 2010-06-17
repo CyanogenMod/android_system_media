@@ -43,9 +43,9 @@ void SDL_start(IEngine *thisEngine)
     fmt.format = AUDIO_S16;
     fmt.channels = 2;
 #ifdef _WIN32 // FIXME Either a bug or a serious misunderstanding
-    fmt.samples = 512;
+    fmt.samples = SndFile_BUFSIZE;
 #else
-    fmt.samples = 256;
+    fmt.samples = SndFile_BUFSIZE / 2;
 #endif
     fmt.callback = SDL_callback;
     fmt.userdata = (void *) thisEngine;

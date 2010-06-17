@@ -160,7 +160,6 @@ static SLresult I3DLocation_SetOrientationAngles(SL3DLocationItf self,
 
 static SLresult I3DLocation_Rotate(SL3DLocationItf self, SLmillidegree theta, const SLVec3D *pAxis)
 {
-    // FIXME spec does not specify a range on theta
     if (!((-360000 <= theta) && (theta <= 360000)))
         return SL_RESULT_PARAMETER_INVALID;
     if (NULL == pAxis)

@@ -50,11 +50,29 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
         SLboolean trackContributedToMix = SL_BOOLEAN_FALSE;
         IBufferQueue *bufferQueue = track->mBufferQueue;
         // should compute elsewhere
-        track->mGains[0] = audioPlayer->mVolume.mLevel;
-        track->mGains[1] = audioPlayer->mVolume.mLevel;
         double gains[2];
-        gains[0] = pow(10.0, track->mGains[0] / 2000.0);
-        gains[1] = pow(10.0, track->mGains[1] / 2000.0);
+        if (audioPlayer->mVolume.mMute || !(~audioPlayer->mMuteSolo.mMuteMask & 3)) {
+            gains[0] = 0.0;
+            gains[1] = 0.0;
+        } else {
+            double playerVolume = pow(10.0, audioPlayer->mVolume.mLevel / 2000.0);
+            SLboolean enableStereoPosition = audioPlayer->mVolume.mEnableStereoPosition;
+            SLpermille stereoPosition = audioPlayer->mVolume.mStereoPosition;
+            if (audioPlayer->mMuteSolo.mMuteMask & 1)
+                gains[0] = 0.0;
+            else {
+                gains[0] = playerVolume;
+                if (enableStereoPosition && stereoPosition < 0)
+                    gains[0] *= -stereoPosition / 1000.0;
+            }
+            if (audioPlayer->mMuteSolo.mMuteMask & 2)
+                gains[1] = 0.0;
+            else {
+                gains[1] = playerVolume;
+                if (enableStereoPosition && stereoPosition > 0)
+                    gains[1] *= stereoPosition / 1000.0;
+            }
+        }
         while (desired > 0) {
             const BufferHeader *oldFront, *newFront, *rear;
             unsigned actual = desired;
@@ -62,8 +80,7 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                 actual = track->mAvail;
             // force actual to be a frame multiple
             if (actual > 0) {
-                // FIXME check for either mute or volume 0
-                // in which case skip the input buffer processing
+                // FIXME check for gain 0 in which case skip the input buffer processing
                 assert(NULL != track->mReader);
                 stereo *mixBuffer = (stereo *) dstWriter;
                 const stereo *source = (const stereo *) track->mReader;
@@ -73,7 +90,7 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                         mixBuffer->left += (short) (source->left * gains[0]);
                         mixBuffer->right += (short) (source->right * gains[1]);
                     }
-                } else if (track->mGains[0] == 0 && track->mGains[1] == 0) {
+                } else if (gains[0] >= 0.999 && gains[1] >= 0.999) {
                     // no gain adjustment needed, so do a simple copy
                     memcpy(dstWriter, track->mReader, actual);
                     trackContributedToMix = SL_BOOLEAN_TRUE;
@@ -203,8 +220,8 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
     track->mAudioPlayer = this;
     track->mReader = NULL;
     track->mAvail = 0;
-    track->mGains[0] = 0;
-    track->mGains[1] = 0;
+    //track->mGains[0] = 0;
+    //track->mGains[1] = 0;
     return SL_RESULT_SUCCESS;
 }
 

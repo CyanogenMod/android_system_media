@@ -32,8 +32,7 @@ struct SLOutputMixExtItf_ {
     void (*FillBuffer)(SLOutputMixExtItf self, void *pBuffer, SLuint32 size);
 };
 
-// Track describes each input to OutputMixer
-// FIXME not for Android
+// Track describes each input to OutputMix
 
 struct Track {
     // const SLDataFormat_PCM *mDfPcm;
@@ -41,7 +40,7 @@ struct Track {
     CAudioPlayer *mAudioPlayer; // mixer examines this track if non-NULL
     const void *mReader;    // pointer to next frame in BufferHeader.mBuffer
     SLuint32 mAvail;        // number of available bytes
-    SLmillibel mGains[2];
+    //SLmillibel mGains[2];
 };
 
 #ifndef this
