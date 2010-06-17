@@ -35,15 +35,15 @@ void *sync_start(void *arg)
         object_unlock_peek(&this->mObject);
         if (shutdown)
             break;
-        unsigned i;
-        // FIXME O(n)
-        for (i = 0; i < INSTANCE_MAX; ++i) {
-            if (!(instanceMask << i) & 1)
-                continue;
+        while (instanceMask) {
+            unsigned i = ctz(instanceMask);
+            assert(MAX_INSTANCE > i);
+            instanceMask &= ~(1 << i);
             IObject *instance = (IObject *) this->mEngine.mInstances[i];
+            // Could be NULL during construct or destroy
             if (NULL == instance)
                 continue;
-            // FIXME race condition here - object could be destroyed by now
+            // FIXME race condition here - object could be destroyed by now, better to do destroy here
             switch (IObjectToObjectID(instance)) {
             case SL_OBJECTID_AUDIOPLAYER:
                 putchar('.');

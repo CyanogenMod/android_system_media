@@ -381,7 +381,7 @@ void IEngine_init(void *self)
     this->mInstanceCount = 1; // ourself
     this->mInstanceMask = 0;
     unsigned i;
-    for (i = 0; i < INSTANCE_MAX; ++i)
+    for (i = 0; i < MAX_INSTANCE; ++i)
         this->mInstances[i] = NULL;
     this->mShutdown = SL_BOOLEAN_FALSE;
 }

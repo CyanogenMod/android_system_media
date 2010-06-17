@@ -36,7 +36,7 @@ static SLresult IDynamicSource_SetSource(SLDynamicSourceItf self, SLDataSource *
         return result;
 #endif
     // need to lock the object, as a change to source can impact most of object
-    IObject *thisObject = this->mThis;
+    IObject *thisObject = InterfaceToIObject(this);
     object_lock_exclusive(thisObject);
     // FIXME a bit of a simplification to say the least!
     this->mDataSource = pDataSource;

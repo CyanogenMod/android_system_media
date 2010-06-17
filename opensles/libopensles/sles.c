@@ -528,17 +528,19 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
         unsigned lossOfControlMask = 0;
         // a NULL engine means we are constructing the engine
         IEngine *thisEngine = (IEngine *) engine;
-        if (NULL == thisEngine)
+        if (NULL == thisEngine) {
             thisEngine = &((CEngine *) this)->mEngine;
-        else {
+        } else {
             interface_lock_exclusive(thisEngine);
-            if (INSTANCE_MAX <= thisEngine->mInstanceCount) {
+            if (MAX_INSTANCE <= thisEngine->mInstanceCount) {
                 // too many objects
-                free(this);
                 interface_unlock_exclusive(thisEngine);
+                free(this);
                 return NULL;
             }
+            // pre-allocate a pending slot, but don't assign bit from mInstanceMask yet
             ++thisEngine->mInstanceCount;
+            assert(((unsigned) ~0) != thisEngine->mInstanceMask);
             interface_unlock_exclusive(thisEngine);
             // const, no lock needed
             if (thisEngine->mLossOfControlGlobal)
@@ -554,7 +556,9 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
             SLuint32 state;
             if (exposedMask & 1) {
                 void *self = (char *) this + x->mOffset;
-                ((IObject **) self)[1] = this;
+                // IObject does not have an mThis, so [1] is not always defined
+                if (index)
+                    ((IObject **) self)[1] = this;
                 VoidHook init = MPH_init_table[x->mMPH].mInit;
                 if (NULL != init)
                     (*init)(self);
@@ -565,21 +569,15 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
         }
         // only expose new object to sync thread after it is fully initialized
         interface_lock_exclusive(thisEngine);
-        unsigned mask = thisEngine->mInstanceMask;
-        assert(mask != (unsigned) ~0);
-        // FIXME O(n)
-        SLuint32 i;
-        for (i = 0; i < INSTANCE_MAX; ++i, mask >>= 1) {
-            if (!(mask & 1)) {
-                assert(NULL == thisEngine->mInstances[i]);
-                thisEngine->mInstances[i] = this;
-                thisEngine->mInstanceMask |= 1 << i;
-                // avoid zero as a valid instance ID
-                this->mInstanceID = i + 1;
-                break;
-            }
-        }
-        assert(i < INSTANCE_MAX);
+        unsigned availMask = ~thisEngine->mInstanceMask;
+        assert(availMask);
+        unsigned i = ctz(availMask);
+        assert(MAX_INSTANCE > i);
+        assert(NULL == thisEngine->mInstances[i]);
+        thisEngine->mInstances[i] = this;
+        thisEngine->mInstanceMask |= 1 << i;
+        // avoid zero as a valid instance ID
+        this->mInstanceID = i + 1;
 #ifdef USE_SDL
         SLboolean unpause = SL_BOOLEAN_FALSE;
         if (SL_OBJECTID_OUTPUTMIX == class__->mObjectID && NULL == thisEngine->mOutputMix) {

@@ -27,18 +27,14 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
     // Force to be a multiple of a frame, assumes stereo 16-bit PCM
     size &= ~3;
     IOutputMixExt *thisExt = (IOutputMixExt *) self;
-    IOutputMix *this = &((COutputMix *) thisExt->mThis)->mOutputMix;
+    IOutputMix *this = &((COutputMix *) InterfaceToIObject(thisExt))->mOutputMix;
     unsigned activeMask = this->mActiveMask;
-    struct Track *track = this->mTracks;
-    unsigned i;
     SLboolean mixBufferHasData = SL_BOOLEAN_FALSE;
-    // FIXME O(32) loop even when few tracks are active.
-    // To avoid loop, use activeMask to check for active track(s)
-    // and decide whether we actually need to copy or mix.
-    for (i = 0; 0 != activeMask; ++i, ++track, activeMask >>= 1) {
-        assert(i < 32);
-        if (!(activeMask & 1))
-            continue;
+    while (activeMask) {
+        unsigned i = ctz(activeMask);
+        assert(MAX_TRACK > i);
+        activeMask &= ~(1 << i);
+        struct Track *track = &this->mTracks[i];
         // track is allocated
         IPlay *play = track->mPlay;
         if (NULL == play)
@@ -160,7 +156,6 @@ void IOutputMixExt_init(void *self)
 
 SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
 {
-    //const SLDataSource *pAudioSrc = &this->mDataSource.u.mSource;
     const SLDataSink *pAudioSnk = &this->mDataSink.u.mSink;
     struct Track *track = NULL;
     switch (*(SLuint32 *)pAudioSnk->pLocator) {
@@ -169,27 +164,31 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
         // pAudioSnk->pFormat is ignored
         IOutputMix *om = &((COutputMix *) ((SLDataLocator_OutputMix *) pAudioSnk->pLocator)->outputMix)->mOutputMix;
         // allocate an entry within OutputMix for this track
-        // FIXME O(n)
-        unsigned i;
-        for (i = 0, track = &om->mTracks[0]; i < 32; ++i, ++track) {
-            if (om->mActiveMask & (1 << i))
-                continue;
-            om->mActiveMask |= 1 << i;
-            break;
-        }
-        if (32 <= i) {
-            // FIXME Need a better error code for all slots full in output mix
+        interface_lock_exclusive(om);
+        unsigned availMask = ~om->mActiveMask;
+        if (!availMask) {
+            interface_unlock_exclusive(om);
+            // All track slots full in output mix
             return SL_RESULT_MEMORY_FAILURE;
         }
+        unsigned i = ctz(availMask);
+        assert(MAX_TRACK > i);
+        om->mActiveMask |= 1 << i;
+        track = &om->mTracks[i];
+        track->mPlay = NULL;    // only field that is accessed before full initialization
+        interface_unlock_exclusive(om);
         }
         break;
     default:
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
 
+    // FIXME Wrong place for this initialization; should first pre-allocate a track slot
+    // using OutputMixExt.mTrackCount, then initialize full audio player, then do track bit
+    // allocation, initialize rest of track, and doubly-link track to player (currently single).
+    assert(NULL != track);
     track->mBufferQueue = &this->mBufferQueue;
     track->mPlay = &this->mPlay;
-    // next 2 fields must be initialized explicitly (not part of this)
     track->mReader = NULL;
     track->mAvail = 0;
     return SL_RESULT_SUCCESS;

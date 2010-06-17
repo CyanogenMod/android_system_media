@@ -24,14 +24,16 @@ extern void object_cond_signal(IObject *this);
 #define object_lock_shared(this)   object_lock_exclusive(this)
 #define object_unlock_shared(this) object_unlock_exclusive(this)
 
-// Currently interface locks are actually on whole object, but don't count on it
+// Currently interface locks are actually on whole object, but don't count on it.
+// These operations are undefined on IObject, as it lacks an mThis.
+// If you have an IObject, then use the object_ functions instead.
 
-#define interface_lock_exclusive(this)   object_lock_exclusive((this)->mThis)
-#define interface_unlock_exclusive(this) object_unlock_exclusive((this)->mThis)
-#define interface_lock_shared(this)      object_lock_shared((this)->mThis)
-#define interface_unlock_shared(this)    object_unlock_shared((this)->mThis)
-#define interface_cond_wait(this)        object_cond_wait((this)->mThis)
-#define interface_cond_signal(this)      object_cond_signal((this)->mThis)
+#define interface_lock_exclusive(this)   object_lock_exclusive(InterfaceToIObject(this))
+#define interface_unlock_exclusive(this) object_unlock_exclusive(InterfaceToIObject(this))
+#define interface_lock_shared(this)      object_lock_shared(InterfaceToIObject(this))
+#define interface_unlock_shared(this)    object_unlock_shared(InterfaceToIObject(this))
+#define interface_cond_wait(this)        object_cond_wait(InterfaceToIObject(this))
+#define interface_cond_signal(this)      object_cond_signal(InterfaceToIObject(this))
 
 // Peek and poke are an optimization for small atomic fields that don't "matter"
 

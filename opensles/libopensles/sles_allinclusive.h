@@ -190,11 +190,9 @@ typedef struct {
 
 typedef struct Object_interface {
     const struct SLObjectItf_ *mItf;
-    // FIXME probably not needed for an Object, as it is always first,
-    // but look for lingering code that assumes it is here before deleting
-    struct Object_interface *mThis;
-    const ClassTable *mClass;
+    // field mThis would be redundant within an IObject, so we substitute mEngine
     struct Engine_interface *mEngine;
+    const ClassTable *mClass;
     SLuint32 mInstanceID; // for debugger and for RPC
     slObjectCallback mCallback;
     void *mContext;
@@ -438,11 +436,9 @@ typedef struct Engine_interface {
     // FIXME Per-class non-const data such as vector of created objects.
     // Each engine is its own universe.
     SLuint32 mInstanceCount;
-    // Vector<Type> instances;
-    // FIXME set of objects
-    unsigned mInstanceMask;
-#define INSTANCE_MAX 32 // FIXME no magic numbers
-    IObject *mInstances[INSTANCE_MAX];
+    unsigned mInstanceMask; // 1 bit per active object
+#define MAX_INSTANCE 32     // see mInstanceMask
+    IObject *mInstances[MAX_INSTANCE];
     SLboolean mShutdown;
     ThreadPool mThreadPool; // for asynchronous operations
 } IEngine;
@@ -563,6 +559,8 @@ typedef struct {
     SLuint8 mNumChannels;
 } IMuteSolo;
 
+#define MAX_TRACK 32        // see mActiveMask
+
 typedef struct {
     const struct SLOutputMixItf_ *mItf;
     IObject *mThis;
@@ -570,7 +568,7 @@ typedef struct {
     void *mContext;
 #ifdef USE_OUTPUTMIXEXT
     unsigned mActiveMask;   // 1 bit per active track
-    struct Track mTracks[32]; // FIXME magic
+    struct Track mTracks[MAX_TRACK];
 #endif
 } IOutputMix;
 
@@ -969,9 +967,17 @@ extern const ClassTable *objectIDtoClass(SLuint32 objectID);
 extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
 extern SLuint32 IObjectToObjectID(IObject *object);
 
-// Map an interface to it's "object ID" (which is really a class ID)
+// Map an interface to it's "object ID" (which is really a class ID).
+// Note: this operation is undefined on IObject, as it lacks an mThis.
+// If you have an IObject, then use IObjectToObjectID directly.
 
 #define InterfaceToObjectID(this) IObjectToObjectID((this)->mThis)
+
+// Map an interface to it's corresponding IObject.
+// Note: this operation is undefined on IObject, as it lacks an mThis.
+// If you have an IObject, then you're done -- you already have what you need.
+
+#define InterfaceToIObject(this) ((this)->mThis)
 
 #ifdef USE_ANDROID
 #include "sles_to_android.h"
@@ -996,3 +1002,4 @@ extern void SDL_start(IEngine *thisEngine);
 #define SL_OBJECT_STATE_RESUMING_1A  ((SLuint32) 0xA) // abort while async resume on work queue
 extern void *sync_start(void *arg);
 extern SLresult err_to_result(int err);
+#define ctz __builtin_ctz
