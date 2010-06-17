@@ -21,7 +21,7 @@
 static SLresult I3DCommit_Commit(SL3DCommitItf self)
 {
     I3DCommit *this = (I3DCommit *) self;
-    IObject *thisObject = this->mThis;
+    IObject *thisObject = InterfaceToIObject(this);
     object_lock_exclusive(thisObject);
     if (this->mDeferred) {
         SLuint32 myGeneration = this->mGeneration;
@@ -36,7 +36,7 @@ static SLresult I3DCommit_Commit(SL3DCommitItf self)
 static SLresult I3DCommit_SetDeferred(SL3DCommitItf self, SLboolean deferred)
 {
     I3DCommit *this = (I3DCommit *) self;
-    IObject *thisObject = this->mThis;
+    IObject *thisObject = InterfaceToIObject(this);
     object_lock_exclusive(thisObject);
     this->mDeferred = SL_BOOLEAN_FALSE != deferred; // normalize
     object_unlock_exclusive(thisObject);

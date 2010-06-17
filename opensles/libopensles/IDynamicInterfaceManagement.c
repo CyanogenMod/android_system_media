@@ -25,9 +25,9 @@ static void HandleAdd(void *self, int MPH)
 {
 
     // validate input parameters
-    IDynamicInterfaceManagement *thisDIM = (IDynamicInterfaceManagement *) self;
-    assert(NULL != thisDIM);
-    IObject *thisObject = thisDIM->mThis;
+    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
+    assert(NULL != this);
+    IObject *thisObject = InterfaceToIObject(this);
     assert(NULL != thisObject);
     assert(0 <= MPH && MPH < MPH_MAX);
     const ClassTable *class__ = thisObject->mClass;
@@ -55,6 +55,7 @@ static void HandleAdd(void *self, int MPH)
         size_t size = ((SLuint32) (index + 1) == class__->mInterfaceCount ?
             class__->mSize : x[1].mOffset) - offset;
         memset(thisItf, 0, size);
+        // Will never add IObject, so [1] is always defined
         ((void **) thisItf)[1] = thisObject;
         VoidHook init = MPH_init_table[MPH].mInit;
         if (NULL != init)
@@ -84,14 +85,14 @@ static void HandleAdd(void *self, int MPH)
     *interfaceStateP = state;
 
     // Make a copy of these, so we can call the callback with mutex unlocked
-    slDynamicInterfaceManagementCallback callback = thisDIM->mCallback;
-    void *context = thisDIM->mContext;
+    slDynamicInterfaceManagementCallback callback = this->mCallback;
+    void *context = this->mContext;
     object_unlock_exclusive(thisObject);
 
     // Note that the mutex is unlocked during the callback
     if (NULL != callback) {
         const SLInterfaceID iid = &SL_IID_array[MPH]; // equal but not == to the original IID
-        (*callback)(&thisDIM->mItf, context, SL_DYNAMIC_ITF_EVENT_ASYNC_TERMINATION, result, iid);
+        (*callback)(&this->mItf, context, SL_DYNAMIC_ITF_EVENT_ASYNC_TERMINATION, result, iid);
     }
 
 }
@@ -103,7 +104,7 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
     if (NULL == iid)
         return SL_RESULT_PARAMETER_INVALID;
     IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-    IObject *thisObject = this->mThis;
+    IObject *thisObject = InterfaceToIObject(this);
     const ClassTable *class__ = thisObject->mClass;
     int MPH, index;
     if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH])))
@@ -151,6 +152,7 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
                 class__->mSize : x[1].mOffset) - offset;
             void *thisItf = (char *) thisObject + offset;
             memset(thisItf, 0, size);
+            // Will never add IObject, so [1] is always defined
             ((void **) thisItf)[1] = thisObject;
             VoidHook init = MPH_init_table[MPH].mInit;
             if (NULL != init)
@@ -183,7 +185,7 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
     if (NULL == iid)
         return SL_RESULT_PARAMETER_INVALID;
     IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-    IObject *thisObject = (IObject *) this->mThis;
+    IObject *thisObject = InterfaceToIObject(this);
     const ClassTable *class__ = thisObject->mClass;
     int MPH, index;
     if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH])))
@@ -245,9 +247,9 @@ static void HandleResume(void *self, int MPH)
 {
 
     // validate input parameters
-    IDynamicInterfaceManagement *thisDIM = (IDynamicInterfaceManagement *) self;
-    assert(NULL != thisDIM);
-    IObject *thisObject = thisDIM->mThis;
+    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
+    assert(NULL != this);
+    IObject *thisObject = InterfaceToIObject(this);
     assert(NULL != thisObject);
     assert(0 <= MPH && MPH < MPH_MAX);
     const ClassTable *class__ = thisObject->mClass;
@@ -300,14 +302,14 @@ static void HandleResume(void *self, int MPH)
     *interfaceStateP = state;
 
     // Make a copy of these, so we can call the callback with mutex unlocked
-    slDynamicInterfaceManagementCallback callback = thisDIM->mCallback;
-    void *context = thisDIM->mContext;
+    slDynamicInterfaceManagementCallback callback = this->mCallback;
+    void *context = this->mContext;
     object_unlock_exclusive(thisObject);
 
     // Note that the mutex is unlocked during the callback
     if (NULL != callback) {
         const SLInterfaceID iid = &SL_IID_array[MPH]; // equal but not == to the original IID
-        (*callback)(&thisDIM->mItf, context, SL_DYNAMIC_ITF_EVENT_ASYNC_TERMINATION, result, iid);
+        (*callback)(&this->mItf, context, SL_DYNAMIC_ITF_EVENT_ASYNC_TERMINATION, result, iid);
     }
 }
 
@@ -318,7 +320,7 @@ static SLresult IDynamicInterfaceManagement_ResumeInterface(SLDynamicInterfaceMa
     if (NULL == iid)
         return SL_RESULT_PARAMETER_INVALID;
     IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-    IObject *thisObject = (IObject *) this->mThis;
+    IObject *thisObject = InterfaceToIObject(this);
     const ClassTable *class__ = thisObject->mClass;
     int MPH, index;
     if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH])))
@@ -391,7 +393,7 @@ static SLresult IDynamicInterfaceManagement_RegisterCallback(SLDynamicInterfaceM
     slDynamicInterfaceManagementCallback callback, void *pContext)
 {
     IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-    IObject *thisObject = this->mThis;
+    IObject *thisObject = InterfaceToIObject(this);
     object_lock_exclusive(thisObject);
     this->mCallback = callback;
     this->mContext = pContext;

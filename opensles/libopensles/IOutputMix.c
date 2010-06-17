@@ -76,10 +76,8 @@ void IOutputMix_init(void *self)
 #ifdef USE_OUTPUTMIXEXT
     this->mActiveMask = 0;
     struct Track *track = &this->mTracks[0];
-    // FIXME O(n)
-    // FIXME magic number
     unsigned i;
-    for (i = 0; i < 32; ++i, ++track)
+    for (i = 0; i < MAX_TRACK; ++i, ++track)
         track->mPlay = NULL;
 #endif
 }

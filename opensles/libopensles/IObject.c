@@ -404,7 +404,7 @@ static void IObject_Destroy(SLObjectItf self)
     // const, no lock needed
     IEngine *thisEngine = this->mEngine;
     unsigned i = this->mInstanceID;
-    assert(0 < i && i <= INSTANCE_MAX);
+    assert(0 < i && i <= MAX_INSTANCE);
     --i;
     // remove object from exposure to sync thread and debugger
     interface_lock_exclusive(thisEngine);
