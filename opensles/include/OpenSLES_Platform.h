@@ -41,7 +41,11 @@ typedef unsigned long               sl_uint32_t;
 typedef signed long                 sl_int32_t;
 
 #ifndef SLAPIENTRY
+#ifdef __GNUC__
 #define SLAPIENTRY                 /* override per-platform */
+#else
+#define SLAPIENTRY __declspec(dllimport)
+#endif
 #endif
 
 #endif /* _OPENSLES_PLATFORM_H_ */
