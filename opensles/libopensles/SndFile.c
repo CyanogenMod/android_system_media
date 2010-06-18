@@ -20,10 +20,15 @@
 
 #ifdef USE_SNDFILE
 
+// FIXME Needs some mutexes here and there
+
 // FIXME should run this asynchronously esp. for socket fd, not on mix thread
 void /*SLAPIENTRY*/ SndFile_Callback(SLBufferQueueItf caller, void *pContext)
 {
-    struct SndFile *this = (struct SndFile *) pContext;
+    CAudioPlayer *thisAP = (CAudioPlayer *) pContext;
+    if (thisAP->mPlay.mState != SL_PLAYSTATE_PLAYING)
+        return;
+    struct SndFile *this = &thisAP->mSndFile;
     SLresult result;
     if (NULL != this->mRetryBuffer && 0 < this->mRetrySize) {
         result = (*caller)->Enqueue(caller, this->mRetryBuffer, this->mRetrySize);
@@ -49,6 +54,9 @@ void /*SLAPIENTRY*/ SndFile_Callback(SLBufferQueueItf caller, void *pContext)
             return;
         }
         assert(SL_RESULT_SUCCESS == result);
+    } else {
+        thisAP->mPlay.mState = SL_PLAYSTATE_PAUSED;
+        (void) sf_seek(this->mSNDFILE, (sf_count_t) 0, SEEK_SET);
     }
 }
 
@@ -61,18 +69,22 @@ SLboolean SndFile_IsSupported(const SF_INFO *sfinfo)
         return SL_BOOLEAN_FALSE;
     }
     switch (sfinfo->format & SF_FORMAT_SUBMASK) {
+    case SF_FORMAT_PCM_U8:
     case SF_FORMAT_PCM_16:
         break;
     default:
         return SL_BOOLEAN_FALSE;
     }
     switch (sfinfo->samplerate) {
+    case 11025:
+    case 22050:
     case 44100:
         break;
     default:
         return SL_BOOLEAN_FALSE;
     }
     switch (sfinfo->channels) {
+    case 1:
     case 2:
         break;
     default:

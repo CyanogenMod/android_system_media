@@ -39,7 +39,7 @@ static void HandleAdd(void *self, int MPH)
 
     // check interface state
     object_lock_exclusive(thisObject);
-    SLuint32 state = *interfaceStateP;
+    SLuint8 state = *interfaceStateP;
     switch (state) {
 
     case INTERFACE_ADDING_1:    // normal case
@@ -261,7 +261,7 @@ static void HandleResume(void *self, int MPH)
 
     // check interface state
     object_lock_exclusive(thisObject);
-    SLuint32 state = *interfaceStateP;
+    SLuint8 state = *interfaceStateP;
     switch (state) {
 
     case INTERFACE_RESUMING_1:      // normal case

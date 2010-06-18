@@ -218,7 +218,7 @@ void TestPlaySawtoothBufferQueue( SLObjectItf sl )
 
     /* Setup to receive buffer queue event callbacks */
     res = (*bufferQueueItf)->RegisterCallback(bufferQueueItf,
-            BufferQueueCallback, &cntxt /** NULL FIXME **/ ); CheckErr(res);
+            BufferQueueCallback, &cntxt); CheckErr(res);
 
     /* Before we start set volume to -3dB (-300mB) */
     res = (*volumeItf)->SetVolumeLevel(volumeItf, -300); CheckErr(res);

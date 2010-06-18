@@ -31,7 +31,7 @@ static void HandleRealize(void *self, int unused)
     assert(NULL != class__);
     AsyncHook realize = class__->mRealize;
     SLresult result;
-    SLuint32 state;
+    SLuint8 state;
 
     // check object state
     object_lock_exclusive(this);
@@ -82,7 +82,7 @@ static void HandleRealize(void *self, int unused)
 static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
 {
     IObject *this = (IObject *) self;
-    SLuint32 state;
+    SLuint8 state;
     const ClassTable *class__ = this->mClass;
     object_lock_exclusive(this);
     state = this->mState;
@@ -152,7 +152,7 @@ static void HandleResume(void *self, int unused)
     assert(NULL != class__);
     AsyncHook resume = class__->mResume;
     SLresult result;
-    SLuint32 state;
+    SLuint8 state;
 
     // check object state
     object_lock_exclusive(this);
@@ -205,7 +205,7 @@ static SLresult IObject_Resume(SLObjectItf self, SLboolean async)
     IObject *this = (IObject *) self;
     const ClassTable *class__ = this->mClass;
     SLresult result;
-    SLuint32 state;
+    SLuint8 state;
     object_lock_exclusive(this);
     state = this->mState;
     // Reject redundant calls to Resume
@@ -259,7 +259,7 @@ static SLresult IObject_GetState(SLObjectItf self, SLuint32 *pState)
     IObject *this = (IObject *) self;
     // Note that the state is immediately obsolete, so a peek lock is safe
     object_lock_peek(this);
-    SLuint32 state = this->mState;
+    SLuint8 state = this->mState;
     object_unlock_peek(this);
     // Re-map the realizing and suspended states
     switch (state) {
