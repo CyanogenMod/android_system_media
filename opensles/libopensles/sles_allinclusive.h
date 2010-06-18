@@ -996,4 +996,9 @@ extern void SDL_start(IEngine *thisEngine);
 #define SL_OBJECT_STATE_RESUMING_1A  ((SLuint32) 0xA) // abort while async resume on work queue
 extern void *sync_start(void *arg);
 extern SLresult err_to_result(int err);
+
+#ifdef __GNUC__
 #define ctz __builtin_ctz
+#else
+extern unsigned ctz(unsigned);
+#endif
