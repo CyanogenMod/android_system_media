@@ -162,11 +162,12 @@ void IEffectSend_init(void *self)
 {
     IEffectSend *this = (IEffectSend *) self;
     this->mItf = &IEffectSend_Itf;
-    this->mOutputMix = NULL; // FIXME wrong
+    this->mOutputMix = NULL; // CAudioPlayer will need to re-initialize
     this->mDirectLevel = 0;
-    // FIXME hard-coded array initialization should be loop on AUX_MAX
-    this->mEnableLevels[AUX_ENVIRONMENTALREVERB].mEnable = SL_BOOLEAN_FALSE;
-    this->mEnableLevels[AUX_ENVIRONMENTALREVERB].mSendLevel = SL_MILLIBEL_MIN;
-    this->mEnableLevels[AUX_PRESETREVERB].mEnable = SL_BOOLEAN_FALSE;
-    this->mEnableLevels[AUX_PRESETREVERB].mSendLevel = SL_MILLIBEL_MIN;
+    struct EnableLevel *enableLevel = this->mEnableLevels;
+    unsigned aux;
+    for (aux = 0; aux < AUX_MAX; ++aux, ++enableLevel) {
+        enableLevel->mEnable = SL_BOOLEAN_FALSE;
+        enableLevel->mSendLevel = SL_MILLIBEL_MIN;
+    }
 }

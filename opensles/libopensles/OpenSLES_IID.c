@@ -98,10 +98,8 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     { 0x3da51de0, 0xddd7, 0x11db, 0xaf70, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_MUTESOLO
     { 0x5a28ebe0, 0xddd7, 0x11db, 0x8220, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-#if 1 // FIXME why needed?
     // SL_IID_NULL
     { 0xec7178ec, 0xe5e1, 0x4432, 0xa3f4, { 0x46, 0x57, 0xe6, 0x79, 0x52, 0x10 } },
-#endif
     // SL_IID_OBJECT
     { 0x79216360, 0xddd7, 0x11db, 0xac16, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_OUTPUTMIX
@@ -175,9 +173,7 @@ const SLInterfaceID SL_IID_MIDIMUTESOLO = &SL_IID_array[MPH_MIDIMUTESOLO];
 const SLInterfaceID SL_IID_MIDITEMPO = &SL_IID_array[MPH_MIDITEMPO];
 const SLInterfaceID SL_IID_MIDITIME = &SL_IID_array[MPH_MIDITIME];
 const SLInterfaceID SL_IID_MUTESOLO = &SL_IID_array[MPH_MUTESOLO];
-#if 1 // FIXME why needed?
 const SLInterfaceID SL_IID_NULL = &SL_IID_array[MPH_NULL];
-#endif
 const SLInterfaceID SL_IID_OBJECT = &SL_IID_array[MPH_OBJECT];
 const SLInterfaceID SL_IID_OUTPUTMIX = &SL_IID_array[MPH_OUTPUTMIX];
 const SLInterfaceID SL_IID_PITCH = &SL_IID_array[MPH_PITCH];

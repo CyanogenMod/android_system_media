@@ -160,7 +160,6 @@ static SLresult I3DSource_GetRolloffModel(SL3DSourceItf self, SLuint8 *pModel)
 static SLresult I3DSource_SetCone(SL3DSourceItf self, SLmillidegree innerAngle,
     SLmillidegree outerAngle, SLmillibel outerLevel)
 {
-    // FIXME spec does not say anything about relationship between innerAngle and outerAngle
     if (!((0 <= innerAngle) && (innerAngle <= 360000) &&
         (0 <= outerAngle) && (outerAngle <= 360000) &&
         (SL_MILLIBEL_MIN <= outerLevel) && (outerLevel <= 0)))

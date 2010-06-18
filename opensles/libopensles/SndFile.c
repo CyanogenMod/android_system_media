@@ -20,10 +20,8 @@
 
 #ifdef USE_SNDFILE
 
-// FIXME Needs some mutexes here and there
-
-// FIXME should run this asynchronously esp. for socket fd, not on mix thread
-void /*SLAPIENTRY*/ SndFile_Callback(SLBufferQueueItf caller, void *pContext)
+// FIXME should run this asynchronously esp. for socket fd, not on mix thread, and add mutexes
+void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
 {
     CAudioPlayer *thisAP = (CAudioPlayer *) pContext;
     if (thisAP->mPlay.mState != SL_PLAYSTATE_PLAYING)
@@ -39,14 +37,13 @@ void /*SLAPIENTRY*/ SndFile_Callback(SLBufferQueueItf caller, void *pContext)
         this->mRetrySize = 0;
         return;
     }
-    short *pBuffer = this->mIs0 ? this->mBuffer0 : this->mBuffer1;
-    this->mIs0 ^= SL_BOOLEAN_TRUE;
+    short *pBuffer = &this->mBuffer[this->mWhich * SndFile_BUFSIZE];
+    if (++this->mWhich >= SndFile_NUMBUFS)
+        this->mWhich = 0;
     sf_count_t count;
-    // FIXME magic number
-    count = sf_read_short(this->mSNDFILE, pBuffer, (sf_count_t) 512);
+    count = sf_read_short(this->mSNDFILE, pBuffer, (sf_count_t) SndFile_BUFSIZE);
     if (0 < count) {
         SLuint32 size = (SLuint32) (count * sizeof(short));
-        // FIXME if we had an internal API, could call this directly
         result = (*caller)->Enqueue(caller, pBuffer, size);
         if (SL_RESULT_BUFFER_INSUFFICIENT == result) {
             this->mRetryBuffer = pBuffer;
@@ -96,7 +93,6 @@ SLboolean SndFile_IsSupported(const SF_INFO *sfinfo)
 SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
 {
     const SLDataSource *pAudioSrc = &this->mDataSource.u.mSource;
-    //const SLDataSink *pAudioSnk = &this->mDataSink.u.mSink;
     SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
     SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
     switch (locatorType) {
@@ -127,7 +123,7 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
     default:
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
-    this->mSndFile.mIs0 = SL_BOOLEAN_TRUE;
+    this->mSndFile.mWhich = 0;
     this->mSndFile.mSNDFILE = NULL;
     this->mSndFile.mRetryBuffer = NULL;
     this->mSndFile.mRetrySize = 0;

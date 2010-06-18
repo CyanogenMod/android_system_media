@@ -128,7 +128,12 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
         if (BUFFER_HEADER_TYPICAL >= this->mBufferQueue.mNumBuffers) {
             this->mBufferQueue.mArray = this->mBufferQueue.mTypical;
         } else {
-            // FIXME integer overflow possible during multiplication
+            // Avoid possible integer overflow during multiplication; this arbitrary maximum is big
+            // enough to not interfere with real applications, but small enough to not overflow.
+            if (this->mBufferQueue.mNumBuffers >= 256) {
+                result = SL_RESULT_MEMORY_FAILURE;
+                goto abort;
+            }
             this->mBufferQueue.mArray = (BufferHeader *)
                     malloc((this->mBufferQueue.mNumBuffers + 1) * sizeof(BufferHeader));
             if (NULL == this->mBufferQueue.mArray) {
@@ -249,6 +254,12 @@ static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup, SLu
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
+    C3DGroup *this = (C3DGroup *) construct(pC3DGroup_class, exposedMask, self);
+    if (NULL == this)
+        return SL_RESULT_MEMORY_FAILURE;
+    this->mMemberMask = 0;
+    // return the new 3DGroup object
+    *pGroup = &this->mObject.mItf;
     return SL_RESULT_FEATURE_UNSUPPORTED;
 }
 

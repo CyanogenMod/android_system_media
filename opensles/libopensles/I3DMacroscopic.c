@@ -91,7 +91,6 @@ static SLresult I3DMacroscopic_SetOrientationVectors(SL3DMacroscopicItf self,
 static SLresult I3DMacroscopic_Rotate(SL3DMacroscopicItf self,
     SLmillidegree theta, const SLVec3D *pAxis)
 {
-    // FIXME spec does not specify a range on theta
     if (!((-360000 <= theta) && (theta <= 360000)))
         return SL_RESULT_PARAMETER_INVALID;
     if (NULL == pAxis)
