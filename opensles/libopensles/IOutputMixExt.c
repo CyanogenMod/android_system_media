@@ -24,6 +24,17 @@
 
 // Used by SDL but not specific to or dependent on SDL
 
+typedef enum {
+    SUMMARY_ZERO  = 0,  // mValue == 0.0 within epsilon
+    SUMMARY_UNITY = 1,  // mValue == 1.0 within epsilon
+    SUMMARY_OTHER = 2   // 0.0 < mValue < 1.0
+} Summary;
+
+typedef struct {
+    float mValue;
+    Summary mSummary;
+} Gain;
+
 static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 size)
 {
     // Force to be a multiple of a frame, assumes stereo 16-bit PCM
@@ -50,27 +61,43 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
         SLboolean trackContributedToMix = SL_BOOLEAN_FALSE;
         IBufferQueue *bufferQueue = track->mBufferQueue;
         // should compute elsewhere
-        double gains[2];
+        Gain gains[2];
         if (audioPlayer->mVolume.mMute || !(~audioPlayer->mMuteSolo.mMuteMask & 3)) {
-            gains[0] = 0.0;
-            gains[1] = 0.0;
+            gains[0].mValue = 0.0;
+            gains[0].mSummary = SUMMARY_ZERO;
+            gains[1].mValue = 0.0;
+            gains[1].mSummary = SUMMARY_ZERO;
         } else {
-            double playerVolume = pow(10.0, audioPlayer->mVolume.mLevel / 2000.0);
+            float playerGain = pow(10.0, audioPlayer->mVolume.mLevel / 2000.0);
             SLboolean enableStereoPosition = audioPlayer->mVolume.mEnableStereoPosition;
             SLpermille stereoPosition = audioPlayer->mVolume.mStereoPosition;
-            if (audioPlayer->mMuteSolo.mMuteMask & 1)
-                gains[0] = 0.0;
-            else {
-                gains[0] = playerVolume;
+            if (audioPlayer->mMuteSolo.mMuteMask & 1) {
+                gains[0].mValue = 0.0;
+                gains[0].mSummary = SUMMARY_ZERO;
+            } else {
+                gains[0].mValue = playerGain;
                 if (enableStereoPosition && stereoPosition < 0)
-                    gains[0] *= -stereoPosition / 1000.0;
+                    gains[0].mValue *= -stereoPosition / 1000.0;
+                if (gains[0].mValue <= 0.001)
+                    gains[0].mSummary = SUMMARY_ZERO;
+                else if (gains[0].mValue >= 0.999)
+                    gains[0].mSummary = SUMMARY_UNITY;
+                else
+                    gains[0].mSummary = SUMMARY_OTHER;
             }
-            if (audioPlayer->mMuteSolo.mMuteMask & 2)
-                gains[1] = 0.0;
-            else {
-                gains[1] = playerVolume;
+            if (audioPlayer->mMuteSolo.mMuteMask & 2) {
+                gains[1].mValue = 0.0;
+                gains[1].mSummary = SUMMARY_ZERO;
+            } else {
+                gains[1].mValue = playerGain;
                 if (enableStereoPosition && stereoPosition > 0)
-                    gains[1] *= stereoPosition / 1000.0;
+                    gains[1].mValue *= stereoPosition / 1000.0;
+                if (gains[1].mValue <= 0.001)
+                    gains[1].mSummary = SUMMARY_ZERO;
+                else if (gains[1].mValue >= 0.999)
+                    gains[1].mSummary = SUMMARY_UNITY;
+                else
+                    gains[1].mSummary = SUMMARY_OTHER;
             }
         }
         while (desired > 0) {
@@ -80,25 +107,36 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                 actual = track->mAvail;
             // force actual to be a frame multiple
             if (actual > 0) {
-                // FIXME check for gain 0 in which case skip the input buffer processing
                 assert(NULL != track->mReader);
                 stereo *mixBuffer = (stereo *) dstWriter;
                 const stereo *source = (const stereo *) track->mReader;
                 unsigned j;
-                if (mixBufferHasData) {
-                    for (j = 0; j < actual; j += sizeof(stereo), ++mixBuffer, ++source) {
-                        mixBuffer->left += (short) (source->left * gains[0]);
-                        mixBuffer->right += (short) (source->right * gains[1]);
-                    }
-                } else if (gains[0] >= 0.999 && gains[1] >= 0.999) {
-                    // no gain adjustment needed, so do a simple copy
-                    memcpy(dstWriter, track->mReader, actual);
-                    trackContributedToMix = SL_BOOLEAN_TRUE;
-                } else {
-                    // apply gain during copy
-                    for (j = 0; j < actual; j += sizeof(stereo), ++mixBuffer, ++source) {
-                        mixBuffer->left = (short) (source->left * gains[0]);
-                        mixBuffer->right = (short) (source->right * gains[1]);
+                if (SUMMARY_ZERO != gains[0].mSummary || SUMMARY_ZERO != gains[1].mSummary) {
+                    if (mixBufferHasData) {
+                        // apply gain during add
+                        if (SUMMARY_UNITY != gains[0].mSummary || SUMMARY_UNITY == gains[1].mSummary) {
+                            for (j = 0; j < actual; j += sizeof(stereo), ++mixBuffer, ++source) {
+                                mixBuffer->left += (short) (source->left * gains[0].mValue);
+                                mixBuffer->right += (short) (source->right * gains[1].mValue);
+                            }
+                        // no gain adjustment needed, so do a simple add
+                        } else {
+                            for (j = 0; j < actual; j += sizeof(stereo), ++mixBuffer, ++source) {
+                                mixBuffer->left += source->left;
+                                mixBuffer->right += source->right;
+                            }
+                        }
+                    } else {
+                        // apply gain during copy
+                        if (SUMMARY_UNITY != gains[0].mSummary || SUMMARY_UNITY != gains[1].mSummary) {
+                            for (j = 0; j < actual; j += sizeof(stereo), ++mixBuffer, ++source) {
+                                mixBuffer->left = (short) (source->left * gains[0].mValue);
+                                mixBuffer->right = (short) (source->right * gains[1].mValue);
+                            }
+                        // no gain adjustment needed, so do a simple copy
+                        } else {
+                            memcpy(dstWriter, track->mReader, actual);
+                        }
                     }
                     trackContributedToMix = SL_BOOLEAN_TRUE;
                 }
@@ -118,11 +156,9 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                         bufferQueue->mFront = (BufferHeader *) newFront;
                         assert(0 < bufferQueue->mState.count);
                         --bufferQueue->mState.count;
-                        // FIXME here or in Enqueue?
                         ++bufferQueue->mState.playIndex;
                         interface_unlock_exclusive(bufferQueue);
-                        // FIXME a good time to do an early warning
-                        // callback depending on buffer count
+                        // A good place to do an early warning callback depending on buffer count
                     }
                 }
                 continue;

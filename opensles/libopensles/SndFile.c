@@ -20,7 +20,6 @@
 
 #ifdef USE_SNDFILE
 
-// FIXME should run this asynchronously esp. for socket fd, not on mix thread, and add mutexes
 void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
 {
     CAudioPlayer *thisAP = (CAudioPlayer *) pContext;
@@ -106,7 +105,6 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
         SLchar *uri = dl_uri->URI;
         if (NULL == uri)
             return SL_RESULT_PARAMETER_INVALID;
-        // FIXME check other schemes and handle, or return SL_RESULT_CONTENT_UNSUPPORTED
         if (!strncmp((const char *) uri, "file:///", 8))
             uri += 8;
         switch (formatType) {
@@ -116,8 +114,7 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
             return SL_RESULT_CONTENT_UNSUPPORTED;
         }
         this->mSndFile.mPathname = uri;
-        // FIXME magic number, should be configurable
-        this->mBufferQueue.mNumBuffers = 2;
+        this->mBufferQueue.mNumBuffers = SndFile_NUMBUFS;
         }
         break;
     default:

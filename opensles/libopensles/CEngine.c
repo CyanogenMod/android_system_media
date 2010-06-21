@@ -43,7 +43,6 @@ SLresult CEngine_Realize(void *self, SLboolean async)
 void CEngine_Destroy(void *self)
 {
     CEngine *this = (CEngine *) self;
-    // FIXME Verify no extant objects
     this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
     (void) pthread_join(this->mSyncThread, (void **) NULL);
     ThreadPool_deinit(&this->mEngine.mThreadPool);

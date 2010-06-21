@@ -74,16 +74,13 @@ static SLresult IEngineCapabilities_QueryAPIVersion(SLEngineCapabilitiesItf self
 static SLresult IEngineCapabilities_QueryLEDCapabilities(SLEngineCapabilitiesItf self,
     SLuint32 *pIndex, SLuint32 *pLEDDeviceID, SLLEDDescriptor *pDescriptor)
 {
-    const struct LED_id_descriptor *id_descriptor = LED_id_descriptors;
-    while (NULL != id_descriptor->descriptor)
-        ++id_descriptor;
-    // FIXME should cache this value
-    SLuint32 maxIndex = id_descriptor - LED_id_descriptors;
+    IEngineCapabilities *this = (IEngineCapabilities *) self;
+    const struct LED_id_descriptor *id_descriptor;
     SLuint32 index;
     if (NULL != pIndex) {
         if (NULL != pLEDDeviceID || NULL != pDescriptor) {
             index = *pIndex;
-            if (index >= maxIndex)
+            if (index >= this->mMaxIndexLED)
                 return SL_RESULT_PARAMETER_INVALID;
             id_descriptor = &LED_id_descriptors[index];
             if (NULL != pLEDDeviceID)
@@ -91,13 +88,12 @@ static SLresult IEngineCapabilities_QueryLEDCapabilities(SLEngineCapabilitiesItf
             if (NULL != pDescriptor)
                 *pDescriptor = *id_descriptor->descriptor;
         }
-        /* FIXME else? */
-        *pIndex = maxIndex;
+        *pIndex = this->mMaxIndexLED;
         return SL_RESULT_SUCCESS;
     } else {
         if (NULL != pLEDDeviceID && NULL != pDescriptor) {
             SLuint32 id = *pLEDDeviceID;
-            for (index = 0; index < maxIndex; ++index) {
+            for (index = 0; index < this->mMaxIndexLED; ++index) {
                 id_descriptor = &LED_id_descriptors[index];
                 if (id == id_descriptor->id) {
                     *pDescriptor = *id_descriptor->descriptor;
@@ -112,16 +108,13 @@ static SLresult IEngineCapabilities_QueryLEDCapabilities(SLEngineCapabilitiesItf
 static SLresult IEngineCapabilities_QueryVibraCapabilities(SLEngineCapabilitiesItf self,
     SLuint32 *pIndex, SLuint32 *pVibraDeviceID, SLVibraDescriptor *pDescriptor)
 {
-    const struct Vibra_id_descriptor *id_descriptor = Vibra_id_descriptors;
-    while (NULL != id_descriptor->descriptor)
-        ++id_descriptor;
-    // FIXME should cache this value
-    SLuint32 maxIndex = id_descriptor - Vibra_id_descriptors;
+    IEngineCapabilities *this = (IEngineCapabilities *) self;
+    const struct Vibra_id_descriptor *id_descriptor;
     SLuint32 index;
     if (NULL != pIndex) {
         if (NULL != pVibraDeviceID || NULL != pDescriptor) {
             index = *pIndex;
-            if (index >= maxIndex)
+            if (index >= this->mMaxIndexVibra)
                 return SL_RESULT_PARAMETER_INVALID;
             id_descriptor = &Vibra_id_descriptors[index];
             if (NULL != pVibraDeviceID)
@@ -129,13 +122,12 @@ static SLresult IEngineCapabilities_QueryVibraCapabilities(SLEngineCapabilitiesI
             if (NULL != pDescriptor)
                 *pDescriptor = *id_descriptor->descriptor;
         }
-        /* FIXME else? */
-        *pIndex = maxIndex;
+        *pIndex = this->mMaxIndexVibra;
         return SL_RESULT_SUCCESS;
     } else {
         if (NULL != pVibraDeviceID && NULL != pDescriptor) {
             SLuint32 id = *pVibraDeviceID;
-            for (index = 0; index < maxIndex; ++index) {
+            for (index = 0; index < this->mMaxIndexVibra; ++index) {
                 id_descriptor = &Vibra_id_descriptors[index];
                 if (id == id_descriptor->id) {
                     *pDescriptor = *id_descriptor->descriptor;
@@ -153,8 +145,7 @@ static SLresult IEngineCapabilities_IsThreadSafe(SLEngineCapabilitiesItf self,
 {
     if (NULL == pIsThreadSafe)
         return SL_RESULT_PARAMETER_INVALID;
-    IEngineCapabilities *this =
-        (IEngineCapabilities *) self;
+    IEngineCapabilities *this = (IEngineCapabilities *) self;
     *pIsThreadSafe = this->mThreadSafe;
     return SL_RESULT_SUCCESS;
 }
@@ -174,4 +165,12 @@ void IEngineCapabilities_init(void *self)
     IEngineCapabilities *this = (IEngineCapabilities *) self;
     this->mItf = &IEngineCapabilities_Itf;
     // mThreadSafe is initialized in slCreateEngine
+    const struct LED_id_descriptor *id_descriptor_LED = LED_id_descriptors;
+    while (NULL != id_descriptor_LED->descriptor)
+        ++id_descriptor_LED;
+    this->mMaxIndexLED = id_descriptor_LED - LED_id_descriptors;
+    const struct Vibra_id_descriptor *id_descriptor_Vibra = Vibra_id_descriptors;
+    while (NULL != id_descriptor_Vibra->descriptor)
+        ++id_descriptor_Vibra;
+    this->mMaxIndexVibra = id_descriptor_Vibra - Vibra_id_descriptors;
 }

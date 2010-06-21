@@ -28,23 +28,6 @@ SLuint32 IObjectToObjectID(IObject *this)
     return this->mClass->mObjectID;
 }
 
-// Map SLInterfaceID to its minimal perfect hash (MPH), or -1 if unknown
-
-/*static*/ int IID_to_MPH(const SLInterfaceID iid)
-{
-    if (&SL_IID_array[0] <= iid && &SL_IID_array[MPH_MAX] > iid)
-        return iid - &SL_IID_array[0];
-    if (NULL != iid) {
-        // FIXME Replace this linear search by a good MPH algorithm
-        const struct SLInterfaceID_ *srch = &SL_IID_array[0];
-        unsigned MPH;
-        for (MPH = 0; MPH < MPH_MAX; ++MPH, ++srch)
-            if (!memcmp(iid, srch, sizeof(struct SLInterfaceID_)))
-                return MPH;
-    }
-    return -1;
-}
-
 // Convert POSIX pthread error code to OpenSL ES result code
 
 SLresult err_to_result(int err)

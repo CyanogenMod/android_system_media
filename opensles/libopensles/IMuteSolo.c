@@ -102,5 +102,5 @@ void IMuteSolo_init(void *self)
     this->mMuteMask = 0;
     this->mSoloMask = 0;
     // const
-    this->mNumChannels = 2; // FIXME Wrong
+    this->mNumChannels = 0; // This will be set later by the containing AudioPlayer or MidiPlayer
 }
