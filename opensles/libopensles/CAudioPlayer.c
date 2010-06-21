@@ -25,7 +25,7 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
     CAudioPlayer *this = (CAudioPlayer *) self;
     SLresult result = SL_RESULT_SUCCESS;
 
-#ifdef USE_ANDROID
+#ifdef ANDROID
     // FIXME move this to android specific files
     result = sles_to_android_audioPlayerRealize(this, async);
 #endif
@@ -84,7 +84,7 @@ void CAudioPlayer_Destroy(void *self)
         this->mSndFile.mSNDFILE = NULL;
     }
 #endif // USE_SNDFILE
-#ifdef USE_ANDROID
+#ifdef ANDROID
     sles_to_android_audioPlayerDestroy(this);
 #endif
 }

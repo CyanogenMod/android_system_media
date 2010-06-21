@@ -51,7 +51,7 @@ static SLresult IBufferQueue_Clear(SLBufferQueueItf self)
     this->mRear = &this->mArray[0];
     this->mSizeConsumed = 0;
     this->mState.count = 0;
-#ifdef USE_ANDROID
+#ifdef ANDROID
     // FIXME must flush associated player
     fprintf(stderr, "FIXME: IBufferQueue_Clear must flush associated player, not implemented\n");
 #endif

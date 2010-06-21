@@ -72,7 +72,7 @@ LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
 	$(TOP)/system/media/opensles/include
 
-LOCAL_CFLAGS += -DUSE_ANDROID -x c++
+LOCAL_CFLAGS += -x c++
 
 LOCAL_STATIC_LIBRARIES += \
         libopensles_helper
