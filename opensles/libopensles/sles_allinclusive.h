@@ -41,7 +41,7 @@ typedef struct C3DGroup_struct C3DGroup;
 #include <SDL/SDL_audio.h>
 #endif // USE_SDL
 
-#ifdef USE_ANDROID
+#ifdef ANDROID
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
@@ -694,7 +694,7 @@ typedef struct {
     SLboolean mMute;
     SLboolean mEnableStereoPosition;
     SLpermille mStereoPosition;
-#ifdef USE_ANDROID
+#ifdef ANDROID
     /**
      * Amplification (can be attenuation) factor derived for the VolumeLevel
      */
@@ -973,7 +973,7 @@ extern SLuint32 IObjectToObjectID(IObject *object);
 
 #define InterfaceToIObject(this) ((this)->mThis)
 
-#ifdef USE_ANDROID
+#ifdef ANDROID
 #include "sles_to_android.h"
 #endif
 

@@ -600,7 +600,7 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     const SLEngineOption *pEngineOptions, SLuint32 numInterfaces,
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
-#ifdef USE_ANDROID
+#ifdef ANDROID
     android::ProcessState::self()->startThreadPool();
 #endif
     if (NULL == pEngine)

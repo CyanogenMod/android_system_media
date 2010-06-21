@@ -26,7 +26,7 @@ static SLresult IVolume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
     if (!((SL_MILLIBEL_MIN <= level) && (SL_MILLIBEL_MAX >= level)))
         return SL_RESULT_PARAMETER_INVALID;
 #endif
-#ifdef USE_ANDROID
+#ifdef ANDROID
     if (!((SL_MILLIBEL_MIN <= level) && (ANDROID_SL_MILLIBEL_MAX >= level)))
         return SL_RESULT_PARAMETER_INVALID;
 #endif
@@ -36,7 +36,7 @@ static SLresult IVolume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
     SLmillibel oldLevel = this->mLevel;
     this->mLevel = level;
     if((this->mMute == SL_BOOLEAN_FALSE) && (oldLevel != level)) {
-#ifdef USE_ANDROID
+#ifdef ANDROID
         switch (InterfaceToObjectID(this)) {
         case SL_OBJECTID_AUDIOPLAYER:
             sles_to_android_audioPlayerVolumeUpdate(this);
@@ -71,7 +71,7 @@ static SLresult IVolume_GetMaxVolumeLevel(SLVolumeItf self, SLmillibel *pMaxLeve
     if (NULL == pMaxLevel)
         return SL_RESULT_PARAMETER_INVALID;
     *pMaxLevel = SL_MILLIBEL_MAX;
-#ifdef USE_ANDROID
+#ifdef ANDROID
     *pMaxLevel = ANDROID_SL_MILLIBEL_MAX;
 #endif
     return SL_RESULT_SUCCESS;
@@ -88,7 +88,7 @@ static SLresult IVolume_SetMute(SLVolumeItf self, SLboolean mute)
             // when unmuting, reapply volume
             IVolume_SetVolumeLevel(self, this->mLevel);
         }
-#ifdef USE_ANDROID
+#ifdef ANDROID
         switch (InterfaceToObjectID(this)) {
         case SL_OBJECTID_AUDIOPLAYER:
             sles_to_android_audioPlayerSetMute(this, mute);
@@ -125,7 +125,7 @@ static SLresult IVolume_EnableStereoPosition(SLVolumeItf self, SLboolean enable)
     interface_lock_exclusive(this);
     if (this->mEnableStereoPosition != enable) {
         this->mEnableStereoPosition = enable;
-#ifdef USE_ANDROID
+#ifdef ANDROID
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
             sles_to_android_audioPlayerVolumeUpdate(this);
         }
@@ -155,7 +155,7 @@ static SLresult IVolume_SetStereoPosition(SLVolumeItf self, SLpermille stereoPos
     interface_lock_exclusive(this);
     if (this->mStereoPosition != stereoPosition) {
         this->mStereoPosition = stereoPosition;
-#ifdef USE_ANDROID
+#ifdef ANDROID
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
             sles_to_android_audioPlayerVolumeUpdate(this);
         }
@@ -197,7 +197,7 @@ void IVolume_init(void *self)
     this->mMute = SL_BOOLEAN_FALSE;
     this->mEnableStereoPosition = SL_BOOLEAN_FALSE;
     this->mStereoPosition = 0;
-#ifdef USE_ANDROID
+#ifdef ANDROID
     this->mAmplFromVolLevel = 1.0f;
     this->mAmplFromStereoPos[0] = 1.0f;
     this->mAmplFromStereoPos[1] = 1.0f;
