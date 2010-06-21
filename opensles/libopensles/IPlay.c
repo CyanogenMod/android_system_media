@@ -62,10 +62,6 @@ static SLresult IPlay_GetPlayState(SLPlayItf self, SLuint32 *pState)
 static SLresult IPlay_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
 {
     SLresult result = SL_RESULT_SUCCESS;
-    // FIXME: for SNDFILE only, check to see if already know duration
-    // if so, good, otherwise save position,
-    // read quickly to end of file, counting frames,
-    // use sample rate to compute duration, then seek back to current position
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
     IPlay *this = (IPlay *) self;
@@ -236,7 +232,7 @@ void IPlay_init(void *self)
     IPlay *this = (IPlay *) self;
     this->mItf = &IPlay_Itf;
     this->mState = SL_PLAYSTATE_STOPPED;
-    this->mDuration = SL_TIME_UNKNOWN;
+    this->mDuration = SL_TIME_UNKNOWN;  // will be set by containing AudioPlayer or MidiPlayer object
     this->mPosition = (SLmillisecond) 0;
     // this->mPlay.mPositionSamples = 0;
     this->mCallback = NULL;

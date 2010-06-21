@@ -995,5 +995,3 @@ SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute) {
     }
     return SL_RESULT_SUCCESS;
 }
-
-

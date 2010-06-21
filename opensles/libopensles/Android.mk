@@ -17,10 +17,12 @@ LOCAL_SRC_FILES:=                     \
         OpenSLES_IID.c                \
         classes.c                     \
         devices.c                     \
+        interfaces.c                  \
         locks.c                       \
         sles.c                        \
         sles_to_android.cpp           \
         sync.c                        \
+        IID_to_MPH.c                  \
         ThreadPool.c                  \
         CAudioPlayer.c                \
         CEngine.c                     \

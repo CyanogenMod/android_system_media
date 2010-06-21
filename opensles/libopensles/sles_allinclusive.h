@@ -382,10 +382,12 @@ typedef struct BufferQueue_interface {
     BufferHeader mTypical[BUFFER_HEADER_TYPICAL+1];
 } IBufferQueue;
 
+#define MAX_DEVICE 2
+
 typedef struct {
     const struct SLDeviceVolumeItf_ *mItf;
     IObject *mThis;
-    SLint32 mVolume[2]; // FIXME Hard-coded for default in/out
+    SLint32 mVolume[MAX_DEVICE]; // FIXME Hard-coded for default in/out
 } IDeviceVolume;
 
 typedef struct {
@@ -444,6 +446,9 @@ typedef struct {
     const struct SLEngineCapabilitiesItf_ *mItf;
     IObject *mThis;
     SLboolean mThreadSafe;
+    // const
+    SLuint32 mMaxIndexLED;
+    SLuint32 mMaxIndexVibra;
 } IEngineCapabilities;
 
 typedef struct {
@@ -1002,3 +1007,4 @@ extern SLresult err_to_result(int err);
 #else
 extern unsigned ctz(unsigned);
 #endif
+extern const char * const interface_names[MPH_MAX];
