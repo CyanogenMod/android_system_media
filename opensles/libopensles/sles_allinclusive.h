@@ -755,11 +755,6 @@ enum AndroidObject_state {
     ANDROID_READY,
     NUM_ANDROID_STATES
 };
-
-typedef struct {
-    android::AudioTrack *mAudioTrack; // FIXME unify AudioTrack between PCM buff queue and URI
-} AudioTrackData;
-
 #endif
 
 /*typedef*/ struct CAudioPlayer_struct {
@@ -802,11 +797,9 @@ typedef struct {
     android::Mutex          *mpLock;
     enum AndroidObject_type mAndroidObjType;
     enum AndroidObject_state mAndroidObjState;
+    android::AudioTrack *mAudioTrack;
     android::sp<android::SfPlayer> mSfPlayer;
     android::sp<android::ALooper>  mRenderLooper;
-    union {
-        AudioTrackData      mAudioTrackData;
-    };
 #endif
 } /*CAudioPlayer*/;
 

@@ -83,22 +83,12 @@ void android_audioPlayerUpdateStereoVolume(IVolume *pVolItf) {
     float leftVol = 1.0f, rightVol = 1.0f;
 
     CAudioPlayer *ap = (CAudioPlayer *)pVolItf->mThis;
-    //FIXME cache channel count?
-    int channelCount = 0;
-    switch (ap->mAndroidObjType) {
-        case AUDIOTRACK_PUSH:
-        case AUDIOTRACK_PULL:
-            channelCount = ap->mAudioTrackData.mAudioTrack->channelCount();
-            break;
-        case MEDIAPLAYER:
-            //FIXME add support for querying channel count from a MediaPlayer
-            fprintf(stderr, "[ FIXME add support for querying channel count from a MediaPlayer ]\n");
-            channelCount = 1;
-        default:
-            fprintf(stderr, "Error in android_audioPlayerUpdateStereoVolume(): shouldn't hit this\n");
-            channelCount = 1;
-            break;
+    if (NULL == ap->mAudioTrack) {
+        return;
     }
+    //FIXME cache channel count?
+    int channelCount = ap->mAudioTrack->channelCount();
+
     //int muteSoloLeft, muteSoleRight;
     //muteSoloLeft = (mChannelMutes & CHANNEL_OUT_FRONT_LEFT) >> 2;
     //muteSoloRight = (mChannelMutes & CHANNEL_OUT_FRONT_RIGHT) >> 3;
@@ -133,18 +123,57 @@ void android_audioPlayerUpdateStereoVolume(IVolume *pVolItf) {
         rightVol *= pVolItf->mAmplFromStereoPos[1];
     }
 
-    switch(ap->mAndroidObjType) {
-    case AUDIOTRACK_PUSH:
-    case AUDIOTRACK_PULL:
-        ap->mAudioTrackData.mAudioTrack->setVolume(leftVol, rightVol);
-        break;
-    case MEDIAPLAYER:
-        // FIXME implement setVolume
-        fprintf(stderr, "FIXME implement setVolume");
-        //ap->mMediaPlayerData.mMediaPlayer->setVolume(leftVol, rightVol);
-        break;
-    default:
-        break;
+    ap->mAudioTrack->setVolume(leftVol, rightVol);
+}
+
+//-----------------------------------------------------------------------------
+void android_handleTrackMarker(CAudioPlayer* ap) {
+    //fprintf(stdout, "received event EVENT_MARKER from AudioTrack\n");
+    slPlayCallback callback = NULL;
+    void* callbackPContext = NULL;
+
+    interface_lock_shared(&ap->mPlay);
+    callback = ap->mPlay.mCallback;
+    callbackPContext = ap->mPlay.mContext;
+    interface_unlock_shared(&ap->mPlay);
+
+    if (NULL != callback) {
+        // getting this event implies SL_PLAYEVENT_HEADATMARKER was set in the event mask
+        (*callback)(&ap->mPlay.mItf, callbackPContext, SL_PLAYEVENT_HEADATMARKER);
+    }
+}
+
+//-----------------------------------------------------------------------------
+void android_handleTrackNewPos(CAudioPlayer* ap) {
+    //fprintf(stdout, "received event EVENT_NEW_POS from AudioTrack\n");
+    slPlayCallback callback = NULL;
+    void* callbackPContext = NULL;
+
+    interface_lock_shared(&ap->mPlay);
+    callback = ap->mPlay.mCallback;
+    callbackPContext = ap->mPlay.mContext;
+    interface_unlock_shared(&ap->mPlay);
+
+    if (NULL != callback) {
+        // getting this event implies SL_PLAYEVENT_HEADATNEWPOS was set in the event mask
+        (*callback)(&ap->mPlay.mItf, callbackPContext, SL_PLAYEVENT_HEADATNEWPOS);
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+void android_handleTrackUnderrun(CAudioPlayer* ap) {
+    slPlayCallback callback = NULL;
+    void* callbackPContext = NULL;
+
+    interface_lock_shared(&ap->mPlay);
+    callback = ap->mPlay.mCallback;
+    callbackPContext = ap->mPlay.mContext;
+    bool headStalled = (ap->mPlay.mEventFlags & SL_PLAYEVENT_HEADSTALLED) != 0;
+    interface_unlock_shared(&ap->mPlay);
+
+    if ((NULL != callback) && headStalled) {
+        (*callback)(&ap->mPlay.mItf, callbackPContext, SL_PLAYEVENT_HEADSTALLED);
     }
 }
 
@@ -175,10 +204,15 @@ static void android_prefetchEventCallback(const int event, const int data1, void
             callback = ap->mPrefetchStatus.mCallback;
             callbackPContext = ap->mPrefetchStatus.mContext;
         }
-        if (data1 >= android::SfPlayer::kStatusEnough) {
+        if (data1 >= android::SfPlayer::kStatusIntermediate) {
             ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
-        } else if (data1 <= android::SfPlayer::kStatusLow) {
+            // FIXME estimate fill level better?
+            ap->mPrefetchStatus.mLevel = 1000;
+            ap->mAndroidObjState = ANDROID_READY;
+        } else if (data1 < android::SfPlayer::kStatusIntermediate) {
             ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+            // FIXME estimate fill level better?
+            ap->mPrefetchStatus.mLevel = 0;
         }
         interface_unlock_exclusive(&ap->mPrefetchStatus);
         // callback with no lock held
@@ -204,6 +238,7 @@ static void android_prefetchEventCallback(const int event, const int data1, void
         if (NULL != playCallback) {
             (*playCallback)(&ap->mPlay.mItf, playContext, SL_PLAYEVENT_HEADATEND);
         }
+        ap->mAudioTrack->stop();
         } break;
 
     default:
@@ -352,6 +387,30 @@ SLresult sles_to_android_checkAudioPlayerSourceSink(CAudioPlayer *pAudioPlayer)
 }
 
 
+
+//-----------------------------------------------------------------------------
+static void android_uriAudioTrackCallback(int event, void* user, void *info) {
+    // EVENT_MORE_DATA needs to be handled with priority over the other events
+    // because it will be called the most often during playback
+    if (event == android::AudioTrack::EVENT_MORE_DATA) {
+        //fprintf(stderr, "received event EVENT_MORE_DATA from AudioTrack\n");
+        // set size to 0 to signal we're not using the callback to write more data
+        android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
+        pBuff->size = 0;
+    } else if (NULL != user) {
+        switch (event) {
+            case (android::AudioTrack::EVENT_MARKER) :
+                android_handleTrackMarker((CAudioPlayer *)user);
+                break;
+            case (android::AudioTrack::EVENT_NEW_POS) :
+                android_handleTrackNewPos((CAudioPlayer *)user);
+                break;
+            case (android::AudioTrack::EVENT_UNDERRUN) :
+                android_handleTrackUnderrun((CAudioPlayer *)user);
+        }
+    }
+}
+
 //-----------------------------------------------------------------------------
 // Callback associated with an AudioTrack of an SL ES AudioPlayer that gets its data
 // from a buffer queue.
@@ -420,66 +479,21 @@ static void android_pullAudioTrackCallback(int event, void* user, void *info) {
     }
     break;
 
-    case (android::AudioTrack::EVENT_MARKER) : {
-        //fprintf(stdout, "received event EVENT_MARKER from AudioTrack\n");
-        slPlayCallback callback = NULL;
-        interface_lock_shared(&pAudioPlayer->mPlay);
-        callback = pAudioPlayer->mPlay.mCallback;
-        callbackPContext = pAudioPlayer->mPlay.mContext;
-        interface_unlock_shared(&pAudioPlayer->mPlay);
-        if (NULL != callback) {
-            // getting this event implies SL_PLAYEVENT_HEADATMARKER was set in the event mask
-            (*callback)(&pAudioPlayer->mPlay.mItf, callbackPContext, SL_PLAYEVENT_HEADATMARKER);
-        }
-    }
-    break;
+    case (android::AudioTrack::EVENT_MARKER) :
+        android_handleTrackMarker(pAudioPlayer);
+        break;
 
-    case (android::AudioTrack::EVENT_NEW_POS) : {
-        //fprintf(stdout, "received event EVENT_NEW_POS from AudioTrack\n");
-        slPlayCallback callback = NULL;
-        interface_lock_shared(&pAudioPlayer->mPlay);
-        callback = pAudioPlayer->mPlay.mCallback;
-        callbackPContext = pAudioPlayer->mPlay.mContext;
-        interface_unlock_shared(&pAudioPlayer->mPlay);
-        if (NULL != callback) {
-            // getting this event implies SL_PLAYEVENT_HEADATNEWPOS was set in the event mask
-            (*callback)(&pAudioPlayer->mPlay.mItf, callbackPContext, SL_PLAYEVENT_HEADATNEWPOS);
-        }
-    }
-    break;
+    case (android::AudioTrack::EVENT_NEW_POS) :
+        android_handleTrackNewPos(pAudioPlayer);
+        break;
 
-    case (android::AudioTrack::EVENT_UNDERRUN) : {
-        slPlayCallback callback = NULL;
-        interface_lock_shared(&pAudioPlayer->mPlay);
-        callback = pAudioPlayer->mPlay.mCallback;
-        callbackPContext = pAudioPlayer->mPlay.mContext;
-        bool headStalled = (pAudioPlayer->mPlay.mEventFlags & SL_PLAYEVENT_HEADSTALLED) != 0;
-        interface_unlock_shared(&pAudioPlayer->mPlay);
-        if ((NULL != callback) && headStalled) {
-            (*callback)(&pAudioPlayer->mPlay.mItf, callbackPContext, SL_PLAYEVENT_HEADSTALLED);
-        }
-    }
-    break;
+    case (android::AudioTrack::EVENT_UNDERRUN) :
+        android_handleTrackUnderrun(pAudioPlayer);
+        break;
 
     default:
         // FIXME where does the notification of SL_PLAYEVENT_HEADATEND, SL_PLAYEVENT_HEADMOVING fit?
         break;
-    }
-}
-
-
-//-----------------------------------------------------------------------------
-static void android_pushAudioTrackCallback(int event, void* user, void *info) {
-    if (event == android::AudioTrack::EVENT_MORE_DATA) {
-        fprintf(stderr, "received event EVENT_MORE_DATA from AudioTrack\n");
-        // set size to 0 to signal we're not using the callback to write more data
-        android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
-        pBuff->size = 0;
-
-    } else if (event == android::AudioTrack::EVENT_MARKER) {
-        fprintf(stderr, "received event EVENT_MARKER from AudioTrack\n");
-    } else if (event == android::AudioTrack::EVENT_NEW_POS) {
-        fprintf(stderr, "received event EVENT_NEW_POS from AudioTrack\n");
     }
 }
 
@@ -506,7 +520,6 @@ SLresult sles_to_android_audioPlayerCreate(
     case SL_DATALOCATOR_BUFFERQUEUE:
         pAudioPlayer->mAndroidObjType = AUDIOTRACK_PULL;
         pAudioPlayer->mpLock = new android::Mutex();
-        pAudioPlayer->mAudioTrackData.mAudioTrack = NULL;
         pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
         break;
     //   -----------------------------------
@@ -514,9 +527,7 @@ SLresult sles_to_android_audioPlayerCreate(
     case SL_DATALOCATOR_URI:
         pAudioPlayer->mAndroidObjType = MEDIAPLAYER;
         pAudioPlayer->mpLock = new android::Mutex();
-        pAudioPlayer->mSfPlayer.clear();
-        pAudioPlayer->mRenderLooper.clear();
-        pAudioPlayer->mPlaybackRate.mCapabilities = 0;
+        pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
         break;
     default:
         pAudioPlayer->mAndroidObjType = INVALID_TYPE;
@@ -526,6 +537,9 @@ SLresult sles_to_android_audioPlayerCreate(
     }
 
     pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
+    pAudioPlayer->mAudioTrack = NULL;
+    pAudioPlayer->mSfPlayer.clear();
+    pAudioPlayer->mRenderLooper.clear();
 
     return result;
 
@@ -550,7 +564,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
 
         uint32_t sampleRate = sles_to_android_sampleRate(df_pcm->samplesPerSec);
 
-        pAudioPlayer->mAudioTrackData.mAudioTrack = new android::AudioTrack(
+        pAudioPlayer->mAudioTrack = new android::AudioTrack(
                 ANDROID_DEFAULT_OUTPUT_STREAM_TYPE,                  // streamType
                 sampleRate,                                          // sampleRate
                 sles_to_android_sampleFormat(df_pcm->bitsPerSample), // format
@@ -560,7 +574,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
                 android_pullAudioTrackCallback,                      // callback
                 (void *) pAudioPlayer,                               // user
                 0);  // FIXME find appropriate frame count         // notificationFrame
-        if (pAudioPlayer->mAudioTrackData.mAudioTrack->initCheck() != android::NO_ERROR) {
+        if (pAudioPlayer->mAudioTrack->initCheck() != android::NO_ERROR) {
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         }
         } break;
@@ -576,19 +590,38 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
                 (void*)pAudioPlayer /*notifUSer*/);
         pAudioPlayer->mRenderLooper->registerHandler(pAudioPlayer->mSfPlayer);
         pAudioPlayer->mRenderLooper->start(false /*runOnCallingThread*/);
-
         object_unlock_exclusive(&pAudioPlayer->mObject);
 
-        pAudioPlayer->mSfPlayer->prepare_sync(
+        int res = pAudioPlayer->mSfPlayer->prepare_sync(
                 (const char*)pAudioPlayer->mDataSource.mLocator.mURI.URI);
 
         object_lock_exclusive(&pAudioPlayer->mObject);
-        if (pAudioPlayer->mSfPlayer->wantPrefetch()) {
-            pAudioPlayer->mAndroidObjState = ANDROID_PREPARED;
+        if (SFPLAYER_SUCCESS != res) {
+            pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
         } else {
-            pAudioPlayer->mAndroidObjState = ANDROID_READY;
+            // create audio track based on parameters retrieved from Stagefright
+            pAudioPlayer->mAudioTrack = new android::AudioTrack(
+                    ANDROID_DEFAULT_OUTPUT_STREAM_TYPE,                  // streamType
+                    pAudioPlayer->mSfPlayer->getSampleRateHz(),          // sampleRate
+                    android::AudioSystem::PCM_16_BIT,                    // format
+                    pAudioPlayer->mSfPlayer->getNumChannels() == 1 ?     //channel mask
+                            android::AudioSystem::CHANNEL_OUT_MONO :
+                            android::AudioSystem::CHANNEL_OUT_STEREO,
+                    0,                                                   // frameCount (here min)
+                    0,                                                   // flags
+                    android_uriAudioTrackCallback,                       // callback
+                    (void *) pAudioPlayer,                               // user
+                    0);                                                  // notificationFrame
+            pAudioPlayer->mSfPlayer->useAudioTrack(pAudioPlayer->mAudioTrack);
+
+            if (pAudioPlayer->mSfPlayer->wantPrefetch()) {
+                pAudioPlayer->mAndroidObjState = ANDROID_PREPARED;
+            } else {
+                pAudioPlayer->mAndroidObjState = ANDROID_READY;
+            }
         }
         object_unlock_exclusive(&pAudioPlayer->mObject);
+
         } break;
     default:
         result = SL_RESULT_CONTENT_UNSUPPORTED;
@@ -602,18 +635,14 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
 SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer) {
     SLresult result = SL_RESULT_SUCCESS;
     //fprintf(stdout, "sles_to_android_audioPlayerDestroy\n");
+
+    pAudioPlayer->mAndroidObjType = INVALID_TYPE;
+
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
     // AudioTrack
     case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
-        // FIXME group in one function?
-        if (pAudioPlayer->mAudioTrackData.mAudioTrack != NULL) {
-            pAudioPlayer->mAudioTrackData.mAudioTrack->stop();
-            delete pAudioPlayer->mAudioTrackData.mAudioTrack;
-            pAudioPlayer->mAudioTrackData.mAudioTrack = NULL;
-            pAudioPlayer->mAndroidObjType = INVALID_TYPE;
-        }
         break;
     //-----------------------------------
     // MediaPlayer
@@ -627,6 +656,12 @@ SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer) {
         break;
     default:
         result = SL_RESULT_CONTENT_UNSUPPORTED;
+    }
+
+    if (pAudioPlayer->mAudioTrack != NULL) {
+        pAudioPlayer->mAudioTrack->stop();
+        delete pAudioPlayer->mAudioTrack;
+        pAudioPlayer->mAudioTrack = NULL;
     }
 
     if (pAudioPlayer->mpLock != NULL) {
@@ -645,7 +680,8 @@ SLresult sles_to_android_audioPlayerSetPlayRate(IPlaybackRate *pRateItf, SLpermi
     CAudioPlayer *ap = (CAudioPlayer *)pRateItf->mThis;
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
-    case AUDIOTRACK_PULL: {
+    case AUDIOTRACK_PULL:
+    case MEDIAPLAYER: {
         // get the content sample rate
         object_lock_peek(ap);
         uint32_t contentRate =
@@ -653,15 +689,13 @@ SLresult sles_to_android_audioPlayerSetPlayRate(IPlaybackRate *pRateItf, SLpermi
         object_unlock_peek(ap);
         // apply the SL ES playback rate on the AudioTrack as a factor of its content sample rate
         ap->mpLock->lock();
-        if (ap->mAudioTrackData.mAudioTrack != NULL) {
-            ap->mAudioTrackData.mAudioTrack->setSampleRate(contentRate * (rate/1000.0f));
+        if (ap->mAudioTrack != NULL) {
+            ap->mAudioTrack->setSampleRate(contentRate * (rate/1000.0f));
         }
         ap->mpLock->unlock();
         }
         break;
-    case MEDIAPLAYER:
-        result = SL_RESULT_FEATURE_UNSUPPORTED;
-        break;
+
     default:
         result = SL_RESULT_CONTENT_UNSUPPORTED;
         break;
@@ -679,12 +713,10 @@ SLresult sles_to_android_audioPlayerSetPlaybackRateBehavior(IPlaybackRate *pRate
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
+    case MEDIAPLAYER:
         if (constraints != (constraints & SL_RATEPROP_NOPITCHCORAUDIO)) {
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         }
-        break;
-    case MEDIAPLAYER:
-        result = SL_RESULT_FEATURE_UNSUPPORTED;
         break;
     default:
         result = SL_RESULT_CONTENT_UNSUPPORTED;
@@ -702,10 +734,8 @@ SLresult sles_to_android_audioPlayerGetCapabilitiesOfRate(IPlaybackRate *pRateIt
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
-        *pCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
-        break;
     case MEDIAPLAYER:
-        *pCapabilities = 0;
+        *pCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
         break;
     default:
         *pCapabilities = 0;
@@ -725,15 +755,15 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
         switch (state) {
         case SL_PLAYSTATE_STOPPED:
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_STOPPED\n");
-            ap->mAudioTrackData.mAudioTrack->stop();
+            ap->mAudioTrack->stop();
             break;
         case SL_PLAYSTATE_PAUSED:
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PAUSED\n");
-            ap->mAudioTrackData.mAudioTrack->pause();
+            ap->mAudioTrack->pause();
             break;
         case SL_PLAYSTATE_PLAYING:
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PLAYING\n");
-            ap->mAudioTrackData.mAudioTrack->start();
+            ap->mAudioTrack->start();
             break;
         default:
             result = SL_RESULT_PARAMETER_INVALID;
@@ -744,7 +774,7 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
         case SL_PLAYSTATE_STOPPED:
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_STOPPED\n");
             // FIXME stop the actual playback
-            fprintf(stderr, "[ FIXME implement stop() ]");
+            fprintf(stderr, "[ FIXME implement stop() ]\n");
             break;
         case SL_PLAYSTATE_PAUSED: {
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PAUSED\n");
@@ -761,7 +791,7 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
                 case(ANDROID_PREFETCHING):
                 case(ANDROID_READY):
                     // FIXME pause the actual playback
-                    fprintf(stderr, "[ FIXME implement pause() ]");
+                    fprintf(stderr, "[ FIXME implement pause() ]\n");
                     break;
                 default:
                     break;
@@ -773,7 +803,7 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
             AndroidObject_state state = ap->mAndroidObjState;
             object_unlock_peek(&ap);
             if (state >= ANDROID_READY) {
-                fprintf(stderr, "FIXME start playback");
+                ap->mAudioTrack->start();
                 ap->mSfPlayer->play();
             }
             } break;
@@ -791,65 +821,56 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
 //-----------------------------------------------------------------------------
 SLresult sles_to_android_audioPlayerUseEventMask(IPlay *pPlayItf, SLuint32 eventFlags) {
     CAudioPlayer *ap = (CAudioPlayer *)pPlayItf->mThis;
-    switch(ap->mAndroidObjType) {
+    /*switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
-    case AUDIOTRACK_PULL:
-        if (eventFlags & SL_PLAYEVENT_HEADATMARKER) {
-            //FIXME getSampleRate() returns the current playback sample rate, not the content
-            //      sample rate, verify if formula valid
-            fprintf(stderr, "[ FIXME: fix marker computation due to sample rate reporting behavior ]");
-            ap->mAudioTrackData.mAudioTrack->setMarkerPosition((uint32_t)((pPlayItf->mMarkerPosition
-                    * ap->mAudioTrackData.mAudioTrack->getSampleRate())/1000));
-        } else {
-            // clear marker
-            ap->mAudioTrackData.mAudioTrack->setMarkerPosition(0);
-        }
-        if (eventFlags & SL_PLAYEVENT_HEADATNEWPOS) {
-            //FIXME getSampleRate() returns the current playback sample rate, not the content
-            //      sample rate, verify if formula valid
-            fprintf(stderr, "[ FIXME: fix marker computation due to sample rate reporting behavior ]");
-            ap->mAudioTrackData.mAudioTrack->setPositionUpdatePeriod(
-                    (uint32_t)((pPlayItf->mPositionUpdatePeriod
-                            * ap->mAudioTrackData.mAudioTrack->getSampleRate())/1000));
-        } else {
-            // clear periodic update
-            ap->mAudioTrackData.mAudioTrack->setPositionUpdatePeriod(0);
-        }
-        if (eventFlags & SL_PLAYEVENT_HEADATEND) {
+    case AUDIOTRACK_PULL:*/
+
+    if (NULL == ap->mAudioTrack) {
+        return SL_RESULT_SUCCESS;
+    }
+
+    if (eventFlags & SL_PLAYEVENT_HEADATMARKER) {
+        //FIXME getSampleRate() returns the current playback sample rate, not the content
+        //      sample rate, verify if formula valid
+        //      need to cache sample rate instead?
+        fprintf(stderr, "[ FIXME: fix marker computation due to sample rate reporting behavior ]\n");
+        ap->mAudioTrack->setMarkerPosition((uint32_t)((pPlayItf->mMarkerPosition
+                * ap->mAudioTrack->getSampleRate())/1000));
+    } else {
+        // clear marker
+        ap->mAudioTrack->setMarkerPosition(0);
+    }
+
+    if (eventFlags & SL_PLAYEVENT_HEADATNEWPOS) {
+        //FIXME getSampleRate() returns the current playback sample rate, not the content
+        //      sample rate, verify if formula valid
+        fprintf(stderr, "[ FIXME: fix marker computation due to sample rate reporting behavior ]\n");
+        ap->mAudioTrack->setPositionUpdatePeriod(
+                (uint32_t)((pPlayItf->mPositionUpdatePeriod
+                        * ap->mAudioTrack->getSampleRate())/1000));
+    } else {
+        // clear periodic update
+        ap->mAudioTrack->setPositionUpdatePeriod(0);
+    }
+
+    if (eventFlags & SL_PLAYEVENT_HEADATEND) {
+        if (AUDIOTRACK_PULL == ap->mAndroidObjType) {
             // FIXME support SL_PLAYEVENT_HEADATEND
             fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADATEND) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
+        } else if (MEDIAPLAYER == ap->mAndroidObjType) {
+            // nothing to do for SL_PLAYEVENT_HEADATEND, callback event will be checked against mask
         }
-        if (eventFlags & SL_PLAYEVENT_HEADMOVING) {
-            // FIXME support SL_PLAYEVENT_HEADMOVING
-            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADMOVING) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
-        }
-        if (eventFlags & SL_PLAYEVENT_HEADSTALLED) {
-            // FIXME support SL_PLAYEVENT_HEADSTALLED
-            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADSTALLED) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
-        }
-        break;
-    case MEDIAPLAYER:
-        // nothing to do for SL_PLAYEVENT_HEADATEND, callback event will be checked against mask
-        if (eventFlags & SL_PLAYEVENT_HEADATMARKER) {
-            // FIXME support SL_PLAYEVENT_HEADATMARKER
-            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADATMARKER) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
-        }
-        if (eventFlags & SL_PLAYEVENT_HEADATNEWPOS) {
-            // FIXME support SL_PLAYEVENT_HEADATNEWPOS
-            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADATNEWPOS) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
-        }
-        if (eventFlags & SL_PLAYEVENT_HEADMOVING) {
-            // FIXME support SL_PLAYEVENT_HEADMOVING
-            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADMOVING) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
-        }
-        if (eventFlags & SL_PLAYEVENT_HEADSTALLED) {
-            // FIXME support SL_PLAYEVENT_HEADSTALLED
-            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADSTALLED) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
-        }
-        break;
-    default:
-        break;
     }
+
+    if (eventFlags & SL_PLAYEVENT_HEADMOVING) {
+        // FIXME support SL_PLAYEVENT_HEADMOVING
+        fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADMOVING) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
+    }
+    if (eventFlags & SL_PLAYEVENT_HEADSTALLED) {
+        // FIXME support SL_PLAYEVENT_HEADSTALLED
+        fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADSTALLED) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
+    }
+
     return SL_RESULT_SUCCESS;
 
 }
@@ -884,11 +905,11 @@ SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *
     case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
         uint32_t positionInFrames;
-        ap->mAudioTrackData.mAudioTrack->getPosition(&positionInFrames);
+        ap->mAudioTrack->getPosition(&positionInFrames);
         //FIXME getSampleRate() returns the current playback sample rate, not the content
         //      sample rate, verify if formula valid
         fprintf(stderr, "FIXME: fix marker computation due to sample rate reporting behavior");
-        *pPosMsec = positionInFrames * 1000 / ap->mAudioTrackData.mAudioTrack->getSampleRate();
+        *pPosMsec = positionInFrames * 1000 / ap->mAudioTrack->getSampleRate();
         break;
     case MEDIAPLAYER:
         // FIXME implement getPosition
@@ -915,10 +936,8 @@ SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute) {
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
-        t = ap->mAudioTrackData.mAudioTrack;
-        break;
     case MEDIAPLAYER:
-        t = ap->mSfPlayer->audioTrack();
+        t = ap->mAudioTrack;
         break;
     default:
         break;

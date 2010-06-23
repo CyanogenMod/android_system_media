@@ -35,6 +35,8 @@
 #define EVENT_PREFETCHFILLLEVELUPDATE "pflu"
 #define EVENT_ENDOFSTREAM             "eos"
 
+#define SFPLAYER_SUCCESS 1
+
 namespace android {
 
     typedef void (*notif_client_t)(int event, const int data1, void* notifUser);
@@ -43,7 +45,7 @@ struct SfPlayer : public AHandler {
     SfPlayer(const sp<ALooper> &renderLooper);
 
     enum CacheStatus {
-        kStatusEmpty,
+        kStatusEmpty = 0,
         kStatusLow,
         kStatusIntermediate,
         kStatusEnough,
@@ -56,15 +58,11 @@ struct SfPlayer : public AHandler {
         kEventEndOfStream             = 'eos',
     };
 
-    /**
-     * temporary accessor until AudioTrack is not owned by SfPlayer
-     */
-    AudioTrack* audioTrack();
-
+    void useAudioTrack(AudioTrack* pTrack);
     void setNotifListener(const notif_client_t cbf, void* notifUser);
 
     void prepare_async(const char *uri);
-    void prepare_sync(const char *uri);
+    int  prepare_sync(const char *uri);
     void play();
     bool wantPrefetch();
     void startPrefetch_async();
@@ -73,6 +71,8 @@ struct SfPlayer : public AHandler {
      * returns the duration in microseconds, -1 if unknown
      */
     int64_t getDurationUsec() { return mDurationUsec; }
+    int32_t getNumChannels()  { return mNumChannels; }
+    int32_t getSampleRateHz() { return mSampleRateHz; }
 
 protected:
     virtual ~SfPlayer();
@@ -94,12 +94,15 @@ private:
         kFlagBuffering = 4,
     };
 
+    AudioTrack *mAudioTrack;
+
     wp<ALooper> mRenderLooper;
     sp<DataSource> mDataSource;
     sp<MediaSource> mAudioSource;
-    AudioTrack *mAudioTrack;
     uint32_t mFlags;
     int64_t mBitrate;  // in bits/sec
+    int32_t mNumChannels;
+    int32_t mSampleRateHz;
     int64_t mTimeDelta;
     int64_t mDurationUsec;
     CacheStatus mCacheStatus;
@@ -107,7 +110,7 @@ private:
     notif_client_t mNotifyClient;
     void*          mNotifyUser;
 
-    void onPrepare(const sp<AMessage> &msg);
+    int onPrepare(const sp<AMessage> &msg);
     void onDecode();
     void onRender(const sp<AMessage> &msg);
     void onCheckCache(const sp<AMessage> &msg);

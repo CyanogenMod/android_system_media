@@ -19,10 +19,12 @@
 namespace android {
 
 SfPlayer::SfPlayer(const sp<ALooper> &renderLooper)
-    : mRenderLooper(renderLooper),
-      mAudioTrack(NULL),
+    : mAudioTrack(NULL),
+      mRenderLooper(renderLooper),
       mFlags(0),
       mBitrate(-1),
+      mNumChannels(1),
+      mSampleRateHz(0),
       mTimeDelta(-1),
       mDurationUsec(-1),
       mCacheStatus(kStatusEmpty),
@@ -33,10 +35,6 @@ SfPlayer::SfPlayer(const sp<ALooper> &renderLooper)
 
 SfPlayer::~SfPlayer() {
     fprintf(stderr, "\t\t~SfPlayer called\n");
-    if (mAudioTrack != NULL) {
-        delete mAudioTrack;
-        mAudioTrack = NULL;
-    }
 
     if (mAudioSource != NULL) {
         mAudioSource->stop();
@@ -46,11 +44,9 @@ SfPlayer::~SfPlayer() {
     quit();
 }
 
-/**
- * temporary accessor until AudioTrack is not owned by SfPlayer
- */
-AudioTrack* SfPlayer::audioTrack() {
-    return mAudioTrack;
+
+void SfPlayer::useAudioTrack(AudioTrack* pTrack) {
+    mAudioTrack = pTrack;
 }
 
 void SfPlayer::setNotifListener(const notif_client_t cbf, void* notifUser) {
@@ -75,14 +71,14 @@ void SfPlayer::prepare_async(const char *uri) {
     msg->post();
 }
 
-void SfPlayer::prepare_sync(const char *uri) {
+int SfPlayer::prepare_sync(const char *uri) {
     //fprintf(stderr, "SfPlayer::prepare_sync(%s)\n", uri);
     sp<AMessage> msg = new AMessage(kWhatPrepare, id());
     msg->setString("uri", uri);
-    onPrepare(msg);
+    return onPrepare(msg);
 }
 
-void SfPlayer::onPrepare(const sp<AMessage> &msg) {
+int SfPlayer::onPrepare(const sp<AMessage> &msg) {
     //fprintf(stderr, "SfPlayer::onPrepare\n");
     AString uri;
     CHECK(msg->findString("uri", &uri));
@@ -104,7 +100,7 @@ void SfPlayer::onPrepare(const sp<AMessage> &msg) {
     if (dataSource == NULL) {
         fprintf(stderr, "Could not create datasource.\n");
         quit();
-        return;
+        return ERROR_UNSUPPORTED;
     }
 
     sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
@@ -112,7 +108,7 @@ void SfPlayer::onPrepare(const sp<AMessage> &msg) {
     if (extractor == NULL) {
         fprintf(stderr, "Could not instantiate extractor.\n");
         quit();
-        return;
+        return ERROR_UNSUPPORTED;
     }
 
     ssize_t audioTrackIndex = -1;
@@ -136,7 +132,7 @@ void SfPlayer::onPrepare(const sp<AMessage> &msg) {
     if (audioTrackIndex < 0) {
         fprintf(stderr, "Could not find an audio track.\n");
         quit();
-        return;
+        return ERROR_UNSUPPORTED;
     }
 
     sp<MediaSource> source = extractor->getTrack(audioTrackIndex);
@@ -164,7 +160,7 @@ void SfPlayer::onPrepare(const sp<AMessage> &msg) {
         if (source == NULL) {
             fprintf(stderr, "Could not instantiate decoder.\n");
             quit();
-            return;
+            return ERROR_UNSUPPORTED;
         }
 
         meta = source->getFormat();
@@ -173,25 +169,14 @@ void SfPlayer::onPrepare(const sp<AMessage> &msg) {
     if (source->start() != OK) {
         fprintf(stderr, "Failed to start source/decoder.\n");
         quit();
-        return;
+        return MEDIA_ERROR_BASE;
     }
 
     mDataSource = dataSource;
     mAudioSource = source;
 
-    int32_t numChannels;
-    int32_t sampleRate;
-    CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
-    CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
-
-    mAudioTrack = new AudioTrack(
-            AudioSystem::MUSIC,
-            sampleRate,
-            AudioSystem::PCM_16_BIT,
-            (numChannels == 2)
-                ? AudioSystem::CHANNEL_OUT_STEREO
-                : AudioSystem::CHANNEL_OUT_MONO,
-            (int)0);
+    CHECK(meta->findInt32(kKeyChannelCount, &mNumChannels));
+    CHECK(meta->findInt32(kKeySampleRate, &mSampleRateHz));
 
     if (!wantPrefetch()) {
         printf("no need to prefetch\n");
@@ -201,6 +186,8 @@ void SfPlayer::onPrepare(const sp<AMessage> &msg) {
         msg->setInt32(EVENT_PREFETCHFILLLEVELUPDATE, (int32_t)1000);
         notify(msg, true /*async*/);
     }
+
+    return SFPLAYER_SUCCESS;
 
 }
 
@@ -225,7 +212,7 @@ void SfPlayer::play() {
     // FIXME start based on play state
     fprintf(stderr, "SfPlayer::play\n");
     mFlags |= kFlagPlaying;
-    mAudioTrack->start();
+    //mAudioTrack->start();
     (new AMessage(kWhatDecode, id()))->post();
 }
 
@@ -238,7 +225,7 @@ void SfPlayer::onDecode() {
             && !eos) {
         printf("buffering more.\n");
 
-        mAudioTrack->pause();
+        //mAudioTrack->pause();
         mFlags |= kFlagBuffering;
         (new AMessage(kWhatCheckCache, id()))->post(100000);
         return;
@@ -297,7 +284,7 @@ void SfPlayer::onCheckCache(const sp<AMessage> &msg) {
     if (eos || status == kStatusHigh
             || ((mFlags & kFlagPreparing) && (status >= kStatusEnough))) {
         // FIXME restart based on play state
-        mAudioTrack->start();
+        //mAudioTrack->start();
         mFlags &= ~kFlagBuffering;
 
         printf("buffering done.\n");
@@ -360,14 +347,13 @@ SfPlayer::CacheStatus SfPlayer::getCacheRemaining(bool *eos) {
         mCacheStatus = kStatusIntermediate;
     }
 
-
     if (oldStatus != mCacheStatus) {
         fprintf(stdout, "Status change to %d\n", mCacheStatus);
         sp<AMessage> msg = new AMessage(kWhatNotif, id());
         msg->setInt32(EVENT_PREFETCHSTATUSCHANGE, mCacheStatus);
         notify(msg, true /*async*/);
         // FIXME update cache level
-        fprintf(stderr, "[ FIXME update cache level ]");
+        fprintf(stderr, "[ FIXME update cache level ]\n");
     }
 
     return mCacheStatus;
