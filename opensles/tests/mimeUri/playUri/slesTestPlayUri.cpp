@@ -74,14 +74,18 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     SLpermille level = 0;
     (*caller)->GetFillLevel(caller, &level);
     SLuint32 status;
+    fprintf(stderr, "\t\tPrefetchEventCallback: received event %lu\n", event);
     (*caller)->GetPrefetchStatus(caller, &status);
     if ((event & (SL_PREFETCHEVENT_STATUSCHANGE|SL_PREFETCHEVENT_FILLLEVELCHANGE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
-        fprintf(stderr, "Error encountered while prefetching data, exiting\n");
+        fprintf(stderr, "\t\tPrefetchEventCallback: Error while prefetching data, exiting\n");
         exit(1);
     }
     if (event & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
-        fprintf(stdout, "\t\tBuffer fill level is = %d\n", level);
+        fprintf(stderr, "\t\tPrefetchEventCallback: Buffer fill level is = %d\n", level);
+    }
+    if (event & SL_PREFETCHEVENT_STATUSCHANGE) {
+        fprintf(stderr, "\t\tPrefetchEventCallback: Prefetch Status is = %lu\n", status);
     }
 
 }
@@ -161,7 +165,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
 
     /* Realizing the player in synchronous mode. */
     res = (*player)->Realize(player, SL_BOOLEAN_FALSE); CheckErr(res);
-    fprintf(stdout, "URI example: after Realize\n");
+    //fprintf(stdout, "URI example: after Realize\n");
 
     /* Get interfaces */
     res = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf);
@@ -174,7 +178,9 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     CheckErr(res);
     res = (*prefetchItf)->RegisterCallback(prefetchItf, PrefetchEventCallback, &prefetchItf);
     CheckErr(res);
-    res = (*prefetchItf)->SetCallbackEventsMask(prefetchItf, SL_PREFETCHEVENT_FILLLEVELCHANGE);
+    res = (*prefetchItf)->SetCallbackEventsMask(prefetchItf,
+            SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE);
+
 
     /* Display duration */
     SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
@@ -193,15 +199,24 @@ void TestPlayUri( SLObjectItf sl, const char* path)
 
     /* Play the URI */
     /*     first cause the player to prefetch the data */
+    fprintf(stderr, "\nbefore set to PAUSED\n\n");
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PAUSED );
+    fprintf(stderr, "\nafter set to PAUSED\n\n");
     CheckErr(res);
 
     /*     wait until there's data to play */
     //SLpermille fillLevel = 0;
     SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
-    while (prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) {
+    SLuint32 timeOutIndex = 100; // 10s
+    while ((prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) && (timeOutIndex > 0)) {
         usleep(100 * 1000);
         (*prefetchItf)->GetPrefetchStatus(prefetchItf, &prefetchStatus);
+        timeOutIndex--;
+    }
+
+    if (timeOutIndex == 0) {
+        fprintf(stderr, "We\'re done here, failed to prefetch data in time, exiting\n");
+        goto destroyRes;
     }
 
     /* Display duration again, */
@@ -225,6 +240,8 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     res = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_STOPPED);
     CheckErr(res);
 
+destroyRes:
+
     /* Destroy the player */
     (*player)->Destroy(player);
 
@@ -242,7 +259,7 @@ int main(int argc, char* const argv[])
 
     fprintf(stdout, "OpenSL ES test %s: exercises SLPlayItf, SLVolumeItf ", argv[0]);
     fprintf(stdout, "and AudioPlayer with SLDataLocator_URI source / OutputMix sink\n");
-    fprintf(stdout, "Plays a sound and stops after its reported duration\n");
+    fprintf(stdout, "Plays a sound and stops after its reported duration\n\n");
 
     if (argc == 1) {
         fprintf(stdout, "Usage: \n\t%s path \n\t%s url\n", argv[0], argv[0]);

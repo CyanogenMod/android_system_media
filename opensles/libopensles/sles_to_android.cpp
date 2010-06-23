@@ -92,10 +92,10 @@ void android_audioPlayerUpdateStereoVolume(IVolume *pVolItf) {
             break;
         case MEDIAPLAYER:
             //FIXME add support for querying channel count from a MediaPlayer
-            fprintf(stderr, "FIXME add support for querying channel count from a MediaPlayer");
+            fprintf(stderr, "[ FIXME add support for querying channel count from a MediaPlayer ]\n");
             channelCount = 1;
         default:
-            fprintf(stderr, "Error in android_audioPlayerUpdateStereoVolume(): shouldn't hit this");
+            fprintf(stderr, "Error in android_audioPlayerUpdateStereoVolume(): shouldn't hit this\n");
             channelCount = 1;
             break;
     }
@@ -139,122 +139,73 @@ void android_audioPlayerUpdateStereoVolume(IVolume *pVolItf) {
         ap->mAudioTrackData.mAudioTrack->setVolume(leftVol, rightVol);
         break;
     case MEDIAPLAYER:
-        ap->mMediaPlayerData.mMediaPlayer->setVolume(leftVol, rightVol);
+        // FIXME implement setVolume
+        fprintf(stderr, "FIXME implement setVolume");
+        //ap->mMediaPlayerData.mMediaPlayer->setVolume(leftVol, rightVol);
         break;
     default:
         break;
     }
 }
 
-
 //-----------------------------------------------------------------------------
-// Used to handle MediaPlayer callback
-class MediaPlayerEventListener: public android::MediaPlayerListener
-{
-public:
-    MediaPlayerEventListener(CAudioPlayer *pPlayer);
-    ~MediaPlayerEventListener();
-    void notify(int msg, int ext1, int ext2);
-private:
-    CAudioPlayer *mPlayer;
-};
+// Callback associated with an SfPlayer of an SL ES AudioPlayer that gets its data
+// from a URI, for prefetching events
+static void android_prefetchEventCallback(const int event, const int data1, void* user) {
+    if (NULL == user) {
+        return;
+    }
 
-MediaPlayerEventListener::MediaPlayerEventListener(CAudioPlayer *pPlayer)
-{
-    //fprintf(stderr, "MediaPlayerEventListener constructor called for %p\n", pPlayer);
-    mPlayer = pPlayer;
-}
+    CAudioPlayer *ap = (CAudioPlayer *)user;
+    //fprintf(stdout, "received event %d = %d from SfAudioPlayer\n", event, data1);
+    switch(event) {
 
-MediaPlayerEventListener::~MediaPlayerEventListener()
-{
-    //fprintf(stderr, "MediaPlayerEventListener destructor called with player %p\n", mPlayer);
-}
+    case(android::SfPlayer::kEventPrefetchFillLevelUpdate): {
+        // FIXME implement buffer filler level updates
+        fprintf(stderr, "[ FIXME implement buffer filler level updates ]\n");
+        //ap->mPrefetchStatus.mLevel = ;
+        } break;
 
-void MediaPlayerEventListener::notify(int msg, int ext1, int ext2)
-{
-    fprintf(stderr, "MediaPlayerEventListener::notify(%d, %d, %d) called\n", msg, ext1, ext2);
-    switch(msg) {
-    case android::MEDIA_PREPARED: {
-        object_lock_exclusive(&mPlayer->mObject);
-        mPlayer->mAndroidObjState = ANDROID_READY;
-        object_unlock_exclusive(&mPlayer->mObject);
+    case(android::SfPlayer::kEventPrefetchStatusChange): {
         slPrefetchCallback callback = NULL;
-        void * callbackPContext = NULL;
-        interface_lock_exclusive(&mPlayer->mPrefetchStatus);
-        mPlayer->mPrefetchStatus.mLevel = 1000;
-        mPlayer->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
-        // FIXME send status change, and fill level change
-        SLuint32 mask = mPlayer->mPrefetchStatus.mCallbackEventsMask;
-        if (mask) {
-            callback = mPlayer->mPrefetchStatus.mCallback;
-            callbackPContext = mPlayer->mPrefetchStatus.mContext;
+        void* callbackPContext = NULL;
+        // SLPrefetchStatusItf callback or no callback?
+        interface_lock_exclusive(&ap->mPrefetchStatus);
+        if (ap->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_STATUSCHANGE) {
+            callback = ap->mPrefetchStatus.mCallback;
+            callbackPContext = ap->mPrefetchStatus.mContext;
         }
-        interface_unlock_exclusive(&mPlayer->mPrefetchStatus);
+        if (data1 >= android::SfPlayer::kStatusEnough) {
+            ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
+        } else if (data1 <= android::SfPlayer::kStatusLow) {
+            ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+        }
+        interface_unlock_exclusive(&ap->mPrefetchStatus);
+        // callback with no lock held
         if (NULL != callback) {
-            (*callback)(&mPlayer->mPrefetchStatus.mItf, callbackPContext,
-                    SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE);
+            (*callback)(&ap->mPrefetchStatus.mItf, callbackPContext, SL_PREFETCHEVENT_STATUSCHANGE);
         }
+        } break;
+
+    case(android::SfPlayer::kEventEndOfStream): {
+        slPlayCallback playCallback = NULL;
+        void * playContext = NULL;
+        // SLPlayItf callback or no callback?
+        interface_lock_exclusive(&ap->mPlay);
+        if (ap->mPlay.mEventFlags & SL_PLAYEVENT_HEADATEND) {
+            playCallback = ap->mPlay.mCallback;
+            playContext = ap->mPlay.mContext;
         }
-        break;
-    case android::MEDIA_PLAYBACK_COMPLETE: {
-        // FIXME update playstate?
-        fprintf(stderr, "FIXME set playstate to PAUSED\n");
-        slPlayCallback callback = NULL;
-        void * callbackPContext = NULL;
-        interface_lock_shared(&mPlayer->mPlay);
-        if (mPlayer->mPlay.mEventFlags & SL_PLAYEVENT_HEADATEND) {
-            callback = mPlayer->mPlay.mCallback;
-            callbackPContext = mPlayer->mPlay.mContext;
+        ap->mPlay.mState = SL_PLAYSTATE_PAUSED;
+        // FIXME update play position to make sure it's at the same value
+        //       as getDuration if it's known?
+        interface_unlock_exclusive(&ap->mPlay);
+        // callback with no lock held
+        if (NULL != playCallback) {
+            (*playCallback)(&ap->mPlay.mItf, playContext, SL_PLAYEVENT_HEADATEND);
         }
-        interface_unlock_shared(&mPlayer->mPlay);
-        if (NULL != callback) {
-            (*callback)(&mPlayer->mPlay.mItf, callbackPContext, SL_PLAYEVENT_HEADATEND);
-        }
-        }
-        break;
-    case android::MEDIA_BUFFERING_UPDATE: {
-        slPrefetchCallback callback = NULL;
-        void * callbackPContext = NULL;
-        interface_lock_exclusive(&mPlayer->mPrefetchStatus);
-        mPlayer->mPrefetchStatus.mLevel = ext1 > 100 ? 1000 : ext1 * 10;
-        if (mPlayer->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
-            callback = mPlayer->mPrefetchStatus.mCallback;
-            callbackPContext = mPlayer->mPrefetchStatus.mContext;
-        }
-        interface_unlock_exclusive(&mPlayer->mPrefetchStatus);
-        if (NULL != callback) {
-                    (*callback)(&mPlayer->mPrefetchStatus.mItf, callbackPContext,
-                            SL_PREFETCHEVENT_FILLLEVELCHANGE);
-        }
-        }
-        break;
-    case android::MEDIA_ERROR: {
-        // An error was encountered, there is no real way in the spec to signal a prefetch error.
-        // Simulate this by signaling a 0 fill level, and a status change to UNDERFLOW, regardless
-        // of the mask
-        object_lock_exclusive(&mPlayer->mObject);
-        mPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
-        object_unlock_exclusive(&mPlayer->mObject);
-        slPrefetchCallback callback = NULL;
-        void * callbackPContext = NULL;
-        interface_lock_exclusive(&mPlayer->mPrefetchStatus);
-        mPlayer->mPrefetchStatus.mLevel = 0;
-        mPlayer->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
-        SLuint32 mask = mPlayer->mPrefetchStatus.mCallbackEventsMask;
-        if (mask) {
-            callback = mPlayer->mPrefetchStatus.mCallback;
-            callbackPContext = mPlayer->mPrefetchStatus.mContext;
-        }
-        interface_unlock_exclusive(&mPlayer->mPrefetchStatus);
-        if (NULL != callback) {
-            (*callback)(&mPlayer->mPrefetchStatus.mItf, callbackPContext,
-                    SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE);
-        }
-        }
-        break;
-    case android::MEDIA_INFO:
-    case android::MEDIA_SEEK_COMPLETE:
-        break;
+        } break;
+
     default:
         break;
     }
@@ -273,7 +224,7 @@ SLresult sles_to_android_checkAudioPlayerSourceSink(CAudioPlayer *pAudioPlayer)
         return SL_RESULT_PARAMETER_INVALID;
     }
     // FIXME verify output mix is in realized state
-    fprintf(stderr, "FIXME verify OutputMix is in Realized state\n");
+    fprintf(stderr, "[ FIXME verify OutputMix is in Realized state ]\n");
 
     //--------------------------------------
     // Source check:
@@ -563,8 +514,8 @@ SLresult sles_to_android_audioPlayerCreate(
     case SL_DATALOCATOR_URI:
         pAudioPlayer->mAndroidObjType = MEDIAPLAYER;
         pAudioPlayer->mpLock = new android::Mutex();
-        pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
-        pAudioPlayer->mMediaPlayerData.mMediaPlayer = NULL;
+        pAudioPlayer->mSfPlayer.clear();
+        pAudioPlayer->mRenderLooper.clear();
         pAudioPlayer->mPlaybackRate.mCapabilities = 0;
         break;
     default:
@@ -573,6 +524,8 @@ SLresult sles_to_android_audioPlayerCreate(
         pAudioPlayer->mPlaybackRate.mCapabilities = 0;
         result = SL_RESULT_PARAMETER_INVALID;
     }
+
+    pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
 
     return result;
 
@@ -607,39 +560,36 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
                 android_pullAudioTrackCallback,                      // callback
                 (void *) pAudioPlayer,                               // user
                 0);  // FIXME find appropriate frame count         // notificationFrame
-        }
         if (pAudioPlayer->mAudioTrackData.mAudioTrack->initCheck() != android::NO_ERROR) {
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         }
-        break;
+        } break;
     //-----------------------------------
     // MediaPlayer
     case MEDIAPLAYER: {
         object_lock_exclusive(&pAudioPlayer->mObject);
         pAudioPlayer->mAndroidObjState = ANDROID_PREPARING;
-        pAudioPlayer->mMediaPlayerData.mMediaPlayer = new android::MediaPlayer();
-        if (pAudioPlayer->mMediaPlayerData.mMediaPlayer == NULL) {
-            result = SL_RESULT_MEMORY_FAILURE;
-            break;
-        }
 
-        pAudioPlayer->mMediaPlayerData.mMediaPlayer->setAudioStreamType(
-                ANDROID_DEFAULT_OUTPUT_STREAM_TYPE);
-
-        if (pAudioPlayer->mMediaPlayerData.mMediaPlayer->setDataSource(
-                android::String8((const char *) pAudioPlayer->mDataSource.mLocator.mURI.URI), NULL)
-                    != android::NO_ERROR) {
-            result = SL_RESULT_CONTENT_UNSUPPORTED;
-            break;
-        }
-
-        // create event listener
-        android::sp<MediaPlayerEventListener> listener = new MediaPlayerEventListener(pAudioPlayer);
-        pAudioPlayer->mMediaPlayerData.mMediaPlayer->setListener(listener);
+        pAudioPlayer->mRenderLooper = new android::ALooper();
+        pAudioPlayer->mSfPlayer = new android::SfPlayer(pAudioPlayer->mRenderLooper);
+        pAudioPlayer->mSfPlayer->setNotifListener(android_prefetchEventCallback,
+                (void*)pAudioPlayer /*notifUSer*/);
+        pAudioPlayer->mRenderLooper->registerHandler(pAudioPlayer->mSfPlayer);
+        pAudioPlayer->mRenderLooper->start(false /*runOnCallingThread*/);
 
         object_unlock_exclusive(&pAudioPlayer->mObject);
+
+        pAudioPlayer->mSfPlayer->prepare_sync(
+                (const char*)pAudioPlayer->mDataSource.mLocator.mURI.URI);
+
+        object_lock_exclusive(&pAudioPlayer->mObject);
+        if (pAudioPlayer->mSfPlayer->wantPrefetch()) {
+            pAudioPlayer->mAndroidObjState = ANDROID_PREPARED;
+        } else {
+            pAudioPlayer->mAndroidObjState = ANDROID_READY;
         }
-        break;
+        object_unlock_exclusive(&pAudioPlayer->mObject);
+        } break;
     default:
         result = SL_RESULT_CONTENT_UNSUPPORTED;
     }
@@ -669,14 +619,10 @@ SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer) {
     // MediaPlayer
     case MEDIAPLAYER:
         // FIXME group in one function?
-        if (pAudioPlayer->mMediaPlayerData.mMediaPlayer != NULL) {
-            pAudioPlayer->mMediaPlayerData.mMediaPlayer->setListener(0);
-            pAudioPlayer->mMediaPlayerData.mMediaPlayer->stop();
-            pAudioPlayer->mMediaPlayerData.mMediaPlayer->disconnect();
-            // FIXME what's going wrong when deleting the MediaPlayer?
-            fprintf(stderr, "FIXME destroy MediaPlayer\n");
-            //delete pAudioPlayer->mMediaPlayerData.mMediaPlayer;
-            pAudioPlayer->mMediaPlayerData.mMediaPlayer = NULL;
+        if (pAudioPlayer->mSfPlayer != NULL) {
+            pAudioPlayer->mSfPlayer.clear();
+            pAudioPlayer->mRenderLooper->stop();
+            pAudioPlayer->mRenderLooper.clear();
         }
         break;
     default:
@@ -797,7 +743,8 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
         switch (state) {
         case SL_PLAYSTATE_STOPPED:
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_STOPPED\n");
-            ap->mMediaPlayerData.mMediaPlayer->stop();
+            // FIXME stop the actual playback
+            fprintf(stderr, "[ FIXME implement stop() ]");
             break;
         case SL_PLAYSTATE_PAUSED: {
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PAUSED\n");
@@ -806,36 +753,19 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
             object_unlock_peek(&ap);
             switch(state) {
                 case(ANDROID_UNINITIALIZED):
-                    break;
                 case(ANDROID_PREPARING):
-                    if (ap->mMediaPlayerData.mMediaPlayer->prepareAsync() != android::NO_ERROR) {
-                        fprintf(stderr, "Failed to prepareAsync() MediaPlayer for %s\n",
-                                ap->mDataSource.mLocator.mURI.URI);
-                        result = SL_RESULT_CONTENT_UNSUPPORTED;
-                        ap->mMediaPlayerData.mMediaPlayer->setListener(0);
-                        // should update state but this is going away
-                    }
                     break;
                 case(ANDROID_PREPARED):
+                    ap->mSfPlayer->startPrefetch_async();
+                    break;
                 case(ANDROID_PREFETCHING):
                 case(ANDROID_READY):
                     // FIXME pause the actual playback
-                    fprintf(stderr, "FIXME implement pause()");
-                    //ap->mMediaPlayerData.mMediaPlayer->pause();
+                    fprintf(stderr, "[ FIXME implement pause() ]");
                     break;
                 default:
                     break;
             }
-
-            /*else {
-                if (ap->mMediaPlayerData.mMediaPlayer->prepareAsync() != android::NO_ERROR) {
-                    fprintf(stderr, "Failed to prepareAsync() MediaPlayer for %s\n",
-                            ap->mDataSource.mLocator.mURI.URI);
-                    result = SL_RESULT_CONTENT_UNSUPPORTED;
-                    ap->mMediaPlayerData.mMediaPlayer->setListener(0);
-                }
-                ap->mMediaPlayerData.mPrepared = true;
-                */
             } break;
         case SL_PLAYSTATE_PLAYING: {
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PLAYING\n");
@@ -843,7 +773,8 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
             AndroidObject_state state = ap->mAndroidObjState;
             object_unlock_peek(&ap);
             if (state >= ANDROID_READY) {
-                ap->mMediaPlayerData.mMediaPlayer->start();
+                fprintf(stderr, "FIXME start playback");
+                ap->mSfPlayer->play();
             }
             } break;
         default:
@@ -866,7 +797,7 @@ SLresult sles_to_android_audioPlayerUseEventMask(IPlay *pPlayItf, SLuint32 event
         if (eventFlags & SL_PLAYEVENT_HEADATMARKER) {
             //FIXME getSampleRate() returns the current playback sample rate, not the content
             //      sample rate, verify if formula valid
-            fprintf(stderr, "FIXME: fix marker computation due to sample rate reporting behavior");
+            fprintf(stderr, "[ FIXME: fix marker computation due to sample rate reporting behavior ]");
             ap->mAudioTrackData.mAudioTrack->setMarkerPosition((uint32_t)((pPlayItf->mMarkerPosition
                     * ap->mAudioTrackData.mAudioTrack->getSampleRate())/1000));
         } else {
@@ -876,7 +807,7 @@ SLresult sles_to_android_audioPlayerUseEventMask(IPlay *pPlayItf, SLuint32 event
         if (eventFlags & SL_PLAYEVENT_HEADATNEWPOS) {
             //FIXME getSampleRate() returns the current playback sample rate, not the content
             //      sample rate, verify if formula valid
-            fprintf(stderr, "FIXME: fix marker computation due to sample rate reporting behavior");
+            fprintf(stderr, "[ FIXME: fix marker computation due to sample rate reporting behavior ]");
             ap->mAudioTrackData.mAudioTrack->setPositionUpdatePeriod(
                     (uint32_t)((pPlayItf->mPositionUpdatePeriod
                             * ap->mAudioTrackData.mAudioTrack->getSampleRate())/1000));
@@ -886,34 +817,34 @@ SLresult sles_to_android_audioPlayerUseEventMask(IPlay *pPlayItf, SLuint32 event
         }
         if (eventFlags & SL_PLAYEVENT_HEADATEND) {
             // FIXME support SL_PLAYEVENT_HEADATEND
-            fprintf(stderr, "FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADATEND) on an SL_OBJECTID_AUDIOPLAYER to be implemented\n");
+            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADATEND) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
         }
         if (eventFlags & SL_PLAYEVENT_HEADMOVING) {
             // FIXME support SL_PLAYEVENT_HEADMOVING
-            fprintf(stderr, "FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADMOVING) on an SL_OBJECTID_AUDIOPLAYER to be implemented\n");
+            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADMOVING) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
         }
         if (eventFlags & SL_PLAYEVENT_HEADSTALLED) {
             // FIXME support SL_PLAYEVENT_HEADSTALLED
-            fprintf(stderr, "FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADSTALLED) on an SL_OBJECTID_AUDIOPLAYER to be implemented\n");
+            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADSTALLED) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
         }
         break;
     case MEDIAPLAYER:
         // nothing to do for SL_PLAYEVENT_HEADATEND, callback event will be checked against mask
         if (eventFlags & SL_PLAYEVENT_HEADATMARKER) {
             // FIXME support SL_PLAYEVENT_HEADATMARKER
-            fprintf(stderr, "FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADATMARKER) on an SL_OBJECTID_AUDIOPLAYER to be implemented\n");
+            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADATMARKER) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
         }
         if (eventFlags & SL_PLAYEVENT_HEADATNEWPOS) {
             // FIXME support SL_PLAYEVENT_HEADATNEWPOS
-            fprintf(stderr, "FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADATNEWPOS) on an SL_OBJECTID_AUDIOPLAYER to be implemented\n");
+            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADATNEWPOS) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
         }
         if (eventFlags & SL_PLAYEVENT_HEADMOVING) {
             // FIXME support SL_PLAYEVENT_HEADMOVING
-            fprintf(stderr, "FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADMOVING) on an SL_OBJECTID_AUDIOPLAYER to be implemented\n");
+            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADMOVING) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
         }
         if (eventFlags & SL_PLAYEVENT_HEADSTALLED) {
             // FIXME support SL_PLAYEVENT_HEADSTALLED
-            fprintf(stderr, "FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADSTALLED) on an SL_OBJECTID_AUDIOPLAYER to be implemented\n");
+            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADSTALLED) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
         }
         break;
     default:
@@ -935,9 +866,10 @@ SLresult sles_to_android_audioPlayerGetDuration(IPlay *pPlayItf, SLmillisecond *
         //       shared memory with the mixer process, the duration is the size of the buffer
         fprintf(stderr, "FIXME: sles_to_android_audioPlayerGetDuration() verify if duration can be retrieved\n");
         break;
-    case MEDIAPLAYER:
-        ap->mMediaPlayerData.mMediaPlayer->getDuration((int*)pDurMsec);
-        break;
+    case MEDIAPLAYER: {
+        int64_t durationUsec = ap->mSfPlayer->getDurationUsec();
+        *pDurMsec = durationUsec == -1 ? SL_TIME_UNKNOWN : durationUsec / 1000;
+        } break;
     default:
         break;
     }
@@ -959,7 +891,9 @@ SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *
         *pPosMsec = positionInFrames * 1000 / ap->mAudioTrackData.mAudioTrack->getSampleRate();
         break;
     case MEDIAPLAYER:
-        ap->mMediaPlayerData.mMediaPlayer->getCurrentPosition((int*)pPosMsec);
+        // FIXME implement getPosition
+        fprintf(stderr, "FIXME: implement getPosition\n");
+        //ap->mMediaPlayerData.mMediaPlayer->getCurrentPosition((int*)pPosMsec);
         break;
     default:
         break;
@@ -977,21 +911,21 @@ SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf) {
 //-----------------------------------------------------------------------------
 SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute) {
     CAudioPlayer *ap = (CAudioPlayer *)pVolItf->mThis;
+    android::AudioTrack *t = NULL;
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
-        // when unmuting: volume levels have already been updated in IVolume_SetMute
-        ap->mAudioTrackData.mAudioTrack->mute(mute == SL_BOOLEAN_TRUE);
+        t = ap->mAudioTrackData.mAudioTrack;
         break;
     case MEDIAPLAYER:
-        if (mute == SL_BOOLEAN_TRUE) {
-            ap->mMediaPlayerData.mMediaPlayer->setVolume(0.0f, 0.0f);
-        }
-        // when unmuting: volume levels have already been updated in IVolume_SetMute which causes
-        // the MediaPlayer to receive non 0 amplification values
+        t = ap->mSfPlayer->audioTrack();
         break;
     default:
         break;
+    }
+    // when unmuting: volume levels have already been updated in IVolume_SetMute
+    if (NULL != t) {
+        t->mute(mute == SL_BOOLEAN_TRUE);
     }
     return SL_RESULT_SUCCESS;
 }
