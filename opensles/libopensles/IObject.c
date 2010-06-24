@@ -415,7 +415,8 @@ static void IObject_Destroy(SLObjectItf self)
     assert(thisEngine->mInstances[i] == this);
     thisEngine->mInstances[i] = NULL;
 #ifdef USE_SDL
-    if (SL_OBJECTID_OUTPUTMIX == class__->mObjectID && (COutputMix *) this == thisEngine->mOutputMix) {
+    if ((SL_OBJECTID_OUTPUTMIX == class__->mObjectID) &&
+        (((COutputMix *) this == thisEngine->mOutputMix))) {
         SDL_PauseAudio(1);
         thisEngine->mOutputMix = NULL;
         // Note we don't attempt to connect another output mix to SDL
@@ -548,6 +549,7 @@ void IObject_init(void *self)
     // mInstanceStates
     this->mState = SL_OBJECT_STATE_UNREALIZED;
     this->mGottenMask = 1;  // IObject
+    this->mAttributesMask = 0;
     this->mCallback = NULL;
     this->mContext = NULL;
     this->mPriority = SL_PRIORITY_NORMAL;

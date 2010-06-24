@@ -27,9 +27,6 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
 
     // initialize cached data, to be overwritten by platform-specific initialization
     this->mNumChannels = 0;
-    this->mMute = SL_BOOLEAN_FALSE;
-    this->mMuteMask = 0;
-    this->mSoloMask = 0;
 
 #ifdef ANDROID
     // FIXME move this to android specific files
@@ -49,6 +46,9 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
             this->mSndFile.mSNDFILE = NULL;
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         } else {
+            int ok;
+            ok = pthread_mutex_init(&this->mSndFile.mMutex, (const pthread_mutexattr_t *) NULL);
+            assert(0 == ok);
             // FIXME how do we know this interface is exposed?
             SLBufferQueueItf bufferQueue = &this->mBufferQueue.mItf;
             // FIXME should use a private internal API, and disallow
@@ -66,6 +66,7 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
             // FIXME Intermediate overflow possible on duration computation
             this->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
             this->mPlay.mDuration = (SLmillisecond) ((sfinfo.frames * 1000) / sfinfo.samplerate);
+            this->mMuteSolo.mNumChannels = sfinfo.channels;
         }
     }
 #endif // USE_SNDFILE
@@ -88,6 +89,9 @@ void CAudioPlayer_Destroy(void *self)
     if (NULL != this->mSndFile.mSNDFILE) {
         sf_close(this->mSndFile.mSNDFILE);
         this->mSndFile.mSNDFILE = NULL;
+        int ok;
+        ok = pthread_mutex_destroy(&this->mSndFile.mMutex);
+        assert(0 == ok);
     }
 #endif // USE_SNDFILE
 #ifdef ANDROID

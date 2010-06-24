@@ -103,10 +103,11 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
     //fprintf(stderr, "\t after sles_to_android_checkAudioPlayerSourceSink()\n");
 #else
     {
-    // FIXME This is due to a bug where we init buffer queues in SndFile below, which is not always present
+    // FIXME This is b/c we init buffer queues in SndFile below, which is not always present
     SLuint32 locatorType = *(SLuint32 *) pAudioSrc->pLocator;
     if (locatorType == SL_DATALOCATOR_BUFFERQUEUE)
-        this->mBufferQueue.mNumBuffers = ((SLDataLocator_BufferQueue *) pAudioSrc->pLocator)->numBuffers;
+        this->mBufferQueue.mNumBuffers = ((SLDataLocator_BufferQueue *)
+            pAudioSrc->pLocator)->numBuffers;
     }
 #endif
 
@@ -391,8 +392,12 @@ void IEngine_init(void *self)
 #endif
     this->mInstanceCount = 1; // ourself
     this->mInstanceMask = 0;
+    this->mChangedMask = 0;
     unsigned i;
     for (i = 0; i < MAX_INSTANCE; ++i)
         this->mInstances[i] = NULL;
     this->mShutdown = SL_BOOLEAN_FALSE;
+    int ok;
+    ok = pthread_cond_init(&this->mShutdownCond, (const pthread_condattr_t *) NULL);
+    assert(0 == ok);
 }

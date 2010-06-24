@@ -26,10 +26,11 @@ static SLresult IThreadSync_EnterCriticalSection(SLThreadSyncItf self)
     for (;;) {
         if (this->mInCriticalSection) {
             if (!pthread_equal(this->mOwner, pthread_self())) {
-                this->mWaiting = SL_BOOLEAN_TRUE;
+                ++this->mWaiting;
                 interface_cond_wait(this);
                 continue;
             }
+            // nested locks are not allowed
             result = SL_RESULT_PRECONDITIONS_VIOLATED;
             break;
         }
@@ -54,7 +55,7 @@ static SLresult IThreadSync_ExitCriticalSection(SLThreadSyncItf self)
         memset(&this->mOwner, 0, sizeof(pthread_t));
         result = SL_RESULT_SUCCESS;
         if (this->mWaiting) {
-            this->mWaiting = SL_BOOLEAN_FALSE;
+            --this->mWaiting;
             interface_cond_signal(this);
         }
     }
@@ -69,10 +70,9 @@ static const struct SLThreadSyncItf_ IThreadSync_Itf = {
 
 void IThreadSync_init(void *self)
 {
-    IThreadSync *this =
-        (IThreadSync *) self;
+    IThreadSync *this = (IThreadSync *) self;
     this->mItf = &IThreadSync_Itf;
     this->mInCriticalSection = SL_BOOLEAN_FALSE;
-    this->mWaiting = SL_BOOLEAN_FALSE;
+    this->mWaiting = 0;
     memset(&this->mOwner, 0, sizeof(pthread_t));
 }

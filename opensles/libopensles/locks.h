@@ -16,6 +16,7 @@
 
 extern void object_lock_exclusive(IObject *this);
 extern void object_unlock_exclusive(IObject *this);
+extern void object_unlock_exclusive_attributes(IObject *this, unsigned attr);
 extern void object_cond_wait(IObject *this);
 extern void object_cond_signal(IObject *this);
 
@@ -30,6 +31,8 @@ extern void object_cond_signal(IObject *this);
 
 #define interface_lock_exclusive(this)   object_lock_exclusive(InterfaceToIObject(this))
 #define interface_unlock_exclusive(this) object_unlock_exclusive(InterfaceToIObject(this))
+#define interface_unlock_exclusive_attributes(this, attr) \
+    object_unlock_exclusive_attributes(InterfaceToIObject(this), (attr))
 #define interface_lock_shared(this)      object_lock_shared(InterfaceToIObject(this))
 #define interface_unlock_shared(this)    object_unlock_shared(InterfaceToIObject(this))
 #define interface_cond_wait(this)        object_cond_wait(InterfaceToIObject(this))

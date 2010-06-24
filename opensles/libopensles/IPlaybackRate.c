@@ -144,5 +144,6 @@ void IPlaybackRate_init(void *self)
     // The generic implementation sets no capabilities because the generic
     // implementation alone doesn't support any.
     this->mCapabilities = 0;
-    // SL_RATEPROP_SILENTAUDIO | SL_RATEPROP_STAGGEREDAUDIO | SL_RATEPROP_NOPITCHCORAUDIO | SL_RATEPROP_PITCHCORAUDIO
+    // SL_RATEPROP_SILENTAUDIO | SL_RATEPROP_STAGGEREDAUDIO | SL_RATEPROP_NOPITCHCORAUDIO |
+    // SL_RATEPROP_PITCHCORAUDIO
 }

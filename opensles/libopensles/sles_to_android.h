@@ -59,21 +59,12 @@ extern SLresult sles_to_android_audioPlayerSetPlaybackRateBehavior(IPlaybackRate
 extern SLresult sles_to_android_audioPlayerGetCapabilitiesOfRate(IPlaybackRate *pRateItf,
         SLuint32 *pCapabilities);
 
-extern SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state);
+extern void sles_to_android_audioPlayerSetPlayState(CAudioPlayer *pAudioPlayer);
 
-extern SLresult sles_to_android_audioPlayerUseEventMask(IPlay *pPlayItf, SLuint32 eventFlags);
+extern void sles_to_android_audioPlayerUseEventMask(CAudioPlayer *pAudioPlayer);
 
 extern SLresult sles_to_android_audioPlayerGetDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
 
-extern SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
+extern void sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
 
 extern SLresult sles_to_android_audioPlayerVolumeUpdate(CAudioPlayer *pAudioPlayer);
-
-/*
- * Mutes or unmutes the Android media framework object associated with the CAudioPlayer that carries
- * the IVolume interface.
- * Pre-condition:
- *   if mute is SL_BOOLEAN_FALSE, a call to this function was preceded by a call
- *   to sles_to_android_audioPlayerVolumeUpdate()
- */
-extern SLresult sles_to_android_audioPlayerSetMute(IVolume *pVolItf, SLboolean mute);
