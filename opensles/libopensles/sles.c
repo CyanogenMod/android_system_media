@@ -599,10 +599,10 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         for (i = 0; i < numOptions; ++i, ++option) {
             switch (option->feature) {
             case SL_ENGINEOPTION_THREADSAFE:
-                threadSafe = (SLboolean) option->data;
+                threadSafe = SL_BOOLEAN_FALSE != (SLboolean) option->data; // normalize
                 break;
             case SL_ENGINEOPTION_LOSSOFCONTROL:
-                lossOfControlGlobal = (SLboolean) option->data;
+                lossOfControlGlobal = SL_BOOLEAN_FALSE != (SLboolean) option->data; // normalize
                 break;
             default:
                 return SL_RESULT_PARAMETER_INVALID;
