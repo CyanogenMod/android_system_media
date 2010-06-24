@@ -39,7 +39,7 @@ static SLresult IVolume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
 #ifdef ANDROID
         switch (InterfaceToObjectID(this)) {
         case SL_OBJECTID_AUDIOPLAYER:
-            sles_to_android_audioPlayerVolumeUpdate(this);
+            sles_to_android_audioPlayerVolumeUpdate(InterfaceToCAudioPlayer(this));
             break;
         case SL_OBJECTID_OUTPUTMIX:
             // FIXME mute/unmute all players attached to this outputmix
@@ -127,7 +127,7 @@ static SLresult IVolume_EnableStereoPosition(SLVolumeItf self, SLboolean enable)
         this->mEnableStereoPosition = enable;
 #ifdef ANDROID
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-            sles_to_android_audioPlayerVolumeUpdate(this);
+            sles_to_android_audioPlayerVolumeUpdate(InterfaceToCAudioPlayer(this));
         }
 #endif
     }
@@ -157,7 +157,7 @@ static SLresult IVolume_SetStereoPosition(SLVolumeItf self, SLpermille stereoPos
         this->mStereoPosition = stereoPosition;
 #ifdef ANDROID
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-            sles_to_android_audioPlayerVolumeUpdate(this);
+            sles_to_android_audioPlayerVolumeUpdate(InterfaceToCAudioPlayer(this));
         }
 #endif
     }

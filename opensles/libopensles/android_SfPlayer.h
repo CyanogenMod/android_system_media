@@ -85,7 +85,7 @@ private:
         kWhatDecode     = 'deco',
         kWhatRender     = 'rend',
         kWhatCheckCache = 'cach',
-        kWhatNotif      = 'notif',
+        kWhatNotif      = 'noti',
     };
 
     enum {
