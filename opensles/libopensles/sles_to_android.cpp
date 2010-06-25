@@ -699,6 +699,7 @@ SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer) {
     case MEDIAPLAYER:
         // FIXME group in one function?
         if (pAudioPlayer->mSfPlayer != NULL) {
+            pAudioPlayer->mSfPlayer->stop();
             pAudioPlayer->mSfPlayer.clear();
             pAudioPlayer->mRenderLooper->stop();
             pAudioPlayer->mRenderLooper.clear();
@@ -823,14 +824,13 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
         switch (state) {
         case SL_PLAYSTATE_STOPPED: {
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_STOPPED\n");
-            // FIXME stop the actual playback
-            fprintf(stderr, "[ FIXME implement stop() ]\n");
             object_lock_peek(&ap);
             AndroidObject_state state = ap->mAndroidObjState;
             object_unlock_peek(&ap);
             if (state >= ANDROID_READY) {
                 ap->mAudioTrack->stop();
             }
+            ap->mSfPlayer->stop();
             } break;
         case SL_PLAYSTATE_PAUSED: {
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PAUSED\n");
