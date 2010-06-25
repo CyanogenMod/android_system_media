@@ -16,6 +16,7 @@
 
 #include "android_SfPlayer.h"
 
+
 namespace android {
 
 SfPlayer::SfPlayer(const sp<ALooper> &renderLooper)
@@ -34,7 +35,7 @@ SfPlayer::SfPlayer(const sp<ALooper> &renderLooper)
 
 
 SfPlayer::~SfPlayer() {
-    fprintf(stderr, "\t\t~SfPlayer called\n");
+    fprintf(stderr, "SfPlayer::~SfPlayer()\n");
 
     if (mAudioSource != NULL) {
         mAudioSource->stop();
@@ -98,15 +99,15 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
     }
 
     if (dataSource == NULL) {
-        fprintf(stderr, "Could not create datasource.\n");
+        fprintf(stderr, "SfPlayer::onPrepare: ERROR: Could not create datasource.\n");
         quit();
         return ERROR_UNSUPPORTED;
     }
 
     sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
-
+    fprintf(stderr, "SfPlayer::onPrepare#2\n");
     if (extractor == NULL) {
-        fprintf(stderr, "Could not instantiate extractor.\n");
+        fprintf(stderr, "SfPlayer::onPrepare: ERROR: Could not instantiate extractor.\n");
         quit();
         return ERROR_UNSUPPORTED;
     }
@@ -130,7 +131,7 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
     }
 
     if (audioTrackIndex < 0) {
-        fprintf(stderr, "Could not find an audio track.\n");
+        fprintf(stderr, "SfPlayer::onPrepare: ERROR: Could not find an audio track.\n");
         quit();
         return ERROR_UNSUPPORTED;
     }
@@ -158,7 +159,7 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
                 source);
 
         if (source == NULL) {
-            fprintf(stderr, "Could not instantiate decoder.\n");
+            fprintf(stderr, "SfPlayer::onPrepare: ERROR: Could not instantiate decoder.\n");
             quit();
             return ERROR_UNSUPPORTED;
         }
@@ -167,7 +168,7 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
     }
 
     if (source->start() != OK) {
-        fprintf(stderr, "Failed to start source/decoder.\n");
+        fprintf(stderr, "SfPlayer::onPrepare: ERROR: Failed to start source/decoder.\n");
         quit();
         return MEDIA_ERROR_BASE;
     }
@@ -179,7 +180,7 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
     CHECK(meta->findInt32(kKeySampleRate, &mSampleRateHz));
 
     if (!wantPrefetch()) {
-        printf("no need to prefetch\n");
+        printf("SfPlayer::onPrepare: no need to prefetch\n");
         // doesn't need prefetching, notify good to go
         sp<AMessage> msg = new AMessage(kWhatNotif, id());
         msg->setInt32(EVENT_PREFETCHSTATUSCHANGE, (int32_t)kStatusEnough);
@@ -187,6 +188,7 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
         notify(msg, true /*async*/);
     }
 
+    //fprintf(stderr, "SfPlayer::onPrepare: end\n");
     return SFPLAYER_SUCCESS;
 
 }
@@ -198,8 +200,9 @@ bool SfPlayer::wantPrefetch() {
 
 
 void SfPlayer::startPrefetch_async() {
+    //printf("SfPlayer::startPrefetch_async()\n");
     if (mDataSource->flags() & DataSource::kWantsPrefetching) {
-        printf("preparing.\n");
+        //printf("SfPlayer::startPrefetch_async(): sending check cache msg\n");
 
         mFlags |= kFlagPreparing;
         mFlags |= kFlagBuffering;
@@ -212,7 +215,6 @@ void SfPlayer::play() {
     // FIXME start based on play state
     fprintf(stderr, "SfPlayer::play\n");
     mFlags |= kFlagPlaying;
-    //mAudioTrack->start();
     (new AMessage(kWhatDecode, id()))->post();
 }
 
@@ -270,10 +272,11 @@ void SfPlayer::onDecode() {
 }
 
 void SfPlayer::onRender(const sp<AMessage> &msg) {
+    //fprintf(stderr, "SfPlayer::onRender\n");
     if (!(mFlags & kFlagPlaying)) {
         return;
     }
-    //fprintf(stderr, "SfPlayer::onRender\n");
+    //fprintf(stderr, "SfPlayer::onRender (rendering)\n");
 
     MediaBuffer *buffer;
     CHECK(msg->findPointer("mbuffer", (void **)&buffer));
@@ -289,6 +292,7 @@ void SfPlayer::onRender(const sp<AMessage> &msg) {
 }
 
 void SfPlayer::onCheckCache(const sp<AMessage> &msg) {
+    //fprintf(stderr, "SfPlayer::onCheckCache\n");
     bool eos;
     CacheStatus status = getCacheRemaining(&eos);
 
@@ -298,15 +302,17 @@ void SfPlayer::onCheckCache(const sp<AMessage> &msg) {
         //mAudioTrack->start();
         mFlags &= ~kFlagBuffering;
 
-        printf("buffering done.\n");
+        printf("SfPlayer::onCheckCache: buffering done.\n");
 
         if (mFlags & kFlagPreparing) {
-            printf("preparation done.\n");
+            //printf("SfPlayer::onCheckCache: preparation done.\n");
             mFlags &= ~kFlagPreparing;
         }
 
         mTimeDelta = -1;
-        (new AMessage(kWhatDecode, id()))->post();
+        if (mFlags & kFlagPlaying) {
+            (new AMessage(kWhatDecode, id()))->post();
+        }
         return;
     }
 
@@ -344,27 +350,33 @@ SfPlayer::CacheStatus SfPlayer::getCacheRemaining(bool *eos) {
 
     int64_t dataRemainingUs = dataRemaining * 8000000ll / mBitrate;
 
-    printf("approx %.2f secs remaining (eos=%d)\n",
+    printf("SfPlayer::getCacheRemaining: approx %.2f secs remaining (eos=%d)\n",
            dataRemainingUs / 1E6, *eos);
 
-    // FIXME evaluate also against the sound duration if the sound duration is < 3s
-    if (dataRemainingUs > 30000000) {
-        mCacheStatus = kStatusHigh;
-    } else if (dataRemainingUs > 10000000) {
+    // FIXME improve
+    if (dataRemainingUs >= mDurationUsec*0.95) {
         mCacheStatus = kStatusEnough;
-    } else if (dataRemainingUs < 2000000) {
-        mCacheStatus = kStatusLow;
+        //printf("SfPlayer::getCacheRemaining: cached most of the content\n");
     } else {
-        mCacheStatus = kStatusIntermediate;
+        // FIXME evaluate also against the sound duration
+        if (dataRemainingUs > 30000000) {
+            mCacheStatus = kStatusHigh;
+        } else if (dataRemainingUs > 10000000) {
+            mCacheStatus = kStatusEnough;
+        } else if (dataRemainingUs < 2000000) {
+            mCacheStatus = kStatusLow;
+        } else {
+            mCacheStatus = kStatusIntermediate;
+        }
     }
 
     if (oldStatus != mCacheStatus) {
-        fprintf(stdout, "Status change to %d\n", mCacheStatus);
+        //fprintf(stdout, "SfPlayer::getCacheRemaining: Status change to %d\n", mCacheStatus);
         sp<AMessage> msg = new AMessage(kWhatNotif, id());
         msg->setInt32(EVENT_PREFETCHSTATUSCHANGE, mCacheStatus);
         notify(msg, true /*async*/);
         // FIXME update cache level
-        fprintf(stderr, "[ FIXME update cache level ]\n");
+        fprintf(stderr, "[ FIXME update cache level in SfPlayer::getCacheRemaining() ]\n");
     }
 
     return mCacheStatus;
