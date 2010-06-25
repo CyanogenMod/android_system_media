@@ -217,6 +217,12 @@ void SfPlayer::play() {
 }
 
 
+void SfPlayer::stop() {
+    fprintf(stderr, "SfPlayer::stop\n");
+    mFlags &= ~kFlagPlaying;
+}
+
+
 void SfPlayer::onDecode() {
     //fprintf(stderr, "SfPlayer::onDecode\n");
     bool eos;
@@ -264,6 +270,11 @@ void SfPlayer::onDecode() {
 }
 
 void SfPlayer::onRender(const sp<AMessage> &msg) {
+    if (!(mFlags & kFlagPlaying)) {
+        return;
+    }
+    //fprintf(stderr, "SfPlayer::onRender\n");
+
     MediaBuffer *buffer;
     CHECK(msg->findPointer("mbuffer", (void **)&buffer));
 

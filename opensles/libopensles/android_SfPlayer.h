@@ -64,6 +64,7 @@ struct SfPlayer : public AHandler {
     void prepare_async(const char *uri);
     int  prepare_sync(const char *uri);
     void play();
+    void stop();
     bool wantPrefetch();
     void startPrefetch_async();
 
