@@ -74,56 +74,98 @@ int android_getMinFrameCount(uint32_t sampleRate) {
     return (afFrameCount*sampleRate*minBufCount)/afSampleRate;
 }
 
+#define LEFT_CHANNEL_MASK  0x1 << 0
+#define RIGHT_CHANNEL_MASK 0x1 << 1
 
-void android_audioPlayerUpdateStereoVolume(IVolume *pVolItf) {
-    // should not be used when muted
-    if (pVolItf->mMute) {
-        return;
-    }
+void android_audioPlayerUpdateStereoVolume(CAudioPlayer* ap) {
     float leftVol = 1.0f, rightVol = 1.0f;
 
-    CAudioPlayer *ap = (CAudioPlayer *)pVolItf->mThis;
     if (NULL == ap->mAudioTrack) {
         return;
     }
-    //FIXME cache channel count?
-    int channelCount = ap->mAudioTrack->channelCount();
+    // should not be used when muted
+    if (SL_BOOLEAN_TRUE == ap->mMute) {
+        return;
+    }
 
-    //int muteSoloLeft, muteSoleRight;
-    //muteSoloLeft = (mChannelMutes & CHANNEL_OUT_FRONT_LEFT) >> 2;
-    //muteSoloRight = (mChannelMutes & CHANNEL_OUT_FRONT_RIGHT) >> 3;
+    int channelCount = ap->mNumChannels;
+
+    // mute has priority over solo
+    int leftAudibilityFactor = 1, rightAudibilityFactor = 1;
+
+    if (channelCount >= 2) {
+        if (ap->mMuteMask & LEFT_CHANNEL_MASK) {
+            // left muted
+            leftAudibilityFactor = 0;
+        } else {
+            // left not muted
+            if (ap->mSoloMask & LEFT_CHANNEL_MASK) {
+                // left soloed
+                leftAudibilityFactor = 1;
+            } else {
+                // left not soloed
+                if (ap->mSoloMask & RIGHT_CHANNEL_MASK) {
+                    // right solo silences left
+                    leftAudibilityFactor = 0;
+                } else {
+                    // left and right are not soloed, and left is not muted
+                    leftAudibilityFactor = 1;
+                }
+            }
+        }
+
+        if (ap->mMuteMask & RIGHT_CHANNEL_MASK) {
+            // right muted
+            rightAudibilityFactor = 0;
+        } else {
+            // right not muted
+            if (ap->mSoloMask & RIGHT_CHANNEL_MASK) {
+                // right soloed
+                rightAudibilityFactor = 1;
+            } else {
+                // right not soloed
+                if (ap->mSoloMask & LEFT_CHANNEL_MASK) {
+                    // left solo silences right
+                    rightAudibilityFactor = 0;
+                } else {
+                    // left and right are not soloed, and right is not muted
+                    rightAudibilityFactor = 1;
+                }
+            }
+        }
+    }
 
     // compute amplification as the combination of volume level and stereo position
 
     // amplification from volume level
     // FIXME use the FX Framework conversions
-    pVolItf->mAmplFromVolLevel = pow(10, (float)pVolItf->mLevel/2000);
-    leftVol *= pVolItf->mAmplFromVolLevel;
-    rightVol *= pVolItf->mAmplFromVolLevel;
+    ap->mVolume.mAmplFromVolLevel = pow(10, (float)ap->mVolume.mLevel/2000);
+    leftVol *= ap->mVolume.mAmplFromVolLevel;
+    rightVol *= ap->mVolume.mAmplFromVolLevel;
 
     // amplification from stereo position
-    if (pVolItf->mEnableStereoPosition) {
+    if (ap->mVolume.mEnableStereoPosition) {
         // panning law depends on number of channels of content: stereo panning vs 2ch. balance
         if(1 == channelCount) {
             // stereo panning
-            double theta = (1000+pVolItf->mStereoPosition)*M_PI_4/1000.0f; // 0 <= theta <= Pi/2
-            pVolItf->mAmplFromStereoPos[0] = cos(theta);
-            pVolItf->mAmplFromStereoPos[1] = sin(theta);
+            double theta = (1000+ap->mVolume.mStereoPosition)*M_PI_4/1000.0f; // 0 <= theta <= Pi/2
+            ap->mVolume.mAmplFromStereoPos[0] = cos(theta);
+            ap->mVolume.mAmplFromStereoPos[1] = sin(theta);
         } else {
             // stereo balance
-            if (pVolItf->mStereoPosition > 0) {
-                pVolItf->mAmplFromStereoPos[0] = (1000-pVolItf->mStereoPosition)/1000.0f;
-                pVolItf->mAmplFromStereoPos[1] = 1.0f;
+            if (ap->mVolume.mStereoPosition > 0) {
+                ap->mVolume.mAmplFromStereoPos[0] = (1000-ap->mVolume.mStereoPosition)/1000.0f;
+                ap->mVolume.mAmplFromStereoPos[1] = 1.0f;
             } else {
-                pVolItf->mAmplFromStereoPos[0] = 1.0f;
-                pVolItf->mAmplFromStereoPos[1] = (1000+pVolItf->mStereoPosition)/1000.0f;
+                ap->mVolume.mAmplFromStereoPos[0] = 1.0f;
+                ap->mVolume.mAmplFromStereoPos[1] = (1000+ap->mVolume.mStereoPosition)/1000.0f;
             }
         }
-        leftVol  *= pVolItf->mAmplFromStereoPos[0];
-        rightVol *= pVolItf->mAmplFromStereoPos[1];
+        leftVol  *= ap->mVolume.mAmplFromStereoPos[0];
+        rightVol *= ap->mVolume.mAmplFromStereoPos[1];
     }
 
-    ap->mAudioTrack->setVolume(leftVol, rightVol);
+    ap->mAudioTrack->setVolume(leftVol * leftAudibilityFactor, rightVol * rightAudibilityFactor);
 }
 
 //-----------------------------------------------------------------------------
@@ -557,6 +599,8 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
     case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
         {
+        // initialize platform-specific CAudioPlayer fields
+
         SLDataLocator_BufferQueue *dl_bq =  (SLDataLocator_BufferQueue *)
                 pAudioPlayer->mDynamicSource.mDataSource;
         SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *)
@@ -577,6 +621,10 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
         if (pAudioPlayer->mAudioTrack->initCheck() != android::NO_ERROR) {
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         }
+
+        // initialize platform-independent CAudioPlayer fields
+
+        pAudioPlayer->mNumChannels = df_pcm->numChannels;
         } break;
     //-----------------------------------
     // MediaPlayer
@@ -598,6 +646,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
         object_lock_exclusive(&pAudioPlayer->mObject);
         if (SFPLAYER_SUCCESS != res) {
             pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
+            pAudioPlayer->mNumChannels = 0;
         } else {
             // create audio track based on parameters retrieved from Stagefright
             pAudioPlayer->mAudioTrack = new android::AudioTrack(
@@ -612,6 +661,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
                     android_uriAudioTrackCallback,                       // callback
                     (void *) pAudioPlayer,                               // user
                     0);                                                  // notificationFrame
+            pAudioPlayer->mNumChannels = pAudioPlayer->mSfPlayer->getNumChannels();
             pAudioPlayer->mSfPlayer->useAudioTrack(pAudioPlayer->mAudioTrack);
 
             if (pAudioPlayer->mSfPlayer->wantPrefetch()) {
@@ -771,11 +821,17 @@ SLresult sles_to_android_audioPlayerSetPlayState(IPlay *pPlayItf, SLuint32 state
         break;
     case MEDIAPLAYER:
         switch (state) {
-        case SL_PLAYSTATE_STOPPED:
+        case SL_PLAYSTATE_STOPPED: {
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_STOPPED\n");
             // FIXME stop the actual playback
             fprintf(stderr, "[ FIXME implement stop() ]\n");
-            break;
+            object_lock_peek(&ap);
+            AndroidObject_state state = ap->mAndroidObjState;
+            object_unlock_peek(&ap);
+            if (state >= ANDROID_READY) {
+                ap->mAudioTrack->stop();
+            }
+            } break;
         case SL_PLAYSTATE_PAUSED: {
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PAUSED\n");
             object_lock_peek(&ap);
@@ -922,9 +978,10 @@ SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *
     return SL_RESULT_SUCCESS;
 }
 
+
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf) {
-    android_audioPlayerUpdateStereoVolume(pVolItf);
+SLresult sles_to_android_audioPlayerVolumeUpdate(CAudioPlayer* ap) {
+    android_audioPlayerUpdateStereoVolume(ap);
     return SL_RESULT_SUCCESS;
 }
 

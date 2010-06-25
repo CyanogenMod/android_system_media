@@ -553,10 +553,6 @@ typedef struct {
 typedef struct {
     const struct SLMuteSoloItf_ *mItf;
     IObject *mThis;
-    SLuint32 mMuteMask;
-    SLuint32 mSoloMask;
-    // const
-    SLuint8 mNumChannels;
 } IMuteSolo;
 
 #define MAX_TRACK 32        // see mActiveMask
@@ -697,7 +693,7 @@ typedef struct {
     const struct SLVolumeItf_ *mItf;
     IObject *mThis;
     SLmillibel mLevel;
-    SLboolean mMute;
+    SLboolean mMute;          // FIXME to be moved inside each object of that supports the interface
     SLboolean mEnableStereoPosition;
     SLpermille mStereoPosition;
 #ifdef ANDROID
@@ -790,6 +786,12 @@ enum AndroidObject_state {
     // rest of fields are not related to the interfaces
     DataLocatorFormat mDataSource;
     DataLocatorFormat mDataSink;
+    // cached data for this instance
+    SLuint8 mNumChannels;
+    SLboolean mMute;
+    SLuint32 mMuteMask;
+    SLuint32 mSoloMask;
+    // implementation-specific data for this instance
 #ifdef USE_SNDFILE
     struct SndFile mSndFile;
 #endif // USE_SNDFILE
@@ -968,6 +970,8 @@ extern SLuint32 IObjectToObjectID(IObject *object);
 // If you have an IObject, then you're done -- you already have what you need.
 
 #define InterfaceToIObject(this) ((this)->mThis)
+
+#define InterfaceToCAudioPlayer(this) (((CAudioPlayer*)InterfaceToIObject(this)))
 
 #ifdef ANDROID
 #include "sles_to_android.h"

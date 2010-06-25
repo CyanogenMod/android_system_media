@@ -78,7 +78,7 @@ LOCAL_C_INCLUDES:=                                                  \
 	frameworks/base/media/libstagefright/include                    \
 	external/opencore/extern_libs_v2/khronos/openmax/include
 
-LOCAL_CFLAGS += -x c++ -Wno-multichar
+LOCAL_CFLAGS += -x c++ -Wno-multichar -Wno-invalid-offsetof
 
 LOCAL_STATIC_LIBRARIES += \
         libopensles_helper
