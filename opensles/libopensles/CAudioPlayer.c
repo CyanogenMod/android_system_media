@@ -25,6 +25,12 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
     CAudioPlayer *this = (CAudioPlayer *) self;
     SLresult result = SL_RESULT_SUCCESS;
 
+    // initialize cached data, to be overwritten by platform-specific initialization
+    this->mNumChannels = 0;
+    this->mMute = SL_BOOLEAN_FALSE;
+    this->mMuteMask = 0;
+    this->mSoloMask = 0;
+
 #ifdef ANDROID
     // FIXME move this to android specific files
     result = sles_to_android_audioPlayerRealize(this, async);

@@ -67,7 +67,7 @@ extern SLresult sles_to_android_audioPlayerGetDuration(IPlay *pPlayItf, SLmillis
 
 extern SLresult sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
 
-extern SLresult sles_to_android_audioPlayerVolumeUpdate(IVolume *pVolItf);
+extern SLresult sles_to_android_audioPlayerVolumeUpdate(CAudioPlayer *pAudioPlayer);
 
 /*
  * Mutes or unmutes the Android media framework object associated with the CAudioPlayer that carries

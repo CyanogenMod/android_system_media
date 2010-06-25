@@ -21,14 +21,22 @@
 static SLresult IMuteSolo_SetChannelMute(SLMuteSoloItf self, SLuint8 chan, SLboolean mute)
 {
     IMuteSolo *this = (IMuteSolo *) self;
-    if (this->mNumChannels <= chan)
+    // SLMuteSolo available only on AudioPlayer
+    // FIXME check if this is true (see spec appendix D) or false (see spec 7.8 MIDI player object)
+    CAudioPlayer* ap = InterfaceToCAudioPlayer(this);
+    if (ap->mNumChannels <= chan)
         return SL_RESULT_PARAMETER_INVALID;
     SLuint32 mask = 1 << chan;
     interface_lock_exclusive(this);
     if (mute)
-        this->mMuteMask |= mask;
+        ap->mMuteMask |= mask;
     else
-        this->mMuteMask &= ~mask;
+        ap->mMuteMask &= ~mask;
+#ifdef ANDROID
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+            sles_to_android_audioPlayerVolumeUpdate(InterfaceToCAudioPlayer(this));
+        }
+#endif
     interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
@@ -38,10 +46,13 @@ static SLresult IMuteSolo_GetChannelMute(SLMuteSoloItf self, SLuint8 chan, SLboo
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
     IMuteSolo *this = (IMuteSolo *) self;
-    if (this->mNumChannels <= chan)
+    // SLMuteSolo available only on AudioPlayer
+    // FIXME check if this is true (see spec appendix D) or false (see spec 7.8 MIDI player object)
+    CAudioPlayer* ap = InterfaceToCAudioPlayer(this);
+    if (ap->mNumChannels <= chan)
         return SL_RESULT_PARAMETER_INVALID;
     interface_lock_peek(this);
-    SLuint32 mask = this->mMuteMask;
+    SLuint32 mask = ap->mMuteMask;
     interface_unlock_peek(this);
     *pMute = (mask >> chan) & 1;
     return SL_RESULT_SUCCESS;
@@ -50,14 +61,22 @@ static SLresult IMuteSolo_GetChannelMute(SLMuteSoloItf self, SLuint8 chan, SLboo
 static SLresult IMuteSolo_SetChannelSolo(SLMuteSoloItf self, SLuint8 chan, SLboolean solo)
 {
     IMuteSolo *this = (IMuteSolo *) self;
-    if (this->mNumChannels <= chan)
+    // SLMuteSolo available only on AudioPlayer
+    // FIXME check if this is true (see spec appendix D) or false (see spec 7.8 MIDI player object)
+    CAudioPlayer* ap = InterfaceToCAudioPlayer(this);
+    if (ap->mNumChannels <= chan)
         return SL_RESULT_PARAMETER_INVALID;
     SLuint32 mask = 1 << chan;
     interface_lock_exclusive(this);
     if (solo)
-        this->mSoloMask |= mask;
+        ap->mSoloMask |= mask;
     else
-        this->mSoloMask &= ~mask;
+        ap->mSoloMask &= ~mask;
+#ifdef ANDROID
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+            sles_to_android_audioPlayerVolumeUpdate(InterfaceToCAudioPlayer(this));
+        }
+#endif
     interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
@@ -67,10 +86,13 @@ static SLresult IMuteSolo_GetChannelSolo(SLMuteSoloItf self, SLuint8 chan, SLboo
     if (NULL == pSolo)
         return SL_RESULT_PARAMETER_INVALID;
     IMuteSolo *this = (IMuteSolo *) self;
-    if (this->mNumChannels <= chan)
+    // SLMuteSolo available only on AudioPlayer
+    // FIXME check if this is true (see spec appendix D) or false (see spec 7.8 MIDI player object)
+    CAudioPlayer* ap = InterfaceToCAudioPlayer(this);
+    if (ap->mNumChannels <= chan)
         return SL_RESULT_PARAMETER_INVALID;
     interface_lock_peek(this);
-    SLuint32 mask = this->mSoloMask;
+    SLuint32 mask = ap->mSoloMask;
     interface_unlock_peek(this);
     *pSolo = (mask >> chan) & 1;
     return SL_RESULT_SUCCESS;
@@ -81,9 +103,9 @@ static SLresult IMuteSolo_GetNumChannels(SLMuteSoloItf self, SLuint8 *pNumChanne
     if (NULL == pNumChannels)
         return SL_RESULT_PARAMETER_INVALID;
     IMuteSolo *this = (IMuteSolo *) self;
-    // no lock needed as mNumChannels is const
-    SLuint8 numChannels = this->mNumChannels;
-    *pNumChannels = numChannels;
+    // SLMuteSolo available only on AudioPlayer
+    // FIXME check if this is true (see spec appendix D) or false (see spec 7.8 MIDI player object)
+    *pNumChannels = InterfaceToCAudioPlayer(this)->mNumChannels;
     return SL_RESULT_SUCCESS;
 }
 
@@ -99,8 +121,4 @@ void IMuteSolo_init(void *self)
 {
     IMuteSolo *this = (IMuteSolo *) self;
     this->mItf = &IMuteSolo_Itf;
-    this->mMuteMask = 0;
-    this->mSoloMask = 0;
-    // const
-    this->mNumChannels = 0; // This will be set later by the containing AudioPlayer or MidiPlayer
 }
