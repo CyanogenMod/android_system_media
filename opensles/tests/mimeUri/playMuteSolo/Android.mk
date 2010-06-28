@@ -5,7 +5,7 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
-	$(TOP)/system/media/opensles/include
+	system/media/opensles/include
 
 LOCAL_SRC_FILES:= \
 	slesTest_playMuteSolo.cpp
