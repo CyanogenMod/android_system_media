@@ -102,7 +102,11 @@ static const struct iid_vtable AudioPlayer_interfaces[INTERFACES_AudioPlayer] = 
     {MPH_VIRTUALIZER, INTERFACE_OPTIONAL,
         offsetof(CAudioPlayer, mVirtualizer)},
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL,
-        offsetof(CAudioPlayer, mVisualization)}
+        offsetof(CAudioPlayer, mVisualization)},
+#ifdef ANDROID
+    {MPH_ANDROIDSTREAMTYPE, INTERFACE_IMPLICIT,
+        offsetof(CAudioPlayer, mAndroidStreamType)},
+#endif
 };
 
 static const ClassTable CAudioPlayer_class = {
@@ -324,7 +328,11 @@ static const struct iid_vtable MidiPlayer_interfaces[INTERFACES_MidiPlayer] = {
     {MPH_VIRTUALIZER, INTERFACE_OPTIONAL,
         offsetof(CMidiPlayer, mVirtualizer)},
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL,
-        offsetof(CMidiPlayer, mVisualization)}
+        offsetof(CMidiPlayer, mVisualization)},
+#ifdef ANDROID
+    {MPH_ANDROIDSTREAMTYPE, INTERFACE_IMPLICIT,
+        offsetof(CMidiPlayer, mAndroidStreamType)},
+#endif
 };
 
 static const ClassTable CMidiPlayer_class = {

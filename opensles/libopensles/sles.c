@@ -441,6 +441,10 @@ extern void
     IVirtualizer_init(void *),
     IVisualization_init(void *),
     IVolume_init(void *);
+#ifdef ANDROID
+extern void
+    IAndroidStreamType_init(void *);
+#endif
 
 #ifdef USE_OUTPUTMIXEXT
 extern void
@@ -498,7 +502,10 @@ extern void
 #else
         NULL, NULL, NULL
 #endif
-        }
+        },
+#ifdef ANDROID
+    { /* MPH_ANDROIDSTREAMTYPE */ IAndroidStreamType_init, NULL, NULL }
+#endif
 };
 
 // Construct a new instance of the specified class, exposing selected interfaces

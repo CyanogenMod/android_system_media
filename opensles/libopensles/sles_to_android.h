@@ -49,6 +49,9 @@ extern SLresult sles_to_android_audioPlayerCreate(CAudioPlayer *pAudioPlayer);
 
 extern SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolean async);
 
+extern SLresult sles_to_android_audioPlayerSetStreamType_l(CAudioPlayer *pAudioPlayer,
+        SLuint32 type);
+
 extern SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer);
 
 extern SLresult sles_to_android_audioPlayerSetPlayRate(IPlaybackRate *pRateItf, SLpermille rate);

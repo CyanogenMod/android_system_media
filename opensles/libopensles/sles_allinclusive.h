@@ -43,6 +43,7 @@ typedef struct COutputMix_struct COutputMix;
 #endif // USE_SDL
 
 #ifdef ANDROID
+#include "OpenSLES_Android.h"
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
@@ -725,6 +726,12 @@ typedef struct /*Volume_interface*/ {
 } /*C3DGroup*/;
 
 #ifdef ANDROID
+typedef struct {
+    const struct SLAndroidStreamTypeItf_ *mItf;
+    IObject *mThis;
+    SLuint32 mStreamType;
+} IAndroidStreamType;
+
 /*
  * Used to define the mapping from an OpenSL ES audio player to an Android
  * media framework object
@@ -745,11 +752,16 @@ enum AndroidObject_state {
     ANDROID_READY,
     NUM_ANDROID_STATES
 };
-#endif
+#endif //ifdef ANDROID
+
 
 /*typedef*/ struct CAudioPlayer_struct {
     IObject mObject;
+#ifdef ANDROID
+#define INTERFACES_AudioPlayer 27 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
+#else
 #define INTERFACES_AudioPlayer 26 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
+#endif
     SLuint8 mInterfaceStates2[INTERFACES_AudioPlayer - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IPlay mPlay;
@@ -766,6 +778,9 @@ enum AndroidObject_state {
     ISeek mSeek;
     IVolume mVolume;
     IMuteSolo mMuteSolo;
+#ifdef ANDROID
+    IAndroidStreamType  mAndroidStreamType;
+#endif
     // optional interfaces
     I3DMacroscopic m3DMacroscopic;
     IBassBoost mBassBoost;
@@ -884,7 +899,11 @@ typedef struct {
 typedef struct {
     // mandated interfaces
     IObject mObject;
+#ifdef ANDROID
+#define INTERFACES_MidiPlayer 30 // see MPH_to_MidiPlayer in MPH_to.c for list of interfaces
+#else
 #define INTERFACES_MidiPlayer 29 // see MPH_to_MidiPlayer in MPH_to.c for list of interfaces
+#endif
     SLuint8 mInterfaceStates2[INTERFACES_MidiPlayer - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IPlay mPlay;
@@ -904,6 +923,7 @@ typedef struct {
     ISeek mSeek;
     IVolume mVolume;
     IMuteSolo mMuteSolo;
+    IAndroidStreamType mAndroidStreamType;
     // optional interfaces
     I3DMacroscopic m3DMacroscopic;
     IBassBoost mBassBoost;

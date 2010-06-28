@@ -63,5 +63,8 @@ const char * const interface_names[MPH_MAX] = {
     "VIRTUALIZER",
     "VISUALIZATION",
     "VOLUME",
-    "OUTPUTMIXEXT"
+    "OUTPUTMIXEXT",
+#ifdef ANDROID
+    "ANDROIDSTREAMTYPE"
+#endif
 };

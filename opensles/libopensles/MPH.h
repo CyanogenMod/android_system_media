@@ -66,7 +66,18 @@
 #define MPH_VISUALIZATION              42
 #define MPH_VOLUME                     43
 #define MPH_OUTPUTMIXEXT               44 // The lack of an ifdef is intentional
+// end of platform-independent interface IDs
 
+// begin platform-specific interface IDs
+#ifdef ANDROID
+#define MPH_ANDROIDSTREAMTYPE          45
+#endif
+
+// total number, dependent on platform-specific IDs
+#ifdef ANDROID
+#define MPH_MAX                        46 // 45 + 1 (_ANDROIDSTREAMTYPE)
+#else
 #define MPH_MAX                        45
+#endif
 
 #endif // !defined(__MPH_H)
