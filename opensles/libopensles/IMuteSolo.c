@@ -21,16 +21,20 @@
 static SLresult IMuteSolo_SetChannelMute(SLMuteSoloItf self, SLuint8 chan, SLboolean mute)
 {
     IMuteSolo *this = (IMuteSolo *) self;
-    if (this->mNumChannels <= chan)
+    IObject *thisObject = this->mThis;
+    if (SL_OBJECTID_AUDIOPLAYER != IObjectToObjectID(thisObject))
+        return SL_RESULT_FEATURE_UNSUPPORTED;
+    CAudioPlayer *ap = (CAudioPlayer *) thisObject;
+    if (ap->mNumChannels <= chan)
         return SL_RESULT_PARAMETER_INVALID;
     SLuint8 mask = 1 << chan;
     interface_lock_exclusive(this);
-    SLuint8 oldMuteMask = this->mMuteMask;
+    SLuint8 oldMuteMask = ap->mMuteMask;
     if (mute)
-        this->mMuteMask |= mask;
+        ap->mMuteMask |= mask;
     else
-        this->mMuteMask &= ~mask;
-    interface_unlock_exclusive_attributes(this, oldMuteMask != this->mMuteMask ? ATTR_GAIN :
+        ap->mMuteMask &= ~mask;
+    interface_unlock_exclusive_attributes(this, oldMuteMask != ap->mMuteMask ? ATTR_GAIN :
         ATTR_NONE);
     return SL_RESULT_SUCCESS;
 }
@@ -40,10 +44,14 @@ static SLresult IMuteSolo_GetChannelMute(SLMuteSoloItf self, SLuint8 chan, SLboo
     if (NULL == pMute)
         return SL_RESULT_PARAMETER_INVALID;
     IMuteSolo *this = (IMuteSolo *) self;
-    if (this->mNumChannels <= chan)
+    IObject *thisObject = this->mThis;
+    if (SL_OBJECTID_AUDIOPLAYER != IObjectToObjectID(thisObject))
+        return SL_RESULT_FEATURE_UNSUPPORTED;
+    CAudioPlayer *ap = (CAudioPlayer *) thisObject;
+    if (ap->mNumChannels <= chan)
         return SL_RESULT_PARAMETER_INVALID;
     interface_lock_peek(this);
-    SLuint8 mask = this->mMuteMask;
+    SLuint8 mask = ap->mMuteMask;
     interface_unlock_peek(this);
     *pMute = (mask >> chan) & 1;
     return SL_RESULT_SUCCESS;
@@ -52,16 +60,20 @@ static SLresult IMuteSolo_GetChannelMute(SLMuteSoloItf self, SLuint8 chan, SLboo
 static SLresult IMuteSolo_SetChannelSolo(SLMuteSoloItf self, SLuint8 chan, SLboolean solo)
 {
     IMuteSolo *this = (IMuteSolo *) self;
-    if (this->mNumChannels <= chan)
+    IObject *thisObject = this->mThis;
+    if (SL_OBJECTID_AUDIOPLAYER != IObjectToObjectID(thisObject))
+        return SL_RESULT_FEATURE_UNSUPPORTED;
+    CAudioPlayer *ap = (CAudioPlayer *) thisObject;
+    if (ap->mNumChannels <= chan)
         return SL_RESULT_PARAMETER_INVALID;
     SLuint8 mask = 1 << chan;
     interface_lock_exclusive(this);
-    SLuint8 oldSoloMask = this->mSoloMask;
+    SLuint8 oldSoloMask = ap->mSoloMask;
     if (solo)
-        this->mSoloMask |= mask;
+        ap->mSoloMask |= mask;
     else
-        this->mSoloMask &= ~mask;
-    interface_unlock_exclusive_attributes(this, oldSoloMask != this->mSoloMask ? ATTR_GAIN :
+        ap->mSoloMask &= ~mask;
+    interface_unlock_exclusive_attributes(this, oldSoloMask != ap->mSoloMask ? ATTR_GAIN :
         ATTR_NONE);
     return SL_RESULT_SUCCESS;
 }
@@ -71,10 +83,14 @@ static SLresult IMuteSolo_GetChannelSolo(SLMuteSoloItf self, SLuint8 chan, SLboo
     if (NULL == pSolo)
         return SL_RESULT_PARAMETER_INVALID;
     IMuteSolo *this = (IMuteSolo *) self;
-    if (this->mNumChannels <= chan)
+    IObject *thisObject = this->mThis;
+    if (SL_OBJECTID_AUDIOPLAYER != IObjectToObjectID(thisObject))
+        return SL_RESULT_FEATURE_UNSUPPORTED;
+    CAudioPlayer *ap = (CAudioPlayer *) thisObject;
+    if (ap->mNumChannels <= chan)
         return SL_RESULT_PARAMETER_INVALID;
     interface_lock_peek(this);
-    SLuint8 mask = this->mSoloMask;
+    SLuint8 mask = ap->mSoloMask;
     interface_unlock_peek(this);
     *pSolo = (mask >> chan) & 1;
     return SL_RESULT_SUCCESS;
@@ -85,8 +101,12 @@ static SLresult IMuteSolo_GetNumChannels(SLMuteSoloItf self, SLuint8 *pNumChanne
     if (NULL == pNumChannels)
         return SL_RESULT_PARAMETER_INVALID;
     IMuteSolo *this = (IMuteSolo *) self;
+    IObject *thisObject = this->mThis;
+    if (SL_OBJECTID_AUDIOPLAYER != IObjectToObjectID(thisObject))
+        return SL_RESULT_FEATURE_UNSUPPORTED;
+    CAudioPlayer *ap = (CAudioPlayer *) thisObject;
     // no lock needed as mNumChannels is const
-    *pNumChannels = this->mNumChannels;
+    *pNumChannels = ap->mNumChannels;
     return SL_RESULT_SUCCESS;
 }
 
@@ -102,8 +122,4 @@ void IMuteSolo_init(void *self)
 {
     IMuteSolo *this = (IMuteSolo *) self;
     this->mItf = &IMuteSolo_Itf;
-    this->mMuteMask = 0;
-    this->mSoloMask = 0;
-    // const
-    this->mNumChannels = 0; // This will be set later by the containing AudioPlayer or MidiPlayer
 }

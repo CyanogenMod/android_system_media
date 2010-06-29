@@ -80,6 +80,12 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
         return SL_RESULT_MEMORY_FAILURE;
     }
 
+    // Initialize private fields not associated with an interface
+    this->mMuteMask = 0;
+    this->mSoloMask = 0;
+    // const
+    this->mNumChannels = 0; // This will be set later by the containing AudioPlayer or MidiPlayer
+
     // Check the source and sink parameters against generic constraints,
     // and make a local copy of all parameters in case other application threads
     // change memory concurrently.

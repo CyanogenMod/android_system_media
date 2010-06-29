@@ -94,17 +94,17 @@ static void android_audioPlayerUpdateStereoVolume(CAudioPlayer* ap) {
     int leftAudibilityFactor = 1, rightAudibilityFactor = 1;
 
     if (channelCount >= STEREO_CHANNELS) {
-        if (ap->mMuteSolo.mMuteMask & LEFT_CHANNEL_MASK) {
+        if (ap->mMuteMask & LEFT_CHANNEL_MASK) {
             // left muted
             leftAudibilityFactor = 0;
         } else {
             // left not muted
-            if (ap->mMuteSolo.mSoloMask & LEFT_CHANNEL_MASK) {
+            if (ap->mSoloMask & LEFT_CHANNEL_MASK) {
                 // left soloed
                 leftAudibilityFactor = 1;
             } else {
                 // left not soloed
-                if (ap->mMuteSolo.mSoloMask & RIGHT_CHANNEL_MASK) {
+                if (ap->mSoloMask & RIGHT_CHANNEL_MASK) {
                     // right solo silences left
                     leftAudibilityFactor = 0;
                 } else {
@@ -114,17 +114,17 @@ static void android_audioPlayerUpdateStereoVolume(CAudioPlayer* ap) {
             }
         }
 
-        if (ap->mMuteSolo.mMuteMask & RIGHT_CHANNEL_MASK) {
+        if (ap->mMuteMask & RIGHT_CHANNEL_MASK) {
             // right muted
             rightAudibilityFactor = 0;
         } else {
             // right not muted
-            if (ap->mMuteSolo.mSoloMask & RIGHT_CHANNEL_MASK) {
+            if (ap->mSoloMask & RIGHT_CHANNEL_MASK) {
                 // right soloed
                 rightAudibilityFactor = 1;
             } else {
                 // right not soloed
-                if (ap->mMuteSolo.mSoloMask & LEFT_CHANNEL_MASK) {
+                if (ap->mSoloMask & LEFT_CHANNEL_MASK) {
                     // left solo silences right
                     rightAudibilityFactor = 0;
                 } else {
@@ -666,7 +666,6 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
                     (void *) pAudioPlayer,                               // user
                     0);                                                  // notificationFrame
             pAudioPlayer->mNumChannels = pAudioPlayer->mSfPlayer->getNumChannels();
-            pAudioPlayer->mMuteSolo.mNumChannels = pAudioPlayer->mNumChannels;
             pAudioPlayer->mSfPlayer->useAudioTrack(pAudioPlayer->mAudioTrack);
 
             if (pAudioPlayer->mSfPlayer->wantPrefetch()) {
@@ -982,6 +981,7 @@ void sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPos
 }
 
 
+//-----------------------------------------------------------------------------
 /*
  * Mutes or unmutes the Android media framework object associated with the CAudioPlayer that carries
  * the IVolume interface.
@@ -989,7 +989,6 @@ void sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPos
  *   if ap->mMute is SL_BOOLEAN_FALSE, a call to this function was preceded by a call
  *   to sles_to_android_audioPlayerVolumeUpdate()
  */
-//-----------------------------------------------------------------------------
 static void android_audioPlayerSetMute(CAudioPlayer* ap) {
     android::AudioTrack *t = NULL;
     switch(ap->mAndroidObjType) {
