@@ -64,7 +64,10 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
     [MPH_PRESETREVERB] = 22,
     [MPH_PLAYBACKRATE] = 23,
     [MPH_VIRTUALIZER] = 24,
-    [MPH_VISUALIZATION] = 25
+    [MPH_VISUALIZATION] = 25,
+#ifdef ANDROID
+    [MPH_ANDROIDSTREAMTYPE] = 26
+#endif
 #else
     -1,
     3,  // MPH_3DDOPPLER
@@ -103,6 +106,10 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
     25, // MPH_VISUALIZATION
     15, // MPH_VOLUME
     -1
+#ifdef ANDROID
+    ,
+    26 // MPH_ANDROIDSTREAMTYPE
+#endif
 #endif
 };
 
@@ -262,7 +269,10 @@ const signed char MPH_to_MidiPlayer[MPH_MAX] = {
     [MPH_PRESETREVERB] = 25,
     [MPH_PLAYBACKRATE] = 26,
     [MPH_VIRTUALIZER] = 27,
-    [MPH_VISUALIZATION] = 28
+    [MPH_VISUALIZATION] = 28,
+#ifdef ANDROID
+    [MPH_ANDROIDSTREAMTYPE] = 29
+#endif
 #else
     -1,
     3,  // MPH_3DDOPPLER
@@ -303,6 +313,10 @@ const signed char MPH_to_MidiPlayer[MPH_MAX] = {
     28, // MPH_VISUALIZATION
     18, // MPH_VOLUME
     -1
+#ifdef ANDROID
+    ,
+    29 // MPH_ANDROIDSTREAMTYPE
+#endif
 #endif
 };
 

@@ -21,6 +21,15 @@
 
 
 //-----------------------------------------------------------------------------
+inline SLuint32 android_to_sles_streamType(int type) {
+    return (SLuint32) type;
+}
+
+//-----------------------------------------------------------------------------
+inline int sles_to_android_streamType(SLuint32 type) {
+    return (int)type;
+}
+
 inline uint32_t sles_to_android_sampleRate(SLuint32 sampleRateMilliHertz) {
     return (uint32_t)(sampleRateMilliHertz / 1000);
 }
@@ -613,7 +622,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
         uint32_t sampleRate = sles_to_android_sampleRate(df_pcm->samplesPerSec);
 
         pAudioPlayer->mAudioTrack = new android::AudioTrack(
-                ANDROID_DEFAULT_OUTPUT_STREAM_TYPE,                  // streamType
+                pAudioPlayer->mAndroidStreamType.mStreamType,        // streamType
                 sampleRate,                                          // sampleRate
                 sles_to_android_sampleFormat(df_pcm->bitsPerSample), // format
                 sles_to_android_channelMask(df_pcm->numChannels, df_pcm->channelMask),//channel mask
@@ -654,7 +663,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
         } else {
             // create audio track based on parameters retrieved from Stagefright
             pAudioPlayer->mAudioTrack = new android::AudioTrack(
-                    ANDROID_DEFAULT_OUTPUT_STREAM_TYPE,                  // streamType
+                    pAudioPlayer->mAndroidStreamType.mStreamType,        // streamType
                     pAudioPlayer->mSfPlayer->getSampleRateHz(),          // sampleRate
                     android::AudioSystem::PCM_16_BIT,                    // format
                     pAudioPlayer->mSfPlayer->getNumChannels() == 1 ?     //channel mask
@@ -684,6 +693,46 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
     return result;
 }
 
+//-----------------------------------------------------------------------------
+/*
+ * Called with a lock held on the CAudioPlayer
+ */
+SLresult sles_to_android_audioPlayerSetStreamType_l(CAudioPlayer *pAudioPlayer, SLuint32 type) {
+    SLresult result = SL_RESULT_SUCCESS;
+    fprintf(stdout, "sles_to_android_audioPlayerSetStreamType %lu\n", type);
+
+    if (pAudioPlayer->mAudioTrack == NULL) {
+        return SL_RESULT_RESOURCE_ERROR;
+    }
+    if (type == android_to_sles_streamType(pAudioPlayer->mAudioTrack->streamType())) {
+        return SL_RESULT_SUCCESS;
+    }
+
+    int format =  pAudioPlayer->mAudioTrack->format();
+    // FIXME sample rate should be cached
+    uint32_t sr = pAudioPlayer->mAudioTrack->getSampleRate();
+
+    pAudioPlayer->mAudioTrack->stop();
+    delete pAudioPlayer->mAudioTrack;
+    pAudioPlayer->mAudioTrack = new android::AudioTrack(
+                    sles_to_android_streamType(type),               // streamType
+                    sr,                                             // sampleRate
+                    format,                                         // format
+                    pAudioPlayer->mNumChannels== 1 ?                //channel mask
+                            android::AudioSystem::CHANNEL_OUT_MONO :
+                            android::AudioSystem::CHANNEL_OUT_STEREO,
+                    0,                                              // frameCount (here min)
+                    0,                                              // flags
+                    pAudioPlayer->mAndroidObjType == MEDIAPLAYER ?  // callback
+                            android_uriAudioTrackCallback : android_pullAudioTrackCallback,
+                    (void *) pAudioPlayer,                          // user
+                    0);  // FIXME find appropriate frame count      // notificationFrame
+    if (pAudioPlayer->mAndroidObjType == MEDIAPLAYER) {
+        pAudioPlayer->mSfPlayer->useAudioTrack(pAudioPlayer->mAudioTrack);
+    }
+
+    return result;
+}
 
 //-----------------------------------------------------------------------------
 SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer) {

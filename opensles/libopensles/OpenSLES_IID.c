@@ -7,7 +7,7 @@
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Materials, and to permit persons to whom the Materials are
  * furnished to do so, subject to
- * the following conditions: 
+ * the following conditions:
  *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Materials.
@@ -30,7 +30,10 @@
 /****************************************************************************/
 
 
-#include "OpenSLES.h" /* SL Header */
+#include "OpenSLES.h"         /* SL Header */
+#ifdef ANDROID
+#include "OpenSLES_Android.h" /* Android-specific SL Header */
+#endif
 #include "MPH.h"
 
 #ifdef __cplusplus
@@ -131,7 +134,11 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     // SL_IID_VOLUME
     { 0x09e8ede0, 0xddde, 0x11db, 0xb4f6, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_OUTPUTMIXEXT (note that the lack of an ifdef is intentional)
-    { 0xfe5cce00, 0x57bb, 0x11df, 0x951c, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } }
+    { 0xfe5cce00, 0x57bb, 0x11df, 0x951c, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
+#ifdef ANDROID
+    // SL_IID_ANDROIDSTREAMTYPE
+    { 0x843b5f60, 0x82d6, 0x11df, 0xac5b, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } }
+#endif
 };
 
 #ifdef __cplusplus
@@ -192,6 +199,9 @@ const SLInterfaceID SL_IID_VOLUME = &SL_IID_array[MPH_VOLUME];
 extern const SLInterfaceID SL_IID_OUTPUTMIXEXT;
 // The lack of an ifdef is intentional
 const SLInterfaceID SL_IID_OUTPUTMIXEXT = &SL_IID_array[MPH_OUTPUTMIXEXT];
+#ifdef ANDROID
+const SLInterfaceID SL_IID_ANDROIDSTREAMTYPE = &SL_IID_array[MPH_ANDROIDSTREAMTYPE];
+#endif
 #ifdef __cplusplus
 }
 #endif

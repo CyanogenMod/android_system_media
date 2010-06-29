@@ -33,6 +33,7 @@ LOCAL_SRC_FILES:=                     \
         I3DLocation.c                 \
         I3DMacroscopic.c              \
         I3DSource.c                   \
+        IAndroidStreamType.c          \
         IAudioDecoderCapabilities.c   \
         IAudioEncoder.c               \
         IAudioEncoderCapabilities.c   \
