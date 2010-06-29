@@ -251,8 +251,8 @@ void audioPlayerGainUpdate(CAudioPlayer *audioPlayer)
         return;
 
     SLboolean mute = audioPlayer->mVolume.mMute;
-    SLuint8 muteMask = audioPlayer->mMuteSolo.mMuteMask;
-    SLuint8 soloMask = audioPlayer->mMuteSolo.mSoloMask;
+    SLuint8 muteMask = audioPlayer->mMuteMask;
+    SLuint8 soloMask = audioPlayer->mSoloMask;
     SLmillibel level = audioPlayer->mVolume.mLevel;
     SLboolean enableStereoPosition = audioPlayer->mVolume.mEnableStereoPosition;
     SLpermille stereoPosition = audioPlayer->mVolume.mStereoPosition;

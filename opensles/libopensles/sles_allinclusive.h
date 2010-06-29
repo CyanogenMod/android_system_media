@@ -561,9 +561,7 @@ typedef struct {
 typedef struct {
     const struct SLMuteSoloItf_ *mItf;
     IObject *mThis;
-    SLuint8 mMuteMask;      // Mask for which channels are muted: bit 0=left, 1=right
-    SLuint8 mSoloMask;      // Mask for which channels are soloed: bit 0=left, 1=right
-    SLuint8 mNumChannels;   // 0 means unknown, then const once it is known, range 1 <= x <= 8
+    // fields that were formerly here are now at CAudioPlayer
 } IMuteSolo;
 
 #define MAX_TRACK 32        // see mActiveMask
@@ -783,8 +781,11 @@ enum AndroidObject_state {
     DataLocatorFormat mDataSource;
     DataLocatorFormat mDataSink;
     // cached data for this instance
-    SLuint8 mNumChannels;
     SLuint8 /*SLboolean*/ mMute;
+    // Formerly at IMuteSolo
+    SLuint8 mMuteMask;      // Mask for which channels are muted: bit 0=left, 1=right
+    SLuint8 mSoloMask;      // Mask for which channels are soloed: bit 0=left, 1=right
+    SLuint8 mNumChannels;   // 0 means unknown, then const once it is known, range 1 <= x <= 8
     // implementation-specific data for this instance
 #ifdef USE_OUTPUTMIXEXT
     struct Track *mTrack;
