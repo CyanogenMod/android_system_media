@@ -178,12 +178,30 @@ void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
     result = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PLAYING );
     ExitOnError(result);
 
-    usleep(durationInMsec * 1000);
+    usleep((durationInMsec/2) * 1000);
+
+    /* Get the stream type during playback  */
+    SLuint32 currentType = 0;
+    result = (*streamTypeItf)->GetStreamType(streamTypeItf, &currentType);
+    ExitOnError(result);
+    if (currentType != type) {
+        fprintf(stderr, "ERROR: current stream type is %lu, should be %lu\n", currentType, type);
+    }
+
+    usleep((durationInMsec/2) * 1000);
 
     /* Make sure player is stopped */
     fprintf(stdout, "Stopping playback\n");
     result = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_STOPPED);
     ExitOnError(result);
+
+    /* Try again to get the stream type, just in case it changed behind our back */
+    result = (*streamTypeItf)->GetStreamType(streamTypeItf, &currentType);
+    ExitOnError(result);
+    if (currentType != type) {
+        fprintf(stderr, "ERROR: current stream type is %lu, should be %lu after stop.\n",
+                currentType, type);
+    }
 
     /* Destroy the player */
     (*player)->Destroy(player);
