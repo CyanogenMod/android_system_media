@@ -59,8 +59,7 @@ static SLresult IDeviceVolume_SetVolume(SLDeviceVolumeItf self, SLuint32 deviceI
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IDeviceVolume_GetVolume(SLDeviceVolumeItf self,
-    SLuint32 deviceID, SLint32 *pVolume)
+static SLresult IDeviceVolume_GetVolume(SLDeviceVolumeItf self, SLuint32 deviceID, SLint32 *pVolume)
 {
     if (NULL == pVolume)
         return SL_RESULT_PARAMETER_INVALID;

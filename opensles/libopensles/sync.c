@@ -26,30 +26,50 @@ void *sync_start(void *arg)
 {
     CEngine *this = (CEngine *) arg;
     for (;;) {
-        usleep(20000*50);
-        // Normally a shared lock would be needed for reading 2 fields,
-        // but in this case their relationship is irrelevant.
-        object_lock_peek(&this->mObject);
-        SLboolean shutdown = this->mEngine.mShutdown;
-        unsigned instanceMask = this->mEngine.mInstanceMask;
-        object_unlock_peek(&this->mObject);
-        if (shutdown)
+
+        usleep(20000*5);
+
+        object_lock_exclusive(&this->mObject);
+        if (this->mEngine.mShutdown) {
+            this->mEngine.mShutdownAck = SL_BOOLEAN_TRUE;
+            pthread_cond_signal(&this->mEngine.mShutdownCond);
+            object_unlock_exclusive(&this->mObject);
             break;
-        while (instanceMask) {
-            unsigned i = ctz(instanceMask);
+        }
+        unsigned instanceMask = this->mEngine.mInstanceMask;
+        unsigned changedMask = this->mEngine.mChangedMask;
+        this->mEngine.mChangedMask = 0;
+        object_unlock_exclusive(&this->mObject);
+
+        // now we know which objects exist, and which of those have changes
+
+        unsigned combinedMask = changedMask | instanceMask;
+        while (combinedMask) {
+            unsigned i = ctz(combinedMask);
             assert(MAX_INSTANCE > i);
-            instanceMask &= ~(1 << i);
+            combinedMask &= ~(1 << i);
             IObject *instance = (IObject *) this->mEngine.mInstances[i];
             // Could be NULL during construct or destroy
             if (NULL == instance)
                 continue;
-            // FIXME race condition here - object could be destroyed by now, better to do destroy here
+
+            // FIXME race condition here - object could be destroyed by now, better do destroy here
+
+            object_lock_exclusive(instance);
+            //unsigned attributesMask = instance->mAttributesMask;
+            instance->mAttributesMask = 0;
+
             switch (IObjectToObjectID(instance)) {
             case SL_OBJECTID_AUDIOPLAYER:
-                putchar('.');
-                fflush(stdout);
+                {
+                //CAudioPlayer *audioPlayer = (CAudioPlayer *) instance;
+                // do something here
+                object_unlock_exclusive(instance);
+                }
                 break;
+
             default:
+                object_unlock_exclusive(instance);
                 break;
             }
         }

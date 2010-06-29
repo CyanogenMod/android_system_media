@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-#ifdef USE_SNDFILE
-extern void SLAPIENTRY SndFile_Callback(SLBufferQueueItf caller, void *pContext);
-extern SLboolean SndFile_IsSupported(const SF_INFO *sfinfo);
-extern SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this_);
-extern void audioPlayerTransportUpdate(CAudioPlayer *this);
+// Platform-specific configuration constants
+
+#if defined(ANDROID) || defined(USE_SDL)
+#define PLATFORM_MILLIBEL_MAX_VOLUME 0  // No more than unity gain
+#else
+#define PLATFORM_MILLIBEL_MAX_VOLUME SL_MILLIBEL_MAX
 #endif

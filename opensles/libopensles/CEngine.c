@@ -44,6 +44,9 @@ void CEngine_Destroy(void *self)
 {
     CEngine *this = (CEngine *) self;
     this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
+    while (!this->mEngine.mShutdownAck)
+        pthread_cond_wait(&this->mEngine.mShutdownCond, &this->mObject.mMutex);
+    object_unlock_exclusive(&this->mObject);
     (void) pthread_join(this->mSyncThread, (void **) NULL);
     ThreadPool_deinit(&this->mEngine.mThreadPool);
 }

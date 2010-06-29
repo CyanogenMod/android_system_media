@@ -20,37 +20,16 @@
 
 static SLresult IVolume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
 {
-#if 0
-    // some compilers allow a wider int type to be passed as a parameter,
-    // but that will be truncated during the field assignment
-    if (!((SL_MILLIBEL_MIN <= level) && (SL_MILLIBEL_MAX >= level)))
+    if (!((SL_MILLIBEL_MIN <= level) && (level <= PLATFORM_MILLIBEL_MAX_VOLUME)))
         return SL_RESULT_PARAMETER_INVALID;
-#endif
-#ifdef ANDROID
-    if (!((SL_MILLIBEL_MIN <= level) && (ANDROID_SL_MILLIBEL_MAX >= level)))
-        return SL_RESULT_PARAMETER_INVALID;
-#endif
-
     IVolume *this = (IVolume *) self;
     interface_lock_exclusive(this);
     SLmillibel oldLevel = this->mLevel;
-    this->mLevel = level;
-    if((this->mMute == SL_BOOLEAN_FALSE) && (oldLevel != level)) {
-#ifdef ANDROID
-        switch (InterfaceToObjectID(this)) {
-        case SL_OBJECTID_AUDIOPLAYER:
-            sles_to_android_audioPlayerVolumeUpdate(InterfaceToCAudioPlayer(this));
-            break;
-        case SL_OBJECTID_OUTPUTMIX:
-            // FIXME mute/unmute all players attached to this outputmix
-            fprintf(stderr, "FIXME: IVolume_SetVolumeLevel on an SL_OBJECTID_OUTPUTMIX to be implemented\n");
-            break;
-        default:
-            break;
-        }
-#endif
-    }
-    interface_unlock_exclusive(this);
+    if (oldLevel != level) {
+        this->mLevel = level;
+        interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+    } else
+        interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -70,10 +49,7 @@ static SLresult IVolume_GetMaxVolumeLevel(SLVolumeItf self, SLmillibel *pMaxLeve
 {
     if (NULL == pMaxLevel)
         return SL_RESULT_PARAMETER_INVALID;
-    *pMaxLevel = SL_MILLIBEL_MAX;
-#ifdef ANDROID
-    *pMaxLevel = ANDROID_SL_MILLIBEL_MAX;
-#endif
+    *pMaxLevel = PLATFORM_MILLIBEL_MAX_VOLUME;
     return SL_RESULT_SUCCESS;
 }
 
@@ -82,27 +58,12 @@ static SLresult IVolume_SetMute(SLVolumeItf self, SLboolean mute)
     IVolume *this = (IVolume *) self;
     mute = SL_BOOLEAN_FALSE != mute; // normalize
     interface_lock_exclusive(this);
-    if (this->mMute != mute) {
+    SLboolean oldMute = this->mMute;
+    if (oldMute != mute) {
         this->mMute = mute;
-        if (this->mMute == SL_BOOLEAN_FALSE) {
-            // when unmuting, reapply volume
-            IVolume_SetVolumeLevel(self, this->mLevel);
-        }
-#ifdef ANDROID
-        switch (InterfaceToObjectID(this)) {
-        case SL_OBJECTID_AUDIOPLAYER:
-            sles_to_android_audioPlayerSetMute(this, mute);
-            break;
-        case SL_OBJECTID_OUTPUTMIX:
-            // FIXME mute/unmute all players attached to this outputmix
-            fprintf(stderr, "FIXME: IVolume_SetMute on an SL_OBJECTID_OUTPUTMIX to be implemented\n");
-            break;
-        default:
-            break;
-        }
-#endif
-    }
-    interface_unlock_exclusive(this);
+        interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+    } else
+        interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -123,15 +84,12 @@ static SLresult IVolume_EnableStereoPosition(SLVolumeItf self, SLboolean enable)
     IVolume *this = (IVolume *) self;
     enable = SL_BOOLEAN_FALSE != enable; // normalize
     interface_lock_exclusive(this);
-    if (this->mEnableStereoPosition != enable) {
+    SLboolean oldEnable = this->mEnableStereoPosition;
+    if (oldEnable != enable) {
         this->mEnableStereoPosition = enable;
-#ifdef ANDROID
-        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-            sles_to_android_audioPlayerVolumeUpdate(InterfaceToCAudioPlayer(this));
-        }
-#endif
-    }
-    interface_unlock_exclusive(this);
+        interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+    } else
+        interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -153,15 +111,12 @@ static SLresult IVolume_SetStereoPosition(SLVolumeItf self, SLpermille stereoPos
         return SL_RESULT_PARAMETER_INVALID;
     IVolume *this = (IVolume *) self;
     interface_lock_exclusive(this);
-    if (this->mStereoPosition != stereoPosition) {
+    SLpermille oldStereoPosition = this->mStereoPosition;
+    if (oldStereoPosition != stereoPosition) {
         this->mStereoPosition = stereoPosition;
-#ifdef ANDROID
-        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-            sles_to_android_audioPlayerVolumeUpdate(InterfaceToCAudioPlayer(this));
-        }
-#endif
-    }
-    interface_unlock_exclusive(this);
+        interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+    } else
+        interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -197,11 +152,4 @@ void IVolume_init(void *self)
     this->mMute = SL_BOOLEAN_FALSE;
     this->mEnableStereoPosition = SL_BOOLEAN_FALSE;
     this->mStereoPosition = 0;
-#ifdef ANDROID
-    this->mAmplFromVolLevel = 1.0f;
-    this->mAmplFromStereoPos[0] = 1.0f;
-    this->mAmplFromStereoPos[1] = 1.0f;
-    this->mChannelMutes = 0;
-    this->mChannelSolos = 0;
-#endif
 }

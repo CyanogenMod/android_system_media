@@ -69,7 +69,8 @@ static SLresult IEqualizer_GetNumberOfBands(SLEqualizerItf self, SLuint16 *pNumB
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEqualizer_GetBandLevelRange(SLEqualizerItf self, SLmillibel *pMin, SLmillibel *pMax)
+static SLresult IEqualizer_GetBandLevelRange(SLEqualizerItf self, SLmillibel *pMin,
+    SLmillibel *pMax)
 {
     if (NULL == pMin && NULL == pMax)
         return SL_RESULT_PARAMETER_INVALID;
@@ -203,7 +204,7 @@ static SLresult IEqualizer_GetNumberOfPresets(SLEqualizerItf self, SLuint16 *pNu
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEqualizer_GetPresetName(SLEqualizerItf self, SLuint16 index, const SLchar ** ppName)
+static SLresult IEqualizer_GetPresetName(SLEqualizerItf self, SLuint16 index, const SLchar **ppName)
 {
     if (NULL == ppName)
         return SL_RESULT_PARAMETER_INVALID;

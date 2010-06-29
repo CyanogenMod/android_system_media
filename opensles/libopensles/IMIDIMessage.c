@@ -18,7 +18,8 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IMIDIMessage_SendMessage(SLMIDIMessageItf self, const SLuint8 *data, SLuint32 length)
+static SLresult IMIDIMessage_SendMessage(SLMIDIMessageItf self, const SLuint8 *data,
+    SLuint32 length)
 {
     if (NULL == data)
         return SL_RESULT_PARAMETER_INVALID;

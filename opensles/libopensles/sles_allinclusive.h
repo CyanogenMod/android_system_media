@@ -31,6 +31,7 @@
 
 typedef struct CAudioPlayer_struct CAudioPlayer;
 typedef struct C3DGroup_struct C3DGroup;
+typedef struct COutputMix_struct COutputMix;
 
 #ifdef USE_SNDFILE
 #include <sndfile.h>
@@ -50,6 +51,8 @@ typedef struct C3DGroup_struct C3DGroup;
 #include <binder/ProcessState.h>
 #include "android_SfPlayer.h"
 #endif
+
+#define STEREO_CHANNELS 2
 
 #ifdef USE_OUTPUTMIXEXT
 #include "OutputMixExt.h"
@@ -149,6 +152,8 @@ struct SndFile {
     // save URI also?
     SLchar *mPathname;
     SNDFILE *mSNDFILE;
+    pthread_mutex_t mMutex; // protects mSNDFILE only
+    SLboolean mEOF;         // sf_read returned zero sample frames
     // These are used when Enqueue returns SL_RESULT_BUFFER_INSUFFICIENT
     const void *mRetryBuffer;
     SLuint32 mRetrySize;
@@ -192,15 +197,16 @@ typedef struct {
 /* Interface structures */
 
 typedef struct Object_interface {
-    const struct SLObjectItf_ *mItf;
+    const struct SLObjectItf_ *mItf;    // const
     // field mThis would be redundant within an IObject, so we substitute mEngine
-    struct Engine_interface *mEngine;
-    const ClassTable *mClass;
-    SLuint32 mInstanceID; // for debugger and for RPC
+    struct Engine_interface *mEngine;   // const
+    const ClassTable *mClass;       // const
+    SLuint32 mInstanceID;           // const for debugger and for RPC
     slObjectCallback mCallback;
     void *mContext;
     unsigned mGottenMask;           // interfaces which are exposed or added, and then gotten
     unsigned mLossOfControlMask;    // interfaces with loss of control enabled
+    unsigned mAttributesMask;       // attributes which have changed since last sync
     SLint32 mPriority;
     pthread_mutex_t mMutex;
     pthread_cond_t mCond;
@@ -209,6 +215,7 @@ typedef struct Object_interface {
     // for best alignment, do not add any fields here
 #define INTERFACES_Default 2
     SLuint8 mInterfaceStates[INTERFACES_Default];    // state of each of interface
+    // do not add any fields here
 } IObject;
 
 #include "locks.h"
@@ -420,26 +427,27 @@ struct EnableLevel {
 typedef struct {
     const struct SLEffectSendItf_ *mItf;
     IObject *mThis;
-    struct OutputMix_class *mOutputMix;
-    SLmillibel mDirectLevel;
-    struct EnableLevel mEnableLevels[AUX_MAX];
+    COutputMix *mOutputMix;     // which output mix this effect send is attached to
+    SLmillibel mDirectLevel;    // dry volume
+    struct EnableLevel mEnableLevels[AUX_MAX];  // wet enable and volume per effect type
 } IEffectSend;
-
-// private
 
 typedef struct Engine_interface {
     const struct SLEngineItf_ *mItf;
     IObject *mThis;
     SLboolean mLossOfControlGlobal;
 #ifdef USE_SDL
-    struct OutputMix_class *mOutputMix; // SDL pulls PCM from an arbitrary OutputMixExt
+    COutputMix *mOutputMix; // SDL pulls PCM from an arbitrary IOutputMixExt
 #endif
     // Each engine is its own universe.
     SLuint32 mInstanceCount;
     unsigned mInstanceMask; // 1 bit per active object
+    unsigned mChangedMask;  // objects which have changed since last sync
 #define MAX_INSTANCE 32     // see mInstanceMask
     IObject *mInstances[MAX_INSTANCE];
     SLboolean mShutdown;
+    SLboolean mShutdownAck;
+    pthread_cond_t mShutdownCond;
     ThreadPool mThreadPool; // for asynchronous operations
 } IEngine;
 
@@ -553,6 +561,9 @@ typedef struct {
 typedef struct {
     const struct SLMuteSoloItf_ *mItf;
     IObject *mThis;
+    SLuint8 mMuteMask;      // Mask for which channels are muted: bit 0=left, 1=right
+    SLuint8 mSoloMask;      // Mask for which channels are soloed: bit 0=left, 1=right
+    SLuint8 mNumChannels;   // 0 means unknown, then const once it is known, range 1 <= x <= 8
 } IMuteSolo;
 
 #define MAX_TRACK 32        // see mActiveMask
@@ -588,13 +599,15 @@ typedef struct Play_interface {
     const struct SLPlayItf_ *mItf;
     IObject *mThis;
     SLuint32 mState;
+    // next 2 fields are read-only to application
     SLmillisecond mDuration;
     SLmillisecond mPosition;
-    // unsigned mPositionSamples;  // position in sample units
     slPlayCallback mCallback;
     void *mContext;
     SLuint32 mEventFlags;
+    // the ISeek trick of using a distinct value doesn't work here because it's readable by app
     SLmillisecond mMarkerPosition;
+    SLboolean mMarkerIsSet;
     SLmillisecond mPositionUpdatePeriod;
 } IPlay;
 
@@ -652,7 +665,7 @@ typedef struct {
 typedef struct {
     const struct SLSeekItf_ *mItf;
     IObject *mThis;
-    SLmillisecond mPos;
+    SLmillisecond mPos;     // mPos != SL_TIME_UNKNOWN means pending seek request
     SLboolean mLoopEnabled;
     SLmillisecond mStartPos;
     SLmillisecond mEndPos;
@@ -662,7 +675,7 @@ typedef struct {
     const struct SLThreadSyncItf_ *mItf;
     IObject *mThis;
     SLboolean mInCriticalSection;
-    SLboolean mWaiting;
+    SLuint32 mWaiting;  // number of threads waiting
     pthread_t mOwner;
 } IThreadSync;
 
@@ -689,31 +702,14 @@ typedef struct {
     SLmilliHertz mRate;
 } IVisualization;
 
-typedef struct {
+typedef struct /*Volume_interface*/ {
     const struct SLVolumeItf_ *mItf;
     IObject *mThis;
+    // Values as specified by the application
     SLmillibel mLevel;
-    SLboolean mMute;          // FIXME to be moved inside each object of that supports the interface
-    SLboolean mEnableStereoPosition;
     SLpermille mStereoPosition;
-#ifdef ANDROID
-    /**
-     * Amplification (can be attenuation) factor derived for the VolumeLevel
-     */
-    float mAmplFromVolLevel;
-    /**
-     * Left/right amplification (can be attenuations) factors derived for the StereoPosition
-     */
-    float mAmplFromStereoPos[2];
-    /**
-     * Channel mask for which channels are muted
-     */
-    int mChannelMutes;
-    /**
-     * Channel mask for which channels are solo'ed
-     */
-    int mChannelSolos;
-#endif
+    SLuint8 /*SLboolean*/ mMute;    // FIXME move inside each object that supports the interface
+    SLuint8 /*SLboolean*/ mEnableStereoPosition;
 } IVolume;
 
 /* Class structures */
@@ -765,13 +761,13 @@ enum AndroidObject_state {
     I3DSource m3DSource;
     IBufferQueue mBufferQueue;
     IEffectSend mEffectSend;
-    IMuteSolo mMuteSolo;
     IMetadataExtraction mMetadataExtraction;
     IMetadataTraversal mMetadataTraversal;
     IPrefetchStatus mPrefetchStatus;
     IRatePitch mRatePitch;
     ISeek mSeek;
     IVolume mVolume;
+    IMuteSolo mMuteSolo;
     // optional interfaces
     I3DMacroscopic m3DMacroscopic;
     IBassBoost mBassBoost;
@@ -788,10 +784,11 @@ enum AndroidObject_state {
     DataLocatorFormat mDataSink;
     // cached data for this instance
     SLuint8 mNumChannels;
-    SLboolean mMute;
-    SLuint32 mMuteMask;
-    SLuint32 mSoloMask;
+    SLuint8 /*SLboolean*/ mMute;
     // implementation-specific data for this instance
+#ifdef USE_OUTPUTMIXEXT
+    struct Track *mTrack;
+#endif
 #ifdef USE_SNDFILE
     struct SndFile mSndFile;
 #endif // USE_SNDFILE
@@ -802,6 +799,14 @@ enum AndroidObject_state {
     android::AudioTrack *mAudioTrack;
     android::sp<android::SfPlayer> mSfPlayer;
     android::sp<android::ALooper>  mRenderLooper;
+    /**
+     * Amplification (can be attenuation) factor derived for the VolumeLevel
+     */
+    float mAmplFromVolLevel;
+    /**
+     * Left/right amplification (can be attenuations) factors derived for the StereoPosition
+     */
+    float mAmplFromStereoPos[STEREO_CHANNELS];
 #endif
 } /*CAudioPlayer*/;
 
@@ -866,7 +871,8 @@ typedef struct {
 typedef struct {
     // mandated interfaces
     IObject mObject;
-#define INTERFACES_MetadataExtractor 5 // see MPH_to_MetadataExtractor in MPH_to.c for list of interfaces
+#define INTERFACES_MetadataExtractor 5 // see MPH_to_MetadataExtractor in MPH_to.c for list of
+                                       // interfaces
     SLuint8 mInterfaceStates2[INTERFACES_MetadataExtractor - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IDynamicSource mDynamicSource;
@@ -887,7 +893,6 @@ typedef struct {
     I3DSource m3DSource;
     IBufferQueue mBufferQueue;
     IEffectSend mEffectSend;
-    IMuteSolo mMuteSolo;
     IMetadataExtraction mMetadataExtraction;
     IMetadataTraversal mMetadataTraversal;
     IMIDIMessage mMIDIMessage;
@@ -897,6 +902,7 @@ typedef struct {
     IPrefetchStatus mPrefetchStatus;
     ISeek mSeek;
     IVolume mVolume;
+    IMuteSolo mMuteSolo;
     // optional interfaces
     I3DMacroscopic m3DMacroscopic;
     IBassBoost mBassBoost;
@@ -910,7 +916,7 @@ typedef struct {
     IVisualization mVisualization;
 } CMidiPlayer;
 
-typedef struct OutputMix_class {
+/*typedef*/ struct COutputMix_struct {
     // mandated interfaces
     IObject mObject;
 #define INTERFACES_OutputMix 11 // see MPH_to_OutputMix in MPH_to.c for list of interfaces
@@ -928,7 +934,7 @@ typedef struct OutputMix_class {
     // optional interfaces
     IBassBoost mBassBoost;
     IVisualization mVisualization;
-} COutputMix;
+} /*COutputMix*/;
 
 typedef struct {
     // mandated interfaces
@@ -977,7 +983,8 @@ extern SLuint32 IObjectToObjectID(IObject *object);
 #include "sles_to_android.h"
 #endif
 
-extern SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *myDataSourceLocator);
+extern SLresult checkDataSource(const SLDataSource *pDataSrc,
+    DataLocatorFormat *myDataSourceLocator);
 extern SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *myDataSinkLocator);
 extern void freeDataLocatorFormat(DataLocatorFormat *dlf);
 extern SLresult CAudioPlayer_Realize(void *self, SLboolean async);
@@ -1003,3 +1010,11 @@ extern SLresult err_to_result(int err);
 extern unsigned ctz(unsigned);
 #endif
 extern const char * const interface_names[MPH_MAX];
+#include "platform.h"
+
+// Attributes
+
+#define ATTR_NONE       ((unsigned) 0x0)    // none
+#define ATTR_GAIN       ((unsigned) 0x1)    // player volume, channel mute, channel solo,
+                                            // player stereo position, player mute
+#define ATTR_TRANSPORT  ((unsigned) 0x2)    // play state, requested position, looping

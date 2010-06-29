@@ -35,17 +35,18 @@ struct SLOutputMixExtItf_ {
 // Track describes each input to OutputMix
 
 struct Track {
-    // const SLDataFormat_PCM *mDfPcm;
     struct BufferQueue_interface *mBufferQueue;
     CAudioPlayer *mAudioPlayer; // mixer examines this track if non-NULL
     const void *mReader;    // pointer to next frame in BufferHeader.mBuffer
     SLuint32 mAvail;        // number of available bytes
-    //SLmillibel mGains[2];
+    float mGains[STEREO_CHANNELS]; // computed gain based on volume, mute, solo, and stereo position
+    SLuint32 mFrameCounter; // number of sample frames consumed from this track, will roll over
 };
 
 #ifndef this
 #define this this_
 #endif
 extern SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this);
+extern void audioPlayerGainUpdate(CAudioPlayer *this);
 
 #endif

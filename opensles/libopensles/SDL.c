@@ -41,11 +41,11 @@ void SDL_start(IEngine *thisEngine)
     SDL_AudioSpec fmt;
     fmt.freq = 44100;
     fmt.format = AUDIO_S16;
-    fmt.channels = 2;
+    fmt.channels = STEREO_CHANNELS;
 #ifdef _WIN32 // FIXME Either a bug or a serious misunderstanding
     fmt.samples = SndFile_BUFSIZE;
 #else
-    fmt.samples = SndFile_BUFSIZE / 2;
+    fmt.samples = SndFile_BUFSIZE / sizeof(short);
 #endif
     fmt.callback = SDL_callback;
     fmt.userdata = (void *) thisEngine;

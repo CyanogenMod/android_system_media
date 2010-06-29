@@ -18,7 +18,8 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IMIDIMuteSolo_SetChannelMute(SLMIDIMuteSoloItf self, SLuint8 channel, SLboolean mute)
+static SLresult IMIDIMuteSolo_SetChannelMute(SLMIDIMuteSoloItf self, SLuint8 channel,
+    SLboolean mute)
 {
     if (channel > 15)
         return SL_RESULT_PARAMETER_INVALID;
@@ -46,7 +47,8 @@ static SLresult IMIDIMuteSolo_GetChannelMute(SLMIDIMuteSoloItf self, SLuint8 cha
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IMIDIMuteSolo_SetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 channel, SLboolean solo)
+static SLresult IMIDIMuteSolo_SetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 channel,
+    SLboolean solo)
 {
     if (channel > 15)
         return SL_RESULT_PARAMETER_INVALID;

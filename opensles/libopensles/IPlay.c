@@ -33,17 +33,11 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
     interface_lock_exclusive(this);
     if (this->mState != state) {
         this->mState = state;
-        if (SL_PLAYSTATE_STOPPED == state) {
+        if (SL_PLAYSTATE_STOPPED == state)
             this->mPosition = (SLmillisecond) 0;
-            // this->mPositionSamples = 0;
-        }
-#ifdef ANDROID
-        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-            result = sles_to_android_audioPlayerSetPlayState(this, state);
-        }
-#endif
-    }
-    interface_unlock_exclusive(this);
+        interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+    } else
+        interface_unlock_exclusive(this);
     return result;
 }
 
@@ -65,14 +59,22 @@ static SLresult IPlay_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
     IPlay *this = (IPlay *) self;
-    interface_lock_peek(this);
-#ifdef ANDROID
-    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-        result = sles_to_android_audioPlayerGetDuration(this, &this->mDuration);
-    }
-#endif
+    // even though this is a getter, it can modify state due to caching
+    interface_lock_exclusive(this);
     SLmillisecond duration = this->mDuration;
-    interface_unlock_peek(this);
+#ifdef ANDROID
+    if ((SL_TIME_UNKNOWN == duration) && (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this))) {
+        SLmillisecond temp;
+        result = sles_to_android_audioPlayerGetDuration(this, &temp);
+        if (SL_RESULT_SUCCESS == result) {
+            duration = temp;
+            this->mDuration = duration;
+        }
+    }
+#else
+    // will be set by containing AudioPlayer or MidiPlayer object at Realize
+#endif
+    interface_unlock_exclusive(this);
     *pMsec = duration;
     return result;
 }
@@ -82,16 +84,21 @@ static SLresult IPlay_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
     if (NULL == pMsec)
         return SL_RESULT_PARAMETER_INVALID;
     IPlay *this = (IPlay *) self;
+    SLmillisecond position;
     interface_lock_peek(this);
 #ifdef ANDROID
+    // Android does not use the mPosition field for audio players
     if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-        sles_to_android_audioPlayerGetPosition(this, &this->mPosition);
-    }
+        sles_to_android_audioPlayerGetPosition(this, &position);
+        // note that we do not cache the position
+    } else
+        position = this->mPosition;
+#else
+    // on other platforms we depend on periodic updates to the current position
+    position = this->mPosition;
 #endif
-    SLmillisecond position = this->mPosition;
     interface_unlock_peek(this);
     *pMsec = position;
-    // FIXME handle SL_TIME_UNKNOWN
     return SL_RESULT_SUCCESS;
 }
 
@@ -101,6 +108,7 @@ static SLresult IPlay_RegisterCallback(SLPlayItf self, slPlayCallback callback, 
     interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
+    // omits _attributes b/c noone cares deeply enough about these fields to need quick notification
     interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
@@ -112,13 +120,9 @@ static SLresult IPlay_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
     interface_lock_exclusive(this);
     if (this->mEventFlags != eventFlags) {
         this->mEventFlags = eventFlags;
-#ifdef ANDROID
-        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-            result = sles_to_android_audioPlayerUseEventMask(this, eventFlags);
-        }
-#endif
-    }
-    interface_unlock_exclusive(this);
+        interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+    } else
+        interface_unlock_exclusive(this);
     return result;
 }
 
@@ -141,31 +145,26 @@ static SLresult IPlay_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
     interface_lock_exclusive(this);
     if (this->mMarkerPosition != mSec) {
         this->mMarkerPosition = mSec;
-#ifdef ANDROID
-        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-            result = sles_to_android_audioPlayerUseEventMask(this, this->mEventFlags);
-        }
-#endif
-    }
-    interface_unlock_exclusive(this);
+        this->mMarkerIsSet = SL_BOOLEAN_TRUE;
+        interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+    } else
+        interface_unlock_exclusive(this);
     return result;
 }
 
 static SLresult IPlay_ClearMarkerPosition(SLPlayItf self)
 {
     IPlay *this = (IPlay *) self;
-    interface_lock_poke(this);
-    this->mMarkerPosition = 0;
+    interface_lock_exclusive(this);
+    this->mMarkerIsSet = SL_BOOLEAN_FALSE;
 #ifdef ANDROID
     if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
         // clearing the marker position can be simulated by using the event mask with a
         // cleared flag for the marker
         SLuint32 eventFlags = this->mEventFlags & (~SL_PLAYEVENT_HEADATMARKER);
-        sles_to_android_audioPlayerUseEventMask(this, eventFlags);
-        // FIXME verify this is still valid for a MediaPlayer
     }
 #endif
-    interface_unlock_poke(this);
+    interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
     return SL_RESULT_SUCCESS;
 }
 
@@ -192,11 +191,12 @@ static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec
         this->mPositionUpdatePeriod = mSec;
 #ifdef ANDROID
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-            result = sles_to_android_audioPlayerUseEventMask(this, this->mEventFlags);
+            // result = sles_to_android_audioPlayerUseEventMask(this, this->mEventFlags);
         }
 #endif
-    }
-    interface_unlock_exclusive(this);
+        interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+    } else
+        interface_unlock_exclusive(this);
     return result;
 }
 
@@ -232,12 +232,12 @@ void IPlay_init(void *self)
     IPlay *this = (IPlay *) self;
     this->mItf = &IPlay_Itf;
     this->mState = SL_PLAYSTATE_STOPPED;
-    this->mDuration = SL_TIME_UNKNOWN;  // will be set by containing AudioPlayer or MidiPlayer object
+    this->mDuration = SL_TIME_UNKNOWN;  // will be set by containing player object
     this->mPosition = (SLmillisecond) 0;
-    // this->mPlay.mPositionSamples = 0;
     this->mCallback = NULL;
     this->mContext = NULL;
     this->mEventFlags = 0;
     this->mMarkerPosition = 0;
+    this->mMarkerIsSet = SL_BOOLEAN_FALSE;
     this->mPositionUpdatePeriod = 1000;
 }

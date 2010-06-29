@@ -27,10 +27,16 @@ static SLresult ISeek_SetPosition(SLSeekItf self, SLmillisecond pos, SLuint32 se
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }
+    // maximum position is a special value that indicates a seek is not pending
+    if (SL_TIME_UNKNOWN == pos)
+        pos = SL_TIME_UNKNOWN - 1;
     ISeek *this = (ISeek *) self;
-    interface_lock_poke(this);
-    this->mPos = pos;
-    interface_unlock_poke(this);
+    interface_lock_exclusive(this);
+    if (pos != this->mPos) {
+        this->mPos = pos;
+        interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+    } else
+        interface_unlock_exclusive(this);
     return SL_RESULT_SUCCESS;
 }
 
@@ -44,7 +50,7 @@ static SLresult ISeek_SetLoop(SLSeekItf self, SLboolean loopEnable,
     this->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize
     this->mStartPos = startPos;
     this->mEndPos = endPos;
-    interface_unlock_exclusive(this);
+    interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
     return SL_RESULT_SUCCESS;
 }
 
@@ -75,8 +81,8 @@ void ISeek_init(void *self)
 {
     ISeek *this = (ISeek *) self;
     this->mItf = &ISeek_Itf;
-    this->mPos = (SLmillisecond) -1;
-    this->mStartPos = (SLmillisecond) -1;
-    this->mEndPos = (SLmillisecond) -1;
+    this->mPos = (SLmillisecond) SL_TIME_UNKNOWN;
+    this->mStartPos = (SLmillisecond) 0;
+    this->mEndPos = (SLmillisecond) SL_TIME_UNKNOWN;
     this->mLoopEnabled = SL_BOOLEAN_FALSE;
 }

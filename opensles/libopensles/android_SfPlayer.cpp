@@ -16,6 +16,7 @@
 
 #include "android_SfPlayer.h"
 
+#include <stdio.h>
 
 namespace android {
 

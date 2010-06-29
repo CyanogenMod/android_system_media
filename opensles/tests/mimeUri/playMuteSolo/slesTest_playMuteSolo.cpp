@@ -280,7 +280,7 @@ int main(int argc, char* const argv[])
 
     if (argc == 1) {
         fprintf(stdout, "Usage: \t%s url\n", argv[0]);
-        fprintf(stdout, "Example: \"%s /sdcard/my.mp3\" ", argv[0]);
+        fprintf(stdout, "Example: \"%s /sdcard/my.mp3\"\n", argv[0]);
         exit(1);
     }
 

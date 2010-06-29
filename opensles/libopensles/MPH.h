@@ -19,6 +19,8 @@
 
 // Minimal perfect hash for each interface ID
 
+#define MPH_NONE                      (-1)
+
 #define MPH_3DCOMMIT                    0
 #define MPH_3DDOPPLER                   1
 #define MPH_3DGROUPING                  2

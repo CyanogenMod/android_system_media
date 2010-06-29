@@ -23,7 +23,10 @@
 void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
 {
     CAudioPlayer *thisAP = (CAudioPlayer *) pContext;
-    if (thisAP->mPlay.mState != SL_PLAYSTATE_PLAYING)
+    object_lock_peek(&thisAP->mObject);
+    SLuint32 state = thisAP->mPlay.mState;
+    object_unlock_peek(&thisAP->mObject);
+    if (SL_PLAYSTATE_PLAYING != state)
         return;
     struct SndFile *this = &thisAP->mSndFile;
     SLresult result;
@@ -36,11 +39,19 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
         this->mRetrySize = 0;
         return;
     }
+    pthread_mutex_lock(&this->mMutex);
+    if (this->mEOF) {
+        pthread_mutex_unlock(&this->mMutex);
+        return;
+    }
     short *pBuffer = &this->mBuffer[this->mWhich * SndFile_BUFSIZE];
     if (++this->mWhich >= SndFile_NUMBUFS)
         this->mWhich = 0;
     sf_count_t count;
     count = sf_read_short(this->mSNDFILE, pBuffer, (sf_count_t) SndFile_BUFSIZE);
+    if (0 >= count)
+        this->mEOF = SL_BOOLEAN_TRUE;
+    pthread_mutex_unlock(&this->mMutex);
     if (0 < count) {
         SLuint32 size = (SLuint32) (count * sizeof(short));
         result = (*caller)->Enqueue(caller, pBuffer, size);
@@ -51,8 +62,12 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
         }
         assert(SL_RESULT_SUCCESS == result);
     } else {
+        object_lock_exclusive(&thisAP->mObject);
+        // FIXME Uh not yet - we just ran out of new data to enqueue,
+        // but there may still be (partially) full buffers in the queue.
         thisAP->mPlay.mState = SL_PLAYSTATE_PAUSED;
-        (void) sf_seek(this->mSNDFILE, (sf_count_t) 0, SEEK_SET);
+        thisAP->mPlay.mPosition = thisAP->mPlay.mDuration;
+        object_unlock_exclusive_attributes(&thisAP->mObject, ATTR_TRANSPORT);
     }
 }
 
@@ -122,9 +137,29 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
     }
     this->mSndFile.mWhich = 0;
     this->mSndFile.mSNDFILE = NULL;
+    // this->mSndFile.mMutex is initialized only when there is a valid mSNDFILE
+    this->mSndFile.mEOF = SL_BOOLEAN_FALSE;
     this->mSndFile.mRetryBuffer = NULL;
     this->mSndFile.mRetrySize = 0;
     return SL_RESULT_SUCCESS;
+}
+
+void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer)
+{
+    // marker and position updates here???
+    SLmillisecond pos;
+
+    pos = audioPlayer->mSeek.mPos;
+    audioPlayer->mSeek.mPos = SL_TIME_UNKNOWN;
+
+    if ((SL_TIME_UNKNOWN != pos) && (NULL != audioPlayer->mSndFile.mSNDFILE)) {
+        pthread_mutex_lock(&audioPlayer->mSndFile.mMutex);
+        // FIXME use pos not 0
+        (void) sf_seek(audioPlayer->mSndFile.mSNDFILE, (sf_count_t) 0, SEEK_SET);
+        audioPlayer->mSndFile.mEOF = SL_BOOLEAN_FALSE;
+        pthread_mutex_unlock(&audioPlayer->mSndFile.mMutex);
+    }
+
 }
 
 #endif // USE_SNDFILE

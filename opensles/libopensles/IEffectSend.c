@@ -119,7 +119,8 @@ static SLresult IEffectSend_GetDirectLevel(SLEffectSendItf self, SLmillibel *pDi
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self, const void *pAuxEffect, SLmillibel sendLevel)
+static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self, const void *pAuxEffect,
+    SLmillibel sendLevel)
 {
     if (!((SL_MILLIBEL_MIN <= sendLevel) && (sendLevel <= 0)))
         return SL_RESULT_PARAMETER_INVALID;
@@ -134,7 +135,8 @@ static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self, const void *pAuxE
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEffectSend_GetSendLevel(SLEffectSendItf self, const void *pAuxEffect, SLmillibel *pSendLevel)
+static SLresult IEffectSend_GetSendLevel(SLEffectSendItf self, const void *pAuxEffect,
+    SLmillibel *pSendLevel)
 {
     if (NULL == pSendLevel)
         return SL_RESULT_PARAMETER_INVALID;
