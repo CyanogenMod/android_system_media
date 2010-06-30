@@ -174,6 +174,9 @@ typedef union {
     SLDataLocator_MIDIBufferQueue mMIDIBufferQueue;
     SLDataLocator_OutputMix mOutputMix;
     SLDataLocator_URI mURI;
+#ifdef ANDROID
+    SLDataLocator_AndroidFD mFD;
+#endif
 } DataLocator;
 
 typedef union {

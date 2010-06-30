@@ -406,20 +406,38 @@ SLresult sles_to_android_checkAudioPlayerSourceSink(CAudioPlayer *pAudioPlayer)
     //   URI
     case SL_DATALOCATOR_URI:
         {
-            SLDataLocator_URI *dl_uri =  (SLDataLocator_URI *) pAudioSrc->pLocator;
-            if (NULL == dl_uri->URI) {
-                return SL_RESULT_PARAMETER_INVALID;
-            }
-            // URI format
-            switch (formatType) {
-            case SL_DATAFORMAT_MIME:
-                break;
-            case SL_DATAFORMAT_PCM:
-            case SL_DATAFORMAT_RESERVED3:
-                fprintf(stderr, "Error: cannot create Audio Player with SL_DATALOCATOR_URI data source without SL_DATAFORMAT_MIME format\n");
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            } // switch (formatType)
+        SLDataLocator_URI *dl_uri =  (SLDataLocator_URI *) pAudioSrc->pLocator;
+        if (NULL == dl_uri->URI) {
+            return SL_RESULT_PARAMETER_INVALID;
+        }
+        // URI format
+        switch (formatType) {
+        case SL_DATAFORMAT_MIME:
+            break;
+        case SL_DATAFORMAT_PCM:
+        case SL_DATAFORMAT_RESERVED3:
+            fprintf(stderr, "Error: cannot create Audio Player with SL_DATALOCATOR_URI data source without SL_DATAFORMAT_MIME format\n");
+            return SL_RESULT_CONTENT_UNSUPPORTED;
+        } // switch (formatType)
         } // case SL_DATALOCATOR_URI
+        break;
+    //------------------
+    //   File Descriptor
+    case SL_DATALOCATOR_ANDROIDFD:
+        {
+        // fd is already non null
+        switch (formatType) {
+        case SL_DATAFORMAT_MIME:
+            break;
+        case SL_DATAFORMAT_PCM:
+            // FIXME implement
+            fprintf(stderr, "[ FIXME implement PCM FD data sources ]\n");
+            break;
+        case SL_DATAFORMAT_RESERVED3:
+            fprintf(stderr, "Error: cannot create Audio Player with SL_DATALOCATOR_ANDROIDFD data source without SL_DATAFORMAT_MIME or SL_DATAFORMAT_PCM format\n");
+            return SL_RESULT_CONTENT_UNSUPPORTED;
+        } // switch (formatType)
+        } // case SL_DATALOCATOR_ANDROIDFD
         break;
     //------------------
     //   Address
@@ -574,8 +592,9 @@ SLresult sles_to_android_audioPlayerCreate(
         pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
         break;
     //   -----------------------------------
-    //   URI to MediaPlayer
+    //   URI or FD to MediaPlayer
     case SL_DATALOCATOR_URI:
+    case SL_DATALOCATOR_ANDROIDFD:
         pAudioPlayer->mAndroidObjType = MEDIAPLAYER;
         pAudioPlayer->mpLock = new android::Mutex();
         pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
@@ -653,8 +672,26 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
         pAudioPlayer->mRenderLooper->start(false /*runOnCallingThread*/);
         object_unlock_exclusive(&pAudioPlayer->mObject);
 
-        int res = pAudioPlayer->mSfPlayer->prepare_sync(
-                (const char*)pAudioPlayer->mDataSource.mLocator.mURI.URI);
+        int res;
+        switch (pAudioPlayer->mDataSource.mLocator.mLocatorType) {
+            case SL_DATALOCATOR_URI:
+                pAudioPlayer->mSfPlayer->setDataSource(
+                        (const char*)pAudioPlayer->mDataSource.mLocator.mURI.URI);
+                res = pAudioPlayer->mSfPlayer->prepare_sync();
+                break;
+            case SL_DATALOCATOR_ANDROIDFD: {
+                int64_t offset = (int64_t)pAudioPlayer->mDataSource.mLocator.mFD.offset;
+                pAudioPlayer->mSfPlayer->setDataSource(
+                        (int)pAudioPlayer->mDataSource.mLocator.mFD.fd,
+                        offset == SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ?
+                                (int64_t)SFPLAYER_FD_FIND_FILE_SIZE : offset,
+                        (int64_t)pAudioPlayer->mDataSource.mLocator.mFD.length);
+                res = pAudioPlayer->mSfPlayer->prepare_sync();
+                } break;
+            default:
+                res = ~SFPLAYER_SUCCESS;
+                break;
+        }
 
         object_lock_exclusive(&pAudioPlayer->mObject);
         if (SFPLAYER_SUCCESS != res) {
@@ -739,8 +776,6 @@ SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer) {
     SLresult result = SL_RESULT_SUCCESS;
     //fprintf(stdout, "sles_to_android_audioPlayerDestroy\n");
 
-    pAudioPlayer->mAndroidObjType = INVALID_TYPE;
-
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
     // AudioTrack
@@ -772,6 +807,8 @@ SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer) {
         delete pAudioPlayer->mpLock;
         pAudioPlayer->mpLock = NULL;
     }
+
+    pAudioPlayer->mAndroidObjType = INVALID_TYPE;
 
     return result;
 }

@@ -30,6 +30,7 @@ SfPlayer::SfPlayer(const sp<ALooper> &renderLooper)
       mTimeDelta(-1),
       mDurationUsec(-1),
       mCacheStatus(kStatusEmpty),
+      mDataLocatorType(kDataLocatorNone),
       mNotifyClient(NULL),
       mNotifyUser(NULL) {
 }
@@ -41,6 +42,8 @@ SfPlayer::~SfPlayer() {
     if (mAudioSource != NULL) {
         mAudioSource->stop();
     }
+
+    resetDataLocator();
 
     // FIXME need to call quit()?
     quit();
@@ -66,37 +69,101 @@ void SfPlayer::notify(const sp<AMessage> &msg, bool async) {
 }
 
 
-void SfPlayer::prepare_async(const char *uri) {
-    //fprintf(stderr, "SfPlayer::prepare_async(%s)\n", uri);
+void SfPlayer::setDataSource(const char *uri) {
+    resetDataLocator();
+
+    size_t len = strlen((const char *) uri);
+    char* newUri = (char*) malloc(len + 1);
+    if (NULL == newUri) {
+        // mem issue
+        fprintf(stderr, "SfPlayer::setDataSource: ERROR not enough memory to allocator URI string\n");
+        return;
+    }
+    memcpy(newUri, uri, len + 1);
+    mDataLocator.uri = newUri;
+
+    mDataLocatorType = kDataLocatorUri;
+}
+
+void SfPlayer::setDataSource(const int fd, const int64_t offset, const int64_t length) {
+    resetDataLocator();
+
+    mDataLocator.fdi.fd = fd;
+
+    struct stat sb;
+    int ret = fstat(fd, &sb);
+    if (ret != 0) {
+        // sockets are not supported
+        fprintf(stderr, "SfPlayer::setDataSource: ERROR fstat(%d) failed: %d, %s\n", fd, ret, strerror(errno));
+        return;
+    }
+
+    if (offset >= sb.st_size) {
+        fprintf(stderr, "SfPlayer::setDataSource: ERROR invalid offset\n");
+        return;
+    }
+    mDataLocator.fdi.offset = offset;
+
+    if (SFPLAYER_FD_FIND_FILE_SIZE == length) {
+        mDataLocator.fdi.length = sb.st_size;
+    } else if (offset + length > sb.st_size) {
+        mDataLocator.fdi.length = sb.st_size - offset;
+    } else {
+        mDataLocator.fdi.length = length;
+    }
+
+    mDataLocatorType = kDataLocatorFd;
+}
+
+void SfPlayer::prepare_async() {
+    //fprintf(stderr, "SfPlayer::prepare_async()\n");
     sp<AMessage> msg = new AMessage(kWhatPrepare, id());
-    msg->setString("uri", uri);
     msg->post();
 }
 
-int SfPlayer::prepare_sync(const char *uri) {
-    //fprintf(stderr, "SfPlayer::prepare_sync(%s)\n", uri);
+int SfPlayer::prepare_sync() {
+    //fprintf(stderr, "SfPlayer::prepare_sync()\n");
     sp<AMessage> msg = new AMessage(kWhatPrepare, id());
-    msg->setString("uri", uri);
     return onPrepare(msg);
 }
 
 int SfPlayer::onPrepare(const sp<AMessage> &msg) {
     //fprintf(stderr, "SfPlayer::onPrepare\n");
-    AString uri;
-    CHECK(msg->findString("uri", &uri));
-
     sp<DataSource> dataSource;
 
-    if (!strncasecmp(uri.c_str(), "http://", 7)) {
-        sp<NuHTTPDataSource> http = new NuHTTPDataSource;
-        if (http->connect(uri.c_str()) == OK) {
-            dataSource =
-                new NuCachedSource2(
-                        new ThrottledSource(
-                            http, 5 * 1024 /* bytes/sec */));
-        }
-    } else {
-        dataSource = DataSource::CreateFromURI(uri.c_str());
+    switch (mDataLocatorType) {
+
+        case kDataLocatorNone:
+            fprintf(stderr, "SfPlayer::onPrepare: ERROR no data locator set\n");
+            return MEDIA_ERROR_BASE;
+            break;
+
+        case kDataLocatorUri:
+            if (!strncasecmp(mDataLocator.uri, "http://", 7)) {
+                sp<NuHTTPDataSource> http = new NuHTTPDataSource;
+                if (http->connect(mDataLocator.uri) == OK) {
+                    dataSource =
+                        new NuCachedSource2(
+                                new ThrottledSource(
+                                        http, 5 * 1024 /* bytes/sec */));
+                }
+            } else {
+                dataSource = DataSource::CreateFromURI(mDataLocator.uri);
+            }
+            break;
+
+        case kDataLocatorFd: {
+            dataSource = new FileSource(
+                    mDataLocator.fdi.fd, mDataLocator.fdi.offset, mDataLocator.fdi.length);
+            status_t err = dataSource->initCheck();
+            if (err != OK) {
+                return err;
+            }
+            }
+            break;
+
+        default:
+            TRESPASS();
     }
 
     if (dataSource == NULL) {
@@ -106,7 +173,6 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
     }
 
     sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
-    fprintf(stderr, "SfPlayer::onPrepare#2\n");
     if (extractor == NULL) {
         fprintf(stderr, "SfPlayer::onPrepare: ERROR: Could not instantiate extractor.\n");
         quit();
@@ -388,6 +454,21 @@ void SfPlayer::quit() {
     CHECK(looper != NULL);
     looper->stop();
 }
+
+/*
+ * post-condition: mDataLocatorType == kDataLocatorNone
+ *
+ */
+void SfPlayer::resetDataLocator() {
+    if (kDataLocatorUri == mDataLocatorType) {
+        if (NULL != mDataLocator.uri) {
+            free(mDataLocator.uri);
+            mDataLocator.uri = NULL;
+        }
+    }
+    mDataLocatorType = kDataLocatorNone;
+}
+
 
 void SfPlayer::onMessageReceived(const sp<AMessage> &msg) {
     switch (msg->what()) {

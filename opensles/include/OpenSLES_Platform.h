@@ -6,11 +6,11 @@
  * deal in the Materials without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Materials, and to permit persons to whom the Materials are
- * furnished to do so, subject to 
- * the following conditions: 
+ * furnished to do so, subject to
+ * the following conditions:
  *
- * The above copyright notice and this permission notice shall be included 
- * in all copies or substantial portions of the Materials. 
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Materials.
  *
  * THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -39,6 +39,10 @@ typedef unsigned short              sl_uint16_t;
 typedef signed short                sl_int16_t;
 typedef unsigned long               sl_uint32_t;
 typedef signed long                 sl_int32_t;
+
+#ifdef ANDROID
+typedef long long                   sl_int64_t;
+#endif
 
 #ifndef SLAPIENTRY
 #ifdef __GNUC__

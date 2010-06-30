@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 #include <binder/ProcessState.h>
-
+#include <sys/stat.h>
 #include <media/AudioTrack.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AHandler.h>
 #include <media/stagefright/foundation/ALooper.h>
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/DataSource.h>
+#include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MetaData.h>
@@ -36,6 +37,7 @@
 #define EVENT_ENDOFSTREAM             "eos"
 
 #define SFPLAYER_SUCCESS 1
+#define SFPLAYER_FD_FIND_FILE_SIZE 0xFFFFFFFFFFFFFFFF /* int64_t */
 
 namespace android {
 
@@ -61,8 +63,11 @@ struct SfPlayer : public AHandler {
     void useAudioTrack(AudioTrack* pTrack);
     void setNotifListener(const notif_client_t cbf, void* notifUser);
 
-    void prepare_async(const char *uri);
-    int  prepare_sync(const char *uri);
+    void setDataSource(const char *uri);
+    void setDataSource(const int fd, const int64_t offset, const int64_t length);
+
+    void prepare_async();
+    int  prepare_sync();
     void play();
     void stop();
     bool wantPrefetch();
@@ -82,6 +87,12 @@ protected:
 private:
 
     enum {
+        kDataLocatorNone = 'none',
+        kDataLocatorUri  = 'uri',
+        kDataLocatorFd   = 'fd',
+    };
+
+    enum {
         kWhatPrepare    = 'prep',
         kWhatDecode     = 'deco',
         kWhatRender     = 'rend',
@@ -93,6 +104,17 @@ private:
         kFlagPlaying   = 1,
         kFlagPreparing = 2,
         kFlagBuffering = 4,
+    };
+
+    struct FdInfo {
+        int fd;
+        int64_t offset;
+        int64_t length;
+    };
+
+    union DataLocator {
+        char* uri;
+        FdInfo fdi;
     };
 
     AudioTrack *mAudioTrack;
@@ -108,6 +130,9 @@ private:
     int64_t mDurationUsec;
     CacheStatus mCacheStatus;
 
+    DataLocator mDataLocator;
+    int         mDataLocatorType;
+
     notif_client_t mNotifyClient;
     void*          mNotifyUser;
 
@@ -121,6 +146,7 @@ private:
     void notify(const sp<AMessage> &msg, bool async);
 
     void quit();
+    void resetDataLocator();
 
     DISALLOW_EVIL_CONSTRUCTORS(SfPlayer);
 };
