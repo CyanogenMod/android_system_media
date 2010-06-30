@@ -21,6 +21,13 @@
 extern "C" {
 
 /*---------------------------------------------------------------------------*/
+/* Android common types                                                      */
+/*---------------------------------------------------------------------------*/
+
+typedef sl_int64_t             SLAint64;           /* 64 bit signed integer */
+
+
+/*---------------------------------------------------------------------------*/
 /* Android Stream Type interface                                             */
 /*---------------------------------------------------------------------------*/
 
@@ -59,6 +66,23 @@ struct SLAndroidStreamTypeItf_ {
         SLuint32 *pType
     );
 };
+
+/*---------------------------------------------------------------------------*/
+/* Android File Descriptor Data Locator                                      */
+/*---------------------------------------------------------------------------*/
+/** Addendum to Data locator macros  */
+#define SL_DATALOCATOR_ANDROIDFD        ((SLuint32) 0x00000009)
+
+#define SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ((SLAint64) 0xFFFFFFFFFFFFFFFF)
+
+/** File Descriptor-based data locator definition where locatorType must be SL_DATALOCATOR_ANDROIDFD */
+typedef struct SLDataLocator_AndroidFD_ {
+    SLuint32        locatorType;
+    SLint32         fd;
+    SLAint64        offset;
+    SLAint64        length;
+} SLDataLocator_AndroidFD;
+
 
 }
 #endif /* __cplusplus */

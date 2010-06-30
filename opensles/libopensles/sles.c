@@ -183,7 +183,9 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
         break;
     case SL_DATALOCATOR_OUTPUTMIX:
         pDataLocator->mOutputMix = *(SLDataLocator_OutputMix *)pLocator;
-        if ((NULL == pDataLocator->mOutputMix.outputMix) || (SL_OBJECTID_OUTPUTMIX != IObjectToObjectID((IObject *) pDataLocator->mOutputMix.outputMix)))
+        if ((NULL == pDataLocator->mOutputMix.outputMix)
+                || (SL_OBJECTID_OUTPUTMIX
+                        != IObjectToObjectID((IObject *) pDataLocator->mOutputMix.outputMix)))
             return SL_RESULT_PARAMETER_INVALID;
         break;
     case SL_DATALOCATOR_URI:
@@ -205,13 +207,26 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
         pDataLocator->mURI.URI = myURI;
         }
         break;
+#ifdef ANDROID
+    case SL_DATALOCATOR_ANDROIDFD:
+        {
+        pDataLocator->mFD = *(SLDataLocator_AndroidFD *)pLocator;
+        fprintf(stdout, "Data locator FD: fd=%ld offset=%lld length=%lld\n", pDataLocator->mFD.fd,
+                pDataLocator->mFD.offset, pDataLocator->mFD.length);
+        if (-1 == pDataLocator->mFD.fd) {
+            return SL_RESULT_PARAMETER_INVALID;
+        }
+        }
+        break;
+#endif
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }
     // Verify that another thread didn't change the locatorType field after we used it
     // to determine sizeof struct to copy.
-    if (locatorType != pDataLocator->mLocatorType)
+    if (locatorType != pDataLocator->mLocatorType) {
         return SL_RESULT_PARAMETER_INVALID;
+    }
     return SL_RESULT_SUCCESS;
 }
 
