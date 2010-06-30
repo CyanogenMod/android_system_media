@@ -37,7 +37,7 @@
 #define EVENT_ENDOFSTREAM             "eos"
 
 #define SFPLAYER_SUCCESS 1
-#define SFPLAYER_FD_FIND_FILE_SIZE 0xFFFFFFFFFFFFFFFFll /* int64_t */
+#define SFPLAYER_FD_FIND_FILE_SIZE ((int64_t)0xFFFFFFFFFFFFFFFFll)
 
 namespace android {
 
@@ -69,6 +69,7 @@ struct SfPlayer : public AHandler {
     void prepare_async();
     int  prepare_sync();
     void play();
+    void pause();
     void stop();
     bool wantPrefetch();
     void startPrefetch_async();
@@ -98,6 +99,8 @@ private:
         kWhatRender     = 'rend',
         kWhatCheckCache = 'cach',
         kWhatNotif      = 'noti',
+        kWhatPlay       = 'play',
+        kWhatPause      = 'paus',
     };
 
     enum {
@@ -141,6 +144,8 @@ private:
     void onRender(const sp<AMessage> &msg);
     void onCheckCache(const sp<AMessage> &msg);
     void onNotify(const sp<AMessage> &msg);
+    void onPlay();
+    void onPause();
 
     CacheStatus getCacheRemaining(bool *eos);
     void notify(const sp<AMessage> &msg, bool async);

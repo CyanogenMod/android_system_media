@@ -279,15 +279,31 @@ void SfPlayer::startPrefetch_async() {
 }
 
 void SfPlayer::play() {
-    // FIXME start based on play state
     fprintf(stderr, "SfPlayer::play\n");
-    mFlags |= kFlagPlaying;
+    mAudioTrack->start();
+    (new AMessage(kWhatPlay, id()))->post();
     (new AMessage(kWhatDecode, id()))->post();
 }
 
 
 void SfPlayer::stop() {
     fprintf(stderr, "SfPlayer::stop\n");
+    (new AMessage(kWhatPause, id()))->post();
+    mAudioTrack->stop();
+}
+
+void SfPlayer::pause() {
+    fprintf(stderr, "SfPlayer::pause\n");
+    (new AMessage(kWhatPause, id()))->post();
+    mAudioTrack->pause();
+}
+
+
+void SfPlayer::onPlay() {
+    mFlags |= kFlagPlaying;
+}
+
+void SfPlayer::onPause() {
     mFlags &= ~kFlagPlaying;
 }
 
@@ -300,9 +316,16 @@ void SfPlayer::onDecode() {
             && !eos) {
         printf("buffering more.\n");
 
-        //mAudioTrack->pause();
+        if (mFlags & kFlagPlaying) {
+            mAudioTrack->pause();
+        }
         mFlags |= kFlagBuffering;
         (new AMessage(kWhatCheckCache, id()))->post(100000);
+        return;
+    }
+
+    if (!(mFlags & (kFlagPlaying | kFlagBuffering | kFlagPreparing))) {
+        // don't decode if we're not buffering, prefetching or playing
         return;
     }
 
@@ -340,22 +363,20 @@ void SfPlayer::onDecode() {
 
 void SfPlayer::onRender(const sp<AMessage> &msg) {
     //fprintf(stderr, "SfPlayer::onRender\n");
-    if (!(mFlags & kFlagPlaying)) {
-        return;
-    }
-    //fprintf(stderr, "SfPlayer::onRender (rendering)\n");
 
     MediaBuffer *buffer;
     CHECK(msg->findPointer("mbuffer", (void **)&buffer));
 
-    mAudioTrack->write(
-            (const uint8_t *)buffer->data() + buffer->range_offset(),
-            buffer->range_length());
-
+    if (mFlags & kFlagPlaying) {
+        mAudioTrack->write(
+                (const uint8_t *)buffer->data() + buffer->range_offset(),
+                buffer->range_length());
+        (new AMessage(kWhatDecode, id()))->post();
+    }
     buffer->release();
     buffer = NULL;
 
-    (new AMessage(kWhatDecode, id()))->post();
+
 }
 
 void SfPlayer::onCheckCache(const sp<AMessage> &msg) {
@@ -365,8 +386,9 @@ void SfPlayer::onCheckCache(const sp<AMessage> &msg) {
 
     if (eos || status == kStatusHigh
             || ((mFlags & kFlagPreparing) && (status >= kStatusEnough))) {
-        // FIXME restart based on play state
-        //mAudioTrack->start();
+        if (mFlags & kFlagPlaying) {
+            mAudioTrack->start();
+        }
         mFlags &= ~kFlagBuffering;
 
         printf("SfPlayer::onCheckCache: buffering done.\n");
@@ -490,6 +512,14 @@ void SfPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
         case kWhatNotif:
             onNotify(msg);
+            break;
+
+        case kWhatPlay:
+            onPlay();
+            break;
+
+        case kWhatPause:
+            onPause();
             break;
 
         default:
