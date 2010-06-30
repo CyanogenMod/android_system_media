@@ -99,3 +99,10 @@ void object_cond_signal(IObject *this)
     ok = pthread_cond_signal(&this->mCond);
     assert(0 == ok);
 }
+
+void object_cond_broadcast(IObject *this)
+{
+    int ok;
+    ok = pthread_cond_broadcast(&this->mCond);
+    assert(0 == ok);
+}

@@ -25,13 +25,13 @@ static SLresult IEngineCapabilities_QuerySupportedProfiles(
         return SL_RESULT_PARAMETER_INVALID;
     // The generic implementation doesn't implement any of the profiles, they shouldn't
     // be declared as supported. Also omits the unofficial driver profile.
-    *pProfilesSupported = 0; // SL_PROFILES_PHONE | SL_PROFILES_MUSIC | SL_PROFILES_GAME
+    // FIXME This isn't completely true but being used temporarily.
+    *pProfilesSupported = SL_PROFILES_PHONE | SL_PROFILES_MUSIC | SL_PROFILES_GAME;
     return SL_RESULT_SUCCESS;
 }
 
-static SLresult IEngineCapabilities_QueryAvailableVoices(
-    SLEngineCapabilitiesItf self, SLuint16 voiceType, SLint16 *pNumMaxVoices,
-    SLboolean *pIsAbsoluteMax, SLint16 *pNumFreeVoices)
+static SLresult IEngineCapabilities_QueryAvailableVoices(SLEngineCapabilitiesItf self,
+    SLuint16 voiceType, SLint16 *pNumMaxVoices, SLboolean *pIsAbsoluteMax, SLint16 *pNumFreeVoices)
 {
     switch (voiceType) {
     case SL_VOICETYPE_2D_AUDIO:

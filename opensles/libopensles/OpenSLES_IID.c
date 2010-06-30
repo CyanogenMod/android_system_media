@@ -59,10 +59,10 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     { 0x70bc7b00, 0xddd3, 0x11db, 0xa873, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_AUDIODECODERCAPABILITIES
     { 0x3fe5a3a0, 0xfcc6, 0x11db, 0x94ac, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-    // SL_IID_AUDIOENCODERCAPABILITIES
-    { 0x0f52a340, 0xfcd1, 0x11db, 0xa993, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_AUDIOENCODER
     { 0xd7d5af7a, 0x351c, 0x41a6, 0x94ec, { 0x1a, 0xc9, 0x5c, 0x71, 0x82, 0x2c } },
+    // SL_IID_AUDIOENCODERCAPABILITIES
+    { 0x0f52a340, 0xfcd1, 0x11db, 0xa993, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_AUDIOIODEVICECAPABILITIES
     { 0xb2564dc0, 0xddd3, 0x11db, 0xbd62, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_BASSBOOST
@@ -77,10 +77,10 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     { 0xc55cc100, 0x038b, 0x11dc, 0xbb45, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_EFFECTSEND
     { 0x56e7d200, 0xddd4, 0x11db, 0xaefb, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-    // SL_IID_ENGINECAPABILITIES
-    { 0x8320d0a0, 0xddd5, 0x11db, 0xa1b1, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_ENGINE
     { 0x8d97c260, 0xddd4, 0x11db, 0x958f, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
+    // SL_IID_ENGINECAPABILITIES
+    { 0x8320d0a0, 0xddd5, 0x11db, 0xa1b1, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_ENVIRONMENTALREVERB
     { 0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac, { 0x4e, 0x23, 0x4d, 0x6, 0x83, 0x9e } },
     // SL_IID_EQUALIZER
@@ -109,10 +109,10 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     { 0x97750f60, 0xddd7, 0x11db, 0x92b1, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_PITCH
     { 0xc7e8ee00, 0xddd7, 0x11db, 0xa42c, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-    // SL_IID_PLAYBACKRATE
-    { 0x2e3b2a40, 0xddda, 0x11db, 0xa349, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_PLAY
     { 0xef0bd9c0, 0xddd7, 0x11db, 0xbf49, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
+    // SL_IID_PLAYBACKRATE
+    { 0x2e3b2a40, 0xddda, 0x11db, 0xa349, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_PREFETCHSTATUS
     { 0x2a41ee80, 0xddd8, 0x11db, 0xa41f, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_PRESETREVERB
@@ -135,10 +135,8 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     { 0x09e8ede0, 0xddde, 0x11db, 0xb4f6, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_OUTPUTMIXEXT (note that the lack of an ifdef is intentional)
     { 0xfe5cce00, 0x57bb, 0x11df, 0x951c, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-#ifdef ANDROID
-    // SL_IID_ANDROIDSTREAMTYPE
+    // SL_IID_ANDROIDSTREAMTYPE (the lack of ifdef is intentional)
     { 0x843b5f60, 0x82d6, 0x11df, 0xac5b, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } }
-#endif
 };
 
 #ifdef __cplusplus
@@ -150,13 +148,10 @@ const SLInterfaceID SL_IID_3DGROUPING = &SL_IID_array[MPH_3DGROUPING];
 const SLInterfaceID SL_IID_3DLOCATION = &SL_IID_array[MPH_3DLOCATION];
 const SLInterfaceID SL_IID_3DMACROSCOPIC = &SL_IID_array[MPH_3DMACROSCOPIC];
 const SLInterfaceID SL_IID_3DSOURCE = &SL_IID_array[MPH_3DSOURCE];
-const SLInterfaceID SL_IID_AUDIODECODERCAPABILITIES =
-    &SL_IID_array[MPH_AUDIODECODERCAPABILITIES];
+const SLInterfaceID SL_IID_AUDIODECODERCAPABILITIES = &SL_IID_array[MPH_AUDIODECODERCAPABILITIES];
 const SLInterfaceID SL_IID_AUDIOENCODER = &SL_IID_array[MPH_AUDIOENCODER];
-const SLInterfaceID SL_IID_AUDIOENCODERCAPABILITIES =
-    &SL_IID_array[MPH_AUDIOENCODERCAPABILITIES];
-const SLInterfaceID SL_IID_AUDIOIODEVICECAPABILITIES =
-    &SL_IID_array[MPH_AUDIOIODEVICECAPABILITIES];
+const SLInterfaceID SL_IID_AUDIOENCODERCAPABILITIES = &SL_IID_array[MPH_AUDIOENCODERCAPABILITIES];
+const SLInterfaceID SL_IID_AUDIOIODEVICECAPABILITIES = &SL_IID_array[MPH_AUDIOIODEVICECAPABILITIES];
 const SLInterfaceID SL_IID_BASSBOOST = &SL_IID_array[MPH_BASSBOOST];
 const SLInterfaceID SL_IID_BUFFERQUEUE = &SL_IID_array[MPH_BUFFERQUEUE];
 const SLInterfaceID SL_IID_DEVICEVOLUME = &SL_IID_array[MPH_DEVICEVOLUME];
@@ -165,16 +160,12 @@ const SLInterfaceID SL_IID_DYNAMICINTERFACEMANAGEMENT =
 const SLInterfaceID SL_IID_DYNAMICSOURCE = &SL_IID_array[MPH_DYNAMICSOURCE];
 const SLInterfaceID SL_IID_EFFECTSEND = &SL_IID_array[MPH_EFFECTSEND];
 const SLInterfaceID SL_IID_ENGINE = &SL_IID_array[MPH_ENGINE];
-const SLInterfaceID SL_IID_ENGINECAPABILITIES =
-    &SL_IID_array[MPH_ENGINECAPABILITIES];
-const SLInterfaceID SL_IID_ENVIRONMENTALREVERB =
-    &SL_IID_array[MPH_ENVIRONMENTALREVERB];
+const SLInterfaceID SL_IID_ENGINECAPABILITIES = &SL_IID_array[MPH_ENGINECAPABILITIES];
+const SLInterfaceID SL_IID_ENVIRONMENTALREVERB = &SL_IID_array[MPH_ENVIRONMENTALREVERB];
 const SLInterfaceID SL_IID_EQUALIZER = &SL_IID_array[MPH_EQUALIZER];
 const SLInterfaceID SL_IID_LED = &SL_IID_array[MPH_LED];
-const SLInterfaceID SL_IID_METADATAEXTRACTION =
-    &SL_IID_array[MPH_METADATAEXTRACTION];
-const SLInterfaceID SL_IID_METADATATRAVERSAL =
-    &SL_IID_array[MPH_METADATATRAVERSAL];
+const SLInterfaceID SL_IID_METADATAEXTRACTION = &SL_IID_array[MPH_METADATAEXTRACTION];
+const SLInterfaceID SL_IID_METADATATRAVERSAL = &SL_IID_array[MPH_METADATATRAVERSAL];
 const SLInterfaceID SL_IID_MIDIMESSAGE = &SL_IID_array[MPH_MIDIMESSAGE];
 const SLInterfaceID SL_IID_MIDIMUTESOLO = &SL_IID_array[MPH_MIDIMUTESOLO];
 const SLInterfaceID SL_IID_MIDITEMPO = &SL_IID_array[MPH_MIDITEMPO];
@@ -197,11 +188,9 @@ const SLInterfaceID SL_IID_VIRTUALIZER = &SL_IID_array[MPH_VIRTUALIZER];
 const SLInterfaceID SL_IID_VISUALIZATION = &SL_IID_array[MPH_VISUALIZATION];
 const SLInterfaceID SL_IID_VOLUME = &SL_IID_array[MPH_VOLUME];
 extern const SLInterfaceID SL_IID_OUTPUTMIXEXT;
-// The lack of an ifdef is intentional
+// The lack of an ifdef is intentional on these
 const SLInterfaceID SL_IID_OUTPUTMIXEXT = &SL_IID_array[MPH_OUTPUTMIXEXT];
-#ifdef ANDROID
 const SLInterfaceID SL_IID_ANDROIDSTREAMTYPE = &SL_IID_array[MPH_ANDROIDSTREAMTYPE];
-#endif
 #ifdef __cplusplus
 }
 #endif

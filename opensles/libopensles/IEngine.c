@@ -246,7 +246,12 @@ static SLresult IEngine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
         pInterfaceIds, pInterfaceRequired, &exposedMask);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    return SL_RESULT_FEATURE_UNSUPPORTED;
+    CListener *this = (CListener *) construct(pCListener_class, exposedMask, self);
+    if (NULL == this)
+        return SL_RESULT_MEMORY_FAILURE;
+    // return the new listener object
+    *pListener = &this->mObject.mItf;
+    return SL_RESULT_SUCCESS;
 }
 
 static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup, SLuint32 numInterfaces,
@@ -267,7 +272,7 @@ static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup, SLu
     this->mMemberMask = 0;
     // return the new 3DGroup object
     *pGroup = &this->mObject.mItf;
-    return SL_RESULT_FEATURE_UNSUPPORTED;
+    return SL_RESULT_SUCCESS;
 }
 
 static SLresult IEngine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix, SLuint32 numInterfaces,
@@ -328,7 +333,13 @@ static SLresult IEngine_QueryNumSupportedInterfaces(SLEngineItf self,
     const ClassTable *class__ = objectIDtoClass(objectID);
     if (NULL == class__)
         return SL_RESULT_FEATURE_UNSUPPORTED;
-    *pNumSupportedInterfaces = class__->mInterfaceCount;
+    // FIXME Cache this value
+    SLuint32 count = 0;
+    SLuint32 i;
+    for (i = 0; i < class__->mInterfaceCount; ++i)
+        if (class__->mInterfaces[i].mInterface != INTERFACE_UNAVAILABLE)
+            ++count;
+    *pNumSupportedInterfaces = count;
     return SL_RESULT_SUCCESS;
 }
 
@@ -340,10 +351,19 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
     const ClassTable *class__ = objectIDtoClass(objectID);
     if (NULL == class__)
         return SL_RESULT_FEATURE_UNSUPPORTED;
-    if (index >= class__->mInterfaceCount)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pInterfaceId = &SL_IID_array[class__->mInterfaces[index].mMPH];
-    return SL_RESULT_SUCCESS;
+    // FIXME O(n)
+    SLuint32 i;
+    for (i = 0; i < class__->mInterfaceCount; ++i) {
+        // FIXME check whether published also (might be internal implicit)
+        if (class__->mInterfaces[i].mInterface == INTERFACE_UNAVAILABLE)
+            continue;
+        if (index == 0) {
+            *pInterfaceId = &SL_IID_array[class__->mInterfaces[i].mMPH];
+            return SL_RESULT_SUCCESS;
+        }
+        --index;
+    }
+    return SL_RESULT_PARAMETER_INVALID;
 };
 
 static SLresult IEngine_QueryNumSupportedExtensions(SLEngineItf self, SLuint32 *pNumExtensions)

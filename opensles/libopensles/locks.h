@@ -19,6 +19,7 @@ extern void object_unlock_exclusive(IObject *this);
 extern void object_unlock_exclusive_attributes(IObject *this, unsigned attr);
 extern void object_cond_wait(IObject *this);
 extern void object_cond_signal(IObject *this);
+extern void object_cond_broadcast(IObject *this);
 
 // Currently shared locks are implemented as exclusive, but don't count on it
 

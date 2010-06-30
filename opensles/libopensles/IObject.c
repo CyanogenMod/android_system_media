@@ -327,7 +327,7 @@ static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, 
         }
     }
     *(void **)pInterface = interface;
-    return SL_RESULT_SUCCESS;
+    return result;
 }
 
 static SLresult IObject_RegisterCallback(SLObjectItf self,

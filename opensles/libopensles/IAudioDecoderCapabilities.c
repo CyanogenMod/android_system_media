@@ -18,7 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IAudioDecoderCapabilities_GetAudioDecoders( SLAudioDecoderCapabilitiesItf self,
+static SLresult IAudioDecoderCapabilities_GetAudioDecoders(SLAudioDecoderCapabilitiesItf self,
     SLuint32 *pNumDecoders, SLuint32 *pDecoderIds)
 {
     if (NULL == pNumDecoders)
@@ -38,8 +38,7 @@ static SLresult IAudioDecoderCapabilities_GetAudioDecoderCapabilities(
     SLAudioDecoderCapabilitiesItf self, SLuint32 decoderId, SLuint32 *pIndex,
     SLAudioCodecDescriptor *pDescriptor)
 {
-    return GetCodecCapabilities(decoderId, pIndex, pDescriptor,
-        DecoderDescriptors);
+    return GetCodecCapabilities(decoderId, pIndex, pDescriptor, DecoderDescriptors);
 }
 
 static const struct SLAudioDecoderCapabilitiesItf_ IAudioDecoderCapabilities_Itf = {
