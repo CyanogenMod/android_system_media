@@ -914,12 +914,6 @@ void sles_to_android_audioPlayerSetPlayState(CAudioPlayer *ap) {
         switch (state) {
         case SL_PLAYSTATE_STOPPED: {
             fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_STOPPED\n");
-            object_lock_peek(&ap);
-            AndroidObject_state state = ap->mAndroidObjState;
-            object_unlock_peek(&ap);
-            if (state >= ANDROID_READY) {
-                ap->mAudioTrack->stop();
-            }
             ap->mSfPlayer->stop();
             } break;
         case SL_PLAYSTATE_PAUSED: {
@@ -930,14 +924,13 @@ void sles_to_android_audioPlayerSetPlayState(CAudioPlayer *ap) {
             switch(state) {
                 case(ANDROID_UNINITIALIZED):
                 case(ANDROID_PREPARING):
+                    ap->mSfPlayer->pause();
                     break;
                 case(ANDROID_PREPARED):
                     ap->mSfPlayer->startPrefetch_async();
-                    break;
                 case(ANDROID_PREFETCHING):
                 case(ANDROID_READY):
-                    // FIXME pause the actual playback
-                    fprintf(stderr, "[ FIXME implement pause() ]\n");
+                    ap->mSfPlayer->pause();
                     break;
                 default:
                     break;
@@ -948,8 +941,8 @@ void sles_to_android_audioPlayerSetPlayState(CAudioPlayer *ap) {
             object_lock_peek(&ap);
             AndroidObject_state state = ap->mAndroidObjState;
             object_unlock_peek(&ap);
+            // FIXME check in spec when playback is allowed to start in another state
             if (state >= ANDROID_READY) {
-                ap->mAudioTrack->start();
                 ap->mSfPlayer->play();
             }
             } break;
