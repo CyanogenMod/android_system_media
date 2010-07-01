@@ -123,7 +123,8 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
         if (!strncmp((const char *) uri, "file:///", 8))
             uri += 8;
         switch (formatType) {
-        case SL_DATAFORMAT_MIME:
+        case SL_DATAFORMAT_NULL:    // OK to omit the data format
+        case SL_DATAFORMAT_MIME:    // we ignore a MIME type if specified
             break;
         default:
             return SL_RESULT_CONTENT_UNSUPPORTED;

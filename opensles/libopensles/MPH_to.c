@@ -33,6 +33,7 @@ const signed char MPH_to_3DGroup[MPH_MAX] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     0, // MPH_OBJECT
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    , -1
 #endif
 };
 
@@ -109,6 +110,9 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
 #ifdef ANDROID
     ,
     26 // MPH_ANDROIDSTREAMTYPE
+#else
+    ,
+    -1
 #endif
 #endif
 };
@@ -143,6 +147,7 @@ const signed char MPH_to_AudioRecorder[MPH_MAX] = {
     7, // MPH_VISUALIZATION
     8, // MPH_VOLUME
     -1
+    , -1
 #endif
 };
 
@@ -177,6 +182,7 @@ const signed char MPH_to_Engine[MPH_MAX] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1,
     4, // MPH_THREADSYNC
     -1, -1, -1, -1, -1
+    , -1
 #endif
 };
 
@@ -194,6 +200,7 @@ const signed char MPH_to_LEDDevice[MPH_MAX] = {
     -1, -1, -1, -1, -1, -1, -1, -1,
     0, // MPH_OBJECT
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    , -1
 #endif
 };
 
@@ -214,6 +221,7 @@ const signed char MPH_to_Listener[MPH_MAX] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     0, // MPH_OBJECT
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    , -1
 #endif
 };
 
@@ -235,6 +243,7 @@ const signed char MPH_to_MetadataExtractor[MPH_MAX] = {
     -1, -1, -1, -1, -1, -1,
     0, // MPH_OBJECT
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    , -1
 #endif
 };
 
@@ -316,6 +325,8 @@ const signed char MPH_to_MidiPlayer[MPH_MAX] = {
 #ifdef ANDROID
     ,
     29 // MPH_ANDROIDSTREAMTYPE
+#else
+    , -1
 #endif
 #endif
 };
@@ -352,12 +363,13 @@ const signed char MPH_to_OutputMix[MPH_MAX] = {
     -1, -1, -1, -1, -1,
     7,  // MPH_VIRTUALIZER
     10, // MPH_VISUALIZATION
-    8,  // MPH_VOLUME
+    8  // MPH_VOLUME
 #ifdef USE_OUTPUTMIXEXT
-    3,  // MPH_OUTPUTMIXEXT
+    , 3  // MPH_OUTPUTMIXEXT
 #else
-    -1,
+    , -1
 #endif
+    , -1
 #endif
 };
 
@@ -375,5 +387,6 @@ const signed char MPH_to_Vibra[MPH_MAX] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     2, // MPH_VIBRA
     -1, -1, -1, -1
+    , -1
 #endif
 };

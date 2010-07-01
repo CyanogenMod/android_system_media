@@ -357,10 +357,10 @@ static const struct iid_vtable OutputMix_interfaces[INTERFACES_OutputMix] = {
     {MPH_OUTPUTMIX, INTERFACE_IMPLICIT,
         offsetof(COutputMix, mOutputMix)},
 #ifdef USE_OUTPUTMIXEXT
-    {MPH_OUTPUTMIXEXT, INTERFACE_IMPLICIT,
+    {MPH_OUTPUTMIXEXT, INTERFACE_IMPLICIT,  // FIXME should be internal implicit (available, but not advertised publicly or included in possible interface count)
         offsetof(COutputMix, mOutputMixExt)},
 #else
-    {MPH_OUTPUTMIXEXT, INTERFACE_TBD /*NOT AVAIL*/, 0},
+    {MPH_OUTPUTMIXEXT, INTERFACE_UNAVAILABLE, 0},
 #endif
     {MPH_ENVIRONMENTALREVERB, INTERFACE_DYNAMIC_GAME,
         offsetof(COutputMix, mEnvironmentalReverb)},
@@ -393,11 +393,11 @@ static const ClassTable COutputMix_class = {
 // Vibra class
 
 static const struct iid_vtable VibraDevice_interfaces[INTERFACES_VibraDevice] = {
-    {MPH_OBJECT, INTERFACE_OPTIONAL,
+    {MPH_OBJECT, INTERFACE_IMPLICIT,
         offsetof(CVibraDevice, mObject)},
-    {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_OPTIONAL,
+    {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CVibraDevice, mDynamicInterfaceManagement)},
-    {MPH_VIBRA, INTERFACE_OPTIONAL,
+    {MPH_VIBRA, INTERFACE_IMPLICIT,
         offsetof(CVibraDevice, mVibra)}
 };
 

@@ -36,6 +36,13 @@ void *sync_start(void *arg)
             object_unlock_exclusive(&this->mObject);
             break;
         }
+        if (this->m3DCommit.mWaiting) {
+            this->m3DCommit.mWaiting = 0;
+            ++this->m3DCommit.mGeneration;
+            // There might be more than one thread blocked in Commit, so wake them all
+            object_cond_broadcast(&this->mObject);
+            // here is where we would process the enqueued 3D commands
+        }
         unsigned instanceMask = this->mEngine.mInstanceMask;
         unsigned changedMask = this->mEngine.mChangedMask;
         this->mEngine.mChangedMask = 0;

@@ -159,12 +159,26 @@ static SLresult IAudioIODeviceCapabilities_GetDefaultAudioDevices(
     }
     if (NULL != pAudioDeviceIDs) {
         // FIXME should be OEM-configurable
-        if (2 > *pNumAudioDevices)
-            return SL_RESULT_BUFFER_INSUFFICIENT;
-        pAudioDeviceIDs[0] = DEVICE_ID_HEADSET;
-        pAudioDeviceIDs[1] = DEVICE_ID_HANDSFREE;
+        switch (defaultDeviceID) {
+        case SL_DEFAULTDEVICEID_AUDIOINPUT:
+            if (1 > *pNumAudioDevices)
+                return SL_RESULT_BUFFER_INSUFFICIENT;
+            pAudioDeviceIDs[0] = SL_DEFAULTDEVICEID_AUDIOINPUT;
+            *pNumAudioDevices = 1;
+            break;
+        case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
+            if (2 > *pNumAudioDevices)
+                return SL_RESULT_BUFFER_INSUFFICIENT;
+            pAudioDeviceIDs[0] = DEVICE_ID_HEADSET;
+            pAudioDeviceIDs[1] = DEVICE_ID_HANDSFREE;
+            *pNumAudioDevices = 2;
+            break;
+        default:
+            assert(SL_BOOLEAN_FALSE);
+            *pNumAudioDevices = 0;
+            break;
+        }
     }
-    *pNumAudioDevices = 1;
     return SL_RESULT_SUCCESS;
 }
 

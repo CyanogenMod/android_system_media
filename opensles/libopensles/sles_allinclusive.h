@@ -229,6 +229,7 @@ typedef struct {
     IObject *mThis;
     SLboolean mDeferred;
     SLuint32 mGeneration;   // incremented each master clock cycle
+    SLuint32 mWaiting;      // number of threads waiting in Commit
 } I3DCommit;
 
 enum CartesianSphericalActive {
@@ -926,7 +927,9 @@ typedef struct {
     ISeek mSeek;
     IVolume mVolume;
     IMuteSolo mMuteSolo;
+#ifdef ANDROID
     IAndroidStreamType mAndroidStreamType;
+#endif
     // optional interfaces
     I3DMacroscopic m3DMacroscopic;
     IBassBoost mBassBoost;
@@ -1042,3 +1045,6 @@ extern const char * const interface_names[MPH_MAX];
 #define ATTR_GAIN       ((unsigned) 0x1)    // player volume, channel mute, channel solo,
                                             // player stereo position, player mute
 #define ATTR_TRANSPORT  ((unsigned) 0x2)    // play state, requested position, looping
+
+#define SL_DATALOCATOR_NULL 0    // application specified a NULL value for pLocator
+#define SL_DATAFORMAT_NULL 0     // application specified a NULL or undefined value for pFormat

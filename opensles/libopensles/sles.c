@@ -88,9 +88,8 @@ SLresult checkInterfaces(const ClassTable *class__,
 }
 
 // private helper shared by decoder and encoder
-SLresult GetCodecCapabilities(SLuint32 decoderId, SLuint32 *pIndex,
-    SLAudioCodecDescriptor *pDescriptor,
-    const struct CodecDescriptor *codecDescriptors)
+SLresult GetCodecCapabilities(SLuint32 codecId, SLuint32 *pIndex,
+    SLAudioCodecDescriptor *pDescriptor, const struct CodecDescriptor *codecDescriptors)
 {
     if (NULL == pIndex)
         return SL_RESULT_PARAMETER_INVALID;
@@ -98,16 +97,29 @@ SLresult GetCodecCapabilities(SLuint32 decoderId, SLuint32 *pIndex,
     SLuint32 index;
     if (NULL == pDescriptor) {
         for (index = 0 ; NULL != cd->mDescriptor; ++cd)
-            if (cd->mCodecID == decoderId)
+            if (cd->mCodecID == codecId)
                 ++index;
         *pIndex = index;
         return SL_RESULT_SUCCESS;
     }
     index = *pIndex;
     for ( ; NULL != cd->mDescriptor; ++cd) {
-        if (cd->mCodecID == decoderId) {
+        if (cd->mCodecID == codecId) {
             if (0 == index) {
                 *pDescriptor = *cd->mDescriptor;
+#if 0   // FIXME Temporary workaround for Khronos bug 6331
+                if (0 < pDescriptor->numSampleRatesSupported) {
+                    // FIXME The malloc is not in the 1.0.1 specification
+                    SLmilliHertz *temp = (SLmilliHertz *) malloc(sizeof(SLmilliHertz) *
+                        pDescriptor->numSampleRatesSupported);
+                    assert(NULL != temp);
+                    memcpy(temp, pDescriptor->pSampleRatesSupported, sizeof(SLmilliHertz) *
+                        pDescriptor->numSampleRatesSupported);
+                    pDescriptor->pSampleRatesSupported = temp;
+                } else {
+                    pDescriptor->pSampleRatesSupported = NULL;
+                }
+#endif
                 return SL_RESULT_SUCCESS;
             }
             --index;
@@ -119,7 +131,7 @@ SLresult GetCodecCapabilities(SLuint32 decoderId, SLuint32 *pIndex,
 static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
 {
     if (NULL == pLocator) {
-        pDataLocator->mLocatorType = 0;
+        pDataLocator->mLocatorType = SL_DATALOCATOR_NULL;
         return SL_RESULT_SUCCESS;
     }
     SLuint32 locatorType = *(SLuint32 *)pLocator;
@@ -245,7 +257,7 @@ static void freeDataLocator(DataLocator *pDataLocator)
 static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
 {
     if (NULL == pFormat) {
-        pDataFormat->mFormatType = 0;
+        pDataFormat->mFormatType = SL_DATAFORMAT_NULL;
         return SL_RESULT_SUCCESS;
     }
     SLuint32 formatType = *(SLuint32 *)pFormat;
@@ -375,10 +387,25 @@ SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataL
     result = checkDataLocator(myDataSrc.pLocator, &pDataLocatorFormat->mLocator);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    result = checkDataFormat(myDataSrc.pFormat, &pDataLocatorFormat->mFormat);
-    if (SL_RESULT_SUCCESS != result) {
-        freeDataLocator(&pDataLocatorFormat->mLocator);
-        return result;
+    switch (pDataLocatorFormat->mLocator.mLocatorType) {
+    case SL_DATALOCATOR_URI:
+    case SL_DATALOCATOR_ADDRESS:
+    case SL_DATALOCATOR_BUFFERQUEUE:
+    case SL_DATALOCATOR_MIDIBUFFERQUEUE:
+        result = checkDataFormat(myDataSrc.pFormat, &pDataLocatorFormat->mFormat);
+        if (SL_RESULT_SUCCESS != result) {
+            freeDataLocator(&pDataLocatorFormat->mLocator);
+            return result;
+        }
+        break;
+    case SL_DATALOCATOR_NULL:
+    case SL_DATALOCATOR_OUTPUTMIX:
+    default:
+        // invalid but fall through; the invalid locator will be caught later
+    case SL_DATALOCATOR_IODEVICE:
+        // for these data locator types, ignore the pFormat as it might be uninitialized
+        pDataLocatorFormat->mFormat.mFormatType = SL_DATAFORMAT_NULL;
+        break;
     }
     pDataLocatorFormat->u.mSource.pLocator = &pDataLocatorFormat->mLocator;
     pDataLocatorFormat->u.mSource.pFormat = &pDataLocatorFormat->mFormat;
@@ -394,10 +421,25 @@ SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLoca
     result = checkDataLocator(myDataSink.pLocator, &pDataLocatorFormat->mLocator);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    result = checkDataFormat(myDataSink.pFormat, &pDataLocatorFormat->mFormat);
-    if (SL_RESULT_SUCCESS != result) {
-        freeDataLocator(&pDataLocatorFormat->mLocator);
-        return result;
+    switch (pDataLocatorFormat->mLocator.mLocatorType) {
+    case SL_DATALOCATOR_URI:
+    case SL_DATALOCATOR_ADDRESS:
+        result = checkDataFormat(myDataSink.pFormat, &pDataLocatorFormat->mFormat);
+        if (SL_RESULT_SUCCESS != result) {
+            freeDataLocator(&pDataLocatorFormat->mLocator);
+            return result;
+        }
+        break;
+    case SL_DATALOCATOR_NULL:
+    case SL_DATALOCATOR_BUFFERQUEUE:
+    case SL_DATALOCATOR_MIDIBUFFERQUEUE:
+    default:
+        // invalid but fall through; the invalid locator will be caught later
+    case SL_DATALOCATOR_IODEVICE:
+    case SL_DATALOCATOR_OUTPUTMIX:
+        // for these data locator types, ignore the pFormat as it might be uninitialized
+        pDataLocatorFormat->mFormat.mFormatType = SL_DATAFORMAT_NULL;
+        break;
     }
     pDataLocatorFormat->u.mSink.pLocator = &pDataLocatorFormat->mLocator;
     pDataLocatorFormat->u.mSink.pFormat = &pDataLocatorFormat->mFormat;
@@ -511,15 +553,15 @@ extern void
     { /* MPH_VIRTUALIZER, */ IVirtualizer_init, NULL, NULL },
     { /* MPH_VISUALIZATION, */ IVisualization_init, NULL, NULL },
     { /* MPH_VOLUME, */ IVolume_init, NULL, NULL },
-    { /* MPH_OUTPUTMIXEXT, */
 #ifdef USE_OUTPUTMIXEXT
-        IOutputMixExt_init, NULL, NULL
+    { /* MPH_OUTPUTMIXEXT, */ IOutputMixExt_init, NULL, NULL },
 #else
-        NULL, NULL, NULL
+    { /* MPH_OUTPUTMIXEXT, */ NULL, NULL, NULL },
 #endif
-        },
 #ifdef ANDROID
     { /* MPH_ANDROIDSTREAMTYPE */ IAndroidStreamType_init, NULL, NULL }
+#else
+    { /* MPH_ANDROIDSTREAMTYPE */ NULL, NULL, NULL }
 #endif
 };
 

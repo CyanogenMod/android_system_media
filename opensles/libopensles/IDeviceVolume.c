@@ -46,9 +46,11 @@ static SLresult IDeviceVolume_SetVolume(SLDeviceVolumeItf self, SLuint32 deviceI
     case SL_DEFAULTDEVICEID_AUDIOINPUT:
     case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
         break;
-    // FIXME These don't work yet
+    // FIXME These are treated same as generic audio output for now
     case DEVICE_ID_HEADSET:
     case DEVICE_ID_HANDSFREE:
+        deviceID = SL_DEFAULTDEVICEID_AUDIOOUTPUT;
+        break;
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }
@@ -67,9 +69,11 @@ static SLresult IDeviceVolume_GetVolume(SLDeviceVolumeItf self, SLuint32 deviceI
     case SL_DEFAULTDEVICEID_AUDIOINPUT:
     case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
         break;
-    // FIXME These don't work yet
+    // FIXME These are treated same as generic audio output for now
     case DEVICE_ID_HEADSET:
     case DEVICE_ID_HANDSFREE:
+        deviceID = SL_DEFAULTDEVICEID_AUDIOOUTPUT;
+        break;
     default:
         return SL_RESULT_PARAMETER_INVALID;
     }

@@ -63,8 +63,7 @@ const char * const interface_names[MPH_MAX] = {
     "VIRTUALIZER",
     "VISUALIZATION",
     "VOLUME",
+    // The lack of ifdef is intentional
     "OUTPUTMIXEXT",
-#ifdef ANDROID
     "ANDROIDSTREAMTYPE"
-#endif
 };

@@ -49,7 +49,7 @@
 #define MPH_MIDITEMPO                  25
 #define MPH_MIDITIME                   26
 #define MPH_MUTESOLO                   27
-#define MPH_NULL                       28 // FIXME why needed?
+#define MPH_NULL                       28
 #define MPH_OBJECT                     29
 #define MPH_OUTPUTMIX                  30
 #define MPH_PITCH                      31
@@ -65,19 +65,19 @@
 #define MPH_VIRTUALIZER                41
 #define MPH_VISUALIZATION              42
 #define MPH_VOLUME                     43
-#define MPH_OUTPUTMIXEXT               44 // The lack of an ifdef is intentional
-// end of platform-independent interface IDs
+// end Khronos standard interfaces
 
-// begin platform-specific interface IDs
-#ifdef ANDROID
+// The lack of ifdef on the remaining is intentional
+
+// start non-standard and platform-independent interface IDs
+#define MPH_OUTPUTMIXEXT               44
+// end non-standard and platform-independent interface IDs
+
+// start non-standard and platform-specific interface IDs
 #define MPH_ANDROIDSTREAMTYPE          45
-#endif
+// end non-standard and platform-specific interface IDs
 
-// total number, dependent on platform-specific IDs
-#ifdef ANDROID
-#define MPH_MAX                        46 // 45 + 1 (_ANDROIDSTREAMTYPE)
-#else
-#define MPH_MAX                        45
-#endif
+// total number
+#define MPH_MAX                        46
 
 #endif // !defined(__MPH_H)
