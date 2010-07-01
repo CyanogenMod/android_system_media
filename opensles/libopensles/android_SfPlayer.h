@@ -37,7 +37,7 @@
 #define EVENT_ENDOFSTREAM             "eos"
 
 #define SFPLAYER_SUCCESS 1
-#define SFPLAYER_FD_FIND_FILE_SIZE 0xFFFFFFFFFFFFFFFF /* int64_t */
+#define SFPLAYER_FD_FIND_FILE_SIZE 0xFFFFFFFFFFFFFFFFll /* int64_t */
 
 namespace android {
 
