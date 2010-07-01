@@ -73,7 +73,7 @@ struct SLAndroidStreamTypeItf_ {
 /** Addendum to Data locator macros  */
 #define SL_DATALOCATOR_ANDROIDFD        ((SLuint32) 0x00000009)
 
-#define SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ((SLAint64) 0xFFFFFFFFFFFFFFFF)
+#define SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ((SLAint64) 0xFFFFFFFFFFFFFFFFll)
 
 /** File Descriptor-based data locator definition where locatorType must be SL_DATALOCATOR_ANDROIDFD */
 typedef struct SLDataLocator_AndroidFD_ {
