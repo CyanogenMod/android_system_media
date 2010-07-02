@@ -25,6 +25,11 @@ inline SLuint32 android_to_sles_streamType(int type) {
     return (SLuint32) type;
 }
 
+inline SLuint32 android_to_sles_sampleRate(uint32_t srHz) {
+    // convert to milliHertz
+    return (SLuint32) srHz*1000;
+}
+
 //-----------------------------------------------------------------------------
 inline int sles_to_android_streamType(SLuint32 type) {
     return (int)type;
@@ -657,6 +662,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
         // initialize platform-independent CAudioPlayer fields
 
         pAudioPlayer->mNumChannels = df_pcm->numChannels;
+        pAudioPlayer->mSampleRateMilliHz = df_pcm->samplesPerSec; // Note: bad field name in SL ES
         } break;
     //-----------------------------------
     // MediaPlayer
@@ -697,6 +703,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
         if (SFPLAYER_SUCCESS != res) {
             pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
             pAudioPlayer->mNumChannels = 0;
+            pAudioPlayer->mSampleRateMilliHz = 0;
         } else {
             // create audio track based on parameters retrieved from Stagefright
             pAudioPlayer->mAudioTrack = new android::AudioTrack(
@@ -712,6 +719,8 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
                     (void *) pAudioPlayer,                               // user
                     0);                                                  // notificationFrame
             pAudioPlayer->mNumChannels = pAudioPlayer->mSfPlayer->getNumChannels();
+            pAudioPlayer->mSampleRateMilliHz =
+                    android_to_sles_sampleRate(pAudioPlayer->mSfPlayer->getSampleRateHz());
             pAudioPlayer->mSfPlayer->useAudioTrack(pAudioPlayer->mAudioTrack);
 
             if (pAudioPlayer->mSfPlayer->wantPrefetch()) {
@@ -746,8 +755,7 @@ SLresult sles_to_android_audioPlayerSetStreamType_l(CAudioPlayer *pAudioPlayer, 
     }
 
     int format =  pAudioPlayer->mAudioTrack->format();
-    // FIXME sample rate should be cached
-    uint32_t sr = pAudioPlayer->mAudioTrack->getSampleRate();
+    uint32_t sr = sles_to_android_sampleRate(pAudioPlayer->mSampleRateMilliHz);
 
     pAudioPlayer->mAudioTrack->stop();
     delete pAudioPlayer->mAudioTrack;
@@ -970,24 +978,16 @@ void sles_to_android_audioPlayerUseEventMask(CAudioPlayer *ap) {
     }
 
     if (eventFlags & SL_PLAYEVENT_HEADATMARKER) {
-        //FIXME getSampleRate() returns the current playback sample rate, not the content
-        //      sample rate, verify if formula valid
-        //      need to cache sample rate instead?
-        fprintf(stderr, "[ FIXME: fix marker computation due to sample rate reporting behavior ]\n");
-        ap->mAudioTrack->setMarkerPosition((uint32_t)((pPlayItf->mMarkerPosition
-                * ap->mAudioTrack->getSampleRate())/1000));
+        ap->mAudioTrack->setMarkerPosition((uint32_t)((((int64_t)pPlayItf->mMarkerPosition
+                * sles_to_android_sampleRate(ap->mSampleRateMilliHz)))/1000));
     } else {
         // clear marker
         ap->mAudioTrack->setMarkerPosition(0);
     }
 
     if (eventFlags & SL_PLAYEVENT_HEADATNEWPOS) {
-        //FIXME getSampleRate() returns the current playback sample rate, not the content
-        //      sample rate, verify if formula valid
-        fprintf(stderr, "[ FIXME: fix marker computation due to sample rate reporting behavior ]\n");
-        ap->mAudioTrack->setPositionUpdatePeriod(
-                (uint32_t)((pPlayItf->mPositionUpdatePeriod
-                        * ap->mAudioTrack->getSampleRate())/1000));
+         ap->mAudioTrack->setPositionUpdatePeriod( (uint32_t)((((int64_t)pPlayItf->mPositionUpdatePeriod
+                        * sles_to_android_sampleRate(ap->mSampleRateMilliHz)))/1000));
     } else {
         // clear periodic update
         ap->mAudioTrack->setPositionUpdatePeriod(0);
@@ -1044,10 +1044,12 @@ void sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPos
     case AUDIOTRACK_PULL:
         uint32_t positionInFrames;
         ap->mAudioTrack->getPosition(&positionInFrames);
-        //FIXME getSampleRate() returns the current playback sample rate, not the content
-        //      sample rate, verify if formula valid
-        fprintf(stderr, "FIXME: fix marker computation due to sample rate reporting behavior");
-        *pPosMsec = positionInFrames * 1000 / ap->mAudioTrack->getSampleRate();
+        if (ap->mSampleRateMilliHz == 0) {
+            *pPosMsec = 0;
+        } else {
+            *pPosMsec = ((int64_t)positionInFrames * 1000) /
+                    sles_to_android_sampleRate(ap->mSampleRateMilliHz);
+        }
         break;
     case MEDIAPLAYER:
         // FIXME implement getPosition
