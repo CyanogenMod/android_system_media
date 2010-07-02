@@ -6,7 +6,6 @@ test_src_files := \
     mimeUri_test.cpp \
 
 shared_libraries := \
-    libstlport \
     libutils \
     libOpenSLES
 
@@ -18,16 +17,14 @@ c_includes := \
     bionic \
     bionic/libstdc++/include \
     external/gtest/include \
-    external/stlport/stlport \
     $(JNI_H_INCLUDE) \
     $(TOP)/system/media/opensles/include
 
 module_tags := tests
 
-# We have to use the android version of libdl when we are not on the simulator
 ifneq ($(TARGET_SIMULATOR),true)
-LOCAL_SHARED_LIBRARIES += libdl libstlport
-include external/stlport/libstlport.mk
+shared_libraries += libstlport
+c_includes += external/stlport/stlport
 endif
 
 $(foreach file,$(test_src_files), \
