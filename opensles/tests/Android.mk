@@ -24,6 +24,12 @@ c_includes := \
 
 module_tags := tests
 
+# We have to use the android version of libdl when we are not on the simulator
+ifneq ($(TARGET_SIMULATOR),true)
+LOCAL_SHARED_LIBRARIES += libdl libstlport
+include external/stlport/libstlport.mk
+endif
+
 $(foreach file,$(test_src_files), \
     $(eval include $(CLEAR_VARS)) \
     $(eval LOCAL_SHARED_LIBRARIES := $(shared_libraries)) \
