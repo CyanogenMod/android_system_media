@@ -83,8 +83,9 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
     // Initialize private fields not associated with an interface
     this->mMuteMask = 0;
     this->mSoloMask = 0;
-    // const
-    this->mNumChannels = 0; // This will be set later by the containing AudioPlayer or MidiPlayer
+    // const, will be set later by the containing AudioPlayer or MidiPlayer
+    this->mNumChannels = 0;
+    this->mSampleRateMilliHz = 0;
 
     // Check the source and sink parameters against generic constraints,
     // and make a local copy of all parameters in case other application threads
