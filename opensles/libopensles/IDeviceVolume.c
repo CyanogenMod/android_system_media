@@ -18,72 +18,97 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IDeviceVolume_GetVolumeScale(SLDeviceVolumeItf self, SLuint32 deviceID,
     SLint32 *pMinValue, SLint32 *pMaxValue, SLboolean *pIsMillibelScale)
 {
+    SL_ENTER_INTERFACE
+
     switch (deviceID) {
     case SL_DEFAULTDEVICEID_AUDIOINPUT:
     case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
     // FIXME move these to device-specific or platform-specific file
     case DEVICE_ID_HEADSET:
     case DEVICE_ID_HANDSFREE:
+        if (NULL != pMinValue)
+            *pMinValue = 0;
+        if (NULL != pMaxValue)
+            *pMaxValue = 10;
+        if (NULL != pIsMillibelScale)
+            *pIsMillibelScale = SL_BOOLEAN_FALSE;
+        result = SL_RESULT_SUCCESS;
         break;
     default:
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
+        break;
     }
-    if (NULL != pMinValue)
-        *pMinValue = 0;
-    if (NULL != pMaxValue)
-        *pMaxValue = 10;
-    if (NULL != pIsMillibelScale)
-        *pIsMillibelScale = SL_BOOLEAN_FALSE;
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IDeviceVolume_SetVolume(SLDeviceVolumeItf self, SLuint32 deviceID, SLint32 volume)
 {
+    SL_ENTER_INTERFACE
+
     switch (deviceID) {
-    case SL_DEFAULTDEVICEID_AUDIOINPUT:
-    case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
-        break;
     // FIXME These are treated same as generic audio output for now
     case DEVICE_ID_HEADSET:
     case DEVICE_ID_HANDSFREE:
         deviceID = SL_DEFAULTDEVICEID_AUDIOOUTPUT;
+        // fall through
+    case SL_DEFAULTDEVICEID_AUDIOINPUT:
+    case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
+        {
+        IDeviceVolume *this = (IDeviceVolume *) self;
+        interface_lock_poke(this);
+        this->mVolume[~deviceID] = volume;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+        }
         break;
     default:
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
+        break;
     }
-    IDeviceVolume *this = (IDeviceVolume *) self;
-    interface_lock_poke(this);
-    this->mVolume[~deviceID] = volume;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IDeviceVolume_GetVolume(SLDeviceVolumeItf self, SLuint32 deviceID, SLint32 *pVolume)
 {
-    if (NULL == pVolume)
-        return SL_RESULT_PARAMETER_INVALID;
-    switch (deviceID) {
-    case SL_DEFAULTDEVICEID_AUDIOINPUT:
-    case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
-        break;
-    // FIXME These are treated same as generic audio output for now
-    case DEVICE_ID_HEADSET:
-    case DEVICE_ID_HANDSFREE:
-        deviceID = SL_DEFAULTDEVICEID_AUDIOOUTPUT;
-        break;
-    default:
-        return SL_RESULT_PARAMETER_INVALID;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pVolume) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        switch (deviceID) {
+        // FIXME These are treated same as generic audio output for now
+        case DEVICE_ID_HEADSET:
+        case DEVICE_ID_HANDSFREE:
+            deviceID = SL_DEFAULTDEVICEID_AUDIOOUTPUT;
+            // fall through
+        case SL_DEFAULTDEVICEID_AUDIOINPUT:
+        case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
+            {
+            IDeviceVolume *this = (IDeviceVolume *) self;
+            interface_lock_peek(this);
+            SLint32 volume = this->mVolume[~deviceID];
+            interface_unlock_peek(this);
+            *pVolume = volume;
+            result = SL_RESULT_SUCCESS;
+            }
+            break;
+        default:
+            result = SL_RESULT_PARAMETER_INVALID;
+            break;
+        }
     }
-    IDeviceVolume *this = (IDeviceVolume *) self;
-    interface_lock_peek(this);
-    SLint32 volume = this->mVolume[~deviceID];
-    interface_unlock_peek(this);
-    *pVolume = volume;
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLDeviceVolumeItf_ IDeviceVolume_Itf = {
     IDeviceVolume_GetVolumeScale,

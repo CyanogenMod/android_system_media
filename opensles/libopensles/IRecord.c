@@ -18,148 +18,226 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IRecord_SetRecordState(SLRecordItf self, SLuint32 state)
 {
+    SL_ENTER_INTERFACE
+
     switch (state) {
     case SL_RECORDSTATE_STOPPED:
     case SL_RECORDSTATE_PAUSED:
     case SL_RECORDSTATE_RECORDING:
+        {
+        IRecord *this = (IRecord *) self;
+        interface_lock_poke(this);
+        this->mState = state;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+        }
         break;
     default:
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
+        break;
     }
-    IRecord *this = (IRecord *) self;
-    interface_lock_poke(this);
-    this->mState = state;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IRecord_GetRecordState(SLRecordItf self, SLuint32 *pState)
 {
+    SL_ENTER_INTERFACE
+
     IRecord *this = (IRecord *) self;
-    if (NULL == pState)
-        return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_peek(this);
-    SLuint32 state = this->mState;
-    interface_unlock_peek(this);
-    *pState = state;
-    return SL_RESULT_SUCCESS;
+    if (NULL == pState) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        interface_lock_peek(this);
+        SLuint32 state = this->mState;
+        interface_unlock_peek(this);
+        *pState = state;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IRecord_SetDurationLimit(SLRecordItf self, SLmillisecond msec)
 {
+    SL_ENTER_INTERFACE
+
     IRecord *this = (IRecord *) self;
     interface_lock_poke(this);
     this->mDurationLimit = msec;
     interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IRecord_GetPosition(SLRecordItf self, SLmillisecond *pMsec)
 {
-    if (NULL == pMsec)
-        return SL_RESULT_PARAMETER_INVALID;
-    IRecord *this = (IRecord *) self;
-    interface_lock_peek(this);
-    SLmillisecond position = this->mPosition;
-    interface_unlock_peek(this);
-    *pMsec = position;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pMsec) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IRecord *this = (IRecord *) self;
+        interface_lock_peek(this);
+        SLmillisecond position = this->mPosition;
+        interface_unlock_peek(this);
+        *pMsec = position;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
 
-static SLresult IRecord_RegisterCallback(SLRecordItf self,
-    slRecordCallback callback, void *pContext)
+
+static SLresult IRecord_RegisterCallback(SLRecordItf self, slRecordCallback callback,
+    void *pContext)
 {
+    SL_ENTER_INTERFACE
+
     IRecord *this = (IRecord *) self;
     interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
     interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IRecord_SetCallbackEventsMask(SLRecordItf self, SLuint32 eventFlags)
 {
+    SL_ENTER_INTERFACE
+
     if (eventFlags & ~(
         SL_RECORDEVENT_HEADATLIMIT  |
         SL_RECORDEVENT_HEADATMARKER |
         SL_RECORDEVENT_HEADATNEWPOS |
         SL_RECORDEVENT_HEADMOVING   |
         SL_RECORDEVENT_HEADSTALLED  |
-        SL_RECORDEVENT_BUFFER_FULL))
-        return SL_RESULT_PARAMETER_INVALID;
-    IRecord *this = (IRecord *) self;
-    interface_lock_poke(this);
-    this->mCallbackEventsMask = eventFlags;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+        SL_RECORDEVENT_BUFFER_FULL)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IRecord *this = (IRecord *) self;
+        interface_lock_poke(this);
+        this->mCallbackEventsMask = eventFlags;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IRecord_GetCallbackEventsMask(SLRecordItf self, SLuint32 *pEventFlags)
 {
-    if (NULL == pEventFlags)
-        return SL_RESULT_PARAMETER_INVALID;
-    IRecord *this = (IRecord *) self;
-    interface_lock_peek(this);
-    SLuint32 callbackEventsMask = this->mCallbackEventsMask;
-    interface_unlock_peek(this);
-    *pEventFlags = callbackEventsMask;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pEventFlags) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IRecord *this = (IRecord *) self;
+        interface_lock_peek(this);
+        SLuint32 callbackEventsMask = this->mCallbackEventsMask;
+        interface_unlock_peek(this);
+        *pEventFlags = callbackEventsMask;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IRecord_SetMarkerPosition(SLRecordItf self, SLmillisecond mSec)
 {
+    SL_ENTER_INTERFACE
+
     IRecord *this = (IRecord *) self;
     interface_lock_poke(this);
     this->mMarkerPosition = mSec;
     interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IRecord_ClearMarkerPosition(SLRecordItf self)
 {
+    SL_ENTER_INTERFACE
+
     IRecord *this = (IRecord *) self;
     interface_lock_poke(this);
     this->mMarkerPosition = 0;
     interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IRecord_GetMarkerPosition(SLRecordItf self, SLmillisecond *pMsec)
 {
-    if (NULL == pMsec)
-        return SL_RESULT_PARAMETER_INVALID;
-    IRecord *this = (IRecord *) self;
-    interface_lock_peek(this);
-    SLmillisecond markerPosition = this->mMarkerPosition;
-    interface_unlock_peek(this);
-    *pMsec = markerPosition;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pMsec) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IRecord *this = (IRecord *) self;
+        interface_lock_peek(this);
+        SLmillisecond markerPosition = this->mMarkerPosition;
+        interface_unlock_peek(this);
+        *pMsec = markerPosition;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IRecord_SetPositionUpdatePeriod(SLRecordItf self, SLmillisecond mSec)
 {
-    if (0 == mSec)
-        return SL_RESULT_PARAMETER_INVALID;
-    IRecord *this = (IRecord *) self;
-    interface_lock_poke(this);
-    this->mPositionUpdatePeriod = mSec;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (0 == mSec) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IRecord *this = (IRecord *) self;
+        interface_lock_poke(this);
+        this->mPositionUpdatePeriod = mSec;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IRecord_GetPositionUpdatePeriod(SLRecordItf self, SLmillisecond *pMsec)
 {
-    if (NULL == pMsec)
-        return SL_RESULT_PARAMETER_INVALID;
-    IRecord *this = (IRecord *) self;
-    interface_lock_peek(this);
-    SLmillisecond positionUpdatePeriod = this->mPositionUpdatePeriod;
-    interface_unlock_peek(this);
-    *pMsec = positionUpdatePeriod;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pMsec) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IRecord *this = (IRecord *) self;
+        interface_lock_peek(this);
+        SLmillisecond positionUpdatePeriod = this->mPositionUpdatePeriod;
+        interface_unlock_peek(this);
+        *pMsec = positionUpdatePeriod;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLRecordItf_ IRecord_Itf = {
     IRecord_SetRecordState,

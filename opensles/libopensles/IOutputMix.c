@@ -18,48 +18,69 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IOutputMix_GetDestinationOutputDeviceIDs(SLOutputMixItf self,
    SLint32 *pNumDevices, SLuint32 *pDeviceIDs)
 {
-    if (NULL == pNumDevices)
-        return SL_RESULT_PARAMETER_INVALID;
-    if (NULL != pDeviceIDs) {
-        if (1 > *pNumDevices)
-            return SL_RESULT_BUFFER_INSUFFICIENT;
-        pDeviceIDs[0] = SL_DEFAULTDEVICEID_AUDIOOUTPUT;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pNumDevices) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        result = SL_RESULT_SUCCESS;
+        if (NULL != pDeviceIDs) {
+            if (1 > *pNumDevices) {
+                result = SL_RESULT_BUFFER_INSUFFICIENT;
+            } else {
+                pDeviceIDs[0] = SL_DEFAULTDEVICEID_AUDIOOUTPUT;
+            }
+        }
+        *pNumDevices = 1;
     }
-    *pNumDevices = 1;
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IOutputMix_RegisterDeviceChangeCallback(SLOutputMixItf self,
     slMixDeviceChangeCallback callback, void *pContext)
 {
+    SL_ENTER_INTERFACE
+
     IOutputMix *this = (IOutputMix *) self;
     interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
     interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IOutputMix_ReRoute(SLOutputMixItf self, SLint32 numOutputDevices,
     SLuint32 *pOutputDeviceIDs)
 {
-    if (1 > numOutputDevices)
-        return SL_RESULT_PARAMETER_INVALID;
-    if (NULL == pOutputDeviceIDs)
-        return SL_RESULT_PARAMETER_INVALID;
-    switch (pOutputDeviceIDs[0]) {
-    case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
-    case DEVICE_ID_HEADSET:
-    case DEVICE_ID_HANDSFREE:
-        break;
-    default:
-        return SL_RESULT_PARAMETER_INVALID;
+    SL_ENTER_INTERFACE
+
+    if ((1 > numOutputDevices) || (NULL == pOutputDeviceIDs)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        switch (pOutputDeviceIDs[0]) {
+        case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
+        case DEVICE_ID_HEADSET:
+        case DEVICE_ID_HANDSFREE:
+            result = SL_RESULT_SUCCESS;
+            break;
+        default:
+            result = SL_RESULT_PARAMETER_INVALID;
+            break;
+        }
     }
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLOutputMixItf_ IOutputMix_Itf = {
     IOutputMix_GetDestinationOutputDeviceIDs,

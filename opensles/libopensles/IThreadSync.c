@@ -18,10 +18,12 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IThreadSync_EnterCriticalSection(SLThreadSyncItf self)
 {
+    SL_ENTER_INTERFACE
+
     IThreadSync *this = (IThreadSync *) self;
-    SLresult result;
     interface_lock_exclusive(this);
     for (;;) {
         if (this->mInCriticalSection) {
@@ -40,28 +42,33 @@ static SLresult IThreadSync_EnterCriticalSection(SLThreadSyncItf self)
         break;
     }
     interface_unlock_exclusive(this);
-    return result;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IThreadSync_ExitCriticalSection(SLThreadSyncItf self)
 {
+    SL_ENTER_INTERFACE
+
     IThreadSync *this = (IThreadSync *) self;
-    SLresult result;
     interface_lock_exclusive(this);
     if (!this->mInCriticalSection || !pthread_equal(this->mOwner, pthread_self())) {
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
         this->mInCriticalSection = SL_BOOLEAN_FALSE;
         memset(&this->mOwner, 0, sizeof(pthread_t));
-        result = SL_RESULT_SUCCESS;
         if (this->mWaiting) {
             --this->mWaiting;
             interface_cond_signal(this);
         }
+        result = SL_RESULT_SUCCESS;
     }
     interface_unlock_exclusive(this);
-    return result;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLThreadSyncItf_ IThreadSync_Itf = {
     IThreadSync_EnterCriticalSection,

@@ -18,91 +18,138 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IMetadataExtraction_GetItemCount(SLMetadataExtractionItf self, SLuint32 *pItemCount)
 {
+    SL_ENTER_INTERFACE
+
     //IMetadataExtraction *this = (IMetadataExtraction *) self;
-    if (NULL == pItemCount)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pItemCount = 0;
-    return SL_RESULT_SUCCESS;
+    if (NULL == pItemCount) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        *pItemCount = 0;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMetadataExtraction_GetKeySize(SLMetadataExtractionItf self,
     SLuint32 index, SLuint32 *pKeySize)
 {
+    SL_ENTER_INTERFACE
+
     //IMetadataExtraction *this = (IMetadataExtraction *) self;
-    if (NULL == pKeySize)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pKeySize = 0;
-    return SL_RESULT_SUCCESS;
+    if (NULL == pKeySize) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        *pKeySize = 0;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMetadataExtraction_GetKey(SLMetadataExtractionItf self,
     SLuint32 index, SLuint32 keySize, SLMetadataInfo *pKey)
 {
+    SL_ENTER_INTERFACE
+
     //IMetadataExtraction *this = (IMetadataExtraction *) self;
-    if (NULL == pKey)
-        return SL_RESULT_PARAMETER_INVALID;
-    SLMetadataInfo key;
-    key.size = 1;
-    key.encoding = SL_CHARACTERENCODING_UTF8;
-    memcpy((char *) key.langCountry, "en", 3);
-    key.data[0] = 0;
-    *pKey = key;
-    return SL_RESULT_SUCCESS;
+    if (NULL == pKey) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        SLMetadataInfo key;
+        key.size = 1;
+        key.encoding = SL_CHARACTERENCODING_UTF8;
+        memcpy((char *) key.langCountry, "en", 3);
+        key.data[0] = 0;
+        *pKey = key;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMetadataExtraction_GetValueSize(SLMetadataExtractionItf self,
     SLuint32 index, SLuint32 *pValueSize)
 {
+    SL_ENTER_INTERFACE
+
     //IMetadataExtraction *this = (IMetadataExtraction *) self;
-    if (NULL == pValueSize)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pValueSize = 0;
-    return SL_RESULT_SUCCESS;
+    if (NULL == pValueSize) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        *pValueSize = 0;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMetadataExtraction_GetValue(SLMetadataExtractionItf self,
     SLuint32 index, SLuint32 valueSize, SLMetadataInfo *pValue)
 {
+    SL_ENTER_INTERFACE
+
     //IMetadataExtraction *this = (IMetadataExtraction *) self;
-    if (NULL == pValue)
-        return SL_RESULT_PARAMETER_INVALID;
-    SLMetadataInfo value;
-    value.size = 1;
-    value.encoding = SL_CHARACTERENCODING_UTF8;
-    memcpy((char *) value.langCountry, "en", 3);
-    value.data[0] = 0;
-    *pValue = value;;
-    return SL_RESULT_SUCCESS;
+    if (NULL == pValue) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        SLMetadataInfo value;
+        value.size = 1;
+        value.encoding = SL_CHARACTERENCODING_UTF8;
+        memcpy((char *) value.langCountry, "en", 3);
+        value.data[0] = 0;
+        *pValue = value;;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMetadataExtraction_AddKeyFilter(SLMetadataExtractionItf self,
     SLuint32 keySize, const void *pKey, SLuint32 keyEncoding,
     const SLchar *pValueLangCountry, SLuint32 valueEncoding, SLuint8 filterMask)
 {
-    if (NULL == pKey || NULL == pValueLangCountry)
-        return SL_RESULT_PARAMETER_INVALID;
-    if (filterMask & ~(SL_METADATA_FILTER_KEY | SL_METADATA_FILTER_KEY | SL_METADATA_FILTER_KEY))
-        return SL_RESULT_PARAMETER_INVALID;
-    IMetadataExtraction *this = (IMetadataExtraction *) self;
-    interface_lock_exclusive(this);
-    this->mKeySize = keySize;
-    this->mKey = pKey;
-    this->mKeyEncoding = keyEncoding;
-    this->mValueLangCountry = pValueLangCountry; // FIXME local copy?
-    this->mValueEncoding = valueEncoding;
-    this->mFilterMask = filterMask;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pKey || NULL == pValueLangCountry || (filterMask & ~(SL_METADATA_FILTER_KEY |
+        SL_METADATA_FILTER_KEY | SL_METADATA_FILTER_KEY))) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IMetadataExtraction *this = (IMetadataExtraction *) self;
+        interface_lock_exclusive(this);
+        this->mKeySize = keySize;
+        this->mKey = pKey;
+        this->mKeyEncoding = keyEncoding;
+        this->mValueLangCountry = pValueLangCountry; // FIXME local copy?
+        this->mValueEncoding = valueEncoding;
+        this->mFilterMask = filterMask;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMetadataExtraction_ClearKeyFilter(SLMetadataExtractionItf self)
 {
+    SL_ENTER_INTERFACE
+
     IMetadataExtraction *this = (IMetadataExtraction *) self;
     this->mKeyFilter = 0;
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLMetadataExtractionItf_ IMetadataExtraction_Itf = {
     IMetadataExtraction_GetItemCount,

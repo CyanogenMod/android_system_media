@@ -152,13 +152,15 @@ int main(int argc, char **argv)
         SLDataSource audioSrc = {&locURI, &dfMIME};
         SLDataLocator_OutputMix locOutputMix = {SL_DATALOCATOR_OUTPUTMIX, mixObject};
         SLDataSink audioSnk = {&locOutputMix, NULL};
-        result = (*engineEngine)->CreateAudioPlayer(engineEngine, &p->mPlayerObject, &audioSrc, &audioSnk, 3, player_ids, player_req);
+        result = (*engineEngine)->CreateAudioPlayer(engineEngine, &p->mPlayerObject, &audioSrc,
+            &audioSnk, 3, player_ids, player_req);
         check(result);
         result = (*p->mPlayerObject)->Realize(p->mPlayerObject, SL_BOOLEAN_FALSE);
         check(result);
         result = (*p->mPlayerObject)->GetInterface(p->mPlayerObject, SL_IID_PLAY, &p->mPlayerPlay);
         check(result);
-        result = (*p->mPlayerObject)->GetInterface(p->mPlayerObject, SL_IID_VOLUME, &p->mPlayerVolume);
+        result = (*p->mPlayerObject)->GetInterface(p->mPlayerObject, SL_IID_VOLUME,
+            &p->mPlayerVolume);
         check(result);
         result = (*p->mPlayerObject)->GetInterface(p->mPlayerObject, SL_IID_SEEK, &p->mPlayerSeek);
         check(result);

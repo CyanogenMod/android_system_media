@@ -18,57 +18,91 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IBassBoost_SetEnabled(SLBassBoostItf self, SLboolean enabled)
 {
+    SL_ENTER_INTERFACE
+
     IBassBoost *this = (IBassBoost *) self;
     interface_lock_poke(this);
     this->mEnabled = SL_BOOLEAN_FALSE != enabled; // normalize
     interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IBassBoost_IsEnabled(SLBassBoostItf self, SLboolean *pEnabled)
 {
-    if (NULL == pEnabled)
-        return SL_RESULT_PARAMETER_INVALID;
-    IBassBoost *this = (IBassBoost *) self;
-    interface_lock_peek(this);
-    SLboolean enabled = this->mEnabled;
-    interface_unlock_peek(this);
-    *pEnabled = enabled;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pEnabled) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IBassBoost *this = (IBassBoost *) self;
+        interface_lock_peek(this);
+        SLboolean enabled = this->mEnabled;
+        interface_unlock_peek(this);
+        *pEnabled = enabled;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IBassBoost_SetStrength(SLBassBoostItf self, SLpermille strength)
 {
-    if (!(0 <= strength) && (strength <= 1000))
-        return SL_RESULT_PARAMETER_INVALID;
-    IBassBoost *this = (IBassBoost *) self;
-    interface_lock_poke(this);
-    this->mStrength = strength;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(0 <= strength) && (strength <= 1000)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IBassBoost *this = (IBassBoost *) self;
+        interface_lock_poke(this);
+        this->mStrength = strength;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IBassBoost_GetRoundedStrength(SLBassBoostItf self, SLpermille *pStrength)
 {
-    if (NULL == pStrength)
-        return SL_RESULT_PARAMETER_INVALID;
-    IBassBoost *this = (IBassBoost *) self;
-    interface_lock_peek(this);
-    SLpermille strength = this->mStrength;
-    interface_unlock_peek(this);
-    *pStrength = strength;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pStrength) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IBassBoost *this = (IBassBoost *) self;
+        interface_lock_peek(this);
+        SLpermille strength = this->mStrength;
+        interface_unlock_peek(this);
+        *pStrength = strength;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IBassBoost_IsStrengthSupported(SLBassBoostItf self, SLboolean *pSupported)
 {
-    if (NULL == pSupported)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pSupported = SL_BOOLEAN_TRUE;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pSupported) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        *pSupported = SL_BOOLEAN_TRUE;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLBassBoostItf_ IBassBoost_Itf = {
     IBassBoost_SetEnabled,

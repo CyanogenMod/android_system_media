@@ -18,40 +18,60 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IMIDIMessage_SendMessage(SLMIDIMessageItf self, const SLuint8 *data,
     SLuint32 length)
 {
-    if (NULL == data)
-        return SL_RESULT_PARAMETER_INVALID;
-    //IMIDIMessage *this = (IMIDIMessage *) self;
-    return SL_RESULT_FEATURE_UNSUPPORTED;
+    SL_ENTER_INTERFACE
+
+    if (NULL == data) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        //IMIDIMessage *this = (IMIDIMessage *) self;
+        result = SL_RESULT_FEATURE_UNSUPPORTED;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDIMessage_RegisterMetaEventCallback(SLMIDIMessageItf self,
     slMetaEventCallback callback, void *pContext)
 {
+    SL_ENTER_INTERFACE
+
     IMIDIMessage *this = (IMIDIMessage *) self;
     interface_lock_exclusive(this);
     this->mMetaEventCallback = callback;
     this->mMetaEventContext = pContext;
     interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDIMessage_RegisterMIDIMessageCallback(SLMIDIMessageItf self,
     slMIDIMessageCallback callback, void *pContext)
 {
+    SL_ENTER_INTERFACE
+
     IMIDIMessage *this = (IMIDIMessage *) self;
     interface_lock_exclusive(this);
     this->mMessageCallback = callback;
     this->mMessageContext = pContext;
     interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDIMessage_AddMIDIMessageCallbackFilter(SLMIDIMessageItf self,
     SLuint32 messageType)
 {
+    SL_ENTER_INTERFACE
+
     switch (messageType) {
     case SL_MIDIMESSAGETYPE_NOTE_ON_OFF:
     case SL_MIDIMESSAGETYPE_POLY_PRESSURE:
@@ -60,26 +80,37 @@ static SLresult IMIDIMessage_AddMIDIMessageCallbackFilter(SLMIDIMessageItf self,
     case SL_MIDIMESSAGETYPE_CHANNEL_PRESSURE:
     case SL_MIDIMESSAGETYPE_PITCH_BEND:
     case SL_MIDIMESSAGETYPE_SYSTEM_MESSAGE:
+        {
+        SLuint8 messageTypeMask = 1 << messageType;
+        IMIDIMessage *this = (IMIDIMessage *) self;
+        interface_lock_exclusive(this);
+        this->mMessageTypes |= messageTypeMask;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+        }
         break;
     default:
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
+        break;
     }
-    SLuint8 messageTypeMask = 1 << messageType;
-    IMIDIMessage *this = (IMIDIMessage *) self;
-    interface_lock_exclusive(this);
-    this->mMessageTypes |= messageTypeMask;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDIMessage_ClearMIDIMessageCallbackFilter(SLMIDIMessageItf self)
 {
+    SL_ENTER_INTERFACE
+
     IMIDIMessage *this = (IMIDIMessage *) self;
     interface_lock_exclusive(this);
     this->mMessageTypes = 0;
     interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLMIDIMessageItf_ IMIDIMessage_Itf = {
     IMIDIMessage_SendMessage,

@@ -18,132 +18,195 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IMIDIMuteSolo_SetChannelMute(SLMIDIMuteSoloItf self, SLuint8 channel,
     SLboolean mute)
 {
-    if (channel > 15)
-        return SL_RESULT_PARAMETER_INVALID;
-    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
-    SLuint16 mask = 1 << channel;
-    interface_lock_exclusive(this);
-    if (mute)
-        this->mChannelMuteMask |= mask;
-    else
-        this->mChannelMuteMask &= ~mask;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (channel > 15) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
+        SLuint16 mask = 1 << channel;
+        interface_lock_exclusive(this);
+        if (mute)
+            this->mChannelMuteMask |= mask;
+        else
+            this->mChannelMuteMask &= ~mask;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDIMuteSolo_GetChannelMute(SLMIDIMuteSoloItf self, SLuint8 channel,
     SLboolean *pMute)
 {
-    if (channel > 15 || (NULL == pMute))
-        return SL_RESULT_PARAMETER_INVALID;
-    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
-    interface_lock_peek(this);
-    SLuint16 mask = this->mChannelMuteMask;
-    interface_unlock_peek(this);
-    *pMute = (mask >> channel) & 1;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (channel > 15 || (NULL == pMute)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
+        interface_lock_peek(this);
+        SLuint16 mask = this->mChannelMuteMask;
+        interface_unlock_peek(this);
+        *pMute = (mask >> channel) & 1;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDIMuteSolo_SetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 channel,
     SLboolean solo)
 {
-    if (channel > 15)
-        return SL_RESULT_PARAMETER_INVALID;
-    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
-    SLuint16 mask = 1 << channel;
-    interface_lock_exclusive(this);
-    if (solo)
-        this->mChannelSoloMask |= mask;
-    else
-        this->mChannelSoloMask &= ~mask;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (channel > 15) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
+        SLuint16 mask = 1 << channel;
+        interface_lock_exclusive(this);
+        if (solo)
+            this->mChannelSoloMask |= mask;
+        else
+            this->mChannelSoloMask &= ~mask;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDIMuteSolo_GetChannelSolo(SLMIDIMuteSoloItf self, SLuint8 channel,
     SLboolean *pSolo)
 {
-    if (channel > 15 || (NULL == pSolo))
-        return SL_RESULT_PARAMETER_INVALID;
-    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
-    interface_lock_peek(this);
-    SLuint16 mask = this->mChannelSoloMask;
-    interface_unlock_peek(this);
-    *pSolo = (mask >> channel) & 1;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (channel > 15 || (NULL == pSolo)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
+        interface_lock_peek(this);
+        SLuint16 mask = this->mChannelSoloMask;
+        interface_unlock_peek(this);
+        *pSolo = (mask >> channel) & 1;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDIMuteSolo_GetTrackCount(SLMIDIMuteSoloItf self, SLuint16 *pCount)
 {
-    if (NULL == pCount)
-        return SL_RESULT_PARAMETER_INVALID;
-    IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
-    // const, so no lock needed
-    SLuint16 trackCount = this->mTrackCount;
-    *pCount = trackCount;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pCount) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
+        // const, so no lock needed
+        SLuint16 trackCount = this->mTrackCount;
+        *pCount = trackCount;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDIMuteSolo_SetTrackMute(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean mute)
 {
+    SL_ENTER_INTERFACE
+
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     // const
-    if (!(track < this->mTrackCount))
-        return SL_RESULT_PARAMETER_INVALID;
-    SLuint32 mask = 1 << track;
-    interface_lock_exclusive(this);
-    if (mute)
-        this->mTrackMuteMask |= mask;
-    else
-        this->mTrackMuteMask &= ~mask;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    if (!(track < this->mTrackCount)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        SLuint32 mask = 1 << track;
+        interface_lock_exclusive(this);
+        if (mute)
+            this->mTrackMuteMask |= mask;
+        else
+            this->mTrackMuteMask &= ~mask;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDIMuteSolo_GetTrackMute(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean *pMute)
 {
+    SL_ENTER_INTERFACE
+
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     // const, no lock needed
-    if (!(track < this->mTrackCount) || NULL == pMute)
-        return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_peek(this);
-    SLuint32 mask = this->mTrackMuteMask;
-    interface_unlock_peek(this);
-    *pMute = (mask >> track) & 1;
-    return SL_RESULT_SUCCESS;
+    if (!(track < this->mTrackCount) || NULL == pMute) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        interface_lock_peek(this);
+        SLuint32 mask = this->mTrackMuteMask;
+        interface_unlock_peek(this);
+        *pMute = (mask >> track) & 1;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDIMuteSolo_SetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean solo)
 {
+    SL_ENTER_INTERFACE
+
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     // const
-    if (!(track < this->mTrackCount))
-        return SL_RESULT_PARAMETER_INVALID;
-    SLuint32 mask = 1 << track;
-    interface_lock_exclusive(this);
-    if (solo)
-        this->mTrackSoloMask |= mask;
-    else
-        this->mTrackSoloMask &= ~mask;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    if (!(track < this->mTrackCount)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        SLuint32 mask = 1 << track; interface_lock_exclusive(this);
+        if (solo)
+            this->mTrackSoloMask |= mask;
+        else
+            this->mTrackSoloMask &= ~mask;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDIMuteSolo_GetTrackSolo(SLMIDIMuteSoloItf self, SLuint16 track, SLboolean *pSolo)
 {
+    SL_ENTER_INTERFACE
+
     IMIDIMuteSolo *this = (IMIDIMuteSolo *) self;
     // const, no lock needed
-    if (!(track < this->mTrackCount) || NULL == pSolo)
-        return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_peek(this);
-    SLuint32 mask = this->mTrackSoloMask;
-    interface_unlock_peek(this);
-    *pSolo = (mask >> track) & 1;
-    return SL_RESULT_SUCCESS;
+    if (!(track < this->mTrackCount) || NULL == pSolo) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        interface_lock_peek(this);
+        SLuint32 mask = this->mTrackSoloMask;
+        interface_unlock_peek(this);
+        *pSolo = (mask >> track) & 1;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLMIDIMuteSoloItf_ IMIDIMuteSolo_Itf = {
     IMIDIMuteSolo_SetChannelMute,

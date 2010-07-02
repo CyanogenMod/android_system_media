@@ -20,43 +20,57 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IAndroidStreamType_SetStreamType(SLAndroidStreamTypeItf self, SLuint32 type)
 {
+    SL_ENTER_INTERFACE
+
     fprintf(stdout, "IAndroidStreamType_SetStreamType for type %lu\n", type);
+
     if (type >= android::AudioSystem::NUM_STREAM_TYPES) {
-        return SL_RESULT_PARAMETER_INVALID;
-    }
-    IAndroidStreamType *this = (IAndroidStreamType *) self;
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IAndroidStreamType *this = (IAndroidStreamType *) self;
 
-    interface_lock_exclusive(this);
-    this->mStreamType = type;
-    switch (InterfaceToObjectID(this)) {
-    case SL_OBJECTID_AUDIOPLAYER:
-        sles_to_android_audioPlayerSetStreamType_l(InterfaceToCAudioPlayer(this), type);
-        break;
-    case SL_OBJECTID_MIDIPLAYER:
-        // FIXME implement once we support MIDIPlayer
-        break;
-    default:
-        break;
-    }
-    interface_unlock_exclusive(this);
+        interface_lock_exclusive(this);
+        this->mStreamType = type;
+        switch (InterfaceToObjectID(this)) {
+        case SL_OBJECTID_AUDIOPLAYER:
+            sles_to_android_audioPlayerSetStreamType_l(InterfaceToCAudioPlayer(this), type);
+            break;
+        case SL_OBJECTID_MIDIPLAYER:
+            // FIXME implement once we support MIDIPlayer
+            break;
+        default:
+            break;
+        }
+        interface_unlock_exclusive(this);
 
-    return SL_RESULT_SUCCESS;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IAndroidStreamType_GetStreamType(SLAndroidStreamTypeItf self, SLuint32 *pType)
 {
-    if (NULL == pType)
-        return SL_RESULT_PARAMETER_INVALID;
-    IAndroidStreamType *this = (IAndroidStreamType *) self;
+    SL_ENTER_INTERFACE
 
-    interface_lock_peek(this);
-    SLuint32 type = this->mStreamType;
-    interface_unlock_peek(this);
+    if (NULL == pType) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IAndroidStreamType *this = (IAndroidStreamType *) self;
 
-    *pType = type;
-    return SL_RESULT_SUCCESS;
+        interface_lock_peek(this);
+        SLuint32 type = this->mStreamType;
+        interface_unlock_peek(this);
+
+        *pType = type;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
 
 
