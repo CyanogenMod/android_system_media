@@ -18,52 +18,81 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IMIDITempo_SetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 tpqn)
 {
-    if (!(1 <= tpqn && tpqn <= 32767))
-        return SL_RESULT_PARAMETER_INVALID;
-    IMIDITempo *this = (IMIDITempo *) self;
-    interface_lock_poke(this);
-    this->mTicksPerQuarterNote = tpqn;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(1 <= tpqn && tpqn <= 32767)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IMIDITempo *this = (IMIDITempo *) self;
+        interface_lock_poke(this);
+        this->mTicksPerQuarterNote = tpqn;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDITempo_GetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 *pTpqn)
 {
-    if (NULL == pTpqn)
-        return SL_RESULT_PARAMETER_INVALID;
-    IMIDITempo *this = (IMIDITempo *) self;
-    interface_lock_peek(this);
-    SLuint32 ticksPerQuarterNote = this->mTicksPerQuarterNote;
-    interface_unlock_peek(this);
-    *pTpqn = ticksPerQuarterNote;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pTpqn) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IMIDITempo *this = (IMIDITempo *) self;
+        interface_lock_peek(this);
+        SLuint32 ticksPerQuarterNote = this->mTicksPerQuarterNote;
+        interface_unlock_peek(this);
+        *pTpqn = ticksPerQuarterNote;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDITempo_SetMicrosecondsPerQuarterNote(SLMIDITempoItf self, SLmicrosecond uspqn)
 {
+    SL_ENTER_INTERFACE
+
     // FIXME spec says zero, is that correct?
-    if (!(1 <= uspqn && uspqn <= 16777215))
-        return SL_RESULT_PARAMETER_INVALID;
-    IMIDITempo *this = (IMIDITempo *) self;
-    interface_lock_poke(this);
-    this->mMicrosecondsPerQuarterNote = uspqn;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    if (!(1 <= uspqn && uspqn <= 16777215)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IMIDITempo *this = (IMIDITempo *) self;
+        interface_lock_poke(this);
+        this->mMicrosecondsPerQuarterNote = uspqn;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IMIDITempo_GetMicrosecondsPerQuarterNote(SLMIDITempoItf self, SLmicrosecond *uspqn)
 {
-    if (NULL == uspqn)
-        return SL_RESULT_PARAMETER_INVALID;
-    IMIDITempo *this = (IMIDITempo *) self;
-    interface_lock_peek(this);
-    SLuint32 microsecondsPerQuarterNote = this->mMicrosecondsPerQuarterNote;
-    interface_unlock_peek(this);
-    *uspqn = microsecondsPerQuarterNote;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == uspqn) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IMIDITempo *this = (IMIDITempo *) self;
+        interface_lock_peek(this);
+        SLuint32 microsecondsPerQuarterNote = this->mMicrosecondsPerQuarterNote;
+        interface_unlock_peek(this);
+        *uspqn = microsecondsPerQuarterNote;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLMIDITempoItf_ IMIDITempo_Itf = {
     IMIDITempo_SetTicksPerQuarterNote,

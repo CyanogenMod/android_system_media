@@ -18,105 +18,145 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IPlaybackRate_SetRate(SLPlaybackRateItf self, SLpermille rate)
 {
+    SL_ENTER_INTERFACE
+
     IPlaybackRate *this = (IPlaybackRate *) self;
     // const, so no lock needed
-    if (!(this->mMinRate <= rate && rate <= this->mMaxRate))
-        return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_poke(this);
-    this->mRate = rate;
-    interface_unlock_poke(this);
+    if (!(this->mMinRate <= rate && rate <= this->mMaxRate)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        interface_lock_poke(this);
+        this->mRate = rate;
+        interface_unlock_poke(this);
 #ifdef ANDROID
-    return sles_to_android_audioPlayerSetPlayRate(this, rate);
+        result = sles_to_android_audioPlayerSetPlayRate(this, rate);
+#else
+        result = SL_RESULT_SUCCESS;
 #endif
-    return SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlaybackRate_GetRate(SLPlaybackRateItf self, SLpermille *pRate)
 {
+    SL_ENTER_INTERFACE
+
     if (NULL == pRate) {
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPlaybackRate *this = (IPlaybackRate *) self;
+        interface_lock_peek(this);
+        SLpermille rate = this->mRate;
+        interface_unlock_peek(this);
+        *pRate = rate;
+        result = SL_RESULT_SUCCESS;
     }
-    IPlaybackRate *this = (IPlaybackRate *) self;
-    interface_lock_peek(this);
-    SLpermille rate = this->mRate;
-    interface_unlock_peek(this);
-    *pRate = rate;
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlaybackRate_SetPropertyConstraints(SLPlaybackRateItf self, SLuint32 constraints)
 {
+    SL_ENTER_INTERFACE
+
     IPlaybackRate *this = (IPlaybackRate *) self;
-    SLresult result = SL_RESULT_SUCCESS;
     this->mProperties = constraints;
 #ifdef ANDROID
     // verify property support before storing
     result = sles_to_android_audioPlayerSetPlaybackRateBehavior(this, constraints);
+#else
+    result = SL_RESULT_SUCCESS;
 #endif
     interface_lock_poke(this);
     if (result == SL_RESULT_SUCCESS) {
         this->mProperties = constraints;
     }
     interface_unlock_poke(this);
-    return result;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlaybackRate_GetProperties(SLPlaybackRateItf self, SLuint32 *pProperties)
 {
+    SL_ENTER_INTERFACE
+
     if (NULL == pProperties) {
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPlaybackRate *this = (IPlaybackRate *) self;
+        interface_lock_peek(this);
+        SLuint32 properties = this->mProperties;
+        interface_unlock_peek(this);
+        *pProperties = properties;
+        result = SL_RESULT_SUCCESS;
     }
-    IPlaybackRate *this = (IPlaybackRate *) self;
-    interface_lock_peek(this);
-    SLuint32 properties = this->mProperties;
-    interface_unlock_peek(this);
-    *pProperties = properties;
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlaybackRate_GetCapabilitiesOfRate(SLPlaybackRateItf self,
     SLpermille rate, SLuint32 *pCapabilities)
 {
+    SL_ENTER_INTERFACE
+
     if (NULL == pCapabilities) {
-        return SL_RESULT_PARAMETER_INVALID;
-    }
-    IPlaybackRate *this = (IPlaybackRate *) self;
-    // const, so no lock needed
-    if (!(this->mMinRate <= rate && rate <= this->mMaxRate))
-        return SL_RESULT_PARAMETER_INVALID;
-    SLuint32 capabilities = 0;
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPlaybackRate *this = (IPlaybackRate *) self;
+        // const, so no lock needed
+        if (!(this->mMinRate <= rate && rate <= this->mMaxRate)) {
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            SLuint32 capabilities = 0;
 #ifdef ANDROID
-    sles_to_android_audioPlayerGetCapabilitiesOfRate(this, &capabilities);
+            sles_to_android_audioPlayerGetCapabilitiesOfRate(this, &capabilities);
 #else
-    capabilities = this->mCapabilities;
+            capabilities = this->mCapabilities;
 #endif
-    *pCapabilities = capabilities;
-    return SL_RESULT_SUCCESS;
+            *pCapabilities = capabilities;
+            result = SL_RESULT_SUCCESS;
+        }
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlaybackRate_GetRateRange(SLPlaybackRateItf self, SLuint8 index,
     SLpermille *pMinRate, SLpermille *pMaxRate, SLpermille *pStepSize, SLuint32 *pCapabilities)
 {
-    if (NULL == pMinRate || NULL == pMaxRate || NULL == pStepSize || NULL == pCapabilities)
-        return SL_RESULT_PARAMETER_INVALID;
+    SL_ENTER_INTERFACE
+
     // only one range
-    if (0 < index)
-        return SL_RESULT_PARAMETER_INVALID;
-    IPlaybackRate *this = (IPlaybackRate *) self;
-    interface_lock_shared(this);
-    SLpermille minRate = this->mMinRate;
-    SLpermille maxRate = this->mMaxRate;
-    SLpermille stepSize = this->mStepSize;
-    SLuint32 capabilities = this->mCapabilities;
-    interface_unlock_shared(this);
-    *pMinRate = minRate;
-    *pMaxRate = maxRate;
-    *pStepSize = stepSize;
-    *pCapabilities = capabilities;
-    return SL_RESULT_SUCCESS;
+    if (NULL == pMinRate || NULL == pMaxRate || NULL == pStepSize || NULL == pCapabilities ||
+        (0 < index)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPlaybackRate *this = (IPlaybackRate *) self;
+        interface_lock_shared(this);
+        SLpermille minRate = this->mMinRate;
+        SLpermille maxRate = this->mMaxRate;
+        SLpermille stepSize = this->mStepSize;
+        SLuint32 capabilities = this->mCapabilities;
+        interface_unlock_shared(this);
+        *pMinRate = minRate;
+        *pMaxRate = maxRate;
+        *pStepSize = stepSize;
+        *pCapabilities = capabilities;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLPlaybackRateItf_ IPlaybackRate_Itf = {
     IPlaybackRate_SetRate,

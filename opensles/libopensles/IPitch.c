@@ -18,37 +18,54 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IPitch_SetPitch(SLPitchItf self, SLpermille pitch)
 {
+    SL_ENTER_INTERFACE
+
     IPitch *this = (IPitch *) self;
     // const, so no lock needed
-    if (!(this->mMinPitch <= pitch && pitch <= this->mMaxPitch))
-        return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_poke(this);
-    this->mPitch = pitch;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    if (!(this->mMinPitch <= pitch && pitch <= this->mMaxPitch)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        interface_lock_poke(this);
+        this->mPitch = pitch;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPitch_GetPitch(SLPitchItf self, SLpermille *pPitch)
 {
-    if (NULL == pPitch)
-        return SL_RESULT_PARAMETER_INVALID;
-    IPitch *this = (IPitch *) self;
-    interface_lock_peek(this);
-    SLpermille pitch = this->mPitch;
-    interface_unlock_peek(this);
-    *pPitch = pitch;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pPitch) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPitch *this = (IPitch *) self;
+        interface_lock_peek(this);
+        SLpermille pitch = this->mPitch;
+        interface_unlock_peek(this);
+        *pPitch = pitch;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPitch_GetPitchCapabilities(SLPitchItf self,
     SLpermille *pMinPitch, SLpermille *pMaxPitch)
 {
+    SL_ENTER_INTERFACE
+
     // per spec, each is optional, and does not require that at least one must be non-NULL
 #if 0
     if (NULL == pMinPitch && NULL == pMaxPitch)
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
 #endif
     IPitch *this = (IPitch *) self;
     // const, so no lock needed
@@ -58,8 +75,11 @@ static SLresult IPitch_GetPitchCapabilities(SLPitchItf self,
         *pMinPitch = minPitch;
     if (NULL != pMaxPitch)
         *pMaxPitch = maxPitch;
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLPitchItf_ IPitch_Itf = {
     IPitch_SetPitch,

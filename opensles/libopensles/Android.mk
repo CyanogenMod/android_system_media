@@ -13,10 +13,13 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
+LOCAL_CFLAGS += -DUSE_CONFORMANCE
+
 LOCAL_SRC_FILES:=                     \
         OpenSLES_IID.c                \
         classes.c                     \
         devices.c                     \
+        debug.c                       \
         interfaces.c                  \
         locks.c                       \
         sles.c                        \

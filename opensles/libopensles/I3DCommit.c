@@ -18,8 +18,11 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult I3DCommit_Commit(SL3DCommitItf self)
 {
+    SL_ENTER_INTERFACE
+
     I3DCommit *this = (I3DCommit *) self;
     IObject *thisObject = InterfaceToIObject(this);
     object_lock_exclusive(thisObject);
@@ -32,18 +35,26 @@ static SLresult I3DCommit_Commit(SL3DCommitItf self)
         } while (this->mGeneration == myGeneration);
     }
     object_unlock_exclusive(thisObject);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DCommit_SetDeferred(SL3DCommitItf self, SLboolean deferred)
 {
+    SL_ENTER_INTERFACE
+
     I3DCommit *this = (I3DCommit *) self;
     IObject *thisObject = InterfaceToIObject(this);
     object_lock_exclusive(thisObject);
     this->mDeferred = SL_BOOLEAN_FALSE != deferred; // normalize
     object_unlock_exclusive(thisObject);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SL3DCommitItf_ I3DCommit_Itf = {
     I3DCommit_Commit,

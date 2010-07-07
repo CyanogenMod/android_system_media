@@ -41,9 +41,8 @@ SLresult err_to_result(int err)
 
 // Check the interface IDs passed into a Create operation
 
-SLresult checkInterfaces(const ClassTable *class__,
-    SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
-    const SLboolean *pInterfaceRequired, unsigned *pExposedMask)
+SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
+    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired, unsigned *pExposedMask)
 {
     assert(NULL != class__ && NULL != pExposedMask);
     unsigned exposedMask = 0;
@@ -326,7 +325,8 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
                 return SL_RESULT_PARAMETER_INVALID;
             break;
         case 0:
-            pDataFormat->mPCM.channelMask = pDataFormat->mPCM.numChannels == 2 ?  SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT : SL_SPEAKER_FRONT_CENTER;
+            pDataFormat->mPCM.channelMask = pDataFormat->mPCM.numChannels == 2 ?
+                SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT : SL_SPEAKER_FRONT_CENTER;
             break;
         default:
             return SL_RESULT_PARAMETER_INVALID;
@@ -641,25 +641,41 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
     return this;
 }
 
-/* Initial entry points */
+
+/* Initial global entry points */
 
 SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     const SLEngineOption *pEngineOptions, SLuint32 numInterfaces,
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
+    SL_ENTER_GLOBAL
+
+    do {
+
 #ifdef ANDROID
-    android::ProcessState::self()->startThreadPool();
-    android::DataSource::RegisterDefaultSniffers();
+        android::ProcessState::self()->startThreadPool();
+        android::DataSource::RegisterDefaultSniffers();
 #endif
-    if (NULL == pEngine)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pEngine = NULL;
-    // default values
-    SLboolean threadSafe = SL_BOOLEAN_TRUE;
-    SLboolean lossOfControlGlobal = SL_BOOLEAN_FALSE;
-    if (NULL != pEngineOptions) {
+
+        if (NULL == pEngine) {
+            result = SL_RESULT_PARAMETER_INVALID;
+            break;
+        }
+        *pEngine = NULL;
+
+        if ((0 < numOptions) && (NULL == pEngineOptions)) {
+            result = SL_RESULT_PARAMETER_INVALID;
+            break;
+        }
+
+        // default values
+        SLboolean threadSafe = SL_BOOLEAN_TRUE;
+        SLboolean lossOfControlGlobal = SL_BOOLEAN_FALSE;
+
+        // process engine options
         SLuint32 i;
         const SLEngineOption *option = pEngineOptions;
+        result = SL_RESULT_SUCCESS;
         for (i = 0; i < numOptions; ++i, ++option) {
             switch (option->feature) {
             case SL_ENGINEOPTION_THREADSAFE:
@@ -669,46 +685,72 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
                 lossOfControlGlobal = SL_BOOLEAN_FALSE != (SLboolean) option->data; // normalize
                 break;
             default:
-                return SL_RESULT_PARAMETER_INVALID;
+                result = SL_RESULT_PARAMETER_INVALID;
+                break;
             }
         }
+        if (SL_RESULT_SUCCESS != result)
+            break;
+
+        unsigned exposedMask;
+        const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
+        result = checkInterfaces(pCEngine_class, numInterfaces,
+            pInterfaceIds, pInterfaceRequired, &exposedMask);
+        if (SL_RESULT_SUCCESS != result)
+            break;
+
+        CEngine *this = (CEngine *) construct(pCEngine_class, exposedMask, NULL);
+        if (NULL == this) {
+            result = SL_RESULT_MEMORY_FAILURE;
+            break;
+        }
+
+        this->mObject.mLossOfControlMask = lossOfControlGlobal ? ~0 : 0;
+        this->mEngine.mLossOfControlGlobal = lossOfControlGlobal;
+        this->mEngineCapabilities.mThreadSafe = threadSafe;
+        *pEngine = &this->mObject.mItf;
+
+    } while(0);
+
+    SL_LEAVE_GLOBAL
+}
+
+
+SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedInterfaces)
+{
+    SL_ENTER_GLOBAL
+
+    if (NULL == pNumSupportedInterfaces) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
+        *pNumSupportedInterfaces = pCEngine_class->mInterfaceCount;
+        result = SL_RESULT_SUCCESS;
     }
-    unsigned exposedMask;
-    const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
-    SLresult result = checkInterfaces(pCEngine_class, numInterfaces,
-        pInterfaceIds, pInterfaceRequired, &exposedMask);
-    if (SL_RESULT_SUCCESS != result)
-        return result;
-    CEngine *this = (CEngine *) construct(pCEngine_class, exposedMask, NULL);
-    if (NULL == this)
-        return SL_RESULT_MEMORY_FAILURE;
-    this->mObject.mLossOfControlMask = lossOfControlGlobal ? ~0 : 0;
-    this->mEngine.mLossOfControlGlobal = lossOfControlGlobal;
-    this->mEngineCapabilities.mThreadSafe = threadSafe;
-    *pEngine = &this->mObject.mItf;
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_GLOBAL
 }
 
-SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(
-    SLuint32 *pNumSupportedInterfaces)
+
+SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index, SLInterfaceID *pInterfaceId)
 {
-    if (NULL == pNumSupportedInterfaces)
-        return SL_RESULT_PARAMETER_INVALID;
-    const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
-    *pNumSupportedInterfaces = pCEngine_class->mInterfaceCount;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_GLOBAL
+
+    if (NULL == pInterfaceId) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
+        if (pCEngine_class->mInterfaceCount <= index) {
+            *pInterfaceId = NULL;
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            *pInterfaceId = &SL_IID_array[pCEngine_class->mInterfaces[index].mMPH];
+            result = SL_RESULT_SUCCESS;
+        }
+    }
+
+    SL_LEAVE_GLOBAL
 }
 
-SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index,
-    SLInterfaceID *pInterfaceId)
-{
-    if (NULL == pInterfaceId)
-        return SL_RESULT_PARAMETER_INVALID;
-    const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
-    if (pCEngine_class->mInterfaceCount <= index)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pInterfaceId = &SL_IID_array[pCEngine_class->mInterfaces[index].mMPH];
-    return SL_RESULT_SUCCESS;
-}
 
 /* End */

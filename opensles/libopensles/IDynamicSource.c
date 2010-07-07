@@ -18,31 +18,38 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IDynamicSource_SetSource(SLDynamicSourceItf self, SLDataSource *pDataSource)
 {
-    if (NULL == pDataSource)
-        return SL_RESULT_PARAMETER_INVALID;
-    IDynamicSource *this = (IDynamicSource *) self;
-// FIXME Full implementation of dynamic sources will need a lot more work.
-// It requires validating the new source by itself, validating it with respect
-// to a data sink if appropriate, terminating the current source, and connecting
-// the new source. Note that all this must appear to app to be atomic, yet can actually
-// involve several steps that may block.
+    SL_ENTER_INTERFACE
+
+    if (NULL == pDataSource) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IDynamicSource *this = (IDynamicSource *) self;
+        // FIXME Full implementation of dynamic sources will need a lot more work.
+        // It requires validating the new source by itself, validating it with respect
+        // to a data sink if appropriate, terminating the current source, and connecting
+        // the new source. Note that all this must appear to app to be atomic, yet can actually
+        // involve several steps that may block.
 #if 0
-    DataLocatorFormat myDataSource;
-    SLresult result;
-    result = checkDataSource(pDataSource, &myDataSource);
-    if (SL_RESULT_SUCCESS != result)
-        return result;
+        DataLocatorFormat myDataSource;
+        SLresult result;
+        result = checkDataSource(pDataSource, &myDataSource);
+        // handle result here
 #endif
-    // need to lock the object, as a change to source can impact most of object
-    IObject *thisObject = InterfaceToIObject(this);
-    object_lock_exclusive(thisObject);
-    // FIXME a bit of a simplification to say the least!
-    this->mDataSource = pDataSource;
-    object_unlock_exclusive(thisObject);
-    return SL_RESULT_FEATURE_UNSUPPORTED;
+        // need to lock the object, as a change to source can impact most of object
+        IObject *thisObject = InterfaceToIObject(this);
+        object_lock_exclusive(thisObject);
+        // FIXME a bit of a simplification to say the least!
+        this->mDataSource = pDataSource;
+        object_unlock_exclusive(thisObject);
+        result = SL_RESULT_FEATURE_UNSUPPORTED;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLDynamicSourceItf_ IDynamicSource_Itf = {
     IDynamicSource_SetSource

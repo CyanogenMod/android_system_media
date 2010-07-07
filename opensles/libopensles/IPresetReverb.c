@@ -20,6 +20,8 @@
 
 static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self, SLuint16 preset)
 {
+    SL_ENTER_INTERFACE
+
     IPresetReverb *this = (IPresetReverb *) self;
     switch (preset) {
     case SL_REVERBPRESET_NONE:
@@ -29,26 +31,35 @@ static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self, SLuint16 preset)
     case SL_REVERBPRESET_MEDIUMHALL:
     case SL_REVERBPRESET_LARGEHALL:
     case SL_REVERBPRESET_PLATE:
+        interface_lock_poke(this);
+        this->mPreset = preset;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
         break;
     default:
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
+        break;
     }
-    interface_lock_poke(this);
-    this->mPreset = preset;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
 
 static SLresult IPresetReverb_GetPreset(SLPresetReverbItf self, SLuint16 *pPreset)
 {
-    if (NULL == pPreset)
-        return SL_RESULT_PARAMETER_INVALID;
-    IPresetReverb *this = (IPresetReverb *) self;
-    interface_lock_peek(this);
-    SLuint16 preset = this->mPreset;
-    interface_unlock_peek(this);
-    *pPreset = preset;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pPreset) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPresetReverb *this = (IPresetReverb *) self;
+        interface_lock_peek(this);
+        SLuint16 preset = this->mPreset;
+        interface_unlock_peek(this);
+        *pPreset = preset;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
 
 static const struct SLPresetReverbItf_ IPresetReverb_Itf = {

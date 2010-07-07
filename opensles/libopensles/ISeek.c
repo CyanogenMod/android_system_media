@@ -18,58 +18,81 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult ISeek_SetPosition(SLSeekItf self, SLmillisecond pos, SLuint32 seekMode)
 {
+    SL_ENTER_INTERFACE
+
     switch (seekMode) {
     case SL_SEEKMODE_FAST:
     case SL_SEEKMODE_ACCURATE:
+        {
+        // maximum position is a special value that indicates a seek is not pending
+        if (SL_TIME_UNKNOWN == pos)
+            pos = SL_TIME_UNKNOWN - 1;
+        ISeek *this = (ISeek *) self;
+        interface_lock_exclusive(this);
+        if (pos != this->mPos) {
+            this->mPos = pos;
+            interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+        } else
+            interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+        }
         break;
     default:
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
+        break;
     }
-    // maximum position is a special value that indicates a seek is not pending
-    if (SL_TIME_UNKNOWN == pos)
-        pos = SL_TIME_UNKNOWN - 1;
-    ISeek *this = (ISeek *) self;
-    interface_lock_exclusive(this);
-    if (pos != this->mPos) {
-        this->mPos = pos;
-        interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
-    } else
-        interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult ISeek_SetLoop(SLSeekItf self, SLboolean loopEnable,
     SLmillisecond startPos, SLmillisecond endPos)
 {
-    if (!(startPos < endPos))
-        return SL_RESULT_PARAMETER_INVALID;
-    ISeek *this = (ISeek *) self;
-    interface_lock_exclusive(this);
-    this->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize
-    this->mStartPos = startPos;
-    this->mEndPos = endPos;
-    interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(startPos < endPos)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        ISeek *this = (ISeek *) self;
+        interface_lock_exclusive(this);
+        this->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize
+        this->mStartPos = startPos;
+        this->mEndPos = endPos;
+        interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult ISeek_GetLoop(SLSeekItf self, SLboolean *pLoopEnabled,
     SLmillisecond *pStartPos, SLmillisecond *pEndPos)
 {
-    if (NULL == pLoopEnabled || NULL == pStartPos || NULL == pEndPos)
-        return SL_RESULT_PARAMETER_INVALID;
-    ISeek *this = (ISeek *) self;
-    interface_lock_shared(this);
-    SLboolean loopEnabled = this->mLoopEnabled;
-    SLmillisecond startPos = this->mStartPos;
-    SLmillisecond endPos = this->mEndPos;
-    interface_unlock_shared(this);
-    *pLoopEnabled = loopEnabled;
-    *pStartPos = startPos;
-    *pEndPos = endPos;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pLoopEnabled || NULL == pStartPos || NULL == pEndPos) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        ISeek *this = (ISeek *) self;
+        interface_lock_shared(this);
+        SLboolean loopEnabled = this->mLoopEnabled;
+        SLmillisecond startPos = this->mStartPos;
+        SLmillisecond endPos = this->mEndPos;
+        interface_unlock_shared(this);
+        *pLoopEnabled = loopEnabled;
+        *pStartPos = startPos;
+        *pEndPos = endPos;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLSeekItf_ ISeek_Itf = {
     ISeek_SetPosition,

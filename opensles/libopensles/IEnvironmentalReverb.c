@@ -24,299 +24,456 @@
 // on the assumption that the block copy will atomically
 // replace each word of the block.
 
+
 static SLresult IEnvironmentalReverb_SetRoomLevel(SLEnvironmentalReverbItf self, SLmillibel room)
 {
-    if (!(SL_MILLIBEL_MIN <= room && room <= 0))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.roomLevel = room;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(SL_MILLIBEL_MIN <= room && room <= 0)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(this);
+        this->mProperties.roomLevel = room;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self, SLmillibel *pRoom)
 {
-    if (NULL == pRoom)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillibel roomLevel = this->mProperties.roomLevel;
-    interface_unlock_peek(this);
-    *pRoom = roomLevel;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pRoom) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_peek(this);
+        SLmillibel roomLevel = this->mProperties.roomLevel;
+        interface_unlock_peek(this);
+        *pRoom = roomLevel;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_SetRoomHFLevel(
     SLEnvironmentalReverbItf self, SLmillibel roomHF)
 {
-    if (!(SL_MILLIBEL_MIN <= roomHF && roomHF <= 0))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.roomHFLevel = roomHF;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(SL_MILLIBEL_MIN <= roomHF && roomHF <= 0)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(this);
+        this->mProperties.roomHFLevel = roomHF;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_GetRoomHFLevel(
     SLEnvironmentalReverbItf self, SLmillibel *pRoomHF)
 {
-    if (NULL == pRoomHF)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillibel roomHFLevel = this->mProperties.roomHFLevel;
-    interface_unlock_peek(this);
-    *pRoomHF = roomHFLevel;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pRoomHF) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_peek(this);
+        SLmillibel roomHFLevel = this->mProperties.roomHFLevel;
+        interface_unlock_peek(this);
+        *pRoomHF = roomHFLevel;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_SetDecayTime(
     SLEnvironmentalReverbItf self, SLmillisecond decayTime)
 {
-    if (!(100 <= decayTime && decayTime <= 20000))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.decayTime = decayTime;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(100 <= decayTime && decayTime <= 20000)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(this);
+        this->mProperties.decayTime = decayTime;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_GetDecayTime(
     SLEnvironmentalReverbItf self, SLmillisecond *pDecayTime)
 {
-    if (NULL == pDecayTime)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillisecond decayTime = this->mProperties.decayTime;
-    interface_unlock_peek(this);
-    *pDecayTime = decayTime;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pDecayTime) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_peek(this);
+        SLmillisecond decayTime = this->mProperties.decayTime;
+        interface_unlock_peek(this);
+        *pDecayTime = decayTime;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_SetDecayHFRatio(
     SLEnvironmentalReverbItf self, SLpermille decayHFRatio)
 {
-    if (!(100 <= decayHFRatio && decayHFRatio <= 2000))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.decayHFRatio = decayHFRatio;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(100 <= decayHFRatio && decayHFRatio <= 2000)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(this);
+        this->mProperties.decayHFRatio = decayHFRatio;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_GetDecayHFRatio(
     SLEnvironmentalReverbItf self, SLpermille *pDecayHFRatio)
 {
-    if (NULL == pDecayHFRatio)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLpermille decayHFRatio = this->mProperties.decayHFRatio;
-    interface_unlock_peek(this);
-    *pDecayHFRatio = decayHFRatio;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pDecayHFRatio) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_peek(this);
+        SLpermille decayHFRatio = this->mProperties.decayHFRatio;
+        interface_unlock_peek(this);
+        *pDecayHFRatio = decayHFRatio;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_SetReflectionsLevel(
     SLEnvironmentalReverbItf self, SLmillibel reflectionsLevel)
 {
-    if (!(SL_MILLIBEL_MIN <= reflectionsLevel && reflectionsLevel <= 1000))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.reflectionsLevel = reflectionsLevel;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(SL_MILLIBEL_MIN <= reflectionsLevel && reflectionsLevel <= 1000)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(this);
+        this->mProperties.reflectionsLevel = reflectionsLevel;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_GetReflectionsLevel(
     SLEnvironmentalReverbItf self, SLmillibel *pReflectionsLevel)
 {
-    if (NULL == pReflectionsLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillibel reflectionsLevel = this->mProperties.reflectionsLevel;
-    interface_unlock_peek(this);
-    *pReflectionsLevel = reflectionsLevel;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pReflectionsLevel) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_peek(this);
+        SLmillibel reflectionsLevel = this->mProperties.reflectionsLevel;
+        interface_unlock_peek(this);
+        *pReflectionsLevel = reflectionsLevel;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_SetReflectionsDelay(
     SLEnvironmentalReverbItf self, SLmillisecond reflectionsDelay)
 {
-    if (!(/* 0 <= reflectionsDelay && */ reflectionsDelay <= 300))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.reflectionsDelay = reflectionsDelay;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(/* 0 <= reflectionsDelay && */ reflectionsDelay <= 300)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(this);
+        this->mProperties.reflectionsDelay = reflectionsDelay;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_GetReflectionsDelay(
     SLEnvironmentalReverbItf self, SLmillisecond *pReflectionsDelay)
 {
-    if (NULL == pReflectionsDelay)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillisecond reflectionsDelay = this->mProperties.reflectionsDelay;
-    interface_unlock_peek(this);
-    *pReflectionsDelay = reflectionsDelay;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pReflectionsDelay) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_peek(this);
+        SLmillisecond reflectionsDelay = this->mProperties.reflectionsDelay;
+        interface_unlock_peek(this);
+        *pReflectionsDelay = reflectionsDelay;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_SetReverbLevel(
     SLEnvironmentalReverbItf self, SLmillibel reverbLevel)
 {
-    if (!(SL_MILLIBEL_MIN <= reverbLevel && reverbLevel <= 2000))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.reverbLevel = reverbLevel;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(SL_MILLIBEL_MIN <= reverbLevel && reverbLevel <= 2000)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(this);
+        this->mProperties.reverbLevel = reverbLevel;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_GetReverbLevel(
     SLEnvironmentalReverbItf self, SLmillibel *pReverbLevel)
 {
-    if (NULL == pReverbLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillibel reverbLevel = this->mProperties.reverbLevel;
-    interface_unlock_peek(this);
-    *pReverbLevel = reverbLevel;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pReverbLevel) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_peek(this);
+        SLmillibel reverbLevel = this->mProperties.reverbLevel;
+        interface_unlock_peek(this);
+        *pReverbLevel = reverbLevel;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_SetReverbDelay(
     SLEnvironmentalReverbItf self, SLmillisecond reverbDelay)
 {
-    if (!(/* 0 <= reverbDelay && */ reverbDelay <= 100))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.reverbDelay = reverbDelay;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(/* 0 <= reverbDelay && */ reverbDelay <= 100)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(this);
+        this->mProperties.reverbDelay = reverbDelay;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_GetReverbDelay(
     SLEnvironmentalReverbItf self, SLmillisecond *pReverbDelay)
 {
-    if (NULL == pReverbDelay)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLmillisecond reverbDelay = this->mProperties.reverbDelay;
-    interface_unlock_peek(this);
-    *pReverbDelay = reverbDelay;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pReverbDelay) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_peek(this);
+        SLmillisecond reverbDelay = this->mProperties.reverbDelay;
+        interface_unlock_peek(this);
+        *pReverbDelay = reverbDelay;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_SetDiffusion(
     SLEnvironmentalReverbItf self, SLpermille diffusion)
 {
-    if (!(0 <= diffusion && diffusion <= 1000))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.diffusion = diffusion;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(0 <= diffusion && diffusion <= 1000)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(this);
+        this->mProperties.diffusion = diffusion;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_GetDiffusion(SLEnvironmentalReverbItf self,
      SLpermille *pDiffusion)
 {
-    if (NULL == pDiffusion)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLpermille diffusion = this->mProperties.diffusion;
-    interface_unlock_peek(this);
-    *pDiffusion = diffusion;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pDiffusion) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_peek(this);
+        SLpermille diffusion = this->mProperties.diffusion;
+        interface_unlock_peek(this);
+        *pDiffusion = diffusion;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_SetDensity(SLEnvironmentalReverbItf self,
     SLpermille density)
 {
-    if (!(0 <= density && density <= 1000))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties.density = density;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(0 <= density && density <= 1000)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(this);
+        this->mProperties.density = density;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_GetDensity(SLEnvironmentalReverbItf self,
     SLpermille *pDensity)
 {
-    if (NULL == pDensity)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_peek(this);
-    SLpermille density = this->mProperties.density;
-    interface_unlock_peek(this);
-    *pDensity = density;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pDensity) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_peek(this);
+        SLpermille density = this->mProperties.density;
+        interface_unlock_peek(this);
+        *pDensity = density;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_SetEnvironmentalReverbProperties(SLEnvironmentalReverbItf self,
     const SLEnvironmentalReverbSettings *pProperties)
 {
-    if (NULL == pProperties)
-        return SL_RESULT_PARAMETER_INVALID;
-    SLEnvironmentalReverbSettings properties = *pProperties;
-    if (!(SL_MILLIBEL_MIN <= properties.roomLevel && properties.roomLevel <= 0))
-        return SL_RESULT_PARAMETER_INVALID;
-    if (!(SL_MILLIBEL_MIN <= properties.roomHFLevel && properties.roomHFLevel <= 0))
-        return SL_RESULT_PARAMETER_INVALID;
-    if (!(100 <= properties.decayTime && properties.decayTime <= 20000))
-        return SL_RESULT_PARAMETER_INVALID;
-    if (!(100 <= properties.decayHFRatio && properties.decayHFRatio <= 2000))
-        return SL_RESULT_PARAMETER_INVALID;
-    if (!(SL_MILLIBEL_MIN <= properties.reflectionsLevel && properties.reflectionsLevel <= 1000))
-        return SL_RESULT_PARAMETER_INVALID;
-    if (!(/* 0 <= properties.reflectionsDelay && */ properties.reflectionsDelay <= 300))
-        return SL_RESULT_PARAMETER_INVALID;
-    if (!(SL_MILLIBEL_MIN <= properties.reverbLevel && properties.reverbLevel <= 2000))
-        return SL_RESULT_PARAMETER_INVALID;
-    if (!(/* 0 <= properties.reverbDelay && */ properties.reverbDelay <= 100))
-        return SL_RESULT_PARAMETER_INVALID;
-    if (!(0 <= properties.diffusion && properties.diffusion <= 1000))
-        return SL_RESULT_PARAMETER_INVALID;
-    if (!(0 <= properties.density && properties.density <= 1000))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_exclusive(this);
-    this->mProperties = properties;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    result = SL_RESULT_PARAMETER_INVALID;
+    do {
+        if (NULL == pProperties)
+            break;
+        SLEnvironmentalReverbSettings properties = *pProperties;
+        if (!(SL_MILLIBEL_MIN <= properties.roomLevel && properties.roomLevel <= 0))
+            break;
+        if (!(SL_MILLIBEL_MIN <= properties.roomHFLevel && properties.roomHFLevel <= 0))
+            break;
+        if (!(100 <= properties.decayTime && properties.decayTime <= 20000))
+            break;
+        if (!(100 <= properties.decayHFRatio && properties.decayHFRatio <= 2000))
+            break;
+        if (!(SL_MILLIBEL_MIN <= properties.reflectionsLevel &&
+            properties.reflectionsLevel <= 1000))
+            break;
+        if (!(/* 0 <= properties.reflectionsDelay && */ properties.reflectionsDelay <= 300))
+            break;
+        if (!(SL_MILLIBEL_MIN <= properties.reverbLevel && properties.reverbLevel <= 2000))
+            break;
+        if (!(/* 0 <= properties.reverbDelay && */ properties.reverbDelay <= 100))
+            break;
+        if (!(0 <= properties.diffusion && properties.diffusion <= 1000))
+            break;
+        if (!(0 <= properties.density && properties.density <= 1000))
+            break;
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(this);
+        this->mProperties = properties;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    } while (0);
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEnvironmentalReverb_GetEnvironmentalReverbProperties(
     SLEnvironmentalReverbItf self, SLEnvironmentalReverbSettings *pProperties)
 {
-    if (NULL == pProperties)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    interface_lock_shared(this);
-    SLEnvironmentalReverbSettings properties = this->mProperties;
-    interface_unlock_shared(this);
-    *pProperties = properties;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pProperties) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+        interface_lock_shared(this);
+        SLEnvironmentalReverbSettings properties = this->mProperties;
+        interface_unlock_shared(this);
+        *pProperties = properties;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLEnvironmentalReverbItf_ IEnvironmentalReverb_Itf = {
     IEnvironmentalReverb_SetRoomLevel,

@@ -18,36 +18,53 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IRatePitch_SetRate(SLRatePitchItf self, SLpermille rate)
 {
+    SL_ENTER_INTERFACE
+
     IRatePitch *this = (IRatePitch *) self;
-    if (!(this->mMinRate <= rate && rate <= this->mMaxRate))
-        return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_poke(this);
-    this->mRate = rate;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    if (!(this->mMinRate <= rate && rate <= this->mMaxRate)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        interface_lock_poke(this);
+        this->mRate = rate;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IRatePitch_GetRate(SLRatePitchItf self, SLpermille *pRate)
 {
-    if (NULL == pRate)
-        return SL_RESULT_PARAMETER_INVALID;
-    IRatePitch *this = (IRatePitch *) self;
-    interface_lock_peek(this);
-    SLpermille rate = this->mRate;
-    interface_unlock_peek(this);
-    *pRate = rate;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pRate) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IRatePitch *this = (IRatePitch *) self;
+        interface_lock_peek(this);
+        SLpermille rate = this->mRate;
+        interface_unlock_peek(this);
+        *pRate = rate;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IRatePitch_GetRatePitchCapabilities(SLRatePitchItf self,
     SLpermille *pMinRate, SLpermille *pMaxRate)
 {
+    SL_ENTER_INTERFACE
+
     // per spec, each is optional, and does not require that at least one must be non-NULL
 #if 0
     if (NULL == pMinRate && NULL == pMaxRate)
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
 #endif
     IRatePitch *this = (IRatePitch *) self;
     // const, so no lock required
@@ -57,8 +74,11 @@ static SLresult IRatePitch_GetRatePitchCapabilities(SLRatePitchItf self,
         *pMinRate = minRate;
     if (NULL != pMaxRate)
         *pMaxRate = maxRate;
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLRatePitchItf_ IRatePitch_Itf = {
     IRatePitch_SetRate,
@@ -70,7 +90,7 @@ void IRatePitch_init(void *self)
 {
     IRatePitch *this = (IRatePitch *) self;
     this->mItf = &IRatePitch_Itf;
-    this->mRate = 0;
+    this->mRate = 1000;
     // const
     this->mMinRate = 500;
     this->mMaxRate = 2000;
