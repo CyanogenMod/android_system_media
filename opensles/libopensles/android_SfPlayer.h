@@ -71,6 +71,7 @@ struct SfPlayer : public AHandler {
     void play();
     void pause();
     void stop();
+    void seek(int64_t timeMsec);
     bool wantPrefetch();
     void startPrefetch_async();
 
@@ -101,6 +102,7 @@ private:
         kWhatNotif      = 'noti',
         kWhatPlay       = 'play',
         kWhatPause      = 'paus',
+        kWhatSeek       = 'seek',
     };
 
     enum {
@@ -132,6 +134,8 @@ private:
     int64_t mTimeDelta;
     int64_t mDurationUsec;
     CacheStatus mCacheStatus;
+    bool mIsSeeking;
+    int64_t mSeekTimeMsec;
 
     DataLocator mDataLocator;
     int         mDataLocatorType;
@@ -146,6 +150,7 @@ private:
     void onNotify(const sp<AMessage> &msg);
     void onPlay();
     void onPause();
+    void onSeek(const sp<AMessage> &msg);
 
     CacheStatus getCacheRemaining(bool *eos);
     void notify(const sp<AMessage> &msg, bool async);

@@ -1064,7 +1064,16 @@ void sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPos
 
 //-----------------------------------------------------------------------------
 void sles_to_android_audioPlayerSeek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec) {
-
+    switch(pAudioPlayer->mAndroidObjType) {
+    case AUDIOTRACK_PUSH:
+    case AUDIOTRACK_PULL:
+        break;
+    case MEDIAPLAYER:
+        pAudioPlayer->mSfPlayer->seek(posMsec);
+        break;
+    default:
+        break;
+    }
 }
 
 
