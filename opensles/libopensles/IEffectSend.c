@@ -64,92 +64,143 @@ static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEff
     return NULL;
 }
 
+
 static SLresult IEffectSend_EnableEffectSend(SLEffectSendItf self,
     const void *pAuxEffect, SLboolean enable, SLmillibel initialLevel)
 {
-    if (!((SL_MILLIBEL_MIN <= initialLevel) && (initialLevel <= 0)))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEffectSend *this = (IEffectSend *) self;
-    struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
-    if (NULL == enableLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_exclusive(this);
-    enableLevel->mEnable = SL_BOOLEAN_FALSE != enable; // normalize
-    enableLevel->mSendLevel = initialLevel;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!((SL_MILLIBEL_MIN <= initialLevel) && (initialLevel <= 0))) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEffectSend *this = (IEffectSend *) self;
+        struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
+        if (NULL == enableLevel) {
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            interface_lock_exclusive(this);
+            enableLevel->mEnable = SL_BOOLEAN_FALSE != enable; // normalize
+            enableLevel->mSendLevel = initialLevel;
+            interface_unlock_exclusive(this);
+            result = SL_RESULT_SUCCESS;
+        }
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEffectSend_IsEnabled(SLEffectSendItf self,
     const void *pAuxEffect, SLboolean *pEnable)
 {
-    if (NULL == pEnable)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEffectSend *this = (IEffectSend *) self;
-    struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
-    if (NULL == enableLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_peek(this);
-    SLboolean enable = enableLevel->mEnable;
-    interface_unlock_peek(this);
-    *pEnable = enable;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pEnable) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEffectSend *this = (IEffectSend *) self;
+        struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
+        if (NULL == enableLevel) {
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            interface_lock_peek(this);
+            SLboolean enable = enableLevel->mEnable;
+            interface_unlock_peek(this);
+            *pEnable = enable;
+            result = SL_RESULT_SUCCESS;
+        }
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEffectSend_SetDirectLevel(SLEffectSendItf self, SLmillibel directLevel)
 {
-    if (!((SL_MILLIBEL_MIN <= directLevel) && (directLevel <= 0)))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEffectSend *this = (IEffectSend *) self;
-    interface_lock_poke(this);
-    this->mDirectLevel = directLevel;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!((SL_MILLIBEL_MIN <= directLevel) && (directLevel <= 0))) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEffectSend *this = (IEffectSend *) self;
+        interface_lock_poke(this);
+        this->mDirectLevel = directLevel;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEffectSend_GetDirectLevel(SLEffectSendItf self, SLmillibel *pDirectLevel)
 {
-    if (NULL == pDirectLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEffectSend *this = (IEffectSend *) self;
-    interface_lock_peek(this);
-    SLmillibel directLevel = this->mDirectLevel;
-    interface_unlock_peek(this);
-    *pDirectLevel = directLevel;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pDirectLevel) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEffectSend *this = (IEffectSend *) self;
+        interface_lock_peek(this);
+        SLmillibel directLevel = this->mDirectLevel;
+        interface_unlock_peek(this);
+        *pDirectLevel = directLevel;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self, const void *pAuxEffect,
     SLmillibel sendLevel)
 {
-    if (!((SL_MILLIBEL_MIN <= sendLevel) && (sendLevel <= 0)))
-        return SL_RESULT_PARAMETER_INVALID;
-    IEffectSend *this = (IEffectSend *) self;
-    struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
-    if (NULL == enableLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    // EnableEffectSend is exclusive, so this has to be also
-    interface_lock_exclusive(this);
-    enableLevel->mSendLevel = sendLevel;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!((SL_MILLIBEL_MIN <= sendLevel) && (sendLevel <= 0))) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEffectSend *this = (IEffectSend *) self;
+        struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
+        if (NULL == enableLevel) {
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            // EnableEffectSend is exclusive, so this has to be also
+            interface_lock_exclusive(this);
+            enableLevel->mSendLevel = sendLevel;
+            interface_unlock_exclusive(this);
+            result = SL_RESULT_SUCCESS;
+        }
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEffectSend_GetSendLevel(SLEffectSendItf self, const void *pAuxEffect,
     SLmillibel *pSendLevel)
 {
-    if (NULL == pSendLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEffectSend *this = (IEffectSend *) self;
-    struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
-    if (NULL == enableLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    interface_lock_peek(this);
-    SLmillibel sendLevel = enableLevel->mSendLevel;
-    interface_unlock_peek(this);
-    *pSendLevel = sendLevel;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pSendLevel) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEffectSend *this = (IEffectSend *) self;
+        struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
+        if (NULL == enableLevel) {
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            interface_lock_peek(this);
+            SLmillibel sendLevel = enableLevel->mSendLevel;
+            interface_unlock_peek(this);
+            *pSendLevel = sendLevel;
+            result = SL_RESULT_SUCCESS;
+        }
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLEffectSendItf_ IEffectSend_Itf = {
     IEffectSend_EnableEffectSend,

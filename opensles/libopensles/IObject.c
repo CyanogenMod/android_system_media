@@ -18,6 +18,7 @@
 
 #include "sles_allinclusive.h"
 
+
 // Called by a worker thread to handle an asynchronous Object.Realize.
 // Parameter self is the Object.
 
@@ -79,8 +80,11 @@ static void HandleRealize(void *self, int unused)
         (*callback)(&this->mItf, context, SL_OBJECT_EVENT_ASYNC_TERMINATION, result, state, NULL);
 }
 
+
 static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
 {
+    SL_ENTER_INTERFACE
+
     IObject *this = (IObject *) self;
     SLuint8 state;
     const ClassTable *class__ = this->mClass;
@@ -89,55 +93,57 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
     // Reject redundant calls to Realize
     if (SL_OBJECT_STATE_UNREALIZED != state) {
         object_unlock_exclusive(this);
-        return SL_RESULT_PRECONDITIONS_VIOLATED;
-    }
-    // Asynchronous: mark operation pending and cancellable
-    if (async && (SL_OBJECTID_ENGINE != class__->mObjectID)) {
-        state = SL_OBJECT_STATE_REALIZING_1;
-    // Synchronous: mark operation pending and non-cancellable
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
-        state = SL_OBJECT_STATE_REALIZING_2;
-    }
-    this->mState = state;
-    object_unlock_exclusive(this);
-    SLresult result;
-    switch (state) {
-    case SL_OBJECT_STATE_REALIZING_1: // asynchronous on non-Engine
-        assert(async);
-        result = ThreadPool_add(&this->mEngine->mThreadPool, HandleRealize, this, 0);
-        if (SL_RESULT_SUCCESS != result) {
-            // Engine was destroyed during realize, or insufficient memory
-            object_lock_exclusive(this);
-            this->mState = SL_OBJECT_STATE_UNREALIZED;
-            object_unlock_exclusive(this);
+        // Asynchronous: mark operation pending and cancellable
+        if (async && (SL_OBJECTID_ENGINE != class__->mObjectID)) {
+            state = SL_OBJECT_STATE_REALIZING_1;
+        // Synchronous: mark operation pending and non-cancellable
+        } else {
+            state = SL_OBJECT_STATE_REALIZING_2;
         }
-        break;
-    case SL_OBJECT_STATE_REALIZING_2: // synchronous, or asynchronous on Engine
-        {
-        AsyncHook realize = class__->mRealize;
-        // Note that the mutex is unlocked during the realize hook
-        result = (NULL != realize) ? (*realize)(this, async) : SL_RESULT_SUCCESS;
-        object_lock_exclusive(this);
-        assert(SL_OBJECT_STATE_REALIZING_2 == this->mState);
-        state = (SL_RESULT_SUCCESS == result) ? SL_OBJECT_STATE_REALIZED :
-            SL_OBJECT_STATE_UNREALIZED;
         this->mState = state;
-        slObjectCallback callback = this->mCallback;
-        void *context = this->mContext;
         object_unlock_exclusive(this);
-        // asynchronous Realize on an Engine is actually done synchronously, but still has callback
-        // This is because there is no thread pool yet to do it asynchronously.
-        if (async && (NULL != callback))
-            (*callback)(&this->mItf, context, SL_OBJECT_EVENT_ASYNC_TERMINATION, result, state,
-                NULL);
+        switch (state) {
+        case SL_OBJECT_STATE_REALIZING_1: // asynchronous on non-Engine
+            assert(async);
+            result = ThreadPool_add(&this->mEngine->mThreadPool, HandleRealize, this, 0);
+            if (SL_RESULT_SUCCESS != result) {
+                // Engine was destroyed during realize, or insufficient memory
+                object_lock_exclusive(this);
+                this->mState = SL_OBJECT_STATE_UNREALIZED;
+                object_unlock_exclusive(this);
+            }
+            break;
+        case SL_OBJECT_STATE_REALIZING_2: // synchronous, or asynchronous on Engine
+            {
+            AsyncHook realize = class__->mRealize;
+            // Note that the mutex is unlocked during the realize hook
+            result = (NULL != realize) ? (*realize)(this, async) : SL_RESULT_SUCCESS;
+            object_lock_exclusive(this);
+            assert(SL_OBJECT_STATE_REALIZING_2 == this->mState);
+            state = (SL_RESULT_SUCCESS == result) ? SL_OBJECT_STATE_REALIZED :
+                SL_OBJECT_STATE_UNREALIZED;
+            this->mState = state;
+            slObjectCallback callback = this->mCallback;
+            void *context = this->mContext;
+            object_unlock_exclusive(this);
+            // asynchronous Realize on an Engine is actually done synchronously, but still has
+            // callback because there is no thread pool yet to do it asynchronously.
+            if (async && (NULL != callback))
+                (*callback)(&this->mItf, context, SL_OBJECT_EVENT_ASYNC_TERMINATION, result, state,
+                    NULL);
+            }
+            break;
+        default:                          // impossible
+            assert(SL_BOOLEAN_FALSE);
+            break;
         }
-        break;
-    default:                          // impossible
-        assert(SL_BOOLEAN_FALSE);
-        break;
     }
-    return result;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 // Called by a worker thread to handle an asynchronous Object.Resume.
 // Parameter self is the Object.
@@ -200,146 +206,168 @@ static void HandleResume(void *self, int unused)
         (*callback)(&this->mItf, context, SL_OBJECT_EVENT_ASYNC_TERMINATION, result, state, NULL);
 }
 
+
 static SLresult IObject_Resume(SLObjectItf self, SLboolean async)
 {
+    SL_ENTER_INTERFACE
+
     IObject *this = (IObject *) self;
     const ClassTable *class__ = this->mClass;
-    SLresult result;
     SLuint8 state;
     object_lock_exclusive(this);
     state = this->mState;
     // Reject redundant calls to Resume
     if (SL_OBJECT_STATE_SUSPENDED != state) {
         object_unlock_exclusive(this);
-        return SL_RESULT_PRECONDITIONS_VIOLATED;
-    }
-    // Asynchronous: mark operation pending and cancellable
-    if (async) {
-        state = SL_OBJECT_STATE_RESUMING_1;
-    // Synchronous: mark operatio pending and non-cancellable
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
-        state = SL_OBJECT_STATE_RESUMING_2;
-    }
-    this->mState = state;
-    object_unlock_exclusive(this);
-    switch (state) {
-    case SL_OBJECT_STATE_RESUMING_1: // asynchronous
-        assert(async);
-        result = ThreadPool_add(&this->mEngine->mThreadPool, HandleResume, this, 0);
-        if (SL_RESULT_SUCCESS != result) {
-            // Engine was destroyed during resume, or insufficient memory
-            object_lock_exclusive(this);
-            this->mState = SL_OBJECT_STATE_SUSPENDED;
-            object_unlock_exclusive(this);
+        // Asynchronous: mark operation pending and cancellable
+        if (async) {
+            state = SL_OBJECT_STATE_RESUMING_1;
+        // Synchronous: mark operatio pending and non-cancellable
+        } else {
+            state = SL_OBJECT_STATE_RESUMING_2;
         }
-        break;
-    case SL_OBJECT_STATE_RESUMING_2: // synchronous
-        {
-        AsyncHook resume = class__->mResume;
-        // Note that the mutex is unlocked during the resume hook
-        result = (NULL != resume) ? (*resume)(this, SL_BOOLEAN_FALSE) : SL_RESULT_SUCCESS;
-        object_lock_exclusive(this);
-        assert(SL_OBJECT_STATE_RESUMING_2 == this->mState);
-        this->mState = (SL_RESULT_SUCCESS == result) ? SL_OBJECT_STATE_REALIZED :
-            SL_OBJECT_STATE_SUSPENDED;
+        this->mState = state;
         object_unlock_exclusive(this);
+        switch (state) {
+        case SL_OBJECT_STATE_RESUMING_1: // asynchronous
+            assert(async);
+            result = ThreadPool_add(&this->mEngine->mThreadPool, HandleResume, this, 0);
+            if (SL_RESULT_SUCCESS != result) {
+                // Engine was destroyed during resume, or insufficient memory
+                object_lock_exclusive(this);
+                this->mState = SL_OBJECT_STATE_SUSPENDED;
+                object_unlock_exclusive(this);
+            }
+            break;
+        case SL_OBJECT_STATE_RESUMING_2: // synchronous
+            {
+            AsyncHook resume = class__->mResume;
+            // Note that the mutex is unlocked during the resume hook
+            result = (NULL != resume) ? (*resume)(this, SL_BOOLEAN_FALSE) : SL_RESULT_SUCCESS;
+            object_lock_exclusive(this);
+            assert(SL_OBJECT_STATE_RESUMING_2 == this->mState);
+            this->mState = (SL_RESULT_SUCCESS == result) ? SL_OBJECT_STATE_REALIZED :
+                SL_OBJECT_STATE_SUSPENDED;
+            object_unlock_exclusive(this);
+            }
+            break;
+        default:                        // impossible
+            assert(SL_BOOLEAN_FALSE);
+            break;
         }
-        break;
-    default:                        // impossible
-        assert(SL_BOOLEAN_FALSE);
-        break;
     }
-    return result;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IObject_GetState(SLObjectItf self, SLuint32 *pState)
 {
-    if (NULL == pState)
-        return SL_RESULT_PARAMETER_INVALID;
-    IObject *this = (IObject *) self;
-    // Note that the state is immediately obsolete, so a peek lock is safe
-    object_lock_peek(this);
-    SLuint8 state = this->mState;
-    object_unlock_peek(this);
-    // Re-map the realizing and suspended states
-    switch (state) {
-    case SL_OBJECT_STATE_REALIZING_1:
-    case SL_OBJECT_STATE_REALIZING_1A:
-    case SL_OBJECT_STATE_REALIZING_2:
-        state = SL_OBJECT_STATE_UNREALIZED;
-        break;
-    case SL_OBJECT_STATE_RESUMING_1:
-    case SL_OBJECT_STATE_RESUMING_1A:
-    case SL_OBJECT_STATE_RESUMING_2:
-    case SL_OBJECT_STATE_SUSPENDING:
-        state = SL_OBJECT_STATE_SUSPENDED;
-        break;
-    case SL_OBJECT_STATE_UNREALIZED:
-    case SL_OBJECT_STATE_REALIZED:
-    case SL_OBJECT_STATE_SUSPENDED:
-        // These are the "official" object states, return them as is
-        break;
-    default:
-        assert(SL_BOOLEAN_FALSE);
-        break;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pState) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IObject *this = (IObject *) self;
+        // Note that the state is immediately obsolete, so a peek lock is safe
+        object_lock_peek(this);
+        SLuint8 state = this->mState;
+        object_unlock_peek(this);
+        // Re-map the realizing, resuming, and suspending states
+        switch (state) {
+        case SL_OBJECT_STATE_REALIZING_1:
+        case SL_OBJECT_STATE_REALIZING_1A:
+        case SL_OBJECT_STATE_REALIZING_2:
+            state = SL_OBJECT_STATE_UNREALIZED;
+            break;
+        case SL_OBJECT_STATE_RESUMING_1:
+        case SL_OBJECT_STATE_RESUMING_1A:
+        case SL_OBJECT_STATE_RESUMING_2:
+        case SL_OBJECT_STATE_SUSPENDING:
+            state = SL_OBJECT_STATE_SUSPENDED;
+            break;
+        case SL_OBJECT_STATE_UNREALIZED:
+        case SL_OBJECT_STATE_REALIZED:
+        case SL_OBJECT_STATE_SUSPENDED:
+            // These are the "official" object states, return them as is
+            break;
+        default:
+            assert(SL_BOOLEAN_FALSE);
+            break;
+        }
+        *pState = state;
+        result = SL_RESULT_SUCCESS;
     }
-    *pState = state;
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, void *pInterface)
 {
-    if (NULL == pInterface)
-        return SL_RESULT_PARAMETER_INVALID;
-    SLresult result;
-    void *interface = NULL;
-    if (NULL == iid)
+    SL_ENTER_INTERFACE
+
+    if (NULL == pInterface) {
         result = SL_RESULT_PARAMETER_INVALID;
-    else {
-        IObject *this = (IObject *) self;
-        const ClassTable *class__ = this->mClass;
-        int MPH, index;
-        if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH]))) {
-            result = SL_RESULT_FEATURE_UNSUPPORTED;
+    } else {
+        void *interface = NULL;
+        if (NULL == iid) {
+            result = SL_RESULT_PARAMETER_INVALID;
         } else {
-            unsigned mask = 1 << index;
-            object_lock_exclusive(this);
-            // Can't get interface on a suspended/suspending/resuming object
-            if (SL_OBJECT_STATE_REALIZED != this->mState) {
-                result = SL_RESULT_PRECONDITIONS_VIOLATED;
+            IObject *this = (IObject *) self;
+            const ClassTable *class__ = this->mClass;
+            int MPH, index;
+            if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH]))) {
+                result = SL_RESULT_FEATURE_UNSUPPORTED;
             } else {
-                switch (this->mInterfaceStates[index]) {
-                case INTERFACE_EXPOSED:
-                case INTERFACE_ADDED:
-                    // Note that interface has been gotten,
-                    // for debugger and to detect incorrect use of interfaces
-                    this->mGottenMask |= mask;
-                    interface = (char *) this + class__->mInterfaces[index].mOffset;
-                    result = SL_RESULT_SUCCESS;
-                    break;
-                // Can't get interface if uninitialized/suspend(ed,ing)/resuming/adding/removing
-                default:
-                    result = SL_RESULT_FEATURE_UNSUPPORTED;
-                    break;
+                unsigned mask = 1 << index;
+                object_lock_exclusive(this);
+                // Can't get interface on a suspended/suspending/resuming object
+                if (SL_OBJECT_STATE_REALIZED != this->mState) {
+                    result = SL_RESULT_PRECONDITIONS_VIOLATED;
+                } else {
+                    switch (this->mInterfaceStates[index]) {
+                    case INTERFACE_EXPOSED:
+                    case INTERFACE_ADDED:
+                        // Note that interface has been gotten,
+                        // for debugger and to detect incorrect use of interfaces
+                        this->mGottenMask |= mask;
+                        interface = (char *) this + class__->mInterfaces[index].mOffset;
+                        result = SL_RESULT_SUCCESS;
+                        break;
+                    // Can't get interface if uninitialized/suspend(ed,ing)/resuming/adding/removing
+                    default:
+                        result = SL_RESULT_FEATURE_UNSUPPORTED;
+                        break;
+                    }
                 }
+                object_unlock_exclusive(this);
             }
-            object_unlock_exclusive(this);
         }
+        *(void **)pInterface = interface;
     }
-    *(void **)pInterface = interface;
-    return result;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IObject_RegisterCallback(SLObjectItf self,
     slObjectCallback callback, void *pContext)
 {
+    SL_ENTER_INTERFACE
+
     IObject *this = (IObject *) self;
     object_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
     object_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 // internal common code for Abort and Destroy
 
@@ -384,14 +412,22 @@ static void Abort_internal(IObject *this, SLboolean shutdown)
     object_unlock_exclusive(this);
 }
 
+
 static void IObject_AbortAsyncOperation(SLObjectItf self)
 {
+    SL_ENTER_INTERFACE_VOID
+
     IObject *this = (IObject *) self;
     Abort_internal(this, SL_BOOLEAN_FALSE);
+
+    SL_LEAVE_INTERFACE_VOID
 }
+
 
 static void IObject_Destroy(SLObjectItf self)
 {
+    SL_ENTER_INTERFACE_VOID
+
     // FIXME Check for dependencies, e.g. destroying an output mix with attached players,
     //       destroying an engine with extant objects, etc.
     // FIXME The abort should be atomic w.r.t. destroy, so another async can't be started in window
@@ -469,60 +505,86 @@ static void IObject_Destroy(SLObjectItf self)
     // one or more interfaces was actively changing at time of Destroy
     assert(incorrect == 0);
     // FIXME assert might be the wrong thing to do; instead block until active ops complete?
+
+    SL_LEAVE_INTERFACE_VOID
 }
+
 
 static SLresult IObject_SetPriority(SLObjectItf self, SLint32 priority, SLboolean preemptable)
 {
+    SL_ENTER_INTERFACE
+
     IObject *this = (IObject *) self;
     object_lock_exclusive(this);
     this->mPriority = priority;
     this->mPreemptable = SL_BOOLEAN_FALSE != preemptable; // normalize
     object_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IObject_GetPriority(SLObjectItf self, SLint32 *pPriority, SLboolean *pPreemptable)
 {
-    if (NULL == pPriority || NULL == pPreemptable)
-        return SL_RESULT_PARAMETER_INVALID;
-    IObject *this = (IObject *) self;
-    object_lock_shared(this);
-    SLint32 priority = this->mPriority;
-    SLboolean preemptable = this->mPreemptable;
-    object_unlock_shared(this);
-    *pPriority = priority;
-    *pPreemptable = preemptable;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pPriority || NULL == pPreemptable) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IObject *this = (IObject *) self;
+        object_lock_shared(this);
+        SLint32 priority = this->mPriority;
+        SLboolean preemptable = this->mPreemptable;
+        object_unlock_shared(this);
+        *pPriority = priority;
+        *pPreemptable = preemptable;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IObject_SetLossOfControlInterfaces(SLObjectItf self,
     SLint16 numInterfaces, SLInterfaceID *pInterfaceIDs, SLboolean enabled)
 {
+    SL_ENTER_INTERFACE
+
+    result = SL_RESULT_SUCCESS;
     if (0 < numInterfaces) {
         SLuint32 i;
-        if (NULL == pInterfaceIDs)
-            return SL_RESULT_PARAMETER_INVALID;
-        IObject *this = (IObject *) self;
-        const ClassTable *class__ = this->mClass;
-        unsigned lossOfControlMask = 0;
-        // FIXME The cast is due to a typo in the spec
-        for (i = 0; i < (SLuint32) numInterfaces; ++i) {
-            SLInterfaceID iid = pInterfaceIDs[i];
-            if (NULL == iid)
-                return SL_RESULT_PARAMETER_INVALID;
-            int MPH, index;
-            if ((0 <= (MPH = IID_to_MPH(iid))) && (0 <= (index = class__->mMPH_to_index[MPH])))
-                lossOfControlMask |= (1 << index);
+        if (NULL == pInterfaceIDs) {
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            IObject *this = (IObject *) self;
+            const ClassTable *class__ = this->mClass;
+            unsigned lossOfControlMask = 0;
+            // FIXME The cast is due to a typo in the spec
+            for (i = 0; i < (SLuint32) numInterfaces; ++i) {
+                SLInterfaceID iid = pInterfaceIDs[i];
+                if (NULL == iid) {
+                    result = SL_RESULT_PARAMETER_INVALID;
+                    goto out;
+                }
+                int MPH, index;
+                // FIXME no error if invalid MPH or index?
+                if ((0 <= (MPH = IID_to_MPH(iid))) && (0 <= (index = class__->mMPH_to_index[MPH])))
+                    lossOfControlMask |= (1 << index);
+            }
+            object_lock_exclusive(this);
+            if (enabled)
+                this->mLossOfControlMask |= lossOfControlMask;
+            else
+                this->mLossOfControlMask &= ~lossOfControlMask;
+            object_unlock_exclusive(this);
         }
-        object_lock_exclusive(this);
-        if (enabled)
-            this->mLossOfControlMask |= lossOfControlMask;
-        else
-            this->mLossOfControlMask &= ~lossOfControlMask;
-        object_unlock_exclusive(this);
     }
-    return SL_RESULT_SUCCESS;
+out:
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLObjectItf_ IObject_Itf = {
     IObject_Realize,

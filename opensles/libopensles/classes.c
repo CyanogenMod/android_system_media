@@ -357,7 +357,9 @@ static const struct iid_vtable OutputMix_interfaces[INTERFACES_OutputMix] = {
     {MPH_OUTPUTMIX, INTERFACE_IMPLICIT,
         offsetof(COutputMix, mOutputMix)},
 #ifdef USE_OUTPUTMIXEXT
-    {MPH_OUTPUTMIXEXT, INTERFACE_IMPLICIT,  // FIXME should be internal implicit (available, but not advertised publicly or included in possible interface count)
+    // FIXME should be internal implicit (available, but not advertised
+    // publicly or included in possible interface count)
+    {MPH_OUTPUTMIXEXT, INTERFACE_IMPLICIT,
         offsetof(COutputMix, mOutputMixExt)},
 #else
     {MPH_OUTPUTMIXEXT, INTERFACE_UNAVAILABLE, 0},

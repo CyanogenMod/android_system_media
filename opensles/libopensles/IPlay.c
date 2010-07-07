@@ -18,104 +18,138 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
 {
-    SLresult result = SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
     switch (state) {
     case SL_PLAYSTATE_STOPPED:
     case SL_PLAYSTATE_PAUSED:
     case SL_PLAYSTATE_PLAYING:
+        {
+        IPlay *this = (IPlay *) self;
+        interface_lock_exclusive(this);
+        if (this->mState != state) {
+            this->mState = state;
+            if (SL_PLAYSTATE_STOPPED == state)
+                this->mPosition = (SLmillisecond) 0;
+            interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+        } else
+            interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+        }
         break;
     default:
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
     }
-    IPlay *this = (IPlay *) self;
-    interface_lock_exclusive(this);
-    if (this->mState != state) {
-        this->mState = state;
-        if (SL_PLAYSTATE_STOPPED == state)
-            this->mPosition = (SLmillisecond) 0;
-        interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
-    } else
-        interface_unlock_exclusive(this);
-    return result;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlay_GetPlayState(SLPlayItf self, SLuint32 *pState)
 {
-    if (NULL == pState)
-        return SL_RESULT_PARAMETER_INVALID;
-    IPlay *this = (IPlay *) self;
-    interface_lock_peek(this);
-    SLuint32 state = this->mState;
-    interface_unlock_peek(this);
-    *pState = state;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pState) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPlay *this = (IPlay *) self;
+        interface_lock_peek(this);
+        SLuint32 state = this->mState;
+        interface_unlock_peek(this);
+        *pState = state;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlay_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
 {
-    SLresult result = SL_RESULT_SUCCESS;
-    if (NULL == pMsec)
-        return SL_RESULT_PARAMETER_INVALID;
-    IPlay *this = (IPlay *) self;
-    // even though this is a getter, it can modify state due to caching
-    interface_lock_exclusive(this);
-    SLmillisecond duration = this->mDuration;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pMsec) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        result = SL_RESULT_SUCCESS;
+        IPlay *this = (IPlay *) self;
+        // even though this is a getter, it can modify state due to caching
+        interface_lock_exclusive(this);
+        SLmillisecond duration = this->mDuration;
 #ifdef ANDROID
-    if ((SL_TIME_UNKNOWN == duration) && (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this))) {
-        SLmillisecond temp;
-        result = sles_to_android_audioPlayerGetDuration(this, &temp);
-        if (SL_RESULT_SUCCESS == result) {
-            duration = temp;
-            this->mDuration = duration;
+        if ((SL_TIME_UNKNOWN == duration) &&
+            (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this))) {
+            SLmillisecond temp;
+            result = sles_to_android_audioPlayerGetDuration(this, &temp);
+            if (SL_RESULT_SUCCESS == result) {
+                duration = temp;
+                this->mDuration = duration;
+            }
         }
-    }
 #else
-    // will be set by containing AudioPlayer or MidiPlayer object at Realize
+        // will be set by containing AudioPlayer or MidiPlayer object at Realize
 #endif
-    interface_unlock_exclusive(this);
-    *pMsec = duration;
-    return result;
+        interface_unlock_exclusive(this);
+        *pMsec = duration;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlay_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
 {
-    if (NULL == pMsec)
-        return SL_RESULT_PARAMETER_INVALID;
-    IPlay *this = (IPlay *) self;
-    SLmillisecond position;
-    interface_lock_peek(this);
+    SL_ENTER_INTERFACE
+
+    if (NULL == pMsec) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPlay *this = (IPlay *) self;
+        SLmillisecond position;
+        interface_lock_peek(this);
 #ifdef ANDROID
-    // Android does not use the mPosition field for audio players
-    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-        sles_to_android_audioPlayerGetPosition(this, &position);
-        // note that we do not cache the position
-    } else
-        position = this->mPosition;
+        // Android does not use the mPosition field for audio players
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+            sles_to_android_audioPlayerGetPosition(this, &position);
+            // note that we do not cache the position
+        } else
+            position = this->mPosition;
 #else
-    // on other platforms we depend on periodic updates to the current position
-    position = this->mPosition;
+        // on other platforms we depend on periodic updates to the current position
+        position = this->mPosition;
 #endif
-    interface_unlock_peek(this);
-    *pMsec = position;
-    return SL_RESULT_SUCCESS;
+        interface_unlock_peek(this);
+        *pMsec = position;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlay_RegisterCallback(SLPlayItf self, slPlayCallback callback, void *pContext)
 {
+    SL_ENTER_INTERFACE
+
     IPlay *this = (IPlay *) self;
     interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
     // omits _attributes b/c noone cares deeply enough about these fields to need quick notification
     interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlay_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
 {
-    SLresult result = SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
     IPlay *this = (IPlay *) self;
     interface_lock_exclusive(this);
     if (this->mEventFlags != eventFlags) {
@@ -123,24 +157,35 @@ static SLresult IPlay_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
         interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
     } else
         interface_unlock_exclusive(this);
-    return result;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlay_GetCallbackEventsMask(SLPlayItf self, SLuint32 *pEventFlags)
 {
-    if (NULL == pEventFlags)
-        return SL_RESULT_PARAMETER_INVALID;
-    IPlay *this = (IPlay *) self;
-    interface_lock_peek(this);
-    SLuint32 eventFlags = this->mEventFlags;
-    interface_unlock_peek(this);
-    *pEventFlags = eventFlags;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pEventFlags) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPlay *this = (IPlay *) self;
+        interface_lock_peek(this);
+        SLuint32 eventFlags = this->mEventFlags;
+        interface_unlock_peek(this);
+        *pEventFlags = eventFlags;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlay_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
 {
-    SLresult result = SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
     IPlay *this = (IPlay *) self;
     interface_lock_exclusive(this);
     if (this->mMarkerPosition != mSec) {
@@ -149,11 +194,16 @@ static SLresult IPlay_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
         interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
     } else
         interface_unlock_exclusive(this);
-    return result;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlay_ClearMarkerPosition(SLPlayItf self)
 {
+    SL_ENTER_INTERFACE
+
     IPlay *this = (IPlay *) self;
     interface_lock_exclusive(this);
     this->mMarkerIsSet = SL_BOOLEAN_FALSE;
@@ -165,52 +215,75 @@ static SLresult IPlay_ClearMarkerPosition(SLPlayItf self)
     }
 #endif
     interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlay_GetMarkerPosition(SLPlayItf self, SLmillisecond *pMsec)
 {
-    if (NULL == pMsec)
-        return SL_RESULT_PARAMETER_INVALID;
-    IPlay *this = (IPlay *) self;
-    interface_lock_peek(this);
-    SLmillisecond markerPosition = this->mMarkerPosition;
-    interface_unlock_peek(this);
-    *pMsec = markerPosition;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pMsec) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPlay *this = (IPlay *) self;
+        interface_lock_peek(this);
+        SLmillisecond markerPosition = this->mMarkerPosition;
+        interface_unlock_peek(this);
+        *pMsec = markerPosition;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec)
 {
-    if (0 == mSec)
-        return SL_RESULT_PARAMETER_INVALID;
-    SLresult result = SL_RESULT_SUCCESS;
-    IPlay *this = (IPlay *) self;
-    interface_lock_exclusive(this);
-    if (this->mPositionUpdatePeriod != mSec) {
-        this->mPositionUpdatePeriod = mSec;
+    SL_ENTER_INTERFACE
+
+    if (0 == mSec) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPlay *this = (IPlay *) self;
+        interface_lock_exclusive(this);
+        if (this->mPositionUpdatePeriod != mSec) {
+            this->mPositionUpdatePeriod = mSec;
 #ifdef ANDROID
-        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-            // result = sles_to_android_audioPlayerUseEventMask(this, this->mEventFlags);
-        }
+            if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+                // result = sles_to_android_audioPlayerUseEventMask(this, this->mEventFlags);
+            }
 #endif
-        interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
-    } else
-        interface_unlock_exclusive(this);
-    return result;
+            interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+        } else
+            interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IPlay_GetPositionUpdatePeriod(SLPlayItf self, SLmillisecond *pMsec)
 {
-    if (NULL == pMsec)
-        return SL_RESULT_PARAMETER_INVALID;
-    IPlay *this = (IPlay *) self;
-    interface_lock_peek(this);
-    SLmillisecond positionUpdatePeriod = this->mPositionUpdatePeriod;
-    interface_unlock_peek(this);
-    *pMsec = positionUpdatePeriod;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pMsec) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPlay *this = (IPlay *) self;
+        interface_lock_peek(this);
+        SLmillisecond positionUpdatePeriod = this->mPositionUpdatePeriod;
+        interface_unlock_peek(this);
+        *pMsec = positionUpdatePeriod;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLPlayItf_ IPlay_Itf = {
     IPlay_SetPlayState,

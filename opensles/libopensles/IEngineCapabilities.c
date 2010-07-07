@@ -18,137 +18,192 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IEngineCapabilities_QuerySupportedProfiles(
     SLEngineCapabilitiesItf self, SLuint16 *pProfilesSupported)
 {
-    if (NULL == pProfilesSupported)
-        return SL_RESULT_PARAMETER_INVALID;
-    // The generic implementation doesn't implement any of the profiles, they shouldn't
-    // be declared as supported. Also omits the unofficial driver profile.
-    // FIXME This isn't completely true but being used temporarily.
-    *pProfilesSupported = SL_PROFILES_PHONE | SL_PROFILES_MUSIC | SL_PROFILES_GAME;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pProfilesSupported) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+#ifdef USE_CONFORMANCE
+        // This isn't completely true but is used to permit the conformance test to run at all.
+        *pProfilesSupported = SL_PROFILES_PHONE | SL_PROFILES_MUSIC | SL_PROFILES_GAME;
+#else
+        // The generic implementation doesn't implement any of the profiles, they shouldn't
+        // be declared as supported. Also omits the unofficial driver profile.
+        *pProfilesSupported = 0;
+#endif
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEngineCapabilities_QueryAvailableVoices(SLEngineCapabilitiesItf self,
     SLuint16 voiceType, SLint16 *pNumMaxVoices, SLboolean *pIsAbsoluteMax, SLint16 *pNumFreeVoices)
 {
+    SL_ENTER_INTERFACE
+
     switch (voiceType) {
     case SL_VOICETYPE_2D_AUDIO:
     case SL_VOICETYPE_MIDI:
     case SL_VOICETYPE_3D_AUDIO:
     case SL_VOICETYPE_3D_MIDIOUTPUT:
+        if (NULL != pNumMaxVoices)
+            *pNumMaxVoices = 32;
+        if (NULL != pIsAbsoluteMax)
+            *pIsAbsoluteMax = SL_BOOLEAN_TRUE;
+        if (NULL != pNumFreeVoices)
+            *pNumFreeVoices = 32;
+        result = SL_RESULT_SUCCESS;
         break;
     default:
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
+        break;
     }
-    if (NULL != pNumMaxVoices)
-        *pNumMaxVoices = 32;
-    if (NULL != pIsAbsoluteMax)
-        *pIsAbsoluteMax = SL_BOOLEAN_TRUE;
-    if (NULL != pNumFreeVoices)
-        *pNumFreeVoices = 32;
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEngineCapabilities_QueryNumberOfMIDISynthesizers(
     SLEngineCapabilitiesItf self, SLint16 *pNum)
 {
-    if (NULL == pNum)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pNum = 1;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pNum) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        *pNum = 1;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEngineCapabilities_QueryAPIVersion(SLEngineCapabilitiesItf self,
     SLint16 *pMajor, SLint16 *pMinor, SLint16 *pStep)
 {
-    if (!(NULL != pMajor && NULL != pMinor && NULL != pStep))
-        return SL_RESULT_PARAMETER_INVALID;
-    *pMajor = 1;
-    *pMinor = 0;
-    *pStep = 1;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(NULL != pMajor && NULL != pMinor && NULL != pStep)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        *pMajor = 1;
+        *pMinor = 0;
+        *pStep = 1;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEngineCapabilities_QueryLEDCapabilities(SLEngineCapabilitiesItf self,
     SLuint32 *pIndex, SLuint32 *pLEDDeviceID, SLLEDDescriptor *pDescriptor)
 {
+    SL_ENTER_INTERFACE
+
     IEngineCapabilities *this = (IEngineCapabilities *) self;
     const struct LED_id_descriptor *id_descriptor;
     SLuint32 index;
     if (NULL != pIndex) {
+        result = SL_RESULT_SUCCESS;
         if (NULL != pLEDDeviceID || NULL != pDescriptor) {
             index = *pIndex;
-            if (index >= this->mMaxIndexLED)
-                return SL_RESULT_PARAMETER_INVALID;
-            id_descriptor = &LED_id_descriptors[index];
-            if (NULL != pLEDDeviceID)
-                *pLEDDeviceID = id_descriptor->id;
-            if (NULL != pDescriptor)
-                *pDescriptor = *id_descriptor->descriptor;
+            if (index >= this->mMaxIndexLED) {
+                result = SL_RESULT_PARAMETER_INVALID;
+            } else {
+                id_descriptor = &LED_id_descriptors[index];
+                if (NULL != pLEDDeviceID)
+                    *pLEDDeviceID = id_descriptor->id;
+                if (NULL != pDescriptor)
+                    *pDescriptor = *id_descriptor->descriptor;
+            }
         }
         *pIndex = this->mMaxIndexLED;
-        return SL_RESULT_SUCCESS;
     } else {
+        result = SL_RESULT_PARAMETER_INVALID;
         if (NULL != pLEDDeviceID && NULL != pDescriptor) {
             SLuint32 id = *pLEDDeviceID;
             for (index = 0; index < this->mMaxIndexLED; ++index) {
                 id_descriptor = &LED_id_descriptors[index];
                 if (id == id_descriptor->id) {
                     *pDescriptor = *id_descriptor->descriptor;
-                    return SL_RESULT_SUCCESS;
+                    result = SL_RESULT_SUCCESS;
+                    break;
                 }
             }
         }
-        return SL_RESULT_PARAMETER_INVALID;
     }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEngineCapabilities_QueryVibraCapabilities(SLEngineCapabilitiesItf self,
     SLuint32 *pIndex, SLuint32 *pVibraDeviceID, SLVibraDescriptor *pDescriptor)
 {
+    SL_ENTER_INTERFACE
+
     IEngineCapabilities *this = (IEngineCapabilities *) self;
     const struct Vibra_id_descriptor *id_descriptor;
     SLuint32 index;
     if (NULL != pIndex) {
+        result = SL_RESULT_SUCCESS;
         if (NULL != pVibraDeviceID || NULL != pDescriptor) {
             index = *pIndex;
-            if (index >= this->mMaxIndexVibra)
-                return SL_RESULT_PARAMETER_INVALID;
-            id_descriptor = &Vibra_id_descriptors[index];
-            if (NULL != pVibraDeviceID)
-                *pVibraDeviceID = id_descriptor->id;
-            if (NULL != pDescriptor)
-                *pDescriptor = *id_descriptor->descriptor;
+            if (index >= this->mMaxIndexVibra) {
+                result = SL_RESULT_PARAMETER_INVALID;
+            } else {
+                id_descriptor = &Vibra_id_descriptors[index];
+                if (NULL != pVibraDeviceID)
+                    *pVibraDeviceID = id_descriptor->id;
+                if (NULL != pDescriptor)
+                    *pDescriptor = *id_descriptor->descriptor;
+            }
         }
         *pIndex = this->mMaxIndexVibra;
-        return SL_RESULT_SUCCESS;
     } else {
+        result = SL_RESULT_PARAMETER_INVALID;
         if (NULL != pVibraDeviceID && NULL != pDescriptor) {
             SLuint32 id = *pVibraDeviceID;
             for (index = 0; index < this->mMaxIndexVibra; ++index) {
                 id_descriptor = &Vibra_id_descriptors[index];
                 if (id == id_descriptor->id) {
                     *pDescriptor = *id_descriptor->descriptor;
-                    return SL_RESULT_SUCCESS;
+                    result = SL_RESULT_SUCCESS;
+                    break;
                 }
             }
         }
-        return SL_RESULT_PARAMETER_INVALID;
     }
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IEngineCapabilities_IsThreadSafe(SLEngineCapabilitiesItf self,
     SLboolean *pIsThreadSafe)
 {
-    if (NULL == pIsThreadSafe)
-        return SL_RESULT_PARAMETER_INVALID;
-    IEngineCapabilities *this = (IEngineCapabilities *) self;
-    *pIsThreadSafe = this->mThreadSafe;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pIsThreadSafe) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEngineCapabilities *this = (IEngineCapabilities *) self;
+        *pIsThreadSafe = this->mThreadSafe;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLEngineCapabilitiesItf_ IEngineCapabilities_Itf = {
     IEngineCapabilities_QuerySupportedProfiles,

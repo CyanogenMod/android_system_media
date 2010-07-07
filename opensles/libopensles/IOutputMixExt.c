@@ -31,8 +31,11 @@ typedef enum {
     GAIN_OTHER = 2   // 0.0f < mValue < 1.0f
 } Summary;
 
+
 static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 size)
 {
+    SL_ENTER_INTERFACE_VOID
+
     // Force to be a multiple of a frame, assumes stereo 16-bit PCM
     size &= ~3;
     IOutputMixExt *thisExt = (IOutputMixExt *) self;
@@ -184,7 +187,10 @@ got_one:
     // No active tracks, so output silence
     if (!mixBufferHasData)
         memset(pBuffer, 0, size);
+
+    SL_LEAVE_INTERFACE_VOID
 }
+
 
 static const struct SLOutputMixExtItf_ IOutputMixExt_Itf = {
     IOutputMixExt_FillBuffer

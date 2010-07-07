@@ -18,6 +18,7 @@
 
 #include "sles_allinclusive.h"
 
+
 // Called by a worker thread to handle an asynchronous AddInterface.
 // Parameter self is the DynamicInterface, and MPH specifies which interface to add.
 
@@ -97,148 +98,165 @@ static void HandleAdd(void *self, int MPH)
 
 }
 
+
 static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManagementItf self,
     const SLInterfaceID iid, SLboolean async)
 {
+    SL_ENTER_INTERFACE
+
     // validate input parameters
-    if (NULL == iid)
-        return SL_RESULT_PARAMETER_INVALID;
-    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-    IObject *thisObject = InterfaceToIObject(this);
-    const ClassTable *class__ = thisObject->mClass;
-    int MPH, index;
-    if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH])))
-        return SL_RESULT_FEATURE_UNSUPPORTED;
-    assert(index < (int) class__->mInterfaceCount);
-    SLuint8 *interfaceStateP = &thisObject->mInterfaceStates[index];
-    SLresult result;
+    if (NULL == iid) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
+        IObject *thisObject = InterfaceToIObject(this);
+        const ClassTable *class__ = thisObject->mClass;
+        int MPH, index;
+        if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH]))) {
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        } else {
+            assert(index < (int) class__->mInterfaceCount);
+            SLuint8 *interfaceStateP = &thisObject->mInterfaceStates[index];
 
-    // check interface state
-    object_lock_exclusive(thisObject);
-    switch (*interfaceStateP) {
+            // check interface state
+            object_lock_exclusive(thisObject);
+            switch (*interfaceStateP) {
 
-    case INTERFACE_UNINITIALIZED:   // normal case
-        if (async) {
-            // Asynchronous: mark operation pending and cancellable
-            *interfaceStateP = INTERFACE_ADDING_1;
-            object_unlock_exclusive(thisObject);
+            case INTERFACE_UNINITIALIZED:   // normal case
+                if (async) {
+                    // Asynchronous: mark operation pending and cancellable
+                    *interfaceStateP = INTERFACE_ADDING_1;
+                    object_unlock_exclusive(thisObject);
 
-            // this section runs with mutex unlocked
-            result = ThreadPool_add(&thisObject->mEngine->mThreadPool, HandleAdd, this, MPH);
-            if (SL_RESULT_SUCCESS != result) {
-                // Engine was destroyed during add, or insufficient memory,
-                // so restore mInterfaceStates state to prior value
-                object_lock_exclusive(thisObject);
-                switch (*interfaceStateP) {
-                case INTERFACE_ADDING_1:    // normal
-                case INTERFACE_ADDING_1A:   // operation aborted while mutex unlocked
-                    *interfaceStateP = INTERFACE_UNINITIALIZED;
-                    break;
-                default:                    // unexpected
-                    // leave state alone
-                    break;
+                    // this section runs with mutex unlocked
+                    result = ThreadPool_add(&thisObject->mEngine->mThreadPool, HandleAdd, this,
+                        MPH);
+                    if (SL_RESULT_SUCCESS != result) {
+                        // Engine was destroyed during add, or insufficient memory,
+                        // so restore mInterfaceStates state to prior value
+                        object_lock_exclusive(thisObject);
+                        switch (*interfaceStateP) {
+                        case INTERFACE_ADDING_1:    // normal
+                        case INTERFACE_ADDING_1A:   // operation aborted while mutex unlocked
+                            *interfaceStateP = INTERFACE_UNINITIALIZED;
+                            break;
+                        default:                    // unexpected
+                            // leave state alone
+                            break;
+                        }
+                    }
+
+                } else {
+                    // Synchronous: mark operation pending to prevent duplication
+                    *interfaceStateP = INTERFACE_ADDING_2;
+                    object_unlock_exclusive(thisObject);
+
+                    // this section runs with mutex unlocked
+                    const struct iid_vtable *x = &class__->mInterfaces[index];
+                    size_t offset = x->mOffset;
+                    size_t size = ((SLuint32) (index + 1) == class__->mInterfaceCount ?
+                        class__->mSize : x[1].mOffset) - offset;
+                    void *thisItf = (char *) thisObject + offset;
+                    memset(thisItf, 0, size);
+                    // Will never add IObject, so [1] is always defined
+                    ((void **) thisItf)[1] = thisObject;
+                    VoidHook init = MPH_init_table[MPH].mInit;
+                    if (NULL != init)
+                        (*init)(thisItf);
+                    result = SL_RESULT_SUCCESS;
+
+                    // re-lock mutex to update state
+                    object_lock_exclusive(thisObject);
+                    assert(INTERFACE_ADDING_2 == *interfaceStateP);
+                    *interfaceStateP = INTERFACE_ADDED;
                 }
+
+                // mutex is still locked
+                break;
+
+            default:    // disallow adding of (partially) initialized interfaces
+                result = SL_RESULT_PRECONDITIONS_VIOLATED;
+                break;
+
             }
 
-        } else {
-            // Synchronous: mark operation pending to prevent duplication
-            *interfaceStateP = INTERFACE_ADDING_2;
             object_unlock_exclusive(thisObject);
 
-            // this section runs with mutex unlocked
-            const struct iid_vtable *x = &class__->mInterfaces[index];
-            size_t offset = x->mOffset;
-            size_t size = ((SLuint32) (index + 1) == class__->mInterfaceCount ?
-                class__->mSize : x[1].mOffset) - offset;
-            void *thisItf = (char *) thisObject + offset;
-            memset(thisItf, 0, size);
-            // Will never add IObject, so [1] is always defined
-            ((void **) thisItf)[1] = thisObject;
-            VoidHook init = MPH_init_table[MPH].mInit;
-            if (NULL != init)
-                (*init)(thisItf);
-            result = SL_RESULT_SUCCESS;
-
-            // re-lock mutex to update state
-            object_lock_exclusive(thisObject);
-            assert(INTERFACE_ADDING_2 == *interfaceStateP);
-            *interfaceStateP = INTERFACE_ADDED;
         }
-
-        // mutex is still locked
-        break;
-
-    default:    // disallow adding of (partially) initialized interfaces
-        result = SL_RESULT_PRECONDITIONS_VIOLATED;
-        break;
-
     }
 
-    object_unlock_exclusive(thisObject);
-    return result;
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IDynamicInterfaceManagement_RemoveInterface(
     SLDynamicInterfaceManagementItf self, const SLInterfaceID iid)
 {
+    SL_ENTER_INTERFACE
+
     // validate input parameters
-    if (NULL == iid)
-        return SL_RESULT_PARAMETER_INVALID;
-    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-    IObject *thisObject = InterfaceToIObject(this);
-    const ClassTable *class__ = thisObject->mClass;
-    int MPH, index;
-    if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH])))
-        return SL_RESULT_PRECONDITIONS_VIOLATED;
-    SLresult result;
-    SLuint8 *interfaceStateP = &thisObject->mInterfaceStates[index];
+    if (NULL == iid) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
+        IObject *thisObject = InterfaceToIObject(this);
+        const ClassTable *class__ = thisObject->mClass;
+        int MPH, index;
+        if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH]))) {
+            result = SL_RESULT_PRECONDITIONS_VIOLATED;
+        } else {
+            SLuint8 *interfaceStateP = &thisObject->mInterfaceStates[index];
 
-    // check interface state
-    object_lock_exclusive(thisObject);
-    switch (*interfaceStateP) {
+            // check interface state
+            object_lock_exclusive(thisObject);
+            switch (*interfaceStateP) {
 
-    case INTERFACE_ADDED:       // normal cases
-    case INTERFACE_SUSPENDED:
-        {
-        // Mark operation pending to prevent duplication
-        *interfaceStateP = INTERFACE_REMOVING;
-        thisObject->mGottenMask &= ~(1 << index);
-        object_unlock_exclusive(thisObject);
+            case INTERFACE_ADDED:       // normal cases
+            case INTERFACE_SUSPENDED:
+                {
+                // Mark operation pending to prevent duplication
+                *interfaceStateP = INTERFACE_REMOVING;
+                thisObject->mGottenMask &= ~(1 << index);
+                object_unlock_exclusive(thisObject);
 
-        // The deinitialization is done with mutex unlocked
-        const struct iid_vtable *x = &class__->mInterfaces[index];
-        size_t offset = x->mOffset;
-        void *thisItf = (char *) thisObject + offset;
-        VoidHook deinit = MPH_init_table[MPH].mDeinit;
-        if (NULL != deinit)
-            (*deinit)(thisItf);
-#ifndef NDEBUG
-        size_t size = ((SLuint32) (index + 1) == class__->mInterfaceCount ?
-            class__->mSize : x[1].mOffset) - offset;
-        memset(thisItf, 0x55, size);
-#endif
-        result = SL_RESULT_SUCCESS;
+                // The deinitialization is done with mutex unlocked
+                const struct iid_vtable *x = &class__->mInterfaces[index];
+                size_t offset = x->mOffset;
+                void *thisItf = (char *) thisObject + offset;
+                VoidHook deinit = MPH_init_table[MPH].mDeinit;
+                if (NULL != deinit)
+                    (*deinit)(thisItf);
+        #ifndef NDEBUG
+                size_t size = ((SLuint32) (index + 1) == class__->mInterfaceCount ?
+                    class__->mSize : x[1].mOffset) - offset;
+                memset(thisItf, 0x55, size);
+        #endif
+                result = SL_RESULT_SUCCESS;
 
-        // Note that this was previously locked, but then unlocked for the deinit hook
-        object_lock_exclusive(thisObject);
-        assert(INTERFACE_REMOVING == *interfaceStateP);
-        *interfaceStateP = INTERFACE_UNINITIALIZED;
+                // Note that this was previously locked, but then unlocked for the deinit hook
+                object_lock_exclusive(thisObject);
+                assert(INTERFACE_REMOVING == *interfaceStateP);
+                *interfaceStateP = INTERFACE_UNINITIALIZED;
+                }
+
+                // mutex is still locked
+                break;
+
+            default:
+                // disallow removal of non-dynamic interfaces, or interfaces which are
+                // currently being resumed (will not auto-cancel an asynchronous resume)
+                result = SL_RESULT_PRECONDITIONS_VIOLATED;
+                break;
+
+            }
+
+            object_unlock_exclusive(thisObject);
         }
-
-        // mutex is still locked
-        break;
-
-    default:
-        // disallow removal of non-dynamic interfaces, or interfaces which are
-        // currently being resumed (will not auto-cancel an asynchronous resume)
-        result = SL_RESULT_PRECONDITIONS_VIOLATED;
-        break;
-
     }
 
-    object_unlock_exclusive(thisObject);
-    return result;
+    SL_LEAVE_INTERFACE
 }
+
 
 // Called by a worker thread to handle an asynchronous ResumeInterface.
 // Parameter self is the DynamicInterface, and MPH specifies which interface to resume.
@@ -313,93 +331,107 @@ static void HandleResume(void *self, int MPH)
     }
 }
 
+
 static SLresult IDynamicInterfaceManagement_ResumeInterface(SLDynamicInterfaceManagementItf self,
     const SLInterfaceID iid, SLboolean async)
 {
+    SL_ENTER_INTERFACE
+
     // validate input parameters
-    if (NULL == iid)
-        return SL_RESULT_PARAMETER_INVALID;
-    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-    IObject *thisObject = InterfaceToIObject(this);
-    const ClassTable *class__ = thisObject->mClass;
-    int MPH, index;
-    if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH])))
-        return SL_RESULT_PRECONDITIONS_VIOLATED;
-    assert(index < (int) class__->mInterfaceCount);
-    SLuint8 *interfaceStateP = &thisObject->mInterfaceStates[index];
-    SLresult result;
+    if (NULL == iid) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
+        IObject *thisObject = InterfaceToIObject(this);
+        const ClassTable *class__ = thisObject->mClass;
+        int MPH, index;
+        if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH]))) {
+            result = SL_RESULT_PRECONDITIONS_VIOLATED;
+        } else {
+            assert(index < (int) class__->mInterfaceCount);
+            SLuint8 *interfaceStateP = &thisObject->mInterfaceStates[index];
 
-    // check interface state
-    object_lock_exclusive(thisObject);
-    switch (*interfaceStateP) {
+            // check interface state
+            object_lock_exclusive(thisObject);
+            switch (*interfaceStateP) {
 
-    case INTERFACE_SUSPENDED:   // normal case
-        if (async) {
-            // Asynchronous: mark operation pending and cancellable
-            *interfaceStateP = INTERFACE_RESUMING_1;
-            object_unlock_exclusive(thisObject);
+            case INTERFACE_SUSPENDED:   // normal case
+                if (async) {
+                    // Asynchronous: mark operation pending and cancellable
+                    *interfaceStateP = INTERFACE_RESUMING_1;
+                    object_unlock_exclusive(thisObject);
 
-            // this section runs with mutex unlocked
-            result = ThreadPool_add(&thisObject->mEngine->mThreadPool, HandleResume, this, MPH);
-            if (SL_RESULT_SUCCESS != result) {
-                // Engine was destroyed during resume, or insufficient memory,
-                // so restore mInterfaceStates state to prior value
-                object_lock_exclusive(thisObject);
-                switch (*interfaceStateP) {
-                case INTERFACE_RESUMING_1:  // normal
-                case INTERFACE_RESUMING_1A: // operation aborted while mutex unlocked
-                    *interfaceStateP = INTERFACE_SUSPENDED;
-                    break;
-                default:                    // unexpected
-                    // leave state alone
-                    break;
+                    // this section runs with mutex unlocked
+                    result = ThreadPool_add(&thisObject->mEngine->mThreadPool, HandleResume, this,
+                        MPH);
+                    if (SL_RESULT_SUCCESS != result) {
+                        // Engine was destroyed during resume, or insufficient memory,
+                        // so restore mInterfaceStates state to prior value
+                        object_lock_exclusive(thisObject);
+                        switch (*interfaceStateP) {
+                        case INTERFACE_RESUMING_1:  // normal
+                        case INTERFACE_RESUMING_1A: // operation aborted while mutex unlocked
+                            *interfaceStateP = INTERFACE_SUSPENDED;
+                            break;
+                        default:                    // unexpected
+                            // leave state alone
+                            break;
+                        }
+                    }
+
+                } else {
+                    // Synchronous: mark operation pending to prevent duplication
+                    *interfaceStateP = INTERFACE_RESUMING_2;
+                    object_unlock_exclusive(thisObject);
+
+                    // this section runs with mutex unlocked
+                    const struct iid_vtable *x = &class__->mInterfaces[index];
+                    size_t offset = x->mOffset;
+                    void *thisItf = (char *) this + offset;
+                    VoidHook resume = MPH_init_table[MPH].mResume;
+                    if (NULL != resume)
+                        (*resume)(thisItf);
+                    result = SL_RESULT_SUCCESS;
+
+                    // re-lock mutex to update state
+                    object_lock_exclusive(thisObject);
+                    assert(INTERFACE_RESUMING_2 == *interfaceStateP);
+                    *interfaceStateP = INTERFACE_ADDED;
                 }
+
+                // mutex is now unlocked
+                break;
+
+            default:    // disallow resumption of non-suspended interfaces
+                object_unlock_exclusive(thisObject);
+                result = SL_RESULT_PRECONDITIONS_VIOLATED;
+                break;
             }
 
-        } else {
-            // Synchronous: mark operation pending to prevent duplication
-            *interfaceStateP = INTERFACE_RESUMING_2;
             object_unlock_exclusive(thisObject);
-
-            // this section runs with mutex unlocked
-            const struct iid_vtable *x = &class__->mInterfaces[index];
-            size_t offset = x->mOffset;
-            void *thisItf = (char *) this + offset;
-            VoidHook resume = MPH_init_table[MPH].mResume;
-            if (NULL != resume)
-                (*resume)(thisItf);
-            result = SL_RESULT_SUCCESS;
-
-            // re-lock mutex to update state
-            object_lock_exclusive(thisObject);
-            assert(INTERFACE_RESUMING_2 == *interfaceStateP);
-            *interfaceStateP = INTERFACE_ADDED;
         }
-
-        // mutex is now unlocked
-        break;
-
-    default:    // disallow resumption of non-suspended interfaces
-        object_unlock_exclusive(thisObject);
-        result = SL_RESULT_PRECONDITIONS_VIOLATED;
-        break;
     }
 
-    object_unlock_exclusive(thisObject);
-    return result;
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IDynamicInterfaceManagement_RegisterCallback(SLDynamicInterfaceManagementItf self,
     slDynamicInterfaceManagementCallback callback, void *pContext)
 {
+    SL_ENTER_INTERFACE
+
     IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
     IObject *thisObject = InterfaceToIObject(this);
     object_lock_exclusive(thisObject);
     this->mCallback = callback;
     this->mContext = pContext;
     object_unlock_exclusive(thisObject);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLDynamicInterfaceManagementItf_ IDynamicInterfaceManagement_Itf = {
     IDynamicInterfaceManagement_AddInterface,

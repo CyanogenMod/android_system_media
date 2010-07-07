@@ -18,29 +18,42 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IAudioEncoderCapabilities_GetAudioEncoders(SLAudioEncoderCapabilitiesItf self,
     SLuint32 *pNumEncoders, SLuint32 *pEncoderIds)
 {
-    if (NULL == pNumEncoders)
-        return SL_RESULT_PARAMETER_INVALID;
-    if (NULL == pEncoderIds) {
-        *pNumEncoders = MAX_ENCODERS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pNumEncoders) {
+        result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        SLuint32 numEncoders = *pNumEncoders;
-        if (MAX_ENCODERS <= numEncoders)
-            *pNumEncoders = numEncoders = MAX_ENCODERS;
-        memcpy(pEncoderIds, Encoder_IDs, numEncoders * sizeof(SLuint32));
+        if (NULL == pEncoderIds) {
+            *pNumEncoders = MAX_ENCODERS;
+        } else {
+            SLuint32 numEncoders = *pNumEncoders;
+            if (MAX_ENCODERS <= numEncoders)
+                *pNumEncoders = numEncoders = MAX_ENCODERS;
+            memcpy(pEncoderIds, Encoder_IDs, numEncoders * sizeof(SLuint32));
+        }
+        result = SL_RESULT_SUCCESS;
     }
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IAudioEncoderCapabilities_GetAudioEncoderCapabilities(
     SLAudioEncoderCapabilitiesItf self, SLuint32 encoderId, SLuint32 *pIndex,
     SLAudioCodecDescriptor *pDescriptor)
 {
-    return GetCodecCapabilities(encoderId, pIndex, pDescriptor,
+    SL_ENTER_INTERFACE
+
+    result = GetCodecCapabilities(encoderId, pIndex, pDescriptor,
         EncoderDescriptors);
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLAudioEncoderCapabilitiesItf_ IAudioEncoderCapabilities_Itf = {
     IAudioEncoderCapabilities_GetAudioEncoders,

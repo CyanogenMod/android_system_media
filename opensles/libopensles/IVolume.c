@@ -18,43 +18,67 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IVolume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
 {
-    if (!((SL_MILLIBEL_MIN <= level) && (level <= PLATFORM_MILLIBEL_MAX_VOLUME)))
-        return SL_RESULT_PARAMETER_INVALID;
-    IVolume *this = (IVolume *) self;
-    interface_lock_exclusive(this);
-    SLmillibel oldLevel = this->mLevel;
-    if (oldLevel != level) {
-        this->mLevel = level;
-        interface_unlock_exclusive_attributes(this, ATTR_GAIN);
-    } else
-        interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!((SL_MILLIBEL_MIN <= level) && (level <= PLATFORM_MILLIBEL_MAX_VOLUME))) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IVolume *this = (IVolume *) self;
+        interface_lock_exclusive(this);
+        SLmillibel oldLevel = this->mLevel;
+        if (oldLevel != level) {
+            this->mLevel = level;
+            interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+        } else
+            interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IVolume_GetVolumeLevel(SLVolumeItf self, SLmillibel *pLevel)
 {
-    if (NULL == pLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    IVolume *this = (IVolume *) self;
-    interface_lock_peek(this);
-    SLmillibel level = this->mLevel;
-    interface_unlock_peek(this);
-    *pLevel = level;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pLevel) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IVolume *this = (IVolume *) self;
+        interface_lock_peek(this);
+        SLmillibel level = this->mLevel;
+        interface_unlock_peek(this);
+        *pLevel = level;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IVolume_GetMaxVolumeLevel(SLVolumeItf self, SLmillibel *pMaxLevel)
 {
-    if (NULL == pMaxLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pMaxLevel = PLATFORM_MILLIBEL_MAX_VOLUME;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pMaxLevel) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        *pMaxLevel = PLATFORM_MILLIBEL_MAX_VOLUME;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IVolume_SetMute(SLVolumeItf self, SLboolean mute)
 {
+    SL_ENTER_INTERFACE
+
     IVolume *this = (IVolume *) self;
     mute = SL_BOOLEAN_FALSE != mute; // normalize
     interface_lock_exclusive(this);
@@ -64,23 +88,35 @@ static SLresult IVolume_SetMute(SLVolumeItf self, SLboolean mute)
         interface_unlock_exclusive_attributes(this, ATTR_GAIN);
     } else
         interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IVolume_GetMute(SLVolumeItf self, SLboolean *pMute)
 {
-    if (NULL == pMute)
-        return SL_RESULT_PARAMETER_INVALID;
-    IVolume *this = (IVolume *) self;
-    interface_lock_peek(this);
-    SLboolean mute = this->mMute;
-    interface_unlock_peek(this);
-    *pMute = mute;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pMute) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IVolume *this = (IVolume *) self;
+        interface_lock_peek(this);
+        SLboolean mute = this->mMute;
+        interface_unlock_peek(this);
+        *pMute = mute;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IVolume_EnableStereoPosition(SLVolumeItf self, SLboolean enable)
 {
+    SL_ENTER_INTERFACE
+
     IVolume *this = (IVolume *) self;
     enable = SL_BOOLEAN_FALSE != enable; // normalize
     interface_lock_exclusive(this);
@@ -90,47 +126,71 @@ static SLresult IVolume_EnableStereoPosition(SLVolumeItf self, SLboolean enable)
         interface_unlock_exclusive_attributes(this, ATTR_GAIN);
     } else
         interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IVolume_IsEnabledStereoPosition(SLVolumeItf self, SLboolean *pEnable)
 {
-    if (NULL == pEnable)
-        return SL_RESULT_PARAMETER_INVALID;
-    IVolume *this = (IVolume *) self;
-    interface_lock_peek(this);
-    SLboolean enable = this->mEnableStereoPosition;
-    interface_unlock_peek(this);
-    *pEnable = enable;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pEnable) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IVolume *this = (IVolume *) self;
+        interface_lock_peek(this);
+        SLboolean enable = this->mEnableStereoPosition;
+        interface_unlock_peek(this);
+        *pEnable = enable;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IVolume_SetStereoPosition(SLVolumeItf self, SLpermille stereoPosition)
 {
-    if (!((-1000 <= stereoPosition) && (1000 >= stereoPosition)))
-        return SL_RESULT_PARAMETER_INVALID;
-    IVolume *this = (IVolume *) self;
-    interface_lock_exclusive(this);
-    SLpermille oldStereoPosition = this->mStereoPosition;
-    if (oldStereoPosition != stereoPosition) {
-        this->mStereoPosition = stereoPosition;
-        interface_unlock_exclusive_attributes(this, ATTR_GAIN);
-    } else
-        interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!((-1000 <= stereoPosition) && (1000 >= stereoPosition))) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IVolume *this = (IVolume *) self;
+        interface_lock_exclusive(this);
+        SLpermille oldStereoPosition = this->mStereoPosition;
+        if (oldStereoPosition != stereoPosition) {
+            this->mStereoPosition = stereoPosition;
+            interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+        } else
+            interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IVolume_GetStereoPosition(SLVolumeItf self, SLpermille *pStereoPosition)
 {
-    if (NULL == pStereoPosition)
-        return SL_RESULT_PARAMETER_INVALID;
-    IVolume *this = (IVolume *) self;
-    interface_lock_peek(this);
-    SLpermille stereoPosition = this->mStereoPosition;
-    interface_unlock_peek(this);
-    *pStereoPosition = stereoPosition;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pStereoPosition) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IVolume *this = (IVolume *) self;
+        interface_lock_peek(this);
+        SLpermille stereoPosition = this->mStereoPosition;
+        interface_unlock_peek(this);
+        *pStereoPosition = stereoPosition;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLVolumeItf_ IVolume_Itf = {
     IVolume_SetVolumeLevel,

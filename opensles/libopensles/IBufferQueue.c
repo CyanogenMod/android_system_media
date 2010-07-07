@@ -18,33 +18,40 @@
 
 #include "sles_allinclusive.h"
 
-static SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
-    SLuint32 size)
+
+static SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer, SLuint32 size)
 {
-    if (NULL == pBuffer || 0 == size)
-        return SL_RESULT_PARAMETER_INVALID;
-    IBufferQueue *this = (IBufferQueue *) self;
-    SLresult result;
-    interface_lock_exclusive(this);
-    BufferHeader *oldRear = this->mRear, *newRear;
-    if ((newRear = oldRear + 1) == &this->mArray[this->mNumBuffers + 1])
-        newRear = this->mArray;
-    if (newRear == this->mFront) {
-        result = SL_RESULT_BUFFER_INSUFFICIENT;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pBuffer || 0 == size) {
+        result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        oldRear->mBuffer = pBuffer;
-        oldRear->mSize = size;
-        this->mRear = newRear;
-        ++this->mState.count;
-        result = SL_RESULT_SUCCESS;
+        IBufferQueue *this = (IBufferQueue *) self;
+        interface_lock_exclusive(this);
+        BufferHeader *oldRear = this->mRear, *newRear;
+        if ((newRear = oldRear + 1) == &this->mArray[this->mNumBuffers + 1])
+            newRear = this->mArray;
+        if (newRear == this->mFront) {
+            result = SL_RESULT_BUFFER_INSUFFICIENT;
+        } else {
+            oldRear->mBuffer = pBuffer;
+            oldRear->mSize = size;
+            this->mRear = newRear;
+            ++this->mState.count;
+            result = SL_RESULT_SUCCESS;
+        }
+        //fprintf(stderr, "Enqueue: nbBuffers in queue = %lu\n", this->mState.count);
+        interface_unlock_exclusive(this);
     }
-    //fprintf(stderr, "Enqueue: nbBuffers in queue = %lu\n", this->mState.count);
-    interface_unlock_exclusive(this);
-    return result;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IBufferQueue_Clear(SLBufferQueueItf self)
 {
+    SL_ENTER_INTERFACE
+
     IBufferQueue *this = (IBufferQueue *) self;
     interface_lock_exclusive(this);
     this->mFront = &this->mArray[0];
@@ -56,40 +63,55 @@ static SLresult IBufferQueue_Clear(SLBufferQueueItf self)
     fprintf(stderr, "FIXME: IBufferQueue_Clear must flush associated player, not implemented\n");
 #endif
     interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
 
-static SLresult IBufferQueue_GetState(SLBufferQueueItf self,
-    SLBufferQueueState *pState)
+
+static SLresult IBufferQueue_GetState(SLBufferQueueItf self, SLBufferQueueState *pState)
 {
-    if (NULL == pState)
-        return SL_RESULT_PARAMETER_INVALID;
-    IBufferQueue *this = (IBufferQueue *) self;
-    SLBufferQueueState state;
-    interface_lock_shared(this);
+    SL_ENTER_INTERFACE
+
+    if (NULL == pState) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IBufferQueue *this = (IBufferQueue *) self;
+        SLBufferQueueState state;
+        interface_lock_shared(this);
 #ifdef __cplusplus // FIXME Is this a compiler bug?
-    state.count = this->mState.count;
-    state.playIndex = this->mState.playIndex;
+        state.count = this->mState.count;
+        state.playIndex = this->mState.playIndex;
 #else
-    state = this->mState;
+        state = this->mState;
 #endif
-    interface_unlock_shared(this);
-    *pState = state;
-    return SL_RESULT_SUCCESS;
+        interface_unlock_shared(this);
+        *pState = state;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
     slBufferQueueCallback callback, void *pContext)
 {
+    SL_ENTER_INTERFACE
+
     // FIXME verify conditions media object is in the SL_PLAYSTATE_STOPPED state
-    fprintf(stderr, "FIXME: verify RegisterCallback is called on a player in SL_PLAYSTATE_STOPPED state, not implemented\n");
+    fprintf(stderr, "FIXME: verify RegisterCallback is called on a player in SL_PLAYSTATE_STOPPED \
+state, not implemented\n");
     IBufferQueue *this = (IBufferQueue *) self;
     interface_lock_exclusive(this);
     this->mCallback = callback;
     this->mContext = pContext;
     interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLBufferQueueItf_ IBufferQueue_Itf = {
     IBufferQueue_Enqueue,

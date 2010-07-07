@@ -18,28 +18,42 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IVisualization_RegisterVisualizationCallback(SLVisualizationItf self,
     slVisualizationCallback callback, void *pContext, SLmilliHertz rate)
 {
-    if (!(0 < rate && rate <= 20000))
-        return SL_RESULT_PARAMETER_INVALID;
-    IVisualization *this = (IVisualization *) self;
-    interface_lock_exclusive(this);
-    this->mCallback = callback;
-    this->mContext = pContext;
-    this->mRate = rate;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!(0 < rate && rate <= 20000)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IVisualization *this = (IVisualization *) self;
+        interface_lock_exclusive(this);
+        this->mCallback = callback;
+        this->mContext = pContext;
+        this->mRate = rate;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
 
-static SLresult IVisualization_GetMaxRate(SLVisualizationItf self,
-    SLmilliHertz *pRate)
+
+static SLresult IVisualization_GetMaxRate(SLVisualizationItf self, SLmilliHertz *pRate)
 {
-    if (NULL == pRate)
-        return SL_RESULT_PARAMETER_INVALID;
-    *pRate = 20000;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pRate) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        *pRate = 20000;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLVisualizationItf_ IVisualization_Itf = {
     IVisualization_RegisterVisualizationCallback,

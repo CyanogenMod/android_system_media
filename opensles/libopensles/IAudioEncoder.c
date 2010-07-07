@@ -18,32 +18,47 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult IAudioEncoder_SetEncoderSettings(SLAudioEncoderItf self,
     SLAudioEncoderSettings  *pSettings)
 {
-    if (NULL == pSettings)
-        return SL_RESULT_PARAMETER_INVALID;
-    IAudioEncoder *this = (IAudioEncoder *) self;
-    SLAudioEncoderSettings settings = *pSettings;
-    // FIXME Validate the settings
-    interface_lock_exclusive(this);
-    this->mSettings = settings;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pSettings) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IAudioEncoder *this = (IAudioEncoder *) self;
+        SLAudioEncoderSettings settings = *pSettings;
+        // FIXME Validate the settings
+        interface_lock_exclusive(this);
+        this->mSettings = settings;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult IAudioEncoder_GetEncoderSettings(SLAudioEncoderItf self,
     SLAudioEncoderSettings *pSettings)
 {
-    if (NULL == pSettings)
-        return SL_RESULT_PARAMETER_INVALID;
-    IAudioEncoder *this = (IAudioEncoder *) self;
-    interface_lock_shared(this);
-    SLAudioEncoderSettings settings = this->mSettings;
-    interface_unlock_shared(this);
-    *pSettings = settings;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pSettings) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IAudioEncoder *this = (IAudioEncoder *) self;
+        interface_lock_shared(this);
+        SLAudioEncoderSettings settings = this->mSettings;
+        interface_unlock_shared(this);
+        *pSettings = settings;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SLAudioEncoderItf_ IAudioEncoder_Itf = {
     IAudioEncoder_SetEncoderSettings,

@@ -18,177 +18,266 @@
 
 #include "sles_allinclusive.h"
 
+
 static SLresult I3DSource_SetHeadRelative(SL3DSourceItf self, SLboolean headRelative)
 {
+    SL_ENTER_INTERFACE
+
     I3DSource *this = (I3DSource *) self;
     interface_lock_poke(this);
     this->mHeadRelative = SL_BOOLEAN_FALSE != headRelative; // normalize
     interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_GetHeadRelative(SL3DSourceItf self, SLboolean *pHeadRelative)
 {
-    if (NULL == pHeadRelative)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_peek(this);
-    SLboolean headRelative = this->mHeadRelative;
-    interface_unlock_peek(this);
-    *pHeadRelative = headRelative;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pHeadRelative) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        I3DSource *this = (I3DSource *) self;
+        interface_lock_peek(this);
+        SLboolean headRelative = this->mHeadRelative;
+        interface_unlock_peek(this);
+        *pHeadRelative = headRelative;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_SetRolloffDistances(SL3DSourceItf self,
     SLmillimeter minDistance, SLmillimeter maxDistance)
 {
+    SL_ENTER_INTERFACE
+
     if (!((0 < minDistance) && (minDistance <= SL_MILLIMETER_MAX) &&
-        (minDistance <= maxDistance) && (maxDistance <= SL_MILLIMETER_MAX)))
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_exclusive(this);
-    this->mMinDistance = minDistance;
-    this->mMaxDistance = maxDistance;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+        (minDistance <= maxDistance) && (maxDistance <= SL_MILLIMETER_MAX))) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        I3DSource *this = (I3DSource *) self;
+        interface_lock_exclusive(this);
+        this->mMinDistance = minDistance;
+        this->mMaxDistance = maxDistance;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_GetRolloffDistances(SL3DSourceItf self,
     SLmillimeter *pMinDistance, SLmillimeter *pMaxDistance)
 {
-    if (NULL == pMinDistance || NULL == pMaxDistance)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_shared(this);
-    SLmillimeter minDistance = this->mMinDistance;
-    SLmillimeter maxDistance = this->mMaxDistance;
-    interface_unlock_shared(this);
-    *pMinDistance = minDistance;
-    *pMaxDistance = maxDistance;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pMinDistance || NULL == pMaxDistance) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        I3DSource *this = (I3DSource *) self; interface_lock_shared(this);
+        SLmillimeter minDistance = this->mMinDistance;
+        SLmillimeter maxDistance = this->mMaxDistance;
+        interface_unlock_shared(this);
+        *pMinDistance = minDistance;
+        *pMaxDistance = maxDistance;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_SetRolloffMaxDistanceMute(SL3DSourceItf self, SLboolean mute)
 {
+    SL_ENTER_INTERFACE
+
     I3DSource *this = (I3DSource *) self;
     interface_lock_poke(this);
     this->mRolloffMaxDistanceMute = SL_BOOLEAN_FALSE != mute; // normalize
     interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_GetRolloffMaxDistanceMute(SL3DSourceItf self, SLboolean *pMute)
 {
-    if (NULL == pMute)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_peek(this);
-    SLboolean mute = this->mRolloffMaxDistanceMute;
-    interface_unlock_peek(this);
-    *pMute = mute;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pMute) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        I3DSource *this = (I3DSource *) self;
+        interface_lock_peek(this);
+        SLboolean mute = this->mRolloffMaxDistanceMute;
+        interface_unlock_peek(this);
+        *pMute = mute;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_SetRolloffFactor(SL3DSourceItf self, SLpermille rolloffFactor)
 {
-    if (!((0 <= rolloffFactor) && (rolloffFactor <= 10000)))
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_poke(this);
-    this->mRolloffFactor = rolloffFactor;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!((0 <= rolloffFactor) && (rolloffFactor <= 10000))) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        I3DSource *this = (I3DSource *) self;
+        interface_lock_poke(this);
+        this->mRolloffFactor = rolloffFactor;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_GetRolloffFactor(SL3DSourceItf self, SLpermille *pRolloffFactor)
 {
+    SL_ENTER_INTERFACE
+
     I3DSource *this = (I3DSource *) self;
     interface_lock_peek(this);
     SLpermille rolloffFactor = this->mRolloffFactor;
     interface_unlock_peek(this);
     *pRolloffFactor = rolloffFactor;
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_SetRoomRolloffFactor(SL3DSourceItf self, SLpermille roomRolloffFactor)
 {
-    if (!((0 <= roomRolloffFactor) && (roomRolloffFactor <= 10000)))
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_poke(this);
-    this->mRoomRolloffFactor = roomRolloffFactor;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (!((0 <= roomRolloffFactor) && (roomRolloffFactor <= 10000))) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        I3DSource *this = (I3DSource *) self;
+        interface_lock_poke(this);
+        this->mRoomRolloffFactor = roomRolloffFactor;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_GetRoomRolloffFactor(SL3DSourceItf self, SLpermille *pRoomRolloffFactor)
 {
+    SL_ENTER_INTERFACE
+
     I3DSource *this = (I3DSource *) self;
     interface_lock_peek(this);
     SLpermille roomRolloffFactor = this->mRoomRolloffFactor;
     interface_unlock_peek(this);
     *pRoomRolloffFactor = roomRolloffFactor;
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_SetRolloffModel(SL3DSourceItf self, SLuint8 model)
 {
+    SL_ENTER_INTERFACE
+
     switch (model) {
     case SL_ROLLOFFMODEL_LINEAR:
     case SL_ROLLOFFMODEL_EXPONENTIAL:
+        {
+        I3DSource *this = (I3DSource *) self;
+        interface_lock_poke(this);
+        this->mDistanceModel = model;
+        interface_unlock_poke(this);
+        result = SL_RESULT_SUCCESS;
+        }
         break;
     default:
-        return SL_RESULT_PARAMETER_INVALID;
+        result = SL_RESULT_PARAMETER_INVALID;
+        break;
     }
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_poke(this);
-    this->mDistanceModel = model;
-    interface_unlock_poke(this);
-    return SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_GetRolloffModel(SL3DSourceItf self, SLuint8 *pModel)
 {
+    SL_ENTER_INTERFACE
+
     I3DSource *this = (I3DSource *) self;
     interface_lock_peek(this);
     SLuint8 model = this->mDistanceModel;
     interface_unlock_peek(this);
     *pModel = model;
-    return SL_RESULT_SUCCESS;
+    result = SL_RESULT_SUCCESS;
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_SetCone(SL3DSourceItf self, SLmillidegree innerAngle,
     SLmillidegree outerAngle, SLmillibel outerLevel)
 {
+    SL_ENTER_INTERFACE
+
     if (!((0 <= innerAngle) && (innerAngle <= 360000) &&
         (0 <= outerAngle) && (outerAngle <= 360000) &&
-        (SL_MILLIBEL_MIN <= outerLevel) && (outerLevel <= 0)))
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_exclusive(this);
-    this->mConeInnerAngle = innerAngle;
-    this->mConeOuterAngle = outerAngle;
-    this->mConeOuterLevel = outerLevel;
-    interface_unlock_exclusive(this);
-    return SL_RESULT_SUCCESS;
+        (SL_MILLIBEL_MIN <= outerLevel) && (outerLevel <= 0))) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        I3DSource *this = (I3DSource *) self;
+        interface_lock_exclusive(this);
+        this->mConeInnerAngle = innerAngle;
+        this->mConeOuterAngle = outerAngle;
+        this->mConeOuterLevel = outerLevel;
+        interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static SLresult I3DSource_GetCone(SL3DSourceItf self, SLmillidegree *pInnerAngle,
     SLmillidegree *pOuterAngle, SLmillibel *pOuterLevel)
 {
-    if (NULL == pInnerAngle || NULL == pOuterAngle || NULL == pOuterLevel)
-        return SL_RESULT_PARAMETER_INVALID;
-    I3DSource *this = (I3DSource *) self;
-    interface_lock_shared(this);
-    SLmillidegree innerAngle = this->mConeInnerAngle;
-    SLmillidegree outerAngle = this->mConeOuterAngle;
-    SLmillibel outerLevel = this->mConeOuterLevel;
-    interface_unlock_shared(this);
-    *pInnerAngle = innerAngle;
-    *pOuterAngle = outerAngle;
-    *pOuterLevel = outerLevel;
-    return SL_RESULT_SUCCESS;
+    SL_ENTER_INTERFACE
+
+    if (NULL == pInnerAngle || NULL == pOuterAngle || NULL == pOuterLevel) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        I3DSource *this = (I3DSource *) self;
+        interface_lock_shared(this);
+        SLmillidegree innerAngle = this->mConeInnerAngle;
+        SLmillidegree outerAngle = this->mConeOuterAngle;
+        SLmillibel outerLevel = this->mConeOuterLevel;
+        interface_unlock_shared(this);
+        *pInnerAngle = innerAngle;
+        *pOuterAngle = outerAngle;
+        *pOuterLevel = outerLevel;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
 }
+
 
 static const struct SL3DSourceItf_ I3DSource_Itf = {
     I3DSource_SetHeadRelative,
