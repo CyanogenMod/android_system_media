@@ -30,6 +30,8 @@ SfPlayer::SfPlayer(const sp<ALooper> &renderLooper)
       mTimeDelta(-1),
       mDurationUsec(-1),
       mCacheStatus(kStatusEmpty),
+      mIsSeeking(false),
+      mSeekTimeMsec(0),
       mDataLocatorType(kDataLocatorNone),
       mNotifyClient(NULL),
       mNotifyUser(NULL) {
@@ -298,6 +300,13 @@ void SfPlayer::pause() {
     mAudioTrack->pause();
 }
 
+void SfPlayer::seek(int64_t timeMsec) {
+    fprintf(stderr, "SfPlayer::seek %d\n", timeMsec);
+    sp<AMessage> msg = new AMessage(kWhatSeek, id());
+    msg->setInt64("seek", timeMsec);
+    msg->post();
+}
+
 
 void SfPlayer::onPlay() {
     mFlags |= kFlagPlaying;
@@ -305,6 +314,14 @@ void SfPlayer::onPlay() {
 
 void SfPlayer::onPause() {
     mFlags &= ~kFlagPlaying;
+}
+
+void SfPlayer::onSeek(const sp<AMessage> &msg) {
+    fprintf(stderr, "SfPlayer::onSeek\n");
+    int64_t timeMsec;
+    CHECK(msg->findInt64("seek", &timeMsec));
+    mIsSeeking = true;
+    mSeekTimeMsec = timeMsec;
 }
 
 
@@ -330,7 +347,12 @@ void SfPlayer::onDecode() {
     }
 
     MediaBuffer *buffer;
-    status_t err = mAudioSource->read(&buffer);
+    MediaSource::ReadOptions readOptions;
+    if (mIsSeeking) {
+        readOptions.setSeekTo(mSeekTimeMsec * 1000);
+        mIsSeeking = false;
+    }
+    status_t err = mAudioSource->read(&buffer, &readOptions);
 
     if (err != OK) {
         if (err != ERROR_END_OF_STREAM) {
@@ -520,6 +542,10 @@ void SfPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
         case kWhatPause:
             onPause();
+            break;
+
+        case kWhatSeek:
+            onSeek(msg);
             break;
 
         default:
