@@ -366,6 +366,21 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
     return SL_RESULT_SUCCESS;
 }
 
+SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDataLocatorFormat,
+        SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
+            const SLboolean *pInterfaceRequired) {
+    // can't request SLSeekItf if data source is a buffer queue
+    if (SL_DATALOCATOR_BUFFERQUEUE == pDataLocatorFormat->mLocator.mLocatorType) {
+        for (int i = 0; i < numInterfaces; i++) {
+            if (pInterfaceRequired[i] && (SL_IID_SEEK == pInterfaceIds[i])) {
+                fprintf(stderr, "Error: can't request SL_IID_SEEK with a buffer queue data source\n");
+                return SL_RESULT_FEATURE_UNSUPPORTED;
+            }
+        }
+    }
+    return SL_RESULT_SUCCESS;
+}
+
 static void freeDataFormat(DataFormat *pDataFormat)
 {
     switch (pDataFormat->mFormatType) {

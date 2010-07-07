@@ -1015,6 +1015,10 @@ extern SLuint32 IObjectToObjectID(IObject *object);
 extern SLresult checkDataSource(const SLDataSource *pDataSrc,
     DataLocatorFormat *myDataSourceLocator);
 extern SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *myDataSinkLocator);
+extern SLresult checkSourceFormatVsInterfacesCompatibility(
+        const DataLocatorFormat *pDataLocatorFormat,
+        SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
+        const SLboolean *pInterfaceRequired);
 extern void freeDataLocatorFormat(DataLocatorFormat *dlf);
 extern SLresult CAudioPlayer_Realize(void *self, SLboolean async);
 extern void CAudioPlayer_Destroy(void *self);
@@ -1043,10 +1047,11 @@ extern const char * const interface_names[MPH_MAX];
 
 // Attributes
 
-#define ATTR_NONE       ((unsigned) 0x0)    // none
-#define ATTR_GAIN       ((unsigned) 0x1)    // player volume, channel mute, channel solo,
-                                            // player stereo position, player mute
-#define ATTR_TRANSPORT  ((unsigned) 0x2)    // play state, requested position, looping
+#define ATTR_NONE       ((unsigned) 0x0)      // none
+#define ATTR_GAIN       ((unsigned) 0x1 << 0) // player volume, channel mute, channel solo,
+                                              // player stereo position, player mute
+#define ATTR_TRANSPORT  ((unsigned) 0x1 << 1) // play state, looping
+#define ATTR_POSITION   ((unsigned) 0x1 << 2) // requested position (a.k.a. seek position)
 
 #define SL_DATALOCATOR_NULL 0    // application specified a NULL value for pLocator
 #define SL_DATAFORMAT_NULL 0     // application specified a NULL or undefined value for pFormat

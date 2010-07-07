@@ -111,12 +111,20 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     // change memory concurrently.
 
                     result = checkDataSource(pAudioSrc, &this->mDataSource);
-                    if (SL_RESULT_SUCCESS != result)
+                    if (SL_RESULT_SUCCESS != result) {
                         break;
+                    }
+
+                    result = checkSourceFormatVsInterfacesCompatibility(&this->mDataSource,
+                            numInterfaces, pInterfaceIds, pInterfaceRequired);
+                    if (SL_RESULT_SUCCESS != result) {
+                        break;
+                    }
 
                     result = checkDataSink(pAudioSnk, &this->mDataSink);
-                    if (SL_RESULT_SUCCESS != result)
+                    if (SL_RESULT_SUCCESS != result) {
                         break;
+                    }
 
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
