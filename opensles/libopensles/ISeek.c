@@ -34,7 +34,7 @@ static SLresult ISeek_SetPosition(SLSeekItf self, SLmillisecond pos, SLuint32 se
         interface_lock_exclusive(this);
         if (pos != this->mPos) {
             this->mPos = pos;
-            interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+            interface_unlock_exclusive_attributes(this, ATTR_POSITION);
         } else
             interface_unlock_exclusive(this);
         result = SL_RESULT_SUCCESS;

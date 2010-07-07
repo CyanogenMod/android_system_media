@@ -36,6 +36,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
     SLuint32 objectID = IObjectToObjectID(this);
     CAudioPlayer *ap;
     // Android likes to see certain updates synchronously
+
     if (attributes & ATTR_GAIN) {
         switch (objectID) {
         case SL_OBJECTID_AUDIOPLAYER:
@@ -49,13 +50,37 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
             break;
         case SL_OBJECTID_OUTPUTMIX:
             // FIXME update gains on all players attached to this outputmix
-            fprintf(stderr, "FIXME: gain update on an SL_OBJECTID_OUTPUTMIX to be implemented\n");
+            fprintf(stderr, "[ FIXME: gain update on an SL_OBJECTID_OUTPUTMIX to be implemented ]\n");
             break;
-        // FIXME MIDI
+        case SL_OBJECTID_MIDIPLAYER:
+            // FIXME MIDI
+            fprintf(stderr, "[ FIXME: gain update on an SL_OBJECTID_MIDIPLAYER to be implemented ]\n");
+            break;
         default:
             break;
         }
     }
+
+    if (attributes & ATTR_POSITION) {
+        switch (objectID) {
+        case SL_OBJECTID_AUDIOPLAYER:
+            attributes &= ~ATTR_POSITION;   // no need to process asynchronously also
+            ap = (CAudioPlayer *) this;
+#ifdef ANDROID
+            sles_to_android_audioPlayerSeek(ap, ap->mSeek.mPos);
+#else
+            audioPlayerTransportUpdate(ap);
+#endif
+            break;
+        case SL_OBJECTID_MIDIPLAYER:
+            // FIXME MIDI
+            fprintf(stderr, "[ FIXME: position update on an SL_OBJECTID_MIDIPLAYER to be implemented ]\n");
+            break;
+        default:
+            break;
+        }
+    }
+
     if (attributes & ATTR_TRANSPORT) {
         if (SL_OBJECTID_AUDIOPLAYER == objectID) {
             attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also

@@ -1063,6 +1063,12 @@ void sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPos
 
 
 //-----------------------------------------------------------------------------
+void sles_to_android_audioPlayerSeek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec) {
+
+}
+
+
+//-----------------------------------------------------------------------------
 /*
  * Mutes or unmutes the Android media framework object associated with the CAudioPlayer that carries
  * the IVolume interface.

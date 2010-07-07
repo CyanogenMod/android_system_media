@@ -68,6 +68,8 @@ extern void sles_to_android_audioPlayerUseEventMask(CAudioPlayer *pAudioPlayer);
 
 extern SLresult sles_to_android_audioPlayerGetDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
 
+extern void sles_to_android_audioPlayerSeek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec);
+
 extern void sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
 
 extern SLresult sles_to_android_audioPlayerVolumeUpdate(CAudioPlayer *pAudioPlayer);
