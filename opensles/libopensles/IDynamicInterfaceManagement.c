@@ -226,11 +226,11 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
                 VoidHook deinit = MPH_init_table[MPH].mDeinit;
                 if (NULL != deinit)
                     (*deinit)(thisItf);
-        #ifndef NDEBUG
+#ifndef NDEBUG
                 size_t size = ((SLuint32) (index + 1) == class__->mInterfaceCount ?
                     class__->mSize : x[1].mOffset) - offset;
                 memset(thisItf, 0x55, size);
-        #endif
+#endif
                 result = SL_RESULT_SUCCESS;
 
                 // Note that this was previously locked, but then unlocked for the deinit hook
