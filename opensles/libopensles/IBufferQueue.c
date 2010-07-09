@@ -40,7 +40,6 @@ static SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
             ++this->mState.count;
             result = SL_RESULT_SUCCESS;
         }
-        //fprintf(stderr, "Enqueue: nbBuffers in queue = %lu\n", this->mState.count);
         interface_unlock_exclusive(this);
     }
 

@@ -63,7 +63,7 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
         assert(SL_RESULT_SUCCESS == result);
     } else {
         object_lock_exclusive(&thisAP->mObject);
-        // FIXME Uh not yet - we just ran out of new data to enqueue,
+        // Should not pause yet - we just ran out of new data to enqueue,
         // but there may still be (partially) full buffers in the queue.
         thisAP->mPlay.mState = SL_PLAYSTATE_PAUSED;
         thisAP->mPlay.mPosition = thisAP->mPlay.mDuration;
@@ -155,7 +155,7 @@ void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer)
 
     if ((SL_TIME_UNKNOWN != pos) && (NULL != audioPlayer->mSndFile.mSNDFILE)) {
         pthread_mutex_lock(&audioPlayer->mSndFile.mMutex);
-        // FIXME use pos not 0
+        // use pos not 0
         (void) sf_seek(audioPlayer->mSndFile.mSNDFILE, (sf_count_t) 0, SEEK_SET);
         audioPlayer->mSndFile.mEOF = SL_BOOLEAN_FALSE;
         pthread_mutex_unlock(&audioPlayer->mSndFile.mMutex);

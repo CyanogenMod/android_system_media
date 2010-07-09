@@ -88,7 +88,6 @@ static SLresult IMetadataTraversal_GetChildInfo(SLMetadataTraversalItf self, SLu
     SL_ENTER_INTERFACE
 
     //IMetadataTraversal *this = (IMetadataTraversal *) self;
-    // FIXME not implemented
     result = SL_RESULT_FEATURE_UNSUPPORTED;
 
     SL_LEAVE_INTERFACE
@@ -104,7 +103,6 @@ static SLresult IMetadataTraversal_SetActiveNode(SLMetadataTraversalItf self, SL
     }
     IMetadataTraversal *this = (IMetadataTraversal *) self;
     this->mIndex = index;
-    // FIXME not implemented
     result = SL_RESULT_PARAMETER_INVALID;
 
     SL_LEAVE_INTERFACE

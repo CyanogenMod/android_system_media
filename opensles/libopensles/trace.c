@@ -14,45 +14,32 @@
  * limitations under the License.
  */
 
-/* debugging */
+/* trace debugging */
+
+#if 0 // ifdef ANDROID  // FIXME requires Stagefright LOG update
+//#define LOG_NDEBUG 0
+#define LOG_TAG "libOpenSLES"
+#else
+#define LOGV printf
+#define LOGE printf
+#endif
 
 #include "sles_allinclusive.h"
 
-#ifndef NDEBUG
-
-#define SL_RESULT_MAX (SL_RESULT_CONTROL_LOST + 1)
-static const char * const result_strings[SL_RESULT_MAX] = {
-    "SUCCESS",
-    "PRECONDITIONS_VIOLATED",
-    "PARAMETER_INVALID",
-    "MEMORY_FAILURE",
-    "RESOURCE_ERROR",
-    "RESOURCE_LOST",
-    "IO_ERROR",
-    "BUFFER_INSUFFICIENT",
-    "CONTENT_CORRUPTED",
-    "CONTENT_UNSUPPORTED",
-    "CONTENT_NOT_FOUND",
-    "PERMISSION_DENIED",
-    "FEATURE_UNSUPPORTED",
-    "INTERNAL_ERROR",
-    "UNKNOWN_ERROR",
-    "OPERATION_ABORTED",
-    "CONTROL_LOST"
-};
+#ifdef USE_TRACE
 
 void slEnterGlobal(const char *function)
 {
-    printf("Entering %s\n", function);
+    LOGV("Entering %s\n", function);
 }
 
 void slLeaveGlobal(const char *function, SLresult result)
 {
     if (SL_RESULT_SUCCESS != result) {
-        if (SL_RESULT_MAX > result)
-            printf("Leaving %s (%s)\n", function, result_strings[result]);
+        if (SLUT_RESULT_MAX > result)
+            LOGV("Leaving %s (%s)\n", function, slutResultStrings[result]);
         else
-            printf("Leaving %s (0x%X)\n", function, (unsigned) result);
+            LOGV("Leaving %s (0x%X)\n", function, (unsigned) result);
     }
 }
 
@@ -63,12 +50,12 @@ void slEnterInterface(const char *function)
     const char *underscore = function;
     while (*underscore != '\0') {
         if (*underscore == '_') {
-            printf("Entering %.*s::%s\n", underscore - function, function, &underscore[1]);
+            LOGV("Entering %.*s::%s\n", underscore - function, function, &underscore[1]);
             return;
         }
         ++underscore;
     }
-    printf("Entering %s\n", function);
+    LOGV("Entering %s\n", function);
 }
 
 void slLeaveInterface(const char *function, SLresult result)
@@ -79,20 +66,20 @@ void slLeaveInterface(const char *function, SLresult result)
         const char *underscore = function;
         while (*underscore != '\0') {
             if (*underscore == '_') {
-                if (SL_RESULT_MAX > result)
-                    printf("Leaving %.*s::%s (%s)\n", underscore - function, function,
-                        &underscore[1], result_strings[result]);
+                if (SLUT_RESULT_MAX > result)
+                    LOGE("Leaving %.*s::%s (%s)\n", underscore - function, function,
+                        &underscore[1], slutResultStrings[result]);
                 else
-                    printf("Leaving %.*s::%s (0x%X)\n", underscore - function, function,
+                    LOGE("Leaving %.*s::%s (0x%X)\n", underscore - function, function,
                         &underscore[1], (unsigned) result);
                 return;
             }
             ++underscore;
         }
-        if (SL_RESULT_MAX > result)
-            printf("Leaving %s (%s)\n", function, result_strings[result]);
+        if (SLUT_RESULT_MAX > result)
+            LOGE("Leaving %s (%s)\n", function, slutResultStrings[result]);
         else
-            printf("Leaving %s (0x%X)\n", function, (unsigned) result);
+            LOGE("Leaving %s (0x%X)\n", function, (unsigned) result);
     }
 }
 
@@ -106,4 +93,4 @@ void slLeaveInterfaceVoid(const char *function)
     slLeaveInterface(function, SL_RESULT_SUCCESS);
 }
 
-#endif // !defined(NDEBUG)
+#endif // defined(USE_TRACE)

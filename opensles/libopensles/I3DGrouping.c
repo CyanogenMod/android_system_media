@@ -88,5 +88,5 @@ void I3DGrouping_init(void *self)
     I3DGrouping *this = (I3DGrouping *) self;
     this->mItf = &I3DGrouping_Itf;
     this->mGroup = NULL;
-    // FIXME initialize the set here
+    // initialize the set here
 }

@@ -128,7 +128,7 @@ static SLresult IMetadataExtraction_AddKeyFilter(SLMetadataExtractionItf self,
         this->mKeySize = keySize;
         this->mKey = pKey;
         this->mKeyEncoding = keyEncoding;
-        this->mValueLangCountry = pValueLangCountry; // FIXME local copy?
+        this->mValueLangCountry = pValueLangCountry; // should make a local copy
         this->mValueEncoding = valueEncoding;
         this->mFilterMask = filterMask;
         interface_unlock_exclusive(this);

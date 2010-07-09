@@ -60,7 +60,7 @@ static SLresult IMIDITempo_SetMicrosecondsPerQuarterNote(SLMIDITempoItf self, SL
 {
     SL_ENTER_INTERFACE
 
-    // FIXME spec says zero, is that correct?
+    // spec says zero, is that correct?
     if (!(1 <= uspqn && uspqn <= 16777215)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -105,6 +105,6 @@ void IMIDITempo_init(void *self)
 {
     IMIDITempo *this = (IMIDITempo *) self;
     this->mItf = &IMIDITempo_Itf;
-    this->mTicksPerQuarterNote = 32; // FIXME
-    this->mMicrosecondsPerQuarterNote = 100; // FIXME
+    this->mTicksPerQuarterNote = 32; // wrong
+    this->mMicrosecondsPerQuarterNote = 100; // wrong
 }

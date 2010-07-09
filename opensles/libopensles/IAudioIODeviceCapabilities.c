@@ -18,6 +18,8 @@
 
 /* AudioIODeviceCapabilities implementation */
 
+// NTH make it platform-configurable
+
 
 static SLresult IAudioIODeviceCapabilities_GetAvailableAudioInputs(
     SLAudioIODeviceCapabilitiesItf self, SLint32 *pNumInputs, SLuint32 *pInputDeviceIDs)
@@ -29,7 +31,6 @@ static SLresult IAudioIODeviceCapabilities_GetAvailableAudioInputs(
     } else {
         result = SL_RESULT_SUCCESS;
         if (NULL != pInputDeviceIDs) {
-            // FIXME should be OEM-configurable
             if (1 > *pNumInputs) {
                 result = SL_RESULT_BUFFER_INSUFFICIENT;
             } else {
@@ -53,7 +54,6 @@ static SLresult IAudioIODeviceCapabilities_QueryAudioInputCapabilities(
     } else {
         result = SL_RESULT_SUCCESS;
         switch (deviceID) {
-        // FIXME should be OEM-configurable
         case SL_DEFAULTDEVICEID_AUDIOINPUT:
             *pDescriptor = *AudioInput_id_descriptors[0].descriptor;
             break;
@@ -94,14 +94,13 @@ static SLresult IAudioIODeviceCapabilities_GetAvailableAudioOutputs(
     } else {
         result = SL_RESULT_SUCCESS;
         if (NULL != pOutputDeviceIDs) {
-            // FIXME should be OEM-configurable
             if (2 > *pNumOutputs) {
                 result = SL_RESULT_BUFFER_INSUFFICIENT;
-                // FIXME if 1 slot available, still fill that
+                // if 1 slot available, should still fill that
             } else {
                 pOutputDeviceIDs[0] = DEVICE_ID_HEADSET;
                 pOutputDeviceIDs[1] = DEVICE_ID_HANDSFREE;
-                // FIXME SL_DEFAULTDEVICEID_AUDIOOUTPUT?
+                // SL_DEFAULTDEVICEID_AUDIOOUTPUT?
             }
         }
         *pNumOutputs = 2;
@@ -121,14 +120,13 @@ static SLresult IAudioIODeviceCapabilities_QueryAudioOutputCapabilities(
     } else {
         result = SL_RESULT_SUCCESS;
         switch (deviceID) {
-        // FIXME should be OEM-configurable
         case DEVICE_ID_HEADSET:
             *pDescriptor = *AudioOutput_id_descriptors[1].descriptor;
             break;
         case DEVICE_ID_HANDSFREE:
             *pDescriptor = *AudioOutput_id_descriptors[2].descriptor;
             break;
-        // FIXME SL_DEFAULTDEVICEID_AUDIOOUTPUT?
+        // SL_DEFAULTDEVICEID_AUDIOOUTPUT?
         default:
             result = SL_RESULT_IO_ERROR;
             break;
@@ -182,7 +180,7 @@ static SLresult IAudioIODeviceCapabilities_GetAssociatedAudioInputs(
     if (NULL == pNumAudioInputs) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        // FIXME Incomplete
+        // Incomplete
         *pNumAudioInputs = 0;
         result = SL_RESULT_SUCCESS;
     }
@@ -200,7 +198,7 @@ static SLresult IAudioIODeviceCapabilities_GetAssociatedAudioOutputs(
     if (NULL == pNumAudioOutputs) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        // FIXME Incomplete
+        // Incomplete
         *pNumAudioOutputs = 0;
         result = SL_RESULT_SUCCESS;
     }
@@ -223,7 +221,6 @@ static SLresult IAudioIODeviceCapabilities_GetDefaultAudioDevices(
         case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
             result = SL_RESULT_SUCCESS;
             if (NULL != pAudioDeviceIDs) {
-                // FIXME should be OEM-configurable
                 switch (defaultDeviceID) {
                 case SL_DEFAULTDEVICEID_AUDIOINPUT:
                     if (1 > *pNumAudioDevices) {
@@ -239,7 +236,7 @@ static SLresult IAudioIODeviceCapabilities_GetDefaultAudioDevices(
                     } else {
                         pAudioDeviceIDs[0] = DEVICE_ID_HEADSET;
                         pAudioDeviceIDs[1] = DEVICE_ID_HANDSFREE;
-                        // FIXME should be capable of returning first item if 1 slot
+                        // should be capable of returning first item if 1 slot
                     }
                     *pNumAudioDevices = 2;
                     break;
@@ -273,7 +270,7 @@ static SLresult IAudioIODeviceCapabilities_QuerySampleFormatsSupported(
         case SL_DEFAULTDEVICEID_AUDIOINPUT:
         case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
             result = SL_RESULT_SUCCESS;
-            // FIXME incomplete
+            // incomplete
             switch (samplingRate) {
             case SL_SAMPLINGRATE_44_1:
                 break;
@@ -284,7 +281,7 @@ static SLresult IAudioIODeviceCapabilities_QuerySampleFormatsSupported(
             if (NULL != pSampleFormats) {
                 if (1 > *pNumOfSampleFormats)
                     result = SL_RESULT_BUFFER_INSUFFICIENT;
-                // FIXME incomplete
+                // incomplete
                 pSampleFormats[0] = SL_PCMSAMPLEFORMAT_FIXED_16;
             }
             *pNumOfSampleFormats = 1;
