@@ -301,7 +301,7 @@ void SfPlayer::pause() {
 }
 
 void SfPlayer::seek(int64_t timeMsec) {
-    fprintf(stderr, "SfPlayer::seek %d\n", timeMsec);
+    fprintf(stderr, "SfPlayer::seek %lld\n", timeMsec);
     sp<AMessage> msg = new AMessage(kWhatSeek, id());
     msg->setInt64("seek", timeMsec);
     msg->post();
