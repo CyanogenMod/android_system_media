@@ -38,6 +38,7 @@ LOCAL_SRC_FILES:=                     \
         sles.c                        \
         sles_to_android.cpp           \
         android_SfPlayer.cpp          \
+        android_Effect.cpp            \
         sync.c                        \
         IID_to_MPH.c                  \
         ThreadPool.c                  \

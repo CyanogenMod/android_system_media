@@ -49,10 +49,14 @@ typedef struct COutputMix_struct COutputMix;
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
+#include "media/AudioEffect.h"
+#include "media/EffectApi.h"
+#include "media/EffectEqualizerApi.h"
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
 #include <binder/ProcessState.h>
 #include "android_SfPlayer.h"
+#include "android_Effect.h"
 #endif
 
 #define STEREO_CHANNELS 2
@@ -474,6 +478,10 @@ typedef struct Engine_interface {
     SLboolean mShutdownAck;
     pthread_cond_t mShutdownCond;
     ThreadPool mThreadPool; // for asynchronous operations
+#ifdef ANDROID
+    SLuint32 mEqNumPresets;
+    char** mEqPresetNames;
+#endif
 } IEngine;
 
 typedef struct {
@@ -497,7 +505,11 @@ struct EqualizerBand {
     SLmilliHertz mMax;
 };
 
+#ifdef ANDROID
+#define MAX_EQ_BANDS 0
+#else
 #define MAX_EQ_BANDS 4  // compile-time limit, runtime limit may be smaller
+#endif
 
 typedef struct {
     const struct SLEqualizerItf_ *mItf;
@@ -512,6 +524,10 @@ typedef struct {
     const struct EqualizerPreset *mPresets;
     SLmillibel mBandLevelRangeMin;
     SLmillibel mBandLevelRangeMax;
+#ifdef ANDROID
+    effect_descriptor_t mEqDescriptor;
+    android::sp<android::AudioEffect> mEqEffect;
+#endif
 } IEqualizer;
 
 #define MAX_LED_COUNT 32

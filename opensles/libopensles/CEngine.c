@@ -49,9 +49,22 @@ void CEngine_Destroy(void *self)
 {
     CEngine *this = (CEngine *) self;
     this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
+#ifdef ANDROID
+    // free effect data
+    //   free EQ data
+    if ((0 < this->mEngine.mEqNumPresets) && (NULL != this->mEngine.mEqPresetNames)) {
+        for(uint32_t i = 0 ; i < this->mEngine.mEqNumPresets ; i++) {
+            if (NULL != this->mEngine.mEqPresetNames[i]) {
+                delete [] this->mEngine.mEqPresetNames[i];
+            }
+        }
+        delete [] this->mEngine.mEqPresetNames;
+    }
+#endif
     while (!this->mEngine.mShutdownAck)
         pthread_cond_wait(&this->mEngine.mShutdownCond, &this->mObject.mMutex);
     object_unlock_exclusive(&this->mObject);
     (void) pthread_join(this->mSyncThread, (void **) NULL);
     ThreadPool_deinit(&this->mEngine.mThreadPool);
+
 }
