@@ -54,16 +54,15 @@
 #define MAX_NUMBER_INTERFACES 3
 #define MAX_NUMBER_OUTPUT_DEVICES 6
 
-
 //-----------------------------------------------------------------
-/* Checks for error. If any errors exit the application! */
-void CheckErr( SLresult res )
+//* Exits the application if an error is encountered */
+#define CheckErr(x) ExitOnErrorFunc(x,__LINE__)
+
+void ExitOnErrorFunc( SLresult result , int line)
 {
-    if ( res != SL_RESULT_SUCCESS )  {
-        fprintf(stdout, "%lu SL failure, exiting\n", res);
+    if (SL_RESULT_SUCCESS != result) {
+        fprintf(stdout, "%lu error code encountered at line %d, exiting\n", result, line);
         exit(1);
-    } else {
-        //fprintf(stdout, "%lu SL success, proceeding...\n", res);
     }
 }
 
@@ -161,7 +160,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
 
     /* Create the audio player */
     res = (*EngineItf)->CreateAudioPlayer(EngineItf, &player,
-            &audioSource, &audioSink, 1, iidArray, required); CheckErr(res);
+            &audioSource, &audioSink, 2, iidArray, required); CheckErr(res);
 
     /* Realizing the player in synchronous mode. */
     res = (*player)->Realize(player, SL_BOOLEAN_FALSE); CheckErr(res);
