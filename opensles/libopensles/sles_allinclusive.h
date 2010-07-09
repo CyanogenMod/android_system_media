@@ -1057,12 +1057,12 @@ extern const char * const interface_names[MPH_MAX];
 #define SL_DATAFORMAT_NULL 0     // application specified a NULL or undefined value for pFormat
 
 #ifdef NDEBUG
-#define SL_ENTER_GLOBAL { SLresult result;
-#define SL_LEAVE_GLOBAL return result; }
-#define SL_ENTER_INTERFACE { SLresult result;
-#define SL_LEAVE_INTERFACE return result; }
-#define SL_ENTER_INTERFACE_VOID {
-#define SL_LEAVE_INTERFACE_VOID return; }
+#define SL_ENTER_GLOBAL SLresult result;
+#define SL_LEAVE_GLOBAL return result;
+#define SL_ENTER_INTERFACE SLresult result;
+#define SL_LEAVE_INTERFACE return result;
+#define SL_ENTER_INTERFACE_VOID
+#define SL_LEAVE_INTERFACE_VOID return;
 #else
 extern void slEnterGlobal(const char *function);
 extern void slLeaveGlobal(const char *function, SLresult result);
@@ -1070,10 +1070,10 @@ extern void slEnterInterface(const char *function);
 extern void slLeaveInterface(const char *function, SLresult result);
 extern void slEnterInterfaceVoid(const char *function);
 extern void slLeaveInterfaceVoid(const char *function);
-#define SL_ENTER_GLOBAL { SLresult result; slEnterGlobal(__FUNCTION__);
-#define SL_LEAVE_GLOBAL slLeaveGlobal(__FUNCTION__, result); return result; }
-#define SL_ENTER_INTERFACE { SLresult result; slEnterInterface(__FUNCTION__);
-#define SL_LEAVE_INTERFACE slLeaveInterface(__FUNCTION__, result); return result; }
-#define SL_ENTER_INTERFACE_VOID { slEnterInterfaceVoid(__FUNCTION__);
-#define SL_LEAVE_INTERFACE_VOID slLeaveInterfaceVoid(__FUNCTION__); return; }
+#define SL_ENTER_GLOBAL SLresult result; slEnterGlobal(__FUNCTION__);
+#define SL_LEAVE_GLOBAL slLeaveGlobal(__FUNCTION__, result); return result;
+#define SL_ENTER_INTERFACE SLresult result; slEnterInterface(__FUNCTION__);
+#define SL_LEAVE_INTERFACE slLeaveInterface(__FUNCTION__, result); return result;
+#define SL_ENTER_INTERFACE_VOID slEnterInterfaceVoid(__FUNCTION__);
+#define SL_LEAVE_INTERFACE_VOID slLeaveInterfaceVoid(__FUNCTION__); return;
 #endif
