@@ -17,7 +17,12 @@
 #define LOG_NDEBUG 0
 #define LOG_TAG "slesTest_playMuteSolo"
 
+#ifdef ANDROID
 #include <utils/Log.h>
+#else
+#define LOGV printf
+#endif
+
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
