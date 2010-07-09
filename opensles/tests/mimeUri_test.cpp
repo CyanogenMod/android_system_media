@@ -244,7 +244,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     } else if ( currentPositionInMsec <= 0 ||
         currentPositionInMsec > (MP3_DURATION * 1.1) ){
         fprintf(stdout, "Current play position is %i : beyond the duration\n",
-                currentPositionInMsec);
+                (int) currentPositionInMsec);
         ASSERT_TRUE(false);
     }
 
