@@ -29,7 +29,6 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
     this->mNumChannels = 0;
 
 #ifdef ANDROID
-    // FIXME move this to android specific files
     result = sles_to_android_audioPlayerRealize(this, async);
 #endif
 
@@ -49,23 +48,13 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
             int ok;
             ok = pthread_mutex_init(&this->mSndFile.mMutex, (const pthread_mutexattr_t *) NULL);
             assert(0 == ok);
-            // FIXME how do we know this interface is exposed?
             SLBufferQueueItf bufferQueue = &this->mBufferQueue.mItf;
-            // FIXME should use a private internal API, and disallow
-            // application to have access to our buffer queue
-            // FIXME if we had an internal API, could call this directly
-            // FIXME can't call this directly as we get a double lock
-            // result = (*bufferQueue)->RegisterCallback(bufferQueue,
-            //    SndFile_Callback, &this->mSndFile);
-            // FIXME so let's inline the code, but this is maintenance risk
-            // we know we are called by Object_Realize, which holds a lock,
-            // but if interface lock != object lock, need to rewrite this
             IBufferQueue *thisBQ = (IBufferQueue *) bufferQueue;
             thisBQ->mCallback = SndFile_Callback;
             thisBQ->mContext = this;
-            // FIXME Intermediate overflow possible on duration computation
             this->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
-            this->mPlay.mDuration = (SLmillisecond) ((sfinfo.frames * 1000) / sfinfo.samplerate);
+            this->mPlay.mDuration = (SLmillisecond)
+                (((long long) sfinfo.frames * 1000LL) / sfinfo.samplerate);
             this->mNumChannels = sfinfo.channels;
         }
     }
@@ -78,7 +67,6 @@ void CAudioPlayer_Destroy(void *self)
     CAudioPlayer *this = (CAudioPlayer *) self;
     freeDataLocatorFormat(&this->mDataSource);
     freeDataLocatorFormat(&this->mDataSink);
-    // FIXME stop the player in a way that app can't restart it
     // Free the buffer queue, if it was larger than typical
     if (NULL != this->mBufferQueue.mArray &&
         this->mBufferQueue.mArray != this->mBufferQueue.mTypical) {

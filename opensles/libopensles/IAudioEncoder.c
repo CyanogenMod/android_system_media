@@ -29,7 +29,6 @@ static SLresult IAudioEncoder_SetEncoderSettings(SLAudioEncoderItf self,
     } else {
         IAudioEncoder *this = (IAudioEncoder *) self;
         SLAudioEncoderSettings settings = *pSettings;
-        // FIXME Validate the settings
         interface_lock_exclusive(this);
         this->mSettings = settings;
         interface_unlock_exclusive(this);

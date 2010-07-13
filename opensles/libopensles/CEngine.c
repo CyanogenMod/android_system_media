@@ -27,7 +27,6 @@ SLresult CEngine_Realize(void *self, SLboolean async)
     SLresult result = err_to_result(err);
     if (SL_RESULT_SUCCESS != result)
         return result;
-    // FIXME Use platform-specific engine configuration options here.
     result = ThreadPool_init(&this->mEngine.mThreadPool, 0, 0);
     if (SL_RESULT_SUCCESS != result) {
         this->mEngine.mShutdown = SL_BOOLEAN_TRUE;

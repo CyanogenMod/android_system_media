@@ -27,6 +27,7 @@
 #include "MPH.h"
 #include "MPH_to.h"
 #include "devices.h"
+#include "OpenSLUT.h"
 #include "ThreadPool.h"
 
 typedef struct CAudioPlayer_struct CAudioPlayer;
@@ -43,6 +44,7 @@ typedef struct COutputMix_struct COutputMix;
 #endif // USE_SDL
 
 #ifdef ANDROID
+#include <utils/Log.h>
 #include "OpenSLES_Android.h"
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
@@ -83,6 +85,18 @@ typedef SLresult (*AsyncHook)(void *self, SLboolean async);
 #define INTERFACE_PHONE_GAME         INTERFACE_OPTIONAL
 #define INTERFACE_TBD                INTERFACE_IMPLICIT
 
+#ifdef USE_CONFORMANCE
+#define INTERFACE_IMPLICIT_CT        INTERFACE_IMPLICIT
+#define INTERFACE_EXPLICIT_CT        INTERFACE_EXPLICIT
+#define INTERFACE_EXPLICIT_GAME_CT   INTERFACE_EXPLICIT_GAME
+#define INTERFACE_OPTIONAL_CT        INTERFACE_OPTIONAL
+#else
+#define INTERFACE_IMPLICIT_CT        INTERFACE_UNAVAILABLE
+#define INTERFACE_EXPLICIT_CT        INTERFACE_UNAVAILABLE
+#define INTERFACE_EXPLICIT_GAME_CT   INTERFACE_UNAVAILABLE
+#define INTERFACE_OPTIONAL_CT        INTERFACE_UNAVAILABLE
+#endif
+
 // Describes how an interface is related to a given object
 
 #define INTERFACE_UNINITIALIZED 1  // not requested at object creation time
@@ -112,7 +126,6 @@ typedef struct {
     const struct iid_vtable *mInterfaces;
     SLuint32 mInterfaceCount;  // number of possible interfaces
     const signed char *mMPH_to_index;
-    // FIXME not yet used
     const char * const mName;
     size_t mSize;
     SLuint32 mObjectID;
@@ -211,11 +224,17 @@ typedef struct Object_interface {
     unsigned mGottenMask;           // interfaces which are exposed or added, and then gotten
     unsigned mLossOfControlMask;    // interfaces with loss of control enabled
     unsigned mAttributesMask;       // attributes which have changed since last sync
+#ifdef USE_CONFORMANCE
     SLint32 mPriority;
+#endif
     pthread_mutex_t mMutex;
     pthread_cond_t mCond;
     SLuint8 mState;                 // really SLuint32, but SLuint8 to save space
+#ifdef USE_CONFORMANCE
     SLuint8 mPreemptable;           // really SLboolean, but SLuint8 to save space
+#else
+    SLuint8 mPadding;
+#endif
     // for best alignment, do not add any fields here
 #define INTERFACES_Default 2
     SLuint8 mInterfaceStates[INTERFACES_Default];    // state of each of interface
@@ -401,7 +420,7 @@ typedef struct BufferQueue_interface {
 typedef struct {
     const struct SLDeviceVolumeItf_ *mItf;
     IObject *mThis;
-    SLint32 mVolume[MAX_DEVICE]; // FIXME Hard-coded for default in/out
+    SLint32 mVolume[MAX_DEVICE];
 } IDeviceVolume;
 
 typedef struct {
@@ -712,7 +731,7 @@ typedef struct /*Volume_interface*/ {
     // Values as specified by the application
     SLmillibel mLevel;
     SLpermille mStereoPosition;
-    SLuint8 /*SLboolean*/ mMute;    // FIXME move inside each object that supports the interface
+    SLuint8 /*SLboolean*/ mMute;
     SLuint8 /*SLboolean*/ mEnableStereoPosition;
 } IVolume;
 
@@ -867,6 +886,7 @@ typedef struct {
     I3DCommit m3DCommit;
     // optional interfaces
     IDeviceVolume mDeviceVolume;
+    // rest of fields are not related to the interfaces
     pthread_t mSyncThread;
 } CEngine;
 
@@ -1056,14 +1076,19 @@ extern const char * const interface_names[MPH_MAX];
 #define SL_DATALOCATOR_NULL 0    // application specified a NULL value for pLocator
 #define SL_DATAFORMAT_NULL 0     // application specified a NULL or undefined value for pFormat
 
-#ifdef NDEBUG
+// Trace debugging
+
+#ifndef USE_TRACE
+
 #define SL_ENTER_GLOBAL SLresult result;
 #define SL_LEAVE_GLOBAL return result;
 #define SL_ENTER_INTERFACE SLresult result;
 #define SL_LEAVE_INTERFACE return result;
 #define SL_ENTER_INTERFACE_VOID
 #define SL_LEAVE_INTERFACE_VOID return;
+
 #else
+
 extern void slEnterGlobal(const char *function);
 extern void slLeaveGlobal(const char *function, SLresult result);
 extern void slEnterInterface(const char *function);
@@ -1076,4 +1101,5 @@ extern void slLeaveInterfaceVoid(const char *function);
 #define SL_LEAVE_INTERFACE slLeaveInterface(__FUNCTION__, result); return result;
 #define SL_ENTER_INTERFACE_VOID slEnterInterfaceVoid(__FUNCTION__);
 #define SL_LEAVE_INTERFACE_VOID slLeaveInterfaceVoid(__FUNCTION__); return;
+
 #endif

@@ -49,7 +49,6 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
     const struct iid_vtable *interfaces = class__->mInterfaces;
     SLuint32 interfaceCount = class__->mInterfaceCount;
     SLuint32 i;
-    // FIXME This section could be pre-computed per class
     for (i = 0; i < interfaceCount; ++i) {
         switch (interfaces[i].mInterface) {
         case INTERFACE_IMPLICIT:
@@ -73,12 +72,6 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
                     return SL_RESULT_FEATURE_UNSUPPORTED;
                 continue;
             }
-            // FIXME this seems a bit strong? what is correct logic?
-            // we are requesting a duplicate explicit interface,
-            // or we are requesting one which is already implicit ?
-            // if (exposedMask & (1 << index))
-            //    return SL_RESULT_PARAMETER_INVALID;
-            // can we request dynamic interfaces here?
             exposedMask |= (1 << index);
         }
     }
@@ -106,9 +99,9 @@ SLresult GetCodecCapabilities(SLuint32 codecId, SLuint32 *pIndex,
         if (cd->mCodecID == codecId) {
             if (0 == index) {
                 *pDescriptor = *cd->mDescriptor;
-#if 0   // FIXME Temporary workaround for Khronos bug 6331
+#if 0   // Temporary workaround for Khronos bug 6331
                 if (0 < pDescriptor->numSampleRatesSupported) {
-                    // FIXME The malloc is not in the 1.0.1 specification
+                    // The malloc is not in the 1.0.1 specification
                     SLmilliHertz *temp = (SLmilliHertz *) malloc(sizeof(SLmilliHertz) *
                         pDescriptor->numSampleRatesSupported);
                     assert(NULL != temp);
@@ -142,10 +135,9 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
         break;
     case SL_DATALOCATOR_BUFFERQUEUE:
         pDataLocator->mBufferQueue = *(SLDataLocator_BufferQueue *)pLocator;
+        // number of buffers must be specified, there is no default value
         if (0 == pDataLocator->mBufferQueue.numBuffers)
             return SL_RESULT_PARAMETER_INVALID;
-            // pDataLocator->mBufferQueue.numBuffers = 2;
-        // FIXME check against a max
         break;
     case SL_DATALOCATOR_IODEVICE:
         {
@@ -374,7 +366,8 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
         SLuint32 i;
         for (i = 0; i < numInterfaces; i++) {
             if (pInterfaceRequired[i] && (SL_IID_SEEK == pInterfaceIds[i])) {
-                fprintf(stderr, "Error: can't request SL_IID_SEEK with a buffer queue data source\n");
+                fprintf(stderr,
+                    "Error: can't request SL_IID_SEEK with a buffer queue data source\n");
                 return SL_RESULT_FEATURE_UNSUPPORTED;
             }
         }
@@ -739,8 +732,14 @@ SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedI
     if (NULL == pNumSupportedInterfaces) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
-        *pNumSupportedInterfaces = pCEngine_class->mInterfaceCount;
+        const ClassTable *class__ = objectIDtoClass(SL_OBJECTID_ENGINE);
+        assert(NULL != class__);
+        SLuint32 count = 0;
+        SLuint32 i;
+        for (i = 0; i < class__->mInterfaceCount; ++i)
+            if (class__->mInterfaces[i].mInterface != INTERFACE_UNAVAILABLE)
+                ++count;
+        *pNumSupportedInterfaces = count;
         result = SL_RESULT_SUCCESS;
     }
 
@@ -755,13 +754,20 @@ SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index, SLInterface
     if (NULL == pInterfaceId) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
-        if (pCEngine_class->mInterfaceCount <= index) {
-            *pInterfaceId = NULL;
-            result = SL_RESULT_PARAMETER_INVALID;
-        } else {
-            *pInterfaceId = &SL_IID_array[pCEngine_class->mInterfaces[index].mMPH];
-            result = SL_RESULT_SUCCESS;
+        *pInterfaceId = NULL;
+        const ClassTable *class__ = objectIDtoClass(SL_OBJECTID_ENGINE);
+        assert(NULL != class__);
+        result = SL_RESULT_PARAMETER_INVALID;   // will be reset later
+        SLuint32 i;
+        for (i = 0; i < class__->mInterfaceCount; ++i) {
+            if (INTERFACE_UNAVAILABLE == class__->mInterfaces[i].mInterface)
+                continue;
+            if (index == 0) {
+                *pInterfaceId = &SL_IID_array[class__->mInterfaces[i].mMPH];
+                result = SL_RESULT_SUCCESS;
+                break;
+            }
+            --index;
         }
     }
 

@@ -50,11 +50,13 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
             break;
         case SL_OBJECTID_OUTPUTMIX:
             // FIXME update gains on all players attached to this outputmix
-            fprintf(stderr, "[ FIXME: gain update on an SL_OBJECTID_OUTPUTMIX to be implemented ]\n");
+            fprintf(stderr,
+                "[ FIXME: gain update on an SL_OBJECTID_OUTPUTMIX to be implemented ]\n");
             break;
         case SL_OBJECTID_MIDIPLAYER:
-            // FIXME MIDI
-            fprintf(stderr, "[ FIXME: gain update on an SL_OBJECTID_MIDIPLAYER to be implemented ]\n");
+            // MIDI
+            fprintf(stderr,
+                "[ FIXME: gain update on an SL_OBJECTID_MIDIPLAYER to be implemented ]\n");
             break;
         default:
             break;
@@ -73,8 +75,9 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
 #endif
             break;
         case SL_OBJECTID_MIDIPLAYER:
-            // FIXME MIDI
-            fprintf(stderr, "[ FIXME: position update on an SL_OBJECTID_MIDIPLAYER to be implemented ]\n");
+            // MIDI
+            fprintf(stderr,
+                "[ FIXME: position update on an SL_OBJECTID_MIDIPLAYER to be implemented ]\n");
             break;
         default:
             break;

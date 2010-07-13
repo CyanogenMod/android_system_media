@@ -170,7 +170,7 @@ static SLresult I3DLocation_SetOrientationVectors(SL3DLocationItf self,
     } else {
         SLVec3D front = *pFront;
         SLVec3D above = *pAbove;
-        // FIXME Check for vectors close to zero or close to parallel
+        // NTH Check for vectors close to zero or close to parallel
         I3DLocation *this = (I3DLocation *) self;
         interface_lock_exclusive(this);
         this->mOrientationVectors.mFront = front;
@@ -218,7 +218,7 @@ static SLresult I3DLocation_Rotate(SL3DLocationItf self, SLmillidegree theta, co
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         SLVec3D axis = *pAxis;
-        // FIXME Check that axis is not (close to) zero vector, length does not matter
+        // NTH Check that axis is not (close to) zero vector, length does not matter
         I3DLocation *this = (I3DLocation *) self;
         interface_lock_exclusive(this);
         while (this->mRotatePending)
@@ -247,7 +247,6 @@ static SLresult I3DLocation_GetOrientationVectors(SL3DLocationItf self,
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         I3DLocation *this = (I3DLocation *) self;
-        // FIXME Should wait for a pending rotate to complete, or orientation angles to be converted
         interface_lock_shared(this);
         SLVec3D front = this->mOrientationVectors.mFront;
         SLVec3D up = this->mOrientationVectors.mUp;

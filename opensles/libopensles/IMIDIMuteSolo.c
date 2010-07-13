@@ -229,5 +229,5 @@ void IMIDIMuteSolo_init(void *self)
     this->mTrackMuteMask = 0;
     this->mTrackSoloMask = 0;
     // const
-    this->mTrackCount = 32; // FIXME
+    this->mTrackCount = 32; // wrong
 }

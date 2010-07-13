@@ -103,11 +103,11 @@ static SLresult I3DMacroscopic_SetOrientationVectors(SL3DMacroscopicItf self,
         I3DMacroscopic *this = (I3DMacroscopic *) self;
         SLVec3D front = *pFront;
         SLVec3D above = *pAbove;
-        // FIXME Check for vectors close to zero or close to parallel
+        // NTH Check for vectors close to zero or close to parallel
         interface_lock_exclusive(this);
         this->mOrientationVectors.mFront = front;
         this->mOrientationVectors.mAbove = above;
-        this->mOrientationVectors.mUp = above; // FIXME
+        this->mOrientationVectors.mUp = above; // wrong
         this->mOrientationActive = ANGLES_UNKNOWN_VECTORS_SET;
         this->mRotatePending = SL_BOOLEAN_FALSE;
         interface_unlock_exclusive(this);
@@ -127,22 +127,14 @@ static SLresult I3DMacroscopic_Rotate(SL3DMacroscopicItf self,
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         SLVec3D axis = *pAxis;
-        // FIXME Check that axis is not (close to) zero vector, length does not matter
+        // NTH Check that axis is not (close to) zero vector, length does not matter
         I3DMacroscopic *this = (I3DMacroscopic *) self;
-        // FIXME Do the rotate here:
-        // interface_lock_shared(this);
-        // read old values and generation
-        // interface_unlock_shared(this);
-        // compute new position
         interface_lock_exclusive(this);
         while (this->mRotatePending)
             interface_cond_wait(this);
         this->mTheta = theta;
         this->mAxis = axis;
         this->mRotatePending = SL_BOOLEAN_TRUE;
-        // compare generation with saved value
-        // if equal, store new position and increment generation
-        // if unequal, discard new position
         interface_unlock_exclusive(this);
         result = SL_RESULT_SUCCESS;
     }

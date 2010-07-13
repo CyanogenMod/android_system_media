@@ -24,6 +24,7 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, 
 {
     SL_ENTER_INTERFACE
 
+#ifdef USE_CONFORMANCE
     if (NULL == pDevice || SL_DEFAULTDEVICEID_LED != deviceID) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -42,6 +43,9 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, 
             }
         }
     }
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE
 }
@@ -52,6 +56,7 @@ static SLresult IEngine_CreateVibraDevice(SLEngineItf self, SLObjectItf *pDevice
 {
     SL_ENTER_INTERFACE
 
+#ifdef USE_CONFORMANCE
     if (NULL == pDevice || SL_DEFAULTDEVICEID_VIBRA != deviceID) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -70,6 +75,9 @@ static SLresult IEngine_CreateVibraDevice(SLEngineItf self, SLObjectItf *pDevice
             }
         }
     }
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE
 }
@@ -133,8 +141,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         break;
 #else
                     {
-                    // FIXME This is b/c we init buffer queues in SndFile below, which is not always
-                    // present
+                    // because we init buffer queues in SndFile below, which is not always present
                     SLuint32 locatorType = *(SLuint32 *) pAudioSrc->pLocator;
                     if (locatorType == SL_DATALOCATOR_BUFFERQUEUE)
                         this->mBufferQueue.mNumBuffers = ((SLDataLocator_BufferQueue *)
@@ -209,6 +216,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 {
     SL_ENTER_INTERFACE
 
+#ifdef USE_CONFORMANCE
     if (NULL == pRecorder) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -236,7 +244,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                     if (SL_RESULT_SUCCESS != result)
                         break;
 
-                    // FIXME This section is not yet fully implemented
+                    // This section is not yet fully implemented
 
                     // return the new audio recorder object
                     *pRecorder = &this->mObject.mItf;
@@ -250,6 +258,9 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
         }
 
     }
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE
 }
@@ -262,6 +273,7 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
 {
     SL_ENTER_INTERFACE
 
+#ifdef USE_CONFORMANCE
     if (NULL == pPlayer || NULL == pMIDISrc || NULL == pAudioOutput) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -280,6 +292,9 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
             }
         }
     }
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE
 }
@@ -290,6 +305,7 @@ static SLresult IEngine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
 {
     SL_ENTER_INTERFACE
 
+#ifdef USE_CONFORMANCE
     if (NULL == pListener) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -308,6 +324,9 @@ static SLresult IEngine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
             }
         }
     }
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE
 }
@@ -318,6 +337,7 @@ static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup, SLu
 {
     SL_ENTER_INTERFACE
 
+#ifdef USE_CONFORMANCE
     if (NULL == pGroup) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -337,6 +357,9 @@ static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup, SLu
             }
         }
     }
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE
 }
@@ -375,6 +398,7 @@ static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self, SLObjectItf *p
 {
     SL_ENTER_INTERFACE
 
+#ifdef USE_CONFORMANCE
     if (NULL == pMetadataExtractor) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -395,6 +419,9 @@ static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self, SLObjectItf *p
             }
         }
     }
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE
 }
@@ -429,7 +456,6 @@ static SLresult IEngine_QueryNumSupportedInterfaces(SLEngineItf self,
         if (NULL == class__) {
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
-            // FIXME Cache this value
             SLuint32 count = 0;
             SLuint32 i;
             for (i = 0; i < class__->mInterfaceCount; ++i)
@@ -458,10 +484,8 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             result = SL_RESULT_PARAMETER_INVALID; // will be reset later
-            // FIXME O(n)
             SLuint32 i;
             for (i = 0; i < class__->mInterfaceCount; ++i) {
-                // FIXME check whether published also (might be internal implicit)
                 if (INTERFACE_UNAVAILABLE == class__->mInterfaces[i].mInterface)
                     continue;
                 if (index == 0) {

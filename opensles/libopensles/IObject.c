@@ -373,7 +373,6 @@ static SLresult IObject_RegisterCallback(SLObjectItf self,
 
 static void Abort_internal(IObject *this, SLboolean shutdown)
 {
-    // FIXME Aborting asynchronous operations during phase 2 is not yet implemented
     const ClassTable *class__ = this->mClass;
     object_lock_exclusive(this);
     // Abort asynchronous operations on the object
@@ -388,7 +387,6 @@ static void Abort_internal(IObject *this, SLboolean shutdown)
         break;
     }
     // Abort asynchronous operations on interfaces
-    // FIXME O(n), could be O(1) using a generation count
     SLuint8 *interfaceStateP = this->mInterfaceStates;
     unsigned index;
     for (index = 0; index < class__->mInterfaceCount; ++index, ++interfaceStateP) {
@@ -403,12 +401,6 @@ static void Abort_internal(IObject *this, SLboolean shutdown)
             break;
         }
     }
-#if 0
-    // FIXME Not fully implemented, the intention is to advise other threads to exit from sync ops
-    // FIXME Also need to wait for async ops to recognize the shutdown
-    if (shutdown)
-        this->mShutdown = SL_BOOLEAN_TRUE;
-#endif
     object_unlock_exclusive(this);
 }
 
@@ -428,10 +420,6 @@ static void IObject_Destroy(SLObjectItf self)
 {
     SL_ENTER_INTERFACE_VOID
 
-    // FIXME Check for dependencies, e.g. destroying an output mix with attached players,
-    //       destroying an engine with extant objects, etc.
-    // FIXME The abort should be atomic w.r.t. destroy, so another async can't be started in window
-    // FIXME Destroy may need to be made asynchronous to permit safe cleanup of resources
     IObject *this = (IObject *) self;
     Abort_internal(this, SL_BOOLEAN_TRUE);
     const ClassTable *class__ = this->mClass;
@@ -504,7 +492,6 @@ static void IObject_Destroy(SLObjectItf self)
     free(this);
     // one or more interfaces was actively changing at time of Destroy
     assert(incorrect == 0);
-    // FIXME assert might be the wrong thing to do; instead block until active ops complete?
 
     SL_LEAVE_INTERFACE_VOID
 }
@@ -514,12 +501,16 @@ static SLresult IObject_SetPriority(SLObjectItf self, SLint32 priority, SLboolea
 {
     SL_ENTER_INTERFACE
 
+#ifdef USE_CONFORMANCE
     IObject *this = (IObject *) self;
     object_lock_exclusive(this);
     this->mPriority = priority;
     this->mPreemptable = SL_BOOLEAN_FALSE != preemptable; // normalize
     object_unlock_exclusive(this);
     result = SL_RESULT_SUCCESS;
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE
 }
@@ -529,6 +520,7 @@ static SLresult IObject_GetPriority(SLObjectItf self, SLint32 *pPriority, SLbool
 {
     SL_ENTER_INTERFACE
 
+#ifdef USE_CONFORMANCE
     if (NULL == pPriority || NULL == pPreemptable) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -541,6 +533,9 @@ static SLresult IObject_GetPriority(SLObjectItf self, SLint32 *pPriority, SLbool
         *pPreemptable = preemptable;
         result = SL_RESULT_SUCCESS;
     }
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE
 }
@@ -551,6 +546,7 @@ static SLresult IObject_SetLossOfControlInterfaces(SLObjectItf self,
 {
     SL_ENTER_INTERFACE
 
+#ifdef USE_CONFORMANCE
     result = SL_RESULT_SUCCESS;
     if (0 < numInterfaces) {
         SLuint32 i;
@@ -560,7 +556,7 @@ static SLresult IObject_SetLossOfControlInterfaces(SLObjectItf self,
             IObject *this = (IObject *) self;
             const ClassTable *class__ = this->mClass;
             unsigned lossOfControlMask = 0;
-            // FIXME The cast is due to a typo in the spec
+            // The cast is due to a typo in the spec, bug 6482
             for (i = 0; i < (SLuint32) numInterfaces; ++i) {
                 SLInterfaceID iid = pInterfaceIDs[i];
                 if (NULL == iid) {
@@ -568,7 +564,7 @@ static SLresult IObject_SetLossOfControlInterfaces(SLObjectItf self,
                     goto out;
                 }
                 int MPH, index;
-                // FIXME no error if invalid MPH or index?
+                // We ignore without error any invalid MPH or index, but spec is unclear
                 if ((0 <= (MPH = IID_to_MPH(iid))) && (0 <= (index = class__->mMPH_to_index[MPH])))
                     lossOfControlMask |= (1 << index);
             }
@@ -581,6 +577,9 @@ static SLresult IObject_SetLossOfControlInterfaces(SLObjectItf self,
         }
     }
 out:
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE
 }
@@ -614,8 +613,10 @@ void IObject_init(void *self)
     this->mAttributesMask = 0;
     this->mCallback = NULL;
     this->mContext = NULL;
+#ifdef USE_CONFORMANCE
     this->mPriority = SL_PRIORITY_NORMAL;
     this->mPreemptable = SL_BOOLEAN_FALSE;
+#endif
     int ok;
     ok = pthread_mutex_init(&this->mMutex, (const pthread_mutexattr_t *) NULL);
     assert(0 == ok);

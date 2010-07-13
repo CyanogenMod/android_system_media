@@ -2,6 +2,18 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
+LOCAL_SRC_FILES := \
+        OpenSLUT.c
+
+LOCAL_C_INCLUDES:=                                                  \
+	system/media/opensles/include
+
+LOCAL_MODULE := libOpenSLUT
+
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
 LOCAL_CFLAGS += -Wno-override-init -Wno-missing-field-initializers
 
 LOCAL_SRC_FILES:=                     \
@@ -14,12 +26,13 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_CFLAGS += -DUSE_CONFORMANCE
+# -DUSE_TRACE
 
 LOCAL_SRC_FILES:=                     \
         OpenSLES_IID.c                \
         classes.c                     \
         devices.c                     \
-        debug.c                       \
+        trace.c                       \
         interfaces.c                  \
         locks.c                       \
         sles.c                        \
@@ -85,7 +98,8 @@ LOCAL_C_INCLUDES:=                                                  \
 LOCAL_CFLAGS += -x c++ -Wno-multichar -Wno-invalid-offsetof
 
 LOCAL_STATIC_LIBRARIES += \
-        libopensles_helper
+        libopensles_helper        \
+        libOpenSLUT
 
 LOCAL_SHARED_LIBRARIES :=         \
         libstagefright            \

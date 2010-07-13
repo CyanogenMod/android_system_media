@@ -109,7 +109,7 @@ const struct Vibra_id_descriptor Vibra_id_descriptors[] = {
     {0, NULL}
 };
 
-// FIXME should build this table from Caps table below
+// should build this table from Caps table below
 
 static const SLuint32 Codec_IDs[] = {
     SL_AUDIOCODEC_PCM,

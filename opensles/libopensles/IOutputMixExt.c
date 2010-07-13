@@ -137,7 +137,7 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                 }
                 // no lock, but safe b/c noone else updates this field
                 track->mFrameCounter += actual >> 2;    // sizeof(short) * STEREO_CHANNELS
-                // FIXME Calling the callback too often, should depend on requested update period
+                // NTH Calling the callback too often, should depend on requested update period
                 if (audioPlayer->mPlay.mCallback)
                     (*audioPlayer->mPlay.mCallback)(&audioPlayer->mPlay.mItf,
                         audioPlayer->mPlay.mContext, SL_PLAYEVENT_HEADMOVING);
@@ -156,7 +156,7 @@ got_one:
                     interface_unlock_shared(bufferQueue);
                     continue;
                 }
-                // FIXME should be able to configure when to
+                // NTH should be able to configure when to
                 // kick off the callback e.g. high/low water-marks etc.
                 // need data but none available, attempt a desperate callback
                 slBufferQueueCallback callback = bufferQueue->mCallback;
@@ -172,7 +172,7 @@ got_one:
                     // unlucky, queue still empty, the callback failed
                 }
                 // here on underflow due to no callback, or failed callback
-                // FIXME underflow, send silence (or previous buffer?)
+                // NTH underflow, send silence (or previous buffer?)
                 // we did a callback to try to kick start again but failed
                 // should log this
             }

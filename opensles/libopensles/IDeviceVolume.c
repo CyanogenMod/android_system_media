@@ -27,7 +27,6 @@ static SLresult IDeviceVolume_GetVolumeScale(SLDeviceVolumeItf self, SLuint32 de
     switch (deviceID) {
     case SL_DEFAULTDEVICEID_AUDIOINPUT:
     case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
-    // FIXME move these to device-specific or platform-specific file
     case DEVICE_ID_HEADSET:
     case DEVICE_ID_HANDSFREE:
         if (NULL != pMinValue)
@@ -52,7 +51,7 @@ static SLresult IDeviceVolume_SetVolume(SLDeviceVolumeItf self, SLuint32 deviceI
     SL_ENTER_INTERFACE
 
     switch (deviceID) {
-    // FIXME These are treated same as generic audio output for now
+    // These are treated same as generic audio output for now
     case DEVICE_ID_HEADSET:
     case DEVICE_ID_HANDSFREE:
         deviceID = SL_DEFAULTDEVICEID_AUDIOOUTPUT;
@@ -84,7 +83,7 @@ static SLresult IDeviceVolume_GetVolume(SLDeviceVolumeItf self, SLuint32 deviceI
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         switch (deviceID) {
-        // FIXME These are treated same as generic audio output for now
+        // These are treated same as generic audio output for now
         case DEVICE_ID_HEADSET:
         case DEVICE_ID_HANDSFREE:
             deviceID = SL_DEFAULTDEVICEID_AUDIOOUTPUT;
@@ -120,7 +119,7 @@ void IDeviceVolume_init(void *self)
 {
     IDeviceVolume *this = (IDeviceVolume *) self;
     this->mItf = &IDeviceVolume_Itf;
-    // FIXME hard-coded array size for default in/out
+    // hard-coded array size for default in/out
     this->mVolume[0] = 10;
     this->mVolume[1] = 10;
 }

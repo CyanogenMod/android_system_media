@@ -27,7 +27,6 @@ static SLresult I3DCommit_Commit(SL3DCommitItf self)
     IObject *thisObject = InterfaceToIObject(this);
     object_lock_exclusive(thisObject);
     if (this->mDeferred) {
-        // FIXME This should be a no-op without blocking if no 3D operations enqueued
         SLuint32 myGeneration = this->mGeneration;
         do {
             ++this->mWaiting;
