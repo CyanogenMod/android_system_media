@@ -18,9 +18,12 @@
 
 #include "sles_allinclusive.h"
 
-// The sync thread runs periodically to synchronize audio state between
-// the application and platform-specific device driver; for best results
-// it should run about every graphics frame (e.g. 20 Hz to 50 Hz).
+
+/** Sync thread.
+ *   The sync thread runs periodically to synchronize audio state between
+ *   the application and platform-specific device driver; for best results
+ *   it should run about every graphics frame (e.g. 20 Hz to 50 Hz).
+ */
 
 void *sync_start(void *arg)
 {

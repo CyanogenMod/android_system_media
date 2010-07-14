@@ -20,6 +20,9 @@
 
 // IObject hooks
 
+
+/** Hook called by Object::Realize when an engine is realized */
+
 SLresult CEngine_Realize(void *self, SLboolean async)
 {
     CEngine *this = (CEngine *) self;
@@ -38,6 +41,9 @@ SLresult CEngine_Realize(void *self, SLboolean async)
 #endif
     return SL_RESULT_SUCCESS;
 }
+
+
+/** Hook called by Object::Destroy when an engine is destroyed */
 
 void CEngine_Destroy(void *self)
 {

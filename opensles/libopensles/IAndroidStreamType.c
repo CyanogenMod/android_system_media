@@ -25,7 +25,7 @@ static SLresult IAndroidStreamType_SetStreamType(SLAndroidStreamTypeItf self, SL
 {
     SL_ENTER_INTERFACE
 
-    fprintf(stdout, "IAndroidStreamType_SetStreamType for type %lu\n", type);
+    SL_LOGV("IAndroidStreamType_SetStreamType for type %lu", type);
 
     if (type >= android::AudioSystem::NUM_STREAM_TYPES) {
         result = SL_RESULT_PARAMETER_INVALID;

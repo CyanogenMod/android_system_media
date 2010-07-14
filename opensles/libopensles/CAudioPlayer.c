@@ -20,6 +20,9 @@
 
 // IObject hooks
 
+
+/** Hook called by Object::Realize when an audio player is realized */
+
 SLresult CAudioPlayer_Realize(void *self, SLboolean async)
 {
     CAudioPlayer *this = (CAudioPlayer *) self;
@@ -61,6 +64,9 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
 #endif // USE_SNDFILE
     return result;
 }
+
+
+/** Hook called by Object::Destroy when an audio player is destroyed */
 
 void CAudioPlayer_Destroy(void *self)
 {

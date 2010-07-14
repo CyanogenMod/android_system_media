@@ -59,7 +59,7 @@ static SLresult IBufferQueue_Clear(SLBufferQueueItf self)
     this->mState.count = 0;
 #ifdef ANDROID
     // FIXME must flush associated player
-    fprintf(stderr, "FIXME: IBufferQueue_Clear must flush associated player, not implemented\n");
+    SL_LOGE("FIXME: IBufferQueue_Clear must flush associated player, not implemented");
 #endif
     interface_unlock_exclusive(this);
     result = SL_RESULT_SUCCESS;
@@ -99,8 +99,8 @@ static SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
     SL_ENTER_INTERFACE
 
     // FIXME verify conditions media object is in the SL_PLAYSTATE_STOPPED state
-    fprintf(stderr, "FIXME: verify RegisterCallback is called on a player in SL_PLAYSTATE_STOPPED \
-state, not implemented\n");
+    SL_LOGE("FIXME: verify RegisterCallback is called on a player in SL_PLAYSTATE_STOPPED \
+state, not implemented");
     IBufferQueue *this = (IBufferQueue *) self;
     interface_lock_exclusive(this);
     this->mCallback = callback;
