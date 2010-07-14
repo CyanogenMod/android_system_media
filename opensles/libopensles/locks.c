@@ -16,6 +16,9 @@
 
 #include "sles_allinclusive.h"
 
+
+/* Exclusively lock an object */
+
 void object_lock_exclusive(IObject *this)
 {
     int ok;
@@ -23,12 +26,18 @@ void object_lock_exclusive(IObject *this)
     assert(0 == ok);
 }
 
+
+/* Exclusively unlock an object and do not report any updates */
+
 void object_unlock_exclusive(IObject *this)
 {
     int ok;
     ok = pthread_mutex_unlock(&this->mMutex);
     assert(0 == ok);
 }
+
+
+/* Exclusively unlock an object and report updates to the specified bit-mask of attributes */
 
 void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
 {
@@ -50,13 +59,11 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
             break;
         case SL_OBJECTID_OUTPUTMIX:
             // FIXME update gains on all players attached to this outputmix
-            fprintf(stderr,
-                "[ FIXME: gain update on an SL_OBJECTID_OUTPUTMIX to be implemented ]\n");
+            SL_LOGE("[ FIXME: gain update on an SL_OBJECTID_OUTPUTMIX to be implemented ]");
             break;
         case SL_OBJECTID_MIDIPLAYER:
             // MIDI
-            fprintf(stderr,
-                "[ FIXME: gain update on an SL_OBJECTID_MIDIPLAYER to be implemented ]\n");
+            SL_LOGE("[ FIXME: gain update on an SL_OBJECTID_MIDIPLAYER to be implemented ]");
             break;
         default:
             break;
@@ -76,8 +83,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
             break;
         case SL_OBJECTID_MIDIPLAYER:
             // MIDI
-            fprintf(stderr,
-                "[ FIXME: position update on an SL_OBJECTID_MIDIPLAYER to be implemented ]\n");
+            SL_LOGE("[ FIXME: position update on an SL_OBJECTID_MIDIPLAYER to be implemented ]");
             break;
         default:
             break;
@@ -114,6 +120,9 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
     }
 }
 
+
+/* Wait on the condition variable associated with the object; see pthread_cond_wait */
+
 void object_cond_wait(IObject *this)
 {
     int ok;
@@ -121,12 +130,18 @@ void object_cond_wait(IObject *this)
     assert(0 == ok);
 }
 
+
+/* Signal the condition variable associated with the object; see pthread_cond_signal */
+
 void object_cond_signal(IObject *this)
 {
     int ok;
     ok = pthread_cond_signal(&this->mCond);
     assert(0 == ok);
 }
+
+
+/* Broadcast the condition variable associated with the object; see pthread_cond_broadcast */
 
 void object_cond_broadcast(IObject *this)
 {

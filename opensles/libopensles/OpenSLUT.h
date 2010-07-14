@@ -23,6 +23,7 @@ extern "C" {
 #endif
 
 extern const char * const slutResultStrings[SLUT_RESULT_MAX];
+extern void slutPrintIID(SLInterfaceID iid);
 
 #ifdef __cplusplus
 }

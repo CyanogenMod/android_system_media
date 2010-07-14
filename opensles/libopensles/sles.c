@@ -20,7 +20,8 @@
 
 /* Private functions */
 
-// Map an IObject to it's "object ID" (which is really a class ID)
+
+/** Map an IObject to it's "object ID" (which is really a class ID) */
 
 SLuint32 IObjectToObjectID(IObject *this)
 {
@@ -28,7 +29,8 @@ SLuint32 IObjectToObjectID(IObject *this)
     return this->mClass->mObjectID;
 }
 
-// Convert POSIX pthread error code to OpenSL ES result code
+
+/** Convert POSIX pthread error code to OpenSL ES result code */
 
 SLresult err_to_result(int err)
 {
@@ -39,7 +41,8 @@ SLresult err_to_result(int err)
     return SL_RESULT_SUCCESS;
 }
 
-// Check the interface IDs passed into a Create operation
+
+/** Check the interface IDs passed into a Create operation */
 
 SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired, unsigned *pExposedMask)
@@ -79,7 +82,9 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
     return SL_RESULT_SUCCESS;
 }
 
-// private helper shared by decoder and encoder
+
+/** Private helper shared by decoder and encoder */
+
 SLresult GetCodecCapabilities(SLuint32 codecId, SLuint32 *pIndex,
     SLAudioCodecDescriptor *pDescriptor, const struct CodecDescriptor *codecDescriptors)
 {
@@ -119,6 +124,8 @@ SLresult GetCodecCapabilities(SLuint32 codecId, SLuint32 *pIndex,
     }
     return SL_RESULT_PARAMETER_INVALID;
 }
+
+/** Check a data locator and make local deep copy */
 
 static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
 {
@@ -214,7 +221,7 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
     case SL_DATALOCATOR_ANDROIDFD:
         {
         pDataLocator->mFD = *(SLDataLocator_AndroidFD *)pLocator;
-        fprintf(stdout, "Data locator FD: fd=%ld offset=%lld length=%lld\n", pDataLocator->mFD.fd,
+        SL_LOGV("Data locator FD: fd=%ld offset=%lld length=%lld", pDataLocator->mFD.fd,
                 pDataLocator->mFD.offset, pDataLocator->mFD.length);
         if (-1 == pDataLocator->mFD.fd) {
             return SL_RESULT_PARAMETER_INVALID;
@@ -233,6 +240,9 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
     return SL_RESULT_SUCCESS;
 }
 
+
+/** Free the local deep copy of a data locator */
+
 static void freeDataLocator(DataLocator *pDataLocator)
 {
     switch (pDataLocator->mLocatorType) {
@@ -245,118 +255,187 @@ static void freeDataLocator(DataLocator *pDataLocator)
     }
 }
 
+
+/** Check a data format and make local deep copy */
+
 static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
 {
+    SLresult result = SL_RESULT_SUCCESS;
+
     if (NULL == pFormat) {
         pDataFormat->mFormatType = SL_DATAFORMAT_NULL;
-        return SL_RESULT_SUCCESS;
+    } else {
+        SLuint32 formatType = *(SLuint32 *)pFormat;
+        switch (formatType) {
+
+        case SL_DATAFORMAT_PCM:
+            pDataFormat->mPCM = *(SLDataFormat_PCM *)pFormat;
+            do {
+
+                // check the channel count
+                switch (pDataFormat->mPCM.numChannels) {
+                case 1:     // mono
+                case 2:     // stereo
+                    break;
+                case 0:     // unknown
+                    result = SL_RESULT_PARAMETER_INVALID;
+                    break;
+                default:    // multi-channel
+                    result = SL_RESULT_CONTENT_UNSUPPORTED;
+                    break;
+                }
+                if (SL_RESULT_SUCCESS != result) {
+                    SL_LOGE("numChannels=%u", (unsigned) pDataFormat->mPCM.numChannels);
+                    break;
+                }
+
+                // check the sampling rate
+                switch (pDataFormat->mPCM.samplesPerSec) {
+                case SL_SAMPLINGRATE_8:
+                case SL_SAMPLINGRATE_11_025:
+                case SL_SAMPLINGRATE_12:
+                case SL_SAMPLINGRATE_16:
+                case SL_SAMPLINGRATE_22_05:
+                case SL_SAMPLINGRATE_24:
+                case SL_SAMPLINGRATE_32:
+                case SL_SAMPLINGRATE_44_1:
+                case SL_SAMPLINGRATE_48:
+                case SL_SAMPLINGRATE_64:
+                case SL_SAMPLINGRATE_88_2:
+                case SL_SAMPLINGRATE_96:
+                case SL_SAMPLINGRATE_192:
+                    break;
+                case 0:
+                    result = SL_RESULT_PARAMETER_INVALID;
+                    break;
+                default:
+                    result = SL_RESULT_CONTENT_UNSUPPORTED;
+                    break;
+                }
+                if (SL_RESULT_SUCCESS != result) {
+                    SL_LOGE("samplesPerSec=%u", (unsigned) pDataFormat->mPCM.samplesPerSec);
+                    break;
+                }
+
+                // check the sample bit depth
+                switch (pDataFormat->mPCM.bitsPerSample) {
+                case SL_PCMSAMPLEFORMAT_FIXED_8:
+                case SL_PCMSAMPLEFORMAT_FIXED_16:
+                    break;
+                case SL_PCMSAMPLEFORMAT_FIXED_20:
+                case SL_PCMSAMPLEFORMAT_FIXED_24:
+                case SL_PCMSAMPLEFORMAT_FIXED_28:
+                case SL_PCMSAMPLEFORMAT_FIXED_32:
+                    result = SL_RESULT_CONTENT_UNSUPPORTED;
+                    break;
+                default:
+                    result = SL_RESULT_PARAMETER_INVALID;
+                    break;
+                }
+                if (SL_RESULT_SUCCESS != result) {
+                    SL_LOGE("bitsPerSample=%u", (unsigned) pDataFormat->mPCM.bitsPerSample);
+                    break;
+                }
+
+                // check the container bit depth
+                switch (pDataFormat->mPCM.containerSize) {
+                case SL_PCMSAMPLEFORMAT_FIXED_8:
+                case SL_PCMSAMPLEFORMAT_FIXED_16:
+                    if (pDataFormat->mPCM.containerSize != pDataFormat->mPCM.bitsPerSample)
+                        result = SL_RESULT_CONTENT_UNSUPPORTED;
+                    break;
+                default:
+                    result = SL_RESULT_CONTENT_UNSUPPORTED;
+                    break;
+                }
+                if (SL_RESULT_SUCCESS != result) {
+                    SL_LOGE("containerSize=%u", (unsigned) pDataFormat->mPCM.containerSize);
+                    break;
+                }
+
+                // check the channel mask
+                switch (pDataFormat->mPCM.channelMask) {
+                case SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT:
+                    if (2 != pDataFormat->mPCM.numChannels)
+                        result = SL_RESULT_PARAMETER_INVALID;
+                    break;
+                case SL_SPEAKER_FRONT_LEFT:
+                case SL_SPEAKER_FRONT_RIGHT:
+                case SL_SPEAKER_FRONT_CENTER:
+                    if (1 != pDataFormat->mPCM.numChannels)
+                        result = SL_RESULT_PARAMETER_INVALID;
+                    break;
+                case 0:
+                    pDataFormat->mPCM.channelMask = pDataFormat->mPCM.numChannels == 2 ?
+                        SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT : SL_SPEAKER_FRONT_CENTER;
+                    break;
+                default:
+                    result = SL_RESULT_PARAMETER_INVALID;
+                    break;
+                }
+                if (SL_RESULT_SUCCESS != result) {
+                    SL_LOGE("channelMask=%u", (unsigned) pDataFormat->mPCM.channelMask);
+                    break;
+                }
+
+                // check the endianness / byte order
+                switch (pDataFormat->mPCM.endianness) {
+                case SL_BYTEORDER_LITTLEENDIAN:
+                    break;
+                case SL_BYTEORDER_BIGENDIAN:
+                    result = SL_RESULT_CONTENT_UNSUPPORTED;
+                    break;
+                default:
+                    result = SL_RESULT_PARAMETER_INVALID;
+                    break;
+                }
+                if (SL_RESULT_SUCCESS != result) {
+                    SL_LOGE("endianness=%u", (unsigned) pDataFormat->mPCM.endianness);
+                    break;
+                }
+
+                // here if all checks passed successfully
+
+            } while(0);
+            break;
+
+        case SL_DATAFORMAT_MIME:
+            pDataFormat->mMIME = *(SLDataFormat_MIME *)pFormat;
+            if (NULL != pDataFormat->mMIME.mimeType) {
+                size_t len = strlen((const char *) pDataFormat->mMIME.mimeType);
+                SLchar *myMIME = (SLchar *) malloc(len + 1);
+                if (NULL == myMIME) {
+                    result = SL_RESULT_MEMORY_FAILURE;
+                } else {
+                    memcpy(myMIME, pDataFormat->mMIME.mimeType, len + 1);
+                    // make sure MIME string was not modified asynchronously
+                    if ('\0' != myMIME[len]) {
+                        free(myMIME);
+                        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+                    }
+                    pDataFormat->mMIME.mimeType = myMIME;
+                }
+            }
+            break;
+
+        default:
+            result = SL_RESULT_PARAMETER_INVALID;
+            SL_LOGE("formatType=%u", (unsigned) formatType);
+            break;
+
+        }
+
+        // make sure format type was not modified asynchronously
+        if (SL_RESULT_SUCCESS == result && formatType != pDataFormat->mFormatType)
+            result = SL_RESULT_PRECONDITIONS_VIOLATED;
+
     }
-    SLuint32 formatType = *(SLuint32 *)pFormat;
-    switch (formatType) {
-    case SL_DATAFORMAT_PCM:
-        pDataFormat->mPCM = *(SLDataFormat_PCM *)pFormat;
-        switch (pDataFormat->mPCM.numChannels) {
-        case 1:
-        case 2:
-            break;
-        case 0:
-            return SL_RESULT_PARAMETER_INVALID;
-        default:
-            return SL_RESULT_CONTENT_UNSUPPORTED;
-        }
-        switch (pDataFormat->mPCM.samplesPerSec) {
-        case SL_SAMPLINGRATE_8:
-        case SL_SAMPLINGRATE_11_025:
-        case SL_SAMPLINGRATE_12:
-        case SL_SAMPLINGRATE_16:
-        case SL_SAMPLINGRATE_22_05:
-        case SL_SAMPLINGRATE_24:
-        case SL_SAMPLINGRATE_32:
-        case SL_SAMPLINGRATE_44_1:
-        case SL_SAMPLINGRATE_48:
-        case SL_SAMPLINGRATE_64:
-        case SL_SAMPLINGRATE_88_2:
-        case SL_SAMPLINGRATE_96:
-        case SL_SAMPLINGRATE_192:
-            break;
-        case 0:
-            return SL_RESULT_PARAMETER_INVALID;
-        default:
-            return SL_RESULT_CONTENT_UNSUPPORTED;
-        }
-        switch (pDataFormat->mPCM.bitsPerSample) {
-        case SL_PCMSAMPLEFORMAT_FIXED_8:
-        case SL_PCMSAMPLEFORMAT_FIXED_16:
-            break;
-        case SL_PCMSAMPLEFORMAT_FIXED_20:
-        case SL_PCMSAMPLEFORMAT_FIXED_24:
-        case SL_PCMSAMPLEFORMAT_FIXED_28:
-        case SL_PCMSAMPLEFORMAT_FIXED_32:
-            return SL_RESULT_CONTENT_UNSUPPORTED;
-        default:
-            return SL_RESULT_PARAMETER_INVALID;
-        }
-        switch (pDataFormat->mPCM.containerSize) {
-        case SL_PCMSAMPLEFORMAT_FIXED_8:
-        case SL_PCMSAMPLEFORMAT_FIXED_16:
-            if (pDataFormat->mPCM.containerSize != pDataFormat->mPCM.bitsPerSample)
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            break;
-        default:
-            return SL_RESULT_CONTENT_UNSUPPORTED;
-        }
-        switch (pDataFormat->mPCM.channelMask) {
-        case SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT:
-            if (2 != pDataFormat->mPCM.numChannels)
-                return SL_RESULT_PARAMETER_INVALID;
-            break;
-        case SL_SPEAKER_FRONT_LEFT:
-        case SL_SPEAKER_FRONT_RIGHT:
-        case SL_SPEAKER_FRONT_CENTER:
-            if (1 != pDataFormat->mPCM.numChannels)
-                return SL_RESULT_PARAMETER_INVALID;
-            break;
-        case 0:
-            pDataFormat->mPCM.channelMask = pDataFormat->mPCM.numChannels == 2 ?
-                SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT : SL_SPEAKER_FRONT_CENTER;
-            break;
-        default:
-            return SL_RESULT_PARAMETER_INVALID;
-        }
-        switch (pDataFormat->mPCM.endianness) {
-        case SL_BYTEORDER_LITTLEENDIAN:
-            break;
-        case SL_BYTEORDER_BIGENDIAN:
-            return SL_RESULT_CONTENT_UNSUPPORTED;
-        default:
-            return SL_RESULT_PARAMETER_INVALID;
-        }
-        break;
-    case SL_DATAFORMAT_MIME:
-        {
-        pDataFormat->mMIME = *(SLDataFormat_MIME *)pFormat;
-        if (NULL == pDataFormat->mMIME.mimeType)
-            return SL_RESULT_SUCCESS;
-        size_t len = strlen((const char *) pDataFormat->mMIME.mimeType);
-        SLchar *myMIME = (SLchar *) malloc(len + 1);
-        if (NULL == myMIME)
-            return SL_RESULT_MEMORY_FAILURE;
-        memcpy(myMIME, pDataFormat->mMIME.mimeType, len + 1);
-        // ditto
-        if ('\0' != myMIME[len]) {
-            free(myMIME);
-            return SL_RESULT_PARAMETER_INVALID;
-        }
-        pDataFormat->mMIME.mimeType = myMIME;
-        }
-        break;
-    default:
-        return SL_RESULT_PARAMETER_INVALID;
-    }
-    if (formatType != pDataFormat->mFormatType)
-        return SL_RESULT_PARAMETER_INVALID;
-    return SL_RESULT_SUCCESS;
+
+    return result;
 }
+
+
+/** Check interface ID compatibility with respect to a particular data locator format */
 
 SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDataLocatorFormat,
         SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
@@ -366,14 +445,16 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
         SLuint32 i;
         for (i = 0; i < numInterfaces; i++) {
             if (pInterfaceRequired[i] && (SL_IID_SEEK == pInterfaceIds[i])) {
-                fprintf(stderr,
-                    "Error: can't request SL_IID_SEEK with a buffer queue data source\n");
+                SL_LOGE("can't request SL_IID_SEEK with a buffer queue data source");
                 return SL_RESULT_FEATURE_UNSUPPORTED;
             }
         }
     }
     return SL_RESULT_SUCCESS;
 }
+
+
+/** Free the local deep copy of a data format */
 
 static void freeDataFormat(DataFormat *pDataFormat)
 {
@@ -386,6 +467,9 @@ static void freeDataFormat(DataFormat *pDataFormat)
         break;
     }
 }
+
+
+/** Check a data source and make local deep copy */
 
 SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataLocatorFormat)
 {
@@ -411,6 +495,8 @@ SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataL
     case SL_DATALOCATOR_OUTPUTMIX:
     default:
         // invalid but fall through; the invalid locator will be caught later
+        SL_LOGE("mLocatorType=%u", (unsigned) pDataLocatorFormat->mLocator.mLocatorType);
+        // keep going
     case SL_DATALOCATOR_IODEVICE:
         // for these data locator types, ignore the pFormat as it might be uninitialized
         pDataLocatorFormat->mFormat.mFormatType = SL_DATAFORMAT_NULL;
@@ -420,6 +506,9 @@ SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataL
     pDataLocatorFormat->u.mSource.pFormat = &pDataLocatorFormat->mFormat;
     return SL_RESULT_SUCCESS;
 }
+
+
+/** Check a data sink and make local deep copy */
 
 SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLocatorFormat)
 {
@@ -444,6 +533,8 @@ SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLoca
     case SL_DATALOCATOR_MIDIBUFFERQUEUE:
     default:
         // invalid but fall through; the invalid locator will be caught later
+        SL_LOGE("mLocatorType=%u", (unsigned) pDataLocatorFormat->mLocator.mLocatorType);
+        // keep going
     case SL_DATALOCATOR_IODEVICE:
     case SL_DATALOCATOR_OUTPUTMIX:
         // for these data locator types, ignore the pFormat as it might be uninitialized
@@ -455,11 +546,15 @@ SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLoca
     return SL_RESULT_SUCCESS;
 }
 
+
+/** Free the local deep copy of a data locator format */
+
 void freeDataLocatorFormat(DataLocatorFormat *dlf)
 {
     freeDataLocator(&dlf->mLocator);
     freeDataFormat(&dlf->mFormat);
 }
+
 
 /* Interface initialization hooks */
 
@@ -574,7 +669,8 @@ extern void
 #endif
 };
 
-// Construct a new instance of the specified class, exposing selected interfaces
+
+/** Construct a new instance of the specified class, exposing selected interfaces */
 
 IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf engine)
 {
@@ -653,6 +749,9 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
 
 /* Initial global entry points */
 
+
+/** slCreateEngine Function */
+
 SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     const SLEngineOption *pEngineOptions, SLuint32 numInterfaces,
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
@@ -725,6 +824,8 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
 }
 
 
+/** slQueryNumSupportedEngineInterfaces Function */
+
 SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedInterfaces)
 {
     SL_ENTER_GLOBAL
@@ -746,6 +847,8 @@ SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedI
     SL_LEAVE_GLOBAL
 }
 
+
+/** slQuerySupportedEngineInterfaces Function */
 
 SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index, SLInterfaceID *pInterfaceId)
 {

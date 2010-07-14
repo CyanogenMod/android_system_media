@@ -1103,3 +1103,10 @@ extern void slLeaveInterfaceVoid(const char *function);
 #define SL_LEAVE_INTERFACE_VOID slLeaveInterfaceVoid(__FUNCTION__); return;
 
 #endif
+
+#define SL_LOGE(...) do { fputs("ERROR: ", stderr); fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
+#if 1
+#define SL_LOGV
+#else
+#define SL_LOGV(...) do { fputs("VERBOSE: ", stderr); fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
+#endif
