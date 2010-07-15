@@ -22,6 +22,8 @@
 
 #define MAX_EQ_PRESETS 3
 
+#ifndef ANDROID
+// FIXME needs to be defined in a platform-dependent manner
 static const struct EqualizerBand EqualizerBands[MAX_EQ_BANDS] = {
     {1000, 1500, 2000},
     {2000, 3000, 4000},
@@ -37,6 +39,7 @@ static const struct EqualizerPreset {
     {"Bass", {500, 200, 100, 0}},
     {"Treble", {0, 100, 200, 500}}
 };
+#endif
 
 
 static SLresult IEqualizer_SetEnabled(SLEqualizerItf self, SLboolean enabled)
@@ -44,10 +47,23 @@ static SLresult IEqualizer_SetEnabled(SLEqualizerItf self, SLboolean enabled)
     SL_ENTER_INTERFACE
 
     IEqualizer *this = (IEqualizer *) self;
-    interface_lock_poke(this);
+    interface_lock_exclusive(this);
     this->mEnabled = SL_BOOLEAN_FALSE != enabled; // normalize
-    interface_unlock_poke(this);
+#ifndef ANDROID
     result = SL_RESULT_SUCCESS;
+#else
+    bool fxEnabled = this->mEqEffect->getEnabled();
+    // the audio effect framework will return an error if you set the same "enabled" state as
+    // the one the effect is currently in, so we only act on state changes
+    if (fxEnabled != (enabled == SL_BOOLEAN_TRUE)) {
+        // state change
+        android::status_t status = this->mEqEffect->setEnabled(this->mEnabled == SL_BOOLEAN_TRUE);
+        result = android_fx_statusToResult(status);
+    } else {
+        result = SL_RESULT_SUCCESS;
+    }
+#endif
+    interface_unlock_exclusive(this);
 
     SL_LEAVE_INTERFACE
 }
@@ -61,11 +77,17 @@ static SLresult IEqualizer_IsEnabled(SLEqualizerItf self, SLboolean *pEnabled)
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEqualizer *this = (IEqualizer *) self;
-        interface_lock_peek(this);
+        interface_lock_shared(this);
         SLboolean enabled = this->mEnabled;
-        interface_unlock_peek(this);
+        interface_unlock_shared(this);
+#ifndef ANDROID
         *pEnabled = enabled;
         result = SL_RESULT_SUCCESS;
+#else
+        bool fxEnabled = this->mEqEffect->getEnabled();
+        *pEnabled = fxEnabled ? SL_BOOLEAN_TRUE : SL_BOOLEAN_FALSE;
+        result = SL_RESULT_SUCCESS;
+#endif
     }
 
     SL_LEAVE_INTERFACE
@@ -116,14 +138,20 @@ static SLresult IEqualizer_SetBandLevel(SLEqualizerItf self, SLuint16 band, SLmi
 
     IEqualizer *this = (IEqualizer *) self;
     if (!(this->mBandLevelRangeMin <= level && level <= this->mBandLevelRangeMax) ||
-        (band >= this->mNumBands)) {
+            (band >= this->mNumBands)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         interface_lock_exclusive(this);
+#ifndef ANDROID
         this->mLevels[band] = level;
         this->mPreset = SL_EQUALIZER_UNDEFINED;
-        interface_unlock_exclusive(this);
         result = SL_RESULT_SUCCESS;
+#else
+        android::status_t status =
+                android_eq_setParam(this->mEqEffect, EQ_PARAM_BAND_LEVEL, band, &level);
+        result = android_fx_statusToResult(status);
+#endif
+        interface_unlock_exclusive(this);
     }
 
     SL_LEAVE_INTERFACE
@@ -142,11 +170,18 @@ static SLresult IEqualizer_GetBandLevel(SLEqualizerItf self, SLuint16 band, SLmi
         if (band >= this->mNumBands) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-            interface_lock_peek(this);
-            SLmillibel level = this->mLevels[band];
-            interface_unlock_peek(this);
-            *pLevel = level;
+            SLmillibel level;
+            interface_lock_shared(this);
+#ifndef ANDROID
+            level = this->mLevels[band];
             result = SL_RESULT_SUCCESS;
+#else
+            android::status_t status =
+                    android_eq_getParam(this->mEqEffect, EQ_PARAM_BAND_LEVEL, band, &level);
+            result = android_fx_statusToResult(status);
+#endif
+            interface_unlock_shared(this);
+            *pLevel = level;
         }
     }
 
@@ -165,9 +200,19 @@ static SLresult IEqualizer_GetCenterFreq(SLEqualizerItf self, SLuint16 band, SLm
         if (band >= this->mNumBands) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
+#ifndef ANDROID
             // Note: no lock, but OK because it is const
             *pCenter = this->mBands[band].mCenter;
             result = SL_RESULT_SUCCESS;
+#else
+            SLmilliHertz center;
+            interface_lock_shared(this);
+            android::status_t status =
+                    android_eq_getParam(this->mEqEffect, EQ_PARAM_CENTER_FREQ, band, &center);
+            interface_unlock_shared(this);
+            result = android_fx_statusToResult(status);
+            *pCenter = center;
+#endif
         }
     }
 
@@ -187,12 +232,27 @@ static SLresult IEqualizer_GetBandFreqRange(SLEqualizerItf self, SLuint16 band,
         if (band >= this->mNumBands) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
+#ifndef ANDROID
             // Note: no lock, but OK because it is const
             if (NULL != pMin)
                 *pMin = this->mBands[band].mMin;
             if (NULL != pMax)
                 *pMax = this->mBands[band].mMax;
             result = SL_RESULT_SUCCESS;
+#else
+            SLmilliHertz range[2]; // SLmilliHertz is SLuint32
+            interface_lock_shared(this);
+            android::status_t status =
+                    android_eq_getParam(this->mEqEffect, EQ_PARAM_BAND_FREQ_RANGE, band, range);
+            interface_unlock_shared(this);
+            result = android_fx_statusToResult(status);
+            if (NULL != pMin) {
+                *pMin = range[0];
+            }
+            if (NULL != pMax) {
+                *pMax = range[1];
+            }
+#endif
         }
     }
 
@@ -208,6 +268,7 @@ static SLresult IEqualizer_GetBand(SLEqualizerItf self, SLmilliHertz frequency, 
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEqualizer *this = (IEqualizer *) self;
+#ifndef ANDROID
         // search for band whose center frequency has the closest ratio to 1.0
         // assumes bands are unsorted (a pessimistic assumption)
         // assumes bands can overlap (a pessimistic assumption)
@@ -230,6 +291,15 @@ static SLresult IEqualizer_GetBand(SLEqualizerItf self, SLmilliHertz frequency, 
         }
         *pBand = band - this->mBands;
         result = SL_RESULT_SUCCESS;
+#else
+        uint32_t band;
+        interface_lock_shared(this);
+        android::status_t status =
+            android_eq_getParam(this->mEqEffect, EQ_PARAM_GET_BAND, frequency, &band);
+        interface_unlock_shared(this);
+        result = android_fx_statusToResult(status);
+        *pBand = (SLuint16)band;
+#endif
     }
 
     SL_LEAVE_INTERFACE
@@ -245,10 +315,24 @@ static SLresult IEqualizer_GetCurrentPreset(SLEqualizerItf self, SLuint16 *pPres
     } else {
         IEqualizer *this = (IEqualizer *) self;
         interface_lock_shared(this);
+#ifndef ANDROID
         SLuint16 preset = this->mPreset;
         interface_unlock_shared(this);
         *pPreset = preset;
         result = SL_RESULT_SUCCESS;
+#else
+        int32_t preset;
+        android::status_t status =
+                android_eq_getParam(this->mEqEffect, EQ_PARAM_CUR_PRESET, 0, &preset);
+        interface_unlock_shared(this);
+        result = android_fx_statusToResult(status);
+        if (preset < 0) {
+            *pPreset = SL_EQUALIZER_UNDEFINED;
+        } else {
+            *pPreset = (SLuint16) preset;
+        }
+#endif
+
     }
 
     SL_LEAVE_INTERFACE
@@ -264,12 +348,20 @@ static SLresult IEqualizer_UsePreset(SLEqualizerItf self, SLuint16 index)
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         interface_lock_exclusive(this);
+#ifndef ANDROID
         SLuint16 band;
         for (band = 0; band < this->mNumBands; ++band)
             this->mLevels[band] = EqualizerPresets[index].mLevels[band];
         this->mPreset = index;
         interface_unlock_exclusive(this);
         result = SL_RESULT_SUCCESS;
+#else
+        int32_t preset = index;
+        android::status_t status =
+                android_eq_setParam(this->mEqEffect, EQ_PARAM_CUR_PRESET, 0, &preset);
+        interface_unlock_shared(this);
+        result = android_fx_statusToResult(status);
+#endif
     }
 
     SL_LEAVE_INTERFACE
@@ -285,7 +377,11 @@ static SLresult IEqualizer_GetNumberOfPresets(SLEqualizerItf self, SLuint16 *pNu
     } else {
         IEqualizer *this = (IEqualizer *) self;
         // Note: no lock, but OK because it is const
+#ifndef ANDROID
         *pNumPresets = this->mNumPresets;
+#else
+        *pNumPresets = this->mThis->mEngine->mEqNumPresets;
+#endif
         result = SL_RESULT_SUCCESS;
     }
 
@@ -301,12 +397,23 @@ static SLresult IEqualizer_GetPresetName(SLEqualizerItf self, SLuint16 index, co
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEqualizer *this = (IEqualizer *) self;
+#ifndef ANDROID
         if (index >= this->mNumPresets) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
             *ppName = (SLchar *) this->mPresets[index].mName;
             result = SL_RESULT_SUCCESS;
         }
+#else
+        if (index >= this->mThis->mEngine->mEqNumPresets) {
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            // FIXME This gives the application access to the library memory space and is
+            //  identified as a security issue. This is being addressed by the OpenSL ES WG
+            *ppName = (SLchar *) this->mThis->mEngine->mEqPresetNames[index];
+            result = SL_RESULT_SUCCESS;
+        }
+#endif
     }
 
     SL_LEAVE_INTERFACE
@@ -339,10 +446,50 @@ void IEqualizer_init(void *self)
     for (band = 0; band < MAX_EQ_BANDS; ++band)
         this->mLevels[band] = 0;
     // const fields
-    this->mNumPresets = MAX_EQ_PRESETS;
-    this->mNumBands = MAX_EQ_BANDS;
+    this->mNumPresets = 0;
+    this->mNumBands = 0;
+#ifndef ANDROID
     this->mBands = EqualizerBands;
     this->mPresets = EqualizerPresets;
+#endif
     this->mBandLevelRangeMin = 0;
-    this->mBandLevelRangeMax = 1000;
+    this->mBandLevelRangeMax = 0;
+
+#ifdef ANDROID
+    // Initialize the EQ settings based on the platform effect, if available
+    uint32_t numEffects = 0;
+    effect_descriptor_t descriptor;
+    bool foundEq = false;
+    //   any effects?
+    android::status_t res = android::AudioEffect::queryNumberEffects(&numEffects);
+    if (android::NO_ERROR != res) {
+        SL_LOGE("IEqualizer_init: unable to find any effects.");
+        goto effectError;
+    }
+    //   EQ in the effects?
+    for (uint32_t i=0 ; i < numEffects ; i++) {
+        res = android::AudioEffect::queryEffect(i, &descriptor);
+        if ((android::NO_ERROR == res) &&
+                (0 == memcmp(SL_IID_EQUALIZER, &descriptor.type, sizeof(effect_uuid_t)))) {
+            SL_LOGV("found effect %d %s", i, descriptor.name);
+            foundEq = true;
+            break;
+        }
+    }
+    if (foundEq) {
+        memcpy(&this->mEqDescriptor, &descriptor, sizeof(effect_descriptor_t));
+    } else {
+        SL_LOGE("IEqualizer_init: unable to find an EQ implementation.");
+        goto effectError;
+    }
+
+    return;
+
+effectError:
+    this->mNumPresets = 0;
+    this->mNumBands = 0;
+    this->mBandLevelRangeMin = 0;
+    this->mBandLevelRangeMax = 0;
+    memset(&this->mEqDescriptor, 0, sizeof(effect_descriptor_t));
+#endif
 }

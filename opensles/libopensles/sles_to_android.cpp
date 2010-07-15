@@ -736,6 +736,18 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
         result = SL_RESULT_CONTENT_UNSUPPORTED;
     }
 
+    int sessionId = pAudioPlayer->mAudioTrack->getSessionId();
+    // initialize EQ
+    // FIXME use a table of effect descriptors when adding support for more effects
+    if (memcmp(SL_IID_EQUALIZER, &pAudioPlayer->mEqualizer.mEqDescriptor.type,
+            sizeof(effect_uuid_t)) == 0) {
+                android_eq_init(sessionId, pAudioPlayer);
+    }
+    // initialize BassBoost
+    // initialize PresetReverb
+    // initialize EnvironmentalReverb + EffectSend
+    // initialize Virtualizer
+
     return result;
 }
 
@@ -755,6 +767,7 @@ SLresult sles_to_android_audioPlayerSetStreamType_l(CAudioPlayer *pAudioPlayer, 
     }
 
     int format =  pAudioPlayer->mAudioTrack->format();
+    int sessionId = pAudioPlayer->mAudioTrack->getSessionId();
     uint32_t sr = sles_to_android_sampleRate(pAudioPlayer->mSampleRateMilliHz);
 
     pAudioPlayer->mAudioTrack->stop();
@@ -771,7 +784,8 @@ SLresult sles_to_android_audioPlayerSetStreamType_l(CAudioPlayer *pAudioPlayer, 
                     pAudioPlayer->mAndroidObjType == MEDIAPLAYER ?  // callback
                             android_uriAudioTrackCallback : android_pullAudioTrackCallback,
                     (void *) pAudioPlayer,                          // user
-                    0);  // FIXME find appropriate frame count      // notificationFrame
+                    0,   // FIXME find appropriate frame count      // notificationFrame
+                    sessionId);
     if (pAudioPlayer->mAndroidObjType == MEDIAPLAYER) {
         pAudioPlayer->mSfPlayer->useAudioTrack(pAudioPlayer->mAudioTrack);
     }
@@ -817,6 +831,8 @@ SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer) {
     }
 
     pAudioPlayer->mAndroidObjType = INVALID_TYPE;
+
+    pAudioPlayer->mEqualizer.mEqEffect.clear();
 
     return result;
 }
