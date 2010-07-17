@@ -174,6 +174,7 @@ struct SndFile {
     // save URI also?
     SLchar *mPathname;
     SNDFILE *mSNDFILE;
+    SF_INFO mSfInfo;
     pthread_mutex_t mMutex; // protects mSNDFILE only
     SLboolean mEOF;         // sf_read returned zero sample frames
     // These are used when Enqueue returns SL_RESULT_BUFFER_INSUFFICIENT
@@ -414,10 +415,14 @@ typedef struct BufferQueue_interface {
     SLBufferQueueState mState;
     slBufferQueueCallback mCallback;
     void *mContext;
-    SLuint32 mNumBuffers;
+    // originally SLuint32, but range-checked down to SLuint16
+    SLuint16 mNumBuffers;
+    /*SLboolean*/ SLuint16 mClearRequested;
     BufferHeader *mArray;
     BufferHeader *mFront, *mRear;
+#ifdef ANDROID
     SLuint32 mSizeConsumed;
+#endif
     // saves a malloc in the typical case
 #define BUFFER_HEADER_TYPICAL 4
     BufferHeader mTypical[BUFFER_HEADER_TYPICAL+1];
@@ -1114,6 +1119,7 @@ extern const char * const interface_names[MPH_MAX];
                                               // player stereo position, player mute
 #define ATTR_TRANSPORT  ((unsigned) 0x1 << 1) // play state, looping
 #define ATTR_POSITION   ((unsigned) 0x1 << 2) // requested position (a.k.a. seek position)
+#define ATTR_ENQUEUE    ((unsigned) 0x1 << 3) // buffer queue became non-empty while in playing state, (NTF rename)
 
 #define SL_DATALOCATOR_NULL 0    // application specified a NULL value for pLocator
 #define SL_DATAFORMAT_NULL 0     // application specified a NULL or undefined value for pFormat
@@ -1146,9 +1152,23 @@ extern void slLeaveInterfaceVoid(const char *function);
 
 #endif
 
-#define SL_LOGE(...) do { fputs("ERROR: ", stderr); fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
-#if 1
-#define SL_LOGV
-#else
-#define SL_LOGV(...) do { fputs("VERBOSE: ", stderr); fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
+#define SL_LOGE(...) do { fprintf(stderr, "ERROR: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
+    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
+// #define SL_LOGV
+#define SL_LOGV(...) do { fprintf(stderr, "VERBOSE: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
+    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
+
+#ifdef USE_OUTPUTMIXEXT
+
+#define SL_PLAYSTATE_STOPPING ((SLuint32) 0x4) // Play::Stop while PLAYING
+// If we needed it, could have PLAYING mean mixer is currently reading from front buffer,
+// while PLAYABLE would mean application requested PLAYING, but buffer queue is empty
+
+#endif
+
+#ifdef USE_SNDFILE
+extern void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer);
+#endif
+#ifdef ANDROID
+extern SLresult android_audioPlayerClear(CAudioPlayer *pAudioPlayer);
 #endif

@@ -26,20 +26,24 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
     object_lock_peek(&thisAP->mObject);
     SLuint32 state = thisAP->mPlay.mState;
     object_unlock_peek(&thisAP->mObject);
+    // FIXME should not muck around directly at this low level
     if (SL_PLAYSTATE_PLAYING != state)
         return;
     struct SndFile *this = &thisAP->mSndFile;
     SLresult result;
-    if (NULL != this->mRetryBuffer && 0 < this->mRetrySize) {
+    pthread_mutex_lock(&this->mMutex);
+    if ((NULL != this->mRetryBuffer) && (0 < this->mRetrySize)) {
         result = (*caller)->Enqueue(caller, this->mRetryBuffer, this->mRetrySize);
-        if (SL_RESULT_BUFFER_INSUFFICIENT == result)
+        if (SL_RESULT_BUFFER_INSUFFICIENT == result) {
+            pthread_mutex_unlock(&this->mMutex);
             return;     // what, again?
+        }
         assert(SL_RESULT_SUCCESS == result);
         this->mRetryBuffer = NULL;
         this->mRetrySize = 0;
+        pthread_mutex_unlock(&this->mMutex);
         return;
     }
-    pthread_mutex_lock(&this->mMutex);
     if (this->mEOF) {
         pthread_mutex_unlock(&this->mMutex);
         return;
@@ -55,6 +59,7 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
     if (0 < count) {
         SLuint32 size = (SLuint32) (count * sizeof(short));
         result = (*caller)->Enqueue(caller, pBuffer, size);
+        // this should not happen, but if it does, who will call us to kick off again?
         if (SL_RESULT_BUFFER_INSUFFICIENT == result) {
             this->mRetryBuffer = pBuffer;
             this->mRetrySize = size;
@@ -63,6 +68,8 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
         assert(SL_RESULT_SUCCESS == result);
     } else {
         object_lock_exclusive(&thisAP->mObject);
+        // FIXME This is really hosed, you can't do this anymore!
+        // FIXME Need a state PAUSE_WHEN_EMPTY
         // Should not pause yet - we just ran out of new data to enqueue,
         // but there may still be (partially) full buffers in the queue.
         thisAP->mPlay.mState = SL_PLAYSTATE_PAUSED;
@@ -111,8 +118,6 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
     SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
     switch (locatorType) {
     case SL_DATALOCATOR_BUFFERQUEUE:
-        this->mBufferQueue.mNumBuffers =
-            ((SLDataLocator_BufferQueue *) pAudioSrc->pLocator)->numBuffers;
         break;
     case SL_DATALOCATOR_URI:
         {
@@ -145,20 +150,42 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
     return SL_RESULT_SUCCESS;
 }
 
+// called with mutex unlocked for marker and position updates, and play state change
+// FIXME should use two separate hooks since we have separate attributes TRANSPORT and POSITION
+
 void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer)
 {
-    // marker and position updates here???
-    SLmillisecond pos;
 
-    pos = audioPlayer->mSeek.mPos;
-    audioPlayer->mSeek.mPos = SL_TIME_UNKNOWN;
+    if (NULL != audioPlayer->mSndFile.mSNDFILE) {
 
-    if ((SL_TIME_UNKNOWN != pos) && (NULL != audioPlayer->mSndFile.mSNDFILE)) {
-        pthread_mutex_lock(&audioPlayer->mSndFile.mMutex);
-        // use pos not 0
-        (void) sf_seek(audioPlayer->mSndFile.mSNDFILE, (sf_count_t) 0, SEEK_SET);
-        audioPlayer->mSndFile.mEOF = SL_BOOLEAN_FALSE;
-        pthread_mutex_unlock(&audioPlayer->mSndFile.mMutex);
+        object_lock_exclusive(&audioPlayer->mObject);
+        SLmillisecond pos = audioPlayer->mSeek.mPos;
+        audioPlayer->mSeek.mPos = SL_TIME_UNKNOWN;
+        SLboolean empty = 0 == audioPlayer->mBufferQueue.mState.count;
+        object_unlock_exclusive(&audioPlayer->mObject);
+
+        if (SL_TIME_UNKNOWN != pos) {
+
+            // discard any enqueued buffers for the old position
+            (*&audioPlayer->mBufferQueue.mItf)->Clear(&audioPlayer->mBufferQueue.mItf);
+            empty = SL_BOOLEAN_TRUE;
+
+            pthread_mutex_lock(&audioPlayer->mSndFile.mMutex);
+            (void) sf_seek(audioPlayer->mSndFile.mSNDFILE, (sf_count_t) (((long long) pos *
+                audioPlayer->mSndFile.mSfInfo.samplerate) / 1000LL), SEEK_SET);
+            audioPlayer->mSndFile.mEOF = SL_BOOLEAN_FALSE;
+            audioPlayer->mSndFile.mRetryBuffer = NULL;
+            audioPlayer->mSndFile.mRetrySize = 0;
+            audioPlayer->mSndFile.mWhich = 0;
+            pthread_mutex_unlock(&audioPlayer->mSndFile.mMutex);
+
+        }
+
+        // FIXME only on seek or play state change (STOPPED, PAUSED) -> PLAYING
+        if (empty) {
+            SndFile_Callback(&audioPlayer->mBufferQueue.mItf, audioPlayer);
+        }
+
     }
 
 }

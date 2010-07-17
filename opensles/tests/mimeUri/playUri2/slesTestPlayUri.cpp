@@ -147,14 +147,14 @@ void TestPlayUri( SLObjectItf sl, const char* path, const char* path2)
     audioSource.pLocator     = (void *)&uri;
 
     /* Create the first audio player */
-    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink, 1,
+    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink, 2,
             iidArray, required);
     ExitOnError(result);
 
     /* Create the second audio player with a different path for its data source */
     uri.URI =  (SLchar*) path2;
     audioSource.pLocator = (void *)&uri;
-    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player2, &audioSource, &audioSink, 1,
+    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player2, &audioSource, &audioSink, 2,
             iidArray, required);
     ExitOnError(result);
 

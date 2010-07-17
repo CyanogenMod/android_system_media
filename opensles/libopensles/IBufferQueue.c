@@ -19,10 +19,36 @@
 #include "sles_allinclusive.h"
 
 
+/** Determine the state of the audio player or audio recorder associated with a buffer queue.
+ *  Note that PLAYSTATE and RECORDSTATE values are equivalent (where PLAYING == RECORDING).
+ */
+
+static SLuint32 getAssociatedState(IBufferQueue *this)
+{
+    SLuint32 state;
+    switch (InterfaceToObjectID(this)) {
+    case SL_OBJECTID_AUDIOPLAYER:
+        state = ((CAudioPlayer *) this->mThis)->mPlay.mState;
+        break;
+    case SL_OBJECTID_AUDIORECORDER:
+        state = ((CAudioRecorder *) this->mThis)->mRecord.mState;
+        break;
+    default:
+        // unreachable, but just in case we will assume it is stopped
+        assert(SL_BOOLEAN_FALSE);
+        state = SL_PLAYSTATE_STOPPED;
+        break;
+    }
+    return state;
+}
+
+
 static SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer, SLuint32 size)
 {
     SL_ENTER_INTERFACE
     //SL_LOGV("IBufferQueue_Enqueue(%p, %p, %lu)", self, pBuffer, size);
+
+    // Note that Enqueue while a Clear is pending is equivalent to Enqueue followed by Clear
 
     if (NULL == pBuffer || 0 == size) {
         result = SL_RESULT_PARAMETER_INVALID;
@@ -41,7 +67,10 @@ static SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
             ++this->mState.count;
             result = SL_RESULT_SUCCESS;
         }
-        interface_unlock_exclusive(this);
+        // set enqueue attribute if state is PLAYING and the first buffer is enqueued
+        interface_unlock_exclusive_attributes(this, ((SL_RESULT_SUCCESS == result) &&
+            (1 == this->mState.count) && (SL_PLAYSTATE_PLAYING == getAssociatedState(this))) ?
+            ATTR_ENQUEUE : ATTR_NONE);
     }
     SL_LEAVE_INTERFACE
 }
@@ -51,18 +80,34 @@ static SLresult IBufferQueue_Clear(SLBufferQueueItf self)
 {
     SL_ENTER_INTERFACE
 
+    result = SL_RESULT_SUCCESS;
     IBufferQueue *this = (IBufferQueue *) self;
     interface_lock_exclusive(this);
-    this->mFront = &this->mArray[0];
-    this->mRear = &this->mArray[0];
-    this->mSizeConsumed = 0;
-    this->mState.count = 0;
+
 #ifdef ANDROID
-    // FIXME must flush associated player
-    SL_LOGE("FIXME: IBufferQueue_Clear must flush associated player, not implemented");
+    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+        CAudioPlayer *audioPlayer = (CAudioPlayer *) this->mThis;
+        // flush associated audio player
+        result = android_audioPlayerClear(audioPlayer);
+        if (SL_RESULT_SUCCESS == result) {
+            this->mFront = &this->mArray[0];
+            this->mRear = &this->mArray[0];
+            this->mState.count = 0;
+            this->mSizeConsumed = 0;
+        }
+    }
 #endif
+
+#ifdef USE_OUTPUTMIXEXT
+    // mixer might be reading from the front buffer, so tread carefully here
+    // NTH asynchronous cancel instead of blocking until mixer acknowledges
+    this->mClearRequested = SL_BOOLEAN_TRUE;
+    do
+        interface_cond_wait(this);
+    while (this->mClearRequested);
+#endif
+
     interface_unlock_exclusive(this);
-    result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
 }
@@ -71,6 +116,8 @@ static SLresult IBufferQueue_Clear(SLBufferQueueItf self)
 static SLresult IBufferQueue_GetState(SLBufferQueueItf self, SLBufferQueueState *pState)
 {
     SL_ENTER_INTERFACE
+
+    // Note that GetState while a Clear is pending is equivalent to GetState before the Clear
 
     if (NULL == pState) {
         result = SL_RESULT_PARAMETER_INVALID;
@@ -98,15 +145,17 @@ static SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
 {
     SL_ENTER_INTERFACE
 
-    // FIXME verify conditions media object is in the SL_PLAYSTATE_STOPPED state
-    SL_LOGE("FIXME: verify RegisterCallback is called on a player in SL_PLAYSTATE_STOPPED \
-state, not implemented");
     IBufferQueue *this = (IBufferQueue *) self;
     interface_lock_exclusive(this);
-    this->mCallback = callback;
-    this->mContext = pContext;
+    // verify pre-condition that media object is in the SL_PLAYSTATE_STOPPED state
+    if (SL_PLAYSTATE_STOPPED == getAssociatedState(this)) {
+        this->mCallback = callback;
+        this->mContext = pContext;
+        result = SL_RESULT_SUCCESS;
+    } else {
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    }
     interface_unlock_exclusive(this);
-    result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
 }
@@ -129,10 +178,13 @@ void IBufferQueue_init(void *self)
     this->mCallback = NULL;
     this->mContext = NULL;
     this->mNumBuffers = 0;
+    this->mClearRequested = SL_BOOLEAN_FALSE;
     this->mArray = NULL;
     this->mFront = NULL;
     this->mRear = NULL;
+#ifdef ANDROID
     this->mSizeConsumed = 0;
+#endif
     BufferHeader *bufferHeader = this->mTypical;
     unsigned i;
     for (i = 0; i < BUFFER_HEADER_TYPICAL+1; ++i, ++bufferHeader) {

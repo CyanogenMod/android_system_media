@@ -29,19 +29,77 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
     case SL_PLAYSTATE_PLAYING:
         {
         IPlay *this = (IPlay *) self;
-        interface_lock_exclusive(this);
-        if (this->mState != state) {
-            this->mState = state;
-            if (SL_PLAYSTATE_STOPPED == state)
-                this->mPosition = (SLmillisecond) 0;
-            interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
-        } else
-            interface_unlock_exclusive(this);
+        unsigned attr = ATTR_NONE;
         result = SL_RESULT_SUCCESS;
+        CAudioPlayer *audioPlayer = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
+            (CAudioPlayer *) this->mThis : NULL;
+        interface_lock_exclusive(this);
+#ifdef USE_OUTPUTMIXEXT
+        for (;; interface_cond_wait(this)) {
+
+            // We are comparing the old state (left) vs. new state (right).
+            // Note that the old state is 3 bits wide, but new state is only 2 bits wide.
+            // That is why the old state is on the left and new state is on the right.
+            switch ((this->mState << 2) | state) {
+
+            case (SL_PLAYSTATE_STOPPED  << 2) | SL_PLAYSTATE_STOPPED:
+            case (SL_PLAYSTATE_PAUSED   << 2) | SL_PLAYSTATE_PAUSED:
+            case (SL_PLAYSTATE_PLAYING  << 2) | SL_PLAYSTATE_PLAYING:
+               // no-op
+                break;
+
+            case (SL_PLAYSTATE_STOPPED  << 2) | SL_PLAYSTATE_PLAYING:
+            case (SL_PLAYSTATE_PAUSED   << 2) | SL_PLAYSTATE_PLAYING:
+                attr = ATTR_TRANSPORT;
+                // set enqueue attribute if queue is non-empty and state becomes PLAYING
+                if ((NULL != audioPlayer) && (audioPlayer->mBufferQueue.mFront !=
+                    audioPlayer->mBufferQueue.mRear)) {
+                    attr |= ATTR_ENQUEUE;
+                }
+                // fall through
+
+            case (SL_PLAYSTATE_STOPPED  << 2) | SL_PLAYSTATE_PAUSED:
+            case (SL_PLAYSTATE_PLAYING  << 2) | SL_PLAYSTATE_PAUSED:
+                // easy
+                this->mState = state;
+                break;
+
+            case (SL_PLAYSTATE_STOPPING << 2) | SL_PLAYSTATE_STOPPED:
+                // either spurious wakeup, or someone else requested same transition
+                continue;
+
+            case (SL_PLAYSTATE_STOPPING << 2) | SL_PLAYSTATE_PAUSED:
+            case (SL_PLAYSTATE_STOPPING << 2) | SL_PLAYSTATE_PLAYING:
+                // wait for other guy to finish his transition, then retry ours
+                continue;
+
+            case (SL_PLAYSTATE_PAUSED   << 2) | SL_PLAYSTATE_STOPPED:
+            case (SL_PLAYSTATE_PLAYING  << 2) | SL_PLAYSTATE_STOPPED:
+                // tell mixer to stop, then wait for mixer to acknowledge the request to stop
+                this->mState = SL_PLAYSTATE_STOPPING;
+                continue;
+
+            default:
+                // unexpected state
+                assert(SL_BOOLEAN_FALSE);
+                result = SL_RESULT_INTERNAL_ERROR;
+                break;
+
+            }
+
+            break;
+        }
+#else
+        // Here life looks easy for an Android, but there are other troubles in play land
+        this->mState = state;
+        attr = ATTR_TRANSPORT;
+#endif
+        interface_unlock_exclusive_attributes(this, attr);
         }
         break;
     default:
         result = SL_RESULT_PARAMETER_INVALID;
+        break;
     }
 
     SL_LEAVE_INTERFACE
@@ -59,8 +117,24 @@ static SLresult IPlay_GetPlayState(SLPlayItf self, SLuint32 *pState)
         interface_lock_peek(this);
         SLuint32 state = this->mState;
         interface_unlock_peek(this);
-        *pState = state;
         result = SL_RESULT_SUCCESS;
+#ifdef USE_OUTPUTMIXEXT
+        switch (state) {
+        case SL_PLAYSTATE_STOPPED:  // as is
+        case SL_PLAYSTATE_PAUSED:
+        case SL_PLAYSTATE_PLAYING:
+            break;
+        case SL_PLAYSTATE_STOPPING: // these states require re-mapping
+            state = SL_PLAYSTATE_STOPPED;
+            break;
+        default:                    // impossible
+            assert(SL_BOOLEAN_FALSE);
+            state = SL_PLAYSTATE_STOPPED;
+            result = SL_RESULT_INTERNAL_ERROR;
+            break;
+        }
+#endif
+        *pState = state;
     }
 
     SL_LEAVE_INTERFACE

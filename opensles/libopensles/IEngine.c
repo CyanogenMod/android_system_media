@@ -134,19 +134,17 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         break;
                     }
 
+                    // copy the buffer queue count from source locator to the buffer queue interface
+
+                    this->mBufferQueue.mNumBuffers = (SL_DATALOCATOR_BUFFERQUEUE == *(SLuint32 *)
+                        pAudioSrc->pLocator) ? ((SLDataLocator_BufferQueue *)
+                        pAudioSrc->pLocator)->numBuffers : 0;
+
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
                     result = android_audioPlayer_checkSourceSink(this);
                     if (SL_RESULT_SUCCESS != result)
                         break;
-#else
-                    {
-                    // because we init buffer queues in SndFile below, which is not always present
-                    SLuint32 locatorType = *(SLuint32 *) pAudioSrc->pLocator;
-                    if (locatorType == SL_DATALOCATOR_BUFFERQUEUE)
-                        this->mBufferQueue.mNumBuffers = ((SLDataLocator_BufferQueue *)
-                            pAudioSrc->pLocator)->numBuffers;
-                    }
 #endif
 
 #ifdef USE_SNDFILE
@@ -163,6 +161,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 
                     // FIXME move to dedicated function
                     // Allocate memory for buffer queue
+
                     //if (0 != this->mBufferQueue.mNumBuffers) {
                         // inline allocation of circular mArray, up to a typical max
                         if (BUFFER_HEADER_TYPICAL >= this->mBufferQueue.mNumBuffers) {
@@ -256,6 +255,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                     }
 #endif
 
+#ifdef ANDROID
                     // FIXME move to dedicated function
                     SLuint32 locatorType = *(SLuint32 *) pAudioSnk->pLocator;
                     if (locatorType == SL_DATALOCATOR_BUFFERQUEUE) {
@@ -282,6 +282,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                         this->mBufferQueue.mFront = this->mBufferQueue.mArray;
                         this->mBufferQueue.mRear = this->mBufferQueue.mArray;
                     }
+#endif
 
 
 

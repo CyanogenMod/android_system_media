@@ -37,13 +37,12 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
 
 #ifdef USE_SNDFILE
     if (NULL != this->mSndFile.mPathname) {
-        SF_INFO sfinfo;
-        sfinfo.format = 0;
+        this->mSndFile.mSfInfo.format = 0;
         this->mSndFile.mSNDFILE = sf_open(
-            (const char *) this->mSndFile.mPathname, SFM_READ, &sfinfo);
+            (const char *) this->mSndFile.mPathname, SFM_READ, &this->mSndFile.mSfInfo);
         if (NULL == this->mSndFile.mSNDFILE) {
             result = SL_RESULT_CONTENT_NOT_FOUND;
-        } else if (!SndFile_IsSupported(&sfinfo)) {
+        } else if (!SndFile_IsSupported(&this->mSndFile.mSfInfo)) {
             sf_close(this->mSndFile.mSNDFILE);
             this->mSndFile.mSNDFILE = NULL;
             result = SL_RESULT_CONTENT_UNSUPPORTED;
@@ -56,9 +55,9 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
             thisBQ->mCallback = SndFile_Callback;
             thisBQ->mContext = this;
             this->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
-            this->mPlay.mDuration = (SLmillisecond)
-                (((long long) sfinfo.frames * 1000LL) / sfinfo.samplerate);
-            this->mNumChannels = sfinfo.channels;
+            this->mPlay.mDuration = (SLmillisecond) (((long long) this->mSndFile.mSfInfo.frames *
+                1000LL) / this->mSndFile.mSfInfo.samplerate);
+            this->mNumChannels = this->mSndFile.mSfInfo.channels;
         }
     }
 #endif // USE_SNDFILE

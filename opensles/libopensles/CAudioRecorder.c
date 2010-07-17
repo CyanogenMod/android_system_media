@@ -24,10 +24,10 @@
 
 SLresult CAudioRecorder_Realize(void *self, SLboolean async)
 {
-    CAudioRecorder *this = (CAudioRecorder *) self;
     SLresult result = SL_RESULT_SUCCESS;
 
 #ifdef ANDROID
+    CAudioRecorder *this = (CAudioRecorder *) self;
     result = android_audioRecorder_realize(this, async);
 #endif
 
@@ -38,7 +38,7 @@ SLresult CAudioRecorder_Realize(void *self, SLboolean async)
 /** Hook called by Object::Resume when an audio recorder is resumed */
 SLresult CAudioRecorder_Resume(void *self, SLboolean async)
 {
-    CAudioRecorder *this = (CAudioRecorder *) self;
+    //CAudioRecorder *this = (CAudioRecorder *) self;
     SLresult result = SL_RESULT_SUCCESS;
 
     // FIXME implement resume on an AudioRecorder
@@ -54,12 +54,14 @@ void CAudioRecorder_Destroy(void *self)
     CAudioRecorder *this = (CAudioRecorder *) self;
     freeDataLocatorFormat(&this->mDataSource);
     freeDataLocatorFormat(&this->mDataSink);
+#ifdef ANDROID
     // Free the buffer queue, if it was larger than typical
     if (NULL != this->mBufferQueue.mArray &&
         this->mBufferQueue.mArray != this->mBufferQueue.mTypical) {
             free(this->mBufferQueue.mArray);
             this->mBufferQueue.mArray = NULL;
     }
+#endif
 
 #ifdef ANDROID
     android_audioRecorder_destroy(this);

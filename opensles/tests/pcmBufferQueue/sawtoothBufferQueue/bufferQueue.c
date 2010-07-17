@@ -252,8 +252,8 @@ void TestPlaySawtoothBufferQueue( SLObjectItf sl )
     res = (*bufferQueueItf)->GetState(bufferQueueItf, &state);
     CheckErr(res);
 
-    //while (state.playIndex < 100) {
-     while(state.count) {
+    // while (state.playIndex < 100) {
+    while (state.count) {
         usleep(10000);
         (*bufferQueueItf)->GetState(bufferQueueItf, &state);
     }

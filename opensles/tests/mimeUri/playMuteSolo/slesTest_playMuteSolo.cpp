@@ -185,7 +185,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     audioSource.pLocator = (void*)&uri;
 
     /* Create the audio player */
-    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink, 1,
+    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink, 2,
             iidArray, required);
     ExitOnError(result);
 

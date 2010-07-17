@@ -38,6 +38,7 @@ extern void object_cond_broadcast(IObject *this);
 #define interface_unlock_shared(this)    object_unlock_shared(InterfaceToIObject(this))
 #define interface_cond_wait(this)        object_cond_wait(InterfaceToIObject(this))
 #define interface_cond_signal(this)      object_cond_signal(InterfaceToIObject(this))
+#define interface_cond_broadcast(this)   object_cond_broadcast(InterfaceToIObject(this))
 
 // Peek and poke are an optimization for small atomic fields that don't "matter"
 

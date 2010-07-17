@@ -38,7 +38,7 @@ struct Track {
     struct BufferQueue_interface *mBufferQueue;
     CAudioPlayer *mAudioPlayer; // mixer examines this track if non-NULL
     const void *mReader;    // pointer to next frame in BufferHeader.mBuffer
-    SLuint32 mAvail;        // number of available bytes
+    SLuint32 mAvail;        // number of available bytes in the current buffer
     float mGains[STEREO_CHANNELS]; // computed gain based on volume, mute, solo, and stereo position
     SLuint32 mFrameCounter; // number of sample frames consumed from this track, will roll over
 };
