@@ -31,6 +31,7 @@
 #include "ThreadPool.h"
 
 typedef struct CAudioPlayer_struct CAudioPlayer;
+typedef struct CAudioRecorder_struct CAudioRecorder;
 typedef struct C3DGroup_struct C3DGroup;
 typedef struct COutputMix_struct COutputMix;
 
@@ -47,6 +48,8 @@ typedef struct COutputMix_struct COutputMix;
 #include <utils/Log.h>
 #include "OpenSLES_Android.h"
 #include "media/AudioSystem.h"
+#include "media/mediarecorder.h"
+#include "media/AudioRecord.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
 #include "media/AudioEffect.h"
@@ -57,6 +60,7 @@ typedef struct COutputMix_struct COutputMix;
 #include <binder/ProcessState.h>
 #include "android_SfPlayer.h"
 #include "android_Effect.h"
+#include "android_AudioRecorder.h"
 #endif
 
 #define STEREO_CHANNELS 2
@@ -867,10 +871,15 @@ enum AndroidObject_state {
 #endif
 } /*CAudioPlayer*/;
 
-typedef struct {
+
+/*typedef*/ struct CAudioRecorder_struct {
     // mandated interfaces
     IObject mObject;
-#define INTERFACES_AudioRecorder 9 // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
+#ifdef ANDROID
+#define INTERFACES_AudioRecorder 10 // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
+#else
+#define INTERFACES_AudioRecorder 9  // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
+#endif
     SLuint8 mInterfaceContinued[INTERFACES_AudioRecorder - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IRecord mRecord;
@@ -881,10 +890,18 @@ typedef struct {
     IEqualizer mEqualizer;
     IVisualization mVisualization;
     IVolume mVolume;
+#ifdef ANDROID
+    IBufferQueue mBufferQueue;
+#endif
     // rest of fields are not related to the interfaces
     DataLocatorFormat mDataSource;
     DataLocatorFormat mDataSink;
-} CAudioRecorder;
+    // implementation-specific data for this instance
+#ifdef ANDROID
+    android::AudioRecord *mAudioRecord;
+#endif
+} /*CAudioRecorder*/;
+
 
 typedef struct {
     // mandated implicit interfaces
@@ -1044,22 +1061,31 @@ extern SLuint32 IObjectToObjectID(IObject *object);
 
 #define InterfaceToCAudioPlayer(this) (((CAudioPlayer*)InterfaceToIObject(this)))
 
+#define InterfaceToCAudioRecorder(this) (((CAudioRecorder*)InterfaceToIObject(this)))
+
 #ifdef ANDROID
 #include "sles_to_android.h"
 #endif
 
 extern SLresult checkDataSource(const SLDataSource *pDataSrc,
-    DataLocatorFormat *myDataSourceLocator);
+        DataLocatorFormat *myDataSourceLocator);
 extern SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *myDataSinkLocator);
 extern SLresult checkSourceFormatVsInterfacesCompatibility(
         const DataLocatorFormat *pDataLocatorFormat,
         SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
         const SLboolean *pInterfaceRequired);
 extern void freeDataLocatorFormat(DataLocatorFormat *dlf);
+
 extern SLresult CAudioPlayer_Realize(void *self, SLboolean async);
 extern void CAudioPlayer_Destroy(void *self);
+
+extern SLresult CAudioRecorder_Realize(void *self, SLboolean async);
+extern SLresult CAudioRecorder_Resume(void *self, SLboolean async);
+extern void CAudioRecorder_Destroy(void *self);
+
 extern SLresult CEngine_Realize(void *self, SLboolean async);
 extern void CEngine_Destroy(void *self);
+
 #ifdef USE_SDL
 extern void SDL_start(IEngine *thisEngine);
 #endif

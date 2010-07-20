@@ -161,6 +161,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         break;
 #endif
 
+                    // FIXME move to dedicated function
                     // Allocate memory for buffer queue
                     //if (0 != this->mBufferQueue.mNumBuffers) {
                         // inline allocation of circular mArray, up to a typical max
@@ -216,7 +217,9 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_CONFORMANCE
+    SL_LOGV("IEngine_CreateAudioRecorder() entering");
+
+#if defined(USE_CONFORMANCE) || defined(ANDROID)
     if (NULL == pRecorder) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -224,18 +227,18 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
         unsigned exposedMask;
         const ClassTable *pCAudioRecorder_class = objectIDtoClass(SL_OBJECTID_AUDIORECORDER);
         result = checkInterfaces(pCAudioRecorder_class, numInterfaces,
-            pInterfaceIds, pInterfaceRequired, &exposedMask);
+                pInterfaceIds, pInterfaceRequired, &exposedMask);
+
         if (SL_RESULT_SUCCESS == result) {
 
             // Construct our new AudioRecorder instance
             CAudioRecorder *this = (CAudioRecorder *) construct(pCAudioRecorder_class, exposedMask,
-                self);
+                    self);
             if (NULL == this) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
 
                 do {
-
                     // Check the source and sink parameters, and make a local copy of all parameters
                     result = checkDataSource(pAudioSrc, &this->mDataSource);
                     if (SL_RESULT_SUCCESS != result)
@@ -244,7 +247,48 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                     if (SL_RESULT_SUCCESS != result)
                         break;
 
-                    // This section is not yet fully implemented
+                    // check the audio source and sink parameters against platform support
+#ifdef ANDROID
+                    result = android_audioRecorder_checkSourceSinkSupport(this);
+                    if (SL_RESULT_SUCCESS != result) {
+                        SL_LOGE("Android: Cannot create AudioRecorder: invalid source or sink");
+                        break;
+                    }
+#endif
+
+                    // FIXME move to dedicated function
+                    SLuint32 locatorType = *(SLuint32 *) pAudioSnk->pLocator;
+                    if (locatorType == SL_DATALOCATOR_BUFFERQUEUE) {
+                        this->mBufferQueue.mNumBuffers = ((SLDataLocator_BufferQueue *)
+                                pAudioSnk->pLocator)->numBuffers;
+                        // inline allocation of circular Buffer Queue mArray, up to a typical max
+                        if (BUFFER_HEADER_TYPICAL >= this->mBufferQueue.mNumBuffers) {
+                            this->mBufferQueue.mArray = this->mBufferQueue.mTypical;
+                        } else {
+                            // Avoid possible integer overflow during multiplication; this arbitrary
+                            // maximum is big enough to not interfere with real applications, but
+                            // small enough to not overflow.
+                            if (this->mBufferQueue.mNumBuffers >= 256) {
+                                result = SL_RESULT_MEMORY_FAILURE;
+                                break;
+                            }
+                            this->mBufferQueue.mArray = (BufferHeader *) malloc((this->mBufferQueue.
+                                    mNumBuffers + 1) * sizeof(BufferHeader));
+                            if (NULL == this->mBufferQueue.mArray) {
+                                result = SL_RESULT_MEMORY_FAILURE;
+                                break;
+                            }
+                        }
+                        this->mBufferQueue.mFront = this->mBufferQueue.mArray;
+                        this->mBufferQueue.mRear = this->mBufferQueue.mArray;
+                    }
+
+
+
+                    // platform-specific initialization
+#ifdef ANDROID
+                    android_audioRecorder_create(this);
+#endif
 
                     // return the new audio recorder object
                     *pRecorder = &this->mObject.mItf;

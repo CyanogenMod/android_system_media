@@ -143,12 +143,20 @@ const signed char MPH_to_AudioRecorder[MPH_MAX] = {
     [MPH_EQUALIZER] = 6,
     [MPH_VISUALIZATION] = 7,
     [MPH_VOLUME] = 8
+#ifdef ANDROID
+    [MPH_BUFFERQUEUE] = 9
+#endif
 #else
     -1, -1, -1, -1, -1, -1, -1,
     3, // MPH_AUDIOENCODER
     -1, -1,
     4, // MPH_BASSBOOST
-    -1, -1,
+#ifdef ANDROID
+    9, // MPH_BUFFERQUEUE
+#else
+    -1,
+#endif
+    -1,
     1, // MPH_DYNAMICINTERFACEMANAGEMENT
     5, // MPH_DYNAMICSOURCE
     -1, -1, -1, -1,

@@ -5,7 +5,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
         OpenSLUT.c
 
-LOCAL_C_INCLUDES:=                                                  \
+LOCAL_C_INCLUDES:= \
 	system/media/opensles/include
 
 LOCAL_MODULE := libOpenSLUT
@@ -39,10 +39,12 @@ LOCAL_SRC_FILES:=                     \
         sles_to_android.cpp           \
         android_SfPlayer.cpp          \
         android_Effect.cpp            \
+        android_AudioRecorder.cpp     \
         sync.c                        \
         IID_to_MPH.c                  \
         ThreadPool.c                  \
         CAudioPlayer.c                \
+        CAudioRecorder.c              \
         CEngine.c                     \
         I3DCommit.c                   \
         I3DDoppler.c                  \

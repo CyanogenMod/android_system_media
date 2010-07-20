@@ -22,6 +22,7 @@
 static SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer, SLuint32 size)
 {
     SL_ENTER_INTERFACE
+    //SL_LOGV("IBufferQueue_Enqueue(%p, %p, %lu)", self, pBuffer, size);
 
     if (NULL == pBuffer || 0 == size) {
         result = SL_RESULT_PARAMETER_INVALID;
@@ -42,7 +43,6 @@ static SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
         }
         interface_unlock_exclusive(this);
     }
-
     SL_LEAVE_INTERFACE
 }
 
@@ -121,6 +121,7 @@ static const struct SLBufferQueueItf_ IBufferQueue_Itf = {
 
 void IBufferQueue_init(void *self)
 {
+    //SL_LOGV("IBufferQueue_init(%p) entering", self);
     IBufferQueue *this = (IBufferQueue *) self;
     this->mItf = &IBufferQueue_Itf;
     this->mState.count = 0;
