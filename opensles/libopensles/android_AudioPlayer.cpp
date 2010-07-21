@@ -91,7 +91,7 @@ int android_getMinFrameCount(uint32_t sampleRate) {
 #define LEFT_CHANNEL_MASK  0x1 << 0
 #define RIGHT_CHANNEL_MASK 0x1 << 1
 
-static void android_audioPlayerUpdateStereoVolume(CAudioPlayer* ap) {
+static void android_audioPlayer_updateStereoVolume(CAudioPlayer* ap) {
     float leftVol = 1.0f, rightVol = 1.0f;
 
     if (NULL == ap->mAudioTrack) {
@@ -183,7 +183,7 @@ static void android_audioPlayerUpdateStereoVolume(CAudioPlayer* ap) {
 }
 
 //-----------------------------------------------------------------------------
-void android_handleTrackMarker(CAudioPlayer* ap) {
+void audioTrack_handleMarker(CAudioPlayer* ap) {
     //fprintf(stdout, "received event EVENT_MARKER from AudioTrack\n");
     slPlayCallback callback = NULL;
     void* callbackPContext = NULL;
@@ -200,7 +200,7 @@ void android_handleTrackMarker(CAudioPlayer* ap) {
 }
 
 //-----------------------------------------------------------------------------
-void android_handleTrackNewPos(CAudioPlayer* ap) {
+void audioTrack_handleNewPos(CAudioPlayer* ap) {
     //fprintf(stdout, "received event EVENT_NEW_POS from AudioTrack\n");
     slPlayCallback callback = NULL;
     void* callbackPContext = NULL;
@@ -218,7 +218,7 @@ void android_handleTrackNewPos(CAudioPlayer* ap) {
 
 
 //-----------------------------------------------------------------------------
-void android_handleTrackUnderrun(CAudioPlayer* ap) {
+void audioTrack_handleUnderrun(CAudioPlayer* ap) {
     slPlayCallback callback = NULL;
     void* callbackPContext = NULL;
 
@@ -303,7 +303,7 @@ static void android_prefetchEventCallback(const int event, const int data1, void
 }
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_checkAudioPlayerSourceSink(CAudioPlayer *pAudioPlayer)
+SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
 {
     const SLDataSource *pAudioSrc = &pAudioPlayer->mDataSource.u.mSource;
     const SLDataSink *pAudioSnk = &pAudioPlayer->mDataSink.u.mSink;
@@ -463,7 +463,7 @@ SLresult sles_to_android_checkAudioPlayerSourceSink(CAudioPlayer *pAudioPlayer)
 
 
 //-----------------------------------------------------------------------------
-static void android_uriAudioTrackCallback(int event, void* user, void *info) {
+static void audioTrack_callBack_uri(int event, void* user, void *info) {
     // EVENT_MORE_DATA needs to be handled with priority over the other events
     // because it will be called the most often during playback
     if (event == android::AudioTrack::EVENT_MORE_DATA) {
@@ -474,13 +474,13 @@ static void android_uriAudioTrackCallback(int event, void* user, void *info) {
     } else if (NULL != user) {
         switch (event) {
             case (android::AudioTrack::EVENT_MARKER) :
-                android_handleTrackMarker((CAudioPlayer *)user);
+                audioTrack_handleMarker((CAudioPlayer *)user);
                 break;
             case (android::AudioTrack::EVENT_NEW_POS) :
-                android_handleTrackNewPos((CAudioPlayer *)user);
+                audioTrack_handleNewPos((CAudioPlayer *)user);
                 break;
             case (android::AudioTrack::EVENT_UNDERRUN) :
-                android_handleTrackUnderrun((CAudioPlayer *)user);
+                audioTrack_handleUnderrun((CAudioPlayer *)user);
         }
     }
 }
@@ -488,7 +488,7 @@ static void android_uriAudioTrackCallback(int event, void* user, void *info) {
 //-----------------------------------------------------------------------------
 // Callback associated with an AudioTrack of an SL ES AudioPlayer that gets its data
 // from a buffer queue.
-static void android_pullAudioTrackCallback(int event, void* user, void *info) {
+static void audioTrack_callBack_pull(int event, void* user, void *info) {
     CAudioPlayer *pAudioPlayer = (CAudioPlayer *)user;
     void * callbackPContext = NULL;
     switch(event) {
@@ -554,15 +554,15 @@ static void android_pullAudioTrackCallback(int event, void* user, void *info) {
     break;
 
     case (android::AudioTrack::EVENT_MARKER) :
-        android_handleTrackMarker(pAudioPlayer);
+        audioTrack_handleMarker(pAudioPlayer);
         break;
 
     case (android::AudioTrack::EVENT_NEW_POS) :
-        android_handleTrackNewPos(pAudioPlayer);
+        audioTrack_handleNewPos(pAudioPlayer);
         break;
 
     case (android::AudioTrack::EVENT_UNDERRUN) :
-        android_handleTrackUnderrun(pAudioPlayer);
+        audioTrack_handleUnderrun(pAudioPlayer);
         break;
 
     default:
@@ -573,7 +573,7 @@ static void android_pullAudioTrackCallback(int event, void* user, void *info) {
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_audioPlayerCreate(
+SLresult android_audioPlayer_create(
         CAudioPlayer *pAudioPlayer) {
 
     const SLDataSource *pAudioSrc = &pAudioPlayer->mDataSource.u.mSource;
@@ -626,10 +626,10 @@ SLresult sles_to_android_audioPlayerCreate(
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolean async) {
+SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async) {
 
     SLresult result = SL_RESULT_SUCCESS;
-    //fprintf(stderr, "entering sles_to_android_audioPlayerRealize\n");
+    //fprintf(stderr, "entering android_audioPlayer_realize\n");
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
     // AudioTrack
@@ -652,7 +652,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
                 sles_to_android_channelMask(df_pcm->numChannels, df_pcm->channelMask),//channel mask
                 0,                                                   // frameCount (here min)
                 0,                                                   // flags
-                android_pullAudioTrackCallback,                      // callback
+                audioTrack_callBack_pull,                      // callback
                 (void *) pAudioPlayer,                               // user
                 0);  // FIXME find appropriate frame count         // notificationFrame
         if (pAudioPlayer->mAudioTrack->initCheck() != android::NO_ERROR) {
@@ -715,7 +715,7 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
                             android::AudioSystem::CHANNEL_OUT_STEREO,
                     0,                                                   // frameCount (here min)
                     0,                                                   // flags
-                    android_uriAudioTrackCallback,                       // callback
+                    audioTrack_callBack_uri,                       // callback
                     (void *) pAudioPlayer,                               // user
                     0);                                                  // notificationFrame
             pAudioPlayer->mNumChannels = pAudioPlayer->mSfPlayer->getNumChannels();
@@ -755,9 +755,9 @@ SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolea
 /*
  * Called with a lock held on the CAudioPlayer
  */
-SLresult sles_to_android_audioPlayerSetStreamType_l(CAudioPlayer *pAudioPlayer, SLuint32 type) {
+SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer, SLuint32 type) {
     SLresult result = SL_RESULT_SUCCESS;
-    fprintf(stdout, "sles_to_android_audioPlayerSetStreamType %lu\n", type);
+    fprintf(stdout, "android_audioPlayer_setStreamType %lu\n", type);
 
     if (pAudioPlayer->mAudioTrack == NULL) {
         return SL_RESULT_RESOURCE_ERROR;
@@ -782,7 +782,7 @@ SLresult sles_to_android_audioPlayerSetStreamType_l(CAudioPlayer *pAudioPlayer, 
                     0,                                              // frameCount (here min)
                     0,                                              // flags
                     pAudioPlayer->mAndroidObjType == MEDIAPLAYER ?  // callback
-                            android_uriAudioTrackCallback : android_pullAudioTrackCallback,
+                            audioTrack_callBack_uri : audioTrack_callBack_pull,
                     (void *) pAudioPlayer,                          // user
                     0,   // FIXME find appropriate frame count      // notificationFrame
                     sessionId);
@@ -794,9 +794,9 @@ SLresult sles_to_android_audioPlayerSetStreamType_l(CAudioPlayer *pAudioPlayer, 
 }
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer) {
+SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     SLresult result = SL_RESULT_SUCCESS;
-    //fprintf(stdout, "sles_to_android_audioPlayerDestroy\n");
+    //fprintf(stdout, "android_audioPlayer_destroy\n");
 
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
@@ -840,7 +840,7 @@ SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer) {
 
 //-----------------------------------------------------------------------------
 // called with no lock held
-SLresult sles_to_android_audioPlayerSetPlayRate(IPlaybackRate *pRateItf, SLpermille rate) {
+SLresult android_audioPlayer_setPlayRate(IPlaybackRate *pRateItf, SLpermille rate) {
     SLresult result = SL_RESULT_SUCCESS;
     CAudioPlayer *ap = (CAudioPlayer *)pRateItf->mThis;
     switch(ap->mAndroidObjType) {
@@ -871,7 +871,7 @@ SLresult sles_to_android_audioPlayerSetPlayRate(IPlaybackRate *pRateItf, SLpermi
 
 //-----------------------------------------------------------------------------
 // called with no lock held
-SLresult sles_to_android_audioPlayerSetPlaybackRateBehavior(IPlaybackRate *pRateItf,
+SLresult android_audioPlayer_setPlaybackRateBehavior(IPlaybackRate *pRateItf,
         SLuint32 constraints) {
     SLresult result = SL_RESULT_SUCCESS;
     CAudioPlayer *ap = (CAudioPlayer *)pRateItf->mThis;
@@ -893,7 +893,7 @@ SLresult sles_to_android_audioPlayerSetPlaybackRateBehavior(IPlaybackRate *pRate
 
 //-----------------------------------------------------------------------------
 // called with no lock held
-SLresult sles_to_android_audioPlayerGetCapabilitiesOfRate(IPlaybackRate *pRateItf,
+SLresult android_audioPlayer_getCapabilitiesOfRate(IPlaybackRate *pRateItf,
         SLuint32 *pCapabilities) {
     CAudioPlayer *ap = (CAudioPlayer *)pRateItf->mThis;
     switch(ap->mAndroidObjType) {
@@ -911,7 +911,7 @@ SLresult sles_to_android_audioPlayerGetCapabilitiesOfRate(IPlaybackRate *pRateIt
 
 
 //-----------------------------------------------------------------------------
-void sles_to_android_audioPlayerSetPlayState(CAudioPlayer *ap) {
+void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
     SLuint32 state = ap->mPlay.mState;
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
@@ -982,7 +982,7 @@ void sles_to_android_audioPlayerSetPlayState(CAudioPlayer *ap) {
 
 
 //-----------------------------------------------------------------------------
-void sles_to_android_audioPlayerUseEventMask(CAudioPlayer *ap) {
+void android_audioPlayer_useEventMask(CAudioPlayer *ap) {
     IPlay *pPlayItf = &ap->mPlay;
     SLuint32 eventFlags = pPlayItf->mEventFlags;
     /*switch(ap->mAndroidObjType) {
@@ -1031,7 +1031,7 @@ void sles_to_android_audioPlayerUseEventMask(CAudioPlayer *ap) {
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_audioPlayerGetDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec) {
+SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec) {
     CAudioPlayer *ap = (CAudioPlayer *)pPlayItf->mThis;
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
@@ -1039,7 +1039,7 @@ SLresult sles_to_android_audioPlayerGetDuration(IPlay *pPlayItf, SLmillisecond *
         *pDurMsec = SL_TIME_UNKNOWN;
         // FIXME if the data source is not a buffer queue, and the audio data is saved in
         //       shared memory with the mixer process, the duration is the size of the buffer
-        fprintf(stderr, "FIXME: sles_to_android_audioPlayerGetDuration() verify if duration can be retrieved\n");
+        fprintf(stderr, "FIXME: android_audioPlayer_getDuration() verify if duration can be retrieved\n");
         break;
     case MEDIAPLAYER: {
         int64_t durationUsec = ap->mSfPlayer->getDurationUsec();
@@ -1053,7 +1053,7 @@ SLresult sles_to_android_audioPlayerGetDuration(IPlay *pPlayItf, SLmillisecond *
 
 
 //-----------------------------------------------------------------------------
-void sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
+void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
     CAudioPlayer *ap = (CAudioPlayer *)pPlayItf->mThis;
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
@@ -1079,7 +1079,7 @@ void sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPos
 
 
 //-----------------------------------------------------------------------------
-void sles_to_android_audioPlayerSeek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec) {
+void android_audioPlayer_seek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec) {
     switch(pAudioPlayer->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
@@ -1099,9 +1099,9 @@ void sles_to_android_audioPlayerSeek(CAudioPlayer *pAudioPlayer, SLmillisecond p
  * the IVolume interface.
  * Pre-condition:
  *   if ap->mMute is SL_BOOLEAN_FALSE, a call to this function was preceded by a call
- *   to sles_to_android_audioPlayerVolumeUpdate()
+ *   to android_audioPlayer_volumeUpdate()
  */
-static void android_audioPlayerSetMute(CAudioPlayer* ap) {
+static void android_audioPlayer_setMute(CAudioPlayer* ap) {
     android::AudioTrack *t = NULL;
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
@@ -1120,8 +1120,8 @@ static void android_audioPlayerSetMute(CAudioPlayer* ap) {
 
 
 //-----------------------------------------------------------------------------
-SLresult sles_to_android_audioPlayerVolumeUpdate(CAudioPlayer* ap) {
-    android_audioPlayerUpdateStereoVolume(ap);
-    android_audioPlayerSetMute(ap);
+SLresult android_audioPlayer_volumeUpdate(CAudioPlayer* ap) {
+    android_audioPlayer_updateStereoVolume(ap);
+    android_audioPlayer_setMute(ap);
     return SL_RESULT_SUCCESS;
 }

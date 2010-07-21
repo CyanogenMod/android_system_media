@@ -36,7 +36,7 @@ static SLresult IAndroidStreamType_SetStreamType(SLAndroidStreamTypeItf self, SL
         this->mStreamType = type;
         switch (InterfaceToObjectID(this)) {
         case SL_OBJECTID_AUDIOPLAYER:
-            sles_to_android_audioPlayerSetStreamType_l(InterfaceToCAudioPlayer(this), type);
+            android_audioPlayer_setStreamType_l(InterfaceToCAudioPlayer(this), type);
             break;
         case SL_OBJECTID_MIDIPLAYER:
             // FIXME implement once we support MIDIPlayer

@@ -1064,7 +1064,7 @@ extern SLuint32 IObjectToObjectID(IObject *object);
 #define InterfaceToCAudioRecorder(this) (((CAudioRecorder*)InterfaceToIObject(this)))
 
 #ifdef ANDROID
-#include "sles_to_android.h"
+#include "android_AudioPlayer.h"
 #endif
 
 extern SLresult checkDataSource(const SLDataSource *pDataSrc,

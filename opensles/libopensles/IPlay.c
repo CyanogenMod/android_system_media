@@ -83,7 +83,7 @@ static SLresult IPlay_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
         if ((SL_TIME_UNKNOWN == duration) &&
             (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this))) {
             SLmillisecond temp;
-            result = sles_to_android_audioPlayerGetDuration(this, &temp);
+            result = android_audioPlayer_getDuration(this, &temp);
             if (SL_RESULT_SUCCESS == result) {
                 duration = temp;
                 this->mDuration = duration;
@@ -113,7 +113,7 @@ static SLresult IPlay_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
 #ifdef ANDROID
         // Android does not use the mPosition field for audio players
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-            sles_to_android_audioPlayerGetPosition(this, &position);
+            android_audioPlayer_getPosition(this, &position);
             // note that we do not cache the position
         } else
             position = this->mPosition;
@@ -253,7 +253,7 @@ static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec
             this->mPositionUpdatePeriod = mSec;
 #ifdef ANDROID
             if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-                // result = sles_to_android_audioPlayerUseEventMask(this, this->mEventFlags);
+                // result = android_audioPlayer_useEventMask(this, this->mEventFlags);
             }
 #endif
             interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
