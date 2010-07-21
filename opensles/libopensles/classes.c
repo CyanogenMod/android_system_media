@@ -107,6 +107,9 @@ static const struct iid_vtable AudioRecorder_interfaces[INTERFACES_AudioRecorder
     {MPH_EQUALIZER, INTERFACE_OPTIONAL, offsetof(CAudioRecorder, mEqualizer)},
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL, offsetof(CAudioRecorder, mVisualization)},
     {MPH_VOLUME, INTERFACE_OPTIONAL, offsetof(CAudioRecorder, mVolume)}
+#ifdef ANDROID
+    ,{MPH_BUFFERQUEUE, INTERFACE_EXPLICIT, offsetof(CAudioRecorder, mBufferQueue)},
+#endif
 };
 
 static const ClassTable CAudioRecorder_class = {
@@ -116,9 +119,9 @@ static const ClassTable CAudioRecorder_class = {
     "AudioRecorder",
     sizeof(CAudioRecorder),
     SL_OBJECTID_AUDIORECORDER,
-    NULL,
-    NULL,
-    NULL
+    CAudioRecorder_Realize,
+    CAudioRecorder_Resume,
+    CAudioRecorder_Destroy
 };
 
 // Engine class

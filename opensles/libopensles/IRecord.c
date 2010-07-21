@@ -31,6 +31,9 @@ static SLresult IRecord_SetRecordState(SLRecordItf self, SLuint32 state)
         IRecord *this = (IRecord *) self;
         interface_lock_poke(this);
         this->mState = state;
+#ifdef ANDROID
+        android_audioRecorder_setRecordState(InterfaceToCAudioRecorder(this), state);
+#endif
         interface_unlock_poke(this);
         result = SL_RESULT_SUCCESS;
         }
@@ -256,6 +259,7 @@ static const struct SLRecordItf_ IRecord_Itf = {
 
 void IRecord_init(void *self)
 {
+    SL_LOGV("IRecord_init(%p) entering", self);
     IRecord *this = (IRecord *) self;
     this->mItf = &IRecord_Itf;
     this->mState = SL_RECORDSTATE_STOPPED;
