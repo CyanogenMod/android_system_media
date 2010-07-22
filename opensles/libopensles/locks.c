@@ -44,6 +44,9 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
     int ok;
     SLuint32 objectID = IObjectToObjectID(this);
     CAudioPlayer *ap;
+
+    // FIXME The endless if statements are getting ugly, should use bit search
+
     // Android likes to see certain updates synchronously
 
     if (attributes & ATTR_GAIN) {
@@ -73,12 +76,12 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
     if (attributes & ATTR_POSITION) {
         switch (objectID) {
         case SL_OBJECTID_AUDIOPLAYER:
-            attributes &= ~ATTR_POSITION;   // no need to process asynchronously also
             ap = (CAudioPlayer *) this;
 #ifdef ANDROID
+            attributes &= ~ATTR_POSITION;   // no need to process asynchronously also
             android_audioPlayer_seek(ap, ap->mSeek.mPos);
 #else
-            audioPlayerTransportUpdate(ap);
+            //audioPlayerTransportUpdate(ap);
 #endif
             break;
         case SL_OBJECTID_MIDIPLAYER:
@@ -92,18 +95,30 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
 
     if (attributes & ATTR_TRANSPORT) {
         if (SL_OBJECTID_AUDIOPLAYER == objectID) {
+#ifdef ANDROID
             attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
             ap = (CAudioPlayer *) this;
-#ifdef ANDROID
             // FIXME should only call when state changes
             android_audioPlayer_setPlayState(ap);
             // FIXME ditto, but for either eventflags or marker position
             android_audioPlayer_useEventMask(ap);
 #else
-            audioPlayerTransportUpdate(ap);
+            //audioPlayerTransportUpdate(ap);
 #endif
         }
     }
+
+    // ( buffer queue count is non-empty and play state == PLAYING ) became true
+    if (attributes & ATTR_ENQUEUE) {
+        if (SL_OBJECTID_AUDIOPLAYER == objectID) {
+            attributes &= ~ATTR_ENQUEUE;
+            ap = (CAudioPlayer *) this;
+            if (SL_PLAYSTATE_PLAYING == ap->mPlay.mState) {
+                // NTH synchronously kick off the first buffer
+            }
+        }
+    }
+
     if (attributes) {
         unsigned oldAttributesMask = this->mAttributesMask;
         this->mAttributesMask = oldAttributesMask | attributes;

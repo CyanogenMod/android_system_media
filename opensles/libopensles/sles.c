@@ -142,9 +142,12 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
         break;
     case SL_DATALOCATOR_BUFFERQUEUE:
         pDataLocator->mBufferQueue = *(SLDataLocator_BufferQueue *)pLocator;
-        // number of buffers must be specified, there is no default value
-        if (0 == pDataLocator->mBufferQueue.numBuffers)
+        // number of buffers must be specified, there is no default value, and must not be excessive
+        if (!((1 <= pDataLocator->mBufferQueue.numBuffers) &&
+            (pDataLocator->mBufferQueue.numBuffers <= 255))) {
+            SL_LOGE("numBuffers=%u", (unsigned) pDataLocator->mBufferQueue.numBuffers);
             return SL_RESULT_PARAMETER_INVALID;
+        }
         break;
     case SL_DATALOCATOR_IODEVICE:
         {
@@ -188,8 +191,10 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
         pDataLocator->mMIDIBufferQueue = *(SLDataLocator_MIDIBufferQueue *)pLocator;
         if (0 == pDataLocator->mMIDIBufferQueue.tpqn)
             pDataLocator->mMIDIBufferQueue.tpqn = 192;
-        if (0 == pDataLocator->mMIDIBufferQueue.numBuffers)
-            pDataLocator->mMIDIBufferQueue.numBuffers = 2;
+        // number of buffers must be specified, there is no default value, and must not be excessive
+        if (!((1 <= pDataLocator->mMIDIBufferQueue.numBuffers) &&
+            (pDataLocator->mMIDIBufferQueue.numBuffers <= 255)))
+            return SL_RESULT_PARAMETER_INVALID;
         break;
     case SL_DATALOCATOR_OUTPUTMIX:
         pDataLocator->mOutputMix = *(SLDataLocator_OutputMix *)pLocator;
@@ -381,10 +386,9 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
                 // check the endianness / byte order
                 switch (pDataFormat->mPCM.endianness) {
                 case SL_BYTEORDER_LITTLEENDIAN:
-                    break;
                 case SL_BYTEORDER_BIGENDIAN:
-                    result = SL_RESULT_CONTENT_UNSUPPORTED;
                     break;
+                // native is proposed but not yet in spec
                 default:
                     result = SL_RESULT_PARAMETER_INVALID;
                     break;

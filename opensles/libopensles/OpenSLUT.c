@@ -114,3 +114,14 @@ void slutPrintIID(SLInterfaceID iid)
         (unsigned) iid->time_low, iid->time_mid, iid->time_hi_and_version, iid->clock_seq,
         iid->node[0], iid->node[1], iid->node[2], iid->node[3], iid->node[4], iid->node[5]);
 }
+
+void slutPrintIIDs(SLInterfaceID *pInterfaceIds, SLboolean *pInterfaceRequired,
+    unsigned numInterfaces)
+{
+    unsigned i;
+    for (i = 0; i < numInterfaces; ++i) {
+        printf("interfaces[%u]=", i);
+        slutPrintIID(pInterfaceIds[i]);
+        printf(" %s\n", (unsigned) pInterfaceRequired[i] ? "required" : "optional");
+    }
+}

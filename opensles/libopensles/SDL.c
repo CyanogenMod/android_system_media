@@ -51,8 +51,8 @@ void SDL_start(IEngine *thisEngine)
     fmt.userdata = (void *) thisEngine;
 
     if (SDL_OpenAudio(&fmt, NULL) < 0) {
-        fprintf(stderr, "Unable to open audio: %s\n", SDL_GetError());
-        exit(1);
+        SL_LOGE("Unable to open audio: %s", SDL_GetError());
+        exit(EXIT_FAILURE);
     }
 }
 

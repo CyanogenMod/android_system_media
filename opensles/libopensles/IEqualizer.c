@@ -442,9 +442,11 @@ void IEqualizer_init(void *self)
     this->mItf = &IEqualizer_Itf;
     this->mEnabled = SL_BOOLEAN_FALSE;
     this->mPreset = SL_EQUALIZER_UNDEFINED;
+#if (0 < MAX_EQ_BANDS)
     unsigned band;
     for (band = 0; band < MAX_EQ_BANDS; ++band)
         this->mLevels[band] = 0;
+#endif
     // const fields
     this->mNumPresets = 0;
     this->mNumBands = 0;

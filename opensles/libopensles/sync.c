@@ -66,16 +66,19 @@ void *sync_start(void *arg)
             // FIXME race condition here - object could be destroyed by now, better do destroy here
 
             object_lock_exclusive(instance);
-            //unsigned attributesMask = instance->mAttributesMask;
+            unsigned attributesMask = instance->mAttributesMask;
             instance->mAttributesMask = 0;
 
             switch (IObjectToObjectID(instance)) {
             case SL_OBJECTID_AUDIOPLAYER:
-                {
-                //CAudioPlayer *audioPlayer = (CAudioPlayer *) instance;
                 // do something here
                 object_unlock_exclusive(instance);
+#ifdef USE_SNDFILE
+                if (attributesMask & (ATTR_POSITION | ATTR_TRANSPORT)) {
+                    CAudioPlayer *audioPlayer = (CAudioPlayer *) instance;
+                    audioPlayerTransportUpdate(audioPlayer);
                 }
+#endif
                 break;
 
             default:

@@ -321,18 +321,13 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     // Source check:
     SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
     SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
-    SLuint32 numBuffers = 0;
+
     switch (locatorType) {
     //------------------
     //   Buffer Queues
     case SL_DATALOCATOR_BUFFERQUEUE: {
         SLDataLocator_BufferQueue *dl_bq =  (SLDataLocator_BufferQueue *) pAudioSrc->pLocator;
-        numBuffers = dl_bq->numBuffers;
-        if (0 == numBuffers) {
-            fprintf(stderr, "Cannot create audio player: data source buffer queue has ");
-            fprintf(stderr, "a depth of 0");
-            return SL_RESULT_PARAMETER_INVALID;
-        }
+
         // Buffer format
         switch (formatType) {
         //     currently only PCM buffer queues are supported,
@@ -343,8 +338,9 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             case 2:
                 break;
             default:
-                fprintf(stderr, "Cannot create audio player: implementation doesn't ");
-                fprintf(stderr, "support buffers with more than 2 channels");
+                // this should have already been rejected by checkDataFormat
+                SL_LOGE("Cannot create audio player: unsupported " \
+                    "PCM data source with %u channels", (unsigned) df_pcm->numChannels);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
             switch (df_pcm->samplesPerSec) {
@@ -357,19 +353,25 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             case SL_SAMPLINGRATE_32:
             case SL_SAMPLINGRATE_44_1:
                 break;
-                // others
+            case SL_SAMPLINGRATE_48:    // not 48?
+            case SL_SAMPLINGRATE_64:
+            case SL_SAMPLINGRATE_88_2:
+            case SL_SAMPLINGRATE_96:
+            case SL_SAMPLINGRATE_192:
             default:
-                fprintf(stderr, "Cannot create audio player: unsupported sample rate");
+                SL_LOGE("Cannot create audio player: unsupported sample rate %u milliHz", (unsigned) df_pcm->samplesPerSec);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
             switch (df_pcm->bitsPerSample) {
             case SL_PCMSAMPLEFORMAT_FIXED_8:
-                fprintf(stdout, "FIXME handle 8bit data\n");
+                SL_LOGE("FIXME handle 8-bit data");
+                return SL_RESULT_CONTENT_UNSUPPORTED;
             case SL_PCMSAMPLEFORMAT_FIXED_16:
                 break;
                 // others
             default:
-                fprintf(stderr, "Cannot create audio player: unsupported sample format %lu",
+                // this should have already been rejected by checkDataFormat
+                SL_LOGE("Cannot create audio player: unsupported sample bit depth %lu",
                         (SLuint32)df_pcm->bitsPerSample);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
@@ -389,9 +391,12 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             switch (df_pcm->endianness) {
             case SL_BYTEORDER_LITTLEENDIAN:
                 break;
-                // others esp. big and native (new not in spec)
+            case SL_BYTEORDER_BIGENDIAN:
+                SL_LOGE("FIXME big-endian byte order is unsupported");
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+                // native is proposed but not yet in spec
             default:
-                //FIXME add error message
+                SL_LOGE("Unsupported byte order %u", (unsigned) df_pcm->endianness);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
             } //case SL_DATAFORMAT_PCM
@@ -404,7 +409,6 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             fprintf(stderr, "Error: cannot create Audio Player with SL_DATALOCATOR_BUFFERQUEUE data source without SL_DATAFORMAT_PCM format\n");
             return SL_RESULT_PARAMETER_INVALID;
         } // switch (formatType)
-        pAudioPlayer->mBufferQueue.mNumBuffers = numBuffers;
         } // case SL_DATALOCATOR_BUFFERQUEUE
         break;
     //------------------
@@ -1124,4 +1128,27 @@ SLresult android_audioPlayer_volumeUpdate(CAudioPlayer* ap) {
     android_audioPlayer_updateStereoVolume(ap);
     android_audioPlayer_setMute(ap);
     return SL_RESULT_SUCCESS;
+}
+
+
+//-----------------------------------------------------------------------------
+/*
+ * BufferQueue::Clear
+ */
+SLresult android_audioPlayerClear(CAudioPlayer *pAudioPlayer) {
+    SLresult result = SL_RESULT_SUCCESS;
+
+    switch (pAudioPlayer->mAndroidObjType) {
+    //-----------------------------------
+    // AudioTrack
+    case AUDIOTRACK_PULL:
+    case AUDIOTRACK_PUSH:
+        pAudioPlayer->mAudioTrack->flush();
+        break;
+    default:
+        result = SL_RESULT_INTERNAL_ERROR;
+        break;
+    }
+
+    return result;
 }

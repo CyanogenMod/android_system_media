@@ -50,7 +50,10 @@ void slEnterInterface(const char *function)
     const char *underscore = function;
     while (*underscore != '\0') {
         if (*underscore == '_') {
-            LOGV("Entering %.*s::%s\n", underscore - function, function, &underscore[1]);
+            if (strcmp(function, "BufferQueue_Enqueue") && strcmp(function, "BufferQueue_GetState")
+                && strcmp(function, "OutputMixExt_FillBuffer") ) {
+                LOGV("Entering %.*s::%s\n", underscore - function, function, &underscore[1]);
+            }
             return;
         }
         ++underscore;

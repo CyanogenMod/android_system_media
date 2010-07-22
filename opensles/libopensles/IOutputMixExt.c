@@ -32,6 +32,90 @@ typedef enum {
 } Summary;
 
 
+/** Check whether a track has any data for us to read. */
+
+static SLboolean track_check(struct Track *track)
+{
+    SLboolean trackHasData = SL_BOOLEAN_FALSE;
+
+    CAudioPlayer *audioPlayer = track->mAudioPlayer;
+    if (NULL != audioPlayer) {
+
+        // track is initialized
+
+        object_lock_exclusive(&audioPlayer->mObject);
+
+        SLboolean doBroadcast = SL_BOOLEAN_FALSE;
+        const BufferHeader *oldFront;
+
+        if (audioPlayer->mBufferQueue.mClearRequested) {
+            // application thread(s) that call BufferQueue::Clear while mixer is active
+            // is active will block synchronously until mixer acknowledges the Clear request
+            audioPlayer->mBufferQueue.mFront = &audioPlayer->mBufferQueue.mArray[0];
+            audioPlayer->mBufferQueue.mRear = &audioPlayer->mBufferQueue.mArray[0];
+            audioPlayer->mBufferQueue.mState.count = 0;
+            audioPlayer->mBufferQueue.mClearRequested = SL_BOOLEAN_FALSE;
+            track->mReader = NULL;
+            track->mAvail = 0;
+            doBroadcast = SL_BOOLEAN_TRUE;
+        }
+
+        switch (audioPlayer->mPlay.mState) {
+
+        case SL_PLAYSTATE_PLAYING:  // continue playing current track data
+            if (0 < track->mAvail) {
+                trackHasData = SL_BOOLEAN_TRUE;
+                break;
+            }
+
+            // try to get another buffer from queue
+            oldFront = audioPlayer->mBufferQueue.mFront;
+            if (oldFront != audioPlayer->mBufferQueue.mRear) {
+                assert(0 < audioPlayer->mBufferQueue.mState.count);
+                track->mReader = oldFront->mBuffer;
+                track->mAvail = oldFront->mSize;
+                // note that the buffer stays on the queue while we are reading
+                audioPlayer->mPlay.mState = SL_PLAYSTATE_PLAYING;
+                trackHasData = SL_BOOLEAN_TRUE;
+            } else {
+                // no buffers on queue, so playable but not playing
+                // NTH should be able to call a desperation callback when completely starved,
+                // or call less often than every buffer based on high/low water-marks
+            }
+            break;
+
+        case SL_PLAYSTATE_STOPPING: // application thread(s) called Play::SetPlayState(STOPPED)
+            audioPlayer->mPlay.mPosition = (SLmillisecond) 0;
+            audioPlayer->mPlay.mState = SL_PLAYSTATE_STOPPED;
+            oldFront = audioPlayer->mBufferQueue.mFront;
+            if (oldFront != audioPlayer->mBufferQueue.mRear) {
+                assert(0 < audioPlayer->mBufferQueue.mState.count);
+                track->mReader = oldFront->mBuffer;
+                track->mAvail = oldFront->mSize;
+            }
+            doBroadcast = SL_BOOLEAN_TRUE;
+            break;
+
+        case SL_PLAYSTATE_STOPPED:  // idle
+        case SL_PLAYSTATE_PAUSED:   // idle
+            break;
+
+        default:
+            assert(SL_BOOLEAN_FALSE);
+            break;
+        }
+
+        if (doBroadcast)
+            object_cond_broadcast(&audioPlayer->mObject);
+
+        object_unlock_exclusive(&audioPlayer->mObject);
+
+    }
+
+    return trackHasData;
+
+}
+
 static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 size)
 {
     SL_ENTER_INTERFACE_VOID
@@ -47,18 +131,16 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
         assert(MAX_TRACK > i);
         activeMask &= ~(1 << i);
         struct Track *track = &this->mTracks[i];
+
         // track is allocated
-        CAudioPlayer *audioPlayer = track->mAudioPlayer;
-        if (NULL == audioPlayer)
+
+        if (!track_check(track))
             continue;
-        // track is initialized
-        if (SL_PLAYSTATE_PLAYING != audioPlayer->mPlay.mState)
-            continue;
+
         // track is playing
         void *dstWriter = pBuffer;
         unsigned desired = size;
         SLboolean trackContributedToMix = SL_BOOLEAN_FALSE;
-        IBufferQueue *bufferQueue = track->mBufferQueue;
         float gains[STEREO_CHANNELS];
         Summary summaries[STEREO_CHANNELS];
         unsigned channel;
@@ -75,7 +157,6 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
             summaries[channel] = summary;
         }
         while (desired > 0) {
-            const BufferHeader *oldFront, *newFront, *rear;
             unsigned actual = desired;
             if (track->mAvail < actual)
                 actual = track->mAvail;
@@ -119,64 +200,52 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
                 track->mReader = (char *) track->mReader + actual;
                 track->mAvail -= actual;
                 if (track->mAvail == 0) {
-                    if (NULL != bufferQueue) {
-                        interface_lock_exclusive(bufferQueue);
-                        oldFront = bufferQueue->mFront;
-                        rear = bufferQueue->mRear;
-                        assert(oldFront != rear);
-                        newFront = oldFront;
-                        if (++newFront == &bufferQueue->mArray[bufferQueue->mNumBuffers + 1])
-                            newFront = bufferQueue->mArray;
-                        bufferQueue->mFront = (BufferHeader *) newFront;
+                    IBufferQueue *bufferQueue = &track->mAudioPlayer->mBufferQueue;
+                    interface_lock_exclusive(bufferQueue);
+                    const BufferHeader *oldFront, *newFront, *rear;
+                    oldFront = bufferQueue->mFront;
+                    rear = bufferQueue->mRear;
+                    // a buffer stays on queue while playing, so it better still be there
+                    assert(oldFront != rear);
+                    newFront = oldFront;
+                    if (++newFront == &bufferQueue->mArray[bufferQueue->mNumBuffers + 1])
+                        newFront = bufferQueue->mArray;
+                    bufferQueue->mFront = (BufferHeader *) newFront;
+                    assert(0 < bufferQueue->mState.count);
+                    --bufferQueue->mState.count;
+                    if (newFront != rear) {
+                        // we don't acknowledge application requests between buffers
+                        // within the same mixer frame
                         assert(0 < bufferQueue->mState.count);
-                        --bufferQueue->mState.count;
-                        ++bufferQueue->mState.playIndex;
-                        interface_unlock_exclusive(bufferQueue);
-                        // A good place to do an early warning callback depending on buffer count
+                        track->mReader = newFront->mBuffer;
+                        track->mAvail = newFront->mSize;
+                    }
+                    // else we would set play state to playable but not playing during next mixer
+                    // frame if the queue is still empty at that time
+                    ++bufferQueue->mState.playIndex;
+                    slBufferQueueCallback callback = bufferQueue->mCallback;
+                    void *context = bufferQueue->mContext;
+                    interface_unlock_exclusive(bufferQueue);
+                    // The callback function is called on each buffer completion
+                    if (NULL != callback) {
+                        (*callback)((SLBufferQueueItf) bufferQueue, context);
+                        // Maybe it enqueued another buffer, or maybe it didn't.
+                        // We will find out later during the next mixer frame.
                     }
                 }
                 // no lock, but safe b/c noone else updates this field
                 track->mFrameCounter += actual >> 2;    // sizeof(short) * STEREO_CHANNELS
                 // NTH Calling the callback too often, should depend on requested update period
-                if (audioPlayer->mPlay.mCallback)
-                    (*audioPlayer->mPlay.mCallback)(&audioPlayer->mPlay.mItf,
-                        audioPlayer->mPlay.mContext, SL_PLAYEVENT_HEADMOVING);
+                // FIXME need a lock to get these pointers, and called too often
+                if (track->mAudioPlayer->mPlay.mCallback)
+                    (*track->mAudioPlayer->mPlay.mCallback)(&track->mAudioPlayer->mPlay.mItf,
+                        track->mAudioPlayer->mPlay.mContext, SL_PLAYEVENT_HEADMOVING);
                 continue;
             }
-            // actual == 0
-            if (NULL != bufferQueue) {
-                interface_lock_shared(bufferQueue);
-                oldFront = bufferQueue->mFront;
-                rear = bufferQueue->mRear;
-                if (oldFront != rear) {
-got_one:
-                    assert(0 < bufferQueue->mState.count);
-                    track->mReader = oldFront->mBuffer;
-                    track->mAvail = oldFront->mSize;
-                    interface_unlock_shared(bufferQueue);
-                    continue;
-                }
-                // NTH should be able to configure when to
-                // kick off the callback e.g. high/low water-marks etc.
-                // need data but none available, attempt a desperate callback
-                slBufferQueueCallback callback = bufferQueue->mCallback;
-                void *context = bufferQueue->mContext;
-                interface_unlock_shared(bufferQueue);
-                if (NULL != callback) {
-                    (*callback)((SLBufferQueueItf) bufferQueue, context);
-                    // if lucky, the callback enqueued a buffer
-                    interface_lock_shared(bufferQueue);
-                    if (rear != bufferQueue->mRear)
-                        goto got_one;
-                    interface_unlock_shared(bufferQueue);
-                    // unlucky, queue still empty, the callback failed
-                }
-                // here on underflow due to no callback, or failed callback
-                // NTH underflow, send silence (or previous buffer?)
-                // we did a callback to try to kick start again but failed
-                // should log this
-            }
-            // no buffer queue or underflow, clear out rest of partial buffer
+            // we need more data: desired > 0 but actual == 0
+            if (track_check(track))
+                continue;
+            // underflow: clear out rest of partial buffer (NTH synthesize comfort noise)
             if (!mixBufferHasData && trackContributedToMix)
                 memset(dstWriter, 0, actual);
             break;

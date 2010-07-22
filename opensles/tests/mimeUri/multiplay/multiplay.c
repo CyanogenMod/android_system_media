@@ -61,7 +61,7 @@ static const char *result_to_string(SLresult result)
     static char buffer[32];
     if ( /* result >= 0 && */ result < sizeof(result_strings) / sizeof(result_strings[0]))
         return result_strings[result];
-    sprintf(buffer, "%d", result);
+    sprintf(buffer, "%d", (int) result);
     return buffer;
 }
 
@@ -166,13 +166,13 @@ int main(int argc, char **argv)
         check(result);
         result = (*p->mPlayerPlay)->GetDuration(p->mPlayerPlay, &p->mPlayerDuration);
         check(result);
-        printf("player %d duration %d\n", i, p->mPlayerDuration);
+        printf("player %d duration %d\n", (int) i, (int) p->mPlayerDuration);
     }
 
     // now loop randomly doing things to the players
     for (;;) {
         SLmillisecond delay = 100 + (rand() & 1023);
-        printf("sleep %u\n", delay);
+        printf("sleep %u\n", (unsigned) delay);
         usleep(delay * 1000);
         i = (rand() & 0x7FFFFFFF) % numPlayers;
         printf("player %d ", i);
@@ -192,18 +192,19 @@ int main(int argc, char **argv)
             printf("PLAYING");
             break;
         default:
-            printf("%u", state);
+            printf("%u", (unsigned) state);
             break;
         }
+        printf("\n");
         if (state == SL_PLAYSTATE_STOPPED || state == SL_PLAYSTATE_PAUSED) {
             SLmillibel volumeLevel = -((rand() & 0x7FFFFFFF) % ((SL_MILLIBEL_MIN + 1) / 10));
-            printf(", volume %d", volumeLevel);
+            printf("volume %d\n", volumeLevel);
             result = (*p->mPlayerVolume)->SetVolumeLevel(p->mPlayerVolume, volumeLevel);
             check(result);
             result = (*p->mPlayerVolume)->EnableStereoPosition(p->mPlayerVolume, SL_BOOLEAN_TRUE);
             check(result);
             SLpermille stereoPosition = ((rand() & 0x7FFFFFFF) % 2001) - 1000;
-            printf(", position %d", stereoPosition);
+            printf("position %d\n", stereoPosition);
             result = (*p->mPlayerVolume)->SetStereoPosition(p->mPlayerVolume, stereoPosition);
             check(result);
             if (state != SL_PLAYSTATE_STOPPED) {
@@ -213,7 +214,6 @@ int main(int argc, char **argv)
             result = (*p->mPlayerPlay)->SetPlayState(p->mPlayerPlay, SL_PLAYSTATE_PLAYING);
             check(result);
         }
-        printf("\n");
     }
 
     // FIXME It would be interesting to end the test on some condition (timer, key pressed) so it
