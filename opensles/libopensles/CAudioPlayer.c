@@ -32,7 +32,7 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
     this->mNumChannels = 0;
 
 #ifdef ANDROID
-    result = sles_to_android_audioPlayerRealize(this, async);
+    result = android_audioPlayer_realize(this, async);
 #endif
 
 #ifdef USE_SNDFILE
@@ -89,6 +89,6 @@ void CAudioPlayer_Destroy(void *self)
     }
 #endif // USE_SNDFILE
 #ifdef ANDROID
-    sles_to_android_audioPlayerDestroy(this);
+    android_audioPlayer_destroy(this);
 #endif
 }

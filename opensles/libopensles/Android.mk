@@ -36,7 +36,7 @@ LOCAL_SRC_FILES:=                     \
         interfaces.c                  \
         locks.c                       \
         sles.c                        \
-        sles_to_android.cpp           \
+        android_AudioPlayer.cpp       \
         android_SfPlayer.cpp          \
         android_Effect.cpp            \
         android_AudioRecorder.cpp     \

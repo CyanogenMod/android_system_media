@@ -26,7 +26,7 @@
  *     SL_RESULT_SUCCESS
  *     SL_PARAMETER_INVALID
  */
-extern SLresult sles_to_android_checkAudioPlayerSourceSink(CAudioPlayer *pAudioPlayer);
+extern SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer);
 
 /*
  * Determines the Android media framework object that maps to the given audio source and sink.
@@ -36,7 +36,7 @@ extern SLresult sles_to_android_checkAudioPlayerSourceSink(CAudioPlayer *pAudioP
  *         unsupported parameter or value
  *     SL_RESULT_CONTENT_UNSUPPORTED if a format is not supported (e.g. sample rate too high)
  */
-extern SLresult sles_to_android_audioPlayerCreate(CAudioPlayer *pAudioPlayer);
+extern SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer);
 
 /*
  * Allocates and initializes the Android media framework objects intended to be used with the
@@ -47,29 +47,29 @@ extern SLresult sles_to_android_audioPlayerCreate(CAudioPlayer *pAudioPlayer);
  *         of the Android resources
  */
 
-extern SLresult sles_to_android_audioPlayerRealize(CAudioPlayer *pAudioPlayer, SLboolean async);
+extern SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async);
 
-extern SLresult sles_to_android_audioPlayerSetStreamType_l(CAudioPlayer *pAudioPlayer,
+extern SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer);
+
+extern SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer,
         SLuint32 type);
 
-extern SLresult sles_to_android_audioPlayerDestroy(CAudioPlayer *pAudioPlayer);
+extern SLresult android_audioPlayer_setPlayRate(IPlaybackRate *pRateItf, SLpermille rate);
 
-extern SLresult sles_to_android_audioPlayerSetPlayRate(IPlaybackRate *pRateItf, SLpermille rate);
-
-extern SLresult sles_to_android_audioPlayerSetPlaybackRateBehavior(IPlaybackRate *pRateItf,
+extern SLresult android_audioPlayer_setPlaybackRateBehavior(IPlaybackRate *pRateItf,
         SLuint32 constraints);
 
-extern SLresult sles_to_android_audioPlayerGetCapabilitiesOfRate(IPlaybackRate *pRateItf,
+extern SLresult android_audioPlayer_getCapabilitiesOfRate(IPlaybackRate *pRateItf,
         SLuint32 *pCapabilities);
 
-extern void sles_to_android_audioPlayerSetPlayState(CAudioPlayer *pAudioPlayer);
+extern void android_audioPlayer_setPlayState(CAudioPlayer *pAudioPlayer);
 
-extern void sles_to_android_audioPlayerUseEventMask(CAudioPlayer *pAudioPlayer);
+extern void android_audioPlayer_useEventMask(CAudioPlayer *pAudioPlayer);
 
-extern SLresult sles_to_android_audioPlayerGetDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
+extern SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
 
-extern void sles_to_android_audioPlayerSeek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec);
+extern void android_audioPlayer_seek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec);
 
-extern void sles_to_android_audioPlayerGetPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
+extern void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
 
-extern SLresult sles_to_android_audioPlayerVolumeUpdate(CAudioPlayer *pAudioPlayer);
+extern SLresult android_audioPlayer_volumeUpdate(CAudioPlayer *pAudioPlayer);

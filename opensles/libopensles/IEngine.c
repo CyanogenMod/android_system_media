@@ -136,7 +136,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
-                    result = sles_to_android_checkAudioPlayerSourceSink(this);
+                    result = android_audioPlayer_checkSourceSink(this);
                     if (SL_RESULT_SUCCESS != result)
                         break;
 #else
@@ -191,7 +191,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 
                         // platform-specific initialization
 #ifdef ANDROID
-                        sles_to_android_audioPlayerCreate(this);
+                        android_audioPlayer_create(this);
 #endif
 
                         // return the new audio player object

@@ -32,7 +32,7 @@ static SLresult IPlaybackRate_SetRate(SLPlaybackRateItf self, SLpermille rate)
         this->mRate = rate;
         interface_unlock_poke(this);
 #ifdef ANDROID
-        result = sles_to_android_audioPlayerSetPlayRate(this, rate);
+        result = android_audioPlayer_setPlayRate(this, rate);
 #else
         result = SL_RESULT_SUCCESS;
 #endif
@@ -69,7 +69,7 @@ static SLresult IPlaybackRate_SetPropertyConstraints(SLPlaybackRateItf self, SLu
     this->mProperties = constraints;
 #ifdef ANDROID
     // verify property support before storing
-    result = sles_to_android_audioPlayerSetPlaybackRateBehavior(this, constraints);
+    result = android_audioPlayer_setPlaybackRateBehavior(this, constraints);
 #else
     result = SL_RESULT_SUCCESS;
 #endif
@@ -117,7 +117,7 @@ static SLresult IPlaybackRate_GetCapabilitiesOfRate(SLPlaybackRateItf self,
         } else {
             SLuint32 capabilities = 0;
 #ifdef ANDROID
-            sles_to_android_audioPlayerGetCapabilitiesOfRate(this, &capabilities);
+            android_audioPlayer_getCapabilitiesOfRate(this, &capabilities);
 #else
             capabilities = this->mCapabilities;
 #endif

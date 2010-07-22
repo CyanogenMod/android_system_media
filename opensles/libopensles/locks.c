@@ -52,7 +52,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
             attributes &= ~ATTR_GAIN;   // no need to process asynchronously also
             ap = (CAudioPlayer *) this;
 #ifdef ANDROID
-            sles_to_android_audioPlayerVolumeUpdate(ap);
+            android_audioPlayer_volumeUpdate(ap);
 #else
             audioPlayerGainUpdate(ap);
 #endif
@@ -76,7 +76,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
             attributes &= ~ATTR_POSITION;   // no need to process asynchronously also
             ap = (CAudioPlayer *) this;
 #ifdef ANDROID
-            sles_to_android_audioPlayerSeek(ap, ap->mSeek.mPos);
+            android_audioPlayer_seek(ap, ap->mSeek.mPos);
 #else
             audioPlayerTransportUpdate(ap);
 #endif
@@ -96,9 +96,9 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
             ap = (CAudioPlayer *) this;
 #ifdef ANDROID
             // FIXME should only call when state changes
-            sles_to_android_audioPlayerSetPlayState(ap);
+            android_audioPlayer_setPlayState(ap);
             // FIXME ditto, but for either eventflags or marker position
-            sles_to_android_audioPlayerUseEventMask(ap);
+            android_audioPlayer_useEventMask(ap);
 #else
             audioPlayerTransportUpdate(ap);
 #endif
