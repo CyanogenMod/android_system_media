@@ -250,6 +250,7 @@ SLresult ThreadPool_add(ThreadPool *tp, void (*handler)(void *, int), void *cont
         }
         assert(NULL == *oldRear);
         *oldRear = closure;
+        tp->mClosureRear = newRear;
         // if a worker thread was waiting to dequeue, then suggest that it try again
         if (0 < tp->mWaitingNotEmpty) {
             --tp->mWaitingNotEmpty;
