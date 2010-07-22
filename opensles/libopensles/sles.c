@@ -514,16 +514,19 @@ SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataL
 
 /** Check a data sink and make local deep copy */
 
-SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLocatorFormat)
+SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLocatorFormat,
+        SLuint32 objType)
 {
     if (NULL == pDataSink)
         return SL_RESULT_PARAMETER_INVALID;
     SLDataSink myDataSink = *pDataSink;
     SLresult result;
     result = checkDataLocator(myDataSink.pLocator, &pDataLocatorFormat->mLocator);
-    if (SL_RESULT_SUCCESS != result)
+    if (SL_RESULT_SUCCESS != result) {
         return result;
+    }
     switch (pDataLocatorFormat->mLocator.mLocatorType) {
+
     case SL_DATALOCATOR_URI:
     case SL_DATALOCATOR_ADDRESS:
         result = checkDataFormat(myDataSink.pFormat, &pDataLocatorFormat->mFormat);
@@ -532,8 +535,26 @@ SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLoca
             return result;
         }
         break;
-    case SL_DATALOCATOR_NULL:
+
     case SL_DATALOCATOR_BUFFERQUEUE:
+        if (SL_OBJECTID_AUDIOPLAYER == objType) {
+            return SL_RESULT_PARAMETER_INVALID;
+        } else if (SL_OBJECTID_AUDIORECORDER == objType) {
+#ifdef ANDROID
+            result = checkDataFormat(myDataSink.pFormat, &pDataLocatorFormat->mFormat);
+            if (SL_RESULT_SUCCESS != result) {
+                return result;
+            }
+            break;
+#else
+            SL_LOGE("mLocatorType=%u", (unsigned) pDataLocatorFormat->mLocator.mLocatorType);
+            freeDataLocator(&pDataLocatorFormat->mLocator);
+            return SL_RESULT_PARAMETER_INVALID;
+#endif
+        }
+        break;
+
+    case SL_DATALOCATOR_NULL:
     case SL_DATALOCATOR_MIDIBUFFERQUEUE:
     default:
         // invalid but fall through; the invalid locator will be caught later
