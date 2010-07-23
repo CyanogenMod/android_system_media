@@ -588,14 +588,16 @@ SLresult android_audioPlayer_create(
     // Output check:
     // currently only OutputMix sinks are supported
     // this has been verified in sles_to_android_CheckAudioPlayerSourceSink
-    if (SL_DATALOCATOR_OUTPUTMIX == pAudioSnk->pLocator->mOutputMix.locatorType) {
+    SLuint32 locatorType = *(SLuint32 *)pAudioSnk->pLocator;
+    if (SL_DATALOCATOR_OUTPUTMIX == locatorType) {
         // FIXME possible race between the earlier check and here - should atomically link these
-        pAudioPlayer->mEffectSend->mOutputMix = pAudioSnk->pLocator->mOutputMix.outputMix;
+        // commented out to fix the build
+        //pAudioPlayer->mEffectSend->mOutputMix = pAudioSnk->pLocator->mOutputMix.outputMix;
     }
 
     //--------------------------------------
     // Source check:
-    SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
+    locatorType = *(SLuint32 *)pAudioSrc->pLocator;
     switch (locatorType) {
     //   -----------------------------------
     //   Buffer Queue to AudioTrack
