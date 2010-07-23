@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-/* SDL platform implementation */
+/** \file SDL.c SDL platform implementation */
 
 #include "sles_allinclusive.h"
 
 #ifdef USE_SDL
+
+/** \brief Called by SDL to fill the next audio output buffer */
 
 static void SDLCALL SDL_callback(void *context, Uint8 *stream, int len)
 {
@@ -35,6 +37,9 @@ static void SDLCALL SDL_callback(void *context, Uint8 *stream, int len)
         memset(stream, 0, (size_t) len);
     }
 }
+
+
+/** \brief Called during slCreateEngine to initialize SDL */
 
 void SDL_start(IEngine *thisEngine)
 {

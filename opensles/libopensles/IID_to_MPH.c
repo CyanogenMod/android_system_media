@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// Map SLInterfaceID to its minimal perfect hash (MPH), or -1 if unknown
+/** \file IID_to_MPH.c Interface ID to MPH mapping */
 
 #include "OpenSLES.h"
 #include "MPH.h"
@@ -22,6 +22,8 @@
 #include <string.h>
 
 extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
+
+/** \brief Map SLInterfaceID to its minimal perfect hash (MPH), or -1 if unknown */
 
 int IID_to_MPH(const SLInterfaceID iid)
 {

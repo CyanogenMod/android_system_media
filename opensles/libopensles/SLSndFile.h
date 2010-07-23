@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/** \file SLSndFile.h libsndfile interface */
+
 #ifdef USE_SNDFILE
 extern void SLAPIENTRY SndFile_Callback(SLBufferQueueItf caller, void *pContext);
 extern SLboolean SndFile_IsSupported(const SF_INFO *sfinfo);

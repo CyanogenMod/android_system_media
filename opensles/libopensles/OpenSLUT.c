@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-/* OpenSL ES Utility Toolkit */
+/** \file OpenSLUT.c OpenSL ES Utility Toolkit */
 
 #include "OpenSLES.h"
 #include "OpenSLUT.h"
 #include <stdio.h>
 #include <string.h>
+
+/** \brief Array of strings correponding to each result code */
 
 const char * const slutResultStrings[SLUT_RESULT_MAX] = {
     "SUCCESS",
@@ -41,10 +43,12 @@ const char * const slutResultStrings[SLUT_RESULT_MAX] = {
     "CONTROL_LOST"
 };
 
+/** \brief Maps an interface ID to its display name */
+
 typedef struct
 {
-    const SLInterfaceID *iid;
-    const char *name;
+    const SLInterfaceID *iid;   ///< The interface ID
+    const char *name;           ///< The display name
 } Pair;
 
 // ## is token concatenation e.g. a##b becomes ab
@@ -52,7 +56,9 @@ typedef struct
 
 #define _(x) { &SL_IID_##x, #x }
 
-Pair pairs[] = {
+/** \brief Array of mappings from interface IDs to display names */
+
+static Pair pairs[] = {
     _(3DCOMMIT),
     _(3DDOPPLER),
     _(3DGROUPING),
@@ -99,6 +105,8 @@ Pair pairs[] = {
     _(VOLUME)
 };
 
+/** \brief Print an interface ID in human-readable format */
+
 void slutPrintIID(SLInterfaceID iid)
 {
     Pair *p;
@@ -114,6 +122,10 @@ void slutPrintIID(SLInterfaceID iid)
         (unsigned) iid->time_low, iid->time_mid, iid->time_hi_and_version, iid->clock_seq,
         iid->node[0], iid->node[1], iid->node[2], iid->node[3], iid->node[4], iid->node[5]);
 }
+
+/** \brief Print an array of interface IDs in human-readable format,
+ *  including whether they are required or optional
+ */
 
 void slutPrintIIDs(SLInterfaceID *pInterfaceIds, SLboolean *pInterfaceRequired,
     unsigned numInterfaces)

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/** \file sles_allinclusive.h Everything including the kitchen sink */
+
 #include "OpenSLES.h"
 #include <stddef.h> // offsetof
 #include <stdlib.h> // malloc
@@ -107,18 +109,18 @@ typedef SLresult (*AsyncHook)(void *self, SLboolean async);
 
 // Describes how an interface is related to a given object
 
-#define INTERFACE_UNINITIALIZED 1  // not requested at object creation time
-#define INTERFACE_EXPOSED       2  // requested at object creation time
-#define INTERFACE_ADDING_1      3  // part 1 of asynchronous AddInterface, pending
-#define INTERFACE_ADDING_2      4  // synchronous AddInterface, or part 2 of asynchronous
-#define INTERFACE_ADDED         5  // AddInterface has completed
-#define INTERFACE_REMOVING      6  // unlocked phase of (synchronous) RemoveInterface
-#define INTERFACE_SUSPENDING    7  // suspend in progress
-#define INTERFACE_SUSPENDED     8  // suspend has completed
-#define INTERFACE_RESUMING_1    9  // part 1 of asynchronous ResumeInterface, pending
-#define INTERFACE_RESUMING_2   10  // synchronous ResumeInterface, or part 2 of asynchronous
-#define INTERFACE_ADDING_1A    11  // part 1 of asynchronous AddInterface, aborted
-#define INTERFACE_RESUMING_1A  12  // part 1 of asynchronous ResumeInterface, aborted
+#define INTERFACE_UNINITIALIZED 1  ///< /not requested at object creation time
+#define INTERFACE_EXPOSED       2  ///< /requested at object creation time
+#define INTERFACE_ADDING_1      3  ///< /part 1 of asynchronous AddInterface, pending
+#define INTERFACE_ADDING_2      4  ///< /synchronous AddInterface, or part 2 of asynchronous
+#define INTERFACE_ADDED         5  ///< /AddInterface has completed
+#define INTERFACE_REMOVING      6  ///< /unlocked phase of (synchronous) RemoveInterface
+#define INTERFACE_SUSPENDING    7  ///< /suspend in progress
+#define INTERFACE_SUSPENDED     8  ///< /suspend has completed
+#define INTERFACE_RESUMING_1    9  ///< /part 1 of asynchronous ResumeInterface, pending
+#define INTERFACE_RESUMING_2   10  ///< /synchronous ResumeInterface, or part 2 of asynchronous
+#define INTERFACE_ADDING_1A    11  ///< /part 1 of asynchronous AddInterface, aborted
+#define INTERFACE_RESUMING_1A  12  ///< /part 1 of asynchronous ResumeInterface, aborted
 
 // Maps an interface ID to its offset within the class that exposes it
 
@@ -623,7 +625,7 @@ typedef struct {
     void *mContext;
 #ifdef USE_OUTPUTMIXEXT
     unsigned mActiveMask;   // 1 bit per active track
-    struct Track mTracks[MAX_TRACK];
+    Track mTracks[MAX_TRACK];
 #endif
 } IOutputMix;
 
@@ -853,7 +855,7 @@ enum AndroidObject_state {
     SLuint32 mSampleRateMilliHz;// 0 means unknown, then const once it is known
     // implementation-specific data for this instance
 #ifdef USE_OUTPUTMIXEXT
-    struct Track *mTrack;
+    Track *mTrack;
 #endif
 #ifdef USE_SNDFILE
     struct SndFile mSndFile;

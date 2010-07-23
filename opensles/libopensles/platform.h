@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// Platform-specific configuration constants
+/** \file platform.h Platform-specific configuration constants */
 
 #if defined(ANDROID) || defined(USE_SDL)
 #define PLATFORM_MILLIBEL_MAX_VOLUME 0  // No more than unity gain

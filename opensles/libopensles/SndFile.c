@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-/* libsndfile integration */
+/** \brief libsndfile integration */
 
 #include "sles_allinclusive.h"
 
 #ifdef USE_SNDFILE
+
+/** \brief Called by BufferQueue after each buffer is consumed */
 
 void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
 {
@@ -78,6 +80,9 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
     }
 }
 
+
+/** \brief Check whether the supplied libsndfile format is supported by us */
+
 SLboolean SndFile_IsSupported(const SF_INFO *sfinfo)
 {
     switch (sfinfo->format & SF_FORMAT_TYPEMASK) {
@@ -110,6 +115,9 @@ SLboolean SndFile_IsSupported(const SF_INFO *sfinfo)
     }
     return SL_BOOLEAN_TRUE;
 }
+
+
+/** \brief Check whether the partially-constructed AudioPlayer is compatible with libsndfile */
 
 SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
 {
@@ -150,17 +158,17 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
     this->mSndFile.mRetrySize = 0;
     if (SL_DATALOCATOR_OUTPUTMIX == ((SLDataLocator_OutputMix *)pAudioSnk->pLocator)->locatorType) {
          // FIXME possible race between the earlier check and here - should atomically link these
-         this->mEffectSend.mOutputMix = ((SLDataLocator_OutputMix *)pAudioSnk->pLocator)->outputMix;
+        this->mEffectSend.mOutputMix = (COutputMix*) ((SLDataLocator_OutputMix *)pAudioSnk->pLocator)->outputMix;
     }
 
     return SL_RESULT_SUCCESS;
 }
 
-// called with mutex unlocked for marker and position updates, and play state change
-// FIXME should use two separate hooks since we have separate attributes TRANSPORT and POSITION
+/** \brief Called with mutex unlocked for marker and position updates, and play state change */
 
 void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer)
 {
+    // FIXME should use two separate hooks since we have separate attributes TRANSPORT and POSITION
 
     if (NULL != audioPlayer->mSndFile.mSNDFILE) {
 

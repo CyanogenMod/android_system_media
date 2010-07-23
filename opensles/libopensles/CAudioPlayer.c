@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-/* AudioPlayer class */
+/** \file CAudioPlayer.c AudioPlayer class */
 
 #include "sles_allinclusive.h"
 
-// IObject hooks
 
-
-/** Hook called by Object::Realize when an audio player is realized */
+/** \brief Hook called by Object::Realize when an audio player is realized */
 
 SLresult CAudioPlayer_Realize(void *self, SLboolean async)
 {
@@ -65,7 +63,7 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
 }
 
 
-/** Hook called by Object::Destroy when an audio player is destroyed */
+/** \brief Hook called by Object::Destroy when an audio player is destroyed */
 
 void CAudioPlayer_Destroy(void *self)
 {

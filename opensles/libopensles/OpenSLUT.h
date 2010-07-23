@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-/* OpenSL ES Utility Toolkit */
+/** \file OpenSLUT.h OpenSL ES Utility Toolkit */
+
+/** \brief Maximum result return code */
 
 #define SLUT_RESULT_MAX (SL_RESULT_CONTROL_LOST + 1)
 
