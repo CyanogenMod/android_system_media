@@ -334,6 +334,8 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
             } else {
                 // return the new MIDI player object
                 *pPlayer = &this->mObject.mItf;
+                // a fake value
+                this->mPlay.mDuration = 0;
             }
         }
     }
