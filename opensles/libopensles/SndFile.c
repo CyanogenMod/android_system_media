@@ -141,12 +141,18 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
     default:
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
+    const SLDataSink *pAudioSnk = &this->mDataSink.u.mSink;
     this->mSndFile.mWhich = 0;
     this->mSndFile.mSNDFILE = NULL;
     // this->mSndFile.mMutex is initialized only when there is a valid mSNDFILE
     this->mSndFile.mEOF = SL_BOOLEAN_FALSE;
     this->mSndFile.mRetryBuffer = NULL;
     this->mSndFile.mRetrySize = 0;
+    if (SL_DATALOCATOR_OUTPUTMIX == ((SLDataLocator_OutputMix *)pAudioSnk->pLocator)->locatorType) {
+         // FIXME possible race between the earlier check and here - should atomically link these
+         this->mEffectSend.mOutputMix = ((SLDataLocator_OutputMix *)pAudioSnk->pLocator)->outputMix;
+    }
+
     return SL_RESULT_SUCCESS;
 }
 
@@ -162,6 +168,8 @@ void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer)
         SLmillisecond pos = audioPlayer->mSeek.mPos;
         audioPlayer->mSeek.mPos = SL_TIME_UNKNOWN;
         SLboolean empty = 0 == audioPlayer->mBufferQueue.mState.count;
+        // FIXME a made-up number that should depend on player state and prefetch status
+        audioPlayer->mPrefetchStatus.mLevel = 1000;
         object_unlock_exclusive(&audioPlayer->mObject);
 
         if (SL_TIME_UNKNOWN != pos) {
