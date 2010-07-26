@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-/* Engine class */
+/** \file CEngine.c Engine class */
 
 #include "sles_allinclusive.h"
 
-// IObject hooks
 
-
-/** Hook called by Object::Realize when an engine is realized */
+/** \brief Hook called by Object::Realize when an engine is realized */
 
 SLresult CEngine_Realize(void *self, SLboolean async)
 {
@@ -43,7 +41,7 @@ SLresult CEngine_Realize(void *self, SLboolean async)
 }
 
 
-/** Hook called by Object::Destroy when an engine is destroyed */
+/** \brief Hook called by Object::Destroy when an engine is destroyed */
 
 void CEngine_Destroy(void *self)
 {

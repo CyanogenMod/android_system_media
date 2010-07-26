@@ -158,7 +158,7 @@ static const SLAudioCodecDescriptor CodecDescriptor_A = {
     0                    // modeSetting
 };
 
-const struct CodecDescriptor DecoderDescriptors[] = {
+const CodecDescriptor DecoderDescriptors[] = {
     {SL_AUDIOCODEC_PCM, &CodecDescriptor_A},
     {SL_AUDIOCODEC_MP3, &CodecDescriptor_A},
     {SL_AUDIOCODEC_AMR, &CodecDescriptor_A},
@@ -171,7 +171,7 @@ const struct CodecDescriptor DecoderDescriptors[] = {
     {SL_AUDIOCODEC_NULL, NULL}
 };
 
-const struct CodecDescriptor EncoderDescriptors[] = {
+const CodecDescriptor EncoderDescriptors[] = {
     {SL_AUDIOCODEC_PCM, &CodecDescriptor_A},
     {SL_AUDIOCODEC_MP3, &CodecDescriptor_A},
     {SL_AUDIOCODEC_AMR, &CodecDescriptor_A},

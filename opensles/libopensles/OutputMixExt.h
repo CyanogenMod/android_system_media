@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* OutputMixExt interface */
+/** \file OutputMixExt.h OutputMixExt interface */
 
 #ifdef USE_OUTPUTMIXEXT
 
@@ -28,20 +28,22 @@ extern const SLInterfaceID SL_IID_OUTPUTMIXEXT;
 
 typedef const struct SLOutputMixExtItf_ * const * SLOutputMixExtItf;
 
+/** \brief v-table for IOutputMixExt */
+
 struct SLOutputMixExtItf_ {
     void (*FillBuffer)(SLOutputMixExtItf self, void *pBuffer, SLuint32 size);
 };
 
-// Track describes each input to OutputMix
+/** \brief Track describes each PCM input source to OutputMix */
 
-struct Track {
+typedef struct {
     struct BufferQueue_interface *mBufferQueue;
-    CAudioPlayer *mAudioPlayer; // mixer examines this track if non-NULL
-    const void *mReader;    // pointer to next frame in BufferHeader.mBuffer
-    SLuint32 mAvail;        // number of available bytes in the current buffer
-    float mGains[STEREO_CHANNELS]; // computed gain based on volume, mute, solo, and stereo position
-    SLuint32 mFrameCounter; // number of sample frames consumed from this track, will roll over
-};
+    CAudioPlayer *mAudioPlayer; ///< Mixer examines this track if non-NULL
+    const void *mReader;    ///< Pointer to next frame in BufferHeader.mBuffer
+    SLuint32 mAvail;        ///< Number of available bytes in the current buffer
+    float mGains[STEREO_CHANNELS]; ///< Computed gain based on volume, mute, solo, and stereo position
+    SLuint32 mFrameCounter; ///< Number of sample frames consumed from this track, will roll over
+} Track;
 
 #ifndef this
 #define this this_

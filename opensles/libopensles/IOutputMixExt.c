@@ -34,7 +34,7 @@ typedef enum {
 
 /** Check whether a track has any data for us to read. */
 
-static SLboolean track_check(struct Track *track)
+static SLboolean track_check(Track *track)
 {
     SLboolean trackHasData = SL_BOOLEAN_FALSE;
 
@@ -130,7 +130,7 @@ static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLui
         unsigned i = ctz(activeMask);
         assert(MAX_TRACK > i);
         activeMask &= ~(1 << i);
-        struct Track *track = &this->mTracks[i];
+        Track *track = &this->mTracks[i];
 
         // track is allocated
 
@@ -275,7 +275,7 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
 {
     this->mTrack = NULL;
     const SLDataSink *pAudioSnk = &this->mDataSink.u.mSink;
-    struct Track *track = NULL;
+    Track *track = NULL;
     switch (*(SLuint32 *)pAudioSnk->pLocator) {
     case SL_DATALOCATOR_OUTPUTMIX:
         {
@@ -320,7 +320,7 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
 void audioPlayerGainUpdate(CAudioPlayer *audioPlayer)
 {
     // FIXME need a lock on the track while updating gain
-    struct Track *track = audioPlayer->mTrack;
+    Track *track = audioPlayer->mTrack;
 
     if (NULL == track)
         return;

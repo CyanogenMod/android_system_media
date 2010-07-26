@@ -86,11 +86,11 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
 /** Private helper shared by decoder and encoder */
 
 SLresult GetCodecCapabilities(SLuint32 codecId, SLuint32 *pIndex,
-    SLAudioCodecDescriptor *pDescriptor, const struct CodecDescriptor *codecDescriptors)
+    SLAudioCodecDescriptor *pDescriptor, const CodecDescriptor *codecDescriptors)
 {
     if (NULL == pIndex)
         return SL_RESULT_PARAMETER_INVALID;
-    const struct CodecDescriptor *cd = codecDescriptors;
+    const CodecDescriptor *cd = codecDescriptors;
     SLuint32 index;
     if (NULL == pDescriptor) {
         for (index = 0 ; NULL != cd->mDescriptor; ++cd)

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-/* AudioRecorder class */
+/* \file CAudioRecorder.c AudioRecorder class */
 
 #include "sles_allinclusive.h"
 
-// IObject hooks
 
-/** Hook called by Object::Realize when an audio recorder is realized */
+/** \brief Hook called by Object::Realize when an audio recorder is realized */
 
 SLresult CAudioRecorder_Realize(void *self, SLboolean async)
 {
@@ -35,7 +34,7 @@ SLresult CAudioRecorder_Realize(void *self, SLboolean async)
 }
 
 
-/** Hook called by Object::Resume when an audio recorder is resumed */
+/** \brief Hook called by Object::Resume when an audio recorder is resumed */
 SLresult CAudioRecorder_Resume(void *self, SLboolean async)
 {
     //CAudioRecorder *this = (CAudioRecorder *) self;
@@ -47,7 +46,7 @@ SLresult CAudioRecorder_Resume(void *self, SLboolean async)
 }
 
 
-/** Hook called by Object::Destroy when an audio recorder is destroyed */
+/** \brief Hook called by Object::Destroy when an audio recorder is destroyed */
 
 void CAudioRecorder_Destroy(void *self)
 {

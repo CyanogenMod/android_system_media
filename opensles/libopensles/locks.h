@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/** \file locks.h Mutual exclusion and condition variables */
+
 extern void object_lock_exclusive(IObject *this);
 extern void object_unlock_exclusive(IObject *this);
 extern void object_unlock_exclusive_attributes(IObject *this, unsigned attr);

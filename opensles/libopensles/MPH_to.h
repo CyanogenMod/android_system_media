@@ -17,7 +17,7 @@
 #ifndef __MPH_to_H
 #define __MPH_to_H
 
-// Map minimal perfect hash of an interface ID to its class index.
+/** \brief Map minimal perfect hash of an interface ID to its class index. */
 
 extern const signed char
     MPH_to_3DGroup[MPH_MAX],

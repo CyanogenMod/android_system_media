@@ -41,19 +41,21 @@ extern const struct Vibra_id_descriptor {
 #define SL_AUDIOCODEC_NULL   0
 #define SL_AUDIOCODEC_VORBIS 9
 
-struct CodecDescriptor {
-    SLuint32 mCodecID;
-    const SLAudioCodecDescriptor *mDescriptor;
-};
+/** \brief Associates a codec ID with a corresponding codec descriptor */
 
-#define MAX_DECODERS 9 // (sizeof(Decoder_IDs) / sizeof(Decoder_IDs[0]))
-#define MAX_ENCODERS 9 // (sizeof(Encoder_IDs) / sizeof(Encoder_IDs[0]))
+typedef struct {
+    SLuint32 mCodecID;  ///< The codec ID
+    const SLAudioCodecDescriptor *mDescriptor;  ///< The corresponding descriptor
+} CodecDescriptor;
+
+#define MAX_DECODERS 9 ///< (sizeof(Decoder_IDs) / sizeof(Decoder_IDs[0]))
+#define MAX_ENCODERS 9 ///< (sizeof(Encoder_IDs) / sizeof(Encoder_IDs[0]))
 
 // For now, but encoders might be different than decoders later
 extern const SLuint32 *Decoder_IDs, *Encoder_IDs;
 
-extern const struct CodecDescriptor DecoderDescriptors[], EncoderDescriptors[];
+extern const CodecDescriptor DecoderDescriptors[], EncoderDescriptors[];
 
 extern SLresult GetCodecCapabilities(SLuint32 decoderId, SLuint32 *pIndex,
     SLAudioCodecDescriptor *pDescriptor,
-    const struct CodecDescriptor *codecDescriptors);
+    const CodecDescriptor *codecDescriptors);

@@ -14,30 +14,34 @@
  * limitations under the License.
  */
 
-/* ThreadPool */
+/** \file ThreadPool.h ThreadPool interface */
 
-typedef struct Closure_struct {
+/** \brief Closure represents a deferred computation */
+
+typedef struct {
     void (*mHandler)(void *, int);
     void *mContext;
     int mParameter;
 } Closure;
 
+/** \brief ThreadPool manages a pool of worker threads that execute Closures */
+
 typedef struct {
-    unsigned mInitialized; // indicates which of the following 3 fields are initialized
+    unsigned mInitialized; ///< Indicates which of the following 3 fields are initialized
     pthread_mutex_t mMutex;
-    pthread_cond_t mCondNotFull;    // signalled when a client thread could be unblocked
-    pthread_cond_t mCondNotEmpty;   // signalled when a worker thread could be unblocked
-    SLboolean mShutdown;   // whether shutdown of thread pool has been requested
-    unsigned mWaitingNotFull;   // number of client threads waiting to enqueue
-    unsigned mWaitingNotEmpty;  // number of worker threads waiting to dequeue
-    unsigned mMaxClosures;  // number of slots in circular buffer for closures, not counting spare
-    unsigned mMaxThreads;   // number of worker threads
-    Closure **mClosureArray;    // the circular buffer of closures
+    pthread_cond_t mCondNotFull;    ///< Signalled when a client thread could be unblocked
+    pthread_cond_t mCondNotEmpty;   ///< Signalled when a worker thread could be unblocked
+    SLboolean mShutdown;   ///< Whether shutdown of thread pool has been requested
+    unsigned mWaitingNotFull;   ///< Number of client threads waiting to enqueue
+    unsigned mWaitingNotEmpty;  ///< Number of worker threads waiting to dequeue
+    unsigned mMaxClosures;  ///< Number of slots in circular buffer for closures, not counting spare
+    unsigned mMaxThreads;   ///< Number of worker threads
+    Closure **mClosureArray;    ///< The circular buffer of closures
     Closure **mClosureFront, **mClosureRear;
-    // saves a malloc in the typical case
+    /// Saves a malloc in the typical case
 #define CLOSURE_TYPICAL 15
     Closure *mClosureTypical[CLOSURE_TYPICAL+1];
-    pthread_t *mThreadArray;    // the worker threads
+    pthread_t *mThreadArray;    ///< The worker threads
 #define THREAD_TYPICAL 4
     pthread_t mThreadTypical[THREAD_TYPICAL];
 } ThreadPool;
