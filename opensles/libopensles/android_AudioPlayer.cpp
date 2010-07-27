@@ -192,6 +192,7 @@ void audioTrack_handleUnderrun(CAudioPlayer* ap) {
     }
 }
 
+#ifndef USE_BACKPORT
 //-----------------------------------------------------------------------------
 // Callback associated with an SfPlayer of an SL ES AudioPlayer that gets its data
 // from a URI, for prefetching events
@@ -260,6 +261,7 @@ static void android_prefetchEventCallback(const int event, const int data1, void
         break;
     }
 }
+#endif
 
 //-----------------------------------------------------------------------------
 SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
@@ -582,8 +584,10 @@ SLresult android_audioPlayer_create(
 
     pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
     pAudioPlayer->mAudioTrack = NULL;
+#ifndef USE_BACKPORT
     pAudioPlayer->mSfPlayer.clear();
     pAudioPlayer->mRenderLooper.clear();
+#endif
 
     pAudioPlayer->mAmplFromVolLevel = 1.0f;
     pAudioPlayer->mAmplFromStereoPos[0] = 1.0f;
@@ -633,6 +637,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         pAudioPlayer->mNumChannels = df_pcm->numChannels;
         pAudioPlayer->mSampleRateMilliHz = df_pcm->samplesPerSec; // Note: bad field name in SL ES
         } break;
+#ifndef USE_BACKPORT
     //-----------------------------------
     // MediaPlayer
     case MEDIAPLAYER: {
@@ -701,10 +706,12 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         object_unlock_exclusive(&pAudioPlayer->mObject);
 
         } break;
+#endif
     default:
         result = SL_RESULT_CONTENT_UNSUPPORTED;
     }
 
+#ifndef USE_BACKPORT
     int sessionId = pAudioPlayer->mAudioTrack->getSessionId();
     // initialize EQ
     // FIXME use a table of effect descriptors when adding support for more effects
@@ -716,6 +723,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     // initialize PresetReverb
     // initialize EnvironmentalReverb + EffectSend
     // initialize Virtualizer
+#endif
 
     return result;
 }
@@ -736,7 +744,9 @@ SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer, SLuint3
     }
 
     int format =  pAudioPlayer->mAudioTrack->format();
+#ifndef USE_BACKPORT
     int sessionId = pAudioPlayer->mAudioTrack->getSessionId();
+#endif
     uint32_t sr = sles_to_android_sampleRate(pAudioPlayer->mSampleRateMilliHz);
 
     pAudioPlayer->mAudioTrack->stop();
@@ -753,11 +763,16 @@ SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer, SLuint3
                     pAudioPlayer->mAndroidObjType == MEDIAPLAYER ?  // callback
                             audioTrack_callBack_uri : audioTrack_callBack_pull,
                     (void *) pAudioPlayer,                          // user
-                    0,   // FIXME find appropriate frame count      // notificationFrame
-                    sessionId);
+                    0    // FIXME find appropriate frame count      // notificationFrame
+#ifndef USE_BACKPORT
+                    , sessionId
+#endif
+                    );
+#ifndef USE_BACKPORT
     if (pAudioPlayer->mAndroidObjType == MEDIAPLAYER) {
         pAudioPlayer->mSfPlayer->useAudioTrack(pAudioPlayer->mAudioTrack);
     }
+#endif
 
     return result;
 }
@@ -773,6 +788,7 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
         break;
+#ifndef USE_BACKPORT
     //-----------------------------------
     // MediaPlayer
     case MEDIAPLAYER:
@@ -784,6 +800,7 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
             pAudioPlayer->mRenderLooper.clear();
         }
         break;
+#endif
     default:
         result = SL_RESULT_CONTENT_UNSUPPORTED;
     }
@@ -801,7 +818,9 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
 
     pAudioPlayer->mAndroidObjType = INVALID_TYPE;
 
+#ifndef USE_BACKPORT
     pAudioPlayer->mEqualizer.mEqEffect.clear();
+#endif
 
     return result;
 }
@@ -903,6 +922,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
             break;
         }
         break;
+#ifndef USE_BACKPORT
     case MEDIAPLAYER:
         switch (state) {
         case SL_PLAYSTATE_STOPPED: {
@@ -944,6 +964,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
             break;
         }
         break;
+#endif
     default:
         break;
     }
@@ -1010,10 +1031,12 @@ SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMse
         //       shared memory with the mixer process, the duration is the size of the buffer
         fprintf(stderr, "FIXME: android_audioPlayer_getDuration() verify if duration can be retrieved\n");
         break;
+#ifndef USE_BACKPORT
     case MEDIAPLAYER: {
         int64_t durationUsec = ap->mSfPlayer->getDurationUsec();
         *pDurMsec = durationUsec == -1 ? SL_TIME_UNKNOWN : durationUsec / 1000;
         } break;
+#endif
     default:
         break;
     }
@@ -1053,9 +1076,11 @@ void android_audioPlayer_seek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec)
     case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
         break;
+#ifndef USE_BACKPORT
     case MEDIAPLAYER:
         pAudioPlayer->mSfPlayer->seek(posMsec);
         break;
+#endif
     default:
         break;
     }

@@ -47,7 +47,7 @@ void CEngine_Destroy(void *self)
 {
     CEngine *this = (CEngine *) self;
     this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
-#ifdef ANDROID
+#if defined(ANDROID) && !defined(USE_BACKPORT)
     // free effect data
     //   free EQ data
     if ((0 < this->mEngine.mEqNumPresets) && (NULL != this->mEngine.mEqPresetNames)) {

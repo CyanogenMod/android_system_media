@@ -22,7 +22,7 @@
 
 #define MAX_EQ_PRESETS 3
 
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
 // FIXME needs to be defined in a platform-dependent manner
 static const struct EqualizerBand EqualizerBands[MAX_EQ_BANDS] = {
     {1000, 1500, 2000},
@@ -49,7 +49,7 @@ static SLresult IEqualizer_SetEnabled(SLEqualizerItf self, SLboolean enabled)
     IEqualizer *this = (IEqualizer *) self;
     interface_lock_exclusive(this);
     this->mEnabled = SL_BOOLEAN_FALSE != enabled; // normalize
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
     result = SL_RESULT_SUCCESS;
 #else
     bool fxEnabled = this->mEqEffect->getEnabled();
@@ -80,7 +80,7 @@ static SLresult IEqualizer_IsEnabled(SLEqualizerItf self, SLboolean *pEnabled)
         interface_lock_shared(this);
         SLboolean enabled = this->mEnabled;
         interface_unlock_shared(this);
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
         *pEnabled = enabled;
         result = SL_RESULT_SUCCESS;
 #else
@@ -142,7 +142,7 @@ static SLresult IEqualizer_SetBandLevel(SLEqualizerItf self, SLuint16 band, SLmi
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         interface_lock_exclusive(this);
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
         this->mLevels[band] = level;
         this->mPreset = SL_EQUALIZER_UNDEFINED;
         result = SL_RESULT_SUCCESS;
@@ -172,7 +172,7 @@ static SLresult IEqualizer_GetBandLevel(SLEqualizerItf self, SLuint16 band, SLmi
         } else {
             SLmillibel level;
             interface_lock_shared(this);
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
             level = this->mLevels[band];
             result = SL_RESULT_SUCCESS;
 #else
@@ -200,7 +200,7 @@ static SLresult IEqualizer_GetCenterFreq(SLEqualizerItf self, SLuint16 band, SLm
         if (band >= this->mNumBands) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
             // Note: no lock, but OK because it is const
             *pCenter = this->mBands[band].mCenter;
             result = SL_RESULT_SUCCESS;
@@ -232,7 +232,7 @@ static SLresult IEqualizer_GetBandFreqRange(SLEqualizerItf self, SLuint16 band,
         if (band >= this->mNumBands) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
             // Note: no lock, but OK because it is const
             if (NULL != pMin)
                 *pMin = this->mBands[band].mMin;
@@ -268,7 +268,7 @@ static SLresult IEqualizer_GetBand(SLEqualizerItf self, SLmilliHertz frequency, 
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEqualizer *this = (IEqualizer *) self;
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
         // search for band whose center frequency has the closest ratio to 1.0
         // assumes bands are unsorted (a pessimistic assumption)
         // assumes bands can overlap (a pessimistic assumption)
@@ -315,7 +315,7 @@ static SLresult IEqualizer_GetCurrentPreset(SLEqualizerItf self, SLuint16 *pPres
     } else {
         IEqualizer *this = (IEqualizer *) self;
         interface_lock_shared(this);
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
         SLuint16 preset = this->mPreset;
         interface_unlock_shared(this);
         *pPreset = preset;
@@ -348,7 +348,7 @@ static SLresult IEqualizer_UsePreset(SLEqualizerItf self, SLuint16 index)
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         interface_lock_exclusive(this);
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
         SLuint16 band;
         for (band = 0; band < this->mNumBands; ++band)
             this->mLevels[band] = EqualizerPresets[index].mLevels[band];
@@ -377,7 +377,7 @@ static SLresult IEqualizer_GetNumberOfPresets(SLEqualizerItf self, SLuint16 *pNu
     } else {
         IEqualizer *this = (IEqualizer *) self;
         // Note: no lock, but OK because it is const
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
         *pNumPresets = this->mNumPresets;
 #else
         *pNumPresets = this->mThis->mEngine->mEqNumPresets;
@@ -397,7 +397,7 @@ static SLresult IEqualizer_GetPresetName(SLEqualizerItf self, SLuint16 index, co
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEqualizer *this = (IEqualizer *) self;
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
         if (index >= this->mNumPresets) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
@@ -450,14 +450,14 @@ void IEqualizer_init(void *self)
     // const fields
     this->mNumPresets = 0;
     this->mNumBands = 0;
-#ifndef ANDROID
+#if !defined(ANDROID) || defined(USE_BACKPORT)
     this->mBands = EqualizerBands;
     this->mPresets = EqualizerPresets;
 #endif
     this->mBandLevelRangeMin = 0;
     this->mBandLevelRangeMax = 0;
 
-#ifdef ANDROID
+#if defined(ANDROID) && !defined(USE_BACKPORT)
     // Initialize the EQ settings based on the platform effect, if available
     uint32_t numEffects = 0;
     effect_descriptor_t descriptor;
