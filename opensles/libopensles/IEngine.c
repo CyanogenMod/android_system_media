@@ -135,9 +135,10 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     }
 
                     // copy the buffer queue count from source locator to the buffer queue interface
+                    // we have already range-checked the value down to a smaller width
 
                     this->mBufferQueue.mNumBuffers = (SL_DATALOCATOR_BUFFERQUEUE == *(SLuint32 *)
-                        pAudioSrc->pLocator) ? ((SLDataLocator_BufferQueue *)
+                        pAudioSrc->pLocator) ? (SLuint16) ((SLDataLocator_BufferQueue *)
                         pAudioSrc->pLocator)->numBuffers : 0;
 
                     // check the audio source and sink parameters against platform support

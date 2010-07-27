@@ -84,7 +84,7 @@ static SLresult IVolume_SetMute(SLVolumeItf self, SLboolean mute)
     interface_lock_exclusive(this);
     SLboolean oldMute = this->mMute;
     if (oldMute != mute) {
-        this->mMute = mute;
+        this->mMute = (SLuint8) mute;
         interface_unlock_exclusive_attributes(this, ATTR_GAIN);
     } else
         interface_unlock_exclusive(this);
@@ -122,10 +122,11 @@ static SLresult IVolume_EnableStereoPosition(SLVolumeItf self, SLboolean enable)
     interface_lock_exclusive(this);
     SLboolean oldEnable = this->mEnableStereoPosition;
     if (oldEnable != enable) {
-        this->mEnableStereoPosition = enable;
+        this->mEnableStereoPosition = (SLuint8) enable;
         interface_unlock_exclusive_attributes(this, ATTR_GAIN);
-    } else
+    } else {
         interface_unlock_exclusive(this);
+    }
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
