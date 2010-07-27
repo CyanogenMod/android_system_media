@@ -41,7 +41,7 @@ typedef struct {
     CAudioPlayer *mAudioPlayer; ///< Mixer examines this track if non-NULL
     const void *mReader;    ///< Pointer to next frame in BufferHeader.mBuffer
     SLuint32 mAvail;        ///< Number of available bytes in the current buffer
-    float mGains[STEREO_CHANNELS]; ///< Computed gain based on volume, mute, solo, and stereo position
+    float mGains[STEREO_CHANNELS]; ///< Computed gain based on volume, mute, solo, stereo position
     SLuint32 mFrameCounter; ///< Number of sample frames consumed from this track, will roll over
 } Track;
 
@@ -50,5 +50,6 @@ typedef struct {
 #endif
 extern SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this);
 extern void audioPlayerGainUpdate(CAudioPlayer *this);
+extern void IOutputMixExt_Destroy(CAudioPlayer *this);
 
 #endif

@@ -70,6 +70,11 @@ void CAudioPlayer_Destroy(void *self)
     CAudioPlayer *this = (CAudioPlayer *) self;
     freeDataLocatorFormat(&this->mDataSource);
     freeDataLocatorFormat(&this->mDataSink);
+    // Unlink the audio player from the associate output mix
+#ifdef USE_OUTPUTMIXEXT
+    IOutputMixExt_Destroy(this);
+#endif
+    this->mOutputMix = NULL;
     // Free the buffer queue, if it was larger than typical
     if (NULL != this->mBufferQueue.mArray &&
         this->mBufferQueue.mArray != this->mBufferQueue.mTypical) {
