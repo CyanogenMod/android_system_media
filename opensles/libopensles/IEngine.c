@@ -642,7 +642,7 @@ void IEngine_init(void *self)
     int ok;
     ok = pthread_cond_init(&this->mShutdownCond, (const pthread_condattr_t *) NULL);
     assert(0 == ok);
-#ifdef ANDROID
+#if defined(ANDROID) && !defined(USE_BACKPORT)
     this->mEqNumPresets = 0;
     this->mEqPresetNames = NULL;
 #endif

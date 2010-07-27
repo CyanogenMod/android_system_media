@@ -6,7 +6,7 @@ LOCAL_SRC_FILES := \
         OpenSLUT.c
 
 LOCAL_C_INCLUDES:= \
-	system/media/opensles/include
+        system/media/opensles/include
 
 LOCAL_MODULE := libOpenSLUT
 
@@ -37,8 +37,6 @@ LOCAL_SRC_FILES:=                     \
         locks.c                       \
         sles.c                        \
         android_AudioPlayer.cpp       \
-        android_SfPlayer.cpp          \
-        android_Effect.cpp            \
         android_AudioRecorder.cpp     \
         sync.c                        \
         IID_to_MPH.c                  \
@@ -91,12 +89,20 @@ LOCAL_SRC_FILES:=                     \
         IVisualization.c              \
         IVolume.c
 
+# comment out for USE_BACKPORT
+LOCAL_SRC_FILES += \
+        android_SfPlayer.cpp          \
+        android_Effect.cpp
+
 LOCAL_C_INCLUDES:=                                                  \
-	$(JNI_H_INCLUDE)                                                \
-	system/media/opensles/include                                   \
-	frameworks/base/media/libstagefright                            \
-	frameworks/base/media/libstagefright/include                    \
-	external/opencore/extern_libs_v2/khronos/openmax/include
+        $(JNI_H_INCLUDE)                                            \
+        system/media/opensles/include
+
+# comment out for USE_BACKPORT
+LOCAL_C_INCLUDES += \
+    frameworks/base/media/libstagefright                            \
+    frameworks/base/media/libstagefright/include                    \
+    external/opencore/extern_libs_v2/khronos/openmax/include
 
 LOCAL_CFLAGS += -x c++ -Wno-multichar -Wno-invalid-offsetof
 
@@ -105,12 +111,15 @@ LOCAL_STATIC_LIBRARIES += \
         libOpenSLUT
 
 LOCAL_SHARED_LIBRARIES :=         \
+        libutils                  \
+        libmedia                  \
+        libbinder
+
+# comment out for USE_BACKPORT
+LOCAL_SHARED_LIBRARIES +=         \
         libstagefright            \
         libstagefright_foundation \
-        libmedia                  \
-        libutils                  \
-        libcutils                 \
-        libbinder
+        libcutils
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
         LOCAL_LDLIBS += -lpthread -ldl

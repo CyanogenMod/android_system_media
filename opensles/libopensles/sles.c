@@ -787,7 +787,9 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
 
 #ifdef ANDROID
         android::ProcessState::self()->startThreadPool();
+#ifndef USE_BACKPORT
         android::DataSource::RegisterDefaultSniffers();
+#endif
 #endif
 
         if (NULL == pEngine) {

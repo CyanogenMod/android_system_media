@@ -54,15 +54,19 @@ typedef struct COutputMix_struct COutputMix;
 #include "media/AudioRecord.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
+#ifndef USE_BACKPORT
 #include "media/AudioEffect.h"
 #include "media/EffectApi.h"
 #include "media/EffectEqualizerApi.h"
+#endif
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
 #include <binder/ProcessState.h>
 #include "android_sles_conversions.h"
+#ifndef USE_BACKPORT
 #include "android_SfPlayer.h"
 #include "android_Effect.h"
+#endif
 #include "android_AudioRecorder.h"
 #endif
 
@@ -489,7 +493,7 @@ typedef struct Engine_interface {
     SLboolean mShutdownAck;
     pthread_cond_t mShutdownCond;
     ThreadPool mThreadPool; // for asynchronous operations
-#ifdef ANDROID
+#if defined(ANDROID) && !defined(USE_BACKPORT)
     SLuint32 mEqNumPresets;
     char** mEqPresetNames;
 #endif
@@ -516,7 +520,7 @@ struct EqualizerBand {
     SLmilliHertz mMax;
 };
 
-#ifdef ANDROID
+#if defined(ANDROID) && !defined(USE_BACKPORT)
 #define MAX_EQ_BANDS 0
 #else
 #define MAX_EQ_BANDS 4  // compile-time limit, runtime limit may be smaller
@@ -535,7 +539,7 @@ typedef struct {
     const struct EqualizerPreset *mPresets;
     SLmillibel mBandLevelRangeMin;
     SLmillibel mBandLevelRangeMax;
-#ifdef ANDROID
+#if defined(ANDROID) && !defined(USE_BACKPORT)
     effect_descriptor_t mEqDescriptor;
     android::sp<android::AudioEffect> mEqEffect;
 #endif
@@ -866,8 +870,10 @@ enum AndroidObject_state {
     enum AndroidObject_type mAndroidObjType;
     enum AndroidObject_state mAndroidObjState;
     android::AudioTrack *mAudioTrack;
+#ifndef USE_BACKPORT
     android::sp<android::SfPlayer> mSfPlayer;
     android::sp<android::ALooper>  mRenderLooper;
+#endif
     /**
      * Amplification (can be attenuation) factor derived for the VolumeLevel
      */
