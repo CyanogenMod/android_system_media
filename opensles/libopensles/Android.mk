@@ -3,12 +3,12 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-        OpenSLUT.c
+        OpenSLESUT.c
 
 LOCAL_C_INCLUDES:= \
         system/media/opensles/include
 
-LOCAL_MODULE := libOpenSLUT
+LOCAL_MODULE := libOpenSLESUT
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -108,7 +108,7 @@ LOCAL_CFLAGS += -x c++ -Wno-multichar -Wno-invalid-offsetof
 
 LOCAL_STATIC_LIBRARIES += \
         libopensles_helper        \
-        libOpenSLUT
+        libOpenSLESUT
 
 LOCAL_SHARED_LIBRARIES :=         \
         libutils                  \
