@@ -20,51 +20,8 @@
 #include "utils/RefBase.h"
 
 
-//-----------------------------------------------------------------------------
-inline SLuint32 android_to_sles_streamType(int type) {
-    return (SLuint32) type;
-}
-
-inline SLuint32 android_to_sles_sampleRate(uint32_t srHz) {
-    // convert to milliHertz
-    return (SLuint32) srHz*1000;
-}
 
 //-----------------------------------------------------------------------------
-inline int sles_to_android_streamType(SLuint32 type) {
-    return (int)type;
-}
-
-inline uint32_t sles_to_android_sampleRate(SLuint32 sampleRateMilliHertz) {
-    return (uint32_t)(sampleRateMilliHertz / 1000);
-}
-
-inline int sles_to_android_sampleFormat(SLuint32 pcmFormat) {
-    switch (pcmFormat) {
-        case SL_PCMSAMPLEFORMAT_FIXED_16:
-            return android::AudioSystem::PCM_16_BIT;
-            break;
-        case SL_PCMSAMPLEFORMAT_FIXED_8:
-            return android::AudioSystem::PCM_8_BIT;
-            break;
-        case SL_PCMSAMPLEFORMAT_FIXED_20:
-        case SL_PCMSAMPLEFORMAT_FIXED_24:
-        case SL_PCMSAMPLEFORMAT_FIXED_28:
-        case SL_PCMSAMPLEFORMAT_FIXED_32:
-        default:
-            return android::AudioSystem::INVALID_FORMAT;
-    }
-}
-
-
-inline int sles_to_android_channelMask(SLuint32 nbChannels, SLuint32 channelMask) {
-    // FIXME handle channel mask mapping between SL ES and Android
-    return (nbChannels == 1 ?
-            android::AudioSystem::CHANNEL_OUT_MONO :
-            android::AudioSystem::CHANNEL_OUT_STEREO);
-}
-
-
 int android_getMinFrameCount(uint32_t sampleRate) {
     int afSampleRate;
     if (android::AudioSystem::getOutputSamplingRate(&afSampleRate,
@@ -88,6 +45,8 @@ int android_getMinFrameCount(uint32_t sampleRate) {
     return (afFrameCount*sampleRate*minBufCount)/afSampleRate;
 }
 
+
+//-----------------------------------------------------------------------------
 #define LEFT_CHANNEL_MASK  0x1 << 0
 #define RIGHT_CHANNEL_MASK 0x1 << 1
 

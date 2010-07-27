@@ -129,7 +129,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         break;
                     }
 
-                    result = checkDataSink(pAudioSnk, &this->mDataSink);
+                    result = checkDataSink(pAudioSnk, &this->mDataSink, SL_OBJECTID_AUDIOPLAYER);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
@@ -238,11 +238,15 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
             } else {
 
                 do {
+                    // const, will be set later by the containing AudioRecorder
+                    this->mNumChannels = 0;
+                    this->mSampleRateMilliHz = 0;
+
                     // Check the source and sink parameters, and make a local copy of all parameters
                     result = checkDataSource(pAudioSrc, &this->mDataSource);
                     if (SL_RESULT_SUCCESS != result)
                         break;
-                    result = checkDataSink(pAudioSnk, &this->mDataSink);
+                    result = checkDataSink(pAudioSnk, &this->mDataSink, SL_OBJECTID_AUDIORECORDER);
                     if (SL_RESULT_SUCCESS != result)
                         break;
 

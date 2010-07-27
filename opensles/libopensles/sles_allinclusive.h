@@ -60,6 +60,7 @@ typedef struct COutputMix_struct COutputMix;
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
 #include <binder/ProcessState.h>
+#include "android_sles_conversions.h"
 #include "android_SfPlayer.h"
 #include "android_Effect.h"
 #include "android_AudioRecorder.h"
@@ -903,6 +904,9 @@ enum AndroidObject_state {
     // rest of fields are not related to the interfaces
     DataLocatorFormat mDataSource;
     DataLocatorFormat mDataSink;
+    // cached data for this instance
+    SLuint8 mNumChannels;   // 0 means unknown, then const once it is known, range 1 <= x <= 8
+    SLuint32 mSampleRateMilliHz;// 0 means unknown, then const once it is known
     // implementation-specific data for this instance
 #ifdef ANDROID
     android::AudioRecord *mAudioRecord;
@@ -1076,7 +1080,8 @@ extern SLuint32 IObjectToObjectID(IObject *object);
 
 extern SLresult checkDataSource(const SLDataSource *pDataSrc,
         DataLocatorFormat *myDataSourceLocator);
-extern SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *myDataSinkLocator);
+extern SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *myDataSinkLocator,
+        SLuint32 objType);
 extern SLresult checkSourceFormatVsInterfacesCompatibility(
         const DataLocatorFormat *pDataLocatorFormat,
         SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
