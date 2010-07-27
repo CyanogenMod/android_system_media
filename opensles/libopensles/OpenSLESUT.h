@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-/** \file OpenSLUT.h OpenSL ES Utility Toolkit */
+/** \file OpenSLESUT.h OpenSL ES Utility Toolkit */
 
 /** \brief Maximum result return code */
 
-#define SLUT_RESULT_MAX (SL_RESULT_CONTROL_LOST + 1)
+#define SLESUT_RESULT_MAX (SL_RESULT_CONTROL_LOST + 1)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern const char * const slutResultStrings[SLUT_RESULT_MAX];
-extern void slutPrintIID(SLInterfaceID iid);
+extern const char * const slesutResultStrings[SLESUT_RESULT_MAX];
+extern void slesutPrintIID(SLInterfaceID iid);
 
 #ifdef __cplusplus
 }

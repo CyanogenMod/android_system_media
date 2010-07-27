@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-/** \file OpenSLUT.c OpenSL ES Utility Toolkit */
+/** \file OpenSLESUT.c OpenSL ES Utility Toolkit */
 
 #include "OpenSLES.h"
-#include "OpenSLUT.h"
+#include "OpenSLESUT.h"
 #include <stdio.h>
 #include <string.h>
 
 /** \brief Array of strings correponding to each result code */
 
-const char * const slutResultStrings[SLUT_RESULT_MAX] = {
+const char * const slesutResultStrings[SLESUT_RESULT_MAX] = {
     "SUCCESS",
     "PRECONDITIONS_VIOLATED",
     "PARAMETER_INVALID",
@@ -107,7 +107,7 @@ static Pair pairs[] = {
 
 /** \brief Print an interface ID in human-readable format */
 
-void slutPrintIID(SLInterfaceID iid)
+void slesutPrintIID(SLInterfaceID iid)
 {
     Pair *p;
     const Pair *end = &pairs[sizeof(pairs)/sizeof(pairs[0])];
@@ -127,13 +127,13 @@ void slutPrintIID(SLInterfaceID iid)
  *  including whether they are required or optional
  */
 
-void slutPrintIIDs(SLInterfaceID *pInterfaceIds, SLboolean *pInterfaceRequired,
+void slesutPrintIIDs(SLInterfaceID *pInterfaceIds, SLboolean *pInterfaceRequired,
     unsigned numInterfaces)
 {
     unsigned i;
     for (i = 0; i < numInterfaces; ++i) {
         printf("interfaces[%u]=", i);
-        slutPrintIID(pInterfaceIds[i]);
+        slesutPrintIID(pInterfaceIds[i]);
         printf(" %s\n", (unsigned) pInterfaceRequired[i] ? "required" : "optional");
     }
 }

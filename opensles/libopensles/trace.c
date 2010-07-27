@@ -36,8 +36,8 @@ void slEnterGlobal(const char *function)
 void slLeaveGlobal(const char *function, SLresult result)
 {
     if (SL_RESULT_SUCCESS != result) {
-        if (SLUT_RESULT_MAX > result)
-            LOGV("Leaving %s (%s)\n", function, slutResultStrings[result]);
+        if (SLESUT_RESULT_MAX > result)
+            LOGV("Leaving %s (%s)\n", function, slesutResultStrings[result]);
         else
             LOGV("Leaving %s (0x%X)\n", function, (unsigned) result);
     }
@@ -69,9 +69,9 @@ void slLeaveInterface(const char *function, SLresult result)
         const char *underscore = function;
         while (*underscore != '\0') {
             if (*underscore == '_') {
-                if (SLUT_RESULT_MAX > result)
+                if (SLESUT_RESULT_MAX > result)
                     LOGE("Leaving %.*s::%s (%s)\n", underscore - function, function,
-                        &underscore[1], slutResultStrings[result]);
+                        &underscore[1], slesutResultStrings[result]);
                 else
                     LOGE("Leaving %.*s::%s (0x%X)\n", underscore - function, function,
                         &underscore[1], (unsigned) result);
@@ -79,8 +79,8 @@ void slLeaveInterface(const char *function, SLresult result)
             }
             ++underscore;
         }
-        if (SLUT_RESULT_MAX > result)
-            LOGE("Leaving %s (%s)\n", function, slutResultStrings[result]);
+        if (SLESUT_RESULT_MAX > result)
+            LOGE("Leaving %s (%s)\n", function, slesutResultStrings[result]);
         else
             LOGE("Leaving %s (0x%X)\n", function, (unsigned) result);
     }

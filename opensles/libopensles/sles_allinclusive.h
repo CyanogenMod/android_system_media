@@ -29,7 +29,7 @@
 #include "MPH.h"
 #include "MPH_to.h"
 #include "devices.h"
-#include "OpenSLUT.h"
+#include "OpenSLESUT.h"
 #include "ThreadPool.h"
 
 typedef struct CAudioPlayer_struct CAudioPlayer;
