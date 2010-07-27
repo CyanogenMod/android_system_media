@@ -335,26 +335,26 @@ void audioPlayerGainUpdate(CAudioPlayer *audioPlayer)
     if (soloMask)
         muteMask |= ~soloMask;
     if (mute || !(~muteMask & 3)) {
-        track->mGains[0] = 0.0;
-        track->mGains[1] = 0.0;
+        track->mGains[0] = 0.0f;
+        track->mGains[1] = 0.0f;
     } else {
-        float playerGain = pow(10.0, level / 2000.0);
+        float playerGain = powf(10.0f, level / 2000.0f);
         unsigned channel;
         for (channel = 0; channel < STEREO_CHANNELS; ++channel) {
             float gain;
             if (muteMask & (1 << channel))
-                gain = 0.0;
+                gain = 0.0f;
             else {
                 gain = playerGain;
                 if (enableStereoPosition) {
                     switch (channel) {
                     case 0:
                         if (stereoPosition > 0)
-                            gain *= (1000 - stereoPosition) / 1000.0;
+                            gain *= (1000 - stereoPosition) / 1000.0f;
                         break;
                     case 1:
                         if (stereoPosition < 0)
-                            gain *= (1000 + stereoPosition) / 1000.0;
+                            gain *= (1000 + stereoPosition) / 1000.0f;
                         break;
                     default:
                         assert(SL_BOOLEAN_FALSE);
