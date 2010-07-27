@@ -23,7 +23,7 @@
 
 // Used by SDL but not specific to or dependent on SDL
 
-// Summary of the gain, as an optimization for the mixer
+/** \brief Summary of the gain, as an optimization for the mixer */
 
 typedef enum {
     GAIN_MUTE  = 0,  // mValue == 0.0f within epsilon
@@ -32,7 +32,7 @@ typedef enum {
 } Summary;
 
 
-/** Check whether a track has any data for us to read. */
+/** \brief Check whether a track has any data for us to read */
 
 static SLboolean track_check(Track *track)
 {
@@ -115,6 +115,9 @@ static SLboolean track_check(Track *track)
     return trackHasData;
 
 }
+
+
+/** \brief This is the mixer for SDL: fill the specified 16-bit stereo PCM buffer */
 
 static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 size)
 {
@@ -271,6 +274,33 @@ void IOutputMixExt_init(void *self)
     this->mItf = &IOutputMixExt_Itf;
 }
 
+
+/** \brief Called by Object::Destroy for an AudioPlayer to release the associated track */
+
+void IOutputMixExt_Destroy(CAudioPlayer *this)
+{
+    COutputMix *outputMix = this->mOutputMix;
+    if (NULL != outputMix) {
+        Track *track = this->mTrack;
+        assert(NULL != track);
+        assert(track->mAudioPlayer == this);
+        unsigned i = track - outputMix->mOutputMix.mTracks;
+        assert( /* 0 <= i && */ i < MAX_TRACK);
+        unsigned mask = 1 << i;
+        // FIXME deadlock possible here due to undocumented lock ordering
+        object_lock_exclusive(&outputMix->mObject);
+        // FIXME how can we be sure the mixer is not reading from this track right now?
+        track->mAudioPlayer = NULL;
+        assert(outputMix->mOutputMix.mActiveMask & mask);
+        outputMix->mOutputMix.mActiveMask &= ~mask;
+        object_unlock_exclusive(&outputMix->mObject);
+        this->mTrack = NULL;
+    }
+}
+
+
+/** \brief Called by Engine::CreateAudioPlayer to allocate a track */
+
 SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
 {
     this->mTrack = NULL;
@@ -316,6 +346,9 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
     track->mFrameCounter = 0;
     return SL_RESULT_SUCCESS;
 }
+
+
+/** \brief Called when a gain-related field (mute, solo, volume, stereo position, etc.) updated */
 
 void audioPlayerGainUpdate(CAudioPlayer *audioPlayer)
 {
@@ -366,5 +399,6 @@ void audioPlayerGainUpdate(CAudioPlayer *audioPlayer)
         }
     }
 }
+
 
 #endif // USE_OUTPUTMIXEXT

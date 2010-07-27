@@ -18,17 +18,26 @@
 
 #include "sles_allinclusive.h"
 
-// Maps AUX index to OutputMix interface index
+
+/** \brief Maps AUX index to OutputMix interface index */
 
 static const unsigned char AUX_to_MPH[AUX_MAX] = {
     MPH_ENVIRONMENTALREVERB,
     MPH_PRESETREVERB
 };
 
+
+/** \brief Private function that validates the effect interface specified by the application */
+
 static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEffect)
 {
-    COutputMix *outputMix = this->mOutputMix;
+    // Make sure this effect send is on an audio player, not a MIDI player
+    CAudioPlayer *audioPlayer = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
+        (CAudioPlayer *) this->mThis : NULL;
+    if (NULL == audioPlayer)
+        return NULL;
     // Make sure the sink for this player is an output mix
+    COutputMix *outputMix = audioPlayer->mOutputMix;
     if (NULL == outputMix)
         return NULL;
     unsigned aux;
@@ -215,7 +224,6 @@ void IEffectSend_init(void *self)
 {
     IEffectSend *this = (IEffectSend *) self;
     this->mItf = &IEffectSend_Itf;
-    this->mOutputMix = NULL; // CAudioPlayer will need to re-initialize
     this->mDirectLevel = 0;
     struct EnableLevel *enableLevel = this->mEnableLevels;
     unsigned aux;

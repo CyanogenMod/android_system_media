@@ -468,7 +468,6 @@ struct EnableLevel {
 typedef struct {
     const struct SLEffectSendItf_ *mItf;
     IObject *mThis;
-    COutputMix *mOutputMix;     // which output mix this effect send is attached to
     SLmillibel mDirectLevel;    // dry volume
     struct EnableLevel mEnableLevels[AUX_MAX];  // wet enable and volume per effect type
 } IEffectSend;
@@ -847,6 +846,7 @@ enum AndroidObject_state {
     // rest of fields are not related to the interfaces
     DataLocatorFormat mDataSource;
     DataLocatorFormat mDataSink;
+    COutputMix *mOutputMix;     // output mix this audio player is attached to, for effect send
     // cached data for this instance
     SLuint8 /*SLboolean*/ mMute;
     // Formerly at IMuteSolo
@@ -1126,7 +1126,7 @@ extern const char * const interface_names[MPH_MAX];
                                               // player stereo position, player mute
 #define ATTR_TRANSPORT  ((unsigned) 0x1 << 1) // play state, looping
 #define ATTR_POSITION   ((unsigned) 0x1 << 2) // requested position (a.k.a. seek position)
-#define ATTR_ENQUEUE    ((unsigned) 0x1 << 3) // buffer queue became non-empty while in playing state, (NTF rename)
+#define ATTR_ENQUEUE    ((unsigned) 0x1 << 3) // buffer queue became non-empty and in playing state
 
 #define SL_DATALOCATOR_NULL 0    // application specified a NULL value for pLocator
 #define SL_DATAFORMAT_NULL 0     // application specified a NULL or undefined value for pFormat

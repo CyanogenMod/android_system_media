@@ -108,6 +108,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                 do {
 
                     // Initialize private fields not associated with an interface
+                    this->mOutputMix = NULL;
                     this->mMuteMask = 0;
                     this->mSoloMask = 0;
                     // const, will be set later by the containing AudioPlayer or MidiPlayer
@@ -140,6 +141,13 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     this->mBufferQueue.mNumBuffers = (SL_DATALOCATOR_BUFFERQUEUE == *(SLuint32 *)
                         pAudioSrc->pLocator) ? (SLuint16) ((SLDataLocator_BufferQueue *)
                         pAudioSrc->pLocator)->numBuffers : 0;
+
+                    // link this audio player to its associated output mix
+                    if (SL_DATALOCATOR_OUTPUTMIX == this->mDataSink.mLocator.mLocatorType) {
+                         // FIXME possible race between earlier check and here by atomically linking
+                        this->mOutputMix = (COutputMix *)
+                            this->mDataSink.mLocator.mOutputMix.outputMix;
+                    }
 
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
