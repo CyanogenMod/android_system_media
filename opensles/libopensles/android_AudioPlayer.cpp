@@ -275,8 +275,6 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         fprintf(stderr, "Cannot create audio player: data sink is not SL_DATALOCATOR_OUTPUTMIX\n");
         return SL_RESULT_PARAMETER_INVALID;
     }
-    // FIXME verify output mix is in realized state
-    fprintf(stderr, "[ FIXME verify OutputMix is in Realized state ]\n");
 
     //--------------------------------------
     // Source check:

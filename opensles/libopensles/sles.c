@@ -197,11 +197,25 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
             return SL_RESULT_PARAMETER_INVALID;
         break;
     case SL_DATALOCATOR_OUTPUTMIX:
+        {
         pDataLocator->mOutputMix = *(SLDataLocator_OutputMix *)pLocator;
-        if ((NULL == pDataLocator->mOutputMix.outputMix)
-                || (SL_OBJECTID_OUTPUTMIX
-                        != IObjectToObjectID((IObject *) pDataLocator->mOutputMix.outputMix)))
+        if (NULL == pDataLocator->mOutputMix.outputMix) {
+            SL_LOGE("locatorType is SL_DATALOCATOR_OUTPUTMIX, but outputMix field is NULL");
             return SL_RESULT_PARAMETER_INVALID;
+        }
+        IObject *outputMixObject = (IObject *) pDataLocator->mOutputMix.outputMix;
+        if (SL_OBJECTID_OUTPUTMIX != IObjectToObjectID(outputMixObject)) {
+            SL_LOGE("locatorType is SL_DATALOCATOR_OUTPUTMIX, but outputMix field does not refer " \
+                "to an SL_OBJECTID_OUTPUTMIX");
+            return SL_RESULT_PARAMETER_INVALID;
+        }
+        if (outputMixObject->mState != SL_OBJECT_STATE_REALIZED) {
+            SL_LOGE("locatorType is SL_DATALOCATOR_OUTPUTMIX, but outputMix field refers to an " \
+                "unrealized SL_OBJECTID_OUTPUTMIX");
+            return SL_RESULT_PRECONDITIONS_VIOLATED;
+        }
+        // FIXME race condition as output mix could disappear, should atomically establish a link
+        }
         break;
     case SL_DATALOCATOR_URI:
         {
