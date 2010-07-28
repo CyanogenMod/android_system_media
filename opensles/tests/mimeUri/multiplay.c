@@ -16,7 +16,7 @@
 
 // multiplay is a command-line test app that plays multiple files randomly
 
-#include "OpenSLES.h"
+#include "SLES/OpenSLES.h"
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>

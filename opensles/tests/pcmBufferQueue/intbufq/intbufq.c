@@ -19,7 +19,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "OpenSLES.h"
+#include "SLES/OpenSLES.h"
 
 #define checkResult(r) do { if ((r) != SL_RESULT_SUCCESS) fprintf(stderr, "error %d at %s:%d\n", \
     (int) r, __FILE__, __LINE__); } while (0)

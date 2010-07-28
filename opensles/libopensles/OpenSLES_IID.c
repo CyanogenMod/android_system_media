@@ -30,9 +30,9 @@
 /****************************************************************************/
 
 
-#include "OpenSLES.h"         /* SL Header */
+#include "SLES/OpenSLES.h"         /* SL Header */
 #ifdef ANDROID
-#include "OpenSLES_Android.h" /* Android-specific SL Header */
+#include "SLES/OpenSLES_Android.h" /* Android-specific SL Header */
 #endif
 #include "MPH.h"
 
