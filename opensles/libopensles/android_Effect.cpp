@@ -219,3 +219,171 @@ SLresult android_fx_statusToResult(android::status_t status) {
     }
 }
 
+
+//-----------------------------------------------------------------------------
+SLresult android_genericFx_queryNumEffects(SLuint32 *pNumSupportedAudioEffects) {
+
+    if (NULL == pNumSupportedAudioEffects) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+
+    android::status_t status =
+            android::AudioEffect::queryNumberEffects((uint32_t*)pNumSupportedAudioEffects);
+
+    SLresult result = SL_RESULT_SUCCESS;
+    switch(status) {
+        case android::NO_ERROR:
+            result = SL_RESULT_SUCCESS;
+            break;
+        case android::PERMISSION_DENIED:
+            result = SL_RESULT_PERMISSION_DENIED;
+            break;
+        case android::NO_INIT:
+            result = SL_RESULT_RESOURCE_ERROR;
+            break;
+        case android::BAD_VALUE:
+            result = SL_RESULT_PARAMETER_INVALID;
+            break;
+        default:
+            result = SL_RESULT_INTERNAL_ERROR;
+            SL_LOGE("received invalid status %d from AudioEffect::queryNumberEffects()", status);
+            break;
+    }
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult android_genericFx_queryEffect(SLuint32 index, SLInterfaceID *pAudioEffectId) {
+
+    if (NULL == pAudioEffectId) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+
+    effect_descriptor_t descriptor;
+    android::status_t status =
+                android::AudioEffect::queryEffect(index, &descriptor);
+
+    SLresult result = SL_RESULT_SUCCESS;
+    switch(status) {
+        case android::NO_ERROR:
+            // FIXME this function will move to an engine interface where we will store the
+            //       audio effect IDs and we only return references to those, as SLInterfaceID
+            //       is a pointer to the struct where a uuid is stored.
+            //*pAudioEffectId = some global reference to where we keep a copy of the effect uuid
+            result = SL_RESULT_SUCCESS;
+            break;
+        case android::PERMISSION_DENIED:
+            result = SL_RESULT_PERMISSION_DENIED;
+            break;
+        case android::NO_INIT:
+        case android::INVALID_OPERATION:
+            result = SL_RESULT_RESOURCE_ERROR;
+            break;
+        case android::BAD_VALUE:
+            result = SL_RESULT_PARAMETER_INVALID;
+            break;
+        default:
+            result = SL_RESULT_INTERNAL_ERROR;
+            SL_LOGE("received invalid status %d from AudioEffect::queryNumberEffects()", status);
+            break;
+    }
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult android_genericFx_createEffect(int sessionId, SLInterfaceID pUuid, void **ppAudioEffect) {
+
+    android::AudioEffect* af = NULL;
+    SLresult result = SL_RESULT_SUCCESS;
+
+    af = new android::AudioEffect(
+            NULL, // not using type to create effect
+            (const effect_uuid_t*)pUuid,
+            0,// priority
+            0,// effect callback
+            0,// callback data
+            sessionId,
+            0 );// output
+    android::status_t status = af->initCheck();
+
+    if (android::NO_ERROR != status) {
+        SL_LOGE("AudioEffect initCheck() returned %d", status);
+        result = SL_RESULT_RESOURCE_ERROR;
+    }
+
+    *ppAudioEffect = af;
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult android_genericFx_releaseEffect(void *pAudioEffect) {
+
+    if (NULL != pAudioEffect) {
+        delete ((android::AudioEffect*)pAudioEffect);
+        return SL_RESULT_SUCCESS;
+    } else {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult android_genericFx_setEnabled(void *pAudioEffect, SLboolean enabled) {
+
+    if (NULL == pAudioEffect) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+
+    android::status_t status =
+            ((android::AudioEffect*)pAudioEffect)->setEnabled(SL_BOOLEAN_TRUE == enabled);
+
+    // the effect framework will return an error if the requested state is the same as the previous,
+    // this prevents us from returning an error when the effect cannot be controlled. We're
+    // therefore returning success regardless of the status code.
+    return SL_RESULT_SUCCESS;
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult android_genericFx_isEnabled(void *pAudioEffect, SLboolean *pEnabled) {
+
+    if (NULL == pAudioEffect) {
+        *pEnabled = SL_BOOLEAN_FALSE;
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+
+    *pEnabled =
+           ((android::AudioEffect*)pAudioEffect)->getEnabled() ? SL_BOOLEAN_TRUE : SL_BOOLEAN_FALSE;
+
+    return SL_RESULT_SUCCESS;
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult android_genericFx_sendCommand(void *pAudioEffect, SLuint32 command, SLuint32 commandSize,
+        void* pCommand, SLuint32 *replySize, void *pReply) {
+
+    if (NULL == pAudioEffect) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+
+    int32_t zeReplySize = 0;
+    // FIXME update size casts when framework moves from int32_t to uint32_t
+    android::status_t status = ((android::AudioEffect*)pAudioEffect)->command(
+            (int32_t) command,
+            (int32_t) commandSize,
+            pCommand,
+            &zeReplySize,
+            pReply);
+    *replySize = zeReplySize;
+
+    if (android::BAD_VALUE == status) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+    return SL_RESULT_SUCCESS;
+}
+
+

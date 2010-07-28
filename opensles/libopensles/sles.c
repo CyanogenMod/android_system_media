@@ -642,8 +642,8 @@ extern void
     IVisualization_init(void *),
     IVolume_init(void *);
 #ifdef ANDROID
-extern void
-    IAndroidStreamType_init(void *);
+extern void IAndroidStreamType_init(void *);
+extern void IAndroidAudioEffect_init(void *);
 #endif
 
 #ifdef USE_OUTPUTMIXEXT
@@ -702,9 +702,11 @@ extern void
     { /* MPH_OUTPUTMIXEXT, */ NULL, NULL, NULL },
 #endif
 #ifdef ANDROID
-    { /* MPH_ANDROIDSTREAMTYPE */ IAndroidStreamType_init, NULL, NULL }
+    { /* MPH_ANDROIDSTREAMTYPE */ IAndroidStreamType_init, NULL, NULL },
+    { /* MPH_ANDROIDAUDIOEFFECT */ IAndroidAudioEffect_init, NULL, NULL }
 #else
-    { /* MPH_ANDROIDSTREAMTYPE */ NULL, NULL, NULL }
+    { /* MPH_ANDROIDSTREAMTYPE */ NULL, NULL, NULL },
+    { /* MPH_ANDROIDAUDIOEFFECT */ NULL, NULL, NULL }
 #endif
 };
 

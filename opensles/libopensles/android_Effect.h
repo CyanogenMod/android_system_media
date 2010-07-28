@@ -24,3 +24,21 @@ extern android::status_t android_eq_getParam(android::sp<android::AudioEffect> p
         int32_t param, int32_t param2, void *pValue);
 
 extern SLresult android_fx_statusToResult(android::status_t status);
+
+
+extern SLresult android_genericFx_queryNumEffects(SLuint32 *pNumSupportedAudioEffects);
+
+extern SLresult android_genericFx_queryEffect(SLuint32 index, SLInterfaceID *pAudioEffectId);
+
+extern SLresult android_genericFx_createEffect(int sessionId, SLInterfaceID pUuid,
+        void **ppAudioEffect);
+
+extern SLresult android_genericFx_releaseEffect(void *pAudioEffect);
+
+extern SLresult android_genericFx_setEnabled(void *pAudioEffect, SLboolean enabled);
+
+extern SLresult android_genericFx_isEnabled(void *pAudioEffect, SLboolean *pEnabled);
+
+extern SLresult android_genericFx_sendCommand(void *pAudioEffect, SLuint32 command,
+        SLuint32 commandSize, void* pCommand, SLuint32 *replySize, void *pReply);
+

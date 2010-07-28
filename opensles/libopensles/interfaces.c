@@ -65,5 +65,6 @@ const char * const interface_names[MPH_MAX] = {
     "VOLUME",
     // The lack of ifdef is intentional
     "OUTPUTMIXEXT",
-    "ANDROIDSTREAMTYPE"
+    "ANDROIDSTREAMTYPE",
+    "ANDROIDAUDIOEFFECT"
 };
