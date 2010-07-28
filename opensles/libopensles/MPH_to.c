@@ -81,7 +81,8 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
     [MPH_VIRTUALIZER] = 24,
     [MPH_VISUALIZATION] = 25,
 #ifdef ANDROID
-    [MPH_ANDROIDSTREAMTYPE] = 26
+    [MPH_ANDROIDSTREAMTYPE] = 26,
+    [MPH_ANDROIDAUDIOEFFECT] = 27
 #endif
 #else
     -1,
@@ -123,10 +124,11 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
     -1
 #ifdef ANDROID
     ,
-    26 // MPH_ANDROIDSTREAMTYPE
+    26, // MPH_ANDROIDSTREAMTYPE
+    27  // MPH_ANDROIDAUDIOEFFECT
 #else
     ,
-    -1
+    -1, -1
 #endif
 #endif
 };

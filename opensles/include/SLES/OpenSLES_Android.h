@@ -67,6 +67,55 @@ struct SLAndroidStreamTypeItf_ {
     );
 };
 
+
+/*---------------------------------------------------------------------------*/
+/* Android Effect interface                                                  */
+/*---------------------------------------------------------------------------*/
+
+extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDAUDIOEFFECT;
+
+/** Android Effect interface methods */
+
+struct SLAndroidAudioEffectItf_;
+typedef const struct SLAndroidAudioEffectItf_ * const * SLAndroidAudioEffectItf;
+
+
+struct SLAndroidAudioEffectItf_ {
+
+    // candidate to be moved to a separate engine interface
+    SLresult (*QueryNumEffects) (SLAndroidAudioEffectItf self,
+        SLuint32 *pNumSupportedAudioEffects);
+
+    // candidate to be moved to a separate engine interface
+    SLresult (*QueryEffect) (SLAndroidAudioEffectItf self,
+        SLuint32 index,
+        SLInterfaceID *pAudioEffectId);
+
+    SLresult (*CreateEffect) (SLAndroidAudioEffectItf self,
+            SLInterfaceID AudioEffectId,
+            void **ppAudioEffect);
+
+    SLresult (*ReleaseEffect) (SLAndroidAudioEffectItf self,
+        void *pAudioEffect);
+
+    SLresult (*SetEnabled) (SLAndroidAudioEffectItf self,
+        void *pAudioEffect,
+        SLboolean enabled);
+
+    SLresult (*IsEnabled) (SLAndroidAudioEffectItf self,
+        void *pAudioEffect,
+        SLboolean *pEnabled);
+
+    SLresult (*SendCommand) (SLAndroidAudioEffectItf self,
+        void *pAudioEffect,
+        SLuint32 command,
+        SLuint32 commandSize,
+        void *pCommand,
+        SLuint32 *replySize,
+        void *pReply);
+};
+
+
 /*---------------------------------------------------------------------------*/
 /* Android File Descriptor Data Locator                                      */
 /*---------------------------------------------------------------------------*/

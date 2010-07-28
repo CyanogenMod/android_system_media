@@ -787,6 +787,11 @@ typedef struct {
     SLuint32 mStreamType;
 } IAndroidStreamType;
 
+typedef struct {
+    const struct SLAndroidAudioEffectItf_ *mItf;
+    IObject *mThis;
+} IAndroidAudioEffect;
+
 /*
  * Used to define the mapping from an OpenSL ES audio player to an Android
  * media framework object
@@ -813,7 +818,7 @@ enum AndroidObject_state {
 /*typedef*/ struct CAudioPlayer_struct {
     IObject mObject;
 #ifdef ANDROID
-#define INTERFACES_AudioPlayer 27 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
+#define INTERFACES_AudioPlayer 28 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
 #else
 #define INTERFACES_AudioPlayer 26 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
 #endif
@@ -835,6 +840,7 @@ enum AndroidObject_state {
     IMuteSolo mMuteSolo;
 #ifdef ANDROID
     IAndroidStreamType  mAndroidStreamType;
+    IAndroidAudioEffect mAndroidAudioEffect;
 #endif
     // optional interfaces
     I3DMacroscopic m3DMacroscopic;
