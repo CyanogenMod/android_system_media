@@ -194,7 +194,7 @@ void android_eq_init(int sessionId, CAudioPlayer* ap) {
         // display EQ characteristics
         android_eq_getParam(ap->mEqualizer.mEqEffect, EQ_PARAM_CENTER_FREQ, i, &freq);
         android_eq_getParam(ap->mEqualizer.mEqEffect, EQ_PARAM_BAND_FREQ_RANGE, i, frange);
-        SL_LOGV(" EQ init: band %d = %d - %d - %dHz\n", i, frange[0]/1000, freq/1000,
+        SL_LOGV(" EQ init: band %d = %d - %d - %dHz", i, frange[0]/1000, freq/1000,
                 frange[1]/1000);
     }
     value = ap->mEqualizer.mBandLevelRangeMax;
