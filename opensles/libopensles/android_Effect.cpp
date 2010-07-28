@@ -370,15 +370,13 @@ SLresult android_genericFx_sendCommand(void *pAudioEffect, SLuint32 command, SLu
         return SL_RESULT_PARAMETER_INVALID;
     }
 
-    int32_t zeReplySize = 0;
     // FIXME update size casts when framework moves from int32_t to uint32_t
     android::status_t status = ((android::AudioEffect*)pAudioEffect)->command(
             (int32_t) command,
             (int32_t) commandSize,
             pCommand,
-            &zeReplySize,
+            (uint32_t*)replySize,
             pReply);
-    *replySize = zeReplySize;
 
     if (android::BAD_VALUE == status) {
         return SL_RESULT_PARAMETER_INVALID;
