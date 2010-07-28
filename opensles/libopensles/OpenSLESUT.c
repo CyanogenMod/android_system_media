@@ -16,7 +16,7 @@
 
 /** \file OpenSLESUT.c OpenSL ES Utility Toolkit */
 
-#include "OpenSLES.h"
+#include "SLES/OpenSLES.h"
 #include "OpenSLESUT.h"
 #include <stdio.h>
 #include <string.h>

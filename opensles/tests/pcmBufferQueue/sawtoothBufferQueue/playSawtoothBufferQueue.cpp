@@ -54,7 +54,7 @@
 #include <sys/time.h>
 
 
-#include "OpenSLES.h"
+#include "SLES/OpenSLES.h"
 
 /*using namespace android;*/
 

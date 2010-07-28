@@ -40,7 +40,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "OpenSLES.h"
+#include "SLES/OpenSLES.h"
 
 //#include "media/AudioSystem.h"
 //#include "media/AudioTrack.h"

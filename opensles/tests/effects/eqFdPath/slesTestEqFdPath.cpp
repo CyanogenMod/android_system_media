@@ -26,8 +26,8 @@
 #include <sys/time.h>
 #include <fcntl.h>
 
-#include "OpenSLES.h"
-#include "OpenSLES_Android.h"
+#include "SLES/OpenSLES.h"
+#include "SLES/OpenSLES_Android.h"
 
 
 #define MAX_NUMBER_INTERFACES 3
