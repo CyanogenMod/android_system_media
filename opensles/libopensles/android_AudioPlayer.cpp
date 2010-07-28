@@ -143,7 +143,7 @@ static void android_audioPlayer_updateStereoVolume(CAudioPlayer* ap) {
 
 //-----------------------------------------------------------------------------
 void audioTrack_handleMarker(CAudioPlayer* ap) {
-    //fprintf(stdout, "received event EVENT_MARKER from AudioTrack\n");
+    //SL_LOGV("received event EVENT_MARKER from AudioTrack");
     slPlayCallback callback = NULL;
     void* callbackPContext = NULL;
 
@@ -160,7 +160,7 @@ void audioTrack_handleMarker(CAudioPlayer* ap) {
 
 //-----------------------------------------------------------------------------
 void audioTrack_handleNewPos(CAudioPlayer* ap) {
-    //fprintf(stdout, "received event EVENT_NEW_POS from AudioTrack\n");
+    //SL_LOGV("received event EVENT_NEW_POS from AudioTrack");
     slPlayCallback callback = NULL;
     void* callbackPContext = NULL;
 
@@ -202,12 +202,12 @@ static void android_prefetchEventCallback(const int event, const int data1, void
     }
 
     CAudioPlayer *ap = (CAudioPlayer *)user;
-    //fprintf(stdout, "received event %d = %d from SfAudioPlayer\n", event, data1);
+    //SL_LOGV("received event %d = %d from SfAudioPlayer", event, data1);
     switch(event) {
 
     case(android::SfPlayer::kEventPrefetchFillLevelUpdate): {
         // FIXME implement buffer filler level updates
-        fprintf(stderr, "[ FIXME implement buffer filler level updates ]\n");
+        SL_LOGE("[ FIXME implement buffer filler level updates ]");
         //ap->mPrefetchStatus.mLevel = ;
         } break;
 
@@ -272,7 +272,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     // Sink check:
     //     currently only OutputMix sinks are supported, regardless of the data source
     if (*(SLuint32 *)pAudioSnk->pLocator != SL_DATALOCATOR_OUTPUTMIX) {
-        fprintf(stderr, "Cannot create audio player: data sink is not SL_DATALOCATOR_OUTPUTMIX\n");
+        SL_LOGE("Cannot create audio player: data sink is not SL_DATALOCATOR_OUTPUTMIX");
         return SL_RESULT_PARAMETER_INVALID;
     }
 
@@ -318,7 +318,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             case SL_SAMPLINGRATE_96:
             case SL_SAMPLINGRATE_192:
             default:
-                SL_LOGE("Cannot create audio player: unsupported sample rate %u milliHz", (unsigned) df_pcm->samplesPerSec);
+                SL_LOGE("Cannot create audio player: unsupported sample rate %u milliHz",
+                    (unsigned) df_pcm->samplesPerSec);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
             switch (df_pcm->bitsPerSample) {
@@ -362,10 +363,12 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             break;
         case SL_DATAFORMAT_MIME:
         case SL_DATAFORMAT_RESERVED3:
-            fprintf(stderr, "Error: cannot create Audio Player with SL_DATALOCATOR_BUFFERQUEUE data source without SL_DATAFORMAT_PCM format\n");
+            SL_LOGE("Error: cannot create Audio Player with SL_DATALOCATOR_BUFFERQUEUE data source "
+                "without SL_DATAFORMAT_PCM format");
             return SL_RESULT_CONTENT_UNSUPPORTED;
         default:
-            fprintf(stderr, "Error: cannot create Audio Player with SL_DATALOCATOR_BUFFERQUEUE data source without SL_DATAFORMAT_PCM format\n");
+            SL_LOGE("Error: cannot create Audio Player with SL_DATALOCATOR_BUFFERQUEUE data source "
+                "without SL_DATAFORMAT_PCM format");
             return SL_RESULT_PARAMETER_INVALID;
         } // switch (formatType)
         } // case SL_DATALOCATOR_BUFFERQUEUE
@@ -384,7 +387,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             break;
         case SL_DATAFORMAT_PCM:
         case SL_DATAFORMAT_RESERVED3:
-            fprintf(stderr, "Error: cannot create Audio Player with SL_DATALOCATOR_URI data source without SL_DATAFORMAT_MIME format\n");
+            SL_LOGE("Error: cannot create Audio Player with SL_DATALOCATOR_URI data source without "
+                "SL_DATAFORMAT_MIME format");
             return SL_RESULT_CONTENT_UNSUPPORTED;
         } // switch (formatType)
         } // case SL_DATALOCATOR_URI
@@ -399,10 +403,11 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             break;
         case SL_DATAFORMAT_PCM:
             // FIXME implement
-            fprintf(stderr, "[ FIXME implement PCM FD data sources ]\n");
+            SL_LOGE("[ FIXME implement PCM FD data sources ]");
             break;
         case SL_DATAFORMAT_RESERVED3:
-            fprintf(stderr, "Error: cannot create Audio Player with SL_DATALOCATOR_ANDROIDFD data source without SL_DATAFORMAT_MIME or SL_DATAFORMAT_PCM format\n");
+            SL_LOGE("Error: cannot create Audio Player with SL_DATALOCATOR_ANDROIDFD data source "
+                "without SL_DATAFORMAT_MIME or SL_DATAFORMAT_PCM format");
             return SL_RESULT_CONTENT_UNSUPPORTED;
         } // switch (formatType)
         } // case SL_DATALOCATOR_ANDROIDFD
@@ -430,7 +435,7 @@ static void audioTrack_callBack_uri(int event, void* user, void *info) {
     // EVENT_MORE_DATA needs to be handled with priority over the other events
     // because it will be called the most often during playback
     if (event == android::AudioTrack::EVENT_MORE_DATA) {
-        //fprintf(stderr, "received event EVENT_MORE_DATA from AudioTrack\n");
+        //SL_LOGV("received event EVENT_MORE_DATA from AudioTrack");
         // set size to 0 to signal we're not using the callback to write more data
         android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
         pBuff->size = 0;
@@ -457,13 +462,13 @@ static void audioTrack_callBack_pull(int event, void* user, void *info) {
     switch(event) {
 
     case (android::AudioTrack::EVENT_MORE_DATA) : {
-        //fprintf(stdout, "received event EVENT_MORE_DATA from AudioTrack\n");
+        //SL_LOGV("received event EVENT_MORE_DATA from AudioTrack");
         slBufferQueueCallback callback = NULL;
         android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
         // retrieve data from the buffer queue
         interface_lock_exclusive(&pAudioPlayer->mBufferQueue);
         if (pAudioPlayer->mBufferQueue.mState.count != 0) {
-            //fprintf(stderr, "nbBuffers in queue = %lu\n",pAudioPlayer->mBufferQueue.mState.count);
+            //SL_LOGV("nbBuffers in queue = %lu",pAudioPlayer->mBufferQueue.mState.count);
             assert(pAudioPlayer->mBufferQueue.mFront != pAudioPlayer->mBufferQueue.mRear);
 
             BufferHeader *oldFront = pAudioPlayer->mBufferQueue.mFront;
@@ -485,7 +490,8 @@ static void audioTrack_callBack_pull(int event, void* user, void *info) {
                 pAudioPlayer->mBufferQueue.mSizeConsumed = 0;
 
                 if (newFront ==
-                        &pAudioPlayer->mBufferQueue.mArray[pAudioPlayer->mBufferQueue.mNumBuffers + 1])
+                        &pAudioPlayer->mBufferQueue.mArray
+                            [pAudioPlayer->mBufferQueue.mNumBuffers + 1])
                 {
                     newFront = pAudioPlayer->mBufferQueue.mArray;
                 }
@@ -600,7 +606,7 @@ SLresult android_audioPlayer_create(
 SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async) {
 
     SLresult result = SL_RESULT_SUCCESS;
-    //fprintf(stderr, "entering android_audioPlayer_realize\n");
+    //SL_LOGV("entering android_audioPlayer_realize");
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
     // AudioTrack
@@ -732,7 +738,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
  */
 SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer, SLuint32 type) {
     SLresult result = SL_RESULT_SUCCESS;
-    fprintf(stdout, "android_audioPlayer_setStreamType %lu\n", type);
+    SL_LOGV("android_audioPlayer_setStreamType %lu", type);
 
     if (pAudioPlayer->mAudioTrack == NULL) {
         return SL_RESULT_RESOURCE_ERROR;
@@ -778,7 +784,7 @@ SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer, SLuint3
 //-----------------------------------------------------------------------------
 SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     SLresult result = SL_RESULT_SUCCESS;
-    //fprintf(stdout, "android_audioPlayer_destroy\n");
+    //SL_LOGV("android_audioPlayer_destroy");
 
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
@@ -904,15 +910,15 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
     case AUDIOTRACK_PULL:
         switch (state) {
         case SL_PLAYSTATE_STOPPED:
-            fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_STOPPED\n");
+            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
             ap->mAudioTrack->stop();
             break;
         case SL_PLAYSTATE_PAUSED:
-            fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PAUSED\n");
+            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
             ap->mAudioTrack->pause();
             break;
         case SL_PLAYSTATE_PLAYING:
-            fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PLAYING\n");
+            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PLAYING");
             ap->mAudioTrack->start();
             break;
         default:
@@ -924,11 +930,11 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
     case MEDIAPLAYER:
         switch (state) {
         case SL_PLAYSTATE_STOPPED: {
-            fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_STOPPED\n");
+            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
             ap->mSfPlayer->stop();
             } break;
         case SL_PLAYSTATE_PAUSED: {
-            fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PAUSED\n");
+            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
             object_lock_peek(&ap);
             AndroidObject_state state = ap->mAndroidObjState;
             object_unlock_peek(&ap);
@@ -948,7 +954,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
             }
             } break;
         case SL_PLAYSTATE_PLAYING: {
-            fprintf(stdout, "setting AudioPlayer to SL_PLAYSTATE_PLAYING\n");
+            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PLAYING");
             object_lock_peek(&ap);
             AndroidObject_state state = ap->mAndroidObjState;
             object_unlock_peek(&ap);
@@ -990,8 +996,9 @@ void android_audioPlayer_useEventMask(CAudioPlayer *ap) {
     }
 
     if (eventFlags & SL_PLAYEVENT_HEADATNEWPOS) {
-         ap->mAudioTrack->setPositionUpdatePeriod( (uint32_t)((((int64_t)pPlayItf->mPositionUpdatePeriod
-                        * sles_to_android_sampleRate(ap->mSampleRateMilliHz)))/1000));
+         ap->mAudioTrack->setPositionUpdatePeriod(
+                (uint32_t)((((int64_t)pPlayItf->mPositionUpdatePeriod
+                * sles_to_android_sampleRate(ap->mSampleRateMilliHz)))/1000));
     } else {
         // clear periodic update
         ap->mAudioTrack->setPositionUpdatePeriod(0);
@@ -1000,7 +1007,8 @@ void android_audioPlayer_useEventMask(CAudioPlayer *ap) {
     if (eventFlags & SL_PLAYEVENT_HEADATEND) {
         if (AUDIOTRACK_PULL == ap->mAndroidObjType) {
             // FIXME support SL_PLAYEVENT_HEADATEND
-            fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADATEND) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
+            SL_LOGE("[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADATEND) on an "
+                "SL_OBJECTID_AUDIOPLAYER to be implemented ]");
         } else if (MEDIAPLAYER == ap->mAndroidObjType) {
             // nothing to do for SL_PLAYEVENT_HEADATEND, callback event will be checked against mask
         }
@@ -1008,11 +1016,13 @@ void android_audioPlayer_useEventMask(CAudioPlayer *ap) {
 
     if (eventFlags & SL_PLAYEVENT_HEADMOVING) {
         // FIXME support SL_PLAYEVENT_HEADMOVING
-        fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADMOVING) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
+        SL_LOGE("[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADMOVING) on an "
+            "SL_OBJECTID_AUDIOPLAYER to be implemented ]");
     }
     if (eventFlags & SL_PLAYEVENT_HEADSTALLED) {
         // FIXME support SL_PLAYEVENT_HEADSTALLED
-        fprintf(stderr, "[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADSTALLED) on an SL_OBJECTID_AUDIOPLAYER to be implemented ]\n");
+        SL_LOGE("[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADSTALLED) on an "
+            "SL_OBJECTID_AUDIOPLAYER to be implemented ]");
     }
 
 }
@@ -1027,7 +1037,7 @@ SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMse
         *pDurMsec = SL_TIME_UNKNOWN;
         // FIXME if the data source is not a buffer queue, and the audio data is saved in
         //       shared memory with the mixer process, the duration is the size of the buffer
-        fprintf(stderr, "FIXME: android_audioPlayer_getDuration() verify if duration can be retrieved\n");
+        SL_LOGE("FIXME: android_audioPlayer_getDuration() verify if duration can be retrieved");
         break;
 #ifndef USE_BACKPORT
     case MEDIAPLAYER: {
@@ -1059,7 +1069,7 @@ void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
         break;
     case MEDIAPLAYER:
         // FIXME implement getPosition
-        fprintf(stderr, "FIXME: implement getPosition\n");
+        SL_LOGE("FIXME: implement getPosition");
         //ap->mMediaPlayerData.mMediaPlayer->getCurrentPosition((int*)pPosMsec);
         break;
     default:

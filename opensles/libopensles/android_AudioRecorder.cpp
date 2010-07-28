@@ -197,7 +197,7 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
     //    ar->mNumChannels
     //    ar->mSampleRateMilliHz
 
-    SL_LOGV("new AudioRecord %u channels, %lu mHz\n", ar->mNumChannels, ar->mSampleRateMilliHz);
+    SL_LOGV("new AudioRecord %u channels, %lu mHz", ar->mNumChannels, ar->mSampleRateMilliHz);
 
     // initialize platform-specific CAudioRecorder fields
     ar->mAudioRecord = new android::AudioRecord();
