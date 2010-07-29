@@ -52,7 +52,7 @@ void slEnterInterface(const char *function)
         if (*underscore == '_') {
             if (strcmp(function, "BufferQueue_Enqueue") && strcmp(function, "BufferQueue_GetState")
                 && strcmp(function, "OutputMixExt_FillBuffer") ) {
-                LOGV("Entering %.*s::%s\n", underscore - function, function, &underscore[1]);
+                LOGV("Entering %.*s::%s\n", (int) (underscore - function), function, &underscore[1]);
             }
             return;
         }
@@ -70,10 +70,10 @@ void slLeaveInterface(const char *function, SLresult result)
         while (*underscore != '\0') {
             if (*underscore == '_') {
                 if (SLESUT_RESULT_MAX > result)
-                    LOGE("Leaving %.*s::%s (%s)\n", underscore - function, function,
+                    LOGE("Leaving %.*s::%s (%s)\n", (int) (underscore - function), function,
                         &underscore[1], slesutResultStrings[result]);
                 else
-                    LOGE("Leaving %.*s::%s (0x%X)\n", underscore - function, function,
+                    LOGE("Leaving %.*s::%s (0x%X)\n", (int) (underscore - function), function,
                         &underscore[1], (unsigned) result);
                 return;
             }
