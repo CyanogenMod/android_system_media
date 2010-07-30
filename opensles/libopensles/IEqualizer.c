@@ -292,7 +292,7 @@ static SLresult IEqualizer_GetBand(SLEqualizerItf self, SLmilliHertz frequency, 
         *pBand = band - this->mBands;
         result = SL_RESULT_SUCCESS;
 #else
-        uint32_t band;
+        uint16_t band;
         interface_lock_shared(this);
         android::status_t status =
             android_eq_getParam(this->mEqEffect, EQ_PARAM_GET_BAND, frequency, &band);
@@ -321,7 +321,7 @@ static SLresult IEqualizer_GetCurrentPreset(SLEqualizerItf self, SLuint16 *pPres
         *pPreset = preset;
         result = SL_RESULT_SUCCESS;
 #else
-        int32_t preset;
+        uint16_t preset;
         android::status_t status =
                 android_eq_getParam(this->mEqEffect, EQ_PARAM_CUR_PRESET, 0, &preset);
         interface_unlock_shared(this);
@@ -356,9 +356,8 @@ static SLresult IEqualizer_UsePreset(SLEqualizerItf self, SLuint16 index)
         interface_unlock_exclusive(this);
         result = SL_RESULT_SUCCESS;
 #else
-        int32_t preset = index;
         android::status_t status =
-                android_eq_setParam(this->mEqEffect, EQ_PARAM_CUR_PRESET, 0, &preset);
+                android_eq_setParam(this->mEqEffect, EQ_PARAM_CUR_PRESET, 0, &index);
         interface_unlock_shared(this);
         result = android_fx_statusToResult(status);
 #endif
