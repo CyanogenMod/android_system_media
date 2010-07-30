@@ -59,14 +59,16 @@ uint32_t eq_valueSize(int32_t param)
     case EQ_PARAM_NUM_BANDS:
     case EQ_PARAM_CUR_PRESET:
     case EQ_PARAM_GET_NUM_OF_PRESETS:
-        size = sizeof(int16_t);
-        break;
     case EQ_PARAM_BAND_LEVEL:
     case EQ_PARAM_GET_BAND:
+        size = sizeof(int16_t);
+        break;
+    case EQ_PARAM_LEVEL_RANGE:
+        size = 2 * sizeof(int16_t);
+        break;
     case EQ_PARAM_CENTER_FREQ:
         size = sizeof(int32_t);
         break;
-    case EQ_PARAM_LEVEL_RANGE:
     case EQ_PARAM_BAND_FREQ_RANGE:
         size = 2 * sizeof(int32_t);
         break;
@@ -151,12 +153,12 @@ void android_eq_init(int sessionId, CAudioPlayer* ap) {
     }
 
     // initialize number of bands, band level range
-    uint32_t num = 0;
+    uint16_t num = 0;
     if (android::NO_ERROR == android_eq_getParam(ap->mEqualizer.mEqEffect,
             EQ_PARAM_NUM_BANDS, 0, &num)) {
         ap->mEqualizer.mNumBands = num;
     }
-    int32_t range[2] = {0, 0};
+    int16_t range[2] = {0, 0};
     if (android::NO_ERROR == android_eq_getParam(ap->mEqualizer.mEqEffect,
             EQ_PARAM_LEVEL_RANGE, 0, range)) {
         ap->mEqualizer.mBandLevelRangeMin = range[0];
@@ -166,7 +168,7 @@ void android_eq_init(int sessionId, CAudioPlayer* ap) {
     SL_LOGV(" EQ init: num presets = %u, band range=[%d %d]mB", num, range[0], range[1]);
 
     // initialize preset number and names, store in IEngine
-    uint32_t numPresets = 0;
+    uint16_t numPresets = 0;
     if (android::NO_ERROR == android_eq_getParam(ap->mEqualizer.mEqEffect,
             EQ_PARAM_GET_NUM_OF_PRESETS, 0, &numPresets)) {
         ap->mObject.mEngine->mEqNumPresets = numPresets;
@@ -188,7 +190,7 @@ void android_eq_init(int sessionId, CAudioPlayer* ap) {
     // configure the EQ so it can easily be heard, for test only
     uint32_t freq = 1977;
     uint32_t frange[2];
-    int32_t value = ap->mEqualizer.mBandLevelRangeMin;
+    int16_t value = ap->mEqualizer.mBandLevelRangeMin;
     for(int32_t i=0 ; i< ap->mEqualizer.mNumBands ; i++) {
         android_eq_setParam(ap->mEqualizer.mEqEffect, EQ_PARAM_BAND_LEVEL, i, &value);
         // display EQ characteristics
