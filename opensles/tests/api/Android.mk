@@ -1,3 +1,6 @@
+# Build only if NOT simulator
+ifneq ($(TARGET_SIMULATOR),true)
+
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -30,3 +33,5 @@ endif
 LOCAL_MODULE:= BufferQueue_test
 
 include $(BUILD_EXECUTABLE)
+
+endif
