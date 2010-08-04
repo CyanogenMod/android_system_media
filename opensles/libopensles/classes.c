@@ -63,7 +63,13 @@ static const struct iid_vtable AudioPlayer_interfaces[INTERFACES_AudioPlayer] = 
     {MPH_MUTESOLO, INTERFACE_GAME, offsetof(CAudioPlayer, mMuteSolo)},
     {MPH_METADATAEXTRACTION, INTERFACE_MUSIC_GAME, offsetof(CAudioPlayer, mMetadataExtraction)},
     {MPH_METADATATRAVERSAL, INTERFACE_MUSIC_GAME, offsetof(CAudioPlayer, mMetadataTraversal)},
+#ifdef ANDROID
+    // FIXME The only reason this is implicit is because Android audio player assumes
+    // the prefetch interface is initialized even if not requested, see android_prefetchEventCallback
+    {MPH_PREFETCHSTATUS, INTERFACE_IMPLICIT, offsetof(CAudioPlayer, mPrefetchStatus)},
+#else
     {MPH_PREFETCHSTATUS, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mPrefetchStatus)},
+#endif
     {MPH_RATEPITCH, INTERFACE_DYNAMIC_GAME, offsetof(CAudioPlayer, mRatePitch)},
     {MPH_SEEK, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mSeek)},
     {MPH_VOLUME, INTERFACE_TBD, offsetof(CAudioPlayer, mVolume)},
