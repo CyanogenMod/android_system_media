@@ -26,6 +26,7 @@ void set_conio_terminal_mode()
     /* register cleanup handler, and set the new terminal mode */
     atexit(reset_terminal_mode);
     cfmakeraw(&new_termios);
+    new_termios.c_oflag |= OPOST;
     tcsetattr(0, TCSANOW, &new_termios);
 }
 
