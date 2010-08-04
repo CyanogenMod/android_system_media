@@ -25,9 +25,8 @@
 #ifdef LOGV
 #undef LOGV
 #endif
-#define __LINE___(x) #x
-#define LOGE(fmt, ...) fprintf(stderr,__FILE__ ":" __LINE___(__LINE__) fmt "\n", ## __VA_ARGS__)
-#define LOGV(fmt, ...) fprintf(stdout,__FILE__ ":" __LINE___(__LINE__) fmt "\n", ## __VA_ARGS__)
+#define LOGE(fmt, ...) do { fprintf(stderr, "%s:%s:%d:E ", __FUNCTION__, __FILE__, __LINE__); fprintf(stderr, fmt, ## __VA_ARGS__); fputc('\n', stderr); } while(0)
+#define LOGV(fmt, ...) do { fprintf(stdout, "%s:%s:%d:V ", __FUNCTION__, __FILE__, __LINE__); fprintf(stdout, fmt, ## __VA_ARGS__); fputc('\n', stdout); } while(0)
 
 namespace android {
 

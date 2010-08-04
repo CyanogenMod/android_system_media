@@ -1145,6 +1145,14 @@ extern const char * const interface_names[MPH_MAX];
 
 // Trace debugging
 
+// Always defined, but may be a no-op if trace support is disabled at compile-time
+extern void slTraceSetEnabled(unsigned enabled);
+
+#define SL_TRACE_ENTER          0x1
+#define SL_TRACE_LEAVE_FAILURE  0x2
+#define SL_TRACE_LEAVE_VOID     0x4
+#define SL_TRACE_DEFAULT        (SL_TRACE_LEAVE_FAILURE)
+
 #ifndef USE_TRACE
 
 #define SL_ENTER_GLOBAL SLresult result;
@@ -1156,18 +1164,18 @@ extern const char * const interface_names[MPH_MAX];
 
 #else
 
-extern void slEnterGlobal(const char *function);
-extern void slLeaveGlobal(const char *function, SLresult result);
-extern void slEnterInterface(const char *function);
-extern void slLeaveInterface(const char *function, SLresult result);
-extern void slEnterInterfaceVoid(const char *function);
-extern void slLeaveInterfaceVoid(const char *function);
-#define SL_ENTER_GLOBAL SLresult result; slEnterGlobal(__FUNCTION__);
-#define SL_LEAVE_GLOBAL slLeaveGlobal(__FUNCTION__, result); return result;
-#define SL_ENTER_INTERFACE SLresult result; slEnterInterface(__FUNCTION__);
-#define SL_LEAVE_INTERFACE slLeaveInterface(__FUNCTION__, result); return result;
-#define SL_ENTER_INTERFACE_VOID slEnterInterfaceVoid(__FUNCTION__);
-#define SL_LEAVE_INTERFACE_VOID slLeaveInterfaceVoid(__FUNCTION__); return;
+extern void slTraceEnterGlobal(const char *function);
+extern void slTraceLeaveGlobal(const char *function, SLresult result);
+extern void slTraceEnterInterface(const char *function);
+extern void slTraceLeaveInterface(const char *function, SLresult result);
+extern void slTraceEnterInterfaceVoid(const char *function);
+extern void slTraceLeaveInterfaceVoid(const char *function);
+#define SL_ENTER_GLOBAL SLresult result; slTraceEnterGlobal(__FUNCTION__);
+#define SL_LEAVE_GLOBAL slTraceLeaveGlobal(__FUNCTION__, result); return result;
+#define SL_ENTER_INTERFACE SLresult result; slTraceEnterInterface(__FUNCTION__);
+#define SL_LEAVE_INTERFACE slTraceLeaveInterface(__FUNCTION__, result); return result;
+#define SL_ENTER_INTERFACE_VOID slTraceEnterInterfaceVoid(__FUNCTION__);
+#define SL_LEAVE_INTERFACE_VOID slTraceLeaveInterfaceVoid(__FUNCTION__); return;
 
 #endif
 
