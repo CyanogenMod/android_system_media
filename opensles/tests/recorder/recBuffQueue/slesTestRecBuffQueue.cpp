@@ -1,0 +1,266 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <getopt.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/time.h>
+#include <fcntl.h>
+
+#include "OpenSLES.h"
+#include "OpenSLES_Android.h"
+
+/* Explicitly requesting SL_IID_BUFFERQUEUE on the AudioRecorder object */
+#define NUM_EXPLICIT_INTERFACES_FOR_RECORDER 1
+
+/* Size of the recording buffer queue */
+#define NB_BUFFERS_IN_QUEUE 1
+/* Size of each buffer in the queue */
+#define BUFFER_SIZE_IN_SAMPLES 1024
+#define BUFFER_SIZE_IN_BYTES   2*BUFFER_SIZE_IN_SAMPLES
+
+/* Local storage for Audio data */
+int8_t pcmData[NB_BUFFERS_IN_QUEUE * BUFFER_SIZE_IN_BYTES];
+
+/* destination for recorded data */
+static FILE* gFp;
+
+//-----------------------------------------------------------------
+/* Exits the application if an error is encountered */
+#define ExitOnError(x) ExitOnErrorFunc(x,__LINE__)
+
+void ExitOnErrorFunc( SLresult result , int line)
+{
+    if (SL_RESULT_SUCCESS != result) {
+        fprintf(stdout, "%lu error code encountered at line %d, exiting\n", result, line);
+        exit(1);
+    }
+}
+
+//-----------------------------------------------------------------
+/* Structure for passing information to callback function */
+typedef struct CallbackCntxt_ {
+    SLPlayItf  playItf;
+    SLuint32   size;
+    SLint8*   pDataBase;    // Base address of local audio data storage
+    SLint8*   pData;        // Current address of local audio data storage
+} CallbackCntxt;
+
+//-----------------------------------------------------------------
+/* Callback for recording buffer queue events */
+void RecBufferQueueCallback(
+        SLBufferQueueItf queueItf,
+        void *pContext)
+{
+    fprintf(stdout, "RecBufferQueueCallback called\n");
+
+    CallbackCntxt *pCntxt = (CallbackCntxt*)pContext;
+
+    /* Save the recorded data  */
+    fwrite(pCntxt->pDataBase, BUFFER_SIZE_IN_BYTES, 1, gFp);
+
+    /* Increase data pointer by buffer size */
+    pCntxt->pData += BUFFER_SIZE_IN_BYTES;
+
+    if (pCntxt->pData >= pCntxt->pDataBase + (NB_BUFFERS_IN_QUEUE * BUFFER_SIZE_IN_BYTES)) {
+        pCntxt->pData = pCntxt->pDataBase;
+    }
+
+    ExitOnError( (*queueItf)->Enqueue(queueItf, pCntxt->pDataBase, BUFFER_SIZE_IN_BYTES) );
+
+    SLBufferQueueState recQueueState;
+    ExitOnError( (*queueItf)->GetState(queueItf, &recQueueState) );
+
+    fprintf(stdout, "\tRecBufferQueueCallback now has pCntxt->pData=%p queue: "
+            "count=%lu playIndex=%lu\n",
+            pCntxt->pData, recQueueState.count, recQueueState.playIndex);
+}
+
+//-----------------------------------------------------------------
+
+/* Play an audio path by opening a file descriptor on that path  */
+void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSeconds)
+{
+    gFp = fopen(path, "w");
+    if (NULL == gFp) {
+        ExitOnError(SL_RESULT_RESOURCE_ERROR);
+    }
+
+    SLresult  result;
+    SLEngineItf EngineItf;
+
+    /* Objects this application uses: one audio recorder */
+    SLObjectItf  recorder;
+
+    /* Interfaces for the audio recorder */
+    SLBufferQueueItf       recBuffQueueItf;
+    SLRecordItf            recordItf;
+
+    /* Source of audio data for the recording */
+    SLDataSource           recSource;
+    SLDataLocator_IODevice ioDevice;
+
+    /* Data sink for recorded audio */
+    SLDataSink                recDest;
+    SLDataLocator_BufferQueue recBuffQueue;
+    SLDataFormat_PCM          pcm;
+
+    SLboolean required[NUM_EXPLICIT_INTERFACES_FOR_RECORDER];
+    SLInterfaceID iidArray[NUM_EXPLICIT_INTERFACES_FOR_RECORDER];
+
+    /* Get the SL Engine Interface which is implicit */
+    result = (*sl)->GetInterface(sl, SL_IID_ENGINE, (void*)&EngineItf);
+    ExitOnError(result);
+
+    /* Initialize arrays required[] and iidArray[] */
+    for (int i=0 ; i < NUM_EXPLICIT_INTERFACES_FOR_RECORDER ; i++) {
+        required[i] = SL_BOOLEAN_FALSE;
+        iidArray[i] = SL_IID_NULL;
+    }
+
+
+    /* ------------------------------------------------------ */
+    /* Configuration of the recorder  */
+
+    /* Request the BufferQueue interface */
+    required[0] = SL_BOOLEAN_TRUE;
+    iidArray[0] = SL_IID_BUFFERQUEUE;
+
+    /* Setup the data source */
+    ioDevice.locatorType = SL_DATALOCATOR_IODEVICE;
+    ioDevice.deviceType = SL_IODEVICE_AUDIOINPUT;
+    ioDevice.deviceID = SL_DEFAULTDEVICEID_AUDIOINPUT;
+    ioDevice.device = NULL;
+    recSource.pLocator = (void *) &ioDevice;
+
+    /* Setup the data sink */
+    recBuffQueue.locatorType = SL_DATALOCATOR_BUFFERQUEUE;
+    recBuffQueue.numBuffers = NB_BUFFERS_IN_QUEUE;
+    /*    set up the format of the data in the buffer queue */
+    pcm.formatType = SL_DATAFORMAT_PCM;
+    pcm.numChannels = 1;
+    pcm.samplesPerSec = SL_SAMPLINGRATE_22_05;
+    pcm.bitsPerSample = SL_PCMSAMPLEFORMAT_FIXED_16;
+    pcm.containerSize = 16;
+    pcm.channelMask = SL_SPEAKER_FRONT_LEFT;
+    pcm.endianness = SL_BYTEORDER_LITTLEENDIAN;
+
+    recDest.pLocator = (void *) &recBuffQueue;
+    recDest.pFormat = (void * ) &pcm;
+
+    /* Create the audio recorder */
+    result = (*EngineItf)->CreateAudioRecorder(EngineItf, &recorder, &recSource, &recDest, 1,
+            iidArray, required);
+    ExitOnError(result);
+    fprintf(stdout, "Recorder created\n");
+
+    /* Realize the recorder in synchronous mode. */
+    result = (*recorder)->Realize(recorder, SL_BOOLEAN_FALSE);
+    ExitOnError(result);
+    fprintf(stdout, "Recorder realized\n");
+
+    /* Get the record interface which is implicit */
+    result = (*recorder)->GetInterface(recorder, SL_IID_RECORD, (void*)&recordItf);
+    ExitOnError(result);
+
+    /* Get the buffer queue interface which was explicitly requested */
+    result = (*recorder)->GetInterface(recorder, SL_IID_BUFFERQUEUE, (void*)&recBuffQueueItf);
+    ExitOnError(result);
+
+    /* ------------------------------------------------------ */
+    /* Initialize the callback and its context for the recording buffer queue */
+    CallbackCntxt cntxt;
+    cntxt.pDataBase = (int8_t*)&pcmData;
+    cntxt.pData = cntxt.pDataBase;
+    cntxt.size = sizeof(pcmData);
+    result = (*recBuffQueueItf)->RegisterCallback(recBuffQueueItf, RecBufferQueueCallback, &cntxt);
+    ExitOnError(result);
+
+    /* Enqueue buffers to map the region of memory allocated to store the recorded data */
+    fprintf(stdout,"Enqueueing buffer ");
+    for(int i = 0 ; i < NB_BUFFERS_IN_QUEUE ; i++) {
+        fprintf(stdout,"%d ", i);
+        result = (*recBuffQueueItf)->Enqueue(recBuffQueueItf, cntxt.pData, BUFFER_SIZE_IN_BYTES);
+        ExitOnError(result);
+        cntxt.pData += BUFFER_SIZE_IN_BYTES;
+    }
+    fprintf(stdout,"\n");
+    cntxt.pData = cntxt.pDataBase;
+
+    /* ------------------------------------------------------ */
+    /* Start recording */
+    result = (*recordItf)->SetRecordState(recordItf, SL_RECORDSTATE_RECORDING);
+    ExitOnError(result);
+    fprintf(stdout, "Starting to record\n");
+
+    /* Record for at least a second */
+    if (durationInSeconds < 1) {
+        durationInSeconds = 1;
+    }
+    usleep(durationInSeconds * 1000 * 1000);
+
+    /* ------------------------------------------------------ */
+    /* End of recording */
+
+    /* Stop recording */
+    result = (*recordItf)->SetRecordState(recordItf, SL_RECORDSTATE_STOPPED);
+    ExitOnError(result);
+    fprintf(stdout, "Stopped recording\n");
+
+    /* Destroy the AudioRecorder object */
+    (*recorder)->Destroy(recorder);
+
+    fclose(gFp);
+}
+
+//-----------------------------------------------------------------
+int main(int argc, char* const argv[])
+{
+    //LOGV("Starting %s\n", argv[0]);
+
+    SLresult    result;
+    SLObjectItf sl;
+
+    fprintf(stdout, "OpenSL ES test %s: exercises SLRecordItf and SLBufferQueueItf ", argv[0]);
+    fprintf(stdout, "on an AudioRecorder object\n");
+
+    if (argc < 2) {
+        fprintf(stdout, "Usage: \t%s destination_file duration_in_seconds\n", argv[0]);
+        fprintf(stdout, "Example: \"%s /sdcard/myrec.raw 4\" \n", argv[0]);
+        exit(1);
+    }
+
+    SLEngineOption EngineOption[] = {
+            {(SLuint32) SL_ENGINEOPTION_THREADSAFE, (SLuint32) SL_BOOLEAN_TRUE}
+    };
+
+    result = slCreateEngine( &sl, 1, EngineOption, 0, NULL, NULL);
+    ExitOnError(result);
+
+    /* Realizing the SL Engine in synchronous mode. */
+    result = (*sl)->Realize(sl, SL_BOOLEAN_FALSE);
+    ExitOnError(result);
+
+    TestRecToBuffQueue(sl, argv[1], (SLAint64)atoi(argv[2]));
+
+    /* Shutdown OpenSL ES */
+    (*sl)->Destroy(sl);
+    exit(0);
+
+    return 0;
+}
