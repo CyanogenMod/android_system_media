@@ -32,7 +32,7 @@
 #define NB_BUFFERS_IN_QUEUE 1
 /* Size of each buffer in the queue */
 #define BUFFER_SIZE_IN_SAMPLES 1024
-#define BUFFER_SIZE_IN_BYTES   2*BUFFER_SIZE_IN_SAMPLES
+#define BUFFER_SIZE_IN_BYTES   (2*BUFFER_SIZE_IN_SAMPLES)
 
 /* Local storage for Audio data */
 int8_t pcmData[NB_BUFFERS_IN_QUEUE * BUFFER_SIZE_IN_BYTES];
@@ -86,7 +86,7 @@ void RecBufferQueueCallback(
     SLBufferQueueState recQueueState;
     ExitOnError( (*queueItf)->GetState(queueItf, &recQueueState) );
 
-    fprintf(stdout, "\tRecBufferQueueCallback now has pCntxt->pData=%p queue: "
+    fprintf(stderr, "\tRecBufferQueueCallback now has pCntxt->pData=%p queue: "
             "count=%lu playIndex=%lu\n",
             pCntxt->pData, recQueueState.count, recQueueState.playIndex);
 }
