@@ -280,7 +280,7 @@ bool SfPlayer::wantPrefetch() {
 
 void SfPlayer::startPrefetch_async() {
     //LOGV("SfPlayer::startPrefetch_async()");
-    if (mDataSource->flags() & DataSource::kWantsPrefetching) {
+    if (wantPrefetch()) {
         //LOGV("SfPlayer::startPrefetch_async(): sending check cache msg");
 
         mFlags |= kFlagPreparing;
@@ -292,6 +292,9 @@ void SfPlayer::startPrefetch_async() {
 
 void SfPlayer::play() {
     LOGV("SfPlayer::play");
+    if (NULL == mAudioTrack) {
+        return;
+    }
     mAudioTrack->start();
     (new AMessage(kWhatPlay, id()))->post();
     (new AMessage(kWhatDecode, id()))->post();
@@ -300,12 +303,18 @@ void SfPlayer::play() {
 
 void SfPlayer::stop() {
     LOGV("SfPlayer::stop");
+    if (NULL == mAudioTrack) {
+        return;
+    }
     (new AMessage(kWhatPause, id()))->post();
     mAudioTrack->stop();
 }
 
 void SfPlayer::pause() {
     LOGV("SfPlayer::pause");
+    if (NULL == mAudioTrack) {
+        return;
+    }
     (new AMessage(kWhatPause, id()))->post();
     mAudioTrack->pause();
 }
