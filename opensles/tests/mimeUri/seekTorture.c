@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-// This test program tortures the seek APIs by positioning "randomly" in a file
+// This test program tortures the seek APIs by positioning "randomly" in a file.
+// It needs as input a permuted .wav and .map produced by the permute tool.
 
 #include "SLES/OpenSLES.h"
 #include <assert.h>
@@ -28,6 +29,7 @@ int main(int argc, char **argv)
 {
     if (argc != 3) {
         fprintf(stderr, "usage: %s file.wav file.map\n", argv[0]);
+        fprintf(stderr, "  where file.wav and file.map are created by the permute tool\n");
         return EXIT_FAILURE;
     }
 
