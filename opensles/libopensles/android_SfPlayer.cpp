@@ -42,6 +42,7 @@ SfPlayer::SfPlayer(const sp<ALooper> &renderLooper)
       mCacheStatus(kStatusEmpty),
       mIsSeeking(false),
       mSeekTimeMsec(0),
+      mBufferInFlight(false),
       mDataLocatorType(kDataLocatorNone),
       mNotifyClient(NULL),
       mNotifyUser(NULL) {
@@ -290,12 +291,15 @@ void SfPlayer::startPrefetch_async() {
     }
 }
 
+
 void SfPlayer::play() {
     LOGV("SfPlayer::play");
     if (NULL == mAudioTrack) {
         return;
     }
+
     mAudioTrack->start();
+
     (new AMessage(kWhatPlay, id()))->post();
     (new AMessage(kWhatDecode, id()))->post();
 }
@@ -303,10 +307,12 @@ void SfPlayer::play() {
 
 void SfPlayer::stop() {
     LOGV("SfPlayer::stop");
+
     if (NULL == mAudioTrack) {
         return;
     }
     mAudioTrack->stop();
+
     (new AMessage(kWhatPause, id()))->post();
 
     // after a stop, playback should resume from the start.
@@ -332,10 +338,12 @@ void SfPlayer::seek(int64_t timeMsec) {
 
 
 void SfPlayer::onPlay() {
+    LOGV("SfPlayer::onPlay");
     mFlags |= kFlagPlaying;
 }
 
 void SfPlayer::onPause() {
+    LOGV("SfPlayer::onPause");
     mFlags &= ~kFlagPlaying;
 }
 
@@ -366,6 +374,13 @@ void SfPlayer::onDecode() {
 
     if (!(mFlags & (kFlagPlaying | kFlagBuffering | kFlagPreparing))) {
         // don't decode if we're not buffering, prefetching or playing
+        //LOGV("don't decode: not buffering, prefetching or playing");
+        return;
+    }
+
+    if (mBufferInFlight) {
+        // the current decoded buffer hasn't been rendered, drop this decode until it is
+        //LOGV("don't decode: buffer in flight");
         return;
     }
 
@@ -375,6 +390,7 @@ void SfPlayer::onDecode() {
         readOptions.setSeekTo(mSeekTimeMsec * 1000);
         mIsSeeking = false;
     }
+
     status_t err = mAudioSource->read(&buffer, &readOptions);
 
     if (err != OK) {
@@ -403,6 +419,8 @@ void SfPlayer::onDecode() {
     }
 
     int64_t delayUs = timeUs + mTimeDelta - ALooper::GetNowUs();
+
+    mBufferInFlight = true;
     msg->post(delayUs);
 }
 
@@ -419,6 +437,7 @@ void SfPlayer::onRender(const sp<AMessage> &msg) {
         (new AMessage(kWhatDecode, id()))->post();
     }
     buffer->release();
+    mBufferInFlight = false;
     buffer = NULL;
 
 
