@@ -136,6 +136,7 @@ private:
     CacheStatus mCacheStatus;
     bool mIsSeeking;
     int64_t mSeekTimeMsec;
+    bool mBufferInFlight;
 
     DataLocator mDataLocator;
     int         mDataLocatorType;
