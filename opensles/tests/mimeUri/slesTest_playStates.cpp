@@ -169,20 +169,31 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     ExitOnError(result);
     usleep(2 * 1000 * 1000);
 
-    /* pause for 2s*/
-    fprintf(stdout, "----- Pausing\n");
+    /* pause for 1s*/
+    fprintf(stdout, "----- Pausing (1s)\n");
     result = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PAUSED );
     ExitOnError(result);
     usleep(2 * 1000 * 1000);
 
     /* resume */
-    fprintf(stdout, "----- Playing (should have resumed where it paused)\n");
+    fprintf(stdout, "----- Playing (2s, should have resumed where it paused)\n");
     result = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PLAYING );
     ExitOnError(result);
     usleep(2 * 1000 * 1000);
 
-    /* Make sure player is stopped */
-    fprintf(stdout, "----- Stopping playback\n");
+    /* stop */
+    fprintf(stdout, "----- Stopping\n");
+    result = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_STOPPED);
+    ExitOnError(result);
+
+    /* play for 2s */
+    fprintf(stdout, "----- Playing (2s, should have started from the beginning\n");
+    result = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PLAYING );
+    ExitOnError(result);
+    usleep(2 * 1000 * 1000);
+
+    /* stop */
+    fprintf(stdout, "----- Stopping\n");
     result = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_STOPPED);
     ExitOnError(result);
 

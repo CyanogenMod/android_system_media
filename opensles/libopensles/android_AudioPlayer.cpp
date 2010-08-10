@@ -607,7 +607,8 @@ SLresult android_audioPlayer_create(
 SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async) {
 
     SLresult result = SL_RESULT_SUCCESS;
-    //SL_LOGV("entering android_audioPlayer_realize");
+    SL_LOGV("pAudioPlayer=%p", pAudioPlayer);
+
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
     // AudioTrack
@@ -683,6 +684,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
             pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
             pAudioPlayer->mNumChannels = 0;
             pAudioPlayer->mSampleRateMilliHz = 0;
+            pAudioPlayer->mAudioTrack = NULL;
         } else {
             // create audio track based on parameters retrieved from Stagefright
             pAudioPlayer->mAudioTrack = new android::AudioTrack(
@@ -717,6 +719,12 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     }
 
 #ifndef USE_BACKPORT
+
+    if (ANDROID_UNINITIALIZED == pAudioPlayer->mAndroidObjState) {
+        return result;
+    }
+    // proceed with effect initialization
+
     int sessionId = pAudioPlayer->mAudioTrack->getSessionId();
     // initialize EQ
     // FIXME use a table of effect descriptors when adding support for more effects
