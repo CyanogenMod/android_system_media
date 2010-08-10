@@ -306,8 +306,12 @@ void SfPlayer::stop() {
     if (NULL == mAudioTrack) {
         return;
     }
-    (new AMessage(kWhatPause, id()))->post();
     mAudioTrack->stop();
+    (new AMessage(kWhatPause, id()))->post();
+
+    // after a stop, playback should resume from the start.
+    mIsSeeking = true;
+    mSeekTimeMsec = 0;
 }
 
 void SfPlayer::pause() {
