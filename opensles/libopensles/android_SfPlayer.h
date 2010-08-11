@@ -132,6 +132,7 @@ private:
     int32_t mNumChannels;
     int32_t mSampleRateHz;
     int64_t mTimeDelta;
+    //int64_t mStartTime;
     int64_t mDurationUsec;
     CacheStatus mCacheStatus;
     bool mIsSeeking;
@@ -156,7 +157,6 @@ private:
     CacheStatus getCacheRemaining(bool *eos);
     void notify(const sp<AMessage> &msg, bool async);
 
-    void quit();
     void resetDataLocator();
 
     DISALLOW_EVIL_CONSTRUCTORS(SfPlayer);
