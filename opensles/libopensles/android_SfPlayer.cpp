@@ -57,9 +57,6 @@ SfPlayer::~SfPlayer() {
     }
 
     resetDataLocator();
-
-    // FIXME need to call quit()?
-    quit();
 }
 
 
@@ -181,14 +178,12 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
 
     if (dataSource == NULL) {
         LOGE("SfPlayer::onPrepare: ERROR: Could not create datasource.");
-        quit();
         return ERROR_UNSUPPORTED;
     }
 
     sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
     if (extractor == NULL) {
         LOGE("SfPlayer::onPrepare: ERROR: Could not instantiate extractor.");
-        quit();
         return ERROR_UNSUPPORTED;
     }
 
@@ -212,7 +207,6 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
 
     if (audioTrackIndex < 0) {
         LOGE("SfPlayer::onPrepare: ERROR: Could not find an audio track.");
-        quit();
         return ERROR_UNSUPPORTED;
     }
 
@@ -240,7 +234,6 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
 
         if (source == NULL) {
             LOGE("SfPlayer::onPrepare: ERROR: Could not instantiate decoder.");
-            quit();
             return ERROR_UNSUPPORTED;
         }
 
@@ -249,7 +242,6 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
 
     if (source->start() != OK) {
         LOGE("SfPlayer::onPrepare: ERROR: Failed to start source/decoder.");
-        quit();
         return MEDIA_ERROR_BASE;
     }
 
@@ -318,6 +310,7 @@ void SfPlayer::stop() {
     // after a stop, playback should resume from the start.
     mIsSeeking = true;
     mSeekTimeMsec = 0;
+    mTimeDelta = -1;
 }
 
 void SfPlayer::pause() {
@@ -353,6 +346,7 @@ void SfPlayer::onSeek(const sp<AMessage> &msg) {
     CHECK(msg->findInt64("seek", &timeMsec));
     mIsSeeking = true;
     mSeekTimeMsec = timeMsec;
+    mTimeDelta = -1;
 }
 
 
@@ -404,7 +398,6 @@ void SfPlayer::onDecode() {
             msg->setInt32(EVENT_ENDOFSTREAM, 1);
             notify(msg, true /*async*/);
         }
-        //quit();
         return;
     }
 
@@ -421,7 +414,12 @@ void SfPlayer::onDecode() {
     int64_t delayUs = timeUs + mTimeDelta - ALooper::GetNowUs();
 
     mBufferInFlight = true;
-    msg->post(delayUs);
+    if (delayUs > 0) {
+        msg->post(delayUs);
+    } else {
+        msg->post();
+    }
+    LOGV("timeUs=%lld, mTimeDelta=%lld, delayUs=%lld", timeUs, mTimeDelta, delayUs);
 }
 
 void SfPlayer::onRender(const sp<AMessage> &msg) {
@@ -535,11 +533,6 @@ SfPlayer::CacheStatus SfPlayer::getCacheRemaining(bool *eos) {
     return mCacheStatus;
 }
 
-void SfPlayer::quit() {
-    sp<ALooper> looper = mRenderLooper.promote();
-    CHECK(looper != NULL);
-    looper->stop();
-}
 
 /*
  * post-condition: mDataLocatorType == kDataLocatorNone

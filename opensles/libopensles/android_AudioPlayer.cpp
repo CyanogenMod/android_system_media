@@ -793,7 +793,7 @@ SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer, SLuint3
 //-----------------------------------------------------------------------------
 SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     SLresult result = SL_RESULT_SUCCESS;
-    //SL_LOGV("android_audioPlayer_destroy");
+    SL_LOGV("android_audioPlayer_destroy(%p)", pAudioPlayer);
 
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
@@ -807,7 +807,7 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     case MEDIAPLAYER:
         // FIXME group in one function?
         if (pAudioPlayer->mSfPlayer != NULL) {
-            pAudioPlayer->mSfPlayer->stop();
+            pAudioPlayer->mRenderLooper->unregisterHandler(pAudioPlayer->mSfPlayer->id());
             pAudioPlayer->mSfPlayer.clear();
             pAudioPlayer->mRenderLooper->stop();
             pAudioPlayer->mRenderLooper.clear();
