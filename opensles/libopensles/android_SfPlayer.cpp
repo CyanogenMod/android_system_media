@@ -40,7 +40,6 @@ SfPlayer::SfPlayer(const sp<ALooper> &renderLooper)
       mTimeDelta(-1),
       mDurationUsec(-1),
       mCacheStatus(kStatusEmpty),
-      mIsSeeking(false),
       mSeekTimeMsec(0),
       mBufferInFlight(false),
       mDataLocatorType(kDataLocatorNone),
@@ -308,9 +307,7 @@ void SfPlayer::stop() {
     (new AMessage(kWhatPause, id()))->post();
 
     // after a stop, playback should resume from the start.
-    mIsSeeking = true;
-    mSeekTimeMsec = 0;
-    mTimeDelta = -1;
+    seek(0);
 }
 
 void SfPlayer::pause() {
@@ -344,7 +341,7 @@ void SfPlayer::onSeek(const sp<AMessage> &msg) {
     LOGV("SfPlayer::onSeek");
     int64_t timeMsec;
     CHECK(msg->findInt64("seek", &timeMsec));
-    mIsSeeking = true;
+    mFlags |= kFlagSeeking;
     mSeekTimeMsec = timeMsec;
     mTimeDelta = -1;
 }
@@ -380,9 +377,9 @@ void SfPlayer::onDecode() {
 
     MediaBuffer *buffer;
     MediaSource::ReadOptions readOptions;
-    if (mIsSeeking) {
+    if (mFlags & kFlagSeeking) {
         readOptions.setSeekTo(mSeekTimeMsec * 1000);
-        mIsSeeking = false;
+        mFlags &= ~kFlagSeeking;
     }
 
     status_t err = mAudioSource->read(&buffer, &readOptions);

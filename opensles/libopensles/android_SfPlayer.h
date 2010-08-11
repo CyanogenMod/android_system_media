@@ -109,6 +109,7 @@ private:
         kFlagPlaying   = 1,
         kFlagPreparing = 2,
         kFlagBuffering = 4,
+        kFlagSeeking   = 8,
     };
 
     struct FdInfo {
@@ -132,10 +133,8 @@ private:
     int32_t mNumChannels;
     int32_t mSampleRateHz;
     int64_t mTimeDelta;
-    //int64_t mStartTime;
     int64_t mDurationUsec;
     CacheStatus mCacheStatus;
-    bool mIsSeeking;
     int64_t mSeekTimeMsec;
     bool mBufferInFlight;
 
