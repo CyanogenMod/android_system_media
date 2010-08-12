@@ -42,6 +42,7 @@ SfPlayer::SfPlayer(const sp<ALooper> &renderLooper)
       mCacheStatus(kStatusEmpty),
       mSeekTimeMsec(0),
       mBufferInFlight(false),
+      mLastDecodedPositionUs(-1),
       mDataLocatorType(kDataLocatorNone),
       mNotifyClient(NULL),
       mNotifyUser(NULL) {
@@ -327,6 +328,23 @@ void SfPlayer::seek(int64_t timeMsec) {
 }
 
 
+uint32_t SfPlayer::getPositionMsec() {
+    Mutex::Autolock _l(mSeekLock);
+    if (mFlags & kFlagSeeking) {
+        return (uint32_t) mSeekTimeMsec;
+    } else {
+        if (mLastDecodedPositionUs < 0) {
+            return 0;
+        } else {
+            return (uint32_t) (mLastDecodedPositionUs / 1000);
+        }
+    }
+}
+
+/*
+ * Message handlers
+ */
+
 void SfPlayer::onPlay() {
     LOGV("SfPlayer::onPlay");
     mFlags |= kFlagPlaying;
@@ -341,9 +359,12 @@ void SfPlayer::onSeek(const sp<AMessage> &msg) {
     LOGV("SfPlayer::onSeek");
     int64_t timeMsec;
     CHECK(msg->findInt64("seek", &timeMsec));
+
+    Mutex::Autolock _l(mSeekLock);
     mFlags |= kFlagSeeking;
     mSeekTimeMsec = timeMsec;
     mTimeDelta = -1;
+    mLastDecodedPositionUs = -1;
 }
 
 
@@ -379,7 +400,6 @@ void SfPlayer::onDecode() {
     MediaSource::ReadOptions readOptions;
     if (mFlags & kFlagSeeking) {
         readOptions.setSeekTo(mSeekTimeMsec * 1000);
-        mFlags &= ~kFlagSeeking;
     }
 
     status_t err = mAudioSource->read(&buffer, &readOptions);
@@ -398,25 +418,26 @@ void SfPlayer::onDecode() {
         return;
     }
 
-    int64_t timeUs;
-    CHECK(buffer->meta_data()->findInt64(kKeyTime, &timeUs));
+    {
+        Mutex::Autolock _l(mSeekLock);
+        CHECK(buffer->meta_data()->findInt64(kKeyTime, &mLastDecodedPositionUs));
+        if (mFlags & kFlagSeeking) {
+            mFlags &= ~kFlagSeeking;
+        }
+    }
 
     sp<AMessage> msg = new AMessage(kWhatRender, id());
     msg->setPointer("mbuffer", buffer);
 
     if (mTimeDelta < 0) {
-        mTimeDelta = ALooper::GetNowUs() - timeUs;
+        mTimeDelta = ALooper::GetNowUs() - mLastDecodedPositionUs;
     }
 
-    int64_t delayUs = timeUs + mTimeDelta - ALooper::GetNowUs();
+    int64_t delayUs = mLastDecodedPositionUs + mTimeDelta - ALooper::GetNowUs();
 
     mBufferInFlight = true;
-    if (delayUs > 0) {
-        msg->post(delayUs);
-    } else {
-        msg->post();
-    }
-    LOGV("timeUs=%lld, mTimeDelta=%lld, delayUs=%lld", timeUs, mTimeDelta, delayUs);
+    msg->post(delayUs); // negative delays are ignored
+    //LOGV("timeUs=%lld, mTimeDelta=%lld, delayUs=%lld", mLastDecodedPositionUs, mTimeDelta, delayUs);
 }
 
 void SfPlayer::onRender(const sp<AMessage> &msg) {
@@ -426,16 +447,13 @@ void SfPlayer::onRender(const sp<AMessage> &msg) {
     CHECK(msg->findPointer("mbuffer", (void **)&buffer));
 
     if (mFlags & kFlagPlaying) {
-        mAudioTrack->write(
-                (const uint8_t *)buffer->data() + buffer->range_offset(),
+        mAudioTrack->write( (const uint8_t *)buffer->data() + buffer->range_offset(),
                 buffer->range_length());
         (new AMessage(kWhatDecode, id()))->post();
     }
     buffer->release();
     mBufferInFlight = false;
     buffer = NULL;
-
-
 }
 
 void SfPlayer::onCheckCache(const sp<AMessage> &msg) {
