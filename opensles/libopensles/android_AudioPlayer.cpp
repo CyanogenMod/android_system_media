@@ -1077,9 +1077,7 @@ void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
         }
         break;
     case MEDIAPLAYER:
-        // FIXME implement getPosition
-        SL_LOGE("FIXME: implement getPosition");
-        //ap->mMediaPlayerData.mMediaPlayer->getCurrentPosition((int*)pPosMsec);
+        *pPosMsec = ap->mSfPlayer->getPositionMsec();
         break;
     default:
         break;

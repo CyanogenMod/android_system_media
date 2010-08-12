@@ -81,6 +81,7 @@ struct SfPlayer : public AHandler {
     int64_t getDurationUsec() { return mDurationUsec; }
     int32_t getNumChannels()  { return mNumChannels; }
     int32_t getSampleRateHz() { return mSampleRateHz; }
+    uint32_t getPositionMsec();
 
 protected:
     virtual ~SfPlayer();
@@ -123,6 +124,9 @@ private:
         FdInfo fdi;
     };
 
+    // mutex used for seek flag and seek time read/write
+    Mutex       mSeekLock;
+
     AudioTrack *mAudioTrack;
 
     wp<ALooper> mRenderLooper;
@@ -137,6 +141,7 @@ private:
     CacheStatus mCacheStatus;
     int64_t mSeekTimeMsec;
     bool mBufferInFlight;
+    int64_t mLastDecodedPositionUs;
 
     DataLocator mDataLocator;
     int         mDataLocatorType;
