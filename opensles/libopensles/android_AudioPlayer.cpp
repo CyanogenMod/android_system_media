@@ -142,7 +142,7 @@ static void android_audioPlayer_updateStereoVolume(CAudioPlayer* ap) {
 }
 
 //-----------------------------------------------------------------------------
-void audioTrack_handleMarker(CAudioPlayer* ap) {
+void audioTrack_handleMarker_lockPlay(CAudioPlayer* ap) {
     //SL_LOGV("received event EVENT_MARKER from AudioTrack");
     slPlayCallback callback = NULL;
     void* callbackPContext = NULL;
@@ -159,7 +159,7 @@ void audioTrack_handleMarker(CAudioPlayer* ap) {
 }
 
 //-----------------------------------------------------------------------------
-void audioTrack_handleNewPos(CAudioPlayer* ap) {
+void audioTrack_handleNewPos_lockPlay(CAudioPlayer* ap) {
     //SL_LOGV("received event EVENT_NEW_POS from AudioTrack");
     slPlayCallback callback = NULL;
     void* callbackPContext = NULL;
@@ -177,7 +177,7 @@ void audioTrack_handleNewPos(CAudioPlayer* ap) {
 
 
 //-----------------------------------------------------------------------------
-void audioTrack_handleUnderrun(CAudioPlayer* ap) {
+void audioTrack_handleUnderrun_lockPlay(CAudioPlayer* ap) {
     slPlayCallback callback = NULL;
     void* callbackPContext = NULL;
 
@@ -192,10 +192,43 @@ void audioTrack_handleUnderrun(CAudioPlayer* ap) {
     }
 }
 
+//-----------------------------------------------------------------------------
+/**
+ * post-condition: play state of AudioPlayer is SL_PLAYSTATE_PAUSED if setPlayStateToPaused is true
+ *
+ * note: a conditional flag, setPlayStateToPaused, is used here to specify whether the play state
+ *       needs to be changed when the player reaches the end of the content to play. This is
+ *       relative to what the specification describes for buffer queues vs the
+ *       SL_PLAYEVENT_HEADATEND event. In the OpenSL ES specification 1.0.1:
+ *        - section 8.12 SLBufferQueueItf states "In the case of starvation due to insufficient
+ *          buffers in the queue, the playing of audio data stops. The player remains in the
+ *          SL_PLAYSTATE_PLAYING state."
+ *        - section 9.2.31 SL_PLAYEVENT states "SL_PLAYEVENT_HEADATEND Playback head is at the end
+ *          of the current content and the player has paused."
+ */
+void audioPlayer_dispatch_headAtEnd_lockPlay(CAudioPlayer *ap, bool setPlayStateToPaused) {
+    slPlayCallback playCallback = NULL;
+    void * playContext = NULL;
+    // SLPlayItf callback or no callback?
+    interface_lock_exclusive(&ap->mPlay);
+    if (ap->mPlay.mEventFlags & SL_PLAYEVENT_HEADATEND) {
+        playCallback = ap->mPlay.mCallback;
+        playContext = ap->mPlay.mContext;
+    }
+    if (setPlayStateToPaused) {
+        ap->mPlay.mState = SL_PLAYSTATE_PAUSED;
+    }
+    interface_unlock_exclusive(&ap->mPlay);
+    // callback with no lock held
+    if (NULL != playCallback) {
+        (*playCallback)(&ap->mPlay.mItf, playContext, SL_PLAYEVENT_HEADATEND);
+    }
+}
+
 #ifndef USE_BACKPORT
 //-----------------------------------------------------------------------------
 // Callback associated with an SfPlayer of an SL ES AudioPlayer that gets its data
-// from a URI, for prefetching events
+// from a URI or FD, for prefetching events
 static void android_prefetchEventCallback(const int event, const int data1, void* user) {
     if (NULL == user) {
         return;
@@ -239,22 +272,9 @@ static void android_prefetchEventCallback(const int event, const int data1, void
         } break;
 
     case(android::SfPlayer::kEventEndOfStream): {
-        slPlayCallback playCallback = NULL;
-        void * playContext = NULL;
-        // SLPlayItf callback or no callback?
-        interface_lock_exclusive(&ap->mPlay);
-        if (ap->mPlay.mEventFlags & SL_PLAYEVENT_HEADATEND) {
-            playCallback = ap->mPlay.mCallback;
-            playContext = ap->mPlay.mContext;
-        }
-        ap->mPlay.mState = SL_PLAYSTATE_PAUSED;
+        audioPlayer_dispatch_headAtEnd_lockPlay(ap, true /*set state to paused?*/);
         // FIXME update play position to make sure it's at the same value
         //       as getDuration if it's known?
-        interface_unlock_exclusive(&ap->mPlay);
-        // callback with no lock held
-        if (NULL != playCallback) {
-            (*playCallback)(&ap->mPlay.mItf, playContext, SL_PLAYEVENT_HEADATEND);
-        }
         ap->mAudioTrack->stop();
         } break;
 
@@ -443,13 +463,17 @@ static void audioTrack_callBack_uri(int event, void* user, void *info) {
     } else if (NULL != user) {
         switch (event) {
             case (android::AudioTrack::EVENT_MARKER) :
-                audioTrack_handleMarker((CAudioPlayer *)user);
+                audioTrack_handleMarker_lockPlay((CAudioPlayer *)user);
                 break;
             case (android::AudioTrack::EVENT_NEW_POS) :
-                audioTrack_handleNewPos((CAudioPlayer *)user);
+                audioTrack_handleNewPos_lockPlay((CAudioPlayer *)user);
                 break;
             case (android::AudioTrack::EVENT_UNDERRUN) :
-                audioTrack_handleUnderrun((CAudioPlayer *)user);
+                audioTrack_handleUnderrun_lockPlay((CAudioPlayer *)user);
+            default:
+                SL_LOGE("Encountered unknown AudioTrack event %d for CAudioPlayer %p", event,
+                        (CAudioPlayer *)user);
+                break;
         }
     }
 }
@@ -458,7 +482,7 @@ static void audioTrack_callBack_uri(int event, void* user, void *info) {
 // Callback associated with an AudioTrack of an SL ES AudioPlayer that gets its data
 // from a buffer queue.
 static void audioTrack_callBack_pull(int event, void* user, void *info) {
-    CAudioPlayer *pAudioPlayer = (CAudioPlayer *)user;
+    CAudioPlayer *ap = (CAudioPlayer *)user;
     void * callbackPContext = NULL;
     switch(event) {
 
@@ -467,39 +491,39 @@ static void audioTrack_callBack_pull(int event, void* user, void *info) {
         slBufferQueueCallback callback = NULL;
         android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
         // retrieve data from the buffer queue
-        interface_lock_exclusive(&pAudioPlayer->mBufferQueue);
-        if (pAudioPlayer->mBufferQueue.mState.count != 0) {
-            //SL_LOGV("nbBuffers in queue = %lu",pAudioPlayer->mBufferQueue.mState.count);
-            assert(pAudioPlayer->mBufferQueue.mFront != pAudioPlayer->mBufferQueue.mRear);
+        interface_lock_exclusive(&ap->mBufferQueue);
+        if (ap->mBufferQueue.mState.count != 0) {
+            //SL_LOGV("nbBuffers in queue = %lu",ap->mBufferQueue.mState.count);
+            assert(ap->mBufferQueue.mFront != ap->mBufferQueue.mRear);
 
-            BufferHeader *oldFront = pAudioPlayer->mBufferQueue.mFront;
+            BufferHeader *oldFront = ap->mBufferQueue.mFront;
             BufferHeader *newFront = &oldFront[1];
 
             // FIXME handle 8bit based on buffer format
             short *pSrc = (short*)((char *)oldFront->mBuffer
-                    + pAudioPlayer->mBufferQueue.mSizeConsumed);
-            if (pAudioPlayer->mBufferQueue.mSizeConsumed + pBuff->size < oldFront->mSize) {
+                    + ap->mBufferQueue.mSizeConsumed);
+            if (ap->mBufferQueue.mSizeConsumed + pBuff->size < oldFront->mSize) {
                 // can't consume the whole or rest of the buffer in one shot
-                pAudioPlayer->mBufferQueue.mSizeConsumed += pBuff->size;
+                ap->mBufferQueue.mSizeConsumed += pBuff->size;
                 // leave pBuff->size untouched
                 // consume data
                 // FIXME can we avoid holding the lock during the copy?
                 memcpy (pBuff->i16, pSrc, pBuff->size);
             } else {
                 // finish consuming the buffer or consume the buffer in one shot
-                pBuff->size = oldFront->mSize - pAudioPlayer->mBufferQueue.mSizeConsumed;
-                pAudioPlayer->mBufferQueue.mSizeConsumed = 0;
+                pBuff->size = oldFront->mSize - ap->mBufferQueue.mSizeConsumed;
+                ap->mBufferQueue.mSizeConsumed = 0;
 
                 if (newFront ==
-                        &pAudioPlayer->mBufferQueue.mArray
-                            [pAudioPlayer->mBufferQueue.mNumBuffers + 1])
+                        &ap->mBufferQueue.mArray
+                            [ap->mBufferQueue.mNumBuffers + 1])
                 {
-                    newFront = pAudioPlayer->mBufferQueue.mArray;
+                    newFront = ap->mBufferQueue.mArray;
                 }
-                pAudioPlayer->mBufferQueue.mFront = newFront;
+                ap->mBufferQueue.mFront = newFront;
 
-                pAudioPlayer->mBufferQueue.mState.count--;
-                pAudioPlayer->mBufferQueue.mState.playIndex++;
+                ap->mBufferQueue.mState.count--;
+                ap->mBufferQueue.mState.playIndex++;
 
                 // consume data
                 // FIXME can we avoid holding the lock during the copy?
@@ -507,36 +531,42 @@ static void audioTrack_callBack_pull(int event, void* user, void *info) {
 
                 // data has been consumed, and the buffer queue state has been updated
                 // we will notify the client if applicable
-                callback = pAudioPlayer->mBufferQueue.mCallback;
+                callback = ap->mBufferQueue.mCallback;
                 // save callback data
-                callbackPContext = pAudioPlayer->mBufferQueue.mContext;
+                callbackPContext = ap->mBufferQueue.mContext;
             }
-        } else {
-            // no data available
+        } else { // empty queue
+            // signal no data available
             pBuff->size = 0;
+
+            // signal we're at the end of the content, but don't pause (see note in function)
+            audioPlayer_dispatch_headAtEnd_lockPlay(ap, false /*set state to paused?*/);
+
+            // stop the track so it restarts playing faster when new data is enqueued
+            ap->mAudioTrack->stop();
         }
-        interface_unlock_exclusive(&pAudioPlayer->mBufferQueue);
+        interface_unlock_exclusive(&ap->mBufferQueue);
         // notify client
         if (NULL != callback) {
-            (*callback)(&pAudioPlayer->mBufferQueue.mItf, callbackPContext);
+            (*callback)(&ap->mBufferQueue.mItf, callbackPContext);
         }
     }
     break;
 
     case (android::AudioTrack::EVENT_MARKER) :
-        audioTrack_handleMarker(pAudioPlayer);
+        audioTrack_handleMarker_lockPlay(ap);
         break;
 
     case (android::AudioTrack::EVENT_NEW_POS) :
-        audioTrack_handleNewPos(pAudioPlayer);
+        audioTrack_handleNewPos_lockPlay(ap);
         break;
 
     case (android::AudioTrack::EVENT_UNDERRUN) :
-        audioTrack_handleUnderrun(pAudioPlayer);
+        audioTrack_handleUnderrun_lockPlay(ap);
         break;
 
     default:
-        // FIXME where does the notification of SL_PLAYEVENT_HEADATEND, SL_PLAYEVENT_HEADMOVING fit?
+        // FIXME where does the notification of SL_PLAYEVENT_HEADMOVING fit?
         break;
     }
 }
@@ -1014,13 +1044,7 @@ void android_audioPlayer_useEventMask(CAudioPlayer *ap) {
     }
 
     if (eventFlags & SL_PLAYEVENT_HEADATEND) {
-        if (AUDIOTRACK_PULL == ap->mAndroidObjType) {
-            // FIXME support SL_PLAYEVENT_HEADATEND
-            SL_LOGE("[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADATEND) on an "
-                "SL_OBJECTID_AUDIOPLAYER to be implemented ]");
-        } else if (MEDIAPLAYER == ap->mAndroidObjType) {
-            // nothing to do for SL_PLAYEVENT_HEADATEND, callback event will be checked against mask
-        }
+        // nothing to do for SL_PLAYEVENT_HEADATEND, callback event will be checked against mask
     }
 
     if (eventFlags & SL_PLAYEVENT_HEADMOVING) {
@@ -1029,9 +1053,7 @@ void android_audioPlayer_useEventMask(CAudioPlayer *ap) {
             "SL_OBJECTID_AUDIOPLAYER to be implemented ]");
     }
     if (eventFlags & SL_PLAYEVENT_HEADSTALLED) {
-        // FIXME support SL_PLAYEVENT_HEADSTALLED
-        SL_LOGE("[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADSTALLED) on an "
-            "SL_OBJECTID_AUDIOPLAYER to be implemented ]");
+        // nothing to do for SL_PLAYEVENT_HEADSTALLED, callback event will be checked against mask
     }
 
 }
