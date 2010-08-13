@@ -59,8 +59,10 @@ static void HandleAdd(void *self, int MPH)
         // Will never add IObject, so [1] is always defined
         ((void **) thisItf)[1] = thisObject;
         VoidHook init = MPH_init_table[MPH].mInit;
-        if (NULL != init)
+        if (NULL != init) {
             (*init)(thisItf);
+            ((size_t *) thisItf)[0] ^= ~0;
+        }
         result = SL_RESULT_SUCCESS;
 
         // re-lock mutex to update state
@@ -161,8 +163,10 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
                     // Will never add IObject, so [1] is always defined
                     ((void **) thisItf)[1] = thisObject;
                     VoidHook init = MPH_init_table[MPH].mInit;
-                    if (NULL != init)
+                    if (NULL != init) {
                         (*init)(thisItf);
+                        ((size_t *) thisItf)[0] ^= ~0;
+                    }
                     result = SL_RESULT_SUCCESS;
 
                     // re-lock mutex to update state

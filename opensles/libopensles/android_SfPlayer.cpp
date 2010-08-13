@@ -25,8 +25,10 @@
 #ifdef LOGV
 #undef LOGV
 #endif
-#define LOGE(fmt, ...) do { fprintf(stderr, "%s:%s:%d:E ", __FUNCTION__, __FILE__, __LINE__); fprintf(stderr, fmt, ## __VA_ARGS__); fputc('\n', stderr); } while(0)
-#define LOGV(fmt, ...) do { fprintf(stdout, "%s:%s:%d:V ", __FUNCTION__, __FILE__, __LINE__); fprintf(stdout, fmt, ## __VA_ARGS__); fputc('\n', stdout); } while(0)
+#define LOGE(fmt, ...) do { fprintf(stderr, "%s:%s:%d:E ", __FUNCTION__, __FILE__, __LINE__); \
+    fprintf(stderr, fmt, ## __VA_ARGS__); fputc('\n', stderr); } while(0)
+#define LOGV(fmt, ...) do { fprintf(stdout, "%s:%s:%d:V ", __FUNCTION__, __FILE__, __LINE__); \
+    fprintf(stdout, fmt, ## __VA_ARGS__); fputc('\n', stdout); } while(0)
 
 namespace android {
 
@@ -437,7 +439,8 @@ void SfPlayer::onDecode() {
 
     mBufferInFlight = true;
     msg->post(delayUs); // negative delays are ignored
-    //LOGV("timeUs=%lld, mTimeDelta=%lld, delayUs=%lld", mLastDecodedPositionUs, mTimeDelta, delayUs);
+    //LOGV("timeUs=%lld, mTimeDelta=%lld, delayUs=%lld",
+    //mLastDecodedPositionUs, mTimeDelta, delayUs);
 }
 
 void SfPlayer::onRender(const sp<AMessage> &msg) {

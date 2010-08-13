@@ -51,5 +51,6 @@ typedef struct {
 extern SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this);
 extern void audioPlayerGainUpdate(CAudioPlayer *this);
 extern void IOutputMixExt_Destroy(CAudioPlayer *this);
+extern void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 size);
 
 #endif

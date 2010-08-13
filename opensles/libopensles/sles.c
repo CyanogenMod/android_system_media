@@ -14,14 +14,41 @@
  * limitations under the License.
  */
 
-/* OpenSL ES prototype */
+/* OpenSL ES private and global functions not associated with an interface or class */
 
 #include "sles_allinclusive.h"
 
-/* Private functions */
+
+/** \brief Return true if the specified interface exists and has been initialized for this object.
+ *  Returns false if the class does not support this kind of interface, or the class supports the
+ *  interface but this particular object has not had the interface exposed at object creation time
+ *  or by DynamicInterface::AddInterface. Note that the return value is not affected by whether
+ *  the application has requested access to the interface with Object::GetInterface. Assumes on
+ *  entry that the object is locked for either shared or exclusive access.
+ */
+
+bool IsInterfaceInitialized(IObject *this, unsigned MPH)
+{
+    assert(NULL != this);
+    assert( /* (MPH_MIN <= MPH) && */ (MPH < (unsigned) MPH_MAX));
+    const ClassTable *class__ = this->mClass;
+    assert(NULL != class__);
+    int index;
+    if (0 > (index = class__->mMPH_to_index[MPH]))
+        return false;
+    assert(MAX_INDEX >= class__->mInterfaceCount);
+    assert(class__->mInterfaceCount > (unsigned) index);
+    switch (this->mInterfaceStates[index]) {
+    case INTERFACE_EXPOSED:
+    case INTERFACE_ADDED:
+        return true;
+    default:
+        return false;
+    }
+}
 
 
-/** Map an IObject to it's "object ID" (which is really a class ID) */
+/** \brief Map an IObject to it's "object ID" (which is really a class ID) */
 
 SLuint32 IObjectToObjectID(IObject *this)
 {
@@ -30,7 +57,7 @@ SLuint32 IObjectToObjectID(IObject *this)
 }
 
 
-/** Convert POSIX pthread error code to OpenSL ES result code */
+/** \brief Convert POSIX pthread error code to OpenSL ES result code */
 
 SLresult err_to_result(int err)
 {
@@ -42,7 +69,7 @@ SLresult err_to_result(int err)
 }
 
 
-/** Check the interface IDs passed into a Create operation */
+/** \brief Check the interface IDs passed into a Create operation */
 
 SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired, unsigned *pExposedMask)
@@ -83,7 +110,7 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
 }
 
 
-/** Private helper shared by decoder and encoder */
+/** \brief Helper shared by decoder and encoder */
 
 SLresult GetCodecCapabilities(SLuint32 codecId, SLuint32 *pIndex,
     SLAudioCodecDescriptor *pDescriptor, const CodecDescriptor *codecDescriptors)
@@ -125,7 +152,8 @@ SLresult GetCodecCapabilities(SLuint32 codecId, SLuint32 *pIndex,
     return SL_RESULT_PARAMETER_INVALID;
 }
 
-/** Check a data locator and make local deep copy */
+
+/** \brief Check a data locator and make local deep copy */
 
 static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
 {
@@ -260,7 +288,7 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
 }
 
 
-/** Free the local deep copy of a data locator */
+/** \brief Free the local deep copy of a data locator */
 
 static void freeDataLocator(DataLocator *pDataLocator)
 {
@@ -275,7 +303,7 @@ static void freeDataLocator(DataLocator *pDataLocator)
 }
 
 
-/** Check a data format and make local deep copy */
+/** \brief Check a data format and make local deep copy */
 
 static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
 {
@@ -453,7 +481,7 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
 }
 
 
-/** Check interface ID compatibility with respect to a particular data locator format */
+/** \brief Check interface ID compatibility with respect to a particular data locator format */
 
 SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDataLocatorFormat,
         SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
@@ -472,7 +500,7 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
 }
 
 
-/** Free the local deep copy of a data format */
+/** \brief Free the local deep copy of a data format */
 
 static void freeDataFormat(DataFormat *pDataFormat)
 {
@@ -487,7 +515,7 @@ static void freeDataFormat(DataFormat *pDataFormat)
 }
 
 
-/** Check a data source and make local deep copy */
+/** \brief Check a data source and make local deep copy */
 
 SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataLocatorFormat)
 {
@@ -526,7 +554,7 @@ SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataL
 }
 
 
-/** Check a data sink and make local deep copy */
+/** \brief Check a data sink and make local deep copy */
 
 SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLocatorFormat,
         SLuint32 objType)
@@ -586,7 +614,7 @@ SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLoca
 }
 
 
-/** Free the local deep copy of a data locator format */
+/** \brief Free the local deep copy of a data locator format */
 
 void freeDataLocatorFormat(DataLocatorFormat *dlf)
 {
@@ -651,6 +679,7 @@ extern void
     IOutputMixExt_init(void *);
 #endif
 
+
 /*static*/ const struct MPH_init MPH_init_table[MPH_MAX] = {
     { /* MPH_3DCOMMIT, */ I3DCommit_init, NULL, NULL },
     { /* MPH_3DDOPPLER, */ I3DDoppler_init, NULL, NULL },
@@ -711,7 +740,7 @@ extern void
 };
 
 
-/** Construct a new instance of the specified class, exposing selected interfaces */
+/** \brief Construct a new instance of the specified class, exposing selected interfaces */
 
 IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf engine)
 {
@@ -755,6 +784,9 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
                 VoidHook init = MPH_init_table[x->mMPH].mInit;
                 if (NULL != init)
                     (*init)(self);
+                // IObject does not require a call to GetInterface
+                if (index)
+                    ((size_t *) self)[0] ^= ~0;
                 state = INTERFACE_EXPOSED;
             } else
                 state = INTERFACE_UNINITIALIZED;
@@ -791,7 +823,7 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
 /* Initial global entry points */
 
 
-/** slCreateEngine Function */
+/** \brief slCreateEngine Function */
 
 SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     const SLEngineOption *pEngineOptions, SLuint32 numInterfaces,
@@ -867,7 +899,7 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
 }
 
 
-/** slQueryNumSupportedEngineInterfaces Function */
+/** \brief slQueryNumSupportedEngineInterfaces Function */
 
 SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedInterfaces)
 {
@@ -891,7 +923,7 @@ SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedI
 }
 
 
-/** slQuerySupportedEngineInterfaces Function */
+/** \brief slQuerySupportedEngineInterfaces Function */
 
 SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index, SLInterfaceID *pInterfaceId)
 {

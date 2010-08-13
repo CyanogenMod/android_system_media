@@ -31,4 +31,6 @@ extern const signed char
     MPH_to_OutputMix[MPH_MAX],
     MPH_to_Vibra[MPH_MAX];
 
+#define MAX_INDEX 32
+
 #endif // !defined(__MPH_to_H)

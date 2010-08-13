@@ -26,6 +26,16 @@
 #include <unistd.h> // usleep
 #include <errno.h>
 
+#ifndef __cplusplus
+typedef int bool;
+#ifndef false
+#define false 0
+#endif
+#ifndef true
+#define true 1
+#endif
+#endif
+
 #include "MPH.h"
 #include "MPH_to.h"
 #include "devices.h"
@@ -237,7 +247,7 @@ typedef struct Object_interface {
     SLuint32 mInstanceID;           // const for debugger and for RPC
     slObjectCallback mCallback;
     void *mContext;
-    unsigned mGottenMask;           // interfaces which are exposed or added, and then gotten
+    unsigned mGottenMask;           ///< bit-mask of interfaces exposed or added, then gotten
     unsigned mLossOfControlMask;    // interfaces with loss of control enabled
     unsigned mAttributesMask;       // attributes which have changed since last sync
 #ifdef USE_CONFORMANCE
@@ -1199,3 +1209,10 @@ extern void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer);
 #ifdef ANDROID
 extern SLresult android_audioPlayerClear(CAudioPlayer *pAudioPlayer);
 #endif
+
+extern SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer, SLuint32 size);
+extern SLresult IBufferQueue_Clear(SLBufferQueueItf self);
+extern SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
+    slBufferQueueCallback callback, void *pContext);
+
+extern bool IsInterfaceInitialized(IObject *this, unsigned MPH);

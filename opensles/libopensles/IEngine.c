@@ -207,8 +207,10 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 
                 } while (0);
 
-                if (SL_RESULT_SUCCESS != result)
+                if (SL_RESULT_SUCCESS != result) {
                     (*this->mObject.mItf->Destroy)(&this->mObject.mItf);
+                    // equivalent to calling IObject_Destroy directly
+                }
 
             }
         }
@@ -311,6 +313,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 
                 if (SL_RESULT_SUCCESS != result)
                     (*this->mObject.mItf->Destroy)(&this->mObject.mItf);
+                // or IObject_Destroy
             }
 
         }

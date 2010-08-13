@@ -27,7 +27,14 @@ static const unsigned char AUX_to_MPH[AUX_MAX] = {
 };
 
 
-/** \brief Private function that validates the effect interface specified by the application */
+/** \brief This is a private function that validates the effect interface specified by the
+ *  application when it calls EnableEffectSend, IsEnabled, SetSendLevel, or GetSendLevel.
+ *  For the interface to be valid, it has to satisfy these requirements:
+ *   - object is an audio player (MIDI player is not supported yet)
+ *   - audio sink is an output mix
+ *   - interface was exposed at object creation time or by DynamicInterface::AddInterface
+ *   - interface was "gotten" with Object::GetInterface
+ */
 
 static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEffect)
 {
@@ -48,7 +55,9 @@ static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEff
     else
         return NULL;
     assert(aux < AUX_MAX);
-    // App couldn't have an interface for effect without exposure
+    // Validate that the application has a valid interface for the effect.  The interface must have
+    // been exposed at object creation time or by DynamicInterface::AddInterface, and it also must
+    // have been "gotten" with Object::GetInterface.
     int index = MPH_to_OutputMix[AUX_to_MPH[aux]];
     if (0 > index)
         return NULL;

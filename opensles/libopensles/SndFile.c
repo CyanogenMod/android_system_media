@@ -36,7 +36,7 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
     SLresult result;
     pthread_mutex_lock(&this->mMutex);
     if ((NULL != this->mRetryBuffer) && (0 < this->mRetrySize)) {
-        result = (*caller)->Enqueue(caller, this->mRetryBuffer, this->mRetrySize);
+        result = IBufferQueue_Enqueue(caller, this->mRetryBuffer, this->mRetrySize);
         if (SL_RESULT_BUFFER_INSUFFICIENT == result) {
             pthread_mutex_unlock(&this->mMutex);
             return;     // what, again?
@@ -61,7 +61,7 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
     pthread_mutex_unlock(&this->mMutex);
     if (0 < count) {
         SLuint32 size = (SLuint32) (count * sizeof(short));
-        result = (*caller)->Enqueue(caller, pBuffer, size);
+        result = IBufferQueue_Enqueue(caller, pBuffer, size);
         // this should not happen, but if it does, who will call us to kick off again?
         if (SL_RESULT_BUFFER_INSUFFICIENT == result) {
             this->mRetryBuffer = pBuffer;
@@ -180,7 +180,7 @@ void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer)
         if (SL_TIME_UNKNOWN != pos) {
 
             // discard any enqueued buffers for the old position
-            (*&audioPlayer->mBufferQueue.mItf)->Clear(&audioPlayer->mBufferQueue.mItf);
+            IBufferQueue_Clear(&audioPlayer->mBufferQueue.mItf);
             empty = SL_BOOLEAN_TRUE;
 
             pthread_mutex_lock(&audioPlayer->mSndFile.mMutex);

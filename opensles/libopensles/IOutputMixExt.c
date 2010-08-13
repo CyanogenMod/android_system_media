@@ -119,7 +119,7 @@ static SLboolean track_check(Track *track)
 
 /** \brief This is the mixer for SDL: fill the specified 16-bit stereo PCM buffer */
 
-static void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 size)
+void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 size)
 {
     SL_ENTER_INTERFACE_VOID
 

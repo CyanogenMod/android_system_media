@@ -248,7 +248,8 @@ static void android_prefetchEventCallback(const int event, const int data1, void
         slPrefetchCallback callback = NULL;
         void* callbackPContext = NULL;
         // SLPrefetchStatusItf callback or no callback?
-        // FIXME What if prefetch interface not explicitly requested by app? Can't assume it is there
+        // FIXME What if prefetch interface not explicitly requested by app?
+        // Can't assume it is there
         interface_lock_exclusive(&ap->mPrefetchStatus);
         if (ap->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_STATUSCHANGE) {
             callback = ap->mPrefetchStatus.mCallback;
