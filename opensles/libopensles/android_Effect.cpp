@@ -342,10 +342,7 @@ SLresult android_genericFx_setEnabled(void *pAudioEffect, SLboolean enabled) {
     android::status_t status =
             ((android::AudioEffect*)pAudioEffect)->setEnabled(SL_BOOLEAN_TRUE == enabled);
 
-    // the effect framework will return an error if the requested state is the same as the previous,
-    // this prevents us from returning an error when the effect cannot be controlled. We're
-    // therefore returning success regardless of the status code.
-    return SL_RESULT_SUCCESS;
+    return android_fx_statusToResult(status);
 }
 
 
@@ -372,10 +369,9 @@ SLresult android_genericFx_sendCommand(void *pAudioEffect, SLuint32 command, SLu
         return SL_RESULT_PARAMETER_INVALID;
     }
 
-    // FIXME update size casts when framework moves from int32_t to uint32_t
     android::status_t status = ((android::AudioEffect*)pAudioEffect)->command(
-            (int32_t) command,
-            (int32_t) commandSize,
+            (uint32_t) command,
+            (uint32_t) commandSize,
             pCommand,
             (uint32_t*)replySize,
             pReply);
