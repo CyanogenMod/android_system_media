@@ -470,6 +470,7 @@ static void audioTrack_callBack_uri(int event, void* user, void *info) {
                 break;
             case (android::AudioTrack::EVENT_UNDERRUN) :
                 audioTrack_handleUnderrun_lockPlay((CAudioPlayer *)user);
+                break;
             default:
                 SL_LOGE("Encountered unknown AudioTrack event %d for CAudioPlayer %p", event,
                         (CAudioPlayer *)user);
@@ -567,6 +568,8 @@ static void audioTrack_callBack_pull(int event, void* user, void *info) {
 
     default:
         // FIXME where does the notification of SL_PLAYEVENT_HEADMOVING fit?
+        SL_LOGE("Encountered unknown AudioTrack event %d for CAudioPlayer %p", event,
+                (CAudioPlayer *)user);
         break;
     }
 }
@@ -1159,6 +1162,14 @@ SLresult android_audioPlayer_volumeUpdate(CAudioPlayer* ap) {
 
 
 //-----------------------------------------------------------------------------
+void android_audioPlayer_forceAudioTrackStart(CAudioPlayer *ap) {
+    if (NULL != ap->mAudioTrack) {
+        ap->mAudioTrack->start();
+    }
+}
+
+
+//-----------------------------------------------------------------------------
 /*
  * BufferQueue::Clear
  */
@@ -1179,3 +1190,4 @@ SLresult android_audioPlayerClear(CAudioPlayer *pAudioPlayer) {
 
     return result;
 }
+

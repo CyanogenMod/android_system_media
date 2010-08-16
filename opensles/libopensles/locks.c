@@ -114,7 +114,12 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
             attributes &= ~ATTR_ENQUEUE;
             ap = (CAudioPlayer *) this;
             if (SL_PLAYSTATE_PLAYING == ap->mPlay.mState) {
-                // NTH synchronously kick off the first buffer
+#ifdef ANDROID
+                // the AudioTrack associated with the AudioPlayer receiving audio from a PCM buffer
+                // queue was stopped when the queue become empty, we restart as soon as a new buffer
+                // has been enqueued since we're in playing state
+                android_audioPlayer_forceAudioTrackStart(ap);
+#endif
             }
         }
     }
