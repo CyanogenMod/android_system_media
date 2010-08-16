@@ -74,4 +74,4 @@ extern void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPos
 
 extern SLresult android_audioPlayer_volumeUpdate(CAudioPlayer *pAudioPlayer);
 
-extern void android_audioPlayer_forceAudioTrackStart(CAudioPlayer *pAudioPlayer);
+extern void android_audioPlayer_bufferQueueRefilled(CAudioPlayer *pAudioPlayer);
