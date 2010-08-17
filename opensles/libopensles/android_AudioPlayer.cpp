@@ -225,11 +225,43 @@ void audioPlayer_dispatch_headAtEnd_lockPlay(CAudioPlayer *ap, bool setPlayState
     }
 }
 
+
+//-----------------------------------------------------------------------------
+/**
+ * pre-condition: AudioPlayer has SLPrefetchStatusItf initialized
+ * post-condition:
+ *  - ap->mPrefetchStatus.mStatus == status
+ *  - the prefetch status callback, if any, has been notified if a change occurred
+ *
+ */
+void audioPlayer_dispatch_prefetchStatus_lockPrefetch(CAudioPlayer *ap, SLuint32 status) {
+    slPrefetchCallback prefetchCallback = NULL;
+    void * prefetchContext = NULL;
+
+    interface_lock_exclusive(&ap->mPrefetchStatus);
+    // status change?
+    if (ap->mPrefetchStatus.mStatus != status) {
+        ap->mPrefetchStatus.mStatus = status;
+        // callback or no callback?
+        if (ap->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_STATUSCHANGE) {
+            prefetchCallback = ap->mPrefetchStatus.mCallback;
+            prefetchContext  = ap->mPrefetchStatus.mContext;
+        }
+    }
+    interface_unlock_exclusive(&ap->mPrefetchStatus);
+
+    // callback with no lock held
+    if (NULL != prefetchCallback) {
+        (*prefetchCallback)(&ap->mPrefetchStatus.mItf, prefetchContext, status);
+    }
+}
+
+
 #ifndef USE_BACKPORT
 //-----------------------------------------------------------------------------
 // Callback associated with an SfPlayer of an SL ES AudioPlayer that gets its data
 // from a URI or FD, for prefetching events
-static void android_prefetchEventCallback(const int event, const int data1, void* user) {
+static void sfplayer_handlePrefetchEvent(const int event, const int data1, void* user) {
     if (NULL == user) {
         return;
     }
@@ -239,17 +271,21 @@ static void android_prefetchEventCallback(const int event, const int data1, void
     switch(event) {
 
     case(android::SfPlayer::kEventPrefetchFillLevelUpdate): {
+        if (!IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
+            break;
+        }
         // FIXME implement buffer filler level updates
         SL_LOGE("[ FIXME implement buffer filler level updates ]");
         //ap->mPrefetchStatus.mLevel = ;
         } break;
 
     case(android::SfPlayer::kEventPrefetchStatusChange): {
+        if (!IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
+            break;
+        }
         slPrefetchCallback callback = NULL;
         void* callbackPContext = NULL;
         // SLPrefetchStatusItf callback or no callback?
-        // FIXME What if prefetch interface not explicitly requested by app?
-        // Can't assume it is there
         interface_lock_exclusive(&ap->mPrefetchStatus);
         if (ap->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_STATUSCHANGE) {
             callback = ap->mPrefetchStatus.mCallback;
@@ -483,7 +519,7 @@ static void audioTrack_callBack_uri(int event, void* user, void *info) {
 //-----------------------------------------------------------------------------
 // Callback associated with an AudioTrack of an SL ES AudioPlayer that gets its data
 // from a buffer queue.
-static void audioTrack_callBack_pull(int event, void* user, void *info) {
+static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *info) {
     CAudioPlayer *ap = (CAudioPlayer *)user;
     void * callbackPContext = NULL;
     switch(event) {
@@ -543,6 +579,11 @@ static void audioTrack_callBack_pull(int event, void* user, void *info) {
 
             // signal we're at the end of the content, but don't pause (see note in function)
             audioPlayer_dispatch_headAtEnd_lockPlay(ap, false /*set state to paused?*/);
+
+            // signal underflow to prefetch status itf
+            if (IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
+                audioPlayer_dispatch_prefetchStatus_lockPrefetch(ap, SL_PREFETCHSTATUS_UNDERFLOW);
+            }
 
             // stop the track so it restarts playing faster when new data is enqueued
             ap->mAudioTrack->stop();
@@ -665,7 +706,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                 sles_to_android_channelMask(df_pcm->numChannels, df_pcm->channelMask),//channel mask
                 0,                                                   // frameCount (here min)
                 0,                                                   // flags
-                audioTrack_callBack_pull,                      // callback
+                audioTrack_callBack_pullFromBuffQueue,               // callback
                 (void *) pAudioPlayer,                               // user
                 0);  // FIXME find appropriate frame count         // notificationFrame
         if (pAudioPlayer->mAudioTrack->initCheck() != android::NO_ERROR) {
@@ -686,7 +727,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         pAudioPlayer->mRenderLooper = new android::ALooper();
         pAudioPlayer->mSfPlayer = new android::SfPlayer(pAudioPlayer->mRenderLooper);
-        pAudioPlayer->mSfPlayer->setNotifListener(android_prefetchEventCallback,
+        pAudioPlayer->mSfPlayer->setNotifListener(sfplayer_handlePrefetchEvent,
                 (void*)pAudioPlayer /*notifUSer*/);
         pAudioPlayer->mRenderLooper->registerHandler(pAudioPlayer->mSfPlayer);
         pAudioPlayer->mRenderLooper->start(false /*runOnCallingThread*/);
@@ -808,7 +849,7 @@ SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer, SLuint3
                     0,                                              // frameCount (here min)
                     0,                                              // flags
                     pAudioPlayer->mAndroidObjType == MEDIAPLAYER ?  // callback
-                            audioTrack_callBack_uri : audioTrack_callBack_pull,
+                            audioTrack_callBack_uri : audioTrack_callBack_pullFromBuffQueue,
                     (void *) pAudioPlayer,                          // user
                     0    // FIXME find appropriate frame count      // notificationFrame
 #ifndef USE_BACKPORT
@@ -1163,9 +1204,18 @@ SLresult android_audioPlayer_volumeUpdate(CAudioPlayer* ap) {
 
 
 //-----------------------------------------------------------------------------
-void android_audioPlayer_forceAudioTrackStart(CAudioPlayer *ap) {
+void android_audioPlayer_bufferQueueRefilled(CAudioPlayer *ap) {
+    // the AudioTrack associated with the AudioPlayer receiving audio from a PCM buffer
+    // queue was stopped when the queue become empty, we restart as soon as a new buffer
+    // has been enqueued since we're in playing state
     if (NULL != ap->mAudioTrack) {
         ap->mAudioTrack->start();
+    }
+
+    // when the queue became empty, an underflow on the prefetch status itf was sent. Now the queue
+    // has received new data, signal it has sufficient data
+    if (IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
+        audioPlayer_dispatch_prefetchStatus_lockPrefetch(ap, SL_PREFETCHSTATUS_SUFFICIENTDATA);
     }
 }
 

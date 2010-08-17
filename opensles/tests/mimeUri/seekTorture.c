@@ -68,7 +68,8 @@ int main(int argc, char **argv)
     SLObjectItf playerObject;
     SLInterfaceID ids[1] = {SL_IID_SEEK};
     SLboolean flags[1] = {SL_BOOLEAN_TRUE};
-    result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc, &audiosnk, 1, ids, flags);
+    result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc, &audiosnk,
+            1, ids, flags);
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
     result = (*playerObject)->Realize(playerObject, SL_BOOLEAN_FALSE);
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
@@ -95,7 +96,8 @@ int main(int argc, char **argv)
         unsigned position, duration;
         while (fscanf(fp_map, "%u %u", &position, &duration) == 2) {
             printf("%u %u\n", position, duration);
-            result = (*playerSeek)->SetPosition(playerSeek, (SLmillisecond) position, SL_SEEKMODE_ACCURATE);
+            result = (*playerSeek)->SetPosition(playerSeek, (SLmillisecond) position,
+                    SL_SEEKMODE_ACCURATE);
             ASSERT_EQ(SL_RESULT_SUCCESS, result);
             if (duration > 0)
                 usleep(duration * 1000);
