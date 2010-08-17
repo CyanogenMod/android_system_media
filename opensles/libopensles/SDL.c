@@ -32,7 +32,7 @@ static void SDLCALL SDL_callback(void *context, Uint8 *stream, int len)
     interface_unlock_shared(thisEngine);
     if (NULL != outputMix) {
         SLOutputMixExtItf OutputMixExt = &outputMix->mOutputMixExt.mItf;
-        (*OutputMixExt)->FillBuffer(OutputMixExt, stream, (SLuint32) len);
+        IOutputMixExt_FillBuffer(OutputMixExt, stream, (SLuint32) len);
     } else {
         memset(stream, 0, (size_t) len);
     }

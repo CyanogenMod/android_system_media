@@ -43,7 +43,8 @@ static SLuint32 bufSizeInFrames = 512;  // -f#
 static SLuint32 channels = 2;       // -c#
 static SLuint32 sampleRate = 44100; // -s#
 static SLuint32 appBufCount = 0;    // -n#
-SLuint32 bufSizeInBytes = 0;
+static SLuint32 bufSizeInBytes = 0; // calculated
+static SLboolean verbose = SL_BOOLEAN_FALSE;
 
 // Storage area for the buffers
 static char *buffers = NULL;
@@ -71,8 +72,10 @@ static SLuint32 min(SLuint32 a, SLuint32 b)
 static void recorderCallback(SLBufferQueueItf caller, void *context)
 {
     SLresult result;
-    putchar('*');
-    fflush(stdout);
+    if (verbose) {
+        putchar('*');
+        fflush(stdout);
+    }
 
     // Enqueue the next empty buffer for the recorder to fill
     assert(whichRecord < appBufCount);
@@ -150,6 +153,9 @@ int main(int argc, char **argv)
                     (unsigned) sampleRate);
                 break;
             }
+        // -v verbose
+        } else if (!strcmp(arg, "-v")) {
+            verbose = SL_BOOLEAN_TRUE;
         } else
             fprintf(stderr, "%s: unknown option %s\n", argv[0], arg);
     }
@@ -282,10 +288,12 @@ int main(int argc, char **argv)
         SLBufferQueueState recorderBQState;
         result = (*recorderBufferQueue)->GetState(recorderBufferQueue, &recorderBQState);
         ASSERT_EQ(SL_RESULT_SUCCESS, result);
-        printf("pC%u pI%u rC%u rI%u\n", (unsigned) playerBQState.count,
-            (unsigned) playerBQState.playIndex, (unsigned) recorderBQState.count,
-            (unsigned) recorderBQState.playIndex);
-        fflush(stdout);
+        if (verbose) {
+            printf("pC%u pI%u rC%u rI%u\n", (unsigned) playerBQState.count,
+                (unsigned) playerBQState.playIndex, (unsigned) recorderBQState.count,
+                (unsigned) recorderBQState.playIndex);
+            fflush(stdout);
+        }
     }
 
     //return EXIT_SUCCESS;

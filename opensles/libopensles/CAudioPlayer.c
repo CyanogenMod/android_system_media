@@ -50,8 +50,7 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
             assert(0 == ok);
             SLBufferQueueItf bufferQueue = &this->mBufferQueue.mItf;
             IBufferQueue *thisBQ = (IBufferQueue *) bufferQueue;
-            thisBQ->mCallback = SndFile_Callback;
-            thisBQ->mContext = this;
+            IBufferQueue_RegisterCallback(&thisBQ->mItf, SndFile_Callback, this);
             this->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
             this->mPlay.mDuration = (SLmillisecond) (((long long) this->mSndFile.mSfInfo.frames *
                 1000LL) / this->mSndFile.mSfInfo.samplerate);

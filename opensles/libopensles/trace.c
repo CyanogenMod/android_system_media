@@ -60,8 +60,10 @@ void slTraceEnterInterface(const char *function)
     while (*underscore != '\0') {
         if (*underscore == '_') {
             if ((strcmp(function, "BufferQueue_Enqueue") && strcmp(function, "BufferQueue_GetState")
-                && strcmp(function, "OutputMixExt_FillBuffer")) && (SL_TRACE_ENTER & slTraceEnabled)) {
-                LOGV("Entering %.*s::%s\n", (int) (underscore - function), function, &underscore[1]);
+                && strcmp(function, "OutputMixExt_FillBuffer")) &&
+                (SL_TRACE_ENTER & slTraceEnabled)) {
+                LOGV("Entering %.*s::%s\n", (int) (underscore - function), function,
+                    &underscore[1]);
             }
             return;
         }

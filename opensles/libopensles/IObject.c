@@ -331,10 +331,13 @@ static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, 
                     switch (this->mInterfaceStates[index]) {
                     case INTERFACE_EXPOSED:
                     case INTERFACE_ADDED:
+                        interface = (char *) this + class__->mInterfaces[index].mOffset;
                         // Note that interface has been gotten,
                         // for debugger and to detect incorrect use of interfaces
-                        this->mGottenMask |= mask;
-                        interface = (char *) this + class__->mInterfaces[index].mOffset;
+                        if (!(this->mGottenMask & mask)) {
+                            this->mGottenMask |= mask;
+                            ((size_t *) interface)[0] ^= ~0;
+                        }
                         result = SL_RESULT_SUCCESS;
                         break;
                     // Can't get interface if uninitialized/suspend(ed,ing)/resuming/adding/removing

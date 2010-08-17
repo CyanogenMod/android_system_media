@@ -43,7 +43,7 @@ static SLuint32 getAssociatedState(IBufferQueue *this)
 }
 
 
-static SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer, SLuint32 size)
+SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer, SLuint32 size)
 {
     SL_ENTER_INTERFACE
     //SL_LOGV("IBufferQueue_Enqueue(%p, %p, %lu)", self, pBuffer, size);
@@ -76,7 +76,7 @@ static SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
 }
 
 
-static SLresult IBufferQueue_Clear(SLBufferQueueItf self)
+SLresult IBufferQueue_Clear(SLBufferQueueItf self)
 {
     SL_ENTER_INTERFACE
 
@@ -140,7 +140,7 @@ static SLresult IBufferQueue_GetState(SLBufferQueueItf self, SLBufferQueueState 
 }
 
 
-static SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
+SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
     slBufferQueueCallback callback, void *pContext)
 {
     SL_ENTER_INTERFACE
