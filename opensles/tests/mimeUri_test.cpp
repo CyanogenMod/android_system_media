@@ -63,7 +63,7 @@ const int MP3_DURATION = 75000; //75 secs
 void CheckErr( SLresult res )
 {
     if ( res != SL_RESULT_SUCCESS )  {
-        fprintf(stdout, "%lu SL failure, exiting\n", res);
+        fprintf(stderr, "%lu SL failure, exiting\n", res);
         //Fail the test case
         ASSERT_TRUE(false);
     }
@@ -76,7 +76,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     SLpermille level = 0;
     (*caller)->GetFillLevel(caller, &level);
     SLuint32 status;
-    fprintf(stderr, "\t\tPrefetchEventCallback: received event %lu\n", event);
+    fprintf(stdout, "\t\tPrefetchEventCallback: received event %lu\n", event);
     (*caller)->GetPrefetchStatus(caller, &status);
     if ((event & (SL_PREFETCHEVENT_STATUSCHANGE|SL_PREFETCHEVENT_FILLLEVELCHANGE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
@@ -84,12 +84,10 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
         ASSERT_TRUE(false);
     }
     if (event & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
-        fprintf(stderr, "\t\tPrefetchEventCallback: Buffer fill level is = %d\n", level);
-        ASSERT_TRUE(false);
+        fprintf(stdout, "\t\tPrefetchEventCallback: Buffer fill level is = %d\n", level);
     }
     if (event & SL_PREFETCHEVENT_STATUSCHANGE) {
-        fprintf(stderr, "\t\tPrefetchEventCallback: Prefetch Status is = %lu\n", status);
-        ASSERT_TRUE(false);
+        fprintf(stdout, "\t\tPrefetchEventCallback: Prefetch Status is = %lu\n", status);
     }
 
 }
@@ -165,7 +163,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
 
     /* Create the audio player */
     res = (*EngineItf)->CreateAudioPlayer(EngineItf, &player,
-            &audioSource, &audioSink, 1, iidArray, required); CheckErr(res);
+            &audioSource, &audioSink, 2, iidArray, required); CheckErr(res);
 
     /* Realizing the player in synchronous mode. */
     res = (*player)->Realize(player, SL_BOOLEAN_FALSE); CheckErr(res);
@@ -189,7 +187,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     res = (*playItf)->GetDuration(playItf, &durationInMsec);
     CheckErr(res);
     if (durationInMsec == SL_TIME_UNKNOWN) {
-        fprintf(stdout, "Content duration is unknown (before starting to prefetch)\n");
+        fprintf(stderr, "Content duration is unknown (before starting to prefetch)\n");
         ASSERT_TRUE(false);
     }
 
@@ -199,9 +197,9 @@ void TestPlayUri( SLObjectItf sl, const char* path)
 
     /* Play the URI */
     /*     first cause the player to prefetch the data */
-    fprintf(stderr, "\nbefore set to PAUSED\n\n");
+    fprintf(stdout, "\nbefore set to PAUSED\n\n");
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PAUSED );
-    fprintf(stderr, "\nafter set to PAUSED\n\n");
+    fprintf(stdout, "\nafter set to PAUSED\n\n");
     CheckErr(res);
 
     /*     wait until there's data to play */
@@ -224,7 +222,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     res = (*playItf)->GetDuration(playItf, &durationInMsec);
     CheckErr(res);
     if (durationInMsec == SL_TIME_UNKNOWN) {
-        fprintf(stdout, "Content duration is unknown (after prefetch completed)\n");
+        fprintf(stderr, "Content duration is unknown (after prefetch completed)\n");
         ASSERT_TRUE(false);
     }
 
@@ -239,11 +237,11 @@ void TestPlayUri( SLObjectItf sl, const char* path)
            res = (*playItf)->GetPosition(playItf, &currentPositionInMsec);
            CheckErr(res);
     if (currentPositionInMsec == SL_TIME_UNKNOWN) {
-      fprintf(stdout, "GetPosition returns UNKNOWN\n");
+      fprintf(stderr, "GetPosition returns UNKNOWN\n");
       ASSERT_TRUE(false);
     } else if ( currentPositionInMsec <= 0 ||
         currentPositionInMsec > (MP3_DURATION * 1.1) ){
-        fprintf(stdout, "Current play position is %i : beyond the duration\n",
+        fprintf(stderr, "Current play position is %i : beyond the duration\n",
                 (int) currentPositionInMsec);
         ASSERT_TRUE(false);
     }
