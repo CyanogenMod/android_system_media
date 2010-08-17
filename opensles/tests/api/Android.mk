@@ -1,3 +1,6 @@
+# Build the unit tests.
+ifneq ($(TARGET_SIMULATOR),true)
+
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -29,4 +32,10 @@ endif
 
 LOCAL_MODULE:= BufferQueue_test
 
+LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/nativetest
+
 include $(BUILD_EXECUTABLE)
+
+endif
+# Build the manual test programs.
+include $(call all-subdir-makefiles)
