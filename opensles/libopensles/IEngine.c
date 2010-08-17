@@ -24,7 +24,7 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, 
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_CONFORMANCE
+#ifdef USE_OPTIONAL
     if (NULL == pDevice || SL_DEFAULTDEVICEID_LED != deviceID) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -56,7 +56,7 @@ static SLresult IEngine_CreateVibraDevice(SLEngineItf self, SLObjectItf *pDevice
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_CONFORMANCE
+#ifdef USE_OPTIONAL
     if (NULL == pDevice || SL_DEFAULTDEVICEID_VIBRA != deviceID) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -229,7 +229,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 
     SL_LOGV("IEngine_CreateAudioRecorder() entering");
 
-#if defined(USE_CONFORMANCE) || defined(ANDROID)
+#if defined(USE_OPTIONAL) || defined(ANDROID)
     if (NULL == pRecorder) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -334,7 +334,7 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_CONFORMANCE
+#if defined(USE_GAME) || defined(USE_PHONE)
     if (NULL == pPlayer || NULL == pMIDISrc || NULL == pAudioOutput) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -368,7 +368,7 @@ static SLresult IEngine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_CONFORMANCE
+#ifdef USE_GAME
     if (NULL == pListener) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -400,7 +400,7 @@ static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup, SLu
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_CONFORMANCE
+#ifdef USE_GAME
     if (NULL == pGroup) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -461,7 +461,7 @@ static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self, SLObjectItf *p
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_CONFORMANCE
+#if defined(USE_GAME) || defined(USE_MUSIC)
     if (NULL == pMetadataExtractor) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -521,9 +521,20 @@ static SLresult IEngine_QueryNumSupportedInterfaces(SLEngineItf self,
         } else {
             SLuint32 count = 0;
             SLuint32 i;
-            for (i = 0; i < class__->mInterfaceCount; ++i)
-                if (class__->mInterfaces[i].mInterface != INTERFACE_UNAVAILABLE)
+            for (i = 0; i < class__->mInterfaceCount; ++i) {
+                switch (class__->mInterfaces[i].mInterface) {
+                case INTERFACE_IMPLICIT:
+                case INTERFACE_EXPLICIT:
+                case INTERFACE_DYNAMIC:
                     ++count;
+                    break;
+                case INTERFACE_UNAVAILABLE:
+                    break;
+                default:
+                    assert(false);
+                    break;
+                }
+            }
             *pNumSupportedInterfaces = count;
             result = SL_RESULT_SUCCESS;
         }
@@ -549,8 +560,17 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
             result = SL_RESULT_PARAMETER_INVALID; // will be reset later
             SLuint32 i;
             for (i = 0; i < class__->mInterfaceCount; ++i) {
-                if (INTERFACE_UNAVAILABLE == class__->mInterfaces[i].mInterface)
+                switch (class__->mInterfaces[i].mInterface) {
+                case INTERFACE_IMPLICIT:
+                case INTERFACE_EXPLICIT:
+                case INTERFACE_DYNAMIC:
+                    break;
+                case INTERFACE_UNAVAILABLE:
                     continue;
+                default:
+                    assert(false);
+                    break;
+                }
                 if (index == 0) {
                     *pInterfaceId = &SL_IID_array[class__->mInterfaces[i].mMPH];
                     result = SL_RESULT_SUCCESS;

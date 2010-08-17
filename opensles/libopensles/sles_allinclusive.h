@@ -96,30 +96,54 @@ typedef SLresult (*AsyncHook)(void *self, SLboolean async);
 
 #define INTERFACE_IMPLICIT           0
 #define INTERFACE_EXPLICIT           1
-#define INTERFACE_OPTIONAL           2
-#define INTERFACE_DYNAMIC            3
-#define INTERFACE_UNAVAILABLE        4
-#define INTERFACE_DYNAMIC_GAME       INTERFACE_DYNAMIC
-#define INTERFACE_DYNAMIC_MUSIC      INTERFACE_DYNAMIC
-#define INTERFACE_DYNAMIC_MUSIC_GAME INTERFACE_DYNAMIC
-#define INTERFACE_EXPLICIT_GAME      INTERFACE_EXPLICIT
-#define INTERFACE_GAME               INTERFACE_OPTIONAL
-#define INTERFACE_GAME_MUSIC         INTERFACE_OPTIONAL
-#define INTERFACE_MUSIC_GAME         INTERFACE_OPTIONAL
-#define INTERFACE_OPTIONAL_DYNAMIC   INTERFACE_DYNAMIC
-#define INTERFACE_PHONE_GAME         INTERFACE_OPTIONAL
-#define INTERFACE_TBD                INTERFACE_IMPLICIT
+#define INTERFACE_DYNAMIC            2
+#define INTERFACE_UNAVAILABLE        3
+// note that INTERFACE_OPTIONAL is always re-mapped to one of the above
 
-#ifdef USE_CONFORMANCE
-#define INTERFACE_IMPLICIT_CT        INTERFACE_IMPLICIT
-#define INTERFACE_EXPLICIT_CT        INTERFACE_EXPLICIT
-#define INTERFACE_EXPLICIT_GAME_CT   INTERFACE_EXPLICIT_GAME
-#define INTERFACE_OPTIONAL_CT        INTERFACE_OPTIONAL
+// Profile-specific interfaces
+
+#ifdef USE_BASE
+#define INTERFACE_IMPLICIT_BASE       INTERFACE_IMPLICIT
+#define INTERFACE_EXPLICIT_BASE       INTERFACE_EXPLICIT
 #else
-#define INTERFACE_IMPLICIT_CT        INTERFACE_UNAVAILABLE
-#define INTERFACE_EXPLICIT_CT        INTERFACE_UNAVAILABLE
-#define INTERFACE_EXPLICIT_GAME_CT   INTERFACE_UNAVAILABLE
-#define INTERFACE_OPTIONAL_CT        INTERFACE_UNAVAILABLE
+#define INTERFACE_IMPLICIT_BASE       INTERFACE_UNAVAILABLE
+#define INTERFACE_EXPLICIT_BASE       INTERFACE_UNAVAILABLE
+#endif
+
+#ifdef USE_GAME
+#define INTERFACE_DYNAMIC_GAME        INTERFACE_DYNAMIC
+#define INTERFACE_EXPLICIT_GAME       INTERFACE_EXPLICIT
+#else
+#define INTERFACE_DYNAMIC_GAME        INTERFACE_OPTIONAL
+#define INTERFACE_EXPLICIT_GAME       INTERFACE_OPTIONAL
+#endif
+
+#ifdef USE_MUSIC
+#define INTERFACE_DYNAMIC_MUSIC       INTERFACE_DYNAMIC
+#else
+#define INTERFACE_DYNAMIC_MUSIC       INTERFACE_OPTIONAL
+#endif
+
+#if defined(USE_GAME) || defined(USE_MUSIC)
+#define INTERFACE_DYNAMIC_GAME_MUSIC  INTERFACE_DYNAMIC
+#define INTERFACE_EXPLICIT_GAME_MUSIC INTERFACE_EXPLICIT
+#else
+#define INTERFACE_DYNAMIC_GAME_MUSIC  INTERFACE_OPTIONAL
+#define INTERFACE_EXPLICIT_GAME_MUSIC INTERFACE_OPTIONAL
+#endif
+
+#if defined(USE_GAME) || defined(USE_PHONE)
+#define INTERFACE_EXPLICIT_GAME_PHONE INTERFACE_EXPLICIT
+#else
+#define INTERFACE_EXPLICIT_GAME_PHONE INTERFACE_OPTIONAL
+#endif
+
+#ifdef USE_OPTIONAL
+#define INTERFACE_OPTIONAL            INTERFACE_EXPLICIT
+#define INTERFACE_DYNAMIC_OPTIONAL    INTERFACE_DYNAMIC
+#else
+#define INTERFACE_OPTIONAL            INTERFACE_UNAVAILABLE
+#define INTERFACE_DYNAMIC_OPTIONAL    INTERFACE_UNAVAILABLE
 #endif
 
 // Describes how an interface is related to a given object
@@ -250,13 +274,13 @@ typedef struct Object_interface {
     unsigned mGottenMask;           ///< bit-mask of interfaces exposed or added, then gotten
     unsigned mLossOfControlMask;    // interfaces with loss of control enabled
     unsigned mAttributesMask;       // attributes which have changed since last sync
-#ifdef USE_CONFORMANCE
+#ifdef USE_BASE
     SLint32 mPriority;
 #endif
     pthread_mutex_t mMutex;
     pthread_cond_t mCond;
     SLuint8 mState;                 // really SLuint32, but SLuint8 to save space
-#ifdef USE_CONFORMANCE
+#ifdef USE_BASE
     SLuint8 mPreemptable;           // really SLboolean, but SLuint8 to save space
 #else
     SLuint8 mPadding;
