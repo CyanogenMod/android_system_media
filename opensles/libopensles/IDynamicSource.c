@@ -27,11 +27,6 @@ static SLresult IDynamicSource_SetSource(SLDynamicSourceItf self, SLDataSource *
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IDynamicSource *this = (IDynamicSource *) self;
-        // Full implementation of dynamic sources will need a lot more work.
-        // It requires validating the new source by itself, validating it with respect
-        // to a data sink if appropriate, terminating the current source, and connecting
-        // the new source. Note that all this must appear to app to be atomic, yet can actually
-        // involve several steps that may block.
 #if 0
         DataLocatorFormat myDataSource;
         SLresult result;
@@ -41,7 +36,7 @@ static SLresult IDynamicSource_SetSource(SLDynamicSourceItf self, SLDataSource *
         // need to lock the object, as a change to source can impact most of object
         IObject *thisObject = InterfaceToIObject(this);
         object_lock_exclusive(thisObject);
-        // a bit of a simplification to say the least!
+        // a bit of a simplification to say the least! (see Khronos bug 6728)
         this->mDataSource = pDataSource;
         object_unlock_exclusive(thisObject);
         result = SL_RESULT_FEATURE_UNSUPPORTED;
