@@ -27,14 +27,19 @@ static SLresult IEngineCapabilities_QuerySupportedProfiles(
     if (NULL == pProfilesSupported) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-#ifdef USE_CONFORMANCE
-        // This isn't completely true but is used to permit the conformance test to run at all.
-        *pProfilesSupported = SL_PROFILES_PHONE | SL_PROFILES_MUSIC | SL_PROFILES_GAME;
-#else
         // The generic implementation doesn't implement any of the profiles, they shouldn't
-        // be declared as supported. Also omits the unofficial driver profile.
-        *pProfilesSupported = 0;
+        // be declared as supported.
+        *pProfilesSupported = 0
+#ifdef USE_GAME
+            | SL_PROFILES_GAME
 #endif
+#ifdef USE_MUSIC
+            | SL_PROFILES_MUSIC
+#endif
+#ifdef USE_PHONE
+            | SL_PROFILES_PHONE
+#endif
+            ;
         result = SL_RESULT_SUCCESS;
     }
 

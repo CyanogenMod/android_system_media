@@ -504,7 +504,7 @@ static SLresult IObject_SetPriority(SLObjectItf self, SLint32 priority, SLboolea
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_CONFORMANCE
+#ifdef USE_BASE
     IObject *this = (IObject *) self;
     object_lock_exclusive(this);
     this->mPriority = priority;
@@ -523,7 +523,7 @@ static SLresult IObject_GetPriority(SLObjectItf self, SLint32 *pPriority, SLbool
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_CONFORMANCE
+#ifdef USE_BASE
     if (NULL == pPriority || NULL == pPreemptable) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -549,7 +549,7 @@ static SLresult IObject_SetLossOfControlInterfaces(SLObjectItf self,
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_CONFORMANCE
+#ifdef USE_BASE
     result = SL_RESULT_SUCCESS;
     if (0 < numInterfaces) {
         SLuint32 i;
@@ -616,7 +616,7 @@ void IObject_init(void *self)
     this->mAttributesMask = 0;
     this->mCallback = NULL;
     this->mContext = NULL;
-#ifdef USE_CONFORMANCE
+#ifdef USE_BASE
     this->mPriority = SL_PRIORITY_NORMAL;
     this->mPreemptable = SL_BOOLEAN_FALSE;
 #endif

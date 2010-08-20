@@ -912,9 +912,20 @@ SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedI
         assert(NULL != class__);
         SLuint32 count = 0;
         SLuint32 i;
-        for (i = 0; i < class__->mInterfaceCount; ++i)
-            if (class__->mInterfaces[i].mInterface != INTERFACE_UNAVAILABLE)
+        for (i = 0; i < class__->mInterfaceCount; ++i) {
+            switch (class__->mInterfaces[i].mInterface) {
+            case INTERFACE_IMPLICIT:
+            case INTERFACE_EXPLICIT:
+            case INTERFACE_DYNAMIC:
                 ++count;
+                break;
+            case INTERFACE_UNAVAILABLE:
+                break;
+            default:
+                assert(false);
+                break;
+            }
+        }
         *pNumSupportedInterfaces = count;
         result = SL_RESULT_SUCCESS;
     }
@@ -938,8 +949,17 @@ SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index, SLInterface
         result = SL_RESULT_PARAMETER_INVALID;   // will be reset later
         SLuint32 i;
         for (i = 0; i < class__->mInterfaceCount; ++i) {
-            if (INTERFACE_UNAVAILABLE == class__->mInterfaces[i].mInterface)
+            switch (class__->mInterfaces[i].mInterface) {
+            case INTERFACE_IMPLICIT:
+            case INTERFACE_EXPLICIT:
+            case INTERFACE_DYNAMIC:
+                break;
+            case INTERFACE_UNAVAILABLE:
                 continue;
+            default:
+                assert(false);
+                break;
+            }
             if (index == 0) {
                 *pInterfaceId = &SL_IID_array[class__->mInterfaces[i].mMPH];
                 result = SL_RESULT_SUCCESS;
