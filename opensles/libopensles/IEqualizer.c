@@ -457,40 +457,13 @@ void IEqualizer_init(void *self)
     this->mBandLevelRangeMax = 0;
 
 #if defined(ANDROID) && !defined(USE_BACKPORT)
-    // Initialize the EQ settings based on the platform effect, if available
-    uint32_t numEffects = 0;
-    effect_descriptor_t descriptor;
-    bool foundEq = false;
-    //   any effects?
-    android::status_t res = android::AudioEffect::queryNumberEffects(&numEffects);
-    if (android::NO_ERROR != res) {
-        SL_LOGE("IEqualizer_init: unable to find any effects.");
-        goto effectError;
-    }
-    //   EQ in the effects?
-    for (uint32_t i=0 ; i < numEffects ; i++) {
-        res = android::AudioEffect::queryEffect(i, &descriptor);
-        if ((android::NO_ERROR == res) &&
-                (0 == memcmp(SL_IID_EQUALIZER, &descriptor.type, sizeof(effect_uuid_t)))) {
-            SL_LOGV("found effect %d %s", i, descriptor.name);
-            foundEq = true;
-            break;
-        }
-    }
-    if (foundEq) {
-        memcpy(&this->mEqDescriptor, &descriptor, sizeof(effect_descriptor_t));
-    } else {
-        SL_LOGE("IEqualizer_init: unable to find an EQ implementation.");
-        goto effectError;
-    }
 
-    return;
-
-effectError:
-    this->mNumPresets = 0;
-    this->mNumBands = 0;
-    this->mBandLevelRangeMin = 0;
-    this->mBandLevelRangeMax = 0;
-    memset(&this->mEqDescriptor, 0, sizeof(effect_descriptor_t));
+    if (!android_fx_initEffectDescriptor(SL_IID_EQUALIZER, &this->mEqDescriptor)) {
+        // EQ init failed
+        this->mNumPresets = 0;
+        this->mNumBands = 0;
+        this->mBandLevelRangeMin = 0;
+        this->mBandLevelRangeMax = 0;
+    }
 #endif
 }

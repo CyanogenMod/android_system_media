@@ -25,6 +25,9 @@ extern android::status_t android_eq_getParam(android::sp<android::AudioEffect> p
 
 extern SLresult android_fx_statusToResult(android::status_t status);
 
+extern bool android_fx_initEffectDescriptor(const SLInterfaceID effectId,
+        effect_descriptor_t* fxDescrLoc);
+
 
 extern SLresult android_genericFx_queryNumEffects(SLuint32 *pNumSupportedAudioEffects);
 
