@@ -19,18 +19,48 @@
 
 /* Exclusively lock an object */
 
-void object_lock_exclusive(IObject *this)
+#ifdef USE_DEBUG
+void object_lock_exclusive_(IObject *this, const char *file, int line)
+{
+    int ok;
+    ok = pthread_mutex_trylock(&this->mMutex);
+    if (0 != ok) {
+        SL_LOGE("object 0x%p was locked by 0x%p at %s:%d\n", this, *(void **)&this->mOwner,
+            this->mFile, this->mLine);
+        ok = pthread_mutex_lock(&this->mMutex);
+        assert(0 == ok);
+    }
+    pthread_t zero;
+    memset(&zero, 0, sizeof(pthread_t));
+    assert(0 == memcmp(&zero, &this->mOwner, sizeof(pthread_t)));
+    assert(NULL == this->mFile);
+    assert(0 == this->mLine);
+    this->mOwner = pthread_self();
+    this->mFile = file;
+    this->mLine = line;
+}
+#else
+void object_lock_exclusive_(IObject *this)
 {
     int ok;
     ok = pthread_mutex_lock(&this->mMutex);
     assert(0 == ok);
 }
+#endif
 
 
 /* Exclusively unlock an object and do not report any updates */
 
 void object_unlock_exclusive(IObject *this)
 {
+#ifdef USE_DEBUG
+    assert(pthread_equal(pthread_self(), this->mOwner));
+    assert(NULL != this->mFile);
+    assert(0 != this->mLine);
+    memset(&this->mOwner, 0, sizeof(pthread_t));
+    this->mFile = NULL;
+    this->mLine = 0;
+#endif
     int ok;
     ok = pthread_mutex_unlock(&this->mMutex);
     assert(0 == ok);
@@ -41,6 +71,13 @@ void object_unlock_exclusive(IObject *this)
 
 void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
 {
+
+#ifdef USE_DEBUG
+    assert(pthread_equal(pthread_self(), this->mOwner));
+    assert(NULL != this->mFile);
+    assert(0 != this->mLine);
+#endif
+
     int ok;
     SLuint32 objectID = IObjectToObjectID(this);
     CAudioPlayer *ap;
@@ -127,6 +164,11 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
         if (oldAttributesMask)
             attributes = ATTR_NONE;
     }
+#ifdef USE_DEBUG
+    memset(&this->mOwner, 0, sizeof(pthread_t));
+    this->mFile = NULL;
+    this->mLine = 0;
+#endif
     ok = pthread_mutex_unlock(&this->mMutex);
     assert(0 == ok);
     if (attributes) {   // first update to this interface since previous sync

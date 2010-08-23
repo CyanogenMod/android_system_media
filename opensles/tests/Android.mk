@@ -20,8 +20,7 @@ c_includes := \
     bionic \
     bionic/libstdc++/include \
     external/gtest/include \
-    $(JNI_H_INCLUDE) \
-    $(TOP)/system/media/opensles/include \
+    system/media/opensles/include \
     external/stlport/stlport
 
 module_tags := tests

@@ -206,11 +206,14 @@ void audioTrack_handleUnderrun_lockPlay(CAudioPlayer* ap) {
  *        - section 9.2.31 SL_PLAYEVENT states "SL_PLAYEVENT_HEADATEND Playback head is at the end
  *          of the current content and the player has paused."
  */
-void audioPlayer_dispatch_headAtEnd_lockPlay(CAudioPlayer *ap, bool setPlayStateToPaused) {
+void audioPlayer_dispatch_headAtEnd_lockPlay(CAudioPlayer *ap, bool setPlayStateToPaused,
+        bool needToLock) {
     slPlayCallback playCallback = NULL;
     void * playContext = NULL;
     // SLPlayItf callback or no callback?
-    interface_lock_exclusive(&ap->mPlay);
+    if (needToLock) {
+        interface_lock_exclusive(&ap->mPlay);
+    }
     if (ap->mPlay.mEventFlags & SL_PLAYEVENT_HEADATEND) {
         playCallback = ap->mPlay.mCallback;
         playContext = ap->mPlay.mContext;
@@ -218,7 +221,9 @@ void audioPlayer_dispatch_headAtEnd_lockPlay(CAudioPlayer *ap, bool setPlayState
     if (setPlayStateToPaused) {
         ap->mPlay.mState = SL_PLAYSTATE_PAUSED;
     }
-    interface_unlock_exclusive(&ap->mPlay);
+    if (needToLock) {
+        interface_unlock_exclusive(&ap->mPlay);
+    }
     // callback with no lock held
     if (NULL != playCallback) {
         (*playCallback)(&ap->mPlay.mItf, playContext, SL_PLAYEVENT_HEADATEND);
@@ -234,11 +239,14 @@ void audioPlayer_dispatch_headAtEnd_lockPlay(CAudioPlayer *ap, bool setPlayState
  *  - the prefetch status callback, if any, has been notified if a change occurred
  *
  */
-void audioPlayer_dispatch_prefetchStatus_lockPrefetch(CAudioPlayer *ap, SLuint32 status) {
+void audioPlayer_dispatch_prefetchStatus_lockPrefetch(CAudioPlayer *ap, SLuint32 status,
+        bool needToLock) {
     slPrefetchCallback prefetchCallback = NULL;
     void * prefetchContext = NULL;
 
-    interface_lock_exclusive(&ap->mPrefetchStatus);
+    if (needToLock) {
+        interface_lock_exclusive(&ap->mPrefetchStatus);
+    }
     // status change?
     if (ap->mPrefetchStatus.mStatus != status) {
         ap->mPrefetchStatus.mStatus = status;
@@ -248,7 +256,9 @@ void audioPlayer_dispatch_prefetchStatus_lockPrefetch(CAudioPlayer *ap, SLuint32
             prefetchContext  = ap->mPrefetchStatus.mContext;
         }
     }
-    interface_unlock_exclusive(&ap->mPrefetchStatus);
+    if (needToLock) {
+        interface_unlock_exclusive(&ap->mPrefetchStatus);
+    }
 
     // callback with no lock held
     if (NULL != prefetchCallback) {
@@ -309,7 +319,7 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
         } break;
 
     case(android::SfPlayer::kEventEndOfStream): {
-        audioPlayer_dispatch_headAtEnd_lockPlay(ap, true /*set state to paused?*/);
+        audioPlayer_dispatch_headAtEnd_lockPlay(ap, true /*set state to paused?*/, true);
         // FIXME update play position to make sure it's at the same value
         //       as getDuration if it's known?
         ap->mAudioTrack->stop();
@@ -578,11 +588,12 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
             pBuff->size = 0;
 
             // signal we're at the end of the content, but don't pause (see note in function)
-            audioPlayer_dispatch_headAtEnd_lockPlay(ap, false /*set state to paused?*/);
+            audioPlayer_dispatch_headAtEnd_lockPlay(ap, false /*set state to paused?*/, false);
 
             // signal underflow to prefetch status itf
             if (IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
-                audioPlayer_dispatch_prefetchStatus_lockPrefetch(ap, SL_PREFETCHSTATUS_UNDERFLOW);
+                audioPlayer_dispatch_prefetchStatus_lockPrefetch(ap, SL_PREFETCHSTATUS_UNDERFLOW,
+                    false);
             }
 
             // stop the track so it restarts playing faster when new data is enqueued
@@ -1215,7 +1226,8 @@ void android_audioPlayer_bufferQueueRefilled(CAudioPlayer *ap) {
     // when the queue became empty, an underflow on the prefetch status itf was sent. Now the queue
     // has received new data, signal it has sufficient data
     if (IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
-        audioPlayer_dispatch_prefetchStatus_lockPrefetch(ap, SL_PREFETCHSTATUS_SUFFICIENTDATA);
+        audioPlayer_dispatch_prefetchStatus_lockPrefetch(ap, SL_PREFETCHSTATUS_SUFFICIENTDATA,
+            true);
     }
 }
 

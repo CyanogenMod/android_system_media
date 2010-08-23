@@ -16,12 +16,22 @@
 
 /** \file locks.h Mutual exclusion and condition variables */
 
-extern void object_lock_exclusive(IObject *this);
+#ifdef USE_DEBUG
+extern void object_lock_exclusive_(IObject *this, const char *file, int line);
+#else
+extern void object_lock_exclusive_(IObject *this);
+#endif
 extern void object_unlock_exclusive(IObject *this);
 extern void object_unlock_exclusive_attributes(IObject *this, unsigned attr);
 extern void object_cond_wait(IObject *this);
 extern void object_cond_signal(IObject *this);
 extern void object_cond_broadcast(IObject *this);
+
+#ifdef USE_DEBUG
+#define object_lock_exclusive(this) object_lock_exclusive_((this), __FILE__, __LINE__)
+#else
+#define object_lock_exclusive(this) object_lock_exclusive_((this))
+#endif
 
 // Currently shared locks are implemented as exclusive, but don't count on it
 
