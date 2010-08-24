@@ -278,6 +278,11 @@ typedef struct Object_interface {
     SLint32 mPriority;
 #endif
     pthread_mutex_t mMutex;
+#ifdef USE_DEBUG
+    pthread_t mOwner;
+    const char *mFile;
+    int mLine;
+#endif
     pthread_cond_t mCond;
     SLuint8 mState;                 // really SLuint32, but SLuint8 to save space
 #ifdef USE_BASE
@@ -1213,11 +1218,15 @@ extern void slTraceLeaveInterfaceVoid(const char *function);
 
 #endif
 
+#ifdef USE_DEBUG
 #define SL_LOGE(...) do { fprintf(stderr, "ERROR: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
     fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
-// #define SL_LOGV
 #define SL_LOGV(...) do { fprintf(stderr, "VERBOSE: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
     fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
+#else
+#define SL_LOGE(...) do { } while (0)
+#define SL_LOGV(...) do { } while (0)
+#endif
 
 #ifdef USE_OUTPUTMIXEXT
 

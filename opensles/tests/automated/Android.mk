@@ -10,8 +10,7 @@ LOCAL_C_INCLUDES:= \
     bionic \
     bionic/libstdc++/include \
     external/gtest/include \
-    $(JNI_H_INCLUDE) \
-    $(TOP)/system/media/opensles/include \
+    system/media/opensles/include \
     external/stlport/stlport
 
 LOCAL_SRC_FILES:= \

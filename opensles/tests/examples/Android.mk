@@ -55,7 +55,6 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	$(JNI_H_INCLUDE) \
 	system/media/opensles/include
 
 LOCAL_SRC_FILES:= \
@@ -81,7 +80,6 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	$(JNI_H_INCLUDE) \
 	system/media/opensles/include
 
 LOCAL_SRC_FILES:= \

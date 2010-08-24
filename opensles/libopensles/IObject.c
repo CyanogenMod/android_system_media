@@ -489,7 +489,7 @@ static void IObject_Destroy(SLObjectItf self)
     }
     // redundant: this->mState = SL_OBJECT_STATE_UNREALIZED;
     object_unlock_exclusive(this);
-#ifndef NDEBUG
+#ifdef USE_DEBUG
     memset(this, 0x55, class__->mSize);
 #endif
     free(this);
@@ -623,6 +623,11 @@ void IObject_init(void *self)
     int ok;
     ok = pthread_mutex_init(&this->mMutex, (const pthread_mutexattr_t *) NULL);
     assert(0 == ok);
+#ifdef USE_DEBUG
+    memset(&this->mOwner, 0, sizeof(pthread_t));
+    this->mFile = NULL;
+    this->mLine = 0;
+#endif
     ok = pthread_cond_init(&this->mCond, (const pthread_condattr_t *) NULL);
     assert(0 == ok);
 }
