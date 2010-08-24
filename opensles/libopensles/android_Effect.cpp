@@ -223,6 +223,46 @@ SLresult android_fx_statusToResult(android::status_t status) {
 
 
 //-----------------------------------------------------------------------------
+bool android_fx_initEffectDescriptor(const SLInterfaceID effectId,
+        effect_descriptor_t* fxDescrLoc) {
+    uint32_t numEffects = 0;
+    effect_descriptor_t descriptor;
+    bool foundEffect = false;
+
+    // any effects?
+    android::status_t res = android::AudioEffect::queryNumberEffects(&numEffects);
+    if (android::NO_ERROR != res) {
+        SL_LOGE("unable to find any effects.");
+        goto effectError;
+    }
+
+    // request effect in the effects?
+    for (uint32_t i=0 ; i < numEffects ; i++) {
+        res = android::AudioEffect::queryEffect(i, &descriptor);
+        if ((android::NO_ERROR == res) &&
+                (0 == memcmp(effectId, &descriptor.type, sizeof(effect_uuid_t)))) {
+            SL_LOGV("found effect %d %s", i, descriptor.name);
+            foundEffect = true;
+            break;
+        }
+    }
+    if (foundEffect) {
+        memcpy(fxDescrLoc, &descriptor, sizeof(effect_descriptor_t));
+    } else {
+        SL_LOGE("unable to find an implementation for the requested effect.");
+        goto effectError;
+    }
+
+    return true;
+
+effectError:
+    // the requested effect wasn't found
+    memset(fxDescrLoc, 0, sizeof(effect_descriptor_t));
+
+    return false;
+}
+
+//-----------------------------------------------------------------------------
 SLresult android_genericFx_queryNumEffects(SLuint32 *pNumSupportedAudioEffects) {
 
     if (NULL == pNumSupportedAudioEffects) {

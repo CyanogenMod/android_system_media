@@ -188,26 +188,40 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
     ExitOnError(result);
     result = (*eqItf)->GetNumberOfPresets(eqItf, &nbPresets);
     ExitOnError(result);
+    /*    Start from a preset  */
     preset = nbPresets > 2 ?  2 : 0;
     result = (*eqItf)->UsePreset(eqItf, preset);
-    /*result = (*eqItf)->SetBandLevel(eqItf, 0, -20);
-    ExitOnError(result);
-    result = (*eqItf)->SetBandLevel(eqItf, 1, -20);
-    ExitOnError(result);*/
+
     preset = 1977;
     result = (*eqItf)->GetCurrentPreset(eqItf, &preset);
     ExitOnError(result);
     if (SL_EQUALIZER_UNDEFINED == preset) {
-        fprintf(stdout, "Using SL_EQUALIZER_UNDEFINED preset, unexpected here!\n");
+        fprintf(stderr, "Using SL_EQUALIZER_UNDEFINED preset, unexpected here!\n");
     } else {
         fprintf(stdout, "Using preset %d\n", preset);
     }
 
+    /*    Tweak it so it's obvious it gets turned on/off later */
+    SLmillibel minLevel, maxLevel = 0;
+    result = (*eqItf)->GetBandLevelRange(eqItf, &minLevel, &maxLevel);
+    ExitOnError(result);
+    fprintf(stdout, "Band level range = %dmB to %dmB\n", minLevel, maxLevel);
+
+    SLuint16 b = 0;
+    for(b = 0 ; b < nbBands/2 ; b++) {
+        result = (*eqItf)->SetBandLevel(eqItf, b, minLevel);
+        ExitOnError(result);
+    }
+    for(b = nbBands/2 ; b < nbBands ; b++) {
+        result = (*eqItf)->SetBandLevel(eqItf, b, maxLevel);
+        ExitOnError(result);
+    }
+
     SLmillibel level = 0;
-    for(int b = 0 ; b < nbBands ; b++) {
+    for(b = 0 ; b < nbBands ; b++) {
         result = (*eqItf)->GetBandLevel(eqItf, b, &level);
         ExitOnError(result);
-        fprintf(stdout, "Band %d level = %dmB", b, level);
+        fprintf(stdout, "Band %d level = %dmB\n", b, level);
     }
 
     /* Switch EQ on/off every TIME_S_BETWEEN_EQ_ON_OFF seconds */
