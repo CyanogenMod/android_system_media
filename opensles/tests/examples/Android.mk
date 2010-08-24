@@ -10,7 +10,7 @@ LOCAL_C_INCLUDES:= \
 	system/media/opensles/include
 
 LOCAL_SRC_FILES:= \
-	slesTest_playStates.cpp
+	slesTestRecBuffQueue.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
@@ -20,7 +20,31 @@ ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
 
-LOCAL_MODULE:= slesTest_playStates
+LOCAL_MODULE:= slesTest_recBuffQueue
+
+include $(BUILD_EXECUTABLE)
+
+#
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_C_INCLUDES:= \
+	system/media/opensles/include
+
+LOCAL_SRC_FILES:= \
+	slesTestPlayFdPath.cpp
+
+LOCAL_SHARED_LIBRARIES := \
+	libutils \
+	libOpenSLES
+
+ifeq ($(TARGET_OS),linux)
+	LOCAL_CFLAGS += -DXP_UNIX
+endif
+
+LOCAL_MODULE:= slesTest_playFdPath
 
 include $(BUILD_EXECUTABLE)
 
@@ -35,7 +59,7 @@ LOCAL_C_INCLUDES:= \
 	system/media/opensles/include
 
 LOCAL_SRC_FILES:= \
-	slesTestPlayStreamType.cpp
+    feedback.c
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
@@ -43,9 +67,10 @@ LOCAL_SHARED_LIBRARIES := \
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
+	#LOCAL_SHARED_LIBRARIES += librt
 endif
 
-LOCAL_MODULE:= slesTest_playStreamType
+LOCAL_MODULE:= slesTest_feedback
 
 include $(BUILD_EXECUTABLE)
 
@@ -60,7 +85,8 @@ LOCAL_C_INCLUDES:= \
 	system/media/opensles/include
 
 LOCAL_SRC_FILES:= \
-	slesTestPlayUri.cpp
+    bufferQueue.c \
+	playSawtoothBufferQueue.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
@@ -68,9 +94,10 @@ LOCAL_SHARED_LIBRARIES := \
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
+	#LOCAL_SHARED_LIBRARIES += librt
 endif
 
-LOCAL_MODULE:= slesTest_playUri
+LOCAL_MODULE:= slesTest_sawtoothBufferQueue
 
 include $(BUILD_EXECUTABLE)
 
@@ -81,11 +108,10 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	$(JNI_H_INCLUDE) \
 	system/media/opensles/include
 
 LOCAL_SRC_FILES:= \
-	slesTestPlayUri2.cpp
+	slesTestEqFdPath.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
@@ -95,6 +121,6 @@ ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
 
-LOCAL_MODULE:= slesTest_playUri2
+LOCAL_MODULE:= slesTest_eqFdPath
 
 include $(BUILD_EXECUTABLE)
