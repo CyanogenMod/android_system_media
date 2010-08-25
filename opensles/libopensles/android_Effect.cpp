@@ -23,10 +23,11 @@
 static const int EQUALIZER_PARAM_SIZE_MAX = sizeof(effect_param_t) + 2 * sizeof(int32_t)
         + EFFECT_STRING_LEN_MAX;
 
+static const int BASSBOOST_PARAM_SIZE_MAX = sizeof(effect_param_t) + 2 * sizeof(int32_t);
+
 
 //-----------------------------------------------------------------------------
-uint32_t eq_paramSize(int32_t param)
-{
+uint32_t eq_paramSize(int32_t param) {
     uint32_t size;
 
     switch (param) {
@@ -51,8 +52,7 @@ uint32_t eq_paramSize(int32_t param)
     return size;
 }
 
-uint32_t eq_valueSize(int32_t param)
-{
+uint32_t eq_valueSize(int32_t param) {
     uint32_t size;
 
     switch (param) {
@@ -80,6 +80,49 @@ uint32_t eq_valueSize(int32_t param)
         SL_LOGE("Trying to access an unknown EQ parameter %d", param);
         break;
     }
+    return size;
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * returns the size in bytes required to represent each bass boost parameter
+ */
+uint32_t bb_paramSize(int32_t param) {
+    uint32_t size;
+
+    switch (param) {
+    case BASSBOOST_PARAM_STRENGTH_SUPPORTED:
+    case BASSBOOST_PARAM_STRENGTH:
+        size = sizeof(int32_t);
+        break;
+    default:
+        size = sizeof(int32_t);
+        SL_LOGE("Trying to use an unknown BassBoost parameter %d", param);
+        break;
+    }
+
+    return size;
+}
+
+/**
+ * returns the size in bytes of the value of each bass boost parameter
+ */
+uint32_t bb_valueSize(int32_t param) {
+    uint32_t size;
+
+    switch (param) {
+    case BASSBOOST_PARAM_STRENGTH_SUPPORTED:
+        size = sizeof(int32_t);
+        break;
+    case BASSBOOST_PARAM_STRENGTH:
+        size = sizeof(int16_t);
+        break;
+    default:
+        size = sizeof(int32_t);
+        SL_LOGE("Trying to access an unknown BassBoost parameter %d", param);
+        break;
+    }
+
     return size;
 }
 
@@ -133,10 +176,78 @@ android::status_t android_eq_setParam(android::sp<android::AudioEffect> pFx,
     return status;
 }
 
+//-----------------------------------------------------------------------------
+android::status_t android_bb_setParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue) {
+
+    android::status_t status;
+    uint32_t buf32[(BASSBOOST_PARAM_SIZE_MAX - 1) / sizeof(uint32_t) + 1];
+    effect_param_t *p = (effect_param_t *)buf32;
+
+    p->psize = bb_paramSize(param);
+    *(int32_t *)p->data = param;
+    p->vsize = bb_valueSize(param);
+    memcpy(p->data + p->psize, pValue, p->vsize);
+    status = pFx->setParameter(p);
+    if (android::NO_ERROR == status) {
+        status = p->status;
+    }
+    return status;
+}
+
+//-----------------------------------------------------------------------------
+android::status_t android_bb_getParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue) {
+
+    android::status_t status;
+    uint32_t buf32[(BASSBOOST_PARAM_SIZE_MAX - 1) / sizeof(uint32_t) + 1];
+    effect_param_t *p = (effect_param_t *)buf32;
+
+    p->psize = bb_paramSize(param);
+    *(int32_t *)p->data = param;
+    p->vsize = bb_valueSize(param);
+    status = pFx->getParameter(p);
+    if (android::NO_ERROR == status) {
+        status = p->status;
+        if (android::NO_ERROR == status) {
+            memcpy(pValue, p->data + p->psize, p->vsize);
+        }
+    }
+
+    return status;
+}
+
+
+//-----------------------------------------------------------------------------
+void android_bb_init(int sessionId, CAudioPlayer* ap) {
+    SL_LOGV("session %d", sessionId);
+
+    ap->mBassBoost.mBassBoostEffect = new android::AudioEffect(
+            &ap->mBassBoost.mBassBoostDescriptor.type,
+            &ap->mBassBoost.mBassBoostDescriptor.uuid,
+            0,// priority
+            0,// effect callback
+            0,// callback data
+            sessionId,// session ID
+            0 );// output
+    android::status_t status = ap->mBassBoost.mBassBoostEffect->initCheck();
+    if (android::NO_ERROR != status) {
+        ap->mBassBoost.mBassBoostEffect.clear();
+        SL_LOGE("BassBoost initCheck() returned %d", status);
+        return;
+    }
+
+    // initialize strength, and whether it's supported
+    int16_t strength;
+    if (android::NO_ERROR == android_bb_getParam(ap->mBassBoost.mBassBoostEffect,
+            BASSBOOST_PARAM_STRENGTH, &strength)) {
+        ap->mBassBoost.mStrength = (SLpermille) strength;
+    }
+}
 
 //-----------------------------------------------------------------------------
 void android_eq_init(int sessionId, CAudioPlayer* ap) {
-    SL_LOGV("android_initEq on session %d", sessionId);
+    SL_LOGV("session %d", sessionId);
 
     ap->mEqualizer.mEqEffect = new android::AudioEffect(
             &ap->mEqualizer.mEqDescriptor.type,//(const effect_uuid_t*)SL_IID_EQUALIZER,//
@@ -148,6 +259,7 @@ void android_eq_init(int sessionId, CAudioPlayer* ap) {
             0 );// output
     android::status_t status = ap->mEqualizer.mEqEffect->initCheck();
     if (android::NO_ERROR != status) {
+        ap->mEqualizer.mEqEffect.clear();
         SL_LOGE("EQ initCheck() returned %d", status);
         return;
     }

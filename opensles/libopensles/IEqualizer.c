@@ -55,6 +55,8 @@ static SLresult IEqualizer_SetEnabled(SLEqualizerItf self, SLboolean enabled)
     bool fxEnabled = this->mEqEffect->getEnabled();
     // the audio effect framework will return an error if you set the same "enabled" state as
     // the one the effect is currently in, so we only act on state changes
+    // FIXME this has been fixed, update this function and IsEnabled to behave like the BassBoost
+    //       implementation
     if (fxEnabled != (enabled == SL_BOOLEAN_TRUE)) {
         // state change
         android::status_t status = this->mEqEffect->setEnabled(this->mEnabled == SL_BOOLEAN_TRUE);
@@ -147,9 +149,13 @@ static SLresult IEqualizer_SetBandLevel(SLEqualizerItf self, SLuint16 band, SLmi
         this->mPreset = SL_EQUALIZER_UNDEFINED;
         result = SL_RESULT_SUCCESS;
 #else
-        android::status_t status =
+        if (this->mEqEffect != 0) {
+            android::status_t status =
                 android_eq_setParam(this->mEqEffect, EQ_PARAM_BAND_LEVEL, band, &level);
-        result = android_fx_statusToResult(status);
+            result = android_fx_statusToResult(status);
+        } else {
+            result = SL_RESULT_CONTROL_LOST;
+        }
 #endif
         interface_unlock_exclusive(this);
     }
@@ -170,15 +176,19 @@ static SLresult IEqualizer_GetBandLevel(SLEqualizerItf self, SLuint16 band, SLmi
         if (band >= this->mNumBands) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-            SLmillibel level;
+            SLmillibel level = 0;
             interface_lock_shared(this);
 #if !defined(ANDROID) || defined(USE_BACKPORT)
             level = this->mLevels[band];
             result = SL_RESULT_SUCCESS;
 #else
-            android::status_t status =
+            if (this->mEqEffect != 0) {
+                android::status_t status =
                     android_eq_getParam(this->mEqEffect, EQ_PARAM_BAND_LEVEL, band, &level);
-            result = android_fx_statusToResult(status);
+                result = android_fx_statusToResult(status);
+            } else {
+                result = SL_RESULT_CONTROL_LOST;
+            }
 #endif
             interface_unlock_shared(this);
             *pLevel = level;
@@ -205,12 +215,16 @@ static SLresult IEqualizer_GetCenterFreq(SLEqualizerItf self, SLuint16 band, SLm
             *pCenter = this->mBands[band].mCenter;
             result = SL_RESULT_SUCCESS;
 #else
-            SLmilliHertz center;
+            SLmilliHertz center = 0;
             interface_lock_shared(this);
-            android::status_t status =
+            if (this->mEqEffect != 0) {
+                android::status_t status =
                     android_eq_getParam(this->mEqEffect, EQ_PARAM_CENTER_FREQ, band, &center);
+                result = android_fx_statusToResult(status);
+            } else {
+                result = SL_RESULT_CONTROL_LOST;
+            }
             interface_unlock_shared(this);
-            result = android_fx_statusToResult(status);
             *pCenter = center;
 #endif
         }
@@ -240,12 +254,16 @@ static SLresult IEqualizer_GetBandFreqRange(SLEqualizerItf self, SLuint16 band,
                 *pMax = this->mBands[band].mMax;
             result = SL_RESULT_SUCCESS;
 #else
-            SLmilliHertz range[2]; // SLmilliHertz is SLuint32
+            SLmilliHertz range[2] = {0, 0}; // SLmilliHertz is SLuint32
             interface_lock_shared(this);
-            android::status_t status =
+            if (this->mEqEffect != 0) {
+                android::status_t status =
                     android_eq_getParam(this->mEqEffect, EQ_PARAM_BAND_FREQ_RANGE, band, range);
+                result = android_fx_statusToResult(status);
+            } else {
+                result = SL_RESULT_CONTROL_LOST;
+            }
             interface_unlock_shared(this);
-            result = android_fx_statusToResult(status);
             if (NULL != pMin) {
                 *pMin = range[0];
             }
@@ -292,12 +310,16 @@ static SLresult IEqualizer_GetBand(SLEqualizerItf self, SLmilliHertz frequency, 
         *pBand = band - this->mBands;
         result = SL_RESULT_SUCCESS;
 #else
-        uint16_t band;
+        uint16_t band = 0;
         interface_lock_shared(this);
-        android::status_t status =
-            android_eq_getParam(this->mEqEffect, EQ_PARAM_GET_BAND, frequency, &band);
+        if (this->mEqEffect != 0) {
+            android::status_t status =
+                android_eq_getParam(this->mEqEffect, EQ_PARAM_GET_BAND, frequency, &band);
+            result = android_fx_statusToResult(status);
+        } else {
+            result = SL_RESULT_CONTROL_LOST;
+        }
         interface_unlock_shared(this);
-        result = android_fx_statusToResult(status);
         *pBand = (SLuint16)band;
 #endif
     }
@@ -321,11 +343,16 @@ static SLresult IEqualizer_GetCurrentPreset(SLEqualizerItf self, SLuint16 *pPres
         *pPreset = preset;
         result = SL_RESULT_SUCCESS;
 #else
-        uint16_t preset;
-        android::status_t status =
-                android_eq_getParam(this->mEqEffect, EQ_PARAM_CUR_PRESET, 0, &preset);
+        uint16_t preset = 0;
+        if (this->mEqEffect != 0) {
+            android::status_t status =
+                    android_eq_getParam(this->mEqEffect, EQ_PARAM_CUR_PRESET, 0, &preset);
+            result = android_fx_statusToResult(status);
+        } else {
+            result = SL_RESULT_CONTROL_LOST;
+        }
         interface_unlock_shared(this);
-        result = android_fx_statusToResult(status);
+
         if (preset < 0) {
             *pPreset = SL_EQUALIZER_UNDEFINED;
         } else {
@@ -356,10 +383,14 @@ static SLresult IEqualizer_UsePreset(SLEqualizerItf self, SLuint16 index)
         interface_unlock_exclusive(this);
         result = SL_RESULT_SUCCESS;
 #else
-        android::status_t status =
+        if (this->mEqEffect != 0) {
+            android::status_t status =
                 android_eq_setParam(this->mEqEffect, EQ_PARAM_CUR_PRESET, 0, &index);
+            result = android_fx_statusToResult(status);
+        } else {
+            result = SL_RESULT_CONTROL_LOST;
+        }
         interface_unlock_shared(this);
-        result = android_fx_statusToResult(status);
 #endif
     }
 

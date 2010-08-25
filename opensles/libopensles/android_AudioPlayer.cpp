@@ -816,9 +816,13 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     // FIXME use a table of effect descriptors when adding support for more effects
     if (memcmp(SL_IID_EQUALIZER, &pAudioPlayer->mEqualizer.mEqDescriptor.type,
             sizeof(effect_uuid_t)) == 0) {
-                android_eq_init(sessionId, pAudioPlayer);
+        android_eq_init(sessionId, pAudioPlayer);
     }
     // initialize BassBoost
+    if (memcmp(SL_IID_BASSBOOST, &pAudioPlayer->mBassBoost.mBassBoostDescriptor.type,
+            sizeof(effect_uuid_t)) == 0) {
+        android_bb_init(sessionId, pAudioPlayer);
+    }
     // initialize PresetReverb
     // initialize EnvironmentalReverb + EffectSend
     // initialize Virtualizer

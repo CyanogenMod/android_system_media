@@ -23,6 +23,14 @@ extern android::status_t android_eq_setParam(android::sp<android::AudioEffect> p
 extern android::status_t android_eq_getParam(android::sp<android::AudioEffect> pFx,
         int32_t param, int32_t param2, void *pValue);
 
+extern void android_bb_init(int sessionId, CAudioPlayer* ap);
+
+extern android::status_t android_bb_setParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue);
+
+extern android::status_t android_bb_getParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue);
+
 extern SLresult android_fx_statusToResult(android::status_t status);
 
 extern bool android_fx_initEffectDescriptor(const SLInterfaceID effectId,

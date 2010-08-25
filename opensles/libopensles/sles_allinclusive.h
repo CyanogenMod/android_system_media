@@ -68,6 +68,7 @@ typedef struct COutputMix_struct COutputMix;
 #include "media/AudioEffect.h"
 #include "media/EffectApi.h"
 #include "media/EffectEqualizerApi.h"
+#include "media/EffectBassBoostApi.h"
 #endif
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
@@ -453,6 +454,10 @@ typedef struct {
     IObject *mThis;
     SLboolean mEnabled;
     SLpermille mStrength;
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    effect_descriptor_t mBassBoostDescriptor;
+    android::sp<android::AudioEffect> mBassBoostEffect;
+#endif
 } IBassBoost;
 
 typedef struct BufferQueue_interface {
