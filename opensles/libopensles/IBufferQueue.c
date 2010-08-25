@@ -93,6 +93,7 @@ SLresult IBufferQueue_Clear(SLBufferQueueItf self)
             this->mFront = &this->mArray[0];
             this->mRear = &this->mArray[0];
             this->mState.count = 0;
+            this->mState.playIndex = 0;
             this->mSizeConsumed = 0;
         }
     }

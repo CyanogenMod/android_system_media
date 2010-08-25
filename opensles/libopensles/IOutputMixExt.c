@@ -54,6 +54,7 @@ static SLboolean track_check(Track *track)
             audioPlayer->mBufferQueue.mFront = &audioPlayer->mBufferQueue.mArray[0];
             audioPlayer->mBufferQueue.mRear = &audioPlayer->mBufferQueue.mArray[0];
             audioPlayer->mBufferQueue.mState.count = 0;
+            audioPlayer->mBufferQueue.mState.playIndex = 0;
             audioPlayer->mBufferQueue.mClearRequested = SL_BOOLEAN_FALSE;
             track->mReader = NULL;
             track->mAvail = 0;

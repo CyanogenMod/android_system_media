@@ -93,7 +93,7 @@ void BufferQueueCallback(
 
     if(pCntxt->pData < (pCntxt->pDataBase + pCntxt->size))
         {
-            fprintf(stdout, "callback: before enqueue\n");
+            //fprintf(stdout, "callback: before enqueue\n");
             res = (*queueItf)->Enqueue(queueItf, (void*) pCntxt->pData,
                     2 * AUDIO_DATA_BUFFER_SIZE); /* Size given in bytes. */
             CheckErr(res);

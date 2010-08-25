@@ -25,14 +25,36 @@ void object_lock_exclusive_(IObject *this, const char *file, int line)
     int ok;
     ok = pthread_mutex_trylock(&this->mMutex);
     if (0 != ok) {
-        SL_LOGE("object 0x%p was locked by 0x%p at %s:%d\n", this, *(void **)&this->mOwner,
-            this->mFile, this->mLine);
-        ok = pthread_mutex_lock(&this->mMutex);
-        assert(0 == ok);
+        // pthread_mutex_timedlock_np is not available, but wait up to 100 ms
+        static const useconds_t backoffs[] = {1, 10000, 20000, 30000, 40000};
+        unsigned i = 0;
+        for (;;) {
+            usleep(backoffs[i]);
+            ok = pthread_mutex_trylock(&this->mMutex);
+            if (0 == ok)
+                break;
+            if (++i >= (sizeof(backoffs) / sizeof(backoffs[0]))) {
+                SL_LOGE("%s:%d: object %p was locked by %p at %s:%d\n",
+                    file, line, this, *(void **)&this->mOwner, this->mFile, this->mLine);
+                // attempt one more time; maybe this time we will be successful
+                ok = pthread_mutex_lock(&this->mMutex);
+                assert(0 == ok);
+                break;
+            }
+        }
     }
     pthread_t zero;
     memset(&zero, 0, sizeof(pthread_t));
-    assert(0 == memcmp(&zero, &this->mOwner, sizeof(pthread_t)));
+    if (0 != memcmp(&zero, &this->mOwner, sizeof(pthread_t))) {
+        if (pthread_equal(pthread_self(), this->mOwner)) {
+            SL_LOGE("%s:%d: object %p was recursively locked by %p at %s:%d\n",
+                file, line, this, *(void **)&this->mOwner, this->mFile, this->mLine);
+        } else {
+            SL_LOGE("%s:%d: object %p was left unlocked in unexpected state by %p at %s:%d\n",
+                file, line, this, *(void **)&this->mOwner, this->mFile, this->mLine);
+        }
+        assert(false);
+    }
     assert(NULL == this->mFile);
     assert(0 == this->mLine);
     this->mOwner = pthread_self();
@@ -40,7 +62,7 @@ void object_lock_exclusive_(IObject *this, const char *file, int line)
     this->mLine = line;
 }
 #else
-void object_lock_exclusive_(IObject *this)
+void object_lock_exclusive(IObject *this)
 {
     int ok;
     ok = pthread_mutex_lock(&this->mMutex);
@@ -182,12 +204,33 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
 
 /* Wait on the condition variable associated with the object; see pthread_cond_wait */
 
+#ifdef USE_DEBUG
+void object_cond_wait_(IObject *this, const char *file, int line)
+{
+    // note that this will unlock the mutex, so we have to clear the owner
+    assert(pthread_equal(pthread_self(), this->mOwner));
+    assert(NULL != this->mFile);
+    assert(0 != this->mLine);
+    memset(&this->mOwner, 0, sizeof(pthread_t));
+    this->mFile = NULL;
+    this->mLine = 0;
+    // alas we don't know the new owner's identity
+    int ok;
+    ok = pthread_cond_wait(&this->mCond, &this->mMutex);
+    assert(0 == ok);
+    // restore my ownership
+    this->mOwner = pthread_self();
+    this->mFile = file;
+    this->mLine = line;
+}
+#else
 void object_cond_wait(IObject *this)
 {
     int ok;
     ok = pthread_cond_wait(&this->mCond, &this->mMutex);
     assert(0 == ok);
 }
+#endif
 
 
 /* Signal the condition variable associated with the object; see pthread_cond_signal */
