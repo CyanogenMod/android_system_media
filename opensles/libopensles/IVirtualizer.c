@@ -18,18 +18,40 @@
 
 #include "sles_allinclusive.h"
 
+#define VIRTUALIZER_STRENGTH_MIN 0
+#define VIRTUALIZER_STRENGTH_MAX 1000
+
+
+/**
+ * returns true if this interface is not associated with an initialized Virtualizer effect
+ */
+static inline bool NO_VIRTUALIZER(IVirtualizer* v) {
+    return (v->mVirtualizerEffect == 0);
+}
+
 
 static SLresult IVirtualizer_SetEnabled(SLVirtualizerItf self, SLboolean enabled)
 {
     SL_ENTER_INTERFACE
 
     IVirtualizer *this = (IVirtualizer *) self;
-    interface_lock_poke(this);
-    this->mEnabled = SL_BOOLEAN_FALSE != enabled; // normalize
-    interface_unlock_poke(this);
+    interface_lock_exclusive(this);
+    this->mEnabled = (SLboolean) enabled;
+#if !defined(ANDROID) || defined(USE_BACKPORT)
     result = SL_RESULT_SUCCESS;
+#else
+    if (NO_VIRTUALIZER(this)) {
+        result = SL_RESULT_CONTROL_LOST;
+    } else {
+        android::status_t status =
+                this->mVirtualizerEffect->setEnabled((bool) this->mEnabled);
+        result = android_fx_statusToResult(status);
+    }
+#endif
+    interface_unlock_exclusive(this);
 
     SL_LEAVE_INTERFACE
+
 }
 
 
@@ -37,18 +59,27 @@ static SLresult IVirtualizer_IsEnabled(SLVirtualizerItf self, SLboolean *pEnable
 {
     SL_ENTER_INTERFACE
 
-    if (NULL == pEnabled) {
-        result = SL_RESULT_PARAMETER_INVALID;
-    } else {
-        IVirtualizer *this = (IVirtualizer *) self;
-        interface_lock_peek(this);
-        SLboolean enabled = this->mEnabled;
-        interface_unlock_peek(this);
-        *pEnabled = enabled;
-        result = SL_RESULT_SUCCESS;
-    }
+     if (NULL == pEnabled) {
+         result = SL_RESULT_PARAMETER_INVALID;
+     } else {
+         IVirtualizer *this = (IVirtualizer *) self;
+         interface_lock_exclusive(this);
+         SLboolean enabled = this->mEnabled;
+ #if !defined(ANDROID) || defined(USE_BACKPORT)
+         *pEnabled = enabled;
+         result = SL_RESULT_SUCCESS;
+ #else
+         if (NO_VIRTUALIZER(this)) {
+             result = SL_RESULT_CONTROL_LOST;
+         } else {
+             *pEnabled = (SLboolean) this->mVirtualizerEffect->getEnabled();
+             result = SL_RESULT_SUCCESS;
+         }
+ #endif
+         interface_unlock_exclusive(this);
+     }
 
-    SL_LEAVE_INTERFACE
+     SL_LEAVE_INTERFACE
 }
 
 
@@ -56,17 +87,27 @@ static SLresult IVirtualizer_SetStrength(SLVirtualizerItf self, SLpermille stren
 {
     SL_ENTER_INTERFACE
 
-    if (!(0 <= strength && strength <= 1000)) {
-        result = SL_RESULT_PARAMETER_INVALID;
-    } else {
-        IVirtualizer *this = (IVirtualizer *) self;
-        interface_lock_poke(this);
-        this->mStrength = strength;
-        interface_unlock_poke(this);
-        result = SL_RESULT_SUCCESS;
-    }
+     if ((VIRTUALIZER_STRENGTH_MIN > strength) || (VIRTUALIZER_STRENGTH_MAX < strength)) {
+         result = SL_RESULT_PARAMETER_INVALID;
+     } else {
+         IVirtualizer *this = (IVirtualizer *) self;
+         interface_lock_exclusive(this);
+ #if !defined(ANDROID) || defined(USE_BACKPORT)
+         this->mStrength = strength;
+         result = SL_RESULT_SUCCESS;
+ #else
+         if (NO_VIRTUALIZER(this)) {
+             result = SL_RESULT_CONTROL_LOST;
+         } else {
+             android::status_t status = android_virt_setParam(this->mVirtualizerEffect,
+                     VIRTUALIZER_PARAM_STRENGTH, &strength);
+             result = android_fx_statusToResult(status);
+         }
+ #endif
+         interface_unlock_exclusive(this);
+     }
 
-    SL_LEAVE_INTERFACE
+     SL_LEAVE_INTERFACE
 }
 
 
@@ -78,11 +119,21 @@ static SLresult IVirtualizer_GetRoundedStrength(SLVirtualizerItf self, SLpermill
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IVirtualizer *this = (IVirtualizer *) self;
-        interface_lock_peek(this);
-        SLpermille strength = this->mStrength;
-        interface_unlock_peek(this);
-        *pStrength = strength;
+        interface_lock_exclusive(this);
+        SLpermille strength = this->mStrength;;
+#if !defined(ANDROID) || defined(USE_BACKPORT)
         result = SL_RESULT_SUCCESS;
+#else
+        if (NO_VIRTUALIZER(this)) {
+            result = SL_RESULT_CONTROL_LOST;
+        } else {
+            android::status_t status = android_virt_getParam(this->mVirtualizerEffect,
+                           VIRTUALIZER_PARAM_STRENGTH, &strength);
+            result = android_fx_statusToResult(status);
+        }
+#endif
+        interface_unlock_exclusive(this);
+        *pStrength = strength;
     }
 
     SL_LEAVE_INTERFACE
@@ -96,8 +147,24 @@ static SLresult IVirtualizer_IsStrengthSupported(SLVirtualizerItf self, SLboolea
     if (NULL == pSupported) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
+#if !defined(ANDROID) || defined(USE_BACKPORT)
         *pSupported = SL_BOOLEAN_TRUE;
         result = SL_RESULT_SUCCESS;
+#else
+        IVirtualizer *this = (IVirtualizer *) self;
+        int32_t supported = 0;
+        interface_lock_exclusive(this);
+        if (NO_VIRTUALIZER(this)) {
+            result = SL_RESULT_CONTROL_LOST;
+        } else {
+            android::status_t status =
+                android_virt_getParam(this->mVirtualizerEffect,
+                        VIRTUALIZER_PARAM_STRENGTH_SUPPORTED, &supported);
+            result = android_fx_statusToResult(status);
+        }
+        interface_unlock_exclusive(this);
+        *pSupported = (SLboolean) (supported != 0);
+#endif
     }
 
     SL_LEAVE_INTERFACE
@@ -118,4 +185,11 @@ void IVirtualizer_init(void *self)
     this->mItf = &IVirtualizer_Itf;
     this->mEnabled = SL_BOOLEAN_FALSE;
     this->mStrength = 0;
+
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    if (!android_fx_initEffectDescriptor(SL_IID_VIRTUALIZER, &this->mVirtualizerDescriptor)) {
+        // Virtualizer init failed
+        SL_LOGE("Virtualizer initialization failed.");
+    }
+#endif
 }

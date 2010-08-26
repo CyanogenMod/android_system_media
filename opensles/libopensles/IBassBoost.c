@@ -21,21 +21,29 @@
 #define BASSBOOST_STRENGTH_MIN 0
 #define BASSBOOST_STRENGTH_MAX 1000
 
+
+/**
+ * returns true if this interface is not associated with an initialized BassBoost effect
+ */
+static inline bool NO_BASSBOOST(IBassBoost* v) {
+    return (v->mBassBoostEffect == 0);
+}
+
+
 static SLresult IBassBoost_SetEnabled(SLBassBoostItf self, SLboolean enabled)
 {
     SL_ENTER_INTERFACE
 
     IBassBoost *this = (IBassBoost *) self;
     interface_lock_exclusive(this);
-    this->mEnabled = SL_BOOLEAN_FALSE != enabled; // normalize
+    this->mEnabled = (SLboolean) enabled;
 #if !defined(ANDROID) || defined(USE_BACKPORT)
     result = SL_RESULT_SUCCESS;
 #else
-    if (this->mBassBoostEffect == 0) {
+    if (NO_BASSBOOST(this)) {
         result = SL_RESULT_CONTROL_LOST;
     } else {
-        android::status_t status =
-                this->mBassBoostEffect->setEnabled(this->mEnabled == SL_BOOLEAN_TRUE);
+        android::status_t status = this->mBassBoostEffect->setEnabled((bool) this->mEnabled);
         result = android_fx_statusToResult(status);
     }
 #endif
@@ -59,10 +67,10 @@ static SLresult IBassBoost_IsEnabled(SLBassBoostItf self, SLboolean *pEnabled)
         *pEnabled = enabled;
         result = SL_RESULT_SUCCESS;
 #else
-        if (this->mBassBoostEffect == 0) {
+        if (NO_BASSBOOST(this)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            *pEnabled = this->mBassBoostEffect->getEnabled() ? SL_BOOLEAN_TRUE : SL_BOOLEAN_FALSE;
+            *pEnabled = (SLboolean) this->mBassBoostEffect->getEnabled();
             result = SL_RESULT_SUCCESS;
         }
 #endif
@@ -86,7 +94,7 @@ static SLresult IBassBoost_SetStrength(SLBassBoostItf self, SLpermille strength)
         this->mStrength = strength;
         result = SL_RESULT_SUCCESS;
 #else
-        if (this->mBassBoostEffect == 0) {
+        if (NO_BASSBOOST(this)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
             android::status_t status =
@@ -114,7 +122,7 @@ static SLresult IBassBoost_GetRoundedStrength(SLBassBoostItf self, SLpermille *p
 #if !defined(ANDROID) || defined(USE_BACKPORT)
         result = SL_RESULT_SUCCESS;
 #else
-        if (this->mBassBoostEffect == 0) {
+        if (NO_BASSBOOST(this)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
             android::status_t status =
@@ -144,7 +152,7 @@ static SLresult IBassBoost_IsStrengthSupported(SLBassBoostItf self, SLboolean *p
         IBassBoost *this = (IBassBoost *) self;
         int32_t supported = 0;
         interface_lock_exclusive(this);
-        if (this->mBassBoostEffect == 0) {
+        if (NO_BASSBOOST(this)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
             android::status_t status =
@@ -153,7 +161,7 @@ static SLresult IBassBoost_IsStrengthSupported(SLBassBoostItf self, SLboolean *p
             result = android_fx_statusToResult(status);
         }
         interface_unlock_exclusive(this);
-        *pSupported = supported == 0 ? SL_BOOLEAN_FALSE : SL_BOOLEAN_TRUE;
+        *pSupported = (SLboolean) (supported != 0);
 #endif
     }
 

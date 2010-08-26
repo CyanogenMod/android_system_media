@@ -15,7 +15,7 @@
  */
 
 #define LOG_NDEBUG 0
-#define LOG_TAG "slesTest_bassboost"
+#define LOG_TAG "slesTest_virtualizer"
 
 #include <utils/Log.h>
 #include <getopt.h>
@@ -33,7 +33,7 @@
 #define MAX_NUMBER_INTERFACES 3
 #define MAX_NUMBER_OUTPUT_DEVICES 6
 
-#define TIME_S_BETWEEN_BB_ON_OFF 3
+#define TIME_S_BETWEEN_VIRT_ON_OFF 3
 
 static int testMode;
 //-----------------------------------------------------------------
@@ -52,7 +52,7 @@ void ExitOnErrorFunc( SLresult result , int line)
 //-----------------------------------------------------------------
 
 /* Play an audio path by opening a file descriptor on that path  */
-void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStrength)
+void TestVirtualizerPathFromFD( SLObjectItf sl, const char* path, int16_t virtStrength)
 {
     SLresult  result;
     SLEngineItf EngineItf;
@@ -72,7 +72,7 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
     /* Play and PrefetchStatus interfaces for the audio player */
     SLPlayItf              playItf;
     SLPrefetchStatusItf    prefetchItf;
-    SLBassBoostItf         bbItf;
+    SLVirtualizerItf       virtItf;
 
     SLboolean required[MAX_NUMBER_INTERFACES];
     SLInterfaceID iidArray[MAX_NUMBER_INTERFACES];
@@ -112,7 +112,7 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
     required[0] = SL_BOOLEAN_TRUE;
     iidArray[0] = SL_IID_PREFETCHSTATUS;
     required[1] = SL_BOOLEAN_TRUE;
-    iidArray[1] = SL_IID_BASSBOOST;
+    iidArray[1] = SL_IID_VIRTUALIZER;
 
     /* Setup the data source structure for the URI */
     locatorFd.locatorType = SL_DATALOCATOR_ANDROIDFD;
@@ -149,7 +149,7 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
     result = (*player)->GetInterface(player, SL_IID_PREFETCHSTATUS, (void*)&prefetchItf);
     ExitOnError(result);
 
-    result = (*player)->GetInterface(player, SL_IID_BASSBOOST, (void*)&bbItf);
+    result = (*player)->GetInterface(player, SL_IID_VIRTUALIZER, (void*)&virtItf);
     ExitOnError(result);
 
     fprintf(stdout, "Player configured\n");
@@ -182,38 +182,38 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
     result = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_PLAYING );
     ExitOnError(result);
 
-    /* Configure BassBoost */
+    /* Configure Virtualizer */
     SLboolean strengthSupported = SL_BOOLEAN_FALSE;
-    result = (*bbItf)->IsStrengthSupported(bbItf, &strengthSupported);
+    result = (*virtItf)->IsStrengthSupported(virtItf, &strengthSupported);
     ExitOnError(result);
     if (SL_BOOLEAN_FALSE == strengthSupported) {
-        fprintf(stdout, "BassBoost strength is not supported on this platform. Too bad!\n");
+        fprintf(stdout, "Virtualizer strength is not supported on this platform. Too bad!\n");
     } else {
-        fprintf(stdout, "BassBoost strength is supported, setting strength to %d\n", boostStrength);
-        result = (*bbItf)->SetStrength(bbItf, boostStrength);
+        fprintf(stdout, "Virtualizer strength is supported, setting strength to %d\n", virtStrength);
+        result = (*virtItf)->SetStrength(virtItf, virtStrength);
         ExitOnError(result);
     }
 
     SLpermille strength = 0;
-    result = (*bbItf)->GetRoundedStrength(bbItf, &strength);
+    result = (*virtItf)->GetRoundedStrength(virtItf, &strength);
     ExitOnError(result);
-    fprintf(stdout, "Rounded strength of boost = %d\n", strength);
+    fprintf(stdout, "Rounded strength of virt = %d\n", strength);
 
 
-    /* Switch BassBoost on/off every TIME_S_BETWEEN_BB_ON_OFF seconds */
+    /* Switch Virtualizer on/off every TIME_S_BETWEEN_VIRT_ON_OFF seconds */
     SLboolean enabled = SL_BOOLEAN_TRUE;
-    result = (*bbItf)->SetEnabled(bbItf, enabled);
+    result = (*virtItf)->SetEnabled(virtItf, enabled);
     ExitOnError(result);
-    for(unsigned int j=0 ; j<(durationInMsec/1000*TIME_S_BETWEEN_BB_ON_OFF) ; j++) {
-        usleep(TIME_S_BETWEEN_BB_ON_OFF * 1000 * 1000);
-        result = (*bbItf)->IsEnabled(bbItf, &enabled);
+    for(unsigned int j=0 ; j<(durationInMsec/1000*TIME_S_BETWEEN_VIRT_ON_OFF) ; j++) {
+        usleep(TIME_S_BETWEEN_VIRT_ON_OFF * 1000 * 1000);
+        result = (*virtItf)->IsEnabled(virtItf, &enabled);
         ExitOnError(result);
         enabled = enabled == SL_BOOLEAN_TRUE ? SL_BOOLEAN_FALSE : SL_BOOLEAN_TRUE;
-        result = (*bbItf)->SetEnabled(bbItf, enabled);
+        result = (*virtItf)->SetEnabled(virtItf, enabled);
         if (SL_BOOLEAN_TRUE == enabled) {
-            fprintf(stdout, "BassBoost on\n");
+            fprintf(stdout, "Virtualizer on\n");
         } else {
-            fprintf(stdout, "BassBoost off\n");
+            fprintf(stdout, "Virtualizer off\n");
         }
         ExitOnError(result);
     }
@@ -240,16 +240,16 @@ int main(int argc, char* const argv[])
     SLresult    result;
     SLObjectItf sl;
 
-    fprintf(stdout, "OpenSL ES test %s: exercises SLBassBoostItf ", argv[0]);
+    fprintf(stdout, "OpenSL ES test %s: exercises SLVirtualizerItf ", argv[0]);
     fprintf(stdout, "and AudioPlayer with SLDataLocator_AndroidFD source / OutputMix sink\n");
     fprintf(stdout, "Plays the sound file designated by the given path, ");
-    fprintf(stdout, "and applies a bass boost effect of the specified strength,\n");
-    fprintf(stdout, "where strength is a integer value between 0 and 1000.\n");
-    fprintf(stdout, "Every %d seconds, the BassBoost will be turned on and off.\n",
-            TIME_S_BETWEEN_BB_ON_OFF);
+    fprintf(stdout, "and applies a virtualization effect of the specified strength,\n");
+    fprintf(stdout, "where strength is an integer value between 0 and 1000.\n");
+    fprintf(stdout, "Every %d seconds, the Virtualizer will be turned on and off.\n",
+            TIME_S_BETWEEN_VIRT_ON_OFF);
 
     if (argc < 3) {
-        fprintf(stdout, "Usage: \t%s path bass_boost_strength\n", argv[0]);
+        fprintf(stdout, "Usage: \t%s path virtualization_strength\n", argv[0]);
         fprintf(stdout, "Example: \"%s /sdcard/my.mp3 1000\" \n", argv[0]);
         exit(1);
     }
@@ -265,8 +265,8 @@ int main(int argc, char* const argv[])
     result = (*sl)->Realize(sl, SL_BOOLEAN_FALSE);
     ExitOnError(result);
 
-    // intentionally not checking that argv[2], the bassboost strength, is between 0 and 1000
-    TestBassBoostPathFromFD(sl, argv[1], (int16_t)atoi(argv[2]));
+    // intentionally not checking that argv[2], the virtualizer strength, is between 0 and 1000
+    TestVirtualizerPathFromFD(sl, argv[1], (int16_t)atoi(argv[2]));
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
