@@ -31,7 +31,24 @@ extern android::status_t android_bb_setParam(android::sp<android::AudioEffect> p
 extern android::status_t android_bb_getParam(android::sp<android::AudioEffect> pFx,
         int32_t param, void *pValue);
 
+extern void android_virt_init(int sessionId, CAudioPlayer* ap);
+
+extern android::status_t android_virt_setParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue);
+
+extern android::status_t android_virt_getParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue);
+
+extern android::status_t android_fx_setParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, uint32_t paramSizeMax, void *pValue, uint32_t valueSize);
+
+extern android::status_t android_fx_getParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, uint32_t paramSizeMax, void *pValue, uint32_t valueSize);
+
 extern SLresult android_fx_statusToResult(android::status_t status);
+
+extern bool android_fx_initEffectObj(int sessionId, android::sp<android::AudioEffect>& effect,
+        const effect_uuid_t *type,  const effect_uuid_t *uuid);
 
 extern bool android_fx_initEffectDescriptor(const SLInterfaceID effectId,
         effect_descriptor_t* fxDescrLoc);

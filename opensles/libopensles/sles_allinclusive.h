@@ -69,6 +69,7 @@ typedef struct COutputMix_struct COutputMix;
 #include "media/EffectApi.h"
 #include "media/EffectEqualizerApi.h"
 #include "media/EffectBassBoostApi.h"
+#include "media/EffectVirtualizerApi.h"
 #endif
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
@@ -790,6 +791,10 @@ typedef struct {
     IObject *mThis;
     SLboolean mEnabled;
     SLpermille mStrength;
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    effect_descriptor_t mVirtualizerDescriptor;
+    android::sp<android::AudioEffect> mVirtualizerEffect;
+#endif
 } IVirtualizer;
 
 typedef struct {

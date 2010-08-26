@@ -827,6 +827,10 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     // initialize PresetReverb
     // initialize EnvironmentalReverb + EffectSend
     // initialize Virtualizer
+    if (memcmp(SL_IID_VIRTUALIZER, &pAudioPlayer->mVirtualizer.mVirtualizerDescriptor.type,
+               sizeof(effect_uuid_t)) == 0) {
+        android_virt_init(sessionId, pAudioPlayer);
+    }
 #endif
 
     return result;
