@@ -741,7 +741,8 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         pAudioPlayer->mSfPlayer->setNotifListener(sfplayer_handlePrefetchEvent,
                 (void*)pAudioPlayer /*notifUSer*/);
         pAudioPlayer->mRenderLooper->registerHandler(pAudioPlayer->mSfPlayer);
-        pAudioPlayer->mRenderLooper->start(false /*runOnCallingThread*/);
+        pAudioPlayer->mRenderLooper->start(false /*runOnCallingThread*/, false /*canCallJava*/,
+                ANDROID_PRIORITY_AUDIO);
         object_unlock_exclusive(&pAudioPlayer->mObject);
 
         int res;
