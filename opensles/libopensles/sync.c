@@ -35,7 +35,8 @@ void *sync_start(void *arg)
         object_lock_exclusive(&this->mObject);
         if (this->mEngine.mShutdown) {
             this->mEngine.mShutdownAck = SL_BOOLEAN_TRUE;
-            pthread_cond_signal(&this->mEngine.mShutdownCond);
+            // broadcast not signal, because this condition is also used for other purposes
+            object_cond_broadcast(&this->mObject);
             object_unlock_exclusive(&this->mObject);
             break;
         }

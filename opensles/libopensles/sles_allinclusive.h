@@ -536,7 +536,6 @@ typedef struct Engine_interface {
     IObject *mInstances[MAX_INSTANCE];
     SLboolean mShutdown;
     SLboolean mShutdownAck;
-    pthread_cond_t mShutdownCond;
     ThreadPool mThreadPool; // for asynchronous operations
 #if defined(ANDROID) && !defined(USE_BACKPORT)
     SLuint32 mEqNumPresets;
@@ -1200,6 +1199,10 @@ extern void slTraceSetEnabled(unsigned enabled);
 #define SL_TRACE_ENTER          0x1
 #define SL_TRACE_LEAVE_FAILURE  0x2
 #define SL_TRACE_LEAVE_VOID     0x4
+#define SL_TRACE_LEAVE_SUCCESS  0x8
+#define SL_TRACE_LEAVE          (SL_TRACE_LEAVE_FAILURE | SL_TRACE_LEAVE_VOID | \
+                                    SL_TRACE_LEAVE_SUCCESS)
+#define SL_TRACE_ALL            (SL_TRACE_ENTER | SL_TRACE_LEAVE)
 #define SL_TRACE_DEFAULT        (SL_TRACE_LEAVE_FAILURE)
 
 #ifndef USE_TRACE

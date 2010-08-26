@@ -438,8 +438,6 @@ static SLresult IEqualizer_GetPresetName(SLEqualizerItf self, SLuint16 index, co
         if (index >= this->mThis->mEngine->mEqNumPresets) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-            // FIXME This gives the application access to the library memory space and is
-            //  identified as a security issue. This is being addressed by the OpenSL ES WG
             *ppName = (SLchar *) this->mThis->mEngine->mEqPresetNames[index];
             result = SL_RESULT_SUCCESS;
         }
