@@ -307,7 +307,7 @@ static SLresult IEqualizer_GetBand(SLEqualizerItf self, SLmilliHertz frequency, 
                 bestBand = band - this->mBands;
             }
         }
-        *pBand = band - this->mBands;
+        *pBand = bestBand;
         result = SL_RESULT_SUCCESS;
 #else
         uint16_t band = 0;
