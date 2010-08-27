@@ -15,8 +15,9 @@
  */
 
 /** \file BufferQueue_test.cpp */
+
 #define LOG_NDEBUG 0
-#define LOG_TAG "bufferQueue"
+#define LOG_TAG "BufferQueue_test"
 
 #ifdef ANDROID
 #include <utils/Log.h>
@@ -30,14 +31,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "SLES/OpenSLES.h"
-
+#include "SLES/OpenSLESUT.h"
 #include <gtest/gtest.h>
-
-#ifdef ANDROID
-#include "gtest/gtest.h"
-#else
-#define ASSERT_EQ(x, y) assert((x) == (y))
-#endif
 
 typedef struct {
     short left;
@@ -46,23 +41,27 @@ typedef struct {
 
 // 1 second of stereo audio at 44.1 kHz
 static stereo stereoBuffer1[44100 * 1];
+static const SLuint32 invalidNumBuffers[] = { 0, 0xFFFFFFFF, 0x80000000, 0x10002, 0x102,
+        0x101, 0x100 };
 static const SLuint32 validNumBuffers[] = { 1, 2, 3, 4, 5, 6, 7, 8, 255 };
 
 //-----------------------------------------------------------------
 /* Checks for error. If any errors exit the application! */
 void CheckErr(SLresult res) {
-    if (res != SL_RESULT_SUCCESS) {
-        fprintf(stderr, "%lu SL failure, exiting\n", res);
+    if (SL_RESULT_SUCCESS != res) {
+        fprintf(stderr, "CheckErr failure: %s (0x%x), exiting\n", slesutResultToString(res), (unsigned) res);
         //Fail the test case
-        ASSERT_TRUE(false);
+        FAIL();
     }
 }
+
+static const SLInterfaceID ids[1] = { SL_IID_BUFFERQUEUE };
+static const SLboolean flags[1] = { SL_BOOLEAN_TRUE };
 
 // The fixture for testing class BufferQueue
 class TestBufferQueue: public ::testing::Test {
 public:
     SLresult res;
-    SLObjectItf sl;
     SLObjectItf outputmixObject;
     SLObjectItf engineObject;
 
@@ -86,13 +85,14 @@ protected:
 
     }
 
+    /*Test setup*/
     virtual void SetUp() {
-        /*Test setup*/
+
+        // create engine
         res = slCreateEngine(&engineObject, 0, NULL, 0, NULL, NULL);
         CheckErr(res);
         res = (*engineObject)->Realize(engineObject, SL_BOOLEAN_FALSE);
         CheckErr(res);
-
         res = (*engineObject)->GetInterface(engineObject, SL_IID_ENGINE, &engineEngine);
         CheckErr(res);
 
@@ -114,6 +114,7 @@ protected:
         pcm.containerSize = 16;
         pcm.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
         pcm.endianness = SL_BYTEORDER_LITTLEENDIAN;
+
         audiosrc.pLocator = &locator_bufferqueue;
         audiosrc.pFormat = &pcm;
         audiosnk.pLocator = &locator_outputmix;
@@ -151,31 +152,25 @@ protected:
 
     /* Test case for creating audio player with various invalid values for numBuffers*/
     void InvalidBuffer() {
-        unsigned nframes = sizeof(stereoBuffer1) / sizeof(stereoBuffer1[0]);
-        float nframes_ = (float) nframes;
-        SLuint32 i;
-        SLInterfaceID ids[1] = { SL_IID_BUFFERQUEUE };
-        SLboolean flags[1] = { SL_BOOLEAN_TRUE };
 
-        static const SLuint32 invalidNumBuffers[] = { 0, 0xFFFFFFFF, 0x80000000, 0x10002, 0x102,
-                0x101, 0x100 };
-        for (i = 0; i < sizeof(invalidNumBuffers) / sizeof(invalidNumBuffers[0]); ++i) {
-            locator_bufferqueue.numBuffers = invalidNumBuffers[i];
-            LOGV("allocation buffer\n");
+        for (unsigned i = 0; i < sizeof(invalidNumBuffers) / sizeof(invalidNumBuffers[0]); ++i) {
+            SLuint32 numBuffers = invalidNumBuffers[i];
+
+            locator_bufferqueue.numBuffers = numBuffers;
+            LOGV("allocation buffer");
             SLresult result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject,
                                                             &audiosrc, &audiosnk, 1, ids, flags);
             ASSERT_EQ(SL_RESULT_PARAMETER_INVALID, result);
+
         }
     }
 
     /*Prepare the buffer*/
-    void PrepareValidBuffer(SLuint32 numbuffer) {
-        SLInterfaceID ids2[1] = { SL_IID_BUFFERQUEUE };
-        SLboolean flags2[1] = { SL_BOOLEAN_TRUE };
+    void PrepareValidBuffer(SLuint32 numBuffers) {
 
-        locator_bufferqueue.numBuffers = validNumBuffers[numbuffer];
+        locator_bufferqueue.numBuffers = numBuffers;
         res = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc, &audiosnk,
-                                                1, ids2, flags2);
+                                                1, ids, flags);
         CheckErr(res);
         res = (*playerObject)->Realize(playerObject, SL_BOOLEAN_FALSE);
         CheckErr(res);
@@ -198,10 +193,10 @@ protected:
         ASSERT_EQ((SLuint32) 0, bufferqueueState.playIndex);
     }
 
-    void EnqueueMaxBuffer(SLuint32 i) {
+    void EnqueueMaxBuffer(SLuint32 numBuffers) {
         SLuint32 j;
 
-        for (j = 0; j < validNumBuffers[i]; ++j) {
+        for (j = 0; j < numBuffers; ++j) {
             res = (*playerBufferQueue)->Enqueue(playerBufferQueue, "test", 4);
             CheckErr(res);
             // verify that each buffer is enqueued properly and increments the buffer count
@@ -212,14 +207,14 @@ protected:
         }
     }
 
-    void EnqueueExtraBuffer(SLuint32 i) {
+    void EnqueueExtraBuffer(SLuint32 numBuffers) {
         // enqueue one more buffer and make sure it fails
         res = (*playerBufferQueue)->Enqueue(playerBufferQueue, "test", 4);
         ASSERT_EQ(SL_RESULT_BUFFER_INSUFFICIENT, res);
         // verify that the failed enqueue did not affect the buffer count
         res = (*playerBufferQueue)->GetState(playerBufferQueue, &bufferqueueState);
         CheckErr(res);
-        ASSERT_EQ(validNumBuffers[i], bufferqueueState.count);
+        ASSERT_EQ(numBuffers, bufferqueueState.count);
         ASSERT_EQ((SLuint32) 0, bufferqueueState.playIndex);
     }
 
@@ -291,38 +286,62 @@ protected:
 };
 
 TEST_F(TestBufferQueue, testInvalidBuffer){
-     LOGV("Test Fixture: InvalidBuffer\n");
-     InvalidBuffer();
+    LOGV("Test Fixture: InvalidBuffer");
+    InvalidBuffer();
 }
 
 TEST_F(TestBufferQueue, testValidBuffer) {
-    PrepareValidBuffer(1);
+    for (unsigned i = 0; i < sizeof(validNumBuffers) / sizeof(validNumBuffers[0]); ++i) {
+        SLuint32 numBuffers = validNumBuffers[i];
+        PrepareValidBuffer(numBuffers);
+    }
 }
 
 TEST_F(TestBufferQueue, testEnqueueMaxBuffer) {
-    PrepareValidBuffer(1);
-    EnqueueMaxBuffer(1);
+    for (unsigned i = 0; i < sizeof(validNumBuffers) / sizeof(validNumBuffers[0]); ++i) {
+        SLuint32 numBuffers = validNumBuffers[i];
+        PrepareValidBuffer(numBuffers);
+        EnqueueMaxBuffer(numBuffers);
+    }
 }
 
-TEST_F(TestBufferQueue, testEnqueExtraBuffer) {
-    PrepareValidBuffer(1);
-    EnqueueMaxBuffer(1);
-    EnqueueExtraBuffer(1);
-    GetPlayerState(SL_PLAYSTATE_STOPPED);
+TEST_F(TestBufferQueue, testEnqueueExtraBuffer) {
+    for (unsigned i = 0; i < sizeof(validNumBuffers) / sizeof(validNumBuffers[0]); ++i) {
+        SLuint32 numBuffers = validNumBuffers[i];
+        PrepareValidBuffer(numBuffers);
+        EnqueueMaxBuffer(numBuffers);
+        EnqueueExtraBuffer(numBuffers);
+        GetPlayerState(SL_PLAYSTATE_STOPPED);
+    }
 }
 
-TEST_F(TestBufferQueue, testEnqueAtPause) {
-    PrepareValidBuffer(1);
-    SetPlayerState(SL_PLAYSTATE_PAUSED);
-    GetPlayerState(SL_PLAYSTATE_PAUSED);
-    EnqueueMaxBuffer(1);
-    CheckBufferCount((SLuint32) 2, (SLuint32) 0);
+TEST_F(TestBufferQueue, testEnqueueAtStopped) {
+    for (unsigned i = 0; i < sizeof(validNumBuffers) / sizeof(validNumBuffers[0]); ++i) {
+        SLuint32 numBuffers = validNumBuffers[i];
+        PrepareValidBuffer(numBuffers);
+        SetPlayerState(SL_PLAYSTATE_STOPPED);
+        EnqueueMaxBuffer(numBuffers);
+        CheckBufferCount(numBuffers, (SLuint32) 0);
+    }
+}
+
+TEST_F(TestBufferQueue, testEnqueueAtPaused) {
+    for (unsigned i = 0; i < sizeof(validNumBuffers) / sizeof(validNumBuffers[0]); ++i) {
+        SLuint32 numBuffers = validNumBuffers[i];
+        PrepareValidBuffer(numBuffers);
+        SetPlayerState(SL_PLAYSTATE_PAUSED);
+        EnqueueMaxBuffer(numBuffers);
+        CheckBufferCount(numBuffers, (SLuint32) 0);
+    }
 }
 
 TEST_F(TestBufferQueue, testClearQueue) {
-    PrepareValidBuffer(1);
-    EnqueueMaxBuffer(1);
-    ClearQueue();
+    for (unsigned i = 0; i < sizeof(validNumBuffers) / sizeof(validNumBuffers[0]); ++i) {
+        SLuint32 numBuffers = validNumBuffers[i];
+        PrepareValidBuffer(numBuffers);
+        EnqueueMaxBuffer(numBuffers);
+        ClearQueue();
+    }
 }
 
 TEST_F(TestBufferQueue, testStateTransitionEmptyQueue) {
@@ -337,15 +356,19 @@ TEST_F(TestBufferQueue, testStateTransitionEmptyQueue) {
         SL_PLAYSTATE_PLAYING,   // stopped -> playing
         SL_PLAYSTATE_PAUSED     // playing -> paused
     };
-    SLuint32 j;
 
-    PrepareValidBuffer(8);
-    /* Set inital state to pause*/
-    SetPlayerState(SL_PLAYSTATE_PAUSED);
+    for (unsigned i = 0; i < sizeof(validNumBuffers) / sizeof(validNumBuffers[0]); ++i) {
+        SLuint32 numBuffers = validNumBuffers[i];
+        SLuint32 j;
 
-    for (j = 0; j < sizeof(newStates) / sizeof(newStates[0]); ++j) {
-        SetPlayerState(newStates[j]);
-        CheckBufferCount((SLuint32) 0, (SLuint32) 0);
+        PrepareValidBuffer(numBuffers);
+        /* Set initial state to paused*/
+        SetPlayerState(SL_PLAYSTATE_PAUSED);
+
+        for (j = 0; j < sizeof(newStates) / sizeof(newStates[0]); ++j) {
+            SetPlayerState(newStates[j]);
+            CheckBufferCount((SLuint32) 0, (SLuint32) 0);
+        }
     }
 }
 
@@ -354,24 +377,31 @@ TEST_F(TestBufferQueue, testStateTransitionNonEmptyQueue) {
         SL_PLAYSTATE_PAUSED,    // paused -> paused
         SL_PLAYSTATE_STOPPED,   // paused -> stopped
         SL_PLAYSTATE_STOPPED,   // stopped -> stopped
-        SL_PLAYSTATE_PAUSED    // stopped -> paused
+        SL_PLAYSTATE_PAUSED     // stopped -> paused
     };
-    SLuint32 j;
 
-    /* Prepare the player */
-    PrepareValidBuffer(2);
-    EnqueueMaxBuffer(2);
-    SetPlayerState(SL_PLAYSTATE_PAUSED);
+    for (unsigned i = 0; i < sizeof(validNumBuffers) / sizeof(validNumBuffers[0]); ++i) {
+        SLuint32 numBuffers = validNumBuffers[i];
+        SLuint32 j;
 
-    for (j = 0; j < sizeof(newStates) / sizeof(newStates[0]); ++j) {
-      SetPlayerState(newStates[j]);
-      CheckBufferCount((SLuint32) 3, (SLuint32) 0);
+        /* Prepare the player */
+        PrepareValidBuffer(numBuffers);
+        EnqueueMaxBuffer(numBuffers);
+        SetPlayerState(SL_PLAYSTATE_PAUSED);
+
+        for (j = 0; j < sizeof(newStates) / sizeof(newStates[0]); ++j) {
+            SetPlayerState(newStates[j]);
+            CheckBufferCount(numBuffers, (SLuint32) 0);
+        }
     }
 }
 
 TEST_F(TestBufferQueue, testStatePlayBuffer){
-     PrepareValidBuffer(8);
-     PlayBufferQueue();
+    for (unsigned i = 0; i < sizeof(validNumBuffers) / sizeof(validNumBuffers[0]); ++i) {
+        SLuint32 numBuffers = validNumBuffers[i];
+        PrepareValidBuffer(numBuffers);
+        PlayBufferQueue();
+    }
 }
 
 int main(int argc, char **argv) {
