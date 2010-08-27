@@ -35,7 +35,7 @@ SLresult CEngine_Realize(void *self, SLboolean async)
         return result;
     }
 #ifdef USE_SDL
-    SDL_start(&this->mEngine);
+    SDL_open(&this->mEngine);
 #endif
     return SL_RESULT_SUCCESS;
 }
@@ -45,6 +45,9 @@ SLresult CEngine_Realize(void *self, SLboolean async)
 
 void CEngine_Destroy(void *self)
 {
+#ifdef USE_SDL
+    SDL_close();
+#endif
     CEngine *this = (CEngine *) self;
     this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
 #if defined(ANDROID) && !defined(USE_BACKPORT)

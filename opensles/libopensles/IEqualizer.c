@@ -42,12 +42,14 @@ static const struct EqualizerPreset {
 #endif
 
 
+#if defined(ANDROID) && !defined(USE_BACKPORT)
 /**
  * returns true if this interface is not associated with an initialized Equalizer effect
  */
 static inline bool NO_EQ(IEqualizer* v) {
     return (v->mEqEffect == 0);
 }
+#endif
 
 
 static SLresult IEqualizer_SetEnabled(SLEqualizerItf self, SLboolean enabled)

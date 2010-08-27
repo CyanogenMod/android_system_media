@@ -41,7 +41,7 @@ static void SDLCALL SDL_callback(void *context, Uint8 *stream, int len)
 
 /** \brief Called during slCreateEngine to initialize SDL */
 
-void SDL_start(IEngine *thisEngine)
+void SDL_open(IEngine *thisEngine)
 {
     SDL_AudioSpec fmt;
     fmt.freq = 44100;
@@ -59,6 +59,14 @@ void SDL_start(IEngine *thisEngine)
         SL_LOGE("Unable to open audio: %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
+}
+
+
+/** \brief Called during Object::Destroy for engine to shutdown SDL */
+
+void SDL_close(void)
+{
+    SDL_CloseAudio();
 }
 
 #endif // USE_SDL
