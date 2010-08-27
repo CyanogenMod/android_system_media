@@ -145,8 +145,8 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
     if (attributes & ATTR_POSITION) {
         switch (objectID) {
         case SL_OBJECTID_AUDIOPLAYER:
-            ap = (CAudioPlayer *) this;
 #ifdef ANDROID
+            ap = (CAudioPlayer *) this;
             attributes &= ~ATTR_POSITION;   // no need to process asynchronously also
             android_audioPlayer_seek(ap, ap->mSeek.mPos);
 #else

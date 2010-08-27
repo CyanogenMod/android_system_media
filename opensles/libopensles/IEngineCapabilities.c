@@ -187,7 +187,6 @@ static SLresult IEngineCapabilities_QueryVibraCapabilities(SLEngineCapabilitiesI
             }
         }
     }
-    result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
 }
