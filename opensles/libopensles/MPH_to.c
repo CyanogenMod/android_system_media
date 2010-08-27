@@ -26,6 +26,9 @@
 // Important note: if you add any interfaces here, be sure to also
 // update the #define for the corresponding INTERFACES_<Class>.
 
+// IObject is the first interface in a class, so the index for MPH_OBJECT must be zero.
+// Don't cross streams, otherwise bad things happen.
+
 const signed char MPH_to_3DGroup[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,

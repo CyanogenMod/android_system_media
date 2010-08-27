@@ -59,9 +59,9 @@ void CEngine_Destroy(void *self)
         delete [] this->mEngine.mEqPresetNames;
     }
 #endif
-    while (!this->mEngine.mShutdownAck)
-        pthread_cond_wait(&this->mEngine.mShutdownCond, &this->mObject.mMutex);
-    object_unlock_exclusive(&this->mObject);
+    while (!this->mEngine.mShutdownAck) {
+        object_cond_wait(&this->mObject);
+    }
     (void) pthread_join(this->mSyncThread, (void **) NULL);
     ThreadPool_deinit(&this->mEngine.mThreadPool);
 

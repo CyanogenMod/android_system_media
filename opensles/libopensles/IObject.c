@@ -427,7 +427,6 @@ static void IObject_Destroy(SLObjectItf self)
     Abort_internal(this, SL_BOOLEAN_TRUE);
     const ClassTable *class__ = this->mClass;
     VoidHook destroy = class__->mDestroy;
-    const struct iid_vtable *x = class__->mInterfaces;
     // const, no lock needed
     IEngine *thisEngine = this->mEngine;
     unsigned i = this->mInstanceID;
@@ -455,11 +454,15 @@ static void IObject_Destroy(SLObjectItf self)
         (*destroy)(this);
     // Call the deinitializer for each currently exposed interface,
     // whether it is implicit, explicit, optional, or dynamically added.
+    // The deinitializers are called in the reverse order that the
+    // initializers were called, so that IObject_deinit is called last.
     unsigned incorrect = 0;
-    SLuint8 *interfaceStateP = this->mInterfaceStates;
-    unsigned index;
-    for (index = 0; index < class__->mInterfaceCount; ++index, ++x, ++interfaceStateP) {
-        SLuint32 state = *interfaceStateP;
+    unsigned index = class__->mInterfaceCount;
+    const struct iid_vtable *x = &class__->mInterfaces[index];
+    SLuint8 *interfaceStateP = &this->mInterfaceStates[index];
+    for ( ; index > 0; --index) {
+        --x;
+        SLuint32 state = *--interfaceStateP;
         switch (state) {
         case INTERFACE_UNINITIALIZED:
             break;
@@ -487,8 +490,7 @@ static void IObject_Destroy(SLObjectItf self)
             break;
         }
     }
-    // redundant: this->mState = SL_OBJECT_STATE_UNREALIZED;
-    object_unlock_exclusive(this);
+    // The mutex is unlocked and destroyed by IObject_deinit, which is the last deinitializer
 #ifdef USE_DEBUG
     memset(this, 0x55, class__->mSize);
 #endif
@@ -601,6 +603,9 @@ static const struct SLObjectItf_ IObject_Itf = {
     IObject_SetLossOfControlInterfaces,
 };
 
+
+/** \brief This must be the first initializer called for an object */
+
 void IObject_init(void *self)
 {
     IObject *this = (IObject *) self;
@@ -630,4 +635,24 @@ void IObject_init(void *self)
 #endif
     ok = pthread_cond_init(&this->mCond, (const pthread_condattr_t *) NULL);
     assert(0 == ok);
+}
+
+
+/** \brief This must be the last deinitializer called for an object */
+
+void IObject_deinit(void *self)
+{
+    IObject *this = (IObject *) self;
+#ifdef USE_DEBUG
+    assert(pthread_equal(pthread_self(), this->mOwner));
+#endif
+    int ok;
+    ok = pthread_cond_destroy(&this->mCond);
+    assert(0 == ok);
+    // equivalent to object_unlock_exclusive, but without the rigmarole
+    ok = pthread_mutex_unlock(&this->mMutex);
+    assert(0 == ok);
+    ok = pthread_mutex_destroy(&this->mMutex);
+    assert(0 == ok);
+    // redundant: this->mState = SL_OBJECT_STATE_UNREALIZED;
 }

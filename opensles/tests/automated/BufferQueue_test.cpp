@@ -134,15 +134,18 @@ protected:
     }
 
     virtual void TearDown() {
-        /* Clean up the engine, player and the mixer*/
-        if (*outputmixObject){
-            (*outputmixObject)->Destroy(outputmixObject);
-        }
-        if (*engineObject){
-            (*engineObject)->Destroy(engineObject);
-        }
-        if (*playerObject){
+        /* Clean up the player, mixer, and the engine (must be done in that order) */
+        if (playerObject){
             (*playerObject)->Destroy(playerObject);
+            playerObject = NULL;
+        }
+        if (outputmixObject){
+            (*outputmixObject)->Destroy(outputmixObject);
+            outputmixObject = NULL;
+        }
+        if (engineObject){
+            (*engineObject)->Destroy(engineObject);
+            engineObject = NULL;
         }
     }
 
@@ -154,13 +157,13 @@ protected:
         SLInterfaceID ids[1] = { SL_IID_BUFFERQUEUE };
         SLboolean flags[1] = { SL_BOOLEAN_TRUE };
 
-        static const SLuint32 invalidNumBuffers[] = { 0, 0xFFFFFFFF, 0x80000000, 0x10002, 0x102, 0x101,
-                0x100 };
+        static const SLuint32 invalidNumBuffers[] = { 0, 0xFFFFFFFF, 0x80000000, 0x10002, 0x102,
+                0x101, 0x100 };
         for (i = 0; i < sizeof(invalidNumBuffers) / sizeof(invalidNumBuffers[0]); ++i) {
             locator_bufferqueue.numBuffers = invalidNumBuffers[i];
             LOGV("allocation buffer\n");
-            SLresult result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc,
-                                                                         &audiosnk, 1, ids, flags);
+            SLresult result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject,
+                                                            &audiosrc, &audiosnk, 1, ids, flags);
             ASSERT_EQ(SL_RESULT_PARAMETER_INVALID, result);
         }
     }
@@ -171,8 +174,8 @@ protected:
         SLboolean flags2[1] = { SL_BOOLEAN_TRUE };
 
         locator_bufferqueue.numBuffers = validNumBuffers[numbuffer];
-        res = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc, &audiosnk, 1,
-                                                 ids2, flags2);
+        res = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc, &audiosnk,
+                                                1, ids2, flags2);
         CheckErr(res);
         res = (*playerObject)->Realize(playerObject, SL_BOOLEAN_FALSE);
         CheckErr(res);
@@ -254,7 +257,8 @@ protected:
 
     void PlayBufferQueue() {
         // enqueue a buffer
-        res = (*playerBufferQueue)->Enqueue(playerBufferQueue, stereoBuffer1, sizeof(stereoBuffer1));
+        res = (*playerBufferQueue)->Enqueue(playerBufferQueue, stereoBuffer1,
+            sizeof(stereoBuffer1));
         CheckErr(res);
         // set play state to playing
         res = (*playerPlay)->SetPlayState(playerPlay, SL_PLAYSTATE_PLAYING);
@@ -285,12 +289,11 @@ protected:
         LOGV("TestEnd");
     }
 };
-/*
+
 TEST_F(TestBufferQueue, testInvalidBuffer){
      LOGV("Test Fixture: InvalidBuffer\n");
      InvalidBuffer();
- }
-*/
+}
 
 TEST_F(TestBufferQueue, testValidBuffer) {
     PrepareValidBuffer(1);
@@ -366,12 +369,11 @@ TEST_F(TestBufferQueue, testStateTransitionNonEmptyQueue) {
     }
 }
 
-/*
 TEST_F(TestBufferQueue, testStatePlayBuffer){
      PrepareValidBuffer(8);
      PlayBufferQueue();
- }
-*/
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

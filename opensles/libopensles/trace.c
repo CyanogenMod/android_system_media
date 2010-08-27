@@ -31,10 +31,12 @@
 // This should be the only global variable
 static unsigned slTraceEnabled = SL_TRACE_DEFAULT;
 
+
 void slTraceSetEnabled(unsigned enabled)
 {
     slTraceEnabled = enabled;
 }
+
 
 void slTraceEnterGlobal(const char *function)
 {
@@ -42,26 +44,37 @@ void slTraceEnterGlobal(const char *function)
         LOGV("Entering %s\n", function);
 }
 
+
 void slTraceLeaveGlobal(const char *function, SLresult result)
 {
-    if ((SL_RESULT_SUCCESS != result) && (SL_TRACE_LEAVE_FAILURE & slTraceEnabled)) {
-        if (SLESUT_RESULT_MAX > result)
-            LOGV("Leaving %s (%s)\n", function, slesutResultStrings[result]);
-        else
-            LOGV("Leaving %s (0x%X)\n", function, (unsigned) result);
+    if (SL_RESULT_SUCCESS == result) {
+        if (SL_TRACE_LEAVE_SUCCESS & slTraceEnabled) {
+            LOGV("Leaving %s\n", function);
+        }
+    } else {
+        if (SL_TRACE_LEAVE_FAILURE & slTraceEnabled) {
+            if (SLESUT_RESULT_MAX > result)
+                LOGE("Leaving %s (%s)\n", function, slesutResultStrings[result]);
+            else
+                LOGE("Leaving %s (0x%X)\n", function, (unsigned) result);
+        }
     }
 }
 
+
 void slTraceEnterInterface(const char *function)
 {
+    if (!(SL_TRACE_ENTER & slTraceEnabled))
+        return;
     if (*function == 'I')
         ++function;
     const char *underscore = function;
     while (*underscore != '\0') {
         if (*underscore == '_') {
-            if ((strcmp(function, "BufferQueue_Enqueue") && strcmp(function, "BufferQueue_GetState")
-                && strcmp(function, "OutputMixExt_FillBuffer")) &&
-                (SL_TRACE_ENTER & slTraceEnabled)) {
+            if (/*(strcmp(function, "BufferQueue_Enqueue") &&
+                strcmp(function, "BufferQueue_GetState") &&
+                strcmp(function, "OutputMixExt_FillBuffer")) &&*/
+                true) {
                 LOGV("Entering %.*s::%s\n", (int) (underscore - function), function,
                     &underscore[1]);
             }
@@ -69,17 +82,32 @@ void slTraceEnterInterface(const char *function)
         }
         ++underscore;
     }
-    if (SL_TRACE_ENTER & slTraceEnabled)
-        LOGV("Entering %s\n", function);
+    LOGV("Entering %s\n", function);
 }
+
 
 void slTraceLeaveInterface(const char *function, SLresult result)
 {
-    if ((SL_RESULT_SUCCESS != result) && (SL_TRACE_LEAVE_FAILURE & slTraceEnabled)) {
-        if (*function == 'I')
-            ++function;
-        const char *underscore = function;
-        while (*underscore != '\0') {
+    if (!((SL_TRACE_LEAVE_SUCCESS | SL_TRACE_LEAVE_FAILURE) & slTraceEnabled))
+        return;
+    if (*function == 'I')
+        ++function;
+    const char *underscore = function;
+    while (*underscore != '\0') {
+        if (*underscore == '_') {
+            break;
+        }
+        ++underscore;
+    }
+    if (SL_RESULT_SUCCESS == result) {
+        if (SL_TRACE_LEAVE_SUCCESS & slTraceEnabled) {
+            if (*underscore == '_')
+                LOGV("Leaving %.*s::%s\n", (int) (underscore - function), function, &underscore[1]);
+            else
+                LOGV("Leaving %s\n", function);
+        }
+    } else {
+        if (SL_TRACE_LEAVE_FAILURE & slTraceEnabled) {
             if (*underscore == '_') {
                 if (SLESUT_RESULT_MAX > result)
                     LOGE("Leaving %.*s::%s (%s)\n", (int) (underscore - function), function,
@@ -87,22 +115,23 @@ void slTraceLeaveInterface(const char *function, SLresult result)
                 else
                     LOGE("Leaving %.*s::%s (0x%X)\n", (int) (underscore - function), function,
                         &underscore[1], (unsigned) result);
-                return;
+            } else {
+                if (SLESUT_RESULT_MAX > result)
+                    LOGE("Leaving %s (%s)\n", function, slesutResultStrings[result]);
+                else
+                    LOGE("Leaving %s (0x%X)\n", function, (unsigned) result);
             }
-            ++underscore;
         }
-        if (SLESUT_RESULT_MAX > result)
-            LOGE("Leaving %s (%s)\n", function, slesutResultStrings[result]);
-        else
-            LOGE("Leaving %s (0x%X)\n", function, (unsigned) result);
     }
 }
+
 
 void slTraceEnterInterfaceVoid(const char *function)
 {
     if (SL_TRACE_ENTER & slTraceEnabled)
         slTraceEnterInterface(function);
 }
+
 
 void slTraceLeaveInterfaceVoid(const char *function)
 {

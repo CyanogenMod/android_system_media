@@ -55,8 +55,6 @@ void object_lock_exclusive_(IObject *this, const char *file, int line)
         }
         assert(false);
     }
-    assert(NULL == this->mFile);
-    assert(0 == this->mLine);
     this->mOwner = pthread_self();
     this->mFile = file;
     this->mLine = line;
@@ -73,25 +71,37 @@ void object_lock_exclusive(IObject *this)
 
 /* Exclusively unlock an object and do not report any updates */
 
-void object_unlock_exclusive(IObject *this)
-{
 #ifdef USE_DEBUG
+void object_unlock_exclusive_(IObject *this, const char *file, int line)
+{
     assert(pthread_equal(pthread_self(), this->mOwner));
     assert(NULL != this->mFile);
     assert(0 != this->mLine);
     memset(&this->mOwner, 0, sizeof(pthread_t));
-    this->mFile = NULL;
-    this->mLine = 0;
-#endif
+    this->mFile = file;
+    this->mLine = line;
     int ok;
     ok = pthread_mutex_unlock(&this->mMutex);
     assert(0 == ok);
 }
+#else
+void object_unlock_exclusive(IObject *this)
+{
+    int ok;
+    ok = pthread_mutex_unlock(&this->mMutex);
+    assert(0 == ok);
+}
+#endif
 
 
 /* Exclusively unlock an object and report updates to the specified bit-mask of attributes */
 
+#ifdef USE_DEBUG
+void object_unlock_exclusive_attributes_(IObject *this, unsigned attributes,
+    const char *file, int line)
+#else
 void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
+#endif
 {
 
 #ifdef USE_DEBUG
@@ -188,8 +198,8 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
     }
 #ifdef USE_DEBUG
     memset(&this->mOwner, 0, sizeof(pthread_t));
-    this->mFile = NULL;
-    this->mLine = 0;
+    this->mFile = file;
+    this->mLine = line;
 #endif
     ok = pthread_mutex_unlock(&this->mMutex);
     assert(0 == ok);
@@ -212,8 +222,8 @@ void object_cond_wait_(IObject *this, const char *file, int line)
     assert(NULL != this->mFile);
     assert(0 != this->mLine);
     memset(&this->mOwner, 0, sizeof(pthread_t));
-    this->mFile = NULL;
-    this->mLine = 0;
+    this->mFile = file;
+    this->mLine = line;
     // alas we don't know the new owner's identity
     int ok;
     ok = pthread_cond_wait(&this->mCond, &this->mMutex);

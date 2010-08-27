@@ -134,10 +134,11 @@ fail:
 
 static void ThreadPool_deinit_internal(ThreadPool *tp, unsigned initialized, unsigned nThreads)
 {
+    int ok;
+
     assert(NULL != tp);
     // Destroy all threads
     if (0 < nThreads) {
-        int ok;
         assert(INITIALIZED_ALL == initialized);
         ok = pthread_mutex_lock(&tp->mMutex);
         assert(0 == ok);
@@ -179,12 +180,18 @@ static void ThreadPool_deinit_internal(ThreadPool *tp, unsigned initialized, uns
     }
 
     // destroy the mutex and condition variables
-    if (initialized & INITIALIZED_CONDNOTEMPTY)
-        (void) pthread_cond_destroy(&tp->mCondNotEmpty);
-    if (initialized & INITIALIZED_CONDNOTFULL)
-        (void) pthread_cond_destroy(&tp->mCondNotFull);
-    if (initialized & INITIALIZED_MUTEX)
-        (void) pthread_mutex_destroy(&tp->mMutex);
+    if (initialized & INITIALIZED_CONDNOTEMPTY) {
+        ok = pthread_cond_destroy(&tp->mCondNotEmpty);
+        assert(0 == ok);
+    }
+    if (initialized & INITIALIZED_CONDNOTFULL) {
+        ok = pthread_cond_destroy(&tp->mCondNotFull);
+        assert(0 == ok);
+    }
+    if (initialized & INITIALIZED_MUTEX) {
+        ok = pthread_mutex_destroy(&tp->mMutex);
+        assert(0 == ok);
+    }
     tp->mInitialized = INITIALIZED_NONE;
 
     // release the closure circular buffer

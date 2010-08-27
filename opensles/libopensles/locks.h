@@ -18,18 +18,24 @@
 
 #ifdef USE_DEBUG
 extern void object_lock_exclusive_(IObject *this, const char *file, int line);
+extern void object_unlock_exclusive_(IObject *this, const char *file, int line);
+extern void object_unlock_exclusive_attributes_(IObject *this, unsigned attr,
+    const char *file, int line);
 extern void object_cond_wait_(IObject *this, const char *file, int line);
 #else
 extern void object_lock_exclusive(IObject *this);
-extern void object_cond_wait(IObject *this);
-#endif
 extern void object_unlock_exclusive(IObject *this);
 extern void object_unlock_exclusive_attributes(IObject *this, unsigned attr);
+extern void object_cond_wait(IObject *this);
+#endif
 extern void object_cond_signal(IObject *this);
 extern void object_cond_broadcast(IObject *this);
 
 #ifdef USE_DEBUG
 #define object_lock_exclusive(this) object_lock_exclusive_((this), __FILE__, __LINE__)
+#define object_unlock_exclusive(this) object_unlock_exclusive_((this), __FILE__, __LINE__)
+#define object_unlock_exclusive_attributes(this, attr) \
+    object_unlock_exclusive_attributes_((this), (attr), __FILE__, __LINE__)
 #define object_cond_wait(this) object_cond_wait_((this), __FILE__, __LINE__)
 #endif
 

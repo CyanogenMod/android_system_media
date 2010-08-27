@@ -678,6 +678,8 @@ extern void IAndroidAudioEffect_init(void *);
 extern void
     IOutputMixExt_init(void *);
 #endif
+extern void
+    IObject_deinit(void *);
 
 
 /*static*/ const struct MPH_init MPH_init_table[MPH_MAX] = {
@@ -710,7 +712,7 @@ extern void
     { /* MPH_MIDIMUTESOLO, */ IMIDIMuteSolo_init, NULL, NULL },
     { /* MPH_MUTESOLO, */ IMuteSolo_init, NULL, NULL },
     { /* MPH_NULL, */ NULL, NULL, NULL },
-    { /* MPH_OBJECT, */ IObject_init, NULL, NULL },
+    { /* MPH_OBJECT, */ IObject_init, NULL, IObject_deinit },
     { /* MPH_OUTPUTMIX, */ IOutputMix_init, NULL, NULL },
     { /* MPH_PITCH, */ IPitch_init, NULL, NULL },
     { /* MPH_PLAY, */ IPlay_init, NULL, NULL },

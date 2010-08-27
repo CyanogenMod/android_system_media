@@ -662,9 +662,7 @@ void IEngine_init(void *self)
     for (i = 0; i < MAX_INSTANCE; ++i)
         this->mInstances[i] = NULL;
     this->mShutdown = SL_BOOLEAN_FALSE;
-    int ok;
-    ok = pthread_cond_init(&this->mShutdownCond, (const pthread_condattr_t *) NULL);
-    assert(0 == ok);
+    this->mShutdownAck = SL_BOOLEAN_FALSE;
 #if defined(ANDROID) && !defined(USE_BACKPORT)
     this->mEqNumPresets = 0;
     this->mEqPresetNames = NULL;
