@@ -137,3 +137,12 @@ void slesutPrintIIDs(SLInterfaceID *pInterfaceIds, SLboolean *pInterfaceRequired
         printf(" %s\n", (unsigned) pInterfaceRequired[i] ? "required" : "optional");
     }
 }
+
+
+/** \brief Convert a result code to a string. */
+
+const char *slesutResultToString(SLresult result)
+{
+    // note that SLresult is unsigned
+    return result < SLESUT_RESULT_MAX ? slesutResultStrings[result] : "UNKNOWN";
+}

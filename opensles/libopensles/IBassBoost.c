@@ -22,12 +22,14 @@
 #define BASSBOOST_STRENGTH_MAX 1000
 
 
+#if defined(ANDROID) && !defined(USE_BACKPORT)
 /**
  * returns true if this interface is not associated with an initialized BassBoost effect
  */
 static inline bool NO_BASSBOOST(IBassBoost* v) {
     return (v->mBassBoostEffect == 0);
 }
+#endif
 
 
 static SLresult IBassBoost_SetEnabled(SLBassBoostItf self, SLboolean enabled)

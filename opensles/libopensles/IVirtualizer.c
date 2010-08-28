@@ -22,12 +22,14 @@
 #define VIRTUALIZER_STRENGTH_MAX 1000
 
 
+#if defined(ANDROID) && !defined(USE_BACKPORT)
 /**
  * returns true if this interface is not associated with an initialized Virtualizer effect
  */
 static inline bool NO_VIRTUALIZER(IVirtualizer* v) {
     return (v->mVirtualizerEffect == 0);
 }
+#endif
 
 
 static SLresult IVirtualizer_SetEnabled(SLVirtualizerItf self, SLboolean enabled)

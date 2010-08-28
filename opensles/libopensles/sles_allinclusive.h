@@ -1159,7 +1159,8 @@ extern SLresult CEngine_Realize(void *self, SLboolean async);
 extern void CEngine_Destroy(void *self);
 
 #ifdef USE_SDL
-extern void SDL_start(IEngine *thisEngine);
+extern void SDL_open(IEngine *thisEngine);
+extern void SDL_close(void);
 #endif
 #define SL_OBJECT_STATE_REALIZING_1  ((SLuint32) 0x4) // async realize on work queue
 #define SL_OBJECT_STATE_REALIZING_2  ((SLuint32) 0x5) // sync realize, or async realize hook
