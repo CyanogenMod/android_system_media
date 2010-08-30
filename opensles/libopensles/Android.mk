@@ -38,12 +38,14 @@ LOCAL_SRC_FILES:=                     \
         sles.c                        \
         android_AudioPlayer.cpp       \
         android_AudioRecorder.cpp     \
+        android_OutputMix.cpp         \
         sync.c                        \
         IID_to_MPH.c                  \
         ThreadPool.c                  \
         CAudioPlayer.c                \
         CAudioRecorder.c              \
         CEngine.c                     \
+        COutputMix.c                  \
         I3DCommit.c                   \
         I3DDoppler.c                  \
         I3DGrouping.c                 \

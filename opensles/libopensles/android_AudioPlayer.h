@@ -17,9 +17,6 @@
 #define ANDROID_DEFAULT_OUTPUT_STREAM_TYPE android::AudioSystem::MUSIC
 #define ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE 4096
 
-// FIXME should all those functions below be inline? there are separated in different files for
-//       code clarity.
-
 /*
  * Checks that the combination of source and sink parameters is supported in this implementation.
  * Return

@@ -71,7 +71,9 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
     /* Play and PrefetchStatus interfaces for the audio player */
     SLPlayItf              playItf;
     SLPrefetchStatusItf    prefetchItf;
-    SLEqualizerItf         eqItf;
+
+    /* Effect interface for the output mix */
+    SLEqualizerItf         eqOutputItf;
 
     SLboolean required[MAX_NUMBER_INTERFACES];
     SLInterfaceID iidArray[MAX_NUMBER_INTERFACES];
@@ -89,6 +91,10 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
     /* ------------------------------------------------------ */
     /* Configuration of the output mix  */
 
+    /* Set arrays required[] and iidArray[] for SLEqualizerItf interface */
+    required[0] = SL_BOOLEAN_TRUE;
+    iidArray[0] = SL_IID_EQUALIZER;
+
     /* Create Output Mix object to be used by the player */
      result = (*EngineItf)->CreateOutputMix(EngineItf, &outputMix, 1, iidArray, required);
      ExitOnError(result);
@@ -96,6 +102,9 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
     /* Realize the Output Mix object in synchronous mode */
     result = (*outputMix)->Realize(outputMix, SL_BOOLEAN_FALSE);
     ExitOnError(result);
+
+    /* Get the SLEqualizerItf interface */
+    result = (*outputMix)->GetInterface(outputMix, SL_IID_EQUALIZER, (void*)&eqOutputItf);
 
     /* Setup the data sink structure */
     locator_outputmix.locatorType = SL_DATALOCATOR_OUTPUTMIX;
@@ -110,8 +119,6 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
     /*  (SLPlayItf is implicit) */
     required[0] = SL_BOOLEAN_TRUE;
     iidArray[0] = SL_IID_PREFETCHSTATUS;
-    required[1] = SL_BOOLEAN_TRUE;
-    iidArray[1] = SL_IID_EQUALIZER;
 
     /* Setup the data source structure for the URI */
     locatorFd.locatorType = SL_DATALOCATOR_ANDROIDFD;
@@ -133,7 +140,7 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
     audioSource.pLocator = (void*)&locatorFd;
 
     /* Create the audio player */
-    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink, 2,
+    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink, 1,
             iidArray, required);
     ExitOnError(result);
 
@@ -146,9 +153,6 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
     ExitOnError(result);
 
     result = (*player)->GetInterface(player, SL_IID_PREFETCHSTATUS, (void*)&prefetchItf);
-    ExitOnError(result);
-
-    result = (*player)->GetInterface(player, SL_IID_EQUALIZER, (void*)&eqItf);
     ExitOnError(result);
 
     fprintf(stdout, "Player configured\n");
@@ -183,16 +187,16 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
 
     /* Configure EQ */
     SLuint16 nbPresets, preset, nbBands = 0;
-    result = (*eqItf)->GetNumberOfBands(eqItf, &nbBands);
+    result = (*eqOutputItf)->GetNumberOfBands(eqOutputItf, &nbBands);
     ExitOnError(result);
-    result = (*eqItf)->GetNumberOfPresets(eqItf, &nbPresets);
+    result = (*eqOutputItf)->GetNumberOfPresets(eqOutputItf, &nbPresets);
     ExitOnError(result);
     /*    Start from a preset  */
     preset = nbPresets > 2 ?  2 : 0;
-    result = (*eqItf)->UsePreset(eqItf, preset);
+    result = (*eqOutputItf)->UsePreset(eqOutputItf, preset);
 
     preset = 1977;
-    result = (*eqItf)->GetCurrentPreset(eqItf, &preset);
+    result = (*eqOutputItf)->GetCurrentPreset(eqOutputItf, &preset);
     ExitOnError(result);
     if (SL_EQUALIZER_UNDEFINED == preset) {
         fprintf(stderr, "Using SL_EQUALIZER_UNDEFINED preset, unexpected here!\n");
@@ -202,37 +206,37 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
 
     /*    Tweak it so it's obvious it gets turned on/off later */
     SLmillibel minLevel, maxLevel = 0;
-    result = (*eqItf)->GetBandLevelRange(eqItf, &minLevel, &maxLevel);
+    result = (*eqOutputItf)->GetBandLevelRange(eqOutputItf, &minLevel, &maxLevel);
     ExitOnError(result);
     fprintf(stdout, "Band level range = %dmB to %dmB\n", minLevel, maxLevel);
 
     SLuint16 b = 0;
     for(b = 0 ; b < nbBands/2 ; b++) {
-        result = (*eqItf)->SetBandLevel(eqItf, b, minLevel);
+        result = (*eqOutputItf)->SetBandLevel(eqOutputItf, b, minLevel);
         ExitOnError(result);
     }
     for(b = nbBands/2 ; b < nbBands ; b++) {
-        result = (*eqItf)->SetBandLevel(eqItf, b, maxLevel);
+        result = (*eqOutputItf)->SetBandLevel(eqOutputItf, b, maxLevel);
         ExitOnError(result);
     }
 
     SLmillibel level = 0;
     for(b = 0 ; b < nbBands ; b++) {
-        result = (*eqItf)->GetBandLevel(eqItf, b, &level);
+        result = (*eqOutputItf)->GetBandLevel(eqOutputItf, b, &level);
         ExitOnError(result);
         fprintf(stdout, "Band %d level = %dmB\n", b, level);
     }
 
     /* Switch EQ on/off every TIME_S_BETWEEN_EQ_ON_OFF seconds */
     SLboolean enabled = SL_BOOLEAN_TRUE;
-    result = (*eqItf)->SetEnabled(eqItf, enabled);
+    result = (*eqOutputItf)->SetEnabled(eqOutputItf, enabled);
     ExitOnError(result);
     for(unsigned int j=0 ; j<(durationInMsec/1000*TIME_S_BETWEEN_EQ_ON_OFF) ; j++) {
         usleep(TIME_S_BETWEEN_EQ_ON_OFF * 1000 * 1000);
-        result = (*eqItf)->IsEnabled(eqItf, &enabled);
+        result = (*eqOutputItf)->IsEnabled(eqOutputItf, &enabled);
         ExitOnError(result);
         enabled = enabled == SL_BOOLEAN_TRUE ? SL_BOOLEAN_FALSE : SL_BOOLEAN_TRUE;
-        result = (*eqItf)->SetEnabled(eqItf, enabled);
+        result = (*eqOutputItf)->SetEnabled(eqOutputItf, enabled);
         if (SL_BOOLEAN_TRUE == enabled) {
             fprintf(stdout, "EQ on\n");
         } else {
@@ -264,7 +268,7 @@ int main(int argc, char* const argv[])
     SLObjectItf sl;
 
     fprintf(stdout, "OpenSL ES test %s: exercises SLEqualizerItf ", argv[0]);
-    fprintf(stdout, "and AudioPlayer with SLDataLocator_AndroidFD source / OutputMix sink\n");
+    fprintf(stdout, "on an OutputMix object\n");
     fprintf(stdout, "Plays the sound file designated by the given path, ");
     fprintf(stdout, "starting at the specified offset, and using the specified length.\n");
     fprintf(stdout, "Omit the length of the file for it to be computed by the system.\n");

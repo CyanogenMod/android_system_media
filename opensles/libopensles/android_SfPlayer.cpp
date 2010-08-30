@@ -55,6 +55,9 @@ SfPlayer::~SfPlayer() {
     LOGV("SfPlayer::~SfPlayer()");
 
     if (mAudioSource != NULL) {
+        if(mBufferInFlight) {
+            LOGE("Attempt to stop the MediaSource with an unreleased buffer.");
+        }
         mAudioSource->stop();
     }
 

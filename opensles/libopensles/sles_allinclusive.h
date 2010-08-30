@@ -70,6 +70,7 @@ typedef struct COutputMix_struct COutputMix;
 #include "media/EffectEqualizerApi.h"
 #include "media/EffectBassBoostApi.h"
 #include "media/EffectVirtualizerApi.h"
+#include "media/EffectPresetReverbApi.h"
 #endif
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
@@ -77,7 +78,7 @@ typedef struct COutputMix_struct COutputMix;
 #include "android_sles_conversions.h"
 #ifndef USE_BACKPORT
 #include "android_SfPlayer.h"
-#include "android_Effect.h"
+#include "android_OutputMix.h"
 #endif
 #include "android_AudioRecorder.h"
 #endif
@@ -538,6 +539,7 @@ typedef struct Engine_interface {
     SLboolean mShutdownAck;
     ThreadPool mThreadPool; // for asynchronous operations
 #if defined(ANDROID) && !defined(USE_BACKPORT)
+    // FIXME number of presets will only be saved in IEqualizer, preset names will not be stored
     SLuint32 mEqNumPresets;
     char** mEqPresetNames;
 #endif
@@ -588,6 +590,10 @@ typedef struct {
     android::sp<android::AudioEffect> mEqEffect;
 #endif
 } IEqualizer;
+
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+#include "android_Effect.h"
+#endif
 
 #define MAX_LED_COUNT 32
 
@@ -1087,6 +1093,9 @@ typedef struct {
     // optional interfaces
     IBassBoost mBassBoost;
     IVisualization mVisualization;
+    // implementation-specific data for this instance
+#ifdef ANDROID
+#endif
 } /*COutputMix*/;
 
 typedef struct {
@@ -1157,6 +1166,10 @@ extern void CAudioRecorder_Destroy(void *self);
 
 extern SLresult CEngine_Realize(void *self, SLboolean async);
 extern void CEngine_Destroy(void *self);
+
+extern SLresult COutputMix_Realize(void *self, SLboolean async);
+extern SLresult COutputMix_Resume(void *self, SLboolean async);
+extern void COutputMix_Destroy(void *self);
 
 #ifdef USE_SDL
 extern void SDL_open(IEngine *thisEngine);

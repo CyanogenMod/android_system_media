@@ -121,6 +121,28 @@ endif
 
 LOCAL_MODULE:= slesTest_eqFdPath
 
+# slesTest_eqOutputPath
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_C_INCLUDES:= \
+	system/media/opensles/include
+
+LOCAL_SRC_FILES:= \
+	slesTestEqOutputPath.cpp
+
+LOCAL_SHARED_LIBRARIES := \
+	libutils \
+	libOpenSLES
+
+ifeq ($(TARGET_OS),linux)
+	LOCAL_CFLAGS += -DXP_UNIX
+endif
+
+LOCAL_MODULE:= slesTest_eqOutputPath
+
 include $(BUILD_EXECUTABLE)
 
 # slesTest_bassboost

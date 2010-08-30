@@ -783,7 +783,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                             android::AudioSystem::CHANNEL_OUT_STEREO,
                     0,                                                   // frameCount (here min)
                     0,                                                   // flags
-                    audioTrack_callBack_uri,                       // callback
+                    audioTrack_callBack_uri,                             // callback
                     (void *) pAudioPlayer,                               // user
                     0);                                                  // notificationFrame
             pAudioPlayer->mNumChannels = pAudioPlayer->mSfPlayer->getNumChannels();
@@ -817,20 +817,24 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     // FIXME use a table of effect descriptors when adding support for more effects
     if (memcmp(SL_IID_EQUALIZER, &pAudioPlayer->mEqualizer.mEqDescriptor.type,
             sizeof(effect_uuid_t)) == 0) {
-        android_eq_init(sessionId, pAudioPlayer);
+        SL_LOGV("Need to initialize EQ for AudioPlayer=%p", pAudioPlayer);
+        android_eq_init(sessionId, &pAudioPlayer->mEqualizer);
     }
     // initialize BassBoost
     if (memcmp(SL_IID_BASSBOOST, &pAudioPlayer->mBassBoost.mBassBoostDescriptor.type,
             sizeof(effect_uuid_t)) == 0) {
+        SL_LOGV("Need to initialize BassBoost for AudioPlayer=%p", pAudioPlayer);
         android_bb_init(sessionId, pAudioPlayer);
     }
-    // initialize PresetReverb
-    // initialize EnvironmentalReverb + EffectSend
     // initialize Virtualizer
     if (memcmp(SL_IID_VIRTUALIZER, &pAudioPlayer->mVirtualizer.mVirtualizerDescriptor.type,
                sizeof(effect_uuid_t)) == 0) {
+        SL_LOGV("Need to initialize Virtualizer for AudioPlayer=%p", pAudioPlayer);
         android_virt_init(sessionId, pAudioPlayer);
     }
+
+    // initialize EffectSend
+    // FIXME initialize EffectSend
 #endif
 
     return result;

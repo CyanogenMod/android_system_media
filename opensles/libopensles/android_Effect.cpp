@@ -216,50 +216,54 @@ void android_bb_init(int sessionId, CAudioPlayer* ap) {
     }
 }
 
+
 //-----------------------------------------------------------------------------
-void android_eq_init(int sessionId, CAudioPlayer* ap) {
+void android_eq_init(int sessionId, IEqualizer* ieq) {
     SL_LOGV("session %d", sessionId);
 
-    if (!android_fx_initEffectObj(sessionId, ap->mEqualizer.mEqEffect,
-            &ap->mEqualizer.mEqDescriptor.type, &ap->mEqualizer.mEqDescriptor.uuid)) {
+    if (!android_fx_initEffectObj(sessionId, ieq->mEqEffect, &ieq->mEqDescriptor.type,
+            &ieq->mEqDescriptor.uuid)) {
         SL_LOGE("Equalizer effect initialization failed");
         return;
     }
 
-    // initialize number of bands, band level range
+    // initialize number of bands, band level range, and number of presets
     uint16_t num = 0;
-    if (android::NO_ERROR == android_eq_getParam(ap->mEqualizer.mEqEffect,
-            EQ_PARAM_NUM_BANDS, 0, &num)) {
-        ap->mEqualizer.mNumBands = num;
+    if (android::NO_ERROR == android_eq_getParam(ieq->mEqEffect, EQ_PARAM_NUM_BANDS, 0, &num)) {
+        ieq->mNumBands = num;
     }
     int16_t range[2] = {0, 0};
-    if (android::NO_ERROR == android_eq_getParam(ap->mEqualizer.mEqEffect,
-            EQ_PARAM_LEVEL_RANGE, 0, range)) {
-        ap->mEqualizer.mBandLevelRangeMin = range[0];
-        ap->mEqualizer.mBandLevelRangeMax = range[1];
+    if (android::NO_ERROR == android_eq_getParam(ieq->mEqEffect, EQ_PARAM_LEVEL_RANGE, 0, range)) {
+        ieq->mBandLevelRangeMin = range[0];
+        ieq->mBandLevelRangeMax = range[1];
     }
 
-    SL_LOGV(" EQ init: num presets = %u, band range=[%d %d]mB", num, range[0], range[1]);
+    SL_LOGV(" EQ init: num bands = %u, band range=[%d %d]mB", num, range[0], range[1]);
 
+    // FIXME don't store presets names, they can be queried each time they're needed
     // initialize preset number and names, store in IEngine
     uint16_t numPresets = 0;
-    if (android::NO_ERROR == android_eq_getParam(ap->mEqualizer.mEqEffect,
+    if (android::NO_ERROR == android_eq_getParam(ieq->mEqEffect,
             EQ_PARAM_GET_NUM_OF_PRESETS, 0, &numPresets)) {
-        ap->mObject.mEngine->mEqNumPresets = numPresets;
+        ieq->mThis->mEngine->mEqNumPresets = numPresets;
+        ieq->mNumPresets = numPresets;
     }
-    char name[EFFECT_STRING_LEN_MAX];
-    if ((0 < numPresets) && (NULL == ap->mObject.mEngine->mEqPresetNames)) {
-        ap->mObject.mEngine->mEqPresetNames = (char **)new char *[numPresets];
-        for(uint32_t i = 0 ; i < numPresets ; i++) {
-            if (android::NO_ERROR == android_eq_getParam(ap->mEqualizer.mEqEffect,
-                    EQ_PARAM_GET_PRESET_NAME, i, name)) {
-                ap->mObject.mEngine->mEqPresetNames[i] = new char[strlen(name) + 1];
-                strcpy(ap->mObject.mEngine->mEqPresetNames[i], name);
-                SL_LOGV(" EQ init: presets = %u is %s", i, ap->mObject.mEngine->mEqPresetNames[i]);
-            }
 
+    interface_lock_exclusive(ieq->mThis->mEngine);
+    char name[EFFECT_STRING_LEN_MAX];
+    if ((0 < numPresets) && (NULL == ieq->mThis->mEngine->mEqPresetNames)) {
+        ieq->mThis->mEngine->mEqPresetNames = (char **)new char *[numPresets];
+        for(uint32_t i = 0 ; i < numPresets ; i++) {
+            if (android::NO_ERROR == android_eq_getParam(ieq->mEqEffect,
+                    EQ_PARAM_GET_PRESET_NAME, i, name)) {
+                ieq->mThis->mEngine->mEqPresetNames[i] = new char[strlen(name) + 1];
+                strcpy(ieq->mThis->mEngine->mEqPresetNames[i], name);
+                SL_LOGV(" EQ init: presets = %u is %s", i, ieq->mThis->mEngine->mEqPresetNames[i]);
+            }
         }
     }
+    interface_unlock_exclusive(ieq->mThis->mEngine);
+
 #if 0
     // configure the EQ so it can easily be heard, for test only
     uint32_t freq = 1977;

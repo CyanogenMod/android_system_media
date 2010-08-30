@@ -158,11 +158,11 @@ static SLresult IEqualizer_SetBandLevel(SLEqualizerItf self, SLuint16 band, SLmi
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_EQ(this)) {
+            result = SL_RESULT_CONTROL_LOST;
+        } else {
             android::status_t status =
                 android_eq_setParam(this->mEqEffect, EQ_PARAM_BAND_LEVEL, band, &level);
             result = android_fx_statusToResult(status);
-        } else {
-            result = SL_RESULT_CONTROL_LOST;
         }
 #endif
         interface_unlock_exclusive(this);
@@ -191,11 +191,11 @@ static SLresult IEqualizer_GetBandLevel(SLEqualizerItf self, SLuint16 band, SLmi
             result = SL_RESULT_SUCCESS;
 #else
             if (NO_EQ(this)) {
+                result = SL_RESULT_CONTROL_LOST;
+            } else {
                 android::status_t status =
                     android_eq_getParam(this->mEqEffect, EQ_PARAM_BAND_LEVEL, band, &level);
                 result = android_fx_statusToResult(status);
-            } else {
-                result = SL_RESULT_CONTROL_LOST;
             }
 #endif
             interface_unlock_shared(this);
@@ -226,11 +226,11 @@ static SLresult IEqualizer_GetCenterFreq(SLEqualizerItf self, SLuint16 band, SLm
             SLmilliHertz center = 0;
             interface_lock_shared(this);
             if (NO_EQ(this)) {
+                result = SL_RESULT_CONTROL_LOST;
+            } else {
                 android::status_t status =
                     android_eq_getParam(this->mEqEffect, EQ_PARAM_CENTER_FREQ, band, &center);
                 result = android_fx_statusToResult(status);
-            } else {
-                result = SL_RESULT_CONTROL_LOST;
             }
             interface_unlock_shared(this);
             *pCenter = center;
@@ -265,11 +265,11 @@ static SLresult IEqualizer_GetBandFreqRange(SLEqualizerItf self, SLuint16 band,
             SLmilliHertz range[2] = {0, 0}; // SLmilliHertz is SLuint32
             interface_lock_shared(this);
             if (NO_EQ(this)) {
+                result = SL_RESULT_CONTROL_LOST;
+            } else {
                 android::status_t status =
                     android_eq_getParam(this->mEqEffect, EQ_PARAM_BAND_FREQ_RANGE, band, range);
                 result = android_fx_statusToResult(status);
-            } else {
-                result = SL_RESULT_CONTROL_LOST;
             }
             interface_unlock_shared(this);
             if (NULL != pMin) {
@@ -321,11 +321,11 @@ static SLresult IEqualizer_GetBand(SLEqualizerItf self, SLmilliHertz frequency, 
         uint16_t band = 0;
         interface_lock_shared(this);
         if (NO_EQ(this)) {
+            result = SL_RESULT_CONTROL_LOST;
+        } else {
             android::status_t status =
                 android_eq_getParam(this->mEqEffect, EQ_PARAM_GET_BAND, frequency, &band);
             result = android_fx_statusToResult(status);
-        } else {
-            result = SL_RESULT_CONTROL_LOST;
         }
         interface_unlock_shared(this);
         *pBand = (SLuint16)band;
@@ -353,11 +353,11 @@ static SLresult IEqualizer_GetCurrentPreset(SLEqualizerItf self, SLuint16 *pPres
 #else
         uint16_t preset = 0;
         if (NO_EQ(this)) {
+            result = SL_RESULT_CONTROL_LOST;
+        } else {
             android::status_t status =
                     android_eq_getParam(this->mEqEffect, EQ_PARAM_CUR_PRESET, 0, &preset);
             result = android_fx_statusToResult(status);
-        } else {
-            result = SL_RESULT_CONTROL_LOST;
         }
         interface_unlock_shared(this);
 
@@ -377,6 +377,7 @@ static SLresult IEqualizer_GetCurrentPreset(SLEqualizerItf self, SLuint16 *pPres
 static SLresult IEqualizer_UsePreset(SLEqualizerItf self, SLuint16 index)
 {
     SL_ENTER_INTERFACE
+    SL_LOGV("index=%d", index);
 
     IEqualizer *this = (IEqualizer *) self;
     if (index >= this->mNumPresets) {
@@ -392,11 +393,11 @@ static SLresult IEqualizer_UsePreset(SLEqualizerItf self, SLuint16 index)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_EQ(this)) {
+            result = SL_RESULT_CONTROL_LOST;
+        } else {
             android::status_t status =
                 android_eq_setParam(this->mEqEffect, EQ_PARAM_CUR_PRESET, 0, &index);
             result = android_fx_statusToResult(status);
-        } else {
-            result = SL_RESULT_CONTROL_LOST;
         }
         interface_unlock_shared(this);
 #endif
@@ -415,11 +416,8 @@ static SLresult IEqualizer_GetNumberOfPresets(SLEqualizerItf self, SLuint16 *pNu
     } else {
         IEqualizer *this = (IEqualizer *) self;
         // Note: no lock, but OK because it is const
-#if !defined(ANDROID) || defined(USE_BACKPORT)
         *pNumPresets = this->mNumPresets;
-#else
-        *pNumPresets = this->mThis->mEngine->mEqNumPresets;
-#endif
+
         result = SL_RESULT_SUCCESS;
     }
 
@@ -443,9 +441,13 @@ static SLresult IEqualizer_GetPresetName(SLEqualizerItf self, SLuint16 index, co
             result = SL_RESULT_SUCCESS;
         }
 #else
-        if (index >= this->mThis->mEngine->mEqNumPresets) {
+        if (index >= this->mNumPresets) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
+            // FIXME query preset name rather than retrieve it from the engine.
+            //       In SL ES 1.0.1, the strings must exist for the lifetime of the engine.
+            //       Starting in 1.1, this will change and we don't need to hold onto the strings
+            //       for so long as they will copied into application space.
             *ppName = (SLchar *) this->mThis->mEngine->mEqPresetNames[index];
             result = SL_RESULT_SUCCESS;
         }
