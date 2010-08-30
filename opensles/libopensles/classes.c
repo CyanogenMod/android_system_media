@@ -309,9 +309,9 @@ static const ClassTable COutputMix_class = {
     "OutputMix",
     sizeof(COutputMix),
     SL_OBJECTID_OUTPUTMIX,
-    NULL,
-    NULL,
-    NULL
+    COutputMix_Realize,
+    COutputMix_Resume,
+    COutputMix_Destroy
 };
 
 // Vibra class

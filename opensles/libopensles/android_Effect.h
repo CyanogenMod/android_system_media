@@ -15,7 +15,7 @@
  */
 
 
-extern void android_eq_init(int sessionId, CAudioPlayer* ap);
+extern void android_eq_init(int sessionId, IEqualizer* ieq);
 
 extern android::status_t android_eq_setParam(android::sp<android::AudioEffect> pFx,
         int32_t param, int32_t param2, void *pValue);
