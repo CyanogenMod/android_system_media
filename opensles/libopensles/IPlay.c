@@ -164,7 +164,8 @@ static SLresult IPlay_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
             }
         }
 #else
-        // will be set by containing AudioPlayer or MidiPlayer object at Realize
+        // will be set by containing AudioPlayer or MidiPlayer object at Realize, if known,
+        // otherwise the duration will be updated each time a new maximum position is detected
 #endif
         interface_unlock_exclusive(this);
         *pMsec = duration;
@@ -183,19 +184,28 @@ static SLresult IPlay_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
     } else {
         IPlay *this = (IPlay *) self;
         SLmillisecond position;
-        interface_lock_peek(this);
+        interface_lock_shared(this);
 #ifdef ANDROID
         // Android does not use the mPosition field for audio players
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
             android_audioPlayer_getPosition(this, &position);
             // note that we do not cache the position
-        } else
+        } else {
             position = this->mPosition;
+        }
 #else
         // on other platforms we depend on periodic updates to the current position
         position = this->mPosition;
+        // if a seek is pending, then lie about current position so the seek appears synchronous
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+            CAudioPlayer *audioPlayer = (CAudioPlayer *) this->mThis;
+            SLmillisecond pos = audioPlayer->mSeek.mPos;
+            if (SL_TIME_UNKNOWN != pos) {
+                position = pos;
+            }
+        }
 #endif
-        interface_unlock_peek(this);
+        interface_unlock_shared(this);
         *pMsec = position;
         result = SL_RESULT_SUCCESS;
     }
@@ -224,14 +234,26 @@ static SLresult IPlay_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
 {
     SL_ENTER_INTERFACE
 
-    IPlay *this = (IPlay *) self;
-    interface_lock_exclusive(this);
-    if (this->mEventFlags != eventFlags) {
-        this->mEventFlags = eventFlags;
-        interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
-    } else
-        interface_unlock_exclusive(this);
-    result = SL_RESULT_SUCCESS;
+    if (eventFlags & ~(SL_PLAYEVENT_HEADATEND | SL_PLAYEVENT_HEADATMARKER |
+            SL_PLAYEVENT_HEADATNEWPOS | SL_PLAYEVENT_HEADMOVING | SL_PLAYEVENT_HEADSTALLED)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPlay *this = (IPlay *) self;
+        interface_lock_exclusive(this);
+        if (this->mEventFlags != eventFlags) {
+#ifdef USE_OUTPUTMIXEXT
+            // enabling the "head at new position" play event will postpone the next update event
+            if (!(this->mEventFlags & SL_PLAYEVENT_HEADATNEWPOS) &&
+                    (eventFlags & SL_PLAYEVENT_HEADATNEWPOS)) {
+                this->mFramesSincePositionUpdate = 0;
+            }
+#endif
+            this->mEventFlags = eventFlags;
+            interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+        } else
+            interface_unlock_exclusive(this);
+        result = SL_RESULT_SUCCESS;
+    }
 
     SL_LEAVE_INTERFACE
 }
@@ -330,6 +352,18 @@ static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec
                 // result = android_audioPlayer_useEventMask(this, this->mEventFlags);
             }
 #endif
+#ifdef USE_OUTPUTMIXEXT
+            if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+                CAudioPlayer *audioPlayer = (CAudioPlayer *) this->mThis;
+                SLuint32 frameUpdatePeriod = ((long long) mSec *
+                    (long long) audioPlayer->mSampleRateMilliHz) / 1000000LL;
+                if (0 == frameUpdatePeriod)
+                    frameUpdatePeriod = ~0;
+                this->mFrameUpdatePeriod = frameUpdatePeriod;
+                // setting a new update period postpones the next callback
+                this->mFramesSincePositionUpdate = 0;
+            }
+#endif
             interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
         } else
             interface_unlock_exclusive(this);
@@ -387,4 +421,10 @@ void IPlay_init(void *self)
     this->mMarkerPosition = 0;
     this->mMarkerIsSet = SL_BOOLEAN_FALSE;
     this->mPositionUpdatePeriod = 1000;
+#ifdef USE_OUTPUTMIXEXT
+    this->mFrameUpdatePeriod = 0;   // because we don't know the sample rate yet
+    this->mLastSeekPosition = 0;
+    this->mFramesSinceLastSeek = 0;
+    this->mFramesSincePositionUpdate = 0;
+#endif
 }

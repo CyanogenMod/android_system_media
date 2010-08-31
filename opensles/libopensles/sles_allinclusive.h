@@ -221,10 +221,7 @@ struct SndFile {
     SF_INFO mSfInfo;
     pthread_mutex_t mMutex; // protects mSNDFILE only
     SLboolean mEOF;         // sf_read returned zero sample frames
-    // These are used when Enqueue returns SL_RESULT_BUFFER_INSUFFICIENT
-    const void *mRetryBuffer;
-    SLuint32 mRetrySize;
-    SLuint32 mWhich;    // which buffer to use next
+    SLuint32 mWhich;        // which buffer to use next
     short mBuffer[SndFile_BUFSIZE * SndFile_NUMBUFS];
 };
 
@@ -712,7 +709,13 @@ typedef struct Play_interface {
     // the ISeek trick of using a distinct value doesn't work here because it's readable by app
     SLmillisecond mMarkerPosition;
     SLboolean mMarkerIsSet;
-    SLmillisecond mPositionUpdatePeriod;
+    SLmillisecond mPositionUpdatePeriod; // Zero means do not do position updates (FIXME ~0)
+#ifdef USE_OUTPUTMIXEXT
+    SLuint32 mFrameUpdatePeriod;         // mPositionUpdatePeriod in frame units
+    SLmillisecond mLastSeekPosition;     // Last known accurate position, set at Seek
+    SLuint32 mFramesSinceLastSeek;       // Frames mixed since last known accurate position
+    SLuint32 mFramesSincePositionUpdate; // Frames mixed since last position update callback
+#endif
 } IPlay;
 
 typedef struct {

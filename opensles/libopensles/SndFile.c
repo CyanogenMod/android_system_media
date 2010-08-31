@@ -21,7 +21,9 @@
 #ifdef USE_SNDFILE
 
 
-/** \brief Called by BufferQueue after each buffer is consumed */
+/** \brief Called by SndFile.c:audioPlayerTransportUpdate after a play state change or seek,
+ *  and by IOutputMixExt::FillBuffer after each buffer is consumed.
+ */
 
 void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
 {
@@ -30,54 +32,73 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
     SLuint32 state = thisAP->mPlay.mState;
     object_unlock_peek(&thisAP->mObject);
     // FIXME should not muck around directly at this low level
-    if (SL_PLAYSTATE_PLAYING != state)
+    if (SL_PLAYSTATE_PLAYING != state) {
         return;
+    }
     struct SndFile *this = &thisAP->mSndFile;
     SLresult result;
     pthread_mutex_lock(&this->mMutex);
-    if ((NULL != this->mRetryBuffer) && (0 < this->mRetrySize)) {
-        result = IBufferQueue_Enqueue(caller, this->mRetryBuffer, this->mRetrySize);
-        if (SL_RESULT_BUFFER_INSUFFICIENT == result) {
-            pthread_mutex_unlock(&this->mMutex);
-            return;     // what, again?
-        }
-        assert(SL_RESULT_SUCCESS == result);
-        this->mRetryBuffer = NULL;
-        this->mRetrySize = 0;
-        pthread_mutex_unlock(&this->mMutex);
-        return;
-    }
     if (this->mEOF) {
         pthread_mutex_unlock(&this->mMutex);
         return;
     }
     short *pBuffer = &this->mBuffer[this->mWhich * SndFile_BUFSIZE];
-    if (++this->mWhich >= SndFile_NUMBUFS)
+    if (++this->mWhich >= SndFile_NUMBUFS) {
         this->mWhich = 0;
+    }
     sf_count_t count;
     count = sf_read_short(this->mSNDFILE, pBuffer, (sf_count_t) SndFile_BUFSIZE);
-    if (0 >= count)
-        this->mEOF = SL_BOOLEAN_TRUE;
     pthread_mutex_unlock(&this->mMutex);
+    bool headAtNewPos = false;
+    object_lock_exclusive(&thisAP->mObject);
+    slPlayCallback callback = thisAP->mPlay.mCallback;
+    void *context = thisAP->mPlay.mContext;
+    // make a copy of sample rate so we are absolutely sure we will not divide by zero
+    SLuint32 sampleRateMilliHz = thisAP->mSampleRateMilliHz;
+    if (0 != sampleRateMilliHz) {
+        // this will overflow after 49 days, but no fix possible as it's part of the API
+        thisAP->mPlay.mPosition = (SLuint32) (((long long) thisAP->mPlay.mFramesSinceLastSeek *
+            1000000LL) / sampleRateMilliHz) + thisAP->mPlay.mLastSeekPosition;
+        // make a good faith effort for the mean time between "head at new position" callbacks to
+        // occur at the requested update period, but there will be jitter
+        SLuint32 frameUpdatePeriod = thisAP->mPlay.mFrameUpdatePeriod;
+        if ((0 != frameUpdatePeriod) &&
+            (thisAP->mPlay.mFramesSincePositionUpdate >= frameUpdatePeriod) &&
+            (SL_PLAYEVENT_HEADATNEWPOS & thisAP->mPlay.mEventFlags)) {
+            // if we overrun a requested update period, then reset the clock modulo the
+            // update period so that it appears to the application as one or more lost callbacks,
+            // but no additional jitter
+            if ((thisAP->mPlay.mFramesSincePositionUpdate -= thisAP->mPlay.mFrameUpdatePeriod) >=
+                    frameUpdatePeriod) {
+                thisAP->mPlay.mFramesSincePositionUpdate %= frameUpdatePeriod;
+            }
+            headAtNewPos = true;
+        }
+    }
     if (0 < count) {
+        object_unlock_exclusive(&thisAP->mObject);
         SLuint32 size = (SLuint32) (count * sizeof(short));
         result = IBufferQueue_Enqueue(caller, pBuffer, size);
-        // this should not happen, but if it does, who will call us to kick off again?
-        if (SL_RESULT_BUFFER_INSUFFICIENT == result) {
-            this->mRetryBuffer = pBuffer;
-            this->mRetrySize = size;
-            return;
+        // not much we can do if the Enqueue fails, so we'll just drop the decoded data
+        if (SL_RESULT_SUCCESS != result) {
+            SL_LOGE("enqueue failed 0x%x", (unsigned) result);
         }
-        assert(SL_RESULT_SUCCESS == result);
     } else {
-        object_lock_exclusive(&thisAP->mObject);
         // FIXME This is really hosed, you can't do this anymore!
         // FIXME Need a state PAUSE_WHEN_EMPTY
         // Should not pause yet - we just ran out of new data to enqueue,
         // but there may still be (partially) full buffers in the queue.
         thisAP->mPlay.mState = SL_PLAYSTATE_PAUSED;
-        thisAP->mPlay.mPosition = thisAP->mPlay.mDuration;
+        this->mEOF = SL_BOOLEAN_TRUE;
+        // this would result in a non-monotonically increasing position, so don't do it
+        // thisAP->mPlay.mPosition = thisAP->mPlay.mDuration;
         object_unlock_exclusive_attributes(&thisAP->mObject, ATTR_TRANSPORT);
+    }
+    // callbacks are called with mutex unlocked
+    if (NULL != callback) {
+        if (headAtNewPos) {
+            (*callback)(&thisAP->mPlay.mItf, context, SL_PLAYEVENT_HEADATNEWPOS);
+        }
     }
 }
 
@@ -132,10 +153,12 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
         {
         SLDataLocator_URI *dl_uri = (SLDataLocator_URI *) pAudioSrc->pLocator;
         SLchar *uri = dl_uri->URI;
-        if (NULL == uri)
+        if (NULL == uri) {
             return SL_RESULT_PARAMETER_INVALID;
-        if (!strncmp((const char *) uri, "file:///", 8))
+        }
+        if (!strncmp((const char *) uri, "file:///", 8)) {
             uri += 8;
+        }
         switch (formatType) {
         case SL_DATAFORMAT_NULL:    // OK to omit the data format
         case SL_DATAFORMAT_MIME:    // we ignore a MIME type if specified
@@ -154,8 +177,6 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
     this->mSndFile.mSNDFILE = NULL;
     // this->mSndFile.mMutex is initialized only when there is a valid mSNDFILE
     this->mSndFile.mEOF = SL_BOOLEAN_FALSE;
-    this->mSndFile.mRetryBuffer = NULL;
-    this->mSndFile.mRetrySize = 0;
 
     return SL_RESULT_SUCCESS;
 }
@@ -170,11 +191,21 @@ void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer)
     if (NULL != audioPlayer->mSndFile.mSNDFILE) {
 
         object_lock_exclusive(&audioPlayer->mObject);
-        SLmillisecond pos = audioPlayer->mSeek.mPos;
-        audioPlayer->mSeek.mPos = SL_TIME_UNKNOWN;
         SLboolean empty = 0 == audioPlayer->mBufferQueue.mState.count;
         // FIXME a made-up number that should depend on player state and prefetch status
         audioPlayer->mPrefetchStatus.mLevel = 1000;
+        SLmillisecond pos = audioPlayer->mSeek.mPos;
+        if (SL_TIME_UNKNOWN != pos) {
+            audioPlayer->mSeek.mPos = SL_TIME_UNKNOWN;
+            // trim seek position to the current known duration
+            if (pos > audioPlayer->mPlay.mDuration) {
+                pos = audioPlayer->mPlay.mDuration;
+            }
+            audioPlayer->mPlay.mLastSeekPosition = pos;
+            audioPlayer->mPlay.mFramesSinceLastSeek = 0;
+            // seek postpones the next head at new position callback
+            audioPlayer->mPlay.mFramesSincePositionUpdate = 0;
+        }
         object_unlock_exclusive(&audioPlayer->mObject);
 
         if (SL_TIME_UNKNOWN != pos) {
@@ -184,11 +215,10 @@ void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer)
             empty = SL_BOOLEAN_TRUE;
 
             pthread_mutex_lock(&audioPlayer->mSndFile.mMutex);
+            // FIXME why void?
             (void) sf_seek(audioPlayer->mSndFile.mSNDFILE, (sf_count_t) (((long long) pos *
                 audioPlayer->mSndFile.mSfInfo.samplerate) / 1000LL), SEEK_SET);
             audioPlayer->mSndFile.mEOF = SL_BOOLEAN_FALSE;
-            audioPlayer->mSndFile.mRetryBuffer = NULL;
-            audioPlayer->mSndFile.mRetrySize = 0;
             audioPlayer->mSndFile.mWhich = 0;
             pthread_mutex_unlock(&audioPlayer->mSndFile.mMutex);
 

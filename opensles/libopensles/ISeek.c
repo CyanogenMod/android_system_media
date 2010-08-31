@@ -28,15 +28,18 @@ static SLresult ISeek_SetPosition(SLSeekItf self, SLmillisecond pos, SLuint32 se
     case SL_SEEKMODE_ACCURATE:
         {
         // maximum position is a special value that indicates a seek is not pending
-        if (SL_TIME_UNKNOWN == pos)
+        if (SL_TIME_UNKNOWN == pos) {
             pos = SL_TIME_UNKNOWN - 1;
+        }
         ISeek *this = (ISeek *) self;
         interface_lock_exclusive(this);
         if (pos != this->mPos) {
             this->mPos = pos;
+            // at this point the seek is merely pending, so do not yet update other fields
             interface_unlock_exclusive_attributes(this, ATTR_POSITION);
-        } else
+        } else {
             interface_unlock_exclusive(this);
+        }
         result = SL_RESULT_SUCCESS;
         }
         break;

@@ -52,9 +52,15 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
             IBufferQueue *thisBQ = (IBufferQueue *) bufferQueue;
             IBufferQueue_RegisterCallback(&thisBQ->mItf, SndFile_Callback, this);
             this->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
+            // this is the initial duration; will update when a new maximum position is detected
             this->mPlay.mDuration = (SLmillisecond) (((long long) this->mSndFile.mSfInfo.frames *
                 1000LL) / this->mSndFile.mSfInfo.samplerate);
             this->mNumChannels = this->mSndFile.mSfInfo.channels;
+            this->mSampleRateMilliHz = this->mSndFile.mSfInfo.samplerate * 1000;
+#ifdef USE_OUTPUTMIXEXT
+            this->mPlay.mFrameUpdatePeriod = ((long long) this->mPlay.mPositionUpdatePeriod *
+                (long long) this->mSampleRateMilliHz) / 1000000LL;
+#endif
         }
     }
 #endif // USE_SNDFILE
