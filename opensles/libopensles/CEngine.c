@@ -45,11 +45,34 @@ SLresult CEngine_Realize(void *self, SLboolean async)
 
 void CEngine_Destroy(void *self)
 {
-#ifdef USE_SDL
-    SDL_close();
-#endif
     CEngine *this = (CEngine *) self;
+
+    // Verify that there are no extant objects
+    unsigned instanceCount = this->mEngine.mInstanceCount;
+    unsigned instanceMask = this->mEngine.mInstanceMask;
+    if ((0 < instanceCount) || (0 != instanceMask)) {
+        SL_LOGE("Object::Destroy of engine %p with %u active objects", this, instanceCount);
+        while (0 != instanceMask) {
+            unsigned i = ctz(instanceMask);
+            assert(MAX_INSTANCE > i);
+            SL_LOGE("Object::Destroy of engine %p with active object ID %u", this, i + 1);
+            instanceMask &= ~(1 << i);
+        }
+
+    }
+
+    // Announce to the sync thread that engine is shutting down; it polls so should see it soon
     this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
+    // Wait for the sync thread to acknowledge the shutdown
+    while (!this->mEngine.mShutdownAck) {
+        object_cond_wait(&this->mObject);
+    }
+    // The sync thread should have exited by now, so collect it by joining
+    (void) pthread_join(this->mSyncThread, (void **) NULL);
+
+    // Shutdown the thread pool used for asynchronous operations (there should not be any)
+    ThreadPool_deinit(&this->mEngine.mThreadPool);
+
 #if defined(ANDROID) && !defined(USE_BACKPORT)
     // free effect data
     //   free EQ data
@@ -62,10 +85,9 @@ void CEngine_Destroy(void *self)
         delete [] this->mEngine.mEqPresetNames;
     }
 #endif
-    while (!this->mEngine.mShutdownAck) {
-        object_cond_wait(&this->mObject);
-    }
-    (void) pthread_join(this->mSyncThread, (void **) NULL);
-    ThreadPool_deinit(&this->mEngine.mThreadPool);
+
+#ifdef USE_SDL
+    SDL_close();
+#endif
 
 }
