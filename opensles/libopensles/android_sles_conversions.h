@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "math.h"
 
 //-----------------------------------------------------------------------------
 // Android to OpenSL ES
@@ -64,4 +65,10 @@ static inline int sles_to_android_channelMask(SLuint32 nbChannels, SLuint32 chan
     return (nbChannels == 1 ?
             android::AudioSystem::CHANNEL_OUT_MONO :
             android::AudioSystem::CHANNEL_OUT_STEREO);
+}
+
+
+static inline float sles_to_android_amplification(SLmillibel level) {
+    // FIXME use the FX Framework conversions
+    return pow(10, (float)level/2000);
 }

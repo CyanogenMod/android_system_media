@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-
 #include "sles_allinclusive.h"
-#include "math.h"
 #include "utils/RefBase.h"
-
 
 
 //-----------------------------------------------------------------------------
@@ -109,12 +106,10 @@ static void android_audioPlayer_updateStereoVolume(CAudioPlayer* ap) {
     }
 
     // compute amplification as the combination of volume level and stereo position
-
-    // amplification from volume level
-    // FIXME use the FX Framework conversions
-    ap->mAmplFromVolLevel = pow(10, (float)ap->mVolume.mLevel/2000);
-    leftVol *= ap->mAmplFromVolLevel;
-    rightVol *= ap->mAmplFromVolLevel;
+    //   amplification from volume level
+    ap->mAmplFromVolLevel = sles_to_android_amplification(ap->mVolume.mLevel);
+    leftVol  *= ap->mAmplFromVolLevel * ap->mAmplFromDirectLevel;
+    rightVol *= ap->mAmplFromVolLevel * ap->mAmplFromDirectLevel;
 
     // amplification from stereo position
     if (ap->mVolume.mEnableStereoPosition) {
@@ -683,6 +678,7 @@ SLresult android_audioPlayer_create(
     pAudioPlayer->mAmplFromVolLevel = 1.0f;
     pAudioPlayer->mAmplFromStereoPos[0] = 1.0f;
     pAudioPlayer->mAmplFromStereoPos[1] = 1.0f;
+    pAudioPlayer->mAmplFromDirectLevel = 1.0f;
 
     return result;
 
@@ -824,13 +820,13 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     if (memcmp(SL_IID_BASSBOOST, &pAudioPlayer->mBassBoost.mBassBoostDescriptor.type,
             sizeof(effect_uuid_t)) == 0) {
         SL_LOGV("Need to initialize BassBoost for AudioPlayer=%p", pAudioPlayer);
-        android_bb_init(sessionId, pAudioPlayer);
+        android_bb_init(sessionId, &pAudioPlayer->mBassBoost);
     }
     // initialize Virtualizer
     if (memcmp(SL_IID_VIRTUALIZER, &pAudioPlayer->mVirtualizer.mVirtualizerDescriptor.type,
                sizeof(effect_uuid_t)) == 0) {
         SL_LOGV("Need to initialize Virtualizer for AudioPlayer=%p", pAudioPlayer);
-        android_virt_init(sessionId, pAudioPlayer);
+        android_virt_init(sessionId, &pAudioPlayer->mVirtualizer);
     }
 
     // initialize EffectSend

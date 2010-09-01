@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-
+/**************************************************************************************************
+ * Equalizer functions
+ ****************************/
 extern void android_eq_init(int sessionId, IEqualizer* ieq);
 
 extern android::status_t android_eq_setParam(android::sp<android::AudioEffect> pFx,
@@ -23,7 +25,10 @@ extern android::status_t android_eq_setParam(android::sp<android::AudioEffect> p
 extern android::status_t android_eq_getParam(android::sp<android::AudioEffect> pFx,
         int32_t param, int32_t param2, void *pValue);
 
-extern void android_bb_init(int sessionId, CAudioPlayer* ap);
+/**************************************************************************************************
+ * BassBoost functions
+ ****************************/
+extern void android_bb_init(int sessionId, IBassBoost* ibb);
 
 extern android::status_t android_bb_setParam(android::sp<android::AudioEffect> pFx,
         int32_t param, void *pValue);
@@ -31,7 +36,10 @@ extern android::status_t android_bb_setParam(android::sp<android::AudioEffect> p
 extern android::status_t android_bb_getParam(android::sp<android::AudioEffect> pFx,
         int32_t param, void *pValue);
 
-extern void android_virt_init(int sessionId, CAudioPlayer* ap);
+/**************************************************************************************************
+ * Virtualizer functions
+ ****************************/
+extern void android_virt_init(int sessionId, IVirtualizer* ivi);
 
 extern android::status_t android_virt_setParam(android::sp<android::AudioEffect> pFx,
         int32_t param, void *pValue);
@@ -39,21 +47,25 @@ extern android::status_t android_virt_setParam(android::sp<android::AudioEffect>
 extern android::status_t android_virt_getParam(android::sp<android::AudioEffect> pFx,
         int32_t param, void *pValue);
 
-extern android::status_t android_fx_setParam(android::sp<android::AudioEffect> pFx,
-        int32_t param, uint32_t paramSizeMax, void *pValue, uint32_t valueSize);
+/**************************************************************************************************
+ * PresetReverb functions
+ ****************************/
+extern void android_prev_init(IPresetReverb* ipr);
 
-extern android::status_t android_fx_getParam(android::sp<android::AudioEffect> pFx,
-        int32_t param, uint32_t paramSizeMax, void *pValue, uint32_t valueSize);
+extern android::status_t android_prev_setPreset(android::sp<android::AudioEffect> pFx,
+        uint16_t preset);
 
-extern SLresult android_fx_statusToResult(android::status_t status);
+extern android::status_t android_prev_getPreset(android::sp<android::AudioEffect> pFx,
+        uint16_t* preset);
 
-extern bool android_fx_initEffectObj(int sessionId, android::sp<android::AudioEffect>& effect,
-        const effect_uuid_t *type,  const effect_uuid_t *uuid);
+/**************************************************************************************************
+ * EnvironmentalReverb functions
+ ****************************/
+extern void android_erev_init(IEnvironmentalReverb* ier);
 
-extern bool android_fx_initEffectDescriptor(const SLInterfaceID effectId,
-        effect_descriptor_t* fxDescrLoc);
-
-
+/**************************************************************************************************
+ * Generic Effect functions
+ ****************************/
 extern SLresult android_genericFx_queryNumEffects(SLuint32 *pNumSupportedAudioEffects);
 
 extern SLresult android_genericFx_queryEffect(SLuint32 index, SLInterfaceID *pAudioEffectId);
@@ -69,4 +81,29 @@ extern SLresult android_genericFx_isEnabled(void *pAudioEffect, SLboolean *pEnab
 
 extern SLresult android_genericFx_sendCommand(void *pAudioEffect, SLuint32 command,
         SLuint32 commandSize, void* pCommand, SLuint32 *replySize, void *pReply);
+
+/**************************************************************************************************
+ * EffectSend functions
+ ****************************/
+extern android::status_t android_fxSend_attach(CAudioPlayer* ap, bool attach,
+        android::sp<android::AudioEffect> pFx, SLmillibel sendLevel);
+
+extern android::status_t android_fxSend_setSendLevel(CAudioPlayer* ap, SLmillibel sendLevel);
+
+/**************************************************************************************************
+ * Effect-agnostic functions
+ ****************************/
+extern android::status_t android_fx_setParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, uint32_t paramSizeMax, void *pValue, uint32_t valueSize);
+
+extern android::status_t android_fx_getParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, uint32_t paramSizeMax, void *pValue, uint32_t valueSize);
+
+extern SLresult android_fx_statusToResult(android::status_t status);
+
+extern bool android_fx_initEffectObj(int sessionId, android::sp<android::AudioEffect>& effect,
+        const effect_uuid_t *type,  const effect_uuid_t *uuid);
+
+extern bool android_fx_initEffectDescriptor(const SLInterfaceID effectId,
+        effect_descriptor_t* fxDescrLoc);
 

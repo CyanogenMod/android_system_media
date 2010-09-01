@@ -18,6 +18,15 @@
 
 #include "sles_allinclusive.h"
 
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+/**
+ * returns true if this interface is not associated with an initialized PresetReverb effect
+ */
+static inline bool NO_PRESETREVERB(IPresetReverb* ipr) {
+    return (ipr->mPresetReverbEffect == 0);
+}
+#endif
+
 static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self, SLuint16 preset)
 {
     SL_ENTER_INTERFACE
@@ -33,8 +42,17 @@ static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self, SLuint16 preset)
     case SL_REVERBPRESET_PLATE:
         interface_lock_poke(this);
         this->mPreset = preset;
-        interface_unlock_poke(this);
+#if !defined(ANDROID) || defined(USE_BACKPORT)
         result = SL_RESULT_SUCCESS;
+#else
+        if (NO_PRESETREVERB(this)) {
+            result = SL_RESULT_CONTROL_LOST;
+        } else {
+            android::status_t status = android_prev_setPreset(this->mPresetReverbEffect, preset);
+            result = android_fx_statusToResult(status);
+        }
+#endif
+        interface_unlock_poke(this);
         break;
     default:
         result = SL_RESULT_PARAMETER_INVALID;
@@ -53,10 +71,20 @@ static SLresult IPresetReverb_GetPreset(SLPresetReverbItf self, SLuint16 *pPrese
     } else {
         IPresetReverb *this = (IPresetReverb *) self;
         interface_lock_peek(this);
-        SLuint16 preset = this->mPreset;
+        SLuint16 preset = SL_REVERBPRESET_NONE;
+#if !defined(ANDROID) || defined(USE_BACKPORT)
+        preset = this->mPreset;
+        result = SL_RESULT_SUCCESS;
+#else
+        if (NO_PRESETREVERB(this)) {
+            result = SL_RESULT_CONTROL_LOST;
+        } else {
+            android::status_t status = android_prev_getPreset(this->mPresetReverbEffect, &preset);
+            result = android_fx_statusToResult(status);
+        }
+#endif
         interface_unlock_peek(this);
         *pPreset = preset;
-        result = SL_RESULT_SUCCESS;
     }
 
     SL_LEAVE_INTERFACE
@@ -72,4 +100,11 @@ void IPresetReverb_init(void *self)
     IPresetReverb *this = (IPresetReverb *) self;
     this->mItf = &IPresetReverb_Itf;
     this->mPreset = SL_REVERBPRESET_NONE;
+
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    if (!android_fx_initEffectDescriptor(SL_IID_PRESETREVERB, &this->mPresetReverbDescriptor)) {
+        // PresetReverb init failed
+        SL_LOGE("PresetReverb initialization failed.");
+    }
+#endif
 }
