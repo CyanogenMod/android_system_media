@@ -454,6 +454,7 @@ static void IObject_Destroy(SLObjectItf self)
 #endif
     interface_unlock_exclusive(thisEngine);
     object_lock_exclusive(this);
+    // The destroy hook is called with mutex locked
     if (NULL != destroy) {
         (*destroy)(this);
     }
