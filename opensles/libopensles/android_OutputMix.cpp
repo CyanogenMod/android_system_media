@@ -35,12 +35,12 @@ SLresult android_outputMix_realize(COutputMix *om, SLboolean async) {
     // initialize EQ
     if (memcmp(SL_IID_EQUALIZER, &om->mEqualizer.mEqDescriptor.type,
             sizeof(effect_uuid_t)) == 0) {
-        android_eq_init(0/*sessionId*/, &om->mEqualizer);
+        android_eq_init(android::AudioSystem::SESSION_OUTPUT_MIX /*sessionId*/, &om->mEqualizer);
     }
     // initialize BassBoost
     if (memcmp(SL_IID_BASSBOOST, &om->mBassBoost.mBassBoostDescriptor.type,
             sizeof(effect_uuid_t)) == 0) {
-        android_bb_init(0/*sessionId*/, &om->mBassBoost);
+        android_bb_init(android::AudioSystem::SESSION_OUTPUT_MIX /*sessionId*/, &om->mBassBoost);
     }
     // initialize PresetReverb
     if (memcmp(SL_IID_PRESETREVERB, &om->mPresetReverb.mPresetReverbDescriptor.type,
@@ -56,7 +56,8 @@ SLresult android_outputMix_realize(COutputMix *om, SLboolean async) {
     // initialize Virtualizer
     if (memcmp(SL_IID_VIRTUALIZER, &om->mVirtualizer.mVirtualizerDescriptor.type,
             sizeof(effect_uuid_t)) == 0) {
-        android_virt_init(0/*sessionId*/, &om->mVirtualizer);
+        android_virt_init(android::AudioSystem::SESSION_OUTPUT_MIX /*sessionId*/,
+                &om->mVirtualizer);
     }
 
     return result;
