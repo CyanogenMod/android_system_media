@@ -58,7 +58,7 @@ LOCAL_C_INCLUDES:= \
 	system/media/opensles/include
 
 LOCAL_SRC_FILES:= \
-    feedback.c
+    slesTestFeedback.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
@@ -83,8 +83,7 @@ LOCAL_C_INCLUDES:= \
 	system/media/opensles/include
 
 LOCAL_SRC_FILES:= \
-    bufferQueue.c \
-	playSawtoothBufferQueue.cpp
+	slesTestSawtoothBufferQueue.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \

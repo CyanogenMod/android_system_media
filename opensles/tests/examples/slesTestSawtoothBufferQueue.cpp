@@ -37,13 +37,26 @@
  * MATERIALS.
  */
 
-#include <stdio.h>
+#define LOG_NDEBUG 0
+#define LOG_TAG "Sawtooth"
+
+#ifdef ANDROID
+#include <utils/Log.h>
+#else
+#define LOGV printf
+#endif
+
+#include <getopt.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/time.h>
+
 
 #include "SLES/OpenSLES.h"
 
-//#include "media/AudioSystem.h"
-//#include "media/AudioTrack.h"
+/*using namespace android;*/
 
 #define SLEEP(x) /* Client system sleep function to sleep x milliseconds
 would replace SLEEP macro */
@@ -190,7 +203,7 @@ void TestPlaySawtoothBufferQueue( SLObjectItf sl )
     }
 
     /* Initialize the context for Buffer queue callbacks */
-    cntxt.pDataBase = (void*)&pcmData;
+    cntxt.pDataBase = /*(void*)&*/pcmData;
     cntxt.pData = cntxt.pDataBase;
     cntxt.size = sizeof(pcmData) / 2;
 
@@ -270,3 +283,29 @@ void TestPlaySawtoothBufferQueue( SLObjectItf sl )
 
 
 
+int main(int argc, char* const argv[])
+{
+    LOGV("Starting sawtoothPlayer\n");
+
+    SLresult    res;
+    SLObjectItf sl;
+
+    SLEngineOption EngineOption[] = {
+            {(SLuint32) SL_ENGINEOPTION_THREADSAFE,
+            (SLuint32) SL_BOOLEAN_TRUE}};
+
+    res = slCreateEngine( &sl, 1, EngineOption, 0, NULL, NULL);
+    CheckErr(res);
+    /* Realizing the SL Engine in synchronous mode. */
+    res = (*sl)->Realize(sl, SL_BOOLEAN_FALSE); CheckErr(res);
+
+    /* Run the test */
+    TestPlaySawtoothBufferQueue(sl);
+
+    /* Shutdown OpenSL ES */
+    (*sl)->Destroy(sl);
+    exit(0);
+
+
+    return 0;
+}
