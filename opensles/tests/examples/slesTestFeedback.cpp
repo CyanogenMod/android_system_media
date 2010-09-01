@@ -22,19 +22,11 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #define ASSERT_EQ(x, y) do { if ((x) == (y)) ; else { fprintf(stderr, "0x%x != 0x%x\n", \
     (unsigned) (x), (unsigned) (y)); assert((x) == (y)); } } while (0)
-
-#if 0
-typedef struct {
-    short left;
-    short right;
-} stereo;
-
-typedef short mono;
-#endif
 
 // default values
 static SLuint32 rxBufCount = 1;     // -r#
