@@ -49,7 +49,8 @@ static const SLuint32 validNumBuffers[] = { 1, 2, 3, 4, 5, 6, 7, 8, 255 };
 /* Checks for error. If any errors exit the application! */
 void CheckErr(SLresult res) {
     if (SL_RESULT_SUCCESS != res) {
-        fprintf(stderr, "CheckErr failure: %s (0x%x), exiting\n", slesutResultToString(res), (unsigned) res);
+        fprintf(stderr, "CheckErr failure: %s (0x%x), exiting\n", slesutResultToString(res),
+            (unsigned) res);
         //Fail the test case
         FAIL();
     }
@@ -135,11 +136,8 @@ protected:
     }
 
     virtual void TearDown() {
-        /* Clean up the player, mixer, and the engine (must be done in that order) */
-        if (playerObject){
-            (*playerObject)->Destroy(playerObject);
-            playerObject = NULL;
-        }
+        // Clean up the mixer and the engine
+        // (must be done in that order, and after player destroyed)
         if (outputmixObject){
             (*outputmixObject)->Destroy(outputmixObject);
             outputmixObject = NULL;
@@ -150,6 +148,14 @@ protected:
         }
     }
 
+    void DestroyPlayer() {
+        if (playerObject){
+            //printf("destroy player\n");
+            (*playerObject)->Destroy(playerObject);
+            playerObject = NULL;
+        }
+    }
+
     /* Test case for creating audio player with various invalid values for numBuffers*/
     void InvalidBuffer() {
 
@@ -157,10 +163,11 @@ protected:
             SLuint32 numBuffers = invalidNumBuffers[i];
 
             locator_bufferqueue.numBuffers = numBuffers;
-            LOGV("allocation buffer");
+            //printf("create audio player - invalid\n");
             SLresult result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject,
                                                             &audiosrc, &audiosnk, 1, ids, flags);
             ASSERT_EQ(SL_RESULT_PARAMETER_INVALID, result);
+            ASSERT_EQ(NULL, playerObject);
 
         }
     }
@@ -169,6 +176,7 @@ protected:
     void PrepareValidBuffer(SLuint32 numBuffers) {
 
         locator_bufferqueue.numBuffers = numBuffers;
+        //printf("create audio player - valid\n");
         res = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc, &audiosnk,
                                                 1, ids, flags);
         CheckErr(res);
@@ -294,6 +302,7 @@ TEST_F(TestBufferQueue, testValidBuffer) {
     for (unsigned i = 0; i < sizeof(validNumBuffers) / sizeof(validNumBuffers[0]); ++i) {
         SLuint32 numBuffers = validNumBuffers[i];
         PrepareValidBuffer(numBuffers);
+        DestroyPlayer();
     }
 }
 
@@ -302,6 +311,7 @@ TEST_F(TestBufferQueue, testEnqueueMaxBuffer) {
         SLuint32 numBuffers = validNumBuffers[i];
         PrepareValidBuffer(numBuffers);
         EnqueueMaxBuffer(numBuffers);
+        DestroyPlayer();
     }
 }
 
@@ -312,6 +322,7 @@ TEST_F(TestBufferQueue, testEnqueueExtraBuffer) {
         EnqueueMaxBuffer(numBuffers);
         EnqueueExtraBuffer(numBuffers);
         GetPlayerState(SL_PLAYSTATE_STOPPED);
+        DestroyPlayer();
     }
 }
 
@@ -322,6 +333,7 @@ TEST_F(TestBufferQueue, testEnqueueAtStopped) {
         SetPlayerState(SL_PLAYSTATE_STOPPED);
         EnqueueMaxBuffer(numBuffers);
         CheckBufferCount(numBuffers, (SLuint32) 0);
+        DestroyPlayer();
     }
 }
 
@@ -332,6 +344,7 @@ TEST_F(TestBufferQueue, testEnqueueAtPaused) {
         SetPlayerState(SL_PLAYSTATE_PAUSED);
         EnqueueMaxBuffer(numBuffers);
         CheckBufferCount(numBuffers, (SLuint32) 0);
+        DestroyPlayer();
     }
 }
 
@@ -341,6 +354,7 @@ TEST_F(TestBufferQueue, testClearQueue) {
         PrepareValidBuffer(numBuffers);
         EnqueueMaxBuffer(numBuffers);
         ClearQueue();
+        DestroyPlayer();
     }
 }
 
@@ -369,6 +383,7 @@ TEST_F(TestBufferQueue, testStateTransitionEmptyQueue) {
             SetPlayerState(newStates[j]);
             CheckBufferCount((SLuint32) 0, (SLuint32) 0);
         }
+        DestroyPlayer();
     }
 }
 
@@ -393,6 +408,7 @@ TEST_F(TestBufferQueue, testStateTransitionNonEmptyQueue) {
             SetPlayerState(newStates[j]);
             CheckBufferCount(numBuffers, (SLuint32) 0);
         }
+        DestroyPlayer();
     }
 }
 
@@ -401,6 +417,7 @@ TEST_F(TestBufferQueue, testStatePlayBuffer){
         SLuint32 numBuffers = validNumBuffers[i];
         PrepareValidBuffer(numBuffers);
         PlayBufferQueue();
+        DestroyPlayer();
     }
 }
 

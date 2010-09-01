@@ -30,6 +30,8 @@ void *sync_start(void *arg)
     CEngine *this = (CEngine *) arg;
     for (;;) {
 
+        // FIXME should be driven by cond_signal rather than polling,
+        // or at least make the poll interval longer or configurable
         usleep(20000*5);
 
         object_lock_exclusive(&this->mObject);
