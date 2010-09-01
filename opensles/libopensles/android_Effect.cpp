@@ -327,9 +327,10 @@ android::status_t android_virt_getParam(android::sp<android::AudioEffect> pFx,
 
 //-----------------------------------------------------------------------------
 void android_prev_init(IPresetReverb* ipr) {
-    SL_LOGV("session is implicitly 0 (aux effect)");
+    SL_LOGV("session is implicitly %d (aux effect)", android::AudioSystem::SESSION_OUTPUT_MIX);
 
-    if (!android_fx_initEffectObj(0/*sessionId*/, ipr->mPresetReverbEffect,
+    if (!android_fx_initEffectObj(android::AudioSystem::SESSION_OUTPUT_MIX /*sessionId*/,
+            ipr->mPresetReverbEffect,
             &ipr->mPresetReverbDescriptor.type, &ipr->mPresetReverbDescriptor.uuid)) {
         SL_LOGE("PresetReverb effect initialization failed");
         return;
@@ -357,9 +358,10 @@ android::status_t android_prev_getPreset(android::sp<android::AudioEffect> pFx, 
 
 //-----------------------------------------------------------------------------
 void android_erev_init(IEnvironmentalReverb* ier) {
-    SL_LOGV("session is implicitly 0 (aux effect)");
+    SL_LOGV("session is implicitly %d (aux effect)", android::AudioSystem::SESSION_OUTPUT_MIX);
 
-    if (!android_fx_initEffectObj(0/*sessionId*/, ier->mEnvironmentalReverbEffect,
+    if (!android_fx_initEffectObj(android::AudioSystem::SESSION_OUTPUT_MIX /*sessionId*/,
+            ier->mEnvironmentalReverbEffect,
             &ier->mEnvironmentalReverbDescriptor.type, &ier->mEnvironmentalReverbDescriptor.uuid)) {
         SL_LOGE("EnvironmentalReverb effect initialization failed");
         return;
