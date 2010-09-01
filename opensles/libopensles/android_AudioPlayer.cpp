@@ -387,7 +387,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             }
             switch (df_pcm->bitsPerSample) {
             case SL_PCMSAMPLEFORMAT_FIXED_8:
-                SL_LOGE("FIXME handle 8-bit data");
+                // FIXME We should support this
+                SL_LOGE("Cannot create audio player: unsupported 8-bit data");
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             case SL_PCMSAMPLEFORMAT_FIXED_16:
                 break;
@@ -403,7 +404,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
                 break;
                 // others
             default:
-                //FIXME add error message
+                SL_LOGE("Cannot create audio player: unsupported container size %u",
+                    (unsigned) df_pcm->containerSize);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
             switch (df_pcm->channelMask) {
@@ -415,22 +417,23 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             case SL_BYTEORDER_LITTLEENDIAN:
                 break;
             case SL_BYTEORDER_BIGENDIAN:
-                SL_LOGE("FIXME big-endian byte order is unsupported");
+                SL_LOGE("Cannot create audio player: unsupported big-endian byte order");
                 return SL_RESULT_CONTENT_UNSUPPORTED;
                 // native is proposed but not yet in spec
             default:
-                SL_LOGE("Unsupported byte order %u", (unsigned) df_pcm->endianness);
+                SL_LOGE("Cannot create audio player: unsupported byte order %u",
+                    (unsigned) df_pcm->endianness);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
             } //case SL_DATAFORMAT_PCM
             break;
         case SL_DATAFORMAT_MIME:
         case SL_DATAFORMAT_RESERVED3:
-            SL_LOGE("Error: cannot create Audio Player with SL_DATALOCATOR_BUFFERQUEUE data source "
+            SL_LOGE("Cannot create audio player with SL_DATALOCATOR_BUFFERQUEUE data source "
                 "without SL_DATAFORMAT_PCM format");
             return SL_RESULT_CONTENT_UNSUPPORTED;
         default:
-            SL_LOGE("Error: cannot create Audio Player with SL_DATALOCATOR_BUFFERQUEUE data source "
+            SL_LOGE("Cannot create audio player with SL_DATALOCATOR_BUFFERQUEUE data source "
                 "without SL_DATAFORMAT_PCM format");
             return SL_RESULT_PARAMETER_INVALID;
         } // switch (formatType)
@@ -450,7 +453,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             break;
         case SL_DATAFORMAT_PCM:
         case SL_DATAFORMAT_RESERVED3:
-            SL_LOGE("Error: cannot create Audio Player with SL_DATALOCATOR_URI data source without "
+            SL_LOGE("Cannot create audio player with SL_DATALOCATOR_URI data source without "
                 "SL_DATAFORMAT_MIME format");
             return SL_RESULT_CONTENT_UNSUPPORTED;
         } // switch (formatType)
@@ -469,7 +472,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             SL_LOGE("[ FIXME implement PCM FD data sources ]");
             break;
         case SL_DATAFORMAT_RESERVED3:
-            SL_LOGE("Error: cannot create Audio Player with SL_DATALOCATOR_ANDROIDFD data source "
+            SL_LOGE("Cannot create audio player with SL_DATALOCATOR_ANDROIDFD data source "
                 "without SL_DATAFORMAT_MIME or SL_DATAFORMAT_PCM format");
             return SL_RESULT_CONTENT_UNSUPPORTED;
         } // switch (formatType)
@@ -483,6 +486,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     case SL_DATALOCATOR_RESERVED5:
     case SL_DATALOCATOR_MIDIBUFFERQUEUE:
     case SL_DATALOCATOR_RESERVED8:
+        SL_LOGE("Cannot create audio player with data locator type 0x%x", (unsigned) locatorType);
         return SL_RESULT_CONTENT_UNSUPPORTED;
     default:
         return SL_RESULT_PARAMETER_INVALID;
@@ -666,6 +670,7 @@ SLresult android_audioPlayer_create(
         pAudioPlayer->mpLock = NULL;
         pAudioPlayer->mPlaybackRate.mCapabilities = 0;
         result = SL_RESULT_PARAMETER_INVALID;
+        break;
     }
 
     pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
@@ -716,7 +721,9 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                 audioTrack_callBack_pullFromBuffQueue,               // callback
                 (void *) pAudioPlayer,                               // user
                 0);  // FIXME find appropriate frame count         // notificationFrame
-        if (pAudioPlayer->mAudioTrack->initCheck() != android::NO_ERROR) {
+        android::status_t status = pAudioPlayer->mAudioTrack->initCheck();
+        if (status != android::NO_ERROR) {
+            SL_LOGE("AudioTrack::initCheck status %u", status);
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         }
 
@@ -798,7 +805,9 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         } break;
 #endif
     default:
-        result = SL_RESULT_CONTENT_UNSUPPORTED;
+        SL_LOGE("Unexpected object type %d", pAudioPlayer->mAndroidObjType);
+        result = SL_RESULT_INTERNAL_ERROR;
+        break;
     }
 
 #ifndef USE_BACKPORT
@@ -910,7 +919,9 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
         break;
 #endif
     default:
-        result = SL_RESULT_CONTENT_UNSUPPORTED;
+        SL_LOGE("Unexpected object type %d", pAudioPlayer->mAndroidObjType);
+        result = SL_RESULT_INTERNAL_ERROR;
+        break;
     }
 
     if (pAudioPlayer->mAudioTrack != NULL) {
@@ -958,7 +969,8 @@ SLresult android_audioPlayer_setPlayRate(IPlaybackRate *pRateItf, SLpermille rat
         break;
 
     default:
-        result = SL_RESULT_CONTENT_UNSUPPORTED;
+        SL_LOGE("Unexpected object type %d", ap->mAndroidObjType);
+        result = SL_RESULT_INTERNAL_ERROR;
         break;
     }
     return result;
@@ -980,7 +992,8 @@ SLresult android_audioPlayer_setPlaybackRateBehavior(IPlaybackRate *pRateItf,
         }
         break;
     default:
-        result = SL_RESULT_CONTENT_UNSUPPORTED;
+        SL_LOGE("Unexpected object type %d", ap->mAndroidObjType);
+        result = SL_RESULT_INTERNAL_ERROR;
         break;
     }
     return result;
