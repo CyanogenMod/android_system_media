@@ -82,6 +82,23 @@ static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEff
     return NULL;
 }
 
+/** \brief This is a private function that translates an Android effect framework status code
+ *  to the SL ES result code used in the EnableEffectSend() function of the SLEffectSendItf
+ *  interface.
+ */
+static SLresult translateEnableFxSendError(android::status_t status) {
+    switch (status) {
+        case android::NO_ERROR:
+            return SL_RESULT_SUCCESS;
+            break;
+        case android::INVALID_OPERATION:
+        case android::BAD_VALUE:
+        default:
+            return SL_RESULT_RESOURCE_ERROR;
+            break;
+    }
+}
+
 
 static SLresult IEffectSend_EnableEffectSend(SLEffectSendItf self,
     const void *pAuxEffect, SLboolean enable, SLmillibel initialLevel)
@@ -99,8 +116,32 @@ static SLresult IEffectSend_EnableEffectSend(SLEffectSendItf self,
             interface_lock_exclusive(this);
             enableLevel->mEnable = SL_BOOLEAN_FALSE != enable; // normalize
             enableLevel->mSendLevel = initialLevel;
-            interface_unlock_exclusive(this);
+#if !defined(ANDROID) || defined(USE_BACKPORT)
             result = SL_RESULT_SUCCESS;
+#else
+            // TODO do not repeat querying of CAudioPlayer, done inside getEnableLevel()
+            CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
+                    (CAudioPlayer *) this->mThis : NULL;
+            // check which effect the send is attached to, attach and set level
+            if (NULL == ap) {
+                result = SL_RESULT_RESOURCE_ERROR;
+            } else {
+                if (pAuxEffect == &ap->mOutputMix->mPresetReverb.mItf) {
+                    result = translateEnableFxSendError(
+                            android_fxSend_attach( ap, (bool) enable,
+                                    ap->mOutputMix->mPresetReverb.mPresetReverbEffect,
+                                    initialLevel) );
+                } else if (pAuxEffect == &ap->mOutputMix->mEnvironmentalReverb.mItf) {
+                    result = translateEnableFxSendError(
+                            android_fxSend_attach( ap, (bool) enable,
+                                    ap->mOutputMix->mEnvironmentalReverb.mEnvironmentalReverbEffect,
+                                    initialLevel) );
+                } else {
+                    result = SL_RESULT_RESOURCE_ERROR;
+                }
+            }
+#endif
+            interface_unlock_exclusive(this);
         }
     }
 
@@ -141,9 +182,23 @@ static SLresult IEffectSend_SetDirectLevel(SLEffectSendItf self, SLmillibel dire
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEffectSend *this = (IEffectSend *) self;
-        interface_lock_poke(this);
+        interface_lock_exclusive(this);
+        SLmillibel oldDirectLevel = this->mDirectLevel;
         this->mDirectLevel = directLevel;
-        interface_unlock_poke(this);
+#if !defined(ANDROID) || defined(USE_BACKPORT)
+        interface_unlock_exclusive(this);
+#else
+        if (oldDirectLevel != directLevel) {
+            CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
+                    (CAudioPlayer *) this->mThis : NULL;
+            if (NULL != ap) {
+                ap->mAmplFromDirectLevel = sles_to_android_amplification(directLevel);
+            }
+            interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+        } else {
+            interface_unlock_exclusive(this);
+        }
+#endif
         result = SL_RESULT_SUCCESS;
     }
 
@@ -186,6 +241,13 @@ static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self, const void *pAuxE
             // EnableEffectSend is exclusive, so this has to be also
             interface_lock_exclusive(this);
             enableLevel->mSendLevel = sendLevel;
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+            CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
+                    (CAudioPlayer *) this->mThis : NULL;
+            if (NULL != ap) {
+                android_fxSend_setSendLevel(ap, sendLevel);
+            }
+#endif
             interface_unlock_exclusive(this);
             result = SL_RESULT_SUCCESS;
         }

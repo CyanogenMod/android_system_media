@@ -555,6 +555,10 @@ typedef struct {
     const struct SLEnvironmentalReverbItf_ *mItf;
     IObject *mThis;
     SLEnvironmentalReverbSettings mProperties;
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    effect_descriptor_t mEnvironmentalReverbDescriptor;
+    android::sp<android::AudioEffect> mEnvironmentalReverbEffect;
+#endif
 } IEnvironmentalReverb;
 
 struct EqualizerBand {
@@ -587,10 +591,6 @@ typedef struct {
     android::sp<android::AudioEffect> mEqEffect;
 #endif
 } IEqualizer;
-
-#if defined(ANDROID) && !defined(USE_BACKPORT)
-#include "android_Effect.h"
-#endif
 
 #define MAX_LED_COUNT 32
 
@@ -745,6 +745,10 @@ typedef struct {
     const struct SLPresetReverbItf_ *mItf;
     IObject *mThis;
     SLuint16 mPreset;
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    effect_descriptor_t mPresetReverbDescriptor;
+    android::sp<android::AudioEffect> mPresetReverbEffect;
+#endif
 } IPresetReverb;
 
 typedef struct {
@@ -804,6 +808,11 @@ typedef struct {
     android::sp<android::AudioEffect> mVirtualizerEffect;
 #endif
 } IVirtualizer;
+
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+// FIXME this include is done here so the effect structures have been defined. Messy.
+#include "android_Effect.h"
+#endif
 
 typedef struct {
     const struct SLVisualizationItf_ *mItf;
@@ -945,6 +954,10 @@ enum AndroidObject_state {
      * Left/right amplification (can be attenuations) factors derived for the StereoPosition
      */
     float mAmplFromStereoPos[STEREO_CHANNELS];
+    /**
+     * Attenuation factor derived from direct level in EffectSend
+     */
+    float mAmplFromDirectLevel;
 #endif
 } /*CAudioPlayer*/;
 
