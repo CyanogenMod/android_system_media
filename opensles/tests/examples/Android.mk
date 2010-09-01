@@ -144,7 +144,7 @@ LOCAL_MODULE:= slesTest_eqOutputPath
 
 include $(BUILD_EXECUTABLE)
 
-# slesTest_bassboost
+# slesTest_bassboostPath
 
 include $(CLEAR_VARS)
 
@@ -164,7 +164,7 @@ ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
 
-LOCAL_MODULE:= slesTest_bassboost
+LOCAL_MODULE:= slesTest_bassboostPath
 
 include $(BUILD_EXECUTABLE)
 
