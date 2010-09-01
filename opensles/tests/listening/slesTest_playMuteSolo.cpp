@@ -34,12 +34,16 @@
 
 
 #define MAX_NUMBER_INTERFACES 3
-#define MAX_NUMBER_OUTPUT_DEVICES 6
 
 #define TEST_MUTE 0
 #define TEST_SOLO 1
 
-static int testMode;
+typedef struct {
+    int testMode;
+    SLPlayItf playItf;
+    SLMuteSoloItf muteSoloItf;
+} Context;
+
 //-----------------------------------------------------------------
 /* Exits the application if an error is encountered */
 #define ExitOnError(x) ExitOnErrorFunc(x,__LINE__)
@@ -56,12 +60,17 @@ void ExitOnErrorFunc( SLresult result , int line)
 /* PlayItf callback for an audio player, will be called for every SL_PLAYEVENT_HEADATNEWPOS event */
 void PlayEventCallback( SLPlayItf caller,  void *pContext, SLuint32 event)
 {
-    SLMuteSoloItf muteSolo = (SLMuteSoloItf)pContext;
+    Context *context = (Context *) pContext;
+    SLPlayItf playItf = context->playItf;
+    SLMuteSoloItf muteSolo = context->muteSoloItf;
     SLuint8 numChannels = 0;
     SLresult res = (*muteSolo)->GetNumChannels(muteSolo, &numChannels); ExitOnError(res);
     //fprintf(stdout, "Content has %d channel(s)\n", numChannels);
+    SLmillisecond position;
+    res = (*playItf)->GetPosition(playItf, &position); ExitOnError(res);
+    printf("position=%u\n", (unsigned) position);
 
-    switch (testMode) {
+    switch (context->testMode) {
         case TEST_MUTE: {
             //---------------------------------------------------
             if (numChannels > 1) { // SLMuteSoloItf only works if more than one channel
@@ -203,8 +212,14 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     result = (*player)->GetInterface(player, SL_IID_MUTESOLO, (void*)&muteSoloItf);
     ExitOnError(result);
 
+    /* Initialize a context for use by the callback */
+    Context             context;
+    context.playItf = playItf;
+    context.muteSoloItf = muteSoloItf;
+    context.testMode = TEST_MUTE;
+
     /*  Setup to receive playback events on position updates */
-    result = (*playItf)->RegisterCallback(playItf, PlayEventCallback, (void*)muteSoloItf);
+    result = (*playItf)->RegisterCallback(playItf, PlayEventCallback, (void *) &context);
     ExitOnError(result);
     result = (*playItf)->SetCallbackEventsMask(playItf, SL_PLAYEVENT_HEADATNEWPOS);
     ExitOnError(result);
@@ -245,13 +260,13 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     /* Run the test for 10s */
     /* see PlayEventCallback() for more of the test of the SLMuteSoloItf interface */
     fprintf(stdout, "\nTesting mute functionality:\n");
-    testMode = TEST_MUTE;
+    context.testMode = TEST_MUTE;
     result = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PLAYING ); ExitOnError(result);
     usleep( 5 * 1000 * 1000);
     result = (*muteSoloItf)->SetChannelMute(muteSoloItf, 0, SL_BOOLEAN_FALSE); ExitOnError(result);
     result = (*muteSoloItf)->SetChannelMute(muteSoloItf, 1, SL_BOOLEAN_FALSE); ExitOnError(result);
     fprintf(stdout, "\nTesting solo functionality:\n");
-    testMode = TEST_SOLO;
+    context.testMode = TEST_SOLO;
     usleep( 5 * 1000 * 1000);
 
     /* Make sure player is stopped */

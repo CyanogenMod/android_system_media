@@ -76,8 +76,9 @@ static void HandleRealize(void *self, int unused)
     object_unlock_exclusive(this);
 
     // Note that the mutex is unlocked during the callback
-    if (NULL != callback)
+    if (NULL != callback) {
         (*callback)(&this->mItf, context, SL_OBJECT_EVENT_ASYNC_TERMINATION, result, state, NULL);
+    }
 }
 
 
@@ -130,9 +131,10 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
             object_unlock_exclusive(this);
             // asynchronous Realize on an Engine is actually done synchronously, but still has
             // callback because there is no thread pool yet to do it asynchronously.
-            if (async && (NULL != callback))
+            if (async && (NULL != callback)) {
                 (*callback)(&this->mItf, context, SL_OBJECT_EVENT_ASYNC_TERMINATION, result, state,
                     NULL);
+            }
             }
             break;
         default:                          // impossible
@@ -202,8 +204,9 @@ static void HandleResume(void *self, int unused)
     object_unlock_exclusive(this);
 
     // Note that the mutex is unlocked during the callback
-    if (NULL != callback)
+    if (NULL != callback) {
         (*callback)(&this->mItf, context, SL_OBJECT_EVENT_ASYNC_TERMINATION, result, state, NULL);
+    }
 }
 
 
@@ -441,6 +444,7 @@ static void IObject_Destroy(SLObjectItf self)
     assert(thisEngine->mInstances[i] == this);
     thisEngine->mInstances[i] = NULL;
 #ifdef USE_SDL
+    // FIXME put this into the output mix destroy callback
     if ((SL_OBJECTID_OUTPUTMIX == class__->mObjectID) &&
         (((COutputMix *) this == thisEngine->mOutputMix))) {
         SDL_PauseAudio(1);
@@ -450,8 +454,9 @@ static void IObject_Destroy(SLObjectItf self)
 #endif
     interface_unlock_exclusive(thisEngine);
     object_lock_exclusive(this);
-    if (NULL != destroy)
+    if (NULL != destroy) {
         (*destroy)(this);
+    }
     // Call the deinitializer for each currently exposed interface,
     // whether it is implicit, explicit, optional, or dynamically added.
     // The deinitializers are called in the reverse order that the
@@ -471,8 +476,9 @@ static void IObject_Destroy(SLObjectItf self)
         case INTERFACE_SUSPENDED:
             {
             VoidHook deinit = MPH_init_table[x->mMPH].mDeinit;
-            if (NULL != deinit)
+            if (NULL != deinit) {
                 (*deinit)((char *) this + x->mOffset);
+            }
             }
             break;
         case INTERFACE_ADDING_1:    // active states indicate incorrect use of API
@@ -574,10 +580,11 @@ static SLresult IObject_SetLossOfControlInterfaces(SLObjectItf self,
                     lossOfControlMask |= (1 << index);
             }
             object_lock_exclusive(this);
-            if (enabled)
+            if (enabled) {
                 this->mLossOfControlMask |= lossOfControlMask;
-            else
+            } else {
                 this->mLossOfControlMask &= ~lossOfControlMask;
+            }
             object_unlock_exclusive(this);
         }
     }

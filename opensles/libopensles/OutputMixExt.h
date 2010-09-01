@@ -42,7 +42,7 @@ typedef struct {
     const void *mReader;    ///< Pointer to next frame in BufferHeader.mBuffer
     SLuint32 mAvail;        ///< Number of available bytes in the current buffer
     float mGains[STEREO_CHANNELS]; ///< Computed gain based on volume, mute, solo, stereo position
-    SLuint32 mFrameCounter; ///< Number of sample frames consumed from this track, will roll over
+    SLuint32 mFramesMixed;  ///< Number of sample frames mixed from track; reset periodically
 } Track;
 
 #ifndef this

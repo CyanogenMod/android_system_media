@@ -45,6 +45,13 @@ static SLboolean track_check(Track *track)
 
         object_lock_exclusive(&audioPlayer->mObject);
 
+        SLuint32 framesMixed = track->mFramesMixed;
+        if (0 != framesMixed) {
+            track->mFramesMixed = 0;
+            audioPlayer->mPlay.mFramesSinceLastSeek += framesMixed;
+            audioPlayer->mPlay.mFramesSincePositionUpdate += framesMixed;
+        }
+
         SLboolean doBroadcast = SL_BOOLEAN_FALSE;
         const BufferHeader *oldFront;
 
@@ -87,7 +94,12 @@ static SLboolean track_check(Track *track)
 
         case SL_PLAYSTATE_STOPPING: // application thread(s) called Play::SetPlayState(STOPPED)
             audioPlayer->mPlay.mPosition = (SLmillisecond) 0;
+            audioPlayer->mPlay.mFramesSinceLastSeek = 0;
+            audioPlayer->mPlay.mFramesSincePositionUpdate = 0;
+            audioPlayer->mPlay.mLastSeekPosition = 0;
             audioPlayer->mPlay.mState = SL_PLAYSTATE_STOPPED;
+            // stop cancels a pending seek
+            audioPlayer->mSeek.mPos = SL_TIME_UNKNOWN;
             oldFront = audioPlayer->mBufferQueue.mFront;
             if (oldFront != audioPlayer->mBufferQueue.mRear) {
                 assert(0 < audioPlayer->mBufferQueue.mState.count);
@@ -106,8 +118,9 @@ static SLboolean track_check(Track *track)
             break;
         }
 
-        if (doBroadcast)
+        if (doBroadcast) {
             object_cond_broadcast(&audioPlayer->mObject);
+        }
 
         object_unlock_exclusive(&audioPlayer->mObject);
 
@@ -138,8 +151,9 @@ void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 si
 
         // track is allocated
 
-        if (!track_check(track))
+        if (!track_check(track)) {
             continue;
+        }
 
         // track is playing
         void *dstWriter = pBuffer;
@@ -152,18 +166,20 @@ void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 si
             float gain = track->mGains[channel];
             gains[channel] = gain;
             Summary summary;
-            if (gain <= 0.001)
+            if (gain <= 0.001) {
                 summary = GAIN_MUTE;
-            else if (gain >= 0.999)
+            } else if (gain >= 0.999) {
                 summary = GAIN_UNITY;
-            else
+            } else {
                 summary = GAIN_OTHER;
+            }
             summaries[channel] = summary;
         }
         while (desired > 0) {
             unsigned actual = desired;
-            if (track->mAvail < actual)
+            if (track->mAvail < actual) {
                 actual = track->mAvail;
+            }
             // force actual to be a frame multiple
             if (actual > 0) {
                 assert(NULL != track->mReader);
@@ -212,8 +228,9 @@ void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 si
                     // a buffer stays on queue while playing, so it better still be there
                     assert(oldFront != rear);
                     newFront = oldFront;
-                    if (++newFront == &bufferQueue->mArray[bufferQueue->mNumBuffers + 1])
+                    if (++newFront == &bufferQueue->mArray[bufferQueue->mNumBuffers + 1]) {
                         newFront = bufferQueue->mArray;
+                    }
                     bufferQueue->mFront = (BufferHeader *) newFront;
                     assert(0 < bufferQueue->mState.count);
                     --bufferQueue->mState.count;
@@ -237,29 +254,28 @@ void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 si
                         // We will find out later during the next mixer frame.
                     }
                 }
-                // no lock, but safe b/c noone else updates this field
-                track->mFrameCounter += actual >> 2;    // sizeof(short) * STEREO_CHANNELS
-                // NTH Calling the callback too often, should depend on requested update period
-                // FIXME need a lock to get these pointers, and called too often
-                if (track->mAudioPlayer->mPlay.mCallback)
-                    (*track->mAudioPlayer->mPlay.mCallback)(&track->mAudioPlayer->mPlay.mItf,
-                        track->mAudioPlayer->mPlay.mContext, SL_PLAYEVENT_HEADMOVING);
+                // no lock, but safe because noone else updates this field
+                track->mFramesMixed += actual >> 2;    // sizeof(short) * STEREO_CHANNELS
                 continue;
             }
             // we need more data: desired > 0 but actual == 0
-            if (track_check(track))
+            if (track_check(track)) {
                 continue;
+            }
             // underflow: clear out rest of partial buffer (NTH synthesize comfort noise)
-            if (!mixBufferHasData && trackContributedToMix)
+            if (!mixBufferHasData && trackContributedToMix) {
                 memset(dstWriter, 0, actual);
+            }
             break;
         }
-        if (trackContributedToMix)
+        if (trackContributedToMix) {
             mixBufferHasData = SL_BOOLEAN_TRUE;
+        }
     }
     // No active tracks, so output silence
-    if (!mixBufferHasData)
+    if (!mixBufferHasData) {
         memset(pBuffer, 0, size);
+    }
 
     SL_LEAVE_INTERFACE_VOID
 }
@@ -344,7 +360,7 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
     track->mAvail = 0;
     track->mGains[0] = 1.0f;
     track->mGains[1] = 1.0f;
-    track->mFrameCounter = 0;
+    track->mFramesMixed = 0;
     return SL_RESULT_SUCCESS;
 }
 
@@ -356,8 +372,9 @@ void audioPlayerGainUpdate(CAudioPlayer *audioPlayer)
     // FIXME need a lock on the track while updating gain
     Track *track = audioPlayer->mTrack;
 
-    if (NULL == track)
+    if (NULL == track) {
         return;
+    }
 
     SLboolean mute = audioPlayer->mVolume.mMute;
     SLuint8 muteMask = audioPlayer->mMuteMask;
@@ -366,8 +383,9 @@ void audioPlayerGainUpdate(CAudioPlayer *audioPlayer)
     SLboolean enableStereoPosition = audioPlayer->mVolume.mEnableStereoPosition;
     SLpermille stereoPosition = audioPlayer->mVolume.mStereoPosition;
 
-    if (soloMask)
+    if (soloMask) {
         muteMask |= ~soloMask;
+    }
     if (mute || !(~muteMask & 3)) {
         track->mGains[0] = 0.0f;
         track->mGains[1] = 0.0f;
@@ -376,19 +394,21 @@ void audioPlayerGainUpdate(CAudioPlayer *audioPlayer)
         unsigned channel;
         for (channel = 0; channel < STEREO_CHANNELS; ++channel) {
             float gain;
-            if (muteMask & (1 << channel))
+            if (muteMask & (1 << channel)) {
                 gain = 0.0f;
-            else {
+            } else {
                 gain = playerGain;
                 if (enableStereoPosition) {
                     switch (channel) {
                     case 0:
-                        if (stereoPosition > 0)
+                        if (stereoPosition > 0) {
                             gain *= (1000 - stereoPosition) / 1000.0f;
+                        }
                         break;
                     case 1:
-                        if (stereoPosition < 0)
+                        if (stereoPosition < 0) {
                             gain *= (1000 + stereoPosition) / 1000.0f;
+                        }
                         break;
                     default:
                         assert(SL_BOOLEAN_FALSE);
