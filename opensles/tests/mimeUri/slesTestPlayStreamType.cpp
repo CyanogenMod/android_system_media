@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+#ifdef ANDROID
 #define LOG_NDEBUG 0
 #define LOG_TAG "slesTest_playStreamType"
 
 #include <utils/Log.h>
+#else
+#define LOGV printf
+#endif
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,7 +30,9 @@
 #include <sys/time.h>
 
 #include "SLES/OpenSLES.h"
+#ifdef ANDROID
 #include "SLES/OpenSLES_Android.h"
+#endif
 
 
 #define MAX_NUMBER_INTERFACES 3
@@ -35,7 +41,6 @@
 #define TEST_MUTE 0
 #define TEST_SOLO 1
 
-static int testMode;
 //-----------------------------------------------------------------
 /* Exits the application if an error is encountered */
 #define ExitOnError(x) ExitOnErrorFunc(x,__LINE__)
@@ -72,7 +77,9 @@ void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
     /* Play, Volume and AndroidStreamType interfaces for the audio player */
     SLPlayItf              playItf;
     SLPrefetchStatusItf    prefetchItf;
+#ifdef ANDROID
     SLAndroidStreamTypeItf streamTypeItf;
+#endif
 
     SLboolean required[MAX_NUMBER_INTERFACES];
     SLInterfaceID iidArray[MAX_NUMBER_INTERFACES];
@@ -140,16 +147,20 @@ void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
     result = (*player)->GetInterface(player, SL_IID_PREFETCHSTATUS, (void*)&prefetchItf);
     ExitOnError(result);
 
+#ifdef ANDROID
     result = (*player)->GetInterface(player, SL_IID_ANDROIDSTREAMTYPE, (void*)&streamTypeItf);
     ExitOnError(result);
+#endif
 
     fprintf(stdout, "Player configured\n");
 
     /* ------------------------------------------------------ */
     /* Test setting the Android audio stream type on the player */
 
+#ifdef ANDROID
     result = (*streamTypeItf)->SetStreamType(streamTypeItf, type);
     ExitOnError(result);
+#endif
 
     /* ------------------------------------------------------ */
     /* Playback and test */
@@ -180,6 +191,7 @@ void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
 
     usleep((durationInMsec/2) * 1000);
 
+#ifdef ANDROID
     /* Get the stream type during playback  */
     SLuint32 currentType = 0;
     result = (*streamTypeItf)->GetStreamType(streamTypeItf, &currentType);
@@ -187,6 +199,7 @@ void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
     if (currentType != type) {
         fprintf(stderr, "ERROR: current stream type is %lu, should be %lu\n", currentType, type);
     }
+#endif
 
     usleep((durationInMsec/2) * 1000);
 
@@ -195,6 +208,7 @@ void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
     result = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_STOPPED);
     ExitOnError(result);
 
+#ifdef ANDROID
     /* Try again to get the stream type, just in case it changed behind our back */
     result = (*streamTypeItf)->GetStreamType(streamTypeItf, &currentType);
     ExitOnError(result);
@@ -202,6 +216,7 @@ void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
         fprintf(stderr, "ERROR: current stream type is %lu, should be %lu after stop.\n",
                 currentType, type);
     }
+#endif
 
     /* Destroy the player */
     (*player)->Destroy(player);

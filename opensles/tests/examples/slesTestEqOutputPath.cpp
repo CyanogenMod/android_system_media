@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+#ifdef ANDROID
 #define LOG_NDEBUG 0
 #define LOG_TAG "slesTest_seekFdPath"
 
 #include <utils/Log.h>
+#else
+#define LOGV printf
+#endif
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,14 +31,15 @@
 #include <fcntl.h>
 
 #include "SLES/OpenSLES.h"
+#ifdef ANDROID
 #include "SLES/OpenSLES_Android.h"
+#endif
 
 
 #define MAX_NUMBER_INTERFACES 3
 
 #define TIME_S_BETWEEN_EQ_ON_OFF 3
 
-static int testMode;
 //-----------------------------------------------------------------
 /* Exits the application if an error is encountered */
 #define ExitOnError(x) ExitOnErrorFunc(x,__LINE__)
@@ -51,7 +56,11 @@ void ExitOnErrorFunc( SLresult result , int line)
 //-----------------------------------------------------------------
 
 /* Play an audio path by opening a file descriptor on that path  */
-void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint64 size)
+void TestEQPathFromFD( SLObjectItf sl, const char* path
+#ifdef ANDROID
+    , SLAint64 offset, SLAint64 size
+#endif
+    )
 {
     SLresult  result;
     SLEngineItf EngineItf;
@@ -61,7 +70,11 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
 
     /* Source of audio data to play */
     SLDataSource            audioSource;
+#ifdef ANDROID
     SLDataLocator_AndroidFD locatorFd;
+#else
+    SLDataLocator_URI       locatorUri;
+#endif
     SLDataFormat_MIME       mime;
 
     /* Data sinks for the audio player */
@@ -121,6 +134,7 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
     iidArray[0] = SL_IID_PREFETCHSTATUS;
 
     /* Setup the data source structure for the URI */
+#ifdef ANDROID
     locatorFd.locatorType = SL_DATALOCATOR_ANDROIDFD;
     int fd = open(path, O_RDONLY);
     if (fd == -1) {
@@ -129,6 +143,10 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
     locatorFd.fd = (SLint32) fd;
     locatorFd.length = size;
     locatorFd.offset = offset;
+#else
+    locatorUri.locatorType = SL_DATALOCATOR_URI;
+    locatorUri.URI = (SLchar *) path;
+#endif
 
     mime.formatType = SL_DATAFORMAT_MIME;
     /*     this is how ignored mime information is specified, according to OpenSL ES spec
@@ -137,7 +155,11 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
     mime.containerType = SL_CONTAINERTYPE_UNSPECIFIED;
 
     audioSource.pFormat  = (void*)&mime;
+#ifdef ANDROID
     audioSource.pLocator = (void*)&locatorFd;
+#else
+    audioSource.pLocator = (void*)&locatorUri;
+#endif
 
     /* Create the audio player */
     result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink, 1,
@@ -256,7 +278,9 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAint
     /* Destroy Output Mix object */
     (*outputMix)->Destroy(outputMix);
 
+#ifdef ANDROID
     close(fd);
+#endif
 }
 
 //-----------------------------------------------------------------
@@ -274,11 +298,13 @@ int main(int argc, char* const argv[])
     fprintf(stdout, "Omit the length of the file for it to be computed by the system.\n");
     fprintf(stdout, "Every %d seconds, the EQ will be turned on and off.\n", TIME_S_BETWEEN_EQ_ON_OFF);
 
+#ifdef ANDROID
     if (argc < 3) {
         fprintf(stdout, "Usage: \t%s path offsetInBytes [sizeInBytes]\n", argv[0]);
         fprintf(stdout, "Example: \"%s /sdcard/my.mp3 0 344460\" \n", argv[0]);
         exit(1);
     }
+#endif
 
     SLEngineOption EngineOption[] = {
             {(SLuint32) SL_ENGINEOPTION_THREADSAFE, (SLuint32) SL_BOOLEAN_TRUE}
@@ -291,6 +317,7 @@ int main(int argc, char* const argv[])
     result = (*sl)->Realize(sl, SL_BOOLEAN_FALSE);
     ExitOnError(result);
 
+#ifdef ANDROID
     if (argc == 3) {
         fprintf(stdout, "\nno file size given, using SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE\n\n");
         TestEQPathFromFD(sl, argv[1], (SLAint64)atoi(argv[2]),
@@ -298,6 +325,9 @@ int main(int argc, char* const argv[])
     } else {
         TestEQPathFromFD(sl, argv[1], (SLAint64)atoi(argv[2]), (SLAint64)atoi(argv[3]));
     }
+#else
+    TestEQPathFromFD(sl, argv[1]);
+#endif
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
