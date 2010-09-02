@@ -223,7 +223,7 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
     SLboolean enabled = SL_BOOLEAN_TRUE;
     result = (*bbItf)->SetEnabled(bbItf, enabled);
     ExitOnError(result);
-    for(unsigned int j=0 ; j<(durationInMsec/1000*TIME_S_BETWEEN_BB_ON_OFF) ; j++) {
+    for(unsigned int j=0 ; j<(durationInMsec/(1000*TIME_S_BETWEEN_BB_ON_OFF)) ; j++) {
         usleep(TIME_S_BETWEEN_BB_ON_OFF * 1000 * 1000);
         result = (*bbItf)->IsEnabled(bbItf, &enabled);
         ExitOnError(result);

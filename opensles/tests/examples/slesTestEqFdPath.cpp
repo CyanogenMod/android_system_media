@@ -250,7 +250,7 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path
     SLboolean enabled = SL_BOOLEAN_TRUE;
     result = (*eqItf)->SetEnabled(eqItf, enabled);
     ExitOnError(result);
-    for(unsigned int j=0 ; j<(durationInMsec/1000*TIME_S_BETWEEN_EQ_ON_OFF) ; j++) {
+    for(unsigned int j=0 ; j<(durationInMsec/(1000*TIME_S_BETWEEN_EQ_ON_OFF)) ; j++) {
         usleep(TIME_S_BETWEEN_EQ_ON_OFF * 1000 * 1000);
         result = (*eqItf)->IsEnabled(eqItf, &enabled);
         ExitOnError(result);
