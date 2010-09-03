@@ -76,10 +76,11 @@
 
 // start non-standard and platform-specific interface IDs
 #define MPH_ANDROIDSTREAMTYPE          45
-#define MPH_ANDROIDAUDIOEFFECT         46
+#define MPH_ANDROIDEFFECT              46
+#define MPH_ANDROIDEFFECTCAPABILITIES  47
 // end non-standard and platform-specific interface IDs
 
 // total number
-#define MPH_MAX                        47
+#define MPH_MAX                        48
 
 #endif // !defined(__MPH_H)

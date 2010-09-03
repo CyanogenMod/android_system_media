@@ -58,6 +58,7 @@ typedef struct COutputMix_struct COutputMix;
 
 #ifdef ANDROID
 #include <utils/Log.h>
+#include <utils/KeyedVector.h>
 #include "SLES/OpenSLES_Android.h"
 #include "media/AudioSystem.h"
 #include "media/mediarecorder.h"
@@ -809,10 +810,6 @@ typedef struct {
 #endif
 } IVirtualizer;
 
-#if defined(ANDROID) && !defined(USE_BACKPORT)
-// FIXME this include is done here so the effect structures have been defined. Messy.
-#include "android_Effect.h"
-#endif
 
 typedef struct {
     const struct SLVisualizationItf_ *mItf;
@@ -854,9 +851,23 @@ typedef struct {
 } IAndroidStreamType;
 
 typedef struct {
-    const struct SLAndroidAudioEffectItf_ *mItf;
+    const struct SLAndroidEffectItf_ *mItf;
     IObject *mThis;
-} IAndroidAudioEffect;
+    android::KeyedVector<SLuint32, android::AudioEffect* > mEffects;
+} IAndroidEffect;
+
+typedef struct {
+    const struct SLAndroidEffectCapabilitiesItf_ *mItf;
+    IObject *mThis;
+    SLuint32 mNumFx;
+    effect_descriptor_t* mFxDescriptors;
+} IAndroidEffectCapabilities;
+
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+// FIXME this include is done here so the effect structures have been defined. Messy.
+#include "android_Effect.h"
+#endif
+
 
 /*
  * Used to define the mapping from an OpenSL ES audio player to an Android
@@ -906,7 +917,7 @@ enum AndroidObject_state {
     IMuteSolo mMuteSolo;
 #ifdef ANDROID
     IAndroidStreamType  mAndroidStreamType;
-    IAndroidAudioEffect mAndroidAudioEffect;
+    IAndroidEffect mAndroidEffect;
 #endif
     // optional interfaces
     I3DMacroscopic m3DMacroscopic;
@@ -999,7 +1010,11 @@ enum AndroidObject_state {
 typedef struct {
     // mandated implicit interfaces
     IObject mObject;
+#ifdef ANDROID
+#define INTERFACES_Engine 11 // see MPH_to_Engine in MPH_to.c for list of interfaces
+#else
 #define INTERFACES_Engine 10 // see MPH_to_Engine in MPH_to.c for list of interfaces
+#endif
     SLuint8 mInterfaceStates2[INTERFACES_Engine - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IEngine mEngine;
@@ -1010,6 +1025,7 @@ typedef struct {
     IAudioDecoderCapabilities mAudioDecoderCapabilities;
     IAudioEncoderCapabilities mAudioEncoderCapabilities;
     I3DCommit m3DCommit;
+    IAndroidEffectCapabilities mAndroidEffectCapabilities;
     // optional interfaces
     IDeviceVolume mDeviceVolume;
     // rest of fields are not related to the interfaces

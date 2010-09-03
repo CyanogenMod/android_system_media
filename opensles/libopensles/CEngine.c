@@ -84,6 +84,10 @@ void CEngine_Destroy(void *self)
         }
         delete [] this->mEngine.mEqPresetNames;
     }
+    //   free effect library data
+    if (NULL != this->mAndroidEffectCapabilities.mFxDescriptors) {
+        delete [] this->mAndroidEffectCapabilities.mFxDescriptors;
+    }
 #endif
 
 #ifdef USE_SDL

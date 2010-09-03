@@ -938,7 +938,17 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     pAudioPlayer->mAndroidObjType = INVALID_TYPE;
 
 #ifndef USE_BACKPORT
+    // FIXME this shouldn't have to be done here, there should be an "interface destroy" hook,
+    //       just like there is an interface init hook, to avoid memory leaks.
     pAudioPlayer->mEqualizer.mEqEffect.clear();
+    pAudioPlayer->mBassBoost.mBassBoostEffect.clear();
+    pAudioPlayer->mVirtualizer.mVirtualizerEffect.clear();
+    if (!pAudioPlayer->mAndroidEffect.mEffects.isEmpty()) {
+        for (size_t i = 0 ; i < pAudioPlayer->mAndroidEffect.mEffects.size() ; i++) {
+            delete pAudioPlayer->mAndroidEffect.mEffects.valueAt(i);
+        }
+        pAudioPlayer->mAndroidEffect.mEffects.clear();
+    }
 #endif
 
     return result;
