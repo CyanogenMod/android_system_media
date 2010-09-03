@@ -140,7 +140,6 @@ private:
     int64_t mDurationUsec;
     CacheStatus mCacheStatus;
     int64_t mSeekTimeMsec;
-    bool mBufferInFlight;
     int64_t mLastDecodedPositionUs;
 
     DataLocator mDataLocator;
@@ -148,6 +147,11 @@ private:
 
     notif_client_t mNotifyClient;
     void*          mNotifyUser;
+
+    // mutex used for protecting the decode buffer
+    Mutex       mDecodeBufferLock;
+    // buffer passed from decoder to renderer
+    MediaBuffer *mDecodeBuffer;
 
     int onPrepare(const sp<AMessage> &msg);
     void onDecode();
