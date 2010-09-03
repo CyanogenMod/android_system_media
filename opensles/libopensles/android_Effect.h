@@ -68,19 +68,22 @@ extern void android_erev_init(IEnvironmentalReverb* ier);
  ****************************/
 extern SLresult android_genericFx_queryNumEffects(SLuint32 *pNumSupportedAudioEffects);
 
-extern SLresult android_genericFx_queryEffect(SLuint32 index, SLInterfaceID *pAudioEffectId);
+extern SLresult android_genericFx_queryEffect(SLuint32 index, effect_descriptor_t* pDescriptor);
 
-extern SLresult android_genericFx_createEffect(int sessionId, SLInterfaceID pUuid,
-        void **ppAudioEffect);
+extern SLresult android_genericFx_createEffect(IAndroidEffect* iae, SLInterfaceID pUuid,
+        int sessionId);
 
-extern SLresult android_genericFx_releaseEffect(void *pAudioEffect);
+extern SLresult android_genericFx_releaseEffect(IAndroidEffect* iae, SLInterfaceID pUuid);
 
-extern SLresult android_genericFx_setEnabled(void *pAudioEffect, SLboolean enabled);
+extern SLresult android_genericFx_setEnabled(IAndroidEffect* iae, SLInterfaceID pUuid,
+        SLboolean enabled);
 
-extern SLresult android_genericFx_isEnabled(void *pAudioEffect, SLboolean *pEnabled);
+extern SLresult android_genericFx_isEnabled(IAndroidEffect* iae, SLInterfaceID pUuid,
+        SLboolean *pEnabled);
 
-extern SLresult android_genericFx_sendCommand(void *pAudioEffect, SLuint32 command,
-        SLuint32 commandSize, void* pCommand, SLuint32 *replySize, void *pReply);
+extern SLresult android_genericFx_sendCommand(IAndroidEffect* iae, SLInterfaceID pUuid,
+        SLuint32 command, SLuint32 commandSize, void* pCommandData,
+        SLuint32 *replySize, void *pReplyData);
 
 /**************************************************************************************************
  * EffectSend functions

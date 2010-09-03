@@ -72,47 +72,64 @@ struct SLAndroidStreamTypeItf_ {
 /* Android Effect interface                                                  */
 /*---------------------------------------------------------------------------*/
 
-extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDAUDIOEFFECT;
+extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDEFFECT;
 
 /** Android Effect interface methods */
 
-struct SLAndroidAudioEffectItf_;
-typedef const struct SLAndroidAudioEffectItf_ * const * SLAndroidAudioEffectItf;
+struct SLAndroidEffectItf_;
+typedef const struct SLAndroidEffectItf_ * const * SLAndroidEffectItf;
 
 
-struct SLAndroidAudioEffectItf_ {
+struct SLAndroidEffectItf_ {
 
-    // candidate to be moved to a separate engine interface
-    SLresult (*QueryNumEffects) (SLAndroidAudioEffectItf self,
-        SLuint32 *pNumSupportedAudioEffects);
+    SLresult (*CreateEffect) (SLAndroidEffectItf self,
+            SLInterfaceID effectId);
 
-    // candidate to be moved to a separate engine interface
-    SLresult (*QueryEffect) (SLAndroidAudioEffectItf self,
-        SLuint32 index,
-        SLInterfaceID *pAudioEffectId);
+    SLresult (*ReleaseEffect) (SLAndroidEffectItf self,
+            SLInterfaceID effectId);
 
-    SLresult (*CreateEffect) (SLAndroidAudioEffectItf self,
-            SLInterfaceID AudioEffectId,
-            void **ppAudioEffect);
+    SLresult (*SetEnabled) (SLAndroidEffectItf self,
+            SLInterfaceID effectId,
+            SLboolean enabled);
 
-    SLresult (*ReleaseEffect) (SLAndroidAudioEffectItf self,
-        void *pAudioEffect);
+    SLresult (*IsEnabled) (SLAndroidEffectItf self,
+            SLInterfaceID effectId,
+            SLboolean *pEnabled);
 
-    SLresult (*SetEnabled) (SLAndroidAudioEffectItf self,
-        void *pAudioEffect,
-        SLboolean enabled);
+    SLresult (*SendCommand) (SLAndroidEffectItf self,
+            SLInterfaceID effectId,
+            SLuint32 command,
+            SLuint32 commandSize,
+            void *pCommandData,
+            SLuint32 *replySize,
+            void *pReplyData);
+};
 
-    SLresult (*IsEnabled) (SLAndroidAudioEffectItf self,
-        void *pAudioEffect,
-        SLboolean *pEnabled);
 
-    SLresult (*SendCommand) (SLAndroidAudioEffectItf self,
-        void *pAudioEffect,
-        SLuint32 command,
-        SLuint32 commandSize,
-        void *pCommand,
-        SLuint32 *replySize,
-        void *pReply);
+/*---------------------------------------------------------------------------*/
+/* Android Effect Capabilities interface                                     */
+/*---------------------------------------------------------------------------*/
+
+extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDEFFECTCAPABILITIES;
+
+/** Android Effect Capabilities interface methods */
+
+struct SLAndroidEffectCapabilitiesItf_;
+typedef const struct SLAndroidEffectCapabilitiesItf_ * const * SLAndroidEffectCapabilitiesItf;
+
+
+struct SLAndroidEffectCapabilitiesItf_ {
+
+    SLresult (*QueryNumEffects) (SLAndroidEffectCapabilitiesItf self,
+            SLuint32 *pNumSupportedEffects);
+
+
+    SLresult (*QueryEffect) (SLAndroidEffectCapabilitiesItf self,
+            SLuint32 index,
+            SLInterfaceID *pEffectType,
+            SLInterfaceID *pEffectImplementation,
+            const SLchar *pName,
+            SLuint16 *pNameSize);
 };
 
 

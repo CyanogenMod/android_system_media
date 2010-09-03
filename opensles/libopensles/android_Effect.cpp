@@ -27,6 +27,10 @@ static const int BASSBOOST_PARAM_SIZE_MAX = sizeof(effect_param_t) + 2 * sizeof(
 
 static const int VIRTUALIZER_PARAM_SIZE_MAX = sizeof(effect_param_t) + 2 * sizeof(int32_t);
 
+static inline SLuint32 KEY_FROM_GUID(SLInterfaceID pUuid) {
+    return pUuid->time_low;
+}
+
 
 //-----------------------------------------------------------------------------
 uint32_t eq_paramSize(int32_t param) {
@@ -553,25 +557,18 @@ SLresult android_genericFx_queryNumEffects(SLuint32 *pNumSupportedAudioEffects) 
 
 
 //-----------------------------------------------------------------------------
-SLresult android_genericFx_queryEffect(SLuint32 index, SLInterfaceID *pAudioEffectId) {
+SLresult android_genericFx_queryEffect(SLuint32 index, effect_descriptor_t* pDescriptor) {
 
-    if (NULL == pAudioEffectId) {
+    if (NULL == pDescriptor) {
         return SL_RESULT_PARAMETER_INVALID;
     }
 
-    effect_descriptor_t descriptor;
     android::status_t status =
-                android::AudioEffect::queryEffect(index, &descriptor);
+                android::AudioEffect::queryEffect(index, pDescriptor);
 
     SLresult result = SL_RESULT_SUCCESS;
-    switch(status) {
-        case android::NO_ERROR:
-            // FIXME this function will move to an engine interface where we will store the
-            //       audio effect IDs and we only return references to those, as SLInterfaceID
-            //       is a pointer to the struct where a uuid is stored.
-            //*pAudioEffectId = some global reference to where we keep a copy of the effect uuid
-            result = SL_RESULT_SUCCESS;
-            break;
+    if (android::NO_ERROR != status) {
+        switch(status) {
         case android::PERMISSION_DENIED:
             result = SL_RESULT_PERMISSION_DENIED;
             break;
@@ -586,18 +583,27 @@ SLresult android_genericFx_queryEffect(SLuint32 index, SLInterfaceID *pAudioEffe
             result = SL_RESULT_INTERNAL_ERROR;
             SL_LOGE("received invalid status %d from AudioEffect::queryNumberEffects()", status);
             break;
+        }
+        // an error occurred, reset the effect descriptor
+        memset(pDescriptor, 0, sizeof(effect_descriptor_t));
     }
+
     return result;
 }
 
 
 //-----------------------------------------------------------------------------
-SLresult android_genericFx_createEffect(int sessionId, SLInterfaceID pUuid, void **ppAudioEffect) {
+SLresult android_genericFx_createEffect(IAndroidEffect* iae, SLInterfaceID pUuid, int sessionId) {
 
-    android::AudioEffect* af = NULL;
     SLresult result = SL_RESULT_SUCCESS;
 
-    af = new android::AudioEffect(
+    // does this effect already exist?
+    if (0 <= iae->mEffects.indexOfKey(KEY_FROM_GUID(pUuid))) {
+        return result;
+    }
+
+    // create new effect
+    android::AudioEffect* pFx = new android::AudioEffect(
             NULL, // not using type to create effect
             (const effect_uuid_t*)pUuid,
             0,// priority
@@ -605,78 +611,91 @@ SLresult android_genericFx_createEffect(int sessionId, SLInterfaceID pUuid, void
             0,// callback data
             sessionId,
             0 );// output
-    android::status_t status = af->initCheck();
 
+    // verify effect was successfully created before storing it
+    android::status_t status = pFx->initCheck();
     if (android::NO_ERROR != status) {
-        SL_LOGE("AudioEffect initCheck() returned %d", status);
+        SL_LOGE("AudioEffect initCheck() returned %d, effect will not be stored", status);
+        delete pFx;
         result = SL_RESULT_RESOURCE_ERROR;
+    } else {
+        SL_LOGV("AudioEffect successfully created on session %d", sessionId);
+        iae->mEffects.add(KEY_FROM_GUID(pUuid), pFx);
     }
 
-    *ppAudioEffect = af;
     return result;
 }
 
 
 //-----------------------------------------------------------------------------
-SLresult android_genericFx_releaseEffect(void *pAudioEffect) {
+SLresult android_genericFx_releaseEffect(IAndroidEffect* iae, SLInterfaceID pUuid) {
 
-    if (NULL != pAudioEffect) {
-        delete ((android::AudioEffect*)pAudioEffect);
-        return SL_RESULT_SUCCESS;
+    ssize_t index = iae->mEffects.indexOfKey(KEY_FROM_GUID(pUuid));
+
+    if (0 > index) {
+        return SL_RESULT_PARAMETER_INVALID;
     } else {
-        return SL_RESULT_PARAMETER_INVALID;
+        android::AudioEffect* pFx = iae->mEffects.valueAt(index);
+        delete pFx;
+        iae->mEffects.removeItem(index);
+        return SL_RESULT_SUCCESS;
     }
 }
 
 
 //-----------------------------------------------------------------------------
-SLresult android_genericFx_setEnabled(void *pAudioEffect, SLboolean enabled) {
+SLresult android_genericFx_setEnabled(IAndroidEffect* iae, SLInterfaceID pUuid, SLboolean enabled) {
 
-    if (NULL == pAudioEffect) {
+    ssize_t index = iae->mEffects.indexOfKey(KEY_FROM_GUID(pUuid));
+
+    if (0 > index) {
         return SL_RESULT_PARAMETER_INVALID;
+    } else {
+        android::AudioEffect* pFx = iae->mEffects.valueAt(index);
+        android::status_t status = pFx->setEnabled(SL_BOOLEAN_TRUE == enabled);
+        return android_fx_statusToResult(status);
     }
-
-    android::status_t status =
-            ((android::AudioEffect*)pAudioEffect)->setEnabled(SL_BOOLEAN_TRUE == enabled);
-
-    return android_fx_statusToResult(status);
 }
 
 
 //-----------------------------------------------------------------------------
-SLresult android_genericFx_isEnabled(void *pAudioEffect, SLboolean *pEnabled) {
+SLresult android_genericFx_isEnabled(IAndroidEffect* iae, SLInterfaceID pUuid, SLboolean *pEnabled)
+{
+    ssize_t index = iae->mEffects.indexOfKey(KEY_FROM_GUID(pUuid));
 
-    if (NULL == pAudioEffect) {
-        *pEnabled = SL_BOOLEAN_FALSE;
+    if (0 > index) {
         return SL_RESULT_PARAMETER_INVALID;
+    } else {
+        android::AudioEffect* pFx = iae->mEffects.valueAt(index);
+        *pEnabled = (SLboolean) pFx->getEnabled();
+        return SL_RESULT_SUCCESS;
     }
-
-    *pEnabled =
-           ((android::AudioEffect*)pAudioEffect)->getEnabled() ? SL_BOOLEAN_TRUE : SL_BOOLEAN_FALSE;
-
-    return SL_RESULT_SUCCESS;
 }
 
 
 //-----------------------------------------------------------------------------
-SLresult android_genericFx_sendCommand(void *pAudioEffect, SLuint32 command, SLuint32 commandSize,
-        void* pCommand, SLuint32 *replySize, void *pReply) {
+SLresult android_genericFx_sendCommand(IAndroidEffect* iae, SLInterfaceID pUuid,
+        SLuint32 command, SLuint32 commandSize, void* pCommandData,
+        SLuint32 *replySize, void *pReplyData) {
 
-    if (NULL == pAudioEffect) {
+    ssize_t index = iae->mEffects.indexOfKey(KEY_FROM_GUID(pUuid));
+
+    if (0 > index) {
         return SL_RESULT_PARAMETER_INVALID;
+    } else {
+        android::AudioEffect* pFx = iae->mEffects.valueAt(index);
+        android::status_t status = pFx->command(
+                (uint32_t) command,
+                (uint32_t) commandSize,
+                pCommandData,
+                (uint32_t*)replySize,
+                pReplyData);
+        if (android::BAD_VALUE == status) {
+                return SL_RESULT_PARAMETER_INVALID;
+        } else {
+            return SL_RESULT_SUCCESS;
+        }
     }
-
-    android::status_t status = ((android::AudioEffect*)pAudioEffect)->command(
-            (uint32_t) command,
-            (uint32_t) commandSize,
-            pCommand,
-            (uint32_t*)replySize,
-            pReply);
-
-    if (android::BAD_VALUE == status) {
-        return SL_RESULT_PARAMETER_INVALID;
-    }
-    return SL_RESULT_SUCCESS;
 }
 
 

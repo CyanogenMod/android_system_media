@@ -83,7 +83,7 @@ static const struct iid_vtable AudioPlayer_interfaces[INTERFACES_AudioPlayer] = 
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL, offsetof(CAudioPlayer, mVisualization)},
 #ifdef ANDROID
     {MPH_ANDROIDSTREAMTYPE, INTERFACE_IMPLICIT, offsetof(CAudioPlayer, mAndroidStreamType)},
-    {MPH_ANDROIDAUDIOEFFECT, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidAudioEffect)},
+    {MPH_ANDROIDEFFECT, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidEffect)},
 #endif
 };
 
@@ -145,7 +145,9 @@ static const struct iid_vtable Engine_interfaces[INTERFACES_Engine] = {
     {MPH_AUDIOENCODERCAPABILITIES, INTERFACE_EXPLICIT_BASE,
         offsetof(CEngine, mAudioEncoderCapabilities)},
     {MPH_3DCOMMIT, INTERFACE_EXPLICIT_GAME, offsetof(CEngine, m3DCommit)},
-    {MPH_DEVICEVOLUME, INTERFACE_OPTIONAL, offsetof(CEngine, mDeviceVolume)}
+    {MPH_DEVICEVOLUME, INTERFACE_OPTIONAL, offsetof(CEngine, mDeviceVolume)},
+    {MPH_ANDROIDEFFECTCAPABILITIES, INTERFACE_EXPLICIT,
+        offsetof(CEngine, mAndroidEffectCapabilities)}
 };
 
 static const ClassTable CEngine_class = {
