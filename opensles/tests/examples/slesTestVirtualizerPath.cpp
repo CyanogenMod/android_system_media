@@ -222,7 +222,7 @@ void TestVirtualizerPathFromFD( SLObjectItf sl, const char* path, int16_t virtSt
     SLboolean enabled = SL_BOOLEAN_TRUE;
     result = (*virtItf)->SetEnabled(virtItf, enabled);
     ExitOnError(result);
-    for(unsigned int j=0 ; j<(durationInMsec/1000*TIME_S_BETWEEN_VIRT_ON_OFF) ; j++) {
+    for(unsigned int j=0 ; j<(durationInMsec/(1000*TIME_S_BETWEEN_VIRT_ON_OFF)) ; j++) {
         usleep(TIME_S_BETWEEN_VIRT_ON_OFF * 1000 * 1000);
         result = (*virtItf)->IsEnabled(virtItf, &enabled);
         ExitOnError(result);

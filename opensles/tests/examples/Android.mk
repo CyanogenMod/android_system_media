@@ -120,6 +120,8 @@ endif
 
 LOCAL_MODULE:= slesTest_eqFdPath
 
+include $(BUILD_EXECUTABLE)
+
 # slesTest_eqOutputPath
 
 include $(CLEAR_VARS)
