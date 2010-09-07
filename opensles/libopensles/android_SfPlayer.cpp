@@ -425,10 +425,13 @@ void SfPlayer::onDecode() {
             // FIXME handle error
         } else {
             //LOGV("SfPlayer::onDecode hit ERROR_END_OF_STREAM");
-            // async notification of end of stream reached
-            sp<AMessage> msg = new AMessage(kWhatNotif, id());
-            msg->setInt32(EVENT_ENDOFSTREAM, 1);
-            notify(msg, true /*async*/);
+            if (mFlags & kFlagPlaying) {
+                //LOGV("SfPlayer::onDecode hit ERROR_END_OF_STREAM while playing");
+                // async notification of end of stream reached during playback
+                sp<AMessage> msg = new AMessage(kWhatNotif, id());
+                msg->setInt32(EVENT_ENDOFSTREAM, 1);
+                notify(msg, true /*async*/);
+            }
         }
         return;
     }

@@ -203,26 +203,35 @@ void audioTrack_handleUnderrun_lockPlay(CAudioPlayer* ap) {
  */
 void audioPlayer_dispatch_headAtEnd_lockPlay(CAudioPlayer *ap, bool setPlayStateToPaused,
         bool needToLock) {
+    //SL_LOGV("ap=%p, setPlayStateToPaused=%d, needToLock=%d", ap, setPlayStateToPaused,
+    //        needToLock);
     slPlayCallback playCallback = NULL;
     void * playContext = NULL;
     // SLPlayItf callback or no callback?
     if (needToLock) {
-        interface_lock_exclusive(&ap->mPlay);
+        interface_lock_peek(&ap->mPlay);
     }
     if (ap->mPlay.mEventFlags & SL_PLAYEVENT_HEADATEND) {
         playCallback = ap->mPlay.mCallback;
         playContext = ap->mPlay.mContext;
     }
-    if (setPlayStateToPaused) {
-        ap->mPlay.mState = SL_PLAYSTATE_PAUSED;
-    }
     if (needToLock) {
-        interface_unlock_exclusive(&ap->mPlay);
+        interface_unlock_peek(&ap->mPlay);
+    }
+    if (setPlayStateToPaused) {
+        if (needToLock) {
+            interface_lock_poke(&ap->mPlay)
+            ap->mPlay.mState = SL_PLAYSTATE_PAUSED;
+            interface_unlock_poke(&ap->mPlay);
+        } else {
+            ap->mPlay.mState = SL_PLAYSTATE_PAUSED;
+        }
     }
     // callback with no lock held
     if (NULL != playCallback) {
         (*playCallback)(&ap->mPlay.mItf, playContext, SL_PLAYEVENT_HEADATEND);
     }
+
 }
 
 
@@ -272,7 +281,7 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
     }
 
     CAudioPlayer *ap = (CAudioPlayer *)user;
-    //SL_LOGV("received event %d = %d from SfAudioPlayer", event, data1);
+    //SL_LOGV("received event %d, data %d from SfAudioPlayer", event, data1);
     switch(event) {
 
     case(android::SfPlayer::kEventPrefetchFillLevelUpdate): {
@@ -898,7 +907,6 @@ SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer, SLuint3
 SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     SLresult result = SL_RESULT_SUCCESS;
     SL_LOGV("android_audioPlayer_destroy(%p)", pAudioPlayer);
-
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
     // AudioTrack
@@ -911,9 +919,9 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     case MEDIAPLAYER:
         // FIXME group in one function?
         if (pAudioPlayer->mSfPlayer != NULL) {
+            pAudioPlayer->mRenderLooper->stop();
             pAudioPlayer->mRenderLooper->unregisterHandler(pAudioPlayer->mSfPlayer->id());
             pAudioPlayer->mSfPlayer.clear();
-            pAudioPlayer->mRenderLooper->stop();
             pAudioPlayer->mRenderLooper.clear();
         }
         break;
