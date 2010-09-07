@@ -152,23 +152,7 @@ int main(int argc, char* const argv[])
 
     fprintf(stdout, "OpenSL ES test %s: exercises SLAndroidEffectCapabilitiesItf.\n", argv[0]);
 
-
-    SLEngineOption EngineOption[] = {
-            {(SLuint32) SL_ENGINEOPTION_THREADSAFE, (SLuint32) SL_BOOLEAN_TRUE}
-    };
-#if 0
-    result = slCreateEngine( &sl, 1, EngineOption, 0, NULL, NULL);
-    ExitOnError(result);
-
-    /* Realizing the SL Engine in synchronous mode. */
-    result = (*sl)->Realize(sl, SL_BOOLEAN_FALSE);
-    ExitOnError(result);
-#endif
     TestGenericFxCapabilities();
-#if 0
-    /* Shutdown OpenSL ES */
-    (*sl)->Destroy(sl);
-    exit(0);
-#endif
+
     return 0;
 }
