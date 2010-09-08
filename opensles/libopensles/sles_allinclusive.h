@@ -1111,7 +1111,11 @@ typedef struct {
 /*typedef*/ struct COutputMix_struct {
     // mandated interfaces
     IObject mObject;
+#ifdef ANDROID
+#define INTERFACES_OutputMix 12 // see MPH_to_OutputMix in MPH_to.c for list of interfaces
+#else
 #define INTERFACES_OutputMix 11 // see MPH_to_OutputMix in MPH_to.c for list of interfaces
+#endif
     SLuint8 mInterfaceStates2[INTERFACES_OutputMix - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IOutputMix mOutputMix;
@@ -1126,9 +1130,10 @@ typedef struct {
     // optional interfaces
     IBassBoost mBassBoost;
     IVisualization mVisualization;
-    // implementation-specific data for this instance
 #ifdef ANDROID
+    IAndroidEffect mAndroidEffect;
 #endif
+    // implementation-specific data for this instance
 } /*COutputMix*/;
 
 typedef struct {
