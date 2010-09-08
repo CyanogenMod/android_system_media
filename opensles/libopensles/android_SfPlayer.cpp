@@ -425,6 +425,8 @@ void SfPlayer::onDecode() {
             // FIXME handle error
         } else {
             //LOGV("SfPlayer::onDecode hit ERROR_END_OF_STREAM");
+            // end of stream reached, rewind
+            seek(0);
             if (mFlags & kFlagPlaying) {
                 //LOGV("SfPlayer::onDecode hit ERROR_END_OF_STREAM while playing");
                 // async notification of end of stream reached during playback
