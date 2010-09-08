@@ -27,6 +27,11 @@ static const int BASSBOOST_PARAM_SIZE_MAX = sizeof(effect_param_t) + 2 * sizeof(
 
 static const int VIRTUALIZER_PARAM_SIZE_MAX = sizeof(effect_param_t) + 2 * sizeof(int32_t);
 
+static const int ENVREVERB_PARAM_SIZE_MAX_SINGLE = sizeof(effect_param_t) + 2 * sizeof(int32_t);
+
+static const int ENVREVERB_PARAM_SIZE_MAX_ALL = sizeof(effect_param_t) + sizeof(int32_t)
+        + sizeof(s_reverb_settings);
+
 static inline SLuint32 KEY_FROM_GUID(SLInterfaceID pUuid) {
     return pUuid->time_low;
 }
@@ -113,7 +118,6 @@ uint32_t bb_valueSize(int32_t param) {
 }
 
 //-----------------------------------------------------------------------------
-
 /**
  * returns the size in bytes of the value of each virtualizer parameter
  */
@@ -130,6 +134,42 @@ uint32_t virt_valueSize(int32_t param) {
     default:
         size = sizeof(int32_t);
         SL_LOGE("Trying to access an unknown Virtualizer parameter %d", param);
+        break;
+    }
+
+    return size;
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * returns the size in bytes of the value of each environmental reverb parameter
+ */
+uint32_t erev_valueSize(int32_t param) {
+    uint32_t size;
+
+    switch (param) {
+    case REVERB_PARAM_ROOM_LEVEL:
+    case REVERB_PARAM_ROOM_HF_LEVEL:
+    case REVERB_PARAM_REFLECTIONS_LEVEL:
+    case REVERB_PARAM_REVERB_LEVEL:
+        size = sizeof(int16_t); // millibel
+        break;
+    case REVERB_PARAM_DECAY_TIME:
+    case REVERB_PARAM_REFLECTIONS_DELAY:
+    case REVERB_PARAM_REVERB_DELAY:
+        size = sizeof(uint32_t); // milliseconds
+        break;
+    case REVERB_PARAM_DECAY_HF_RATIO:
+    case REVERB_PARAM_DIFFUSION:
+    case REVERB_PARAM_DENSITY:
+        size = sizeof(int16_t); // permille
+        break;
+    case REVERB_PARAM_PROPERTIES:
+        size = sizeof(s_reverb_settings); // struct of all reverb properties
+        break;
+    default:
+        size = sizeof(int32_t);
+        SL_LOGE("Trying to access an unknown Environmental Reverb parameter %d", param);
         break;
     }
 
@@ -372,8 +412,41 @@ void android_erev_init(IEnvironmentalReverb* ier) {
     }
 
     // initialize reverb properties
+    SLEnvironmentalReverbSettings properties;
+    if (android::NO_ERROR == android_erev_getParam(ier->mEnvironmentalReverbEffect,
+            REVERB_PARAM_PROPERTIES, &properties)) {
+        ier->mProperties = properties;
+    }
+}
 
-    // FIXME init properties
+//-----------------------------------------------------------------------------
+android::status_t android_erev_setParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue) {
+
+    // given the size difference between a single reverb property and the whole set of reverb
+    // properties, select which max size to pass to avoid allocating too much memory
+    if (param == REVERB_PARAM_PROPERTIES) {
+        return android_fx_setParam(pFx, param, ENVREVERB_PARAM_SIZE_MAX_ALL,
+                pValue, erev_valueSize(param));
+    } else {
+        return android_fx_setParam(pFx, param, ENVREVERB_PARAM_SIZE_MAX_SINGLE,
+                pValue, erev_valueSize(param));
+    }
+}
+
+//-----------------------------------------------------------------------------
+android::status_t android_erev_getParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue) {
+
+    // given the size difference between a single reverb property and the whole set of reverb
+    // properties, select which max size to pass to avoid allocating too much memory
+    if (param == REVERB_PARAM_PROPERTIES) {
+        return android_fx_getParam(pFx, param, ENVREVERB_PARAM_SIZE_MAX_ALL,
+                pValue, erev_valueSize(param));
+    } else {
+        return android_fx_getParam(pFx, param, ENVREVERB_PARAM_SIZE_MAX_SINGLE,
+                pValue, erev_valueSize(param));
+    }
 }
 
 

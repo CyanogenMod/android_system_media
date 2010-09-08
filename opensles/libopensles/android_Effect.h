@@ -63,6 +63,12 @@ extern android::status_t android_prev_getPreset(android::sp<android::AudioEffect
  ****************************/
 extern void android_erev_init(IEnvironmentalReverb* ier);
 
+extern android::status_t android_erev_setParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue);
+
+extern android::status_t android_erev_getParam(android::sp<android::AudioEffect> pFx,
+        int32_t param, void *pValue);
+
 /**************************************************************************************************
  * Generic Effect functions
  ****************************/

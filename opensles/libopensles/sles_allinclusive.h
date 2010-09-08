@@ -72,6 +72,7 @@ typedef struct COutputMix_struct COutputMix;
 #include "media/EffectBassBoostApi.h"
 #include "media/EffectVirtualizerApi.h"
 #include "media/EffectPresetReverbApi.h"
+#include "media/EffectEnvironmentalReverbApi.h"
 #endif
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
