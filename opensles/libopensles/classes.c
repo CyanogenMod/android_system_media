@@ -301,7 +301,10 @@ static const struct iid_vtable OutputMix_interfaces[INTERFACES_OutputMix] = {
     // but portions of Volume are mandated only in Game and Music profiles
     {MPH_VOLUME, INTERFACE_EXPLICIT, offsetof(COutputMix, mVolume)},
     {MPH_BASSBOOST, INTERFACE_DYNAMIC_OPTIONAL, offsetof(COutputMix, mBassBoost)},
-    {MPH_VISUALIZATION, INTERFACE_OPTIONAL, offsetof(COutputMix, mVisualization)}
+    {MPH_VISUALIZATION, INTERFACE_OPTIONAL, offsetof(COutputMix, mVisualization)},
+#ifdef ANDROID
+    {MPH_ANDROIDEFFECT, INTERFACE_EXPLICIT, offsetof(COutputMix, mAndroidEffect)},
+#endif
 };
 
 static const ClassTable COutputMix_class = {

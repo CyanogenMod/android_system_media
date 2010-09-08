@@ -383,7 +383,10 @@ const signed char MPH_to_OutputMix[MPH_MAX] = {
     [MPH_VIRTUALIZER] = 7,
     [MPH_VOLUME] = 8,
     [MPH_BASSBOOST] = 9,
-    [MPH_VISUALIZATION] = 10
+    [MPH_VISUALIZATION] = 10,
+#ifdef ANDROID
+    [MPH_ANDROIDEFFECT] = 11
+#endif
 #else
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     9,  // MPH_BASSBOOST
@@ -406,7 +409,13 @@ const signed char MPH_to_OutputMix[MPH_MAX] = {
 #else
     , -1
 #endif
+    , -1 // MPH_ANDROIDSTREAMTYPE
+#ifdef ANDROID
+    , 11 // MPH_ANDROIDEFFECT
+#else
     , -1
+#endif
+    , -1 // MPH_ANDROIDEFFECTCAPABILITIES
 #endif
 };
 
