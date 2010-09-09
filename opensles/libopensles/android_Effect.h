@@ -111,7 +111,7 @@ extern android::status_t android_fx_getParam(android::sp<android::AudioEffect> p
 extern SLresult android_fx_statusToResult(android::status_t status);
 
 extern bool android_fx_initEffectObj(int sessionId, android::sp<android::AudioEffect>& effect,
-        const effect_uuid_t *type,  const effect_uuid_t *uuid);
+        const effect_uuid_t *type);
 
 extern bool android_fx_initEffectDescriptor(const SLInterfaceID effectId,
         effect_descriptor_t* fxDescrLoc);
