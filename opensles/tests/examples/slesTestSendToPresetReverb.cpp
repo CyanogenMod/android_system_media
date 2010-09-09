@@ -16,7 +16,7 @@
 
 #ifdef ANDROID
 #define LOG_NDEBUG 0
-#define LOG_TAG "slesTest_bassboost"
+#define LOG_TAG "slesTest_sendToPresetReverb"
 
 #include <utils/Log.h>
 #else
@@ -39,7 +39,7 @@
 
 #define MAX_NUMBER_INTERFACES 3
 
-#define TIME_S_BETWEEN_BB_ON_OFF 3
+#define TIME_S_BETWEEN_SETTING_CHANGE 5
 
 //-----------------------------------------------------------------
 /* Exits the application if an error is encountered */
@@ -56,8 +56,9 @@ void ExitOnErrorFunc( SLresult result , int line)
 
 //-----------------------------------------------------------------
 
-/* Play an audio path by opening a file descriptor on that path  */
-void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStrength)
+/* Play an audio path and feed a global reverb  */
+void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmillibel directLevel,
+        SLmillibel sendLevel)
 {
     SLresult  result;
     SLEngineItf EngineItf;
@@ -80,8 +81,10 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
 
     /* Interfaces for the audio player */
     SLPlayItf              playItf;
-    SLPrefetchStatusItf    prefetchItf;
-    SLBassBoostItf         bbItf;
+    SLEffectSendItf        effectSendItf;
+
+    /* Interface for the output mix */
+    SLPresetReverbItf      reverbItf;
 
     SLboolean required[MAX_NUMBER_INTERFACES];
     SLInterfaceID iidArray[MAX_NUMBER_INTERFACES];
@@ -99,6 +102,10 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
     /* ------------------------------------------------------ */
     /* Configuration of the output mix  */
 
+    /* Set arrays required[] and iidArray[] for required interfaces */
+    required[0] = SL_BOOLEAN_TRUE;
+    iidArray[0] = SL_IID_PRESETREVERB;
+
     /* Create Output Mix object to be used by the player */
      result = (*EngineItf)->CreateOutputMix(EngineItf, &outputMix, 1, iidArray, required);
      ExitOnError(result);
@@ -107,11 +114,33 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
     result = (*outputMix)->Realize(outputMix, SL_BOOLEAN_FALSE);
     ExitOnError(result);
 
+    /* Get the SLPresetReverbItf for the output mix */
+    result = (*outputMix)->GetInterface(outputMix, SL_IID_PRESETREVERB, (void*)&reverbItf);
+    ExitOnError(result);
+
     /* Setup the data sink structure */
     locator_outputmix.locatorType = SL_DATALOCATOR_OUTPUTMIX;
     locator_outputmix.outputMix   = outputMix;
     audioSink.pLocator            = (void*)&locator_outputmix;
     audioSink.pFormat             = NULL;
+
+    /* Select the reverb preset */
+    fprintf(stdout, "\nUsing preset ");
+    switch(preset) {
+        case SL_REVERBPRESET_NONE:
+            fprintf(stdout, "SL_REVERBPRESET_NONE, don't expect to hear reverb\n");
+            break;
+        case SL_REVERBPRESET_SMALLROOM: fprintf(stdout, "SL_REVERBPRESET_SMALLROOM\n"); break;
+        case SL_REVERBPRESET_MEDIUMROOM: fprintf(stdout, "SL_REVERBPRESET_MEDIUMROOM\n"); break;
+        case SL_REVERBPRESET_LARGEROOM: fprintf(stdout, "SL_REVERBPRESET_LARGEROOM\n"); break;
+        case SL_REVERBPRESET_MEDIUMHALL: fprintf(stdout, "SL_REVERBPRESET_MEDIUMHALL\n"); break;
+        case SL_REVERBPRESET_LARGEHALL: fprintf(stdout, "SL_REVERBPRESET_LARGEHALL\n"); break;
+        case SL_REVERBPRESET_PLATE: fprintf(stdout, "SL_REVERBPRESET_PLATE\n"); break;
+        default:
+            fprintf(stdout, "unknown, use at your own risk\n"); break;
+    }
+    result = (*reverbItf)->SetPreset(reverbItf, preset);
+    ExitOnError(result);
 
     /* ------------------------------------------------------ */
     /* Configuration of the player  */
@@ -121,7 +150,7 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
     required[0] = SL_BOOLEAN_TRUE;
     iidArray[0] = SL_IID_PREFETCHSTATUS;
     required[1] = SL_BOOLEAN_TRUE;
-    iidArray[1] = SL_IID_BASSBOOST;
+    iidArray[1] = SL_IID_EFFECTSEND;
 
 #ifdef ANDROID
     /* Setup the data source structure for the URI */
@@ -160,32 +189,17 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
     result = (*player)->Realize(player, SL_BOOLEAN_FALSE); ExitOnError(result);
     fprintf(stdout, "URI example: after Realize\n");
 
-    /* Get the SLPlayItf, SLPrefetchStatusItf and SLBassBoostItf interfaces for the player */
+    /* Get the SLPlayItf, SLPrefetchStatusItf and SLEffectSendItf interfaces for the player*/
     result = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf);
     ExitOnError(result);
 
-    result = (*player)->GetInterface(player, SL_IID_PREFETCHSTATUS, (void*)&prefetchItf);
-    ExitOnError(result);
-
-    result = (*player)->GetInterface(player, SL_IID_BASSBOOST, (void*)&bbItf);
+    result = (*player)->GetInterface(player, SL_IID_EFFECTSEND, (void*)&effectSendItf);
     ExitOnError(result);
 
     fprintf(stdout, "Player configured\n");
 
     /* ------------------------------------------------------ */
     /* Playback and test */
-
-    /* Start the data prefetching by setting the player to the paused state */
-    result = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PAUSED );
-    ExitOnError(result);
-
-    /* Wait until there's data to play */
-    SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
-    while (prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) {
-        usleep(100 * 1000);
-        (*prefetchItf)->GetPrefetchStatus(prefetchItf, &prefetchStatus);
-        ExitOnError(result);
-    }
 
     /* Get duration */
     SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
@@ -195,45 +209,35 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
         durationInMsec = 5000;
     }
 
+    /* Feed the output mix' reverb from the audio player using the given send level */
+    result = (*effectSendItf)->EnableEffectSend(effectSendItf, reverbItf, SL_BOOLEAN_TRUE,
+            sendLevel);
+    ExitOnError(result);
+
+    result = (*effectSendItf)->SetDirectLevel(effectSendItf, directLevel);
+    ExitOnError(result);
+    fprintf(stdout, "Set direct level to %dmB\n", directLevel);
+
+    result = (*effectSendItf)->SetSendLevel(effectSendItf, reverbItf, sendLevel);
+    ExitOnError(result);
+    fprintf(stdout, "Set send level to %dmB\n", sendLevel);
+
     /* Start playback */
-    fprintf(stdout, "Starting to play\n");
-    result = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_PLAYING );
+    result = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PLAYING );
     ExitOnError(result);
 
-    /* Configure BassBoost */
-    SLboolean strengthSupported = SL_BOOLEAN_FALSE;
-    result = (*bbItf)->IsStrengthSupported(bbItf, &strengthSupported);
-    ExitOnError(result);
-    if (SL_BOOLEAN_FALSE == strengthSupported) {
-        fprintf(stdout, "BassBoost strength is not supported on this platform. Too bad!\n");
-    } else {
-        fprintf(stdout, "BassBoost strength is supported, setting strength to %d\n", boostStrength);
-        result = (*bbItf)->SetStrength(bbItf, boostStrength);
-        ExitOnError(result);
-    }
-
-    SLpermille strength = 0;
-    result = (*bbItf)->GetRoundedStrength(bbItf, &strength);
-    ExitOnError(result);
-    fprintf(stdout, "Rounded strength of boost = %d\n", strength);
-
-
-    /* Switch BassBoost on/off every TIME_S_BETWEEN_BB_ON_OFF seconds */
+    /* Disable preset reverb every TIME_S_BETWEEN_SETTING_CHANGE seconds */
     SLboolean enabled = SL_BOOLEAN_TRUE;
-    result = (*bbItf)->SetEnabled(bbItf, enabled);
-    ExitOnError(result);
-    for(unsigned int j=0 ; j<(durationInMsec/(1000*TIME_S_BETWEEN_BB_ON_OFF)) ; j++) {
-        usleep(TIME_S_BETWEEN_BB_ON_OFF * 1000 * 1000);
-        result = (*bbItf)->IsEnabled(bbItf, &enabled);
-        ExitOnError(result);
-        enabled = enabled == SL_BOOLEAN_TRUE ? SL_BOOLEAN_FALSE : SL_BOOLEAN_TRUE;
-        result = (*bbItf)->SetEnabled(bbItf, enabled);
-        if (SL_BOOLEAN_TRUE == enabled) {
-            fprintf(stdout, "BassBoost on\n");
+    for(unsigned int j=0 ; j<(durationInMsec/(1000*TIME_S_BETWEEN_SETTING_CHANGE)) ; j++) {
+        enabled = !enabled;
+        result = (*reverbItf)->SetPreset(reverbItf, enabled ? preset : SL_REVERBPRESET_NONE);
+        if (enabled) {
+            fprintf(stdout, "Reverb on\n");
         } else {
-            fprintf(stdout, "BassBoost off\n");
+            fprintf(stdout, "Reverb off\n");
         }
         ExitOnError(result);
+        usleep(TIME_S_BETWEEN_SETTING_CHANGE * 1000 * 1000);
     }
 
     /* Make sure player is stopped */
@@ -260,17 +264,17 @@ int main(int argc, char* const argv[])
     SLresult    result;
     SLObjectItf sl;
 
-    fprintf(stdout, "OpenSL ES test %s: exercises SLBassBoostItf ", argv[0]);
-    fprintf(stdout, "and AudioPlayer with SLDataLocator_AndroidFD source / OutputMix sink\n");
+    fprintf(stdout, "OpenSL ES test %s: exercises SLEffectSendItf ", argv[0]);
+    fprintf(stdout, "on AudioPlayer and SLPresetReverbItf on OutputMix.\n");
     fprintf(stdout, "Plays the sound file designated by the given path, ");
-    fprintf(stdout, "and applies a bass boost effect of the specified strength,\n");
-    fprintf(stdout, "where strength is a integer value between 0 and 1000.\n");
-    fprintf(stdout, "Every %d seconds, the BassBoost will be turned on and off.\n",
-            TIME_S_BETWEEN_BB_ON_OFF);
+    fprintf(stdout, "and sends a specified amount of energy to a global reverb\n");
+    fprintf(stdout, "(sendLevel in mB), with a given direct level (in mB).\n");
+    fprintf(stdout, "Every %d seconds, the reverb turned on and off.\n",
+            TIME_S_BETWEEN_SETTING_CHANGE);
 
-    if (argc < 3) {
-        fprintf(stdout, "Usage: \t%s path bass_boost_strength\n", argv[0]);
-        fprintf(stdout, "Example: \"%s /sdcard/my.mp3 1000\" \n", argv[0]);
+    if (argc < 5) {
+        fprintf(stdout, "Usage: \t%s path preset directLevel sendLevel\n", argv[0]);
+        fprintf(stdout, "Example: \"%s /sdcard/my.mp3 6 -2000 0\" \n", argv[0]);
         exit(1);
     }
 
@@ -285,8 +289,9 @@ int main(int argc, char* const argv[])
     result = (*sl)->Realize(sl, SL_BOOLEAN_FALSE);
     ExitOnError(result);
 
-    // intentionally not checking that argv[2], the bassboost strength, is between 0 and 1000
-    TestBassBoostPathFromFD(sl, argv[1], (int16_t)atoi(argv[2]));
+    // intentionally not checking that levels are of correct value
+    TestSendToPresetReverb(sl, argv[1], atoi(argv[2]), (SLmillibel)atoi(argv[3]),
+            (SLmillibel)atoi(argv[4]));
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);

@@ -246,7 +246,7 @@ void android_bb_init(int sessionId, IBassBoost* ibb) {
     SL_LOGV("session %d", sessionId);
 
     if (!android_fx_initEffectObj(sessionId, ibb->mBassBoostEffect,
-            &ibb->mBassBoostDescriptor.type,  &ibb->mBassBoostDescriptor.uuid))
+            &ibb->mBassBoostDescriptor.type))
     {
         SL_LOGE("BassBoost effect initialization failed");
         return;
@@ -265,8 +265,7 @@ void android_bb_init(int sessionId, IBassBoost* ibb) {
 void android_eq_init(int sessionId, IEqualizer* ieq) {
     SL_LOGV("session %d", sessionId);
 
-    if (!android_fx_initEffectObj(sessionId, ieq->mEqEffect, &ieq->mEqDescriptor.type,
-            &ieq->mEqDescriptor.uuid)) {
+    if (!android_fx_initEffectObj(sessionId, ieq->mEqEffect, &ieq->mEqDescriptor.type)) {
         SL_LOGE("Equalizer effect initialization failed");
         return;
     }
@@ -339,7 +338,7 @@ void android_virt_init(int sessionId, IVirtualizer* ivi) {
     SL_LOGV("session %d", sessionId);
 
     if (!android_fx_initEffectObj(sessionId, ivi->mVirtualizerEffect,
-            &ivi->mVirtualizerDescriptor.type, &ivi->mVirtualizerDescriptor.uuid)) {
+            &ivi->mVirtualizerDescriptor.type)) {
         SL_LOGE("Virtualizer effect initialization failed");
         return;
     }
@@ -374,8 +373,7 @@ void android_prev_init(IPresetReverb* ipr) {
     SL_LOGV("session is implicitly %d (aux effect)", android::AudioSystem::SESSION_OUTPUT_MIX);
 
     if (!android_fx_initEffectObj(android::AudioSystem::SESSION_OUTPUT_MIX /*sessionId*/,
-            ipr->mPresetReverbEffect,
-            &ipr->mPresetReverbDescriptor.type, &ipr->mPresetReverbDescriptor.uuid)) {
+            ipr->mPresetReverbEffect, &ipr->mPresetReverbDescriptor.type)) {
         SL_LOGE("PresetReverb effect initialization failed");
         return;
     }
@@ -384,13 +382,18 @@ void android_prev_init(IPresetReverb* ipr) {
     uint16_t preset;
     if (android::NO_ERROR == android_prev_getPreset(ipr->mPresetReverbEffect, &preset)) {
         ipr->mPreset = preset;
+        // enable the effect is it has a effective preset loaded
+        ipr->mPresetReverbEffect->setEnabled(SL_REVERBPRESET_NONE != preset);
     }
 }
 
 //-----------------------------------------------------------------------------
 android::status_t android_prev_setPreset(android::sp<android::AudioEffect> pFx, uint16_t preset) {
-    return android_fx_setParam(pFx, REVERB_PARAM_PRESET, sizeof(uint16_t), &preset,
-            sizeof(uint16_t));
+    android::status_t status = android_fx_setParam(pFx, REVERB_PARAM_PRESET, sizeof(uint16_t),
+            &preset, sizeof(uint16_t));
+    // enable the effect if the preset is different from SL_REVERBPRESET_NONE
+    pFx->setEnabled(SL_REVERBPRESET_NONE != preset);
+    return status;
 }
 
 //-----------------------------------------------------------------------------
@@ -405,11 +408,14 @@ void android_erev_init(IEnvironmentalReverb* ier) {
     SL_LOGV("session is implicitly %d (aux effect)", android::AudioSystem::SESSION_OUTPUT_MIX);
 
     if (!android_fx_initEffectObj(android::AudioSystem::SESSION_OUTPUT_MIX /*sessionId*/,
-            ier->mEnvironmentalReverbEffect,
-            &ier->mEnvironmentalReverbDescriptor.type, &ier->mEnvironmentalReverbDescriptor.uuid)) {
+            ier->mEnvironmentalReverbEffect, &ier->mEnvironmentalReverbDescriptor.type)) {
         SL_LOGE("EnvironmentalReverb effect initialization failed");
         return;
     }
+
+    // enable env reverb: other SL ES effects have an explicit SetEnabled() function, and the
+    //  preset reverb state depends on the selected preset.
+    ier->mEnvironmentalReverbEffect->setEnabled(true);
 
     // initialize reverb properties
     SLEnvironmentalReverbSettings properties;
@@ -453,12 +459,14 @@ android::status_t android_erev_getParam(android::sp<android::AudioEffect> pFx,
 //-----------------------------------------------------------------------------
 android::status_t android_fxSend_attach(CAudioPlayer* ap, bool attach,
         android::sp<android::AudioEffect> pFx, SLmillibel sendLevel) {
+
     if ((NULL == ap->mAudioTrack) || (pFx == 0)) {
         return android::INVALID_OPERATION;
     }
 
     if (attach) {
         android::status_t status = ap->mAudioTrack->attachAuxEffect(pFx->id());
+        //SL_LOGV("attachAuxEffect(%d) returned %d", pFx->id(), status);
         if (android::NO_ERROR == status) {
             status =
                 ap->mAudioTrack->setAuxEffectSendLevel( sles_to_android_amplification(sendLevel) );
@@ -535,10 +543,10 @@ SLresult android_fx_statusToResult(android::status_t status) {
 
 //-----------------------------------------------------------------------------
 bool android_fx_initEffectObj(int sessionId, android::sp<android::AudioEffect>& effect,
-        const effect_uuid_t *type,  const effect_uuid_t *uuid) {
+        const effect_uuid_t *type) {
     SL_LOGV("session %d", sessionId);
 
-    effect = new android::AudioEffect(type, uuid,
+    effect = new android::AudioEffect(type, EFFECT_UUID_NULL,
             0,// priority
             0,// effect callback
             0,// callback data
