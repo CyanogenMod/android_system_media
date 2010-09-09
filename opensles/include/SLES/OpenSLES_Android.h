@@ -55,7 +55,6 @@ extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDSTREAMTYPE;
 struct SLAndroidStreamTypeItf_;
 typedef const struct SLAndroidStreamTypeItf_ * const * SLAndroidStreamTypeItf;
 
-
 struct SLAndroidStreamTypeItf_ {
     SLresult (*SetStreamType) (
         SLAndroidStreamTypeItf self,
@@ -78,7 +77,6 @@ extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDEFFECT;
 
 struct SLAndroidEffectItf_;
 typedef const struct SLAndroidEffectItf_ * const * SLAndroidEffectItf;
-
 
 struct SLAndroidEffectItf_ {
 
@@ -107,6 +105,50 @@ struct SLAndroidEffectItf_ {
 
 
 /*---------------------------------------------------------------------------*/
+/* Android Effect Send interface                                             */
+/*---------------------------------------------------------------------------*/
+
+extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDEFFECTSEND;
+
+/** Android Effect Send interface methods */
+
+struct SLAndroidEffectSendItf_;
+typedef const struct SLAndroidEffectSendItf_ * const * SLAndroidEffectSendItf;
+
+struct SLAndroidEffectSendItf_ {
+    SLresult (*EnableEffectSend) (
+        SLEffectSendItf self,
+        SLInterfaceID effectId,
+        SLboolean enable,
+        SLmillibel initialLevel
+    );
+    SLresult (*IsEnabled) (
+        SLEffectSendItf self,
+        SLInterfaceID effectId,
+        SLboolean *pEnable
+    );
+    SLresult (*SetDirectLevel) (
+        SLEffectSendItf self,
+        SLmillibel directLevel
+    );
+    SLresult (*GetDirectLevel) (
+        SLEffectSendItf self,
+        SLmillibel *pDirectLevel
+    );
+    SLresult (*SetSendLevel) (
+        SLEffectSendItf self,
+        SLInterfaceID effectId,
+        SLmillibel sendLevel
+    );
+    SLresult (*GetSendLevel)(
+        SLEffectSendItf self,
+        SLInterfaceID effectId,
+        SLmillibel *pSendLevel
+    );
+};
+
+
+/*---------------------------------------------------------------------------*/
 /* Android Effect Capabilities interface                                     */
 /*---------------------------------------------------------------------------*/
 
@@ -116,7 +158,6 @@ extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDEFFECTCAPABILITIES;
 
 struct SLAndroidEffectCapabilitiesItf_;
 typedef const struct SLAndroidEffectCapabilitiesItf_ * const * SLAndroidEffectCapabilitiesItf;
-
 
 struct SLAndroidEffectCapabilitiesItf_ {
 
