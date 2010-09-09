@@ -39,4 +39,4 @@ $(foreach file,$(test_src_files), \
 
 endif
 # Build the manual test programs.
-include $(call all-subdir-makefiles)
+include $(call all-makefiles-under,$(LOCAL_PATH))
