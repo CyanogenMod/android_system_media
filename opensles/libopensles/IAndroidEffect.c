@@ -38,6 +38,10 @@ static SLresult IAndroidEffect_CreateEffect(SLAndroidEffectItf self,
     } else if (SL_OBJECTID_OUTPUTMIX == IObjectToObjectID(this->mThis)) {
         result = android_genericFx_createEffect(this, effectImplementationId,
                 android::AudioSystem::SESSION_OUTPUT_MIX);
+    } else {
+        // the interface itself is invalid because it is not attached to an AudioPlayer or
+        // an OutputMix
+        result = SL_RESULT_PARAMETER_INVALID;
     }
 
     SL_LEAVE_INTERFACE

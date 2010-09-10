@@ -85,7 +85,8 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
     [MPH_VISUALIZATION] = 25,
 #ifdef ANDROID
     [MPH_ANDROIDSTREAMTYPE] = 26,
-    [MPH_ANDROIDEFFECT] = 27
+    [MPH_ANDROIDEFFECT] = 27,
+    [MPH_ANDROIDEFFECTSEND] = 28
 #endif
 #else
     -1,
@@ -128,10 +129,15 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
 #ifdef ANDROID
     ,
     26, // MPH_ANDROIDSTREAMTYPE
-    27  // MPH_ANDROIDEFFECT
+    27, // MPH_ANDROIDEFFECT
+    -1, // MPH_ANDROIDEFFECTCAPABILITIES
+    28  // MPH_ANDROIDEFFECTSEND
 #else
     ,
-    -1, -1
+    -1, // MPH_ANDROIDSTREAMTYPE
+    -1, // MPH_ANDROIDEFFECT
+    -1, // MPH_ANDROIDEFFECTCAPABILITIES
+    -1  // MPH_ANDROIDEFFECTSEND
 #endif
 #endif
 };

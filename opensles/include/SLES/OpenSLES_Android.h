@@ -81,21 +81,21 @@ typedef const struct SLAndroidEffectItf_ * const * SLAndroidEffectItf;
 struct SLAndroidEffectItf_ {
 
     SLresult (*CreateEffect) (SLAndroidEffectItf self,
-            SLInterfaceID effectId);
+            SLInterfaceID effectImplementationId);
 
     SLresult (*ReleaseEffect) (SLAndroidEffectItf self,
-            SLInterfaceID effectId);
+            SLInterfaceID effectImplementationId);
 
     SLresult (*SetEnabled) (SLAndroidEffectItf self,
-            SLInterfaceID effectId,
+            SLInterfaceID effectImplementationId,
             SLboolean enabled);
 
     SLresult (*IsEnabled) (SLAndroidEffectItf self,
-            SLInterfaceID effectId,
+            SLInterfaceID effectImplementationId,
             SLboolean *pEnabled);
 
     SLresult (*SendCommand) (SLAndroidEffectItf self,
-            SLInterfaceID effectId,
+            SLInterfaceID effectImplementationId,
             SLuint32 command,
             SLuint32 commandSize,
             void *pCommandData,
@@ -117,32 +117,32 @@ typedef const struct SLAndroidEffectSendItf_ * const * SLAndroidEffectSendItf;
 
 struct SLAndroidEffectSendItf_ {
     SLresult (*EnableEffectSend) (
-        SLEffectSendItf self,
-        SLInterfaceID effectId,
+        SLAndroidEffectSendItf self,
+        SLInterfaceID effectImplementationId,
         SLboolean enable,
         SLmillibel initialLevel
     );
     SLresult (*IsEnabled) (
-        SLEffectSendItf self,
-        SLInterfaceID effectId,
+        SLAndroidEffectSendItf self,
+        SLInterfaceID effectImplementationId,
         SLboolean *pEnable
     );
     SLresult (*SetDirectLevel) (
-        SLEffectSendItf self,
+        SLAndroidEffectSendItf self,
         SLmillibel directLevel
     );
     SLresult (*GetDirectLevel) (
-        SLEffectSendItf self,
+        SLAndroidEffectSendItf self,
         SLmillibel *pDirectLevel
     );
     SLresult (*SetSendLevel) (
-        SLEffectSendItf self,
-        SLInterfaceID effectId,
+        SLAndroidEffectSendItf self,
+        SLInterfaceID effectImplementationId,
         SLmillibel sendLevel
     );
     SLresult (*GetSendLevel)(
-        SLEffectSendItf self,
-        SLInterfaceID effectId,
+        SLAndroidEffectSendItf self,
+        SLInterfaceID effectImplementationId,
         SLmillibel *pSendLevel
     );
 };

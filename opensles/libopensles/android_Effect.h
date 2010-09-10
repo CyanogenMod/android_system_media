@@ -91,11 +91,17 @@ extern SLresult android_genericFx_sendCommand(IAndroidEffect* iae, SLInterfaceID
         SLuint32 command, SLuint32 commandSize, void* pCommandData,
         SLuint32 *replySize, void *pReplyData);
 
+extern bool android_genericFx_hasEffect(IAndroidEffect* iae, SLInterfaceID pUuid);
+
+
 /**************************************************************************************************
  * EffectSend functions
  ****************************/
 extern android::status_t android_fxSend_attach(CAudioPlayer* ap, bool attach,
         android::sp<android::AudioEffect> pFx, SLmillibel sendLevel);
+
+extern SLresult android_fxSend_attachToAux(CAudioPlayer* ap, SLInterfaceID pUuid,
+        SLboolean attach, SLmillibel sendLevel);
 
 extern android::status_t android_fxSend_setSendLevel(CAudioPlayer* ap, SLmillibel sendLevel);
 
