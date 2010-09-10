@@ -34,8 +34,9 @@ bool IsInterfaceInitialized(IObject *this, unsigned MPH)
     const ClassTable *class__ = this->mClass;
     assert(NULL != class__);
     int index;
-    if (0 > (index = class__->mMPH_to_index[MPH]))
+    if (0 > (index = class__->mMPH_to_index[MPH])) {
         return false;
+    }
     assert(MAX_INDEX >= class__->mInterfaceCount);
     assert(class__->mInterfaceCount > (unsigned) index);
     switch (this->mInterfaceStates[index]) {
@@ -54,6 +55,71 @@ SLuint32 IObjectToObjectID(IObject *this)
 {
     assert(NULL != this);
     return this->mClass->mObjectID;
+}
+
+
+/** \brief Acquire a strong reference to an object.
+ *  Check that object has the specified "object ID" (which is really a class ID) and is in the
+ *  realized state.  If so, then acquire a strong reference to it and return true.
+ *  Otherwise return false.
+ */
+
+SLresult AcquireStrongRef(IObject *object, SLuint32 expectedObjectID)
+{
+    if (NULL == object) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+    // NTH additional validity checks on address here
+    SLresult result;
+    object_lock_exclusive(object);
+    SLuint32 actualObjectID = IObjectToObjectID(object);
+    if (expectedObjectID != actualObjectID) {
+        SL_LOGE("object %p has object ID %lu but expected %lu", object, actualObjectID,
+            expectedObjectID);
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else if (SL_OBJECT_STATE_REALIZED != object->mState) {
+        SL_LOGE("object %p with object ID %lu is not realized", object, actualObjectID);
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    } else {
+        ++object->mStrongRefCount;
+        result = SL_RESULT_SUCCESS;
+    }
+    object_unlock_exclusive(object);
+    return result;
+}
+
+
+/** \brief Release a strong reference to an object.
+ *  Entry condition: the object is locked.
+ *  Exit condition: the object is unlocked.
+ *  Finishes the destroy if needed.
+ */
+
+void ReleaseStrongRefAndUnlockExclusive(IObject *object)
+{
+    assert(pthread_equal(pthread_self(), object->mOwner));
+    assert(0 < object->mStrongRefCount);
+    if ((0 == --object->mStrongRefCount) && (SL_OBJECT_STATE_DESTROYING == object->mState)) {
+        // FIXME do the destroy here - merge with IDestroy
+        // but can't do this until we move Destroy to the sync thread
+        // as Destroy is now a blocking operation, and to avoid a race
+    } else {
+        object_unlock_exclusive(object);
+    }
+}
+
+
+/** \brief Release a strong reference to an object.
+ *  Entry condition: the object is unlocked.
+ *  Exit condition: the object is unlocked.
+ *  Finishes the destroy if needed.
+ */
+
+void ReleaseStrongRef(IObject *object)
+{
+    assert(NULL != object);
+    object_lock_exclusive(object);
+    ReleaseStrongRefAndUnlockExclusive(object);
 }
 
 
@@ -161,13 +227,19 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
         pDataLocator->mLocatorType = SL_DATALOCATOR_NULL;
         return SL_RESULT_SUCCESS;
     }
+    SLresult result;
     SLuint32 locatorType = *(SLuint32 *)pLocator;
     switch (locatorType) {
+
     case SL_DATALOCATOR_ADDRESS:
         pDataLocator->mAddress = *(SLDataLocator_Address *)pLocator;
-        if (0 < pDataLocator->mAddress.length && NULL == pDataLocator->mAddress.pAddress)
+        // if length is greater than zero, then the address must be non-NULL
+        if (0 < pDataLocator->mAddress.length && NULL == pDataLocator->mAddress.pAddress) {
+            SL_LOGE("pAddress is NULL");
             return SL_RESULT_PARAMETER_INVALID;
+        }
         break;
+
     case SL_DATALOCATOR_BUFFERQUEUE:
         pDataLocator->mBufferQueue = *(SLDataLocator_BufferQueue *)pLocator;
         // number of buffers must be specified, there is no default value, and must not be excessive
@@ -177,108 +249,142 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
             return SL_RESULT_PARAMETER_INVALID;
         }
         break;
+
     case SL_DATALOCATOR_IODEVICE:
         {
         pDataLocator->mIODevice = *(SLDataLocator_IODevice *)pLocator;
         SLuint32 deviceType = pDataLocator->mIODevice.deviceType;
-        if (NULL != pDataLocator->mIODevice.device) {
-            switch (IObjectToObjectID((IObject *) pDataLocator->mIODevice.device)) {
-            case SL_OBJECTID_LEDDEVICE:
-                if (SL_IODEVICE_LEDARRAY != deviceType)
-                    return SL_RESULT_PARAMETER_INVALID;
+        SLObjectItf device = pDataLocator->mIODevice.device;
+        if (NULL != device) {
+            pDataLocator->mIODevice.deviceID = 0;
+            SLuint32 expectedObjectID;
+            switch (deviceType) {
+            case SL_IODEVICE_LEDARRAY:
+                expectedObjectID = SL_OBJECTID_LEDDEVICE;
                 break;
-            case SL_OBJECTID_VIBRADEVICE:
-                if (SL_IODEVICE_VIBRA != deviceType)
-                    return SL_RESULT_PARAMETER_INVALID;
+            case SL_IODEVICE_VIBRA:
+                expectedObjectID = SL_OBJECTID_VIBRADEVICE;
                 break;
+            // audio input and audio output cannot be specified via objects
+            case SL_IODEVICE_AUDIOINPUT:
+            // worse yet, an SL_IODEVICE enum constant for audio output does not exist yet
+            // case SL_IODEVICE_AUDIOOUTPUT:
             default:
+                SL_LOGE("invalid deviceType %lu", deviceType);
+                pDataLocator->mIODevice.device = NULL;
                 return SL_RESULT_PARAMETER_INVALID;
             }
-            pDataLocator->mIODevice.deviceID = 0;
+            // check that device has the correct object ID and is realized,
+            // and acquire a strong reference to it
+            result = AcquireStrongRef((IObject *) device, expectedObjectID);
+            if (SL_RESULT_SUCCESS != result) {
+                SL_LOGE("locator type is IODEVICE, but device field %p has wrong object ID or is " \
+                    "not realized", device);
+                pDataLocator->mIODevice.device = NULL;
+                return result;
+            }
         } else {
-            switch (pDataLocator->mIODevice.deviceID) {
-            case SL_DEFAULTDEVICEID_LED:
-                if (SL_IODEVICE_LEDARRAY != deviceType)
+            SLuint32 deviceID = pDataLocator->mIODevice.deviceID;
+            // FIXME this section should be OEM-configurable
+            switch (deviceType) {
+            case SL_IODEVICE_LEDARRAY:
+                if (SL_DEFAULTDEVICEID_LED != deviceID) {
+                    SL_LOGE("invalid LED deviceID %lu", deviceID);
                     return SL_RESULT_PARAMETER_INVALID;
+                }
                 break;
-            case SL_DEFAULTDEVICEID_VIBRA:
-                if (SL_IODEVICE_VIBRA != deviceType)
+            case SL_IODEVICE_VIBRA:
+                if (SL_DEFAULTDEVICEID_VIBRA != deviceID) {
+                    SL_LOGE("invalid vibra deviceID %lu", deviceID);
                     return SL_RESULT_PARAMETER_INVALID;
+                }
                 break;
-            case SL_DEFAULTDEVICEID_AUDIOINPUT:
-                if (SL_IODEVICE_AUDIOINPUT != deviceType)
+            case SL_IODEVICE_AUDIOINPUT:
+                if (SL_DEFAULTDEVICEID_AUDIOINPUT != deviceID) {
+                    SL_LOGE("invalid audio input deviceID %lu", deviceID);
                     return SL_RESULT_PARAMETER_INVALID;
+                }
                 break;
             default:
+                SL_LOGE("invalid deviceType %lu", deviceType);
                 return SL_RESULT_PARAMETER_INVALID;
             }
         }
         }
         break;
+
     case SL_DATALOCATOR_MIDIBUFFERQUEUE:
         pDataLocator->mMIDIBufferQueue = *(SLDataLocator_MIDIBufferQueue *)pLocator;
         if (0 == pDataLocator->mMIDIBufferQueue.tpqn)
             pDataLocator->mMIDIBufferQueue.tpqn = 192;
         // number of buffers must be specified, there is no default value, and must not be excessive
         if (!((1 <= pDataLocator->mMIDIBufferQueue.numBuffers) &&
-            (pDataLocator->mMIDIBufferQueue.numBuffers <= 255)))
+            (pDataLocator->mMIDIBufferQueue.numBuffers <= 255))) {
+            SL_LOGE("invalid MIDI buffer queue");
             return SL_RESULT_PARAMETER_INVALID;
+        }
         break;
+
     case SL_DATALOCATOR_OUTPUTMIX:
-        {
         pDataLocator->mOutputMix = *(SLDataLocator_OutputMix *)pLocator;
-        if (NULL == pDataLocator->mOutputMix.outputMix) {
-            SL_LOGE("locatorType is SL_DATALOCATOR_OUTPUTMIX, but outputMix field is NULL");
-            return SL_RESULT_PARAMETER_INVALID;
-        }
-        IObject *outputMixObject = (IObject *) pDataLocator->mOutputMix.outputMix;
-        if (SL_OBJECTID_OUTPUTMIX != IObjectToObjectID(outputMixObject)) {
-            SL_LOGE("locatorType is SL_DATALOCATOR_OUTPUTMIX, but outputMix field does not refer " \
-                "to an SL_OBJECTID_OUTPUTMIX");
-            return SL_RESULT_PARAMETER_INVALID;
-        }
-        if (outputMixObject->mState != SL_OBJECT_STATE_REALIZED) {
-            SL_LOGE("locatorType is SL_DATALOCATOR_OUTPUTMIX, but outputMix field refers to an " \
-                "unrealized SL_OBJECTID_OUTPUTMIX");
-            return SL_RESULT_PRECONDITIONS_VIOLATED;
-        }
-        // FIXME race condition as output mix could disappear, should atomically establish a link
+        // check that output mix object has the correct object ID and is realized,
+        // and acquire a strong reference to it
+        result = AcquireStrongRef((IObject *) pDataLocator->mOutputMix.outputMix,
+            SL_OBJECTID_OUTPUTMIX);
+        if (SL_RESULT_SUCCESS != result) {
+            SL_LOGE("locatorType is SL_DATALOCATOR_OUTPUTMIX, but outputMix field %p does not " \
+                "refer to an SL_OBJECTID_OUTPUTMIX or is not realized", \
+                pDataLocator->mOutputMix.outputMix);
+            pDataLocator->mOutputMix.outputMix = NULL;
+            return result;
         }
         break;
+
     case SL_DATALOCATOR_URI:
         {
         pDataLocator->mURI = *(SLDataLocator_URI *)pLocator;
-        if (NULL == pDataLocator->mURI.URI)
+        if (NULL == pDataLocator->mURI.URI) {
+            SL_LOGE("invalid URI");
             return SL_RESULT_PARAMETER_INVALID;
+        }
+        // NTH verify URI address for validity
         size_t len = strlen((const char *) pDataLocator->mURI.URI);
         SLchar *myURI = (SLchar *) malloc(len + 1);
-        if (NULL == myURI)
+        if (NULL == myURI) {
+            pDataLocator->mURI.URI = NULL;
             return SL_RESULT_MEMORY_FAILURE;
+        }
         memcpy(myURI, pDataLocator->mURI.URI, len + 1);
         // Verify that another thread didn't change the NUL-terminator after we used it
         // to determine length of string to copy. It's OK if the string became shorter.
         if ('\0' != myURI[len]) {
             free(myURI);
+            pDataLocator->mURI.URI = NULL;
             return SL_RESULT_PARAMETER_INVALID;
         }
         pDataLocator->mURI.URI = myURI;
         }
         break;
+
 #ifdef ANDROID
     case SL_DATALOCATOR_ANDROIDFD:
         {
         pDataLocator->mFD = *(SLDataLocator_AndroidFD *)pLocator;
         SL_LOGV("Data locator FD: fd=%ld offset=%lld length=%lld", pDataLocator->mFD.fd,
                 pDataLocator->mFD.offset, pDataLocator->mFD.length);
-        if (-1 == pDataLocator->mFD.fd) {
+        // NTH check against process fd limit
+        if (0 > pDataLocator->mFD.fd) {
             return SL_RESULT_PARAMETER_INVALID;
         }
         }
         break;
 #endif
+
     default:
+        SL_LOGE("invalid locatorType %lu", locatorType);
         return SL_RESULT_PARAMETER_INVALID;
     }
+
     // Verify that another thread didn't change the locatorType field after we used it
     // to determine sizeof struct to copy.
     if (locatorType != pDataLocator->mLocatorType) {
@@ -294,8 +400,23 @@ static void freeDataLocator(DataLocator *pDataLocator)
 {
     switch (pDataLocator->mLocatorType) {
     case SL_DATALOCATOR_URI:
-        free(pDataLocator->mURI.URI);
+        if (NULL != pDataLocator->mURI.URI) {
+            free(pDataLocator->mURI.URI);
+            pDataLocator->mURI.URI = NULL;
+        }
         pDataLocator->mURI.URI = NULL;
+        break;
+    case SL_DATALOCATOR_IODEVICE:
+        if (NULL != pDataLocator->mIODevice.device) {
+            ReleaseStrongRef((IObject *) pDataLocator->mIODevice.device);
+            pDataLocator->mIODevice.device = NULL;
+        }
+        break;
+    case SL_DATALOCATOR_OUTPUTMIX:
+        if (NULL != pDataLocator->mOutputMix.outputMix) {
+            ReleaseStrongRef((IObject *) pDataLocator->mOutputMix.outputMix);
+            pDataLocator->mOutputMix.outputMix = NULL;
+        }
         break;
     default:
         break;
@@ -448,6 +569,7 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
         case SL_DATAFORMAT_MIME:
             pDataFormat->mMIME = *(SLDataFormat_MIME *)pFormat;
             if (NULL != pDataFormat->mMIME.mimeType) {
+                // NTH check address for validity
                 size_t len = strlen((const char *) pDataFormat->mMIME.mimeType);
                 SLchar *myMIME = (SLchar *) malloc(len + 1);
                 if (NULL == myMIME) {
@@ -457,10 +579,11 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
                     // make sure MIME string was not modified asynchronously
                     if ('\0' != myMIME[len]) {
                         free(myMIME);
+                        myMIME = NULL;
                         result = SL_RESULT_PRECONDITIONS_VIOLATED;
                     }
-                    pDataFormat->mMIME.mimeType = myMIME;
                 }
+                pDataFormat->mMIME.mimeType = myMIME;
             }
             break;
 
@@ -487,9 +610,11 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
         SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
             const SLboolean *pInterfaceRequired) {
     // can't request SLSeekItf if data source is a buffer queue
+    // FIXME there are other invalid combinations -- see docs
     if (SL_DATALOCATOR_BUFFERQUEUE == pDataLocatorFormat->mLocator.mLocatorType) {
         SLuint32 i;
         for (i = 0; i < numInterfaces; i++) {
+            // FIXME the == needs work
             if (pInterfaceRequired[i] && (SL_IID_SEEK == pInterfaceIds[i])) {
                 SL_LOGE("can't request SL_IID_SEEK with a buffer queue data source");
                 return SL_RESULT_FEATURE_UNSUPPORTED;
@@ -506,8 +631,10 @@ static void freeDataFormat(DataFormat *pDataFormat)
 {
     switch (pDataFormat->mFormatType) {
     case SL_DATAFORMAT_MIME:
-        free(pDataFormat->mMIME.mimeType);
-        pDataFormat->mMIME.mimeType = NULL;
+        if (NULL != pDataFormat->mMIME.mimeType) {
+            free(pDataFormat->mMIME.mimeType);
+            pDataFormat->mMIME.mimeType = NULL;
+        }
         break;
     default:
         break;
@@ -519,35 +646,45 @@ static void freeDataFormat(DataFormat *pDataFormat)
 
 SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataLocatorFormat)
 {
-    if (NULL == pDataSrc)
+    if (NULL == pDataSrc) {
+        SL_LOGE("pDataSrc NULL");
         return SL_RESULT_PARAMETER_INVALID;
+    }
     SLDataSource myDataSrc = *pDataSrc;
     SLresult result;
     result = checkDataLocator(myDataSrc.pLocator, &pDataLocatorFormat->mLocator);
-    if (SL_RESULT_SUCCESS != result)
+    if (SL_RESULT_SUCCESS != result) {
         return result;
+    }
     switch (pDataLocatorFormat->mLocator.mLocatorType) {
+
     case SL_DATALOCATOR_URI:
     case SL_DATALOCATOR_ADDRESS:
     case SL_DATALOCATOR_BUFFERQUEUE:
     case SL_DATALOCATOR_MIDIBUFFERQUEUE:
+#ifdef ANDROID
+    case SL_DATALOCATOR_ANDROIDFD:
+#endif
         result = checkDataFormat(myDataSrc.pFormat, &pDataLocatorFormat->mFormat);
         if (SL_RESULT_SUCCESS != result) {
             freeDataLocator(&pDataLocatorFormat->mLocator);
             return result;
         }
         break;
+
     case SL_DATALOCATOR_NULL:
     case SL_DATALOCATOR_OUTPUTMIX:
     default:
         // invalid but fall through; the invalid locator will be caught later
         SL_LOGE("mLocatorType=%u", (unsigned) pDataLocatorFormat->mLocator.mLocatorType);
         // keep going
+
     case SL_DATALOCATOR_IODEVICE:
         // for these data locator types, ignore the pFormat as it might be uninitialized
         pDataLocatorFormat->mFormat.mFormatType = SL_DATAFORMAT_NULL;
         break;
     }
+
     pDataLocatorFormat->u.mSource.pLocator = &pDataLocatorFormat->mLocator;
     pDataLocatorFormat->u.mSource.pFormat = &pDataLocatorFormat->mFormat;
     return SL_RESULT_SUCCESS;
@@ -559,8 +696,10 @@ SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataL
 SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLocatorFormat,
         SLuint32 objType)
 {
-    if (NULL == pDataSink)
+    if (NULL == pDataSink) {
+        SL_LOGE("pDataSink NULL");
         return SL_RESULT_PARAMETER_INVALID;
+    }
     SLDataSink myDataSink = *pDataSink;
     SLresult result;
     result = checkDataLocator(myDataSink.pLocator, &pDataLocatorFormat->mLocator);
@@ -580,6 +719,7 @@ SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLoca
 
     case SL_DATALOCATOR_BUFFERQUEUE:
         if (SL_OBJECTID_AUDIOPLAYER == objType) {
+            SL_LOGE("buffer queue can't be used as data sink for audio player");
             return SL_RESULT_PARAMETER_INVALID;
         } else if (SL_OBJECTID_AUDIORECORDER == objType) {
 #ifdef ANDROID
@@ -602,12 +742,14 @@ SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLoca
         // invalid but fall through; the invalid locator will be caught later
         SL_LOGE("mLocatorType=%u", (unsigned) pDataLocatorFormat->mLocator.mLocatorType);
         // keep going
+
     case SL_DATALOCATOR_IODEVICE:
     case SL_DATALOCATOR_OUTPUTMIX:
         // for these data locator types, ignore the pFormat as it might be uninitialized
         pDataLocatorFormat->mFormat.mFormatType = SL_DATAFORMAT_NULL;
         break;
     }
+
     pDataLocatorFormat->u.mSink.pLocator = &pDataLocatorFormat->mLocator;
     pDataLocatorFormat->u.mSink.pFormat = &pDataLocatorFormat->mFormat;
     return SL_RESULT_SUCCESS;
@@ -815,6 +957,7 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
         // avoid zero as a valid instance ID
         this->mInstanceID = i + 1;
 #ifdef USE_SDL
+        // FIXME move to output mix create hook for output mix
         SLboolean unpause = SL_BOOLEAN_FALSE;
         if (SL_OBJECTID_OUTPUTMIX == class__->mObjectID && NULL == thisEngine->mOutputMix) {
             thisEngine->mOutputMix = (COutputMix *) this;
@@ -823,8 +966,9 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
 #endif
         interface_unlock_exclusive(thisEngine);
 #ifdef USE_SDL
-        if (unpause)
+        if (unpause) {
             SDL_PauseAudio(0);
+        }
 #endif
     }
     return this;
@@ -858,6 +1002,7 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         *pEngine = NULL;
 
         if ((0 < numOptions) && (NULL == pEngineOptions)) {
+            SL_LOGE("numOptions=%lu and pEngineOptions=NULL", numOptions);
             result = SL_RESULT_PARAMETER_INVALID;
             break;
         }
@@ -879,19 +1024,23 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
                 lossOfControlGlobal = SL_BOOLEAN_FALSE != (SLboolean) option->data; // normalize
                 break;
             default:
+                SL_LOGE("unknown engine option: feature=%lu data=%lu",
+                    option->feature, option->data);
                 result = SL_RESULT_PARAMETER_INVALID;
                 break;
             }
         }
-        if (SL_RESULT_SUCCESS != result)
+        if (SL_RESULT_SUCCESS != result) {
             break;
+        }
 
         unsigned exposedMask;
         const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
         result = checkInterfaces(pCEngine_class, numInterfaces,
             pInterfaceIds, pInterfaceRequired, &exposedMask);
-        if (SL_RESULT_SUCCESS != result)
+        if (SL_RESULT_SUCCESS != result) {
             break;
+        }
 
         CEngine *this = (CEngine *) construct(pCEngine_class, exposedMask, NULL);
         if (NULL == this) {
@@ -982,6 +1131,3 @@ SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index, SLInterface
 
     SL_LEAVE_GLOBAL
 }
-
-
-/* End */

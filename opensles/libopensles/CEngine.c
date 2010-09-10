@@ -41,6 +41,14 @@ SLresult CEngine_Realize(void *self, SLboolean async)
 }
 
 
+/** \brief Hook called by Object::Resume when an engine is resumed */
+
+SLresult CEngine_Resume(void *self, SLboolean async)
+{
+    return SL_RESULT_SUCCESS;
+}
+
+
 /** \brief Hook called by Object::Destroy when an engine is destroyed */
 
 void CEngine_Destroy(void *self)
@@ -94,4 +102,12 @@ void CEngine_Destroy(void *self)
     SDL_close();
 #endif
 
+}
+
+
+/** \brief Hook called by Object::Destroy before an engine is about to be destroyed */
+
+bool CEngine_PreDestroy(void *self)
+{
+    return true;
 }

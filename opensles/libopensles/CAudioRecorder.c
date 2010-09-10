@@ -35,14 +35,10 @@ SLresult CAudioRecorder_Realize(void *self, SLboolean async)
 
 
 /** \brief Hook called by Object::Resume when an audio recorder is resumed */
+
 SLresult CAudioRecorder_Resume(void *self, SLboolean async)
 {
-    //CAudioRecorder *this = (CAudioRecorder *) self;
-    SLresult result = SL_RESULT_SUCCESS;
-
-    // FIXME implement resume on an AudioRecorder
-
-    return result;
+    return SL_RESULT_SUCCESS;
 }
 
 
@@ -65,4 +61,12 @@ void CAudioRecorder_Destroy(void *self)
 #ifdef ANDROID
     android_audioRecorder_destroy(this);
 #endif
+}
+
+
+/** \brief Hook called by Object::Destroy before an audio recorder is about to be destroyed */
+
+bool CAudioRecorder_PreDestroy(void *self)
+{
+    return true;
 }

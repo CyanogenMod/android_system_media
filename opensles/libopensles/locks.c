@@ -17,7 +17,7 @@
 #include "sles_allinclusive.h"
 
 
-/* Exclusively lock an object */
+/** \brief Exclusively lock an object */
 
 #ifdef USE_DEBUG
 void object_lock_exclusive_(IObject *this, const char *file, int line)
@@ -69,7 +69,7 @@ void object_lock_exclusive(IObject *this)
 #endif
 
 
-/* Exclusively unlock an object and do not report any updates */
+/** \brief Exclusively unlock an object and do not report any updates */
 
 #ifdef USE_DEBUG
 void object_unlock_exclusive_(IObject *this, const char *file, int line)
@@ -94,7 +94,9 @@ void object_unlock_exclusive(IObject *this)
 #endif
 
 
-/* Exclusively unlock an object and report updates to the specified bit-mask of attributes */
+/** \brief Exclusively unlock an object and report updates to the specified bit-mask of
+ *  attributes
+ */
 
 #ifdef USE_DEBUG
 void object_unlock_exclusive_attributes_(IObject *this, unsigned attributes,
@@ -212,7 +214,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
 }
 
 
-/* Wait on the condition variable associated with the object; see pthread_cond_wait */
+/** \brief Wait on the condition variable associated with the object; see pthread_cond_wait */
 
 #ifdef USE_DEBUG
 void object_cond_wait_(IObject *this, const char *file, int line)
@@ -243,7 +245,7 @@ void object_cond_wait(IObject *this)
 #endif
 
 
-/* Signal the condition variable associated with the object; see pthread_cond_signal */
+/** \brief Signal the condition variable associated with the object; see pthread_cond_signal */
 
 void object_cond_signal(IObject *this)
 {
@@ -253,7 +255,9 @@ void object_cond_signal(IObject *this)
 }
 
 
-/* Broadcast the condition variable associated with the object; see pthread_cond_broadcast */
+/** \brief Broadcast the condition variable associated with the object;
+ *  see pthread_cond_broadcast
+ */
 
 void object_cond_broadcast(IObject *this)
 {

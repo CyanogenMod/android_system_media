@@ -41,7 +41,7 @@ typedef struct {
     CAudioPlayer *mAudioPlayer; ///< Mixer examines this track if non-NULL
     const void *mReader;    ///< Pointer to next frame in BufferHeader.mBuffer
     SLuint32 mAvail;        ///< Number of available bytes in the current buffer
-    float mGains[STEREO_CHANNELS]; ///< Computed gain based on volume, mute, solo, stereo position
+    float mGains[STEREO_CHANNELS]; ///< Copied from CAudioPlayer::mGains
     SLuint32 mFramesMixed;  ///< Number of sample frames mixed from track; reset periodically
 } Track;
 

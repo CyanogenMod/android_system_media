@@ -94,11 +94,4 @@ void IOutputMix_init(void *self)
     this->mItf = &IOutputMix_Itf;
     this->mCallback = NULL;
     this->mContext = NULL;
-#ifdef USE_OUTPUTMIXEXT
-    this->mActiveMask = 0;
-    Track *track = &this->mTracks[0];
-    unsigned i;
-    for (i = 0; i < MAX_TRACK; ++i, ++track)
-        track->mAudioPlayer = NULL;
-#endif
 }

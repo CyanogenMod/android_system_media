@@ -35,14 +35,10 @@ SLresult COutputMix_Realize(void *self, SLboolean async)
 
 
 /** \brief Hook called by Object::Resume when an output mix is resumed */
+
 SLresult COutputMix_Resume(void *self, SLboolean async)
 {
-    //COutputMix *this = (COutputMix *) self;
-    SLresult result = SL_RESULT_SUCCESS;
-
-    // FIXME implement resume on an OutputMix
-
-    return result;
+    return SL_RESULT_SUCCESS;
 }
 
 
@@ -55,4 +51,12 @@ void COutputMix_Destroy(void *self)
     COutputMix *this = (COutputMix *) self;
     android_outputMix_destroy(this);
 #endif
+}
+
+
+/** \brief Hook called by Object::Destroy before an output mix is about to be destroyed */
+
+bool COutputMix_PreDestroy(void *self)
+{
+    return true;
 }

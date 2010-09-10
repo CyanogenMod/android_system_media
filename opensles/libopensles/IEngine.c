@@ -25,7 +25,7 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, 
     SL_ENTER_INTERFACE
 
 #ifdef USE_OPTIONAL
-    if (NULL == pDevice || SL_DEFAULTDEVICEID_LED != deviceID) {
+    if ((NULL == pDevice) || (SL_DEFAULTDEVICEID_LED != deviceID)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         *pDevice = NULL;
@@ -57,7 +57,7 @@ static SLresult IEngine_CreateVibraDevice(SLEngineItf self, SLObjectItf *pDevice
     SL_ENTER_INTERFACE
 
 #ifdef USE_OPTIONAL
-    if (NULL == pDevice || SL_DEFAULTDEVICEID_VIBRA != deviceID) {
+    if ((NULL == pDevice) || (SL_DEFAULTDEVICEID_VIBRA != deviceID)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         *pDevice = NULL;
@@ -142,9 +142,8 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         pAudioSrc->pLocator) ? (SLuint16) ((SLDataLocator_BufferQueue *)
                         pAudioSrc->pLocator)->numBuffers : 0;
 
-                    // link this audio player to its associated output mix
+                    // link this audio player to its associated output mix via a strong reference
                     if (SL_DATALOCATOR_OUTPUTMIX == this->mDataSink.mLocator.mLocatorType) {
-                         // FIXME possible race between earlier check and here by atomically linking
                         this->mOutputMix = (COutputMix *)
                             this->mDataSink.mLocator.mOutputMix.outputMix;
                     }
@@ -152,20 +151,23 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
                     result = android_audioPlayer_checkSourceSink(this);
-                    if (SL_RESULT_SUCCESS != result)
+                    if (SL_RESULT_SUCCESS != result) {
                         break;
+                    }
 #endif
 
 #ifdef USE_SNDFILE
                     result = SndFile_checkAudioPlayerSourceSink(this);
-                    if (SL_RESULT_SUCCESS != result)
+                    if (SL_RESULT_SUCCESS != result) {
                         break;
+                    }
 #endif
 
 #ifdef USE_OUTPUTMIXEXT
                     result = IOutputMixExt_checkAudioPlayerSourceSink(this);
-                    if (SL_RESULT_SUCCESS != result)
+                    if (SL_RESULT_SUCCESS != result) {
                         break;
+                    }
 #endif
 
                     // FIXME move to dedicated function
@@ -255,11 +257,13 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 
                     // Check the source and sink parameters, and make a local copy of all parameters
                     result = checkDataSource(pAudioSrc, &this->mDataSource);
-                    if (SL_RESULT_SUCCESS != result)
+                    if (SL_RESULT_SUCCESS != result) {
                         break;
+                    }
                     result = checkDataSink(pAudioSnk, &this->mDataSink, SL_OBJECTID_AUDIORECORDER);
-                    if (SL_RESULT_SUCCESS != result)
+                    if (SL_RESULT_SUCCESS != result) {
                         break;
+                    }
 
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
@@ -299,8 +303,6 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                     }
 #endif
 
-
-
                     // platform-specific initialization
 #ifdef ANDROID
                     android_audioRecorder_create(this);
@@ -311,9 +313,10 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 
                 } while (0);
 
-                if (SL_RESULT_SUCCESS != result)
+                if (SL_RESULT_SUCCESS != result) {
                     (*this->mObject.mItf->Destroy)(&this->mObject.mItf);
-                // or IObject_Destroy
+                    // equivalent to calling IObject_Destroy directly
+                }
             }
 
         }
@@ -335,7 +338,7 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
     SL_ENTER_INTERFACE
 
 #if defined(USE_GAME) || defined(USE_PHONE)
-    if (NULL == pPlayer || NULL == pMIDISrc || NULL == pAudioOutput) {
+    if ((NULL == pPlayer) || (NULL == pMIDISrc) || (NULL == pAudioOutput)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         *pPlayer = NULL;
@@ -350,7 +353,7 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
             } else {
                 // return the new MIDI player object
                 *pPlayer = &this->mObject.mItf;
-                // a fake value
+                // FIXME a fake value - why not use value from IPlay_init? what does CT check for?
                 this->mPlay.mDuration = 0;
             }
         }
@@ -659,8 +662,9 @@ void IEngine_init(void *self)
     this->mInstanceMask = 0;
     this->mChangedMask = 0;
     unsigned i;
-    for (i = 0; i < MAX_INSTANCE; ++i)
+    for (i = 0; i < MAX_INSTANCE; ++i) {
         this->mInstances[i] = NULL;
+    }
     this->mShutdown = SL_BOOLEAN_FALSE;
     this->mShutdownAck = SL_BOOLEAN_FALSE;
 #if defined(ANDROID) && !defined(USE_BACKPORT)
