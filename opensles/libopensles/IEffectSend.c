@@ -185,21 +185,27 @@ static SLresult IEffectSend_SetDirectLevel(SLEffectSendItf self, SLmillibel dire
     } else {
         IEffectSend *this = (IEffectSend *) self;
         interface_lock_exclusive(this);
-        SLmillibel oldDirectLevel = this->mDirectLevel;
-        if (oldDirectLevel != directLevel) {
-            this->mDirectLevel = directLevel;
-#if defined(ANDROID) && !defined(USE_BACKPORT)
-            CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
-                    (CAudioPlayer *) this->mThis : NULL;
-            if (NULL != ap) {
+        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
+                (CAudioPlayer *) this->mThis : NULL;
+        if (NULL != ap) {
+            SLmillibel oldDirectLevel = ap->mDirectLevel;
+            if (oldDirectLevel != directLevel) {
+                ap->mDirectLevel = directLevel;
+#if defined(ANDROID)
                 ap->mAmplFromDirectLevel = sles_to_android_amplification(directLevel);
-            }
+                interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+#else
+                interface_unlock_exclusive(this);
 #endif
-            interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+            } else {
+                interface_unlock_exclusive(this);
+            }
+            result = SL_RESULT_SUCCESS;
         } else {
             interface_unlock_exclusive(this);
+            // the interface itself is invalid because it is not attached to an AudioPlayer
+            result = SL_RESULT_PARAMETER_INVALID;
         }
-        result = SL_RESULT_SUCCESS;
     }
 
     SL_LEAVE_INTERFACE
@@ -214,11 +220,17 @@ static SLresult IEffectSend_GetDirectLevel(SLEffectSendItf self, SLmillibel *pDi
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEffectSend *this = (IEffectSend *) self;
-        interface_lock_peek(this);
-        SLmillibel directLevel = this->mDirectLevel;
-        interface_unlock_peek(this);
-        *pDirectLevel = directLevel;
-        result = SL_RESULT_SUCCESS;
+        interface_lock_shared(this);
+        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
+                (CAudioPlayer *) this->mThis : NULL;
+        if (NULL != ap) {
+            *pDirectLevel = ap->mDirectLevel;
+            result = SL_RESULT_SUCCESS;
+        } else {
+            // the interface itself is invalid because it is not attached to an AudioPlayer
+            result = SL_RESULT_PARAMETER_INVALID;
+        }
+        interface_unlock_shared(this);
     }
 
     SL_LEAVE_INTERFACE
@@ -295,7 +307,6 @@ void IEffectSend_init(void *self)
 {
     IEffectSend *this = (IEffectSend *) self;
     this->mItf = &IEffectSend_Itf;
-    this->mDirectLevel = 0;
     struct EnableLevel *enableLevel = this->mEnableLevels;
     unsigned aux;
     for (aux = 0; aux < AUX_MAX; ++aux, ++enableLevel) {

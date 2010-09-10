@@ -478,6 +478,33 @@ android::status_t android_fxSend_attach(CAudioPlayer* ap, bool attach,
 }
 
 //-----------------------------------------------------------------------------
+/**
+ * pre-condition:
+ *    ap != NULL
+ *    ap->mOutputMix != NULL
+ */
+SLresult android_fxSend_attachToAux(CAudioPlayer* ap, SLInterfaceID pUuid, SLboolean attach,
+        SLmillibel sendLevel) {
+    ssize_t index = ap->mOutputMix->mAndroidEffect.mEffects.indexOfKey(KEY_FROM_GUID(pUuid));
+
+    if (0 > index) {
+        SL_LOGE("invalid effect ID: no such effect attached to the OutputMix");
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+
+    android::AudioEffect* pFx = ap->mOutputMix->mAndroidEffect.mEffects.valueAt(index);
+    if (NULL == pFx) {
+        return SL_RESULT_RESOURCE_ERROR;
+    }
+    if (android::NO_ERROR == android_fxSend_attach( ap, (bool) attach, pFx, sendLevel) ) {
+        return SL_RESULT_SUCCESS;
+    } else {
+        return SL_RESULT_RESOURCE_ERROR;
+    }
+
+}
+
+//-----------------------------------------------------------------------------
 android::status_t android_fxSend_setSendLevel(CAudioPlayer* ap, SLmillibel sendLevel) {
     if (NULL == ap->mAudioTrack) {
         return android::INVALID_OPERATION;
@@ -779,4 +806,11 @@ SLresult android_genericFx_sendCommand(IAndroidEffect* iae, SLInterfaceID pUuid,
     }
 }
 
+//-----------------------------------------------------------------------------
+/**
+ * returns true if the given effect id is present in the AndroidEffect interface
+ */
+bool android_genericFx_hasEffect(IAndroidEffect* iae, SLInterfaceID pUuid) {
+    return( 0 <= iae->mEffects.indexOfKey(KEY_FROM_GUID(pUuid)));
+}
 

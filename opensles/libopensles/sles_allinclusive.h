@@ -517,7 +517,6 @@ struct EnableLevel {
 typedef struct {
     const struct SLEffectSendItf_ *mItf;
     IObject *mThis;
-    SLmillibel mDirectLevel;    // dry volume
     struct EnableLevel mEnableLevels[AUX_MAX];  // wet enable and volume per effect type
 } IEffectSend;
 
@@ -864,6 +863,14 @@ typedef struct {
     effect_descriptor_t* mFxDescriptors;
 } IAndroidEffectCapabilities;
 
+typedef struct {
+    const struct SLAndroidEffectSendItf_ *mItf;
+    IObject *mThis;
+    // only one send per interface for now (1 bus)
+    SLboolean mEnabled;
+    SLmillibel mSendLevel; //android::KeyedVector<SLuint32, SLmillibel> mSendLevels;
+} IAndroidEffectSend;
+
 #if defined(ANDROID) && !defined(USE_BACKPORT)
 // FIXME this include is done here so the effect structures have been defined. Messy.
 #include "android_Effect.h"
@@ -896,7 +903,7 @@ enum AndroidObject_state {
 /*typedef*/ struct CAudioPlayer_struct {
     IObject mObject;
 #ifdef ANDROID
-#define INTERFACES_AudioPlayer 28 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
+#define INTERFACES_AudioPlayer 29 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
 #else
 #define INTERFACES_AudioPlayer 26 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
 #endif
@@ -919,6 +926,7 @@ enum AndroidObject_state {
 #ifdef ANDROID
     IAndroidStreamType  mAndroidStreamType;
     IAndroidEffect mAndroidEffect;
+    IAndroidEffectSend mAndroidEffectSend;
 #endif
     // optional interfaces
     I3DMacroscopic m3DMacroscopic;
@@ -967,7 +975,11 @@ enum AndroidObject_state {
      */
     float mAmplFromStereoPos[STEREO_CHANNELS];
     /**
-     * Attenuation factor derived from direct level in EffectSend
+     * Dry volume modified by effect send interfaces: SLEffectSendItf and SLAndroidEffectSendItf
+     */
+    SLmillibel mDirectLevel;
+    /**
+     * Attenuation factor derived from direct level
      */
     float mAmplFromDirectLevel;
 #endif

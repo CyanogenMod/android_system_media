@@ -692,7 +692,8 @@ SLresult android_audioPlayer_create(
     pAudioPlayer->mAmplFromVolLevel = 1.0f;
     pAudioPlayer->mAmplFromStereoPos[0] = 1.0f;
     pAudioPlayer->mAmplFromStereoPos[1] = 1.0f;
-    pAudioPlayer->mAmplFromDirectLevel = 1.0f;
+    pAudioPlayer->mDirectLevel = 0; // no attenuation
+    pAudioPlayer->mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
 
     return result;
 
