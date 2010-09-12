@@ -209,23 +209,17 @@ void audioPlayer_dispatch_headAtEnd_lockPlay(CAudioPlayer *ap, bool setPlayState
     void * playContext = NULL;
     // SLPlayItf callback or no callback?
     if (needToLock) {
-        interface_lock_peek(&ap->mPlay);
+        interface_lock_exclusive(&ap->mPlay);
     }
     if (ap->mPlay.mEventFlags & SL_PLAYEVENT_HEADATEND) {
         playCallback = ap->mPlay.mCallback;
         playContext = ap->mPlay.mContext;
     }
-    if (needToLock) {
-        interface_unlock_peek(&ap->mPlay);
-    }
     if (setPlayStateToPaused) {
-        if (needToLock) {
-            interface_lock_poke(&ap->mPlay)
-            ap->mPlay.mState = SL_PLAYSTATE_PAUSED;
-            interface_unlock_poke(&ap->mPlay);
-        } else {
-            ap->mPlay.mState = SL_PLAYSTATE_PAUSED;
-        }
+        ap->mPlay.mState = SL_PLAYSTATE_PAUSED;
+    }
+    if (needToLock) {
+        interface_unlock_exclusive(&ap->mPlay);
     }
     // callback with no lock held
     if (NULL != playCallback) {
@@ -686,7 +680,6 @@ SLresult android_audioPlayer_create(
     pAudioPlayer->mAudioTrack = NULL;
 #ifndef USE_BACKPORT
     pAudioPlayer->mSfPlayer.clear();
-    pAudioPlayer->mRenderLooper.clear();
 #endif
 
     pAudioPlayer->mAmplFromVolLevel = 1.0f;
@@ -749,13 +742,10 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         object_lock_exclusive(&pAudioPlayer->mObject);
         pAudioPlayer->mAndroidObjState = ANDROID_PREPARING;
 
-        pAudioPlayer->mRenderLooper = new android::ALooper();
-        pAudioPlayer->mSfPlayer = new android::SfPlayer(pAudioPlayer->mRenderLooper);
+        pAudioPlayer->mSfPlayer = new android::SfPlayer();
         pAudioPlayer->mSfPlayer->setNotifListener(sfplayer_handlePrefetchEvent,
-                (void*)pAudioPlayer /*notifUSer*/);
-        pAudioPlayer->mRenderLooper->registerHandler(pAudioPlayer->mSfPlayer);
-        pAudioPlayer->mRenderLooper->start(false /*runOnCallingThread*/, false /*canCallJava*/,
-                ANDROID_PRIORITY_AUDIO);
+                        (void*)pAudioPlayer /*notifUSer*/);
+        pAudioPlayer->mSfPlayer->armLooper();
         object_unlock_exclusive(&pAudioPlayer->mObject);
 
         int res;
@@ -825,8 +815,8 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     if (ANDROID_UNINITIALIZED == pAudioPlayer->mAndroidObjState) {
         return result;
     }
-    // proceed with effect initialization
 
+    // proceed with effect initialization
     int sessionId = pAudioPlayer->mAudioTrack->getSessionId();
     // initialize EQ
     // FIXME use a table of effect descriptors when adding support for more effects
@@ -918,12 +908,8 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     //-----------------------------------
     // MediaPlayer
     case MEDIAPLAYER:
-        // FIXME group in one function?
-        if (pAudioPlayer->mSfPlayer != NULL) {
-            pAudioPlayer->mRenderLooper->stop();
-            pAudioPlayer->mRenderLooper->unregisterHandler(pAudioPlayer->mSfPlayer->id());
+        if (pAudioPlayer->mSfPlayer != 0) {
             pAudioPlayer->mSfPlayer.clear();
-            pAudioPlayer->mRenderLooper.clear();
         }
         break;
 #endif

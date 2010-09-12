@@ -964,7 +964,6 @@ enum AndroidObject_state {
     android::AudioTrack *mAudioTrack;
 #ifndef USE_BACKPORT
     android::sp<android::SfPlayer> mSfPlayer;
-    android::sp<android::ALooper>  mRenderLooper;
 #endif
     /**
      * Amplification (can be attenuation) factor derived for the VolumeLevel
