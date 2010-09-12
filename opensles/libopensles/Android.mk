@@ -52,6 +52,7 @@ LOCAL_SRC_FILES:=                     \
         I3DLocation.c                 \
         I3DMacroscopic.c              \
         I3DSource.c                   \
+        IAndroidConfiguration.c       \
         IAndroidEffect.c              \
         IAndroidEffectCapabilities.c  \
         IAndroidEffectSend.c          \

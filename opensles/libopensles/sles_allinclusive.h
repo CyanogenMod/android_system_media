@@ -871,6 +871,11 @@ typedef struct {
     SLmillibel mSendLevel; //android::KeyedVector<SLuint32, SLmillibel> mSendLevels;
 } IAndroidEffectSend;
 
+typedef struct {
+    const struct SLAndroidConfigurationItf_ *mItf;
+    IObject *mThis;
+} IAndroidConfiguration;
+
 #if defined(ANDROID) && !defined(USE_BACKPORT)
 // FIXME this include is done here so the effect structures have been defined. Messy.
 #include "android_Effect.h"
@@ -989,7 +994,7 @@ enum AndroidObject_state {
     // mandated interfaces
     IObject mObject;
 #ifdef ANDROID
-#define INTERFACES_AudioRecorder 10 // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
+#define INTERFACES_AudioRecorder 11 // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
 #else
 #define INTERFACES_AudioRecorder 9  // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
 #endif
@@ -1005,6 +1010,7 @@ enum AndroidObject_state {
     IVolume mVolume;
 #ifdef ANDROID
     IBufferQueue mBufferQueue;
+    IAndroidConfiguration mAndroidConfiguration;
 #endif
     // rest of fields are not related to the interfaces
     DataLocatorFormat mDataSource;
