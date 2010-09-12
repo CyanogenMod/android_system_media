@@ -44,7 +44,7 @@ namespace android {
     typedef void (*notif_client_t)(int event, const int data1, void* notifUser);
 
 struct SfPlayer : public AHandler {
-    SfPlayer(const sp<ALooper> &renderLooper);
+    SfPlayer();
 
     enum CacheStatus {
         kStatusEmpty = 0,
@@ -60,6 +60,7 @@ struct SfPlayer : public AHandler {
         kEventEndOfStream             = 'eos',
     };
 
+    void armLooper();
     void useAudioTrack(AudioTrack* pTrack);
     void setNotifListener(const notif_client_t cbf, void* notifUser);
 
@@ -129,7 +130,7 @@ private:
 
     AudioTrack *mAudioTrack;
 
-    wp<ALooper> mRenderLooper;
+    sp<ALooper> mRenderLooper;
     sp<DataSource> mDataSource;
     sp<MediaSource> mAudioSource;
     uint32_t mFlags;

@@ -32,9 +32,8 @@
 
 namespace android {
 
-SfPlayer::SfPlayer(const sp<ALooper> &renderLooper)
+SfPlayer::SfPlayer()
     : mAudioTrack(NULL),
-      mRenderLooper(renderLooper),
       mFlags(0),
       mBitrate(-1),
       mNumChannels(1),
@@ -48,11 +47,17 @@ SfPlayer::SfPlayer(const sp<ALooper> &renderLooper)
       mNotifyClient(NULL),
       mNotifyUser(NULL),
       mDecodeBuffer(NULL) {
+
+      mRenderLooper = new android::ALooper();
 }
 
 
 SfPlayer::~SfPlayer() {
     LOGV("SfPlayer::~SfPlayer()");
+
+    mRenderLooper->stop();
+    mRenderLooper->unregisterHandler(this->id());
+    mRenderLooper.clear();
 
     if (mAudioSource != NULL) {
         {
@@ -69,6 +74,11 @@ SfPlayer::~SfPlayer() {
     resetDataLocator();
 }
 
+void SfPlayer::armLooper() {
+    mRenderLooper->registerHandler(this);
+    mRenderLooper->start(false /*runOnCallingThread*/, false /*canCallJava*/,
+            ANDROID_PRIORITY_AUDIO);
+}
 
 void SfPlayer::useAudioTrack(AudioTrack* pTrack) {
     mAudioTrack = pTrack;
