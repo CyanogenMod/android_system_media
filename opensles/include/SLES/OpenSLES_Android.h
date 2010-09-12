@@ -175,6 +175,30 @@ struct SLAndroidEffectCapabilitiesItf_ {
 
 
 /*---------------------------------------------------------------------------*/
+/* Android Configuration interface                                           */
+/*---------------------------------------------------------------------------*/
+extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDCONFIGURATION;
+
+/** Android Configuration interface methods */
+
+struct SLAndroidConfigurationItf_;
+typedef const struct SLAndroidConfigurationItf_ * const * SLAndroidConfigurationItf;
+
+struct SLAndroidConfigurationItf_ {
+
+    SLresult (*SetConfiguration) (SLAndroidConfigurationItf self,
+            const SLchar *configKey,
+            const void *pConfigValue,
+            SLuint32 valueSize);
+
+    SLresult (*GetConfiguration) (SLAndroidConfigurationItf self,
+           const SLchar *configKey,
+           SLuint32 *pValueSize,
+           void *pConfigValue
+       );
+};
+
+/*---------------------------------------------------------------------------*/
 /* Android File Descriptor Data Locator                                      */
 /*---------------------------------------------------------------------------*/
 /** Addendum to Data locator macros  */

@@ -79,9 +79,10 @@
 #define MPH_ANDROIDEFFECT              46
 #define MPH_ANDROIDEFFECTCAPABILITIES  47
 #define MPH_ANDROIDEFFECTSEND          48
+#define MPH_ANDROIDCONFIGURATION       49
 // end non-standard and platform-specific interface IDs
 
 // total number
-#define MPH_MAX                        49
+#define MPH_MAX                        50
 
 #endif // !defined(__MPH_H)
