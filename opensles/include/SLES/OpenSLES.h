@@ -991,6 +991,8 @@ struct SLPlayItf_ {
 
 #define SL_PREFETCHEVENT_STATUSCHANGE		((SLuint32) 0x00000001)
 #define SL_PREFETCHEVENT_FILLLEVELCHANGE	((SLuint32) 0x00000002)
+#define SL_PREFETCHEVENT_ERROR			((SLuint32) 0x00000003)
+#define SL_PREFETCHEVENT_ERROR_UNRECOVERABLE	((SLuint32) 0x00000004)
 
 #define SL_PREFETCHSTATUS_UNDERFLOW		((SLuint32) 0x00000001)
 #define SL_PREFETCHSTATUS_SUFFICIENTDATA	((SLuint32) 0x00000002)
@@ -2652,13 +2654,13 @@ struct SLEngineItf_ {
         SLuint32 * pNumExtensions
     );
     SLresult (*QuerySupportedExtension) (
-        SLEngineItf self, 
+        SLEngineItf self,
         SLuint32 index,
         SLchar * pExtensionName,
         SLint16 * pNameLength
     );
     SLresult (*IsExtensionSupported) (
-        SLEngineItf self, 
+        SLEngineItf self,
         const SLchar * pExtensionName,
         SLboolean * pSupported
     );
