@@ -283,6 +283,7 @@ static SLresult IObject_GetState(SLObjectItf self, SLuint32 *pState)
         case SL_OBJECT_STATE_REALIZING_1:
         case SL_OBJECT_STATE_REALIZING_1A:
         case SL_OBJECT_STATE_REALIZING_2:
+        case SL_OBJECT_STATE_DESTROYING:    // application shouldn't call GetState after Destroy
             state = SL_OBJECT_STATE_UNREALIZED;
             break;
         case SL_OBJECT_STATE_RESUMING_1:
@@ -375,23 +376,39 @@ static SLresult IObject_RegisterCallback(SLObjectItf self,
 }
 
 
-// internal common code for Abort and Destroy
+/** \brief This is internal common code for Abort and Destroy.
+ *  Note: called with mutex unlocked, and returns with mutex locked.
+ */
 
-static void Abort_internal(IObject *this, SLboolean shutdown)
+static void Abort_internal(IObject *this)
 {
     const ClassTable *class__ = this->mClass;
+    bool anyAsync = false;
     object_lock_exclusive(this);
+
     // Abort asynchronous operations on the object
     switch (this->mState) {
     case SL_OBJECT_STATE_REALIZING_1:   // Realize
         this->mState = SL_OBJECT_STATE_REALIZING_1A;
+        anyAsync = true;
         break;
     case SL_OBJECT_STATE_RESUMING_1:    // Resume
         this->mState = SL_OBJECT_STATE_RESUMING_1A;
+        anyAsync = true;
+        break;
+    case SL_OBJECT_STATE_REALIZING_1A:  // Realize
+    case SL_OBJECT_STATE_REALIZING_2:
+    case SL_OBJECT_STATE_RESUMING_1A:   // Resume
+    case SL_OBJECT_STATE_RESUMING_2:
+        anyAsync = true;
+        break;
+    case SL_OBJECT_STATE_DESTROYING:
+        assert(false);
         break;
     default:
         break;
     }
+
     // Abort asynchronous operations on interfaces
     SLuint8 *interfaceStateP = this->mInterfaceStates;
     unsigned index;
@@ -399,15 +416,65 @@ static void Abort_internal(IObject *this, SLboolean shutdown)
         switch (*interfaceStateP) {
         case INTERFACE_ADDING_1:    // AddInterface
             *interfaceStateP = INTERFACE_ADDING_1A;
+            anyAsync = true;
             break;
         case INTERFACE_RESUMING_1:  // ResumeInterface
             *interfaceStateP = INTERFACE_RESUMING_1A;
+            anyAsync = true;
+            break;
+        case INTERFACE_ADDING_1A:   // AddInterface
+        case INTERFACE_ADDING_2:
+        case INTERFACE_RESUMING_1A: // ResumeInterface
+        case INTERFACE_RESUMING_2:
+        case INTERFACE_REMOVING:    // RemoveInterface is sync, but partially without a mutex lock
+            anyAsync = true;
             break;
         default:
             break;
         }
     }
-    object_unlock_exclusive(this);
+
+    // Wait until all asynchronous operations either complete normally or recognize the abort
+    while (anyAsync) {
+        object_unlock_exclusive(this);
+        // FIXME should use condition variable instead of polling
+        usleep(20000);
+        anyAsync = false;
+        object_lock_exclusive(this);
+        switch (this->mState) {
+        case SL_OBJECT_STATE_REALIZING_1:   // state 1 means it cycled during the usleep window
+        case SL_OBJECT_STATE_RESUMING_1:
+        case SL_OBJECT_STATE_REALIZING_1A:
+        case SL_OBJECT_STATE_REALIZING_2:
+        case SL_OBJECT_STATE_RESUMING_1A:
+        case SL_OBJECT_STATE_RESUMING_2:
+            anyAsync = true;
+            break;
+        case SL_OBJECT_STATE_DESTROYING:
+            assert(false);
+            break;
+        default:
+            break;
+        }
+        interfaceStateP = this->mInterfaceStates;
+        for (index = 0; index < class__->mInterfaceCount; ++index, ++interfaceStateP) {
+            switch (*interfaceStateP) {
+            case INTERFACE_ADDING_1:    // state 1 means it cycled during the usleep window
+            case INTERFACE_RESUMING_1:
+            case INTERFACE_ADDING_1A:
+            case INTERFACE_ADDING_2:
+            case INTERFACE_RESUMING_1A:
+            case INTERFACE_RESUMING_2:
+            case INTERFACE_REMOVING:
+                anyAsync = true;
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    // At this point there are no pending asynchronous operations
 }
 
 
@@ -416,7 +483,8 @@ static void IObject_AbortAsyncOperation(SLObjectItf self)
     SL_ENTER_INTERFACE_VOID
 
     IObject *this = (IObject *) self;
-    Abort_internal(this, SL_BOOLEAN_FALSE);
+    Abort_internal(this);
+    object_unlock_exclusive(this);
 
     SL_LEAVE_INTERFACE_VOID
 }
@@ -427,16 +495,35 @@ static void IObject_Destroy(SLObjectItf self)
     SL_ENTER_INTERFACE_VOID
 
     IObject *this = (IObject *) self;
-    Abort_internal(this, SL_BOOLEAN_TRUE);
+    // mutex is unlocked
+    Abort_internal(this);
+    // mutex is locked
     const ClassTable *class__ = this->mClass;
+    BoolHook preDestroy = class__->mPreDestroy;
+    // The pre-destroy hook is called with mutex locked, and should block until it is safe to
+    // destroy.  It is OK to unlock the mutex temporarily, as it long as it re-locks the mutex
+    // before returning.
+    if (NULL != preDestroy) {
+        bool okToDestroy = (*preDestroy)(this);
+        if (!okToDestroy) {
+            object_unlock_exclusive(this);
+            // unfortunately Destroy doesn't return a result
+            SL_LOGE("Object::Destroy(%p) not allowed", this);
+            SL_LEAVE_INTERFACE_VOID
+        }
+    }
+    this->mState = SL_OBJECT_STATE_DESTROYING;
     VoidHook destroy = class__->mDestroy;
     // const, no lock needed
     IEngine *thisEngine = this->mEngine;
     unsigned i = this->mInstanceID;
     assert(0 < i && i <= MAX_INSTANCE);
     --i;
+    // avoid a recursive lock on the engine when destroying the engine itself
+    if (thisEngine->mThis != this) {
+        interface_lock_exclusive(thisEngine);
+    }
     // remove object from exposure to sync thread and debugger
-    interface_lock_exclusive(thisEngine);
     assert(0 < thisEngine->mInstanceCount);
     --thisEngine->mInstanceCount;
     assert(0 != thisEngine->mInstanceMask);
@@ -452,8 +539,10 @@ static void IObject_Destroy(SLObjectItf self)
         // Note we don't attempt to connect another output mix to SDL
     }
 #endif
-    interface_unlock_exclusive(thisEngine);
-    object_lock_exclusive(this);
+    // avoid a recursive unlock on the engine when destroying the engine itself
+    if (thisEngine->mThis != this) {
+        interface_unlock_exclusive(thisEngine);
+    }
     // The destroy hook is called with mutex locked
     if (NULL != destroy) {
         (*destroy)(this);
@@ -577,8 +666,10 @@ static SLresult IObject_SetLossOfControlInterfaces(SLObjectItf self,
                 }
                 int MPH, index;
                 // We ignore without error any invalid MPH or index, but spec is unclear
-                if ((0 <= (MPH = IID_to_MPH(iid))) && (0 <= (index = class__->mMPH_to_index[MPH])))
+                if ((0 <= (MPH = IID_to_MPH(iid))) && (0 <=
+                    (index = class__->mMPH_to_index[MPH]))) {
                     lossOfControlMask |= (1 << index);
+                }
             }
             object_lock_exclusive(this);
             if (enabled) {
@@ -633,6 +724,7 @@ void IObject_init(void *self)
     this->mPriority = SL_PRIORITY_NORMAL;
     this->mPreemptable = SL_BOOLEAN_FALSE;
 #endif
+    this->mStrongRefCount = 0;
     int ok;
     ok = pthread_mutex_init(&this->mMutex, (const pthread_mutexattr_t *) NULL);
     assert(0 == ok);

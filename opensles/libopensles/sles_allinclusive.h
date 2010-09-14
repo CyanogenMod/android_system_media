@@ -96,6 +96,7 @@ typedef struct COutputMix_struct COutputMix;
 typedef void (*VoidHook)(void *self);
 typedef SLresult (*StatusHook)(void *self);
 typedef SLresult (*AsyncHook)(void *self, SLboolean async);
+typedef bool (*BoolHook)(void *self);
 
 // Describes how an interface is related to a given class
 
@@ -187,6 +188,7 @@ typedef struct {
     AsyncHook mRealize;
     AsyncHook mResume;
     VoidHook mDestroy;
+    BoolHook mPreDestroy;
 } ClassTable;
 
 // BufferHeader describes each element of a BufferQueue, other than the data
@@ -292,8 +294,10 @@ typedef struct Object_interface {
 #else
     SLuint8 mPadding;
 #endif
+    SLuint8 mStrongRefCount;        // number of strong references to this object
+    // (object cannot be destroyed as long as > 0, and referrers _prefer_ it stay in Realized state)
     // for best alignment, do not add any fields here
-#define INTERFACES_Default 2
+#define INTERFACES_Default 1
     SLuint8 mInterfaceStates[INTERFACES_Default];    // state of each of interface
     // do not add any fields here
 } IObject;
@@ -675,16 +679,14 @@ typedef struct {
     IObject *mThis;
     slMixDeviceChangeCallback mCallback;
     void *mContext;
-#ifdef USE_OUTPUTMIXEXT
-    unsigned mActiveMask;   // 1 bit per active track
-    Track mTracks[MAX_TRACK];
-#endif
 } IOutputMix;
 
 #ifdef USE_OUTPUTMIXEXT
 typedef struct {
     const struct SLOutputMixExtItf_ *mItf;
     IObject *mThis;
+    unsigned mActiveMask;   // 1 bit per active track
+    Track mTracks[MAX_TRACK];
 } IOutputMixExt;
 #endif
 
@@ -955,9 +957,16 @@ enum AndroidObject_state {
     SLuint8 mSoloMask;      // Mask for which channels are soloed: bit 0=left, 1=right
     SLuint8 mNumChannels;   // 0 means unknown, then const once it is known, range 1 <= x <= 8
     SLuint32 mSampleRateMilliHz;// 0 means unknown, then const once it is known
+    // Formerly at IEffectSend
+    /**
+     * Dry volume modified by effect send interfaces: SLEffectSendItf and SLAndroidEffectSendItf
+     */
+    SLmillibel mDirectLevel;
     // implementation-specific data for this instance
 #ifdef USE_OUTPUTMIXEXT
     Track *mTrack;
+    float mGains[STEREO_CHANNELS];  ///< Computed gain based on volume, mute, solo, stereo position
+    SLboolean mDestroyRequested;    ///< Mixer to acknowledge application's call to Object::Destroy
 #endif
 #ifdef USE_SNDFILE
     struct SndFile mSndFile;
@@ -978,10 +987,6 @@ enum AndroidObject_state {
      * Left/right amplification (can be attenuations) factors derived for the StereoPosition
      */
     float mAmplFromStereoPos[STEREO_CHANNELS];
-    /**
-     * Dry volume modified by effect send interfaces: SLEffectSendItf and SLAndroidEffectSendItf
-     */
-    SLmillibel mDirectLevel;
     /**
      * Attenuation factor derived from direct level
      */
@@ -1043,7 +1048,9 @@ typedef struct {
     IAudioDecoderCapabilities mAudioDecoderCapabilities;
     IAudioEncoderCapabilities mAudioEncoderCapabilities;
     I3DCommit m3DCommit;
+#ifdef ANDROID
     IAndroidEffectCapabilities mAndroidEffectCapabilities;
+#endif
     // optional interfaces
     IDeviceVolume mDeviceVolume;
     // rest of fields are not related to the interfaces
@@ -1213,18 +1220,24 @@ extern SLresult checkSourceFormatVsInterfacesCompatibility(
 extern void freeDataLocatorFormat(DataLocatorFormat *dlf);
 
 extern SLresult CAudioPlayer_Realize(void *self, SLboolean async);
+extern SLresult CAudioPlayer_Resume(void *self, SLboolean async);
 extern void CAudioPlayer_Destroy(void *self);
+extern bool CAudioPlayer_PreDestroy(void *self);
 
 extern SLresult CAudioRecorder_Realize(void *self, SLboolean async);
 extern SLresult CAudioRecorder_Resume(void *self, SLboolean async);
 extern void CAudioRecorder_Destroy(void *self);
+extern bool CAudioRecorder_PreDestroy(void *self);
 
 extern SLresult CEngine_Realize(void *self, SLboolean async);
+extern SLresult CEngine_Resume(void *self, SLboolean async);
 extern void CEngine_Destroy(void *self);
+extern bool CEngine_PreDestroy(void *self);
 
 extern SLresult COutputMix_Realize(void *self, SLboolean async);
 extern SLresult COutputMix_Resume(void *self, SLboolean async);
 extern void COutputMix_Destroy(void *self);
+extern bool COutputMix_PreDestroy(void *self);
 
 #ifdef USE_SDL
 extern void SDL_open(IEngine *thisEngine);
@@ -1237,6 +1250,7 @@ extern void SDL_close(void);
 #define SL_OBJECT_STATE_SUSPENDING   ((SLuint32) 0x8) // suspend in progress
 #define SL_OBJECT_STATE_REALIZING_1A ((SLuint32) 0x9) // abort while async realize on work queue
 #define SL_OBJECT_STATE_RESUMING_1A  ((SLuint32) 0xA) // abort while async resume on work queue
+#define SL_OBJECT_STATE_DESTROYING   ((SLuint32) 0xB) // destroy object when no strong references
 extern void *sync_start(void *arg);
 extern SLresult err_to_result(int err);
 
@@ -1331,3 +1345,6 @@ extern SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
     slBufferQueueCallback callback, void *pContext);
 
 extern bool IsInterfaceInitialized(IObject *this, unsigned MPH);
+extern SLresult AcquireStrongRef(IObject *object, SLuint32 expectedObjectID);
+extern void ReleaseStrongRef(IObject *object);
+extern void ReleaseStrongRefAndUnlockExclusive(IObject *object);

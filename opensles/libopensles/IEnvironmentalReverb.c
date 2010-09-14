@@ -587,7 +587,6 @@ static SLresult IEnvironmentalReverb_SetDensity(SLEnvironmentalReverbItf self,
         }
 #endif
         interface_unlock_exclusive(this);
-        result = SL_RESULT_SUCCESS;
     }
 
     SL_LEAVE_INTERFACE

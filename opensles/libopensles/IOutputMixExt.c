@@ -21,7 +21,7 @@
 
 #ifdef USE_OUTPUTMIXEXT
 
-// Used by SDL but not specific to or dependent on SDL
+// OutputMixExt is used by SDL, but is not specific to or dependent on SDL
 
 /** \brief Summary of the gain, as an optimization for the mixer */
 
@@ -36,6 +36,7 @@ typedef enum {
 
 static SLboolean track_check(Track *track)
 {
+    assert(NULL != track);
     SLboolean trackHasData = SL_BOOLEAN_FALSE;
 
     CAudioPlayer *audioPlayer = track->mAudioPlayer;
@@ -43,7 +44,10 @@ static SLboolean track_check(Track *track)
 
         // track is initialized
 
+        // FIXME This lock could block and result in stuttering;
+        // a trylock with retry or lockless solution would be ideal
         object_lock_exclusive(&audioPlayer->mObject);
+        assert(audioPlayer->mTrack == track);
 
         SLuint32 framesMixed = track->mFramesMixed;
         if (0 != framesMixed) {
@@ -57,7 +61,7 @@ static SLboolean track_check(Track *track)
 
         if (audioPlayer->mBufferQueue.mClearRequested) {
             // application thread(s) that call BufferQueue::Clear while mixer is active
-            // is active will block synchronously until mixer acknowledges the Clear request
+            // will block synchronously until mixer acknowledges the Clear request
             audioPlayer->mBufferQueue.mFront = &audioPlayer->mBufferQueue.mArray[0];
             audioPlayer->mBufferQueue.mRear = &audioPlayer->mBufferQueue.mArray[0];
             audioPlayer->mBufferQueue.mState.count = 0;
@@ -66,6 +70,23 @@ static SLboolean track_check(Track *track)
             track->mReader = NULL;
             track->mAvail = 0;
             doBroadcast = SL_BOOLEAN_TRUE;
+        }
+
+        if (audioPlayer->mDestroyRequested) {
+            // an application thread that calls Object::Destroy while mixer is active will block
+            // synchronously in the PreDestroy hook until mixer acknowledges the Destroy request
+            COutputMix *outputMix = audioPlayer->mOutputMix;
+            assert(NULL != outputMix);
+            unsigned i = track - outputMix->mOutputMixExt.mTracks;
+            assert( /* 0 <= i && */ i < MAX_TRACK);
+            unsigned mask = 1 << i;
+            track->mAudioPlayer = NULL;
+            assert(outputMix->mOutputMixExt.mActiveMask & mask);
+            outputMix->mOutputMixExt.mActiveMask &= ~mask;
+            audioPlayer->mTrack = NULL;
+            audioPlayer->mDestroyRequested = SL_BOOLEAN_FALSE;
+            doBroadcast = SL_BOOLEAN_TRUE;
+            goto broadcast;
         }
 
         switch (audioPlayer->mPlay.mState) {
@@ -90,6 +111,10 @@ static SLboolean track_check(Track *track)
                 // NTH should be able to call a desperation callback when completely starved,
                 // or call less often than every buffer based on high/low water-marks
             }
+
+            // copy gains from audio player to track
+            track->mGains[0] = audioPlayer->mGains[0];
+            track->mGains[1] = audioPlayer->mGains[1];
             break;
 
         case SL_PLAYSTATE_STOPPING: // application thread(s) called Play::SetPlayState(STOPPED)
@@ -118,6 +143,7 @@ static SLboolean track_check(Track *track)
             break;
         }
 
+broadcast:
         if (doBroadcast) {
             object_cond_broadcast(&audioPlayer->mObject);
         }
@@ -131,7 +157,7 @@ static SLboolean track_check(Track *track)
 }
 
 
-/** \brief This is the mixer for SDL: fill the specified 16-bit stereo PCM buffer */
+/** \brief This is the track mixer: fill the specified 16-bit stereo PCM buffer */
 
 void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 size)
 {
@@ -139,8 +165,7 @@ void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 si
 
     // Force to be a multiple of a frame, assumes stereo 16-bit PCM
     size &= ~3;
-    IOutputMixExt *thisExt = (IOutputMixExt *) self;
-    IOutputMix *this = &((COutputMix *) InterfaceToIObject(thisExt))->mOutputMix;
+    IOutputMixExt *this = (IOutputMixExt *) self;
     unsigned activeMask = this->mActiveMask;
     SLboolean mixBufferHasData = SL_BOOLEAN_FALSE;
     while (activeMask) {
@@ -289,6 +314,12 @@ void IOutputMixExt_init(void *self)
 {
     IOutputMixExt *this = (IOutputMixExt *) self;
     this->mItf = &IOutputMixExt_Itf;
+    this->mActiveMask = 0;
+    Track *track = &this->mTracks[0];
+    unsigned i;
+    for (i = 0; i < MAX_TRACK; ++i, ++track) {
+        track->mAudioPlayer = NULL;
+    }
 }
 
 
@@ -296,23 +327,25 @@ void IOutputMixExt_init(void *self)
 
 void IOutputMixExt_Destroy(CAudioPlayer *this)
 {
+#if 0
     COutputMix *outputMix = this->mOutputMix;
     if (NULL != outputMix) {
         Track *track = this->mTrack;
         assert(NULL != track);
         assert(track->mAudioPlayer == this);
-        unsigned i = track - outputMix->mOutputMix.mTracks;
+        unsigned i = track - outputMix->mOutputMixExt.mTracks;
         assert( /* 0 <= i && */ i < MAX_TRACK);
         unsigned mask = 1 << i;
         // FIXME deadlock possible here due to undocumented lock ordering
         object_lock_exclusive(&outputMix->mObject);
         // FIXME how can we be sure the mixer is not reading from this track right now?
         track->mAudioPlayer = NULL;
-        assert(outputMix->mOutputMix.mActiveMask & mask);
-        outputMix->mOutputMix.mActiveMask &= ~mask;
+        assert(outputMix->mOutputMixExt.mActiveMask & mask);
+        outputMix->mOutputMixExt.mActiveMask &= ~mask;
         object_unlock_exclusive(&outputMix->mObject);
         this->mTrack = NULL;
     }
+#endif
 }
 
 
@@ -327,23 +360,26 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
     case SL_DATALOCATOR_OUTPUTMIX:
         {
         // pAudioSnk->pFormat is ignored
-        IOutputMix *om = &((COutputMix *) ((SLDataLocator_OutputMix *)
-            pAudioSnk->pLocator)->outputMix)->mOutputMix;
+        IOutputMixExt *omExt = &((COutputMix *) ((SLDataLocator_OutputMix *)
+            pAudioSnk->pLocator)->outputMix)->mOutputMixExt;
         // allocate an entry within OutputMix for this track
-        interface_lock_exclusive(om);
-        unsigned availMask = ~om->mActiveMask;
+        interface_lock_exclusive(omExt);
+        unsigned availMask = ~omExt->mActiveMask;
         if (!availMask) {
-            interface_unlock_exclusive(om);
+            interface_unlock_exclusive(omExt);
             // All track slots full in output mix
             return SL_RESULT_MEMORY_FAILURE;
         }
         unsigned i = ctz(availMask);
         assert(MAX_TRACK > i);
-        om->mActiveMask |= 1 << i;
-        track = &om->mTracks[i];
+        omExt->mActiveMask |= 1 << i;
+        track = &omExt->mTracks[i];
         track->mAudioPlayer = NULL;    // only field that is accessed before full initialization
-        interface_unlock_exclusive(om);
+        interface_unlock_exclusive(omExt);
         this->mTrack = track;
+        this->mGains[0] = 1.0f;
+        this->mGains[1] = 1.0f;
+        this->mDestroyRequested = SL_BOOLEAN_FALSE;
         }
         break;
     default:
@@ -369,13 +405,6 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
 
 void audioPlayerGainUpdate(CAudioPlayer *audioPlayer)
 {
-    // FIXME need a lock on the track while updating gain
-    Track *track = audioPlayer->mTrack;
-
-    if (NULL == track) {
-        return;
-    }
-
     SLboolean mute = audioPlayer->mVolume.mMute;
     SLuint8 muteMask = audioPlayer->mMuteMask;
     SLuint8 soloMask = audioPlayer->mSoloMask;
@@ -387,8 +416,8 @@ void audioPlayerGainUpdate(CAudioPlayer *audioPlayer)
         muteMask |= ~soloMask;
     }
     if (mute || !(~muteMask & 3)) {
-        track->mGains[0] = 0.0f;
-        track->mGains[1] = 0.0f;
+        audioPlayer->mGains[0] = 0.0f;
+        audioPlayer->mGains[1] = 0.0f;
     } else {
         float playerGain = powf(10.0f, level / 2000.0f);
         unsigned channel;
@@ -416,7 +445,7 @@ void audioPlayerGainUpdate(CAudioPlayer *audioPlayer)
                     }
                 }
             }
-            track->mGains[channel] = gain;
+            audioPlayer->mGains[channel] = gain;
         }
     }
 }

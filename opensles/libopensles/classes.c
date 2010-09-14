@@ -39,6 +39,7 @@ static const ClassTable C3DGroup_class = {
     SL_OBJECTID_3DGROUP,
     NULL,
     NULL,
+    NULL,
     NULL
 };
 
@@ -96,8 +97,9 @@ static const ClassTable CAudioPlayer_class = {
     sizeof(CAudioPlayer),
     SL_OBJECTID_AUDIOPLAYER,
     CAudioPlayer_Realize,
-    NULL /*CAudioPlayer_Resume*/,
-    CAudioPlayer_Destroy
+    CAudioPlayer_Resume,
+    CAudioPlayer_Destroy,
+    CAudioPlayer_PreDestroy
 };
 
 // AudioRecorder class
@@ -128,7 +130,8 @@ static const ClassTable CAudioRecorder_class = {
     SL_OBJECTID_AUDIORECORDER,
     CAudioRecorder_Realize,
     CAudioRecorder_Resume,
-    CAudioRecorder_Destroy
+    CAudioRecorder_Destroy,
+    CAudioRecorder_PreDestroy
 };
 
 // Engine class
@@ -147,9 +150,11 @@ static const struct iid_vtable Engine_interfaces[INTERFACES_Engine] = {
     {MPH_AUDIOENCODERCAPABILITIES, INTERFACE_EXPLICIT_BASE,
         offsetof(CEngine, mAudioEncoderCapabilities)},
     {MPH_3DCOMMIT, INTERFACE_EXPLICIT_GAME, offsetof(CEngine, m3DCommit)},
-    {MPH_DEVICEVOLUME, INTERFACE_OPTIONAL, offsetof(CEngine, mDeviceVolume)},
-    {MPH_ANDROIDEFFECTCAPABILITIES, INTERFACE_EXPLICIT,
+    {MPH_DEVICEVOLUME, INTERFACE_OPTIONAL, offsetof(CEngine, mDeviceVolume)}
+#ifdef ANDROID
+    , {MPH_ANDROIDEFFECTCAPABILITIES, INTERFACE_EXPLICIT,
         offsetof(CEngine, mAndroidEffectCapabilities)}
+#endif
 };
 
 static const ClassTable CEngine_class = {
@@ -160,8 +165,9 @@ static const ClassTable CEngine_class = {
     sizeof(CEngine),
     SL_OBJECTID_ENGINE,
     CEngine_Realize,
-    NULL,
-    CEngine_Destroy
+    CEngine_Resume,
+    CEngine_Destroy,
+    CEngine_PreDestroy
 };
 
 // LEDDevice class
@@ -180,6 +186,7 @@ static const ClassTable CLEDDevice_class = {
     "LEDDevice",
     sizeof(CLEDDevice),
     SL_OBJECTID_LEDDEVICE,
+    NULL,
     NULL,
     NULL,
     NULL
@@ -204,6 +211,7 @@ static const ClassTable CListener_class = {
     SL_OBJECTID_LISTENER,
     NULL,
     NULL,
+    NULL,
     NULL
 };
 
@@ -225,6 +233,7 @@ static const ClassTable CMetadataExtractor_class = {
     "MetadataExtractor",
     sizeof(CMetadataExtractor),
     SL_OBJECTID_METADATAEXTRACTOR,
+    NULL,
     NULL,
     NULL,
     NULL
@@ -278,6 +287,7 @@ static const ClassTable CMidiPlayer_class = {
     SL_OBJECTID_MIDIPLAYER,
     NULL,
     NULL,
+    NULL,
     NULL
 };
 
@@ -318,7 +328,8 @@ static const ClassTable COutputMix_class = {
     SL_OBJECTID_OUTPUTMIX,
     COutputMix_Realize,
     COutputMix_Resume,
-    COutputMix_Destroy
+    COutputMix_Destroy,
+    COutputMix_PreDestroy
 };
 
 // Vibra class
@@ -337,6 +348,7 @@ static const ClassTable CVibraDevice_class = {
     "VibraDevice",
     sizeof(CVibraDevice),
     SL_OBJECTID_VIBRADEVICE,
+    NULL,
     NULL,
     NULL,
     NULL

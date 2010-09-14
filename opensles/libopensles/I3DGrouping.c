@@ -27,12 +27,11 @@ static SLresult I3DGrouping_Set3DGroup(SL3DGroupingItf self, SLObjectItf group)
     C3DGroup *newGroup = (C3DGroup *) group;
     result = SL_RESULT_SUCCESS;
     if (NULL != newGroup) {
-        if (SL_OBJECTID_3DGROUP != IObjectToObjectID(&newGroup->mObject))
-            result = SL_RESULT_PARAMETER_INVALID;
-        // FIXME race possible if new group unrealized immediately after check, and also
-        //       missing locks later on during the updates to old and new group member masks
-        else if (SL_OBJECT_STATE_REALIZED != newGroup->mObject.mState)
-            result = SL_RESULT_PRECONDITIONS_VIOLATED;
+        // check that new group has the correct object ID and is realized, and acquire a strong
+        // reference to it. FYI note that a deadlock will occur if application incorrectly
+        // specifies group as this audio player
+        result = AcquireStrongRef(&newGroup->mObject, SL_OBJECTID_3DGROUP);
+        // the new group is left unlocked, but it will be locked again below
     }
     if (SL_RESULT_SUCCESS == result) {
         I3DGrouping *this = (I3DGrouping *) self;
@@ -42,13 +41,22 @@ static SLresult I3DGrouping_Set3DGroup(SL3DGroupingItf self, SLObjectItf group)
         if (newGroup != oldGroup) {
             // remove this object from the old group's set of objects
             if (NULL != oldGroup) {
+                IObject *oldGroupObject = &oldGroup->mObject;
+                // note that we already have a strong reference to the old group
+                object_lock_exclusive(oldGroupObject);
                 assert(oldGroup->mMemberMask & mask);
                 oldGroup->mMemberMask &= ~mask;
+                ReleaseStrongRefAndUnlockExclusive(oldGroupObject);
             }
             // add this object to the new group's set of objects
             if (NULL != newGroup) {
+                IObject *newGroupObject = &newGroup->mObject;
+                // we already have a strong reference to the new group, but we need to re-lock it
+                // so that we always lock objects in the same nesting order to prevent a deadlock
+                object_lock_exclusive(newGroupObject);
                 assert(!(newGroup->mMemberMask & mask));
                 newGroup->mMemberMask |= mask;
+                object_unlock_exclusive(newGroupObject);
             }
             this->mGroup = newGroup;
         }
@@ -67,10 +75,10 @@ static SLresult I3DGrouping_Get3DGroup(SL3DGroupingItf self, SLObjectItf *pGroup
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         I3DGrouping *this = (I3DGrouping *) self;
-        interface_lock_peek(this);
+        interface_lock_shared(this);
         C3DGroup *group = this->mGroup;
         *pGroup = (NULL != group) ? &group->mObject.mItf : NULL;
-        interface_unlock_peek(this);
+        interface_unlock_shared(this);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -88,5 +96,4 @@ void I3DGrouping_init(void *self)
     I3DGrouping *this = (I3DGrouping *) self;
     this->mItf = &I3DGrouping_Itf;
     this->mGroup = NULL;
-    // initialize the set here
 }

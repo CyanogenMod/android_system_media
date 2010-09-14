@@ -68,6 +68,14 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
 }
 
 
+/** \brief Hook called by Object::Resume when an audio player is resumed */
+
+SLresult CAudioPlayer_Resume(void *self, SLboolean async)
+{
+    return SL_RESULT_SUCCESS;
+}
+
+
 /** \brief Hook called by Object::Destroy when an audio player is destroyed */
 
 void CAudioPlayer_Destroy(void *self)
@@ -98,4 +106,21 @@ void CAudioPlayer_Destroy(void *self)
 #ifdef ANDROID
     android_audioPlayer_destroy(this);
 #endif
+}
+
+
+/** \brief Hook called by Object::Destroy before an audio player is about to be destroyed */
+
+bool CAudioPlayer_PreDestroy(void *self)
+{
+#ifdef USE_OUTPUTMIXEXT
+    CAudioPlayer *this = (CAudioPlayer *) self;
+    // Request the mixer thread to unlink this audio player's track
+    this->mDestroyRequested = true;
+    while (this->mDestroyRequested) {
+        object_cond_wait(self);
+    }
+    // Mixer thread has acknowledged the request
+#endif
+    return true;
 }
