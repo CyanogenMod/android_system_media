@@ -35,6 +35,80 @@ static FILE* gMonitorFp = NULL;
         "Cannot create AudioRecorder: data source device type must be SL_IODEVICE_AUDIOINPUT"
 #define ERROR_INPUT_ID_MUST_BE_DEFAULT \
         "Cannot create AudioRecorder: data source device ID must be SL_DEFAULTDEVICEID_AUDIOINPUT"
+#define ERROR_UNKNOWN_KEY \
+        "Cannot set recording configuration: unknown key"
+#define ERROR_SET_UNKNOWN_PRESET \
+        "Cannot set recording preset: unknown preset"
+#define ERROR_VALUESIZE_TOO_LOW \
+        "Configuration error: value size too low to store valid value"
+#define ERROR_INVALID_SOURCE_FOR_VOICE_RECO \
+        "Cannot set recording preset to voice recognition: incompatible recording source"
+#define ERROR_AEC_UNSUPPORTED \
+        "Cannot change AEC setting: unsupported feature on this platform"
+#define ERROR_AGC_UNSUPPORTED \
+        "Cannot change AGC setting: unsupported feature on this platform"
+#define ERROR_NULL_PARAM \
+        "Configuration error: invalid NULL parameter"
+
+#define KEY_RECORDING_SOURCE_PARAMSIZE  sizeof(SLuint32)
+#define KEY_RECORDING_PRESET_PARAMSIZE  sizeof(SLuint32)
+
+//-----------------------------------------------------------------------------
+// Internal utility functions
+//----------------------------
+
+SLresult audioRecorder_setPreset(CAudioRecorder* ar, SLuint32 recordPreset) {
+    SLresult result = SL_RESULT_SUCCESS;
+
+    switch (recordPreset) {
+    case SL_ANDROID_RECORDING_PRESET_DEFAULT:
+        ar->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
+        break;
+    case SL_ANDROID_RECORDING_PRESET_CAMCORDER:
+        ar->mRecordSource = android::AUDIO_SOURCE_CAMCORDER;
+        break;
+    case SL_ANDROID_RECORDING_PRESET_VOICE_RECOGNITION:
+        ar->mRecordSource = android::AUDIO_SOURCE_VOICE_RECOGNITION;
+        break;
+    case SL_ANDROID_RECORDING_PRESET_NONE:
+        // it is an error to set preset "none"
+    default:
+        SL_LOGE(ERROR_SET_UNKNOWN_PRESET);
+        result = SL_RESULT_PARAMETER_INVALID;
+    }
+
+    return result;
+}
+
+
+SLresult audioRecorder_getPreset(CAudioRecorder* ar, SLuint32* pPreset) {
+    SLresult result = SL_RESULT_SUCCESS;
+
+    switch (ar->mRecordSource) {
+    case android::AUDIO_SOURCE_DEFAULT:
+    case android::AUDIO_SOURCE_MIC:
+        *pPreset = SL_ANDROID_RECORDING_PRESET_DEFAULT;
+        break;
+    case android::AUDIO_SOURCE_VOICE_UPLINK:
+    case android::AUDIO_SOURCE_VOICE_DOWNLINK:
+    case android::AUDIO_SOURCE_VOICE_CALL:
+        *pPreset = SL_ANDROID_RECORDING_PRESET_NONE;
+        break;
+    case android::AUDIO_SOURCE_VOICE_RECOGNITION:
+        *pPreset = SL_ANDROID_RECORDING_PRESET_VOICE_RECOGNITION;
+        break;
+    case android::AUDIO_SOURCE_CAMCORDER:
+        *pPreset = SL_ANDROID_RECORDING_PRESET_CAMCORDER;
+        break;
+    default:
+        *pPreset = SL_ANDROID_RECORDING_PRESET_NONE;
+        result = SL_RESULT_INTERNAL_ERROR;
+        break;
+    }
+
+    return result;
+}
+
 
 //-----------------------------------------------------------------------------
 SLresult android_audioRecorder_checkSourceSinkSupport(CAudioRecorder* ar) {
@@ -177,6 +251,70 @@ SLresult android_audioRecorder_create(CAudioRecorder* ar) {
     SLresult result = SL_RESULT_SUCCESS;
 
     ar->mAudioRecord = NULL;
+    ar->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
+
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult android_audioRecorder_setConfig(CAudioRecorder* ar, const SLchar *configKey,
+        const void *pConfigValue, SLuint32 valueSize) {
+
+    SLresult result = SL_RESULT_SUCCESS;
+
+    if (NULL == ar) {
+        result = SL_RESULT_INTERNAL_ERROR;
+    } else if (NULL == pConfigValue) {
+        SL_LOGE(ERROR_NULL_PARAM);
+        result = SL_RESULT_PARAMETER_INVALID;
+
+    } else if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_PRESET) == 0) {
+
+        // recording preset
+        if (KEY_RECORDING_PRESET_PARAMSIZE > valueSize) {
+            SL_LOGE(ERROR_VALUESIZE_TOO_LOW);
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            result = audioRecorder_setPreset(ar, *(SLuint32*)pConfigValue);
+        }
+
+    } else {
+        SL_LOGE(ERROR_UNKNOWN_KEY);
+        result = SL_RESULT_PARAMETER_INVALID;
+    }
+
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult android_audioRecorder_getConfig(CAudioRecorder* ar, const SLchar *configKey,
+        SLuint32* pValueSize, void *pConfigValue) {
+
+    SLresult result = SL_RESULT_SUCCESS;
+
+    if (NULL == ar) {
+        return SL_RESULT_INTERNAL_ERROR;
+    } else if ((NULL == pValueSize) || (NULL == pConfigValue)) {
+        SL_LOGE(ERROR_NULL_PARAM);
+        result = SL_RESULT_PARAMETER_INVALID;
+
+    } else if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_PRESET) == 0) {
+
+        // recording preset
+        if (KEY_RECORDING_PRESET_PARAMSIZE > *pValueSize) {
+            SL_LOGE(ERROR_VALUESIZE_TOO_LOW);
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            *pValueSize = KEY_RECORDING_PRESET_PARAMSIZE;
+            result = audioRecorder_getPreset(ar, (SLuint32*)pConfigValue);
+        }
+
+    } else {
+        SL_LOGE(ERROR_UNKNOWN_KEY);
+        result = SL_RESULT_PARAMETER_INVALID;
+    }
 
     return result;
 }
@@ -201,7 +339,7 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
 
     // initialize platform-specific CAudioRecorder fields
     ar->mAudioRecord = new android::AudioRecord();
-    ar->mAudioRecord->set(android::AUDIO_SOURCE_DEFAULT, // source
+    ar->mAudioRecord->set(ar->mRecordSource, // source
             sles_to_android_sampleRate(ar->mSampleRateMilliHz), // sample rate in Hertz
             android::AudioSystem::PCM_16_BIT,   //FIXME use format from buffer queue sink
             sles_to_android_channelMask(ar->mNumChannels, 0 /*no channel mask*/), // channel config

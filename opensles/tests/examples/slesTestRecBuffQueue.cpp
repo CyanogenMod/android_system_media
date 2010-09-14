@@ -24,9 +24,11 @@
 
 #include "OpenSLES.h"
 #include "OpenSLES_Android.h"
+#include "OpenSLES_AndroidConfiguration.h"
 
-/* Explicitly requesting SL_IID_BUFFERQUEUE on the AudioRecorder object */
-#define NUM_EXPLICIT_INTERFACES_FOR_RECORDER 1
+/* Explicitly requesting SL_IID_BUFFERQUEUE and SL_IID_ANDROIDCONFIGURATION
+ * on the AudioRecorder object */
+#define NUM_EXPLICIT_INTERFACES_FOR_RECORDER 2
 
 /* Size of the recording buffer queue */
 #define NB_BUFFERS_IN_QUEUE 1
@@ -108,8 +110,9 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
     SLObjectItf  recorder;
 
     /* Interfaces for the audio recorder */
-    SLBufferQueueItf       recBuffQueueItf;
-    SLRecordItf            recordItf;
+    SLBufferQueueItf          recBuffQueueItf;
+    SLRecordItf               recordItf;
+    SLAndroidConfigurationItf configItf;
 
     /* Source of audio data for the recording */
     SLDataSource           recSource;
@@ -137,9 +140,11 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
     /* ------------------------------------------------------ */
     /* Configuration of the recorder  */
 
-    /* Request the BufferQueue interface */
+    /* Request the BufferQueue and AndroidConfiguration interfaces */
     required[0] = SL_BOOLEAN_TRUE;
     iidArray[0] = SL_IID_BUFFERQUEUE;
+    required[1] = SL_BOOLEAN_TRUE;
+    iidArray[1] = SL_IID_ANDROIDCONFIGURATION;
 
     /* Setup the data source */
     ioDevice.locatorType = SL_DATALOCATOR_IODEVICE;
@@ -164,10 +169,31 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
     recDest.pFormat = (void * ) &pcm;
 
     /* Create the audio recorder */
-    result = (*EngineItf)->CreateAudioRecorder(EngineItf, &recorder, &recSource, &recDest, 1,
-            iidArray, required);
+    result = (*EngineItf)->CreateAudioRecorder(EngineItf, &recorder, &recSource, &recDest,
+            NUM_EXPLICIT_INTERFACES_FOR_RECORDER, iidArray, required);
     ExitOnError(result);
     fprintf(stdout, "Recorder created\n");
+
+    /* Get the Android configuration interface which is explicit */
+    result = (*recorder)->GetInterface(recorder, SL_IID_ANDROIDCONFIGURATION, (void*)&configItf);
+    ExitOnError(result);
+
+    /* Use the configuration interface to configure the recorder before it's realized */
+    SLuint32 presetValue = SL_ANDROID_RECORDING_PRESET_CAMCORDER;
+    result = (*configItf)->SetConfiguration(configItf, SL_ANDROID_KEY_RECORDING_PRESET,
+            &presetValue, sizeof(SLuint32));
+    ExitOnError(result);
+    fprintf(stdout, "Recorder parametrized\n");
+
+    presetValue = SL_ANDROID_RECORDING_PRESET_NONE;
+    SLuint32 presetSize = 2*sizeof(SLuint32); // intentionally too big
+    result = (*configItf)->GetConfiguration(configItf, SL_ANDROID_KEY_RECORDING_PRESET,
+            &presetSize, (void*)&presetValue);
+    ExitOnError(result);
+    if (presetValue != SL_ANDROID_RECORDING_PRESET_CAMCORDER) {
+        fprintf(stderr, "Error retrieved recording preset\n");
+        ExitOnError(SL_RESULT_INTERNAL_ERROR);
+    }
 
     /* Realize the recorder in synchronous mode. */
     result = (*recorder)->Realize(recorder, SL_BOOLEAN_FALSE);

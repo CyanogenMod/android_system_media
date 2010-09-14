@@ -328,9 +328,24 @@ static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, 
             } else {
                 unsigned mask = 1 << index;
                 object_lock_exclusive(this);
-                // Can't get interface on a suspended/suspending/resuming object
                 if (SL_OBJECT_STATE_REALIZED != this->mState) {
+                    // Can't get interface on a suspended/suspending/resuming object
                     result = SL_RESULT_PRECONDITIONS_VIOLATED;
+
+                    // unless this is an explicit + configuration interface,
+                    // which will be checked here:
+
+                    // FIXME: temporary hack to allow an interface to be called before it's
+                    //        object is realized
+                    if (this->mInterfaceStates[index] == INTERFACE_EXPOSED) {
+                        interface = (char *) this + class__->mInterfaces[index].mOffset;
+                        if (!(this->mGottenMask & mask)) {
+                            this->mGottenMask |= mask;
+                            ((size_t *) interface)[0] ^= ~0;
+                        }
+                        result = SL_RESULT_SUCCESS;
+                    }
+
                 } else {
                     switch (this->mInterfaceStates[index]) {
                     case INTERFACE_EXPOSED:

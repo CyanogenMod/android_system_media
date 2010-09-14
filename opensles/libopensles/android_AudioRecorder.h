@@ -18,6 +18,12 @@ extern SLresult android_audioRecorder_checkSourceSinkSupport(CAudioRecorder* ar)
 
 extern SLresult android_audioRecorder_create(CAudioRecorder* ar);
 
+extern SLresult android_audioRecorder_setConfig(CAudioRecorder* ar, const SLchar *configKey,
+        const void *pConfigValue, SLuint32 valueSize);
+
+extern SLresult android_audioRecorder_getConfig(CAudioRecorder* ar, const SLchar *configKey,
+        SLuint32* pValueSize, void *pConfigValue);
+
 extern SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async);
 
 extern void android_audioRecorder_destroy(CAudioRecorder* ar);
