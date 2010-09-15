@@ -23,6 +23,8 @@ SLresult android_outputMix_create(COutputMix *om) {
     SLresult result = SL_RESULT_SUCCESS;
     SL_LOGV("om=%p", om);
 
+    om->mAndroidEffect.mEffects = new android::KeyedVector<SLuint32, android::AudioEffect* >();
+
     return result;
 }
 
@@ -77,12 +79,13 @@ SLresult android_outputMix_destroy(COutputMix *om) {
     om->mVirtualizer.mVirtualizerEffect.clear();
     om->mEnvironmentalReverb.mEnvironmentalReverbEffect.clear();
     om->mPresetReverb.mPresetReverbEffect.clear();
-    if (!om->mAndroidEffect.mEffects.isEmpty()) {
-        for (size_t i = 0 ; i < om->mAndroidEffect.mEffects.size() ; i++) {
-            delete om->mAndroidEffect.mEffects.valueAt(i);
+    if (!om->mAndroidEffect.mEffects->isEmpty()) {
+        for (size_t i = 0 ; i < om->mAndroidEffect.mEffects->size() ; i++) {
+            delete om->mAndroidEffect.mEffects->valueAt(i);
         }
-        om->mAndroidEffect.mEffects.clear();
+        om->mAndroidEffect.mEffects->clear();
     }
+    delete om->mAndroidEffect.mEffects;
 #endif
 
     return result;
