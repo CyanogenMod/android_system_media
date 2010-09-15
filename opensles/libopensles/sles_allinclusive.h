@@ -60,6 +60,7 @@ typedef struct COutputMix_struct COutputMix;
 #include <utils/Log.h>
 #include <utils/KeyedVector.h>
 #include "SLES/OpenSLES_Android.h"
+#include "SLES/OpenSLES_AndroidConfiguration.h"
 #include "media/AudioSystem.h"
 #include "media/mediarecorder.h"
 #include "media/AudioRecord.h"
@@ -166,6 +167,7 @@ typedef bool (*BoolHook)(void *self);
 #define INTERFACE_RESUMING_2   10  ///< /synchronous ResumeInterface, or part 2 of asynchronous
 #define INTERFACE_ADDING_1A    11  ///< /part 1 of asynchronous AddInterface, aborted
 #define INTERFACE_RESUMING_1A  12  ///< /part 1 of asynchronous ResumeInterface, aborted
+
 
 // Maps an interface ID to its offset within the class that exposes it
 
@@ -1026,6 +1028,7 @@ enum AndroidObject_state {
     // implementation-specific data for this instance
 #ifdef ANDROID
     android::AudioRecord *mAudioRecord;
+    int mRecordSource;
 #endif
 } /*CAudioRecorder*/;
 
