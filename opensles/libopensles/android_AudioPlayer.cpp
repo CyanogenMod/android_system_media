@@ -887,7 +887,9 @@ SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer, SLuint3
                     );
 #ifndef USE_BACKPORT
     if (pAudioPlayer->mAndroidObjType == MEDIAPLAYER) {
-        pAudioPlayer->mSfPlayer->useAudioTrack(pAudioPlayer->mAudioTrack);
+        if (pAudioPlayer->mSfPlayer != 0) {
+            pAudioPlayer->mSfPlayer->useAudioTrack(pAudioPlayer->mAudioTrack);
+        }
     }
 #endif
 
@@ -1054,7 +1056,9 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
         switch (state) {
         case SL_PLAYSTATE_STOPPED: {
             SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
-            ap->mSfPlayer->stop();
+            if (ap->mSfPlayer != 0) {
+                ap->mSfPlayer->stop();
+            }
             } break;
         case SL_PLAYSTATE_PAUSED: {
             SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
@@ -1064,13 +1068,19 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
             switch(state) {
                 case(ANDROID_UNINITIALIZED):
                 case(ANDROID_PREPARING):
-                    ap->mSfPlayer->pause();
+                    if (ap->mSfPlayer != 0) {
+                        ap->mSfPlayer->pause();
+                    }
                     break;
                 case(ANDROID_PREPARED):
-                    ap->mSfPlayer->startPrefetch_async();
+                    if (ap->mSfPlayer != 0) {
+                        ap->mSfPlayer->startPrefetch_async();
+                    }
                 case(ANDROID_PREFETCHING):
                 case(ANDROID_READY):
-                    ap->mSfPlayer->pause();
+                    if (ap->mSfPlayer != 0) {
+                        ap->mSfPlayer->pause();
+                    }
                     break;
                 default:
                     break;
@@ -1082,7 +1092,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
             AndroidObject_state state = ap->mAndroidObjState;
             object_unlock_peek(&ap);
             // FIXME check in spec when playback is allowed to start in another state
-            if (state >= ANDROID_READY) {
+            if ((state >= ANDROID_READY) && (ap->mSfPlayer != 0)) {
                 ap->mSfPlayer->play();
             }
             } break;
@@ -1156,8 +1166,11 @@ SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMse
         break;
 #ifndef USE_BACKPORT
     case MEDIAPLAYER: {
-        int64_t durationUsec = ap->mSfPlayer->getDurationUsec();
-        *pDurMsec = durationUsec == -1 ? SL_TIME_UNKNOWN : durationUsec / 1000;
+        int64_t durationUsec = SL_TIME_UNKNOWN;
+        if (ap->mSfPlayer != 0) {
+            durationUsec = ap->mSfPlayer->getDurationUsec();
+            *pDurMsec = durationUsec == -1 ? SL_TIME_UNKNOWN : durationUsec / 1000;
+        }
         } break;
 #endif
     default:
@@ -1183,7 +1196,11 @@ void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
         }
         break;
     case MEDIAPLAYER:
-        *pPosMsec = ap->mSfPlayer->getPositionMsec();
+        if (ap->mSfPlayer != 0) {
+            *pPosMsec = ap->mSfPlayer->getPositionMsec();
+        } else {
+            *pPosMsec = 0;
+        }
         break;
     default:
         break;
@@ -1192,14 +1209,17 @@ void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
 
 
 //-----------------------------------------------------------------------------
-void android_audioPlayer_seek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec) {
-    switch(pAudioPlayer->mAndroidObjType) {
+void android_audioPlayer_seek(CAudioPlayer *ap, SLmillisecond posMsec) {
+
+    switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
         break;
 #ifndef USE_BACKPORT
     case MEDIAPLAYER:
-        pAudioPlayer->mSfPlayer->seek(posMsec);
+        if (ap->mSfPlayer != 0) {
+            ap->mSfPlayer->seek(posMsec);
+        }
         break;
 #endif
     default:

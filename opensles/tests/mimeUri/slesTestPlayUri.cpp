@@ -55,8 +55,7 @@
 #include "SLES/OpenSLES.h"
 
 
-#define MAX_NUMBER_INTERFACES 3
-#define MAX_NUMBER_OUTPUT_DEVICES 6
+#define MAX_NUMBER_INTERFACES 2
 
 //-----------------------------------------------------------------
 //* Exits the application if an error is encountered */
@@ -82,7 +81,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     if ((event & (SL_PREFETCHEVENT_STATUSCHANGE|SL_PREFETCHEVENT_FILLLEVELCHANGE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
         fprintf(stderr, "\t\tPrefetchEventCallback: Error while prefetching data, exiting\n");
-        exit(1);
+        //exit(1);
     }
     if (event & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
         fprintf(stderr, "\t\tPrefetchEventCallback: Buffer fill level is = %d\n", level);
@@ -163,12 +162,12 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     audioSink.pFormat            = NULL;
 
     /* Create the audio player */
-    res = (*EngineItf)->CreateAudioPlayer(EngineItf, &player,
-            &audioSource, &audioSink, 2, iidArray, required); CheckErr(res);
+    res = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink,
+            MAX_NUMBER_INTERFACES, iidArray, required); CheckErr(res);
 
     /* Realizing the player in synchronous mode. */
     res = (*player)->Realize(player, SL_BOOLEAN_FALSE); CheckErr(res);
-    //fprintf(stdout, "URI example: after Realize\n");
+    fprintf(stdout, "URI example: after Realize\n");
 
     /* Get interfaces */
     res = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf);
@@ -183,6 +182,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     CheckErr(res);
     res = (*prefetchItf)->SetCallbackEventsMask(prefetchItf,
             SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE);
+    CheckErr(res);
 
 
     /* Display duration */
@@ -218,7 +218,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     }
 
     if (timeOutIndex == 0) {
-        fprintf(stderr, "We\'re done here, failed to prefetch data in time, exiting\n");
+        fprintf(stderr, "\nWe\'re done waiting, failed to prefetch data in time, exiting\n");
         goto destroyRes;
     }
 
