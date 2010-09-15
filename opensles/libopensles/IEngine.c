@@ -595,7 +595,11 @@ static SLresult IEngine_QueryNumSupportedExtensions(SLEngineItf self, SLuint32 *
     if (NULL == pNumExtensions) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
+#ifdef ANDROID
+        // FIXME support Android extensions
+#else
         *pNumExtensions = 0;
+#endif
         result = SL_RESULT_SUCCESS;
     }
 
@@ -609,7 +613,13 @@ static SLresult IEngine_QuerySupportedExtension(SLEngineItf self,
     SL_ENTER_INTERFACE
 
     // any index >= 0 will be >= number of supported extensions
+
+#ifdef ANDROID
+    // FIXME support Android extensions
     result = SL_RESULT_PARAMETER_INVALID;
+#else
+    result = SL_RESULT_PARAMETER_INVALID;
+#endif
 
     SL_LEAVE_INTERFACE
 }
@@ -623,8 +633,13 @@ static SLresult IEngine_IsExtensionSupported(SLEngineItf self,
     if (NULL == pExtensionName || NULL == pSupported) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
+#ifdef ANDROID
+        // FIXME support Android extensions
+        *pSupported = SL_BOOLEAN_FALSE;
+#else
         // no extensions are supported
         *pSupported = SL_BOOLEAN_FALSE;
+#endif
         result = SL_RESULT_SUCCESS;
     }
 
