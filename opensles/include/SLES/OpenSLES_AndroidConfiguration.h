@@ -31,8 +31,8 @@ extern "C" {
 /**   preset "none" cannot be set, it is used to indicate the current settings
  *     do not match any of the presets. */
 #define SL_ANDROID_RECORDING_PRESET_NONE              ((SLuint32) 0x00000000)
-/**   default recording configuration on the platform */
-#define SL_ANDROID_RECORDING_PRESET_DEFAULT           ((SLuint32) 0x00000001)
+/**   generic recording configuration on the platform */
+#define SL_ANDROID_RECORDING_PRESET_GENERIC           ((SLuint32) 0x00000001)
 /**   uses the microphone audio source with the same orientation as the camera
  *     if available, the main device microphone otherwise */
 #define SL_ANDROID_RECORDING_PRESET_CAMCORDER         ((SLuint32) 0x00000002)
