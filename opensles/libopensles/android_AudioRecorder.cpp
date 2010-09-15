@@ -38,7 +38,7 @@ static FILE* gMonitorFp = NULL;
 #define ERROR_UNKNOWN_KEY \
         "Cannot set recording configuration: unknown key"
 #define ERROR_SET_UNKNOWN_PRESET \
-        "Cannot set recording preset: unknown preset"
+        "Cannot set recording preset: unknown or invalid preset"
 #define ERROR_VALUESIZE_TOO_LOW \
         "Configuration error: value size too low to store valid value"
 #define ERROR_INVALID_SOURCE_FOR_VOICE_RECO \
@@ -61,7 +61,7 @@ SLresult audioRecorder_setPreset(CAudioRecorder* ar, SLuint32 recordPreset) {
     SLresult result = SL_RESULT_SUCCESS;
 
     switch (recordPreset) {
-    case SL_ANDROID_RECORDING_PRESET_DEFAULT:
+    case SL_ANDROID_RECORDING_PRESET_GENERIC:
         ar->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
         break;
     case SL_ANDROID_RECORDING_PRESET_CAMCORDER:
@@ -87,7 +87,7 @@ SLresult audioRecorder_getPreset(CAudioRecorder* ar, SLuint32* pPreset) {
     switch (ar->mRecordSource) {
     case android::AUDIO_SOURCE_DEFAULT:
     case android::AUDIO_SOURCE_MIC:
-        *pPreset = SL_ANDROID_RECORDING_PRESET_DEFAULT;
+        *pPreset = SL_ANDROID_RECORDING_PRESET_GENERIC;
         break;
     case android::AUDIO_SOURCE_VOICE_UPLINK:
     case android::AUDIO_SOURCE_VOICE_DOWNLINK:
