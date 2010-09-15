@@ -485,14 +485,14 @@ android::status_t android_fxSend_attach(CAudioPlayer* ap, bool attach,
  */
 SLresult android_fxSend_attachToAux(CAudioPlayer* ap, SLInterfaceID pUuid, SLboolean attach,
         SLmillibel sendLevel) {
-    ssize_t index = ap->mOutputMix->mAndroidEffect.mEffects.indexOfKey(KEY_FROM_GUID(pUuid));
+    ssize_t index = ap->mOutputMix->mAndroidEffect.mEffects->indexOfKey(KEY_FROM_GUID(pUuid));
 
     if (0 > index) {
         SL_LOGE("invalid effect ID: no such effect attached to the OutputMix");
         return SL_RESULT_PARAMETER_INVALID;
     }
 
-    android::AudioEffect* pFx = ap->mOutputMix->mAndroidEffect.mEffects.valueAt(index);
+    android::AudioEffect* pFx = ap->mOutputMix->mAndroidEffect.mEffects->valueAt(index);
     if (NULL == pFx) {
         return SL_RESULT_RESOURCE_ERROR;
     }
@@ -706,7 +706,7 @@ SLresult android_genericFx_createEffect(IAndroidEffect* iae, SLInterfaceID pUuid
     SLresult result = SL_RESULT_SUCCESS;
 
     // does this effect already exist?
-    if (0 <= iae->mEffects.indexOfKey(KEY_FROM_GUID(pUuid))) {
+    if (0 <= iae->mEffects->indexOfKey(KEY_FROM_GUID(pUuid))) {
         return result;
     }
 
@@ -728,7 +728,7 @@ SLresult android_genericFx_createEffect(IAndroidEffect* iae, SLInterfaceID pUuid
         result = SL_RESULT_RESOURCE_ERROR;
     } else {
         SL_LOGV("AudioEffect successfully created on session %d", sessionId);
-        iae->mEffects.add(KEY_FROM_GUID(pUuid), pFx);
+        iae->mEffects->add(KEY_FROM_GUID(pUuid), pFx);
     }
 
     return result;
@@ -738,14 +738,14 @@ SLresult android_genericFx_createEffect(IAndroidEffect* iae, SLInterfaceID pUuid
 //-----------------------------------------------------------------------------
 SLresult android_genericFx_releaseEffect(IAndroidEffect* iae, SLInterfaceID pUuid) {
 
-    ssize_t index = iae->mEffects.indexOfKey(KEY_FROM_GUID(pUuid));
+    ssize_t index = iae->mEffects->indexOfKey(KEY_FROM_GUID(pUuid));
 
     if (0 > index) {
         return SL_RESULT_PARAMETER_INVALID;
     } else {
-        android::AudioEffect* pFx = iae->mEffects.valueAt(index);
+        android::AudioEffect* pFx = iae->mEffects->valueAt(index);
         delete pFx;
-        iae->mEffects.removeItem(index);
+        iae->mEffects->removeItem(index);
         return SL_RESULT_SUCCESS;
     }
 }
@@ -754,12 +754,12 @@ SLresult android_genericFx_releaseEffect(IAndroidEffect* iae, SLInterfaceID pUui
 //-----------------------------------------------------------------------------
 SLresult android_genericFx_setEnabled(IAndroidEffect* iae, SLInterfaceID pUuid, SLboolean enabled) {
 
-    ssize_t index = iae->mEffects.indexOfKey(KEY_FROM_GUID(pUuid));
+    ssize_t index = iae->mEffects->indexOfKey(KEY_FROM_GUID(pUuid));
 
     if (0 > index) {
         return SL_RESULT_PARAMETER_INVALID;
     } else {
-        android::AudioEffect* pFx = iae->mEffects.valueAt(index);
+        android::AudioEffect* pFx = iae->mEffects->valueAt(index);
         android::status_t status = pFx->setEnabled(SL_BOOLEAN_TRUE == enabled);
         return android_fx_statusToResult(status);
     }
@@ -769,12 +769,12 @@ SLresult android_genericFx_setEnabled(IAndroidEffect* iae, SLInterfaceID pUuid, 
 //-----------------------------------------------------------------------------
 SLresult android_genericFx_isEnabled(IAndroidEffect* iae, SLInterfaceID pUuid, SLboolean *pEnabled)
 {
-    ssize_t index = iae->mEffects.indexOfKey(KEY_FROM_GUID(pUuid));
+    ssize_t index = iae->mEffects->indexOfKey(KEY_FROM_GUID(pUuid));
 
     if (0 > index) {
         return SL_RESULT_PARAMETER_INVALID;
     } else {
-        android::AudioEffect* pFx = iae->mEffects.valueAt(index);
+        android::AudioEffect* pFx = iae->mEffects->valueAt(index);
         *pEnabled = (SLboolean) pFx->getEnabled();
         return SL_RESULT_SUCCESS;
     }
@@ -786,12 +786,12 @@ SLresult android_genericFx_sendCommand(IAndroidEffect* iae, SLInterfaceID pUuid,
         SLuint32 command, SLuint32 commandSize, void* pCommandData,
         SLuint32 *replySize, void *pReplyData) {
 
-    ssize_t index = iae->mEffects.indexOfKey(KEY_FROM_GUID(pUuid));
+    ssize_t index = iae->mEffects->indexOfKey(KEY_FROM_GUID(pUuid));
 
     if (0 > index) {
         return SL_RESULT_PARAMETER_INVALID;
     } else {
-        android::AudioEffect* pFx = iae->mEffects.valueAt(index);
+        android::AudioEffect* pFx = iae->mEffects->valueAt(index);
         android::status_t status = pFx->command(
                 (uint32_t) command,
                 (uint32_t) commandSize,
@@ -811,6 +811,6 @@ SLresult android_genericFx_sendCommand(IAndroidEffect* iae, SLInterfaceID pUuid,
  * returns true if the given effect id is present in the AndroidEffect interface
  */
 bool android_genericFx_hasEffect(IAndroidEffect* iae, SLInterfaceID pUuid) {
-    return( 0 <= iae->mEffects.indexOfKey(KEY_FROM_GUID(pUuid)));
+    return( 0 <= iae->mEffects->indexOfKey(KEY_FROM_GUID(pUuid)));
 }
 

@@ -685,6 +685,9 @@ SLresult android_audioPlayer_create(
     pAudioPlayer->mDirectLevel = 0; // no attenuation
     pAudioPlayer->mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
 
+    pAudioPlayer->mAndroidEffect.mEffects =
+            new android::KeyedVector<SLuint32, android::AudioEffect* >();
+
     return result;
 
 }
@@ -935,12 +938,13 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     pAudioPlayer->mEqualizer.mEqEffect.clear();
     pAudioPlayer->mBassBoost.mBassBoostEffect.clear();
     pAudioPlayer->mVirtualizer.mVirtualizerEffect.clear();
-    if (!pAudioPlayer->mAndroidEffect.mEffects.isEmpty()) {
-        for (size_t i = 0 ; i < pAudioPlayer->mAndroidEffect.mEffects.size() ; i++) {
-            delete pAudioPlayer->mAndroidEffect.mEffects.valueAt(i);
+    if (!pAudioPlayer->mAndroidEffect.mEffects->isEmpty()) {
+        for (size_t i = 0 ; i < pAudioPlayer->mAndroidEffect.mEffects->size() ; i++) {
+            delete pAudioPlayer->mAndroidEffect.mEffects->valueAt(i);
         }
-        pAudioPlayer->mAndroidEffect.mEffects.clear();
+        pAudioPlayer->mAndroidEffect.mEffects->clear();
     }
+    delete pAudioPlayer->mAndroidEffect.mEffects;
 #endif
 
     return result;
