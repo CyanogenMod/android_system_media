@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/**************************************************************************************************
+ * AudioRecorder lifecycle
+ ****************************/
 extern SLresult android_audioRecorder_checkSourceSinkSupport(CAudioRecorder* ar);
 
 extern SLresult android_audioRecorder_create(CAudioRecorder* ar);
@@ -28,4 +31,10 @@ extern SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean asyn
 
 extern void android_audioRecorder_destroy(CAudioRecorder* ar);
 
+/**************************************************************************************************
+ * AudioRecorder control
+ ****************************/
+
 extern void android_audioRecorder_setRecordState(CAudioRecorder* ar, SLuint32 state);
+
+extern void android_audioRecorder_useEventMask(CAudioRecorder *ar);

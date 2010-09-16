@@ -176,6 +176,12 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
 #else
             //audioPlayerTransportUpdate(ap);
 #endif
+        } else if (SL_OBJECTID_AUDIORECORDER == objectID) {
+#ifdef ANDROID
+            attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
+            CAudioRecorder* ar = (CAudioRecorder *) this;
+            android_audioRecorder_useEventMask(ar);
+#endif
         }
     }
 
