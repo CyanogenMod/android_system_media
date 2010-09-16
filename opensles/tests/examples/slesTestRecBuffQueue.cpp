@@ -63,6 +63,27 @@ typedef struct CallbackCntxt_ {
     SLint8*   pData;        // Current address of local audio data storage
 } CallbackCntxt;
 
+
+//-----------------------------------------------------------------
+/* Callback for recording buffer queue events */
+void RecCallback(
+        SLRecordItf caller,
+        void *pContext,
+        SLuint32 event)
+{
+    if (SL_RECORDEVENT_HEADATNEWPOS & event) {
+        SLmillisecond pMsec = 0;
+        (*caller)->GetPosition(caller, &pMsec);
+        fprintf(stdout, "SL_RECORDEVENT_HEADATNEWPOS current position=%lums\n", pMsec);
+    }
+
+    if (SL_RECORDEVENT_HEADATMARKER & event) {
+        SLmillisecond pMsec = 0;
+        (*caller)->GetPosition(caller, &pMsec);
+        fprintf(stdout, "SL_RECORDEVENT_HEADATMARKER current position=%lums\n", pMsec);
+    }
+}
+
 //-----------------------------------------------------------------
 /* Callback for recording buffer queue events */
 void RecBufferQueueCallback(
@@ -203,6 +224,18 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
     /* Get the record interface which is implicit */
     result = (*recorder)->GetInterface(recorder, SL_IID_RECORD, (void*)&recordItf);
     ExitOnError(result);
+
+    /* Set up the recorder callback to get events during the recording */
+    result = (*recordItf)->SetMarkerPosition(recordItf, 2000);
+    ExitOnError(result);
+    result = (*recordItf)->SetPositionUpdatePeriod(recordItf, 500);
+    ExitOnError(result);
+    result = (*recordItf)->SetCallbackEventsMask(recordItf,
+            SL_RECORDEVENT_HEADATMARKER | SL_RECORDEVENT_HEADATNEWPOS);
+    ExitOnError(result);
+    result = (*recordItf)->RegisterCallback(recordItf, RecCallback, NULL);
+    ExitOnError(result);
+    fprintf(stdout, "Recorder callback registered\n");
 
     /* Get the buffer queue interface which was explicitly requested */
     result = (*recorder)->GetInterface(recorder, SL_IID_BUFFERQUEUE, (void*)&recBuffQueueItf);
