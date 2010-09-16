@@ -713,7 +713,6 @@ typedef struct Play_interface {
     SLuint32 mEventFlags;
     // the ISeek trick of using a distinct value doesn't work here because it's readable by app
     SLmillisecond mMarkerPosition;
-    SLboolean mMarkerIsSet;
     SLmillisecond mPositionUpdatePeriod; // Zero means do not do position updates (FIXME ~0)
 #ifdef USE_OUTPUTMIXEXT
     SLuint32 mFrameUpdatePeriod;         // mPositionUpdatePeriod in frame units

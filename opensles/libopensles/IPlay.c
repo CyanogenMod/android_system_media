@@ -286,7 +286,6 @@ static SLresult IPlay_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
     interface_lock_exclusive(this);
     if (this->mMarkerPosition != mSec) {
         this->mMarkerPosition = mSec;
-        this->mMarkerIsSet = SL_BOOLEAN_TRUE;
         interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
     } else
         interface_unlock_exclusive(this);
@@ -302,12 +301,10 @@ static SLresult IPlay_ClearMarkerPosition(SLPlayItf self)
 
     IPlay *this = (IPlay *) self;
     interface_lock_exclusive(this);
-    this->mMarkerIsSet = SL_BOOLEAN_FALSE;
 #ifdef ANDROID
     if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-        // clearing the marker position can be simulated by using the event mask with a
-        // cleared flag for the marker
-        SLuint32 eventFlags = this->mEventFlags & (~SL_PLAYEVENT_HEADATMARKER);
+        // clearing the marker position is equivalent to setting the marker at 0
+        this->mMarkerPosition = 0;
     }
 #endif
     interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
@@ -419,7 +416,6 @@ void IPlay_init(void *self)
     this->mContext = NULL;
     this->mEventFlags = 0;
     this->mMarkerPosition = 0;
-    this->mMarkerIsSet = SL_BOOLEAN_FALSE;
     this->mPositionUpdatePeriod = 1000;
 #ifdef USE_OUTPUTMIXEXT
     this->mFrameUpdatePeriod = 0;   // because we don't know the sample rate yet

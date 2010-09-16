@@ -110,6 +110,57 @@ SLresult audioRecorder_getPreset(CAudioRecorder* ar, SLuint32* pPreset) {
 }
 
 
+void audioRecorder_handleNewPos_lockRecord(CAudioRecorder* ar) {
+    //SL_LOGV("received event EVENT_NEW_POS from AudioRecord");
+    slRecordCallback callback = NULL;
+    void* callbackPContext = NULL;
+
+    interface_lock_shared(&ar->mRecord);
+    callback = ar->mRecord.mCallback;
+    callbackPContext = ar->mRecord.mContext;
+    interface_unlock_shared(&ar->mRecord);
+
+    if (NULL != callback) {
+        // getting this event implies SL_RECORDEVENT_HEADATNEWPOS was set in the event mask
+        (*callback)(&ar->mRecord.mItf, callbackPContext, SL_RECORDEVENT_HEADATNEWPOS);
+    }
+}
+
+
+void audioRecorder_handleMarker_lockRecord(CAudioRecorder* ar) {
+    //SL_LOGV("received event EVENT_MARKER from AudioRecord");
+    slRecordCallback callback = NULL;
+    void* callbackPContext = NULL;
+
+    interface_lock_shared(&ar->mRecord);
+    callback = ar->mRecord.mCallback;
+    callbackPContext = ar->mRecord.mContext;
+    interface_unlock_shared(&ar->mRecord);
+
+    if (NULL != callback) {
+        // getting this event implies SL_RECORDEVENT_HEADATMARKER was set in the event mask
+        (*callback)(&ar->mRecord.mItf, callbackPContext, SL_RECORDEVENT_HEADATMARKER);
+    }
+}
+
+
+void audioRecorder_handleOverrun_lockRecord(CAudioRecorder* ar) {
+    //SL_LOGV("received event EVENT_OVERRUN from AudioRecord");
+    slRecordCallback callback = NULL;
+    void* callbackPContext = NULL;
+
+    interface_lock_shared(&ar->mRecord);
+    if (ar->mRecord.mCallbackEventsMask & SL_RECORDEVENT_BUFFER_FULL) {
+        callback = ar->mRecord.mCallback;
+        callbackPContext = ar->mRecord.mContext;
+    }
+    interface_unlock_shared(&ar->mRecord);
+
+    if (NULL != callback) {
+        (*callback)(&ar->mRecord.mItf, callbackPContext, SL_RECORDEVENT_BUFFER_FULL);
+    }
+}
+
 //-----------------------------------------------------------------------------
 SLresult android_audioRecorder_checkSourceSinkSupport(CAudioRecorder* ar) {
 
@@ -230,14 +281,16 @@ static void audioRecorder_callback(int event, void* user, void *info) {
         }
         break;
 
+    case android::AudioRecord::EVENT_OVERRUN:
+        audioRecorder_handleOverrun_lockRecord(ar);
+        break;
+
     case android::AudioRecord::EVENT_MARKER:
-        // FIXME implement
-        SL_LOGE("FIXME audioRecorder_callback(EVENT_MARKER, %p, %p) not supported", user, info);
+        audioRecorder_handleMarker_lockRecord(ar);
         break;
 
     case android::AudioRecord::EVENT_NEW_POS:
-        // FIXME implement
-        SL_LOGE("FIXME audioRecorder_callback(EVENT_NEW_POS, %p, %p) not supported", user, info);
+        audioRecorder_handleNewPos_lockRecord(ar);
         break;
 
     }
@@ -407,5 +460,57 @@ void android_audioRecorder_setRecordState(CAudioRecorder* ar, SLuint32 state) {
      default:
          break;
      }
+
+}
+
+
+//-----------------------------------------------------------------------------
+void android_audioRecorder_useEventMask(CAudioRecorder *ar) {
+    IRecord *pRecordItf = &ar->mRecord;
+    SLuint32 eventFlags = pRecordItf->mCallbackEventsMask;
+
+    if (NULL == ar->mAudioRecord) {
+        return;
+    }
+
+    if ((eventFlags & SL_RECORDEVENT_HEADATMARKER) && (pRecordItf->mMarkerPosition != 0)) {
+        ar->mAudioRecord->setMarkerPosition((uint32_t)((((int64_t)pRecordItf->mMarkerPosition
+                * sles_to_android_sampleRate(ar->mSampleRateMilliHz)))/1000));
+    } else {
+        // clear marker
+        ar->mAudioRecord->setMarkerPosition(0);
+    }
+
+    if (eventFlags & SL_RECORDEVENT_HEADATNEWPOS) {
+         ar->mAudioRecord->setPositionUpdatePeriod(
+                (uint32_t)((((int64_t)pRecordItf->mPositionUpdatePeriod
+                * sles_to_android_sampleRate(ar->mSampleRateMilliHz)))/1000));
+    } else {
+        // clear periodic update
+        ar->mAudioRecord->setPositionUpdatePeriod(0);
+    }
+
+    if (eventFlags & SL_RECORDEVENT_HEADATLIMIT) {
+        // FIXME support SL_RECORDEVENT_HEADATLIMIT
+        SL_LOGE("[ FIXME: IRecord_SetCallbackEventsMask(SL_RECORDEVENT_HEADATLIMIT) on an "
+                    "SL_OBJECTID_AUDIORECORDER to be implemented ]");
+    }
+
+    if (eventFlags & SL_RECORDEVENT_HEADMOVING) {
+        // FIXME support SL_RECORDEVENT_HEADMOVING
+        SL_LOGE("[ FIXME: IRecord_SetCallbackEventsMask(SL_RECORDEVENT_HEADMOVING) on an "
+                "SL_OBJECTID_AUDIORECORDER to be implemented ]");
+    }
+
+    if (eventFlags & SL_RECORDEVENT_BUFFER_FULL) {
+        // nothing to do for SL_RECORDEVENT_BUFFER_FULL, callback event will be checked against mask
+        // when AudioRecord::EVENT_OVERRUN is encountered
+    }
+
+    if (eventFlags & SL_RECORDEVENT_HEADSTALLED) {
+        // FIXME support SL_RECORDEVENT_HEADSTALLED
+        SL_LOGE("[ FIXME: IRecord_SetCallbackEventsMask(SL_RECORDEVENT_HEADSTALLED) on an "
+                "SL_OBJECTID_AUDIORECORDER to be implemented ]");
+    }
 
 }
