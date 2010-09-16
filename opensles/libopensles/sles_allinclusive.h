@@ -977,6 +977,9 @@ enum AndroidObject_state {
     android::Mutex          *mpLock;
     enum AndroidObject_type mAndroidObjType;
     enum AndroidObject_state mAndroidObjState;
+    /** identifies which group of effects ("session") this player belongs to */
+    int mSessionId;
+    /** plays the PCM data for this player */
     android::AudioTrack *mAudioTrack;
 #ifndef USE_BACKPORT
     android::sp<android::SfPlayer> mSfPlayer;

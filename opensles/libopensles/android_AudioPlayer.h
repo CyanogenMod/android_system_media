@@ -17,6 +17,9 @@
 #define ANDROID_DEFAULT_OUTPUT_STREAM_TYPE android::AudioSystem::MUSIC
 #define ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE 4096
 
+/**************************************************************************************************
+ * AudioPlayer lifecycle
+ ****************************/
 /*
  * Checks that the combination of source and sink parameters is supported in this implementation.
  * Return
@@ -48,6 +51,9 @@ extern SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolea
 
 extern SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer);
 
+/**************************************************************************************************
+ * Configuration
+ ****************************/
 extern SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer,
         SLuint32 type);
 
@@ -59,16 +65,19 @@ extern SLresult android_audioPlayer_setPlaybackRateBehavior(IPlaybackRate *pRate
 extern SLresult android_audioPlayer_getCapabilitiesOfRate(IPlaybackRate *pRateItf,
         SLuint32 *pCapabilities);
 
+extern SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
+
+extern SLresult android_audioPlayer_volumeUpdate(CAudioPlayer *pAudioPlayer);
+
+/**************************************************************************************************
+ * Playback control and events
+ ****************************/
 extern void android_audioPlayer_setPlayState(CAudioPlayer *pAudioPlayer);
 
 extern void android_audioPlayer_useEventMask(CAudioPlayer *pAudioPlayer);
 
-extern SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
-
 extern void android_audioPlayer_seek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec);
 
 extern void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
-
-extern SLresult android_audioPlayer_volumeUpdate(CAudioPlayer *pAudioPlayer);
 
 extern void android_audioPlayer_bufferQueueRefilled(CAudioPlayer *pAudioPlayer);
