@@ -43,10 +43,8 @@ static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEff
         (CAudioPlayer *) this->mThis : NULL;
     if (NULL == audioPlayer)
         return NULL;
-    // Make sure the sink for this player is an output mix
-    COutputMix *outputMix = audioPlayer->mOutputMix;
-    if (NULL == outputMix)
-        return NULL;
+    // Get the output mix for this player
+    COutputMix *outputMix = CAudioPlayer_GetOutputMix(audioPlayer);
     unsigned aux;
     if (pAuxEffect == &outputMix->mEnvironmentalReverb.mItf)
         aux = AUX_ENVIRONMENTALREVERB;
@@ -128,16 +126,13 @@ static SLresult IEffectSend_EnableEffectSend(SLEffectSendItf self,
             if (NULL == ap) {
                 result = SL_RESULT_RESOURCE_ERROR;
             } else {
-                if (pAuxEffect == &ap->mOutputMix->mPresetReverb.mItf) {
-                    result = translateEnableFxSendError(
-                            android_fxSend_attach( ap, (bool) enable,
-                                    ap->mOutputMix->mPresetReverb.mPresetReverbEffect,
-                                    initialLevel) );
-                } else if (pAuxEffect == &ap->mOutputMix->mEnvironmentalReverb.mItf) {
-                    result = translateEnableFxSendError(
-                            android_fxSend_attach( ap, (bool) enable,
-                                    ap->mOutputMix->mEnvironmentalReverb.mEnvironmentalReverbEffect,
-                                    initialLevel) );
+                COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
+                if (pAuxEffect == &outputMix->mPresetReverb.mItf) {
+                    result = translateEnableFxSendError(android_fxSend_attach(ap, (bool) enable,
+                        outputMix->mPresetReverb.mPresetReverbEffect, initialLevel));
+                } else if (pAuxEffect == &outputMix->mEnvironmentalReverb.mItf) {
+                    result = translateEnableFxSendError(android_fxSend_attach(ap, (bool) enable,
+                        outputMix->mEnvironmentalReverb.mEnvironmentalReverbEffect, initialLevel));
                 } else {
                     result = SL_RESULT_RESOURCE_ERROR;
                 }

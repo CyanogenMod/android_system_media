@@ -35,7 +35,12 @@ static SLresult I3DGrouping_Set3DGroup(SL3DGroupingItf self, SLObjectItf group)
     }
     if (SL_RESULT_SUCCESS == result) {
         I3DGrouping *this = (I3DGrouping *) self;
-        unsigned mask = 1 << (InterfaceToIObject(this)->mInstanceID - 1);
+        IObject *thisObject = InterfaceToIObject(this);
+        unsigned id = thisObject->mInstanceID;
+        assert(0 != id);        // player object must be published by this point
+        --id;
+        assert(MAX_INSTANCE > id);
+        unsigned mask = 1 << id;
         interface_lock_exclusive(this);
         C3DGroup *oldGroup = this->mGroup;
         if (newGroup != oldGroup) {
@@ -96,4 +101,18 @@ void I3DGrouping_init(void *self)
     I3DGrouping *this = (I3DGrouping *) self;
     this->mItf = &I3DGrouping_Itf;
     this->mGroup = NULL;
+}
+
+void I3DGrouping_deinit(void *self)
+{
+    I3DGrouping *this = (I3DGrouping *) self;
+    C3DGroup *group = this->mGroup;
+    if (NULL != group) {
+        unsigned mask = 1 << (InterfaceToIObject(this)->mInstanceID - 1);
+        IObject *groupObject = &group->mObject;
+        object_lock_exclusive(groupObject);
+        assert(group->mMemberMask & mask);
+        group->mMemberMask &= ~mask;
+        ReleaseStrongRefAndUnlockExclusive(groupObject);
+    }
 }

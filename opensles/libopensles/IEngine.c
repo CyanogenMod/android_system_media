@@ -39,6 +39,8 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, 
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
                 this->mDeviceID = deviceID;
+                IObject_Publish(&this->mObject);
+                // return the new LED object
                 *pDevice = &this->mObject.mItf;
             }
         }
@@ -71,6 +73,8 @@ static SLresult IEngine_CreateVibraDevice(SLEngineItf self, SLObjectItf *pDevice
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
                 this->mDeviceID = deviceID;
+                IObject_Publish(&this->mObject);
+                // return the new vibra object
                 *pDevice = &this->mObject.mItf;
             }
         }
@@ -108,7 +112,6 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                 do {
 
                     // Initialize private fields not associated with an interface
-                    this->mOutputMix = NULL;
                     this->mMuteMask = 0;
                     this->mSoloMask = 0;
                     // const, will be set later by the containing AudioPlayer or MidiPlayer
@@ -141,12 +144,6 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     this->mBufferQueue.mNumBuffers = (SL_DATALOCATOR_BUFFERQUEUE == *(SLuint32 *)
                         pAudioSrc->pLocator) ? (SLuint16) ((SLDataLocator_BufferQueue *)
                         pAudioSrc->pLocator)->numBuffers : 0;
-
-                    // link this audio player to its associated output mix via a strong reference
-                    if (SL_DATALOCATOR_OUTPUTMIX == this->mDataSink.mLocator.mLocatorType) {
-                        this->mOutputMix = (COutputMix *)
-                            this->mDataSink.mLocator.mOutputMix.outputMix;
-                    }
 
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
@@ -204,14 +201,14 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         android_audioPlayer_create(this);
 #endif
 
-                        // return the new audio player object
-                        *pPlayer = &this->mObject.mItf;
-
                 } while (0);
 
                 if (SL_RESULT_SUCCESS != result) {
-                    (*this->mObject.mItf->Destroy)(&this->mObject.mItf);
-                    // equivalent to calling IObject_Destroy directly
+                    IObject_Destroy(&this->mObject.mItf);
+                } else {
+                    IObject_Publish(&this->mObject);
+                    // return the new audio player object
+                    *pPlayer = &this->mObject.mItf;
                 }
 
             }
@@ -228,8 +225,6 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
     SL_ENTER_INTERFACE
-
-    SL_LOGV("IEngine_CreateAudioRecorder() entering");
 
 #if defined(USE_OPTIONAL) || defined(ANDROID)
     if (NULL == pRecorder) {
@@ -308,14 +303,14 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                     android_audioRecorder_create(this);
 #endif
 
-                    // return the new audio recorder object
-                    *pRecorder = &this->mObject.mItf;
-
                 } while (0);
 
                 if (SL_RESULT_SUCCESS != result) {
-                    (*this->mObject.mItf->Destroy)(&this->mObject.mItf);
-                    // equivalent to calling IObject_Destroy directly
+                    IObject_Destroy(&this->mObject.mItf);
+                } else {
+                    IObject_Publish(&this->mObject);
+                    // return the new audio recorder object
+                    *pRecorder = &this->mObject.mItf;
                 }
             }
 
@@ -351,10 +346,11 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
             if (NULL == this) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
-                // return the new MIDI player object
-                *pPlayer = &this->mObject.mItf;
                 // FIXME a fake value - why not use value from IPlay_init? what does CT check for?
                 this->mPlay.mDuration = 0;
+                IObject_Publish(&this->mObject);
+                // return the new MIDI player object
+                *pPlayer = &this->mObject.mItf;
             }
         }
     }
@@ -385,7 +381,8 @@ static SLresult IEngine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
             if (NULL == this) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
-                // return the new listener object
+                IObject_Publish(&this->mObject);
+                // return the new 3D listener object
                 *pListener = &this->mObject.mItf;
             }
         }
@@ -418,7 +415,8 @@ static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup, SLu
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
                 this->mMemberMask = 0;
-                // return the new 3DGroup object
+                IObject_Publish(&this->mObject);
+                // return the new 3D group object
                 *pGroup = &this->mObject.mItf;
             }
         }
@@ -452,6 +450,24 @@ static SLresult IEngine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix, SLu
 #ifdef ANDROID
                 android_outputMix_create(this);
 #endif
+#ifdef USE_SDL
+                IEngine *thisEngine = this->mObject.mEngine;
+                interface_lock_exclusive(thisEngine);
+                bool unpause = false;
+                if (NULL == thisEngine->mOutputMix) {
+                    thisEngine->mOutputMix = this;
+                    unpause = true;
+                }
+                interface_unlock_exclusive(thisEngine);
+#endif
+                IObject_Publish(&this->mObject);
+#ifdef USE_SDL
+                if (unpause) {
+                    // Enable SDL_callback to be called periodically by SDL's internal thread
+                    SDL_PauseAudio(0);
+                }
+#endif
+                // return the new output mix object
                 *pMix = &this->mObject.mItf;
             }
         }
@@ -483,6 +499,8 @@ static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self, SLObjectItf *p
             if (NULL == this) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
+                IObject_Publish(&this->mObject);
+                // return the new metadata extractor object
                 *pMetadataExtractor = &this->mObject.mItf;
                 result = SL_RESULT_SUCCESS;
             }

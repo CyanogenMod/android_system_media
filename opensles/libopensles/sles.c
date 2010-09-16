@@ -127,10 +127,12 @@ void ReleaseStrongRef(IObject *object)
 
 SLresult err_to_result(int err)
 {
-    if (EAGAIN == err || ENOMEM == err)
+    if (EAGAIN == err || ENOMEM == err) {
         return SL_RESULT_RESOURCE_ERROR;
-    if (0 != err)
+    }
+    if (0 != err) {
         return SL_RESULT_INTERNAL_ERROR;
+    }
     return SL_RESULT_SUCCESS;
 }
 
@@ -155,17 +157,20 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
         }
     }
     if (0 < numInterfaces) {
-        if (NULL == pInterfaceIds || NULL == pInterfaceRequired)
+        if (NULL == pInterfaceIds || NULL == pInterfaceRequired) {
             return SL_RESULT_PARAMETER_INVALID;
+        }
         for (i = 0; i < numInterfaces; ++i) {
             SLInterfaceID iid = pInterfaceIds[i];
-            if (NULL == iid)
+            if (NULL == iid) {
                 return SL_RESULT_PARAMETER_INVALID;
+            }
             int MPH, index;
             if ((0 > (MPH = IID_to_MPH(iid))) ||
                 (0 > (index = class__->mMPH_to_index[MPH]))) {
-                if (pInterfaceRequired[i])
+                if (pInterfaceRequired[i]) {
                     return SL_RESULT_FEATURE_UNSUPPORTED;
+                }
                 continue;
             }
             exposedMask |= (1 << index);
@@ -181,14 +186,17 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
 SLresult GetCodecCapabilities(SLuint32 codecId, SLuint32 *pIndex,
     SLAudioCodecDescriptor *pDescriptor, const CodecDescriptor *codecDescriptors)
 {
-    if (NULL == pIndex)
+    if (NULL == pIndex) {
         return SL_RESULT_PARAMETER_INVALID;
+    }
     const CodecDescriptor *cd = codecDescriptors;
     SLuint32 index;
     if (NULL == pDescriptor) {
-        for (index = 0 ; NULL != cd->mDescriptor; ++cd)
-            if (cd->mCodecID == codecId)
+        for (index = 0 ; NULL != cd->mDescriptor; ++cd) {
+            if (cd->mCodecID == codecId) {
                 ++index;
+            }
+        }
         *pIndex = index;
         return SL_RESULT_SUCCESS;
     }
@@ -234,7 +242,7 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
     case SL_DATALOCATOR_ADDRESS:
         pDataLocator->mAddress = *(SLDataLocator_Address *)pLocator;
         // if length is greater than zero, then the address must be non-NULL
-        if (0 < pDataLocator->mAddress.length && NULL == pDataLocator->mAddress.pAddress) {
+        if ((0 < pDataLocator->mAddress.length) && (NULL == pDataLocator->mAddress.pAddress)) {
             SL_LOGE("pAddress is NULL");
             return SL_RESULT_PARAMETER_INVALID;
         }
@@ -315,8 +323,9 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
 
     case SL_DATALOCATOR_MIDIBUFFERQUEUE:
         pDataLocator->mMIDIBufferQueue = *(SLDataLocator_MIDIBufferQueue *)pLocator;
-        if (0 == pDataLocator->mMIDIBufferQueue.tpqn)
+        if (0 == pDataLocator->mMIDIBufferQueue.tpqn) {
             pDataLocator->mMIDIBufferQueue.tpqn = 192;
+        }
         // number of buffers must be specified, there is no default value, and must not be excessive
         if (!((1 <= pDataLocator->mMIDIBufferQueue.numBuffers) &&
             (pDataLocator->mMIDIBufferQueue.numBuffers <= 255))) {
@@ -509,8 +518,9 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
                 switch (pDataFormat->mPCM.containerSize) {
                 case SL_PCMSAMPLEFORMAT_FIXED_8:
                 case SL_PCMSAMPLEFORMAT_FIXED_16:
-                    if (pDataFormat->mPCM.containerSize != pDataFormat->mPCM.bitsPerSample)
+                    if (pDataFormat->mPCM.containerSize != pDataFormat->mPCM.bitsPerSample) {
                         result = SL_RESULT_CONTENT_UNSUPPORTED;
+                    }
                     break;
                 default:
                     result = SL_RESULT_CONTENT_UNSUPPORTED;
@@ -524,14 +534,16 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
                 // check the channel mask
                 switch (pDataFormat->mPCM.channelMask) {
                 case SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT:
-                    if (2 != pDataFormat->mPCM.numChannels)
+                    if (2 != pDataFormat->mPCM.numChannels) {
                         result = SL_RESULT_PARAMETER_INVALID;
+                    }
                     break;
                 case SL_SPEAKER_FRONT_LEFT:
                 case SL_SPEAKER_FRONT_RIGHT:
                 case SL_SPEAKER_FRONT_CENTER:
-                    if (1 != pDataFormat->mPCM.numChannels)
+                    if (1 != pDataFormat->mPCM.numChannels) {
                         result = SL_RESULT_PARAMETER_INVALID;
+                    }
                     break;
                 case 0:
                     pDataFormat->mPCM.channelMask = pDataFormat->mPCM.numChannels == 2 ?
@@ -542,7 +554,8 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
                     break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
-                    SL_LOGE("channelMask=%u", (unsigned) pDataFormat->mPCM.channelMask);
+                    SL_LOGE("channelMask=0x%lx numChannels=%lu", pDataFormat->mPCM.channelMask,
+                        pDataFormat->mPCM.numChannels);
                     break;
                 }
 
@@ -595,8 +608,9 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
         }
 
         // make sure format type was not modified asynchronously
-        if (SL_RESULT_SUCCESS == result && formatType != pDataFormat->mFormatType)
+        if ((SL_RESULT_SUCCESS == result) && (formatType != pDataFormat->mFormatType)) {
             result = SL_RESULT_PRECONDITIONS_VIOLATED;
+        }
 
     }
 
@@ -824,13 +838,14 @@ extern void
     IOutputMixExt_init(void *);
 #endif
 extern void
+    I3DGrouping_deinit(void *),
     IObject_deinit(void *);
 
 
 /*static*/ const struct MPH_init MPH_init_table[MPH_MAX] = {
     { /* MPH_3DCOMMIT, */ I3DCommit_init, NULL, NULL },
     { /* MPH_3DDOPPLER, */ I3DDoppler_init, NULL, NULL },
-    { /* MPH_3DGROUPING, */ I3DGrouping_init, NULL, NULL },
+    { /* MPH_3DGROUPING, */ I3DGrouping_init, NULL, I3DGrouping_deinit },
     { /* MPH_3DLOCATION, */ I3DLocation_init, NULL, NULL },
     { /* MPH_3DMACROSCOPIC, */ I3DMacroscopic_init, NULL, NULL },
     { /* MPH_3DSOURCE, */ I3DSource_init, NULL, NULL },
@@ -908,7 +923,7 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
         } else {
             interface_lock_exclusive(thisEngine);
             if (MAX_INSTANCE <= thisEngine->mInstanceCount) {
-                // too many objects
+                SL_LOGE("Too many objects");
                 interface_unlock_exclusive(thisEngine);
                 free(this);
                 return NULL;
@@ -918,8 +933,9 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
             assert(((unsigned) ~0) != thisEngine->mInstanceMask);
             interface_unlock_exclusive(thisEngine);
             // const, no lock needed
-            if (thisEngine->mLossOfControlGlobal)
+            if (thisEngine->mLossOfControlGlobal) {
                 lossOfControlMask = ~0;
+            }
         }
         this->mLossOfControlMask = lossOfControlMask;
         this->mClass = class__;
@@ -932,44 +948,24 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
             if (exposedMask & 1) {
                 void *self = (char *) this + x->mOffset;
                 // IObject does not have an mThis, so [1] is not always defined
-                if (index)
+                if (index) {
                     ((IObject **) self)[1] = this;
+                }
                 VoidHook init = MPH_init_table[x->mMPH].mInit;
-                if (NULL != init)
+                if (NULL != init) {
                     (*init)(self);
+                }
                 // IObject does not require a call to GetInterface
-                if (index)
+                if (index) {
                     ((size_t *) self)[0] ^= ~0;
+                }
                 state = INTERFACE_EXPOSED;
-            } else
+            } else {
                 state = INTERFACE_UNINITIALIZED;
+            }
             *interfaceStateP++ = state;
         }
-        // only expose new object to sync thread after it is fully initialized
-        interface_lock_exclusive(thisEngine);
-        unsigned availMask = ~thisEngine->mInstanceMask;
-        assert(availMask);
-        unsigned i = ctz(availMask);
-        assert(MAX_INSTANCE > i);
-        assert(NULL == thisEngine->mInstances[i]);
-        thisEngine->mInstances[i] = this;
-        thisEngine->mInstanceMask |= 1 << i;
-        // avoid zero as a valid instance ID
-        this->mInstanceID = i + 1;
-#ifdef USE_SDL
-        // FIXME move to output mix create hook for output mix
-        SLboolean unpause = SL_BOOLEAN_FALSE;
-        if (SL_OBJECTID_OUTPUTMIX == class__->mObjectID && NULL == thisEngine->mOutputMix) {
-            thisEngine->mOutputMix = (COutputMix *) this;
-            unpause = SL_BOOLEAN_TRUE;
-        }
-#endif
-        interface_unlock_exclusive(thisEngine);
-#ifdef USE_SDL
-        if (unpause) {
-            SDL_PauseAudio(0);
-        }
-#endif
+        // note that the new object is not yet published; creator must call IObject_Publish
     }
     return this;
 }

@@ -505,7 +505,7 @@ static void IObject_AbortAsyncOperation(SLObjectItf self)
 }
 
 
-static void IObject_Destroy(SLObjectItf self)
+void IObject_Destroy(SLObjectItf self)
 {
     SL_ENTER_INTERFACE_VOID
 
@@ -532,28 +532,22 @@ static void IObject_Destroy(SLObjectItf self)
     // const, no lock needed
     IEngine *thisEngine = this->mEngine;
     unsigned i = this->mInstanceID;
-    assert(0 < i && i <= MAX_INSTANCE);
-    --i;
+    assert(MAX_INSTANCE >= i);
     // avoid a recursive lock on the engine when destroying the engine itself
     if (thisEngine->mThis != this) {
         interface_lock_exclusive(thisEngine);
     }
-    // remove object from exposure to sync thread and debugger
+    // An unpublished object has a slot reserved, but the ID hasn't been chosen yet
     assert(0 < thisEngine->mInstanceCount);
     --thisEngine->mInstanceCount;
-    assert(0 != thisEngine->mInstanceMask);
-    thisEngine->mInstanceMask &= ~(1 << i);
-    assert(thisEngine->mInstances[i] == this);
-    thisEngine->mInstances[i] = NULL;
-#ifdef USE_SDL
-    // FIXME put this into the output mix destroy callback
-    if ((SL_OBJECTID_OUTPUTMIX == class__->mObjectID) &&
-        (((COutputMix *) this == thisEngine->mOutputMix))) {
-        SDL_PauseAudio(1);
-        thisEngine->mOutputMix = NULL;
-        // Note we don't attempt to connect another output mix to SDL
+    // If object is published, then remove it from exposure to sync thread and debugger
+    if (0 != i) {
+        --i;
+        assert(0 != thisEngine->mInstanceMask);
+        thisEngine->mInstanceMask &= ~(1 << i);
+        assert(thisEngine->mInstances[i] == this);
+        thisEngine->mInstances[i] = NULL;
     }
-#endif
     // avoid a recursive unlock on the engine when destroying the engine itself
     if (thisEngine->mThis != this) {
         interface_unlock_exclusive(thisEngine);
@@ -770,4 +764,27 @@ void IObject_deinit(void *self)
     ok = pthread_mutex_destroy(&this->mMutex);
     assert(0 == ok);
     // redundant: this->mState = SL_OBJECT_STATE_UNREALIZED;
+}
+
+
+/** \brief Publish a new object after it is fully initialized.
+ *  Publishing will expose the object to sync thread and debugger,
+ *  and make it safe to return the SLObjectItf to the application.
+ */
+
+void IObject_Publish(IObject *this)
+{
+    IEngine *thisEngine = this->mEngine;
+    interface_lock_exclusive(thisEngine);
+    // construct earlier reserved a pending slot, but did not choose the actual slot number
+    unsigned availMask = ~thisEngine->mInstanceMask;
+    assert(availMask);
+    unsigned i = ctz(availMask);
+    assert(MAX_INSTANCE > i);
+    assert(NULL == thisEngine->mInstances[i]);
+    thisEngine->mInstances[i] = this;
+    thisEngine->mInstanceMask |= 1 << i;
+    // avoid zero as a valid instance ID
+    this->mInstanceID = i + 1;
+    interface_unlock_exclusive(thisEngine);
 }

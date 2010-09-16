@@ -40,7 +40,7 @@ static const ClassTable C3DGroup_class = {
     NULL,
     NULL,
     NULL,
-    NULL
+    C3DGroup_PreDestroy
 };
 
 // AudioPlayer class
@@ -198,8 +198,8 @@ static const struct iid_vtable Listener_interfaces[INTERFACES_Listener] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(CListener, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CListener, mDynamicInterfaceManagement)},
-    {MPH_3DDOPPLER, INTERFACE_DYNAMIC_GAME, offsetof(C3DGroup, m3DDoppler)},
-    {MPH_3DLOCATION, INTERFACE_EXPLICIT_GAME, offsetof(C3DGroup, m3DLocation)}
+    {MPH_3DDOPPLER, INTERFACE_DYNAMIC_GAME, offsetof(CListener, m3DDoppler)},
+    {MPH_3DLOCATION, INTERFACE_EXPLICIT_GAME, offsetof(CListener, m3DLocation)}
 };
 
 static const ClassTable CListener_class = {

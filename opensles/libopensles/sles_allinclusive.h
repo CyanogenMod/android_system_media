@@ -274,7 +274,7 @@ typedef struct Object_interface {
     // field mThis would be redundant within an IObject, so we substitute mEngine
     struct Engine_interface *mEngine;   // const
     const ClassTable *mClass;       // const
-    SLuint32 mInstanceID;           // const for debugger and for RPC
+    SLuint32 mInstanceID;           // const for debugger and for RPC, 0 means unpublished
     slObjectCallback mCallback;
     void *mContext;
     unsigned mGottenMask;           ///< bit-mask of interfaces exposed or added, then gotten
@@ -350,7 +350,7 @@ typedef struct {
 typedef struct {
     const struct SL3DGroupingItf_ *mItf;
     IObject *mThis;
-    C3DGroup *mGroup;   // link to associated group or NULL
+    C3DGroup *mGroup;   // strong reference to associated group or NULL
 } I3DGrouping;
 
 enum AnglesVectorsActive {
@@ -689,6 +689,7 @@ typedef struct {
     IObject *mThis;
     unsigned mActiveMask;   // 1 bit per active track
     Track mTracks[MAX_TRACK];
+    SLboolean mDestroyRequested;    ///< Mixer to acknowledge application's call to Object::Destroy
 } IOutputMixExt;
 #endif
 
@@ -949,7 +950,6 @@ enum AndroidObject_state {
     // rest of fields are not related to the interfaces
     DataLocatorFormat mDataSource;
     DataLocatorFormat mDataSink;
-    COutputMix *mOutputMix;     // output mix this audio player is attached to, for effect send
     // cached data for this instance
     SLuint8 /*SLboolean*/ mMute;
     // Formerly at IMuteSolo
@@ -1194,6 +1194,8 @@ extern IObject *construct(const ClassTable *class__,
 extern const ClassTable *objectIDtoClass(SLuint32 objectID);
 extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
 extern SLuint32 IObjectToObjectID(IObject *object);
+extern void IObject_Publish(IObject *this);
+extern void IObject_Destroy(SLObjectItf self);
 
 // Map an interface to it's "object ID" (which is really a class ID).
 // Note: this operation is undefined on IObject, as it lacks an mThis.
@@ -1224,6 +1226,8 @@ extern SLresult checkSourceFormatVsInterfacesCompatibility(
         SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
         const SLboolean *pInterfaceRequired);
 extern void freeDataLocatorFormat(DataLocatorFormat *dlf);
+
+extern bool C3DGroup_PreDestroy(void *self);
 
 extern SLresult CAudioPlayer_Realize(void *self, SLboolean async);
 extern SLresult CAudioPlayer_Resume(void *self, SLboolean async);
@@ -1354,3 +1358,5 @@ extern bool IsInterfaceInitialized(IObject *this, unsigned MPH);
 extern SLresult AcquireStrongRef(IObject *object, SLuint32 expectedObjectID);
 extern void ReleaseStrongRef(IObject *object);
 extern void ReleaseStrongRefAndUnlockExclusive(IObject *object);
+
+extern COutputMix *CAudioPlayer_GetOutputMix(CAudioPlayer *audioPlayer);

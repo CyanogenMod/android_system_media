@@ -46,7 +46,6 @@ SLresult COutputMix_Resume(void *self, SLboolean async)
 
 void COutputMix_Destroy(void *self)
 {
-
 #ifdef ANDROID
     COutputMix *this = (COutputMix *) self;
     android_outputMix_destroy(this);
@@ -58,5 +57,23 @@ void COutputMix_Destroy(void *self)
 
 bool COutputMix_PreDestroy(void *self)
 {
-    return true;
+    // Ignore destroy requests if there are any players attached to this output mix
+    COutputMix *outputMix = (COutputMix *) self;
+    // See design document for explanation
+    if (0 == outputMix->mObject.mStrongRefCount) {
+#ifdef USE_SDL
+        // Tell the asynchronous SDL_callback that we want to destroy the output mix
+        outputMix->mOutputMixExt.mDestroyRequested = true;
+        while (outputMix->mOutputMixExt.mDestroyRequested) {
+            object_cond_wait(&outputMix->mObject);
+        }
+        // SDL_Callback has acknowledged our request and unlinked output mix from engine.
+        // Disable SDL_callback from being called periodically by SDL's internal thread.
+        SDL_PauseAudio(1);
+#endif
+        return true;
+    }
+    SL_LOGE("Object::Destroy(%p) for OutputMix ignored; %u players attached", outputMix,
+        outputMix->mObject.mStrongRefCount);
+    return false;
 }
