@@ -21,6 +21,7 @@
 
 SLresult android_outputMix_create(COutputMix *om) {
     SLresult result = SL_RESULT_SUCCESS;
+
     SL_LOGV("om=%p", om);
 
     om->mAndroidEffect.mEffects = new android::KeyedVector<SLuint32, android::AudioEffect* >();

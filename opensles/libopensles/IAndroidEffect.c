@@ -111,6 +111,7 @@ void IAndroidEffect_init(void *self)
     IAndroidEffect *this = (IAndroidEffect *) self;
     this->mItf = &IAndroidEffect_Itf;
 
+    // mEffects lifecycle is handled by the object on which SLAndroidEffect is exposed
 }
 
 #endif // #ifdef ANDROID
