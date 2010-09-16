@@ -17,7 +17,8 @@ part2.c : part23in.c
 
 part3.c : part23in.c
 	$(RM) $@
-	sed -n '26,54p' < part23in.c >> $@
+# was 26,54p
+	sed -n '/static const unsigned char asso_values.. =/,/^    };/p' < part23in.c >> $@
 
 # part4.c is human-generated
 
@@ -27,7 +28,8 @@ part5.c : part5gen
 # part6.c is human-generated
 
 part7.c : part23in.c hash.sed
-	sed -n '55p' < part23in.c | sed -f hash.sed >> $@
+# was 55p
+	sed -n '/return asso_values.(unsigned char)str.3.. + asso_values.(unsigned char)str.0..;/p' < part23in.c | sed -f hash.sed >> $@
 
 # part8.c is human_generated
 
@@ -44,7 +46,8 @@ part5gen.c : frag2.c part23in.c frag3.c
 	$(RM) $@
 	cp frag2.c $@
 	grep '#define MAX_HASH_VALUE' part23in.c >> $@
-	sed -n '81,152p' < part23in.c >> $@
+# was 81,156p
+	sed -n '/static const char . const wordlist.. =/,/^    };/p' < part23in.c >> $@
 	cat frag3.c >> $@
 
 part5gen : part5gen.o OpenSLES_IID.o interfaces.o
