@@ -31,23 +31,6 @@ typedef sl_int64_t             SLAint64;           /* 64 bit signed integer */
 /* Android Stream Type interface                                             */
 /*---------------------------------------------------------------------------*/
 
-/** Stream types */
-// FIXME verify those are all the ones we need
-// FIXME verify we want to use the same values as in android::AudioSystem
-/*      same as android.media.AudioManager.STREAM_VOICE_CALL */
-#define SL_ANDROID_STREAM_VOICE        ((SLuint32) 0x00000000)
-/*      same as android.media.AudioManager.STREAM_SYSTEM */
-#define SL_ANDROID_STREAM_SYSTEM       ((SLuint32) 0x00000001)
-/*      same as android.media.AudioManager.STREAM_RING */
-#define SL_ANDROID_STREAM_RING         ((SLuint32) 0x00000002)
-/*      same as android.media.AudioManager.STREAM_MUSIC */
-#define SL_ANDROID_STREAM_MEDIA        ((SLuint32) 0x00000003)
-/*      same as android.media.AudioManager.STREAM_ALARM */
-#define SL_ANDROID_STREAM_ALARM        ((SLuint32) 0x00000004)
-/*      same as android.media.AudioManager.STREAM_NOTIFICATION */
-#define SL_ANDROID_STREAM_NOTIFICATION ((SLuint32) 0x00000005)
-
-
 extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDSTREAMTYPE;
 
 /** Android Stream Type interface methods */

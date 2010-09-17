@@ -16,7 +16,9 @@
 
 #include "sles_allinclusive.h"
 #include "utils/RefBase.h"
+#include "android_prompts.h"
 
+#define KEY_STREAM_TYPE_PARAMSIZE  sizeof(SLint32)
 
 //-----------------------------------------------------------------------------
 int android_getMinFrameCount(uint32_t sampleRate) {
@@ -265,8 +267,86 @@ void audioPlayer_dispatch_prefetchStatus_lockPrefetch(CAudioPlayer *ap, SLuint32
 }
 
 
-#ifndef USE_BACKPORT
 //-----------------------------------------------------------------------------
+SLresult audioPlayer_setStreamType(CAudioPlayer* ap, SLint32 type) {
+    SLresult result = SL_RESULT_SUCCESS;
+    SL_LOGV("type %ld", type);
+
+    int newStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
+    switch(type) {
+    case SL_ANDROID_STREAM_VOICE:
+        newStreamType = android::AudioSystem::VOICE_CALL;
+        break;
+    case SL_ANDROID_STREAM_SYSTEM:
+        newStreamType = android::AudioSystem::SYSTEM;
+        break;
+    case SL_ANDROID_STREAM_RING:
+        newStreamType = android::AudioSystem::RING;
+        break;
+    case SL_ANDROID_STREAM_MEDIA:
+        newStreamType = android::AudioSystem::MUSIC;
+        break;
+    case SL_ANDROID_STREAM_ALARM:
+        newStreamType = android::AudioSystem::ALARM;
+        break;
+    case SL_ANDROID_STREAM_NOTIFICATION:
+        newStreamType = android::AudioSystem::NOTIFICATION;
+        break;
+    default:
+        SL_LOGE(ERROR_PLAYERSTREAMTYPE_SET_UNKNOWN_TYPE);
+        result = SL_RESULT_PARAMETER_INVALID;
+        break;
+    }
+
+    // stream type needs to be set before the object is realized
+    // (ap->mAudioTrack is supposed to be NULL until then)
+    if (SL_OBJECT_STATE_UNREALIZED == ap->mObject.mState) {
+        SL_LOGE(ERROR_PLAYERSTREAMTYPE_REALIZED);
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    } else {
+        ap->mStreamType = newStreamType;
+    }
+
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult audioPlayer_getStreamType(CAudioPlayer* ap, SLint32 *pType) {
+    SLresult result = SL_RESULT_SUCCESS;
+
+    switch(ap->mStreamType) {
+    case android::AudioSystem::VOICE_CALL:
+        *pType = SL_ANDROID_STREAM_VOICE;
+        break;
+    case android::AudioSystem::SYSTEM:
+        *pType = SL_ANDROID_STREAM_SYSTEM;
+        break;
+    case android::AudioSystem::RING:
+        *pType = SL_ANDROID_STREAM_RING;
+        break;
+    case android::AudioSystem::DEFAULT:
+    case android::AudioSystem::MUSIC:
+        *pType = SL_ANDROID_STREAM_MEDIA;
+        break;
+    case android::AudioSystem::ALARM:
+        *pType = SL_ANDROID_STREAM_ALARM;
+        break;
+    case android::AudioSystem::NOTIFICATION:
+        *pType = SL_ANDROID_STREAM_NOTIFICATION;
+        break;
+    default:
+        result = SL_RESULT_INTERNAL_ERROR;
+        *pType = SL_ANDROID_STREAM_MEDIA;
+        break;
+    }
+
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+#ifndef USE_BACKPORT
 // Callback associated with an SfPlayer of an SL ES AudioPlayer that gets its data
 // from a URI or FD, for prefetching events
 static void sfplayer_handlePrefetchEvent(const int event, const int data1, void* user) {
@@ -328,6 +408,7 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
     }
 }
 #endif
+
 
 //-----------------------------------------------------------------------------
 SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
@@ -674,6 +755,7 @@ SLresult android_audioPlayer_create(
     }
 
     pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
+    pAudioPlayer->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
     pAudioPlayer->mAudioTrack = NULL;
 #ifndef USE_BACKPORT
     pAudioPlayer->mSfPlayer.clear();
@@ -694,6 +776,71 @@ SLresult android_audioPlayer_create(
 
     return result;
 
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult android_audioPlayer_setConfig(CAudioPlayer *ap, const SLchar *configKey,
+        const void *pConfigValue, SLuint32 valueSize) {
+
+    SLresult result = SL_RESULT_SUCCESS;
+
+    if (NULL == ap) {
+        result = SL_RESULT_INTERNAL_ERROR;
+    } else if (NULL == pConfigValue) {
+        SL_LOGE(ERROR_CONFIG_NULL_PARAM);
+        result = SL_RESULT_PARAMETER_INVALID;
+
+    } else if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_STREAM_TYPE) == 0) {
+
+        // stream type
+        if (KEY_STREAM_TYPE_PARAMSIZE > valueSize) {
+            SL_LOGE(ERROR_CONFIG_VALUESIZE_TOO_LOW);
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            result = audioPlayer_setStreamType(ap, *(SLuint32*)pConfigValue);
+        }
+
+    } else {
+        SL_LOGE(ERROR_CONFIG_UNKNOWN_KEY);
+        result = SL_RESULT_PARAMETER_INVALID;
+    }
+
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+SLresult android_audioPlayer_getConfig(CAudioPlayer* ap, const SLchar *configKey,
+        SLuint32* pValueSize, void *pConfigValue) {
+
+    SLresult result = SL_RESULT_SUCCESS;
+
+    if (NULL == ap) {
+        return SL_RESULT_INTERNAL_ERROR;
+    } else if (NULL == pValueSize) {
+        SL_LOGE(ERROR_CONFIG_NULL_PARAM);
+        result = SL_RESULT_PARAMETER_INVALID;
+
+    } else if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_STREAM_TYPE) == 0) {
+
+        // stream type
+        if (KEY_STREAM_TYPE_PARAMSIZE > *pValueSize) {
+            SL_LOGE(ERROR_CONFIG_VALUESIZE_TOO_LOW);
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            *pValueSize = KEY_STREAM_TYPE_PARAMSIZE;
+            if (NULL != pConfigValue) {
+                result = audioPlayer_getStreamType(ap, (SLint32*)pConfigValue);
+            }
+        }
+
+    } else {
+        SL_LOGE(ERROR_CONFIG_UNKNOWN_KEY);
+        result = SL_RESULT_PARAMETER_INVALID;
+    }
+
+    return result;
 }
 
 
@@ -719,7 +866,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         uint32_t sampleRate = sles_to_android_sampleRate(df_pcm->samplesPerSec);
 
         pAudioPlayer->mAudioTrack = new android::AudioTrack(
-                pAudioPlayer->mAndroidStreamType.mStreamType,        // streamType
+                pAudioPlayer->mStreamType,                           // streamType
                 sampleRate,                                          // sampleRate
                 sles_to_android_sampleFormat(df_pcm->bitsPerSample), // format
                 sles_to_android_channelMask(df_pcm->numChannels, df_pcm->channelMask),//channel mask
@@ -782,7 +929,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         } else {
             // create audio track based on parameters retrieved from Stagefright
             pAudioPlayer->mAudioTrack = new android::AudioTrack(
-                    pAudioPlayer->mAndroidStreamType.mStreamType,        // streamType
+                    pAudioPlayer->mStreamType,                           // streamType
                     pAudioPlayer->mSfPlayer->getSampleRateHz(),          // sampleRate
                     android::AudioSystem::PCM_16_BIT,                    // format
                     pAudioPlayer->mSfPlayer->getNumChannels() == 1 ?     //channel mask
