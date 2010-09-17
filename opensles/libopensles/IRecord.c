@@ -71,12 +71,12 @@ static SLresult IRecord_SetDurationLimit(SLRecordItf self, SLmillisecond msec)
     SL_ENTER_INTERFACE
 
     IRecord *this = (IRecord *) self;
-    interface_lock_poke(this);
+    interface_lock_exclusive(this);
     if (this->mDurationLimit != msec) {
         this->mDurationLimit = msec;
         interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
     } else {
-        interface_unlock_poke(this);
+        interface_unlock_exclusive(this);
     }
     result = SL_RESULT_SUCCESS;
 
@@ -133,12 +133,12 @@ static SLresult IRecord_SetCallbackEventsMask(SLRecordItf self, SLuint32 eventFl
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IRecord *this = (IRecord *) self;
-        interface_lock_poke(this);
+        interface_lock_exclusive(this);
         if (this->mCallbackEventsMask != eventFlags) {
             this->mCallbackEventsMask = eventFlags;
             interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
         } else {
-            interface_unlock_poke(this);
+            interface_unlock_exclusive(this);
         }
         result = SL_RESULT_SUCCESS;
     }
@@ -171,12 +171,12 @@ static SLresult IRecord_SetMarkerPosition(SLRecordItf self, SLmillisecond mSec)
     SL_ENTER_INTERFACE
 
     IRecord *this = (IRecord *) self;
-    interface_lock_poke(this);
+    interface_lock_exclusive(this);
     if (this->mMarkerPosition != mSec) {
         this->mMarkerPosition = mSec;
         interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
     } else {
-        interface_unlock_poke(this);
+        interface_unlock_exclusive(this);
     }
     result = SL_RESULT_SUCCESS;
 
@@ -189,12 +189,12 @@ static SLresult IRecord_ClearMarkerPosition(SLRecordItf self)
     SL_ENTER_INTERFACE
 
     IRecord *this = (IRecord *) self;
-    interface_lock_poke(this);
+    interface_lock_exclusive(this);
     if (this->mMarkerPosition != 0) {
         this->mMarkerPosition = 0;
         interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
     } else {
-        interface_unlock_poke(this);
+        interface_unlock_exclusive(this);
     }
     result = SL_RESULT_SUCCESS;
 
@@ -229,12 +229,12 @@ static SLresult IRecord_SetPositionUpdatePeriod(SLRecordItf self, SLmillisecond 
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IRecord *this = (IRecord *) self;
-        interface_lock_poke(this);
+        interface_lock_exclusive(this);
         if (this->mPositionUpdatePeriod != mSec) {
             this->mPositionUpdatePeriod = mSec;
             interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
         } else {
-            interface_unlock_poke(this);
+            interface_unlock_exclusive(this);
         }
         result = SL_RESULT_SUCCESS;
     }

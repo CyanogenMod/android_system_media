@@ -150,14 +150,14 @@ void audioRecorder_handleOverrun_lockRecord(CAudioRecorder* ar) {
     void* callbackPContext = NULL;
 
     interface_lock_shared(&ar->mRecord);
-    if (ar->mRecord.mCallbackEventsMask & SL_RECORDEVENT_BUFFER_FULL) {
+    if (ar->mRecord.mCallbackEventsMask & SL_RECORDEVENT_HEADSTALLED) {
         callback = ar->mRecord.mCallback;
         callbackPContext = ar->mRecord.mContext;
     }
     interface_unlock_shared(&ar->mRecord);
 
     if (NULL != callback) {
-        (*callback)(&ar->mRecord.mItf, callbackPContext, SL_RECORDEVENT_BUFFER_FULL);
+        (*callback)(&ar->mRecord.mItf, callbackPContext, SL_RECORDEVENT_HEADSTALLED);
     }
 }
 
@@ -503,14 +503,14 @@ void android_audioRecorder_useEventMask(CAudioRecorder *ar) {
     }
 
     if (eventFlags & SL_RECORDEVENT_BUFFER_FULL) {
-        // nothing to do for SL_RECORDEVENT_BUFFER_FULL, callback event will be checked against mask
-        // when AudioRecord::EVENT_OVERRUN is encountered
+        // nothing to do for SL_RECORDEVENT_BUFFER_FULL since this will not be encountered on
+        // recording to buffer queues
     }
 
     if (eventFlags & SL_RECORDEVENT_HEADSTALLED) {
-        // FIXME support SL_RECORDEVENT_HEADSTALLED
-        SL_LOGE("[ FIXME: IRecord_SetCallbackEventsMask(SL_RECORDEVENT_HEADSTALLED) on an "
-                "SL_OBJECTID_AUDIORECORDER to be implemented ]");
+        // nothing to do for SL_RECORDEVENT_HEADSTALLED, callback event will be checked against mask
+        // when AudioRecord::EVENT_OVERRUN is encountered
+
     }
 
 }
