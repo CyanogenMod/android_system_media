@@ -83,9 +83,10 @@ static const struct iid_vtable AudioPlayer_interfaces[INTERFACES_AudioPlayer] = 
     {MPH_VIRTUALIZER, INTERFACE_DYNAMIC_OPTIONAL, offsetof(CAudioPlayer, mVirtualizer)},
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL, offsetof(CAudioPlayer, mVisualization)},
 #ifdef ANDROID
-    {MPH_ANDROIDSTREAMTYPE, INTERFACE_IMPLICIT, offsetof(CAudioPlayer, mAndroidStreamType)},
     {MPH_ANDROIDEFFECT, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidEffect)},
     {MPH_ANDROIDEFFECTSEND, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidEffectSend)},
+    // FIXME mark it as explicit + can be called before realize
+    {MPH_ANDROIDCONFIGURATION, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidConfiguration)},
 #endif
 };
 
@@ -117,6 +118,7 @@ static const struct iid_vtable AudioRecorder_interfaces[INTERFACES_AudioRecorder
     {MPH_VOLUME, INTERFACE_OPTIONAL, offsetof(CAudioRecorder, mVolume)}
 #ifdef ANDROID
     ,{MPH_BUFFERQUEUE, INTERFACE_EXPLICIT, offsetof(CAudioRecorder, mBufferQueue)},
+    // FIXME mark it as explicit + can be called before realize
     {MPH_ANDROIDCONFIGURATION, INTERFACE_EXPLICIT, offsetof(CAudioRecorder, mAndroidConfiguration)}
 #endif
 };
@@ -273,9 +275,6 @@ static const struct iid_vtable MidiPlayer_interfaces[INTERFACES_MidiPlayer] = {
     {MPH_PLAYBACKRATE, INTERFACE_DYNAMIC_OPTIONAL, offsetof(CMidiPlayer, mPlaybackRate)},
     {MPH_VIRTUALIZER, INTERFACE_DYNAMIC_OPTIONAL, offsetof(CMidiPlayer, mVirtualizer)},
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL, offsetof(CMidiPlayer, mVisualization)},
-#ifdef ANDROID
-    {MPH_ANDROIDSTREAMTYPE, INTERFACE_IMPLICIT, offsetof(CMidiPlayer, mAndroidStreamType)},
-#endif
 };
 
 static const ClassTable CMidiPlayer_class = {

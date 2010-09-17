@@ -84,9 +84,9 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
     [MPH_VIRTUALIZER] = 24,
     [MPH_VISUALIZATION] = 25,
 #ifdef ANDROID
-    [MPH_ANDROIDSTREAMTYPE] = 26,
-    [MPH_ANDROIDEFFECT] = 27,
-    [MPH_ANDROIDEFFECTSEND] = 28
+    [MPH_ANDROIDEFFECT] = 26,
+    [MPH_ANDROIDEFFECTSEND] = 27,
+    [MPH_ANDROIDCONFIGURATION] = 28
 #endif
 #else
     -1,
@@ -128,14 +128,12 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
     -1  // not using MPH_OUTPUTMIXEXT
 #ifdef ANDROID
     ,
-    26, // MPH_ANDROIDSTREAMTYPE
-    27, // MPH_ANDROIDEFFECT
+    26, // MPH_ANDROIDEFFECT
     -1, // MPH_ANDROIDEFFECTCAPABILITIES
-    28, // MPH_ANDROIDEFFECTSEND
-    -1  // not using MPH_ANDROIDCONFIGURATION
+    27, // MPH_ANDROIDEFFECTSEND
+    28  // MPH_ANDROIDCONFIGURATION
 #else
     ,
-    -1, // not using MPH_ANDROIDSTREAMTYPE
     -1, // not using MPH_ANDROIDEFFECT
     -1, // not using MPH_ANDROIDEFFECTCAPABILITIES
     -1, // not using MPH_ANDROIDEFFECTSEND
@@ -183,7 +181,6 @@ const signed char MPH_to_AudioRecorder[MPH_MAX] = {
     7, // MPH_VISUALIZATION
     8, // MPH_VOLUME
     -1, // not using MPH_OUTPUTMIXEXT
-    -1, // not using MPH_ANDROIDSTREAMTYPE
     -1, // not using MPH_ANDROIDEFFECT
     -1, // not using MPH_ANDROIDEFFECTCAPABILITIES
     -1  // not using MPH_ANDROIDEFFECTSEND
@@ -333,9 +330,6 @@ const signed char MPH_to_MidiPlayer[MPH_MAX] = {
     [MPH_PLAYBACKRATE] = 26,
     [MPH_VIRTUALIZER] = 27,
     [MPH_VISUALIZATION] = 28,
-#ifdef ANDROID
-    [MPH_ANDROIDSTREAMTYPE] = 29
-#endif
 #else
     -1,
     3,  // MPH_3DDOPPLER
@@ -376,12 +370,6 @@ const signed char MPH_to_MidiPlayer[MPH_MAX] = {
     28, // MPH_VISUALIZATION
     18, // MPH_VOLUME
     -1
-#ifdef ANDROID
-    ,
-    29 // MPH_ANDROIDSTREAMTYPE
-#else
-    , -1
-#endif
 #endif
 };
 
@@ -426,7 +414,6 @@ const signed char MPH_to_OutputMix[MPH_MAX] = {
 #else
     , -1
 #endif
-    , -1 // MPH_ANDROIDSTREAMTYPE
 #ifdef ANDROID
     , 11 // MPH_ANDROIDEFFECT
 #else

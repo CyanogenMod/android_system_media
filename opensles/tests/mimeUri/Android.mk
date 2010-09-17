@@ -1,6 +1,6 @@
 LOCAL_PATH:= $(call my-dir)
 
-#
+# slesTest_playStates
 
 include $(CLEAR_VARS)
 
@@ -24,7 +24,7 @@ LOCAL_MODULE:= slesTest_playStates
 
 include $(BUILD_EXECUTABLE)
 
-#
+# slesTest_playStreamType
 
 include $(CLEAR_VARS)
 
@@ -48,7 +48,7 @@ LOCAL_MODULE:= slesTest_playStreamType
 
 include $(BUILD_EXECUTABLE)
 
-#
+# slesTest_playUri
 
 include $(CLEAR_VARS)
 
@@ -72,7 +72,7 @@ LOCAL_MODULE:= slesTest_playUri
 
 include $(BUILD_EXECUTABLE)
 
-#
+# slesTest_playUri2
 
 include $(CLEAR_VARS)
 

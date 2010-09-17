@@ -135,8 +135,6 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     { 0x09e8ede0, 0xddde, 0x11db, 0xb4f6, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_OUTPUTMIXEXT (note that the lack of an ifdef is intentional)
     { 0xfe5cce00, 0x57bb, 0x11df, 0x951c, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-    // SL_IID_ANDROIDSTREAMTYPE (the lack of ifdef is intentional)
-    { 0x843b5f60, 0x82d6, 0x11df, 0xac5b, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_ANDROIDEFFECT (the lack of ifdef is intentional)
     { 0xae12da60, 0x99ac, 0x11df, 0xb456, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_ANDROIDEFFECTCAPABILITIES (the lack of ifdef is intentional)
@@ -198,7 +196,6 @@ const SLInterfaceID SL_IID_VOLUME = &SL_IID_array[MPH_VOLUME];
 extern const SLInterfaceID SL_IID_OUTPUTMIXEXT;
 // The lack of an ifdef is intentional on these
 const SLInterfaceID SL_IID_OUTPUTMIXEXT = &SL_IID_array[MPH_OUTPUTMIXEXT];
-const SLInterfaceID SL_IID_ANDROIDSTREAMTYPE = &SL_IID_array[MPH_ANDROIDSTREAMTYPE];
 const SLInterfaceID SL_IID_ANDROIDEFFECT = &SL_IID_array[MPH_ANDROIDEFFECT];
 const SLInterfaceID SL_IID_ANDROIDEFFECTCAPABILITIES = &SL_IID_array[MPH_ANDROIDEFFECTCAPABILITIES];
 const SLInterfaceID SL_IID_ANDROIDEFFECTSEND = &SL_IID_array[MPH_ANDROIDEFFECTSEND];

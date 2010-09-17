@@ -300,7 +300,7 @@ SLresult audioPlayer_setStreamType(CAudioPlayer* ap, SLint32 type) {
 
     // stream type needs to be set before the object is realized
     // (ap->mAudioTrack is supposed to be NULL until then)
-    if (SL_OBJECT_STATE_UNREALIZED == ap->mObject.mState) {
+    if (SL_OBJECT_STATE_REALIZED == ap->mObject.mState) {
         SL_LOGE(ERROR_PLAYERSTREAMTYPE_REALIZED);
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {

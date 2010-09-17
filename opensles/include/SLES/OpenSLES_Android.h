@@ -28,29 +28,6 @@ typedef sl_int64_t             SLAint64;           /* 64 bit signed integer */
 
 
 /*---------------------------------------------------------------------------*/
-/* Android Stream Type interface                                             */
-/*---------------------------------------------------------------------------*/
-
-extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDSTREAMTYPE;
-
-/** Android Stream Type interface methods */
-
-struct SLAndroidStreamTypeItf_;
-typedef const struct SLAndroidStreamTypeItf_ * const * SLAndroidStreamTypeItf;
-
-struct SLAndroidStreamTypeItf_ {
-    SLresult (*SetStreamType) (
-        SLAndroidStreamTypeItf self,
-        SLuint32 type
-    );
-    SLresult (*GetStreamType) (
-        SLAndroidStreamTypeItf self,
-        SLuint32 *pType
-    );
-};
-
-
-/*---------------------------------------------------------------------------*/
 /* Android Effect interface                                                  */
 /*---------------------------------------------------------------------------*/
 

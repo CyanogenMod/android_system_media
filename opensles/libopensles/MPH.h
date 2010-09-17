@@ -75,14 +75,13 @@
 // end non-standard and platform-independent interface IDs
 
 // start non-standard and platform-specific interface IDs
-#define MPH_ANDROIDSTREAMTYPE          45
-#define MPH_ANDROIDEFFECT              46
-#define MPH_ANDROIDEFFECTCAPABILITIES  47
-#define MPH_ANDROIDEFFECTSEND          48
-#define MPH_ANDROIDCONFIGURATION       49
+#define MPH_ANDROIDEFFECT              45
+#define MPH_ANDROIDEFFECTCAPABILITIES  46
+#define MPH_ANDROIDEFFECTSEND          47
+#define MPH_ANDROIDCONFIGURATION       48
 // end non-standard and platform-specific interface IDs
 
 // total number
-#define MPH_MAX                        50
+#define MPH_MAX                        49
 
 #endif // !defined(__MPH_H)
