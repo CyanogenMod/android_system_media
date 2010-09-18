@@ -46,8 +46,29 @@ extern SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer);
  *     SL_RESULT_CONTENT_UNSUPPORTED if an error occurred during the allocation and initialization
  *         of the Android resources
  */
-
 extern SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async);
+
+/*
+ * Return
+ *     SL_RESULT_SUCCESS
+ *     SL_RESULT_PARAMETER_INVALID
+ *     SL_RESULT_INTERNAL_ERROR
+ *     SL_RESULT_PRECONDITIONS_VIOLATED
+ */
+extern SLresult android_audioPlayer_setConfig(CAudioPlayer *pAudioPlayer, const SLchar *configKey,
+        const void *pConfigValue, SLuint32 valueSize);
+
+/*
+ * if pConfigValue is NULL, pValueSize contains the size required for the given key
+ *
+ * Return
+ *     SL_RESULT_SUCCESS
+ *     SL_RESULT_PARAMETER_INVALID
+ *     SL_RESULT_INTERNAL_ERROR
+ *     SL_RESULT_PRECONDITIONS_VIOLATED
+ */
+extern SLresult android_audioPlayer_getConfig(CAudioPlayer *pAudioPlayer, const SLchar *configKey,
+        SLuint32* pValueSize, void *pConfigValue);
 
 extern SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer);
 

@@ -33,10 +33,10 @@ static SLresult IAndroidStreamType_SetStreamType(SLAndroidStreamTypeItf self, SL
         IAndroidStreamType *this = (IAndroidStreamType *) self;
 
         interface_lock_exclusive(this);
-        this->mStreamType = type;
+        //this->mStreamType = type;
         switch (InterfaceToObjectID(this)) {
         case SL_OBJECTID_AUDIOPLAYER:
-            android_audioPlayer_setStreamType_l(InterfaceToCAudioPlayer(this), type);
+
             break;
         case SL_OBJECTID_MIDIPLAYER:
             // FIXME implement once we support MIDIPlayer
@@ -63,10 +63,10 @@ static SLresult IAndroidStreamType_GetStreamType(SLAndroidStreamTypeItf self, SL
         IAndroidStreamType *this = (IAndroidStreamType *) self;
 
         interface_lock_peek(this);
-        SLuint32 type = this->mStreamType;
+        //SLuint32 type = this->mStreamType;
         interface_unlock_peek(this);
 
-        *pType = type;
+        //*pType = type;
         result = SL_RESULT_SUCCESS;
     }
 
@@ -83,7 +83,7 @@ void IAndroidStreamType_init(void *self)
 {
     IAndroidStreamType *this = (IAndroidStreamType *) self;
     this->mItf = &IAndroidStreamType_Itf;
-    this->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
+    //this->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
 }
 
 #endif // #ifdef ANDROID

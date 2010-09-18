@@ -850,7 +850,6 @@ typedef struct /*Volume_interface*/ {
 typedef struct {
     const struct SLAndroidStreamTypeItf_ *mItf;
     IObject *mThis;
-    SLuint32 mStreamType;
 } IAndroidStreamType;
 
 typedef struct {
@@ -978,6 +977,8 @@ enum AndroidObject_state {
     enum AndroidObject_state mAndroidObjState;
     /** identifies which group of effects ("session") this player belongs to */
     int mSessionId;
+    /** identifies the Android stream type playback will occur on */
+    int mStreamType;
     /** plays the PCM data for this player */
     android::AudioTrack *mAudioTrack;
 #ifndef USE_BACKPORT

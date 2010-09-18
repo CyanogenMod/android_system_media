@@ -35,14 +35,16 @@ static SLresult IAndroidConfiguration_SetConfiguration(SLAndroidConfigurationItf
 #else
     // route configuration to the appropriate object
     if (SL_OBJECTID_AUDIORECORDER == IObjectToObjectID((this)->mThis)) {
-        SL_LOGV("SetConfiguration issued for AudioRecorder");
+        SL_LOGV("SetConfiguration issued for AudioRecorder key=%s valueSize=%lu",
+                configKey, valueSize);
         result = android_audioRecorder_setConfig((CAudioRecorder *) this->mThis, configKey,
                 pConfigValue, valueSize);
     } else if (SL_OBJECTID_AUDIOPLAYER == IObjectToObjectID((this)->mThis)) {
-        SL_LOGV("SetConfiguration issued for AudioPlayer");
-        result = SL_RESULT_PARAMETER_INVALID;
-    } else if (SL_OBJECTID_OUTPUTMIX == IObjectToObjectID((this)->mThis)) {
-        SL_LOGV("SetConfiguration issued for OutputMix");
+        SL_LOGV("SetConfiguration issued for AudioPlayer key=%s valueSize=%lu",
+                configKey, valueSize);
+        result = android_audioPlayer_setConfig((CAudioPlayer *) this->mThis, configKey,
+                pConfigValue, valueSize);
+    } else {
         result = SL_RESULT_PARAMETER_INVALID;
     }
 #endif
@@ -75,8 +77,9 @@ static SLresult IAndroidConfiguration_GetConfiguration(SLAndroidConfigurationItf
             result = android_audioRecorder_getConfig((CAudioRecorder *) this->mThis, configKey,
                     pValueSize, pConfigValue);
         } else if (SL_OBJECTID_AUDIOPLAYER == IObjectToObjectID((this)->mThis)) {
-            result = SL_RESULT_PARAMETER_INVALID;
-        } else if (SL_OBJECTID_OUTPUTMIX == IObjectToObjectID((this)->mThis)) {
+            result = android_audioPlayer_getConfig((CAudioPlayer *) this->mThis, configKey,
+                    pValueSize, pConfigValue);
+        } else {
             result = SL_RESULT_PARAMETER_INVALID;
         }
 

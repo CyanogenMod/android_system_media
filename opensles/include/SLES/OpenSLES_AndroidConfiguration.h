@@ -48,19 +48,18 @@ extern "C" {
 #define SL_ANDROID_KEY_STREAM_TYPE ((const SLchar*) "androidPlaybackStreamType")
 
 /** Audio playback stream type  values */
-// FIXME remove comments in front of #define below once the SLAndroidStreamTypeItf interface is gone
 /*      same as android.media.AudioManager.STREAM_VOICE_CALL */
-//#define SL_ANDROID_STREAM_VOICE        ((SLint32) 0x00000000)
+#define SL_ANDROID_STREAM_VOICE        ((SLint32) 0x00000000)
 /*      same as android.media.AudioManager.STREAM_SYSTEM */
-//#define SL_ANDROID_STREAM_SYSTEM       ((SLint32) 0x00000001)
+#define SL_ANDROID_STREAM_SYSTEM       ((SLint32) 0x00000001)
 /*      same as android.media.AudioManager.STREAM_RING */
-//#define SL_ANDROID_STREAM_RING         ((SLint32) 0x00000002)
+#define SL_ANDROID_STREAM_RING         ((SLint32) 0x00000002)
 /*      same as android.media.AudioManager.STREAM_MUSIC */
-//#define SL_ANDROID_STREAM_MEDIA        ((SLint32) 0x00000003)
+#define SL_ANDROID_STREAM_MEDIA        ((SLint32) 0x00000003)
 /*      same as android.media.AudioManager.STREAM_ALARM */
-//#define SL_ANDROID_STREAM_ALARM        ((SLint32) 0x00000004)
+#define SL_ANDROID_STREAM_ALARM        ((SLint32) 0x00000004)
 /*      same as android.media.AudioManager.STREAM_NOTIFICATION */
-//#define SL_ANDROID_STREAM_NOTIFICATION ((SLint32) 0x00000005)
+#define SL_ANDROID_STREAM_NOTIFICATION ((SLint32) 0x00000005)
 
 
 
