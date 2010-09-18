@@ -36,23 +36,17 @@ static SLresult IAndroidEffectSend_EnableEffectSend(SLAndroidEffectSendItf self,
             SL_LOGE("invalid interface: not attached to an AudioPlayer");
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-            // does this AudioPlayer have an OutputMix?
-            if (NULL == ap->mOutputMix) {
-                SL_LOGE("invalid interface: AudioPlayer doesn't have an OutputMix");
-                result = SL_RESULT_PARAMETER_INVALID;
-            } else {
+            COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
 #if !defined(ANDROID) || defined(USE_BACKPORT)
-                result = SL_RESULT_SUCCESS;
+            result = SL_RESULT_SUCCESS;
 #else
-                result = android_fxSend_attachToAux(ap, effectImplementationId, enable,
-                        initialLevel);
+            result = android_fxSend_attachToAux(ap, effectImplementationId, enable, initialLevel);
 #endif
-                if (SL_RESULT_SUCCESS == result) {
-                    // there currently is support for only one send bus, so there is a single send
-                    // level and a single enable flag
-                    this->mSendLevel = initialLevel;
-                    this->mEnabled = enable;
-                }
+            if (SL_RESULT_SUCCESS == result) {
+                // there currently is support for only one send bus, so there is a single send
+                // level and a single enable flag
+                this->mSendLevel = initialLevel;
+                this->mEnabled = enable;
             }
         }
         interface_unlock_exclusive(this);
@@ -153,38 +147,32 @@ static SLresult IAndroidEffectSend_SetSendLevel(SLAndroidEffectSendItf self,
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IAndroidEffectSend *this = (IAndroidEffectSend *) self;
-         interface_lock_exclusive(this);
-         // is SLAndroidEffectSendItf on an AudioPlayer?
-         CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
+        interface_lock_exclusive(this);
+        // is SLAndroidEffectSendItf on an AudioPlayer?
+        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
                  (CAudioPlayer *) this->mThis : NULL;
-         if (NULL == ap) {
-             SL_LOGE("invalid interface: not attached to an AudioPlayer");
-             result = SL_RESULT_PARAMETER_INVALID;
-         } else {
-             // does this AudioPlayer have an OutputMix?
-             if (NULL == ap->mOutputMix) {
-                 SL_LOGE("invalid interface: AudioPlayer doesn't have an OutputMix");
-                 result = SL_RESULT_PARAMETER_INVALID;
-             } else {
+        if (NULL == ap) {
+            SL_LOGE("invalid interface: not attached to an AudioPlayer");
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
  #if !defined(ANDROID) || defined(USE_BACKPORT)
-                 result = SL_RESULT_SUCCESS;
+            result = SL_RESULT_SUCCESS;
  #else
-                 if (android_genericFx_hasEffect(&ap->mOutputMix->mAndroidEffect,
-                         effectImplementationId)) {
-                     result = android_fxSend_setSendLevel(ap, sendLevel);
-                 } else {
-                     SL_LOGE("trying to send to an effect not on this AudioPlayer's OutputMix");
-                     result = SL_RESULT_PARAMETER_INVALID;
-                 }
+            if (android_genericFx_hasEffect(&outputMix->mAndroidEffect, effectImplementationId)) {
+                 result = android_fxSend_setSendLevel(ap, sendLevel);
+            } else {
+                 SL_LOGE("trying to send to an effect not on this AudioPlayer's OutputMix");
+                 result = SL_RESULT_PARAMETER_INVALID;
+            }
  #endif
-                 if (SL_RESULT_SUCCESS == result) {
-                     // there currently is support for only one send bus, so there is a single send
-                     // level
-                     this->mSendLevel = sendLevel;
-                 }
-             }
-         }
-         interface_unlock_exclusive(this);
+            if (SL_RESULT_SUCCESS == result) {
+                // there currently is support for only one send bus, so there is a single send
+                // level
+                this->mSendLevel = sendLevel;
+            }
+        }
+        interface_unlock_exclusive(this);
     }
 
     SL_LEAVE_INTERFACE
@@ -208,28 +196,22 @@ static SLresult IAndroidEffectSend_GetSendLevel(SLAndroidEffectSendItf self,
             SL_LOGE("invalid interface: not attached to an AudioPlayer");
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-            // does this AudioPlayer have an OutputMix?
-            if (NULL == ap->mOutputMix) {
-                SL_LOGE("invalid interface: AudioPlayer doesn't have an OutputMix");
-                result = SL_RESULT_PARAMETER_INVALID;
-            } else {
+            COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
 #if !defined(ANDROID) || defined(USE_BACKPORT)
-                result = SL_RESULT_SUCCESS;
+            result = SL_RESULT_SUCCESS;
 #else
-                if (android_genericFx_hasEffect(&ap->mOutputMix->mAndroidEffect,
-                        effectImplementationId)) {
-                    result = SL_RESULT_SUCCESS;
-                } else {
-                    SL_LOGE("trying to retrieve send level on an effect not on this AudioPlayer's \
+            if (android_genericFx_hasEffect(&outputMix->mAndroidEffect, effectImplementationId)) {
+                result = SL_RESULT_SUCCESS;
+            } else {
+                SL_LOGE("trying to retrieve send level on an effect not on this AudioPlayer's \
 OutputMix");
-                    result = SL_RESULT_PARAMETER_INVALID;
+                result = SL_RESULT_PARAMETER_INVALID;
                 }
 #endif
-                if (SL_RESULT_SUCCESS == result) {
-                    // there currently is support for only one send bus, so there is a single send
-                    // level
-                    *pSendLevel = this->mSendLevel;
-                }
+            if (SL_RESULT_SUCCESS == result) {
+                // there currently is support for only one send bus, so there is a single send
+                // level
+                *pSendLevel = this->mSendLevel;
             }
         }
         interface_unlock_exclusive(this);

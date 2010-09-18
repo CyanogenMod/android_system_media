@@ -211,11 +211,17 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
 #endif
     ok = pthread_mutex_unlock(&this->mMutex);
     assert(0 == ok);
-    if (attributes) {   // first update to this interface since previous sync
-        IEngine *thisEngine = this->mEngine;
-        interface_lock_exclusive(thisEngine);
-        thisEngine->mChangedMask |= 1 << (this->mInstanceID - 1);
-        interface_unlock_exclusive(thisEngine);
+    // first update to this interface since previous sync
+    if (attributes) {
+        unsigned id = this->mInstanceID;
+        if (0 != id) {
+            --id;
+            assert(MAX_INSTANCE > id);
+            IEngine *thisEngine = this->mEngine;
+            interface_lock_exclusive(thisEngine);
+            thisEngine->mChangedMask |= 1 << id;
+            interface_unlock_exclusive(thisEngine);
+        }
     }
 }
 

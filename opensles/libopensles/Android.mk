@@ -45,6 +45,7 @@ LOCAL_SRC_FILES:=                     \
         sync.c                        \
         IID_to_MPH.c                  \
         ThreadPool.c                  \
+        C3DGroup.c                    \
         CAudioPlayer.c                \
         CAudioRecorder.c              \
         CEngine.c                     \

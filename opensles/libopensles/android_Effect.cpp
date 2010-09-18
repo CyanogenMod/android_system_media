@@ -485,14 +485,15 @@ android::status_t android_fxSend_attach(CAudioPlayer* ap, bool attach,
  */
 SLresult android_fxSend_attachToAux(CAudioPlayer* ap, SLInterfaceID pUuid, SLboolean attach,
         SLmillibel sendLevel) {
-    ssize_t index = ap->mOutputMix->mAndroidEffect.mEffects->indexOfKey(KEY_FROM_GUID(pUuid));
+    COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
+    ssize_t index = outputMix->mAndroidEffect.mEffects->indexOfKey(KEY_FROM_GUID(pUuid));
 
     if (0 > index) {
         SL_LOGE("invalid effect ID: no such effect attached to the OutputMix");
         return SL_RESULT_PARAMETER_INVALID;
     }
 
-    android::AudioEffect* pFx = ap->mOutputMix->mAndroidEffect.mEffects->valueAt(index);
+    android::AudioEffect* pFx = outputMix->mAndroidEffect.mEffects->valueAt(index);
     if (NULL == pFx) {
         return SL_RESULT_RESOURCE_ERROR;
     }

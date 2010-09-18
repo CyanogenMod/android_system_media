@@ -83,11 +83,6 @@ void CAudioPlayer_Destroy(void *self)
     CAudioPlayer *this = (CAudioPlayer *) self;
     freeDataLocatorFormat(&this->mDataSource);
     freeDataLocatorFormat(&this->mDataSink);
-    // Unlink the audio player from the associate output mix
-#ifdef USE_OUTPUTMIXEXT
-    IOutputMixExt_Destroy(this);
-#endif
-    this->mOutputMix = NULL;
     // Free the buffer queue, if it was larger than typical
     if (NULL != this->mBufferQueue.mArray &&
         this->mBufferQueue.mArray != this->mBufferQueue.mTypical) {
@@ -123,4 +118,18 @@ bool CAudioPlayer_PreDestroy(void *self)
     // Mixer thread has acknowledged the request
 #endif
     return true;
+}
+
+
+/** \brief Given an audio player, return its data sink, which is guaranteed to be a non-NULL output
+ *  mix.  This function is used by effect send.
+ */
+
+COutputMix *CAudioPlayer_GetOutputMix(CAudioPlayer *audioPlayer)
+{
+    assert(NULL != audioPlayer);
+    assert(SL_DATALOCATOR_OUTPUTMIX == audioPlayer->mDataSink.mLocator.mLocatorType);
+    SLObjectItf outputMix = audioPlayer->mDataSink.mLocator.mOutputMix.outputMix;
+    assert(NULL != outputMix);
+    return (COutputMix *) outputMix;
 }

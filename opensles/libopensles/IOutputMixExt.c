@@ -75,8 +75,7 @@ static SLboolean track_check(Track *track)
         if (audioPlayer->mDestroyRequested) {
             // an application thread that calls Object::Destroy while mixer is active will block
             // synchronously in the PreDestroy hook until mixer acknowledges the Destroy request
-            COutputMix *outputMix = audioPlayer->mOutputMix;
-            assert(NULL != outputMix);
+            COutputMix *outputMix = CAudioPlayer_GetOutputMix(audioPlayer);
             unsigned i = track - outputMix->mOutputMixExt.mTracks;
             assert( /* 0 <= i && */ i < MAX_TRACK);
             unsigned mask = 1 << i;
@@ -165,9 +164,27 @@ void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 si
 
     // Force to be a multiple of a frame, assumes stereo 16-bit PCM
     size &= ~3;
-    IOutputMixExt *this = (IOutputMixExt *) self;
-    unsigned activeMask = this->mActiveMask;
     SLboolean mixBufferHasData = SL_BOOLEAN_FALSE;
+    IOutputMixExt *this = (IOutputMixExt *) self;
+    IObject *thisObject = this->mThis;
+    // This lock should never block, except when the application destroys the output mix object
+    object_lock_exclusive(thisObject);
+    unsigned activeMask;
+    // If the output mix is marked for destruction, then acknowledge the request
+    if (this->mDestroyRequested) {
+        IEngine *thisEngine = thisObject->mEngine;
+        interface_lock_exclusive(thisEngine);
+        assert(&thisEngine->mOutputMix->mObject == thisObject);
+        thisEngine->mOutputMix = NULL;
+        // Note we don't attempt to connect another output mix, even if there is one
+        interface_unlock_exclusive(thisEngine);
+        // Acknowledge the destroy request, and notify the pre-destroy hook
+        this->mDestroyRequested = SL_BOOLEAN_FALSE;
+        object_cond_broadcast(thisObject);
+        activeMask = 0;
+    } else {
+        activeMask = this->mActiveMask;
+    }
     while (activeMask) {
         unsigned i = ctz(activeMask);
         assert(MAX_TRACK > i);
@@ -297,6 +314,7 @@ void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 si
             mixBufferHasData = SL_BOOLEAN_TRUE;
         }
     }
+    object_unlock_exclusive(thisObject);
     // No active tracks, so output silence
     if (!mixBufferHasData) {
         memset(pBuffer, 0, size);
@@ -320,32 +338,7 @@ void IOutputMixExt_init(void *self)
     for (i = 0; i < MAX_TRACK; ++i, ++track) {
         track->mAudioPlayer = NULL;
     }
-}
-
-
-/** \brief Called by Object::Destroy for an AudioPlayer to release the associated track */
-
-void IOutputMixExt_Destroy(CAudioPlayer *this)
-{
-#if 0
-    COutputMix *outputMix = this->mOutputMix;
-    if (NULL != outputMix) {
-        Track *track = this->mTrack;
-        assert(NULL != track);
-        assert(track->mAudioPlayer == this);
-        unsigned i = track - outputMix->mOutputMixExt.mTracks;
-        assert( /* 0 <= i && */ i < MAX_TRACK);
-        unsigned mask = 1 << i;
-        // FIXME deadlock possible here due to undocumented lock ordering
-        object_lock_exclusive(&outputMix->mObject);
-        // FIXME how can we be sure the mixer is not reading from this track right now?
-        track->mAudioPlayer = NULL;
-        assert(outputMix->mOutputMixExt.mActiveMask & mask);
-        outputMix->mOutputMixExt.mActiveMask &= ~mask;
-        object_unlock_exclusive(&outputMix->mObject);
-        this->mTrack = NULL;
-    }
-#endif
+    this->mDestroyRequested = SL_BOOLEAN_FALSE;
 }
 
 
