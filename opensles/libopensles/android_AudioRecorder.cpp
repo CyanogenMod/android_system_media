@@ -57,7 +57,7 @@ SLresult audioRecorder_setPreset(CAudioRecorder* ar, SLuint32 recordPreset) {
 
     // recording preset needs to be set before the object is realized
     // (ap->mAudioRecord is supposed to be NULL until then)
-    if (SL_OBJECT_STATE_UNREALIZED == ar->mObject.mState) {
+    if (SL_OBJECT_STATE_REALIZED == ar->mObject.mState) {
         SL_LOGE(ERROR_RECORDERPRESET_REALIZED);
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {

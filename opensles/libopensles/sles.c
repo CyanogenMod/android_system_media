@@ -826,7 +826,6 @@ extern void
     IVisualization_init(void *),
     IVolume_init(void *);
 #ifdef ANDROID
-extern void IAndroidStreamType_init(void *);
 extern void IAndroidEffect_init(void *);
 extern void IAndroidEffectCapabilities_init(void *);
 extern void IAndroidEffectSend_init(void *);
@@ -893,13 +892,11 @@ extern void
     { /* MPH_OUTPUTMIXEXT, */ NULL, NULL, NULL },
 #endif
 #ifdef ANDROID
-    { /* MPH_ANDROIDSTREAMTYPE */ IAndroidStreamType_init, NULL, NULL },
     { /* MPH_ANDROIDEFFECT */ IAndroidEffect_init, NULL, NULL },
     { /* MPH_ANDROIDEFFECTCAPABILITIES */ IAndroidEffectCapabilities_init, NULL, NULL },
     { /* MPH_ANDROIDEFFECTSEND */ IAndroidEffectSend_init, NULL, NULL },
     { /* MPH_ANDROIDCONFIGURATION */ IAndroidConfiguration_init, NULL, NULL }
 #else
-    { /* MPH_ANDROIDSTREAMTYPE */ NULL, NULL, NULL },
     { /* MPH_ANDROIDEFFECT */ NULL, NULL, NULL },
     { /* MPH_ANDROIDEFFECTCAPABILITIES */ NULL, NULL, NULL },
     { /* MPH_ANDROIDEFFECTSEND */ NULL, NULL, NULL },

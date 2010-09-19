@@ -65,7 +65,9 @@ static SLresult IAndroidConfiguration_GetConfiguration(SLAndroidConfigurationItf
 #ifndef ANDROID
     result = SL_RESULT_SUCCESS;
 #else
-    if ((NULL == pValueSize) || (NULL == pConfigValue)) {
+    // having value size is required, but pConfigValue being NULL is allowed to allow properties
+    // to report their actual value size (if applicable)
+    if (NULL == pValueSize) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IAndroidConfiguration *this = (IAndroidConfiguration *) self;

@@ -60,7 +60,6 @@ LOCAL_SRC_FILES:=                     \
         IAndroidEffect.c              \
         IAndroidEffectCapabilities.c  \
         IAndroidEffectSend.c          \
-        IAndroidStreamType.c          \
         IAudioDecoderCapabilities.c   \
         IAudioEncoder.c               \
         IAudioEncoderCapabilities.c   \

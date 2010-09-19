@@ -32,14 +32,12 @@
 #include "SLES/OpenSLES.h"
 #ifdef ANDROID
 #include "SLES/OpenSLES_Android.h"
+#include "SLES/OpenSLES_AndroidConfiguration.h"
 #endif
 
 
-#define MAX_NUMBER_INTERFACES 3
-#define MAX_NUMBER_OUTPUT_DEVICES 6
+#define MAX_NUMBER_INTERFACES 2
 
-#define TEST_MUTE 0
-#define TEST_SOLO 1
 
 //-----------------------------------------------------------------
 /* Exits the application if an error is encountered */
@@ -56,8 +54,8 @@ void ExitOnErrorFunc( SLresult result , int line)
 
 //-----------------------------------------------------------------
 
-/* Play an audio URIs, mute and solo channels  */
-void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
+/* Play an audio URIs on the given stream type  */
+void TestStreamTypeConfiguration( SLObjectItf sl, const char* path, const SLint32 type)
 {
     SLresult  result;
     SLEngineItf EngineItf;
@@ -78,7 +76,7 @@ void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
     SLPlayItf              playItf;
     SLPrefetchStatusItf    prefetchItf;
 #ifdef ANDROID
-    SLAndroidStreamTypeItf streamTypeItf;
+    SLAndroidConfigurationItf configItf;
 #endif
 
     SLboolean required[MAX_NUMBER_INTERFACES];
@@ -114,10 +112,13 @@ void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
     /* ------------------------------------------------------ */
     /* Configuration of the player  */
 
-    /* Set arrays required[] and iidArray[] for SLMuteSoloItf and SLPrefetchStatusItf interfaces */
+    /* Set arrays required[] and iidArray[] for SLAndroidConfigurationItf interfaces */
     /*  (SLPlayItf is implicit) */
     required[0] = SL_BOOLEAN_TRUE;
     iidArray[0] = SL_IID_PREFETCHSTATUS;
+    required[1] = SL_BOOLEAN_TRUE;
+    iidArray[1] = SL_IID_ANDROIDCONFIGURATION;
+
 
     /* Setup the data source structure for the URI */
     uri.locatorType = SL_DATALOCATOR_URI;
@@ -132,35 +133,35 @@ void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
     audioSource.pLocator = (void*)&uri;
 
     /* Create the audio player */
-    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink, 1,
-            iidArray, required);
+    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink,
+            MAX_NUMBER_INTERFACES, iidArray, required);
     ExitOnError(result);
+
+    /* Retrieve the configuration interface before the player is realized so its resources
+     * can be configured.
+     */
+#ifdef ANDROID
+    result = (*player)->GetInterface(player, SL_IID_ANDROIDCONFIGURATION, (void*)&configItf);
+    ExitOnError(result);
+
+    /* Set the Android audio stream type on the player */
+    result = (*configItf)->SetConfiguration(configItf,
+            SL_ANDROID_KEY_STREAM_TYPE, &type, sizeof(SLint32));
+    ExitOnError(result);
+#endif
 
     /* Realize the player in synchronous mode. */
     result = (*player)->Realize(player, SL_BOOLEAN_FALSE); ExitOnError(result);
     fprintf(stdout, "URI example: after Realize\n");
 
-    /* Get the SLPlayItf, SLPrefetchStatusItf and SLAndroidStreamTypeItf interfaces for the player*/
+    /* Get the SLPlayItf, SLPrefetchStatusItf and SLAndroidConfigurationItf interfaces for the player*/
     result = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf);
     ExitOnError(result);
 
     result = (*player)->GetInterface(player, SL_IID_PREFETCHSTATUS, (void*)&prefetchItf);
     ExitOnError(result);
 
-#ifdef ANDROID
-    result = (*player)->GetInterface(player, SL_IID_ANDROIDSTREAMTYPE, (void*)&streamTypeItf);
-    ExitOnError(result);
-#endif
-
     fprintf(stdout, "Player configured\n");
-
-    /* ------------------------------------------------------ */
-    /* Test setting the Android audio stream type on the player */
-
-#ifdef ANDROID
-    result = (*streamTypeItf)->SetStreamType(streamTypeItf, type);
-    ExitOnError(result);
-#endif
 
     /* ------------------------------------------------------ */
     /* Playback and test */
@@ -193,11 +194,20 @@ void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
 
 #ifdef ANDROID
     /* Get the stream type during playback  */
-    SLuint32 currentType = 0;
-    result = (*streamTypeItf)->GetStreamType(streamTypeItf, &currentType);
+    SLint32 currentType = -1;
+    SLuint32 valueSize = sizeof(SLint32) * 2; // trying too big on purpose
+    result = (*configItf)->GetConfiguration(configItf,
+            SL_ANDROID_KEY_STREAM_TYPE, &valueSize, NULL);
+    ExitOnError(result);
+    if (valueSize != sizeof(SLint32)) {
+        fprintf(stderr, "ERROR: size for stream type is %lu, should be %u\n",
+                valueSize, sizeof(SLint32));
+    }
+    result = (*configItf)->GetConfiguration(configItf,
+                SL_ANDROID_KEY_STREAM_TYPE, &valueSize, &currentType);
     ExitOnError(result);
     if (currentType != type) {
-        fprintf(stderr, "ERROR: current stream type is %lu, should be %lu\n", currentType, type);
+        fprintf(stderr, "ERROR: stream type is %lu, should be %lu\n", currentType, type);
     }
 #endif
 
@@ -210,11 +220,11 @@ void TestPlayUri( SLObjectItf sl, const char* path, const SLuint32 type)
 
 #ifdef ANDROID
     /* Try again to get the stream type, just in case it changed behind our back */
-    result = (*streamTypeItf)->GetStreamType(streamTypeItf, &currentType);
+    result = (*configItf)->GetConfiguration(configItf,
+            SL_ANDROID_KEY_STREAM_TYPE, &valueSize, &currentType);
     ExitOnError(result);
     if (currentType != type) {
-        fprintf(stderr, "ERROR: current stream type is %lu, should be %lu after stop.\n",
-                currentType, type);
+        fprintf(stderr, "ERROR: stream type is %lu, should be %lu\n", currentType, type);
     }
 #endif
 
@@ -233,7 +243,7 @@ int main(int argc, char* const argv[])
     SLresult    result;
     SLObjectItf sl;
 
-    fprintf(stdout, "OpenSL ES test %s: exercises SLPlayItf, SLAndroidStreamTypeItf\n",
+    fprintf(stdout, "OpenSL ES test %s: exercises SLPlayItf, SLAndroidConfigurationItf\n",
             argv[0]);
     fprintf(stdout, "and AudioPlayer with SLDataLocator_URI source / OutputMix sink\n");
     fprintf(stdout, "Plays a sound on the specified android stream type\n");
@@ -256,7 +266,7 @@ int main(int argc, char* const argv[])
     result = (*sl)->Realize(sl, SL_BOOLEAN_FALSE);
     ExitOnError(result);
 
-    TestPlayUri(sl, argv[1], (SLuint32)atoi(argv[2]));
+    TestStreamTypeConfiguration(sl, argv[1], (SLint32)atoi(argv[2]));
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);

@@ -848,10 +848,6 @@ typedef struct /*Volume_interface*/ {
 } /*C3DGroup*/;
 
 #ifdef ANDROID
-typedef struct {
-    const struct SLAndroidStreamTypeItf_ *mItf;
-    IObject *mThis;
-} IAndroidStreamType;
 
 typedef struct {
     const struct SLAndroidEffectItf_ *mItf;
@@ -932,9 +928,9 @@ enum AndroidObject_state {
     IVolume mVolume;
     IMuteSolo mMuteSolo;
 #ifdef ANDROID
-    IAndroidStreamType  mAndroidStreamType;
     IAndroidEffect mAndroidEffect;
     IAndroidEffectSend mAndroidEffectSend;
+    IAndroidConfiguration mAndroidConfiguration;
 #endif
     // optional interfaces
     I3DMacroscopic m3DMacroscopic;
@@ -1098,11 +1094,8 @@ typedef struct {
 typedef struct {
     // mandated interfaces
     IObject mObject;
-#ifdef ANDROID
-#define INTERFACES_MidiPlayer 30 // see MPH_to_MidiPlayer in MPH_to.c for list of interfaces
-#else
+
 #define INTERFACES_MidiPlayer 29 // see MPH_to_MidiPlayer in MPH_to.c for list of interfaces
-#endif
     SLuint8 mInterfaceStates2[INTERFACES_MidiPlayer - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IPlay mPlay;
@@ -1122,9 +1115,6 @@ typedef struct {
     ISeek mSeek;
     IVolume mVolume;
     IMuteSolo mMuteSolo;
-#ifdef ANDROID
-    IAndroidStreamType mAndroidStreamType;
-#endif
     // optional interfaces
     I3DMacroscopic m3DMacroscopic;
     IBassBoost mBassBoost;
