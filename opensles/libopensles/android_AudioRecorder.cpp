@@ -290,8 +290,9 @@ SLresult android_audioRecorder_create(CAudioRecorder* ar) {
 
     SLresult result = SL_RESULT_SUCCESS;
 
-    ar->mNumChannels = 0;
-    ar->mSampleRateMilliHz = 0;
+    //  the following platform-independent fields have been initialized in CreateAudioRecorder()
+    //    ar->mNumChannels
+    //    ar->mSampleRateMilliHz
 
     ar->mAudioRecord = NULL;
     ar->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
@@ -376,7 +377,7 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
         SL_LOGE(ERROR_RECORDER_SINK_MUST_BE_BUFFERQUEUE);
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
-    //  the following platform-independent field have been initialized in CreateAudioRecorder()
+    //  the following platform-independent fields have been initialized in CreateAudioRecorder()
     //    ar->mNumChannels
     //    ar->mSampleRateMilliHz
 
