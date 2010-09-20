@@ -92,9 +92,19 @@ static SLresult IRecord_GetPosition(SLRecordItf self, SLmillisecond *pMsec)
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IRecord *this = (IRecord *) self;
-        interface_lock_peek(this);
+        SLmillisecond position;
+        interface_lock_shared(this);
+#ifdef ANDROID
+        // Android does not use the mPosition field for audio recorders
+        if (SL_OBJECTID_AUDIORECORDER == InterfaceToObjectID(this)) {
+            android_audioRecorder_getPosition(InterfaceToCAudioRecorder(this), &position);
+        } else {
+            position = this->mPosition;
+        }
+#else
         SLmillisecond position = this->mPosition;
-        interface_unlock_peek(this);
+#endif
+        interface_unlock_shared(this);
         *pMsec = position;
         result = SL_RESULT_SUCCESS;
     }
