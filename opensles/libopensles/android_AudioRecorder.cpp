@@ -290,6 +290,9 @@ SLresult android_audioRecorder_create(CAudioRecorder* ar) {
 
     SLresult result = SL_RESULT_SUCCESS;
 
+    ar->mNumChannels = 0;
+    ar->mSampleRateMilliHz = 0;
+
     ar->mAudioRecord = NULL;
     ar->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
 
@@ -471,6 +474,7 @@ void android_audioRecorder_useEventMask(CAudioRecorder *ar) {
     }
 
     if (eventFlags & SL_RECORDEVENT_HEADATNEWPOS) {
+        SL_LOGV("pos update period %ld", pRecordItf->mPositionUpdatePeriod);
          ar->mAudioRecord->setPositionUpdatePeriod(
                 (uint32_t)((((int64_t)pRecordItf->mPositionUpdatePeriod
                 * sles_to_android_sampleRate(ar->mSampleRateMilliHz)))/1000));
@@ -502,4 +506,21 @@ void android_audioRecorder_useEventMask(CAudioRecorder *ar) {
 
     }
 
+}
+
+
+//-----------------------------------------------------------------------------
+void android_audioRecorder_getPosition(CAudioRecorder *ar, SLmillisecond *pPosMsec) {
+    if ((NULL == ar) || (NULL == ar->mAudioRecord)) {
+        *pPosMsec = 0;
+    } else {
+        uint32_t positionInFrames;
+        ar->mAudioRecord->getPosition(&positionInFrames);
+        if (ar->mSampleRateMilliHz == 0) {
+            *pPosMsec = 0;
+        } else {
+            *pPosMsec = ((int64_t)positionInFrames * 1000) /
+                    sles_to_android_sampleRate(ar->mSampleRateMilliHz);
+        }
+    }
 }
