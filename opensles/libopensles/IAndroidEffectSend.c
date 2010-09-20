@@ -40,7 +40,10 @@ static SLresult IAndroidEffectSend_EnableEffectSend(SLAndroidEffectSendItf self,
 #if !defined(ANDROID) || defined(USE_BACKPORT)
             result = SL_RESULT_SUCCESS;
 #else
-            result = android_fxSend_attachToAux(ap, effectImplementationId, enable, initialLevel);
+            // the initial send level set here is the total energy on the aux bus,
+            //  so it must take into account the player volume level
+            result = android_fxSend_attachToAux(ap, effectImplementationId, enable,
+                    initialLevel + ap->mVolume.mLevel);
 #endif
             if (SL_RESULT_SUCCESS == result) {
                 // there currently is support for only one send bus, so there is a single send
@@ -160,7 +163,9 @@ static SLresult IAndroidEffectSend_SetSendLevel(SLAndroidEffectSendItf self,
             result = SL_RESULT_SUCCESS;
  #else
             if (android_genericFx_hasEffect(&outputMix->mAndroidEffect, effectImplementationId)) {
-                 result = android_fxSend_setSendLevel(ap, sendLevel);
+                // the send level set here is the total energy on the aux bus, so it must take
+                // into account the player volume level
+                result = android_fxSend_setSendLevel(ap, sendLevel + ap->mVolume.mLevel);
             } else {
                  SL_LOGE("trying to send to an effect not on this AudioPlayer's OutputMix");
                  result = SL_RESULT_PARAMETER_INVALID;
