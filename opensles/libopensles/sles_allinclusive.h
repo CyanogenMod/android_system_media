@@ -1314,13 +1314,25 @@ extern void slTraceLeaveInterfaceVoid(const char *function);
 
 #endif
 
-#ifdef USE_DEBUG
-#define SL_LOGE(...) do { fprintf(stderr, "ERROR: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
-    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
-#define SL_LOGV(...) do { fprintf(stderr, "VERBOSE: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
-    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
+#ifdef ANDROID
+extern const char tag[];
+#define SL_LOGE(...) __android_log_print(ANDROID_LOG_ERROR, tag, __VA_ARGS__)
+#define SL_LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, tag, __VA_ARGS__)
 #else
-#define SL_LOGE(...) do { } while (0)
+#define SL_LOGE(...) do { fprintf(stderr, "SL_LOGE: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
+    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
+#define SL_LOGD(...) do { fprintf(stderr, "SL_LOGD: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
+    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
+#endif
+
+#ifdef USE_VERBOSE
+#ifdef ANDROID
+#define SL_LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, tag, __VA_ARGS__)
+#else
+#define SL_LOGV(...) do { fprintf(stderr, "SL_LOGV: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
+    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
+#endif
+#else
 #define SL_LOGV(...) do { } while (0)
 #endif
 
