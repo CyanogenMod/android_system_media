@@ -264,7 +264,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 #ifdef ANDROID
                     result = android_audioRecorder_checkSourceSinkSupport(this);
                     if (SL_RESULT_SUCCESS != result) {
-                        SL_LOGE("Android: Cannot create AudioRecorder: invalid source or sink");
+                        SL_LOGE("Cannot create AudioRecorder: invalid source or sink");
                         break;
                     }
 #endif

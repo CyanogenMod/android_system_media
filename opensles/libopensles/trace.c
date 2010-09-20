@@ -18,8 +18,6 @@
 
 #include "sles_allinclusive.h"
 
-const char tag[] = "libOpenSLES";
-
 #ifdef USE_TRACE
 
 // This should be the only global variable
@@ -49,9 +47,9 @@ void slTraceLeaveGlobal(const char *function, SLresult result)
     } else {
         if (SL_TRACE_LEAVE_FAILURE & slTraceEnabled) {
             if (SLESUT_RESULT_MAX > result) {
-                SL_LOGE("Leaving %s (%s)", function, slesutResultStrings[result]);
+                SL_LOGW("Leaving %s (%s)", function, slesutResultStrings[result]);
             } else {
-                SL_LOGE("Leaving %s (0x%X)", function, (unsigned) result);
+                SL_LOGW("Leaving %s (0x%X)", function, (unsigned) result);
             }
         }
     }
@@ -102,7 +100,8 @@ void slTraceLeaveInterface(const char *function, SLresult result)
     if (SL_RESULT_SUCCESS == result) {
         if (SL_TRACE_LEAVE_SUCCESS & slTraceEnabled) {
             if (*underscore == '_') {
-                SL_LOGD("Leaving %.*s::%s", (int) (underscore - function), function, &underscore[1]);
+                SL_LOGD("Leaving %.*s::%s", (int) (underscore - function), function,
+                    &underscore[1]);
             } else {
                 SL_LOGD("Leaving %s", function);
             }
@@ -111,17 +110,17 @@ void slTraceLeaveInterface(const char *function, SLresult result)
         if (SL_TRACE_LEAVE_FAILURE & slTraceEnabled) {
             if (*underscore == '_') {
                 if (SLESUT_RESULT_MAX > result) {
-                    SL_LOGE("Leaving %.*s::%s (%s)", (int) (underscore - function), function,
+                    SL_LOGW("Leaving %.*s::%s (%s)", (int) (underscore - function), function,
                         &underscore[1], slesutResultStrings[result]);
                 } else {
-                    SL_LOGE("Leaving %.*s::%s (0x%X)", (int) (underscore - function), function,
+                    SL_LOGW("Leaving %.*s::%s (0x%X)", (int) (underscore - function), function,
                         &underscore[1], (unsigned) result);
                 }
             } else {
                 if (SLESUT_RESULT_MAX > result) {
-                    SL_LOGE("Leaving %s (%s)", function, slesutResultStrings[result]);
+                    SL_LOGW("Leaving %s (%s)", function, slesutResultStrings[result]);
                 } else {
-                    SL_LOGE("Leaving %s (0x%X)", function, (unsigned) result);
+                    SL_LOGW("Leaving %s (0x%X)", function, (unsigned) result);
                 }
             }
         }

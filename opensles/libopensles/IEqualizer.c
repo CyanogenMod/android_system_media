@@ -377,7 +377,7 @@ static SLresult IEqualizer_GetCurrentPreset(SLEqualizerItf self, SLuint16 *pPres
 static SLresult IEqualizer_UsePreset(SLEqualizerItf self, SLuint16 index)
 {
     SL_ENTER_INTERFACE
-    SL_LOGV("index=%d", index);
+    SL_LOGV("Equalizer::UsePreset index=%u", index);
 
     IEqualizer *this = (IEqualizer *) self;
     if (index >= this->mNumPresets) {
