@@ -127,12 +127,16 @@ static SLresult IEffectSend_EnableEffectSend(SLEffectSendItf self,
                 result = SL_RESULT_RESOURCE_ERROR;
             } else {
                 COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
+                // the initial send level set here is the total energy on the aux bus,
+                //  so it must take into account the player volume level
                 if (pAuxEffect == &outputMix->mPresetReverb.mItf) {
                     result = translateEnableFxSendError(android_fxSend_attach(ap, (bool) enable,
-                        outputMix->mPresetReverb.mPresetReverbEffect, initialLevel));
+                        outputMix->mPresetReverb.mPresetReverbEffect,
+                        initialLevel + ap->mVolume.mLevel));
                 } else if (pAuxEffect == &outputMix->mEnvironmentalReverb.mItf) {
                     result = translateEnableFxSendError(android_fxSend_attach(ap, (bool) enable,
-                        outputMix->mEnvironmentalReverb.mEnvironmentalReverbEffect, initialLevel));
+                        outputMix->mEnvironmentalReverb.mEnvironmentalReverbEffect,
+                        initialLevel + ap->mVolume.mLevel));
                 } else {
                     result = SL_RESULT_RESOURCE_ERROR;
                 }
@@ -252,11 +256,15 @@ static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self, const void *pAuxE
             CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
                     (CAudioPlayer *) this->mThis : NULL;
             if (NULL != ap) {
-                android_fxSend_setSendLevel(ap, sendLevel);
+                // the send level set here is the total energy on the aux bus, so it must take
+                // into account the player volume level
+                result = android_fxSend_setSendLevel(ap, sendLevel + ap->mVolume.mLevel);
             }
+#else
+            result = SL_RESULT_SUCCESS;
 #endif
             interface_unlock_exclusive(this);
-            result = SL_RESULT_SUCCESS;
+
         }
     }
 
