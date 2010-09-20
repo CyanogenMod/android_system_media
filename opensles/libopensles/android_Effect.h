@@ -97,12 +97,24 @@ extern bool android_genericFx_hasEffect(IAndroidEffect* iae, SLInterfaceID pUuid
 /**************************************************************************************************
  * EffectSend functions
  ****************************/
+/**
+ * sendLevel is the total energy going to the send bus. This implies that the volume attenuation
+ *   should be combined with the send level for the aux level to follow volume changes.
+ */
 extern android::status_t android_fxSend_attach(CAudioPlayer* ap, bool attach,
         android::sp<android::AudioEffect> pFx, SLmillibel sendLevel);
 
+/**
+ * sendLevel is the total energy going to the send bus. This implies that the volume attenuation
+ *   should be combined with the send level for the aux level to follow volume changes.
+ */
 extern SLresult android_fxSend_attachToAux(CAudioPlayer* ap, SLInterfaceID pUuid,
         SLboolean attach, SLmillibel sendLevel);
 
+/**
+ * sendLevel is the total energy going to the send bus. This implies that the volume attenuation
+ *   should be combined with the send level for the aux level to follow volume changes.
+ */
 extern android::status_t android_fxSend_setSendLevel(CAudioPlayer* ap, SLmillibel sendLevel);
 
 /**************************************************************************************************

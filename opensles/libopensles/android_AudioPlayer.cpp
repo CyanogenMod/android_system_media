@@ -110,6 +110,7 @@ static void android_audioPlayer_updateStereoVolume(CAudioPlayer* ap) {
     // compute amplification as the combination of volume level and stereo position
     //   amplification from volume level
     ap->mAmplFromVolLevel = sles_to_android_amplification(ap->mVolume.mLevel);
+    //   amplification from direct level (changed in SLEffectSendtItf and SLAndroidEffectSendItf)
     leftVol  *= ap->mAmplFromVolLevel * ap->mAmplFromDirectLevel;
     rightVol *= ap->mAmplFromVolLevel * ap->mAmplFromDirectLevel;
 
@@ -136,6 +137,23 @@ static void android_audioPlayer_updateStereoVolume(CAudioPlayer* ap) {
     }
 
     ap->mAudioTrack->setVolume(leftVol * leftAudibilityFactor, rightVol * rightAudibilityFactor);
+
+    // changes in the AudioPlayer volume must be reflected in the send level:
+    //  in SLEffectSendItf or in SLAndroidEffectSendItf?
+    // FIXME replace interface test by an internal API once we have one.
+    if (NULL != ap->mEffectSend.mItf) {
+        for (unsigned int i=0 ; i<AUX_MAX ; i++) {
+            if (ap->mEffectSend.mEnableLevels[i].mEnable) {
+                android_fxSend_setSendLevel(ap,
+                        ap->mEffectSend.mEnableLevels[i].mSendLevel + ap->mVolume.mLevel);
+                // there's a single aux bus on Android, so we can stop looking once the first
+                // aux effect is found.
+                break;
+            }
+        }
+    } else if (NULL != ap->mAndroidEffectSend.mItf) {
+        android_fxSend_setSendLevel(ap, ap->mAndroidEffectSend.mSendLevel + ap->mVolume.mLevel);
+    }
 }
 
 //-----------------------------------------------------------------------------
