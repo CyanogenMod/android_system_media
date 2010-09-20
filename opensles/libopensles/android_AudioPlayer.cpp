@@ -380,10 +380,22 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
         if (!IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
             break;
         }
-        // FIXME implement buffer filler level updates
-        SL_LOGD("[ FIXME implement buffer filler level updates ]");
-        //ap->mPrefetchStatus.mLevel = ;
-        } break;
+        slPrefetchCallback callback = NULL;
+        void* callbackPContext = NULL;
+        // SLPrefetchStatusItf callback or no callback?
+        interface_lock_exclusive(&ap->mPrefetchStatus);
+        if (ap->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
+            callback = ap->mPrefetchStatus.mCallback;
+            callbackPContext = ap->mPrefetchStatus.mContext;
+        }
+        ap->mPrefetchStatus.mLevel = (SLpermille)data1;
+        interface_unlock_exclusive(&ap->mPrefetchStatus);
+        // callback with no lock held
+        if (NULL != callback) {
+            (*callback)(&ap->mPrefetchStatus.mItf, callbackPContext,
+                    SL_PREFETCHEVENT_FILLLEVELCHANGE);
+        }
+    } break;
 
     case(android::SfPlayer::kEventPrefetchStatusChange): {
         if (!IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {

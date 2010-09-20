@@ -20,6 +20,7 @@
 #include "SLES/OpenSLES.h"
 #include "SLES/OpenSLES_Android.h"
 #include "sllog.h"
+#include <stdlib.h>
 
 namespace android {
 
@@ -34,6 +35,9 @@ SfPlayer::SfPlayer()
       mCacheStatus(kStatusEmpty),
       mSeekTimeMsec(0),
       mLastDecodedPositionUs(-1),
+      mCacheFill(0),
+      mLastNotifiedCacheFill(0),
+      mCacheFillNotifThreshold(100),
       mDataLocatorType(kDataLocatorNone),
       mNotifyClient(NULL),
       mNotifyUser(NULL),
@@ -78,6 +82,21 @@ void SfPlayer::useAudioTrack(AudioTrack* pTrack) {
 void SfPlayer::setNotifListener(const notif_client_t cbf, void* notifUser) {
     mNotifyClient = cbf;
     mNotifyUser = notifUser;
+}
+
+
+void SfPlayer::notifyStatus() {
+    sp<AMessage> msg = new AMessage(kWhatNotif, id());
+    msg->setInt32(EVENT_PREFETCHSTATUSCHANGE, (int32_t)mCacheStatus);
+    notify(msg, true /*async*/);
+}
+
+
+void SfPlayer::notifyCacheFill() {
+    sp<AMessage> msg = new AMessage(kWhatNotif, id());
+    mLastNotifiedCacheFill = mCacheFill;
+    msg->setInt32(EVENT_PREFETCHFILLLEVELUPDATE, (int32_t)mLastNotifiedCacheFill);
+    notify(msg, true /*async*/);
 }
 
 
@@ -166,7 +185,7 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
                     dataSource =
                         new NuCachedSource2(
                                 new ThrottledSource(
-                                        http, 5 * 1024 /* bytes/sec */));
+                                        http, 50 * 1024 /* bytes/sec */));
                 }
             } else {
                 dataSource = DataSource::CreateFromURI(mDataLocator.uri);
@@ -265,10 +284,10 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
     if (!wantPrefetch()) {
         SL_LOGV("SfPlayer::onPrepare: no need to prefetch");
         // doesn't need prefetching, notify good to go
-        sp<AMessage> msg = new AMessage(kWhatNotif, id());
-        msg->setInt32(EVENT_PREFETCHSTATUSCHANGE, (int32_t)kStatusEnough);
-        msg->setInt32(EVENT_PREFETCHFILLLEVELUPDATE, (int32_t)1000);
-        notify(msg, true /*async*/);
+        mCacheStatus = kStatusHigh;
+        mCacheFill = 1000;
+        notifyStatus();
+        notifyCacheFill();
     }
 
     //SL_LOGV("SfPlayer::onPrepare: end");
@@ -348,6 +367,20 @@ uint32_t SfPlayer::getPositionMsec() {
             return 0;
         } else {
             return (uint32_t) (mLastDecodedPositionUs / 1000);
+        }
+    }
+}
+
+
+int64_t SfPlayer::getPositionUsec() {
+    Mutex::Autolock _l(mSeekLock);
+    if (mFlags & kFlagSeeking) {
+        return mSeekTimeMsec * 1000;
+    } else {
+        if (mLastDecodedPositionUs < 0) {
+            return 0;
+        } else {
+            return mLastDecodedPositionUs;
         }
     }
 }
@@ -540,33 +573,63 @@ SfPlayer::CacheStatus SfPlayer::getCacheRemaining(bool *eos) {
 
     int64_t dataRemainingUs = dataRemaining * 8000000ll / mBitrate;
 
-    SL_LOGV("SfPlayer::getCacheRemaining: approx %.2f secs remaining (eos=%d)",
-           dataRemainingUs / 1E6, *eos);
+    //SL_LOGV("SfPlayer::getCacheRemaining: approx %.2f secs remaining (eos=%d)",
+    //       dataRemainingUs / 1E6, *eos);
 
-    // FIXME improve
-    if (dataRemainingUs >= mDurationUsec*0.95) {
-        mCacheStatus = kStatusEnough;
-        SL_LOGV("SfPlayer::getCacheRemaining: cached most of the content");
+    if (*eos) {
+        // data is buffered up to the end of the stream, it can't get any better than this
+        mCacheStatus = kStatusHigh;
+        mCacheFill = 1000;
+
     } else {
-        // FIXME evaluate also against the sound duration
-        if (dataRemainingUs > 30000000) {
-            mCacheStatus = kStatusHigh;
-        } else if (dataRemainingUs > 10000000) {
-            mCacheStatus = kStatusEnough;
-        } else if (dataRemainingUs < 2000000) {
-            mCacheStatus = kStatusLow;
+        if (mDurationUsec > 0) {
+            // known duration:
+
+            //   fill level is ratio of how much has been played + how much is
+            //   cached, divided by total duration
+            uint32_t currentPositionUsec = getPositionUsec();
+            mCacheFill = (int16_t) ((1000.0
+                    * (double)(currentPositionUsec + dataRemainingUs) / mDurationUsec));
+            //SL_LOGV("cacheFill = %d", mCacheFill);
+
+            //   cache status is evaluated against duration thresholds
+            if (dataRemainingUs > DURATION_CACHED_HIGH_US) {
+                mCacheStatus = kStatusHigh;
+                //LOGV("high");
+            } else if (dataRemainingUs > DURATION_CACHED_MED_US) {
+                //LOGV("enough");
+                mCacheStatus = kStatusEnough;
+            } else if (dataRemainingUs < DURATION_CACHED_LOW_US) {
+                //LOGV("low");
+                mCacheStatus = kStatusLow;
+            } else {
+                mCacheStatus = kStatusIntermediate;
+            }
+
         } else {
-            mCacheStatus = kStatusIntermediate;
+            // unknown duration:
+
+            //   cache status is evaluated against cache amount thresholds
+            //   (no duration so we don't have the bitrate either, could be derived from format?)
+            if (dataRemaining > SIZE_CACHED_HIGH_BYTES) {
+                mCacheStatus = kStatusHigh;
+            } else if (dataRemaining > SIZE_CACHED_MED_BYTES) {
+                mCacheStatus = kStatusEnough;
+            } else if (dataRemaining < SIZE_CACHED_LOW_BYTES) {
+                mCacheStatus = kStatusLow;
+            } else {
+                mCacheStatus = kStatusIntermediate;
+            }
         }
+
     }
 
     if (oldStatus != mCacheStatus) {
-        //SL_LOGV("SfPlayer::getCacheRemaining: Status change to %d", mCacheStatus);
-        sp<AMessage> msg = new AMessage(kWhatNotif, id());
-        msg->setInt32(EVENT_PREFETCHSTATUSCHANGE, mCacheStatus);
-        notify(msg, true /*async*/);
-        // FIXME update cache level
-        SL_LOGD("[ FIXME update cache level in SfPlayer::getCacheRemaining() ]");
+        notifyStatus();
+    }
+
+    if (abs(mCacheFill - mLastNotifiedCacheFill) > mCacheFillNotifThreshold) {
+        notifyCacheFill();
     }
 
     return mCacheStatus;

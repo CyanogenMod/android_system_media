@@ -32,12 +32,23 @@
 #include "NuHTTPDataSource.h"
 #include "ThrottledSource.h"
 
+#define DURATION_CACHED_HIGH_US  30000000 // 30s
+#define DURATION_CACHED_MED_US   10000000 // 10s
+#define DURATION_CACHED_LOW_US    2000000 //  2s
+
+#define SIZE_CACHED_HIGH_BYTES 1000000
+#define SIZE_CACHED_MED_BYTES   700000
+#define SIZE_CACHED_LOW_BYTES   400000
+
 #define EVENT_PREFETCHSTATUSCHANGE    "prsc"
 #define EVENT_PREFETCHFILLLEVELUPDATE "pflu"
 #define EVENT_ENDOFSTREAM             "eos"
 
 #define SFPLAYER_SUCCESS 1
 #define SFPLAYER_FD_FIND_FILE_SIZE ((int64_t)0xFFFFFFFFFFFFFFFFll)
+
+#define NO_FILL_LEVEL_UPDATE -1
+#define NO_STATUS_UPDATE kStatusUnknown
 
 namespace android {
 
@@ -47,6 +58,7 @@ struct SfPlayer : public AHandler {
     SfPlayer();
 
     enum CacheStatus {
+        kStatusUnknown = -1,
         kStatusEmpty = 0,
         kStatusLow,
         kStatusIntermediate,
@@ -66,6 +78,8 @@ struct SfPlayer : public AHandler {
 
     void setDataSource(const char *uri);
     void setDataSource(const int fd, const int64_t offset, const int64_t length);
+
+    void setCacheFillUpdateThreshold(int16_t thr) { mCacheFillNotifThreshold = thr; }
 
     void prepare_async();
     int  prepare_sync();
@@ -142,6 +156,9 @@ private:
     CacheStatus mCacheStatus;
     int64_t mSeekTimeMsec;
     int64_t mLastDecodedPositionUs;
+    int16_t mCacheFill; // cache fill level in permille
+    int16_t mLastNotifiedCacheFill; // last cache fill level communicated to the listener
+    int16_t mCacheFillNotifThreshold; // threshold in cache fill level for cache fill to be reported
 
     DataLocator mDataLocator;
     int         mDataLocatorType;
@@ -154,6 +171,7 @@ private:
     // buffer passed from decoder to renderer
     MediaBuffer *mDecodeBuffer;
 
+    // message handlers
     int onPrepare(const sp<AMessage> &msg);
     void onDecode();
     void onRender(const sp<AMessage> &msg);
@@ -164,6 +182,9 @@ private:
     void onSeek(const sp<AMessage> &msg);
 
     CacheStatus getCacheRemaining(bool *eos);
+    int64_t getPositionUsec();
+    void notifyStatus();
+    void notifyCacheFill();
     void notify(const sp<AMessage> &msg, bool async);
 
     void resetDataLocator();
