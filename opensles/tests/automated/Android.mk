@@ -1,4 +1,5 @@
 # Build the unit tests.
+ifneq (X,X)
 ifneq ($(TARGET_SIMULATOR),true)
 
 LOCAL_PATH:= $(call my-dir)
@@ -33,8 +34,11 @@ LOCAL_MODULE:= BufferQueue_test
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/nativetest
 
+LOCAL_STATIC_LIBRARIES := libOpenSLESUT
+
 include $(BUILD_EXECUTABLE)
 
+endif
 endif
 # Build the manual test programs.
 include $(call all-subdir-makefiles)
