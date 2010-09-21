@@ -37,7 +37,7 @@ static SLresult IAndroidEffectSend_EnableEffectSend(SLAndroidEffectSendItf self,
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
             COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#ifdef USE_BACKPORT
             result = SL_RESULT_SUCCESS;
 #else
             // the initial send level set here is the total energy on the aux bus,
@@ -96,10 +96,8 @@ static SLresult IAndroidEffectSend_SetDirectLevel(SLAndroidEffectSendItf self,
              SLmillibel oldDirectLevel = ap->mDirectLevel;
              if (oldDirectLevel != directLevel) {
                  ap->mDirectLevel = directLevel;
- #if defined(ANDROID)
                  ap->mAmplFromDirectLevel = sles_to_android_amplification(directLevel);
                  interface_unlock_exclusive_attributes(this, ATTR_GAIN);
- #endif
              } else {
                  interface_unlock_exclusive(this);
              }
@@ -159,9 +157,9 @@ static SLresult IAndroidEffectSend_SetSendLevel(SLAndroidEffectSendItf self,
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
             COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
- #if !defined(ANDROID) || defined(USE_BACKPORT)
+#ifdef USE_BACKPORT
             result = SL_RESULT_SUCCESS;
- #else
+#else
             if (android_genericFx_hasEffect(&outputMix->mAndroidEffect, effectImplementationId)) {
                 // the send level set here is the total energy on the aux bus, so it must take
                 // into account the player volume level
@@ -170,7 +168,7 @@ static SLresult IAndroidEffectSend_SetSendLevel(SLAndroidEffectSendItf self,
                  SL_LOGE("trying to send to an effect not on this AudioPlayer's OutputMix");
                  result = SL_RESULT_PARAMETER_INVALID;
             }
- #endif
+#endif
             if (SL_RESULT_SUCCESS == result) {
                 // there currently is support for only one send bus, so there is a single send
                 // level
@@ -202,7 +200,7 @@ static SLresult IAndroidEffectSend_GetSendLevel(SLAndroidEffectSendItf self,
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
             COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#ifdef USE_BACKPORT
             result = SL_RESULT_SUCCESS;
 #else
             if (android_genericFx_hasEffect(&outputMix->mAndroidEffect, effectImplementationId)) {

@@ -26,8 +26,8 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_CFLAGS += -DUSE_BASE -DUSE_GAME -DUSE_MUSIC -DUSE_PHONE -DUSE_OPTIONAL \
--UUSE_TRACE -DUSE_DEBUG -UNDEBUG -DUSE_LOG=SLAndroidLogLevel_Verbose
+LOCAL_CFLAGS += -DUSE_PROFILES=0 -DUSE_TRACE -DUSE_DEBUG -UNDEBUG \
+-DUSE_LOG=SLAndroidLogLevel_Verbose
 
 # Reduce size of .so and hide internal global symbols
 LOCAL_CFLAGS += -fvisibility=hidden -DSLAPIENTRY='__attribute__((visibility("default")))'
@@ -52,30 +52,41 @@ LOCAL_SRC_FILES:=                     \
         CAudioRecorder.c              \
         CEngine.c                     \
         COutputMix.c                  \
+        IAndroidConfiguration.c       \
+        IAndroidEffect.c              \
+        IAndroidEffectCapabilities.c  \
+        IAndroidEffectSend.c          \
+        IBassBoost.c                  \
+        IBufferQueue.c                \
+        IEffectSend.c                 \
+        IEngine.c                     \
+        IEnvironmentalReverb.c        \
+        IEqualizer.c                  \
+        IMuteSolo.c                   \
+        IObject.c                     \
+        IPlay.c                       \
+        IPrefetchStatus.c             \
+        IPresetReverb.c               \
+        IRecord.c                     \
+        ISeek.c                       \
+        IVirtualizer.c                \
+        IVolume.c
+
+EXCLUDE_SRC :=                        \
         I3DCommit.c                   \
         I3DDoppler.c                  \
         I3DGrouping.c                 \
         I3DLocation.c                 \
         I3DMacroscopic.c              \
         I3DSource.c                   \
-        IAndroidConfiguration.c       \
-        IAndroidEffect.c              \
-        IAndroidEffectCapabilities.c  \
-        IAndroidEffectSend.c          \
         IAudioDecoderCapabilities.c   \
         IAudioEncoder.c               \
         IAudioEncoderCapabilities.c   \
         IAudioIODeviceCapabilities.c  \
-        IBassBoost.c                  \
-        IBufferQueue.c                \
         IDeviceVolume.c               \
         IDynamicInterfaceManagement.c \
         IDynamicSource.c              \
-        IEffectSend.c                 \
-        IEngine.c                     \
         IEngineCapabilities.c         \
-        IEnvironmentalReverb.c        \
-        IEqualizer.c                  \
         ILEDArray.c                   \
         IMIDIMessage.c                \
         IMIDIMuteSolo.c               \
@@ -83,22 +94,13 @@ LOCAL_SRC_FILES:=                     \
         IMIDITime.c                   \
         IMetadataExtraction.c         \
         IMetadataTraversal.c          \
-        IMuteSolo.c                   \
-        IObject.c                     \
         IOutputMix.c                  \
         IPitch.c                      \
-        IPlay.c                       \
         IPlaybackRate.c               \
-        IPrefetchStatus.c             \
-        IPresetReverb.c               \
         IRatePitch.c                  \
-        IRecord.c                     \
-        ISeek.c                       \
         IThreadSync.c                 \
         IVibra.c                      \
-        IVirtualizer.c                \
-        IVisualization.c              \
-        IVolume.c
+        IVisualization.c
 
 # comment out for USE_BACKPORT
 LOCAL_SRC_FILES += \

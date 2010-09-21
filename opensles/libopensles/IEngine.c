@@ -24,7 +24,7 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, 
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_OPTIONAL
+#if USE_PROFILES & USE_PROFILES_OPTIONAL
     if ((NULL == pDevice) || (SL_DEFAULTDEVICEID_LED != deviceID)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -58,7 +58,7 @@ static SLresult IEngine_CreateVibraDevice(SLEngineItf self, SLObjectItf *pDevice
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_OPTIONAL
+#if USE_PROFILES & USE_PROFILES_OPTIONAL
     if ((NULL == pDevice) || (SL_DEFAULTDEVICEID_VIBRA != deviceID)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -235,7 +235,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 {
     SL_ENTER_INTERFACE
 
-#if defined(USE_OPTIONAL) || defined(ANDROID)
+#if (USE_PROFILES & USE_PROFILES_OPTIONAL) || defined(ANDROID)
     if (NULL == pRecorder) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -341,7 +341,7 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
 {
     SL_ENTER_INTERFACE
 
-#if defined(USE_GAME) || defined(USE_PHONE)
+#if USE_PROFILES & (USE_PROFILES_GAME | USE_PROFILES_PHONE)
     if ((NULL == pPlayer) || (NULL == pMIDISrc) || (NULL == pAudioOutput)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -376,7 +376,7 @@ static SLresult IEngine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_GAME
+#if USE_PROFILES & USE_PROFILES_GAME
     if (NULL == pListener) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -409,7 +409,7 @@ static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup, SLu
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_GAME
+#if USE_PROFILES & USE_PROFILES_GAME
     if (NULL == pGroup) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -492,7 +492,7 @@ static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self, SLObjectItf *p
 {
     SL_ENTER_INTERFACE
 
-#if defined(USE_GAME) || defined(USE_MUSIC)
+#if USE_PROFILES & (USE_PROFILES_GAME | USE_PROFILES_MUSIC)
     if (NULL == pMetadataExtractor) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -545,6 +545,7 @@ static SLresult IEngine_QueryNumSupportedInterfaces(SLEngineItf self,
 {
     SL_ENTER_INTERFACE
 
+#if USE_PROFILES & USE_PROFILES_BASE
     if (NULL == pNumSupportedInterfaces) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -572,6 +573,9 @@ static SLresult IEngine_QueryNumSupportedInterfaces(SLEngineItf self,
             result = SL_RESULT_SUCCESS;
         }
     }
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE;
 }
@@ -582,6 +586,7 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
 {
     SL_ENTER_INTERFACE
 
+#if USE_PROFILES & USE_PROFILES_BASE
     if (NULL == pInterfaceId) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -614,6 +619,9 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
             }
         }
     }
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE
 };

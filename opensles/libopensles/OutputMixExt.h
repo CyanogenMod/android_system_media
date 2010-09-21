@@ -16,8 +16,6 @@
 
 /** \file OutputMixExt.h OutputMixExt interface */
 
-#ifdef USE_OUTPUTMIXEXT
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -51,5 +49,3 @@ typedef struct {
 extern SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this);
 extern void audioPlayerGainUpdate(CAudioPlayer *this);
 extern void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 size);
-
-#endif

@@ -39,10 +39,7 @@ typedef unsigned short              sl_uint16_t;
 typedef signed short                sl_int16_t;
 typedef unsigned long               sl_uint32_t;
 typedef signed long                 sl_int32_t;
-
-#ifdef ANDROID
 typedef long long                   sl_int64_t;
-#endif
 
 #ifndef SLAPIENTRY
 #ifdef __GNUC__

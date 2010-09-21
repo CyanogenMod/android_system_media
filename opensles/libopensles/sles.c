@@ -97,7 +97,9 @@ SLresult AcquireStrongRef(IObject *object, SLuint32 expectedObjectID)
 
 void ReleaseStrongRefAndUnlockExclusive(IObject *object)
 {
+#ifdef USE_DEBUG
     assert(pthread_equal(pthread_self(), object->mOwner));
+#endif
     assert(0 < object->mStrongRefCount);
     if ((0 == --object->mStrongRefCount) && (SL_OBJECT_STATE_DESTROYING == object->mState)) {
         // FIXME do the destroy here - merge with IDestroy
@@ -152,7 +154,10 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
     for (i = 0; i < interfaceCount; ++i) {
         switch (interfaces[i].mInterface) {
         case INTERFACE_IMPLICIT:
-            exposedMask |= 1 << i;
+            // there must be an initialization hook present
+            if (NULL != MPH_init_table[interfaces[i].mMPH].mInit) {
+                exposedMask |= 1 << i;
+            }
             break;
         default:
             break;
@@ -170,7 +175,9 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
             }
             int MPH, index;
             if ((0 > (MPH = IID_to_MPH(iid))) ||
-                (0 > (index = class__->mMPH_to_index[MPH]))) {
+                    // there must be an initialization hook present
+                    (NULL == MPH_init_table[MPH].mInit) ||
+                    (0 > (index = class__->mMPH_to_index[MPH]))) {
                 // Here if interface was not found, or is not available for this object type
                 if (pInterfaceRequired[i]) {
                     // Application said it required the interface, so give up
@@ -816,10 +823,15 @@ void freeDataLocatorFormat(DataLocatorFormat *dlf)
 extern void
     I3DCommit_init(void *),
     I3DDoppler_init(void *),
+    I3DGrouping_deinit(void *),
     I3DGrouping_init(void *),
     I3DLocation_init(void *),
     I3DMacroscopic_init(void *),
     I3DSource_init(void *),
+    IAndroidConfiguration_init(void *),
+    IAndroidEffectCapabilities_init(void *),
+    IAndroidEffectSend_init(void *),
+    IAndroidEffect_init(void *),
     IAudioDecoderCapabilities_init(void *),
     IAudioEncoderCapabilities_init(void *),
     IAudioEncoder_init(void *),
@@ -843,6 +855,7 @@ extern void
     IMetadataTraversal_init(void *),
     IMuteSolo_init(void *),
     IObject_init(void *),
+    IOutputMixExt_init(void *),
     IOutputMix_init(void *),
     IPitch_init(void *),
     IPlay_init(void *),
@@ -857,20 +870,61 @@ extern void
     IVirtualizer_init(void *),
     IVisualization_init(void *),
     IVolume_init(void *);
-#ifdef ANDROID
-extern void IAndroidEffect_init(void *);
-extern void IAndroidEffectCapabilities_init(void *);
-extern void IAndroidEffectSend_init(void *);
-extern void IAndroidConfiguration_init(void *);
+
+extern void
+    IObject_deinit(void *);
+
+#if !(USE_PROFILES & USE_PROFILES_MUSIC)
+#define IDynamicSource_init         NULL
+#define IMetadataExtraction_init    NULL
+#define IMetadataTraversal_init     NULL
+#define IPlaybackRate_init          NULL
+#define IVisualization_init         NULL
 #endif
 
-#ifdef USE_OUTPUTMIXEXT
-extern void
-    IOutputMixExt_init(void *);
+#if !(USE_PROFILES & USE_PROFILES_GAME)
+#define I3DCommit_init      NULL
+#define I3DDoppler_init     NULL
+#define I3DGrouping_init    NULL
+#define I3DLocation_init    NULL
+#define I3DMacroscopic_init NULL
+#define I3DSource_init      NULL
+#define IMIDIMessage_init   NULL
+#define IMIDIMuteSolo_init  NULL
+#define IMIDITempo_init     NULL
+#define IMIDITime_init      NULL
+#define IPitch_init         NULL
+#define IRatePitch_init     NULL
+#define I3DGrouping_deinit  NULL
 #endif
-extern void
-    I3DGrouping_deinit(void *),
-    IObject_deinit(void *);
+
+#if !(USE_PROFILES & USE_PROFILES_BASE)
+#define IAudioDecoderCapabilities_init   NULL
+#define IAudioEncoderCapabilities_init   NULL
+#define IAudioEncoder_init               NULL
+#define IAudioIODeviceCapabilities_init  NULL
+#define IDeviceVolume_init               NULL
+#define IDynamicInterfaceManagement_init NULL
+#define IEngineCapabilities_init         NULL
+#define IOutputMix_init                  NULL
+#define IThreadSync_init                 NULL
+#endif
+
+#if !(USE_PROFILES & USE_PROFILES_OPTIONAL)
+#define ILEDArray_init  NULL
+#define IVibra_init     NULL
+#endif
+
+#ifndef ANDROID
+#define IAndroidConfiguration_init      NULL
+#define IAndroidEffect_init             NULL
+#define IAndroidEffectCapabilities_init NULL
+#define IAndroidEffectSend_init         NULL
+#endif
+
+#ifndef USE_OUTPUTMIXEXT
+#define IOutputMixExt_init  NULL
+#endif
 
 
 /*static*/ const struct MPH_init MPH_init_table[MPH_MAX] = {
@@ -918,24 +972,12 @@ extern void
     { /* MPH_VIRTUALIZER, */ IVirtualizer_init, NULL, NULL },
     { /* MPH_VISUALIZATION, */ IVisualization_init, NULL, NULL },
     { /* MPH_VOLUME, */ IVolume_init, NULL, NULL },
-#ifdef USE_OUTPUTMIXEXT
     { /* MPH_OUTPUTMIXEXT, */ IOutputMixExt_init, NULL, NULL },
-#else
-    { /* MPH_OUTPUTMIXEXT, */ NULL, NULL, NULL },
-#endif
-#ifdef ANDROID
     { /* MPH_ANDROIDEFFECT */ IAndroidEffect_init, NULL, NULL },
     { /* MPH_ANDROIDEFFECTCAPABILITIES */ IAndroidEffectCapabilities_init, NULL, NULL },
     { /* MPH_ANDROIDEFFECTSEND */ IAndroidEffectSend_init, NULL, NULL },
     { /* MPH_ANDROIDCONFIGURATION */ IAndroidConfiguration_init, NULL, NULL },
     { /* MPH_ANDROIDSIMPLEBUFFERQUEUE, */ IBufferQueue_init /* alias */, NULL, NULL }
-#else
-    { /* MPH_ANDROIDEFFECT */ NULL, NULL, NULL },
-    { /* MPH_ANDROIDEFFECTCAPABILITIES */ NULL, NULL, NULL },
-    { /* MPH_ANDROIDEFFECTSEND */ NULL, NULL, NULL },
-    { /* MPH_ANDROIDCONFIGURATION */ NULL, NULL, NULL },
-    { /* MPH_ANDROIDSIMPLEBUFFERQUEUE, */ NULL, NULL, NULL }
-#endif
 };
 
 
@@ -983,6 +1025,7 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
                     ((IObject **) self)[1] = this;
                 }
                 VoidHook init = MPH_init_table[x->mMPH].mInit;
+                // paranoid double-check for presence of an initialization hook
                 if (NULL != init) {
                     (*init)(self);
                 }

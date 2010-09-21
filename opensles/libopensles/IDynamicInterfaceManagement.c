@@ -59,6 +59,7 @@ static void HandleAdd(void *self, int MPH)
         // Will never add IObject, so [1] is always defined
         ((void **) thisItf)[1] = thisObject;
         VoidHook init = MPH_init_table[MPH].mInit;
+        // paranoid double-check for presence of an initialization hook
         if (NULL != init) {
             (*init)(thisItf);
             ((size_t *) thisItf)[0] ^= ~0;
@@ -114,7 +115,10 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
         IObject *thisObject = InterfaceToIObject(this);
         const ClassTable *class__ = thisObject->mClass;
         int MPH, index;
-        if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH]))) {
+        if ((0 > (MPH = IID_to_MPH(iid))) ||
+                // there must be an initialization hook present
+                (NULL == MPH_init_table[MPH].mInit) ||
+                (0 > (index = class__->mMPH_to_index[MPH]))) {
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             assert(index < (int) class__->mInterfaceCount);
@@ -162,6 +166,7 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
                     memset(thisItf, 0, size);
                     // Will never add IObject, so [1] is always defined
                     ((void **) thisItf)[1] = thisObject;
+                    // paranoid double-check for presence of an initialization hook
                     VoidHook init = MPH_init_table[MPH].mInit;
                     if (NULL != init) {
                         (*init)(thisItf);
@@ -206,7 +211,10 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
         IObject *thisObject = InterfaceToIObject(this);
         const ClassTable *class__ = thisObject->mClass;
         int MPH, index;
-        if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH]))) {
+        if ((0 > (MPH = IID_to_MPH(iid))) ||
+                // no need to check for an initialization hook
+                // (NULL == MPH_init_table[MPH].mInit) ||
+                (0 > (index = class__->mMPH_to_index[MPH]))) {
             result = SL_RESULT_PRECONDITIONS_VIOLATED;
         } else {
             SLuint8 *interfaceStateP = &thisObject->mInterfaceStates[index];
@@ -349,7 +357,10 @@ static SLresult IDynamicInterfaceManagement_ResumeInterface(SLDynamicInterfaceMa
         IObject *thisObject = InterfaceToIObject(this);
         const ClassTable *class__ = thisObject->mClass;
         int MPH, index;
-        if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH]))) {
+        if ((0 > (MPH = IID_to_MPH(iid))) ||
+                // no need to check for an initialization hook
+                // (NULL == MPH_init_table[MPH].mInit) ||
+                (0 > (index = class__->mMPH_to_index[MPH]))) {
             result = SL_RESULT_PRECONDITIONS_VIOLATED;
         } else {
             assert(index < (int) class__->mInterfaceCount);

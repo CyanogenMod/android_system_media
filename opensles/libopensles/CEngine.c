@@ -24,10 +24,12 @@
 SLresult CEngine_Realize(void *self, SLboolean async)
 {
     CEngine *this = (CEngine *) self;
+    // create the sync thread
     int err = pthread_create(&this->mSyncThread, (const pthread_attr_t *) NULL, sync_start, this);
     SLresult result = err_to_result(err);
     if (SL_RESULT_SUCCESS != result)
         return result;
+    // initialize the thread pool for asynchronous operations
     result = ThreadPool_init(&this->mEngine.mThreadPool, 0, 0);
     if (SL_RESULT_SUCCESS != result) {
         this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
@@ -55,18 +57,20 @@ void CEngine_Destroy(void *self)
 {
     CEngine *this = (CEngine *) self;
 
+    // FIXME Move this section to CEngine_PreDestroy and return false
     // Verify that there are no extant objects
     unsigned instanceCount = this->mEngine.mInstanceCount;
     unsigned instanceMask = this->mEngine.mInstanceMask;
     if ((0 < instanceCount) || (0 != instanceMask)) {
-        SL_LOGE("Object::Destroy(%p) for engine with %u active objects", this, instanceCount);
+        SL_LOGE("Object::Destroy(%p) for engine ignored; %u total active objects",
+            this, instanceCount);
         while (0 != instanceMask) {
             unsigned i = ctz(instanceMask);
             assert(MAX_INSTANCE > i);
-            SL_LOGE("Object::Destroy(%p) for engine with active object ID %u", this, i + 1);
+            SL_LOGE("Object::Destroy(%p) for engine ignored; active object ID %u at %p",
+                this, i + 1, this->mEngine.mInstances[i]);
             instanceMask &= ~(1 << i);
         }
-
     }
 
     // Announce to the sync thread that engine is shutting down; it polls so should see it soon

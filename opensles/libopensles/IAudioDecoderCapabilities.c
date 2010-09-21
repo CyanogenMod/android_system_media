@@ -37,6 +37,7 @@ static SLresult IAudioDecoderCapabilities_GetAudioDecoders(SLAudioDecoderCapabil
         }
         result = SL_RESULT_SUCCESS;
     }
+
     SL_LEAVE_INTERFACE
 }
 

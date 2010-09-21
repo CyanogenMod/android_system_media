@@ -18,7 +18,6 @@
 
 #include "sles_allinclusive.h"
 
-#ifdef USE_SDL
 
 /** \brief Called by SDL to fill the next audio output buffer */
 
@@ -68,5 +67,3 @@ void SDL_close(void)
 {
     SDL_CloseAudio();
 }
-
-#endif // USE_SDL

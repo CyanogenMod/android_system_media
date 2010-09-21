@@ -249,6 +249,7 @@ static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self, const void *pAuxE
         if (NULL == enableLevel) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
+            result = SL_RESULT_SUCCESS;
             // EnableEffectSend is exclusive, so this has to be also
             interface_lock_exclusive(this);
             enableLevel->mSendLevel = sendLevel;
@@ -260,8 +261,6 @@ static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self, const void *pAuxE
                 // into account the player volume level
                 result = android_fxSend_setSendLevel(ap, sendLevel + ap->mVolume.mLevel);
             }
-#else
-            result = SL_RESULT_SUCCESS;
 #endif
             interface_unlock_exclusive(this);
 

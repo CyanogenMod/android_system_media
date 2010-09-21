@@ -91,28 +91,28 @@ extern const char slLogTag[];
 
 #if (USE_LOG <= SLAndroidLogLevel_Warn)
 #define SL_LOGW(...) do { fprintf(stderr, "SL_LOGW: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
-    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } } while(0)
+    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
 #else
 #define SL_LOGW(...) do { } while (0)
 #endif
 
 #if (USE_LOG <= SLAndroidLogLevel_Info)
 #define SL_LOGI(...) do { fprintf(stderr, "SL_LOGI: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
-    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } } while(0)
+    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
 #else
 #define SL_LOGI(...) do { } while (0)
 #endif
 
 #if (USE_LOG <= SLAndroidLogLevel_Debug)
 #define SL_LOGD(...) do { fprintf(stderr, "SL_LOGD: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
-    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } } while(0)
+    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
 #else
 #define SL_LOGD(...) do { } while (0)
 #endif
 
 #if (USE_LOG <= SLAndroidLogLevel_Verbose)
 #define SL_LOGV(...) do { fprintf(stderr, "SL_LOGV: %s:%s:%d ", __FILE__, __FUNCTION__, __LINE__); \
-    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } } while(0)
+    fprintf(stderr, __VA_ARGS__); fputc('\n', stderr); } while(0)
 #else
 #define SL_LOGV(...) do { } while (0)
 #endif

@@ -16,8 +16,6 @@
 
 /* Android Effect Capabilities implementation */
 
-#ifdef ANDROID
-
 #include "sles_allinclusive.h"
 
 
@@ -116,5 +114,3 @@ void IAndroidEffectCapabilities_init(void *self)
     }
 
 }
-
-#endif // #ifdef ANDROID

@@ -19,9 +19,17 @@
 #include "sles_allinclusive.h"
 #include <math.h>
 
-#ifdef USE_OUTPUTMIXEXT
 
 // OutputMixExt is used by SDL, but is not specific to or dependent on SDL
+
+
+// stereo is a frame consisting of a pair of 16-bit PCM samples
+
+typedef struct {
+    short left;
+    short right;
+} stereo;
+
 
 /** \brief Summary of the gain, as an optimization for the mixer */
 
@@ -442,6 +450,3 @@ void audioPlayerGainUpdate(CAudioPlayer *audioPlayer)
         }
     }
 }
-
-
-#endif // USE_OUTPUTMIXEXT

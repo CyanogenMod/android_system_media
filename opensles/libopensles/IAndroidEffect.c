@@ -16,8 +16,6 @@
 
 /* Android Effect implementation */
 
-#ifdef ANDROID
-
 #include "sles_allinclusive.h"
 
 
@@ -112,5 +110,3 @@ void IAndroidEffect_init(void *self)
 
     // mEffects lifecycle is handled by the object on which SLAndroidEffect is exposed
 }
-
-#endif // #ifdef ANDROID

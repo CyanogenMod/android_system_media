@@ -61,13 +61,15 @@ bool COutputMix_PreDestroy(void *self)
     COutputMix *outputMix = (COutputMix *) self;
     // See design document for explanation
     if (0 == outputMix->mObject.mStrongRefCount) {
-#ifdef USE_SDL
-        // Tell the asynchronous SDL_callback that we want to destroy the output mix
+#ifdef USE_OUTPUTMIXEXT
+        // Tell the asynchronous mixer callback that we want to destroy the output mix
         outputMix->mOutputMixExt.mDestroyRequested = true;
         while (outputMix->mOutputMixExt.mDestroyRequested) {
             object_cond_wait(&outputMix->mObject);
         }
-        // SDL_Callback has acknowledged our request and unlinked output mix from engine.
+#endif
+#ifdef USE_SDL
+        // Mixer callback has acknowledged our request and unlinked output mix from engine.
         // Disable SDL_callback from being called periodically by SDL's internal thread.
         SDL_PauseAudio(1);
 #endif
