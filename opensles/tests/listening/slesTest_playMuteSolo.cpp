@@ -253,8 +253,10 @@ void TestPlayUri( SLObjectItf sl, const char* path)
         goto destroyKillKill;
     } else {
         /* Mute left channel */
-        result = (*muteSoloItf)->SetChannelMute(muteSoloItf, 0, SL_BOOLEAN_TRUE); ExitOnError(result);
-        result = (*muteSoloItf)->SetChannelMute(muteSoloItf, 1, SL_BOOLEAN_FALSE); ExitOnError(result);
+        result = (*muteSoloItf)->SetChannelMute(muteSoloItf, 0, SL_BOOLEAN_TRUE);
+        ExitOnError(result);
+        result = (*muteSoloItf)->SetChannelMute(muteSoloItf, 1, SL_BOOLEAN_FALSE);
+        ExitOnError(result);
     }
 
     /* Run the test for 10s */

@@ -154,7 +154,7 @@ void TestStreamTypeConfiguration( SLObjectItf sl, const char* path, const SLint3
     result = (*player)->Realize(player, SL_BOOLEAN_FALSE); ExitOnError(result);
     fprintf(stdout, "URI example: after Realize\n");
 
-    /* Get the SLPlayItf, SLPrefetchStatusItf and SLAndroidConfigurationItf interfaces for the player*/
+    /* Get the SLPlayItf, SLPrefetchStatusItf and SLAndroidConfigurationItf interfaces for player */
     result = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf);
     ExitOnError(result);
 

@@ -141,9 +141,18 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     // copy the buffer queue count from source locator to the buffer queue interface
                     // we have already range-checked the value down to a smaller width
 
-                    this->mBufferQueue.mNumBuffers = (SL_DATALOCATOR_BUFFERQUEUE == *(SLuint32 *)
-                        pAudioSrc->pLocator) ? (SLuint16) ((SLDataLocator_BufferQueue *)
-                        pAudioSrc->pLocator)->numBuffers : 0;
+                    switch (*(SLuint32 *) pAudioSrc->pLocator) {
+                    case SL_DATALOCATOR_BUFFERQUEUE:
+#ifdef ANDROID
+                    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+#endif
+                        this->mBufferQueue.mNumBuffers = (SLuint16) ((SLDataLocator_BufferQueue *)
+                            pAudioSrc->pLocator)->numBuffers;
+                        break;
+                    default:
+                        this->mBufferQueue.mNumBuffers = 0;
+                        break;
+                    }
 
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
@@ -272,7 +281,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 #ifdef ANDROID
                     // FIXME move to dedicated function
                     SLuint32 locatorType = *(SLuint32 *) pAudioSnk->pLocator;
-                    if (locatorType == SL_DATALOCATOR_BUFFERQUEUE) {
+                    if (locatorType == SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE) {
                         this->mBufferQueue.mNumBuffers = ((SLDataLocator_BufferQueue *)
                                 pAudioSnk->pLocator)->numBuffers;
                         // inline allocation of circular Buffer Queue mArray, up to a typical max
@@ -596,6 +605,7 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
                     break;
                 }
                 if (index == 0) {
+                    // FIXME Note that if there are aliases, this returns only the primary
                     *pInterfaceId = &SL_IID_array[class__->mInterfaces[i].mMPH];
                     result = SL_RESULT_SUCCESS;
                     break;

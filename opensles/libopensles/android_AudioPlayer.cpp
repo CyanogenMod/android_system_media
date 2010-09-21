@@ -449,7 +449,9 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     switch (locatorType) {
     //------------------
     //   Buffer Queues
-    case SL_DATALOCATOR_BUFFERQUEUE: {
+    case SL_DATALOCATOR_BUFFERQUEUE:
+    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+        {
         SLDataLocator_BufferQueue *dl_bq =  (SLDataLocator_BufferQueue *) pAudioSrc->pLocator;
 
         // Buffer format
@@ -531,15 +533,15 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             break;
         case SL_DATAFORMAT_MIME:
         case SL_DATAFORMAT_RESERVED3:
-            SL_LOGE("Cannot create audio player with SL_DATALOCATOR_BUFFERQUEUE data source "
+            SL_LOGE("Cannot create audio player with buffer queue data source "
                 "without SL_DATAFORMAT_PCM format");
             return SL_RESULT_CONTENT_UNSUPPORTED;
         default:
-            SL_LOGE("Cannot create audio player with SL_DATALOCATOR_BUFFERQUEUE data source "
+            SL_LOGE("Cannot create audio player with buffer queue data source "
                 "without SL_DATAFORMAT_PCM format");
             return SL_RESULT_PARAMETER_INVALID;
         } // switch (formatType)
-        } // case SL_DATALOCATOR_BUFFERQUEUE
+        } // case SL_DATALOCATOR_BUFFERQUEUE or SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE
         break;
     //------------------
     //   URI
@@ -752,6 +754,7 @@ SLresult android_audioPlayer_create(
     //   -----------------------------------
     //   Buffer Queue to AudioTrack
     case SL_DATALOCATOR_BUFFERQUEUE:
+    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
         pAudioPlayer->mAndroidObjType = AUDIOTRACK_PULL;
         pAudioPlayer->mpLock = new android::Mutex();
         pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;

@@ -17,6 +17,9 @@
 /** \file OpenSLESUT.c OpenSL ES Utility Toolkit */
 
 #include "SLES/OpenSLES.h"
+#ifdef ANDROID
+#include "SLES/OpenSLES_Android.h"
+#endif
 #include "OpenSLESUT.h"
 #include <stdio.h>
 #include <string.h>
@@ -102,7 +105,17 @@ static Pair pairs[] = {
     _(VIBRA),
     _(VIRTUALIZER),
     _(VISUALIZATION),
-    _(VOLUME)
+    _(VOLUME),
+#if 0 // ifdef USE_OUTPUTMIXEXT
+    _(OUTPUTMIXEXT),
+#endif
+#ifdef ANDROID
+    _(ANDROIDEFFECT),
+    _(ANDROIDEFFECTCAPABILITIES),
+    _(ANDROIDEFFECTSEND),
+    _(ANDROIDCONFIGURATION),
+    _(ANDROIDSIMPLEBUFFERQUEUE)
+#endif
 };
 
 /** \brief Print an interface ID in human-readable format */

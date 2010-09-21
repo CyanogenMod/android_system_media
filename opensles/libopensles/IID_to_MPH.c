@@ -30,9 +30,9 @@ int IID_to_MPH(const SLInterfaceID iid)
 #define MAX_HASH_VALUE 115
   static const unsigned char asso_values[] =
     {
-        5, 116, 116,  56, 116, 116,   7, 116, 116,   7,
-      116,  12, 116, 116, 116,  41, 116, 116, 116, 116,
-      116, 116,  51, 116, 116, 116, 116, 116, 116, 116,
+        5, 116, 116,  61, 116, 116,   7, 116, 116,   7,
+      116,  12, 116, 116, 116,  46, 116, 116, 116, 116,
+      116, 116,  56, 116, 116,  36, 116, 116, 116, 116,
       116,   7,  20, 116, 116, 116, 116, 116, 116, 116,
       116, 116,  41,  20,  36, 116,  21, 116, 116, 116,
       116, 116, 116,  26, 116,   2, 116, 116, 116, 116,
@@ -149,22 +149,22 @@ int IID_to_MPH(const SLInterfaceID iid)
         -1,
         -1,
         MPH_METADATAEXTRACTION,
-        MPH_VIBRA,
+        MPH_ANDROIDSIMPLEBUFFERQUEUE,
         -1,
         -1,
         -1,
         MPH_OUTPUTMIX,
-        MPH_AUDIOENCODERCAPABILITIES,
+        MPH_VIBRA,
         -1,
         -1,
         -1,
         MPH_ENGINE,
-        MPH_MIDIMUTESOLO,
+        MPH_AUDIOENCODERCAPABILITIES,
         -1,
         -1,
         -1,
         MPH_AUDIOENCODER,
-        -1,
+        MPH_MIDIMUTESOLO,
         -1,
         -1,
         -1,
@@ -178,7 +178,8 @@ int IID_to_MPH(const SLInterfaceID iid)
     if (&SL_IID_array[0] <= iid && &SL_IID_array[MPH_MAX] > iid)
         return iid - &SL_IID_array[0];
     if (NULL != iid) {
-        unsigned key = asso_values[((unsigned char *)iid)[3]] + asso_values[((unsigned char *)iid)[0]];
+        unsigned key = asso_values[((unsigned char *)iid)[3]] +
+            asso_values[((unsigned char *)iid)[0]];
         if (key <= MAX_HASH_VALUE) {
             int MPH = hash_to_MPH[key];
             if (MPH >= 0) {

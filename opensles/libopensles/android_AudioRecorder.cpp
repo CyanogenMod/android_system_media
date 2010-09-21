@@ -156,8 +156,8 @@ SLresult android_audioRecorder_checkSourceSinkSupport(CAudioRecorder* ar) {
 
     // Sink check:
     // only buffer queue sinks are supported, regardless of the data source
-    if (SL_DATALOCATOR_BUFFERQUEUE != *(SLuint32 *)pAudioSnk->pLocator) {
-        SL_LOGE(ERROR_RECORDER_SINK_MUST_BE_BUFFERQUEUE);
+    if (SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE != *(SLuint32 *)pAudioSnk->pLocator) {
+        SL_LOGE(ERROR_RECORDER_SINK_MUST_BE_ANDROIDSIMPLEBUFFERQUEUE);
         return SL_RESULT_PARAMETER_INVALID;
     } else {
         // only PCM buffer queues are supported
@@ -373,8 +373,8 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
     SLresult result = SL_RESULT_SUCCESS;
 
     // initialize platform-independent CAudioRecorder fields
-    if (SL_DATALOCATOR_BUFFERQUEUE != ar->mDataSink.mLocator.mLocatorType) {
-        SL_LOGE(ERROR_RECORDER_SINK_MUST_BE_BUFFERQUEUE);
+    if (SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE != ar->mDataSink.mLocator.mLocatorType) {
+        SL_LOGE(ERROR_RECORDER_SINK_MUST_BE_ANDROIDSIMPLEBUFFERQUEUE);
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
     //  the following platform-independent fields have been initialized in CreateAudioRecorder()

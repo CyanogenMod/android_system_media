@@ -207,7 +207,8 @@ void TestVirtualizerPathFromFD( SLObjectItf sl, const char* path, int16_t virtSt
     if (SL_BOOLEAN_FALSE == strengthSupported) {
         fprintf(stdout, "Virtualizer strength is not supported on this platform. Too bad!\n");
     } else {
-        fprintf(stdout, "Virtualizer strength is supported, setting strength to %d\n", virtStrength);
+        fprintf(stdout, "Virtualizer strength is supported, setting strength to %d\n",
+                virtStrength);
         result = (*virtItf)->SetStrength(virtItf, virtStrength);
         ExitOnError(result);
     }

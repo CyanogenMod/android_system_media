@@ -53,7 +53,7 @@ void guidToString(const SLInterfaceID guid, char *str) {
     if ((NULL == guid) || (NULL == str)) {
         return;
     }
-    snprintf(str, GUID_DISPLAY_LENGTH, "%08x-%04x-%04x-%04x-%02x%02x%02x%02x%02x%02x",
+    snprintf(str, GUID_DISPLAY_LENGTH, "%08lx-%04x-%04x-%04x-%02x%02x%02x%02x%02x%02x",
             guid->time_low,
             guid->time_mid,
             guid->time_hi_and_version,

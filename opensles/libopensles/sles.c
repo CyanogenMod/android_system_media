@@ -143,10 +143,12 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired, unsigned *pExposedMask)
 {
     assert(NULL != class__ && NULL != pExposedMask);
+    // Initially no interfaces are exposed
     unsigned exposedMask = 0;
     const struct iid_vtable *interfaces = class__->mInterfaces;
     SLuint32 interfaceCount = class__->mInterfaceCount;
     SLuint32 i;
+    // Expose all implicit interfaces
     for (i = 0; i < interfaceCount; ++i) {
         switch (interfaces[i].mInterface) {
         case INTERFACE_IMPLICIT:
@@ -160,6 +162,7 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
         if (NULL == pInterfaceIds || NULL == pInterfaceRequired) {
             return SL_RESULT_PARAMETER_INVALID;
         }
+        // Loop for each requested interface
         for (i = 0; i < numInterfaces; ++i) {
             SLInterfaceID iid = pInterfaceIds[i];
             if (NULL == iid) {
@@ -168,12 +171,19 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
             int MPH, index;
             if ((0 > (MPH = IID_to_MPH(iid))) ||
                 (0 > (index = class__->mMPH_to_index[MPH]))) {
+                // Here if interface was not found, or is not available for this object type
                 if (pInterfaceRequired[i]) {
+                    // Application said it required the interface, so give up
+                    SL_LOGE("class %s interface %lu required but unavailable MPH=%d",
+                            class__->mName, i, MPH);
                     return SL_RESULT_FEATURE_UNSUPPORTED;
                 }
+                // Application said it didn't really need the interface, so ignore
                 continue;
             }
+            // The requested interface was both found and available, so expose it
             exposedMask |= (1 << index);
+            // Note that we ignore duplicate requests, including equal and aliased IDs
         }
     }
     *pExposedMask = exposedMask;
@@ -249,6 +259,12 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
         break;
 
     case SL_DATALOCATOR_BUFFERQUEUE:
+#ifdef ANDROID
+    // This is an alias that is _not_ converted; the rest of the code must check for both locator
+    // types. That's because it is only an alias for audio players, not audio recorder objects
+    // so we have to remember the distinction.
+    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+#endif
         pDataLocator->mBufferQueue = *(SLDataLocator_BufferQueue *)pLocator;
         // number of buffers must be specified, there is no default value, and must not be excessive
         if (!((1 <= pDataLocator->mBufferQueue.numBuffers) &&
@@ -625,8 +641,12 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
             const SLboolean *pInterfaceRequired) {
     // can't request SLSeekItf if data source is a buffer queue
     // FIXME there are other invalid combinations -- see docs
-    if (SL_DATALOCATOR_BUFFERQUEUE == pDataLocatorFormat->mLocator.mLocatorType) {
-        SLuint32 i;
+    SLuint32 i;
+    switch (pDataLocatorFormat->mLocator.mLocatorType) {
+    case SL_DATALOCATOR_BUFFERQUEUE:
+#ifdef ANDROID
+    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+#endif
         for (i = 0; i < numInterfaces; i++) {
             // FIXME the == needs work
             if (pInterfaceRequired[i] && (SL_IID_SEEK == pInterfaceIds[i])) {
@@ -634,6 +654,9 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
                 return SL_RESULT_FEATURE_UNSUPPORTED;
             }
         }
+        break;
+    default:
+        break;
     }
     return SL_RESULT_SUCCESS;
 }
@@ -678,6 +701,7 @@ SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataL
     case SL_DATALOCATOR_MIDIBUFFERQUEUE:
 #ifdef ANDROID
     case SL_DATALOCATOR_ANDROIDFD:
+    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
 #endif
         result = checkDataFormat(myDataSrc.pFormat, &pDataLocatorFormat->mFormat);
         if (SL_RESULT_SUCCESS != result) {
@@ -732,21 +756,29 @@ SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLoca
         break;
 
     case SL_DATALOCATOR_BUFFERQUEUE:
+#ifdef ANDROID
+    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+#endif
         if (SL_OBJECTID_AUDIOPLAYER == objType) {
             SL_LOGE("buffer queue can't be used as data sink for audio player");
-            return SL_RESULT_PARAMETER_INVALID;
+            result = SL_RESULT_PARAMETER_INVALID;
         } else if (SL_OBJECTID_AUDIORECORDER == objType) {
 #ifdef ANDROID
-            result = checkDataFormat(myDataSink.pFormat, &pDataLocatorFormat->mFormat);
-            if (SL_RESULT_SUCCESS != result) {
-                return result;
+            if (SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE !=
+                pDataLocatorFormat->mLocator.mLocatorType) {
+                SL_LOGE("audio recorder source locator must be SL_DATALOCATOR_ANDROIDBUFFERQUEUE");
+                result = SL_RESULT_PARAMETER_INVALID;
+            } else {
+                result = checkDataFormat(myDataSink.pFormat, &pDataLocatorFormat->mFormat);
             }
-            break;
 #else
             SL_LOGE("mLocatorType=%u", (unsigned) pDataLocatorFormat->mLocator.mLocatorType);
-            freeDataLocator(&pDataLocatorFormat->mLocator);
-            return SL_RESULT_PARAMETER_INVALID;
+            result = SL_RESULT_PARAMETER_INVALID;
 #endif
+        }
+        if (SL_RESULT_SUCCESS != result) {
+            freeDataLocator(&pDataLocatorFormat->mLocator);
+            return result;
         }
         break;
 
@@ -895,12 +927,14 @@ extern void
     { /* MPH_ANDROIDEFFECT */ IAndroidEffect_init, NULL, NULL },
     { /* MPH_ANDROIDEFFECTCAPABILITIES */ IAndroidEffectCapabilities_init, NULL, NULL },
     { /* MPH_ANDROIDEFFECTSEND */ IAndroidEffectSend_init, NULL, NULL },
-    { /* MPH_ANDROIDCONFIGURATION */ IAndroidConfiguration_init, NULL, NULL }
+    { /* MPH_ANDROIDCONFIGURATION */ IAndroidConfiguration_init, NULL, NULL },
+    { /* MPH_ANDROIDSIMPLEBUFFERQUEUE, */ IBufferQueue_init /* alias */, NULL, NULL }
 #else
     { /* MPH_ANDROIDEFFECT */ NULL, NULL, NULL },
     { /* MPH_ANDROIDEFFECTCAPABILITIES */ NULL, NULL, NULL },
     { /* MPH_ANDROIDEFFECTSEND */ NULL, NULL, NULL },
-    { /* MPH_ANDROIDCONFIGURATION */ NULL, NULL, NULL }
+    { /* MPH_ANDROIDCONFIGURATION */ NULL, NULL, NULL },
+    { /* MPH_ANDROIDSIMPLEBUFFERQUEUE, */ NULL, NULL, NULL }
 #endif
 };
 
@@ -1114,6 +1148,7 @@ SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index, SLInterface
                 break;
             }
             if (index == 0) {
+                // The engine has no aliases, but if it did, this would return only the primary
                 *pInterfaceId = &SL_IID_array[class__->mInterfaces[i].mMPH];
                 result = SL_RESULT_SUCCESS;
                 break;

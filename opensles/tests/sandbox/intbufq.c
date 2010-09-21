@@ -16,10 +16,31 @@
 
 /* interactive buffer queue test program */
 
+#ifdef ANDROID
+#define USE_ANDROID_SIMPLE_BUFFER_QUEUE     // change to #undef for compatibility testing
+#endif
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "SLES/OpenSLES.h"
+#ifdef USE_ANDROID_SIMPLE_BUFFER_QUEUE
+#include "SLES/OpenSLES_Android.h"
+#endif
+
+#ifdef USE_ANDROID_SIMPLE_BUFFER_QUEUE
+#define DATALOCATOR_BUFFERQUEUE SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE
+#define IID_BUFFERQUEUE SL_IID_ANDROIDSIMPLEBUFFERQUEUE
+#define BufferQueueItf SLAndroidSimpleBufferQueueItf
+#define BufferQueueState SLAndroidSimpleBufferQueueState
+#define INDEX index
+#else
+#define DATALOCATOR_BUFFERQUEUE SL_DATALOCATOR_BUFFERQUEUE
+#define IID_BUFFERQUEUE SL_IID_BUFFERQUEUE
+#define BufferQueueItf SLBufferQueueItf
+#define BufferQueueState SLBufferQueueState
+#define INDEX playIndex
+#endif
 
 #define checkResult(r) do { if ((r) != SL_RESULT_SUCCESS) fprintf(stderr, "error %d at %s:%d\n", \
     (int) r, __FILE__, __LINE__); } while (0)
@@ -38,10 +59,10 @@ frame_t square[SQUARE_FRAMES];
 #define SAWTOOTH_FRAMES (44100*5)
 frame_t sawtooth[SAWTOOTH_FRAMES];
 
-SLBufferQueueItf expectedCaller = NULL;
+BufferQueueItf expectedCaller = NULL;
 void *expectedContext = NULL;
 
-static void callback(SLBufferQueueItf caller, void *context)
+static void callback(BufferQueueItf caller, void *context)
 {
     putchar('.');
     if (caller != expectedCaller)
@@ -78,7 +99,7 @@ int main(int argc, char **argv)
     SLDataFormat_PCM pcm;
     SLDataLocator_OutputMix locator_outputmix;
     SLDataLocator_BufferQueue locator_bufferqueue;
-    locator_bufferqueue.locatorType = SL_DATALOCATOR_BUFFERQUEUE;
+    locator_bufferqueue.locatorType = DATALOCATOR_BUFFERQUEUE;
     locator_bufferqueue.numBuffers = 255;
     locator_outputmix.locatorType = SL_DATALOCATOR_OUTPUTMIX;
     locator_outputmix.outputMix = outputmixObject;
@@ -94,17 +115,18 @@ int main(int argc, char **argv)
     audiosnk.pLocator = &locator_outputmix;
     audiosnk.pFormat = NULL;
     SLObjectItf playerObject;
-    SLInterfaceID ids[1] = {SL_IID_BUFFERQUEUE};
+    SLInterfaceID ids[1] = {IID_BUFFERQUEUE};
     SLboolean flags[1] = {SL_BOOLEAN_TRUE};
-    result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc, &audiosnk, 1, ids, flags);
+    result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc, &audiosnk,
+            1, ids, flags);
     checkResult(result);
     result = (*playerObject)->Realize(playerObject, SL_BOOLEAN_FALSE);
     checkResult(result);
     SLPlayItf playerPlay;
     result = (*playerObject)->GetInterface(playerObject, SL_IID_PLAY, &playerPlay);
     checkResult(result);
-    SLBufferQueueItf playerBufferqueue;
-    result = (*playerObject)->GetInterface(playerObject, SL_IID_BUFFERQUEUE, &playerBufferqueue);
+    BufferQueueItf playerBufferqueue;
+    result = (*playerObject)->GetInterface(playerObject, IID_BUFFERQUEUE, &playerBufferqueue);
     checkResult(result);
     SLuint32 state;
     state = SL_PLAYSTATE_PLAYING;
@@ -136,7 +158,7 @@ int main(int argc, char **argv)
         if (kbhit()) {
             frame_t *buffer;
             unsigned size;
-            SLBufferQueueState bufqstate;
+            BufferQueueState bufqstate;
             int ch = getch();
             switch (ch) {
             case '0' ... '9':
@@ -193,7 +215,7 @@ enqueue:
             case 'g':
                 result = (*playerBufferqueue)->GetState(playerBufferqueue, &bufqstate);
                 checkResult(result);
-                printf("\rplayIndex=%u\r\n", (unsigned) bufqstate.playIndex);
+                printf("\rplayIndex=%u\r\n", (unsigned) bufqstate.INDEX);
                 printf("count=%u\r\n", (unsigned) bufqstate.count);
                 break;
             case 'p':
