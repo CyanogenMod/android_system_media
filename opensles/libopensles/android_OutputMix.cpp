@@ -22,7 +22,7 @@
 SLresult android_outputMix_create(COutputMix *om) {
     SLresult result = SL_RESULT_SUCCESS;
 
-    SL_LOGV("om=%p", om);
+    SL_LOGV("Create outputMix=%p", om);
 
     om->mAndroidEffect.mEffects = new android::KeyedVector<SLuint32, android::AudioEffect* >();
 
@@ -32,7 +32,7 @@ SLresult android_outputMix_create(COutputMix *om) {
 
 SLresult android_outputMix_realize(COutputMix *om, SLboolean async) {
     SLresult result = SL_RESULT_SUCCESS;
-    SL_LOGV("om=%p", om);
+    SL_LOGV("Realize outputMix=%p", om);
 
     // initialize effects
     // initialize EQ
@@ -69,7 +69,7 @@ SLresult android_outputMix_realize(COutputMix *om, SLboolean async) {
 
 SLresult android_outputMix_destroy(COutputMix *om) {
     SLresult result = SL_RESULT_SUCCESS;
-    SL_LOGV("om=%p", om);
+    SL_LOGV("Destroy outputMix=%p", om);
 
 
 #ifndef USE_BACKPORT

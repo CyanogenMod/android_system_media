@@ -19,6 +19,7 @@
 
 #ifdef __cplusplus
 extern "C" {
+#endif
 
 /*---------------------------------------------------------------------------*/
 /* Android common types                                                      */
@@ -166,7 +167,7 @@ struct SLAndroidConfigurationItf_ {
 
 #define SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ((SLAint64) 0xFFFFFFFFFFFFFFFFll)
 
-/** File Descriptor-based data locator definition where locatorType must be SL_DATALOCATOR_ANDROIDFD */
+/** File Descriptor-based data locator definition, locatorType must be SL_DATALOCATOR_ANDROIDFD */
 typedef struct SLDataLocator_AndroidFD_ {
     SLuint32        locatorType;
     SLint32         fd;
@@ -175,6 +176,7 @@ typedef struct SLDataLocator_AndroidFD_ {
 } SLDataLocator_AndroidFD;
 
 
+#ifdef __cplusplus
 }
 #endif /* __cplusplus */
 

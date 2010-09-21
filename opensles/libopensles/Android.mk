@@ -26,7 +26,7 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_CFLAGS += -DUSE_BASE -DUSE_GAME -DUSE_MUSIC -DUSE_PHONE -DUSE_OPTIONAL \
--DUSE_TRACE -DUSE_DEBUG -UNDEBUG -DUSE_VERBOSE
+-UUSE_TRACE -DUSE_DEBUG -UNDEBUG -DUSE_LOG=SLAndroidLogLevel_Verbose
 
 # Reduce size of .so and hide internal global symbols
 LOCAL_CFLAGS += -fvisibility=hidden -DSLAPIENTRY='__attribute__((visibility("default")))'
@@ -39,6 +39,7 @@ LOCAL_SRC_FILES:=                     \
         interfaces.c                  \
         locks.c                       \
         sles.c                        \
+        sllog.c                       \
         android_AudioPlayer.cpp       \
         android_AudioRecorder.cpp     \
         android_OutputMix.cpp         \

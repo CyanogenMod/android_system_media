@@ -17,18 +17,9 @@
 #include "android_SfPlayer.h"
 
 #include <stdio.h>
-
-// The usual SL_LOGx macros and Android LOGx are not available
-#ifdef LOGE
-#undef LOGE
-#endif
-#ifdef LOGV
-#undef LOGV
-#endif
-#define LOGE(fmt, ...) do { fprintf(stderr, "%s:%s:%d:E ", __FUNCTION__, __FILE__, __LINE__); \
-    fprintf(stderr, fmt, ## __VA_ARGS__); fputc('\n', stderr); } while(0)
-#define LOGV(fmt, ...) do { fprintf(stdout, "%s:%s:%d:V ", __FUNCTION__, __FILE__, __LINE__); \
-    fprintf(stdout, fmt, ## __VA_ARGS__); fputc('\n', stdout); } while(0)
+#include "SLES/OpenSLES.h"
+#include "SLES/OpenSLES_Android.h"
+#include "sllog.h"
 
 namespace android {
 
@@ -53,7 +44,7 @@ SfPlayer::SfPlayer()
 
 
 SfPlayer::~SfPlayer() {
-    LOGV("SfPlayer::~SfPlayer()");
+    SL_LOGV("SfPlayer::~SfPlayer()");
 
     mRenderLooper->stop();
     mRenderLooper->unregisterHandler(this->id());
@@ -106,7 +97,7 @@ void SfPlayer::setDataSource(const char *uri) {
     char* newUri = (char*) malloc(len + 1);
     if (NULL == newUri) {
         // mem issue
-        LOGE("SfPlayer::setDataSource: ERROR not enough memory to allocator URI string");
+        SL_LOGE("SfPlayer::setDataSource: not enough memory to allocator URI string");
         return;
     }
     memcpy(newUri, uri, len + 1);
@@ -124,12 +115,12 @@ void SfPlayer::setDataSource(const int fd, const int64_t offset, const int64_t l
     int ret = fstat(fd, &sb);
     if (ret != 0) {
         // sockets are not supported
-        LOGE("SfPlayer::setDataSource: ERROR fstat(%d) failed: %d, %s", fd, ret, strerror(errno));
+        SL_LOGE("SfPlayer::setDataSource: fstat(%d) failed: %d, %s", fd, ret, strerror(errno));
         return;
     }
 
     if (offset >= sb.st_size) {
-        LOGE("SfPlayer::setDataSource: ERROR invalid offset");
+        SL_LOGE("SfPlayer::setDataSource: invalid offset");
         return;
     }
     mDataLocator.fdi.offset = offset;
@@ -146,25 +137,25 @@ void SfPlayer::setDataSource(const int fd, const int64_t offset, const int64_t l
 }
 
 void SfPlayer::prepare_async() {
-    //LOGV("SfPlayer::prepare_async()");
+    //SL_LOGV("SfPlayer::prepare_async()");
     sp<AMessage> msg = new AMessage(kWhatPrepare, id());
     msg->post();
 }
 
 int SfPlayer::prepare_sync() {
-    //LOGV("SfPlayer::prepare_sync()");
+    //SL_LOGV("SfPlayer::prepare_sync()");
     sp<AMessage> msg = new AMessage(kWhatPrepare, id());
     return onPrepare(msg);
 }
 
 int SfPlayer::onPrepare(const sp<AMessage> &msg) {
-    //LOGV("SfPlayer::onPrepare");
+    //SL_LOGV("SfPlayer::onPrepare");
     sp<DataSource> dataSource;
 
     switch (mDataLocatorType) {
 
         case kDataLocatorNone:
-            LOGE("SfPlayer::onPrepare: ERROR no data locator set");
+            SL_LOGE("SfPlayer::onPrepare: no data locator set");
             return MEDIA_ERROR_BASE;
             break;
 
@@ -197,13 +188,13 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
     }
 
     if (dataSource == NULL) {
-        LOGE("SfPlayer::onPrepare: ERROR: Could not create datasource.");
+        SL_LOGE("SfPlayer::onPrepare: Could not create data source.");
         return ERROR_UNSUPPORTED;
     }
 
     sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
     if (extractor == NULL) {
-        LOGE("SfPlayer::onPrepare: ERROR: Could not instantiate extractor.");
+        SL_LOGE("SfPlayer::onPrepare: Could not instantiate extractor.");
         return ERROR_UNSUPPORTED;
     }
 
@@ -226,7 +217,7 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
     }
 
     if (audioTrackIndex < 0) {
-        LOGE("SfPlayer::onPrepare: ERROR: Could not find an audio track.");
+        SL_LOGE("SfPlayer::onPrepare: Could not find an audio track.");
         return ERROR_UNSUPPORTED;
     }
 
@@ -253,7 +244,7 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
                 source);
 
         if (source == NULL) {
-            LOGE("SfPlayer::onPrepare: ERROR: Could not instantiate decoder.");
+            SL_LOGE("SfPlayer::onPrepare: Could not instantiate decoder.");
             return ERROR_UNSUPPORTED;
         }
 
@@ -261,7 +252,7 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
     }
 
     if (source->start() != OK) {
-        LOGE("SfPlayer::onPrepare: ERROR: Failed to start source/decoder.");
+        SL_LOGE("SfPlayer::onPrepare: Failed to start source/decoder.");
         return MEDIA_ERROR_BASE;
     }
 
@@ -272,7 +263,7 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
     CHECK(meta->findInt32(kKeySampleRate, &mSampleRateHz));
 
     if (!wantPrefetch()) {
-        LOGV("SfPlayer::onPrepare: no need to prefetch");
+        SL_LOGV("SfPlayer::onPrepare: no need to prefetch");
         // doesn't need prefetching, notify good to go
         sp<AMessage> msg = new AMessage(kWhatNotif, id());
         msg->setInt32(EVENT_PREFETCHSTATUSCHANGE, (int32_t)kStatusEnough);
@@ -280,7 +271,7 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
         notify(msg, true /*async*/);
     }
 
-    //LOGV("SfPlayer::onPrepare: end");
+    //SL_LOGV("SfPlayer::onPrepare: end");
     return SFPLAYER_SUCCESS;
 
 }
@@ -292,9 +283,9 @@ bool SfPlayer::wantPrefetch() {
 
 
 void SfPlayer::startPrefetch_async() {
-    //LOGV("SfPlayer::startPrefetch_async()");
+    //SL_LOGV("SfPlayer::startPrefetch_async()");
     if (wantPrefetch()) {
-        //LOGV("SfPlayer::startPrefetch_async(): sending check cache msg");
+        //SL_LOGV("SfPlayer::startPrefetch_async(): sending check cache msg");
 
         mFlags |= kFlagPreparing;
         mFlags |= kFlagBuffering;
@@ -305,7 +296,7 @@ void SfPlayer::startPrefetch_async() {
 
 
 void SfPlayer::play() {
-    LOGV("SfPlayer::play");
+    SL_LOGV("SfPlayer::play");
     if (NULL == mAudioTrack) {
         return;
     }
@@ -318,7 +309,7 @@ void SfPlayer::play() {
 
 
 void SfPlayer::stop() {
-    LOGV("SfPlayer::stop");
+    SL_LOGV("SfPlayer::stop");
 
     if (NULL == mAudioTrack) {
         return;
@@ -332,7 +323,7 @@ void SfPlayer::stop() {
 }
 
 void SfPlayer::pause() {
-    LOGV("SfPlayer::pause");
+    SL_LOGV("SfPlayer::pause");
     if (NULL == mAudioTrack) {
         return;
     }
@@ -341,7 +332,7 @@ void SfPlayer::pause() {
 }
 
 void SfPlayer::seek(int64_t timeMsec) {
-    LOGV("SfPlayer::seek %lld", timeMsec);
+    SL_LOGV("SfPlayer::seek %lld", timeMsec);
     sp<AMessage> msg = new AMessage(kWhatSeek, id());
     msg->setInt64("seek", timeMsec);
     msg->post();
@@ -366,17 +357,17 @@ uint32_t SfPlayer::getPositionMsec() {
  */
 
 void SfPlayer::onPlay() {
-    LOGV("SfPlayer::onPlay");
+    SL_LOGV("SfPlayer::onPlay");
     mFlags |= kFlagPlaying;
 }
 
 void SfPlayer::onPause() {
-    LOGV("SfPlayer::onPause");
+    SL_LOGV("SfPlayer::onPause");
     mFlags &= ~kFlagPlaying;
 }
 
 void SfPlayer::onSeek(const sp<AMessage> &msg) {
-    LOGV("SfPlayer::onSeek");
+    SL_LOGV("SfPlayer::onSeek");
     int64_t timeMsec;
     CHECK(msg->findInt64("seek", &timeMsec));
 
@@ -389,12 +380,12 @@ void SfPlayer::onSeek(const sp<AMessage> &msg) {
 
 
 void SfPlayer::onDecode() {
-    //LOGV("SfPlayer::onDecode");
+    //SL_LOGV("SfPlayer::onDecode");
     bool eos;
     if ((mDataSource->flags() & DataSource::kWantsPrefetching)
             && (getCacheRemaining(&eos) == kStatusLow)
             && !eos) {
-        LOGV("buffering more.");
+        SL_LOGV("buffering more.");
 
         if (mFlags & kFlagPlaying) {
             mAudioTrack->pause();
@@ -406,7 +397,7 @@ void SfPlayer::onDecode() {
 
     if (!(mFlags & (kFlagPlaying | kFlagBuffering | kFlagPreparing))) {
         // don't decode if we're not buffering, prefetching or playing
-        //LOGV("don't decode: not buffering, prefetching or playing");
+        //SL_LOGV("don't decode: not buffering, prefetching or playing");
         return;
     }
 
@@ -431,12 +422,12 @@ void SfPlayer::onDecode() {
 
     if (err != OK) {
         if (err != ERROR_END_OF_STREAM) {
-            LOGE("MediaSource::read returned error %d", err);
+            SL_LOGE("MediaSource::read returned error %d", err);
             // FIXME handle error
         } else {
-            //LOGV("SfPlayer::onDecode hit ERROR_END_OF_STREAM");
+            //SL_LOGV("SfPlayer::onDecode hit ERROR_END_OF_STREAM");
             if (mFlags & kFlagPlaying) {
-                //LOGV("SfPlayer::onDecode hit ERROR_END_OF_STREAM while playing");
+                //SL_LOGV("SfPlayer::onDecode hit ERROR_END_OF_STREAM while playing");
                 // async notification of end of stream reached during playback
                 sp<AMessage> msg = new AMessage(kWhatNotif, id());
                 msg->setInt32(EVENT_ENDOFSTREAM, 1);
@@ -462,13 +453,13 @@ void SfPlayer::onDecode() {
     int64_t delayUs = mLastDecodedPositionUs + mTimeDelta - ALooper::GetNowUs();
 
     msg->post(delayUs); // negative delays are ignored
-    //LOGV("timeUs=%lld, mTimeDelta=%lld, delayUs=%lld",
+    //SL_LOGV("timeUs=%lld, mTimeDelta=%lld, delayUs=%lld",
     //mLastDecodedPositionUs, mTimeDelta, delayUs);
 }
 
 
 void SfPlayer::onRender(const sp<AMessage> &msg) {
-    //LOGV("SfPlayer::onRender");
+    //SL_LOGV("SfPlayer::onRender");
 
     Mutex::Autolock _l(mDecodeBufferLock);
 
@@ -490,7 +481,7 @@ void SfPlayer::onRender(const sp<AMessage> &msg) {
 
 
 void SfPlayer::onCheckCache(const sp<AMessage> &msg) {
-    //LOGV("SfPlayer::onCheckCache");
+    //SL_LOGV("SfPlayer::onCheckCache");
     bool eos;
     CacheStatus status = getCacheRemaining(&eos);
 
@@ -501,10 +492,10 @@ void SfPlayer::onCheckCache(const sp<AMessage> &msg) {
         }
         mFlags &= ~kFlagBuffering;
 
-        LOGV("SfPlayer::onCheckCache: buffering done.");
+        SL_LOGV("SfPlayer::onCheckCache: buffering done.");
 
         if (mFlags & kFlagPreparing) {
-            //LOGV("SfPlayer::onCheckCache: preparation done.");
+            //SL_LOGV("SfPlayer::onCheckCache: preparation done.");
             mFlags &= ~kFlagPreparing;
         }
 
@@ -524,15 +515,15 @@ void SfPlayer::onNotify(const sp<AMessage> &msg) {
     }
     int32_t cacheInfo;
     if (msg->findInt32(EVENT_PREFETCHSTATUSCHANGE, &cacheInfo)) {
-        LOGV("\tSfPlayer notifying %s = %d", EVENT_PREFETCHSTATUSCHANGE, cacheInfo);
+        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_PREFETCHSTATUSCHANGE, cacheInfo);
         mNotifyClient(kEventPrefetchStatusChange, cacheInfo, mNotifyUser);
     }
     if (msg->findInt32(EVENT_PREFETCHFILLLEVELUPDATE, &cacheInfo)) {
-        LOGV("\tSfPlayer notifying %s = %d", EVENT_PREFETCHFILLLEVELUPDATE, cacheInfo);
+        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_PREFETCHFILLLEVELUPDATE, cacheInfo);
         mNotifyClient(kEventPrefetchFillLevelUpdate, cacheInfo, mNotifyUser);
     }
     if (msg->findInt32(EVENT_ENDOFSTREAM, &cacheInfo)) {
-        LOGV("\tSfPlayer notifying %s = %d", EVENT_ENDOFSTREAM, cacheInfo);
+        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_ENDOFSTREAM, cacheInfo);
         mNotifyClient(kEventEndOfStream, cacheInfo, mNotifyUser);
     }
 }
@@ -549,13 +540,13 @@ SfPlayer::CacheStatus SfPlayer::getCacheRemaining(bool *eos) {
 
     int64_t dataRemainingUs = dataRemaining * 8000000ll / mBitrate;
 
-    LOGV("SfPlayer::getCacheRemaining: approx %.2f secs remaining (eos=%d)",
+    SL_LOGV("SfPlayer::getCacheRemaining: approx %.2f secs remaining (eos=%d)",
            dataRemainingUs / 1E6, *eos);
 
     // FIXME improve
     if (dataRemainingUs >= mDurationUsec*0.95) {
         mCacheStatus = kStatusEnough;
-        LOGV("SfPlayer::getCacheRemaining: cached most of the content");
+        SL_LOGV("SfPlayer::getCacheRemaining: cached most of the content");
     } else {
         // FIXME evaluate also against the sound duration
         if (dataRemainingUs > 30000000) {
@@ -570,12 +561,12 @@ SfPlayer::CacheStatus SfPlayer::getCacheRemaining(bool *eos) {
     }
 
     if (oldStatus != mCacheStatus) {
-        //LOGV("SfPlayer::getCacheRemaining: Status change to %d", mCacheStatus);
+        //SL_LOGV("SfPlayer::getCacheRemaining: Status change to %d", mCacheStatus);
         sp<AMessage> msg = new AMessage(kWhatNotif, id());
         msg->setInt32(EVENT_PREFETCHSTATUSCHANGE, mCacheStatus);
         notify(msg, true /*async*/);
         // FIXME update cache level
-        LOGE("[ FIXME update cache level in SfPlayer::getCacheRemaining() ]");
+        SL_LOGD("[ FIXME update cache level in SfPlayer::getCacheRemaining() ]");
     }
 
     return mCacheStatus;

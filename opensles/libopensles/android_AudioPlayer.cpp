@@ -381,7 +381,7 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
             break;
         }
         // FIXME implement buffer filler level updates
-        SL_LOGE("[ FIXME implement buffer filler level updates ]");
+        SL_LOGD("[ FIXME implement buffer filler level updates ]");
         //ap->mPrefetchStatus.mLevel = ;
         } break;
 
@@ -571,7 +571,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             break;
         case SL_DATAFORMAT_PCM:
             // FIXME implement
-            SL_LOGE("[ FIXME implement PCM FD data sources ]");
+            SL_LOGD("[ FIXME implement PCM FD data sources ]");
             break;
         case SL_DATAFORMAT_RESERVED3:
             SL_LOGE("Cannot create audio player with SL_DATALOCATOR_ANDROIDFD data source "
@@ -866,7 +866,7 @@ SLresult android_audioPlayer_getConfig(CAudioPlayer* ap, const SLchar *configKey
 SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async) {
 
     SLresult result = SL_RESULT_SUCCESS;
-    SL_LOGV("pAudioPlayer=%p", pAudioPlayer);
+    SL_LOGV("Realize pAudioPlayer=%p", pAudioPlayer);
 
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
@@ -1200,15 +1200,15 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
     case AUDIOTRACK_PULL:
         switch (state) {
         case SL_PLAYSTATE_STOPPED:
-            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
+            SL_LOGI("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
             ap->mAudioTrack->stop();
             break;
         case SL_PLAYSTATE_PAUSED:
-            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
+            SL_LOGI("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
             ap->mAudioTrack->pause();
             break;
         case SL_PLAYSTATE_PLAYING:
-            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PLAYING");
+            SL_LOGI("setting AudioPlayer to SL_PLAYSTATE_PLAYING");
             ap->mAudioTrack->start();
             break;
         default:
@@ -1220,13 +1220,13 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
     case MEDIAPLAYER:
         switch (state) {
         case SL_PLAYSTATE_STOPPED: {
-            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
+            SL_LOGI("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
             if (ap->mSfPlayer != 0) {
                 ap->mSfPlayer->stop();
             }
             } break;
         case SL_PLAYSTATE_PAUSED: {
-            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
+            SL_LOGI("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
             object_lock_peek(&ap);
             AndroidObject_state state = ap->mAndroidObjState;
             object_unlock_peek(&ap);
@@ -1252,7 +1252,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
             }
             } break;
         case SL_PLAYSTATE_PLAYING: {
-            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PLAYING");
+            SL_LOGI("setting AudioPlayer to SL_PLAYSTATE_PLAYING");
             object_lock_peek(&ap);
             AndroidObject_state state = ap->mAndroidObjState;
             object_unlock_peek(&ap);
@@ -1308,7 +1308,7 @@ void android_audioPlayer_useEventMask(CAudioPlayer *ap) {
 
     if (eventFlags & SL_PLAYEVENT_HEADMOVING) {
         // FIXME support SL_PLAYEVENT_HEADMOVING
-        SL_LOGE("[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADMOVING) on an "
+        SL_LOGD("[ FIXME: IPlay_SetCallbackEventsMask(SL_PLAYEVENT_HEADMOVING) on an "
             "SL_OBJECTID_AUDIOPLAYER to be implemented ]");
     }
     if (eventFlags & SL_PLAYEVENT_HEADSTALLED) {
@@ -1327,7 +1327,7 @@ SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMse
         *pDurMsec = SL_TIME_UNKNOWN;
         // FIXME if the data source is not a buffer queue, and the audio data is saved in
         //       shared memory with the mixer process, the duration is the size of the buffer
-        SL_LOGE("FIXME: android_audioPlayer_getDuration() verify if duration can be retrieved");
+        SL_LOGD("FIXME: android_audioPlayer_getDuration() verify if duration can be retrieved");
         break;
 #ifndef USE_BACKPORT
     case MEDIAPLAYER: {

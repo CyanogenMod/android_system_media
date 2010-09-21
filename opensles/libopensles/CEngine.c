@@ -59,11 +59,11 @@ void CEngine_Destroy(void *self)
     unsigned instanceCount = this->mEngine.mInstanceCount;
     unsigned instanceMask = this->mEngine.mInstanceMask;
     if ((0 < instanceCount) || (0 != instanceMask)) {
-        SL_LOGE("Object::Destroy of engine %p with %u active objects", this, instanceCount);
+        SL_LOGE("Object::Destroy(%p) for engine with %u active objects", this, instanceCount);
         while (0 != instanceMask) {
             unsigned i = ctz(instanceMask);
             assert(MAX_INSTANCE > i);
-            SL_LOGE("Object::Destroy of engine %p with active object ID %u", this, i + 1);
+            SL_LOGE("Object::Destroy(%p) for engine with active object ID %u", this, i + 1);
             instanceMask &= ~(1 << i);
         }
 

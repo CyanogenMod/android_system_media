@@ -405,7 +405,7 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
 #ifdef MONITOR_RECORDING
     gMonitorFp = fopen(MONITOR_TARGET, "w");
     if (NULL == gMonitorFp) { SL_LOGE("error opening %s", MONITOR_TARGET); }
-    else { SL_LOGE("recording to %s", MONITOR_TARGET); } // LOGE so it's always displayed
+    else { SL_LOGE("recording to %s", MONITOR_TARGET); } // SL_LOGE so it's always displayed
 #endif
 
     return result;
@@ -486,13 +486,13 @@ void android_audioRecorder_useEventMask(CAudioRecorder *ar) {
 
     if (eventFlags & SL_RECORDEVENT_HEADATLIMIT) {
         // FIXME support SL_RECORDEVENT_HEADATLIMIT
-        SL_LOGE("[ FIXME: IRecord_SetCallbackEventsMask(SL_RECORDEVENT_HEADATLIMIT) on an "
+        SL_LOGD("[ FIXME: IRecord_SetCallbackEventsMask(SL_RECORDEVENT_HEADATLIMIT) on an "
                     "SL_OBJECTID_AUDIORECORDER to be implemented ]");
     }
 
     if (eventFlags & SL_RECORDEVENT_HEADMOVING) {
         // FIXME support SL_RECORDEVENT_HEADMOVING
-        SL_LOGE("[ FIXME: IRecord_SetCallbackEventsMask(SL_RECORDEVENT_HEADMOVING) on an "
+        SL_LOGD("[ FIXME: IRecord_SetCallbackEventsMask(SL_RECORDEVENT_HEADMOVING) on an "
                 "SL_OBJECTID_AUDIORECORDER to be implemented ]");
     }
 
