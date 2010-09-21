@@ -129,7 +129,7 @@ struct SLAndroidEffectCapabilitiesItf_ {
             SLuint32 index,
             SLInterfaceID *pEffectType,
             SLInterfaceID *pEffectImplementation,
-            const SLchar *pName,
+            SLchar *pName,
             SLuint16 *pNameSize);
 };
 
@@ -162,7 +162,7 @@ struct SLAndroidConfigurationItf_ {
 /* Android File Descriptor Data Locator                                      */
 /*---------------------------------------------------------------------------*/
 /** Addendum to Data locator macros  */
-#define SL_DATALOCATOR_ANDROIDFD        ((SLuint32) 0x00000009)
+#define SL_DATALOCATOR_ANDROIDFD        ((SLuint32) 0x800007BD)
 
 #define SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ((SLAint64) 0xFFFFFFFFFFFFFFFFll)
 
