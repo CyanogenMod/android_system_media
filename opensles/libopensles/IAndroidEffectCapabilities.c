@@ -44,7 +44,7 @@ static SLresult IAndroidEffectCapabilities_QueryNumEffects(SLAndroidEffectCapabi
 
 static SLresult IAndroidEffectCapabilities_QueryEffect(SLAndroidEffectCapabilitiesItf self,
         SLuint32 index, SLInterfaceID *pEffectType, SLInterfaceID *pEffectImplementation,
-        const SLchar * pName, SLuint16 *pNameSize) {
+        SLchar * pName, SLuint16 *pNameSize) {
 
     SL_ENTER_INTERFACE
 
