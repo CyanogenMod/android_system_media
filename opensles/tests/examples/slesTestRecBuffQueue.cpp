@@ -26,7 +26,7 @@
 #include "OpenSLES_Android.h"
 #include "OpenSLES_AndroidConfiguration.h"
 
-/* Explicitly requesting SL_IID_BUFFERQUEUE and SL_IID_ANDROIDCONFIGURATION
+/* Explicitly requesting SL_IID_ANDROIDSIMPLEBUFFERQUEUE and SL_IID_ANDROIDCONFIGURATION
  * on the AudioRecorder object */
 #define NUM_EXPLICIT_INTERFACES_FOR_RECORDER 2
 
@@ -87,7 +87,7 @@ void RecCallback(
 //-----------------------------------------------------------------
 /* Callback for recording buffer queue events */
 void RecBufferQueueCallback(
-        SLBufferQueueItf queueItf,
+        SLAndroidSimpleBufferQueueItf queueItf,
         void *pContext)
 {
     fprintf(stdout, "RecBufferQueueCallback called\n");
@@ -106,12 +106,12 @@ void RecBufferQueueCallback(
 
     ExitOnError( (*queueItf)->Enqueue(queueItf, pCntxt->pDataBase, BUFFER_SIZE_IN_BYTES) );
 
-    SLBufferQueueState recQueueState;
+    SLAndroidSimpleBufferQueueState recQueueState;
     ExitOnError( (*queueItf)->GetState(queueItf, &recQueueState) );
 
     fprintf(stderr, "\tRecBufferQueueCallback now has pCntxt->pData=%p queue: "
             "count=%lu playIndex=%lu\n",
-            pCntxt->pData, recQueueState.count, recQueueState.playIndex);
+            pCntxt->pData, recQueueState.count, recQueueState.index);
 }
 
 //-----------------------------------------------------------------
@@ -131,7 +131,7 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
     SLObjectItf  recorder;
 
     /* Interfaces for the audio recorder */
-    SLBufferQueueItf          recBuffQueueItf;
+    SLAndroidSimpleBufferQueueItf recBuffQueueItf;
     SLRecordItf               recordItf;
     SLAndroidConfigurationItf configItf;
 
@@ -141,7 +141,7 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
 
     /* Data sink for recorded audio */
     SLDataSink                recDest;
-    SLDataLocator_BufferQueue recBuffQueue;
+    SLDataLocator_AndroidSimpleBufferQueue recBuffQueue;
     SLDataFormat_PCM          pcm;
 
     SLboolean required[NUM_EXPLICIT_INTERFACES_FOR_RECORDER];
@@ -161,9 +161,9 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
     /* ------------------------------------------------------ */
     /* Configuration of the recorder  */
 
-    /* Request the BufferQueue and AndroidConfiguration interfaces */
+    /* Request the AndroidSimpleBufferQueue and AndroidConfiguration interfaces */
     required[0] = SL_BOOLEAN_TRUE;
-    iidArray[0] = SL_IID_BUFFERQUEUE;
+    iidArray[0] = SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
     required[1] = SL_BOOLEAN_TRUE;
     iidArray[1] = SL_IID_ANDROIDCONFIGURATION;
 
@@ -175,7 +175,7 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
     recSource.pLocator = (void *) &ioDevice;
 
     /* Setup the data sink */
-    recBuffQueue.locatorType = SL_DATALOCATOR_BUFFERQUEUE;
+    recBuffQueue.locatorType = SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE;
     recBuffQueue.numBuffers = NB_BUFFERS_IN_QUEUE;
     /*    set up the format of the data in the buffer queue */
     pcm.formatType = SL_DATAFORMAT_PCM;
@@ -238,7 +238,7 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
     fprintf(stdout, "Recorder callback registered\n");
 
     /* Get the buffer queue interface which was explicitly requested */
-    result = (*recorder)->GetInterface(recorder, SL_IID_BUFFERQUEUE, (void*)&recBuffQueueItf);
+    result = (*recorder)->GetInterface(recorder, SL_IID_ANDROIDSIMPLEBUFFERQUEUE, (void*)&recBuffQueueItf);
     ExitOnError(result);
 
     /* ------------------------------------------------------ */
@@ -295,7 +295,7 @@ int main(int argc, char* const argv[])
     SLresult    result;
     SLObjectItf sl;
 
-    fprintf(stdout, "OpenSL ES test %s: exercises SLRecordItf and SLBufferQueueItf ", argv[0]);
+    fprintf(stdout, "OpenSL ES test %s: exercises SLRecordItf and SLAndroidSimpleBufferQueueItf ", argv[0]);
     fprintf(stdout, "on an AudioRecorder object\n");
 
     if (argc < 2) {

@@ -148,6 +148,9 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
     SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
     switch (locatorType) {
     case SL_DATALOCATOR_BUFFERQUEUE:
+#ifdef ANDROID
+    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+#endif
         break;
     case SL_DATALOCATOR_URI:
         {

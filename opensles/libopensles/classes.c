@@ -117,7 +117,7 @@ static const struct iid_vtable AudioRecorder_interfaces[INTERFACES_AudioRecorder
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL, offsetof(CAudioRecorder, mVisualization)},
     {MPH_VOLUME, INTERFACE_OPTIONAL, offsetof(CAudioRecorder, mVolume)}
 #ifdef ANDROID
-    ,{MPH_BUFFERQUEUE, INTERFACE_EXPLICIT, offsetof(CAudioRecorder, mBufferQueue)},
+    ,{MPH_ANDROIDSIMPLEBUFFERQUEUE, INTERFACE_EXPLICIT, offsetof(CAudioRecorder, mBufferQueue)},
     // FIXME mark it as explicit + can be called before realize
     {MPH_ANDROIDCONFIGURATION, INTERFACE_EXPLICIT, offsetof(CAudioRecorder, mAndroidConfiguration)}
 #endif

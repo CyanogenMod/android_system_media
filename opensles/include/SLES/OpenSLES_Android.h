@@ -159,11 +159,56 @@ struct SLAndroidConfigurationItf_ {
        );
 };
 
+
+/*---------------------------------------------------------------------------*/
+/* Android Simple Buffer Queue Interface                                     */
+/*---------------------------------------------------------------------------*/
+
+extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
+
+struct SLAndroidSimpleBufferQueueItf_;
+typedef const struct SLAndroidSimpleBufferQueueItf_ * const * SLAndroidSimpleBufferQueueItf;
+
+typedef void (/*SLAPIENTRY*/ *slAndroidSimpleBufferQueueCallback)(
+	SLAndroidSimpleBufferQueueItf caller,
+	void *pContext
+);
+
+/** Android simple buffer queue state **/
+
+typedef struct SLAndroidSimpleBufferQueueState_ {
+	SLuint32	count;
+	SLuint32	index;
+} SLAndroidSimpleBufferQueueState;
+
+
+struct SLAndroidSimpleBufferQueueItf_ {
+	SLresult (*Enqueue) (
+		SLAndroidSimpleBufferQueueItf self,
+		const void *pBuffer,
+		SLuint32 size
+	);
+	SLresult (*Clear) (
+		SLAndroidSimpleBufferQueueItf self
+	);
+	SLresult (*GetState) (
+		SLAndroidSimpleBufferQueueItf self,
+		SLAndroidSimpleBufferQueueState *pState
+	);
+	SLresult (*RegisterCallback) (
+		SLAndroidSimpleBufferQueueItf self,
+		slAndroidSimpleBufferQueueCallback callback,
+		void* pContext
+	);
+};
+
+
 /*---------------------------------------------------------------------------*/
 /* Android File Descriptor Data Locator                                      */
 /*---------------------------------------------------------------------------*/
+
 /** Addendum to Data locator macros  */
-#define SL_DATALOCATOR_ANDROIDFD        ((SLuint32) 0x800007BD)
+#define SL_DATALOCATOR_ANDROIDFD                ((SLuint32) 0x800007BC)
 
 #define SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ((SLAint64) 0xFFFFFFFFFFFFFFFFll)
 
@@ -174,6 +219,20 @@ typedef struct SLDataLocator_AndroidFD_ {
     SLAint64        offset;
     SLAint64        length;
 } SLDataLocator_AndroidFD;
+
+
+/*---------------------------------------------------------------------------*/
+/* Android Android Simple Buffer Queue Data Locator                          */
+/*---------------------------------------------------------------------------*/
+
+/** Addendum to Data locator macros  */
+#define SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE ((SLuint32) 0x800007BD)
+
+/** BufferQueue-based data locator definition where locatorType must be SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE*/
+typedef struct SLDataLocator_AndroidSimpleBufferQueue {
+	SLuint32	locatorType;
+	SLuint32	numBuffers;
+} SLDataLocator_AndroidSimpleBufferQueue;
 
 
 #ifdef __cplusplus

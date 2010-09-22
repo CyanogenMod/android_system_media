@@ -26,8 +26,8 @@
 //-----------------------------------------------------------------------------
 // Android AudioRecorder errors
 //----------------------
-#define ERROR_RECORDER_SINK_MUST_BE_BUFFERQUEUE \
-        "Cannot create AudioRecorder: data sink must be SL_DATALOCATOR_BUFFERQUEUE"
+#define ERROR_RECORDER_SINK_MUST_BE_ANDROIDSIMPLEBUFFERQUEUE \
+        "Cannot create AudioRecorder: data sink must be SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE"
 #define ERROR_RECORDER_SINK_FORMAT_MUST_BE_PCM \
         "Cannot create AudioRecorder: data sink must be in PCM format"
 #define ERROR_RECORDER_SOURCE_MUST_BE_IODEVICE \

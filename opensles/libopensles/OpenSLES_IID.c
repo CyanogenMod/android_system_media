@@ -143,6 +143,8 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     { 0x7be462c0, 0xbc43, 0x11df, 0x8670, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_ANDROIDCONFIGURATION (the lack of ifdef is intentional)
     { 0x89f6a7e0, 0xbeac, 0x11df, 0x8b5c, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
+    // SL_IID_ANDROIDSIMPLEBUFERQUEUE (the lack of ifdef is intentional)
+    { 0x198e4940, 0xc5d7, 0x11df, 0xa2a6, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } }
 };
 
 #ifdef __cplusplus
@@ -200,6 +202,7 @@ const SLInterfaceID SL_IID_ANDROIDEFFECT = &SL_IID_array[MPH_ANDROIDEFFECT];
 const SLInterfaceID SL_IID_ANDROIDEFFECTCAPABILITIES = &SL_IID_array[MPH_ANDROIDEFFECTCAPABILITIES];
 const SLInterfaceID SL_IID_ANDROIDEFFECTSEND = &SL_IID_array[MPH_ANDROIDEFFECTSEND];
 const SLInterfaceID SL_IID_ANDROIDCONFIGURATION = &SL_IID_array[MPH_ANDROIDCONFIGURATION];
+const SLInterfaceID SL_IID_ANDROIDSIMPLEBUFFERQUEUE = &SL_IID_array[MPH_ANDROIDSIMPLEBUFFERQUEUE];
 #ifdef __cplusplus
 }
 #endif

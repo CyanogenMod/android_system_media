@@ -293,7 +293,8 @@ int main(int argc, char* const argv[])
     fprintf(stdout, "Plays the sound file designated by the given path, ");
     fprintf(stdout, "starting at the specified offset, and using the specified length.\n");
     fprintf(stdout, "Omit the length of the file for it to be computed by the system.\n");
-    fprintf(stdout, "Every %d seconds, the EQ will be turned on and off.\n", TIME_S_BETWEEN_EQ_ON_OFF);
+    fprintf(stdout, "Every %d seconds, the EQ will be turned on and off.\n",
+            TIME_S_BETWEEN_EQ_ON_OFF);
 
 #ifdef ANDROID
     if (argc < 3)

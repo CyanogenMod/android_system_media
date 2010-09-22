@@ -1,5 +1,8 @@
 all : IID_to_MPH.c
 
+install :
+	cp IID_to_MPH.c ../../libopensles
+
 CFLAGS = -I../../include
 
 %.o : %.c

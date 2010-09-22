@@ -102,7 +102,7 @@ static SLresult IRecord_GetPosition(SLRecordItf self, SLmillisecond *pMsec)
             position = this->mPosition;
         }
 #else
-        SLmillisecond position = this->mPosition;
+        position = this->mPosition;
 #endif
         interface_unlock_shared(this);
         *pMsec = position;

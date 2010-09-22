@@ -22,6 +22,16 @@
 // If defined, then compile with C99 such as GNU C, not GNU C++ or non-GNU C.
 //#define USE_DESIGNATED_INITIALIZERS
 
+// It is critical that all entries are populated with either a specific index
+// or -1. Do not let the compiler use a default initializer of zero, because
+// that actually maps to the IObject index. To test this, try defining END to
+// generate an extra entry, and verify that you get one error message per class.
+//#define END , (-1)  // for testing
+#define END           // for production
+
+// Another good test is to use the GNU C compiler with -S option (for assembler output),
+// and compile both with and without USE_DESIGNATED_INITIALIZERS.  The resulting .s
+// files should be identical for both compilations.
 
 // Important note: if you add any interfaces here, be sure to also
 // update the #define for the corresponding INTERFACES_<Class>.
@@ -49,8 +59,14 @@ const signed char MPH_to_3DGroup[MPH_MAX] = {
     1, // MPH_DYNAMICINTERFACEMANAGEMENT
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     0, // MPH_OBJECT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-    , -1
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, // MPH_OUTPUTMIXEXT
+    -1, // MPH_ANDROIDEFFECT
+    -1, // MPH_ANDROIDEFFECTCAPABILITIES
+    -1, // MPH_ANDROIDEFFECTSEND
+    -1, // MPH_ANDROIDCONFIGURATION
+    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
+    END
 #endif
 };
 
@@ -86,7 +102,8 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
 #ifdef ANDROID
     [MPH_ANDROIDEFFECT] = 26,
     [MPH_ANDROIDEFFECTSEND] = 27,
-    [MPH_ANDROIDCONFIGURATION] = 28
+    [MPH_ANDROIDCONFIGURATION] = 28,
+    [MPH_ANDROIDSIMPLEBUFFERQUEUE] = 7  // alias for [MPH_BUFFERQUEUE]
 #endif
 #else
     -1,
@@ -125,20 +142,21 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
     24, // MPH_VIRTUALIZER
     25, // MPH_VISUALIZATION
     15, // MPH_VOLUME
-    -1  // not using MPH_OUTPUTMIXEXT
+    -1, // not using MPH_OUTPUTMIXEXT
 #ifdef ANDROID
-    ,
     26, // MPH_ANDROIDEFFECT
     -1, // MPH_ANDROIDEFFECTCAPABILITIES
     27, // MPH_ANDROIDEFFECTSEND
-    28  // MPH_ANDROIDCONFIGURATION
+    28, // MPH_ANDROIDCONFIGURATION
+    7   // MPH_SIMPLEBUFFERQUEUE    // alias for [MPH_BUFFERQUEUE]
 #else
-    ,
     -1, // not using MPH_ANDROIDEFFECT
     -1, // not using MPH_ANDROIDEFFECTCAPABILITIES
     -1, // not using MPH_ANDROIDEFFECTSEND
-    -1  // not using MPH_ANDROIDCONFIGURATION
+    -1, // not using MPH_ANDROIDCONFIGURATION
+    -1  // not using MPH_ANDROIDSIMPLEBUFFERQUEUE
 #endif
+    END
 #endif
 };
 
@@ -153,9 +171,9 @@ const signed char MPH_to_AudioRecorder[MPH_MAX] = {
     [MPH_DYNAMICSOURCE] = 5,
     [MPH_EQUALIZER] = 6,
     [MPH_VISUALIZATION] = 7,
-    [MPH_VOLUME] = 8
+    [MPH_VOLUME] = 8,
 #ifdef ANDROID
-    [MPH_BUFFERQUEUE] = 9
+    [MPH_ANDROIDSIMPLEBUFFERQUEUE] = 9, // this is not an alias
     [MPH_ANDROIDCONFIGURATION] = 10
 #endif
 #else
@@ -163,11 +181,7 @@ const signed char MPH_to_AudioRecorder[MPH_MAX] = {
     3, // MPH_AUDIOENCODER
     -1, -1,
     4, // MPH_BASSBOOST
-#ifdef ANDROID
-    9, // MPH_BUFFERQUEUE
-#else
-    -1,
-#endif
+    -1, // MPH_BUFFERQUEUE (application must specify MPH_ANDROIDSIMPLEBUFFERQUEUE)
     -1,
     1, // MPH_DYNAMICINTERFACEMANAGEMENT
     5, // MPH_DYNAMICSOURCE
@@ -183,12 +197,15 @@ const signed char MPH_to_AudioRecorder[MPH_MAX] = {
     -1, // not using MPH_OUTPUTMIXEXT
     -1, // not using MPH_ANDROIDEFFECT
     -1, // not using MPH_ANDROIDEFFECTCAPABILITIES
-    -1  // not using MPH_ANDROIDEFFECTSEND
+    -1, // not using MPH_ANDROIDEFFECTSEND
 #ifdef ANDROID
-    ,10 // MPH_ANDROIDCONFIGURATION
+    10, // MPH_ANDROIDCONFIGURATION
+    9   // MPH_ANDROIDSIMPLEBUFFERQUEUE (this is not an alias)
 #else
-    -1  // not using MPH_ANDROIDCONFIGURATION
+    -1, // not using MPH_ANDROIDCONFIGURATION
+    -1  // not using MPH_ANDROIDSIMPLEBUFFERQUEUE
 #endif
+    END
 #endif
 };
 
@@ -204,9 +221,8 @@ const signed char MPH_to_Engine[MPH_MAX] = {
     [MPH_AUDIODECODERCAPABILITIES] = 6,
     [MPH_AUDIOENCODERCAPABILITIES] = 7,
     [MPH_3DCOMMIT] = 8,
-    [MPH_DEVICEVOLUME] = 9
+    [MPH_DEVICEVOLUME] = 9,
 #ifdef ANDROID
-    ,
     [MPH_ANDROIDEFFECTCAPABILITIES] = 10
 #endif
 #else
@@ -226,14 +242,22 @@ const signed char MPH_to_Engine[MPH_MAX] = {
     0, // MPH_OBJECT
     -1, -1, -1, -1, -1, -1, -1, -1, -1,
     4, // MPH_THREADSYNC
-    -1, -1, -1, -1
-    , -1
+    -1, -1, -1, -1,
+    -1, // MPH_OUTPUTMIXEXT
 #ifdef ANDROID
-    , -1, -1
-    , 10 // MPH_ANDROIDEFFECTCAPABILITIES
+    -1, // MPH_ANDROIDEFFECT
+    10, // MPH_ANDROIDEFFECTCAPABILITIES
+    -1, // MPH_ANDROIDEFFECTSEND
+    -1, // MPH_ANDROIDCONFIGURATION
+    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
 #else
-    , -1, -1, -1
+    -1, // MPH_ANDROIDEFFECT
+    -1, // MPH_ANDROIDEFFECTCAPABILITIES
+    -1, // MPH_ANDROIDEFFECTSEND
+    -1, // MPH_ANDROIDCONFIGURATION
+    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
 #endif
+    END
 #endif
 };
 
@@ -250,8 +274,14 @@ const signed char MPH_to_LEDDevice[MPH_MAX] = {
     2, // MPH_LED
     -1, -1, -1, -1, -1, -1, -1, -1,
     0, // MPH_OBJECT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-    , -1
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, // MPH_OUTPUTMIXEXT
+    -1, // MPH_ANDROIDEFFECT
+    -1, // MPH_ANDROIDEFFECTCAPABILITIES
+    -1, // MPH_ANDROIDEFFECTSEND
+    -1, // MPH_ANDROIDCONFIGURATION
+    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
+    END
 #endif
 };
 
@@ -271,8 +301,14 @@ const signed char MPH_to_Listener[MPH_MAX] = {
     1, // MPH_DYNAMICINTERFACEMANAGEMENT
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     0, // MPH_OBJECT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-    , -1
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, // MPH_OUTPUTMIXEXT
+    -1, // MPH_ANDROIDEFFECT
+    -1, // MPH_ANDROIDEFFECTCAPABILITIES
+    -1, // MPH_ANDROIDEFFECTSEND
+    -1, // MPH_ANDROIDCONFIGURATION
+    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
+    END
 #endif
 };
 
@@ -293,8 +329,14 @@ const signed char MPH_to_MetadataExtractor[MPH_MAX] = {
     4, // MPH_METADATATRAVERSAL
     -1, -1, -1, -1, -1, -1,
     0, // MPH_OBJECT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-    , -1
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, // MPH_OUTPUTMIXEXT
+    -1, // MPH_ANDROIDEFFECT
+    -1, // MPH_ANDROIDEFFECTCAPABILITIES
+    -1, // MPH_ANDROIDEFFECTSEND
+    -1, // MPH_ANDROIDCONFIGURATION
+    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
+    END
 #endif
 };
 
@@ -369,7 +411,13 @@ const signed char MPH_to_MidiPlayer[MPH_MAX] = {
     27, // MPH_VIRTUALIZER
     28, // MPH_VISUALIZATION
     18, // MPH_VOLUME
-    -1
+    -1, // MPH_OUTPUTMIXEXT
+    -1, // MPH_ANDROIDEFFECT
+    -1, // MPH_ANDROIDEFFECTCAPABILITIES
+    -1, // MPH_ANDROIDEFFECTSEND
+    -1, // MPH_ANDROIDCONFIGURATION
+    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
+    END
 #endif
 };
 
@@ -408,18 +456,22 @@ const signed char MPH_to_OutputMix[MPH_MAX] = {
     -1, -1, -1, -1, -1,
     7,  // MPH_VIRTUALIZER
     10, // MPH_VISUALIZATION
-    8  // MPH_VOLUME
+    8,  // MPH_VOLUME
 #ifdef USE_OUTPUTMIXEXT
-    , 3  // MPH_OUTPUTMIXEXT
+    3,  // MPH_OUTPUTMIXEXT
 #else
-    , -1
+    -1,
 #endif
 #ifdef ANDROID
-    , 11 // MPH_ANDROIDEFFECT
+    11, // MPH_ANDROIDEFFECT
 #else
-    , -1
+    -1,
 #endif
-    , -1 // MPH_ANDROIDEFFECTCAPABILITIES
+    -1, // MPH_ANDROIDEFFECTCAPABILITIES
+    -1, // MPH_ANDROIDEFFECTSEND
+    -1, // MPH_ANDROIDCONFIGURATION
+    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
+    END
 #endif
 };
 
@@ -436,7 +488,13 @@ const signed char MPH_to_Vibra[MPH_MAX] = {
     0, // MPH_OBJECT
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     2, // MPH_VIBRA
-    -1, -1, -1, -1
-    , -1
+    -1, -1, -1,
+    -1, // MPH_OUTPUTMIXEXT
+    -1, // MPH_ANDROIDEFFECT
+    -1, // MPH_ANDROIDEFFECTCAPABILITIES
+    -1, // MPH_ANDROIDEFFECTSEND
+    -1, // MPH_ANDROIDCONFIGURATION
+    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
+    END
 #endif
 };

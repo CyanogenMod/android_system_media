@@ -15,6 +15,7 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_CFLAGS += -Wno-override-init -Wno-missing-field-initializers
+# optional, see comments in MPH_to.c: -DUSE_DESIGNATED_INITIALIZERS -S
 
 LOCAL_SRC_FILES:=                     \
         MPH_to.c

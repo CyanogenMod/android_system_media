@@ -19,6 +19,7 @@
 #undef NDEBUG
 
 #include "SLES/OpenSLES.h"
+#include "SLES/OpenSLES_Android.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,7 +46,7 @@ static char *buffers = NULL;
 static SLuint32 whichRecord;
 static SLuint32 whichPlay;
 
-SLBufferQueueItf recorderBufferQueue;
+SLAndroidSimpleBufferQueueItf recorderBufferQueue;
 SLBufferQueueItf playerBufferQueue;
 
 // Compute maximum of two values
@@ -61,7 +62,7 @@ static SLuint32 min(SLuint32 a, SLuint32 b)
 }
 
 // Called after audio recorder fills a buffer with data
-static void recorderCallback(SLBufferQueueItf caller, void *context)
+static void recorderCallback(SLAndroidSimpleBufferQueueItf caller, void *context)
 {
     SLresult result;
     if (verbose) {
@@ -194,9 +195,9 @@ int main(int argc, char **argv)
     SLDataSink audiosnk;
     SLDataFormat_PCM pcm;
     SLDataLocator_OutputMix locator_outputmix;
-    SLDataLocator_BufferQueue locator_bufferqueue;
-    locator_bufferqueue.locatorType = SL_DATALOCATOR_BUFFERQUEUE;
-    locator_bufferqueue.numBuffers = txBufCount;
+    SLDataLocator_BufferQueue locator_bufferqueue_tx;
+    locator_bufferqueue_tx.locatorType = SL_DATALOCATOR_BUFFERQUEUE;
+    locator_bufferqueue_tx.numBuffers = txBufCount;
     locator_outputmix.locatorType = SL_DATALOCATOR_OUTPUTMIX;
     locator_outputmix.outputMix = outputmixObject;
     pcm.formatType = SL_DATAFORMAT_PCM;
@@ -207,15 +208,15 @@ int main(int argc, char **argv)
     pcm.channelMask = channels == 1 ? SL_SPEAKER_FRONT_CENTER :
         (SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT);
     pcm.endianness = SL_BYTEORDER_LITTLEENDIAN;
-    audiosrc.pLocator = &locator_bufferqueue;
+    audiosrc.pLocator = &locator_bufferqueue_tx;
     audiosrc.pFormat = &pcm;
     audiosnk.pLocator = &locator_outputmix;
     audiosnk.pFormat = NULL;
     SLObjectItf playerObject;
-    SLInterfaceID ids[1] = {SL_IID_BUFFERQUEUE};
-    SLboolean flags[1] = {SL_BOOLEAN_TRUE};
+    SLInterfaceID ids_tx[1] = {SL_IID_BUFFERQUEUE};
+    SLboolean flags_tx[1] = {SL_BOOLEAN_TRUE};
     result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc, &audiosnk,
-        1, ids, flags);
+        1, ids_tx, flags_tx);
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
     result = (*playerObject)->Realize(playerObject, SL_BOOLEAN_FALSE);
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
@@ -231,25 +232,29 @@ int main(int argc, char **argv)
     // The buffer queue as sink is an Android-specific extension.
 
     SLDataLocator_IODevice locator_iodevice;
+    SLDataLocator_AndroidSimpleBufferQueue locator_bufferqueue_rx;
     locator_iodevice.locatorType = SL_DATALOCATOR_IODEVICE;
     locator_iodevice.deviceType = SL_IODEVICE_AUDIOINPUT;
     locator_iodevice.deviceID = SL_DEFAULTDEVICEID_AUDIOINPUT;
     locator_iodevice.device = NULL;
     audiosrc.pLocator = &locator_iodevice;
     audiosrc.pFormat = &pcm;
-    locator_bufferqueue.numBuffers = rxBufCount;
-    audiosnk.pLocator = &locator_bufferqueue;
+    locator_bufferqueue_rx.locatorType = SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE;
+    locator_bufferqueue_rx.numBuffers = rxBufCount;
+    audiosnk.pLocator = &locator_bufferqueue_rx;
     audiosnk.pFormat = &pcm;
     SLObjectItf recorderObject;
+    SLInterfaceID ids_rx[1] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
+    SLboolean flags_rx[1] = {SL_BOOLEAN_TRUE};
     result = (*engineEngine)->CreateAudioRecorder(engineEngine, &recorderObject, &audiosrc,
-        &audiosnk, 1, ids, flags);
+        &audiosnk, 1, ids_rx, flags_rx);
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
     result = (*recorderObject)->Realize(recorderObject, SL_BOOLEAN_FALSE);
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
     SLRecordItf recorderRecord;
     result = (*recorderObject)->GetInterface(recorderObject, SL_IID_RECORD, &recorderRecord);
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
-    result = (*recorderObject)->GetInterface(recorderObject, SL_IID_BUFFERQUEUE,
+    result = (*recorderObject)->GetInterface(recorderObject, SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
         &recorderBufferQueue);
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
     result = (*recorderBufferQueue)->RegisterCallback(recorderBufferQueue, recorderCallback, NULL);
@@ -277,13 +282,13 @@ int main(int argc, char **argv)
         SLBufferQueueState playerBQState;
         result = (*playerBufferQueue)->GetState(playerBufferQueue, &playerBQState);
         ASSERT_EQ(SL_RESULT_SUCCESS, result);
-        SLBufferQueueState recorderBQState;
+        SLAndroidSimpleBufferQueueState recorderBQState;
         result = (*recorderBufferQueue)->GetState(recorderBufferQueue, &recorderBQState);
         ASSERT_EQ(SL_RESULT_SUCCESS, result);
         if (verbose) {
             printf("pC%u pI%u rC%u rI%u\n", (unsigned) playerBQState.count,
                 (unsigned) playerBQState.playIndex, (unsigned) recorderBQState.count,
-                (unsigned) recorderBQState.playIndex);
+                (unsigned) recorderBQState.index);
             fflush(stdout);
         }
     }

@@ -174,15 +174,15 @@ typedef bool (*BoolHook)(void *self);
 // Maps an interface ID to its offset within the class that exposes it
 
 struct iid_vtable {
-    unsigned char mMPH;
-    unsigned char mInterface;   // relationship
+    unsigned char mMPH;         // primary MPH for this interface, does not include any aliases
+    unsigned char mInterface;   // relationship of interface to this class
     /*size_t*/ unsigned short mOffset;
 };
 
 // Per-class const data shared by all instances of the same class
 
 typedef struct {
-    const struct iid_vtable *mInterfaces;
+    const struct iid_vtable *mInterfaces;   // maps interface index to info about that interface
     SLuint32 mInterfaceCount;  // number of possible interfaces
     const signed char *mMPH_to_index;
     const char * const mName;
