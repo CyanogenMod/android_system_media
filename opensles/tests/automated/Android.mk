@@ -1,4 +1,4 @@
-#Build the unit tests.
+# Build the unit tests.
 ifneq ($(TARGET_SIMULATOR),true)
 
 LOCAL_PATH:= $(call my-dir)
@@ -22,6 +22,7 @@ LOCAL_SHARED_LIBRARIES := \
     libstlport
 
 LOCAL_STATIC_LIBRARIES := \
+    libOpenSLESUT \
     libgtest
 
 ifeq ($(TARGET_OS),linux)
@@ -36,6 +37,5 @@ LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/nativetest
 include $(BUILD_EXECUTABLE)
 
 endif
-
-#Build the manual test programs.
+# Build the manual test programs.
 include $(call all-subdir-makefiles)
