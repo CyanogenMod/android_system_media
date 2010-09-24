@@ -1108,13 +1108,15 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     pAudioPlayer->mEqualizer.mEqEffect.clear();
     pAudioPlayer->mBassBoost.mBassBoostEffect.clear();
     pAudioPlayer->mVirtualizer.mVirtualizerEffect.clear();
-    if (!pAudioPlayer->mAndroidEffect.mEffects->isEmpty()) {
-        for (size_t i = 0 ; i < pAudioPlayer->mAndroidEffect.mEffects->size() ; i++) {
-            delete pAudioPlayer->mAndroidEffect.mEffects->valueAt(i);
+    if (NULL != pAudioPlayer->mAndroidEffect.mEffects) {
+        if (!pAudioPlayer->mAndroidEffect.mEffects->isEmpty()) {
+            for (size_t i = 0 ; i < pAudioPlayer->mAndroidEffect.mEffects->size() ; i++) {
+                delete pAudioPlayer->mAndroidEffect.mEffects->valueAt(i);
+            }
+            pAudioPlayer->mAndroidEffect.mEffects->clear();
         }
-        pAudioPlayer->mAndroidEffect.mEffects->clear();
+        delete pAudioPlayer->mAndroidEffect.mEffects;
     }
-    delete pAudioPlayer->mAndroidEffect.mEffects;
 #endif
 
     return result;

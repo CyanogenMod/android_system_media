@@ -90,7 +90,7 @@ void RecBufferQueueCallback(
         SLAndroidSimpleBufferQueueItf queueItf,
         void *pContext)
 {
-    fprintf(stdout, "RecBufferQueueCallback called\n");
+    //fprintf(stdout, "RecBufferQueueCallback called\n");
 
     CallbackCntxt *pCntxt = (CallbackCntxt*)pContext;
 
@@ -109,9 +109,9 @@ void RecBufferQueueCallback(
     SLAndroidSimpleBufferQueueState recQueueState;
     ExitOnError( (*queueItf)->GetState(queueItf, &recQueueState) );
 
-    fprintf(stderr, "\tRecBufferQueueCallback now has pCntxt->pData=%p queue: "
+    /*fprintf(stderr, "\tRecBufferQueueCallback now has pCntxt->pData=%p queue: "
             "count=%lu playIndex=%lu\n",
-            pCntxt->pData, recQueueState.count, recQueueState.index);
+            pCntxt->pData, recQueueState.count, recQueueState.index);*/
 }
 
 //-----------------------------------------------------------------
