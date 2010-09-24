@@ -39,6 +39,9 @@ typedef struct {
     short right;
 } stereo;
 
+// volume of sine wave in range 0.0 to 1.0
+static float gVolume = 1.0f;
+
 // 1 second of stereo audio at 44.1 kHz
 static stereo stereoBuffer1[44100 * 1];
 static const SLuint32 invalidNumBuffers[] = { 0, 0xFFFFFFFF, 0x80000000, 0x10002, 0x102,
@@ -128,7 +131,7 @@ protected:
         for (i = 0; i < nframes; ++i) {
             float i_ = (float) i;
             float pcm_ = sin((i_ * (1.0f + 0.5f * (i_ / nframes_)) * 0.01 * M_PI * 2.0));
-            int pcm = (int) (pcm_ * 32766.0);
+            int pcm = (int) (pcm_ * 32766.0 * gVolume);
             ASSERT_TRUE(-32768 <= pcm && pcm <= 32767) << "pcm out of bound " << pcm;
             stereoBuffer1[i].left = pcm;
             stereoBuffer1[nframes - 1 - i].right = pcm;
@@ -423,5 +426,14 @@ TEST_F(TestBufferQueue, testStatePlayBuffer){
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
+#if 1   // temporary workaround if hardware volume control is not working
+    const char *VOLUME = getenv("BufferQueue_test_VOLUME");
+    if (NULL != VOLUME) {
+        float volume = atof(VOLUME);
+        if (volume >= 0.0f && volume <= 1.0f) {
+            gVolume = volume;
+        }
+    }
+#endif
     return RUN_ALL_TESTS();
 }
