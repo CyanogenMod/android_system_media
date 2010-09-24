@@ -67,17 +67,17 @@ static SLresult IVirtualizer_IsEnabled(SLVirtualizerItf self, SLboolean *pEnable
          IVirtualizer *this = (IVirtualizer *) self;
          interface_lock_exclusive(this);
          SLboolean enabled = this->mEnabled;
- #if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID) || defined(USE_BACKPORT)
          *pEnabled = enabled;
          result = SL_RESULT_SUCCESS;
- #else
+#else
          if (NO_VIRTUALIZER(this)) {
              result = SL_RESULT_CONTROL_LOST;
          } else {
              *pEnabled = (SLboolean) this->mVirtualizerEffect->getEnabled();
              result = SL_RESULT_SUCCESS;
          }
- #endif
+#endif
          interface_unlock_exclusive(this);
      }
 
@@ -94,10 +94,10 @@ static SLresult IVirtualizer_SetStrength(SLVirtualizerItf self, SLpermille stren
      } else {
          IVirtualizer *this = (IVirtualizer *) self;
          interface_lock_exclusive(this);
- #if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID) || defined(USE_BACKPORT)
          this->mStrength = strength;
          result = SL_RESULT_SUCCESS;
- #else
+#else
          if (NO_VIRTUALIZER(this)) {
              result = SL_RESULT_CONTROL_LOST;
          } else {
@@ -105,7 +105,7 @@ static SLresult IVirtualizer_SetStrength(SLVirtualizerItf self, SLpermille stren
                      VIRTUALIZER_PARAM_STRENGTH, &strength);
              result = android_fx_statusToResult(status);
          }
- #endif
+#endif
          interface_unlock_exclusive(this);
      }
 

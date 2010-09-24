@@ -86,17 +86,17 @@ static SLresult IEqualizer_IsEnabled(SLEqualizerItf self, SLboolean *pEnabled)
           IEqualizer *this = (IEqualizer *) self;
           interface_lock_exclusive(this);
           SLboolean enabled = this->mEnabled;
-  #if !defined(ANDROID) || defined(USE_BACKPORT)
+ #if !defined(ANDROID) || defined(USE_BACKPORT)
           *pEnabled = enabled;
           result = SL_RESULT_SUCCESS;
-  #else
+ #else
           if (NO_EQ(this)) {
               result = SL_RESULT_CONTROL_LOST;
           } else {
               *pEnabled = (SLboolean) this->mEqEffect->getEnabled();
               result = SL_RESULT_SUCCESS;
           }
-  #endif
+ #endif
           interface_unlock_exclusive(this);
       }
 

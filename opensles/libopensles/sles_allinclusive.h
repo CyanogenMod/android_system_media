@@ -17,6 +17,9 @@
 /** \file sles_allinclusive.h Everything including the kitchen sink */
 
 #include "SLES/OpenSLES.h"
+#ifdef ANDROID
+#include "SLES/OpenSLES_Android.h"
+#endif
 #include <stddef.h> // offsetof
 #include <stdlib.h> // malloc
 #include <string.h> // memcmp
@@ -35,6 +38,17 @@ typedef int bool;
 #define true 1
 #endif
 #endif
+
+// The OpenSLES.h definitions of SL_PROFILES_... have casts, so are unusable by preprocessor
+#define USE_PROFILES_PHONE    0x1   // == SL_PROFILES_PHONE
+#define USE_PROFILES_MUSIC    0x2   // == SL_PROFILES_MUSIC
+#define USE_PROFILES_GAME     0x4   // == SL_PROFILES_GAME
+// Pseudo profiles, used to decide whether to include code for incomplete or untested features
+// Features that are not in union of all profiles: audio recorder, LED, Vibra
+#define USE_PROFILES_OPTIONAL 0x8
+// Features that are in the intersection of all profiles:
+// object priorities, preemption, loss of control, device configuration
+#define USE_PROFILES_BASE     0x10
 
 #include "MPH.h"
 #include "MPH_to.h"
@@ -59,7 +73,6 @@ typedef struct COutputMix_struct COutputMix;
 #ifdef ANDROID
 #include <utils/Log.h>
 #include <utils/KeyedVector.h>
-#include "SLES/OpenSLES_Android.h"
 #include "SLES/OpenSLES_AndroidConfiguration.h"
 #include "media/AudioSystem.h"
 #include "media/mediarecorder.h"
@@ -111,7 +124,7 @@ typedef bool (*BoolHook)(void *self);
 
 // Profile-specific interfaces
 
-#ifdef USE_BASE
+#if USE_PROFILES & USE_PROFILES_BASE
 #define INTERFACE_IMPLICIT_BASE       INTERFACE_IMPLICIT
 #define INTERFACE_EXPLICIT_BASE       INTERFACE_EXPLICIT
 #else
@@ -119,7 +132,7 @@ typedef bool (*BoolHook)(void *self);
 #define INTERFACE_EXPLICIT_BASE       INTERFACE_UNAVAILABLE
 #endif
 
-#ifdef USE_GAME
+#if USE_PROFILES & USE_PROFILES_GAME
 #define INTERFACE_DYNAMIC_GAME        INTERFACE_DYNAMIC
 #define INTERFACE_EXPLICIT_GAME       INTERFACE_EXPLICIT
 #else
@@ -127,13 +140,13 @@ typedef bool (*BoolHook)(void *self);
 #define INTERFACE_EXPLICIT_GAME       INTERFACE_OPTIONAL
 #endif
 
-#ifdef USE_MUSIC
+#if USE_PROFILES & USE_PROFILES_MUSIC
 #define INTERFACE_DYNAMIC_MUSIC       INTERFACE_DYNAMIC
 #else
 #define INTERFACE_DYNAMIC_MUSIC       INTERFACE_OPTIONAL
 #endif
 
-#if defined(USE_GAME) || defined(USE_MUSIC)
+#if USE_PROFILES & (USE_PROFILES_GAME | USE_PROFILES_MUSIC)
 #define INTERFACE_DYNAMIC_GAME_MUSIC  INTERFACE_DYNAMIC
 #define INTERFACE_EXPLICIT_GAME_MUSIC INTERFACE_EXPLICIT
 #else
@@ -141,13 +154,13 @@ typedef bool (*BoolHook)(void *self);
 #define INTERFACE_EXPLICIT_GAME_MUSIC INTERFACE_OPTIONAL
 #endif
 
-#if defined(USE_GAME) || defined(USE_PHONE)
+#if USE_PROFILES & (USE_PROFILES_GAME | USE_PROFILES_PHONE)
 #define INTERFACE_EXPLICIT_GAME_PHONE INTERFACE_EXPLICIT
 #else
 #define INTERFACE_EXPLICIT_GAME_PHONE INTERFACE_OPTIONAL
 #endif
 
-#ifdef USE_OPTIONAL
+#if USE_PROFILES & USE_PROFILES_OPTIONAL
 #define INTERFACE_OPTIONAL            INTERFACE_EXPLICIT
 #define INTERFACE_DYNAMIC_OPTIONAL    INTERFACE_DYNAMIC
 #else
@@ -201,17 +214,6 @@ typedef struct {
     const void *mBuffer;
     SLuint32 mSize;
 } BufferHeader;
-
-#ifdef USE_OUTPUTMIXEXT
-
-// stereo is a frame consisting of a pair of 16-bit PCM samples
-
-typedef struct {
-    short left;
-    short right;
-} stereo;
-
-#endif
 
 #ifdef __cplusplus
 #define this this_
@@ -282,7 +284,7 @@ typedef struct Object_interface {
     unsigned mGottenMask;           ///< bit-mask of interfaces exposed or added, then gotten
     unsigned mLossOfControlMask;    // interfaces with loss of control enabled
     unsigned mAttributesMask;       // attributes which have changed since last sync
-#ifdef USE_BASE
+#if USE_PROFILES & USE_PROFILES_BASE
     SLint32 mPriority;
 #endif
     pthread_mutex_t mMutex;
@@ -293,7 +295,7 @@ typedef struct Object_interface {
 #endif
     pthread_cond_t mCond;
     SLuint8 mState;                 // really SLuint32, but SLuint8 to save space
-#ifdef USE_BASE
+#if USE_PROFILES & USE_PROFILES_BASE
     SLuint8 mPreemptable;           // really SLboolean, but SLuint8 to save space
 #else
     SLuint8 mPadding;
@@ -539,7 +541,7 @@ typedef struct Engine_interface {
     SLuint32 mInstanceCount;
     unsigned mInstanceMask; // 1 bit per active object
     unsigned mChangedMask;  // objects which have changed since last sync
-#define MAX_INSTANCE 32     // see mInstanceMask
+#define MAX_INSTANCE 32     // maximum active objects per engine, see mInstanceMask
     IObject *mInstances[MAX_INSTANCE];
     SLboolean mShutdown;
     SLboolean mShutdownAck;
@@ -851,6 +853,8 @@ typedef struct /*Volume_interface*/ {
 
 #ifdef ANDROID
 
+// FIXME Move these into the I... section above
+
 typedef struct {
     const struct SLAndroidEffectItf_ *mItf;
     IObject *mThis;
@@ -903,7 +907,8 @@ enum AndroidObject_state {
     ANDROID_READY,
     NUM_ANDROID_STATES
 };
-#endif //ifdef ANDROID
+
+#endif  // ANDROID
 
 
 /*typedef*/ struct CAudioPlayer_struct {
@@ -1006,7 +1011,7 @@ enum AndroidObject_state {
 #else
 #define INTERFACES_AudioRecorder 9  // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
 #endif
-    SLuint8 mInterfaceContinued[INTERFACES_AudioRecorder - INTERFACES_Default];
+    SLuint8 mInterfaceStates2[INTERFACES_AudioRecorder - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IRecord mRecord;
     IAudioEncoder mAudioEncoder;
@@ -1335,6 +1340,7 @@ extern SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
 extern SLresult IBufferQueue_Clear(SLBufferQueueItf self);
 extern SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
     slBufferQueueCallback callback, void *pContext);
+extern void IBufferQueue_Destroy(IBufferQueue *this);
 
 extern bool IsInterfaceInitialized(IObject *this, unsigned MPH);
 extern SLresult AcquireStrongRef(IObject *object, SLuint32 expectedObjectID);

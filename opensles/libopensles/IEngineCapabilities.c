@@ -27,19 +27,10 @@ static SLresult IEngineCapabilities_QuerySupportedProfiles(
     if (NULL == pProfilesSupported) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        // The generic implementation doesn't implement any of the profiles, they shouldn't
-        // be declared as supported.
-        *pProfilesSupported = 0
-#ifdef USE_GAME
-            | SL_PROFILES_GAME
-#endif
-#ifdef USE_MUSIC
-            | SL_PROFILES_MUSIC
-#endif
-#ifdef USE_PHONE
-            | SL_PROFILES_PHONE
-#endif
-            ;
+        // The generic implementation doesn't implement any of the profiles, they shouldn't be
+        // declared as supported. Also exclude the fake profiles BASE and OPTIONAL.
+        *pProfilesSupported = USE_PROFILES &
+                (USE_PROFILES_GAME | USE_PROFILES_MUSIC | USE_PROFILES_PHONE);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -58,11 +49,11 @@ static SLresult IEngineCapabilities_QueryAvailableVoices(SLEngineCapabilitiesItf
     case SL_VOICETYPE_3D_AUDIO:
     case SL_VOICETYPE_3D_MIDIOUTPUT:
         if (NULL != pNumMaxVoices)
-            *pNumMaxVoices = 32;
+            *pNumMaxVoices = MAX_INSTANCE - 2;
         if (NULL != pIsAbsoluteMax)
             *pIsAbsoluteMax = SL_BOOLEAN_TRUE;
         if (NULL != pNumFreeVoices)
-            *pNumFreeVoices = 32;
+            *pNumFreeVoices = MAX_INSTANCE - 2;
         result = SL_RESULT_SUCCESS;
         break;
     default:

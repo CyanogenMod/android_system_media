@@ -149,4 +149,4 @@ void slTraceSetEnabled(unsigned enabled)
 {
 }
 
-#endif // defined(USE_TRACE)
+#endif // USE_TRACE

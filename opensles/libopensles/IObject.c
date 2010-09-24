@@ -323,7 +323,10 @@ static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, 
             IObject *this = (IObject *) self;
             const ClassTable *class__ = this->mClass;
             int MPH, index;
-            if ((0 > (MPH = IID_to_MPH(iid))) || (0 > (index = class__->mMPH_to_index[MPH]))) {
+            if ((0 > (MPH = IID_to_MPH(iid))) ||
+                    // there must an initialization hook present
+                    (NULL == MPH_init_table[MPH].mInit) ||
+                    (0 > (index = class__->mMPH_to_index[MPH]))) {
                 result = SL_RESULT_FEATURE_UNSUPPORTED;
             } else {
                 unsigned mask = 1 << index;
@@ -611,7 +614,7 @@ static SLresult IObject_SetPriority(SLObjectItf self, SLint32 priority, SLboolea
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_BASE
+#if USE_PROFILES & USE_PROFILES_BASE
     IObject *this = (IObject *) self;
     object_lock_exclusive(this);
     this->mPriority = priority;
@@ -630,7 +633,7 @@ static SLresult IObject_GetPriority(SLObjectItf self, SLint32 *pPriority, SLbool
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_BASE
+#if USE_PROFILES & USE_PROFILES_BASE
     if (NULL == pPriority || NULL == pPreemptable) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -656,7 +659,7 @@ static SLresult IObject_SetLossOfControlInterfaces(SLObjectItf self,
 {
     SL_ENTER_INTERFACE
 
-#ifdef USE_BASE
+#if USE_PROFILES & USE_PROFILES_BASE
     result = SL_RESULT_SUCCESS;
     if (0 < numInterfaces) {
         SLuint32 i;
@@ -675,8 +678,10 @@ static SLresult IObject_SetLossOfControlInterfaces(SLObjectItf self,
                 }
                 int MPH, index;
                 // We ignore without error any invalid MPH or index, but spec is unclear
-                if ((0 <= (MPH = IID_to_MPH(iid))) && (0 <=
-                    (index = class__->mMPH_to_index[MPH]))) {
+                if ((0 <= (MPH = IID_to_MPH(iid))) &&
+                        // no need to check for an initialization hook
+                        // (NULL == MPH_init_table[MPH].mInit) ||
+                        (0 <= (index = class__->mMPH_to_index[MPH]))) {
                     lossOfControlMask |= (1 << index);
                 }
             }
@@ -729,7 +734,7 @@ void IObject_init(void *self)
     this->mAttributesMask = 0;
     this->mCallback = NULL;
     this->mContext = NULL;
-#ifdef USE_BASE
+#if USE_PROFILES & USE_PROFILES_BASE
     this->mPriority = SL_PRIORITY_NORMAL;
     this->mPreemptable = SL_BOOLEAN_FALSE;
 #endif

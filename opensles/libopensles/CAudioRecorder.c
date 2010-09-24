@@ -50,15 +50,7 @@ void CAudioRecorder_Destroy(void *self)
     freeDataLocatorFormat(&this->mDataSource);
     freeDataLocatorFormat(&this->mDataSink);
 #ifdef ANDROID
-    // Free the buffer queue, if it was larger than typical
-    if (NULL != this->mBufferQueue.mArray &&
-        this->mBufferQueue.mArray != this->mBufferQueue.mTypical) {
-            free(this->mBufferQueue.mArray);
-            this->mBufferQueue.mArray = NULL;
-    }
-#endif
-
-#ifdef ANDROID
+    IBufferQueue_Destroy(&this->mBufferQueue);
     android_audioRecorder_destroy(this);
 #endif
 }

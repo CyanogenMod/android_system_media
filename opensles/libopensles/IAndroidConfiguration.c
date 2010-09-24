@@ -30,9 +30,6 @@ static SLresult IAndroidConfiguration_SetConfiguration(SLAndroidConfigurationItf
 
     interface_lock_exclusive(this);
 
-#ifndef ANDROID
-    result = SL_RESULT_SUCCESS;
-#else
     // route configuration to the appropriate object
     if (SL_OBJECTID_AUDIORECORDER == IObjectToObjectID((this)->mThis)) {
         SL_LOGV("SetConfiguration issued for AudioRecorder key=%s valueSize=%lu",
@@ -47,7 +44,6 @@ static SLresult IAndroidConfiguration_SetConfiguration(SLAndroidConfigurationItf
     } else {
         result = SL_RESULT_PARAMETER_INVALID;
     }
-#endif
 
     interface_unlock_exclusive(this);
 
@@ -62,9 +58,6 @@ static SLresult IAndroidConfiguration_GetConfiguration(SLAndroidConfigurationItf
 {
     SL_ENTER_INTERFACE
 
-#ifndef ANDROID
-    result = SL_RESULT_SUCCESS;
-#else
     // having value size is required, but pConfigValue being NULL is allowed to allow properties
     // to report their actual value size (if applicable)
     if (NULL == pValueSize) {
@@ -87,7 +80,6 @@ static SLresult IAndroidConfiguration_GetConfiguration(SLAndroidConfigurationItf
 
         interface_unlock_exclusive(this);
     }
-#endif
 
     SL_LEAVE_INTERFACE
 }

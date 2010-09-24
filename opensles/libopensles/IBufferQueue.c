@@ -56,8 +56,9 @@ SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer, SLuint
         IBufferQueue *this = (IBufferQueue *) self;
         interface_lock_exclusive(this);
         BufferHeader *oldRear = this->mRear, *newRear;
-        if ((newRear = oldRear + 1) == &this->mArray[this->mNumBuffers + 1])
+        if ((newRear = oldRear + 1) == &this->mArray[this->mNumBuffers + 1]) {
             newRear = this->mArray;
+        }
         if (newRear == this->mFront) {
             result = SL_RESULT_BUFFER_INSUFFICIENT;
         } else {
@@ -103,9 +104,9 @@ SLresult IBufferQueue_Clear(SLBufferQueueItf self)
     // mixer might be reading from the front buffer, so tread carefully here
     // NTH asynchronous cancel instead of blocking until mixer acknowledges
     this->mClearRequested = SL_BOOLEAN_TRUE;
-    do
+    do {
         interface_cond_wait(this);
-    while (this->mClearRequested);
+    } while (this->mClearRequested);
 #endif
 
     interface_unlock_exclusive(this);
@@ -191,5 +192,18 @@ void IBufferQueue_init(void *self)
     for (i = 0; i < BUFFER_HEADER_TYPICAL+1; ++i, ++bufferHeader) {
         bufferHeader->mBuffer = NULL;
         bufferHeader->mSize = 0;
+    }
+}
+
+
+/** \brief Free the buffer queue, if it was larger than typical.
+  * Called by CAudioPlayer_Destroy and CAudioRecorder_Destroy.
+  */
+
+void IBufferQueue_Destroy(IBufferQueue *this)
+{
+    if ((NULL != this->mArray) && (this->mArray != this->mTypical)) {
+        free(this->mArray);
+        this->mArray = NULL;
     }
 }
