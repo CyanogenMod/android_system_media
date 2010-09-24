@@ -72,6 +72,15 @@ bool CAudioPlayer_PreDestroy(void *self)
 {
 #ifdef USE_OUTPUTMIXEXT
     CAudioPlayer *this = (CAudioPlayer *) self;
+    // Safe to proceed immediately if a track has not yet been assigned
+    Track *track = this->mTrack;
+    if (NULL == track)
+        return true;
+    // FIXME We're reading from track without taking even a share lock on it
+    CAudioPlayer *audioPlayer = track->mAudioPlayer;
+    if (NULL == audioPlayer)
+        return true;
+    assert(audioPlayer == this);
     // Request the mixer thread to unlink this audio player's track
     this->mDestroyRequested = true;
     while (this->mDestroyRequested) {

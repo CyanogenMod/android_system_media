@@ -392,6 +392,7 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
     // allocation, initialize rest of track, and doubly-link track to player (currently single).
     assert(NULL != track);
     track->mBufferQueue = &this->mBufferQueue;
+    // FIXME should be last thing to do? and is the track locked? probably not
     track->mAudioPlayer = this;
     track->mReader = NULL;
     track->mAvail = 0;
