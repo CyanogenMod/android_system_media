@@ -25,7 +25,9 @@ static void SDLCALL SDL_callback(void *context, Uint8 *stream, int len)
 {
     assert(len > 0);
     IEngine *thisEngine = (IEngine *) context;
-    // A peek would be risky if output mixes are dynamic, so we pause during switch and use shared
+    // A peek lock would be risky if output mixes are dynamic, so we use SDL_PauseAudio to
+    // temporarily disable callbacks during any change to the current output mix, and use a
+    // shared lock here
     interface_lock_shared(thisEngine);
     COutputMix *outputMix = thisEngine->mOutputMix;
     interface_unlock_shared(thisEngine);
