@@ -263,7 +263,7 @@ void android_bb_init(int sessionId, IBassBoost* ibb) {
 
 //-----------------------------------------------------------------------------
 void android_eq_init(int sessionId, IEqualizer* ieq) {
-    SL_LOGV("session %d", sessionId);
+    SL_LOGV("android_eq_init on session %d", sessionId);
 
     if (!android_fx_initEffectObj(sessionId, ieq->mEqEffect, &ieq->mEqDescriptor.type)) {
         SL_LOGE("Equalizer effect initialization failed");
@@ -335,7 +335,7 @@ void android_eq_init(int sessionId, IEqualizer* ieq) {
 
 //-----------------------------------------------------------------------------
 void android_virt_init(int sessionId, IVirtualizer* ivi) {
-    SL_LOGV("session %d", sessionId);
+    SL_LOGV("android_virt_init on session %d", sessionId);
 
     if (!android_fx_initEffectObj(sessionId, ivi->mVirtualizerEffect,
             &ivi->mVirtualizerDescriptor.type)) {
@@ -572,7 +572,7 @@ SLresult android_fx_statusToResult(android::status_t status) {
 //-----------------------------------------------------------------------------
 bool android_fx_initEffectObj(int sessionId, android::sp<android::AudioEffect>& effect,
         const effect_uuid_t *type) {
-    SL_LOGV("session %d", sessionId);
+    //SL_LOGV("android_fx_initEffectObj on session %d", sessionId);
 
     effect = new android::AudioEffect(type, EFFECT_UUID_NULL,
             0,// priority
