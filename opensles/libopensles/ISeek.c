@@ -58,11 +58,27 @@ static SLresult ISeek_SetLoop(SLSeekItf self, SLboolean loopEnable,
     } else {
         ISeek *this = (ISeek *) self;
         interface_lock_exclusive(this);
+#ifdef ANDROID
+        if ((startPos != 0) && (endPos != SL_TIME_UNKNOWN)) {
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        } else {
+            this->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize
+            // start and end positions already initialized to [0, end of stream]
+            /*this->mStartPos = 0;
+            this->mEndPos = (SLmillisecond) SL_TIME_UNKNOWN;*/
+            CAudioPlayer *ap = InterfaceToCAudioPlayer(this);
+            if (NULL != ap) {
+                android_audioPlayer_loop(ap, loopEnable);
+            }
+            result = SL_RESULT_SUCCESS;
+        }
+#else
         this->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize
         this->mStartPos = startPos;
         this->mEndPos = endPos;
-        interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
         result = SL_RESULT_SUCCESS;
+#endif
+        interface_unlock_exclusive(this);
     }
 
     SL_LEAVE_INTERFACE

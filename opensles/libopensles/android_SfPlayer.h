@@ -87,6 +87,7 @@ struct SfPlayer : public AHandler {
     void pause();
     void stop();
     void seek(int64_t timeMsec);
+    void loop(bool loop);
     bool wantPrefetch();
     void startPrefetch_async();
 
@@ -119,6 +120,7 @@ private:
         kWhatPlay       = 'play',
         kWhatPause      = 'paus',
         kWhatSeek       = 'seek',
+        kWhatLoop       = 'loop',
     };
 
     enum {
@@ -126,6 +128,7 @@ private:
         kFlagPreparing = 2,
         kFlagBuffering = 4,
         kFlagSeeking   = 8,
+        kFlagLooping   = 16,
     };
 
     struct FdInfo {
@@ -180,9 +183,11 @@ private:
     void onPlay();
     void onPause();
     void onSeek(const sp<AMessage> &msg);
+    void onLoop(const sp<AMessage> &msg);
 
     CacheStatus getCacheRemaining(bool *eos);
     int64_t getPositionUsec();
+    void reachedEndOfStream();
     void notifyStatus();
     void notifyCacheFill();
     void notify(const sp<AMessage> &msg, bool async);

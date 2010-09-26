@@ -358,6 +358,13 @@ void SfPlayer::seek(int64_t timeMsec) {
 }
 
 
+void SfPlayer::loop(bool loop) {
+    sp<AMessage> msg = new AMessage(kWhatLoop, id());
+    msg->setInt32("loop", (int32_t)loop);
+    msg->post();
+}
+
+
 uint32_t SfPlayer::getPositionMsec() {
     Mutex::Autolock _l(mSeekLock);
     if (mFlags & kFlagSeeking) {
@@ -385,7 +392,24 @@ int64_t SfPlayer::getPositionUsec() {
     }
 }
 
-/*
+
+void SfPlayer::reachedEndOfStream() {
+    SL_LOGV("SfPlayer::reachedEndOfStream");
+    if (mFlags & kFlagPlaying) {
+        // async notification of end of stream reached during playback
+        sp<AMessage> msg = new AMessage(kWhatNotif, id());
+        msg->setInt32(EVENT_ENDOFSTREAM, 1);
+        notify(msg, true /*async*/);
+    }
+    if (mFlags & kFlagLooping) {
+        seek(0);
+        // kick-off decoding again
+        (new AMessage(kWhatDecode, id()))->post();
+    }
+}
+
+
+/**
  * Message handlers
  */
 
@@ -394,10 +418,12 @@ void SfPlayer::onPlay() {
     mFlags |= kFlagPlaying;
 }
 
+
 void SfPlayer::onPause() {
     SL_LOGV("SfPlayer::onPause");
     mFlags &= ~kFlagPlaying;
 }
+
 
 void SfPlayer::onSeek(const sp<AMessage> &msg) {
     SL_LOGV("SfPlayer::onSeek");
@@ -409,6 +435,21 @@ void SfPlayer::onSeek(const sp<AMessage> &msg) {
     mSeekTimeMsec = timeMsec;
     mTimeDelta = -1;
     mLastDecodedPositionUs = -1;
+}
+
+
+void SfPlayer::onLoop(const sp<AMessage> &msg) {
+    //SL_LOGV("SfPlayer::onLoop");
+    int32_t loop;
+    CHECK(msg->findInt32("loop", &loop));
+
+    if (loop) {
+        //SL_LOGV("SfPlayer::onLoop start looping");
+        mFlags |= kFlagLooping;
+    } else {
+        //SL_LOGV("SfPlayer::onLoop stop looping");
+        mFlags &= ~kFlagLooping;
+    }
 }
 
 
@@ -453,29 +494,25 @@ void SfPlayer::onDecode() {
         }
     }
 
-    if (err != OK) {
-        if (err != ERROR_END_OF_STREAM) {
-            SL_LOGE("MediaSource::read returned error %d", err);
-            // FIXME handle error
-        } else {
-            //SL_LOGV("SfPlayer::onDecode hit ERROR_END_OF_STREAM");
-            if (mFlags & kFlagPlaying) {
-                //SL_LOGV("SfPlayer::onDecode hit ERROR_END_OF_STREAM while playing");
-                // async notification of end of stream reached during playback
-                sp<AMessage> msg = new AMessage(kWhatNotif, id());
-                msg->setInt32(EVENT_ENDOFSTREAM, 1);
-                notify(msg, true /*async*/);
-            }
-        }
-        return;
-    }
-
     {
         Mutex::Autolock _l(mSeekLock);
         if (mFlags & kFlagSeeking) {
             mFlags &= ~kFlagSeeking;
         }
     }
+
+    if (err != OK) {
+        if (err != ERROR_END_OF_STREAM) {
+            SL_LOGE("MediaSource::read returned error %d", err);
+            // FIXME handle error
+        } else {
+            // handle notification and looping at end of stream
+            reachedEndOfStream();
+        }
+        return;
+    }
+
+    // render
 
     sp<AMessage> msg = new AMessage(kWhatRender, id());
 
@@ -498,6 +535,7 @@ void SfPlayer::onRender(const sp<AMessage> &msg) {
 
     if (NULL == mDecodeBuffer) {
         // nothing to render, move along
+        //SL_LOGV("SfPlayer::onRender NULL buffer, exiting");
         return;
     }
 
@@ -683,6 +721,10 @@ void SfPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
         case kWhatSeek:
             onSeek(msg);
+            break;
+
+        case kWhatLoop:
+            onLoop(msg);
             break;
 
         default:
