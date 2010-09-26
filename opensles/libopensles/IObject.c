@@ -308,7 +308,6 @@ static SLresult IObject_GetState(SLObjectItf self, SLuint32 *pState)
     SL_LEAVE_INTERFACE
 }
 
-
 static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, void *pInterface)
 {
     SL_ENTER_INTERFACE
@@ -331,24 +330,11 @@ static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, 
             } else {
                 unsigned mask = 1 << index;
                 object_lock_exclusive(this);
-                if (SL_OBJECT_STATE_REALIZED != this->mState) {
+                if ((SL_OBJECT_STATE_REALIZED != this->mState) && (INTERFACE_EXPLICIT_PREREALIZE !=
+                        class__->mInterfaces[index].mInterface)) {
                     // Can't get interface on a suspended/suspending/resuming object
+                    // unless this is an explicit pre-realize interface
                     result = SL_RESULT_PRECONDITIONS_VIOLATED;
-
-                    // unless this is an explicit + configuration interface,
-                    // which will be checked here:
-
-                    // FIXME: temporary hack to allow an interface to be called before it's
-                    //        object is realized
-                    if (this->mInterfaceStates[index] == INTERFACE_EXPOSED) {
-                        interface = (char *) this + class__->mInterfaces[index].mOffset;
-                        if (!(this->mGottenMask & mask)) {
-                            this->mGottenMask |= mask;
-                            ((size_t *) interface)[0] ^= ~0;
-                        }
-                        result = SL_RESULT_SUCCESS;
-                    }
-
                 } else {
                     switch (this->mInterfaceStates[index]) {
                     case INTERFACE_EXPOSED:

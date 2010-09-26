@@ -114,12 +114,13 @@ typedef SLresult (*StatusHook)(void *self);
 typedef SLresult (*AsyncHook)(void *self, SLboolean async);
 typedef bool (*BoolHook)(void *self);
 
-// Describes how an interface is related to a given class
+// Describes how an interface is related to a given class, used in iid_vtable::mInterface
 
-#define INTERFACE_IMPLICIT           0
-#define INTERFACE_EXPLICIT           1
-#define INTERFACE_DYNAMIC            2
-#define INTERFACE_UNAVAILABLE        3
+#define INTERFACE_IMPLICIT            0 // no need for application to request prior to GetInterface
+#define INTERFACE_EXPLICIT            1 // must be requested explicitly during object creation
+#define INTERFACE_DYNAMIC             2 // can be requested after object creation
+#define INTERFACE_UNAVAILABLE         3 // this interface is not available on objects of this class
+#define INTERFACE_EXPLICIT_PREREALIZE 4 // explicit, and can call GetInterface before Realize
 // note that INTERFACE_OPTIONAL is always re-mapped to one of the above
 
 // Profile-specific interfaces
@@ -1293,7 +1294,9 @@ extern void slTraceSetEnabled(unsigned enabled);
 #define SL_TRACE_LEAVE          (SL_TRACE_LEAVE_FAILURE | SL_TRACE_LEAVE_VOID | \
                                     SL_TRACE_LEAVE_SUCCESS)
 #define SL_TRACE_ALL            (SL_TRACE_ENTER | SL_TRACE_LEAVE)
+#ifndef SL_TRACE_DEFAULT
 #define SL_TRACE_DEFAULT        (SL_TRACE_LEAVE_FAILURE)
+#endif
 
 #ifndef USE_TRACE
 

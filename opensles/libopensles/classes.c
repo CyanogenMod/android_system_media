@@ -85,8 +85,8 @@ static const struct iid_vtable AudioPlayer_interfaces[INTERFACES_AudioPlayer] = 
 #ifdef ANDROID
     {MPH_ANDROIDEFFECT, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidEffect)},
     {MPH_ANDROIDEFFECTSEND, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidEffectSend)},
-    // FIXME mark it as explicit + can be called before realize
-    {MPH_ANDROIDCONFIGURATION, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidConfiguration)},
+    {MPH_ANDROIDCONFIGURATION, INTERFACE_EXPLICIT_PREREALIZE,
+            offsetof(CAudioPlayer, mAndroidConfiguration)},
 #endif
 };
 
@@ -115,11 +115,11 @@ static const struct iid_vtable AudioRecorder_interfaces[INTERFACES_AudioRecorder
     {MPH_DYNAMICSOURCE, INTERFACE_OPTIONAL, offsetof(CAudioRecorder, mDynamicSource)},
     {MPH_EQUALIZER, INTERFACE_DYNAMIC_OPTIONAL, offsetof(CAudioRecorder, mEqualizer)},
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL, offsetof(CAudioRecorder, mVisualization)},
-    {MPH_VOLUME, INTERFACE_OPTIONAL, offsetof(CAudioRecorder, mVolume)}
+    {MPH_VOLUME, INTERFACE_OPTIONAL, offsetof(CAudioRecorder, mVolume)},
 #ifdef ANDROID
-    ,{MPH_ANDROIDSIMPLEBUFFERQUEUE, INTERFACE_EXPLICIT, offsetof(CAudioRecorder, mBufferQueue)},
-    // FIXME mark it as explicit + can be called before realize
-    {MPH_ANDROIDCONFIGURATION, INTERFACE_EXPLICIT, offsetof(CAudioRecorder, mAndroidConfiguration)}
+    {MPH_ANDROIDSIMPLEBUFFERQUEUE, INTERFACE_EXPLICIT, offsetof(CAudioRecorder, mBufferQueue)},
+    {MPH_ANDROIDCONFIGURATION, INTERFACE_EXPLICIT_PREREALIZE,
+            offsetof(CAudioRecorder, mAndroidConfiguration)},
 #endif
 };
 
@@ -152,10 +152,10 @@ static const struct iid_vtable Engine_interfaces[INTERFACES_Engine] = {
     {MPH_AUDIOENCODERCAPABILITIES, INTERFACE_EXPLICIT_BASE,
         offsetof(CEngine, mAudioEncoderCapabilities)},
     {MPH_3DCOMMIT, INTERFACE_EXPLICIT_GAME, offsetof(CEngine, m3DCommit)},
-    {MPH_DEVICEVOLUME, INTERFACE_OPTIONAL, offsetof(CEngine, mDeviceVolume)}
+    {MPH_DEVICEVOLUME, INTERFACE_OPTIONAL, offsetof(CEngine, mDeviceVolume)},
 #ifdef ANDROID
-    , {MPH_ANDROIDEFFECTCAPABILITIES, INTERFACE_EXPLICIT,
-        offsetof(CEngine, mAndroidEffectCapabilities)}
+    {MPH_ANDROIDEFFECTCAPABILITIES, INTERFACE_EXPLICIT,
+        offsetof(CEngine, mAndroidEffectCapabilities)},
 #endif
 };
 
@@ -178,7 +178,7 @@ static const struct iid_vtable LEDDevice_interfaces[INTERFACES_LEDDevice] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(CLEDDevice, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CLEDDevice, mDynamicInterfaceManagement)},
-    {MPH_LED, INTERFACE_IMPLICIT, offsetof(CLEDDevice, mLEDArray)}
+    {MPH_LED, INTERFACE_IMPLICIT, offsetof(CLEDDevice, mLEDArray)},
 };
 
 static const ClassTable CLEDDevice_class = {
@@ -201,7 +201,7 @@ static const struct iid_vtable Listener_interfaces[INTERFACES_Listener] = {
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CListener, mDynamicInterfaceManagement)},
     {MPH_3DDOPPLER, INTERFACE_DYNAMIC_GAME, offsetof(CListener, m3DDoppler)},
-    {MPH_3DLOCATION, INTERFACE_EXPLICIT_GAME, offsetof(CListener, m3DLocation)}
+    {MPH_3DLOCATION, INTERFACE_EXPLICIT_GAME, offsetof(CListener, m3DLocation)},
 };
 
 static const ClassTable CListener_class = {
@@ -225,7 +225,7 @@ static const struct iid_vtable MetadataExtractor_interfaces[INTERFACES_MetadataE
         offsetof(CMetadataExtractor, mDynamicInterfaceManagement)},
     {MPH_DYNAMICSOURCE, INTERFACE_IMPLICIT, offsetof(CMetadataExtractor, mDynamicSource)},
     {MPH_METADATAEXTRACTION, INTERFACE_IMPLICIT, offsetof(CMetadataExtractor, mMetadataExtraction)},
-    {MPH_METADATATRAVERSAL, INTERFACE_IMPLICIT, offsetof(CMetadataExtractor, mMetadataTraversal)}
+    {MPH_METADATATRAVERSAL, INTERFACE_IMPLICIT, offsetof(CMetadataExtractor, mMetadataTraversal)},
 };
 
 static const ClassTable CMetadataExtractor_class = {
@@ -337,7 +337,7 @@ static const struct iid_vtable VibraDevice_interfaces[INTERFACES_VibraDevice] = 
     {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(CVibraDevice, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CVibraDevice, mDynamicInterfaceManagement)},
-    {MPH_VIBRA, INTERFACE_IMPLICIT, offsetof(CVibraDevice, mVibra)}
+    {MPH_VIBRA, INTERFACE_IMPLICIT, offsetof(CVibraDevice, mVibra)},
 };
 
 static const ClassTable CVibraDevice_class = {
