@@ -37,7 +37,6 @@ LOCAL_SRC_FILES:=                     \
         classes.c                     \
         devices.c                     \
         trace.c                       \
-        interfaces.c                  \
         locks.c                       \
         sles.c                        \
         sllog.c                       \
