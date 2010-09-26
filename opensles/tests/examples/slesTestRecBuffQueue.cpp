@@ -238,7 +238,8 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
     fprintf(stdout, "Recorder callback registered\n");
 
     /* Get the buffer queue interface which was explicitly requested */
-    result = (*recorder)->GetInterface(recorder, SL_IID_ANDROIDSIMPLEBUFFERQUEUE, (void*)&recBuffQueueItf);
+    result = (*recorder)->GetInterface(recorder, SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
+            (void*)&recBuffQueueItf);
     ExitOnError(result);
 
     /* ------------------------------------------------------ */
@@ -295,7 +296,8 @@ int main(int argc, char* const argv[])
     SLresult    result;
     SLObjectItf sl;
 
-    fprintf(stdout, "OpenSL ES test %s: exercises SLRecordItf and SLAndroidSimpleBufferQueueItf ", argv[0]);
+    fprintf(stdout, "OpenSL ES test %s: exercises SLRecordItf and SLAndroidSimpleBufferQueueItf ",
+            argv[0]);
     fprintf(stdout, "on an AudioRecorder object\n");
 
     if (argc < 2) {

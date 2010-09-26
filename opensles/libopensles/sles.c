@@ -159,7 +159,13 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
                 exposedMask |= 1 << i;
             }
             break;
+        case INTERFACE_EXPLICIT:
+        case INTERFACE_DYNAMIC:
+        case INTERFACE_UNAVAILABLE:
+        case INTERFACE_EXPLICIT_PREREALIZE:
+            break;
         default:
+            assert(false);
             break;
         }
     }
@@ -1146,6 +1152,7 @@ SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedI
             switch (class__->mInterfaces[i].mInterface) {
             case INTERFACE_IMPLICIT:
             case INTERFACE_EXPLICIT:
+            case INTERFACE_EXPLICIT_PREREALIZE:
             case INTERFACE_DYNAMIC:
                 ++count;
                 break;
@@ -1182,6 +1189,7 @@ SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index, SLInterface
             switch (class__->mInterfaces[i].mInterface) {
             case INTERFACE_IMPLICIT:
             case INTERFACE_EXPLICIT:
+            case INTERFACE_EXPLICIT_PREREALIZE:
             case INTERFACE_DYNAMIC:
                 break;
             case INTERFACE_UNAVAILABLE:

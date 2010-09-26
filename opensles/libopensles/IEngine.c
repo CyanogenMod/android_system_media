@@ -559,6 +559,7 @@ static SLresult IEngine_QueryNumSupportedInterfaces(SLEngineItf self,
                 switch (class__->mInterfaces[i].mInterface) {
                 case INTERFACE_IMPLICIT:
                 case INTERFACE_EXPLICIT:
+                case INTERFACE_EXPLICIT_PREREALIZE:
                 case INTERFACE_DYNAMIC:
                     ++count;
                     break;
@@ -601,6 +602,7 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
                 switch (class__->mInterfaces[i].mInterface) {
                 case INTERFACE_IMPLICIT:
                 case INTERFACE_EXPLICIT:
+                case INTERFACE_EXPLICIT_PREREALIZE:
                 case INTERFACE_DYNAMIC:
                     break;
                 case INTERFACE_UNAVAILABLE:

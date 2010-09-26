@@ -28,6 +28,7 @@ include $(CLEAR_VARS)
 
 LOCAL_CFLAGS += -DUSE_PROFILES=0 -DUSE_TRACE -DUSE_DEBUG -UNDEBUG \
 -DUSE_LOG=SLAndroidLogLevel_Verbose
+#-DSL_TRACE_DEFAULT=SL_TRACE_ALL
 
 # Reduce size of .so and hide internal global symbols
 LOCAL_CFLAGS += -fvisibility=hidden -DSLAPIENTRY='__attribute__((visibility("default")))'
