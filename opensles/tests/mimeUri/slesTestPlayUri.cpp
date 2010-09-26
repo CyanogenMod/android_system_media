@@ -64,7 +64,7 @@
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stdout, "%lu error code encountered at line %d, exiting\n", result, line);
+        fprintf(stderr, "%lu error code encountered at line %d, exiting\n", result, line);
         exit(1);
     }
 }
@@ -76,18 +76,18 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     SLpermille level = 0;
     (*caller)->GetFillLevel(caller, &level);
     SLuint32 status;
-    fprintf(stderr, "\t\tPrefetchEventCallback: received event %lu\n", event);
+    //fprintf(stdout, "\t\tPrefetchEventCallback: received event %lu\n", event);
     (*caller)->GetPrefetchStatus(caller, &status);
     if ((event & (SL_PREFETCHEVENT_STATUSCHANGE|SL_PREFETCHEVENT_FILLLEVELCHANGE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
-        fprintf(stderr, "\t\tPrefetchEventCallback: Error while prefetching data, exiting\n");
+        fprintf(stdout, "\t\tPrefetchEventCallback: Error while prefetching data, exiting\n");
         //exit(1);
     }
     if (event & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
-        fprintf(stderr, "\t\tPrefetchEventCallback: Buffer fill level is = %d\n", level);
+        fprintf(stdout, "\t\tPrefetchEventCallback: Buffer fill level is = %d\n", level);
     }
     if (event & SL_PREFETCHEVENT_STATUSCHANGE) {
-        fprintf(stderr, "\t\tPrefetchEventCallback: Prefetch Status is = %lu\n", status);
+        fprintf(stdout, "\t\tPrefetchEventCallback: Prefetch Status is = %lu\n", status);
     }
 
 }
@@ -184,6 +184,8 @@ void TestPlayUri( SLObjectItf sl, const char* path)
             SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE);
     CheckErr(res);
 
+    /* Configure fill level updates every 5 percent */
+    (*prefetchItf)->SetFillUpdatePeriod(prefetchItf, 50);
 
     /* Display duration */
     SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
@@ -202,9 +204,9 @@ void TestPlayUri( SLObjectItf sl, const char* path)
 
     /* Play the URI */
     /*     first cause the player to prefetch the data */
-    fprintf(stderr, "\nbefore set to PAUSED\n\n");
+    fprintf(stdout, "\nbefore set to PAUSED\n\n");
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PAUSED );
-    fprintf(stderr, "\nafter set to PAUSED\n\n");
+    fprintf(stdout, "\nafter set to PAUSED\n\n");
     CheckErr(res);
 
     /*     wait until there's data to play */
