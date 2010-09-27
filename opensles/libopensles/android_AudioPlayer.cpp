@@ -1134,6 +1134,7 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
             pAudioPlayer->mAndroidEffect.mEffects->clear();
         }
         delete pAudioPlayer->mAndroidEffect.mEffects;
+        pAudioPlayer->mAndroidEffect.mEffects = NULL;
     }
 #endif
 
