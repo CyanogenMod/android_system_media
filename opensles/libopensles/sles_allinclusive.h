@@ -895,8 +895,7 @@ typedef struct {
 enum AndroidObject_type {
     INVALID_TYPE     =-1,
     MEDIAPLAYER      = 0,
-    AUDIOTRACK_PUSH  = 1,
-    AUDIOTRACK_PULL  = 2,
+    AUDIOTRACK_PULL  = 1,
     NUM_AUDIOPLAYER_MAP_TYPES
 };
 

@@ -886,7 +886,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
     // AudioTrack
-    case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
         {
         // initialize platform-specific CAudioPlayer fields
@@ -1083,7 +1082,6 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     switch (pAudioPlayer->mAndroidObjType) {
     //-----------------------------------
     // AudioTrack
-    case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
         break;
 #ifndef USE_BACKPORT
@@ -1141,7 +1139,6 @@ SLresult android_audioPlayer_setPlayRate(IPlaybackRate *pRateItf, SLpermille rat
     SLresult result = SL_RESULT_SUCCESS;
     CAudioPlayer *ap = (CAudioPlayer *)pRateItf->mThis;
     switch(ap->mAndroidObjType) {
-    case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
     case MEDIAPLAYER: {
         // get the content sample rate
@@ -1174,7 +1171,6 @@ SLresult android_audioPlayer_setPlaybackRateBehavior(IPlaybackRate *pRateItf,
     SLresult result = SL_RESULT_SUCCESS;
     CAudioPlayer *ap = (CAudioPlayer *)pRateItf->mThis;
     switch(ap->mAndroidObjType) {
-    case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
     case MEDIAPLAYER:
         if (constraints != (constraints & SL_RATEPROP_NOPITCHCORAUDIO)) {
@@ -1196,7 +1192,6 @@ SLresult android_audioPlayer_getCapabilitiesOfRate(IPlaybackRate *pRateItf,
         SLuint32 *pCapabilities) {
     CAudioPlayer *ap = (CAudioPlayer *)pRateItf->mThis;
     switch(ap->mAndroidObjType) {
-    case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
     case MEDIAPLAYER:
         *pCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
@@ -1213,7 +1208,6 @@ SLresult android_audioPlayer_getCapabilitiesOfRate(IPlaybackRate *pRateItf,
 void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
     SLuint32 state = ap->mPlay.mState;
     switch(ap->mAndroidObjType) {
-    case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
         switch (state) {
         case SL_PLAYSTATE_STOPPED:
@@ -1295,7 +1289,6 @@ void android_audioPlayer_useEventMask(CAudioPlayer *ap) {
     IPlay *pPlayItf = &ap->mPlay;
     SLuint32 eventFlags = pPlayItf->mEventFlags;
     /*switch(ap->mAndroidObjType) {
-    case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:*/
 
     if (NULL == ap->mAudioTrack) {
@@ -1339,7 +1332,6 @@ void android_audioPlayer_useEventMask(CAudioPlayer *ap) {
 SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec) {
     CAudioPlayer *ap = (CAudioPlayer *)pPlayItf->mThis;
     switch(ap->mAndroidObjType) {
-    case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
         *pDurMsec = SL_TIME_UNKNOWN;
         // FIXME if the data source is not a buffer queue, and the audio data is saved in
@@ -1366,7 +1358,6 @@ SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMse
 void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
     CAudioPlayer *ap = (CAudioPlayer *)pPlayItf->mThis;
     switch(ap->mAndroidObjType) {
-    case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
         uint32_t positionInFrames;
         ap->mAudioTrack->getPosition(&positionInFrames);
@@ -1394,7 +1385,6 @@ void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
 void android_audioPlayer_seek(CAudioPlayer *ap, SLmillisecond posMsec) {
 
     switch(ap->mAndroidObjType) {
-    case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
         break;
 #ifndef USE_BACKPORT
@@ -1430,7 +1420,6 @@ void android_audioPlayer_loop(CAudioPlayer *ap, SLboolean loopEnable) {
 static void android_audioPlayer_setMute(CAudioPlayer* ap) {
     android::AudioTrack *t = NULL;
     switch(ap->mAndroidObjType) {
-    case AUDIOTRACK_PUSH:
     case AUDIOTRACK_PULL:
     case MEDIAPLAYER:
         t = ap->mAudioTrack;
@@ -1482,7 +1471,6 @@ SLresult android_audioPlayerClear(CAudioPlayer *pAudioPlayer) {
     //-----------------------------------
     // AudioTrack
     case AUDIOTRACK_PULL:
-    case AUDIOTRACK_PUSH:
         pAudioPlayer->mAudioTrack->flush();
         break;
     default:
