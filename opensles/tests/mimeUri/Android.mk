@@ -70,6 +70,30 @@ endif
 
 LOCAL_MODULE:= slesTest_playUri
 
+
+# slesTest_loopUri
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_C_INCLUDES:= \
+	system/media/opensles/include
+
+LOCAL_SRC_FILES:= \
+	slesTestLoopUri.cpp
+
+LOCAL_SHARED_LIBRARIES := \
+	libutils \
+	libOpenSLES
+
+ifeq ($(TARGET_OS),linux)
+	LOCAL_CFLAGS += -DXP_UNIX
+endif
+
+LOCAL_MODULE:= slesTest_loopUri
+
+
 include $(BUILD_EXECUTABLE)
 
 # slesTest_playUri2
