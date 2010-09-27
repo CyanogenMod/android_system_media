@@ -1411,6 +1411,15 @@ void android_audioPlayer_seek(CAudioPlayer *ap, SLmillisecond posMsec) {
 
 
 //-----------------------------------------------------------------------------
+void android_audioPlayer_loop(CAudioPlayer *ap, SLboolean loopEnable) {
+
+    if ((MEDIAPLAYER == ap->mAndroidObjType) && (ap->mSfPlayer != 0)) {
+        ap->mSfPlayer->loop((bool)loopEnable);
+    }
+}
+
+
+//-----------------------------------------------------------------------------
 /*
  * Mutes or unmutes the Android media framework object associated with the CAudioPlayer that carries
  * the IVolume interface.
