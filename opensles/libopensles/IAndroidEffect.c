@@ -108,5 +108,7 @@ void IAndroidEffect_init(void *self)
     IAndroidEffect *this = (IAndroidEffect *) self;
     this->mItf = &IAndroidEffect_Itf;
 
-    // mEffects lifecycle is handled by the object on which SLAndroidEffect is exposed
+    // mEffects lifecycle is handled by the object on which SLAndroidEffect is exposed.  This is a
+    // safety initialization just in case the object is partially constructed and then destroyed.
+    this->mEffects = NULL;
 }

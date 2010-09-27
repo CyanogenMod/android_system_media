@@ -111,6 +111,9 @@ void IAndroidEffectCapabilities_init(void *self)
                         this->mFxDescriptors[i].name);
             }
         }
+    } else {
+        // for safety
+        this->mFxDescriptors = NULL;
     }
 
 }
