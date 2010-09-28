@@ -29,16 +29,22 @@ static SLresult IMuteSolo_SetChannelMute(SLMuteSoloItf self, SLuint8 chan, SLboo
         result = SL_RESULT_FEATURE_UNSUPPORTED;
     } else {
         CAudioPlayer *ap = (CAudioPlayer *) thisObject;
-        if (ap->mNumChannels <= chan) {
+        interface_lock_exclusive(this);
+        SLuint8 numChannels = ap->mNumChannels;
+        if (1 >= numChannels) {
+            interface_unlock_exclusive(this);
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        } else if (numChannels <= chan) {
+            interface_unlock_exclusive(this);
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
             SLuint8 mask = 1 << chan;
-            interface_lock_exclusive(this);
             SLuint8 oldMuteMask = ap->mMuteMask;
-            if (mute)
+            if (mute) {
                 ap->mMuteMask |= mask;
-            else
+            } else {
                 ap->mMuteMask &= ~mask;
+            }
             interface_unlock_exclusive_attributes(this, oldMuteMask != ap->mMuteMask ? ATTR_GAIN :
                 ATTR_NONE);
             result = SL_RESULT_SUCCESS;
@@ -62,15 +68,22 @@ static SLresult IMuteSolo_GetChannelMute(SLMuteSoloItf self, SLuint8 chan, SLboo
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             CAudioPlayer *ap = (CAudioPlayer *) thisObject;
-            if (ap->mNumChannels <= chan) {
+            SLboolean mute;
+            interface_lock_shared(this);
+            SLuint8 numChannels = ap->mNumChannels;
+            if (1 >= numChannels) {
+                mute = SL_BOOLEAN_FALSE;
+                result = SL_RESULT_FEATURE_UNSUPPORTED;
+            } else if (numChannels <= chan) {
+                mute = SL_BOOLEAN_FALSE;
                 result = SL_RESULT_PARAMETER_INVALID;
             } else {
-                interface_lock_peek(this);
                 SLuint8 mask = ap->mMuteMask;
-                interface_unlock_peek(this);
-                *pMute = (mask >> chan) & 1;
+                mute = (SLboolean) ((mask >> chan) & 1);
                 result = SL_RESULT_SUCCESS;
             }
+            interface_unlock_shared(this);
+            *pMute = mute;
         }
     }
 
@@ -88,16 +101,22 @@ static SLresult IMuteSolo_SetChannelSolo(SLMuteSoloItf self, SLuint8 chan, SLboo
         result = SL_RESULT_FEATURE_UNSUPPORTED;
     } else {
         CAudioPlayer *ap = (CAudioPlayer *) thisObject;
-        if (ap->mNumChannels <= chan)
+        interface_lock_exclusive(this);
+        SLuint8 numChannels = ap->mNumChannels;
+        if (1 >= numChannels) {
+            interface_unlock_exclusive(this);
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        } else if (numChannels <= chan) {
+            interface_unlock_exclusive(this);
             result = SL_RESULT_PARAMETER_INVALID;
-        else {
+        } else {
             SLuint8 mask = 1 << chan;
-            interface_lock_exclusive(this);
             SLuint8 oldSoloMask = ap->mSoloMask;
-            if (solo)
+            if (solo) {
                 ap->mSoloMask |= mask;
-            else
+            } else {
                 ap->mSoloMask &= ~mask;
+            }
             interface_unlock_exclusive_attributes(this, oldSoloMask != ap->mSoloMask ? ATTR_GAIN :
                 ATTR_NONE);
             result = SL_RESULT_SUCCESS;
@@ -121,15 +140,22 @@ static SLresult IMuteSolo_GetChannelSolo(SLMuteSoloItf self, SLuint8 chan, SLboo
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             CAudioPlayer *ap = (CAudioPlayer *) thisObject;
-            if (ap->mNumChannels <= chan) {
+            SLboolean solo;
+            interface_lock_shared(this);
+            SLuint8 numChannels = ap->mNumChannels;
+            if (1 >= numChannels) {
+                solo = SL_BOOLEAN_FALSE;
+                result = SL_RESULT_FEATURE_UNSUPPORTED;
+            } else if (numChannels <= chan) {
+                solo = SL_BOOLEAN_FALSE;
                 result = SL_RESULT_PARAMETER_INVALID;
             } else {
-                interface_lock_peek(this);
                 SLuint8 mask = ap->mSoloMask;
-                interface_unlock_peek(this);
-                *pSolo = (mask >> chan) & 1;
+                solo = (SLboolean) ((mask >> chan) & 1);
                 result = SL_RESULT_SUCCESS;
             }
+            interface_unlock_shared(this);
+            *pSolo = solo;
         }
     }
 
@@ -150,9 +176,11 @@ static SLresult IMuteSolo_GetNumChannels(SLMuteSoloItf self, SLuint8 *pNumChanne
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             CAudioPlayer *ap = (CAudioPlayer *) thisObject;
-            // no lock needed as mNumChannels is const
-            *pNumChannels = ap->mNumChannels;
-            result = SL_RESULT_SUCCESS;
+            object_lock_shared(thisObject);
+            SLuint8 numChannels = ap->mNumChannels;
+            object_unlock_shared(thisObject);
+            *pNumChannels = numChannels;
+            result = 0 < numChannels ? SL_RESULT_SUCCESS : SL_RESULT_PRECONDITIONS_VIOLATED;
         }
     }
 

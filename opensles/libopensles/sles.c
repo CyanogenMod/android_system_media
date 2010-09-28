@@ -666,6 +666,12 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
                 SL_LOGE("can't request SL_IID_SEEK with a buffer queue data source");
                 return SL_RESULT_FEATURE_UNSUPPORTED;
             }
+            if (pInterfaceRequired[i] && (SL_IID_MUTESOLO == pInterfaceIds[i]) &&
+                    (SL_DATAFORMAT_PCM == pDataLocatorFormat->mFormat.mFormatType) &&
+                    (1 == pDataLocatorFormat->mFormat.mPCM.numChannels)) {
+                SL_LOGE("can't request SL_IID_MUTESOLO with a mono buffer queue data source");
+                return SL_RESULT_FEATURE_UNSUPPORTED;
+            }
         }
         break;
     default:
@@ -992,6 +998,7 @@ extern void
 IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf engine)
 {
     IObject *this;
+    // Do not change this to malloc; we depend on the object being memset to zero
     this = (IObject *) calloc(1, class__->mSize);
     if (NULL != this) {
         unsigned lossOfControlMask = 0;

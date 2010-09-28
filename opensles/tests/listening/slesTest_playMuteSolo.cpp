@@ -212,6 +212,13 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     result = (*player)->GetInterface(player, SL_IID_MUTESOLO, (void*)&muteSoloItf);
     ExitOnError(result);
 
+    // Attempt to get the channel count before it is necessarily known.
+    // This may fail depending on the platform.
+    SLuint8 numChannels = 123;
+    result = (*muteSoloItf)->GetNumChannels(muteSoloItf, &numChannels);
+    printf("GetNumChannels after Realize but before pre-fetch: result=%lu, numChannels=%u\n",
+        result, numChannels);
+
     /* Initialize a context for use by the callback */
     Context             context;
     context.playItf = playItf;
@@ -243,7 +250,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     }
 
     /* Query the number of channels */
-    SLuint8 numChannels = 0;
+    numChannels = 123;
     result = (*muteSoloItf)->GetNumChannels(muteSoloItf, &numChannels);
     ExitOnError(result);
     fprintf(stdout, "Content has %d channel(s)\n", numChannels);

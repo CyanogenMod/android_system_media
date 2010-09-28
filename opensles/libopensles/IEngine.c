@@ -123,7 +123,8 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     // Initialize private fields not associated with an interface
                     this->mMuteMask = 0;
                     this->mSoloMask = 0;
-                    // const, will be set later by the containing AudioPlayer or MidiPlayer
+                    // Will be set soon for PCM buffer queues, or later by platform-specific code
+                    // during Realize or Prefetch
                     this->mNumChannels = 0;
                     this->mSampleRateMilliHz = 0;
 
@@ -136,13 +137,18 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         break;
                     }
 
-                    result = checkSourceFormatVsInterfacesCompatibility(&this->mDataSource,
-                            numInterfaces, pInterfaceIds, pInterfaceRequired);
+                    result = checkDataSink(pAudioSnk, &this->mDataSink, SL_OBJECTID_AUDIOPLAYER);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
 
-                    result = checkDataSink(pAudioSnk, &this->mDataSink, SL_OBJECTID_AUDIOPLAYER);
+                    // It would be unsafe to ever refer to the application pointers again
+                    pAudioSrc = NULL;
+                    pAudioSnk = NULL;
+
+                    // Check that the requested interfaces are compatible with the data source
+                    result = checkSourceFormatVsInterfacesCompatibility(&this->mDataSource,
+                            numInterfaces, pInterfaceIds, pInterfaceRequired);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
@@ -150,13 +156,16 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     // copy the buffer queue count from source locator to the buffer queue interface
                     // we have already range-checked the value down to a smaller width
 
-                    switch (*(SLuint32 *) pAudioSrc->pLocator) {
+                    switch (this->mDataSource.mLocator.mLocatorType) {
                     case SL_DATALOCATOR_BUFFERQUEUE:
 #ifdef ANDROID
                     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
 #endif
-                        this->mBufferQueue.mNumBuffers = (SLuint16) ((SLDataLocator_BufferQueue *)
-                            pAudioSrc->pLocator)->numBuffers;
+                        this->mBufferQueue.mNumBuffers =
+                                (SLuint16) this->mDataSource.mLocator.mBufferQueue.numBuffers;
+                        assert(SL_DATAFORMAT_PCM == this->mDataSource.mFormat.mFormatType);
+                        this->mNumChannels = this->mDataSource.mFormat.mPCM.numChannels;
+                        this->mSampleRateMilliHz = this->mDataSource.mFormat.mPCM.samplesPerSec;
                         break;
                     default:
                         this->mBufferQueue.mNumBuffers = 0;
@@ -268,9 +277,18 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
             } else {
 
                 do {
-                    // const, will be set later by the containing AudioRecorder
+
+                    // Initialize fields not associated with any interface
+
+                    // These fields are set to real values by
+                    // android_audioRecorder_checkSourceSinkSupport.  Note that the data sink is
+                    // always PCM buffer queue, so we know the channel count and sample rate early.
                     this->mNumChannels = 0;
                     this->mSampleRateMilliHz = 0;
+#ifdef ANDROID
+                    this->mAudioRecord = NULL;
+                    this->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
+#endif
 
                     // Check the source and sink parameters, and make a local copy of all parameters
                     result = checkDataSource(pAudioSrc, &this->mDataSource);
@@ -281,6 +299,10 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
+
+                    // It would be unsafe to ever refer to the application pointers again
+                    pAudioSrc = NULL;
+                    pAudioSnk = NULL;
 
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
@@ -293,10 +315,10 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 
 #ifdef ANDROID
                     // FIXME move to dedicated function
-                    SLuint32 locatorType = *(SLuint32 *) pAudioSnk->pLocator;
+                    SLuint32 locatorType = this->mDataSink.mLocator.mLocatorType;
                     if (locatorType == SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE) {
-                        this->mBufferQueue.mNumBuffers = ((SLDataLocator_BufferQueue *)
-                                pAudioSnk->pLocator)->numBuffers;
+                        this->mBufferQueue.mNumBuffers =
+                            this->mDataSink.mLocator.mBufferQueue.numBuffers;
                         // inline allocation of circular Buffer Queue mArray, up to a typical max
                         if (BUFFER_HEADER_TYPICAL >= this->mBufferQueue.mNumBuffers) {
                             this->mBufferQueue.mArray = this->mBufferQueue.mTypical;
