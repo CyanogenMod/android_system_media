@@ -1035,53 +1035,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     return result;
 }
 
-//-----------------------------------------------------------------------------
-/*
- * Called with a lock held on the CAudioPlayer
- */
-SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer, SLuint32 type) {
-    SLresult result = SL_RESULT_SUCCESS;
-    SL_LOGV("android_audioPlayer_setStreamType %lu", type);
-
-    if (pAudioPlayer->mAudioTrack == NULL) {
-        return SL_RESULT_RESOURCE_ERROR;
-    }
-    if (type == android_to_sles_streamType(pAudioPlayer->mAudioTrack->streamType())) {
-        return SL_RESULT_SUCCESS;
-    }
-
-    int format =  pAudioPlayer->mAudioTrack->format();
-    uint32_t sr = sles_to_android_sampleRate(pAudioPlayer->mSampleRateMilliHz);
-
-    pAudioPlayer->mAudioTrack->stop();
-    delete pAudioPlayer->mAudioTrack;
-    pAudioPlayer->mAudioTrack = new android::AudioTrack(
-                    sles_to_android_streamType(type),               // streamType
-                    sr,                                             // sampleRate
-                    format,                                         // format
-                    pAudioPlayer->mNumChannels== 1 ?                //channel mask
-                            android::AudioSystem::CHANNEL_OUT_MONO :
-                            android::AudioSystem::CHANNEL_OUT_STEREO,
-                    0,                                              // frameCount (here min)
-                    0,                                              // flags
-                    pAudioPlayer->mAndroidObjType == MEDIAPLAYER ?  // callback
-                            audioTrack_callBack_uri : audioTrack_callBack_pullFromBuffQueue,
-                    (void *) pAudioPlayer,                          // user
-                    0    // FIXME find appropriate frame count      // notificationFrame
-#ifndef USE_BACKPORT
-                    , pAudioPlayer->mSessionId
-#endif
-                    );
-#ifndef USE_BACKPORT
-    if (pAudioPlayer->mAndroidObjType == MEDIAPLAYER) {
-        if (pAudioPlayer->mSfPlayer != 0) {
-            pAudioPlayer->mSfPlayer->useAudioTrack(pAudioPlayer->mAudioTrack);
-        }
-    }
-#endif
-
-    return result;
-}
 
 //-----------------------------------------------------------------------------
 SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
