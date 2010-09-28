@@ -75,9 +75,6 @@ extern SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer);
 /**************************************************************************************************
  * Configuration
  ****************************/
-extern SLresult android_audioPlayer_setStreamType_l(CAudioPlayer *pAudioPlayer,
-        SLuint32 type);
-
 extern SLresult android_audioPlayer_setPlayRate(IPlaybackRate *pRateItf, SLpermille rate);
 
 extern SLresult android_audioPlayer_setPlaybackRateBehavior(IPlaybackRate *pRateItf,
