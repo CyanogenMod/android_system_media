@@ -1112,6 +1112,7 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
 
         unsigned exposedMask;
         const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
+        assert(NULL != pCEngine_class);
         result = checkInterfaces(pCEngine_class, numInterfaces,
             pInterfaceIds, pInterfaceRequired, &exposedMask);
         if (SL_RESULT_SUCCESS != result) {

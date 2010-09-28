@@ -27,6 +27,7 @@ extern "C" {
 extern const char * const slesutResultStrings[SLESUT_RESULT_MAX];
 extern void slesutPrintIID(SLInterfaceID iid);
 extern const char *slesutResultToString(SLresult result);
+extern const char *slesutObjectIDToString(SLuint32 objectID);
 
 #ifdef __cplusplus
 }

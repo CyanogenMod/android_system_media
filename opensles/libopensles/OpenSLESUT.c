@@ -159,3 +159,23 @@ const char *slesutResultToString(SLresult result)
     // note that SLresult is unsigned
     return result < SLESUT_RESULT_MAX ? slesutResultStrings[result] : "UNKNOWN";
 }
+
+
+/** \brief Convert an object ID to a string or NULL. */
+
+const char *slesutObjectIDToString(SLuint32 objectID)
+{
+    static const char * const objectIDstrings[10] = {
+        "SL_OBJECTID_ENGINE",
+        "SL_OBJECTID_LEDDEVICE",
+        "SL_OBJECTID_VIBRADEVICE",
+        "SL_OBJECTID_AUDIOPLAYER",
+        "SL_OBJECTID_AUDIORECORDER",
+        "SL_OBJECTID_MIDIPLAYER",
+        "SL_OBJECTID_LISTENER",
+        "SL_OBJECTID_3DGROUP",
+        "SL_OBJECTID_OUTPUTMIX",
+        "SL_OBJECTID_METADATAEXTRACTOR"
+    };
+    return (0x1001 <= objectID) && (objectID <= 0x100A) ? objectIDstrings[objectID - 0x1001] : NULL;
+}

@@ -39,6 +39,8 @@
 // IObject is the first interface in a class, so the index for MPH_OBJECT must be zero.
 // Don't cross streams, otherwise bad things happen.
 
+
+#if USE_PROFILES & USE_PROFILE_GAME
 const signed char MPH_to_3DGroup[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -69,6 +71,7 @@ const signed char MPH_to_3DGroup[MPH_MAX] = {
     END
 #endif
 };
+#endif
 
 const signed char MPH_to_AudioPlayer[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
@@ -160,6 +163,7 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
 #endif
 };
 
+#if (USE_PROFILES & USE_PROFILES_OPTIONAL) || defined(ANDROID)
 const signed char MPH_to_AudioRecorder[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -208,6 +212,7 @@ const signed char MPH_to_AudioRecorder[MPH_MAX] = {
     END
 #endif
 };
+#endif
 
 const signed char MPH_to_Engine[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
@@ -261,6 +266,7 @@ const signed char MPH_to_Engine[MPH_MAX] = {
 #endif
 };
 
+#if USE_PROFILES & USE_PROFILES_OPTIONAL
 const signed char MPH_to_LEDDevice[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -284,7 +290,9 @@ const signed char MPH_to_LEDDevice[MPH_MAX] = {
     END
 #endif
 };
+#endif
 
+#if USE_PROFILES & USE_PROFILE_GAME
 const signed char MPH_to_Listener[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -311,7 +319,9 @@ const signed char MPH_to_Listener[MPH_MAX] = {
     END
 #endif
 };
+#endif
 
+#if USE_PROFILES & (USE_PROFILES_GAME | USE_PROFILES_MUSIC)
 const signed char MPH_to_MetadataExtractor[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -339,7 +349,9 @@ const signed char MPH_to_MetadataExtractor[MPH_MAX] = {
     END
 #endif
 };
+#endif
 
+#if USE_PROFILES & USE_PROFILE_GAME
 const signed char MPH_to_MidiPlayer[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -420,6 +432,7 @@ const signed char MPH_to_MidiPlayer[MPH_MAX] = {
     END
 #endif
 };
+#endif
 
 const signed char MPH_to_OutputMix[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
@@ -475,6 +488,7 @@ const signed char MPH_to_OutputMix[MPH_MAX] = {
 #endif
 };
 
+#if USE_PROFILES & USE_PROFILE_OPTIONAL
 const signed char MPH_to_Vibra[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -498,3 +512,4 @@ const signed char MPH_to_Vibra[MPH_MAX] = {
     END
 #endif
 };
+#endif

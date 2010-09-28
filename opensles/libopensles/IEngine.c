@@ -31,8 +31,12 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, 
         *pDevice = NULL;
         unsigned exposedMask;
         const ClassTable *pCLEDDevice_class = objectIDtoClass(SL_OBJECTID_LEDDEVICE);
-        result = checkInterfaces(pCLEDDevice_class, numInterfaces, pInterfaceIds,
-            pInterfaceRequired, &exposedMask);
+        if (NULL == pCLEDDevice_class) {
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        } else {
+            result = checkInterfaces(pCLEDDevice_class, numInterfaces, pInterfaceIds,
+                pInterfaceRequired, &exposedMask);
+        }
         if (SL_RESULT_SUCCESS == result) {
             CLEDDevice *this = (CLEDDevice *) construct(pCLEDDevice_class, exposedMask, self);
             if (NULL == this) {
@@ -65,8 +69,12 @@ static SLresult IEngine_CreateVibraDevice(SLEngineItf self, SLObjectItf *pDevice
         *pDevice = NULL;
         unsigned exposedMask;
         const ClassTable *pCVibraDevice_class = objectIDtoClass(SL_OBJECTID_VIBRADEVICE);
-        result = checkInterfaces(pCVibraDevice_class, numInterfaces,
-            pInterfaceIds, pInterfaceRequired, &exposedMask);
+        if (NULL == pCVibraDevice_class) {
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        } else {
+            result = checkInterfaces(pCVibraDevice_class, numInterfaces,
+                pInterfaceIds, pInterfaceRequired, &exposedMask);
+        }
         if (SL_RESULT_SUCCESS == result) {
             CVibraDevice *this = (CVibraDevice *) construct(pCVibraDevice_class, exposedMask, self);
             if (NULL == this) {
@@ -99,6 +107,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
         *pPlayer = NULL;
         unsigned exposedMask;
         const ClassTable *pCAudioPlayer_class = objectIDtoClass(SL_OBJECTID_AUDIOPLAYER);
+        assert(NULL != pCAudioPlayer_class);
         result = checkInterfaces(pCAudioPlayer_class, numInterfaces,
             pInterfaceIds, pInterfaceRequired, &exposedMask);
         if (SL_RESULT_SUCCESS == result) {
@@ -242,8 +251,12 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
         *pRecorder = NULL;
         unsigned exposedMask;
         const ClassTable *pCAudioRecorder_class = objectIDtoClass(SL_OBJECTID_AUDIORECORDER);
-        result = checkInterfaces(pCAudioRecorder_class, numInterfaces,
-                pInterfaceIds, pInterfaceRequired, &exposedMask);
+        if (NULL == pCAudioRecorder_class) {
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        } else {
+            result = checkInterfaces(pCAudioRecorder_class, numInterfaces,
+                    pInterfaceIds, pInterfaceRequired, &exposedMask);
+        }
 
         if (SL_RESULT_SUCCESS == result) {
 
@@ -348,8 +361,12 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
         *pPlayer = NULL;
         unsigned exposedMask;
         const ClassTable *pCMidiPlayer_class = objectIDtoClass(SL_OBJECTID_MIDIPLAYER);
-        result = checkInterfaces(pCMidiPlayer_class, numInterfaces,
-            pInterfaceIds, pInterfaceRequired, &exposedMask);
+        if (NULL == pCMidiPlayer_class) {
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        } else {
+            result = checkInterfaces(pCMidiPlayer_class, numInterfaces,
+                pInterfaceIds, pInterfaceRequired, &exposedMask);
+        }
         if (SL_RESULT_SUCCESS == result) {
             CMidiPlayer *this = (CMidiPlayer *) construct(pCMidiPlayer_class, exposedMask, self);
             if (NULL == this) {
@@ -383,8 +400,12 @@ static SLresult IEngine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
         *pListener = NULL;
         unsigned exposedMask;
         const ClassTable *pCListener_class = objectIDtoClass(SL_OBJECTID_LISTENER);
-        result = checkInterfaces(pCListener_class, numInterfaces,
-            pInterfaceIds, pInterfaceRequired, &exposedMask);
+        if (NULL == pCListener_class) {
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        } else {
+            result = checkInterfaces(pCListener_class, numInterfaces,
+                pInterfaceIds, pInterfaceRequired, &exposedMask);
+        }
         if (SL_RESULT_SUCCESS == result) {
             CListener *this = (CListener *) construct(pCListener_class, exposedMask, self);
             if (NULL == this) {
@@ -416,8 +437,12 @@ static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup, SLu
         *pGroup = NULL;
         unsigned exposedMask;
         const ClassTable *pC3DGroup_class = objectIDtoClass(SL_OBJECTID_3DGROUP);
-        result = checkInterfaces(pC3DGroup_class, numInterfaces,
-            pInterfaceIds, pInterfaceRequired, &exposedMask);
+        if (NULL == pC3DGroup_class) {
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        } else {
+            result = checkInterfaces(pC3DGroup_class, numInterfaces,
+                pInterfaceIds, pInterfaceRequired, &exposedMask);
+        }
         if (SL_RESULT_SUCCESS == result) {
             C3DGroup *this = (C3DGroup *) construct(pC3DGroup_class, exposedMask, self);
             if (NULL == this) {
@@ -449,6 +474,7 @@ static SLresult IEngine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix, SLu
         *pMix = NULL;
         unsigned exposedMask;
         const ClassTable *pCOutputMix_class = objectIDtoClass(SL_OBJECTID_OUTPUTMIX);
+        assert(NULL != pCOutputMix_class);
         result = checkInterfaces(pCOutputMix_class, numInterfaces,
             pInterfaceIds, pInterfaceRequired, &exposedMask);
         if (SL_RESULT_SUCCESS == result) {
@@ -500,8 +526,12 @@ static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self, SLObjectItf *p
         unsigned exposedMask;
         const ClassTable *pCMetadataExtractor_class =
             objectIDtoClass(SL_OBJECTID_METADATAEXTRACTOR);
-        result = checkInterfaces(pCMetadataExtractor_class, numInterfaces,
-            pInterfaceIds, pInterfaceRequired, &exposedMask);
+        if (NULL == pCMetadataExtractor_class) {
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        } else {
+            result = checkInterfaces(pCMetadataExtractor_class, numInterfaces,
+                pInterfaceIds, pInterfaceRequired, &exposedMask);
+        }
         if (SL_RESULT_SUCCESS == result) {
             CMetadataExtractor *this = (CMetadataExtractor *)
                 construct(pCMetadataExtractor_class, exposedMask, self);
@@ -545,7 +575,6 @@ static SLresult IEngine_QueryNumSupportedInterfaces(SLEngineItf self,
 {
     SL_ENTER_INTERFACE
 
-#if USE_PROFILES & USE_PROFILES_BASE
     if (NULL == pNumSupportedInterfaces) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -574,9 +603,6 @@ static SLresult IEngine_QueryNumSupportedInterfaces(SLEngineItf self,
             result = SL_RESULT_SUCCESS;
         }
     }
-#else
-    result = SL_RESULT_FEATURE_UNSUPPORTED;
-#endif
 
     SL_LEAVE_INTERFACE;
 }
@@ -587,7 +613,6 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
 {
     SL_ENTER_INTERFACE
 
-#if USE_PROFILES & USE_PROFILES_BASE
     if (NULL == pInterfaceId) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -621,9 +646,6 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
             }
         }
     }
-#else
-    result = SL_RESULT_FEATURE_UNSUPPORTED;
-#endif
 
     SL_LEAVE_INTERFACE
 };

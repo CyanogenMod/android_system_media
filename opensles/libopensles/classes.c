@@ -18,6 +18,9 @@
 
 #include "sles_allinclusive.h"
 
+
+#if USE_PROFILES & USE_PROFILES_GAME
+
 // 3DGroup class
 
 static const struct iid_vtable _3DGroup_interfaces[INTERFACES_3DGroup] = {
@@ -42,6 +45,9 @@ static const ClassTable C3DGroup_class = {
     NULL,
     C3DGroup_PreDestroy
 };
+
+#endif
+
 
 // AudioPlayer class
 
@@ -103,6 +109,9 @@ static const ClassTable CAudioPlayer_class = {
     CAudioPlayer_PreDestroy
 };
 
+
+#if (USE_PROFILES & USE_PROFILES_OPTIONAL) || defined(ANDROID)
+
 // AudioRecorder class
 
 static const struct iid_vtable AudioRecorder_interfaces[INTERFACES_AudioRecorder] = {
@@ -135,6 +144,9 @@ static const ClassTable CAudioRecorder_class = {
     CAudioRecorder_Destroy,
     CAudioRecorder_PreDestroy
 };
+
+#endif
+
 
 // Engine class
 
@@ -172,6 +184,9 @@ static const ClassTable CEngine_class = {
     CEngine_PreDestroy
 };
 
+
+#if USE_PROFILES & USE_PROFILES_OPTIONAL
+
 // LEDDevice class
 
 static const struct iid_vtable LEDDevice_interfaces[INTERFACES_LEDDevice] = {
@@ -193,6 +208,11 @@ static const ClassTable CLEDDevice_class = {
     NULL,
     NULL
 };
+
+#endif
+
+
+#if USE_PROFILES & USE_PROFILES_GAME
 
 // Listener class
 
@@ -217,6 +237,11 @@ static const ClassTable CListener_class = {
     NULL
 };
 
+#endif
+
+
+#if USE_PROFILES & (USE_PROFILES_GAME | USE_PROFILES_MUSIC)
+
 // MetadataExtractor class
 
 static const struct iid_vtable MetadataExtractor_interfaces[INTERFACES_MetadataExtractor] = {
@@ -240,6 +265,11 @@ static const ClassTable CMetadataExtractor_class = {
     NULL,
     NULL
 };
+
+#endif
+
+
+#if USE_PROFILES & USE_PROFILES_GAME
 
 // MidiPlayer class
 
@@ -290,6 +320,9 @@ static const ClassTable CMidiPlayer_class = {
     NULL
 };
 
+#endif
+
+
 // OutputMix class
 
 static const struct iid_vtable OutputMix_interfaces[INTERFACES_OutputMix] = {
@@ -331,6 +364,9 @@ static const ClassTable COutputMix_class = {
     COutputMix_PreDestroy
 };
 
+
+#if USE_PROFILES & USE_PROFILES_OPTIONAL
+
 // Vibra class
 
 static const struct iid_vtable VibraDevice_interfaces[INTERFACES_VibraDevice] = {
@@ -353,27 +389,55 @@ static const ClassTable CVibraDevice_class = {
     NULL
 };
 
-/* Map SL_OBJECTID to class */
+#endif
+
 
 static const ClassTable * const classes[] = {
     // Do not change order of these entries; they are in numerical order
     &CEngine_class,
+#if USE_PROFILES & USE_PROFILES_OPTIONAL
     &CLEDDevice_class,
     &CVibraDevice_class,
+#else
+    NULL,
+    NULL,
+#endif
     &CAudioPlayer_class,
+#if (USE_PROFILES & USE_PROFILES_OPTIONAL) || defined(ANDROID)
     &CAudioRecorder_class,
+#else
+    NULL,
+#endif
+#if USE_PROFILES & (USE_PROFILES_GAME | USE_PROFILES_PHONE)
     &CMidiPlayer_class,
+#else
+    NULL,
+#endif
+#if USE_PROFILES & USE_PROFILES_GAME
     &CListener_class,
     &C3DGroup_class,
+#else
+    NULL,
+    NULL,
+#endif
     &COutputMix_class,
+#if USE_PROFILES & (USE_PROFILES_GAME | USE_PROFILES_MUSIC)
     &CMetadataExtractor_class
+#else
+    NULL
+#endif
 };
+
+
+/* \brief Map SL_OBJECTID to class or NULL if object ID not supported */
 
 const ClassTable *objectIDtoClass(SLuint32 objectID)
 {
+    // object ID is the engine and always present
+    assert(NULL != classes[0]);
     SLuint32 objectID0 = classes[0]->mObjectID;
-    if (objectID0 <= objectID &&
-        classes[sizeof(classes)/sizeof(classes[0])-1]->mObjectID >= objectID)
+    if ((objectID0 <= objectID) && ((objectID0 + sizeof(classes)/sizeof(classes[0])) > objectID)) {
         return classes[objectID - objectID0];
+    }
     return NULL;
 }
