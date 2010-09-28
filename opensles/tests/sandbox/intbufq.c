@@ -20,6 +20,7 @@
 #define USE_ANDROID_SIMPLE_BUFFER_QUEUE     // change to #undef for compatibility testing
 #endif
 
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,6 +59,9 @@ frame_t square[SQUARE_FRAMES];
 
 #define SAWTOOTH_FRAMES (44100*5)
 frame_t sawtooth[SAWTOOTH_FRAMES];
+
+#define HALF_FRAMES (44100*5)
+frame_t half[HALF_FRAMES];
 
 BufferQueueItf expectedCaller = NULL;
 void *expectedContext = NULL;
@@ -115,10 +119,10 @@ int main(int argc, char **argv)
     audiosnk.pLocator = &locator_outputmix;
     audiosnk.pFormat = NULL;
     SLObjectItf playerObject;
-    SLInterfaceID ids[1] = {IID_BUFFERQUEUE};
-    SLboolean flags[1] = {SL_BOOLEAN_TRUE};
+    SLInterfaceID ids[2] = {IID_BUFFERQUEUE, SL_IID_MUTESOLO};
+    SLboolean flags[2] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
     result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc, &audiosnk,
-            1, ids, flags);
+            2, ids, flags);
     checkResult(result);
     result = (*playerObject)->Realize(playerObject, SL_BOOLEAN_FALSE);
     checkResult(result);
@@ -128,6 +132,12 @@ int main(int argc, char **argv)
     BufferQueueItf playerBufferqueue;
     result = (*playerObject)->GetInterface(playerObject, IID_BUFFERQUEUE, &playerBufferqueue);
     checkResult(result);
+    SLMuteSoloItf playerMuteSolo;
+    result = (*playerObject)->GetInterface(playerObject, SL_IID_MUTESOLO, &playerMuteSolo);
+    checkResult(result);
+    SLuint8 numChannels = 123;
+    result = (*playerMuteSolo)->GetNumChannels(playerMuteSolo, &numChannels);
+    assert(2 == numChannels);
     SLuint32 state;
     state = SL_PLAYSTATE_PLAYING;
     result = (*playerPlay)->SetPlayState(playerPlay, state);
@@ -148,6 +158,10 @@ int main(int argc, char **argv)
     for (i = 0; i < SAWTOOTH_FRAMES; ++i) {
         sawtooth[i].left = ((((int) (i % (unsigned) (sr / hz))) - 50) / 100.0) * 60000.0 - 30000.0;
         sawtooth[i].right = sawtooth[i].left;
+    }
+    for (i = 0; i < HALF_FRAMES; ++i) {
+        half[i].left = sine[i].left;
+        half[i].right = sawtooth[i].right / 2;
     }
 
     set_conio_terminal_mode();
@@ -176,6 +190,10 @@ int main(int argc, char **argv)
             case 'q':
                 buffer = square;
                 size = sizeof(square);
+                goto enqueue;
+            case 'h':
+                buffer = half;
+                size = sizeof(half);
                 goto enqueue;
             case 'r':
                 if (in_count) {

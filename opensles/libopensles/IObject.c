@@ -335,6 +335,11 @@ static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, 
                     // Can't get interface on a suspended/suspending/resuming object
                     // unless this is an explicit pre-realize interface
                     result = SL_RESULT_PRECONDITIONS_VIOLATED;
+                } else if ((MPH_MUTESOLO == MPH) && (SL_OBJECTID_AUDIOPLAYER == class__->mObjectID)
+                        && (1 == ((CAudioPlayer *) this)->mNumChannels)) {
+                    // Can't get the MuteSolo interface of an audio player if the channel count is
+                    // mono, but _can_ get the MuteSolo interface if the channel count is unknown
+                    result = SL_RESULT_FEATURE_UNSUPPORTED;
                 } else {
                     switch (this->mInterfaceStates[index]) {
                     case INTERFACE_EXPOSED:
