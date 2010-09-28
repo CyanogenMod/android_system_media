@@ -24,7 +24,7 @@
 
 namespace android {
 
-SfPlayer::SfPlayer()
+SfPlayer::SfPlayer(AudioPlayback_Parameters *app)
     : mAudioTrack(NULL),
       mFlags(0),
       mBitrate(-1),
@@ -44,6 +44,11 @@ SfPlayer::SfPlayer()
       mDecodeBuffer(NULL) {
 
       mRenderLooper = new android::ALooper();
+
+      mPlaybackParams.sessionId = app->sessionId;
+      mPlaybackParams.streamType = app->streamType;
+      mPlaybackParams.trackcb = app->trackcb;
+      mPlaybackParams.trackcbUser = app->trackcbUser;
 }
 
 
@@ -82,6 +87,13 @@ void SfPlayer::useAudioTrack(AudioTrack* pTrack) {
 void SfPlayer::setNotifListener(const notif_client_t cbf, void* notifUser) {
     mNotifyClient = cbf;
     mNotifyUser = notifUser;
+}
+
+
+void SfPlayer::notifyPrepared(status_t prepareRes) {
+    sp<AMessage> msg = new AMessage(kWhatNotif, id());
+    msg->setInt32(EVENT_PREPARED, (int32_t)prepareRes);
+    notify(msg, true /*async*/);
 }
 
 
@@ -155,27 +167,22 @@ void SfPlayer::setDataSource(const int fd, const int64_t offset, const int64_t l
     mDataLocatorType = kDataLocatorFd;
 }
 
-void SfPlayer::prepare_async() {
-    //SL_LOGV("SfPlayer::prepare_async()");
+void SfPlayer::prepare() {
+    //SL_LOGV("SfPlayer::prepare()");
     sp<AMessage> msg = new AMessage(kWhatPrepare, id());
     msg->post();
 }
 
-int SfPlayer::prepare_sync() {
-    //SL_LOGV("SfPlayer::prepare_sync()");
-    sp<AMessage> msg = new AMessage(kWhatPrepare, id());
-    return onPrepare(msg);
-}
 
-int SfPlayer::onPrepare(const sp<AMessage> &msg) {
-    //SL_LOGV("SfPlayer::onPrepare");
+void SfPlayer::onPrepare(const sp<AMessage> &msg) {
+    SL_LOGV("SfPlayer::onPrepare");
     sp<DataSource> dataSource;
 
     switch (mDataLocatorType) {
 
         case kDataLocatorNone:
             SL_LOGE("SfPlayer::onPrepare: no data locator set");
-            return MEDIA_ERROR_BASE;
+            notifyPrepared(MEDIA_ERROR_BASE);
             break;
 
         case kDataLocatorUri:
@@ -197,7 +204,8 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
                     mDataLocator.fdi.fd, mDataLocator.fdi.offset, mDataLocator.fdi.length);
             status_t err = dataSource->initCheck();
             if (err != OK) {
-                return err;
+                notifyPrepared(err);
+                return;
             }
             }
             break;
@@ -208,13 +216,15 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
 
     if (dataSource == NULL) {
         SL_LOGE("SfPlayer::onPrepare: Could not create data source.");
-        return ERROR_UNSUPPORTED;
+        notifyPrepared(ERROR_UNSUPPORTED);
+        return;
     }
 
     sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
     if (extractor == NULL) {
         SL_LOGE("SfPlayer::onPrepare: Could not instantiate extractor.");
-        return ERROR_UNSUPPORTED;
+        notifyPrepared(ERROR_UNSUPPORTED);
+        return;
     }
 
     ssize_t audioTrackIndex = -1;
@@ -237,7 +247,7 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
 
     if (audioTrackIndex < 0) {
         SL_LOGE("SfPlayer::onPrepare: Could not find an audio track.");
-        return ERROR_UNSUPPORTED;
+        notifyPrepared(ERROR_UNSUPPORTED);
     }
 
     sp<MediaSource> source = extractor->getTrack(audioTrackIndex);
@@ -264,7 +274,8 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
 
         if (source == NULL) {
             SL_LOGE("SfPlayer::onPrepare: Could not instantiate decoder.");
-            return ERROR_UNSUPPORTED;
+            notifyPrepared(ERROR_UNSUPPORTED);
+            return;
         }
 
         meta = source->getFormat();
@@ -272,7 +283,8 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
 
     if (source->start() != OK) {
         SL_LOGE("SfPlayer::onPrepare: Failed to start source/decoder.");
-        return MEDIA_ERROR_BASE;
+        notifyPrepared(MEDIA_ERROR_BASE);
+        return;
     }
 
     mDataSource = dataSource;
@@ -290,8 +302,24 @@ int SfPlayer::onPrepare(const sp<AMessage> &msg) {
         notifyCacheFill();
     }
 
+    // at this point we have enough information about the source to create its associated AudioTrack
+    mAudioTrack = new android::AudioTrack(
+            mPlaybackParams.streamType,                          // streamType
+            mSampleRateHz,                                       // sampleRate
+            android::AudioSystem::PCM_16_BIT,                    // format
+            mNumChannels == 1 ?     //channel mask
+                    android::AudioSystem::CHANNEL_OUT_MONO :
+                    android::AudioSystem::CHANNEL_OUT_STEREO,
+            0,                                                   // frameCount (here min)
+            0,                                                   // flags
+            mPlaybackParams.trackcb,                             // callback
+            mPlaybackParams.trackcbUser,                         // user
+            0,                                                   // notificationFrame
+            mPlaybackParams.sessionId
+        );
+
     //SL_LOGV("SfPlayer::onPrepare: end");
-    return SFPLAYER_SUCCESS;
+    notifyPrepared(SFPLAYER_SUCCESS);
 
 }
 
@@ -302,25 +330,20 @@ bool SfPlayer::wantPrefetch() {
 
 
 void SfPlayer::startPrefetch_async() {
-    //SL_LOGV("SfPlayer::startPrefetch_async()");
+    SL_LOGV("SfPlayer::startPrefetch_async()");
     if (wantPrefetch()) {
         //SL_LOGV("SfPlayer::startPrefetch_async(): sending check cache msg");
 
         mFlags |= kFlagPreparing;
         mFlags |= kFlagBuffering;
 
-        (new AMessage(kWhatCheckCache, id()))->post(100000);
+        (new AMessage(kWhatCheckCache, id()))->post();
     }
 }
 
 
 void SfPlayer::play() {
     SL_LOGV("SfPlayer::play");
-    if (NULL == mAudioTrack) {
-        return;
-    }
-
-    mAudioTrack->start();
 
     (new AMessage(kWhatPlay, id()))->post();
     (new AMessage(kWhatDecode, id()))->post();
@@ -330,10 +353,9 @@ void SfPlayer::play() {
 void SfPlayer::stop() {
     SL_LOGV("SfPlayer::stop");
 
-    if (NULL == mAudioTrack) {
-        return;
+    if (NULL != mAudioTrack) {
+        mAudioTrack->stop();
     }
-    mAudioTrack->stop();
 
     (new AMessage(kWhatPause, id()))->post();
 
@@ -416,6 +438,10 @@ void SfPlayer::reachedEndOfStream() {
 void SfPlayer::onPlay() {
     SL_LOGV("SfPlayer::onPlay");
     mFlags |= kFlagPlaying;
+
+    if (NULL != mAudioTrack) {
+        mAudioTrack->start();
+    }
 }
 
 
@@ -507,6 +533,9 @@ void SfPlayer::onDecode() {
             // FIXME handle error
         } else {
             // handle notification and looping at end of stream
+            if (0 < mDurationUsec) {
+                mLastDecodedPositionUs = mDurationUsec;
+            }
             reachedEndOfStream();
         }
         return;
@@ -584,18 +613,23 @@ void SfPlayer::onNotify(const sp<AMessage> &msg) {
     if (NULL == mNotifyClient) {
         return;
     }
-    int32_t cacheInfo;
-    if (msg->findInt32(EVENT_PREFETCHSTATUSCHANGE, &cacheInfo)) {
-        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_PREFETCHSTATUSCHANGE, cacheInfo);
-        mNotifyClient(kEventPrefetchStatusChange, cacheInfo, mNotifyUser);
+    int32_t val;
+    if (msg->findInt32(EVENT_PREFETCHSTATUSCHANGE, &val)) {
+        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_PREFETCHSTATUSCHANGE, val);
+        mNotifyClient(kEventPrefetchStatusChange, val, mNotifyUser);
     }
-    if (msg->findInt32(EVENT_PREFETCHFILLLEVELUPDATE, &cacheInfo)) {
-        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_PREFETCHFILLLEVELUPDATE, cacheInfo);
-        mNotifyClient(kEventPrefetchFillLevelUpdate, cacheInfo, mNotifyUser);
+    if (msg->findInt32(EVENT_PREFETCHFILLLEVELUPDATE, &val)) {
+        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_PREFETCHFILLLEVELUPDATE, val);
+        mNotifyClient(kEventPrefetchFillLevelUpdate, val, mNotifyUser);
     }
-    if (msg->findInt32(EVENT_ENDOFSTREAM, &cacheInfo)) {
-        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_ENDOFSTREAM, cacheInfo);
-        mNotifyClient(kEventEndOfStream, cacheInfo, mNotifyUser);
+    if (msg->findInt32(EVENT_ENDOFSTREAM, &val)) {
+        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_ENDOFSTREAM, val);
+        mNotifyClient(kEventEndOfStream, val, mNotifyUser);
+    }
+
+    if (msg->findInt32(EVENT_PREPARED, &val)) {
+        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_PREPARED, val);
+        mNotifyClient(kEventPrepared, val, mNotifyUser);
     }
 }
 

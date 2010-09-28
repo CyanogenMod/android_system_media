@@ -70,6 +70,7 @@ endif
 
 LOCAL_MODULE:= slesTest_playUri
 
+include $(BUILD_EXECUTABLE)
 
 # slesTest_loopUri
 
@@ -92,7 +93,6 @@ ifeq ($(TARGET_OS),linux)
 endif
 
 LOCAL_MODULE:= slesTest_loopUri
-
 
 include $(BUILD_EXECUTABLE)
 
