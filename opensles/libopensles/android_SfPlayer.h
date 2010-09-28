@@ -40,6 +40,10 @@
 #define SIZE_CACHED_MED_BYTES   700000
 #define SIZE_CACHED_LOW_BYTES   400000
 
+/*
+ * events sent to mNotifyClient during prepare, prefetch, and playback
+ */
+#define EVENT_PREPARED                "prep"
 #define EVENT_PREFETCHSTATUSCHANGE    "prsc"
 #define EVENT_PREFETCHFILLLEVELUPDATE "pflu"
 #define EVENT_ENDOFSTREAM             "eos"
@@ -50,12 +54,21 @@
 #define NO_FILL_LEVEL_UPDATE -1
 #define NO_STATUS_UPDATE kStatusUnknown
 
+
+typedef struct AudioPlayback_Parameters_struct {
+    int streamType;
+    int sessionId;
+    android::AudioTrack::callback_t trackcb;
+    void* trackcbUser;
+} AudioPlayback_Parameters;
+
+
 namespace android {
 
     typedef void (*notif_client_t)(int event, const int data1, void* notifUser);
 
 struct SfPlayer : public AHandler {
-    SfPlayer();
+    SfPlayer(AudioPlayback_Parameters *app);
 
     enum CacheStatus {
         kStatusUnknown = -1,
@@ -67,6 +80,7 @@ struct SfPlayer : public AHandler {
     };
 
     enum {
+        kEventPrepared                = 'prep',
         kEventPrefetchStatusChange    = 'prsc',
         kEventPrefetchFillLevelUpdate = 'pflu',
         kEventEndOfStream             = 'eos',
@@ -81,8 +95,7 @@ struct SfPlayer : public AHandler {
 
     void setCacheFillUpdateThreshold(int16_t thr) { mCacheFillNotifThreshold = thr; }
 
-    void prepare_async();
-    int  prepare_sync();
+    void prepare();
     void play();
     void pause();
     void stop();
@@ -97,6 +110,7 @@ struct SfPlayer : public AHandler {
     int64_t getDurationUsec() { return mDurationUsec; }
     int32_t getNumChannels()  { return mNumChannels; }
     int32_t getSampleRateHz() { return mSampleRateHz; }
+    AudioTrack* getAudioTrack() { return mAudioTrack; }
     uint32_t getPositionMsec();
 
 protected:
@@ -162,6 +176,7 @@ private:
     int16_t mCacheFill; // cache fill level in permille
     int16_t mLastNotifiedCacheFill; // last cache fill level communicated to the listener
     int16_t mCacheFillNotifThreshold; // threshold in cache fill level for cache fill to be reported
+    AudioPlayback_Parameters mPlaybackParams;
 
     DataLocator mDataLocator;
     int         mDataLocatorType;
@@ -175,7 +190,7 @@ private:
     MediaBuffer *mDecodeBuffer;
 
     // message handlers
-    int onPrepare(const sp<AMessage> &msg);
+    void onPrepare(const sp<AMessage> &msg);
     void onDecode();
     void onRender(const sp<AMessage> &msg);
     void onCheckCache(const sp<AMessage> &msg);
@@ -190,6 +205,7 @@ private:
     void reachedEndOfStream();
     void notifyStatus();
     void notifyCacheFill();
+    void notifyPrepared(status_t prepareRes);
     void notify(const sp<AMessage> &msg, bool async);
 
     void resetDataLocator();
