@@ -73,14 +73,21 @@ void CEngine_Destroy(void *self)
         }
     }
 
-    // Announce to the sync thread that engine is shutting down; it polls so should see it soon
-    this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
-    // Wait for the sync thread to acknowledge the shutdown
-    while (!this->mEngine.mShutdownAck) {
-        object_cond_wait(&this->mObject);
+    // If engine was created but not realized, there will be no sync thread yet
+    pthread_t zero;
+    memset(&zero, 0, sizeof(pthread_t));
+    if (0 != memcmp(&zero, &this->mSyncThread, sizeof(pthread_t))) {
+
+        // Announce to the sync thread that engine is shutting down; it polls so should see it soon
+        this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
+        // Wait for the sync thread to acknowledge the shutdown
+        while (!this->mEngine.mShutdownAck) {
+            object_cond_wait(&this->mObject);
+        }
+        // The sync thread should have exited by now, so collect it by joining
+        (void) pthread_join(this->mSyncThread, (void **) NULL);
+
     }
-    // The sync thread should have exited by now, so collect it by joining
-    (void) pthread_join(this->mSyncThread, (void **) NULL);
 
     // Shutdown the thread pool used for asynchronous operations (there should not be any)
     ThreadPool_deinit(&this->mEngine.mThreadPool);
