@@ -365,16 +365,47 @@ SLresult audioPlayer_getStreamType(CAudioPlayer* ap, SLint32 *pType) {
 
 //-----------------------------------------------------------------------------
 #ifndef USE_BACKPORT
+static void sfplayer_prepare(CAudioPlayer *ap) {
+    if (ap->mSfPlayer != 0) {
+        ap->mSfPlayer->prepare();
+    }
+    ap->mAndroidObjState = ANDROID_PREPARING;
+}
+#endif
+
+//-----------------------------------------------------------------------------
+#ifndef USE_BACKPORT
 // Callback associated with an SfPlayer of an SL ES AudioPlayer that gets its data
-// from a URI or FD, for prefetching events
+// from a URI or FD, for prepare and prefetch events
 static void sfplayer_handlePrefetchEvent(const int event, const int data1, void* user) {
     if (NULL == user) {
         return;
     }
 
     CAudioPlayer *ap = (CAudioPlayer *)user;
-    //SL_LOGV("received event %d, data %d from SfAudioPlayer", event, data1);
+    SL_LOGV("received event %d, data %d from SfAudioPlayer", event, data1);
     switch(event) {
+
+    case(android::SfPlayer::kEventPrepared): {
+        object_lock_exclusive(&ap->mObject);
+
+        if (SFPLAYER_SUCCESS != data1) {
+            ap->mAudioTrack = NULL;
+            ap->mNumChannels = 0;
+            ap->mSampleRateMilliHz = 0;
+            ap->mAndroidObjState = ANDROID_UNINITIALIZED;
+
+        } else {
+            ap->mAudioTrack = ap->mSfPlayer->getAudioTrack();
+            ap->mNumChannels = ap->mSfPlayer->getNumChannels();
+            ap->mSampleRateMilliHz = android_to_sles_sampleRate(ap->mSfPlayer->getSampleRateHz());
+            ap->mSfPlayer->startPrefetch_async();
+
+            ap->mAndroidObjState = ANDROID_READY;
+        }
+
+        object_unlock_exclusive(&ap->mObject);
+    } break;
 
     case(android::SfPlayer::kEventPrefetchFillLevelUpdate): {
         if (!IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
@@ -428,9 +459,9 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
 
     case(android::SfPlayer::kEventEndOfStream): {
         audioPlayer_dispatch_headAtEnd_lockPlay(ap, true /*set state to paused?*/, true);
-        // FIXME update play position to make sure it's at the same value
-        //       as getDuration if it's known?
-        ap->mAudioTrack->stop();
+        if (NULL != ap->mAudioTrack) {
+            ap->mAudioTrack->stop();
+        }
         } break;
 
     default:
@@ -921,26 +952,36 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         pAudioPlayer->mNumChannels = df_pcm->numChannels;
         pAudioPlayer->mSampleRateMilliHz = df_pcm->samplesPerSec; // Note: bad field name in SL ES
+
+        pAudioPlayer->mAndroidObjState = ANDROID_READY;
         } break;
 #ifndef USE_BACKPORT
     //-----------------------------------
     // MediaPlayer
     case MEDIAPLAYER: {
         object_lock_exclusive(&pAudioPlayer->mObject);
-        pAudioPlayer->mAndroidObjState = ANDROID_PREPARING;
 
-        pAudioPlayer->mSfPlayer = new android::SfPlayer();
+        pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
+        pAudioPlayer->mNumChannels = 0;
+        pAudioPlayer->mSampleRateMilliHz = 0;
+        pAudioPlayer->mAudioTrack = NULL;
+
+        AudioPlayback_Parameters app;
+        app.sessionId = pAudioPlayer->mSessionId;
+        app.streamType = pAudioPlayer->mStreamType;
+        app.trackcb = audioTrack_callBack_uri;
+        app.trackcbUser = (void *) pAudioPlayer;
+
+        pAudioPlayer->mSfPlayer = new android::SfPlayer(&app);
         pAudioPlayer->mSfPlayer->setNotifListener(sfplayer_handlePrefetchEvent,
                         (void*)pAudioPlayer /*notifUSer*/);
         pAudioPlayer->mSfPlayer->armLooper();
         object_unlock_exclusive(&pAudioPlayer->mObject);
 
-        int res;
         switch (pAudioPlayer->mDataSource.mLocator.mLocatorType) {
             case SL_DATALOCATOR_URI:
                 pAudioPlayer->mSfPlayer->setDataSource(
                         (const char*)pAudioPlayer->mDataSource.mLocator.mURI.URI);
-                res = pAudioPlayer->mSfPlayer->prepare_sync();
                 break;
             case SL_DATALOCATOR_ANDROIDFD: {
                 int64_t offset = (int64_t)pAudioPlayer->mDataSource.mLocator.mFD.offset;
@@ -949,49 +990,11 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                         offset == SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ?
                                 (int64_t)SFPLAYER_FD_FIND_FILE_SIZE : offset,
                         (int64_t)pAudioPlayer->mDataSource.mLocator.mFD.length);
-                res = pAudioPlayer->mSfPlayer->prepare_sync();
                 } break;
             default:
-                res = ~SFPLAYER_SUCCESS;
+                SL_LOGE(ERROR_PLAYERREALIZE_UNKNOWN_DATASOURCE_LOCATOR);
                 break;
         }
-
-        object_lock_exclusive(&pAudioPlayer->mObject);
-        if (SFPLAYER_SUCCESS != res) {
-            pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
-            pAudioPlayer->mNumChannels = 0;
-            pAudioPlayer->mSampleRateMilliHz = 0;
-            pAudioPlayer->mAudioTrack = NULL;
-        } else {
-            // create audio track based on parameters retrieved from Stagefright
-            pAudioPlayer->mAudioTrack = new android::AudioTrack(
-                    pAudioPlayer->mStreamType,                           // streamType
-                    pAudioPlayer->mSfPlayer->getSampleRateHz(),          // sampleRate
-                    android::AudioSystem::PCM_16_BIT,                    // format
-                    pAudioPlayer->mSfPlayer->getNumChannels() == 1 ?     //channel mask
-                            android::AudioSystem::CHANNEL_OUT_MONO :
-                            android::AudioSystem::CHANNEL_OUT_STEREO,
-                    0,                                                   // frameCount (here min)
-                    0,                                                   // flags
-                    audioTrack_callBack_uri,                             // callback
-                    (void *) pAudioPlayer,                               // user
-                    0                                                    // notificationFrame
-#ifndef USE_BACKPORT
-                    , pAudioPlayer->mSessionId
-#endif
-                );
-            pAudioPlayer->mNumChannels = pAudioPlayer->mSfPlayer->getNumChannels();
-            pAudioPlayer->mSampleRateMilliHz =
-                    android_to_sles_sampleRate(pAudioPlayer->mSfPlayer->getSampleRateHz());
-            pAudioPlayer->mSfPlayer->useAudioTrack(pAudioPlayer->mAudioTrack);
-
-            if (pAudioPlayer->mSfPlayer->wantPrefetch()) {
-                pAudioPlayer->mAndroidObjState = ANDROID_PREPARED;
-            } else {
-                pAudioPlayer->mAndroidObjState = ANDROID_READY;
-            }
-        }
-        object_unlock_exclusive(&pAudioPlayer->mObject);
 
         } break;
 #endif
@@ -1002,10 +1005,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     }
 
 #ifndef USE_BACKPORT
-
-    if (ANDROID_UNINITIALIZED == pAudioPlayer->mAndroidObjState) {
-        return result;
-    }
 
     // proceed with effect initialization
     // initialize EQ
@@ -1173,16 +1172,22 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
     case AUDIOTRACK_PULL:
         switch (state) {
         case SL_PLAYSTATE_STOPPED:
-            SL_LOGI("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
-            ap->mAudioTrack->stop();
+            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
+            if (NULL != ap->mAudioTrack) {
+                ap->mAudioTrack->stop();
+            }
             break;
         case SL_PLAYSTATE_PAUSED:
-            SL_LOGI("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
-            ap->mAudioTrack->pause();
+            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
+            if (NULL != ap->mAudioTrack) {
+                ap->mAudioTrack->pause();
+            }
             break;
         case SL_PLAYSTATE_PLAYING:
-            SL_LOGI("setting AudioPlayer to SL_PLAYSTATE_PLAYING");
-            ap->mAudioTrack->start();
+            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PLAYING");
+            if (NULL != ap->mAudioTrack) {
+                ap->mAudioTrack->start();
+            }
             break;
         default:
             // checked by caller, should not happen
@@ -1193,28 +1198,22 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
     case MEDIAPLAYER:
         switch (state) {
         case SL_PLAYSTATE_STOPPED: {
-            SL_LOGI("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
+            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
             if (ap->mSfPlayer != 0) {
                 ap->mSfPlayer->stop();
             }
             } break;
         case SL_PLAYSTATE_PAUSED: {
-            SL_LOGI("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
+            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
             object_lock_peek(&ap);
             AndroidObject_state state = ap->mAndroidObjState;
             object_unlock_peek(&ap);
             switch(state) {
                 case(ANDROID_UNINITIALIZED):
-                case(ANDROID_PREPARING):
-                    if (ap->mSfPlayer != 0) {
-                        ap->mSfPlayer->pause();
-                    }
+                    sfplayer_prepare(ap);
                     break;
-                case(ANDROID_PREPARED):
-                    if (ap->mSfPlayer != 0) {
-                        ap->mSfPlayer->startPrefetch_async();
-                    }
-                case(ANDROID_PREFETCHING):
+                case(ANDROID_PREPARING):
+                    break;
                 case(ANDROID_READY):
                     if (ap->mSfPlayer != 0) {
                         ap->mSfPlayer->pause();
@@ -1225,15 +1224,25 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
             }
             } break;
         case SL_PLAYSTATE_PLAYING: {
-            SL_LOGI("setting AudioPlayer to SL_PLAYSTATE_PLAYING");
+            SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PLAYING");
             object_lock_peek(&ap);
             AndroidObject_state state = ap->mAndroidObjState;
             object_unlock_peek(&ap);
-            // FIXME check in spec when playback is allowed to start in another state
-            if ((state >= ANDROID_READY) && (ap->mSfPlayer != 0)) {
-                ap->mSfPlayer->play();
+            switch(state) {
+                case(ANDROID_UNINITIALIZED):
+                    sfplayer_prepare(ap);
+                    // fall through
+                case(ANDROID_PREPARING):
+                case(ANDROID_READY):
+                    if (ap->mSfPlayer != 0) {
+                        ap->mSfPlayer->play();
+                    }
+                    break;
+                default:
+                    break;
             }
             } break;
+
         default:
             // checked by caller, should not happen
             break;
@@ -1321,11 +1330,11 @@ void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
     CAudioPlayer *ap = (CAudioPlayer *)pPlayItf->mThis;
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PULL:
-        uint32_t positionInFrames;
-        ap->mAudioTrack->getPosition(&positionInFrames);
-        if (ap->mSampleRateMilliHz == 0) {
+        if ((ap->mSampleRateMilliHz == 0) || (NULL == ap->mAudioTrack)) {
             *pPosMsec = 0;
         } else {
+            uint32_t positionInFrames;
+            ap->mAudioTrack->getPosition(&positionInFrames);
             *pPosMsec = ((int64_t)positionInFrames * 1000) /
                     sles_to_android_sampleRate(ap->mSampleRateMilliHz);
         }

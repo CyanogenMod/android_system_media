@@ -902,8 +902,6 @@ enum AndroidObject_type {
 enum AndroidObject_state {
     ANDROID_UNINITIALIZED = -1,
     ANDROID_PREPARING,
-    ANDROID_PREPARED,
-    ANDROID_PREFETCHING,
     ANDROID_READY,
     NUM_ANDROID_STATES
 };
