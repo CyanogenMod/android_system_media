@@ -35,7 +35,7 @@ static SLresult IPlaybackRate_SetRate(SLPlaybackRateItf self, SLpermille rate)
         CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
                 (CAudioPlayer *) this->mThis : NULL;
         if (NULL != ap) {
-            result = android_audioPlayer_setPlayRate(ap, rate);
+            result = android_audioPlayer_setPlayRate(ap, rate, true);
         } else {
             result = SL_RESULT_PARAMETER_INVALID;
         }

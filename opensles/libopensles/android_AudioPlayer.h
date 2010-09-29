@@ -75,7 +75,8 @@ extern SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer);
 /**************************************************************************************************
  * Configuration
  ****************************/
-extern SLresult android_audioPlayer_setPlayRate(CAudioPlayer *pAudioPlayer, SLpermille rate);
+extern SLresult android_audioPlayer_setPlayRate(CAudioPlayer *pAudioPlayer, SLpermille rate,
+        bool lockAP);
 
 extern SLresult android_audioPlayer_setPlaybackRateBehavior(CAudioPlayer *pAudioPlayer,
         SLuint32 constraints);
@@ -90,7 +91,7 @@ extern SLresult android_audioPlayer_volumeUpdate(CAudioPlayer *pAudioPlayer);
 /**************************************************************************************************
  * Playback control and events
  ****************************/
-extern void android_audioPlayer_setPlayState(CAudioPlayer *pAudioPlayer);
+extern void android_audioPlayer_setPlayState(CAudioPlayer *pAudioPlayer, bool lockAP);
 
 extern void android_audioPlayer_useEventMask(CAudioPlayer *pAudioPlayer);
 
