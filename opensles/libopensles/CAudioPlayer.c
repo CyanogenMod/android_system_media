@@ -26,9 +26,6 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
     CAudioPlayer *this = (CAudioPlayer *) self;
     SLresult result = SL_RESULT_SUCCESS;
 
-    // initialize cached data, to be overwritten by platform-specific initialization
-    this->mNumChannels = 0;
-
 #ifdef ANDROID
     result = android_audioPlayer_realize(this, async);
 #endif
@@ -36,6 +33,10 @@ SLresult CAudioPlayer_Realize(void *self, SLboolean async)
 #ifdef USE_SNDFILE
     result = SndFile_Realize(this);
 #endif
+
+    // At this point the channel count and sample rate might still be unknown,
+    // depending on the data source and the platform implementation.
+    // If they are unknown here, then they will be determined during prefetch.
 
     return result;
 }
