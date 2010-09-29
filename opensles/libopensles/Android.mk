@@ -65,6 +65,7 @@ LOCAL_SRC_FILES:=                     \
         IMuteSolo.c                   \
         IObject.c                     \
         IPlay.c                       \
+        IPlaybackRate.c               \
         IPrefetchStatus.c             \
         IPresetReverb.c               \
         IRecord.c                     \
@@ -96,7 +97,6 @@ EXCLUDE_SRC :=                        \
         IMetadataTraversal.c          \
         IOutputMix.c                  \
         IPitch.c                      \
-        IPlaybackRate.c               \
         IRatePitch.c                  \
         IThreadSync.c                 \
         IVibra.c                      \

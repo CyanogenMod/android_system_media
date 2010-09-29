@@ -207,6 +207,7 @@ void audioTrack_handleUnderrun_lockPlay(CAudioPlayer* ap) {
     }
 }
 
+
 //-----------------------------------------------------------------------------
 /**
  * post-condition: play state of AudioPlayer is SL_PLAYSTATE_PAUSED if setPlayStateToPaused is true
@@ -383,7 +384,7 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
     }
 
     CAudioPlayer *ap = (CAudioPlayer *)user;
-    SL_LOGV("received event %d, data %d from SfAudioPlayer", event, data1);
+    //SL_LOGV("received event %d, data %d from SfAudioPlayer", event, data1);
     switch(event) {
 
     case(android::SfPlayer::kEventPrepared): {
@@ -400,6 +401,11 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
             ap->mNumChannels = ap->mSfPlayer->getNumChannels();
             ap->mSampleRateMilliHz = android_to_sles_sampleRate(ap->mSfPlayer->getSampleRateHz());
             ap->mSfPlayer->startPrefetch_async();
+
+            // update the new track with the current settings
+            android_audioPlayer_useEventMask(ap);
+            android_audioPlayer_volumeUpdate(ap);
+            android_audioPlayer_setPlayRate(ap, ap->mPlaybackRate.mRate);
 
             ap->mAndroidObjState = ANDROID_READY;
         }
@@ -459,7 +465,7 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
 
     case(android::SfPlayer::kEventEndOfStream): {
         audioPlayer_dispatch_headAtEnd_lockPlay(ap, true /*set state to paused?*/, true);
-        if (NULL != ap->mAudioTrack) {
+        if ((NULL != ap->mAudioTrack) && (!ap->mSeek.mLoopEnabled)) {
             ap->mAudioTrack->stop();
         }
         } break;
@@ -838,6 +844,11 @@ SLresult android_audioPlayer_create(
     pAudioPlayer->mAndroidEffect.mEffects =
             new android::KeyedVector<SLuint32, android::AudioEffect* >();
 
+    // initialize interface-specific fields that can be used regardless of whether the interface
+    // is exposed on the AudioPlayer or not
+    pAudioPlayer->mSeek.mLoopEnabled = SL_BOOLEAN_FALSE;
+    pAudioPlayer->mPlaybackRate.mRate = 1000;
+
     return result;
 
 }
@@ -1096,16 +1107,15 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
 
 //-----------------------------------------------------------------------------
 // called with no lock held
-SLresult android_audioPlayer_setPlayRate(IPlaybackRate *pRateItf, SLpermille rate) {
+SLresult android_audioPlayer_setPlayRate(CAudioPlayer *ap, SLpermille rate) {
     SLresult result = SL_RESULT_SUCCESS;
-    CAudioPlayer *ap = (CAudioPlayer *)pRateItf->mThis;
+    uint32_t contentRate = 0;
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PULL:
     case MEDIAPLAYER: {
         // get the content sample rate
         object_lock_peek(ap);
-        uint32_t contentRate =
-            sles_to_android_sampleRate(ap->mDataSource.mFormat.mPCM.samplesPerSec);
+        uint32_t contentRate = sles_to_android_sampleRate(ap->mSampleRateMilliHz);
         object_unlock_peek(ap);
         // apply the SL ES playback rate on the AudioTrack as a factor of its content sample rate
         ap->mpLock->lock();
@@ -1127,10 +1137,9 @@ SLresult android_audioPlayer_setPlayRate(IPlaybackRate *pRateItf, SLpermille rat
 
 //-----------------------------------------------------------------------------
 // called with no lock held
-SLresult android_audioPlayer_setPlaybackRateBehavior(IPlaybackRate *pRateItf,
+SLresult android_audioPlayer_setPlaybackRateBehavior(CAudioPlayer *ap,
         SLuint32 constraints) {
     SLresult result = SL_RESULT_SUCCESS;
-    CAudioPlayer *ap = (CAudioPlayer *)pRateItf->mThis;
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PULL:
     case MEDIAPLAYER:
@@ -1149,9 +1158,8 @@ SLresult android_audioPlayer_setPlaybackRateBehavior(IPlaybackRate *pRateItf,
 
 //-----------------------------------------------------------------------------
 // called with no lock held
-SLresult android_audioPlayer_getCapabilitiesOfRate(IPlaybackRate *pRateItf,
+SLresult android_audioPlayer_getCapabilitiesOfRate(CAudioPlayer *ap,
         SLuint32 *pCapabilities) {
-    CAudioPlayer *ap = (CAudioPlayer *)pRateItf->mThis;
     switch(ap->mAndroidObjType) {
     case AUDIOTRACK_PULL:
     case MEDIAPLAYER:

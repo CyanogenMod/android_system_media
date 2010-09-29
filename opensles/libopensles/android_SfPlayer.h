@@ -36,6 +36,11 @@
 #define DURATION_CACHED_MED_US   10000000 // 10s
 #define DURATION_CACHED_LOW_US    2000000 //  2s
 
+/*
+ * by how much time data is written to the AudioTrack ahead of the scheduled render time
+ */
+#define RENDER_SAFETY_DELAY_US 5000 // 5ms
+
 #define SIZE_CACHED_HIGH_BYTES 1000000
 #define SIZE_CACHED_MED_BYTES   700000
 #define SIZE_CACHED_LOW_BYTES   400000

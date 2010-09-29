@@ -549,11 +549,22 @@ void SfPlayer::onDecode() {
         mTimeDelta = ALooper::GetNowUs() - mLastDecodedPositionUs;
     }
 
-    int64_t delayUs = mLastDecodedPositionUs + mTimeDelta - ALooper::GetNowUs();
+    int64_t delayUs = mLastDecodedPositionUs + mTimeDelta - ALooper::GetNowUs()
+            - RENDER_SAFETY_DELAY_US; // negative delays are ignored
 
-    msg->post(delayUs); // negative delays are ignored
+
+    if ((NULL != mAudioTrack) && (mAudioTrack->getSampleRate() > mSampleRateHz)) {
+        // we're speeding up playback, feed data faster
+        // FIXME not the right formula, delays need to be evaluated differently
+        delayUs = RENDER_SAFETY_DELAY_US;
+        //SL_LOGV("delayUs=%lld new", delayUs);
+    }
+
+    // FIXME clicks can be observed if solely relying on delayUs, this is a safe compromise
+    msg->post(delayUs > RENDER_SAFETY_DELAY_US ? RENDER_SAFETY_DELAY_US : delayUs);
+    //msg->post(delayUs); // negative delays are ignored
     //SL_LOGV("timeUs=%lld, mTimeDelta=%lld, delayUs=%lld",
-    //mLastDecodedPositionUs, mTimeDelta, delayUs);
+    //        mLastDecodedPositionUs, mTimeDelta, delayUs);
 }
 
 
