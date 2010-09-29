@@ -100,4 +100,9 @@ extern void android_audioPlayer_loop(CAudioPlayer *pAudioPlayer, SLboolean loopE
 
 extern void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
 
-extern void android_audioPlayer_bufferQueueRefilled(CAudioPlayer *pAudioPlayer);
+/**************************************************************************************************
+ * Buffer Queue events
+ ****************************/
+extern void android_audioPlayer_bufferQueue_onRefilled(CAudioPlayer *pAudioPlayer);
+
+extern SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *pAudioPlayer);

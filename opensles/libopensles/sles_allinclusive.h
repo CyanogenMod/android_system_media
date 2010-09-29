@@ -1332,9 +1332,6 @@ extern void slTraceLeaveInterfaceVoid(const char *function);
 #ifdef USE_SNDFILE
 extern void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer);
 #endif
-#ifdef ANDROID
-extern SLresult android_audioPlayerClear(CAudioPlayer *pAudioPlayer);
-#endif
 
 extern SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer, SLuint32 size);
 extern SLresult IBufferQueue_Clear(SLBufferQueueItf self);
