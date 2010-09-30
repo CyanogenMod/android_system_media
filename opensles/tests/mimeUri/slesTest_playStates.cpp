@@ -28,8 +28,7 @@
 #include "SLES/OpenSLES.h"
 
 
-#define MAX_NUMBER_INTERFACES 3
-#define MAX_NUMBER_OUTPUT_DEVICES 6
+#define MAX_NUMBER_INTERFACES 2
 
 #define TEST_MUTE 0
 #define TEST_SOLO 1
@@ -50,7 +49,7 @@ void ExitOnErrorFunc( SLresult result , int line)
 
 //-----------------------------------------------------------------
 
-/* Play an audio URIs, mute and solo channels  */
+/* Play an audio URIs, play, pause, stop  */
 void TestPlayUri( SLObjectItf sl, const char* path)
 {
     SLresult  result;
@@ -126,8 +125,8 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     audioSource.pLocator = (void*)&uri;
 
     /* Create the audio player */
-    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink, 1,
-            iidArray, required);
+    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink,
+            MAX_NUMBER_INTERFACES, iidArray, required);
     ExitOnError(result);
 
     /* Realize the player in synchronous mode. */
