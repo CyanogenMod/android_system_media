@@ -192,7 +192,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
             ap = (CAudioPlayer *) this;
             if (SL_PLAYSTATE_PLAYING == ap->mPlay.mState) {
 #ifdef ANDROID
-                android_audioPlayer_bufferQueueRefilled(ap);
+                android_audioPlayer_bufferQueue_onRefilled(ap);
 #endif
             }
         }

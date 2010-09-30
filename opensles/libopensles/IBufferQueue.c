@@ -89,7 +89,7 @@ SLresult IBufferQueue_Clear(SLBufferQueueItf self)
     if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
         CAudioPlayer *audioPlayer = (CAudioPlayer *) this->mThis;
         // flush associated audio player
-        result = android_audioPlayerClear(audioPlayer);
+        result = android_audioPlayer_bufferQueue_onClear(audioPlayer);
         if (SL_RESULT_SUCCESS == result) {
             this->mFront = &this->mArray[0];
             this->mRear = &this->mArray[0];

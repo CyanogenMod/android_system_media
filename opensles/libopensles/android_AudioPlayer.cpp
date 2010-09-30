@@ -1076,11 +1076,6 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
         pAudioPlayer->mAudioTrack = NULL;
     }
 
-    if (pAudioPlayer->mpLock != NULL) {
-        delete pAudioPlayer->mpLock;
-        pAudioPlayer->mpLock = NULL;
-    }
-
     pAudioPlayer->mAndroidObjType = INVALID_TYPE;
 
 #ifndef USE_BACKPORT
@@ -1100,6 +1095,11 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
         pAudioPlayer->mAndroidEffect.mEffects = NULL;
     }
 #endif
+
+    if (pAudioPlayer->mpLock != NULL) {
+        delete pAudioPlayer->mpLock;
+        pAudioPlayer->mpLock = NULL;
+    }
 
     return result;
 }
@@ -1422,7 +1422,7 @@ SLresult android_audioPlayer_volumeUpdate(CAudioPlayer* ap) {
 
 
 //-----------------------------------------------------------------------------
-void android_audioPlayer_bufferQueueRefilled(CAudioPlayer *ap) {
+void android_audioPlayer_bufferQueue_onRefilled(CAudioPlayer *ap) {
     // the AudioTrack associated with the AudioPlayer receiving audio from a PCM buffer
     // queue was stopped when the queue become empty, we restart as soon as a new buffer
     // has been enqueued since we're in playing state
@@ -1443,14 +1443,16 @@ void android_audioPlayer_bufferQueueRefilled(CAudioPlayer *ap) {
 /*
  * BufferQueue::Clear
  */
-SLresult android_audioPlayerClear(CAudioPlayer *pAudioPlayer) {
+SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *ap) {
     SLresult result = SL_RESULT_SUCCESS;
 
-    switch (pAudioPlayer->mAndroidObjType) {
+    switch (ap->mAndroidObjType) {
     //-----------------------------------
     // AudioTrack
     case AUDIOTRACK_PULL:
-        pAudioPlayer->mAudioTrack->flush();
+        if (NULL != ap->mAudioTrack) {
+            ap->mAudioTrack->flush();
+        }
         break;
     default:
         result = SL_RESULT_INTERNAL_ERROR;
