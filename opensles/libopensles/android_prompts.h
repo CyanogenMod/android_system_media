@@ -24,6 +24,8 @@
         "Cannot set stream type: audio player already realized"
 #define ERROR_PLAYERREALIZE_UNKNOWN_DATASOURCE_LOCATOR \
         "Cannot realize AudioPlayer: with unknown data source locator"
+#define ERROR_PLAYER_NEW_NULL_TRACK \
+        "Internal error: new AudioTrack shouldn't be NULL"
 
 //-----------------------------------------------------------------------------
 // Android AudioRecorder errors

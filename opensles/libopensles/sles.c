@@ -890,7 +890,7 @@ extern void
 #define IDynamicSource_init         NULL
 #define IMetadataExtraction_init    NULL
 #define IMetadataTraversal_init     NULL
-#define IPlaybackRate_init          NULL
+//#define IPlaybackRate_init          NULL
 #define IVisualization_init         NULL
 #endif
 

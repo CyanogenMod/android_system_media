@@ -28,11 +28,17 @@ static SLresult IPlaybackRate_SetRate(SLPlaybackRateItf self, SLpermille rate)
     if (!(this->mMinRate <= rate && rate <= this->mMaxRate)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        interface_lock_poke(this);
+        interface_lock_exclusive(this);
         this->mRate = rate;
-        interface_unlock_poke(this);
+        interface_unlock_exclusive(this);
 #ifdef ANDROID
-        result = android_audioPlayer_setPlayRate(this, rate);
+        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
+                (CAudioPlayer *) this->mThis : NULL;
+        if (NULL != ap) {
+            result = android_audioPlayer_setPlayRate(ap, rate);
+        } else {
+            result = SL_RESULT_PARAMETER_INVALID;
+        }
 #else
         result = SL_RESULT_SUCCESS;
 #endif
@@ -69,7 +75,14 @@ static SLresult IPlaybackRate_SetPropertyConstraints(SLPlaybackRateItf self, SLu
     this->mProperties = constraints;
 #ifdef ANDROID
     // verify property support before storing
-    result = android_audioPlayer_setPlaybackRateBehavior(this, constraints);
+    CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
+            (CAudioPlayer *) this->mThis : NULL;
+    if (NULL != ap) {
+        result = android_audioPlayer_setPlaybackRateBehavior(ap, constraints);
+    } else {
+        result = SL_RESULT_PARAMETER_INVALID;
+    }
+
 #else
     result = SL_RESULT_SUCCESS;
 #endif
@@ -117,7 +130,11 @@ static SLresult IPlaybackRate_GetCapabilitiesOfRate(SLPlaybackRateItf self,
         } else {
             SLuint32 capabilities = 0;
 #ifdef ANDROID
-            android_audioPlayer_getCapabilitiesOfRate(this, &capabilities);
+            CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
+                    (CAudioPlayer *) this->mThis : NULL;
+            if (NULL != ap) {
+                android_audioPlayer_getCapabilitiesOfRate(ap, &capabilities);
+            }
 #else
             capabilities = this->mCapabilities;
 #endif
@@ -169,6 +186,7 @@ static const struct SLPlaybackRateItf_ IPlaybackRate_Itf = {
 
 void IPlaybackRate_init(void *self)
 {
+    //SL_LOGV("IPlaybackRate_init called");
     IPlaybackRate *this = (IPlaybackRate *) self;
     this->mItf = &IPlaybackRate_Itf;
     this->mProperties = SL_RATEPROP_NOPITCHCORAUDIO;

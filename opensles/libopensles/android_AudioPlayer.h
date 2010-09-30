@@ -75,12 +75,12 @@ extern SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer);
 /**************************************************************************************************
  * Configuration
  ****************************/
-extern SLresult android_audioPlayer_setPlayRate(IPlaybackRate *pRateItf, SLpermille rate);
+extern SLresult android_audioPlayer_setPlayRate(CAudioPlayer *pAudioPlayer, SLpermille rate);
 
-extern SLresult android_audioPlayer_setPlaybackRateBehavior(IPlaybackRate *pRateItf,
+extern SLresult android_audioPlayer_setPlaybackRateBehavior(CAudioPlayer *pAudioPlayer,
         SLuint32 constraints);
 
-extern SLresult android_audioPlayer_getCapabilitiesOfRate(IPlaybackRate *pRateItf,
+extern SLresult android_audioPlayer_getCapabilitiesOfRate(CAudioPlayer *pAudioPlayer,
         SLuint32 *pCapabilities);
 
 extern SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
