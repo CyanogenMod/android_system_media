@@ -29,7 +29,6 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
     object_lock_peek(&thisAP->mObject);
     SLuint32 state = thisAP->mPlay.mState;
     object_unlock_peek(&thisAP->mObject);
-    // FIXME should not muck around directly at this low level
     if (SL_PLAYSTATE_PLAYING != state) {
         return;
     }
@@ -82,10 +81,6 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
             SL_LOGE("enqueue failed 0x%lx", result);
         }
     } else {
-        // FIXME This is really hosed, you can't do this anymore!
-        // FIXME Need a state PAUSE_WHEN_EMPTY
-        // Should not pause yet - we just ran out of new data to enqueue,
-        // but there may still be (partially) full buffers in the queue.
         thisAP->mPlay.mState = SL_PLAYSTATE_PAUSED;
         this->mEOF = SL_BOOLEAN_TRUE;
         // this would result in a non-monotonically increasing position, so don't do it
@@ -187,7 +182,6 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
 
 void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer)
 {
-    // FIXME should use two separate hooks since we have separate attributes TRANSPORT and POSITION
 
     if (NULL != audioPlayer->mSndFile.mSNDFILE) {
 

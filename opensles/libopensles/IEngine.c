@@ -314,7 +314,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 #endif
 
 #ifdef ANDROID
-                    // FIXME move to dedicated function
+                    // Allocate memory for buffer queue
                     SLuint32 locatorType = this->mDataSink.mLocator.mLocatorType;
                     if (locatorType == SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE) {
                         this->mBufferQueue.mNumBuffers =
@@ -659,7 +659,6 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
                     break;
                 }
                 if (index == 0) {
-                    // FIXME Note that if there are aliases, this returns only the primary
                     *pInterfaceId = &SL_IID_array[class__->mInterfaces[i].mMPH];
                     result = SL_RESULT_SUCCESS;
                     break;

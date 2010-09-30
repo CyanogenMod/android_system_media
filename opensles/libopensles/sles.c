@@ -322,7 +322,6 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
             }
         } else {
             SLuint32 deviceID = pDataLocator->mIODevice.deviceID;
-            // FIXME this section should be OEM-configurable
             switch (deviceType) {
             case SL_IODEVICE_LEDARRAY:
                 if (SL_DEFAULTDEVICEID_LED != deviceID) {

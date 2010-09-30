@@ -698,7 +698,7 @@ static SLresult IEnvironmentalReverb_GetEnvironmentalReverbProperties(
 #endif
         *pProperties = this->mProperties;
 
-        interface_unlock_peek(this);
+        interface_unlock_shared(this);
     }
 
     SL_LEAVE_INTERFACE

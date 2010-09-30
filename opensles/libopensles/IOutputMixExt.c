@@ -355,6 +355,30 @@ void IOutputMixExt_init(void *self)
 SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
 {
     this->mTrack = NULL;
+
+    // check the source for compatibility
+    switch (this->mDataSource.mLocator.mLocatorType) {
+    case SL_DATALOCATOR_BUFFERQUEUE:
+#ifdef ANDROID
+    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+#endif
+        switch (this->mDataSource.mFormat.mFormatType) {
+        case SL_DATAFORMAT_PCM:
+#ifdef USE_SDL
+            // SDL is hard-coded to 44.1 kHz, and there is no sample rate converter
+            if (SL_SAMPLINGRATE_44_1 != this->mDataSource.mFormat.mPCM.samplesPerSec)
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+#endif
+            break;
+        default:
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+
+    // check the sink for compatibility
     const SLDataSink *pAudioSnk = &this->mDataSink.u.mSink;
     Track *track = NULL;
     switch (*(SLuint32 *)pAudioSnk->pLocator) {
@@ -387,12 +411,8 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
 
-    // FIXME Wrong place for this initialization; should first pre-allocate a track slot
-    // using OutputMixExt.mTrackCount, then initialize full audio player, then do track bit
-    // allocation, initialize rest of track, and doubly-link track to player (currently single).
     assert(NULL != track);
     track->mBufferQueue = &this->mBufferQueue;
-    // FIXME should be last thing to do? and is the track locked? probably not
     track->mAudioPlayer = this;
     track->mReader = NULL;
     track->mAvail = 0;

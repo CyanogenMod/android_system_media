@@ -40,7 +40,7 @@
 // Don't cross streams, otherwise bad things happen.
 
 
-#if USE_PROFILES & USE_PROFILE_GAME
+#if USE_PROFILES & USE_PROFILES_GAME
 const signed char MPH_to_3DGroup[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -292,7 +292,7 @@ const signed char MPH_to_LEDDevice[MPH_MAX] = {
 };
 #endif
 
-#if USE_PROFILES & USE_PROFILE_GAME
+#if USE_PROFILES & USE_PROFILES_GAME
 const signed char MPH_to_Listener[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -351,7 +351,7 @@ const signed char MPH_to_MetadataExtractor[MPH_MAX] = {
 };
 #endif
 
-#if USE_PROFILES & USE_PROFILE_GAME
+#if USE_PROFILES & USE_PROFILES_GAME
 const signed char MPH_to_MidiPlayer[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -488,7 +488,7 @@ const signed char MPH_to_OutputMix[MPH_MAX] = {
 #endif
 };
 
-#if USE_PROFILES & USE_PROFILE_OPTIONAL
+#if USE_PROFILES & USE_PROFILES_OPTIONAL
 const signed char MPH_to_Vibra[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,

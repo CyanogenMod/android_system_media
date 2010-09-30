@@ -18,12 +18,9 @@
 
 #include "sles_allinclusive.h"
 
-// FIXME move to platform-specific configuration
-
 #define MAX_EQ_PRESETS 3
 
 #if !defined(ANDROID) || defined(USE_BACKPORT)
-// FIXME needs to be defined in a platform-dependent manner
 static const struct EqualizerBand EqualizerBands[MAX_EQ_BANDS] = {
     {1000, 1500, 2000},
     {2000, 3000, 4000},
