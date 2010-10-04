@@ -41,24 +41,30 @@ static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEff
     // Make sure this effect send is on an audio player, not a MIDI player
     CAudioPlayer *audioPlayer = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
         (CAudioPlayer *) this->mThis : NULL;
-    if (NULL == audioPlayer)
+    if (NULL == audioPlayer) {
         return NULL;
+    }
     // Get the output mix for this player
     COutputMix *outputMix = CAudioPlayer_GetOutputMix(audioPlayer);
     unsigned aux;
-    if (pAuxEffect == &outputMix->mEnvironmentalReverb.mItf)
+    if (pAuxEffect == &outputMix->mEnvironmentalReverb.mItf) {
         aux = AUX_ENVIRONMENTALREVERB;
-    else if (pAuxEffect == &outputMix->mPresetReverb.mItf)
+    } else if (pAuxEffect == &outputMix->mPresetReverb.mItf) {
         aux = AUX_PRESETREVERB;
-    else
+    } else {
+        SL_LOGE("EffectSend on unknown aux effect %p", pAuxEffect);
         return NULL;
+    }
     assert(aux < AUX_MAX);
     // Validate that the application has a valid interface for the effect.  The interface must have
     // been exposed at object creation time or by DynamicInterface::AddInterface, and it also must
     // have been "gotten" with Object::GetInterface.
-    int index = MPH_to_OutputMix[AUX_to_MPH[aux]];
-    if (0 > index)
+    unsigned MPH = AUX_to_MPH[aux];
+    int index = MPH_to_OutputMix[MPH];
+    if (0 > index) {
+        SL_LOGE("EffectSend aux=%u MPH=%u", aux, MPH);
         return NULL;
+    }
     unsigned mask = 1 << index;
     object_lock_shared(&outputMix->mObject);
     SLuint32 state = outputMix->mObject.mInterfaceStates[index];
@@ -71,10 +77,13 @@ static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEff
     case INTERFACE_SUSPENDING:
     case INTERFACE_RESUMING_1:
     case INTERFACE_RESUMING_2:
-        if (mask)
+        if (mask) {
             return &this->mEnableLevels[aux];
+        }
+        SL_LOGE("EffectSend no GetInterface yet");
         break;
     default:
+        SL_LOGE("EffectSend invalid interface state %lu", state);
         break;
     }
     return NULL;
@@ -87,14 +96,13 @@ static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEff
  */
 static SLresult translateEnableFxSendError(android::status_t status) {
     switch (status) {
-        case android::NO_ERROR:
-            return SL_RESULT_SUCCESS;
-            break;
-        case android::INVALID_OPERATION:
-        case android::BAD_VALUE:
-        default:
-            return SL_RESULT_RESOURCE_ERROR;
-            break;
+    case android::NO_ERROR:
+        return SL_RESULT_SUCCESS;
+    case android::INVALID_OPERATION:
+    case android::BAD_VALUE:
+    default:
+        SL_LOGE("EffectSend status %u", status);
+        return SL_RESULT_RESOURCE_ERROR;
     }
 }
 #endif
@@ -122,24 +130,23 @@ static SLresult IEffectSend_EnableEffectSend(SLEffectSendItf self,
             // TODO do not repeat querying of CAudioPlayer, done inside getEnableLevel()
             CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
                     (CAudioPlayer *) this->mThis : NULL;
+            // note that if this was a MIDI player, getEnableLevel would have returned NULL
+            assert(NULL != ap);
             // check which effect the send is attached to, attach and set level
-            if (NULL == ap) {
-                result = SL_RESULT_RESOURCE_ERROR;
+            COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
+            // the initial send level set here is the total energy on the aux bus,
+            //  so it must take into account the player volume level
+            if (pAuxEffect == &outputMix->mPresetReverb.mItf) {
+                result = translateEnableFxSendError(android_fxSend_attach(ap, (bool) enable,
+                    outputMix->mPresetReverb.mPresetReverbEffect,
+                    initialLevel + ap->mVolume.mLevel));
+            } else if (pAuxEffect == &outputMix->mEnvironmentalReverb.mItf) {
+                result = translateEnableFxSendError(android_fxSend_attach(ap, (bool) enable,
+                    outputMix->mEnvironmentalReverb.mEnvironmentalReverbEffect,
+                    initialLevel + ap->mVolume.mLevel));
             } else {
-                COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
-                // the initial send level set here is the total energy on the aux bus,
-                //  so it must take into account the player volume level
-                if (pAuxEffect == &outputMix->mPresetReverb.mItf) {
-                    result = translateEnableFxSendError(android_fxSend_attach(ap, (bool) enable,
-                        outputMix->mPresetReverb.mPresetReverbEffect,
-                        initialLevel + ap->mVolume.mLevel));
-                } else if (pAuxEffect == &outputMix->mEnvironmentalReverb.mItf) {
-                    result = translateEnableFxSendError(android_fxSend_attach(ap, (bool) enable,
-                        outputMix->mEnvironmentalReverb.mEnvironmentalReverbEffect,
-                        initialLevel + ap->mVolume.mLevel));
-                } else {
-                    result = SL_RESULT_RESOURCE_ERROR;
-                }
+                SL_LOGE("EffectSend unknown aux effect %p", pAuxEffect);
+                result = SL_RESULT_PARAMETER_INVALID;
             }
 #endif
             interface_unlock_exclusive(this);
@@ -161,11 +168,12 @@ static SLresult IEffectSend_IsEnabled(SLEffectSendItf self,
         IEffectSend *this = (IEffectSend *) self;
         struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
         if (NULL == enableLevel) {
+            *pEnable = SL_BOOLEAN_FALSE;
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-            interface_lock_peek(this);
+            interface_lock_shared(this);
             SLboolean enable = enableLevel->mEnable;
-            interface_unlock_peek(this);
+            interface_unlock_shared(this);
             *pEnable = enable;
             result = SL_RESULT_SUCCESS;
         }
@@ -199,12 +207,11 @@ static SLresult IEffectSend_SetDirectLevel(SLEffectSendItf self, SLmillibel dire
             } else {
                 interface_unlock_exclusive(this);
             }
-            result = SL_RESULT_SUCCESS;
         } else {
+            // MIDI player is silently not supported
             interface_unlock_exclusive(this);
-            // the interface itself is invalid because it is not attached to an AudioPlayer
-            result = SL_RESULT_PARAMETER_INVALID;
         }
+        result = SL_RESULT_SUCCESS;
     }
 
     SL_LEAVE_INTERFACE
@@ -224,12 +231,12 @@ static SLresult IEffectSend_GetDirectLevel(SLEffectSendItf self, SLmillibel *pDi
                 (CAudioPlayer *) this->mThis : NULL;
         if (NULL != ap) {
             *pDirectLevel = ap->mDirectLevel;
-            result = SL_RESULT_SUCCESS;
         } else {
-            // the interface itself is invalid because it is not attached to an AudioPlayer
-            result = SL_RESULT_PARAMETER_INVALID;
+            // MIDI player is silently not supported
+            *pDirectLevel = 0;
         }
         interface_unlock_shared(this);
+        result = SL_RESULT_SUCCESS;
     }
 
     SL_LEAVE_INTERFACE
@@ -284,9 +291,9 @@ static SLresult IEffectSend_GetSendLevel(SLEffectSendItf self, const void *pAuxE
         if (NULL == enableLevel) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-            interface_lock_peek(this);
+            interface_lock_shared(this);
             SLmillibel sendLevel = enableLevel->mSendLevel;
-            interface_unlock_peek(this);
+            interface_unlock_shared(this);
             *pSendLevel = sendLevel;
             result = SL_RESULT_SUCCESS;
         }

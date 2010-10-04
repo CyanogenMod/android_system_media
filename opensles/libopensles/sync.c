@@ -67,8 +67,6 @@ void *sync_start(void *arg)
                 continue;
             }
 
-            // FIXME race condition here - object could be destroyed by now, better do destroy here
-
             object_lock_exclusive(instance);
             unsigned attributesMask = instance->mAttributesMask;
             instance->mAttributesMask = 0;

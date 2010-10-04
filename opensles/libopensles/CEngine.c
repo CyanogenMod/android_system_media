@@ -57,7 +57,6 @@ void CEngine_Destroy(void *self)
 {
     CEngine *this = (CEngine *) self;
 
-    // FIXME Move this section to CEngine_PreDestroy and return false
     // Verify that there are no extant objects
     unsigned instanceCount = this->mEngine.mInstanceCount;
     unsigned instanceMask = this->mEngine.mInstanceMask;

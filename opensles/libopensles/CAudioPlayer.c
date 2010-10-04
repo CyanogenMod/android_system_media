@@ -77,7 +77,6 @@ bool CAudioPlayer_PreDestroy(void *self)
     Track *track = this->mTrack;
     if (NULL == track)
         return true;
-    // FIXME We're reading from track without taking even a share lock on it
     CAudioPlayer *audioPlayer = track->mAudioPlayer;
     if (NULL == audioPlayer)
         return true;
