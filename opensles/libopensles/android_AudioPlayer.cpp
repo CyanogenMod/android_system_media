@@ -18,6 +18,8 @@
 #include "utils/RefBase.h"
 #include "android_prompts.h"
 
+template class android::KeyedVector<SLuint32, android::AudioEffect* > ;
+
 #define KEY_STREAM_TYPE_PARAMSIZE  sizeof(SLint32)
 
 //-----------------------------------------------------------------------------
@@ -836,7 +838,8 @@ SLresult android_audioPlayer_create(
     pAudioPlayer->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
     pAudioPlayer->mAudioTrack = NULL;
 #ifndef USE_BACKPORT
-    pAudioPlayer->mSfPlayer.clear();
+    // no longer needed, as placement new (explicit constructor) already does this
+    // pAudioPlayer->mSfPlayer.clear();
 #endif
 
 #ifndef USE_BACKPORT
@@ -851,10 +854,7 @@ SLresult android_audioPlayer_create(
 
     // initialize interface-specific fields that can be used regardless of whether the interface
     // is exposed on the AudioPlayer or not
-    pAudioPlayer->mAndroidEffect.mEffects =
-             new android::KeyedVector<SLuint32, android::AudioEffect* >();
-    pAudioPlayer->mSeek.mLoopEnabled = SL_BOOLEAN_FALSE;
-    pAudioPlayer->mPlaybackRate.mRate = 1000;
+    // (section no longer applicable, as all previous initializations were the same as the defaults)
 
     return result;
 
@@ -1067,6 +1067,7 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     //-----------------------------------
     // MediaPlayer
     case MEDIAPLAYER:
+        // FIXME might no longer be needed since we call explicit destructor
         if (pAudioPlayer->mSfPlayer != 0) {
             pAudioPlayer->mSfPlayer.clear();
         }
@@ -1084,25 +1085,11 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
         pAudioPlayer->mAudioTrack = NULL;
     }
 
+    // FIXME might not be needed
     pAudioPlayer->mAndroidObjType = INVALID_TYPE;
 
-#ifndef USE_BACKPORT
-    // FIXME this shouldn't have to be done here, there should be an "interface destroy" hook,
-    //       just like there is an interface init hook, to avoid memory leaks.
-    pAudioPlayer->mEqualizer.mEqEffect.clear();
-    pAudioPlayer->mBassBoost.mBassBoostEffect.clear();
-    pAudioPlayer->mVirtualizer.mVirtualizerEffect.clear();
-    if (NULL != pAudioPlayer->mAndroidEffect.mEffects) {
-        if (!pAudioPlayer->mAndroidEffect.mEffects->isEmpty()) {
-            for (size_t i = 0 ; i < pAudioPlayer->mAndroidEffect.mEffects->size() ; i++) {
-                delete pAudioPlayer->mAndroidEffect.mEffects->valueAt(i);
-            }
-            pAudioPlayer->mAndroidEffect.mEffects->clear();
-        }
-        delete pAudioPlayer->mAndroidEffect.mEffects;
-        pAudioPlayer->mAndroidEffect.mEffects = NULL;
-    }
-#endif
+    // explicit destructor
+    pAudioPlayer->mSfPlayer.~sp();
 
     if (pAudioPlayer->mpLock != NULL) {
         delete pAudioPlayer->mpLock;

@@ -57,7 +57,6 @@ void CAudioPlayer_Destroy(void *self)
     CAudioPlayer *this = (CAudioPlayer *) self;
     freeDataLocatorFormat(&this->mDataSource);
     freeDataLocatorFormat(&this->mDataSink);
-    IBufferQueue_Destroy(&this->mBufferQueue);
 #ifdef USE_SNDFILE
     SndFile_Destroy(this);
 #endif

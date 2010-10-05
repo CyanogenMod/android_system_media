@@ -53,29 +53,29 @@ static void HandleAdd(void *self, int MPH)
         const struct iid_vtable *x = &class__->mInterfaces[index];
         size_t offset = x->mOffset;
         void *thisItf = (char *) thisObject + offset;
-        size_t size = ((SLuint32) (index + 1) == class__->mInterfaceCount ?
-            class__->mSize : x[1].mOffset) - offset;
-        memset(thisItf, 0, size);
-        // Will never add IObject, so [1] is always defined
-        ((void **) thisItf)[1] = thisObject;
-        VoidHook init = MPH_init_table[MPH].mInit;
-        // paranoid double-check for presence of an initialization hook
-        if (NULL != init) {
-            (*init)(thisItf);
-            ((size_t *) thisItf)[0] ^= ~0;
+        BoolHook expose = MPH_init_table[MPH].mExpose;
+        // call the optional expose hook
+        if ((NULL == expose) || (*expose)(thisItf)) {
+            result = SL_RESULT_SUCCESS;
+        } else {
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
         }
-        result = SL_RESULT_SUCCESS;
 
         // re-lock mutex to update state
         object_lock_exclusive(thisObject);
         assert(INTERFACE_ADDING_2 == *interfaceStateP);
-        state = INTERFACE_ADDED;
+        if (SL_RESULT_SUCCESS == result) {
+            ((size_t *) thisItf)[0] ^= ~0;
+            state = INTERFACE_ADDED;
+        } else {
+            state = INTERFACE_INITIALIZED;
+        }
         }
         break;
 
     case INTERFACE_ADDING_1A:   // operation was aborted while on work queue
         result = SL_RESULT_OPERATION_ABORTED;
-        state = INTERFACE_UNINITIALIZED;
+        state = INTERFACE_INITIALIZED;
         break;
 
     default:                    // impossible
@@ -116,8 +116,8 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
         const ClassTable *class__ = thisObject->mClass;
         int MPH, index;
         if ((0 > (MPH = IID_to_MPH(iid))) ||
-                // there must be an initialization hook present
-                (NULL == MPH_init_table[MPH].mInit) ||
+                // no need to check for an initialization hook
+                // (NULL == MPH_init_table[MPH].mInit) ||
                 (0 > (index = class__->mMPH_to_index[MPH]))) {
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
@@ -128,7 +128,7 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
             object_lock_exclusive(thisObject);
             switch (*interfaceStateP) {
 
-            case INTERFACE_UNINITIALIZED:   // normal case
+            case INTERFACE_INITIALIZED: // normal case
                 if (async) {
                     // Asynchronous: mark operation pending and cancellable
                     *interfaceStateP = INTERFACE_ADDING_1;
@@ -144,7 +144,7 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
                         switch (*interfaceStateP) {
                         case INTERFACE_ADDING_1:    // normal
                         case INTERFACE_ADDING_1A:   // operation aborted while mutex unlocked
-                            *interfaceStateP = INTERFACE_UNINITIALIZED;
+                            *interfaceStateP = INTERFACE_INITIALIZED;
                             break;
                         default:                    // unexpected
                             // leave state alone
@@ -160,24 +160,24 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
                     // this section runs with mutex unlocked
                     const struct iid_vtable *x = &class__->mInterfaces[index];
                     size_t offset = x->mOffset;
-                    size_t size = ((SLuint32) (index + 1) == class__->mInterfaceCount ?
-                        class__->mSize : x[1].mOffset) - offset;
                     void *thisItf = (char *) thisObject + offset;
-                    memset(thisItf, 0, size);
-                    // Will never add IObject, so [1] is always defined
-                    ((void **) thisItf)[1] = thisObject;
-                    // paranoid double-check for presence of an initialization hook
-                    VoidHook init = MPH_init_table[MPH].mInit;
-                    if (NULL != init) {
-                        (*init)(thisItf);
-                        ((size_t *) thisItf)[0] ^= ~0;
+                    // call the optional expose hook
+                    BoolHook expose = MPH_init_table[MPH].mExpose;
+                    if ((NULL == expose) || (*expose)(thisItf)) {
+                        result = SL_RESULT_SUCCESS;
+                    } else {
+                        result = SL_RESULT_FEATURE_UNSUPPORTED;
                     }
-                    result = SL_RESULT_SUCCESS;
 
                     // re-lock mutex to update state
                     object_lock_exclusive(thisObject);
                     assert(INTERFACE_ADDING_2 == *interfaceStateP);
-                    *interfaceStateP = INTERFACE_ADDED;
+                    if (SL_RESULT_SUCCESS == result) {
+                        ((size_t *) thisItf)[0] ^= ~0;
+                        *interfaceStateP = INTERFACE_ADDED;
+                    } else {
+                        *interfaceStateP = INTERFACE_INITIALIZED;
+                    }
                 }
 
                 // mutex is still locked
@@ -231,24 +231,22 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
                 thisObject->mGottenMask &= ~(1 << index);
                 object_unlock_exclusive(thisObject);
 
-                // The deinitialization is done with mutex unlocked
+#if 0 // remove hook is not yet implemented
+                // The removal is done with mutex unlocked
                 const struct iid_vtable *x = &class__->mInterfaces[index];
                 size_t offset = x->mOffset;
                 void *thisItf = (char *) thisObject + offset;
-                VoidHook deinit = MPH_init_table[MPH].mDeinit;
-                if (NULL != deinit)
-                    (*deinit)(thisItf);
-#ifdef USE_DEBUG
-                size_t size = ((SLuint32) (index + 1) == class__->mInterfaceCount ?
-                    class__->mSize : x[1].mOffset) - offset;
-                memset(thisItf, 0x55, size);
+                VoidHook remove = MPH_init_table[MPH].mRemove;
+                if (NULL != remove) {
+                    (*remove)(thisItf);
+                }
 #endif
                 result = SL_RESULT_SUCCESS;
 
                 // Note that this was previously locked, but then unlocked for the deinit hook
                 object_lock_exclusive(thisObject);
                 assert(INTERFACE_REMOVING == *interfaceStateP);
-                *interfaceStateP = INTERFACE_UNINITIALIZED;
+                *interfaceStateP = INTERFACE_INITIALIZED;
                 }
 
                 // mutex is still locked
@@ -305,8 +303,9 @@ static void HandleResume(void *self, int MPH)
         size_t offset = x->mOffset;
         void *thisItf = (char *) thisObject + offset;
         VoidHook resume = MPH_init_table[MPH].mResume;
-        if (NULL != resume)
+        if (NULL != resume) {
             (*resume)(thisItf);
+        }
         result = SL_RESULT_SUCCESS;
 
         // re-lock mutex to update state
@@ -404,8 +403,9 @@ static SLresult IDynamicInterfaceManagement_ResumeInterface(SLDynamicInterfaceMa
                     size_t offset = x->mOffset;
                     void *thisItf = (char *) this + offset;
                     VoidHook resume = MPH_init_table[MPH].mResume;
-                    if (NULL != resume)
+                    if (NULL != resume) {
                         (*resume)(thisItf);
+                    }
                     result = SL_RESULT_SUCCESS;
 
                     // re-lock mutex to update state

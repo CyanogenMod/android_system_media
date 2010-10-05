@@ -100,11 +100,31 @@ void IPresetReverb_init(void *self)
     IPresetReverb *this = (IPresetReverb *) self;
     this->mItf = &IPresetReverb_Itf;
     this->mPreset = SL_REVERBPRESET_NONE;
-
 #if defined(ANDROID) && !defined(USE_BACKPORT)
+    memset(&this->mPresetReverbDescriptor, 0, sizeof(effect_descriptor_t));
+    // placement new (explicit constructor)
+    (void) new (&this->mPresetReverbEffect) android::sp<android::AudioEffect>();
+#endif
+}
+
+void IPresetReverb_deinit(void *self)
+{
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    IPresetReverb *this = (IPresetReverb *) self;
+    // explicit destructor
+    this->mPresetReverbEffect.~sp();
+#endif
+}
+
+bool IPresetReverb_Expose(void *self)
+{
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    IPresetReverb *this = (IPresetReverb *) self;
     if (!android_fx_initEffectDescriptor(SL_IID_PRESETREVERB, &this->mPresetReverbDescriptor)) {
         // PresetReverb init failed
         SL_LOGE("PresetReverb initialization failed.");
+        return false;
     }
 #endif
+    return true;
 }

@@ -81,20 +81,33 @@ void IAndroidEffectCapabilities_init(void *self)
     IAndroidEffectCapabilities *this = (IAndroidEffectCapabilities *) self;
     this->mItf = &IAndroidEffectCapabilities_Itf;
 
+    // This is the default initialization; fields will be updated when interface is exposed
     this->mNumFx = 0;
-    SLuint32 numEffects;
-    if (SL_RESULT_SUCCESS == android_genericFx_queryNumEffects(&numEffects)) {
-        this->mNumFx = numEffects;
-    }
-    SL_LOGV("Effect Capabilities has %ld effects", this->mNumFx);
+    this->mFxDescriptors = NULL;
+}
 
+bool IAndroidEffectCapabilities_Expose(void *self)
+{
+    IAndroidEffectCapabilities *this = (IAndroidEffectCapabilities *) self;
+    SLuint32 numEffects = 0;
+    SLresult result = android_genericFx_queryNumEffects(&numEffects);
+    if (SL_RESULT_SUCCESS != result) {
+        SL_LOGE("android_genericFx_queryNumEffects %lu", result);
+        return false;
+    }
+    this->mNumFx = numEffects;
+    SL_LOGV("Effect Capabilities has %ld effects", this->mNumFx);
     if (this->mNumFx > 0) {
-        SLresult result = SL_RESULT_SUCCESS;
         this->mFxDescriptors = (effect_descriptor_t*) new effect_descriptor_t[this->mNumFx];
         for (SLuint32 i = 0 ; i < this->mNumFx ; i++) {
-            result = android_genericFx_queryEffect(i, &this->mFxDescriptors[i]);
-            if (SL_RESULT_SUCCESS != result) {
-                SL_LOGE("Error (SLresult is %ld) querying effect %ld", result, i);
+            SLresult result2;
+            result2 = android_genericFx_queryEffect(i, &this->mFxDescriptors[i]);
+            if (SL_RESULT_SUCCESS != result2) {
+                SL_LOGE("Error (SLresult is %ld) querying effect %ld", result2, i);
+                // Remember the first failing result code, but keep going
+                if (SL_RESULT_SUCCESS == result) {
+                    result = result2;
+                }
             } else {
                 SL_LOGV("effect %ld: type=%08x-%04x-%04x-%04x-%02x%02x%02x%02x%02x%02x name=%s",
                         i,
@@ -111,9 +124,16 @@ void IAndroidEffectCapabilities_init(void *self)
                         this->mFxDescriptors[i].name);
             }
         }
-    } else {
-        // for safety
+    }
+    return SL_RESULT_SUCCESS == result;
+}
+
+void IAndroidEffectCapabilities_deinit(void *self)
+{
+    IAndroidEffectCapabilities *this = (IAndroidEffectCapabilities *) self;
+    // free effect library data
+    if (NULL != this->mFxDescriptors) {
+        delete[] this->mFxDescriptors;
         this->mFxDescriptors = NULL;
     }
-
 }

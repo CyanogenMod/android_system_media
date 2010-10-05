@@ -171,4 +171,5 @@ void IMetadataExtraction_init(void *self)
     this->mValueLangCountry = 0 /*TBD*/;
     this->mValueEncoding = 0 /*TBD*/;
     this->mFilterMask = 0 /*TBD*/;
+    this->mKeyFilter = 0;
 }

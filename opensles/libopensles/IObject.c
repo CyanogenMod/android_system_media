@@ -323,8 +323,8 @@ static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, 
             const ClassTable *class__ = this->mClass;
             int MPH, index;
             if ((0 > (MPH = IID_to_MPH(iid))) ||
-                    // there must an initialization hook present
-                    (NULL == MPH_init_table[MPH].mInit) ||
+                    // no need to check for an initialization hook
+                    // (NULL == MPH_init_table[MPH].mInit) ||
                     (0 > (index = class__->mMPH_to_index[MPH]))) {
                 result = SL_RESULT_FEATURE_UNSUPPORTED;
             } else {
@@ -353,7 +353,8 @@ static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, 
                         }
                         result = SL_RESULT_SUCCESS;
                         break;
-                    // Can't get interface if uninitialized/suspend(ed,ing)/resuming/adding/removing
+                    // Can't get interface if uninitialized, initialized, suspended,
+                    // suspending, resuming, adding, or removing
                     default:
                         result = SL_RESULT_FEATURE_UNSUPPORTED;
                         break;
@@ -550,11 +551,10 @@ void IObject_Destroy(SLObjectItf self)
     if (NULL != destroy) {
         (*destroy)(this);
     }
-    // Call the deinitializer for each currently exposed interface,
+    // Call the deinitializer for each currently initialized interface,
     // whether it is implicit, explicit, optional, or dynamically added.
     // The deinitializers are called in the reverse order that the
     // initializers were called, so that IObject_deinit is called last.
-    unsigned incorrect = 0;
     unsigned index = class__->mInterfaceCount;
     const struct iid_vtable *x = &class__->mInterfaces[index];
     SLuint8 *interfaceStateP = &this->mInterfaceStates[index];
@@ -567,11 +567,17 @@ void IObject_Destroy(SLObjectItf self)
         case INTERFACE_EXPOSED:     // quiescent states
         case INTERFACE_ADDED:
         case INTERFACE_SUSPENDED:
+            // here is where we would call the remove hook
+            // fall through
+        case INTERFACE_INITIALIZED:
             {
+            size_t offset = x->mOffset;
+            void *thisItf = (char *) this + offset;
             VoidHook deinit = MPH_init_table[x->mMPH].mDeinit;
             if (NULL != deinit) {
-                (*deinit)((char *) this + x->mOffset);
+                (*deinit)(thisItf);
             }
+            *interfaceStateP = INTERFACE_UNINITIALIZED;
             }
             break;
         case INTERFACE_ADDING_1:    // active states indicate incorrect use of API
@@ -582,7 +588,7 @@ void IObject_Destroy(SLObjectItf self)
         case INTERFACE_RESUMING_2:
         case INTERFACE_REMOVING:
         case INTERFACE_SUSPENDING:
-            ++incorrect;
+            SL_LOGE("Object::Destroy(%p) while interface %u active", this, index);
             break;
         default:
             assert(SL_BOOLEAN_FALSE);
@@ -594,8 +600,6 @@ void IObject_Destroy(SLObjectItf self)
     memset(this, 0x55, class__->mSize);
 #endif
     free(this);
-    // one or more interfaces was actively changing at time of Destroy
-    assert(incorrect == 0);
 
     SL_LEAVE_INTERFACE_VOID
 }
@@ -719,7 +723,7 @@ void IObject_init(void *self)
     // mInstanceID
     // mLossOfControlMask
     // mEngine
-    // mInstanceStates
+    // mInterfaceStates
     this->mState = SL_OBJECT_STATE_UNREALIZED;
     this->mGottenMask = 1;  // IObject
     this->mAttributesMask = 0;

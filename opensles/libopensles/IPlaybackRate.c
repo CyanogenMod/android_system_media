@@ -186,7 +186,6 @@ static const struct SLPlaybackRateItf_ IPlaybackRate_Itf = {
 
 void IPlaybackRate_init(void *self)
 {
-    //SL_LOGV("IPlaybackRate_init called");
     IPlaybackRate *this = (IPlaybackRate *) self;
     this->mItf = &IPlaybackRate_Itf;
     this->mProperties = SL_RATEPROP_NOPITCHCORAUDIO;
@@ -196,7 +195,6 @@ void IPlaybackRate_init(void *self)
     this->mMaxRate = 2000;
     this->mStepSize = 0;
 #ifdef ANDROID
-    this->mStepSize = 0;
     // for an AudioPlayer, mCapabilities will be initialized in sles_to_android_audioPlayerCreate
 #endif
     // The generic implementation sets no capabilities because the generic

@@ -185,11 +185,31 @@ void IBassBoost_init(void *self)
     this->mItf = &IBassBoost_Itf;
     this->mEnabled = SL_BOOLEAN_FALSE;
     this->mStrength = 0;
-
 #if defined(ANDROID) && !defined(USE_BACKPORT)
+    memset(&this->mBassBoostDescriptor, 0, sizeof(effect_descriptor_t));
+    // placement new (explicit constructor)
+    (void) new (&this->mBassBoostEffect) android::sp<android::AudioEffect>();
+#endif
+}
+
+void IBassBoost_deinit(void *self)
+{
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    IBassBoost *this = (IBassBoost *) self;
+    // explicit destructor
+    this->mBassBoostEffect.~sp();
+#endif
+}
+
+bool IBassBoost_Expose(void *self)
+{
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    IBassBoost *this = (IBassBoost *) self;
     if (!android_fx_initEffectDescriptor(SL_IID_BASSBOOST, &this->mBassBoostDescriptor)) {
         // BassBoost init failed
         SL_LOGE("BassBoost initialization failed.");
+        return false;
     }
 #endif
+    return true;
 }

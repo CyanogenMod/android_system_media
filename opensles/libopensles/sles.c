@@ -191,7 +191,9 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
                             class__->mName, i, MPH);
                     return SL_RESULT_FEATURE_UNSUPPORTED;
                 }
-                // Application said it didn't really need the interface, so ignore
+                // Application said it didn't really need the interface, so ignore with warning
+                SL_LOGW("class %s interface %lu requested but unavailable MPH=%d",
+                        class__->mName, i, MPH);
                 continue;
             }
             // The requested interface was both found and available, so expose it
@@ -370,7 +372,7 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
             SL_OBJECTID_OUTPUTMIX);
         if (SL_RESULT_SUCCESS != result) {
             SL_LOGE("locatorType is SL_DATALOCATOR_OUTPUTMIX, but outputMix field %p does not " \
-                "refer to an SL_OBJECTID_OUTPUTMIX or is not realized", \
+                "refer to an SL_OBJECTID_OUTPUTMIX or the output mix is not realized", \
                 pDataLocator->mOutputMix.outputMix);
             pDataLocator->mOutputMix.outputMix = NULL;
             return result;
@@ -834,18 +836,17 @@ void freeDataLocatorFormat(DataLocatorFormat *dlf)
 extern void
     I3DCommit_init(void *),
     I3DDoppler_init(void *),
-    I3DGrouping_deinit(void *),
     I3DGrouping_init(void *),
     I3DLocation_init(void *),
     I3DMacroscopic_init(void *),
     I3DSource_init(void *),
     IAndroidConfiguration_init(void *),
+    IAndroidEffect_init(void *),
     IAndroidEffectCapabilities_init(void *),
     IAndroidEffectSend_init(void *),
-    IAndroidEffect_init(void *),
     IAudioDecoderCapabilities_init(void *),
-    IAudioEncoderCapabilities_init(void *),
     IAudioEncoder_init(void *),
+    IAudioEncoderCapabilities_init(void *),
     IAudioIODeviceCapabilities_init(void *),
     IBassBoost_init(void *),
     IBufferQueue_init(void *),
@@ -853,8 +854,8 @@ extern void
     IDynamicInterfaceManagement_init(void *),
     IDynamicSource_init(void *),
     IEffectSend_init(void *),
-    IEngineCapabilities_init(void *),
     IEngine_init(void *),
+    IEngineCapabilities_init(void *),
     IEnvironmentalReverb_init(void *),
     IEqualizer_init(void *),
     ILEDArray_init(void *),
@@ -866,8 +867,8 @@ extern void
     IMetadataTraversal_init(void *),
     IMuteSolo_init(void *),
     IObject_init(void *),
-    IOutputMixExt_init(void *),
     IOutputMix_init(void *),
+    IOutputMixExt_init(void *),
     IPitch_init(void *),
     IPlay_init(void *),
     IPlaybackRate_init(void *),
@@ -883,7 +884,26 @@ extern void
     IVolume_init(void *);
 
 extern void
-    IObject_deinit(void *);
+    I3DGrouping_deinit(void *),
+    IAndroidEffect_deinit(void *),
+    IAndroidEffectCapabilities_deinit(void *),
+    IBassBoost_deinit(void *),
+    IBufferQueue_deinit(void *),
+    IEngine_deinit(void *),
+    IEnvironmentalReverb_deinit(void *),
+    IEqualizer_deinit(void *),
+    IObject_deinit(void *),
+    IPresetReverb_deinit(void *),
+    IThreadSync_deinit(void *),
+    IVirtualizer_deinit(void *);
+
+extern bool
+    IAndroidEffectCapabilities_Expose(void *),
+    IBassBoost_Expose(void *),
+    IEnvironmentalReverb_Expose(void *),
+    IEqualizer_Expose(void *),
+    IPresetReverb_Expose(void *),
+    IVirtualizer_Expose(void *);
 
 #if !(USE_PROFILES & USE_PROFILES_MUSIC)
 #define IDynamicSource_init         NULL
@@ -919,6 +939,7 @@ extern void
 #define IEngineCapabilities_init         NULL
 #define IOutputMix_init                  NULL
 #define IThreadSync_init                 NULL
+#define IThreadSync_deinit               NULL
 #endif
 
 #if !(USE_PROFILES & USE_PROFILES_OPTIONAL)
@@ -927,10 +948,13 @@ extern void
 #endif
 
 #ifndef ANDROID
-#define IAndroidConfiguration_init      NULL
-#define IAndroidEffect_init             NULL
-#define IAndroidEffectCapabilities_init NULL
-#define IAndroidEffectSend_init         NULL
+#define IAndroidConfiguration_init        NULL
+#define IAndroidEffect_init               NULL
+#define IAndroidEffectCapabilities_init   NULL
+#define IAndroidEffectSend_init           NULL
+#define IAndroidEffect_deinit             NULL
+#define IAndroidEffectCapabilities_deinit NULL
+#define IAndroidEffectCapabilities_Expose NULL
 #endif
 
 #ifndef USE_OUTPUTMIXEXT
@@ -939,56 +963,59 @@ extern void
 
 
 /*static*/ const struct MPH_init MPH_init_table[MPH_MAX] = {
-    { /* MPH_3DCOMMIT, */ I3DCommit_init, NULL, NULL },
-    { /* MPH_3DDOPPLER, */ I3DDoppler_init, NULL, NULL },
-    { /* MPH_3DGROUPING, */ I3DGrouping_init, NULL, I3DGrouping_deinit },
-    { /* MPH_3DLOCATION, */ I3DLocation_init, NULL, NULL },
-    { /* MPH_3DMACROSCOPIC, */ I3DMacroscopic_init, NULL, NULL },
-    { /* MPH_3DSOURCE, */ I3DSource_init, NULL, NULL },
-    { /* MPH_AUDIODECODERCAPABILITIES, */ IAudioDecoderCapabilities_init, NULL, NULL },
-    { /* MPH_AUDIOENCODER, */ IAudioEncoder_init, NULL, NULL },
-    { /* MPH_AUDIOENCODERCAPABILITIES, */ IAudioEncoderCapabilities_init, NULL, NULL },
-    { /* MPH_AUDIOIODEVICECAPABILITIES, */ IAudioIODeviceCapabilities_init, NULL, NULL },
-    { /* MPH_BASSBOOST, */ IBassBoost_init, NULL, NULL },
-    { /* MPH_BUFFERQUEUE, */ IBufferQueue_init, NULL, NULL },
-    { /* MPH_DEVICEVOLUME, */ IDeviceVolume_init, NULL, NULL },
-    { /* MPH_DYNAMICINTERFACEMANAGEMENT, */ IDynamicInterfaceManagement_init, NULL, NULL },
-    { /* MPH_DYNAMICSOURCE, */ IDynamicSource_init, NULL, NULL },
-    { /* MPH_EFFECTSEND, */ IEffectSend_init, NULL, NULL },
-    { /* MPH_ENGINE, */ IEngine_init, NULL, NULL },
-    { /* MPH_ENGINECAPABILITIES, */ IEngineCapabilities_init, NULL, NULL },
-    { /* MPH_ENVIRONMENTALREVERB, */ IEnvironmentalReverb_init, NULL, NULL },
-    { /* MPH_EQUALIZER, */ IEqualizer_init, NULL, NULL },
-    { /* MPH_LED, */ ILEDArray_init, NULL, NULL },
-    { /* MPH_METADATAEXTRACTION, */ IMetadataExtraction_init, NULL, NULL },
-    { /* MPH_METADATATRAVERSAL, */ IMetadataTraversal_init, NULL, NULL },
-    { /* MPH_MIDIMESSAGE, */ IMIDIMessage_init, NULL, NULL },
-    { /* MPH_MIDITIME, */ IMIDITime_init, NULL, NULL },
-    { /* MPH_MIDITEMPO, */ IMIDITempo_init, NULL, NULL },
-    { /* MPH_MIDIMUTESOLO, */ IMIDIMuteSolo_init, NULL, NULL },
-    { /* MPH_MUTESOLO, */ IMuteSolo_init, NULL, NULL },
-    { /* MPH_NULL, */ NULL, NULL, NULL },
-    { /* MPH_OBJECT, */ IObject_init, NULL, IObject_deinit },
-    { /* MPH_OUTPUTMIX, */ IOutputMix_init, NULL, NULL },
-    { /* MPH_PITCH, */ IPitch_init, NULL, NULL },
-    { /* MPH_PLAY, */ IPlay_init, NULL, NULL },
-    { /* MPH_PLAYBACKRATE, */ IPlaybackRate_init, NULL, NULL },
-    { /* MPH_PREFETCHSTATUS, */ IPrefetchStatus_init, NULL, NULL },
-    { /* MPH_PRESETREVERB, */ IPresetReverb_init, NULL, NULL },
-    { /* MPH_RATEPITCH, */ IRatePitch_init, NULL, NULL },
-    { /* MPH_RECORD, */ IRecord_init, NULL, NULL },
-    { /* MPH_SEEK, */ ISeek_init, NULL, NULL },
-    { /* MPH_THREADSYNC, */ IThreadSync_init, NULL, NULL },
-    { /* MPH_VIBRA, */ IVibra_init, NULL, NULL },
-    { /* MPH_VIRTUALIZER, */ IVirtualizer_init, NULL, NULL },
-    { /* MPH_VISUALIZATION, */ IVisualization_init, NULL, NULL },
-    { /* MPH_VOLUME, */ IVolume_init, NULL, NULL },
-    { /* MPH_OUTPUTMIXEXT, */ IOutputMixExt_init, NULL, NULL },
-    { /* MPH_ANDROIDEFFECT */ IAndroidEffect_init, NULL, NULL },
-    { /* MPH_ANDROIDEFFECTCAPABILITIES */ IAndroidEffectCapabilities_init, NULL, NULL },
-    { /* MPH_ANDROIDEFFECTSEND */ IAndroidEffectSend_init, NULL, NULL },
-    { /* MPH_ANDROIDCONFIGURATION */ IAndroidConfiguration_init, NULL, NULL },
-    { /* MPH_ANDROIDSIMPLEBUFFERQUEUE, */ IBufferQueue_init /* alias */, NULL, NULL }
+    { /* MPH_3DCOMMIT, */ I3DCommit_init, NULL, NULL, NULL },
+    { /* MPH_3DDOPPLER, */ I3DDoppler_init, NULL, NULL, NULL },
+    { /* MPH_3DGROUPING, */ I3DGrouping_init, NULL, I3DGrouping_deinit, NULL },
+    { /* MPH_3DLOCATION, */ I3DLocation_init, NULL, NULL, NULL },
+    { /* MPH_3DMACROSCOPIC, */ I3DMacroscopic_init, NULL, NULL, NULL },
+    { /* MPH_3DSOURCE, */ I3DSource_init, NULL, NULL, NULL },
+    { /* MPH_AUDIODECODERCAPABILITIES, */ IAudioDecoderCapabilities_init, NULL, NULL, NULL },
+    { /* MPH_AUDIOENCODER, */ IAudioEncoder_init, NULL, NULL, NULL },
+    { /* MPH_AUDIOENCODERCAPABILITIES, */ IAudioEncoderCapabilities_init, NULL, NULL, NULL },
+    { /* MPH_AUDIOIODEVICECAPABILITIES, */ IAudioIODeviceCapabilities_init, NULL, NULL, NULL },
+    { /* MPH_BASSBOOST, */ IBassBoost_init, NULL, IBassBoost_deinit, IBassBoost_Expose },
+    { /* MPH_BUFFERQUEUE, */ IBufferQueue_init, NULL, IBufferQueue_deinit, NULL },
+    { /* MPH_DEVICEVOLUME, */ IDeviceVolume_init, NULL, NULL, NULL },
+    { /* MPH_DYNAMICINTERFACEMANAGEMENT, */ IDynamicInterfaceManagement_init, NULL, NULL, NULL },
+    { /* MPH_DYNAMICSOURCE, */ IDynamicSource_init, NULL, NULL, NULL },
+    { /* MPH_EFFECTSEND, */ IEffectSend_init, NULL, NULL, NULL },
+    { /* MPH_ENGINE, */ IEngine_init, NULL, IEngine_deinit, NULL },
+    { /* MPH_ENGINECAPABILITIES, */ IEngineCapabilities_init, NULL, NULL, NULL },
+    { /* MPH_ENVIRONMENTALREVERB, */ IEnvironmentalReverb_init, NULL, IEnvironmentalReverb_deinit,
+        IEnvironmentalReverb_Expose },
+    { /* MPH_EQUALIZER, */ IEqualizer_init, NULL, IEqualizer_deinit, IEqualizer_Expose },
+    { /* MPH_LED, */ ILEDArray_init, NULL, NULL, NULL },
+    { /* MPH_METADATAEXTRACTION, */ IMetadataExtraction_init, NULL, NULL, NULL },
+    { /* MPH_METADATATRAVERSAL, */ IMetadataTraversal_init, NULL, NULL, NULL },
+    { /* MPH_MIDIMESSAGE, */ IMIDIMessage_init, NULL, NULL, NULL },
+    { /* MPH_MIDITIME, */ IMIDITime_init, NULL, NULL, NULL },
+    { /* MPH_MIDITEMPO, */ IMIDITempo_init, NULL, NULL, NULL },
+    { /* MPH_MIDIMUTESOLO, */ IMIDIMuteSolo_init, NULL, NULL, NULL },
+    { /* MPH_MUTESOLO, */ IMuteSolo_init, NULL, NULL, NULL },
+    { /* MPH_NULL, */ NULL, NULL, NULL, NULL },
+    { /* MPH_OBJECT, */ IObject_init, NULL, IObject_deinit, NULL },
+    { /* MPH_OUTPUTMIX, */ IOutputMix_init, NULL, NULL, NULL },
+    { /* MPH_PITCH, */ IPitch_init, NULL, NULL, NULL },
+    { /* MPH_PLAY, */ IPlay_init, NULL, NULL, NULL },
+    { /* MPH_PLAYBACKRATE, */ IPlaybackRate_init, NULL, NULL, NULL },
+    { /* MPH_PREFETCHSTATUS, */ IPrefetchStatus_init, NULL, NULL, NULL },
+    { /* MPH_PRESETREVERB, */ IPresetReverb_init, NULL, IPresetReverb_deinit,
+        IPresetReverb_Expose },
+    { /* MPH_RATEPITCH, */ IRatePitch_init, NULL, NULL, NULL },
+    { /* MPH_RECORD, */ IRecord_init, NULL, NULL, NULL },
+    { /* MPH_SEEK, */ ISeek_init, NULL, NULL, NULL },
+    { /* MPH_THREADSYNC, */ IThreadSync_init, NULL, IThreadSync_deinit, NULL },
+    { /* MPH_VIBRA, */ IVibra_init, NULL, NULL, NULL },
+    { /* MPH_VIRTUALIZER, */ IVirtualizer_init, NULL, IVirtualizer_deinit, IVirtualizer_Expose },
+    { /* MPH_VISUALIZATION, */ IVisualization_init, NULL, NULL, NULL },
+    { /* MPH_VOLUME, */ IVolume_init, NULL, NULL, NULL },
+    { /* MPH_OUTPUTMIXEXT, */ IOutputMixExt_init, NULL, NULL, NULL },
+    { /* MPH_ANDROIDEFFECT */ IAndroidEffect_init, NULL, IAndroidEffect_deinit, NULL },
+    { /* MPH_ANDROIDEFFECTCAPABILITIES */ IAndroidEffectCapabilities_init, NULL,
+        IAndroidEffectCapabilities_deinit, IAndroidEffectCapabilities_Expose },
+    { /* MPH_ANDROIDEFFECTSEND */ IAndroidEffectSend_init, NULL, NULL, NULL },
+    { /* MPH_ANDROIDCONFIGURATION */ IAndroidConfiguration_init, NULL, NULL, NULL },
+    { /* MPH_ANDROIDSIMPLEBUFFERQUEUE, */ IBufferQueue_init /* alias */, NULL, NULL, NULL }
 };
 
 
@@ -1000,6 +1027,7 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
     // Do not change this to malloc; we depend on the object being memset to zero
     this = (IObject *) calloc(1, class__->mSize);
     if (NULL != this) {
+        SL_LOGV("construct %s at %p", class__->mName, this);
         unsigned lossOfControlMask = 0;
         // a NULL engine means we are constructing the engine
         IEngine *thisEngine = (IEngine *) engine;
@@ -1030,22 +1058,27 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
         SLuint32 index;
         for (index = 0; index < class__->mInterfaceCount; ++index, ++x, exposedMask >>= 1) {
             SLuint8 state;
-            if (exposedMask & 1) {
+            // initialize all interfaces with init hooks, even if not exposed
+            const struct MPH_init *mi = &MPH_init_table[x->mMPH];
+            VoidHook init = mi->mInit;
+            if (NULL != init) {
                 void *self = (char *) this + x->mOffset;
                 // IObject does not have an mThis, so [1] is not always defined
                 if (index) {
                     ((IObject **) self)[1] = this;
                 }
-                VoidHook init = MPH_init_table[x->mMPH].mInit;
-                // paranoid double-check for presence of an initialization hook
-                if (NULL != init) {
-                    (*init)(self);
-                }
+                // call the initialization hook
+                (*init)(self);
                 // IObject does not require a call to GetInterface
                 if (index) {
                     ((size_t *) self)[0] ^= ~0;
                 }
-                state = INTERFACE_EXPOSED;
+                // if interface is exposed, also call the optional expose hook
+                BoolHook expose;
+                state = (exposedMask & 1) && ((NULL == (expose = mi->mExpose)) || (*expose)(self)) ?
+                        INTERFACE_EXPOSED : INTERFACE_INITIALIZED;
+                // FIXME log or report to application if an expose hook on a
+                // required explicit interface fails at creation time
             } else {
                 state = INTERFACE_UNINITIALIZED;
             }
@@ -1131,9 +1164,13 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
             break;
         }
 
+        // initialize fields not associated with an interface
+        memset(&this->mSyncThread, 0, sizeof(pthread_t));
+        // initialize fields related to an interface
         this->mObject.mLossOfControlMask = lossOfControlGlobal ? ~0 : 0;
         this->mEngine.mLossOfControlGlobal = lossOfControlGlobal;
         this->mEngineCapabilities.mThreadSafe = threadSafe;
+        // FIXME publish the engine here
         *pEngine = &this->mObject.mItf;
 
     } while(0);

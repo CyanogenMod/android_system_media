@@ -172,7 +172,6 @@ static const struct SLBufferQueueItf_ IBufferQueue_Itf = {
 
 void IBufferQueue_init(void *self)
 {
-    //SL_LOGV("IBufferQueue_init(%p) entering", self);
     IBufferQueue *this = (IBufferQueue *) self;
     this->mItf = &IBufferQueue_Itf;
     this->mState.count = 0;
@@ -196,12 +195,13 @@ void IBufferQueue_init(void *self)
 }
 
 
-/** \brief Free the buffer queue, if it was larger than typical.
-  * Called by CAudioPlayer_Destroy and CAudioRecorder_Destroy.
-  */
+/** \brief Interface deinitialization hook called by IObject::Destroy.
+ *  Free the buffer queue, if it was larger than typical.
+ */
 
-void IBufferQueue_Destroy(IBufferQueue *this)
+void IBufferQueue_deinit(void *self)
 {
+    IBufferQueue *this = (IBufferQueue *) self;
     if ((NULL != this->mArray) && (this->mArray != this->mTypical)) {
         free(this->mArray);
         this->mArray = NULL;

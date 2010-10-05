@@ -54,5 +54,6 @@ void IDynamicSource_init(void *self)
 {
     IDynamicSource *this = (IDynamicSource *) self;
     this->mItf = &IDynamicSource_Itf;
-    // mDataSource will be initialized later in CreateAudioPlayer etc.
+    // mDataSource will be re-initialized later in the containing object constructor
+    this->mDataSource = NULL;
 }

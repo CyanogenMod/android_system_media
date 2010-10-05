@@ -187,11 +187,31 @@ void IVirtualizer_init(void *self)
     this->mItf = &IVirtualizer_Itf;
     this->mEnabled = SL_BOOLEAN_FALSE;
     this->mStrength = 0;
-
 #if defined(ANDROID) && !defined(USE_BACKPORT)
+    memset(&this->mVirtualizerDescriptor, 0, sizeof(effect_descriptor_t));
+    // placement new (explicit constructor)
+    (void) new (&this->mVirtualizerEffect) android::sp<android::AudioEffect>();
+#endif
+}
+
+void IVirtualizer_deinit(void *self)
+{
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    IVirtualizer *this = (IVirtualizer *) self;
+    // explicit destructor
+    this->mVirtualizerEffect.~sp();
+#endif
+}
+
+bool IVirtualizer_Expose(void *self)
+{
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    IVirtualizer *this = (IVirtualizer *) self;
     if (!android_fx_initEffectDescriptor(SL_IID_VIRTUALIZER, &this->mVirtualizerDescriptor)) {
         // Virtualizer init failed
         SL_LOGE("Virtualizer initialization failed.");
+        return false;
     }
 #endif
+    return true;
 }
