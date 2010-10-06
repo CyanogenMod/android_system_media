@@ -61,6 +61,10 @@ void CheckErr(SLresult res) {
 
 static const SLInterfaceID ids[1] = { SL_IID_BUFFERQUEUE };
 static const SLboolean flags[1] = { SL_BOOLEAN_TRUE };
+static const SLInterfaceID ids_mutesolo[2] = { SL_IID_BUFFERQUEUE, SL_IID_MUTESOLO };
+static const SLboolean flags_mutesolo[2] = { SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE };
+static const SLInterfaceID ids_seek[2] = { SL_IID_BUFFERQUEUE, SL_IID_SEEK };
+static const SLboolean flags_seek[2] = { SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE };
 
 // The fixture for testing class BufferQueue
 class TestBufferQueue: public ::testing::Test {
@@ -299,6 +303,34 @@ protected:
 TEST_F(TestBufferQueue, testInvalidBuffer){
     //LOGV("Test Fixture: InvalidBuffer");
     InvalidBuffer();
+}
+
+TEST_F(TestBufferQueue, testMuteSolo) {
+    // create audio player with buffer queue data source in stereo PCM format and ask for mute solo
+    locator_bufferqueue.numBuffers = 1;
+    SLresult result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc,
+            &audiosnk, 2, ids_mutesolo, flags_mutesolo);
+    ASSERT_EQ(SL_RESULT_SUCCESS, result);
+    ASSERT_TRUE(NULL != playerObject);
+    DestroyPlayer();
+    // create audio player with buffer queue data source in mono PCM format and ask for mute solo
+    pcm.numChannels = 1;
+    pcm.channelMask = SL_SPEAKER_FRONT_CENTER;
+    result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc, &audiosnk,
+            2, ids_mutesolo, flags_mutesolo);
+    ASSERT_EQ(SL_RESULT_FEATURE_UNSUPPORTED, result);
+    ASSERT_EQ(NULL, playerObject);
+    DestroyPlayer();
+}
+
+TEST_F(TestBufferQueue, testSeek) {
+    // can create audio player with buffer queue data source and ask for seek
+    locator_bufferqueue.numBuffers = 1;
+    SLresult result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject,
+                                                    &audiosrc, &audiosnk, 2, ids_seek, flags_seek);
+    ASSERT_EQ(SL_RESULT_FEATURE_UNSUPPORTED, result);
+    ASSERT_EQ(NULL, playerObject);
+    DestroyPlayer();
 }
 
 TEST_F(TestBufferQueue, testValidBuffer) {

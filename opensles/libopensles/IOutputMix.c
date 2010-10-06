@@ -28,6 +28,8 @@ static SLresult IOutputMix_GetDestinationOutputDeviceIDs(SLOutputMixItf self,
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         result = SL_RESULT_SUCCESS;
+        // The application can set pDeviceIDs == NULL in order to find out number of devices.
+        // Then the application can allocate a proper-sized device ID array and try again.
         if (NULL != pDeviceIDs) {
             if (1 > *pNumDevices) {
                 result = SL_RESULT_BUFFER_INSUFFICIENT;
@@ -63,13 +65,15 @@ static SLresult IOutputMix_ReRoute(SLOutputMixItf self, SLint32 numOutputDevices
 {
     SL_ENTER_INTERFACE
 
-    if ((1 > numOutputDevices) || (NULL == pOutputDeviceIDs)) {
+    if ((1 != numOutputDevices) || (NULL == pOutputDeviceIDs)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         switch (pOutputDeviceIDs[0]) {
         case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
+#if 0 // FIXME These OEM-specific constants should be configurable
         case DEVICE_ID_HEADSET:
         case DEVICE_ID_HANDSFREE:
+#endif
             result = SL_RESULT_SUCCESS;
             break;
         default:

@@ -120,8 +120,11 @@ typedef bool (*BoolHook)(void *self);
 #define INTERFACE_EXPLICIT            1 // must be requested explicitly during object creation
 #define INTERFACE_DYNAMIC             2 // can be requested after object creation
 #define INTERFACE_UNAVAILABLE         3 // this interface is not available on objects of this class
-#define INTERFACE_EXPLICIT_PREREALIZE 4 // explicit, and can call GetInterface before Realize
+#define INTERFACE_IMPLICIT_PREREALIZE 4 // implicit, and can call GetInterface before Realize
+#define INTERFACE_EXPLICIT_PREREALIZE 5 // explicit, and can call GetInterface before Realize
+// 6 and 7 are reserved for the meaningless DYNAMIC_PREREALIZE and UNAVAILABLE_PREREALIZE
 // note that INTERFACE_OPTIONAL is always re-mapped to one of the above
+#define INTERFACE_PREREALIZE          4 // bit-mask to test for calling GetInterface before Realize
 
 // Profile-specific interfaces
 
@@ -1229,9 +1232,8 @@ extern SLresult checkDataSource(const SLDataSource *pDataSrc,
 extern SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *myDataSinkLocator,
         SLuint32 objType);
 extern SLresult checkSourceFormatVsInterfacesCompatibility(
-        const DataLocatorFormat *pDataLocatorFormat,
-        SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
-        const SLboolean *pInterfaceRequired);
+        const DataLocatorFormat *pDataLocatorFormat, const ClassTable *class__,
+        unsigned exposedMask);
 extern void freeDataLocatorFormat(DataLocatorFormat *dlf);
 
 extern bool C3DGroup_PreDestroy(void *self);

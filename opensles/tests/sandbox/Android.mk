@@ -158,3 +158,32 @@ LOCAL_CFLAGS += -UNDEBUG
 LOCAL_MODULE:= slesTest_reverb
 
 include $(BUILD_EXECUTABLE)
+
+# outputmix
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_C_INCLUDES:= \
+	system/media/opensles/include
+
+LOCAL_SRC_FILES:= \
+	outputmix.c
+
+LOCAL_SHARED_LIBRARIES := \
+	libutils \
+	libOpenSLES
+
+LOCAL_STATIC_LIBRARIES := \
+    libOpenSLESUT
+
+ifeq ($(TARGET_OS),linux)
+	LOCAL_CFLAGS += -DXP_UNIX
+endif
+
+LOCAL_CFLAGS += -UNDEBUG
+
+LOCAL_MODULE:= slesTest_outputmix
+
+include $(BUILD_EXECUTABLE)

@@ -154,6 +154,7 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
     for (i = 0; i < interfaceCount; ++i) {
         switch (interfaces[i].mInterface) {
         case INTERFACE_IMPLICIT:
+        case INTERFACE_IMPLICIT_PREREALIZE:
             // there must be an initialization hook present
             if (NULL != MPH_init_table[interfaces[i].mMPH].mInit) {
                 exposedMask |= 1 << i;
@@ -173,6 +174,7 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
         if (NULL == pInterfaceIds || NULL == pInterfaceRequired) {
             return SL_RESULT_PARAMETER_INVALID;
         }
+        bool anyRequiredButUnsupported = false;
         // Loop for each requested interface
         for (i = 0; i < numInterfaces; ++i) {
             SLInterfaceID iid = pInterfaceIds[i];
@@ -183,13 +185,14 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
             if ((0 > (MPH = IID_to_MPH(iid))) ||
                     // there must be an initialization hook present
                     (NULL == MPH_init_table[MPH].mInit) ||
-                    (0 > (index = class__->mMPH_to_index[MPH]))) {
+                    (0 > (index = class__->mMPH_to_index[MPH])) ||
+                    (INTERFACE_UNAVAILABLE == interfaces[index].mInterface)) {
                 // Here if interface was not found, or is not available for this object type
                 if (pInterfaceRequired[i]) {
                     // Application said it required the interface, so give up
                     SL_LOGE("class %s interface %lu required but unavailable MPH=%d",
                             class__->mName, i, MPH);
-                    return SL_RESULT_FEATURE_UNSUPPORTED;
+                    anyRequiredButUnsupported = true;
                 }
                 // Application said it didn't really need the interface, so ignore with warning
                 SL_LOGW("class %s interface %lu requested but unavailable MPH=%d",
@@ -199,6 +202,9 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
             // The requested interface was both found and available, so expose it
             exposedMask |= (1 << index);
             // Note that we ignore duplicate requests, including equal and aliased IDs
+        }
+        if (anyRequiredButUnsupported) {
+            return SL_RESULT_FEATURE_UNSUPPORTED;
         }
     }
     *pExposedMask = exposedMask;
@@ -651,28 +657,32 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
 /** \brief Check interface ID compatibility with respect to a particular data locator format */
 
 SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDataLocatorFormat,
-        SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
-            const SLboolean *pInterfaceRequired) {
-    // can't request SLSeekItf if data source is a buffer queue
-    // FIXME there are other invalid combinations -- see docs
-    SLuint32 i;
+        const ClassTable *class__, unsigned exposedMask) {
     switch (pDataLocatorFormat->mLocator.mLocatorType) {
     case SL_DATALOCATOR_BUFFERQUEUE:
 #ifdef ANDROID
     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
 #endif
-        for (i = 0; i < numInterfaces; i++) {
-            // FIXME the == needs work
-            if (pInterfaceRequired[i] && (SL_IID_SEEK == pInterfaceIds[i])) {
+        {
+        // can't request SLSeekItf if data source is a buffer queue
+        int index = class__->mMPH_to_index[MPH_SEEK];
+        if (0 <= index) {
+            if (exposedMask & (1 << index)) {
                 SL_LOGE("can't request SL_IID_SEEK with a buffer queue data source");
                 return SL_RESULT_FEATURE_UNSUPPORTED;
             }
-            if (pInterfaceRequired[i] && (SL_IID_MUTESOLO == pInterfaceIds[i]) &&
+        }
+        // can't request SLMuteSoloItf if data source is a mono buffer queue
+        index = class__->mMPH_to_index[MPH_MUTESOLO];
+        if (0 <= index) {
+            if ((exposedMask & (1 << index)) &&
                     (SL_DATAFORMAT_PCM == pDataLocatorFormat->mFormat.mFormatType) &&
                     (1 == pDataLocatorFormat->mFormat.mPCM.numChannels)) {
                 SL_LOGE("can't request SL_IID_MUTESOLO with a mono buffer queue data source");
                 return SL_RESULT_FEATURE_UNSUPPORTED;
             }
+        }
+        // FIXME there are other invalid combinations -- see docs
         }
         break;
     default:
@@ -937,7 +947,6 @@ extern bool
 #define IDeviceVolume_init               NULL
 #define IDynamicInterfaceManagement_init NULL
 #define IEngineCapabilities_init         NULL
-#define IOutputMix_init                  NULL
 #define IThreadSync_init                 NULL
 #define IThreadSync_deinit               NULL
 #endif
@@ -1170,7 +1179,8 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         this->mObject.mLossOfControlMask = lossOfControlGlobal ? ~0 : 0;
         this->mEngine.mLossOfControlGlobal = lossOfControlGlobal;
         this->mEngineCapabilities.mThreadSafe = threadSafe;
-        // FIXME publish the engine here
+        IObject_Publish(&this->mObject);
+        // return the new engine object
         *pEngine = &this->mObject.mItf;
 
     } while(0);
@@ -1195,6 +1205,7 @@ SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedI
         for (i = 0; i < class__->mInterfaceCount; ++i) {
             switch (class__->mInterfaces[i].mInterface) {
             case INTERFACE_IMPLICIT:
+            case INTERFACE_IMPLICIT_PREREALIZE:
             case INTERFACE_EXPLICIT:
             case INTERFACE_EXPLICIT_PREREALIZE:
             case INTERFACE_DYNAMIC:
@@ -1232,6 +1243,7 @@ SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index, SLInterface
         for (i = 0; i < class__->mInterfaceCount; ++i) {
             switch (class__->mInterfaces[i].mInterface) {
             case INTERFACE_IMPLICIT:
+            case INTERFACE_IMPLICIT_PREREALIZE:
             case INTERFACE_EXPLICIT:
             case INTERFACE_EXPLICIT_PREREALIZE:
             case INTERFACE_DYNAMIC:

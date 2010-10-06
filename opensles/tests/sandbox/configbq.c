@@ -17,6 +17,7 @@
 // Test various buffer queue configurations
 
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -91,6 +92,8 @@ int main(int argc, char **argv)
 
     // loop over all formats
     PCM *format;
+    float hzLeft = 440.0;   // A440 (Concert A)
+    float hzRight = 440.0;
     for (format = formats; format->numChannels; ++format) {
 
         printf("Channels: %d, sample rate: %lu, bits: %u\n", format->numChannels,
@@ -138,48 +141,48 @@ int main(int argc, char **argv)
         result = (*playerObject)->Realize(playerObject, SL_BOOLEAN_FALSE);
         assert(SL_RESULT_SUCCESS == result);
 
-        // generate a square wave buffer
-#define N 44100
-        unsigned char buffer[N];
-        int counter = 0;
+        // generate a sine wave buffer, ascending in half-steps for each format
+#define N (44100*4)
+        static unsigned char buffer[N];
         unsigned i;
         for (i = 0; i < N; ) {
-            short sampleLeft = (counter++ & 0x10) ? -32768 : 32767;
-            short sampleRight = (counter++ & 0x10) ? -32768 : 32767;
+            float seconds = (((i * 8) / (format->bitsPerSample * format->numChannels)) * 1000.0) /
+                    format->milliHz;
+            short sampleLeft = sin(seconds * M_PI_2 * hzLeft) * 32767.0;
+            short sampleRight = sin(seconds * M_PI_2 * hzRight) * 32767.0;
             if (2 == format->numChannels) {
                 if (8 == format->bitsPerSample) {
                     buffer[i++] = (sampleLeft + 32768) >> 8;
                     buffer[i++] = (sampleRight + 32768) >> 8;
                 } else {
                     assert(16 == format->bitsPerSample);
-                    buffer[i++] = sampleLeft;
+                    buffer[i++] = sampleLeft & 0xFF;
                     buffer[i++] = sampleLeft >> 8;
-                    buffer[i++] = sampleRight;
+                    buffer[i++] = sampleRight & 0xFF;
                     buffer[i++] = sampleRight >> 8;
                 }
             } else {
                 assert(1 == format->numChannels);
+                // cast to int and divide by 2 are needed to prevent overflow
+                short sampleMono = ((int) sampleLeft + (int) sampleRight) / 2;
                 if (8 == format->bitsPerSample) {
-                    buffer[i++] = (sampleLeft + 32768) >> 8;
+                    buffer[i++] = (sampleMono + 32768) >> 8;
                 } else {
                     assert(16 == format->bitsPerSample);
-                    buffer[i++] = sampleLeft;
-                    buffer[i++] = sampleLeft >> 8;
+                    buffer[i++] = sampleMono & 0xFF;
+                    buffer[i++] = sampleMono >> 8;
                 }
             }
+            if (seconds >= 1.0f)
+                break;
         }
-#if 0
-        for (i = 0; i < N; ++i) {
-            printf("buffer[%u] = 0x%02x\n", i, buffer[i]);
-        }
-#endif
 
         // get the buffer queue interface and enqueue a buffer
         SLBufferQueueItf playerBufferQueue;
         result = (*playerObject)->GetInterface(playerObject, SL_IID_BUFFERQUEUE,
                 &playerBufferQueue);
         assert(SL_RESULT_SUCCESS == result);
-        result = (*playerBufferQueue)->Enqueue(playerBufferQueue, buffer, sizeof(buffer));
+        result = (*playerBufferQueue)->Enqueue(playerBufferQueue, buffer, i);
         assert(SL_RESULT_SUCCESS == result);
 
         // get the play interface
@@ -204,7 +207,9 @@ int main(int argc, char **argv)
         // destroy audio player
         (*playerObject)->Destroy(playerObject);
 
-        usleep(1000000);
+        //usleep(1000000);
+        hzLeft *= 1.05946309; // twelfth root of 2
+        hzRight /= 1.05946309;
     }
 
     // destroy output mix

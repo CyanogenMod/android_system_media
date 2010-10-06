@@ -24,7 +24,7 @@
 // 3DGroup class
 
 static const struct iid_vtable _3DGroup_interfaces[INTERFACES_3DGroup] = {
-    {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(C3DGroup, mObject)},
+    {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(C3DGroup, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(C3DGroup, mDynamicInterfaceManagement)},
     {MPH_3DLOCATION, INTERFACE_IMPLICIT, offsetof(C3DGroup, m3DLocation)},
@@ -52,7 +52,7 @@ static const ClassTable C3DGroup_class = {
 // AudioPlayer class
 
 static const struct iid_vtable AudioPlayer_interfaces[INTERFACES_AudioPlayer] = {
-    {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(CAudioPlayer, mObject)},
+    {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CAudioPlayer, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT_BASE,
         offsetof(CAudioPlayer, mDynamicInterfaceManagement)},
     {MPH_PLAY, INTERFACE_IMPLICIT, offsetof(CAudioPlayer, mPlay)},
@@ -64,10 +64,10 @@ static const struct iid_vtable AudioPlayer_interfaces[INTERFACES_AudioPlayer] = 
     // FIXME Currently we create an internal buffer queue for playing encoded files
     {MPH_BUFFERQUEUE, INTERFACE_IMPLICIT, offsetof(CAudioPlayer, mBufferQueue)},
 #else
-    {MPH_BUFFERQUEUE, INTERFACE_EXPLICIT_GAME, offsetof(CAudioPlayer, mBufferQueue)},
+    {MPH_BUFFERQUEUE, INTERFACE_EXPLICIT/*_GAME*/, offsetof(CAudioPlayer, mBufferQueue)},
 #endif
-    {MPH_EFFECTSEND, INTERFACE_EXPLICIT_GAME_MUSIC, offsetof(CAudioPlayer, mEffectSend)},
-    {MPH_MUTESOLO, INTERFACE_EXPLICIT_GAME, offsetof(CAudioPlayer, mMuteSolo)},
+    {MPH_EFFECTSEND, INTERFACE_EXPLICIT/*_GAME_MUSIC*/, offsetof(CAudioPlayer, mEffectSend)},
+    {MPH_MUTESOLO, INTERFACE_EXPLICIT/*_GAME*/, offsetof(CAudioPlayer, mMuteSolo)},
     {MPH_METADATAEXTRACTION, INTERFACE_DYNAMIC_GAME_MUSIC,
         offsetof(CAudioPlayer, mMetadataExtraction)},
     {MPH_METADATATRAVERSAL, INTERFACE_DYNAMIC_GAME_MUSIC,
@@ -115,7 +115,7 @@ static const ClassTable CAudioPlayer_class = {
 // AudioRecorder class
 
 static const struct iid_vtable AudioRecorder_interfaces[INTERFACES_AudioRecorder] = {
-    {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(CAudioRecorder, mObject)},
+    {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CAudioRecorder, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT_BASE,
         offsetof(CAudioRecorder, mDynamicInterfaceManagement)},
     {MPH_RECORD, INTERFACE_IMPLICIT, offsetof(CAudioRecorder, mRecord)},
@@ -151,7 +151,7 @@ static const ClassTable CAudioRecorder_class = {
 // Engine class
 
 static const struct iid_vtable Engine_interfaces[INTERFACES_Engine] = {
-    {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(CEngine, mObject)},
+    {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CEngine, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT_BASE,
         offsetof(CEngine, mDynamicInterfaceManagement)},
     {MPH_ENGINE, INTERFACE_IMPLICIT, offsetof(CEngine, mEngine)},
@@ -190,7 +190,7 @@ static const ClassTable CEngine_class = {
 // LEDDevice class
 
 static const struct iid_vtable LEDDevice_interfaces[INTERFACES_LEDDevice] = {
-    {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(CLEDDevice, mObject)},
+    {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CLEDDevice, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CLEDDevice, mDynamicInterfaceManagement)},
     {MPH_LED, INTERFACE_IMPLICIT, offsetof(CLEDDevice, mLEDArray)},
@@ -217,7 +217,7 @@ static const ClassTable CLEDDevice_class = {
 // Listener class
 
 static const struct iid_vtable Listener_interfaces[INTERFACES_Listener] = {
-    {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(CListener, mObject)},
+    {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CListener, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CListener, mDynamicInterfaceManagement)},
     {MPH_3DDOPPLER, INTERFACE_DYNAMIC_GAME, offsetof(CListener, m3DDoppler)},
@@ -245,7 +245,7 @@ static const ClassTable CListener_class = {
 // MetadataExtractor class
 
 static const struct iid_vtable MetadataExtractor_interfaces[INTERFACES_MetadataExtractor] = {
-    {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(CMetadataExtractor, mObject)},
+    {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CMetadataExtractor, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CMetadataExtractor, mDynamicInterfaceManagement)},
     {MPH_DYNAMICSOURCE, INTERFACE_IMPLICIT, offsetof(CMetadataExtractor, mDynamicSource)},
@@ -274,7 +274,7 @@ static const ClassTable CMetadataExtractor_class = {
 // MidiPlayer class
 
 static const struct iid_vtable MidiPlayer_interfaces[INTERFACES_MidiPlayer] = {
-    {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(CMidiPlayer, mObject)},
+    {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CMidiPlayer, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CMidiPlayer, mDynamicInterfaceManagement)},
     {MPH_PLAY, INTERFACE_IMPLICIT, offsetof(CMidiPlayer, mPlay)},
@@ -326,7 +326,7 @@ static const ClassTable CMidiPlayer_class = {
 // OutputMix class
 
 static const struct iid_vtable OutputMix_interfaces[INTERFACES_OutputMix] = {
-    {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(COutputMix, mObject)},
+    {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(COutputMix, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT_BASE,
         offsetof(COutputMix, mDynamicInterfaceManagement)},
     {MPH_OUTPUTMIX, INTERFACE_IMPLICIT, offsetof(COutputMix, mOutputMix)},
@@ -337,14 +337,15 @@ static const struct iid_vtable OutputMix_interfaces[INTERFACES_OutputMix] = {
 #else
     {MPH_OUTPUTMIXEXT, INTERFACE_UNAVAILABLE, 0},
 #endif
-    {MPH_ENVIRONMENTALREVERB, INTERFACE_DYNAMIC_GAME, offsetof(COutputMix, mEnvironmentalReverb)},
-    {MPH_EQUALIZER, INTERFACE_DYNAMIC_GAME_MUSIC, offsetof(COutputMix, mEqualizer)},
-    {MPH_PRESETREVERB, INTERFACE_DYNAMIC_MUSIC, offsetof(COutputMix, mPresetReverb)},
-    {MPH_VIRTUALIZER, INTERFACE_DYNAMIC_GAME_MUSIC, offsetof(COutputMix, mVirtualizer)},
-    // The overall Volume interface is explicit,
+    {MPH_ENVIRONMENTALREVERB, INTERFACE_DYNAMIC/*_GAME*/,
+        offsetof(COutputMix, mEnvironmentalReverb)},
+    {MPH_EQUALIZER, INTERFACE_DYNAMIC/*_GAME_MUSIC*/, offsetof(COutputMix, mEqualizer)},
+    {MPH_PRESETREVERB, INTERFACE_DYNAMIC/*_MUSIC*/, offsetof(COutputMix, mPresetReverb)},
+    {MPH_VIRTUALIZER, INTERFACE_DYNAMIC/*_GAME_MUSIC*/, offsetof(COutputMix, mVirtualizer)},
+    // The overall Volume interface is explicit optional,
     // but portions of Volume are mandated only in Game and Music profiles
-    {MPH_VOLUME, INTERFACE_EXPLICIT, offsetof(COutputMix, mVolume)},
-    {MPH_BASSBOOST, INTERFACE_DYNAMIC_OPTIONAL, offsetof(COutputMix, mBassBoost)},
+    {MPH_VOLUME, INTERFACE_OPTIONAL, offsetof(COutputMix, mVolume)},
+    {MPH_BASSBOOST, INTERFACE_DYNAMIC/*_OPTIONAL*/, offsetof(COutputMix, mBassBoost)},
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL, offsetof(COutputMix, mVisualization)},
 #ifdef ANDROID
     {MPH_ANDROIDEFFECT, INTERFACE_EXPLICIT, offsetof(COutputMix, mAndroidEffect)},
@@ -370,7 +371,7 @@ static const ClassTable COutputMix_class = {
 // Vibra class
 
 static const struct iid_vtable VibraDevice_interfaces[INTERFACES_VibraDevice] = {
-    {MPH_OBJECT, INTERFACE_IMPLICIT, offsetof(CVibraDevice, mObject)},
+    {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CVibraDevice, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CVibraDevice, mDynamicInterfaceManagement)},
     {MPH_VIBRA, INTERFACE_IMPLICIT, offsetof(CVibraDevice, mVibra)},

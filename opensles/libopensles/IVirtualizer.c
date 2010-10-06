@@ -208,7 +208,6 @@ bool IVirtualizer_Expose(void *self)
 #if defined(ANDROID) && !defined(USE_BACKPORT)
     IVirtualizer *this = (IVirtualizer *) self;
     if (!android_fx_initEffectDescriptor(SL_IID_VIRTUALIZER, &this->mVirtualizerDescriptor)) {
-        // Virtualizer init failed
         SL_LOGE("Virtualizer initialization failed.");
         return false;
     }

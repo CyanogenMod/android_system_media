@@ -121,7 +121,6 @@ bool IPresetReverb_Expose(void *self)
 #if defined(ANDROID) && !defined(USE_BACKPORT)
     IPresetReverb *this = (IPresetReverb *) self;
     if (!android_fx_initEffectDescriptor(SL_IID_PRESETREVERB, &this->mPresetReverbDescriptor)) {
-        // PresetReverb init failed
         SL_LOGE("PresetReverb initialization failed.");
         return false;
     }
