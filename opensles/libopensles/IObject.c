@@ -348,6 +348,7 @@ static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, 
                         // for debugger and to detect incorrect use of interfaces
                         if (!(this->mGottenMask & mask)) {
                             this->mGottenMask |= mask;
+                            // This trickery validates the v-table
                             ((size_t *) interface)[0] ^= ~0;
                         }
                         result = SL_RESULT_SUCCESS;
@@ -435,7 +436,7 @@ static void Abort_internal(IObject *this)
         case INTERFACE_ADDING_2:
         case INTERFACE_RESUMING_1A: // ResumeInterface
         case INTERFACE_RESUMING_2:
-        case INTERFACE_REMOVING:    // RemoveInterface is sync, but partially without a mutex lock
+        case INTERFACE_REMOVING:    // not observable: RemoveInterface is synchronous & mutex locked
             anyAsync = true;
             break;
         default:
@@ -560,6 +561,8 @@ void IObject_Destroy(SLObjectItf self)
     SLuint8 *interfaceStateP = &this->mInterfaceStates[index];
     for ( ; index > 0; --index) {
         --x;
+        size_t offset = x->mOffset;
+        void *thisItf = (char *) this + offset;
         SLuint32 state = *--interfaceStateP;
         switch (state) {
         case INTERFACE_UNINITIALIZED:
@@ -567,12 +570,17 @@ void IObject_Destroy(SLObjectItf self)
         case INTERFACE_EXPOSED:     // quiescent states
         case INTERFACE_ADDED:
         case INTERFACE_SUSPENDED:
-            // here is where we would call the remove hook
+            // The remove hook is called with mutex locked
+            {
+            VoidHook remove = MPH_init_table[x->mMPH].mRemove;
+            if (NULL != remove) {
+                (*remove)(thisItf);
+            }
+            *interfaceStateP = INTERFACE_INITIALIZED;
+            }
             // fall through
         case INTERFACE_INITIALIZED:
             {
-            size_t offset = x->mOffset;
-            void *thisItf = (char *) this + offset;
             VoidHook deinit = MPH_init_table[x->mMPH].mDeinit;
             if (NULL != deinit) {
                 (*deinit)(thisItf);
@@ -596,10 +604,13 @@ void IObject_Destroy(SLObjectItf self)
         }
     }
     // The mutex is unlocked and destroyed by IObject_deinit, which is the last deinitializer
-#ifdef USE_DEBUG
-    memset(this, 0x55, class__->mSize);
-#endif
+    memset(this, 0x55, class__->mSize); // catch broken applications that continue using interfaces
+                                        // was ifdef USE_DEBUG but safer to do this unconditionally
     free(this);
+
+    if (SL_OBJECTID_ENGINE == class__->mObjectID) {
+        CEngine_Destroyed((CEngine *) this);
+    }
 
     SL_LEAVE_INTERFACE_VOID
 }

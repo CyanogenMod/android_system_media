@@ -59,7 +59,11 @@ int main(int argc, char **argv)
         void *interface = NULL;
         // Use the interface ID as returned by slQuerySupportedEngineInterfaces
         result = (*engineObject)->GetInterface(engineObject, engine_ids[index], &interface);
-        assert(SL_RESULT_PRECONDITIONS_VIOLATED == result);
+        assert(SL_RESULT_SUCCESS == result || SL_RESULT_PRECONDITIONS_VIOLATED == result);
+        if (SL_RESULT_SUCCESS == result) {
+            printf("interface available pre-realize: ");
+            slesutPrintIID(engine_ids[index]);
+        }
     }
     printf("Destroy engine before realization\n");
     (*engineObject)->Destroy(engineObject);
@@ -84,7 +88,16 @@ int main(int argc, char **argv)
         // Calling GetInterface multiple times should return the same interface
         assert(interface_again == interface);
     }
+    printf("Create too many engines\n");
+    SLObjectItf engineObject2;
+    result = slCreateEngine(&engineObject2, 0, NULL, 0, NULL, NULL);
+    assert(SL_RESULT_RESOURCE_ERROR == result);
+    assert(NULL == engineObject2);
     printf("Destroy engine\n");
     (*engineObject)->Destroy(engineObject);
+    printf("Now should be able to create another engine\n");
+    result = slCreateEngine(&engineObject2, 0, NULL, 0, NULL, NULL);
+    assert(SL_RESULT_SUCCESS == result);
+    printf("Exit without destroying engine -- examine log for expected error message\n");
     return EXIT_SUCCESS;
 }

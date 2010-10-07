@@ -53,21 +53,16 @@ static const ClassTable C3DGroup_class = {
 
 static const struct iid_vtable AudioPlayer_interfaces[INTERFACES_AudioPlayer] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CAudioPlayer, mObject)},
-    {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT_BASE,
+    {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CAudioPlayer, mDynamicInterfaceManagement)},
     {MPH_PLAY, INTERFACE_IMPLICIT, offsetof(CAudioPlayer, mPlay)},
     {MPH_3DDOPPLER, INTERFACE_DYNAMIC_GAME, offsetof(CAudioPlayer, m3DDoppler)},
     {MPH_3DGROUPING, INTERFACE_EXPLICIT_GAME, offsetof(CAudioPlayer, m3DGrouping)},
     {MPH_3DLOCATION, INTERFACE_EXPLICIT_GAME, offsetof(CAudioPlayer, m3DLocation)},
     {MPH_3DSOURCE, INTERFACE_EXPLICIT_GAME, offsetof(CAudioPlayer, m3DSource)},
-#ifdef USE_SNDFILE
-    // FIXME Currently we create an internal buffer queue for playing encoded files
-    {MPH_BUFFERQUEUE, INTERFACE_IMPLICIT, offsetof(CAudioPlayer, mBufferQueue)},
-#else
-    {MPH_BUFFERQUEUE, INTERFACE_EXPLICIT/*_GAME*/, offsetof(CAudioPlayer, mBufferQueue)},
-#endif
-    {MPH_EFFECTSEND, INTERFACE_EXPLICIT/*_GAME_MUSIC*/, offsetof(CAudioPlayer, mEffectSend)},
-    {MPH_MUTESOLO, INTERFACE_EXPLICIT/*_GAME*/, offsetof(CAudioPlayer, mMuteSolo)},
+    {MPH_BUFFERQUEUE, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mBufferQueue)},
+    {MPH_EFFECTSEND, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mEffectSend)},
+    {MPH_MUTESOLO, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mMuteSolo)},
     {MPH_METADATAEXTRACTION, INTERFACE_DYNAMIC_GAME_MUSIC,
         offsetof(CAudioPlayer, mMetadataExtraction)},
     {MPH_METADATATRAVERSAL, INTERFACE_DYNAMIC_GAME_MUSIC,
@@ -116,7 +111,7 @@ static const ClassTable CAudioPlayer_class = {
 
 static const struct iid_vtable AudioRecorder_interfaces[INTERFACES_AudioRecorder] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CAudioRecorder, mObject)},
-    {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT_BASE,
+    {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CAudioRecorder, mDynamicInterfaceManagement)},
     {MPH_RECORD, INTERFACE_IMPLICIT, offsetof(CAudioRecorder, mRecord)},
     {MPH_AUDIOENCODER, INTERFACE_EXPLICIT, offsetof(CAudioRecorder, mAudioEncoder)},
@@ -152,7 +147,7 @@ static const ClassTable CAudioRecorder_class = {
 
 static const struct iid_vtable Engine_interfaces[INTERFACES_Engine] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CEngine, mObject)},
-    {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT_BASE,
+    {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CEngine, mDynamicInterfaceManagement)},
     {MPH_ENGINE, INTERFACE_IMPLICIT, offsetof(CEngine, mEngine)},
     {MPH_ENGINECAPABILITIES, INTERFACE_IMPLICIT_BASE, offsetof(CEngine, mEngineCapabilities)},
@@ -327,25 +322,23 @@ static const ClassTable CMidiPlayer_class = {
 
 static const struct iid_vtable OutputMix_interfaces[INTERFACES_OutputMix] = {
     {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(COutputMix, mObject)},
-    {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT_BASE,
+    {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(COutputMix, mDynamicInterfaceManagement)},
     {MPH_OUTPUTMIX, INTERFACE_IMPLICIT, offsetof(COutputMix, mOutputMix)},
 #ifdef USE_OUTPUTMIXEXT
-    // FIXME should be internal implicit (available, but not advertised
-    // publicly or included in possible interface count)
-    {MPH_OUTPUTMIXEXT, INTERFACE_IMPLICIT, offsetof(COutputMix, mOutputMixExt)},
+    {MPH_OUTPUTMIXEXT, INTERFACE_UNAVAILABLE, offsetof(COutputMix, mOutputMixExt)},
 #else
     {MPH_OUTPUTMIXEXT, INTERFACE_UNAVAILABLE, 0},
 #endif
-    {MPH_ENVIRONMENTALREVERB, INTERFACE_DYNAMIC/*_GAME*/,
+    {MPH_ENVIRONMENTALREVERB, INTERFACE_DYNAMIC,
         offsetof(COutputMix, mEnvironmentalReverb)},
-    {MPH_EQUALIZER, INTERFACE_DYNAMIC/*_GAME_MUSIC*/, offsetof(COutputMix, mEqualizer)},
-    {MPH_PRESETREVERB, INTERFACE_DYNAMIC/*_MUSIC*/, offsetof(COutputMix, mPresetReverb)},
-    {MPH_VIRTUALIZER, INTERFACE_DYNAMIC/*_GAME_MUSIC*/, offsetof(COutputMix, mVirtualizer)},
+    {MPH_EQUALIZER, INTERFACE_DYNAMIC, offsetof(COutputMix, mEqualizer)},
+    {MPH_PRESETREVERB, INTERFACE_DYNAMIC, offsetof(COutputMix, mPresetReverb)},
+    {MPH_VIRTUALIZER, INTERFACE_DYNAMIC, offsetof(COutputMix, mVirtualizer)},
     // The overall Volume interface is explicit optional,
     // but portions of Volume are mandated only in Game and Music profiles
     {MPH_VOLUME, INTERFACE_OPTIONAL, offsetof(COutputMix, mVolume)},
-    {MPH_BASSBOOST, INTERFACE_DYNAMIC/*_OPTIONAL*/, offsetof(COutputMix, mBassBoost)},
+    {MPH_BASSBOOST, INTERFACE_DYNAMIC, offsetof(COutputMix, mBassBoost)},
     {MPH_VISUALIZATION, INTERFACE_OPTIONAL, offsetof(COutputMix, mVisualization)},
 #ifdef ANDROID
     {MPH_ANDROIDEFFECT, INTERFACE_EXPLICIT, offsetof(COutputMix, mAndroidEffect)},
