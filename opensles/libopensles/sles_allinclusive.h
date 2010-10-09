@@ -110,7 +110,7 @@ typedef struct COutputMix_struct COutputMix;
 // Hook functions
 
 typedef void (*VoidHook)(void *self);
-typedef SLresult (*StatusHook)(void *self);
+//typedef SLresult (*ResultHook)(void *self);
 typedef SLresult (*AsyncHook)(void *self, SLboolean async);
 typedef bool (*BoolHook)(void *self);
 
@@ -171,18 +171,19 @@ typedef bool (*BoolHook)(void *self);
 
 // Describes how an interface is related to a given object
 
-#define INTERFACE_UNINITIALIZED 1  ///< /not requested at object creation time
-#define INTERFACE_EXPOSED       2  ///< /requested at object creation time
-#define INTERFACE_ADDING_1      3  ///< /part 1 of asynchronous AddInterface, pending
-#define INTERFACE_ADDING_2      4  ///< /synchronous AddInterface, or part 2 of asynchronous
-#define INTERFACE_ADDED         5  ///< /AddInterface has completed
-#define INTERFACE_REMOVING      6  ///< /unlocked phase of (synchronous) RemoveInterface
-#define INTERFACE_SUSPENDING    7  ///< /suspend in progress
-#define INTERFACE_SUSPENDED     8  ///< /suspend has completed
-#define INTERFACE_RESUMING_1    9  ///< /part 1 of asynchronous ResumeInterface, pending
-#define INTERFACE_RESUMING_2   10  ///< /synchronous ResumeInterface, or part 2 of asynchronous
-#define INTERFACE_ADDING_1A    11  ///< /part 1 of asynchronous AddInterface, aborted
-#define INTERFACE_RESUMING_1A  12  ///< /part 1 of asynchronous ResumeInterface, aborted
+#define INTERFACE_UNINITIALIZED 0  ///< not available
+#define INTERFACE_INITIALIZED   1  ///< not requested at object creation time
+#define INTERFACE_EXPOSED       2  ///< requested at object creation time
+#define INTERFACE_ADDING_1      3  ///< part 1 of asynchronous AddInterface, pending
+#define INTERFACE_ADDING_2      4  ///< synchronous AddInterface, or part 2 of asynchronous
+#define INTERFACE_ADDED         5  ///< AddInterface has completed
+#define INTERFACE_REMOVING      6  ///< unlocked phase of (synchronous) RemoveInterface
+#define INTERFACE_SUSPENDING    7  ///< suspend in progress
+#define INTERFACE_SUSPENDED     8  ///< suspend has completed
+#define INTERFACE_RESUMING_1    9  ///< part 1 of asynchronous ResumeInterface, pending
+#define INTERFACE_RESUMING_2   10  ///< synchronous ResumeInterface, or part 2 of asynchronous
+#define INTERFACE_ADDING_1A    11  ///< part 1 of asynchronous AddInterface, aborted
+#define INTERFACE_RESUMING_1A  12  ///< part 1 of asynchronous ResumeInterface, aborted
 
 
 // Maps an interface ID to its offset within the class that exposes it
@@ -491,7 +492,7 @@ typedef struct BufferQueue_interface {
     BufferHeader mTypical[BUFFER_HEADER_TYPICAL+1];
 } IBufferQueue;
 
-#define MAX_DEVICE 2
+#define MAX_DEVICE 2    // hard-coded array size for default in/out
 
 typedef struct {
     const struct SLDeviceVolumeItf_ *mItf;
@@ -590,12 +591,16 @@ typedef struct {
     IObject *mThis;
     SLboolean mEnabled;
     SLuint16 mPreset;
+#if 0 < MAX_EQ_BANDS
     SLmillibel mLevels[MAX_EQ_BANDS];
+#endif
     // const to end of struct
     SLuint16 mNumPresets;
     SLuint16 mNumBands;
+#if !defined(ANDROID) || defined(USE_BACKPORT)
     const struct EqualizerBand *mBands;
     const struct EqualizerPreset *mPresets;
+#endif
     SLmillibel mBandLevelRangeMin;
     SLmillibel mBandLevelRangeMax;
 #if defined(ANDROID) && !defined(USE_BACKPORT)
@@ -819,7 +824,6 @@ typedef struct {
 #endif
 } IVirtualizer;
 
-
 typedef struct {
     const struct SLVisualizationItf_ *mItf;
     IObject *mThis;
@@ -849,6 +853,7 @@ typedef struct /*Volume_interface*/ {
     I3DDoppler m3DDoppler;
     I3DSource m3DSource;
     I3DMacroscopic m3DMacroscopic;
+    // remaining are per-instance private fields not associated with an interface
     unsigned mMemberMask;   // set of member objects
 } /*C3DGroup*/;
 
@@ -948,7 +953,7 @@ enum AndroidObject_state {
     IPlaybackRate mPlaybackRate;
     IVirtualizer mVirtualizer;
     IVisualization mVisualization;
-    // rest of fields are not related to the interfaces
+    // remaining are per-instance private fields not associated with an interface
     DataLocatorFormat mDataSource;
     DataLocatorFormat mDataSink;
     // cached data for this instance
@@ -1023,7 +1028,7 @@ enum AndroidObject_state {
     IBufferQueue mBufferQueue;
     IAndroidConfiguration mAndroidConfiguration;
 #endif
-    // rest of fields are not related to the interfaces
+    // remaining are per-instance private fields not associated with an interface
     DataLocatorFormat mDataSource;
     DataLocatorFormat mDataSink;
     // cached data for this instance
@@ -1060,7 +1065,7 @@ typedef struct {
 #endif
     // optional interfaces
     IDeviceVolume mDeviceVolume;
-    // rest of fields are not related to the interfaces
+    // remaining are per-instance private fields not associated with an interface
     pthread_t mSyncThread;
 } CEngine;
 
@@ -1071,6 +1076,7 @@ typedef struct {
     SLuint8 mInterfaceStates2[INTERFACES_LEDDevice - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     ILEDArray mLEDArray;
+    // remaining are per-instance private fields not associated with an interface
     SLuint32 mDeviceID;
 } CLEDDevice;
 
@@ -1082,6 +1088,7 @@ typedef struct {
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     I3DDoppler m3DDoppler;
     I3DLocation m3DLocation;
+    // remaining are per-instance private fields not associated with an interface
 } CListener;
 
 typedef struct {
@@ -1094,6 +1101,7 @@ typedef struct {
     IDynamicSource mDynamicSource;
     IMetadataExtraction mMetadataExtraction;
     IMetadataTraversal mMetadataTraversal;
+    // remaining are per-instance private fields not associated with an interface
 } CMetadataExtractor;
 
 typedef struct {
@@ -1131,6 +1139,7 @@ typedef struct {
     IPlaybackRate mPlaybackRate;
     IVirtualizer mVirtualizer;
     IVisualization mVisualization;
+    // remaining are per-instance private fields not associated with an interface
 } CMidiPlayer;
 
 /*typedef*/ struct COutputMix_struct {
@@ -1158,7 +1167,7 @@ typedef struct {
 #ifdef ANDROID
     IAndroidEffect mAndroidEffect;
 #endif
-    // implementation-specific data for this instance
+    // remaining are per-instance private fields not associated with an interface
 } /*COutputMix*/;
 
 typedef struct {
@@ -1168,15 +1177,18 @@ typedef struct {
     SLuint8 mInterfaceStates2[INTERFACES_VibraDevice - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IVibra mVibra;
-    //
+    // remaining are per-instance private fields not associated with an interface
     SLuint32 mDeviceID;
 } CVibraDevice;
 
 struct MPH_init {
-    // unsigned char mMPH;
-    VoidHook mInit;
-    VoidHook mResume;
-    VoidHook mDeinit;
+    VoidHook mInit;     // called first to initialize the interface, right after object is allocated
+    // Each interface is initialized regardless whether it is exposed to application.
+    VoidHook mResume;   // called to resume interface after suspension, not currently used
+    VoidHook mDeinit;   // called last when object is about to be destroyed
+    BoolHook mExpose;   // called after initialization, only if interface is exposed to application
+    // will need a remove hook after expose: VoidHook mRemove
+    // will need a suspend hook when suspend is implemented
 };
 
 extern /*static*/ int IID_to_MPH(const SLInterfaceID iid);
@@ -1337,7 +1349,6 @@ extern SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer,
 extern SLresult IBufferQueue_Clear(SLBufferQueueItf self);
 extern SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
     slBufferQueueCallback callback, void *pContext);
-extern void IBufferQueue_Destroy(IBufferQueue *this);
 
 extern bool IsInterfaceInitialized(IObject *this, unsigned MPH);
 extern SLresult AcquireStrongRef(IObject *object, SLuint32 expectedObjectID);

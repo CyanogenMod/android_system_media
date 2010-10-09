@@ -83,3 +83,11 @@ void IThreadSync_init(void *self)
     this->mWaiting = 0;
     memset(&this->mOwner, 0, sizeof(pthread_t));
 }
+
+void IThreadSync_deinit(void *self)
+{
+    IThreadSync *this = (IThreadSync *) self;
+    if (this->mInCriticalSection) {
+        SL_LOGW("ThreadSync::EnterCriticalSection was active at Engine::Destroy");
+    }
+}

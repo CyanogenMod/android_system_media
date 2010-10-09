@@ -748,12 +748,31 @@ void IEnvironmentalReverb_init(void *self)
     IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     this->mItf = &IEnvironmentalReverb_Itf;
     this->mProperties = IEnvironmentalReverb_default;
-
 #if defined(ANDROID) && !defined(USE_BACKPORT)
+    memset(&this->mEnvironmentalReverbDescriptor, 0, sizeof(effect_descriptor_t));
+    // placement new (explicit constructor)
+    (void) new (&this->mEnvironmentalReverbEffect) android::sp<android::AudioEffect>();
+#endif
+}
+
+void IEnvironmentalReverb_deinit(void *self)
+{
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+    // explicit destructor
+    this->mEnvironmentalReverbEffect.~sp();
+#endif
+}
+
+bool IEnvironmentalReverb_Expose(void *self)
+{
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
     if (!android_fx_initEffectDescriptor(SL_IID_ENVIRONMENTALREVERB,
             &this->mEnvironmentalReverbDescriptor)) {
-        // PresetReverb init failed
         SL_LOGE("EnvironmentalReverb initialization failed.");
+        return false;
     }
 #endif
+    return true;
 }

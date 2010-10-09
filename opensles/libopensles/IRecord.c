@@ -289,7 +289,6 @@ static const struct SLRecordItf_ IRecord_Itf = {
 
 void IRecord_init(void *self)
 {
-    //SL_LOGV("IRecord_init(%p) entering", self);
     IRecord *this = (IRecord *) self;
     this->mItf = &IRecord_Itf;
     this->mState = SL_RECORDSTATE_STOPPED;
@@ -300,5 +299,4 @@ void IRecord_init(void *self)
     this->mCallbackEventsMask = 0;
     this->mMarkerPosition = 0;
     this->mPositionUpdatePeriod = 1000;
-
 }

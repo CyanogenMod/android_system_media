@@ -121,12 +121,48 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                 do {
 
                     // Initialize private fields not associated with an interface
+
+                    // Default data source in case of failure in checkDataSource
+                    this->mDataSource.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
+                    this->mDataSource.mFormat.mFormatType = SL_DATAFORMAT_NULL;
+
+                    // Default data sink in case of failure in checkDataSink
+                    this->mDataSink.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
+                    this->mDataSink.mFormat.mFormatType = SL_DATAFORMAT_NULL;
+
+                    // Default is no per-channel mute or solo
                     this->mMuteMask = 0;
                     this->mSoloMask = 0;
+
                     // Will be set soon for PCM buffer queues, or later by platform-specific code
                     // during Realize or Prefetch
                     this->mNumChannels = 0;
                     this->mSampleRateMilliHz = 0;
+
+                    // More default values, in case destructor needs to be called early
+                    this->mDirectLevel = 0;
+#ifdef USE_OUTPUTMIXEXT
+                    this->mTrack = NULL;
+                    this->mGains[0] = 1.0f;
+                    this->mGains[1] = 1.0f;
+                    this->mDestroyRequested = SL_BOOLEAN_FALSE;
+#endif
+#ifdef USE_SNDFILE
+                    this->mSndFile.mPathname = NULL;
+                    this->mSndFile.mSNDFILE = NULL;
+                    memset(&this->mSndFile.mSfInfo, 0, sizeof(SF_INFO));
+                    memset(&this->mSndFile.mMutex, 0, sizeof(pthread_mutex_t));
+                    this->mSndFile.mEOF = SL_BOOLEAN_FALSE;
+                    this->mSndFile.mWhich = 0;
+                    memset(this->mSndFile.mBuffer, 0, sizeof(this->mSndFile.mBuffer));
+#endif
+#ifdef ANDROID
+                    // extra safe initializations of pointers, in case of incomplete construction
+                    this->mpLock = NULL;
+                    this->mAudioTrack = NULL;
+                    // placement new (explicit constructor)
+                    (void) new (&this->mSfPlayer) android::sp<android::SfPlayer>();
+#endif
 
                     // Check the source and sink parameters against generic constraints,
                     // and make a local copy of all parameters in case other application threads
@@ -279,6 +315,14 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                 do {
 
                     // Initialize fields not associated with any interface
+
+                    // Default data source in case of failure in checkDataSource
+                    this->mDataSource.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
+                    this->mDataSource.mFormat.mFormatType = SL_DATAFORMAT_NULL;
+
+                    // Default data sink in case of failure in checkDataSink
+                    this->mDataSink.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
+                    this->mDataSink.mFormat.mFormatType = SL_DATAFORMAT_NULL;
 
                     // These fields are set to real values by
                     // android_audioRecorder_checkSourceSinkSupport.  Note that the data sink is
@@ -753,7 +797,7 @@ void IEngine_init(void *self)
 {
     IEngine *this = (IEngine *) self;
     this->mItf = &IEngine_Itf;
-    // mLossOfControlGlobal is initialized in CreateEngine
+    // mLossOfControlGlobal is initialized in slCreateEngine
 #ifdef USE_SDL
     this->mOutputMix = NULL;
 #endif
@@ -766,8 +810,29 @@ void IEngine_init(void *self)
     }
     this->mShutdown = SL_BOOLEAN_FALSE;
     this->mShutdownAck = SL_BOOLEAN_FALSE;
+    // mThreadPool is initialized in CEngine_Realize
+    memset(&this->mThreadPool, 0, sizeof(ThreadPool));
 #if defined(ANDROID) && !defined(USE_BACKPORT)
     this->mEqNumPresets = 0;
     this->mEqPresetNames = NULL;
+#endif
+}
+
+void IEngine_deinit(void *self)
+{
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    IEngine *this = (IEngine *) self;
+    // free equalizer preset names
+    if (NULL != this->mEqPresetNames) {
+        for (unsigned i = 0; i < this->mEqNumPresets; ++i) {
+            if (NULL != this->mEqPresetNames[i]) {
+                delete[] this->mEqPresetNames[i];
+                this->mEqPresetNames[i] = NULL;
+            }
+        }
+        delete[] this->mEqPresetNames;
+        this->mEqPresetNames = NULL;
+    }
+    this->mEqNumPresets = 0;
 #endif
 }

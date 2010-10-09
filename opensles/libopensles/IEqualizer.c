@@ -477,7 +477,7 @@ void IEqualizer_init(void *self)
     this->mItf = &IEqualizer_Itf;
     this->mEnabled = SL_BOOLEAN_FALSE;
     this->mPreset = SL_EQUALIZER_UNDEFINED;
-#if (0 < MAX_EQ_BANDS)
+#if 0 < MAX_EQ_BANDS
     unsigned band;
     for (band = 0; band < MAX_EQ_BANDS; ++band)
         this->mLevels[band] = 0;
@@ -491,15 +491,34 @@ void IEqualizer_init(void *self)
 #endif
     this->mBandLevelRangeMin = 0;
     this->mBandLevelRangeMax = 0;
-
 #if defined(ANDROID) && !defined(USE_BACKPORT)
+    memset(&this->mEqDescriptor, 0, sizeof(effect_descriptor_t));
+    // placement new (explicit constructor)
+    (void) new (&this->mEqEffect) android::sp<android::AudioEffect>();
+#endif
+}
 
+void IEqualizer_deinit(void *self)
+{
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    IEqualizer *this = (IEqualizer *) self;
+    // explicit destructor
+    this->mEqEffect.~sp();
+#endif
+}
+
+bool IEqualizer_Expose(void *self)
+{
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    IEqualizer *this = (IEqualizer *) self;
     if (!android_fx_initEffectDescriptor(SL_IID_EQUALIZER, &this->mEqDescriptor)) {
-        // EQ init failed
+        SL_LOGE("Equalizer initialization failed");
         this->mNumPresets = 0;
         this->mNumBands = 0;
         this->mBandLevelRangeMin = 0;
         this->mBandLevelRangeMax = 0;
+        return false;
     }
 #endif
+    return true;
 }

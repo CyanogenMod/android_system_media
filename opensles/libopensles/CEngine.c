@@ -91,23 +91,6 @@ void CEngine_Destroy(void *self)
     // Shutdown the thread pool used for asynchronous operations (there should not be any)
     ThreadPool_deinit(&this->mEngine.mThreadPool);
 
-#if defined(ANDROID) && !defined(USE_BACKPORT)
-    // free effect data
-    //   free EQ data
-    if ((0 < this->mEngine.mEqNumPresets) && (NULL != this->mEngine.mEqPresetNames)) {
-        for(uint32_t i = 0 ; i < this->mEngine.mEqNumPresets ; i++) {
-            if (NULL != this->mEngine.mEqPresetNames[i]) {
-                delete [] this->mEngine.mEqPresetNames[i];
-            }
-        }
-        delete [] this->mEngine.mEqPresetNames;
-    }
-    //   free effect library data
-    if (NULL != this->mAndroidEffectCapabilities.mFxDescriptors) {
-        delete [] this->mAndroidEffectCapabilities.mFxDescriptors;
-    }
-#endif
-
 #ifdef USE_SDL
     SDL_close();
 #endif

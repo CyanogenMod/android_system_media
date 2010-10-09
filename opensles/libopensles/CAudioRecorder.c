@@ -50,7 +50,6 @@ void CAudioRecorder_Destroy(void *self)
     freeDataLocatorFormat(&this->mDataSource);
     freeDataLocatorFormat(&this->mDataSink);
 #ifdef ANDROID
-    IBufferQueue_Destroy(&this->mBufferQueue);
     android_audioRecorder_destroy(this);
 #endif
 }

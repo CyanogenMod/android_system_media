@@ -20,13 +20,8 @@
 
 
 SLresult android_outputMix_create(COutputMix *om) {
-    SLresult result = SL_RESULT_SUCCESS;
-
     SL_LOGV("Create outputMix=%p", om);
-
-    om->mAndroidEffect.mEffects = new android::KeyedVector<SLuint32, android::AudioEffect* >();
-
-    return result;
+    return SL_RESULT_SUCCESS;
 }
 
 
@@ -68,27 +63,6 @@ SLresult android_outputMix_realize(COutputMix *om, SLboolean async) {
 
 
 SLresult android_outputMix_destroy(COutputMix *om) {
-    SLresult result = SL_RESULT_SUCCESS;
     SL_LOGV("Destroy outputMix=%p", om);
-
-
-#ifndef USE_BACKPORT
-    // FIXME this shouldn't have to be done here, there should be an "interface destroy" hook,
-    //       just like there is an interface init hook, to avoid memory leaks.
-    om->mEqualizer.mEqEffect.clear();
-    om->mBassBoost.mBassBoostEffect.clear();
-    om->mVirtualizer.mVirtualizerEffect.clear();
-    om->mEnvironmentalReverb.mEnvironmentalReverbEffect.clear();
-    om->mPresetReverb.mPresetReverbEffect.clear();
-    if (!om->mAndroidEffect.mEffects->isEmpty()) {
-        for (size_t i = 0 ; i < om->mAndroidEffect.mEffects->size() ; i++) {
-            delete om->mAndroidEffect.mEffects->valueAt(i);
-        }
-        om->mAndroidEffect.mEffects->clear();
-    }
-    delete om->mAndroidEffect.mEffects;
-#endif
-
-    return result;
+    return SL_RESULT_SUCCESS;
 }
-

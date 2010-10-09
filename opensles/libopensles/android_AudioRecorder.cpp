@@ -423,8 +423,10 @@ void android_audioRecorder_destroy(CAudioRecorder* ar) {
     }
 
 #ifdef MONITOR_RECORDING
-    if (NULL != gMonitorFp) { fclose(gMonitorFp); }
-    gMonitorFp = NULL;
+    if (NULL != gMonitorFp) {
+        fclose(gMonitorFp);
+        gMonitorFp = NULL;
+    }
 #endif
 }
 

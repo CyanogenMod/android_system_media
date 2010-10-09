@@ -107,8 +107,20 @@ void IAndroidEffect_init(void *self)
 {
     IAndroidEffect *this = (IAndroidEffect *) self;
     this->mItf = &IAndroidEffect_Itf;
+    this->mEffects = new android::KeyedVector<SLuint32, android::AudioEffect* >();
+}
 
-    // mEffects lifecycle is handled by the object on which SLAndroidEffect is exposed.  This is a
-    // safety initialization just in case the object is partially constructed and then destroyed.
-    this->mEffects = NULL;
+void IAndroidEffect_deinit(void *self)
+{
+    IAndroidEffect *this = (IAndroidEffect *) self;
+    if (NULL != this->mEffects) {
+        if (!this->mEffects->isEmpty()) {
+            for (size_t i = 0 ; i < this->mEffects->size() ; i++) {
+                delete this->mEffects->valueAt(i);
+            }
+            this->mEffects->clear();
+        }
+        delete this->mEffects;
+        this->mEffects = NULL;
+    }
 }
