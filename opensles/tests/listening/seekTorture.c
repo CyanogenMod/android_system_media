@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     SLDataLocator_OutputMix locator_outputmix;
     SLDataLocator_URI locator_uri;
     locator_uri.locatorType = SL_DATALOCATOR_URI;
-    locator_uri.URI = argv[1];
+    locator_uri.URI = (SLchar *) argv[1];
     locator_outputmix.locatorType = SL_DATALOCATOR_OUTPUTMIX;
     locator_outputmix.outputMix = outputmixObject;
     audiosrc.pLocator = &locator_uri;

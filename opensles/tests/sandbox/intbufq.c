@@ -24,6 +24,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "SLES/OpenSLES.h"
 #ifdef USE_ANDROID_SIMPLE_BUFFER_QUEUE
 #include "SLES/OpenSLES_Android.h"

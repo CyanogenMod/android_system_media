@@ -233,7 +233,7 @@ found:
     }
 
     // create audio player
-    SLDataLocator_URI locURI = {SL_DATALOCATOR_URI, pathname};
+    SLDataLocator_URI locURI = {SL_DATALOCATOR_URI, (SLchar *) pathname};
     SLDataFormat_MIME dfMIME = {SL_DATAFORMAT_MIME, NULL, SL_CONTAINERTYPE_UNSPECIFIED};
     SLDataSource audioSrc = {&locURI, &dfMIME};
     SLDataLocator_OutputMix locOutputMix = {SL_DATALOCATOR_OUTPUTMIX, mixObject};
