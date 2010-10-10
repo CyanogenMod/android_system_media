@@ -330,10 +330,9 @@ static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, 
             } else {
                 unsigned mask = 1 << index;
                 object_lock_exclusive(this);
-                if ((SL_OBJECT_STATE_REALIZED != this->mState) && (INTERFACE_EXPLICIT_PREREALIZE !=
-                        class__->mInterfaces[index].mInterface)) {
-                    // Can't get interface on a suspended/suspending/resuming object
-                    // unless this is an explicit pre-realize interface
+                if ((SL_OBJECT_STATE_REALIZED != this->mState) &&
+                        !(INTERFACE_PREREALIZE & class__->mInterfaces[index].mInterface)) {
+                    // Can't get interface on an unrealized object unless pre-realize is ok
                     result = SL_RESULT_PRECONDITIONS_VIOLATED;
                 } else if ((MPH_MUTESOLO == MPH) && (SL_OBJECTID_AUDIOPLAYER == class__->mObjectID)
                         && (1 == ((CAudioPlayer *) this)->mNumChannels)) {
@@ -538,8 +537,9 @@ void IObject_Destroy(SLObjectItf self)
     // If object is published, then remove it from exposure to sync thread and debugger
     if (0 != i) {
         --i;
-        assert(0 != thisEngine->mInstanceMask);
-        thisEngine->mInstanceMask &= ~(1 << i);
+        unsigned mask = 1 << i;
+        assert(thisEngine->mInstanceMask & mask);
+        thisEngine->mInstanceMask &= ~mask;
         assert(thisEngine->mInstances[i] == this);
         thisEngine->mInstances[i] = NULL;
     }

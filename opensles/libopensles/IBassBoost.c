@@ -206,7 +206,6 @@ bool IBassBoost_Expose(void *self)
 #if defined(ANDROID) && !defined(USE_BACKPORT)
     IBassBoost *this = (IBassBoost *) self;
     if (!android_fx_initEffectDescriptor(SL_IID_BASSBOOST, &this->mBassBoostDescriptor)) {
-        // BassBoost init failed
         SL_LOGE("BassBoost initialization failed.");
         return false;
     }

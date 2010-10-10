@@ -184,7 +184,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 
                     // Check that the requested interfaces are compatible with the data source
                     result = checkSourceFormatVsInterfacesCompatibility(&this->mDataSource,
-                            numInterfaces, pInterfaceIds, pInterfaceRequired);
+                            pCAudioPlayer_class, exposedMask);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
@@ -653,6 +653,7 @@ static SLresult IEngine_QueryNumSupportedInterfaces(SLEngineItf self,
             for (i = 0; i < class__->mInterfaceCount; ++i) {
                 switch (class__->mInterfaces[i].mInterface) {
                 case INTERFACE_IMPLICIT:
+                case INTERFACE_IMPLICIT_PREREALIZE:
                 case INTERFACE_EXPLICIT:
                 case INTERFACE_EXPLICIT_PREREALIZE:
                 case INTERFACE_DYNAMIC:
@@ -692,6 +693,7 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
             for (i = 0; i < class__->mInterfaceCount; ++i) {
                 switch (class__->mInterfaces[i].mInterface) {
                 case INTERFACE_IMPLICIT:
+                case INTERFACE_IMPLICIT_PREREALIZE:
                 case INTERFACE_EXPLICIT:
                 case INTERFACE_EXPLICIT_PREREALIZE:
                 case INTERFACE_DYNAMIC:

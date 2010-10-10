@@ -66,6 +66,7 @@ LOCAL_SRC_FILES:=                     \
         IEqualizer.c                  \
         IMuteSolo.c                   \
         IObject.c                     \
+        IOutputMix.c                  \
         IPlay.c                       \
         IPlaybackRate.c               \
         IPrefetchStatus.c             \
@@ -97,7 +98,6 @@ EXCLUDE_SRC :=                        \
         IMIDITime.c                   \
         IMetadataExtraction.c         \
         IMetadataTraversal.c          \
-        IOutputMix.c                  \
         IPitch.c                      \
         IRatePitch.c                  \
         IThreadSync.c                 \
