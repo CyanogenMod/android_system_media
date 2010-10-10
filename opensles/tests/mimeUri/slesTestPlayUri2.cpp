@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-#define LOG_NDEBUG 0
-#define LOG_TAG "slesTestPlayUri"
-
-#ifdef ANDROID
-#include <utils/Log.h>
-#else
-#define LOGV printf
-#endif
-
-#include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
-#include <sys/time.h>
 
 #include "SLES/OpenSLES.h"
 
 
 #define MAX_NUMBER_INTERFACES 3
-#define MAX_NUMBER_OUTPUT_DEVICES 6
 
 
 //-----------------------------------------------------------------
@@ -43,7 +30,7 @@ void ExitOnError( SLresult result )
 {
     if (SL_RESULT_SUCCESS != result) {
         fprintf(stdout, "%lu error code encountered, exiting\n", result);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -118,7 +105,7 @@ void TestPlayUri( SLObjectItf sl, const char* path, const char* path2)
     /* Configuration of the output mix  */
 
     /* Create Output Mix object to be used each player */
-     result = (*EngineItf)->CreateOutputMix(EngineItf, &outputMix, 1, iidArray, required);
+     result = (*EngineItf)->CreateOutputMix(EngineItf, &outputMix, 0, iidArray, required);
      ExitOnError(result);
 
     /* Realize the Output Mix object in synchronous mode */
@@ -261,8 +248,6 @@ void TestPlayUri( SLObjectItf sl, const char* path, const char* path2)
 //-----------------------------------------------------------------
 int main(int argc, char* const argv[])
 {
-    LOGV("Starting %s\n", argv[0]);
-
     SLresult    result;
     SLObjectItf sl;
 
@@ -276,7 +261,7 @@ int main(int argc, char* const argv[])
         fprintf(stdout, "Usage: \n\t%s url1 url2 \n\t%s url\n", argv[0], argv[0]);
         fprintf(stdout, "Example: \"%s /sdcard/my.mp3 http://blabla/my.wav\" ", argv[0]);
         fprintf(stdout, "or \"%s file:///sdcard/my.mp3\"\n", argv[0]);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     SLEngineOption EngineOption[] = {
@@ -298,7 +283,6 @@ int main(int argc, char* const argv[])
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
-    exit(0);
 
-    return 0;
+    return EXIT_SUCCESS;
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -50,7 +49,7 @@ void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
         fprintf(stdout, "%lu error code encountered at line %d, exiting\n", result, line);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -291,8 +290,6 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
 //-----------------------------------------------------------------
 int main(int argc, char* const argv[])
 {
-    //LOGV("Starting %s\n", argv[0]);
-
     SLresult    result;
     SLObjectItf sl;
 
@@ -303,7 +300,7 @@ int main(int argc, char* const argv[])
     if (argc < 2) {
         fprintf(stdout, "Usage: \t%s destination_file duration_in_seconds\n", argv[0]);
         fprintf(stdout, "Example: \"%s /sdcard/myrec.raw 4\" \n", argv[0]);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     SLEngineOption EngineOption[] = {
@@ -321,7 +318,6 @@ int main(int argc, char* const argv[])
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
-    exit(0);
 
-    return 0;
+    return EXIT_SUCCESS;
 }

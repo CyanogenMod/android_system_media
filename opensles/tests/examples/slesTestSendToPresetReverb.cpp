@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-#ifdef ANDROID
-#define LOG_NDEBUG 0
-#define LOG_TAG "slesTest_sendToPresetReverb"
-
-#include <utils/Log.h>
-#else
-#define LOGV printf
-#endif
-
-#include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -49,7 +39,7 @@ void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
         fprintf(stderr, "%lu error code encountered at line %d, exiting\n", result, line);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -259,8 +249,6 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
 //-----------------------------------------------------------------
 int main(int argc, char* const argv[])
 {
-    LOGV("Starting %s\n", argv[0]);
-
     SLresult    result;
     SLObjectItf sl;
 
@@ -275,7 +263,7 @@ int main(int argc, char* const argv[])
     if (argc < 5) {
         fprintf(stdout, "Usage: \t%s path preset directLevel sendLevel\n", argv[0]);
         fprintf(stdout, "Example: \"%s /sdcard/my.mp3 6 -2000 0\" \n", argv[0]);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     SLEngineOption EngineOption[] = {
@@ -295,7 +283,6 @@ int main(int argc, char* const argv[])
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
-    exit(0);
 
-    return 0;
+    return EXIT_SUCCESS;
 }

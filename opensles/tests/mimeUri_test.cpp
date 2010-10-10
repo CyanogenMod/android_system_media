@@ -138,7 +138,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     required[1] = SL_BOOLEAN_TRUE;
     iidArray[1] = SL_IID_PREFETCHSTATUS;
     // Create Output Mix object to be used by player
-    res = (*EngineItf)->CreateOutputMix(EngineItf, &OutputMix, 1,
+    res = (*EngineItf)->CreateOutputMix(EngineItf, &OutputMix, 0,
             iidArray, required); CheckErr(res);
 
     // Realizing the Output Mix object in synchronous mode.

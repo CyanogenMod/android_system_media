@@ -37,16 +37,6 @@
  * MATERIALS.
  */
 
-#define LOG_NDEBUG 0
-#define LOG_TAG "Sawtooth"
-
-#ifdef ANDROID
-#include <utils/Log.h>
-#else
-#define LOGV printf
-#endif
-
-#include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -56,13 +46,8 @@
 
 #include "SLES/OpenSLES.h"
 
-/*using namespace android;*/
-
-#define SLEEP(x) /* Client system sleep function to sleep x milliseconds
-would replace SLEEP macro */
 
 #define MAX_NUMBER_INTERFACES 3
-#define MAX_NUMBER_OUTPUT_DEVICES 6
 
 /* Local storage for Audio data in 16 bit words */
 #define AUDIO_DATA_STORAGE_SIZE 4096 * 100
@@ -76,7 +61,7 @@ void CheckErr( SLresult res )
     if ( res != SL_RESULT_SUCCESS )
         {
             fprintf(stdout, "%lu SL failure, exiting\n", res);
-            exit(1);
+            exit(EXIT_FAILURE);
         }
     else {
         //fprintf(stdout, "%d SL success, proceeding...\n", res);
@@ -164,15 +149,17 @@ void TestPlaySawtoothBufferQueue( SLObjectItf sl )
     required[0] = SL_BOOLEAN_TRUE;
     iidArray[0] = SL_IID_VOLUME;
     // Create Output Mix object to be used by player
-    res = (*EngineItf)->CreateOutputMix(EngineItf, &OutputMix, 1,
+    res = (*EngineItf)->CreateOutputMix(EngineItf, &OutputMix, 0,
             iidArray, required); CheckErr(res);
 
     // Realizing the Output Mix object in synchronous mode.
     res = (*OutputMix)->Realize(OutputMix, SL_BOOLEAN_FALSE);
     CheckErr(res);
 
+#if 0
     res = (*OutputMix)->GetInterface(OutputMix, SL_IID_VOLUME,
             (void*)&volumeItf); CheckErr(res);
+#endif
 
     /* Setup the data source structure for the buffer queue */
     bufferQueue.locatorType = SL_DATALOCATOR_BUFFERQUEUE;
@@ -233,8 +220,10 @@ void TestPlaySawtoothBufferQueue( SLObjectItf sl )
     res = (*bufferQueueItf)->RegisterCallback(bufferQueueItf,
             BufferQueueCallback, &cntxt); CheckErr(res);
 
+#if 0
     /* Before we start set volume to -3dB (-300mB) */
     res = (*volumeItf)->SetVolumeLevel(volumeItf, -300); CheckErr(res);
+#endif
 
     /* Enqueue a few buffers to get the ball rolling */
     res = (*bufferQueueItf)->Enqueue(bufferQueueItf, cntxt.pData,
@@ -285,8 +274,6 @@ void TestPlaySawtoothBufferQueue( SLObjectItf sl )
 
 int main(int argc, char* const argv[])
 {
-    LOGV("Starting sawtoothPlayer\n");
-
     SLresult    res;
     SLObjectItf sl;
 
@@ -304,8 +291,6 @@ int main(int argc, char* const argv[])
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
-    exit(0);
 
-
-    return 0;
+    return EXIT_SUCCESS;
 }

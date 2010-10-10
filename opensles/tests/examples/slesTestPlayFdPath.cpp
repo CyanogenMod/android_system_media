@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_NDEBUG 0
-#define LOG_TAG "slesTest_playFdPath"
-
-#include <utils/Log.h>
-#include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,7 +26,6 @@
 
 
 #define MAX_NUMBER_INTERFACES 3
-#define MAX_NUMBER_OUTPUT_DEVICES 6
 
 #define TEST_MUTE 0
 #define TEST_SOLO 1
@@ -45,7 +39,7 @@ void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
         fprintf(stdout, "%lu error code encountered at line %d, exiting\n", result, line);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -91,7 +85,7 @@ void TestPlayPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAi
     /* Configuration of the output mix  */
 
     /* Create Output Mix object to be used by the player */
-     result = (*EngineItf)->CreateOutputMix(EngineItf, &outputMix, 1, iidArray, required);
+     result = (*EngineItf)->CreateOutputMix(EngineItf, &outputMix, 0, iidArray, required);
      ExitOnError(result);
 
     /* Realize the Output Mix object in synchronous mode */
@@ -116,7 +110,8 @@ void TestPlayPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAi
     locatorFd.locatorType = SL_DATALOCATOR_ANDROIDFD;
     int fd = open(path, O_RDONLY);
     if (fd == -1) {
-        ExitOnError(SL_RESULT_RESOURCE_ERROR);
+        perror(path);
+        exit(EXIT_FAILURE);
     }
     locatorFd.fd = (SLint32) fd;
     locatorFd.length = size;
@@ -195,8 +190,6 @@ void TestPlayPathFromFD( SLObjectItf sl, const char* path, SLAint64 offset, SLAi
 //-----------------------------------------------------------------
 int main(int argc, char* const argv[])
 {
-    LOGV("Starting %s\n", argv[0]);
-
     SLresult    result;
     SLObjectItf sl;
 
@@ -209,7 +202,7 @@ int main(int argc, char* const argv[])
     if (argc < 3) {
         fprintf(stdout, "Usage: \t%s path offsetInBytes [sizeInBytes]\n", argv[0]);
         fprintf(stdout, "Example: \"%s /sdcard/my.mp3 0 344460\" \n", argv[0]);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     SLEngineOption EngineOption[] = {
@@ -224,7 +217,7 @@ int main(int argc, char* const argv[])
     ExitOnError(result);
 
     if (argc == 3) {
-        fprintf(stdout, "\nno file size given, using SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE\n\n");
+        fprintf(stdout, "no file size given, using SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE\n");
         TestPlayPathFromFD(sl, argv[1], (SLAint64)atoi(argv[2]),
                 SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE);
     } else {
@@ -233,7 +226,6 @@ int main(int argc, char* const argv[])
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
-    exit(0);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
