@@ -107,12 +107,15 @@ void IAndroidEffect_init(void *self)
 {
     IAndroidEffect *this = (IAndroidEffect *) self;
     this->mItf = &IAndroidEffect_Itf;
+#ifndef TARGET_SIMULATOR
     this->mEffects = new android::KeyedVector<SLuint32, android::AudioEffect* >();
+#endif
 }
 
 void IAndroidEffect_deinit(void *self)
 {
     IAndroidEffect *this = (IAndroidEffect *) self;
+#ifndef TARGET_SIMULATOR
     if (NULL != this->mEffects) {
         if (!this->mEffects->isEmpty()) {
             for (size_t i = 0 ; i < this->mEffects->size() ; i++) {
@@ -123,4 +126,5 @@ void IAndroidEffect_deinit(void *self)
         delete this->mEffects;
         this->mEffects = NULL;
     }
+#endif
 }
