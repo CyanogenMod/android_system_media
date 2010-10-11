@@ -48,6 +48,9 @@
 
 #define MAX_NUMBER_INTERFACES 2
 
+#define PREFETCHEVENT_ERROR_CANDIDATE \
+        (SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE)
+
 //-----------------------------------------------------------------
 //* Exits the application if an error is encountered */
 #define CheckErr(x) ExitOnErrorFunc(x,__LINE__)
@@ -69,7 +72,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     SLuint32 status;
     //fprintf(stdout, "PrefetchEventCallback: received event %lu\n", event);
     (*caller)->GetPrefetchStatus(caller, &status);
-    if ((event & (SL_PREFETCHEVENT_STATUSCHANGE|SL_PREFETCHEVENT_FILLLEVELCHANGE))
+    if ((PREFETCHEVENT_ERROR_CANDIDATE == (event & PREFETCHEVENT_ERROR_CANDIDATE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
         fprintf(stdout, "PrefetchEventCallback: Error while prefetching data, exiting\n");
         //exit(EXIT_FAILURE);

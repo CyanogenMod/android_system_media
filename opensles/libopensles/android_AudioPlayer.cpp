@@ -394,15 +394,49 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
     switch(event) {
 
     case(android::SfPlayer::kEventPrepared): {
-        object_lock_exclusive(&ap->mObject);
 
         if (SFPLAYER_SUCCESS != data1) {
+            object_lock_exclusive(&ap->mObject);
+
             ap->mAudioTrack = NULL;
             ap->mNumChannels = 0;
             ap->mSampleRateMilliHz = 0;
             ap->mAndroidObjState = ANDROID_UNINITIALIZED;
 
+            object_unlock_exclusive(&ap->mObject);
+
+            // SfPlayer prepare() failed prefetching, there is no event in SLPrefetchStatus to
+            //  indicate a prefetch error, so we signal it by sending simulataneously two events:
+            //  - SL_PREFETCHEVENT_FILLLEVELCHANGE with a level of 0
+            //  - SL_PREFETCHEVENT_STATUSCHANGE with a status of SL_PREFETCHSTATUS_UNDERFLOW
+            SL_LOGE(ERROR_PLAYER_PREFETCH_d, data1);
+            if (!IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
+                break;
+            }
+
+            slPrefetchCallback callback = NULL;
+            void* callbackPContext = NULL;
+
+            interface_lock_exclusive(&ap->mPrefetchStatus);
+            ap->mPrefetchStatus.mLevel = 0;
+            ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+            if ((ap->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_FILLLEVELCHANGE)
+                    && (ap->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_STATUSCHANGE)) {
+                callback = ap->mPrefetchStatus.mCallback;
+                callbackPContext = ap->mPrefetchStatus.mContext;
+            }
+            interface_unlock_exclusive(&ap->mPrefetchStatus);
+
+            // callback with no lock held
+            if (NULL != callback) {
+                (*callback)(&ap->mPrefetchStatus.mItf, callbackPContext,
+                        SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE);
+            }
+
+
         } else {
+            object_lock_exclusive(&ap->mObject);
+
             ap->mAudioTrack = ap->mSfPlayer->getAudioTrack();
             ap->mNumChannels = ap->mSfPlayer->getNumChannels();
             ap->mSampleRateMilliHz = android_to_sles_sampleRate(ap->mSfPlayer->getSampleRateHz());
@@ -414,9 +448,10 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
             android_audioPlayer_setPlayRate(ap, ap->mPlaybackRate.mRate, false /*lockAP*/);
 
             ap->mAndroidObjState = ANDROID_READY;
+
+            object_unlock_exclusive(&ap->mObject);
         }
 
-        object_unlock_exclusive(&ap->mObject);
     } break;
 
     case(android::SfPlayer::kEventPrefetchFillLevelUpdate): {

@@ -26,6 +26,8 @@
         "Cannot realize AudioPlayer: with unknown data source locator"
 #define ERROR_PLAYER_NEW_NULL_TRACK \
         "Internal error: new AudioTrack shouldn't be NULL"
+#define ERROR_PLAYER_PREFETCH_d \
+        "Error (%d) encountered while prefetching"
 
 //-----------------------------------------------------------------------------
 // Android AudioRecorder errors
