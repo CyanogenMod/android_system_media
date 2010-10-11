@@ -246,8 +246,9 @@ void SfPlayer::onPrepare(const sp<AMessage> &msg) {
     }
 
     if (audioTrackIndex < 0) {
-        SL_LOGE("SfPlayer::onPrepare: Could not find an audio track.");
+        SL_LOGE("SfPlayer::onPrepare: Could not find a supported audio track.");
         notifyPrepared(ERROR_UNSUPPORTED);
+        return;
     }
 
     sp<MediaSource> source = extractor->getTrack(audioTrackIndex);
