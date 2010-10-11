@@ -1190,7 +1190,7 @@ struct MPH_init {
     VoidHook mResume;   // called to resume interface after suspension, not currently used
     VoidHook mDeinit;   // called last when object is about to be destroyed
     BoolHook mExpose;   // called after initialization, only if interface is exposed to application
-    // will need a remove hook after expose: VoidHook mRemove
+    VoidHook mRemove;   // called by DynamicInterfaceManager::RemoveInterface, and prior to mDeinit
     // will need a suspend hook when suspend is implemented
 };
 
@@ -1252,6 +1252,7 @@ extern SLresult CEngine_Realize(void *self, SLboolean async);
 extern SLresult CEngine_Resume(void *self, SLboolean async);
 extern void CEngine_Destroy(void *self);
 extern bool CEngine_PreDestroy(void *self);
+extern void CEngine_Destroyed(CEngine *self);
 
 extern SLresult COutputMix_Realize(void *self, SLboolean async);
 extern SLresult COutputMix_Resume(void *self, SLboolean async);

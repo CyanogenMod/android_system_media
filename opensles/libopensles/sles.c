@@ -658,14 +658,14 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
 
 SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDataLocatorFormat,
         const ClassTable *class__, unsigned exposedMask) {
+    int index;
     switch (pDataLocatorFormat->mLocator.mLocatorType) {
     case SL_DATALOCATOR_BUFFERQUEUE:
 #ifdef ANDROID
     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
 #endif
-        {
         // can't request SLSeekItf if data source is a buffer queue
-        int index = class__->mMPH_to_index[MPH_SEEK];
+        index = class__->mMPH_to_index[MPH_SEEK];
         if (0 <= index) {
             if (exposedMask & (1 << index)) {
                 SL_LOGE("can't request SL_IID_SEEK with a buffer queue data source");
@@ -682,10 +682,24 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
                 return SL_RESULT_FEATURE_UNSUPPORTED;
             }
         }
-        // FIXME there are other invalid combinations -- see docs
-        }
         break;
     default:
+        // can't request SLBufferQueueItf or its alias SLAndroidSimpleBufferQueueItf
+        // if the data source is not a buffer queue
+        index = class__->mMPH_to_index[MPH_BUFFERQUEUE];
+#ifdef ANDROID
+        assert(index == class__->mMPH_to_index[MPH_ANDROIDSIMPLEBUFFERQUEUE]);
+#endif
+        if (0 <= index) {
+            if (exposedMask & (1 << index)) {
+                SL_LOGE("can't request SL_IID_BUFFERQUEUE "
+#ifdef ANDROID
+                        "or SL_IID_ANDROIDSIMPLEBUFFERQUEUE "
+#endif
+                        "with a non-buffer queue data source");
+                return SL_RESULT_FEATURE_UNSUPPORTED;
+            }
+        }
         break;
     }
     return SL_RESULT_SUCCESS;
@@ -919,7 +933,6 @@ extern bool
 #define IDynamicSource_init         NULL
 #define IMetadataExtraction_init    NULL
 #define IMetadataTraversal_init     NULL
-//#define IPlaybackRate_init          NULL
 #define IVisualization_init         NULL
 #endif
 
@@ -945,7 +958,6 @@ extern bool
 #define IAudioEncoder_init               NULL
 #define IAudioIODeviceCapabilities_init  NULL
 #define IDeviceVolume_init               NULL
-#define IDynamicInterfaceManagement_init NULL
 #define IEngineCapabilities_init         NULL
 #define IThreadSync_init                 NULL
 #define IThreadSync_deinit               NULL
@@ -972,59 +984,62 @@ extern bool
 
 
 /*static*/ const struct MPH_init MPH_init_table[MPH_MAX] = {
-    { /* MPH_3DCOMMIT, */ I3DCommit_init, NULL, NULL, NULL },
-    { /* MPH_3DDOPPLER, */ I3DDoppler_init, NULL, NULL, NULL },
-    { /* MPH_3DGROUPING, */ I3DGrouping_init, NULL, I3DGrouping_deinit, NULL },
-    { /* MPH_3DLOCATION, */ I3DLocation_init, NULL, NULL, NULL },
-    { /* MPH_3DMACROSCOPIC, */ I3DMacroscopic_init, NULL, NULL, NULL },
-    { /* MPH_3DSOURCE, */ I3DSource_init, NULL, NULL, NULL },
-    { /* MPH_AUDIODECODERCAPABILITIES, */ IAudioDecoderCapabilities_init, NULL, NULL, NULL },
-    { /* MPH_AUDIOENCODER, */ IAudioEncoder_init, NULL, NULL, NULL },
-    { /* MPH_AUDIOENCODERCAPABILITIES, */ IAudioEncoderCapabilities_init, NULL, NULL, NULL },
-    { /* MPH_AUDIOIODEVICECAPABILITIES, */ IAudioIODeviceCapabilities_init, NULL, NULL, NULL },
-    { /* MPH_BASSBOOST, */ IBassBoost_init, NULL, IBassBoost_deinit, IBassBoost_Expose },
-    { /* MPH_BUFFERQUEUE, */ IBufferQueue_init, NULL, IBufferQueue_deinit, NULL },
-    { /* MPH_DEVICEVOLUME, */ IDeviceVolume_init, NULL, NULL, NULL },
-    { /* MPH_DYNAMICINTERFACEMANAGEMENT, */ IDynamicInterfaceManagement_init, NULL, NULL, NULL },
-    { /* MPH_DYNAMICSOURCE, */ IDynamicSource_init, NULL, NULL, NULL },
-    { /* MPH_EFFECTSEND, */ IEffectSend_init, NULL, NULL, NULL },
-    { /* MPH_ENGINE, */ IEngine_init, NULL, IEngine_deinit, NULL },
-    { /* MPH_ENGINECAPABILITIES, */ IEngineCapabilities_init, NULL, NULL, NULL },
+    { /* MPH_3DCOMMIT, */ I3DCommit_init, NULL, NULL, NULL, NULL },
+    { /* MPH_3DDOPPLER, */ I3DDoppler_init, NULL, NULL, NULL, NULL },
+    { /* MPH_3DGROUPING, */ I3DGrouping_init, NULL, I3DGrouping_deinit, NULL, NULL },
+    { /* MPH_3DLOCATION, */ I3DLocation_init, NULL, NULL, NULL, NULL },
+    { /* MPH_3DMACROSCOPIC, */ I3DMacroscopic_init, NULL, NULL, NULL, NULL },
+    { /* MPH_3DSOURCE, */ I3DSource_init, NULL, NULL, NULL, NULL },
+    { /* MPH_AUDIODECODERCAPABILITIES, */ IAudioDecoderCapabilities_init, NULL, NULL, NULL, NULL },
+    { /* MPH_AUDIOENCODER, */ IAudioEncoder_init, NULL, NULL, NULL, NULL },
+    { /* MPH_AUDIOENCODERCAPABILITIES, */ IAudioEncoderCapabilities_init, NULL, NULL, NULL, NULL },
+    { /* MPH_AUDIOIODEVICECAPABILITIES, */ IAudioIODeviceCapabilities_init, NULL, NULL, NULL,
+        NULL },
+    { /* MPH_BASSBOOST, */ IBassBoost_init, NULL, IBassBoost_deinit, IBassBoost_Expose, NULL },
+    { /* MPH_BUFFERQUEUE, */ IBufferQueue_init, NULL, IBufferQueue_deinit, NULL, NULL },
+    { /* MPH_DEVICEVOLUME, */ IDeviceVolume_init, NULL, NULL, NULL, NULL },
+    { /* MPH_DYNAMICINTERFACEMANAGEMENT, */ IDynamicInterfaceManagement_init, NULL, NULL, NULL,
+        NULL },
+    { /* MPH_DYNAMICSOURCE, */ IDynamicSource_init, NULL, NULL, NULL, NULL },
+    { /* MPH_EFFECTSEND, */ IEffectSend_init, NULL, NULL, NULL, NULL },
+    { /* MPH_ENGINE, */ IEngine_init, NULL, IEngine_deinit, NULL, NULL },
+    { /* MPH_ENGINECAPABILITIES, */ IEngineCapabilities_init, NULL, NULL, NULL, NULL },
     { /* MPH_ENVIRONMENTALREVERB, */ IEnvironmentalReverb_init, NULL, IEnvironmentalReverb_deinit,
-        IEnvironmentalReverb_Expose },
-    { /* MPH_EQUALIZER, */ IEqualizer_init, NULL, IEqualizer_deinit, IEqualizer_Expose },
-    { /* MPH_LED, */ ILEDArray_init, NULL, NULL, NULL },
-    { /* MPH_METADATAEXTRACTION, */ IMetadataExtraction_init, NULL, NULL, NULL },
-    { /* MPH_METADATATRAVERSAL, */ IMetadataTraversal_init, NULL, NULL, NULL },
-    { /* MPH_MIDIMESSAGE, */ IMIDIMessage_init, NULL, NULL, NULL },
-    { /* MPH_MIDITIME, */ IMIDITime_init, NULL, NULL, NULL },
-    { /* MPH_MIDITEMPO, */ IMIDITempo_init, NULL, NULL, NULL },
-    { /* MPH_MIDIMUTESOLO, */ IMIDIMuteSolo_init, NULL, NULL, NULL },
-    { /* MPH_MUTESOLO, */ IMuteSolo_init, NULL, NULL, NULL },
-    { /* MPH_NULL, */ NULL, NULL, NULL, NULL },
-    { /* MPH_OBJECT, */ IObject_init, NULL, IObject_deinit, NULL },
-    { /* MPH_OUTPUTMIX, */ IOutputMix_init, NULL, NULL, NULL },
-    { /* MPH_PITCH, */ IPitch_init, NULL, NULL, NULL },
-    { /* MPH_PLAY, */ IPlay_init, NULL, NULL, NULL },
-    { /* MPH_PLAYBACKRATE, */ IPlaybackRate_init, NULL, NULL, NULL },
-    { /* MPH_PREFETCHSTATUS, */ IPrefetchStatus_init, NULL, NULL, NULL },
+        IEnvironmentalReverb_Expose, NULL },
+    { /* MPH_EQUALIZER, */ IEqualizer_init, NULL, IEqualizer_deinit, IEqualizer_Expose, NULL },
+    { /* MPH_LED, */ ILEDArray_init, NULL, NULL, NULL, NULL },
+    { /* MPH_METADATAEXTRACTION, */ IMetadataExtraction_init, NULL, NULL, NULL, NULL },
+    { /* MPH_METADATATRAVERSAL, */ IMetadataTraversal_init, NULL, NULL, NULL, NULL },
+    { /* MPH_MIDIMESSAGE, */ IMIDIMessage_init, NULL, NULL, NULL, NULL },
+    { /* MPH_MIDITIME, */ IMIDITime_init, NULL, NULL, NULL, NULL },
+    { /* MPH_MIDITEMPO, */ IMIDITempo_init, NULL, NULL, NULL, NULL },
+    { /* MPH_MIDIMUTESOLO, */ IMIDIMuteSolo_init, NULL, NULL, NULL, NULL },
+    { /* MPH_MUTESOLO, */ IMuteSolo_init, NULL, NULL, NULL, NULL },
+    { /* MPH_NULL, */ NULL, NULL, NULL, NULL, NULL },
+    { /* MPH_OBJECT, */ IObject_init, NULL, IObject_deinit, NULL, NULL },
+    { /* MPH_OUTPUTMIX, */ IOutputMix_init, NULL, NULL, NULL, NULL },
+    { /* MPH_PITCH, */ IPitch_init, NULL, NULL, NULL, NULL },
+    { /* MPH_PLAY, */ IPlay_init, NULL, NULL, NULL, NULL },
+    { /* MPH_PLAYBACKRATE, */ IPlaybackRate_init, NULL, NULL, NULL, NULL },
+    { /* MPH_PREFETCHSTATUS, */ IPrefetchStatus_init, NULL, NULL, NULL, NULL },
     { /* MPH_PRESETREVERB, */ IPresetReverb_init, NULL, IPresetReverb_deinit,
-        IPresetReverb_Expose },
-    { /* MPH_RATEPITCH, */ IRatePitch_init, NULL, NULL, NULL },
-    { /* MPH_RECORD, */ IRecord_init, NULL, NULL, NULL },
-    { /* MPH_SEEK, */ ISeek_init, NULL, NULL, NULL },
-    { /* MPH_THREADSYNC, */ IThreadSync_init, NULL, IThreadSync_deinit, NULL },
-    { /* MPH_VIBRA, */ IVibra_init, NULL, NULL, NULL },
-    { /* MPH_VIRTUALIZER, */ IVirtualizer_init, NULL, IVirtualizer_deinit, IVirtualizer_Expose },
-    { /* MPH_VISUALIZATION, */ IVisualization_init, NULL, NULL, NULL },
-    { /* MPH_VOLUME, */ IVolume_init, NULL, NULL, NULL },
-    { /* MPH_OUTPUTMIXEXT, */ IOutputMixExt_init, NULL, NULL, NULL },
-    { /* MPH_ANDROIDEFFECT */ IAndroidEffect_init, NULL, IAndroidEffect_deinit, NULL },
+        IPresetReverb_Expose, NULL },
+    { /* MPH_RATEPITCH, */ IRatePitch_init, NULL, NULL, NULL, NULL },
+    { /* MPH_RECORD, */ IRecord_init, NULL, NULL, NULL, NULL },
+    { /* MPH_SEEK, */ ISeek_init, NULL, NULL, NULL, NULL },
+    { /* MPH_THREADSYNC, */ IThreadSync_init, NULL, IThreadSync_deinit, NULL, NULL },
+    { /* MPH_VIBRA, */ IVibra_init, NULL, NULL, NULL, NULL },
+    { /* MPH_VIRTUALIZER, */ IVirtualizer_init, NULL, IVirtualizer_deinit, IVirtualizer_Expose,
+        NULL },
+    { /* MPH_VISUALIZATION, */ IVisualization_init, NULL, NULL, NULL, NULL },
+    { /* MPH_VOLUME, */ IVolume_init, NULL, NULL, NULL, NULL },
+    { /* MPH_OUTPUTMIXEXT, */ IOutputMixExt_init, NULL, NULL, NULL, NULL },
+    { /* MPH_ANDROIDEFFECT */ IAndroidEffect_init, NULL, IAndroidEffect_deinit, NULL, NULL },
     { /* MPH_ANDROIDEFFECTCAPABILITIES */ IAndroidEffectCapabilities_init, NULL,
-        IAndroidEffectCapabilities_deinit, IAndroidEffectCapabilities_Expose },
-    { /* MPH_ANDROIDEFFECTSEND */ IAndroidEffectSend_init, NULL, NULL, NULL },
-    { /* MPH_ANDROIDCONFIGURATION */ IAndroidConfiguration_init, NULL, NULL, NULL },
-    { /* MPH_ANDROIDSIMPLEBUFFERQUEUE, */ IBufferQueue_init /* alias */, NULL, NULL, NULL }
+        IAndroidEffectCapabilities_deinit, IAndroidEffectCapabilities_Expose, NULL },
+    { /* MPH_ANDROIDEFFECTSEND */ IAndroidEffectSend_init, NULL, NULL, NULL, NULL },
+    { /* MPH_ANDROIDCONFIGURATION */ IAndroidConfiguration_init, NULL, NULL, NULL, NULL },
+    { /* MPH_ANDROIDSIMPLEBUFFERQUEUE, */ IBufferQueue_init /* alias */, NULL, NULL, NULL, NULL }
 };
 
 
@@ -1080,6 +1095,7 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
                 (*init)(self);
                 // IObject does not require a call to GetInterface
                 if (index) {
+                    // This trickery invalidates the v-table until GetInterface
                     ((size_t *) self)[0] ^= ~0;
                 }
                 // if interface is exposed, also call the optional expose hook
@@ -1099,6 +1115,44 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
 }
 
 
+/* This implementation supports at most one engine */
+
+static CEngine *theOneTrueEngine = NULL;
+static pthread_mutex_t theOneTrueMutex = PTHREAD_MUTEX_INITIALIZER;
+
+
+/** \brief Called by dlopen when .so is loaded */
+
+__attribute__((constructor)) static void onDlOpen(void)
+{
+}
+
+
+/** \brief Called by dlclose when .so is unloaded */
+
+__attribute__((destructor)) static void onDlClose(void)
+{
+    if (NULL != theOneTrueEngine) {
+        SL_LOGE("Object::Destroy omitted for engine %p", theOneTrueEngine);
+    }
+}
+
+/** \brief Called by IObject::Destroy after engine is destroyed. The parameter refers to the
+ *  previous engine, which is now undefined memory.
+ */
+
+void CEngine_Destroyed(CEngine *self)
+{
+    int ok;
+    ok = pthread_mutex_lock(&theOneTrueMutex);
+    assert(0 == ok);
+    assert(self == theOneTrueEngine);
+    theOneTrueEngine = NULL;
+    ok = pthread_mutex_unlock(&theOneTrueMutex);
+    assert(0 == ok);
+}
+
+
 /* Initial global entry points */
 
 
@@ -1110,7 +1164,17 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
 {
     SL_ENTER_GLOBAL
 
+    int ok;
+    ok = pthread_mutex_lock(&theOneTrueMutex);
+    assert(0 == ok);
+
     do {
+
+        if (NULL != theOneTrueEngine) {
+            SL_LOGE("slCreateEngine while another engine %p is active", theOneTrueEngine);
+            result = SL_RESULT_RESOURCE_ERROR;
+            break;
+        }
 
 #ifdef ANDROID
         android::ProcessState::self()->startThreadPool();
@@ -1180,10 +1244,14 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         this->mEngine.mLossOfControlGlobal = lossOfControlGlobal;
         this->mEngineCapabilities.mThreadSafe = threadSafe;
         IObject_Publish(&this->mObject);
+        theOneTrueEngine = this;
         // return the new engine object
         *pEngine = &this->mObject.mItf;
 
     } while(0);
+
+    ok = pthread_mutex_unlock(&theOneTrueMutex);
+    assert(0 == ok);
 
     SL_LEAVE_GLOBAL
 }

@@ -203,6 +203,7 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
 {
     SL_ENTER_INTERFACE
 
+#if USE_PROFILES & USE_PROFILES_BASE
     // validate input parameters
     if (NULL == iid) {
         result = SL_RESULT_PARAMETER_INVALID;
@@ -226,25 +227,29 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
             case INTERFACE_ADDED:       // normal cases
             case INTERFACE_SUSPENDED:
                 {
-                // Mark operation pending to prevent duplication
-                *interfaceStateP = INTERFACE_REMOVING;
-                thisObject->mGottenMask &= ~(1 << index);
-                object_unlock_exclusive(thisObject);
-
-#if 0 // remove hook is not yet implemented
-                // The removal is done with mutex unlocked
+                // Compute address of the interface
                 const struct iid_vtable *x = &class__->mInterfaces[index];
                 size_t offset = x->mOffset;
                 void *thisItf = (char *) thisObject + offset;
+
+                // Mark operation pending (not necessary; remove is synchronous with mutex locked)
+                *interfaceStateP = INTERFACE_REMOVING;
+
+                // Check if application ever called Object::GetInterface
+                unsigned mask = 1 << index;
+                if (thisObject->mGottenMask & mask) {
+                    thisObject->mGottenMask &= ~mask;
+                    // This trickery invalidates the v-table
+                    ((size_t *) thisItf)[0] ^= ~0;
+                }
+
+                // The remove hook is called with mutex locked
                 VoidHook remove = MPH_init_table[MPH].mRemove;
                 if (NULL != remove) {
                     (*remove)(thisItf);
                 }
-#endif
                 result = SL_RESULT_SUCCESS;
 
-                // Note that this was previously locked, but then unlocked for the deinit hook
-                object_lock_exclusive(thisObject);
                 assert(INTERFACE_REMOVING == *interfaceStateP);
                 *interfaceStateP = INTERFACE_INITIALIZED;
                 }
@@ -263,6 +268,9 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
             object_unlock_exclusive(thisObject);
         }
     }
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     SL_LEAVE_INTERFACE
 }
@@ -414,11 +422,10 @@ static SLresult IDynamicInterfaceManagement_ResumeInterface(SLDynamicInterfaceMa
                     *interfaceStateP = INTERFACE_ADDED;
                 }
 
-                // mutex is now unlocked
+                // mutex is now locked
                 break;
 
             default:    // disallow resumption of non-suspended interfaces
-                object_unlock_exclusive(thisObject);
                 result = SL_RESULT_PRECONDITIONS_VIOLATED;
                 break;
             }

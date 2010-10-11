@@ -60,6 +60,7 @@ LOCAL_SRC_FILES:=                     \
         IAndroidEffectSend.c          \
         IBassBoost.c                  \
         IBufferQueue.c                \
+        IDynamicInterfaceManagement.c \
         IEffectSend.c                 \
         IEngine.c                     \
         IEnvironmentalReverb.c        \
@@ -88,7 +89,6 @@ EXCLUDE_SRC :=                        \
         IAudioEncoderCapabilities.c   \
         IAudioIODeviceCapabilities.c  \
         IDeviceVolume.c               \
-        IDynamicInterfaceManagement.c \
         IDynamicSource.c              \
         IEngineCapabilities.c         \
         ILEDArray.c                   \
