@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     // configure audio source
     SLDataLocator_URI loc_uri;
     loc_uri.locatorType = SL_DATALOCATOR_URI;
-    loc_uri.URI = argv[1];
+    loc_uri.URI = (SLchar *) argv[1];
     SLDataFormat_MIME format_mime;
     format_mime.formatType = SL_DATAFORMAT_MIME;
     format_mime.mimeType = NULL;
