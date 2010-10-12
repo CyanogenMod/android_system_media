@@ -37,20 +37,11 @@
  * MATERIALS.
  */
 
-#define LOG_NDEBUG 0
-#define LOG_TAG "slesTestPlayUri"
-
-#ifdef ANDROID
-#include <utils/Log.h>
-#else
-#define LOGV printf
-#endif
-#include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+//#include <string.h>
 #include <unistd.h>
-#include <sys/time.h>
+//#include <sys/time.h>
 
 #include "SLES/OpenSLES.h"
 
@@ -65,7 +56,7 @@ void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
         fprintf(stderr, "%lu error code encountered at line %d, exiting\n", result, line);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -76,18 +67,18 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     SLpermille level = 0;
     (*caller)->GetFillLevel(caller, &level);
     SLuint32 status;
-    //fprintf(stdout, "\t\tPrefetchEventCallback: received event %lu\n", event);
+    //fprintf(stdout, "PrefetchEventCallback: received event %lu\n", event);
     (*caller)->GetPrefetchStatus(caller, &status);
     if ((event & (SL_PREFETCHEVENT_STATUSCHANGE|SL_PREFETCHEVENT_FILLLEVELCHANGE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
-        fprintf(stdout, "\t\tPrefetchEventCallback: Error while prefetching data, exiting\n");
-        //exit(1);
+        fprintf(stdout, "PrefetchEventCallback: Error while prefetching data, exiting\n");
+        //exit(EXIT_FAILURE);
     }
     if (event & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
-        fprintf(stdout, "\t\tPrefetchEventCallback: Buffer fill level is = %d\n", level);
+        fprintf(stdout, "PrefetchEventCallback: Buffer fill level is = %d\n", level);
     }
     if (event & SL_PREFETCHEVENT_STATUSCHANGE) {
-        fprintf(stdout, "\t\tPrefetchEventCallback: Prefetch Status is = %lu\n", status);
+        fprintf(stdout, "PrefetchEventCallback: Prefetch Status is = %lu\n", status);
     }
 
 }
@@ -138,7 +129,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     required[1] = SL_BOOLEAN_TRUE;
     iidArray[1] = SL_IID_PREFETCHSTATUS;
     // Create Output Mix object to be used by player
-    res = (*EngineItf)->CreateOutputMix(EngineItf, &OutputMix, 1,
+    res = (*EngineItf)->CreateOutputMix(EngineItf, &OutputMix, 0,
             iidArray, required); CheckErr(res);
 
     // Realizing the Output Mix object in synchronous mode.
@@ -204,9 +195,9 @@ void TestPlayUri( SLObjectItf sl, const char* path)
 
     /* Play the URI */
     /*     first cause the player to prefetch the data */
-    fprintf(stdout, "\nbefore set to PAUSED\n\n");
+    fprintf(stdout, "Before set to PAUSED\n");
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PAUSED );
-    fprintf(stdout, "\nafter set to PAUSED\n\n");
+    fprintf(stdout, "After set to PAUSED\n");
     CheckErr(res);
 
     /*     wait until there's data to play */
@@ -220,7 +211,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     }
 
     if (timeOutIndex == 0) {
-        fprintf(stderr, "\nWe\'re done waiting, failed to prefetch data in time, exiting\n");
+        fprintf(stderr, "We\'re done waiting, failed to prefetch data in time, exiting\n");
         goto destroyRes;
     }
 
@@ -257,8 +248,6 @@ destroyRes:
 //-----------------------------------------------------------------
 int main(int argc, char* const argv[])
 {
-    LOGV("Starting slesTestPlayUri\n");
-
     SLresult    res;
     SLObjectItf sl;
 
@@ -267,10 +256,10 @@ int main(int argc, char* const argv[])
     fprintf(stdout, "Plays a sound and stops after its reported duration\n\n");
 
     if (argc == 1) {
-        fprintf(stdout, "Usage: \n\t%s path \n\t%s url\n", argv[0], argv[0]);
+        fprintf(stdout, "Usage: %s path \n\t%s url\n", argv[0], argv[0]);
         fprintf(stdout, "Example: \"%s /sdcard/my.mp3\"  or \"%s file:///sdcard/my.mp3\"\n",
                 argv[0], argv[0]);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     SLEngineOption EngineOption[] = {
@@ -287,7 +276,6 @@ int main(int argc, char* const argv[])
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
-    exit(0);
 
-    return 0;
+    return EXIT_SUCCESS;
 }

@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 // Describes the state of one player
 
@@ -126,10 +127,11 @@ int main(int argc, char **argv)
     const SLInterfaceID mix_ids[] = {SL_IID_VOLUME};
     const SLboolean mix_req[] = {SL_BOOLEAN_TRUE};
     SLObjectItf mixObject;
-    result = (*engineEngine)->CreateOutputMix(engineEngine, &mixObject, 1, mix_ids, mix_req);
+    result = (*engineEngine)->CreateOutputMix(engineEngine, &mixObject, 0, mix_ids, mix_req);
     check(result);
     result = (*mixObject)->Realize(mixObject, SL_BOOLEAN_FALSE);
     check(result);
+#if 0
     SLVolumeItf mixVolume;
     result = (*mixObject)->GetInterface(mixObject, SL_IID_VOLUME, &mixVolume);
     check(result);
@@ -137,6 +139,7 @@ int main(int argc, char **argv)
     result = (*mixVolume)->GetVolumeLevel(mixVolume, &mixVolumeLevelDefault);
     check(result);
     printf("default mix volume level = %d\n", mixVolumeLevelDefault);
+#endif
 
     printf("numPathnames=%d\n", numPathnames);
     printf("numPlayers=%d\n", numPlayers);

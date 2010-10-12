@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_NDEBUG 0
-#define LOG_TAG "slesTest_virtualizer"
-
-#include <utils/Log.h>
-#include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -30,7 +25,7 @@
 #include "SLES/OpenSLES_Android.h"
 
 
-#define MAX_NUMBER_INTERFACES 3
+#define MAX_NUMBER_INTERFACES 1
 
 #define GUID_DISPLAY_LENGTH 35
 #define FX_NAME_LENGTH 64
@@ -44,7 +39,7 @@ void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
         fprintf(stderr, "%lu error code encountered at line %d, exiting\n", result, line);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -122,7 +117,7 @@ void TestGenericFxCapabilities(  )
     ExitOnError(result);
     fprintf(stdout, "Effect library contains %ld effects:\n", nbEffects);
 
-    SLchar effectName[FX_NAME_LENGTH];
+    SLchar effectName[FX_NAME_LENGTH+1];
     SLuint16 effectNameLength = FX_NAME_LENGTH;
     char typeString[GUID_DISPLAY_LENGTH];
     char implString[GUID_DISPLAY_LENGTH];
@@ -130,12 +125,24 @@ void TestGenericFxCapabilities(  )
     SLInterfaceID effectType, effectImplementation;
     for (SLuint32 i = 0 ; i < nbEffects ; i++ ) {
         fprintf(stdout,"- effect %ld: ", i);
+        memset(effectName, 'Z', FX_NAME_LENGTH+1);
+        effectNameLength = FX_NAME_LENGTH;
         result = (*EffectLibItf)->QueryEffect(EffectLibItf, i,
                 &effectType, &effectImplementation, effectName, &effectNameLength);
+        if ('Z' != effectName[FX_NAME_LENGTH]) {
+            fprintf(stderr, "QueryEffect wrote beyond end of buffer\n");
+            continue;
+        }
         ExitOnError(result);
+        printf("length=%u ", effectNameLength);
+        if (FX_NAME_LENGTH < effectNameLength) {
+            printf(" (>max) ");
+            effectNameLength = FX_NAME_LENGTH;
+        }
         guidToString(effectType, typeString);
         guidToString(effectImplementation, implString);
-        fprintf(stdout, "type = %s impl = %s name = %s \n", typeString, implString, effectName);
+        effectName[FX_NAME_LENGTH - 1] = '\0';
+        fprintf(stdout, " type=%s, impl=%s name=%.*s \n", typeString, implString, effectNameLength, effectName);
     }
 
     /* Shutdown OpenSL ES */
@@ -145,8 +152,6 @@ void TestGenericFxCapabilities(  )
 //-----------------------------------------------------------------
 int main(int argc, char* const argv[])
 {
-    LOGV("Starting %s\n", argv[0]);
-
     SLresult    result;
     SLObjectItf sl;
 
@@ -154,5 +159,5 @@ int main(int argc, char* const argv[])
 
     TestGenericFxCapabilities();
 
-    return 0;
+    return EXIT_SUCCESS;
 }

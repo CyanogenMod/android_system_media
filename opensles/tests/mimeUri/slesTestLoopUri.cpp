@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_NDEBUG 0
-#define LOG_TAG "slesTestLoopUri"
-
-#ifdef ANDROID
-#include <utils/Log.h>
-#else
-#define LOGV printf
-#endif
-#include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -44,7 +35,7 @@ void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
         fprintf(stderr, "%lu error code encountered at line %d, exiting\n", result, line);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -60,7 +51,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     if ((event & (SL_PREFETCHEVENT_STATUSCHANGE|SL_PREFETCHEVENT_FILLLEVELCHANGE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
         fprintf(stdout, "\t\tPrefetchEventCallback: Error while prefetching data, exiting\n");
-        //exit(1);
+        //exit(EXIT_FAILURE);
     }
     if (event & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
         fprintf(stdout, "\t\tPrefetchEventCallback: Buffer fill level is = %d\n", level);
@@ -114,7 +105,7 @@ void TestLoopUri( SLObjectItf sl, const char* path)
     required[0] = SL_BOOLEAN_TRUE;
     iidArray[0] = SL_IID_VOLUME;
     // Create Output Mix object to be used by player
-    res = (*EngineItf)->CreateOutputMix(EngineItf, &OutputMix, 1,
+    res = (*EngineItf)->CreateOutputMix(EngineItf, &OutputMix, 0,
             iidArray, required); CheckErr(res);
 
     // Realizing the Output Mix object in synchronous mode.
@@ -241,8 +232,6 @@ destroyRes:
 //-----------------------------------------------------------------
 int main(int argc, char* const argv[])
 {
-    LOGV("Starting slesTestLoopUri\n");
-
     SLresult    res;
     SLObjectItf sl;
 
@@ -254,7 +243,7 @@ int main(int argc, char* const argv[])
         fprintf(stdout, "Usage: \n\t%s path \n\t%s url\n", argv[0], argv[0]);
         fprintf(stdout, "Example: \"%s /sdcard/my.mp3\"  or \"%s file:///sdcard/my.mp3\"\n",
                 argv[0], argv[0]);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     SLEngineOption EngineOption[] = {
@@ -271,7 +260,6 @@ int main(int argc, char* const argv[])
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
-    exit(0);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
