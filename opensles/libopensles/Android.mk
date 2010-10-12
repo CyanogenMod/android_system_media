@@ -143,7 +143,9 @@ ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
 endif
 
 ifneq ($(TARGET_SIMULATOR),true)
-LOCAL_SHARED_LIBRARIES += libdl
+		LOCAL_SHARED_LIBRARIES += libdl
+else
+        LOCAL_CFLAGS += -DTARGET_SIMULATOR
 endif
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
