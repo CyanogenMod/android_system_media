@@ -992,6 +992,10 @@ enum AndroidObject_state {
     android::AudioTrack *mAudioTrack;
 #ifndef USE_BACKPORT
     android::sp<android::SfPlayer> mSfPlayer;
+    /** aux effect the AudioTrack will be attached to if aux send enabled */
+    android::sp<android::AudioEffect> mAuxEffect;
+    /** send level to aux effect, there's a single aux bus, so there's a single level */
+    SLmillibel mAuxSendLevel;
 #endif
     /**
      * Amplification (can be attenuation) factor derived for the VolumeLevel

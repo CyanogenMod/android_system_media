@@ -367,6 +367,14 @@ SLresult audioPlayer_getStreamType(CAudioPlayer* ap, SLint32 *pType) {
 
 
 //-----------------------------------------------------------------------------
+void audioPlayer_auxEffectUpdate(CAudioPlayer* ap) {
+    if ((NULL != ap->mAudioTrack) && (ap->mAuxEffect != 0)) {
+        android_fxSend_attach(ap, true, ap->mAuxEffect, ap->mVolume.mLevel + ap->mAuxSendLevel);
+    }
+}
+
+
+//-----------------------------------------------------------------------------
 #ifndef USE_BACKPORT
 static void sfplayer_prepare(CAudioPlayer *ap, bool lockAP) {
 
@@ -443,6 +451,7 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
             ap->mSfPlayer->startPrefetch_async();
 
             // update the new track with the current settings
+            audioPlayer_auxEffectUpdate(ap);
             android_audioPlayer_useEventMask(ap);
             android_audioPlayer_volumeUpdate(ap);
             android_audioPlayer_setPlayRate(ap, ap->mPlaybackRate.mRate, false /*lockAP*/);
@@ -887,6 +896,7 @@ SLresult android_audioPlayer_create(
     pAudioPlayer->mAmplFromStereoPos[1] = 1.0f;
     pAudioPlayer->mDirectLevel = 0; // no attenuation
     pAudioPlayer->mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
+    pAudioPlayer->mAuxSendLevel = 0;
 
     // initialize interface-specific fields that can be used regardless of whether the interface
     // is exposed on the AudioPlayer or not
@@ -1126,6 +1136,7 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
 
     // explicit destructor
     pAudioPlayer->mSfPlayer.~sp();
+    pAudioPlayer->mAuxEffect.~sp();
 
     if (pAudioPlayer->mpLock != NULL) {
         delete pAudioPlayer->mpLock;
