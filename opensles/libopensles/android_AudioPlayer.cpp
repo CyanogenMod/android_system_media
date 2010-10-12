@@ -537,8 +537,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             case SL_SAMPLINGRATE_24:
             case SL_SAMPLINGRATE_32:
             case SL_SAMPLINGRATE_44_1:
+            case SL_SAMPLINGRATE_48:
                 break;
-            case SL_SAMPLINGRATE_48:    // not 48?
             case SL_SAMPLINGRATE_64:
             case SL_SAMPLINGRATE_88_2:
             case SL_SAMPLINGRATE_96:
@@ -551,8 +551,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             switch (df_pcm->bitsPerSample) {
             case SL_PCMSAMPLEFORMAT_FIXED_8:
                 // FIXME We should support this
-                SL_LOGE("Cannot create audio player: unsupported 8-bit data");
-                return SL_RESULT_CONTENT_UNSUPPORTED;
+                //SL_LOGE("Cannot create audio player: unsupported 8-bit data");
+                //return SL_RESULT_CONTENT_UNSUPPORTED;
             case SL_PCMSAMPLEFORMAT_FIXED_16:
                 break;
                 // others
@@ -563,6 +563,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
             switch (df_pcm->containerSize) {
+            case 8:
             case 16:
                 break;
                 // others
