@@ -80,9 +80,6 @@ void SfPlayer::armLooper() {
             ANDROID_PRIORITY_AUDIO);
 }
 
-void SfPlayer::useAudioTrack(AudioTrack* pTrack) {
-    mAudioTrack = pTrack;
-}
 
 void SfPlayer::setNotifListener(const notif_client_t cbf, void* notifUser) {
     mNotifyClient = cbf;
@@ -415,7 +412,9 @@ int64_t SfPlayer::getPositionUsec() {
     }
 }
 
-
+/**
+ * called from message loop
+ */
 void SfPlayer::reachedEndOfStream() {
     SL_LOGV("SfPlayer::reachedEndOfStream");
     if (mFlags & kFlagPlaying) {
@@ -428,6 +427,45 @@ void SfPlayer::reachedEndOfStream() {
         seek(0);
         // kick-off decoding again
         (new AMessage(kWhatDecode, id()))->post();
+    }
+}
+
+/**
+ * called from message loop
+ */
+void SfPlayer::updatePlaybackParamsFromSource() {
+    if (mAudioSource != 0) {
+        sp<MetaData> meta = mAudioSource->getFormat();
+
+        SL_LOGV("old sample rate = %d", mSampleRateHz);
+        CHECK(meta->findInt32(kKeyChannelCount, &mNumChannels));
+        CHECK(meta->findInt32(kKeySampleRate, &mSampleRateHz));
+        SL_LOGV("new sample rate = %d", mSampleRateHz);
+
+        // the AudioTrack currently used by the AudioPlayer will be deleted by AudioPlayer itself
+        // SfPlayer never deletes the AudioTrack it creates and uses.
+        mAudioTrack = new android::AudioTrack(
+                mPlaybackParams.streamType,                          // streamType
+                mSampleRateHz,                                       // sampleRate
+                android::AudioSystem::PCM_16_BIT,                    // format
+                mNumChannels == 1 ?     //channel mask
+                        android::AudioSystem::CHANNEL_OUT_MONO :
+                        android::AudioSystem::CHANNEL_OUT_STEREO,
+                0,                                                   // frameCount (here min)
+                0,                                                   // flags
+                mPlaybackParams.trackcb,                             // callback
+                mPlaybackParams.trackcbUser,                         // user
+                0,                                                   // notificationFrame
+                mPlaybackParams.sessionId
+        );
+        if (mFlags & kFlagPlaying) {
+            mAudioTrack->start();
+        }
+
+        // notify the AudioPlayer synchronously there's a new AudioTrack to use and configure
+        sp<AMessage> msg = new AMessage(kWhatNotif, id());
+        msg->setInt32(EVENT_NEW_AUDIOTRACK, 0/*data field unused*/);
+        notify(msg, false /*async*/);
     }
 }
 
@@ -529,17 +567,35 @@ void SfPlayer::onDecode() {
     }
 
     if (err != OK) {
-        if (err != ERROR_END_OF_STREAM) {
-            SL_LOGE("MediaSource::read returned error %d", err);
-            pause();
-            notifyPrepared(err);
-            return;
-        } else {
-            // handle notification and looping at end of stream
-            if (0 < mDurationUsec) {
-                mLastDecodedPositionUs = mDurationUsec;
+        bool continueDecoding = false;
+        switch(err) {
+            case ERROR_END_OF_STREAM:
+                // handle notification and looping at end of stream
+                if (0 < mDurationUsec) {
+                    mLastDecodedPositionUs = mDurationUsec;
+                }
+                reachedEndOfStream();
+                break;
+            case INFO_FORMAT_CHANGED:
+                SL_LOGI("MediaSource::read encountered INFO_FORMAT_CHANGED");
+                // reconfigure output
+                updatePlaybackParamsFromSource();
+                continueDecoding = true;
+                break;
+            case INFO_DISCONTINUITY:
+                SL_LOGI("MediaSource::read encountered INFO_DISCONTINUITY");
+                continueDecoding = true;
+                break;
+            default:
+                SL_LOGE("MediaSource::read returned error %d", err);
+                break;
+        }
+        if (continueDecoding) {
+            if (NULL == mDecodeBuffer) {
+                (new AMessage(kWhatDecode, id()))->post();
+                return;
             }
-            reachedEndOfStream();
+        } else {
             return;
         }
     }
@@ -644,6 +700,11 @@ void SfPlayer::onNotify(const sp<AMessage> &msg) {
     if (msg->findInt32(EVENT_PREPARED, &val)) {
         SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_PREPARED, val);
         mNotifyClient(kEventPrepared, val, mNotifyUser);
+    }
+
+    if (msg->findInt32(EVENT_NEW_AUDIOTRACK, &val)) {
+        SL_LOGV("\tSfPlayer notifying %s", EVENT_NEW_AUDIOTRACK);
+        mNotifyClient(kEventNewAudioTrack, val, mNotifyUser);
     }
 }
 

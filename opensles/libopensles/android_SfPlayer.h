@@ -52,6 +52,7 @@
 #define EVENT_PREFETCHSTATUSCHANGE    "prsc"
 #define EVENT_PREFETCHFILLLEVELUPDATE "pflu"
 #define EVENT_ENDOFSTREAM             "eos"
+#define EVENT_NEW_AUDIOTRACK          "nwat"
 
 #define SFPLAYER_SUCCESS 1
 #define SFPLAYER_FD_FIND_FILE_SIZE ((int64_t)0xFFFFFFFFFFFFFFFFll)
@@ -89,10 +90,10 @@ struct SfPlayer : public AHandler {
         kEventPrefetchStatusChange    = 'prsc',
         kEventPrefetchFillLevelUpdate = 'pflu',
         kEventEndOfStream             = 'eos',
+        kEventNewAudioTrack           = 'nwat'
     };
 
     void armLooper();
-    void useAudioTrack(AudioTrack* pTrack);
     void setNotifListener(const notif_client_t cbf, void* notifUser);
 
     void setDataSource(const char *uri);
@@ -208,6 +209,7 @@ private:
     CacheStatus getCacheRemaining(bool *eos);
     int64_t getPositionUsec();
     void reachedEndOfStream();
+    void updatePlaybackParamsFromSource();
     void notifyStatus();
     void notifyCacheFill();
     void notifyPrepared(status_t prepareRes);

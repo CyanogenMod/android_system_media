@@ -463,6 +463,28 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
 
     } break;
 
+    case(android::SfPlayer::kEventNewAudioTrack): {
+        object_lock_exclusive(&ap->mObject);
+        // SfPlayer has a new AudioTrack, delete the old one and configure the new one before
+        // starting to use it
+
+        if (NULL != ap->mAudioTrack) {
+            delete ap->mAudioTrack;
+            ap->mAudioTrack = NULL;
+        }
+        ap->mAudioTrack = ap->mSfPlayer->getAudioTrack();
+        ap->mNumChannels = ap->mSfPlayer->getNumChannels();
+        ap->mSampleRateMilliHz = android_to_sles_sampleRate(ap->mSfPlayer->getSampleRateHz());
+
+        // update the new track with the current settings
+        audioPlayer_auxEffectUpdate(ap);
+        android_audioPlayer_useEventMask(ap);
+        android_audioPlayer_volumeUpdate(ap);
+        android_audioPlayer_setPlayRate(ap, ap->mPlaybackRate.mRate, false /*lockAP*/);
+
+        object_unlock_exclusive(&ap->mObject);
+    } break;
+
     case(android::SfPlayer::kEventPrefetchFillLevelUpdate): {
         if (!IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
             break;
