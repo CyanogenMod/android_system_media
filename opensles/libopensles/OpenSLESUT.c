@@ -24,27 +24,6 @@
 #include <stdio.h>
 #include <string.h>
 
-/** \brief Array of strings correponding to each result code */
-
-const char * const slesutResultStrings[SLESUT_RESULT_MAX] = {
-    "SUCCESS",
-    "PRECONDITIONS_VIOLATED",
-    "PARAMETER_INVALID",
-    "MEMORY_FAILURE",
-    "RESOURCE_ERROR",
-    "RESOURCE_LOST",
-    "IO_ERROR",
-    "BUFFER_INSUFFICIENT",
-    "CONTENT_CORRUPTED",
-    "CONTENT_UNSUPPORTED",
-    "CONTENT_NOT_FOUND",
-    "PERMISSION_DENIED",
-    "FEATURE_UNSUPPORTED",
-    "INTERNAL_ERROR",
-    "UNKNOWN_ERROR",
-    "OPERATION_ABORTED",
-    "CONTROL_LOST"
-};
 
 /** \brief Maps an interface ID to its display name */
 
@@ -118,6 +97,7 @@ static Pair pairs[] = {
 #endif
 };
 
+
 /** \brief Print an interface ID in human-readable format */
 
 void slesutPrintIID(SLInterfaceID iid)
@@ -136,6 +116,7 @@ void slesutPrintIID(SLInterfaceID iid)
         iid->node[0], iid->node[1], iid->node[2], iid->node[3], iid->node[4], iid->node[5]);
 }
 
+
 /** \brief Print an array of interface IDs in human-readable format,
  *  including whether they are required or optional
  */
@@ -149,15 +130,6 @@ void slesutPrintIIDs(SLInterfaceID *pInterfaceIds, SLboolean *pInterfaceRequired
         slesutPrintIID(pInterfaceIds[i]);
         printf(" %s\n", (unsigned) pInterfaceRequired[i] ? "required" : "optional");
     }
-}
-
-
-/** \brief Convert a result code to a string. */
-
-const char *slesutResultToString(SLresult result)
-{
-    // note that SLresult is unsigned
-    return result < SLESUT_RESULT_MAX ? slesutResultStrings[result] : "UNKNOWN";
 }
 
 

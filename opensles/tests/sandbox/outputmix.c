@@ -53,6 +53,9 @@ int main(int argc, char **argv)
         printf(" [%lu] = ", i);
         slesutPrintIID(interfaceID);
     }
+    // create output mix, with no place to put the new object
+    result = (*engineEngine)->CreateOutputMix(engineEngine, NULL, 0, NULL, NULL);
+    assert(SL_RESULT_PARAMETER_INVALID == result);
     // create output mix, requesting no explicit interfaces
     SLObjectItf outputMixObject;
     result = (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObject, 0, NULL, NULL);

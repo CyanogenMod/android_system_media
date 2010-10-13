@@ -69,6 +69,8 @@ ifeq ($(TARGET_OS),linux)
 	#LOCAL_SHARED_LIBRARIES += librt
 endif
 
+LOCAL_CFLAGS += -UNDEBUG
+
 LOCAL_MODULE:= slesTest_feedback
 
 include $(BUILD_EXECUTABLE)

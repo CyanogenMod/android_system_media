@@ -52,8 +52,10 @@ static const SLuint32 validNumBuffers[] = { 1, 2, 3, 4, 5, 6, 7, 8, 255 };
 /* Checks for error. If any errors exit the application! */
 void CheckErr(SLresult res) {
     if (SL_RESULT_SUCCESS != res) {
-        fprintf(stderr, "CheckErr failure: %s (0x%x), exiting\n", slesutResultToString(res),
-            (unsigned) res);
+        const char *str = slesutResultToString(res);
+        if (NULL == str)
+            str = "unknown";
+        fprintf(stderr, "CheckErr failure: %s (0x%lx), exiting\n", str, res);
         //Fail the test case
         FAIL();
     }

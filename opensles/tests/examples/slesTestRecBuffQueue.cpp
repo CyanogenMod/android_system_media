@@ -14,6 +14,27 @@
  * limitations under the License.
  */
 
+/* Audio Record Test
+
+First run the program from shell:
+  # slesTest_recBuffQueue /sdcard/myrec.raw 4
+
+These use adb on host to retrive the file:
+  % adb pull /sdcard/myrec.raw myrec.raw
+
+How to examine the output with Audacity:
+ Project / Import raw data
+ Select myrec.raw file, then click Open button
+ Choose these options:
+  Signed 16-bit PCM
+  Little-endian
+  1 Channel (Mono)
+  Sample rate 22050 Hz
+ Click Import button
+
+*/
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

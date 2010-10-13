@@ -142,7 +142,8 @@ void TestGenericFxCapabilities(  )
         guidToString(effectType, typeString);
         guidToString(effectImplementation, implString);
         effectName[FX_NAME_LENGTH - 1] = '\0';
-        fprintf(stdout, " type=%s, impl=%s name=%.*s \n", typeString, implString, effectNameLength, effectName);
+        fprintf(stdout, " type=%s, impl=%s name=%.*s \n", typeString, implString, effectNameLength,
+                effectName);
     }
 
     /* Shutdown OpenSL ES */

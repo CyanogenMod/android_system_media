@@ -2,8 +2,9 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := \
-        OpenSLESUT.c
+LOCAL_SRC_FILES :=     \
+        OpenSLESUT.c   \
+        slesutResult.c
 
 LOCAL_C_INCLUDES:= \
         system/media/opensles/include
