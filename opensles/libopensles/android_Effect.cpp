@@ -460,8 +460,21 @@ android::status_t android_erev_getParam(android::sp<android::AudioEffect> pFx,
 android::status_t android_fxSend_attach(CAudioPlayer* ap, bool attach,
         android::sp<android::AudioEffect> pFx, SLmillibel sendLevel) {
 
-    if ((NULL == ap->mAudioTrack) || (pFx == 0)) {
+    if (pFx == 0) {
         return android::INVALID_OPERATION;
+    }
+
+    if (NULL == ap->mAudioTrack) {
+        // the player doesn't have an AudioTrack at the moment, so store this info to use it
+        // when the AudioTrack becomes available
+        if (attach) {
+            ap->mAuxEffect = pFx;
+        } else {
+            ap->mAuxEffect.clear();
+        }
+        // we keep track of the send level, independently of the current audio player level
+        ap->mAuxSendLevel = sendLevel - ap->mVolume.mLevel;
+        return android::NO_ERROR;
     }
 
     if (attach) {
@@ -507,8 +520,11 @@ SLresult android_fxSend_attachToAux(CAudioPlayer* ap, SLInterfaceID pUuid, SLboo
 
 //-----------------------------------------------------------------------------
 android::status_t android_fxSend_setSendLevel(CAudioPlayer* ap, SLmillibel sendLevel) {
+    // we keep track of the send level, independently of the current audio player level
+    ap->mAuxSendLevel = sendLevel - ap->mVolume.mLevel;
+
     if (NULL == ap->mAudioTrack) {
-        return android::INVALID_OPERATION;
+        return android::NO_ERROR;
     }
 
     return ap->mAudioTrack->setAuxEffectSendLevel( sles_to_android_amplification(sendLevel) );

@@ -162,6 +162,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     this->mAudioTrack = NULL;
                     // placement new (explicit constructor)
                     (void) new (&this->mSfPlayer) android::sp<android::SfPlayer>();
+                    (void) new (&this->mAuxEffect) android::sp<android::AudioEffect>();
 #endif
 
                     // Check the source and sink parameters against generic constraints,
