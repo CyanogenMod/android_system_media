@@ -98,7 +98,7 @@ bool slesutCompareEnvronmentalReverbSettings(
 
 // Print an environmental reverb settings structure.
 
-void slesutPrintEnvironmentalReverbSettings( const SLEnvironmentalReverbSettings *settings)
+void slesutPrintEnvironmentalReverbSettings(const SLEnvironmentalReverbSettings *settings)
 {
     printf("roomLevel: %u\n", settings->roomLevel);
     printf("roomHFLevel: %u\n", settings->roomHFLevel);
@@ -134,24 +134,26 @@ int main(int argc, char **argv)
         }
     }
     if (argc - i != 1) {
-        fprintf(stderr, "usage: %s --mix-preset=# --mix-name=name filename\n", prog);
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "usage: %s --mix-preset=# --mix-name=I3DL2 filename\n", prog);
+        return EXIT_FAILURE;
     }
     char *pathname = argv[i];
 
     if (NULL != mixEnvName) {
         unsigned j;
         for (j = 0; j < sizeof(pairs) / sizeof(pairs[0]); ++j) {
-            //printf("comparing %s %s\n", mixEnvName, pairs[j].mName);
             if (!strcasecmp(mixEnvName, pairs[j].mName)) {
                 mixEnvSettings = pairs[j].mSettings;
                 goto found;
             }
         }
-        fprintf(stderr, "%s: reverb name %s not found\n", prog, mixEnvName);
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "%s: reverb name %s not found, available names are:\n", prog, mixEnvName);
+        for (j = 0; j < sizeof(pairs) / sizeof(pairs[0]); ++j) {
+            fprintf(stderr, "    %s\n", pairs[j].mName);
+        }
+        return EXIT_FAILURE;
 found:
-        printf("Using reverb name %s\n", mixEnvName);
+        ;
     }
 
     // create engine
@@ -196,7 +198,7 @@ found:
             result = (*mixPresetReverb)->GetPreset(mixPresetReverb, &getPresetReverb);
             assert(SL_RESULT_SUCCESS == result);
             assert(getPresetReverb == mixPresetNumber);
-            printf("output mix preset reverb successfully changed to %u\n", mixPresetNumber);
+            printf("Output mix preset reverb successfully changed to %u\n", mixPresetNumber);
         } else
             printf("Unable to set preset reverb to %u, result=%lu\n", mixPresetNumber, result);
     }
@@ -229,7 +231,11 @@ found:
         printf("--------------------------------------------\n");
         slesutPrintEnvironmentalReverbSettings(&getSettings);
         printf("\n");
-        // assert(slesutCompareEnvronmentalReverbSettings(&getSettings, &mixEnvSettings));
+        if (!slesutCompareEnvronmentalReverbSettings(&getSettings, &mixEnvSettings)) {
+            printf("Warning: new and read are different; check details above\n");
+        } else {
+            printf("New and read match, life is good\n");
+        }
     }
 
     // create audio player
@@ -238,8 +244,8 @@ found:
     SLDataSource audioSrc = {&locURI, &dfMIME};
     SLDataLocator_OutputMix locOutputMix = {SL_DATALOCATOR_OUTPUTMIX, mixObject};
     SLDataSink audioSnk = {&locOutputMix, NULL};
-    SLInterfaceID player_ids[3];
-    SLboolean player_req[3];
+    SLInterfaceID player_ids[4];
+    SLboolean player_req[4];
     count = 0;
     if (playerPreset != ((SLuint16) ~0)) {
         player_req[count] = SL_BOOLEAN_TRUE;
@@ -253,36 +259,18 @@ found:
         player_req[count] = SL_BOOLEAN_TRUE;
         player_ids[count++] = SL_IID_EFFECTSEND;
     }
+    player_req[count] = SL_BOOLEAN_TRUE;
+    player_ids[count++] = SL_IID_PREFETCHSTATUS;
     SLObjectItf playerObject;
     result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audioSrc,
         &audioSnk, count, player_ids, player_req);
     assert(SL_RESULT_SUCCESS == result);
+
+    // realize audio player
     result = (*playerObject)->Realize(playerObject, SL_BOOLEAN_FALSE);
-    SLPlayItf playerPlay;
-    result = (*playerObject)->GetInterface(playerObject, SL_IID_PLAY, &playerPlay);
     assert(SL_RESULT_SUCCESS == result);
 
-    // get duration
-    SLmillisecond duration;
-    result = (*playerPlay)->GetDuration(playerPlay, &duration);
-    assert(SL_RESULT_SUCCESS == result);
-    if (SL_TIME_UNKNOWN == duration)
-        printf("first attempt at duration: unknown\n");
-    else
-        printf("first attempt at duration: %.1f seconds\n", duration / 1000.0);
-
-    // set play state to paused to enable pre-fetch so we can get a more reliable duration
-    result = (*playerPlay)->SetPlayState(playerPlay, SL_PLAYSTATE_PAUSED);
-    assert(SL_RESULT_SUCCESS == result);
-    usleep(1000000);
-    result = (*playerPlay)->GetDuration(playerPlay, &duration);
-    assert(SL_RESULT_SUCCESS == result);
-    if (SL_TIME_UNKNOWN == duration)
-        printf("second attempt at duration: unknown\n");
-    else
-        printf("second attempt at duration: %.1f seconds\n", duration / 1000.0);
-
-    // if reverb is on output mix (aux effect), then enable it
+    // if reverb is on output mix (aux effect), then enable it for this player
     if (mixPresetNumber != ((SLuint16) ~0) || mixEnvName != NULL) {
         SLEffectSendItf playerEffectSend;
         result = (*playerObject)->GetInterface(playerObject, SL_IID_EFFECTSEND, &playerEffectSend);
@@ -299,6 +287,43 @@ found:
         }
     }
 
+    // get the play interface
+    SLPlayItf playerPlay;
+    result = (*playerObject)->GetInterface(playerObject, SL_IID_PLAY, &playerPlay);
+    assert(SL_RESULT_SUCCESS == result);
+
+    // set play state to paused to enable pre-fetch so we can get a more reliable duration
+    result = (*playerPlay)->SetPlayState(playerPlay, SL_PLAYSTATE_PAUSED);
+    assert(SL_RESULT_SUCCESS == result);
+
+    // get the prefetch status interface
+    SLPrefetchStatusItf playerPrefetchStatus;
+    result = (*playerObject)->GetInterface(playerObject, SL_IID_PREFETCHSTATUS, &playerPrefetchStatus);
+    assert(SL_RESULT_SUCCESS == result);
+
+    // poll prefetch status to detect when it completes
+    SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+    SLuint32 timeOutIndex = 100; // 10s
+    while ((prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) && (timeOutIndex > 0)) {
+        usleep(100 * 1000);
+        (*playerPrefetchStatus)->GetPrefetchStatus(playerPrefetchStatus, &prefetchStatus);
+        timeOutIndex--;
+    }
+    if (timeOutIndex == 0) {
+        fprintf(stderr, "\nWe\'re done waiting, failed to prefetch data in time, exiting\n");
+        goto destroyRes;
+    }
+
+    // get the duration
+    SLmillisecond duration;
+    result = (*playerPlay)->GetDuration(playerPlay, &duration);
+    assert(SL_RESULT_SUCCESS == result);
+    if (SL_TIME_UNKNOWN == duration) {
+        printf("duration: unknown\n");
+    } else {
+        printf("duration: %.1f seconds\n", duration / 1000.0);
+    }
+
     // start audio playing
     result = (*playerPlay)->SetPlayState(playerPlay, SL_PLAYSTATE_PLAYING);
     assert(SL_RESULT_SUCCESS == result);
@@ -310,9 +335,15 @@ found:
         assert(SL_RESULT_SUCCESS == result);
         if (SL_PLAYSTATE_PLAYING != state)
             break;
-        usleep(5000000);
+        usleep(1000000);
      }
     assert(SL_PLAYSTATE_PAUSED == state);
+
+destroyRes:
+    // cleanup objects
+    (*playerObject)->Destroy(playerObject);
+    (*mixObject)->Destroy(mixObject);
+    (*engineObject)->Destroy(engineObject);
 
     return EXIT_SUCCESS;
 }
