@@ -531,15 +531,17 @@ void SfPlayer::onDecode() {
     if (err != OK) {
         if (err != ERROR_END_OF_STREAM) {
             SL_LOGE("MediaSource::read returned error %d", err);
-            // FIXME handle error
+            pause();
+            notifyPrepared(err);
+            return;
         } else {
             // handle notification and looping at end of stream
             if (0 < mDurationUsec) {
                 mLastDecodedPositionUs = mDurationUsec;
             }
             reachedEndOfStream();
+            return;
         }
-        return;
     }
 
     // render
