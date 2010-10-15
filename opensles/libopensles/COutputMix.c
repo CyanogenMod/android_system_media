@@ -62,16 +62,26 @@ bool COutputMix_PreDestroy(void *self)
     // See design document for explanation
     if (0 == outputMix->mObject.mStrongRefCount) {
 #ifdef USE_OUTPUTMIXEXT
-        // Tell the asynchronous mixer callback that we want to destroy the output mix
-        outputMix->mOutputMixExt.mDestroyRequested = true;
-        while (outputMix->mOutputMixExt.mDestroyRequested) {
-            object_cond_wait(&outputMix->mObject);
+        // We only support a single active output mix per engine, so check if this is the active mix
+        IEngine *thisEngine = outputMix->mObject.mEngine;
+        interface_lock_exclusive(thisEngine);
+        bool thisIsTheActiveOutputMix = false;
+        if (outputMix == thisEngine->mOutputMix) {
+            thisIsTheActiveOutputMix = true;
         }
-#endif
+        interface_unlock_exclusive(thisEngine);
+        if (thisIsTheActiveOutputMix) {
+            // Tell the asynchronous mixer callback that we want to destroy the output mix
+            outputMix->mOutputMixExt.mDestroyRequested = true;
+            while (outputMix->mOutputMixExt.mDestroyRequested) {
+                object_cond_wait(&outputMix->mObject);
+            }
 #ifdef USE_SDL
-        // Mixer callback has acknowledged our request and unlinked output mix from engine.
-        // Disable SDL_callback from being called periodically by SDL's internal thread.
-        SDL_PauseAudio(1);
+            // Mixer callback has acknowledged our request and unlinked output mix from engine.
+            // Disable SDL_callback from being called periodically by SDL's internal thread.
+            SDL_PauseAudio(1);
+#endif
+        }
 #endif
         return true;
     }

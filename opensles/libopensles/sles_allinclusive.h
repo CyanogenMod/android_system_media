@@ -1275,7 +1275,9 @@ extern void SDL_close(void);
 #define SL_OBJECT_STATE_REALIZING_1A ((SLuint32) 0x9) // abort while async realize on work queue
 #define SL_OBJECT_STATE_RESUMING_1A  ((SLuint32) 0xA) // abort while async resume on work queue
 #define SL_OBJECT_STATE_DESTROYING   ((SLuint32) 0xB) // destroy object when no strong references
+#ifndef ANDROID
 extern void *sync_start(void *arg);
+#endif
 extern SLresult err_to_result(int err);
 
 #ifdef __GNUC__

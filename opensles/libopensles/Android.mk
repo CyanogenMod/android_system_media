@@ -47,7 +47,6 @@ LOCAL_SRC_FILES:=                     \
         android_AudioPlayer.cpp       \
         android_AudioRecorder.cpp     \
         android_OutputMix.cpp         \
-        sync.c                        \
         IID_to_MPH.c                  \
         ThreadPool.c                  \
         C3DGroup.c                    \
@@ -79,6 +78,7 @@ LOCAL_SRC_FILES:=                     \
         IVolume.c
 
 EXCLUDE_SRC :=                        \
+        sync.c                        \
         I3DCommit.c                   \
         I3DDoppler.c                  \
         I3DGrouping.c                 \

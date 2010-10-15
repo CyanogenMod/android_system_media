@@ -56,7 +56,7 @@ void *sync_start(void *arg)
 
         // now we know which objects exist, and which of those have changes
 
-        unsigned combinedMask = changedMask | instanceMask;
+        unsigned combinedMask = changedMask /* | instanceMask for debugger */;
         while (combinedMask) {
             unsigned i = ctz(combinedMask);
             assert(MAX_INSTANCE > i);

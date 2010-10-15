@@ -1170,12 +1170,6 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
 
     do {
 
-        if (NULL != theOneTrueEngine) {
-            SL_LOGE("slCreateEngine while another engine %p is active", theOneTrueEngine);
-            result = SL_RESULT_RESOURCE_ERROR;
-            break;
-        }
-
 #ifdef ANDROID
         android::ProcessState::self()->startThreadPool();
 #ifndef USE_BACKPORT
@@ -1188,6 +1182,12 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
             break;
         }
         *pEngine = NULL;
+
+        if (NULL != theOneTrueEngine) {
+            SL_LOGE("slCreateEngine while another engine %p is active", theOneTrueEngine);
+            result = SL_RESULT_RESOURCE_ERROR;
+            break;
+        }
 
         if ((0 < numOptions) && (NULL == pEngineOptions)) {
             SL_LOGE("numOptions=%lu and pEngineOptions=NULL", numOptions);

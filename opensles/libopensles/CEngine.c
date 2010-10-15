@@ -24,11 +24,14 @@
 SLresult CEngine_Realize(void *self, SLboolean async)
 {
     CEngine *this = (CEngine *) self;
+    SLresult result;
+#ifndef ANDROID
     // create the sync thread
     int err = pthread_create(&this->mSyncThread, (const pthread_attr_t *) NULL, sync_start, this);
-    SLresult result = err_to_result(err);
+    result = err_to_result(err);
     if (SL_RESULT_SUCCESS != result)
         return result;
+#endif
     // initialize the thread pool for asynchronous operations
     result = ThreadPool_init(&this->mEngine.mThreadPool, 0, 0);
     if (SL_RESULT_SUCCESS != result) {
