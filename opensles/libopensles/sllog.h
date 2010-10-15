@@ -25,18 +25,16 @@
 //    V(erbose)
 // Debug and verbose are usually compiled out except during development.
 
-/** These values match the definitions in core/include/cutils/log.h */
-typedef enum {
-    SLAndroidLogLevel_Unknown = 0,
-    SLAndroidLogLevel_Default = 1,
-    SLAndroidLogLevel_Verbose = 2,
-    SLAndroidLogLevel_Debug = 3,
-    SLAndroidLogLevel_Info = 4,
-    SLAndroidLogLevel_Warn = 5,
-    SLAndroidLogLevel_Error = 6,
-    SLAndroidLogLevel_Fatal = 7,
-    SLAndroidLogLevel_Silent = 8
-} SLAndroidLogLevel;
+/** These values match the definitions in system/core/include/cutils/log.h */
+#define SLAndroidLogLevel_Unknown 0
+#define SLAndroidLogLevel_Default 1
+#define SLAndroidLogLevel_Verbose 2
+#define SLAndroidLogLevel_Debug   3
+#define SLAndroidLogLevel_Info    4
+#define SLAndroidLogLevel_Warn    5
+#define SLAndroidLogLevel_Error   6
+#define SLAndroidLogLevel_Fatal   7
+#define SLAndroidLogLevel_Silent  8
 
 // USE_LOG is the minimum log priority level that is enabled at build time.
 // It is configured in Android.mk but can be overridden per source file.
