@@ -262,8 +262,7 @@ setplaystate:
                 checkResult(result);
                 break;
             case 'x':
-                exit(EXIT_SUCCESS);
-                break;
+                goto out;
             default:
                 putchar('?');
                 fflush(stdout);
@@ -273,4 +272,9 @@ setplaystate:
         }
     }
 
+out:
+    (*playerObject)->Destroy(playerObject);
+    (*outputmixObject)->Destroy(outputmixObject);
+    (*engineObject)->Destroy(engineObject);
+    return EXIT_SUCCESS;
 }

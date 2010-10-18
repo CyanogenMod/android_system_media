@@ -23,6 +23,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#define bool int
+#define false 0
+#define true 1
+
 // Table of I3DL2 named environmental reverb settings
 
 typedef struct {
@@ -71,14 +75,13 @@ char *mixEnvName = NULL;
 SLEnvironmentalReverbSettings mixEnvSettings;
 
 // Reverb parameters for audio player
-SLuint16 playerPreset = ~0;
-char *playerName = NULL;
-SLEnvironmentalReverbSettings playerSettings;
+SLuint16 playerPresetNumber = ~0;
+char *playerEnvName = NULL;
+SLEnvironmentalReverbSettings playerEnvSettings;
 
 // Compare two environmental reverb settings structures.
 // Returns true if the settings are identical, or false if they are different.
 
-#define bool int
 bool slesutCompareEnvronmentalReverbSettings(
         const SLEnvironmentalReverbSettings *settings1,
         const SLEnvironmentalReverbSettings *settings2)
@@ -112,6 +115,50 @@ void slesutPrintEnvironmentalReverbSettings(const SLEnvironmentalReverbSettings 
     printf("density: %u\n", settings->density);
 }
 
+// Lookup environmental reverb settings by name
+
+const SLEnvironmentalReverbSettings *lookupEnvName(const char *name)
+{
+    unsigned j;
+    for (j = 0; j < sizeof(pairs) / sizeof(pairs[0]); ++j) {
+        if (!strcasecmp(name, pairs[j].mName)) {
+            return &pairs[j].mSettings;
+        }
+    }
+    return NULL;
+}
+
+// Print all available environmental reverb names
+
+void printEnvNames(void)
+{
+    unsigned j;
+    bool needSpace = false;
+    bool needNewline = false;
+    unsigned lineLen = 0;
+    for (j = 0; j < sizeof(pairs) / sizeof(pairs[0]); ++j) {
+        const char *name = pairs[j].mName;
+        unsigned nameLen = strlen(name);
+        if (lineLen + (needSpace ? 1 : 0) + nameLen > 72) {
+            putchar('\n');
+            needSpace = false;
+            needNewline = false;
+            lineLen = 0;
+        }
+        if (needSpace) {
+            putchar(' ');
+            ++lineLen;
+        }
+        fputs(name, stdout);
+        lineLen += nameLen;
+        needSpace = true;
+        needNewline = true;
+    }
+    if (needNewline) {
+        putchar('\n');
+    }
+}
+
 // Main program
 
 int main(int argc, char **argv)
@@ -129,31 +176,41 @@ int main(int argc, char **argv)
             mixPresetNumber = atoi(&arg[13]);
         } else if (!strncmp(arg, "--mix-name=", 11)) {
             mixEnvName = &arg[11];
+        } else if (!strncmp(arg, "--player-preset=", 16)) {
+            playerPresetNumber = atoi(&arg[16]);
+        } else if (!strncmp(arg, "--player-name=", 14)) {
+            playerEnvName = &arg[14];
         } else {
             fprintf(stderr, "%s: unknown option %s ignored\n", prog, arg);
         }
     }
     if (argc - i != 1) {
-        fprintf(stderr, "usage: %s --mix-preset=# --mix-name=I3DL2 filename\n", prog);
+        fprintf(stderr, "usage: %s --mix-preset=# --mix-name=I3DL2 --player-preset=# "
+                "--player-name=I3DL2 filename\n", prog);
         return EXIT_FAILURE;
     }
     char *pathname = argv[i];
 
+    const SLEnvironmentalReverbSettings *envSettings;
     if (NULL != mixEnvName) {
-        unsigned j;
-        for (j = 0; j < sizeof(pairs) / sizeof(pairs[0]); ++j) {
-            if (!strcasecmp(mixEnvName, pairs[j].mName)) {
-                mixEnvSettings = pairs[j].mSettings;
-                goto found;
-            }
+        envSettings = lookupEnvName(mixEnvName);
+        if (NULL == envSettings) {
+            fprintf(stderr, "%s: mix environmental reverb name %s not found, "
+                    "available names are:\n", prog, mixEnvName);
+            printEnvNames();
+            return EXIT_FAILURE;
         }
-        fprintf(stderr, "%s: reverb name %s not found, available names are:\n", prog, mixEnvName);
-        for (j = 0; j < sizeof(pairs) / sizeof(pairs[0]); ++j) {
-            fprintf(stderr, "    %s\n", pairs[j].mName);
+        mixEnvSettings = *envSettings;
+    }
+    if (NULL != playerEnvName) {
+        envSettings = lookupEnvName(playerEnvName);
+        if (NULL == envSettings) {
+            fprintf(stderr, "%s: player environmental reverb name %s not found, "
+                    "available names are:\n", prog, playerEnvName);
+            printEnvNames();
+            return EXIT_FAILURE;
         }
-        return EXIT_FAILURE;
-found:
-        ;
+        playerEnvSettings = *envSettings;
     }
 
     // create engine
@@ -200,7 +257,8 @@ found:
             assert(getPresetReverb == mixPresetNumber);
             printf("Output mix preset reverb successfully changed to %u\n", mixPresetNumber);
         } else
-            printf("Unable to set preset reverb to %u, result=%lu\n", mixPresetNumber, result);
+            printf("Unable to set output mix preset reverb to %u, result=%lu\n", mixPresetNumber,
+                    result);
     }
 
     // configure environmental reverb on output mix
@@ -247,11 +305,11 @@ found:
     SLInterfaceID player_ids[4];
     SLboolean player_req[4];
     count = 0;
-    if (playerPreset != ((SLuint16) ~0)) {
+    if (playerPresetNumber != ((SLuint16) ~0)) {
         player_req[count] = SL_BOOLEAN_TRUE;
         player_ids[count++] = SL_IID_PRESETREVERB;
     }
-    if (playerName != NULL) {
+    if (playerEnvName != NULL) {
         player_req[count] = SL_BOOLEAN_TRUE;
         player_ids[count++] = SL_IID_ENVIRONMENTALREVERB;
     }
@@ -287,6 +345,63 @@ found:
         }
     }
 
+    // configure preset reverb on player
+    SLPresetReverbItf playerPresetReverb;
+    if (playerPresetNumber != ((SLuint16) ~0)) {
+        result = (*playerObject)->GetInterface(playerObject, SL_IID_PRESETREVERB,
+                &playerPresetReverb);
+        assert(SL_RESULT_SUCCESS == result);
+        SLuint16 getPresetReverb = 12345;
+        result = (*playerPresetReverb)->GetPreset(playerPresetReverb, &getPresetReverb);
+        assert(SL_RESULT_SUCCESS == result);
+        printf("Player default preset reverb %u\n", getPresetReverb);
+        result = (*playerPresetReverb)->SetPreset(playerPresetReverb, playerPresetNumber);
+        if (SL_RESULT_SUCCESS == result) {
+            result = (*playerPresetReverb)->GetPreset(playerPresetReverb, &getPresetReverb);
+            assert(SL_RESULT_SUCCESS == result);
+            assert(getPresetReverb == playerPresetNumber);
+            printf("Player preset reverb successfully changed to %u\n", playerPresetNumber);
+        } else
+            printf("Unable to set player preset reverb to %u, result=%lu\n", playerPresetNumber,
+                    result);
+    }
+
+    // configure environmental reverb on player
+    SLEnvironmentalReverbItf playerEnvironmentalReverb;
+    if (playerEnvName != NULL) {
+        result = (*playerObject)->GetInterface(playerObject, SL_IID_ENVIRONMENTALREVERB,
+                &playerEnvironmentalReverb);
+        assert(SL_RESULT_SUCCESS == result);
+        SLEnvironmentalReverbSettings getSettings;
+        memset(&getSettings, 0, sizeof(getSettings));
+        result = (*playerEnvironmentalReverb)->GetEnvironmentalReverbProperties(
+                playerEnvironmentalReverb, &getSettings);
+        assert(SL_RESULT_SUCCESS == result);
+        printf("Player default environmental reverb settings\n");
+        printf("--------------------------------------------\n");
+        slesutPrintEnvironmentalReverbSettings(&getSettings);
+        printf("\n");
+        result = (*playerEnvironmentalReverb)->SetEnvironmentalReverbProperties(
+                playerEnvironmentalReverb, &playerEnvSettings);
+        assert(SL_RESULT_SUCCESS == result);
+        printf("Player new environmental reverb settings\n");
+        printf("----------------------------------------\n");
+        slesutPrintEnvironmentalReverbSettings(&playerEnvSettings);
+        printf("\n");
+        result = (*playerEnvironmentalReverb)->GetEnvironmentalReverbProperties(
+                playerEnvironmentalReverb, &getSettings);
+        assert(SL_RESULT_SUCCESS == result);
+        printf("Player read environmental reverb settings\n");
+        printf("-----------------------------------------\n");
+        slesutPrintEnvironmentalReverbSettings(&getSettings);
+        printf("\n");
+        if (!slesutCompareEnvronmentalReverbSettings(&getSettings, &playerEnvSettings)) {
+            printf("Warning: new and read are different; check details above\n");
+        } else {
+            printf("New and read match, life is good\n");
+        }
+    }
+
     // get the play interface
     SLPlayItf playerPlay;
     result = (*playerObject)->GetInterface(playerObject, SL_IID_PLAY, &playerPlay);
@@ -298,7 +413,8 @@ found:
 
     // get the prefetch status interface
     SLPrefetchStatusItf playerPrefetchStatus;
-    result = (*playerObject)->GetInterface(playerObject, SL_IID_PREFETCHSTATUS, &playerPrefetchStatus);
+    result = (*playerObject)->GetInterface(playerObject, SL_IID_PREFETCHSTATUS,
+            &playerPrefetchStatus);
     assert(SL_RESULT_SUCCESS == result);
 
     // poll prefetch status to detect when it completes

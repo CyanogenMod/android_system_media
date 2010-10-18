@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <utils/Log.h>
 
 typedef struct {
     SLuint32 mObjectID;
@@ -49,6 +50,7 @@ void *thread_start(void *param)
         SLresult result;
 
         ++ta->mCounter;
+        //LOGE("mCounter %d", ta->mCounter);
         switch (ta->mObjectID) {
         case SL_OBJECTID_OUTPUTMIX:
             {
@@ -78,9 +80,11 @@ void *thread_start(void *param)
             SLPlayItf playerPlay;
             result = (*myPlayerObject)->GetInterface(myPlayerObject, SL_IID_PLAY, &playerPlay);
             assert(SL_RESULT_SUCCESS == result);
-            result = (*playerPlay)->SetPlayState(playerPlay, SL_PLAYSTATE_PLAYING);//PAUSED);
+            result = (*playerPlay)->SetPlayState(playerPlay, SL_PLAYSTATE_PAUSED);
             assert(SL_RESULT_SUCCESS == result);
-            usleep(1000000 + (rand() & 0xFFFFF));//Android crash on 10000 and PAUSED
+            usleep(1000 + (rand() & 0xFFF));
+            //usleep(1000);
+            //sleep(1);
             (*myPlayerObject)->Destroy(myPlayerObject);
             }
             break;
@@ -90,13 +94,15 @@ void *thread_start(void *param)
 
         }
         //usleep(100000);
+        //break;
     }
 
     return NULL;
 }
 
 
-const char * const uris[4] = {"wav/frog.wav", "wav/bach.wav", "wav/8days.wav", "wav/help16.wav"};
+//const char * const uris[4] = {"wav/frog.wav", "wav/bach.wav", "wav/8days.wav", "wav/help16.wav"};
+const char * const uris[4] = {"wav/frog.wav", "wav/frog.wav", "wav/frog.wav", "wav/frog.wav"};
 
 // Main program
 
@@ -155,7 +161,7 @@ int main(int argc, char **argv)
 
     // let it run for a while
     int j;
-    for (j = 0; j < 10; ++j) {
+    for (j = 0; j < 100; ++j) {
         sleep(1);
         for (i = 0; i < MAX_THREAD; ++i) {
             ThreadArgument *ta = &thread_args[i];

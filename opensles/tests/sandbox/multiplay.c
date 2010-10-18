@@ -87,6 +87,7 @@ int main(int argc, char **argv)
     int i;
     const char *arg;
     int numPlayers = 0;
+    int playTimeInMilliseconds = 0; // default to run forever
     SLmillibel mixVolumeLevel = 0;
     for (i = 1; i < argc; ++i) {
         arg = argv[i];
@@ -96,6 +97,8 @@ int main(int argc, char **argv)
             numPlayers = atoi(&arg[2]);
         else if (!strncmp(arg, "-v", 2))
             mixVolumeLevel = atoi(&arg[2]);
+        else if (!strncmp(arg, "-t", 2))
+            playTimeInMilliseconds = atoi(&arg[2]) * 1000;
         else
             fprintf(stderr, "unknown option: %s\n", arg);
     }
@@ -217,10 +220,16 @@ int main(int argc, char **argv)
             result = (*p->mPlayerPlay)->SetPlayState(p->mPlayerPlay, SL_PLAYSTATE_PLAYING);
             check(result);
         }
+        if ((playTimeInMilliseconds > 0) && ((playTimeInMilliseconds -= delay) < 0))
+            break;
     }
 
-    // FIXME It would be interesting to end the test on some condition (timer, key pressed) so it
-    // also exercises the destruction of the players, output mix and engine after this test has run.
+    for (i = 0; i < numPlayers; ++i) {
+        SLObjectItf playerObject = players[i].mPlayerObject;
+        (*playerObject)->Destroy(playerObject);
+    }
+    (*mixObject)->Destroy(mixObject);
+    (*engineObject)->Destroy(engineObject);
 
-    // return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

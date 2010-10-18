@@ -167,6 +167,35 @@ LOCAL_MODULE:= slesTest_reverb
 
 include $(BUILD_EXECUTABLE)
 
+# srcsink
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_C_INCLUDES:= \
+	system/media/opensles/include
+
+LOCAL_SRC_FILES:= \
+	srcsink.c
+
+LOCAL_SHARED_LIBRARIES := \
+	libutils \
+	libOpenSLES
+
+LOCAL_STATIC_LIBRARIES := \
+    libOpenSLESUT
+
+ifeq ($(TARGET_OS),linux)
+	LOCAL_CFLAGS += -DXP_UNIX
+endif
+
+LOCAL_CFLAGS += -UNDEBUG
+
+LOCAL_MODULE:= slesTest_srcsink
+
+include $(BUILD_EXECUTABLE)
+
 # outputmix
 
 include $(CLEAR_VARS)
@@ -280,5 +309,65 @@ endif
 LOCAL_CFLAGS += -UNDEBUG
 
 LOCAL_MODULE:= slesTest_multithread
+
+include $(BUILD_EXECUTABLE)
+
+# playbq
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_C_INCLUDES:= \
+	system/media/opensles/include
+
+LOCAL_SRC_FILES:= \
+	playbq.c
+
+LOCAL_SHARED_LIBRARIES := \
+	libutils \
+	libOpenSLES
+
+LOCAL_STATIC_LIBRARIES := \
+    libOpenSLESUT \
+    libsndfile
+
+ifeq ($(TARGET_OS),linux)
+	LOCAL_CFLAGS += -DXP_UNIX
+endif
+
+LOCAL_CFLAGS += -UNDEBUG
+
+LOCAL_MODULE:= slesTest_playbq
+
+# commented out because libsndfile is not yet standard
+#include $(BUILD_EXECUTABLE)
+
+# monkey
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_C_INCLUDES:= \
+	system/media/opensles/include
+
+LOCAL_SRC_FILES:= \
+	monkey.c
+
+LOCAL_SHARED_LIBRARIES := \
+	libutils \
+	libOpenSLES
+
+LOCAL_STATIC_LIBRARIES := \
+    libOpenSLESUT
+
+ifeq ($(TARGET_OS),linux)
+	LOCAL_CFLAGS += -DXP_UNIX
+endif
+
+LOCAL_CFLAGS += -UNDEBUG
+
+LOCAL_MODULE:= slesTest_monkey
 
 include $(BUILD_EXECUTABLE)
