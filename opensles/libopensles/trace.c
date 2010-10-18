@@ -46,10 +46,11 @@ void slTraceLeaveGlobal(const char *function, SLresult result)
         }
     } else {
         if (SL_TRACE_LEAVE_FAILURE & slTraceEnabled) {
-            if (SLESUT_RESULT_MAX > result) {
-                SL_LOGW("Leaving %s (%s)", function, slesutResultStrings[result]);
+            const char *str = slesutResultToString(result);
+            if (NULL != str) {
+                SL_LOGW("Leaving %s (%s)", function, str);
             } else {
-                SL_LOGW("Leaving %s (0x%X)", function, (unsigned) result);
+                SL_LOGW("Leaving %s (0x%lX)", function, result);
             }
         }
     }
@@ -108,19 +109,20 @@ void slTraceLeaveInterface(const char *function, SLresult result)
         }
     } else {
         if (SL_TRACE_LEAVE_FAILURE & slTraceEnabled) {
+            const char *str = slesutResultToString(result);
             if (*underscore == '_') {
-                if (SLESUT_RESULT_MAX > result) {
+                if (NULL != str) {
                     SL_LOGW("Leaving %.*s::%s (%s)", (int) (underscore - function), function,
-                        &underscore[1], slesutResultStrings[result]);
+                        &underscore[1], str);
                 } else {
-                    SL_LOGW("Leaving %.*s::%s (0x%X)", (int) (underscore - function), function,
-                        &underscore[1], (unsigned) result);
+                    SL_LOGW("Leaving %.*s::%s (0x%lX)", (int) (underscore - function), function,
+                        &underscore[1], result);
                 }
             } else {
-                if (SLESUT_RESULT_MAX > result) {
-                    SL_LOGW("Leaving %s (%s)", function, slesutResultStrings[result]);
+                if (NULL != str) {
+                    SL_LOGW("Leaving %s (%s)", function, str);
                 } else {
-                    SL_LOGW("Leaving %s (0x%X)", function, (unsigned) result);
+                    SL_LOGW("Leaving %s (0x%lX)", function, result);
                 }
             }
         }

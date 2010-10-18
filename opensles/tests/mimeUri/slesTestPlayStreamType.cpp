@@ -107,8 +107,10 @@ void TestStreamTypeConfiguration( SLObjectItf sl, const char* path, const SLint3
     /*  (SLPlayItf is implicit) */
     required[0] = SL_BOOLEAN_TRUE;
     iidArray[0] = SL_IID_PREFETCHSTATUS;
+#ifdef ANDROID
     required[1] = SL_BOOLEAN_TRUE;
     iidArray[1] = SL_IID_ANDROIDCONFIGURATION;
+#endif
 
 
     /* Setup the data source structure for the URI */

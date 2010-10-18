@@ -63,6 +63,8 @@ void ExitOnErrorFunc( SLresult result , int line)
     }
 }
 
+bool prefetchError = false;
+
 //-----------------------------------------------------------------
 /* PrefetchStatusItf callback for an audio player */
 void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint32 event)
@@ -75,7 +77,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     if ((PREFETCHEVENT_ERROR_CANDIDATE == (event & PREFETCHEVENT_ERROR_CANDIDATE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
         fprintf(stdout, "PrefetchEventCallback: Error while prefetching data, exiting\n");
-        //exit(EXIT_FAILURE);
+        prefetchError = true;
     }
     if (event & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
         fprintf(stdout, "PrefetchEventCallback: Buffer fill level is = %d\n", level);
@@ -207,13 +209,14 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     //SLpermille fillLevel = 0;
     SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
     SLuint32 timeOutIndex = 100; // 10s
-    while ((prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) && (timeOutIndex > 0)) {
+    while ((prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) && (timeOutIndex > 0) &&
+            !prefetchError) {
         usleep(100 * 1000);
         (*prefetchItf)->GetPrefetchStatus(prefetchItf, &prefetchStatus);
         timeOutIndex--;
     }
 
-    if (timeOutIndex == 0) {
+    if (timeOutIndex == 0 || prefetchError) {
         fprintf(stderr, "We\'re done waiting, failed to prefetch data in time, exiting\n");
         goto destroyRes;
     }
