@@ -719,6 +719,17 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
 };
 
 
+static const char * const extensionNames[] = {
+#ifdef ANDROID
+    "ANDROID_SDK_LEVEL_9",  // Android 2.3 aka "Gingerbread"
+    // in the future, add more entries for each SDK level here, and
+    // don't delete the entries for previous SDK levels unless support is removed
+#else
+    "WILHELM_DESKTOP",
+#endif
+};
+
+
 static SLresult IEngine_QueryNumSupportedExtensions(SLEngineItf self, SLuint32 *pNumExtensions)
 {
     SL_ENTER_INTERFACE
@@ -726,11 +737,7 @@ static SLresult IEngine_QueryNumSupportedExtensions(SLEngineItf self, SLuint32 *
     if (NULL == pNumExtensions) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-#ifdef ANDROID
-        // FIXME support Android extensions
-#else
-        *pNumExtensions = 0;
-#endif
+        *pNumExtensions = sizeof(extensionNames) / sizeof(extensionNames[0]);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -743,14 +750,38 @@ static SLresult IEngine_QuerySupportedExtension(SLEngineItf self,
 {
     SL_ENTER_INTERFACE
 
-    // any index >= 0 will be >= number of supported extensions
-
-#ifdef ANDROID
-    // FIXME support Android extensions
-    result = SL_RESULT_PARAMETER_INVALID;
-#else
-    result = SL_RESULT_PARAMETER_INVALID;
-#endif
+    if (NULL == pNameLength) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        size_t actualNameLength;
+        unsigned numExtensions = sizeof(extensionNames) / sizeof(extensionNames[0]);
+        if (index >= numExtensions) {
+            actualNameLength = 0;
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            const char *extensionName = extensionNames[index];
+            actualNameLength = strlen(extensionName) + 1;
+            if (NULL == pExtensionName) {
+                // application is querying the name length in order to allocate a buffer
+                result = SL_RESULT_SUCCESS;
+            } else {
+                SLint16 availableNameLength = *pNameLength;
+                if (0 >= availableNameLength) {
+                    // there is not even room for the terminating NUL
+                    result = SL_RESULT_BUFFER_INSUFFICIENT;
+                } else if (actualNameLength > (size_t) availableNameLength) {
+                    // "no invalid strings are written. That is, the null-terminator always exists"
+                    memcpy(pExtensionName, extensionName, (size_t) availableNameLength - 1);
+                    pExtensionName[(size_t) availableNameLength - 1] = '\0';
+                    result = SL_RESULT_BUFFER_INSUFFICIENT;
+                } else {
+                    memcpy(pExtensionName, extensionName, actualNameLength);
+                    result = SL_RESULT_SUCCESS;
+                }
+            }
+        }
+        *pNameLength = actualNameLength;
+    }
 
     SL_LEAVE_INTERFACE
 }
@@ -761,17 +792,24 @@ static SLresult IEngine_IsExtensionSupported(SLEngineItf self,
 {
     SL_ENTER_INTERFACE
 
-    if (NULL == pExtensionName || NULL == pSupported) {
+    if (NULL == pSupported) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-#ifdef ANDROID
-        // FIXME support Android extensions
-        *pSupported = SL_BOOLEAN_FALSE;
-#else
-        // no extensions are supported
-        *pSupported = SL_BOOLEAN_FALSE;
-#endif
-        result = SL_RESULT_SUCCESS;
+        SLboolean isSupported = SL_BOOLEAN_FALSE;
+        if (NULL == pExtensionName) {
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else {
+            unsigned numExtensions = sizeof(extensionNames) / sizeof(extensionNames[0]);
+            unsigned i;
+            for (i = 0; i < numExtensions; ++i) {
+                if (!strcmp((const char *) pExtensionName, extensionNames[i])) {
+                    isSupported = SL_BOOLEAN_TRUE;
+                    break;
+                }
+            }
+            result = SL_RESULT_SUCCESS;
+        }
+        *pSupported = isSupported;
     }
 
     SL_LEAVE_INTERFACE

@@ -34,7 +34,7 @@ void object_lock_exclusive_(IObject *this, const char *file, int line)
             if (0 == ok)
                 break;
             if (++i >= (sizeof(backoffs) / sizeof(backoffs[0]))) {
-                SL_LOGE("%s:%d: object %p was locked by %p at %s:%d\n",
+                SL_LOGW("%s:%d: object %p was locked by %p at %s:%d\n",
                     file, line, this, *(void **)&this->mOwner, this->mFile, this->mLine);
                 // attempt one more time; maybe this time we will be successful
                 ok = pthread_mutex_lock(&this->mMutex);
