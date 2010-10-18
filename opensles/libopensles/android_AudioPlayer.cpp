@@ -747,6 +747,9 @@ static void audioTrack_callBack_uri(int event, void* user, void *info) {
             case (android::AudioTrack::EVENT_UNDERRUN) :
                 audioTrack_handleUnderrun_lockPlay((CAudioPlayer *)user);
                 break;
+            case (android::AudioTrack::EVENT_BUFFER_END) :
+            case (android::AudioTrack::EVENT_LOOP_END) :
+                break;
             default:
                 SL_LOGE("Encountered unknown AudioTrack event %d for CAudioPlayer %p", event,
                         (CAudioPlayer *)user);
