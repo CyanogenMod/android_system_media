@@ -521,6 +521,10 @@ void SfPlayer::onLoop(const sp<AMessage> &msg) {
 void SfPlayer::onDecode() {
     //SL_LOGV("SfPlayer::onDecode");
     bool eos;
+    if (mDataSource == 0) {
+        // application set play state to paused which failed, then set play state to playing
+        return;
+    }
     if ((mDataSource->flags() & DataSource::kWantsPrefetching)
             && (getCacheRemaining(&eos) == kStatusLow)
             && !eos) {
