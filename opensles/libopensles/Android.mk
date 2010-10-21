@@ -158,6 +158,10 @@ LOCAL_PRELINK_MODULE:= false
 
 LOCAL_MODULE:= libOpenSLES
 
+ifeq ($(TARGET_BUILD_VARIANT),userdebug)
+        LOCAL_CFLAGS += -DUSERDEBUG_BUILD=1
+endif
+
 include $(BUILD_SHARED_LIBRARY)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))

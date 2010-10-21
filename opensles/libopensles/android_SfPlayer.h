@@ -32,6 +32,10 @@
 #include "NuHTTPDataSource.h"
 #include "ThrottledSource.h"
 
+#ifdef USERDEBUG_BUILD
+#define _DEBUG_AUDIO_TESTS 1
+#endif
+
 #define DURATION_CACHED_HIGH_US  30000000 // 30s
 #define DURATION_CACHED_MED_US   10000000 // 10s
 #define DURATION_CACHED_LOW_US    2000000 //  2s
@@ -161,7 +165,9 @@ private:
         char* uri;
         FdInfo fdi;
     };
-
+#ifdef _DEBUG_AUDIO_TESTS
+    FILE *mMonitorAudioFp; // Automated tests
+#endif
     // mutex used for seek flag and seek time read/write
     Mutex       mSeekLock;
 

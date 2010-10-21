@@ -22,6 +22,12 @@
 #include "sllog.h"
 #include <stdlib.h>
 
+#ifdef _DEBUG_AUDIO_TESTS
+// defines used for automated audio quality tests
+#define MONITOR_AUDIO_TARGET "/sdcard/playbackqual.raw"
+#define MONITOR_AUDIO_PLAY_PROP "system.media.sles-decode-dump"
+#include <cutils/properties.h> // for property_get
+#endif
 namespace android {
 
 SfPlayer::SfPlayer(AudioPlayback_Parameters *app)
@@ -49,6 +55,9 @@ SfPlayer::SfPlayer(AudioPlayback_Parameters *app)
       mPlaybackParams.streamType = app->streamType;
       mPlaybackParams.trackcb = app->trackcb;
       mPlaybackParams.trackcbUser = app->trackcbUser;
+#ifdef _DEBUG_AUDIO_TESTS
+      mMonitorAudioFp = NULL; // automated tests
+#endif
 }
 
 
@@ -476,6 +485,16 @@ void SfPlayer::updatePlaybackParamsFromSource() {
 
 void SfPlayer::onPlay() {
     SL_LOGV("SfPlayer::onPlay");
+#ifdef _DEBUG_AUDIO_TESTS
+    // Automated tests: Open file for Intercepting pcm audio for quality validation
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get(MONITOR_AUDIO_PLAY_PROP, value, NULL) &&
+           (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        mMonitorAudioFp = fopen(MONITOR_AUDIO_TARGET, "w");
+        if (mMonitorAudioFp == NULL) { LOGE("error opening %s", MONITOR_AUDIO_TARGET); }
+        else { LOGE("recording to %s", MONITOR_AUDIO_TARGET); }
+    }
+#endif
     mFlags |= kFlagPlaying;
 
     if (NULL != mAudioTrack) {
@@ -487,6 +506,13 @@ void SfPlayer::onPlay() {
 void SfPlayer::onPause() {
     SL_LOGV("SfPlayer::onPause");
     mFlags &= ~kFlagPlaying;
+#ifdef _DEBUG_AUDIO_TESTS
+    // Automated tests: close intercept file
+    if (mMonitorAudioFp != NULL) {
+        fclose(mMonitorAudioFp);
+    }
+    mMonitorAudioFp = NULL;
+#endif
 }
 
 
@@ -646,8 +672,13 @@ void SfPlayer::onRender(const sp<AMessage> &msg) {
         mAudioTrack->write( (const uint8_t *)mDecodeBuffer->data() + mDecodeBuffer->range_offset(),
                 mDecodeBuffer->range_length());
         (new AMessage(kWhatDecode, id()))->post();
+#ifdef _DEBUG_AUDIO_TESTS
+        // Automated tests: Intercept PCM data and write to file for later validations
+        if (mMonitorAudioFp != NULL) {
+            fwrite((const uint8_t *)mDecodeBuffer->data() + mDecodeBuffer->range_offset(), mDecodeBuffer->range_length(), 1, mMonitorAudioFp);
+        }
+#endif
     }
-
     mDecodeBuffer->release();
     mDecodeBuffer = NULL;
 
