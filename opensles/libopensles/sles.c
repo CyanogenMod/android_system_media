@@ -551,19 +551,15 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
                 }
 
                 // check the container bit depth
-                switch (pDataFormat->mPCM.containerSize) {
-                case SL_PCMSAMPLEFORMAT_FIXED_8:
-                case SL_PCMSAMPLEFORMAT_FIXED_16:
-                    if (pDataFormat->mPCM.containerSize != pDataFormat->mPCM.bitsPerSample) {
-                        result = SL_RESULT_CONTENT_UNSUPPORTED;
-                    }
-                    break;
-                default:
+                if (pDataFormat->mPCM.containerSize < pDataFormat->mPCM.bitsPerSample) {
+                    result = SL_RESULT_PARAMETER_INVALID;
+                } else if (pDataFormat->mPCM.containerSize != pDataFormat->mPCM.bitsPerSample) {
                     result = SL_RESULT_CONTENT_UNSUPPORTED;
-                    break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
-                    SL_LOGE("containerSize=%u", (unsigned) pDataFormat->mPCM.containerSize);
+                    SL_LOGE("containerSize=%u, bitsPerSample=%u",
+                            (unsigned) pDataFormat->mPCM.containerSize,
+                            (unsigned) pDataFormat->mPCM.bitsPerSample);
                     break;
                 }
 
