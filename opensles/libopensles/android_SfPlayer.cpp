@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+//#define USE_LOG SLAndroidLogLevel_Verbose
+
 #include "android_SfPlayer.h"
 
 #include <stdio.h>
@@ -67,6 +69,12 @@ SfPlayer::~SfPlayer() {
     mRenderLooper->stop();
     mRenderLooper->unregisterHandler(this->id());
     mRenderLooper.clear();
+
+    if (mAudioTrack != NULL) {
+        mAudioTrack->stop();
+        delete mAudioTrack;
+        mAudioTrack = NULL;
+    }
 
     if (mAudioSource != NULL) {
         {
@@ -310,6 +318,7 @@ void SfPlayer::onPrepare(const sp<AMessage> &msg) {
     }
 
     // at this point we have enough information about the source to create its associated AudioTrack
+    assert(NULL == mAudioTrack);
     mAudioTrack = new android::AudioTrack(
             mPlaybackParams.streamType,                          // streamType
             mSampleRateHz,                                       // sampleRate
@@ -453,6 +462,11 @@ void SfPlayer::updatePlaybackParamsFromSource() {
 
         // the AudioTrack currently used by the AudioPlayer will be deleted by AudioPlayer itself
         // SfPlayer never deletes the AudioTrack it creates and uses.
+        if (NULL != mAudioTrack) {
+            mAudioTrack->stop();
+            delete mAudioTrack;
+            mAudioTrack = NULL;
+        }
         mAudioTrack = new android::AudioTrack(
                 mPlaybackParams.streamType,                          // streamType
                 mSampleRateHz,                                       // sampleRate
@@ -669,13 +683,15 @@ void SfPlayer::onRender(const sp<AMessage> &msg) {
     }
 
     if (mFlags & kFlagPlaying) {
+        assert(NULL != mAudioTrack);
         mAudioTrack->write( (const uint8_t *)mDecodeBuffer->data() + mDecodeBuffer->range_offset(),
                 mDecodeBuffer->range_length());
         (new AMessage(kWhatDecode, id()))->post();
 #ifdef _DEBUG_AUDIO_TESTS
         // Automated tests: Intercept PCM data and write to file for later validations
         if (mMonitorAudioFp != NULL) {
-            fwrite((const uint8_t *)mDecodeBuffer->data() + mDecodeBuffer->range_offset(), mDecodeBuffer->range_length(), 1, mMonitorAudioFp);
+            fwrite((const uint8_t *)mDecodeBuffer->data() + mDecodeBuffer->range_offset(),
+                    mDecodeBuffer->range_length(), 1, mMonitorAudioFp);
         }
 #endif
     }
@@ -693,6 +709,7 @@ void SfPlayer::onCheckCache(const sp<AMessage> &msg) {
     if (eos || status == kStatusHigh
             || ((mFlags & kFlagPreparing) && (status >= kStatusEnough))) {
         if (mFlags & kFlagPlaying) {
+            assert(NULL != mAudioTrack);
             mAudioTrack->start();
         }
         mFlags &= ~kFlagBuffering;

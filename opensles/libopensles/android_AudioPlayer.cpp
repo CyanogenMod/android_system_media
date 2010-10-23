@@ -465,6 +465,10 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
 
     case(android::SfPlayer::kEventNewAudioTrack): {
         object_lock_exclusive(&ap->mObject);
+#if 1
+        // SfPlayer has a new AudioTrack, update our pointer copy and configure the new one before
+        // starting to use it
+#else
         // SfPlayer has a new AudioTrack, delete the old one and configure the new one before
         // starting to use it
 
@@ -472,6 +476,7 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
             delete ap->mAudioTrack;
             ap->mAudioTrack = NULL;
         }
+#endif
         ap->mAudioTrack = ap->mSfPlayer->getAudioTrack();
         ap->mNumChannels = ap->mSfPlayer->getNumChannels();
         ap->mSampleRateMilliHz = android_to_sles_sampleRate(ap->mSfPlayer->getSampleRateHz());
@@ -1133,11 +1138,19 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     //-----------------------------------
     // AudioTrack
     case AUDIOTRACK_PULL:
+        // We own the audio track for PCM buffer queue players
+        if (pAudioPlayer->mAudioTrack != NULL) {
+            pAudioPlayer->mAudioTrack->stop();
+            delete pAudioPlayer->mAudioTrack;
+            pAudioPlayer->mAudioTrack = NULL;
+        }
         break;
 #ifndef USE_BACKPORT
     //-----------------------------------
     // MediaPlayer
     case MEDIAPLAYER:
+        // We don't own this audio track, SfPlayer does
+        pAudioPlayer->mAudioTrack = NULL;
         // FIXME might no longer be needed since we call explicit destructor
         if (pAudioPlayer->mSfPlayer != 0) {
             pAudioPlayer->mSfPlayer.clear();
@@ -1148,12 +1161,6 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
         SL_LOGE("Unexpected object type %d", pAudioPlayer->mAndroidObjType);
         result = SL_RESULT_INTERNAL_ERROR;
         break;
-    }
-
-    if (pAudioPlayer->mAudioTrack != NULL) {
-        pAudioPlayer->mAudioTrack->stop();
-        delete pAudioPlayer->mAudioTrack;
-        pAudioPlayer->mAudioTrack = NULL;
     }
 
     // FIXME might not be needed
