@@ -20,6 +20,7 @@
 #ifdef ANDROID
 #include "SLES/OpenSLES_Android.h"
 #endif
+#define SL_API
 #include <stddef.h> // offsetof
 #include <stdlib.h> // malloc
 #include <string.h> // memcmp
@@ -56,6 +57,7 @@ typedef int bool;
 #include "OpenSLESUT.h"
 #include "ThreadPool.h"
 
+typedef struct CEngine_struct CEngine;
 typedef struct CAudioPlayer_struct CAudioPlayer;
 typedef struct CAudioRecorder_struct CAudioRecorder;
 typedef struct C3DGroup_struct C3DGroup;
@@ -283,7 +285,7 @@ typedef struct {
 typedef struct Object_interface {
     const struct SLObjectItf_ *mItf;    // const
     // field mThis would be redundant within an IObject, so we substitute mEngine
-    struct Engine_interface *mEngine;   // const
+    CEngine *mEngine;               // const
     const ClassTable *mClass;       // const
     SLuint32 mInstanceID;           // const for debugger and for RPC, 0 means unpublished
     slObjectCallback mCallback;
@@ -552,12 +554,7 @@ typedef struct Engine_interface {
     IObject *mInstances[MAX_INSTANCE];
     SLboolean mShutdown;
     SLboolean mShutdownAck;
-    ThreadPool mThreadPool; // for asynchronous operations
-#if defined(ANDROID) && !defined(USE_BACKPORT)
-    // FIXME number of presets will only be saved in IEqualizer, preset names will not be stored
-    SLuint32 mEqNumPresets;
-    char** mEqPresetNames;
-#endif
+    // SLuint32 mVersion;      // 0xXXYYZZ where XX=major, YY=minor, ZZ=step
 } IEngine;
 
 typedef struct {
@@ -1059,7 +1056,7 @@ enum AndroidObject_state {
 } /*CAudioRecorder*/;
 
 
-typedef struct {
+/*typedef*/ struct CEngine_struct {
     // mandated implicit interfaces
     IObject mObject;
 #ifdef ANDROID
@@ -1077,14 +1074,20 @@ typedef struct {
     IAudioDecoderCapabilities mAudioDecoderCapabilities;
     IAudioEncoderCapabilities mAudioEncoderCapabilities;
     I3DCommit m3DCommit;
+    // optional interfaces
+    IDeviceVolume mDeviceVolume;
 #ifdef ANDROID
     IAndroidEffectCapabilities mAndroidEffectCapabilities;
 #endif
-    // optional interfaces
-    IDeviceVolume mDeviceVolume;
     // remaining are per-instance private fields not associated with an interface
+    ThreadPool mThreadPool; // for asynchronous operations
     pthread_t mSyncThread;
-} CEngine;
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    // FIXME number of presets will only be saved in IEqualizer, preset names will not be stored
+    SLuint32 mEqNumPresets;
+    char** mEqPresetNames;
+#endif
+} /*CEngine*/;
 
 typedef struct {
     // mandated interfaces
@@ -1375,3 +1378,7 @@ extern void ReleaseStrongRef(IObject *object);
 extern void ReleaseStrongRefAndUnlockExclusive(IObject *object);
 
 extern COutputMix *CAudioPlayer_GetOutputMix(CAudioPlayer *audioPlayer);
+extern SLresult IEngineCapabilities_QueryLEDCapabilities(SLEngineCapabilitiesItf self,
+    SLuint32 *pIndex, SLuint32 *pLEDDeviceID, SLLEDDescriptor *pDescriptor);
+extern SLresult IEngineCapabilities_QueryVibraCapabilities(SLEngineCapabilitiesItf self,
+    SLuint32 *pIndex, SLuint32 *pVibraDeviceID, SLVibraDescriptor *pDescriptor);

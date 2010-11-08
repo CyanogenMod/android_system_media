@@ -66,6 +66,7 @@ LOCAL_SRC_FILES:=                     \
         IDynamicInterfaceManagement.c \
         IEffectSend.c                 \
         IEngine.c                     \
+        IEngineCapabilities.c         \
         IEnvironmentalReverb.c        \
         IEqualizer.c                  \
         IMuteSolo.c                   \
@@ -94,7 +95,6 @@ EXCLUDE_SRC :=                        \
         IAudioIODeviceCapabilities.c  \
         IDeviceVolume.c               \
         IDynamicSource.c              \
-        IEngineCapabilities.c         \
         ILEDArray.c                   \
         IMIDIMessage.c                \
         IMIDIMuteSolo.c               \
@@ -147,7 +147,7 @@ ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
 endif
 
 ifneq ($(TARGET_SIMULATOR),true)
-		LOCAL_SHARED_LIBRARIES += libdl
+        LOCAL_SHARED_LIBRARIES += libdl
 else
         LOCAL_CFLAGS += -DTARGET_SIMULATOR
 endif

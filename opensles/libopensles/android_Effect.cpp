@@ -292,7 +292,7 @@ void android_eq_init(int sessionId, IEqualizer* ieq) {
         ieq->mNumPresets = numPresets;
     }
 
-    interface_lock_exclusive(ieq->mThis->mEngine);
+    object_lock_exclusive(&ieq->mThis->mEngine->mObject);
     char name[EFFECT_STRING_LEN_MAX];
     if ((0 < numPresets) && (NULL == ieq->mThis->mEngine->mEqPresetNames)) {
         ieq->mThis->mEngine->mEqPresetNames = (char **)new char *[numPresets];
@@ -305,7 +305,7 @@ void android_eq_init(int sessionId, IEqualizer* ieq) {
             }
         }
     }
-    interface_unlock_exclusive(ieq->mThis->mEngine);
+    object_unlock_exclusive(&ieq->mThis->mEngine->mObject);
 
 #if 0
     // configure the EQ so it can easily be heard, for test only

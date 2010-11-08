@@ -63,7 +63,7 @@ bool COutputMix_PreDestroy(void *self)
     if (0 == outputMix->mObject.mStrongRefCount) {
 #ifdef USE_OUTPUTMIXEXT
         // We only support a single active output mix per engine, so check if this is the active mix
-        IEngine *thisEngine = outputMix->mObject.mEngine;
+        IEngine *thisEngine = &outputMix->mObject.mEngine->mEngine;
         interface_lock_exclusive(thisEngine);
         bool thisIsTheActiveOutputMix = false;
         if (outputMix == thisEngine->mOutputMix) {

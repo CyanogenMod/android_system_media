@@ -3,7 +3,7 @@ all : IID_to_MPH.c
 install :
 	cp IID_to_MPH.c ../../libopensles
 
-CFLAGS = -I../../include
+CFLAGS = -I../../include -g
 
 %.o : %.c
 	gcc -c -o $@ $(CFLAGS) $<
@@ -21,7 +21,7 @@ part2.c : part23in.c
 part3.c : part23in.c
 	$(RM) $@
 # was 26,54p
-	sed -n '/static const unsigned char asso_values.. =/,/^    };/p' < part23in.c >> $@
+	sed -n '/static const unsigned .* asso_values.. =/,/^    };/p' < part23in.c >> $@
 
 # part4.c is human-generated
 
@@ -32,7 +32,7 @@ part5.c : part5gen
 
 part7.c : part23in.c hash.sed
 # was 55p
-	sed -n '/return asso_values.(unsigned char)str.3.. + asso_values.(unsigned char)str.0..;/p' < part23in.c | sed -f hash.sed >> $@
+	sed -n '/return asso_values/p' < part23in.c | sed -f hash.sed >> $@
 
 # part8.c is human_generated
 

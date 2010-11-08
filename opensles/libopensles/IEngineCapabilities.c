@@ -99,7 +99,7 @@ static SLresult IEngineCapabilities_QueryAPIVersion(SLEngineCapabilitiesItf self
 }
 
 
-static SLresult IEngineCapabilities_QueryLEDCapabilities(SLEngineCapabilitiesItf self,
+SLresult IEngineCapabilities_QueryLEDCapabilities(SLEngineCapabilitiesItf self,
     SLuint32 *pIndex, SLuint32 *pLEDDeviceID, SLLEDDescriptor *pDescriptor)
 {
     SL_ENTER_INTERFACE
@@ -141,7 +141,7 @@ static SLresult IEngineCapabilities_QueryLEDCapabilities(SLEngineCapabilitiesItf
 }
 
 
-static SLresult IEngineCapabilities_QueryVibraCapabilities(SLEngineCapabilitiesItf self,
+SLresult IEngineCapabilities_QueryVibraCapabilities(SLEngineCapabilitiesItf self,
     SLuint32 *pIndex, SLuint32 *pVibraDeviceID, SLVibraDescriptor *pDescriptor)
 {
     SL_ENTER_INTERFACE

@@ -525,7 +525,7 @@ void IObject_Destroy(SLObjectItf self)
     this->mState = SL_OBJECT_STATE_DESTROYING;
     VoidHook destroy = class__->mDestroy;
     // const, no lock needed
-    IEngine *thisEngine = this->mEngine;
+    IEngine *thisEngine = &this->mEngine->mEngine;
     unsigned i = this->mInstanceID;
     assert(MAX_INSTANCE >= i);
     // avoid a recursive lock on the engine when destroying the engine itself
@@ -785,7 +785,7 @@ void IObject_deinit(void *self)
 
 void IObject_Publish(IObject *this)
 {
-    IEngine *thisEngine = this->mEngine;
+    IEngine *thisEngine = &this->mEngine->mEngine;
     interface_lock_exclusive(thisEngine);
     // construct earlier reserved a pending slot, but did not choose the actual slot number
     unsigned availMask = ~thisEngine->mInstanceMask;

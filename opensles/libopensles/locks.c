@@ -217,7 +217,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
         if (0 != id) {
             --id;
             assert(MAX_INSTANCE > id);
-            IEngine *thisEngine = this->mEngine;
+            IEngine *thisEngine = &this->mEngine->mEngine;
             interface_lock_exclusive(thisEngine);
             thisEngine->mChangedMask |= 1 << id;
             interface_unlock_exclusive(thisEngine);

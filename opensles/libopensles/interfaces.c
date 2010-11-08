@@ -16,9 +16,13 @@
 
 // Map minimal perfect hash of an interface ID to its name
 
+#include <assert.h>
+#include <string.h>
 #include "MPH.h"
 
 const char * const interface_names[MPH_MAX] = {
+
+    // OpenSL ES 1.0.1 interfaces
     "3DCOMMIT",
     "3DDOPPLER",
     "3DGROUPING",
@@ -63,12 +67,32 @@ const char * const interface_names[MPH_MAX] = {
     "VIRTUALIZER",
     "VISUALIZATION",
     "VOLUME",
-    // The lack of ifdef is intentional
+
+    // Wilhelm desktop extended interfaces
     "OUTPUTMIXEXT",
+
+    // Android API level 9 extended interfaces
     "ANDROIDEFFECT",
     "ANDROIDEFFECTCAPABILITIES",
     "ANDROIDEFFECTSEND",
     "ANDROIDCONFIGURATION",
     "ANDROIDSIMPLEBUFFERQUEUE",
+
+    // Android API level 10 extended interfaces
     "ANDROIDSTREAMSOURCE"
+
 };
+
+
+/** Convert an MPH value to an MPH identifier */
+
+void MPH_to_MPH_string(unsigned MPH, char buffer[40])
+{
+    assert(MPH_MAX > MPH);
+    const char *infix;
+    infix = "";
+    strcpy(buffer, "MPH");
+    strcpy(&buffer[3], infix);
+    strcat(buffer, "_");
+    strcat(buffer, interface_names[MPH]);
+}

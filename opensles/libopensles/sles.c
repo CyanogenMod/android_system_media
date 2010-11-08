@@ -1002,6 +1002,7 @@ extern bool
 #define IAndroidEffect_deinit             NULL
 #define IAndroidEffectCapabilities_deinit NULL
 #define IAndroidEffectCapabilities_Expose NULL
+#define IAndroidStreamSource_init         NULL
 #endif
 
 #ifndef USE_OUTPUTMIXEXT
@@ -1059,14 +1060,17 @@ extern bool
         NULL },
     { /* MPH_VISUALIZATION, */ IVisualization_init, NULL, NULL, NULL, NULL },
     { /* MPH_VOLUME, */ IVolume_init, NULL, NULL, NULL, NULL },
+// Wilhelm desktop extended interfaces
     { /* MPH_OUTPUTMIXEXT, */ IOutputMixExt_init, NULL, NULL, NULL, NULL },
+// Android API level 9 extended interfaces
     { /* MPH_ANDROIDEFFECT */ IAndroidEffect_init, NULL, IAndroidEffect_deinit, NULL, NULL },
     { /* MPH_ANDROIDEFFECTCAPABILITIES */ IAndroidEffectCapabilities_init, NULL,
         IAndroidEffectCapabilities_deinit, IAndroidEffectCapabilities_Expose, NULL },
     { /* MPH_ANDROIDEFFECTSEND */ IAndroidEffectSend_init, NULL, NULL, NULL, NULL },
     { /* MPH_ANDROIDCONFIGURATION */ IAndroidConfiguration_init, NULL, NULL, NULL, NULL },
     { /* MPH_ANDROIDSIMPLEBUFFERQUEUE */ IBufferQueue_init /* alias */, NULL, NULL, NULL, NULL },
-    { /* MPH_ANDROIDSTREAMSOURCE */ IAndroidStreamSource_init, NULL, NULL, NULL, NULL }
+// Android API level 10 extended interfaces
+    { /* MPH_ANDROIDSTREAMSOURCE */ IAndroidStreamSource_init, NULL, NULL, NULL, NULL },
 };
 
 
@@ -1083,8 +1087,10 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
         // a NULL engine means we are constructing the engine
         IEngine *thisEngine = (IEngine *) engine;
         if (NULL == thisEngine) {
-            thisEngine = &((CEngine *) this)->mEngine;
+            // thisEngine = &((CEngine *) this)->mEngine;
+            this->mEngine = (CEngine *) this;
         } else {
+            this->mEngine = (CEngine *) thisEngine->mThis;
             interface_lock_exclusive(thisEngine);
             if (MAX_INSTANCE <= thisEngine->mInstanceCount) {
                 SL_LOGE("Too many objects");
@@ -1103,7 +1109,6 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
         }
         this->mLossOfControlMask = lossOfControlMask;
         this->mClass = class__;
-        this->mEngine = thisEngine;
         const struct iid_vtable *x = class__->mInterfaces;
         SLuint8 *interfaceStateP = this->mInterfaceStates;
         SLuint32 index;
@@ -1183,13 +1188,14 @@ void CEngine_Destroyed(CEngine *self)
 /* Initial global entry points */
 
 
-/** \brief slCreateEngine Function */
+/** \brief Internal code shared by slCreateEngine and xaCreateEngine */
 
-SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
+static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     const SLEngineOption *pEngineOptions, SLuint32 numInterfaces,
-    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
+    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired,
+    const ClassTable *pCEngine_class)
 {
-    SL_ENTER_GLOBAL
+    SLresult result;
 
     int ok;
     ok = pthread_mutex_lock(&theOneTrueMutex);
@@ -1265,7 +1271,13 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         }
 
         // initialize fields not associated with an interface
+        // mThreadPool is initialized in CEngine_Realize
+        memset(&this->mThreadPool, 0, sizeof(ThreadPool));
         memset(&this->mSyncThread, 0, sizeof(pthread_t));
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+        this->mEqNumPresets = 0;
+        this->mEqPresetNames = NULL;
+#endif
         // initialize fields related to an interface
         this->mObject.mLossOfControlMask = lossOfControlGlobal ? ~0 : 0;
         this->mEngine.mLossOfControlGlobal = lossOfControlGlobal;
@@ -1280,20 +1292,34 @@ SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     ok = pthread_mutex_unlock(&theOneTrueMutex);
     assert(0 == ok);
 
+    return result;
+}
+
+
+/** \brief slCreateEngine Function */
+
+SL_API SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
+    const SLEngineOption *pEngineOptions, SLuint32 numInterfaces,
+    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
+{
+    SL_ENTER_GLOBAL
+
+    result = liCreateEngine(pEngine, numOptions, pEngineOptions, numInterfaces, pInterfaceIds,
+            pInterfaceRequired, objectIDtoClass(SL_OBJECTID_ENGINE));
+
     SL_LEAVE_GLOBAL
 }
 
 
-/** \brief slQueryNumSupportedEngineInterfaces Function */
+/** Internal function for slQuerySupportedEngineInterfaces and xaQuerySupportedEngineInterfaces */
 
-SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedInterfaces)
+static SLresult liQueryNumSupportedInterfaces(SLuint32 *pNumSupportedInterfaces,
+        const ClassTable *class__)
 {
-    SL_ENTER_GLOBAL
-
+    SLresult result;
     if (NULL == pNumSupportedInterfaces) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        const ClassTable *class__ = objectIDtoClass(SL_OBJECTID_ENGINE);
         assert(NULL != class__);
         SLuint32 count = 0;
         SLuint32 i;
@@ -1316,22 +1342,33 @@ SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedI
         *pNumSupportedInterfaces = count;
         result = SL_RESULT_SUCCESS;
     }
+    return result;
+}
+
+
+/** \brief slQueryNumSupportedEngineInterfaces Function */
+
+SL_API SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedInterfaces)
+{
+    SL_ENTER_GLOBAL
+
+    result = liQueryNumSupportedInterfaces(pNumSupportedInterfaces,
+            objectIDtoClass(SL_OBJECTID_ENGINE));
 
     SL_LEAVE_GLOBAL
 }
 
 
-/** \brief slQuerySupportedEngineInterfaces Function */
+/** Internal function for slQuerySupportedEngineInterfaces and xaQuerySupportedEngineInterfaces */
 
-SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index, SLInterfaceID *pInterfaceId)
+static SLresult liQuerySupportedInterfaces(SLuint32 index, SLInterfaceID *pInterfaceId,
+        const ClassTable *class__)
 {
-    SL_ENTER_GLOBAL
-
+    SLresult result;
     if (NULL == pInterfaceId) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         *pInterfaceId = NULL;
-        const ClassTable *class__ = objectIDtoClass(SL_OBJECTID_ENGINE);
         assert(NULL != class__);
         result = SL_RESULT_PARAMETER_INVALID;   // will be reset later
         SLuint32 i;
@@ -1350,7 +1387,6 @@ SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index, SLInterface
                 break;
             }
             if (index == 0) {
-                // The engine has no aliases, but if it did, this would return only the primary
                 *pInterfaceId = &SL_IID_array[class__->mInterfaces[i].mMPH];
                 result = SL_RESULT_SUCCESS;
                 break;
@@ -1358,6 +1394,18 @@ SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index, SLInterface
             --index;
         }
     }
+    return result;
+}
+
+
+/** \brief slQuerySupportedEngineInterfaces Function */
+
+SL_API SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index,
+        SLInterfaceID *pInterfaceId)
+{
+    SL_ENTER_GLOBAL
+
+    result = liQuerySupportedInterfaces(index, pInterfaceId, objectIDtoClass(SL_OBJECTID_ENGINE));
 
     SL_LEAVE_GLOBAL
 }

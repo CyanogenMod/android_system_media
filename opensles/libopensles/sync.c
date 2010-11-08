@@ -49,7 +49,7 @@ void *sync_start(void *arg)
             object_cond_broadcast(&this->mObject);
             // here is where we would process the enqueued 3D commands
         }
-        unsigned instanceMask = this->mEngine.mInstanceMask;
+        // unsigned instanceMask = this->mEngine.mInstanceMask; // for debugger
         unsigned changedMask = this->mEngine.mChangedMask;
         this->mEngine.mChangedMask = 0;
         object_unlock_exclusive(&this->mObject);

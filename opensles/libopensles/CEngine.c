@@ -33,7 +33,7 @@ SLresult CEngine_Realize(void *self, SLboolean async)
         return result;
 #endif
     // initialize the thread pool for asynchronous operations
-    result = ThreadPool_init(&this->mEngine.mThreadPool, 0, 0);
+    result = ThreadPool_init(&this->mThreadPool, 0, 0);
     if (SL_RESULT_SUCCESS != result) {
         this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
         (void) pthread_join(this->mSyncThread, (void **) NULL);
@@ -92,7 +92,22 @@ void CEngine_Destroy(void *self)
     }
 
     // Shutdown the thread pool used for asynchronous operations (there should not be any)
-    ThreadPool_deinit(&this->mEngine.mThreadPool);
+    ThreadPool_deinit(&this->mThreadPool);
+
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    // free equalizer preset names
+    if (NULL != this->mEqPresetNames) {
+        for (unsigned i = 0; i < this->mEqNumPresets; ++i) {
+            if (NULL != this->mEqPresetNames[i]) {
+                delete[] this->mEqPresetNames[i];
+                this->mEqPresetNames[i] = NULL;
+            }
+        }
+        delete[] this->mEqPresetNames;
+        this->mEqPresetNames = NULL;
+    }
+    this->mEqNumPresets = 0;
+#endif
 
 #ifdef USE_SDL
     SDL_close();

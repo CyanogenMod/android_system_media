@@ -17,7 +17,6 @@
 // Map minimal perfect hash of an interface ID to its class index.
 
 #include "MPH.h"
-#include "MPH_to.h"
 
 // If defined, then compile with C99 such as GNU C, not GNU C++ or non-GNU C.
 //#define USE_DESIGNATED_INITIALIZERS
@@ -40,7 +39,6 @@
 // Don't cross streams, otherwise bad things happen.
 
 
-#if USE_PROFILES & USE_PROFILES_GAME
 const signed char MPH_to_3DGroup[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -51,27 +49,9 @@ const signed char MPH_to_3DGroup[MPH_MAX] = {
     [MPH_3DSOURCE] = 4,
     [MPH_3DMACROSCOPIC] = 5
 #else
-    -1,
-    3, // MPH_3DDOPPLER
-    -1,
-    2, // MPH_3DLOCATION
-    5, // MPH_3DMACROSCOPIC
-    4, // MPH_3DSOURCE
-    -1, -1, -1, -1, -1, -1, -1,
-    1, // MPH_DYNAMICINTERFACEMANAGEMENT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    0, // MPH_OBJECT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, // MPH_OUTPUTMIXEXT
-    -1, // MPH_ANDROIDEFFECT
-    -1, // MPH_ANDROIDEFFECTCAPABILITIES
-    -1, // MPH_ANDROIDEFFECTSEND
-    -1, // MPH_ANDROIDCONFIGURATION
-    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
-    END
+#include "MPH_to_3DGroup.h"
 #endif
 };
-#endif
 
 const signed char MPH_to_AudioPlayer[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
@@ -110,63 +90,10 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
     [MPH_ANDROIDSTREAMSOURCE] = 29
 #endif
 #else
-    -1,
-    3,  // MPH_3DDOPPLER
-    4,  // MPH_3DGROUPING
-    5,  // MPH_3DLOCATION
-    16, // MPH_3DMACROSCOPIC
-    6,  // MPH_3DSOURCE
-    -1, -1, -1, -1,
-    17, // MPH_BASSBOOST
-    7,  // MPH_BUFFERQUEUE
-    -1,
-    1,  // MPH_DYNAMICINTERFACEMANAGEMENT
-    18, // MPH_DYNAMICSOURCE
-    8,  // MPH_EFFECTSEND
-    -1, -1,
-    19, // MPH_ENVIRONMENTALREVERB
-    20, // MPH_EQUALIZER
-    -1,
-    10, // MPH_METADATAEXTRACTION
-    11, // MPH_METADATATRAVERSAL
-    -1, -1, -1, -1,
-    9,  // MPH_MUTESOLO
-    -1,
-    0,  // MPH_OBJECT
-    -1,
-    21, // MPH_PITCH
-    2,  // MPH_PLAY
-    23, // MPH_PLAYBACKRATE
-    12, // MPH_PREFETCHSTATUS
-    22, // MPH_PRESETREVERB
-    13, // MPH_RATEPITCH
-    -1,
-    14, // MPH_SEEK
-    -1, -1,
-    24, // MPH_VIRTUALIZER
-    25, // MPH_VISUALIZATION
-    15, // MPH_VOLUME
-    -1, // not using MPH_OUTPUTMIXEXT
-#ifdef ANDROID
-    26, // MPH_ANDROIDEFFECT
-    -1, // MPH_ANDROIDEFFECTCAPABILITIES
-    27, // MPH_ANDROIDEFFECTSEND
-    28, // MPH_ANDROIDCONFIGURATION
-    7,  // MPH_SIMPLEBUFFERQUEUE    // alias for [MPH_BUFFERQUEUE]
-    29  // MPH_ANDROIDSTREAMSOURCE
-#else
-    -1, // not using MPH_ANDROIDEFFECT
-    -1, // not using MPH_ANDROIDEFFECTCAPABILITIES
-    -1, // not using MPH_ANDROIDEFFECTSEND
-    -1, // not using MPH_ANDROIDCONFIGURATION
-    -1, // not using MPH_ANDROIDSIMPLEBUFFERQUEUE
-    -1  // not using MPH_ANDROIDSTREAMSOURCE
-#endif
-    END
+#include "MPH_to_AudioPlayer.h"
 #endif
 };
 
-#if (USE_PROFILES & USE_PROFILES_OPTIONAL) || defined(ANDROID)
 const signed char MPH_to_AudioRecorder[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -184,38 +111,9 @@ const signed char MPH_to_AudioRecorder[MPH_MAX] = {
     [MPH_ANDROIDCONFIGURATION] = 10
 #endif
 #else
-    -1, -1, -1, -1, -1, -1, -1,
-    3, // MPH_AUDIOENCODER
-    -1, -1,
-    4, // MPH_BASSBOOST
-    -1, // MPH_BUFFERQUEUE (application must specify MPH_ANDROIDSIMPLEBUFFERQUEUE)
-    -1,
-    1, // MPH_DYNAMICINTERFACEMANAGEMENT
-    5, // MPH_DYNAMICSOURCE
-    -1, -1, -1, -1,
-    6, // MPH_EQUALIZER
-    -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    0, // MPH_OBJECT
-    -1, -1, -1, -1, -1, -1, -1,
-    2, // MPH_RECORD
-    -1, -1, -1, -1,
-    7, // MPH_VISUALIZATION
-    8, // MPH_VOLUME
-    -1, // not using MPH_OUTPUTMIXEXT
-    -1, // not using MPH_ANDROIDEFFECT
-    -1, // not using MPH_ANDROIDEFFECTCAPABILITIES
-    -1, // not using MPH_ANDROIDEFFECTSEND
-#ifdef ANDROID
-    10, // MPH_ANDROIDCONFIGURATION
-    9   // MPH_ANDROIDSIMPLEBUFFERQUEUE (this is not an alias)
-#else
-    -1, // not using MPH_ANDROIDCONFIGURATION
-    -1  // not using MPH_ANDROIDSIMPLEBUFFERQUEUE
-#endif
-    END
+#include "MPH_to_AudioRecorder.h"
 #endif
 };
-#endif
 
 const signed char MPH_to_Engine[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
@@ -234,42 +132,10 @@ const signed char MPH_to_Engine[MPH_MAX] = {
     [MPH_ANDROIDEFFECTCAPABILITIES] = 10
 #endif
 #else
-    8, // MPH_3DCOMMIT
-    -1, -1, -1, -1, -1,
-    6, // MPH_AUDIODECODERCAPABILITIES
-    -1,
-    7, // MPH_AUDIOENCODERCAPABILITIES
-    5, // MPH_AUDIOIODEVICECAPABILITIES
-    -1, -1,
-    9, // MPH_DEVICEVOLUME
-    1, // MPH_DYNAMICINTERFACEMANAGEMENT
-    -1, -1,
-    2, // MPH_ENGINE
-    3, // MPH_ENGINECAPABILITIES
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    0, // MPH_OBJECT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    4, // MPH_THREADSYNC
-    -1, -1, -1, -1,
-    -1, // MPH_OUTPUTMIXEXT
-#ifdef ANDROID
-    -1, // MPH_ANDROIDEFFECT
-    10, // MPH_ANDROIDEFFECTCAPABILITIES
-    -1, // MPH_ANDROIDEFFECTSEND
-    -1, // MPH_ANDROIDCONFIGURATION
-    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
-#else
-    -1, // MPH_ANDROIDEFFECT
-    -1, // MPH_ANDROIDEFFECTCAPABILITIES
-    -1, // MPH_ANDROIDEFFECTSEND
-    -1, // MPH_ANDROIDCONFIGURATION
-    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
-#endif
-    END
+#include "MPH_to_Engine.h"
 #endif
 };
 
-#if USE_PROFILES & USE_PROFILES_OPTIONAL
 const signed char MPH_to_LEDDevice[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -277,25 +143,10 @@ const signed char MPH_to_LEDDevice[MPH_MAX] = {
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
     [MPH_LED] = 2
 #else
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    1, // MPH_DYNAMICINTERFACEMANAGEMENT
-    -1, -1, -1, -1, -1, -1,
-    2, // MPH_LED
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    0, // MPH_OBJECT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, // MPH_OUTPUTMIXEXT
-    -1, // MPH_ANDROIDEFFECT
-    -1, // MPH_ANDROIDEFFECTCAPABILITIES
-    -1, // MPH_ANDROIDEFFECTSEND
-    -1, // MPH_ANDROIDCONFIGURATION
-    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
-    END
+#include "MPH_to_LEDDevice.h"
 #endif
 };
-#endif
 
-#if USE_PROFILES & USE_PROFILES_GAME
 const signed char MPH_to_Listener[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -304,27 +155,10 @@ const signed char MPH_to_Listener[MPH_MAX] = {
     [MPH_3DDOPPLER] = 2,
     [MPH_3DLOCATION] = 3
 #else
-    -1,
-    2, // MPH_3DDOPPLER
-    -1,
-    3, // MPH_3DLOCATION
-    -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    1, // MPH_DYNAMICINTERFACEMANAGEMENT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    0, // MPH_OBJECT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, // MPH_OUTPUTMIXEXT
-    -1, // MPH_ANDROIDEFFECT
-    -1, // MPH_ANDROIDEFFECTCAPABILITIES
-    -1, // MPH_ANDROIDEFFECTSEND
-    -1, // MPH_ANDROIDCONFIGURATION
-    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
-    END
+#include "MPH_to_Listener.h"
 #endif
 };
-#endif
 
-#if USE_PROFILES & (USE_PROFILES_GAME | USE_PROFILES_MUSIC)
 const signed char MPH_to_MetadataExtractor[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -334,27 +168,10 @@ const signed char MPH_to_MetadataExtractor[MPH_MAX] = {
     [MPH_METADATAEXTRACTION] = 3,
     [MPH_METADATATRAVERSAL] = 4
 #else
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    1, // MPH_DYNAMICINTERFACEMANAGEMENT
-    2, // MPH_DYNAMICSOURCE
-    -1, -1, -1, -1, -1, -1,
-    3, // MPH_METADATAEXTRACTION
-    4, // MPH_METADATATRAVERSAL
-    -1, -1, -1, -1, -1, -1,
-    0, // MPH_OBJECT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, // MPH_OUTPUTMIXEXT
-    -1, // MPH_ANDROIDEFFECT
-    -1, // MPH_ANDROIDEFFECTCAPABILITIES
-    -1, // MPH_ANDROIDEFFECTSEND
-    -1, // MPH_ANDROIDCONFIGURATION
-    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
-    END
+#include "MPH_to_MetadataExtractor.h"
 #endif
 };
-#endif
 
-#if USE_PROFILES & USE_PROFILES_GAME
 const signed char MPH_to_MidiPlayer[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -388,54 +205,9 @@ const signed char MPH_to_MidiPlayer[MPH_MAX] = {
     [MPH_VIRTUALIZER] = 27,
     [MPH_VISUALIZATION] = 28,
 #else
-    -1,
-    3,  // MPH_3DDOPPLER
-    4,  // MPH_3DGROUPING
-    5,  // MPH_3DLOCATION
-    19, // MPH_3DMACROSCOPIC
-    6,  // MPH_3DSOURCE
-    -1, -1, -1, -1,
-    20, // MPH_BASSBOOST
-    7,  // MPH_BUFFERQUEUE
-    -1,
-    1,  // MPH_DYNAMICINTERFACEMANAGEMENT
-    21, // MPH_DYNAMICSOURCE
-    8,  // MPH_EFFECTSEND
-    -1, -1,
-    22, // MPH_ENVIRONMENTALREVERB
-    23, // MPH_EQUALIZER
-    -1,
-    10, // MPH_METADATAEXTRACTION
-    11, // MPH_METADATATRAVERSAL
-    12, // MPH_MIDIMESSAGE
-    15, // MPH_MIDIMUTESOLO
-    14, // MPH_MIDITEMPO
-    13, // MPH_MIDITIME
-    9,  // MPH_MUTESOLO
-    -1,
-    0,  // MPH_OBJECT
-    -1,
-    24, // MPH_PITCH
-    2,  // MPH_PLAY
-    26, // MPH_PLAYBACKRATE
-    16, // MPH_PREFETCHSTATUS
-    25, // MPH_PRESETREVERB
-    -1, -1,
-    17, // MPH_SEEK
-    -1, -1,
-    27, // MPH_VIRTUALIZER
-    28, // MPH_VISUALIZATION
-    18, // MPH_VOLUME
-    -1, // MPH_OUTPUTMIXEXT
-    -1, // MPH_ANDROIDEFFECT
-    -1, // MPH_ANDROIDEFFECTCAPABILITIES
-    -1, // MPH_ANDROIDEFFECTSEND
-    -1, // MPH_ANDROIDCONFIGURATION
-    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
-    END
+#include "MPH_to_MidiPlayer.h"
 #endif
 };
-#endif
 
 const signed char MPH_to_OutputMix[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
@@ -457,41 +229,10 @@ const signed char MPH_to_OutputMix[MPH_MAX] = {
     [MPH_ANDROIDEFFECT] = 11
 #endif
 #else
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    9,  // MPH_BASSBOOST
-    -1, -1,
-    1,  // MPH_DYNAMICINTERFACEMANAGEMENT
-    -1, -1, -1, -1,
-    4,  // MPH_ENVIRONMENTALREVERB
-    5,  // MPH_EQUALIZER
-    -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    0,  // MPH_OBJECT
-    2,  // MPH_OUTPUTMIX
-    -1, -1, -1, -1,
-    6,  // MPH_PRESETREVERB
-    -1, -1, -1, -1, -1,
-    7,  // MPH_VIRTUALIZER
-    10, // MPH_VISUALIZATION
-    8,  // MPH_VOLUME
-#ifdef USE_OUTPUTMIXEXT
-    3,  // MPH_OUTPUTMIXEXT
-#else
-    -1,
-#endif
-#ifdef ANDROID
-    11, // MPH_ANDROIDEFFECT
-#else
-    -1,
-#endif
-    -1, // MPH_ANDROIDEFFECTCAPABILITIES
-    -1, // MPH_ANDROIDEFFECTSEND
-    -1, // MPH_ANDROIDCONFIGURATION
-    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
-    END
+#include "MPH_to_OutputMix.h"
 #endif
 };
 
-#if USE_PROFILES & USE_PROFILES_OPTIONAL
 const signed char MPH_to_Vibra[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
@@ -499,20 +240,6 @@ const signed char MPH_to_Vibra[MPH_MAX] = {
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
     [MPH_VIBRA] = 2
 #else
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    1, // MPH_DYNAMICINTERFACEMANAGEMENT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    0, // MPH_OBJECT
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    2, // MPH_VIBRA
-    -1, -1, -1,
-    -1, // MPH_OUTPUTMIXEXT
-    -1, // MPH_ANDROIDEFFECT
-    -1, // MPH_ANDROIDEFFECTCAPABILITIES
-    -1, // MPH_ANDROIDEFFECTSEND
-    -1, // MPH_ANDROIDCONFIGURATION
-    -1  // MPH_ANDROIDSIMPLEBUFFERQUEUE
-    END
+#include "MPH_to_Vibra.h"
 #endif
 };
-#endif

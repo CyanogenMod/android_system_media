@@ -22,6 +22,7 @@
 #define MPH_NONE                      (-1)
 #define MPH_MIN                         0
 
+// OpenSL ES 1.0.1 interfaces
 #define MPH_3DCOMMIT                    0
 #define MPH_3DDOPPLER                   1
 #define MPH_3DGROUPING                  2
@@ -66,24 +67,21 @@
 #define MPH_VIRTUALIZER                41
 #define MPH_VISUALIZATION              42
 #define MPH_VOLUME                     43
-// end Khronos standard interfaces
 
-// The lack of ifdef on the remaining is intentional
-
-// start non-standard and platform-independent interface IDs
+// Wilhelm desktop extended interfaces
 #define MPH_OUTPUTMIXEXT               44
-// end non-standard and platform-independent interface IDs
 
-// start non-standard and platform-specific interface IDs
+// Android API level 9 extended interfaces
 #define MPH_ANDROIDEFFECT              45
 #define MPH_ANDROIDEFFECTCAPABILITIES  46
 #define MPH_ANDROIDEFFECTSEND          47
 #define MPH_ANDROIDCONFIGURATION       48
 #define MPH_ANDROIDSIMPLEBUFFERQUEUE   49
-#define MPH_ANDROIDSTREAMSOURCE        50
-// end non-standard and platform-specific interface IDs
 
-// total number
+// Android API level 10 extended interfaces
+#define MPH_ANDROIDSTREAMSOURCE        50
+
+// total number of interface IDs
 #define MPH_MAX                        51
 
 #endif // !defined(__MPH_H)

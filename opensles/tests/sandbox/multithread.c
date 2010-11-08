@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <utils/Log.h>
 
 typedef struct {
     SLuint32 mObjectID;
@@ -50,7 +49,6 @@ void *thread_start(void *param)
         SLresult result;
 
         ++ta->mCounter;
-        //LOGE("mCounter %d", ta->mCounter);
         switch (ta->mObjectID) {
         case SL_OBJECTID_OUTPUTMIX:
             {

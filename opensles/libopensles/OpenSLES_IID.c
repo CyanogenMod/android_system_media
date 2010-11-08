@@ -44,7 +44,14 @@ extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
 /* Interface IDs                                                             */
 /*****************************************************************************/
 
+// Note that the lack of an ifdef on each section is intentional. The entries in this table map
+// to an interface GUID from an MPH (a short-hand representation of the full interface GUID).
+// The presence of an entry does not represent a commitment to support that particular interface.
+
 const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
+
+// OpenSL ES 1.0.1 interfaces
+
     // SL_IID_3DCOMMIT
     { 0x3564ad80, 0xdd0f, 0x11db, 0x9e19, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_3DDOPPLER
@@ -133,25 +140,36 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     { 0xe46b26a0, 0xdddd, 0x11db, 0x8afd, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // SL_IID_VOLUME
     { 0x09e8ede0, 0xddde, 0x11db, 0xb4f6, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-    // SL_IID_OUTPUTMIXEXT (note that the lack of an ifdef is intentional)
+
+// Wilhelm desktop extended interfaces
+
+    // SL_IID_OUTPUTMIXEXT
     { 0xfe5cce00, 0x57bb, 0x11df, 0x951c, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-    // SL_IID_ANDROIDEFFECT (the lack of ifdef is intentional)
+
+// Android API level 9 extended interfaces
+
+    // SL_IID_ANDROIDEFFECT
     { 0xae12da60, 0x99ac, 0x11df, 0xb456, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-    // SL_IID_ANDROIDEFFECTCAPABILITIES (the lack of ifdef is intentional)
+    // SL_IID_ANDROIDEFFECTCAPABILITIES
     { 0x6a4f6d60, 0xb5e6, 0x11df, 0xbb3b, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-    // SL_IID_ANDROIDEFFECTSEND (the lack of ifdef is intentional)
+    // SL_IID_ANDROIDEFFECTSEND
     { 0x7be462c0, 0xbc43, 0x11df, 0x8670, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-    // SL_IID_ANDROIDCONFIGURATION (the lack of ifdef is intentional)
+    // SL_IID_ANDROIDCONFIGURATION
     { 0x89f6a7e0, 0xbeac, 0x11df, 0x8b5c, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-    // SL_IID_ANDROIDSIMPLEBUFERQUEUE (the lack of ifdef is intentional)
+    // SL_IID_ANDROIDSIMPLEBUFERQUEUE
     { 0x198e4940, 0xc5d7, 0x11df, 0xa2a6, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-    // SL_IID_ANDROIDSTREAMSOURCE (the lack of ifdef is intentional)
-    { 0x7fc1a460, 0xeec1, 0x11df, 0xa306, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } }
+
+// Android API level 10 extended interfaces
+    // SL_IID_ANDROIDSTREAMSOURCE
+    { 0x7fc1a460, 0xeec1, 0x11df, 0xa306, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
+
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// OpenSL ES 1.0.1 interfaces
 const SLInterfaceID SL_IID_3DCOMMIT = &SL_IID_array[MPH_3DCOMMIT];
 const SLInterfaceID SL_IID_3DDOPPLER = &SL_IID_array[MPH_3DDOPPLER];
 const SLInterfaceID SL_IID_3DGROUPING = &SL_IID_array[MPH_3DGROUPING];
@@ -197,15 +215,21 @@ const SLInterfaceID SL_IID_VIBRA = &SL_IID_array[MPH_VIBRA];
 const SLInterfaceID SL_IID_VIRTUALIZER = &SL_IID_array[MPH_VIRTUALIZER];
 const SLInterfaceID SL_IID_VISUALIZATION = &SL_IID_array[MPH_VISUALIZATION];
 const SLInterfaceID SL_IID_VOLUME = &SL_IID_array[MPH_VOLUME];
+
+// Wilhelm desktop extended interfaces
 extern const SLInterfaceID SL_IID_OUTPUTMIXEXT;
-// The lack of an ifdef is intentional on these
 const SLInterfaceID SL_IID_OUTPUTMIXEXT = &SL_IID_array[MPH_OUTPUTMIXEXT];
+
+// Android API level 9 extended interfaces
 const SLInterfaceID SL_IID_ANDROIDEFFECT = &SL_IID_array[MPH_ANDROIDEFFECT];
 const SLInterfaceID SL_IID_ANDROIDEFFECTCAPABILITIES = &SL_IID_array[MPH_ANDROIDEFFECTCAPABILITIES];
 const SLInterfaceID SL_IID_ANDROIDEFFECTSEND = &SL_IID_array[MPH_ANDROIDEFFECTSEND];
 const SLInterfaceID SL_IID_ANDROIDCONFIGURATION = &SL_IID_array[MPH_ANDROIDCONFIGURATION];
 const SLInterfaceID SL_IID_ANDROIDSIMPLEBUFFERQUEUE = &SL_IID_array[MPH_ANDROIDSIMPLEBUFFERQUEUE];
+
+// Android API level 10 extended interfaces
 const SLInterfaceID SL_IID_ANDROIDSTREAMSOURCE = &SL_IID_array[MPH_ANDROIDSTREAMSOURCE];
+
 #ifdef __cplusplus
 }
 #endif

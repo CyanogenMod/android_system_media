@@ -180,7 +180,7 @@ void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 si
     unsigned activeMask;
     // If the output mix is marked for destruction, then acknowledge the request
     if (this->mDestroyRequested) {
-        IEngine *thisEngine = thisObject->mEngine;
+        IEngine *thisEngine = &thisObject->mEngine->mEngine;
         interface_lock_exclusive(thisEngine);
         assert(&thisEngine->mOutputMix->mObject == thisObject);
         thisEngine->mOutputMix = NULL;

@@ -553,7 +553,7 @@ static SLresult IEngine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix, SLu
                 android_outputMix_create(this);
 #endif
 #ifdef USE_SDL
-                IEngine *thisEngine = this->mObject.mEngine;
+                IEngine *thisEngine = &this->mObject.mEngine->mEngine;
                 interface_lock_exclusive(thisEngine);
                 bool unpause = false;
                 if (NULL == thisEngine->mOutputMix) {
@@ -851,29 +851,8 @@ void IEngine_init(void *self)
     }
     this->mShutdown = SL_BOOLEAN_FALSE;
     this->mShutdownAck = SL_BOOLEAN_FALSE;
-    // mThreadPool is initialized in CEngine_Realize
-    memset(&this->mThreadPool, 0, sizeof(ThreadPool));
-#if defined(ANDROID) && !defined(USE_BACKPORT)
-    this->mEqNumPresets = 0;
-    this->mEqPresetNames = NULL;
-#endif
 }
 
 void IEngine_deinit(void *self)
 {
-#if defined(ANDROID) && !defined(USE_BACKPORT)
-    IEngine *this = (IEngine *) self;
-    // free equalizer preset names
-    if (NULL != this->mEqPresetNames) {
-        for (unsigned i = 0; i < this->mEqNumPresets; ++i) {
-            if (NULL != this->mEqPresetNames[i]) {
-                delete[] this->mEqPresetNames[i];
-                this->mEqPresetNames[i] = NULL;
-            }
-        }
-        delete[] this->mEqPresetNames;
-        this->mEqPresetNames = NULL;
-    }
-    this->mEqNumPresets = 0;
-#endif
 }
