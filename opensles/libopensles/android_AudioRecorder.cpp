@@ -48,6 +48,9 @@ SLresult audioRecorder_setPreset(CAudioRecorder* ar, SLuint32 recordPreset) {
     case SL_ANDROID_RECORDING_PRESET_VOICE_RECOGNITION:
         newRecordSource = android::AUDIO_SOURCE_VOICE_RECOGNITION;
         break;
+    case SL_ANDROID_RECORDING_PRESET_VOICE_COMMUNICATION:
+        newRecordSource = android::AUDIO_SOURCE_VOICE_COMMUNICATION;
+        break;
     case SL_ANDROID_RECORDING_PRESET_NONE:
         // it is an error to set preset "none"
     default:
@@ -86,6 +89,9 @@ SLresult audioRecorder_getPreset(CAudioRecorder* ar, SLuint32* pPreset) {
         break;
     case android::AUDIO_SOURCE_CAMCORDER:
         *pPreset = SL_ANDROID_RECORDING_PRESET_CAMCORDER;
+        break;
+    case android::AUDIO_SOURCE_VOICE_COMMUNICATION:
+        *pPreset = SL_ANDROID_RECORDING_PRESET_VOICE_COMMUNICATION;
         break;
     default:
         *pPreset = SL_ANDROID_RECORDING_PRESET_NONE;
