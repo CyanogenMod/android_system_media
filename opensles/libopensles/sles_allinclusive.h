@@ -890,6 +890,13 @@ typedef struct {
     IObject *mThis;
 } IAndroidConfiguration;
 
+typedef struct {
+    const struct SLAndroidStreamSourceItf_ *mItf;
+    IObject *mThis;
+    slAndroidStreamSourceCallback mCallback;
+    void *mContext;
+} IAndroidStreamSource;
+
 #if defined(ANDROID) && !defined(USE_BACKPORT)
 // FIXME this include is done here so the effect structures have been defined. Messy.
 #include "android_Effect.h"
@@ -904,6 +911,7 @@ enum AndroidObject_type {
     INVALID_TYPE     =-1,
     MEDIAPLAYER      = 0,
     AUDIOTRACK_PULL  = 1,
+    STREAM_SOURCE    = 2,
     NUM_AUDIOPLAYER_MAP_TYPES
 };
 
@@ -920,7 +928,7 @@ enum AndroidObject_state {
 /*typedef*/ struct CAudioPlayer_struct {
     IObject mObject;
 #ifdef ANDROID
-#define INTERFACES_AudioPlayer 29 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
+#define INTERFACES_AudioPlayer 30 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
 #else
 #define INTERFACES_AudioPlayer 26 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
 #endif
@@ -944,6 +952,7 @@ enum AndroidObject_state {
     IAndroidEffect mAndroidEffect;
     IAndroidEffectSend mAndroidEffectSend;
     IAndroidConfiguration mAndroidConfiguration;
+    IAndroidStreamSource mAndroidStreamSource;
 #endif
     // optional interfaces
     I3DMacroscopic m3DMacroscopic;

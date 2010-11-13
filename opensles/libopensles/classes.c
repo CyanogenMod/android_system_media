@@ -88,6 +88,7 @@ static const struct iid_vtable AudioPlayer_interfaces[INTERFACES_AudioPlayer] = 
     {MPH_ANDROIDEFFECTSEND, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidEffectSend)},
     {MPH_ANDROIDCONFIGURATION, INTERFACE_EXPLICIT_PREREALIZE,
             offsetof(CAudioPlayer, mAndroidConfiguration)},
+    {MPH_ANDROIDSTREAMSOURCE, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidStreamSource)},
 #endif
 };
 

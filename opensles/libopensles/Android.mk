@@ -59,6 +59,7 @@ LOCAL_SRC_FILES:=                     \
         IAndroidEffect.c              \
         IAndroidEffectCapabilities.c  \
         IAndroidEffectSend.c          \
+        IAndroidStreamSource.c        \
         IBassBoost.c                  \
         IBufferQueue.c                \
         IDynamicInterfaceManagement.c \

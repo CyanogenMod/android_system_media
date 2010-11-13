@@ -80,9 +80,10 @@
 #define MPH_ANDROIDEFFECTSEND          47
 #define MPH_ANDROIDCONFIGURATION       48
 #define MPH_ANDROIDSIMPLEBUFFERQUEUE   49
+#define MPH_ANDROIDSTREAMSOURCE        50
 // end non-standard and platform-specific interface IDs
 
 // total number
-#define MPH_MAX                        50
+#define MPH_MAX                        51
 
 #endif // !defined(__MPH_H)

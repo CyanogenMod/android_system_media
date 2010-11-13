@@ -204,6 +204,32 @@ struct SLAndroidSimpleBufferQueueItf_ {
 
 
 /*---------------------------------------------------------------------------*/
+/* Android Stream Source Interface                                           */
+/*---------------------------------------------------------------------------*/
+
+extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDSTREAMSOURCE;
+
+struct SLAndroidStreamSourceItf_;
+typedef const struct SLAndroidStreamSourceItf_ * const * SLAndroidStreamSourceItf;
+
+typedef SLresult (/*SLAPIENTRY*/ *slAndroidStreamSourceCallback)(
+    SLAndroidStreamSourceItf caller,
+    void *pContext,   /* input */
+    SLAint64 offset,  /* input */
+    SLAint64* pLength,/* input, output */
+    void *pData       /* output */
+);
+
+struct SLAndroidStreamSourceItf_ {
+    SLresult (*RegisterCallback) (
+        SLAndroidStreamSourceItf self,
+        slAndroidStreamSourceCallback callback,
+        void* pContext
+    );
+};
+
+
+/*---------------------------------------------------------------------------*/
 /* Android File Descriptor Data Locator                                      */
 /*---------------------------------------------------------------------------*/
 
@@ -219,6 +245,20 @@ typedef struct SLDataLocator_AndroidFD_ {
     SLAint64        offset;
     SLAint64        length;
 } SLDataLocator_AndroidFD;
+
+
+/*---------------------------------------------------------------------------*/
+/* Android Streamer Data Locator                                             */
+/*---------------------------------------------------------------------------*/
+
+/** Addendum to Data locator macros  */
+#define SL_DATALOCATOR_ANDROIDSTREAMER          ((SLuint32) 0x800007BD)
+
+/** Streamer-based data locator definition, locatorType must be SL_DATALOCATOR_ANDROIDSTREAMER */
+typedef struct SLDataLocator_AndroidStreamer_ {
+    SLuint32        locatorType;
+    void*           pStreamer;
+} SLDataLocator_AndroidStreamer;
 
 
 /*---------------------------------------------------------------------------*/

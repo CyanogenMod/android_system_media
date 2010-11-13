@@ -864,6 +864,7 @@ extern void
     IAndroidEffect_init(void *),
     IAndroidEffectCapabilities_init(void *),
     IAndroidEffectSend_init(void *),
+    IAndroidStreamSource_init(void *),
     IAudioDecoderCapabilities_init(void *),
     IAudioEncoder_init(void *),
     IAudioEncoderCapabilities_init(void *),
@@ -1035,7 +1036,8 @@ extern bool
         IAndroidEffectCapabilities_deinit, IAndroidEffectCapabilities_Expose, NULL },
     { /* MPH_ANDROIDEFFECTSEND */ IAndroidEffectSend_init, NULL, NULL, NULL, NULL },
     { /* MPH_ANDROIDCONFIGURATION */ IAndroidConfiguration_init, NULL, NULL, NULL, NULL },
-    { /* MPH_ANDROIDSIMPLEBUFFERQUEUE, */ IBufferQueue_init /* alias */, NULL, NULL, NULL, NULL }
+    { /* MPH_ANDROIDSIMPLEBUFFERQUEUE */ IBufferQueue_init /* alias */, NULL, NULL, NULL, NULL },
+    { /* MPH_ANDROIDSTREAMSOURCE */ IAndroidStreamSource_init, NULL, NULL, NULL, NULL }
 };
 
 
