@@ -196,7 +196,7 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
     result = (*playItf)->GetDuration(playItf, &durationInMsec);
     ExitOnError(result);
     if (durationInMsec == SL_TIME_UNKNOWN) {
-        durationInMsec = 5000;
+        durationInMsec = 10000;
     }
 
     /* Feed the output mix' reverb from the audio player using the given send level */
