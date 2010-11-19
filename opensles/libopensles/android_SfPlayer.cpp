@@ -268,7 +268,7 @@ void SfPlayer::onPrepare(const sp<AMessage> &msg) {
     sp<MediaSource> source = extractor->getTrack(audioTrackIndex);
     sp<MetaData> meta = source->getFormat();
 
-    off_t size;
+    off64_t size;
     int64_t durationUs;
     if (dataSource->getSize(&size) == OK
             && meta->findInt64(kKeyDuration, &durationUs)) {
