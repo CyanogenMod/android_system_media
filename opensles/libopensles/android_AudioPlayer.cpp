@@ -714,6 +714,14 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         } // case SL_DATALOCATOR_ANDROIDFD
         break;
     //------------------
+    //   Stream
+    case SL_DATALOCATOR_ANDROIDSTREAMER:
+        {
+        // FIXME implement
+        SL_LOGD("[ FIXME implement format check for STREAMER data sources ]");
+        } // case SL_DATALOCATOR_ANDROIDSTREAMER
+        break;
+    //------------------
     //   Address
     case SL_DATALOCATOR_ADDRESS:
     case SL_DATALOCATOR_IODEVICE:
@@ -724,6 +732,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         SL_LOGE("Cannot create audio player with data locator type 0x%x", (unsigned) locatorType);
         return SL_RESULT_CONTENT_UNSUPPORTED;
     default:
+        SL_LOGE("Cannot create audio player with invalid data locator type 0x%x",
+                (unsigned) locatorType);
         return SL_RESULT_PARAMETER_INVALID;
     }// switch (locatorType)
 
@@ -901,6 +911,11 @@ SLresult android_audioPlayer_create(
         pAudioPlayer->mpLock = new android::Mutex();
         pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
         break;
+    case SL_DATALOCATOR_ANDROIDSTREAMER:
+        pAudioPlayer->mAndroidObjType = STREAM_SOURCE;
+        pAudioPlayer->mpLock = new android::Mutex();
+        pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
+        break;
     default:
         pAudioPlayer->mAndroidObjType = INVALID_TYPE;
         pAudioPlayer->mpLock = NULL;
@@ -1032,9 +1047,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                 audioTrack_callBack_pullFromBuffQueue,               // callback
                 (void *) pAudioPlayer,                               // user
                 0      // FIXME find appropriate frame count         // notificationFrame
-#ifndef USE_BACKPORT
                 , pAudioPlayer->mSessionId
-#endif
                 );
         android::status_t status = pAudioPlayer->mAudioTrack->initCheck();
         if (status != android::NO_ERROR) {
@@ -1049,7 +1062,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         pAudioPlayer->mAndroidObjState = ANDROID_READY;
         } break;
-#ifndef USE_BACKPORT
     //-----------------------------------
     // MediaPlayer
     case MEDIAPLAYER: {
@@ -1092,14 +1104,22 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         }
 
         } break;
-#endif
+   //-----------------------------------
+   // StreamPlayer
+   case STREAM_SOURCE: {
+        object_lock_exclusive(&pAudioPlayer->mObject);
+
+        android_StreamPlayer_realize_lApObj(pAudioPlayer);
+
+        object_unlock_exclusive(&pAudioPlayer->mObject);
+        } break;
+    //-----------------------------------
     default:
         SL_LOGE("Unexpected object type %d", pAudioPlayer->mAndroidObjType);
         result = SL_RESULT_INTERNAL_ERROR;
         break;
     }
 
-#ifndef USE_BACKPORT
 
     // proceed with effect initialization
     // initialize EQ
@@ -1124,7 +1144,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
     // initialize EffectSend
     // FIXME initialize EffectSend
-#endif
 
     return result;
 }
@@ -1145,7 +1164,6 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
             pAudioPlayer->mAudioTrack = NULL;
         }
         break;
-#ifndef USE_BACKPORT
     //-----------------------------------
     // MediaPlayer
     case MEDIAPLAYER:
@@ -1156,7 +1174,12 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
             pAudioPlayer->mSfPlayer.clear();
         }
         break;
-#endif
+    //-----------------------------------
+    // StreamPlayer
+    case STREAM_SOURCE:
+        android_StreamPlayer_destroy(pAudioPlayer);
+        break;
+    //-----------------------------------
     default:
         SL_LOGE("Unexpected object type %d", pAudioPlayer->mAndroidObjType);
         result = SL_RESULT_INTERNAL_ERROR;

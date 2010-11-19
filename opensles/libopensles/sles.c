@@ -423,6 +423,24 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
         }
         }
         break;
+    case SL_DATALOCATOR_ANDROIDSTREAMER:
+        {
+        pDataLocator->mURI = *(SLDataLocator_URI *)pLocator;
+        if (NULL == pDataLocator->mURI.URI) {
+            SL_LOGE("invalid URI for Streamer locator");
+            return SL_RESULT_PARAMETER_INVALID;
+        }
+        size_t len = strlen((const char *) pDataLocator->mURI.URI);
+        SLchar *myURI = (SLchar *) malloc(len + 1);
+        if (NULL == myURI) {
+            pDataLocator->mURI.URI = NULL;
+            return SL_RESULT_MEMORY_FAILURE;
+        }
+        memcpy(myURI, pDataLocator->mURI.URI, len + 1);
+        pDataLocator->mURI.URI = myURI;
+        SL_LOGV("Data locator SL_DATALOCATOR_ANDROIDSTREAMER, URI = %s", myURI);
+        }
+        break;
 #endif
 
     default:
@@ -463,6 +481,15 @@ static void freeDataLocator(DataLocator *pDataLocator)
             pDataLocator->mOutputMix.outputMix = NULL;
         }
         break;
+#ifdef ANDROID
+    case SL_DATALOCATOR_ANDROIDSTREAMER:
+        if (NULL != pDataLocator->mURI.URI) {
+            free(pDataLocator->mURI.URI);
+            pDataLocator->mURI.URI = NULL;
+        }
+        pDataLocator->mURI.URI = NULL;
+        break;
+#endif
     default:
         break;
     }
@@ -742,6 +769,7 @@ SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataL
 #ifdef ANDROID
     case SL_DATALOCATOR_ANDROIDFD:
     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+    case SL_DATALOCATOR_ANDROIDSTREAMER:
 #endif
         result = checkDataFormat(myDataSrc.pFormat, &pDataLocatorFormat->mFormat);
         if (SL_RESULT_SUCCESS != result) {

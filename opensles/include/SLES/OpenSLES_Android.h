@@ -248,20 +248,6 @@ typedef struct SLDataLocator_AndroidFD_ {
 
 
 /*---------------------------------------------------------------------------*/
-/* Android Streamer Data Locator                                             */
-/*---------------------------------------------------------------------------*/
-
-/** Addendum to Data locator macros  */
-#define SL_DATALOCATOR_ANDROIDSTREAMER          ((SLuint32) 0x800007BD)
-
-/** Streamer-based data locator definition, locatorType must be SL_DATALOCATOR_ANDROIDSTREAMER */
-typedef struct SLDataLocator_AndroidStreamer_ {
-    SLuint32        locatorType;
-    void*           pStreamer;
-} SLDataLocator_AndroidStreamer;
-
-
-/*---------------------------------------------------------------------------*/
 /* Android Android Simple Buffer Queue Data Locator                          */
 /*---------------------------------------------------------------------------*/
 
@@ -274,6 +260,20 @@ typedef struct SLDataLocator_AndroidSimpleBufferQueue {
 	SLuint32	numBuffers;
 } SLDataLocator_AndroidSimpleBufferQueue;
 
+
+/*---------------------------------------------------------------------------*/
+/* Android Streamer Data Locator                                             */
+/*---------------------------------------------------------------------------*/
+
+/** Addendum to Data locator macros  */
+#define SL_DATALOCATOR_ANDROIDSTREAMER          ((SLuint32) 0x800007BE)
+
+/** Streamer-based data locator definition, locatorType must be SL_DATALOCATOR_ANDROIDSTREAMER */
+typedef struct SLDataLocator_AndroidStreamer_ {
+    SLuint32        locatorType;
+    SLchar *        URI;// FIXME temporary use of a URI field for testing
+    void*           pStreamer;
+} SLDataLocator_AndroidStreamer;
 
 #ifdef __cplusplus
 }

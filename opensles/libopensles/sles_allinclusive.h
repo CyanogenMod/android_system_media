@@ -94,6 +94,7 @@ typedef struct COutputMix_struct COutputMix;
 #include "android_sles_conversions.h"
 #ifndef USE_BACKPORT
 #include "android_SfPlayer.h"
+#include "android_StreamPlayer.h"
 #include "android_OutputMix.h"
 #endif
 #include "android_AudioRecorder.h"
@@ -254,6 +255,7 @@ typedef union {
     SLDataLocator_URI mURI;
 #ifdef ANDROID
     SLDataLocator_AndroidFD mFD;
+    SLDataLocator_AndroidStreamer mStreamer;
 #endif
 } DataLocator;
 
@@ -999,13 +1001,12 @@ enum AndroidObject_state {
     int mStreamType;
     /** plays the PCM data for this player */
     android::AudioTrack *mAudioTrack;
-#ifndef USE_BACKPORT
     android::sp<android::SfPlayer> mSfPlayer;
+    android::StreamPlayer *mStreamPlayer;
     /** aux effect the AudioTrack will be attached to if aux send enabled */
     android::sp<android::AudioEffect> mAuxEffect;
     /** send level to aux effect, there's a single aux bus, so there's a single level */
     SLmillibel mAuxSendLevel;
-#endif
     /**
      * Amplification (can be attenuation) factor derived for the VolumeLevel
      */
