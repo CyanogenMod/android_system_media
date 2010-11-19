@@ -43,16 +43,28 @@ void android_StreamPlayer_destroy(CAudioPlayer *ap) {
 
 namespace android {
 
-StreamPlayer::StreamPlayer(StreamPlayback_Parameters* params)
+StreamPlayer::StreamPlayer(StreamPlayback_Parameters* params) :
+    mMediaPlayer(0)
 {
     SL_LOGV("StreamPlayer::StreamPlayer()");
 
+    mMediaPlayer = new MediaPlayer();
+    mMediaPlayer->setAudioStreamType(params->streamType);
+    mMediaPlayer->setAudioSessionId(params->sessionId);
+
+    // TODO create MediaPlayer event listener
 }
 
 
 StreamPlayer::~StreamPlayer() {
     SL_LOGV("StreamPlayer::~StreamPlayer()");
 
+    if (mMediaPlayer != NULL) {
+        mMediaPlayer->setListener(0);
+        mMediaPlayer->stop();
+        mMediaPlayer->disconnect();
+        mMediaPlayer.clear();
+    }
 }
 
 
