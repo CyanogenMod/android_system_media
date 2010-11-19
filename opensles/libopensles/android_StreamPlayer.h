@@ -35,7 +35,7 @@ public:
     virtual ~StreamPlayer();
 
 protected:
-
+    sp<MediaPlayer> mMediaPlayer;
 
 private:
 
