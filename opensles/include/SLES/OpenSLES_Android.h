@@ -27,6 +27,8 @@ extern "C" {
 
 typedef sl_int64_t             SLAint64;           /* 64 bit signed integer */
 
+typedef SLuint32               SLAstreamEvent;
+
 
 /*---------------------------------------------------------------------------*/
 /* Android Effect interface                                                  */
@@ -212,12 +214,16 @@ extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDSTREAMSOURCE;
 struct SLAndroidStreamSourceItf_;
 typedef const struct SLAndroidStreamSourceItf_ * const * SLAndroidStreamSourceItf;
 
+#define SL_ANDROID_STREAMEVENT_NONE              ((SLuint32) 0x00000000)
+#define SL_ANDROID_STREAMEVENT_FLUSH             ((SLuint32) 0x00000001)
+
 typedef SLresult (/*SLAPIENTRY*/ *slAndroidStreamSourceCallback)(
-    SLAndroidStreamSourceItf caller,
-    void *pContext,   /* input */
-    SLAint64 offset,  /* input */
-    SLAint64* pLength,/* input, output */
-    void *pData       /* output */
+    SLAndroidStreamSourceItf caller,/* input */
+    void *pContext,                 /* input */
+    SLAint64 offset,                /* input */
+    SLAint64* pLength,              /* input, output */
+    SLAstreamEvent* pEvent,         /* output */
+    void *pData                     /* output */
 );
 
 struct SLAndroidStreamSourceItf_ {
@@ -268,10 +274,15 @@ typedef struct SLDataLocator_AndroidSimpleBufferQueue {
 /** Addendum to Data locator macros  */
 #define SL_DATALOCATOR_ANDROIDSTREAMER          ((SLuint32) 0x800007BE)
 
+#define SL_ANDROID_STREAMORIGIN_INVALID         ((SLuint32) 0x00000000)
+#define SL_ANDROID_STREAMORIGIN_FILE            ((SLuint32) 0x00000001)
+#define SL_ANDROID_STREAMORIGIN_TRANSPORTSTREAM ((SLuint32) 0x00000002)
+
 /** Streamer-based data locator definition, locatorType must be SL_DATALOCATOR_ANDROIDSTREAMER */
 typedef struct SLDataLocator_AndroidStreamer_ {
     SLuint32        locatorType;
     SLchar *        URI;// FIXME temporary use of a URI field for testing
+    SLuint32        streamOrigin;
     void*           pStreamer;
 } SLDataLocator_AndroidStreamer;
 

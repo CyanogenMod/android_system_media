@@ -44,27 +44,21 @@ void ExitOnErrorFunc( SLresult result , int line)
 
 bool prefetchError = false;
 
-//-----------------------------------------------------------------
-/* PrefetchStatusItf callback for an audio player */
-void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint32 event)
-{
-    SLpermille level = 0;
-    (*caller)->GetFillLevel(caller, &level);
-    SLuint32 status;
-    //fprintf(stdout, "PrefetchEventCallback: received event %lu\n", event);
-    (*caller)->GetPrefetchStatus(caller, &status);
-    if ((PREFETCHEVENT_ERROR_CANDIDATE == (event & PREFETCHEVENT_ERROR_CANDIDATE))
-            && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
-        fprintf(stdout, "PrefetchEventCallback: Error while prefetching data, exiting\n");
-        prefetchError = true;
-    }
-    if (event & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
-        fprintf(stdout, "PrefetchEventCallback: Buffer fill level is = %d\n", level);
-    }
-    if (event & SL_PREFETCHEVENT_STATUSCHANGE) {
-        fprintf(stdout, "PrefetchEventCallback: Prefetch Status is = %lu\n", status);
-    }
 
+//-----------------------------------------------------------------
+/* AndroidStreamSourceItf callback for an audio player */
+SLresult AndroidStreamSourceCallback(
+        SLAndroidStreamSourceItf caller,/* input */
+        void *pContext,                 /* input */
+        SLAint64 offset,                /* input */
+        SLAint64* pLength,              /* input, output */
+        SLAstreamEvent* pEvent,         /* output */
+        void *pData)                    /* output */
+{
+    *pLength = 0; // not returning any data
+    *pEvent = SL_ANDROID_STREAMEVENT_NO_ERROR;
+    //leaving pData untouched
+    return SL_RESULT_SUCCESS;
 }
 
 
@@ -81,7 +75,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     SLresult                   res;
 
     SLDataSource               audioSource;
-    SLDataLocator_URI          uri;
+    SLDataLocator_AndroidStreamer streamLocator;
     SLDataFormat_MIME          mime;
 
     SLDataSink                 audioSink;
@@ -90,7 +84,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     SLObjectItf                player;
     SLPlayItf                  playItf;
     SLVolumeItf                volItf;
-    SLPrefetchStatusItf        prefetchItf;
+    SLAndroidStreamSourceItf   streamSrcItf;
 
     SLObjectItf                OutputMix;
 
@@ -111,7 +105,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     required[0] = SL_BOOLEAN_TRUE;
     iidArray[0] = SL_IID_VOLUME;
     required[1] = SL_BOOLEAN_TRUE;
-    iidArray[1] = SL_IID_PREFETCHSTATUS;
+    iidArray[1] = SL_IID_ANDROIDSTREAMSOURCE;
     // Create Output Mix object to be used by player
     res = (*EngineItf)->CreateOutputMix(EngineItf, &OutputMix, 0,
             iidArray, required); CheckErr(res);
@@ -121,14 +115,15 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     CheckErr(res);
 
     /* Setup the data source structure for the URI */
-    uri.locatorType = SL_DATALOCATOR_ANDROIDSTREAMER;
-    uri.URI         =  (SLchar*) path;
+    streamLocator.locatorType  = SL_DATALOCATOR_ANDROIDSTREAMER;
+    streamLocator.URI          =  (SLchar*) path;
+    streamLocator.streamOrigin = SL_ANDROID_STREAMORIGIN_FILE;
     mime.formatType    = SL_DATAFORMAT_MIME;
     mime.mimeType      = (SLchar*)NULL;
     mime.containerType = SL_CONTAINERTYPE_UNSPECIFIED;
 
     audioSource.pFormat      = (void *)&mime;
-    audioSource.pLocator     = (void *)&uri;
+    audioSource.pLocator     = (void *)&streamLocator;
 
     /* Setup the data sink structure */
     locator_outputmix.locatorType   = SL_DATALOCATOR_OUTPUTMIX;
@@ -145,22 +140,14 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     fprintf(stdout, "URI example: after Realize\n");
 
     /* Get interfaces */
-    res = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf);
-    CheckErr(res);
+    res = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf); CheckErr(res);
 
-    res = (*player)->GetInterface(player, SL_IID_VOLUME,  (void*)&volItf);
-    CheckErr(res);
+    res = (*player)->GetInterface(player, SL_IID_VOLUME,  (void*)&volItf); CheckErr(res);
 
-    res = (*player)->GetInterface(player, SL_IID_PREFETCHSTATUS, (void*)&prefetchItf);
+    res = (*player)->GetInterface(player, SL_IID_ANDROIDSTREAMSOURCE, (void*)&streamSrcItf);
     CheckErr(res);
-    res = (*prefetchItf)->RegisterCallback(prefetchItf, PrefetchEventCallback, &prefetchItf);
-    CheckErr(res);
-    res = (*prefetchItf)->SetCallbackEventsMask(prefetchItf,
-            SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE);
-    CheckErr(res);
-
-    /* Configure fill level updates every 5 percent */
-    (*prefetchItf)->SetFillUpdatePeriod(prefetchItf, 50);
+    res = (*streamSrcItf)->RegisterCallback(streamSrcItf, AndroidStreamSourceCallback,
+            &streamSrcItf); CheckErr(res);
 
     /* Display duration */
     SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
@@ -191,7 +178,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     while ((prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) && (timeOutIndex > 0) &&
             !prefetchError) {
         usleep(1 * 1000 * 1000); // 1s
-        (*prefetchItf)->GetPrefetchStatus(prefetchItf, &prefetchStatus);
+        //(*prefetchItf)->GetPrefetchStatus(prefetchItf, &prefetchStatus);
         timeOutIndex--;
     }
 

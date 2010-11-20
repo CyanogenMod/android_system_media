@@ -26,6 +26,8 @@ void android_StreamPlayer_realize_lApObj(CAudioPlayer *ap) {
     ap_params.sessionId = ap->mSessionId;
     ap_params.streamType = ap->mStreamType;
     ap->mStreamPlayer = new android::StreamPlayer(&ap_params);
+
+    ap->mStreamPlayer->setStream(ap->mDataSource.mLocator.mStreamer.streamOrigin);
 }
 
 
@@ -67,5 +69,26 @@ StreamPlayer::~StreamPlayer() {
     }
 }
 
+void StreamPlayer::setStream(SLuint32 streamOrigin) {
+    SL_LOGV("StreamPlayer::setStream(%ld)", streamOrigin);
+
+    int type;
+    switch(streamOrigin) {
+    case SL_ANDROID_STREAMORIGIN_FILE:
+        type = MEDIA_PLAYER_STREAM_ORIGIN_FILE;
+        break;
+    case SL_ANDROID_STREAMORIGIN_TRANSPORTSTREAM:
+        type = MEDIA_PLAYER_STREAM_ORIGIN_TRANSPORT_STREAM;
+        break;
+    default:
+        type = MEDIA_PLAYER_STREAM_ORIGIN_INVALID;
+        break;
+    }
+
+    if (mMediaPlayer != NULL) {
+        // FIXME uncomment when new setDataSource() interface is finalized
+        //mMediaPlayer->setDataSource(type);
+    }
+}
 
 } // namespace android

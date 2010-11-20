@@ -425,7 +425,7 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
         break;
     case SL_DATALOCATOR_ANDROIDSTREAMER:
         {
-        pDataLocator->mURI = *(SLDataLocator_URI *)pLocator;
+        pDataLocator->mStreamer = *(SLDataLocator_AndroidStreamer*)pLocator;
         if (NULL == pDataLocator->mURI.URI) {
             SL_LOGE("invalid URI for Streamer locator");
             return SL_RESULT_PARAMETER_INVALID;
@@ -433,12 +433,13 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
         size_t len = strlen((const char *) pDataLocator->mURI.URI);
         SLchar *myURI = (SLchar *) malloc(len + 1);
         if (NULL == myURI) {
-            pDataLocator->mURI.URI = NULL;
+            pDataLocator->mStreamer.URI = NULL;
             return SL_RESULT_MEMORY_FAILURE;
         }
-        memcpy(myURI, pDataLocator->mURI.URI, len + 1);
-        pDataLocator->mURI.URI = myURI;
-        SL_LOGV("Data locator SL_DATALOCATOR_ANDROIDSTREAMER, URI = %s", myURI);
+        memcpy(myURI, pDataLocator->mStreamer.URI, len + 1);
+        pDataLocator->mStreamer.URI = myURI;
+        SL_LOGV("Data locator SL_DATALOCATOR_ANDROIDSTREAMER, URI = %s, streamOrigin = %ld",
+                myURI, pDataLocator->mStreamer.streamOrigin);
         }
         break;
 #endif

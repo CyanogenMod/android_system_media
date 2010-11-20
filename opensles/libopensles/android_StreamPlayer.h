@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+// FIXME move to mediaplayer.h
+enum media_player_stream_origin {
+    MEDIA_PLAYER_STREAM_ORIGIN_INVALID           = 0,
+    MEDIA_PLAYER_STREAM_ORIGIN_FILE              = 1 << 0,
+    MEDIA_PLAYER_STREAM_ORIGIN_TRANSPORT_STREAM  = 1 << 1
+};
+
 typedef struct StreamPlayback_Parameters_struct {
     int streamType;
     int sessionId;
@@ -33,6 +40,8 @@ class StreamPlayer
 public:
     StreamPlayer(StreamPlayback_Parameters* params);
     virtual ~StreamPlayer();
+
+    void setStream(SLuint32 streamOrigin);
 
 protected:
     sp<MediaPlayer> mMediaPlayer;

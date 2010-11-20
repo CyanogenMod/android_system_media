@@ -27,9 +27,14 @@ SLresult IAndroidStreamSource_RegisterCallback(SLAndroidStreamSourceItf self,
 
     interface_lock_exclusive(this);
 
-    this->mCallback = callback;
-    this->mContext = pContext;
-    result = SL_RESULT_SUCCESS;
+    // verify pre-condition that media object is in the SL_PLAYSTATE_STOPPED state
+    if (SL_PLAYSTATE_STOPPED == ((CAudioPlayer*) this->mThis)->mPlay.mState) {
+        this->mCallback = callback;
+        this->mContext = pContext;
+        result = SL_RESULT_SUCCESS;
+    } else {
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    }
 
     interface_unlock_exclusive(this);
 
