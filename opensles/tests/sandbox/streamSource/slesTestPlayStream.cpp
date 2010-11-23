@@ -30,6 +30,8 @@
 #define PREFETCHEVENT_ERROR_CANDIDATE \
         (SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE)
 
+FILE *file;
+
 //-----------------------------------------------------------------
 //* Exits the application if an error is encountered */
 #define CheckErr(x) ExitOnErrorFunc(x,__LINE__)
@@ -50,13 +52,20 @@ bool prefetchError = false;
 SLresult AndroidStreamSourceCallback(
         SLAndroidStreamSourceItf caller,/* input */
         void *pContext,                 /* input */
-        SLAint64 offset,                /* input */
         SLAint64* pLength,              /* input, output */
         SLAstreamEvent* pEvent,         /* output */
         void *pData)                    /* output */
 {
-    *pLength = 0; // not returning any data
-    *pEvent = SL_ANDROID_STREAMEVENT_NO_ERROR;
+    fprintf(stdout, "AndroidStreamSourceCallback called\n");
+
+    size_t nbRead = fread(pData, 1, *pLength, file);
+
+    *pLength = nbRead;
+    if (nbRead <= 0) {
+        *pEvent = SL_ANDROID_STREAMEVENT_EOS;
+    } else {
+        *pEvent = SL_ANDROID_STREAMEVENT_NONE; // no event to report
+    }
     //leaving pData untouched
     return SL_RESULT_SUCCESS;
 }
@@ -90,6 +99,8 @@ void TestPlayStream( SLObjectItf sl, const char* path)
 
     SLboolean required[MAX_NUMBER_INTERFACES];
     SLInterfaceID iidArray[MAX_NUMBER_INTERFACES];
+
+    file = fopen(path, "rb");
 
     /* Get the SL Engine Interface which is implicit */
     res = (*sl)->GetInterface(sl, SL_IID_ENGINE, (void*)&EngineItf);
@@ -161,7 +172,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     }
 
     /* Set the player volume */
-    res = (*volItf)->SetVolumeLevel( volItf, -300);
+    res = (*volItf)->SetVolumeLevel( volItf, 0);//-300);
     CheckErr(res);
 
     /* Play the URI */
@@ -173,7 +184,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
 
     /*     wait until there's data to play */
     //SLpermille fillLevel = 0;
-    SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+ /*   SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
     SLuint32 timeOutIndex = 2;
     while ((prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) && (timeOutIndex > 0) &&
             !prefetchError) {
@@ -185,7 +196,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     if (timeOutIndex == 0 || prefetchError) {
         fprintf(stderr, "We\'re done waiting, failed to prefetch data in time, exiting\n");
         goto destroyRes;
-    }
+    }*/
 
     /* Display duration again, */
     res = (*playItf)->GetDuration(playItf, &durationInMsec);
@@ -201,7 +212,9 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     CheckErr(res);
 
     /* Wait as long as the duration of the content before stopping */
-    usleep(durationInMsec * 1000);
+    //usleep(durationInMsec * 1000);
+    usleep(30 /*s*/ * 1000 * 1000);
+
 
     /* Make sure player is stopped */
     fprintf(stdout, "URI example: stopping playback\n");
@@ -215,6 +228,8 @@ destroyRes:
 
     /* Destroy Output Mix object */
     (*OutputMix)->Destroy(OutputMix);
+
+    fclose(file);
 }
 
 //-----------------------------------------------------------------

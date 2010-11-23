@@ -216,11 +216,12 @@ typedef const struct SLAndroidStreamSourceItf_ * const * SLAndroidStreamSourceIt
 
 #define SL_ANDROID_STREAMEVENT_NONE              ((SLuint32) 0x00000000)
 #define SL_ANDROID_STREAMEVENT_FLUSH             ((SLuint32) 0x00000001)
+#define SL_ANDROID_STREAMEVENT_DISCONTINUITY     ((SLuint32) 0x00000002)
+#define SL_ANDROID_STREAMEVENT_EOS               ((SLuint32) 0x00000004)
 
 typedef SLresult (/*SLAPIENTRY*/ *slAndroidStreamSourceCallback)(
     SLAndroidStreamSourceItf caller,/* input */
     void *pContext,                 /* input */
-    SLAint64 offset,                /* input */
     SLAint64* pLength,              /* input, output */
     SLAstreamEvent* pEvent,         /* output */
     void *pData                     /* output */
@@ -281,9 +282,9 @@ typedef struct SLDataLocator_AndroidSimpleBufferQueue {
 /** Streamer-based data locator definition, locatorType must be SL_DATALOCATOR_ANDROIDSTREAMER */
 typedef struct SLDataLocator_AndroidStreamer_ {
     SLuint32        locatorType;
-    SLchar *        URI;// FIXME temporary use of a URI field for testing
-    SLuint32        streamOrigin;
-    void*           pStreamer;
+    SLchar *        URI;          // FIXME temporary use of a URI field for testing
+    SLuint32        streamOrigin; // FIXME required for future-proofness?
+    SLAint64        cacheSize;    // FIXME use optional cache size if shared memory size?
 } SLDataLocator_AndroidStreamer;
 
 #ifdef __cplusplus

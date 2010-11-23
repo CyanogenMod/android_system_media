@@ -107,3 +107,8 @@ extern void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPos
 extern void android_audioPlayer_bufferQueue_onRefilled(CAudioPlayer *pAudioPlayer);
 
 extern SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *pAudioPlayer);
+
+/**************************************************************************************************
+ * Stream Source events
+ ****************************/
+extern void android_audioPlayer_registerStreamSourceCallback(CAudioPlayer *pAudioPlayer);

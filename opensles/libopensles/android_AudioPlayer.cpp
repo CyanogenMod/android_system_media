@@ -1301,7 +1301,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
             break;
         }
         break;
-#ifndef USE_BACKPORT
+
     case MEDIAPLAYER:
         switch (playState) {
         case SL_PLAYSTATE_STOPPED: {
@@ -1349,7 +1349,11 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
             break;
         }
         break;
-#endif
+
+    case STREAM_SOURCE:
+        android_StreamPlayer_setPlayState(ap, playState, objState);
+        break;
+
     default:
         break;
     }
@@ -1554,4 +1558,15 @@ SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *ap) {
 
     return result;
 }
+
+void android_audioPlayer_registerStreamSourceCallback(CAudioPlayer *ap) {
+    //object_lock_exclusive(&ap->mObject);
+
+    if (ap->mAndroidObjType == STREAM_SOURCE) {
+        android_StreamPlayer_registerCallback_lApObj(ap);
+    }
+
+    //object_unlock_exclusive(&ap->mObject);
+}
+
 

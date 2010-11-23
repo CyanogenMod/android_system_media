@@ -32,6 +32,7 @@ SLresult IAndroidStreamSource_RegisterCallback(SLAndroidStreamSourceItf self,
         this->mCallback = callback;
         this->mContext = pContext;
         result = SL_RESULT_SUCCESS;
+        android_audioPlayer_registerStreamSourceCallback((CAudioPlayer*) this->mThis);
     } else {
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     }

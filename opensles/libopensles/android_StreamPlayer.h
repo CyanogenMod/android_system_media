@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#include <binder/IServiceManager.h>
+
+//--------------------------------------------------------------------------------------------------
 // FIXME move to mediaplayer.h
 enum media_player_stream_origin {
     MEDIA_PLAYER_STREAM_ORIGIN_INVALID           = 0,
@@ -26,6 +29,7 @@ typedef struct StreamPlayback_Parameters_struct {
     int sessionId;
 } StreamPlayback_Parameters;
 
+//--------------------------------------------------------------------------------------------------
 /*
  * Called with a lock on the CAudioPlayer mObject
  */
@@ -33,21 +37,75 @@ extern void android_StreamPlayer_realize_lApObj(CAudioPlayer *ap);
 
 extern void android_StreamPlayer_destroy(CAudioPlayer *ap);
 
+extern void android_StreamPlayer_setPlayState(CAudioPlayer *ap, SLuint32 playState,
+        AndroidObject_state objState);
+
+/*
+ * Called with a lock on the CAudioPlayer mObject
+ */
+extern void android_StreamPlayer_registerCallback_lApObj(CAudioPlayer *ap);
+
+//--------------------------------------------------------------------------------------------------
 namespace android {
 
-class StreamPlayer
+class StreamMediaPlayerClient : public BnMediaPlayerClient {
+public:
+    StreamMediaPlayerClient();
+    virtual ~StreamMediaPlayerClient();
+
+    // IMediaPlayerClient implementation
+    virtual void notify(int msg, int ext1, int ext2);
+
+};
+
+//--------------------------------------------------------------------------------------------------
+
+class StreamSourceAppProxy : public BnStreamSource/*, public BnMediaPlayerClient*/ {
+public:
+    StreamSourceAppProxy(slAndroidStreamSourceCallback callback, void *appContext);
+    virtual ~StreamSourceAppProxy();
+
+    // IStreamSource implementation
+    virtual void setListener(const sp<IStreamListener> &listener);
+    virtual void setBuffers(const Vector<sp<IMemory> > &buffers);
+    virtual void onBufferAvailable(size_t index);
+
+private:
+    sp<IStreamListener> mListener;
+    Vector<sp<IMemory> > mBuffers;
+
+    slAndroidStreamSourceCallback mCallback;
+    void * mAppContext;
+
+    DISALLOW_EVIL_CONSTRUCTORS(StreamSourceAppProxy);
+};
+
+
+//--------------------------------------------------------------------------------------------------
+class StreamPlayer : public RefBase
 {
 public:
     StreamPlayer(StreamPlayback_Parameters* params);
     virtual ~StreamPlayer();
 
-    void setStream(SLuint32 streamOrigin);
+    void useCallbackToApp(slAndroidStreamSourceCallback callback, void *context);
+
+    void stop();
+    void pause();
+    void play();
 
 protected:
-    sp<MediaPlayer> mMediaPlayer;
+    StreamPlayback_Parameters mPlaybackParams;
+    sp<StreamSourceAppProxy> mAppProxy; // application proxy for the stream source
+    sp<StreamMediaPlayerClient> mMPClient;
+    sp<IMediaPlayer> mPlayer;
+
+    sp<IServiceManager> mServiceManager;
+    sp<IBinder> mBinder;
+    sp<IMediaPlayerService> mMediaPlayerService;
 
 private:
-
+    Mutex mLock;
 };
 
 } // namespace android

@@ -81,7 +81,7 @@ typedef struct COutputMix_struct COutputMix;
 #include "media/AudioRecord.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
-#ifndef USE_BACKPORT
+#include <media/IStreamSource.h>
 #include "media/AudioEffect.h"
 #include "media/EffectApi.h"
 #include "media/EffectEqualizerApi.h"
@@ -89,14 +89,12 @@ typedef struct COutputMix_struct COutputMix;
 #include "media/EffectVirtualizerApi.h"
 #include "media/EffectPresetReverbApi.h"
 #include "media/EffectEnvironmentalReverbApi.h"
-#endif
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
 #include <binder/ProcessState.h>
 #include "android_sles_conversions.h"
 #ifndef USE_BACKPORT
 #include "android_SfPlayer.h"
-#include "android_StreamPlayer.h"
 #include "android_OutputMix.h"
 #endif
 #include "android_AudioRecorder.h"
@@ -896,11 +894,6 @@ typedef struct {
     void *mContext;
 } IAndroidStreamSource;
 
-#if defined(ANDROID) && !defined(USE_BACKPORT)
-// FIXME this include is done here so the effect structures have been defined. Messy.
-#include "android_Effect.h"
-#endif
-
 
 /*
  * Used to define the mapping from an OpenSL ES audio player to an Android
@@ -920,6 +913,12 @@ enum AndroidObject_state {
     ANDROID_READY,
     NUM_ANDROID_STATES
 };
+
+#ifdef ANDROID
+// FIXME this include is done here so the effect structures and enums have been defined. Messy.
+#include "android_Effect.h"
+#include "android_StreamPlayer.h"
+#endif
 
 #endif  // ANDROID
 
@@ -999,7 +998,7 @@ enum AndroidObject_state {
     /** plays the PCM data for this player */
     android::AudioTrack *mAudioTrack;
     android::sp<android::SfPlayer> mSfPlayer;
-    android::StreamPlayer *mStreamPlayer;
+    android::sp<android::StreamPlayer> mStreamPlayer;
     /** aux effect the AudioTrack will be attached to if aux send enabled */
     android::sp<android::AudioEffect> mAuxEffect;
     /** send level to aux effect, there's a single aux bus, so there's a single level */
