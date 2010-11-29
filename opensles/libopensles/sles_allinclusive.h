@@ -17,10 +17,12 @@
 /** \file sles_allinclusive.h Everything including the kitchen sink */
 
 #include "SLES/OpenSLES.h"
+#include "OMXAL/OpenMAXAL.h"
+#undef XA_API
+#define XA_API SLAPIENTRY
 #ifdef ANDROID
 #include "SLES/OpenSLES_Android.h"
 #endif
-#define SL_API
 #include <stddef.h> // offsetof
 #include <stdlib.h> // malloc
 #include <string.h> // memcmp
@@ -842,6 +844,11 @@ typedef struct /*Volume_interface*/ {
     SLuint8 /*SLboolean*/ mEnableStereoPosition;
 } IVolume;
 
+typedef struct {
+    const struct XAEngineItf_ *mItf;
+    IObject *mThis;
+} IXAEngine;
+
 /* Class structures */
 
 /*typedef*/ struct C3DGroup_struct {
@@ -1059,9 +1066,9 @@ enum AndroidObject_state {
     // mandated implicit interfaces
     IObject mObject;
 #ifdef ANDROID
-#define INTERFACES_Engine 11 // see MPH_to_Engine in MPH_to.c for list of interfaces
+#define INTERFACES_Engine 12 // see MPH_to_Engine in MPH_to.c for list of interfaces
 #else
-#define INTERFACES_Engine 10 // see MPH_to_Engine in MPH_to.c for list of interfaces
+#define INTERFACES_Engine 11 // see MPH_to_Engine in MPH_to.c for list of interfaces
 #endif
     SLuint8 mInterfaceStates2[INTERFACES_Engine - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
@@ -1075,6 +1082,8 @@ enum AndroidObject_state {
     I3DCommit m3DCommit;
     // optional interfaces
     IDeviceVolume mDeviceVolume;
+    // OpenMAX AL mandated implicit interfaces
+    IXAEngine mXAEngine;
 #ifdef ANDROID
     IAndroidEffectCapabilities mAndroidEffectCapabilities;
 #endif
@@ -1218,6 +1227,7 @@ extern SLresult checkInterfaces(const ClassTable *class__,
 extern IObject *construct(const ClassTable *class__,
     unsigned exposedMask, SLEngineItf engine);
 extern const ClassTable *objectIDtoClass(SLuint32 objectID);
+extern const ClassTable *xaObjectIDtoClass(XAuint32 objectID);
 extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
 extern SLuint32 IObjectToObjectID(IObject *object);
 extern void IObject_Publish(IObject *this);
@@ -1337,6 +1347,11 @@ extern void slTraceSetEnabled(unsigned enabled);
 #define SL_ENTER_INTERFACE_VOID
 #define SL_LEAVE_INTERFACE_VOID return;
 
+#define XA_ENTER_GLOBAL XAresult result;
+#define XA_LEAVE_GLOBAL return result;
+#define XA_ENTER_INTERFACE XAresult result;
+#define XA_LEAVE_INTERFACE return result;
+
 #else
 
 extern void slTraceEnterGlobal(const char *function);
@@ -1351,6 +1366,11 @@ extern void slTraceLeaveInterfaceVoid(const char *function);
 #define SL_LEAVE_INTERFACE slTraceLeaveInterface(__FUNCTION__, result); return result;
 #define SL_ENTER_INTERFACE_VOID slTraceEnterInterfaceVoid(__FUNCTION__);
 #define SL_LEAVE_INTERFACE_VOID slTraceLeaveInterfaceVoid(__FUNCTION__); return;
+
+#define XA_ENTER_GLOBAL XAresult result; slTraceEnterGlobal(__FUNCTION__);
+#define XA_LEAVE_GLOBAL slTraceLeaveGlobal(__FUNCTION__, result); return result;
+#define XA_ENTER_INTERFACE XAresult result; slTraceEnterInterface(__FUNCTION__);
+#define XA_LEAVE_INTERFACE slTraceLeaveInterface(__FUNCTION__, result); return result;
 
 #endif
 
@@ -1381,3 +1401,6 @@ extern SLresult IEngineCapabilities_QueryLEDCapabilities(SLEngineCapabilitiesItf
     SLuint32 *pIndex, SLuint32 *pLEDDeviceID, SLLEDDescriptor *pDescriptor);
 extern SLresult IEngineCapabilities_QueryVibraCapabilities(SLEngineCapabilitiesItf self,
     SLuint32 *pIndex, SLuint32 *pVibraDeviceID, SLVibraDescriptor *pDescriptor);
+
+extern CEngine *theOneTrueEngine;
+extern pthread_mutex_t theOneTrueMutex;

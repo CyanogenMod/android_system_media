@@ -3,7 +3,7 @@ all : IID_to_MPH.c
 install :
 	cp IID_to_MPH.c ../../libopensles
 
-CFLAGS = -I../../include -g
+CFLAGS = -I../../include -g -DNDEBUG
 
 %.o : %.c
 	gcc -c -o $@ $(CFLAGS) $<

@@ -722,6 +722,7 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
 static const char * const extensionNames[] = {
 #ifdef ANDROID
     "ANDROID_SDK_LEVEL_9",  // Android 2.3 aka "Gingerbread"
+    "ANDROID_SDK_LEVEL_10", // Android 3.0 aka "Honeycomb"
     // in the future, add more entries for each SDK level here, and
     // don't delete the entries for previous SDK levels unless support is removed
 #else
@@ -855,4 +856,249 @@ void IEngine_init(void *self)
 
 void IEngine_deinit(void *self)
 {
+}
+
+
+// OpenMAX AL Engine
+
+
+static XAresult IEngine_CreateCameraDevice(XAEngineItf self, XAObjectItf *pDevice,
+        XAuint32 deviceID, XAuint32 numInterfaces, const XAInterfaceID *pInterfaceIds,
+        const XAboolean *pInterfaceRequired)
+{
+    XA_ENTER_INTERFACE
+
+    //IXAEngine *this = (IXAEngine *) self;
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+
+    XA_LEAVE_INTERFACE
+}
+
+
+static XAresult IEngine_CreateRadioDevice(XAEngineItf self, XAObjectItf *pDevice,
+        XAuint32 numInterfaces, const XAInterfaceID *pInterfaceIds,
+        const XAboolean *pInterfaceRequired)
+{
+    XA_ENTER_INTERFACE
+
+    //IXAEngine *this = (IXAEngine *) self;
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+
+    XA_LEAVE_INTERFACE
+}
+
+
+static XAresult IXAEngine_CreateLEDDevice(XAEngineItf self, XAObjectItf *pDevice, XAuint32 deviceID,
+        XAuint32 numInterfaces, const XAInterfaceID *pInterfaceIds,
+        const XAboolean *pInterfaceRequired)
+{
+    // forward to OpenSL ES
+    return IEngine_CreateLEDDevice(&((CEngine *) ((IXAEngine *) self)->mThis)->mEngine.mItf,
+            (SLObjectItf *) pDevice, deviceID, numInterfaces, (const SLInterfaceID *) pInterfaceIds,
+            (const SLboolean *) pInterfaceRequired);
+}
+
+
+static XAresult IXAEngine_CreateVibraDevice(XAEngineItf self, XAObjectItf *pDevice,
+        XAuint32 deviceID, XAuint32 numInterfaces, const XAInterfaceID *pInterfaceIds,
+        const XAboolean *pInterfaceRequired)
+{
+    // forward to OpenSL ES
+    return IEngine_CreateVibraDevice(&((CEngine *) ((IXAEngine *) self)->mThis)->mEngine.mItf,
+            (SLObjectItf *) pDevice, deviceID, numInterfaces, (const SLInterfaceID *) pInterfaceIds,
+            (const SLboolean *) pInterfaceRequired);
+}
+
+
+static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer,
+        XADataSource *pDataSrc, XADataSource *pBankSrc, XADataSink *pAudioSnk,
+        XADataSink *pImageVideoSnk, XADataSink *pVibra, XADataSink *pLEDArray,
+        XAuint32 numInterfaces, const XAInterfaceID *pInterfaceIds,
+        const XAboolean *pInterfaceRequired)
+{
+    XA_ENTER_INTERFACE
+
+    //IXAEngine *this = (IXAEngine *) self;
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+
+    XA_LEAVE_INTERFACE
+}
+
+
+static XAresult IEngine_CreateMediaRecorder(XAEngineItf self, XAObjectItf *pRecorder,
+        XADataSource *pAudioSrc, XADataSource *pImageVideoSrc,
+        XADataSink *pDataSnk, XAuint32 numInterfaces, const XAInterfaceID *pInterfaceIds,
+        const XAboolean *pInterfaceRequired)
+{
+    XA_ENTER_INTERFACE
+
+    //IXAEngine *this = (IXAEngine *) self;
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+
+    XA_LEAVE_INTERFACE
+}
+
+
+static XAresult IXAEngine_CreateOutputMix(XAEngineItf self, XAObjectItf *pMix,
+        XAuint32 numInterfaces, const XAInterfaceID *pInterfaceIds,
+        const XAboolean *pInterfaceRequired)
+{
+    // forward to OpenSL ES
+    return IEngine_CreateOutputMix(&((CEngine *) ((IXAEngine *) self)->mThis)->mEngine.mItf,
+            (SLObjectItf *) pMix, numInterfaces, (const SLInterfaceID *) pInterfaceIds,
+            (const SLboolean *) pInterfaceRequired);
+}
+
+
+static XAresult IXAEngine_CreateMetadataExtractor(XAEngineItf self, XAObjectItf *pMetadataExtractor,
+            XADataSource *pDataSource, XAuint32 numInterfaces,
+            const XAInterfaceID *pInterfaceIds, const XAboolean *pInterfaceRequired)
+{
+    // forward to OpenSL ES
+    return IEngine_CreateMetadataExtractor(&((CEngine *) ((IXAEngine *) self)->mThis)->mEngine.mItf,
+            (SLObjectItf *) pMetadataExtractor, (SLDataSource *) pDataSource, numInterfaces,
+            (const SLInterfaceID *) pInterfaceIds, (const SLboolean *) pInterfaceRequired);
+}
+
+
+static XAresult IXAEngine_CreateExtensionObject(XAEngineItf self, XAObjectItf *pObject,
+            void *pParameters, XAuint32 objectID, XAuint32 numInterfaces,
+            const XAInterfaceID *pInterfaceIds, const XAboolean *pInterfaceRequired)
+{
+    // forward to OpenSL ES
+    return IEngine_CreateExtensionObject(&((CEngine *) ((IXAEngine *) self)->mThis)->mEngine.mItf,
+            (SLObjectItf *) pObject, pParameters, objectID, numInterfaces,
+            (const SLInterfaceID *) pInterfaceIds, (const SLboolean *) pInterfaceRequired);
+}
+
+
+static XAresult IEngine_GetImplementationInfo(XAEngineItf self, XAuint32 *pMajor, XAuint32 *pMinor,
+        XAuint32 *pStep, /* XAuint32 nImplementationTextSize, */ const XAchar *pImplementationText)
+{
+    XA_ENTER_INTERFACE
+
+    //IXAEngine *this = (IXAEngine *) self;
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+
+    XA_LEAVE_INTERFACE
+}
+
+
+static XAresult IXAEngine_QuerySupportedProfiles(XAEngineItf self, XAint16 *pProfilesSupported)
+{
+    XA_ENTER_INTERFACE
+
+    if (NULL == pProfilesSupported) {
+        result = XA_RESULT_PARAMETER_INVALID;
+    } else {
+#if 1
+        *pProfilesSupported = 0;
+        // FIXME the code below was copied from OpenSL ES and needs to be adapted for OpenMAX AL.
+#else
+        // The generic implementation doesn't implement any of the profiles, they shouldn't be
+        // declared as supported. Also exclude the fake profiles BASE and OPTIONAL.
+        *pProfilesSupported = USE_PROFILES &
+                (USE_PROFILES_GAME | USE_PROFILES_MUSIC | USE_PROFILES_PHONE);
+#endif
+        result = XA_RESULT_SUCCESS;
+    }
+
+    XA_LEAVE_INTERFACE
+}
+
+
+static XAresult IXAEngine_QueryNumSupportedInterfaces(XAEngineItf self, XAuint32 objectID,
+        XAuint32 *pNumSupportedInterfaces)
+{
+    // forward to OpenSL ES
+    return IEngine_QueryNumSupportedInterfaces(
+            &((CEngine *) ((IXAEngine *) self)->mThis)->mEngine.mItf, objectID,
+            pNumSupportedInterfaces);
+}
+
+
+static XAresult IXAEngine_QuerySupportedInterfaces(XAEngineItf self, XAuint32 objectID,
+        XAuint32 index, XAInterfaceID *pInterfaceId)
+{
+    // forward to OpenSL ES
+    return IEngine_QuerySupportedInterfaces(
+            &((CEngine *) ((IXAEngine *) self)->mThis)->mEngine.mItf, objectID, index,
+            (SLInterfaceID *) pInterfaceId);
+}
+
+
+static XAresult IXAEngine_QueryNumSupportedExtensions(XAEngineItf self, XAuint32 *pNumExtensions)
+{
+    // forward to OpenSL ES
+    return IEngine_QueryNumSupportedExtensions(
+            &((CEngine *) ((IXAEngine *) self)->mThis)->mEngine.mItf, pNumExtensions);
+}
+
+
+static XAresult IXAEngine_QuerySupportedExtension(XAEngineItf self, XAuint32 index,
+        XAchar *pExtensionName, XAint16 *pNameLength)
+{
+    // forward to OpenSL ES
+    return IEngine_QuerySupportedExtension(&((CEngine *) ((IXAEngine *) self)->mThis)->mEngine.mItf,
+            index, pExtensionName, (SLint16 *) pNameLength);
+}
+
+
+static XAresult IXAEngine_IsExtensionSupported(XAEngineItf self, const XAchar *pExtensionName,
+        XAboolean *pSupported)
+{
+    // forward to OpenSL ES
+    return IEngine_IsExtensionSupported(&((CEngine *) ((IXAEngine *) self)->mThis)->mEngine.mItf,
+            pExtensionName, pSupported);
+}
+
+
+static XAresult IXAEngine_QueryLEDCapabilities(XAEngineItf self, XAuint32 *pIndex,
+        XAuint32 *pLEDDeviceID, XALEDDescriptor *pDescriptor)
+{
+    // forward to OpenSL ES EngineCapabilities
+    return (XAresult) IEngineCapabilities_QueryLEDCapabilities(
+            &((CEngine *) ((IXAEngine *) self)->mThis)->mEngineCapabilities.mItf, pIndex,
+            pLEDDeviceID, (SLLEDDescriptor *) pDescriptor);
+}
+
+
+static XAresult IXAEngine_QueryVibraCapabilities(XAEngineItf self, XAuint32 *pIndex,
+        XAuint32 *pVibraDeviceID, XAVibraDescriptor *pDescriptor)
+{
+    // forward to OpenSL ES EngineCapabilities
+    return (XAresult) IEngineCapabilities_QueryVibraCapabilities(
+            &((CEngine *) ((IXAEngine *) self)->mThis)->mEngineCapabilities.mItf, pIndex,
+            pVibraDeviceID, (SLVibraDescriptor *) pDescriptor);
+}
+
+
+// OpenMAX AL engine v-table
+
+static const struct XAEngineItf_ IXAEngine_Itf = {
+    IEngine_CreateCameraDevice,
+    IEngine_CreateRadioDevice,
+    IXAEngine_CreateLEDDevice,
+    IXAEngine_CreateVibraDevice,
+    IEngine_CreateMediaPlayer,
+    IEngine_CreateMediaRecorder,
+    IXAEngine_CreateOutputMix,
+    IXAEngine_CreateMetadataExtractor,
+    IXAEngine_CreateExtensionObject,
+    IEngine_GetImplementationInfo,
+    IXAEngine_QuerySupportedProfiles,
+    IXAEngine_QueryNumSupportedInterfaces,
+    IXAEngine_QuerySupportedInterfaces,
+    IXAEngine_QueryNumSupportedExtensions,
+    IXAEngine_QuerySupportedExtension,
+    IXAEngine_IsExtensionSupported,
+    IXAEngine_QueryLEDCapabilities,
+    IXAEngine_QueryVibraCapabilities
+};
+
+
+void IXAEngine_init(void *self)
+{
+    IXAEngine *this = (IXAEngine *) self;
+    this->mItf = &IXAEngine_Itf;
 }

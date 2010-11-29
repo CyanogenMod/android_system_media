@@ -31,6 +31,7 @@
 
 
 #include "SLES/OpenSLES.h"         /* SL Header */
+#include "OMXAL/OpenMAXAL.h"
 #ifdef ANDROID
 #include "SLES/OpenSLES_Android.h" /* Android-specific SL Header */
 #endif
@@ -163,6 +164,11 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     // SL_IID_ANDROIDSTREAMSOURCE
     { 0x7fc1a460, 0xeec1, 0x11df, 0xa306, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
 
+// OpenMAX AL 1.0.1
+
+    // XA_IID_ENGINE
+    { 0x45c58f40, 0xdf04, 0x11db, 0x9e76, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
+
 };
 
 #ifdef __cplusplus
@@ -229,6 +235,9 @@ const SLInterfaceID SL_IID_ANDROIDSIMPLEBUFFERQUEUE = &SL_IID_array[MPH_ANDROIDS
 
 // Android API level 10 extended interfaces
 const SLInterfaceID SL_IID_ANDROIDSTREAMSOURCE = &SL_IID_array[MPH_ANDROIDSTREAMSOURCE];
+
+// OpenMAX AL 1.0.1
+const XAInterfaceID XA_IID_ENGINE = (XAInterfaceID) &SL_IID_array[MPH_XAENGINE];
 
 #ifdef __cplusplus
 }

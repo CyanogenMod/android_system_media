@@ -128,8 +128,9 @@ const signed char MPH_to_Engine[MPH_MAX] = {
     [MPH_AUDIOENCODERCAPABILITIES] = 7,
     [MPH_3DCOMMIT] = 8,
     [MPH_DEVICEVOLUME] = 9,
+    [MPH_XAENGINE] = 10,
 #ifdef ANDROID
-    [MPH_ANDROIDEFFECTCAPABILITIES] = 10
+    [MPH_ANDROIDEFFECTCAPABILITIES] = 11
 #endif
 #else
 #include "MPH_to_Engine.h"

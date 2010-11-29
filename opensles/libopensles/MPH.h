@@ -81,7 +81,10 @@
 // Android API level 10 extended interfaces
 #define MPH_ANDROIDSTREAMSOURCE        50
 
+// OpenMAX AL 1.0.1
+#define MPH_XAENGINE                   51
+
 // total number of interface IDs
-#define MPH_MAX                        51
+#define MPH_MAX                        52
 
 #endif // !defined(__MPH_H)

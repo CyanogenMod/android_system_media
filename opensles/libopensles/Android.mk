@@ -17,8 +17,10 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_CFLAGS += -Wno-override-init -Wno-missing-field-initializers
+LOCAL_CFLAGS += -Wno-override-init
+# -Wno-missing-field-initializers
 # optional, see comments in MPH_to.c: -DUSE_DESIGNATED_INITIALIZERS -S
+LOCAL_CFLAGS += -DUSE_DESIGNATED_INITIALIZERS
 
 LOCAL_SRC_FILES:=                     \
         MPH_to.c
@@ -29,6 +31,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
+LOCAL_CFLAGS += -DSL_API= -DXA_API=SLAPIENTRY -DXAAPIENTRY=
 #LOCAL_CFLAGS += -DUSE_PROFILES=0 -UUSE_TRACE -UUSE_DEBUG -DNDEBUG -DUSE_LOG=SLAndroidLogLevel_Info
 LOCAL_CFLAGS += -DUSE_PROFILES=0 -DUSE_TRACE -DUSE_DEBUG -UNDEBUG \
    -DUSE_LOG=SLAndroidLogLevel_Verbose
@@ -40,7 +43,9 @@ LOCAL_CFLAGS += -fvisibility=hidden -DSLAPIENTRY='__attribute__((visibility("def
 LOCAL_SRC_FILES:=                     \
         OpenSLES_IID.c                \
         classes.c                     \
+        data.c                        \
         devices.c                     \
+        entry.c                       \
         trace.c                       \
         locks.c                       \
         sles.c                        \

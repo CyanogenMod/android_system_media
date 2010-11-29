@@ -19,6 +19,29 @@
 #include "sles_allinclusive.h"
 
 
+/* This implementation supports at most one engine */
+
+CEngine *theOneTrueEngine = NULL;
+pthread_mutex_t theOneTrueMutex = PTHREAD_MUTEX_INITIALIZER;
+
+
+/** \brief Called by dlopen when .so is loaded */
+
+__attribute__((constructor)) static void onDlOpen(void)
+{
+}
+
+
+/** \brief Called by dlclose when .so is unloaded */
+
+__attribute__((destructor)) static void onDlClose(void)
+{
+    if (NULL != theOneTrueEngine) {
+        SL_LOGE("Object::Destroy omitted for engine %p", theOneTrueEngine);
+    }
+}
+
+
 /** \brief Hook called by Object::Realize when an engine is realized */
 
 SLresult CEngine_Realize(void *self, SLboolean async)
@@ -121,4 +144,20 @@ void CEngine_Destroy(void *self)
 bool CEngine_PreDestroy(void *self)
 {
     return true;
+}
+
+
+/** \brief Called by IObject::Destroy after engine is destroyed. The parameter refers to the
+ *  previous engine, which is now undefined memory.
+ */
+
+void CEngine_Destroyed(CEngine *self)
+{
+    int ok;
+    ok = pthread_mutex_lock(&theOneTrueMutex);
+    assert(0 == ok);
+    assert(self == theOneTrueEngine);
+    theOneTrueEngine = NULL;
+    ok = pthread_mutex_unlock(&theOneTrueMutex);
+    assert(0 == ok);
 }

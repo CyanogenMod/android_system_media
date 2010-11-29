@@ -183,3 +183,49 @@ const CodecDescriptor EncoderDescriptors[] = {
     {SL_AUDIOCODEC_VORBIS, &CodecDescriptor_A},
     {SL_AUDIOCODEC_NULL, NULL}
 };
+
+
+/** \brief Helper shared by decoder and encoder */
+
+SLresult GetCodecCapabilities(SLuint32 codecId, SLuint32 *pIndex,
+    SLAudioCodecDescriptor *pDescriptor, const CodecDescriptor *codecDescriptors)
+{
+    if (NULL == pIndex) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+    const CodecDescriptor *cd = codecDescriptors;
+    SLuint32 index;
+    if (NULL == pDescriptor) {
+        for (index = 0 ; NULL != cd->mDescriptor; ++cd) {
+            if (cd->mCodecID == codecId) {
+                ++index;
+            }
+        }
+        *pIndex = index;
+        return SL_RESULT_SUCCESS;
+    }
+    index = *pIndex;
+    for ( ; NULL != cd->mDescriptor; ++cd) {
+        if (cd->mCodecID == codecId) {
+            if (0 == index) {
+                *pDescriptor = *cd->mDescriptor;
+#if 0   // Temporary workaround for Khronos bug 6331
+                if (0 < pDescriptor->numSampleRatesSupported) {
+                    // The malloc is not in the 1.0.1 specification
+                    SLmilliHertz *temp = (SLmilliHertz *) malloc(sizeof(SLmilliHertz) *
+                        pDescriptor->numSampleRatesSupported);
+                    assert(NULL != temp);
+                    memcpy(temp, pDescriptor->pSampleRatesSupported, sizeof(SLmilliHertz) *
+                        pDescriptor->numSampleRatesSupported);
+                    pDescriptor->pSampleRatesSupported = temp;
+                } else {
+                    pDescriptor->pSampleRatesSupported = NULL;
+                }
+#endif
+                return SL_RESULT_SUCCESS;
+            }
+            --index;
+        }
+    }
+    return SL_RESULT_PARAMETER_INVALID;
+}

@@ -79,7 +79,10 @@ const char * const interface_names[MPH_MAX] = {
     "ANDROIDSIMPLEBUFFERQUEUE",
 
     // Android API level 10 extended interfaces
-    "ANDROIDSTREAMSOURCE"
+    "ANDROIDSTREAMSOURCE",
+
+    // OpenMAX AL 1.0.1
+    "XAENGINE",
 
 };
 

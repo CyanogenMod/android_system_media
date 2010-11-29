@@ -161,6 +161,7 @@ static const struct iid_vtable Engine_interfaces[INTERFACES_Engine] = {
         offsetof(CEngine, mAudioEncoderCapabilities)},
     {MPH_3DCOMMIT, INTERFACE_EXPLICIT_GAME, offsetof(CEngine, m3DCommit)},
     {MPH_DEVICEVOLUME, INTERFACE_OPTIONAL, offsetof(CEngine, mDeviceVolume)},
+    {MPH_XAENGINE, INTERFACE_IMPLICIT, offsetof(CEngine, mXAEngine)},
 #ifdef ANDROID
     {MPH_ANDROIDEFFECTCAPABILITIES, INTERFACE_EXPLICIT,
         offsetof(CEngine, mAndroidEffectCapabilities)},
@@ -433,6 +434,53 @@ const ClassTable *objectIDtoClass(SLuint32 objectID)
     SLuint32 objectID0 = classes[0]->mObjectID;
     if ((objectID0 <= objectID) && ((objectID0 + sizeof(classes)/sizeof(classes[0])) > objectID)) {
         return classes[objectID - objectID0];
+    }
+    return NULL;
+}
+
+
+static const ClassTable * const xaClasses[] = {
+    &CEngine_class,
+#if USE_PROFILES & USE_PROFILES_OPTIONAL
+    &CLEDDevice_class,
+    &CVibraDevice_class,
+#else
+    NULL,
+    NULL,
+#endif
+#if 1
+    NULL,
+    NULL,
+    NULL,
+#else
+    &xaCMediaPlayer_class,
+    &xaCMediaRecorder_class,
+    &xaCRadioDevice_class,
+#endif
+    &COutputMix_class,
+#if USE_PROFILES & (USE_PROFILES_GAME | USE_PROFILES_MUSIC)
+    &CMetadataExtractor_class,
+#else
+    NULL,
+#endif
+#if 1
+    NULL
+#else
+    &xaCCameraDevice_class
+#endif
+};
+
+
+/* \brief Map XA_OBJECTID to class or NULL if object ID not supported */
+
+const ClassTable *xaObjectIDtoClass(XAuint32 objectID)
+{
+    // object ID is the engine and always present
+    assert(NULL != xaClasses[0]);
+    SLuint32 objectID0 = xaClasses[0]->mObjectID;
+    if ((objectID0 <= objectID) && ((objectID0 + sizeof(xaClasses)/sizeof(xaClasses[0])) >
+            objectID)) {
+        return xaClasses[objectID - objectID0];
     }
     return NULL;
 }
