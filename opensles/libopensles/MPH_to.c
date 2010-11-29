@@ -87,7 +87,7 @@ const signed char MPH_to_AudioPlayer[MPH_MAX] = {
     [MPH_ANDROIDEFFECTSEND] = 27,
     [MPH_ANDROIDCONFIGURATION] = 28,
     [MPH_ANDROIDSIMPLEBUFFERQUEUE] = 7,  // alias for [MPH_BUFFERQUEUE]
-    [MPH_ANDROIDSTREAMSOURCE] = 29
+    [MPH_ANDROIDBUFFERQUEUE] = 29
 #endif
 #else
 #include "MPH_to_AudioPlayer.h"

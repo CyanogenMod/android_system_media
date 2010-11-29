@@ -257,7 +257,7 @@ typedef union {
     SLDataLocator_URI mURI;
 #ifdef ANDROID
     SLDataLocator_AndroidFD mFD;
-    SLDataLocator_AndroidStreamer mStreamer;
+    SLDataLocator_AndroidBufferQueue mBQ;
 #endif
 } DataLocator;
 
@@ -895,11 +895,11 @@ typedef struct {
 } IAndroidConfiguration;
 
 typedef struct {
-    const struct SLAndroidStreamSourceItf_ *mItf;
+    const struct SLAndroidBufferQueueItf_ *mItf;
     IObject *mThis;
-    slAndroidStreamSourceCallback mCallback;
+    slAndroidBufferQueueCallback mCallback;
     void *mContext;
-} IAndroidStreamSource;
+} IAndroidBufferQueue;
 
 
 /*
@@ -957,7 +957,7 @@ enum AndroidObject_state {
     IAndroidEffect mAndroidEffect;
     IAndroidEffectSend mAndroidEffectSend;
     IAndroidConfiguration mAndroidConfiguration;
-    IAndroidStreamSource mAndroidStreamSource;
+    IAndroidBufferQueue mAndroidBufferQueue;
 #endif
     // optional interfaces
     I3DMacroscopic m3DMacroscopic;

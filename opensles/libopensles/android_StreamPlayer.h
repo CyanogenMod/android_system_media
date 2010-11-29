@@ -62,7 +62,7 @@ public:
 
 class StreamSourceAppProxy : public BnStreamSource/*, public BnMediaPlayerClient*/ {
 public:
-    StreamSourceAppProxy(slAndroidStreamSourceCallback callback, void *appContext);
+    StreamSourceAppProxy(slAndroidBufferQueueCallback callback, void *appContext);
     virtual ~StreamSourceAppProxy();
 
     // IStreamSource implementation
@@ -74,7 +74,7 @@ private:
     sp<IStreamListener> mListener;
     Vector<sp<IMemory> > mBuffers;
 
-    slAndroidStreamSourceCallback mCallback;
+    slAndroidBufferQueueCallback mCallback;
     void * mAppContext;
 
     DISALLOW_EVIL_CONSTRUCTORS(StreamSourceAppProxy);
@@ -88,7 +88,7 @@ public:
     StreamPlayer(StreamPlayback_Parameters* params);
     virtual ~StreamPlayer();
 
-    void useCallbackToApp(slAndroidStreamSourceCallback callback, void *context);
+    void useCallbackToApp(slAndroidBufferQueueCallback callback, void *context);
 
     void stop();
     void pause();

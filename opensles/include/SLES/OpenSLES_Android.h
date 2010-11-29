@@ -27,7 +27,7 @@ extern "C" {
 
 typedef sl_int64_t             SLAint64;           /* 64 bit signed integer */
 
-typedef SLuint32               SLAstreamEvent;
+typedef SLuint32               SLAbufferQueueEvent;
 
 
 /*---------------------------------------------------------------------------*/
@@ -206,33 +206,57 @@ struct SLAndroidSimpleBufferQueueItf_ {
 
 
 /*---------------------------------------------------------------------------*/
-/* Android Stream Source Interface                                           */
+/* Android Buffer Qeueue Interface                                           */
 /*---------------------------------------------------------------------------*/
 
-extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDSTREAMSOURCE;
+extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUE;
 
-struct SLAndroidStreamSourceItf_;
-typedef const struct SLAndroidStreamSourceItf_ * const * SLAndroidStreamSourceItf;
+struct SLAndroidBufferQueueItf_;
+typedef const struct SLAndroidBufferQueueItf_ * const * SLAndroidBufferQueueItf;
 
-#define SL_ANDROID_STREAMEVENT_NONE              ((SLuint32) 0x00000000)
-#define SL_ANDROID_STREAMEVENT_FLUSH             ((SLuint32) 0x00000001)
-#define SL_ANDROID_STREAMEVENT_DISCONTINUITY     ((SLuint32) 0x00000002)
-#define SL_ANDROID_STREAMEVENT_EOS               ((SLuint32) 0x00000004)
+#define SL_ANDROIDBUFFERQUEUE_EVENT_NONE              ((SLuint32) 0x00000000)
+#define SL_ANDROIDBUFFERQUEUE_EVENT_FLUSH             ((SLuint32) 0x00000001)
+#define SL_ANDROIDBUFFERQUEUE_EVENT_DISCONTINUITY     ((SLuint32) 0x00000002)
+#define SL_ANDROIDBUFFERQUEUE_EVENT_EOS               ((SLuint32) 0x00000004)
 
-typedef SLresult (/*SLAPIENTRY*/ *slAndroidStreamSourceCallback)(
-    SLAndroidStreamSourceItf caller,/* input */
-    void *pContext,                 /* input */
-    SLAint64* pLength,              /* input, output */
-    SLAstreamEvent* pEvent,         /* output */
-    void *pData                     /* output */
+typedef SLresult (/*SLAPIENTRY*/ *slAndroidBufferQueueCallback)(
+    SLAndroidBufferQueueItf caller,/* input */
+    void *pContext,                /* input */
+    SLuint32 bufferId,             /* input */
+    SLAint64 bufferLength,         /* input */
+    void *pBufferDataLocation      /* input */
 );
 
-struct SLAndroidStreamSourceItf_ {
+struct SLAndroidBufferQueueItf_ {
     SLresult (*RegisterCallback) (
-        SLAndroidStreamSourceItf self,
-        slAndroidStreamSourceCallback callback,
+        SLAndroidBufferQueueItf self,
+        slAndroidBufferQueueCallback callback,
         void* pContext
     );
+
+    SLresult (*Clear) (
+        SLAndroidBufferQueueItf self
+    );
+
+    SLresult (*Enqueue) (
+        SLAndroidBufferQueueItf self,
+        SLuint32 bufferId,
+        SLuint32 length,
+        SLAbufferQueueEvent event,
+        void *pData
+    );
+
+    // FIXME TBD if needed
+    /*
+    SLResult (*SetCallbackEventMask) (
+        SLAndroidBufferQueueItf self,
+        SLuint32 eventMask
+    );
+    SLResult (*GetCallbackEventMask) (
+        SLAndroidBufferQueueItf self,
+        SLuint32 *pEventMask
+    );
+    */
 };
 
 
@@ -269,23 +293,19 @@ typedef struct SLDataLocator_AndroidSimpleBufferQueue {
 
 
 /*---------------------------------------------------------------------------*/
-/* Android Streamer Data Locator                                             */
+/* Android Buffer Queue Data Locator                                         */
 /*---------------------------------------------------------------------------*/
 
 /** Addendum to Data locator macros  */
-#define SL_DATALOCATOR_ANDROIDSTREAMER          ((SLuint32) 0x800007BE)
+#define SL_DATALOCATOR_ANDROIDBUFFERQUEUE       ((SLuint32) 0x800007BE)
 
-#define SL_ANDROID_STREAMORIGIN_INVALID         ((SLuint32) 0x00000000)
-#define SL_ANDROID_STREAMORIGIN_FILE            ((SLuint32) 0x00000001)
-#define SL_ANDROID_STREAMORIGIN_TRANSPORTSTREAM ((SLuint32) 0x00000002)
-
-/** Streamer-based data locator definition, locatorType must be SL_DATALOCATOR_ANDROIDSTREAMER */
-typedef struct SLDataLocator_AndroidStreamer_ {
-    SLuint32        locatorType;
-    SLchar *        URI;          // FIXME temporary use of a URI field for testing
-    SLuint32        streamOrigin; // FIXME required for future-proofness?
-    SLAint64        cacheSize;    // FIXME use optional cache size if shared memory size?
-} SLDataLocator_AndroidStreamer;
+/** Android Buffer Queue-based data locator definition,
+ *  locatorType must be SL_DATALOCATOR_ANDROIDBUFFERQUEUE */
+typedef struct SLDataLocator_AndroidBufferQueue_ {
+    SLuint32    locatorType;
+    SLuint32    numBuffers;
+    SLuint32    queueSize;    // FIXME use optional queue size for shared memory size?
+} SLDataLocator_AndroidBufferQueue;
 
 #ifdef __cplusplus
 }

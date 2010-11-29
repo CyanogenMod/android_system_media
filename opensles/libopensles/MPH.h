@@ -79,7 +79,7 @@
 #define MPH_ANDROIDSIMPLEBUFFERQUEUE   49
 
 // Android API level 10 extended interfaces
-#define MPH_ANDROIDSTREAMSOURCE        50
+#define MPH_ANDROIDBUFFERQUEUE         50
 
 // OpenMAX AL 1.0.1
 #define MPH_XAENGINE                   51

@@ -715,11 +715,9 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         break;
     //------------------
     //   Stream
-    case SL_DATALOCATOR_ANDROIDSTREAMER:
+    case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
         {
-        // FIXME implement
-        SL_LOGD("[ FIXME implement format check for STREAMER data sources ]");
-        } // case SL_DATALOCATOR_ANDROIDSTREAMER
+        } // case SL_DATALOCATOR_ANDROIDBUFFERQUEUE
         break;
     //------------------
     //   Address
@@ -911,7 +909,7 @@ SLresult android_audioPlayer_create(
         pAudioPlayer->mpLock = new android::Mutex();
         pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
         break;
-    case SL_DATALOCATOR_ANDROIDSTREAMER:
+    case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
         pAudioPlayer->mAndroidObjType = STREAM_SOURCE;
         pAudioPlayer->mpLock = new android::Mutex();
         pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
@@ -1559,14 +1557,13 @@ SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *ap) {
     return result;
 }
 
-void android_audioPlayer_registerStreamSourceCallback(CAudioPlayer *ap) {
-    //object_lock_exclusive(&ap->mObject);
 
+//-----------------------------------------------------------------------------
+/* must be called with a lock on pAudioPlayer->mObj */
+void android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer *ap) {
     if (ap->mAndroidObjType == STREAM_SOURCE) {
         android_StreamPlayer_registerCallback_lApObj(ap);
     }
-
-    //object_unlock_exclusive(&ap->mObject);
 }
 
 

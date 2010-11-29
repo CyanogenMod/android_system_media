@@ -161,7 +161,7 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     { 0x198e4940, 0xc5d7, 0x11df, 0xa2a6, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
 
 // Android API level 10 extended interfaces
-    // SL_IID_ANDROIDSTREAMSOURCE
+    // SL_IID_ANDROIDBUFFERQUEUE
     { 0x7fc1a460, 0xeec1, 0x11df, 0xa306, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
 
 // OpenMAX AL 1.0.1
@@ -234,7 +234,7 @@ const SLInterfaceID SL_IID_ANDROIDCONFIGURATION = &SL_IID_array[MPH_ANDROIDCONFI
 const SLInterfaceID SL_IID_ANDROIDSIMPLEBUFFERQUEUE = &SL_IID_array[MPH_ANDROIDSIMPLEBUFFERQUEUE];
 
 // Android API level 10 extended interfaces
-const SLInterfaceID SL_IID_ANDROIDSTREAMSOURCE = &SL_IID_array[MPH_ANDROIDSTREAMSOURCE];
+const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUE = &SL_IID_array[MPH_ANDROIDBUFFERQUEUE];
 
 // OpenMAX AL 1.0.1
 const XAInterfaceID XA_IID_ENGINE = (XAInterfaceID) &SL_IID_array[MPH_XAENGINE];

@@ -101,7 +101,7 @@ int IID_to_MPH(const SLInterfaceID iid)
         -1,
         -1,
         MPH_3DLOCATION,
-        MPH_ANDROIDSTREAMSOURCE,
+        MPH_ANDROIDBUFFERQUEUE,
         MPH_VIBRA,
         -1,
         -1,

@@ -48,25 +48,32 @@ bool prefetchError = false;
 
 
 //-----------------------------------------------------------------
-/* AndroidStreamSourceItf callback for an audio player */
-SLresult AndroidStreamSourceCallback(
-        SLAndroidStreamSourceItf caller,/* input */
-        void *pContext,                 /* input */
-        SLAint64* pLength,              /* input, output */
-        SLAstreamEvent* pEvent,         /* output */
-        void *pData)                    /* output */
+/* AndroidBufferQueueItf callback for an audio player */
+SLresult AndroidBufferQueueCallback(
+        SLAndroidBufferQueueItf caller,
+            void *pContext,
+            SLuint32 bufferId,
+            SLAint64 bufferLength,
+            void *pBufferDataLocation)
+
 {
-    fprintf(stdout, "AndroidStreamSourceCallback called\n");
+    fprintf(stdout, "AndroidBufferQueueCallback called\n");
 
-    size_t nbRead = fread(pData, 1, *pLength, file);
+    size_t nbRead = fread(pBufferDataLocation, 1, bufferLength, file);
 
-    *pLength = nbRead;
+    SLAbufferQueueEvent event = SL_ANDROIDBUFFERQUEUE_EVENT_NONE;
     if (nbRead <= 0) {
-        *pEvent = SL_ANDROID_STREAMEVENT_EOS;
+        event = SL_ANDROIDBUFFERQUEUE_EVENT_EOS;
     } else {
-        *pEvent = SL_ANDROID_STREAMEVENT_NONE; // no event to report
+        event = SL_ANDROIDBUFFERQUEUE_EVENT_NONE; // no event to report
     }
-    //leaving pData untouched
+
+    // enqueue the data right-away because in this example we're reading from a file, so we
+    // can afford to do that. When streaming from the network, we would write from our cache
+    // to this queue.
+    // last param is NULL because we've already written the data in the buffer queue
+    (*caller)->Enqueue(caller, bufferId, nbRead, event, NULL);
+
     return SL_RESULT_SUCCESS;
 }
 
@@ -84,7 +91,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     SLresult                   res;
 
     SLDataSource               audioSource;
-    SLDataLocator_AndroidStreamer streamLocator;
+    SLDataLocator_AndroidBufferQueue streamLocator;
     SLDataFormat_MIME          mime;
 
     SLDataSink                 audioSink;
@@ -93,7 +100,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     SLObjectItf                player;
     SLPlayItf                  playItf;
     SLVolumeItf                volItf;
-    SLAndroidStreamSourceItf   streamSrcItf;
+    SLAndroidBufferQueueItf    abqItf;
 
     SLObjectItf                OutputMix;
 
@@ -116,7 +123,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     required[0] = SL_BOOLEAN_TRUE;
     iidArray[0] = SL_IID_VOLUME;
     required[1] = SL_BOOLEAN_TRUE;
-    iidArray[1] = SL_IID_ANDROIDSTREAMSOURCE;
+    iidArray[1] = SL_IID_ANDROIDBUFFERQUEUE;
     // Create Output Mix object to be used by player
     res = (*EngineItf)->CreateOutputMix(EngineItf, &OutputMix, 0,
             iidArray, required); CheckErr(res);
@@ -126,9 +133,9 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     CheckErr(res);
 
     /* Setup the data source structure for the URI */
-    streamLocator.locatorType  = SL_DATALOCATOR_ANDROIDSTREAMER;
-    streamLocator.URI          =  (SLchar*) path;
-    streamLocator.streamOrigin = SL_ANDROID_STREAMORIGIN_FILE;
+    streamLocator.locatorType  = SL_DATALOCATOR_ANDROIDBUFFERQUEUE;
+    streamLocator.numBuffers   = 0; // ignored at the moment
+    streamLocator.queueSize    = 0; // ignored at the moment
     mime.formatType    = SL_DATAFORMAT_MIME;
     mime.mimeType      = (SLchar*)NULL;
     mime.containerType = SL_CONTAINERTYPE_UNSPECIFIED;
@@ -155,10 +162,10 @@ void TestPlayStream( SLObjectItf sl, const char* path)
 
     res = (*player)->GetInterface(player, SL_IID_VOLUME,  (void*)&volItf); CheckErr(res);
 
-    res = (*player)->GetInterface(player, SL_IID_ANDROIDSTREAMSOURCE, (void*)&streamSrcItf);
+    res = (*player)->GetInterface(player, SL_IID_ANDROIDBUFFERQUEUE, (void*)&abqItf);
     CheckErr(res);
-    res = (*streamSrcItf)->RegisterCallback(streamSrcItf, AndroidStreamSourceCallback,
-            &streamSrcItf); CheckErr(res);
+    res = (*abqItf)->RegisterCallback(abqItf, AndroidBufferQueueCallback,
+            &abqItf); CheckErr(res);
 
     /* Display duration */
     SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
@@ -238,9 +245,9 @@ int main(int argc, char* const argv[])
     SLresult    res;
     SLObjectItf sl;
 
-    fprintf(stdout, "OpenSL ES test %s: exercises SLPlayItf, SLVolumeItf, SLAndroidStreamSource ",
+    fprintf(stdout, "OpenSL ES test %s: exercises SLPlayItf, SLVolumeItf, SLAndroidBufferQueue \n",
             argv[0]);
-    fprintf(stdout, "and AudioPlayer with SL_DATALOCATOR_ANDROIDSTREAMER source / OutputMix sink\n");
+    fprintf(stdout, "and AudioPlayer with SL_DATALOCATOR_ANDROIDBUFFERQUEUE source / OutputMix sink\n");
     fprintf(stdout, "Plays a sound and stops after its reported duration\n\n");
 
     if (argc == 1) {

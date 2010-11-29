@@ -90,8 +90,8 @@ void android_StreamPlayer_setPlayState(CAudioPlayer *ap, SLuint32 playState,
 
 void android_StreamPlayer_registerCallback_lApObj(CAudioPlayer *ap) {
     if (ap->mStreamPlayer != 0) {
-        ap->mStreamPlayer->useCallbackToApp(ap->mAndroidStreamSource.mCallback,
-                ap->mAndroidStreamSource.mContext);
+        ap->mStreamPlayer->useCallbackToApp(ap->mAndroidBufferQueue.mCallback,
+                ap->mAndroidBufferQueue.mContext);
     }
 }
 
@@ -114,7 +114,7 @@ void StreamMediaPlayerClient::notify(int msg, int ext1, int ext2) {
 }
 
 //--------------------------------------------------------------------------------------------------
-StreamSourceAppProxy::StreamSourceAppProxy(slAndroidStreamSourceCallback callback, void *context) :
+StreamSourceAppProxy::StreamSourceAppProxy(slAndroidBufferQueueCallback callback, void *context) :
     mCallback(callback),
     mAppContext(context)
 {
@@ -140,20 +140,23 @@ void StreamSourceAppProxy::onBufferAvailable(size_t index) {
 
     CHECK_LT(index, mBuffers.size());
     sp<IMemory> mem = mBuffers.itemAt(index);
-
     SLAint64 length = (SLAint64) mem->size();
-    SLAstreamEvent event = SL_ANDROID_STREAMEVENT_NONE;
-    (*mCallback)(NULL /* FIXME needs SLAndroidStreamSourceItf */, mAppContext, &length, &event,
-            mem->pointer());
 
-    if (event != SL_ANDROID_STREAMEVENT_NONE) {
-        if (event & SL_ANDROID_STREAMEVENT_FLUSH) {
+    (*mCallback)(NULL,     /* SLAndroidBufferQueueItf self */ //FIXME don't pass NULL
+            mAppContext,  /* void *pContext */
+            index,        /* SLuint32 bufferId */
+            length,       /*  SLAint64 bufferLength */
+            mem->pointer()/* void *pBufferDataLocation */
+    );
+
+    /*if (event != SL_ANDROIDBUFFERQUEUE_EVENT_NONE) {
+        if (event & SL_ANDROIDBUFFERQUEUE_EVENT_FLUSH) {
             mListener->queueCommand(IStreamListener::FLUSH);
         }
-        if (event & SL_ANDROID_STREAMEVENT_DISCONTINUITY) {
+        if (event & SL_ANDROIDBUFFERQUEUE_EVENT_DISCONTINUITY) {
             mListener->queueCommand(IStreamListener::DISCONTINUITY);
         }
-        if (event & SL_ANDROID_STREAMEVENT_EOS) {
+        if (event & SL_ANDROIDBUFFERQUEUE_EVENT_EOS) {
             mListener->queueCommand(IStreamListener::EOS);
         }
     }
@@ -161,7 +164,7 @@ void StreamSourceAppProxy::onBufferAvailable(size_t index) {
         mListener->queueCommand(IStreamListener::EOS);
     } else {
         mListener->queueBuffer(index, length);
-    }
+    }*/
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -215,7 +218,7 @@ void StreamPlayer::play() {
     }
 }
 
-void StreamPlayer::useCallbackToApp(slAndroidStreamSourceCallback callback, void *context) {
+void StreamPlayer::useCallbackToApp(slAndroidBufferQueueCallback callback, void *context) {
     Mutex::Autolock _l(mLock);
 
     mAppProxy = new StreamSourceAppProxy(callback, context);

@@ -109,6 +109,7 @@ extern void android_audioPlayer_bufferQueue_onRefilled(CAudioPlayer *pAudioPlaye
 extern SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *pAudioPlayer);
 
 /**************************************************************************************************
- * Stream Source events
+ * Android Buffer Queue
  ****************************/
-extern void android_audioPlayer_registerStreamSourceCallback(CAudioPlayer *pAudioPlayer);
+/* must be called with a lock on pAudioPlayer->mThis */
+extern void android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer *pAudioPlayer);

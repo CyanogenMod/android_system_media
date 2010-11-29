@@ -225,7 +225,7 @@ extern void
     IAndroidEffect_init(void *),
     IAndroidEffectCapabilities_init(void *),
     IAndroidEffectSend_init(void *),
-    IAndroidStreamSource_init(void *),
+    IAndroidBufferQueue_init(void *),
     IAudioDecoderCapabilities_init(void *),
     IAudioEncoder_init(void *),
     IAudioEncoderCapabilities_init(void *),
@@ -337,7 +337,7 @@ extern void
 #define IAndroidEffect_deinit             NULL
 #define IAndroidEffectCapabilities_deinit NULL
 #define IAndroidEffectCapabilities_Expose NULL
-#define IAndroidStreamSource_init         NULL
+#define IAndroidBufferQueue_init          NULL
 #endif
 
 #ifndef USE_OUTPUTMIXEXT
@@ -405,7 +405,7 @@ extern void
     { /* MPH_ANDROIDCONFIGURATION */ IAndroidConfiguration_init, NULL, NULL, NULL, NULL },
     { /* MPH_ANDROIDSIMPLEBUFFERQUEUE */ IBufferQueue_init /* alias */, NULL, NULL, NULL, NULL },
 // Android API level 10 extended interfaces
-    { /* MPH_ANDROIDSTREAMSOURCE */ IAndroidStreamSource_init, NULL, NULL, NULL, NULL },
+    { /* MPH_ANDROIDBUFFERQUEUE */ IAndroidBufferQueue_init, NULL, NULL, NULL, NULL },
 // OpenMAX AL 1.0.1 interfaces
     { /* MPHXA_ENGINE */ IXAEngine_init, NULL, NULL, NULL, NULL },
 };

@@ -61,11 +61,11 @@ LOCAL_SRC_FILES:=                     \
         CAudioRecorder.c              \
         CEngine.c                     \
         COutputMix.c                  \
+        IAndroidBufferQueue.c         \
         IAndroidConfiguration.c       \
         IAndroidEffect.c              \
         IAndroidEffectCapabilities.c  \
         IAndroidEffectSend.c          \
-        IAndroidStreamSource.c        \
         IBassBoost.c                  \
         IBufferQueue.c                \
         IDynamicInterfaceManagement.c \
