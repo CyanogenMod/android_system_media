@@ -1,0 +1,297 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Class structures
+
+
+/*typedef*/ struct CAudioPlayer_struct {
+    IObject mObject;
+#ifdef ANDROID
+#define INTERFACES_AudioPlayer 30 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
+#else
+#define INTERFACES_AudioPlayer 26 // see MPH_to_AudioPlayer in MPH_to.c for list of interfaces
+#endif
+    SLuint8 mInterfaceStates2[INTERFACES_AudioPlayer - INTERFACES_Default];
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IPlay mPlay;
+    I3DDoppler m3DDoppler;
+    I3DGrouping m3DGrouping;
+    I3DLocation m3DLocation;
+    I3DSource m3DSource;
+    IBufferQueue mBufferQueue;
+    IEffectSend mEffectSend;
+    IMetadataExtraction mMetadataExtraction;
+    IMetadataTraversal mMetadataTraversal;
+    IPrefetchStatus mPrefetchStatus;
+    IRatePitch mRatePitch;
+    ISeek mSeek;
+    IVolume mVolume;
+    IMuteSolo mMuteSolo;
+#ifdef ANDROID
+    IAndroidEffect mAndroidEffect;
+    IAndroidEffectSend mAndroidEffectSend;
+    IAndroidConfiguration mAndroidConfiguration;
+    IAndroidBufferQueue mAndroidBufferQueue;
+#endif
+    // optional interfaces
+    I3DMacroscopic m3DMacroscopic;
+    IBassBoost mBassBoost;
+    IDynamicSource mDynamicSource;
+    IEnvironmentalReverb mEnvironmentalReverb;
+    IEqualizer mEqualizer;
+    IPitch mPitch;
+    IPresetReverb mPresetReverb;
+    IPlaybackRate mPlaybackRate;
+    IVirtualizer mVirtualizer;
+    IVisualization mVisualization;
+    // remaining are per-instance private fields not associated with an interface
+    DataLocatorFormat mDataSource;
+    DataLocatorFormat mDataSink;
+    // cached data for this instance
+    SLuint8 /*SLboolean*/ mMute;
+    // Formerly at IMuteSolo
+    SLuint8 mMuteMask;      // Mask for which channels are muted: bit 0=left, 1=right
+    SLuint8 mSoloMask;      // Mask for which channels are soloed: bit 0=left, 1=right
+    SLuint8 mNumChannels;   // 0 means unknown, then const once it is known, range 1 <= x <= 8
+    SLuint32 mSampleRateMilliHz;// 0 means unknown, then const once it is known
+    // Formerly at IEffectSend
+    /**
+     * Dry volume modified by effect send interfaces: SLEffectSendItf and SLAndroidEffectSendItf
+     */
+    SLmillibel mDirectLevel;
+    // implementation-specific data for this instance
+#ifdef USE_OUTPUTMIXEXT
+    Track *mTrack;
+    float mGains[STEREO_CHANNELS];  ///< Computed gain based on volume, mute, solo, stereo position
+    SLboolean mDestroyRequested;    ///< Mixer to acknowledge application's call to Object::Destroy
+#endif
+#ifdef USE_SNDFILE
+    struct SndFile mSndFile;
+#endif // USE_SNDFILE
+#ifdef ANDROID
+    android::Mutex          *mpLock;
+    enum AndroidObject_type mAndroidObjType;
+    enum AndroidObject_state mAndroidObjState;
+    /** identifies which group of effects ("session") this player belongs to */
+    int mSessionId;
+    /** identifies the Android stream type playback will occur on */
+    int mStreamType;
+    /** plays the PCM data for this player */
+    android::AudioTrack *mAudioTrack;
+    android::sp<android::SfPlayer> mSfPlayer;
+    android::sp<android::StreamPlayer> mStreamPlayer;
+    /** aux effect the AudioTrack will be attached to if aux send enabled */
+    android::sp<android::AudioEffect> mAuxEffect;
+    /** send level to aux effect, there's a single aux bus, so there's a single level */
+    SLmillibel mAuxSendLevel;
+    /**
+     * Amplification (can be attenuation) factor derived for the VolumeLevel
+     */
+    float mAmplFromVolLevel;
+    /**
+     * Left/right amplification (can be attenuations) factors derived for the StereoPosition
+     */
+    float mAmplFromStereoPos[STEREO_CHANNELS];
+    /**
+     * Attenuation factor derived from direct level
+     */
+    float mAmplFromDirectLevel;
+#endif
+} /*CAudioPlayer*/;
+
+
+/*typedef*/ struct CAudioRecorder_struct {
+    // mandated interfaces
+    IObject mObject;
+#ifdef ANDROID
+#define INTERFACES_AudioRecorder 11 // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
+#else
+#define INTERFACES_AudioRecorder 9  // see MPH_to_AudioRecorder in MPH_to.c for list of interfaces
+#endif
+    SLuint8 mInterfaceStates2[INTERFACES_AudioRecorder - INTERFACES_Default];
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IRecord mRecord;
+    IAudioEncoder mAudioEncoder;
+    // optional interfaces
+    IBassBoost mBassBoost;
+    IDynamicSource mDynamicSource;
+    IEqualizer mEqualizer;
+    IVisualization mVisualization;
+    IVolume mVolume;
+#ifdef ANDROID
+    IBufferQueue mBufferQueue;
+    IAndroidConfiguration mAndroidConfiguration;
+#endif
+    // remaining are per-instance private fields not associated with an interface
+    DataLocatorFormat mDataSource;
+    DataLocatorFormat mDataSink;
+    // cached data for this instance
+    SLuint8 mNumChannels;   // 0 means unknown, then const once it is known, range 1 <= x <= 8
+    SLuint32 mSampleRateMilliHz;// 0 means unknown, then const once it is known
+    // implementation-specific data for this instance
+#ifdef ANDROID
+    android::AudioRecord *mAudioRecord;
+    int mRecordSource;
+#endif
+} /*CAudioRecorder*/;
+
+
+/*typedef*/ struct CEngine_struct {
+    // mandated implicit interfaces
+    IObject mObject;
+#ifdef ANDROID
+#define INTERFACES_Engine 12 // see MPH_to_Engine in MPH_to.c for list of interfaces
+#else
+#define INTERFACES_Engine 11 // see MPH_to_Engine in MPH_to.c for list of interfaces
+#endif
+    SLuint8 mInterfaceStates2[INTERFACES_Engine - INTERFACES_Default];
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IEngine mEngine;
+    IEngineCapabilities mEngineCapabilities;
+    IThreadSync mThreadSync;
+    // mandated explicit interfaces
+    IAudioIODeviceCapabilities mAudioIODeviceCapabilities;
+    IAudioDecoderCapabilities mAudioDecoderCapabilities;
+    IAudioEncoderCapabilities mAudioEncoderCapabilities;
+    I3DCommit m3DCommit;
+    // optional interfaces
+    IDeviceVolume mDeviceVolume;
+    // OpenMAX AL mandated implicit interfaces
+    IXAEngine mXAEngine;
+#ifdef ANDROID
+    IAndroidEffectCapabilities mAndroidEffectCapabilities;
+#endif
+    // remaining are per-instance private fields not associated with an interface
+    ThreadPool mThreadPool; // for asynchronous operations
+    pthread_t mSyncThread;
+#if defined(ANDROID) && !defined(USE_BACKPORT)
+    // FIXME number of presets will only be saved in IEqualizer, preset names will not be stored
+    SLuint32 mEqNumPresets;
+    char** mEqPresetNames;
+#endif
+} /*CEngine*/;
+
+typedef struct {
+    // mandated interfaces
+    IObject mObject;
+#define INTERFACES_LEDDevice 3 // see MPH_to_LEDDevice in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_LEDDevice - INTERFACES_Default];
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    ILEDArray mLEDArray;
+    // remaining are per-instance private fields not associated with an interface
+    SLuint32 mDeviceID;
+} CLEDDevice;
+
+typedef struct {
+    // mandated interfaces
+    IObject mObject;
+#define INTERFACES_Listener 4 // see MPH_to_Listener in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_Listener - INTERFACES_Default];
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    I3DDoppler m3DDoppler;
+    I3DLocation m3DLocation;
+    // remaining are per-instance private fields not associated with an interface
+} CListener;
+
+typedef struct {
+    // mandated interfaces
+    IObject mObject;
+#define INTERFACES_MetadataExtractor 5 // see MPH_to_MetadataExtractor in MPH_to.c for list of
+                                       // interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_MetadataExtractor - INTERFACES_Default];
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IDynamicSource mDynamicSource;
+    IMetadataExtraction mMetadataExtraction;
+    IMetadataTraversal mMetadataTraversal;
+    // remaining are per-instance private fields not associated with an interface
+} CMetadataExtractor;
+
+typedef struct {
+    // mandated interfaces
+    IObject mObject;
+
+#define INTERFACES_MidiPlayer 29 // see MPH_to_MidiPlayer in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_MidiPlayer - INTERFACES_Default];
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IPlay mPlay;
+    I3DDoppler m3DDoppler;
+    I3DGrouping m3DGrouping;
+    I3DLocation m3DLocation;
+    I3DSource m3DSource;
+    IBufferQueue mBufferQueue;
+    IEffectSend mEffectSend;
+    IMetadataExtraction mMetadataExtraction;
+    IMetadataTraversal mMetadataTraversal;
+    IMIDIMessage mMIDIMessage;
+    IMIDITime mMIDITime;
+    IMIDITempo mMIDITempo;
+    IMIDIMuteSolo mMIDIMuteSolo;
+    IPrefetchStatus mPrefetchStatus;
+    ISeek mSeek;
+    IVolume mVolume;
+    IMuteSolo mMuteSolo;
+    // optional interfaces
+    I3DMacroscopic m3DMacroscopic;
+    IBassBoost mBassBoost;
+    IDynamicSource mDynamicSource;
+    IEnvironmentalReverb mEnvironmentalReverb;
+    IEqualizer mEqualizer;
+    IPitch mPitch;
+    IPresetReverb mPresetReverb;
+    IPlaybackRate mPlaybackRate;
+    IVirtualizer mVirtualizer;
+    IVisualization mVisualization;
+    // remaining are per-instance private fields not associated with an interface
+} CMidiPlayer;
+
+/*typedef*/ struct COutputMix_struct {
+    // mandated interfaces
+    IObject mObject;
+#ifdef ANDROID
+#define INTERFACES_OutputMix 12 // see MPH_to_OutputMix in MPH_to.c for list of interfaces
+#else
+#define INTERFACES_OutputMix 11 // see MPH_to_OutputMix in MPH_to.c for list of interfaces
+#endif
+    SLuint8 mInterfaceStates2[INTERFACES_OutputMix - INTERFACES_Default];
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IOutputMix mOutputMix;
+#ifdef USE_OUTPUTMIXEXT
+    IOutputMixExt mOutputMixExt;
+#endif
+    IEnvironmentalReverb mEnvironmentalReverb;
+    IEqualizer mEqualizer;
+    IPresetReverb mPresetReverb;
+    IVirtualizer mVirtualizer;
+    IVolume mVolume;
+    // optional interfaces
+    IBassBoost mBassBoost;
+    IVisualization mVisualization;
+#ifdef ANDROID
+    IAndroidEffect mAndroidEffect;
+#endif
+    // remaining are per-instance private fields not associated with an interface
+} /*COutputMix*/;
+
+typedef struct {
+    // mandated interfaces
+    IObject mObject;
+#define INTERFACES_VibraDevice 3 // see MPH_to_VibraDevice in MPH_to.c for list of interfaces
+    SLuint8 mInterfaceStates2[INTERFACES_VibraDevice - INTERFACES_Default];
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IVibra mVibra;
+    // remaining are per-instance private fields not associated with an interface
+    SLuint32 mDeviceID;
+} CVibraDevice;
