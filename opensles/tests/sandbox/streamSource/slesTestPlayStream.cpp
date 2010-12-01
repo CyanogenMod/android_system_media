@@ -46,7 +46,6 @@ void ExitOnErrorFunc( SLresult result , int line)
 
 bool prefetchError = false;
 
-
 //-----------------------------------------------------------------
 /* AndroidBufferQueueItf callback for an audio player */
 SLresult AndroidBufferQueueCallback(
@@ -57,7 +56,7 @@ SLresult AndroidBufferQueueCallback(
             void *pBufferDataLocation)
 
 {
-    fprintf(stdout, "AndroidBufferQueueCallback called\n");
+    fprintf(stdout, "cb ");
 
     size_t nbRead = fread(pBufferDataLocation, 1, bufferLength, file);
 
@@ -68,11 +67,14 @@ SLresult AndroidBufferQueueCallback(
         event = SL_ANDROIDBUFFERQUEUE_EVENT_NONE; // no event to report
     }
 
+    //fprintf(stdout, "caller = %p\n", caller);
+
     // enqueue the data right-away because in this example we're reading from a file, so we
     // can afford to do that. When streaming from the network, we would write from our cache
     // to this queue.
     // last param is NULL because we've already written the data in the buffer queue
     (*caller)->Enqueue(caller, bufferId, nbRead, event, NULL);
+    //(*abqItf)->Enqueue(abqItf, bufferId, nbRead, event, NULL);
 
     return SL_RESULT_SUCCESS;
 }
@@ -164,8 +166,8 @@ void TestPlayStream( SLObjectItf sl, const char* path)
 
     res = (*player)->GetInterface(player, SL_IID_ANDROIDBUFFERQUEUE, (void*)&abqItf);
     CheckErr(res);
-    res = (*abqItf)->RegisterCallback(abqItf, AndroidBufferQueueCallback,
-            &abqItf); CheckErr(res);
+
+    res = (*abqItf)->RegisterCallback(abqItf, AndroidBufferQueueCallback, &abqItf); CheckErr(res);
 
     /* Display duration */
     SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
@@ -220,13 +222,16 @@ void TestPlayStream( SLObjectItf sl, const char* path)
 
     /* Wait as long as the duration of the content before stopping */
     //usleep(durationInMsec * 1000);
-    usleep(30 /*s*/ * 1000 * 1000);
+    usleep(15 /*s*/ * 1000 * 1000);
 
 
     /* Make sure player is stopped */
     fprintf(stdout, "URI example: stopping playback\n");
     res = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_STOPPED);
     CheckErr(res);
+
+    fprintf(stdout, "sleeping to verify playback stopped\n");
+    usleep(2 /*s*/ * 1000 * 1000);
 
 destroyRes:
 

@@ -51,7 +51,8 @@ SLresult IAndroidBufferQueue_Clear(SLAndroidBufferQueueItf self)
 
     interface_lock_exclusive(this);
 
-    SL_LOGE("[ FIXME implement IAndroidBufferQueue_Clear ]");
+    // FIXME return value?
+    android_audioPlayer_androidBufferQueue_clear_l((CAudioPlayer*) this->mThis);
 
     interface_unlock_exclusive(this);
 
@@ -69,11 +70,15 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
 
     IAndroidBufferQueue *this = (IAndroidBufferQueue *) self;
 
-    interface_lock_exclusive(this);
+    // FIXME PRIORITY1 restore lock once async fixes in StreamPlayer done
+    //interface_lock_exclusive(this);
 
-    SL_LOGE("[ FIXME implement IAndroidBufferQueue_Enqueue ]");
+    // FIXME return value?
+    android_audioPlayer_androidBufferQueue_enqueue_l((CAudioPlayer*) this->mThis,
+            bufferId, length, event, pData);
 
-    interface_unlock_exclusive(this);
+    // FIXME PRIORITY1 restore lock once async fixes in StreamPlayer done
+    //interface_unlock_exclusive(this);
 
     SL_LEAVE_INTERFACE
 }

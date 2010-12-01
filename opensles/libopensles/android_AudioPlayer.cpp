@@ -1110,7 +1110,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
    case STREAM_SOURCE: {
         object_lock_exclusive(&pAudioPlayer->mObject);
 
-        android_StreamPlayer_realize_lApObj(pAudioPlayer);
+        android_StreamPlayer_realize_l(pAudioPlayer);
 
         object_unlock_exclusive(&pAudioPlayer->mObject);
         } break;
@@ -1562,11 +1562,23 @@ SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *ap) {
 
 
 //-----------------------------------------------------------------------------
-/* must be called with a lock on pAudioPlayer->mObj */
 void android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer *ap) {
     if (ap->mAndroidObjType == STREAM_SOURCE) {
-        android_StreamPlayer_registerCallback_lApObj(ap);
+        android_StreamPlayer_registerCallback_l(ap);
     }
 }
 
+//-----------------------------------------------------------------------------
+void android_audioPlayer_androidBufferQueue_clear_l(CAudioPlayer *ap) {
+    if (ap->mAndroidObjType == STREAM_SOURCE) {
+        android_StreamPlayer_clear_l(ap);
+    }
+}
+
+void android_audioPlayer_androidBufferQueue_enqueue_l(CAudioPlayer *ap,
+        SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData) {
+    if (ap->mAndroidObjType == STREAM_SOURCE) {
+        android_StreamPlayer_enqueue_l(ap, bufferId, length, event, pData);
+    }
+}
 

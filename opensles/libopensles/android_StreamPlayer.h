@@ -31,19 +31,16 @@ typedef struct StreamPlayback_Parameters_struct {
 
 //--------------------------------------------------------------------------------------------------
 /*
- * Called with a lock on the CAudioPlayer mObject
+ * xxx_l functions are called with a lock on the CAudioPlayer mObject
  */
-extern void android_StreamPlayer_realize_lApObj(CAudioPlayer *ap);
-
+extern void android_StreamPlayer_realize_l(CAudioPlayer *ap);
 extern void android_StreamPlayer_destroy(CAudioPlayer *ap);
-
 extern void android_StreamPlayer_setPlayState(CAudioPlayer *ap, SLuint32 playState,
         AndroidObject_state objState);
-
-/*
- * Called with a lock on the CAudioPlayer mObject
- */
-extern void android_StreamPlayer_registerCallback_lApObj(CAudioPlayer *ap);
+extern void android_StreamPlayer_registerCallback_l(CAudioPlayer *ap);
+extern void android_StreamPlayer_enqueue_l(CAudioPlayer *ap,
+        SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
+extern void android_StreamPlayer_clear_l(CAudioPlayer *ap);
 
 //--------------------------------------------------------------------------------------------------
 namespace android {
@@ -60,9 +57,9 @@ public:
 
 //--------------------------------------------------------------------------------------------------
 
-class StreamSourceAppProxy : public BnStreamSource/*, public BnMediaPlayerClient*/ {
+class StreamSourceAppProxy : public BnStreamSource {
 public:
-    StreamSourceAppProxy(slAndroidBufferQueueCallback callback, void *appContext);
+    StreamSourceAppProxy(slAndroidBufferQueueCallback callback, void *appContext, const void *caller);
     virtual ~StreamSourceAppProxy();
 
     // IStreamSource implementation
@@ -70,12 +67,17 @@ public:
     virtual void setBuffers(const Vector<sp<IMemory> > &buffers);
     virtual void onBufferAvailable(size_t index);
 
+    void receivedFromAppCommand(IStreamListener::Command cmd);
+    void receivedFromAppBuffer(size_t buffIndex, size_t buffLength);
+
 private:
+    Mutex mListenerLock;
     sp<IStreamListener> mListener;
     Vector<sp<IMemory> > mBuffers;
 
     slAndroidBufferQueueCallback mCallback;
-    void * mAppContext;
+    void *mAppContext;
+    const void *mCaller;
 
     DISALLOW_EVIL_CONSTRUCTORS(StreamSourceAppProxy);
 };
@@ -88,8 +90,11 @@ public:
     StreamPlayer(StreamPlayback_Parameters* params);
     virtual ~StreamPlayer();
 
-    void useCallbackToApp(slAndroidBufferQueueCallback callback, void *context);
+    void appRegisterCallback(slAndroidBufferQueueCallback callback, void *context, const void *caller);
+    void appEnqueue(SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
+    void appClear();
 
+    void prepare();
     void stop();
     void pause();
     void play();
