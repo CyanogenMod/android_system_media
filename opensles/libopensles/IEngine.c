@@ -918,8 +918,103 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
 {
     XA_ENTER_INTERFACE
 
-    //IXAEngine *this = (IXAEngine *) self;
-    result = SL_RESULT_FEATURE_UNSUPPORTED;
+    if (NULL == pPlayer) {
+        result = XA_RESULT_PARAMETER_INVALID;
+    } else {
+        *pPlayer = NULL;
+        unsigned exposedMask;
+        const ClassTable *pCMediaPlayer_class = objectIDtoClass(XA_OBJECTID_MEDIAPLAYER);
+        assert(NULL != pCMediaPlayer_class);
+        result = checkInterfaces(pCMediaPlayer_class, numInterfaces,
+                (const SLInterfaceID *) pInterfaceIds, pInterfaceRequired, &exposedMask);
+        if (XA_RESULT_SUCCESS == result) {
+
+            // Construct our new MediaPlayer instance
+            CMediaPlayer *this = (CMediaPlayer *) construct(pCMediaPlayer_class, exposedMask,
+                    &((CEngine *) ((IXAEngine *) self)->mThis)->mEngine.mItf);
+            if (NULL == this) {
+                result = XA_RESULT_MEMORY_FAILURE;
+            } else {
+
+                do {
+
+                    // Initialize private fields not associated with an interface
+
+                    // (assume calloc or memset 0 during allocation)
+                    // placement new
+
+
+                    // Check the source and sink parameters against generic constraints
+
+                    result = checkDataSource((const SLDataSource *) pDataSrc, &this->mDataSource);
+                    if (XA_RESULT_SUCCESS != result) {
+                        break;
+                    }
+
+                    result = checkDataSource((const SLDataSource *) pBankSrc, &this->mBankSource);
+                    if (XA_RESULT_SUCCESS != result) {
+                        break;
+                    }
+
+                    result = checkDataSink((const SLDataSink *) pAudioSnk, &this->mAudioSink, 0);
+                    if (XA_RESULT_SUCCESS != result) {
+                        break;
+                    }
+
+                    result = checkDataSink((const SLDataSink *) pImageVideoSnk,
+                            &this->mImageVideoSink, 0);
+                    if (XA_RESULT_SUCCESS != result) {
+                        break;
+                    }
+
+                    result = checkDataSink((const SLDataSink *) pVibra, &this->mVibraSink, 0);
+                    if (XA_RESULT_SUCCESS != result) {
+                        break;
+                    }
+
+                    result = checkDataSink((const SLDataSink *) pLEDArray, &this->mLEDArraySink, 0);
+                    if (XA_RESULT_SUCCESS != result) {
+                        break;
+                    }
+
+                    // Unsafe to ever refer to application pointers again
+                    pDataSrc = NULL;
+                    pBankSrc = NULL;
+                    pAudioSnk = NULL;
+                    pImageVideoSnk = NULL;
+                    pVibra = NULL;
+                    pLEDArray = NULL;
+
+                    // Check that the requested interfaces are compatible with the data source
+                    // ...
+
+                    // check the source and sink parameters against platform support
+#ifdef ANDROID
+                    // result = android_mediaPlayer_checkSourceSink(this);
+                    if (XA_RESULT_SUCCESS != result) {
+                        break;
+                    }
+#endif
+
+                    // platform-specific initialization
+#ifdef ANDROID
+                    // ...
+#endif
+
+                } while (0);
+
+                if (XA_RESULT_SUCCESS != result) {
+                    IObject_Destroy(&this->mObject.mItf);
+                } else {
+                    IObject_Publish(&this->mObject);
+                    // return the new media player object
+                    *pPlayer = (XAObjectItf) &this->mObject.mItf;
+                }
+
+            }
+        }
+
+    }
 
     XA_LEAVE_INTERFACE
 }

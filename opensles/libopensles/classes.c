@@ -40,6 +40,7 @@ static const ClassTable C3DGroup_class = {
     "3DGroup",
     sizeof(C3DGroup),
     SL_OBJECTID_3DGROUP,
+    0,      // OpenMAX AL object ID
     NULL,
     NULL,
     NULL,
@@ -99,6 +100,7 @@ static const ClassTable CAudioPlayer_class = {
     "AudioPlayer",
     sizeof(CAudioPlayer),
     SL_OBJECTID_AUDIOPLAYER,
+    0,      // OpenMAX AL object ID
     CAudioPlayer_Realize,
     CAudioPlayer_Resume,
     CAudioPlayer_Destroy,
@@ -135,6 +137,7 @@ static const ClassTable CAudioRecorder_class = {
     "AudioRecorder",
     sizeof(CAudioRecorder),
     SL_OBJECTID_AUDIORECORDER,
+    0,      // OpenMAX AL object ID
     CAudioRecorder_Realize,
     CAudioRecorder_Resume,
     CAudioRecorder_Destroy,
@@ -175,6 +178,7 @@ static const ClassTable CEngine_class = {
     "Engine",
     sizeof(CEngine),
     SL_OBJECTID_ENGINE,
+    XA_OBJECTID_ENGINE,
     CEngine_Realize,
     CEngine_Resume,
     CEngine_Destroy,
@@ -200,6 +204,7 @@ static const ClassTable CLEDDevice_class = {
     "LEDDevice",
     sizeof(CLEDDevice),
     SL_OBJECTID_LEDDEVICE,
+    XA_OBJECTID_LEDDEVICE,
     NULL,
     NULL,
     NULL,
@@ -228,6 +233,7 @@ static const ClassTable CListener_class = {
     "Listener",
     sizeof(CListener),
     SL_OBJECTID_LISTENER,
+    0,      // OpenMAX AL object ID
     NULL,
     NULL,
     NULL,
@@ -257,6 +263,7 @@ static const ClassTable CMetadataExtractor_class = {
     "MetadataExtractor",
     sizeof(CMetadataExtractor),
     SL_OBJECTID_METADATAEXTRACTOR,
+    XA_OBJECTID_METADATAEXTRACTOR,
     NULL,
     NULL,
     NULL,
@@ -311,6 +318,7 @@ static const ClassTable CMidiPlayer_class = {
     "MidiPlayer",
     sizeof(CMidiPlayer),
     SL_OBJECTID_MIDIPLAYER,
+    0,      // OpenMAX AL object ID
     NULL,
     NULL,
     NULL,
@@ -354,6 +362,7 @@ static const ClassTable COutputMix_class = {
     "OutputMix",
     sizeof(COutputMix),
     SL_OBJECTID_OUTPUTMIX,
+    XA_OBJECTID_OUTPUTMIX,
     COutputMix_Realize,
     COutputMix_Resume,
     COutputMix_Destroy,
@@ -379,6 +388,7 @@ static const ClassTable CVibraDevice_class = {
     "VibraDevice",
     sizeof(CVibraDevice),
     SL_OBJECTID_VIBRADEVICE,
+    XA_OBJECTID_VIBRADEVICE,
     NULL,
     NULL,
     NULL,
@@ -388,7 +398,30 @@ static const ClassTable CVibraDevice_class = {
 #endif
 
 
-static const ClassTable * const classes[] = {
+// Media player class
+
+static const struct iid_vtable MediaPlayer_interfaces[INTERFACES_MediaPlayer] = {
+    {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CMediaPlayer, mObject)},
+    {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
+        offsetof(CMediaPlayer, mDynamicInterfaceManagement)},
+};
+
+static const ClassTable CMediaPlayer_class = {
+    MediaPlayer_interfaces,
+    INTERFACES_MediaPlayer,
+    MPH_to_MediaPlayer,
+    "MediaPlayer",
+    sizeof(CMediaPlayer),
+    0,      // OpenSL ES object ID
+    XA_OBJECTID_MEDIAPLAYER,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+
+
+static const ClassTable * const slClasses[] = {
     // Do not change order of these entries; they are in numerical order
     &CEngine_class,
 #if USE_PROFILES & USE_PROFILES_OPTIONAL
@@ -425,20 +458,6 @@ static const ClassTable * const classes[] = {
 };
 
 
-/* \brief Map SL_OBJECTID to class or NULL if object ID not supported */
-
-const ClassTable *objectIDtoClass(SLuint32 objectID)
-{
-    // object ID is the engine and always present
-    assert(NULL != classes[0]);
-    SLuint32 objectID0 = classes[0]->mObjectID;
-    if ((objectID0 <= objectID) && ((objectID0 + sizeof(classes)/sizeof(classes[0])) > objectID)) {
-        return classes[objectID - objectID0];
-    }
-    return NULL;
-}
-
-
 static const ClassTable * const xaClasses[] = {
     &CEngine_class,
 #if USE_PROFILES & USE_PROFILES_OPTIONAL
@@ -448,14 +467,13 @@ static const ClassTable * const xaClasses[] = {
     NULL,
     NULL,
 #endif
+    &CMediaPlayer_class,
 #if 1
     NULL,
     NULL,
-    NULL,
 #else
-    &xaCMediaPlayer_class,
-    &xaCMediaRecorder_class,
-    &xaCRadioDevice_class,
+    &CMediaRecorder_class,
+    &CRadioDevice_class,
 #endif
     &COutputMix_class,
 #if USE_PROFILES & (USE_PROFILES_GAME | USE_PROFILES_MUSIC)
@@ -466,21 +484,27 @@ static const ClassTable * const xaClasses[] = {
 #if 1
     NULL
 #else
-    &xaCCameraDevice_class
+    &CCameraDevice_class
 #endif
 };
 
 
-/* \brief Map XA_OBJECTID to class or NULL if object ID not supported */
+/* \brief Map SL_OBJECTID to class or NULL if object ID not supported */
 
-const ClassTable *xaObjectIDtoClass(XAuint32 objectID)
+const ClassTable *objectIDtoClass(SLuint32 objectID)
 {
     // object ID is the engine and always present
-    assert(NULL != xaClasses[0]);
-    SLuint32 objectID0 = xaClasses[0]->mObjectID;
-    if ((objectID0 <= objectID) && ((objectID0 + sizeof(xaClasses)/sizeof(xaClasses[0])) >
+    assert(NULL != slClasses[0]);
+    SLuint32 slObjectID0 = slClasses[0]->mSLObjectID;
+    if ((slObjectID0 <= objectID) && ((slObjectID0 + sizeof(slClasses)/sizeof(slClasses[0])) >
             objectID)) {
-        return xaClasses[objectID - objectID0];
+        return slClasses[objectID - slObjectID0];
+    }
+    assert(NULL != xaClasses[0]);
+    SLuint32 xaObjectID0 = xaClasses[0]->mXAObjectID;
+    if ((xaObjectID0 <= objectID) && ((xaObjectID0 + sizeof(xaClasses)/sizeof(xaClasses[0])) >
+            objectID)) {
+        return xaClasses[objectID - xaObjectID0];
     }
     return NULL;
 }

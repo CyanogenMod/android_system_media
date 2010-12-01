@@ -29,7 +29,8 @@ extern const signed char
     MPH_to_MetadataExtractor[MPH_MAX],
     MPH_to_MidiPlayer[MPH_MAX],
     MPH_to_OutputMix[MPH_MAX],
-    MPH_to_Vibra[MPH_MAX];
+    MPH_to_Vibra[MPH_MAX],
+    MPH_to_MediaPlayer[MPH_MAX];
 
 /** \brief Maximum number of interfaces on a single object. */
 #define MAX_INDEX 32

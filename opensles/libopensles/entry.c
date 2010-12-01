@@ -87,7 +87,7 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         }
 
         unsigned exposedMask;
-        const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
+        // const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
         assert(NULL != pCEngine_class);
         result = checkInterfaces(pCEngine_class, numInterfaces,
             pInterfaceIds, pInterfaceRequired, &exposedMask);
@@ -253,7 +253,7 @@ XA_API XAresult XAAPIENTRY xaCreateEngine(XAObjectItf *pEngine, XAuint32 numOpti
     result = liCreateEngine((SLObjectItf *) pEngine, numOptions,
             (const SLEngineOption *) pEngineOptions, numInterfaces,
             (const SLInterfaceID *) pInterfaceIds, (const SLboolean *) pInterfaceRequired,
-            xaObjectIDtoClass(XA_OBJECTID_ENGINE));
+            objectIDtoClass(XA_OBJECTID_ENGINE));
 
     XA_LEAVE_GLOBAL
 }
@@ -266,7 +266,7 @@ XA_API XAresult XAAPIENTRY xaQueryNumSupportedEngineInterfaces(XAuint32 *pNumSup
     XA_ENTER_GLOBAL
 
     result = liQueryNumSupportedInterfaces(pNumSupportedInterfaces,
-            xaObjectIDtoClass(XA_OBJECTID_ENGINE));
+            objectIDtoClass(XA_OBJECTID_ENGINE));
 
     XA_LEAVE_GLOBAL
 }
@@ -280,7 +280,7 @@ XA_API XAresult XAAPIENTRY xaQuerySupportedEngineInterfaces(XAuint32 index,
     XA_ENTER_GLOBAL
 
     result = liQuerySupportedInterfaces(index, (SLInterfaceID *) pInterfaceId,
-            xaObjectIDtoClass(XA_OBJECTID_ENGINE));
+            objectIDtoClass(XA_OBJECTID_ENGINE));
 
     XA_LEAVE_GLOBAL
 }

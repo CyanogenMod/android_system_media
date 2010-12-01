@@ -47,7 +47,7 @@ int main(int argc, char **argv)
             XA_DEFAULTDEVICEID_VIBRA, 0, NULL, NULL);
     printf("result = %ld, deviceObject=%p\n", result, deviceObject);
 
-    printf("CreateMediaPlayer");
+    printf("CreateMediaPlayer\n");
     XAObjectItf playerObject;
     XADataLocator_URI locUri;
     locUri.locatorType = XA_DATALOCATOR_URI;

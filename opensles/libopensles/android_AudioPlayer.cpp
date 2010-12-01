@@ -663,14 +663,14 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             } //case SL_DATAFORMAT_PCM
             break;
         case SL_DATAFORMAT_MIME:
-        case SL_DATAFORMAT_RESERVED3:
+        case XA_DATAFORMAT_RAWIMAGE:
             SL_LOGE("Cannot create audio player with buffer queue data source "
                 "without SL_DATAFORMAT_PCM format");
             return SL_RESULT_CONTENT_UNSUPPORTED;
         default:
-            SL_LOGE("Cannot create audio player with buffer queue data source "
-                "without SL_DATAFORMAT_PCM format");
-            return SL_RESULT_PARAMETER_INVALID;
+            // invalid data format is detected earlier
+            assert(false);
+            return SL_RESULT_INTERNAL_ERROR;
         } // switch (formatType)
         } // case SL_DATALOCATOR_BUFFERQUEUE or SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE
         break;
@@ -687,7 +687,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         case SL_DATAFORMAT_MIME:
             break;
         case SL_DATAFORMAT_PCM:
-        case SL_DATAFORMAT_RESERVED3:
+        case XA_DATAFORMAT_RAWIMAGE:
             SL_LOGE("Cannot create audio player with SL_DATALOCATOR_URI data source without "
                 "SL_DATAFORMAT_MIME format");
             return SL_RESULT_CONTENT_UNSUPPORTED;
@@ -706,10 +706,14 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             // FIXME implement
             SL_LOGD("[ FIXME implement PCM FD data sources ]");
             break;
-        case SL_DATAFORMAT_RESERVED3:
+        case XA_DATAFORMAT_RAWIMAGE:
             SL_LOGE("Cannot create audio player with SL_DATALOCATOR_ANDROIDFD data source "
                 "without SL_DATAFORMAT_MIME or SL_DATAFORMAT_PCM format");
             return SL_RESULT_CONTENT_UNSUPPORTED;
+        default:
+            // invalid data format is detected earlier
+            assert(false);
+            return SL_RESULT_INTERNAL_ERROR;
         } // switch (formatType)
         } // case SL_DATALOCATOR_ANDROIDFD
         break;
@@ -724,9 +728,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     case SL_DATALOCATOR_ADDRESS:
     case SL_DATALOCATOR_IODEVICE:
     case SL_DATALOCATOR_OUTPUTMIX:
-    case SL_DATALOCATOR_RESERVED5:
+    case XA_DATALOCATOR_NATIVEDISPLAY:
     case SL_DATALOCATOR_MIDIBUFFERQUEUE:
-    case SL_DATALOCATOR_RESERVED8:
         SL_LOGE("Cannot create audio player with data locator type 0x%x", (unsigned) locatorType);
         return SL_RESULT_CONTENT_UNSUPPORTED;
     default:

@@ -208,7 +208,10 @@ typedef struct {
     const signed char *mMPH_to_index;
     const char * const mName;
     size_t mSize;
-    SLuint32 mObjectID;
+    // OpenSL ES and OpenMAX AL object IDs come from different ranges, and some objects such as
+    // Engine, Output Mix, LED, and Vibra belong to both APIs, so we keep both object IDs
+    SLuint16 mSLObjectID;   // OpenSL ES object ID
+    XAuint16 mXAObjectID;   // OpenMAX AL object ID
     // hooks
     AsyncHook mRealize;
     AsyncHook mResume;
@@ -297,7 +300,6 @@ extern SLresult checkInterfaces(const ClassTable *class__,
 extern IObject *construct(const ClassTable *class__,
     unsigned exposedMask, SLEngineItf engine);
 extern const ClassTable *objectIDtoClass(SLuint32 objectID);
-extern const ClassTable *xaObjectIDtoClass(XAuint32 objectID);
 extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
 extern SLuint32 IObjectToObjectID(IObject *object);
 extern void IObject_Publish(IObject *this);

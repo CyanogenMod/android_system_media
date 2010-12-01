@@ -97,7 +97,7 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
         // Asynchronous: mark operation pending and cancellable
-        if (async && (SL_OBJECTID_ENGINE != class__->mObjectID)) {
+        if (async && (SL_OBJECTID_ENGINE != class__->mSLObjectID)) {
             state = SL_OBJECT_STATE_REALIZING_1;
         // Synchronous: mark operation pending and non-cancellable
         } else {
@@ -334,8 +334,8 @@ static SLresult IObject_GetInterface(SLObjectItf self, const SLInterfaceID iid, 
                         !(INTERFACE_PREREALIZE & class__->mInterfaces[index].mInterface)) {
                     // Can't get interface on an unrealized object unless pre-realize is ok
                     result = SL_RESULT_PRECONDITIONS_VIOLATED;
-                } else if ((MPH_MUTESOLO == MPH) && (SL_OBJECTID_AUDIOPLAYER == class__->mObjectID)
-                        && (1 == ((CAudioPlayer *) this)->mNumChannels)) {
+                } else if ((MPH_MUTESOLO == MPH) && (SL_OBJECTID_AUDIOPLAYER ==
+                        class__->mSLObjectID) && (1 == ((CAudioPlayer *) this)->mNumChannels)) {
                     // Can't get the MuteSolo interface of an audio player if the channel count is
                     // mono, but _can_ get the MuteSolo interface if the channel count is unknown
                     result = SL_RESULT_FEATURE_UNSUPPORTED;
@@ -608,7 +608,7 @@ void IObject_Destroy(SLObjectItf self)
                                         // was ifdef USE_DEBUG but safer to do this unconditionally
     free(this);
 
-    if (SL_OBJECTID_ENGINE == class__->mObjectID) {
+    if (SL_OBJECTID_ENGINE == class__->mSLObjectID) {
         CEngine_Destroyed((CEngine *) this);
     }
 

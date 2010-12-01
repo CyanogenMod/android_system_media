@@ -71,10 +71,15 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
             case SL_IODEVICE_VIBRA:
                 expectedObjectID = SL_OBJECTID_VIBRADEVICE;
                 break;
+            case XA_IODEVICE_CAMERA:
+                expectedObjectID = XA_OBJECTID_CAMERADEVICE;
+                break;
+            case XA_IODEVICE_RADIO:
+                expectedObjectID = XA_OBJECTID_RADIODEVICE;
+                break;
             // audio input and audio output cannot be specified via objects
             case SL_IODEVICE_AUDIOINPUT:
-            // worse yet, an SL_IODEVICE enum constant for audio output does not exist yet
-            // case SL_IODEVICE_AUDIOOUTPUT:
+            // case SL_IODEVICE_AUDIOOUTPUT:   // does not exist in 1.0.1, added in 1.1
             default:
                 SL_LOGE("invalid deviceType %lu", deviceType);
                 pDataLocator->mIODevice.device = NULL;
@@ -110,6 +115,18 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
                     return SL_RESULT_PARAMETER_INVALID;
                 }
                 break;
+            case XA_IODEVICE_RADIO:
+                // no default device ID for radio; see Khronos bug XXXX
+                break;
+            case XA_IODEVICE_CAMERA:
+                if (XA_DEFAULTDEVICEID_CAMERA != deviceID) {
+                    SL_LOGE("invalid audio input deviceID %lu", deviceID);
+                    return XA_RESULT_PARAMETER_INVALID;
+                }
+                break;
+            // case SL_IODEVICE_AUDIOOUTPUT:
+                // does not exist in 1.0.1, added in 1.1
+                // break;
             default:
                 SL_LOGE("invalid deviceType %lu", deviceType);
                 return SL_RESULT_PARAMETER_INVALID;
@@ -144,6 +161,11 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
             pDataLocator->mOutputMix.outputMix = NULL;
             return result;
         }
+        break;
+
+    case XA_DATALOCATOR_NATIVEDISPLAY:
+        pDataLocator->mNativeDisplay = *(XADataLocator_NativeDisplay *)pLocator;
+        // don't check the hWindow and hDisplay as they aren't portable
         break;
 
     case SL_DATALOCATOR_URI:
@@ -210,6 +232,11 @@ static SLresult checkDataLocator(void *pLocator, DataLocator *pDataLocator)
 static void freeDataLocator(DataLocator *pDataLocator)
 {
     switch (pDataLocator->mLocatorType) {
+    case SL_DATALOCATOR_ADDRESS:
+    case SL_DATALOCATOR_BUFFERQUEUE:
+    case SL_DATALOCATOR_MIDIBUFFERQUEUE:
+    case XA_DATALOCATOR_NATIVEDISPLAY:
+        break;
     case SL_DATALOCATOR_URI:
         if (NULL != pDataLocator->mURI.URI) {
             free(pDataLocator->mURI.URI);
@@ -231,10 +258,13 @@ static void freeDataLocator(DataLocator *pDataLocator)
         break;
 #ifdef ANDROID
     case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
-
+    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+    case SL_DATALOCATOR_ANDROIDFD:
         break;
 #endif
     default:
+        // an invalid data locator is caught earlier when making the copy
+        assert(false);
         break;
     }
 }
@@ -403,6 +433,57 @@ static SLresult checkDataFormat(void *pFormat, DataFormat *pDataFormat)
             }
             break;
 
+        case XA_DATAFORMAT_RAWIMAGE:
+            pDataFormat->mRawImage = *(XADataFormat_RawImage *)pFormat;
+            switch (pDataFormat->mRawImage.colorFormat) {
+            case XA_COLORFORMAT_MONOCHROME:
+            case XA_COLORFORMAT_8BITRGB332:
+            case XA_COLORFORMAT_12BITRGB444:
+            case XA_COLORFORMAT_16BITARGB4444:
+            case XA_COLORFORMAT_16BITARGB1555:
+            case XA_COLORFORMAT_16BITRGB565:
+            case XA_COLORFORMAT_16BITBGR565:
+            case XA_COLORFORMAT_18BITRGB666:
+            case XA_COLORFORMAT_18BITARGB1665:
+            case XA_COLORFORMAT_19BITARGB1666:
+            case XA_COLORFORMAT_24BITRGB888:
+            case XA_COLORFORMAT_24BITBGR888:
+            case XA_COLORFORMAT_24BITARGB1887:
+            case XA_COLORFORMAT_25BITARGB1888:
+            case XA_COLORFORMAT_32BITBGRA8888:
+            case XA_COLORFORMAT_32BITARGB8888:
+            case XA_COLORFORMAT_YUV411PLANAR:
+            case XA_COLORFORMAT_YUV420PLANAR:
+            case XA_COLORFORMAT_YUV420SEMIPLANAR:
+            case XA_COLORFORMAT_YUV422PLANAR:
+            case XA_COLORFORMAT_YUV422SEMIPLANAR:
+            case XA_COLORFORMAT_YCBYCR:
+            case XA_COLORFORMAT_YCRYCB:
+            case XA_COLORFORMAT_CBYCRY:
+            case XA_COLORFORMAT_CRYCBY:
+            case XA_COLORFORMAT_YUV444INTERLEAVED:
+            case XA_COLORFORMAT_RAWBAYER8BIT:
+            case XA_COLORFORMAT_RAWBAYER10BIT:
+            case XA_COLORFORMAT_RAWBAYER8BITCOMPRESSED:
+            case XA_COLORFORMAT_L2:
+            case XA_COLORFORMAT_L4:
+            case XA_COLORFORMAT_L8:
+            case XA_COLORFORMAT_L16:
+            case XA_COLORFORMAT_L24:
+            case XA_COLORFORMAT_L32:
+            case XA_COLORFORMAT_18BITBGR666:
+            case XA_COLORFORMAT_24BITARGB6666:
+            case XA_COLORFORMAT_24BITABGR6666:
+                break;
+            case XA_COLORFORMAT_UNUSED:
+            default:
+                result = XA_RESULT_PARAMETER_INVALID;
+                SL_LOGE("Unsupported color format %ld", pDataFormat->mRawImage.colorFormat);
+                break;
+            }
+            // no checks for height, width, or stride
+            break;
+
         default:
             result = SL_RESULT_PARAMETER_INVALID;
             SL_LOGE("formatType=%u", (unsigned) formatType);
@@ -450,6 +531,13 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
             }
         }
         break;
+#ifdef ANDROID
+    case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
+#endif
+    case SL_DATALOCATOR_ADDRESS:
+    case SL_DATALOCATOR_MIDIBUFFERQUEUE:
+    case XA_DATALOCATOR_NATIVEDISPLAY:
+        // any special checks here???
     default:
         // can't request SLBufferQueueItf or its alias SLAndroidSimpleBufferQueueItf
         // if the data source is not a buffer queue
@@ -484,7 +572,13 @@ static void freeDataFormat(DataFormat *pDataFormat)
             pDataFormat->mMIME.mimeType = NULL;
         }
         break;
+    case SL_DATAFORMAT_PCM:
+    case XA_DATAFORMAT_RAWIMAGE:
+    case SL_DATAFORMAT_NULL:
+        break;
     default:
+        // an invalid data format is caught earlier during the copy
+        assert(false);
         break;
     }
 }
@@ -533,6 +627,9 @@ SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataL
         // for these data locator types, ignore the pFormat as it might be uninitialized
         pDataLocatorFormat->mFormat.mFormatType = SL_DATAFORMAT_NULL;
         break;
+    case XA_DATALOCATOR_NATIVEDISPLAY:
+        // should not be allowed as a data source?!
+        break;
     }
 
     pDataLocatorFormat->u.mSource.pLocator = &pDataLocatorFormat->mLocator;
@@ -544,7 +641,7 @@ SLresult checkDataSource(const SLDataSource *pDataSrc, DataLocatorFormat *pDataL
 /** \brief Check a data sink and make local deep copy */
 
 SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLocatorFormat,
-        SLuint32 objType)
+        SLuint32 objType)   // FIXME objType should be mask of allowed data locators instead
 {
     if (NULL == pDataSink) {
         SL_LOGE("pDataSink NULL");
@@ -606,6 +703,13 @@ SLresult checkDataSink(const SLDataSink *pDataSink, DataLocatorFormat *pDataLoca
         // for these data locator types, ignore the pFormat as it might be uninitialized
         pDataLocatorFormat->mFormat.mFormatType = SL_DATAFORMAT_NULL;
         break;
+    case XA_DATALOCATOR_NATIVEDISPLAY:
+        // this is OK
+        break;
+#ifdef ANDROID
+    case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
+        break;
+#endif
     }
 
     pDataLocatorFormat->u.mSink.pLocator = &pDataLocatorFormat->mLocator;

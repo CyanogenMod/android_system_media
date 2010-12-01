@@ -24,6 +24,7 @@ typedef union {
     SLDataLocator_MIDIBufferQueue mMIDIBufferQueue;
     SLDataLocator_OutputMix mOutputMix;
     SLDataLocator_URI mURI;
+    XADataLocator_NativeDisplay mNativeDisplay;
 #ifdef ANDROID
     SLDataLocator_AndroidFD mFD;
     SLDataLocator_AndroidBufferQueue mBQ;
@@ -34,6 +35,7 @@ typedef union {
     SLuint32 mFormatType;
     SLDataFormat_PCM mPCM;
     SLDataFormat_MIME mMIME;
+    XADataFormat_RawImage mRawImage;
 } DataFormat;
 
 typedef struct {

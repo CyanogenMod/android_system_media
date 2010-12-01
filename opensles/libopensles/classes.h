@@ -295,3 +295,18 @@ typedef struct {
     // remaining are per-instance private fields not associated with an interface
     SLuint32 mDeviceID;
 } CVibraDevice;
+
+
+typedef struct CMediaPlayer_struct {
+    IObject mObject;
+#define INTERFACES_MediaPlayer 2
+    XAuint8 mInterfaceStates2[INTERFACES_MediaPlayer - INTERFACES_Default];
+    IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    // ...
+    DataLocatorFormat mDataSource;
+    DataLocatorFormat mBankSource;
+    DataLocatorFormat mAudioSink;
+    DataLocatorFormat mImageVideoSink;
+    DataLocatorFormat mVibraSink;
+    DataLocatorFormat mLEDArraySink;
+} CMediaPlayer;

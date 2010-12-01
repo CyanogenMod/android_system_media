@@ -61,5 +61,6 @@ int main(int argc, char **argv)
     _(MidiPlayer)
     _(OutputMix)
     _(Vibra)
+    _(MediaPlayer)
     return EXIT_SUCCESS;
 }
