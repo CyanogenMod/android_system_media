@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-#define USE_LOG SLAndroidLogLevel_Verbose
+//#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
+#undef this // FIXME shouldn't have to do this, no pun intended
 #include <media/IMediaPlayerService.h>
 
 //----------------------------------------------------------------
 void android_StreamPlayer_realize_l(CAudioPlayer *ap) {
-    SL_LOGV("android_StreamPlayer_realize_l(%p)", ap);
+    SL_LOGI("android_StreamPlayer_realize_l(%p)", ap);
 
     StreamPlayback_Parameters ap_params;
     ap_params.sessionId = ap->mSessionId;
     ap_params.streamType = ap->mStreamType;
     ap->mStreamPlayer = new android::StreamPlayer(&ap_params);
+    ap->mStreamPlayer->init();
 }
 
 
 void android_StreamPlayer_destroy(CAudioPlayer *ap) {
-    SL_LOGV("android_StreamPlayer_destroy(%p)", ap);
+    SL_LOGI("android_StreamPlayer_destroy(%p)", ap);
 
     ap->mStreamPlayer.clear();
 }
@@ -104,7 +106,6 @@ void android_StreamPlayer_registerCallback_l(CAudioPlayer *ap) {
 
 void android_StreamPlayer_enqueue_l(CAudioPlayer *ap,
         SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData) {
-    //SL_LOGE("#################### android_StreamPlayer_enqueue_l");
     if (ap->mStreamPlayer != 0) {
         ap->mStreamPlayer->appEnqueue(bufferId, length, event, pData);
     }
@@ -132,7 +133,7 @@ StreamMediaPlayerClient::~StreamMediaPlayerClient() {
 //--------------------------------------------------
 // IMediaPlayerClient implementation
 void StreamMediaPlayerClient::notify(int msg, int ext1, int ext2) {
-    SL_LOGV("StreamMediaPlayerClient::notify(msg=%d, ext1=%d, ext2=%d)", msg, ext1, ext2);
+    SL_LOGE("StreamMediaPlayerClient::notify(msg=%d, ext1=%d, ext2=%d)", msg, ext1, ext2);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -163,7 +164,7 @@ void StreamSourceAppProxy::setBuffers(const Vector<sp<IMemory> > &buffers) {
 }
 
 void StreamSourceAppProxy::onBufferAvailable(size_t index) {
-    LOGI("onBufferAvailable %d", index);
+    SL_LOGD("StreamSourceAppProxy::onBufferAvailable(%d)", index);
 
     CHECK_LT(index, mBuffers.size());
     sp<IMemory> mem = mBuffers.itemAt(index);
@@ -202,6 +203,8 @@ StreamPlayer::StreamPlayer(StreamPlayback_Parameters* params) :
 {
     SL_LOGV("StreamPlayer::StreamPlayer()");
 
+    mLooper = new android::ALooper();
+
     mPlaybackParams = *params;
 
     mServiceManager = defaultServiceManager();
@@ -211,9 +214,12 @@ StreamPlayer::StreamPlayer(StreamPlayback_Parameters* params) :
     CHECK(mMediaPlayerService.get() != NULL);
 }
 
-
 StreamPlayer::~StreamPlayer() {
     SL_LOGV("StreamPlayer::~StreamPlayer()");
+
+    mLooper->stop();
+    mLooper->unregisterHandler(id());
+    mLooper.clear();
 
     mAppProxy.clear();
     mMPClient.clear();
@@ -224,14 +230,27 @@ StreamPlayer::~StreamPlayer() {
     mServiceManager.clear();
 }
 
+void StreamPlayer::init() {
+    mLooper->registerHandler(this);
+    mLooper->start(false /*runOnCallingThread*/, false /*canCallJava*/); // use default priority
+}
+
 void StreamPlayer::prepare() {
-    // FIXME PRIORITY1 must be async
-    SL_LOGE("StreamPlayer::prepare()");
-    mPlayer = mMediaPlayerService->create(getpid(), mMPClient /*IMediaPlayerClient*/,
-            mAppProxy /*IStreamSource*/, mPlaybackParams.sessionId);
-    SL_LOGE("StreamPlayer::prepare() after mMediaPlayerService->create()");
-    // FIXME PRIORITY1
-    //mPlayer->setAudioStreamType(mPlaybackParams.streamType);
+    SL_LOGI("StreamPlayer::prepare()");
+    sp<AMessage> msg = new AMessage(kWhatPrepare, id());
+    msg->post();
+}
+
+void StreamPlayer::play() {
+    //SL_LOGV("StreamPlayer::play()");
+    sp<AMessage> msg = new AMessage(kWhatPlay, id());
+    msg->post();
+}
+
+void StreamPlayer::pause() {
+    //SL_LOGV("StreamPlayer::prepare()");
+    sp<AMessage> msg = new AMessage(kWhatPause, id());
+    msg->post();
 }
 
 void StreamPlayer::stop() {
@@ -242,25 +261,7 @@ void StreamPlayer::stop() {
     }
 }
 
-void StreamPlayer::pause() {
-    // FIXME PRIORITY1 must be async
-    Mutex::Autolock _l(mLock);
-    if (mPlayer != 0) {
-        mPlayer->pause();
-    }
-}
-
-void StreamPlayer::play() {
-    // FIXME PRIORITY1 must be async
-    Mutex::Autolock _l(mLock);
-    if (mPlayer != 0) {
-        mPlayer->start();
-    }
-}
-
 void StreamPlayer::appRegisterCallback(slAndroidBufferQueueCallback callback, void *context, const void *caller) {
-    //SL_LOGE("#################### appRegisterCallback");
-
     Mutex::Autolock _l(mLock);
 
     mAppProxy = new StreamSourceAppProxy(callback, context, caller);
@@ -297,5 +298,54 @@ void StreamPlayer::appClear() {
         SL_LOGE("[ FIXME implement StreamPlayer::appClear() ]");
     }
 }
+
+//--------------------------------------------------
+// AHandler implementation
+void StreamPlayer::onMessageReceived(const sp<AMessage> &msg) {
+    switch (msg->what()) {
+        case kWhatPrepare:
+            onPrepare();
+            break;
+/*
+        case kWhatNotif:
+            onNotify(msg);
+            break;
+*/
+        case kWhatPlay:
+            onPlay();
+            break;
+
+        case kWhatPause:
+            onPause();
+            break;
+
+        default:
+            TRESPASS();
+    }
+}
+
+//--------------------------------------------------
+// Event handlers
+void StreamPlayer::onPrepare() {
+    SL_LOGI("StreamPlayer::onPrepare()");
+    mPlayer = mMediaPlayerService->create(getpid(), mMPClient /*IMediaPlayerClient*/,
+            mAppProxy /*IStreamSource*/, mPlaybackParams.sessionId);
+    SL_LOGI("StreamPlayer::onPrepare() after mMediaPlayerService->create()");
+    // FIXME PRIORITY1
+    //mPlayer->setAudioStreamType(mPlaybackParams.streamType);
+}
+
+void StreamPlayer::onPause() {
+    if (mPlayer != 0) {
+        mPlayer->pause();
+    }
+}
+
+void StreamPlayer::onPlay() {
+    if (mPlayer != 0) {
+        mPlayer->start();
+    }
+}
+
 
 } // namespace android

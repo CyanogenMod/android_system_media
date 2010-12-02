@@ -84,11 +84,13 @@ private:
 
 
 //--------------------------------------------------------------------------------------------------
-class StreamPlayer : public RefBase
+class StreamPlayer : public AHandler
 {
 public:
     StreamPlayer(StreamPlayback_Parameters* params);
     virtual ~StreamPlayer();
+
+    void init();
 
     void appRegisterCallback(slAndroidBufferQueueCallback callback, void *context, const void *caller);
     void appEnqueue(SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
@@ -100,6 +102,11 @@ public:
     void play();
 
 protected:
+    // AHandler implementation
+    virtual void onMessageReceived(const sp<AMessage> &msg);
+
+    sp<ALooper> mLooper;
+
     StreamPlayback_Parameters mPlaybackParams;
     sp<StreamSourceAppProxy> mAppProxy; // application proxy for the stream source
     sp<StreamMediaPlayerClient> mMPClient;
@@ -111,6 +118,19 @@ protected:
 
 private:
     Mutex mLock;
+
+    enum {
+        kWhatPrepare    = 'prep',
+        kWhatNotif      = 'noti',
+        kWhatPlay       = 'play',
+        kWhatPause      = 'paus',
+    };
+
+    // Event handlers
+    void onPrepare();
+    void onNotif(const sp<AMessage> &msg);
+    void onPlay();
+    void onPause();
 };
 
 } // namespace android

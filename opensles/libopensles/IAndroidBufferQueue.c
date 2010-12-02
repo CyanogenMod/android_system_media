@@ -70,15 +70,14 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
 
     IAndroidBufferQueue *this = (IAndroidBufferQueue *) self;
 
-    // FIXME PRIORITY1 restore lock once async fixes in StreamPlayer done
-    //interface_lock_exclusive(this);
+    interface_lock_exclusive(this);
 
-    // FIXME return value?
+    // FIXME return value? of particular interest: error is length is larger than size received
+    //   in callback
     android_audioPlayer_androidBufferQueue_enqueue_l((CAudioPlayer*) this->mThis,
             bufferId, length, event, pData);
 
-    // FIXME PRIORITY1 restore lock once async fixes in StreamPlayer done
-    //interface_unlock_exclusive(this);
+    interface_unlock_exclusive(this);
 
     SL_LEAVE_INTERFACE
 }

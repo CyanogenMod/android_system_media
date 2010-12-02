@@ -34,7 +34,8 @@ include $(CLEAR_VARS)
 LOCAL_CFLAGS += -DSL_API= -DXA_API=SLAPIENTRY -DXAAPIENTRY=
 #LOCAL_CFLAGS += -DUSE_PROFILES=0 -UUSE_TRACE -UUSE_DEBUG -DNDEBUG -DUSE_LOG=SLAndroidLogLevel_Info
 LOCAL_CFLAGS += -DUSE_PROFILES=0 -DUSE_TRACE -DUSE_DEBUG -UNDEBUG \
-   -DUSE_LOG=SLAndroidLogLevel_Verbose
+#   -DUSE_LOG=SLAndroidLogLevel_Verbose
+   -DUSE_LOG=SLAndroidLogLevel_Info
 LOCAL_CFLAGS += -DSL_TRACE_DEFAULT=SL_TRACE_ALL
 
 # Reduce size of .so and hide internal global symbols

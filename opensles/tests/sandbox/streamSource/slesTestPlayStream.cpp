@@ -74,7 +74,6 @@ SLresult AndroidBufferQueueCallback(
     // to this queue.
     // last param is NULL because we've already written the data in the buffer queue
     (*caller)->Enqueue(caller, bufferId, nbRead, event, NULL);
-    //(*abqItf)->Enqueue(abqItf, bufferId, nbRead, event, NULL);
 
     return SL_RESULT_SUCCESS;
 }
@@ -193,7 +192,8 @@ void TestPlayStream( SLObjectItf sl, const char* path)
 
     /*     wait until there's data to play */
     //SLpermille fillLevel = 0;
- /*   SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+ /*
+    SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
     SLuint32 timeOutIndex = 2;
     while ((prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) && (timeOutIndex > 0) &&
             !prefetchError) {
@@ -205,7 +205,8 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     if (timeOutIndex == 0 || prefetchError) {
         fprintf(stderr, "We\'re done waiting, failed to prefetch data in time, exiting\n");
         goto destroyRes;
-    }*/
+    }
+*/
 
     /* Display duration again, */
     res = (*playItf)->GetDuration(playItf, &durationInMsec);
@@ -222,7 +223,9 @@ void TestPlayStream( SLObjectItf sl, const char* path)
 
     /* Wait as long as the duration of the content before stopping */
     //usleep(durationInMsec * 1000);
-    usleep(15 /*s*/ * 1000 * 1000);
+    int playTimeInSec = 15;
+    fprintf(stdout, "Letting playback go on for %d sec\n", playTimeInSec);
+    usleep(playTimeInSec /*s*/ * 1000 * 1000);
 
 
     /* Make sure player is stopped */
