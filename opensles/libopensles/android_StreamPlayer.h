@@ -53,6 +53,12 @@ public:
     // IMediaPlayerClient implementation
     virtual void notify(int msg, int ext1, int ext2);
 
+    void blockUntilPlayerPrepared();
+
+private:
+    Mutex mLock;
+    Condition mPlayerPreparedCondition;
+    bool mPlayerPrepared;
 };
 
 //--------------------------------------------------------------------------------------------------
@@ -108,8 +114,8 @@ protected:
     sp<ALooper> mLooper;
 
     StreamPlayback_Parameters mPlaybackParams;
-    sp<StreamSourceAppProxy> mAppProxy; // application proxy for the stream source
-    sp<StreamMediaPlayerClient> mMPClient;
+    sp<StreamSourceAppProxy> mAppProxy; // application proxy for the android buffer queue source
+    sp<StreamMediaPlayerClient> mPlayerClient; // receives events from media player
     sp<IMediaPlayer> mPlayer;
 
     sp<IServiceManager> mServiceManager;

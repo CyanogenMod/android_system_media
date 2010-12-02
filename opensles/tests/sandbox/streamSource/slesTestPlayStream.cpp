@@ -209,13 +209,14 @@ void TestPlayStream( SLObjectItf sl, const char* path)
 */
 
     /* Display duration again, */
-    res = (*playItf)->GetDuration(playItf, &durationInMsec);
+/*    res = (*playItf)->GetDuration(playItf, &durationInMsec);
     CheckErr(res);
     if (durationInMsec == SL_TIME_UNKNOWN) {
         fprintf(stdout, "Content duration is unknown (after prefetch completed)\n");
     } else {
         fprintf(stdout, "Content duration is %lu ms (after prefetch completed)\n", durationInMsec);
     }
+*/
 
     fprintf(stdout, "URI example: starting to play\n");
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PLAYING );
