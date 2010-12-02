@@ -343,7 +343,7 @@ void StreamPlayer::onMessageReceived(const sp<AMessage> &msg) {
 // Event handlers
 void StreamPlayer::onPrepare() {
     SL_LOGI("StreamPlayer::onPrepare()");
-    mPlayer = mMediaPlayerService->create(getpid(), mMPClient /*IMediaPlayerClient*/,
+    mPlayer = mMediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
             mAppProxy /*IStreamSource*/, mPlaybackParams.sessionId);
     SL_LOGI("StreamPlayer::onPrepare() after mMediaPlayerService->create()");
     mPlayer->setAudioStreamType(mPlaybackParams.streamType);
