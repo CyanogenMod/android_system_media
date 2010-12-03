@@ -50,3 +50,43 @@ typedef struct {
     DataLocator mLocator;
     DataFormat mFormat;
 } DataLocatorFormat;
+
+#define SL_DATALOCATOR_NULL 0    // application specified a NULL value for pLocator
+#define SL_DATAFORMAT_NULL 0     // application specified a NULL or undefined value for pFormat
+
+// bit masks used to configure the allowed data locators for a given data source or data sink
+#define DATALOCATOR_MASK_NONE            0L
+#define DATALOCATOR_MASK_NULL            (1L << SL_DATALOCATOR_NULL)
+#define DATALOCATOR_MASK_URI             (1L << SL_DATALOCATOR_URI)
+#define DATALOCATOR_MASK_ADDRESS         (1L << SL_DATALOCATOR_ADDRESS)
+#define DATALOCATOR_MASK_IODEVICE        (1L << SL_DATALOCATOR_IODEVICE)
+#define DATALOCATOR_MASK_OUTPUTMIX       (1L << SL_DATALOCATOR_OUTPUTMIX)
+#define DATALOCATOR_MASK_NATIVEDISPLAY   (1L << XA_DATALOCATOR_NATIVEDISPLAY)
+#define DATALOCATOR_MASK_BUFFERQUEUE     (1L << SL_DATALOCATOR_BUFFERQUEUE)
+#define DATALOCATOR_MASK_MIDIBUFFERQUEUE (1L << SL_DATALOCATOR_MIDIBUFFERQUEUE)
+#define DATALOCATOR_MASK_ANDROIDFD                \
+                 (0x100L << (SL_DATALOCATOR_ANDROIDFD - SL_DATALOCATOR_ANDROIDFD))
+#define DATALOCATOR_MASK_ANDROIDSIMPLEBUFFERQUEUE \
+                 (0x100L << (SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE - SL_DATALOCATOR_ANDROIDFD))
+#define DATALOCATOR_MASK_ANDROIDBUFFERQUEUE       \
+                 (0x100L << (SL_DATALOCATOR_ANDROIDBUFFERQUEUE - SL_DATALOCATOR_ANDROIDFD))
+#define DATALOCATOR_MASK_ALL             0x7FFL
+
+// bit masks used to configure the allowed data formats for a given data source or data sink
+#define DATAFORMAT_MASK_NONE             0L
+#define DATAFORMAT_MASK_NULL             (1L << SL_DATAFORMAT_NULL)
+#define DATAFORMAT_MASK_MIME             (1L << SL_DATAFORMAT_MIME)
+#define DATAFORMAT_MASK_PCM              (1L << SL_DATAFORMAT_PCM)
+#define DATAFORMAT_MASK_RAWIMAGE         (1L << XA_DATAFORMAT_RAWIMAGE)
+#define DATAFORMAT_MASK_ALL              0xFL
+
+extern SLresult checkDataSource(const char *name, const SLDataSource *pDataSrc,
+        DataLocatorFormat *myDataSourceLocator, SLuint32 allowedDataLocatorMask,
+        SLuint32 allowedDataFormatMask);
+extern SLresult checkDataSink(const char *name, const SLDataSink *pDataSink,
+        DataLocatorFormat *myDataSinkLocator, SLuint32 allowedDataLocatorMask,
+        SLuint32 allowedDataFormatMask);
+extern SLresult checkSourceFormatVsInterfacesCompatibility(
+        const DataLocatorFormat *pDataLocatorFormat, const ClassTable *class__,
+        unsigned exposedMask);
+extern void freeDataLocatorFormat(DataLocatorFormat *dlf);

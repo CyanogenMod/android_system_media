@@ -62,6 +62,7 @@ LOCAL_SRC_FILES:=                     \
         CAudioRecorder.c              \
         CEngine.c                     \
         COutputMix.c                  \
+        CMediaPlayer.c                \
         IAndroidBufferQueue.c         \
         IAndroidConfiguration.c       \
         IAndroidEffect.c              \

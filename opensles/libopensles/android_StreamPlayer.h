@@ -65,7 +65,8 @@ private:
 
 class StreamSourceAppProxy : public BnStreamSource {
 public:
-    StreamSourceAppProxy(slAndroidBufferQueueCallback callback, void *appContext, const void *caller);
+    StreamSourceAppProxy(slAndroidBufferQueueCallback callback, void *appContext,
+            const void *caller);
     virtual ~StreamSourceAppProxy();
 
     // IStreamSource implementation
@@ -98,7 +99,8 @@ public:
 
     void init();
 
-    void appRegisterCallback(slAndroidBufferQueueCallback callback, void *context, const void *caller);
+    void appRegisterCallback(slAndroidBufferQueueCallback callback, void *context,
+            const void *caller);
     void appEnqueue(SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
     void appClear();
 

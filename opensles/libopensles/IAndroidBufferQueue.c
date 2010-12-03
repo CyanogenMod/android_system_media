@@ -52,6 +52,7 @@ SLresult IAndroidBufferQueue_Clear(SLAndroidBufferQueueItf self)
     interface_lock_exclusive(this);
 
     // FIXME return value?
+    result = SL_RESULT_SUCCESS;
     android_audioPlayer_androidBufferQueue_clear_l((CAudioPlayer*) this->mThis);
 
     interface_unlock_exclusive(this);
@@ -74,6 +75,7 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
 
     // FIXME return value? of particular interest: error is length is larger than size received
     //   in callback
+    result = SL_RESULT_SUCCESS;
     android_audioPlayer_androidBufferQueue_enqueue_l((CAudioPlayer*) this->mThis,
             bufferId, length, event, pData);
 

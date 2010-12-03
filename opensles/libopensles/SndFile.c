@@ -159,8 +159,13 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
         case SL_DATAFORMAT_NULL:    // OK to omit the data format
         case SL_DATAFORMAT_MIME:    // we ignore a MIME type if specified
             break;
-        default:
+        case SL_DATAFORMAT_PCM:
+        case XA_DATAFORMAT_RAWIMAGE:
             return SL_RESULT_CONTENT_UNSUPPORTED;
+        default:
+            // an invalid data format is detected earlier during the deep copy
+            assert(false);
+            return SL_RESULT_INTERNAL_ERROR;
         }
         this->mSndFile.mPathname = uri;
         this->mBufferQueue.mNumBuffers = SndFile_NUMBUFS;

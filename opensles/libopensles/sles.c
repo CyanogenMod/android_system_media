@@ -54,8 +54,13 @@ bool IsInterfaceInitialized(IObject *this, unsigned MPH)
 SLuint32 IObjectToObjectID(IObject *this)
 {
     assert(NULL != this);
-    // FIXME Note this returns only the SLES object ID, not the OMX AL!!!
-    return this->mClass->mSLObjectID;
+    // FIXME Note this returns the SLES object ID in preference to the OMX AL if both available
+    const ClassTable *class__ = this->mClass;
+    assert(NULL != class__);
+    SLuint32 id = class__->mSLObjectID;
+    if (!id)
+        id = class__->mXAObjectID;
+    return id;
 }
 
 
@@ -408,7 +413,8 @@ extern void
 // Android API level 10 extended interfaces
     { /* MPH_ANDROIDBUFFERQUEUE */ IAndroidBufferQueue_init, NULL, NULL, NULL, NULL },
 // OpenMAX AL 1.0.1 interfaces
-    { /* MPHXA_ENGINE */ IXAEngine_init, NULL, NULL, NULL, NULL },
+    { /* MPH_XAENGINE */ IXAEngine_init, NULL, NULL, NULL, NULL },
+    { /* MPH_XAPLAY */ IPlay_init, NULL, NULL, NULL, NULL },
 };
 
 

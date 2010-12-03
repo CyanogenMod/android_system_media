@@ -31,8 +31,10 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
         IPlay *this = (IPlay *) self;
         unsigned attr = ATTR_NONE;
         result = SL_RESULT_SUCCESS;
+#ifdef USE_OUTPUTMIXEXT
         CAudioPlayer *audioPlayer = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
             (CAudioPlayer *) this->mThis : NULL;
+#endif
         interface_lock_exclusive(this);
 #ifdef USE_OUTPUTMIXEXT
         for (;; interface_cond_wait(this)) {
@@ -94,6 +96,7 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
         this->mState = state;
         attr = ATTR_TRANSPORT;
 #endif
+        SL_LOGI("set play state %ld", state);
         interface_unlock_exclusive_attributes(this, attr);
         }
         break;

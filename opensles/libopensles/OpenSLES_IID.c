@@ -168,6 +168,8 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
 
     // XA_IID_ENGINE
     { 0x45c58f40, 0xdf04, 0x11db, 0x9e76, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
+    // XA_IID_PLAY
+    { 0xb9c293e0, 0xf776, 0x11db, 0x80df, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
 
 };
 
@@ -238,6 +240,7 @@ const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUE = &SL_IID_array[MPH_ANDROIDBUFFERQ
 
 // OpenMAX AL 1.0.1
 const XAInterfaceID XA_IID_ENGINE = (XAInterfaceID) &SL_IID_array[MPH_XAENGINE];
+const XAInterfaceID XA_IID_PLAY = (XAInterfaceID) &SL_IID_array[MPH_XAPLAY];
 
 #ifdef __cplusplus
 }

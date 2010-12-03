@@ -165,7 +165,8 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
     }
 
     if (attributes & ATTR_TRANSPORT) {
-        if (SL_OBJECTID_AUDIOPLAYER == objectID) {
+        switch (objectID) {
+        case SL_OBJECTID_AUDIOPLAYER:
 #ifdef ANDROID
             attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
             ap = (CAudioPlayer *) this;
@@ -176,12 +177,41 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
 #else
             //audioPlayerTransportUpdate(ap);
 #endif
-        } else if (SL_OBJECTID_AUDIORECORDER == objectID) {
+            break;
+        case SL_OBJECTID_AUDIORECORDER:
 #ifdef ANDROID
+            {
             attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
             CAudioRecorder* ar = (CAudioRecorder *) this;
             android_audioRecorder_useEventMask(ar);
+            }
 #endif
+            break;
+        case XA_OBJECTID_MEDIAPLAYER:
+#ifdef ANDROID
+            {
+            attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
+            CMediaPlayer *mp = (CMediaPlayer *) this;
+            // CMediaPlayer_setPlayState(mp);
+            android::sp<android::IMediaPlayer> player = mp->mPlayer;
+            if (player != NULL) {
+                switch (mp->mPlay.mState) {
+                case XA_PLAYSTATE_PLAYING:
+                    player->start();
+                    break;
+                case XA_PLAYSTATE_PAUSED:
+                case XA_PLAYSTATE_STOPPED:
+                    player->stop();
+                    break;
+                default:
+                    break;
+                }
+            }
+            }
+#endif
+            break;
+        default:
+            break;
         }
     }
 

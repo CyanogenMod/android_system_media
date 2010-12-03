@@ -26,6 +26,8 @@ int main(int argc, char **argv)
     printf("CreateOutputMix");
     result = (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObject, 0, NULL, NULL);
     printf("result = %ld, outputMixObject=%p\n", result, outputMixObject);
+    result = (*outputMixObject)->Realize(outputMixObject, XA_BOOLEAN_FALSE);
+    printf("result = %ld\n", result);
 
     XAObjectItf deviceObject;
     printf("CreateCameraDevice\n");
@@ -75,6 +77,23 @@ int main(int argc, char **argv)
     result = (*engineEngine)->CreateMediaPlayer(engineEngine, &playerObject, &dataSrc, NULL,
             &audioSnk, &imageVideoSink, NULL, NULL, 0, NULL, NULL);
     printf("result = %ld, playerObject=%p\n", result, playerObject);
+    result = (*playerObject)->Realize(playerObject, XA_BOOLEAN_FALSE);
+    printf("result = %ld\n", result);
+
+    printf("GetInterface for PLAY\n");
+    XAPlayItf playerPlay;
+    result = (*playerObject)->GetInterface(playerObject, XA_IID_PLAY, &playerPlay);
+    printf("result = %ld\n", result);
+    printf("playerPlay = %p\n", playerPlay);
+    assert(XA_RESULT_SUCCESS == result);
+
+    printf("SetPlayState to PLAYING\n");
+    result = (*playerPlay)->SetPlayState(playerPlay, XA_PLAYSTATE_PLAYING);
+    printf("result = %ld\n", result);
+    assert(XA_RESULT_SUCCESS == result);
+
+    printf("destroying media player\n");
+    (*playerObject)->Destroy(playerObject);
 
     printf("destroying output mix\n");
     (*outputMixObject)->Destroy(outputMixObject);

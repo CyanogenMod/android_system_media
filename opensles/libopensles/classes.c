@@ -404,6 +404,7 @@ static const struct iid_vtable MediaPlayer_interfaces[INTERFACES_MediaPlayer] = 
     {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CMediaPlayer, mObject)},
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CMediaPlayer, mDynamicInterfaceManagement)},
+    {MPH_XAPLAY, INTERFACE_IMPLICIT, offsetof(CMediaPlayer, mPlay)},
 };
 
 static const ClassTable CMediaPlayer_class = {
@@ -414,10 +415,10 @@ static const ClassTable CMediaPlayer_class = {
     sizeof(CMediaPlayer),
     0,      // OpenSL ES object ID
     XA_OBJECTID_MEDIAPLAYER,
-    NULL,
-    NULL,
-    NULL,
-    NULL
+    CMediaPlayer_Realize,
+    CMediaPlayer_Resume,
+    CMediaPlayer_Destroy,
+    CMediaPlayer_PreDestroy
 };
 
 

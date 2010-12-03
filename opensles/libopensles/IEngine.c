@@ -169,12 +169,20 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     // and make a local copy of all parameters in case other application threads
                     // change memory concurrently.
 
-                    result = checkDataSource(pAudioSrc, &this->mDataSource);
+                    result = checkDataSource("pAudioSrc", pAudioSrc, &this->mDataSource,
+                            DATALOCATOR_MASK_URI | DATALOCATOR_MASK_ADDRESS |
+                            DATALOCATOR_MASK_BUFFERQUEUE
+#ifdef ANDROID
+                            | DATALOCATOR_MASK_ANDROIDFD | DATALOCATOR_MASK_ANDROIDSIMPLEBUFFERQUEUE
+                            // FIXME | DATALOCATOR_MASK_ANDROID_BUFFERQUEUE ???
+#endif
+                            , DATAFORMAT_MASK_MIME | DATAFORMAT_MASK_PCM);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
 
-                    result = checkDataSink(pAudioSnk, &this->mDataSink, SL_OBJECTID_AUDIOPLAYER);
+                    result = checkDataSink("pAudioSnk", pAudioSnk, &this->mDataSink,
+                            DATALOCATOR_MASK_OUTPUTMIX, DATAFORMAT_MASK_NULL);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
@@ -336,11 +344,18 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 #endif
 
                     // Check the source and sink parameters, and make a local copy of all parameters
-                    result = checkDataSource(pAudioSrc, &this->mDataSource);
+                    result = checkDataSource("pAudioSrc", pAudioSrc, &this->mDataSource,
+                            DATALOCATOR_MASK_IODEVICE, DATAFORMAT_MASK_NULL);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
-                    result = checkDataSink(pAudioSnk, &this->mDataSink, SL_OBJECTID_AUDIORECORDER);
+                    result = checkDataSink("pAudioSnk", pAudioSnk, &this->mDataSink,
+                            DATALOCATOR_MASK_URI
+#ifdef ANDROID
+                            | DATALOCATOR_MASK_ANDROIDSIMPLEBUFFERQUEUE
+#endif
+                            , DATAFORMAT_MASK_MIME | DATAFORMAT_MASK_PCM
+                    );
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
@@ -439,6 +454,13 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
             if (NULL == this) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
+#if 0
+                "pMIDISrc", pMIDISrc, URI | MIDIBUFFERQUEUE, NONE
+                "pBankSrc", pBanksrc, NULL | URI | ADDRESS, NULL
+                "pAudioOutput", pAudioOutput, OUTPUTMIX, NULL
+                "pVibra", pVibra, NULL | IODEVICE, NULL
+                "pLEDArray", pLEDArray, NULL | IODEVICE, NULL
+#endif
                 // FIXME a fake value - why not use value from IPlay_init? what does CT check for?
                 this->mPlay.mDuration = 0;
                 IObject_Publish(&this->mObject);
@@ -605,6 +627,9 @@ static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self, SLObjectItf *p
             if (NULL == this) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
+#if 0
+                "pDataSource", pDataSource, NONE, NONE
+#endif
                 IObject_Publish(&this->mObject);
                 // return the new metadata extractor object
                 *pMetadataExtractor = &this->mObject.mItf;
@@ -946,33 +971,47 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
 
                     // Check the source and sink parameters against generic constraints
 
-                    result = checkDataSource((const SLDataSource *) pDataSrc, &this->mDataSource);
+                    result = checkDataSource("pDataSrc", (const SLDataSource *) pDataSrc,
+                            &this->mDataSource, DATALOCATOR_MASK_URI
+#ifdef ANDROID
+                            | DATALOCATOR_MASK_ANDROIDFD
+                            // FIXME | DATALOCATOR_MASK_ANDROIDBUFFERQUEUE ???
+#endif
+                            , DATAFORMAT_MASK_MIME);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
                     }
 
-                    result = checkDataSource((const SLDataSource *) pBankSrc, &this->mBankSource);
+                    result = checkDataSource("pBankSrc", (const SLDataSource *) pBankSrc,
+                            &this->mBankSource, DATALOCATOR_MASK_NULL | DATALOCATOR_MASK_URI |
+                            DATALOCATOR_MASK_ADDRESS, DATAFORMAT_MASK_NULL);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
                     }
 
-                    result = checkDataSink((const SLDataSink *) pAudioSnk, &this->mAudioSink, 0);
+                    result = checkDataSink("pAudioSnk", (const SLDataSink *) pAudioSnk,
+                            &this->mAudioSink, DATALOCATOR_MASK_OUTPUTMIX, DATAFORMAT_MASK_NULL);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
                     }
 
-                    result = checkDataSink((const SLDataSink *) pImageVideoSnk,
-                            &this->mImageVideoSink, 0);
+                    result = checkDataSink("pImageVideoSnk", (const SLDataSink *) pImageVideoSnk,
+                            &this->mImageVideoSink, DATALOCATOR_MASK_NATIVEDISPLAY,
+                            DATAFORMAT_MASK_NULL);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
                     }
 
-                    result = checkDataSink((const SLDataSink *) pVibra, &this->mVibraSink, 0);
+                    result = checkDataSink("pVibra", (const SLDataSink *) pVibra, &this->mVibraSink,
+                            DATALOCATOR_MASK_NULL | DATALOCATOR_MASK_IODEVICE,
+                            DATAFORMAT_MASK_NULL);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
                     }
 
-                    result = checkDataSink((const SLDataSink *) pLEDArray, &this->mLEDArraySink, 0);
+                    result = checkDataSink("pLEDArray", (const SLDataSink *) pLEDArray,
+                            &this->mLEDArraySink, DATALOCATOR_MASK_NULL | DATALOCATOR_MASK_IODEVICE,
+                            DATAFORMAT_MASK_NULL);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
                     }
@@ -1030,6 +1069,12 @@ static XAresult IEngine_CreateMediaRecorder(XAEngineItf self, XAObjectItf *pReco
     //IXAEngine *this = (IXAEngine *) self;
     result = SL_RESULT_FEATURE_UNSUPPORTED;
 
+#if 0
+    "pAudioSrc", pAudioSrc,
+    "pImageVideoSrc", pImageVideoSrc,
+    "pDataSink", pDataSnk,
+#endif
+
     XA_LEAVE_INTERFACE
 }
 
@@ -1074,6 +1119,7 @@ static XAresult IEngine_GetImplementationInfo(XAEngineItf self, XAuint32 *pMajor
 
     //IXAEngine *this = (IXAEngine *) self;
     result = SL_RESULT_FEATURE_UNSUPPORTED;
+    // FIXME
 
     XA_LEAVE_INTERFACE
 }
@@ -1087,6 +1133,7 @@ static XAresult IXAEngine_QuerySupportedProfiles(XAEngineItf self, XAint16 *pPro
         result = XA_RESULT_PARAMETER_INVALID;
     } else {
 #if 1
+        // FIXME
         *pProfilesSupported = 0;
         // FIXME the code below was copied from OpenSL ES and needs to be adapted for OpenMAX AL.
 #else

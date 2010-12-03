@@ -83,8 +83,9 @@
 
 // OpenMAX AL 1.0.1
 #define MPH_XAENGINE                   51
+#define MPH_XAPLAY                     52
 
 // total number of interface IDs
-#define MPH_MAX                        52
+#define MPH_MAX                        53
 
 #endif // !defined(__MPH_H)

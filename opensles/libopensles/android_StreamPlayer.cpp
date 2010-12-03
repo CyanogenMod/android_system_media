@@ -198,7 +198,7 @@ void StreamSourceAppProxy::onBufferAvailable(size_t index) {
 void StreamSourceAppProxy::receivedFromAppCommand(IStreamListener::Command cmd) {
     Mutex::Autolock _l(mListenerLock);
     if (mListener != 0) {
-        mListener->issueCommand(cmd, false /* synchronous */);
+        // mListener->issueCommand(cmd, false /* synchronous */);
     }
 }
 
@@ -276,7 +276,8 @@ void StreamPlayer::stop() {
     }
 }
 
-void StreamPlayer::appRegisterCallback(slAndroidBufferQueueCallback callback, void *context, const void *caller) {
+void StreamPlayer::appRegisterCallback(slAndroidBufferQueueCallback callback, void *context,
+        const void *caller) {
     Mutex::Autolock _l(mLock);
 
     mAppProxy = new StreamSourceAppProxy(callback, context, caller);

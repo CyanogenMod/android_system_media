@@ -30,7 +30,8 @@ static SLresult IDynamicSource_SetSource(SLDynamicSourceItf self, SLDataSource *
 #if 0
         DataLocatorFormat myDataSource;
         SLresult result;
-        result = checkDataSource(pDataSource, &myDataSource);
+        result = checkDataSource("pDataSource", pDataSource, &myDataSource, DATALOCATOR_MASK_ALL,
+                DATAFORMAT_MASK_ALL);
         // handle result here
 #endif
         // need to lock the object, as a change to source can impact most of object
