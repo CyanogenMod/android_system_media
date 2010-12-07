@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello, Android, using native media!</string>
+    <string name="app_name">NativeMedia</string>
+    <string name="java_player">Play using Java URI player</string>
+    <string name="openmaxal_player">Play using OpenMAX AL streaming media player</string>
+</resources>
