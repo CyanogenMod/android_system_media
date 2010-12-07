@@ -198,7 +198,7 @@ void StreamSourceAppProxy::onBufferAvailable(size_t index) {
 void StreamSourceAppProxy::receivedFromAppCommand(IStreamListener::Command cmd) {
     Mutex::Autolock _l(mListenerLock);
     if (mListener != 0) {
-        mListener->queueCommand(cmd);
+        mListener->issueCommand(cmd, false /* synchronous */);
     }
 }
 
@@ -289,9 +289,6 @@ void StreamPlayer::appEnqueue(SLuint32 bufferId, SLuint32 length, SLAbufferQueue
     Mutex::Autolock _l(mLock);
     if (mAppProxy != 0) {
         if (event != SL_ANDROIDBUFFERQUEUE_EVENT_NONE) {
-            if (event & SL_ANDROIDBUFFERQUEUE_EVENT_FLUSH) {
-                mAppProxy->receivedFromAppCommand(IStreamListener::FLUSH);
-            }
             if (event & SL_ANDROIDBUFFERQUEUE_EVENT_DISCONTINUITY) {
                 mAppProxy->receivedFromAppCommand(IStreamListener::DISCONTINUITY);
             }

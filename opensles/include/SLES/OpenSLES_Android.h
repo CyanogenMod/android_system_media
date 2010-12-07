@@ -215,9 +215,8 @@ struct SLAndroidBufferQueueItf_;
 typedef const struct SLAndroidBufferQueueItf_ * const * SLAndroidBufferQueueItf;
 
 #define SL_ANDROIDBUFFERQUEUE_EVENT_NONE              ((SLuint32) 0x00000000)
-#define SL_ANDROIDBUFFERQUEUE_EVENT_FLUSH             ((SLuint32) 0x00000001)
+#define SL_ANDROIDBUFFERQUEUE_EVENT_EOS               ((SLuint32) 0x00000001)
 #define SL_ANDROIDBUFFERQUEUE_EVENT_DISCONTINUITY     ((SLuint32) 0x00000002)
-#define SL_ANDROIDBUFFERQUEUE_EVENT_EOS               ((SLuint32) 0x00000004)
 
 typedef SLresult (/*SLAPIENTRY*/ *slAndroidBufferQueueCallback)(
     SLAndroidBufferQueueItf caller,/* input */
