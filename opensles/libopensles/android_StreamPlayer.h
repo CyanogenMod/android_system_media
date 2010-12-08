@@ -45,23 +45,6 @@ extern void android_StreamPlayer_clear_l(CAudioPlayer *ap);
 //--------------------------------------------------------------------------------------------------
 namespace android {
 
-class StreamMediaPlayerClient : public BnMediaPlayerClient {
-public:
-    StreamMediaPlayerClient();
-    virtual ~StreamMediaPlayerClient();
-
-    // IMediaPlayerClient implementation
-    virtual void notify(int msg, int ext1, int ext2);
-
-    void blockUntilPlayerPrepared();
-
-private:
-    Mutex mLock;
-    Condition mPlayerPreparedCondition;
-    bool mPlayerPrepared;
-};
-
-//--------------------------------------------------------------------------------------------------
 
 class StreamSourceAppProxy : public BnStreamSource {
 public:
@@ -91,54 +74,29 @@ private:
 
 
 //--------------------------------------------------------------------------------------------------
-class StreamPlayer : public AHandler
+class StreamPlayer : public AVPlayer
 {
 public:
-    StreamPlayer(StreamPlayback_Parameters* params);
+    StreamPlayer(AudioPlayback_Parameters* params);
     virtual ~StreamPlayer();
 
-    void init();
+    // overridden from AVPlayer
+    virtual void init();
+
 
     void appRegisterCallback(slAndroidBufferQueueCallback callback, void *context,
             const void *caller);
     void appEnqueue(SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
     void appClear();
 
-    void prepare();
-    void stop();
-    void pause();
-    void play();
-
 protected:
-    // AHandler implementation
-    virtual void onMessageReceived(const sp<AMessage> &msg);
-
-    sp<ALooper> mLooper;
-
-    StreamPlayback_Parameters mPlaybackParams;
     sp<StreamSourceAppProxy> mAppProxy; // application proxy for the android buffer queue source
-    sp<StreamMediaPlayerClient> mPlayerClient; // receives events from media player
-    sp<IMediaPlayer> mPlayer;
 
-    sp<IServiceManager> mServiceManager;
-    sp<IBinder> mBinder;
-    sp<IMediaPlayerService> mMediaPlayerService;
+    // overridden from AVPlayer
+    virtual void onPrepare();
 
 private:
-    Mutex mLock;
-
-    enum {
-        kWhatPrepare    = 'prep',
-        kWhatNotif      = 'noti',
-        kWhatPlay       = 'play',
-        kWhatPause      = 'paus',
-    };
-
-    // Event handlers
-    void onPrepare();
-    void onNotif(const sp<AMessage> &msg);
-    void onPlay();
-    void onPause();
+    DISALLOW_EVIL_CONSTRUCTORS(StreamPlayer);
 };
 
 } // namespace android

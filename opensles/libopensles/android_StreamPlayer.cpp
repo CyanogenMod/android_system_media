@@ -24,9 +24,11 @@
 void android_StreamPlayer_realize_l(CAudioPlayer *ap) {
     SL_LOGI("android_StreamPlayer_realize_l(%p)", ap);
 
-    StreamPlayback_Parameters ap_params;
+    AudioPlayback_Parameters ap_params;
     ap_params.sessionId = ap->mSessionId;
     ap_params.streamType = ap->mStreamType;
+    ap_params.trackcb = NULL;
+    ap_params.trackcbUser = NULL;
     ap->mStreamPlayer = new android::StreamPlayer(&ap_params);
     ap->mStreamPlayer->init();
 }
@@ -122,36 +124,6 @@ void android_StreamPlayer_clear_l(CAudioPlayer *ap) {
 namespace android {
 
 //--------------------------------------------------------------------------------------------------
-StreamMediaPlayerClient::StreamMediaPlayerClient() :
-    mPlayerPrepared(false)
-{
-
-}
-
-StreamMediaPlayerClient::~StreamMediaPlayerClient() {
-
-}
-
-//--------------------------------------------------
-// IMediaPlayerClient implementation
-void StreamMediaPlayerClient::notify(int msg, int ext1, int ext2) {
-    SL_LOGE("StreamMediaPlayerClient::notify(msg=%d, ext1=%d, ext2=%d)", msg, ext1, ext2);
-
-    if (msg == MEDIA_PREPARED) {
-        mPlayerPrepared = true;
-        mPlayerPreparedCondition.signal();
-    }
-}
-
-//--------------------------------------------------
-void StreamMediaPlayerClient::blockUntilPlayerPrepared() {
-    Mutex::Autolock _l(mLock);
-    while (!mPlayerPrepared) {
-        mPlayerPreparedCondition.wait(mLock);
-    }
-}
-
-//--------------------------------------------------------------------------------------------------
 StreamSourceAppProxy::StreamSourceAppProxy(
         slAndroidBufferQueueCallback callback, void *context, const void *caller) :
     mCallback(callback),
@@ -211,69 +183,23 @@ void StreamSourceAppProxy::receivedFromAppBuffer(size_t buffIndex, size_t buffLe
 
 
 //--------------------------------------------------------------------------------------------------
-StreamPlayer::StreamPlayer(StreamPlayback_Parameters* params) :
-    mAppProxy(0),
-    mPlayerClient(0),
-    mPlayer(0)
+StreamPlayer::StreamPlayer(AudioPlayback_Parameters* params) : AVPlayer(params),
+    mAppProxy(0)
 {
     SL_LOGV("StreamPlayer::StreamPlayer()");
 
-    mLooper = new android::ALooper();
-
     mPlaybackParams = *params;
 
-    mServiceManager = defaultServiceManager();
-    mBinder = mServiceManager->getService(String16("media.player"));
-    mMediaPlayerService = interface_cast<IMediaPlayerService>(mBinder);
-
-    CHECK(mMediaPlayerService.get() != NULL);
 }
 
 StreamPlayer::~StreamPlayer() {
-    SL_LOGV("StreamPlayer::~StreamPlayer()");
-
-    mLooper->stop();
-    mLooper->unregisterHandler(id());
-    mLooper.clear();
+    SL_LOGI("StreamPlayer::~StreamPlayer()");
 
     mAppProxy.clear();
-    mPlayerClient.clear();
-
-    mPlayer.clear();
-    mMediaPlayerService.clear();
-    mBinder.clear();
-    mServiceManager.clear();
 }
 
 void StreamPlayer::init() {
-    mLooper->registerHandler(this);
-    mLooper->start(false /*runOnCallingThread*/, false /*canCallJava*/); // use default priority
-}
-
-void StreamPlayer::prepare() {
-    SL_LOGI("StreamPlayer::prepare()");
-    sp<AMessage> msg = new AMessage(kWhatPrepare, id());
-    msg->post();
-}
-
-void StreamPlayer::play() {
-    //SL_LOGV("StreamPlayer::play()");
-    sp<AMessage> msg = new AMessage(kWhatPlay, id());
-    msg->post();
-}
-
-void StreamPlayer::pause() {
-    //SL_LOGV("StreamPlayer::prepare()");
-    sp<AMessage> msg = new AMessage(kWhatPause, id());
-    msg->post();
-}
-
-void StreamPlayer::stop() {
-    // FIXME PRIORITY1 must be async
-    Mutex::Autolock _l(mLock);
-    if (mPlayer != 0) {
-        mPlayer->stop();
-    }
+    AVPlayer::init();
 }
 
 void StreamPlayer::appRegisterCallback(slAndroidBufferQueueCallback callback, void *context,
@@ -281,7 +207,7 @@ void StreamPlayer::appRegisterCallback(slAndroidBufferQueueCallback callback, vo
     Mutex::Autolock _l(mLock);
 
     mAppProxy = new StreamSourceAppProxy(callback, context, caller);
-    mPlayerClient = new StreamMediaPlayerClient();
+
     CHECK(mAppProxy != 0);
 }
 
@@ -312,30 +238,6 @@ void StreamPlayer::appClear() {
     }
 }
 
-//--------------------------------------------------
-// AHandler implementation
-void StreamPlayer::onMessageReceived(const sp<AMessage> &msg) {
-    switch (msg->what()) {
-        case kWhatPrepare:
-            onPrepare();
-            break;
-/*
-        case kWhatNotif:
-            onNotify(msg);
-            break;
-*/
-        case kWhatPlay:
-            onPlay();
-            break;
-
-        case kWhatPause:
-            onPause();
-            break;
-
-        default:
-            TRESPASS();
-    }
-}
 
 //--------------------------------------------------
 // Event handlers
@@ -344,25 +246,12 @@ void StreamPlayer::onPrepare() {
     mPlayer = mMediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
             mAppProxy /*IStreamSource*/, mPlaybackParams.sessionId);
     SL_LOGI("StreamPlayer::onPrepare() after mMediaPlayerService->create()");
-    mPlayer->setAudioStreamType(mPlaybackParams.streamType);
-    mPlayer->prepareAsync();
-    mPlayerClient->blockUntilPlayerPrepared();
+
+    // blocks until mPlayer is prepared
+    AVPlayer::onPrepare();
     SL_LOGI("StreamPlayer::onPrepare() done");
 }
 
-void StreamPlayer::onPause() {
-    SL_LOGI("StreamPlayer::onPause()");
-    if (mPlayer != 0) {
-        mPlayer->pause();
-    }
-}
-
-void StreamPlayer::onPlay() {
-    SL_LOGI("StreamPlayer::onPlay()");
-    if (mPlayer != 0) {
-        mPlayer->start();
-    }
-}
 
 
 } // namespace android

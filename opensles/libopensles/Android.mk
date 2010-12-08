@@ -51,6 +51,7 @@ LOCAL_SRC_FILES:=                     \
         locks.c                       \
         sles.c                        \
         sllog.c                       \
+        android_AVPlayer.cpp          \
         android_AudioPlayer.cpp       \
         android_AudioRecorder.cpp     \
         android_OutputMix.cpp         \

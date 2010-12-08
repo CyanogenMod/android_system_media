@@ -275,6 +275,7 @@ enum AndroidObject_state {
 #ifdef ANDROID
 // FIXME this include is done here so the effect structures and enums have been defined. Messy.
 #include "android_Effect.h"
+#include "android_AVPlayer.h"
 #include "android_StreamPlayer.h"
 #endif
 

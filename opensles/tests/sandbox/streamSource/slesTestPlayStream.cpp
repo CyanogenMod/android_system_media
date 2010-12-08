@@ -138,8 +138,8 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     streamLocator.numBuffers   = 0; // ignored at the moment
     streamLocator.queueSize    = 0; // ignored at the moment
     mime.formatType    = SL_DATAFORMAT_MIME;
-    mime.mimeType      = (SLchar*)NULL;
-    mime.containerType = SL_CONTAINERTYPE_UNSPECIFIED;
+    mime.mimeType      = (SLchar *) "video/mp2ts";//(SLchar*)NULL;
+    mime.containerType = SL_CONTAINERTYPE_MPEG_TS;
 
     audioSource.pFormat      = (void *)&mime;
     audioSource.pLocator     = (void *)&streamLocator;
