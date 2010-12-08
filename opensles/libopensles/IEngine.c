@@ -174,9 +174,10 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                             DATALOCATOR_MASK_BUFFERQUEUE
 #ifdef ANDROID
                             | DATALOCATOR_MASK_ANDROIDFD | DATALOCATOR_MASK_ANDROIDSIMPLEBUFFERQUEUE
-                            // FIXME | DATALOCATOR_MASK_ANDROID_BUFFERQUEUE ???
+                            | DATALOCATOR_MASK_ANDROIDBUFFERQUEUE
 #endif
                             , DATAFORMAT_MASK_MIME | DATAFORMAT_MASK_PCM);
+
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }

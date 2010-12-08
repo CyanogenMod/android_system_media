@@ -264,7 +264,7 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
             break;
         }
         if (!(allowedDataLocatorMask & actualMask)) {
-            SL_LOGE("%s: Data locator type %ld not allowed", name, locatorType);
+            SL_LOGE("%s: Data locator type 0x%lx not allowed", name, locatorType);
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         }
     }
@@ -710,7 +710,7 @@ SLresult checkDataSource(const char *name, const SLDataSource *pDataSrc,
         allowedDataFormatMask &= DATAFORMAT_MASK_PCM;
         break;
     case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
-        allowedDataFormatMask &= DATAFORMAT_MASK_NULL;
+        allowedDataFormatMask &= DATAFORMAT_MASK_MIME;;
         break;
 #endif
     default:
