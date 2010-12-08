@@ -198,7 +198,7 @@ void StreamSourceAppProxy::onBufferAvailable(size_t index) {
 void StreamSourceAppProxy::receivedFromAppCommand(IStreamListener::Command cmd) {
     Mutex::Autolock _l(mListenerLock);
     if (mListener != 0) {
-        // mListener->issueCommand(cmd, false /* synchronous */);
+        mListener->issueCommand(cmd, false /* synchronous */);
     }
 }
 

@@ -82,7 +82,7 @@ void MyStreamSource::onBufferAvailable(size_t index) {
 
     ssize_t n = read(mFd, mem->pointer(), mem->size());
     if (n <= 0) {
-        //mListener->queueCommand(IStreamListener::EOS);
+        mListener->issueCommand(IStreamListener::EOS, false /* synchronous */);
     } else {
         mListener->queueBuffer(index, n);
     }
