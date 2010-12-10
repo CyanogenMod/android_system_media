@@ -20,7 +20,11 @@
 #include <string.h>
 #define LOG_TAG "NativeMedia"
 #include <utils/Log.h>
+//FIXME shouldn't be needed here, but needed for declaration of XA_IID_ANDROIDBUFFERQUEUE
+#include "SLES/OpenSLES.h"
+#include "SLES/OpenSLES_Android.h"
 #include "OMXAL/OpenMAXAL.h"
+#include "OMXAL/OpenMAXAL_Android.h"
 
 // engine interfaces
 static XAObjectItf engineObject = NULL;
@@ -30,37 +34,69 @@ static XAEngineItf engineEngine;
 static XAObjectItf outputMixObject = NULL;
 
 // streaming media player interfaces
-static XAObjectItf streamingPlayerObject = NULL;
-static XAPlayItf streamingPlayerPlay;
+static XAObjectItf             playerObj = NULL;
+static XAPlayItf               playerPlayItf = NULL;
+static XAAndroidBufferQueueItf playerBQItf = NULL;
 
 // cached surface
 static jobject theSurface;
 static JNIEnv *theEnv;
 
+// handle of the file to play
+FILE *file;
+
+// AndroidBufferQueueItf callback for an audio player
+XAresult AndroidBufferQueueCallback(
+        XAAndroidBufferQueueItf caller,
+        void *pContext,
+        XAuint32 bufferId,
+        XAuint32 bufferLength,
+        void *pBufferDataLocation)
+
+{
+    size_t nbRead = fread(pBufferDataLocation, 1, bufferLength, file);
+
+    XAAbufferQueueEvent event = XA_ANDROIDBUFFERQUEUE_EVENT_NONE;
+    if (nbRead <= 0) {
+        event = XA_ANDROIDBUFFERQUEUE_EVENT_EOS;
+    } else {
+        event = XA_ANDROIDBUFFERQUEUE_EVENT_NONE; // no event to report
+    }
+
+    // enqueue the data right-away because in this example we're reading from a file, so we
+    // can afford to do that. When streaming from the network, we would write from our cache
+    // to this queue.
+    // last param is NULL because we've already written the data in the buffer queue
+    (*caller)->Enqueue(caller, bufferId, nbRead, event, NULL);
+
+    return XA_RESULT_SUCCESS;
+}
+
+
 // create the engine and output mix objects
 void Java_com_example_nativemedia_NativeMedia_createEngine(JNIEnv* env, jclass clazz)
 {
-    XAresult result;
+    XAresult res;
 
     // create engine
-    result = xaCreateEngine(&engineObject, 0, NULL, 0, NULL, NULL);
-    assert(XA_RESULT_SUCCESS == result);
+    res = xaCreateEngine(&engineObject, 0, NULL, 0, NULL, NULL);
+    assert(XA_RESULT_SUCCESS == res);
 
     // realize the engine
-    result = (*engineObject)->Realize(engineObject, XA_BOOLEAN_FALSE);
-    assert(XA_RESULT_SUCCESS == result);
+    res = (*engineObject)->Realize(engineObject, XA_BOOLEAN_FALSE);
+    assert(XA_RESULT_SUCCESS == res);
 
     // get the engine interface, which is needed in order to create other objects
-    result = (*engineObject)->GetInterface(engineObject, XA_IID_ENGINE, &engineEngine);
-    assert(XA_RESULT_SUCCESS == result);
+    res = (*engineObject)->GetInterface(engineObject, XA_IID_ENGINE, &engineEngine);
+    assert(XA_RESULT_SUCCESS == res);
 
     // create output mix
-    result = (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObject, 0, NULL, NULL);
-    assert(XA_RESULT_SUCCESS == result);
+    res = (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObject, 0, NULL, NULL);
+    assert(XA_RESULT_SUCCESS == res);
 
     // realize the output mix
-    result = (*outputMixObject)->Realize(outputMixObject, XA_BOOLEAN_FALSE);
-    assert(XA_RESULT_SUCCESS == result);
+    res = (*outputMixObject)->Realize(outputMixObject, XA_BOOLEAN_FALSE);
+    assert(XA_RESULT_SUCCESS == res);
 
 }
 
@@ -69,16 +105,23 @@ void Java_com_example_nativemedia_NativeMedia_createEngine(JNIEnv* env, jclass c
 jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNIEnv* env,
         jclass clazz, jstring filename)
 {
-    XAresult result;
+    XAresult res;
 
     // convert Java string to UTF-8
     const char *utf8 = (*env)->GetStringUTFChars(env, filename, NULL);
     assert(NULL != utf8);
 
-    // configure audio source
-    XADataLocator_URI loc_uri = {XA_DATALOCATOR_URI, (XAchar *) utf8};
+    // open the file to play
+    file = fopen(utf8, "rb");
+    if (file == NULL) {
+        LOGE("Failed to open %s", utf8);
+        return JNI_FALSE;
+    }
+
+    // configure data source
+    XADataLocator_AndroidBufferQueue loc_abq = {XA_DATALOCATOR_ANDROIDBUFFERQUEUE, 0, 0};
     XADataFormat_MIME format_mime = {XA_DATAFORMAT_MIME, NULL, XA_CONTAINERTYPE_UNSPECIFIED};
-    XADataSource dataSrc = {&loc_uri, &format_mime};
+    XADataSource dataSrc = {&loc_abq, &format_mime};
 
     // configure audio sink
     XADataLocator_OutputMix loc_outmix = {XA_DATALOCATOR_OUTPUTMIX, outputMixObject};
@@ -88,22 +131,42 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     XADataLocator_NativeDisplay loc_nd = {XA_DATALOCATOR_NATIVEDISPLAY, theSurface, theEnv};
     XADataSink imageVideoSink = {&loc_nd, NULL};
 
+    // declare interfaces to use
+    XAboolean     required[2] = {XA_BOOLEAN_TRUE, XA_BOOLEAN_TRUE};
+    XAInterfaceID iidArray[2] = {XA_IID_PLAY,     XA_IID_ANDROIDBUFFERQUEUE};
+
     // create media player
-    result = (*engineEngine)->CreateMediaPlayer(engineEngine, &streamingPlayerObject, &dataSrc,
-            NULL, &audioSnk, &imageVideoSink, NULL, NULL, 0, NULL, NULL);
-    assert(XA_RESULT_SUCCESS == result);
+    res = (*engineEngine)->CreateMediaPlayer(engineEngine, &playerObj, &dataSrc,
+            NULL, &audioSnk, &imageVideoSink, NULL, NULL,
+            2 /*XAuint32 numInterfaces*/,
+            iidArray /*const XAInterfaceID *pInterfaceIds*/,
+            required /*const XAboolean *pInterfaceRequired*/);
+    assert(XA_RESULT_SUCCESS == res);
 
     // release the Java string and UTF-8
     (*env)->ReleaseStringUTFChars(env, filename, utf8);
 
     // realize the player
-    result = (*streamingPlayerObject)->Realize(streamingPlayerObject, XA_BOOLEAN_FALSE);
-    assert(XA_RESULT_SUCCESS == result);
+    res = (*playerObj)->Realize(playerObj, XA_BOOLEAN_FALSE);
+    assert(XA_RESULT_SUCCESS == res);
 
     // get the play interface
-    result = (*streamingPlayerObject)->GetInterface(streamingPlayerObject, XA_IID_PLAY,
-            &streamingPlayerPlay);
-    assert(XA_RESULT_SUCCESS == result);
+    res = (*playerObj)->GetInterface(playerObj, XA_IID_PLAY, &playerPlayItf);
+    assert(XA_RESULT_SUCCESS == res);
+
+    // get the Android buffer queue interface
+    res = (*playerObj)->GetInterface(playerObj, XA_IID_ANDROIDBUFFERQUEUE, &playerBQItf);
+    assert(XA_RESULT_SUCCESS == res);
+
+    // register the callback from which OpenMAX AL can retrieve the data to play
+    res = (*playerBQItf)->RegisterCallback(playerBQItf, AndroidBufferQueueCallback, &playerBQItf);
+
+    // prepare the player
+    res = (*playerPlayItf)->SetPlayState(playerPlayItf, XA_PLAYSTATE_PAUSED);
+    assert(XA_RESULT_SUCCESS == res);
+
+    res = (*playerPlayItf)->SetPlayState(playerPlayItf, XA_PLAYSTATE_PLAYING);
+        assert(XA_RESULT_SUCCESS == res);
 
     return JNI_TRUE;
 }
@@ -113,15 +176,15 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
 void Java_com_example_nativemedia_NativeMedia_setPlayingStreamingMediaPlayer(JNIEnv* env,
         jclass clazz, jboolean isPlaying)
 {
-    XAresult result;
+    XAresult res;
 
     // make sure the streaming media player was created
-    if (NULL != streamingPlayerPlay) {
+    if (NULL != playerPlayItf) {
 
         // set the player's state
-        result = (*streamingPlayerPlay)->SetPlayState(streamingPlayerPlay, isPlaying ?
+        res = (*playerPlayItf)->SetPlayState(playerPlayItf, isPlaying ?
             XA_PLAYSTATE_PLAYING : XA_PLAYSTATE_PAUSED);
-        assert(XA_RESULT_SUCCESS == result);
+        assert(XA_RESULT_SUCCESS == res);
 
     }
 
@@ -133,10 +196,11 @@ void Java_com_example_nativemedia_NativeMedia_shutdown(JNIEnv* env, jclass clazz
 {
 
     // destroy streaming media player object, and invalidate all associated interfaces
-    if (streamingPlayerObject != NULL) {
-        (*streamingPlayerObject)->Destroy(streamingPlayerObject);
-        streamingPlayerObject = NULL;
-        streamingPlayerPlay = NULL;
+    if (playerObj != NULL) {
+        (*playerObj)->Destroy(playerObj);
+        playerObj = NULL;
+        playerPlayItf = NULL;
+        playerBQItf = NULL;
     }
 
     // destroy output mix object, and invalidate all associated interfaces
@@ -152,6 +216,10 @@ void Java_com_example_nativemedia_NativeMedia_shutdown(JNIEnv* env, jclass clazz
         engineEngine = NULL;
     }
 
+    // close the file
+    if (file != NULL) {
+        fclose(file);
+    }
 }
 
 

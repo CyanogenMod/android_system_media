@@ -87,6 +87,7 @@ AVPlayer::~AVPlayer() {
 }
 
 void AVPlayer::init() {
+    SL_LOGI("AVPlayer::init()");
     mLooper->registerHandler(this);
     mLooper->start(false /*runOnCallingThread*/, false /*canCallJava*/); // use default priority
 }

@@ -1563,8 +1563,11 @@ SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *ap) {
 
 //-----------------------------------------------------------------------------
 void android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer *ap) {
-    if (ap->mAndroidObjType == STREAM_SOURCE) {
-        android_StreamPlayer_registerCallback_l(ap);
+    if ((ap->mAndroidObjType == STREAM_SOURCE) && (ap->mStreamPlayer != 0)) {
+        android_StreamPlayer_androidBufferQueue_registerCallback(ap->mStreamPlayer.get(),
+                ap->mAndroidBufferQueue.mCallback,
+                ap->mAndroidBufferQueue.mContext,
+                (const void*)&(ap->mAndroidBufferQueue.mItf));
     }
 }
 

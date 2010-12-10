@@ -116,7 +116,7 @@ public class NativeMedia extends Activity {
             boolean created = false;
             public void onClick(View view) {
                 if (!created) {
-                    created = createStreamingMediaPlayer("/sdcard/Ratatouille.ts");
+                    created = createStreamingMediaPlayer("/sdcard/videos/ts/bar.ts");
                 } else {
                     isPlayingStreaming = !isPlayingStreaming;
                     setPlayingStreamingMediaPlayer(isPlayingStreaming);
@@ -127,7 +127,7 @@ public class NativeMedia extends Activity {
         mp = new MediaPlayer();
         mp.setDisplay(javaHolder);
         try {
-            mp.setDataSource("/sdcard/burnAfterReading.m4v");
+            mp.setDataSource("/sdcard/videos/burnAfterReading.m4v");
         } catch (IOException e) {
 
         }

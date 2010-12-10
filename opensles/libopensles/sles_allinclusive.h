@@ -323,6 +323,7 @@ extern void IObject_Destroy(SLObjectItf self);
 #define InterfaceToCAudioRecorder(this) (((CAudioRecorder*)InterfaceToIObject(this)))
 
 #ifdef ANDROID
+#include "android_Player.h"
 #include "android_AudioPlayer.h"
 #endif
 

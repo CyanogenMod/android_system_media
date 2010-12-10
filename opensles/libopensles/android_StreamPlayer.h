@@ -16,31 +16,12 @@
 
 #include <binder/IServiceManager.h>
 
-//--------------------------------------------------------------------------------------------------
-// FIXME move to mediaplayer.h
-enum media_player_stream_origin {
-    MEDIA_PLAYER_STREAM_ORIGIN_INVALID           = 0,
-    MEDIA_PLAYER_STREAM_ORIGIN_FILE              = 1 << 0,
-    MEDIA_PLAYER_STREAM_ORIGIN_TRANSPORT_STREAM  = 1 << 1
-};
 
 typedef struct StreamPlayback_Parameters_struct {
     int streamType;
     int sessionId;
 } StreamPlayback_Parameters;
 
-//--------------------------------------------------------------------------------------------------
-/*
- * xxx_l functions are called with a lock on the CAudioPlayer mObject
- */
-extern void android_StreamPlayer_realize_l(CAudioPlayer *ap);
-extern void android_StreamPlayer_destroy(CAudioPlayer *ap);
-extern void android_StreamPlayer_setPlayState(CAudioPlayer *ap, SLuint32 playState,
-        AndroidObject_state objState);
-extern void android_StreamPlayer_registerCallback_l(CAudioPlayer *ap);
-extern void android_StreamPlayer_enqueue_l(CAudioPlayer *ap,
-        SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
-extern void android_StreamPlayer_clear_l(CAudioPlayer *ap);
 
 //--------------------------------------------------------------------------------------------------
 namespace android {
@@ -84,7 +65,7 @@ public:
     virtual void init();
 
 
-    void appRegisterCallback(slAndroidBufferQueueCallback callback, void *context,
+    void registerQueueCallback(slAndroidBufferQueueCallback callback, void *context,
             const void *caller);
     void appEnqueue(SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
     void appClear();
@@ -100,3 +81,19 @@ private:
 };
 
 } // namespace android
+
+
+//--------------------------------------------------------------------------------------------------
+/*
+ * xxx_l functions are called with a lock on the CAudioPlayer mObject
+ */
+extern void android_StreamPlayer_realize_l(CAudioPlayer *ap);
+extern void android_StreamPlayer_destroy(CAudioPlayer *ap);
+extern void android_StreamPlayer_setPlayState(CAudioPlayer *ap, SLuint32 playState,
+        AndroidObject_state objState);
+extern void android_StreamPlayer_androidBufferQueue_registerCallback(
+        android::StreamPlayer *splr,
+        slAndroidBufferQueueCallback callback, void* context, const void* callerItf);
+extern void android_StreamPlayer_enqueue_l(CAudioPlayer *ap,
+        SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
+extern void android_StreamPlayer_clear_l(CAudioPlayer *ap);

@@ -976,7 +976,7 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                             &this->mDataSource, DATALOCATOR_MASK_URI
 #ifdef ANDROID
                             | DATALOCATOR_MASK_ANDROIDFD
-                            // FIXME | DATALOCATOR_MASK_ANDROIDBUFFERQUEUE ???
+                            | DATALOCATOR_MASK_ANDROIDBUFFERQUEUE
 #endif
                             , DATAFORMAT_MASK_MIME);
                     if (XA_RESULT_SUCCESS != result) {
@@ -1038,7 +1038,7 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
 
                     // platform-specific initialization
 #ifdef ANDROID
-                    // ...
+                    android_Player_create(this);
 #endif
 
                 } while (0);

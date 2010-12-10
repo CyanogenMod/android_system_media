@@ -251,6 +251,7 @@ const signed char MPH_to_MediaPlayer[MPH_MAX] = {
     [MPH_OBJECT] = 0,
     [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
     [MPH_XAPLAY] = 2,
+    [MPH_ANDROIDBUFFERQUEUE] = 3,
     // FIXME more TBD
 #else
 #include "MPH_to_MediaPlayer.h"

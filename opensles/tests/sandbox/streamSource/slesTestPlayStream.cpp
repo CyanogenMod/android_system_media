@@ -52,11 +52,11 @@ SLresult AndroidBufferQueueCallback(
         SLAndroidBufferQueueItf caller,
             void *pContext,
             SLuint32 bufferId,
-            SLAint64 bufferLength,
+            SLuint32 bufferLength,
             void *pBufferDataLocation)
 
 {
-    fprintf(stdout, "cb ");
+    fprintf(stdout, "pBufferDataLocation=%p \n", pBufferDataLocation);
 
     size_t nbRead = fread(pBufferDataLocation, 1, bufferLength, file);
 

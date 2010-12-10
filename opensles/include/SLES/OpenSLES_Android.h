@@ -222,7 +222,7 @@ typedef SLresult (/*SLAPIENTRY*/ *slAndroidBufferQueueCallback)(
     SLAndroidBufferQueueItf caller,/* input */
     void *pContext,                /* input */
     SLuint32 bufferId,             /* input */
-    SLAint64 bufferLength,         /* input */
+    SLuint32 bufferLength,         /* input */
     void *pBufferDataLocation      /* input */
 );
 

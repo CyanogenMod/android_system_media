@@ -299,10 +299,13 @@ typedef struct {
 
 typedef struct CMediaPlayer_struct {
     IObject mObject;
-#define INTERFACES_MediaPlayer 3
+#define INTERFACES_MediaPlayer 4
     XAuint8 mInterfaceStates2[INTERFACES_MediaPlayer - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IPlay mPlay;
+#ifdef ANDROID
+    IAndroidBufferQueue mAndroidBufferQueue;
+#endif
     // ...
     DataLocatorFormat mDataSource;
     DataLocatorFormat mBankSource;
@@ -311,6 +314,7 @@ typedef struct CMediaPlayer_struct {
     DataLocatorFormat mVibraSink;
     DataLocatorFormat mLEDArraySink;
 #ifdef ANDROID
-    android::sp<android::IMediaPlayer> mPlayer;
+    //android::sp<android::IMediaPlayer> mPlayer;
+    android::sp<android::AVPlayer> mAVPlayer;
 #endif
 } CMediaPlayer;

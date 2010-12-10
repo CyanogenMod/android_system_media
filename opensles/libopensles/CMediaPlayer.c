@@ -39,104 +39,27 @@
 #ifdef ANDROID
 using namespace android;
 
-struct MyStreamSource : public BnStreamSource {
-    // Caller retains ownership of fd.
-    MyStreamSource(int fd);
-
-    virtual void setListener(const sp<IStreamListener> &listener);
-    virtual void setBuffers(const Vector<sp<IMemory> > &buffers);
-
-    virtual void onBufferAvailable(size_t index);
-
-protected:
-    virtual ~MyStreamSource();
-
-private:
-    int mFd;
-
-    sp<IStreamListener> mListener;
-    Vector<sp<IMemory> > mBuffers;
-
-    DISALLOW_EVIL_CONSTRUCTORS(MyStreamSource);
-};
-
-MyStreamSource::MyStreamSource(int fd)
-    : mFd(fd) {
-    CHECK_GE(fd, 0);
-}
-
-MyStreamSource::~MyStreamSource() {
-}
-
-void MyStreamSource::setListener(const sp<IStreamListener> &listener) {
-    mListener = listener;
-}
-
-void MyStreamSource::setBuffers(const Vector<sp<IMemory> > &buffers) {
-    mBuffers = buffers;
-}
-
-void MyStreamSource::onBufferAvailable(size_t index) {
-    CHECK_LT(index, mBuffers.size());
-    sp<IMemory> mem = mBuffers.itemAt(index);
-
-    ssize_t n = read(mFd, mem->pointer(), mem->size());
-    if (n <= 0) {
-        mListener->issueCommand(IStreamListener::EOS, false /* synchronous */);
-    } else {
-        mListener->queueBuffer(index, n);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-struct MyClient : public BnMediaPlayerClient {
-    MyClient()
-        : mEOS(false) {
-    }
-
-    virtual void notify(int msg, int ext1, int ext2) {
-        Mutex::Autolock autoLock(mLock);
-
-        if (msg == MEDIA_ERROR || msg == MEDIA_PLAYBACK_COMPLETE) {
-            mEOS = true;
-            mCondition.signal();
-        }
-    }
-
-    void waitForEOS() {
-        Mutex::Autolock autoLock(mLock);
-        while (!mEOS) {
-            mCondition.wait(mLock);
-        }
-    }
-
-protected:
-    virtual ~MyClient() {
-    }
-
-private:
-    Mutex mLock;
-    Condition mCondition;
-
-    bool mEOS;
-
-    DISALLOW_EVIL_CONSTRUCTORS(MyClient);
-};
 #endif
 
 
 XAresult CMediaPlayer_Realize(void *self, XAboolean async)
 {
-#ifdef ANDROID
     CMediaPlayer *thiz = (CMediaPlayer *) self;
 
+    SLresult result = XA_RESULT_SUCCESS;
+
+#ifdef ANDROID
+    result = android_Player_realize(thiz, async);
+#endif
+
+    // FIXME add support for display surface retrieval
+#if 0
     assert(XA_DATALOCATOR_URI == thiz->mDataSource.mLocator.mLocatorType);
     // assert(XA_FORMAT_NULL == this->mDataSource.mFormat.mFormatType);
     assert(XA_DATALOCATOR_NATIVEDISPLAY == thiz->mImageVideoSink.mLocator.mLocatorType);
     // assert(XA_FORMAT_NULL == this->mImageVideoSink.mFormat.mFormatType);
     // FIXME ignore the audio sink
-
+#ifdef ANDROID
     int fd = open((const char *) thiz->mDataSource.mLocator.mURI.URI, O_RDONLY);
     if (0 >= fd) {
         return err_to_result(errno);
@@ -165,8 +88,8 @@ XAresult CMediaPlayer_Realize(void *self, XAboolean async)
         player->setVideoSurface(surface);
     }
 #endif
-
-    return XA_RESULT_SUCCESS;
+#endif
+    return result;
 }
 
 

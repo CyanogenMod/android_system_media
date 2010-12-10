@@ -6,11 +6,11 @@
  * "Materials "), to deal in the Materials without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Materials, and to
- * permit persons to whom the Materials are furnished to do so, subject to 
- * the following conditions: 
+ * permit persons to whom the Materials are furnished to do so, subject to
+ * the following conditions:
  *
- * The above copyright notice and this permission notice shall be included 
- * in all copies or substantial portions of the Materials. 
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Materials.
  *
  * THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -42,16 +42,20 @@ typedef signed long                 xa_int32_t;
 typedef unsigned long long          xa_uint64_t;
 
 #ifndef XAAPIENTRY
+#ifdef __GNUC__
 #define XAAPIENTRY                 /* override per-platform */
+#else
+#define XAAPIENTRY __declspec(dllimport)
+#endif
 #endif
 
 /** The XA_API is a platform-specific macro used
  *  to declare OPENMAX AL function prototypes.  It is modified to meet the
- *  requirements for a particular platform 
+ *  requirements for a particular platform
  *
  * Example:
- * #ifdef __SYMBIAN32__   
- * #   define XA_API __declspec(dllimport) 
+ * #ifdef __SYMBIAN32__
+ * #   define XA_API __declspec(dllimport)
  * #endif
  */
 

@@ -6,11 +6,11 @@
  * "Materials "), to deal in the Materials without restriction, including
  * without limitation the rights to use, copy, modify, merge, publish,
  * distribute, sublicense, and/or sell copies of the Materials, and to
- * permit persons to whom the Materials are furnished to do so, subject to 
- * the following conditions: 
+ * permit persons to whom the Materials are furnished to do so, subject to
+ * the following conditions:
  *
- * The above copyright notice and this permission notice shall be included 
- * in all copies or substantial portions of the Materials. 
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Materials.
  *
  * THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -32,12 +32,11 @@
 #ifndef _OPENMAXAL_H_
 #define _OPENMAXAL_H_
 
-#include "OpenMAXAL_Platform.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include "OpenMAXAL_Platform.h"
 
 
   /*****************************************************************/
@@ -214,19 +213,19 @@ struct XAObjectItf_ {
 XA_API extern const XAInterfaceID XA_IID_CONFIGEXTENSION;
 
 struct XAConfigExtensionsItf_;
-typedef const struct XAConfigExtensionsItf_ 
+typedef const struct XAConfigExtensionsItf_
     * const * XAConfigExtensionsItf;
 
 struct XAConfigExtensionsItf_ {
     XAresult (*SetConfiguration) (
-        XAConfigExtensionsItf self, 
+        XAConfigExtensionsItf self,
         const XAchar * configKey,
-        XAuint32 valueSize, 
+        XAuint32 valueSize,
         const void * pConfigValue
     );
     XAresult (*GetConfiguration) (
-        XAConfigExtensionsItf self, 
-        const XAchar * configKey, 
+        XAConfigExtensionsItf self,
+        const XAchar * configKey,
         XAuint32 * pValueSize,
         void * pConfigValue
     );
@@ -502,10 +501,10 @@ typedef struct XADataLocator_URI_ {
 
 typedef struct XAEngineOption_ {
     XAuint32 feature;
-    XAuint32 data; 
+    XAuint32 data;
 } XAEngineOption;
 
-XA_API XAresult XAAPIENTRY xaCreateEngine( 
+XA_API XAresult XAAPIENTRY xaCreateEngine(
     XAObjectItf * pEngine,
     XAuint32 numOptions,
     const XAEngineOption * pEngineOptions,
@@ -640,7 +639,7 @@ struct XAEngineItf_ {
     XAresult (*QuerySupportedInterfaces) (
         XAEngineItf self,
         XAuint32 objectID,
-        XAuint32 index, 
+        XAuint32 index,
         XAInterfaceID * pInterfaceId
     );
     XAresult (*QueryNumSupportedExtensions) (
@@ -648,13 +647,13 @@ struct XAEngineItf_ {
         XAuint32 * pNumExtensions
     );
     XAresult (*QuerySupportedExtension) (
-        XAEngineItf self, 
+        XAEngineItf self,
         XAuint32 index,
         XAchar * pExtensionName,
         XAint16 * pNameLength
     );
     XAresult (*IsExtensionSupported) (
-        XAEngineItf self, 
+        XAEngineItf self,
         const XAchar * pExtensionName,
         XAboolean * pSupported
     );
@@ -739,11 +738,11 @@ struct XAPlayItf_ {
         XAuint32 * pState
     );
     XAresult (*GetDuration) (
-        XAPlayItf self, 
+        XAPlayItf self,
         XAmillisecond * pMsec
     );
     XAresult (*GetPosition) (
-        XAPlayItf self, 
+        XAPlayItf self,
         XAmillisecond * pMsec
     );
     XAresult (*RegisterCallback) (
@@ -831,7 +830,7 @@ struct XAPlaybackRateItf_ {
 XA_API extern const XAInterfaceID XA_IID_PREFETCHSTATUS;
 
 struct XAPrefetchStatusItf_;
-typedef const struct XAPrefetchStatusItf_ 
+typedef const struct XAPrefetchStatusItf_
     * const * XAPrefetchStatusItf;
 
 typedef void (XAAPIENTRY * xaPrefetchCallback) (
@@ -842,11 +841,11 @@ typedef void (XAAPIENTRY * xaPrefetchCallback) (
 
 struct XAPrefetchStatusItf_ {
     XAresult (*GetPrefetchStatus) (
-        XAPrefetchStatusItf self, 
+        XAPrefetchStatusItf self,
         XAuint32 * pStatus
     );
     XAresult (*GetFillLevel) (
-        XAPrefetchStatusItf self, 
+        XAPrefetchStatusItf self,
         XApermille * pLevel
     );
     XAresult (*RegisterCallback) (
@@ -855,19 +854,19 @@ struct XAPrefetchStatusItf_ {
         void * pContext
     );
     XAresult (*SetCallbackEventsMask) (
-        XAPrefetchStatusItf self, 
+        XAPrefetchStatusItf self,
         XAuint32 eventFlags
     );
     XAresult (*GetCallbackEventsMask) (
-        XAPrefetchStatusItf self, 
+        XAPrefetchStatusItf self,
         XAuint32 * pEventFlags
     );
     XAresult (*SetFillUpdatePeriod) (
-        XAPrefetchStatusItf self, 
+        XAPrefetchStatusItf self,
         XApermille period
     );
     XAresult (*GetFillUpdatePeriod) (
-        XAPrefetchStatusItf self, 
+        XAPrefetchStatusItf self,
         XApermille * pPeriod
     );
 };
@@ -1003,20 +1002,20 @@ typedef const struct XAImageEffectsItf_ * const * XAImageEffectsItf;
 
 struct XAImageEffectsItf_ {
     XAresult (*QuerySupportedImageEffects) (
-        XAImageEffectsItf self, 
-        XAuint32 index, 
+        XAImageEffectsItf self,
+        XAuint32 index,
         XAuint32 * pImageEffectId
     );
     XAresult (*EnableImageEffect) (
-        XAImageEffectsItf self, 
+        XAImageEffectsItf self,
         XAuint32 imageEffectID
     );
     XAresult (*DisableImageEffect) (
-        XAImageEffectsItf self, 
+        XAImageEffectsItf self,
         XAuint32 imageEffectID
     );
     XAresult (*IsImageEffectEnabled) (
-        XAImageEffectsItf self, 
+        XAImageEffectsItf self,
         XAuint32 imageEffectID,
         XAboolean * pEnabled
     );
@@ -1187,8 +1186,8 @@ struct XASnapshotItf_ {
         XAuint32 fps,
         XAboolean freezeViewFinder,
         XADataSink sink,
-        xaSnapshotInitiatedCallback initiatedCallback, 
-        xaSnapshotTakenCallback takenCallback, 
+        xaSnapshotInitiatedCallback initiatedCallback,
+        xaSnapshotTakenCallback takenCallback,
         void * pContext
     );
     XAresult (*TakeSnapshot) (
@@ -1369,7 +1368,7 @@ typedef void (XAAPIENTRY * xaMetadataInsertionCallback) (
 struct XAMetadataInsertionItf_ {
     XAresult (*CreateChildNode) (
         XAMetadataInsertionItf self,
-        XAint32 parentNodeID, 
+        XAint32 parentNodeID,
         XAuint32 type,
         XAchar * mimeType,
         XAint32 * pChildNodeID
@@ -1416,7 +1415,7 @@ struct XAMetadataInsertionItf_ {
 
 
 XA_API extern const XAInterfaceID XA_IID_METADATATRAVERSAL;
- 
+
 struct XAMetadataTraversalItf_;
 typedef const struct XAMetadataTraversalItf_
     *  const *  XAMetadataTraversalItf;
@@ -1705,7 +1704,7 @@ struct XACameraItf_ {
         void * pContext
     );
     XAresult (*SetFlashMode) (
-        XACameraItf self, 
+        XACameraItf self,
         XAuint32 flashMode
     );
     XAresult (*GetFlashMode) (
@@ -1717,19 +1716,19 @@ struct XACameraItf_ {
         XAboolean * pReady
     );
     XAresult (*SetFocusMode) (
-        XACameraItf self, 
-        XAuint32 focusMode, 
+        XACameraItf self,
+        XAuint32 focusMode,
         XAmillimeter manualSetting,
         XAboolean macroEnabled
     );
     XAresult (*GetFocusMode) (
         XACameraItf self,
-        XAuint32 * pFocusMode, 
+        XAuint32 * pFocusMode,
         XAmillimeter * pManualSetting,
         XAboolean * pMacroEnabled
     );
     XAresult (*SetFocusRegionPattern) (
-        XACameraItf self, 
+        XACameraItf self,
         XAuint32 focusPattern,
         XAuint32 activePoints1,
         XAuint32 activePoints2
@@ -1744,7 +1743,7 @@ struct XACameraItf_ {
         XACameraItf self,
         XAuint32 * pNumPositionEntries,
         XAFocusPointPosition * pFocusPosition
-    ); 
+    );
     XAresult (*GetFocusModeStatus) (
         XACameraItf self,
         XAuint32 * pFocusStatus,
@@ -1752,7 +1751,7 @@ struct XACameraItf_ {
         XAuint32 * pRegionStatus2
     );
     XAresult (*SetMeteringMode) (
-        XACameraItf self, 
+        XACameraItf self,
         XAuint32 meteringMode
     );
     XAresult (*GetMeteringMode) (
@@ -1760,7 +1759,7 @@ struct XACameraItf_ {
         XAuint32 * pMeteringMode
     );
     XAresult (*SetExposureMode) (
-        XACameraItf self, 
+        XACameraItf self,
         XAuint32 exposure,
         XAuint32 compensation
     );
@@ -1770,7 +1769,7 @@ struct XACameraItf_ {
         XAuint32 * pCompensation
     );
     XAresult (*SetISOSensitivity) (
-        XACameraItf self, 
+        XACameraItf self,
         XAuint32 isoSensitivity,
         XAuint32 manualSetting
     );
@@ -1780,7 +1779,7 @@ struct XACameraItf_ {
         XAuint32 * pManualSetting
     );
     XAresult (*SetAperture) (
-        XACameraItf self, 
+        XACameraItf self,
         XAuint32 aperture,
         XAuint32 manualSetting
     );
@@ -1790,7 +1789,7 @@ struct XACameraItf_ {
         XAuint32 * pManualSetting
     );
     XAresult (*SetShutterSpeed) (
-        XACameraItf self, 
+        XACameraItf self,
         XAuint32 shutterSpeed,
         XAmicrosecond manualSetting
     );
@@ -1800,7 +1799,7 @@ struct XACameraItf_ {
         XAmicrosecond * pManualSetting
     );
     XAresult (*SetWhiteBalance) (
-        XACameraItf self, 
+        XACameraItf self,
         XAuint32 whiteBalance,
         XAuint32 manualSetting
     );
@@ -1868,7 +1867,7 @@ typedef struct XAAudioOutputDescriptor_ {
     XAint16 deviceScope;
     XAint16 deviceLocation;
     XAboolean isForTelephony;
-    XAmilliHertz minSampleRate; 
+    XAmilliHertz minSampleRate;
     XAmilliHertz maxSampleRate;
     XAboolean isFreqRangeContinuous;
     XAmilliHertz *samplingRatesSupported;
@@ -1907,34 +1906,34 @@ typedef void (XAAPIENTRY * xaDefaultDeviceIDMapChangedCallback) (
 
 struct XAAudioIODeviceCapabilitiesItf_ {
     XAresult (*GetAvailableAudioInputs) (
-        XAAudioIODeviceCapabilitiesItf self, 
+        XAAudioIODeviceCapabilitiesItf self,
         XAint32 * pNumInputs,
         XAuint32 * pInputDeviceIDs
     );
     XAresult (*QueryAudioInputCapabilities) (
-        XAAudioIODeviceCapabilitiesItf self, 
-        XAuint32 deviceID, 
+        XAAudioIODeviceCapabilitiesItf self,
+        XAuint32 deviceID,
         XAAudioInputDescriptor * pDescriptor
     );
     XAresult (*RegisterAvailableAudioInputsChangedCallback) (
         XAAudioIODeviceCapabilitiesItf self,
         xaAvailableAudioInputsChangedCallback callback,
-        void * pContext 
+        void * pContext
     );
     XAresult (*GetAvailableAudioOutputs) (
-        XAAudioIODeviceCapabilitiesItf self, 
+        XAAudioIODeviceCapabilitiesItf self,
         XAint32 * pNumOutputs,
         XAuint32 * pOutputDeviceIDs
     );
     XAresult (*QueryAudioOutputCapabilities) (
-        XAAudioIODeviceCapabilitiesItf self, 
-        XAuint32 deviceID, 
+        XAAudioIODeviceCapabilitiesItf self,
+        XAuint32 deviceID,
         XAAudioOutputDescriptor * pDescriptor
     );
     XAresult (*RegisterAvailableAudioOutputsChangedCallback) (
         XAAudioIODeviceCapabilitiesItf self,
         xaAvailableAudioOutputsChangedCallback callback,
-        void * pContext 
+        void * pContext
     );
     XAresult (*RegisterDefaultDeviceIDMapChangedCallback) (
         XAAudioIODeviceCapabilitiesItf self,
@@ -1946,7 +1945,7 @@ struct XAAudioIODeviceCapabilitiesItf_ {
         XAuint32 deviceID,
         XAint32 * pNumAudioInputs,
         XAuint32 * pAudioInputDeviceIDs
-    ); 
+    );
     XAresult (*GetAssociatedAudioOutputs) (
         XAAudioIODeviceCapabilitiesItf self,
         XAuint32 deviceID,
@@ -1960,7 +1959,7 @@ struct XAAudioIODeviceCapabilitiesItf_ {
         XAuint32 *pAudioDeviceIDs
     );
     XAresult (*QuerySampleFormatsSupported) (
-        XAAudioIODeviceCapabilitiesItf self, 
+        XAAudioIODeviceCapabilitiesItf self,
         XAuint32 deviceID,
         XAmilliHertz samplingRate,
         XAint32 *pSampleFormats,
@@ -2210,7 +2209,7 @@ struct XARadioItf_ {
     );
     XAresult (*RegisterRadioCallback) (
         XARadioItf self,
-        xaRadioCallback callback, 
+        xaRadioCallback callback,
         void * pContext
     );
 };
@@ -2544,12 +2543,12 @@ struct XARDSItf_ {
     );
     XAresult (*RegisterRDSCallback) (
         XARDSItf self,
-        xaRDSCallback callback, 
+        xaRDSCallback callback,
         void * pContext
     );
     XAresult (*RegisterODADataCallback) (
         XARDSItf self,
-        xaNewODADataCallback callback, 
+        xaNewODADataCallback callback,
         void * pContext
     );
 };

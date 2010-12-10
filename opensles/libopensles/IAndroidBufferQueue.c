@@ -28,14 +28,28 @@ SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf self,
     interface_lock_exclusive(this);
 
     // verify pre-condition that media object is in the SL_PLAYSTATE_STOPPED state
-    if (SL_PLAYSTATE_STOPPED == ((CAudioPlayer*) this->mThis)->mPlay.mState) {
+    // FIXME PRIORITY 1 check play state
+    //if (SL_PLAYSTATE_STOPPED == ((CAudioPlayer*) this->mThis)->mPlay.mState) {
         this->mCallback = callback;
         this->mContext = pContext;
-        result = SL_RESULT_SUCCESS;
-        android_audioPlayer_androidBufferQueue_registerCallback_l((CAudioPlayer*) this->mThis);
-    } else {
-        result = SL_RESULT_PRECONDITIONS_VIOLATED;
-    }
+
+        switch (InterfaceToObjectID(this)) {
+        case SL_OBJECTID_AUDIOPLAYER:
+            result = SL_RESULT_SUCCESS;
+            android_audioPlayer_androidBufferQueue_registerCallback_l((CAudioPlayer*) this->mThis);
+            break;
+        case XA_OBJECTID_MEDIAPLAYER:
+            SL_LOGI("IAndroidBufferQueue_RegisterCallback()");
+            result = SL_RESULT_SUCCESS;
+            android_Player_androidBufferQueue_registerCallback_l((CMediaPlayer*) this->mThis);
+        default:
+            result = SL_RESULT_PARAMETER_INVALID;
+            break;
+        }
+
+    //} else {
+    //    result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    //}
 
     interface_unlock_exclusive(this);
 
@@ -75,9 +89,22 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
 
     // FIXME return value? of particular interest: error is length is larger than size received
     //   in callback
-    result = SL_RESULT_SUCCESS;
-    android_audioPlayer_androidBufferQueue_enqueue_l((CAudioPlayer*) this->mThis,
-            bufferId, length, event, pData);
+    switch (InterfaceToObjectID(this)) {
+    case SL_OBJECTID_AUDIOPLAYER:
+        result = SL_RESULT_SUCCESS;
+        android_audioPlayer_androidBufferQueue_enqueue_l((CAudioPlayer*) this->mThis,
+                bufferId, length, event, pData);
+        break;
+    case XA_OBJECTID_MEDIAPLAYER:
+        //SL_LOGV("IAndroidBufferQueue_Enqueue()");
+        result = SL_RESULT_SUCCESS;
+        android_Player_androidBufferQueue_enqueue_l((CMediaPlayer*) this->mThis,
+                bufferId, length, event, pData);
+        break;
+    default:
+        result = SL_RESULT_PARAMETER_INVALID;
+        break;
+    }
 
     interface_unlock_exclusive(this);
 

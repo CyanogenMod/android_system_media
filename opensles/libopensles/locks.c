@@ -192,21 +192,10 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
             {
             attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
             CMediaPlayer *mp = (CMediaPlayer *) this;
-            // CMediaPlayer_setPlayState(mp);
-            android::sp<android::IMediaPlayer> player = mp->mPlayer;
-            if (player != NULL) {
-                switch (mp->mPlay.mState) {
-                case XA_PLAYSTATE_PLAYING:
-                    player->start();
-                    break;
-                case XA_PLAYSTATE_PAUSED:
-                case XA_PLAYSTATE_STOPPED:
-                    player->stop();
-                    break;
-                default:
-                    break;
-                }
-            }
+            SLuint32 playState = mp->mPlay.mState;
+            // FIXME use object state
+            //AndroidObject_state objState = mp->mAndroidObjState;
+            android_Player_setPlayState(mp, playState, ANDROID_UNINITIALIZED);
             }
 #endif
             break;
