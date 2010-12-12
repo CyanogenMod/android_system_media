@@ -84,6 +84,7 @@
 #ifdef ANDROID
     android::Mutex          *mpLock;
     enum AndroidObject_type mAndroidObjType;
+    /** identifies the initialization and preparation state */
     enum AndroidObject_state mAndroidObjState;
     /** identifies which group of effects ("session") this player belongs to */
     int mSessionId;
@@ -313,8 +314,19 @@ typedef struct CMediaPlayer_struct {
     DataLocatorFormat mImageVideoSink;
     DataLocatorFormat mVibraSink;
     DataLocatorFormat mLEDArraySink;
+    /**
+     * Dry volume modified by effect send interfaces: SLEffectSendItf and SLAndroidEffectSendItf
+     */
+    SLmillibel mDirectLevel;
 #ifdef ANDROID
-    //android::sp<android::IMediaPlayer> mPlayer;
     android::sp<android::AVPlayer> mAVPlayer;
+    enum AndroidObject_type mAndroidObjType;
+    /** identifies the initialization and preparation state */
+    enum AndroidObject_state mAndroidObjState;
+    /** identifies which group of effects ("session") this player belongs to */
+    int mSessionId;
+    /** identifies the Android stream type playback will occur on */
+    int mStreamType;
+    AndroidAudioLevels mAndroidAudioLevels;
 #endif
 } CMediaPlayer;

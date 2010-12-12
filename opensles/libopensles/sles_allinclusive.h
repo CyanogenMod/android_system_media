@@ -22,6 +22,7 @@
 #define XA_API SLAPIENTRY
 #ifdef ANDROID
 #include "SLES/OpenSLES_Android.h"
+#include "OMXAL/OpenMAXAL_Android.h"
 #endif
 #include <stddef.h> // offsetof
 #include <stdlib.h> // malloc
@@ -253,24 +254,7 @@ struct SndFile {
 
 #ifdef ANDROID
 
-/*
- * Used to define the mapping from an OpenSL ES audio player to an Android
- * media framework object
- */
-enum AndroidObject_type {
-    INVALID_TYPE     =-1,
-    MEDIAPLAYER      = 0,
-    AUDIOTRACK_PULL  = 1,
-    STREAM_SOURCE    = 2,
-    NUM_AUDIOPLAYER_MAP_TYPES
-};
-
-enum AndroidObject_state {
-    ANDROID_UNINITIALIZED = -1,
-    ANDROID_PREPARING,
-    ANDROID_READY,
-    NUM_ANDROID_STATES
-};
+#include "android_defs.h"
 
 #ifdef ANDROID
 // FIXME this include is done here so the effect structures and enums have been defined. Messy.

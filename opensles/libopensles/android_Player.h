@@ -31,7 +31,10 @@ extern XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async);
 /**************************************************************************************************
  * Playback control and events
  ****************************/
-extern XAresult android_Player_setPlayState(CMediaPlayer *mp, SLuint32 playState,
+/**
+ * pre-condition: avp != NULL
+ */
+extern XAresult android_Player_setPlayState(android::AVPlayer *avp, SLuint32 playState,
         AndroidObject_state objState);
 
 

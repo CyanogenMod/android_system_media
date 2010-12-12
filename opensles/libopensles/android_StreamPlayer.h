@@ -89,8 +89,6 @@ private:
  */
 extern void android_StreamPlayer_realize_l(CAudioPlayer *ap);
 extern void android_StreamPlayer_destroy(CAudioPlayer *ap);
-extern void android_StreamPlayer_setPlayState(CAudioPlayer *ap, SLuint32 playState,
-        AndroidObject_state objState);
 extern void android_StreamPlayer_androidBufferQueue_registerCallback(
         android::StreamPlayer *splr,
         slAndroidBufferQueueCallback callback, void* context, const void* callerItf);

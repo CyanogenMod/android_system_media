@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#define ANDROID_DEFAULT_OUTPUT_STREAM_TYPE android::AudioSystem::MUSIC
 #define ANDROID_DEFAULT_AUDIOTRACK_BUFFER_SIZE 4096
 
 /**************************************************************************************************

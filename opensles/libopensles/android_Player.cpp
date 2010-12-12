@@ -33,12 +33,12 @@ XAresult android_Player_create(CMediaPlayer *mp) {
 
     SLuint32 sourceLocator = *(SLuint32 *)pDataSrc->pLocator;
     switch(sourceLocator) {
-    case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
+    case XA_DATALOCATOR_ANDROIDBUFFERQUEUE:
+        mp->mAndroidObjType = AV_PLR_TS_ABQ;
         break;
-    case SL_DATALOCATOR_URI: // intended fall-through
+    case XA_DATALOCATOR_URI: // intended fall-through
+    case XA_DATALOCATOR_ADDRESS: // intended fall-through
     case SL_DATALOCATOR_ANDROIDFD: // intended fall-through
-    case SL_DATALOCATOR_BUFFERQUEUE: // intended fall-through
-    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE: // intended fall-through
     default:
         SL_LOGE("Unable to create MediaPlayer for data source locator 0x%lx", sourceLocator);
         result = XA_RESULT_PARAMETER_INVALID;
@@ -46,28 +46,17 @@ XAresult android_Player_create(CMediaPlayer *mp) {
 
     }
 
+    mp->mAndroidObjState = ANDROID_UNINITIALIZED;
+    mp->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
+    mp->mSessionId = android::AudioSystem::newAudioSessionId();
 
-    // FIXME port all CAudioPlayer initialization to CMediaPlayer
-    // FIXME verify play state is correctly initialized
-/*
-    pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
-    pAudioPlayer->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
-    pAudioPlayer->mAudioTrack = NULL;
+    mp->mAndroidAudioLevels.mAmplFromVolLevel = 1.0f;
+    mp->mAndroidAudioLevels.mAmplFromStereoPos[0] = 1.0f;
+    mp->mAndroidAudioLevels.mAmplFromStereoPos[1] = 1.0f;
+    mp->mAndroidAudioLevels.mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
+    mp->mAndroidAudioLevels.mAuxSendLevel = 0;
+    mp->mDirectLevel = 0; // no attenuation
 
-    pAudioPlayer->mSessionId = android::AudioSystem::newAudioSessionId();
-
-
-    pAudioPlayer->mAmplFromVolLevel = 1.0f;
-    pAudioPlayer->mAmplFromStereoPos[0] = 1.0f;
-    pAudioPlayer->mAmplFromStereoPos[1] = 1.0f;
-    pAudioPlayer->mDirectLevel = 0; // no attenuation
-    pAudioPlayer->mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
-    pAudioPlayer->mAuxSendLevel = 0;
-
-    // initialize interface-specific fields that can be used regardless of whether the interface
-    // is exposed on the AudioPlayer or not
-    // (section no longer applicable, as all previous initializations were the same as the defaults)
-*/
     return result;
 }
 
@@ -82,23 +71,20 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
     const SLuint32 sourceLocator = *(SLuint32 *)pDataSrc->pLocator;
 
     AudioPlayback_Parameters ap_params;
-    ap_params.sessionId = 0;// FIXME mp->mSessionId;
-    ap_params.streamType = android::AudioSystem::MUSIC;// FIXME mp->mStreamType;
+    ap_params.sessionId = mp->mSessionId;
+    ap_params.streamType = mp->mStreamType;
     ap_params.trackcb = NULL;
     ap_params.trackcbUser = NULL;
 
-    switch(sourceLocator) {
-    case SL_DATALOCATOR_ANDROIDBUFFERQUEUE: {
+    switch(mp->mAndroidObjType) {
+    case AV_PLR_TS_ABQ: {
         mp->mAVPlayer = new android::StreamPlayer(&ap_params);
         mp->mAVPlayer->init();
         }
         break;
-    case SL_DATALOCATOR_URI: // intended fall-through
-    case SL_DATALOCATOR_ANDROIDFD: // intended fall-through
-    case SL_DATALOCATOR_BUFFERQUEUE: // intended fall-through
-    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE: // intended fall-through
+    case INVALID_TYPE:
     default:
-        SL_LOGE("Unable to realize MediaPlayer for data source locator 0x%lx", sourceLocator);
+        SL_LOGE("Unable to realize MediaPlayer, invalid internal Android object type");
         result = XA_RESULT_PARAMETER_INVALID;
         break;
 
@@ -109,55 +95,50 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
 
 
 //-----------------------------------------------------------------------------
-// FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
-XAresult android_Player_setPlayState(CMediaPlayer *mp, SLuint32 playState,
+/**
+ * pre-condition: avp != NULL
+ */
+XAresult android_Player_setPlayState(android::AVPlayer *avp, SLuint32 playState,
         AndroidObject_state objState)
 {
     XAresult result = XA_RESULT_SUCCESS;
 
     switch (playState) {
      case SL_PLAYSTATE_STOPPED: {
-         SL_LOGV("setting StreamPlayer to SL_PLAYSTATE_STOPPED");
-         if (mp->mAVPlayer != 0) {
-             mp->mAVPlayer->stop();
-         }
+         SL_LOGV("setting AVPlayer to SL_PLAYSTATE_STOPPED");
+         avp->stop();
      } break;
      case SL_PLAYSTATE_PAUSED: {
-         SL_LOGV("setting StreamPlayer to SL_PLAYSTATE_PAUSED");
+         SL_LOGV("setting AVPlayer to SL_PLAYSTATE_PAUSED");
          switch(objState) {
          case(ANDROID_UNINITIALIZED):
-             if (mp->mAVPlayer != 0) {
-                 mp->mAVPlayer->prepare();
-             }
+             avp->prepare();
          break;
          case(ANDROID_PREPARING):
              break;
          case(ANDROID_READY):
-             if (mp->mAVPlayer != 0) {
-                 mp->mAVPlayer->pause();
-             }
+             avp->pause();
          break;
          default:
+             SL_LOGE("Android object in invalid state");
              break;
          }
      } break;
      case SL_PLAYSTATE_PLAYING: {
-         SL_LOGV("setting StreamPlayer to SL_PLAYSTATE_PLAYING");
+         SL_LOGV("setting AVPlayer to SL_PLAYSTATE_PLAYING");
          switch(objState) {
          case(ANDROID_UNINITIALIZED):
              // FIXME PRIORITY1 prepare should update the obj state
              //  for the moment test app sets state to PAUSED to prepare, then to PLAYING
-             /*if (mp->mAVPlayer != 0) {
-                 mp->mAVPlayer->prepare();
-             }*/
+             //avp->prepare();
+
          // fall through
          case(ANDROID_PREPARING):
          case(ANDROID_READY):
-             if (mp->mAVPlayer != 0) {
-                 mp->mAVPlayer->play();
-             }
+             avp->play();
          break;
          default:
+             SL_LOGE("Android object in invalid state");
              break;
          }
      } break;
@@ -168,65 +149,6 @@ XAresult android_Player_setPlayState(CMediaPlayer *mp, SLuint32 playState,
      }
 
     return result;
-}
-
-
-//----------------------------------------------------------------
-// FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
-void android_StreamPlayer_setPlayState(CAudioPlayer *ap, SLuint32 playState,
-        AndroidObject_state objState)
-{
-    switch (playState) {
-    case SL_PLAYSTATE_STOPPED: {
-        SL_LOGV("setting StreamPlayer to SL_PLAYSTATE_STOPPED");
-        if (ap->mStreamPlayer != 0) {
-            ap->mStreamPlayer->stop();
-        }
-    } break;
-    case SL_PLAYSTATE_PAUSED: {
-        SL_LOGV("setting StreamPlayer to SL_PLAYSTATE_PAUSED");
-        switch(objState) {
-        case(ANDROID_UNINITIALIZED):
-            if (ap->mStreamPlayer != 0) {
-                ap->mStreamPlayer->prepare();
-            }
-        break;
-        case(ANDROID_PREPARING):
-            break;
-        case(ANDROID_READY):
-            if (ap->mStreamPlayer != 0) {
-                ap->mStreamPlayer->pause();
-            }
-        break;
-        default:
-            break;
-        }
-    } break;
-    case SL_PLAYSTATE_PLAYING: {
-        SL_LOGV("setting StreamPlayer to SL_PLAYSTATE_PLAYING");
-        switch(objState) {
-        case(ANDROID_UNINITIALIZED):
-            // FIXME PRIORITY1 prepare should update the obj state
-            //  for the moment test app sets state to PAUSED to prepare, then to PLAYING
-            /*if (ap->mStreamPlayer != 0) {
-                ap->mStreamPlayer->prepare();
-            }*/
-        // fall through
-        case(ANDROID_PREPARING):
-        case(ANDROID_READY):
-            if (ap->mStreamPlayer != 0) {
-                ap->mStreamPlayer->play();
-            }
-        break;
-        default:
-            break;
-        }
-    } break;
-
-    default:
-        // checked by caller, should not happen
-        break;
-    }
 }
 
 
