@@ -830,4 +830,3 @@ SLresult android_genericFx_sendCommand(IAndroidEffect* iae, SLInterfaceID pUuid,
 bool android_genericFx_hasEffect(IAndroidEffect* iae, SLInterfaceID pUuid) {
     return( 0 <= iae->mEffects->indexOfKey(KEY_FROM_GUID(pUuid)));
 }
-
