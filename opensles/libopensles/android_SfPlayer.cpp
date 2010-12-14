@@ -16,13 +16,8 @@
 
 //#define USE_LOG SLAndroidLogLevel_Verbose
 
-#include "android_SfPlayer.h"
-
-#include <stdio.h>
-#include "SLES/OpenSLES.h"
-#include "SLES/OpenSLES_Android.h"
-#include "sllog.h"
-#include <stdlib.h>
+#include "sles_allinclusive.h"
+#undef this // FIXME shouldn't have to do this, no pun intended
 
 #ifdef _DEBUG_AUDIO_TESTS
 // defines used for automated audio quality tests
@@ -106,14 +101,14 @@ void SfPlayer::setNotifListener(const notif_client_t cbf, void* notifUser) {
 
 void SfPlayer::notifyPrepared(status_t prepareRes) {
     sp<AMessage> msg = new AMessage(kWhatNotif, id());
-    msg->setInt32(EVENT_PREPARED, (int32_t)prepareRes);
+    msg->setInt32(PLAYEREVENT_PREPARED, (int32_t)prepareRes);
     notify(msg, true /*async*/);
 }
 
 
 void SfPlayer::notifyStatus() {
     sp<AMessage> msg = new AMessage(kWhatNotif, id());
-    msg->setInt32(EVENT_PREFETCHSTATUSCHANGE, (int32_t)mCacheStatus);
+    msg->setInt32(PLAYEREVENT_PREFETCHSTATUSCHANGE, (int32_t)mCacheStatus);
     notify(msg, true /*async*/);
 }
 
@@ -121,7 +116,7 @@ void SfPlayer::notifyStatus() {
 void SfPlayer::notifyCacheFill() {
     sp<AMessage> msg = new AMessage(kWhatNotif, id());
     mLastNotifiedCacheFill = mCacheFill;
-    msg->setInt32(EVENT_PREFETCHFILLLEVELUPDATE, (int32_t)mLastNotifiedCacheFill);
+    msg->setInt32(PLAYEREVENT_PREFETCHFILLLEVELUPDATE, (int32_t)mLastNotifiedCacheFill);
     notify(msg, true /*async*/);
 }
 
@@ -335,7 +330,7 @@ void SfPlayer::onPrepare(const sp<AMessage> &msg) {
         );
 
     //SL_LOGV("SfPlayer::onPrepare: end");
-    notifyPrepared(SFPLAYER_SUCCESS);
+    notifyPrepared(PLAYER_SUCCESS);
 
 }
 
@@ -438,7 +433,7 @@ void SfPlayer::reachedEndOfStream() {
     if (mFlags & kFlagPlaying) {
         // async notification of end of stream reached during playback
         sp<AMessage> msg = new AMessage(kWhatNotif, id());
-        msg->setInt32(EVENT_ENDOFSTREAM, 1);
+        msg->setInt32(PLAYEREVENT_ENDOFSTREAM, 1);
         notify(msg, true /*async*/);
     }
     if (mFlags & kFlagLooping) {
@@ -487,7 +482,7 @@ void SfPlayer::updatePlaybackParamsFromSource() {
 
         // notify the AudioPlayer synchronously there's a new AudioTrack to use and configure
         sp<AMessage> msg = new AMessage(kWhatNotif, id());
-        msg->setInt32(EVENT_NEW_AUDIOTRACK, 0/*data field unused*/);
+        msg->setInt32(PLAYEREVENT_NEW_AUDIOTRACK, 0/*data field unused*/);
         notify(msg, false /*async*/);
     }
 }
@@ -736,26 +731,26 @@ void SfPlayer::onNotify(const sp<AMessage> &msg) {
         return;
     }
     int32_t val;
-    if (msg->findInt32(EVENT_PREFETCHSTATUSCHANGE, &val)) {
-        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_PREFETCHSTATUSCHANGE, val);
+    if (msg->findInt32(PLAYEREVENT_PREFETCHSTATUSCHANGE, &val)) {
+        SL_LOGV("\tSfPlayer notifying %s = %d", PLAYEREVENT_PREFETCHSTATUSCHANGE, val);
         mNotifyClient(kEventPrefetchStatusChange, val, mNotifyUser);
     }
-    if (msg->findInt32(EVENT_PREFETCHFILLLEVELUPDATE, &val)) {
-        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_PREFETCHFILLLEVELUPDATE, val);
+    if (msg->findInt32(PLAYEREVENT_PREFETCHFILLLEVELUPDATE, &val)) {
+        SL_LOGV("\tSfPlayer notifying %s = %d", PLAYEREVENT_PREFETCHFILLLEVELUPDATE, val);
         mNotifyClient(kEventPrefetchFillLevelUpdate, val, mNotifyUser);
     }
-    if (msg->findInt32(EVENT_ENDOFSTREAM, &val)) {
-        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_ENDOFSTREAM, val);
+    if (msg->findInt32(PLAYEREVENT_ENDOFSTREAM, &val)) {
+        SL_LOGV("\tSfPlayer notifying %s = %d", PLAYEREVENT_ENDOFSTREAM, val);
         mNotifyClient(kEventEndOfStream, val, mNotifyUser);
     }
 
-    if (msg->findInt32(EVENT_PREPARED, &val)) {
-        SL_LOGV("\tSfPlayer notifying %s = %d", EVENT_PREPARED, val);
-        mNotifyClient(kEventPrepared, val, mNotifyUser);
+    if (msg->findInt32(PLAYEREVENT_PREPARED, &val)) {
+        SL_LOGV("\tSfPlayer notifying %s = %d", PLAYEREVENT_PREPARED, val);
+        mNotifyClient(AVPlayer::kEventPrepared, val, mNotifyUser);
     }
 
-    if (msg->findInt32(EVENT_NEW_AUDIOTRACK, &val)) {
-        SL_LOGV("\tSfPlayer notifying %s", EVENT_NEW_AUDIOTRACK);
+    if (msg->findInt32(PLAYEREVENT_NEW_AUDIOTRACK, &val)) {
+        SL_LOGV("\tSfPlayer notifying %s", PLAYEREVENT_NEW_AUDIOTRACK);
         mNotifyClient(kEventNewAudioTrack, val, mNotifyUser);
     }
 }

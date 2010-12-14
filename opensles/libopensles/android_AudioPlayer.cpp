@@ -401,9 +401,9 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
     //SL_LOGV("received event %d, data %d from SfAudioPlayer", event, data1);
     switch(event) {
 
-    case(android::SfPlayer::kEventPrepared): {
+    case(android::AVPlayer::kEventPrepared): {
 
-        if (SFPLAYER_SUCCESS != data1) {
+        if (PLAYER_SUCCESS != data1) {
             object_lock_exclusive(&ap->mObject);
 
             ap->mAudioTrack = NULL;
@@ -445,16 +445,20 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
         } else {
             object_lock_exclusive(&ap->mObject);
 
-            ap->mAudioTrack = ap->mSfPlayer->getAudioTrack();
-            ap->mNumChannels = ap->mSfPlayer->getNumChannels();
-            ap->mSampleRateMilliHz = android_to_sles_sampleRate(ap->mSfPlayer->getSampleRateHz());
-            ap->mSfPlayer->startPrefetch_async();
-
-            // update the new track with the current settings
-            audioPlayer_auxEffectUpdate(ap);
-            android_audioPlayer_useEventMask(ap);
-            android_audioPlayer_volumeUpdate(ap);
-            android_audioPlayer_setPlayRate(ap, ap->mPlaybackRate.mRate, false /*lockAP*/);
+            if (A_PLR_URI_FD == ap->mAndroidObjType) {
+                ap->mAudioTrack = ap->mSfPlayer->getAudioTrack();
+                ap->mNumChannels = ap->mSfPlayer->getNumChannels();
+                ap->mSampleRateMilliHz =
+                        android_to_sles_sampleRate(ap->mSfPlayer->getSampleRateHz());
+                ap->mSfPlayer->startPrefetch_async();
+                // update the new track with the current settings
+                audioPlayer_auxEffectUpdate(ap);
+                android_audioPlayer_useEventMask(ap);
+                android_audioPlayer_volumeUpdate(ap);
+                android_audioPlayer_setPlayRate(ap, ap->mPlaybackRate.mRate, false /*lockAP*/);
+            } else if (A_PLR_TS_ABQ) {
+                SL_LOGI("Received SfPlayer::kEventPrepared from AVPlayer for CAudioPlayer %p", ap);
+            }
 
             ap->mAndroidObjState = ANDROID_READY;
 
@@ -1110,7 +1114,8 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
    case A_PLR_TS_ABQ: {
         object_lock_exclusive(&pAudioPlayer->mObject);
 
-        android_StreamPlayer_realize_l(pAudioPlayer);
+        android_StreamPlayer_realize_l(pAudioPlayer, sfplayer_handlePrefetchEvent,
+                (void*)pAudioPlayer);
 
         object_unlock_exclusive(&pAudioPlayer->mObject);
         } break;
@@ -1354,7 +1359,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
     case A_PLR_TS_ABQ: {
         android::AVPlayer* avp = (android::AVPlayer*) ap->mStreamPlayer.get();
         if (avp != NULL) {
-            android_Player_setPlayState(avp, playState, objState);
+            android_Player_setPlayState(avp, playState, &(ap->mAndroidObjState));
         }
         }
         break;

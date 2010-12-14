@@ -42,10 +42,15 @@ private:
 class AVPlayer : public AHandler
 {
 public:
+
+    enum {
+        kEventPrepared                = 'prep'
+    };
+
     AVPlayer(AudioPlayback_Parameters* params);
     virtual ~AVPlayer();
 
-    virtual void init();
+    virtual void init(const notif_client_t cbf, void* notifUser);
 
     virtual void prepare();
     virtual void play();
@@ -62,15 +67,40 @@ protected:
         kWhatStop       = 'stop'
     };
 
+    // Send a notification to one of the event listeners
+    virtual void notify(const char* event, int data, bool async);
+
     // AHandler implementation
     virtual void onMessageReceived(const sp<AMessage> &msg);
+
+    // Async event handlers (called from AVPlayer's event loop)
+    virtual void onPrepare();
+    virtual void onNotify(const sp<AMessage> &msg);
+    virtual void onPlay();
+    virtual void onPause();
+    virtual void onStop();
+
+    // Event notification from AVPlayer to OpenSL ES / OpenMAX AL framework
+    notif_client_t mNotifyClient;
+    void*          mNotifyUser;
+
+    enum {
+        kFlagPrepared  = 1 <<0,
+        kFlagPlaying   = 1 <<1,
+        /*kFlagBuffering = 1 <<2,
+        kFlagSeeking   = 1 <<3,
+        kFlagLooping   = 1 <<4,*/
+    };
+
+    uint32_t mStateFlags;
 
     sp<ALooper> mLooper;
 
     AudioPlayback_Parameters mPlaybackParams;
 
     sp<IMediaPlayer> mPlayer;
-    sp<MediaPlayerNotificationClient> mPlayerClient; // receives events from mPlayer
+    // Receives Android MediaPlayer events from mPlayer
+    sp<MediaPlayerNotificationClient> mPlayerClient;
 
     sp<IServiceManager> mServiceManager;
     sp<IBinder> mBinder;
@@ -78,12 +108,6 @@ protected:
 
     Mutex mLock;
 
-    // Event handlers
-    virtual void onPrepare();
-    //virtual void onNotif(const sp<AMessage> &msg);
-    virtual void onPlay();
-    virtual void onPause();
-    virtual void onStop();
 };
 
 } // namespace android

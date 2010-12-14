@@ -61,10 +61,6 @@ public:
     StreamPlayer(AudioPlayback_Parameters* params);
     virtual ~StreamPlayer();
 
-    // overridden from AVPlayer
-    virtual void init();
-
-
     void registerQueueCallback(slAndroidBufferQueueCallback callback, void *context,
             const void *caller);
     void appEnqueue(SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
@@ -87,7 +83,8 @@ private:
 /*
  * xxx_l functions are called with a lock on the CAudioPlayer mObject
  */
-extern void android_StreamPlayer_realize_l(CAudioPlayer *ap);
+extern void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_client_t cbf,
+        void* notifUser);
 extern void android_StreamPlayer_destroy(CAudioPlayer *ap);
 extern void android_StreamPlayer_androidBufferQueue_registerCallback(
         android::StreamPlayer *splr,

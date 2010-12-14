@@ -22,7 +22,8 @@
 
 //--------------------------------------------------------------------------------------------------
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
-void android_StreamPlayer_realize_l(CAudioPlayer *ap) {
+
+void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_client_t cbf, void* notifUser) {
     SL_LOGI("android_StreamPlayer_realize_l(%p)", ap);
 
     AudioPlayback_Parameters ap_params;
@@ -31,7 +32,7 @@ void android_StreamPlayer_realize_l(CAudioPlayer *ap) {
     ap_params.trackcb = NULL;
     ap_params.trackcbUser = NULL;
     ap->mStreamPlayer = new android::StreamPlayer(&ap_params);
-    ap->mStreamPlayer->init();
+    ap->mStreamPlayer->init(cbf, notifUser);
 }
 
 
@@ -146,10 +147,6 @@ StreamPlayer::~StreamPlayer() {
     mAppProxy.clear();
 }
 
-void StreamPlayer::init() {
-    SL_LOGI("StreamPlayer::init()");
-    AVPlayer::init();
-}
 
 void StreamPlayer::registerQueueCallback(slAndroidBufferQueueCallback callback, void *context,
         const void *caller) {

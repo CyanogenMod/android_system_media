@@ -194,7 +194,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
             CMediaPlayer *mp = (CMediaPlayer *) this;
             android::AVPlayer* avp = mp->mAVPlayer.get();
             if (avp != NULL) {
-                android_Player_setPlayState(avp, mp->mPlay.mState, mp->mAndroidObjState);
+                android_Player_setPlayState(avp, mp->mPlay.mState, &(mp->mAndroidObjState));
             }
             }
 #endif

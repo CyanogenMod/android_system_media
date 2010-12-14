@@ -49,16 +49,7 @@
 #define SIZE_CACHED_MED_BYTES   700000
 #define SIZE_CACHED_LOW_BYTES   400000
 
-/*
- * events sent to mNotifyClient during prepare, prefetch, and playback
- */
-#define EVENT_PREPARED                "prep"
-#define EVENT_PREFETCHSTATUSCHANGE    "prsc"
-#define EVENT_PREFETCHFILLLEVELUPDATE "pflu"
-#define EVENT_ENDOFSTREAM             "eos"
-#define EVENT_NEW_AUDIOTRACK          "nwat"
 
-#define SFPLAYER_SUCCESS 1
 #define SFPLAYER_FD_FIND_FILE_SIZE ((int64_t)0xFFFFFFFFFFFFFFFFll)
 
 #define NO_FILL_LEVEL_UPDATE -1
@@ -75,7 +66,6 @@ typedef struct AudioPlayback_Parameters_struct {
 
 namespace android {
 
-    typedef void (*notif_client_t)(int event, const int data1, void* notifUser);
 
 struct SfPlayer : public AHandler {
     SfPlayer(AudioPlayback_Parameters *app);
@@ -90,7 +80,7 @@ struct SfPlayer : public AHandler {
     };
 
     enum {
-        kEventPrepared                = 'prep',
+        //kEventPrepared                = 'prep', // see AVPlayer definitions
         kEventPrefetchStatusChange    = 'prsc',
         kEventPrefetchFillLevelUpdate = 'pflu',
         kEventEndOfStream             = 'eos',

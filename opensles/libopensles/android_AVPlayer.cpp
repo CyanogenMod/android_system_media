@@ -54,6 +54,9 @@ void MediaPlayerNotificationClient::blockUntilPlayerPrepared() {
 
 //--------------------------------------------------------------------------------------------------
 AVPlayer::AVPlayer(AudioPlayback_Parameters* params) :
+    mNotifyClient(NULL),
+    mNotifyUser(NULL),
+    mStateFlags(0),
     mPlayer(0),
     mPlayerClient(0)
 {
@@ -86,11 +89,16 @@ AVPlayer::~AVPlayer() {
     mServiceManager.clear();
 }
 
-void AVPlayer::init() {
+void AVPlayer::init(const notif_client_t cbf, void* notifUser) {
     SL_LOGI("AVPlayer::init()");
+
+    mNotifyClient = cbf;
+    mNotifyUser = notifUser;
+
     mLooper->registerHandler(this);
     mLooper->start(false /*runOnCallingThread*/, false /*canCallJava*/); // use default priority
 }
+
 
 void AVPlayer::prepare() {
     SL_LOGI("AVPlayer::prepare()");
@@ -116,6 +124,16 @@ void AVPlayer::stop() {
     msg->post();
 }
 
+void AVPlayer::notify(const char* event, int data, bool async) {
+    sp<AMessage> msg = new AMessage(kWhatNotif, id());
+    msg->setInt32(event, (int32_t)data);
+    if (async) {
+        msg->post();
+    } else {
+        this->onNotify(msg);
+    }
+}
+
 
 //--------------------------------------------------
 // AHandler implementation
@@ -124,11 +142,11 @@ void AVPlayer::onMessageReceived(const sp<AMessage> &msg) {
         case kWhatPrepare:
             onPrepare();
             break;
-/*
+
         case kWhatNotif:
             onNotify(msg);
             break;
-*/
+
         case kWhatPlay:
             onPlay();
             break;
@@ -150,32 +168,53 @@ void AVPlayer::onMessageReceived(const sp<AMessage> &msg) {
 // Event handlers
 void AVPlayer::onPrepare() {
     SL_LOGI("AVPlayer::onPrepare()");
-    if (mPlayer != 0) {
+    if (!(mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
         mPlayer->setAudioStreamType(mPlaybackParams.streamType);
         mPlayer->prepareAsync();
         mPlayerClient->blockUntilPlayerPrepared();
+        notify(PLAYEREVENT_PREPARED, PLAYER_SUCCESS, false /*async*/);
+        mStateFlags |= kFlagPrepared;
     }
-    SL_LOGI("AVPlayer::onPrepare() done");
+    SL_LOGI("AVPlayer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
+}
+
+void AVPlayer::onNotify(const sp<AMessage> &msg) {
+    if (NULL == mNotifyClient) {
+        return;
+    }
+
+    int32_t val;
+    if (msg->findInt32(PLAYEREVENT_PREPARED, &val)) {
+        SL_LOGV("AVPlayer notifying %s = %d", PLAYEREVENT_PREPARED, val);
+        mNotifyClient(kEventPrepared, val, mNotifyUser);
+    }
 }
 
 void AVPlayer::onPause() {
     SL_LOGI("AVPlayer::onPause()");
-    if (mPlayer != 0) {
+    if ((mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
         mPlayer->pause();
+        mStateFlags &= ~kFlagPlaying;
     }
+
 }
 
 void AVPlayer::onPlay() {
     SL_LOGI("AVPlayer::onPlay()");
-    if (mPlayer != 0) {
+    if ((mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
+        SL_LOGI("starting player");
         mPlayer->start();
+        mStateFlags |= kFlagPlaying;
+    } else {
+        SL_LOGV("NOT starting player mStateFlags=0x%x", mStateFlags);
     }
 }
 
 void AVPlayer::onStop() {
     SL_LOGI("AVPlayer::onStop()");
-    if (mPlayer != 0) {
+    if ((mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
         mPlayer->stop();
+        mStateFlags &= ~kFlagPlaying;
     }
 }
 

@@ -18,6 +18,34 @@
 #include "utils/RefBase.h"
 #include "android_prompts.h"
 
+//-----------------------------------------------------------------------------
+static void player_handleMediaPlayerEventNotifications(const int event, const int data1, void* user)
+{
+    if (NULL == user) {
+        return;
+    }
+
+    CMediaPlayer* mp = (CMediaPlayer*) user;
+    //SL_LOGV("received event %d, data %d from AVPlayer", event, data1);
+
+    switch(event) {
+
+    case android::AVPlayer::kEventPrepared: {
+        if (PLAYER_SUCCESS == data1) {
+            object_lock_exclusive(&mp->mObject);
+            SL_LOGV("Received AVPlayer::kEventPrepared from AVPlayer for CMediaPlayer %p", mp);
+            mp->mAndroidObjState = ANDROID_READY;
+            object_unlock_exclusive(&mp->mObject);
+        }
+        }
+        break;
+
+    default:
+        SL_LOGE("Received unknown event %d, data %d from AVPlayer", event, data1);
+        break;
+    }
+}
+
 
 //-----------------------------------------------------------------------------
 XAresult android_Player_create(CMediaPlayer *mp) {
@@ -79,7 +107,7 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
     switch(mp->mAndroidObjType) {
     case AV_PLR_TS_ABQ: {
         mp->mAVPlayer = new android::StreamPlayer(&ap_params);
-        mp->mAVPlayer->init();
+        mp->mAVPlayer->init(player_handleMediaPlayerEventNotifications, (void*)mp);
         }
         break;
     case INVALID_TYPE:
@@ -99,9 +127,10 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
  * pre-condition: avp != NULL
  */
 XAresult android_Player_setPlayState(android::AVPlayer *avp, SLuint32 playState,
-        AndroidObject_state objState)
+        AndroidObject_state* pObjState)
 {
     XAresult result = XA_RESULT_SUCCESS;
+    AndroidObject_state objState = *pObjState;
 
     switch (playState) {
      case SL_PLAYSTATE_STOPPED: {
@@ -112,13 +141,14 @@ XAresult android_Player_setPlayState(android::AVPlayer *avp, SLuint32 playState,
          SL_LOGV("setting AVPlayer to SL_PLAYSTATE_PAUSED");
          switch(objState) {
          case(ANDROID_UNINITIALIZED):
+             *pObjState = ANDROID_PREPARING;
              avp->prepare();
-         break;
+             break;
          case(ANDROID_PREPARING):
              break;
          case(ANDROID_READY):
              avp->pause();
-         break;
+             break;
          default:
              SL_LOGE("Android object in invalid state");
              break;
@@ -128,15 +158,14 @@ XAresult android_Player_setPlayState(android::AVPlayer *avp, SLuint32 playState,
          SL_LOGV("setting AVPlayer to SL_PLAYSTATE_PLAYING");
          switch(objState) {
          case(ANDROID_UNINITIALIZED):
-             // FIXME PRIORITY1 prepare should update the obj state
-             //  for the moment test app sets state to PAUSED to prepare, then to PLAYING
-             //avp->prepare();
-
-         // fall through
+             *pObjState = ANDROID_PREPARING;
+             avp->prepare();
+             // intended fall through
          case(ANDROID_PREPARING):
+             // intended fall through
          case(ANDROID_READY):
              avp->play();
-         break;
+             break;
          default:
              SL_LOGE("Android object in invalid state");
              break;

@@ -75,6 +75,8 @@ typedef struct COutputMix_struct COutputMix;
 #include <SDL/SDL_audio.h>
 #endif // USE_SDL
 
+#define STEREO_CHANNELS 2
+
 #ifdef ANDROID
 #include <utils/Log.h>
 #include <utils/KeyedVector.h>
@@ -96,14 +98,11 @@ typedef struct COutputMix_struct COutputMix;
 #define ANDROID_SL_MILLIBEL_MAX 0
 #include <binder/ProcessState.h>
 #include "android_sles_conversions.h"
-#ifndef USE_BACKPORT
-#include "android_SfPlayer.h"
 #include "android_OutputMix.h"
+#include "android_defs.h"
+#include "android_SfPlayer.h"
 #endif
 #include "android_AudioRecorder.h"
-#endif
-
-#define STEREO_CHANNELS 2
 
 #ifdef USE_OUTPUTMIXEXT
 #include "OutputMixExt.h"
@@ -253,8 +252,6 @@ struct SndFile {
 #include "itfstruct.h"
 
 #ifdef ANDROID
-
-#include "android_defs.h"
 
 #ifdef ANDROID
 // FIXME this include is done here so the effect structures and enums have been defined. Messy.

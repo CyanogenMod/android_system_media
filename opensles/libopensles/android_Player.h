@@ -35,7 +35,7 @@ extern XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async);
  * pre-condition: avp != NULL
  */
 extern XAresult android_Player_setPlayState(android::AVPlayer *avp, SLuint32 playState,
-        AndroidObject_state objState);
+        AndroidObject_state* pObjState);
 
 
 

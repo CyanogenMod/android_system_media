@@ -43,6 +43,8 @@ enum AndroidObject_state {
 
 #define ANDROID_DEFAULT_OUTPUT_STREAM_TYPE android::AudioSystem::MUSIC
 
+#define PLAYER_SUCCESS 1
+
 
 /*
  * Structure to maintain the set of audio levels about a player
@@ -64,3 +66,17 @@ typedef struct AndroidAudioLevels_struct {
     float mAmplFromDirectLevel;
 } AndroidAudioLevels;
 
+
+
+
+typedef void (*notif_client_t)(int event, const int data1, void* notifUser);
+
+
+/**
+ * events sent to mNotifyClient during prepare, prefetch, and playback
+ */
+#define PLAYEREVENT_PREPARED                "prep"
+#define PLAYEREVENT_PREFETCHSTATUSCHANGE    "prsc"
+#define PLAYEREVENT_PREFETCHFILLLEVELUPDATE "pflu"
+#define PLAYEREVENT_ENDOFSTREAM             "eos"
+#define PLAYEREVENT_NEW_AUDIOTRACK          "nwat"
