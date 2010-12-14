@@ -2,7 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE_TAGS := test
+LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := src/com/example/nativemedia/NativeMedia.java
 
