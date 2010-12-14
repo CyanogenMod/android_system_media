@@ -19,6 +19,8 @@
 #include "sles_allinclusive.h"
 #undef this // FIXME shouldn't have to do this, no pun intended
 #include <media/IMediaPlayerService.h>
+#include <surfaceflinger/ISurfaceComposer.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
 
 namespace android {
 
@@ -57,6 +59,7 @@ AVPlayer::AVPlayer(AudioPlayback_Parameters* params) :
     mNotifyClient(NULL),
     mNotifyUser(NULL),
     mStateFlags(0),
+    mVideoSurface(0),
     mPlayer(0),
     mPlayerClient(0)
 {
@@ -97,6 +100,10 @@ void AVPlayer::init(const notif_client_t cbf, void* notifUser) {
 
     mLooper->registerHandler(this);
     mLooper->start(false /*runOnCallingThread*/, false /*canCallJava*/); // use default priority
+}
+
+void AVPlayer::setVideoSurface(void* surface) {
+    mVideoSurface = (Surface*) surface;
 }
 
 
@@ -169,6 +176,9 @@ void AVPlayer::onMessageReceived(const sp<AMessage> &msg) {
 void AVPlayer::onPrepare() {
     SL_LOGI("AVPlayer::onPrepare()");
     if (!(mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
+        if (mVideoSurface != 0) {
+            mPlayer->setVideoSurface(mVideoSurface);
+        }
         mPlayer->setAudioStreamType(mPlaybackParams.streamType);
         mPlayer->prepareAsync();
         mPlayerClient->blockUntilPlayerPrepared();

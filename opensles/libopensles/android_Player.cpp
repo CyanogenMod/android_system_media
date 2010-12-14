@@ -124,6 +124,19 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
 
 //-----------------------------------------------------------------------------
 /**
+ * pre-conditions: avp != NULL, surface != NULL
+ */
+XAresult android_Player_setVideoSurface(android::AVPlayer *avp, void* surface) {
+    XAresult result = XA_RESULT_SUCCESS;
+
+    avp->setVideoSurface(surface);
+
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+/**
  * pre-condition: avp != NULL
  */
 XAresult android_Player_setPlayState(android::AVPlayer *avp, SLuint32 playState,

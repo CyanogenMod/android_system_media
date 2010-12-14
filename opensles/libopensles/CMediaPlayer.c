@@ -46,49 +46,25 @@ XAresult CMediaPlayer_Realize(void *self, XAboolean async)
 {
     CMediaPlayer *thiz = (CMediaPlayer *) self;
 
-    SLresult result = XA_RESULT_SUCCESS;
+    XAresult result = XA_RESULT_SUCCESS;
 
 #ifdef ANDROID
+    // realize player
     result = android_Player_realize(thiz, async);
-#endif
+    if (XA_RESULT_SUCCESS == result) {
 
-    // FIXME add support for display surface retrieval
-#if 0
-    assert(XA_DATALOCATOR_URI == thiz->mDataSource.mLocator.mLocatorType);
-    // assert(XA_FORMAT_NULL == this->mDataSource.mFormat.mFormatType);
-    assert(XA_DATALOCATOR_NATIVEDISPLAY == thiz->mImageVideoSink.mLocator.mLocatorType);
-    // assert(XA_FORMAT_NULL == this->mImageVideoSink.mFormat.mFormatType);
-    // FIXME ignore the audio sink
-#ifdef ANDROID
-    int fd = open((const char *) thiz->mDataSource.mLocator.mURI.URI, O_RDONLY);
-    if (0 >= fd) {
-        return err_to_result(errno);
-    }
+        // if there is a video sink
+        if (XA_DATALOCATOR_NATIVEDISPLAY == thiz->mImageVideoSink.mLocator.mLocatorType) {
+            XANativeHandle nativeSurface = thiz->mImageVideoSink.mLocator.mNativeDisplay.hWindow;
 
-    JNIEnv *env = (JNIEnv *) thiz->mImageVideoSink.mLocator.mNativeDisplay.hDisplay;
-    jobject jsurface = (jobject) thiz->mImageVideoSink.mLocator.mNativeDisplay.hWindow;
-    jclass cls = env->GetObjectClass(jsurface);
-    jfieldID fid = env->GetFieldID(cls, "mNativeSurface", "I");
-    jint mNativeSurface = env->GetIntField(jsurface, fid);
-
-    sp<Surface> surface = (Surface *) mNativeSurface;
-
-    sp<IServiceManager> sm = defaultServiceManager();
-    sp<IBinder> binder = sm->getService(String16("media.player"));
-    sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
-
-    CHECK(service.get() != NULL);
-
-    sp<MyClient> client = new MyClient;
-
-    sp<IMediaPlayer> player = service->create(getpid(), client, new MyStreamSource(fd), 0);
-
-    if (player != NULL) {
-        thiz->mPlayer = player;
-        player->setVideoSurface(surface);
+            if ((thiz->mAVPlayer != 0) && (NULL != nativeSurface)) {
+                // initialize display surface
+                result = android_Player_setVideoSurface(thiz->mAVPlayer.get(), nativeSurface);
+            }
+        }
     }
 #endif
-#endif
+
     return result;
 }
 

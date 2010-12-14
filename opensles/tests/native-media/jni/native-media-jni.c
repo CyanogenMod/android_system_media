@@ -39,7 +39,8 @@ static XAPlayItf               playerPlayItf = NULL;
 static XAAndroidBufferQueueItf playerBQItf = NULL;
 
 // cached surface
-static jobject theSurface;
+static jobject theJavaSurface;
+static void* theNativeSurface;
 static JNIEnv *theEnv;
 
 // handle of the file to play
@@ -119,7 +120,8 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     }
 
     // configure data source
-    XADataLocator_AndroidBufferQueue loc_abq = {XA_DATALOCATOR_ANDROIDBUFFERQUEUE, 0, 0};
+    XADataLocator_AndroidBufferQueue loc_abq = {XA_DATALOCATOR_ANDROIDBUFFERQUEUE,
+            0, 0 /* number of buffers and size of queue are ignored for now, subject to change */};
     XADataFormat_MIME format_mime = {XA_DATAFORMAT_MIME, NULL, XA_CONTAINERTYPE_UNSPECIFIED};
     XADataSource dataSrc = {&loc_abq, &format_mime};
 
@@ -128,7 +130,8 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     XADataSink audioSnk = {&loc_outmix, NULL};
 
     // configure image video sink
-    XADataLocator_NativeDisplay loc_nd = {XA_DATALOCATOR_NATIVEDISPLAY, theSurface, theEnv};
+    /** line below to initialize surface is temporary, WILL change */
+    XADataLocator_NativeDisplay loc_nd = {XA_DATALOCATOR_NATIVEDISPLAY, theNativeSurface, 0 };
     XADataSink imageVideoSink = {&loc_nd, NULL};
 
     // declare interfaces to use
@@ -227,5 +230,11 @@ void Java_com_example_nativemedia_NativeMedia_shutdown(JNIEnv* env, jclass clazz
 void Java_com_example_nativemedia_NativeMedia_setSurface(JNIEnv *env, jclass clazz, jobject surface)
 {
     theEnv = env;
-    theSurface = surface;
+    theJavaSurface = surface;
+
+    /** Code below to retrieve surface from Java object is a temporary HACK, WILL change */
+    jclass cls = (*env)->GetObjectClass(env, surface);
+    jfieldID fid = (*env)->GetFieldID(env, cls, "mNativeSurface", "I");
+    jint nativeSurface = (*env)->GetIntField(env, surface, fid);
+    theNativeSurface = (void *) nativeSurface;
 }
