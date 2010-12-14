@@ -66,7 +66,7 @@ struct XAAndroidBufferQueueItf_ {
         XAuint32 bufferId,
         XAuint32 length,
         XAAbufferQueueEvent event,
-        void *pData
+        void *pData // FIXME ignored for now, subject to change
     );
 };
 
@@ -82,8 +82,8 @@ struct XAAndroidBufferQueueItf_ {
  *  locatorType must be XA_DATALOCATOR_ANDROIDBUFFERQUEUE */
 typedef struct XADataLocator_AndroidBufferQueue_ {
     XAuint32    locatorType;
-    XAuint32    numBuffers;
-    XAuint32    queueSize;    // FIXME use optional queue size for shared memory size?
+    XAuint32    numBuffers;  // FIXME ignored for now, subject to change
+    XAuint32    queueSize;   // FIXME ignored for now, subject to change
 } XADataLocator_AndroidBufferQueue;
 
 #ifdef __cplusplus

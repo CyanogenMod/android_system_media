@@ -51,6 +51,7 @@ public:
     virtual ~AVPlayer();
 
     virtual void init(const notif_client_t cbf, void* notifUser);
+    virtual void setVideoSurface(void* surface);
 
     virtual void prepare();
     virtual void play();
@@ -97,6 +98,7 @@ protected:
     sp<ALooper> mLooper;
 
     AudioPlayback_Parameters mPlaybackParams;
+    sp<Surface> mVideoSurface;
 
     sp<IMediaPlayer> mPlayer;
     // Receives Android MediaPlayer events from mPlayer

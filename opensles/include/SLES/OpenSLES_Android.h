@@ -242,7 +242,7 @@ struct SLAndroidBufferQueueItf_ {
         SLuint32 bufferId,
         SLuint32 length,
         SLAbufferQueueEvent event,
-        void *pData
+        void *pData    // FIXME ignored for now, subject to change
     );
 
     // FIXME TBD if needed
@@ -302,8 +302,8 @@ typedef struct SLDataLocator_AndroidSimpleBufferQueue {
  *  locatorType must be SL_DATALOCATOR_ANDROIDBUFFERQUEUE */
 typedef struct SLDataLocator_AndroidBufferQueue_ {
     SLuint32    locatorType;
-    SLuint32    numBuffers;
-    SLuint32    queueSize;    // FIXME use optional queue size for shared memory size?
+    SLuint32    numBuffers;   // FIXME ignored for now, subject to change
+    SLuint32    queueSize;    // FIXME ignored for now, subject to change
 } SLDataLocator_AndroidBufferQueue;
 
 #ifdef __cplusplus

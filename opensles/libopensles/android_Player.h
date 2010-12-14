@@ -26,7 +26,10 @@ extern XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async);
 /**************************************************************************************************
  * Configuration
  ****************************/
-
+/**
+ * pre-conditions: avp != NULL, surface != NULL
+ */
+extern XAresult android_Player_setVideoSurface(android::AVPlayer *avp, void* surface);
 
 /**************************************************************************************************
  * Playback control and events
