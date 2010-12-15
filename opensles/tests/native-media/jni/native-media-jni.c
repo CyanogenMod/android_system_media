@@ -25,6 +25,7 @@
 #include "SLES/OpenSLES_Android.h"
 #include "OMXAL/OpenMAXAL.h"
 #include "OMXAL/OpenMAXAL_Android.h"
+#include <android/native_window_jni.h>
 
 // engine interfaces
 static XAObjectItf engineObject = NULL;
@@ -38,10 +39,8 @@ static XAObjectItf             playerObj = NULL;
 static XAPlayItf               playerPlayItf = NULL;
 static XAAndroidBufferQueueItf playerBQItf = NULL;
 
-// cached surface
-static jobject theJavaSurface;
-static void* theNativeSurface;
-static JNIEnv *theEnv;
+// cached surface where the video display happens
+static ANativeWindow* theNativeWindow;
 
 // handle of the file to play
 FILE *file;
@@ -130,8 +129,12 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     XADataSink audioSnk = {&loc_outmix, NULL};
 
     // configure image video sink
-    /** line below to initialize surface is temporary, WILL change */
-    XADataLocator_NativeDisplay loc_nd = {XA_DATALOCATOR_NATIVEDISPLAY, theNativeSurface, 0 };
+    XADataLocator_NativeDisplay loc_nd = {
+            XA_DATALOCATOR_NATIVEDISPLAY /* locatorType */,
+            // currently the video sink only works on ANativeWindow created from a Surface
+            (void*)theNativeWindow       /* hWindow */,
+            // ignored here
+            0                            /* hDisplay */};
     XADataSink imageVideoSink = {&loc_nd, NULL};
 
     // declare interfaces to use
@@ -141,7 +144,7 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     // create media player
     res = (*engineEngine)->CreateMediaPlayer(engineEngine, &playerObj, &dataSrc,
             NULL, &audioSnk, &imageVideoSink, NULL, NULL,
-            2 /*XAuint32 numInterfaces*/,
+            2        /*XAuint32 numInterfaces*/,
             iidArray /*const XAInterfaceID *pInterfaceIds*/,
             required /*const XAboolean *pInterfaceRequired*/);
     assert(XA_RESULT_SUCCESS == res);
@@ -197,7 +200,6 @@ void Java_com_example_nativemedia_NativeMedia_setPlayingStreamingMediaPlayer(JNI
 // shut down the native media system
 void Java_com_example_nativemedia_NativeMedia_shutdown(JNIEnv* env, jclass clazz)
 {
-
     // destroy streaming media player object, and invalidate all associated interfaces
     if (playerObj != NULL) {
         (*playerObj)->Destroy(playerObj);
@@ -223,18 +225,15 @@ void Java_com_example_nativemedia_NativeMedia_shutdown(JNIEnv* env, jclass clazz
     if (file != NULL) {
         fclose(file);
     }
+
+    // make sure we don't leak native windows
+    ANativeWindow_release(theNativeWindow);
 }
 
 
 // set the surface
 void Java_com_example_nativemedia_NativeMedia_setSurface(JNIEnv *env, jclass clazz, jobject surface)
 {
-    theEnv = env;
-    theJavaSurface = surface;
-
-    /** Code below to retrieve surface from Java object is a temporary HACK, WILL change */
-    jclass cls = (*env)->GetObjectClass(env, surface);
-    jfieldID fid = (*env)->GetFieldID(env, cls, "mNativeSurface", "I");
-    jint nativeSurface = (*env)->GetIntField(env, surface, fid);
-    theNativeSurface = (void *) nativeSurface;
+    // obtain a native window from a Java surface
+    theNativeWindow = ANativeWindow_fromSurface(env, surface);
 }
