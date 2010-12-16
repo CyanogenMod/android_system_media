@@ -145,16 +145,8 @@ int main(int argc, char **argv)
     format_pcm.containerSize = 8;
     result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audioSrc,
             &audioSnk, 1, ids, req);
-#if 0
     assert(SL_RESULT_PARAMETER_INVALID == result);
     assert(NULL == playerObject);
-#else
-    if (SL_RESULT_PARAMETER_INVALID == result) {
-        printf("ERROR: expected SL_RESULT_PARAMETER_INVALID\n");
-        if (NULL != playerObject)
-            (*playerObject)->Destroy(playerObject);
-    }
-#endif
     format_pcm.containerSize = 32;
     result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audioSrc,
             &audioSnk, 1, ids, req);

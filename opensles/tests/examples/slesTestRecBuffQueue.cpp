@@ -193,6 +193,7 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
     ioDevice.deviceID = SL_DEFAULTDEVICEID_AUDIOINPUT;
     ioDevice.device = NULL;
     recSource.pLocator = (void *) &ioDevice;
+    recSource.pFormat = NULL;
 
     /* Setup the data sink */
     recBuffQueue.locatorType = SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE;
