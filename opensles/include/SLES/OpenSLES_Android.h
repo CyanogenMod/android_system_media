@@ -34,7 +34,7 @@ typedef SLuint32               SLAbufferQueueEvent;
 /* Android Effect interface                                                  */
 /*---------------------------------------------------------------------------*/
 
-extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDEFFECT;
+extern SL_API const SLInterfaceID SL_IID_ANDROIDEFFECT;
 
 /** Android Effect interface methods */
 
@@ -71,7 +71,7 @@ struct SLAndroidEffectItf_ {
 /* Android Effect Send interface                                             */
 /*---------------------------------------------------------------------------*/
 
-extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDEFFECTSEND;
+extern SL_API const SLInterfaceID SL_IID_ANDROIDEFFECTSEND;
 
 /** Android Effect Send interface methods */
 
@@ -115,7 +115,7 @@ struct SLAndroidEffectSendItf_ {
 /* Android Effect Capabilities interface                                     */
 /*---------------------------------------------------------------------------*/
 
-extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDEFFECTCAPABILITIES;
+extern SL_API const SLInterfaceID SL_IID_ANDROIDEFFECTCAPABILITIES;
 
 /** Android Effect Capabilities interface methods */
 
@@ -140,7 +140,7 @@ struct SLAndroidEffectCapabilitiesItf_ {
 /*---------------------------------------------------------------------------*/
 /* Android Configuration interface                                           */
 /*---------------------------------------------------------------------------*/
-extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDCONFIGURATION;
+extern SL_API const SLInterfaceID SL_IID_ANDROIDCONFIGURATION;
 
 /** Android Configuration interface methods */
 
@@ -166,12 +166,12 @@ struct SLAndroidConfigurationItf_ {
 /* Android Simple Buffer Queue Interface                                     */
 /*---------------------------------------------------------------------------*/
 
-extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
+extern SL_API const SLInterfaceID SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
 
 struct SLAndroidSimpleBufferQueueItf_;
 typedef const struct SLAndroidSimpleBufferQueueItf_ * const * SLAndroidSimpleBufferQueueItf;
 
-typedef void (/*SLAPIENTRY*/ *slAndroidSimpleBufferQueueCallback)(
+typedef void (SLAPIENTRY *slAndroidSimpleBufferQueueCallback)(
 	SLAndroidSimpleBufferQueueItf caller,
 	void *pContext
 );
@@ -209,7 +209,7 @@ struct SLAndroidSimpleBufferQueueItf_ {
 /* Android Buffer Qeueue Interface                                           */
 /*---------------------------------------------------------------------------*/
 
-extern SLAPIENTRY const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUE;
+extern SL_API const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUE;
 
 struct SLAndroidBufferQueueItf_;
 typedef const struct SLAndroidBufferQueueItf_ * const * SLAndroidBufferQueueItf;
@@ -218,7 +218,7 @@ typedef const struct SLAndroidBufferQueueItf_ * const * SLAndroidBufferQueueItf;
 #define SL_ANDROIDBUFFERQUEUE_EVENT_EOS               ((SLuint32) 0x00000001)
 #define SL_ANDROIDBUFFERQUEUE_EVENT_DISCONTINUITY     ((SLuint32) 0x00000002)
 
-typedef SLresult (/*SLAPIENTRY*/ *slAndroidBufferQueueCallback)(
+typedef SLresult (SLAPIENTRY *slAndroidBufferQueueCallback)(
     SLAndroidBufferQueueItf caller,/* input */
     void *pContext,                /* input */
     SLuint32 bufferId,             /* input */

@@ -18,8 +18,6 @@
 
 #include "SLES/OpenSLES.h"
 #include "OMXAL/OpenMAXAL.h"
-#undef XA_API
-#define XA_API SLAPIENTRY
 #ifdef ANDROID
 #include "SLES/OpenSLES_Android.h"
 #include "OMXAL/OpenMAXAL_Android.h"

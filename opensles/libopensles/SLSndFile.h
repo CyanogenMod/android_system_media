@@ -16,7 +16,7 @@
 
 /** \file SLSndFile.h libsndfile interface */
 
-extern void SLAPIENTRY SndFile_Callback(SLBufferQueueItf caller, void *pContext);
+extern void SndFile_Callback(SLBufferQueueItf caller, void *pContext);
 extern SLboolean SndFile_IsSupported(const SF_INFO *sfinfo);
 extern SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this_);
 extern void audioPlayerTransportUpdate(CAudioPlayer *this);

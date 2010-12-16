@@ -32,7 +32,7 @@ SLAndroidLogLevel slLogLevel = USE_LOG_RUNTIME;
 
 /** \brief Set the runtime log level */
 
-SLAPIENTRY void slAndroidSetLogLevel(SLAndroidLogLevel logLevel)
+SL_API void SLAPIENTRY slAndroidSetLogLevel(SLAndroidLogLevel logLevel)
 {
     // Errors can't be disabled
     if (logLevel > SLAndroidLogLevel_Error)

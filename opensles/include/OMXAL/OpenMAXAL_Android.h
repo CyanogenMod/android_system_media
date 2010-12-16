@@ -32,8 +32,7 @@ typedef XAuint32               XAAbufferQueueEvent;
 /* Android Buffer Qeueue Interface                                           */
 /*---------------------------------------------------------------------------*/
 
-// FIXME what's wrong with XAAPIENTRY?
-extern SLAPIENTRY const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUE;
+extern XA_API const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUE;
 
 struct XAAndroidBufferQueueItf_;
 typedef const struct XAAndroidBufferQueueItf_ * const * XAAndroidBufferQueueItf;
@@ -42,7 +41,7 @@ typedef const struct XAAndroidBufferQueueItf_ * const * XAAndroidBufferQueueItf;
 #define XA_ANDROIDBUFFERQUEUE_EVENT_EOS               ((XAuint32) 0x00000001)
 #define XA_ANDROIDBUFFERQUEUE_EVENT_DISCONTINUITY     ((XAuint32) 0x00000002)
 
-typedef XAresult (/*XAAPIENTRY*/ *xaAndroidBufferQueueCallback)(
+typedef XAresult (XAAPIENTRY *xaAndroidBufferQueueCallback)(
     XAAndroidBufferQueueItf caller,/* input */
     void *pContext,                /* input */
     XAuint32 bufferId,             /* input */

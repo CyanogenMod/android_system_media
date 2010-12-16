@@ -39,14 +39,11 @@ typedef unsigned short              xa_uint16_t;
 typedef signed short                xa_int16_t;
 typedef unsigned long               xa_uint32_t;
 typedef signed long                 xa_int32_t;
+typedef long long                   xa_int64_t;
 typedef unsigned long long          xa_uint64_t;
 
 #ifndef XAAPIENTRY
-#ifdef __GNUC__
 #define XAAPIENTRY                 /* override per-platform */
-#else
-#define XAAPIENTRY __declspec(dllimport)
-#endif
 #endif
 
 /** The XA_API is a platform-specific macro used
@@ -60,7 +57,11 @@ typedef unsigned long long          xa_uint64_t;
  */
 
 #ifndef XA_API
+#ifdef __GNUC__
 #define XA_API
+#else
+#define XA_API __declspec(dllimport)
+#endif
 #endif
 
 #endif /* _OPENMAXAL_PLATFORM_H_ */
