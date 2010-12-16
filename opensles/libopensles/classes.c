@@ -405,7 +405,9 @@ static const struct iid_vtable MediaPlayer_interfaces[INTERFACES_MediaPlayer] = 
     {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CMediaPlayer, mDynamicInterfaceManagement)},
     {MPH_XAPLAY, INTERFACE_IMPLICIT, offsetof(CMediaPlayer, mPlay)},
+#ifdef ANDROID
     {MPH_ANDROIDBUFFERQUEUE, INTERFACE_EXPLICIT, offsetof(CMediaPlayer, mAndroidBufferQueue)},
+#endif
 };
 
 static const ClassTable CMediaPlayer_class = {
