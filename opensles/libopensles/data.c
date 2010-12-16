@@ -186,16 +186,16 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
             size_t len = strlen((const char *) pDataLocator->mURI.URI);
             SLchar *myURI = (SLchar *) malloc(len + 1);
             if (NULL == myURI) {
-                pDataLocator->mURI.URI = NULL;
                 result = SL_RESULT_MEMORY_FAILURE;
-            }
-            memcpy(myURI, pDataLocator->mURI.URI, len + 1);
-            // Verify that another thread didn't change the NUL-terminator after we used it
-            // to determine length of string to copy. It's OK if the string became shorter.
-            if ('\0' != myURI[len]) {
-                free(myURI);
-                pDataLocator->mURI.URI = NULL;
-                result = SL_RESULT_PARAMETER_INVALID;
+            } else {
+                memcpy(myURI, pDataLocator->mURI.URI, len + 1);
+                // Verify that another thread didn't change the NUL-terminator after we used it
+                // to determine length of string to copy. It's OK if the string became shorter.
+                if ('\0' != myURI[len]) {
+                    free(myURI);
+                    myURI = NULL;
+                    result = SL_RESULT_PARAMETER_INVALID;
+                }
             }
             pDataLocator->mURI.URI = myURI;
             }
