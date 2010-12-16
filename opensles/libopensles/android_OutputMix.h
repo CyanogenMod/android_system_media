@@ -20,4 +20,3 @@ extern SLresult android_outputMix_create(COutputMix *om);
 extern SLresult android_outputMix_realize(COutputMix *om, SLboolean async);
 
 extern SLresult android_outputMix_destroy(COutputMix *om);
-

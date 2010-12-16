@@ -56,4 +56,3 @@ extern void android_audioRecorder_setRecordState(CAudioRecorder* ar, SLuint32 st
 extern void android_audioRecorder_useEventMask(CAudioRecorder *ar);
 
 extern void android_audioRecorder_getPosition(CAudioRecorder *ar, SLmillisecond *pPosMsec);
-

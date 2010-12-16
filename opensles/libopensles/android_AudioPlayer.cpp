@@ -1593,4 +1593,3 @@ void android_audioPlayer_androidBufferQueue_enqueue_l(CAudioPlayer *ap,
         android_StreamPlayer_enqueue_l(ap, bufferId, length, event, pData);
     }
 }
-

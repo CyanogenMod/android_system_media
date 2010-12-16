@@ -133,4 +133,3 @@ extern bool android_fx_initEffectObj(int sessionId, android::sp<android::AudioEf
 
 extern bool android_fx_initEffectDescriptor(const SLInterfaceID effectId,
         effect_descriptor_t* fxDescrLoc);
-
