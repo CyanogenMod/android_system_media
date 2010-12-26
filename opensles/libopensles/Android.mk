@@ -56,7 +56,7 @@ LOCAL_SRC_FILES:=                     \
         CEngine.c                     \
         COutputMix.c                  \
         IAndroidConfiguration.c       \
-        IAndroidEffect.c              \
+        IAndroidEffect.cpp            \
         IAndroidEffectCapabilities.c  \
         IAndroidEffectSend.c          \
         IBassBoost.c                  \
