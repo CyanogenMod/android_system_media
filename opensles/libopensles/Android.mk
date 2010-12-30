@@ -70,7 +70,7 @@ LOCAL_SRC_FILES:=                     \
         CMediaPlayer.c                \
         IAndroidBufferQueue.c         \
         IAndroidConfiguration.c       \
-        IAndroidEffect.c              \
+        IAndroidEffect.cpp            \
         IAndroidEffectCapabilities.c  \
         IAndroidEffectSend.c          \
         IBassBoost.c                  \
