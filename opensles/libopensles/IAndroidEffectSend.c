@@ -37,14 +37,10 @@ static SLresult IAndroidEffectSend_EnableEffectSend(SLAndroidEffectSendItf self,
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
             COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
-#ifdef USE_BACKPORT
-            result = SL_RESULT_SUCCESS;
-#else
             // the initial send level set here is the total energy on the aux bus,
             //  so it must take into account the player volume level
             result = android_fxSend_attachToAux(ap, effectImplementationId, enable,
                     initialLevel + ap->mVolume.mLevel);
-#endif
             if (SL_RESULT_SUCCESS == result) {
                 // there currently is support for only one send bus, so there is a single send
                 // level and a single enable flag
@@ -157,9 +153,6 @@ static SLresult IAndroidEffectSend_SetSendLevel(SLAndroidEffectSendItf self,
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
             COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
-#ifdef USE_BACKPORT
-            result = SL_RESULT_SUCCESS;
-#else
             if (android_genericFx_hasEffect(&outputMix->mAndroidEffect, effectImplementationId)) {
                 // the send level set here is the total energy on the aux bus, so it must take
                 // into account the player volume level
@@ -168,7 +161,6 @@ static SLresult IAndroidEffectSend_SetSendLevel(SLAndroidEffectSendItf self,
                  SL_LOGE("trying to send to an effect not on this AudioPlayer's OutputMix");
                  result = SL_RESULT_PARAMETER_INVALID;
             }
-#endif
             if (SL_RESULT_SUCCESS == result) {
                 // there currently is support for only one send bus, so there is a single send
                 // level
@@ -200,9 +192,6 @@ static SLresult IAndroidEffectSend_GetSendLevel(SLAndroidEffectSendItf self,
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
             COutputMix *outputMix = CAudioPlayer_GetOutputMix(ap);
-#ifdef USE_BACKPORT
-            result = SL_RESULT_SUCCESS;
-#else
             if (android_genericFx_hasEffect(&outputMix->mAndroidEffect, effectImplementationId)) {
                 result = SL_RESULT_SUCCESS;
             } else {
@@ -210,7 +199,6 @@ static SLresult IAndroidEffectSend_GetSendLevel(SLAndroidEffectSendItf self,
 OutputMix");
                 result = SL_RESULT_PARAMETER_INVALID;
                 }
-#endif
             if (SL_RESULT_SUCCESS == result) {
                 // there currently is support for only one send bus, so there is a single send
                 // level

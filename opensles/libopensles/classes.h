@@ -178,7 +178,7 @@
     // remaining are per-instance private fields not associated with an interface
     ThreadPool mThreadPool; // for asynchronous operations
     pthread_t mSyncThread;
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     // FIXME number of presets will only be saved in IEqualizer, preset names will not be stored
     SLuint32 mEqNumPresets;
     char** mEqPresetNames;

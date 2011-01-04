@@ -22,7 +22,7 @@
 #define VIRTUALIZER_STRENGTH_MAX 1000
 
 
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
 /**
  * returns true if this interface is not associated with an initialized Virtualizer effect
  */
@@ -39,7 +39,7 @@ static SLresult IVirtualizer_SetEnabled(SLVirtualizerItf self, SLboolean enabled
     IVirtualizer *this = (IVirtualizer *) self;
     interface_lock_exclusive(this);
     this->mEnabled = (SLboolean) enabled;
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
     result = SL_RESULT_SUCCESS;
 #else
     if (NO_VIRTUALIZER(this)) {
@@ -67,7 +67,7 @@ static SLresult IVirtualizer_IsEnabled(SLVirtualizerItf self, SLboolean *pEnable
          IVirtualizer *this = (IVirtualizer *) self;
          interface_lock_exclusive(this);
          SLboolean enabled = this->mEnabled;
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
          *pEnabled = enabled;
          result = SL_RESULT_SUCCESS;
 #else
@@ -94,7 +94,7 @@ static SLresult IVirtualizer_SetStrength(SLVirtualizerItf self, SLpermille stren
      } else {
          IVirtualizer *this = (IVirtualizer *) self;
          interface_lock_exclusive(this);
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
          this->mStrength = strength;
          result = SL_RESULT_SUCCESS;
 #else
@@ -123,7 +123,7 @@ static SLresult IVirtualizer_GetRoundedStrength(SLVirtualizerItf self, SLpermill
         IVirtualizer *this = (IVirtualizer *) self;
         interface_lock_exclusive(this);
         SLpermille strength = this->mStrength;;
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_VIRTUALIZER(this)) {
@@ -149,7 +149,7 @@ static SLresult IVirtualizer_IsStrengthSupported(SLVirtualizerItf self, SLboolea
     if (NULL == pSupported) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
         *pSupported = SL_BOOLEAN_TRUE;
         result = SL_RESULT_SUCCESS;
 #else
@@ -187,7 +187,7 @@ void IVirtualizer_init(void *self)
     this->mItf = &IVirtualizer_Itf;
     this->mEnabled = SL_BOOLEAN_FALSE;
     this->mStrength = 0;
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     memset(&this->mVirtualizerDescriptor, 0, sizeof(effect_descriptor_t));
     // placement new (explicit constructor)
     (void) new (&this->mVirtualizerEffect) android::sp<android::AudioEffect>();
@@ -196,7 +196,7 @@ void IVirtualizer_init(void *self)
 
 void IVirtualizer_deinit(void *self)
 {
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     IVirtualizer *this = (IVirtualizer *) self;
     // explicit destructor
     this->mVirtualizerEffect.~sp();
@@ -205,7 +205,7 @@ void IVirtualizer_deinit(void *self)
 
 bool IVirtualizer_Expose(void *self)
 {
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     IVirtualizer *this = (IVirtualizer *) self;
     if (!android_fx_initEffectDescriptor(SL_IID_VIRTUALIZER, &this->mVirtualizerDescriptor)) {
         SL_LOGE("Virtualizer initialization failed.");

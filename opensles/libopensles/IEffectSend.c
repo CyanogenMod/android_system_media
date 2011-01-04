@@ -89,7 +89,7 @@ static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEff
     return NULL;
 }
 
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
 /** \brief This is a private function that translates an Android effect framework status code
  *  to the SL ES result code used in the EnableEffectSend() function of the SLEffectSendItf
  *  interface.
@@ -124,7 +124,7 @@ static SLresult IEffectSend_EnableEffectSend(SLEffectSendItf self,
             interface_lock_exclusive(this);
             enableLevel->mEnable = SL_BOOLEAN_FALSE != enable; // normalize
             enableLevel->mSendLevel = initialLevel;
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
             result = SL_RESULT_SUCCESS;
 #else
             // TODO do not repeat querying of CAudioPlayer, done inside getEnableLevel()
@@ -260,7 +260,7 @@ static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self, const void *pAuxE
             // EnableEffectSend is exclusive, so this has to be also
             interface_lock_exclusive(this);
             enableLevel->mSendLevel = sendLevel;
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
             CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
                     (CAudioPlayer *) this->mThis : NULL;
             if (NULL != ap) {

@@ -208,7 +208,7 @@ typedef struct {
     IObject *mThis;
     SLboolean mEnabled;
     SLpermille mStrength;
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     effect_descriptor_t mBassBoostDescriptor;
     android::sp<android::AudioEffect> mBassBoostEffect;
 #endif
@@ -304,7 +304,7 @@ typedef struct {
     const struct SLEnvironmentalReverbItf_ *mItf;
     IObject *mThis;
     SLEnvironmentalReverbSettings mProperties;
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     effect_descriptor_t mEnvironmentalReverbDescriptor;
     android::sp<android::AudioEffect> mEnvironmentalReverbEffect;
 #endif
@@ -316,7 +316,7 @@ struct EqualizerBand {
     SLmilliHertz mMax;
 };
 
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
 #define MAX_EQ_BANDS 0
 #else
 #define MAX_EQ_BANDS 4  // compile-time limit, runtime limit may be smaller
@@ -333,13 +333,13 @@ typedef struct {
     // const to end of struct
     SLuint16 mNumPresets;
     SLuint16 mNumBands;
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
     const struct EqualizerBand *mBands;
     const struct EqualizerPreset *mPresets;
 #endif
     SLmillibel mBandLevelRangeMin;
     SLmillibel mBandLevelRangeMax;
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     effect_descriptor_t mEqDescriptor;
     android::sp<android::AudioEffect> mEqEffect;
 #endif
@@ -496,7 +496,7 @@ typedef struct {
     const struct SLPresetReverbItf_ *mItf;
     IObject *mThis;
     SLuint16 mPreset;
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     effect_descriptor_t mPresetReverbDescriptor;
     android::sp<android::AudioEffect> mPresetReverbEffect;
 #endif
@@ -554,7 +554,7 @@ typedef struct {
     IObject *mThis;
     SLboolean mEnabled;
     SLpermille mStrength;
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     effect_descriptor_t mVirtualizerDescriptor;
     android::sp<android::AudioEffect> mVirtualizerEffect;
 #endif

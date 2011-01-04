@@ -375,7 +375,6 @@ void audioPlayer_auxEffectUpdate(CAudioPlayer* ap) {
 
 
 //-----------------------------------------------------------------------------
-#ifndef USE_BACKPORT
 static void sfplayer_prepare(CAudioPlayer *ap, bool lockAP) {
 
     if (lockAP) { object_lock_exclusive(&ap->mObject); }
@@ -386,10 +385,8 @@ static void sfplayer_prepare(CAudioPlayer *ap, bool lockAP) {
         ap->mSfPlayer->prepare();
     }
 }
-#endif
 
 //-----------------------------------------------------------------------------
-#ifndef USE_BACKPORT
 // Callback associated with an SfPlayer of an SL ES AudioPlayer that gets its data
 // from a URI or FD, for prepare and prefetch events
 static void sfplayer_handlePrefetchEvent(const int event, const int data1, void* user) {
@@ -559,7 +556,6 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
         break;
     }
 }
-#endif
 
 
 //-----------------------------------------------------------------------------
@@ -932,14 +928,10 @@ SLresult android_audioPlayer_create(
     pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
     pAudioPlayer->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
     pAudioPlayer->mAudioTrack = NULL;
-#ifndef USE_BACKPORT
     // no longer needed, as placement new (explicit constructor) already does this
     // pAudioPlayer->mSfPlayer.clear();
-#endif
 
-#ifndef USE_BACKPORT
     pAudioPlayer->mSessionId = android::AudioSystem::newAudioSessionId();
-#endif
 
     pAudioPlayer->mAmplFromVolLevel = 1.0f;
     pAudioPlayer->mAmplFromStereoPos[0] = 1.0f;
@@ -1424,7 +1416,6 @@ SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMse
         //       shared memory with the mixer process, the duration is the size of the buffer
         SL_LOGD("FIXME: android_audioPlayer_getDuration() verify if duration can be retrieved");
         break;
-#ifndef USE_BACKPORT
     case A_PLR_URI_FD: {
         int64_t durationUsec = SL_TIME_UNKNOWN;
         if (ap->mSfPlayer != 0) {
@@ -1432,7 +1423,6 @@ SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMse
             *pDurMsec = durationUsec == -1 ? SL_TIME_UNKNOWN : durationUsec / 1000;
         }
         } break;
-#endif
     default:
         break;
     }
@@ -1473,13 +1463,11 @@ void android_audioPlayer_seek(CAudioPlayer *ap, SLmillisecond posMsec) {
     switch(ap->mAndroidObjType) {
     case A_PLR_PCM_BQ:
         break;
-#ifndef USE_BACKPORT
     case A_PLR_URI_FD:
         if (ap->mSfPlayer != 0) {
             ap->mSfPlayer->seek(posMsec);
         }
         break;
-#endif
     default:
         break;
     }
