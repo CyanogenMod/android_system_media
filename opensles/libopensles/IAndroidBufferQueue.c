@@ -42,6 +42,7 @@ SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf self,
             SL_LOGI("IAndroidBufferQueue_RegisterCallback()");
             result = SL_RESULT_SUCCESS;
             android_Player_androidBufferQueue_registerCallback_l((CMediaPlayer*) this->mThis);
+            break;
         default:
             result = SL_RESULT_PARAMETER_INVALID;
             break;
