@@ -55,7 +55,7 @@ void COutputMix_Destroy(void *self)
 
 /** \brief Hook called by Object::Destroy before an output mix is about to be destroyed */
 
-bool COutputMix_PreDestroy(void *self)
+predestroy_t COutputMix_PreDestroy(void *self)
 {
     // Ignore destroy requests if there are any players attached to this output mix
     COutputMix *outputMix = (COutputMix *) self;
@@ -83,9 +83,9 @@ bool COutputMix_PreDestroy(void *self)
 #endif
         }
 #endif
-        return true;
+        return predestroy_ok;
     }
     SL_LOGE("Object::Destroy(%p) for OutputMix ignored; %u players attached", outputMix,
         outputMix->mObject.mStrongRefCount);
-    return false;
+    return predestroy_error;
 }

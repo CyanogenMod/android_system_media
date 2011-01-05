@@ -746,10 +746,7 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
 
 static const char * const extensionNames[] = {
 #ifdef ANDROID
-    "ANDROID_SDK_LEVEL_9",  // Android 2.3 aka "Gingerbread"
-    "ANDROID_SDK_LEVEL_10", // Android 3.0 aka "Honeycomb"
-    // in the future, add more entries for each SDK level here, and
-    // don't delete the entries for previous SDK levels unless support is removed
+    "ANDROID_SDK_LEVEL_11", // Android 3.0 aka "Honeycomb"
 #else
     "WILHELM_DESKTOP",
 #endif

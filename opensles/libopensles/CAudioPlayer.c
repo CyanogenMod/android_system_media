@@ -68,17 +68,19 @@ void CAudioPlayer_Destroy(void *self)
 
 /** \brief Hook called by Object::Destroy before an audio player is about to be destroyed */
 
-bool CAudioPlayer_PreDestroy(void *self)
+predestroy_t CAudioPlayer_PreDestroy(void *self)
 {
 #ifdef USE_OUTPUTMIXEXT
     CAudioPlayer *this = (CAudioPlayer *) self;
     // Safe to proceed immediately if a track has not yet been assigned
     Track *track = this->mTrack;
-    if (NULL == track)
-        return true;
+    if (NULL == track) {
+        return predestroy_ok;
+    }
     CAudioPlayer *audioPlayer = track->mAudioPlayer;
-    if (NULL == audioPlayer)
-        return true;
+    if (NULL == audioPlayer) {
+        return predestroy_ok;
+    }
     assert(audioPlayer == this);
     // Request the mixer thread to unlink this audio player's track
     this->mDestroyRequested = true;
@@ -87,7 +89,7 @@ bool CAudioPlayer_PreDestroy(void *self)
     }
     // Mixer thread has acknowledged the request
 #endif
-    return true;
+    return predestroy_ok;
 }
 
 

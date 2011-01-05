@@ -11,7 +11,8 @@ LOCAL_C_INCLUDES:= \
     bionic/libstdc++/include \
     external/gtest/include \
     system/media/opensles/include \
-    external/stlport/stlport
+    external/stlport/stlport \
+    system/media/opensles/libopensles
 
 LOCAL_SRC_FILES:= \
     BufferQueue_test.cpp

@@ -21,13 +21,13 @@
 
 /** \brief Hook called by Object::Destroy before a 3D group is about to be destroyed */
 
-bool C3DGroup_PreDestroy(void *self)
+predestroy_t C3DGroup_PreDestroy(void *self)
 {
     C3DGroup *this = (C3DGroup *) self;
     // See design document for explanation
     if (0 == this->mMemberMask) {
-        return true;
+        return predestroy_ok;
     }
     SL_LOGE("Object::Destroy(%p) for 3DGroup ignored; mMemberMask=0x%x", this, this->mMemberMask);
-    return false;
+    return predestroy_error;
 }

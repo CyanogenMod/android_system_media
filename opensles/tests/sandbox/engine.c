@@ -15,7 +15,7 @@
  */
 
 #include "SLES/OpenSLES.h"
-#include "SLES/OpenSLESUT.h"
+#include "OpenSLESUT.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -150,11 +150,13 @@ int main(int argc, char **argv)
         assert(interface_again == interface);
     }
 
-    printf("Create too many engines\n");
     SLObjectItf engineObject2;
+#if 0
+    printf("Create too many engines\n");
     result = slCreateEngine(&engineObject2, 0, NULL, 0, NULL, NULL);
     assert(SL_RESULT_RESOURCE_ERROR == result);
     assert(NULL == engineObject2);
+#endif
 
     printf("Destroy engine\n");
     (*engineObject)->Destroy(engineObject);

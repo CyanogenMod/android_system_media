@@ -31,25 +31,15 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     int ok;
     ok = pthread_mutex_lock(&theOneTrueMutex);
     assert(0 == ok);
+    bool needToUnlockTheOneTrueMutex = true;
 
     do {
-
-#ifdef ANDROID
-        android::ProcessState::self()->startThreadPool();
-        android::DataSource::RegisterDefaultSniffers();
-#endif
 
         if (NULL == pEngine) {
             result = SL_RESULT_PARAMETER_INVALID;
             break;
         }
         *pEngine = NULL;
-
-        if (NULL != theOneTrueEngine) {
-            SL_LOGE("slCreateEngine while another engine %p is active", theOneTrueEngine);
-            result = SL_RESULT_RESOURCE_ERROR;
-            break;
-        }
 
         if ((0 < numOptions) && (NULL == pEngineOptions)) {
             SL_LOGE("numOptions=%lu and pEngineOptions=NULL", numOptions);
@@ -85,7 +75,6 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         }
 
         unsigned exposedMask;
-        // const ClassTable *pCEngine_class = objectIDtoClass(SL_OBJECTID_ENGINE);
         assert(NULL != pCEngine_class);
         result = checkInterfaces(pCEngine_class, numInterfaces,
             pInterfaceIds, pInterfaceRequired, &exposedMask);
@@ -93,7 +82,61 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
             break;
         }
 
-        CEngine *this = (CEngine *) construct(pCEngine_class, exposedMask, NULL);
+        // if an engine already exists, then increment its ref count
+        CEngine *this = theOneTrueEngine;
+        if (NULL != this) {
+            assert(0 < theOneTrueRefCount);
+            ++theOneTrueRefCount;
+
+            // In order to update the engine object, we need to lock it,
+            // but that would violate the lock order and potentially deadlock.
+            // So we unlock now and note that it should not be unlocked later.
+            ok = pthread_mutex_unlock(&theOneTrueMutex);
+            assert(0 == ok);
+            needToUnlockTheOneTrueMutex = false;
+            object_lock_exclusive(&this->mObject);
+
+            // now expose additional interfaces not requested by the earlier engine create
+            const struct iid_vtable *x = pCEngine_class->mInterfaces;
+            SLuint8 *interfaceStateP = this->mObject.mInterfaceStates;
+            SLuint32 index;
+            for (index = 0; index < pCEngine_class->mInterfaceCount; ++index, ++x,
+                    exposedMask >>= 1, ++interfaceStateP) {
+                switch (*interfaceStateP) {
+                case INTERFACE_EXPOSED:         // previously exposed
+                    break;
+                case INTERFACE_INITIALIZED:     // not exposed during the earlier create
+                    if (exposedMask & 1) {
+                        const struct MPH_init *mi = &MPH_init_table[x->mMPH];
+                        BoolHook expose = mi->mExpose;
+                        if ((NULL == expose) || (*expose)((char *) this + x->mOffset)) {
+                            *interfaceStateP = INTERFACE_EXPOSED;
+                        }
+                        // FIXME log or report to application that expose hook failed
+                    }
+                    break;
+                case INTERFACE_UNINITIALIZED:   // no init hook
+                    break;
+                default:                        // impossible
+                    assert(false);
+                    break;
+                }
+            }
+            object_unlock_exclusive(&this->mObject);
+            // return the shared engine object
+            *pEngine = &this->mObject.mItf;
+            break;
+        }
+
+        // here when creating the first engine reference
+        assert(0 == theOneTrueRefCount);
+
+#ifdef ANDROID
+        android::ProcessState::self()->startThreadPool();
+        android::DataSource::RegisterDefaultSniffers();
+#endif
+
+        this = (CEngine *) construct(pCEngine_class, exposedMask, NULL);
         if (NULL == this) {
             result = SL_RESULT_MEMORY_FAILURE;
             break;
@@ -113,13 +156,17 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         this->mEngineCapabilities.mThreadSafe = threadSafe;
         IObject_Publish(&this->mObject);
         theOneTrueEngine = this;
+        theOneTrueRefCount = 1;
         // return the new engine object
         *pEngine = &this->mObject.mItf;
 
     } while(0);
 
-    ok = pthread_mutex_unlock(&theOneTrueMutex);
-    assert(0 == ok);
+    if (needToUnlockTheOneTrueMutex) {
+        ok = pthread_mutex_unlock(&theOneTrueMutex);
+        assert(0 == ok);
+        needToUnlockTheOneTrueMutex = false;
+    }
 
     return result;
 }

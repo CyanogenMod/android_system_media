@@ -108,12 +108,19 @@ typedef struct COutputMix_struct COutputMix;
 
 #include "sllog.h"
 
+typedef enum {
+    predestroy_error,   // Application should not be calling destroy now
+    predestroy_ok,      // OK to destroy object now
+    predestroy_again    // Application did nothing wrong, but should destroy again to be effective
+} predestroy_t;
+
 // Hook functions
 
 typedef void (*VoidHook)(void *self);
 //typedef SLresult (*ResultHook)(void *self);
 typedef SLresult (*AsyncHook)(void *self, SLboolean async);
 typedef bool (*BoolHook)(void *self);
+typedef predestroy_t (*PreDestroyHook)(void *self);
 
 // Describes how an interface is related to a given class, used in iid_vtable::mInterface
 
@@ -214,7 +221,7 @@ typedef struct {
     AsyncHook mRealize;
     AsyncHook mResume;
     VoidHook mDestroy;
-    BoolHook mPreDestroy;
+    PreDestroyHook mPreDestroy;
 } ClassTable;
 
 // BufferHeader describes each element of a BufferQueue, other than the data
@@ -306,33 +313,33 @@ extern void IObject_Destroy(SLObjectItf self);
 #include "android_AudioPlayer.h"
 #endif
 
-extern bool C3DGroup_PreDestroy(void *self);
+extern predestroy_t C3DGroup_PreDestroy(void *self);
 
 extern SLresult CAudioPlayer_Realize(void *self, SLboolean async);
 extern SLresult CAudioPlayer_Resume(void *self, SLboolean async);
 extern void CAudioPlayer_Destroy(void *self);
-extern bool CAudioPlayer_PreDestroy(void *self);
+extern predestroy_t CAudioPlayer_PreDestroy(void *self);
 
 extern SLresult CAudioRecorder_Realize(void *self, SLboolean async);
 extern SLresult CAudioRecorder_Resume(void *self, SLboolean async);
 extern void CAudioRecorder_Destroy(void *self);
-extern bool CAudioRecorder_PreDestroy(void *self);
+extern predestroy_t CAudioRecorder_PreDestroy(void *self);
 
 extern SLresult CEngine_Realize(void *self, SLboolean async);
 extern SLresult CEngine_Resume(void *self, SLboolean async);
 extern void CEngine_Destroy(void *self);
-extern bool CEngine_PreDestroy(void *self);
+extern predestroy_t CEngine_PreDestroy(void *self);
 extern void CEngine_Destroyed(CEngine *self);
 
 extern SLresult COutputMix_Realize(void *self, SLboolean async);
 extern SLresult COutputMix_Resume(void *self, SLboolean async);
 extern void COutputMix_Destroy(void *self);
-extern bool COutputMix_PreDestroy(void *self);
+extern predestroy_t COutputMix_PreDestroy(void *self);
 
 extern SLresult CMediaPlayer_Realize(void *self, SLboolean async);
 extern SLresult CMediaPlayer_Resume(void *self, SLboolean async);
 extern void CMediaPlayer_Destroy(void *self);
-extern bool CMediaPlayer_PreDestroy(void *self);
+extern predestroy_t CMediaPlayer_PreDestroy(void *self);
 
 #ifdef USE_SDL
 extern void SDL_open(IEngine *thisEngine);
@@ -392,3 +399,4 @@ extern SLresult IEngineCapabilities_QueryVibraCapabilities(SLEngineCapabilitiesI
 
 extern CEngine *theOneTrueEngine;
 extern pthread_mutex_t theOneTrueMutex;
+extern unsigned theOneTrueRefCount;

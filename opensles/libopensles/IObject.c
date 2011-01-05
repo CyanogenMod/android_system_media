@@ -89,12 +89,27 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
     IObject *this = (IObject *) self;
     SLuint8 state;
     const ClassTable *class__ = this->mClass;
+    bool isSharedEngine = false;
     object_lock_exclusive(this);
+    // note that SL_OBJECTID_ENGINE and XA_OBJECTID_ENGINE map to same class
+    if (class__ == objectIDtoClass(SL_OBJECTID_ENGINE)) {
+        // important: the lock order is engine followed by theOneTrueMutex
+        int ok = pthread_mutex_lock(&theOneTrueMutex);
+        assert(0 == ok);
+        isSharedEngine = 1 < theOneTrueRefCount;
+        ok = pthread_mutex_unlock(&theOneTrueMutex);
+        assert(0 == ok);
+    }
     state = this->mState;
-    // Reject redundant calls to Realize
+    // Reject redundant calls to Realize, except on a shared engine
     if (SL_OBJECT_STATE_UNREALIZED != state) {
         object_unlock_exclusive(this);
-        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+        // redundant realize on the shared engine is permitted
+        if (isSharedEngine && (SL_OBJECT_STATE_REALIZED == state)) {
+            result = SL_RESULT_SUCCESS;
+        } else {
+            result = SL_RESULT_PRECONDITIONS_VIOLATED;
+        }
     } else {
         // Asynchronous: mark operation pending and cancellable
         if (async && (SL_OBJECTID_ENGINE != class__->mSLObjectID)) {
@@ -509,17 +524,26 @@ void IObject_Destroy(SLObjectItf self)
     Abort_internal(this);
     // mutex is locked
     const ClassTable *class__ = this->mClass;
-    BoolHook preDestroy = class__->mPreDestroy;
+    PreDestroyHook preDestroy = class__->mPreDestroy;
     // The pre-destroy hook is called with mutex locked, and should block until it is safe to
     // destroy.  It is OK to unlock the mutex temporarily, as it long as it re-locks the mutex
     // before returning.
     if (NULL != preDestroy) {
-        bool okToDestroy = (*preDestroy)(this);
-        if (!okToDestroy) {
+        predestroy_t okToDestroy = (*preDestroy)(this);
+        switch (okToDestroy) {
+        case predestroy_ok:
+            break;
+        case predestroy_error:
+            SL_LOGE("Object::Destroy(%p) not allowed", this);
+            // fall through
+        case predestroy_again:
             object_unlock_exclusive(this);
             // unfortunately Destroy doesn't return a result
-            SL_LOGE("Object::Destroy(%p) not allowed", this);
             SL_LEAVE_INTERFACE_VOID
+            // unreachable
+        default:
+            assert(false);
+            break;
         }
     }
     this->mState = SL_OBJECT_STATE_DESTROYING;

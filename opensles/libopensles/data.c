@@ -227,7 +227,7 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
 
         // Verify that another thread didn't change the locatorType field after we used it
         // to determine sizeof struct to copy.
-        if (locatorType != pDataLocator->mLocatorType) {
+        if ((SL_RESULT_SUCCESS == result) && (locatorType != pDataLocator->mLocatorType)) {
             SL_LOGE("%s: locatorType changed from %lu to %lu", name, locatorType,
                     pDataLocator->mLocatorType);
             result = SL_RESULT_PRECONDITIONS_VIOLATED;
@@ -262,7 +262,7 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
             break;
         }
         if (!(allowedDataLocatorMask & actualMask)) {
-            SL_LOGE("%s: Data locator type 0x%lx not allowed", name, locatorType);
+            SL_LOGE("%s: data locator type 0x%lx not allowed", name, locatorType);
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         }
     }
@@ -347,7 +347,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
-                    SL_LOGE("numChannels=%u", (unsigned) pDataFormat->mPCM.numChannels);
+                    SL_LOGE("%s: numChannels=%u", name, (unsigned) pDataFormat->mPCM.numChannels);
                     break;
                 }
 
@@ -375,7 +375,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
-                    SL_LOGE("samplesPerSec=%u", (unsigned) pDataFormat->mPCM.samplesPerSec);
+                    SL_LOGE("%s: samplesPerSec=%lu", name, pDataFormat->mPCM.samplesPerSec);
                     break;
                 }
 
@@ -395,7 +395,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
-                    SL_LOGE("bitsPerSample=%u", (unsigned) pDataFormat->mPCM.bitsPerSample);
+                    SL_LOGE("%s: bitsPerSample=%lu", name, pDataFormat->mPCM.bitsPerSample);
                     break;
                 }
 
@@ -406,7 +406,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     result = SL_RESULT_CONTENT_UNSUPPORTED;
                 }
                 if (SL_RESULT_SUCCESS != result) {
-                    SL_LOGE("containerSize=%u, bitsPerSample=%u",
+                    SL_LOGE("%s: containerSize=%u, bitsPerSample=%u", name,
                             (unsigned) pDataFormat->mPCM.containerSize,
                             (unsigned) pDataFormat->mPCM.bitsPerSample);
                     break;
@@ -435,8 +435,8 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
-                    SL_LOGE("channelMask=0x%lx numChannels=%lu", pDataFormat->mPCM.channelMask,
-                        pDataFormat->mPCM.numChannels);
+                    SL_LOGE("%s: channelMask=0x%lx numChannels=%lu", name,
+                        pDataFormat->mPCM.channelMask, pDataFormat->mPCM.numChannels);
                     break;
                 }
 
@@ -451,7 +451,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
-                    SL_LOGE("endianness=%u", (unsigned) pDataFormat->mPCM.endianness);
+                    SL_LOGE("%s: endianness=%u", name, (unsigned) pDataFormat->mPCM.endianness);
                     break;
                 }
 
@@ -526,7 +526,8 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
             case XA_COLORFORMAT_UNUSED:
             default:
                 result = XA_RESULT_PARAMETER_INVALID;
-                SL_LOGE("Unsupported color format %ld", pDataFormat->mRawImage.colorFormat);
+                SL_LOGE("%s: unsupported color format %ld", name,
+                    pDataFormat->mRawImage.colorFormat);
                 break;
             }
             // no checks for height, width, or stride
@@ -534,7 +535,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
 
         default:
             result = SL_RESULT_PARAMETER_INVALID;
-            SL_LOGE("formatType=%u", (unsigned) formatType);
+            SL_LOGE("%s: formatType=%u", name, (unsigned) formatType);
             break;
 
         }
@@ -564,7 +565,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
             break;
         }
         if (!(allowedDataFormatMask & actualMask)) {
-            SL_LOGE("%s: Data format %ld not allowed", name, formatType);
+            SL_LOGE("%s: data format %ld not allowed", name, formatType);
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         }
     }
@@ -672,7 +673,7 @@ SLresult checkDataSource(const char *name, const SLDataSource *pDataSrc,
                 (allowedDataFormatMask & DATAFORMAT_MASK_NULL)) {
             return SL_RESULT_SUCCESS;
         }
-        SL_LOGE("DataSource %s cannot be NULL", name);
+        SL_LOGE("%s: data source cannot be NULL", name);
         return SL_RESULT_PARAMETER_INVALID;
     }
     SLDataSource myDataSrc = *pDataSrc;
@@ -746,7 +747,7 @@ SLresult checkDataSink(const char *name, const SLDataSink *pDataSink,
                 (allowedDataFormatMask & DATAFORMAT_MASK_NULL)) {
             return SL_RESULT_SUCCESS;
         }
-        SL_LOGE("DataSink %s cannot be NULL", name);
+        SL_LOGE("%s: data sink cannot be NULL", name);
         return SL_RESULT_PARAMETER_INVALID;
     }
     SLDataSink myDataSink = *pDataSink;
