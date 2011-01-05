@@ -97,7 +97,6 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
                         SL_LOGE("%s: locatorType=IODEVICE, but device field %p has wrong " \
                             "object ID or is not realized", name, device);
                         pDataLocator->mIODevice.device = NULL;
-                        // FIXME return result;
                     }
                 }
             } else {
@@ -166,7 +165,6 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
                     "not refer to an SL_OBJECTID_OUTPUTMIX or the output mix is not realized", \
                     name, pDataLocator->mOutputMix.outputMix);
                 pDataLocator->mOutputMix.outputMix = NULL;
-                // FIXME return result;
             }
             break;
 

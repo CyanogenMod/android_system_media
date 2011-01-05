@@ -70,10 +70,6 @@ static SLresult IOutputMix_ReRoute(SLOutputMixItf self, SLint32 numOutputDevices
     } else {
         switch (pOutputDeviceIDs[0]) {
         case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
-#if 0 // FIXME These OEM-specific constants should be configurable
-        case DEVICE_ID_HEADSET:
-        case DEVICE_ID_HANDSFREE:
-#endif
             result = SL_RESULT_SUCCESS;
             break;
         default:

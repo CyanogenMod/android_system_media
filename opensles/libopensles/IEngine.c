@@ -240,7 +240,6 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     }
 #endif
 
-                    // FIXME move to dedicated function
                     // Allocate memory for buffer queue
 
                     //if (0 != this->mBufferQueue.mNumBuffers) {
@@ -462,7 +461,7 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
                 "pVibra", pVibra, NULL | IODEVICE, NULL
                 "pLEDArray", pLEDArray, NULL | IODEVICE, NULL
 #endif
-                // FIXME a fake value - why not use value from IPlay_init? what does CT check for?
+                // a fake value - why not use value from IPlay_init? what does CT check for?
                 this->mPlay.mDuration = 0;
                 IObject_Publish(&this->mObject);
                 // return the new MIDI player object
@@ -1120,7 +1119,6 @@ static XAresult IEngine_GetImplementationInfo(XAEngineItf self, XAuint32 *pMajor
 
     //IXAEngine *this = (IXAEngine *) self;
     result = SL_RESULT_FEATURE_UNSUPPORTED;
-    // FIXME
 
     XA_LEAVE_INTERFACE
 }
@@ -1134,9 +1132,8 @@ static XAresult IXAEngine_QuerySupportedProfiles(XAEngineItf self, XAint16 *pPro
         result = XA_RESULT_PARAMETER_INVALID;
     } else {
 #if 1
-        // FIXME
         *pProfilesSupported = 0;
-        // FIXME the code below was copied from OpenSL ES and needs to be adapted for OpenMAX AL.
+        // the code below was copied from OpenSL ES and needs to be adapted for OpenMAX AL.
 #else
         // The generic implementation doesn't implement any of the profiles, they shouldn't be
         // declared as supported. Also exclude the fake profiles BASE and OPTIONAL.

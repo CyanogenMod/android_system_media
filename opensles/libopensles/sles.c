@@ -54,7 +54,7 @@ bool IsInterfaceInitialized(IObject *this, unsigned MPH)
 SLuint32 IObjectToObjectID(IObject *this)
 {
     assert(NULL != this);
-    // FIXME Note this returns the SLES object ID in preference to the OMX AL if both available
+    // Note this returns the OpenSL ES object ID in preference to the OpenMAX AL if both available
     const ClassTable *class__ = this->mClass;
     assert(NULL != class__);
     SLuint32 id = class__->mSLObjectID;
