@@ -227,7 +227,7 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
 
         // Verify that another thread didn't change the locatorType field after we used it
         // to determine sizeof struct to copy.
-        if (locatorType != pDataLocator->mLocatorType) {
+        if ((SL_RESULT_SUCCESS == result) && (locatorType != pDataLocator->mLocatorType)) {
             SL_LOGE("%s: locatorType changed from %lu to %lu", name, locatorType,
                     pDataLocator->mLocatorType);
             result = SL_RESULT_PRECONDITIONS_VIOLATED;
