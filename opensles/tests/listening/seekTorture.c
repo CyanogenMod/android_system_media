@@ -57,12 +57,16 @@ int main(int argc, char **argv)
     SLDataSink audiosnk;
     SLDataLocator_OutputMix locator_outputmix;
     SLDataLocator_URI locator_uri;
+    SLDataFormat_MIME mime;
     locator_uri.locatorType = SL_DATALOCATOR_URI;
     locator_uri.URI = (SLchar *) argv[1];
     locator_outputmix.locatorType = SL_DATALOCATOR_OUTPUTMIX;
     locator_outputmix.outputMix = outputmixObject;
+    mime.formatType = SL_DATAFORMAT_MIME;
+    mime.mimeType = (SLchar *) NULL;
+    mime.containerType = SL_CONTAINERTYPE_UNSPECIFIED;
     audiosrc.pLocator = &locator_uri;
-    audiosrc.pFormat = NULL;
+    audiosrc.pFormat = &mime;
     audiosnk.pLocator = &locator_outputmix;
     audiosnk.pFormat = NULL;
     SLObjectItf playerObject;
