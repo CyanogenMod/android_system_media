@@ -307,29 +307,6 @@ void android_eq_init(int sessionId, IEqualizer* ieq) {
     }
     object_unlock_exclusive(&ieq->mThis->mEngine->mObject);
 
-#if 0
-    // configure the EQ so it can easily be heard, for test only
-    uint32_t freq = 1977;
-    uint32_t frange[2];
-    int16_t value = ap->mEqualizer.mBandLevelRangeMin;
-    for(int32_t i=0 ; i< ap->mEqualizer.mNumBands ; i++) {
-        android_eq_setParam(ap->mEqualizer.mEqEffect, EQ_PARAM_BAND_LEVEL, i, &value);
-        // display EQ characteristics
-        android_eq_getParam(ap->mEqualizer.mEqEffect, EQ_PARAM_CENTER_FREQ, i, &freq);
-        android_eq_getParam(ap->mEqualizer.mEqEffect, EQ_PARAM_BAND_FREQ_RANGE, i, frange);
-        SL_LOGV(" EQ init: band %d = %d - %d - %dHz", i, frange[0]/1000, freq/1000,
-                frange[1]/1000);
-    }
-    value = ap->mEqualizer.mBandLevelRangeMax;
-    if (ap->mEqualizer.mNumBands > 2) {
-        android_eq_setParam(ap->mEqualizer.mEqEffect, EQ_PARAM_BAND_LEVEL, 2, &value);
-    }
-    if (ap->mEqualizer.mNumBands > 3) {
-        android_eq_setParam(ap->mEqualizer.mEqEffect, EQ_PARAM_BAND_LEVEL, 3, &value);
-    }
-
-    ap->mEqualizer.mEqEffect->setEnabled(true);
-#endif
 }
 
 
