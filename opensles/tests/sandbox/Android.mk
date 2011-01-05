@@ -61,7 +61,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/opensles/include
+	system/media/opensles/include \
+	system/media/opensles/libopensles
 
 LOCAL_SRC_FILES:= \
 	engine.c
@@ -90,7 +91,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/opensles/include
+	system/media/opensles/include \
+    system/media/opensles/libopensles
 
 LOCAL_SRC_FILES:= \
 	object.c
@@ -203,7 +205,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/opensles/include
+	system/media/opensles/include \
+	system/media/opensles/libopensles
 
 LOCAL_SRC_FILES:= \
 	outputmix.c

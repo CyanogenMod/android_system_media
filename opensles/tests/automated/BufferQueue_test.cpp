@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "SLES/OpenSLES.h"
-#include "SLES/OpenSLESUT.h"
+#include "OpenSLESUT.h"
 #include <gtest/gtest.h>
 
 typedef struct {

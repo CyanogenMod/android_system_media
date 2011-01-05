@@ -15,7 +15,7 @@
  */
 
 #include "SLES/OpenSLES.h"
-#include "SLES/OpenSLESUT.h"
+#include "OpenSLESUT.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>

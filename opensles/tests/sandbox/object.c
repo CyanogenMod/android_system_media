@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "SLES/OpenSLES.h"
-#include "SLES/OpenSLESUT.h"
+#include "OpenSLESUT.h"
 
 int main(int arg, char **argv)
 {
