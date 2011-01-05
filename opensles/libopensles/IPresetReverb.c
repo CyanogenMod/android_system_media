@@ -18,7 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
 /**
  * returns true if this interface is not associated with an initialized PresetReverb effect
  */
@@ -42,7 +42,7 @@ static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self, SLuint16 preset)
     case SL_REVERBPRESET_PLATE:
         interface_lock_poke(this);
         this->mPreset = preset;
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_PRESETREVERB(this)) {
@@ -72,7 +72,7 @@ static SLresult IPresetReverb_GetPreset(SLPresetReverbItf self, SLuint16 *pPrese
         IPresetReverb *this = (IPresetReverb *) self;
         interface_lock_peek(this);
         SLuint16 preset = SL_REVERBPRESET_NONE;
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
         preset = this->mPreset;
         result = SL_RESULT_SUCCESS;
 #else
@@ -100,7 +100,7 @@ void IPresetReverb_init(void *self)
     IPresetReverb *this = (IPresetReverb *) self;
     this->mItf = &IPresetReverb_Itf;
     this->mPreset = SL_REVERBPRESET_NONE;
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     memset(&this->mPresetReverbDescriptor, 0, sizeof(effect_descriptor_t));
     // placement new (explicit constructor)
     (void) new (&this->mPresetReverbEffect) android::sp<android::AudioEffect>();
@@ -109,7 +109,7 @@ void IPresetReverb_init(void *self)
 
 void IPresetReverb_deinit(void *self)
 {
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     IPresetReverb *this = (IPresetReverb *) self;
     // explicit destructor
     this->mPresetReverbEffect.~sp();
@@ -118,7 +118,7 @@ void IPresetReverb_deinit(void *self)
 
 bool IPresetReverb_Expose(void *self)
 {
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     IPresetReverb *this = (IPresetReverb *) self;
     if (!android_fx_initEffectDescriptor(SL_IID_PRESETREVERB, &this->mPresetReverbDescriptor)) {
         SL_LOGE("PresetReverb initialization failed.");

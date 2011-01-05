@@ -117,7 +117,7 @@ void CEngine_Destroy(void *self)
     // Shutdown the thread pool used for asynchronous operations (there should not be any)
     ThreadPool_deinit(&this->mThreadPool);
 
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     // free equalizer preset names
     if (NULL != this->mEqPresetNames) {
         for (unsigned i = 0; i < this->mEqNumPresets; ++i) {

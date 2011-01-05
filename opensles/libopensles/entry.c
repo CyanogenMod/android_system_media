@@ -36,9 +36,7 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
 
 #ifdef ANDROID
         android::ProcessState::self()->startThreadPool();
-#ifndef USE_BACKPORT
         android::DataSource::RegisterDefaultSniffers();
-#endif
 #endif
 
         if (NULL == pEngine) {
@@ -105,7 +103,7 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         // mThreadPool is initialized in CEngine_Realize
         memset(&this->mThreadPool, 0, sizeof(ThreadPool));
         memset(&this->mSyncThread, 0, sizeof(pthread_t));
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
         this->mEqNumPresets = 0;
         this->mEqPresetNames = NULL;
 #endif

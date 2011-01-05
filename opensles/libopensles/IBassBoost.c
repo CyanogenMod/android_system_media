@@ -22,7 +22,7 @@
 #define BASSBOOST_STRENGTH_MAX 1000
 
 
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
 /**
  * returns true if this interface is not associated with an initialized BassBoost effect
  */
@@ -39,7 +39,7 @@ static SLresult IBassBoost_SetEnabled(SLBassBoostItf self, SLboolean enabled)
     IBassBoost *this = (IBassBoost *) self;
     interface_lock_exclusive(this);
     this->mEnabled = (SLboolean) enabled;
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
     result = SL_RESULT_SUCCESS;
 #else
     if (NO_BASSBOOST(this)) {
@@ -65,7 +65,7 @@ static SLresult IBassBoost_IsEnabled(SLBassBoostItf self, SLboolean *pEnabled)
         IBassBoost *this = (IBassBoost *) self;
         interface_lock_exclusive(this);
         SLboolean enabled = this->mEnabled;
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
         *pEnabled = enabled;
         result = SL_RESULT_SUCCESS;
 #else
@@ -92,7 +92,7 @@ static SLresult IBassBoost_SetStrength(SLBassBoostItf self, SLpermille strength)
     } else {
         IBassBoost *this = (IBassBoost *) self;
         interface_lock_exclusive(this);
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
         this->mStrength = strength;
         result = SL_RESULT_SUCCESS;
 #else
@@ -121,7 +121,7 @@ static SLresult IBassBoost_GetRoundedStrength(SLBassBoostItf self, SLpermille *p
         IBassBoost *this = (IBassBoost *) self;
         interface_lock_exclusive(this);
         SLpermille strength = this->mStrength;;
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_BASSBOOST(this)) {
@@ -147,7 +147,7 @@ static SLresult IBassBoost_IsStrengthSupported(SLBassBoostItf self, SLboolean *p
     if (NULL == pSupported) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-#if !defined(ANDROID) || defined(USE_BACKPORT)
+#if !defined(ANDROID)
         *pSupported = SL_BOOLEAN_TRUE;
         result = SL_RESULT_SUCCESS;
 #else
@@ -185,7 +185,7 @@ void IBassBoost_init(void *self)
     this->mItf = &IBassBoost_Itf;
     this->mEnabled = SL_BOOLEAN_FALSE;
     this->mStrength = 0;
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     memset(&this->mBassBoostDescriptor, 0, sizeof(effect_descriptor_t));
     // placement new (explicit constructor)
     (void) new (&this->mBassBoostEffect) android::sp<android::AudioEffect>();
@@ -194,7 +194,7 @@ void IBassBoost_init(void *self)
 
 void IBassBoost_deinit(void *self)
 {
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     IBassBoost *this = (IBassBoost *) self;
     // explicit destructor
     this->mBassBoostEffect.~sp();
@@ -203,7 +203,7 @@ void IBassBoost_deinit(void *self)
 
 bool IBassBoost_Expose(void *self)
 {
-#if defined(ANDROID) && !defined(USE_BACKPORT)
+#if defined(ANDROID)
     IBassBoost *this = (IBassBoost *) self;
     if (!android_fx_initEffectDescriptor(SL_IID_BASSBOOST, &this->mBassBoostDescriptor)) {
         SL_LOGE("BassBoost initialization failed.");

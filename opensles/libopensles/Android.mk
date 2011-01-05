@@ -60,6 +60,8 @@ LOCAL_SRC_FILES:=                     \
         android_AudioRecorder.cpp     \
         android_OutputMix.cpp         \
         android_StreamPlayer.cpp      \
+        android_SfPlayer.cpp          \
+        android_Effect.cpp            \
         IID_to_MPH.c                  \
         ThreadPool.c                  \
         C3DGroup.c                    \
@@ -120,20 +122,12 @@ EXCLUDE_SRC :=                        \
         IVibra.c                      \
         IVisualization.c
 
-# comment out for USE_BACKPORT
-LOCAL_SRC_FILES += \
-        android_SfPlayer.cpp          \
-        android_Effect.cpp
-
 LOCAL_C_INCLUDES:=                                                  \
         $(JNI_H_INCLUDE)                                            \
-        system/media/opensles/include
-
-# comment out for USE_BACKPORT
-LOCAL_C_INCLUDES += \
-    frameworks/base/media/libstagefright                            \
-    frameworks/base/media/libstagefright/include                    \
-    frameworks/base/include/media/stagefright/openmax
+        system/media/opensles/include                               \
+        frameworks/base/media/libstagefright                        \
+        frameworks/base/media/libstagefright/include                \
+        frameworks/base/include/media/stagefright/openmax
 
 LOCAL_CFLAGS += -x c++ -Wno-multichar -Wno-invalid-offsetof
 
@@ -144,10 +138,7 @@ LOCAL_STATIC_LIBRARIES += \
 LOCAL_SHARED_LIBRARIES :=         \
         libutils                  \
         libmedia                  \
-        libbinder
-
-# comment out for USE_BACKPORT
-LOCAL_SHARED_LIBRARIES +=         \
+        libbinder                 \
         libstagefright            \
         libstagefright_foundation \
         libcutils
