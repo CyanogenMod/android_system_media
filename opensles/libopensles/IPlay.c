@@ -96,7 +96,7 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
         this->mState = state;
         attr = ATTR_TRANSPORT;
 #endif
-        SL_LOGI("set play state %ld", state);
+        // SL_LOGD("set play state %ld", state);
         interface_unlock_exclusive_attributes(this, attr);
         }
         break;
