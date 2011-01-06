@@ -140,7 +140,11 @@ void TestStreamTypeConfiguration( SLObjectItf sl, const char* path, const SLint3
     /* Set the Android audio stream type on the player */
     result = (*configItf)->SetConfiguration(configItf,
             SL_ANDROID_KEY_STREAM_TYPE, &type, sizeof(SLint32));
-    ExitOnError(result);
+    if (SL_RESULT_PARAMETER_INVALID == result) {
+        fprintf(stderr, "invalid stream type %ld\n", type);
+    } else {
+        ExitOnError(result);
+    }
 #endif
 
     /* Realize the player in synchronous mode. */
@@ -242,7 +246,9 @@ int main(int argc, char* const argv[])
     if (argc < 3) {
         fprintf(stdout, "Usage: \t%s url stream_type\n", argv[0]);
         fprintf(stdout, " where stream_type is one of the SL_ANDROID_STREAM_ constants.\n");
-        fprintf(stdout, "Example: \"%s /sdcard/my.mp3 3\" \n", argv[0]);
+        fprintf(stdout, "Example: \"%s /sdcard/my.mp3 5\" \n", argv[0]);
+        fprintf(stdout, "Stream type %ld is the default (media or music), %ld is notifications\n",
+            SL_ANDROID_STREAM_MEDIA, SL_ANDROID_STREAM_NOTIFICATION);
         return EXIT_FAILURE;
     }
 
