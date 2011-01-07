@@ -20,11 +20,10 @@
 #include <string.h>
 #define LOG_TAG "NativeMedia"
 #include <utils/Log.h>
-//FIXME shouldn't be needed here, but needed for declaration of XA_IID_ANDROIDBUFFERQUEUE
-#include "SLES/OpenSLES.h"
-#include "SLES/OpenSLES_Android.h"
+
 #include "OMXAL/OpenMAXAL.h"
 #include "OMXAL/OpenMAXAL_Android.h"
+
 #include <android/native_window_jni.h>
 
 // engine interfaces
