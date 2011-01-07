@@ -103,7 +103,7 @@ void AVPlayer::init(const notif_client_t cbf, void* notifUser) {
 }
 
 void AVPlayer::setVideoSurface(void* surface) {
-    mVideoSurface = (Surface*) surface;
+    mVideoSurface = static_cast<Surface *>((ANativeWindow*)surface);
 }
 
 
