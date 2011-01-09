@@ -90,3 +90,17 @@ extern SLresult checkSourceFormatVsInterfacesCompatibility(
         const DataLocatorFormat *pDataLocatorFormat, const ClassTable *class__,
         unsigned exposedMask);
 extern void freeDataLocatorFormat(DataLocatorFormat *dlf);
+
+
+/* For stream information storage */
+typedef struct {
+    XAuint32 domain;
+    union {
+        XAMediaContainerInformation containerInfo;
+        XAVideoStreamInformation videoInfo;
+        XAAudioStreamInformation audioInfo;
+        XAImageStreamInformation imageInfo;
+        XATimedTextStreamInformation textInfo;
+        XAMIDIStreamInformation midiInfo;
+    };
+} StreamInfo;
