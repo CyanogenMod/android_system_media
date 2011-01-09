@@ -304,6 +304,7 @@ typedef struct CMediaPlayer_struct {
     XAuint8 mInterfaceStates2[INTERFACES_MediaPlayer - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IPlay mPlay;
+    IStreamInformation mStreamInfo;
 #ifdef ANDROID
     IAndroidBufferQueue mAndroidBufferQueue;
 #endif

@@ -110,12 +110,11 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
         mp->mAVPlayer->init(player_handleMediaPlayerEventNotifications, (void*)mp);
         }
         break;
-    case INVALID_TYPE:
+    case INVALID_TYPE: // intended fall-through
     default:
         SL_LOGE("Unable to realize MediaPlayer, invalid internal Android object type");
         result = XA_RESULT_PARAMETER_INVALID;
         break;
-
     }
 
     return result;

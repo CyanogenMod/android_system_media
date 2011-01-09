@@ -92,6 +92,7 @@ LOCAL_SRC_FILES:=                     \
         IPresetReverb.c               \
         IRecord.c                     \
         ISeek.c                       \
+        IStreamInformation.c          \
         IVirtualizer.c                \
         IVolume.c
 

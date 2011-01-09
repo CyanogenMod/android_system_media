@@ -583,6 +583,16 @@ typedef struct {
     IObject *mThis;
 } IXAEngine;
 
+typedef struct {
+    const struct XAStreamInformationItf_ *mItf;
+    IObject *mThis;
+    xaStreamEventChangeCallback mCallback;
+    void *mContext;
+#ifdef ANDROID
+    android::Vector<StreamInfo> mStreamInfoTable;
+#endif
+} IStreamInformation;
+
 /* Class structures */
 
 /*typedef*/ struct C3DGroup_struct {
