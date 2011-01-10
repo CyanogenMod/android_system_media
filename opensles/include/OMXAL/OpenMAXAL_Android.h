@@ -27,9 +27,51 @@ extern "C" {
 
 typedef XAuint32               XAAbufferQueueEvent;
 
+/*---------------------------------------------------------------------------*/
+/* Android Simple Buffer Queue Interface                                     */
+/*---------------------------------------------------------------------------*/
+#if 0
+extern XA_API const SLInterfaceID XA_IID_ANDROIDSIMPLEBUFFERQUEUE;
+
+struct XAAndroidSimpleBufferQueueItf_;
+typedef const struct XAAndroidSimpleBufferQueueItf_ * const * XAAndroidSimpleBufferQueueItf;
+
+typedef void (XAAPIENTRY *xaAndroidSimpleBufferQueueCallback)(
+    xaAndroidSimpleBufferQueueItf caller,
+    void *pContext
+);
+
+/** Android simple buffer queue state **/
+
+typedef struct XAAndroidSimpleBufferQueueState_ {
+    SLuint32    count;
+    SLuint32    index;
+} XAAndroidSimpleBufferQueueState;
+
+
+struct XAAndroidSimpleBufferQueueItf_ {
+    XAresult (*Enqueue) (
+        XAAndroidSimpleBufferQueueItf self,
+        const void *pBuffer,
+        XAuint32 size
+    );
+    XAresult (*Clear) (
+        XAAndroidSimpleBufferQueueItf self
+    );
+    XAresult (*GetState) (
+        XAAndroidSimpleBufferQueueItf self,
+        XAAndroidSimpleBufferQueueState *pState
+    );
+    XAresult (*RegisterCallback) (
+        XAAndroidSimpleBufferQueueItf self,
+        xaAndroidSimpleBufferQueueCallback callback,
+        void* pContext
+    );
+};
+#endif
 
 /*---------------------------------------------------------------------------*/
-/* Android Buffer Qeueue Interface                                           */
+/* Android Buffer Queue Interface                                           */
 /*---------------------------------------------------------------------------*/
 
 extern XA_API const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUE;
