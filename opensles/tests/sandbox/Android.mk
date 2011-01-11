@@ -403,3 +403,32 @@ LOCAL_CFLAGS += -UNDEBUG
 LOCAL_MODULE:= slesTest_xa
 
 include $(BUILD_EXECUTABLE)
+
+# dual
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_C_INCLUDES:= \
+	system/media/opensles/include
+
+LOCAL_SRC_FILES:= \
+	dual.c
+
+LOCAL_SHARED_LIBRARIES := \
+	libutils \
+	libOpenSLES
+
+LOCAL_STATIC_LIBRARIES := \
+    libOpenSLESUT
+
+ifeq ($(TARGET_OS),linux)
+	LOCAL_CFLAGS += -DXP_UNIX
+endif
+
+LOCAL_CFLAGS += -UNDEBUG
+
+LOCAL_MODULE:= slesTest_dual
+
+include $(BUILD_EXECUTABLE)

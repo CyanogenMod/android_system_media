@@ -1,7 +1,24 @@
+/*
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "OMXAL/OpenMAXAL.h"
+#include "OMXAL/OpenMAXAL_Android.h"
 
 int main(int argc, char **argv)
 {
@@ -51,15 +68,25 @@ int main(int argc, char **argv)
 
     printf("CreateMediaPlayer\n");
     XAObjectItf playerObject;
+#if 1
+    XADataLocator_AndroidBufferQueue locABQ;
+    memset(&locABQ, 0, sizeof(locABQ));
+    locABQ.locatorType = XA_DATALOCATOR_ANDROIDBUFFERQUEUE;
+#else
     XADataLocator_URI locUri;
     locUri.locatorType = XA_DATALOCATOR_URI;
     locUri.URI = (XAchar *) "/sdcard/hello.wav";
+#endif
     XADataFormat_MIME fmtMime;
     fmtMime.formatType = XA_DATAFORMAT_MIME;
     fmtMime.mimeType = NULL;
     fmtMime.containerType = XA_CONTAINERTYPE_UNSPECIFIED;
     XADataSource dataSrc;
+#if 1
+    dataSrc.pLocator = &locABQ;
+#else
     dataSrc.pLocator = &locUri;
+#endif
     dataSrc.pFormat = &fmtMime;
     XADataSink audioSnk;
     XADataLocator_OutputMix locOM;

@@ -19,10 +19,12 @@
 #include "sles_allinclusive.h"
 
 
-/* This implementation supports at most one engine */
+/* This implementation supports at most one engine, identical for both OpenSL ES and OpenMAX AL */
 
 CEngine *theOneTrueEngine = NULL;
 pthread_mutex_t theOneTrueMutex = PTHREAD_MUTEX_INITIALIZER;
+unsigned theOneTrueRefCount = 0;
+// incremented by slCreateEngine or xaCreateEngine, decremented by Object::Destroy on engine
 
 
 /** \brief Called by dlopen when .so is loaded */
@@ -36,7 +38,7 @@ __attribute__((constructor)) static void onDlOpen(void)
 
 __attribute__((destructor)) static void onDlClose(void)
 {
-    if (NULL != theOneTrueEngine) {
+    if ((NULL != theOneTrueEngine) || (0 < theOneTrueRefCount)) {
         SL_LOGE("Object::Destroy omitted for engine %p", theOneTrueEngine);
     }
 }
@@ -141,9 +143,26 @@ void CEngine_Destroy(void *self)
 
 /** \brief Hook called by Object::Destroy before an engine is about to be destroyed */
 
-bool CEngine_PreDestroy(void *self)
+predestroy_t CEngine_PreDestroy(void *self)
 {
-    return true;
+    predestroy_t ret;
+    (void) pthread_mutex_lock(&theOneTrueMutex);
+    assert(self == theOneTrueEngine);
+    switch (theOneTrueRefCount) {
+    case 0:
+        assert(false);
+        ret = predestroy_error;
+        break;
+    case 1:
+        ret = predestroy_ok;
+        break;
+    default:
+        --theOneTrueRefCount;
+        ret = predestroy_again;
+        break;
+    }
+    (void) pthread_mutex_unlock(&theOneTrueMutex);
+    return ret;
 }
 
 
@@ -158,6 +177,8 @@ void CEngine_Destroyed(CEngine *self)
     assert(0 == ok);
     assert(self == theOneTrueEngine);
     theOneTrueEngine = NULL;
+    assert(1 == theOneTrueRefCount);
+    theOneTrueRefCount = 0;
     ok = pthread_mutex_unlock(&theOneTrueMutex);
     assert(0 == ok);
 }

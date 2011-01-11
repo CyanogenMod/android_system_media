@@ -57,7 +57,7 @@ void CAudioRecorder_Destroy(void *self)
 
 /** \brief Hook called by Object::Destroy before an audio recorder is about to be destroyed */
 
-bool CAudioRecorder_PreDestroy(void *self)
+predestroy_t CAudioRecorder_PreDestroy(void *self)
 {
-    return true;
+    return predestroy_ok;
 }

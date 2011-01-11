@@ -61,6 +61,7 @@ XAresult android_Player_create(CMediaPlayer *mp) {
 
     SLuint32 sourceLocator = *(SLuint32 *)pDataSrc->pLocator;
     switch(sourceLocator) {
+    // FIXME This should be Android simple buffer queue
     case XA_DATALOCATOR_ANDROIDBUFFERQUEUE:
         mp->mAndroidObjType = AV_PLR_TS_ABQ;
         break;

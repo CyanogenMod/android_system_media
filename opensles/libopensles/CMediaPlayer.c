@@ -89,7 +89,7 @@ void CMediaPlayer_Destroy(void *self)
 }
 
 
-bool CMediaPlayer_PreDestroy(void *self)
+predestroy_t CMediaPlayer_PreDestroy(void *self)
 {
-    return true;
+    return predestroy_ok;
 }
