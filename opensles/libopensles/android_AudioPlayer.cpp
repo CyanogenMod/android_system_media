@@ -1093,7 +1093,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                 pAudioPlayer->mSfPlayer->setDataSource(
                         (int)pAudioPlayer->mDataSource.mLocator.mFD.fd,
                         offset == SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ?
-                                (int64_t)SFPLAYER_FD_FIND_FILE_SIZE : offset,
+                                (int64_t)PLAYER_FD_FIND_FILE_SIZE : offset,
                         (int64_t)pAudioPlayer->mDataSource.mLocator.mFD.length);
                 } break;
             default:

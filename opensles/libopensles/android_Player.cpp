@@ -59,20 +59,21 @@ XAresult android_Player_create(CMediaPlayer *mp) {
     // FIXME verify image data sink
     const SLDataSink *pVideoSnk = &mp->mImageVideoSink.u.mSink;
 
-    SLuint32 sourceLocator = *(SLuint32 *)pDataSrc->pLocator;
+    XAuint32 sourceLocator = *(XAuint32 *)pDataSrc->pLocator;
     switch(sourceLocator) {
-    // FIXME This should be Android simple buffer queue
+    // FIXME support Android simple buffer queue as well
     case XA_DATALOCATOR_ANDROIDBUFFERQUEUE:
         mp->mAndroidObjType = AV_PLR_TS_ABQ;
         break;
     case XA_DATALOCATOR_URI: // intended fall-through
+    case SL_DATALOCATOR_ANDROIDFD:
+        mp->mAndroidObjType = AV_PLR_URI_FD;
+        break;
     case XA_DATALOCATOR_ADDRESS: // intended fall-through
-    case SL_DATALOCATOR_ANDROIDFD: // intended fall-through
     default:
         SL_LOGE("Unable to create MediaPlayer for data source locator 0x%lx", sourceLocator);
         result = XA_RESULT_PARAMETER_INVALID;
         break;
-
     }
 
     mp->mAndroidObjState = ANDROID_UNINITIALIZED;
@@ -111,6 +112,30 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
         mp->mAVPlayer->init(player_handleMediaPlayerEventNotifications, (void*)mp);
         }
         break;
+    case AV_PLR_URI_FD: {
+        mp->mAVPlayer = new android::LocAVPlayer(&ap_params);
+        mp->mAVPlayer->init(player_handleMediaPlayerEventNotifications, (void*)mp);
+        switch (mp->mDataSource.mLocator.mLocatorType) {
+        case XA_DATALOCATOR_URI:
+            ((android::LocAVPlayer*)mp->mAVPlayer.get())->setDataSource(
+                    (const char*)mp->mDataSource.mLocator.mURI.URI);
+            break;
+        case XA_DATALOCATOR_ANDROIDFD: {
+            int64_t offset = (int64_t)mp->mDataSource.mLocator.mFD.offset;
+            ((android::LocAVPlayer*)mp->mAVPlayer.get())->setDataSource(
+                    (int)mp->mDataSource.mLocator.mFD.fd,
+                    offset == SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ?
+                            (int64_t)PLAYER_FD_FIND_FILE_SIZE : offset,
+                    (int64_t)mp->mDataSource.mLocator.mFD.length);
+            }
+            break;
+        default:
+            SL_LOGE("Invalid or unsupported data locator type %lu for data source",
+                    mp->mDataSource.mLocator.mLocatorType);
+            result = XA_RESULT_PARAMETER_INVALID;
+        }
+        }
+        break;
     case INVALID_TYPE: // intended fall-through
     default:
         SL_LOGE("Unable to realize MediaPlayer, invalid internal Android object type");
@@ -121,6 +146,17 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
     return result;
 }
 
+//-----------------------------------------------------------------------------
+XAresult android_Player_destroy(CMediaPlayer *mp) {
+    SL_LOGI("android_Player_destroy(%p)", mp);
+    XAresult result = XA_RESULT_SUCCESS;
+
+    if (mp->mAVPlayer != 0) {
+        mp->mAVPlayer.clear();
+    }
+
+    return result;
+}
 
 //-----------------------------------------------------------------------------
 /**
@@ -149,7 +185,8 @@ XAresult android_Player_setPlayState(android::AVPlayer *avp, SLuint32 playState,
      case SL_PLAYSTATE_STOPPED: {
          SL_LOGV("setting AVPlayer to SL_PLAYSTATE_STOPPED");
          avp->stop();
-     } break;
+         }
+         break;
      case SL_PLAYSTATE_PAUSED: {
          SL_LOGV("setting AVPlayer to SL_PLAYSTATE_PAUSED");
          switch(objState) {
@@ -166,7 +203,8 @@ XAresult android_Player_setPlayState(android::AVPlayer *avp, SLuint32 playState,
              SL_LOGE("Android object in invalid state");
              break;
          }
-     } break;
+         }
+         break;
      case SL_PLAYSTATE_PLAYING: {
          SL_LOGV("setting AVPlayer to SL_PLAYSTATE_PLAYING");
          switch(objState) {
@@ -183,8 +221,8 @@ XAresult android_Player_setPlayState(android::AVPlayer *avp, SLuint32 playState,
              SL_LOGE("Android object in invalid state");
              break;
          }
-     } break;
-
+         }
+         break;
      default:
          // checked by caller, should not happen
          break;

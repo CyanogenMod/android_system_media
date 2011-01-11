@@ -25,6 +25,8 @@ extern "C" {
 /* Android common types                                                      */
 /*---------------------------------------------------------------------------*/
 
+typedef xa_int64_t             XAAint64;           /* 64 bit signed integer */
+
 typedef XAuint32               XAAbufferQueueEvent;
 
 /*---------------------------------------------------------------------------*/
@@ -126,6 +128,24 @@ typedef struct XADataLocator_AndroidBufferQueue_ {
     XAuint32    numBuffers;  // FIXME ignored for now, subject to change
     XAuint32    queueSize;   // FIXME ignored for now, subject to change
 } XADataLocator_AndroidBufferQueue;
+
+
+/*---------------------------------------------------------------------------*/
+/* Android File Descriptor Data Locator                                      */
+/*---------------------------------------------------------------------------*/
+
+/** Addendum to Data locator macros  */
+#define XA_DATALOCATOR_ANDROIDFD                ((SLuint32) 0x800007BC)
+
+#define XA_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ((SLAint64) 0xFFFFFFFFFFFFFFFFll)
+
+/** File Descriptor-based data locator definition, locatorType must be XA_DATALOCATOR_ANDROIDFD */
+typedef struct XADataLocator_AndroidFD_ {
+    XAuint32        locatorType;
+    XAint32         fd;
+    XAAint64        offset;
+    XAAint64        length;
+} XADataLocator_AndroidFD;
 
 #ifdef __cplusplus
 }

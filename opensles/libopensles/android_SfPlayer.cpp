@@ -165,7 +165,7 @@ void SfPlayer::setDataSource(const int fd, const int64_t offset, const int64_t l
     }
     mDataLocator.fdi.offset = offset;
 
-    if (SFPLAYER_FD_FIND_FILE_SIZE == length) {
+    if (PLAYER_FD_FIND_FILE_SIZE == length) {
         mDataLocator.fdi.length = sb.st_size;
     } else if (offset + length > sb.st_size) {
         mDataLocator.fdi.length = sb.st_size - offset;

@@ -22,6 +22,8 @@ extern XAresult android_Player_create(CMediaPlayer *mp);
 
 extern XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async);
 
+extern XAresult android_Player_destroy(CMediaPlayer *mp);
+
 
 /**************************************************************************************************
  * Configuration
