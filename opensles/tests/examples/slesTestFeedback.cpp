@@ -343,7 +343,7 @@ int main(int argc, char **argv)
     locator_iodevice.deviceID = SL_DEFAULTDEVICEID_AUDIOINPUT;
     locator_iodevice.device = NULL;
     audiosrc.pLocator = &locator_iodevice;
-    audiosrc.pFormat = &pcm;
+    audiosrc.pFormat = NULL;
     locator_bufferqueue_rx.locatorType = SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE;
     locator_bufferqueue_rx.numBuffers = rxBufCount;
     audiosnk.pLocator = &locator_bufferqueue_rx;
