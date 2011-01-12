@@ -692,8 +692,11 @@ SLresult checkDataSource(const char *name, const SLDataSource *pDataSrc,
     case SL_DATALOCATOR_BUFFERQUEUE:
         allowedDataFormatMask &= DATAFORMAT_MASK_PCM;
         break;
-    case SL_DATALOCATOR_NULL:
+    // Per the spec, the pFormat field is ignored in some cases
     case SL_DATALOCATOR_IODEVICE:
+        myDataSrc.pFormat = NULL;
+        // fall through
+    case SL_DATALOCATOR_NULL:
     case SL_DATALOCATOR_MIDIBUFFERQUEUE:
         allowedDataFormatMask &= DATAFORMAT_MASK_NULL;
         break;
@@ -766,11 +769,14 @@ SLresult checkDataSink(const char *name, const SLDataSink *pDataSink,
     case SL_DATALOCATOR_BUFFERQUEUE:
         allowedDataFormatMask &= DATAFORMAT_MASK_PCM;
         break;
-    case SL_DATALOCATOR_NULL:
+    // Per the spec, the pFormat field is ignored in some cases
     case SL_DATALOCATOR_IODEVICE:
     case SL_DATALOCATOR_OUTPUTMIX:
-    case SL_DATALOCATOR_MIDIBUFFERQUEUE:
     case XA_DATALOCATOR_NATIVEDISPLAY:
+        myDataSink.pFormat = NULL;
+        // fall through
+    case SL_DATALOCATOR_NULL:
+    case SL_DATALOCATOR_MIDIBUFFERQUEUE:
         allowedDataFormatMask &= DATAFORMAT_MASK_NULL;
         break;
 #ifdef ANDROID
