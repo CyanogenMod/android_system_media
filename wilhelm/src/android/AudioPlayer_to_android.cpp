@@ -442,7 +442,7 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
         } else {
             object_lock_exclusive(&ap->mObject);
 
-            if (A_PLR_URI_FD == ap->mAndroidObjType) {
+            if (A_PLR_URIFD == ap->mAndroidObjType) {
                 ap->mAudioTrack = ap->mSfPlayer->getAudioTrack();
                 ap->mNumChannels = ap->mSfPlayer->getNumChannels();
                 ap->mSampleRateMilliHz =
@@ -908,7 +908,7 @@ SLresult android_audioPlayer_create(
     //   URI or FD to MediaPlayer
     case SL_DATALOCATOR_URI:
     case SL_DATALOCATOR_ANDROIDFD:
-        pAudioPlayer->mAndroidObjType = A_PLR_URI_FD;
+        pAudioPlayer->mAndroidObjType = A_PLR_URIFD;
         pAudioPlayer->mpLock = new android::Mutex();
         pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
         break;
@@ -1062,7 +1062,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         } break;
     //-----------------------------------
     // MediaPlayer
-    case A_PLR_URI_FD: {
+    case A_PLR_URIFD: {
         object_lock_exclusive(&pAudioPlayer->mObject);
 
         pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
@@ -1165,7 +1165,7 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
         break;
     //-----------------------------------
     // MediaPlayer
-    case A_PLR_URI_FD:
+    case A_PLR_URIFD:
         // We don't own this audio track, SfPlayer does
         pAudioPlayer->mAudioTrack = NULL;
         // FIXME might no longer be needed since we call explicit destructor
@@ -1207,7 +1207,7 @@ SLresult android_audioPlayer_setPlayRate(CAudioPlayer *ap, SLpermille rate, bool
     uint32_t contentRate = 0;
     switch(ap->mAndroidObjType) {
     case A_PLR_PCM_BQ:
-    case A_PLR_URI_FD: {
+    case A_PLR_URIFD: {
         // get the content sample rate
         if (lockAP) { object_lock_shared(&ap->mObject); }
         uint32_t contentRate = sles_to_android_sampleRate(ap->mSampleRateMilliHz);
@@ -1235,7 +1235,7 @@ SLresult android_audioPlayer_setPlaybackRateBehavior(CAudioPlayer *ap,
     SLresult result = SL_RESULT_SUCCESS;
     switch(ap->mAndroidObjType) {
     case A_PLR_PCM_BQ:
-    case A_PLR_URI_FD:
+    case A_PLR_URIFD:
         if (constraints != (constraints & SL_RATEPROP_NOPITCHCORAUDIO)) {
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         }
@@ -1255,7 +1255,7 @@ SLresult android_audioPlayer_getCapabilitiesOfRate(CAudioPlayer *ap,
         SLuint32 *pCapabilities) {
     switch(ap->mAndroidObjType) {
     case A_PLR_PCM_BQ:
-    case A_PLR_URI_FD:
+    case A_PLR_URIFD:
         *pCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
         break;
     default:
@@ -1301,7 +1301,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
         }
         break;
 
-    case A_PLR_URI_FD:
+    case A_PLR_URIFD:
         switch (playState) {
         case SL_PLAYSTATE_STOPPED: {
             SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
@@ -1417,7 +1417,7 @@ SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMse
         //       shared memory with the mixer process, the duration is the size of the buffer
         SL_LOGD("FIXME: android_audioPlayer_getDuration() verify if duration can be retrieved");
         break;
-    case A_PLR_URI_FD: {
+    case A_PLR_URIFD: {
         int64_t durationUsec = SL_TIME_UNKNOWN;
         if (ap->mSfPlayer != 0) {
             durationUsec = ap->mSfPlayer->getDurationUsec();
@@ -1445,7 +1445,7 @@ void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
                     sles_to_android_sampleRate(ap->mSampleRateMilliHz);
         }
         break;
-    case A_PLR_URI_FD:
+    case A_PLR_URIFD:
         if (ap->mSfPlayer != 0) {
             *pPosMsec = ap->mSfPlayer->getPositionMsec();
         } else {
@@ -1464,7 +1464,7 @@ void android_audioPlayer_seek(CAudioPlayer *ap, SLmillisecond posMsec) {
     switch(ap->mAndroidObjType) {
     case A_PLR_PCM_BQ:
         break;
-    case A_PLR_URI_FD:
+    case A_PLR_URIFD:
         if (ap->mSfPlayer != 0) {
             ap->mSfPlayer->seek(posMsec);
         }
@@ -1478,7 +1478,7 @@ void android_audioPlayer_seek(CAudioPlayer *ap, SLmillisecond posMsec) {
 //-----------------------------------------------------------------------------
 void android_audioPlayer_loop(CAudioPlayer *ap, SLboolean loopEnable) {
 
-    if ((A_PLR_URI_FD == ap->mAndroidObjType) && (ap->mSfPlayer != 0)) {
+    if ((A_PLR_URIFD == ap->mAndroidObjType) && (ap->mSfPlayer != 0)) {
         ap->mSfPlayer->loop((bool)loopEnable);
     }
 }
@@ -1496,7 +1496,7 @@ static void android_audioPlayer_setMute(CAudioPlayer* ap) {
     android::AudioTrack *t = NULL;
     switch(ap->mAndroidObjType) {
     case A_PLR_PCM_BQ:
-    case A_PLR_URI_FD:
+    case A_PLR_URIFD:
         t = ap->mAudioTrack;
         break;
     default:

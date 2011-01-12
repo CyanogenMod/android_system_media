@@ -21,11 +21,15 @@
  */
 enum AndroidObject_type {
     INVALID_TYPE     =-1,
-    A_PLR_URI_FD     = 0, // audio player, compressed data, URI or FD data source
+    A_PLR_URIFD      = 0, // audio player, compressed data, URI or FD data source
     A_PLR_PCM_BQ     = 1, // audio player, PCM, buffer queue data source
-    A_PLR_TS_ABQ     = 2, // audio player, transport stream, Android buffer queue data source
-    AV_PLR_TS_ABQ    = 3, // audio video player, transport stream, Android buffer queue data source
-    AV_PLR_URI_FD    = 4, // audio video player, compressed data, URI or FD data source
+    A_PLR_TS_ABQ     = 2, // audio player, transport stream, Android simple buffer queue data source
+    A_PLR_URIFD_ASQ  = 3, // audio player, URI or FD data source (as in android::MediaPlayer),
+                          //    decoded to a PCM Android simple buffer queue data sink
+    AV_PLR_TS_ABQ    = 4, // audio video player, transport stream, Android buffer queue data source
+    AV_PLR_URIFD     = 5, // audio video player, URI or FD data source (as in android::MediaPlayer)
+    A_RCR_MIC_ASQ    = 6, // audio recorder, device data source,
+                          //    streamed into a PCM Android simple buffer queue data sink
     NUM_AUDIOPLAYER_MAP_TYPES
 };
 

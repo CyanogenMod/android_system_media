@@ -294,14 +294,26 @@ static void audioRecorder_callback(int event, void* user, void *info) {
 SLresult android_audioRecorder_create(CAudioRecorder* ar) {
     SL_LOGV("android_audioRecorder_create(%p) entering", ar);
 
+    const SLDataSource *pAudioSrc = &ar->mDataSource.u.mSource;
+    const SLDataSink *pAudioSnk = &ar->mDataSink.u.mSink;
     SLresult result = SL_RESULT_SUCCESS;
+
+    const SLuint32 sourceLocatorType = *(SLuint32 *)pAudioSrc->pLocator;
+    const SLuint32 sinkLocatorType = *(SLuint32 *)pAudioSnk->pLocator;
 
     //  the following platform-independent fields have been initialized in CreateAudioRecorder()
     //    ar->mNumChannels
     //    ar->mSampleRateMilliHz
 
-    ar->mAudioRecord = NULL;
-    ar->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
+    if ((SL_DATALOCATOR_IODEVICE == sourceLocatorType) &&
+            (SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE == sinkLocatorType)) {
+        // microphone to simple buffer queue
+        ar->mAndroidObjType = A_RCR_MIC_ASQ;
+        ar->mAudioRecord = NULL;
+        ar->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
+    } else {
+        result = SL_RESULT_CONTENT_UNSUPPORTED;
+    }
 
     return result;
 }

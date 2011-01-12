@@ -96,10 +96,8 @@ typedef struct COutputMix_struct COutputMix;
 #define ANDROID_SL_MILLIBEL_MAX 0
 #include <binder/ProcessState.h>
 #include "android/android_sles_conversions.h"
-#include "android/android_OutputMix.h"
 #include "android/android_defs.h"
 #include "android/android_SfPlayer.h"
-#include "android/android_AudioRecorder.h"
 #endif
 
 #ifdef USE_OUTPUTMIXEXT
@@ -310,8 +308,10 @@ extern void IObject_Destroy(SLObjectItf self);
 #define InterfaceToCAudioRecorder(this) (((CAudioRecorder*)InterfaceToIObject(this)))
 
 #ifdef ANDROID
-#include "android/android_Player.h"
-#include "android/android_AudioPlayer.h"
+#include "android/MediaPlayer_to_android.h"
+#include "android/OutputMix_to_android.h"
+#include "android/AudioPlayer_to_android.h"
+#include "android/AudioRecorder_to_android.h"
 #endif
 
 extern predestroy_t C3DGroup_PreDestroy(void *self);

@@ -67,7 +67,7 @@ XAresult android_Player_create(CMediaPlayer *mp) {
         break;
     case XA_DATALOCATOR_URI: // intended fall-through
     case SL_DATALOCATOR_ANDROIDFD:
-        mp->mAndroidObjType = AV_PLR_URI_FD;
+        mp->mAndroidObjType = AV_PLR_URIFD;
         break;
     case XA_DATALOCATOR_ADDRESS: // intended fall-through
     default:
@@ -112,7 +112,7 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
         mp->mAVPlayer->init(player_handleMediaPlayerEventNotifications, (void*)mp);
         }
         break;
-    case AV_PLR_URI_FD: {
+    case AV_PLR_URIFD: {
         mp->mAVPlayer = new android::LocAVPlayer(&ap_params);
         mp->mAVPlayer->init(player_handleMediaPlayerEventNotifications, (void*)mp);
         switch (mp->mDataSource.mLocator.mLocatorType) {
