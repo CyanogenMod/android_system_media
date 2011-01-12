@@ -92,10 +92,13 @@ int main(int argc, char **argv)
     assert(SL_RESULT_SUCCESS == result);
 
     // create audio player using the realized output mix
+    // and a bogus data format for the sink (ignored per spec)
+    audioSnk.pFormat = (void *) 0xDEADBEEF;
     result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audioSrc,
             &audioSnk, 1, ids, req);
     assert(SL_RESULT_SUCCESS == result);
     assert(NULL != playerObject);
+    audioSnk.pFormat = NULL;
 
     // destroy player
     (*playerObject)->Destroy(playerObject);
