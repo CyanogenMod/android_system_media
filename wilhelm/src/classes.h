@@ -96,6 +96,7 @@
     android::sp<android::StreamPlayer> mStreamPlayer;
     /** aux effect the AudioTrack will be attached to if aux send enabled */
     android::sp<android::AudioEffect> mAuxEffect;
+    // FIXME all levels below need to be encapsulated in a field of type AndroidAudioLevels
     /** send level to aux effect, there's a single aux bus, so there's a single level */
     SLmillibel mAuxSendLevel;
     /**
@@ -144,8 +145,9 @@
     SLuint32 mSampleRateMilliHz;// 0 means unknown, then const once it is known
     // implementation-specific data for this instance
 #ifdef ANDROID
-    android::AudioRecord *mAudioRecord;
-    int mRecordSource;
+    enum AndroidObject_type mAndroidObjType;
+    android::AudioRecord *mAudioRecord; //FIXME candidate to be encapsulated in a ARecorder subclass
+    int mRecordSource;                  //FIXME candidate to be encapsulated in a ARecorder subclass
 #endif
 } /*CAudioRecorder*/;
 

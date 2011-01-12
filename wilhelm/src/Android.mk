@@ -55,12 +55,12 @@ LOCAL_SRC_FILES:=                     \
         sles.c                        \
         sllog.c                       \
         ThreadPool.c                  \
-        android/android_Player.cpp            \
+        android/AudioPlayer_to_android.cpp    \
+        android/AudioRecorder_to_android.cpp  \
+        android/MediaPlayer_to_android.cpp    \
+        android/OutputMix_to_android.cpp      \
         android/android_AVPlayer.cpp          \
-        android/android_AudioPlayer.cpp       \
-        android/android_AudioRecorder.cpp     \
         android/android_LocAVPlayer.cpp       \
-        android/android_OutputMix.cpp         \
         android/android_StreamPlayer.cpp      \
         android/android_SfPlayer.cpp          \
         android/android_Effect.cpp            \
