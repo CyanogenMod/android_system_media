@@ -50,8 +50,6 @@
 #define SIZE_CACHED_LOW_BYTES   400000
 
 
-#define SFPLAYER_FD_FIND_FILE_SIZE ((int64_t)0xFFFFFFFFFFFFFFFFll)
-
 #define NO_FILL_LEVEL_UPDATE -1
 #define NO_STATUS_UPDATE kStatusUnknown
 
@@ -120,12 +118,6 @@ protected:
 private:
 
     enum {
-        kDataLocatorNone = 'none',
-        kDataLocatorUri  = 'uri',
-        kDataLocatorFd   = 'fd',
-    };
-
-    enum {
         kWhatPrepare    = 'prep',
         kWhatDecode     = 'deco',
         kWhatRender     = 'rend',
@@ -145,16 +137,6 @@ private:
         kFlagLooping   = 16,
     };
 
-    struct FdInfo {
-        int fd;
-        int64_t offset;
-        int64_t length;
-    };
-
-    union DataLocator {
-        char* uri;
-        FdInfo fdi;
-    };
 #ifdef _DEBUG_AUDIO_TESTS
     FILE *mMonitorAudioFp; // Automated tests
 #endif

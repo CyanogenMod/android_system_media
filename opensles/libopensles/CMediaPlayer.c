@@ -86,6 +86,9 @@ void CMediaPlayer_Destroy(void *self)
     freeDataLocatorFormat(&this->mImageVideoSink);
     freeDataLocatorFormat(&this->mVibraSink);
     freeDataLocatorFormat(&this->mLEDArraySink);
+#ifdef ANDROID
+    android_Player_destroy(this);
+#endif
 }
 
 

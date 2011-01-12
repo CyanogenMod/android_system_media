@@ -25,6 +25,7 @@ enum AndroidObject_type {
     A_PLR_PCM_BQ     = 1, // audio player, PCM, buffer queue data source
     A_PLR_TS_ABQ     = 2, // audio player, transport stream, Android buffer queue data source
     AV_PLR_TS_ABQ    = 3, // audio video player, transport stream, Android buffer queue data source
+    AV_PLR_URI_FD    = 4, // audio video player, compressed data, URI or FD data source
     NUM_AUDIOPLAYER_MAP_TYPES
 };
 
@@ -44,6 +45,8 @@ enum AndroidObject_state {
 #define ANDROID_DEFAULT_OUTPUT_STREAM_TYPE android::AudioSystem::MUSIC
 
 #define PLAYER_SUCCESS 1
+
+#define PLAYER_FD_FIND_FILE_SIZE ((int64_t)0xFFFFFFFFFFFFFFFFll)
 
 
 /*
@@ -67,8 +70,6 @@ typedef struct AndroidAudioLevels_struct {
 } AndroidAudioLevels;
 
 
-
-
 typedef void (*notif_client_t)(int event, const int data1, void* notifUser);
 
 
@@ -80,3 +81,25 @@ typedef void (*notif_client_t)(int event, const int data1, void* notifUser);
 #define PLAYEREVENT_PREFETCHFILLLEVELUPDATE "pflu"
 #define PLAYEREVENT_ENDOFSTREAM             "eos"
 #define PLAYEREVENT_NEW_AUDIOTRACK          "nwat"
+
+
+namespace android {
+
+enum {
+    kDataLocatorNone = 'none',
+    kDataLocatorUri  = 'uri',
+    kDataLocatorFd   = 'fd',
+    };
+
+struct FdInfo {
+    int fd;
+    int64_t offset;
+    int64_t length;
+};
+
+union DataLocator {
+    char* uri;
+    FdInfo fdi;
+};
+
+} // namespace android

@@ -58,6 +58,7 @@ LOCAL_SRC_FILES:=                     \
         android_AVPlayer.cpp          \
         android_AudioPlayer.cpp       \
         android_AudioRecorder.cpp     \
+        android_LocAVPlayer.cpp       \
         android_OutputMix.cpp         \
         android_StreamPlayer.cpp      \
         android_SfPlayer.cpp          \

@@ -17,12 +17,6 @@
 #include <binder/IServiceManager.h>
 
 
-typedef struct StreamPlayback_Parameters_struct {
-    int streamType;
-    int sessionId;
-} StreamPlayback_Parameters;
-
-
 //--------------------------------------------------------------------------------------------------
 namespace android {
 

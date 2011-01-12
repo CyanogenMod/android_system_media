@@ -59,6 +59,7 @@ AVPlayer::AVPlayer(AudioPlayback_Parameters* params) :
     mNotifyClient(NULL),
     mNotifyUser(NULL),
     mStateFlags(0),
+    mPlaybackParams(*params),
     mVideoSurface(0),
     mPlayer(0),
     mPlayerClient(0)
@@ -66,8 +67,6 @@ AVPlayer::AVPlayer(AudioPlayback_Parameters* params) :
     SL_LOGI("AVPlayer::AVPlayer()");
 
     mLooper = new android::ALooper();
-
-    mPlaybackParams = *params;
 
     mServiceManager = defaultServiceManager();
     mBinder = mServiceManager->getService(String16("media.player"));

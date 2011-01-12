@@ -263,6 +263,7 @@ struct SndFile {
 #include "android_Effect.h"
 #include "android_AVPlayer.h"
 #include "android_StreamPlayer.h"
+#include "android_LocAVPlayer.h"
 #endif
 
 #endif  // ANDROID
