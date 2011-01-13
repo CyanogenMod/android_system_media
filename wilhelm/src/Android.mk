@@ -171,4 +171,15 @@ endif
 
 include $(BUILD_SHARED_LIBRARY)
 
+# Make /system/lib/libOpenMAXAL.so a symlink to /system/lib/libOpenSLES.so
+# based on system/core/toolbox as there is no standard macro for this yet.
+SYMLINKS := $(addprefix $(TARGET_OUT)/lib/,libOpenMAXAL.so)
+$(SYMLINKS) : $(TARGET_OUT)/lib/libOpenSLES.so $(LOCAL_PATH)/Android.mk
+	@echo symlink $< $@
+	@rm -f $@
+	$(hide) ln -sf $(notdir $<) $@
+ALL_DEFAULT_INSTALLED_MODULES += $(SYMLINKS)
+ALL_MODULES.$(LOCAL_MODULE).INSTALLED := \
+    $(ALL_MODULES.$(LOCAL_MODULE).INSTALLED) $(SYMLINKS)
+
 include $(call all-makefiles-under,$(LOCAL_PATH))
