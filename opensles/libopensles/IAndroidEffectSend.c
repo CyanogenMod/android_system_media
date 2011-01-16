@@ -132,7 +132,7 @@ static SLresult IAndroidEffectSend_GetDirectLevel(SLAndroidEffectSendItf self,
             SL_LOGE("invalid interface: not attached to an AudioPlayer");
             result = SL_RESULT_PARAMETER_INVALID;
         }
-        interface_unlock_exclusive(this);
+        interface_unlock_peek(this);
     }
 
     SL_LEAVE_INTERFACE
