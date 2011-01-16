@@ -31,7 +31,7 @@ static SLresult IAndroidEffectCapabilities_QueryNumEffects(SLAndroidEffectCapabi
         interface_lock_peek(this);
 
         *pNumSupportedAudioEffects = this->mNumFx;
-        result = SL_RESULT_SUCCESS
+        result = SL_RESULT_SUCCESS;
 
         interface_unlock_peek(this);
     }
