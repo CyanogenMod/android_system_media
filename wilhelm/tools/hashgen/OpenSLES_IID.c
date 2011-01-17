@@ -1,1 +1,1 @@
-../../libopensles/OpenSLES_IID.c
+../../src/OpenSLES_IID.c

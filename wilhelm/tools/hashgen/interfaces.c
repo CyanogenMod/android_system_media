@@ -1,1 +1,1 @@
-../../libopensles/interfaces.c
+../../src/interfaces.c

@@ -84,6 +84,7 @@ const char * const interface_names[MPH_MAX] = {
     // OpenMAX AL 1.0.1
     "XAENGINE",
     "XAPLAY",
+    "XASTREAMINFORMATION",
 
 };
 
