@@ -65,7 +65,7 @@ static SLresult IVibra_SetFrequency(SLVibraItf self, SLmilliHertz frequency)
         IVibra *this = (IVibra *) self;
         interface_lock_poke(this);
         this->mFrequency = frequency;
-        interface_unlock_exclusive(this);
+        interface_unlock_poke(this);
         result = SL_RESULT_SUCCESS;
     }
 
