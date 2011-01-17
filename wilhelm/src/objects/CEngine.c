@@ -38,9 +38,12 @@ __attribute__((constructor)) static void onDlOpen(void)
 
 __attribute__((destructor)) static void onDlClose(void)
 {
+    // a memory barrier would be sufficient, but the mutex is easier
+    (void) pthread_mutex_lock(&theOneTrueMutex);
     if ((NULL != theOneTrueEngine) || (0 < theOneTrueRefCount)) {
         SL_LOGE("Object::Destroy omitted for engine %p", theOneTrueEngine);
     }
+    (void) pthread_mutex_unlock(&theOneTrueMutex);
 }
 
 

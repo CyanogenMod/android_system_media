@@ -58,11 +58,13 @@ extern void object_cond_broadcast(IObject *this);
 #define interface_cond_signal(this)      object_cond_signal(InterfaceToIObject(this))
 #define interface_cond_broadcast(this)   object_cond_broadcast(InterfaceToIObject(this))
 
-// Peek and poke are an optimization for small atomic fields that don't "matter"
+// Peek and poke are an optimization for small atomic fields that don't "matter".
+// Don't use for struct, as struct copy might not be atomic.
+// On uniprocessor they can be no-ops, on SMP they could be memory barriers but locks are easier.
 
-#define object_lock_peek(this)      /* object_lock_shared(this) */
-#define object_unlock_peek(this)    /* object_unlock_shared(this) */
-#define interface_lock_poke(this)   /* interface_lock_exclusive(this) */
-#define interface_unlock_poke(this) /* interface_unlock_exclusive(this) */
-#define interface_lock_peek(this)   /* interface_lock_shared(this) */
-#define interface_unlock_peek(this) /* interface_unlock_shared(this) */
+#define object_lock_peek(this)      object_lock_shared(this)
+#define object_unlock_peek(this)    object_unlock_shared(this)
+#define interface_lock_poke(this)   interface_lock_exclusive(this)
+#define interface_unlock_poke(this) interface_unlock_exclusive(this)
+#define interface_lock_peek(this)   interface_lock_shared(this)
+#define interface_unlock_peek(this) interface_unlock_shared(this)
