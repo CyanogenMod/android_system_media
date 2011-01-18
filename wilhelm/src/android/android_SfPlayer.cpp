@@ -761,7 +761,9 @@ SfPlayer::CacheStatus SfPlayer::getCacheRemaining(bool *eos) {
 
     CacheStatus oldStatus = mCacheStatus;
 
-    size_t dataRemaining = cachedSource->approxDataRemaining(eos);
+    status_t finalStatus;
+    size_t dataRemaining = cachedSource->approxDataRemaining(&finalStatus);
+    *eos = (finalStatus != OK);
 
     CHECK_GE(mBitrate, 0);
 
