@@ -125,7 +125,6 @@ EXCLUDE_SRC :=                            \
         itf/IVisualization.c
 
 LOCAL_C_INCLUDES:=                                                  \
-        $(JNI_H_INCLUDE)                                            \
         system/media/wilhelm/include                                \
         frameworks/base/media/libstagefright                        \
         frameworks/base/media/libstagefright/include                \
