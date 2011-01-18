@@ -23,12 +23,10 @@
 
 // It is critical that all entries are populated with either a specific index
 // or -1. Do not let the compiler use a default initializer of zero, because
-// that actually maps to the IObject index. To test this, try defining END to
-// generate an extra entry, and verify that you get one error message per class.
-//#define END , (-1)  // for testing
-#define END           // for production
+// that actually maps to the IObject index. For non-USE_DESIGNATED_INITIALIZERS
+// builds, we use the automagically-generated MPH_to_*.h files for this reason.
 
-// Another good test is to use the GNU C compiler with -S option (for assembler output),
+// A good test is to use the GNU C compiler with -S option (for assembler output),
 // and compile both with and without USE_DESIGNATED_INITIALIZERS.  The resulting .s
 // files should be identical for both compilations.
 
