@@ -24,16 +24,16 @@ static SLresult IAndroidEffect_CreateEffect(SLAndroidEffectItf self,
 
     SL_ENTER_INTERFACE
 
-    IAndroidEffect *this = (IAndroidEffect *) self;
-    if (SL_OBJECTID_AUDIOPLAYER == IObjectToObjectID(this->mThis)) {
-        CAudioPlayer *ap = (CAudioPlayer *)this->mThis;
+    IAndroidEffect *thiz = (IAndroidEffect *) self;
+    if (SL_OBJECTID_AUDIOPLAYER == IObjectToObjectID(thiz->mThis)) {
+        CAudioPlayer *ap = (CAudioPlayer *)thiz->mThis;
         if (NULL != ap->mAudioTrack) {
-            result = android_genericFx_createEffect(this, effectImplementationId, ap->mSessionId);
+            result = android_genericFx_createEffect(thiz, effectImplementationId, ap->mSessionId);
         } else {
             result = SL_RESULT_RESOURCE_ERROR;
         }
-    } else if (SL_OBJECTID_OUTPUTMIX == IObjectToObjectID(this->mThis)) {
-        result = android_genericFx_createEffect(this, effectImplementationId,
+    } else if (SL_OBJECTID_OUTPUTMIX == IObjectToObjectID(thiz->mThis)) {
+        result = android_genericFx_createEffect(thiz, effectImplementationId,
                 android::AudioSystem::SESSION_OUTPUT_MIX);
     } else {
         // the interface itself is invalid because it is not attached to an AudioPlayer or
@@ -50,8 +50,8 @@ static SLresult IAndroidEffect_ReleaseEffect(SLAndroidEffectItf self,
 
     SL_ENTER_INTERFACE
 
-    IAndroidEffect *this = (IAndroidEffect *) self;
-    result = android_genericFx_releaseEffect(this, effectImplementationId);
+    IAndroidEffect *thiz = (IAndroidEffect *) self;
+    result = android_genericFx_releaseEffect(thiz, effectImplementationId);
 
     SL_LEAVE_INTERFACE
 }
@@ -62,8 +62,8 @@ static SLresult IAndroidEffect_SetEnabled(SLAndroidEffectItf self,
 
     SL_ENTER_INTERFACE
 
-    IAndroidEffect *this = (IAndroidEffect *) self;
-    result = android_genericFx_setEnabled(this, effectImplementationId, enabled);
+    IAndroidEffect *thiz = (IAndroidEffect *) self;
+    result = android_genericFx_setEnabled(thiz, effectImplementationId, enabled);
 
     SL_LEAVE_INTERFACE
 }
@@ -74,8 +74,8 @@ static SLresult IAndroidEffect_IsEnabled(SLAndroidEffectItf self,
 
     SL_ENTER_INTERFACE
 
-    IAndroidEffect *this = (IAndroidEffect *) self;
-    result = android_genericFx_isEnabled(this, effectImplementationId, pEnabled);
+    IAndroidEffect *thiz = (IAndroidEffect *) self;
+    result = android_genericFx_isEnabled(thiz, effectImplementationId, pEnabled);
 
     SL_LEAVE_INTERFACE
 }
@@ -87,8 +87,8 @@ static SLresult IAndroidEffect_SendCommand(SLAndroidEffectItf self,
 
     SL_ENTER_INTERFACE
 
-    IAndroidEffect *this = (IAndroidEffect *) self;
-    result = android_genericFx_sendCommand(this, effectImplementationId, command, commandSize,
+    IAndroidEffect *thiz = (IAndroidEffect *) self;
+    result = android_genericFx_sendCommand(thiz, effectImplementationId, command, commandSize,
             pCommand, replySize, pReply);
 
     SL_LEAVE_INTERFACE
@@ -105,26 +105,26 @@ static const struct SLAndroidEffectItf_ IAndroidEffect_Itf = {
 
 void IAndroidEffect_init(void *self)
 {
-    IAndroidEffect *this = (IAndroidEffect *) self;
-    this->mItf = &IAndroidEffect_Itf;
+    IAndroidEffect *thiz = (IAndroidEffect *) self;
+    thiz->mItf = &IAndroidEffect_Itf;
 #ifndef TARGET_SIMULATOR
-    this->mEffects = new android::KeyedVector<SLuint32, android::AudioEffect* >();
+    thiz->mEffects = new android::KeyedVector<SLuint32, android::AudioEffect* >();
 #endif
 }
 
 void IAndroidEffect_deinit(void *self)
 {
-    IAndroidEffect *this = (IAndroidEffect *) self;
+    IAndroidEffect *thiz = (IAndroidEffect *) self;
 #ifndef TARGET_SIMULATOR
-    if (NULL != this->mEffects) {
-        if (!this->mEffects->isEmpty()) {
-            for (size_t i = 0 ; i < this->mEffects->size() ; i++) {
-                delete this->mEffects->valueAt(i);
+    if (NULL != thiz->mEffects) {
+        if (!thiz->mEffects->isEmpty()) {
+            for (size_t i = 0 ; i < thiz->mEffects->size() ; i++) {
+                delete thiz->mEffects->valueAt(i);
             }
-            this->mEffects->clear();
+            thiz->mEffects->clear();
         }
-        delete this->mEffects;
-        this->mEffects = NULL;
+        delete thiz->mEffects;
+        thiz->mEffects = NULL;
     }
 #endif
 }

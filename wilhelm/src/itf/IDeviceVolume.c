@@ -59,10 +59,10 @@ static SLresult IDeviceVolume_SetVolume(SLDeviceVolumeItf self, SLuint32 deviceI
     case SL_DEFAULTDEVICEID_AUDIOINPUT:
     case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
         {
-        IDeviceVolume *this = (IDeviceVolume *) self;
-        interface_lock_poke(this);
-        this->mVolume[~deviceID] = volume;
-        interface_unlock_poke(this);
+        IDeviceVolume *thiz = (IDeviceVolume *) self;
+        interface_lock_poke(thiz);
+        thiz->mVolume[~deviceID] = volume;
+        interface_unlock_poke(thiz);
         result = SL_RESULT_SUCCESS;
         }
         break;
@@ -91,10 +91,10 @@ static SLresult IDeviceVolume_GetVolume(SLDeviceVolumeItf self, SLuint32 deviceI
         case SL_DEFAULTDEVICEID_AUDIOINPUT:
         case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
             {
-            IDeviceVolume *this = (IDeviceVolume *) self;
-            interface_lock_peek(this);
-            SLint32 volume = this->mVolume[~deviceID];
-            interface_unlock_peek(this);
+            IDeviceVolume *thiz = (IDeviceVolume *) self;
+            interface_lock_peek(thiz);
+            SLint32 volume = thiz->mVolume[~deviceID];
+            interface_unlock_peek(thiz);
             *pVolume = volume;
             result = SL_RESULT_SUCCESS;
             }
@@ -117,10 +117,10 @@ static const struct SLDeviceVolumeItf_ IDeviceVolume_Itf = {
 
 void IDeviceVolume_init(void *self)
 {
-    IDeviceVolume *this = (IDeviceVolume *) self;
-    this->mItf = &IDeviceVolume_Itf;
+    IDeviceVolume *thiz = (IDeviceVolume *) self;
+    thiz->mItf = &IDeviceVolume_Itf;
     unsigned i;
     for (i = 0; i < MAX_DEVICE; ++i) {
-        this->mVolume[i] = 10;
+        thiz->mVolume[i] = 10;
     }
 }

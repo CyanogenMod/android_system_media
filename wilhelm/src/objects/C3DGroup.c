@@ -23,11 +23,11 @@
 
 predestroy_t C3DGroup_PreDestroy(void *self)
 {
-    C3DGroup *this = (C3DGroup *) self;
+    C3DGroup *thiz = (C3DGroup *) self;
     // See design document for explanation
-    if (0 == this->mMemberMask) {
+    if (0 == thiz->mMemberMask) {
         return predestroy_ok;
     }
-    SL_LOGE("Object::Destroy(%p) for 3DGroup ignored; mMemberMask=0x%x", this, this->mMemberMask);
+    SL_LOGE("Object::Destroy(%p) for 3DGroup ignored; mMemberMask=0x%x", thiz, thiz->mMemberMask);
     return predestroy_error;
 }

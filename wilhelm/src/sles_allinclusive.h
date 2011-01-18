@@ -229,10 +229,6 @@ typedef struct {
     SLuint32 mSize;
 } BufferHeader;
 
-#ifdef __cplusplus
-#define this this_
-#endif
-
 #ifdef USE_SNDFILE
 
 #define SndFile_BUFSIZE 512     // in 16-bit samples
@@ -280,32 +276,32 @@ struct MPH_init {
 
 extern /*static*/ int IID_to_MPH(const SLInterfaceID iid);
 extern /*static*/ const struct MPH_init MPH_init_table[MPH_MAX];
-extern SLresult checkInterfaces(const ClassTable *class__,
+extern SLresult checkInterfaces(const ClassTable *clazz,
     SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
     const SLboolean *pInterfaceRequired, unsigned *pExposedMask);
-extern IObject *construct(const ClassTable *class__,
+extern IObject *construct(const ClassTable *clazz,
     unsigned exposedMask, SLEngineItf engine);
 extern const ClassTable *objectIDtoClass(SLuint32 objectID);
 extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
 extern SLuint32 IObjectToObjectID(IObject *object);
-extern void IObject_Publish(IObject *this);
+extern void IObject_Publish(IObject *thiz);
 extern void IObject_Destroy(SLObjectItf self);
 
 // Map an interface to it's "object ID" (which is really a class ID).
 // Note: this operation is undefined on IObject, as it lacks an mThis.
 // If you have an IObject, then use IObjectToObjectID directly.
 
-#define InterfaceToObjectID(this) IObjectToObjectID((this)->mThis)
+#define InterfaceToObjectID(thiz) IObjectToObjectID((thiz)->mThis)
 
 // Map an interface to it's corresponding IObject.
 // Note: this operation is undefined on IObject, as it lacks an mThis.
 // If you have an IObject, then you're done -- you already have what you need.
 
-#define InterfaceToIObject(this) ((this)->mThis)
+#define InterfaceToIObject(thiz) ((thiz)->mThis)
 
-#define InterfaceToCAudioPlayer(this) (((CAudioPlayer*)InterfaceToIObject(this)))
+#define InterfaceToCAudioPlayer(thiz) (((CAudioPlayer*)InterfaceToIObject(thiz)))
 
-#define InterfaceToCAudioRecorder(this) (((CAudioRecorder*)InterfaceToIObject(this)))
+#define InterfaceToCAudioRecorder(thiz) (((CAudioRecorder*)InterfaceToIObject(thiz)))
 
 #ifdef ANDROID
 #include "android/MediaPlayer_to_android.h"
@@ -387,7 +383,7 @@ extern SLresult IBufferQueue_Clear(SLBufferQueueItf self);
 extern SLresult IBufferQueue_RegisterCallback(SLBufferQueueItf self,
     slBufferQueueCallback callback, void *pContext);
 
-extern bool IsInterfaceInitialized(IObject *this, unsigned MPH);
+extern bool IsInterfaceInitialized(IObject *thiz, unsigned MPH);
 extern SLresult AcquireStrongRef(IObject *object, SLuint32 expectedObjectID);
 extern void ReleaseStrongRef(IObject *object);
 extern void ReleaseStrongRefAndUnlockExclusive(IObject *object);

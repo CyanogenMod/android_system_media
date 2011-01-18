@@ -29,12 +29,12 @@ static SLresult I3DMacroscopic_SetSize(SL3DMacroscopicItf self,
         (0 <= depth) && (depth <= SL_MILLIMETER_MAX))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        I3DMacroscopic *this = (I3DMacroscopic *) self;
-        interface_lock_exclusive(this);
-        this->mSize.mWidth = width;
-        this->mSize.mHeight = height;
-        this->mSize.mDepth = depth;
-        interface_unlock_exclusive(this);
+        I3DMacroscopic *thiz = (I3DMacroscopic *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mSize.mWidth = width;
+        thiz->mSize.mHeight = height;
+        thiz->mSize.mDepth = depth;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -50,12 +50,12 @@ static SLresult I3DMacroscopic_GetSize(SL3DMacroscopicItf self,
     if (NULL == pWidth || NULL == pHeight || NULL == pDepth) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        I3DMacroscopic *this = (I3DMacroscopic *) self;
-        interface_lock_shared(this);
-        SLmillimeter width = this->mSize.mWidth;
-        SLmillimeter height = this->mSize.mHeight;
-        SLmillimeter depth = this->mSize.mDepth;
-        interface_unlock_shared(this);
+        I3DMacroscopic *thiz = (I3DMacroscopic *) self;
+        interface_lock_shared(thiz);
+        SLmillimeter width = thiz->mSize.mWidth;
+        SLmillimeter height = thiz->mSize.mHeight;
+        SLmillimeter depth = thiz->mSize.mDepth;
+        interface_unlock_shared(thiz);
         *pWidth = width;
         *pHeight = height;
         *pDepth = depth;
@@ -76,15 +76,15 @@ static SLresult I3DMacroscopic_SetOrientationAngles(SL3DMacroscopicItf self,
         (-360000 <= roll) && (roll <= 360000))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        I3DMacroscopic *this = (I3DMacroscopic *) self;
-        interface_lock_exclusive(this);
-        this->mOrientationAngles.mHeading = heading;
-        this->mOrientationAngles.mPitch = pitch;
-        this->mOrientationAngles.mRoll = roll;
-        this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
-        this->mRotatePending = SL_BOOLEAN_FALSE;
-        // ++this->mGeneration;
-        interface_unlock_exclusive(this);
+        I3DMacroscopic *thiz = (I3DMacroscopic *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mOrientationAngles.mHeading = heading;
+        thiz->mOrientationAngles.mPitch = pitch;
+        thiz->mOrientationAngles.mRoll = roll;
+        thiz->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
+        thiz->mRotatePending = SL_BOOLEAN_FALSE;
+        // ++thiz->mGeneration;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -100,17 +100,17 @@ static SLresult I3DMacroscopic_SetOrientationVectors(SL3DMacroscopicItf self,
     if (NULL == pFront || NULL == pAbove) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        I3DMacroscopic *this = (I3DMacroscopic *) self;
+        I3DMacroscopic *thiz = (I3DMacroscopic *) self;
         SLVec3D front = *pFront;
         SLVec3D above = *pAbove;
         // NTH Check for vectors close to zero or close to parallel
-        interface_lock_exclusive(this);
-        this->mOrientationVectors.mFront = front;
-        this->mOrientationVectors.mAbove = above;
-        this->mOrientationVectors.mUp = above; // wrong
-        this->mOrientationActive = ANGLES_UNKNOWN_VECTORS_SET;
-        this->mRotatePending = SL_BOOLEAN_FALSE;
-        interface_unlock_exclusive(this);
+        interface_lock_exclusive(thiz);
+        thiz->mOrientationVectors.mFront = front;
+        thiz->mOrientationVectors.mAbove = above;
+        thiz->mOrientationVectors.mUp = above; // wrong
+        thiz->mOrientationActive = ANGLES_UNKNOWN_VECTORS_SET;
+        thiz->mRotatePending = SL_BOOLEAN_FALSE;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -128,14 +128,14 @@ static SLresult I3DMacroscopic_Rotate(SL3DMacroscopicItf self,
     } else {
         SLVec3D axis = *pAxis;
         // NTH Check that axis is not (close to) zero vector, length does not matter
-        I3DMacroscopic *this = (I3DMacroscopic *) self;
-        interface_lock_exclusive(this);
-        while (this->mRotatePending)
-            interface_cond_wait(this);
-        this->mTheta = theta;
-        this->mAxis = axis;
-        this->mRotatePending = SL_BOOLEAN_TRUE;
-        interface_unlock_exclusive(this);
+        I3DMacroscopic *thiz = (I3DMacroscopic *) self;
+        interface_lock_exclusive(thiz);
+        while (thiz->mRotatePending)
+            interface_cond_wait(thiz);
+        thiz->mTheta = theta;
+        thiz->mAxis = axis;
+        thiz->mRotatePending = SL_BOOLEAN_TRUE;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -151,36 +151,36 @@ static SLresult I3DMacroscopic_GetOrientationVectors(SL3DMacroscopicItf self,
     if (NULL == pFront || NULL == pUp) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        I3DMacroscopic *this = (I3DMacroscopic *) self;
-        interface_lock_exclusive(this);
+        I3DMacroscopic *thiz = (I3DMacroscopic *) self;
+        interface_lock_exclusive(thiz);
         for (;;) {
-            enum AnglesVectorsActive orientationActive = this->mOrientationActive;
+            enum AnglesVectorsActive orientationActive = thiz->mOrientationActive;
             switch (orientationActive) {
             case ANGLES_COMPUTED_VECTORS_SET:    // not in 1.0.1
             case ANGLES_REQUESTED_VECTORS_SET:   // not in 1.0.1
             case ANGLES_UNKNOWN_VECTORS_SET:
             case ANGLES_SET_VECTORS_COMPUTED:
                 {
-                SLVec3D front = this->mOrientationVectors.mFront;
-                SLVec3D up = this->mOrientationVectors.mUp;
-                interface_unlock_exclusive(this);
+                SLVec3D front = thiz->mOrientationVectors.mFront;
+                SLVec3D up = thiz->mOrientationVectors.mUp;
+                interface_unlock_exclusive(thiz);
                 *pFront = front;
                 *pUp = up;
                 }
                 break;
             case ANGLES_SET_VECTORS_UNKNOWN:
-                this->mOrientationActive = ANGLES_SET_VECTORS_REQUESTED;
+                thiz->mOrientationActive = ANGLES_SET_VECTORS_REQUESTED;
                 // fall through
             case ANGLES_SET_VECTORS_REQUESTED:
                 // matched by cond_broadcast in case multiple requesters
 #if 0
-                interface_cond_wait(this);
+                interface_cond_wait(thiz);
 #else
-                this->mOrientationActive = ANGLES_SET_VECTORS_COMPUTED;
+                thiz->mOrientationActive = ANGLES_SET_VECTORS_COMPUTED;
 #endif
                 continue;
             default:
-                interface_unlock_exclusive(this);
+                interface_unlock_exclusive(thiz);
                 assert(SL_BOOLEAN_FALSE);
                 pFront->x = 0;
                 pFront->y = 0;
@@ -210,28 +210,28 @@ static const struct SL3DMacroscopicItf_ I3DMacroscopic_Itf = {
 
 void I3DMacroscopic_init(void *self)
 {
-    I3DMacroscopic *this = (I3DMacroscopic *) self;
-    this->mItf = &I3DMacroscopic_Itf;
-    this->mSize.mWidth = 0;
-    this->mSize.mHeight = 0;
-    this->mSize.mDepth = 0;
-    this->mOrientationAngles.mHeading = 0;
-    this->mOrientationAngles.mPitch = 0;
-    this->mOrientationAngles.mRoll = 0;
-    memset(&this->mOrientationVectors, 0x55, sizeof(this->mOrientationVectors));
-    this->mOrientationVectors.mFront.x = 0;
-    this->mOrientationVectors.mFront.y = 0;
-    this->mOrientationVectors.mFront.z = -1000;
-    this->mOrientationVectors.mUp.x = 0;
-    this->mOrientationVectors.mUp.y = 1000;
-    this->mOrientationVectors.mUp.z = 0;
-    this->mOrientationVectors.mAbove.x = 0;
-    this->mOrientationVectors.mAbove.y = 0;
-    this->mOrientationVectors.mAbove.z = 0;
-    this->mOrientationActive = ANGLES_SET_VECTORS_COMPUTED;
-    this->mTheta = 0x55555555;
-    this->mAxis.x = 0x55555555;
-    this->mAxis.y = 0x55555555;
-    this->mAxis.z = 0x55555555;
-    this->mRotatePending = SL_BOOLEAN_FALSE;
+    I3DMacroscopic *thiz = (I3DMacroscopic *) self;
+    thiz->mItf = &I3DMacroscopic_Itf;
+    thiz->mSize.mWidth = 0;
+    thiz->mSize.mHeight = 0;
+    thiz->mSize.mDepth = 0;
+    thiz->mOrientationAngles.mHeading = 0;
+    thiz->mOrientationAngles.mPitch = 0;
+    thiz->mOrientationAngles.mRoll = 0;
+    memset(&thiz->mOrientationVectors, 0x55, sizeof(thiz->mOrientationVectors));
+    thiz->mOrientationVectors.mFront.x = 0;
+    thiz->mOrientationVectors.mFront.y = 0;
+    thiz->mOrientationVectors.mFront.z = -1000;
+    thiz->mOrientationVectors.mUp.x = 0;
+    thiz->mOrientationVectors.mUp.y = 1000;
+    thiz->mOrientationVectors.mUp.z = 0;
+    thiz->mOrientationVectors.mAbove.x = 0;
+    thiz->mOrientationVectors.mAbove.y = 0;
+    thiz->mOrientationVectors.mAbove.z = 0;
+    thiz->mOrientationActive = ANGLES_SET_VECTORS_COMPUTED;
+    thiz->mTheta = 0x55555555;
+    thiz->mAxis.x = 0x55555555;
+    thiz->mAxis.y = 0x55555555;
+    thiz->mAxis.z = 0x55555555;
+    thiz->mRotatePending = SL_BOOLEAN_FALSE;
 }

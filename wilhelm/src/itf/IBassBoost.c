@@ -36,20 +36,20 @@ static SLresult IBassBoost_SetEnabled(SLBassBoostItf self, SLboolean enabled)
 {
     SL_ENTER_INTERFACE
 
-    IBassBoost *this = (IBassBoost *) self;
-    interface_lock_exclusive(this);
-    this->mEnabled = (SLboolean) enabled;
+    IBassBoost *thiz = (IBassBoost *) self;
+    interface_lock_exclusive(thiz);
+    thiz->mEnabled = (SLboolean) enabled;
 #if !defined(ANDROID)
     result = SL_RESULT_SUCCESS;
 #else
-    if (NO_BASSBOOST(this)) {
+    if (NO_BASSBOOST(thiz)) {
         result = SL_RESULT_CONTROL_LOST;
     } else {
-        android::status_t status = this->mBassBoostEffect->setEnabled((bool) this->mEnabled);
+        android::status_t status = thiz->mBassBoostEffect->setEnabled((bool) thiz->mEnabled);
         result = android_fx_statusToResult(status);
     }
 #endif
-    interface_unlock_exclusive(this);
+    interface_unlock_exclusive(thiz);
 
     SL_LEAVE_INTERFACE
 }
@@ -62,21 +62,21 @@ static SLresult IBassBoost_IsEnabled(SLBassBoostItf self, SLboolean *pEnabled)
     if (NULL == pEnabled) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IBassBoost *this = (IBassBoost *) self;
-        interface_lock_exclusive(this);
-        SLboolean enabled = this->mEnabled;
+        IBassBoost *thiz = (IBassBoost *) self;
+        interface_lock_exclusive(thiz);
+        SLboolean enabled = thiz->mEnabled;
 #if !defined(ANDROID)
         *pEnabled = enabled;
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_BASSBOOST(this)) {
+        if (NO_BASSBOOST(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            *pEnabled = (SLboolean) this->mBassBoostEffect->getEnabled();
+            *pEnabled = (SLboolean) thiz->mBassBoostEffect->getEnabled();
             result = SL_RESULT_SUCCESS;
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -90,21 +90,21 @@ static SLresult IBassBoost_SetStrength(SLBassBoostItf self, SLpermille strength)
     if ((BASSBOOST_STRENGTH_MIN > strength) || (BASSBOOST_STRENGTH_MAX < strength)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IBassBoost *this = (IBassBoost *) self;
-        interface_lock_exclusive(this);
+        IBassBoost *thiz = (IBassBoost *) self;
+        interface_lock_exclusive(thiz);
 #if !defined(ANDROID)
-        this->mStrength = strength;
+        thiz->mStrength = strength;
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_BASSBOOST(this)) {
+        if (NO_BASSBOOST(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
             android::status_t status =
-                android_bb_setParam(this->mBassBoostEffect, BASSBOOST_PARAM_STRENGTH, &strength);
+                android_bb_setParam(thiz->mBassBoostEffect, BASSBOOST_PARAM_STRENGTH, &strength);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -118,21 +118,21 @@ static SLresult IBassBoost_GetRoundedStrength(SLBassBoostItf self, SLpermille *p
     if (NULL == pStrength) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IBassBoost *this = (IBassBoost *) self;
-        interface_lock_exclusive(this);
-        SLpermille strength = this->mStrength;;
+        IBassBoost *thiz = (IBassBoost *) self;
+        interface_lock_exclusive(thiz);
+        SLpermille strength = thiz->mStrength;;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_BASSBOOST(this)) {
+        if (NO_BASSBOOST(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
             android::status_t status =
-                   android_bb_getParam(this->mBassBoostEffect, BASSBOOST_PARAM_STRENGTH, &strength);
+                   android_bb_getParam(thiz->mBassBoostEffect, BASSBOOST_PARAM_STRENGTH, &strength);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
         *pStrength = strength;
     }
 
@@ -151,18 +151,18 @@ static SLresult IBassBoost_IsStrengthSupported(SLBassBoostItf self, SLboolean *p
         *pSupported = SL_BOOLEAN_TRUE;
         result = SL_RESULT_SUCCESS;
 #else
-        IBassBoost *this = (IBassBoost *) self;
+        IBassBoost *thiz = (IBassBoost *) self;
         int32_t supported = 0;
-        interface_lock_exclusive(this);
-        if (NO_BASSBOOST(this)) {
+        interface_lock_exclusive(thiz);
+        if (NO_BASSBOOST(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
             android::status_t status =
-                android_bb_getParam(this->mBassBoostEffect, BASSBOOST_PARAM_STRENGTH_SUPPORTED,
+                android_bb_getParam(thiz->mBassBoostEffect, BASSBOOST_PARAM_STRENGTH_SUPPORTED,
                         &supported);
             result = android_fx_statusToResult(status);
         }
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
         *pSupported = (SLboolean) (supported != 0);
 #endif
     }
@@ -181,31 +181,31 @@ static const struct SLBassBoostItf_ IBassBoost_Itf = {
 
 void IBassBoost_init(void *self)
 {
-    IBassBoost *this = (IBassBoost *) self;
-    this->mItf = &IBassBoost_Itf;
-    this->mEnabled = SL_BOOLEAN_FALSE;
-    this->mStrength = 0;
+    IBassBoost *thiz = (IBassBoost *) self;
+    thiz->mItf = &IBassBoost_Itf;
+    thiz->mEnabled = SL_BOOLEAN_FALSE;
+    thiz->mStrength = 0;
 #if defined(ANDROID)
-    memset(&this->mBassBoostDescriptor, 0, sizeof(effect_descriptor_t));
+    memset(&thiz->mBassBoostDescriptor, 0, sizeof(effect_descriptor_t));
     // placement new (explicit constructor)
-    (void) new (&this->mBassBoostEffect) android::sp<android::AudioEffect>();
+    (void) new (&thiz->mBassBoostEffect) android::sp<android::AudioEffect>();
 #endif
 }
 
 void IBassBoost_deinit(void *self)
 {
 #if defined(ANDROID)
-    IBassBoost *this = (IBassBoost *) self;
+    IBassBoost *thiz = (IBassBoost *) self;
     // explicit destructor
-    this->mBassBoostEffect.~sp();
+    thiz->mBassBoostEffect.~sp();
 #endif
 }
 
 bool IBassBoost_Expose(void *self)
 {
 #if defined(ANDROID)
-    IBassBoost *this = (IBassBoost *) self;
-    if (!android_fx_initEffectDescriptor(SL_IID_BASSBOOST, &this->mBassBoostDescriptor)) {
+    IBassBoost *thiz = (IBassBoost *) self;
+    if (!android_fx_initEffectDescriptor(SL_IID_BASSBOOST, &thiz->mBassBoostDescriptor)) {
         SL_LOGE("BassBoost initialization failed.");
         return false;
     }

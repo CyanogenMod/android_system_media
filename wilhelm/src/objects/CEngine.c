@@ -51,24 +51,24 @@ __attribute__((destructor)) static void onDlClose(void)
 
 SLresult CEngine_Realize(void *self, SLboolean async)
 {
-    CEngine *this = (CEngine *) self;
+    CEngine *thiz = (CEngine *) self;
     SLresult result;
 #ifndef ANDROID
     // create the sync thread
-    int err = pthread_create(&this->mSyncThread, (const pthread_attr_t *) NULL, sync_start, this);
+    int err = pthread_create(&thiz->mSyncThread, (const pthread_attr_t *) NULL, sync_start, thiz);
     result = err_to_result(err);
     if (SL_RESULT_SUCCESS != result)
         return result;
 #endif
     // initialize the thread pool for asynchronous operations
-    result = ThreadPool_init(&this->mThreadPool, 0, 0);
+    result = ThreadPool_init(&thiz->mThreadPool, 0, 0);
     if (SL_RESULT_SUCCESS != result) {
-        this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
-        (void) pthread_join(this->mSyncThread, (void **) NULL);
+        thiz->mEngine.mShutdown = SL_BOOLEAN_TRUE;
+        (void) pthread_join(thiz->mSyncThread, (void **) NULL);
         return result;
     }
 #ifdef USE_SDL
-    SDL_open(&this->mEngine);
+    SDL_open(&thiz->mEngine);
 #endif
     return SL_RESULT_SUCCESS;
 }
@@ -86,19 +86,19 @@ SLresult CEngine_Resume(void *self, SLboolean async)
 
 void CEngine_Destroy(void *self)
 {
-    CEngine *this = (CEngine *) self;
+    CEngine *thiz = (CEngine *) self;
 
     // Verify that there are no extant objects
-    unsigned instanceCount = this->mEngine.mInstanceCount;
-    unsigned instanceMask = this->mEngine.mInstanceMask;
+    unsigned instanceCount = thiz->mEngine.mInstanceCount;
+    unsigned instanceMask = thiz->mEngine.mInstanceMask;
     if ((0 < instanceCount) || (0 != instanceMask)) {
         SL_LOGE("Object::Destroy(%p) for engine ignored; %u total active objects",
-            this, instanceCount);
+            thiz, instanceCount);
         while (0 != instanceMask) {
             unsigned i = ctz(instanceMask);
             assert(MAX_INSTANCE > i);
             SL_LOGE("Object::Destroy(%p) for engine ignored; active object ID %u at %p",
-                this, i + 1, this->mEngine.mInstances[i]);
+                thiz, i + 1, thiz->mEngine.mInstances[i]);
             instanceMask &= ~(1 << i);
         }
     }
@@ -106,35 +106,35 @@ void CEngine_Destroy(void *self)
     // If engine was created but not realized, there will be no sync thread yet
     pthread_t zero;
     memset(&zero, 0, sizeof(pthread_t));
-    if (0 != memcmp(&zero, &this->mSyncThread, sizeof(pthread_t))) {
+    if (0 != memcmp(&zero, &thiz->mSyncThread, sizeof(pthread_t))) {
 
         // Announce to the sync thread that engine is shutting down; it polls so should see it soon
-        this->mEngine.mShutdown = SL_BOOLEAN_TRUE;
+        thiz->mEngine.mShutdown = SL_BOOLEAN_TRUE;
         // Wait for the sync thread to acknowledge the shutdown
-        while (!this->mEngine.mShutdownAck) {
-            object_cond_wait(&this->mObject);
+        while (!thiz->mEngine.mShutdownAck) {
+            object_cond_wait(&thiz->mObject);
         }
         // The sync thread should have exited by now, so collect it by joining
-        (void) pthread_join(this->mSyncThread, (void **) NULL);
+        (void) pthread_join(thiz->mSyncThread, (void **) NULL);
 
     }
 
     // Shutdown the thread pool used for asynchronous operations (there should not be any)
-    ThreadPool_deinit(&this->mThreadPool);
+    ThreadPool_deinit(&thiz->mThreadPool);
 
 #if defined(ANDROID)
     // free equalizer preset names
-    if (NULL != this->mEqPresetNames) {
-        for (unsigned i = 0; i < this->mEqNumPresets; ++i) {
-            if (NULL != this->mEqPresetNames[i]) {
-                delete[] this->mEqPresetNames[i];
-                this->mEqPresetNames[i] = NULL;
+    if (NULL != thiz->mEqPresetNames) {
+        for (unsigned i = 0; i < thiz->mEqNumPresets; ++i) {
+            if (NULL != thiz->mEqPresetNames[i]) {
+                delete[] thiz->mEqPresetNames[i];
+                thiz->mEqPresetNames[i] = NULL;
             }
         }
-        delete[] this->mEqPresetNames;
-        this->mEqPresetNames = NULL;
+        delete[] thiz->mEqPresetNames;
+        thiz->mEqPresetNames = NULL;
     }
-    this->mEqNumPresets = 0;
+    thiz->mEqNumPresets = 0;
 #endif
 
 #ifdef USE_SDL

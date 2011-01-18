@@ -577,7 +577,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
 /** \brief Check interface ID compatibility with respect to a particular data locator format */
 
 SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDataLocatorFormat,
-        const ClassTable *class__, unsigned exposedMask) {
+        const ClassTable *clazz, unsigned exposedMask) {
     int index;
     switch (pDataLocatorFormat->mLocator.mLocatorType) {
     case SL_DATALOCATOR_BUFFERQUEUE:
@@ -585,7 +585,7 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
 #endif
         // can't request SLSeekItf if data source is a buffer queue
-        index = class__->mMPH_to_index[MPH_SEEK];
+        index = clazz->mMPH_to_index[MPH_SEEK];
         if (0 <= index) {
             if (exposedMask & (1 << index)) {
                 SL_LOGE("can't request SL_IID_SEEK with a buffer queue data source");
@@ -593,7 +593,7 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
             }
         }
         // can't request SLMuteSoloItf if data source is a mono buffer queue
-        index = class__->mMPH_to_index[MPH_MUTESOLO];
+        index = clazz->mMPH_to_index[MPH_MUTESOLO];
         if (0 <= index) {
             if ((exposedMask & (1 << index)) &&
                     (SL_DATAFORMAT_PCM == pDataLocatorFormat->mFormat.mFormatType) &&
@@ -613,9 +613,9 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
     default:
         // can't request SLBufferQueueItf or its alias SLAndroidSimpleBufferQueueItf
         // if the data source is not a buffer queue
-        index = class__->mMPH_to_index[MPH_BUFFERQUEUE];
+        index = clazz->mMPH_to_index[MPH_BUFFERQUEUE];
 #ifdef ANDROID
-        assert(index == class__->mMPH_to_index[MPH_ANDROIDSIMPLEBUFFERQUEUE]);
+        assert(index == clazz->mMPH_to_index[MPH_ANDROIDSIMPLEBUFFERQUEUE]);
 #endif
         if (0 <= index) {
             if (exposedMask & (1 << index)) {

@@ -27,19 +27,19 @@
  *  entry that the object is locked for either shared or exclusive access.
  */
 
-bool IsInterfaceInitialized(IObject *this, unsigned MPH)
+bool IsInterfaceInitialized(IObject *thiz, unsigned MPH)
 {
-    assert(NULL != this);
+    assert(NULL != thiz);
     assert( /* (MPH_MIN <= MPH) && */ (MPH < (unsigned) MPH_MAX));
-    const ClassTable *class__ = this->mClass;
-    assert(NULL != class__);
+    const ClassTable *clazz = thiz->mClass;
+    assert(NULL != clazz);
     int index;
-    if (0 > (index = class__->mMPH_to_index[MPH])) {
+    if (0 > (index = clazz->mMPH_to_index[MPH])) {
         return false;
     }
-    assert(MAX_INDEX >= class__->mInterfaceCount);
-    assert(class__->mInterfaceCount > (unsigned) index);
-    switch (this->mInterfaceStates[index]) {
+    assert(MAX_INDEX >= clazz->mInterfaceCount);
+    assert(clazz->mInterfaceCount > (unsigned) index);
+    switch (thiz->mInterfaceStates[index]) {
     case INTERFACE_EXPOSED:
     case INTERFACE_ADDED:
         return true;
@@ -51,15 +51,15 @@ bool IsInterfaceInitialized(IObject *this, unsigned MPH)
 
 /** \brief Map an IObject to it's "object ID" (which is really a class ID) */
 
-SLuint32 IObjectToObjectID(IObject *this)
+SLuint32 IObjectToObjectID(IObject *thiz)
 {
-    assert(NULL != this);
+    assert(NULL != thiz);
     // Note this returns the OpenSL ES object ID in preference to the OpenMAX AL if both available
-    const ClassTable *class__ = this->mClass;
-    assert(NULL != class__);
-    SLuint32 id = class__->mSLObjectID;
+    const ClassTable *clazz = thiz->mClass;
+    assert(NULL != clazz);
+    SLuint32 id = clazz->mSLObjectID;
     if (!id)
-        id = class__->mXAObjectID;
+        id = clazz->mXAObjectID;
     return id;
 }
 
@@ -147,14 +147,14 @@ SLresult err_to_result(int err)
 
 /** \brief Check the interface IDs passed into a Create operation */
 
-SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
+SLresult checkInterfaces(const ClassTable *clazz, SLuint32 numInterfaces,
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired, unsigned *pExposedMask)
 {
-    assert(NULL != class__ && NULL != pExposedMask);
+    assert(NULL != clazz && NULL != pExposedMask);
     // Initially no interfaces are exposed
     unsigned exposedMask = 0;
-    const struct iid_vtable *interfaces = class__->mInterfaces;
-    SLuint32 interfaceCount = class__->mInterfaceCount;
+    const struct iid_vtable *interfaces = clazz->mInterfaces;
+    SLuint32 interfaceCount = clazz->mInterfaceCount;
     SLuint32 i;
     // Expose all implicit interfaces
     for (i = 0; i < interfaceCount; ++i) {
@@ -191,18 +191,18 @@ SLresult checkInterfaces(const ClassTable *class__, SLuint32 numInterfaces,
             if ((0 > (MPH = IID_to_MPH(iid))) ||
                     // there must be an initialization hook present
                     (NULL == MPH_init_table[MPH].mInit) ||
-                    (0 > (index = class__->mMPH_to_index[MPH])) ||
+                    (0 > (index = clazz->mMPH_to_index[MPH])) ||
                     (INTERFACE_UNAVAILABLE == interfaces[index].mInterface)) {
                 // Here if interface was not found, or is not available for this object type
                 if (pInterfaceRequired[i]) {
                     // Application said it required the interface, so give up
                     SL_LOGE("class %s interface %lu required but unavailable MPH=%d",
-                            class__->mName, i, MPH);
+                            clazz->mName, i, MPH);
                     anyRequiredButUnsupported = true;
                 }
                 // Application said it didn't really need the interface, so ignore with warning
                 SL_LOGW("class %s interface %lu requested but unavailable MPH=%d",
-                        class__->mName, i, MPH);
+                        clazz->mName, i, MPH);
                 continue;
             }
             // The requested interface was both found and available, so expose it
@@ -420,26 +420,26 @@ extern void
 
 /** \brief Construct a new instance of the specified class, exposing selected interfaces */
 
-IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf engine)
+IObject *construct(const ClassTable *clazz, unsigned exposedMask, SLEngineItf engine)
 {
-    IObject *this;
+    IObject *thiz;
     // Do not change this to malloc; we depend on the object being memset to zero
-    this = (IObject *) calloc(1, class__->mSize);
-    if (NULL != this) {
-        SL_LOGV("construct %s at %p", class__->mName, this);
+    thiz = (IObject *) calloc(1, clazz->mSize);
+    if (NULL != thiz) {
+        SL_LOGV("construct %s at %p", clazz->mName, thiz);
         unsigned lossOfControlMask = 0;
         // a NULL engine means we are constructing the engine
         IEngine *thisEngine = (IEngine *) engine;
         if (NULL == thisEngine) {
-            // thisEngine = &((CEngine *) this)->mEngine;
-            this->mEngine = (CEngine *) this;
+            // thisEngine = &((CEngine *) thiz)->mEngine;
+            thiz->mEngine = (CEngine *) thiz;
         } else {
-            this->mEngine = (CEngine *) thisEngine->mThis;
+            thiz->mEngine = (CEngine *) thisEngine->mThis;
             interface_lock_exclusive(thisEngine);
             if (MAX_INSTANCE <= thisEngine->mInstanceCount) {
                 SL_LOGE("Too many objects");
                 interface_unlock_exclusive(thisEngine);
-                free(this);
+                free(thiz);
                 return NULL;
             }
             // pre-allocate a pending slot, but don't assign bit from mInstanceMask yet
@@ -451,21 +451,21 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
                 lossOfControlMask = ~0;
             }
         }
-        this->mLossOfControlMask = lossOfControlMask;
-        this->mClass = class__;
-        const struct iid_vtable *x = class__->mInterfaces;
-        SLuint8 *interfaceStateP = this->mInterfaceStates;
+        thiz->mLossOfControlMask = lossOfControlMask;
+        thiz->mClass = clazz;
+        const struct iid_vtable *x = clazz->mInterfaces;
+        SLuint8 *interfaceStateP = thiz->mInterfaceStates;
         SLuint32 index;
-        for (index = 0; index < class__->mInterfaceCount; ++index, ++x, exposedMask >>= 1) {
+        for (index = 0; index < clazz->mInterfaceCount; ++index, ++x, exposedMask >>= 1) {
             SLuint8 state;
             // initialize all interfaces with init hooks, even if not exposed
             const struct MPH_init *mi = &MPH_init_table[x->mMPH];
             VoidHook init = mi->mInit;
             if (NULL != init) {
-                void *self = (char *) this + x->mOffset;
+                void *self = (char *) thiz + x->mOffset;
                 // IObject does not have an mThis, so [1] is not always defined
                 if (index) {
-                    ((IObject **) self)[1] = this;
+                    ((IObject **) self)[1] = thiz;
                 }
                 // call the initialization hook
                 (*init)(self);
@@ -487,5 +487,5 @@ IObject *construct(const ClassTable *class__, unsigned exposedMask, SLEngineItf 
         }
         // note that the new object is not yet published; creator must call IObject_Publish
     }
-    return this;
+    return thiz;
 }

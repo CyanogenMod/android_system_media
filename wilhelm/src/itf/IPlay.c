@@ -28,21 +28,21 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
     case SL_PLAYSTATE_PAUSED:
     case SL_PLAYSTATE_PLAYING:
         {
-        IPlay *this = (IPlay *) self;
+        IPlay *thiz = (IPlay *) self;
         unsigned attr = ATTR_NONE;
         result = SL_RESULT_SUCCESS;
 #ifdef USE_OUTPUTMIXEXT
-        CAudioPlayer *audioPlayer = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
-            (CAudioPlayer *) this->mThis : NULL;
+        CAudioPlayer *audioPlayer = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+            (CAudioPlayer *) thiz->mThis : NULL;
 #endif
-        interface_lock_exclusive(this);
+        interface_lock_exclusive(thiz);
 #ifdef USE_OUTPUTMIXEXT
-        for (;; interface_cond_wait(this)) {
+        for (;; interface_cond_wait(thiz)) {
 
             // We are comparing the old state (left) vs. new state (right).
             // Note that the old state is 3 bits wide, but new state is only 2 bits wide.
             // That is why the old state is on the left and new state is on the right.
-            switch ((this->mState << 2) | state) {
+            switch ((thiz->mState << 2) | state) {
 
             case (SL_PLAYSTATE_STOPPED  << 2) | SL_PLAYSTATE_STOPPED:
             case (SL_PLAYSTATE_PAUSED   << 2) | SL_PLAYSTATE_PAUSED:
@@ -63,7 +63,7 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
             case (SL_PLAYSTATE_STOPPED  << 2) | SL_PLAYSTATE_PAUSED:
             case (SL_PLAYSTATE_PLAYING  << 2) | SL_PLAYSTATE_PAUSED:
                 // easy
-                this->mState = state;
+                thiz->mState = state;
                 break;
 
             case (SL_PLAYSTATE_STOPPING << 2) | SL_PLAYSTATE_STOPPED:
@@ -78,7 +78,7 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
             case (SL_PLAYSTATE_PAUSED   << 2) | SL_PLAYSTATE_STOPPED:
             case (SL_PLAYSTATE_PLAYING  << 2) | SL_PLAYSTATE_STOPPED:
                 // tell mixer to stop, then wait for mixer to acknowledge the request to stop
-                this->mState = SL_PLAYSTATE_STOPPING;
+                thiz->mState = SL_PLAYSTATE_STOPPING;
                 continue;
 
             default:
@@ -93,11 +93,11 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
         }
 #else
         // Here life looks easy for an Android, but there are other troubles in play land
-        this->mState = state;
+        thiz->mState = state;
         attr = ATTR_TRANSPORT;
 #endif
         // SL_LOGD("set play state %ld", state);
-        interface_unlock_exclusive_attributes(this, attr);
+        interface_unlock_exclusive_attributes(thiz, attr);
         }
         break;
     default:
@@ -116,10 +116,10 @@ static SLresult IPlay_GetPlayState(SLPlayItf self, SLuint32 *pState)
     if (NULL == pState) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPlay *this = (IPlay *) self;
-        interface_lock_peek(this);
-        SLuint32 state = this->mState;
-        interface_unlock_peek(this);
+        IPlay *thiz = (IPlay *) self;
+        interface_lock_peek(thiz);
+        SLuint32 state = thiz->mState;
+        interface_unlock_peek(thiz);
         result = SL_RESULT_SUCCESS;
 #ifdef USE_OUTPUTMIXEXT
         switch (state) {
@@ -152,25 +152,25 @@ static SLresult IPlay_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         result = SL_RESULT_SUCCESS;
-        IPlay *this = (IPlay *) self;
+        IPlay *thiz = (IPlay *) self;
         // even though this is a getter, it can modify state due to caching
-        interface_lock_exclusive(this);
-        SLmillisecond duration = this->mDuration;
+        interface_lock_exclusive(thiz);
+        SLmillisecond duration = thiz->mDuration;
 #ifdef ANDROID
         if ((SL_TIME_UNKNOWN == duration) &&
-            (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this))) {
+            (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz))) {
             SLmillisecond temp;
-            result = android_audioPlayer_getDuration(this, &temp);
+            result = android_audioPlayer_getDuration(thiz, &temp);
             if (SL_RESULT_SUCCESS == result) {
                 duration = temp;
-                this->mDuration = duration;
+                thiz->mDuration = duration;
             }
         }
 #else
         // will be set by containing AudioPlayer or MidiPlayer object at Realize, if known,
         // otherwise the duration will be updated each time a new maximum position is detected
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
         *pMsec = duration;
     }
 
@@ -185,30 +185,30 @@ static SLresult IPlay_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
     if (NULL == pMsec) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPlay *this = (IPlay *) self;
+        IPlay *thiz = (IPlay *) self;
         SLmillisecond position;
-        interface_lock_shared(this);
+        interface_lock_shared(thiz);
 #ifdef ANDROID
         // Android does not use the mPosition field for audio players
-        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-            android_audioPlayer_getPosition(this, &position);
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+            android_audioPlayer_getPosition(thiz, &position);
             // note that we do not cache the position
         } else {
-            position = this->mPosition;
+            position = thiz->mPosition;
         }
 #else
         // on other platforms we depend on periodic updates to the current position
-        position = this->mPosition;
+        position = thiz->mPosition;
         // if a seek is pending, then lie about current position so the seek appears synchronous
-        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-            CAudioPlayer *audioPlayer = (CAudioPlayer *) this->mThis;
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+            CAudioPlayer *audioPlayer = (CAudioPlayer *) thiz->mThis;
             SLmillisecond pos = audioPlayer->mSeek.mPos;
             if (SL_TIME_UNKNOWN != pos) {
                 position = pos;
             }
         }
 #endif
-        interface_unlock_shared(this);
+        interface_unlock_shared(thiz);
         *pMsec = position;
         result = SL_RESULT_SUCCESS;
     }
@@ -221,12 +221,12 @@ static SLresult IPlay_RegisterCallback(SLPlayItf self, slPlayCallback callback, 
 {
     SL_ENTER_INTERFACE
 
-    IPlay *this = (IPlay *) self;
-    interface_lock_exclusive(this);
-    this->mCallback = callback;
-    this->mContext = pContext;
+    IPlay *thiz = (IPlay *) self;
+    interface_lock_exclusive(thiz);
+    thiz->mCallback = callback;
+    thiz->mContext = pContext;
     // omits _attributes b/c noone cares deeply enough about these fields to need quick notification
-    interface_unlock_exclusive(this);
+    interface_unlock_exclusive(thiz);
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -241,20 +241,20 @@ static SLresult IPlay_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
             SL_PLAYEVENT_HEADATNEWPOS | SL_PLAYEVENT_HEADMOVING | SL_PLAYEVENT_HEADSTALLED)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPlay *this = (IPlay *) self;
-        interface_lock_exclusive(this);
-        if (this->mEventFlags != eventFlags) {
+        IPlay *thiz = (IPlay *) self;
+        interface_lock_exclusive(thiz);
+        if (thiz->mEventFlags != eventFlags) {
 #ifdef USE_OUTPUTMIXEXT
             // enabling the "head at new position" play event will postpone the next update event
-            if (!(this->mEventFlags & SL_PLAYEVENT_HEADATNEWPOS) &&
+            if (!(thiz->mEventFlags & SL_PLAYEVENT_HEADATNEWPOS) &&
                     (eventFlags & SL_PLAYEVENT_HEADATNEWPOS)) {
-                this->mFramesSincePositionUpdate = 0;
+                thiz->mFramesSincePositionUpdate = 0;
             }
 #endif
-            this->mEventFlags = eventFlags;
-            interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+            thiz->mEventFlags = eventFlags;
+            interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
         } else
-            interface_unlock_exclusive(this);
+            interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -269,10 +269,10 @@ static SLresult IPlay_GetCallbackEventsMask(SLPlayItf self, SLuint32 *pEventFlag
     if (NULL == pEventFlags) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPlay *this = (IPlay *) self;
-        interface_lock_peek(this);
-        SLuint32 eventFlags = this->mEventFlags;
-        interface_unlock_peek(this);
+        IPlay *thiz = (IPlay *) self;
+        interface_lock_peek(thiz);
+        SLuint32 eventFlags = thiz->mEventFlags;
+        interface_unlock_peek(thiz);
         *pEventFlags = eventFlags;
         result = SL_RESULT_SUCCESS;
     }
@@ -285,13 +285,13 @@ static SLresult IPlay_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
 {
     SL_ENTER_INTERFACE
 
-    IPlay *this = (IPlay *) self;
-    interface_lock_exclusive(this);
-    if (this->mMarkerPosition != mSec) {
-        this->mMarkerPosition = mSec;
-        interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+    IPlay *thiz = (IPlay *) self;
+    interface_lock_exclusive(thiz);
+    if (thiz->mMarkerPosition != mSec) {
+        thiz->mMarkerPosition = mSec;
+        interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
     } else
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -302,15 +302,15 @@ static SLresult IPlay_ClearMarkerPosition(SLPlayItf self)
 {
     SL_ENTER_INTERFACE
 
-    IPlay *this = (IPlay *) self;
-    interface_lock_exclusive(this);
+    IPlay *thiz = (IPlay *) self;
+    interface_lock_exclusive(thiz);
 #ifdef ANDROID
-    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
+    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
         // clearing the marker position is equivalent to setting the marker at 0
-        this->mMarkerPosition = 0;
+        thiz->mMarkerPosition = 0;
     }
 #endif
-    interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+    interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -324,10 +324,10 @@ static SLresult IPlay_GetMarkerPosition(SLPlayItf self, SLmillisecond *pMsec)
     if (NULL == pMsec) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPlay *this = (IPlay *) self;
-        interface_lock_peek(this);
-        SLmillisecond markerPosition = this->mMarkerPosition;
-        interface_unlock_peek(this);
+        IPlay *thiz = (IPlay *) self;
+        interface_lock_peek(thiz);
+        SLmillisecond markerPosition = thiz->mMarkerPosition;
+        interface_unlock_peek(thiz);
         *pMsec = markerPosition;
         result = SL_RESULT_SUCCESS;
     }
@@ -343,30 +343,30 @@ static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec
     if (0 == mSec) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPlay *this = (IPlay *) self;
-        interface_lock_exclusive(this);
-        if (this->mPositionUpdatePeriod != mSec) {
-            this->mPositionUpdatePeriod = mSec;
+        IPlay *thiz = (IPlay *) self;
+        interface_lock_exclusive(thiz);
+        if (thiz->mPositionUpdatePeriod != mSec) {
+            thiz->mPositionUpdatePeriod = mSec;
 #ifdef ANDROID
-            if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-                // result = android_audioPlayer_useEventMask(this, this->mEventFlags);
+            if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+                // result = android_audioPlayer_useEventMask(thiz, thiz->mEventFlags);
             }
 #endif
 #ifdef USE_OUTPUTMIXEXT
-            if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) {
-                CAudioPlayer *audioPlayer = (CAudioPlayer *) this->mThis;
+            if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+                CAudioPlayer *audioPlayer = (CAudioPlayer *) thiz->mThis;
                 SLuint32 frameUpdatePeriod = ((long long) mSec *
                     (long long) audioPlayer->mSampleRateMilliHz) / 1000000LL;
                 if (0 == frameUpdatePeriod)
                     frameUpdatePeriod = ~0;
-                this->mFrameUpdatePeriod = frameUpdatePeriod;
+                thiz->mFrameUpdatePeriod = frameUpdatePeriod;
                 // setting a new update period postpones the next callback
-                this->mFramesSincePositionUpdate = 0;
+                thiz->mFramesSincePositionUpdate = 0;
             }
 #endif
-            interface_unlock_exclusive_attributes(this, ATTR_TRANSPORT);
+            interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
         } else
-            interface_unlock_exclusive(this);
+            interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -381,10 +381,10 @@ static SLresult IPlay_GetPositionUpdatePeriod(SLPlayItf self, SLmillisecond *pMs
     if (NULL == pMsec) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPlay *this = (IPlay *) self;
-        interface_lock_peek(this);
-        SLmillisecond positionUpdatePeriod = this->mPositionUpdatePeriod;
-        interface_unlock_peek(this);
+        IPlay *thiz = (IPlay *) self;
+        interface_lock_peek(thiz);
+        SLmillisecond positionUpdatePeriod = thiz->mPositionUpdatePeriod;
+        interface_unlock_peek(thiz);
         *pMsec = positionUpdatePeriod;
         result = SL_RESULT_SUCCESS;
     }
@@ -410,20 +410,20 @@ static const struct SLPlayItf_ IPlay_Itf = {
 
 void IPlay_init(void *self)
 {
-    IPlay *this = (IPlay *) self;
-    this->mItf = &IPlay_Itf;
-    this->mState = SL_PLAYSTATE_STOPPED;
-    this->mDuration = SL_TIME_UNKNOWN;  // will be set by containing player object
-    this->mPosition = (SLmillisecond) 0;
-    this->mCallback = NULL;
-    this->mContext = NULL;
-    this->mEventFlags = 0;
-    this->mMarkerPosition = 0;
-    this->mPositionUpdatePeriod = 1000;
+    IPlay *thiz = (IPlay *) self;
+    thiz->mItf = &IPlay_Itf;
+    thiz->mState = SL_PLAYSTATE_STOPPED;
+    thiz->mDuration = SL_TIME_UNKNOWN;  // will be set by containing player object
+    thiz->mPosition = (SLmillisecond) 0;
+    thiz->mCallback = NULL;
+    thiz->mContext = NULL;
+    thiz->mEventFlags = 0;
+    thiz->mMarkerPosition = 0;
+    thiz->mPositionUpdatePeriod = 1000;
 #ifdef USE_OUTPUTMIXEXT
-    this->mFrameUpdatePeriod = 0;   // because we don't know the sample rate yet
-    this->mLastSeekPosition = 0;
-    this->mFramesSinceLastSeek = 0;
-    this->mFramesSincePositionUpdate = 0;
+    thiz->mFrameUpdatePeriod = 0;   // because we don't know the sample rate yet
+    thiz->mLastSeekPosition = 0;
+    thiz->mFramesSinceLastSeek = 0;
+    thiz->mFramesSincePositionUpdate = 0;
 #endif
 }

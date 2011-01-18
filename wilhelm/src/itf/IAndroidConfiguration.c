@@ -26,26 +26,26 @@ static SLresult IAndroidConfiguration_SetConfiguration(SLAndroidConfigurationItf
 {
     SL_ENTER_INTERFACE
 
-    IAndroidConfiguration *this = (IAndroidConfiguration *) self;
+    IAndroidConfiguration *thiz = (IAndroidConfiguration *) self;
 
-    interface_lock_exclusive(this);
+    interface_lock_exclusive(thiz);
 
     // route configuration to the appropriate object
-    if (SL_OBJECTID_AUDIORECORDER == IObjectToObjectID((this)->mThis)) {
+    if (SL_OBJECTID_AUDIORECORDER == IObjectToObjectID((thiz)->mThis)) {
         SL_LOGV("SetConfiguration issued for AudioRecorder key=%s valueSize=%lu",
                 configKey, valueSize);
-        result = android_audioRecorder_setConfig((CAudioRecorder *) this->mThis, configKey,
+        result = android_audioRecorder_setConfig((CAudioRecorder *) thiz->mThis, configKey,
                 pConfigValue, valueSize);
-    } else if (SL_OBJECTID_AUDIOPLAYER == IObjectToObjectID((this)->mThis)) {
+    } else if (SL_OBJECTID_AUDIOPLAYER == IObjectToObjectID((thiz)->mThis)) {
         SL_LOGV("SetConfiguration issued for AudioPlayer key=%s valueSize=%lu",
                 configKey, valueSize);
-        result = android_audioPlayer_setConfig((CAudioPlayer *) this->mThis, configKey,
+        result = android_audioPlayer_setConfig((CAudioPlayer *) thiz->mThis, configKey,
                 pConfigValue, valueSize);
     } else {
         result = SL_RESULT_PARAMETER_INVALID;
     }
 
-    interface_unlock_exclusive(this);
+    interface_unlock_exclusive(thiz);
 
     SL_LEAVE_INTERFACE
 }
@@ -63,22 +63,22 @@ static SLresult IAndroidConfiguration_GetConfiguration(SLAndroidConfigurationItf
     if (NULL == pValueSize) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IAndroidConfiguration *this = (IAndroidConfiguration *) self;
+        IAndroidConfiguration *thiz = (IAndroidConfiguration *) self;
 
-        interface_lock_exclusive(this);
+        interface_lock_exclusive(thiz);
 
         // route configuration request to the appropriate object
-        if (SL_OBJECTID_AUDIORECORDER == IObjectToObjectID((this)->mThis)) {
-            result = android_audioRecorder_getConfig((CAudioRecorder *) this->mThis, configKey,
+        if (SL_OBJECTID_AUDIORECORDER == IObjectToObjectID((thiz)->mThis)) {
+            result = android_audioRecorder_getConfig((CAudioRecorder *) thiz->mThis, configKey,
                     pValueSize, pConfigValue);
-        } else if (SL_OBJECTID_AUDIOPLAYER == IObjectToObjectID((this)->mThis)) {
-            result = android_audioPlayer_getConfig((CAudioPlayer *) this->mThis, configKey,
+        } else if (SL_OBJECTID_AUDIOPLAYER == IObjectToObjectID((thiz)->mThis)) {
+            result = android_audioPlayer_getConfig((CAudioPlayer *) thiz->mThis, configKey,
                     pValueSize, pConfigValue);
         } else {
             result = SL_RESULT_PARAMETER_INVALID;
         }
 
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -92,6 +92,6 @@ static const struct SLAndroidConfigurationItf_ IAndroidConfiguration_Itf = {
 
 void IAndroidConfiguration_init(void *self)
 {
-    IAndroidConfiguration *this = (IAndroidConfiguration *) self;
-    this->mItf = &IAndroidConfiguration_Itf;
+    IAndroidConfiguration *thiz = (IAndroidConfiguration *) self;
+    thiz->mItf = &IAndroidConfiguration_Itf;
 }

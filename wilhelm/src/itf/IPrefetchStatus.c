@@ -26,10 +26,10 @@ static SLresult IPrefetchStatus_GetPrefetchStatus(SLPrefetchStatusItf self, SLui
     if (NULL == pStatus) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPrefetchStatus *this = (IPrefetchStatus *) self;
-        interface_lock_peek(this);
-        SLuint32 status = this->mStatus;
-        interface_unlock_peek(this);
+        IPrefetchStatus *thiz = (IPrefetchStatus *) self;
+        interface_lock_peek(thiz);
+        SLuint32 status = thiz->mStatus;
+        interface_unlock_peek(thiz);
         *pStatus = status;
         result = SL_RESULT_SUCCESS;
     }
@@ -45,10 +45,10 @@ static SLresult IPrefetchStatus_GetFillLevel(SLPrefetchStatusItf self, SLpermill
     if (NULL == pLevel) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPrefetchStatus *this = (IPrefetchStatus *) self;
-        interface_lock_peek(this);
-        SLpermille level = this->mLevel;
-        interface_unlock_peek(this);
+        IPrefetchStatus *thiz = (IPrefetchStatus *) self;
+        interface_lock_peek(thiz);
+        SLpermille level = thiz->mLevel;
+        interface_unlock_peek(thiz);
         *pLevel = level;
         result = SL_RESULT_SUCCESS;
     }
@@ -62,11 +62,11 @@ static SLresult IPrefetchStatus_RegisterCallback(SLPrefetchStatusItf self,
 {
     SL_ENTER_INTERFACE
 
-    IPrefetchStatus *this = (IPrefetchStatus *) self;
-    interface_lock_exclusive(this);
-    this->mCallback = callback;
-    this->mContext = pContext;
-    interface_unlock_exclusive(this);
+    IPrefetchStatus *thiz = (IPrefetchStatus *) self;
+    interface_lock_exclusive(thiz);
+    thiz->mCallback = callback;
+    thiz->mContext = pContext;
+    interface_unlock_exclusive(thiz);
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -77,10 +77,10 @@ static SLresult IPrefetchStatus_SetCallbackEventsMask(SLPrefetchStatusItf self, 
 {
     SL_ENTER_INTERFACE
 
-    IPrefetchStatus *this = (IPrefetchStatus *) self;
-    interface_lock_poke(this);
-    this->mCallbackEventsMask = eventFlags;
-    interface_unlock_poke(this);
+    IPrefetchStatus *thiz = (IPrefetchStatus *) self;
+    interface_lock_poke(thiz);
+    thiz->mCallbackEventsMask = eventFlags;
+    interface_unlock_poke(thiz);
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -95,10 +95,10 @@ static SLresult IPrefetchStatus_GetCallbackEventsMask(SLPrefetchStatusItf self,
     if (NULL == pEventFlags) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPrefetchStatus *this = (IPrefetchStatus *) self;
-        interface_lock_peek(this);
-        SLuint32 callbackEventsMask = this->mCallbackEventsMask;
-        interface_unlock_peek(this);
+        IPrefetchStatus *thiz = (IPrefetchStatus *) self;
+        interface_lock_peek(thiz);
+        SLuint32 callbackEventsMask = thiz->mCallbackEventsMask;
+        interface_unlock_peek(thiz);
         *pEventFlags = callbackEventsMask;
         result = SL_RESULT_SUCCESS;
     }
@@ -114,10 +114,10 @@ static SLresult IPrefetchStatus_SetFillUpdatePeriod(SLPrefetchStatusItf self, SL
     if (0 == period) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPrefetchStatus *this = (IPrefetchStatus *) self;
-        interface_lock_poke(this);
-        this->mFillUpdatePeriod = period;
-        interface_unlock_poke(this);
+        IPrefetchStatus *thiz = (IPrefetchStatus *) self;
+        interface_lock_poke(thiz);
+        thiz->mFillUpdatePeriod = period;
+        interface_unlock_poke(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -132,10 +132,10 @@ static SLresult IPrefetchStatus_GetFillUpdatePeriod(SLPrefetchStatusItf self, SL
     if (NULL == pPeriod) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPrefetchStatus *this = (IPrefetchStatus *) self;
-        interface_lock_peek(this);
-        SLpermille fillUpdatePeriod = this->mFillUpdatePeriod;
-        interface_unlock_peek(this);
+        IPrefetchStatus *thiz = (IPrefetchStatus *) self;
+        interface_lock_peek(thiz);
+        SLpermille fillUpdatePeriod = thiz->mFillUpdatePeriod;
+        interface_unlock_peek(thiz);
         *pPeriod = fillUpdatePeriod;
         result = SL_RESULT_SUCCESS;
     }
@@ -156,12 +156,12 @@ static const struct SLPrefetchStatusItf_ IPrefetchStatus_Itf = {
 
 void IPrefetchStatus_init(void *self)
 {
-    IPrefetchStatus *this = (IPrefetchStatus *) self;
-    this->mItf = &IPrefetchStatus_Itf;
-    this->mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
-    this->mLevel = 0;
-    this->mCallback = NULL;
-    this->mContext = NULL;
-    this->mCallbackEventsMask = 0;
-    this->mFillUpdatePeriod = 100;
+    IPrefetchStatus *thiz = (IPrefetchStatus *) self;
+    thiz->mItf = &IPrefetchStatus_Itf;
+    thiz->mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+    thiz->mLevel = 0;
+    thiz->mCallback = NULL;
+    thiz->mContext = NULL;
+    thiz->mCallbackEventsMask = 0;
+    thiz->mFillUpdatePeriod = 100;
 }

@@ -18,7 +18,7 @@
 
 extern void SndFile_Callback(SLBufferQueueItf caller, void *pContext);
 extern SLboolean SndFile_IsSupported(const SF_INFO *sfinfo);
-extern SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this_);
-extern void audioPlayerTransportUpdate(CAudioPlayer *this);
-extern SLresult SndFile_Realize(CAudioPlayer *this);
-extern void SndFile_Destroy(CAudioPlayer *this);
+extern SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *thiz);
+extern void audioPlayerTransportUpdate(CAudioPlayer *thiz);
+extern SLresult SndFile_Realize(CAudioPlayer *thiz);
+extern void SndFile_Destroy(CAudioPlayer *thiz);

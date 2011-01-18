@@ -62,6 +62,6 @@ static const struct SLAudioEncoderCapabilitiesItf_ IAudioEncoderCapabilities_Itf
 
 void IAudioEncoderCapabilities_init(void *self)
 {
-    IAudioEncoderCapabilities *this = (IAudioEncoderCapabilities *) self;
-    this->mItf = &IAudioEncoderCapabilities_Itf;
+    IAudioEncoderCapabilities *thiz = (IAudioEncoderCapabilities *) self;
+    thiz->mItf = &IAudioEncoderCapabilities_Itf;
 }

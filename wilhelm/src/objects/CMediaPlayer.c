@@ -77,15 +77,15 @@ XAresult CMediaPlayer_Resume(void *self, XAboolean async)
 
 void CMediaPlayer_Destroy(void *self)
 {
-    CMediaPlayer *this = (CMediaPlayer *) self;
-    freeDataLocatorFormat(&this->mDataSource);
-    freeDataLocatorFormat(&this->mBankSource);
-    freeDataLocatorFormat(&this->mAudioSink);
-    freeDataLocatorFormat(&this->mImageVideoSink);
-    freeDataLocatorFormat(&this->mVibraSink);
-    freeDataLocatorFormat(&this->mLEDArraySink);
+    CMediaPlayer *thiz = (CMediaPlayer *) self;
+    freeDataLocatorFormat(&thiz->mDataSource);
+    freeDataLocatorFormat(&thiz->mBankSource);
+    freeDataLocatorFormat(&thiz->mAudioSink);
+    freeDataLocatorFormat(&thiz->mImageVideoSink);
+    freeDataLocatorFormat(&thiz->mVibraSink);
+    freeDataLocatorFormat(&thiz->mLEDArraySink);
 #ifdef ANDROID
-    android_Player_destroy(this);
+    android_Player_destroy(thiz);
 #endif
 }
 

@@ -27,12 +27,12 @@ static SLresult IVisualization_RegisterVisualizationCallback(SLVisualizationItf 
     if (!(0 < rate && rate <= 20000)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IVisualization *this = (IVisualization *) self;
-        interface_lock_exclusive(this);
-        this->mCallback = callback;
-        this->mContext = pContext;
-        this->mRate = rate;
-        interface_unlock_exclusive(this);
+        IVisualization *thiz = (IVisualization *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mCallback = callback;
+        thiz->mContext = pContext;
+        thiz->mRate = rate;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -62,9 +62,9 @@ static const struct SLVisualizationItf_ IVisualization_Itf = {
 
 void IVisualization_init(void *self)
 {
-    IVisualization *this = (IVisualization *) self;
-    this->mItf = &IVisualization_Itf;
-    this->mCallback = NULL;
-    this->mContext = NULL;
-    this->mRate = 20000;
+    IVisualization *thiz = (IVisualization *) self;
+    thiz->mItf = &IVisualization_Itf;
+    thiz->mCallback = NULL;
+    thiz->mContext = NULL;
+    thiz->mRate = 20000;
 }

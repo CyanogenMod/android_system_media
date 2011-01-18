@@ -24,10 +24,10 @@ static XAresult IStreamInformation_QueryMediaContainerInformation( XAStreamInfor
     XA_ENTER_INTERFACE
 
 #ifdef ANDROID
-    IStreamInformation *this = (IStreamInformation *) self;
-    interface_lock_exclusive(this);
-    info = (XAMediaContainerInformation*)&(this->mStreamInfoTable.itemAt(0).containerInfo);
-    interface_unlock_exclusive(this);
+    IStreamInformation *thiz = (IStreamInformation *) self;
+    interface_lock_exclusive(thiz);
+    info = (XAMediaContainerInformation*)&(thiz->mStreamInfoTable.itemAt(0).containerInfo);
+    interface_unlock_exclusive(thiz);
     // even though the pointer to the media container info is returned, the values aren't set
     //  for the actual container in this version, they are simply initialized to defaults
     //  (see IStreamInformation_init)
@@ -60,20 +60,20 @@ static XAresult IStreamInformation_QueryStreamType( XAStreamInformationItf self,
         // stream 0 is reserved for the container
         result = XA_RESULT_PARAMETER_INVALID;
     } else {
-        IStreamInformation *this = (IStreamInformation *) self;
+        IStreamInformation *thiz = (IStreamInformation *) self;
 
-        interface_lock_exclusive(this);
-        XAuint32 nbStreams = this->mStreamInfoTable.itemAt(0).containerInfo.numStreams;
+        interface_lock_exclusive(thiz);
+        XAuint32 nbStreams = thiz->mStreamInfoTable.itemAt(0).containerInfo.numStreams;
         // streams in the container are numbered 1..nbStreams
         if (streamIndex <= nbStreams) {
             result = XA_RESULT_SUCCESS;
-            *domain = this->mStreamInfoTable.itemAt(streamIndex).domain;
+            *domain = thiz->mStreamInfoTable.itemAt(streamIndex).domain;
         } else {
             SL_LOGE("Querying stream type for stream %ld, only %ld streams available",
                     streamIndex, nbStreams);
             result = XA_RESULT_PARAMETER_INVALID;
         }
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 #endif
 
@@ -114,14 +114,14 @@ static XAresult IStreamInformation_RegisterStreamChangeCallback( XAStreamInforma
 {
     XA_ENTER_INTERFACE
 
-    IStreamInformation *this = (IStreamInformation *) self;
+    IStreamInformation *thiz = (IStreamInformation *) self;
 
-    interface_lock_exclusive(this);
+    interface_lock_exclusive(thiz);
 
-    this->mCallback = callback;
-    this->mContext = pContext;
+    thiz->mCallback = callback;
+    thiz->mContext = pContext;
 
-    switch (InterfaceToObjectID(this)) {
+    switch (InterfaceToObjectID(thiz)) {
 
     case XA_OBJECTID_MEDIAPLAYER:
         SL_LOGI("IStreamInformation_RegisterStreamChangeCallback()");
@@ -132,7 +132,7 @@ static XAresult IStreamInformation_RegisterStreamChangeCallback( XAStreamInforma
         break;
     }
 
-    interface_unlock_exclusive(this);
+    interface_unlock_exclusive(thiz);
 
     XA_LEAVE_INTERFACE
 }
@@ -184,11 +184,11 @@ static const struct XAStreamInformationItf_ IStreamInformation_Itf = {
 
 void IStreamInformation_init(void *self)
 {
-    IStreamInformation *this = (IStreamInformation *) self;
-    this->mItf = &IStreamInformation_Itf;
+    IStreamInformation *thiz = (IStreamInformation *) self;
+    thiz->mItf = &IStreamInformation_Itf;
 
-    this->mCallback = NULL;
-    this->mContext = NULL;
+    thiz->mCallback = NULL;
+    thiz->mContext = NULL;
 
 #ifdef ANDROID
     // initialize container info
@@ -197,6 +197,6 @@ void IStreamInformation_init(void *self)
     contInf.containerInfo.containerType = XA_CONTAINERTYPE_UNSPECIFIED;
     contInf.containerInfo.mediaDuration = XA_TIME_UNKNOWN;
     contInf.containerInfo.numStreams = 0;
-    this->mStreamInfoTable.add(contInf);
+    thiz->mStreamInfoTable.add(contInf);
 #endif
 }

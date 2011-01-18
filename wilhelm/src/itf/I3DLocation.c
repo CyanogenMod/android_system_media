@@ -26,12 +26,12 @@ static SLresult I3DLocation_SetLocationCartesian(SL3DLocationItf self, const SLV
     if (NULL == pLocation) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        I3DLocation *this = (I3DLocation *) self;
+        I3DLocation *thiz = (I3DLocation *) self;
         SLVec3D locationCartesian = *pLocation;
-        interface_lock_exclusive(this);
-        this->mLocationCartesian = locationCartesian;
-        this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
-        interface_unlock_exclusive(this);
+        interface_lock_exclusive(thiz);
+        thiz->mLocationCartesian = locationCartesian;
+        thiz->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -49,13 +49,13 @@ static SLresult I3DLocation_SetLocationSpherical(SL3DLocationItf self,
         (0 <= distance) && (distance <= SL_MILLIMETER_MAX))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        I3DLocation *this = (I3DLocation *) self;
-        interface_lock_exclusive(this);
-        this->mLocationSpherical.mAzimuth = azimuth;
-        this->mLocationSpherical.mElevation = elevation;
-        this->mLocationSpherical.mDistance = distance;
-        this->mLocationActive = CARTESIAN_UNKNOWN_SPHERICAL_SET;
-        interface_unlock_exclusive(this);
+        I3DLocation *thiz = (I3DLocation *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mLocationSpherical.mAzimuth = azimuth;
+        thiz->mLocationSpherical.mElevation = elevation;
+        thiz->mLocationSpherical.mDistance = distance;
+        thiz->mLocationActive = CARTESIAN_UNKNOWN_SPHERICAL_SET;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -70,30 +70,30 @@ static SLresult I3DLocation_Move(SL3DLocationItf self, const SLVec3D *pMovement)
     if (NULL == pMovement) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        I3DLocation *this = (I3DLocation *) self;
+        I3DLocation *thiz = (I3DLocation *) self;
         SLVec3D movementCartesian = *pMovement;
-        interface_lock_exclusive(this);
+        interface_lock_exclusive(thiz);
         for (;;) {
-            enum CartesianSphericalActive locationActive = this->mLocationActive;
+            enum CartesianSphericalActive locationActive = thiz->mLocationActive;
             switch (locationActive) {
             case CARTESIAN_COMPUTED_SPHERICAL_SET:
             case CARTESIAN_SET_SPHERICAL_COMPUTED:  // not in 1.0.1
             case CARTESIAN_SET_SPHERICAL_REQUESTED: // not in 1.0.1
             case CARTESIAN_SET_SPHERICAL_UNKNOWN:
-                this->mLocationCartesian.x += movementCartesian.x;
-                this->mLocationCartesian.y += movementCartesian.y;
-                this->mLocationCartesian.z += movementCartesian.z;
-                this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
+                thiz->mLocationCartesian.x += movementCartesian.x;
+                thiz->mLocationCartesian.y += movementCartesian.y;
+                thiz->mLocationCartesian.z += movementCartesian.z;
+                thiz->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
                 break;
             case CARTESIAN_UNKNOWN_SPHERICAL_SET:
-                this->mLocationActive = CARTESIAN_REQUESTED_SPHERICAL_SET;
+                thiz->mLocationActive = CARTESIAN_REQUESTED_SPHERICAL_SET;
                 // fall through
             case CARTESIAN_REQUESTED_SPHERICAL_SET:
                 // matched by cond_broadcast in case multiple requesters
 #if 0
-                interface_cond_wait(this);
+                interface_cond_wait(thiz);
 #else
-                this->mLocationActive = CARTESIAN_COMPUTED_SPHERICAL_SET;
+                thiz->mLocationActive = CARTESIAN_COMPUTED_SPHERICAL_SET;
 #endif
                 continue;
             default:
@@ -102,7 +102,7 @@ static SLresult I3DLocation_Move(SL3DLocationItf self, const SLVec3D *pMovement)
             }
             break;
         }
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -117,35 +117,35 @@ static SLresult I3DLocation_GetLocationCartesian(SL3DLocationItf self, SLVec3D *
     if (NULL == pLocation) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        I3DLocation *this = (I3DLocation *) self;
-        interface_lock_exclusive(this);
+        I3DLocation *thiz = (I3DLocation *) self;
+        interface_lock_exclusive(thiz);
         for (;;) {
-            enum CartesianSphericalActive locationActive = this->mLocationActive;
+            enum CartesianSphericalActive locationActive = thiz->mLocationActive;
             switch (locationActive) {
             case CARTESIAN_COMPUTED_SPHERICAL_SET:
             case CARTESIAN_SET_SPHERICAL_COMPUTED:  // not in 1.0.1
             case CARTESIAN_SET_SPHERICAL_REQUESTED: // not in 1.0.1
             case CARTESIAN_SET_SPHERICAL_UNKNOWN:
                 {
-                SLVec3D locationCartesian = this->mLocationCartesian;
-                interface_unlock_exclusive(this);
+                SLVec3D locationCartesian = thiz->mLocationCartesian;
+                interface_unlock_exclusive(thiz);
                 *pLocation = locationCartesian;
                 }
                 break;
             case CARTESIAN_UNKNOWN_SPHERICAL_SET:
-                this->mLocationActive = CARTESIAN_REQUESTED_SPHERICAL_SET;
+                thiz->mLocationActive = CARTESIAN_REQUESTED_SPHERICAL_SET;
                 // fall through
             case CARTESIAN_REQUESTED_SPHERICAL_SET:
                 // matched by cond_broadcast in case multiple requesters
 #if 0
-                interface_cond_wait(this);
+                interface_cond_wait(thiz);
 #else
-                this->mLocationActive = CARTESIAN_COMPUTED_SPHERICAL_SET;
+                thiz->mLocationActive = CARTESIAN_COMPUTED_SPHERICAL_SET;
 #endif
                 continue;
             default:
                 assert(SL_BOOLEAN_FALSE);
-                interface_unlock_exclusive(this);
+                interface_unlock_exclusive(thiz);
                 pLocation->x = 0;
                 pLocation->y = 0;
                 pLocation->z = 0;
@@ -171,13 +171,13 @@ static SLresult I3DLocation_SetOrientationVectors(SL3DLocationItf self,
         SLVec3D front = *pFront;
         SLVec3D above = *pAbove;
         // NTH Check for vectors close to zero or close to parallel
-        I3DLocation *this = (I3DLocation *) self;
-        interface_lock_exclusive(this);
-        this->mOrientationVectors.mFront = front;
-        this->mOrientationVectors.mAbove = above;
-        this->mOrientationActive = ANGLES_UNKNOWN_VECTORS_SET;
-        this->mRotatePending = SL_BOOLEAN_FALSE;
-        interface_unlock_exclusive(this);
+        I3DLocation *thiz = (I3DLocation *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mOrientationVectors.mFront = front;
+        thiz->mOrientationVectors.mAbove = above;
+        thiz->mOrientationActive = ANGLES_UNKNOWN_VECTORS_SET;
+        thiz->mRotatePending = SL_BOOLEAN_FALSE;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -195,14 +195,14 @@ static SLresult I3DLocation_SetOrientationAngles(SL3DLocationItf self,
         (-360000 <= roll) && (roll <= 360000))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        I3DLocation *this = (I3DLocation *) self;
-        interface_lock_exclusive(this);
-        this->mOrientationAngles.mHeading = heading;
-        this->mOrientationAngles.mPitch = pitch;
-        this->mOrientationAngles.mRoll = roll;
-        this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
-        this->mRotatePending = SL_BOOLEAN_FALSE;
-        interface_unlock_exclusive(this);
+        I3DLocation *thiz = (I3DLocation *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mOrientationAngles.mHeading = heading;
+        thiz->mOrientationAngles.mPitch = pitch;
+        thiz->mOrientationAngles.mRoll = roll;
+        thiz->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
+        thiz->mRotatePending = SL_BOOLEAN_FALSE;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -219,18 +219,18 @@ static SLresult I3DLocation_Rotate(SL3DLocationItf self, SLmillidegree theta, co
     } else {
         SLVec3D axis = *pAxis;
         // NTH Check that axis is not (close to) zero vector, length does not matter
-        I3DLocation *this = (I3DLocation *) self;
-        interface_lock_exclusive(this);
-        while (this->mRotatePending)
+        I3DLocation *thiz = (I3DLocation *) self;
+        interface_lock_exclusive(thiz);
+        while (thiz->mRotatePending)
 #if 0
-            interface_cond_wait(this);
+            interface_cond_wait(thiz);
 #else
             break;
 #endif
-        this->mTheta = theta;
-        this->mAxis = axis;
-        this->mRotatePending = SL_BOOLEAN_TRUE;
-        interface_unlock_exclusive(this);
+        thiz->mTheta = theta;
+        thiz->mAxis = axis;
+        thiz->mRotatePending = SL_BOOLEAN_TRUE;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -246,11 +246,11 @@ static SLresult I3DLocation_GetOrientationVectors(SL3DLocationItf self,
     if (NULL == pFront || NULL == pUp) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        I3DLocation *this = (I3DLocation *) self;
-        interface_lock_shared(this);
-        SLVec3D front = this->mOrientationVectors.mFront;
-        SLVec3D up = this->mOrientationVectors.mUp;
-        interface_unlock_shared(this);
+        I3DLocation *thiz = (I3DLocation *) self;
+        interface_lock_shared(thiz);
+        SLVec3D front = thiz->mOrientationVectors.mFront;
+        SLVec3D up = thiz->mOrientationVectors.mUp;
+        interface_unlock_shared(thiz);
         *pFront = front;
         *pUp = up;
         result = SL_RESULT_SUCCESS;
@@ -273,21 +273,21 @@ static const struct SL3DLocationItf_ I3DLocation_Itf = {
 
 void I3DLocation_init(void *self)
 {
-    I3DLocation *this = (I3DLocation *) self;
-    this->mItf = &I3DLocation_Itf;
-    this->mLocationCartesian.x = 0;
-    this->mLocationCartesian.y = 0;
-    this->mLocationCartesian.z = 0;
-    memset(&this->mLocationSpherical, 0x55, sizeof(this->mLocationSpherical));
-    this->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
-    this->mOrientationAngles.mHeading = 0;
-    this->mOrientationAngles.mPitch = 0;
-    this->mOrientationAngles.mRoll = 0;
-    memset(&this->mOrientationVectors, 0x55, sizeof(this->mOrientationVectors));
-    this->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
-    this->mTheta = 0x55555555;
-    this->mAxis.x = 0x55555555;
-    this->mAxis.y = 0x55555555;
-    this->mAxis.z = 0x55555555;
-    this->mRotatePending = SL_BOOLEAN_FALSE;
+    I3DLocation *thiz = (I3DLocation *) self;
+    thiz->mItf = &I3DLocation_Itf;
+    thiz->mLocationCartesian.x = 0;
+    thiz->mLocationCartesian.y = 0;
+    thiz->mLocationCartesian.z = 0;
+    memset(&thiz->mLocationSpherical, 0x55, sizeof(thiz->mLocationSpherical));
+    thiz->mLocationActive = CARTESIAN_SET_SPHERICAL_UNKNOWN;
+    thiz->mOrientationAngles.mHeading = 0;
+    thiz->mOrientationAngles.mPitch = 0;
+    thiz->mOrientationAngles.mRoll = 0;
+    memset(&thiz->mOrientationVectors, 0x55, sizeof(thiz->mOrientationVectors));
+    thiz->mOrientationActive = ANGLES_SET_VECTORS_UNKNOWN;
+    thiz->mTheta = 0x55555555;
+    thiz->mAxis.x = 0x55555555;
+    thiz->mAxis.y = 0x55555555;
+    thiz->mAxis.z = 0x55555555;
+    thiz->mRotatePending = SL_BOOLEAN_FALSE;
 }

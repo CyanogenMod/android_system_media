@@ -17,7 +17,7 @@
 //#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
-#undef this // FIXME shouldn't have to do this, no pun intended
+
 
 #ifdef _DEBUG_AUDIO_TESTS
 // defines used for automated audio quality tests

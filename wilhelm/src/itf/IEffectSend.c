@@ -36,11 +36,11 @@ static const unsigned char AUX_to_MPH[AUX_MAX] = {
  *   - interface was "gotten" with Object::GetInterface
  */
 
-static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEffect)
+static struct EnableLevel *getEnableLevel(IEffectSend *thiz, const void *pAuxEffect)
 {
     // Make sure this effect send is on an audio player, not a MIDI player
-    CAudioPlayer *audioPlayer = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
-        (CAudioPlayer *) this->mThis : NULL;
+    CAudioPlayer *audioPlayer = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+        (CAudioPlayer *) thiz->mThis : NULL;
     if (NULL == audioPlayer) {
         return NULL;
     }
@@ -78,7 +78,7 @@ static struct EnableLevel *getEnableLevel(IEffectSend *this, const void *pAuxEff
     case INTERFACE_RESUMING_1:
     case INTERFACE_RESUMING_2:
         if (mask) {
-            return &this->mEnableLevels[aux];
+            return &thiz->mEnableLevels[aux];
         }
         SL_LOGE("EffectSend no GetInterface yet");
         break;
@@ -116,20 +116,20 @@ static SLresult IEffectSend_EnableEffectSend(SLEffectSendItf self,
     if (!((SL_MILLIBEL_MIN <= initialLevel) && (initialLevel <= 0))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEffectSend *this = (IEffectSend *) self;
-        struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
+        IEffectSend *thiz = (IEffectSend *) self;
+        struct EnableLevel *enableLevel = getEnableLevel(thiz, pAuxEffect);
         if (NULL == enableLevel) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-            interface_lock_exclusive(this);
+            interface_lock_exclusive(thiz);
             enableLevel->mEnable = SL_BOOLEAN_FALSE != enable; // normalize
             enableLevel->mSendLevel = initialLevel;
 #if !defined(ANDROID)
             result = SL_RESULT_SUCCESS;
 #else
             // TODO do not repeat querying of CAudioPlayer, done inside getEnableLevel()
-            CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
-                    (CAudioPlayer *) this->mThis : NULL;
+            CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+                    (CAudioPlayer *) thiz->mThis : NULL;
             // note that if this was a MIDI player, getEnableLevel would have returned NULL
             assert(NULL != ap);
             // check which effect the send is attached to, attach and set level
@@ -149,7 +149,7 @@ static SLresult IEffectSend_EnableEffectSend(SLEffectSendItf self,
                 result = SL_RESULT_PARAMETER_INVALID;
             }
 #endif
-            interface_unlock_exclusive(this);
+            interface_unlock_exclusive(thiz);
         }
     }
 
@@ -165,15 +165,15 @@ static SLresult IEffectSend_IsEnabled(SLEffectSendItf self,
     if (NULL == pEnable) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEffectSend *this = (IEffectSend *) self;
-        struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
+        IEffectSend *thiz = (IEffectSend *) self;
+        struct EnableLevel *enableLevel = getEnableLevel(thiz, pAuxEffect);
         if (NULL == enableLevel) {
             *pEnable = SL_BOOLEAN_FALSE;
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-            interface_lock_shared(this);
+            interface_lock_shared(thiz);
             SLboolean enable = enableLevel->mEnable;
-            interface_unlock_shared(this);
+            interface_unlock_shared(thiz);
             *pEnable = enable;
             result = SL_RESULT_SUCCESS;
         }
@@ -190,26 +190,26 @@ static SLresult IEffectSend_SetDirectLevel(SLEffectSendItf self, SLmillibel dire
     if (!((SL_MILLIBEL_MIN <= directLevel) && (directLevel <= 0))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEffectSend *this = (IEffectSend *) self;
-        interface_lock_exclusive(this);
-        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
-                (CAudioPlayer *) this->mThis : NULL;
+        IEffectSend *thiz = (IEffectSend *) self;
+        interface_lock_exclusive(thiz);
+        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+                (CAudioPlayer *) thiz->mThis : NULL;
         if (NULL != ap) {
             SLmillibel oldDirectLevel = ap->mDirectLevel;
             if (oldDirectLevel != directLevel) {
                 ap->mDirectLevel = directLevel;
 #if defined(ANDROID)
                 ap->mAmplFromDirectLevel = sles_to_android_amplification(directLevel);
-                interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+                interface_unlock_exclusive_attributes(thiz, ATTR_GAIN);
 #else
-                interface_unlock_exclusive(this);
+                interface_unlock_exclusive(thiz);
 #endif
             } else {
-                interface_unlock_exclusive(this);
+                interface_unlock_exclusive(thiz);
             }
         } else {
             // MIDI player is silently not supported
-            interface_unlock_exclusive(this);
+            interface_unlock_exclusive(thiz);
         }
         result = SL_RESULT_SUCCESS;
     }
@@ -225,17 +225,17 @@ static SLresult IEffectSend_GetDirectLevel(SLEffectSendItf self, SLmillibel *pDi
     if (NULL == pDirectLevel) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEffectSend *this = (IEffectSend *) self;
-        interface_lock_shared(this);
-        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
-                (CAudioPlayer *) this->mThis : NULL;
+        IEffectSend *thiz = (IEffectSend *) self;
+        interface_lock_shared(thiz);
+        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+                (CAudioPlayer *) thiz->mThis : NULL;
         if (NULL != ap) {
             *pDirectLevel = ap->mDirectLevel;
         } else {
             // MIDI player is silently not supported
             *pDirectLevel = 0;
         }
-        interface_unlock_shared(this);
+        interface_unlock_shared(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -251,25 +251,25 @@ static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self, const void *pAuxE
     if (!((SL_MILLIBEL_MIN <= sendLevel) && (sendLevel <= 0))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEffectSend *this = (IEffectSend *) self;
-        struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
+        IEffectSend *thiz = (IEffectSend *) self;
+        struct EnableLevel *enableLevel = getEnableLevel(thiz, pAuxEffect);
         if (NULL == enableLevel) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
             result = SL_RESULT_SUCCESS;
             // EnableEffectSend is exclusive, so this has to be also
-            interface_lock_exclusive(this);
+            interface_lock_exclusive(thiz);
             enableLevel->mSendLevel = sendLevel;
 #if defined(ANDROID)
-            CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
-                    (CAudioPlayer *) this->mThis : NULL;
+            CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+                    (CAudioPlayer *) thiz->mThis : NULL;
             if (NULL != ap) {
                 // the send level set here is the total energy on the aux bus, so it must take
                 // into account the player volume level
                 result = android_fxSend_setSendLevel(ap, sendLevel + ap->mVolume.mLevel);
             }
 #endif
-            interface_unlock_exclusive(this);
+            interface_unlock_exclusive(thiz);
 
         }
     }
@@ -286,14 +286,14 @@ static SLresult IEffectSend_GetSendLevel(SLEffectSendItf self, const void *pAuxE
     if (NULL == pSendLevel) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEffectSend *this = (IEffectSend *) self;
-        struct EnableLevel *enableLevel = getEnableLevel(this, pAuxEffect);
+        IEffectSend *thiz = (IEffectSend *) self;
+        struct EnableLevel *enableLevel = getEnableLevel(thiz, pAuxEffect);
         if (NULL == enableLevel) {
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-            interface_lock_shared(this);
+            interface_lock_shared(thiz);
             SLmillibel sendLevel = enableLevel->mSendLevel;
-            interface_unlock_shared(this);
+            interface_unlock_shared(thiz);
             *pSendLevel = sendLevel;
             result = SL_RESULT_SUCCESS;
         }
@@ -314,9 +314,9 @@ static const struct SLEffectSendItf_ IEffectSend_Itf = {
 
 void IEffectSend_init(void *self)
 {
-    IEffectSend *this = (IEffectSend *) self;
-    this->mItf = &IEffectSend_Itf;
-    struct EnableLevel *enableLevel = this->mEnableLevels;
+    IEffectSend *thiz = (IEffectSend *) self;
+    thiz->mItf = &IEffectSend_Itf;
+    struct EnableLevel *enableLevel = thiz->mEnableLevels;
     unsigned aux;
     for (aux = 0; aux < AUX_MAX; ++aux, ++enableLevel) {
         enableLevel->mEnable = SL_BOOLEAN_FALSE;

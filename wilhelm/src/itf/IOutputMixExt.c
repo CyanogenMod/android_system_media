@@ -173,13 +173,13 @@ void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 si
     // Force to be a multiple of a frame, assumes stereo 16-bit PCM
     size &= ~3;
     SLboolean mixBufferHasData = SL_BOOLEAN_FALSE;
-    IOutputMixExt *this = (IOutputMixExt *) self;
-    IObject *thisObject = this->mThis;
+    IOutputMixExt *thiz = (IOutputMixExt *) self;
+    IObject *thisObject = thiz->mThis;
     // This lock should never block, except when the application destroys the output mix object
     object_lock_exclusive(thisObject);
     unsigned activeMask;
     // If the output mix is marked for destruction, then acknowledge the request
-    if (this->mDestroyRequested) {
+    if (thiz->mDestroyRequested) {
         IEngine *thisEngine = &thisObject->mEngine->mEngine;
         interface_lock_exclusive(thisEngine);
         assert(&thisEngine->mOutputMix->mObject == thisObject);
@@ -187,17 +187,17 @@ void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 si
         // Note we don't attempt to connect another output mix, even if there is one
         interface_unlock_exclusive(thisEngine);
         // Acknowledge the destroy request, and notify the pre-destroy hook
-        this->mDestroyRequested = SL_BOOLEAN_FALSE;
+        thiz->mDestroyRequested = SL_BOOLEAN_FALSE;
         object_cond_broadcast(thisObject);
         activeMask = 0;
     } else {
-        activeMask = this->mActiveMask;
+        activeMask = thiz->mActiveMask;
     }
     while (activeMask) {
         unsigned i = ctz(activeMask);
         assert(MAX_TRACK > i);
         activeMask &= ~(1 << i);
-        Track *track = &this->mTracks[i];
+        Track *track = &thiz->mTracks[i];
 
         // track is allocated
 
@@ -338,35 +338,35 @@ static const struct SLOutputMixExtItf_ IOutputMixExt_Itf = {
 
 void IOutputMixExt_init(void *self)
 {
-    IOutputMixExt *this = (IOutputMixExt *) self;
-    this->mItf = &IOutputMixExt_Itf;
-    this->mActiveMask = 0;
-    Track *track = &this->mTracks[0];
+    IOutputMixExt *thiz = (IOutputMixExt *) self;
+    thiz->mItf = &IOutputMixExt_Itf;
+    thiz->mActiveMask = 0;
+    Track *track = &thiz->mTracks[0];
     unsigned i;
     for (i = 0; i < MAX_TRACK; ++i, ++track) {
         track->mAudioPlayer = NULL;
     }
-    this->mDestroyRequested = SL_BOOLEAN_FALSE;
+    thiz->mDestroyRequested = SL_BOOLEAN_FALSE;
 }
 
 
 /** \brief Called by Engine::CreateAudioPlayer to allocate a track */
 
-SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
+SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *thiz)
 {
-    this->mTrack = NULL;
+    thiz->mTrack = NULL;
 
     // check the source for compatibility
-    switch (this->mDataSource.mLocator.mLocatorType) {
+    switch (thiz->mDataSource.mLocator.mLocatorType) {
     case SL_DATALOCATOR_BUFFERQUEUE:
 #ifdef ANDROID
     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
 #endif
-        switch (this->mDataSource.mFormat.mFormatType) {
+        switch (thiz->mDataSource.mFormat.mFormatType) {
         case SL_DATAFORMAT_PCM:
 #ifdef USE_SDL
             // SDL is hard-coded to 44.1 kHz, and there is no sample rate converter
-            if (SL_SAMPLINGRATE_44_1 != this->mDataSource.mFormat.mPCM.samplesPerSec)
+            if (SL_SAMPLINGRATE_44_1 != thiz->mDataSource.mFormat.mPCM.samplesPerSec)
                 return SL_RESULT_CONTENT_UNSUPPORTED;
 #endif
             break;
@@ -379,7 +379,7 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
     }
 
     // check the sink for compatibility
-    const SLDataSink *pAudioSnk = &this->mDataSink.u.mSink;
+    const SLDataSink *pAudioSnk = &thiz->mDataSink.u.mSink;
     Track *track = NULL;
     switch (*(SLuint32 *)pAudioSnk->pLocator) {
     case SL_DATALOCATOR_OUTPUTMIX:
@@ -401,10 +401,10 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
         track = &omExt->mTracks[i];
         track->mAudioPlayer = NULL;    // only field that is accessed before full initialization
         interface_unlock_exclusive(omExt);
-        this->mTrack = track;
-        this->mGains[0] = 1.0f;
-        this->mGains[1] = 1.0f;
-        this->mDestroyRequested = SL_BOOLEAN_FALSE;
+        thiz->mTrack = track;
+        thiz->mGains[0] = 1.0f;
+        thiz->mGains[1] = 1.0f;
+        thiz->mDestroyRequested = SL_BOOLEAN_FALSE;
         }
         break;
     default:
@@ -412,8 +412,8 @@ SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this)
     }
 
     assert(NULL != track);
-    track->mBufferQueue = &this->mBufferQueue;
-    track->mAudioPlayer = this;
+    track->mBufferQueue = &thiz->mBufferQueue;
+    track->mAudioPlayer = thiz;
     track->mReader = NULL;
     track->mAvail = 0;
     track->mGains[0] = 1.0f;

@@ -31,11 +31,11 @@ static SLresult ISeek_SetPosition(SLSeekItf self, SLmillisecond pos, SLuint32 se
         if (SL_TIME_UNKNOWN == pos) {
             pos = SL_TIME_UNKNOWN - 1;
         }
-        ISeek *this = (ISeek *) self;
-        interface_lock_exclusive(this);
-        this->mPos = pos;
+        ISeek *thiz = (ISeek *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mPos = pos;
         // at this point the seek is merely pending, so do not yet update other fields
-        interface_unlock_exclusive_attributes(this, ATTR_POSITION);
+        interface_unlock_exclusive_attributes(thiz, ATTR_POSITION);
         result = SL_RESULT_SUCCESS;
         }
         break;
@@ -56,29 +56,29 @@ static SLresult ISeek_SetLoop(SLSeekItf self, SLboolean loopEnable,
     if (!(startPos < endPos)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        ISeek *this = (ISeek *) self;
-        interface_lock_exclusive(this);
+        ISeek *thiz = (ISeek *) self;
+        interface_lock_exclusive(thiz);
 #ifdef ANDROID
         if ((startPos != 0) && (endPos != SL_TIME_UNKNOWN)) {
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
-            this->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize
+            thiz->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize
             // start and end positions already initialized to [0, end of stream]
-            /*this->mStartPos = 0;
-            this->mEndPos = (SLmillisecond) SL_TIME_UNKNOWN;*/
-            CAudioPlayer *ap = InterfaceToCAudioPlayer(this);
+            /*thiz->mStartPos = 0;
+            thiz->mEndPos = (SLmillisecond) SL_TIME_UNKNOWN;*/
+            CAudioPlayer *ap = InterfaceToCAudioPlayer(thiz);
             if (NULL != ap) {
                 android_audioPlayer_loop(ap, loopEnable);
             }
             result = SL_RESULT_SUCCESS;
         }
 #else
-        this->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize
-        this->mStartPos = startPos;
-        this->mEndPos = endPos;
+        thiz->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize
+        thiz->mStartPos = startPos;
+        thiz->mEndPos = endPos;
         result = SL_RESULT_SUCCESS;
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -93,12 +93,12 @@ static SLresult ISeek_GetLoop(SLSeekItf self, SLboolean *pLoopEnabled,
     if (NULL == pLoopEnabled || NULL == pStartPos || NULL == pEndPos) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        ISeek *this = (ISeek *) self;
-        interface_lock_shared(this);
-        SLboolean loopEnabled = this->mLoopEnabled;
-        SLmillisecond startPos = this->mStartPos;
-        SLmillisecond endPos = this->mEndPos;
-        interface_unlock_shared(this);
+        ISeek *thiz = (ISeek *) self;
+        interface_lock_shared(thiz);
+        SLboolean loopEnabled = thiz->mLoopEnabled;
+        SLmillisecond startPos = thiz->mStartPos;
+        SLmillisecond endPos = thiz->mEndPos;
+        interface_unlock_shared(thiz);
         *pLoopEnabled = loopEnabled;
         *pStartPos = startPos;
         *pEndPos = endPos;
@@ -117,10 +117,10 @@ static const struct SLSeekItf_ ISeek_Itf = {
 
 void ISeek_init(void *self)
 {
-    ISeek *this = (ISeek *) self;
-    this->mItf = &ISeek_Itf;
-    this->mPos = (SLmillisecond) SL_TIME_UNKNOWN;
-    this->mStartPos = (SLmillisecond) 0;
-    this->mEndPos = (SLmillisecond) SL_TIME_UNKNOWN;
-    this->mLoopEnabled = SL_BOOLEAN_FALSE;
+    ISeek *thiz = (ISeek *) self;
+    thiz->mItf = &ISeek_Itf;
+    thiz->mPos = (SLmillisecond) SL_TIME_UNKNOWN;
+    thiz->mStartPos = (SLmillisecond) 0;
+    thiz->mEndPos = (SLmillisecond) SL_TIME_UNKNOWN;
+    thiz->mLoopEnabled = SL_BOOLEAN_FALSE;
 }

@@ -42,21 +42,21 @@ static SLresult IEnvironmentalReverb_SetRoomLevel(SLEnvironmentalReverbItf self,
     if (!(SL_MILLIBEL_MIN <= room && room <= 0)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_exclusive(this);
-        this->mProperties.roomLevel = room;
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mProperties.roomLevel = room;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_setParam(this->mEnvironmentalReverbEffect,
+            android::status_t status = android_erev_setParam(thiz->mEnvironmentalReverbEffect,
                     REVERB_PARAM_ROOM_LEVEL, &room);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -70,22 +70,22 @@ static SLresult IEnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self,
     if (NULL == pRoom) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_peek(this);
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_peek(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_getParam(this->mEnvironmentalReverbEffect,
-                    REVERB_PARAM_ROOM_LEVEL, &this->mProperties.roomLevel);
+            android::status_t status = android_erev_getParam(thiz->mEnvironmentalReverbEffect,
+                    REVERB_PARAM_ROOM_LEVEL, &thiz->mProperties.roomLevel);
             result = android_fx_statusToResult(status);
         }
 #endif
-        *pRoom = this->mProperties.roomLevel;
+        *pRoom = thiz->mProperties.roomLevel;
 
-        interface_unlock_peek(this);
+        interface_unlock_peek(thiz);
 
     }
 
@@ -101,21 +101,21 @@ static SLresult IEnvironmentalReverb_SetRoomHFLevel(
     if (!(SL_MILLIBEL_MIN <= roomHF && roomHF <= 0)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_exclusive(this);
-        this->mProperties.roomHFLevel = roomHF;
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mProperties.roomHFLevel = roomHF;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_setParam(this->mEnvironmentalReverbEffect,
+            android::status_t status = android_erev_setParam(thiz->mEnvironmentalReverbEffect,
                     REVERB_PARAM_ROOM_HF_LEVEL, &roomHF);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -130,22 +130,22 @@ static SLresult IEnvironmentalReverb_GetRoomHFLevel(
     if (NULL == pRoomHF) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_peek(this);
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_peek(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_getParam(this->mEnvironmentalReverbEffect,
-                    REVERB_PARAM_ROOM_HF_LEVEL, &this->mProperties.roomHFLevel);
+            android::status_t status = android_erev_getParam(thiz->mEnvironmentalReverbEffect,
+                    REVERB_PARAM_ROOM_HF_LEVEL, &thiz->mProperties.roomHFLevel);
             result = android_fx_statusToResult(status);
         }
 #endif
-        *pRoomHF = this->mProperties.roomHFLevel;
+        *pRoomHF = thiz->mProperties.roomHFLevel;
 
-        interface_unlock_peek(this);
+        interface_unlock_peek(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -160,21 +160,21 @@ static SLresult IEnvironmentalReverb_SetDecayTime(
     if (!(100 <= decayTime && decayTime <= 20000)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_exclusive(this);
-        this->mProperties.decayTime = decayTime;
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mProperties.decayTime = decayTime;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_setParam(this->mEnvironmentalReverbEffect,
+            android::status_t status = android_erev_setParam(thiz->mEnvironmentalReverbEffect,
                     REVERB_PARAM_DECAY_TIME, &decayTime);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -189,22 +189,22 @@ static SLresult IEnvironmentalReverb_GetDecayTime(
     if (NULL == pDecayTime) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_peek(this);
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_peek(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_getParam(this->mEnvironmentalReverbEffect,
-                    REVERB_PARAM_DECAY_TIME, &this->mProperties.decayTime);
+            android::status_t status = android_erev_getParam(thiz->mEnvironmentalReverbEffect,
+                    REVERB_PARAM_DECAY_TIME, &thiz->mProperties.decayTime);
             result = android_fx_statusToResult(status);
         }
 #endif
-        *pDecayTime = this->mProperties.decayTime;
+        *pDecayTime = thiz->mProperties.decayTime;
 
-        interface_unlock_peek(this);
+        interface_unlock_peek(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -219,21 +219,21 @@ static SLresult IEnvironmentalReverb_SetDecayHFRatio(
     if (!(100 <= decayHFRatio && decayHFRatio <= 2000)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_exclusive(this);
-        this->mProperties.decayHFRatio = decayHFRatio;
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mProperties.decayHFRatio = decayHFRatio;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_setParam(this->mEnvironmentalReverbEffect,
+            android::status_t status = android_erev_setParam(thiz->mEnvironmentalReverbEffect,
                     REVERB_PARAM_DECAY_HF_RATIO, &decayHFRatio);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -248,22 +248,22 @@ static SLresult IEnvironmentalReverb_GetDecayHFRatio(
     if (NULL == pDecayHFRatio) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_peek(this);
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_peek(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_getParam(this->mEnvironmentalReverbEffect,
-                    REVERB_PARAM_DECAY_HF_RATIO, &this->mProperties.decayHFRatio);
+            android::status_t status = android_erev_getParam(thiz->mEnvironmentalReverbEffect,
+                    REVERB_PARAM_DECAY_HF_RATIO, &thiz->mProperties.decayHFRatio);
             result = android_fx_statusToResult(status);
         }
 #endif
-        *pDecayHFRatio = this->mProperties.decayHFRatio;
+        *pDecayHFRatio = thiz->mProperties.decayHFRatio;
 
-        interface_unlock_peek(this);
+        interface_unlock_peek(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -278,21 +278,21 @@ static SLresult IEnvironmentalReverb_SetReflectionsLevel(
     if (!(SL_MILLIBEL_MIN <= reflectionsLevel && reflectionsLevel <= 1000)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_exclusive(this);
-        this->mProperties.reflectionsLevel = reflectionsLevel;
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mProperties.reflectionsLevel = reflectionsLevel;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_setParam(this->mEnvironmentalReverbEffect,
+            android::status_t status = android_erev_setParam(thiz->mEnvironmentalReverbEffect,
                     REVERB_PARAM_REFLECTIONS_LEVEL, &reflectionsLevel);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -307,22 +307,22 @@ static SLresult IEnvironmentalReverb_GetReflectionsLevel(
     if (NULL == pReflectionsLevel) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_peek(this);
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_peek(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_getParam(this->mEnvironmentalReverbEffect,
-                    REVERB_PARAM_REFLECTIONS_LEVEL, &this->mProperties.reflectionsLevel);
+            android::status_t status = android_erev_getParam(thiz->mEnvironmentalReverbEffect,
+                    REVERB_PARAM_REFLECTIONS_LEVEL, &thiz->mProperties.reflectionsLevel);
             result = android_fx_statusToResult(status);
         }
 #endif
-        *pReflectionsLevel = this->mProperties.reflectionsLevel;
+        *pReflectionsLevel = thiz->mProperties.reflectionsLevel;
 
-        interface_unlock_peek(this);
+        interface_unlock_peek(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -337,21 +337,21 @@ static SLresult IEnvironmentalReverb_SetReflectionsDelay(
     if (!(/* 0 <= reflectionsDelay && */ reflectionsDelay <= 300)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_exclusive(this);
-        this->mProperties.reflectionsDelay = reflectionsDelay;
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mProperties.reflectionsDelay = reflectionsDelay;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_setParam(this->mEnvironmentalReverbEffect,
+            android::status_t status = android_erev_setParam(thiz->mEnvironmentalReverbEffect,
                     REVERB_PARAM_REFLECTIONS_DELAY, &reflectionsDelay);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -366,22 +366,22 @@ static SLresult IEnvironmentalReverb_GetReflectionsDelay(
     if (NULL == pReflectionsDelay) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_peek(this);
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_peek(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_getParam(this->mEnvironmentalReverbEffect,
-                    REVERB_PARAM_REFLECTIONS_DELAY, &this->mProperties.reflectionsDelay);
+            android::status_t status = android_erev_getParam(thiz->mEnvironmentalReverbEffect,
+                    REVERB_PARAM_REFLECTIONS_DELAY, &thiz->mProperties.reflectionsDelay);
             result = android_fx_statusToResult(status);
         }
 #endif
-        *pReflectionsDelay = this->mProperties.reflectionsDelay;
+        *pReflectionsDelay = thiz->mProperties.reflectionsDelay;
 
-        interface_unlock_peek(this);
+        interface_unlock_peek(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -396,21 +396,21 @@ static SLresult IEnvironmentalReverb_SetReverbLevel(
     if (!(SL_MILLIBEL_MIN <= reverbLevel && reverbLevel <= 2000)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_exclusive(this);
-        this->mProperties.reverbLevel = reverbLevel;
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mProperties.reverbLevel = reverbLevel;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_setParam(this->mEnvironmentalReverbEffect,
+            android::status_t status = android_erev_setParam(thiz->mEnvironmentalReverbEffect,
                     REVERB_PARAM_REVERB_LEVEL, &reverbLevel);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -425,22 +425,22 @@ static SLresult IEnvironmentalReverb_GetReverbLevel(
     if (NULL == pReverbLevel) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_peek(this);
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_peek(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_getParam(this->mEnvironmentalReverbEffect,
-                    REVERB_PARAM_REVERB_LEVEL, &this->mProperties.reverbLevel);
+            android::status_t status = android_erev_getParam(thiz->mEnvironmentalReverbEffect,
+                    REVERB_PARAM_REVERB_LEVEL, &thiz->mProperties.reverbLevel);
             result = android_fx_statusToResult(status);
         }
 #endif
-        *pReverbLevel = this->mProperties.reverbLevel;
+        *pReverbLevel = thiz->mProperties.reverbLevel;
 
-        interface_unlock_peek(this);
+        interface_unlock_peek(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -455,21 +455,21 @@ static SLresult IEnvironmentalReverb_SetReverbDelay(
     if (!(/* 0 <= reverbDelay && */ reverbDelay <= 100)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_exclusive(this);
-        this->mProperties.reverbDelay = reverbDelay;
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mProperties.reverbDelay = reverbDelay;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_setParam(this->mEnvironmentalReverbEffect,
+            android::status_t status = android_erev_setParam(thiz->mEnvironmentalReverbEffect,
                     REVERB_PARAM_REVERB_DELAY, &reverbDelay);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -484,22 +484,22 @@ static SLresult IEnvironmentalReverb_GetReverbDelay(
     if (NULL == pReverbDelay) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_peek(this);
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_peek(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_getParam(this->mEnvironmentalReverbEffect,
-                    REVERB_PARAM_REVERB_DELAY, &this->mProperties.reverbDelay);
+            android::status_t status = android_erev_getParam(thiz->mEnvironmentalReverbEffect,
+                    REVERB_PARAM_REVERB_DELAY, &thiz->mProperties.reverbDelay);
             result = android_fx_statusToResult(status);
         }
 #endif
-        *pReverbDelay = this->mProperties.reverbDelay;
+        *pReverbDelay = thiz->mProperties.reverbDelay;
 
-        interface_unlock_peek(this);
+        interface_unlock_peek(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -514,21 +514,21 @@ static SLresult IEnvironmentalReverb_SetDiffusion(
     if (!(0 <= diffusion && diffusion <= 1000)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_exclusive(this);
-        this->mProperties.diffusion = diffusion;
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mProperties.diffusion = diffusion;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_setParam(this->mEnvironmentalReverbEffect,
+            android::status_t status = android_erev_setParam(thiz->mEnvironmentalReverbEffect,
                     REVERB_PARAM_DIFFUSION, &diffusion);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -543,22 +543,22 @@ static SLresult IEnvironmentalReverb_GetDiffusion(SLEnvironmentalReverbItf self,
     if (NULL == pDiffusion) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_peek(this);
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_peek(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_getParam(this->mEnvironmentalReverbEffect,
-                    REVERB_PARAM_DIFFUSION, &this->mProperties.diffusion);
+            android::status_t status = android_erev_getParam(thiz->mEnvironmentalReverbEffect,
+                    REVERB_PARAM_DIFFUSION, &thiz->mProperties.diffusion);
             result = android_fx_statusToResult(status);
         }
 #endif
-        *pDiffusion = this->mProperties.diffusion;
+        *pDiffusion = thiz->mProperties.diffusion;
 
-        interface_unlock_peek(this);
+        interface_unlock_peek(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -573,20 +573,20 @@ static SLresult IEnvironmentalReverb_SetDensity(SLEnvironmentalReverbItf self,
     if (!(0 <= density && density <= 1000)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_exclusive(this);
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_setParam(this->mEnvironmentalReverbEffect,
+            android::status_t status = android_erev_setParam(thiz->mEnvironmentalReverbEffect,
                     REVERB_PARAM_DENSITY, &density);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -601,22 +601,22 @@ static SLresult IEnvironmentalReverb_GetDensity(SLEnvironmentalReverbItf self,
     if (NULL == pDensity) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_peek(this);
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_peek(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_getParam(this->mEnvironmentalReverbEffect,
-                    REVERB_PARAM_DENSITY, &this->mProperties.density);
+            android::status_t status = android_erev_getParam(thiz->mEnvironmentalReverbEffect,
+                    REVERB_PARAM_DENSITY, &thiz->mProperties.density);
             result = android_fx_statusToResult(status);
         }
 #endif
-        *pDensity = this->mProperties.density;
+        *pDensity = thiz->mProperties.density;
 
-        interface_unlock_peek(this);
+        interface_unlock_peek(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -654,21 +654,21 @@ static SLresult IEnvironmentalReverb_SetEnvironmentalReverbProperties(SLEnvironm
             break;
         if (!(0 <= properties.density && properties.density <= 1000))
             break;
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_exclusive(this);
-        this->mProperties = properties;
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mProperties = properties;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_setParam(this->mEnvironmentalReverbEffect,
+            android::status_t status = android_erev_setParam(thiz->mEnvironmentalReverbEffect,
                     REVERB_PARAM_PROPERTIES, &properties);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     } while (0);
 
     SL_LEAVE_INTERFACE
@@ -683,22 +683,22 @@ static SLresult IEnvironmentalReverb_GetEnvironmentalReverbProperties(
     if (NULL == pProperties) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-        interface_lock_shared(this);
+        IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+        interface_lock_shared(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_ENVREVERB(this)) {
+        if (NO_ENVREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_erev_getParam(this->mEnvironmentalReverbEffect,
-                    REVERB_PARAM_PROPERTIES, &this->mProperties);
+            android::status_t status = android_erev_getParam(thiz->mEnvironmentalReverbEffect,
+                    REVERB_PARAM_PROPERTIES, &thiz->mProperties);
             result = android_fx_statusToResult(status);
         }
 #endif
-        *pProperties = this->mProperties;
+        *pProperties = thiz->mProperties;
 
-        interface_unlock_shared(this);
+        interface_unlock_shared(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -745,31 +745,31 @@ static const SLEnvironmentalReverbSettings IEnvironmentalReverb_default = {
 
 void IEnvironmentalReverb_init(void *self)
 {
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
-    this->mItf = &IEnvironmentalReverb_Itf;
-    this->mProperties = IEnvironmentalReverb_default;
+    IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
+    thiz->mItf = &IEnvironmentalReverb_Itf;
+    thiz->mProperties = IEnvironmentalReverb_default;
 #if defined(ANDROID)
-    memset(&this->mEnvironmentalReverbDescriptor, 0, sizeof(effect_descriptor_t));
+    memset(&thiz->mEnvironmentalReverbDescriptor, 0, sizeof(effect_descriptor_t));
     // placement new (explicit constructor)
-    (void) new (&this->mEnvironmentalReverbEffect) android::sp<android::AudioEffect>();
+    (void) new (&thiz->mEnvironmentalReverbEffect) android::sp<android::AudioEffect>();
 #endif
 }
 
 void IEnvironmentalReverb_deinit(void *self)
 {
 #if defined(ANDROID)
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+    IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
     // explicit destructor
-    this->mEnvironmentalReverbEffect.~sp();
+    thiz->mEnvironmentalReverbEffect.~sp();
 #endif
 }
 
 bool IEnvironmentalReverb_Expose(void *self)
 {
 #if defined(ANDROID)
-    IEnvironmentalReverb *this = (IEnvironmentalReverb *) self;
+    IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
     if (!android_fx_initEffectDescriptor(SL_IID_ENVIRONMENTALREVERB,
-            &this->mEnvironmentalReverbDescriptor)) {
+            &thiz->mEnvironmentalReverbDescriptor)) {
         SL_LOGE("EnvironmentalReverb initialization failed.");
         return false;
     }

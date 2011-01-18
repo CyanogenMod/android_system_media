@@ -23,7 +23,7 @@ static SLresult IMetadataExtraction_GetItemCount(SLMetadataExtractionItf self, S
 {
     SL_ENTER_INTERFACE
 
-    //IMetadataExtraction *this = (IMetadataExtraction *) self;
+    //IMetadataExtraction *thiz = (IMetadataExtraction *) self;
     if (NULL == pItemCount) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -40,7 +40,7 @@ static SLresult IMetadataExtraction_GetKeySize(SLMetadataExtractionItf self,
 {
     SL_ENTER_INTERFACE
 
-    //IMetadataExtraction *this = (IMetadataExtraction *) self;
+    //IMetadataExtraction *thiz = (IMetadataExtraction *) self;
     if (NULL == pKeySize) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -57,7 +57,7 @@ static SLresult IMetadataExtraction_GetKey(SLMetadataExtractionItf self,
 {
     SL_ENTER_INTERFACE
 
-    //IMetadataExtraction *this = (IMetadataExtraction *) self;
+    //IMetadataExtraction *thiz = (IMetadataExtraction *) self;
     if (NULL == pKey) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -79,7 +79,7 @@ static SLresult IMetadataExtraction_GetValueSize(SLMetadataExtractionItf self,
 {
     SL_ENTER_INTERFACE
 
-    //IMetadataExtraction *this = (IMetadataExtraction *) self;
+    //IMetadataExtraction *thiz = (IMetadataExtraction *) self;
     if (NULL == pValueSize) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -96,7 +96,7 @@ static SLresult IMetadataExtraction_GetValue(SLMetadataExtractionItf self,
 {
     SL_ENTER_INTERFACE
 
-    //IMetadataExtraction *this = (IMetadataExtraction *) self;
+    //IMetadataExtraction *thiz = (IMetadataExtraction *) self;
     if (NULL == pValue) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
@@ -123,15 +123,15 @@ static SLresult IMetadataExtraction_AddKeyFilter(SLMetadataExtractionItf self,
         SL_METADATA_FILTER_KEY | SL_METADATA_FILTER_KEY))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IMetadataExtraction *this = (IMetadataExtraction *) self;
-        interface_lock_exclusive(this);
-        this->mKeySize = keySize;
-        this->mKey = pKey;
-        this->mKeyEncoding = keyEncoding;
-        this->mValueLangCountry = pValueLangCountry; // should make a local copy
-        this->mValueEncoding = valueEncoding;
-        this->mFilterMask = filterMask;
-        interface_unlock_exclusive(this);
+        IMetadataExtraction *thiz = (IMetadataExtraction *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mKeySize = keySize;
+        thiz->mKey = pKey;
+        thiz->mKeyEncoding = keyEncoding;
+        thiz->mValueLangCountry = pValueLangCountry; // should make a local copy
+        thiz->mValueEncoding = valueEncoding;
+        thiz->mFilterMask = filterMask;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -143,8 +143,8 @@ static SLresult IMetadataExtraction_ClearKeyFilter(SLMetadataExtractionItf self)
 {
     SL_ENTER_INTERFACE
 
-    IMetadataExtraction *this = (IMetadataExtraction *) self;
-    this->mKeyFilter = 0;
+    IMetadataExtraction *thiz = (IMetadataExtraction *) self;
+    thiz->mKeyFilter = 0;
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -163,13 +163,13 @@ static const struct SLMetadataExtractionItf_ IMetadataExtraction_Itf = {
 
 void IMetadataExtraction_init(void *self)
 {
-    IMetadataExtraction *this = (IMetadataExtraction *) self;
-    this->mItf = &IMetadataExtraction_Itf;
-    this->mKeySize = 0;
-    this->mKey = NULL;
-    this->mKeyEncoding = 0 /*TBD*/;
-    this->mValueLangCountry = 0 /*TBD*/;
-    this->mValueEncoding = 0 /*TBD*/;
-    this->mFilterMask = 0 /*TBD*/;
-    this->mKeyFilter = 0;
+    IMetadataExtraction *thiz = (IMetadataExtraction *) self;
+    thiz->mItf = &IMetadataExtraction_Itf;
+    thiz->mKeySize = 0;
+    thiz->mKey = NULL;
+    thiz->mKeyEncoding = 0 /*TBD*/;
+    thiz->mValueLangCountry = 0 /*TBD*/;
+    thiz->mValueEncoding = 0 /*TBD*/;
+    thiz->mFilterMask = 0 /*TBD*/;
+    thiz->mKeyFilter = 0;
 }

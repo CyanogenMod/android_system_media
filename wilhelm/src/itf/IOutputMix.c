@@ -49,11 +49,11 @@ static SLresult IOutputMix_RegisterDeviceChangeCallback(SLOutputMixItf self,
 {
     SL_ENTER_INTERFACE
 
-    IOutputMix *this = (IOutputMix *) self;
-    interface_lock_exclusive(this);
-    this->mCallback = callback;
-    this->mContext = pContext;
-    interface_unlock_exclusive(this);
+    IOutputMix *thiz = (IOutputMix *) self;
+    interface_lock_exclusive(thiz);
+    thiz->mCallback = callback;
+    thiz->mContext = pContext;
+    interface_unlock_exclusive(thiz);
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -90,8 +90,8 @@ static const struct SLOutputMixItf_ IOutputMix_Itf = {
 
 void IOutputMix_init(void *self)
 {
-    IOutputMix *this = (IOutputMix *) self;
-    this->mItf = &IOutputMix_Itf;
-    this->mCallback = NULL;
-    this->mContext = NULL;
+    IOutputMix *thiz = (IOutputMix *) self;
+    thiz->mItf = &IOutputMix_Itf;
+    thiz->mCallback = NULL;
+    thiz->mContext = NULL;
 }

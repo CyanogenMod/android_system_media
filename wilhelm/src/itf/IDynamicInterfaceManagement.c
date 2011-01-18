@@ -26,15 +26,15 @@ static void HandleAdd(void *self, int MPH)
 {
 
     // validate input parameters
-    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-    assert(NULL != this);
-    IObject *thisObject = InterfaceToIObject(this);
+    IDynamicInterfaceManagement *thiz = (IDynamicInterfaceManagement *) self;
+    assert(NULL != thiz);
+    IObject *thisObject = InterfaceToIObject(thiz);
     assert(NULL != thisObject);
     assert(0 <= MPH && MPH < MPH_MAX);
-    const ClassTable *class__ = thisObject->mClass;
-    assert(NULL != class__);
-    int index = class__->mMPH_to_index[MPH];
-    assert(0 <= index && index < (int) class__->mInterfaceCount);
+    const ClassTable *clazz = thisObject->mClass;
+    assert(NULL != clazz);
+    int index = clazz->mMPH_to_index[MPH];
+    assert(0 <= index && index < (int) clazz->mInterfaceCount);
     SLuint8 *interfaceStateP = &thisObject->mInterfaceStates[index];
     SLresult result;
 
@@ -50,7 +50,7 @@ static void HandleAdd(void *self, int MPH)
         object_unlock_exclusive(thisObject);
 
         // this section runs with mutex unlocked
-        const struct iid_vtable *x = &class__->mInterfaces[index];
+        const struct iid_vtable *x = &clazz->mInterfaces[index];
         size_t offset = x->mOffset;
         void *thisItf = (char *) thisObject + offset;
         BoolHook expose = MPH_init_table[MPH].mExpose;
@@ -89,14 +89,14 @@ static void HandleAdd(void *self, int MPH)
     *interfaceStateP = state;
 
     // Make a copy of these, so we can call the callback with mutex unlocked
-    slDynamicInterfaceManagementCallback callback = this->mCallback;
-    void *context = this->mContext;
+    slDynamicInterfaceManagementCallback callback = thiz->mCallback;
+    void *context = thiz->mContext;
     object_unlock_exclusive(thisObject);
 
     // Note that the mutex is unlocked during the callback
     if (NULL != callback) {
         const SLInterfaceID iid = &SL_IID_array[MPH]; // equal but not == to the original IID
-        (*callback)(&this->mItf, context, SL_DYNAMIC_ITF_EVENT_ASYNC_TERMINATION, result, iid);
+        (*callback)(&thiz->mItf, context, SL_DYNAMIC_ITF_EVENT_ASYNC_TERMINATION, result, iid);
     }
 
 }
@@ -111,17 +111,17 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
     if (NULL == iid) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-        IObject *thisObject = InterfaceToIObject(this);
-        const ClassTable *class__ = thisObject->mClass;
+        IDynamicInterfaceManagement *thiz = (IDynamicInterfaceManagement *) self;
+        IObject *thisObject = InterfaceToIObject(thiz);
+        const ClassTable *clazz = thisObject->mClass;
         int MPH, index;
         if ((0 > (MPH = IID_to_MPH(iid))) ||
                 // no need to check for an initialization hook
                 // (NULL == MPH_init_table[MPH].mInit) ||
-                (0 > (index = class__->mMPH_to_index[MPH]))) {
+                (0 > (index = clazz->mMPH_to_index[MPH]))) {
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
-            assert(index < (int) class__->mInterfaceCount);
+            assert(index < (int) clazz->mInterfaceCount);
             SLuint8 *interfaceStateP = &thisObject->mInterfaceStates[index];
 
             // check interface state
@@ -135,7 +135,7 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
                     object_unlock_exclusive(thisObject);
 
                     // this section runs with mutex unlocked
-                    result = ThreadPool_add(&thisObject->mEngine->mThreadPool, HandleAdd, this,
+                    result = ThreadPool_add(&thisObject->mEngine->mThreadPool, HandleAdd, thiz,
                         MPH);
                     if (SL_RESULT_SUCCESS != result) {
                         // Engine was destroyed during add, or insufficient memory,
@@ -158,7 +158,7 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
                     object_unlock_exclusive(thisObject);
 
                     // this section runs with mutex unlocked
-                    const struct iid_vtable *x = &class__->mInterfaces[index];
+                    const struct iid_vtable *x = &clazz->mInterfaces[index];
                     size_t offset = x->mOffset;
                     void *thisItf = (char *) thisObject + offset;
                     // call the optional expose hook
@@ -208,14 +208,14 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
     if (NULL == iid) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-        IObject *thisObject = InterfaceToIObject(this);
-        const ClassTable *class__ = thisObject->mClass;
+        IDynamicInterfaceManagement *thiz = (IDynamicInterfaceManagement *) self;
+        IObject *thisObject = InterfaceToIObject(thiz);
+        const ClassTable *clazz = thisObject->mClass;
         int MPH, index;
         if ((0 > (MPH = IID_to_MPH(iid))) ||
                 // no need to check for an initialization hook
                 // (NULL == MPH_init_table[MPH].mInit) ||
-                (0 > (index = class__->mMPH_to_index[MPH]))) {
+                (0 > (index = clazz->mMPH_to_index[MPH]))) {
             result = SL_RESULT_PRECONDITIONS_VIOLATED;
         } else {
             SLuint8 *interfaceStateP = &thisObject->mInterfaceStates[index];
@@ -228,7 +228,7 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
             case INTERFACE_SUSPENDED:
                 {
                 // Compute address of the interface
-                const struct iid_vtable *x = &class__->mInterfaces[index];
+                const struct iid_vtable *x = &clazz->mInterfaces[index];
                 size_t offset = x->mOffset;
                 void *thisItf = (char *) thisObject + offset;
 
@@ -283,15 +283,15 @@ static void HandleResume(void *self, int MPH)
 {
 
     // validate input parameters
-    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-    assert(NULL != this);
-    IObject *thisObject = InterfaceToIObject(this);
+    IDynamicInterfaceManagement *thiz = (IDynamicInterfaceManagement *) self;
+    assert(NULL != thiz);
+    IObject *thisObject = InterfaceToIObject(thiz);
     assert(NULL != thisObject);
     assert(0 <= MPH && MPH < MPH_MAX);
-    const ClassTable *class__ = thisObject->mClass;
-    assert(NULL != class__);
-    int index = class__->mMPH_to_index[MPH];
-    assert(0 <= index && index < (int) class__->mInterfaceCount);
+    const ClassTable *clazz = thisObject->mClass;
+    assert(NULL != clazz);
+    int index = clazz->mMPH_to_index[MPH];
+    assert(0 <= index && index < (int) clazz->mInterfaceCount);
     SLuint8 *interfaceStateP = &thisObject->mInterfaceStates[index];
     SLresult result;
 
@@ -307,7 +307,7 @@ static void HandleResume(void *self, int MPH)
         object_unlock_exclusive(thisObject);
 
         // this section runs with mutex unlocked
-        const struct iid_vtable *x = &class__->mInterfaces[index];
+        const struct iid_vtable *x = &clazz->mInterfaces[index];
         size_t offset = x->mOffset;
         void *thisItf = (char *) thisObject + offset;
         VoidHook resume = MPH_init_table[MPH].mResume;
@@ -339,14 +339,14 @@ static void HandleResume(void *self, int MPH)
     *interfaceStateP = state;
 
     // Make a copy of these, so we can call the callback with mutex unlocked
-    slDynamicInterfaceManagementCallback callback = this->mCallback;
-    void *context = this->mContext;
+    slDynamicInterfaceManagementCallback callback = thiz->mCallback;
+    void *context = thiz->mContext;
     object_unlock_exclusive(thisObject);
 
     // Note that the mutex is unlocked during the callback
     if (NULL != callback) {
         const SLInterfaceID iid = &SL_IID_array[MPH]; // equal but not == to the original IID
-        (*callback)(&this->mItf, context, SL_DYNAMIC_ITF_EVENT_ASYNC_TERMINATION, result, iid);
+        (*callback)(&thiz->mItf, context, SL_DYNAMIC_ITF_EVENT_ASYNC_TERMINATION, result, iid);
     }
 }
 
@@ -360,17 +360,17 @@ static SLresult IDynamicInterfaceManagement_ResumeInterface(SLDynamicInterfaceMa
     if (NULL == iid) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-        IObject *thisObject = InterfaceToIObject(this);
-        const ClassTable *class__ = thisObject->mClass;
+        IDynamicInterfaceManagement *thiz = (IDynamicInterfaceManagement *) self;
+        IObject *thisObject = InterfaceToIObject(thiz);
+        const ClassTable *clazz = thisObject->mClass;
         int MPH, index;
         if ((0 > (MPH = IID_to_MPH(iid))) ||
                 // no need to check for an initialization hook
                 // (NULL == MPH_init_table[MPH].mInit) ||
-                (0 > (index = class__->mMPH_to_index[MPH]))) {
+                (0 > (index = clazz->mMPH_to_index[MPH]))) {
             result = SL_RESULT_PRECONDITIONS_VIOLATED;
         } else {
-            assert(index < (int) class__->mInterfaceCount);
+            assert(index < (int) clazz->mInterfaceCount);
             SLuint8 *interfaceStateP = &thisObject->mInterfaceStates[index];
 
             // check interface state
@@ -384,7 +384,7 @@ static SLresult IDynamicInterfaceManagement_ResumeInterface(SLDynamicInterfaceMa
                     object_unlock_exclusive(thisObject);
 
                     // this section runs with mutex unlocked
-                    result = ThreadPool_add(&thisObject->mEngine->mThreadPool, HandleResume, this,
+                    result = ThreadPool_add(&thisObject->mEngine->mThreadPool, HandleResume, thiz,
                         MPH);
                     if (SL_RESULT_SUCCESS != result) {
                         // Engine was destroyed during resume, or insufficient memory,
@@ -407,9 +407,9 @@ static SLresult IDynamicInterfaceManagement_ResumeInterface(SLDynamicInterfaceMa
                     object_unlock_exclusive(thisObject);
 
                     // this section runs with mutex unlocked
-                    const struct iid_vtable *x = &class__->mInterfaces[index];
+                    const struct iid_vtable *x = &clazz->mInterfaces[index];
                     size_t offset = x->mOffset;
-                    void *thisItf = (char *) this + offset;
+                    void *thisItf = (char *) thiz + offset;
                     VoidHook resume = MPH_init_table[MPH].mResume;
                     if (NULL != resume) {
                         (*resume)(thisItf);
@@ -443,11 +443,11 @@ static SLresult IDynamicInterfaceManagement_RegisterCallback(SLDynamicInterfaceM
 {
     SL_ENTER_INTERFACE
 
-    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-    IObject *thisObject = InterfaceToIObject(this);
+    IDynamicInterfaceManagement *thiz = (IDynamicInterfaceManagement *) self;
+    IObject *thisObject = InterfaceToIObject(thiz);
     object_lock_exclusive(thisObject);
-    this->mCallback = callback;
-    this->mContext = pContext;
+    thiz->mCallback = callback;
+    thiz->mContext = pContext;
     object_unlock_exclusive(thisObject);
     result = SL_RESULT_SUCCESS;
 
@@ -464,8 +464,8 @@ static const struct SLDynamicInterfaceManagementItf_ IDynamicInterfaceManagement
 
 void IDynamicInterfaceManagement_init(void *self)
 {
-    IDynamicInterfaceManagement *this = (IDynamicInterfaceManagement *) self;
-    this->mItf = &IDynamicInterfaceManagement_Itf;
-    this->mCallback = NULL;
-    this->mContext = NULL;
+    IDynamicInterfaceManagement *thiz = (IDynamicInterfaceManagement *) self;
+    thiz->mItf = &IDynamicInterfaceManagement_Itf;
+    thiz->mCallback = NULL;
+    thiz->mContext = NULL;
 }

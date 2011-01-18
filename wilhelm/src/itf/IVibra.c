@@ -23,10 +23,10 @@ static SLresult IVibra_Vibrate(SLVibraItf self, SLboolean vibrate)
 {
     SL_ENTER_INTERFACE
 
-    IVibra *this = (IVibra *) self;
-    interface_lock_poke(this);
-    this->mVibrate = SL_BOOLEAN_FALSE != vibrate; // normalize
-    interface_unlock_poke(this);
+    IVibra *thiz = (IVibra *) self;
+    interface_lock_poke(thiz);
+    thiz->mVibrate = SL_BOOLEAN_FALSE != vibrate; // normalize
+    interface_unlock_poke(thiz);
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -40,10 +40,10 @@ static SLresult IVibra_IsVibrating(SLVibraItf self, SLboolean *pVibrating)
     if (NULL == pVibrating) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IVibra *this = (IVibra *) self;
-        interface_lock_peek(this);
-        SLboolean vibrate = this->mVibrate;
-        interface_unlock_peek(this);
+        IVibra *thiz = (IVibra *) self;
+        interface_lock_peek(thiz);
+        SLboolean vibrate = thiz->mVibrate;
+        interface_unlock_peek(thiz);
         *pVibrating = vibrate;
         result = SL_RESULT_SUCCESS;
     }
@@ -62,10 +62,10 @@ static SLresult IVibra_SetFrequency(SLVibraItf self, SLmilliHertz frequency)
     } else if (!(d->minFrequency <= frequency && frequency <= d->maxFrequency)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IVibra *this = (IVibra *) self;
-        interface_lock_poke(this);
-        this->mFrequency = frequency;
-        interface_unlock_poke(this);
+        IVibra *thiz = (IVibra *) self;
+        interface_lock_poke(thiz);
+        thiz->mFrequency = frequency;
+        interface_unlock_poke(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -80,10 +80,10 @@ static SLresult IVibra_GetFrequency(SLVibraItf self, SLmilliHertz *pFrequency)
     if (NULL == pFrequency) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IVibra *this = (IVibra *) self;
-        interface_lock_peek(this);
-        SLmilliHertz frequency = this->mFrequency;
-        interface_unlock_peek(this);
+        IVibra *thiz = (IVibra *) self;
+        interface_lock_peek(thiz);
+        SLmilliHertz frequency = thiz->mFrequency;
+        interface_unlock_peek(thiz);
         *pFrequency = frequency;
         result = SL_RESULT_SUCCESS;
     }
@@ -102,10 +102,10 @@ static SLresult IVibra_SetIntensity(SLVibraItf self, SLpermille intensity)
     } else if (!(0 <= intensity && intensity <= 1000)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IVibra *this = (IVibra *) self;
-        interface_lock_poke(this);
-        this->mIntensity = intensity;
-        interface_unlock_poke(this);
+        IVibra *thiz = (IVibra *) self;
+        interface_lock_poke(thiz);
+        thiz->mIntensity = intensity;
+        interface_unlock_poke(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -124,10 +124,10 @@ static SLresult IVibra_GetIntensity(SLVibraItf self, SLpermille *pIntensity)
         if (!d->supportsIntensity) {
             result = SL_RESULT_PRECONDITIONS_VIOLATED;
         } else {
-            IVibra *this = (IVibra *) self;
-            interface_lock_peek(this);
-            SLpermille intensity = this->mIntensity;
-            interface_unlock_peek(this);
+            IVibra *thiz = (IVibra *) self;
+            interface_lock_peek(thiz);
+            SLpermille intensity = thiz->mIntensity;
+            interface_unlock_peek(thiz);
             *pIntensity = intensity;
             result = SL_RESULT_SUCCESS;
         }
@@ -148,10 +148,10 @@ static const struct SLVibraItf_ IVibra_Itf = {
 
 void IVibra_init(void *self)
 {
-    IVibra *this = (IVibra *) self;
-    this->mItf = &IVibra_Itf;
-    this->mVibrate = SL_BOOLEAN_FALSE;
+    IVibra *thiz = (IVibra *) self;
+    thiz->mItf = &IVibra_Itf;
+    thiz->mVibrate = SL_BOOLEAN_FALSE;
     // next 2 values are undefined per spec
-    this->mFrequency = Vibra_id_descriptors[0].descriptor->minFrequency;
-    this->mIntensity = 1000;
+    thiz->mFrequency = Vibra_id_descriptors[0].descriptor->minFrequency;
+    thiz->mIntensity = 1000;
 }

@@ -23,15 +23,15 @@ static SLresult I3DCommit_Commit(SL3DCommitItf self)
 {
     SL_ENTER_INTERFACE
 
-    I3DCommit *this = (I3DCommit *) self;
-    IObject *thisObject = InterfaceToIObject(this);
+    I3DCommit *thiz = (I3DCommit *) self;
+    IObject *thisObject = InterfaceToIObject(thiz);
     object_lock_exclusive(thisObject);
-    if (this->mDeferred) {
-        SLuint32 myGeneration = this->mGeneration;
+    if (thiz->mDeferred) {
+        SLuint32 myGeneration = thiz->mGeneration;
         do {
-            ++this->mWaiting;
+            ++thiz->mWaiting;
             object_cond_wait(thisObject);
-        } while (this->mGeneration == myGeneration);
+        } while (thiz->mGeneration == myGeneration);
     }
     object_unlock_exclusive(thisObject);
     result = SL_RESULT_SUCCESS;
@@ -44,10 +44,10 @@ static SLresult I3DCommit_SetDeferred(SL3DCommitItf self, SLboolean deferred)
 {
     SL_ENTER_INTERFACE
 
-    I3DCommit *this = (I3DCommit *) self;
-    IObject *thisObject = InterfaceToIObject(this);
+    I3DCommit *thiz = (I3DCommit *) self;
+    IObject *thisObject = InterfaceToIObject(thiz);
     object_lock_exclusive(thisObject);
-    this->mDeferred = SL_BOOLEAN_FALSE != deferred; // normalize
+    thiz->mDeferred = SL_BOOLEAN_FALSE != deferred; // normalize
     object_unlock_exclusive(thisObject);
     result = SL_RESULT_SUCCESS;
 
@@ -62,9 +62,9 @@ static const struct SL3DCommitItf_ I3DCommit_Itf = {
 
 void I3DCommit_init(void *self)
 {
-    I3DCommit *this = (I3DCommit *) self;
-    this->mItf = &I3DCommit_Itf;
-    this->mDeferred = SL_BOOLEAN_FALSE;
-    this->mGeneration = 0;
-    this->mWaiting = 0;
+    I3DCommit *thiz = (I3DCommit *) self;
+    thiz->mItf = &I3DCommit_Itf;
+    thiz->mDeferred = SL_BOOLEAN_FALSE;
+    thiz->mGeneration = 0;
+    thiz->mWaiting = 0;
 }

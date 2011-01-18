@@ -74,10 +74,10 @@ static SLresult IAudioIODeviceCapabilities_RegisterAvailableAudioInputsChangedCa
     SL_ENTER_INTERFACE
 
     IAudioIODeviceCapabilities * this = (IAudioIODeviceCapabilities *) self;
-    interface_lock_exclusive(this);
-    this->mAvailableAudioInputsChangedCallback = callback;
-    this->mAvailableAudioInputsChangedContext = pContext;
-    interface_unlock_exclusive(this);
+    interface_lock_exclusive(thiz);
+    thiz->mAvailableAudioInputsChangedCallback = callback;
+    thiz->mAvailableAudioInputsChangedContext = pContext;
+    interface_unlock_exclusive(thiz);
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -144,10 +144,10 @@ static SLresult IAudioIODeviceCapabilities_RegisterAvailableAudioOutputsChangedC
     SL_ENTER_INTERFACE
 
     IAudioIODeviceCapabilities * this = (IAudioIODeviceCapabilities *) self;
-    interface_lock_exclusive(this);
-    this->mAvailableAudioOutputsChangedCallback = callback;
-    this->mAvailableAudioOutputsChangedContext = pContext;
-    interface_unlock_exclusive(this);
+    interface_lock_exclusive(thiz);
+    thiz->mAvailableAudioOutputsChangedCallback = callback;
+    thiz->mAvailableAudioOutputsChangedContext = pContext;
+    interface_unlock_exclusive(thiz);
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -161,10 +161,10 @@ static SLresult IAudioIODeviceCapabilities_RegisterDefaultDeviceIDMapChangedCall
     SL_ENTER_INTERFACE
 
     IAudioIODeviceCapabilities * this = (IAudioIODeviceCapabilities *) self;
-    interface_lock_exclusive(this);
-    this->mDefaultDeviceIDMapChangedCallback = callback;
-    this->mDefaultDeviceIDMapChangedContext = pContext;
-    interface_unlock_exclusive(this);
+    interface_lock_exclusive(thiz);
+    thiz->mDefaultDeviceIDMapChangedCallback = callback;
+    thiz->mDefaultDeviceIDMapChangedContext = pContext;
+    interface_unlock_exclusive(thiz);
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -312,12 +312,12 @@ static const struct SLAudioIODeviceCapabilitiesItf_ IAudioIODeviceCapabilities_I
 
 void IAudioIODeviceCapabilities_init(void *self)
 {
-    IAudioIODeviceCapabilities *this = (IAudioIODeviceCapabilities *) self;
-    this->mItf = &IAudioIODeviceCapabilities_Itf;
-    this->mAvailableAudioInputsChangedCallback = NULL;
-    this->mAvailableAudioInputsChangedContext = NULL;
-    this->mAvailableAudioOutputsChangedCallback = NULL;
-    this->mAvailableAudioOutputsChangedContext = NULL;
-    this->mDefaultDeviceIDMapChangedCallback = NULL;
-    this->mDefaultDeviceIDMapChangedContext = NULL;
+    IAudioIODeviceCapabilities *thiz = (IAudioIODeviceCapabilities *) self;
+    thiz->mItf = &IAudioIODeviceCapabilities_Itf;
+    thiz->mAvailableAudioInputsChangedCallback = NULL;
+    thiz->mAvailableAudioInputsChangedContext = NULL;
+    thiz->mAvailableAudioOutputsChangedCallback = NULL;
+    thiz->mAvailableAudioOutputsChangedContext = NULL;
+    thiz->mDefaultDeviceIDMapChangedCallback = NULL;
+    thiz->mDefaultDeviceIDMapChangedContext = NULL;
 }

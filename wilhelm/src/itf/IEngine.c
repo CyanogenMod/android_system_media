@@ -38,14 +38,14 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, 
                 pInterfaceRequired, &exposedMask);
         }
         if (SL_RESULT_SUCCESS == result) {
-            CLEDDevice *this = (CLEDDevice *) construct(pCLEDDevice_class, exposedMask, self);
-            if (NULL == this) {
+            CLEDDevice *thiz = (CLEDDevice *) construct(pCLEDDevice_class, exposedMask, self);
+            if (NULL == thiz) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
-                this->mDeviceID = deviceID;
-                IObject_Publish(&this->mObject);
+                thiz->mDeviceID = deviceID;
+                IObject_Publish(&thiz->mObject);
                 // return the new LED object
-                *pDevice = &this->mObject.mItf;
+                *pDevice = &thiz->mObject.mItf;
             }
         }
     }
@@ -76,14 +76,14 @@ static SLresult IEngine_CreateVibraDevice(SLEngineItf self, SLObjectItf *pDevice
                 pInterfaceIds, pInterfaceRequired, &exposedMask);
         }
         if (SL_RESULT_SUCCESS == result) {
-            CVibraDevice *this = (CVibraDevice *) construct(pCVibraDevice_class, exposedMask, self);
-            if (NULL == this) {
+            CVibraDevice *thiz = (CVibraDevice *) construct(pCVibraDevice_class, exposedMask, self);
+            if (NULL == thiz) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
-                this->mDeviceID = deviceID;
-                IObject_Publish(&this->mObject);
+                thiz->mDeviceID = deviceID;
+                IObject_Publish(&thiz->mObject);
                 // return the new vibra object
-                *pDevice = &this->mObject.mItf;
+                *pDevice = &thiz->mObject.mItf;
             }
         }
     }
@@ -113,8 +113,8 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
         if (SL_RESULT_SUCCESS == result) {
 
             // Construct our new AudioPlayer instance
-            CAudioPlayer *this = (CAudioPlayer *) construct(pCAudioPlayer_class, exposedMask, self);
-            if (NULL == this) {
+            CAudioPlayer *thiz = (CAudioPlayer *) construct(pCAudioPlayer_class, exposedMask, self);
+            if (NULL == thiz) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
 
@@ -123,53 +123,53 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     // Initialize private fields not associated with an interface
 
                     // Default data source in case of failure in checkDataSource
-                    this->mDataSource.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
-                    this->mDataSource.mFormat.mFormatType = SL_DATAFORMAT_NULL;
+                    thiz->mDataSource.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
+                    thiz->mDataSource.mFormat.mFormatType = SL_DATAFORMAT_NULL;
 
                     // Default data sink in case of failure in checkDataSink
-                    this->mDataSink.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
-                    this->mDataSink.mFormat.mFormatType = SL_DATAFORMAT_NULL;
+                    thiz->mDataSink.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
+                    thiz->mDataSink.mFormat.mFormatType = SL_DATAFORMAT_NULL;
 
                     // Default is no per-channel mute or solo
-                    this->mMuteMask = 0;
-                    this->mSoloMask = 0;
+                    thiz->mMuteMask = 0;
+                    thiz->mSoloMask = 0;
 
                     // Will be set soon for PCM buffer queues, or later by platform-specific code
                     // during Realize or Prefetch
-                    this->mNumChannels = 0;
-                    this->mSampleRateMilliHz = 0;
+                    thiz->mNumChannels = 0;
+                    thiz->mSampleRateMilliHz = 0;
 
                     // More default values, in case destructor needs to be called early
-                    this->mDirectLevel = 0;
+                    thiz->mDirectLevel = 0;
 #ifdef USE_OUTPUTMIXEXT
-                    this->mTrack = NULL;
-                    this->mGains[0] = 1.0f;
-                    this->mGains[1] = 1.0f;
-                    this->mDestroyRequested = SL_BOOLEAN_FALSE;
+                    thiz->mTrack = NULL;
+                    thiz->mGains[0] = 1.0f;
+                    thiz->mGains[1] = 1.0f;
+                    thiz->mDestroyRequested = SL_BOOLEAN_FALSE;
 #endif
 #ifdef USE_SNDFILE
-                    this->mSndFile.mPathname = NULL;
-                    this->mSndFile.mSNDFILE = NULL;
-                    memset(&this->mSndFile.mSfInfo, 0, sizeof(SF_INFO));
-                    memset(&this->mSndFile.mMutex, 0, sizeof(pthread_mutex_t));
-                    this->mSndFile.mEOF = SL_BOOLEAN_FALSE;
-                    this->mSndFile.mWhich = 0;
-                    memset(this->mSndFile.mBuffer, 0, sizeof(this->mSndFile.mBuffer));
+                    thiz->mSndFile.mPathname = NULL;
+                    thiz->mSndFile.mSNDFILE = NULL;
+                    memset(&thiz->mSndFile.mSfInfo, 0, sizeof(SF_INFO));
+                    memset(&thiz->mSndFile.mMutex, 0, sizeof(pthread_mutex_t));
+                    thiz->mSndFile.mEOF = SL_BOOLEAN_FALSE;
+                    thiz->mSndFile.mWhich = 0;
+                    memset(thiz->mSndFile.mBuffer, 0, sizeof(thiz->mSndFile.mBuffer));
 #endif
 #ifdef ANDROID
                     // extra safe initializations of pointers, in case of incomplete construction
-                    this->mpLock = NULL;
-                    this->mAudioTrack = NULL;
+                    thiz->mpLock = NULL;
+                    thiz->mAudioTrack = NULL;
                     // placement new (explicit constructor)
-                    (void) new (&this->mSfPlayer) android::sp<android::SfPlayer>();
-                    (void) new (&this->mAuxEffect) android::sp<android::AudioEffect>();
+                    (void) new (&thiz->mSfPlayer) android::sp<android::SfPlayer>();
+                    (void) new (&thiz->mAuxEffect) android::sp<android::AudioEffect>();
 #endif
 
                     // Check the source and sink parameters against generic constraints,
                     // and make a local copy of all parameters in case other application threads
                     // change memory concurrently.
 
-                    result = checkDataSource("pAudioSrc", pAudioSrc, &this->mDataSource,
+                    result = checkDataSource("pAudioSrc", pAudioSrc, &thiz->mDataSource,
                             DATALOCATOR_MASK_URI | DATALOCATOR_MASK_ADDRESS |
                             DATALOCATOR_MASK_BUFFERQUEUE
 #ifdef ANDROID
@@ -182,7 +182,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         break;
                     }
 
-                    result = checkDataSink("pAudioSnk", pAudioSnk, &this->mDataSink,
+                    result = checkDataSink("pAudioSnk", pAudioSnk, &thiz->mDataSink,
                             DATALOCATOR_MASK_OUTPUTMIX, DATAFORMAT_MASK_NULL);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
@@ -193,7 +193,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     pAudioSnk = NULL;
 
                     // Check that the requested interfaces are compatible with the data source
-                    result = checkSourceFormatVsInterfacesCompatibility(&this->mDataSource,
+                    result = checkSourceFormatVsInterfacesCompatibility(&thiz->mDataSource,
                             pCAudioPlayer_class, exposedMask);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
@@ -202,39 +202,39 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     // copy the buffer queue count from source locator to the buffer queue interface
                     // we have already range-checked the value down to a smaller width
 
-                    switch (this->mDataSource.mLocator.mLocatorType) {
+                    switch (thiz->mDataSource.mLocator.mLocatorType) {
                     case SL_DATALOCATOR_BUFFERQUEUE:
 #ifdef ANDROID
                     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
 #endif
-                        this->mBufferQueue.mNumBuffers =
-                                (SLuint16) this->mDataSource.mLocator.mBufferQueue.numBuffers;
-                        assert(SL_DATAFORMAT_PCM == this->mDataSource.mFormat.mFormatType);
-                        this->mNumChannels = this->mDataSource.mFormat.mPCM.numChannels;
-                        this->mSampleRateMilliHz = this->mDataSource.mFormat.mPCM.samplesPerSec;
+                        thiz->mBufferQueue.mNumBuffers =
+                                (SLuint16) thiz->mDataSource.mLocator.mBufferQueue.numBuffers;
+                        assert(SL_DATAFORMAT_PCM == thiz->mDataSource.mFormat.mFormatType);
+                        thiz->mNumChannels = thiz->mDataSource.mFormat.mPCM.numChannels;
+                        thiz->mSampleRateMilliHz = thiz->mDataSource.mFormat.mPCM.samplesPerSec;
                         break;
                     default:
-                        this->mBufferQueue.mNumBuffers = 0;
+                        thiz->mBufferQueue.mNumBuffers = 0;
                         break;
                     }
 
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
-                    result = android_audioPlayer_checkSourceSink(this);
+                    result = android_audioPlayer_checkSourceSink(thiz);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
 #endif
 
 #ifdef USE_SNDFILE
-                    result = SndFile_checkAudioPlayerSourceSink(this);
+                    result = SndFile_checkAudioPlayerSourceSink(thiz);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
 #endif
 
 #ifdef USE_OUTPUTMIXEXT
-                    result = IOutputMixExt_checkAudioPlayerSourceSink(this);
+                    result = IOutputMixExt_checkAudioPlayerSourceSink(thiz);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
@@ -242,45 +242,45 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 
                     // Allocate memory for buffer queue
 
-                    //if (0 != this->mBufferQueue.mNumBuffers) {
+                    //if (0 != thiz->mBufferQueue.mNumBuffers) {
                         // inline allocation of circular mArray, up to a typical max
-                        if (BUFFER_HEADER_TYPICAL >= this->mBufferQueue.mNumBuffers) {
-                            this->mBufferQueue.mArray = this->mBufferQueue.mTypical;
+                        if (BUFFER_HEADER_TYPICAL >= thiz->mBufferQueue.mNumBuffers) {
+                            thiz->mBufferQueue.mArray = thiz->mBufferQueue.mTypical;
                         } else {
                             // Avoid possible integer overflow during multiplication; this arbitrary
                             // maximum is big enough to not interfere with real applications, but
                             // small enough to not overflow.
-                            if (this->mBufferQueue.mNumBuffers >= 256) {
+                            if (thiz->mBufferQueue.mNumBuffers >= 256) {
                                 result = SL_RESULT_MEMORY_FAILURE;
                                 break;
                             }
-                            this->mBufferQueue.mArray = (BufferHeader *) malloc((this->mBufferQueue.
+                            thiz->mBufferQueue.mArray = (BufferHeader *) malloc((thiz->mBufferQueue.
                                 mNumBuffers + 1) * sizeof(BufferHeader));
-                            if (NULL == this->mBufferQueue.mArray) {
+                            if (NULL == thiz->mBufferQueue.mArray) {
                                 result = SL_RESULT_MEMORY_FAILURE;
                                 break;
                             }
                         }
-                        this->mBufferQueue.mFront = this->mBufferQueue.mArray;
-                        this->mBufferQueue.mRear = this->mBufferQueue.mArray;
+                        thiz->mBufferQueue.mFront = thiz->mBufferQueue.mArray;
+                        thiz->mBufferQueue.mRear = thiz->mBufferQueue.mArray;
                         //}
 
                         // used to store the data source of our audio player
-                        this->mDynamicSource.mDataSource = &this->mDataSource.u.mSource;
+                        thiz->mDynamicSource.mDataSource = &thiz->mDataSource.u.mSource;
 
                         // platform-specific initialization
 #ifdef ANDROID
-                        android_audioPlayer_create(this);
+                        android_audioPlayer_create(thiz);
 #endif
 
                 } while (0);
 
                 if (SL_RESULT_SUCCESS != result) {
-                    IObject_Destroy(&this->mObject.mItf);
+                    IObject_Destroy(&thiz->mObject.mItf);
                 } else {
-                    IObject_Publish(&this->mObject);
+                    IObject_Publish(&thiz->mObject);
                     // return the new audio player object
-                    *pPlayer = &this->mObject.mItf;
+                    *pPlayer = &thiz->mObject.mItf;
                 }
 
             }
@@ -315,9 +315,9 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
         if (SL_RESULT_SUCCESS == result) {
 
             // Construct our new AudioRecorder instance
-            CAudioRecorder *this = (CAudioRecorder *) construct(pCAudioRecorder_class, exposedMask,
+            CAudioRecorder *thiz = (CAudioRecorder *) construct(pCAudioRecorder_class, exposedMask,
                     self);
-            if (NULL == this) {
+            if (NULL == thiz) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
 
@@ -326,30 +326,30 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                     // Initialize fields not associated with any interface
 
                     // Default data source in case of failure in checkDataSource
-                    this->mDataSource.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
-                    this->mDataSource.mFormat.mFormatType = SL_DATAFORMAT_NULL;
+                    thiz->mDataSource.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
+                    thiz->mDataSource.mFormat.mFormatType = SL_DATAFORMAT_NULL;
 
                     // Default data sink in case of failure in checkDataSink
-                    this->mDataSink.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
-                    this->mDataSink.mFormat.mFormatType = SL_DATAFORMAT_NULL;
+                    thiz->mDataSink.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
+                    thiz->mDataSink.mFormat.mFormatType = SL_DATAFORMAT_NULL;
 
                     // These fields are set to real values by
                     // android_audioRecorder_checkSourceSinkSupport.  Note that the data sink is
                     // always PCM buffer queue, so we know the channel count and sample rate early.
-                    this->mNumChannels = 0;
-                    this->mSampleRateMilliHz = 0;
+                    thiz->mNumChannels = 0;
+                    thiz->mSampleRateMilliHz = 0;
 #ifdef ANDROID
-                    this->mAudioRecord = NULL;
-                    this->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
+                    thiz->mAudioRecord = NULL;
+                    thiz->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
 #endif
 
                     // Check the source and sink parameters, and make a local copy of all parameters
-                    result = checkDataSource("pAudioSrc", pAudioSrc, &this->mDataSource,
+                    result = checkDataSource("pAudioSrc", pAudioSrc, &thiz->mDataSource,
                             DATALOCATOR_MASK_IODEVICE, DATAFORMAT_MASK_NULL);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
-                    result = checkDataSink("pAudioSnk", pAudioSnk, &this->mDataSink,
+                    result = checkDataSink("pAudioSnk", pAudioSnk, &thiz->mDataSink,
                             DATALOCATOR_MASK_URI
 #ifdef ANDROID
                             | DATALOCATOR_MASK_ANDROIDSIMPLEBUFFERQUEUE
@@ -366,7 +366,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
-                    result = android_audioRecorder_checkSourceSinkSupport(this);
+                    result = android_audioRecorder_checkSourceSinkSupport(thiz);
                     if (SL_RESULT_SUCCESS != result) {
                         SL_LOGE("Cannot create AudioRecorder: invalid source or sink");
                         break;
@@ -375,46 +375,46 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
 
 #ifdef ANDROID
                     // Allocate memory for buffer queue
-                    SLuint32 locatorType = this->mDataSink.mLocator.mLocatorType;
+                    SLuint32 locatorType = thiz->mDataSink.mLocator.mLocatorType;
                     if (locatorType == SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE) {
-                        this->mBufferQueue.mNumBuffers =
-                            this->mDataSink.mLocator.mBufferQueue.numBuffers;
+                        thiz->mBufferQueue.mNumBuffers =
+                            thiz->mDataSink.mLocator.mBufferQueue.numBuffers;
                         // inline allocation of circular Buffer Queue mArray, up to a typical max
-                        if (BUFFER_HEADER_TYPICAL >= this->mBufferQueue.mNumBuffers) {
-                            this->mBufferQueue.mArray = this->mBufferQueue.mTypical;
+                        if (BUFFER_HEADER_TYPICAL >= thiz->mBufferQueue.mNumBuffers) {
+                            thiz->mBufferQueue.mArray = thiz->mBufferQueue.mTypical;
                         } else {
                             // Avoid possible integer overflow during multiplication; this arbitrary
                             // maximum is big enough to not interfere with real applications, but
                             // small enough to not overflow.
-                            if (this->mBufferQueue.mNumBuffers >= 256) {
+                            if (thiz->mBufferQueue.mNumBuffers >= 256) {
                                 result = SL_RESULT_MEMORY_FAILURE;
                                 break;
                             }
-                            this->mBufferQueue.mArray = (BufferHeader *) malloc((this->mBufferQueue.
+                            thiz->mBufferQueue.mArray = (BufferHeader *) malloc((thiz->mBufferQueue.
                                     mNumBuffers + 1) * sizeof(BufferHeader));
-                            if (NULL == this->mBufferQueue.mArray) {
+                            if (NULL == thiz->mBufferQueue.mArray) {
                                 result = SL_RESULT_MEMORY_FAILURE;
                                 break;
                             }
                         }
-                        this->mBufferQueue.mFront = this->mBufferQueue.mArray;
-                        this->mBufferQueue.mRear = this->mBufferQueue.mArray;
+                        thiz->mBufferQueue.mFront = thiz->mBufferQueue.mArray;
+                        thiz->mBufferQueue.mRear = thiz->mBufferQueue.mArray;
                     }
 #endif
 
                     // platform-specific initialization
 #ifdef ANDROID
-                    android_audioRecorder_create(this);
+                    android_audioRecorder_create(thiz);
 #endif
 
                 } while (0);
 
                 if (SL_RESULT_SUCCESS != result) {
-                    IObject_Destroy(&this->mObject.mItf);
+                    IObject_Destroy(&thiz->mObject.mItf);
                 } else {
-                    IObject_Publish(&this->mObject);
+                    IObject_Publish(&thiz->mObject);
                     // return the new audio recorder object
-                    *pRecorder = &this->mObject.mItf;
+                    *pRecorder = &thiz->mObject.mItf;
                 }
             }
 
@@ -450,8 +450,8 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
                 pInterfaceIds, pInterfaceRequired, &exposedMask);
         }
         if (SL_RESULT_SUCCESS == result) {
-            CMidiPlayer *this = (CMidiPlayer *) construct(pCMidiPlayer_class, exposedMask, self);
-            if (NULL == this) {
+            CMidiPlayer *thiz = (CMidiPlayer *) construct(pCMidiPlayer_class, exposedMask, self);
+            if (NULL == thiz) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
 #if 0
@@ -462,10 +462,10 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
                 "pLEDArray", pLEDArray, NULL | IODEVICE, NULL
 #endif
                 // a fake value - why not use value from IPlay_init? what does CT check for?
-                this->mPlay.mDuration = 0;
-                IObject_Publish(&this->mObject);
+                thiz->mPlay.mDuration = 0;
+                IObject_Publish(&thiz->mObject);
                 // return the new MIDI player object
-                *pPlayer = &this->mObject.mItf;
+                *pPlayer = &thiz->mObject.mItf;
             }
         }
     }
@@ -496,13 +496,13 @@ static SLresult IEngine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
                 pInterfaceIds, pInterfaceRequired, &exposedMask);
         }
         if (SL_RESULT_SUCCESS == result) {
-            CListener *this = (CListener *) construct(pCListener_class, exposedMask, self);
-            if (NULL == this) {
+            CListener *thiz = (CListener *) construct(pCListener_class, exposedMask, self);
+            if (NULL == thiz) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
-                IObject_Publish(&this->mObject);
+                IObject_Publish(&thiz->mObject);
                 // return the new 3D listener object
-                *pListener = &this->mObject.mItf;
+                *pListener = &thiz->mObject.mItf;
             }
         }
     }
@@ -533,14 +533,14 @@ static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup, SLu
                 pInterfaceIds, pInterfaceRequired, &exposedMask);
         }
         if (SL_RESULT_SUCCESS == result) {
-            C3DGroup *this = (C3DGroup *) construct(pC3DGroup_class, exposedMask, self);
-            if (NULL == this) {
+            C3DGroup *thiz = (C3DGroup *) construct(pC3DGroup_class, exposedMask, self);
+            if (NULL == thiz) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
-                this->mMemberMask = 0;
-                IObject_Publish(&this->mObject);
+                thiz->mMemberMask = 0;
+                IObject_Publish(&thiz->mObject);
                 // return the new 3D group object
-                *pGroup = &this->mObject.mItf;
+                *pGroup = &thiz->mObject.mItf;
             }
         }
     }
@@ -567,24 +567,24 @@ static SLresult IEngine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix, SLu
         result = checkInterfaces(pCOutputMix_class, numInterfaces,
             pInterfaceIds, pInterfaceRequired, &exposedMask);
         if (SL_RESULT_SUCCESS == result) {
-            COutputMix *this = (COutputMix *) construct(pCOutputMix_class, exposedMask, self);
-            if (NULL == this) {
+            COutputMix *thiz = (COutputMix *) construct(pCOutputMix_class, exposedMask, self);
+            if (NULL == thiz) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
 #ifdef ANDROID
-                android_outputMix_create(this);
+                android_outputMix_create(thiz);
 #endif
 #ifdef USE_SDL
-                IEngine *thisEngine = &this->mObject.mEngine->mEngine;
+                IEngine *thisEngine = &thiz->mObject.mEngine->mEngine;
                 interface_lock_exclusive(thisEngine);
                 bool unpause = false;
                 if (NULL == thisEngine->mOutputMix) {
-                    thisEngine->mOutputMix = this;
+                    thisEngine->mOutputMix = thiz;
                     unpause = true;
                 }
                 interface_unlock_exclusive(thisEngine);
 #endif
-                IObject_Publish(&this->mObject);
+                IObject_Publish(&thiz->mObject);
 #ifdef USE_SDL
                 if (unpause) {
                     // Enable SDL_callback to be called periodically by SDL's internal thread
@@ -592,7 +592,7 @@ static SLresult IEngine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix, SLu
                 }
 #endif
                 // return the new output mix object
-                *pMix = &this->mObject.mItf;
+                *pMix = &thiz->mObject.mItf;
             }
         }
     }
@@ -622,17 +622,17 @@ static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self, SLObjectItf *p
                 pInterfaceIds, pInterfaceRequired, &exposedMask);
         }
         if (SL_RESULT_SUCCESS == result) {
-            CMetadataExtractor *this = (CMetadataExtractor *)
+            CMetadataExtractor *thiz = (CMetadataExtractor *)
                 construct(pCMetadataExtractor_class, exposedMask, self);
-            if (NULL == this) {
+            if (NULL == thiz) {
                 result = SL_RESULT_MEMORY_FAILURE;
             } else {
 #if 0
                 "pDataSource", pDataSource, NONE, NONE
 #endif
-                IObject_Publish(&this->mObject);
+                IObject_Publish(&thiz->mObject);
                 // return the new metadata extractor object
-                *pMetadataExtractor = &this->mObject.mItf;
+                *pMetadataExtractor = &thiz->mObject.mItf;
                 result = SL_RESULT_SUCCESS;
             }
         }
@@ -670,14 +670,14 @@ static SLresult IEngine_QueryNumSupportedInterfaces(SLEngineItf self,
     if (NULL == pNumSupportedInterfaces) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        const ClassTable *class__ = objectIDtoClass(objectID);
-        if (NULL == class__) {
+        const ClassTable *clazz = objectIDtoClass(objectID);
+        if (NULL == clazz) {
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             SLuint32 count = 0;
             SLuint32 i;
-            for (i = 0; i < class__->mInterfaceCount; ++i) {
-                switch (class__->mInterfaces[i].mInterface) {
+            for (i = 0; i < clazz->mInterfaceCount; ++i) {
+                switch (clazz->mInterfaces[i].mInterface) {
                 case INTERFACE_IMPLICIT:
                 case INTERFACE_IMPLICIT_PREREALIZE:
                 case INTERFACE_EXPLICIT:
@@ -710,14 +710,14 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         *pInterfaceId = NULL;
-        const ClassTable *class__ = objectIDtoClass(objectID);
-        if (NULL == class__) {
+        const ClassTable *clazz = objectIDtoClass(objectID);
+        if (NULL == clazz) {
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             result = SL_RESULT_PARAMETER_INVALID; // will be reset later
             SLuint32 i;
-            for (i = 0; i < class__->mInterfaceCount; ++i) {
-                switch (class__->mInterfaces[i].mInterface) {
+            for (i = 0; i < clazz->mInterfaceCount; ++i) {
+                switch (clazz->mInterfaces[i].mInterface) {
                 case INTERFACE_IMPLICIT:
                 case INTERFACE_IMPLICIT_PREREALIZE:
                 case INTERFACE_EXPLICIT:
@@ -731,7 +731,7 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
                     break;
                 }
                 if (index == 0) {
-                    *pInterfaceId = &SL_IID_array[class__->mInterfaces[i].mMPH];
+                    *pInterfaceId = &SL_IID_array[clazz->mInterfaces[i].mMPH];
                     result = SL_RESULT_SUCCESS;
                     break;
                 }
@@ -859,21 +859,21 @@ static const struct SLEngineItf_ IEngine_Itf = {
 
 void IEngine_init(void *self)
 {
-    IEngine *this = (IEngine *) self;
-    this->mItf = &IEngine_Itf;
+    IEngine *thiz = (IEngine *) self;
+    thiz->mItf = &IEngine_Itf;
     // mLossOfControlGlobal is initialized in slCreateEngine
 #ifdef USE_SDL
-    this->mOutputMix = NULL;
+    thiz->mOutputMix = NULL;
 #endif
-    this->mInstanceCount = 1; // ourself
-    this->mInstanceMask = 0;
-    this->mChangedMask = 0;
+    thiz->mInstanceCount = 1; // ourself
+    thiz->mInstanceMask = 0;
+    thiz->mChangedMask = 0;
     unsigned i;
     for (i = 0; i < MAX_INSTANCE; ++i) {
-        this->mInstances[i] = NULL;
+        thiz->mInstances[i] = NULL;
     }
-    this->mShutdown = SL_BOOLEAN_FALSE;
-    this->mShutdownAck = SL_BOOLEAN_FALSE;
+    thiz->mShutdown = SL_BOOLEAN_FALSE;
+    thiz->mShutdownAck = SL_BOOLEAN_FALSE;
 }
 
 void IEngine_deinit(void *self)
@@ -890,7 +890,7 @@ static XAresult IEngine_CreateCameraDevice(XAEngineItf self, XAObjectItf *pDevic
 {
     XA_ENTER_INTERFACE
 
-    //IXAEngine *this = (IXAEngine *) self;
+    //IXAEngine *thiz = (IXAEngine *) self;
     result = SL_RESULT_FEATURE_UNSUPPORTED;
 
     XA_LEAVE_INTERFACE
@@ -903,7 +903,7 @@ static XAresult IEngine_CreateRadioDevice(XAEngineItf self, XAObjectItf *pDevice
 {
     XA_ENTER_INTERFACE
 
-    //IXAEngine *this = (IXAEngine *) self;
+    //IXAEngine *thiz = (IXAEngine *) self;
     result = SL_RESULT_FEATURE_UNSUPPORTED;
 
     XA_LEAVE_INTERFACE
@@ -952,9 +952,9 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
         if (XA_RESULT_SUCCESS == result) {
 
             // Construct our new MediaPlayer instance
-            CMediaPlayer *this = (CMediaPlayer *) construct(pCMediaPlayer_class, exposedMask,
+            CMediaPlayer *thiz = (CMediaPlayer *) construct(pCMediaPlayer_class, exposedMask,
                     &((CEngine *) ((IXAEngine *) self)->mThis)->mEngine.mItf);
-            if (NULL == this) {
+            if (NULL == thiz) {
                 result = XA_RESULT_MEMORY_FAILURE;
             } else {
 
@@ -969,7 +969,7 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                     // Check the source and sink parameters against generic constraints
 
                     result = checkDataSource("pDataSrc", (const SLDataSource *) pDataSrc,
-                            &this->mDataSource, DATALOCATOR_MASK_URI
+                            &thiz->mDataSource, DATALOCATOR_MASK_URI
 #ifdef ANDROID
                             | DATALOCATOR_MASK_ANDROIDFD
                             | DATALOCATOR_MASK_ANDROIDBUFFERQUEUE
@@ -980,26 +980,26 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                     }
 
                     result = checkDataSource("pBankSrc", (const SLDataSource *) pBankSrc,
-                            &this->mBankSource, DATALOCATOR_MASK_NULL | DATALOCATOR_MASK_URI |
+                            &thiz->mBankSource, DATALOCATOR_MASK_NULL | DATALOCATOR_MASK_URI |
                             DATALOCATOR_MASK_ADDRESS, DATAFORMAT_MASK_NULL);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
                     }
 
                     result = checkDataSink("pAudioSnk", (const SLDataSink *) pAudioSnk,
-                            &this->mAudioSink, DATALOCATOR_MASK_OUTPUTMIX, DATAFORMAT_MASK_NULL);
+                            &thiz->mAudioSink, DATALOCATOR_MASK_OUTPUTMIX, DATAFORMAT_MASK_NULL);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
                     }
 
                     result = checkDataSink("pImageVideoSnk", (const SLDataSink *) pImageVideoSnk,
-                            &this->mImageVideoSink, DATALOCATOR_MASK_NATIVEDISPLAY,
+                            &thiz->mImageVideoSink, DATALOCATOR_MASK_NATIVEDISPLAY,
                             DATAFORMAT_MASK_NULL);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
                     }
 
-                    result = checkDataSink("pVibra", (const SLDataSink *) pVibra, &this->mVibraSink,
+                    result = checkDataSink("pVibra", (const SLDataSink *) pVibra, &thiz->mVibraSink,
                             DATALOCATOR_MASK_NULL | DATALOCATOR_MASK_IODEVICE,
                             DATAFORMAT_MASK_NULL);
                     if (XA_RESULT_SUCCESS != result) {
@@ -1007,7 +1007,7 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                     }
 
                     result = checkDataSink("pLEDArray", (const SLDataSink *) pLEDArray,
-                            &this->mLEDArraySink, DATALOCATOR_MASK_NULL | DATALOCATOR_MASK_IODEVICE,
+                            &thiz->mLEDArraySink, DATALOCATOR_MASK_NULL | DATALOCATOR_MASK_IODEVICE,
                             DATAFORMAT_MASK_NULL);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
@@ -1026,7 +1026,7 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
 
                     // check the source and sink parameters against platform support
 #ifdef ANDROID
-                    // result = android_mediaPlayer_checkSourceSink(this);
+                    // result = android_mediaPlayer_checkSourceSink(thiz);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
                     }
@@ -1034,17 +1034,17 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
 
                     // platform-specific initialization
 #ifdef ANDROID
-                    android_Player_create(this);
+                    android_Player_create(thiz);
 #endif
 
                 } while (0);
 
                 if (XA_RESULT_SUCCESS != result) {
-                    IObject_Destroy(&this->mObject.mItf);
+                    IObject_Destroy(&thiz->mObject.mItf);
                 } else {
-                    IObject_Publish(&this->mObject);
+                    IObject_Publish(&thiz->mObject);
                     // return the new media player object
-                    *pPlayer = (XAObjectItf) &this->mObject.mItf;
+                    *pPlayer = (XAObjectItf) &thiz->mObject.mItf;
                 }
 
             }
@@ -1063,7 +1063,7 @@ static XAresult IEngine_CreateMediaRecorder(XAEngineItf self, XAObjectItf *pReco
 {
     XA_ENTER_INTERFACE
 
-    //IXAEngine *this = (IXAEngine *) self;
+    //IXAEngine *thiz = (IXAEngine *) self;
     result = SL_RESULT_FEATURE_UNSUPPORTED;
 
 #if 0
@@ -1114,7 +1114,7 @@ static XAresult IEngine_GetImplementationInfo(XAEngineItf self, XAuint32 *pMajor
 {
     XA_ENTER_INTERFACE
 
-    //IXAEngine *this = (IXAEngine *) self;
+    //IXAEngine *thiz = (IXAEngine *) self;
     result = SL_RESULT_FEATURE_UNSUPPORTED;
 
     XA_LEAVE_INTERFACE
@@ -1236,6 +1236,6 @@ static const struct XAEngineItf_ IXAEngine_Itf = {
 
 void IXAEngine_init(void *self)
 {
-    IXAEngine *this = (IXAEngine *) self;
-    this->mItf = &IXAEngine_Itf;
+    IXAEngine *thiz = (IXAEngine *) self;
+    thiz->mItf = &IXAEngine_Itf;
 }
