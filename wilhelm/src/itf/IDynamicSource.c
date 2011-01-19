@@ -26,7 +26,7 @@ static SLresult IDynamicSource_SetSource(SLDynamicSourceItf self, SLDataSource *
     if (NULL == pDataSource) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IDynamicSource *this = (IDynamicSource *) self;
+        IDynamicSource *thiz = (IDynamicSource *) self;
 #if 0
         DataLocatorFormat myDataSource;
         SLresult result;
@@ -35,10 +35,10 @@ static SLresult IDynamicSource_SetSource(SLDynamicSourceItf self, SLDataSource *
         // handle result here
 #endif
         // need to lock the object, as a change to source can impact most of object
-        IObject *thisObject = InterfaceToIObject(this);
+        IObject *thisObject = InterfaceToIObject(thiz);
         object_lock_exclusive(thisObject);
         // a bit of a simplification to say the least! (see Khronos bug 6728)
-        this->mDataSource = pDataSource;
+        thiz->mDataSource = pDataSource;
         object_unlock_exclusive(thisObject);
         result = SL_RESULT_FEATURE_UNSUPPORTED;
     }
@@ -53,8 +53,8 @@ static const struct SLDynamicSourceItf_ IDynamicSource_Itf = {
 
 void IDynamicSource_init(void *self)
 {
-    IDynamicSource *this = (IDynamicSource *) self;
-    this->mItf = &IDynamicSource_Itf;
+    IDynamicSource *thiz = (IDynamicSource *) self;
+    thiz->mItf = &IDynamicSource_Itf;
     // mDataSource will be re-initialized later in the containing object constructor
-    this->mDataSource = NULL;
+    thiz->mDataSource = NULL;
 }

@@ -27,32 +27,32 @@
 
 void *sync_start(void *arg)
 {
-    CEngine *this = (CEngine *) arg;
+    CEngine *thiz = (CEngine *) arg;
     for (;;) {
 
         // FIXME should be driven by cond_signal rather than polling,
         // or at least make the poll interval longer or configurable
         usleep(20000*5);
 
-        object_lock_exclusive(&this->mObject);
-        if (this->mEngine.mShutdown) {
-            this->mEngine.mShutdownAck = SL_BOOLEAN_TRUE;
+        object_lock_exclusive(&thiz->mObject);
+        if (thiz->mEngine.mShutdown) {
+            thiz->mEngine.mShutdownAck = SL_BOOLEAN_TRUE;
             // broadcast not signal, because this condition is also used for other purposes
-            object_cond_broadcast(&this->mObject);
-            object_unlock_exclusive(&this->mObject);
+            object_cond_broadcast(&thiz->mObject);
+            object_unlock_exclusive(&thiz->mObject);
             break;
         }
-        if (this->m3DCommit.mWaiting) {
-            this->m3DCommit.mWaiting = 0;
-            ++this->m3DCommit.mGeneration;
+        if (thiz->m3DCommit.mWaiting) {
+            thiz->m3DCommit.mWaiting = 0;
+            ++thiz->m3DCommit.mGeneration;
             // There might be more than one thread blocked in Commit, so wake them all
-            object_cond_broadcast(&this->mObject);
+            object_cond_broadcast(&thiz->mObject);
             // here is where we would process the enqueued 3D commands
         }
-        // unsigned instanceMask = this->mEngine.mInstanceMask; // for debugger
-        unsigned changedMask = this->mEngine.mChangedMask;
-        this->mEngine.mChangedMask = 0;
-        object_unlock_exclusive(&this->mObject);
+        // unsigned instanceMask = thiz->mEngine.mInstanceMask; // for debugger
+        unsigned changedMask = thiz->mEngine.mChangedMask;
+        thiz->mEngine.mChangedMask = 0;
+        object_unlock_exclusive(&thiz->mObject);
 
         // now we know which objects exist, and which of those have changes
 
@@ -61,7 +61,7 @@ void *sync_start(void *arg)
             unsigned i = ctz(combinedMask);
             assert(MAX_INSTANCE > i);
             combinedMask &= ~(1 << i);
-            IObject *instance = (IObject *) this->mEngine.mInstances[i];
+            IObject *instance = (IObject *) thiz->mEngine.mInstances[i];
             // Could be NULL during construct or destroy
             if (NULL == instance) {
                 continue;

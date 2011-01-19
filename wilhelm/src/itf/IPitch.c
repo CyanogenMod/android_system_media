@@ -23,14 +23,14 @@ static SLresult IPitch_SetPitch(SLPitchItf self, SLpermille pitch)
 {
     SL_ENTER_INTERFACE
 
-    IPitch *this = (IPitch *) self;
+    IPitch *thiz = (IPitch *) self;
     // const, so no lock needed
-    if (!(this->mMinPitch <= pitch && pitch <= this->mMaxPitch)) {
+    if (!(thiz->mMinPitch <= pitch && pitch <= thiz->mMaxPitch)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        interface_lock_poke(this);
-        this->mPitch = pitch;
-        interface_unlock_poke(this);
+        interface_lock_poke(thiz);
+        thiz->mPitch = pitch;
+        interface_unlock_poke(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -45,10 +45,10 @@ static SLresult IPitch_GetPitch(SLPitchItf self, SLpermille *pPitch)
     if (NULL == pPitch) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPitch *this = (IPitch *) self;
-        interface_lock_peek(this);
-        SLpermille pitch = this->mPitch;
-        interface_unlock_peek(this);
+        IPitch *thiz = (IPitch *) self;
+        interface_lock_peek(thiz);
+        SLpermille pitch = thiz->mPitch;
+        interface_unlock_peek(thiz);
         *pPitch = pitch;
         result = SL_RESULT_SUCCESS;
     }
@@ -67,10 +67,10 @@ static SLresult IPitch_GetPitchCapabilities(SLPitchItf self,
     if (NULL == pMinPitch && NULL == pMaxPitch)
         result = SL_RESULT_PARAMETER_INVALID;
 #endif
-    IPitch *this = (IPitch *) self;
+    IPitch *thiz = (IPitch *) self;
     // const, so no lock needed
-    SLpermille minPitch = this->mMinPitch;
-    SLpermille maxPitch = this->mMaxPitch;
+    SLpermille minPitch = thiz->mMinPitch;
+    SLpermille maxPitch = thiz->mMaxPitch;
     if (NULL != pMinPitch)
         *pMinPitch = minPitch;
     if (NULL != pMaxPitch)
@@ -89,10 +89,10 @@ static const struct SLPitchItf_ IPitch_Itf = {
 
 void IPitch_init(void *self)
 {
-    IPitch *this = (IPitch *) self;
-    this->mItf = &IPitch_Itf;
-    this->mPitch = 1000;
+    IPitch *thiz = (IPitch *) self;
+    thiz->mItf = &IPitch_Itf;
+    thiz->mPitch = 1000;
     // const
-    this->mMinPitch = -500;
-    this->mMaxPitch = 2000;
+    thiz->mMinPitch = -500;
+    thiz->mMaxPitch = 2000;
 }

@@ -26,14 +26,14 @@ static SLresult IVolume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
     if (!((SL_MILLIBEL_MIN <= level) && (level <= PLATFORM_MILLIBEL_MAX_VOLUME))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IVolume *this = (IVolume *) self;
-        interface_lock_exclusive(this);
-        SLmillibel oldLevel = this->mLevel;
+        IVolume *thiz = (IVolume *) self;
+        interface_lock_exclusive(thiz);
+        SLmillibel oldLevel = thiz->mLevel;
         if (oldLevel != level) {
-            this->mLevel = level;
-            interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+            thiz->mLevel = level;
+            interface_unlock_exclusive_attributes(thiz, ATTR_GAIN);
         } else
-            interface_unlock_exclusive(this);
+            interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -48,10 +48,10 @@ static SLresult IVolume_GetVolumeLevel(SLVolumeItf self, SLmillibel *pLevel)
     if (NULL == pLevel) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IVolume *this = (IVolume *) self;
-        interface_lock_peek(this);
-        SLmillibel level = this->mLevel;
-        interface_unlock_peek(this);
+        IVolume *thiz = (IVolume *) self;
+        interface_lock_peek(thiz);
+        SLmillibel level = thiz->mLevel;
+        interface_unlock_peek(thiz);
         *pLevel = level;
         result = SL_RESULT_SUCCESS;
     }
@@ -79,15 +79,15 @@ static SLresult IVolume_SetMute(SLVolumeItf self, SLboolean mute)
 {
     SL_ENTER_INTERFACE
 
-    IVolume *this = (IVolume *) self;
+    IVolume *thiz = (IVolume *) self;
     mute = SL_BOOLEAN_FALSE != mute; // normalize
-    interface_lock_exclusive(this);
-    SLboolean oldMute = this->mMute;
+    interface_lock_exclusive(thiz);
+    SLboolean oldMute = thiz->mMute;
     if (oldMute != mute) {
-        this->mMute = (SLuint8) mute;
-        interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+        thiz->mMute = (SLuint8) mute;
+        interface_unlock_exclusive_attributes(thiz, ATTR_GAIN);
     } else
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -101,10 +101,10 @@ static SLresult IVolume_GetMute(SLVolumeItf self, SLboolean *pMute)
     if (NULL == pMute) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IVolume *this = (IVolume *) self;
-        interface_lock_peek(this);
-        SLboolean mute = this->mMute;
-        interface_unlock_peek(this);
+        IVolume *thiz = (IVolume *) self;
+        interface_lock_peek(thiz);
+        SLboolean mute = thiz->mMute;
+        interface_unlock_peek(thiz);
         *pMute = mute;
         result = SL_RESULT_SUCCESS;
     }
@@ -117,15 +117,15 @@ static SLresult IVolume_EnableStereoPosition(SLVolumeItf self, SLboolean enable)
 {
     SL_ENTER_INTERFACE
 
-    IVolume *this = (IVolume *) self;
+    IVolume *thiz = (IVolume *) self;
     enable = SL_BOOLEAN_FALSE != enable; // normalize
-    interface_lock_exclusive(this);
-    SLboolean oldEnable = this->mEnableStereoPosition;
+    interface_lock_exclusive(thiz);
+    SLboolean oldEnable = thiz->mEnableStereoPosition;
     if (oldEnable != enable) {
-        this->mEnableStereoPosition = (SLuint8) enable;
-        interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+        thiz->mEnableStereoPosition = (SLuint8) enable;
+        interface_unlock_exclusive_attributes(thiz, ATTR_GAIN);
     } else {
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
     result = SL_RESULT_SUCCESS;
 
@@ -140,10 +140,10 @@ static SLresult IVolume_IsEnabledStereoPosition(SLVolumeItf self, SLboolean *pEn
     if (NULL == pEnable) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IVolume *this = (IVolume *) self;
-        interface_lock_peek(this);
-        SLboolean enable = this->mEnableStereoPosition;
-        interface_unlock_peek(this);
+        IVolume *thiz = (IVolume *) self;
+        interface_lock_peek(thiz);
+        SLboolean enable = thiz->mEnableStereoPosition;
+        interface_unlock_peek(thiz);
         *pEnable = enable;
         result = SL_RESULT_SUCCESS;
     }
@@ -159,14 +159,14 @@ static SLresult IVolume_SetStereoPosition(SLVolumeItf self, SLpermille stereoPos
     if (!((-1000 <= stereoPosition) && (1000 >= stereoPosition))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IVolume *this = (IVolume *) self;
-        interface_lock_exclusive(this);
-        SLpermille oldStereoPosition = this->mStereoPosition;
+        IVolume *thiz = (IVolume *) self;
+        interface_lock_exclusive(thiz);
+        SLpermille oldStereoPosition = thiz->mStereoPosition;
         if (oldStereoPosition != stereoPosition) {
-            this->mStereoPosition = stereoPosition;
-            interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+            thiz->mStereoPosition = stereoPosition;
+            interface_unlock_exclusive_attributes(thiz, ATTR_GAIN);
         } else
-            interface_unlock_exclusive(this);
+            interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -181,10 +181,10 @@ static SLresult IVolume_GetStereoPosition(SLVolumeItf self, SLpermille *pStereoP
     if (NULL == pStereoPosition) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IVolume *this = (IVolume *) self;
-        interface_lock_peek(this);
-        SLpermille stereoPosition = this->mStereoPosition;
-        interface_unlock_peek(this);
+        IVolume *thiz = (IVolume *) self;
+        interface_lock_peek(thiz);
+        SLpermille stereoPosition = thiz->mStereoPosition;
+        interface_unlock_peek(thiz);
         *pStereoPosition = stereoPosition;
         result = SL_RESULT_SUCCESS;
     }
@@ -207,10 +207,10 @@ static const struct SLVolumeItf_ IVolume_Itf = {
 
 void IVolume_init(void *self)
 {
-    IVolume *this = (IVolume *) self;
-    this->mItf = &IVolume_Itf;
-    this->mLevel = 0;
-    this->mMute = SL_BOOLEAN_FALSE;
-    this->mEnableStereoPosition = SL_BOOLEAN_FALSE;
-    this->mStereoPosition = 0;
+    IVolume *thiz = (IVolume *) self;
+    thiz->mItf = &IVolume_Itf;
+    thiz->mLevel = 0;
+    thiz->mMute = SL_BOOLEAN_FALSE;
+    thiz->mEnableStereoPosition = SL_BOOLEAN_FALSE;
+    thiz->mStereoPosition = 0;
 }

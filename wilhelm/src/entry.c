@@ -83,8 +83,8 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         }
 
         // if an engine already exists, then increment its ref count
-        CEngine *this = theOneTrueEngine;
-        if (NULL != this) {
+        CEngine *thiz = theOneTrueEngine;
+        if (NULL != thiz) {
             assert(0 < theOneTrueRefCount);
             ++theOneTrueRefCount;
 
@@ -94,11 +94,11 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
             ok = pthread_mutex_unlock(&theOneTrueMutex);
             assert(0 == ok);
             needToUnlockTheOneTrueMutex = false;
-            object_lock_exclusive(&this->mObject);
+            object_lock_exclusive(&thiz->mObject);
 
             // now expose additional interfaces not requested by the earlier engine create
             const struct iid_vtable *x = pCEngine_class->mInterfaces;
-            SLuint8 *interfaceStateP = this->mObject.mInterfaceStates;
+            SLuint8 *interfaceStateP = thiz->mObject.mInterfaceStates;
             SLuint32 index;
             for (index = 0; index < pCEngine_class->mInterfaceCount; ++index, ++x,
                     exposedMask >>= 1, ++interfaceStateP) {
@@ -109,7 +109,7 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
                     if (exposedMask & 1) {
                         const struct MPH_init *mi = &MPH_init_table[x->mMPH];
                         BoolHook expose = mi->mExpose;
-                        if ((NULL == expose) || (*expose)((char *) this + x->mOffset)) {
+                        if ((NULL == expose) || (*expose)((char *) thiz + x->mOffset)) {
                             *interfaceStateP = INTERFACE_EXPOSED;
                         }
                         // FIXME log or report to application that expose hook failed
@@ -122,9 +122,9 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
                     break;
                 }
             }
-            object_unlock_exclusive(&this->mObject);
+            object_unlock_exclusive(&thiz->mObject);
             // return the shared engine object
-            *pEngine = &this->mObject.mItf;
+            *pEngine = &thiz->mObject.mItf;
             break;
         }
 
@@ -136,29 +136,29 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         android::DataSource::RegisterDefaultSniffers();
 #endif
 
-        this = (CEngine *) construct(pCEngine_class, exposedMask, NULL);
-        if (NULL == this) {
+        thiz = (CEngine *) construct(pCEngine_class, exposedMask, NULL);
+        if (NULL == thiz) {
             result = SL_RESULT_MEMORY_FAILURE;
             break;
         }
 
         // initialize fields not associated with an interface
         // mThreadPool is initialized in CEngine_Realize
-        memset(&this->mThreadPool, 0, sizeof(ThreadPool));
-        memset(&this->mSyncThread, 0, sizeof(pthread_t));
+        memset(&thiz->mThreadPool, 0, sizeof(ThreadPool));
+        memset(&thiz->mSyncThread, 0, sizeof(pthread_t));
 #if defined(ANDROID)
-        this->mEqNumPresets = 0;
-        this->mEqPresetNames = NULL;
+        thiz->mEqNumPresets = 0;
+        thiz->mEqPresetNames = NULL;
 #endif
         // initialize fields related to an interface
-        this->mObject.mLossOfControlMask = lossOfControlGlobal ? ~0 : 0;
-        this->mEngine.mLossOfControlGlobal = lossOfControlGlobal;
-        this->mEngineCapabilities.mThreadSafe = threadSafe;
-        IObject_Publish(&this->mObject);
-        theOneTrueEngine = this;
+        thiz->mObject.mLossOfControlMask = lossOfControlGlobal ? ~0 : 0;
+        thiz->mEngine.mLossOfControlGlobal = lossOfControlGlobal;
+        thiz->mEngineCapabilities.mThreadSafe = threadSafe;
+        IObject_Publish(&thiz->mObject);
+        theOneTrueEngine = thiz;
         theOneTrueRefCount = 1;
         // return the new engine object
-        *pEngine = &this->mObject.mItf;
+        *pEngine = &thiz->mObject.mItf;
 
     } while(0);
 
@@ -190,17 +190,17 @@ SL_API SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOpti
 /** Internal function for slQuerySupportedEngineInterfaces and xaQuerySupportedEngineInterfaces */
 
 static SLresult liQueryNumSupportedInterfaces(SLuint32 *pNumSupportedInterfaces,
-        const ClassTable *class__)
+        const ClassTable *clazz)
 {
     SLresult result;
     if (NULL == pNumSupportedInterfaces) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        assert(NULL != class__);
+        assert(NULL != clazz);
         SLuint32 count = 0;
         SLuint32 i;
-        for (i = 0; i < class__->mInterfaceCount; ++i) {
-            switch (class__->mInterfaces[i].mInterface) {
+        for (i = 0; i < clazz->mInterfaceCount; ++i) {
+            switch (clazz->mInterfaces[i].mInterface) {
             case INTERFACE_IMPLICIT:
             case INTERFACE_IMPLICIT_PREREALIZE:
             case INTERFACE_EXPLICIT:
@@ -238,18 +238,18 @@ SL_API SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSup
 /** Internal function for slQuerySupportedEngineInterfaces and xaQuerySupportedEngineInterfaces */
 
 static SLresult liQuerySupportedInterfaces(SLuint32 index, SLInterfaceID *pInterfaceId,
-        const ClassTable *class__)
+        const ClassTable *clazz)
 {
     SLresult result;
     if (NULL == pInterfaceId) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         *pInterfaceId = NULL;
-        assert(NULL != class__);
+        assert(NULL != clazz);
         result = SL_RESULT_PARAMETER_INVALID;   // will be reset later
         SLuint32 i;
-        for (i = 0; i < class__->mInterfaceCount; ++i) {
-            switch (class__->mInterfaces[i].mInterface) {
+        for (i = 0; i < clazz->mInterfaceCount; ++i) {
+            switch (clazz->mInterfaces[i].mInterface) {
             case INTERFACE_IMPLICIT:
             case INTERFACE_IMPLICIT_PREREALIZE:
             case INTERFACE_EXPLICIT:
@@ -263,7 +263,7 @@ static SLresult liQuerySupportedInterfaces(SLuint32 index, SLInterfaceID *pInter
                 break;
             }
             if (index == 0) {
-                *pInterfaceId = &SL_IID_array[class__->mInterfaces[i].mMPH];
+                *pInterfaceId = &SL_IID_array[clazz->mInterfaces[i].mMPH];
                 result = SL_RESULT_SUCCESS;
                 break;
             }

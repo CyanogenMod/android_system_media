@@ -43,9 +43,6 @@ typedef struct {
     SLuint32 mFramesMixed;  ///< Number of sample frames mixed from track; reset periodically
 } Track;
 
-#ifndef this
-#define this this_
-#endif
-extern SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *this);
-extern void audioPlayerGainUpdate(CAudioPlayer *this);
+extern SLresult IOutputMixExt_checkAudioPlayerSourceSink(CAudioPlayer *thiz);
+extern void audioPlayerGainUpdate(CAudioPlayer *thiz);
 extern void IOutputMixExt_FillBuffer(SLOutputMixExtItf self, void *pBuffer, SLuint32 size);

@@ -26,10 +26,10 @@ static SLresult IMIDITempo_SetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 
     if (!(1 <= tpqn && tpqn <= 32767)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IMIDITempo *this = (IMIDITempo *) self;
-        interface_lock_poke(this);
-        this->mTicksPerQuarterNote = tpqn;
-        interface_unlock_poke(this);
+        IMIDITempo *thiz = (IMIDITempo *) self;
+        interface_lock_poke(thiz);
+        thiz->mTicksPerQuarterNote = tpqn;
+        interface_unlock_poke(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -44,10 +44,10 @@ static SLresult IMIDITempo_GetTicksPerQuarterNote(SLMIDITempoItf self, SLuint32 
     if (NULL == pTpqn) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IMIDITempo *this = (IMIDITempo *) self;
-        interface_lock_peek(this);
-        SLuint32 ticksPerQuarterNote = this->mTicksPerQuarterNote;
-        interface_unlock_peek(this);
+        IMIDITempo *thiz = (IMIDITempo *) self;
+        interface_lock_peek(thiz);
+        SLuint32 ticksPerQuarterNote = thiz->mTicksPerQuarterNote;
+        interface_unlock_peek(thiz);
         *pTpqn = ticksPerQuarterNote;
         result = SL_RESULT_SUCCESS;
     }
@@ -64,10 +64,10 @@ static SLresult IMIDITempo_SetMicrosecondsPerQuarterNote(SLMIDITempoItf self, SL
     if (!(1 <= uspqn && uspqn <= 16777215)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IMIDITempo *this = (IMIDITempo *) self;
-        interface_lock_poke(this);
-        this->mMicrosecondsPerQuarterNote = uspqn;
-        interface_unlock_poke(this);
+        IMIDITempo *thiz = (IMIDITempo *) self;
+        interface_lock_poke(thiz);
+        thiz->mMicrosecondsPerQuarterNote = uspqn;
+        interface_unlock_poke(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -82,10 +82,10 @@ static SLresult IMIDITempo_GetMicrosecondsPerQuarterNote(SLMIDITempoItf self, SL
     if (NULL == uspqn) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IMIDITempo *this = (IMIDITempo *) self;
-        interface_lock_peek(this);
-        SLuint32 microsecondsPerQuarterNote = this->mMicrosecondsPerQuarterNote;
-        interface_unlock_peek(this);
+        IMIDITempo *thiz = (IMIDITempo *) self;
+        interface_lock_peek(thiz);
+        SLuint32 microsecondsPerQuarterNote = thiz->mMicrosecondsPerQuarterNote;
+        interface_unlock_peek(thiz);
         *uspqn = microsecondsPerQuarterNote;
         result = SL_RESULT_SUCCESS;
     }
@@ -103,8 +103,8 @@ static const struct SLMIDITempoItf_ IMIDITempo_Itf = {
 
 void IMIDITempo_init(void *self)
 {
-    IMIDITempo *this = (IMIDITempo *) self;
-    this->mItf = &IMIDITempo_Itf;
-    this->mTicksPerQuarterNote = 32; // wrong
-    this->mMicrosecondsPerQuarterNote = 100; // wrong
+    IMIDITempo *thiz = (IMIDITempo *) self;
+    thiz->mItf = &IMIDITempo_Itf;
+    thiz->mTicksPerQuarterNote = 32; // wrong
+    thiz->mMicrosecondsPerQuarterNote = 100; // wrong
 }

@@ -23,13 +23,13 @@ static SLresult IRatePitch_SetRate(SLRatePitchItf self, SLpermille rate)
 {
     SL_ENTER_INTERFACE
 
-    IRatePitch *this = (IRatePitch *) self;
-    if (!(this->mMinRate <= rate && rate <= this->mMaxRate)) {
+    IRatePitch *thiz = (IRatePitch *) self;
+    if (!(thiz->mMinRate <= rate && rate <= thiz->mMaxRate)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        interface_lock_poke(this);
-        this->mRate = rate;
-        interface_unlock_poke(this);
+        interface_lock_poke(thiz);
+        thiz->mRate = rate;
+        interface_unlock_poke(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -44,10 +44,10 @@ static SLresult IRatePitch_GetRate(SLRatePitchItf self, SLpermille *pRate)
     if (NULL == pRate) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IRatePitch *this = (IRatePitch *) self;
-        interface_lock_peek(this);
-        SLpermille rate = this->mRate;
-        interface_unlock_peek(this);
+        IRatePitch *thiz = (IRatePitch *) self;
+        interface_lock_peek(thiz);
+        SLpermille rate = thiz->mRate;
+        interface_unlock_peek(thiz);
         *pRate = rate;
         result = SL_RESULT_SUCCESS;
     }
@@ -66,10 +66,10 @@ static SLresult IRatePitch_GetRatePitchCapabilities(SLRatePitchItf self,
     if (NULL == pMinRate && NULL == pMaxRate)
         result = SL_RESULT_PARAMETER_INVALID;
 #endif
-    IRatePitch *this = (IRatePitch *) self;
+    IRatePitch *thiz = (IRatePitch *) self;
     // const, so no lock required
-    SLpermille minRate = this->mMinRate;
-    SLpermille maxRate = this->mMaxRate;
+    SLpermille minRate = thiz->mMinRate;
+    SLpermille maxRate = thiz->mMaxRate;
     if (NULL != pMinRate)
         *pMinRate = minRate;
     if (NULL != pMaxRate)
@@ -88,10 +88,10 @@ static const struct SLRatePitchItf_ IRatePitch_Itf = {
 
 void IRatePitch_init(void *self)
 {
-    IRatePitch *this = (IRatePitch *) self;
-    this->mItf = &IRatePitch_Itf;
-    this->mRate = 1000;
+    IRatePitch *thiz = (IRatePitch *) self;
+    thiz->mItf = &IRatePitch_Itf;
+    thiz->mRate = 1000;
     // const
-    this->mMinRate = 500;
-    this->mMaxRate = 2000;
+    thiz->mMinRate = 500;
+    thiz->mMaxRate = 2000;
 }

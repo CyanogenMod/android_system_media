@@ -17,7 +17,6 @@
 //#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
-#undef this // FIXME shouldn't have to do this, no pun intended
 #include <media/IMediaPlayerService.h>
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/SurfaceComposerClient.h>

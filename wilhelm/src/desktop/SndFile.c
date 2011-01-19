@@ -32,20 +32,20 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
     if (SL_PLAYSTATE_PLAYING != state) {
         return;
     }
-    struct SndFile *this = &thisAP->mSndFile;
+    struct SndFile *thiz = &thisAP->mSndFile;
     SLresult result;
-    pthread_mutex_lock(&this->mMutex);
-    if (this->mEOF) {
-        pthread_mutex_unlock(&this->mMutex);
+    pthread_mutex_lock(&thiz->mMutex);
+    if (thiz->mEOF) {
+        pthread_mutex_unlock(&thiz->mMutex);
         return;
     }
-    short *pBuffer = &this->mBuffer[this->mWhich * SndFile_BUFSIZE];
-    if (++this->mWhich >= SndFile_NUMBUFS) {
-        this->mWhich = 0;
+    short *pBuffer = &thiz->mBuffer[thiz->mWhich * SndFile_BUFSIZE];
+    if (++thiz->mWhich >= SndFile_NUMBUFS) {
+        thiz->mWhich = 0;
     }
     sf_count_t count;
-    count = sf_read_short(this->mSNDFILE, pBuffer, (sf_count_t) SndFile_BUFSIZE);
-    pthread_mutex_unlock(&this->mMutex);
+    count = sf_read_short(thiz->mSNDFILE, pBuffer, (sf_count_t) SndFile_BUFSIZE);
+    pthread_mutex_unlock(&thiz->mMutex);
     bool headAtNewPos = false;
     object_lock_exclusive(&thisAP->mObject);
     slPlayCallback callback = thisAP->mPlay.mCallback;
@@ -82,7 +82,7 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
         }
     } else {
         thisAP->mPlay.mState = SL_PLAYSTATE_PAUSED;
-        this->mEOF = SL_BOOLEAN_TRUE;
+        thiz->mEOF = SL_BOOLEAN_TRUE;
         // this would result in a non-monotonically increasing position, so don't do it
         // thisAP->mPlay.mPosition = thisAP->mPlay.mDuration;
         object_unlock_exclusive_attributes(&thisAP->mObject, ATTR_TRANSPORT);
@@ -134,9 +134,9 @@ SLboolean SndFile_IsSupported(const SF_INFO *sfinfo)
 
 /** \brief Check whether the partially-constructed AudioPlayer is compatible with libsndfile */
 
-SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
+SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *thiz)
 {
-    const SLDataSource *pAudioSrc = &this->mDataSource.u.mSource;
+    const SLDataSource *pAudioSrc = &thiz->mDataSource.u.mSource;
     SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
     SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
     switch (locatorType) {
@@ -167,17 +167,17 @@ SLresult SndFile_checkAudioPlayerSourceSink(CAudioPlayer *this)
             assert(false);
             return SL_RESULT_INTERNAL_ERROR;
         }
-        this->mSndFile.mPathname = uri;
-        this->mBufferQueue.mNumBuffers = SndFile_NUMBUFS;
+        thiz->mSndFile.mPathname = uri;
+        thiz->mBufferQueue.mNumBuffers = SndFile_NUMBUFS;
         }
         break;
     default:
         return SL_RESULT_CONTENT_UNSUPPORTED;
     }
-    this->mSndFile.mWhich = 0;
-    this->mSndFile.mSNDFILE = NULL;
-    // this->mSndFile.mMutex is initialized only when there is a valid mSNDFILE
-    this->mSndFile.mEOF = SL_BOOLEAN_FALSE;
+    thiz->mSndFile.mWhich = 0;
+    thiz->mSndFile.mSNDFILE = NULL;
+    // thiz->mSndFile.mMutex is initialized only when there is a valid mSNDFILE
+    thiz->mSndFile.mEOF = SL_BOOLEAN_FALSE;
 
     return SL_RESULT_SUCCESS;
 }
@@ -236,35 +236,35 @@ void audioPlayerTransportUpdate(CAudioPlayer *audioPlayer)
 
 /** \brief Called by CAudioPlayer_Realize */
 
-SLresult SndFile_Realize(CAudioPlayer *this)
+SLresult SndFile_Realize(CAudioPlayer *thiz)
 {
     SLresult result = SL_RESULT_SUCCESS;
-    if (NULL != this->mSndFile.mPathname) {
-        this->mSndFile.mSfInfo.format = 0;
-        this->mSndFile.mSNDFILE = sf_open(
-            (const char *) this->mSndFile.mPathname, SFM_READ, &this->mSndFile.mSfInfo);
-        if (NULL == this->mSndFile.mSNDFILE) {
+    if (NULL != thiz->mSndFile.mPathname) {
+        thiz->mSndFile.mSfInfo.format = 0;
+        thiz->mSndFile.mSNDFILE = sf_open(
+            (const char *) thiz->mSndFile.mPathname, SFM_READ, &thiz->mSndFile.mSfInfo);
+        if (NULL == thiz->mSndFile.mSNDFILE) {
             result = SL_RESULT_CONTENT_NOT_FOUND;
-        } else if (!SndFile_IsSupported(&this->mSndFile.mSfInfo)) {
-            sf_close(this->mSndFile.mSNDFILE);
-            this->mSndFile.mSNDFILE = NULL;
+        } else if (!SndFile_IsSupported(&thiz->mSndFile.mSfInfo)) {
+            sf_close(thiz->mSndFile.mSNDFILE);
+            thiz->mSndFile.mSNDFILE = NULL;
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         } else {
             int ok;
-            ok = pthread_mutex_init(&this->mSndFile.mMutex, (const pthread_mutexattr_t *) NULL);
+            ok = pthread_mutex_init(&thiz->mSndFile.mMutex, (const pthread_mutexattr_t *) NULL);
             assert(0 == ok);
-            SLBufferQueueItf bufferQueue = &this->mBufferQueue.mItf;
+            SLBufferQueueItf bufferQueue = &thiz->mBufferQueue.mItf;
             IBufferQueue *thisBQ = (IBufferQueue *) bufferQueue;
-            IBufferQueue_RegisterCallback(&thisBQ->mItf, SndFile_Callback, this);
-            this->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
+            IBufferQueue_RegisterCallback(&thisBQ->mItf, SndFile_Callback, thiz);
+            thiz->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
             // this is the initial duration; will update when a new maximum position is detected
-            this->mPlay.mDuration = (SLmillisecond) (((long long) this->mSndFile.mSfInfo.frames *
-                1000LL) / this->mSndFile.mSfInfo.samplerate);
-            this->mNumChannels = this->mSndFile.mSfInfo.channels;
-            this->mSampleRateMilliHz = this->mSndFile.mSfInfo.samplerate * 1000;
+            thiz->mPlay.mDuration = (SLmillisecond) (((long long) thiz->mSndFile.mSfInfo.frames *
+                1000LL) / thiz->mSndFile.mSfInfo.samplerate);
+            thiz->mNumChannels = thiz->mSndFile.mSfInfo.channels;
+            thiz->mSampleRateMilliHz = thiz->mSndFile.mSfInfo.samplerate * 1000;
 #ifdef USE_OUTPUTMIXEXT
-            this->mPlay.mFrameUpdatePeriod = ((long long) this->mPlay.mPositionUpdatePeriod *
-                (long long) this->mSampleRateMilliHz) / 1000000LL;
+            thiz->mPlay.mFrameUpdatePeriod = ((long long) thiz->mPlay.mPositionUpdatePeriod *
+                (long long) thiz->mSampleRateMilliHz) / 1000000LL;
 #endif
         }
     }
@@ -274,13 +274,13 @@ SLresult SndFile_Realize(CAudioPlayer *this)
 
 /** \brief Called by CAudioPlayer_Destroy */
 
-void SndFile_Destroy(CAudioPlayer *this)
+void SndFile_Destroy(CAudioPlayer *thiz)
 {
-    if (NULL != this->mSndFile.mSNDFILE) {
-        sf_close(this->mSndFile.mSNDFILE);
-        this->mSndFile.mSNDFILE = NULL;
+    if (NULL != thiz->mSndFile.mSNDFILE) {
+        sf_close(thiz->mSndFile.mSNDFILE);
+        thiz->mSndFile.mSNDFILE = NULL;
         int ok;
-        ok = pthread_mutex_destroy(&this->mSndFile.mMutex);
+        ok = pthread_mutex_destroy(&thiz->mSndFile.mMutex);
         assert(0 == ok);
     }
 }

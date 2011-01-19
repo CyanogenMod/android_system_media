@@ -26,8 +26,8 @@ SLresult CAudioRecorder_Realize(void *self, SLboolean async)
     SLresult result = SL_RESULT_SUCCESS;
 
 #ifdef ANDROID
-    CAudioRecorder *this = (CAudioRecorder *) self;
-    result = android_audioRecorder_realize(this, async);
+    CAudioRecorder *thiz = (CAudioRecorder *) self;
+    result = android_audioRecorder_realize(thiz, async);
 #endif
 
     return result;
@@ -46,11 +46,11 @@ SLresult CAudioRecorder_Resume(void *self, SLboolean async)
 
 void CAudioRecorder_Destroy(void *self)
 {
-    CAudioRecorder *this = (CAudioRecorder *) self;
-    freeDataLocatorFormat(&this->mDataSource);
-    freeDataLocatorFormat(&this->mDataSink);
+    CAudioRecorder *thiz = (CAudioRecorder *) self;
+    freeDataLocatorFormat(&thiz->mDataSource);
+    freeDataLocatorFormat(&thiz->mDataSink);
 #ifdef ANDROID
-    android_audioRecorder_destroy(this);
+    android_audioRecorder_destroy(thiz);
 #endif
 }
 

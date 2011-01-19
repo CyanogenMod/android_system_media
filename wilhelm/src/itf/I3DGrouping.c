@@ -34,15 +34,15 @@ static SLresult I3DGrouping_Set3DGroup(SL3DGroupingItf self, SLObjectItf group)
         // the new group is left unlocked, but it will be locked again below
     }
     if (SL_RESULT_SUCCESS == result) {
-        I3DGrouping *this = (I3DGrouping *) self;
-        IObject *thisObject = InterfaceToIObject(this);
+        I3DGrouping *thiz = (I3DGrouping *) self;
+        IObject *thisObject = InterfaceToIObject(thiz);
         unsigned id = thisObject->mInstanceID;
         assert(0 != id);        // player object must be published by this point
         --id;
         assert(MAX_INSTANCE > id);
         unsigned mask = 1 << id;
-        interface_lock_exclusive(this);
-        C3DGroup *oldGroup = this->mGroup;
+        interface_lock_exclusive(thiz);
+        C3DGroup *oldGroup = thiz->mGroup;
         if (newGroup != oldGroup) {
             // remove this object from the old group's set of objects
             if (NULL != oldGroup) {
@@ -63,9 +63,9 @@ static SLresult I3DGrouping_Set3DGroup(SL3DGroupingItf self, SLObjectItf group)
                 newGroup->mMemberMask |= mask;
                 object_unlock_exclusive(newGroupObject);
             }
-            this->mGroup = newGroup;
+            thiz->mGroup = newGroup;
         }
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -79,11 +79,11 @@ static SLresult I3DGrouping_Get3DGroup(SL3DGroupingItf self, SLObjectItf *pGroup
     if (NULL == pGroup) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        I3DGrouping *this = (I3DGrouping *) self;
-        interface_lock_shared(this);
-        C3DGroup *group = this->mGroup;
+        I3DGrouping *thiz = (I3DGrouping *) self;
+        interface_lock_shared(thiz);
+        C3DGroup *group = thiz->mGroup;
         *pGroup = (NULL != group) ? &group->mObject.mItf : NULL;
-        interface_unlock_shared(this);
+        interface_unlock_shared(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -98,17 +98,17 @@ static const struct SL3DGroupingItf_ I3DGrouping_Itf = {
 
 void I3DGrouping_init(void *self)
 {
-    I3DGrouping *this = (I3DGrouping *) self;
-    this->mItf = &I3DGrouping_Itf;
-    this->mGroup = NULL;
+    I3DGrouping *thiz = (I3DGrouping *) self;
+    thiz->mItf = &I3DGrouping_Itf;
+    thiz->mGroup = NULL;
 }
 
 void I3DGrouping_deinit(void *self)
 {
-    I3DGrouping *this = (I3DGrouping *) self;
-    C3DGroup *group = this->mGroup;
+    I3DGrouping *thiz = (I3DGrouping *) self;
+    C3DGroup *group = thiz->mGroup;
     if (NULL != group) {
-        unsigned mask = 1 << (InterfaceToIObject(this)->mInstanceID - 1);
+        unsigned mask = 1 << (InterfaceToIObject(thiz)->mInstanceID - 1);
         IObject *groupObject = &group->mObject;
         object_lock_exclusive(groupObject);
         assert(group->mMemberMask & mask);

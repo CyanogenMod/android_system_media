@@ -26,8 +26,8 @@ static SLresult IMIDITime_GetDuration(SLMIDITimeItf self, SLuint32 *pDuration)
     if (NULL == pDuration) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IMIDITime *this = (IMIDITime *) self;
-        SLuint32 duration = this->mDuration;
+        IMIDITime *thiz = (IMIDITime *) self;
+        SLuint32 duration = thiz->mDuration;
         *pDuration = duration;
         result = SL_RESULT_SUCCESS;
     }
@@ -40,14 +40,14 @@ static SLresult IMIDITime_SetPosition(SLMIDITimeItf self, SLuint32 position)
 {
     SL_ENTER_INTERFACE
 
-    IMIDITime *this = (IMIDITime *) self;
+    IMIDITime *thiz = (IMIDITime *) self;
     // const, no lock needed
-    if (!(position < this->mDuration)) {
+    if (!(position < thiz->mDuration)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        interface_lock_poke(this);
-        this->mPosition = position;
-        interface_unlock_poke(this);
+        interface_lock_poke(thiz);
+        thiz->mPosition = position;
+        interface_unlock_poke(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -62,10 +62,10 @@ static SLresult IMIDITime_GetPosition(SLMIDITimeItf self, SLuint32 *pPosition)
     if (NULL == pPosition) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IMIDITime *this = (IMIDITime *) self;
-        interface_lock_peek(this);
-        SLuint32 position = this->mPosition;
-        interface_unlock_peek(this);
+        IMIDITime *thiz = (IMIDITime *) self;
+        interface_lock_peek(thiz);
+        SLuint32 position = thiz->mPosition;
+        interface_unlock_peek(thiz);
         *pPosition = position;
         result = SL_RESULT_SUCCESS;
     }
@@ -78,16 +78,16 @@ static SLresult IMIDITime_SetLoopPoints(SLMIDITimeItf self, SLuint32 startTick, 
 {
     SL_ENTER_INTERFACE
 
-    IMIDITime *this = (IMIDITime *) self;
+    IMIDITime *thiz = (IMIDITime *) self;
     // const, no lock needed
-    SLuint32 duration = this->mDuration;
+    SLuint32 duration = thiz->mDuration;
     if (!((startTick < duration) && (numTicks <= duration - startTick))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        interface_lock_exclusive(this);
-        this->mStartTick = startTick;
-        this->mNumTicks = numTicks;
-        interface_unlock_exclusive(this);
+        interface_lock_exclusive(thiz);
+        thiz->mStartTick = startTick;
+        thiz->mNumTicks = numTicks;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -103,11 +103,11 @@ static SLresult IMIDITime_GetLoopPoints(SLMIDITimeItf self, SLuint32 *pStartTick
     if (NULL == pStartTick || NULL == pNumTicks) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IMIDITime *this = (IMIDITime *) self;
-        interface_lock_shared(this);
-        SLuint32 startTick = this->mStartTick;
-        SLuint32 numTicks = this->mNumTicks;
-        interface_unlock_shared(this);
+        IMIDITime *thiz = (IMIDITime *) self;
+        interface_lock_shared(thiz);
+        SLuint32 startTick = thiz->mStartTick;
+        SLuint32 numTicks = thiz->mNumTicks;
+        interface_unlock_shared(thiz);
         *pStartTick = startTick;
         *pNumTicks = numTicks;
         result = SL_RESULT_SUCCESS;
@@ -127,10 +127,10 @@ static const struct SLMIDITimeItf_ IMIDITime_Itf = {
 
 void IMIDITime_init(void *self)
 {
-    IMIDITime *this = (IMIDITime *) self;
-    this->mItf = &IMIDITime_Itf;
-    this->mDuration = 0;
-    this->mPosition = 0;
-    this->mStartTick = 0;
-    this->mNumTicks = 0;
+    IMIDITime *thiz = (IMIDITime *) self;
+    thiz->mItf = &IMIDITime_Itf;
+    thiz->mDuration = 0;
+    thiz->mPosition = 0;
+    thiz->mStartTick = 0;
+    thiz->mNumTicks = 0;
 }

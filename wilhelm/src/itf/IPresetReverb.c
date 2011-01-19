@@ -31,7 +31,7 @@ static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self, SLuint16 preset)
 {
     SL_ENTER_INTERFACE
 
-    IPresetReverb *this = (IPresetReverb *) self;
+    IPresetReverb *thiz = (IPresetReverb *) self;
     switch (preset) {
     case SL_REVERBPRESET_NONE:
     case SL_REVERBPRESET_SMALLROOM:
@@ -40,19 +40,19 @@ static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self, SLuint16 preset)
     case SL_REVERBPRESET_MEDIUMHALL:
     case SL_REVERBPRESET_LARGEHALL:
     case SL_REVERBPRESET_PLATE:
-        interface_lock_poke(this);
-        this->mPreset = preset;
+        interface_lock_poke(thiz);
+        thiz->mPreset = preset;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_PRESETREVERB(this)) {
+        if (NO_PRESETREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_prev_setPreset(this->mPresetReverbEffect, preset);
+            android::status_t status = android_prev_setPreset(thiz->mPresetReverbEffect, preset);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_poke(this);
+        interface_unlock_poke(thiz);
         break;
     default:
         result = SL_RESULT_PARAMETER_INVALID;
@@ -69,21 +69,21 @@ static SLresult IPresetReverb_GetPreset(SLPresetReverbItf self, SLuint16 *pPrese
     if (NULL == pPreset) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IPresetReverb *this = (IPresetReverb *) self;
-        interface_lock_peek(this);
+        IPresetReverb *thiz = (IPresetReverb *) self;
+        interface_lock_peek(thiz);
         SLuint16 preset = SL_REVERBPRESET_NONE;
 #if !defined(ANDROID)
-        preset = this->mPreset;
+        preset = thiz->mPreset;
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_PRESETREVERB(this)) {
+        if (NO_PRESETREVERB(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_prev_getPreset(this->mPresetReverbEffect, &preset);
+            android::status_t status = android_prev_getPreset(thiz->mPresetReverbEffect, &preset);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_peek(this);
+        interface_unlock_peek(thiz);
         *pPreset = preset;
     }
 
@@ -97,30 +97,30 @@ static const struct SLPresetReverbItf_ IPresetReverb_Itf = {
 
 void IPresetReverb_init(void *self)
 {
-    IPresetReverb *this = (IPresetReverb *) self;
-    this->mItf = &IPresetReverb_Itf;
-    this->mPreset = SL_REVERBPRESET_NONE;
+    IPresetReverb *thiz = (IPresetReverb *) self;
+    thiz->mItf = &IPresetReverb_Itf;
+    thiz->mPreset = SL_REVERBPRESET_NONE;
 #if defined(ANDROID)
-    memset(&this->mPresetReverbDescriptor, 0, sizeof(effect_descriptor_t));
+    memset(&thiz->mPresetReverbDescriptor, 0, sizeof(effect_descriptor_t));
     // placement new (explicit constructor)
-    (void) new (&this->mPresetReverbEffect) android::sp<android::AudioEffect>();
+    (void) new (&thiz->mPresetReverbEffect) android::sp<android::AudioEffect>();
 #endif
 }
 
 void IPresetReverb_deinit(void *self)
 {
 #if defined(ANDROID)
-    IPresetReverb *this = (IPresetReverb *) self;
+    IPresetReverb *thiz = (IPresetReverb *) self;
     // explicit destructor
-    this->mPresetReverbEffect.~sp();
+    thiz->mPresetReverbEffect.~sp();
 #endif
 }
 
 bool IPresetReverb_Expose(void *self)
 {
 #if defined(ANDROID)
-    IPresetReverb *this = (IPresetReverb *) self;
-    if (!android_fx_initEffectDescriptor(SL_IID_PRESETREVERB, &this->mPresetReverbDescriptor)) {
+    IPresetReverb *thiz = (IPresetReverb *) self;
+    if (!android_fx_initEffectDescriptor(SL_IID_PRESETREVERB, &thiz->mPresetReverbDescriptor)) {
         SL_LOGE("PresetReverb initialization failed.");
         return false;
     }

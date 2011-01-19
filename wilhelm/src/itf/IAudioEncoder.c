@@ -27,11 +27,11 @@ static SLresult IAudioEncoder_SetEncoderSettings(SLAudioEncoderItf self,
     if (NULL == pSettings) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IAudioEncoder *this = (IAudioEncoder *) self;
+        IAudioEncoder *thiz = (IAudioEncoder *) self;
         SLAudioEncoderSettings settings = *pSettings;
-        interface_lock_exclusive(this);
-        this->mSettings = settings;
-        interface_unlock_exclusive(this);
+        interface_lock_exclusive(thiz);
+        thiz->mSettings = settings;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -47,10 +47,10 @@ static SLresult IAudioEncoder_GetEncoderSettings(SLAudioEncoderItf self,
     if (NULL == pSettings) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IAudioEncoder *this = (IAudioEncoder *) self;
-        interface_lock_shared(this);
-        SLAudioEncoderSettings settings = this->mSettings;
-        interface_unlock_shared(this);
+        IAudioEncoder *thiz = (IAudioEncoder *) self;
+        interface_lock_shared(thiz);
+        SLAudioEncoderSettings settings = thiz->mSettings;
+        interface_unlock_shared(thiz);
         *pSettings = settings;
         result = SL_RESULT_SUCCESS;
     }
@@ -66,7 +66,7 @@ static const struct SLAudioEncoderItf_ IAudioEncoder_Itf = {
 
 void IAudioEncoder_init(void *self)
 {
-    IAudioEncoder *this = (IAudioEncoder *) self;
-    this->mItf = &IAudioEncoder_Itf;
-    memset(&this->mSettings, 0, sizeof(SLAudioEncoderSettings));
+    IAudioEncoder *thiz = (IAudioEncoder *) self;
+    thiz->mItf = &IAudioEncoder_Itf;
+    memset(&thiz->mSettings, 0, sizeof(SLAudioEncoderSettings));
 }

@@ -27,11 +27,11 @@ static SLresult IAndroidEffectSend_EnableEffectSend(SLAndroidEffectSendItf self,
     if (!((SL_MILLIBEL_MIN <= initialLevel) && (initialLevel <= 0))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IAndroidEffectSend *this = (IAndroidEffectSend *) self;
-        interface_lock_exclusive(this);
+        IAndroidEffectSend *thiz = (IAndroidEffectSend *) self;
+        interface_lock_exclusive(thiz);
         // is SLAndroidEffectSendItf on an AudioPlayer?
-        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
-                (CAudioPlayer *) this->mThis : NULL;
+        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+                (CAudioPlayer *) thiz->mThis : NULL;
         if (NULL == ap) {
             SL_LOGE("invalid interface: not attached to an AudioPlayer");
             result = SL_RESULT_PARAMETER_INVALID;
@@ -44,11 +44,11 @@ static SLresult IAndroidEffectSend_EnableEffectSend(SLAndroidEffectSendItf self,
             if (SL_RESULT_SUCCESS == result) {
                 // there currently is support for only one send bus, so there is a single send
                 // level and a single enable flag
-                this->mSendLevel = initialLevel;
-                this->mEnabled = enable;
+                thiz->mSendLevel = initialLevel;
+                thiz->mEnabled = enable;
             }
         }
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -63,11 +63,11 @@ static SLresult IAndroidEffectSend_IsEnabled(SLAndroidEffectSendItf self,
     if (NULL == pEnable) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IAndroidEffectSend *this = (IAndroidEffectSend *) self;
-        interface_lock_shared(this);
+        IAndroidEffectSend *thiz = (IAndroidEffectSend *) self;
+        interface_lock_shared(thiz);
         // there currently is support for only one send bus, so there is a single enable flag
-        SLboolean enable = this->mEnabled;
-        interface_unlock_shared(this);
+        SLboolean enable = thiz->mEnabled;
+        interface_unlock_shared(thiz);
         *pEnable = enable;
         result = SL_RESULT_SUCCESS;
     }
@@ -84,22 +84,22 @@ static SLresult IAndroidEffectSend_SetDirectLevel(SLAndroidEffectSendItf self,
      if (!((SL_MILLIBEL_MIN <= directLevel) && (directLevel <= 0))) {
          result = SL_RESULT_PARAMETER_INVALID;
      } else {
-         IAndroidEffectSend *this = (IAndroidEffectSend *) self;
-         interface_lock_exclusive(this);
-         CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
-                 (CAudioPlayer *) this->mThis : NULL;
+         IAndroidEffectSend *thiz = (IAndroidEffectSend *) self;
+         interface_lock_exclusive(thiz);
+         CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+                 (CAudioPlayer *) thiz->mThis : NULL;
          if (NULL != ap) {
              SLmillibel oldDirectLevel = ap->mDirectLevel;
              if (oldDirectLevel != directLevel) {
                  ap->mDirectLevel = directLevel;
                  ap->mAmplFromDirectLevel = sles_to_android_amplification(directLevel);
-                 interface_unlock_exclusive_attributes(this, ATTR_GAIN);
+                 interface_unlock_exclusive_attributes(thiz, ATTR_GAIN);
              } else {
-                 interface_unlock_exclusive(this);
+                 interface_unlock_exclusive(thiz);
              }
              result = SL_RESULT_SUCCESS;
          } else {
-             interface_unlock_exclusive(this);
+             interface_unlock_exclusive(thiz);
              SL_LOGE("invalid interface: not attached to an AudioPlayer");
              result = SL_RESULT_PARAMETER_INVALID;
          }
@@ -117,10 +117,10 @@ static SLresult IAndroidEffectSend_GetDirectLevel(SLAndroidEffectSendItf self,
     if (NULL == pDirectLevel) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IAndroidEffectSend *this = (IAndroidEffectSend *) self;
-        interface_lock_peek(this);
-        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
-                (CAudioPlayer *) this->mThis : NULL;
+        IAndroidEffectSend *thiz = (IAndroidEffectSend *) self;
+        interface_lock_peek(thiz);
+        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+                (CAudioPlayer *) thiz->mThis : NULL;
         if (NULL != ap) {
             *pDirectLevel = ap->mDirectLevel;
             result = SL_RESULT_SUCCESS;
@@ -128,7 +128,7 @@ static SLresult IAndroidEffectSend_GetDirectLevel(SLAndroidEffectSendItf self,
             SL_LOGE("invalid interface: not attached to an AudioPlayer");
             result = SL_RESULT_PARAMETER_INVALID;
         }
-        interface_unlock_peek(this);
+        interface_unlock_peek(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -143,11 +143,11 @@ static SLresult IAndroidEffectSend_SetSendLevel(SLAndroidEffectSendItf self,
     if (!((SL_MILLIBEL_MIN <= sendLevel) && (sendLevel <= 0))) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IAndroidEffectSend *this = (IAndroidEffectSend *) self;
-        interface_lock_exclusive(this);
+        IAndroidEffectSend *thiz = (IAndroidEffectSend *) self;
+        interface_lock_exclusive(thiz);
         // is SLAndroidEffectSendItf on an AudioPlayer?
-        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
-                 (CAudioPlayer *) this->mThis : NULL;
+        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+                 (CAudioPlayer *) thiz->mThis : NULL;
         if (NULL == ap) {
             SL_LOGE("invalid interface: not attached to an AudioPlayer");
             result = SL_RESULT_PARAMETER_INVALID;
@@ -164,10 +164,10 @@ static SLresult IAndroidEffectSend_SetSendLevel(SLAndroidEffectSendItf self,
             if (SL_RESULT_SUCCESS == result) {
                 // there currently is support for only one send bus, so there is a single send
                 // level
-                this->mSendLevel = sendLevel;
+                thiz->mSendLevel = sendLevel;
             }
         }
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -182,11 +182,11 @@ static SLresult IAndroidEffectSend_GetSendLevel(SLAndroidEffectSendItf self,
     if (NULL == pSendLevel) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IAndroidEffectSend *this = (IAndroidEffectSend *) self;
-        interface_lock_exclusive(this);
+        IAndroidEffectSend *thiz = (IAndroidEffectSend *) self;
+        interface_lock_exclusive(thiz);
         // is SLAndroidEffectSendItf on an AudioPlayer?
-        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(this)) ?
-                (CAudioPlayer *) this->mThis : NULL;
+        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+                (CAudioPlayer *) thiz->mThis : NULL;
         if (NULL == ap) {
             SL_LOGE("invalid interface: not attached to an AudioPlayer");
             result = SL_RESULT_PARAMETER_INVALID;
@@ -202,10 +202,10 @@ OutputMix");
             if (SL_RESULT_SUCCESS == result) {
                 // there currently is support for only one send bus, so there is a single send
                 // level
-                *pSendLevel = this->mSendLevel;
+                *pSendLevel = thiz->mSendLevel;
             }
         }
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -223,8 +223,8 @@ static const struct SLAndroidEffectSendItf_ IAndroidEffectSend_Itf = {
 
 void IAndroidEffectSend_init(void *self)
 {
-    IAndroidEffectSend *this = (IAndroidEffectSend *) self;
-    this->mItf = &IAndroidEffectSend_Itf;
-    this->mEnabled =  SL_BOOLEAN_FALSE;
-    this->mSendLevel = SL_MILLIBEL_MIN;
+    IAndroidEffectSend *thiz = (IAndroidEffectSend *) self;
+    thiz->mItf = &IAndroidEffectSend_Itf;
+    thiz->mEnabled =  SL_BOOLEAN_FALSE;
+    thiz->mSendLevel = SL_MILLIBEL_MIN;
 }

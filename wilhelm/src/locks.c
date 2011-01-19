@@ -20,24 +20,24 @@
 /** \brief Exclusively lock an object */
 
 #ifdef USE_DEBUG
-void object_lock_exclusive_(IObject *this, const char *file, int line)
+void object_lock_exclusive_(IObject *thiz, const char *file, int line)
 {
     int ok;
-    ok = pthread_mutex_trylock(&this->mMutex);
+    ok = pthread_mutex_trylock(&thiz->mMutex);
     if (0 != ok) {
         // pthread_mutex_timedlock_np is not available, but wait up to 100 ms
         static const useconds_t backoffs[] = {1, 10000, 20000, 30000, 40000};
         unsigned i = 0;
         for (;;) {
             usleep(backoffs[i]);
-            ok = pthread_mutex_trylock(&this->mMutex);
+            ok = pthread_mutex_trylock(&thiz->mMutex);
             if (0 == ok)
                 break;
             if (++i >= (sizeof(backoffs) / sizeof(backoffs[0]))) {
                 SL_LOGW("%s:%d: object %p was locked by %p at %s:%d\n",
-                    file, line, this, *(void **)&this->mOwner, this->mFile, this->mLine);
+                    file, line, thiz, *(void **)&thiz->mOwner, thiz->mFile, thiz->mLine);
                 // attempt one more time; maybe this time we will be successful
-                ok = pthread_mutex_lock(&this->mMutex);
+                ok = pthread_mutex_lock(&thiz->mMutex);
                 assert(0 == ok);
                 break;
             }
@@ -45,25 +45,25 @@ void object_lock_exclusive_(IObject *this, const char *file, int line)
     }
     pthread_t zero;
     memset(&zero, 0, sizeof(pthread_t));
-    if (0 != memcmp(&zero, &this->mOwner, sizeof(pthread_t))) {
-        if (pthread_equal(pthread_self(), this->mOwner)) {
+    if (0 != memcmp(&zero, &thiz->mOwner, sizeof(pthread_t))) {
+        if (pthread_equal(pthread_self(), thiz->mOwner)) {
             SL_LOGE("%s:%d: object %p was recursively locked by %p at %s:%d\n",
-                file, line, this, *(void **)&this->mOwner, this->mFile, this->mLine);
+                file, line, thiz, *(void **)&thiz->mOwner, thiz->mFile, thiz->mLine);
         } else {
             SL_LOGE("%s:%d: object %p was left unlocked in unexpected state by %p at %s:%d\n",
-                file, line, this, *(void **)&this->mOwner, this->mFile, this->mLine);
+                file, line, thiz, *(void **)&thiz->mOwner, thiz->mFile, thiz->mLine);
         }
         assert(false);
     }
-    this->mOwner = pthread_self();
-    this->mFile = file;
-    this->mLine = line;
+    thiz->mOwner = pthread_self();
+    thiz->mFile = file;
+    thiz->mLine = line;
 }
 #else
-void object_lock_exclusive(IObject *this)
+void object_lock_exclusive(IObject *thiz)
 {
     int ok;
-    ok = pthread_mutex_lock(&this->mMutex);
+    ok = pthread_mutex_lock(&thiz->mMutex);
     assert(0 == ok);
 }
 #endif
@@ -72,23 +72,23 @@ void object_lock_exclusive(IObject *this)
 /** \brief Exclusively unlock an object and do not report any updates */
 
 #ifdef USE_DEBUG
-void object_unlock_exclusive_(IObject *this, const char *file, int line)
+void object_unlock_exclusive_(IObject *thiz, const char *file, int line)
 {
-    assert(pthread_equal(pthread_self(), this->mOwner));
-    assert(NULL != this->mFile);
-    assert(0 != this->mLine);
-    memset(&this->mOwner, 0, sizeof(pthread_t));
-    this->mFile = file;
-    this->mLine = line;
+    assert(pthread_equal(pthread_self(), thiz->mOwner));
+    assert(NULL != thiz->mFile);
+    assert(0 != thiz->mLine);
+    memset(&thiz->mOwner, 0, sizeof(pthread_t));
+    thiz->mFile = file;
+    thiz->mLine = line;
     int ok;
-    ok = pthread_mutex_unlock(&this->mMutex);
+    ok = pthread_mutex_unlock(&thiz->mMutex);
     assert(0 == ok);
 }
 #else
-void object_unlock_exclusive(IObject *this)
+void object_unlock_exclusive(IObject *thiz)
 {
     int ok;
-    ok = pthread_mutex_unlock(&this->mMutex);
+    ok = pthread_mutex_unlock(&thiz->mMutex);
     assert(0 == ok);
 }
 #endif
@@ -99,21 +99,21 @@ void object_unlock_exclusive(IObject *this)
  */
 
 #ifdef USE_DEBUG
-void object_unlock_exclusive_attributes_(IObject *this, unsigned attributes,
+void object_unlock_exclusive_attributes_(IObject *thiz, unsigned attributes,
     const char *file, int line)
 #else
-void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
+void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
 #endif
 {
 
 #ifdef USE_DEBUG
-    assert(pthread_equal(pthread_self(), this->mOwner));
-    assert(NULL != this->mFile);
-    assert(0 != this->mLine);
+    assert(pthread_equal(pthread_self(), thiz->mOwner));
+    assert(NULL != thiz->mFile);
+    assert(0 != thiz->mLine);
 #endif
 
     int ok;
-    SLuint32 objectID = IObjectToObjectID(this);
+    SLuint32 objectID = IObjectToObjectID(thiz);
     CAudioPlayer *ap;
 
     // FIXME The endless if statements are getting ugly, should use bit search
@@ -124,7 +124,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
         switch (objectID) {
         case SL_OBJECTID_AUDIOPLAYER:
             attributes &= ~ATTR_GAIN;   // no need to process asynchronously also
-            ap = (CAudioPlayer *) this;
+            ap = (CAudioPlayer *) thiz;
 #ifdef ANDROID
             android_audioPlayer_volumeUpdate(ap);
 #else
@@ -148,7 +148,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
         switch (objectID) {
         case SL_OBJECTID_AUDIOPLAYER:
 #ifdef ANDROID
-            ap = (CAudioPlayer *) this;
+            ap = (CAudioPlayer *) thiz;
             attributes &= ~ATTR_POSITION;   // no need to process asynchronously also
             android_audioPlayer_seek(ap, ap->mSeek.mPos);
 #else
@@ -169,7 +169,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
         case SL_OBJECTID_AUDIOPLAYER:
 #ifdef ANDROID
             attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
-            ap = (CAudioPlayer *) this;
+            ap = (CAudioPlayer *) thiz;
             // FIXME should only call when state changes
             android_audioPlayer_setPlayState(ap, false /*lockAP*/);
             // FIXME ditto, but for either eventflags or marker position
@@ -182,7 +182,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
 #ifdef ANDROID
             {
             attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
-            CAudioRecorder* ar = (CAudioRecorder *) this;
+            CAudioRecorder* ar = (CAudioRecorder *) thiz;
             android_audioRecorder_useEventMask(ar);
             }
 #endif
@@ -191,7 +191,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
 #ifdef ANDROID
             {
             attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
-            CMediaPlayer *mp = (CMediaPlayer *) this;
+            CMediaPlayer *mp = (CMediaPlayer *) thiz;
             android::AVPlayer* avp = mp->mAVPlayer.get();
             if (avp != NULL) {
                 android_Player_setPlayState(avp, mp->mPlay.mState, &(mp->mAndroidObjState));
@@ -208,7 +208,7 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
     if (attributes & ATTR_ENQUEUE) {
         if (SL_OBJECTID_AUDIOPLAYER == objectID) {
             attributes &= ~ATTR_ENQUEUE;
-            ap = (CAudioPlayer *) this;
+            ap = (CAudioPlayer *) thiz;
             if (SL_PLAYSTATE_PLAYING == ap->mPlay.mState) {
 #ifdef ANDROID
                 android_audioPlayer_bufferQueue_onRefilled(ap);
@@ -218,25 +218,25 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
     }
 
     if (attributes) {
-        unsigned oldAttributesMask = this->mAttributesMask;
-        this->mAttributesMask = oldAttributesMask | attributes;
+        unsigned oldAttributesMask = thiz->mAttributesMask;
+        thiz->mAttributesMask = oldAttributesMask | attributes;
         if (oldAttributesMask)
             attributes = ATTR_NONE;
     }
 #ifdef USE_DEBUG
-    memset(&this->mOwner, 0, sizeof(pthread_t));
-    this->mFile = file;
-    this->mLine = line;
+    memset(&thiz->mOwner, 0, sizeof(pthread_t));
+    thiz->mFile = file;
+    thiz->mLine = line;
 #endif
-    ok = pthread_mutex_unlock(&this->mMutex);
+    ok = pthread_mutex_unlock(&thiz->mMutex);
     assert(0 == ok);
     // first update to this interface since previous sync
     if (attributes) {
-        unsigned id = this->mInstanceID;
+        unsigned id = thiz->mInstanceID;
         if (0 != id) {
             --id;
             assert(MAX_INSTANCE > id);
-            IEngine *thisEngine = &this->mEngine->mEngine;
+            IEngine *thisEngine = &thiz->mEngine->mEngine;
             interface_lock_exclusive(thisEngine);
             thisEngine->mChangedMask |= 1 << id;
             interface_unlock_exclusive(thisEngine);
@@ -248,29 +248,29 @@ void object_unlock_exclusive_attributes(IObject *this, unsigned attributes)
 /** \brief Wait on the condition variable associated with the object; see pthread_cond_wait */
 
 #ifdef USE_DEBUG
-void object_cond_wait_(IObject *this, const char *file, int line)
+void object_cond_wait_(IObject *thiz, const char *file, int line)
 {
     // note that this will unlock the mutex, so we have to clear the owner
-    assert(pthread_equal(pthread_self(), this->mOwner));
-    assert(NULL != this->mFile);
-    assert(0 != this->mLine);
-    memset(&this->mOwner, 0, sizeof(pthread_t));
-    this->mFile = file;
-    this->mLine = line;
+    assert(pthread_equal(pthread_self(), thiz->mOwner));
+    assert(NULL != thiz->mFile);
+    assert(0 != thiz->mLine);
+    memset(&thiz->mOwner, 0, sizeof(pthread_t));
+    thiz->mFile = file;
+    thiz->mLine = line;
     // alas we don't know the new owner's identity
     int ok;
-    ok = pthread_cond_wait(&this->mCond, &this->mMutex);
+    ok = pthread_cond_wait(&thiz->mCond, &thiz->mMutex);
     assert(0 == ok);
     // restore my ownership
-    this->mOwner = pthread_self();
-    this->mFile = file;
-    this->mLine = line;
+    thiz->mOwner = pthread_self();
+    thiz->mFile = file;
+    thiz->mLine = line;
 }
 #else
-void object_cond_wait(IObject *this)
+void object_cond_wait(IObject *thiz)
 {
     int ok;
-    ok = pthread_cond_wait(&this->mCond, &this->mMutex);
+    ok = pthread_cond_wait(&thiz->mCond, &thiz->mMutex);
     assert(0 == ok);
 }
 #endif
@@ -278,10 +278,10 @@ void object_cond_wait(IObject *this)
 
 /** \brief Signal the condition variable associated with the object; see pthread_cond_signal */
 
-void object_cond_signal(IObject *this)
+void object_cond_signal(IObject *thiz)
 {
     int ok;
-    ok = pthread_cond_signal(&this->mCond);
+    ok = pthread_cond_signal(&thiz->mCond);
     assert(0 == ok);
 }
 
@@ -290,9 +290,9 @@ void object_cond_signal(IObject *this)
  *  see pthread_cond_broadcast
  */
 
-void object_cond_broadcast(IObject *this)
+void object_cond_broadcast(IObject *thiz)
 {
     int ok;
-    ok = pthread_cond_broadcast(&this->mCond);
+    ok = pthread_cond_broadcast(&thiz->mCond);
     assert(0 == ok);
 }

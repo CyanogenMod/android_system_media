@@ -23,25 +23,25 @@ SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf self,
 {
     SL_ENTER_INTERFACE
 
-    IAndroidBufferQueue *this = (IAndroidBufferQueue *) self;
+    IAndroidBufferQueue *thiz = (IAndroidBufferQueue *) self;
 
-    interface_lock_exclusive(this);
+    interface_lock_exclusive(thiz);
 
     // verify pre-condition that media object is in the SL_PLAYSTATE_STOPPED state
     // FIXME PRIORITY 1 check play state
-    //if (SL_PLAYSTATE_STOPPED == ((CAudioPlayer*) this->mThis)->mPlay.mState) {
-        this->mCallback = callback;
-        this->mContext = pContext;
+    //if (SL_PLAYSTATE_STOPPED == ((CAudioPlayer*) thiz->mThis)->mPlay.mState) {
+        thiz->mCallback = callback;
+        thiz->mContext = pContext;
 
-        switch (InterfaceToObjectID(this)) {
+        switch (InterfaceToObjectID(thiz)) {
         case SL_OBJECTID_AUDIOPLAYER:
             result = SL_RESULT_SUCCESS;
-            android_audioPlayer_androidBufferQueue_registerCallback_l((CAudioPlayer*) this->mThis);
+            android_audioPlayer_androidBufferQueue_registerCallback_l((CAudioPlayer*) thiz->mThis);
             break;
         case XA_OBJECTID_MEDIAPLAYER:
             SL_LOGI("IAndroidBufferQueue_RegisterCallback()");
             result = SL_RESULT_SUCCESS;
-            android_Player_androidBufferQueue_registerCallback_l((CMediaPlayer*) this->mThis);
+            android_Player_androidBufferQueue_registerCallback_l((CMediaPlayer*) thiz->mThis);
             break;
         default:
             result = SL_RESULT_PARAMETER_INVALID;
@@ -52,7 +52,7 @@ SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf self,
     //    result = SL_RESULT_PRECONDITIONS_VIOLATED;
     //}
 
-    interface_unlock_exclusive(this);
+    interface_unlock_exclusive(thiz);
 
     SL_LEAVE_INTERFACE
 }
@@ -62,15 +62,15 @@ SLresult IAndroidBufferQueue_Clear(SLAndroidBufferQueueItf self)
 {
     SL_ENTER_INTERFACE
 
-    IAndroidBufferQueue *this = (IAndroidBufferQueue *) self;
+    IAndroidBufferQueue *thiz = (IAndroidBufferQueue *) self;
 
-    interface_lock_exclusive(this);
+    interface_lock_exclusive(thiz);
 
     // FIXME return value?
     result = SL_RESULT_SUCCESS;
-    android_audioPlayer_androidBufferQueue_clear_l((CAudioPlayer*) this->mThis);
+    android_audioPlayer_androidBufferQueue_clear_l((CAudioPlayer*) thiz->mThis);
 
-    interface_unlock_exclusive(this);
+    interface_unlock_exclusive(thiz);
 
     SL_LEAVE_INTERFACE
 }
@@ -84,22 +84,22 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
 {
     SL_ENTER_INTERFACE
 
-    IAndroidBufferQueue *this = (IAndroidBufferQueue *) self;
+    IAndroidBufferQueue *thiz = (IAndroidBufferQueue *) self;
 
-    interface_lock_exclusive(this);
+    interface_lock_exclusive(thiz);
 
     // FIXME return value? of particular interest: error is length is larger than size received
     //   in callback
-    switch (InterfaceToObjectID(this)) {
+    switch (InterfaceToObjectID(thiz)) {
     case SL_OBJECTID_AUDIOPLAYER:
         result = SL_RESULT_SUCCESS;
-        android_audioPlayer_androidBufferQueue_enqueue_l((CAudioPlayer*) this->mThis,
+        android_audioPlayer_androidBufferQueue_enqueue_l((CAudioPlayer*) thiz->mThis,
                 bufferId, length, event, pData);
         break;
     case XA_OBJECTID_MEDIAPLAYER:
         //SL_LOGV("IAndroidBufferQueue_Enqueue()");
         result = SL_RESULT_SUCCESS;
-        android_Player_androidBufferQueue_enqueue_l((CMediaPlayer*) this->mThis,
+        android_Player_androidBufferQueue_enqueue_l((CMediaPlayer*) thiz->mThis,
                 bufferId, length, event, pData);
         break;
     default:
@@ -107,7 +107,7 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
         break;
     }
 
-    interface_unlock_exclusive(this);
+    interface_unlock_exclusive(thiz);
 
     SL_LEAVE_INTERFACE
 }
@@ -121,9 +121,9 @@ static const struct SLAndroidBufferQueueItf_ IAndroidBufferQueue_Itf = {
 
 void IAndroidBufferQueue_init(void *self)
 {
-    IAndroidBufferQueue *this = (IAndroidBufferQueue *) self;
-    this->mItf = &IAndroidBufferQueue_Itf;
+    IAndroidBufferQueue *thiz = (IAndroidBufferQueue *) self;
+    thiz->mItf = &IAndroidBufferQueue_Itf;
 
-    this->mCallback = NULL;
-    this->mContext = NULL;
+    thiz->mCallback = NULL;
+    thiz->mContext = NULL;
 }

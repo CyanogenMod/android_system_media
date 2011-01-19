@@ -87,7 +87,7 @@ extern SLresult checkDataSink(const char *name, const SLDataSink *pDataSink,
         DataLocatorFormat *myDataSinkLocator, SLuint32 allowedDataLocatorMask,
         SLuint32 allowedDataFormatMask);
 extern SLresult checkSourceFormatVsInterfacesCompatibility(
-        const DataLocatorFormat *pDataLocatorFormat, const ClassTable *class__,
+        const DataLocatorFormat *pDataLocatorFormat, const ClassTable *clazz,
         unsigned exposedMask);
 extern void freeDataLocatorFormat(DataLocatorFormat *dlf);
 

@@ -23,15 +23,15 @@
 
 SLresult CAudioPlayer_Realize(void *self, SLboolean async)
 {
-    CAudioPlayer *this = (CAudioPlayer *) self;
+    CAudioPlayer *thiz = (CAudioPlayer *) self;
     SLresult result = SL_RESULT_SUCCESS;
 
 #ifdef ANDROID
-    result = android_audioPlayer_realize(this, async);
+    result = android_audioPlayer_realize(thiz, async);
 #endif
 
 #ifdef USE_SNDFILE
-    result = SndFile_Realize(this);
+    result = SndFile_Realize(thiz);
 #endif
 
     // At this point the channel count and sample rate might still be unknown,
@@ -54,14 +54,14 @@ SLresult CAudioPlayer_Resume(void *self, SLboolean async)
 
 void CAudioPlayer_Destroy(void *self)
 {
-    CAudioPlayer *this = (CAudioPlayer *) self;
-    freeDataLocatorFormat(&this->mDataSource);
-    freeDataLocatorFormat(&this->mDataSink);
+    CAudioPlayer *thiz = (CAudioPlayer *) self;
+    freeDataLocatorFormat(&thiz->mDataSource);
+    freeDataLocatorFormat(&thiz->mDataSink);
 #ifdef USE_SNDFILE
-    SndFile_Destroy(this);
+    SndFile_Destroy(thiz);
 #endif
 #ifdef ANDROID
-    android_audioPlayer_destroy(this);
+    android_audioPlayer_destroy(thiz);
 #endif
 }
 
@@ -71,9 +71,9 @@ void CAudioPlayer_Destroy(void *self)
 predestroy_t CAudioPlayer_PreDestroy(void *self)
 {
 #ifdef USE_OUTPUTMIXEXT
-    CAudioPlayer *this = (CAudioPlayer *) self;
+    CAudioPlayer *thiz = (CAudioPlayer *) self;
     // Safe to proceed immediately if a track has not yet been assigned
-    Track *track = this->mTrack;
+    Track *track = thiz->mTrack;
     if (NULL == track) {
         return predestroy_ok;
     }
@@ -81,10 +81,10 @@ predestroy_t CAudioPlayer_PreDestroy(void *self)
     if (NULL == audioPlayer) {
         return predestroy_ok;
     }
-    assert(audioPlayer == this);
+    assert(audioPlayer == thiz);
     // Request the mixer thread to unlink this audio player's track
-    this->mDestroyRequested = true;
-    while (this->mDestroyRequested) {
+    thiz->mDestroyRequested = true;
+    while (thiz->mDestroyRequested) {
         object_cond_wait(self);
     }
     // Mixer thread has acknowledged the request

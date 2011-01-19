@@ -26,8 +26,8 @@ SLresult COutputMix_Realize(void *self, SLboolean async)
     SLresult result = SL_RESULT_SUCCESS;
 
 #ifdef ANDROID
-    COutputMix *this = (COutputMix *) self;
-    result = android_outputMix_realize(this, async);
+    COutputMix *thiz = (COutputMix *) self;
+    result = android_outputMix_realize(thiz, async);
 #endif
 
     return result;
@@ -47,8 +47,8 @@ SLresult COutputMix_Resume(void *self, SLboolean async)
 void COutputMix_Destroy(void *self)
 {
 #ifdef ANDROID
-    COutputMix *this = (COutputMix *) self;
-    android_outputMix_destroy(this);
+    COutputMix *thiz = (COutputMix *) self;
+    android_outputMix_destroy(thiz);
 #endif
 }
 

@@ -36,21 +36,21 @@ static SLresult IVirtualizer_SetEnabled(SLVirtualizerItf self, SLboolean enabled
 {
     SL_ENTER_INTERFACE
 
-    IVirtualizer *this = (IVirtualizer *) self;
-    interface_lock_exclusive(this);
-    this->mEnabled = (SLboolean) enabled;
+    IVirtualizer *thiz = (IVirtualizer *) self;
+    interface_lock_exclusive(thiz);
+    thiz->mEnabled = (SLboolean) enabled;
 #if !defined(ANDROID)
     result = SL_RESULT_SUCCESS;
 #else
-    if (NO_VIRTUALIZER(this)) {
+    if (NO_VIRTUALIZER(thiz)) {
         result = SL_RESULT_CONTROL_LOST;
     } else {
         android::status_t status =
-                this->mVirtualizerEffect->setEnabled((bool) this->mEnabled);
+                thiz->mVirtualizerEffect->setEnabled((bool) thiz->mEnabled);
         result = android_fx_statusToResult(status);
     }
 #endif
-    interface_unlock_exclusive(this);
+    interface_unlock_exclusive(thiz);
 
     SL_LEAVE_INTERFACE
 
@@ -64,21 +64,21 @@ static SLresult IVirtualizer_IsEnabled(SLVirtualizerItf self, SLboolean *pEnable
      if (NULL == pEnabled) {
          result = SL_RESULT_PARAMETER_INVALID;
      } else {
-         IVirtualizer *this = (IVirtualizer *) self;
-         interface_lock_exclusive(this);
-         SLboolean enabled = this->mEnabled;
+         IVirtualizer *thiz = (IVirtualizer *) self;
+         interface_lock_exclusive(thiz);
+         SLboolean enabled = thiz->mEnabled;
 #if !defined(ANDROID)
          *pEnabled = enabled;
          result = SL_RESULT_SUCCESS;
 #else
-         if (NO_VIRTUALIZER(this)) {
+         if (NO_VIRTUALIZER(thiz)) {
              result = SL_RESULT_CONTROL_LOST;
          } else {
-             *pEnabled = (SLboolean) this->mVirtualizerEffect->getEnabled();
+             *pEnabled = (SLboolean) thiz->mVirtualizerEffect->getEnabled();
              result = SL_RESULT_SUCCESS;
          }
 #endif
-         interface_unlock_exclusive(this);
+         interface_unlock_exclusive(thiz);
      }
 
      SL_LEAVE_INTERFACE
@@ -92,21 +92,21 @@ static SLresult IVirtualizer_SetStrength(SLVirtualizerItf self, SLpermille stren
      if ((VIRTUALIZER_STRENGTH_MIN > strength) || (VIRTUALIZER_STRENGTH_MAX < strength)) {
          result = SL_RESULT_PARAMETER_INVALID;
      } else {
-         IVirtualizer *this = (IVirtualizer *) self;
-         interface_lock_exclusive(this);
+         IVirtualizer *thiz = (IVirtualizer *) self;
+         interface_lock_exclusive(thiz);
 #if !defined(ANDROID)
-         this->mStrength = strength;
+         thiz->mStrength = strength;
          result = SL_RESULT_SUCCESS;
 #else
-         if (NO_VIRTUALIZER(this)) {
+         if (NO_VIRTUALIZER(thiz)) {
              result = SL_RESULT_CONTROL_LOST;
          } else {
-             android::status_t status = android_virt_setParam(this->mVirtualizerEffect,
+             android::status_t status = android_virt_setParam(thiz->mVirtualizerEffect,
                      VIRTUALIZER_PARAM_STRENGTH, &strength);
              result = android_fx_statusToResult(status);
          }
 #endif
-         interface_unlock_exclusive(this);
+         interface_unlock_exclusive(thiz);
      }
 
      SL_LEAVE_INTERFACE
@@ -120,21 +120,21 @@ static SLresult IVirtualizer_GetRoundedStrength(SLVirtualizerItf self, SLpermill
     if (NULL == pStrength) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        IVirtualizer *this = (IVirtualizer *) self;
-        interface_lock_exclusive(this);
-        SLpermille strength = this->mStrength;;
+        IVirtualizer *thiz = (IVirtualizer *) self;
+        interface_lock_exclusive(thiz);
+        SLpermille strength = thiz->mStrength;;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
-        if (NO_VIRTUALIZER(this)) {
+        if (NO_VIRTUALIZER(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
-            android::status_t status = android_virt_getParam(this->mVirtualizerEffect,
+            android::status_t status = android_virt_getParam(thiz->mVirtualizerEffect,
                            VIRTUALIZER_PARAM_STRENGTH, &strength);
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
         *pStrength = strength;
     }
 
@@ -153,18 +153,18 @@ static SLresult IVirtualizer_IsStrengthSupported(SLVirtualizerItf self, SLboolea
         *pSupported = SL_BOOLEAN_TRUE;
         result = SL_RESULT_SUCCESS;
 #else
-        IVirtualizer *this = (IVirtualizer *) self;
+        IVirtualizer *thiz = (IVirtualizer *) self;
         int32_t supported = 0;
-        interface_lock_exclusive(this);
-        if (NO_VIRTUALIZER(this)) {
+        interface_lock_exclusive(thiz);
+        if (NO_VIRTUALIZER(thiz)) {
             result = SL_RESULT_CONTROL_LOST;
         } else {
             android::status_t status =
-                android_virt_getParam(this->mVirtualizerEffect,
+                android_virt_getParam(thiz->mVirtualizerEffect,
                         VIRTUALIZER_PARAM_STRENGTH_SUPPORTED, &supported);
             result = android_fx_statusToResult(status);
         }
-        interface_unlock_exclusive(this);
+        interface_unlock_exclusive(thiz);
         *pSupported = (SLboolean) (supported != 0);
 #endif
     }
@@ -183,31 +183,31 @@ static const struct SLVirtualizerItf_ IVirtualizer_Itf = {
 
 void IVirtualizer_init(void *self)
 {
-    IVirtualizer *this = (IVirtualizer *) self;
-    this->mItf = &IVirtualizer_Itf;
-    this->mEnabled = SL_BOOLEAN_FALSE;
-    this->mStrength = 0;
+    IVirtualizer *thiz = (IVirtualizer *) self;
+    thiz->mItf = &IVirtualizer_Itf;
+    thiz->mEnabled = SL_BOOLEAN_FALSE;
+    thiz->mStrength = 0;
 #if defined(ANDROID)
-    memset(&this->mVirtualizerDescriptor, 0, sizeof(effect_descriptor_t));
+    memset(&thiz->mVirtualizerDescriptor, 0, sizeof(effect_descriptor_t));
     // placement new (explicit constructor)
-    (void) new (&this->mVirtualizerEffect) android::sp<android::AudioEffect>();
+    (void) new (&thiz->mVirtualizerEffect) android::sp<android::AudioEffect>();
 #endif
 }
 
 void IVirtualizer_deinit(void *self)
 {
 #if defined(ANDROID)
-    IVirtualizer *this = (IVirtualizer *) self;
+    IVirtualizer *thiz = (IVirtualizer *) self;
     // explicit destructor
-    this->mVirtualizerEffect.~sp();
+    thiz->mVirtualizerEffect.~sp();
 #endif
 }
 
 bool IVirtualizer_Expose(void *self)
 {
 #if defined(ANDROID)
-    IVirtualizer *this = (IVirtualizer *) self;
-    if (!android_fx_initEffectDescriptor(SL_IID_VIRTUALIZER, &this->mVirtualizerDescriptor)) {
+    IVirtualizer *thiz = (IVirtualizer *) self;
+    if (!android_fx_initEffectDescriptor(SL_IID_VIRTUALIZER, &thiz->mVirtualizerDescriptor)) {
         SL_LOGE("Virtualizer initialization failed.");
         return false;
     }

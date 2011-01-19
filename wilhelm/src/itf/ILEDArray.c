@@ -23,10 +23,10 @@ static SLresult ILEDArray_ActivateLEDArray(SLLEDArrayItf self, SLuint32 lightMas
 {
     SL_ENTER_INTERFACE
 
-    ILEDArray *this = (ILEDArray *) self;
-    interface_lock_poke(this);
-    this->mLightMask = lightMask;
-    interface_unlock_poke(this);
+    ILEDArray *thiz = (ILEDArray *) self;
+    interface_lock_poke(thiz);
+    thiz->mLightMask = lightMask;
+    interface_unlock_poke(thiz);
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -40,10 +40,10 @@ static SLresult ILEDArray_IsLEDArrayActivated(SLLEDArrayItf self, SLuint32 *pLig
     if (NULL == pLightMask) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        ILEDArray *this = (ILEDArray *) self;
-        interface_lock_peek(this);
-        SLuint32 lightMask = this->mLightMask;
-        interface_unlock_peek(this);
+        ILEDArray *thiz = (ILEDArray *) self;
+        interface_lock_peek(thiz);
+        SLuint32 lightMask = thiz->mLightMask;
+        interface_unlock_peek(thiz);
         *pLightMask = lightMask;
         result = SL_RESULT_SUCCESS;
     }
@@ -67,11 +67,11 @@ static SLresult ILEDArray_SetColor(SLLEDArrayItf self, SLuint8 index, const SLHS
             break;
         if (!(0 <= color.lightness && color.lightness <= 1000))
             break;
-        ILEDArray *this = (ILEDArray *) self;
+        ILEDArray *thiz = (ILEDArray *) self;
         // can't use poke because struct copy might not be atomic
-        interface_lock_exclusive(this);
-        this->mColors[index] = color;
-        interface_unlock_exclusive(this);
+        interface_lock_exclusive(thiz);
+        thiz->mColors[index] = color;
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     } while (0);
 
@@ -86,11 +86,11 @@ static SLresult ILEDArray_GetColor(SLLEDArrayItf self, SLuint8 index, SLHSL *pCo
     if (!(index < MAX_LED_COUNT) || NULL == pColor) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        ILEDArray *this = (ILEDArray *) self;
+        ILEDArray *thiz = (ILEDArray *) self;
         // can't use peek because struct copy might not be atomic
-        interface_lock_shared(this);
-        SLHSL color = this->mColors[index];
-        interface_unlock_shared(this);
+        interface_lock_shared(thiz);
+        SLHSL color = thiz->mColors[index];
+        interface_unlock_shared(thiz);
         *pColor = color;
         result = SL_RESULT_SUCCESS;
     }
@@ -108,10 +108,10 @@ static const struct SLLEDArrayItf_ ILEDArray_Itf = {
 
 void ILEDArray_init(void *self)
 {
-    ILEDArray *this = (ILEDArray *) self;
-    this->mItf = &ILEDArray_Itf;
-    this->mLightMask = 0;
-    SLHSL *color = this->mColors;
+    ILEDArray *thiz = (ILEDArray *) self;
+    thiz->mItf = &ILEDArray_Itf;
+    thiz->mLightMask = 0;
+    SLHSL *color = thiz->mColors;
     SLuint8 index;
     for (index = 0; index < MAX_LED_COUNT; ++index, ++color) {
         color->hue = 0; // red, but per specification 1.0.1 pg. 259: "Default color is undefined."
@@ -119,5 +119,5 @@ void ILEDArray_init(void *self)
         color->lightness = 1000;
     }
     // const
-    this->mCount = MAX_LED_COUNT;
+    thiz->mCount = MAX_LED_COUNT;
 }
