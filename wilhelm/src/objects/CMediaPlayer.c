@@ -17,8 +17,6 @@
 /** \file CMediaPlayer.c MediaPlayer class */
 
 #ifdef ANDROID
-// FIXME JNI should not be part of the API we can avoid it
-#include <jni.h>
 
 #include <binder/ProcessState.h>
 
