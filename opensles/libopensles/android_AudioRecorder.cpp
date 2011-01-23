@@ -388,7 +388,8 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
     ar->mAudioRecord->set(ar->mRecordSource, // source
             sles_to_android_sampleRate(ar->mSampleRateMilliHz), // sample rate in Hertz
             android::AudioSystem::PCM_16_BIT,   //FIXME use format from buffer queue sink
-            sles_to_android_channelMask(ar->mNumChannels, 0 /*no channel mask*/), // channel config
+            sles_to_android_channelMaskIn(ar->mNumChannels, 0 /*no channel mask*/),
+                                   // channel config
             0,                     //frameCount min
             0,                     // flags
             audioRecorder_callback,// callback_t
