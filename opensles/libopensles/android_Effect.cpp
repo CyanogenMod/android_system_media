@@ -32,6 +32,8 @@ static const int ENVREVERB_PARAM_SIZE_MAX_SINGLE = sizeof(effect_param_t) + 2 * 
 static const int ENVREVERB_PARAM_SIZE_MAX_ALL = sizeof(effect_param_t) + sizeof(int32_t)
         + sizeof(s_reverb_settings);
 
+static const int PRESETREVERB_PARAM_SIZE_MAX = sizeof(effect_param_t) + 2 * sizeof(int32_t);
+
 static inline SLuint32 KEY_FROM_GUID(SLInterfaceID pUuid) {
     return pUuid->time_low;
 }
@@ -389,8 +391,8 @@ void android_prev_init(IPresetReverb* ipr) {
 
 //-----------------------------------------------------------------------------
 android::status_t android_prev_setPreset(android::sp<android::AudioEffect> pFx, uint16_t preset) {
-    android::status_t status = android_fx_setParam(pFx, REVERB_PARAM_PRESET, sizeof(uint16_t),
-            &preset, sizeof(uint16_t));
+    android::status_t status = android_fx_setParam(pFx, REVERB_PARAM_PRESET,
+            PRESETREVERB_PARAM_SIZE_MAX, &preset, sizeof(uint16_t));
     // enable the effect if the preset is different from SL_REVERBPRESET_NONE
     pFx->setEnabled(SL_REVERBPRESET_NONE != preset);
     return status;
@@ -398,7 +400,7 @@ android::status_t android_prev_setPreset(android::sp<android::AudioEffect> pFx, 
 
 //-----------------------------------------------------------------------------
 android::status_t android_prev_getPreset(android::sp<android::AudioEffect> pFx, uint16_t* preset) {
-    return android_fx_getParam(pFx, REVERB_PARAM_PRESET, sizeof(uint16_t), preset,
+    return android_fx_getParam(pFx, REVERB_PARAM_PRESET, PRESETREVERB_PARAM_SIZE_MAX, preset,
             sizeof(uint16_t));
 }
 
