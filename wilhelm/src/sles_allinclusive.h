@@ -255,6 +255,9 @@ struct SndFile {
 #ifdef ANDROID
 // FIXME this include is done here so the effect structures and enums have been defined. Messy.
 #include "android/android_Effect.h"
+#include "android/android_GenericPlayer.h"
+#include "android/android_AudioSfDecoder.h"
+#include "android/android_AudioToCbRenderer.h"
 #include "android/android_AVPlayer.h"
 #include "android/android_StreamPlayer.h"
 #include "android/android_LocAVPlayer.h"

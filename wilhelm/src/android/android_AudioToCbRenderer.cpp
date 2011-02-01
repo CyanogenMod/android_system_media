@@ -1,0 +1,121 @@
+/*
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#define USE_LOG SLAndroidLogLevel_Verbose
+
+#include "sles_allinclusive.h"
+
+namespace android {
+
+//--------------------------------------------------------------------------------------------------
+AudioToCbRenderer::AudioToCbRenderer(AudioPlayback_Parameters* params) : AudioSfDecoder(params),
+        mDecodeCbf(NULL),
+        mDecodeUser(NULL)
+{
+    SL_LOGI("AudioToCbRenderer::AudioToCbRenderer()");
+
+}
+
+
+AudioToCbRenderer::~AudioToCbRenderer() {
+    SL_LOGI("AudioToCbRenderer::~AudioToCbRenderer()");
+
+}
+
+void AudioToCbRenderer::setDataPushListener(const data_push_cbf_t pushCbf, void* pushUser) {
+    mDecodeCbf = pushCbf;
+    mDecodeUser = pushUser;
+}
+
+//--------------------------------------------------
+// Event handlers
+void AudioToCbRenderer::onPrepare() {
+    SL_LOGI("AudioToCbRenderer::onPrepare()");
+    AudioSfDecoder::onPrepare();
+    SL_LOGI("AudioToCbRenderer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
+}
+
+
+void AudioToCbRenderer::onRender() {
+    SL_LOGV("AudioToCbRenderer::onRender");
+
+    Mutex::Autolock _l(mDecodeBufferLock);
+
+    if (NULL == mDecodeBuffer) {
+        // nothing to render, move along
+        //SL_LOGV("AudioToCbRenderer::onRender NULL buffer, exiting");
+        return;
+    }
+
+    if (mStateFlags & kFlagPlaying) {
+        if (NULL != mDecodeCbf) {
+            size_t full = mDecodeBuffer->range_length();
+            size_t consumed = 0;
+            size_t offset = 0;
+            while (offset < full) {
+                consumed = mDecodeCbf(
+                        (const uint8_t *)mDecodeBuffer->data()
+                                + offset + mDecodeBuffer->range_offset(),
+                        mDecodeBuffer->range_length() - offset,
+                        mDecodeUser);
+                offset += consumed;
+                //SL_LOGV("consumed=%lu, offset=%lu, full=%lu", consumed, offset, full);
+                if (consumed == 0) {
+                    // decoded data is not being consumed, skip this buffer
+                    break;
+                }
+            }
+        }
+        (new AMessage(kWhatDecode, id()))->post();
+    }
+
+    mDecodeBuffer->release();
+    mDecodeBuffer = NULL;
+}
+
+
+//--------------------------------------------------
+// Audio output
+void AudioToCbRenderer::createAudioSink() {
+    SL_LOGI("AudioToCbRenderer::createAudioSink()");
+    SL_LOGV("sample rate = %d nb channels = %d", mSampleRateHz, mNumChannels);
+}
+
+
+void AudioToCbRenderer::updateAudioSink() {
+    SL_LOGI("AudioToCbRenderer::updateAudioSink()");
+    if (mAudioSource != 0) {
+        sp<MetaData> meta = mAudioSource->getFormat();
+
+        SL_LOGV("old sample rate = %d", mSampleRateHz);
+        CHECK(meta->findInt32(kKeyChannelCount, &mNumChannels));
+        CHECK(meta->findInt32(kKeySampleRate, &mSampleRateHz));
+        SL_LOGV("new sample rate = %d", mSampleRateHz);
+
+    }
+}
+
+
+void AudioToCbRenderer::startAudioSink() {
+    SL_LOGI("AudioToCbRenderer::startAudioSink()");
+}
+
+
+void AudioToCbRenderer::pauseAudioSink() {
+    SL_LOGI("AudioToCbRenderer::pauseAudioSink()");
+}
+
+} // namespace android

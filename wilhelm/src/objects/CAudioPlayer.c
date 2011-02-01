@@ -55,13 +55,13 @@ SLresult CAudioPlayer_Resume(void *self, SLboolean async)
 void CAudioPlayer_Destroy(void *self)
 {
     CAudioPlayer *thiz = (CAudioPlayer *) self;
+#ifdef ANDROID
+    android_audioPlayer_destroy(thiz);
+#endif
     freeDataLocatorFormat(&thiz->mDataSource);
     freeDataLocatorFormat(&thiz->mDataSink);
 #ifdef USE_SNDFILE
     SndFile_Destroy(thiz);
-#endif
-#ifdef ANDROID
-    android_audioPlayer_destroy(thiz);
 #endif
 }
 

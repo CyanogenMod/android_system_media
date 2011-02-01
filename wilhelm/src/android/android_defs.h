@@ -53,7 +53,7 @@ enum AndroidObject_state {
 #define PLAYER_FD_FIND_FILE_SIZE ((int64_t)0xFFFFFFFFFFFFFFFFll)
 
 
-/*
+/**
  * Structure to maintain the set of audio levels about a player
  */
 typedef struct AndroidAudioLevels_struct {
@@ -74,11 +74,20 @@ typedef struct AndroidAudioLevels_struct {
 } AndroidAudioLevels;
 
 
-typedef void (*notif_client_t)(int event, const int data1, void* notifUser);
+/**
+ * Event notification callback from Android to SL ES framework
+ */
+typedef void (*notif_cbf_t)(int event, int data1, void* notifUser);
+
+/**
+ * Audio data push callback from Android objects to SL ES framework
+ */
+typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, void* user);
 
 
 /**
- * events sent to mNotifyClient during prepare, prefetch, and playback
+ * Events sent to mNotifyClient during prepare, prefetch, and playback
+ * used in APlayer::notify() and AMessage::findxxx()
  */
 #define PLAYEREVENT_PREPARED                "prep"
 #define PLAYEREVENT_PREFETCHSTATUSCHANGE    "prsc"
@@ -86,6 +95,12 @@ typedef void (*notif_client_t)(int event, const int data1, void* notifUser);
 #define PLAYEREVENT_ENDOFSTREAM             "eos"
 #define PLAYEREVENT_NEW_AUDIOTRACK          "nwat"
 
+
+/**
+ * Command parameters for AHandler commands
+ */
+#define WHATPARAM_SEEK_SEEKTIME_MS "seekTimeMs"
+#define WHATPARAM_LOOP_LOOPING     "looping"
 
 namespace android {
 
@@ -101,8 +116,14 @@ struct FdInfo {
     int64_t length;
 };
 
+// TODO currently used by SfPlayer, to replace by DataLocator2
 union DataLocator {
     char* uri;
+    FdInfo fdi;
+};
+
+union DataLocator2 {
+    const char* uriRef;
     FdInfo fdi;
 };
 

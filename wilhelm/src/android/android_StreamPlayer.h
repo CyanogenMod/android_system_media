@@ -77,7 +77,7 @@ private:
 /*
  * xxx_l functions are called with a lock on the CAudioPlayer mObject
  */
-extern void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_client_t cbf,
+extern void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_cbf_t cbf,
         void* notifUser);
 extern void android_StreamPlayer_destroy(CAudioPlayer *ap);
 extern void android_StreamPlayer_androidBufferQueue_registerCallback(

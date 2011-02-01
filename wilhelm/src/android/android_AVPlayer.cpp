@@ -90,7 +90,7 @@ AVPlayer::~AVPlayer() {
     mServiceManager.clear();
 }
 
-void AVPlayer::init(const notif_client_t cbf, void* notifUser) {
+void AVPlayer::init(const notif_cbf_t cbf, void* notifUser) {
     SL_LOGI("AVPlayer::init()");
 
     mNotifyClient = cbf;

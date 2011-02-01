@@ -86,7 +86,7 @@ struct SfPlayer : public AHandler {
     };
 
     void armLooper();
-    void setNotifListener(const notif_client_t cbf, void* notifUser);
+    void setNotifListener(const notif_cbf_t cbf, void* notifUser);
 
     void setDataSource(const char *uri);
     void setDataSource(const int fd, const int64_t offset, const int64_t length);
@@ -149,11 +149,14 @@ private:
     sp<DataSource> mDataSource;
     sp<MediaSource> mAudioSource;
     uint32_t mFlags;
+
+    // negative values indicate invalid value
     int64_t mBitrate;  // in bits/sec
     int32_t mNumChannels;
     int32_t mSampleRateHz;
     int64_t mTimeDelta;
     int64_t mDurationUsec;
+
     CacheStatus mCacheStatus;
     int64_t mSeekTimeMsec;
     int64_t mLastDecodedPositionUs;
@@ -165,8 +168,8 @@ private:
     DataLocator mDataLocator;
     int         mDataLocatorType;
 
-    notif_client_t mNotifyClient;
-    void*          mNotifyUser;
+    notif_cbf_t mNotifyClient;
+    void*       mNotifyUser;
 
     // mutex used for protecting the decode buffer
     Mutex       mDecodeBufferLock;

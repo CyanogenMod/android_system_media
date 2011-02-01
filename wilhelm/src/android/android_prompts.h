@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+//-----------------------------------------------------------------------------
+// Android general purpose errors
+//----------------------
+#define ERROR_SHOULDNT_BE_HERE_S \
+        "Reached an invalid code path in %s"
 
 //-----------------------------------------------------------------------------
 // Android AudioPlayer errors
@@ -24,6 +29,14 @@
         "Cannot set stream type: audio player already realized"
 #define ERROR_PLAYERREALIZE_UNKNOWN_DATASOURCE_LOCATOR \
         "Cannot realize AudioPlayer: with unknown data source locator"
+#define ERROR_PLAYERREALIZE_UNEXPECTED_OBJECT_TYPE_D \
+        "Cannot realize AudioPlayer: unexpected object type \%d"
+#define ERROR_PLAYERDESTROY_UNEXPECTED_OBJECT_TYPE_D \
+        "Cannot destroy AudioPlayer: unexpected object type \%d"
+#define ERROR_PLAYERSETPLAYSTATE_UNEXPECTED_OBJECT_TYPE_D \
+        "Cannot set AudioPlayer playstate: unexpected object type \%d"
+#define ERROR_PLAYERSETPLAYSTATE_INVALID_OBJECT_STATE_D \
+        "Cannot set AudioPlayer playstate to %ld: Android object in invalid state"
 #define ERROR_PLAYER_NEW_NULL_TRACK \
         "Internal error: new AudioTrack shouldn't be NULL"
 #define ERROR_PLAYER_PREFETCH_d \

@@ -93,7 +93,7 @@ void SfPlayer::armLooper() {
 }
 
 
-void SfPlayer::setNotifListener(const notif_client_t cbf, void* notifUser) {
+void SfPlayer::setNotifListener(const notif_cbf_t cbf, void* notifUser) {
     mNotifyClient = cbf;
     mNotifyUser = notifUser;
 }

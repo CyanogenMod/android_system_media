@@ -22,7 +22,7 @@
 //--------------------------------------------------------------------------------------------------
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
 
-void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_client_t cbf, void* notifUser) {
+void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_cbf_t cbf, void* notifUser) {
     SL_LOGI("android_StreamPlayer_realize_l(%p)", ap);
 
     AudioPlayback_Parameters ap_params;

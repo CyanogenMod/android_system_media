@@ -161,8 +161,11 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     thiz->mpLock = NULL;
                     thiz->mAudioTrack = NULL;
                     // placement new (explicit constructor)
+                    // FIXME unnecessary once those fields are encapsulated in one class, rather
+                    //   than a structure
                     (void) new (&thiz->mSfPlayer) android::sp<android::SfPlayer>();
                     (void) new (&thiz->mAuxEffect) android::sp<android::AudioEffect>();
+                    (void) new (&thiz->mAPlayer) android::sp<android::GenericPlayer>();
 #endif
 
                     // Check the source and sink parameters against generic constraints,
@@ -183,7 +186,16 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     }
 
                     result = checkDataSink("pAudioSnk", pAudioSnk, &thiz->mDataSink,
-                            DATALOCATOR_MASK_OUTPUTMIX, DATAFORMAT_MASK_NULL);
+                            DATALOCATOR_MASK_OUTPUTMIX                  // for playback
+#ifdef ANDROID
+                            | DATALOCATOR_MASK_ANDROIDSIMPLEBUFFERQUEUE // for decode to a BQ
+                            | DATALOCATOR_MASK_BUFFERQUEUE              // for decode to a BQ
+#endif
+                            , DATAFORMAT_MASK_NULL
+#ifdef ANDROID
+                            | DATAFORMAT_MASK_PCM                       // for decode to PCM
+#endif
+                            );
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
@@ -199,24 +211,39 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         break;
                     }
 
-                    // copy the buffer queue count from source locator to the buffer queue interface
+                    // copy the buffer queue count from source locator (for playback) / from the
+                    // sink locator (for decode on ANDROID build) to the buffer queue interface
                     // we have already range-checked the value down to a smaller width
-
+                    SLuint16 nbBuffers = 0;
                     switch (thiz->mDataSource.mLocator.mLocatorType) {
                     case SL_DATALOCATOR_BUFFERQUEUE:
 #ifdef ANDROID
                     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
 #endif
-                        thiz->mBufferQueue.mNumBuffers =
-                                (SLuint16) thiz->mDataSource.mLocator.mBufferQueue.numBuffers;
+                        nbBuffers = (SLuint16) thiz->mDataSource.mLocator.mBufferQueue.numBuffers;
                         assert(SL_DATAFORMAT_PCM == thiz->mDataSource.mFormat.mFormatType);
                         thiz->mNumChannels = thiz->mDataSource.mFormat.mPCM.numChannels;
                         thiz->mSampleRateMilliHz = thiz->mDataSource.mFormat.mPCM.samplesPerSec;
                         break;
                     default:
-                        thiz->mBufferQueue.mNumBuffers = 0;
+                        nbBuffers = 0;
                         break;
                     }
+#ifdef ANDROID
+                    switch(thiz->mDataSink.mLocator.mLocatorType) {
+                    case SL_DATALOCATOR_BUFFERQUEUE:
+                    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+                        nbBuffers = thiz->mDataSink.mLocator.mBufferQueue.numBuffers;
+                        assert(SL_DATAFORMAT_PCM == thiz->mDataSink.mFormat.mFormatType);
+                        thiz->mNumChannels = thiz->mDataSink.mFormat.mPCM.numChannels;
+                        thiz->mSampleRateMilliHz = thiz->mDataSink.mFormat.mPCM.samplesPerSec;
+                        break;
+                    default:
+                        // leave nbBuffers unchanged
+                        break;
+                    }
+#endif
+                    thiz->mBufferQueue.mNumBuffers = nbBuffers;
 
                     // check the audio source and sink parameters against platform support
 #ifdef ANDROID
@@ -964,7 +991,11 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
 
                     // (assume calloc or memset 0 during allocation)
                     // placement new
-
+#ifdef ANDROID
+                    // FIXME unnecessary once those fields are encapsulated in one class, rather
+                    //   than a structure
+                    (void) new (&thiz->mAVPlayer) android::sp<android::AVPlayer>();
+#endif
 
                     // Check the source and sink parameters against generic constraints
 

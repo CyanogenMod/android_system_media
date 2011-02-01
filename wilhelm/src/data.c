@@ -574,12 +574,22 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
 }
 
 
-/** \brief Check interface ID compatibility with respect to a particular data locator format */
+/** \brief Check interface ID compatibility with respect to a particular source
+ *         data locator format
+ */
 
-SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDataLocatorFormat,
+SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pSrcDataLocatorFormat,
         const ClassTable *clazz, unsigned exposedMask) {
     int index;
-    switch (pDataLocatorFormat->mLocator.mLocatorType) {
+    switch (pSrcDataLocatorFormat->mLocator.mLocatorType) {
+    case SL_DATALOCATOR_URI:
+#ifdef ANDROID
+    case SL_DATALOCATOR_ANDROIDFD:
+#endif
+        // URIs and FD can be sources when "playing" to an OutputMix or a Buffer Queue for decode
+        // so we don't prevent the retrieval of the BufferQueue interfaces for those sources
+        break;
+
     case SL_DATALOCATOR_BUFFERQUEUE:
 #ifdef ANDROID
     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
@@ -596,13 +606,14 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pDa
         index = clazz->mMPH_to_index[MPH_MUTESOLO];
         if (0 <= index) {
             if ((exposedMask & (1 << index)) &&
-                    (SL_DATAFORMAT_PCM == pDataLocatorFormat->mFormat.mFormatType) &&
-                    (1 == pDataLocatorFormat->mFormat.mPCM.numChannels)) {
+                    (SL_DATAFORMAT_PCM == pSrcDataLocatorFormat->mFormat.mFormatType) &&
+                    (1 == pSrcDataLocatorFormat->mFormat.mPCM.numChannels)) {
                 SL_LOGE("can't request SL_IID_MUTESOLO with a mono buffer queue data source");
                 return SL_RESULT_FEATURE_UNSUPPORTED;
             }
         }
         break;
+
 #ifdef ANDROID
     case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
 #endif

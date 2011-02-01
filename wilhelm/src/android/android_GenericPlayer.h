@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,10 @@
  */
 
 
-#include <binder/IServiceManager.h>
-
-
 //--------------------------------------------------------------------------------------------------
 namespace android {
 
-class MediaPlayerNotificationClient : public BnMediaPlayerClient
-{
-public:
-    MediaPlayerNotificationClient();
-    virtual ~MediaPlayerNotificationClient();
-
-    // IMediaPlayerClient implementation
-    virtual void notify(int msg, int ext1, int ext2);
-
-    void blockUntilPlayerPrepared();
-
-private:
-    Mutex mLock;
-    Condition mPlayerPreparedCondition;
-    bool mPlayerPrepared;
-};
-
-//--------------------------------------------------------------------------------------------------
-class AVPlayer : public AHandler
+class GenericPlayer : public AHandler
 {
 public:
 
@@ -47,25 +26,34 @@ public:
         kEventPrepared                = 'prep'
     };
 
-    AVPlayer(AudioPlayback_Parameters* params);
-    virtual ~AVPlayer();
+    GenericPlayer(const AudioPlayback_Parameters* params);
+    virtual ~GenericPlayer();
 
     virtual void init(const notif_cbf_t cbf, void* notifUser);
-    virtual void setVideoSurface(void* surface);
+
+    virtual void setDataSource(const char *uri);
+    virtual void setDataSource(int fd, int64_t offset, int64_t length);
 
     virtual void prepare();
     virtual void play();
     virtual void pause();
     virtual void stop();
+    virtual void seek(int64_t timeMsec);
+    virtual void loop(bool loop);
 
 protected:
+
+    void resetDataLocator();
+    DataLocator2 mDataLocator;
+    int          mDataLocatorType;
 
     enum {
         kWhatPrepare    = 'prep',
         kWhatNotif      = 'noti',
         kWhatPlay       = 'play',
         kWhatPause      = 'paus',
-        kWhatStop       = 'stop'
+        kWhatSeek       = 'seek',
+        kWhatLoop       = 'loop',
     };
 
     // Send a notification to one of the event listeners
@@ -74,42 +62,36 @@ protected:
     // AHandler implementation
     virtual void onMessageReceived(const sp<AMessage> &msg);
 
-    // Async event handlers (called from AVPlayer's event loop)
+    // Async event handlers (called from GenericPlayer's event loop)
     virtual void onPrepare();
     virtual void onNotify(const sp<AMessage> &msg);
     virtual void onPlay();
     virtual void onPause();
-    virtual void onStop();
+    virtual void onSeek(const sp<AMessage> &msg);
+    virtual void onLoop(const sp<AMessage> &msg);
 
-    // Event notification from AVPlayer to OpenSL ES / OpenMAX AL framework
+    // Event notification from GenericPlayer to OpenSL ES / OpenMAX AL framework
     notif_cbf_t mNotifyClient;
     void*       mNotifyUser;
 
     enum {
         kFlagPrepared  = 1 <<0,
-        kFlagPlaying   = 1 <<1,
-        /*kFlagBuffering = 1 <<2,
-        kFlagSeeking   = 1 <<3,
-        kFlagLooping   = 1 <<4,*/
+        kFlagPreparing = 1 <<1,
+        kFlagPlaying   = 1 <<2,
+        kFlagBuffering = 1 <<3,
+        kFlagSeeking   = 1 <<4,
+        kFlagLooping   = 1 <<5,
     };
 
     uint32_t mStateFlags;
 
     sp<ALooper> mLooper;
+    int32_t mLooperPriority;
 
     AudioPlayback_Parameters mPlaybackParams;
-    sp<Surface> mVideoSurface;
 
-    sp<IMediaPlayer> mPlayer;
-    // Receives Android MediaPlayer events from mPlayer
-    sp<MediaPlayerNotificationClient> mPlayerClient;
-
-    sp<IServiceManager> mServiceManager;
-    sp<IBinder> mBinder;
-    sp<IMediaPlayerService> mMediaPlayerService;
-
-    Mutex mLock;
-
+private:
+    DISALLOW_EVIL_CONSTRUCTORS(GenericPlayer);
 };
 
 } // namespace android

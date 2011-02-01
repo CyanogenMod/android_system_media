@@ -23,6 +23,132 @@ template class android::KeyedVector<SLuint32, android::AudioEffect* > ;
 #define KEY_STREAM_TYPE_PARAMSIZE  sizeof(SLint32)
 
 //-----------------------------------------------------------------------------
+// FIXME this method will be absorbed into android_audioPlayer_setPlayState() once
+//       bufferqueue and uri/fd playback are moved under the GenericPlayer C++ object
+SLresult aplayer_setPlayState(const android::sp<android::GenericPlayer> &ap, SLuint32 playState,
+        AndroidObject_state* pObjState) {
+    SLresult result = SL_RESULT_SUCCESS;
+    AndroidObject_state objState = *pObjState;
+
+    switch (playState) {
+     case SL_PLAYSTATE_STOPPED:
+         SL_LOGV("setting GenericPlayer to SL_PLAYSTATE_STOPPED");
+         ap->stop();
+         break;
+     case SL_PLAYSTATE_PAUSED:
+         SL_LOGV("setting GenericPlayer to SL_PLAYSTATE_PAUSED");
+         switch(objState) {
+         case ANDROID_UNINITIALIZED:
+             *pObjState = ANDROID_PREPARING;
+             ap->prepare();
+             break;
+         case ANDROID_PREPARING:
+             break;
+         case ANDROID_READY:
+             ap->pause();
+             break;
+         default:
+             SL_LOGE(ERROR_PLAYERSETPLAYSTATE_INVALID_OBJECT_STATE_D, playState);
+             result = SL_RESULT_INTERNAL_ERROR;
+             break;
+         }
+         break;
+     case SL_PLAYSTATE_PLAYING: {
+         SL_LOGV("setting GenericPlayer to SL_PLAYSTATE_PLAYING");
+         switch(objState) {
+         case ANDROID_UNINITIALIZED:
+             *pObjState = ANDROID_PREPARING;
+             ap->prepare();
+             // intended fall through
+         case ANDROID_PREPARING:
+             // intended fall through
+         case ANDROID_READY:
+             ap->play();
+             break;
+         default:
+             SL_LOGE(ERROR_PLAYERSETPLAYSTATE_INVALID_OBJECT_STATE_D, playState);
+             result = SL_RESULT_INTERNAL_ERROR;
+             break;
+         }
+         }
+         break;
+     default:
+         // checked by caller, should not happen
+         SL_LOGE(ERROR_SHOULDNT_BE_HERE_S, "aplayer_setPlayState");
+         result = SL_RESULT_INTERNAL_ERROR;
+         break;
+     }
+
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+// Callback associated with a AudioToCbRenderer of an SL ES AudioPlayer that gets its data
+// from a URI or FD, to write the decoded audio data to a buffer queue
+static size_t adecoder_writeToBufferQueue(const uint8_t *data, size_t size, void* user) {
+    size_t sizeConsumed = 0;
+    if (NULL == user) {
+        return sizeConsumed;
+    }
+    SL_LOGI("received %d bytes from decoder", size);
+    CAudioPlayer *ap = (CAudioPlayer *)user;
+    slBufferQueueCallback callback = NULL;
+    void * callbackPContext = NULL;
+
+    // push decoded data to the buffer queue
+    object_lock_exclusive(&ap->mObject);
+
+    if (ap->mBufferQueue.mState.count != 0) {
+        assert(ap->mBufferQueue.mFront != ap->mBufferQueue.mRear);
+
+        BufferHeader *oldFront = ap->mBufferQueue.mFront;
+        BufferHeader *newFront = &oldFront[1];
+
+        uint8_t *pDest = (uint8_t *)oldFront->mBuffer + ap->mBufferQueue.mSizeConsumed;
+        if (ap->mBufferQueue.mSizeConsumed + size < oldFront->mSize) {
+            // room to consume the whole or rest of the decoded data in one shot
+            ap->mBufferQueue.mSizeConsumed += size;
+            // consume data but no callback to the BufferQueue interface here
+            memcpy (pDest, data, size);
+            sizeConsumed = size;
+        } else {
+            // push as much as possible of the decoded data into the buffer queue
+            sizeConsumed = oldFront->mSize - ap->mBufferQueue.mSizeConsumed;
+
+            // the buffer at the head of the buffer queue is full, update the state
+            ap->mBufferQueue.mSizeConsumed = 0;
+            if (newFront ==  &ap->mBufferQueue.mArray[ap->mBufferQueue.mNumBuffers + 1]) {
+                newFront = ap->mBufferQueue.mArray;
+            }
+            ap->mBufferQueue.mFront = newFront;
+
+            ap->mBufferQueue.mState.count--;
+            ap->mBufferQueue.mState.playIndex++;
+            // consume data
+            memcpy (pDest, data, sizeConsumed);
+            // data has been copied to the buffer, and the buffer queue state has been updated
+            // we will notify the client if applicable
+            callback = ap->mBufferQueue.mCallback;
+            // save callback data
+            callbackPContext = ap->mBufferQueue.mContext;
+        }
+
+    } else {
+        // no available buffers in the queue to write the decoded data
+        sizeConsumed = 0;
+    }
+
+    object_unlock_exclusive(&ap->mObject);
+    // notify client
+    if (NULL != callback) {
+        (*callback)(&ap->mBufferQueue.mItf, callbackPContext);
+    }
+
+    return sizeConsumed;
+}
+
+//-----------------------------------------------------------------------------
 int android_getMinFrameCount(uint32_t sampleRate) {
     int afSampleRate;
     if (android::AudioSystem::getOutputSamplingRate(&afSampleRate,
@@ -375,6 +501,130 @@ void audioPlayer_auxEffectUpdate(CAudioPlayer* ap) {
 
 
 //-----------------------------------------------------------------------------
+void audioPlayer_setInvalid(CAudioPlayer* ap) {
+    ap->mAndroidObjType = INVALID_TYPE;
+    ap->mpLock = NULL;
+    ap->mPlaybackRate.mCapabilities = 0;
+}
+
+
+//-----------------------------------------------------------------------------
+/*
+ * returns true if the given data sink is supported by AudioPlayer that don't
+ *   play to an OutputMix object, false otherwise
+ *
+ * pre-condition: the locator of the audio sink is not SL_DATALOCATOR_OUTPUTMIX
+ */
+bool audioPlayer_isSupportedNonOutputMixSink(const SLDataSink* pAudioSink) {
+    bool result = true;
+    const SLuint32 sinkLocatorType = *(SLuint32 *)pAudioSink->pLocator;
+    const SLuint32 sinkFormatType = *(SLuint32 *)pAudioSink->pFormat;
+
+    switch (sinkLocatorType) {
+
+    case SL_DATALOCATOR_BUFFERQUEUE:
+    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+        if (SL_DATAFORMAT_PCM != sinkFormatType) {
+            SL_LOGE("Unsupported sink format 0x%x, expected SL_DATAFORMAT_PCM",
+                    (unsigned)sinkFormatType);
+            result = false;
+        }
+        // it's no use checking the PCM format fields because additional characteristics
+        // such as the number of channels, or sample size are unknown to the player at this stage
+        break;
+
+    default:
+        SL_LOGE("Unsupported sink locator type 0x%x", (unsigned)sinkLocatorType);
+        result = false;
+        break;
+    }
+
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+/*
+ * returns the Android object type if the locator type combinations for the source and sinks
+ *   are supported by this implementation, INVALID_TYPE otherwise
+ */
+AndroidObject_type audioPlayer_getAndroidObjectTypeForSourceSink(CAudioPlayer *ap) {
+
+    const SLDataSource *pAudioSrc = &ap->mDataSource.u.mSource;
+    const SLDataSink *pAudioSnk = &ap->mDataSink.u.mSink;
+    const SLuint32 sourceLocatorType = *(SLuint32 *)pAudioSrc->pLocator;
+    const SLuint32 sinkLocatorType = *(SLuint32 *)pAudioSnk->pLocator;
+    AndroidObject_type type = INVALID_TYPE;
+
+    //--------------------------------------
+    // Sink / source matching check:
+    // the following source / sink combinations are supported
+    //     SL_DATALOCATOR_BUFFERQUEUE                / SL_DATALOCATOR_OUTPUTMIX
+    //     SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE   / SL_DATALOCATOR_OUTPUTMIX
+    //     SL_DATALOCATOR_URI                        / SL_DATALOCATOR_OUTPUTMIX
+    //     SL_DATALOCATOR_ANDROIDFD                  / SL_DATALOCATOR_OUTPUTMIX
+    //     SL_DATALOCATOR_ANDROIDBUFFERQUEUE         / SL_DATALOCATOR_OUTPUTMIX
+    //     SL_DATALOCATOR_URI                        / SL_DATALOCATOR_BUFFERQUEUE
+    //     SL_DATALOCATOR_ANDROIDFD                  / SL_DATALOCATOR_BUFFERQUEUE
+    //     SL_DATALOCATOR_URI                        / SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE
+    //     SL_DATALOCATOR_ANDROIDFD                  / SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE
+    switch (sinkLocatorType) {
+
+    case SL_DATALOCATOR_OUTPUTMIX: {
+        switch (sourceLocatorType) {
+
+        //   Buffer Queue to AudioTrack
+        case SL_DATALOCATOR_BUFFERQUEUE:
+        case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+            type = A_PLR_PCM_BQ;
+            break;
+
+        //   URI or FD to MediaPlayer
+        case SL_DATALOCATOR_URI:
+        case SL_DATALOCATOR_ANDROIDFD:
+            type = A_PLR_URIFD;
+            break;
+
+        //   Android BufferQueue to MediaPlayer (shared memory streaming)
+        case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
+            type = A_PLR_TS_ABQ;
+            break;
+
+        default:
+            SL_LOGE("Source data locator 0x%x not supported with SL_DATALOCATOR_OUTPUTMIX sink",
+                    (unsigned)sourceLocatorType);
+            break;
+        }
+        }
+        break;
+
+    case SL_DATALOCATOR_BUFFERQUEUE:
+    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+        switch (sourceLocatorType) {
+
+        //   URI or FD decoded to PCM in a buffer queue
+        case SL_DATALOCATOR_URI:
+        case SL_DATALOCATOR_ANDROIDFD:
+            type = A_PLR_URIFD_ASQ;
+            break;
+
+        default:
+            SL_LOGE("Source data locator 0x%x not supported with SL_DATALOCATOR_BUFFERQUEUE sink",
+                    (unsigned)sourceLocatorType);
+            break;
+        }
+        break;
+
+    default:
+        SL_LOGE("Sink data locator 0x%x not supported", (unsigned)sinkLocatorType);
+        break;
+    }
+
+    return type;
+}
+
+
+//-----------------------------------------------------------------------------
 static void sfplayer_prepare(CAudioPlayer *ap, bool lockAP) {
 
     if (lockAP) { object_lock_exclusive(&ap->mObject); }
@@ -389,7 +639,7 @@ static void sfplayer_prepare(CAudioPlayer *ap, bool lockAP) {
 //-----------------------------------------------------------------------------
 // Callback associated with an SfPlayer of an SL ES AudioPlayer that gets its data
 // from a URI or FD, for prepare and prefetch events
-static void sfplayer_handlePrefetchEvent(const int event, const int data1, void* user) {
+static void sfplayer_handlePrefetchEvent(int event, int data1, void* user) {
     if (NULL == user) {
         return;
     }
@@ -398,7 +648,7 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
     //SL_LOGV("received event %d, data %d from SfAudioPlayer", event, data1);
     switch(event) {
 
-    case(android::AVPlayer::kEventPrepared): {
+    case android::AVPlayer::kEventPrepared: {
 
         if (PLAYER_SUCCESS != data1) {
             object_lock_exclusive(&ap->mObject);
@@ -453,7 +703,9 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
                 android_audioPlayer_useEventMask(ap);
                 android_audioPlayer_volumeUpdate(ap);
                 android_audioPlayer_setPlayRate(ap, ap->mPlaybackRate.mRate, false /*lockAP*/);
-            } else if (A_PLR_TS_ABQ) {
+            } else if (A_PLR_PCM_BQ == ap->mAndroidObjType) {
+                ((android::AudioToCbRenderer*)ap->mAPlayer.get())->startPrefetch_async();
+            } else if (A_PLR_TS_ABQ == ap->mAndroidObjType) {
                 SL_LOGI("Received SfPlayer::kEventPrepared from AVPlayer for CAudioPlayer %p", ap);
             }
 
@@ -462,9 +714,10 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
             object_unlock_exclusive(&ap->mObject);
         }
 
-    } break;
+    }
+    break;
 
-    case(android::SfPlayer::kEventNewAudioTrack): {
+    case android::SfPlayer::kEventNewAudioTrack: {
         object_lock_exclusive(&ap->mObject);
 #if 1
         // SfPlayer has a new AudioTrack, update our pointer copy and configure the new one before
@@ -489,9 +742,10 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
         android_audioPlayer_setPlayRate(ap, ap->mPlaybackRate.mRate, false /*lockAP*/);
 
         object_unlock_exclusive(&ap->mObject);
-    } break;
+    }
+    break;
 
-    case(android::SfPlayer::kEventPrefetchFillLevelUpdate): {
+    case android::SfPlayer::kEventPrefetchFillLevelUpdate : {
         if (!IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
             break;
         }
@@ -512,9 +766,10 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
             (*callback)(&ap->mPrefetchStatus.mItf, callbackPContext,
                     SL_PREFETCHEVENT_FILLLEVELCHANGE);
         }
-    } break;
+    }
+    break;
 
-    case(android::SfPlayer::kEventPrefetchStatusChange): {
+    case android::SfPlayer::kEventPrefetchStatusChange: {
         if (!IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
             break;
         }
@@ -543,14 +798,16 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
         if (NULL != callback) {
             (*callback)(&ap->mPrefetchStatus.mItf, callbackPContext, SL_PREFETCHEVENT_STATUSCHANGE);
         }
-        } break;
+        }
+        break;
 
-    case(android::SfPlayer::kEventEndOfStream): {
+    case android::SfPlayer::kEventEndOfStream: {
         audioPlayer_dispatch_headAtEnd_lockPlay(ap, true /*set state to paused?*/, true);
         if ((NULL != ap->mAudioTrack) && (!ap->mSeek.mLoopEnabled)) {
             ap->mAudioTrack->stop();
         }
-        } break;
+        }
+        break;
 
     default:
         break;
@@ -561,22 +818,22 @@ static void sfplayer_handlePrefetchEvent(const int event, const int data1, void*
 //-----------------------------------------------------------------------------
 SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
 {
-    const SLDataSource *pAudioSrc = &pAudioPlayer->mDataSource.u.mSource;
-    const SLDataSink *pAudioSnk = &pAudioPlayer->mDataSink.u.mSink;
-    //--------------------------------------
-    // Sink check:
-    //     currently only OutputMix sinks are supported, regardless of the data source
-    if (*(SLuint32 *)pAudioSnk->pLocator != SL_DATALOCATOR_OUTPUTMIX) {
-        SL_LOGE("Cannot create audio player: data sink is not SL_DATALOCATOR_OUTPUTMIX");
+    // verify that the locator types for the source / sink combination is supported
+    pAudioPlayer->mAndroidObjType = audioPlayer_getAndroidObjectTypeForSourceSink(pAudioPlayer);
+    if (INVALID_TYPE == pAudioPlayer->mAndroidObjType) {
         return SL_RESULT_PARAMETER_INVALID;
     }
 
-    //--------------------------------------
-    // Source check:
-    SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
-    SLuint32 formatType = *(SLuint32 *)pAudioSrc->pFormat;
+    const SLDataSource *pAudioSrc = &pAudioPlayer->mDataSource.u.mSource;
+    const SLDataSink *pAudioSnk = &pAudioPlayer->mDataSink.u.mSink;
 
-    switch (locatorType) {
+    // format check:
+    const SLuint32 sourceLocatorType = *(SLuint32 *)pAudioSrc->pLocator;
+    const SLuint32 sinkLocatorType = *(SLuint32 *)pAudioSnk->pLocator;
+    const SLuint32 sourceFormatType = *(SLuint32 *)pAudioSrc->pFormat;
+    const SLuint32 sinkFormatType = *(SLuint32 *)pAudioSnk->pFormat;
+
+    switch (sourceLocatorType) {
     //------------------
     //   Buffer Queues
     case SL_DATALOCATOR_BUFFERQUEUE:
@@ -585,7 +842,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         SLDataLocator_BufferQueue *dl_bq =  (SLDataLocator_BufferQueue *) pAudioSrc->pLocator;
 
         // Buffer format
-        switch (formatType) {
+        switch (sourceFormatType) {
         //     currently only PCM buffer queues are supported,
         case SL_DATAFORMAT_PCM: {
             SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *) pAudioSrc->pFormat;
@@ -671,7 +928,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             // invalid data format is detected earlier
             assert(false);
             return SL_RESULT_INTERNAL_ERROR;
-        } // switch (formatType)
+        } // switch (sourceFormatType)
         } // case SL_DATALOCATOR_BUFFERQUEUE or SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE
         break;
     //------------------
@@ -683,7 +940,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             return SL_RESULT_PARAMETER_INVALID;
         }
         // URI format
-        switch (formatType) {
+        switch (sourceFormatType) {
         case SL_DATAFORMAT_MIME:
             break;
         case SL_DATAFORMAT_PCM:
@@ -691,7 +948,12 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             SL_LOGE("Cannot create audio player with SL_DATALOCATOR_URI data source without "
                 "SL_DATAFORMAT_MIME format");
             return SL_RESULT_CONTENT_UNSUPPORTED;
-        } // switch (formatType)
+        } // switch (sourceFormatType)
+        // decoding format check
+        if ((sinkLocatorType != SL_DATALOCATOR_OUTPUTMIX) &&
+                !audioPlayer_isSupportedNonOutputMixSink(pAudioSnk)) {
+            return SL_RESULT_CONTENT_UNSUPPORTED;
+        }
         } // case SL_DATALOCATOR_URI
         break;
     //------------------
@@ -699,7 +961,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     case SL_DATALOCATOR_ANDROIDFD:
         {
         // fd is already non null
-        switch (formatType) {
+        switch (sourceFormatType) {
         case SL_DATAFORMAT_MIME:
             break;
         case SL_DATAFORMAT_PCM:
@@ -714,7 +976,11 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             // invalid data format is detected earlier
             assert(false);
             return SL_RESULT_INTERNAL_ERROR;
-        } // switch (formatType)
+        } // switch (sourceFormatType)
+        if ((sinkLocatorType != SL_DATALOCATOR_OUTPUTMIX) &&
+                !audioPlayer_isSupportedNonOutputMixSink(pAudioSnk)) {
+            return SL_RESULT_CONTENT_UNSUPPORTED;
+        }
         } // case SL_DATALOCATOR_ANDROIDFD
         break;
     //------------------
@@ -730,11 +996,12 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     case SL_DATALOCATOR_OUTPUTMIX:
     case XA_DATALOCATOR_NATIVEDISPLAY:
     case SL_DATALOCATOR_MIDIBUFFERQUEUE:
-        SL_LOGE("Cannot create audio player with data locator type 0x%x", (unsigned) locatorType);
+        SL_LOGE("Cannot create audio player with data locator type 0x%x",
+                (unsigned) sourceLocatorType);
         return SL_RESULT_CONTENT_UNSUPPORTED;
     default:
         SL_LOGE("Cannot create audio player with invalid data locator type 0x%x",
-                (unsigned) locatorType);
+                (unsigned) sourceLocatorType);
         return SL_RESULT_PARAMETER_INVALID;
     }// switch (locatorType)
 
@@ -754,17 +1021,17 @@ static void audioTrack_callBack_uri(int event, void* user, void *info) {
         pBuff->size = 0;
     } else if (NULL != user) {
         switch (event) {
-            case (android::AudioTrack::EVENT_MARKER) :
+            case android::AudioTrack::EVENT_MARKER :
                 audioTrack_handleMarker_lockPlay((CAudioPlayer *)user);
                 break;
-            case (android::AudioTrack::EVENT_NEW_POS) :
+            case android::AudioTrack::EVENT_NEW_POS :
                 audioTrack_handleNewPos_lockPlay((CAudioPlayer *)user);
                 break;
-            case (android::AudioTrack::EVENT_UNDERRUN) :
+            case android::AudioTrack::EVENT_UNDERRUN :
                 audioTrack_handleUnderrun_lockPlay((CAudioPlayer *)user);
                 break;
-            case (android::AudioTrack::EVENT_BUFFER_END) :
-            case (android::AudioTrack::EVENT_LOOP_END) :
+            case android::AudioTrack::EVENT_BUFFER_END :
+            case android::AudioTrack::EVENT_LOOP_END :
                 break;
             default:
                 SL_LOGE("Encountered unknown AudioTrack event %d for CAudioPlayer %p", event,
@@ -782,7 +1049,7 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
     void * callbackPContext = NULL;
     switch(event) {
 
-    case (android::AudioTrack::EVENT_MORE_DATA) : {
+    case android::AudioTrack::EVENT_MORE_DATA: {
         //SL_LOGV("received event EVENT_MORE_DATA from AudioTrack");
         slBufferQueueCallback callback = NULL;
         android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
@@ -855,15 +1122,15 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
     }
     break;
 
-    case (android::AudioTrack::EVENT_MARKER) :
+    case android::AudioTrack::EVENT_MARKER:
         audioTrack_handleMarker_lockPlay(ap);
         break;
 
-    case (android::AudioTrack::EVENT_NEW_POS) :
+    case android::AudioTrack::EVENT_NEW_POS:
         audioTrack_handleNewPos_lockPlay(ap);
         break;
 
-    case (android::AudioTrack::EVENT_UNDERRUN) :
+    case android::AudioTrack::EVENT_UNDERRUN:
         audioTrack_handleUnderrun_lockPlay(ap);
         break;
 
@@ -877,75 +1144,37 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
 
 
 //-----------------------------------------------------------------------------
-SLresult android_audioPlayer_create(
-        CAudioPlayer *pAudioPlayer) {
+SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
 
-    const SLDataSource *pAudioSrc = &pAudioPlayer->mDataSource.u.mSource;
-    const SLDataSink *pAudioSnk = &pAudioPlayer->mDataSink.u.mSink;
     SLresult result = SL_RESULT_SUCCESS;
-
-    //--------------------------------------
-    // Sink check:
-    // currently only OutputMix sinks are supported
-    // this has already been verified in sles_to_android_CheckAudioPlayerSourceSink
-    // SLuint32 locatorType = *(SLuint32 *)pAudioSnk->pLocator;
-    // if (SL_DATALOCATOR_OUTPUTMIX == locatorType) {
-    // }
-
-    //--------------------------------------
-    // Source check:
-    SLuint32 locatorType = *(SLuint32 *)pAudioSrc->pLocator;
-    switch (locatorType) {
-    //   -----------------------------------
-    //   Buffer Queue to AudioTrack
-    case SL_DATALOCATOR_BUFFERQUEUE:
-    case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
-        pAudioPlayer->mAndroidObjType = A_PLR_PCM_BQ;
-        pAudioPlayer->mpLock = new android::Mutex();
-        pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
-        break;
-    //   -----------------------------------
-    //   URI or FD to MediaPlayer
-    case SL_DATALOCATOR_URI:
-    case SL_DATALOCATOR_ANDROIDFD:
-        pAudioPlayer->mAndroidObjType = A_PLR_URIFD;
-        pAudioPlayer->mpLock = new android::Mutex();
-        pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
-        break;
-    case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
-        pAudioPlayer->mAndroidObjType = A_PLR_TS_ABQ;
-        pAudioPlayer->mpLock = new android::Mutex();
-        pAudioPlayer->mPlaybackRate.mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
-        break;
-    default:
-        pAudioPlayer->mAndroidObjType = INVALID_TYPE;
-        pAudioPlayer->mpLock = NULL;
-        pAudioPlayer->mPlaybackRate.mCapabilities = 0;
+    // pAudioPlayer->mAndroidObjType has been set in audioPlayer_getAndroidObjectTypeForSourceSink()
+    if (INVALID_TYPE == pAudioPlayer->mAndroidObjType) {
+        audioPlayer_setInvalid(pAudioPlayer);
         result = SL_RESULT_PARAMETER_INVALID;
-        break;
+    } else {
+
+        pAudioPlayer->mpLock = new android::Mutex();
+        pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
+        pAudioPlayer->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
+        pAudioPlayer->mAudioTrack = NULL;
+        // not needed, as placement new (explicit constructor) already does this
+        // pAudioPlayer->mSfPlayer.clear();
+
+        pAudioPlayer->mSessionId = android::AudioSystem::newAudioSessionId();
+
+        pAudioPlayer->mAmplFromVolLevel = 1.0f;
+        pAudioPlayer->mAmplFromStereoPos[0] = 1.0f;
+        pAudioPlayer->mAmplFromStereoPos[1] = 1.0f;
+        pAudioPlayer->mDirectLevel = 0; // no attenuation
+        pAudioPlayer->mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
+        pAudioPlayer->mAuxSendLevel = 0;
+
+        // initialize interface-specific fields that can be used regardless of whether the
+        // interface is exposed on the AudioPlayer or not
+        // (empty section, as all initializations are the same as the defaults)
     }
 
-    pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
-    pAudioPlayer->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
-    pAudioPlayer->mAudioTrack = NULL;
-    // no longer needed, as placement new (explicit constructor) already does this
-    // pAudioPlayer->mSfPlayer.clear();
-
-    pAudioPlayer->mSessionId = android::AudioSystem::newAudioSessionId();
-
-    pAudioPlayer->mAmplFromVolLevel = 1.0f;
-    pAudioPlayer->mAmplFromStereoPos[0] = 1.0f;
-    pAudioPlayer->mAmplFromStereoPos[1] = 1.0f;
-    pAudioPlayer->mDirectLevel = 0; // no attenuation
-    pAudioPlayer->mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
-    pAudioPlayer->mAuxSendLevel = 0;
-
-    // initialize interface-specific fields that can be used regardless of whether the interface
-    // is exposed on the AudioPlayer or not
-    // (section no longer applicable, as all previous initializations were the same as the defaults)
-
     return result;
-
 }
 
 
@@ -1059,7 +1288,8 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         pAudioPlayer->mSampleRateMilliHz = df_pcm->samplesPerSec; // Note: bad field name in SL ES
 
         pAudioPlayer->mAndroidObjState = ANDROID_READY;
-        } break;
+        }
+        break;
     //-----------------------------------
     // MediaPlayer
     case A_PLR_URIFD: {
@@ -1095,26 +1325,65 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                         offset == SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ?
                                 (int64_t)PLAYER_FD_FIND_FILE_SIZE : offset,
                         (int64_t)pAudioPlayer->mDataSource.mLocator.mFD.length);
-                } break;
+                }
+                break;
             default:
                 SL_LOGE(ERROR_PLAYERREALIZE_UNKNOWN_DATASOURCE_LOCATOR);
                 break;
         }
 
-        } break;
-   //-----------------------------------
-   // StreamPlayer
-   case A_PLR_TS_ABQ: {
+        }
+        break;
+    //-----------------------------------
+    // StreamPlayer
+    case A_PLR_TS_ABQ: {
         object_lock_exclusive(&pAudioPlayer->mObject);
 
         android_StreamPlayer_realize_l(pAudioPlayer, sfplayer_handlePrefetchEvent,
                 (void*)pAudioPlayer);
 
         object_unlock_exclusive(&pAudioPlayer->mObject);
-        } break;
+        }
+        break;
+    //-----------------------------------
+    // AudioToCbRenderer
+    case A_PLR_URIFD_ASQ: {
+        object_lock_exclusive(&pAudioPlayer->mObject);
+
+        AudioPlayback_Parameters app;
+        app.sessionId = pAudioPlayer->mSessionId;
+        app.streamType = pAudioPlayer->mStreamType;
+
+        android::AudioToCbRenderer* decoder = new android::AudioToCbRenderer(&app);
+        pAudioPlayer->mAPlayer = decoder;
+        decoder->setDataPushListener(adecoder_writeToBufferQueue, (void*)pAudioPlayer);
+        decoder->init(sfplayer_handlePrefetchEvent, (void*)pAudioPlayer);
+
+        switch (pAudioPlayer->mDataSource.mLocator.mLocatorType) {
+        case SL_DATALOCATOR_URI:
+            decoder->setDataSource(
+                    (const char*)pAudioPlayer->mDataSource.mLocator.mURI.URI);
+            break;
+        case SL_DATALOCATOR_ANDROIDFD: {
+            int64_t offset = (int64_t)pAudioPlayer->mDataSource.mLocator.mFD.offset;
+            decoder->setDataSource(
+                    (int)pAudioPlayer->mDataSource.mLocator.mFD.fd,
+                    offset == SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ?
+                            (int64_t)PLAYER_FD_FIND_FILE_SIZE : offset,
+                            (int64_t)pAudioPlayer->mDataSource.mLocator.mFD.length);
+            }
+            break;
+        default:
+            SL_LOGE(ERROR_PLAYERREALIZE_UNKNOWN_DATASOURCE_LOCATOR);
+            break;
+        }
+
+        object_unlock_exclusive(&pAudioPlayer->mObject);
+        }
+        break;
     //-----------------------------------
     default:
-        SL_LOGE("Unexpected object type %d", pAudioPlayer->mAndroidObjType);
+        SL_LOGE(ERROR_PLAYERREALIZE_UNEXPECTED_OBJECT_TYPE_D, pAudioPlayer->mAndroidObjType);
         result = SL_RESULT_INTERNAL_ERROR;
         break;
     }
@@ -1169,9 +1438,7 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
         // We don't own this audio track, SfPlayer does
         pAudioPlayer->mAudioTrack = NULL;
         // FIXME might no longer be needed since we call explicit destructor
-        if (pAudioPlayer->mSfPlayer != 0) {
-            pAudioPlayer->mSfPlayer.clear();
-        }
+        pAudioPlayer->mSfPlayer.clear();
         break;
     //-----------------------------------
     // StreamPlayer
@@ -1179,8 +1446,12 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
         android_StreamPlayer_destroy(pAudioPlayer);
         break;
     //-----------------------------------
+    case A_PLR_URIFD_ASQ:
+        pAudioPlayer->mAPlayer.clear();
+        break;
+    //-----------------------------------
     default:
-        SL_LOGE("Unexpected object type %d", pAudioPlayer->mAndroidObjType);
+        SL_LOGE(ERROR_PLAYERDESTROY_UNEXPECTED_OBJECT_TYPE_D, pAudioPlayer->mAndroidObjType);
         result = SL_RESULT_INTERNAL_ERROR;
         break;
     }
@@ -1191,6 +1462,7 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     // explicit destructor
     pAudioPlayer->mSfPlayer.~sp();
     pAudioPlayer->mAuxEffect.~sp();
+    pAudioPlayer->mAPlayer.~sp();
 
     if (pAudioPlayer->mpLock != NULL) {
         delete pAudioPlayer->mpLock;
@@ -1308,16 +1580,17 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
             if (ap->mSfPlayer != 0) {
                 ap->mSfPlayer->stop();
             }
-            } break;
+            }
+            break;
         case SL_PLAYSTATE_PAUSED: {
             SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
             switch(objState) {
-                case(ANDROID_UNINITIALIZED):
+                case ANDROID_UNINITIALIZED:
                     sfplayer_prepare(ap, lockAP);
                     break;
-                case(ANDROID_PREPARING):
+                caseANDROID_PREPARING:
                     break;
-                case(ANDROID_READY):
+                case ANDROID_READY:
                     if (ap->mSfPlayer != 0) {
                         ap->mSfPlayer->pause();
                     }
@@ -1325,15 +1598,16 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
                 default:
                     break;
             }
-            } break;
+            }
+            break;
         case SL_PLAYSTATE_PLAYING: {
             SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PLAYING");
             switch(objState) {
-                case(ANDROID_UNINITIALIZED):
+                case ANDROID_UNINITIALIZED:
                     sfplayer_prepare(ap, lockAP);
                     // fall through
-                case(ANDROID_PREPARING):
-                case(ANDROID_READY):
+                case ANDROID_PREPARING:
+                case ANDROID_READY:
                     if (ap->mSfPlayer != 0) {
                         ap->mSfPlayer->play();
                     }
@@ -1341,7 +1615,8 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
                 default:
                     break;
             }
-            } break;
+            }
+            break;
 
         default:
             // checked by caller, should not happen
@@ -1357,7 +1632,13 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
         }
         break;
 
+    case A_PLR_URIFD_ASQ:
+        // FIXME report and use the return code to the lock mechanism, which is where play state
+        //   changes are updated (see object_unlock_exclusive_attributes())
+        aplayer_setPlayState(ap->mAPlayer, playState, &(ap->mAndroidObjState));
+        break;
     default:
+        SL_LOGE(ERROR_PLAYERSETPLAYSTATE_UNEXPECTED_OBJECT_TYPE_D, ap->mAndroidObjType);
         break;
     }
 }
@@ -1423,7 +1704,8 @@ SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMse
             durationUsec = ap->mSfPlayer->getDurationUsec();
             *pDurMsec = durationUsec == -1 ? SL_TIME_UNKNOWN : durationUsec / 1000;
         }
-        } break;
+        }
+        break;
     default:
         break;
     }
