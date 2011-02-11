@@ -243,3 +243,27 @@ endif
 LOCAL_MODULE:= slesTest_sendToPresetReverb
 
 include $(BUILD_EXECUTABLE)
+
+# slesTest_decodeToBuffQueue
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_C_INCLUDES:= \
+	system/media/wilhelm/include
+
+LOCAL_SRC_FILES:= \
+	slesTestDecodeToBuffQueue.cpp
+
+LOCAL_SHARED_LIBRARIES := \
+	libutils \
+	libOpenSLES
+
+ifeq ($(TARGET_OS),linux)
+	LOCAL_CFLAGS += -DXP_UNIX
+endif
+
+LOCAL_MODULE:= slesTest_decodeToBuffQueue
+
+include $(BUILD_EXECUTABLE)
