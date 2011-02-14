@@ -83,16 +83,16 @@ void AudioSfDecoder::onPrepare() {
         return;
 
     case kDataLocatorUri:
-        if (!strncasecmp(mDataLocator.uriRef, "http://", 7)) {
-            SL_LOGE("AudioSfDecoder::onPrepare: http source not supported yet");
+        dataSource = DataSource::CreateFromURI(mDataLocator.uriRef);
+        if (dataSource == NULL) {
+            SL_LOGE("AudioSfDecoder::onPrepare(): Error opening %s", mDataLocator.uriRef);
             notifyPrepared(MEDIA_ERROR_BASE);
             return;
-        } else {
-            dataSource = DataSource::CreateFromURI(mDataLocator.uriRef);
         }
         break;
 
-    case kDataLocatorFd: {
+    case kDataLocatorFd:
+    {
         dataSource = new FileSource(
                 mDataLocator.fdi.fd, mDataLocator.fdi.offset, mDataLocator.fdi.length);
         status_t err = dataSource->initCheck();
@@ -100,8 +100,8 @@ void AudioSfDecoder::onPrepare() {
             notifyPrepared(err);
             return;
         }
+        break;
     }
-    break;
 
     default:
         TRESPASS();
