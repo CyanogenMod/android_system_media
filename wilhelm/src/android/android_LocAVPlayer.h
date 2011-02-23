@@ -18,22 +18,15 @@
 namespace android {
 
 //--------------------------------------------------------------------------------------------------
-class LocAVPlayer : public AVPlayer
+class LocAVPlayer : public GenericMediaPlayer
 {
 public:
-    LocAVPlayer(AudioPlayback_Parameters* params);
+    LocAVPlayer(AudioPlayback_Parameters* params, bool hasVideo);
     virtual ~LocAVPlayer();
-
-    void setDataSource(const char *uri);
-    void setDataSource(const int fd, const int64_t offset, const int64_t length);
 
 protected:
     // overridden from AVPlayer
     virtual void onPrepare();
-
-    void resetDataLocator();
-    DataLocator mDataLocator;
-    int         mDataLocatorType;
 
 private:
     DISALLOW_EVIL_CONSTRUCTORS(LocAVPlayer);

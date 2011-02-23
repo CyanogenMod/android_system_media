@@ -31,7 +31,7 @@ extern XAresult android_Player_destroy(CMediaPlayer *mp);
 /**
  * pre-conditions: avp != NULL, surface != NULL
  */
-extern XAresult android_Player_setVideoSurface(android::AVPlayer *avp, void* surface);
+extern XAresult android_Player_setVideoSurface(android::GenericMediaPlayer *avp, void* surface);
 
 /**************************************************************************************************
  * Playback control and events
@@ -39,7 +39,7 @@ extern XAresult android_Player_setVideoSurface(android::AVPlayer *avp, void* sur
 /**
  * pre-condition: avp != NULL
  */
-extern XAresult android_Player_setPlayState(android::AVPlayer *avp, SLuint32 playState,
+extern XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playState,
         AndroidObject_state* pObjState);
 
 

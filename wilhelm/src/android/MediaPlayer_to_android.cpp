@@ -30,7 +30,7 @@ static void player_handleMediaPlayerEventNotifications(const int event, const in
 
     switch(event) {
 
-    case android::AVPlayer::kEventPrepared: {
+    case android::GenericPlayer::kEventPrepared: {
         if (PLAYER_SUCCESS == data1) {
             object_lock_exclusive(&mp->mObject);
             SL_LOGV("Received AVPlayer::kEventPrepared from AVPlayer for CMediaPlayer %p", mp);
@@ -108,12 +108,12 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
 
     switch(mp->mAndroidObjType) {
     case AV_PLR_TS_ABQ: {
-        mp->mAVPlayer = new android::StreamPlayer(&ap_params);
+        mp->mAVPlayer = new android::StreamPlayer(&ap_params, true /*hasVideo*/);
         mp->mAVPlayer->init(player_handleMediaPlayerEventNotifications, (void*)mp);
         }
         break;
     case AV_PLR_URIFD: {
-        mp->mAVPlayer = new android::LocAVPlayer(&ap_params);
+        mp->mAVPlayer = new android::LocAVPlayer(&ap_params, true /*hasVideo*/);
         mp->mAVPlayer->init(player_handleMediaPlayerEventNotifications, (void*)mp);
         switch (mp->mDataSource.mLocator.mLocatorType) {
         case XA_DATALOCATOR_URI:
@@ -162,7 +162,7 @@ XAresult android_Player_destroy(CMediaPlayer *mp) {
 /**
  * pre-conditions: avp != NULL, surface != NULL
  */
-XAresult android_Player_setVideoSurface(android::AVPlayer *avp, void* surface) {
+XAresult android_Player_setVideoSurface(android::GenericMediaPlayer *avp, void* surface) {
     XAresult result = XA_RESULT_SUCCESS;
 
     avp->setVideoSurface(surface);
@@ -175,7 +175,7 @@ XAresult android_Player_setVideoSurface(android::AVPlayer *avp, void* surface) {
 /**
  * pre-condition: avp != NULL
  */
-XAresult android_Player_setPlayState(android::AVPlayer *avp, SLuint32 playState,
+XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playState,
         AndroidObject_state* pObjState)
 {
     XAresult result = XA_RESULT_SUCCESS;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,66 +38,26 @@ private:
     bool mPlayerPrepared;
 };
 
+
 //--------------------------------------------------------------------------------------------------
-class AVPlayer : public AHandler
+class GenericMediaPlayer : public GenericPlayer
 {
 public:
 
-    enum {
-        kEventPrepared                = 'prep'
-    };
+    GenericMediaPlayer(const AudioPlayback_Parameters* params, bool hasVideo);
+    virtual ~GenericMediaPlayer();
 
-    AVPlayer(AudioPlayback_Parameters* params);
-    virtual ~AVPlayer();
-
-    virtual void init(const notif_cbf_t cbf, void* notifUser);
     virtual void setVideoSurface(void* surface);
-
-    virtual void prepare();
-    virtual void play();
-    virtual void pause();
-    virtual void stop();
 
 protected:
 
-    enum {
-        kWhatPrepare    = 'prep',
-        kWhatNotif      = 'noti',
-        kWhatPlay       = 'play',
-        kWhatPause      = 'paus',
-        kWhatStop       = 'stop'
-    };
-
-    // Send a notification to one of the event listeners
-    virtual void notify(const char* event, int data, bool async);
-
-    // AHandler implementation
-    virtual void onMessageReceived(const sp<AMessage> &msg);
-
-    // Async event handlers (called from AVPlayer's event loop)
+    // Async event handlers (called from GenericPlayer's event loop)
     virtual void onPrepare();
-    virtual void onNotify(const sp<AMessage> &msg);
     virtual void onPlay();
     virtual void onPause();
-    virtual void onStop();
 
-    // Event notification from AVPlayer to OpenSL ES / OpenMAX AL framework
-    notif_cbf_t mNotifyClient;
-    void*       mNotifyUser;
+    bool mHasVideo;
 
-    enum {
-        kFlagPrepared  = 1 <<0,
-        kFlagPlaying   = 1 <<1,
-        /*kFlagBuffering = 1 <<2,
-        kFlagSeeking   = 1 <<3,
-        kFlagLooping   = 1 <<4,*/
-    };
-
-    uint32_t mStateFlags;
-
-    sp<ALooper> mLooper;
-
-    AudioPlayback_Parameters mPlaybackParams;
     sp<Surface> mVideoSurface;
 
     sp<IMediaPlayer> mPlayer;
@@ -108,8 +68,8 @@ protected:
     sp<IBinder> mBinder;
     sp<IMediaPlayerService> mMediaPlayerService;
 
-    Mutex mLock;
-
+private:
+    DISALLOW_EVIL_CONSTRUCTORS(GenericMediaPlayer);
 };
 
 } // namespace android

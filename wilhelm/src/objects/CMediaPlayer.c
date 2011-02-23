@@ -57,7 +57,9 @@ XAresult CMediaPlayer_Realize(void *self, XAboolean async)
 
             if ((thiz->mAVPlayer != 0) && (NULL != nativeSurface)) {
                 // initialize display surface
-                result = android_Player_setVideoSurface(thiz->mAVPlayer.get(), nativeSurface);
+                android::GenericMediaPlayer* avp =
+                        (android::GenericMediaPlayer*)(thiz->mAVPlayer.get());
+                result = android_Player_setVideoSurface(avp, nativeSurface);
             }
         }
     }

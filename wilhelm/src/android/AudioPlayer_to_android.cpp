@@ -648,7 +648,7 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, void* user) {
     //SL_LOGV("received event %d, data %d from SfAudioPlayer", event, data1);
     switch(event) {
 
-    case android::AVPlayer::kEventPrepared: {
+    case android::GenericPlayer::kEventPrepared: {
 
         if (PLAYER_SUCCESS != data1) {
             object_lock_exclusive(&ap->mObject);
@@ -1625,7 +1625,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
         break;
 
     case A_PLR_TS_ABQ: {
-        android::AVPlayer* avp = (android::AVPlayer*) ap->mStreamPlayer.get();
+        android::GenericPlayer* avp = (android::GenericPlayer*) ap->mStreamPlayer.get();
         if (avp != NULL) {
             android_Player_setPlayState(avp, playState, &(ap->mAndroidObjState));
         }

@@ -323,7 +323,7 @@ typedef struct CMediaPlayer_struct {
      */
     SLmillibel mDirectLevel;
 #ifdef ANDROID
-    android::sp<android::AVPlayer> mAVPlayer;
+    android::sp<android::GenericPlayer> mAVPlayer;
     enum AndroidObject_type mAndroidObjType;
     /** identifies the initialization and preparation state */
     enum AndroidObject_state mAndroidObjState;

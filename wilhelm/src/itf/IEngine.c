@@ -994,7 +994,7 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
 #ifdef ANDROID
                     // FIXME unnecessary once those fields are encapsulated in one class, rather
                     //   than a structure
-                    (void) new (&thiz->mAVPlayer) android::sp<android::AVPlayer>();
+                    (void) new (&thiz->mAVPlayer) android::sp<android::GenericPlayer>();
 #endif
 
                     // Check the source and sink parameters against generic constraints
