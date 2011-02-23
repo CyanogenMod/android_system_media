@@ -158,7 +158,7 @@ void DecBufferQueueCallback(
     CallbackCntxt *pCntxt = (CallbackCntxt*)pContext;
 
     /* Save the decoded data  */
-    if (fwrite(pCntxt->pDataBase, BUFFER_SIZE_IN_BYTES, 1, gFp) < BUFFER_SIZE_IN_BYTES) {
+    if (fwrite(pCntxt->pDataBase, 1, BUFFER_SIZE_IN_BYTES, gFp) < BUFFER_SIZE_IN_BYTES) {
         fprintf(stdout, "Error writing to output file, signaling EOS\n");
         SignalEos();
         return;
