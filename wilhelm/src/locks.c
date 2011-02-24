@@ -192,7 +192,7 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
             {
             attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
             CMediaPlayer *mp = (CMediaPlayer *) thiz;
-            android::AVPlayer* avp = mp->mAVPlayer.get();
+            android::GenericPlayer* avp = mp->mAVPlayer.get();
             if (avp != NULL) {
                 android_Player_setPlayState(avp, mp->mPlay.mState, &(mp->mAndroidObjState));
             }

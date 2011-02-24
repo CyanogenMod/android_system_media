@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-//#define USE_LOG SLAndroidLogLevel_Verbose
+#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
 #include <media/IMediaPlayerService.h>
@@ -30,7 +30,7 @@ void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_cbf_t cbf, voi
     ap_params.streamType = ap->mStreamType;
     ap_params.trackcb = NULL;
     ap_params.trackcbUser = NULL;
-    ap->mStreamPlayer = new android::StreamPlayer(&ap_params);
+    ap->mStreamPlayer = new android::StreamPlayer(&ap_params, false /*hasVideo*/);
     ap->mStreamPlayer->init(cbf, notifUser);
 }
 
@@ -131,8 +131,9 @@ void StreamSourceAppProxy::receivedFromAppBuffer(size_t buffIndex, size_t buffLe
 
 
 //--------------------------------------------------------------------------------------------------
-StreamPlayer::StreamPlayer(AudioPlayback_Parameters* params) : AVPlayer(params),
-    mAppProxy(0)
+StreamPlayer::StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo) :
+        GenericMediaPlayer(params, hasVideo),
+        mAppProxy(0)
 {
     SL_LOGI("StreamPlayer::StreamPlayer()");
 
@@ -150,7 +151,7 @@ StreamPlayer::~StreamPlayer() {
 void StreamPlayer::registerQueueCallback(slAndroidBufferQueueCallback callback, void *context,
         const void *caller) {
     SL_LOGI("StreamPlayer::registerQueueCallback");
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mAppProxyLock);
 
     mAppProxy = new StreamSourceAppProxy(callback, context, caller);
 
@@ -160,7 +161,7 @@ void StreamPlayer::registerQueueCallback(slAndroidBufferQueueCallback callback, 
 
 void StreamPlayer::appEnqueue(SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event,
         void *pData) {
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mAppProxyLock);
     if (mAppProxy != 0) {
         if (event != SL_ANDROIDBUFFERQUEUE_EVENT_NONE) {
             if (event & SL_ANDROIDBUFFERQUEUE_EVENT_DISCONTINUITY) {
@@ -178,7 +179,7 @@ void StreamPlayer::appEnqueue(SLuint32 bufferId, SLuint32 length, SLAbufferQueue
 }
 
 void StreamPlayer::appClear() {
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mAppProxyLock);
     if (mAppProxy != 0) {
         // FIXME PRIORITY1 implement
         SL_LOGE("[ FIXME implement StreamPlayer::appClear() ]");
@@ -190,12 +191,12 @@ void StreamPlayer::appClear() {
 // Event handlers
 void StreamPlayer::onPrepare() {
     SL_LOGI("StreamPlayer::onPrepare()");
-    //Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mAppProxyLock);
     if (mAppProxy != 0) {
         mPlayer = mMediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
                 mAppProxy /*IStreamSource*/, mPlaybackParams.sessionId);
         // blocks until mPlayer is prepared
-        AVPlayer::onPrepare();
+        GenericMediaPlayer::onPrepare();
         SL_LOGI("StreamPlayer::onPrepare() done");
     } else {
         SL_LOGE("Nothing to do here because there is no registered callback");

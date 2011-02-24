@@ -49,10 +49,10 @@ private:
 
 
 //--------------------------------------------------------------------------------------------------
-class StreamPlayer : public AVPlayer
+class StreamPlayer : public GenericMediaPlayer
 {
 public:
-    StreamPlayer(AudioPlayback_Parameters* params);
+    StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo);
     virtual ~StreamPlayer();
 
     void registerQueueCallback(slAndroidBufferQueueCallback callback, void *context,
@@ -63,8 +63,10 @@ public:
 protected:
     sp<StreamSourceAppProxy> mAppProxy; // application proxy for the android buffer queue source
 
-    // overridden from AVPlayer
+    // overridden from GenericMediaPlayer
     virtual void onPrepare();
+
+    Mutex mAppProxyLock;
 
 private:
     DISALLOW_EVIL_CONSTRUCTORS(StreamPlayer);

@@ -746,7 +746,7 @@ void SfPlayer::onNotify(const sp<AMessage> &msg) {
 
     if (msg->findInt32(PLAYEREVENT_PREPARED, &val)) {
         SL_LOGV("\tSfPlayer notifying %s = %d", PLAYEREVENT_PREPARED, val);
-        mNotifyClient(AVPlayer::kEventPrepared, val, mNotifyUser);
+        mNotifyClient(GenericMediaPlayer::kEventPrepared, val, mNotifyUser);
     }
 
     if (msg->findInt32(PLAYEREVENT_NEW_AUDIOTRACK, &val)) {
