@@ -173,7 +173,6 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
                     object_lock_exclusive(thisObject);
                     assert(INTERFACE_ADDING_2 == *interfaceStateP);
                     if (SL_RESULT_SUCCESS == result) {
-                        ((size_t *) thisItf)[0] ^= ~0;
                         *interfaceStateP = INTERFACE_ADDED;
                     } else {
                         *interfaceStateP = INTERFACE_INITIALIZED;
