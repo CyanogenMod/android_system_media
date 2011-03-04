@@ -204,10 +204,10 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
         }
     }
 
-    // ( buffer queue count is non-empty and play state == PLAYING ) became true
-    if (attributes & ATTR_ENQUEUE) {
+    if (attributes & ATTR_BQ_ENQUEUE) {
+        // ( buffer queue count is non-empty and play state == PLAYING ) became true
         if (SL_OBJECTID_AUDIOPLAYER == objectID) {
-            attributes &= ~ATTR_ENQUEUE;
+            attributes &= ~ATTR_BQ_ENQUEUE;
             ap = (CAudioPlayer *) thiz;
             if (SL_PLAYSTATE_PLAYING == ap->mPlay.mState) {
 #ifdef ANDROID
@@ -215,7 +215,25 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
 #endif
             }
         }
+#ifndef ANDROID
     }
+#else
+    } else if (attributes & ATTR_ABQ_ENQUEUE) {
+        // (Android buffer queue count is non-empty and play state == PLAYING ) became true
+        if (SL_OBJECTID_AUDIOPLAYER == objectID) {
+            attributes &= ~ATTR_BQ_ENQUEUE;
+            ap = (CAudioPlayer *) thiz;
+            if (SL_PLAYSTATE_PLAYING == ap->mPlay.mState) {
+                // FIXME notify queue refilled
+            }
+        } else if (XA_OBJECTID_MEDIAPLAYER == objectID) {
+            attributes &= ~ATTR_BQ_ENQUEUE;
+            if (SL_PLAYSTATE_PLAYING == ((CMediaPlayer*)thiz)->mPlay.mState) {
+                // FIXME notify queue refilled
+            }
+        }
+    }
+#endif
 
     if (attributes) {
         unsigned oldAttributesMask = thiz->mAttributesMask;

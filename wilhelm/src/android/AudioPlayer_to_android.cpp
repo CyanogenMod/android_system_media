@@ -15,6 +15,7 @@
  */
 
 #include "sles_allinclusive.h"
+#include "android/AndroidBufferQueueSource.h"
 #include "utils/RefBase.h"
 #include "android_prompts.h"
 
@@ -986,9 +987,25 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     //------------------
     //   Stream
     case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
+    {
+        switch (sourceFormatType) {
+        case SL_DATAFORMAT_MIME:
         {
-        } // case SL_DATALOCATOR_ANDROIDBUFFERQUEUE
+            SLDataFormat_MIME *df_mime = (SLDataFormat_MIME *) pAudioSrc->pFormat;
+            if (SL_CONTAINERTYPE_MPEG_TS != df_mime->containerType) {
+                SL_LOGE("Cannot create player with SL_DATALOCATOR_ANDROIDBUFFERQUEUE data source "
+                        "that is not fed MPEG-2 TS data");
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+        }
         break;
+        default:
+            SL_LOGE("Cannot create player with SL_DATALOCATOR_ANDROIDBUFFERQUEUE data source "
+                    "without SL_DATAFORMAT_MIME format");
+            return SL_RESULT_CONTENT_UNSUPPORTED;
+        }
+    }
+    break; // case SL_DATALOCATOR_ANDROIDBUFFERQUEUE
     //------------------
     //   Address
     case SL_DATALOCATOR_ADDRESS:
@@ -1442,10 +1459,9 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
         break;
     //-----------------------------------
     // StreamPlayer
-    case A_PLR_TS_ABQ:
-        android_StreamPlayer_destroy(pAudioPlayer);
-        break;
+    case A_PLR_TS_ABQ:                   // intended fall-through
     //-----------------------------------
+    // AudioToCbRenderer
     case A_PLR_URIFD_ASQ:
         pAudioPlayer->mAPlayer.clear();
         break;
@@ -1624,14 +1640,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
         }
         break;
 
-    case A_PLR_TS_ABQ: {
-        android::GenericPlayer* avp = (android::GenericPlayer*) ap->mStreamPlayer.get();
-        if (avp != NULL) {
-            android_Player_setPlayState(avp, playState, &(ap->mAndroidObjState));
-        }
-        }
-        break;
-
+    case A_PLR_TS_ABQ:     // intended fall-through
     case A_PLR_URIFD_ASQ:
         // FIXME report and use the return code to the lock mechanism, which is where play state
         //   changes are updated (see object_unlock_exclusive_attributes())
@@ -1842,10 +1851,14 @@ SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *ap) {
 
 
 //-----------------------------------------------------------------------------
+// abqSrc_callBack_pullFromBuffQueue is implemented in AndroidBufferQueueSource.cpp
 void android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer *ap) {
-    if ((ap->mAndroidObjType == A_PLR_TS_ABQ) && (ap->mStreamPlayer != 0)) {
-        android_StreamPlayer_androidBufferQueue_registerCallback(ap->mStreamPlayer.get(),
+    if ((ap->mAndroidObjType == A_PLR_TS_ABQ) && (ap->mAPlayer != 0)) {
+        android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(ap->mAPlayer.get());
+        splr->registerQueueCallback(
                 ap->mAndroidBufferQueue.mCallback,
+                abqSrc_callBack_pullFromBuffQueue,
+                (const void*)ap, true /*userIsAudioPlayer*/,
                 ap->mAndroidBufferQueue.mContext,
                 (const void*)&(ap->mAndroidBufferQueue.mItf));
     }
@@ -1859,7 +1872,7 @@ void android_audioPlayer_androidBufferQueue_clear_l(CAudioPlayer *ap) {
 }
 
 void android_audioPlayer_androidBufferQueue_enqueue_l(CAudioPlayer *ap,
-        SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData) {
+        SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData) {
     if (ap->mAndroidObjType == A_PLR_TS_ABQ) {
         android_StreamPlayer_enqueue_l(ap, bufferId, length, event, pData);
     }

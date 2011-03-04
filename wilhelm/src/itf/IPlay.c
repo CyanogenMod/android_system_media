@@ -56,7 +56,7 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
                 // set enqueue attribute if queue is non-empty and state becomes PLAYING
                 if ((NULL != audioPlayer) && (audioPlayer->mBufferQueue.mFront !=
                     audioPlayer->mBufferQueue.mRear)) {
-                    attr |= ATTR_ENQUEUE;
+                    attr |= ATTR_BQ_ENQUEUE;
                 }
                 // fall through
 

@@ -29,51 +29,9 @@ typedef xa_int64_t             XAAint64;           /* 64 bit signed integer */
 
 typedef XAuint32               XAAbufferQueueEvent;
 
-/*---------------------------------------------------------------------------*/
-/* Android Simple Buffer Queue Interface                                     */
-/*---------------------------------------------------------------------------*/
-#if 0
-extern XA_API const SLInterfaceID XA_IID_ANDROIDSIMPLEBUFFERQUEUE;
-
-struct XAAndroidSimpleBufferQueueItf_;
-typedef const struct XAAndroidSimpleBufferQueueItf_ * const * XAAndroidSimpleBufferQueueItf;
-
-typedef void (XAAPIENTRY *xaAndroidSimpleBufferQueueCallback)(
-    xaAndroidSimpleBufferQueueItf caller,
-    void *pContext
-);
-
-/** Android simple buffer queue state **/
-
-typedef struct XAAndroidSimpleBufferQueueState_ {
-    SLuint32    count;
-    SLuint32    index;
-} XAAndroidSimpleBufferQueueState;
-
-
-struct XAAndroidSimpleBufferQueueItf_ {
-    XAresult (*Enqueue) (
-        XAAndroidSimpleBufferQueueItf self,
-        const void *pBuffer,
-        XAuint32 size
-    );
-    XAresult (*Clear) (
-        XAAndroidSimpleBufferQueueItf self
-    );
-    XAresult (*GetState) (
-        XAAndroidSimpleBufferQueueItf self,
-        XAAndroidSimpleBufferQueueState *pState
-    );
-    XAresult (*RegisterCallback) (
-        XAAndroidSimpleBufferQueueItf self,
-        xaAndroidSimpleBufferQueueCallback callback,
-        void* pContext
-    );
-};
-#endif
 
 /*---------------------------------------------------------------------------*/
-/* Android Buffer Queue Interface                                           */
+/* Android Buffer Queue Interface                                            */
 /*---------------------------------------------------------------------------*/
 
 extern XA_API const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUE;
@@ -81,17 +39,30 @@ extern XA_API const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUE;
 struct XAAndroidBufferQueueItf_;
 typedef const struct XAAndroidBufferQueueItf_ * const * XAAndroidBufferQueueItf;
 
-#define XA_ANDROIDBUFFERQUEUE_EVENT_NONE              ((XAuint32) 0x00000000)
-#define XA_ANDROIDBUFFERQUEUE_EVENT_EOS               ((XAuint32) 0x00000001)
-#define XA_ANDROIDBUFFERQUEUE_EVENT_DISCONTINUITY     ((XAuint32) 0x00000002)
+#define XA_ANDROID_ITEMKEY_NONE          ((XAuint32) 0x00000000)
+#define XA_ANDROID_ITEMKEY_EOS           ((XAuint32) 0x00000001)
+#define XA_ANDROID_ITEMKEY_DISCONTINUITY ((XAuint32) 0x00000002)
+
+typedef struct XAAndroidBufferItem_ {
+    XAuint32 itemKey;  // identifies the item
+    XAuint32 itemSize;
+    XAuint8  itemData[0];
+} XAAndroidBufferItem;
 
 typedef XAresult (XAAPIENTRY *xaAndroidBufferQueueCallback)(
     XAAndroidBufferQueueItf caller,/* input */
     void *pContext,                /* input */
-    XAuint32 bufferId,             /* input */
-    XAuint32 bufferLength,         /* input */
-    void *pBufferDataLocation      /* input */
+    const void *pBufferData,       /* input */
+    XAuint32 dataSize,             /* input */
+    XAuint32 dataUsed,             /* input */
+    const XAAndroidBufferItem *pItems,/* input */
+    XAuint32 itemsLength           /* input */
 );
+
+typedef struct XAAndroidBufferQueueState_ {
+    XAuint32    count;
+    XAuint32    index;
+} XAAndroidBufferQueueState;
 
 struct XAAndroidBufferQueueItf_ {
     XAresult (*RegisterCallback) (
@@ -106,10 +77,10 @@ struct XAAndroidBufferQueueItf_ {
 
     XAresult (*Enqueue) (
         XAAndroidBufferQueueItf self,
-        XAuint32 bufferId,
-        XAuint32 length,
-        XAAbufferQueueEvent event,
-        void *pData // FIXME ignored for now, subject to change
+        const void *pData,
+        XAuint32 dataLength,
+        const XAAndroidBufferItem *pItems,
+        XAuint32 itemsLength
     );
 };
 
@@ -125,8 +96,7 @@ struct XAAndroidBufferQueueItf_ {
  *  locatorType must be XA_DATALOCATOR_ANDROIDBUFFERQUEUE */
 typedef struct XADataLocator_AndroidBufferQueue_ {
     XAuint32    locatorType;
-    XAuint32    numBuffers;  // FIXME ignored for now, subject to change
-    XAuint32    queueSize;   // FIXME ignored for now, subject to change
+    XAuint32    numBuffers;
 } XADataLocator_AndroidBufferQueue;
 
 

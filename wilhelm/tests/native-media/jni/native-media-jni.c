@@ -37,36 +37,53 @@ static XAObjectItf outputMixObject = NULL;
 static XAObjectItf             playerObj = NULL;
 static XAPlayItf               playerPlayItf = NULL;
 static XAAndroidBufferQueueItf playerBQItf = NULL;
+// number of required interfaces for the MediaPlayer creation
+#define NB_MAXAL_INTERFACES 2 // XAAndroidBufferQueueItf and XAPlayItf
 
 // cached surface where the video display happens
 static ANativeWindow* theNativeWindow;
 
+// number of buffers in our buffer queue
+#define NB_BUFFERS 16
+// we're streaming MPEG-2 transport stream data, operate on transport stream block size
+#define MPEG2_TS_BLOCK_SIZE 188
+// determines how much memory we're dedicating to memory caching
+#define BUFFER_SIZE 20*MPEG2_TS_BLOCK_SIZE // 20 is an arbitrary number chosen here
+
+// where we cache in memory the data to play
+char dataCache[BUFFER_SIZE * NB_BUFFERS];
 // handle of the file to play
 FILE *file;
 
 // AndroidBufferQueueItf callback for an audio player
 XAresult AndroidBufferQueueCallback(
         XAAndroidBufferQueueItf caller,
-        void *pContext,
-        XAuint32 bufferId,
-        XAuint32 bufferLength,
-        void *pBufferDataLocation)
-
+        void *pContext,                /* input */
+        const void *pBufferData,       /* input */
+        XAuint32 dataSize,             /* input */
+        XAuint32 dataUsed,             /* input */
+        const XAAndroidBufferItem *pItems,/* input */
+        XAuint32 itemsLength           /* input */)
 {
-    size_t nbRead = fread(pBufferDataLocation, 1, bufferLength, file);
-
-    XAAbufferQueueEvent event = XA_ANDROIDBUFFERQUEUE_EVENT_NONE;
-    if (nbRead <= 0) {
-        event = XA_ANDROIDBUFFERQUEUE_EVENT_EOS;
+    // assert(BUFFER_SIZE <= dataSize);
+    size_t nbRead = fread((void*)pBufferData, 1, BUFFER_SIZE, file);
+    if (nbRead > 0) {
+        (*caller)->Enqueue(caller,
+                pBufferData /*pData*/,
+                nbRead /*dataLength*/,
+                NULL /*pMsg*/,
+                0 /*msgLength*/);
     } else {
-        event = XA_ANDROIDBUFFERQUEUE_EVENT_NONE; // no event to report
+        // signal EOS
+        XAAndroidBufferItem msgEos;
+        msgEos.itemKey = XA_ANDROID_ITEMKEY_EOS;
+        msgEos.itemSize = 0;
+        // EOS message has no parameters, so the total size of the message is the size of the key
+        //   plus the size if itemSize, both XAuint32
+        (*caller)->Enqueue(caller, NULL /*pData*/, 0 /*dataLength*/,
+                        &msgEos /*pMsg*/,
+                        sizeof(XAuint32)*2 /*msgLength*/);
     }
-
-    // enqueue the data right-away because in this example we're reading from a file, so we
-    // can afford to do that. When streaming from the network, we would write from our cache
-    // to this queue.
-    // last param is NULL because we've already written the data in the buffer queue
-    (*caller)->Enqueue(caller, bufferId, nbRead, event, NULL);
 
     return XA_RESULT_SUCCESS;
 }
@@ -118,14 +135,14 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     }
 
     // configure data source
-    XADataLocator_AndroidBufferQueue loc_abq = {XA_DATALOCATOR_ANDROIDBUFFERQUEUE,
-            0, 0 /* number of buffers and size of queue are ignored for now, subject to change */};
-    XADataFormat_MIME format_mime = {XA_DATAFORMAT_MIME, NULL, XA_CONTAINERTYPE_UNSPECIFIED};
+    XADataLocator_AndroidBufferQueue loc_abq = { XA_DATALOCATOR_ANDROIDBUFFERQUEUE, NB_BUFFERS };
+    XADataFormat_MIME format_mime = {
+            XA_DATAFORMAT_MIME, (XAchar *)"video/mp2ts", XA_CONTAINERTYPE_MPEG_TS };
     XADataSource dataSrc = {&loc_abq, &format_mime};
 
     // configure audio sink
-    XADataLocator_OutputMix loc_outmix = {XA_DATALOCATOR_OUTPUTMIX, outputMixObject};
-    XADataSink audioSnk = {&loc_outmix, NULL};
+    XADataLocator_OutputMix loc_outmix = { XA_DATALOCATOR_OUTPUTMIX, outputMixObject };
+    XADataSink audioSnk = { &loc_outmix, NULL };
 
     // configure image video sink
     XADataLocator_NativeDisplay loc_nd = {
@@ -137,13 +154,13 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     XADataSink imageVideoSink = {&loc_nd, NULL};
 
     // declare interfaces to use
-    XAboolean     required[2] = {XA_BOOLEAN_TRUE, XA_BOOLEAN_TRUE};
-    XAInterfaceID iidArray[2] = {XA_IID_PLAY,     XA_IID_ANDROIDBUFFERQUEUE};
+    XAboolean     required[NB_MAXAL_INTERFACES] = {XA_BOOLEAN_TRUE, XA_BOOLEAN_TRUE};
+    XAInterfaceID iidArray[NB_MAXAL_INTERFACES] = {XA_IID_PLAY,     XA_IID_ANDROIDBUFFERQUEUE};
 
     // create media player
     res = (*engineEngine)->CreateMediaPlayer(engineEngine, &playerObj, &dataSrc,
             NULL, &audioSnk, &imageVideoSink, NULL, NULL,
-            2        /*XAuint32 numInterfaces*/,
+            NB_MAXAL_INTERFACES /*XAuint32 numInterfaces*/,
             iidArray /*const XAInterfaceID *pInterfaceIds*/,
             required /*const XAboolean *pInterfaceRequired*/);
     assert(XA_RESULT_SUCCESS == res);
@@ -164,7 +181,21 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     assert(XA_RESULT_SUCCESS == res);
 
     // register the callback from which OpenMAX AL can retrieve the data to play
-    res = (*playerBQItf)->RegisterCallback(playerBQItf, AndroidBufferQueueCallback, &playerBQItf);
+    res = (*playerBQItf)->RegisterCallback(playerBQItf, AndroidBufferQueueCallback, NULL);
+
+    /* Fill our cache */
+    if (fread(dataCache, 1, BUFFER_SIZE * NB_BUFFERS, file) <= 0) {
+        LOGE("Error filling cache, exiting\n");
+        return JNI_FALSE;
+    }
+    /* Enqueue the content of our cache before starting to play,
+       we don't want to starve the player */
+    int i;
+    for (i=0 ; i < NB_BUFFERS ; i++) {
+        res = (*playerBQItf)->Enqueue(playerBQItf, dataCache + i*BUFFER_SIZE, BUFFER_SIZE, NULL, 0);
+        assert(XA_RESULT_SUCCESS == res);
+    }
+
 
     // prepare the player
     res = (*playerPlayItf)->SetPlayState(playerPlayItf, XA_PLAYSTATE_PAUSED);

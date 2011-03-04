@@ -27,8 +27,6 @@ extern "C" {
 
 typedef sl_int64_t             SLAint64;           /* 64 bit signed integer */
 
-typedef SLuint32               SLAbufferQueueEvent;
-
 
 /*---------------------------------------------------------------------------*/
 /* Android Effect interface                                                  */
@@ -206,7 +204,7 @@ struct SLAndroidSimpleBufferQueueItf_ {
 
 
 /*---------------------------------------------------------------------------*/
-/* Android Buffer Qeueue Interface                                           */
+/* Android Buffer Queue Interface                                            */
 /*---------------------------------------------------------------------------*/
 
 extern SL_API const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUE;
@@ -214,17 +212,30 @@ extern SL_API const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUE;
 struct SLAndroidBufferQueueItf_;
 typedef const struct SLAndroidBufferQueueItf_ * const * SLAndroidBufferQueueItf;
 
-#define SL_ANDROIDBUFFERQUEUE_EVENT_NONE              ((SLuint32) 0x00000000)
-#define SL_ANDROIDBUFFERQUEUE_EVENT_EOS               ((SLuint32) 0x00000001)
-#define SL_ANDROIDBUFFERQUEUE_EVENT_DISCONTINUITY     ((SLuint32) 0x00000002)
+#define SL_ANDROID_ITEMKEY_NONE          ((SLuint32) 0x00000000)
+#define SL_ANDROID_ITEMKEY_EOS           ((SLuint32) 0x00000001)
+#define SL_ANDROID_ITEMKEY_DISCONTINUITY ((SLuint32) 0x00000002)
+
+typedef struct SLAndroidBufferItem_ {
+    SLuint32 itemKey;  // identifies the item
+    SLuint32 itemSize;
+    SLuint8  itemData[0];
+} SLAndroidBufferItem;
 
 typedef SLresult (SLAPIENTRY *slAndroidBufferQueueCallback)(
     SLAndroidBufferQueueItf caller,/* input */
     void *pContext,                /* input */
-    SLuint32 bufferId,             /* input */
-    SLuint32 bufferLength,         /* input */
-    void *pBufferDataLocation      /* input */
+    const void *pBufferData,       /* input */
+    SLuint32 dataSize,             /* input */
+    SLuint32 dataUsed,             /* input */
+    const SLAndroidBufferItem *pItems,/* input */
+    SLuint32 itemsLength           /* input */
 );
+
+typedef struct SLAndroidBufferQueueState_ {
+    SLuint32    count;
+    SLuint32    index;
+} SLAndroidBufferQueueState;
 
 struct SLAndroidBufferQueueItf_ {
     SLresult (*RegisterCallback) (
@@ -239,10 +250,10 @@ struct SLAndroidBufferQueueItf_ {
 
     SLresult (*Enqueue) (
         SLAndroidBufferQueueItf self,
-        SLuint32 bufferId,
-        SLuint32 length,
-        SLAbufferQueueEvent event,
-        void *pData    // FIXME ignored for now, subject to change
+        const void *pData,
+        SLuint32 dataLength,
+        const SLAndroidBufferItem *pItems,
+        SLuint32 itemsLength
     );
 
     // FIXME TBD if needed
@@ -302,8 +313,7 @@ typedef struct SLDataLocator_AndroidSimpleBufferQueue {
  *  locatorType must be SL_DATALOCATOR_ANDROIDBUFFERQUEUE */
 typedef struct SLDataLocator_AndroidBufferQueue_ {
     SLuint32    locatorType;
-    SLuint32    numBuffers;   // FIXME ignored for now, subject to change
-    SLuint32    queueSize;    // FIXME ignored for now, subject to change
+    SLuint32    numBuffers;
 } SLDataLocator_AndroidBufferQueue;
 
 #ifdef __cplusplus

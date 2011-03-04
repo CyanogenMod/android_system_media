@@ -71,7 +71,7 @@ SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer, SLuint
         // set enqueue attribute if state is PLAYING and the first buffer is enqueued
         interface_unlock_exclusive_attributes(thiz, ((SL_RESULT_SUCCESS == result) &&
             (1 == thiz->mState.count) && (SL_PLAYSTATE_PLAYING == getAssociatedState(thiz))) ?
-            ATTR_ENQUEUE : ATTR_NONE);
+            ATTR_BQ_ENQUEUE : ATTR_NONE);
     }
     SL_LEAVE_INTERFACE
 }

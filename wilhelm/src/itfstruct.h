@@ -641,8 +641,12 @@ typedef struct {
 typedef struct {
     const struct SLAndroidBufferQueueItf_ *mItf;
     IObject *mThis;
+    SLAndroidBufferQueueState mState;
     slAndroidBufferQueueCallback mCallback;
     void *mContext;
+    SLuint16 mNumBuffers;
+    AdvancedBufferHeader *mBufferArray;
+    AdvancedBufferHeader *mFront, *mRear;
 } IAndroidBufferQueue;
 
 #endif

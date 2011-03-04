@@ -15,6 +15,7 @@
  */
 
 #include "sles_allinclusive.h"
+#include "android/AndroidBufferQueueSource.h"
 #include "utils/RefBase.h"
 #include "android_prompts.h"
 
@@ -44,6 +45,66 @@ static void player_handleMediaPlayerEventNotifications(const int event, const in
         SL_LOGE("Received unknown event %d, data %d from AVPlayer", event, data1);
         break;
     }
+}
+
+
+//-----------------------------------------------------------------------------
+XAresult android_Player_checkSourceSink(CMediaPlayer *mp) {
+
+    XAresult result = XA_RESULT_SUCCESS;
+
+    const SLDataSource *pSrc    = &mp->mDataSource.u.mSource;
+    const SLDataSink *pAudioSnk = &mp->mAudioSink.u.mSink;
+
+    // format check:
+    const SLuint32 sourceLocatorType = *(SLuint32 *)pSrc->pLocator;
+    const SLuint32 sourceFormatType  = *(SLuint32 *)pSrc->pFormat;
+    const SLuint32 audioSinkLocatorType = *(SLuint32 *)pAudioSnk->pLocator;
+    //const SLuint32 sinkFormatType = *(SLuint32 *)pAudioSnk->pFormat;
+
+    // Source check
+    switch(sourceLocatorType) {
+
+    case XA_DATALOCATOR_ANDROIDBUFFERQUEUE: {
+        switch (sourceFormatType) {
+        case XA_DATAFORMAT_MIME: {
+            SLDataFormat_MIME *df_mime = (SLDataFormat_MIME *) pSrc->pFormat;
+            if (SL_CONTAINERTYPE_MPEG_TS != df_mime->containerType) {
+                SL_LOGE("Cannot create player with XA_DATALOCATOR_ANDROIDBUFFERQUEUE data source "
+                        "that is not fed MPEG-2 TS data");
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+        } break;
+        default:
+            SL_LOGE("Cannot create player with XA_DATALOCATOR_ANDROIDBUFFERQUEUE data source "
+                    "without SL_DATAFORMAT_MIME format");
+            return XA_RESULT_CONTENT_UNSUPPORTED;
+        }
+    } break;
+
+    case XA_DATALOCATOR_URI: // intended fall-through
+    case XA_DATALOCATOR_ANDROIDFD:
+        break;
+
+    default:
+        SL_LOGE("Cannot create media player with data locator type 0x%x",
+                (unsigned) sourceLocatorType);
+        return SL_RESULT_PARAMETER_INVALID;
+    }// switch (locatorType)
+
+    // Audio sink check: only playback is supported here
+    switch(audioSinkLocatorType) {
+
+    case XA_DATALOCATOR_OUTPUTMIX:
+        break;
+
+    default:
+        SL_LOGE("Cannot create media player with audio sink data locator of type 0x%x",
+                (unsigned) audioSinkLocatorType);
+        return XA_RESULT_PARAMETER_INVALID;
+    }// switch (locaaudioSinkLocatorTypeorType)
+
+    return result;
 }
 
 
@@ -233,19 +294,25 @@ XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playS
 
 
 //-----------------------------------------------------------------------------
+
+
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
 void android_Player_androidBufferQueue_registerCallback_l(CMediaPlayer *mp) {
     if (mp->mAVPlayer != 0) {
         SL_LOGI("android_Player_androidBufferQueue_registerCallback_l");
-        android::StreamPlayer* splr = (android::StreamPlayer*)(mp->mAVPlayer.get());
-        splr->registerQueueCallback(mp->mAndroidBufferQueue.mCallback,
+        android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
+        splr->registerQueueCallback(
+                mp->mAndroidBufferQueue.mCallback,
+                abqSrc_callBack_pullFromBuffQueue,
+                (const void*)mp, false /*userIsAudioPlayer*/,
                 mp->mAndroidBufferQueue.mContext, (const void*)&(mp->mAndroidBufferQueue.mItf));
+
     }
 }
 
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
 void android_Player_androidBufferQueue_enqueue_l(CMediaPlayer *mp,
-        SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData) {
+        SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData) {
     if (mp->mAVPlayer != 0) {
         android::StreamPlayer* splr = (android::StreamPlayer*)(mp->mAVPlayer.get());
         splr->appEnqueue(bufferId, length, event, pData);

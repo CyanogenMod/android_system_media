@@ -57,7 +57,7 @@
     IPlaybackRate mPlaybackRate;
     IVirtualizer mVirtualizer;
     IVisualization mVisualization;
-    // remaining are per-instance private fields not associated with an interface
+    // fields below are per-instance private fields not associated with an interface
     DataLocatorFormat mDataSource;
     DataLocatorFormat mDataSink;
     // cached data for this instance
@@ -93,8 +93,7 @@
     /** plays the PCM data for this player */
     android::AudioTrack *mAudioTrack;                 // FIXME consolidate into one class
     android::sp<android::SfPlayer> mSfPlayer;         // FIXME consolidate into one class
-    android::sp<android::StreamPlayer> mStreamPlayer; // FIXME consolidate into one class
-    android::sp<android::GenericPlayer> mAPlayer;     // FIXME consolidate into one class
+    android::sp<android::GenericPlayer> mAPlayer;
     /** aux effect the AudioTrack will be attached to if aux send enabled */
     android::sp<android::AudioEffect> mAuxEffect;
     // FIXME all levels below need to be encapsulated in a field of type AndroidAudioLevels
@@ -306,12 +305,13 @@ typedef struct CMediaPlayer_struct {
 #define INTERFACES_MediaPlayer 4
     XAuint8 mInterfaceStates2[INTERFACES_MediaPlayer - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
+    IDynamicSource mDynamicSource;
     IPlay mPlay;
     IStreamInformation mStreamInfo;
 #ifdef ANDROID
     IAndroidBufferQueue mAndroidBufferQueue;
 #endif
-    // ...
+    // fields below are per-instance private fields not associated with an interface
     DataLocatorFormat mDataSource;
     DataLocatorFormat mBankSource;
     DataLocatorFormat mAudioSink;

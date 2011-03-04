@@ -20,10 +20,16 @@
 //--------------------------------------------------------------------------------------------------
 namespace android {
 
+typedef void (*cb_buffAvailable_t)(const void* user, bool userIsAudioPlayer,
+        size_t bufferId, void* bufferLoc, size_t buffSize);
 
+//--------------------------------------------------------------------------------------------------
 class StreamSourceAppProxy : public BnStreamSource {
 public:
-    StreamSourceAppProxy(slAndroidBufferQueueCallback callback, void *appContext,
+    StreamSourceAppProxy(slAndroidBufferQueueCallback callback,
+            cb_buffAvailable_t notify,
+            const void* user, bool userIsAudioPlayer,
+            void *appContext,
             const void *caller);
     virtual ~StreamSourceAppProxy();
 
@@ -40,7 +46,11 @@ private:
     sp<IStreamListener> mListener;
     Vector<sp<IMemory> > mBuffers;
 
-    slAndroidBufferQueueCallback mCallback;
+    slAndroidBufferQueueCallback mCallback; // FIXME remove
+    cb_buffAvailable_t mCbNotifyBufferAvailable;
+    const void* mUser;
+    bool mUserIsAudioPlayer;
+
     void *mAppContext;
     const void *mCaller;
 
@@ -55,9 +65,12 @@ public:
     StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo);
     virtual ~StreamPlayer();
 
-    void registerQueueCallback(slAndroidBufferQueueCallback callback, void *context,
+    void registerQueueCallback(slAndroidBufferQueueCallback callback,
+            cb_buffAvailable_t notify,
+            const void* user, bool userIsAudioPlayer,
+            void *context,
             const void *caller);
-    void appEnqueue(SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
+    void appEnqueue(SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData);
     void appClear();
 
 protected:
@@ -81,10 +94,6 @@ private:
  */
 extern void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_cbf_t cbf,
         void* notifUser);
-extern void android_StreamPlayer_destroy(CAudioPlayer *ap);
-extern void android_StreamPlayer_androidBufferQueue_registerCallback(
-        android::StreamPlayer *splr,
-        slAndroidBufferQueueCallback callback, void* context, const void* callerItf);
 extern void android_StreamPlayer_enqueue_l(CAudioPlayer *ap,
-        SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
+        SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData);
 extern void android_StreamPlayer_clear_l(CAudioPlayer *ap);

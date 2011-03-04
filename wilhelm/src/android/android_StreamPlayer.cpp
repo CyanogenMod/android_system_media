@@ -30,42 +30,27 @@ void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_cbf_t cbf, voi
     ap_params.streamType = ap->mStreamType;
     ap_params.trackcb = NULL;
     ap_params.trackcbUser = NULL;
-    ap->mStreamPlayer = new android::StreamPlayer(&ap_params, false /*hasVideo*/);
-    ap->mStreamPlayer->init(cbf, notifUser);
-}
-
-
-// FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
-void android_StreamPlayer_destroy(CAudioPlayer *ap) {
-    SL_LOGI("android_StreamPlayer_destroy(%p)", ap);
-
-    ap->mStreamPlayer.clear();
+    android::StreamPlayer* splr = new android::StreamPlayer(&ap_params, false /*hasVideo*/);
+    ap->mAPlayer = splr;
+    splr->init(cbf, notifUser);
 }
 
 
 //-----------------------------------------------------------------------------
-void android_StreamPlayer_androidBufferQueue_registerCallback(android::StreamPlayer *splr,
-        slAndroidBufferQueueCallback callback, void* context, const void* callerItf)
-{
-    if (splr != NULL) {
-        SL_LOGI("android_Player_androidBufferQueue_registerCallback");
-        splr->registerQueueCallback(callback, context, callerItf);
-    }
-}
 
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
 void android_StreamPlayer_enqueue_l(CAudioPlayer *ap,
-        SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData) {
-    if (ap->mStreamPlayer != 0) {
-        ap->mStreamPlayer->appEnqueue(bufferId, length, event, pData);
+        SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData) {
+    if (ap->mAPlayer != 0) {
+        ((android::StreamPlayer*)ap->mAPlayer.get())->appEnqueue(bufferId, length, event, pData);
     }
 }
 
 
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
 void android_StreamPlayer_clear_l(CAudioPlayer *ap) {
-    if (ap->mStreamPlayer != 0) {
-        ap->mStreamPlayer->appClear();
+    if (ap->mAPlayer != 0) {
+        ((android::StreamPlayer*)ap->mAPlayer.get())->appClear();
     }
 }
 
@@ -73,8 +58,14 @@ void android_StreamPlayer_clear_l(CAudioPlayer *ap) {
 namespace android {
 
 StreamSourceAppProxy::StreamSourceAppProxy(
-        slAndroidBufferQueueCallback callback, void *context, const void *caller) :
+        slAndroidBufferQueueCallback callback,
+        cb_buffAvailable_t notify,
+        const void* user, bool userIsAudioPlayer,
+        void *context, const void *caller) :
     mCallback(callback),
+    mCbNotifyBufferAvailable(notify),
+    mUser(user),
+    mUserIsAudioPlayer(userIsAudioPlayer),
     mAppContext(context),
     mCaller(caller)
 {
@@ -105,14 +96,21 @@ void StreamSourceAppProxy::onBufferAvailable(size_t index) {
     sp<IMemory> mem = mBuffers.itemAt(index);
     SLAint64 length = (SLAint64) mem->size();
 
+    (*mCbNotifyBufferAvailable)(mUser, mUserIsAudioPlayer, index, mem->pointer(), mem->size());
+
+#if 0
+    // FIXME remove
     // FIXME PRIORITY1 needs to be called asynchronously, from AudioPlayer code after having
     //   obtained under lock the callback function pointer and context
     (*mCallback)((SLAndroidBufferQueueItf)mCaller,     /* SLAndroidBufferQueueItf self */
-            mAppContext,  /* void *pContext */
-            index,        /* SLuint32 bufferId */
-            length,       /*  SLAint64 bufferLength */
-            mem->pointer()/* void *pBufferDataLocation */
+            mAppContext,   /* void *pContext */
+            index,         /* SLuint32 bufferId */
+            length,        /*  SLAint64 bufferLength */
+            mem->pointer(),/* void *pBufferDataLocation */
+            0,             /* SLuint32 msgLength */
+            NULL           /*void *pMsgDataLocation*/
     );
+#endif
 }
 
 void StreamSourceAppProxy::receivedFromAppCommand(IStreamListener::Command cmd) {
@@ -148,26 +146,32 @@ StreamPlayer::~StreamPlayer() {
 }
 
 
-void StreamPlayer::registerQueueCallback(slAndroidBufferQueueCallback callback, void *context,
+void StreamPlayer::registerQueueCallback(
+        slAndroidBufferQueueCallback callback,
+        cb_buffAvailable_t notify,
+        const void* user, bool userIsAudioPlayer,
+        void *context,
         const void *caller) {
     SL_LOGI("StreamPlayer::registerQueueCallback");
     Mutex::Autolock _l(mAppProxyLock);
 
-    mAppProxy = new StreamSourceAppProxy(callback, context, caller);
+    mAppProxy = new StreamSourceAppProxy(callback,
+            notify, user, userIsAudioPlayer,
+            context, caller);
 
     CHECK(mAppProxy != 0);
     SL_LOGI("StreamPlayer::registerQueueCallback end");
 }
 
-void StreamPlayer::appEnqueue(SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event,
+void StreamPlayer::appEnqueue(SLuint32 bufferId, SLuint32 length, SLuint32 event,
         void *pData) {
     Mutex::Autolock _l(mAppProxyLock);
     if (mAppProxy != 0) {
-        if (event != SL_ANDROIDBUFFERQUEUE_EVENT_NONE) {
-            if (event & SL_ANDROIDBUFFERQUEUE_EVENT_DISCONTINUITY) {
+        if (event != SL_ANDROID_ITEMKEY_NONE) {
+            if (event & SL_ANDROID_ITEMKEY_DISCONTINUITY) {
                 mAppProxy->receivedFromAppCommand(IStreamListener::DISCONTINUITY);
             }
-            if (event & SL_ANDROIDBUFFERQUEUE_EVENT_EOS) {
+            if (event & SL_ANDROID_ITEMKEY_EOS) {
                 mAppProxy->receivedFromAppCommand(IStreamListener::EOS);
             }
         }

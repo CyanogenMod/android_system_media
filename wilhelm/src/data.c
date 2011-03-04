@@ -201,7 +201,7 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
 
 #ifdef ANDROID
         case SL_DATALOCATOR_ANDROIDFD:
-            {
+        {
             pDataLocator->mFD = *(SLDataLocator_AndroidFD *)pLocator;
             SL_LOGV("%s: fd=%ld offset=%lld length=%lld", name, pDataLocator->mFD.fd,
                     pDataLocator->mFD.offset, pDataLocator->mFD.length);
@@ -210,13 +210,19 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
                 SL_LOGE("%s: fd=%ld\n", name, pDataLocator->mFD.fd);
                 result = SL_RESULT_PARAMETER_INVALID;
             }
-            }
             break;
+        }
         case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
-            {
-            pDataLocator->mBQ = *(SLDataLocator_AndroidBufferQueue*)pLocator;
+        {
+            pDataLocator->mABQ = *(SLDataLocator_AndroidBufferQueue*)pLocator;
+            // number of buffers must be specified, there is no default value, and can't be too big
+            if (!((1 <= pDataLocator->mBufferQueue.numBuffers) &&
+                    (pDataLocator->mBufferQueue.numBuffers <= 255))) {
+                SL_LOGE("%s: numBuffers=%lu", name, pDataLocator->mABQ.numBuffers);
+                result = SL_RESULT_PARAMETER_INVALID;
             }
             break;
+        }
 #endif
 
         case SL_DATALOCATOR_NULL:   // a NULL pointer is allowed, but not a pointer to NULL

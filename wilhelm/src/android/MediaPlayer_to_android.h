@@ -17,6 +17,7 @@
 /**************************************************************************************************
  * Player lifecycle
  ****************************/
+extern XAresult android_Player_checkSourceSink(CMediaPlayer *mp);
 
 extern XAresult android_Player_create(CMediaPlayer *mp);
 
@@ -56,4 +57,4 @@ extern XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint3
 extern void android_Player_androidBufferQueue_registerCallback_l(CMediaPlayer *mp);
 /* must be called with a lock on mp->mThis */
 extern void android_Player_androidBufferQueue_enqueue_l(CMediaPlayer *mp,
-        SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
+        SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData);

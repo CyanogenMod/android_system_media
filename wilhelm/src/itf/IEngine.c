@@ -215,6 +215,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     // sink locator (for decode on ANDROID build) to the buffer queue interface
                     // we have already range-checked the value down to a smaller width
                     SLuint16 nbBuffers = 0;
+                    bool usesAdvancedBufferHeaders = false;
                     switch (thiz->mDataSource.mLocator.mLocatorType) {
                     case SL_DATALOCATOR_BUFFERQUEUE:
 #ifdef ANDROID
@@ -225,6 +226,13 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         thiz->mNumChannels = thiz->mDataSource.mFormat.mPCM.numChannels;
                         thiz->mSampleRateMilliHz = thiz->mDataSource.mFormat.mPCM.samplesPerSec;
                         break;
+#ifdef ANDROID
+                    case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
+                        nbBuffers = (SLuint16) thiz->mDataSource.mLocator.mABQ.numBuffers;
+                        usesAdvancedBufferHeaders = true;
+                        thiz->mAndroidBufferQueue.mNumBuffers = nbBuffers;
+                        break;
+#endif
                     default:
                         nbBuffers = 0;
                         break;
@@ -268,8 +276,38 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 #endif
 
                     // Allocate memory for buffer queue
-
-                    //if (0 != thiz->mBufferQueue.mNumBuffers) {
+                    if (usesAdvancedBufferHeaders) {
+                        // locator is SL_DATALOCATOR_ANDROIDBUFFERQUEUE
+                        // Avoid possible integer overflow during multiplication; this arbitrary
+                        // maximum is big enough to not interfere with real applications, but
+                        // small enough to not overflow.
+                        if (thiz->mAndroidBufferQueue.mNumBuffers >= 256) {
+                            result = SL_RESULT_MEMORY_FAILURE;
+                            break;
+                        }
+                        thiz->mAndroidBufferQueue.mBufferArray = (AdvancedBufferHeader *)
+                                malloc( (thiz->mAndroidBufferQueue.mNumBuffers + 1)
+                                        * sizeof(AdvancedBufferHeader));
+                        if (NULL == thiz->mAndroidBufferQueue.mBufferArray) {
+                            result = SL_RESULT_MEMORY_FAILURE;
+                            break;
+                        } else {
+                            for (SLuint16 i=0 ; i<(thiz->mAndroidBufferQueue.mNumBuffers + 1) ;
+                                    i++) {
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mDataBuffer = NULL;
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mDataSize = 0;
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mDataSizeConsumed = 0;
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mMsgSize = 0;
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mMsgBuffer = NULL;
+                            }
+                            thiz->mAndroidBufferQueue.mFront =
+                                    thiz->mAndroidBufferQueue.mBufferArray;
+                            thiz->mAndroidBufferQueue.mRear =
+                                    thiz->mAndroidBufferQueue.mBufferArray;
+                        }
+                    } else {
+                        // locator is SL_DATALOCATOR_BUFFERQUEUE
+                        //         or SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE
                         // inline allocation of circular mArray, up to a typical max
                         if (BUFFER_HEADER_TYPICAL >= thiz->mBufferQueue.mNumBuffers) {
                             thiz->mBufferQueue.mArray = thiz->mBufferQueue.mTypical;
@@ -282,7 +320,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                                 break;
                             }
                             thiz->mBufferQueue.mArray = (BufferHeader *) malloc((thiz->mBufferQueue.
-                                mNumBuffers + 1) * sizeof(BufferHeader));
+                                    mNumBuffers + 1) * sizeof(BufferHeader));
                             if (NULL == thiz->mBufferQueue.mArray) {
                                 result = SL_RESULT_MEMORY_FAILURE;
                                 break;
@@ -290,14 +328,14 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         }
                         thiz->mBufferQueue.mFront = thiz->mBufferQueue.mArray;
                         thiz->mBufferQueue.mRear = thiz->mBufferQueue.mArray;
-                        //}
+                    }
 
-                        // used to store the data source of our audio player
-                        thiz->mDynamicSource.mDataSource = &thiz->mDataSource.u.mSource;
+                    // used to store the data source of our audio player
+                    thiz->mDynamicSource.mDataSource = &thiz->mDataSource.u.mSource;
 
-                        // platform-specific initialization
+                    // platform-specific initialization
 #ifdef ANDROID
-                        android_audioPlayer_create(thiz);
+                    android_audioPlayer_create(thiz);
 #endif
 
                 } while (0);
@@ -989,6 +1027,19 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
 
                     // Initialize private fields not associated with an interface
 
+                    // Default data source in case of failure in checkDataSource
+                    thiz->mDataSource.mLocator.mLocatorType = SL_DATALOCATOR_NULL;
+                    thiz->mDataSource.mFormat.mFormatType = XA_DATAFORMAT_NULL;
+
+                    // Default andio and image sink in case of failure in checkDataSink
+                    thiz->mAudioSink.mLocator.mLocatorType = XA_DATALOCATOR_NULL;
+                    thiz->mAudioSink.mFormat.mFormatType = XA_DATAFORMAT_NULL;
+                    thiz->mImageVideoSink.mLocator.mLocatorType = XA_DATALOCATOR_NULL;
+                    thiz->mImageVideoSink.mFormat.mFormatType = XA_DATAFORMAT_NULL;
+
+                    // More default values, in case destructor needs to be called early
+                    thiz->mDirectLevel = 0;
+
                     // (assume calloc or memset 0 during allocation)
                     // placement new
 #ifdef ANDROID
@@ -1053,15 +1104,53 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                     pLEDArray = NULL;
 
                     // Check that the requested interfaces are compatible with the data source
-                    // ...
+                    // FIXME implement
 
                     // check the source and sink parameters against platform support
 #ifdef ANDROID
-                    // result = android_mediaPlayer_checkSourceSink(thiz);
+                    result = android_Player_checkSourceSink(thiz);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
                     }
 #endif
+
+                    // AndroidBufferQueue-specific initialization
+                    if (XA_DATALOCATOR_ANDROIDBUFFERQUEUE ==
+                            thiz->mDataSource.mLocator.mLocatorType) {
+                        XAuint16 nbBuffers = (XAuint16) thiz->mDataSource.mLocator.mABQ.numBuffers;
+
+                        // Avoid possible integer overflow during multiplication; this arbitrary
+                        // maximum is big enough to not interfere with real applications, but
+                        // small enough to not overflow.
+                        if (nbBuffers >= 256) {
+                            result = SL_RESULT_MEMORY_FAILURE;
+                            break;
+                        }
+                        thiz->mAndroidBufferQueue.mBufferArray = (AdvancedBufferHeader *)
+                                    malloc( (nbBuffers + 1) * sizeof(AdvancedBufferHeader));
+                        if (NULL == thiz->mAndroidBufferQueue.mBufferArray) {
+                            result = SL_RESULT_MEMORY_FAILURE;
+                            break;
+                        } else {
+                            for (XAuint16 i=0 ; i<(nbBuffers + 1) ; i++) {
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mDataBuffer = NULL;
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mDataSize = 0;
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mDataSizeConsumed = 0;
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mMsgSize = 0;
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mMsgBuffer = NULL;
+                            }
+                            thiz->mAndroidBufferQueue.mFront =
+                                    thiz->mAndroidBufferQueue.mBufferArray;
+                            thiz->mAndroidBufferQueue.mRear =
+                                    thiz->mAndroidBufferQueue.mBufferArray;
+                        }
+
+                        thiz->mAndroidBufferQueue.mNumBuffers = nbBuffers;
+
+                    }
+
+                    // used to store the data source of our audio player
+                    thiz->mDynamicSource.mDataSource = &thiz->mDataSource.u.mSource;
 
                     // platform-specific initialization
 #ifdef ANDROID

@@ -27,7 +27,7 @@ typedef union {
     XADataLocator_NativeDisplay mNativeDisplay;
 #ifdef ANDROID
     SLDataLocator_AndroidFD mFD;
-    SLDataLocator_AndroidBufferQueue mBQ;
+    SLDataLocator_AndroidBufferQueue mABQ;
 #endif
 } DataLocator;
 
@@ -52,7 +52,9 @@ typedef struct {
 } DataLocatorFormat;
 
 #define SL_DATALOCATOR_NULL 0    // application specified a NULL value for pLocator
+#define XA_DATALOCATOR_NULL SL_DATALOCATOR_NULL
 #define SL_DATAFORMAT_NULL 0     // application specified a NULL or undefined value for pFormat
+#define XA_DATAFORMAT_NULL SL_DATAFORMAT_NULL
 
 // bit masks used to configure the allowed data locators for a given data source or data sink
 #define DATALOCATOR_MASK_NONE            0L

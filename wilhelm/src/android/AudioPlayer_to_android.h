@@ -116,4 +116,4 @@ extern void android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlay
 extern void android_audioPlayer_androidBufferQueue_clear_l(CAudioPlayer *pAudioPlayer);
 /* must be called with a lock on pAudioPlayer->mThis */
 extern void android_audioPlayer_androidBufferQueue_enqueue_l(CAudioPlayer *pAudioPlayer,
-        SLuint32 bufferId, SLuint32 length, SLAbufferQueueEvent event, void *pData);
+        SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData);
