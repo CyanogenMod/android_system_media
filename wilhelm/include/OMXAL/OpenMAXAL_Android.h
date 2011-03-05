@@ -105,9 +105,9 @@ typedef struct XADataLocator_AndroidBufferQueue_ {
 /*---------------------------------------------------------------------------*/
 
 /** Addendum to Data locator macros  */
-#define XA_DATALOCATOR_ANDROIDFD                ((SLuint32) 0x800007BC)
+#define XA_DATALOCATOR_ANDROIDFD                ((XAuint32) 0x800007BC)
 
-#define XA_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ((SLAint64) 0xFFFFFFFFFFFFFFFFll)
+#define XA_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE ((XAAint64) 0xFFFFFFFFFFFFFFFFll)
 
 /** File Descriptor-based data locator definition, locatorType must be XA_DATALOCATOR_ANDROIDFD */
 typedef struct XADataLocator_AndroidFD_ {

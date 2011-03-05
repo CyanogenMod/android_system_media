@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#include <surfaceflinger/Surface.h>
+#include <gui/ISurfaceTexture.h>
+
 /**************************************************************************************************
  * Player lifecycle
  ****************************/
@@ -30,9 +33,16 @@ extern XAresult android_Player_destroy(CMediaPlayer *mp);
  * Configuration
  ****************************/
 /**
- * pre-conditions: avp != NULL, surface != NULL
+ * pre-conditions: avp != NULL, surface != 0
  */
-extern XAresult android_Player_setVideoSurface(android::GenericMediaPlayer *avp, void* surface);
+extern XAresult android_Player_setVideoSurface(android::GenericMediaPlayer *avp,
+        const android::sp<android::Surface> &surface);
+
+/**
+ * pre-conditions: avp != NULL, surfaceTexture != 0
+ */
+extern XAresult android_Player_setVideoSurfaceTexture(android::GenericMediaPlayer *avp,
+        const android::sp<android::ISurfaceTexture> &surfaceTexture);
 
 /**************************************************************************************************
  * Playback control and events

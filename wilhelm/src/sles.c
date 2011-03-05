@@ -412,7 +412,8 @@ extern void
     { /* MPH_ANDROIDCONFIGURATION */ IAndroidConfiguration_init, NULL, NULL, NULL, NULL },
     { /* MPH_ANDROIDSIMPLEBUFFERQUEUE */ IBufferQueue_init /* alias */, NULL, NULL, NULL, NULL },
 // Android API level 10 extended interfaces
-    { /* MPH_ANDROIDBUFFERQUEUE */ IAndroidBufferQueue_init, NULL, IAndroidBufferQueue_deinit, NULL, NULL },
+    { /* MPH_ANDROIDBUFFERQUEUE */ IAndroidBufferQueue_init, NULL, IAndroidBufferQueue_deinit, NULL,
+        NULL },
 // OpenMAX AL 1.0.1 interfaces
     { /* MPH_XAENGINE */ IXAEngine_init, NULL, NULL, NULL, NULL },
     { /* MPH_XAPLAY */ IPlay_init, NULL, NULL, NULL, NULL },

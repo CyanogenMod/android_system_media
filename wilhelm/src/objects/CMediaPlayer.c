@@ -34,6 +34,8 @@
 
 #include "sles_allinclusive.h"
 
+#include <jni.h>
+
 #ifdef ANDROID
 using namespace android;
 
@@ -52,14 +54,36 @@ XAresult CMediaPlayer_Realize(void *self, XAboolean async)
     if (XA_RESULT_SUCCESS == result) {
 
         // if there is a video sink
-        if (XA_DATALOCATOR_NATIVEDISPLAY == thiz->mImageVideoSink.mLocator.mLocatorType) {
-            XANativeHandle nativeSurface = thiz->mImageVideoSink.mLocator.mNativeDisplay.hWindow;
-
-            if ((thiz->mAVPlayer != 0) && (NULL != nativeSurface)) {
-                // initialize display surface
-                android::GenericMediaPlayer* avp =
-                        (android::GenericMediaPlayer*)(thiz->mAVPlayer.get());
-                result = android_Player_setVideoSurface(avp, nativeSurface);
+        if (XA_DATALOCATOR_NATIVEDISPLAY ==
+                thiz->mImageVideoSink.mLocator.mLocatorType) {
+            JNIEnv *env = (JNIEnv *) thiz->mImageVideoSink.mLocator.mNativeDisplay.hDisplay;
+            if (env != NULL) {
+                // FIXME this is a temporary hack because ANativeWindow is not Binderable yet
+                jobject object = (jobject) thiz->mImageVideoSink.mLocator.mNativeDisplay.hWindow;
+                assert(object != NULL);
+                jclass surfaceClass = env->FindClass("android/view/Surface");
+                jclass surfaceTextureClass = env->FindClass("android/graphics/SurfaceTexture");
+                jclass objectClass = env->GetObjectClass(object);
+                if (thiz->mAVPlayer != 0) {
+                    // initialize display surface
+                    android::GenericMediaPlayer* avp =
+                            (android::GenericMediaPlayer*)(thiz->mAVPlayer.get());
+                    if (objectClass == surfaceClass) {
+                        sp<Surface> nativeSurface((Surface *) env->GetIntField(object,
+                                env->GetFieldID(surfaceClass, "mNativeSurface", "I")));
+                        result = android_Player_setVideoSurface(avp, nativeSurface);
+                    } else if (objectClass == surfaceTextureClass) {
+                        sp<ISurfaceTexture> nativeSurfaceTexture((ISurfaceTexture *)
+                                env->GetIntField(object, env->GetFieldID(surfaceTextureClass,
+                                "mSurfaceTexture", "I")));
+                        result = android_Player_setVideoSurfaceTexture(avp, nativeSurfaceTexture);
+                    }
+                }
+            } else {
+                ANativeWindow *nativeWindow = (ANativeWindow *)
+                        thiz->mImageVideoSink.mLocator.mNativeDisplay.hWindow;
+                assert(nativeWindow != NULL);
+                // FIXME here is where to implement ANativeWindow support
             }
         }
     }

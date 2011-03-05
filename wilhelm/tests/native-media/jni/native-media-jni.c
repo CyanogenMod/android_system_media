@@ -26,6 +26,9 @@
 
 #include <android/native_window_jni.h>
 
+// define as 1 if ANativeWindow * is not supported as a video sink
+#define NO_NATIVE_WINDOW 1
+
 // engine interfaces
 static XAObjectItf engineObject = NULL;
 static XAEngineItf engineEngine;
@@ -41,7 +44,11 @@ static XAAndroidBufferQueueItf playerBQItf = NULL;
 #define NB_MAXAL_INTERFACES 2 // XAAndroidBufferQueueItf and XAPlayItf
 
 // cached surface where the video display happens
+#if NO_NATIVE_WINDOW
+static jobject theSurfaceOrSurfaceTexture;
+#else
 static ANativeWindow* theNativeWindow;
+#endif
 
 // number of buffers in our buffer queue
 #define NB_BUFFERS 16
@@ -146,11 +153,17 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
 
     // configure image video sink
     XADataLocator_NativeDisplay loc_nd = {
-            XA_DATALOCATOR_NATIVEDISPLAY /* locatorType */,
-            // currently the video sink only works on ANativeWindow created from a Surface
-            (void*)theNativeWindow       /* hWindow */,
-            // ignored here
-            0                            /* hDisplay */};
+            XA_DATALOCATOR_NATIVEDISPLAY,        // locatorType
+#if NO_NATIVE_WINDOW
+            (void *) theSurfaceOrSurfaceTexture, // jobject
+            (void *) env                         // JNIEnv *env
+#else
+            // later the video sink can be an ANativeWindow created from a Surface or SurfaceTexture
+            (void*)theNativeWindow,              // hWindow
+            // must be NULL
+            NULL                                 // hDisplay
+#endif
+    };
     XADataSink imageVideoSink = {&loc_nd, NULL};
 
     // declare interfaces to use
@@ -256,14 +269,35 @@ void Java_com_example_nativemedia_NativeMedia_shutdown(JNIEnv* env, jclass clazz
         fclose(file);
     }
 
+#if !NO_NATIVE_WINDOW
     // make sure we don't leak native windows
-    ANativeWindow_release(theNativeWindow);
+    if (theNativeWindow != NULL) {
+        ANativeWindow_release(theNativeWindow);
+    }
+#endif
 }
 
 
 // set the surface
 void Java_com_example_nativemedia_NativeMedia_setSurface(JNIEnv *env, jclass clazz, jobject surface)
 {
+#if NO_NATIVE_WINDOW
+    theSurfaceOrSurfaceTexture = surface;
+#else
     // obtain a native window from a Java surface
     theNativeWindow = ANativeWindow_fromSurface(env, surface);
+#endif
+}
+
+
+// set the surface texture
+void Java_com_example_nativemedia_NativeMedia_setSurfaceTexture(JNIEnv *env, jclass clazz,
+        jobject surfaceTexture)
+{
+#if NO_NATIVE_WINDOW
+    theSurfaceOrSurfaceTexture = surfaceTexture;
+#else
+    // obtain a native window from a Java surface texture
+    theNativeWindow = ANativeWindow_fromSurfaceTexture(env, surfaceTexture);
+#endif
 }

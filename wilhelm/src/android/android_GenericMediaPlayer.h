@@ -16,6 +16,8 @@
 
 
 #include <binder/IServiceManager.h>
+#include <surfaceflinger/Surface.h>
+#include <gui/ISurfaceTexture.h>
 
 
 //--------------------------------------------------------------------------------------------------
@@ -47,7 +49,8 @@ public:
     GenericMediaPlayer(const AudioPlayback_Parameters* params, bool hasVideo);
     virtual ~GenericMediaPlayer();
 
-    virtual void setVideoSurface(void* surface);
+    virtual void setVideoSurface(const sp<Surface> &surface);
+    virtual void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
 
 protected:
 
@@ -59,6 +62,7 @@ protected:
     bool mHasVideo;
 
     sp<Surface> mVideoSurface;
+    sp<ISurfaceTexture> mVideoSurfaceTexture;
 
     sp<IMediaPlayer> mPlayer;
     // Receives Android MediaPlayer events from mPlayer

@@ -58,6 +58,7 @@ GenericMediaPlayer::GenericMediaPlayer(const AudioPlayback_Parameters* params, b
     GenericPlayer(params),
     mHasVideo(hasVideo),
     mVideoSurface(0),
+    mVideoSurfaceTexture(0),
     mPlayer(0),
     mPlayerClient(0)
 {
@@ -78,8 +79,12 @@ GenericMediaPlayer::~GenericMediaPlayer() {
 }
 
 //--------------------------------------------------
-void GenericMediaPlayer::setVideoSurface(void* surface) {
-    mVideoSurface = static_cast<Surface *>((ANativeWindow*)surface);
+void GenericMediaPlayer::setVideoSurface(const sp<Surface> &surface) {
+    mVideoSurface = surface;
+}
+
+void GenericMediaPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {
+    mVideoSurfaceTexture = surfaceTexture;
 }
 
 //--------------------------------------------------
@@ -87,8 +92,12 @@ void GenericMediaPlayer::setVideoSurface(void* surface) {
 void GenericMediaPlayer::onPrepare() {
     SL_LOGI("GenericMediaPlayer::onPrepare()");
     if (!(mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
-        if (mHasVideo && (mVideoSurface != 0)) {
-            mPlayer->setVideoSurface(mVideoSurface);
+        if (mHasVideo) {
+            if (mVideoSurface != 0) {
+                mPlayer->setVideoSurface(mVideoSurface);
+            } else if (mVideoSurfaceTexture != 0) {
+                mPlayer->setVideoSurfaceTexture(mVideoSurfaceTexture);
+            }
         }
         mPlayer->setAudioStreamType(mPlaybackParams.streamType);
         mPlayer->prepareAsync();

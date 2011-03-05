@@ -223,10 +223,24 @@ XAresult android_Player_destroy(CMediaPlayer *mp) {
 /**
  * pre-conditions: avp != NULL, surface != NULL
  */
-XAresult android_Player_setVideoSurface(android::GenericMediaPlayer *avp, void* surface) {
+XAresult android_Player_setVideoSurface(android::GenericMediaPlayer *avp,
+        const android::sp<android::Surface> &surface) {
     XAresult result = XA_RESULT_SUCCESS;
 
     avp->setVideoSurface(surface);
+
+    return result;
+}
+
+
+/**
+ * pre-conditions: avp != NULL, surfaceTexture != NULL
+ */
+XAresult android_Player_setVideoSurfaceTexture(android::GenericMediaPlayer *avp,
+        const android::sp<android::ISurfaceTexture> &surfaceTexture) {
+    XAresult result = XA_RESULT_SUCCESS;
+
+    avp->setVideoSurfaceTexture(surfaceTexture);
 
     return result;
 }

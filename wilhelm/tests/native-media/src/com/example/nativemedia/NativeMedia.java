@@ -29,6 +29,7 @@ import android.view.View.OnClickListener;
 import android.view.View;
 import android.widget.Button;
 import java.io.IOException;
+import android.graphics.SurfaceTexture;
 
 public class NativeMedia extends Activity {
     public static final String TAG = "NativeMedia";
@@ -157,6 +158,8 @@ public class NativeMedia extends Activity {
     public static native void setPlayingStreamingMediaPlayer(boolean isPlaying);
     public static native void shutdown();
     public static native void setSurface(Surface surface);
+    // currently unused in this test app
+    public static native void setSurfaceTexture(SurfaceTexture surfaceTexture);
 
     /** Load jni .so on initialization */
     static {
