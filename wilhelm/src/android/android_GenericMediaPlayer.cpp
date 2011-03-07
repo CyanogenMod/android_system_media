@@ -87,6 +87,7 @@ void GenericMediaPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfa
     mVideoSurfaceTexture = surfaceTexture;
 }
 
+
 //--------------------------------------------------
 // Event handlers
 void GenericMediaPlayer::onPrepare() {

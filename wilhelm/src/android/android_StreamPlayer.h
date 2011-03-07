@@ -20,14 +20,10 @@
 //--------------------------------------------------------------------------------------------------
 namespace android {
 
-typedef void (*cb_buffAvailable_t)(const void* user, bool userIsAudioPlayer,
-        size_t bufferId, void* bufferLoc, size_t buffSize);
-
 //--------------------------------------------------------------------------------------------------
 class StreamSourceAppProxy : public BnStreamSource {
 public:
-    StreamSourceAppProxy(slAndroidBufferQueueCallback callback,
-            cb_buffAvailable_t notify,
+    StreamSourceAppProxy(
             const void* user, bool userIsAudioPlayer,
             void *appContext,
             const void *caller);
@@ -38,18 +34,25 @@ public:
     virtual void setBuffers(const Vector<sp<IMemory> > &buffers);
     virtual void onBufferAvailable(size_t index);
 
-    void receivedFromAppCommand(IStreamListener::Command cmd);
-    void receivedFromAppBuffer(size_t buffIndex, size_t buffLength);
+    // Consumption from ABQ
+    void pullFromBuffQueue();
+
+    void receivedCmd_l(IStreamListener::Command cmd, const sp<AMessage> &msg = NULL);
+    void receivedBuffer_l(size_t buffIndex, size_t buffLength);
 
 private:
-    Mutex mListenerLock;
+    // for mListener and mAvailableBuffers
+    Mutex mLock;
     sp<IStreamListener> mListener;
+    // array of shared memory buffers
     Vector<sp<IMemory> > mBuffers;
+    // list of available buffers in shared memory, identified by their index
+    List<size_t> mAvailableBuffers;
 
-    slAndroidBufferQueueCallback mCallback; // FIXME remove
-    cb_buffAvailable_t mCbNotifyBufferAvailable;
     const void* mUser;
     bool mUserIsAudioPlayer;
+    // the Android Buffer Queue from which data is consumed and written to shared memory
+    IAndroidBufferQueue* mAndroidBufferQueue;
 
     void *mAppContext;
     const void *mCaller;
@@ -65,21 +68,32 @@ public:
     StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo);
     virtual ~StreamPlayer();
 
-    void registerQueueCallback(slAndroidBufferQueueCallback callback,
-            cb_buffAvailable_t notify,
+    // overridden from GenericPlayer
+    virtual void onMessageReceived(const sp<AMessage> &msg);
+
+    void registerQueueCallback(
             const void* user, bool userIsAudioPlayer,
             void *context,
             const void *caller);
-    void appEnqueue(SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData);
+    void queueRefilled_l();
     void appClear();
 
 protected:
+
+    enum {
+        // message to asynchronously notify mAppProxy the Android Buffer Queue was refilled
+        kWhatQueueRefilled = 'qrfi'
+    };
+
     sp<StreamSourceAppProxy> mAppProxy; // application proxy for the android buffer queue source
 
     // overridden from GenericMediaPlayer
     virtual void onPrepare();
 
+    void onQueueRefilled();
+
     Mutex mAppProxyLock;
+
 
 private:
     DISALLOW_EVIL_CONSTRUCTORS(StreamPlayer);
@@ -94,6 +108,4 @@ private:
  */
 extern void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_cbf_t cbf,
         void* notifUser);
-extern void android_StreamPlayer_enqueue_l(CAudioPlayer *ap,
-        SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData);
 extern void android_StreamPlayer_clear_l(CAudioPlayer *ap);

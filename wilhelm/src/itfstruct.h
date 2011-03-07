@@ -645,6 +645,7 @@ typedef struct {
     slAndroidBufferQueueCallback mCallback;
     void *mContext;
     SLuint16 mNumBuffers;
+    AndroidBufferType_type mBufferType;
     AdvancedBufferHeader *mBufferArray;
     AdvancedBufferHeader *mFront, *mRear;
 } IAndroidBufferQueue;

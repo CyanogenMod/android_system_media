@@ -61,6 +61,8 @@ static ANativeWindow* theNativeWindow;
 char dataCache[BUFFER_SIZE * NB_BUFFERS];
 // handle of the file to play
 FILE *file;
+// has the app reached the end of the file
+char reachedEof = 0;
 
 // AndroidBufferQueueItf callback for an audio player
 XAresult AndroidBufferQueueCallback(
@@ -80,7 +82,7 @@ XAresult AndroidBufferQueueCallback(
                 nbRead /*dataLength*/,
                 NULL /*pMsg*/,
                 0 /*msgLength*/);
-    } else {
+    } else if (!reachedEof) {
         // signal EOS
         XAAndroidBufferItem msgEos;
         msgEos.itemKey = XA_ANDROID_ITEMKEY_EOS;
@@ -90,6 +92,7 @@ XAresult AndroidBufferQueueCallback(
         (*caller)->Enqueue(caller, NULL /*pData*/, 0 /*dataLength*/,
                         &msgEos /*pMsg*/,
                         sizeof(XAuint32)*2 /*msgLength*/);
+        reachedEof = 1;
     }
 
     return XA_RESULT_SUCCESS;

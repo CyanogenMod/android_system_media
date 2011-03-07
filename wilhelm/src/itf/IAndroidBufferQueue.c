@@ -19,7 +19,8 @@
 #include "sles_allinclusive.h"
 
 
-/** Determine the state of the audio player or audio recorder associated with a buffer queue.
+/**
+ * Determine the state of the audio player or audio recorder associated with a buffer queue.
  *  Note that PLAYSTATE and RECORDSTATE values are equivalent (where PLAYING == RECORDING).
  */
 
@@ -27,22 +28,75 @@ static SLuint32 getAssociatedState(IAndroidBufferQueue *thiz)
 {
     SLuint32 state;
     switch (InterfaceToObjectID(thiz)) {
-    case XA_OBJECTID_MEDIAPLAYER:
+      case XA_OBJECTID_MEDIAPLAYER:
         state = ((CMediaPlayer *) thiz->mThis)->mPlay.mState;
         break;
-    case SL_OBJECTID_AUDIOPLAYER:
+      case SL_OBJECTID_AUDIOPLAYER:
         state = ((CAudioPlayer *) thiz->mThis)->mPlay.mState;
         break;
-    case SL_OBJECTID_AUDIORECORDER:
+      case SL_OBJECTID_AUDIORECORDER:
         state = ((CAudioRecorder *) thiz->mThis)->mRecord.mState;
         break;
-    default:
+      default:
         // unreachable, but just in case we will assume it is stopped
         assert(SL_BOOLEAN_FALSE);
         state = SL_PLAYSTATE_STOPPED;
         break;
     }
     return state;
+}
+
+
+/**
+ * parse and set the items associated with the given buffer, based on the buffer type,
+ * which determines the set of authorized items and format
+ */
+static void setItems(const SLAndroidBufferItem *pItems, SLuint32 itemsLength,
+        SLuint16 bufferType, AdvancedBufferHeader *pBuff)
+{
+    if ((NULL == pItems) || (0 == itemsLength)) {
+        // no item data, reset item structure based on type
+        switch (bufferType) {
+          case kAndroidBufferTypeMpeg2Ts:
+            pBuff->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
+            pBuff->mItems.mTsCmdData.mPts = 0;
+            break;
+          case kAndroidBufferTypeInvalid:
+          default:
+            return;
+        }
+    } else {
+        // parse item data based on type
+        switch (bufferType) {
+
+          case kAndroidBufferTypeMpeg2Ts: {
+            SLuint32 index = 0;
+            // supported Mpeg2Ts commands are mutually exclusive
+            if (SL_ANDROID_ITEMKEY_EOS == pItems->itemKey) {
+                pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_EOS;
+                //SL_LOGD("Found EOS event=%ld", pBuff->mItems.mTsCmdData.mTsCmdCode);
+            } else if (SL_ANDROID_ITEMKEY_DISCONTINUITY == pItems->itemKey) {
+                if (pItems->itemSize == 0) {
+                    pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_DISCONTINUITY;
+                    //SL_LOGD("Found DISCONTINUITYevent=%ld", pBuff->mItems.mTsCmdData.mTsCmdCode);
+                } else if (pItems->itemSize == sizeof(SLAint64)) {
+                    pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_DISCON_NEWPTS;
+                    pBuff->mItems.mTsCmdData.mPts = *((SLAint64*)pItems->itemData);
+                    //SL_LOGD("Found PTS=%lld", pBuff->mItems.mTsCmdData.mPts);
+                } else {
+                    SL_LOGE("Invalid size for MPEG-2 PTS, ignoring value");
+                    pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_DISCONTINUITY;
+                }
+            } else {
+                pBuff->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
+            }
+            break;
+          }
+
+          default:
+            return;
+        }
+    }
 }
 
 
@@ -56,29 +110,28 @@ SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf self,
     interface_lock_exclusive(thiz);
 
     // verify pre-condition that media object is in the SL_PLAYSTATE_STOPPED state
-    // FIXME PRIORITY 1 check play state
-    //if (SL_PLAYSTATE_STOPPED == ((CAudioPlayer*) thiz->mThis)->mPlay.mState) {
+    if (SL_PLAYSTATE_STOPPED == getAssociatedState(thiz)) {
         thiz->mCallback = callback;
         thiz->mContext = pContext;
 
         switch (InterfaceToObjectID(thiz)) {
-        case SL_OBJECTID_AUDIOPLAYER:
+          case SL_OBJECTID_AUDIOPLAYER:
             result = SL_RESULT_SUCCESS;
             android_audioPlayer_androidBufferQueue_registerCallback_l((CAudioPlayer*) thiz->mThis);
             break;
-        case XA_OBJECTID_MEDIAPLAYER:
+          case XA_OBJECTID_MEDIAPLAYER:
             SL_LOGI("IAndroidBufferQueue_RegisterCallback()");
             result = SL_RESULT_SUCCESS;
             android_Player_androidBufferQueue_registerCallback_l((CMediaPlayer*) thiz->mThis);
             break;
-        default:
+          default:
             result = SL_RESULT_PARAMETER_INVALID;
             break;
         }
 
-    //} else {
-    //    result = SL_RESULT_PRECONDITIONS_VIOLATED;
-    //}
+    } else {
+        result = SL_RESULT_PRECONDITIONS_VIOLATED;
+    }
 
     interface_unlock_exclusive(thiz);
 
@@ -94,7 +147,7 @@ SLresult IAndroidBufferQueue_Clear(SLAndroidBufferQueueItf self)
 
     interface_lock_exclusive(thiz);
 
-    // FIXME return value?
+    // TODO return value?
     result = SL_RESULT_SUCCESS;
     android_audioPlayer_androidBufferQueue_clear_l((CAudioPlayer*) thiz->mThis);
 
@@ -120,6 +173,21 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
     } else {
         IAndroidBufferQueue *thiz = (IAndroidBufferQueue *) self;
 
+        // buffer size check, can be done outside of lock because buffer type can't change
+        switch (thiz->mBufferType) {
+          case kAndroidBufferTypeMpeg2Ts:
+            if (dataLength % MPEG2_TS_BLOCK_SIZE == 0) {
+                break;
+            }
+            // intended fall-through if test failed
+            SL_LOGE("Error enqueueing MPEG-2 TS data: size needs to be a multiple of %d",
+                    MPEG2_TS_BLOCK_SIZE);
+          case kAndroidBufferTypeInvalid:
+          default:
+            result = SL_RESULT_PARAMETER_INVALID;
+            SL_LEAVE_INTERFACE
+        }
+
         interface_lock_exclusive(thiz);
 
         AdvancedBufferHeader *oldRear = thiz->mRear, *newRear;
@@ -134,12 +202,13 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
             oldRear->mDataSizeConsumed = 0;
             thiz->mRear = newRear;
             ++thiz->mState.count;
+            setItems(pItems, itemsLength, thiz->mBufferType, oldRear);
             result = SL_RESULT_SUCCESS;
         }
         // set enqueue attribute if state is PLAYING and the first buffer is enqueued
         interface_unlock_exclusive_attributes(thiz, ((SL_RESULT_SUCCESS == result) &&
                 (1 == thiz->mState.count) && (SL_PLAYSTATE_PLAYING == getAssociatedState(thiz))) ?
-                        ATTR_BQ_ENQUEUE : ATTR_NONE);
+                        ATTR_ABQ_ENQUEUE : ATTR_NONE);
     }
 
     SL_LEAVE_INTERFACE
@@ -164,6 +233,7 @@ void IAndroidBufferQueue_init(void *self)
     thiz->mCallback = NULL;
     thiz->mContext = NULL;
 
+    thiz->mBufferType = kAndroidBufferTypeInvalid;
     thiz->mBufferArray = NULL;
     thiz->mFront = NULL;
     thiz->mRear = NULL;

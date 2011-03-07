@@ -15,7 +15,6 @@
  */
 
 #include "sles_allinclusive.h"
-#include "android/AndroidBufferQueueSource.h"
 #include "utils/RefBase.h"
 #include "android_prompts.h"
 
@@ -1711,11 +1710,13 @@ SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMse
         int64_t durationUsec = SL_TIME_UNKNOWN;
         if (ap->mSfPlayer != 0) {
             durationUsec = ap->mSfPlayer->getDurationUsec();
-            *pDurMsec = durationUsec == -1 ? SL_TIME_UNKNOWN : durationUsec / 1000;
         }
+        *pDurMsec = durationUsec == -1 ? SL_TIME_UNKNOWN : durationUsec / 1000;
         }
         break;
+    case A_PLR_TS_ABQ: // intended fall-through
     default:
+        *pDurMsec = SL_TIME_UNKNOWN;
         break;
     }
     return SL_RESULT_SUCCESS;
@@ -1809,7 +1810,7 @@ SLresult android_audioPlayer_volumeUpdate(CAudioPlayer* ap) {
 
 
 //-----------------------------------------------------------------------------
-void android_audioPlayer_bufferQueue_onRefilled(CAudioPlayer *ap) {
+void android_audioPlayer_bufferQueue_onRefilled_l(CAudioPlayer *ap) {
     // the AudioTrack associated with the AudioPlayer receiving audio from a PCM buffer
     // queue was stopped when the queue become empty, we restart as soon as a new buffer
     // has been enqueued since we're in playing state
@@ -1851,13 +1852,10 @@ SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *ap) {
 
 
 //-----------------------------------------------------------------------------
-// abqSrc_callBack_pullFromBuffQueue is implemented in AndroidBufferQueueSource.cpp
 void android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer *ap) {
     if ((ap->mAndroidObjType == A_PLR_TS_ABQ) && (ap->mAPlayer != 0)) {
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(ap->mAPlayer.get());
         splr->registerQueueCallback(
-                ap->mAndroidBufferQueue.mCallback,
-                abqSrc_callBack_pullFromBuffQueue,
                 (const void*)ap, true /*userIsAudioPlayer*/,
                 ap->mAndroidBufferQueue.mContext,
                 (const void*)&(ap->mAndroidBufferQueue.mItf));
@@ -1871,9 +1869,9 @@ void android_audioPlayer_androidBufferQueue_clear_l(CAudioPlayer *ap) {
     }
 }
 
-void android_audioPlayer_androidBufferQueue_enqueue_l(CAudioPlayer *ap,
-        SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData) {
-    if (ap->mAndroidObjType == A_PLR_TS_ABQ) {
-        android_StreamPlayer_enqueue_l(ap, bufferId, length, event, pData);
+void android_audioPlayer_androidBufferQueue_onRefilled_l(CAudioPlayer *ap) {
+    if ((ap->mAndroidObjType == A_PLR_TS_ABQ) && (ap->mAPlayer != 0)) {
+        android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(ap->mAPlayer.get());
+        splr->queueRefilled_l();
     }
 }

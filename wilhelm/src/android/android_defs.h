@@ -52,6 +52,8 @@ enum AndroidObject_state {
 
 #define PLAYER_FD_FIND_FILE_SIZE ((int64_t)0xFFFFFFFFFFFFFFFFll)
 
+#define MPEG2_TS_BLOCK_SIZE 188
+
 
 /**
  * Structure to maintain the set of audio levels about a player
@@ -102,13 +104,33 @@ typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, void* user);
 #define WHATPARAM_SEEK_SEEKTIME_MS "seekTimeMs"
 #define WHATPARAM_LOOP_LOOPING     "looping"
 
+/**
+ * Event mask for MPEG-2 TS events associated with TS data
+ */
+#define ANDROID_MP2TSEVENT_NONE          ((SLuint32) 0x0)
+// buffer is at End Of Stream
+#define ANDROID_MP2TSEVENT_EOS           ((SLuint32) 0x1)
+// buffer marks a discontinuity with previous TS data, resume display as soon as possible
+#define ANDROID_MP2TSEVENT_DISCONTINUITY ((SLuint32) 0x1 << 1)
+// buffer marks a discontinuity with previous TS data, resume display upon reaching the
+// associated presentation time stamp
+#define ANDROID_MP2TSEVENT_DISCON_NEWPTS ((SLuint32) 0x1 << 2)
+
+/**
+ * Types of buffers stored in Android Buffer Queues, see IAndroidBufferQueue.mBufferType
+ */
+enum AndroidBufferType_type {
+    kAndroidBufferTypeInvalid = ((SLuint16) 0x0),
+    kAndroidBufferTypeMpeg2Ts = ((SLuint16) 0x1),
+};
+
 namespace android {
 
 enum {
     kDataLocatorNone = 'none',
     kDataLocatorUri  = 'uri',
     kDataLocatorFd   = 'fd',
-    };
+};
 
 struct FdInfo {
     int fd;

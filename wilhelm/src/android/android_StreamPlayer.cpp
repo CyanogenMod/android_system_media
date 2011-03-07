@@ -37,16 +37,6 @@ void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_cbf_t cbf, voi
 
 
 //-----------------------------------------------------------------------------
-
-// FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
-void android_StreamPlayer_enqueue_l(CAudioPlayer *ap,
-        SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData) {
-    if (ap->mAPlayer != 0) {
-        ((android::StreamPlayer*)ap->mAPlayer.get())->appEnqueue(bufferId, length, event, pData);
-    }
-}
-
-
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
 void android_StreamPlayer_clear_l(CAudioPlayer *ap) {
     if (ap->mAPlayer != 0) {
@@ -58,18 +48,21 @@ void android_StreamPlayer_clear_l(CAudioPlayer *ap) {
 namespace android {
 
 StreamSourceAppProxy::StreamSourceAppProxy(
-        slAndroidBufferQueueCallback callback,
-        cb_buffAvailable_t notify,
         const void* user, bool userIsAudioPlayer,
         void *context, const void *caller) :
-    mCallback(callback),
-    mCbNotifyBufferAvailable(notify),
     mUser(user),
     mUserIsAudioPlayer(userIsAudioPlayer),
+    mAndroidBufferQueue(NULL),
     mAppContext(context),
     mCaller(caller)
 {
     SL_LOGI("StreamSourceAppProxy::StreamSourceAppProxy()");
+
+    if (mUserIsAudioPlayer) {
+        mAndroidBufferQueue = &((CAudioPlayer*)mUser)->mAndroidBufferQueue;
+    } else {
+        mAndroidBufferQueue = &((CMediaPlayer*)mUser)->mAndroidBufferQueue;
+    }
 }
 
 StreamSourceAppProxy::~StreamSourceAppProxy() {
@@ -81,7 +74,7 @@ StreamSourceAppProxy::~StreamSourceAppProxy() {
 //--------------------------------------------------
 // IStreamSource implementation
 void StreamSourceAppProxy::setListener(const sp<IStreamListener> &listener) {
-    Mutex::Autolock _l(mListenerLock);
+    Mutex::Autolock _l(mLock);
     mListener = listener;
 }
 
@@ -90,40 +83,156 @@ void StreamSourceAppProxy::setBuffers(const Vector<sp<IMemory> > &buffers) {
 }
 
 void StreamSourceAppProxy::onBufferAvailable(size_t index) {
-    SL_LOGD("StreamSourceAppProxy::onBufferAvailable(%d)", index);
+    //SL_LOGD("StreamSourceAppProxy::onBufferAvailable(%d)", index);
 
     CHECK_LT(index, mBuffers.size());
     sp<IMemory> mem = mBuffers.itemAt(index);
     SLAint64 length = (SLAint64) mem->size();
 
-    (*mCbNotifyBufferAvailable)(mUser, mUserIsAudioPlayer, index, mem->pointer(), mem->size());
+    {
+        Mutex::Autolock _l(mLock);
+        mAvailableBuffers.push_back(index);
+    }
+//SL_LOGD("onBufferAvailable() now %d buffers available in queue", mAvailableBuffers.size());
 
-#if 0
-    // FIXME remove
-    // FIXME PRIORITY1 needs to be called asynchronously, from AudioPlayer code after having
-    //   obtained under lock the callback function pointer and context
-    (*mCallback)((SLAndroidBufferQueueItf)mCaller,     /* SLAndroidBufferQueueItf self */
-            mAppContext,   /* void *pContext */
-            index,         /* SLuint32 bufferId */
-            length,        /*  SLAint64 bufferLength */
-            mem->pointer(),/* void *pBufferDataLocation */
-            0,             /* SLuint32 msgLength */
-            NULL           /*void *pMsgDataLocation*/
-    );
-#endif
+    // a new shared mem buffer is available: let's try to fill immediately
+    pullFromBuffQueue();
 }
 
-void StreamSourceAppProxy::receivedFromAppCommand(IStreamListener::Command cmd) {
-    Mutex::Autolock _l(mListenerLock);
+void StreamSourceAppProxy::receivedCmd_l(IStreamListener::Command cmd, const sp<AMessage> &msg) {
     if (mListener != 0) {
-        mListener->issueCommand(cmd, false /* synchronous */);
+        mListener->issueCommand(cmd, false /* synchronous */, msg);
     }
 }
 
-void StreamSourceAppProxy::receivedFromAppBuffer(size_t buffIndex, size_t buffLength) {
-    Mutex::Autolock _l(mListenerLock);
+void StreamSourceAppProxy::receivedBuffer_l(size_t buffIndex, size_t buffLength) {
     if (mListener != 0) {
         mListener->queueBuffer(buffIndex, buffLength);
+    }
+}
+
+//--------------------------------------------------
+// consumption from ABQ
+void StreamSourceAppProxy::pullFromBuffQueue() {
+
+    size_t bufferId;
+    void* bufferLoc;
+    size_t buffSize;
+
+    slAndroidBufferQueueCallback callback = NULL;
+    void* callbackPContext = NULL;
+    AdvancedBufferHeader *oldFront = NULL;
+
+    // retrieve data from the buffer queue
+    interface_lock_exclusive(mAndroidBufferQueue);
+
+    if (mAndroidBufferQueue->mState.count != 0) {
+        // SL_LOGD("nbBuffers in ABQ = %lu, buffSize=%lu",abq->mState.count, buffSize);
+        assert(mAndroidBufferQueue->mFront != mAndroidBufferQueue->mRear);
+
+        oldFront = mAndroidBufferQueue->mFront;
+        AdvancedBufferHeader *newFront = &oldFront[1];
+
+        // consume events when starting to read data from a buffer for the first time
+        if (oldFront->mDataSizeConsumed == 0) {
+            if (oldFront->mItems.mTsCmdData.mTsCmdCode & ANDROID_MP2TSEVENT_EOS) {
+                receivedCmd_l(IStreamListener::EOS);
+            } else if (oldFront->mItems.mTsCmdData.mTsCmdCode & ANDROID_MP2TSEVENT_DISCONTINUITY) {
+                receivedCmd_l(IStreamListener::DISCONTINUITY);
+            } else if (oldFront->mItems.mTsCmdData.mTsCmdCode & ANDROID_MP2TSEVENT_DISCON_NEWPTS) {
+                sp<AMessage> msg = new AMessage();
+                msg->setInt64(IStreamListener::kKeyResumeAtPTS,
+                        (int64_t)oldFront->mItems.mTsCmdData.mPts);
+                receivedCmd_l(IStreamListener::DISCONTINUITY, msg /*msg*/);
+            }
+            oldFront->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
+        }
+
+        {
+            // we're going to change the shared mem buffer queue, so lock it
+            Mutex::Autolock _l(mLock);
+            if (!mAvailableBuffers.empty()) {
+                bufferId = *mAvailableBuffers.begin();
+                CHECK_LT(bufferId, mBuffers.size());
+                sp<IMemory> mem = mBuffers.itemAt(bufferId);
+                bufferLoc = mem->pointer();
+                buffSize = mem->size();
+
+                char *pSrc = ((char*)oldFront->mDataBuffer) + oldFront->mDataSizeConsumed;
+                if (oldFront->mDataSizeConsumed + buffSize < oldFront->mDataSize) {
+                    // more available than requested, copy as much as requested
+                    // consume data: 1/ copy to given destination
+                    memcpy(bufferLoc, pSrc, buffSize);
+                    //               2/ keep track of how much has been consumed
+                    oldFront->mDataSizeConsumed += buffSize;
+                    //               3/ notify shared mem listener that new data is available
+                    receivedBuffer_l(bufferId, buffSize);
+                    mAvailableBuffers.erase(mAvailableBuffers.begin());
+                } else {
+                    // requested as much available or more: consume the whole of the current
+                    //   buffer and move to the next
+                    size_t consumed = oldFront->mDataSize - oldFront->mDataSizeConsumed;
+                    //SL_LOGD("consuming rest of buffer: enqueueing=%ld", consumed);
+                    oldFront->mDataSizeConsumed = oldFront->mDataSize;
+
+                    // move queue to next
+                    if (newFront == &mAndroidBufferQueue->
+                            mBufferArray[mAndroidBufferQueue->mNumBuffers + 1]) {
+                        // reached the end, circle back
+                        newFront = mAndroidBufferQueue->mBufferArray;
+                    }
+                    mAndroidBufferQueue->mFront = newFront;
+                    mAndroidBufferQueue->mState.count--;
+                    mAndroidBufferQueue->mState.index++;
+
+                    if (consumed > 0) {
+                        // consume data: 1/ copy to given destination
+                        memcpy(bufferLoc, pSrc, consumed);
+                        //               2/ keep track of how much has been consumed
+                        // here nothing to do because we are done with this buffer
+                        //               3/ notify StreamPlayer that new data is available
+                        receivedBuffer_l(bufferId, consumed);
+                        mAvailableBuffers.erase(mAvailableBuffers.begin());
+                    }
+
+                    // data has been consumed, and the buffer queue state has been updated
+                    // we will notify the client if applicable
+                    callback = mAndroidBufferQueue->mCallback;
+                    // save callback data
+                    callbackPContext = mAndroidBufferQueue->mContext;
+                }
+                //SL_LOGD("onBufferAvailable() %d buffers available after enqueue",
+                //     mAvailableBuffers.size());
+            }
+        }
+
+
+    } else { // empty queue
+        SL_LOGD("ABQ empty, starving!");
+        // signal we're at the end of the content, but don't pause (see note in function)
+        if (mUserIsAudioPlayer) {
+            // FIXME declare this external
+            //audioPlayer_dispatch_headAtEnd_lockPlay((CAudioPlayer*)user,
+            //        false /*set state to paused?*/, false);
+        } else {
+            // FIXME implement headAtEnd dispatch for CMediaPlayer
+        }
+    }
+
+    interface_unlock_exclusive(mAndroidBufferQueue);
+
+    // notify client
+    if (NULL != callback) {
+        // oldFront was only initialized in the code path where callback is initialized
+        //    so no need to check if it's valid
+        (*callback)(&mAndroidBufferQueue->mItf, callbackPContext,
+                (void *)oldFront->mDataBuffer,/* pBufferData  */
+                oldFront->mDataSize, /* dataSize  */
+                // here a buffer is only dequeued when fully consumed
+                oldFront->mDataSize, /* dataUsed  */
+                // no messages during playback
+                0, /* itemsLength */
+                NULL /* pItems */);
     }
 }
 
@@ -146,46 +255,47 @@ StreamPlayer::~StreamPlayer() {
 }
 
 
+void StreamPlayer::onMessageReceived(const sp<AMessage> &msg) {
+    switch (msg->what()) {
+        case kWhatQueueRefilled:
+            onQueueRefilled();
+            break;
+
+        default:
+            GenericMediaPlayer::onMessageReceived(msg);
+            break;
+    }
+}
+
+
 void StreamPlayer::registerQueueCallback(
-        slAndroidBufferQueueCallback callback,
-        cb_buffAvailable_t notify,
         const void* user, bool userIsAudioPlayer,
         void *context,
         const void *caller) {
     SL_LOGI("StreamPlayer::registerQueueCallback");
     Mutex::Autolock _l(mAppProxyLock);
 
-    mAppProxy = new StreamSourceAppProxy(callback,
-            notify, user, userIsAudioPlayer,
+    mAppProxy = new StreamSourceAppProxy(
+            user, userIsAudioPlayer,
             context, caller);
 
     CHECK(mAppProxy != 0);
     SL_LOGI("StreamPlayer::registerQueueCallback end");
 }
 
-void StreamPlayer::appEnqueue(SLuint32 bufferId, SLuint32 length, SLuint32 event,
-        void *pData) {
-    Mutex::Autolock _l(mAppProxyLock);
-    if (mAppProxy != 0) {
-        if (event != SL_ANDROID_ITEMKEY_NONE) {
-            if (event & SL_ANDROID_ITEMKEY_DISCONTINUITY) {
-                mAppProxy->receivedFromAppCommand(IStreamListener::DISCONTINUITY);
-            }
-            if (event & SL_ANDROID_ITEMKEY_EOS) {
-                mAppProxy->receivedFromAppCommand(IStreamListener::EOS);
-            }
-        }
-        if (length > 0) {
-            // FIXME PRIORITY1 verify given length isn't bigger than declared length in app callback
-            mAppProxy->receivedFromAppBuffer((size_t)bufferId, (size_t)length);
-        }
-    }
+
+/**
+ * Called with a lock on ABQ
+ */
+void StreamPlayer::queueRefilled_l() {
+    // async notification that the ABQ was refilled
+    (new AMessage(kWhatQueueRefilled, id()))->post();
 }
 
 void StreamPlayer::appClear() {
     Mutex::Autolock _l(mAppProxyLock);
     if (mAppProxy != 0) {
-        // FIXME PRIORITY1 implement
+        // FIXME PRIORITY1 implement, add discontinuity?
         SL_LOGE("[ FIXME implement StreamPlayer::appClear() ]");
     }
 }
@@ -208,5 +318,12 @@ void StreamPlayer::onPrepare() {
 }
 
 
+void StreamPlayer::onQueueRefilled() {
+    //SL_LOGD("StreamPlayer::onQueueRefilled()");
+    Mutex::Autolock _l(mAppProxyLock);
+    if (mAppProxy != 0) {
+        mAppProxy->pullFromBuffQueue();
+    }
+}
 
 } // namespace android

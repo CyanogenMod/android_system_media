@@ -103,7 +103,7 @@ extern void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPos
 /**************************************************************************************************
  * Buffer Queue events
  ****************************/
-extern void android_audioPlayer_bufferQueue_onRefilled(CAudioPlayer *pAudioPlayer);
+extern void android_audioPlayer_bufferQueue_onRefilled_l(CAudioPlayer *pAudioPlayer);
 
 extern SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *pAudioPlayer);
 
@@ -115,5 +115,4 @@ extern void android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlay
 /* must be called with a lock on pAudioPlayer->mThis */
 extern void android_audioPlayer_androidBufferQueue_clear_l(CAudioPlayer *pAudioPlayer);
 /* must be called with a lock on pAudioPlayer->mThis */
-extern void android_audioPlayer_androidBufferQueue_enqueue_l(CAudioPlayer *pAudioPlayer,
-        SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData);
+extern void android_audioPlayer_androidBufferQueue_onRefilled_l(CAudioPlayer *pAudioPlayer);

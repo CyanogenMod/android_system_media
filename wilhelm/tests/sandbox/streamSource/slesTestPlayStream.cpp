@@ -38,6 +38,8 @@
 char dataCache[BUFFER_SIZE * NB_BUFFERS];
 /* From where we read the data to play */
 FILE *file;
+/* Has the app reached the end of the file */
+bool reachedEof = false;
 
 //-----------------------------------------------------------------
 //* Exits the application if an error is encountered */
@@ -72,7 +74,7 @@ SLresult AndroidBufferQueueCallback(
                 nbRead /*dataLength*/,
                 NULL /*pMsg*/,
                 0 /*msgLength*/);
-    } else {
+    } else if (!reachedEof) {
         // signal EOS
         SLAndroidBufferItem msgEos;
         msgEos.itemKey = SL_ANDROID_ITEMKEY_EOS;
@@ -82,6 +84,7 @@ SLresult AndroidBufferQueueCallback(
         (*caller)->Enqueue(caller, NULL /*pData*/, 0 /*dataLength*/,
                         &msgEos /*pMsg*/,
                         sizeof(SLuint32)*2 /*msgLength*/);
+        reachedEof = true;
     }
 
     return SL_RESULT_SUCCESS;
@@ -117,7 +120,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     SLboolean required[MAX_NUMBER_INTERFACES];
     SLInterfaceID iidArray[MAX_NUMBER_INTERFACES];
 
-    int playTimeInSec = 90;
+    int playTimeInSec = 60;
 
     file = fopen(path, "rb");
 
@@ -204,7 +207,6 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     fprintf(stdout, "After set to PAUSED\n");
     CheckErr(res);
 
-
     /* Fill our cache */
     if (fread(dataCache, 1, BUFFER_SIZE * NB_BUFFERS, file) <= 0) {
         fprintf(stderr, "Error filling cache, exiting\n");
@@ -217,9 +219,19 @@ void TestPlayStream( SLObjectItf sl, const char* path)
         CheckErr(res);
     }
 
-
-
-
+#if 0   // used to test ABQ starving where only one buffer is enqueued before playback
+    /* Fill our cache */
+    if (fread(dataCache, 1, BUFFER_SIZE * 1, file) <= 0) {
+        fprintf(stderr, "Error filling cache, exiting\n");
+        goto destroyRes;
+    }
+    /* Enqueue the content of our cache before starting to play,
+         * we don't want to starve the player */
+    for (int i=0 ; i < 1 ; i++) {
+        res = (*abqItf)->Enqueue(abqItf, dataCache + i*BUFFER_SIZE, BUFFER_SIZE, NULL, 0);
+        CheckErr(res);
+    }
+#endif
     /*     wait until there's data to play */
     //SLpermille fillLevel = 0;
  /*

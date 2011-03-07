@@ -55,7 +55,6 @@ LOCAL_SRC_FILES:=                     \
         sles.c                        \
         sllog.c                       \
         ThreadPool.c                  \
-        android/AndroidBufferQueueSource.cpp  \
         android/AudioPlayer_to_android.cpp    \
         android/AudioRecorder_to_android.cpp  \
         android/MediaPlayer_to_android.cpp    \

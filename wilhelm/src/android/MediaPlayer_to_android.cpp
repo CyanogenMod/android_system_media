@@ -15,7 +15,6 @@
  */
 
 #include "sles_allinclusive.h"
-#include "android/AndroidBufferQueueSource.h"
 #include "utils/RefBase.h"
 #include "android_prompts.h"
 
@@ -246,6 +245,34 @@ XAresult android_Player_setVideoSurfaceTexture(android::GenericMediaPlayer *avp,
 }
 
 
+XAresult android_Player_getDuration(IPlay *pPlayItf, XAmillisecond *pDurMsec) {
+    XAresult result = XA_RESULT_SUCCESS;
+    CMediaPlayer *avp = (CMediaPlayer *)pPlayItf->mThis;
+
+    switch (avp->mAndroidObjType) {
+
+    case AV_PLR_TS_ABQ: // intended fall-through
+    case AV_PLR_URIFD: {
+        // FIXME implement for a MediaPlayer playing on URI or FD (on LocAVPlayer, returns -1)
+        int dur = -1;
+        if (avp->mAVPlayer != 0) {
+            avp->mAVPlayer->getDurationMsec(&dur);
+        }
+        if (dur < 0) {
+            *pDurMsec = SL_TIME_UNKNOWN;
+        } else {
+            *pDurMsec = (XAmillisecond)dur;
+        }
+    } break;
+
+    default:
+        *pDurMsec = XA_TIME_UNKNOWN;
+        break;
+    }
+
+    return result;
+}
+
 //-----------------------------------------------------------------------------
 /**
  * pre-condition: avp != NULL
@@ -308,28 +335,23 @@ XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playS
 
 
 //-----------------------------------------------------------------------------
-
-
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
 void android_Player_androidBufferQueue_registerCallback_l(CMediaPlayer *mp) {
     if (mp->mAVPlayer != 0) {
         SL_LOGI("android_Player_androidBufferQueue_registerCallback_l");
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
         splr->registerQueueCallback(
-                mp->mAndroidBufferQueue.mCallback,
-                abqSrc_callBack_pullFromBuffQueue,
                 (const void*)mp, false /*userIsAudioPlayer*/,
                 mp->mAndroidBufferQueue.mContext, (const void*)&(mp->mAndroidBufferQueue.mItf));
 
     }
 }
 
-// FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
-void android_Player_androidBufferQueue_enqueue_l(CMediaPlayer *mp,
-        SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData) {
+
+void android_Player_androidBufferQueue_onRefilled_l(CMediaPlayer *mp) {
     if (mp->mAVPlayer != 0) {
-        android::StreamPlayer* splr = (android::StreamPlayer*)(mp->mAVPlayer.get());
-        splr->appEnqueue(bufferId, length, event, pData);
+        android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
+        splr->queueRefilled_l();
     }
 }
 

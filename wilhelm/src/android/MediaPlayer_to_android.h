@@ -44,6 +44,8 @@ extern XAresult android_Player_setVideoSurface(android::GenericMediaPlayer *avp,
 extern XAresult android_Player_setVideoSurfaceTexture(android::GenericMediaPlayer *avp,
         const android::sp<android::ISurfaceTexture> &surfaceTexture);
 
+extern XAresult android_Player_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
+
 /**************************************************************************************************
  * Playback control and events
  ****************************/
@@ -66,5 +68,4 @@ extern XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint3
 /* must be called with a lock on mp->mThis */
 extern void android_Player_androidBufferQueue_registerCallback_l(CMediaPlayer *mp);
 /* must be called with a lock on mp->mThis */
-extern void android_Player_androidBufferQueue_enqueue_l(CMediaPlayer *mp,
-        SLuint32 bufferId, SLuint32 length, SLuint32 event, void *pData);
+extern void android_Player_androidBufferQueue_onRefilled_l(CMediaPlayer *mp);

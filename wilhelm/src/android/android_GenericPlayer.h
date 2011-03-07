@@ -41,6 +41,8 @@ public:
     virtual void seek(int64_t timeMsec);
     virtual void loop(bool loop);
 
+    virtual void getDurationMsec(int* msec); // -1 if unknown
+
 protected:
 
     void resetDataLocator();

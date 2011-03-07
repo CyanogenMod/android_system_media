@@ -27,8 +27,6 @@ extern "C" {
 
 typedef xa_int64_t             XAAint64;           /* 64 bit signed integer */
 
-typedef XAuint32               XAAbufferQueueEvent;
-
 
 /*---------------------------------------------------------------------------*/
 /* Android Buffer Queue Interface                                            */

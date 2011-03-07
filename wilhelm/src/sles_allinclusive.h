@@ -223,11 +223,25 @@ typedef struct {
 } ClassTable;
 
 // BufferHeader describes each element of a BufferQueue, other than the data
-
 typedef struct {
     const void *mBuffer;
     SLuint32 mSize;
 } BufferHeader;
+
+#ifdef ANDROID
+// Holds information about all commands that can be passed alongside an MPEG-2 TS buffer
+// Is used with buffers of type kAndroidBufferTypeMpeg2Ts
+typedef struct {
+    SLuint32 mTsCmdCode;
+    SLAint64 mPts;
+} Mpeg2TsCommands;
+
+// Union of the different structures to hold items stored in an AdvancedBufferHeader
+//   when an item comes from an AndroidBufferQueue as the data source, it's a command
+//   when an item is output to an AndroidBufferQueue as the data sink, it's a message (or metadata)
+typedef union {
+    Mpeg2TsCommands mTsCmdData;
+} AdvancedBufferItems;
 
 // AdvancedBufferHeader describes each element of an AndroidBufferQueue, other than the data
 //  and associated messages
@@ -235,9 +249,9 @@ typedef struct {
     const void *mDataBuffer;
     SLuint32 mDataSize;
     SLuint32 mDataSizeConsumed;
-    const void *mMsgBuffer;
-    SLuint32 mMsgSize;
+    AdvancedBufferItems mItems;
 } AdvancedBufferHeader;
+#endif
 
 #ifdef USE_SNDFILE
 

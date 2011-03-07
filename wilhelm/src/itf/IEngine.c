@@ -292,13 +292,36 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                             result = SL_RESULT_MEMORY_FAILURE;
                             break;
                         } else {
+
+                            // initialize ABQ buffer type
+                            // assert below has been checked in android_audioPlayer_checkSourceSink
+                            assert(SL_DATAFORMAT_MIME == thiz->mDataSource.mFormat.mFormatType);
+                            if (SL_CONTAINERTYPE_MPEG_TS ==
+                                    thiz->mDataSource.mFormat.mMIME.containerType) {
+                                thiz->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeMpeg2Ts;
+                            } else {
+                                thiz->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeInvalid;
+                                SL_LOGE("Invalid buffer type in Android Buffer Queue");
+                                result = SL_RESULT_CONTENT_UNSUPPORTED;
+                            }
+
+                            // initialize ABQ memory
                             for (SLuint16 i=0 ; i<(thiz->mAndroidBufferQueue.mNumBuffers + 1) ;
                                     i++) {
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataBuffer = NULL;
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataSize = 0;
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataSizeConsumed = 0;
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mMsgSize = 0;
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mMsgBuffer = NULL;
+                                switch (thiz->mAndroidBufferQueue.mBufferType) {
+                                  case kAndroidBufferTypeMpeg2Ts:
+                                    thiz->mAndroidBufferQueue.mBufferArray[i].mItems.mTsCmdData.
+                                             mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
+                                    thiz->mAndroidBufferQueue.mBufferArray[i].mItems.mTsCmdData.
+                                             mPts = 0;
+                                    break;
+                                  default:
+                                    result = SL_RESULT_CONTENT_UNSUPPORTED;
+                                    break;
+                                }
                             }
                             thiz->mAndroidBufferQueue.mFront =
                                     thiz->mAndroidBufferQueue.mBufferArray;
@@ -1126,6 +1149,20 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                             result = SL_RESULT_MEMORY_FAILURE;
                             break;
                         }
+
+                        // initialize ABQ buffer type
+                        // assert below has been checked in android_audioPlayer_checkSourceSink
+                        assert(XA_DATAFORMAT_MIME == thiz->mDataSource.mFormat.mFormatType);
+                        if (XA_CONTAINERTYPE_MPEG_TS ==
+                                thiz->mDataSource.mFormat.mMIME.containerType) {
+                            thiz->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeMpeg2Ts;
+                        } else {
+                            thiz->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeInvalid;
+                            SL_LOGE("Invalid buffer type in Android Buffer Queue");
+                            result = SL_RESULT_CONTENT_UNSUPPORTED;
+                        }
+
+                        // initialize ABQ memory
                         thiz->mAndroidBufferQueue.mBufferArray = (AdvancedBufferHeader *)
                                     malloc( (nbBuffers + 1) * sizeof(AdvancedBufferHeader));
                         if (NULL == thiz->mAndroidBufferQueue.mBufferArray) {
@@ -1136,8 +1173,17 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataBuffer = NULL;
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataSize = 0;
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataSizeConsumed = 0;
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mMsgSize = 0;
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mMsgBuffer = NULL;
+                                switch (thiz->mAndroidBufferQueue.mBufferType) {
+                                  case kAndroidBufferTypeMpeg2Ts:
+                                    thiz->mAndroidBufferQueue.mBufferArray[i].mItems.mTsCmdData.
+                                            mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
+                                    thiz->mAndroidBufferQueue.mBufferArray[i].mItems.mTsCmdData.
+                                            mPts = 0;
+                                    break;
+                                  default:
+                                    result = SL_RESULT_CONTENT_UNSUPPORTED;
+                                    break;
+                                }
                             }
                             thiz->mAndroidBufferQueue.mFront =
                                     thiz->mAndroidBufferQueue.mBufferArray;

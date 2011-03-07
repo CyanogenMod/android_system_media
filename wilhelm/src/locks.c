@@ -211,7 +211,7 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
             ap = (CAudioPlayer *) thiz;
             if (SL_PLAYSTATE_PLAYING == ap->mPlay.mState) {
 #ifdef ANDROID
-                android_audioPlayer_bufferQueue_onRefilled(ap);
+                android_audioPlayer_bufferQueue_onRefilled_l(ap);
 #endif
             }
         }
@@ -221,15 +221,16 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
     } else if (attributes & ATTR_ABQ_ENQUEUE) {
         // (Android buffer queue count is non-empty and play state == PLAYING ) became true
         if (SL_OBJECTID_AUDIOPLAYER == objectID) {
-            attributes &= ~ATTR_BQ_ENQUEUE;
+            attributes &= ~ATTR_ABQ_ENQUEUE;
             ap = (CAudioPlayer *) thiz;
             if (SL_PLAYSTATE_PLAYING == ap->mPlay.mState) {
-                // FIXME notify queue refilled
+                android_audioPlayer_androidBufferQueue_onRefilled_l(ap);
             }
         } else if (XA_OBJECTID_MEDIAPLAYER == objectID) {
-            attributes &= ~ATTR_BQ_ENQUEUE;
-            if (SL_PLAYSTATE_PLAYING == ((CMediaPlayer*)thiz)->mPlay.mState) {
-                // FIXME notify queue refilled
+            attributes &= ~ATTR_ABQ_ENQUEUE;
+            CMediaPlayer* mp = (CMediaPlayer *)thiz;
+            if (SL_PLAYSTATE_PLAYING == mp->mPlay.mState) {
+                android_Player_androidBufferQueue_onRefilled_l(mp);
             }
         }
     }

@@ -142,6 +142,13 @@ void GenericPlayer::loop(bool loop) {
 
 
 //--------------------------------------------------
+void GenericPlayer::getDurationMsec(int* msec) {
+    // unknown duration
+    *msec = -1;
+}
+
+
+//--------------------------------------------------
 /*
  * post-condition: mDataLocatorType == kDataLocatorNone
  *
