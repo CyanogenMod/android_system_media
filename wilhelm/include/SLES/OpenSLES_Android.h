@@ -256,17 +256,11 @@ struct SLAndroidBufferQueueItf_ {
         SLuint32 itemsLength
     );
 
-    // FIXME TBD if needed
-    /*
-    SLResult (*SetCallbackEventMask) (
+    SLresult (*GetState) (
         SLAndroidBufferQueueItf self,
-        SLuint32 eventMask
+        SLAndroidBufferQueueState *pState
     );
-    SLResult (*GetCallbackEventMask) (
-        SLAndroidBufferQueueItf self,
-        SLuint32 *pEventMask
-    );
-    */
+
 };
 
 

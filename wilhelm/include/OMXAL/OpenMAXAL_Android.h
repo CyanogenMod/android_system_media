@@ -80,6 +80,11 @@ struct XAAndroidBufferQueueItf_ {
         const XAAndroidBufferItem *pItems,
         XAuint32 itemsLength
     );
+
+    XAresult (*GetState) (
+        XAAndroidBufferQueueItf self,
+        XAAndroidBufferQueueState *pState
+    );
 };
 
 

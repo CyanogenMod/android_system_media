@@ -18,6 +18,7 @@
 #include "utils/RefBase.h"
 #include "android_prompts.h"
 
+
 //-----------------------------------------------------------------------------
 static void player_handleMediaPlayerEventNotifications(const int event, const int data1, void* user)
 {
@@ -292,13 +293,13 @@ XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playS
      case SL_PLAYSTATE_PAUSED: {
          SL_LOGV("setting AVPlayer to SL_PLAYSTATE_PAUSED");
          switch(objState) {
-         case(ANDROID_UNINITIALIZED):
+         case ANDROID_UNINITIALIZED:
              *pObjState = ANDROID_PREPARING;
              avp->prepare();
              break;
-         case(ANDROID_PREPARING):
+         case ANDROID_PREPARING:
              break;
-         case(ANDROID_READY):
+         case ANDROID_READY:
              avp->pause();
              break;
          default:
@@ -310,13 +311,13 @@ XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playS
      case SL_PLAYSTATE_PLAYING: {
          SL_LOGV("setting AVPlayer to SL_PLAYSTATE_PLAYING");
          switch(objState) {
-         case(ANDROID_UNINITIALIZED):
+         case ANDROID_UNINITIALIZED:
              *pObjState = ANDROID_PREPARING;
              avp->prepare();
              // intended fall through
-         case(ANDROID_PREPARING):
+         case ANDROID_PREPARING:
              // intended fall through
-         case(ANDROID_READY):
+         case ANDROID_READY:
              avp->play();
              break;
          default:
@@ -335,9 +336,8 @@ XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playS
 
 
 //-----------------------------------------------------------------------------
-// FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
 void android_Player_androidBufferQueue_registerCallback_l(CMediaPlayer *mp) {
-    if (mp->mAVPlayer != 0) {
+    if ((mp->mAndroidObjType == AV_PLR_TS_ABQ) && (mp->mAVPlayer != 0)) {
         SL_LOGI("android_Player_androidBufferQueue_registerCallback_l");
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
         splr->registerQueueCallback(
@@ -348,8 +348,16 @@ void android_Player_androidBufferQueue_registerCallback_l(CMediaPlayer *mp) {
 }
 
 
+void android_Player_androidBufferQueue_clear_l(CMediaPlayer *mp) {
+    if ((mp->mAndroidObjType == AV_PLR_TS_ABQ) && (mp->mAVPlayer != 0)) {
+        android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
+        splr->appClear_l();
+    }
+}
+
+
 void android_Player_androidBufferQueue_onRefilled_l(CMediaPlayer *mp) {
-    if (mp->mAVPlayer != 0) {
+    if ((mp->mAndroidObjType == AV_PLR_TS_ABQ) && (mp->mAVPlayer != 0)) {
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
         splr->queueRefilled_l();
     }

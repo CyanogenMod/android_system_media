@@ -76,7 +76,7 @@ public:
             void *context,
             const void *caller);
     void queueRefilled_l();
-    void appClear();
+    void appClear_l();
 
 protected:
 
@@ -108,4 +108,3 @@ private:
  */
 extern void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_cbf_t cbf,
         void* notifUser);
-extern void android_StreamPlayer_clear_l(CAudioPlayer *ap);

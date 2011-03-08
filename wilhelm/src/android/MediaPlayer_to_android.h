@@ -68,4 +68,6 @@ extern XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint3
 /* must be called with a lock on mp->mThis */
 extern void android_Player_androidBufferQueue_registerCallback_l(CMediaPlayer *mp);
 /* must be called with a lock on mp->mThis */
+extern void android_Player_androidBufferQueue_clear_l(CMediaPlayer *mp);
+/* must be called with a lock on mp->mThis */
 extern void android_Player_androidBufferQueue_onRefilled_l(CMediaPlayer *mp);

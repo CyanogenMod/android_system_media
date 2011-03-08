@@ -36,14 +36,6 @@ void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_cbf_t cbf, voi
 }
 
 
-//-----------------------------------------------------------------------------
-// FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
-void android_StreamPlayer_clear_l(CAudioPlayer *ap) {
-    if (ap->mAPlayer != 0) {
-        ((android::StreamPlayer*)ap->mAPlayer.get())->appClear();
-    }
-}
-
 //--------------------------------------------------------------------------------------------------
 namespace android {
 
@@ -292,11 +284,12 @@ void StreamPlayer::queueRefilled_l() {
     (new AMessage(kWhatQueueRefilled, id()))->post();
 }
 
-void StreamPlayer::appClear() {
+
+void StreamPlayer::appClear_l() {
+    // the user of StreamPlayer has cleared its AndroidBufferQueue: a discontinuity is expected
     Mutex::Autolock _l(mAppProxyLock);
     if (mAppProxy != 0) {
-        // FIXME PRIORITY1 implement, add discontinuity?
-        SL_LOGE("[ FIXME implement StreamPlayer::appClear() ]");
+        mAppProxy->receivedCmd_l(IStreamListener::DISCONTINUITY);
     }
 }
 

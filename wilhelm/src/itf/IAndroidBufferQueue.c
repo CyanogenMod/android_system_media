@@ -126,7 +126,6 @@ SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf self,
             break;
           default:
             result = SL_RESULT_PARAMETER_INVALID;
-            break;
         }
 
     } else {
@@ -142,14 +141,48 @@ SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf self,
 SLresult IAndroidBufferQueue_Clear(SLAndroidBufferQueueItf self)
 {
     SL_ENTER_INTERFACE
+    result = SL_RESULT_SUCCESS;
 
     IAndroidBufferQueue *thiz = (IAndroidBufferQueue *) self;
 
     interface_lock_exclusive(thiz);
 
-    // TODO return value?
-    result = SL_RESULT_SUCCESS;
-    android_audioPlayer_androidBufferQueue_clear_l((CAudioPlayer*) thiz->mThis);
+    // reset the queue pointers
+    thiz->mFront = &thiz->mBufferArray[0];
+    thiz->mRear = &thiz->mBufferArray[0];
+    // reset the queue state
+    thiz->mState.count = 0;
+    thiz->mState.index = 0;
+    // reset the individual buffers
+    for (XAuint16 i=0 ; i<(thiz->mNumBuffers + 1) ; i++) {
+        thiz->mBufferArray[i].mDataBuffer = NULL;
+        thiz->mBufferArray[i].mDataSize = 0;
+        thiz->mBufferArray[i].mDataSizeConsumed = 0;
+        switch (thiz->mBufferType) {
+          case kAndroidBufferTypeMpeg2Ts:
+            thiz->mBufferArray[i].mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
+            thiz->mBufferArray[i].mItems.mTsCmdData.mPts = 0;
+            break;
+          default:
+            result = SL_RESULT_CONTENT_UNSUPPORTED;
+        }
+    }
+
+    if (SL_RESULT_SUCCESS == result) {
+        // object-specific behavior for a clear
+        switch (InterfaceToObjectID(thiz)) {
+        case SL_OBJECTID_AUDIOPLAYER:
+            result = SL_RESULT_SUCCESS;
+            android_audioPlayer_androidBufferQueue_clear_l((CAudioPlayer*) thiz->mThis);
+            break;
+        case XA_OBJECTID_MEDIAPLAYER:
+            result = SL_RESULT_SUCCESS;
+            android_Player_androidBufferQueue_clear_l((CMediaPlayer*) thiz->mThis);
+            break;
+        default:
+            result = SL_RESULT_PARAMETER_INVALID;
+        }
+    }
 
     interface_unlock_exclusive(thiz);
 
@@ -180,7 +213,7 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
                 break;
             }
             // intended fall-through if test failed
-            SL_LOGE("Error enqueueing MPEG-2 TS data: size needs to be a multiple of %d",
+            SL_LOGE("Error enqueueing MPEG-2 TS data: size must be a multiple of %d (block size)",
                     MPEG2_TS_BLOCK_SIZE);
           case kAndroidBufferTypeInvalid:
           default:
@@ -215,10 +248,37 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
 }
 
 
+SLresult IAndroidBufferQueue_GetState(SLAndroidBufferQueueItf self,
+        SLAndroidBufferQueueState *pState)
+{
+    SL_ENTER_INTERFACE
+
+    // Note that GetState while a Clear is pending is equivalent to GetState before the Clear
+
+    if (NULL == pState) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IAndroidBufferQueue *thiz = (IAndroidBufferQueue *) self;
+
+        interface_lock_shared(thiz);
+
+        pState->count = thiz->mState.count;
+        pState->index = thiz->mState.index;
+
+        interface_unlock_shared(thiz);
+
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
+}
+
+
 static const struct SLAndroidBufferQueueItf_ IAndroidBufferQueue_Itf = {
     IAndroidBufferQueue_RegisterCallback,
     IAndroidBufferQueue_Clear,
-    IAndroidBufferQueue_Enqueue
+    IAndroidBufferQueue_Enqueue,
+    IAndroidBufferQueue_GetState
 };
 
 

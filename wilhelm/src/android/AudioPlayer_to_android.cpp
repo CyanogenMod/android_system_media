@@ -1603,7 +1603,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
                 case ANDROID_UNINITIALIZED:
                     sfplayer_prepare(ap, lockAP);
                     break;
-                caseANDROID_PREPARING:
+                case ANDROID_PREPARING:
                     break;
                 case ANDROID_READY:
                     if (ap->mSfPlayer != 0) {
@@ -1864,8 +1864,9 @@ void android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer *ap)
 
 //-----------------------------------------------------------------------------
 void android_audioPlayer_androidBufferQueue_clear_l(CAudioPlayer *ap) {
-    if (ap->mAndroidObjType == A_PLR_TS_ABQ) {
-        android_StreamPlayer_clear_l(ap);
+    if ((ap->mAndroidObjType == A_PLR_TS_ABQ) && (ap->mAPlayer != 0)) {
+        android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(ap->mAPlayer.get());
+        splr->appClear_l();
     }
 }
 

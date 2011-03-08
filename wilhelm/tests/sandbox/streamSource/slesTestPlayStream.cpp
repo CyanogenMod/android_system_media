@@ -67,27 +67,70 @@ SLresult AndroidBufferQueueCallback(
         SLuint32 itemsLength           /* input */)
 {
     // assert(BUFFER_SIZE <= dataSize);
-    size_t nbRead = fread((void*)pBufferData, 1, BUFFER_SIZE, file);
-    if (nbRead > 0) {
-        (*caller)->Enqueue(caller,
-                pBufferData /*pData*/,
-                nbRead /*dataLength*/,
-                NULL /*pMsg*/,
-                0 /*msgLength*/);
-    } else if (!reachedEof) {
-        // signal EOS
-        SLAndroidBufferItem msgEos;
-        msgEos.itemKey = SL_ANDROID_ITEMKEY_EOS;
-        msgEos.itemSize = 0;
-        // EOS message has no parameters, so the total size of the message is the size of the key
+
+    //--------------------------------------------------------------------------------
+    // this section is for testing only, this is NOT an example of how to use the API
+    // to play a .ts file, but rather shows more ways to exercise the API
+    //--------------------------------------------------------------------------------
+    SLAndroidBufferQueueState state;
+    (*caller)->GetState(caller, &state);
+    fprintf(stdout, "ABQ state count=%lu, index=%lu\n", state.count, state.index);
+
+    // just to test, clear the queue to see what happens
+    if (state.index == 500) {
+        (*caller)->Clear(caller);
+        // we've cleared the queue, and have introduced a discontinuity, so signal it
+        SLAndroidBufferItem msgDiscontinuity;
+        msgDiscontinuity.itemKey = SL_ANDROID_ITEMKEY_DISCONTINUITY;
+        msgDiscontinuity.itemSize = 0;
+        // message has no parameters, so the total size of the message is the size of the key
         //   plus the size if itemSize, both SLuint32
         (*caller)->Enqueue(caller, NULL /*pData*/, 0 /*dataLength*/,
+                &msgDiscontinuity /*pMsg*/,
+                sizeof(SLuint32)*2 /*msgLength*/);
+
+        // we've cleared the queue, it's now empty: let's rebuffer a bit so playback doesn't starve
+        size_t nbRead = fread((void*)pBufferData, 1, BUFFER_SIZE*(NB_BUFFERS/2), file);
+        if (nbRead == BUFFER_SIZE*(NB_BUFFERS/2)) {
+            for (int i=0 ; i < NB_BUFFERS/2 ; i++) {
+                SLresult res = (*caller)->Enqueue(caller, dataCache + i*BUFFER_SIZE,
+                        BUFFER_SIZE, NULL, 0);
+                CheckErr(res);
+            }
+        }
+        return SL_RESULT_SUCCESS;
+    }
+    //--------------------------------------------------------------------------------
+    // end of test only section
+    //--------------------------------------------------------------------------------
+    else {
+
+        // pBufferData can be null if the last consumed buffer contained only a command
+        // just like we do for signalling DISCONTINUITY (above) or EOS (below)
+        if (pBufferData != NULL) {
+            size_t nbRead = fread((void*)pBufferData, 1, BUFFER_SIZE, file);
+            if (nbRead > 0) {
+                (*caller)->Enqueue(caller,
+                        pBufferData /*pData*/,
+                        nbRead /*dataLength*/,
+                        NULL /*pMsg*/,
+                        0 /*msgLength*/);
+            } else if (!reachedEof) {
+                // signal EOS
+                SLAndroidBufferItem msgEos;
+                msgEos.itemKey = SL_ANDROID_ITEMKEY_EOS;
+                msgEos.itemSize = 0;
+                // EOS message has no parameters, so the total size of the message is the size of the key
+                //   plus the size if itemSize, both SLuint32
+                (*caller)->Enqueue(caller, NULL /*pData*/, 0 /*dataLength*/,
                         &msgEos /*pMsg*/,
                         sizeof(SLuint32)*2 /*msgLength*/);
-        reachedEof = true;
-    }
+                reachedEof = true;
+            }
+        }
 
-    return SL_RESULT_SUCCESS;
+        return SL_RESULT_SUCCESS;
+    }
 }
 
 
