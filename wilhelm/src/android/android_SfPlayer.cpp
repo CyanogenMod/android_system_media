@@ -733,25 +733,25 @@ void SfPlayer::onNotify(const sp<AMessage> &msg) {
     int32_t val;
     if (msg->findInt32(PLAYEREVENT_PREFETCHSTATUSCHANGE, &val)) {
         SL_LOGV("\tSfPlayer notifying %s = %d", PLAYEREVENT_PREFETCHSTATUSCHANGE, val);
-        mNotifyClient(kEventPrefetchStatusChange, val, mNotifyUser);
+        mNotifyClient(kEventPrefetchStatusChange, val, 0, mNotifyUser);
     }
     if (msg->findInt32(PLAYEREVENT_PREFETCHFILLLEVELUPDATE, &val)) {
         SL_LOGV("\tSfPlayer notifying %s = %d", PLAYEREVENT_PREFETCHFILLLEVELUPDATE, val);
-        mNotifyClient(kEventPrefetchFillLevelUpdate, val, mNotifyUser);
+        mNotifyClient(kEventPrefetchFillLevelUpdate, val, 0, mNotifyUser);
     }
     if (msg->findInt32(PLAYEREVENT_ENDOFSTREAM, &val)) {
         SL_LOGV("\tSfPlayer notifying %s = %d", PLAYEREVENT_ENDOFSTREAM, val);
-        mNotifyClient(kEventEndOfStream, val, mNotifyUser);
+        mNotifyClient(kEventEndOfStream, val, 0, mNotifyUser);
     }
 
     if (msg->findInt32(PLAYEREVENT_PREPARED, &val)) {
         SL_LOGV("\tSfPlayer notifying %s = %d", PLAYEREVENT_PREPARED, val);
-        mNotifyClient(GenericMediaPlayer::kEventPrepared, val, mNotifyUser);
+        mNotifyClient(GenericMediaPlayer::kEventPrepared, val, 0, mNotifyUser);
     }
 
     if (msg->findInt32(PLAYEREVENT_NEW_AUDIOTRACK, &val)) {
         SL_LOGV("\tSfPlayer notifying %s", PLAYEREVENT_NEW_AUDIOTRACK);
-        mNotifyClient(kEventNewAudioTrack, val, mNotifyUser);
+        mNotifyClient(kEventNewAudioTrack, val, 0, mNotifyUser);
     }
 }
 

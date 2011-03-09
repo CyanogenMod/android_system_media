@@ -269,7 +269,8 @@ extern void
     IVibra_init(void *),
     IVirtualizer_init(void *),
     IVisualization_init(void *),
-    IVolume_init(void *);
+    IVolume_init(void *),
+    IStreamInformation_init(void*);
 
 extern void
     I3DGrouping_deinit(void *),
@@ -284,7 +285,8 @@ extern void
     IObject_deinit(void *),
     IPresetReverb_deinit(void *),
     IThreadSync_deinit(void *),
-    IVirtualizer_deinit(void *);
+    IVirtualizer_deinit(void *),
+    IStreamInformation_deinit(void *);
 
 extern bool
     IAndroidEffectCapabilities_Expose(void *),
@@ -345,6 +347,7 @@ extern void
 #define IAndroidEffectCapabilities_deinit NULL
 #define IAndroidEffectCapabilities_Expose NULL
 #define IAndroidBufferQueue_init          NULL
+#define IStreamInformation_init           NULL
 #endif
 
 #ifndef USE_OUTPUTMIXEXT
@@ -417,6 +420,9 @@ extern void
 // OpenMAX AL 1.0.1 interfaces
     { /* MPH_XAENGINE */ IXAEngine_init, NULL, NULL, NULL, NULL },
     { /* MPH_XAPLAY */ IPlay_init, NULL, NULL, NULL, NULL },
+    { /* MPH_XASTREAMINFORMATION */ IStreamInformation_init, NULL, IStreamInformation_deinit,
+        NULL, NULL },
+    { /* MPH_XAVOLUME, */ IVolume_init, NULL, NULL, NULL, NULL },
 };
 
 

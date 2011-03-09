@@ -583,11 +583,13 @@ typedef struct {
     IObject *mThis;
 } IXAEngine;
 
+#define NB_SUPPORTED_STREAMS 1 // only one (video) stream supported in this implementation
 typedef struct {
     const struct XAStreamInformationItf_ *mItf;
     IObject *mThis;
     xaStreamEventChangeCallback mCallback;
     void *mContext;
+    XAboolean mActiveStreams[NB_SUPPORTED_STREAMS];
 #ifdef ANDROID
     android::Vector<StreamInfo> mStreamInfoTable;
 #endif

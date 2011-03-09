@@ -311,6 +311,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataBuffer = NULL;
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataSize = 0;
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataSizeConsumed = 0;
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mBufferContext = NULL;
                                 switch (thiz->mAndroidBufferQueue.mBufferType) {
                                   case kAndroidBufferTypeMpeg2Ts:
                                     thiz->mAndroidBufferQueue.mBufferArray[i].mItems.mTsCmdData.
@@ -1156,6 +1157,17 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                         if (XA_CONTAINERTYPE_MPEG_TS ==
                                 thiz->mDataSource.mFormat.mMIME.containerType) {
                             thiz->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeMpeg2Ts;
+
+                            // Set the container type for the StreamInformation interface
+                            XAMediaContainerInformation *containerInfo =
+                                    (XAMediaContainerInformation*)
+                                        // always storing container info at index 0, as per spec
+                                        &(thiz->mStreamInfo.mStreamInfoTable.itemAt(0).
+                                                containerInfo);
+                            containerInfo->containerType = XA_CONTAINERTYPE_MPEG_TS;
+                            // there are no streams at this stage
+                            containerInfo->numStreams = 0;
+
                         } else {
                             thiz->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeInvalid;
                             SL_LOGE("Invalid buffer type in Android Buffer Queue");
@@ -1173,6 +1185,7 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataBuffer = NULL;
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataSize = 0;
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataSizeConsumed = 0;
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mBufferContext = NULL;
                                 switch (thiz->mAndroidBufferQueue.mBufferType) {
                                   case kAndroidBufferTypeMpeg2Ts:
                                     thiz->mAndroidBufferQueue.mBufferArray[i].mItems.mTsCmdData.

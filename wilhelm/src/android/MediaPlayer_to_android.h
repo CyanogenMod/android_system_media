@@ -46,6 +46,11 @@ extern XAresult android_Player_setVideoSurfaceTexture(android::GenericMediaPlaye
 
 extern XAresult android_Player_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
 
+/**
+ * pre-condition: avp != NULL, pVolItf != NULL
+ */
+extern XAresult android_Player_volumeUpdate(android::GenericPlayer *avp, IVolume *pVolItf);
+
 /**************************************************************************************************
  * Playback control and events
  ****************************/

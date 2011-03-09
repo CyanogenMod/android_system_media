@@ -20,7 +20,7 @@
 
 
 //-----------------------------------------------------------------------------
-static void player_handleMediaPlayerEventNotifications(const int event, const int data1, void* user)
+static void player_handleMediaPlayerEventNotifications(int event, int data1, int data2, void* user)
 {
     if (NULL == user) {
         return;
@@ -31,15 +31,55 @@ static void player_handleMediaPlayerEventNotifications(const int event, const in
 
     switch(event) {
 
-    case android::GenericPlayer::kEventPrepared: {
+      case android::GenericPlayer::kEventPrepared: {
         if (PLAYER_SUCCESS == data1) {
             object_lock_exclusive(&mp->mObject);
             SL_LOGV("Received AVPlayer::kEventPrepared from AVPlayer for CMediaPlayer %p", mp);
             mp->mAndroidObjState = ANDROID_READY;
             object_unlock_exclusive(&mp->mObject);
         }
+        break;
+      }
+
+      case android::GenericPlayer::kEventHasVideoSize: {
+        SL_LOGV("Received AVPlayer::kEventHasVideoSize (%d,%d) for CMediaPlayer %p",
+                data1, data2, mp);
+
+        object_lock_exclusive(&mp->mObject);
+
+        // remove an existing video info entry (here we only have one video stream)
+        for(size_t i=0 ; i < mp->mStreamInfo.mStreamInfoTable.size() ; i++) {
+            if (XA_DOMAINTYPE_VIDEO == mp->mStreamInfo.mStreamInfoTable.itemAt(i).domain) {
+                mp->mStreamInfo.mStreamInfoTable.removeAt(i);
+                break;
+            }
+        }
+        // update the stream information with a new video info entry
+        StreamInfo streamInfo;
+        streamInfo.domain = XA_DOMAINTYPE_VIDEO;
+        streamInfo.videoInfo.codecId = 0;// unknown, we don't have that info FIXME
+        streamInfo.videoInfo.width = (XAuint32)data1;
+        streamInfo.videoInfo.height = (XAuint32)data2;
+        streamInfo.videoInfo.bitRate = 0;// unknown, we don't have that info FIXME
+        streamInfo.videoInfo.duration = XA_TIME_UNKNOWN;
+        StreamInfo &contInfo = mp->mStreamInfo.mStreamInfoTable.editItemAt(0);
+        contInfo.containerInfo.numStreams = 1;
+        ssize_t index = mp->mStreamInfo.mStreamInfoTable.add(streamInfo);
+
+        xaStreamEventChangeCallback callback = mp->mStreamInfo.mCallback;
+        void* callbackPContext = mp->mStreamInfo.mContext;
+
+        object_unlock_exclusive(&mp->mObject);
+
+        // notify (outside of lock) that the stream information has been updated
+        if ((NULL != callback) && (index >= 0)) {
+            (*callback)(&mp->mStreamInfo.mItf, XA_STREAMCBEVENT_PROPERTYCHANGE /*eventId*/,
+                    1 /*streamIndex, only one stream supported here, 0 is reserved*/,
+                    NULL /*pEventData, always NULL in OpenMAX AL 1.0.1*/,
+                    callbackPContext /*pContext*/);
         }
         break;
+      }
 
     default:
         SL_LOGE("Received unknown event %d, data %d from AVPlayer", event, data1);
@@ -141,11 +181,6 @@ XAresult android_Player_create(CMediaPlayer *mp) {
     mp->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
     mp->mSessionId = android::AudioSystem::newAudioSessionId();
 
-    mp->mAndroidAudioLevels.mAmplFromVolLevel = 1.0f;
-    mp->mAndroidAudioLevels.mAmplFromStereoPos[0] = 1.0f;
-    mp->mAndroidAudioLevels.mAmplFromStereoPos[1] = 1.0f;
-    mp->mAndroidAudioLevels.mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
-    mp->mAndroidAudioLevels.mAuxSendLevel = 0;
     mp->mDirectLevel = 0; // no attenuation
 
     return result;
@@ -270,6 +305,21 @@ XAresult android_Player_getDuration(IPlay *pPlayItf, XAmillisecond *pDurMsec) {
         *pDurMsec = XA_TIME_UNKNOWN;
         break;
     }
+
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
+/**
+ * pre-condition: avp != NULL, pVolItf != NULL
+ */
+XAresult android_Player_volumeUpdate(android::GenericPlayer *avp, IVolume *pVolItf)
+{
+    XAresult result = XA_RESULT_SUCCESS;
+
+    avp->updateVolume((bool)pVolItf->mMute, (bool)pVolItf->mEnableStereoPosition,
+            pVolItf->mStereoPosition, pVolItf->mLevel);
 
     return result;
 }

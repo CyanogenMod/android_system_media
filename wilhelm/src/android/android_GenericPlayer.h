@@ -23,7 +23,8 @@ class GenericPlayer : public AHandler
 public:
 
     enum {
-        kEventPrepared                = 'prep'
+        kEventPrepared      = 'prep',
+        kEventHasVideoSize  = 'vsiz',
     };
 
     GenericPlayer(const AudioPlayback_Parameters* params);
@@ -43,23 +44,28 @@ public:
 
     virtual void getDurationMsec(int* msec); // -1 if unknown
 
+    void updateVolume(bool mute, bool useStereoPos, XApermille stereoPos, XAmillibel volume);
+
 protected:
+    Mutex mSettingsLock;
 
     void resetDataLocator();
     DataLocator2 mDataLocator;
     int          mDataLocatorType;
 
     enum {
-        kWhatPrepare    = 'prep',
-        kWhatNotif      = 'noti',
-        kWhatPlay       = 'play',
-        kWhatPause      = 'paus',
-        kWhatSeek       = 'seek',
-        kWhatLoop       = 'loop',
+        kWhatPrepare      = 'prep',
+        kWhatNotif        = 'noti',
+        kWhatPlay         = 'play',
+        kWhatPause        = 'paus',
+        kWhatSeek         = 'seek',
+        kWhatLoop         = 'loop',
+        kWhatVolumeUpdate = 'volu'
     };
 
     // Send a notification to one of the event listeners
-    virtual void notify(const char* event, int data, bool async);
+    virtual void notify(const char* event, int data1, bool async);
+    virtual void notify(const char* event, int data1, int data2, bool async);
 
     // AHandler implementation
     virtual void onMessageReceived(const sp<AMessage> &msg);
@@ -71,6 +77,7 @@ protected:
     virtual void onPause();
     virtual void onSeek(const sp<AMessage> &msg);
     virtual void onLoop(const sp<AMessage> &msg);
+    virtual void onVolumeUpdate();
 
     // Event notification from GenericPlayer to OpenSL ES / OpenMAX AL framework
     notif_cbf_t mNotifyClient;
@@ -91,6 +98,9 @@ protected:
     int32_t mLooperPriority;
 
     AudioPlayback_Parameters mPlaybackParams;
+
+    AndroidAudioLevels mAndroidAudioLevels;
+    int mChannelCount; // this is used for the panning law, and is not exposed outside of the object
 
 private:
     DISALLOW_EVIL_CONSTRUCTORS(GenericPlayer);

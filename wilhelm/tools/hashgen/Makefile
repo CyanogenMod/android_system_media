@@ -1,6 +1,6 @@
 all : IID_to_MPH.c
 
-install :
+install : IID_to_MPH.c
 	cp IID_to_MPH.c ../../src/autogen
 
 CFLAGS = -I../../include -g -DNDEBUG
@@ -32,7 +32,7 @@ part5.c : part5gen
 
 part7.c : part23in.c hash.sed
 # was 55p
-	sed -n '/return asso_values/p' < part23in.c | sed -f hash.sed >> $@
+	sed -n '/return.*asso_values/p' < part23in.c | sed -f hash.sed >> $@
 
 # part8.c is human_generated
 

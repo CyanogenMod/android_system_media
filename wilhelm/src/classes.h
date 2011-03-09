@@ -302,12 +302,13 @@ typedef struct {
 
 typedef struct CMediaPlayer_struct {
     IObject mObject;
-#define INTERFACES_MediaPlayer 4
+#define INTERFACES_MediaPlayer 6
     XAuint8 mInterfaceStates2[INTERFACES_MediaPlayer - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IDynamicSource mDynamicSource;
     IPlay mPlay;
     IStreamInformation mStreamInfo;
+    IVolume mVolume;
 #ifdef ANDROID
     IAndroidBufferQueue mAndroidBufferQueue;
 #endif
@@ -331,6 +332,5 @@ typedef struct CMediaPlayer_struct {
     int mSessionId;
     /** identifies the Android stream type playback will occur on */
     int mStreamType;
-    AndroidAudioLevels mAndroidAudioLevels;
 #endif
 } CMediaPlayer;

@@ -104,5 +104,9 @@ typedef struct {
         XAImageStreamInformation imageInfo;
         XATimedTextStreamInformation textInfo;
         XAMIDIStreamInformation midiInfo;
+        XAVendorStreamInformation vendorInfo;
     };
 } StreamInfo;
+
+// FIXME a terrible hack until OpenMAX AL spec is updated
+#define XA_DOMAINTYPE_CONTAINER 0

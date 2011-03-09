@@ -26,6 +26,7 @@ static XAresult IStreamInformation_QueryMediaContainerInformation( XAStreamInfor
 #ifdef ANDROID
     IStreamInformation *thiz = (IStreamInformation *) self;
     interface_lock_exclusive(thiz);
+    // always storing container info at index 0, as per spec
     info = (XAMediaContainerInformation*)&(thiz->mStreamInfoTable.itemAt(0).containerInfo);
     interface_unlock_exclusive(thiz);
     // even though the pointer to the media container info is returned, the values aren't set
@@ -63,6 +64,7 @@ static XAresult IStreamInformation_QueryStreamType( XAStreamInformationItf self,
         IStreamInformation *thiz = (IStreamInformation *) self;
 
         interface_lock_exclusive(thiz);
+
         XAuint32 nbStreams = thiz->mStreamInfoTable.itemAt(0).containerInfo.numStreams;
         // streams in the container are numbered 1..nbStreams
         if (streamIndex <= nbStreams) {
@@ -73,6 +75,7 @@ static XAresult IStreamInformation_QueryStreamType( XAStreamInformationItf self,
                     streamIndex, nbStreams);
             result = XA_RESULT_PARAMETER_INVALID;
         }
+
         interface_unlock_exclusive(thiz);
     }
 #endif
@@ -87,8 +90,62 @@ static XAresult IStreamInformation_QueryStreamInformation( XAStreamInformationIt
 {
     XA_ENTER_INTERFACE
 
-    SL_LOGE("unsupported XAStreamInformationItf function");
-    result = XA_RESULT_CONTENT_UNSUPPORTED;
+    if (NULL == info) {
+        result = XA_RESULT_PARAMETER_INVALID;
+    } else {
+
+#ifndef ANDROID
+        result = XA_RESULT_FEATURE_UNSUPPORTED;
+#else
+
+        IStreamInformation *thiz = (IStreamInformation *) self;
+
+        interface_lock_exclusive(thiz);
+
+        XAuint32 nbStreams = thiz->mStreamInfoTable.itemAt(0).containerInfo.numStreams;
+        // streams in the container are numbered 1..nbStreams
+        if (streamIndex <= nbStreams) {
+            result = XA_RESULT_SUCCESS;
+            const StreamInfo& streamInfo = thiz->mStreamInfoTable.itemAt((size_t)streamIndex);
+
+            switch (streamInfo.domain) {
+            case XA_DOMAINTYPE_CONTAINER:
+                *(XAMediaContainerInformation *)info = streamInfo.containerInfo;
+                break;
+            case XA_DOMAINTYPE_AUDIO:
+                *(XAAudioStreamInformation *)info = streamInfo.audioInfo;
+                break;
+            case XA_DOMAINTYPE_VIDEO:
+                *(XAVideoStreamInformation *)info = streamInfo.videoInfo;
+                break;
+            case XA_DOMAINTYPE_IMAGE:
+                *(XAImageStreamInformation *)info = streamInfo.imageInfo;
+                break;
+            case XA_DOMAINTYPE_TIMEDTEXT:
+                *(XATimedTextStreamInformation *)info = streamInfo.textInfo;
+                break;
+            case XA_DOMAINTYPE_MIDI:
+                *(XAMIDIStreamInformation *)info = streamInfo.midiInfo;
+                break;
+            case XA_DOMAINTYPE_VENDOR:
+                *(XAVendorStreamInformation *)info = streamInfo.vendorInfo;
+                break;
+            default:
+                SL_LOGE("StreamInformation::QueryStreamInformation index %lu has unknown domain %lu", streamIndex, streamInfo.domain);
+                result = XA_RESULT_INTERNAL_ERROR;
+                break;
+            }
+
+        } else {
+            SL_LOGE("Querying stream type for stream %ld, only %ld streams available",
+                    streamIndex, nbStreams);
+            result = XA_RESULT_PARAMETER_INVALID;
+        }
+
+        interface_unlock_exclusive(thiz);
+#endif
+
+    }
 
     XA_LEAVE_INTERFACE
 }
@@ -149,10 +206,15 @@ static XAresult IStreamInformation_QueryActiveStreams( XAStreamInformationItf se
         XA_LEAVE_INTERFACE;
     }
 
-    SL_LOGE("unsupported XAStreamInformationItf function");
-    result = XA_RESULT_CONTENT_UNSUPPORTED;
-    *numStreams = 0;
-    activeStreams = NULL;
+    IStreamInformation *thiz = (IStreamInformation *) self;
+
+    interface_lock_exclusive(thiz);
+
+    result = XA_RESULT_SUCCESS;
+    *numStreams = thiz->mStreamInfoTable.itemAt(0).containerInfo.numStreams;
+    activeStreams = thiz->mActiveStreams;
+
+    interface_unlock_exclusive(thiz);
 
     XA_LEAVE_INTERFACE
 }
@@ -182,21 +244,40 @@ static const struct XAStreamInformationItf_ IStreamInformation_Itf = {
     IStreamInformation_SetActiveStream
 };
 
+
 void IStreamInformation_init(void *self)
 {
+    SL_LOGV("IStreamInformation_init\n");
     IStreamInformation *thiz = (IStreamInformation *) self;
     thiz->mItf = &IStreamInformation_Itf;
 
     thiz->mCallback = NULL;
     thiz->mContext = NULL;
 
+    for (int i=0 ; i < NB_SUPPORTED_STREAMS ; i++) {
+        thiz->mActiveStreams[i] = XA_BOOLEAN_FALSE;
+    }
+
 #ifdef ANDROID
+    // placement new constructor for C++ field within C struct
+    (void) new (&thiz->mStreamInfoTable) android::Vector<StreamInfo>();
     // initialize container info
     StreamInfo contInf;
-    contInf.domain = XA_DOMAINTYPE_UNKNOWN; // there should really be a domain for the container!
+    contInf.domain = XA_DOMAINTYPE_CONTAINER;
     contInf.containerInfo.containerType = XA_CONTAINERTYPE_UNSPECIFIED;
     contInf.containerInfo.mediaDuration = XA_TIME_UNKNOWN;
+    // FIXME shouldn't this be 1 ?
     contInf.containerInfo.numStreams = 0;
+    // always storing container info at index 0, as per spec: here, the table was still empty
     thiz->mStreamInfoTable.add(contInf);
+#endif
+}
+
+
+void IStreamInformation_deinit(void *self) {
+#ifdef ANDROID
+    IStreamInformation *thiz = (IStreamInformation *) self;
+    // explicit destructor
+    thiz->mStreamInfoTable.~Vector<StreamInfo>();
 #endif
 }

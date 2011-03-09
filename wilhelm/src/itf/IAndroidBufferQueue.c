@@ -158,6 +158,7 @@ SLresult IAndroidBufferQueue_Clear(SLAndroidBufferQueueItf self)
         thiz->mBufferArray[i].mDataBuffer = NULL;
         thiz->mBufferArray[i].mDataSize = 0;
         thiz->mBufferArray[i].mDataSizeConsumed = 0;
+        thiz->mBufferArray[i].mBufferContext = NULL;
         switch (thiz->mBufferType) {
           case kAndroidBufferTypeMpeg2Ts:
             thiz->mBufferArray[i].mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
@@ -191,7 +192,8 @@ SLresult IAndroidBufferQueue_Clear(SLAndroidBufferQueueItf self)
 
 
 SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
-        const void *pData,
+        void *pBufferContext,
+        void *pData,
         SLuint32 dataLength,
         const SLAndroidBufferItem *pItems,
         SLuint32 itemsLength)
@@ -233,6 +235,7 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
             oldRear->mDataBuffer = pData;
             oldRear->mDataSize = dataLength;
             oldRear->mDataSizeConsumed = 0;
+            oldRear->mBufferContext = pBufferContext;
             thiz->mRear = newRear;
             ++thiz->mState.count;
             setItems(pItems, itemsLength, thiz->mBufferType, oldRear);

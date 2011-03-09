@@ -639,7 +639,7 @@ static void sfplayer_prepare(CAudioPlayer *ap, bool lockAP) {
 //-----------------------------------------------------------------------------
 // Callback associated with an SfPlayer of an SL ES AudioPlayer that gets its data
 // from a URI or FD, for prepare and prefetch events
-static void sfplayer_handlePrefetchEvent(int event, int data1, void* user) {
+static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* user) {
     if (NULL == user) {
         return;
     }

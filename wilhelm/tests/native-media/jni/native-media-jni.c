@@ -18,6 +18,7 @@
 #include <jni.h>
 #include <pthread.h>
 #include <string.h>
+#define LOG_NDEBUG 0
 #define LOG_TAG "NativeMedia"
 #include <utils/Log.h>
 
@@ -40,8 +41,10 @@ static XAObjectItf outputMixObject = NULL;
 static XAObjectItf             playerObj = NULL;
 static XAPlayItf               playerPlayItf = NULL;
 static XAAndroidBufferQueueItf playerBQItf = NULL;
+static XAStreamInformationItf  playerStreamInfoItf = NULL;
+static XAVolumeItf             playerVolItf;
 // number of required interfaces for the MediaPlayer creation
-#define NB_MAXAL_INTERFACES 2 // XAAndroidBufferQueueItf and XAPlayItf
+#define NB_MAXAL_INTERFACES 3 // XAAndroidBufferQueueItf, XAStreamInformationItf and XAPlayItf
 
 // cached surface where the video display happens
 #if NO_NATIVE_WINDOW
@@ -67,17 +70,62 @@ char reachedEof = 0;
 // AndroidBufferQueueItf callback for an audio player
 XAresult AndroidBufferQueueCallback(
         XAAndroidBufferQueueItf caller,
-        void *pContext,                /* input */
-        const void *pBufferData,       /* input */
+        void *pCallbackContext,        /* input */
+        void *pBufferContext,          /* input */
+        void *pBufferData,             /* input */
         XAuint32 dataSize,             /* input */
         XAuint32 dataUsed,             /* input */
         const XAAndroidBufferItem *pItems,/* input */
         XAuint32 itemsLength           /* input */)
 {
     // assert(BUFFER_SIZE <= dataSize);
+    if (pBufferData == NULL) {
+        // this is the case when our buffer with the EOS message has been consumed
+        return XA_RESULT_SUCCESS;
+    }
+
+#if 0
+    // sample code to use the XAVolumeItf
+    XAAndroidBufferQueueState state;
+    (*caller)->GetState(caller, &state);
+    switch (state.index) {
+    case 300:
+        (*playerVolItf)->SetVolumeLevel(playerVolItf, -600); // -6dB
+        LOGV("setting volume to -6dB");
+        break;
+    case 400:
+        (*playerVolItf)->SetVolumeLevel(playerVolItf, -1200); // -12dB
+        LOGV("setting volume to -12dB");
+        break;
+    case 500:
+        (*playerVolItf)->SetVolumeLevel(playerVolItf, 0); // full volume
+        LOGV("setting volume to 0dB (full volume)");
+        break;
+    case 600:
+        (*playerVolItf)->SetMute(playerVolItf, XA_BOOLEAN_TRUE); // mute
+        LOGV("muting player");
+        break;
+    case 700:
+        (*playerVolItf)->SetMute(playerVolItf, XA_BOOLEAN_FALSE); // unmute
+        LOGV("unmuting player");
+        break;
+    case 800:
+        (*playerVolItf)->SetStereoPosition(playerVolItf, -1000);
+        (*playerVolItf)->EnableStereoPosition(playerVolItf, XA_BOOLEAN_TRUE);
+        LOGV("pan sound to the left (hard-left)");
+        break;
+    case 900:
+        (*playerVolItf)->EnableStereoPosition(playerVolItf, XA_BOOLEAN_FALSE);
+        LOGV("disabling stereo position");
+        break;
+    default:
+        break;
+    }
+#endif
+
     size_t nbRead = fread((void*)pBufferData, 1, BUFFER_SIZE, file);
-    if (nbRead > 0) {
-        (*caller)->Enqueue(caller,
+    if ((nbRead > 0) && (NULL != pBufferData)) {
+        (*caller)->Enqueue(caller, NULL /*pBufferContext*/,
                 pBufferData /*pData*/,
                 nbRead /*dataLength*/,
                 NULL /*pMsg*/,
@@ -89,13 +137,37 @@ XAresult AndroidBufferQueueCallback(
         msgEos.itemSize = 0;
         // EOS message has no parameters, so the total size of the message is the size of the key
         //   plus the size if itemSize, both XAuint32
-        (*caller)->Enqueue(caller, NULL /*pData*/, 0 /*dataLength*/,
-                        &msgEos /*pMsg*/,
-                        sizeof(XAuint32)*2 /*msgLength*/);
+        (*caller)->Enqueue(caller, NULL /*pBufferContext*/,
+                NULL /*pData*/, 0 /*dataLength*/,
+                &msgEos /*pMsg*/,
+                sizeof(XAuint32)*2 /*msgLength*/);
         reachedEof = 1;
     }
 
     return XA_RESULT_SUCCESS;
+}
+
+
+void StreamChangeCallback (XAStreamInformationItf caller,
+        XAuint32 eventId,
+        XAuint32 streamIndex,
+        void * pEventData,
+        void * pContext )
+{
+    if (XA_STREAMCBEVENT_PROPERTYCHANGE == eventId) {
+        LOGD("StreamChangeCallback called for stream %lu", streamIndex);
+
+        XAuint32 domain;
+        if (XA_RESULT_SUCCESS == (*caller)->QueryStreamType(caller, streamIndex, &domain)) {
+            if (XA_DOMAINTYPE_VIDEO == domain) {
+                XAVideoStreamInformation videoInfo;
+                if (XA_RESULT_SUCCESS == (*caller)->QueryStreamInformation(caller, streamIndex,
+                        &videoInfo)) {
+                    LOGI("Found video size %lu x %lu", videoInfo.width, videoInfo.height);
+                }
+            }
+        }
+    }
 }
 
 
@@ -170,8 +242,11 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     XADataSink imageVideoSink = {&loc_nd, NULL};
 
     // declare interfaces to use
-    XAboolean     required[NB_MAXAL_INTERFACES] = {XA_BOOLEAN_TRUE, XA_BOOLEAN_TRUE};
-    XAInterfaceID iidArray[NB_MAXAL_INTERFACES] = {XA_IID_PLAY,     XA_IID_ANDROIDBUFFERQUEUE};
+    XAboolean     required[NB_MAXAL_INTERFACES]
+                           = {XA_BOOLEAN_TRUE, XA_BOOLEAN_TRUE,           XA_BOOLEAN_TRUE};
+    XAInterfaceID iidArray[NB_MAXAL_INTERFACES]
+                           = {XA_IID_PLAY,     XA_IID_ANDROIDBUFFERQUEUE, XA_IID_STREAMINFORMATION};
+
 
     // create media player
     res = (*engineEngine)->CreateMediaPlayer(engineEngine, &playerObj, &dataSrc,
@@ -192,12 +267,25 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     res = (*playerObj)->GetInterface(playerObj, XA_IID_PLAY, &playerPlayItf);
     assert(XA_RESULT_SUCCESS == res);
 
+    // get the stream information interface (for video size)
+    res = (*playerObj)->GetInterface(playerObj, XA_IID_STREAMINFORMATION, &playerStreamInfoItf);
+    assert(XA_RESULT_SUCCESS == res);
+
+    // get the volume interface
+    res = (*playerObj)->GetInterface(playerObj, XA_IID_VOLUME, &playerVolItf);
+    assert(XA_RESULT_SUCCESS == res);
+
     // get the Android buffer queue interface
     res = (*playerObj)->GetInterface(playerObj, XA_IID_ANDROIDBUFFERQUEUE, &playerBQItf);
     assert(XA_RESULT_SUCCESS == res);
 
     // register the callback from which OpenMAX AL can retrieve the data to play
     res = (*playerBQItf)->RegisterCallback(playerBQItf, AndroidBufferQueueCallback, NULL);
+    assert(XA_RESULT_SUCCESS == res);
+
+    // we want to be notified of the video size once it's found, so we register a callback for that
+    res = (*playerStreamInfoItf)->RegisterStreamChangeCallback(playerStreamInfoItf,
+            StreamChangeCallback, NULL);
 
     /* Fill our cache */
     if (fread(dataCache, 1, BUFFER_SIZE * NB_BUFFERS, file) <= 0) {
@@ -208,15 +296,20 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
        we don't want to starve the player */
     int i;
     for (i=0 ; i < NB_BUFFERS ; i++) {
-        res = (*playerBQItf)->Enqueue(playerBQItf, dataCache + i*BUFFER_SIZE, BUFFER_SIZE, NULL, 0);
+        res = (*playerBQItf)->Enqueue(playerBQItf, NULL /*pBufferContext*/,
+                dataCache + i*BUFFER_SIZE, BUFFER_SIZE, NULL, 0);
         assert(XA_RESULT_SUCCESS == res);
     }
-
 
     // prepare the player
     res = (*playerPlayItf)->SetPlayState(playerPlayItf, XA_PLAYSTATE_PAUSED);
     assert(XA_RESULT_SUCCESS == res);
 
+    // set the volume
+    res = (*playerVolItf)->SetVolumeLevel(playerVolItf, 0);//-300);
+    assert(XA_RESULT_SUCCESS == res);
+
+    // start the playback
     res = (*playerPlayItf)->SetPlayState(playerPlayItf, XA_PLAYSTATE_PLAYING);
         assert(XA_RESULT_SUCCESS == res);
 

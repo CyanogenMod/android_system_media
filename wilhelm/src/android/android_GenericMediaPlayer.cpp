@@ -24,7 +24,8 @@
 namespace android {
 
 //--------------------------------------------------------------------------------------------------
-MediaPlayerNotificationClient::MediaPlayerNotificationClient() :
+MediaPlayerNotificationClient::MediaPlayerNotificationClient(GenericMediaPlayer* gmp) :
+    mGenericMediaPlayer(gmp),
     mPlayerPrepared(false)
 {
 
@@ -39,9 +40,18 @@ MediaPlayerNotificationClient::~MediaPlayerNotificationClient() {
 void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2) {
     SL_LOGI("MediaPlayerNotificationClient::notify(msg=%d, ext1=%d, ext2=%d)", msg, ext1, ext2);
 
-    if (msg == MEDIA_PREPARED) {
+    switch (msg) {
+      case MEDIA_PREPARED:
         mPlayerPrepared = true;
         mPlayerPreparedCondition.signal();
+        break;
+
+      case MEDIA_SET_VIDEO_SIZE:
+        mGenericMediaPlayer->notify(PLAYEREVENT_VIDEO_SIZE_UPDATE,
+                (int32_t)ext1, (int32_t)ext2, true /*async*/);
+        break;
+
+      default: { }
     }
 }
 
@@ -70,7 +80,7 @@ GenericMediaPlayer::GenericMediaPlayer(const AudioPlayback_Parameters* params, b
 
     CHECK(mMediaPlayerService.get() != NULL);
 
-    mPlayerClient = new MediaPlayerNotificationClient();
+    mPlayerClient = new MediaPlayerNotificationClient(this);
 }
 
 GenericMediaPlayer::~GenericMediaPlayer() {
@@ -124,6 +134,18 @@ void GenericMediaPlayer::onPause() {
     if ((mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
         mPlayer->pause();
         mStateFlags &= ~kFlagPlaying;
+    }
+}
+
+
+void GenericMediaPlayer::onVolumeUpdate() {
+    // use settings lock to read the volume settings
+    Mutex::Autolock _l(mSettingsLock);
+    if (this->mAndroidAudioLevels.mMute) {
+        mPlayer->setVolume(0.0f, 0.0f);
+    } else {
+        mPlayer->setVolume(mAndroidAudioLevels.mFinalVolume[0],
+                mAndroidAudioLevels.mFinalVolume[1]);
     }
 
 }

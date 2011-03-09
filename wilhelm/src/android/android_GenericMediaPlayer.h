@@ -23,10 +23,11 @@
 //--------------------------------------------------------------------------------------------------
 namespace android {
 
+class GenericMediaPlayer;
 class MediaPlayerNotificationClient : public BnMediaPlayerClient
 {
 public:
-    MediaPlayerNotificationClient();
+    MediaPlayerNotificationClient(GenericMediaPlayer* gmp);
     virtual ~MediaPlayerNotificationClient();
 
     // IMediaPlayerClient implementation
@@ -36,6 +37,7 @@ public:
 
 private:
     Mutex mLock;
+    GenericMediaPlayer* mGenericMediaPlayer;
     Condition mPlayerPreparedCondition;
     bool mPlayerPrepared;
 };
@@ -53,11 +55,13 @@ public:
     virtual void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
 
 protected:
+    friend class MediaPlayerNotificationClient;
 
     // Async event handlers (called from GenericPlayer's event loop)
     virtual void onPrepare();
     virtual void onPlay();
     virtual void onPause();
+    virtual void onVolumeUpdate();
 
     bool mHasVideo;
 
