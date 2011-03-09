@@ -4,7 +4,9 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
 
-LOCAL_SRC_FILES := src/com/example/nativemedia/NativeMedia.java
+LOCAL_SRC_FILES := \
+    src/com/example/nativemedia/NativeMedia.java \
+    src/com/example/nativemedia/MyGLSurfaceView.java
 
 LOCAL_PACKAGE_NAME := native-media
 LOCAL_CERTIFICATE := platform
