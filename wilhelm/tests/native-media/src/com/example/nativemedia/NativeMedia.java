@@ -17,29 +17,50 @@
 package com.example.nativemedia;
 
 import android.app.Activity;
-import android.media.MediaPlayer.OnPreparedListener;
+import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View.OnClickListener;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import java.io.IOException;
+
+import android.content.Context;
+
 import android.graphics.SurfaceTexture;
 
-public class NativeMedia extends Activity {
-    public static final String TAG = "NativeMedia";
+import android.media.MediaPlayer.OnPreparedListener;
+import android.media.MediaPlayer;
 
-    static boolean isPlayingStreaming = false;
-    MediaPlayer mp;
-    SurfaceView javaSurfaceView;
-    SurfaceView openmaxalSurfaceView;
-    SurfaceHolder javaHolder;
-    SurfaceHolder openmaxalHolder;
+public class NativeMedia extends Activity {
+    static final String TAG = "NativeMedia";
+
+    String mSourceString = null;
+    String mSinkString = null;
+
+    // member variables for Java media player
+    MediaPlayer mMediaPlayer;
+    boolean mMediaPlayerIsPrepared = false;
+    SurfaceView mSurfaceView1;
+    SurfaceHolder mSurfaceHolder1;
+
+    // member variables for native media player
+    boolean mIsPlayingStreaming = false;
+    SurfaceView mSurfaceView2;
+    SurfaceHolder mSurfaceHolder2;
+
+    VideoSink mSelectedVideoSink;
+    VideoSink mJavaMediaPlayerVideoSink;
+    VideoSink mNativeMediaPlayerVideoSink;
+
+    SurfaceHolderVideoSink mSurfaceHolder1VideoSink, mSurfaceHolder2VideoSink;
+    GLViewVideoSink mGLView1VideoSink, mGLView2VideoSink;
 
     /** Called when the activity is first created. */
     @Override
@@ -47,28 +68,28 @@ public class NativeMedia extends Activity {
         super.onCreate(icicle);
         setContentView(R.layout.main);
 
-        // initialize native media system
+        mGLView1 = (MyGLSurfaceView) findViewById(R.id.glsurfaceview1);
+        mGLView2 = (MyGLSurfaceView) findViewById(R.id.glsurfaceview2);
 
+        //setContentView(mGLView);
+        //setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        // initialize native media system
         createEngine();
 
-        javaSurfaceView = (SurfaceView) findViewById(R.id.java_surface);
-        openmaxalSurfaceView = (SurfaceView) findViewById(R.id.openmaxal_surface);
+        // set up the Surface 1 video sink
+        mSurfaceView1 = (SurfaceView) findViewById(R.id.surfaceview1);
+        mSurfaceHolder1 = mSurfaceView1.getHolder();
 
-        javaHolder = javaSurfaceView.getHolder();
-        openmaxalHolder = openmaxalSurfaceView.getHolder();
+        mSurfaceHolder1.addCallback(new SurfaceHolder.Callback() {
 
-        openmaxalHolder.addCallback(new SurfaceHolder.Callback() {
-
-            public void surfaceChanged(SurfaceHolder holder, int format,
-                    int width, int height) {
-                Log.v(TAG, "surfaceChanged format=" + format + ", width=" + width + ", height=" +
-                        height);
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                Log.v(TAG, "surfaceChanged format=" + format + ", width=" + width + ", height=" + height);
             }
 
             public void surfaceCreated(SurfaceHolder holder) {
                 Log.v(TAG, "surfaceCreated");
                 setSurface(holder.getSurface());
-                Log.v(TAG, "surfaceCreated 2");
             }
 
             public void surfaceDestroyed(SurfaceHolder holder) {
@@ -77,61 +98,176 @@ public class NativeMedia extends Activity {
 
         });
 
-        openmaxalHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        // set up the Surface 2 video sink
+        mSurfaceView2 = (SurfaceView) findViewById(R.id.surfaceview2);
+        mSurfaceHolder2 = mSurfaceView2.getHolder();
 
-        ((Button) findViewById(R.id.java_player)).setOnClickListener(new OnClickListener() {
-            public void onClick(View view) {
-                mp.setOnPreparedListener(new OnPreparedListener() {
-                    public void onPrepared(MediaPlayer xy) {
-                        int width = xy.getVideoWidth();
-                        int height = xy.getVideoHeight();
-                        Log.v(TAG, "onPrepared width=" + width + ", height=" + height);
-                        if (width!=0 && height!=0) {
-                          javaHolder.setFixedSize(width, height);
-                          xy.setOnVideoSizeChangedListener(
-                            new MediaPlayer.OnVideoSizeChangedListener() {
-                              public void onVideoSizeChanged(MediaPlayer ab, int width,
-                                int height) {
-                                  int w2 = ab.getVideoWidth();
-                                  int h2 = ab.getVideoHeight();
-                                  Log.v(TAG, "onVideoSizeChanged width=" + w2 + " (" + width +
-                                        "), height=" + h2 + " (" + height + ")");
-                                  if (w2 != 0 && h2 != 0) {
-                                      javaHolder.setFixedSize(w2, h2);
-                                  }
-                              }
-                          });
-                          xy.start();
+        mSurfaceHolder2.addCallback(new SurfaceHolder.Callback() {
 
-                        }
-                    }
-                });
-                mp.prepareAsync();
-
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                Log.v(TAG, "surfaceChanged format=" + format + ", width=" + width + ", height=" + height);
             }
+
+            public void surfaceCreated(SurfaceHolder holder) {
+                Log.v(TAG, "surfaceCreated");
+                setSurface(holder.getSurface());
+            }
+
+            public void surfaceDestroyed(SurfaceHolder holder) {
+                Log.v(TAG, "surfaceDestroyed");
+            }
+
+        });
+
+        // create Java media player
+        mMediaPlayer = new MediaPlayer();
+
+        // set up Java media player listeners
+        mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+
+            public void onPrepared(MediaPlayer mediaPlayer) {
+                int width = mediaPlayer.getVideoWidth();
+                int height = mediaPlayer.getVideoHeight();
+                Log.v(TAG, "onPrepared width=" + width + ", height=" + height);
+                if (width != 0 && height != 0 && mJavaMediaPlayerVideoSink != null) {
+                    mJavaMediaPlayerVideoSink.setFixedSize(width, height);
+                }
+                mMediaPlayerIsPrepared = true;
+                mediaPlayer.start();
+            }
+
+        });
+
+        mMediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
+
+            public void onVideoSizeChanged(MediaPlayer mediaPlayer, int width, int height) {
+                Log.v(TAG, "onVideoSizeChanged width=" + width + ", height=" + height);
+                if (width != 0 && height != 0 && mJavaMediaPlayerVideoSink != null) {
+                    mJavaMediaPlayerVideoSink.setFixedSize(width, height);
+                }
+            }
+
+        });
+
+        // initialize content source spinner
+        Spinner sourceSpinner = (Spinner) findViewById(R.id.source_spinner);
+        ArrayAdapter<CharSequence> sourceAdapter = ArrayAdapter.createFromResource(
+                this, R.array.source_array, android.R.layout.simple_spinner_item);
+        sourceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sourceSpinner.setAdapter(sourceAdapter);
+        sourceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                mSourceString = parent.getItemAtPosition(pos).toString();
+                Log.v(TAG, "onItemSelected " + mSourceString);
+            }
+
+            public void onNothingSelected(AdapterView parent) {
+                Log.v(TAG, "onNothingSelected");
+                mSourceString = null;
+            }
+
+        });
+
+        // initialize video sink spinner
+        Spinner sinkSpinner = (Spinner) findViewById(R.id.sink_spinner);
+        ArrayAdapter<CharSequence> sinkAdapter = ArrayAdapter.createFromResource(
+                this, R.array.sink_array, android.R.layout.simple_spinner_item);
+        sinkAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sinkSpinner.setAdapter(sinkAdapter);
+        sinkSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                mSinkString = parent.getItemAtPosition(pos).toString();
+                Log.v(TAG, "onItemSelected " + mSinkString);
+                if ("Surface 1".equals(mSinkString)) {
+                    if (mSurfaceHolder1VideoSink == null) {
+                        mSurfaceHolder1VideoSink = new SurfaceHolderVideoSink(mSurfaceHolder1);
+                    }
+                    mSelectedVideoSink = mSurfaceHolder1VideoSink;
+                } else if ("Surface 2".equals(mSinkString)) {
+                    if (mSurfaceHolder2VideoSink == null) {
+                        mSurfaceHolder2VideoSink = new SurfaceHolderVideoSink(mSurfaceHolder2);
+                    }
+                    mSelectedVideoSink = mSurfaceHolder2VideoSink;
+                } else if ("SurfaceTexture 1".equals(mSinkString)) {
+                    if (mGLView1VideoSink == null) {
+                        mGLView1VideoSink = new GLViewVideoSink(mGLView1);
+                    }
+                    mSelectedVideoSink = mGLView1VideoSink;
+                } else if ("SurfaceTexture 2".equals(mSinkString)) {
+                    if (mGLView2VideoSink == null) {
+                        mGLView2VideoSink = new GLViewVideoSink(mGLView2);
+                    }
+                    mSelectedVideoSink = mGLView2VideoSink;
+                }
+            }
+
+            public void onNothingSelected(AdapterView parent) {
+                Log.v(TAG, "onNothingSelected");
+                mSinkString = null;
+                mSelectedVideoSink = null;
+            }
+
         });
 
         // initialize button click handlers
 
-        ((Button) findViewById(R.id.openmaxal_player)).setOnClickListener(new OnClickListener() {
+        // Java MediaPlayer start/pause
+
+        ((Button) findViewById(R.id.start_java)).setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View view) {
+                if (mJavaMediaPlayerVideoSink == null) {
+                    if (mSelectedVideoSink == null) {
+                        return;
+                    }
+                    mSelectedVideoSink.useAsSinkForJava(mMediaPlayer);
+                    mJavaMediaPlayerVideoSink = mSelectedVideoSink;
+                }
+                if (!mMediaPlayerIsPrepared) {
+                    if (mSourceString != null) {
+                        try {
+                            mMediaPlayer.setDataSource(mSourceString);
+                        } catch (IOException e) {
+                            Log.e(TAG, "IOException " + e);
+                        }
+                        mMediaPlayer.prepareAsync();
+                    }
+                } else if (mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.pause();
+                } else {
+                    mMediaPlayer.start();
+                }
+            }
+
+        });
+
+        // native MediaPlayer start/pause
+
+        ((Button) findViewById(R.id.start_native)).setOnClickListener(new View.OnClickListener() {
+
             boolean created = false;
             public void onClick(View view) {
                 if (!created) {
-                    created = createStreamingMediaPlayer("/sdcard/videos/ts/bar.ts");
-                } else {
-                    isPlayingStreaming = !isPlayingStreaming;
-                    setPlayingStreamingMediaPlayer(isPlayingStreaming);
+                    if (mNativeMediaPlayerVideoSink == null) {
+                        if (mSelectedVideoSink == null) {
+                            return;
+                        }
+                        mSelectedVideoSink.useAsSinkForNative();
+                        mNativeMediaPlayerVideoSink = mSelectedVideoSink;
+                    }
+                    if (mSourceString != null) {
+                        created = createStreamingMediaPlayer(mSourceString);
+                    }
+                }
+                if (created) {
+                    mIsPlayingStreaming = !mIsPlayingStreaming;
+                    setPlayingStreamingMediaPlayer(mIsPlayingStreaming);
                 }
             }
+
         });
-
-        mp = new MediaPlayer();
-        mp.setDisplay(javaHolder);
-        try {
-            mp.setDataSource("/sdcard/videos/burnAfterReading.m4v");
-        } catch (IOException e) {
-
-        }
 
     }
 
@@ -139,9 +275,18 @@ public class NativeMedia extends Activity {
     @Override
     protected void onPause()
     {
-        isPlayingStreaming = false;
+        mIsPlayingStreaming = false;
         setPlayingStreamingMediaPlayer(false);
+        mGLView1.onPause();
+        mGLView2.onPause();
         super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mGLView1.onResume();
+        mGLView2.onResume();
     }
 
     /** Called when the activity is about to be destroyed. */
@@ -152,18 +297,82 @@ public class NativeMedia extends Activity {
         super.onDestroy();
     }
 
+    private MyGLSurfaceView mGLView1, mGLView2;
+
     /** Native methods, implemented in jni folder */
     public static native void createEngine();
     public static native boolean createStreamingMediaPlayer(String filename);
     public static native void setPlayingStreamingMediaPlayer(boolean isPlaying);
     public static native void shutdown();
     public static native void setSurface(Surface surface);
-    // currently unused in this test app
     public static native void setSurfaceTexture(SurfaceTexture surfaceTexture);
 
     /** Load jni .so on initialization */
     static {
          System.loadLibrary("native-media-jni");
+    }
+
+    // VideoSink abstracts out the difference between Surface and SurfaceTexture
+    // aka SurfaceHolder and GLSurfaceView
+    static abstract class VideoSink {
+
+        abstract void setFixedSize(int width, int height);
+        abstract void useAsSinkForJava(MediaPlayer mediaPlayer);
+        abstract void useAsSinkForNative();
+
+    }
+
+    static class SurfaceHolderVideoSink extends VideoSink {
+
+        private final SurfaceHolder mSurfaceHolder;
+
+        SurfaceHolderVideoSink(SurfaceHolder surfaceHolder) {
+            mSurfaceHolder = surfaceHolder;
+        }
+
+        void setFixedSize(int width, int height) {
+            mSurfaceHolder.setFixedSize(width, height);
+        }
+
+        void useAsSinkForJava(MediaPlayer mediaPlayer) {
+            mediaPlayer.setDisplay(mSurfaceHolder);
+        }
+
+        void useAsSinkForNative() {
+            setSurface(mSurfaceHolder.getSurface());
+        }
+
+    }
+
+    static class GLViewVideoSink extends VideoSink {
+
+        private final MyGLSurfaceView mMyGLSurfaceView;
+
+        GLViewVideoSink(MyGLSurfaceView myGLSurfaceView) {
+            mMyGLSurfaceView = myGLSurfaceView;
+        }
+
+        void setFixedSize(int width, int height) {
+        }
+
+        void useAsSinkForJava(MediaPlayer mediaPlayer) {
+            // This API is @hide currently, so use reflection instead:
+            // mMediaPlayer.setTexture(surfaceTexture);
+            Class clazz = MediaPlayer.class;
+            Class[] types = new Class[] { SurfaceTexture.class };
+            Object[] arglist = new Object[] { mMyGLSurfaceView.getSurfaceTexture() };
+            try {
+                clazz.getMethod("setTexture", types).invoke(mediaPlayer, arglist);
+            } catch (NoSuchMethodException e) {
+            } catch (IllegalAccessException e) {
+            } catch (java.lang.reflect.InvocationTargetException e) {
+            }
+        }
+
+        void useAsSinkForNative() {
+            setSurfaceTexture(mMyGLSurfaceView.getSurfaceTexture());
+        }
+
     }
 
 }

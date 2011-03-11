@@ -270,12 +270,14 @@ void Java_com_example_nativemedia_NativeMedia_shutdown(JNIEnv* env, jclass clazz
     // close the file
     if (file != NULL) {
         fclose(file);
+        file = NULL;
     }
 
 #if !NO_NATIVE_WINDOW
     // make sure we don't leak native windows
     if (theNativeWindow != NULL) {
         ANativeWindow_release(theNativeWindow);
+        theNativeWindow = NULL;
     }
 #endif
 }
