@@ -163,7 +163,7 @@ ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
         LOCAL_LDLIBS += -lpthread
 endif
 
-LOCAL_PRELINK_MODULE:= false
+
 
 LOCAL_MODULE:= libOpenSLES
 
