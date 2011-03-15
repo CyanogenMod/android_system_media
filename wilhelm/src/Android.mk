@@ -96,7 +96,7 @@ LOCAL_SRC_FILES:=                     \
         itf/IPresetReverb.c               \
         itf/IRecord.c                     \
         itf/ISeek.c                       \
-        itf/IStreamInformation.c          \
+        itf/IStreamInformation.cpp        \
         itf/IVirtualizer.c                \
         itf/IVolume.c
 
