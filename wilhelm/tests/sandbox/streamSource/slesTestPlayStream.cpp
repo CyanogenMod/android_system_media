@@ -24,6 +24,7 @@
 #include "SLES/OpenSLES.h"
 #include "SLES/OpenSLES_Android.h"
 
+//#define TEST_DISPLAY_FIRST_BUFFER_ITEM
 
 #define MAX_NUMBER_INTERFACES 2
 
@@ -93,9 +94,8 @@ SLresult AndroidBufferQueueCallback(
                 NULL /*pData*/, 0 /*dataLength*/,
                 &msgDiscontinuity /*pMsg*/,
                 sizeof(SLuint32)*2 /*msgLength*/);
-
         // we've cleared the queue, it's now empty: let's rebuffer a bit so playback doesn't starve
-        size_t nbRead = fread((void*)pBufferData, 1, BUFFER_SIZE*(NB_BUFFERS/2), file);
+        size_t nbRead = fread((void*)dataCache, 1, BUFFER_SIZE*(NB_BUFFERS/2), file);
         if (nbRead == BUFFER_SIZE*(NB_BUFFERS/2)) {
             for (int i=0 ; i < NB_BUFFERS/2 ; i++) {
                 SLresult res = (*caller)->Enqueue(caller,  NULL /*pBufferContext*/,
@@ -110,6 +110,14 @@ SLresult AndroidBufferQueueCallback(
     // end of test only section
     //--------------------------------------------------------------------------------
     else {
+
+#ifdef TEST_DISPLAY_FIRST_BUFFER_ITEM
+        // display item data (only parsing first item)
+        if (itemsLength !=0) {
+            fprintf(stdout, "item key=0x%lx size=%lu data=0x%lx\n",
+                    pItems->itemKey, pItems->itemSize, *((SLuint32*)&pItems->itemData));
+        }
+#endif
 
         // pBufferData can be null if the last consumed buffer contained only a command
         // just like we do for signalling DISCONTINUITY (above) or EOS (below)
@@ -236,6 +244,9 @@ void TestPlayStream( SLObjectItf sl, const char* path)
             // context is not used in the example, but can be used to track who registered
             // the buffer queue callback
             NULL /*pContext*/); CheckErr(res);
+
+    res = (*abqItf)->SetCallbackEventsMask(abqItf, SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED);
+    CheckErr(res);
 
     /* Display duration */
     SLmillisecond durationInMsec = SL_TIME_UNKNOWN;

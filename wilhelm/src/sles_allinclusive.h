@@ -251,6 +251,7 @@ typedef struct {
     SLuint32 mDataSizeConsumed;
     AdvancedBufferItems mItems;
     const void *mBufferContext;
+    SLuint32 mBufferState;
 } AdvancedBufferHeader;
 #endif
 

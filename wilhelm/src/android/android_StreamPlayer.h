@@ -16,6 +16,9 @@
 
 #include <binder/IServiceManager.h>
 
+// number of SLuint32 fields to store a buffer event message in an item, by mapping each
+//   to the item key (SLuint32), the item size (SLuint32), and the item data (mask on SLuint32)
+#define NB_BUFFEREVENT_ITEM_FIELDS 3
 
 //--------------------------------------------------------------------------------------------------
 namespace android {
@@ -28,6 +31,9 @@ public:
             void *appContext,
             const void *caller);
     virtual ~StreamSourceAppProxy();
+
+    // store an item structure to indicate a processed buffer
+    static const SLuint32 kItemProcessed[NB_BUFFEREVENT_ITEM_FIELDS];
 
     // IStreamSource implementation
     virtual void setListener(const sp<IStreamListener> &listener);
