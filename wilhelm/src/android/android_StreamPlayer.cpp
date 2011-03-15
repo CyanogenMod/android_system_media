@@ -218,6 +218,7 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
         // oldFront was only initialized in the code path where callback is initialized
         //    so no need to check if it's valid
         (*callback)(&mAndroidBufferQueue->mItf, callbackPContext,
+                (void *)oldFront->mBufferContext, /* pBufferContext */
                 (void *)oldFront->mDataBuffer,/* pBufferData  */
                 oldFront->mDataSize, /* dataSize  */
                 // here a buffer is only dequeued when fully consumed
@@ -286,11 +287,8 @@ void StreamPlayer::queueRefilled_l() {
 
 
 void StreamPlayer::appClear_l() {
-    // the user of StreamPlayer has cleared its AndroidBufferQueue: a discontinuity is expected
-    Mutex::Autolock _l(mAppProxyLock);
-    if (mAppProxy != 0) {
-        mAppProxy->receivedCmd_l(IStreamListener::DISCONTINUITY);
-    }
+    // the user of StreamPlayer has cleared its AndroidBufferQueue:
+    // there's no clear() for the shared memory queue, so this is a no-op
 }
 
 

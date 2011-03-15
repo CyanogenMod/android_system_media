@@ -173,6 +173,8 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     { 0xb9c293e0, 0xf776, 0x11db, 0x80df, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
     // XA_IID_STREAMINFORMATION
     { 0x3a628fe0, 0x1238, 0x11de, 0xad9f, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
+    // XA_IID_VOLUME
+    { 0x088ba520, 0xf777, 0x11db, 0xa5e3, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
 
 // OpenMAX AL 1.0.1 Android API level 10 extended interfaces
     // XA_IID_ANDROIDBUFFERQUEUE
@@ -250,6 +252,7 @@ const XAInterfaceID XA_IID_ENGINE = (XAInterfaceID) &SL_IID_array[MPH_XAENGINE];
 const XAInterfaceID XA_IID_PLAY = (XAInterfaceID) &SL_IID_array[MPH_XAPLAY];
 const XAInterfaceID XA_IID_STREAMINFORMATION =
         (XAInterfaceID) &SL_IID_array[MPH_XASTREAMINFORMATION];
+const XAInterfaceID XA_IID_VOLUME = (XAInterfaceID) &SL_IID_array[MPH_XAVOLUME];
 
 // OpenMAX AL 1.0.1 Android API level 10 extended interfaces
 const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUE =

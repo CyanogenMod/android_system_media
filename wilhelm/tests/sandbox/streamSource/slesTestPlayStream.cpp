@@ -32,7 +32,8 @@
 
 #define NB_BUFFERS 16
 #define MPEG2_TS_BLOCK_SIZE 188
-#define BUFFER_SIZE 20*MPEG2_TS_BLOCK_SIZE
+#define BUFFER_SIZE (20*MPEG2_TS_BLOCK_SIZE)
+#define DISCONTINUITY_MAGIC 1977
 
 /* Where we store the data to play */
 char dataCache[BUFFER_SIZE * NB_BUFFERS];
@@ -40,6 +41,8 @@ char dataCache[BUFFER_SIZE * NB_BUFFERS];
 FILE *file;
 /* Has the app reached the end of the file */
 bool reachedEof = false;
+/* Special discontinuity buffer context */
+int myDiscBufferContext = DISCONTINUITY_MAGIC;
 
 //-----------------------------------------------------------------
 //* Exits the application if an error is encountered */
@@ -59,12 +62,13 @@ bool prefetchError = false;
 /* AndroidBufferQueueItf callback for an audio player */
 SLresult AndroidBufferQueueCallback(
         SLAndroidBufferQueueItf caller,
-        void *pContext,                /* input */
-        const void *pBufferData,       /* input */
-        SLuint32 dataSize,             /* input */
-        SLuint32 dataUsed,             /* input */
-        const SLAndroidBufferItem *pItems,/* input */
-        SLuint32 itemsLength           /* input */)
+        void *pCallbackContext,            /* input */
+        void *pBufferContext,              /* input */
+        void *pBufferData,                 /* input */
+        SLuint32 dataSize,                 /* input */
+        SLuint32 dataUsed,                 /* input */
+        const SLAndroidBufferItem *pItems, /* input */
+        SLuint32 itemsLength               /* input */)
 {
     // assert(BUFFER_SIZE <= dataSize);
 
@@ -85,7 +89,8 @@ SLresult AndroidBufferQueueCallback(
         msgDiscontinuity.itemSize = 0;
         // message has no parameters, so the total size of the message is the size of the key
         //   plus the size if itemSize, both SLuint32
-        (*caller)->Enqueue(caller, NULL /*pData*/, 0 /*dataLength*/,
+        (*caller)->Enqueue(caller, (void*)&myDiscBufferContext /*pBufferContext*/,
+                NULL /*pData*/, 0 /*dataLength*/,
                 &msgDiscontinuity /*pMsg*/,
                 sizeof(SLuint32)*2 /*msgLength*/);
 
@@ -93,7 +98,8 @@ SLresult AndroidBufferQueueCallback(
         size_t nbRead = fread((void*)pBufferData, 1, BUFFER_SIZE*(NB_BUFFERS/2), file);
         if (nbRead == BUFFER_SIZE*(NB_BUFFERS/2)) {
             for (int i=0 ; i < NB_BUFFERS/2 ; i++) {
-                SLresult res = (*caller)->Enqueue(caller, dataCache + i*BUFFER_SIZE,
+                SLresult res = (*caller)->Enqueue(caller,  NULL /*pBufferContext*/,
+                        dataCache + i*BUFFER_SIZE,
                         BUFFER_SIZE, NULL, 0);
                 CheckErr(res);
             }
@@ -107,10 +113,13 @@ SLresult AndroidBufferQueueCallback(
 
         // pBufferData can be null if the last consumed buffer contained only a command
         // just like we do for signalling DISCONTINUITY (above) or EOS (below)
+        if ((pBufferContext != NULL) && (*((int*)pBufferContext) == DISCONTINUITY_MAGIC)) {
+            fprintf(stdout, "Successfully detected my discontinuity buffer having been consumed\n");
+        }
         if (pBufferData != NULL) {
             size_t nbRead = fread((void*)pBufferData, 1, BUFFER_SIZE, file);
             if (nbRead > 0) {
-                (*caller)->Enqueue(caller,
+                (*caller)->Enqueue(caller, NULL /*pBufferContext*/,
                         pBufferData /*pData*/,
                         nbRead /*dataLength*/,
                         NULL /*pMsg*/,
@@ -122,7 +131,8 @@ SLresult AndroidBufferQueueCallback(
                 msgEos.itemSize = 0;
                 // EOS message has no parameters, so the total size of the message is the size of the key
                 //   plus the size if itemSize, both SLuint32
-                (*caller)->Enqueue(caller, NULL /*pData*/, 0 /*dataLength*/,
+                (*caller)->Enqueue(caller,  NULL /*pBufferContext*/,
+                        NULL /*pData*/, 0 /*dataLength*/,
                         &msgEos /*pMsg*/,
                         sizeof(SLuint32)*2 /*msgLength*/);
                 reachedEof = true;
@@ -258,7 +268,8 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     /* Enqueue the content of our cache before starting to play,
          * we don't want to starve the player */
     for (int i=0 ; i < NB_BUFFERS ; i++) {
-        res = (*abqItf)->Enqueue(abqItf, dataCache + i*BUFFER_SIZE, BUFFER_SIZE, NULL, 0);
+        res = (*abqItf)->Enqueue(abqItf,  NULL /*pBufferContext*/,
+                dataCache + i*BUFFER_SIZE, BUFFER_SIZE, NULL, 0);
         CheckErr(res);
     }
 

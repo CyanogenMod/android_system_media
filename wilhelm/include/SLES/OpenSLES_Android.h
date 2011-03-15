@@ -224,8 +224,9 @@ typedef struct SLAndroidBufferItem_ {
 
 typedef SLresult (SLAPIENTRY *slAndroidBufferQueueCallback)(
     SLAndroidBufferQueueItf caller,/* input */
-    void *pContext,                /* input */
-    const void *pBufferData,       /* input */
+    void *pCallbackContext,        /* input */
+    void *pBufferContext,          /* input */
+    void *pBufferData,             /* input */
     SLuint32 dataSize,             /* input */
     SLuint32 dataUsed,             /* input */
     const SLAndroidBufferItem *pItems,/* input */
@@ -241,7 +242,7 @@ struct SLAndroidBufferQueueItf_ {
     SLresult (*RegisterCallback) (
         SLAndroidBufferQueueItf self,
         slAndroidBufferQueueCallback callback,
-        void* pContext
+        void* pCallbackContext
     );
 
     SLresult (*Clear) (
@@ -250,7 +251,8 @@ struct SLAndroidBufferQueueItf_ {
 
     SLresult (*Enqueue) (
         SLAndroidBufferQueueItf self,
-        const void *pData,
+        void *pBufferContext,
+        void *pData,
         SLuint32 dataLength,
         const SLAndroidBufferItem *pItems,
         SLuint32 itemsLength

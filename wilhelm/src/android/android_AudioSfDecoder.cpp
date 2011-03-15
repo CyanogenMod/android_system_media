@@ -459,15 +459,15 @@ void AudioSfDecoder::onNotify(const sp<AMessage> &msg) {
     int32_t val;
     if (msg->findInt32(PLAYEREVENT_PREFETCHSTATUSCHANGE, &val)) {
         SL_LOGV("\tASfPlayer notifying %s = %d", PLAYEREVENT_PREFETCHSTATUSCHANGE, val);
-        mNotifyClient(kEventPrefetchStatusChange, val, mNotifyUser);
+        mNotifyClient(kEventPrefetchStatusChange, val, 0, mNotifyUser);
     }
     else if (msg->findInt32(PLAYEREVENT_PREFETCHFILLLEVELUPDATE, &val)) {
         SL_LOGV("\tASfPlayer notifying %s = %d", PLAYEREVENT_PREFETCHFILLLEVELUPDATE, val);
-        mNotifyClient(kEventPrefetchFillLevelUpdate, val, mNotifyUser);
+        mNotifyClient(kEventPrefetchFillLevelUpdate, val, 0, mNotifyUser);
     }
     else if (msg->findInt32(PLAYEREVENT_ENDOFSTREAM, &val)) {
         SL_LOGV("\tASfPlayer notifying %s = %d", PLAYEREVENT_ENDOFSTREAM, val);
-        mNotifyClient(kEventEndOfStream, val, mNotifyUser);
+        mNotifyClient(kEventEndOfStream, val, 0, mNotifyUser);
     }
     else {
         GenericPlayer::onNotify(msg);

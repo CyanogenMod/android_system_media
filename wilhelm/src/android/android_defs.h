@@ -59,27 +59,33 @@ enum AndroidObject_state {
  * Structure to maintain the set of audio levels about a player
  */
 typedef struct AndroidAudioLevels_struct {
-/** send level to aux effect, there's a single aux bus, so there's a single level */
-    SLmillibel mAuxSendLevel;
     /**
-     * Amplification (can be attenuation) factor derived for the VolumeLevel
+     * Is this player muted
      */
-    float mAmplFromVolLevel;
+    bool mMute;
     /**
-     * Left/right amplification (can be attenuations) factors derived for the StereoPosition
+     * Send level to aux effect, there's a single aux bus, so there's a single level
      */
-    float mAmplFromStereoPos[STEREO_CHANNELS];
+    // FIXME not used yet, will be used when supporting effects in OpenMAX AL
+    //SLmillibel mAuxSendLevel;
     /**
      * Attenuation factor derived from direct level
      */
-    float mAmplFromDirectLevel;
+    // FIXME not used yet, will be used when supporting effects in OpenMAX AL
+    //float mAmplFromDirectLevel;
+    /**
+     * Android Left/Right volume
+     * The final volume of an Android AudioTrack or MediaPlayer is a stereo amplification
+     * (or attenuation) represented as a float from 0.0f to 1.0f
+     */
+    float mFinalVolume[STEREO_CHANNELS];
 } AndroidAudioLevels;
 
 
 /**
  * Event notification callback from Android to SL ES framework
  */
-typedef void (*notif_cbf_t)(int event, int data1, void* notifUser);
+typedef void (*notif_cbf_t)(int event, int data1, int data2, void* notifUser);
 
 /**
  * Audio data push callback from Android objects to SL ES framework
@@ -96,6 +102,7 @@ typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, void* user);
 #define PLAYEREVENT_PREFETCHFILLLEVELUPDATE "pflu"
 #define PLAYEREVENT_ENDOFSTREAM             "eos"
 #define PLAYEREVENT_NEW_AUDIOTRACK          "nwat"
+#define PLAYEREVENT_VIDEO_SIZE_UPDATE       "vsiz"
 
 
 /**

@@ -85,6 +85,7 @@ const char * const interface_names[MPH_MAX] = {
     "XAENGINE",
     "XAPLAY",
     "XASTREAMINFORMATION",
+    "XAVOLUME",
 
 };
 

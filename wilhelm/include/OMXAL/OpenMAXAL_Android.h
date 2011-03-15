@@ -49,8 +49,9 @@ typedef struct XAAndroidBufferItem_ {
 
 typedef XAresult (XAAPIENTRY *xaAndroidBufferQueueCallback)(
     XAAndroidBufferQueueItf caller,/* input */
-    void *pContext,                /* input */
-    const void *pBufferData,       /* input */
+    void *pCallbackContext,        /* input */
+    void *pBufferContext,          /* input */
+    void *pBufferData,             /* input */
     XAuint32 dataSize,             /* input */
     XAuint32 dataUsed,             /* input */
     const XAAndroidBufferItem *pItems,/* input */
@@ -66,7 +67,7 @@ struct XAAndroidBufferQueueItf_ {
     XAresult (*RegisterCallback) (
         XAAndroidBufferQueueItf self,
         xaAndroidBufferQueueCallback callback,
-        void* pContext
+        void* pCallbackContext
     );
 
     XAresult (*Clear) (
@@ -75,7 +76,8 @@ struct XAAndroidBufferQueueItf_ {
 
     XAresult (*Enqueue) (
         XAAndroidBufferQueueItf self,
-        const void *pData,
+        void *pBufferContext,
+        void *pData,
         XAuint32 dataLength,
         const XAAndroidBufferItem *pItems,
         XAuint32 itemsLength

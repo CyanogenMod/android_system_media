@@ -139,6 +139,17 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
             // MIDI
             SL_LOGD("[ FIXME: gain update on an SL_OBJECTID_MIDIPLAYER to be implemented ]");
             break;
+        case XA_OBJECTID_MEDIAPLAYER: {
+#ifdef ANDROID
+            attributes &= ~ATTR_GAIN;   // no need to process asynchronously also
+            CMediaPlayer *mp = (CMediaPlayer *) thiz;
+            android::GenericPlayer* avp = mp->mAVPlayer.get();
+            if (avp != NULL) {
+                android_Player_volumeUpdate(avp, &mp->mVolume);
+            }
+#endif
+            break;
+        }
         default:
             break;
         }
