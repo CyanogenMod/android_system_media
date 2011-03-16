@@ -170,12 +170,14 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
 
         case XA_DATALOCATOR_NATIVEDISPLAY:
             pDataLocator->mNativeDisplay = *(XADataLocator_NativeDisplay *)pLocator;
-            // if hDisplay is NULL, then hWindow is NDK C ANativeWindow *
-            // if hDisplay is non-NULL, then:
-            //   hWindow is JNI jobject Surface or SurfaceTexture
-            //   hDisplay is JNIENV *
+            // hWindow is NDK C ANativeWindow * and hDisplay must be NULL
             if (pDataLocator->mNativeDisplay.hWindow == NULL) {
-                SL_LOGE("%s: hWindow must be non-NULL", name);
+                SL_LOGE("%s: hWindow must be non-NULL ANativeWindow *", name);
+                result = SL_RESULT_PARAMETER_INVALID;
+            }
+            if (pDataLocator->mNativeDisplay.hDisplay != NULL) {
+                SL_LOGE("%s: hDisplay must be NULL, but is %p", name,
+                        pDataLocator->mNativeDisplay.hDisplay);
                 result = SL_RESULT_PARAMETER_INVALID;
             }
             break;
