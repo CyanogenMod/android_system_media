@@ -28,6 +28,7 @@
 #include <media/IMediaPlayerService.h>
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
+#include <gui/SurfaceTextureClient.h>
 
 #include <fcntl.h>
 #endif
@@ -56,34 +57,39 @@ XAresult CMediaPlayer_Realize(void *self, XAboolean async)
         // if there is a video sink
         if (XA_DATALOCATOR_NATIVEDISPLAY ==
                 thiz->mImageVideoSink.mLocator.mLocatorType) {
-            JNIEnv *env = (JNIEnv *) thiz->mImageVideoSink.mLocator.mNativeDisplay.hDisplay;
-            if (env != NULL) {
-                // FIXME this is a temporary hack because ANativeWindow is not Binderable yet
-                jobject object = (jobject) thiz->mImageVideoSink.mLocator.mNativeDisplay.hWindow;
-                assert(object != NULL);
-                jclass surfaceClass = env->FindClass("android/view/Surface");
-                jclass surfaceTextureClass = env->FindClass("android/graphics/SurfaceTexture");
-                jclass objectClass = env->GetObjectClass(object);
-                if (thiz->mAVPlayer != 0) {
-                    // initialize display surface
-                    android::GenericMediaPlayer* avp =
-                            (android::GenericMediaPlayer*)(thiz->mAVPlayer.get());
-                    if (objectClass == surfaceClass) {
-                        sp<Surface> nativeSurface((Surface *) env->GetIntField(object,
-                                env->GetFieldID(surfaceClass, "mNativeSurface", "I")));
-                        result = android_Player_setVideoSurface(avp, nativeSurface);
-                    } else if (objectClass == surfaceTextureClass) {
-                        sp<ISurfaceTexture> nativeSurfaceTexture((ISurfaceTexture *)
-                                env->GetIntField(object, env->GetFieldID(surfaceTextureClass,
-                                "mSurfaceTexture", "I")));
-                        result = android_Player_setVideoSurfaceTexture(avp, nativeSurfaceTexture);
-                    }
-                }
+            ANativeWindow *nativeWindow = (ANativeWindow *)
+                    thiz->mImageVideoSink.mLocator.mNativeDisplay.hWindow;
+            // we already verified earlier that hWindow is non-NULL
+            assert(nativeWindow != NULL);
+            int err;
+            int value;
+            // this could crash if app passes in a bad parameter, but that's OK
+            err = (*nativeWindow->query)(nativeWindow, NATIVE_WINDOW_CONCRETE_TYPE, &value);
+            if (0 != err) {
+                SL_LOGE("Query NATIVE_WINDOW_CONCRETE_TYPE on ANativeWindow * %p failed; "
+                        "errno %d", nativeWindow, err);
             } else {
-                ANativeWindow *nativeWindow = (ANativeWindow *)
-                        thiz->mImageVideoSink.mLocator.mNativeDisplay.hWindow;
-                assert(nativeWindow != NULL);
-                // FIXME here is where to implement ANativeWindow support
+                android::GenericMediaPlayer* avp =
+                        static_cast<android::GenericMediaPlayer *>(thiz->mAVPlayer.get());
+                switch (value) {
+                case NATIVE_WINDOW_SURFACE: {                // Surface
+                    sp<Surface> nativeSurface(static_cast<Surface *>(nativeWindow));
+                    result = android_Player_setVideoSurface(avp, nativeSurface);
+                    } break;
+                case NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT: { // SurfaceTextureClient
+                    sp<SurfaceTextureClient> surfaceTextureClient(
+                            static_cast<SurfaceTextureClient *>(nativeWindow));
+                    sp<ISurfaceTexture> nativeSurfaceTexture(
+                            surfaceTextureClient->getISurfaceTexture());
+                    result = android_Player_setVideoSurfaceTexture(avp, nativeSurfaceTexture);
+                    } break;
+                case NATIVE_WINDOW_FRAMEBUFFER:              // FramebufferNativeWindow
+                    // fall through
+                default:
+                    SL_LOGE("ANativeWindow * %p has unknown or unsupported concrete type %d",
+                            nativeWindow, value);
+                    break;
+                }
             }
         }
     }

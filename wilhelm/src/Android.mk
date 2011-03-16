@@ -145,7 +145,8 @@ LOCAL_SHARED_LIBRARIES :=         \
         libbinder                 \
         libstagefright            \
         libstagefright_foundation \
-        libcutils
+        libcutils                 \
+        libgui
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
         LOCAL_LDLIBS += -lpthread -ldl
