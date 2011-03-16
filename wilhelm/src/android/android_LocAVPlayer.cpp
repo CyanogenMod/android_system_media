@@ -26,13 +26,13 @@ namespace android {
 LocAVPlayer::LocAVPlayer(AudioPlayback_Parameters* params, bool hasVideo) :
         GenericMediaPlayer(params, hasVideo)
 {
-    SL_LOGI("LocAVPlayer::LocAVPlayer()");
+    SL_LOGD("LocAVPlayer::LocAVPlayer()");
 
 }
 
 
 LocAVPlayer::~LocAVPlayer() {
-    SL_LOGI("LocAVPlayer::~LocAVPlayer()");
+    SL_LOGD("LocAVPlayer::~LocAVPlayer()");
 
 }
 
@@ -40,7 +40,7 @@ LocAVPlayer::~LocAVPlayer() {
 //--------------------------------------------------
 // Event handlers
 void LocAVPlayer::onPrepare() {
-    SL_LOGI("LocAVPlayer::onPrepare()");
+    SL_LOGD("LocAVPlayer::onPrepare()");
     switch (mDataLocatorType) {
     case kDataLocatorUri:
         mPlayer = mMediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
@@ -60,7 +60,7 @@ void LocAVPlayer::onPrepare() {
     }
     // blocks until mPlayer is prepared
     GenericMediaPlayer::onPrepare();
-    SL_LOGI("LocAVPlayer::onPrepare() done");
+    SL_LOGD("LocAVPlayer::onPrepare() done");
 }
 
 } // namespace android

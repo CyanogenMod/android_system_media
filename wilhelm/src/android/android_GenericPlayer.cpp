@@ -30,7 +30,7 @@ GenericPlayer::GenericPlayer(const AudioPlayback_Parameters* params) :
         mPlaybackParams(*params),
         mChannelCount(1)
 {
-    SL_LOGI("GenericPlayer::GenericPlayer()");
+    SL_LOGD("GenericPlayer::GenericPlayer()");
 
     mLooper = new android::ALooper();
 
@@ -51,7 +51,7 @@ GenericPlayer::~GenericPlayer() {
 
 
 void GenericPlayer::init(const notif_cbf_t cbf, void* notifUser) {
-    SL_LOGI("GenericPlayer::init()");
+    SL_LOGD("GenericPlayer::init()");
 
     mNotifyClient = cbf;
     mNotifyUser = notifUser;
@@ -101,28 +101,28 @@ void GenericPlayer::setDataSource(int fd, int64_t offset, int64_t length) {
 
 
 void GenericPlayer::prepare() {
-    SL_LOGI("GenericPlayer::prepare()");
+    SL_LOGD("GenericPlayer::prepare()");
     sp<AMessage> msg = new AMessage(kWhatPrepare, id());
     msg->post();
 }
 
 
 void GenericPlayer::play() {
-    SL_LOGI("GenericPlayer::play()");
+    SL_LOGD("GenericPlayer::play()");
     sp<AMessage> msg = new AMessage(kWhatPlay, id());
     msg->post();
 }
 
 
 void GenericPlayer::pause() {
-    SL_LOGI("GenericPlayer::pause()");
+    SL_LOGD("GenericPlayer::pause()");
     sp<AMessage> msg = new AMessage(kWhatPause, id());
     msg->post();
 }
 
 
 void GenericPlayer::stop() {
-    SL_LOGI("GenericPlayer::stop()");
+    SL_LOGD("GenericPlayer::stop()");
     (new AMessage(kWhatPause, id()))->post();
 
     // after a stop, playback should resume from the start.
@@ -271,12 +271,12 @@ void GenericPlayer::onMessageReceived(const sp<AMessage> &msg) {
 //--------------------------------------------------
 // Event handlers
 void GenericPlayer::onPrepare() {
-    SL_LOGI("GenericPlayer::onPrepare()");
+    SL_LOGD("GenericPlayer::onPrepare()");
     if (!(mStateFlags & kFlagPrepared)) {
         mStateFlags |= kFlagPrepared;
         notify(PLAYEREVENT_PREPARED, PLAYER_SUCCESS, false /*async*/);
     }
-    SL_LOGI("GenericPlayer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
+    SL_LOGD("GenericPlayer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
 }
 
 
@@ -297,9 +297,9 @@ void GenericPlayer::onNotify(const sp<AMessage> &msg) {
 
 
 void GenericPlayer::onPlay() {
-    SL_LOGI("GenericPlayer::onPlay()");
+    SL_LOGD("GenericPlayer::onPlay()");
     if ((mStateFlags & kFlagPrepared)) {
-        SL_LOGI("starting player");
+        SL_LOGD("starting player");
         mStateFlags |= kFlagPlaying;
     } else {
         SL_LOGV("NOT starting player mStateFlags=0x%x", mStateFlags);
@@ -308,7 +308,7 @@ void GenericPlayer::onPlay() {
 
 
 void GenericPlayer::onPause() {
-    SL_LOGI("GenericPlayer::onPause()");
+    SL_LOGD("GenericPlayer::onPause()");
     if ((mStateFlags & kFlagPrepared)) {
         mStateFlags &= ~kFlagPlaying;
     }

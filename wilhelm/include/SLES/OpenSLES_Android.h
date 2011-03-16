@@ -25,8 +25,9 @@ extern "C" {
 /* Android common types                                                      */
 /*---------------------------------------------------------------------------*/
 
-typedef sl_int64_t             SLAint64;           /* 64 bit signed integer */
+typedef sl_int64_t             SLAint64;          /* 64 bit signed integer   */
 
+typedef sl_uint64_t            SLAuint64;         /* 64 bit unsigned integer */
 
 /*---------------------------------------------------------------------------*/
 /* Android Effect interface                                                  */

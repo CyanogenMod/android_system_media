@@ -25,8 +25,9 @@ extern "C" {
 /* Android common types                                                      */
 /*---------------------------------------------------------------------------*/
 
-typedef xa_int64_t             XAAint64;           /* 64 bit signed integer */
+typedef xa_int64_t             XAAint64;          /* 64 bit signed integer   */
 
+typedef xa_uint64_t            XAAuint64;         /* 64 bit unsigned integer */
 
 /*---------------------------------------------------------------------------*/
 /* Android Buffer Queue Interface                                            */

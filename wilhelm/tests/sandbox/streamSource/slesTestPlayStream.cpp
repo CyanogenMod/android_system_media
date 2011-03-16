@@ -25,6 +25,8 @@
 #include "SLES/OpenSLES_Android.h"
 
 //#define TEST_DISPLAY_FIRST_BUFFER_ITEM
+//#define TEST_CLEAR
+//#define TEST_PTS
 
 #define MAX_NUMBER_INTERFACES 2
 
@@ -45,8 +47,15 @@ bool reachedEof = false;
 /* Special discontinuity buffer context */
 int myDiscBufferContext = DISCONTINUITY_MAGIC;
 
+/* structure to store my discontinuity with PTS command */
+typedef struct {
+        SLuint32 discKey;  // identifies the item
+        SLuint32 discSize;
+        SLAuint64 discPts;
+} DiscPts;
+
 //-----------------------------------------------------------------
-//* Exits the application if an error is encountered */
+/* Exits the application if an error is encountered */
 #define CheckErr(x) ExitOnErrorFunc(x,__LINE__)
 
 void ExitOnErrorFunc( SLresult result , int line)
@@ -83,6 +92,7 @@ SLresult AndroidBufferQueueCallback(
 
     // just to test, clear the queue to see what happens
     if (state.index == 500) {
+#ifdef TEST_CLEAR
         (*caller)->Clear(caller);
         // we've cleared the queue, and have introduced a discontinuity, so signal it
         SLAndroidBufferItem msgDiscontinuity;
@@ -104,6 +114,18 @@ SLresult AndroidBufferQueueCallback(
                 CheckErr(res);
             }
         }
+#endif
+#ifdef TEST_PTS
+        DiscPts msgDiscontinuity = { SL_ANDROID_ITEMKEY_DISCONTINUITY,
+                sizeof(SLAuint64), 15*90*1000 /*15s in 90kHz clock */ };
+        // enqueue discontinuity message with our PTS
+        (*caller)->Enqueue(caller, (void*)&myDiscBufferContext /*pBufferContext*/,
+                NULL /*pData*/, 0 /*dataLength*/,
+                (SLAndroidBufferItem*)&msgDiscontinuity,
+                sizeof(DiscPts) );
+        fprintf(stdout, "rendering will resume at 15s mark");
+
+#endif
         return SL_RESULT_SUCCESS;
     }
     //--------------------------------------------------------------------------------
