@@ -260,8 +260,7 @@ void IStreamInformation_init(void *self)
 
 #ifdef ANDROID
     // placement new constructor for C++ field within C struct
-    // FIXME Temporary hack to unbreak the x86 build (but breaks the feature)
-    //(void) new (&thiz->mStreamInfoTable) android::Vector<StreamInfo>();
+    (void) new (&thiz->mStreamInfoTable) android::Vector<StreamInfo>();
     // initialize container info
     StreamInfo contInf;
     contInf.domain = XA_DOMAINTYPE_CONTAINER;
@@ -279,7 +278,6 @@ void IStreamInformation_deinit(void *self) {
 #ifdef ANDROID
     IStreamInformation *thiz = (IStreamInformation *) self;
     // explicit destructor
-    // FIXME Temporary hack to unbreak the x86 build (but breaks the feature)
-    //thiz->mStreamInfoTable.~Vector<StreamInfo>();
+    thiz->mStreamInfoTable.~Vector<StreamInfo>();
 #endif
 }
