@@ -41,8 +41,7 @@ LOCAL_CFLAGS += -DUSE_PROFILES=0 -DUSE_TRACE -DUSE_DEBUG -UNDEBUG \
 #LOCAL_CFLAGS += -DSL_TRACE_DEFAULT=SL_TRACE_ALL
 
 # Reduce size of .so and hide internal global symbols
-LOCAL_CFLAGS += -fvisibility=hidden -DSL_API='__attribute__((visibility("default")))' \
-        -DXA_API='__attribute__((visibility("default")))'
+LOCAL_CFLAGS += -fvisibility=hidden -DLI_API='__attribute__((visibility("default")))'
 
 LOCAL_SRC_FILES:=                     \
         OpenSLES_IID.c                \
@@ -53,6 +52,7 @@ LOCAL_SRC_FILES:=                     \
         trace.c                       \
         locks.c                       \
         sles.c                        \
+        sl_iid.c                      \
         sllog.c                       \
         ThreadPool.c                  \
         android/AudioPlayer_to_android.cpp    \
@@ -166,23 +166,40 @@ endif
 
 LOCAL_PRELINK_MODULE:= false
 
-LOCAL_MODULE:= libOpenSLES
+LOCAL_MODULE := libwilhelm
+LOCAL_MODULE_TAGS := optional
 
 ifeq ($(TARGET_BUILD_VARIANT),userdebug)
         LOCAL_CFLAGS += -DUSERDEBUG_BUILD=1
 endif
 
+LOCAL_PRELINK_MODULE := false
 include $(BUILD_SHARED_LIBRARY)
 
-# Make /system/lib/libOpenMAXAL.so a symlink to /system/lib/libOpenSLES.so
-# based on system/core/toolbox as there is no standard macro for this yet.
-SYMLINKS := $(addprefix $(TARGET_OUT)/lib/,libOpenMAXAL.so)
-$(SYMLINKS) : $(TARGET_OUT)/lib/libOpenSLES.so $(LOCAL_PATH)/Android.mk
-	@echo symlink $< $@
-	@rm -f $@
-	$(hide) ln -sf $(notdir $<) $@
-ALL_DEFAULT_INSTALLED_MODULES += $(SYMLINKS)
-ALL_MODULES.$(LOCAL_MODULE).INSTALLED := \
-    $(ALL_MODULES.$(LOCAL_MODULE).INSTALLED) $(SYMLINKS)
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES := sl_entry.c sl_iid.c
+LOCAL_C_INCLUDES:=                                                  \
+        system/media/wilhelm/include                                \
+        frameworks/base/media/libstagefright                        \
+        frameworks/base/media/libstagefright/include                \
+        frameworks/base/include/media/stagefright/openmax
+LOCAL_MODULE := libOpenSLES
+LOCAL_PRELINK_MODULE := false
+LOCAL_MODULE_TAGS := optional
+LOCAL_CFLAGS += -x c++ -DLI_API= -fvisibility=hidden -DSL_API='__attribute__((visibility("default")))'
+LOCAL_SHARED_LIBRARIES := libwilhelm
+include $(BUILD_SHARED_LIBRARY)
 
-include $(call all-makefiles-under,$(LOCAL_PATH))
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES := xa_entry.c xa_iid.c
+LOCAL_C_INCLUDES:=                                                  \
+        system/media/wilhelm/include                                \
+        frameworks/base/media/libstagefright                        \
+        frameworks/base/media/libstagefright/include                \
+        frameworks/base/include/media/stagefright/openmax
+LOCAL_MODULE := libOpenMAXAL
+LOCAL_PRELINK_MODULE := false
+LOCAL_MODULE_TAGS := optional
+LOCAL_CFLAGS += -x c++ -DLI_API= -fvisibility=hidden -DXA_API='__attribute__((visibility("default")))'
+LOCAL_SHARED_LIBRARIES := libwilhelm
+include $(BUILD_SHARED_LIBRARY)

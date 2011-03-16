@@ -389,7 +389,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
-	libOpenSLES
+	libOpenMAXAL
 
 LOCAL_STATIC_LIBRARIES := \
     libOpenSLESUT
@@ -418,7 +418,8 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
-	libOpenSLES
+	libOpenSLES \
+	libOpenMAXAL
 
 LOCAL_STATIC_LIBRARIES := \
     libOpenSLESUT
