@@ -212,9 +212,18 @@ extern SL_API const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUE;
 struct SLAndroidBufferQueueItf_;
 typedef const struct SLAndroidBufferQueueItf_ * const * SLAndroidBufferQueueItf;
 
-#define SL_ANDROID_ITEMKEY_NONE          ((SLuint32) 0x00000000)
-#define SL_ANDROID_ITEMKEY_EOS           ((SLuint32) 0x00000001)
-#define SL_ANDROID_ITEMKEY_DISCONTINUITY ((SLuint32) 0x00000002)
+#define SL_ANDROID_ITEMKEY_NONE             ((SLuint32) 0x00000000)
+#define SL_ANDROID_ITEMKEY_EOS              ((SLuint32) 0x00000001)
+#define SL_ANDROID_ITEMKEY_DISCONTINUITY    ((SLuint32) 0x00000002)
+#define SL_ANDROID_ITEMKEY_BUFFERQUEUEEVENT ((SLuint32) 0x00000003)
+
+#define SL_ANDROIDBUFFERQUEUEEVENT_NONE        ((SLuint32) 0x00000000)
+#define SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED   ((SLuint32) 0x00000001)
+#define SL_ANDROIDBUFFERQUEUEEVENT_UNREALIZED  ((SLuint32) 0x00000002)
+#define SL_ANDROIDBUFFERQUEUEEVENT_CLEARED     ((SLuint32) 0x00000004)
+#define SL_ANDROIDBUFFERQUEUEEVENT_STOPPED     ((SLuint32) 0x00000008)
+#define SL_ANDROIDBUFFERQUEUEEVENT_ERROR       ((SLuint32) 0x00000010)
+#define SL_ANDROIDBUFFERQUEUEEVENT_CONTENT_END ((SLuint32) 0x00000020)
 
 typedef struct SLAndroidBufferItem_ {
     SLuint32 itemKey;  // identifies the item
@@ -263,6 +272,15 @@ struct SLAndroidBufferQueueItf_ {
         SLAndroidBufferQueueState *pState
     );
 
+    SLresult (*SetCallbackEventsMask) (
+            SLAndroidBufferQueueItf self,
+            SLuint32 eventFlags
+    );
+
+    SLresult (*GetCallbackEventsMask) (
+            SLAndroidBufferQueueItf self,
+            SLuint32 *pEventFlags
+    );
 };
 
 

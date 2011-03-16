@@ -100,7 +100,7 @@ static void setItems(const SLAndroidBufferItem *pItems, SLuint32 itemsLength,
 }
 
 
-SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf self,
+static SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf self,
         slAndroidBufferQueueCallback callback, void *pContext)
 {
     SL_ENTER_INTERFACE
@@ -138,7 +138,7 @@ SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf self,
 }
 
 
-SLresult IAndroidBufferQueue_Clear(SLAndroidBufferQueueItf self)
+static SLresult IAndroidBufferQueue_Clear(SLAndroidBufferQueueItf self)
 {
     SL_ENTER_INTERFACE
     result = SL_RESULT_SUCCESS;
@@ -159,6 +159,7 @@ SLresult IAndroidBufferQueue_Clear(SLAndroidBufferQueueItf self)
         thiz->mBufferArray[i].mDataSize = 0;
         thiz->mBufferArray[i].mDataSizeConsumed = 0;
         thiz->mBufferArray[i].mBufferContext = NULL;
+        thiz->mBufferArray[i].mBufferState = SL_ANDROIDBUFFERQUEUEEVENT_NONE;
         switch (thiz->mBufferType) {
           case kAndroidBufferTypeMpeg2Ts:
             thiz->mBufferArray[i].mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
@@ -191,7 +192,7 @@ SLresult IAndroidBufferQueue_Clear(SLAndroidBufferQueueItf self)
 }
 
 
-SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
+static SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
         void *pBufferContext,
         void *pData,
         SLuint32 dataLength,
@@ -236,6 +237,7 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
             oldRear->mDataSize = dataLength;
             oldRear->mDataSizeConsumed = 0;
             oldRear->mBufferContext = pBufferContext;
+            oldRear->mBufferState = SL_ANDROIDBUFFERQUEUEEVENT_NONE;
             thiz->mRear = newRear;
             ++thiz->mState.count;
             setItems(pItems, itemsLength, thiz->mBufferType, oldRear);
@@ -251,7 +253,7 @@ SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
 }
 
 
-SLresult IAndroidBufferQueue_GetState(SLAndroidBufferQueueItf self,
+static SLresult IAndroidBufferQueue_GetState(SLAndroidBufferQueueItf self,
         SLAndroidBufferQueueState *pState)
 {
     SL_ENTER_INTERFACE
@@ -277,11 +279,54 @@ SLresult IAndroidBufferQueue_GetState(SLAndroidBufferQueueItf self,
 }
 
 
+static SLresult IAndroidBufferQueue_SetCallbackEventsMask(SLAndroidBufferQueueItf self,
+        SLuint32 eventFlags)
+{
+    SL_ENTER_INTERFACE
+
+    IAndroidBufferQueue *thiz = (IAndroidBufferQueue *) self;
+    interface_lock_exclusive(thiz);
+    // FIXME only supporting SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED in this implementation
+    if ((SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED == eventFlags) ||
+            (SL_ANDROIDBUFFERQUEUEEVENT_NONE == eventFlags)) {
+        thiz->mCallbackEventsMask = eventFlags;
+        result = SL_RESULT_SUCCESS;
+    } else {
+        result = SL_RESULT_FEATURE_UNSUPPORTED;
+    }
+    interface_unlock_exclusive(thiz);
+
+    SL_LEAVE_INTERFACE
+}
+
+
+static SLresult IAndroidBufferQueue_GetCallbackEventsMask(SLAndroidBufferQueueItf self,
+        SLuint32 *pEventFlags)
+{
+    SL_ENTER_INTERFACE
+
+    if (NULL == pEventFlags) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IAndroidBufferQueue *thiz = (IAndroidBufferQueue *) self;
+        interface_lock_peek(thiz);
+        SLuint32 callbackEventsMask = thiz->mCallbackEventsMask;
+        interface_unlock_peek(thiz);
+        *pEventFlags = callbackEventsMask;
+        result = SL_RESULT_SUCCESS;
+    }
+
+    SL_LEAVE_INTERFACE
+}
+
+
 static const struct SLAndroidBufferQueueItf_ IAndroidBufferQueue_Itf = {
     IAndroidBufferQueue_RegisterCallback,
     IAndroidBufferQueue_Clear,
     IAndroidBufferQueue_Enqueue,
-    IAndroidBufferQueue_GetState
+    IAndroidBufferQueue_GetState,
+    IAndroidBufferQueue_SetCallbackEventsMask,
+    IAndroidBufferQueue_GetCallbackEventsMask
 };
 
 
@@ -295,6 +340,7 @@ void IAndroidBufferQueue_init(void *self)
 
     thiz->mCallback = NULL;
     thiz->mContext = NULL;
+    thiz->mCallbackEventsMask = SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED;
 
     thiz->mBufferType = kAndroidBufferTypeInvalid;
     thiz->mBufferArray = NULL;

@@ -645,6 +645,7 @@ typedef struct {
     IObject *mThis;
     SLAndroidBufferQueueState mState;
     slAndroidBufferQueueCallback mCallback;
+    SLuint32 mCallbackEventsMask;
     void *mContext;
     SLuint16 mNumBuffers;
     AndroidBufferType_type mBufferType;
