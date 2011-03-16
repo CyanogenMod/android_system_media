@@ -37,9 +37,18 @@ extern XA_API const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUE;
 struct XAAndroidBufferQueueItf_;
 typedef const struct XAAndroidBufferQueueItf_ * const * XAAndroidBufferQueueItf;
 
-#define XA_ANDROID_ITEMKEY_NONE          ((XAuint32) 0x00000000)
-#define XA_ANDROID_ITEMKEY_EOS           ((XAuint32) 0x00000001)
-#define XA_ANDROID_ITEMKEY_DISCONTINUITY ((XAuint32) 0x00000002)
+#define XA_ANDROID_ITEMKEY_NONE             ((XAuint32) 0x00000000)
+#define XA_ANDROID_ITEMKEY_EOS              ((XAuint32) 0x00000001)
+#define XA_ANDROID_ITEMKEY_DISCONTINUITY    ((XAuint32) 0x00000002)
+#define XA_ANDROID_ITEMKEY_BUFFERQUEUEEVENT ((XAuint32) 0x00000003)
+
+#define XA_ANDROIDBUFFERQUEUEEVENT_NONE        ((SLuint32) 0x00000000)
+#define XA_ANDROIDBUFFERQUEUEEVENT_PROCESSED   ((SLuint32) 0x00000001)
+#define XA_ANDROIDBUFFERQUEUEEVENT_UNREALIZED  ((SLuint32) 0x00000002)
+#define XA_ANDROIDBUFFERQUEUEEVENT_CLEARED     ((SLuint32) 0x00000004)
+#define XA_ANDROIDBUFFERQUEUEEVENT_STOPPED     ((SLuint32) 0x00000008)
+#define XA_ANDROIDBUFFERQUEUEEVENT_ERROR       ((SLuint32) 0x00000010)
+#define XA_ANDROIDBUFFERQUEUEEVENT_CONTENT_END ((SLuint32) 0x00000020)
 
 typedef struct XAAndroidBufferItem_ {
     XAuint32 itemKey;  // identifies the item
@@ -86,6 +95,17 @@ struct XAAndroidBufferQueueItf_ {
     XAresult (*GetState) (
         XAAndroidBufferQueueItf self,
         XAAndroidBufferQueueState *pState
+    );
+
+
+    XAresult (*SetCallbackEventsMask) (
+            XAAndroidBufferQueueItf self,
+            XAuint32 eventFlags
+    );
+
+    XAresult (*GetCallbackEventsMask) (
+            XAAndroidBufferQueueItf self,
+            XAuint32 *pEventFlags
     );
 };
 

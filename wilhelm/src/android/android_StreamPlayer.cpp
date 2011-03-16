@@ -63,6 +63,12 @@ StreamSourceAppProxy::~StreamSourceAppProxy() {
     mBuffers.clear();
 }
 
+const SLuint32 StreamSourceAppProxy::kItemProcessed[NB_BUFFEREVENT_ITEM_FIELDS] = {
+        SL_ANDROID_ITEMKEY_BUFFERQUEUEEVENT, // item key
+        sizeof(SLuint32),                    // item size
+        SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED // item data
+};
+
 //--------------------------------------------------
 // IStreamSource implementation
 void StreamSourceAppProxy::setListener(const sp<IStreamListener> &listener) {
@@ -189,9 +195,12 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
 
                     // data has been consumed, and the buffer queue state has been updated
                     // we will notify the client if applicable
-                    callback = mAndroidBufferQueue->mCallback;
-                    // save callback data
-                    callbackPContext = mAndroidBufferQueue->mContext;
+                    if (mAndroidBufferQueue->mCallbackEventsMask &
+                            SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED) {
+                        callback = mAndroidBufferQueue->mCallback;
+                        // save callback data
+                        callbackPContext = mAndroidBufferQueue->mContext;
+                    }
                 }
                 //SL_LOGD("onBufferAvailable() %d buffers available after enqueue",
                 //     mAvailableBuffers.size());
@@ -215,17 +224,17 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
 
     // notify client
     if (NULL != callback) {
-        // oldFront was only initialized in the code path where callback is initialized
-        //    so no need to check if it's valid
         (*callback)(&mAndroidBufferQueue->mItf, callbackPContext,
+                // oldFront was only initialized in the code path where callback is initialized
+                //    so no need to check if it's valid
                 (void *)oldFront->mBufferContext, /* pBufferContext */
                 (void *)oldFront->mDataBuffer,/* pBufferData  */
                 oldFront->mDataSize, /* dataSize  */
                 // here a buffer is only dequeued when fully consumed
                 oldFront->mDataSize, /* dataUsed  */
-                // no messages during playback
-                0, /* itemsLength */
-                NULL /* pItems */);
+                // no messages during playback other than marking the buffer as processed
+                (SLAndroidBufferItem*)(&kItemProcessed) /* pItems */,
+                3*sizeof(SLuint32) /* itemsLength */ );
     }
 }
 

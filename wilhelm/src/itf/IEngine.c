@@ -312,6 +312,8 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataSize = 0;
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataSizeConsumed = 0;
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mBufferContext = NULL;
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mBufferState =
+                                        SL_ANDROIDBUFFERQUEUEEVENT_NONE;
                                 switch (thiz->mAndroidBufferQueue.mBufferType) {
                                   case kAndroidBufferTypeMpeg2Ts:
                                     thiz->mAndroidBufferQueue.mBufferArray[i].mItems.mTsCmdData.
@@ -1186,6 +1188,8 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataSize = 0;
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mDataSizeConsumed = 0;
                                 thiz->mAndroidBufferQueue.mBufferArray[i].mBufferContext = NULL;
+                                thiz->mAndroidBufferQueue.mBufferArray[i].mBufferState =
+                                        XA_ANDROIDBUFFERQUEUEEVENT_NONE;
                                 switch (thiz->mAndroidBufferQueue.mBufferType) {
                                   case kAndroidBufferTypeMpeg2Ts:
                                     thiz->mAndroidBufferQueue.mBufferArray[i].mItems.mTsCmdData.
