@@ -616,13 +616,13 @@ void SfPlayer::onDecode() {
                 reachedEndOfStream();
                 break;
             case INFO_FORMAT_CHANGED:
-                SL_LOGI("MediaSource::read encountered INFO_FORMAT_CHANGED");
+                SL_LOGD("MediaSource::read encountered INFO_FORMAT_CHANGED");
                 // reconfigure output
                 updatePlaybackParamsFromSource();
                 continueDecoding = true;
                 break;
             case INFO_DISCONTINUITY:
-                SL_LOGI("MediaSource::read encountered INFO_DISCONTINUITY");
+                SL_LOGD("MediaSource::read encountered INFO_DISCONTINUITY");
                 continueDecoding = true;
                 break;
             default:

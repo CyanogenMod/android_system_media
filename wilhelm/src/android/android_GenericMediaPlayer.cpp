@@ -72,7 +72,7 @@ GenericMediaPlayer::GenericMediaPlayer(const AudioPlayback_Parameters* params, b
     mPlayer(0),
     mPlayerClient(0)
 {
-    SL_LOGI("GenericMediaPlayer::GenericMediaPlayer()");
+    SL_LOGD("GenericMediaPlayer::GenericMediaPlayer()");
 
     mServiceManager = defaultServiceManager();
     mBinder = mServiceManager->getService(String16("media.player"));
@@ -84,7 +84,7 @@ GenericMediaPlayer::GenericMediaPlayer(const AudioPlayback_Parameters* params, b
 }
 
 GenericMediaPlayer::~GenericMediaPlayer() {
-    SL_LOGI("GenericMediaPlayer::~GenericMediaPlayer()");
+    SL_LOGD("GenericMediaPlayer::~GenericMediaPlayer()");
 
 }
 
@@ -101,7 +101,7 @@ void GenericMediaPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfa
 //--------------------------------------------------
 // Event handlers
 void GenericMediaPlayer::onPrepare() {
-    SL_LOGI("GenericMediaPlayer::onPrepare()");
+    SL_LOGD("GenericMediaPlayer::onPrepare()");
     if (!(mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
         if (mHasVideo) {
             if (mVideoSurface != 0) {
@@ -115,13 +115,13 @@ void GenericMediaPlayer::onPrepare() {
         mPlayerClient->blockUntilPlayerPrepared();
         GenericPlayer::onPrepare();
     }
-    SL_LOGI("GenericMediaPlayer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
+    SL_LOGD("GenericMediaPlayer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
 }
 
 void GenericMediaPlayer::onPlay() {
-    SL_LOGI("GenericMediaPlayer::onPlay()");
+    SL_LOGD("GenericMediaPlayer::onPlay()");
     if ((mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
-        SL_LOGI("starting player");
+        SL_LOGD("starting player");
         mPlayer->start();
         mStateFlags |= kFlagPlaying;
     } else {
@@ -130,7 +130,7 @@ void GenericMediaPlayer::onPlay() {
 }
 
 void GenericMediaPlayer::onPause() {
-    SL_LOGI("GenericMediaPlayer::onPause()");
+    SL_LOGD("GenericMediaPlayer::onPause()");
     if ((mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
         mPlayer->pause();
         mStateFlags &= ~kFlagPlaying;

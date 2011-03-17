@@ -233,7 +233,7 @@ typedef struct {
 // Is used with buffers of type kAndroidBufferTypeMpeg2Ts
 typedef struct {
     SLuint32 mTsCmdCode;
-    SLAint64 mPts;
+    SLAuint64 mPts;
 } Mpeg2TsCommands;
 
 // Union of the different structures to hold items stored in an AdvancedBufferHeader

@@ -388,7 +388,7 @@ XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playS
 //-----------------------------------------------------------------------------
 void android_Player_androidBufferQueue_registerCallback_l(CMediaPlayer *mp) {
     if ((mp->mAndroidObjType == AV_PLR_TS_ABQ) && (mp->mAVPlayer != 0)) {
-        SL_LOGI("android_Player_androidBufferQueue_registerCallback_l");
+        SL_LOGD("android_Player_androidBufferQueue_registerCallback_l");
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
         splr->registerQueueCallback(
                 (const void*)mp, false /*userIsAudioPlayer*/,

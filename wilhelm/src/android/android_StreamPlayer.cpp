@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define USE_LOG SLAndroidLogLevel_Verbose
+//#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
 #include <media/IMediaPlayerService.h>
@@ -58,7 +58,7 @@ StreamSourceAppProxy::StreamSourceAppProxy(
 }
 
 StreamSourceAppProxy::~StreamSourceAppProxy() {
-    SL_LOGI("StreamSourceAppProxy::~StreamSourceAppProxy()");
+    SL_LOGD("StreamSourceAppProxy::~StreamSourceAppProxy()");
     mListener.clear();
     mBuffers.clear();
 }
@@ -244,14 +244,14 @@ StreamPlayer::StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo) :
         GenericMediaPlayer(params, hasVideo),
         mAppProxy(0)
 {
-    SL_LOGI("StreamPlayer::StreamPlayer()");
+    SL_LOGD("StreamPlayer::StreamPlayer()");
 
     mPlaybackParams = *params;
 
 }
 
 StreamPlayer::~StreamPlayer() {
-    SL_LOGI("StreamPlayer::~StreamPlayer()");
+    SL_LOGD("StreamPlayer::~StreamPlayer()");
 
     mAppProxy.clear();
 }
@@ -274,7 +274,7 @@ void StreamPlayer::registerQueueCallback(
         const void* user, bool userIsAudioPlayer,
         void *context,
         const void *caller) {
-    SL_LOGI("StreamPlayer::registerQueueCallback");
+    SL_LOGD("StreamPlayer::registerQueueCallback");
     Mutex::Autolock _l(mAppProxyLock);
 
     mAppProxy = new StreamSourceAppProxy(
@@ -282,7 +282,7 @@ void StreamPlayer::registerQueueCallback(
             context, caller);
 
     CHECK(mAppProxy != 0);
-    SL_LOGI("StreamPlayer::registerQueueCallback end");
+    SL_LOGD("StreamPlayer::registerQueueCallback end");
 }
 
 
@@ -304,14 +304,14 @@ void StreamPlayer::appClear_l() {
 //--------------------------------------------------
 // Event handlers
 void StreamPlayer::onPrepare() {
-    SL_LOGI("StreamPlayer::onPrepare()");
+    SL_LOGD("StreamPlayer::onPrepare()");
     Mutex::Autolock _l(mAppProxyLock);
     if (mAppProxy != 0) {
         mPlayer = mMediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
                 mAppProxy /*IStreamSource*/, mPlaybackParams.sessionId);
         // blocks until mPlayer is prepared
         GenericMediaPlayer::onPrepare();
-        SL_LOGI("StreamPlayer::onPrepare() done");
+        SL_LOGD("StreamPlayer::onPrepare() done");
     } else {
         SL_LOGE("Nothing to do here because there is no registered callback");
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define USE_LOG SLAndroidLogLevel_Verbose
+//#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
 
@@ -71,7 +71,7 @@ void AudioSfDecoder::startPrefetch_async() {
 //--------------------------------------------------
 // Event handlers
 void AudioSfDecoder::onPrepare() {
-    SL_LOGI("AudioSfDecoder::onPrepare()");
+    SL_LOGD("AudioSfDecoder::onPrepare()");
 
     sp<DataSource> dataSource;
 
@@ -196,19 +196,19 @@ void AudioSfDecoder::onPrepare() {
     createAudioSink();
 
     GenericPlayer::onPrepare();
-    SL_LOGI("AudioSfDecoder::onPrepare() done, mStateFlags=0x%x", mStateFlags);
+    SL_LOGD("AudioSfDecoder::onPrepare() done, mStateFlags=0x%x", mStateFlags);
 }
 
 
 void AudioSfDecoder::onPause() {
-    SL_LOGI("AudioSfDecoder::onPause()");
+    SL_LOGD("AudioSfDecoder::onPause()");
     GenericPlayer::onPause();
     pauseAudioSink();
 }
 
 
 void AudioSfDecoder::onPlay() {
-    SL_LOGI("AudioSfDecoder::onPlay()");
+    SL_LOGD("AudioSfDecoder::onPlay()");
     GenericPlayer::onPlay();
     startAudioSink();
 }
@@ -346,13 +346,13 @@ void AudioSfDecoder::onDecode() {
                 }
                 break;
             case INFO_FORMAT_CHANGED:
-                SL_LOGI("MediaSource::read encountered INFO_FORMAT_CHANGED");
+                SL_LOGD("MediaSource::read encountered INFO_FORMAT_CHANGED");
                 // reconfigure output
                 updateAudioSink();
                 continueDecoding = true;
                 break;
             case INFO_DISCONTINUITY:
-                SL_LOGI("MediaSource::read encountered INFO_DISCONTINUITY");
+                SL_LOGD("MediaSource::read encountered INFO_DISCONTINUITY");
                 continueDecoding = true;
                 break;
             default:

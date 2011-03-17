@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define USE_LOG SLAndroidLogLevel_Verbose
+//#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
 
@@ -25,13 +25,13 @@ AudioToCbRenderer::AudioToCbRenderer(AudioPlayback_Parameters* params) : AudioSf
         mDecodeCbf(NULL),
         mDecodeUser(NULL)
 {
-    SL_LOGI("AudioToCbRenderer::AudioToCbRenderer()");
+    SL_LOGD("AudioToCbRenderer::AudioToCbRenderer()");
 
 }
 
 
 AudioToCbRenderer::~AudioToCbRenderer() {
-    SL_LOGI("AudioToCbRenderer::~AudioToCbRenderer()");
+    SL_LOGD("AudioToCbRenderer::~AudioToCbRenderer()");
 
 }
 
@@ -43,9 +43,9 @@ void AudioToCbRenderer::setDataPushListener(const data_push_cbf_t pushCbf, void*
 //--------------------------------------------------
 // Event handlers
 void AudioToCbRenderer::onPrepare() {
-    SL_LOGI("AudioToCbRenderer::onPrepare()");
+    SL_LOGD("AudioToCbRenderer::onPrepare()");
     AudioSfDecoder::onPrepare();
-    SL_LOGI("AudioToCbRenderer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
+    SL_LOGD("AudioToCbRenderer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
 }
 
 
@@ -90,13 +90,13 @@ void AudioToCbRenderer::onRender() {
 //--------------------------------------------------
 // Audio output
 void AudioToCbRenderer::createAudioSink() {
-    SL_LOGI("AudioToCbRenderer::createAudioSink()");
+    SL_LOGD("AudioToCbRenderer::createAudioSink()");
     SL_LOGV("sample rate = %d nb channels = %d", mSampleRateHz, mNumChannels);
 }
 
 
 void AudioToCbRenderer::updateAudioSink() {
-    SL_LOGI("AudioToCbRenderer::updateAudioSink()");
+    SL_LOGD("AudioToCbRenderer::updateAudioSink()");
     if (mAudioSource != 0) {
         sp<MetaData> meta = mAudioSource->getFormat();
 
@@ -110,12 +110,12 @@ void AudioToCbRenderer::updateAudioSink() {
 
 
 void AudioToCbRenderer::startAudioSink() {
-    SL_LOGI("AudioToCbRenderer::startAudioSink()");
+    SL_LOGD("AudioToCbRenderer::startAudioSink()");
 }
 
 
 void AudioToCbRenderer::pauseAudioSink() {
-    SL_LOGI("AudioToCbRenderer::pauseAudioSink()");
+    SL_LOGD("AudioToCbRenderer::pauseAudioSink()");
 }
 
 } // namespace android

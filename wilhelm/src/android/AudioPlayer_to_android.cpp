@@ -91,7 +91,7 @@ static size_t adecoder_writeToBufferQueue(const uint8_t *data, size_t size, void
     if (NULL == user) {
         return sizeConsumed;
     }
-    SL_LOGI("received %d bytes from decoder", size);
+    SL_LOGD("received %d bytes from decoder", size);
     CAudioPlayer *ap = (CAudioPlayer *)user;
     slBufferQueueCallback callback = NULL;
     void * callbackPContext = NULL;
@@ -706,7 +706,7 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
             } else if (A_PLR_PCM_BQ == ap->mAndroidObjType) {
                 ((android::AudioToCbRenderer*)ap->mAPlayer.get())->startPrefetch_async();
             } else if (A_PLR_TS_ABQ == ap->mAndroidObjType) {
-                SL_LOGI("Received SfPlayer::kEventPrepared from AVPlayer for CAudioPlayer %p", ap);
+                SL_LOGD("Received SfPlayer::kEventPrepared from AVPlayer for CAudioPlayer %p", ap);
             }
 
             ap->mAndroidObjState = ANDROID_READY;
