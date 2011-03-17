@@ -8,6 +8,6 @@ LOCAL_SRC_FILES := native-media-jni.c
 LOCAL_CFLAGS += -Isystem/media/wilhelm/include
 
 LOCAL_PRELINK_MODULE := false
-LOCAL_SHARED_LIBRARIES += libutils libOpenSLES libandroid
+LOCAL_SHARED_LIBRARIES += libutils libOpenMAXAL libandroid
 
 include $(BUILD_SHARED_LIBRARY)

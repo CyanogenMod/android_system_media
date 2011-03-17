@@ -428,3 +428,12 @@ extern SLresult IEngineCapabilities_QueryVibraCapabilities(SLEngineCapabilitiesI
 extern CEngine *theOneTrueEngine;
 extern pthread_mutex_t theOneTrueMutex;
 extern unsigned theOneTrueRefCount;
+
+extern LI_API SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
+    const SLEngineOption *pEngineOptions, SLuint32 numInterfaces,
+    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired,
+    const ClassTable *pCEngine_class);
+extern LI_API SLresult liQueryNumSupportedInterfaces(SLuint32 *pNumSupportedInterfaces,
+        const ClassTable *clazz);
+extern LI_API SLresult liQuerySupportedInterfaces(SLuint32 index, SLInterfaceID *pInterfaceId,
+        const ClassTable *clazz);

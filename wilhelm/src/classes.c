@@ -497,7 +497,7 @@ static const ClassTable * const xaClasses[] = {
 
 /* \brief Map SL_OBJECTID to class or NULL if object ID not supported */
 
-const ClassTable *objectIDtoClass(SLuint32 objectID)
+LI_API const ClassTable *objectIDtoClass(SLuint32 objectID)
 {
     // object ID is the engine and always present
     assert(NULL != slClasses[0]);
