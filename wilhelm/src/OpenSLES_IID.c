@@ -39,7 +39,7 @@
 #include "MPH.h"
 
 #ifdef __cplusplus
-extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
+LI_API extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
 #endif
 
 /*****************************************************************************/
@@ -50,7 +50,7 @@ extern const struct SLInterfaceID_ SL_IID_array[MPH_MAX];
 // to an interface GUID from an MPH (a short-hand representation of the full interface GUID).
 // The presence of an entry does not represent a commitment to support that particular interface.
 
-const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
+LI_API const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
 
 // OpenSL ES 1.0.1 interfaces
 
@@ -181,83 +181,3 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
     // same as SL_IID_ANDROIDBUFFERQUEUE
 
 };
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-// OpenSL ES 1.0.1 interfaces
-const SLInterfaceID SL_IID_3DCOMMIT = &SL_IID_array[MPH_3DCOMMIT];
-const SLInterfaceID SL_IID_3DDOPPLER = &SL_IID_array[MPH_3DDOPPLER];
-const SLInterfaceID SL_IID_3DGROUPING = &SL_IID_array[MPH_3DGROUPING];
-const SLInterfaceID SL_IID_3DLOCATION = &SL_IID_array[MPH_3DLOCATION];
-const SLInterfaceID SL_IID_3DMACROSCOPIC = &SL_IID_array[MPH_3DMACROSCOPIC];
-const SLInterfaceID SL_IID_3DSOURCE = &SL_IID_array[MPH_3DSOURCE];
-const SLInterfaceID SL_IID_AUDIODECODERCAPABILITIES = &SL_IID_array[MPH_AUDIODECODERCAPABILITIES];
-const SLInterfaceID SL_IID_AUDIOENCODER = &SL_IID_array[MPH_AUDIOENCODER];
-const SLInterfaceID SL_IID_AUDIOENCODERCAPABILITIES = &SL_IID_array[MPH_AUDIOENCODERCAPABILITIES];
-const SLInterfaceID SL_IID_AUDIOIODEVICECAPABILITIES = &SL_IID_array[MPH_AUDIOIODEVICECAPABILITIES];
-const SLInterfaceID SL_IID_BASSBOOST = &SL_IID_array[MPH_BASSBOOST];
-const SLInterfaceID SL_IID_BUFFERQUEUE = &SL_IID_array[MPH_BUFFERQUEUE];
-const SLInterfaceID SL_IID_DEVICEVOLUME = &SL_IID_array[MPH_DEVICEVOLUME];
-const SLInterfaceID SL_IID_DYNAMICINTERFACEMANAGEMENT =
-    &SL_IID_array[MPH_DYNAMICINTERFACEMANAGEMENT];
-const SLInterfaceID SL_IID_DYNAMICSOURCE = &SL_IID_array[MPH_DYNAMICSOURCE];
-const SLInterfaceID SL_IID_EFFECTSEND = &SL_IID_array[MPH_EFFECTSEND];
-const SLInterfaceID SL_IID_ENGINE = &SL_IID_array[MPH_ENGINE];
-const SLInterfaceID SL_IID_ENGINECAPABILITIES = &SL_IID_array[MPH_ENGINECAPABILITIES];
-const SLInterfaceID SL_IID_ENVIRONMENTALREVERB = &SL_IID_array[MPH_ENVIRONMENTALREVERB];
-const SLInterfaceID SL_IID_EQUALIZER = &SL_IID_array[MPH_EQUALIZER];
-const SLInterfaceID SL_IID_LED = &SL_IID_array[MPH_LED];
-const SLInterfaceID SL_IID_METADATAEXTRACTION = &SL_IID_array[MPH_METADATAEXTRACTION];
-const SLInterfaceID SL_IID_METADATATRAVERSAL = &SL_IID_array[MPH_METADATATRAVERSAL];
-const SLInterfaceID SL_IID_MIDIMESSAGE = &SL_IID_array[MPH_MIDIMESSAGE];
-const SLInterfaceID SL_IID_MIDIMUTESOLO = &SL_IID_array[MPH_MIDIMUTESOLO];
-const SLInterfaceID SL_IID_MIDITEMPO = &SL_IID_array[MPH_MIDITEMPO];
-const SLInterfaceID SL_IID_MIDITIME = &SL_IID_array[MPH_MIDITIME];
-const SLInterfaceID SL_IID_MUTESOLO = &SL_IID_array[MPH_MUTESOLO];
-const SLInterfaceID SL_IID_NULL = &SL_IID_array[MPH_NULL];
-const SLInterfaceID SL_IID_OBJECT = &SL_IID_array[MPH_OBJECT];
-const SLInterfaceID SL_IID_OUTPUTMIX = &SL_IID_array[MPH_OUTPUTMIX];
-const SLInterfaceID SL_IID_PITCH = &SL_IID_array[MPH_PITCH];
-const SLInterfaceID SL_IID_PLAY = &SL_IID_array[MPH_PLAY];
-const SLInterfaceID SL_IID_PLAYBACKRATE = &SL_IID_array[MPH_PLAYBACKRATE];
-const SLInterfaceID SL_IID_PREFETCHSTATUS = &SL_IID_array[MPH_PREFETCHSTATUS];
-const SLInterfaceID SL_IID_PRESETREVERB = &SL_IID_array[MPH_PRESETREVERB];
-const SLInterfaceID SL_IID_RATEPITCH = &SL_IID_array[MPH_RATEPITCH];
-const SLInterfaceID SL_IID_RECORD = &SL_IID_array[MPH_RECORD];
-const SLInterfaceID SL_IID_SEEK = &SL_IID_array[MPH_SEEK];
-const SLInterfaceID SL_IID_THREADSYNC = &SL_IID_array[MPH_THREADSYNC];
-const SLInterfaceID SL_IID_VIBRA = &SL_IID_array[MPH_VIBRA];
-const SLInterfaceID SL_IID_VIRTUALIZER = &SL_IID_array[MPH_VIRTUALIZER];
-const SLInterfaceID SL_IID_VISUALIZATION = &SL_IID_array[MPH_VISUALIZATION];
-const SLInterfaceID SL_IID_VOLUME = &SL_IID_array[MPH_VOLUME];
-
-// Wilhelm desktop extended interfaces
-extern const SLInterfaceID SL_IID_OUTPUTMIXEXT;
-const SLInterfaceID SL_IID_OUTPUTMIXEXT = &SL_IID_array[MPH_OUTPUTMIXEXT];
-
-// Android API level 9 extended interfaces
-const SLInterfaceID SL_IID_ANDROIDEFFECT = &SL_IID_array[MPH_ANDROIDEFFECT];
-const SLInterfaceID SL_IID_ANDROIDEFFECTCAPABILITIES = &SL_IID_array[MPH_ANDROIDEFFECTCAPABILITIES];
-const SLInterfaceID SL_IID_ANDROIDEFFECTSEND = &SL_IID_array[MPH_ANDROIDEFFECTSEND];
-const SLInterfaceID SL_IID_ANDROIDCONFIGURATION = &SL_IID_array[MPH_ANDROIDCONFIGURATION];
-const SLInterfaceID SL_IID_ANDROIDSIMPLEBUFFERQUEUE = &SL_IID_array[MPH_ANDROIDSIMPLEBUFFERQUEUE];
-
-// Android API level 10 extended interfaces
-const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUE = &SL_IID_array[MPH_ANDROIDBUFFERQUEUE];
-
-// OpenMAX AL 1.0.1
-const XAInterfaceID XA_IID_ENGINE = (XAInterfaceID) &SL_IID_array[MPH_XAENGINE];
-const XAInterfaceID XA_IID_PLAY = (XAInterfaceID) &SL_IID_array[MPH_XAPLAY];
-const XAInterfaceID XA_IID_STREAMINFORMATION =
-        (XAInterfaceID) &SL_IID_array[MPH_XASTREAMINFORMATION];
-const XAInterfaceID XA_IID_VOLUME = (XAInterfaceID) &SL_IID_array[MPH_XAVOLUME];
-
-// OpenMAX AL 1.0.1 Android API level 10 extended interfaces
-const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUE =
-        (XAInterfaceID) &SL_IID_array[MPH_ANDROIDBUFFERQUEUE]; //same as SL
-
-#ifdef __cplusplus
-}
-#endif

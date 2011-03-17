@@ -21,7 +21,7 @@
 
 /** \brief Internal code shared by slCreateEngine and xaCreateEngine */
 
-static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
+LI_API SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     const SLEngineOption *pEngineOptions, SLuint32 numInterfaces,
     const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired,
     const ClassTable *pCEngine_class)
@@ -172,24 +172,9 @@ static SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
 }
 
 
-/** \brief slCreateEngine Function */
-
-SL_API SLresult SLAPIENTRY slCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
-    const SLEngineOption *pEngineOptions, SLuint32 numInterfaces,
-    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
-{
-    SL_ENTER_GLOBAL
-
-    result = liCreateEngine(pEngine, numOptions, pEngineOptions, numInterfaces, pInterfaceIds,
-            pInterfaceRequired, objectIDtoClass(SL_OBJECTID_ENGINE));
-
-    SL_LEAVE_GLOBAL
-}
-
-
 /** Internal function for slQuerySupportedEngineInterfaces and xaQuerySupportedEngineInterfaces */
 
-static SLresult liQueryNumSupportedInterfaces(SLuint32 *pNumSupportedInterfaces,
+LI_API SLresult liQueryNumSupportedInterfaces(SLuint32 *pNumSupportedInterfaces,
         const ClassTable *clazz)
 {
     SLresult result;
@@ -222,22 +207,9 @@ static SLresult liQueryNumSupportedInterfaces(SLuint32 *pNumSupportedInterfaces,
 }
 
 
-/** \brief slQueryNumSupportedEngineInterfaces Function */
-
-SL_API SLresult SLAPIENTRY slQueryNumSupportedEngineInterfaces(SLuint32 *pNumSupportedInterfaces)
-{
-    SL_ENTER_GLOBAL
-
-    result = liQueryNumSupportedInterfaces(pNumSupportedInterfaces,
-            objectIDtoClass(SL_OBJECTID_ENGINE));
-
-    SL_LEAVE_GLOBAL
-}
-
-
 /** Internal function for slQuerySupportedEngineInterfaces and xaQuerySupportedEngineInterfaces */
 
-static SLresult liQuerySupportedInterfaces(SLuint32 index, SLInterfaceID *pInterfaceId,
+LI_API SLresult liQuerySupportedInterfaces(SLuint32 index, SLInterfaceID *pInterfaceId,
         const ClassTable *clazz)
 {
     SLresult result;
@@ -271,61 +243,4 @@ static SLresult liQuerySupportedInterfaces(SLuint32 index, SLInterfaceID *pInter
         }
     }
     return result;
-}
-
-
-/** \brief slQuerySupportedEngineInterfaces Function */
-
-SL_API SLresult SLAPIENTRY slQuerySupportedEngineInterfaces(SLuint32 index,
-        SLInterfaceID *pInterfaceId)
-{
-    SL_ENTER_GLOBAL
-
-    result = liQuerySupportedInterfaces(index, pInterfaceId, objectIDtoClass(SL_OBJECTID_ENGINE));
-
-    SL_LEAVE_GLOBAL
-}
-
-
-/** \brief xaCreateEngine Function */
-
-XA_API XAresult XAAPIENTRY xaCreateEngine(XAObjectItf *pEngine, XAuint32 numOptions,
-        const XAEngineOption *pEngineOptions, XAuint32 numInterfaces,
-        const XAInterfaceID *pInterfaceIds, const XAboolean *pInterfaceRequired)
-{
-    XA_ENTER_GLOBAL
-
-    result = liCreateEngine((SLObjectItf *) pEngine, numOptions,
-            (const SLEngineOption *) pEngineOptions, numInterfaces,
-            (const SLInterfaceID *) pInterfaceIds, (const SLboolean *) pInterfaceRequired,
-            objectIDtoClass(XA_OBJECTID_ENGINE));
-
-    XA_LEAVE_GLOBAL
-}
-
-
-/** \brief xaQueryNumSupportedEngineInterfaces Function */
-
-XA_API XAresult XAAPIENTRY xaQueryNumSupportedEngineInterfaces(XAuint32 *pNumSupportedInterfaces)
-{
-    XA_ENTER_GLOBAL
-
-    result = liQueryNumSupportedInterfaces(pNumSupportedInterfaces,
-            objectIDtoClass(XA_OBJECTID_ENGINE));
-
-    XA_LEAVE_GLOBAL
-}
-
-
-/** \brief xaQuerySupportedEngineInterfaces Function */
-
-XA_API XAresult XAAPIENTRY xaQuerySupportedEngineInterfaces(XAuint32 index,
-        XAInterfaceID *pInterfaceId)
-{
-    XA_ENTER_GLOBAL
-
-    result = liQuerySupportedInterfaces(index, (SLInterfaceID *) pInterfaceId,
-            objectIDtoClass(XA_OBJECTID_ENGINE));
-
-    XA_LEAVE_GLOBAL
 }
