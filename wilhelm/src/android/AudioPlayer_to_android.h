@@ -69,6 +69,8 @@ extern SLresult android_audioPlayer_setConfig(CAudioPlayer *pAudioPlayer, const 
 extern SLresult android_audioPlayer_getConfig(CAudioPlayer *pAudioPlayer, const SLchar *configKey,
         SLuint32* pValueSize, void *pConfigValue);
 
+extern SLresult android_audioPlayer_preDestroy(CAudioPlayer *pAudioPlayer);
+
 extern SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer);
 
 /**************************************************************************************************

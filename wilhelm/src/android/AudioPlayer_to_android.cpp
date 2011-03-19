@@ -1030,47 +1030,62 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
 static void audioTrack_callBack_uri(int event, void* user, void *info) {
     // EVENT_MORE_DATA needs to be handled with priority over the other events
     // because it will be called the most often during playback
+
     if (event == android::AudioTrack::EVENT_MORE_DATA) {
         //SL_LOGV("received event EVENT_MORE_DATA from AudioTrack");
         // set size to 0 to signal we're not using the callback to write more data
         android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
         pBuff->size = 0;
     } else if (NULL != user) {
+        CAudioPlayer *ap = (CAudioPlayer *)user;
+        if (!ap->mAudioTrackProtector->enterCb()) {
+            // it is not safe to enter the callback (the track is about to go away)
+            return;
+        }
         switch (event) {
             case android::AudioTrack::EVENT_MARKER :
-                audioTrack_handleMarker_lockPlay((CAudioPlayer *)user);
+                audioTrack_handleMarker_lockPlay(ap);
                 break;
             case android::AudioTrack::EVENT_NEW_POS :
-                audioTrack_handleNewPos_lockPlay((CAudioPlayer *)user);
+                audioTrack_handleNewPos_lockPlay(ap);
                 break;
             case android::AudioTrack::EVENT_UNDERRUN :
-                audioTrack_handleUnderrun_lockPlay((CAudioPlayer *)user);
+                audioTrack_handleUnderrun_lockPlay(ap);
                 break;
             case android::AudioTrack::EVENT_BUFFER_END :
             case android::AudioTrack::EVENT_LOOP_END :
                 break;
             default:
                 SL_LOGE("Encountered unknown AudioTrack event %d for CAudioPlayer %p", event,
-                        (CAudioPlayer *)user);
+                        ap);
                 break;
         }
+        ap->mAudioTrackProtector->exitCb();
     }
 }
 
 //-----------------------------------------------------------------------------
 // Callback associated with an AudioTrack of an SL ES AudioPlayer that gets its data
-// from a buffer queue.
+// from a buffer queue. This will not be called once the AudioTrack has been destroyed.
 static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *info) {
     CAudioPlayer *ap = (CAudioPlayer *)user;
+
+    if (!ap->mAudioTrackProtector->enterCb()) {
+        // it is not safe to enter the callback (the track is about to go away)
+        return;
+    }
+
     void * callbackPContext = NULL;
     switch(event) {
 
     case android::AudioTrack::EVENT_MORE_DATA: {
-        //SL_LOGV("received event EVENT_MORE_DATA from AudioTrack");
+        //SL_LOGV("received event EVENT_MORE_DATA from AudioTrack TID=%d", gettid());
         slBufferQueueCallback callback = NULL;
         android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
+
         // retrieve data from the buffer queue
         interface_lock_exclusive(&ap->mBufferQueue);
+
         if (ap->mBufferQueue.mState.count != 0) {
             //SL_LOGV("nbBuffers in queue = %lu",ap->mBufferQueue.mState.count);
             assert(ap->mBufferQueue.mFront != ap->mBufferQueue.mRear);
@@ -1131,6 +1146,7 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
             ap->mAudioTrack->stop();
         }
         interface_unlock_exclusive(&ap->mBufferQueue);
+
         // notify client
         if (NULL != callback) {
             (*callback)(&ap->mBufferQueue.mItf, callbackPContext);
@@ -1139,14 +1155,17 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
     break;
 
     case android::AudioTrack::EVENT_MARKER:
+        //SL_LOGI("received event EVENT_MARKER from AudioTrack");
         audioTrack_handleMarker_lockPlay(ap);
         break;
 
     case android::AudioTrack::EVENT_NEW_POS:
+        //SL_LOGI("received event EVENT_NEW_POS from AudioTrack");
         audioTrack_handleNewPos_lockPlay(ap);
         break;
 
     case android::AudioTrack::EVENT_UNDERRUN:
+        //SL_LOGI("received event EVENT_UNDERRUN from AudioTrack");
         audioTrack_handleUnderrun_lockPlay(ap);
         break;
 
@@ -1156,6 +1175,8 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
                 (CAudioPlayer *)user);
         break;
     }
+
+    ap->mAudioTrackProtector->exitCb();
 }
 
 
@@ -1175,6 +1196,8 @@ SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
         pAudioPlayer->mAudioTrack = NULL;
         // not needed, as placement new (explicit constructor) already does this
         // pAudioPlayer->mSfPlayer.clear();
+
+        pAudioPlayer->mAudioTrackProtector = new android::AudioTrackProtector();
 
         pAudioPlayer->mSessionId = android::AudioSystem::newAudioSessionId();
 
@@ -1434,6 +1457,23 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
 
 //-----------------------------------------------------------------------------
+/**
+ * Called with a lock on AudioPlayer
+ */
+SLresult android_audioPlayer_preDestroy(CAudioPlayer *pAudioPlayer) {
+    SLresult result = SL_RESULT_SUCCESS;
+
+    object_unlock_exclusive(&pAudioPlayer->mObject);
+    if (pAudioPlayer->mAudioTrackProtector != 0) {
+        pAudioPlayer->mAudioTrackProtector->requestCbExitAndWait();
+    }
+    object_lock_exclusive(&pAudioPlayer->mObject);
+
+    return result;
+}
+
+
+//-----------------------------------------------------------------------------
 SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     SLresult result = SL_RESULT_SUCCESS;
     SL_LOGV("android_audioPlayer_destroy(%p)", pAudioPlayer);
@@ -1471,10 +1511,13 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
         break;
     }
 
+    pAudioPlayer->mAudioTrackProtector.clear();
+
     // FIXME might not be needed
     pAudioPlayer->mAndroidObjType = INVALID_TYPE;
 
     // explicit destructor
+    pAudioPlayer->mAudioTrackProtector.~sp();
     pAudioPlayer->mSfPlayer.~sp();
     pAudioPlayer->mAuxEffect.~sp();
     pAudioPlayer->mAPlayer.~sp();
