@@ -25,6 +25,7 @@
 #include <stddef.h> // offsetof
 #include <stdlib.h> // malloc
 #include <string.h> // memcmp
+#include <strings.h>
 #include <stdio.h>  // debugging
 #include <assert.h> // debugging
 #include <pthread.h>
