@@ -70,8 +70,12 @@ void CAudioPlayer_Destroy(void *self)
 
 predestroy_t CAudioPlayer_PreDestroy(void *self)
 {
-#ifdef USE_OUTPUTMIXEXT
     CAudioPlayer *thiz = (CAudioPlayer *) self;
+#ifdef ANDROID
+    android_audioPlayer_preDestroy(thiz);
+#endif
+
+#ifdef USE_OUTPUTMIXEXT
     // Safe to proceed immediately if a track has not yet been assigned
     Track *track = thiz->mTrack;
     if (NULL == track) {

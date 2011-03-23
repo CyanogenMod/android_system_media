@@ -288,6 +288,7 @@ struct SndFile {
 #include "android/android_AudioToCbRenderer.h"
 #include "android/android_StreamPlayer.h"
 #include "android/android_LocAVPlayer.h"
+#include "android/AudioTrackProtector.h"
 #endif
 
 #endif  // ANDROID

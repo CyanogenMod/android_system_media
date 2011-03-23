@@ -92,6 +92,7 @@
     int mStreamType;
     /** plays the PCM data for this player */
     android::AudioTrack *mAudioTrack;                 // FIXME consolidate into one class
+    android::sp<android::AudioTrackProtector> mAudioTrackProtector;
     android::sp<android::SfPlayer> mSfPlayer;         // FIXME consolidate into one class
     android::sp<android::GenericPlayer> mAPlayer;
     /** aux effect the AudioTrack will be attached to if aux send enabled */
