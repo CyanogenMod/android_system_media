@@ -16,6 +16,7 @@
 
 #include <media/IStreamSource.h>
 #include <binder/IServiceManager.h>
+#include "android/android_GenericMediaPlayer.h"
 
 // number of SLuint32 fields to store a buffer event message in an item, by mapping each
 //   to the item key (SLuint32), the item size (SLuint32), and the item data (mask on SLuint32)

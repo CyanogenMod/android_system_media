@@ -18,6 +18,7 @@
 
 #include "sles_allinclusive.h"
 #include <media/IMediaPlayerService.h>
+#include "android_LocAVPlayer.h"
 
 
 namespace android {

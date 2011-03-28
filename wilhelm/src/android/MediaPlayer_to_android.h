@@ -17,6 +17,7 @@
 #include <surfaceflinger/Surface.h>
 #include <gui/ISurfaceTexture.h>
 
+
 /**************************************************************************************************
  * Player lifecycle
  ****************************/
@@ -33,15 +34,17 @@ extern XAresult android_Player_destroy(CMediaPlayer *mp);
  * Configuration
  ****************************/
 /**
- * pre-conditions: avp != NULL, surface != 0
+ * pre-conditions: gp != 0, surface != 0
  */
-extern XAresult android_Player_setVideoSurface(android::GenericMediaPlayer *avp,
+extern XAresult android_Player_setVideoSurface(
+        const android::sp<android::GenericPlayer> &gp,
         const android::sp<android::Surface> &surface);
 
 /**
- * pre-conditions: avp != NULL, surfaceTexture != 0
+ * pre-conditions: gp != 0, surfaceTexture != 0
  */
-extern XAresult android_Player_setVideoSurfaceTexture(android::GenericMediaPlayer *avp,
+extern XAresult android_Player_setVideoSurfaceTexture(
+        const android::sp<android::GenericPlayer> &gp,
         const android::sp<android::ISurfaceTexture> &surfaceTexture);
 
 extern XAresult android_Player_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#ifndef __ANDROID_GENERICMEDIAPLAYER_H__
+#define __ANDROID_GENERICMEDIAPLAYER_H__
 
 #include <binder/IServiceManager.h>
 #include <surfaceflinger/Surface.h>
@@ -81,3 +83,5 @@ private:
 };
 
 } // namespace android
+
+#endif /* __ANDROID_GENERICMEDIAPLAYER_H__ */

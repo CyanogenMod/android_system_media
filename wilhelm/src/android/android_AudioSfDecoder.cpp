@@ -17,6 +17,7 @@
 //#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
+#include "android/android_AudioSfDecoder.h"
 
 namespace android {
 

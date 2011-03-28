@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "android/android_AudioSfDecoder.h"
 
 //--------------------------------------------------------------------------------------------------
 namespace android {

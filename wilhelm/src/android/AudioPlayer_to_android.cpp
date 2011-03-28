@@ -17,6 +17,9 @@
 #include "sles_allinclusive.h"
 #include "utils/RefBase.h"
 #include "android_prompts.h"
+#include "android/android_AudioToCbRenderer.h"
+#include "android/android_StreamPlayer.h"
+#include "android/android_LocAVPlayer.h"
 
 template class android::KeyedVector<SLuint32, android::AudioEffect* > ;
 

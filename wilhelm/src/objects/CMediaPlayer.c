@@ -16,30 +16,12 @@
 
 /** \file CMediaPlayer.c MediaPlayer class */
 
-#ifdef ANDROID
-
-#include <binder/ProcessState.h>
-
-#include <media/IStreamSource.h>
-#include <media/mediaplayer.h>
-#include <media/stagefright/foundation/ADebug.h>
-
-#include <binder/IServiceManager.h>
-#include <media/IMediaPlayerService.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-#include <gui/SurfaceTextureClient.h>
-
-#include <fcntl.h>
-#endif
-
 #include "sles_allinclusive.h"
 
-#include <jni.h>
-
 #ifdef ANDROID
+#include <gui/SurfaceTextureClient.h>
+#include "android/android_GenericMediaPlayer.h"
 using namespace android;
-
 #endif
 
 
@@ -69,19 +51,19 @@ XAresult CMediaPlayer_Realize(void *self, XAboolean async)
                 SL_LOGE("Query NATIVE_WINDOW_CONCRETE_TYPE on ANativeWindow * %p failed; "
                         "errno %d", nativeWindow, err);
             } else {
-                android::GenericMediaPlayer* avp =
-                        static_cast<android::GenericMediaPlayer *>(thiz->mAVPlayer.get());
+                // thiz->mAVPlayer != 0 is implied by success after android_Player_realize()
                 switch (value) {
                 case NATIVE_WINDOW_SURFACE: {                // Surface
                     sp<Surface> nativeSurface(static_cast<Surface *>(nativeWindow));
-                    result = android_Player_setVideoSurface(avp, nativeSurface);
+                    result = android_Player_setVideoSurface(thiz->mAVPlayer, nativeSurface);
                     } break;
                 case NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT: { // SurfaceTextureClient
                     sp<SurfaceTextureClient> surfaceTextureClient(
                             static_cast<SurfaceTextureClient *>(nativeWindow));
                     sp<ISurfaceTexture> nativeSurfaceTexture(
                             surfaceTextureClient->getISurfaceTexture());
-                    result = android_Player_setVideoSurfaceTexture(avp, nativeSurfaceTexture);
+                    result = android_Player_setVideoSurfaceTexture(thiz->mAVPlayer,
+                            nativeSurfaceTexture);
                     } break;
                 case NATIVE_WINDOW_FRAMEBUFFER:              // FramebufferNativeWindow
                     // fall through

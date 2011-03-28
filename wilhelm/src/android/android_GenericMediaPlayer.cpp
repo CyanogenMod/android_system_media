@@ -20,6 +20,7 @@
 #include <media/IMediaPlayerService.h>
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
+#include "android_GenericMediaPlayer.h"
 
 namespace android {
 

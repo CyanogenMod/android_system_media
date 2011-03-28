@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "android_GenericMediaPlayer.h"
 
 namespace android {
 

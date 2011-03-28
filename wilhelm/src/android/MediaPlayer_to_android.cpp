@@ -17,6 +17,10 @@
 #include "sles_allinclusive.h"
 #include "utils/RefBase.h"
 #include "android_prompts.h"
+// LocAVPlayer and StreamPlayer derive from GenericMediaPlayer,
+//    so no need to #include "android_GenericMediaPlayer.h"
+#include "android_LocAVPlayer.h"
+#include "android_StreamPlayer.h"
 
 
 //-----------------------------------------------------------------------------
@@ -256,26 +260,28 @@ XAresult android_Player_destroy(CMediaPlayer *mp) {
 
 //-----------------------------------------------------------------------------
 /**
- * pre-conditions: avp != NULL, surface != NULL
+ * pre-conditions: gp != 0, surface != 0
  */
-XAresult android_Player_setVideoSurface(android::GenericMediaPlayer *avp,
+XAresult android_Player_setVideoSurface(const android::sp<android::GenericPlayer> &gp,
         const android::sp<android::Surface> &surface) {
     XAresult result = XA_RESULT_SUCCESS;
 
-    avp->setVideoSurface(surface);
+    android::GenericMediaPlayer* gmp = static_cast<android::GenericMediaPlayer*>(gp.get());
+    gmp->setVideoSurface(surface);
 
     return result;
 }
 
 
 /**
- * pre-conditions: avp != NULL, surfaceTexture != NULL
+ * pre-conditions: gp != 0, surfaceTexture != 0
  */
-XAresult android_Player_setVideoSurfaceTexture(android::GenericMediaPlayer *avp,
+XAresult android_Player_setVideoSurfaceTexture(const android::sp<android::GenericPlayer> &gp,
         const android::sp<android::ISurfaceTexture> &surfaceTexture) {
     XAresult result = XA_RESULT_SUCCESS;
 
-    avp->setVideoSurfaceTexture(surfaceTexture);
+    android::GenericMediaPlayer* gmp = static_cast<android::GenericMediaPlayer*>(gp.get());
+    gmp->setVideoSurfaceTexture(surfaceTexture);
 
     return result;
 }

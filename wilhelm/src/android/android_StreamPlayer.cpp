@@ -19,6 +19,7 @@
 #include "sles_allinclusive.h"
 #include <media/IStreamSource.h>
 #include <media/IMediaPlayerService.h>
+#include "android_StreamPlayer.h"
 
 //--------------------------------------------------------------------------------------------------
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer

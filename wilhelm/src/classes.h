@@ -18,11 +18,6 @@
 #include "android/AudioTrackProtector.h"
 #include "android/android_Effect.h"
 #include "android/android_GenericPlayer.h"
-#include "android/android_GenericMediaPlayer.h"
-#include "android/android_AudioSfDecoder.h"
-#include "android/android_AudioToCbRenderer.h"
-#include "android/android_StreamPlayer.h"
-#include "android/android_LocAVPlayer.h"
 #endif
 
 // Class structures

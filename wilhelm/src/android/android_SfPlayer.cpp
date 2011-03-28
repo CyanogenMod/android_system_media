@@ -17,7 +17,7 @@
 //#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
-
+#include "android_GenericMediaPlayer.h"
 
 #ifdef _DEBUG_AUDIO_TESTS
 // defines used for automated audio quality tests
