@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+#ifdef ANDROID
+#include "media/AudioEffect.h"
+#include "media/EffectApi.h"
+#endif
+
 /* Interface structures */
 
 typedef struct Object_interface {

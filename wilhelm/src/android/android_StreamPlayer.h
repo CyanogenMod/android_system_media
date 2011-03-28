@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <media/IStreamSource.h>
 #include <binder/IServiceManager.h>
 
 // number of SLuint32 fields to store a buffer event message in an item, by mapping each

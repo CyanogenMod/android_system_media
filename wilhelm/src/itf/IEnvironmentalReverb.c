@@ -17,6 +17,9 @@
 /* EnvironmentalReverb implementation */
 
 #include "sles_allinclusive.h"
+#ifdef ANDROID
+#include "media/EffectEnvironmentalReverbApi.h"
+#endif
 
 // Note: all Set operations use exclusive not poke,
 // because SetEnvironmentalReverbProperties is exclusive.

@@ -85,14 +85,6 @@ typedef struct COutputMix_struct COutputMix;
 #include "media/AudioRecord.h"
 #include "media/AudioTrack.h"
 #include "media/mediaplayer.h"
-#include <media/IStreamSource.h>
-#include "media/AudioEffect.h"
-#include "media/EffectApi.h"
-#include "media/EffectEqualizerApi.h"
-#include "media/EffectBassBoostApi.h"
-#include "media/EffectVirtualizerApi.h"
-#include "media/EffectPresetReverbApi.h"
-#include "media/EffectEnvironmentalReverbApi.h"
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
 #include <binder/ProcessState.h>
@@ -276,23 +268,6 @@ struct SndFile {
 
 #include "data.h"
 #include "itfstruct.h"
-
-#ifdef ANDROID
-
-#ifdef ANDROID
-// FIXME this include is done here so the effect structures and enums have been defined. Messy.
-#include "android/android_Effect.h"
-#include "android/android_GenericPlayer.h"
-#include "android/android_GenericMediaPlayer.h"
-#include "android/android_AudioSfDecoder.h"
-#include "android/android_AudioToCbRenderer.h"
-#include "android/android_StreamPlayer.h"
-#include "android/android_LocAVPlayer.h"
-#include "android/AudioTrackProtector.h"
-#endif
-
-#endif  // ANDROID
-
 #include "classes.h"
 
 struct MPH_init {

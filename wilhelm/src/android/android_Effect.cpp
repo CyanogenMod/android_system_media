@@ -18,6 +18,11 @@
 #include "sles_allinclusive.h"
 #include "math.h"
 #include "utils/RefBase.h"
+#include "media/EffectEqualizerApi.h"
+#include "media/EffectBassBoostApi.h"
+#include "media/EffectVirtualizerApi.h"
+#include "media/EffectPresetReverbApi.h"
+#include "media/EffectEnvironmentalReverbApi.h"
 
 
 static const int EQUALIZER_PARAM_SIZE_MAX = sizeof(effect_param_t) + 2 * sizeof(int32_t)

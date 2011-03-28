@@ -17,6 +17,9 @@
 /* Virtualizer implementation */
 
 #include "sles_allinclusive.h"
+#ifdef ANDROID
+#include "media/EffectVirtualizerApi.h"
+#endif
 
 #define VIRTUALIZER_STRENGTH_MIN 0
 #define VIRTUALIZER_STRENGTH_MAX 1000
