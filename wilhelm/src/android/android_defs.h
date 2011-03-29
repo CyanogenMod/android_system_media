@@ -16,16 +16,20 @@
 
 
 /**
- * Used to define the mapping from an OpenSL ES audio player to an Android
+ * Used to define the mapping from an OpenSL ES or OpenMAX AL object to an Android
  * media framework object
  */
 enum AndroidObject_type {
-    INVALID_TYPE     =-1,
-    A_PLR_URIFD      = 0, // audio player, compressed data, URI or FD data source
-    A_PLR_PCM_BQ     = 1, // audio player, PCM, buffer queue data source
-    A_PLR_TS_ABQ     = 2, // audio player, transport stream, Android simple buffer queue data source
-    A_PLR_URIFD_ASQ  = 3, // audio player, URI or FD data source (as in android::MediaPlayer),
-                          //    decoded to a PCM Android simple buffer queue data sink
+    INVALID_TYPE                              =-1,
+    // audio player, playing from a URI or FD data source
+    AUDIOPLAYER_FROM_URIFD                    = 0,
+    // audio player, playing PCM buffers in a buffer queue data source
+    AUDIOPLAYER_FROM_PCM_BUFFERQUEUE          = 1,
+    // audio player, playing transport stream packets in an Android buffer queue data source
+    AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE    = 2,
+    // audio player, decoding from a URI or FD data source to a buffer queue data sink in PCM format
+    AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE = 3,
+    // FIXME rename values below to something easier to read (following model from previous values)
     AV_PLR_TS_ABQ    = 4, // audio video player, transport stream, Android buffer queue data source
     AV_PLR_URIFD     = 5, // audio video player, URI or FD data source (as in android::MediaPlayer)
     A_RCR_MIC_ASQ    = 6, // audio recorder, device data source,
@@ -54,6 +58,13 @@ enum AndroidObject_state {
 
 #define MPEG2_TS_BLOCK_SIZE 188
 
+// FIXME separate the cases where we don't need an AudioTrack callback
+typedef struct AudioPlayback_Parameters_struct {
+    int streamType;
+    int sessionId;
+    android::AudioTrack::callback_t trackcb;
+    void* trackcbUser;
+} AudioPlayback_Parameters;
 
 /**
  * Structure to maintain the set of audio levels about a player
@@ -101,15 +112,13 @@ typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, void* user);
 #define PLAYEREVENT_PREFETCHSTATUSCHANGE    "prsc"
 #define PLAYEREVENT_PREFETCHFILLLEVELUPDATE "pflu"
 #define PLAYEREVENT_ENDOFSTREAM             "eos"
-#define PLAYEREVENT_NEW_AUDIOTRACK          "nwat"
 #define PLAYEREVENT_VIDEO_SIZE_UPDATE       "vsiz"
 
 
 /**
- * Command parameters for AHandler commands
+ * Time value when time is unknown. Used for instance for duration or playback position
  */
-#define WHATPARAM_SEEK_SEEKTIME_MS "seekTimeMs"
-#define WHATPARAM_LOOP_LOOPING     "looping"
+#define ANDROID_UNKNOWN_TIME -1
 
 /**
  * Event mask for MPEG-2 TS events associated with TS data
@@ -131,7 +140,27 @@ enum AndroidBufferType_type {
     kAndroidBufferTypeMpeg2Ts = ((SLuint16) 0x1),
 };
 
+/**
+ * Notification thresholds relative to content duration in the cache
+ */
+#define DURATION_CACHED_HIGH_MS  30000 // 30s
+#define DURATION_CACHED_MED_MS   10000 // 10s
+#define DURATION_CACHED_LOW_MS    2000 //  2s
+
+
 namespace android {
+
+/**
+ * Prefetch cache status
+ */
+enum CacheStatus_t {
+        kStatusUnknown = -1,
+        kStatusEmpty   = 0,
+        kStatusLow,
+        kStatusIntermediate,
+        kStatusEnough,
+        kStatusHigh
+};
 
 enum {
     kDataLocatorNone = 'none',

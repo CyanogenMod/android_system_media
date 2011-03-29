@@ -324,7 +324,7 @@ XAresult android_Player_volumeUpdate(android::GenericPlayer *avp, IVolume *pVolI
 {
     XAresult result = XA_RESULT_SUCCESS;
 
-    avp->updateVolume((bool)pVolItf->mMute, (bool)pVolItf->mEnableStereoPosition,
+    avp->setVolume((bool)pVolItf->mMute, (bool)pVolItf->mEnableStereoPosition,
             pVolItf->mStereoPosition, pVolItf->mLevel);
 
     return result;

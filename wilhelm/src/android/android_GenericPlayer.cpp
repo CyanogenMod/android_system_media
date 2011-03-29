@@ -18,6 +18,9 @@
 
 #include "sles_allinclusive.h"
 
+#include <media/stagefright/foundation/ADebug.h>
+#include <sys/stat.h>
+
 namespace android {
 
 //--------------------------------------------------------------------------------------------------
@@ -28,7 +31,13 @@ GenericPlayer::GenericPlayer(const AudioPlayback_Parameters* params) :
         mStateFlags(0),
         mLooperPriority(PRIORITY_DEFAULT),
         mPlaybackParams(*params),
-        mChannelCount(1)
+        mChannelCount(1),
+        mDurationMsec(ANDROID_UNKNOWN_TIME),
+        mPositionMsec(ANDROID_UNKNOWN_TIME),
+        mCacheStatus(kStatusEmpty),
+        mCacheFill(0),
+        mLastNotifiedCacheFill(0),
+        mCacheFillNotifThreshold(100)
 {
     SL_LOGD("GenericPlayer::GenericPlayer()");
 
@@ -145,14 +154,24 @@ void GenericPlayer::loop(bool loop) {
 }
 
 
+void GenericPlayer::setBufferingUpdateThreshold(int16_t thresholdPercent) {
+    sp<AMessage> msg = new AMessage(kWhatBuffUpdateThres, id());
+    msg->setInt32(WHATPARAM_BUFFERING_UPDATETHRESHOLD_PERCENT, (int32_t)thresholdPercent);
+    msg->post();
+}
+
+
 //--------------------------------------------------
 void GenericPlayer::getDurationMsec(int* msec) {
-    // unknown duration
-    *msec = -1;
+    *msec = mDurationMsec;
+}
+
+void GenericPlayer::getPositionMsec(int* msec) {
+    *msec = mPositionMsec;
 }
 
 //--------------------------------------------------
-void GenericPlayer::updateVolume(bool mute, bool useStereoPos,
+void GenericPlayer::setVolume(bool mute, bool useStereoPos,
         XApermille stereoPos, XAmillibel volume) {
 
     // compute amplification as the combination of volume level and stereo position
@@ -262,6 +281,18 @@ void GenericPlayer::onMessageReceived(const sp<AMessage> &msg) {
             onVolumeUpdate();
             break;
 
+        case kWhatSeekComplete:
+            onSeekComplete();
+            break;
+
+        case kWhatBufferingUpdate:
+            onBufferingUpdate(msg);
+            break;
+
+        case kWhatBuffUpdateThres:
+            onSetBufferingUpdateThreshold(msg);
+            break;
+
         default:
             TRESPASS();
     }
@@ -270,6 +301,8 @@ void GenericPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
 //--------------------------------------------------
 // Event handlers
+//  it is strictly verboten to call those methods outside of the event loop
+
 void GenericPlayer::onPrepare() {
     SL_LOGD("GenericPlayer::onPrepare()");
     if (!(mStateFlags & kFlagPrepared)) {
@@ -286,11 +319,20 @@ void GenericPlayer::onNotify(const sp<AMessage> &msg) {
     }
 
     int32_t val1, val2;
-    if (msg->findInt32(PLAYEREVENT_PREPARED, &val1)) {
+    if (msg->findInt32(PLAYEREVENT_PREFETCHSTATUSCHANGE, &val1)) {
+        SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_PREFETCHSTATUSCHANGE, val1);
+        mNotifyClient(kEventPrefetchStatusChange, val1, 0, mNotifyUser);
+    } else if (msg->findInt32(PLAYEREVENT_PREFETCHFILLLEVELUPDATE, &val1)) {
+        SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_PREFETCHFILLLEVELUPDATE, val1);
+        mNotifyClient(kEventPrefetchFillLevelUpdate, val1, 0, mNotifyUser);
+    } else if (msg->findInt32(PLAYEREVENT_ENDOFSTREAM, &val1)) {
+        SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_ENDOFSTREAM, val1);
+        mNotifyClient(kEventEndOfStream, val1, 0, mNotifyUser);
+    } else if (msg->findInt32(PLAYEREVENT_PREPARED, &val1)) {
         SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_PREPARED, val1);
         mNotifyClient(kEventPrepared, val1, 0, mNotifyUser);
     } else if (msg->findRect(PLAYEREVENT_VIDEO_SIZE_UPDATE, &val1, &val2, &val1, &val2)) {
-        SL_LOGD("GenericPlayer notifying %s = %d, %d", PLAYEREVENT_VIDEO_SIZE_UPDATE, val1, val2);
+        SL_LOGV("GenericPlayer notifying %s = %d, %d", PLAYEREVENT_VIDEO_SIZE_UPDATE, val1, val2);
         mNotifyClient(kEventHasVideoSize, val1, val2, mNotifyUser);
     }
 }
@@ -312,7 +354,6 @@ void GenericPlayer::onPause() {
     if ((mStateFlags & kFlagPrepared)) {
         mStateFlags &= ~kFlagPlaying;
     }
-
 }
 
 
@@ -328,6 +369,51 @@ void GenericPlayer::onLoop(const sp<AMessage> &msg) {
 
 void GenericPlayer::onVolumeUpdate() {
 
+}
+
+
+void GenericPlayer::onSeekComplete() {
+    SL_LOGD("GenericPlayer::onSeekComplete()");
+    mStateFlags &= ~kFlagSeeking;
+}
+
+
+void GenericPlayer::onBufferingUpdate(const sp<AMessage> &msg) {
+
+}
+
+
+void GenericPlayer::onSetBufferingUpdateThreshold(const sp<AMessage> &msg) {
+    int32_t thresholdPercent = 0;
+    if (msg->findInt32(WHATPARAM_BUFFERING_UPDATETHRESHOLD_PERCENT, &thresholdPercent)) {
+        Mutex::Autolock _l(mSettingsLock);
+        mCacheFillNotifThreshold = (int16_t)thresholdPercent;
+    }
+}
+
+
+//-------------------------------------------------
+void GenericPlayer::notifyStatus() {
+    notify(PLAYEREVENT_PREFETCHSTATUSCHANGE, (int32_t)mCacheStatus, true /*async*/);
+}
+
+
+void GenericPlayer::notifyCacheFill() {
+    mLastNotifiedCacheFill = mCacheFill;
+    notify(PLAYEREVENT_PREFETCHFILLLEVELUPDATE, (int32_t)mLastNotifiedCacheFill, true/*async*/);
+}
+
+
+void GenericPlayer::seekComplete() {
+    sp<AMessage> msg = new AMessage(kWhatSeekComplete, id());
+    msg->post();
+}
+
+
+void GenericPlayer::bufferingUpdate(int16_t fillLevelPerMille) {
+    sp<AMessage> msg = new AMessage(kWhatBufferingUpdate, id());
+    msg->setInt32(WHATPARAM_BUFFERING_UPDATE, fillLevelPerMille);
+    msg->post();
 }
 
 } // namespace android

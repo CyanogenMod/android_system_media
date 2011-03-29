@@ -14,8 +14,22 @@
  * limitations under the License.
  */
 
+#ifndef __ANDROID_GENERICPLAYER_H__
+#define __ANDROID_GENERICPLAYER_H__
+
+#include <media/stagefright/foundation/AHandler.h>
+#include <media/stagefright/foundation/ALooper.h>
+#include <media/stagefright/foundation/AMessage.h>
 
 //--------------------------------------------------------------------------------------------------
+/**
+ * Message parameters for AHandler messages, see list in GenericPlayer::kWhatxxx
+ */
+#define WHATPARAM_SEEK_SEEKTIME_MS                  "seekTimeMs"
+#define WHATPARAM_LOOP_LOOPING                      "looping"
+#define WHATPARAM_BUFFERING_UPDATE                  "bufferingUpdate"
+#define WHATPARAM_BUFFERING_UPDATETHRESHOLD_PERCENT "buffUpdateThreshold"
+
 namespace android {
 
 class GenericPlayer : public AHandler
@@ -23,9 +37,13 @@ class GenericPlayer : public AHandler
 public:
 
     enum {
-        kEventPrepared      = 'prep',
-        kEventHasVideoSize  = 'vsiz',
+        kEventPrepared                = 'prep',
+        kEventHasVideoSize            = 'vsiz',
+        kEventPrefetchStatusChange    = 'pfsc',
+        kEventPrefetchFillLevelUpdate = 'pflu',
+        kEventEndOfStream             = 'eos'
     };
+
 
     GenericPlayer(const AudioPlayback_Parameters* params);
     virtual ~GenericPlayer();
@@ -41,10 +59,12 @@ public:
     virtual void stop();
     virtual void seek(int64_t timeMsec);
     virtual void loop(bool loop);
+    virtual void setBufferingUpdateThreshold(int16_t thresholdPercent);
 
-    virtual void getDurationMsec(int* msec); // -1 if unknown
+    virtual void getDurationMsec(int* msec); // ANDROID_UNKNOWN_TIME if unknown
+    virtual void getPositionMsec(int* msec); // ANDROID_UNKNOWN_TIME if unknown
 
-    void updateVolume(bool mute, bool useStereoPos, XApermille stereoPos, XAmillibel volume);
+    void setVolume(bool mute, bool useStereoPos, XApermille stereoPos, XAmillibel volume);
 
 protected:
     Mutex mSettingsLock;
@@ -53,14 +73,19 @@ protected:
     DataLocator2 mDataLocator;
     int          mDataLocatorType;
 
+    // Constants used to identify the messages in this player's AHandler message loop
+    //   in onMessageReceived()
     enum {
-        kWhatPrepare      = 'prep',
-        kWhatNotif        = 'noti',
-        kWhatPlay         = 'play',
-        kWhatPause        = 'paus',
-        kWhatSeek         = 'seek',
-        kWhatLoop         = 'loop',
-        kWhatVolumeUpdate = 'volu'
+        kWhatPrepare         = 'prep',
+        kWhatNotif           = 'noti',
+        kWhatPlay            = 'play',
+        kWhatPause           = 'paus',
+        kWhatSeek            = 'seek',
+        kWhatSeekComplete    = 'skcp',
+        kWhatLoop            = 'loop',
+        kWhatVolumeUpdate    = 'volu',
+        kWhatBufferingUpdate = 'bufu',
+        kWhatBuffUpdateThres = 'buut',
     };
 
     // Send a notification to one of the event listeners
@@ -78,6 +103,18 @@ protected:
     virtual void onSeek(const sp<AMessage> &msg);
     virtual void onLoop(const sp<AMessage> &msg);
     virtual void onVolumeUpdate();
+    virtual void onSeekComplete();
+    virtual void onBufferingUpdate(const sp<AMessage> &msg);
+    virtual void onSetBufferingUpdateThreshold(const sp<AMessage> &msg);
+
+    // Convenience methods
+    //   for async notifications of prefetch status and cache fill level, needs to be called
+    //     with mSettingsLock locked
+    void notifyStatus();
+    void notifyCacheFill();
+    //   for internal async notification to update state that the player is no longer seeking
+    void seekComplete();
+    void bufferingUpdate(int16_t fillLevelPerMille);
 
     // Event notification from GenericPlayer to OpenSL ES / OpenMAX AL framework
     notif_cbf_t mNotifyClient;
@@ -101,9 +138,19 @@ protected:
 
     AndroidAudioLevels mAndroidAudioLevels;
     int mChannelCount; // this is used for the panning law, and is not exposed outside of the object
+    int32_t mDurationMsec;
+    int32_t mPositionMsec;
+
+    CacheStatus_t mCacheStatus;
+    int16_t mCacheFill; // cache fill level + played back level in permille
+    int16_t mLastNotifiedCacheFill; // last cache fill level communicated to the listener
+    int16_t mCacheFillNotifThreshold; // threshold in cache fill level for cache fill to be reported
+
 
 private:
     DISALLOW_EVIL_CONSTRUCTORS(GenericPlayer);
 };
 
 } // namespace android
+
+#endif /* __ANDROID_GENERICPLAYER_H__ */

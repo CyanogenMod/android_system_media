@@ -45,6 +45,8 @@
 
 #include "SLES/OpenSLES.h"
 
+//#define TEST_VOLUME_ITF
+//#define TEST_COLD_START
 
 #define MAX_NUMBER_INTERFACES 2
 
@@ -85,7 +87,32 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     if (event & SL_PREFETCHEVENT_STATUSCHANGE) {
         fprintf(stdout, "PrefetchEventCallback: Prefetch Status is = %lu\n", status);
     }
+}
 
+
+//-----------------------------------------------------------------
+/* PlayItf callback for playback events */
+void PlayEventCallback(
+        SLPlayItf caller,
+        void *pContext,
+        SLuint32 event)
+{
+    if (SL_PLAYEVENT_HEADATEND & event) {
+        fprintf(stdout, "SL_PLAYEVENT_HEADATEND reached\n");
+        //SignalEos();
+    }
+
+    if (SL_PLAYEVENT_HEADATNEWPOS & event) {
+        SLmillisecond pMsec = 0;
+        (*caller)->GetPosition(caller, &pMsec);
+        fprintf(stdout, "SL_PLAYEVENT_HEADATNEWPOS current position=%lums\n", pMsec);
+    }
+
+    if (SL_PLAYEVENT_HEADATMARKER & event) {
+        SLmillisecond pMsec = 0;
+        (*caller)->GetPosition(caller, &pMsec);
+        fprintf(stdout, "SL_PLAYEVENT_HEADATMARKER current position=%lums\n", pMsec);
+    }
 }
 
 
@@ -183,6 +210,17 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     /* Configure fill level updates every 5 percent */
     (*prefetchItf)->SetFillUpdatePeriod(prefetchItf, 50);
 
+    /* Set up the player callback to get events during the decoding */
+    res = (*playItf)->SetMarkerPosition(playItf, 2000);
+    CheckErr(res);
+    res = (*playItf)->SetPositionUpdatePeriod(playItf, 500);
+    CheckErr(res);
+    res = (*playItf)->SetCallbackEventsMask(playItf,
+            SL_PLAYEVENT_HEADATMARKER | SL_PLAYEVENT_HEADATNEWPOS | SL_PLAYEVENT_HEADATEND);
+    CheckErr(res);
+    res = (*playItf)->RegisterCallback(playItf, PlayEventCallback, NULL);
+    CheckErr(res);
+
     /* Display duration */
     SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
     res = (*playItf)->GetDuration(playItf, &durationInMsec);
@@ -205,6 +243,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     fprintf(stdout, "After set to PAUSED\n");
     CheckErr(res);
 
+    usleep(100 * 1000);
     /*     wait until there's data to play */
     //SLpermille fillLevel = 0;
     SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
@@ -234,8 +273,34 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PLAYING );
     CheckErr(res);
 
-    /* Wait as long as the duration of the content before stopping */
+#ifdef TEST_VOLUME_ITF
+    usleep(5*1000 * 1000);
+    fprintf(stdout, "setting vol to 0\n");
+    (*volItf)->SetVolumeLevel( volItf, 0);
+    usleep(3*1000 * 1000);
+    fprintf(stdout, "setting vol to -20dB\n");
+    (*volItf)->SetVolumeLevel( volItf, -2000);
+    usleep(3*1000 * 1000);
+    fprintf(stdout, "mute\n");
+    (*volItf)->SetMute( volItf, SL_BOOLEAN_TRUE);
+    usleep(3*1000 * 1000);
+    fprintf(stdout, "setting vol to 0dB while muted\n");
+    (*volItf)->SetVolumeLevel( volItf, 0);
+    usleep(3*1000 * 1000);
+    fprintf(stdout, "unmuting\n");
+    (*volItf)->SetMute( volItf, SL_BOOLEAN_FALSE);
+    usleep(3*1000 * 1000);
+#endif
+
+#ifndef TEST_COLD_START
     usleep(durationInMsec * 1000);
+#else
+    /* Wait as long as the duration of the content before stopping */
+    /* Experiment: wait for the duration + 200ms: with a cold start of the audio hardware, we */
+    /*    won't see the SL_PLAYEVENT_HEADATEND event, due to hw wake up induced latency, but  */
+    /*    with a warm start it will be received.                                              */
+    usleep((durationInMsec + 200) * 1000);
+#endif
 
     /* Make sure player is stopped */
     fprintf(stdout, "URI example: stopping playback\n");

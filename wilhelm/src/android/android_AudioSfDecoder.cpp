@@ -19,6 +19,13 @@
 #include "sles_allinclusive.h"
 #include "android/android_AudioSfDecoder.h"
 
+#include <media/stagefright/foundation/ADebug.h>
+
+
+#define SIZE_CACHED_HIGH_BYTES 1000000
+#define SIZE_CACHED_MED_BYTES   700000
+#define SIZE_CACHED_LOW_BYTES   400000
+
 namespace android {
 
 //--------------------------------------------------------------------------------------------------
@@ -28,10 +35,6 @@ AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : Generic
         mSampleRateHz(0),
         mDurationUsec(-1),
         mDecodeBuffer(NULL),
-        mCacheStatus(kStatusEmpty),
-        mCacheFill(0),
-        mLastNotifiedCacheFill(0),
-        mCacheFillNotifThreshold(100),
         mTimeDelta(-1),
         mSeekTimeMsec(0),
         mLastDecodedPositionUs(-1)
@@ -246,7 +249,7 @@ void AudioSfDecoder::onLoop(const sp<AMessage> &msg) {
 void AudioSfDecoder::onCheckCache(const sp<AMessage> &msg) {
     //SL_LOGV("AudioSfDecoder::onCheckCache");
     bool eos;
-    CacheStatus status = getCacheRemaining(&eos);
+    CacheStatus_t status = getCacheRemaining(&eos);
 
     if (eos || status == kStatusHigh
             || ((mStateFlags & kFlagPreparing) && (status >= kStatusEnough))) {
@@ -444,14 +447,6 @@ void AudioSfDecoder::notifyPrepared(status_t prepareRes) {
 
 }
 
-void AudioSfDecoder::notifyStatus() {
-    notify(PLAYEREVENT_PREFETCHSTATUSCHANGE, (int32_t)mCacheStatus, true);
-}
-
-void AudioSfDecoder::notifyCacheFill() {
-    mLastNotifiedCacheFill = mCacheFill;
-    notify(PLAYEREVENT_PREFETCHFILLLEVELUPDATE, (int32_t)mLastNotifiedCacheFill, true);
-}
 
 void AudioSfDecoder::onNotify(const sp<AMessage> &msg) {
     if (NULL == mNotifyClient) {
@@ -498,11 +493,11 @@ int64_t AudioSfDecoder::getPositionUsec() {
 }
 
 
-AudioSfDecoder::CacheStatus AudioSfDecoder::getCacheRemaining(bool *eos) {
+CacheStatus_t AudioSfDecoder::getCacheRemaining(bool *eos) {
     sp<NuCachedSource2> cachedSource =
         static_cast<NuCachedSource2 *>(mDataSource.get());
 
-    CacheStatus oldStatus = mCacheStatus;
+    CacheStatus_t oldStatus = mCacheStatus;
 
     status_t finalStatus;
     size_t dataRemaining = cachedSource->approxDataRemaining(&finalStatus);
@@ -531,13 +526,13 @@ AudioSfDecoder::CacheStatus AudioSfDecoder::getCacheRemaining(bool *eos) {
             //SL_LOGV("cacheFill = %d", mCacheFill);
 
             //   cache status is evaluated against duration thresholds
-            if (dataRemainingUs > DURATION_CACHED_HIGH_US) {
+            if (dataRemainingUs > DURATION_CACHED_HIGH_MS*1000) {
                 mCacheStatus = kStatusHigh;
                 //LOGV("high");
-            } else if (dataRemainingUs > DURATION_CACHED_MED_US) {
+            } else if (dataRemainingUs > DURATION_CACHED_MED_MS*1000) {
                 //LOGV("enough");
                 mCacheStatus = kStatusEnough;
-            } else if (dataRemainingUs < DURATION_CACHED_LOW_US) {
+            } else if (dataRemainingUs < DURATION_CACHED_LOW_MS*1000) {
                 //LOGV("low");
                 mCacheStatus = kStatusLow;
             } else {

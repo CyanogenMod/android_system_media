@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+#include <media/stagefright/DataSource.h>
+#include <media/stagefright/MediaSource.h>
+#include <media/stagefright/FileSource.h>
+#include <media/stagefright/MediaDefs.h>
+#include <media/stagefright/MediaExtractor.h>
+#include <media/stagefright/MetaData.h>
+#include <media/stagefright/OMXClient.h>
+#include <media/stagefright/OMXCodec.h>
+#include "NuCachedSource2.h"
+#include "NuHTTPDataSource.h"
+#include "ThrottledSource.h"
+
+#include "android_GenericPlayer.h"
 
 //--------------------------------------------------------------------------------------------------
 namespace android {
@@ -31,21 +44,6 @@ public:
     void startPrefetch_async();
 
 protected:
-
-    enum CacheStatus {
-            kStatusUnknown = -1,
-            kStatusEmpty = 0,
-            kStatusLow,
-            kStatusIntermediate,
-            kStatusEnough,
-            kStatusHigh
-        };
-
-    enum {
-        kEventPrefetchStatusChange    = 'prsc',
-        kEventPrefetchFillLevelUpdate = 'pflu',
-        kEventEndOfStream             = 'eos',
-    };
 
     enum {
         kWhatDecode     = 'deco',
@@ -92,14 +90,7 @@ protected:
 
 private:
 
-    void notifyStatus();
-    void notifyCacheFill();
     void notifyPrepared(status_t prepareRes);
-
-    CacheStatus mCacheStatus;
-    int16_t mCacheFill; // cache fill level in permille, signed per OpenSL ES
-    int16_t mLastNotifiedCacheFill; // last cache fill level communicated to the listener
-    int16_t mCacheFillNotifThreshold; // threshold in cache fill level for cache fill to be reported
 
     int64_t mTimeDelta;
     int64_t mSeekTimeMsec;
@@ -108,12 +99,8 @@ private:
     // mutex used for seek flag and seek time read/write
     Mutex mSeekLock;
 
-/*
-    sp<ALooper> mRenderLooper;
-*/
-
     bool wantPrefetch();
-    CacheStatus getCacheRemaining(bool *eos);
+    CacheStatus_t getCacheRemaining(bool *eos);
     int64_t getPositionUsec();
 
 private:

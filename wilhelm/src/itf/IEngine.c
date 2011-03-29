@@ -165,7 +165,6 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     //   than a structure
                     (void) new (&thiz->mAudioTrackProtector)
                             android::sp<android::AudioTrackProtector>();
-                    (void) new (&thiz->mSfPlayer) android::sp<android::SfPlayer>();
                     (void) new (&thiz->mAuxEffect) android::sp<android::AudioEffect>();
                     (void) new (&thiz->mAPlayer) android::sp<android::GenericPlayer>();
 #endif

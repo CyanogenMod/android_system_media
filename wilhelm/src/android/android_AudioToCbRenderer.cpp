@@ -19,6 +19,8 @@
 #include "sles_allinclusive.h"
 #include "android/android_AudioToCbRenderer.h"
 
+#include <media/stagefright/foundation/ADebug.h>
+
 namespace android {
 
 //--------------------------------------------------------------------------------------------------

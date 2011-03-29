@@ -66,7 +66,6 @@ LOCAL_SRC_FILES:=                     \
         android/android_GenericPlayer.cpp     \
         android/android_LocAVPlayer.cpp       \
         android/android_StreamPlayer.cpp      \
-        android/android_SfPlayer.cpp          \
         android/android_Effect.cpp            \
         autogen/IID_to_MPH.c                  \
         objects/C3DGroup.c                    \

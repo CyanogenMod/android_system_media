@@ -117,6 +117,12 @@ static SLresult IPrefetchStatus_SetFillUpdatePeriod(SLPrefetchStatusItf self, SL
         IPrefetchStatus *thiz = (IPrefetchStatus *) self;
         interface_lock_poke(thiz);
         thiz->mFillUpdatePeriod = period;
+#ifdef ANDROID
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+            CAudioPlayer *ap = (CAudioPlayer *) thiz->mThis;
+            android_audioPlayer_setBufferingUpdateThresholdPerMille(ap, period);
+        }
+#endif
         interface_unlock_poke(thiz);
         result = SL_RESULT_SUCCESS;
     }

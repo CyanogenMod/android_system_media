@@ -17,9 +17,11 @@
 //#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
+#include "android_StreamPlayer.h"
+
 #include <media/IStreamSource.h>
 #include <media/IMediaPlayerService.h>
-#include "android_StreamPlayer.h"
+#include <media/stagefright/foundation/ADebug.h>
 
 //--------------------------------------------------------------------------------------------------
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer

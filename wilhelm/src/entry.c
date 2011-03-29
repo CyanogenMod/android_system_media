@@ -18,6 +18,10 @@
 
 #include "sles_allinclusive.h"
 
+#ifdef ANDROID
+#include <media/stagefright/DataSource.h>
+#include <binder/ProcessState.h>
+#endif
 
 /** \brief Internal code shared by slCreateEngine and xaCreateEngine */
 

@@ -17,6 +17,8 @@
 #ifndef __ANDROID_GENERICMEDIAPLAYER_H__
 #define __ANDROID_GENERICMEDIAPLAYER_H__
 
+#include "android_GenericMediaPlayer.h"
+
 #include <binder/IServiceManager.h>
 #include <surfaceflinger/Surface.h>
 #include <gui/ISurfaceTexture.h>
@@ -63,7 +65,10 @@ protected:
     virtual void onPrepare();
     virtual void onPlay();
     virtual void onPause();
+    virtual void onSeek(const sp<AMessage> &msg);
+    virtual void onLoop(const sp<AMessage> &msg);
     virtual void onVolumeUpdate();
+    virtual void onBufferingUpdate(const sp<AMessage> &msg);
 
     bool mHasVideo;
 
@@ -78,8 +83,11 @@ protected:
     sp<IBinder> mBinder;
     sp<IMediaPlayerService> mMediaPlayerService;
 
+    Parcel metadatafilter;
+
 private:
     DISALLOW_EVIL_CONSTRUCTORS(GenericMediaPlayer);
+    void onAfterMediaPlayerPrepared();
 };
 
 } // namespace android

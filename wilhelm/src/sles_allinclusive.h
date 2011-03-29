@@ -87,10 +87,8 @@ typedef struct COutputMix_struct COutputMix;
 #include "media/mediaplayer.h"
 #include <utils/String8.h>
 #define ANDROID_SL_MILLIBEL_MAX 0
-#include <binder/ProcessState.h>
 #include "android/android_sles_conversions.h"
 #include "android/android_defs.h"
-#include "android/android_SfPlayer.h"
 #endif
 
 #ifdef USE_OUTPUTMIXEXT
