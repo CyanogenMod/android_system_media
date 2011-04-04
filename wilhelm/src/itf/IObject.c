@@ -743,7 +743,7 @@ static const struct SLObjectItf_ IObject_Itf = {
     IObject_Destroy,
     IObject_SetPriority,
     IObject_GetPriority,
-    IObject_SetLossOfControlInterfaces,
+    IObject_SetLossOfControlInterfaces
 };
 
 

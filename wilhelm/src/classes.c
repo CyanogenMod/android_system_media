@@ -401,8 +401,8 @@ static const ClassTable CVibraDevice_class = {
 // Media player class
 
 static const struct iid_vtable MediaPlayer_interfaces[INTERFACES_MediaPlayer] = {
-    {MPH_OBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CMediaPlayer, mObject)},
-    {MPH_DYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
+    {MPH_XAOBJECT, INTERFACE_IMPLICIT_PREREALIZE, offsetof(CMediaPlayer, mObject)},
+    {MPH_XADYNAMICINTERFACEMANAGEMENT, INTERFACE_IMPLICIT,
         offsetof(CMediaPlayer, mDynamicInterfaceManagement)},
     {MPH_XAPLAY, INTERFACE_IMPLICIT, offsetof(CMediaPlayer, mPlay)},
     {MPH_XASTREAMINFORMATION, INTERFACE_EXPLICIT, offsetof(CMediaPlayer, mStreamInfo)},

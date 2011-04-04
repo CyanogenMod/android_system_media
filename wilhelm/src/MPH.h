@@ -51,7 +51,7 @@
 #define MPH_MIDITEMPO                  25
 #define MPH_MIDITIME                   26
 #define MPH_MUTESOLO                   27
-#define MPH_NULL                       28
+#define MPH_NULL                       28  // shared by SL and XA
 #define MPH_OBJECT                     29
 #define MPH_OUTPUTMIX                  30
 #define MPH_PITCH                      31
@@ -72,22 +72,60 @@
 #define MPH_OUTPUTMIXEXT               44
 
 // Android API level 9 extended interfaces
+// GUID and MPH are shared by SL and XA, but currently documented for SL only
 #define MPH_ANDROIDEFFECT              45
 #define MPH_ANDROIDEFFECTCAPABILITIES  46
 #define MPH_ANDROIDEFFECTSEND          47
 #define MPH_ANDROIDCONFIGURATION       48
 #define MPH_ANDROIDSIMPLEBUFFERQUEUE   49
 
-// Android API level 10 extended interfaces
-#define MPH_ANDROIDBUFFERQUEUE         50  // used for SL and XA
+// Android API level 12 extended interfaces
+// GUID and MPH are shared by SL and XA, but currently documented for XA only
+#define MPH_ANDROIDBUFFERQUEUE         50
 
-// OpenMAX AL 1.0.1
-#define MPH_XAENGINE                   51
-#define MPH_XAPLAY                     52
-#define MPH_XASTREAMINFORMATION        53
-#define MPH_XAVOLUME                   54
+// OpenMAX AL 1.0.1 interfaces
+#define MPH_XAAUDIODECODERCAPABILITIES   51
+#define MPH_XAAUDIOENCODER               52
+#define MPH_XAAUDIOENCODERCAPABILITIES   53
+#define MPH_XAAUDIOIODEVICECAPABILITIES  54
+#define MPH_XACAMERA                     55
+#define MPH_XACAMERACAPABILITIES         56
+#define MPH_XACONFIGEXTENSION            57
+#define MPH_XADEVICEVOLUME               58
+#define MPH_XADYNAMICINTERFACEMANAGEMENT 59
+#define MPH_XADYNAMICSOURCE              60
+#define MPH_XAENGINE                     61
+#define MPH_XAEQUALIZER                  62
+#define MPH_XAIMAGECONTROLS              63
+#define MPH_XAIMAGEDECODERCAPABILITIES   64
+#define MPH_XAIMAGEEFFECTS               65
+#define MPH_XAIMAGEENCODER               66
+#define MPH_XAIMAGEENCODERCAPABILITIES   67
+#define MPH_XALED                        68
+#define MPH_XAMETADATAEXTRACTION         69
+#define MPH_XAMETADATAINSERTION          70
+#define MPH_XAMETADATATRAVERSAL          71
+#define MPH_XANULL                 MPH_NULL
+#define MPH_XAOBJECT                     72
+#define MPH_XAOUTPUTMIX                  73
+#define MPH_XAPLAY                       74
+#define MPH_XAPLAYBACKRATE               75
+#define MPH_XAPREFETCHSTATUS             76
+#define MPH_XARADIO                      77
+#define MPH_XARDS                        78
+#define MPH_XARECORD                     79
+#define MPH_XASEEK                       80
+#define MPH_XASNAPSHOT                   81
+#define MPH_XASTREAMINFORMATION          82
+#define MPH_XATHREADSYNC                 83
+#define MPH_XAVIBRA                      84
+#define MPH_XAVIDEODECODERCAPABILITIES   85
+#define MPH_XAVIDEOENCODER               86
+#define MPH_XAVIDEOENCODERCAPABILITIES   87
+#define MPH_XAVIDEOPOSTPROCESSING        88
+#define MPH_XAVOLUME                     89
 
 // total number of interface IDs
-#define MPH_MAX                        55
+#define MPH_MAX                          90
 
 #endif // !defined(__MPH_H)

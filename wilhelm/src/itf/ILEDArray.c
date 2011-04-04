@@ -103,7 +103,7 @@ static const struct SLLEDArrayItf_ ILEDArray_Itf = {
     ILEDArray_ActivateLEDArray,
     ILEDArray_IsLEDArrayActivated,
     ILEDArray_SetColor,
-    ILEDArray_GetColor,
+    ILEDArray_GetColor
 };
 
 void ILEDArray_init(void *self)
