@@ -165,7 +165,6 @@ LI_API SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
     if (needToUnlockTheOneTrueMutex) {
         ok = pthread_mutex_unlock(&theOneTrueMutex);
         assert(0 == ok);
-        needToUnlockTheOneTrueMutex = false;
     }
 
     return result;

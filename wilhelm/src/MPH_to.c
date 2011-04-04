@@ -246,8 +246,8 @@ const signed char MPH_to_Vibra[MPH_MAX] = {
 const signed char MPH_to_MediaPlayer[MPH_MAX] = {
 #ifdef USE_DESIGNATED_INITIALIZERS
     [0 ... MPH_MAX-1] = -1,
-    [MPH_OBJECT] = 0,
-    [MPH_DYNAMICINTERFACEMANAGEMENT] = 1,
+    [MPH_XAOBJECT] = 0,
+    [MPH_XADYNAMICINTERFACEMANAGEMENT] = 1,
     [MPH_XAPLAY] = 2,
     [MPH_XASTREAMINFORMATION] = 3,
     [MPH_XAVOLUME] = 4,

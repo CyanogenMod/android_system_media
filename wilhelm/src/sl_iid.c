@@ -78,7 +78,8 @@ const SLInterfaceID SL_IID_ANDROIDEFFECTSEND = &SL_IID_array[MPH_ANDROIDEFFECTSE
 const SLInterfaceID SL_IID_ANDROIDCONFIGURATION = &SL_IID_array[MPH_ANDROIDCONFIGURATION];
 const SLInterfaceID SL_IID_ANDROIDSIMPLEBUFFERQUEUE = &SL_IID_array[MPH_ANDROIDSIMPLEBUFFERQUEUE];
 
-// Android API level 10 extended interfaces
+// Android API level 12 extended interfaces
+// GUID and MPH are shared by SL and XA
 const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUE = &SL_IID_array[MPH_ANDROIDBUFFERQUEUE];
 
 #ifdef __cplusplus

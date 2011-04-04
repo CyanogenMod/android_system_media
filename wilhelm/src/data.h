@@ -51,9 +51,11 @@ typedef struct {
     DataFormat mFormat;
 } DataLocatorFormat;
 
-#define SL_DATALOCATOR_NULL 0    // application specified a NULL value for pLocator
+#define SL_DATALOCATOR_NULL 0   // application specified a NULL value for pLocator
+                                // (not a valid value for mLocatorType)
 #define XA_DATALOCATOR_NULL SL_DATALOCATOR_NULL
-#define SL_DATAFORMAT_NULL 0     // application specified a NULL or undefined value for pFormat
+#define SL_DATAFORMAT_NULL 0    // application specified a NULL value for pFormat
+                                // (not a valid value for mLocatorType)
 #define XA_DATAFORMAT_NULL SL_DATAFORMAT_NULL
 
 // bit masks used to configure the allowed data locators for a given data source or data sink
