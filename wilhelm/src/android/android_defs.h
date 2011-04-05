@@ -52,7 +52,7 @@ enum AndroidObjectState {
 };
 
 
-#define ANDROID_DEFAULT_OUTPUT_STREAM_TYPE android::AudioSystem::MUSIC
+#define ANDROID_DEFAULT_OUTPUT_STREAM_TYPE AUDIO_STREAM_MUSIC
 
 #define PLAYER_SUCCESS 1
 

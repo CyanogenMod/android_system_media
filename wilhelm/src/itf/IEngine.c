@@ -18,6 +18,7 @@
 
 #include "sles_allinclusive.h"
 
+#include <hardware/audio.h>
 
 static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, SLuint32 deviceID,
     SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
@@ -436,7 +437,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                     thiz->mSampleRateMilliHz = 0;
 #ifdef ANDROID
                     thiz->mAudioRecord = NULL;
-                    thiz->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
+                    thiz->mRecordSource = AUDIO_SOURCE_DEFAULT;
 #endif
 
                     // Check the source and sink parameters, and make a local copy of all parameters

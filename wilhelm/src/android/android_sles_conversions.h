@@ -16,6 +16,8 @@
 
 #include "math.h"
 
+#include <hardware/audio.h>
+
 //-----------------------------------------------------------------------------
 // Android to OpenSL ES
 //----------------------
@@ -45,17 +47,17 @@ static inline uint32_t sles_to_android_sampleRate(SLuint32 sampleRateMilliHertz)
 static inline int sles_to_android_sampleFormat(SLuint32 pcmFormat) {
     switch (pcmFormat) {
         case SL_PCMSAMPLEFORMAT_FIXED_16:
-            return android::AudioSystem::PCM_16_BIT;
+            return AUDIO_FORMAT_PCM_16_BIT;
             break;
         case SL_PCMSAMPLEFORMAT_FIXED_8:
-            return android::AudioSystem::PCM_8_BIT;
+            return AUDIO_FORMAT_PCM_8_BIT;
             break;
         case SL_PCMSAMPLEFORMAT_FIXED_20:
         case SL_PCMSAMPLEFORMAT_FIXED_24:
         case SL_PCMSAMPLEFORMAT_FIXED_28:
         case SL_PCMSAMPLEFORMAT_FIXED_32:
         default:
-            return android::AudioSystem::INVALID_FORMAT;
+            return AUDIO_FORMAT_INVALID;
     }
 }
 
@@ -63,16 +65,16 @@ static inline int sles_to_android_sampleFormat(SLuint32 pcmFormat) {
 static inline int sles_to_android_channelMaskIn(SLuint32 nbChannels, SLuint32 channelMask) {
     // FIXME handle channel mask mapping between SL ES and Android
     return (nbChannels == 1 ?
-            android::AudioSystem::CHANNEL_IN_MONO :
-            android::AudioSystem::CHANNEL_IN_STEREO);
+            AUDIO_CHANNEL_IN_MONO :
+            AUDIO_CHANNEL_IN_STEREO);
 }
 
 
 static inline int sles_to_android_channelMaskOut(SLuint32 nbChannels, SLuint32 channelMask) {
     // FIXME handle channel mask mapping between SL ES and Android
     return (nbChannels == 1 ?
-            android::AudioSystem::CHANNEL_OUT_MONO :
-            android::AudioSystem::CHANNEL_OUT_STEREO);
+            AUDIO_CHANNEL_OUT_MONO :
+            AUDIO_CHANNEL_OUT_STEREO);
 }
 
 

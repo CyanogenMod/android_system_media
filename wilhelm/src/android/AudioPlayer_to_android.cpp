@@ -20,6 +20,8 @@
 #include "android/android_StreamPlayer.h"
 #include "android/android_LocAVPlayer.h"
 
+#include <hardware/audio.h>
+
 template class android::KeyedVector<SLuint32, android::AudioEffect* > ;
 
 #define KEY_STREAM_TYPE_PARAMSIZE  sizeof(SLint32)
@@ -424,22 +426,22 @@ SLresult audioPlayer_setStreamType(CAudioPlayer* ap, SLint32 type) {
     int newStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
     switch(type) {
     case SL_ANDROID_STREAM_VOICE:
-        newStreamType = android::AudioSystem::VOICE_CALL;
+        newStreamType = AUDIO_STREAM_VOICE_CALL;
         break;
     case SL_ANDROID_STREAM_SYSTEM:
-        newStreamType = android::AudioSystem::SYSTEM;
+        newStreamType = AUDIO_STREAM_SYSTEM;
         break;
     case SL_ANDROID_STREAM_RING:
-        newStreamType = android::AudioSystem::RING;
+        newStreamType = AUDIO_STREAM_RING;
         break;
     case SL_ANDROID_STREAM_MEDIA:
-        newStreamType = android::AudioSystem::MUSIC;
+        newStreamType = AUDIO_STREAM_MUSIC;
         break;
     case SL_ANDROID_STREAM_ALARM:
-        newStreamType = android::AudioSystem::ALARM;
+        newStreamType = AUDIO_STREAM_ALARM;
         break;
     case SL_ANDROID_STREAM_NOTIFICATION:
-        newStreamType = android::AudioSystem::NOTIFICATION;
+        newStreamType = AUDIO_STREAM_NOTIFICATION;
         break;
     default:
         SL_LOGE(ERROR_PLAYERSTREAMTYPE_SET_UNKNOWN_TYPE);
@@ -465,23 +467,23 @@ SLresult audioPlayer_getStreamType(CAudioPlayer* ap, SLint32 *pType) {
     SLresult result = SL_RESULT_SUCCESS;
 
     switch(ap->mStreamType) {
-    case android::AudioSystem::VOICE_CALL:
+    case AUDIO_STREAM_VOICE_CALL:
         *pType = SL_ANDROID_STREAM_VOICE;
         break;
-    case android::AudioSystem::SYSTEM:
+    case AUDIO_STREAM_SYSTEM:
         *pType = SL_ANDROID_STREAM_SYSTEM;
         break;
-    case android::AudioSystem::RING:
+    case AUDIO_STREAM_RING:
         *pType = SL_ANDROID_STREAM_RING;
         break;
-    case android::AudioSystem::DEFAULT:
-    case android::AudioSystem::MUSIC:
+    case AUDIO_STREAM_DEFAULT:
+    case AUDIO_STREAM_MUSIC:
         *pType = SL_ANDROID_STREAM_MEDIA;
         break;
-    case android::AudioSystem::ALARM:
+    case AUDIO_STREAM_ALARM:
         *pType = SL_ANDROID_STREAM_ALARM;
         break;
-    case android::AudioSystem::NOTIFICATION:
+    case AUDIO_STREAM_NOTIFICATION:
         *pType = SL_ANDROID_STREAM_NOTIFICATION;
         break;
     default:

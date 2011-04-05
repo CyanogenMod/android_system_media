@@ -18,6 +18,8 @@
 #include "sles_allinclusive.h"
 #include "android_prompts.h"
 
+#include <hardware/audio.h>
+
 // use this flag to dump all recorded audio into a file
 //#define MONITOR_RECORDING
 #ifdef MONITOR_RECORDING
@@ -37,19 +39,19 @@ static FILE* gMonitorFp = NULL;
 SLresult audioRecorder_setPreset(CAudioRecorder* ar, SLuint32 recordPreset) {
     SLresult result = SL_RESULT_SUCCESS;
 
-    int newRecordSource = android::AUDIO_SOURCE_DEFAULT;
+    int newRecordSource = AUDIO_SOURCE_DEFAULT;
     switch (recordPreset) {
     case SL_ANDROID_RECORDING_PRESET_GENERIC:
-        newRecordSource = android::AUDIO_SOURCE_DEFAULT;
+        newRecordSource = AUDIO_SOURCE_DEFAULT;
         break;
     case SL_ANDROID_RECORDING_PRESET_CAMCORDER:
-        newRecordSource = android::AUDIO_SOURCE_CAMCORDER;
+        newRecordSource = AUDIO_SOURCE_CAMCORDER;
         break;
     case SL_ANDROID_RECORDING_PRESET_VOICE_RECOGNITION:
-        newRecordSource = android::AUDIO_SOURCE_VOICE_RECOGNITION;
+        newRecordSource = AUDIO_SOURCE_VOICE_RECOGNITION;
         break;
     case SL_ANDROID_RECORDING_PRESET_VOICE_COMMUNICATION:
-        newRecordSource = android::AUDIO_SOURCE_VOICE_COMMUNICATION;
+        newRecordSource = AUDIO_SOURCE_VOICE_COMMUNICATION;
         break;
     case SL_ANDROID_RECORDING_PRESET_NONE:
         // it is an error to set preset "none"
@@ -75,22 +77,22 @@ SLresult audioRecorder_getPreset(CAudioRecorder* ar, SLuint32* pPreset) {
     SLresult result = SL_RESULT_SUCCESS;
 
     switch (ar->mRecordSource) {
-    case android::AUDIO_SOURCE_DEFAULT:
-    case android::AUDIO_SOURCE_MIC:
+    case AUDIO_SOURCE_DEFAULT:
+    case AUDIO_SOURCE_MIC:
         *pPreset = SL_ANDROID_RECORDING_PRESET_GENERIC;
         break;
-    case android::AUDIO_SOURCE_VOICE_UPLINK:
-    case android::AUDIO_SOURCE_VOICE_DOWNLINK:
-    case android::AUDIO_SOURCE_VOICE_CALL:
+    case AUDIO_SOURCE_VOICE_UPLINK:
+    case AUDIO_SOURCE_VOICE_DOWNLINK:
+    case AUDIO_SOURCE_VOICE_CALL:
         *pPreset = SL_ANDROID_RECORDING_PRESET_NONE;
         break;
-    case android::AUDIO_SOURCE_VOICE_RECOGNITION:
+    case AUDIO_SOURCE_VOICE_RECOGNITION:
         *pPreset = SL_ANDROID_RECORDING_PRESET_VOICE_RECOGNITION;
         break;
-    case android::AUDIO_SOURCE_CAMCORDER:
+    case AUDIO_SOURCE_CAMCORDER:
         *pPreset = SL_ANDROID_RECORDING_PRESET_CAMCORDER;
         break;
-    case android::AUDIO_SOURCE_VOICE_COMMUNICATION:
+    case AUDIO_SOURCE_VOICE_COMMUNICATION:
         *pPreset = SL_ANDROID_RECORDING_PRESET_VOICE_COMMUNICATION;
         break;
     default:
@@ -310,7 +312,7 @@ SLresult android_audioRecorder_create(CAudioRecorder* ar) {
         // microphone to simple buffer queue
         ar->mAndroidObjType = AUDIORECORDER_FROM_MIC_TO_PCM_BUFFERQUEUE;
         ar->mAudioRecord = NULL;
-        ar->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
+        ar->mRecordSource = AUDIO_SOURCE_DEFAULT;
     } else {
         result = SL_RESULT_CONTENT_UNSUPPORTED;
     }
@@ -405,7 +407,7 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
     ar->mAudioRecord = new android::AudioRecord();
     ar->mAudioRecord->set(ar->mRecordSource, // source
             sles_to_android_sampleRate(ar->mSampleRateMilliHz), // sample rate in Hertz
-            android::AudioSystem::PCM_16_BIT,   //FIXME use format from buffer queue sink
+            AUDIO_FORMAT_PCM_16_BIT,   //FIXME use format from buffer queue sink
             sles_to_android_channelMaskIn(ar->mNumChannels, 0 /*no channel mask*/),
                                    // channel config
             0,                     //frameCount min

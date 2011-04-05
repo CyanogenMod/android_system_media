@@ -18,6 +18,7 @@
 
 #include "sles_allinclusive.h"
 
+#include <hardware/audio.h>
 
 static SLresult IAndroidEffect_CreateEffect(SLAndroidEffectItf self,
         SLInterfaceID effectImplementationId) {
@@ -34,7 +35,7 @@ static SLresult IAndroidEffect_CreateEffect(SLAndroidEffectItf self,
         }
     } else if (SL_OBJECTID_OUTPUTMIX == IObjectToObjectID(thiz->mThis)) {
         result = android_genericFx_createEffect(thiz, effectImplementationId,
-                android::AudioSystem::SESSION_OUTPUT_MIX);
+                AUDIO_SESSION_OUTPUT_MIX);
     } else {
         // the interface itself is invalid because it is not attached to an AudioPlayer or
         // an OutputMix
