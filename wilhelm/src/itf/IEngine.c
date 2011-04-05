@@ -1424,3 +1424,8 @@ void IXAEngine_init(void *self)
     IXAEngine *thiz = (IXAEngine *) self;
     thiz->mItf = &IXAEngine_Itf;
 }
+
+
+void IXAEngine_deinit(void *self)
+{
+}
