@@ -73,7 +73,7 @@ static SLresult IAudioIODeviceCapabilities_RegisterAvailableAudioInputsChangedCa
 {
     SL_ENTER_INTERFACE
 
-    IAudioIODeviceCapabilities * this = (IAudioIODeviceCapabilities *) self;
+    IAudioIODeviceCapabilities * thiz = (IAudioIODeviceCapabilities *) self;
     interface_lock_exclusive(thiz);
     thiz->mAvailableAudioInputsChangedCallback = callback;
     thiz->mAvailableAudioInputsChangedContext = pContext;
@@ -143,7 +143,7 @@ static SLresult IAudioIODeviceCapabilities_RegisterAvailableAudioOutputsChangedC
 {
     SL_ENTER_INTERFACE
 
-    IAudioIODeviceCapabilities * this = (IAudioIODeviceCapabilities *) self;
+    IAudioIODeviceCapabilities * thiz = (IAudioIODeviceCapabilities *) self;
     interface_lock_exclusive(thiz);
     thiz->mAvailableAudioOutputsChangedCallback = callback;
     thiz->mAvailableAudioOutputsChangedContext = pContext;
@@ -160,7 +160,7 @@ static SLresult IAudioIODeviceCapabilities_RegisterDefaultDeviceIDMapChangedCall
 {
     SL_ENTER_INTERFACE
 
-    IAudioIODeviceCapabilities * this = (IAudioIODeviceCapabilities *) self;
+    IAudioIODeviceCapabilities * thiz = (IAudioIODeviceCapabilities *) self;
     interface_lock_exclusive(thiz);
     thiz->mDefaultDeviceIDMapChangedCallback = callback;
     thiz->mDefaultDeviceIDMapChangedContext = pContext;

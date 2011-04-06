@@ -70,6 +70,7 @@ static SLresult IOutputMix_ReRoute(SLOutputMixItf self, SLint32 numOutputDevices
     } else {
         switch (pOutputDeviceIDs[0]) {
         case SL_DEFAULTDEVICEID_AUDIOOUTPUT:
+        case DEVICE_ID_HEADSET:
             result = SL_RESULT_SUCCESS;
             break;
         default:

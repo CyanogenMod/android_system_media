@@ -278,6 +278,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 
                     // Allocate memory for buffer queue
                     if (usesAdvancedBufferHeaders) {
+#ifdef ANDROID
                         // locator is SL_DATALOCATOR_ANDROIDBUFFERQUEUE
                         // Avoid possible integer overflow during multiplication; this arbitrary
                         // maximum is big enough to not interfere with real applications, but
@@ -332,6 +333,9 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                             thiz->mAndroidBufferQueue.mRear =
                                     thiz->mAndroidBufferQueue.mBufferArray;
                         }
+#else
+                        assert(false);
+#endif
                     } else {
                         // locator is SL_DATALOCATOR_BUFFERQUEUE
                         //         or SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE
@@ -1141,6 +1145,7 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                     }
 #endif
 
+#ifdef ANDROID
                     // AndroidBufferQueue-specific initialization
                     if (XA_DATALOCATOR_ANDROIDBUFFERQUEUE ==
                             thiz->mDataSource.mLocator.mLocatorType) {
@@ -1212,6 +1217,7 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                         thiz->mAndroidBufferQueue.mNumBuffers = nbBuffers;
 
                     }
+#endif
 
                     // used to store the data source of our audio player
                     thiz->mDynamicSource.mDataSource = &thiz->mDataSource.u.mSource;
