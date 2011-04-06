@@ -19,21 +19,23 @@
  * Used to define the mapping from an OpenSL ES or OpenMAX AL object to an Android
  * media framework object
  */
-enum AndroidObject_type {
-    INVALID_TYPE                              =-1,
+enum AndroidObjectType {
+    INVALID_TYPE                                =-1,
     // audio player, playing from a URI or FD data source
-    AUDIOPLAYER_FROM_URIFD                    = 0,
+    AUDIOPLAYER_FROM_URIFD                      = 0,
     // audio player, playing PCM buffers in a buffer queue data source
-    AUDIOPLAYER_FROM_PCM_BUFFERQUEUE          = 1,
+    AUDIOPLAYER_FROM_PCM_BUFFERQUEUE            = 1,
     // audio player, playing transport stream packets in an Android buffer queue data source
-    AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE    = 2,
+    AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE      = 2,
     // audio player, decoding from a URI or FD data source to a buffer queue data sink in PCM format
-    AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE = 3,
-    // FIXME rename values below to something easier to read (following model from previous values)
-    AV_PLR_TS_ABQ    = 4, // audio video player, transport stream, Android buffer queue data source
-    AV_PLR_URIFD     = 5, // audio video player, URI or FD data source (as in android::MediaPlayer)
-    A_RCR_MIC_ASQ    = 6, // audio recorder, device data source,
-                          //    streamed into a PCM Android simple buffer queue data sink
+    AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE   = 3,
+    // audio video player, playing transport stream packets in an Android buffer queue data source
+    AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE = 4,
+    // audio video player, playing from a URI or FD data source
+    AUDIOVIDEOPLAYER_FROM_URIFD                 = 5,
+    // audio recorder, recording from an input device data source, streamed into a
+    //   PCM buffer queue data sink
+    AUDIORECORDER_FROM_MIC_TO_PCM_BUFFERQUEUE   = 6,
     NUM_AUDIOPLAYER_MAP_TYPES
 };
 
@@ -42,7 +44,7 @@ enum AndroidObject_type {
  * Used to define the states of the OpenSL ES / OpenMAX AL object initialization and preparation
  * with regards to the Android-side of the data
  */
-enum AndroidObject_state {
+enum AndroidObjectState {
     ANDROID_UNINITIALIZED = -1,
     ANDROID_PREPARING,
     ANDROID_READY,
@@ -69,7 +71,7 @@ typedef struct AudioPlayback_Parameters_struct {
 /**
  * Structure to maintain the set of audio levels about a player
  */
-typedef struct AndroidAudioLevels_struct {
+typedef struct AndroidAudioLevels_t {
     /**
      * Is this player muted
      */

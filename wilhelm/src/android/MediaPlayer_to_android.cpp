@@ -168,11 +168,11 @@ XAresult android_Player_create(CMediaPlayer *mp) {
     switch(sourceLocator) {
     // FIXME support Android simple buffer queue as well
     case XA_DATALOCATOR_ANDROIDBUFFERQUEUE:
-        mp->mAndroidObjType = AV_PLR_TS_ABQ;
+        mp->mAndroidObjType = AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE;
         break;
     case XA_DATALOCATOR_URI: // intended fall-through
     case SL_DATALOCATOR_ANDROIDFD:
-        mp->mAndroidObjType = AV_PLR_URIFD;
+        mp->mAndroidObjType = AUDIOVIDEOPLAYER_FROM_URIFD;
         break;
     case XA_DATALOCATOR_ADDRESS: // intended fall-through
     default:
@@ -207,12 +207,12 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
     ap_params.trackcbUser = NULL;
 
     switch(mp->mAndroidObjType) {
-    case AV_PLR_TS_ABQ: {
+    case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: {
         mp->mAVPlayer = new android::StreamPlayer(&ap_params, true /*hasVideo*/);
         mp->mAVPlayer->init(player_handleMediaPlayerEventNotifications, (void*)mp);
         }
         break;
-    case AV_PLR_URIFD: {
+    case AUDIOVIDEOPLAYER_FROM_URIFD: {
         mp->mAVPlayer = new android::LocAVPlayer(&ap_params, true /*hasVideo*/);
         mp->mAVPlayer->init(player_handleMediaPlayerEventNotifications, (void*)mp);
         switch (mp->mDataSource.mLocator.mLocatorType) {
@@ -293,8 +293,8 @@ XAresult android_Player_getDuration(IPlay *pPlayItf, XAmillisecond *pDurMsec) {
 
     switch (avp->mAndroidObjType) {
 
-    case AV_PLR_TS_ABQ: // intended fall-through
-    case AV_PLR_URIFD: {
+    case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: // intended fall-through
+    case AUDIOVIDEOPLAYER_FROM_URIFD: {
         // FIXME implement for a MediaPlayer playing on URI or FD (on LocAVPlayer, returns -1)
         int dur = -1;
         if (avp->mAVPlayer != 0) {
@@ -335,10 +335,10 @@ XAresult android_Player_volumeUpdate(android::GenericPlayer *avp, IVolume *pVolI
  * pre-condition: avp != NULL
  */
 XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playState,
-        AndroidObject_state* pObjState)
+        AndroidObjectState* pObjState)
 {
     XAresult result = XA_RESULT_SUCCESS;
-    AndroidObject_state objState = *pObjState;
+    AndroidObjectState objState = *pObjState;
 
     switch (playState) {
      case SL_PLAYSTATE_STOPPED: {
@@ -393,7 +393,8 @@ XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playS
 
 //-----------------------------------------------------------------------------
 void android_Player_androidBufferQueue_registerCallback_l(CMediaPlayer *mp) {
-    if ((mp->mAndroidObjType == AV_PLR_TS_ABQ) && (mp->mAVPlayer != 0)) {
+    if ((mp->mAndroidObjType == AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE)
+            && (mp->mAVPlayer != 0)) {
         SL_LOGD("android_Player_androidBufferQueue_registerCallback_l");
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
         splr->registerQueueCallback(
@@ -405,7 +406,8 @@ void android_Player_androidBufferQueue_registerCallback_l(CMediaPlayer *mp) {
 
 
 void android_Player_androidBufferQueue_clear_l(CMediaPlayer *mp) {
-    if ((mp->mAndroidObjType == AV_PLR_TS_ABQ) && (mp->mAVPlayer != 0)) {
+    if ((mp->mAndroidObjType == AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE)
+            && (mp->mAVPlayer != 0)) {
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
         splr->appClear_l();
     }
@@ -413,7 +415,8 @@ void android_Player_androidBufferQueue_clear_l(CMediaPlayer *mp) {
 
 
 void android_Player_androidBufferQueue_onRefilled_l(CMediaPlayer *mp) {
-    if ((mp->mAndroidObjType == AV_PLR_TS_ABQ) && (mp->mAVPlayer != 0)) {
+    if ((mp->mAndroidObjType == AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE)
+            && (mp->mAVPlayer != 0)) {
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
         splr->queueRefilled_l();
     }

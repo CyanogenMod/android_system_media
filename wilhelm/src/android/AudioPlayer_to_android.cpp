@@ -28,9 +28,9 @@ template class android::KeyedVector<SLuint32, android::AudioEffect* > ;
 // FIXME this method will be absorbed into android_audioPlayer_setPlayState() once
 //       bufferqueue and uri/fd playback are moved under the GenericPlayer C++ object
 SLresult aplayer_setPlayState(const android::sp<android::GenericPlayer> &ap, SLuint32 playState,
-        AndroidObject_state* pObjState) {
+        AndroidObjectState* pObjState) {
     SLresult result = SL_RESULT_SUCCESS;
-    AndroidObject_state objState = *pObjState;
+    AndroidObjectState objState = *pObjState;
 
     switch (playState) {
      case SL_PLAYSTATE_STOPPED:
@@ -550,13 +550,13 @@ bool audioPlayer_isSupportedNonOutputMixSink(const SLDataSink* pAudioSink) {
  * returns the Android object type if the locator type combinations for the source and sinks
  *   are supported by this implementation, INVALID_TYPE otherwise
  */
-AndroidObject_type audioPlayer_getAndroidObjectTypeForSourceSink(CAudioPlayer *ap) {
+AndroidObjectType audioPlayer_getAndroidObjectTypeForSourceSink(CAudioPlayer *ap) {
 
     const SLDataSource *pAudioSrc = &ap->mDataSource.u.mSource;
     const SLDataSink *pAudioSnk = &ap->mDataSink.u.mSink;
     const SLuint32 sourceLocatorType = *(SLuint32 *)pAudioSrc->pLocator;
     const SLuint32 sinkLocatorType = *(SLuint32 *)pAudioSnk->pLocator;
-    AndroidObject_type type = INVALID_TYPE;
+    AndroidObjectType type = INVALID_TYPE;
 
     //--------------------------------------
     // Sink / source matching check:
@@ -1548,7 +1548,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
 
     if (lockAP) { object_lock_shared(&ap->mObject); }
     SLuint32 playState = ap->mPlay.mState;
-    AndroidObject_state objState = ap->mAndroidObjState;
+    AndroidObjectState objState = ap->mAndroidObjState;
     if (lockAP) { object_unlock_shared(&ap->mObject); }
 
     switch(ap->mAndroidObjType) {

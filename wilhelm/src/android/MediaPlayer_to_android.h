@@ -61,7 +61,7 @@ extern XAresult android_Player_volumeUpdate(android::GenericPlayer *avp, IVolume
  * pre-condition: avp != NULL
  */
 extern XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playState,
-        AndroidObject_state* pObjState);
+        AndroidObjectState* pObjState);
 
 
 

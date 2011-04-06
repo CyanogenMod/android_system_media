@@ -89,9 +89,9 @@
 #endif // USE_SNDFILE
 #ifdef ANDROID
     android::Mutex          *mpLock;
-    enum AndroidObject_type mAndroidObjType;
+    enum AndroidObjectType mAndroidObjType;
     /** identifies the initialization and preparation state */
-    enum AndroidObject_state mAndroidObjState;
+    enum AndroidObjectState mAndroidObjState;
     /** identifies which group of effects ("session") this player belongs to */
     int mSessionId;
     /** identifies the Android stream type playback will occur on */
@@ -151,7 +151,7 @@
     SLuint32 mSampleRateMilliHz;// 0 means unknown, then const once it is known
     // implementation-specific data for this instance
 #ifdef ANDROID
-    enum AndroidObject_type mAndroidObjType;
+    enum AndroidObjectType mAndroidObjType;
     android::AudioRecord *mAudioRecord; //FIXME candidate to be encapsulated in a ARecorder subclass
     int mRecordSource;                  //FIXME candidate to be encapsulated in a ARecorder subclass
 #endif
@@ -331,9 +331,9 @@ typedef struct CMediaPlayer_struct {
     SLmillibel mDirectLevel;
 #ifdef ANDROID
     android::sp<android::GenericPlayer> mAVPlayer;
-    enum AndroidObject_type mAndroidObjType;
+    enum AndroidObjectType mAndroidObjType;
     /** identifies the initialization and preparation state */
-    enum AndroidObject_state mAndroidObjState;
+    enum AndroidObjectState mAndroidObjState;
     /** identifies which group of effects ("session") this player belongs to */
     int mSessionId;
     /** identifies the Android stream type playback will occur on */

@@ -308,7 +308,7 @@ SLresult android_audioRecorder_create(CAudioRecorder* ar) {
     if ((SL_DATALOCATOR_IODEVICE == sourceLocatorType) &&
             (SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE == sinkLocatorType)) {
         // microphone to simple buffer queue
-        ar->mAndroidObjType = A_RCR_MIC_ASQ;
+        ar->mAndroidObjType = AUDIORECORDER_FROM_MIC_TO_PCM_BUFFERQUEUE;
         ar->mAudioRecord = NULL;
         ar->mRecordSource = android::AUDIO_SOURCE_DEFAULT;
     } else {
