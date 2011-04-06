@@ -351,6 +351,8 @@ extern void
 #define IAndroidEffectCapabilities_Expose NULL
 #define IAndroidBufferQueue_init          NULL
 #define IStreamInformation_init           NULL
+#define IAndroidBufferQueue_deinit        NULL
+#define IStreamInformation_deinit         NULL
 #endif
 
 #ifndef USE_OUTPUTMIXEXT
