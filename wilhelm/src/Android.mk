@@ -186,7 +186,8 @@ LOCAL_C_INCLUDES:=                                                  \
 LOCAL_MODULE := libOpenSLES
 LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_TAGS := optional
-LOCAL_CFLAGS += -x c++ -DLI_API= -fvisibility=hidden -DSL_API='__attribute__((visibility("default")))'
+LOCAL_CFLAGS += -x c++ -DLI_API= -fvisibility=hidden \
+                -DSL_API='__attribute__((visibility("default")))'
 LOCAL_SHARED_LIBRARIES := libwilhelm
 include $(BUILD_SHARED_LIBRARY)
 
@@ -200,6 +201,7 @@ LOCAL_C_INCLUDES:=                                                  \
 LOCAL_MODULE := libOpenMAXAL
 LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_TAGS := optional
-LOCAL_CFLAGS += -x c++ -DLI_API= -fvisibility=hidden -DXA_API='__attribute__((visibility("default")))'
+LOCAL_CFLAGS += -x c++ -DLI_API= -fvisibility=hidden \
+                -DXA_API='__attribute__((visibility("default")))'
 LOCAL_SHARED_LIBRARIES := libwilhelm
 include $(BUILD_SHARED_LIBRARY)

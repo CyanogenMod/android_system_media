@@ -131,7 +131,8 @@ static XAresult IStreamInformation_QueryStreamInformation( XAStreamInformationIt
                 *(XAVendorStreamInformation *)info = streamInfo.vendorInfo;
                 break;
             default:
-                SL_LOGE("StreamInformation::QueryStreamInformation index %lu has unknown domain %lu", streamIndex, streamInfo.domain);
+                SL_LOGE("StreamInformation::QueryStreamInformation index %lu has "
+                        "unknown domain %lu", streamIndex, streamInfo.domain);
                 result = XA_RESULT_INTERNAL_ERROR;
                 break;
             }
