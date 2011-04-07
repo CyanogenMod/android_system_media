@@ -307,6 +307,8 @@ extern void IObject_Destroy(SLObjectItf self);
 
 #define InterfaceToCAudioRecorder(thiz) (((CAudioRecorder*)InterfaceToIObject(thiz)))
 
+#define InterfaceToCMediaPlayer(thiz) (((CMediaPlayer*)InterfaceToIObject(thiz)))
+
 #ifdef ANDROID
 #include "android/MediaPlayer_to_android.h"
 #include "android/OutputMix_to_android.h"

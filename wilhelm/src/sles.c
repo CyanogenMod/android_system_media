@@ -453,7 +453,7 @@ extern void
     { /* MPH_XARADIO */ NULL, NULL, NULL, NULL, NULL },
     { /* MPH_XARDS */ NULL, NULL, NULL, NULL, NULL },
     { /* MPH_XARECORD */ NULL, NULL, NULL, NULL, NULL },
-    { /* MPH_XASEEK */ NULL, NULL, NULL, NULL, NULL },
+    { /* MPH_XASEEK */ ISeek_init, NULL, NULL, NULL, NULL },
     { /* MPH_XASNAPSHOT */ NULL, NULL, NULL, NULL, NULL },
     { /* MPH_XASTREAMINFORMATION */ IStreamInformation_init, NULL, IStreamInformation_deinit,
         NULL, NULL },

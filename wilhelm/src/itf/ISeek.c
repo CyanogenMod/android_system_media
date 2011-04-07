@@ -62,15 +62,36 @@ static SLresult ISeek_SetLoop(SLSeekItf self, SLboolean loopEnable,
         if ((startPos != 0) && (endPos != SL_TIME_UNKNOWN)) {
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
-            thiz->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize
-            // start and end positions already initialized to [0, end of stream]
-            /*thiz->mStartPos = 0;
-            thiz->mEndPos = (SLmillisecond) SL_TIME_UNKNOWN;*/
-            CAudioPlayer *ap = InterfaceToCAudioPlayer(thiz);
-            if (NULL != ap) {
-                android_audioPlayer_loop(ap, loopEnable);
+            switch (IObjectToObjectID((thiz)->mThis)) {
+              case SL_OBJECTID_AUDIOPLAYER: {
+                CAudioPlayer *ap = InterfaceToCAudioPlayer(thiz);
+                if (NULL != ap) {
+                    // FIXME should return a result
+                    android_audioPlayer_loop(ap, loopEnable);
+                } else {
+                    result = SL_RESULT_PARAMETER_INVALID;
+                }
+                break;
+              }
+              case XA_OBJECTID_MEDIAPLAYER: {
+                CMediaPlayer *mp = InterfaceToCMediaPlayer(thiz);
+                if (NULL != mp) {
+                    result = android_Player_loop(mp, loopEnable);
+                } else {
+                    result = SL_RESULT_PARAMETER_INVALID;
+                }
+                break;
+              }
+              default: {
+                result = SL_RESULT_PARAMETER_INVALID;
+              }
             }
-            result = SL_RESULT_SUCCESS;
+            if (SL_RESULT_SUCCESS == result) {
+                thiz->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize
+                // start and end positions already initialized to [0, end of stream]
+                /*thiz->mStartPos = 0;
+                  thiz->mEndPos = (SLmillisecond) SL_TIME_UNKNOWN;*/
+            }
         }
 #else
         thiz->mLoopEnabled = SL_BOOLEAN_FALSE != loopEnable; // normalize

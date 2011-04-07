@@ -157,7 +157,7 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
 
     if (attributes & ATTR_POSITION) {
         switch (objectID) {
-        case SL_OBJECTID_AUDIOPLAYER:
+          case SL_OBJECTID_AUDIOPLAYER:
 #ifdef ANDROID
             ap = (CAudioPlayer *) thiz;
             attributes &= ~ATTR_POSITION;   // no need to process asynchronously also
@@ -166,12 +166,17 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
             //audioPlayerTransportUpdate(ap);
 #endif
             break;
-        case SL_OBJECTID_MIDIPLAYER:
+          case SL_OBJECTID_MIDIPLAYER:
             // MIDI
             SL_LOGD("[ FIXME: position update on an SL_OBJECTID_MIDIPLAYER to be implemented ]");
             break;
-        default:
+          case XA_OBJECTID_MEDIAPLAYER: {
+            CMediaPlayer *mp = (CMediaPlayer *) thiz;
+            attributes &= ~ATTR_POSITION;   // no need to process asynchronously also
+            android_Player_seek(mp, mp->mSeek.mPos);
             break;
+          }
+          default: { }
         }
     }
 

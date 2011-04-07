@@ -63,6 +63,12 @@ extern XAresult android_Player_volumeUpdate(android::GenericPlayer *avp, IVolume
 extern XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playState,
         AndroidObjectState* pObjState);
 
+/**
+ * for all functions below: pre-condition: mp != NULL
+ */
+extern XAresult android_Player_seek(CMediaPlayer *ap, SLmillisecond posMsec);
+extern XAresult android_Player_loop(CMediaPlayer *mp, SLboolean loopEnable);
+
 
 
 /**************************************************************************************************

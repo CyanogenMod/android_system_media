@@ -85,9 +85,30 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
         break;
       }
 
-    default:
-        SL_LOGE("Received unknown event %d, data %d from AVPlayer", event, data1);
+      case android::GenericPlayer::kEventEndOfStream: {
+        SL_LOGV("Received AVPlayer::kEventEndOfStream for CMediaPlayer %p", mp);
+
+        object_lock_exclusive(&mp->mObject);
+        // should be xaPlayCallback but we're sharing the itf between SL and AL
+        slPlayCallback playCallback = NULL;
+        void * playContext = NULL;
+        // XAPlayItf callback or no callback?
+        if (mp->mPlay.mEventFlags & XA_PLAYEVENT_HEADATEND) {
+            playCallback = mp->mPlay.mCallback;
+            playContext = mp->mPlay.mContext;
+        }
+        object_unlock_exclusive(&mp->mObject);
+
+        // callback with no lock held
+        if (NULL != playCallback) {
+            (*playCallback)(&mp->mPlay.mItf, playContext, XA_PLAYEVENT_HEADATEND);
+        }
         break;
+      }
+
+      default: {
+        SL_LOGE("Received unknown event %d, data %d from AVPlayer", event, data1);
+      }
     }
 }
 
@@ -387,6 +408,46 @@ XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playS
          break;
      }
 
+    return result;
+}
+
+
+/**
+ * pre-condition: mp != NULL
+ */
+XAresult android_Player_seek(CMediaPlayer *mp, SLmillisecond posMsec) {
+    XAresult result = XA_RESULT_SUCCESS;
+    switch (mp->mAndroidObjType) {
+      case AUDIOVIDEOPLAYER_FROM_URIFD:
+        if (mp->mAVPlayer !=0) {
+            mp->mAVPlayer->seek(posMsec);
+        }
+        break;
+      case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: // intended fall-through
+      default: {
+          result = XA_RESULT_PARAMETER_INVALID;
+      }
+    }
+    return result;
+}
+
+
+/**
+ * pre-condition: mp != NULL
+ */
+XAresult android_Player_loop(CMediaPlayer *mp, SLboolean loopEnable) {
+    XAresult result = XA_RESULT_SUCCESS;
+    switch (mp->mAndroidObjType) {
+      case AUDIOVIDEOPLAYER_FROM_URIFD:
+        if (mp->mAVPlayer !=0) {
+            mp->mAVPlayer->loop(loopEnable);
+        }
+        break;
+      case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: // intended fall-through
+      default: {
+          result = XA_RESULT_PARAMETER_INVALID;
+      }
+    }
     return result;
 }
 
