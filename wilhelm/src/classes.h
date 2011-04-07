@@ -308,13 +308,18 @@ typedef struct {
 
 typedef struct CMediaPlayer_struct {
     IObject mObject;
+#ifdef ANDROID
+#define INTERFACES_MediaPlayer 7
+#else
 #define INTERFACES_MediaPlayer 6
+#endif
     XAuint8 mInterfaceStates2[INTERFACES_MediaPlayer - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
     IDynamicSource mDynamicSource;
     IPlay mPlay;
     IStreamInformation mStreamInfo;
     IVolume mVolume;
+    ISeek mSeek;
 #ifdef ANDROID
     IAndroidBufferQueue mAndroidBufferQueue;
 #endif
