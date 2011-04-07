@@ -17,13 +17,17 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
+LOCAL_C_INCLUDES:= \
+        system/media/wilhelm/include
+
 LOCAL_CFLAGS += -Wno-override-init
 # -Wno-missing-field-initializers
 # optional, see comments in MPH_to.c: -DUSE_DESIGNATED_INITIALIZERS -S
 LOCAL_CFLAGS += -DUSE_DESIGNATED_INITIALIZERS
 
 LOCAL_SRC_FILES:=                     \
-        MPH_to.c
+        MPH_to.c \
+        handlers.c
 
 LOCAL_MODULE:= libopensles_helper
 
@@ -49,6 +53,7 @@ LOCAL_SRC_FILES:=                     \
         data.c                        \
         devices.c                     \
         entry.c                       \
+        handler_bodies.c              \
         trace.c                       \
         locks.c                       \
         sles.c                        \

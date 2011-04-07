@@ -307,6 +307,8 @@ extern void IObject_Destroy(SLObjectItf self);
 
 #define InterfaceToCAudioRecorder(thiz) (((CAudioRecorder*)InterfaceToIObject(thiz)))
 
+#define InterfaceToCAudioRecorder(thiz) (((CAudioRecorder*)InterfaceToIObject(thiz)))
+
 #define InterfaceToCMediaPlayer(thiz) (((CMediaPlayer*)InterfaceToIObject(thiz)))
 
 #ifdef ANDROID
@@ -368,18 +370,8 @@ extern unsigned ctz(unsigned);
 #endif
 extern const char * const interface_names[MPH_MAX];
 #include "platform.h"
-
-// Attributes
-
-#define ATTR_NONE       ((unsigned) 0x0)      // none
-#define ATTR_GAIN       ((unsigned) 0x1 << 0) // player volume, channel mute, channel solo,
-                                              // player stereo position, player mute
-#define ATTR_TRANSPORT   ((unsigned) 0x1 << 1) // play state, looping
-#define ATTR_POSITION    ((unsigned) 0x1 << 2) // requested position (a.k.a. seek position)
-#define ATTR_BQ_ENQUEUE  ((unsigned) 0x1 << 3) // buffer queue became non-empty and in playing state
-#define ATTR_ABQ_ENQUEUE ((unsigned) 0x1 << 4) // Android buffer queue became non-empty and
-                                               //     in playing state
-
+#include "attr.h"
+#include "handlers.h"
 #include "trace.h"
 
 #ifdef USE_SNDFILE

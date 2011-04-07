@@ -113,151 +113,43 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
 #endif
 
     int ok;
+
+    // make SL object IDs be contiguous with XA object IDs
     SLuint32 objectID = IObjectToObjectID(thiz);
-    CAudioPlayer *ap;
-
-    // FIXME The endless if statements are getting ugly, should use bit search
-
-    // Android likes to see certain updates synchronously
-
-    if (attributes & ATTR_GAIN) {
-        switch (objectID) {
-        case SL_OBJECTID_AUDIOPLAYER:
-            attributes &= ~ATTR_GAIN;   // no need to process asynchronously also
-            ap = (CAudioPlayer *) thiz;
-#ifdef ANDROID
-            android_audioPlayer_volumeUpdate(ap);
-#else
-            audioPlayerGainUpdate(ap);
-#endif
-            break;
-        case SL_OBJECTID_OUTPUTMIX:
-            // FIXME update gains on all players attached to this outputmix
-            SL_LOGD("[ FIXME: gain update on an SL_OBJECTID_OUTPUTMIX to be implemented ]");
-            break;
-        case SL_OBJECTID_MIDIPLAYER:
-            // MIDI
-            SL_LOGD("[ FIXME: gain update on an SL_OBJECTID_MIDIPLAYER to be implemented ]");
-            break;
-        case XA_OBJECTID_MEDIAPLAYER: {
-#ifdef ANDROID
-            attributes &= ~ATTR_GAIN;   // no need to process asynchronously also
-            CMediaPlayer *mp = (CMediaPlayer *) thiz;
-            android::GenericPlayer* avp = mp->mAVPlayer.get();
-            if (avp != NULL) {
-                android_Player_volumeUpdate(avp, &mp->mVolume);
-            }
-#endif
-            break;
-        }
-        default:
-            break;
-        }
+    if ((XA_OBJECTID_ENGINE <= objectID) && (objectID <= XA_OBJECTID_CAMERADEVICE)) {
+        ;
+    } else if ((SL_OBJECTID_ENGINE <= objectID) && (objectID <= SL_OBJECTID_METADATAEXTRACTOR)) {
+        objectID -= SL_OBJECTID_ENGINE - XA_OBJECTID_CAMERADEVICE - 1;
+    } else {
+        assert(false);
+        objectID = 0;
     }
 
-    if (attributes & ATTR_POSITION) {
-        switch (objectID) {
-          case SL_OBJECTID_AUDIOPLAYER:
-#ifdef ANDROID
-            ap = (CAudioPlayer *) thiz;
-            attributes &= ~ATTR_POSITION;   // no need to process asynchronously also
-            android_audioPlayer_seek(ap, ap->mSeek.mPos);
-#else
-            //audioPlayerTransportUpdate(ap);
-#endif
-            break;
-          case SL_OBJECTID_MIDIPLAYER:
-            // MIDI
-            SL_LOGD("[ FIXME: position update on an SL_OBJECTID_MIDIPLAYER to be implemented ]");
-            break;
-          case XA_OBJECTID_MEDIAPLAYER: {
-            CMediaPlayer *mp = (CMediaPlayer *) thiz;
-            attributes &= ~ATTR_POSITION;   // no need to process asynchronously also
-            android_Player_seek(mp, mp->mSeek.mPos);
-            break;
-          }
-          default: { }
+    // first synchronously handle updates to attributes here, while object is still locked.
+    // This appears to be a loop, but actually typically runs through the loop only once.
+    unsigned asynchronous = attributes;
+    while (attributes) {
+        // this sequence is carefully crafted to be O(1); tread carefully when making changes
+        unsigned bit = ctz(attributes);
+        // ATTR_INDEX_MAX == next bit position after the last attribute
+        assert(ATTR_INDEX_MAX > bit);
+        // compute the entry in the handler table using object ID and bit number
+        AttributeHandler handler = handlerTable[objectID][bit];
+        if (NULL != handler) {
+            asynchronous &= ~(*handler)(thiz);
         }
+        attributes &= ~(1 << bit);
     }
 
-    if (attributes & ATTR_TRANSPORT) {
-        switch (objectID) {
-        case SL_OBJECTID_AUDIOPLAYER:
-#ifdef ANDROID
-            attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
-            ap = (CAudioPlayer *) thiz;
-            // FIXME should only call when state changes
-            android_audioPlayer_setPlayState(ap, false /*lockAP*/);
-            // FIXME ditto, but for either eventflags or marker position
-            android_audioPlayer_useEventMask(ap);
-#else
-            //audioPlayerTransportUpdate(ap);
-#endif
-            break;
-        case SL_OBJECTID_AUDIORECORDER:
-#ifdef ANDROID
-            {
-            attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
-            CAudioRecorder* ar = (CAudioRecorder *) thiz;
-            android_audioRecorder_useEventMask(ar);
-            }
-#endif
-            break;
-        case XA_OBJECTID_MEDIAPLAYER:
-#ifdef ANDROID
-            {
-            attributes &= ~ATTR_TRANSPORT;   // no need to process asynchronously also
-            CMediaPlayer *mp = (CMediaPlayer *) thiz;
-            android::GenericPlayer* avp = mp->mAVPlayer.get();
-            if (avp != NULL) {
-                android_Player_setPlayState(avp, mp->mPlay.mState, &(mp->mAndroidObjState));
-            }
-            }
-#endif
-            break;
-        default:
-            break;
-        }
-    }
-
-    if (attributes & ATTR_BQ_ENQUEUE) {
-        // ( buffer queue count is non-empty and play state == PLAYING ) became true
-        if (SL_OBJECTID_AUDIOPLAYER == objectID) {
-            attributes &= ~ATTR_BQ_ENQUEUE;
-            ap = (CAudioPlayer *) thiz;
-            if (SL_PLAYSTATE_PLAYING == ap->mPlay.mState) {
-#ifdef ANDROID
-                android_audioPlayer_bufferQueue_onRefilled_l(ap);
-#endif
-            }
-        }
-#ifndef ANDROID
-    }
-#else
-    } else if (attributes & ATTR_ABQ_ENQUEUE) {
-        // (Android buffer queue count is non-empty and play state == PLAYING ) became true
-        if (SL_OBJECTID_AUDIOPLAYER == objectID) {
-            attributes &= ~ATTR_ABQ_ENQUEUE;
-            ap = (CAudioPlayer *) thiz;
-            if (SL_PLAYSTATE_PLAYING == ap->mPlay.mState) {
-                android_audioPlayer_androidBufferQueue_onRefilled_l(ap);
-            }
-        } else if (XA_OBJECTID_MEDIAPLAYER == objectID) {
-            attributes &= ~ATTR_ABQ_ENQUEUE;
-            CMediaPlayer* mp = (CMediaPlayer *)thiz;
-            if (SL_PLAYSTATE_PLAYING == mp->mPlay.mState) {
-                android_Player_androidBufferQueue_onRefilled_l(mp);
-            }
-        }
-    }
-#endif
-
-    if (attributes) {
+    // any remaining attributes are handled asynchronously in the sync thread
+    if (asynchronous) {
         unsigned oldAttributesMask = thiz->mAttributesMask;
-        thiz->mAttributesMask = oldAttributesMask | attributes;
-        if (oldAttributesMask)
-            attributes = ATTR_NONE;
+        thiz->mAttributesMask = oldAttributesMask | asynchronous;
+        if (oldAttributesMask) {
+            asynchronous = ATTR_NONE;
+        }
     }
+
 #ifdef USE_DEBUG
     memset(&thiz->mOwner, 0, sizeof(pthread_t));
     thiz->mFile = file;
@@ -265,18 +157,21 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
 #endif
     ok = pthread_mutex_unlock(&thiz->mMutex);
     assert(0 == ok);
+
     // first update to this interface since previous sync
-    if (attributes) {
+    if (ATTR_NONE != asynchronous) {
         unsigned id = thiz->mInstanceID;
         if (0 != id) {
             --id;
             assert(MAX_INSTANCE > id);
             IEngine *thisEngine = &thiz->mEngine->mEngine;
+            // FIXME atomic or here
             interface_lock_exclusive(thisEngine);
             thisEngine->mChangedMask |= 1 << id;
             interface_unlock_exclusive(thisEngine);
         }
     }
+
 }
 
 
