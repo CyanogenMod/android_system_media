@@ -113,7 +113,9 @@ static SLresult IEffectSend_EnableEffectSend(SLEffectSendItf self,
 {
     SL_ENTER_INTERFACE
 
-    if (!((SL_MILLIBEL_MIN <= initialLevel) && (initialLevel <= 0))) {
+    //if (!((SL_MILLIBEL_MIN <= initialLevel) && (initialLevel <= 0))) {
+    // comparison (SL_MILLIBEL_MIN <= initialLevel) is always true due to range of SLmillibel
+    if (!(initialLevel <= 0)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEffectSend *thiz = (IEffectSend *) self;
@@ -187,7 +189,9 @@ static SLresult IEffectSend_SetDirectLevel(SLEffectSendItf self, SLmillibel dire
 {
     SL_ENTER_INTERFACE
 
-    if (!((SL_MILLIBEL_MIN <= directLevel) && (directLevel <= 0))) {
+    //if (!((SL_MILLIBEL_MIN <= directLevel) && (directLevel <= 0))) {
+    // comparison (SL_MILLIBEL_MIN <= directLevel) is always true due to range of SLmillibel
+    if (!(directLevel <= 0)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEffectSend *thiz = (IEffectSend *) self;
@@ -248,7 +252,9 @@ static SLresult IEffectSend_SetSendLevel(SLEffectSendItf self, const void *pAuxE
 {
     SL_ENTER_INTERFACE
 
-    if (!((SL_MILLIBEL_MIN <= sendLevel) && (sendLevel <= 0))) {
+    //if (!((SL_MILLIBEL_MIN <= sendLevel) && (sendLevel <= 0))) {
+    // comparison (SL_MILLIBEL_MIN <= sendLevel) is always true due to range of SLmillibel
+    if (!(sendLevel <= 0)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEffectSend *thiz = (IEffectSend *) self;

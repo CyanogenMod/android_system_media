@@ -24,7 +24,9 @@ static SLresult IAndroidEffectSend_EnableEffectSend(SLAndroidEffectSendItf self,
 {
     SL_ENTER_INTERFACE
 
-    if (!((SL_MILLIBEL_MIN <= initialLevel) && (initialLevel <= 0))) {
+    //if (!((SL_MILLIBEL_MIN <= initialLevel) && (initialLevel <= 0))) {
+    // comparison (SL_MILLIBEL_MIN <= initialLevel) is always true due to range of SLmillibel
+    if (!(initialLevel <= 0)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IAndroidEffectSend *thiz = (IAndroidEffectSend *) self;
@@ -81,29 +83,31 @@ static SLresult IAndroidEffectSend_SetDirectLevel(SLAndroidEffectSendItf self,
 {
     SL_ENTER_INTERFACE
 
-     if (!((SL_MILLIBEL_MIN <= directLevel) && (directLevel <= 0))) {
-         result = SL_RESULT_PARAMETER_INVALID;
-     } else {
-         IAndroidEffectSend *thiz = (IAndroidEffectSend *) self;
-         interface_lock_exclusive(thiz);
-         CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
-                 (CAudioPlayer *) thiz->mThis : NULL;
-         if (NULL != ap) {
-             SLmillibel oldDirectLevel = ap->mDirectLevel;
-             if (oldDirectLevel != directLevel) {
-                 ap->mDirectLevel = directLevel;
-                 ap->mAmplFromDirectLevel = sles_to_android_amplification(directLevel);
-                 interface_unlock_exclusive_attributes(thiz, ATTR_GAIN);
-             } else {
-                 interface_unlock_exclusive(thiz);
-             }
-             result = SL_RESULT_SUCCESS;
-         } else {
-             interface_unlock_exclusive(thiz);
-             SL_LOGE("invalid interface: not attached to an AudioPlayer");
-             result = SL_RESULT_PARAMETER_INVALID;
-         }
-     }
+    //if (!((SL_MILLIBEL_MIN <= directLevel) && (directLevel <= 0))) {
+    // comparison (SL_MILLIBEL_MIN <= directLevel) is always true due to range of SLmillibel
+    if (!(directLevel <= 0)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IAndroidEffectSend *thiz = (IAndroidEffectSend *) self;
+        interface_lock_exclusive(thiz);
+        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+                (CAudioPlayer *) thiz->mThis : NULL;
+        if (NULL != ap) {
+            SLmillibel oldDirectLevel = ap->mDirectLevel;
+            if (oldDirectLevel != directLevel) {
+                ap->mDirectLevel = directLevel;
+                ap->mAmplFromDirectLevel = sles_to_android_amplification(directLevel);
+                interface_unlock_exclusive_attributes(thiz, ATTR_GAIN);
+            } else {
+                interface_unlock_exclusive(thiz);
+            }
+            result = SL_RESULT_SUCCESS;
+        } else {
+            interface_unlock_exclusive(thiz);
+            SL_LOGE("invalid interface: not attached to an AudioPlayer");
+            result = SL_RESULT_PARAMETER_INVALID;
+        }
+    }
 
      SL_LEAVE_INTERFACE
 }
@@ -140,7 +144,9 @@ static SLresult IAndroidEffectSend_SetSendLevel(SLAndroidEffectSendItf self,
 {
     SL_ENTER_INTERFACE
 
-    if (!((SL_MILLIBEL_MIN <= sendLevel) && (sendLevel <= 0))) {
+    //if (!((SL_MILLIBEL_MIN <= sendLevel) && (sendLevel <= 0))) {
+    // comparison (SL_MILLIBEL_MIN <= sendLevel) is always true due to range of SLmillibel
+    if (!(sendLevel <= 0)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IAndroidEffectSend *thiz = (IAndroidEffectSend *) self;

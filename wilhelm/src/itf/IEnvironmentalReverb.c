@@ -42,7 +42,9 @@ static SLresult IEnvironmentalReverb_SetRoomLevel(SLEnvironmentalReverbItf self,
 {
     SL_ENTER_INTERFACE
 
-    if (!(SL_MILLIBEL_MIN <= room && room <= 0)) {
+    //if (!(SL_MILLIBEL_MIN <= room && room <= 0)) {
+    // comparison (SL_MILLIBEL_MIN <= room) is always true due to range of SLmillibel
+    if (!(room <= 0)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
@@ -101,7 +103,9 @@ static SLresult IEnvironmentalReverb_SetRoomHFLevel(
 {
     SL_ENTER_INTERFACE
 
-    if (!(SL_MILLIBEL_MIN <= roomHF && roomHF <= 0)) {
+    //if (!(SL_MILLIBEL_MIN <= roomHF && roomHF <= 0)) {
+    // comparison (SL_MILLIBEL_MIN <= roomHF) is always true due to range of SLmillibel
+    if (!(roomHF <= 0)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
@@ -278,7 +282,9 @@ static SLresult IEnvironmentalReverb_SetReflectionsLevel(
 {
     SL_ENTER_INTERFACE
 
-    if (!(SL_MILLIBEL_MIN <= reflectionsLevel && reflectionsLevel <= 1000)) {
+    //if (!(SL_MILLIBEL_MIN <= reflectionsLevel && reflectionsLevel <= 1000)) {
+    // comparison (SL_MILLIBEL_MIN <= reflectionsLevel) is always true due to range of SLmillibel
+    if (!(reflectionsLevel <= 1000)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
@@ -396,7 +402,9 @@ static SLresult IEnvironmentalReverb_SetReverbLevel(
 {
     SL_ENTER_INTERFACE
 
-    if (!(SL_MILLIBEL_MIN <= reverbLevel && reverbLevel <= 2000)) {
+    //if (!(SL_MILLIBEL_MIN <= reverbLevel && reverbLevel <= 2000)) {
+    // comparison (SL_MILLIBEL_MIN <= reverbLevel) is always true due to range of SLmillibel
+    if (!(reverbLevel <= 2000)) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
@@ -631,25 +639,27 @@ static SLresult IEnvironmentalReverb_SetEnvironmentalReverbProperties(SLEnvironm
 {
     SL_ENTER_INTERFACE
 
+    // note that it's unnecessary to verify that any level stored inside the "properties" struct
+    //  is >= SL_MILLIBEL_MIN before using it, due to range of SLmillibel
+
     result = SL_RESULT_PARAMETER_INVALID;
     do {
         if (NULL == pProperties)
             break;
         SLEnvironmentalReverbSettings properties = *pProperties;
-        if (!(SL_MILLIBEL_MIN <= properties.roomLevel && properties.roomLevel <= 0))
+        if (!(properties.roomLevel <= 0))
             break;
-        if (!(SL_MILLIBEL_MIN <= properties.roomHFLevel && properties.roomHFLevel <= 0))
+        if (!(properties.roomHFLevel <= 0))
             break;
         if (!(100 <= properties.decayTime && properties.decayTime <= 20000))
             break;
         if (!(100 <= properties.decayHFRatio && properties.decayHFRatio <= 2000))
             break;
-        if (!(SL_MILLIBEL_MIN <= properties.reflectionsLevel &&
-            properties.reflectionsLevel <= 1000))
+        if (!(properties.reflectionsLevel <= 1000))
             break;
         if (!(/* 0 <= properties.reflectionsDelay && */ properties.reflectionsDelay <= 300))
             break;
-        if (!(SL_MILLIBEL_MIN <= properties.reverbLevel && properties.reverbLevel <= 2000))
+        if (!(properties.reverbLevel <= 2000))
             break;
         if (!(/* 0 <= properties.reverbDelay && */ properties.reverbDelay <= 100))
             break;
