@@ -1745,8 +1745,8 @@ static void android_audioPlayer_setMute(CAudioPlayer* ap) {
 
       case AUDIOPLAYER_FROM_URIFD:                    // intended fall-through
       case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE:
-        if ( (NULL != ap->mAPlayer.get()) && (NULL != &ap->mVolume) ) {
-            android_Player_volumeUpdate(ap->mAPlayer.get(), &ap->mVolume);
+        if ( (ap->mAPlayer != 0) && (NULL != &ap->mVolume) ) {
+            android_Player_volumeUpdate(ap->mAPlayer, &ap->mVolume);
         }
         break;
 

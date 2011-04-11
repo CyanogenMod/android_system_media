@@ -339,13 +339,14 @@ XAresult android_Player_getDuration(IPlay *pPlayItf, XAmillisecond *pDurMsec) {
 
 //-----------------------------------------------------------------------------
 /**
- * pre-condition: avp != NULL, pVolItf != NULL
+ * pre-condition: avp != 0, pVolItf != NULL
  */
-XAresult android_Player_volumeUpdate(android::GenericPlayer *avp, IVolume *pVolItf)
+XAresult android_Player_volumeUpdate(const android::sp<android::GenericPlayer> &gp,
+        IVolume *pVolItf)
 {
     XAresult result = XA_RESULT_SUCCESS;
 
-    avp->setVolume((bool)pVolItf->mMute, (bool)pVolItf->mEnableStereoPosition,
+    gp->setVolume((bool)pVolItf->mMute, (bool)pVolItf->mEnableStereoPosition,
             pVolItf->mStereoPosition, pVolItf->mLevel);
 
     return result;
@@ -353,9 +354,10 @@ XAresult android_Player_volumeUpdate(android::GenericPlayer *avp, IVolume *pVolI
 
 //-----------------------------------------------------------------------------
 /**
- * pre-condition: avp != NULL
+ * pre-condition: gp != 0
  */
-XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playState,
+XAresult android_Player_setPlayState(const android::sp<android::GenericPlayer> &gp,
+        SLuint32 playState,
         AndroidObjectState* pObjState)
 {
     XAresult result = XA_RESULT_SUCCESS;
@@ -364,7 +366,7 @@ XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playS
     switch (playState) {
      case SL_PLAYSTATE_STOPPED: {
          SL_LOGV("setting AVPlayer to SL_PLAYSTATE_STOPPED");
-         avp->stop();
+         gp->stop();
          }
          break;
      case SL_PLAYSTATE_PAUSED: {
@@ -372,12 +374,12 @@ XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playS
          switch(objState) {
          case ANDROID_UNINITIALIZED:
              *pObjState = ANDROID_PREPARING;
-             avp->prepare();
+             gp->prepare();
              break;
          case ANDROID_PREPARING:
              break;
          case ANDROID_READY:
-             avp->pause();
+             gp->pause();
              break;
          default:
              SL_LOGE("Android object in invalid state");
@@ -390,12 +392,12 @@ XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playS
          switch(objState) {
          case ANDROID_UNINITIALIZED:
              *pObjState = ANDROID_PREPARING;
-             avp->prepare();
+             gp->prepare();
              // intended fall through
          case ANDROID_PREPARING:
              // intended fall through
          case ANDROID_READY:
-             avp->play();
+             gp->play();
              break;
          default:
              SL_LOGE("Android object in invalid state");

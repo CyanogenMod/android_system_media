@@ -266,6 +266,7 @@ void GenericMediaPlayer::onBufferingUpdate(const sp<AMessage> &msg) {
  */
 void GenericMediaPlayer::onAfterMediaPlayerPrepared() {
     // the MediaPlayer mPlayer is prepared, retrieve its duration
+    // FIXME retrieve channel count
     {
         Mutex::Autolock _l(mSettingsLock);
         int msec = 0;

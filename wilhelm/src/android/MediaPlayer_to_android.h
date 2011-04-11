@@ -50,17 +50,19 @@ extern XAresult android_Player_setVideoSurfaceTexture(
 extern XAresult android_Player_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
 
 /**
- * pre-condition: avp != NULL, pVolItf != NULL
+ * pre-condition: gp != 0, pVolItf != NULL
  */
-extern XAresult android_Player_volumeUpdate(android::GenericPlayer *avp, IVolume *pVolItf);
+extern XAresult android_Player_volumeUpdate(
+        const android::sp<android::GenericPlayer> &gp, IVolume *pVolItf);
 
 /**************************************************************************************************
  * Playback control and events
  ****************************/
 /**
- * pre-condition: avp != NULL
+ * pre-condition: gp != 0
  */
-extern XAresult android_Player_setPlayState(android::GenericPlayer *avp, SLuint32 playState,
+extern XAresult android_Player_setPlayState(const android::sp<android::GenericPlayer> &gp,
+        SLuint32 playState,
         AndroidObjectState* pObjState);
 
 /**
