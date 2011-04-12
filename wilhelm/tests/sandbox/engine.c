@@ -166,5 +166,7 @@ int main(int argc, char **argv)
     assert(SL_RESULT_SUCCESS == result);
 
     printf("Exit without destroying engine -- examine log for expected error message\n");
+    free(engine_ids);
+    free(engine_req);
     return EXIT_SUCCESS;
 }

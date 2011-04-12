@@ -88,7 +88,7 @@ SLresult AndroidBufferQueueCallback(
     //--------------------------------------------------------------------------------
     SLAndroidBufferQueueState state;
     (*caller)->GetState(caller, &state);
-    fprintf(stdout, "ABQ state count=%lu, index=%lu\n", state.count, state.index);
+    //fprintf(stdout, "ABQ state count=%lu, index=%lu\n", state.count, state.index);
 
     // just to test, clear the queue to see what happens
     if (state.index == 500) {

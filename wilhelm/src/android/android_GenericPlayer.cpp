@@ -50,7 +50,7 @@ GenericPlayer::GenericPlayer(const AudioPlayback_Parameters* params) :
 
 
 GenericPlayer::~GenericPlayer() {
-    SL_LOGI("GenericPlayer::~GenericPlayer()");
+    SL_LOGV("GenericPlayer::~GenericPlayer()");
 
     mLooper->stop();
     mLooper->unregisterHandler(id());

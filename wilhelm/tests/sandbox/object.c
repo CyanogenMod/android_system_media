@@ -156,7 +156,7 @@ int main(int arg, char **argv)
     assert(SL_BOOLEAN_FALSE == isSupported);
     SLchar *supportedExt;
 #ifdef ANDROID
-    supportedExt = (SLchar *) "ANDROID_SDK_LEVEL_11";
+    supportedExt = (SLchar *) "ANDROID_SDK_LEVEL_12";
 #else
     supportedExt = (SLchar *) "WILHELM_DESKTOP";
 #endif

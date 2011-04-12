@@ -68,6 +68,7 @@ static SLresult ISeek_SetLoop(SLSeekItf self, SLboolean loopEnable,
                 if (NULL != ap) {
                     // FIXME should return a result
                     android_audioPlayer_loop(ap, loopEnable);
+                    result = SL_RESULT_SUCCESS;
                 } else {
                     result = SL_RESULT_PARAMETER_INVALID;
                 }

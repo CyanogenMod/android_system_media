@@ -37,8 +37,8 @@ typedef unsigned char               sl_uint8_t;
 typedef signed char                 sl_int8_t;
 typedef unsigned short              sl_uint16_t;
 typedef signed short                sl_int16_t;
-typedef unsigned long               sl_uint32_t;
-typedef signed long                 sl_int32_t;
+typedef unsigned int /*long*/       sl_uint32_t;
+typedef signed int /*long*/         sl_int32_t;
 typedef long long                   sl_int64_t;
 typedef unsigned long long          sl_uint64_t;
 

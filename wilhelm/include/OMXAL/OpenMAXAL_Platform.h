@@ -37,8 +37,8 @@ typedef unsigned char               xa_uint8_t;
 typedef signed char                 xa_int8_t;
 typedef unsigned short              xa_uint16_t;
 typedef signed short                xa_int16_t;
-typedef unsigned long               xa_uint32_t;
-typedef signed long                 xa_int32_t;
+typedef unsigned int /*long*/       xa_uint32_t;
+typedef signed int /*long*/         xa_int32_t;
 typedef long long                   xa_int64_t;
 typedef unsigned long long          xa_uint64_t;
 

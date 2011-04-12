@@ -48,7 +48,7 @@ MediaPlayerNotificationClient::~MediaPlayerNotificationClient() {
 //--------------------------------------------------
 // IMediaPlayerClient implementation
 void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2) {
-    SL_LOGI("MediaPlayerNotificationClient::notify(msg=%d, ext1=%d, ext2=%d)", msg, ext1, ext2);
+    SL_LOGV("MediaPlayerNotificationClient::notify(msg=%d, ext1=%d, ext2=%d)", msg, ext1, ext2);
 
     switch (msg) {
       case MEDIA_PREPARED:
@@ -190,7 +190,7 @@ void GenericMediaPlayer::onLoop(const sp<AMessage> &msg) {
     SL_LOGV("GenericMediaPlayer::onLoop");
     int32_t loop = 0;
     if (msg->findInt32(WHATPARAM_LOOP_LOOPING, &loop)) {
-        if (OK == mPlayer->setLooping(loop)) {
+        if (mPlayer != 0 && OK == mPlayer->setLooping(loop)) {
             if (loop) {
                 mStateFlags |= kFlagLooping;
             } else {
