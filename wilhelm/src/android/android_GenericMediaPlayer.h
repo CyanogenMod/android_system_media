@@ -35,7 +35,7 @@ public:
     virtual ~MediaPlayerNotificationClient();
 
     // IMediaPlayerClient implementation
-    virtual void notify(int msg, int ext1, int ext2);
+    virtual void notify(int msg, int ext1, int ext2, const Parcel *obj);
 
     void blockUntilPlayerPrepared();
 
