@@ -197,7 +197,7 @@ XAresult android_Player_create(CMediaPlayer *mp) {
         break;
     case XA_DATALOCATOR_ADDRESS: // intended fall-through
     default:
-        SL_LOGE("Unable to create MediaPlayer for data source locator 0x%lx", sourceLocator);
+        SL_LOGE("Unable to create MediaPlayer for data source locator 0x%x", sourceLocator);
         result = XA_RESULT_PARAMETER_INVALID;
         break;
     }
@@ -251,7 +251,7 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
             }
             break;
         default:
-            SL_LOGE("Invalid or unsupported data locator type %lu for data source",
+            SL_LOGE("Invalid or unsupported data locator type %u for data source",
                     mp->mDataSource.mLocator.mLocatorType);
             result = XA_RESULT_PARAMETER_INVALID;
         }

@@ -172,7 +172,7 @@ SLresult android_audioRecorder_checkSourceSinkSupport(CAudioRecorder* ar) {
             SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *)ar->mDataSink.u.mSink.pFormat;
             ar->mSampleRateMilliHz = df_pcm->samplesPerSec;
             ar->mNumChannels = df_pcm->numChannels;
-            SL_LOGV("AudioRecorder requested sample rate = %lumHz, %u channel(s)",
+            SL_LOGV("AudioRecorder requested sample rate = %u mHz, %u channel(s)",
                     ar->mSampleRateMilliHz, ar->mNumChannels);
         }
         else {
@@ -399,7 +399,7 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
     //    ar->mNumChannels
     //    ar->mSampleRateMilliHz
 
-    SL_LOGV("new AudioRecord %u channels, %lu mHz", ar->mNumChannels, ar->mSampleRateMilliHz);
+    SL_LOGV("new AudioRecord %u channels, %u mHz", ar->mNumChannels, ar->mSampleRateMilliHz);
 
     // initialize platform-specific CAudioRecorder fields
     ar->mAudioRecord = new android::AudioRecord();
@@ -452,7 +452,7 @@ void android_audioRecorder_destroy(CAudioRecorder* ar) {
 
 //-----------------------------------------------------------------------------
 void android_audioRecorder_setRecordState(CAudioRecorder* ar, SLuint32 state) {
-    SL_LOGV("android_audioRecorder_setRecordState(%p, %lu) entering", ar, state);
+    SL_LOGV("android_audioRecorder_setRecordState(%p, %u) entering", ar, state);
 
     if (NULL == ar->mAudioRecord) {
         return;
@@ -496,7 +496,7 @@ void android_audioRecorder_useEventMask(CAudioRecorder *ar) {
     }
 
     if (eventFlags & SL_RECORDEVENT_HEADATNEWPOS) {
-        SL_LOGV("pos update period %ld", pRecordItf->mPositionUpdatePeriod);
+        SL_LOGV("pos update period %d", pRecordItf->mPositionUpdatePeriod);
          ar->mAudioRecord->setPositionUpdatePeriod(
                 (uint32_t)((((int64_t)pRecordItf->mPositionUpdatePeriod
                 * sles_to_android_sampleRate(ar->mSampleRateMilliHz)))/1000));

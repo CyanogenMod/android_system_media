@@ -129,7 +129,7 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
     interface_lock_exclusive(mAndroidBufferQueue);
 
     if (mAndroidBufferQueue->mState.count != 0) {
-        // SL_LOGD("nbBuffers in ABQ = %lu, buffSize=%lu",abq->mState.count, buffSize);
+        // SL_LOGD("nbBuffers in ABQ = %u, buffSize=%u",abq->mState.count, buffSize);
         assert(mAndroidBufferQueue->mFront != mAndroidBufferQueue->mRear);
 
         oldFront = mAndroidBufferQueue->mFront;
@@ -174,7 +174,7 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
                     // requested as much available or more: consume the whole of the current
                     //   buffer and move to the next
                     size_t consumed = oldFront->mDataSize - oldFront->mDataSizeConsumed;
-                    //SL_LOGD("consuming rest of buffer: enqueueing=%ld", consumed);
+                    //SL_LOGD("consuming rest of buffer: enqueueing=%u", consumed);
                     oldFront->mDataSizeConsumed = oldFront->mDataSize;
 
                     // move queue to next

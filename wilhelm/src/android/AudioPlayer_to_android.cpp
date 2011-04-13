@@ -419,7 +419,7 @@ void audioPlayer_dispatch_prefetchStatus_lockPrefetch(CAudioPlayer *ap, SLuint32
 //-----------------------------------------------------------------------------
 SLresult audioPlayer_setStreamType(CAudioPlayer* ap, SLint32 type) {
     SLresult result = SL_RESULT_SUCCESS;
-    SL_LOGV("type %ld", type);
+    SL_LOGV("type %d", type);
 
     int newStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
     switch(type) {
@@ -848,7 +848,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
                 // others
             default:
                 // this should have already been rejected by checkDataFormat
-                SL_LOGE("Cannot create audio player: unsupported sample bit depth %lu",
+                SL_LOGE("Cannot create audio player: unsupported sample bit depth %u",
                         (SLuint32)df_pcm->bitsPerSample);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
@@ -1049,7 +1049,7 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
         interface_lock_exclusive(&ap->mBufferQueue);
 
         if (ap->mBufferQueue.mState.count != 0) {
-            //SL_LOGV("nbBuffers in queue = %lu",ap->mBufferQueue.mState.count);
+            //SL_LOGV("nbBuffers in queue = %u",ap->mBufferQueue.mState.count);
             assert(ap->mBufferQueue.mFront != ap->mBufferQueue.mRear);
 
             BufferHeader *oldFront = ap->mBufferQueue.mFront;

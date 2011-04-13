@@ -80,11 +80,11 @@ SLresult AcquireStrongRef(IObject *object, SLuint32 expectedObjectID)
     object_lock_exclusive(object);
     SLuint32 actualObjectID = IObjectToObjectID(object);
     if (expectedObjectID != actualObjectID) {
-        SL_LOGE("object %p has object ID %lu but expected %lu", object, actualObjectID,
+        SL_LOGE("object %p has object ID %u but expected %u", object, actualObjectID,
             expectedObjectID);
         result = SL_RESULT_PARAMETER_INVALID;
     } else if (SL_OBJECT_STATE_REALIZED != object->mState) {
-        SL_LOGE("object %p with object ID %lu is not realized", object, actualObjectID);
+        SL_LOGE("object %p with object ID %u is not realized", object, actualObjectID);
         result = SL_RESULT_PRECONDITIONS_VIOLATED;
     } else {
         ++object->mStrongRefCount;
@@ -196,12 +196,12 @@ SLresult checkInterfaces(const ClassTable *clazz, SLuint32 numInterfaces,
                 // Here if interface was not found, or is not available for this object type
                 if (pInterfaceRequired[i]) {
                     // Application said it required the interface, so give up
-                    SL_LOGE("class %s interface %lu required but unavailable MPH=%d",
+                    SL_LOGE("class %s interface %u required but unavailable MPH=%d",
                             clazz->mName, i, MPH);
                     anyRequiredButUnsupported = true;
                 }
                 // Application said it didn't really need the interface, so ignore with warning
-                SL_LOGW("class %s interface %lu requested but unavailable MPH=%d",
+                SL_LOGW("class %s interface %u requested but unavailable MPH=%d",
                         clazz->mName, i, MPH);
                 continue;
             }

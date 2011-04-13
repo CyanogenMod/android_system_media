@@ -92,24 +92,24 @@ bool IAndroidEffectCapabilities_Expose(void *self)
     SLuint32 numEffects = 0;
     SLresult result = android_genericFx_queryNumEffects(&numEffects);
     if (SL_RESULT_SUCCESS != result) {
-        SL_LOGE("android_genericFx_queryNumEffects %lu", result);
+        SL_LOGE("android_genericFx_queryNumEffects %u", result);
         return false;
     }
     thiz->mNumFx = numEffects;
-    SL_LOGV("Effect Capabilities has %ld effects", thiz->mNumFx);
+    SL_LOGV("Effect Capabilities has %d effects", thiz->mNumFx);
     if (thiz->mNumFx > 0) {
         thiz->mFxDescriptors = (effect_descriptor_t*) new effect_descriptor_t[thiz->mNumFx];
         for (SLuint32 i = 0 ; i < thiz->mNumFx ; i++) {
             SLresult result2;
             result2 = android_genericFx_queryEffect(i, &thiz->mFxDescriptors[i]);
             if (SL_RESULT_SUCCESS != result2) {
-                SL_LOGE("Error (SLresult is %ld) querying effect %ld", result2, i);
+                SL_LOGE("Error (SLresult is %d) querying effect %d", result2, i);
                 // Remember the first failing result code, but keep going
                 if (SL_RESULT_SUCCESS == result) {
                     result = result2;
                 }
             } else {
-                SL_LOGV("effect %ld: type=%08x-%04x-%04x-%04x-%02x%02x%02x%02x%02x%02x name=%s",
+                SL_LOGV("effect %d: type=%08x-%04x-%04x-%04x-%02x%02x%02x%02x%02x%02x name=%s",
                         i,
                         thiz->mFxDescriptors[i].type.timeLow,
                         thiz->mFxDescriptors[i].type.timeMid,

@@ -32,12 +32,12 @@ static SLresult IAndroidConfiguration_SetConfiguration(SLAndroidConfigurationItf
 
     // route configuration to the appropriate object
     if (SL_OBJECTID_AUDIORECORDER == IObjectToObjectID((thiz)->mThis)) {
-        SL_LOGV("SetConfiguration issued for AudioRecorder key=%s valueSize=%lu",
+        SL_LOGV("SetConfiguration issued for AudioRecorder key=%s valueSize=%u",
                 configKey, valueSize);
         result = android_audioRecorder_setConfig((CAudioRecorder *) thiz->mThis, configKey,
                 pConfigValue, valueSize);
     } else if (SL_OBJECTID_AUDIOPLAYER == IObjectToObjectID((thiz)->mThis)) {
-        SL_LOGV("SetConfiguration issued for AudioPlayer key=%s valueSize=%lu",
+        SL_LOGV("SetConfiguration issued for AudioPlayer key=%s valueSize=%u",
                 configKey, valueSize);
         result = android_audioPlayer_setConfig((CAudioPlayer *) thiz->mThis, configKey,
                 pConfigValue, valueSize);

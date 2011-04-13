@@ -74,11 +74,11 @@ static void setItems(const SLAndroidBufferItem *pItems, SLuint32 itemsLength,
             // supported Mpeg2Ts commands are mutually exclusive
             if (SL_ANDROID_ITEMKEY_EOS == pItems->itemKey) {
                 pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_EOS;
-                //SL_LOGD("Found EOS event=%ld", pBuff->mItems.mTsCmdData.mTsCmdCode);
+                //SL_LOGD("Found EOS event=%d", pBuff->mItems.mTsCmdData.mTsCmdCode);
             } else if (SL_ANDROID_ITEMKEY_DISCONTINUITY == pItems->itemKey) {
                 if (pItems->itemSize == 0) {
                     pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_DISCONTINUITY;
-                    //SL_LOGD("Found DISCONTINUITYevent=%ld", pBuff->mItems.mTsCmdData.mTsCmdCode);
+                    //SL_LOGD("Found DISCONTINUITYevent=%d", pBuff->mItems.mTsCmdData.mTsCmdCode);
                 } else if (pItems->itemSize == sizeof(SLAuint64)) {
                     pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_DISCON_NEWPTS;
                     pBuff->mItems.mTsCmdData.mPts = *((SLAuint64*)pItems->itemData);

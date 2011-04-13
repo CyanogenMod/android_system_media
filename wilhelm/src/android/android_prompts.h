@@ -36,7 +36,7 @@
 #define ERROR_PLAYERSETPLAYSTATE_UNEXPECTED_OBJECT_TYPE_D \
         "Cannot set AudioPlayer playstate: unexpected object type \%d"
 #define ERROR_PLAYERSETPLAYSTATE_INVALID_OBJECT_STATE_D \
-        "Cannot set AudioPlayer playstate to %ld: Android object in invalid state"
+        "Cannot set AudioPlayer playstate to %d: Android object in invalid state"
 #define ERROR_PLAYER_NEW_NULL_TRACK \
         "Internal error: new AudioTrack shouldn't be NULL"
 #define ERROR_PLAYER_PREFETCH_d \

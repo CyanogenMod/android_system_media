@@ -54,7 +54,7 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
             // number of buffers must be specified, there is no default value, and can't be too big
             if (!((1 <= pDataLocator->mBufferQueue.numBuffers) &&
                 (pDataLocator->mBufferQueue.numBuffers <= 255))) {
-                SL_LOGE("%s: numBuffers=%lu", name, pDataLocator->mBufferQueue.numBuffers);
+                SL_LOGE("%s: numBuffers=%u", name, pDataLocator->mBufferQueue.numBuffers);
                 result = SL_RESULT_PARAMETER_INVALID;
             }
             break;
@@ -84,7 +84,7 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
                 case SL_IODEVICE_AUDIOINPUT:
                 // case SL_IODEVICE_AUDIOOUTPUT:   // does not exist in 1.0.1, added in 1.1
                 default:
-                    SL_LOGE("%s: deviceType=%lu", name, deviceType);
+                    SL_LOGE("%s: deviceType=%u", name, deviceType);
                     pDataLocator->mIODevice.device = NULL;
                     expectedObjectID = 0;
                     result = SL_RESULT_PARAMETER_INVALID;
@@ -104,19 +104,19 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
                 switch (deviceType) {
                 case SL_IODEVICE_LEDARRAY:
                     if (SL_DEFAULTDEVICEID_LED != deviceID) {
-                        SL_LOGE("%s: invalid LED deviceID=%lu", name, deviceID);
+                        SL_LOGE("%s: invalid LED deviceID=%u", name, deviceID);
                         result = SL_RESULT_PARAMETER_INVALID;
                     }
                     break;
                 case SL_IODEVICE_VIBRA:
                     if (SL_DEFAULTDEVICEID_VIBRA != deviceID) {
-                        SL_LOGE("%s: invalid vibra deviceID=%lu", name, deviceID);
+                        SL_LOGE("%s: invalid vibra deviceID=%u", name, deviceID);
                         result = SL_RESULT_PARAMETER_INVALID;
                     }
                     break;
                 case SL_IODEVICE_AUDIOINPUT:
                     if (SL_DEFAULTDEVICEID_AUDIOINPUT != deviceID) {
-                        SL_LOGE("%s: invalid audio input deviceID=%lu", name, deviceID);
+                        SL_LOGE("%s: invalid audio input deviceID=%u", name, deviceID);
                         result = SL_RESULT_PARAMETER_INVALID;
                     }
                     break;
@@ -125,7 +125,7 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
                     break;
                 case XA_IODEVICE_CAMERA:
                     if (XA_DEFAULTDEVICEID_CAMERA != deviceID) {
-                        SL_LOGE("%s: invalid audio input deviceID=%lu", name, deviceID);
+                        SL_LOGE("%s: invalid audio input deviceID=%u", name, deviceID);
                         result = XA_RESULT_PARAMETER_INVALID;
                     }
                     break;
@@ -133,7 +133,7 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
                     // does not exist in 1.0.1, added in 1.1
                     // break;
                 default:
-                    SL_LOGE("%s: deviceType=%lu is invalid", name, deviceType);
+                    SL_LOGE("%s: deviceType=%u is invalid", name, deviceType);
                     result = SL_RESULT_PARAMETER_INVALID;
                 }
             }
@@ -148,7 +148,7 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
             // number of buffers must be specified, there is no default value, and can't be too big
             if (!((1 <= pDataLocator->mMIDIBufferQueue.numBuffers) &&
                 (pDataLocator->mMIDIBufferQueue.numBuffers <= 255))) {
-                SL_LOGE("%s: SLDataLocator_MIDIBufferQueue.numBuffers=%ld", name,
+                SL_LOGE("%s: SLDataLocator_MIDIBufferQueue.numBuffers=%d", name,
                         pDataLocator->mMIDIBufferQueue.numBuffers);
                 result = SL_RESULT_PARAMETER_INVALID;
             }
@@ -212,11 +212,11 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
         case SL_DATALOCATOR_ANDROIDFD:
         {
             pDataLocator->mFD = *(SLDataLocator_AndroidFD *)pLocator;
-            SL_LOGV("%s: fd=%ld offset=%lld length=%lld", name, pDataLocator->mFD.fd,
+            SL_LOGV("%s: fd=%d offset=%lld length=%lld", name, pDataLocator->mFD.fd,
                     pDataLocator->mFD.offset, pDataLocator->mFD.length);
             // NTH check against process fd limit
             if (0 > pDataLocator->mFD.fd) {
-                SL_LOGE("%s: fd=%ld\n", name, pDataLocator->mFD.fd);
+                SL_LOGE("%s: fd=%d\n", name, pDataLocator->mFD.fd);
                 result = SL_RESULT_PARAMETER_INVALID;
             }
             break;
@@ -227,7 +227,7 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
             // number of buffers must be specified, there is no default value, and can't be too big
             if (!((1 <= pDataLocator->mBufferQueue.numBuffers) &&
                     (pDataLocator->mBufferQueue.numBuffers <= 255))) {
-                SL_LOGE("%s: numBuffers=%lu", name, pDataLocator->mABQ.numBuffers);
+                SL_LOGE("%s: numBuffers=%u", name, pDataLocator->mABQ.numBuffers);
                 result = SL_RESULT_PARAMETER_INVALID;
             }
             break;
@@ -236,14 +236,14 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
 
         case SL_DATALOCATOR_NULL:   // a NULL pointer is allowed, but not a pointer to NULL
         default:
-            SL_LOGE("%s: locatorType=%lu", name, locatorType);
+            SL_LOGE("%s: locatorType=%u", name, locatorType);
             result = SL_RESULT_PARAMETER_INVALID;
         }
 
         // Verify that another thread didn't change the locatorType field after we used it
         // to determine sizeof struct to copy.
         if ((SL_RESULT_SUCCESS == result) && (locatorType != pDataLocator->mLocatorType)) {
-            SL_LOGE("%s: locatorType changed from %lu to %lu", name, locatorType,
+            SL_LOGE("%s: locatorType changed from %u to %u", name, locatorType,
                     pDataLocator->mLocatorType);
             result = SL_RESULT_PRECONDITIONS_VIOLATED;
         }
@@ -277,7 +277,7 @@ static SLresult checkDataLocator(const char *name, void *pLocator, DataLocator *
             break;
         }
         if (!(allowedDataLocatorMask & actualMask)) {
-            SL_LOGE("%s: data locator type 0x%lx not allowed", name, locatorType);
+            SL_LOGE("%s: data locator type 0x%x not allowed", name, locatorType);
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         }
     }
@@ -390,7 +390,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
-                    SL_LOGE("%s: samplesPerSec=%lu", name, pDataFormat->mPCM.samplesPerSec);
+                    SL_LOGE("%s: samplesPerSec=%u", name, pDataFormat->mPCM.samplesPerSec);
                     break;
                 }
 
@@ -410,7 +410,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
-                    SL_LOGE("%s: bitsPerSample=%lu", name, pDataFormat->mPCM.bitsPerSample);
+                    SL_LOGE("%s: bitsPerSample=%u", name, pDataFormat->mPCM.bitsPerSample);
                     break;
                 }
 
@@ -450,7 +450,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     break;
                 }
                 if (SL_RESULT_SUCCESS != result) {
-                    SL_LOGE("%s: channelMask=0x%lx numChannels=%lu", name,
+                    SL_LOGE("%s: channelMask=0x%x numChannels=%u", name,
                         pDataFormat->mPCM.channelMask, pDataFormat->mPCM.numChannels);
                     break;
                 }
@@ -541,7 +541,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
             case XA_COLORFORMAT_UNUSED:
             default:
                 result = XA_RESULT_PARAMETER_INVALID;
-                SL_LOGE("%s: unsupported color format %ld", name,
+                SL_LOGE("%s: unsupported color format %d", name,
                     pDataFormat->mRawImage.colorFormat);
                 break;
             }
@@ -557,7 +557,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
 
         // make sure format type was not modified asynchronously
         if ((SL_RESULT_SUCCESS == result) && (formatType != pDataFormat->mFormatType)) {
-            SL_LOGE("%s: formatType changed from %lu to %lu", name, formatType,
+            SL_LOGE("%s: formatType changed from %u to %u", name, formatType,
                     pDataFormat->mFormatType);
             result = SL_RESULT_PRECONDITIONS_VIOLATED;
         }
@@ -580,7 +580,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
             break;
         }
         if (!(allowedDataFormatMask & actualMask)) {
-            SL_LOGE("%s: data format %ld not allowed", name, formatType);
+            SL_LOGE("%s: data format %d not allowed", name, formatType);
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         }
     }
