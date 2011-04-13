@@ -50,7 +50,7 @@ void slTraceLeaveGlobal(const char *function, SLresult result)
             if (NULL != str) {
                 SL_LOGW("Leaving %s (%s)", function, str);
             } else {
-                SL_LOGW("Leaving %s (0x%lX)", function, result);
+                SL_LOGW("Leaving %s (0x%X)", function, result);
             }
         }
     }
@@ -115,14 +115,14 @@ void slTraceLeaveInterface(const char *function, SLresult result)
                     SL_LOGW("Leaving %.*s::%s (%s)", (int) (underscore - function), function,
                         &underscore[1], str);
                 } else {
-                    SL_LOGW("Leaving %.*s::%s (0x%lX)", (int) (underscore - function), function,
+                    SL_LOGW("Leaving %.*s::%s (0x%X)", (int) (underscore - function), function,
                         &underscore[1], result);
                 }
             } else {
                 if (NULL != str) {
                     SL_LOGW("Leaving %s (%s)", function, str);
                 } else {
-                    SL_LOGW("Leaving %s (0x%lX)", function, result);
+                    SL_LOGW("Leaving %s (0x%X)", function, result);
                 }
             }
         }

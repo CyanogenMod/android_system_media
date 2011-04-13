@@ -75,7 +75,7 @@ void AudioToCbRenderer::onRender() {
                         mDecodeBuffer->range_length() - offset,
                         mDecodeUser);
                 offset += consumed;
-                //SL_LOGV("consumed=%lu, offset=%lu, full=%lu", consumed, offset, full);
+                //SL_LOGV("consumed=%u, offset=%u, full=%u", consumed, offset, full);
                 if (consumed == 0) {
                     // decoded data is not being consumed, skip this buffer
                     break;

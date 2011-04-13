@@ -83,7 +83,7 @@ static struct EnableLevel *getEnableLevel(IEffectSend *thiz, const void *pAuxEff
         SL_LOGE("EffectSend no GetInterface yet");
         break;
     default:
-        SL_LOGE("EffectSend invalid interface state %lu", state);
+        SL_LOGE("EffectSend invalid interface state %u", state);
         break;
     }
     return NULL;

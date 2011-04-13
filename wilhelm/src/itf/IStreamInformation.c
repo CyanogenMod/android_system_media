@@ -71,7 +71,7 @@ static XAresult IStreamInformation_QueryStreamType( XAStreamInformationItf self,
             result = XA_RESULT_SUCCESS;
             *domain = thiz->mStreamInfoTable.itemAt(streamIndex).domain;
         } else {
-            SL_LOGE("Querying stream type for stream %ld, only %ld streams available",
+            SL_LOGE("Querying stream type for stream %d, only %d streams available",
                     streamIndex, nbStreams);
             result = XA_RESULT_PARAMETER_INVALID;
         }
@@ -131,14 +131,14 @@ static XAresult IStreamInformation_QueryStreamInformation( XAStreamInformationIt
                 *(XAVendorStreamInformation *)info = streamInfo.vendorInfo;
                 break;
             default:
-                SL_LOGE("StreamInformation::QueryStreamInformation index %lu has "
-                        "unknown domain %lu", streamIndex, streamInfo.domain);
+                SL_LOGE("StreamInformation::QueryStreamInformation index %u has "
+                        "unknown domain %u", streamIndex, streamInfo.domain);
                 result = XA_RESULT_INTERNAL_ERROR;
                 break;
             }
 
         } else {
-            SL_LOGE("Querying stream type for stream %ld, only %ld streams available",
+            SL_LOGE("Querying stream type for stream %d, only %d streams available",
                     streamIndex, nbStreams);
             result = XA_RESULT_PARAMETER_INVALID;
         }

@@ -46,7 +46,7 @@ LI_API SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         *pEngine = NULL;
 
         if ((0 < numOptions) && (NULL == pEngineOptions)) {
-            SL_LOGE("numOptions=%lu and pEngineOptions=NULL", numOptions);
+            SL_LOGE("numOptions=%u and pEngineOptions=NULL", numOptions);
             result = SL_RESULT_PARAMETER_INVALID;
             break;
         }
@@ -68,7 +68,7 @@ LI_API SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
                 lossOfControlGlobal = SL_BOOLEAN_FALSE != (SLboolean) option->data; // normalize
                 break;
             default:
-                SL_LOGE("unknown engine option: feature=%lu data=%lu",
+                SL_LOGE("unknown engine option: feature=%u data=%u",
                     option->feature, option->data);
                 result = SL_RESULT_PARAMETER_INVALID;
                 break;

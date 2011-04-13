@@ -46,7 +46,7 @@ static SLuint32 getAssociatedState(IBufferQueue *thiz)
 SLresult IBufferQueue_Enqueue(SLBufferQueueItf self, const void *pBuffer, SLuint32 size)
 {
     SL_ENTER_INTERFACE
-    //SL_LOGV("IBufferQueue_Enqueue(%p, %p, %lu)", self, pBuffer, size);
+    //SL_LOGV("IBufferQueue_Enqueue(%p, %p, %u)", self, pBuffer, size);
 
     // Note that Enqueue while a Clear is pending is equivalent to Enqueue followed by Clear
 
