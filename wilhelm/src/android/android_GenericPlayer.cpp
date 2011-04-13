@@ -141,6 +141,10 @@ void GenericPlayer::stop() {
 
 void GenericPlayer::seek(int64_t timeMsec) {
     SL_LOGV("GenericPlayer::seek %lld", timeMsec);
+    if (timeMsec < 0) {
+        SL_LOGE("GenericPlayer::seek error, can't seek to negative time %lldms", timeMsec);
+        return;
+    }
     sp<AMessage> msg = new AMessage(kWhatSeek, id());
     msg->setInt64(WHATPARAM_SEEK_SEEKTIME_MS, timeMsec);
     msg->post();

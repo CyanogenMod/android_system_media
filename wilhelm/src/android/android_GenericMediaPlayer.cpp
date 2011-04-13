@@ -95,6 +95,7 @@ void MediaPlayerNotificationClient::blockUntilPlayerPrepared() {
 GenericMediaPlayer::GenericMediaPlayer(const AudioPlayback_Parameters* params, bool hasVideo) :
     GenericPlayer(params),
     mHasVideo(hasVideo),
+    mSeekTimeMsec(0),
     mVideoSurface(0),
     mVideoSurfaceTexture(0),
     mPlayer(0),
@@ -169,17 +170,31 @@ void GenericMediaPlayer::onPause() {
     }
 }
 
-
+/**
+ * pre-condition: WHATPARAM_SEEK_SEEKTIME_MS parameter value >= 0
+ */
 void GenericMediaPlayer::onSeek(const sp<AMessage> &msg) {
     SL_LOGV("GenericMediaPlayer::onSeek");
-    if ((mStateFlags & kFlagSeeking) || !(mStateFlags & kFlagPrepared)) {
+    int64_t timeMsec = ANDROID_UNKNOWN_TIME;
+    if (!msg->findInt64(WHATPARAM_SEEK_SEEKTIME_MS, &timeMsec)) {
+        // invalid command, drop it
+        return;
+    }
+    if ((mStateFlags & kFlagSeeking) && (timeMsec == mSeekTimeMsec)) {
+        // already seeking to the same time, cancel this command
+        return;
+    } else if (!(mStateFlags & kFlagPrepared)) {
         // we are not ready to accept a seek command at this time, retry later
         msg->post(DEFAULT_COMMAND_DELAY_FOR_REPOST_US);
     } else {
-        int64_t timeMsec;
         if (msg->findInt64(WHATPARAM_SEEK_SEEKTIME_MS, &timeMsec) && (mPlayer != 0)) {
-            if (OK == mPlayer->seekTo(timeMsec)) {
-                mStateFlags |= kFlagSeeking;
+            mStateFlags |= kFlagSeeking;
+            mSeekTimeMsec = (int32_t)timeMsec;
+            if (OK != mPlayer->seekTo(timeMsec)) {
+                mStateFlags &= ~kFlagSeeking;
+                mSeekTimeMsec = ANDROID_UNKNOWN_TIME;
+            } else {
+                mPositionMsec = mSeekTimeMsec;
             }
         }
     }

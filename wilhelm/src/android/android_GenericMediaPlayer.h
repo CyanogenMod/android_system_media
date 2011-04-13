@@ -71,6 +71,7 @@ protected:
     virtual void onBufferingUpdate(const sp<AMessage> &msg);
 
     bool mHasVideo;
+    int32_t mSeekTimeMsec;
 
     sp<Surface> mVideoSurface;
     sp<ISurfaceTexture> mVideoSurfaceTexture;
