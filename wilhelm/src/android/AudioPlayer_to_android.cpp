@@ -991,7 +991,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
 
 
 //-----------------------------------------------------------------------------
-static void audioTrack_callBack_uri(int event, void* user, void *info) {
+static void audioTrack_callBack_uri(android::AudioTrack::event_type event, void* user, void *info) {
     // EVENT_MORE_DATA needs to be handled with priority over the other events
     // because it will be called the most often during playback
 
@@ -1031,7 +1031,7 @@ static void audioTrack_callBack_uri(int event, void* user, void *info) {
 //-----------------------------------------------------------------------------
 // Callback associated with an AudioTrack of an SL ES AudioPlayer that gets its data
 // from a buffer queue. This will not be called once the AudioTrack has been destroyed.
-static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *info) {
+static void audioTrack_callBack_pullFromBuffQueue(android::AudioTrack::event_type event, void* user, void *info) {
     CAudioPlayer *ap = (CAudioPlayer *)user;
 
     if (!ap->mAudioTrackProtector->enterCb()) {
