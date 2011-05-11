@@ -18,7 +18,7 @@
 #include "sles_allinclusive.h"
 #include "android_prompts.h"
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 // use this flag to dump all recorded audio into a file
 //#define MONITOR_RECORDING

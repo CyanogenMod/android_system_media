@@ -18,7 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 static SLresult IAndroidEffect_CreateEffect(SLAndroidEffectItf self,
         SLInterfaceID effectImplementationId) {

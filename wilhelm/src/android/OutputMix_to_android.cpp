@@ -18,7 +18,7 @@
 //#include "math.h"
 //#include "utils/RefBase.h"
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 SLresult android_outputMix_create(COutputMix *om) {
     SL_LOGV("Create outputMix=%p", om);

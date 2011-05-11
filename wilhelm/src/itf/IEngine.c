@@ -18,7 +18,7 @@
 
 #include "sles_allinclusive.h"
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, SLuint32 deviceID,
     SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)

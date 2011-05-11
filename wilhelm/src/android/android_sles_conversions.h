@@ -16,7 +16,7 @@
 
 #include "math.h"
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 //-----------------------------------------------------------------------------
 // Android to OpenSL ES

@@ -20,7 +20,7 @@
 #include "android/android_StreamPlayer.h"
 #include "android/android_LocAVPlayer.h"
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 template class android::KeyedVector<SLuint32, android::AudioEffect* > ;
 

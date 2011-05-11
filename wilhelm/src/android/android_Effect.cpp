@@ -24,7 +24,7 @@
 #include "media/EffectPresetReverbApi.h"
 #include "media/EffectEnvironmentalReverbApi.h"
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 static const int EQUALIZER_PARAM_SIZE_MAX = sizeof(effect_param_t) + 2 * sizeof(int32_t)
         + EFFECT_STRING_LEN_MAX;
