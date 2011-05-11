@@ -55,7 +55,7 @@
 #define MAX_NUMBER_OUTPUT_DEVICES 6
 
 //The expected playback duration
-const int MP3_DURATION = 75000; //75 secs
+const int MP3_DURATION = 71030; //71 secs
 
 
 //-----------------------------------------------------------------
@@ -63,7 +63,7 @@ const int MP3_DURATION = 75000; //75 secs
 void CheckErr( SLresult res )
 {
     if ( res != SL_RESULT_SUCCESS )  {
-        fprintf(stderr, "%lu SL failure, exiting\n", res);
+        fprintf(stderr, "%u SL failure, exiting\n", res);
         //Fail the test case
         ASSERT_TRUE(false);
     }
@@ -76,7 +76,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     SLpermille level = 0;
     (*caller)->GetFillLevel(caller, &level);
     SLuint32 status;
-    fprintf(stdout, "\t\tPrefetchEventCallback: received event %lu\n", event);
+    fprintf(stdout, "\t\tPrefetchEventCallback: received event %u\n", event);
     (*caller)->GetPrefetchStatus(caller, &status);
     if ((event & (SL_PREFETCHEVENT_STATUSCHANGE|SL_PREFETCHEVENT_FILLLEVELCHANGE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
@@ -87,7 +87,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
         fprintf(stdout, "\t\tPrefetchEventCallback: Buffer fill level is = %d\n", level);
     }
     if (event & SL_PREFETCHEVENT_STATUSCHANGE) {
-        fprintf(stdout, "\t\tPrefetchEventCallback: Prefetch Status is = %lu\n", status);
+        fprintf(stdout, "\t\tPrefetchEventCallback: Prefetch Status is = %u\n", status);
     }
 
 }
@@ -186,10 +186,6 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
     res = (*playItf)->GetDuration(playItf, &durationInMsec);
     CheckErr(res);
-    if (durationInMsec == SL_TIME_UNKNOWN) {
-        fprintf(stderr, "Content duration is unknown (before starting to prefetch)\n");
-        ASSERT_TRUE(false);
-    }
 
     /* Set the player volume */
     res = (*volItf)->SetVolumeLevel( volItf, -300);
@@ -197,9 +193,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
 
     /* Play the URI */
     /*     first cause the player to prefetch the data */
-    fprintf(stdout, "\nbefore set to PAUSED\n\n");
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PAUSED );
-    fprintf(stdout, "\nafter set to PAUSED\n\n");
     CheckErr(res);
 
     /*     wait until there's data to play */
@@ -213,7 +207,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     }
 
     if (timeOutIndex == 0) {
-        fprintf(stderr, "We\'re done here, failed to prefetch data in time, exiting\n");
+        fprintf(stderr, "Error: Failed to prefetch data in time, exiting\n");
         ASSERT_TRUE(false);
        // goto destroyRes;
     }
@@ -222,7 +216,14 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     res = (*playItf)->GetDuration(playItf, &durationInMsec);
     CheckErr(res);
     if (durationInMsec == SL_TIME_UNKNOWN) {
-        fprintf(stderr, "Content duration is unknown (after prefetch completed)\n");
+        fprintf(stderr, "Error: GetDuration returned SL_TIME_UNKNOWN (after prefetch completed)\n");
+        ASSERT_TRUE(false);
+    }
+    SLint32 durationDiffMsec = durationInMsec - MP3_DURATION;
+    if (durationDiffMsec < 0) { durationDiffMsec *= -1; }
+    if (durationDiffMsec > (MP3_DURATION/20)) {
+        fprintf(stderr, "Error: GetDuration returned %d, more than 5percent off from expected %d\n",
+                durationInMsec, MP3_DURATION);
         ASSERT_TRUE(false);
     }
 
@@ -237,17 +238,16 @@ void TestPlayUri( SLObjectItf sl, const char* path)
            res = (*playItf)->GetPosition(playItf, &currentPositionInMsec);
            CheckErr(res);
     if (currentPositionInMsec == SL_TIME_UNKNOWN) {
-      fprintf(stderr, "GetPosition returns UNKNOWN\n");
+      fprintf(stderr, "Error: GetPosition returns SL_TIME_UNKNOWN after expected duration\n");
       ASSERT_TRUE(false);
     } else if ( currentPositionInMsec <= 0 ||
         currentPositionInMsec > (MP3_DURATION * 1.1) ){
-        fprintf(stderr, "Current play position is %i : beyond the duration\n",
+        fprintf(stderr, "Error: GetPosition returns %i, should be expected duration for test\n",
                 (int) currentPositionInMsec);
         ASSERT_TRUE(false);
     }
 
     /* Make sure player is stopped */
-    fprintf(stdout, "URI example: stopping playback\n");
     res = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_STOPPED);
     CheckErr(res);
 
@@ -258,6 +258,8 @@ destroyRes:
 
     /* Destroy Output Mix object */
     (*OutputMix)->Destroy(OutputMix);
+
+    fprintf(stdout, "End of test reached\n");
 }
 
 
