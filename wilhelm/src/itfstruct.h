@@ -16,7 +16,7 @@
 
 #ifdef ANDROID
 #include "media/AudioEffect.h"
-#include "media/EffectApi.h"
+#include "hardware/audio_effect.h"
 #endif
 
 /* Interface structures */
