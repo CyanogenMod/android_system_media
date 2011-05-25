@@ -1,0 +1,98 @@
+/*
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+package android.filterpacks.base;
+
+import android.filterfw.core.Filter;
+import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterParameter;
+import android.filterfw.core.Frame;
+import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GLFrame;
+import android.filterfw.core.MutableFrameFormat;
+
+import java.util.Set;
+
+public class GLTextureSource extends Filter {
+
+    @FilterParameter(name = "texId", isOptional = false, isUpdatable = false)
+    private int mTexId;
+
+    @FilterParameter(name = "width", isOptional = false, isUpdatable = false)
+    private int mWidth;
+
+    @FilterParameter(name = "height", isOptional = false, isUpdatable = false)
+    private int mHeight;
+
+    private MutableFrameFormat mOutputFormat;
+    private Frame mFrame;
+
+    public GLTextureSource(String name) {
+        super(name);
+    }
+
+    @Override
+    public void initFilter() {
+        mOutputFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE, FrameFormat.TARGET_GPU);
+        mOutputFormat.setBytesPerSample(4);
+        mOutputFormat.setDimensions(mWidth, mHeight);
+    }
+
+    @Override
+    public String[] getInputNames() {
+        return null;
+    }
+
+    @Override
+    public String[] getOutputNames() {
+        return new String[] { "frame" };
+    }
+
+    @Override
+    public boolean setInputFormat(int index, FrameFormat format) {
+        return false;
+    }
+
+    @Override
+    public FrameFormat getFormatForOutput(int index) {
+        return mOutputFormat;
+    }
+
+    @Override
+    public int process(FilterEnvironment env) {
+        // Generate frame if not generated already
+        if (mFrame == null) {
+            mFrame = env.getFrameManager().newBoundFrame(mOutputFormat,
+                                                         GLFrame.EXISTING_TEXTURE_BINDING,
+                                                         mTexId);
+        }
+
+        // Push output
+        putOutput(0, mFrame);
+
+        // Wait for free output
+        return Filter.STATUS_FINISHED;
+    }
+
+    @Override
+    public void tearDown(FilterEnvironment env) {
+        if (mFrame != null) {
+            mFrame.release();
+        }
+    }
+
+}
