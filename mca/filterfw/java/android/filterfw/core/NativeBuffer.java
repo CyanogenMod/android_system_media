@@ -76,7 +76,7 @@ public class NativeBuffer {
     }
 
     static {
-        System.loadLibrary("filterfw2-jni");
+        System.loadLibrary("filterfw-jni");
     }
 
     void attachToFrame(Frame frame) {

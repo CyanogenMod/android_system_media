@@ -29,7 +29,7 @@ LOCAL_SRC_FILES += native/brightness.c \
                    native/invert.c \
                    native/to_rgba.c
 
-LOCAL_SHARED_LIBRARIES := libutils libfilterfw2
+LOCAL_SHARED_LIBRARIES := libutils libfilterfw
 
 LOCAL_PRELINK_MODULE := false
 

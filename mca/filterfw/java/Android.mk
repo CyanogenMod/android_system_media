@@ -27,7 +27,7 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_MODULE := filterfw
 
-LOCAL_JNI_SHARED_LIBRARIES := libfilterfw2-jni
+LOCAL_JNI_SHARED_LIBRARIES := libfilterfw-jni
 
 LOCAL_PROGUARD_ENABLED := disabled
 

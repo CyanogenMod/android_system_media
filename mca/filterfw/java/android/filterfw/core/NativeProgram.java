@@ -117,7 +117,7 @@ public class NativeProgram extends Program {
     }
 
     static {
-        System.loadLibrary("filterfw2-jni");
+        System.loadLibrary("filterfw-jni");
     }
 
     private native boolean allocate();

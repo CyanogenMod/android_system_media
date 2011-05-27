@@ -16,13 +16,13 @@
 LOCAL_PATH := $(call my-dir)
 
 #####################
-# Build module libfilterfw2_static
+# Build module libfilterfw_static
 
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_MODULE := libfilterfw2_static
+LOCAL_MODULE := libfilterfw_static
 
 # Compile source files
 NDK_FILES = filter/src/data_buffer.cc \
@@ -52,15 +52,15 @@ LOCAL_EXPORT_LDLIBS := -llog -lgcc
 include $(BUILD_STATIC_LIBRARY)
 
 #####################
-# Build module libfilterfw2.so
+# Build module libfilterfw.so
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := libfilterfw2
+LOCAL_MODULE := libfilterfw
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_WHOLE_STATIC_LIBRARIES := libfilterfw2_static
+LOCAL_WHOLE_STATIC_LIBRARIES := libfilterfw_static
 
 LOCAL_SHARED_LIBRARIES := libandroid \
                           libGLESv2 \

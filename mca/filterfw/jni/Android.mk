@@ -16,12 +16,12 @@
 LOCAL_PATH := $(call my-dir)
 
 #####################
-# Build module libfilterfw2-jni
+# Build module libfilterfw-jni
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_MODULE    = libfilterfw2-jni_static
+LOCAL_MODULE    = libfilterfw-jni_static
 
 LOCAL_SRC_FILES = jni_init.cc \
                   jni_gl_environment.cc \
@@ -54,16 +54,16 @@ LOCAL_PRELINK_MODULE := false
 include $(BUILD_STATIC_LIBRARY)
 
 #####################
-# Build module libfilterfw2-jni
+# Build module libfilterfw-jni
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := libfilterfw2-jni
+LOCAL_MODULE := libfilterfw-jni
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_WHOLE_STATIC_LIBRARIES := libfilterfw2-jni_static
+LOCAL_WHOLE_STATIC_LIBRARIES := libfilterfw-jni_static
 
-LOCAL_SHARED_LIBRARIES := libfilterfw2 \
+LOCAL_SHARED_LIBRARIES := libfilterfw \
                           libstlport \
                           libGLESv2 \
                           libEGL \
