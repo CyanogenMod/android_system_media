@@ -18,7 +18,7 @@
 package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
@@ -63,22 +63,22 @@ public class GLTextureSource extends Filter {
     }
 
     @Override
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         return false;
     }
 
     @Override
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return mOutputFormat;
     }
 
     @Override
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext context) {
         // Generate frame if not generated already
         if (mFrame == null) {
-            mFrame = env.getFrameManager().newBoundFrame(mOutputFormat,
-                                                         GLFrame.EXISTING_TEXTURE_BINDING,
-                                                         mTexId);
+            mFrame = context.getFrameManager().newBoundFrame(mOutputFormat,
+                                                             GLFrame.EXISTING_TEXTURE_BINDING,
+                                                             mTexId);
         }
 
         // Push output
@@ -89,7 +89,7 @@ public class GLTextureSource extends Filter {
     }
 
     @Override
-    public void tearDown(FilterEnvironment env) {
+    public void tearDown(FilterContext context) {
         if (mFrame != null) {
             mFrame.release();
         }

@@ -32,16 +32,16 @@ public class AsyncRunner extends GraphRunner{
     public static final int RUNNER_WAS_STOPPED = 0;
     public static final int RUNNER_COMPLETED   = 1;
 
-    private FilterEnvironment mEnv;
+    private FilterContext mFilterContext;
     private Class mSchedulerClass;
     private SyncRunner mRunner;
     private AsyncRunnerTask mRunTask;
 
-    private FilterEnvironment.OnFrameReceivedListener mUiListener;
+    private FilterContext.OnFrameReceivedListener mUiListener;
     private OnRunnerDoneListener mDoneListener;
 
-    private FilterEnvironment.OnFrameReceivedListener mBackgroundListener =
-            new FilterEnvironment.OnFrameReceivedListener() {
+    private FilterContext.OnFrameReceivedListener mBackgroundListener =
+            new FilterContext.OnFrameReceivedListener() {
         public void onFrameReceived(Filter filter, Frame frame, Object userData) {
             if (LOGVV) Log.v(TAG, "Received callback at forwarding listener.");
             if (mRunTask != null) {
@@ -71,7 +71,7 @@ public class AsyncRunner extends GraphRunner{
             }
 
             if (LOGV) Log.v(TAG, "Starting background graph processing.");
-            GLEnvironment glEnv = mEnv.getGLEnvironment();
+            GLEnvironment glEnv = mFilterContext.getGLEnvironment();
 
             glEnv.activate();
 
@@ -143,22 +143,22 @@ public class AsyncRunner extends GraphRunner{
     private static final String TAG = "AsyncRunner";
 
     /** Create a new asynchronous graph runner with the given filter
-     * environment, and the given scheduler class.
+     * context, and the given scheduler class.
      *
      * Must be created on the UI thread.
      */
-    public AsyncRunner(FilterEnvironment env, Class schedulerClass) {
-        mEnv = env;
+    public AsyncRunner(FilterContext context, Class schedulerClass) {
+        mFilterContext = context;
         mSchedulerClass = schedulerClass;
     }
 
     /** Create a new asynchronous graph runner with the given filter
-     * environment. Uses a default scheduler.
+     * context. Uses a default scheduler.
      *
      * Must be created on the UI thread.
      */
-    public AsyncRunner(FilterEnvironment env) {
-        mEnv = env;
+    public AsyncRunner(FilterContext context) {
+        mFilterContext = context;
         mSchedulerClass = SimpleScheduler.class;
     }
 
@@ -189,15 +189,15 @@ public class AsyncRunner extends GraphRunner{
             mRunTask.getStatus() != AsyncTask.Status.FINISHED) {
             throw new RuntimeException("Graph is already running!");
         }
-        mRunner = new SyncRunner(mEnv, graph, mSchedulerClass);
+        mRunner = new SyncRunner(mFilterContext, graph, mSchedulerClass);
     }
 
     public FilterGraph getGraph() {
         return mRunner != null ? mRunner.getGraph() : null;
     }
 
-    public FilterEnvironment getEnvironment() {
-        return mEnv;
+    public FilterContext getContext() {
+        return mFilterContext;
     }
 
     /** Execute the graph in a background thread. */
@@ -237,7 +237,7 @@ public class AsyncRunner extends GraphRunner{
      * {@link #setUiThreadCallback}. The listener returned by this method
      * should only be invoked from within the graph running in this
      * AsyncRunner. */
-    public FilterEnvironment.OnFrameReceivedListener getForwardingCallback() {
+    public FilterContext.OnFrameReceivedListener getForwardingCallback() {
         return mBackgroundListener;
     }
 
@@ -247,7 +247,7 @@ public class AsyncRunner extends GraphRunner{
      * CallbackFilter. If the frame needs to be kept around by the UI thread,
      * make sure to call retain() on it before the callback exists, and then
      * call release() when done with it. */
-    public void setUiThreadCallback(FilterEnvironment.OnFrameReceivedListener uiListener) {
+    public void setUiThreadCallback(FilterContext.OnFrameReceivedListener uiListener) {
         mUiListener = uiListener;
     }
 
@@ -255,14 +255,14 @@ public class AsyncRunner extends GraphRunner{
      */
     private void disableUiGlContext() {
         if (LOGV) Log.v(TAG, "Deactivating GL context in UI thread.");
-        mEnv.getGLEnvironment().deactivate();
+        mFilterContext.getGLEnvironment().deactivate();
     }
 
     /** Activate GL context in the UI thread.
      */
     private void enableUiGlContext() {
         if (LOGV) Log.v(TAG, "Reactivating GL context in UI thread.");
-        mEnv.getGLEnvironment().activate();
+        mFilterContext.getGLEnvironment().activate();
     }
 
 }

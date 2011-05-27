@@ -26,11 +26,11 @@ import android.graphics.Bitmap;
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 
-public class ObjectFrame extends Frame {
+public class JavaFrame extends Frame {
 
     private Object mObject;
 
-    ObjectFrame(FrameFormat format, FrameManager frameManager, boolean isEmpty) {
+    JavaFrame(FrameFormat format, FrameManager frameManager, boolean isEmpty) {
         super(format, frameManager);
         if (!isEmpty) {
             initWithFormat(format);
@@ -78,13 +78,13 @@ public class ObjectFrame extends Frame {
         // Make sure we have an object class set
         if (objectClass == null) {
             throw new RuntimeException(
-                "ObjectFrame based on TYPE_OBJECT requires an object class!");
+                "JavaFrame based on TYPE_OBJECT requires an object class!");
         }
 
         // Size must be 1 for custom objects
         if (count != 1) {
             throw new RuntimeException(
-                "ObjectFrame does not support instantiating a frame based on " + objectClass + " " +
+                "JavaFrame does not support instantiating a frame based on " + objectClass + " " +
                 "with a size not equal to 1!");
         }
 
@@ -102,12 +102,12 @@ public class ObjectFrame extends Frame {
         // Make sure we have an object class set
         if (structClass == null) {
             throw new RuntimeException(
-                "ObjectFrame based on TYPE_STRUCT requires an object class!");
+                "JavaFrame based on TYPE_STRUCT requires an object class!");
         }
 
         // Make sure it is a NativeBuffer subclass
         if (!NativeBuffer.class.isAssignableFrom(structClass)) {
-            throw new RuntimeException("ObjectFrame's class must be a subclass of " +
+            throw new RuntimeException("JavaFrame's class must be a subclass of " +
                                        "NativeBuffer when using TYPE_STRUCT!");
         }
 
@@ -181,7 +181,7 @@ public class ObjectFrame extends Frame {
         } else if (!format.getObjectClass().isAssignableFrom(object.getClass())) {
             throw new RuntimeException(
                 "Attempting to set object value of type '" + object.getClass() + "' on " +
-                "ObjectFrame of type '" + format.getObjectClass() + "'!");
+                "JavaFrame of type '" + format.getObjectClass() + "'!");
         }
 
         // Set the object value

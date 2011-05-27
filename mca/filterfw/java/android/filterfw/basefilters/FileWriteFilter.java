@@ -20,7 +20,7 @@ package android.filterpacks.base;
 import android.content.Context;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
@@ -39,7 +39,7 @@ public class FileWriteFilter extends Filter {
     private String mOutputName;
 
     @FilterParameter(name = "context", isOptional = false)
-    private Context mContext;
+    private Context mActivityContext;
 
     private BufferedOutputStream mWriter;
 
@@ -58,12 +58,12 @@ public class FileWriteFilter extends Filter {
     }
 
     @Override
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         return format.isBinaryDataType() || format.getObjectClass() == String.class;
     }
 
     @Override
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return null;
     }
 
@@ -75,10 +75,10 @@ public class FileWriteFilter extends Filter {
     }
 
     @Override
-    public int open(FilterEnvironment env) {
+    public int open(FilterContext context) {
         FileOutputStream outStream = null;
         try {
-            outStream = mContext.openFileOutput(mOutputName, Context.MODE_PRIVATE);
+            outStream = mActivityContext.openFileOutput(mOutputName, Context.MODE_PRIVATE);
         } catch (FileNotFoundException exception) {
             throw new RuntimeException("FileWriter: Could not open file: " + mOutputName + ": " +
                                        exception.getMessage());
@@ -89,7 +89,7 @@ public class FileWriteFilter extends Filter {
     }
 
     @Override
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext context) {
         Frame input = pullInput(0);
         ByteBuffer data;
 
@@ -110,7 +110,7 @@ public class FileWriteFilter extends Filter {
     }
 
     @Override
-    public void close(FilterEnvironment env) {
+    public void close(FilterContext context) {
         try {
             mWriter.close();
         } catch (IOException exception) {

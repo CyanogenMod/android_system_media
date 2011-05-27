@@ -18,10 +18,10 @@
 package android.filterpacks.text;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
-import android.filterfw.core.ObjectFrame;
+import android.filterfw.core.JavaFrame;
 
 public class ToUpperCase extends Filter {
 
@@ -39,7 +39,7 @@ public class ToUpperCase extends Filter {
         return new String[] { "uppercase" };
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         // TODO: Check meta-property ObjectClass
         if (format.getBaseType() == FrameFormat.TYPE_OBJECT) {
             mOutputFormat = format;
@@ -48,11 +48,11 @@ public class ToUpperCase extends Filter {
         return false;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return mOutputFormat;
     }
 
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext env) {
         Frame input = pullInput(0);
         String inputString = (String)input.getObjectValue();
 

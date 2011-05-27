@@ -18,7 +18,7 @@
 package android.filterpacks.ui;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.FilterSurfaceView;
 import android.filterfw.core.FilterSurfaceRenderer;
@@ -119,7 +119,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
     }
 
     @Override
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         if (format.isBinaryDataType() &&
             format.getBytesPerSample() == 4 &&
             format.getNumberOfDimensions() == 2 &&
@@ -132,12 +132,12 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
     }
 
     @Override
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return null;
     }
 
     @Override
-    public void prepare(FilterEnvironment environment) {
+    public void prepare(FilterContext environment) {
         // Create identity shader to render, and make sure to render upside-down, as textures
         // are stored internally bottom-to-top.
         mProgram = ShaderProgram.createIdentity();
@@ -165,7 +165,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
     }
 
     @Override
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext env) {
         if (mSurfaceView != null) {
             if (LOGV) Log.v(TAG, "Starting frame processing");
 
@@ -218,7 +218,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
     }
 
     @Override
-    public void tearDown(FilterEnvironment env) {
+    public void tearDown(FilterContext env) {
         if (mScreen != null) {
             mScreen.release();
         }

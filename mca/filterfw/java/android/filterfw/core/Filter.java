@@ -18,7 +18,7 @@
 package android.filterfw.core;
 
 import android.content.Context;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterPort;
 import android.filterfw.core.FrameManager;
 import android.filterfw.core.KeyValueMap;
@@ -144,7 +144,7 @@ public abstract class Filter {
     protected void initFilter() {
     }
 
-    protected void prepare(FilterEnvironment environment) {
+    protected void prepare(FilterContext context) {
     }
 
     protected void parametersUpdated(Set<String> updated) {
@@ -154,16 +154,16 @@ public abstract class Filter {
 
     public abstract String[] getOutputNames();
 
-    public abstract boolean setInputFormat(int index, FrameFormat format);
-
-    public abstract FrameFormat getFormatForOutput(int index);
+    public abstract boolean acceptsInputFormat(int index, FrameFormat format);
 
     public FrameFormat getInputFormat(int index) {
         FilterPort inPort = getInputPortAtIndex(index);
         return inPort.getFormat();
     }
 
-    public int open(FilterEnvironment env) {
+    public abstract FrameFormat getOutputFormat(int index);
+
+    public int open(FilterContext context) {
         int result = 0;
         if (getNumberOfInputs() > 0) {
             result |= STATUS_WAIT_FOR_ALL_INPUTS;
@@ -174,16 +174,16 @@ public abstract class Filter {
         return result;
     }
 
-    public abstract int process(FilterEnvironment env);
+    public abstract int process(FilterContext context);
 
     public int getSleepDelay() {
         return 250;
     }
 
-    public void close(FilterEnvironment env) {
+    public void close(FilterContext context) {
     }
 
-    public void tearDown(FilterEnvironment env) {
+    public void tearDown(FilterContext context) {
     }
 
     public final int getNumberOfInputs() {
@@ -284,26 +284,26 @@ public abstract class Filter {
         mStatus &= ~flag;
     }
 
-    final boolean performOpen(FilterEnvironment env) {
+    final boolean performOpen(FilterContext context) {
         synchronized(this) {
-            mStatus = open(env);
+            mStatus = open(context);
         }
         mIsOpen = true;
         return mStatus != STATUS_ERROR;
     }
 
-    final int performProcess(FilterEnvironment env) {
+    final int performProcess(FilterContext context) {
         synchronized(this) {
-            mStatus = process(env);
-            releasePulledFrames(env);
+            mStatus = process(context);
+            releasePulledFrames(context);
         }
         return mStatus;
     }
 
-    final void performClose(FilterEnvironment env) {
+    final void performClose(FilterContext context) {
         synchronized(this) {
             mIsOpen = false;
-            close(env);
+            close(context);
         }
     }
 
@@ -420,9 +420,9 @@ public abstract class Filter {
         }
     }
 
-    private final void releasePulledFrames(FilterEnvironment env) {
+    private final void releasePulledFrames(FilterContext context) {
         for (Frame frame : mPulledFrames) {
-            env.getFrameManager().releaseFrame(frame);
+            context.getFrameManager().releaseFrame(frame);
         }
         mPulledFrames.clear();
     }

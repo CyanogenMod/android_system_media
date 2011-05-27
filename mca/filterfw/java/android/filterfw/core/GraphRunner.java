@@ -26,7 +26,7 @@ public abstract class GraphRunner {
 
     public abstract FilterGraph getGraph();
 
-    public abstract FilterEnvironment getEnvironment();
+    public abstract FilterContext getContext();
 
     public abstract void run();
 

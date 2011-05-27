@@ -18,7 +18,7 @@
 package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
@@ -48,11 +48,11 @@ public class FrameFetch extends Filter {
         return new String[] { "frame" };
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         return false;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         if (mFormat != null) {
             return mFormat;
         } else {
@@ -60,8 +60,8 @@ public class FrameFetch extends Filter {
         }
     }
 
-    public int process(FilterEnvironment env) {
-        Frame output = env.fetchFrame(mKey);
+    public int process(FilterContext context) {
+        Frame output = context.fetchFrame(mKey);
         Log.i("FrameFetch", "Got frame " + output + " for key: " + mKey + "!");
         if (output != null) {
             putOutput(0, output);

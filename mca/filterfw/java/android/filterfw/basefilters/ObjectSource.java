@@ -20,7 +20,7 @@ package android.filterpacks.base;
 import java.util.Set;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
@@ -52,11 +52,11 @@ public class ObjectSource extends Filter {
         return new String[] { "frame" };
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         return false;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         updateOutputFormat();
         return mOutputFormat;
     }
@@ -66,10 +66,10 @@ public class ObjectSource extends Filter {
         mOutputFormat.setObjectClass(mObject.getClass());
     }
 
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext context) {
         if (mFrame == null) {
             updateOutputFormat();
-            mFrame = env.getFrameManager().newEmptyFrame(mOutputFormat);
+            mFrame = context.getFrameManager().newEmptyFrame(mOutputFormat);
             mFrame.setObjectValue(mObject);
         }
         // Push output
@@ -79,7 +79,7 @@ public class ObjectSource extends Filter {
         return repeatFrame ? Filter.STATUS_WAIT_FOR_FREE_OUTPUTS : Filter.STATUS_FINISHED;
     }
 
-    public void tearDown(FilterEnvironment env) {
+    public void tearDown(FilterContext context) {
         mFrame.release();
     }
 

@@ -18,7 +18,7 @@
 package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.KeyValueMap;
@@ -48,7 +48,7 @@ public class ToRGBAFilter extends Filter {
         return new String[] { "image" };
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         if (format.isBinaryDataType()) {
             mOutputFormat = format.mutableCopy();
             mOutputFormat.setBytesPerSample(4);
@@ -58,11 +58,11 @@ public class ToRGBAFilter extends Filter {
         return false;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return mOutputFormat;
     }
 
-    public void prepare(FilterEnvironment environment) {
+    public void prepare(FilterContext environment) {
         switch (mOutputFormat.getTarget()) {
             case FrameFormat.TARGET_NATIVE:
                 switch (mInputBPP) {
@@ -85,7 +85,7 @@ public class ToRGBAFilter extends Filter {
         }
     }
 
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext env) {
         // Get input frame
         Frame input = pullInput(0);
 

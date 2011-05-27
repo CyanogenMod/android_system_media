@@ -20,7 +20,7 @@ package android.filterfw;
 import android.filterfw.core.AsyncRunner;
 import android.filterfw.core.CachedFrameManager;
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterFactory;
 import android.filterfw.core.FilterFunction;
 import android.filterfw.core.FrameHandle;
@@ -29,7 +29,7 @@ import android.filterfw.core.GLEnvironment;
 
 public class FilterFunctionEnvironment {
 
-    private FilterEnvironment mEnvironment;
+    private FilterContext mFilterContext;
 
     public FilterFunctionEnvironment() {
         init(null, null);
@@ -39,15 +39,15 @@ public class FilterFunctionEnvironment {
         init(frameManager, glEnvironment);
     }
 
-    public FilterEnvironment getEnvironment() {
-        return mEnvironment;
+    public FilterContext getContext() {
+        return mFilterContext;
     }
 
     public FilterFunction createFunction(Class filterClass, Object... parameters) {
         String filterName = "FilterFunction(" + filterClass.getSimpleName() + ")";
         Filter filter = FilterFactory.sharedFactory().createFilterByClass(filterClass, filterName);
         filter.initWithParameterList(parameters);
-        return new FilterFunction(mEnvironment, filter);
+        return new FilterFunction(mFilterContext, filter);
     }
 
     public FrameHandle executeSequence(FilterFunction[] functions) {
@@ -83,10 +83,10 @@ public class FilterFunctionEnvironment {
             glEnvironment.activate();
         }
 
-        // Setup the environment
-        mEnvironment = new FilterEnvironment();
-        mEnvironment.setFrameManager(frameManager);
-        mEnvironment.setGLEnvironment(glEnvironment);
+        // Setup the context
+        mFilterContext = new FilterContext();
+        mFilterContext.setFrameManager(frameManager);
+        mFilterContext.setGLEnvironment(glEnvironment);
     }
 
 }

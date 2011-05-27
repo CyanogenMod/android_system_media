@@ -18,7 +18,7 @@
 package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
@@ -69,7 +69,7 @@ public class DrawRectFilter extends Filter {
         return new String[] { "image" };
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         switch(index) {
             case 0: // image
                 if (format.isBinaryDataType() &&
@@ -87,15 +87,15 @@ public class DrawRectFilter extends Filter {
         return false;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return mOutputFormat;
     }
 
-    public void prepare(FilterEnvironment env) {
+    public void prepare(FilterContext env) {
         mProgram = new ShaderProgram(mVertexShader, mFixedColorFragmentShader);
     }
 
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext env) {
         // Get input frame
         Frame imageFrame = pullInput(0);
         Frame boxFrame = pullInput(1);

@@ -19,7 +19,7 @@ package android.filterpacks.imageproc;
 
 import android.content.Context;
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
@@ -85,22 +85,22 @@ public class ImageDecoder extends Filter {
         return new String[] { "image" };
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         return false;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return mOutputFormat;
     }
 
-    public int open(FilterEnvironment env) {
+    public int open(FilterContext env) {
         mImageFrame = env.getFrameManager().newFrame(mOutputFormat);
         mImageFrame.setBitmap(mBitmap);
 
         return Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext env) {
         putOutput(0, mImageFrame);
 
         if (repeatFrame) {
@@ -110,7 +110,7 @@ public class ImageDecoder extends Filter {
         }
     }
 
-    public void close(FilterEnvironment env) {
+    public void close(FilterContext env) {
         mImageFrame.release();
         mImageFrame = null;
     }

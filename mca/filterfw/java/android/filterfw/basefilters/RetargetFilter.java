@@ -18,7 +18,7 @@
 package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
@@ -56,24 +56,24 @@ public class RetargetFilter extends Filter {
         return new String[] { "frame" };
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         mOutputFormat = format.mutableCopy();
         mOutputFormat.setTarget(mTarget);
         return true;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return mOutputFormat;
     }
 
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext context) {
         // Get input frame
         Frame input = pullInput(0);
 
         // Create output frame
         MutableFrameFormat outFormat = input.getFormat().mutableCopy();
         outFormat.setTarget(mTarget);
-        Frame output = env.getFrameManager().newFrame(outFormat);
+        Frame output = context.getFrameManager().newFrame(outFormat);
 
         // Process
         output.setDataFromFrame(input);

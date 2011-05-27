@@ -18,10 +18,10 @@
 package android.filterpacks.text;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
-import android.filterfw.core.ObjectFrame;
+import android.filterfw.core.JavaFrame;
 import android.util.Log;
 
 public class StringLogger extends Filter {
@@ -38,16 +38,16 @@ public class StringLogger extends Filter {
         return null;
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         // TODO: Check meta-property ObjectClass
         return format.getBaseType() == FrameFormat.TYPE_OBJECT;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return null;
     }
 
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext env) {
         Frame input = pullInput(0);
         String inputString = (String)input.getObjectValue();
 

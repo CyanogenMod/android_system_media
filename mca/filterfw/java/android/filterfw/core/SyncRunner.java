@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class SyncRunner extends GraphRunner {
 
     private Scheduler mScheduler = null;
-    private FilterEnvironment mEnvironment = null;
+    private FilterContext mFilterContext = null;
 
     private ScheduledThreadPoolExecutor mWakeExecutor = new ScheduledThreadPoolExecutor(1);
     private ConditionVariable mWakeCondition = new ConditionVariable();
@@ -35,7 +35,7 @@ public class SyncRunner extends GraphRunner {
 
 
     // TODO: Provide factory based constructor?
-    public SyncRunner(FilterEnvironment env, FilterGraph graph, Class schedulerClass) {
+    public SyncRunner(FilterContext context, FilterGraph graph, Class schedulerClass) {
         // Create the scheduler
         if (Scheduler.class.isAssignableFrom(schedulerClass)) {
             try {
@@ -54,32 +54,32 @@ public class SyncRunner extends GraphRunner {
             throw new IllegalArgumentException("Class provided is not a Scheduler subclass!");
         }
 
-        // Add us to the specified environment
-        mEnvironment = env;
-        mEnvironment.addRunner(this);
+        // Add us to the specified context
+        mFilterContext = context;
+        mFilterContext.addRunner(this);
 
         mTimer = new StopWatchMap();
 
         // Setup graph filters
-        graph.setupFilters(mEnvironment);
+        graph.setupFilters(mFilterContext);
     }
 
     protected void finalize() throws Throwable {
         // TODO: Is this the best place to do this, or should we make it explicit?
-        getGraph().tearDownFilters(mEnvironment);
+        getGraph().tearDownFilters(mFilterContext);
     }
 
     public FilterGraph getGraph() {
         return mScheduler != null ? mScheduler.getGraph() : null;
     }
 
-    public FilterEnvironment getEnvironment() {
-        return mEnvironment;
+    public FilterContext getContext() {
+        return mFilterContext;
     }
 
     public void open() {
         if (!getGraph().isOpen()) {
-            getGraph().openFilters(mEnvironment);
+            getGraph().openFilters(mFilterContext);
         }
     }
 
@@ -90,7 +90,7 @@ public class SyncRunner extends GraphRunner {
 
     public void close() {
         // Close filters
-        getGraph().closeFilters(mEnvironment);
+        getGraph().closeFilters(mFilterContext);
     }
 
     public void run() {
@@ -127,7 +127,7 @@ public class SyncRunner extends GraphRunner {
 
     private void processFilterNode(Filter filter) {
         LogMCA.perFrame("Processing " + filter);
-        filter.performProcess(mEnvironment);
+        filter.performProcess(mFilterContext);
         if (filter.checkStatus(Filter.STATUS_ERROR)) {
             throw new RuntimeException("There was an error executing " + filter + "!");
         } else if (filter.checkStatus(Filter.STATUS_SLEEP)) {

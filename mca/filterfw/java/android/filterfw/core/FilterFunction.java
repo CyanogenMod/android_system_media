@@ -19,19 +19,19 @@ package android.filterfw.core;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterConnection;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FrameHandle;
 
 public class FilterFunction {
 
     private Filter mFilter;
-    private FilterEnvironment mEnvironment;
+    private FilterContext mFilterContext;
     private boolean mFilterSetup = false;
     private FilterConnection[] mInputStubs;
     private FilterConnection[] mOutputStubs;
 
-    public FilterFunction(FilterEnvironment environment, Filter filter) {
-        mEnvironment = environment;
+    public FilterFunction(FilterContext context, Filter filter) {
+        mFilterContext = context;
         mFilter = filter;
         setupConnectionStubs();
     }
@@ -54,7 +54,7 @@ public class FilterFunction {
         if (!mFilterSetup) {
             setupFilterInputs(inputs);
             setupFilterOutputs();
-            mFilter.prepare(mEnvironment);
+            mFilter.prepare(mFilterContext);
             mFilterSetup = true;
         }
 
@@ -64,9 +64,9 @@ public class FilterFunction {
         }
 
         // Process the filter
-        mFilter.performOpen(mEnvironment);
-        mFilter.performProcess(mEnvironment);
-        mFilter.performClose(mEnvironment);
+        mFilter.performOpen(mFilterContext);
+        mFilter.performProcess(mFilterContext);
+        mFilter.performClose(mFilterContext);
 
         // Clear inputs
         for (int i = 0; i < filterInCount; ++i) {
@@ -80,6 +80,10 @@ public class FilterFunction {
             mOutputStubs[0].clearFrame();
         }
         return result;
+    }
+
+    public FilterContext getContext() {
+        return mFilterContext;
     }
 
     public void updateParameters(Object... keyValues) {
@@ -108,7 +112,7 @@ public class FilterFunction {
     private void setupFilterInputs(FrameHandle[] inputs) {
         // Set input formats (from input frames)
         for (int i = 0; i < inputs.length; ++i) {
-            if (!mFilter.setInputFormat(i, inputs[i].getFrame().getFormat())) {
+            if (!mFilter.acceptsInputFormat(i, inputs[i].getFrame().getFormat())) {
                 throw new RuntimeException("Filter " + mFilter + " does not accept the " +
                                            "input given on port " + i + "!");
             }
@@ -123,9 +127,9 @@ public class FilterFunction {
     private void setupFilterOutputs() {
         // We are actually not interested in the filter output, as we will use the generated output
         // frames themselves to determine the format. Still, as the filter may run critical code
-        // in the getFormatForOutput() method, we call it here.
+        // in the getOutputFormat() method, we call it here.
         for (int i = 0; i < mFilter.getNumberOfOutputs(); ++i) {
-            mFilter.getFormatForOutput(i);
+            mFilter.getOutputFormat(i);
         }
 
         // Connect outputs to connection stubs

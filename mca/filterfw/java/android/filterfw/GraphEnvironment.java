@@ -21,7 +21,7 @@ import android.content.Context;
 import android.filterfw.core.AsyncRunner;
 import android.filterfw.core.CachedFrameManager;
 import android.filterfw.core.FilterGraph;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FrameManager;
 import android.filterfw.core.GLEnvironment;
 import android.filterfw.core.GraphRunner;
@@ -38,7 +38,7 @@ public class GraphEnvironment {
     public static final int MODE_ASYNCHRONOUS = 1;
     public static final int MODE_SYNCHRONOUS  = 2;
 
-    private FilterEnvironment mEnvironment;
+    private FilterContext mContext;
     private GraphReader mGraphReader;
     private ArrayList<GraphHandle> mGraphs = new ArrayList<GraphHandle>();
 
@@ -55,7 +55,7 @@ public class GraphEnvironment {
             return mGraph;
         }
 
-        public AsyncRunner getAsyncRunner(FilterEnvironment environment) {
+        public AsyncRunner getAsyncRunner(FilterContext environment) {
             if (mAsyncRunner == null) {
                 mAsyncRunner = new AsyncRunner(environment, SimpleScheduler.class);
                 mAsyncRunner.setGraph(mGraph);
@@ -63,7 +63,7 @@ public class GraphEnvironment {
             return mAsyncRunner;
         }
 
-        public GraphRunner getSyncRunner(FilterEnvironment environment) {
+        public GraphRunner getSyncRunner(FilterContext environment) {
             if (mSyncRunner == null) {
                 mSyncRunner = new SyncRunner(environment, mGraph, SimpleScheduler.class);
             }
@@ -114,10 +114,10 @@ public class GraphEnvironment {
     public GraphRunner getRunner(int graphId, int executionMode) {
         switch (executionMode) {
             case MODE_ASYNCHRONOUS:
-                return mGraphs.get(graphId).getAsyncRunner(mEnvironment);
+                return mGraphs.get(graphId).getAsyncRunner(mContext);
 
             case MODE_SYNCHRONOUS:
-                return mGraphs.get(graphId).getSyncRunner(mEnvironment);
+                return mGraphs.get(graphId).getSyncRunner(mContext);
 
             default:
                 throw new RuntimeException(
@@ -125,16 +125,16 @@ public class GraphEnvironment {
         }
     }
 
-    public FilterEnvironment getEnvironment() {
-        return mEnvironment;
+    public FilterContext getContext() {
+        return mContext;
     }
 
     public void activateGLEnvironment() {
-        mEnvironment.getGLEnvironment().activate();
+        mContext.getGLEnvironment().activate();
     }
 
     public void deactivateGLEnvironment() {
-        mEnvironment.getGLEnvironment().deactivate();
+        mContext.getGLEnvironment().deactivate();
     }
 
     private void init(FrameManager frameManager, GLEnvironment glEnvironment, GraphReader reader) {
@@ -159,9 +159,9 @@ public class GraphEnvironment {
         mGraphReader = reader;
 
         // Setup the environment
-        mEnvironment = new FilterEnvironment();
-        mEnvironment.setFrameManager(new CachedFrameManager());
-        mEnvironment.setGLEnvironment(glEnvironment);
+        mContext = new FilterContext();
+        mContext.setFrameManager(new CachedFrameManager());
+        mContext.setGLEnvironment(glEnvironment);
     }
 
 }

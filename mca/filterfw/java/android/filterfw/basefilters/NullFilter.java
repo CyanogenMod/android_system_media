@@ -18,7 +18,7 @@
 package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 
@@ -36,15 +36,15 @@ public class NullFilter extends Filter {
         return null;
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         return true;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return null;
     }
 
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext context) {
         pullInput(0);
         return Filter.STATUS_WAIT_FOR_ALL_INPUTS;
     }

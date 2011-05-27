@@ -18,13 +18,13 @@
 package android.filterpacks.text;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
-import android.filterfw.core.ObjectFrame;
+import android.filterfw.core.JavaFrame;
 
 public class StringSource extends Filter {
 
@@ -45,16 +45,16 @@ public class StringSource extends Filter {
         return new String[] { "string" };
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         return false;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         mOutputFormat = new FrameFormat(FrameFormat.TYPE_OBJECT, FrameFormat.TARGET_JAVA);
         return mOutputFormat;
     }
 
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext env) {
         Frame output = env.getFrameManager().newEmptyFrame(mOutputFormat);
         output.setObjectValue(mString);
         putOutput(0, output);

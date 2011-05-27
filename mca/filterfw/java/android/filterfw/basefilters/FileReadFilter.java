@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
@@ -41,7 +41,7 @@ import android.util.Log;
 public class FileReadFilter extends Filter {
 
     @FilterParameter(name = "context", isOptional = false)
-    private Context mContext;
+    private Context mActivityContext;
 
     @FilterParameter(name = "format", isOptional = false)
     private FrameFormat mFrameFormat;
@@ -90,12 +90,12 @@ public class FileReadFilter extends Filter {
     }
 
     @Override
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         return false;
     }
 
     @Override
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return mOutputFormat;
     }
 
@@ -107,14 +107,14 @@ public class FileReadFilter extends Filter {
     }
 
     @Override
-    public int open(FilterEnvironment env) {
+    public int open(FilterContext context) {
         try {
             switch (mFileMode) {
                 case FILE_MODE_FILE:
-                    mInputStream = mContext.openFileInput(mFileInputName);
+                    mInputStream = mActivityContext.openFileInput(mFileInputName);
                     break;
                 case FILE_MODE_RESOURCE:
-                    mInputStream = mContext.getResources().openRawResource(mResourceId);
+                    mInputStream = mActivityContext.getResources().openRawResource(mResourceId);
                     break;
             }
             Log.i("FileReadFilter", "InputStream = " + mInputStream);
@@ -125,7 +125,7 @@ public class FileReadFilter extends Filter {
     }
 
     @Override
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext context) {
         int fileSize = 0;
         ByteBuffer byteBuffer = null;
 
@@ -146,7 +146,7 @@ public class FileReadFilter extends Filter {
 
         // Put it into a frame
         mOutputFormat.setDimensions(fileSize);
-        Frame output = env.getFrameManager().newFrame(mOutputFormat);
+        Frame output = context.getFrameManager().newFrame(mOutputFormat);
         output.setData(byteBuffer);
 
         // Push output
@@ -159,7 +159,7 @@ public class FileReadFilter extends Filter {
     }
 
     @Override
-    public void close(FilterEnvironment env) {
+    public void close(FilterContext context) {
         try {
             mInputStream.close();
         } catch (IOException exception) {

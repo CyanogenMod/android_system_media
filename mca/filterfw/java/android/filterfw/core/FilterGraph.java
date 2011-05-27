@@ -25,7 +25,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterpacks.base.FrameBranch;
@@ -120,18 +120,18 @@ public class FilterGraph {
         return mSourceFilters;
     }
 
-    public void openFilters(FilterEnvironment env) {
+    public void openFilters(FilterContext context) {
         for (Filter filter : mFilters) {
-            if (!filter.performOpen(env)) {
+            if (!filter.performOpen(context)) {
                 throw new RuntimeException("Failed to open filter " + filter + "!");
             }
         }
         mIsOpen = true;
     }
 
-    public void closeFilters(FilterEnvironment env) {
+    public void closeFilters(FilterContext context) {
         for (Filter filter : mFilters) {
-            filter.performClose(env);
+            filter.performClose(context);
         }
         mIsOpen = false;
     }
@@ -199,7 +199,7 @@ public class FilterGraph {
 
     private void setupInputPortsFor(Filter filter) {
         for (int i = 0; i < filter.getNumberOfInputs(); ++i) {
-            if (!filter.setInputFormat(i, filter.getInputPortAtIndex(i).getFormat())) {
+            if (!filter.acceptsInputFormat(i, filter.getInputPortAtIndex(i).getFormat())) {
                 throw new RuntimeException("Filter " + filter + " does not accept the " +
                                            "input given on port " + i + "!");
             }
@@ -208,7 +208,7 @@ public class FilterGraph {
 
     private void setupOutputPortsFor(Filter filter) {
         for (int i = 0; i < filter.getNumberOfOutputs(); ++i) {
-            FrameFormat format = filter.getFormatForOutput(i);
+            FrameFormat format = filter.getOutputFormat(i);
             if (format == null) {
                 throw new RuntimeException("Filter " + filter + " did not produce an " +
                                            "output format for port " + i + "!");
@@ -221,9 +221,9 @@ public class FilterGraph {
         // TODO
     }
 
-    private void prepareFilters(FilterEnvironment env) {
+    private void prepareFilters(FilterContext context) {
       for (Filter filter : mFilters) {
-        filter.prepare(env);
+        filter.prepare(context);
       }
     }
 
@@ -324,7 +324,7 @@ public class FilterGraph {
     }
 
     // Core internal methods /////////////////////////////////////////////////////////////////////////
-    void setupFilters(FilterEnvironment env) {
+    void setupFilters(FilterContext context) {
         if (mDiscardUnconnectedFilters) {
             discardUnconnectedFilters();
         }
@@ -334,12 +334,12 @@ public class FilterGraph {
         connectPorts();
         checkConnections();
         setupPorts();
-        prepareFilters(env);
+        prepareFilters(context);
     }
 
-    void tearDownFilters(FilterEnvironment env) {
+    void tearDownFilters(FilterContext context) {
         for (Filter filter : mFilters) {
-            filter.tearDown(env);
+            filter.tearDown(context);
         }
     }
 }

@@ -26,14 +26,14 @@ import android.filterfw.core.GraphRunner;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class FilterEnvironment {
+public class FilterContext {
 
     private FrameManager mFrameManager;
     private GLEnvironment mGLEnvironment;
     private HashSet<GraphRunner> mRunners;
     private HashMap<String, Frame> mStoredFrames;
 
-    public FilterEnvironment() {
+    public FilterContext() {
         mRunners = new HashSet<GraphRunner>();
         mStoredFrames = new HashMap<String, Frame>();
     }

@@ -19,7 +19,7 @@ package android.filterpacks.imageproc;
 
 import android.content.Context;
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
@@ -55,15 +55,15 @@ public class ImageEncoder extends Filter {
         return null;
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         return format.getBaseType() == FrameFormat.TYPE_BYTE;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return null;
     }
 
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext env) {
         Frame input = pullInput(0);
         Bitmap bitmap = input.getBitmap();
         FileOutputStream outStream = null;

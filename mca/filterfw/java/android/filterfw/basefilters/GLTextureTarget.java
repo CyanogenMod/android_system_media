@@ -18,7 +18,7 @@
 package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
@@ -54,7 +54,7 @@ public class GLTextureTarget extends Filter {
     }
 
     @Override
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         if (format.getDimensionCount() == 2 && format.getBytesPerSample() == 4) {
             mInputFormat = format;
             return true;
@@ -63,7 +63,7 @@ public class GLTextureTarget extends Filter {
     }
 
     @Override
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return null;
     }
 
@@ -75,14 +75,14 @@ public class GLTextureTarget extends Filter {
         }
     }
 
-    public void prepare(FilterEnvironment env) {
+    public void prepare(FilterContext context) {
         mFrameFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE, FrameFormat.TARGET_GPU);
         mFrameFormat.setBytesPerSample(4);
         mFrameFormat.setDimensions(mInputFormat.getDimensions());
     }
 
     @Override
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext context) {
         // Get input frame
         Frame input = pullInput(0);
 
@@ -91,7 +91,7 @@ public class GLTextureTarget extends Filter {
             int binding = mCreateTex
                 ? GLFrame.NEW_TEXTURE_BINDING
                 : GLFrame.EXISTING_TEXTURE_BINDING;
-            mFrame = env.getFrameManager().newBoundFrame(mFrameFormat, binding, mTexId);
+            mFrame = context.getFrameManager().newBoundFrame(mFrameFormat, binding, mTexId);
         }
 
         // Copy to our texture frame
@@ -102,7 +102,7 @@ public class GLTextureTarget extends Filter {
     }
 
     @Override
-    public void tearDown(FilterEnvironment env) {
+    public void tearDown(FilterContext context) {
         if (mFrame != null) {
             mFrame.release();
         }

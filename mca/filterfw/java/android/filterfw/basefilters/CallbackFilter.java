@@ -18,7 +18,7 @@
 package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
@@ -30,7 +30,7 @@ import android.filterfw.core.Program;
 public class CallbackFilter extends Filter {
 
     @FilterParameter(name = "listener", isOptional = false)
-    private FilterEnvironment.OnFrameReceivedListener mListener;
+    private FilterContext.OnFrameReceivedListener mListener;
 
     @FilterParameter(name = "userData", isOptional = true)
     private Object mUserData;
@@ -47,15 +47,15 @@ public class CallbackFilter extends Filter {
         return null;
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         return true;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return null;
     }
 
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext context) {
         // Get frame and forward to listener
         Frame input = pullInput(0);
         if (mListener != null) {

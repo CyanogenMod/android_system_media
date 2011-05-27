@@ -18,7 +18,7 @@
 package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterEnvironment;
+import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
@@ -62,7 +62,7 @@ public class BlendFilter extends Filter {
         return new String[] { "blended" };
     }
 
-    public boolean setInputFormat(int index, FrameFormat format) {
+    public boolean acceptsInputFormat(int index, FrameFormat format) {
         if (format.isBinaryDataType() && format.getBytesPerSample() == 4) {
             mOutputFormat = format;
             return true;
@@ -70,11 +70,11 @@ public class BlendFilter extends Filter {
         return false;
     }
 
-    public FrameFormat getFormatForOutput(int index) {
+    public FrameFormat getOutputFormat(int index) {
         return mOutputFormat;
     }
 
-    public void prepare(FilterEnvironment environment) {
+    public void prepare(FilterContext environment) {
         switch (mOutputFormat.getTarget()) {
             case FrameFormat.TARGET_NATIVE:
                 throw new RuntimeException("TODO: Write native implementation for Blend!");
@@ -95,7 +95,7 @@ public class BlendFilter extends Filter {
         }
     }
 
-    public int process(FilterEnvironment env) {
+    public int process(FilterContext env) {
         // Get input frame
         Frame[] inputs = { pullInput(0), pullInput(1) };
 

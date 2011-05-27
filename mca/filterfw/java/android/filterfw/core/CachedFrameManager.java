@@ -22,7 +22,7 @@ import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
 import android.filterfw.core.GLFrame;
 import android.filterfw.core.NativeFrame;
-import android.filterfw.core.ObjectFrame;
+import android.filterfw.core.JavaFrame;
 import android.filterfw.core.SimpleFrameManager;
 
 import java.util.LinkedList;
