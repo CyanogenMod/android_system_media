@@ -211,6 +211,14 @@ public class FrameFormat {
             }
         }
 
+        // Check meta-data
+        for (String specKey : specification.mMetaData.keySet()) {
+            if (!mMetaData.hasKey(specKey)
+            || !mMetaData.getValue(specKey).equals(specification.mMetaData.getValue(specKey))) {
+                return false;
+            }
+        }
+
         // Passed all the tests
         return true;
     }
@@ -257,11 +265,11 @@ public class FrameFormat {
     }
 
     public String toString() {
-        return "Format {\n  BaseType: " + baseTypeToString(mBaseType)
-            + "\n  Target: " + targetToString(mTarget)
-            + "\n  BytesPerSample: " + mBytesPerSample
-            + "\n  Dimensions: " + dimensionsToString(mDimensions)
-            + "}";
+        return "Format {  BaseType: " + baseTypeToString(mBaseType)
+            + ", Target: " + targetToString(mTarget)
+            + ", BytesPerSample: " + mBytesPerSample
+            + ", Dimensions: " + dimensionsToString(mDimensions)
+            + " }";
     }
 
     private void initDefaults() {

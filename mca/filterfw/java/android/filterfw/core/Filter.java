@@ -158,6 +158,11 @@ public abstract class Filter {
 
     public abstract FrameFormat getFormatForOutput(int index);
 
+    public FrameFormat getInputFormat(int index) {
+        FilterPort inPort = getInputPortAtIndex(index);
+        return inPort.getFormat();
+    }
+
     public int open(FilterEnvironment env) {
         int result = 0;
         if (getNumberOfInputs() > 0) {
@@ -198,19 +203,37 @@ public abstract class Filter {
     }
 
     public final FilterPort getInputPort(String portName) {
-        return mInputPortNames.get(portName);
+        FilterPort result = mInputPortNames.get(portName);
+        if (result == null) {
+            throw new IllegalArgumentException("Unknown input port '" + portName + "' on filter "
+                + this + "!");
+        }
+        return result;
     }
 
     public final FilterPort getOutputPort(String portName) {
-        return mOutputPortNames.get(portName);
+        FilterPort result = mOutputPortNames.get(portName);
+        if (result == null) {
+            throw new IllegalArgumentException("Unknown output port '" + portName + "' on filter "
+                + this + "!");
+        }
+        return result;
     }
 
     public final FilterPort getInputPortAtIndex(int index) {
-        return index < mInputPorts.length ? mInputPorts[index] : null;
+        if (index >= mInputPorts.length) {
+            throw new IllegalArgumentException("Input port index " + index + " on filter " + this
+                + " out of bounds!");
+        }
+        return mInputPorts[index];
     }
 
     public final FilterPort getOutputPortAtIndex(int index) {
-        return index < mOutputPorts.length ? mOutputPorts[index] : null;
+        if (index >= mOutputPorts.length) {
+            throw new IllegalArgumentException("Output port index " + index + " on filter " + this
+                + " out of bounds!");
+        }
+        return mOutputPorts[index];
     }
 
     protected final void putOutput(int index, Frame frame) {

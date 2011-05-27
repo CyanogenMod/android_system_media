@@ -270,6 +270,11 @@ public class GLFrame extends Frame {
         }
     }
 
+    public String toString() {
+        return "GLFrame (" + getFormat() + ") with texture ID " + getTextureId()
+            + ", FBO ID " + getFboId();
+    }
+
     static {
         System.loadLibrary("filterfw-jni");
     }

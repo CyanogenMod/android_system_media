@@ -195,6 +195,10 @@ public class NativeFrame extends Frame {
         }
     }
 
+    public String toString() {
+        return "NativeFrame (" + getFormat() + ") with native buffer of size " + getCapacity();
+    }
+
     static {
         System.loadLibrary("filterfw-jni");
     }
