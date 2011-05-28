@@ -17,7 +17,6 @@
 
 package android.filterfw;
 
-import android.filterfw.core.AsyncRunner;
 import android.filterfw.core.CachedFrameManager;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
