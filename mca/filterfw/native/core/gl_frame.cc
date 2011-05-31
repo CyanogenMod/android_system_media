@@ -20,6 +20,8 @@
 #include "core/gl_frame.h"
 #include "core/shader_program.h"
 
+#include <vector>
+
 namespace android {
 namespace filterfw {
 
@@ -116,13 +118,13 @@ bool GLFrame::SetTextureParameter(GLenum pname, GLint value) {
   return false;
 }
 
-bool GLFrame::CopyDataTo(uint8* buffer, int size) {
+bool GLFrame::CopyDataTo(uint8_t* buffer, int size) {
   return (size >= Size())
     ? CopyPixelsTo(buffer)
     : false;
 }
 
-bool GLFrame::CopyPixelsTo(uint8* buffer) {
+bool GLFrame::CopyPixelsTo(uint8_t* buffer) {
   if (texture_state_ == kStateAllocated)
     return ReadTexturePixels(buffer);
   else if (fbo_state_ == kStateBound)
@@ -131,7 +133,7 @@ bool GLFrame::CopyPixelsTo(uint8* buffer) {
     return false;
 }
 
-bool GLFrame::WriteData(const uint8* data, int data_size) {
+bool GLFrame::WriteData(const uint8_t* data, int data_size) {
   return (data_size == Size()) ? UploadTexturePixels(data) : false;
 }
 
@@ -154,7 +156,7 @@ bool GLFrame::CopyPixelsFrom(const GLFrame* frame) {
   if (frame == this) {
     return true;
   } else if (frame && frame->width_ == width_ && frame->height_ == height_) {
-    vector<const GLFrame*> sources;
+    std::vector<const GLFrame*> sources;
     sources.push_back(frame);
     GetIdentity()->Process(sources, this);
     return true;
@@ -264,7 +266,7 @@ bool GLFrame::CreateFBO() {
   return true;
 }
 
-bool GLFrame::ReadFboPixels(uint8* pixels) const {
+bool GLFrame::ReadFboPixels(uint8_t* pixels) const {
   if (fbo_state_ == kStateBound) {
     BindFrameBuffer();
     glReadPixels(0,
@@ -279,7 +281,7 @@ bool GLFrame::ReadFboPixels(uint8* pixels) const {
   return false;
 }
 
-bool GLFrame::ReadTexturePixels(uint8* pixels) const {
+bool GLFrame::ReadTexturePixels(uint8_t* pixels) const {
   // Read pixels from texture if we do not have an FBO
   // NOTE: OpenGL ES does NOT support glGetTexImage() for reading out texture
   // data. The only way for us to get texture data is to create a new FBO and
@@ -294,7 +296,7 @@ bool GLFrame::ReadTexturePixels(uint8* pixels) const {
   // Create source frame set (unfortunately this requires an ugly const-cast,
   // as we need to wrap ourselves in a frame-set. Still, as this set is used
   // as input only, we are certain we will not be modified).
-  vector<const GLFrame*> sources;
+  std::vector<const GLFrame*> sources;
   sources.push_back(this);
 
   // Create target frame
@@ -359,7 +361,7 @@ bool GLFrame::BindTextureToFBO() {
   return true;
 }
 
-bool GLFrame::UploadTexturePixels(const uint8* pixels) {
+bool GLFrame::UploadTexturePixels(const uint8_t* pixels) {
   if (fbo_state_ == kStateBound) {
     // Get rid of FBO
     // TODO: Is this necessary? Can we just leave the FBO?

@@ -1,15 +1,28 @@
-// Copyright 2011 Google Inc. All Rights Reserved.
+/*
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "time_util.h"
-
-#include <map>
-#include <sys/time.h>
-
-#include <cutils/log.h>
 #include "utilities.h"
 
+#include <cutils/log.h>
+#include <sys/time.h>
+#include <map>
+
 namespace android {
-namespace mff {
+namespace filterfw {
 
 uint64_t getTimeUs() {
     static long basesec;
@@ -55,10 +68,10 @@ void NamedStopWatch::Stop() {
 }
 
 namespace {
-static NamedStopWatch* GetWatchForName(const string& watch_name) {
+static NamedStopWatch* GetWatchForName(const std::string& watch_name) {
     // TODO: this leaks the NamedStopWatch objects. Replace it with a
     // singleton to avoid that and make it thread safe.
-    static map<string, NamedStopWatch*> watches;
+    static std::map<std::string, NamedStopWatch*> watches;
     NamedStopWatch* watch = FindPtrOrNull(watches, watch_name);
     if (!watch) {
         watch = new NamedStopWatch(watch_name);
@@ -68,10 +81,10 @@ static NamedStopWatch* GetWatchForName(const string& watch_name) {
 };
 }  // namespace
 
-ScopedTimer::ScopedTimer(const string& stop_watch_name) {
+ScopedTimer::ScopedTimer(const std::string& stop_watch_name) {
     mWatch = GetWatchForName(stop_watch_name);
     mWatch->Start();
 }
 
-} // namespace mff
+} // namespace filterfw
 } // namespace android

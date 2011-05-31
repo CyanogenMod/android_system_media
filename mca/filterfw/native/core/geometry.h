@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef FILTERFW_CORE_GEOMETRY_H__
-#define FILTERFW_CORE_GEOMETRY_H__
+#ifndef ANDROID_FILTERFW_CORE_GEOMETRY_H
+#define ANDROID_FILTERFW_CORE_GEOMETRY_H
 
-#include "base/basictypes.h"
+#include <vector>
 
 namespace android {
 namespace filterfw {
@@ -61,11 +61,11 @@ class Quad {
       points_[3] = p3;
     }
 
-    const vector<Point>& points() const { return points_; }
+    const std::vector<Point>& points() const { return points_; }
     const Point& point(int ix) const;
 
   protected:
-    vector<Point> points_;
+    std::vector<Point> points_;
 };
 
 struct Rect {
@@ -91,4 +91,4 @@ struct Rect {
 } // namespace filterfw
 } // namespace android
 
-#endif
+#endif // ANDROID_FILTERFW_CORE_GEOMETRY_H

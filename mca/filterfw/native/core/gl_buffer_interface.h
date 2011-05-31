@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef VIDEO_FILTER_GL_BUFFER_INTERFACE_H__
-#define VIDEO_FILTER_GL_BUFFER_INTERFACE_H__
+#ifndef ANDROID_FILTERFW_CORE_GL_BUFFER_INTERFACE_H
+#define ANDROID_FILTERFW_CORE_GL_BUFFER_INTERFACE_H
 
 #include <GLES2/gl2.h>
 
@@ -68,4 +68,4 @@ class GLBufferHandle : public GLTextureHandle, public GLFrameBufferHandle {
 } // namespace filterfw
 } // namespace android
 
-#endif  // VIDEO_FILTER_GL_BUFFER_INTERFACE_H__
+#endif  // ANDROID_FILTERFW_CORE_GL_BUFFER_INTERFACE_H

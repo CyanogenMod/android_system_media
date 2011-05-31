@@ -1,18 +1,29 @@
-// Copyright 2011 Google Inc. All Rights Reserved.
+/*
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-#include <assert.h>
 #include <cutils/log.h>
-#include <math.h>
+#include <cmath>
 
 #include "geometry.h"
 
-#define ASSERT(x) assert(x)
-
 namespace android {
-namespace mff {
+namespace filterfw {
 
 float Point::Length() const {
-  return sqrtf(x_ * x_ + y_ * y_);
+  return std::sqrt(x_ * x_ + y_ * y_);
 }
 
 bool Point::ScaleTo(float new_length) {
@@ -117,7 +128,7 @@ bool Rect::ScaleWithLengthLimit(float factor, float max_length) {
 }
 
 const Point& Quad::point(int ix) const {
-  ASSERT(ix < static_cast<int>(points_.size()));
+  LOG_ASSERT(ix < static_cast<int>(points_.size()), "Access out of bounds");
   return points_[ix];
 }
 
@@ -145,5 +156,5 @@ bool SlantedRect::FromCenterAxisAndLengths(const Point& center,
   return true;
 }
 
-} // namespace mff
+} // namespace filterfw
 } // namespace android

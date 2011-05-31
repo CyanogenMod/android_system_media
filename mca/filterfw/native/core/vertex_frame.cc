@@ -43,7 +43,7 @@ bool VertexFrame::CreateBuffer() {
   return !GLEnv::CheckGLError("Generating VBO");
 }
 
-bool VertexFrame::WriteData(const uint8* data, int size) {
+bool VertexFrame::WriteData(const uint8_t* data, int size) {
   // Create buffer if not created already
   const bool first_upload = !HasVBO();
   if (first_upload && !CreateBuffer()) {

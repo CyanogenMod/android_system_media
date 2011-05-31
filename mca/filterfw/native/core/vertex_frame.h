@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef FILTERFW_CORE_VERTEXFRAME_H__
-#define FILTERFW_CORE_VERTEXFRAME_H__
+#ifndef ANDROID_FILTERFW_CORE_VERTEXFRAME_H
+#define ANDROID_FILTERFW_CORE_VERTEXFRAME_H
 
 #include <GLES2/gl2.h>
 
@@ -38,7 +38,7 @@ class VertexFrame {
     // passed in the constructor for the first upload. Subsequent uploads must
     // be able to fit within the allocated space (i.e. size must not exceed the
     // frame's size).
-    bool WriteData(const uint8* data, int size);
+    bool WriteData(const uint8_t* data, int size);
 
     // The size of the vertex buffer in bytes.
     int Size() const;
@@ -74,4 +74,4 @@ class VertexFrame {
 } // namespace filterfw
 } // namespace android
 
-#endif  // FILTERFW_CORE_VERTEXFRAME_H__
+#endif  // ANDROID_FILTERFW_CORE_VERTEXFRAME_H

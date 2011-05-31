@@ -20,6 +20,9 @@
 #include "core/native_frame.h"
 #include "core/native_program.h"
 
+#include <string>
+#include <vector>
+
 namespace android {
 namespace filterfw {
 
@@ -37,7 +40,7 @@ NativeProgram::~NativeProgram() {
     dlclose(lib_handle_);
 }
 
-bool NativeProgram::OpenLibrary(const string& lib_name) {
+bool NativeProgram::OpenLibrary(const std::string& lib_name) {
   if (!lib_handle_) {
     lib_handle_ = dlopen(lib_name.c_str(), RTLD_NOW);
     if (!lib_handle_) {
@@ -49,7 +52,7 @@ bool NativeProgram::OpenLibrary(const string& lib_name) {
   return false;
 }
 
-bool NativeProgram::BindProcessFunction(const string& func_name) {
+bool NativeProgram::BindProcessFunction(const std::string& func_name) {
   if (!lib_handle_)
     return false;
   process_function_ = reinterpret_cast<ProcessFunctionPtr>(dlsym(lib_handle_, func_name.c_str()));
@@ -60,35 +63,35 @@ bool NativeProgram::BindProcessFunction(const string& func_name) {
   return true;
 }
 
-bool NativeProgram::BindInitFunction(const string& func_name) {
+bool NativeProgram::BindInitFunction(const std::string& func_name) {
   if (!lib_handle_)
     return false;
   init_function_ = reinterpret_cast<InitFunctionPtr>(dlsym(lib_handle_, func_name.c_str()));
   return init_function_ != NULL;
 }
 
-bool NativeProgram::BindSetValueFunction(const string& func_name) {
+bool NativeProgram::BindSetValueFunction(const std::string& func_name) {
   if (!lib_handle_)
     return false;
   setvalue_function_ = reinterpret_cast<SetValueFunctionPtr>(dlsym(lib_handle_, func_name.c_str()));
   return setvalue_function_ != NULL;
 }
 
-bool NativeProgram::BindGetValueFunction(const string& func_name) {
+bool NativeProgram::BindGetValueFunction(const std::string& func_name) {
   if (!lib_handle_)
     return false;
   getvalue_function_ = reinterpret_cast<GetValueFunctionPtr>(dlsym(lib_handle_, func_name.c_str()));
   return getvalue_function_ != NULL;
 }
 
-bool NativeProgram::BindTeardownFunction(const string& func_name) {
+bool NativeProgram::BindTeardownFunction(const std::string& func_name) {
   if (!lib_handle_)
     return false;
   teardown_function_ = reinterpret_cast<TeardownFunctionPtr>(dlsym(lib_handle_, func_name.c_str()));
   return teardown_function_ != NULL;
 }
 
-bool NativeProgram::CallProcess(const vector<DataBuffer*>& inputs,
+bool NativeProgram::CallProcess(const std::vector<DataBuffer*>& inputs,
                                 int size,
                                 DataBuffer* output) {
   if (process_function_) {
@@ -109,7 +112,7 @@ bool NativeProgram::CallInit() {
   return false;
 }
 
-bool NativeProgram::CallSetValue(const string& key, Value value) {
+bool NativeProgram::CallSetValue(const std::string& key, Value value) {
   if (setvalue_function_) {
     setvalue_function_(key.c_str(), value, user_data_);
     return true;
@@ -117,7 +120,7 @@ bool NativeProgram::CallSetValue(const string& key, Value value) {
   return false;
 }
 
-Value NativeProgram::CallGetValue(const string& key) {
+Value NativeProgram::CallGetValue(const std::string& key) {
   if (getvalue_function_) {
     Value value = getvalue_function_(key.c_str(), user_data_);
     return value;

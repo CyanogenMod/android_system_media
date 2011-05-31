@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef FILTERFW_CORE_TIME_UTIL_H_
-#define FILTERFW_CORE_TIME_UTIL_H_
+#ifndef ANDROID_FILTERFW_CORE_TIME_UTIL_H
+#define ANDROID_FILTERFW_CORE_TIME_UTIL_H
 
 #include <string>
 #include <utils/RefBase.h>
 
-#include "base/basictypes.h"
-
 #define LOG_MFF_RUNNING_TIMES 0
 
 namespace android {
-namespace mff {
+namespace filterfw {
 
 uint64_t getTimeUs();
 
@@ -65,7 +63,7 @@ class ScopedTimer {
     NamedStopWatch* mWatch;
 };
 
-} // namespace mff
+} // namespace filterfw
 } // namespace android
 
-#endif  // FILTERFW_CORE_TIME_UTIL_H_
+#endif  // ANDROID_FILTERFW_CORE_TIME_UTIL_H

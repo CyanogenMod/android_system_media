@@ -17,7 +17,6 @@
 #include "jni/jni_vertex_frame.h"
 #include "jni/jni_util.h"
 
-#include "native/base/basictypes.h"
 #include "native/core/vertex_frame.h"
 
 using android::filterfw::VertexFrame;
@@ -39,7 +38,7 @@ jboolean Java_android_filterfw_core_VertexFrame_setNativeInts(JNIEnv* env,
     jint* int_ptr = env->GetIntArrayElements(ints, NULL);
     const int length = env->GetArrayLength(ints);
     if (int_ptr) {
-      const bool success = frame->WriteData(reinterpret_cast<const uint8*>(int_ptr),
+      const bool success = frame->WriteData(reinterpret_cast<const uint8_t*>(int_ptr),
                                             length * sizeof(jint));
       env->ReleaseIntArrayElements(ints, int_ptr, JNI_ABORT);
       return ToJBool(success);
@@ -56,7 +55,7 @@ jboolean Java_android_filterfw_core_VertexFrame_setNativeFloats(JNIEnv* env,
     jfloat* float_ptr = env->GetFloatArrayElements(floats, NULL);
     const int length = env->GetArrayLength(floats);
     if (float_ptr) {
-      const bool success = frame->WriteData(reinterpret_cast<const uint8*>(float_ptr),
+      const bool success = frame->WriteData(reinterpret_cast<const uint8_t*>(float_ptr),
                                             length * sizeof(jfloat));
       env->ReleaseFloatArrayElements(floats, float_ptr, JNI_ABORT);
       return ToJBool(success);
@@ -74,7 +73,7 @@ jboolean Java_android_filterfw_core_VertexFrame_setNativeData(JNIEnv* env,
   if (frame && data) {
     jbyte* bytes = env->GetByteArrayElements(data, NULL);
     if (bytes) {
-      const bool success = frame->WriteData(reinterpret_cast<const uint8*>(bytes + offset),
+      const bool success = frame->WriteData(reinterpret_cast<const uint8_t*>(bytes + offset),
                                             length);
       env->ReleaseByteArrayElements(data, bytes, JNI_ABORT);
       return ToJBool(success);
@@ -87,4 +86,3 @@ jint Java_android_filterfw_core_VertexFrame_getNativeVboId(JNIEnv* env, jobject 
   VertexFrame* frame = ConvertFromJava<VertexFrame>(env, thiz);
   return frame ? frame->GetVboId() : -1;
 }
-

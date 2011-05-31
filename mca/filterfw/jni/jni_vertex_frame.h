@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef JNI_VERTEX_FRAME_H
-#define JNI_VERTEX_FRAME_H
+#ifndef ANDROID_FILTERFW_JNI_VERTEX_FRAME_H
+#define ANDROID_FILTERFW_JNI_VERTEX_FRAME_H
 
 #include <jni.h>
 
@@ -51,4 +51,4 @@ Java_android_filterfw_core_VertexFrame_getNativeVboId(JNIEnv* env, jobject thiz)
 }
 #endif
 
-#endif /* JNI_VERTEX_FRAME_H */
+#endif // ANDROID_FILTERFW_JNI_VERTEX_FRAME_H

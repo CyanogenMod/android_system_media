@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef FILTERFW_NATIVE_FILTERFW_VALUE_H__
-#define FILTERFW_NATIVE_FILTERFW_VALUE_H__
+#ifndef ANDROID_FILTERFW_FILTER_VALUE_H
+#define ANDROID_FILTERFW_FILTER_VALUE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -74,4 +74,4 @@ void ReleaseValue(Value* value);
 } // extern "C"
 #endif
 
-#endif  // FILTERFW_NATIVE_FILTERFW_VALUE_H__
+#endif  // ANDROID_FILTERFW_FILTER_VALUE_H

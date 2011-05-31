@@ -20,7 +20,6 @@
 #include "jni/jni_native_buffer.h"
 #include "jni/jni_util.h"
 
-#include "native/base/basictypes.h"
 #include "native/base/logging.h"
 #include "native/core/gl_frame.h"
 #include "native/core/native_frame.h"
@@ -54,7 +53,7 @@ jboolean Java_android_filterfw_core_NativeFrame_setNativeData(JNIEnv* env,
   if (frame && data) {
     jbyte* bytes = env->GetByteArrayElements(data, NULL);
     if (bytes) {
-      const bool success = frame->WriteData(reinterpret_cast<const uint8*>(bytes + offset),
+      const bool success = frame->WriteData(reinterpret_cast<const uint8_t*>(bytes + offset),
                                             0,
                                             length);
       env->ReleaseByteArrayElements(data, bytes, JNI_ABORT);
@@ -69,7 +68,7 @@ jbyteArray Java_android_filterfw_core_NativeFrame_getNativeData(JNIEnv* env,
                                                                 jint size) {
   NativeFrame* frame = ConvertFromJava<NativeFrame>(env, thiz);
   if (frame) {
-    const uint8* data = frame->Data();
+    const uint8_t* data = frame->Data();
     if (!data || size > frame->Size())
       return NULL;
     jbyteArray result = env->NewByteArray(size);
@@ -84,7 +83,7 @@ jboolean Java_android_filterfw_core_NativeFrame_getNativeBuffer(JNIEnv* env,
                                                                 jobject buffer) {
   NativeFrame* frame = ConvertFromJava<NativeFrame>(env, thiz);
   if (frame) {
-    uint8* data = frame->MutableData();
+    uint8_t* data = frame->MutableData();
     DataBuffer nbuffer(reinterpret_cast<char*>(data), frame->Size());
     return ToJBool(nbuffer.AttachToJavaObject(env, buffer));
   }
@@ -99,7 +98,7 @@ jboolean Java_android_filterfw_core_NativeFrame_setNativeInts(JNIEnv* env,
     jint* int_ptr = env->GetIntArrayElements(ints, NULL);
     const int length = env->GetArrayLength(ints);
     if (int_ptr) {
-      const bool success = frame->WriteData(reinterpret_cast<const uint8*>(int_ptr),
+      const bool success = frame->WriteData(reinterpret_cast<const uint8_t*>(int_ptr),
                                             0,
                                             length * sizeof(jint));
       env->ReleaseIntArrayElements(ints, int_ptr, JNI_ABORT);
@@ -114,7 +113,7 @@ jintArray Java_android_filterfw_core_NativeFrame_getNativeInts(JNIEnv* env,
                                                                jint size) {
   NativeFrame* frame = ConvertFromJava<NativeFrame>(env, thiz);
   if (frame) {
-    const uint8* data = frame->Data();
+    const uint8_t* data = frame->Data();
     if (!data || size > frame->Size() || (size % sizeof(jint)) != 0)
       return NULL;
     const int count = size / sizeof(jint);
@@ -133,7 +132,7 @@ jboolean Java_android_filterfw_core_NativeFrame_setNativeFloats(JNIEnv* env,
     jfloat* float_ptr = env->GetFloatArrayElements(floats, NULL);
     const int length = env->GetArrayLength(floats);
     if (float_ptr) {
-      const bool success = frame->WriteData(reinterpret_cast<const uint8*>(float_ptr),
+      const bool success = frame->WriteData(reinterpret_cast<const uint8_t*>(float_ptr),
                                             0,
                                             length * sizeof(jfloat));
       env->ReleaseFloatArrayElements(floats, float_ptr, JNI_ABORT);
@@ -148,7 +147,7 @@ jfloatArray Java_android_filterfw_core_NativeFrame_getNativeFloats(JNIEnv* env,
                                                                    jint size) {
   NativeFrame* frame = ConvertFromJava<NativeFrame>(env, thiz);
   if (frame) {
-    const uint8* data = frame->Data();
+    const uint8_t* data = frame->Data();
     if (!data || size > frame->Size() || (size % sizeof(jfloat)) != 0)
       return NULL;
     const int count = size / sizeof(jfloat);
@@ -165,7 +164,7 @@ jboolean Java_android_filterfw_core_NativeFrame_setNativeBitmap(JNIEnv* env,
                                                                 jint size) {
   NativeFrame* frame = ConvertFromJava<NativeFrame>(env, thiz);
   if (frame && bitmap) {
-    uint8* pixels;
+    uint8_t* pixels;
     const int result = AndroidBitmap_lockPixels(env, bitmap, reinterpret_cast<void**>(&pixels));
     if (result == ANDROID_BITMAP_RESUT_SUCCESS) {
       const bool success = frame->WriteData(pixels, 0, size);
@@ -180,7 +179,7 @@ jboolean Java_android_filterfw_core_NativeFrame_getNativeBitmap(JNIEnv* env,
                                                                 jobject bitmap) {
   NativeFrame* frame = ConvertFromJava<NativeFrame>(env, thiz);
   if (frame && bitmap) {
-    uint8* pixels;
+    uint8_t* pixels;
     const int result = AndroidBitmap_lockPixels(env, bitmap, reinterpret_cast<void**>(&pixels));
     if (result == ANDROID_BITMAP_RESUT_SUCCESS) {
       memcpy(pixels, frame->Data(), frame->Size());
@@ -216,4 +215,3 @@ jboolean Java_android_filterfw_core_NativeFrame_nativeCopyFromGL(JNIEnv* env,
   }
   return JNI_FALSE;
 }
-

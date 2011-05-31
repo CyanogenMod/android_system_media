@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-#include "core/time_util.h"
-
-#include <map>
-#include <sys/time.h>
-
 #include "base/logging.h"
 #include "base/utilities.h"
 
+#include "core/time_util.h"
+
+#include <map>
+#include <string>
+#include <sys/time.h>
+
 namespace android {
-namespace mff {
+namespace filterfw {
 
 uint64_t getTimeUs() {
     static long basesec;
@@ -87,5 +88,5 @@ ScopedTimer::ScopedTimer(const string& stop_watch_name) {
     mWatch->Start();
 }
 
-} // namespace mff
+} // namespace filterfw
 } // namespace android

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef FILTERFW_CORE_NATIVE_PROGRAM_H__
-#define FILTERFW_CORE_NATIVE_PROGRAM_H__
+#ifndef ANDROID_FILTERFW_CORE_NATIVE_PROGRAM_H
+#define ANDROID_FILTERFW_CORE_NATIVE_PROGRAM_H
 
-#include "base/basictypes.h"
+#include <vector>
+#include <string>
+
 #include "base/utilities.h"
 
 #include "filter/value.h"
@@ -42,18 +44,18 @@ class NativeProgram {
 
     ~NativeProgram();
 
-    bool OpenLibrary(const string& lib_name);
+    bool OpenLibrary(const std::string& lib_name);
 
-    bool BindInitFunction(const string& func_name);
-    bool BindSetValueFunction(const string& func_name);
-    bool BindGetValueFunction(const string& func_name);
-    bool BindProcessFunction(const string& func_name);
-    bool BindTeardownFunction(const string& func_name);
+    bool BindInitFunction(const std::string& func_name);
+    bool BindSetValueFunction(const std::string& func_name);
+    bool BindGetValueFunction(const std::string& func_name);
+    bool BindProcessFunction(const std::string& func_name);
+    bool BindTeardownFunction(const std::string& func_name);
 
     bool CallInit();
-    bool CallSetValue(const string& key, Value value);
-    Value CallGetValue(const string& key);
-    bool CallProcess(const vector<DataBuffer*>& inputs,
+    bool CallSetValue(const std::string& key, Value value);
+    Value CallGetValue(const std::string& key);
+    bool CallProcess(const std::vector<DataBuffer*>& inputs,
                      int size,
                      DataBuffer* output);
     bool CallTeardown();
@@ -78,4 +80,4 @@ class NativeProgram {
 } // namespace filterfw
 } // namespace android
 
-#endif  // FILTERFW_CORE_NATIVE_PROGRAM_H__
+#endif  // ANDROID_FILTERFW_CORE_NATIVE_PROGRAM_H

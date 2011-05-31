@@ -20,7 +20,6 @@
 #include "jni/jni_gl_environment.h"
 #include "jni/jni_util.h"
 
-#include "native/base/basictypes.h"
 #include "native/core/gl_env.h"
 
 using android::filterfw::GLEnv;
@@ -153,4 +152,3 @@ jboolean Java_android_filterfw_core_GLEnvironment_nativeRemoveSurfaceId(JNIEnv* 
   GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
   return gl_env ? ToJBool(gl_env->ReleaseSurfaceId(surfaceId)) : JNI_FALSE;
 }
-

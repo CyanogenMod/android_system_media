@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef FILTERFW_NATIVE_FILTERFW_NATIVE_BUFFER_H__
-#define FILTERFW_NATIVE_FILTERFW_NATIVE_BUFFER_H__
+#ifndef ANDROID_FILTERFW_FILTER_NATIVE_BUFFER_H
+#define ANDROID_FILTERFW_FILTER_NATIVE_BUFFER_H
 
 #include <jni.h>
 
@@ -45,4 +45,4 @@ char* NativeBuffer_GetDataPtrFromJavaObject(JNIEnv* env, jobject buffer, int off
 } // extern "C"
 #endif
 
-#endif  // FILTERFW_NATIVE_FILTERFW_NATIVE_BUFFER_H__
+#endif  // ANDROID_FILTERFW_FILTER_NATIVE_BUFFER_H

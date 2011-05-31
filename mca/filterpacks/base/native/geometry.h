@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef VIDEO_FILTER_GEOMETRY_H__
-#define VIDEO_FILTER_GEOMETRY_H__
+#ifndef ANDROID_FILTERFW_FILTERPACKS_BASE_GEOMETRY_H
+#define ANDROID_FILTERFW_FILTERPACKS_BASE_GEOMETRY_H
 
-#include "basictypes.h"
+#include <vector>
 
 namespace android {
-namespace mff {
+namespace filterfw {
 
 // This is an initial implementation of some geometrical structures. This is
 // likely to grow and become more sophisticated in the future.
@@ -61,11 +61,11 @@ class Quad {
       points_[3] = p3;
     }
 
-    const vector<Point>& points() const { return points_; }
+    const std::vector<Point>& points() const { return points_; }
     const Point& point(int ix) const;
 
   protected:
-    vector<Point> points_;
+    std::vector<Point> points_;
 };
 
 class SlantedRect : public Quad {
@@ -105,7 +105,7 @@ struct Rect {
   bool ScaleWithLengthLimit(float factor, float max_length);
 };
 
-} // namespace mff
+} // namespace filterfw
 } // namespace android
 
-#endif
+#endif // ANDROID_FILTERFW_FILTERPACKS_BASE_GEOMETRY_H

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef FILTERFW_NATIVE_FILTERFW_DATA_BUFFER_H__
-#define FILTERFW_NATIVE_FILTERFW_DATA_BUFFER_H__
+#ifndef ANDROID_FILTERFW_FILTER_DATA_BUFFER_H
+#define ANDROID_FILTERFW_FILTER_DATA_BUFFER_H
 
 #include <jni.h>
 #include <stdlib.h>
@@ -101,5 +101,4 @@ class DataBuffer {
     DataBuffer& operator=(const DataBuffer&);
 };
 
-#endif  // FILTERFW_NATIVE_FILTERFW_DATA_BUFFER_H__
-
+#endif  // ANDROID_FILTERFW_FILTER_DATA_BUFFER_H

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+#include <string>
+#include <vector>
+
 #include "jni/jni_native_program.h"
 #include "jni/jni_util.h"
 
-#include "native/base/basictypes.h"
 #include "native/base/logging.h"
 #include "native/core/native_frame.h"
 #include "native/core/native_program.h"
@@ -102,7 +104,7 @@ jboolean Java_android_filterfw_core_NativeProgram_callNativeSetValue(JNIEnv* env
   }
   NativeProgram* program = ConvertFromJava<NativeProgram>(env, thiz);
   const Value c_value = ToCValue(env, value);
-  const string c_key = ToCppString(env, key);
+  const std::string c_key = ToCppString(env, key);
   if (!ValueIsNull(c_value)) {
     return ToJBool(program && program->CallSetValue(c_key, c_value));
   } else {
@@ -115,7 +117,7 @@ jobject Java_android_filterfw_core_NativeProgram_callNativeGetValue(JNIEnv* env,
                                                                     jobject thiz,
                                                                     jstring key) {
   NativeProgram* program = ConvertFromJava<NativeProgram>(env, thiz);
-  const string c_key = ToCppString(env, key);
+  const std::string c_key = ToCppString(env, key);
   if (program) {
     Value result = program->CallGetValue(c_key);
     return ToJObject(env, result);
@@ -141,7 +143,7 @@ jboolean Java_android_filterfw_core_NativeProgram_callNativeProcess(JNIEnv* env,
   bool is_copy;
   bool err = false;
   const int input_count = env->GetArrayLength(inputs);
-  vector<DataBuffer*> input_buffers(input_count, NULL);
+  std::vector<DataBuffer*> input_buffers(input_count, NULL);
   for (int i = 0 ; i < input_count; ++i) {
     jobject input = env->GetObjectArrayElement(inputs, i);
     if (!input) {
@@ -179,7 +181,7 @@ jboolean Java_android_filterfw_core_NativeProgram_callNativeProcess(JNIEnv* env,
 
       // Attach buffer to output frame if this was allocated by the program
       if (output_was_empty && output_buffer.data()) {
-        output_frame->SetData(reinterpret_cast<uint8*>(output_buffer.data()), output_buffer.size());
+        output_frame->SetData(reinterpret_cast<uint8_t*>(output_buffer.data()), output_buffer.size());
       }
     }
   }
@@ -196,4 +198,3 @@ jboolean Java_android_filterfw_core_NativeProgram_callNativeTeardown(JNIEnv* env
   NativeProgram* program = ConvertFromJava<NativeProgram>(env, thiz);
   return ToJBool(program && program->CallTeardown());
 }
-

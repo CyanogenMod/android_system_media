@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <string>
+
 #include "jni/jni_util.h"
 
 #include "base/logging.h"
@@ -93,14 +95,14 @@ JNIEnv* GetCurrentJNIEnv() {
 }
 #endif
 
-jstring ToJString(JNIEnv* env, const string& value) {
+jstring ToJString(JNIEnv* env, const std::string& value) {
   return env->NewStringUTF(value.c_str());
 }
 
-string ToCppString(JNIEnv* env, jstring value) {
+std::string ToCppString(JNIEnv* env, jstring value) {
   jboolean isCopy;
   const char* c_value = env->GetStringUTFChars(value, &isCopy);
-  string result(c_value);
+  std::string result(c_value);
   if (isCopy == JNI_TRUE)
     env->ReleaseStringUTFChars(value, c_value);
   return result;
@@ -116,13 +118,13 @@ bool ToCppBool(jboolean value) {
 
 // TODO: We actually shouldn't use such a function as it requires a class name lookup at every
 // invocation. Instead, store the class objects and use those.
-bool IsJavaInstanceOf(JNIEnv* env, jobject object, const string& class_name) {
+bool IsJavaInstanceOf(JNIEnv* env, jobject object, const std::string& class_name) {
   jclass clazz = env->FindClass(class_name.c_str());
   return clazz ? env->IsInstanceOf(object, clazz) == JNI_TRUE : false;
 }
 
 template<typename T>
-jobject CreateJObject(JNIEnv* env, const string& class_name, const string& signature, T value) {
+jobject CreateJObject(JNIEnv* env, const std::string& class_name, const std::string& signature, T value) {
   jobject result = JNI_NULL;
 
   return result;
@@ -181,4 +183,3 @@ jobject ToJObject(JNIEnv* env, const Value& value) {
   }
   return result;
 }
-

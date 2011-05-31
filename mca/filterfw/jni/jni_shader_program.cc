@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+#include <string>
+#include <vector>
+
 #include "jni/jni_shader_program.h"
 #include "jni/jni_util.h"
 
-#include "native/base/basictypes.h"
 #include "native/base/logging.h"
 #include "native/core/geometry.h"
 #include "native/core/gl_frame.h"
@@ -65,7 +67,7 @@ jboolean Java_android_filterfw_core_ShaderProgram_setUniformValue(JNIEnv* env,
                                                                   jobject value) {
   ShaderProgram* program = ConvertFromJava<ShaderProgram>(env, thiz);
   const Value c_value = ToCValue(env, value);
-  const string c_key = ToCppString(env, key);
+  const std::string c_key = ToCppString(env, key);
   if (c_value.value) {
     return ToJBool(program && program->SetUniformValue(c_key, c_value));
   } else {
@@ -78,7 +80,7 @@ jobject Java_android_filterfw_core_ShaderProgram_getUniformValue(JNIEnv* env,
                                                                  jobject thiz,
                                                                  jstring key) {
   ShaderProgram* program = ConvertFromJava<ShaderProgram>(env, thiz);
-  const string c_key = ToCppString(env, key);
+  const std::string c_key = ToCppString(env, key);
   return program ? ToJObject(env, program->GetUniformValue(c_key)) : JNI_NULL;
 }
 
@@ -87,7 +89,7 @@ jboolean Java_android_filterfw_core_ShaderProgram_shaderProcess(JNIEnv* env,
                                                                 jobjectArray inputs,
                                                                 jobject output) {
   ShaderProgram* program = ConvertFromJava<ShaderProgram>(env, thiz);
-  vector<const GLFrame*> input_frames;
+  std::vector<const GLFrame*> input_frames;
   if (program && inputs && output) {
     // Get the input frames
     const int input_count = env->GetArrayLength(inputs);
@@ -224,7 +226,7 @@ jboolean Java_android_filterfw_core_ShaderProgram_setShaderAttributeValues(
     const int length = env->GetArrayLength(values);
 
     // Get the program variable to set
-    const string attr_string = ToCppString(env, attr_name);
+    const std::string attr_string = ToCppString(env, attr_name);
     ProgramVar program_var = program->GetAttribute(attr_string);
 
     // Set the variable
@@ -256,7 +258,7 @@ jboolean Java_android_filterfw_core_ShaderProgram_setShaderAttributeVertexFrame(
     VertexFrame* v_frame = ConvertFromJava<VertexFrame>(env, vertex_frame);
 
     // Get the program variable to set
-    const string attr_string = ToCppString(env, attr_name);
+    const std::string attr_string = ToCppString(env, attr_name);
     ProgramVar program_var = program->GetAttribute(attr_string);
 
     // Set the variable

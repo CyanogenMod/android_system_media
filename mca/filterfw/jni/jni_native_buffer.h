@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef JNI_NATIVE_BUFFER_H
-#define JNI_NATIVE_BUFFER_H
+#ifndef ANDROID_FILTEFW_JNI_NATIVE_BUFFER_H
+#define ANDROID_FILTEFW_JNI_NATIVE_BUFFER_H
 
 #include <jni.h>
 
@@ -36,4 +36,4 @@ Java_android_filterfw_core_NativeBuffer_nativeCopyTo(JNIEnv* env, jobject thiz, 
 }
 #endif
 
-#endif /* JNI_NATIVE_BUFFER_H */
+#endif // ANDROID_FILTEFW_JNI_NATIVE_BUFFER_H

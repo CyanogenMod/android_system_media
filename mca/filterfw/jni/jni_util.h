@@ -19,12 +19,11 @@
 #include <hash_map>
 #include <string>
 
-#include "base/basictypes.h"
 #include "base/utilities.h"
 #include "filter/value.h"
 
-#ifndef VIDEO_JNI_JNI_UTIL_H_
-#define VIDEO_JNI_JNI_UTIL_H_
+#ifndef ANDROID_FILTERFW_JNI_JNI_UTIL_H
+#define ANDROID_FILTERFW_JNI_JNI_UTIL_H
 
 // We add this JNI_NULL macro to allow consistent code separation of Java and
 // C++ types.
@@ -94,8 +93,8 @@ class ObjectPool {
     // Create a new ObjectPool for a specific object type. Pass the path to the
     // Java equivalent class of the C++ class, and the name of the java member
     // field that will store the object's ID.
-    static void Setup(const string& jclass_name,
-                      const string& id_fld_name) {
+    static void Setup(const std::string& jclass_name,
+                      const std::string& id_fld_name) {
       instance_ = new ObjectPool<T>(jclass_name, id_fld_name);
     }
 
@@ -178,12 +177,13 @@ class ObjectPool {
       return objects_.size();
     }
 
-    const string& GetJavaClassName() const {
+    const std::string& GetJavaClassName() const {
       return jclass_name_;
     }
 
   private:
-    explicit ObjectPool(const string& jclass_name, const string& id_fld_name)
+    explicit ObjectPool(const std::string& jclass_name,
+                        const std::string& id_fld_name)
       : jclass_name_(jclass_name),
         id_field_name_(id_fld_name),
         next_id_(0) { }
@@ -191,8 +191,8 @@ class ObjectPool {
     typedef std::hash_map<int, T*>    CObjMap;
     typedef std::hash_map<int, bool>  FlagMap;
     static ObjectPool* instance_;
-    string jclass_name_;
-    string id_field_name_;
+    std::string jclass_name_;
+    std::string id_field_name_;
     int next_id_;
     CObjMap objects_;
     FlagMap owns_;
@@ -264,10 +264,10 @@ jboolean ToJBool(bool value);
 bool ToCppBool(jboolean value);
 
 // Convert Java String to C++ string.
-jstring ToJString(JNIEnv* env, const string& value);
+jstring ToJString(JNIEnv* env, const std::string& value);
 
 // Convert C++ string to Java String.
-string ToCppString(JNIEnv* env, jstring value);
+std::string ToCppString(JNIEnv* env, jstring value);
 
 // Convert Java object to a (C) Value object.
 Value ToCValue(JNIEnv* env, jobject object);
@@ -277,7 +277,7 @@ jobject ToJObject(JNIEnv* env, const Value& value);
 
 // Returns true, iff the passed object is an instance of the class specified
 // by its fully qualified class name.
-bool IsJavaInstanceOf(JNIEnv* env, jobject object, const string& class_name);
+bool IsJavaInstanceOf(JNIEnv* env, jobject object,
+                      const std::string& class_name);
 
-#endif
-
+#endif // ANDROID_FILTERFW_JNI_JNI_UTIL_H

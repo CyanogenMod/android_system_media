@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef JNI_SHADER_PROGRAM_H
-#define JNI_SHADER_PROGRAM_H
+#ifndef ANDROID_FILTERFW_JNI_SHADER_PROGRAM_H
+#define ANDROID_FILTERFW_JNI_SHADER_PROGRAM_H
 
 #include <jni.h>
 
@@ -128,4 +128,4 @@ Java_android_filterfw_core_ShaderProgram_setShaderAttributeVertexFrame(JNIEnv* e
 }
 #endif
 
-#endif /* JNI_SHADER_PROGRAM_H */
+#endif // ANDROID_FILTERFW_JNI_SHADER_PROGRAM_H

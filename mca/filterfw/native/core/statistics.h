@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef FILTERFW_CORE_STATISTICS_H_
-#define FILTERFW_CORE_STATISTICS_H_
+#ifndef ANDROID_FILTERFW_CORE_STATISTICS_H
+#define ANDROID_FILTERFW_CORE_STATISTICS_H
 
 namespace android {
 namespace filterfw {
@@ -68,4 +68,4 @@ class RCFilter {
 } // namespace filterfw
 } // namespace android
 
-#endif  // FILTERFW_CORE_STATISTICS_H_
+#endif  // ANDROID_FILTERFW_CORE_STATISTICS_H

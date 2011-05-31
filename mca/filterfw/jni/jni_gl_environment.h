@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef JNI_GL_ENVIRONMENT_H
-#define JNI_GL_ENVIRONMENT_H
+#ifndef ANDROID_FILTERFW_JNI_GL_ENVIRONMENT_H
+#define ANDROID_FILTERFW_JNI_GL_ENVIRONMENT_H
 
 #include <jni.h>
 
@@ -66,4 +66,4 @@ Java_android_filterfw_core_GLEnvironment_nativeRemoveSurfaceId(JNIEnv* env,
 }
 #endif
 
-#endif /* JNI_GL_ENVIRONMENT_H */
+#endif // ANDROID_FILTERFW_JNI_GL_ENVIRONMENT_H

@@ -20,14 +20,14 @@ namespace android {
 namespace filterfw {
 
 NativeFrame::NativeFrame(int size) : data_(NULL), size_(size), capacity_(size) {
-  data_ = capacity_ == 0 ? NULL : new uint8[capacity_];
+  data_ = capacity_ == 0 ? NULL : new uint8_t[capacity_];
 }
 
 NativeFrame::~NativeFrame() {
   delete[] data_;
 }
 
-bool NativeFrame::WriteData(const uint8* data, int offset, int size) {
+bool NativeFrame::WriteData(const uint8_t* data, int offset, int size) {
   if (size_ >= (offset + size)) {
     memcpy(data_ + offset, data, size);
     return true;
@@ -35,7 +35,7 @@ bool NativeFrame::WriteData(const uint8* data, int offset, int size) {
   return false;
 }
 
-bool NativeFrame::SetData(uint8* data, int size) {
+bool NativeFrame::SetData(uint8_t* data, int size) {
   delete[] data_;
   size_ = capacity_ = size;
   data_ = data;

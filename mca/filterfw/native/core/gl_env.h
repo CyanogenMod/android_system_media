@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef FILTERFW_CORE_GL_ENV_H__
-#define FILTERFW_CORE_GL_ENV_H__
+#ifndef ANDROID_FILTERFW_CORE_GL_ENV_H
+#define ANDROID_FILTERFW_CORE_GL_ENV_H
 
-#include "base/basictypes.h"
+#include <string>
+#include <utility>
+#include <map>
+
 #include "base/logging.h"
 #include "base/utilities.h"
 
@@ -163,12 +166,12 @@ class GLEnv {
     // Checks if the current environment is in a GL error state. If so, it will
     // output an error message referencing the given operation string. Returns
     // true if there was at least one error.
-    static bool CheckGLError(const string& operation);
+    static bool CheckGLError(const std::string& operation);
 
     // Checks if the current environment is in an EGL error state. If so, it
     // will output an error message referencing the given operation string.
     // Returns true if there was at least one error.
-    static bool CheckEGLError(const string& operation);
+    static bool CheckEGLError(const std::string& operation);
 
     // Get the currently used (shader) program.
     static GLuint GetCurrentProgram();
@@ -181,7 +184,7 @@ class GLEnv {
     static int NumberOfComponents(GLenum type);
 
   private:
-    typedef pair<EGLSurface, WindowHandle*> SurfaceWindowPair;
+    typedef std::pair<EGLSurface, WindowHandle*> SurfaceWindowPair;
 
     // Initializes a new GL environment.
     bool Init();
@@ -201,8 +204,8 @@ class GLEnv {
 
     // The EGL display, contexts, and surfaces.
     EGLDisplay display_;
-    map<int, EGLContext> contexts_;
-    map<int, SurfaceWindowPair> surfaces_;
+    std::map<int, EGLContext> contexts_;
+    std::map<int, SurfaceWindowPair> surfaces_;
 
     // The currently active context and surface ids.
     int context_id_;
@@ -239,7 +242,7 @@ class GLBoundVariable {
     T* Value();
 
   private:
-    typedef map<int, T*> GLVarMap;
+    typedef std::map<int, T*> GLVarMap;
     GLVarMap variables_;
 };
 
@@ -265,4 +268,4 @@ T* GLBoundVariable<T>::Value() {
 } // namespace filterfw
 } // namespace android
 
-#endif  // FILTERFW_CORE_GL_ENV_H__
+#endif  // ANDROID_FILTERFW_CORE_GL_ENV_H

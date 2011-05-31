@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef FILTERFW_CORE_GL_FRAME_H__
-#define FILTERFW_CORE_GL_FRAME_H__
+#ifndef ANDROID_FILTERFW_CORE_GL_FRAME_H
+#define ANDROID_FILTERFW_CORE_GL_FRAME_H
 
 #include <GLES2/gl2.h>
 
@@ -53,10 +53,10 @@ class GLFrame : public GLBufferHandle {
 
     // Write the data with the given size in bytes to the frame. The frame size must match the
     // size of the data.
-    bool WriteData(const uint8* data, int size);
+    bool WriteData(const uint8_t* data, int size);
 
     // Copies the frame data to the given buffer.
-    bool CopyDataTo(uint8* buffer, int size);
+    bool CopyDataTo(uint8_t* buffer, int size);
 
     // Copies the pixels from another GL frame to this frame.
     bool CopyPixelsFrom(const GLFrame* frame);
@@ -122,16 +122,16 @@ class GLFrame : public GLBufferHandle {
     bool CreateFBO();
 
     // Copies pixels from texture or FBO to the specified buffer.
-    bool CopyPixelsTo(uint8* buffer);
+    bool CopyPixelsTo(uint8_t* buffer);
 
     // Reads the pixels from the internal texture to the given buffer.
-    bool ReadTexturePixels(uint8* pixels) const;
+    bool ReadTexturePixels(uint8_t* pixels) const;
 
     // Reads the pixels from the internal FBO to the given buffer.
-    bool ReadFboPixels(uint8* pixels) const;
+    bool ReadFboPixels(uint8_t* pixels) const;
 
     // Writes the specified pixels to the internal texture.
-    bool UploadTexturePixels(const uint8* pixels);
+    bool UploadTexturePixels(const uint8_t* pixels);
 
     // Binds the internal texture.
     bool BindTexture() const;
@@ -176,4 +176,4 @@ class GLFrame : public GLBufferHandle {
 } // namespace filterfw
 } // namespace android
 
-#endif  // FILTERFW_CORE_GL_FRAME_H__
+#endif  // ANDROID_FILTERFW_CORE_GL_FRAME_H

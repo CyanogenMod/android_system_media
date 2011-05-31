@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <string>
-
 #include "base/logging.h"
 
 #include "core/geometry.h"
@@ -24,6 +22,10 @@
 #include "core/gl_frame.h"
 #include "core/shader_program.h"
 #include "core/vertex_frame.h"
+
+#include <string>
+#include <sstream>
+#include <vector>
 
 namespace android {
 namespace filterfw {
@@ -65,7 +67,7 @@ ShaderProgram::VertexAttrib::VertexAttrib()
 }
 
 // ShaderProgram implementation ////////////////////////////////////////////////
-ShaderProgram::ShaderProgram(const string& fragment_shader)
+ShaderProgram::ShaderProgram(const std::string& fragment_shader)
   : fragment_shader_source_(fragment_shader),
     vertex_shader_source_(s_default_vertex_shader_source_),
     fragment_shader_(0),
@@ -78,8 +80,8 @@ ShaderProgram::ShaderProgram(const string& fragment_shader)
     clears_(false) {
 }
 
-ShaderProgram::ShaderProgram(const string& vertex_shader,
-                             const string& fragment_shader)
+ShaderProgram::ShaderProgram(const std::string& vertex_shader,
+                             const std::string& fragment_shader)
   : fragment_shader_source_(fragment_shader),
     vertex_shader_source_(vertex_shader),
     fragment_shader_(0),
@@ -123,7 +125,7 @@ bool ShaderProgram::IsVarValid(ProgramVar var) {
   return var != -1;
 }
 
-bool ShaderProgram::Process(const vector<const GLTextureHandle*>& input,
+bool ShaderProgram::Process(const std::vector<const GLTextureHandle*>& input,
                             GLFrameBufferHandle* output) {
   // TODO: This can be optimized: If the input and output are the same, as in
   // the last iteration (typical of a multi-pass filter), a lot of this setup
@@ -142,8 +144,8 @@ bool ShaderProgram::Process(const vector<const GLTextureHandle*>& input,
   }
 
   // Get all required textures
-  vector<GLuint> textures;
-  vector<GLenum> targets;
+  std::vector<GLuint> textures;
+  std::vector<GLenum> targets;
   for (unsigned i = 0; i < input.size(); ++i) {
     // Get the current input frame and make sure it is a GL frame
     if (input[i]) {
@@ -167,8 +169,8 @@ bool ShaderProgram::Process(const vector<const GLTextureHandle*>& input,
   return true;
 }
 
-bool ShaderProgram::Process(const vector<const GLFrame*>& input, GLFrame* output) {
-  vector<const GLTextureHandle*> textures(input.size());
+bool ShaderProgram::Process(const std::vector<const GLFrame*>& input, GLFrame* output) {
+  std::vector<const GLTextureHandle*> textures(input.size());
   std::copy(input.begin(), input.end(), textures.begin());
   return Process(textures, output);
 }
@@ -278,8 +280,8 @@ GLuint ShaderProgram::CompileShader(GLenum shader_type, const char* source) {
       LOGE("Problem compiling shader! Source:");
       LOGE("%s", source);
       std::string src(source);
-      int cur_pos = 0;
-      int next_pos = 0;
+      unsigned int cur_pos = 0;
+      unsigned int next_pos = 0;
       int line_number = 1;
       while ( (next_pos = src.find_first_of('\n', cur_pos)) != std::string::npos) {
         LOGE("%03d : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
@@ -347,14 +349,14 @@ VertexFrame* ShaderProgram::DefaultVertexBuffer() {
     LOGI("Uploading Data to VBO!");
     s_default_vbo_.SetValue(new VertexFrame(sizeof(s_default_vertices_)));
     s_default_vbo_.Value()->WriteData(
-      reinterpret_cast<const uint8*>(s_default_vertices_),
+      reinterpret_cast<const uint8_t*>(s_default_vertices_),
       sizeof(s_default_vertices_)
     );
   }
   return s_default_vbo_.Value();
 }
 
-bool ShaderProgram::BindVertexValues(const string& varname,
+bool ShaderProgram::BindVertexValues(const std::string& varname,
                                      int stride,
                                      int offset) {
   // As the user may have specified a shader, first check if we have a variable
@@ -364,7 +366,7 @@ bool ShaderProgram::BindVertexValues(const string& varname,
     // Use mutable vertex data if user has requested custom input vectors. Use
     // a constant VBO otherwise (more efficient).
     if (vertex_data_) {
-      const uint8* data = reinterpret_cast<const uint8*>(vertex_data_);
+      const uint8_t* data = reinterpret_cast<const uint8_t*>(vertex_data_);
       return SetAttributeValues(attr,           // the program attribute
                                 data,           // The vertex buffer
                                 GL_FLOAT,       // Type is float
@@ -392,14 +394,14 @@ bool ShaderProgram::BindVertexData() {
                                                    2 * sizeof(float));
 }
 
-string ShaderProgram::InputTextureUniformName(int index) {
-  stringstream tex_name;
+std::string ShaderProgram::InputTextureUniformName(int index) {
+  std::stringstream tex_name;
   tex_name << "tex_sampler_" << index;
   return tex_name.str();
 }
 
-bool ShaderProgram::BindInputTextures(const vector<GLuint>& textures,
-                                      const vector<GLenum>& targets) {
+bool ShaderProgram::BindInputTextures(const std::vector<GLuint>& textures,
+                                      const std::vector<GLenum>& targets) {
   for (unsigned i = 0; i < textures.size(); ++i) {
     // Activate texture unit i
     glActiveTexture(BaseTextureUnit() + i);
@@ -438,8 +440,8 @@ bool ShaderProgram::UseProgram() {
   return true;
 }
 
-bool ShaderProgram::RenderFrame(const vector<GLuint>& textures,
-                                const vector<GLenum>& targets) {
+bool ShaderProgram::RenderFrame(const std::vector<GLuint>& textures,
+                                const std::vector<GLenum>& targets) {
   // Make sure we have enough texture units to accomodate the textures
   if (textures.size() > static_cast<unsigned>(MaxTextureUnits())) {
     LOGE("ShaderProgram: Number of input textures is unsupported on this "
@@ -524,8 +526,8 @@ void ShaderProgram::SetClearColor(float red, float green, float blue, float alph
 }
 
 // Variable Value Setting Helpers //////////////////////////////////////////////
-bool ShaderProgram::CheckValueCount(const string& var_type,
-                                    const string& var_name,
+bool ShaderProgram::CheckValueCount(const std::string& var_type,
+                                    const std::string& var_name,
                                     int expected_count,
                                     int components,
                                     int value_size) {
@@ -540,8 +542,8 @@ bool ShaderProgram::CheckValueCount(const string& var_type,
   return true;
 }
 
-bool ShaderProgram::CheckValueMult(const string& var_type,
-                                   const string& var_name,
+bool ShaderProgram::CheckValueMult(const std::string& var_type,
+                                   const std::string& var_name,
                                    int components,
                                    int value_size) {
   if (value_size % components != 0) {
@@ -571,7 +573,7 @@ int ShaderProgram::MaxUniformCount() {
   return count1 < count2 ? count1 : count2;
 }
 
-ProgramVar ShaderProgram::GetUniform(const string& name) const {
+ProgramVar ShaderProgram::GetUniform(const std::string& name) const {
   if (!IsExecutable()) {
     LOGE("ShaderProgram: Error: Must link program before querying uniforms!");
     return -1;
@@ -717,16 +719,16 @@ bool ShaderProgram::SetUniformValue(ProgramVar var,
   return false;
 }
 
-bool ShaderProgram::SetUniformValue(ProgramVar var, const vector<int>& values) {
+bool ShaderProgram::SetUniformValue(ProgramVar var, const std::vector<int>& values) {
   return SetUniformValue(var, &values[0], values.size());
 }
 
 bool ShaderProgram::SetUniformValue(ProgramVar var,
-                                    const vector<float>& values) {
+                                    const std::vector<float>& values) {
   return SetUniformValue(var, &values[0], values.size());
 }
 
-bool ShaderProgram::SetUniformValue(const string& name, const Value& value) {
+bool ShaderProgram::SetUniformValue(const std::string& name, const Value& value) {
   if (ValueIsFloat(value))
     return SetUniformValue(GetUniform(name), GetFloatValue(value));
   else if (ValueIsInt(value))
@@ -739,7 +741,7 @@ bool ShaderProgram::SetUniformValue(const string& name, const Value& value) {
     return false;
 }
 
-Value ShaderProgram::GetUniformValue(const string& name) {
+Value ShaderProgram::GetUniformValue(const std::string& name) {
   ProgramVar var = GetUniform(name);
   if (IsVarValid(var)) {
     // Get uniform information
@@ -838,7 +840,7 @@ int ShaderProgram::MaxAttributeCount() {
   return result;
 }
 
-ProgramVar ShaderProgram::GetAttribute(const string& name) const {
+ProgramVar ShaderProgram::GetAttribute(const std::string& name) const {
   if (!IsExecutable()) {
     LOGE("ShaderProgram: Error: Must link program before querying attributes!");
     return -1;
@@ -873,7 +875,7 @@ bool ShaderProgram::SetAttributeValues(ProgramVar var,
 }
 
 bool ShaderProgram::SetAttributeValues(ProgramVar var,
-                                       const uint8* data,
+                                       const uint8_t* data,
                                        GLenum type,
                                        int components,
                                        int stride,
@@ -898,7 +900,7 @@ bool ShaderProgram::SetAttributeValues(ProgramVar var,
 }
 
 bool ShaderProgram::SetAttributeValues(ProgramVar var,
-                                       const vector<float>& data,
+                                       const std::vector<float>& data,
                                        int components) {
   return SetAttributeValues(var, &data[0], data.size(), components);
 }

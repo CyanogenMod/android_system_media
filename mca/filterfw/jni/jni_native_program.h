@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef JNI_NATIVE_PROGRAM_H
-#define JNI_NATIVE_PROGRAM_H
+#ifndef ANDROID_FILTERFW_JNI_NATIVE_PROGRAM_H
+#define ANDROID_FILTERFW_JNI_NATIVE_PROGRAM_H
 
 #include <jni.h>
 
@@ -91,4 +91,4 @@ Java_android_filterfw_core_NativeProgram_callNativeTeardown(JNIEnv* env, jobject
 }
 #endif
 
-#endif /* JNI_NATIVE_PROGRAM_H */
+#endif // ANDROID_FILTERFW_JNI_NATIVE_PROGRAM_H

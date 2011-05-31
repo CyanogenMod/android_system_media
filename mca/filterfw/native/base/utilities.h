@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef BASE_UTILTIES_H_
-#define BASE_UTILTIES_H_
+#ifndef ANDROID_FILTERFW_BASE_UTILITIES_H
+#define ANDROID_FILTERFW_BASE_UTILITIES_H
 
-#include "base/basictypes.h"
+#include <set>
+#include <utility>
+
+namespace android {
+namespace filterfw {
 
 // Convenience Macro to make copy constructor and assignment operator private
 // (thereby disallowing copying and assigning).
@@ -98,7 +102,7 @@ class CheckList {
     }
 
   private:
-    set<T> items_;
+    std::set<T> items_;
 };
 
 template<typename T>
@@ -109,7 +113,7 @@ void CheckList<T>::AddItem(const T& item) {
 
 template<typename T>
 bool CheckList<T>::CheckItem(const T& item) {
-  typename set<T>::iterator iter = items_.find(item);
+  typename std::set<T>::iterator iter = items_.find(item);
   if (iter != items_.end())
     items_.erase(iter);
   return items_.empty();
@@ -145,10 +149,12 @@ bool ContainsKey(const Collection& collection, const Key& key) {
 template <class Collection, class Key, class Value>
 bool InsertIfNotPresent(Collection * const collection,
                         const Key& key, const Value& value) {
-  pair<typename Collection::iterator, bool> ret =
+  std::pair<typename Collection::iterator, bool> ret =
     collection->insert(typename Collection::value_type(key, value));
   return ret.second;
 }
 
-#endif // BASE_UTILTIES_H_
+} // namespace filterfw
+} // namespace android
 
+#endif // ANDROID_FILTERFW_BASE_UTILITIES_H

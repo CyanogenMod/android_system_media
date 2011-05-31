@@ -16,7 +16,7 @@
 
 #include "core/geometry.h"
 
-#include <math.h>
+#include <cmath>
 
 #include "base/logging.h"
 
@@ -24,7 +24,7 @@ namespace android {
 namespace filterfw {
 
 float Point::Length() const {
-  return sqrtf(x_ * x_ + y_ * y_);
+  return std::sqrt(x_ * x_ + y_ * y_);
 }
 
 bool Point::ScaleTo(float new_length) {
@@ -129,7 +129,7 @@ bool Rect::ScaleWithLengthLimit(float factor, float max_length) {
 }
 
 const Point& Quad::point(int ix) const {
-  ASSERT(ix < static_cast<int>(points_.size()));
+  LOG_ASSERT(ix < static_cast<int>(points_.size()), "Access out of bounds");
   return points_[ix];
 }
 

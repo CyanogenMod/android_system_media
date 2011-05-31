@@ -17,6 +17,9 @@
 #include "base/logging.h"
 #include "core/gl_env.h"
 
+#include <map>
+#include <string>
+
 namespace android {
 namespace filterfw {
 
@@ -40,7 +43,7 @@ GLEnv::~GLEnv() {
     active_env_ = NULL;
 
   // Destroy surfaces
-  for (map<int, SurfaceWindowPair>::iterator it = surfaces_.begin();
+  for (std::map<int, SurfaceWindowPair>::iterator it = surfaces_.begin();
        it != surfaces_.end();
        ++it) {
     if (it->first != 0 || created_surface_) {
@@ -53,7 +56,7 @@ GLEnv::~GLEnv() {
   }
 
   // Destroy contexts
-  for (map<int, EGLContext>::iterator it = contexts_.begin();
+  for (std::map<int, EGLContext>::iterator it = contexts_.begin();
        it != contexts_.end();
        ++it) {
     if (it->first != 0 || created_context_)
@@ -225,7 +228,7 @@ bool GLEnv::ReleaseSurfaceId(int surface_id) {
 }
 
 int GLEnv::FindSurfaceIdForWindow(const WindowHandle* window_handle) {
-  for (map<int, SurfaceWindowPair>::iterator it = surfaces_.begin();
+  for (std::map<int, SurfaceWindowPair>::iterator it = surfaces_.begin();
        it != surfaces_.end();
        ++it) {
     const WindowHandle* my_handle = it->second.second;
@@ -267,7 +270,7 @@ void GLEnv::ReleaseContextId(int context_id) {
   }
 }
 
-bool GLEnv::CheckGLError(const string& op) {
+bool GLEnv::CheckGLError(const std::string& op) {
   bool err = false;
   for (GLint error = glGetError(); error; error = glGetError()) {
     LOGE("GL Error: Operation '%s' caused GL error (0x%x)\n",
@@ -278,7 +281,7 @@ bool GLEnv::CheckGLError(const string& op) {
   return err;
 }
 
-bool GLEnv::CheckEGLError(const string& op) {
+bool GLEnv::CheckEGLError(const std::string& op) {
   bool err = false;
   for (EGLint error = eglGetError();
        error != EGL_SUCCESS;
@@ -294,7 +297,7 @@ bool GLEnv::CheckEGLError(const string& op) {
 GLuint GLEnv::GetCurrentProgram() {
   GLint result;
   glGetIntegerv(GL_CURRENT_PROGRAM, &result);
-  ASSERT(result >= 0);
+  LOG_ASSERT(result >= 0);
   return static_cast<GLuint>(result);
 }
 

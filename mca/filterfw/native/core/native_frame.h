@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-#ifndef FILTERFW_CORE_NATIVE_FRAME_H__
-#define FILTERFW_CORE_NATIVE_FRAME_H__
+#ifndef ANDROID_FILTERFW_CORE_NATIVE_FRAME_H
+#define ANDROID_FILTERFW_CORE_NATIVE_FRAME_H
 
-#include "base/basictypes.h"
 #include "base/utilities.h"
 
 namespace android {
@@ -34,19 +33,19 @@ class NativeFrame {
 
     // Set the frame data and size in bytes. The NativeFrame object takes ownership of the data.
     // To copy data into an existing frame, use WriteData().
-    bool SetData(uint8* data, int size);
+    bool SetData(uint8_t* data, int size);
 
     // Write the specified data of the given size to the frame at the specified offset. The
     // receiver must be large enough to hold the data.
-    bool WriteData(const uint8* data, int offset, int size);
+    bool WriteData(const uint8_t* data, int offset, int size);
 
     // Returns a pointer to the data, or NULL if no data was set.
-    const uint8* Data() const {
+    const uint8_t* Data() const {
       return data_;
     }
 
     // Returns a non-const pointer to the data, or NULL if no data was set.
-    uint8* MutableData() {
+    uint8_t* MutableData() {
       return data_;
     }
 
@@ -69,7 +68,7 @@ class NativeFrame {
 
   private:
     // Pointer to the data. Owned by the frame.
-    uint8* data_;
+    uint8_t* data_;
 
     // Size of data buffer in bytes.
     int size_;
@@ -83,4 +82,4 @@ class NativeFrame {
 } // namespace filterfw
 } // namespace android
 
-#endif  // FILTERFW_CORE_NATIVE_FRAME_H__
+#endif  // ANDROID_FILTERFW_CORE_NATIVE_FRAME_H

@@ -14,44 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef BASE_LOGGING_H_
-#define BASE_LOGGING_H_
+#ifndef ANDROID_FILTERFW_BASE_LOGGING_H
+#define ANDROID_FILTERFW_BASE_LOGGING_H
 
-#include <assert.h>
-
-#include <android/log.h>
-
-#define  LOG_TAG "MCA"
 #define  LOG_EVERY_FRAME false
-
-enum LogFormat {
-  LogFormat_Long,
-  LogFormat_Short
-};
-
-// LOGE and LOGI are shortcuts to writing out to the Android info and error
-// logs. Example usage: LOGE("Critical Error: %d is zero.", x);
-#define  LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
-#define  LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define  LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
-#define  LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 #define  LOG_FRAME(...) if (LOG_EVERY_FRAME) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
 
-// ASSERT provides a short-cut to the Android log assert (on the error log).
-// Example usage: ASSERT(1 != 0, "This is bad.");
-#ifndef ASSERT
-#define ASSERT(CONDITION) assert(CONDITION)
-#endif
+#define  LOG_TAG "MCA"
+#include <utils/Log.h>
 
-#ifndef LOG_ASSERT
-#define LOG_ASSERT(CONDITION, ...) \
-  if (!CONDITION) {\
-    __android_log_assert( #CONDITION,\
-                          LOG_TAG,\
-                          __VA_ARGS__); \
-    assert(false); \
-  }
-#endif
-
-#endif // BASE_LOGGING_H_
+#endif //  ANDROID_FILTERFW_BASE_LOGGING_H

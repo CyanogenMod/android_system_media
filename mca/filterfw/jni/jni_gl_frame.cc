@@ -19,7 +19,6 @@
 #include "jni/jni_gl_frame.h"
 #include "jni/jni_util.h"
 
-#include "native/base/basictypes.h"
 #include "native/core/gl_frame.h"
 #include "native/core/native_frame.h"
 
@@ -94,7 +93,7 @@ jboolean Java_android_filterfw_core_GLFrame_setNativeData(JNIEnv* env,
   if (frame && data) {
     jbyte* bytes = env->GetByteArrayElements(data, NULL);
     if (bytes) {
-      const bool success = frame->WriteData(reinterpret_cast<const uint8*>(bytes + offset), length);
+      const bool success = frame->WriteData(reinterpret_cast<const uint8_t*>(bytes + offset), length);
       env->ReleaseByteArrayElements(data, bytes, JNI_ABORT);
       return ToJBool(success);
     }
@@ -107,7 +106,7 @@ jbyteArray Java_android_filterfw_core_GLFrame_getNativeData(JNIEnv* env, jobject
   if (frame && frame->Size() > 0) {
     jbyteArray result = env->NewByteArray(frame->Size());
     jbyte* data = env->GetByteArrayElements(result, NULL);
-    frame->CopyDataTo(reinterpret_cast<uint8*>(data), frame->Size());
+    frame->CopyDataTo(reinterpret_cast<uint8_t*>(data), frame->Size());
     env->ReleaseByteArrayElements(result, data, 0);
     return result;
   }
@@ -122,7 +121,7 @@ jboolean Java_android_filterfw_core_GLFrame_setNativeInts(JNIEnv* env,
     jint* int_ptr = env->GetIntArrayElements(ints, NULL);
     const int length = env->GetArrayLength(ints);
     if (int_ptr) {
-      const bool success = frame->WriteData(reinterpret_cast<const uint8*>(int_ptr),
+      const bool success = frame->WriteData(reinterpret_cast<const uint8_t*>(int_ptr),
                                             length * sizeof(jint));
       env->ReleaseIntArrayElements(ints, int_ptr, JNI_ABORT);
       return ToJBool(success);
@@ -136,7 +135,7 @@ jintArray Java_android_filterfw_core_GLFrame_getNativeInts(JNIEnv* env, jobject 
   if (frame && frame->Size() > 0 && (frame->Size() % sizeof(jint) == 0)) {
     jintArray result = env->NewIntArray(frame->Size() / sizeof(jint));
     jint* data = env->GetIntArrayElements(result, NULL);
-    frame->CopyDataTo(reinterpret_cast<uint8*>(data), frame->Size());
+    frame->CopyDataTo(reinterpret_cast<uint8_t*>(data), frame->Size());
     env->ReleaseIntArrayElements(result, data, 0);
     return result;
   }
@@ -151,7 +150,7 @@ jboolean Java_android_filterfw_core_GLFrame_setNativeFloats(JNIEnv* env,
     jfloat* float_ptr = env->GetFloatArrayElements(floats, NULL);
     const int length = env->GetArrayLength(floats);
     if (float_ptr) {
-      const bool success = frame->WriteData(reinterpret_cast<const uint8*>(float_ptr),
+      const bool success = frame->WriteData(reinterpret_cast<const uint8_t*>(float_ptr),
                                             length * sizeof(jfloat));
       env->ReleaseFloatArrayElements(floats, float_ptr, JNI_ABORT);
       return ToJBool(success);
@@ -165,7 +164,7 @@ jfloatArray Java_android_filterfw_core_GLFrame_getNativeFloats(JNIEnv* env, jobj
   if (frame && frame->Size() > 0 && (frame->Size() % sizeof(jfloat) == 0)) {
     jfloatArray result = env->NewFloatArray(frame->Size() / sizeof(jfloat));
     jfloat* data = env->GetFloatArrayElements(result, NULL);
-    frame->CopyDataTo(reinterpret_cast<uint8*>(data), frame->Size());
+    frame->CopyDataTo(reinterpret_cast<uint8_t*>(data), frame->Size());
     env->ReleaseFloatArrayElements(result, data, 0);
     return result;
   }
@@ -178,7 +177,7 @@ jboolean Java_android_filterfw_core_GLFrame_setNativeBitmap(JNIEnv* env,
                                                             jint size) {
   GLFrame* frame = ConvertFromJava<GLFrame>(env, thiz);
   if (frame && bitmap) {
-    uint8* pixels;
+    uint8_t* pixels;
     const int result = AndroidBitmap_lockPixels(env, bitmap, reinterpret_cast<void**>(&pixels));
     if (result == ANDROID_BITMAP_RESUT_SUCCESS) {
       const bool success = frame->WriteData(pixels, size);
@@ -194,7 +193,7 @@ jboolean Java_android_filterfw_core_GLFrame_getNativeBitmap(JNIEnv* env,
                                                             jobject bitmap) {
   GLFrame* frame = ConvertFromJava<GLFrame>(env, thiz);
   if (frame && bitmap) {
-    uint8* pixels;
+    uint8_t* pixels;
     const int result = AndroidBitmap_lockPixels(env, bitmap, reinterpret_cast<void**>(&pixels));
     if (result == ANDROID_BITMAP_RESUT_SUCCESS) {
       frame->CopyDataTo(pixels, frame->Size());
@@ -263,4 +262,3 @@ jboolean Java_android_filterfw_core_GLFrame_nativeFocus(JNIEnv* env, jobject thi
     GLFrame* frame = ConvertFromJava<GLFrame>(env, thiz);
     return ToJBool(frame && frame->FocusFrameBuffer());
 }
-
