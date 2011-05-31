@@ -33,12 +33,21 @@ import android.filterfw.io.TextGraphReader;
 
 import java.util.ArrayList;
 
-public class GraphEnvironment {
+/**
+ * A GraphEnvironment provides a simple front-end to filter graph setup and execution using the
+ * mobile filter framework. Typically, you use a GraphEnvironment in the following fashion:
+ *   1. Instantiate a new GraphEnvironment instance.
+ *   2. Perform any configuration, such as adding graph references and setting a GL environment.
+ *   3. Load a graph file using loadGraph() or add a graph using addGraph().
+ *   4. Obtain a GraphRunner instance using getRunner().
+ *   5. Execute the obtained runner.
+ * Note that it is possible to add multiple graphs and runners to a single GraphEnvironment.
+ */
+public class GraphEnvironment extends MffEnvironment {
 
     public static final int MODE_ASYNCHRONOUS = 1;
     public static final int MODE_SYNCHRONOUS  = 2;
 
-    private FilterContext mContext;
     private GraphReader mGraphReader;
     private ArrayList<GraphHandle> mGraphs = new ArrayList<GraphHandle>();
 
@@ -71,25 +80,59 @@ public class GraphEnvironment {
         }
     };
 
+    /**
+     * Create a new GraphEnvironment with default components.
+     */
     public GraphEnvironment() {
-        init(null, null, null);
+        super(null);
     }
 
-    public GraphEnvironment(FrameManager frameManager,
-                            GLEnvironment glEnvironment,
-                            GraphReader reader) {
-        init(frameManager, glEnvironment, reader);
+    /**
+     * Create a new GraphEnvironment with a custom FrameManager and GraphReader. Specifying null
+     * for either of these, will auto-create a default instance.
+     *
+     * @param frameManager The FrameManager to use, or null to auto-create one.
+     * @param reader        The GraphReader to use for graph loading, or null to auto-create one.
+     *                      Note, that the reader will not be created until it is required. Pass
+     *                      null if you will not load any graph files.
+     */
+    public GraphEnvironment(FrameManager frameManager, GraphReader reader) {
+        super(frameManager);
+        mGraphReader = reader;
     }
 
+    /**
+     * Returns the used graph reader. This will create one, if a reader has not been set already.
+     */
+    public GraphReader getGraphReader() {
+        if (mGraphReader == null) {
+            mGraphReader = new TextGraphReader();
+        }
+        return mGraphReader;
+    }
+
+    /**
+     * Add graph references to resolve during graph reading. The references added here are shared
+     * among all graphs.
+     *
+     * @param references An alternating argument list of keys (Strings) and values.
+     */
     public void addReferences(Object... references) {
-        mGraphReader.addReferencesByKeysAndValues(references);
+        getGraphReader().addReferencesByKeysAndValues(references);
     }
 
+    /**
+     * Loads a graph file from the specified resource and adds it to this environment.
+     *
+     * @param context       The context in which to read the resource.
+     * @param resourceId    The ID of the graph resource to load.
+     * @returns             A unique ID for the graph.
+     */
     public int loadGraph(Context context, int resourceId) {
         // Read the file into a graph
         FilterGraph graph = null;
         try {
-            graph = mGraphReader.readResource(context, resourceId);
+            graph = getGraphReader().readResource(context, resourceId);
         } catch (GraphIOException e) {
             throw new RuntimeException("Could not read graph: " + e.getMessage());
         }
@@ -98,70 +141,57 @@ public class GraphEnvironment {
         return addGraph(graph);
     }
 
+    /**
+     * Add a graph to the environment. Consider using loadGraph() if you are loading a graph from
+     * a graph file.
+     *
+     * @param graph The graph to add to the environment.
+     * @returns     A unique ID for the added graph.
+     */
     public int addGraph(FilterGraph graph) {
         GraphHandle graphHandle = new GraphHandle(graph);
         mGraphs.add(graphHandle);
         return mGraphs.size() - 1;
     }
 
+    /**
+     * Access a specific graph of this environment given a graph ID (previously returned from
+     * loadGraph() or addGraph()). Throws an InvalidArgumentException if no graph with the
+     * specified ID could be found.
+     *
+     * @param graphId   The ID of the graph to get.
+     * @returns         The graph with the specified ID.
+     */
     public FilterGraph getGraph(int graphId) {
         if (graphId < 0 || graphId >= mGraphs.size()) {
-            throw new RuntimeException("Invalid graph ID " + graphId + " specified in runGraph()!");
+            throw new IllegalArgumentException(
+                "Invalid graph ID " + graphId + " specified in runGraph()!");
         }
         return mGraphs.get(graphId).getGraph();
     }
 
+    /**
+     * Get a GraphRunner instance for the graph with the specified ID. The GraphRunner instance can
+     * be used to execute the graph. Throws an InvalidArgumentException if no graph with the
+     * specified ID could be found.
+     *
+     * @param graphId       The ID of the graph to get.
+     * @param executionMode The mode of graph execution. Currently this can be either
+                            MODE_SYNCHRONOUS or MODE_ASYNCHRONOUS.
+     * @returns             A GraphRunner instance for this graph.
+     */
     public GraphRunner getRunner(int graphId, int executionMode) {
         switch (executionMode) {
             case MODE_ASYNCHRONOUS:
-                return mGraphs.get(graphId).getAsyncRunner(mContext);
+                return mGraphs.get(graphId).getAsyncRunner(getContext());
 
             case MODE_SYNCHRONOUS:
-                return mGraphs.get(graphId).getSyncRunner(mContext);
+                return mGraphs.get(graphId).getSyncRunner(getContext());
 
             default:
                 throw new RuntimeException(
                     "Invalid execution mode " + executionMode + " specified in getRunner()!");
         }
-    }
-
-    public FilterContext getContext() {
-        return mContext;
-    }
-
-    public void activateGLEnvironment() {
-        mContext.getGLEnvironment().activate();
-    }
-
-    public void deactivateGLEnvironment() {
-        mContext.getGLEnvironment().deactivate();
-    }
-
-    private void init(FrameManager frameManager, GLEnvironment glEnvironment, GraphReader reader) {
-        // Get or create the frame manager
-        if (frameManager == null) {
-            frameManager = new CachedFrameManager();
-        }
-
-        // Get or create the GL environment
-        if (glEnvironment == null) {
-            glEnvironment = new GLEnvironment();
-            if (!glEnvironment.initWithNewContext()) {
-                throw new RuntimeException("Could not init GL environment!");
-            }
-            glEnvironment.activate();
-        }
-
-        // Create new reader
-        if (reader == null) {
-            reader = new TextGraphReader();
-        }
-        mGraphReader = reader;
-
-        // Setup the environment
-        mContext = new FilterContext();
-        mContext.setFrameManager(new CachedFrameManager());
-        mContext.setGLEnvironment(glEnvironment);
     }
 
 }

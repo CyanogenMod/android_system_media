@@ -26,29 +26,60 @@ import android.filterfw.core.FrameHandle;
 import android.filterfw.core.FrameManager;
 import android.filterfw.core.GLEnvironment;
 
-public class FilterFunctionEnvironment {
+/**
+ * A FilterFunctionEnvironment provides a simple functional front-end to manually executing
+ * filters. Use this environment if a graph-based approach is not convenient for your case.
+ * Typically, a FilterFunctionEnvironment is used as follows:
+ *   1. Instantiate a new FilterFunctionEnvironment instance.
+ *   2. Perform any configuration, such as setting a GL environment.
+ *   3. Wrap Filters into FilterFunctions by calling createFunction().
+ *   4. Execute FilterFunctions individually and use the results for further processing.
+ * Additionally, there is a convenience method to execute a number of filters in sequence.
+ */
+public class FilterFunctionEnvironment extends MffEnvironment {
 
-    private FilterContext mFilterContext;
-
+    /**
+     * Create a new FilterFunctionEnvironment with the default components.
+     */
     public FilterFunctionEnvironment() {
-        init(null, null);
+        super(null);
     }
 
-    public FilterFunctionEnvironment(FrameManager frameManager, GLEnvironment glEnvironment) {
-        init(frameManager, glEnvironment);
+    /**
+     * Create a new FilterFunctionEnvironment with a custom FrameManager. Pass null to auto-create
+     * a FrameManager.
+     *
+     * @param frameManager The FrameManager to use, or null to auto-create one.
+     */
+    public FilterFunctionEnvironment(FrameManager frameManager) {
+        super(frameManager);
     }
 
-    public FilterContext getContext() {
-        return mFilterContext;
-    }
-
+    /**
+     * Create a new FilterFunction from a specific filter class. The function is initialized with
+     * the given key-value list of parameters. Note, that this function uses the default shared
+     * FilterFactory to create the filter instance.
+     *
+     * @param filterClass   The class of the filter to wrap. This must be a Filter subclass.
+     * @param parameters    An argument list of alternating key-value filter parameters.
+     * @returns             A new FilterFunction instance.
+     */
     public FilterFunction createFunction(Class filterClass, Object... parameters) {
         String filterName = "FilterFunction(" + filterClass.getSimpleName() + ")";
         Filter filter = FilterFactory.sharedFactory().createFilterByClass(filterClass, filterName);
         filter.initWithParameterList(parameters);
-        return new FilterFunction(mFilterContext, filter);
+        return new FilterFunction(getContext(), filter);
     }
 
+    /**
+     * Convenience method to execute a sequence of filter functions. Note that every function in
+     * the list MUST have one input and one output port, except the first filter (which must not
+     * have any input ports) and the last filter (which may not have any output ports).
+     *
+     * @param functions A list of filter functions. The first filter must be a source filter.
+     * @returns         The result of the last filter executed, or null if the last filter did not
+                        produce any output.
+     */
     public FrameHandle executeSequence(FilterFunction[] functions) {
         FrameHandle oldFrame = null;
         FrameHandle newFrame = null;
@@ -65,27 +96,6 @@ public class FilterFunctionEnvironment {
             oldFrame.release();
         }
         return newFrame;
-    }
-
-    private void init(FrameManager frameManager, GLEnvironment glEnvironment) {
-        // Get or create the frame manager
-        if (frameManager == null) {
-            frameManager = new CachedFrameManager();
-        }
-
-        // Get or create the GL environment
-        if (glEnvironment == null) {
-            glEnvironment = new GLEnvironment();
-            if (!glEnvironment.initWithNewContext()) {
-                throw new RuntimeException("Could not init GL environment!");
-            }
-            glEnvironment.activate();
-        }
-
-        // Setup the context
-        mFilterContext = new FilterContext();
-        mFilterContext.setFrameManager(frameManager);
-        mFilterContext.setGLEnvironment(glEnvironment);
     }
 
 }
