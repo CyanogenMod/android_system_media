@@ -213,7 +213,8 @@ public class FrameFormat {
 
         // Check meta-data
         for (String specKey : specification.mMetaData.keySet()) {
-            if (!mMetaData.hasKey(specKey)
+            if (mMetaData == null
+            || !mMetaData.hasKey(specKey)
             || !mMetaData.getValue(specKey).equals(specification.mMetaData.getValue(specKey))) {
                 return false;
             }
