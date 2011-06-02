@@ -92,6 +92,7 @@ public class MediaSource extends Filter {
     private boolean mGotSize;
     private boolean mPrepared;
     private boolean mPlaying;
+    private boolean mPaused;
 
     private static final boolean LOGV = true;
     private static final boolean LOGVV = false;
@@ -125,12 +126,12 @@ public class MediaSource extends Filter {
         mOutputFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE,
                                                FrameFormat.TARGET_GPU);
         mOutputFormat.setBytesPerSample(4);
+        // Don't know dimensions until we open the media file
+        mOutputFormat.setDimensions(0, 0);
 
         mMediaFormat = mOutputFormat.mutableCopy();
         mMediaFormat.setMetaValue(GLFrame.USE_EXTERNAL_TEXTURE, true);
 
-        // Don't know dimensions until we open the media file
-        mOutputFormat.setDimensions(0, 0);
         return mOutputFormat;
     }
 
@@ -181,29 +182,34 @@ public class MediaSource extends Filter {
                 }
             }
             mMediaPlayer.start();
-            mPlaying = true;
         }
 
-        if (mWaitForNewFrame) {
-            boolean gotNewFrame;
-            gotNewFrame = mNewFrameAvailable.block(1000);
-            if (!gotNewFrame) {
-                Log.e(TAG, "Timeout waiting for new frame");
-                return Filter.STATUS_ERROR;
+        // Use last frame if paused, unless just starting playback, in which case
+        // we want at least one valid frame before pausing
+        if (!mPaused || !mPlaying) {
+            if (mWaitForNewFrame) {
+                boolean gotNewFrame;
+                gotNewFrame = mNewFrameAvailable.block(1000);
+                if (!gotNewFrame) {
+                    Log.e(TAG, "Timeout waiting for new frame");
+                    return Filter.STATUS_ERROR;
+                }
+                mNewFrameAvailable.close();
             }
-            mNewFrameAvailable.close();
+
+            mSurfaceTexture.updateTexImage();
+
+            mSurfaceTexture.getTransformMatrix(mFrameTransform);
+            mFrameExtractor.setHostValue("frame_transform", mFrameTransform);
         }
-
-        mSurfaceTexture.updateTexImage();
-
-        mSurfaceTexture.getTransformMatrix(mFrameTransform);
-        mFrameExtractor.setHostValue("frame_transform", mFrameTransform);
 
         Frame output = context.getFrameManager().newFrame(mOutputFormat);
         mFrameExtractor.process(mMediaFrame, output);
 
         putOutput(0, output);
         output.release();
+
+        mPlaying = true;
 
         return Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
@@ -248,6 +254,10 @@ public class MediaSource extends Filter {
                 mMediaPlayer.setLooping(mLooping);
             }
         }
+    }
+
+    synchronized public void pauseVideo(boolean pauseState) {
+        mPaused = pauseState;
     }
 
     /** Creates a media player, sets it up, and calls prepare */
