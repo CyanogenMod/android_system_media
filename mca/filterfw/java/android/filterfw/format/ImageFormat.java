@@ -39,7 +39,7 @@ public class ImageFormat {
         MutableFrameFormat result = new MutableFrameFormat(baseType, target);
         result.setDimensions(width, height);
         result.setBytesPerSample(bytesPerSample);
-        result.setMetaValue(COLORSPACE_KEY, colorspace);
+        // result.setMetaValue(COLORSPACE_KEY, colorspace);
         if (baseType == FrameFormat.TYPE_OBJECT) {
             result.setObjectClass(Bitmap.class);
         }
