@@ -212,11 +212,13 @@ public class FrameFormat {
         }
 
         // Check meta-data
-        for (String specKey : specification.mMetaData.keySet()) {
-            if (mMetaData == null
-            || !mMetaData.hasKey(specKey)
-            || !mMetaData.getValue(specKey).equals(specification.mMetaData.getValue(specKey))) {
-                return false;
+        if (specification.mMetaData != null) {
+            for (String specKey : specification.mMetaData.keySet()) {
+                if (mMetaData == null
+                || !mMetaData.hasKey(specKey)
+                || !mMetaData.getValue(specKey).equals(specification.mMetaData.getValue(specKey))) {
+                    return false;
+                }
             }
         }
 
