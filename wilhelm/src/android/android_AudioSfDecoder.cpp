@@ -30,6 +30,8 @@ namespace android {
 
 //--------------------------------------------------------------------------------------------------
 AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : GenericPlayer(params),
+        mDataSource(0),
+        mAudioSource(0),
         mBitrate(-1),
         mNumChannels(1),
         mSampleRateHz(0),
@@ -46,7 +48,9 @@ AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : Generic
 
 AudioSfDecoder::~AudioSfDecoder() {
     SL_LOGV("AudioSfDecoder::~AudioSfDecoder()");
-
+    if (mAudioSource != 0) {
+        mAudioSource->stop();
+    }
 }
 
 
