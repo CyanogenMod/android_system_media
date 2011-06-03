@@ -29,10 +29,10 @@ import android.filterfw.core.Program;
 
 public class CallbackFilter extends Filter {
 
-    @FilterParameter(name = "listener", isOptional = false)
+    @FilterParameter(name = "listener", isOptional = false, isUpdatable = true)
     private FilterContext.OnFrameReceivedListener mListener;
 
-    @FilterParameter(name = "userData", isOptional = true)
+    @FilterParameter(name = "userData", isOptional = true, isUpdatable = true)
     private Object mUserData;
 
     public CallbackFilter(String name) {
