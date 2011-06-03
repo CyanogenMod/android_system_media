@@ -19,10 +19,23 @@ package android.filterfw.core;
 
 public abstract class GraphRunner {
 
+    /** Interface for listeners waiting for the runner to complete. */
+    public interface OnRunnerDoneListener {
+        /** Callback method to be called when the runner completes a
+         * {@link #run()} call.
+         *
+         * @param result will be RESULT_FINISHED if the graph finished
+         *        running on its own, or RESULT_STOPPED if the runner was
+         *        stopped by a call to stop().
+         */
+        public void onRunnerDone(int result);
+    }
+
     public static final int RESULT_RUNNING  = 1;
     public static final int RESULT_FINISHED = 2;
     public static final int RESULT_SLEEPING = 3;
     public static final int RESULT_BLOCKED  = 4;
+    public static final int RESULT_STOPPED  = 5;
 
     public abstract FilterGraph getGraph();
 
@@ -30,6 +43,7 @@ public abstract class GraphRunner {
 
     public abstract void run();
 
+    public abstract void setDoneCallback(OnRunnerDoneListener listener);
     public abstract boolean isRunning();
 
     public abstract void stop();

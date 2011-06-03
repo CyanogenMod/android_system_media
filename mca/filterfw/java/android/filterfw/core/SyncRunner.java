@@ -28,6 +28,7 @@ public class SyncRunner extends GraphRunner {
     private Scheduler mScheduler = null;
     private FilterContext mFilterContext = null;
 
+    private OnRunnerDoneListener mDoneListener = null;
     private ScheduledThreadPoolExecutor mWakeExecutor = new ScheduledThreadPoolExecutor(1);
     private ConditionVariable mWakeCondition = new ConditionVariable();
 
@@ -106,11 +107,20 @@ public class SyncRunner extends GraphRunner {
             status = performStep(false);
         }
         close();
+
+        // Call completion callback if set
+        if (mDoneListener != null) {
+            mDoneListener.onRunnerDone(status);
+        }
     }
 
 
     public boolean isRunning() {
         return false;
+    }
+
+    public void setDoneCallback(OnRunnerDoneListener listener) {
+        mDoneListener = listener;
     }
 
     public void stop() {

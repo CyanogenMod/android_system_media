@@ -29,9 +29,6 @@ import java.util.concurrent.TimeUnit;
 
 public class AsyncRunner extends GraphRunner{
 
-    public static final int RUNNER_WAS_STOPPED = 0;
-    public static final int RUNNER_COMPLETED   = 1;
-
     private FilterContext mFilterContext;
     private Class mSchedulerClass;
     private SyncRunner mRunner;
@@ -94,7 +91,7 @@ public class AsyncRunner extends GraphRunner{
 
             glEnv.deactivate();
             if (LOGV) Log.v(TAG, "Done with background graph processing.");
-            return isDone ? RUNNER_COMPLETED : RUNNER_WAS_STOPPED;
+            return isDone ? RESULT_FINISHED : RESULT_STOPPED;
         }
 
         protected void onCancelled(Integer result) {
@@ -160,17 +157,6 @@ public class AsyncRunner extends GraphRunner{
     public AsyncRunner(FilterContext context) {
         mFilterContext = context;
         mSchedulerClass = SimpleScheduler.class;
-    }
-
-    /** Interface for listeners waiting for the runner to complete. */
-    public interface OnRunnerDoneListener {
-        /** Callback method to be called when the runner finishes running.
-         *
-         * @param stopReason will be RUNNER_COMPLETED if the graph finished
-         *        running on its own, or RUNNER_WAS_STOPPED if the runner was
-         *        stopped by a call to stop().
-         */
-        public void onRunnerDone(int stopReason);
     }
 
     /** Set a callback to be called in the UI thread once the AsyncRunner
