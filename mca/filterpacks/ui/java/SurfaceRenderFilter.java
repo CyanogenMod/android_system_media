@@ -137,7 +137,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
     }
 
     @Override
-    public void prepare(FilterContext environment) {
+    public void prepare(FilterContext context) {
         // Create identity shader to render, and make sure to render upside-down, as textures
         // are stored internally bottom-to-top.
         mProgram = ShaderProgram.createIdentity();
@@ -152,64 +152,67 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
                                                                  FrameFormat.TARGET_GPU);
         screenFormat.setBytesPerSample(4);
         screenFormat.setDimensions(mSurfaceView.getWidth(), mSurfaceView.getHeight());
-        mScreen = (GLFrame)environment.getFrameManager().newBoundFrame(screenFormat,
+        mScreen = (GLFrame)context.getFrameManager().newBoundFrame(screenFormat,
                                                                        GLFrame.EXISTING_FBO_BINDING,
                                                                        0);
-
-        // Bind surface view to us. This will emit a surfaceChanged call that will update our
-        // screen width and height.
-        if (mSurfaceView != null) {
-            mSurfaceView.unbind();
-            mSurfaceView.bindToRenderer(this, environment.getGLEnvironment());
-        }
     }
 
     @Override
-    public int process(FilterContext env) {
-        if (mSurfaceView != null) {
-            if (LOGV) Log.v(TAG, "Starting frame processing");
+    public int open(FilterContext context) {
 
-            // Make sure we are processing in the correct GL environment
-            GLEnvironment glEnv = mSurfaceView.getGLEnv();
-            if (glEnv != env.getGLEnvironment()) {
-                throw new RuntimeException("Surface created under different GLEnvironment!");
-            }
+        // Bind surface view to us. This will emit a surfaceChanged call that will update our
+        // screen width and height.
+        mSurfaceView.unbind();
+        mSurfaceView.bindToRenderer(this, context.getGLEnvironment());
 
-            // Get input frame
-            Frame input = pullInput(0);
-            boolean createdFrame = false;
+        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
+                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
+    }
 
-            float currentAspectRatio = (float)input.getFormat().getWidth() / input.getFormat().getHeight();
-            if (currentAspectRatio != mAspectRatio) {
-                if (LOGV) Log.v(TAG, "New aspect ratio: " + currentAspectRatio +", previously: " + mAspectRatio);
-                mAspectRatio = currentAspectRatio;
-                updateTargetRect();
-            }
+    @Override
+    public int process(FilterContext context) {
+        if (LOGV) Log.v(TAG, "Starting frame processing");
 
-            // See if we need to copy to GPU
-            Frame gpuFrame = null;
-            if (input.getFormat().getTarget() == FrameFormat.TARGET_NATIVE) {
-                MutableFrameFormat gpuFormat = input.getFormat().mutableCopy();
-                gpuFormat.setTarget(FrameFormat.TARGET_GPU);
-                gpuFrame = env.getFrameManager().newFrame(gpuFormat);
-                gpuFrame.setData(input.getData());
-                createdFrame = true;
-            } else {
-                gpuFrame = input;
-            }
+        GLEnvironment glEnv = mSurfaceView.getGLEnv();
+        if (glEnv != context.getGLEnvironment()) {
+            throw new RuntimeException("Surface created under different GLEnvironment!");
+        }
 
-            // Activate our surface
-            glEnv.activateSurfaceWithId(mSurfaceView.getSurfaceId());
 
-            // Process
-            mProgram.process(gpuFrame, mScreen);
+        // Get input frame
+        Frame input = pullInput(0);
+        boolean createdFrame = false;
 
-            // And swap buffers
-            glEnv.swapBuffers();
+        float currentAspectRatio = (float)input.getFormat().getWidth() / input.getFormat().getHeight();
+        if (currentAspectRatio != mAspectRatio) {
+            if (LOGV) Log.v(TAG, "New aspect ratio: " + currentAspectRatio +", previously: " + mAspectRatio);
+            mAspectRatio = currentAspectRatio;
+            updateTargetRect();
+        }
 
-            if (createdFrame) {
-                gpuFrame.release();
-            }
+        // See if we need to copy to GPU
+        Frame gpuFrame = null;
+        if (input.getFormat().getTarget() == FrameFormat.TARGET_NATIVE) {
+            MutableFrameFormat gpuFormat = input.getFormat().mutableCopy();
+            gpuFormat.setTarget(FrameFormat.TARGET_GPU);
+            gpuFrame = context.getFrameManager().newFrame(gpuFormat);
+            gpuFrame.setData(input.getData());
+            createdFrame = true;
+        } else {
+            gpuFrame = input;
+        }
+
+        // Activate our surface
+        glEnv.activateSurfaceWithId(mSurfaceView.getSurfaceId());
+
+        // Process
+        mProgram.process(gpuFrame, mScreen);
+
+        // And swap buffers
+        glEnv.swapBuffers();
+
+        if (createdFrame) {
+            gpuFrame.release();
         }
 
         // Wait for next input and free output
@@ -218,7 +221,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
     }
 
     @Override
-    public void tearDown(FilterContext env) {
+    public void tearDown(FilterContext context) {
         if (mScreen != null) {
             mScreen.release();
         }

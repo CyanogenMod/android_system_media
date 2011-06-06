@@ -27,8 +27,6 @@ import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
-import android.filterfw.core.NativeFrame;
-import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
@@ -101,16 +99,18 @@ public class SurfaceTextureSource extends Filter {
     @FilterParameter(name = "waitTimeout", isOptional = true, isUpdatable = true)
     private int mWaitTimeout = 1000;
 
+    // Variables for input->output conversion
     private GLFrame mMediaFrame;
-    private SurfaceTexture mSurfaceTexture;
     private ShaderProgram mFrameExtractor;
+    private SurfaceTexture mSurfaceTexture;
     private MutableFrameFormat mOutputFormat;
     private MutableFrameFormat mMediaFormat;
     private ConditionVariable mNewFrameAvailable;
     private float[] mFrameTransform;
     private boolean mFirstFrame;
 
-    private final String mFrameShader =
+    // Shader for output
+    private final String mRenderShader =
             "#extension GL_OES_EGL_image_external : require\n" +
             "precision mediump float;\n" +
             "uniform mat4 frame_transform;\n" +
@@ -120,6 +120,8 @@ public class SurfaceTextureSource extends Filter {
             "  vec2 transformed_texcoord = (frame_transform * vec4(v_texcoord, 0., 1.) ).xy;" +
             "  gl_FragColor = texture2D(tex_sampler_0, transformed_texcoord);\n" +
             "}\n";
+
+    // Variables for logging
 
     private static final boolean LOGV = true;
     private static final boolean LOGVV = false;
@@ -167,20 +169,23 @@ public class SurfaceTextureSource extends Filter {
     protected void prepare(FilterContext context) {
         if (LOGV) Log.v(TAG, "Preparing SurfaceTextureSource");
 
+        // Prepare input
         mMediaFrame = (GLFrame)context.getFrameManager().newFrame(mMediaFormat);
 
-        mFrameExtractor = new ShaderProgram(mFrameShader);
+        // Prepare output
+        mFrameExtractor = new ShaderProgram(mRenderShader);
         // SurfaceTexture defines (0,0) to be bottom-left. The filter framework
         // defines (0,0) as top-left, so do the flip here.
         mFrameExtractor.setSourceRect(0, 1, 1, -1);
-
-        mSurfaceTexture = new SurfaceTexture(mMediaFrame.getTextureId());
-        mSourceListener.onSurfaceTextureSourceReady(mSurfaceTexture);
     }
 
     @Override
     public int open(FilterContext context) {
         if (LOGV) Log.v(TAG, "Opening SurfaceTextureSource");
+        // Create SurfaceTexture anew each time - it can use substantial memory.
+        mSurfaceTexture = new SurfaceTexture(mMediaFrame.getTextureId());
+        // Connect SurfaceTexture to source
+        mSourceListener.onSurfaceTextureSourceReady(mSurfaceTexture);
         // Connect SurfaceTexture to callback
         mSurfaceTexture.setOnFrameAvailableListener(onFrameAvailableListener);
         mFirstFrame = true;
@@ -192,6 +197,7 @@ public class SurfaceTextureSource extends Filter {
     public int process(FilterContext context) {
         if (LOGVV) Log.v(TAG, "Processing new frame");
 
+        // First, get new frame if available
         if (mWaitForNewFrame || mFirstFrame) {
             boolean gotNewFrame;
             if (mWaitTimeout != 0) {
@@ -210,6 +216,8 @@ public class SurfaceTextureSource extends Filter {
         mSurfaceTexture.updateTexImage();
 
         mSurfaceTexture.getTransformMatrix(mFrameTransform);
+
+        // Next, render to output
         mFrameExtractor.setHostValue("frame_transform", mFrameTransform);
 
         Frame output = context.getFrameManager().newFrame(mOutputFormat);
@@ -223,8 +231,9 @@ public class SurfaceTextureSource extends Filter {
 
     @Override
     public void close(FilterContext context) {
-        if (LOGV) Log.v(TAG, "MediaSource closed");
-        mSurfaceTexture.setOnFrameAvailableListener(null);
+        if (LOGV) Log.v(TAG, "SurfaceTextureSource closed");
+        mSourceListener.onSurfaceTextureSourceReady(null);
+        mSurfaceTexture = null;
     }
 
     @Override
@@ -232,8 +241,6 @@ public class SurfaceTextureSource extends Filter {
         if (mMediaFrame != null) {
             mMediaFrame.release();
         }
-        mSurfaceTexture = null;
-        mSourceListener.onSurfaceTextureSourceReady(mSurfaceTexture);
     }
 
     @Override
@@ -250,5 +257,4 @@ public class SurfaceTextureSource extends Filter {
             mNewFrameAvailable.open();
         }
     };
-
 }
