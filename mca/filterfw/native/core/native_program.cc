@@ -95,11 +95,10 @@ bool NativeProgram::CallProcess(const std::vector<DataBuffer*>& inputs,
                                 int size,
                                 DataBuffer* output) {
   if (process_function_) {
-    process_function_(reinterpret_cast<const NativeBuffer*>(&inputs[0]),
-                      size,
-                      reinterpret_cast<NativeBuffer>(output),
-                      user_data_);
-    return true;
+    return process_function_(reinterpret_cast<const NativeBuffer*>(&inputs[0]),
+                             size,
+                             reinterpret_cast<NativeBuffer>(output),
+                             user_data_) == 1;
   }
   return false;
 }

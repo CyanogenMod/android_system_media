@@ -34,7 +34,7 @@ class NativeFrame;
 typedef void (*InitFunctionPtr)(void**);
 typedef void (*SetValueFunctionPtr)(const char*, Value, void*);
 typedef Value (*GetValueFunctionPtr)(const char*, void*);
-typedef void (*ProcessFunctionPtr)(const NativeBuffer*, int, NativeBuffer, void*);
+typedef int (*ProcessFunctionPtr)(const NativeBuffer*, int, NativeBuffer, void*);
 typedef void (*TeardownFunctionPtr)(void*);
 
 class NativeProgram {
