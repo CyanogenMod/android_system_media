@@ -276,7 +276,7 @@ public class GLFrame extends Frame {
     }
 
     static {
-        System.loadLibrary("filterfw-jni");
+        System.loadLibrary("filterfw");
     }
 
     private native boolean allocate(int width, int height);

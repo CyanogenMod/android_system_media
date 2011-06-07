@@ -16,12 +16,12 @@
 LOCAL_PATH := $(call my-dir)
 
 #####################
-# Build module libfilterfw-jni
+# Build module libfilterfw_jni
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_MODULE    = libfilterfw-jni_static
+LOCAL_MODULE    = libfilterfw_jni
 
 LOCAL_SRC_FILES = jni_init.cc \
                   jni_gl_environment.cc \
@@ -52,30 +52,4 @@ LOCAL_C_INCLUDES += \
 LOCAL_PRELINK_MODULE := false
 
 include $(BUILD_STATIC_LIBRARY)
-
-#####################
-# Build module libfilterfw-jni
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := libfilterfw-jni
-
-LOCAL_MODULE_TAGS := optional
-
-LOCAL_WHOLE_STATIC_LIBRARIES := libfilterfw-jni_static
-
-LOCAL_SHARED_LIBRARIES := libfilterfw \
-                          libstlport \
-                          libGLESv2 \
-                          libEGL \
-                          libutils \
-                          libandroid \
-                          libjnigraphics
-
-# Don't prelink this library.  For more efficient code, you may want
-# to add this library to the prelink map and set this to true. However,
-# it's difficult to do this for applications that are not supplied as
-# part of a system image.
-LOCAL_PRELINK_MODULE := false
-
-include $(BUILD_SHARED_LIBRARY)
 

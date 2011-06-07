@@ -109,7 +109,7 @@ public class VertexFrame extends Frame {
     }
 
     static {
-        System.loadLibrary("filterfw-jni");
+        System.loadLibrary("filterfw");
     }
 
     private native boolean allocate(int size);
@@ -124,4 +124,3 @@ public class VertexFrame extends Frame {
 
     private native int getNativeVboId();
 }
-

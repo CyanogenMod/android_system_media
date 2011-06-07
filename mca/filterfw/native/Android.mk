@@ -22,7 +22,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_MODULE := libfilterfw_static
+LOCAL_MODULE := libfilterfw_native
 
 # Compile source files
 NDK_FILES = filter/src/data_buffer.cc \
@@ -51,30 +51,3 @@ LOCAL_EXPORT_LDLIBS := -llog -lgcc
 # TODO: Build a shared library as well?
 include $(BUILD_STATIC_LIBRARY)
 
-#####################
-# Build module libfilterfw.so
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := libfilterfw
-
-LOCAL_MODULE_TAGS := optional
-
-LOCAL_WHOLE_STATIC_LIBRARIES := libfilterfw_static
-
-LOCAL_SHARED_LIBRARIES := libandroid \
-                          libGLESv2 \
-                          libEGL \
-                          libgui \
-                          libdl \
-                          libstlport \
-                          libcutils \
-                          libutils \
-
-# Don't prelink this library.  For more efficient code, you may want
-# to add this library to the prelink map and set this to true. However,
-# it's difficult to do this for applications that are not supplied as
-# part of a system image.
-LOCAL_PRELINK_MODULE := false
-
-include $(BUILD_SHARED_LIBRARY)

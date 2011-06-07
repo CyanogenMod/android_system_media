@@ -76,7 +76,7 @@ public class NativeBuffer {
     }
 
     static {
-        System.loadLibrary("filterfw-jni");
+        System.loadLibrary("filterfw");
     }
 
     void attachToFrame(Frame frame) {
@@ -93,4 +93,3 @@ public class NativeBuffer {
     private native boolean deallocate(boolean ownsData);
     private native boolean nativeCopyTo(NativeBuffer buffer);
 }
-

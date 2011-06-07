@@ -60,7 +60,7 @@ public class GLEnvironment {
     }
 
     static {
-        System.loadLibrary("filterfw-jni");
+        System.loadLibrary("filterfw");
     }
 
     private native boolean allocate();

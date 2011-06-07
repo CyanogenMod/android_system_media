@@ -193,7 +193,7 @@ public class ShaderProgram extends Program {
     }
 
     static {
-        System.loadLibrary("filterfw-jni");
+        System.loadLibrary("filterfw");
     }
 
     private native boolean allocate(String vertexShader, String fragmentShader);
