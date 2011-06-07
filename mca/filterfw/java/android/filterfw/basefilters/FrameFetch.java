@@ -62,7 +62,6 @@ public class FrameFetch extends Filter {
 
     public int process(FilterContext context) {
         Frame output = context.fetchFrame(mKey);
-        Log.i("FrameFetch", "Got frame " + output + " for key: " + mKey + "!");
         if (output != null) {
             putOutput(0, output);
             return mRepeatFrame ? Filter.STATUS_WAIT_FOR_FREE_OUTPUTS : Filter.STATUS_FINISHED;

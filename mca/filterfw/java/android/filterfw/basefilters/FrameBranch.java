@@ -29,8 +29,6 @@ public class FrameBranch extends Filter {
     @FilterParameter(name = "outputs", isOptional = true)
     private int mNumberOfOutputs = 2;
 
-    private FrameFormat mOutputFormat;
-
     public FrameBranch(String name) {
         super(name);
     }
@@ -48,12 +46,11 @@ public class FrameBranch extends Filter {
     }
 
     public boolean acceptsInputFormat(int index, FrameFormat format) {
-        mOutputFormat = format;
         return true;
     }
 
     public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
+        return getInputFormat(0);
     }
 
     public int process(FilterContext context) {

@@ -19,24 +19,21 @@ package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
+import android.filterfw.core.ProgramParameter;
 import android.filterfw.core.ShaderProgram;
 
 import java.util.Set;
 
-public class BrightnessFilter extends Filter {
+public class BrightnessFilter extends ImageFilter {
 
-    @FilterParameter(name = "brightness", isOptional = false, isUpdatable = true)
-    private float mBrightness;
-
+    @ProgramParameter(name = "brightness", type = float.class)
     private Program mProgram;
-    private FrameFormat mOutputFormat;
 
     private final String mBrightnessShader =
             "precision mediump float;\n" +
@@ -52,28 +49,9 @@ public class BrightnessFilter extends Filter {
         super(name);
     }
 
-    public String[] getInputNames() {
-        return new String[] { "image" };
-    }
-
-    public String[] getOutputNames() {
-        return new String[] { "image" };
-    }
-
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        if (format.isBinaryDataType()) {
-            mOutputFormat = format;
-            return true;
-        }
-        return false;
-    }
-
-    public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
-    }
-
-    public void prepare(FilterContext environment) {
-        switch (mOutputFormat.getTarget()) {
+    @Override
+    protected void createProgram(int target) {
+        switch (target) {
             case FrameFormat.TARGET_NATIVE:
                 mProgram = new NativeProgram("filterpack_imageproc", "brightness");
                 break;
@@ -85,35 +63,10 @@ public class BrightnessFilter extends Filter {
             default:
                 throw new RuntimeException("BrightnessFilter could not create suitable program!");
         }
-        mProgram.setHostValue("brightness", mBrightness);
     }
 
-    public void parametersUpdated(Set<String> updated) {
-        if (mProgram != null) {
-            mProgram.setHostValue("brightness", mBrightness);
-        }
+    @Override
+    protected Program getProgram() {
+        return mProgram;
     }
-
-    public int process(FilterContext env) {
-        // Get input frame
-        Frame input = pullInput(0);
-
-        // Create output frame
-        // TODO: Use Frame Provider
-        Frame output = env.getFrameManager().newFrame(input.getFormat());
-
-        // Process
-        mProgram.process(input, output);
-
-        // Push output
-        putOutput(0, output);
-
-        // Release pushed frame
-        output.release();
-
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
-    }
-
 }

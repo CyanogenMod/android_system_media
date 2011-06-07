@@ -32,7 +32,7 @@ import android.util.Log;
 
 import java.util.Set;
 
-public class FisheyeFilter extends Filter {
+public class FisheyeFilter extends ImageFilter {
     private static final String TAG = "FisheyeFilter";
 
     // This parameter has range between 0 and 1. It controls the effect of radial distortion.
@@ -48,8 +48,6 @@ public class FisheyeFilter extends Filter {
     private float mFocusY;
 
     private Program mProgram;
-    // In this filter output and input use the same format.
-    private FrameFormat mOutputFormat;
 
     private final String mFisheyeShader =
             "precision mediump float;\n" +
@@ -81,29 +79,9 @@ public class FisheyeFilter extends Filter {
         super(name);
     }
 
-    public String[] getInputNames() {
-        return new String[] { "image" };
-    }
-
-    public String[] getOutputNames() {
-        return new String[] { "image" };
-    }
-
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        if (format.isBinaryDataType() &&
-            format.getTarget() == FrameFormat.TARGET_GPU) {
-            mOutputFormat = format;
-            return true;
-        }
-        return false;
-    }
-
-    public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
-    }
-
-    public void prepare(FilterContext environment) {
-        switch (mOutputFormat.getTarget()) {
+    @Override
+    protected void createProgram(int target) {
+        switch (target) {
           /*
             case FrameFormat.TARGET_NATIVE:
                 mProgram = new NativeProgram("filterpack_imageproc", "brightness");
@@ -118,8 +96,9 @@ public class FisheyeFilter extends Filter {
                 throw new RuntimeException("FisheyeFilter could not create suitable program!");
         }
 
-        mFocusX = (float) (0.5 * mOutputFormat.getWidth());
-        mFocusY = (float) (0.5 * mOutputFormat.getHeight());
+        FrameFormat outFormat = getInputFormat(0);
+        mFocusX = (float) (0.5 * outFormat.getWidth());
+        mFocusY = (float) (0.5 * outFormat.getHeight());
 
         float center[] = {mFocusX, mFocusY};
 
@@ -127,11 +106,12 @@ public class FisheyeFilter extends Filter {
 
         // set uniforms in shader
         mProgram.setHostValue("center", center);
-        mProgram.setHostValue("width", (float) mOutputFormat.getWidth());
-        mProgram.setHostValue("height", (float) mOutputFormat.getHeight());
+        mProgram.setHostValue("width", (float) outFormat.getWidth());
+        mProgram.setHostValue("height", (float) outFormat.getHeight());
         mProgram.setHostValue("alpha", (float) (mScale * 2.0 + 0.75));
     }
 
+    @Override
     public void parametersUpdated(Set<String> updated) {
         if (mProgram != null) {
           Log.v(TAG, "alpha=" + (mScale * 2.0 + 0.75));
@@ -139,6 +119,7 @@ public class FisheyeFilter extends Filter {
         }
     }
 
+    @Override
     public int process(FilterContext env) {
         // Get input frame
         Frame input = pullInput(0);
@@ -176,4 +157,8 @@ public class FisheyeFilter extends Filter {
                 Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
+    @Override
+    protected Program getProgram() {
+        return mProgram;
+    }
 }

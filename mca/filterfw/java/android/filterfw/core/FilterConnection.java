@@ -23,12 +23,14 @@ import android.filterfw.core.FrameFormat;
 public class FilterConnection {
 
     protected Frame mFrameOnWire;
+    protected FrameFormat mFormat;
 
-    public void setFormat(FrameFormat format) {
+    public final void setFormat(FrameFormat format) {
+        mFormat = format;
     }
 
-    public FrameFormat getFormat() {
-        return null;
+    public final FrameFormat getFormat() {
+        return mFormat;
     }
 
     public Frame getFrame() {

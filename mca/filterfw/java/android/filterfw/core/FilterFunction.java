@@ -91,7 +91,7 @@ public class FilterFunction {
     }
 
     public Object getParameterValue(String key) {
-        return mFilter.getParameters().getValue(key);
+        return mFilter.getParameters().get(key);
     }
 
     public String toString() {
@@ -112,14 +112,14 @@ public class FilterFunction {
     private void setupFilterInputs(FrameHandle[] inputs) {
         // Set input formats (from input frames)
         for (int i = 0; i < inputs.length; ++i) {
-            if (!mFilter.acceptsInputFormat(i, inputs[i].getFrame().getFormat())) {
+            FrameFormat format = inputs[i].getFrame().getFormat();
+            if (!mFilter.acceptsInputFormat(i, format)) {
                 throw new RuntimeException("Filter " + mFilter + " does not accept the " +
                                            "input given on port " + i + "!");
             }
-        }
 
-        // Connect inputs to connection stubs
-        for (int i = 0; i < inputs.length; ++i) {
+            // Connect input to connection stub
+            mInputStubs[i].setFormat(format);
             mFilter.getInputPortAtIndex(i).setConnection(mInputStubs[i]);
         }
     }
@@ -130,10 +130,8 @@ public class FilterFunction {
         // in the getOutputFormat() method, we call it here.
         for (int i = 0; i < mFilter.getNumberOfOutputs(); ++i) {
             mFilter.getOutputFormat(i);
-        }
 
-        // Connect outputs to connection stubs
-        for (int i = 0; i < mFilter.getNumberOfOutputs(); ++i) {
+            // Connect output to connection stub
             mFilter.getOutputPortAtIndex(i).setConnection(mOutputStubs[i]);
         }
     }

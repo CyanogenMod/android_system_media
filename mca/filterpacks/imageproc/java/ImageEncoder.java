@@ -24,7 +24,7 @@ import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.KeyValueMap;
-
+import android.filterfw.format.ImageFormat;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 
@@ -56,7 +56,9 @@ public class ImageEncoder extends Filter {
     }
 
     public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return format.getBaseType() == FrameFormat.TYPE_BYTE;
+        FrameFormat requiredFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                        FrameFormat.TARGET_UNSPECIFIED);
+        return format.isCompatibleWith(requiredFormat);
     }
 
     public FrameFormat getOutputFormat(int index) {

@@ -24,6 +24,7 @@ import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GLFrame;
 import android.filterfw.core.MutableFrameFormat;
+import android.filterfw.format.ImageFormat;
 
 import java.util.Set;
 
@@ -47,9 +48,9 @@ public class GLTextureSource extends Filter {
 
     @Override
     public void initFilter() {
-        mOutputFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE, FrameFormat.TARGET_GPU);
-        mOutputFormat.setBytesPerSample(4);
-        mOutputFormat.setDimensions(mWidth, mHeight);
+        mOutputFormat = ImageFormat.create(mWidth, mHeight,
+                                           ImageFormat.COLORSPACE_RGBA,
+                                           FrameFormat.TARGET_GPU);
     }
 
     @Override

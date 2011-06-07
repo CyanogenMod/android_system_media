@@ -31,9 +31,11 @@ public abstract class GraphReader {
 
     protected KeyValueMap mReferences = new KeyValueMap();
 
-    public abstract FilterGraph readString(String graphString) throws GraphIOException;
+    public abstract FilterGraph readGraphString(String graphString) throws GraphIOException;
 
-    public FilterGraph readResource(Context context, int resourceId) throws GraphIOException {
+    public abstract KeyValueMap readKeyValueAssignments(String assignments) throws GraphIOException;
+
+    public FilterGraph readGraphResource(Context context, int resourceId) throws GraphIOException {
         InputStream inputStream = context.getResources().openRawResource(resourceId);
         InputStreamReader reader = new InputStreamReader(inputStream);
         StringWriter writer = new StringWriter();
@@ -46,18 +48,19 @@ public abstract class GraphReader {
         } catch (IOException e) {
             throw new RuntimeException("Could not read specified resource file!");
         }
-        return readString(writer.toString());
+        return readGraphString(writer.toString());
     }
 
     public void addReference(String name, Object object) {
-        mReferences.setValue(name, object);
+        mReferences.put(name, object);
     }
 
     public void addReferencesByMap(KeyValueMap refs) {
-        mReferences.updateWithMap(refs);
+        mReferences.putAll(refs);
     }
 
     public void addReferencesByKeysAndValues(Object... references) {
         mReferences.setKeyValues(references);
     }
+
 }

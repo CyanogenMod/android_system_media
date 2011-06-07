@@ -28,8 +28,6 @@ public class PortToPortConnection extends FilterConnection {
     private FilterPort mSourcePort;
     private FilterPort mTargetPort;
 
-    private FrameFormat mFormat;
-
     // TODO: Move most of these to core internal methods?
 
     final boolean initWithConnection(FilterPort source, FilterPort target) {
@@ -51,14 +49,6 @@ public class PortToPortConnection extends FilterConnection {
         mTargetPort = target;
 
         return true;
-    }
-
-    public final void setFormat(FrameFormat format) {
-        mFormat = format;
-    }
-
-    public final FrameFormat getFormat() {
-        return mFormat;
     }
 
     public final FilterPort getSourcePort() {

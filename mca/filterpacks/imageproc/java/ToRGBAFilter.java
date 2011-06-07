@@ -30,7 +30,7 @@ import android.filterfw.core.ShaderProgram;
 
 import android.util.Log;
 
-public class ToRGBAFilter extends Filter {
+public class ToRGBAFilter extends ImageFilter {
 
     private int mInputBPP;
     private Program mProgram;
@@ -40,30 +40,15 @@ public class ToRGBAFilter extends Filter {
         super(name);
     }
 
-    public String[] getInputNames() {
-        return new String[] { "image" };
-    }
-
-    public String[] getOutputNames() {
-        return new String[] { "image" };
-    }
-
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        if (format.isBinaryDataType()) {
-            mOutputFormat = format.mutableCopy();
-            mOutputFormat.setBytesPerSample(4);
-            mInputBPP = format.getBytesPerSample();
-            return true;
-        }
-        return false;
-    }
-
     public FrameFormat getOutputFormat(int index) {
+        mOutputFormat = getInputFormat(0).mutableCopy();
+        mOutputFormat.setBytesPerSample(4);
         return mOutputFormat;
     }
 
-    public void prepare(FilterContext environment) {
-        switch (mOutputFormat.getTarget()) {
+    public void createProgram(int target) {
+        mInputBPP = getInputFormat(0).getBytesPerSample();
+        switch (target) {
             case FrameFormat.TARGET_NATIVE:
                 switch (mInputBPP) {
                     case 1:
@@ -108,5 +93,9 @@ public class ToRGBAFilter extends Filter {
                 Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
+    @Override
+    protected Program getProgram() {
+        return mProgram;
+    }
 
 }

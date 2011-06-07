@@ -97,15 +97,15 @@ public class FrameFormat {
     }
 
     public boolean hasMetaKey(String key) {
-        return mMetaData != null ? mMetaData.hasKey(key) : false;
+        return mMetaData != null ? mMetaData.containsKey(key) : false;
     }
 
     public boolean hasMetaKey(String key, Class expectedClass) {
-        if (mMetaData != null && mMetaData.hasKey(key)) {
-            if (!expectedClass.isAssignableFrom(mMetaData.getValue(key).getClass())) {
+        if (mMetaData != null && mMetaData.containsKey(key)) {
+            if (!expectedClass.isAssignableFrom(mMetaData.get(key).getClass())) {
                 throw new RuntimeException(
                     "FrameFormat meta-key '" + key + "' is of type " +
-                    mMetaData.getValue(key).getClass() + " but expected to be of type " +
+                    mMetaData.get(key).getClass() + " but expected to be of type " +
                     expectedClass + "!");
             }
             return true;
@@ -114,7 +114,7 @@ public class FrameFormat {
     }
 
     public Object getMetaValue(String key) {
-        return mMetaData != null ? mMetaData.getValue(key) : null;
+        return mMetaData != null ? mMetaData.get(key) : null;
     }
 
     public int getNumberOfDimensions() {
@@ -215,8 +215,8 @@ public class FrameFormat {
         if (specification.mMetaData != null) {
             for (String specKey : specification.mMetaData.keySet()) {
                 if (mMetaData == null
-                || !mMetaData.hasKey(specKey)
-                || !mMetaData.getValue(specKey).equals(specification.mMetaData.getValue(specKey))) {
+                || !mMetaData.containsKey(specKey)
+                || !mMetaData.get(specKey).equals(specification.mMetaData.get(specKey))) {
                     return false;
                 }
             }

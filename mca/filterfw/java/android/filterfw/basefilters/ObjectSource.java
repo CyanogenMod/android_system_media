@@ -28,7 +28,7 @@ import android.filterfw.core.MutableFrameFormat;
 
 public class ObjectSource extends Filter {
 
-    @FilterParameter(name = "object", isOptional = false, isUpdatable = true)
+    @FilterParameter(name = "object", isOptional = true, isUpdatable = true)
     private Object mObject;
 
     @FilterParameter(name = "format", isOptional = false, isUpdatable = true)
@@ -63,15 +63,22 @@ public class ObjectSource extends Filter {
 
     private void updateOutputFormat() {
         mOutputFormat = mFormat.mutableCopy();
-        mOutputFormat.setObjectClass(mObject.getClass());
+        if (mObject != null) {
+            mOutputFormat.setObjectClass(mObject.getClass());
+        }
     }
 
     public int process(FilterContext context) {
+        // If no frame has been created, create one now.
         if (mFrame == null) {
+            if (mObject == null) {
+                throw new NullPointerException("ObjectSource producing frame with no object set!");
+            }
             updateOutputFormat();
             mFrame = context.getFrameManager().newEmptyFrame(mOutputFormat);
             mFrame.setObjectValue(mObject);
         }
+
         // Push output
         putOutput(0, mFrame);
 
@@ -85,6 +92,7 @@ public class ObjectSource extends Filter {
 
     @Override
     public void parametersUpdated(Set<String> updated) {
+        // Release our internal frame, so that it is regenerated on the next call to process().
         if (mFrame != null) {
             mFrame.release();
             mFrame = null;

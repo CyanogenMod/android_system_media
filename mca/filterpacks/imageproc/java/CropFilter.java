@@ -30,13 +30,19 @@ import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.geometry.Point;
 import android.filterfw.geometry.Quad;
+import android.filterfw.format.ImageFormat;
 
 import android.util.Log;
 
 public class CropFilter extends Filter {
 
     private ShaderProgram mProgram;
-    private FrameFormat mOutputFormat;
+
+    @FilterParameter(name = "owidth", isOptional = true, isUpdatable = true)
+    private int mOutputWidth = -1;
+
+    @FilterParameter(name = "oheight", isOptional = true, isUpdatable = true)
+    private int mOutputHeight = -1;
 
     public CropFilter(String name) {
         super(name);
@@ -50,15 +56,14 @@ public class CropFilter extends Filter {
         return new String[] { "image" };
     }
 
+    // TODO: Support non-GPU image frames
     public boolean acceptsInputFormat(int index, FrameFormat format) {
         switch(index) {
-            case 0: // image
-                if (format.isBinaryDataType() &&
-                    format.getTarget() == FrameFormat.TARGET_GPU) {
-                    mOutputFormat = format;
-                    return true;
-                }
-                return false;
+            case 0: { // image
+                FrameFormat requiredFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                                FrameFormat.TARGET_GPU);
+                return format.isCompatibleWith(requiredFormat);
+            }
 
             case 1: // box
                 return (format.getTarget() == FrameFormat.TARGET_JAVA &&
@@ -69,7 +74,7 @@ public class CropFilter extends Filter {
     }
 
     public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
+        return getInputFormat(0);
     }
 
     public void prepare(FilterContext env) {
@@ -84,8 +89,13 @@ public class CropFilter extends Filter {
         // Get the box
         Quad box = (Quad)boxFrame.getObjectValue();
 
+        // Create output format
+        MutableFrameFormat outputFormat = imageFrame.getFormat().mutableCopy();
+        outputFormat.setDimensions(mOutputWidth == -1 ? outputFormat.getWidth() : mOutputWidth,
+                                   mOutputHeight == -1 ? outputFormat.getHeight() : mOutputHeight);
+
         // Create output frame
-        Frame output = env.getFrameManager().newFrame(mOutputFormat);
+        Frame output = env.getFrameManager().newFrame(outputFormat);
 
         mProgram.setSourceRegion(box);
         mProgram.process(imageFrame, output);

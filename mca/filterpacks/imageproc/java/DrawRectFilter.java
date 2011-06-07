@@ -28,6 +28,7 @@ import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.geometry.Quad;
+import android.filterfw.format.ImageFormat;
 import android.opengl.GLES20;
 
 public class DrawRectFilter extends Filter {
@@ -42,7 +43,6 @@ public class DrawRectFilter extends Filter {
     private float mColorBlue = 0.0f;
 
     private ShaderProgram mProgram;
-    private FrameFormat mOutputFormat;
 
     private final String mVertexShader =
         "attribute vec4 aPosition;\n" +
@@ -71,13 +71,11 @@ public class DrawRectFilter extends Filter {
 
     public boolean acceptsInputFormat(int index, FrameFormat format) {
         switch(index) {
-            case 0: // image
-                if (format.isBinaryDataType() &&
-                    format.getTarget() == FrameFormat.TARGET_GPU) {
-                    mOutputFormat = format;
-                    return true;
-                }
-                return false;
+            case 0: { // image
+                FrameFormat requiredFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                                FrameFormat.TARGET_GPU);
+                return format.isCompatibleWith(requiredFormat);
+            }
 
             case 1: // box
                 return (format.getTarget() == FrameFormat.TARGET_JAVA &&
@@ -88,7 +86,7 @@ public class DrawRectFilter extends Filter {
     }
 
     public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
+        return getInputFormat(0);
     }
 
     public void prepare(FilterContext env) {
@@ -105,7 +103,7 @@ public class DrawRectFilter extends Filter {
         box = box.scaled(2.0f).translated(-1.0f, -1.0f);
 
         // Create output frame with copy of input
-        GLFrame output = (GLFrame)env.getFrameManager().newFrame(mOutputFormat);
+        GLFrame output = (GLFrame)env.getFrameManager().newFrame(imageFrame.getFormat());
         output.setDataFromFrame(imageFrame);
 
         // Draw onto output

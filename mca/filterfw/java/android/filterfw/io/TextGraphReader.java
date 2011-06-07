@@ -128,7 +128,7 @@ public class TextGraphReader extends GraphReader {
         }
     }
 
-    public FilterGraph readString(String graphString) throws GraphIOException {
+    public FilterGraph readGraphString(String graphString) throws GraphIOException {
         FilterGraph result = new FilterGraph();
 
         reset();
@@ -156,10 +156,10 @@ public class TextGraphReader extends GraphReader {
         final Pattern curlyOpenPattern = Pattern.compile("\\{");
         final Pattern ignorePattern = Pattern.compile("(\\s+|//[^\\n]*\\n)+");
         final Pattern packageNamePattern = Pattern.compile("[a-zA-Z\\.]+");
-        final Pattern portPattern = Pattern.compile("\\[[a-zA-Z0-9]+\\]");
+        final Pattern portPattern = Pattern.compile("\\[[a-zA-Z0-9\\-_]+\\]");
         final Pattern rightArrowPattern = Pattern.compile("=>");
         final Pattern semicolonPattern = Pattern.compile(";");
-        final Pattern wordPattern = Pattern.compile("[a-zA-Z0-9]+");
+        final Pattern wordPattern = Pattern.compile("[a-zA-Z0-9\\-_]+");
 
         final int STATE_COMMAND           = 0;
         final int STATE_IMPORT_PKG        = 1;
@@ -235,8 +235,7 @@ public class TextGraphReader extends GraphReader {
                     break;
 
                 case STATE_PARAMETERS: {
-                    KeyValueMap params = new KeyValueMap();
-                    params.readAssignments(scanner, curlyClosePattern, mBoundReferences);
+                    KeyValueMap params = readKeyValueAssignments(scanner, curlyClosePattern);
                     mCommands.add(new InitFilterCommand(params));
                     state = STATE_CURLY_CLOSE;
                     break;
@@ -281,9 +280,8 @@ public class TextGraphReader extends GraphReader {
                 }
 
                 case STATE_ASSIGNMENT: {
-                    KeyValueMap assignment = new KeyValueMap();
-                    assignment.readAssignments(scanner, semicolonPattern, mBoundReferences);
-                    mBoundReferences.updateWithMap(assignment);
+                    KeyValueMap assignment = readKeyValueAssignments(scanner, semicolonPattern);
+                    mBoundReferences.putAll(assignment);
                     state = STATE_SEMICOLON;
                     break;
                 }
@@ -296,9 +294,8 @@ public class TextGraphReader extends GraphReader {
                 }
 
                 case STATE_SETTING: {
-                    KeyValueMap setting = new KeyValueMap();
-                    setting.readAssignments(scanner, semicolonPattern, mBoundReferences);
-                    mSettings.updateWithMap(setting);
+                    KeyValueMap setting = readKeyValueAssignments(scanner, semicolonPattern);
+                    mSettings.putAll(setting);
                     state = STATE_SEMICOLON;
                     break;
                 }
@@ -316,10 +313,91 @@ public class TextGraphReader extends GraphReader {
         }
     }
 
+    public KeyValueMap readKeyValueAssignments(String assignments) throws GraphIOException {
+        final Pattern ignorePattern = Pattern.compile("\\s+");
+        PatternScanner scanner = new PatternScanner(assignments, ignorePattern);
+        return readKeyValueAssignments(scanner, null);
+    }
+
+    private KeyValueMap readKeyValueAssignments(PatternScanner scanner,
+                                                Pattern endPattern) throws GraphIOException {
+        // Our parser is a state-machine, and these are our states
+        final int STATE_IDENTIFIER = 0;
+        final int STATE_EQUALS     = 1;
+        final int STATE_VALUE      = 2;
+        final int STATE_POST_VALUE = 3;
+
+        final Pattern equalsPattern = Pattern.compile("=");
+        final Pattern semicolonPattern = Pattern.compile(";");
+        final Pattern wordPattern = Pattern.compile("[a-zA-Z]+[a-zA-Z0-9]*");
+        final Pattern stringPattern = Pattern.compile("'[^']*'|\\\"[^\\\"]*\\\"");
+        final Pattern intPattern = Pattern.compile("[0-9]+");
+        final Pattern floatPattern = Pattern.compile("[0-9]*\\.[0-9]+f?");
+        final Pattern referencePattern = Pattern.compile("\\$[a-zA-Z]+[a-zA-Z0-9]");
+        final Pattern booleanPattern = Pattern.compile("true|false");
+
+        int state = STATE_IDENTIFIER;
+        KeyValueMap newVals = new KeyValueMap();
+        String curKey = null;
+        String curValue = null;
+
+        while (!scanner.atEnd() && !(endPattern != null && scanner.peek(endPattern))) {
+            switch (state) {
+                case STATE_IDENTIFIER:
+                    curKey = scanner.eat(wordPattern, "<identifier>");
+                    state = STATE_EQUALS;
+                    break;
+
+                case STATE_EQUALS:
+                    scanner.eat(equalsPattern, "=");
+                    state = STATE_VALUE;
+                    break;
+
+                case STATE_VALUE:
+                    if ((curValue = scanner.tryEat(stringPattern)) != null) {
+                        newVals.put(curKey, curValue.substring(1, curValue.length() - 1));
+                    } else if ((curValue = scanner.tryEat(referencePattern)) != null) {
+                        String refName = curValue.substring(1, curValue.length());
+                        Object referencedObject = mBoundReferences != null
+                            ? mBoundReferences.get(refName)
+                            : null;
+                        if (referencedObject == null) {
+                            throw new GraphIOException(
+                                "Unknown object reference to '" + refName + "'!");
+                        }
+                        newVals.put(curKey, referencedObject);
+                    } else if ((curValue = scanner.tryEat(booleanPattern)) != null) {
+                        newVals.put(curKey, Boolean.parseBoolean(curValue));
+                    } else if ((curValue = scanner.tryEat(floatPattern)) != null) {
+                        newVals.put(curKey, Float.parseFloat(curValue));
+                    } else if ((curValue = scanner.tryEat(intPattern)) != null) {
+                        newVals.put(curKey, Integer.parseInt(curValue));
+                    } else {
+                        throw new GraphIOException(scanner.unexpectedTokenMessage("<value>"));
+                    }
+                    state = STATE_POST_VALUE;
+                    break;
+
+                case STATE_POST_VALUE:
+                    scanner.eat(semicolonPattern, ";");
+                    state = STATE_IDENTIFIER;
+                    break;
+            }
+        }
+
+        // Make sure end is expected
+        if (state != STATE_IDENTIFIER && state != STATE_POST_VALUE) {
+            throw new GraphIOException(
+                "Unexpected end of assignments on line " + scanner.lineNo() + "!");
+        }
+
+        return newVals;
+    }
+
     private void bindExternal(String name) throws GraphIOException {
-        if (mReferences.hasKey(name)) {
-            Object value = mReferences.getValue(name);
-            mBoundReferences.setValue(name, value);
+        if (mReferences.containsKey(name)) {
+            Object value = mReferences.get(name);
+            mBoundReferences.put(name, value);
         } else {
             throw new GraphIOException("Unknown external variable '" + name + "'! "
                 + "You must add a reference to this external in the host program using "
@@ -334,7 +412,7 @@ public class TextGraphReader extends GraphReader {
      **/
     private void checkReferences() throws GraphIOException {
         for (String reference : mReferences.keySet()) {
-            if (!mBoundReferences.hasKey(reference)) {
+            if (!mBoundReferences.containsKey(reference)) {
                 throw new GraphIOException(
                     "Host program specifies reference to '" + reference + "', which is not "
                     + "declared @external in graph file!");
@@ -344,7 +422,7 @@ public class TextGraphReader extends GraphReader {
 
     private void applySettings() throws GraphIOException {
         for (String setting : mSettings.keySet()) {
-            Object value = mSettings.getValue(setting);
+            Object value = mSettings.get(setting);
             if (setting.equals("autoBranch")) {
                 expectSettingClass(setting, value, String.class);
                 if (value.equals("synced")) {

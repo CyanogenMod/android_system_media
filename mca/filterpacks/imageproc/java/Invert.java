@@ -26,10 +26,9 @@ import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 
-public class Invert extends Filter {
+public class Invert extends ImageFilter {
 
     private Program mProgram;
-    private FrameFormat mOutputFormat;
 
     private final String mInvertShader =
             "precision mediump float;\n" +
@@ -40,36 +39,16 @@ public class Invert extends Filter {
             "  gl_FragColor.r = 1.0 - color.r;\n" +
             "  gl_FragColor.g = 1.0 - color.g;\n" +
             "  gl_FragColor.b = 1.0 - color.b;\n" +
+            "  gl_FragColor.a = color.a;\n" +
             "}\n";;
 
     public Invert(String name) {
         super(name);
     }
 
-    public String[] getInputNames() {
-        return new String[] { "frame" };
-    }
-
-    public String[] getOutputNames() {
-        return new String[] { "frame" };
-    }
-
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        if (format.isBinaryDataType() &&
-            (format.getTarget() == FrameFormat.TARGET_NATIVE ||
-             format.getTarget() == FrameFormat.TARGET_GPU)) {
-            mOutputFormat = format;
-            return true;
-        }
-        return false;
-    }
-
-    public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
-    }
-
-    public void prepare(FilterContext environment) {
-        switch (mOutputFormat.getTarget()) {
+    @Override
+    public void createProgram(int target) {
+        switch (target) {
             case FrameFormat.TARGET_NATIVE:
                 mProgram = new NativeProgram("filterpack_imageproc", "invert");
                 break;
@@ -80,25 +59,9 @@ public class Invert extends Filter {
         }
     }
 
-    public int process(FilterContext env) {
-        // Get input frame
-        Frame input = pullInput(0);
-
-        // Create output frame
-        Frame output = env.getFrameManager().newFrame(mOutputFormat);
-
-        // Process
-        mProgram.process(input, output);
-
-        // Push output
-        putOutput(0, output);
-
-        // Release pushed frame
-        output.release();
-
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
+    @Override
+    protected Program getProgram() {
+        return mProgram;
     }
 
 }

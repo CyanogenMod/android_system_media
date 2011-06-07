@@ -28,12 +28,12 @@ import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.geometry.Quad;
+import android.filterfw.format.ImageFormat;
 import android.opengl.GLES20;
 
 public class DrawOverlayFilter extends Filter {
 
     private ShaderProgram mProgram;
-    private FrameFormat mOutputFormat;
 
     public DrawOverlayFilter(String name) {
         super(name);
@@ -49,17 +49,17 @@ public class DrawOverlayFilter extends Filter {
 
     public boolean acceptsInputFormat(int index, FrameFormat format) {
         switch(index) {
-            case 0: // source
-                if (format.isBinaryDataType() &&
-                    format.getTarget() == FrameFormat.TARGET_GPU) {
-                    mOutputFormat = format;
-                    return true;
-                }
-                return false;
+            case 0: { // source
+                FrameFormat requiredFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                                FrameFormat.TARGET_GPU);
+                return format.isCompatibleWith(requiredFormat);
+            }
 
-            case 1: // overlay
-                return (format.isBinaryDataType() &&
-                        format.getTarget() == FrameFormat.TARGET_GPU);
+            case 1: { // overlay
+                FrameFormat requiredFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                                FrameFormat.TARGET_GPU);
+                return format.isCompatibleWith(requiredFormat);
+            }
 
             case 2: // box
                 return (format.getTarget() == FrameFormat.TARGET_JAVA &&
@@ -70,7 +70,7 @@ public class DrawOverlayFilter extends Filter {
     }
 
     public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
+        return getInputFormat(0);
     }
 
     public void prepare(FilterContext env) {
@@ -90,7 +90,7 @@ public class DrawOverlayFilter extends Filter {
         mProgram.setTargetRegion(box);
 
         // Create output frame with copy of input
-        Frame output = env.getFrameManager().newFrame(mOutputFormat);
+        Frame output = env.getFrameManager().newFrame(sourceFrame.getFormat());
         output.setDataFromFrame(sourceFrame);
 
         // Draw onto output

@@ -57,13 +57,17 @@ public class RetargetFilter extends Filter {
     }
 
     public boolean acceptsInputFormat(int index, FrameFormat format) {
-        mOutputFormat = format.mutableCopy();
-        mOutputFormat.setTarget(mTarget);
         return true;
     }
 
     public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
+        return getRetargetedFormat(getInputFormat(0));
+    }
+
+    public FrameFormat getRetargetedFormat(FrameFormat format) {
+        MutableFrameFormat retargeted = format.mutableCopy();
+        retargeted.setTarget(mTarget);
+        return retargeted;
     }
 
     public int process(FilterContext context) {
@@ -71,8 +75,7 @@ public class RetargetFilter extends Filter {
         Frame input = pullInput(0);
 
         // Create output frame
-        MutableFrameFormat outFormat = input.getFormat().mutableCopy();
-        outFormat.setTarget(mTarget);
+        FrameFormat outFormat = getRetargetedFormat(input.getFormat());
         Frame output = context.getFrameManager().newFrame(outFormat);
 
         // Process

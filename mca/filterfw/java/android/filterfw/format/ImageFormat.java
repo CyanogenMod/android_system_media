@@ -65,6 +65,14 @@ public class ImageFormat {
                       target);
     }
 
+    public static MutableFrameFormat create(int colorspace) {
+        return create(FrameFormat.SIZE_UNSPECIFIED,
+                      FrameFormat.SIZE_UNSPECIFIED,
+                      colorspace,
+                      bytesPerSampleForColorspace(colorspace),
+                      FrameFormat.TARGET_UNSPECIFIED);
+    }
+
     public static int bytesPerSampleForColorspace(int colorspace) {
         switch (colorspace) {
             case COLORSPACE_GRAY:

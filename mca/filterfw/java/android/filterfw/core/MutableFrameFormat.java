@@ -86,7 +86,7 @@ public class MutableFrameFormat extends FrameFormat {
         if (mMetaData == null) {
             mMetaData = new KeyValueMap();
         }
-        mMetaData.setValue(key, value);
+        mMetaData.put(key, value);
     }
 
 }

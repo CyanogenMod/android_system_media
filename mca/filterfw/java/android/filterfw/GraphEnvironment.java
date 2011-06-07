@@ -132,7 +132,7 @@ public class GraphEnvironment extends MffEnvironment {
         // Read the file into a graph
         FilterGraph graph = null;
         try {
-            graph = getGraphReader().readResource(context, resourceId);
+            graph = getGraphReader().readGraphResource(context, resourceId);
         } catch (GraphIOException e) {
             throw new RuntimeException("Could not read graph: " + e.getMessage());
         }

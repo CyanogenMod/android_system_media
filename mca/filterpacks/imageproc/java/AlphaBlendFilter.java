@@ -26,17 +26,16 @@ import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
+import android.filterfw.core.ProgramParameter;
 import android.filterfw.core.ShaderProgram;
+import android.filterfw.format.ImageFormat;
 
 import java.util.Set;
 
-public class AlphaBlendFilter extends Filter {
+public class AlphaBlendFilter extends ImageFilter {
 
-    @FilterParameter(name = "weight", isOptional = true)
-    private float mWeight = 1.0f;
-
+    @ProgramParameter(name = "weight", type = float.class)
     private Program mProgram;
-    private FrameFormat mOutputFormat;
 
     private final String mAlphaBlendShader =
             "precision mediump float;\n" +
@@ -56,28 +55,19 @@ public class AlphaBlendFilter extends Filter {
         super(name);
     }
 
+    @Override
     public String[] getInputNames() {
         return new String[] { "source", "overlay", "mask" };
     }
 
+    @Override
     public String[] getOutputNames() {
         return new String[] { "blended" };
     }
 
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        if (format.isBinaryDataType() && format.getBytesPerSample() == 4) {
-            mOutputFormat = format;
-            return true;
-        }
-        return false;
-    }
-
-    public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
-    }
-
-    public void prepare(FilterContext environment) {
-        switch (mOutputFormat.getTarget()) {
+    @Override
+    protected void createProgram(int target) {
+        switch (target) {
             case FrameFormat.TARGET_NATIVE:
                 throw new RuntimeException("TODO: Write native implementation for AlphaBlend!");
 
@@ -88,34 +78,11 @@ public class AlphaBlendFilter extends Filter {
             default:
                 throw new RuntimeException("AlphaBlendFilter could not create suitable program!");
         }
-        mProgram.setHostValue("weight", mWeight);
     }
 
-    public void parametersUpdated(Set<String> updated) {
-        if (mProgram != null) {
-            mProgram.setHostValue("weight", mWeight);
-        }
-    }
-
-    public int process(FilterContext env) {
-        // Get input frames
-        Frame[] inputs = { pullInput(0), pullInput(1), pullInput(2) };
-
-        // Create output frame
-        Frame output = env.getFrameManager().newFrame(inputs[0].getFormat());
-
-        // Process
-        mProgram.process(inputs, output);
-
-        // Push output
-        putOutput(0, output);
-
-        // Release pushed frame
-        output.release();
-
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
+    @Override
+    protected Program getProgram() {
+        return mProgram;
     }
 
 }

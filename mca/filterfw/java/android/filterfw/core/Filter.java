@@ -24,10 +24,16 @@ import android.filterfw.core.FrameManager;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.Protocol;
 import android.filterfw.core.ProtocolException;
+import android.filterfw.io.TextGraphReader;
+import android.filterfw.io.GraphIOException;
 import android.util.Log;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -59,6 +65,8 @@ public abstract class Filter {
     private HashSet<Frame> mPulledFrames;
 
     private KeyValueMap mParameters;
+    private KeyValueMap mUpdatedParams;
+
     private Protocol mFilterProtocol;
 
     private int mStatus = 0;
@@ -70,21 +78,24 @@ public abstract class Filter {
         mStatus = STATUS_READY;
     }
 
-    public final void initWithParameterMap(KeyValueMap parameters) throws ProtocolException {
-        parameters.assertConformsToProtocol(getProtocol());
+    public final void initWithParameterMap(KeyValueMap parameters) {
+        getProtocol().assertKeyValueMapConforms(parameters);
         mParameters = parameters;
         setParameters(parameters, false);
         initFilter();
         setupIOPorts();
     }
 
-    public final void initWithParameterString(String assignments) throws ProtocolException {
-        KeyValueMap parameters = new KeyValueMap();
-        parameters.readAssignments(assignments);
-        initWithParameterMap(parameters);
+    public final void initWithParameterString(String assignments) {
+        try {
+            KeyValueMap parameters = new TextGraphReader().readKeyValueAssignments(assignments);
+            initWithParameterMap(parameters);
+        } catch (GraphIOException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
-    public final void initWithParameterList(Object... keyValues) throws ProtocolException {
+    public final void initWithParameterList(Object... keyValues) {
         KeyValueMap parameters = new KeyValueMap();
         parameters.setKeyValues(keyValues);
         initWithParameterMap(parameters);
@@ -92,19 +103,16 @@ public abstract class Filter {
 
     public final void init() throws ProtocolException {
         KeyValueMap parameters = new KeyValueMap();
-        parameters.assertConformsToProtocol(getProtocol());
+        getProtocol().assertKeyValueMapConforms(parameters);
         initWithParameterMap(parameters);
     }
 
-    public final void updateParameterMap(KeyValueMap parameters) throws ProtocolException {
+    public final void updateParameterMap(KeyValueMap parameters) {
         mParameters = getProtocol().updateKVMap(mParameters, parameters);
-        synchronized(this) {
-            setParameters(parameters, true);
-        }
-        parametersUpdated(parameters.keySet());
+        mUpdatedParams = parameters;
     }
 
-    public final void updateParameterList(Object... keyValues) throws ProtocolException {
+    public final void updateParameterList(Object... keyValues) {
         KeyValueMap parameters = new KeyValueMap();
         parameters.setKeyValues(keyValues);
         updateParameterMap(parameters);
@@ -138,7 +146,10 @@ public abstract class Filter {
     }
 
     protected void setParameters(KeyValueMap parameters, boolean isUpdate) {
-        parameters.setFilterParameters(this);
+        setExposedParameters(parameters, isUpdate);
+        if (isUpdate) {
+            parametersUpdated(parameters.keySet());
+        }
     }
 
     protected void initFilter() {
@@ -265,6 +276,107 @@ public abstract class Filter {
         return result;
     }
 
+    protected final Field getParameterField(String name) {
+        // TODO: Add cache
+        Class filterClass = getClass();
+        FilterParameter param;
+        for (Field field : filterClass.getDeclaredFields()) {
+            if ((param = field.getAnnotation(FilterParameter.class)) != null) {
+                String paramName = param.name().isEmpty() ? field.getName() : param.name();
+                if (name.equals(paramName)) {
+                    return field;
+                }
+            }
+        }
+        return null;
+    }
+
+    protected final ProgramVariable getProgramVariable(String name) {
+        // TODO: Add cache
+        Class filterClass = getClass();
+        for (Field field : filterClass.getDeclaredFields()) {
+            ProgramParameter[] params = getProgramParameters(field);
+            for (ProgramParameter param : params) {
+                String varName = param.name();
+                String exposedName = param.exposedName().isEmpty() ? varName : param.exposedName();
+                if (name.equals(exposedName)) {
+                    field.setAccessible(true);
+                    try {
+                        return new ProgramVariable((Program)field.get(this), varName);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(
+                            "Access to field '" + field.getName() + "' was denied!");
+                    } catch (ClassCastException e) {
+                        throw new RuntimeException(
+                            "Non Program field '" + field.getName() + "' annotated with "
+                            + " ProgramParameter!");
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    protected final ProgramParameter[] getProgramParameters(Field field) {
+        Annotation annotation;
+        if ((annotation = field.getAnnotation(ProgramParameter.class)) != null) {
+            ProgramParameter[] result = new ProgramParameter[1];
+            result[0] = (ProgramParameter)annotation;
+            return result;
+        } else if ((annotation = field.getAnnotation(ProgramParameters.class)) != null) {
+            return ((ProgramParameters)annotation).value();
+        } else {
+            return new ProgramParameter[0];
+        }
+    }
+
+    protected final boolean setParameterField(String name, Object value) {
+        Field field = getParameterField(name);
+        if (field != null) {
+            field.setAccessible(true);
+            try {
+                field.set(this, value);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(
+                    "Access to field '" + field.getName() + "' was denied!");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    protected final boolean setProgramVariable(String name, Object value, boolean isUpdate) {
+        ProgramVariable programVar = getProgramVariable(name);
+        if (programVar != null) {
+            // If this is not an update, postpone until process to ensure program is setup
+            if (!isUpdate) {
+                if (mUpdatedParams == null) {
+                    mUpdatedParams = new KeyValueMap();
+                }
+                mUpdatedParams.put(name, value);
+            } else {
+                programVar.setValue(value);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    protected final void setExposedParameters(KeyValueMap keyValueMap, boolean isUpdate) {
+        // Go through all parameter entries
+        for (Entry<String, Object> entry : keyValueMap.entrySet()) {
+            // Try setting filter field
+            if (!setParameterField(entry.getKey(), entry.getValue())) {
+                // If that fails, try setting a program variable
+                if (!setProgramVariable(entry.getKey(), entry.getValue(), isUpdate)) {
+                    // If that fails too, throw an exception
+                    throw new RuntimeException("Attempting to set unknown parameter '"
+                        + entry.getKey() + "' on filter " + this + "!");
+                }
+            }
+        }
+    }
+
     public String toString() {
         return "'" + getName() + "' (" + getFilterClassName() + ")";
     }
@@ -294,6 +406,10 @@ public abstract class Filter {
 
     final int performProcess(FilterContext context) {
         synchronized(this) {
+            if (mUpdatedParams != null) {
+                setParameters(mUpdatedParams, true);
+                mUpdatedParams = null;
+            }
             mStatus = process(context);
             releasePulledFrames(context);
         }

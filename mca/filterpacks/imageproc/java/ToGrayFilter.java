@@ -31,7 +31,7 @@ import android.filterfw.core.ShaderProgram;
 
 import android.util.Log;
 
-public class ToGrayFilter extends Filter {
+public class ToGrayFilter extends ImageFilter {
 
     @FilterParameter(name = "outputChannels", isOptional = false)
     private int mOutChannels;
@@ -49,37 +49,22 @@ public class ToGrayFilter extends Filter {
             "void main() {\n" +
             "  vec4 color = texture2D(tex_sampler_0, v_texcoord);\n" +
             "  float y = dot(color, vec4(0.299, 0.587, 0.114, 0));\n" +
-            "  gl_FragColor = vec4(y, y, y, 1);\n" +
+            "  gl_FragColor = vec4(y, y, y, color.a);\n" +
             "}\n";
 
     public ToGrayFilter(String name) {
         super(name);
     }
 
-    public String[] getInputNames() {
-        return new String[] { "image" };
-    }
-
-    public String[] getOutputNames() {
-        return new String[] { "image" };
-    }
-
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        if (format.isBinaryDataType()) {
-            mInputChannels = format.getBytesPerSample();
-            mOutputFormat = format.mutableCopy();
-            mOutputFormat.setBytesPerSample(mOutChannels);
-            return true;
-        }
-        return false;
-    }
-
     public FrameFormat getOutputFormat(int index) {
+        mOutputFormat = getInputFormat(0).mutableCopy();
+        mOutputFormat.setBytesPerSample(mOutChannels);
         return mOutputFormat;
     }
 
-    public void prepare(FilterContext environment) {
-        switch (mOutputFormat.getTarget()) {
+    public void createProgram(int target) {
+        mInputChannels = getInputFormat(0).getBytesPerSample();
+        switch (target) {
             case FrameFormat.TARGET_NATIVE:
                 /*switch (mOutChannels) {
                   case 1:
@@ -140,5 +125,9 @@ public class ToGrayFilter extends Filter {
                 Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
+    @Override
+    protected Program getProgram() {
+        return mProgram;
+    }
 
 }

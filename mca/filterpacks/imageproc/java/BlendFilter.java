@@ -26,17 +26,16 @@ import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
+import android.filterfw.core.ProgramParameter;
 import android.filterfw.core.ShaderProgram;
+import android.filterfw.format.ImageFormat;
 
 import java.util.Set;
 
-public class BlendFilter extends Filter {
+public class BlendFilter extends ImageFilter {
 
-    @FilterParameter(name = "blend", isOptional = false, isUpdatable = true)
-    private float mBlend;
-
+    @ProgramParameter(name = "blend", type = float.class)
     private Program mProgram;
-    private FrameFormat mOutputFormat;
 
     private final String mBlendShader =
             "precision mediump float;\n" +
@@ -54,28 +53,19 @@ public class BlendFilter extends Filter {
         super(name);
     }
 
+    @Override
     public String[] getInputNames() {
         return new String[] { "left", "right" };
     }
 
+    @Override
     public String[] getOutputNames() {
         return new String[] { "blended" };
     }
 
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        if (format.isBinaryDataType() && format.getBytesPerSample() == 4) {
-            mOutputFormat = format;
-            return true;
-        }
-        return false;
-    }
-
-    public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
-    }
-
-    public void prepare(FilterContext environment) {
-        switch (mOutputFormat.getTarget()) {
+    @Override
+    protected void createProgram(int target) {
+        switch (target) {
             case FrameFormat.TARGET_NATIVE:
                 throw new RuntimeException("TODO: Write native implementation for Blend!");
 
@@ -86,34 +76,10 @@ public class BlendFilter extends Filter {
             default:
                 throw new RuntimeException("BlendFilter could not create suitable program!");
         }
-        mProgram.setHostValue("blend", mBlend);
     }
 
-    public void parametersUpdated(Set<String> updated) {
-        if (mProgram != null) {
-            mProgram.setHostValue("blend", mBlend);
-        }
+    @Override
+    protected Program getProgram() {
+        return mProgram;
     }
-
-    public int process(FilterContext env) {
-        // Get input frame
-        Frame[] inputs = { pullInput(0), pullInput(1) };
-
-        // Create output frame
-        Frame output = env.getFrameManager().newFrame(inputs[0].getFormat());
-
-        // Process
-        mProgram.process(inputs, output);
-
-        // Push output
-        putOutput(0, output);
-
-        // Release pushed frame
-        output.release();
-
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
-    }
-
 }

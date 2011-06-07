@@ -27,6 +27,7 @@ import android.filterfw.core.FrameManager;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.NativeFrame;
+import android.filterfw.format.ImageFormat;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -72,9 +73,10 @@ public class ImageDecoder extends Filter {
         mBitmap = BitmapFactory.decodeResource(mContext.getResources(), resourceId);
 
         // Setup output format
-        mOutputFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE, target);
-        mOutputFormat.setBytesPerSample(4);
-        mOutputFormat.setDimensions(mBitmap.getWidth(), mBitmap.getHeight());
+        mOutputFormat = ImageFormat.create(mBitmap.getWidth(),
+                                           mBitmap.getHeight(),
+                                           ImageFormat.COLORSPACE_RGBA,
+                                           target);
     }
 
     public String[] getInputNames() {

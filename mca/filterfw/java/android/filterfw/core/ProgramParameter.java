@@ -17,26 +17,14 @@
 
 package android.filterfw.core;
 
-import android.filterfw.core.Frame;
-import android.filterfw.core.KeyValueMap;
-import android.filterfw.core.Program;
+import java.lang.annotation.*;
 
-public abstract class JavaProgram extends Program {
-
-    private KeyValueMap mHostVariables;
-
-    public JavaProgram() {
-        mHostVariables = new KeyValueMap();
-    }
-
-    public abstract void process(Frame[] inputs, Frame output);
-
-    public void setHostValue(String variableName, Object value) {
-        mHostVariables.put(variableName, value);
-    }
-
-    public Object getHostValue(String variableName) {
-        return mHostVariables.get(variableName);
-    }
-
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface ProgramParameter {
+    String  name();
+    Class   type();
+    String  exposedName() default "";
+    boolean isOptional() default false;
+    boolean isUpdatable() default true;
 }

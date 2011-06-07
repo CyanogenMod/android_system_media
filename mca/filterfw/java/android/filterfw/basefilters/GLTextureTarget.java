@@ -24,6 +24,7 @@ import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GLFrame;
 import android.filterfw.core.MutableFrameFormat;
+import android.filterfw.format.ImageFormat;
 
 import java.util.Set;
 
@@ -35,7 +36,6 @@ public class GLTextureTarget extends Filter {
     @FilterParameter(name = "createTex", isOptional = true)
     private boolean mCreateTex = false;
 
-    private FrameFormat mInputFormat;
     private MutableFrameFormat mFrameFormat;
     private Frame mFrame;
 
@@ -55,11 +55,9 @@ public class GLTextureTarget extends Filter {
 
     @Override
     public boolean acceptsInputFormat(int index, FrameFormat format) {
-        if (format.getDimensionCount() == 2 && format.getBytesPerSample() == 4) {
-            mInputFormat = format;
-            return true;
-        }
-        return false;
+        FrameFormat acceptable = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                    FrameFormat.TARGET_UNSPECIFIED);
+        return format.isCompatibleWith(acceptable);
     }
 
     @Override
@@ -78,7 +76,7 @@ public class GLTextureTarget extends Filter {
     public void prepare(FilterContext context) {
         mFrameFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE, FrameFormat.TARGET_GPU);
         mFrameFormat.setBytesPerSample(4);
-        mFrameFormat.setDimensions(mInputFormat.getDimensions());
+        mFrameFormat.setDimensions(getInputFormat(0).getDimensions());
     }
 
     @Override

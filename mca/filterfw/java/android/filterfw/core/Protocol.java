@@ -24,6 +24,8 @@ import android.filterfw.core.ProtocolException;
 import java.io.StringWriter;
 import java.lang.String;
 import java.lang.reflect.Field;
+import java.lang.annotation.Annotation;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +35,7 @@ import java.util.Set;
 import android.util.Log;
 
 // TODO: Rename to FilterProtocol as it is quite specific to filters (given the updatable flag)?
+//       ...or to ParameterProtocol?
 public class Protocol {
 
     private class ParameterSig {
@@ -60,18 +63,14 @@ public class Protocol {
         Protocol result = new Protocol();
 
         // Go through all filter parameters
-        FilterParameter param;
+        Annotation annotation;
         for (Field field : filter.getClass().getDeclaredFields()) {
-            if ((param = field.getAnnotation(FilterParameter.class)) != null) {
-                // Create the modifier mask
-                int modifiers = param.isUpdatable() ? MODIFIER_UPDATABLE : MODIFIER_NONE;
-                modifiers |= param.isOptional() ? MODIFIER_OPTIONAL : MODIFIER_NONE;
-
-                // Get the parameter name
-                String paramName = param.name().isEmpty() ? field.getName() : param.name();
-
-                // Add the parameter
-                result.addParameter(paramName, getBoxedType(field.getType()), modifiers);
+            if ((annotation = field.getAnnotation(FilterParameter.class)) != null) {
+                addFilterParameter((FilterParameter)annotation, field, result);
+            } else if ((annotation = field.getAnnotation(ProgramParameter.class)) != null) {
+                addProgramParameter((ProgramParameter)annotation, field, result);
+            } else if ((annotation = field.getAnnotation(ProgramParameters.class)) != null) {
+                addProgramParameters((ProgramParameters)annotation, field, result);
             }
         }
 
@@ -145,7 +144,7 @@ public class Protocol {
 
         // Update the KV-Map
         KeyValueMap result = (KeyValueMap)kvMap.clone();
-        result.updateWithMap(update);
+        result.putAll(update);
 
         // Make sure the result conforms with this protocol
         assertKeyValueMapConforms(result);
@@ -193,14 +192,15 @@ public class Protocol {
             ParameterSig paramSig = entry.getValue();
 
             // Make sure required key is present
-            if ((paramSig.modifiers & MODIFIER_OPTIONAL) == 0 && !kvMap.hasKey(entry.getKey())) {
+            if ((paramSig.modifiers & MODIFIER_OPTIONAL) == 0
+                && !kvMap.containsKey(entry.getKey())) {
                 throw new ProtocolException(
                     "Protocol conformance error: KeyValueMap [" + kvMap.toString() + "] is missing " +
                     "required key '" + entry.getKey() + "'!");
             }
 
             // Make sure type is compatible
-            Object value = kvMap.getValue(entry.getKey());
+            Object value = kvMap.get(entry.getKey());
             if (value != null) {
                 if (!paramSig.type.isAssignableFrom(value.getClass())) {
                     throw new ProtocolException(
@@ -231,5 +231,49 @@ public class Protocol {
             }
         }
     }
+
+    private static void addFilterParameter(FilterParameter filterParam,
+                                           Field field,
+                                           Protocol result) {
+        // Create the modifier mask
+        int modifiers = filterParam.isUpdatable() ? MODIFIER_UPDATABLE : MODIFIER_NONE;
+        modifiers |= filterParam.isOptional() ? MODIFIER_OPTIONAL : MODIFIER_NONE;
+
+        // Get the parameter name
+        String paramName = filterParam.name().isEmpty()
+            ? field.getName()
+            : filterParam.name();
+
+        // Add the parameter
+        result.addParameter(paramName, getBoxedType(field.getType()), modifiers);
+    }
+
+    private static void addProgramParameter(ProgramParameter programParam,
+                                            Field field,
+                                            Protocol result) {
+        // Create the modifier mask
+        int modifiers = programParam.isUpdatable() ? MODIFIER_UPDATABLE : MODIFIER_NONE;
+        modifiers |= programParam.isOptional() ? MODIFIER_OPTIONAL : MODIFIER_NONE;
+
+        // Get the parameter name
+        String paramName = programParam.exposedName().isEmpty()
+            ? programParam.name()
+            : programParam.exposedName();
+
+        // Get the parameter type
+        Class type = programParam.type();
+
+        // Add the parameter
+        result.addParameter(paramName, getBoxedType(type), modifiers);
+    }
+
+    private static void addProgramParameters(ProgramParameters programParams,
+                                             Field field,
+                                             Protocol result) {
+        for (ProgramParameter programParam : programParams.value()) {
+            addProgramParameter(programParam, field, result);
+        }
+    }
+
 
 }
