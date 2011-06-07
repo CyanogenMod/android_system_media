@@ -177,7 +177,7 @@ jboolean Java_android_filterfw_core_NativeProgram_callNativeProcess(JNIEnv* env,
       const bool output_was_empty = (output_buffer.data() == NULL);
 
       // Process the frames!
-      program->CallProcess(input_buffers, input_count, &output_buffer);
+      err = !program->CallProcess(input_buffers, input_count, &output_buffer);
 
       // Attach buffer to output frame if this was allocated by the program
       if (output_was_empty && output_buffer.data()) {
