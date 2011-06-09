@@ -157,6 +157,7 @@ public class MediaSource extends Filter {
 
     @Override
     public int process(FilterContext context) {
+        // Note: process is synchronized by its caller in the Filter base class
         if (LOGVV) Log.v(TAG, "Processing new frame");
 
         if (mMediaPlayer == null) {
@@ -165,20 +166,18 @@ public class MediaSource extends Filter {
         }
 
         if (!mPlaying) {
-            synchronized(this) {
-                int waitCount = 0;
-                while (!mGotSize || !mPrepared) {
-                    try {
-                        this.wait(100);
-                    } catch (InterruptedException e) {
-                        // ignoring
-                    }
-                    waitCount++;
-                    if (waitCount == 50) {
-                        Log.e(TAG, "MediaPlayer timed out while preparing");
-                        mMediaPlayer.release();
-                        return Filter.STATUS_ERROR;
-                    }
+            int waitCount = 0;
+            while (!mGotSize || !mPrepared) {
+                try {
+                    this.wait(100);
+                } catch (InterruptedException e) {
+                    // ignoring
+                }
+                waitCount++;
+                if (waitCount == 50) {
+                    Log.e(TAG, "MediaPlayer timed out while preparing");
+                    mMediaPlayer.release();
+                    return Filter.STATUS_ERROR;
                 }
             }
             mMediaPlayer.start();
@@ -251,12 +250,21 @@ public class MediaSource extends Filter {
             }
         } else if (updated.contains("loop")) {
             if (isOpen()) {
-                mMediaPlayer.setLooping(mLooping);
+                synchronized(this) {
+                    mMediaPlayer.setLooping(mLooping);
+                }
             }
         }
     }
 
     synchronized public void pauseVideo(boolean pauseState) {
+        if (isOpen()) {
+            if (pauseState && !mPaused) {
+                mMediaPlayer.pause();
+            } else if (!pauseState && mPaused) {
+                mMediaPlayer.start();
+            }
+        }
         mPaused = pauseState;
     }
 
@@ -265,6 +273,7 @@ public class MediaSource extends Filter {
         mPrepared = false;
         mGotSize = false;
         mPlaying = false;
+        mPaused = false;
 
         if (mMediaPlayer != null) {
             // Clean up existing media player
