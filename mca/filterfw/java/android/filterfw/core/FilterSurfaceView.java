@@ -21,7 +21,6 @@ import android.content.Context;
 import android.filterfw.core.FilterSurfaceRenderer;
 import android.filterfw.core.GLEnvironment;
 import android.util.AttributeSet;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 

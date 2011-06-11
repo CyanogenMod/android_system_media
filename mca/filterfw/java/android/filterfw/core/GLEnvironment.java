@@ -33,6 +33,7 @@ public class GLEnvironment {
 
     public static native GLEnvironment activeEnvironment();
 
+    @Override
     protected void finalize() throws Throwable {
         deallocate();
     }

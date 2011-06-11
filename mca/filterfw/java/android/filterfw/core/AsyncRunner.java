@@ -39,6 +39,7 @@ public class AsyncRunner extends GraphRunner{
 
     private FilterContext.OnFrameReceivedListener mBackgroundListener =
             new FilterContext.OnFrameReceivedListener() {
+        @Override
         public void onFrameReceived(Filter filter, Frame frame, Object userData) {
             if (LOGVV) Log.v(TAG, "Received callback at forwarding listener.");
             if (mRunTask != null) {
@@ -57,11 +58,13 @@ public class AsyncRunner extends GraphRunner{
 
         private static final String TAG = "AsyncRunnerTask";
 
+        @Override
         protected void onPreExecute() {
             // Disable our GL context in the UI thread
             disableUiGlContext();
         }
 
+        @Override
         protected Integer doInBackground(SyncRunner... runner) {
             if (runner.length > 1) {
                 throw new RuntimeException("More than one callback data set received!");
@@ -94,10 +97,12 @@ public class AsyncRunner extends GraphRunner{
             return isDone ? RESULT_FINISHED : RESULT_STOPPED;
         }
 
+        @Override
         protected void onCancelled(Integer result) {
             onPostExecute(result);
         }
 
+        @Override
         protected void onPostExecute(Integer result) {
             if (LOGV) Log.v(TAG, "Starting post-execute.");
             enableUiGlContext();
@@ -121,6 +126,7 @@ public class AsyncRunner extends GraphRunner{
         }
 
         /** Runs in UI thread to pass on frame callbacks */
+        @Override
         public void onProgressUpdate(FrameReceivedContents... publishPacket) {
             if (publishPacket.length > 1) {
                 throw new RuntimeException("More than one callback data set received!");
@@ -163,6 +169,7 @@ public class AsyncRunner extends GraphRunner{
      * completes running a graph, whether the completion is due to a stop() call
      * or the filters running out of data to process.
      */
+    @Override
     public void setDoneCallback(OnRunnerDoneListener listener) {
         mDoneListener = listener;
     }
@@ -178,15 +185,18 @@ public class AsyncRunner extends GraphRunner{
         mRunner = new SyncRunner(mFilterContext, graph, mSchedulerClass);
     }
 
+    @Override
     public FilterGraph getGraph() {
         return mRunner != null ? mRunner.getGraph() : null;
     }
 
+    @Override
     public FilterContext getContext() {
         return mFilterContext;
     }
 
     /** Execute the graph in a background thread. */
+    @Override
     public void run() {
         if (LOGV) Log.v(TAG, "Running graph.");
         if (mRunTask != null &&
@@ -204,6 +214,7 @@ public class AsyncRunner extends GraphRunner{
     /** Stop graph execution. This is an asynchronous call; register a callback
      * with setDoneCallback to be notified of when the background processing has
      * been completed. */
+    @Override
     public void stop() {
         if (LOGV) Log.v(TAG, "Stopping graph.");
         if (mRunTask != null) {
@@ -212,6 +223,7 @@ public class AsyncRunner extends GraphRunner{
     }
 
     /** Check if background processing is happening */
+    @Override
     public boolean isRunning() {
         if (mRunTask == null) return false;
         else return (mRunTask.getStatus() != AsyncTask.Status.FINISHED);

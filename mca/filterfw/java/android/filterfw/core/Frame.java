@@ -19,7 +19,6 @@ package android.filterfw.core;
 
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
-import android.filterfw.core.NativeBuffer;
 import android.graphics.Bitmap;
 import java.nio.ByteBuffer;
 

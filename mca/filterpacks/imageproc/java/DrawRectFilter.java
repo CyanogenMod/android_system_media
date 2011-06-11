@@ -61,14 +61,17 @@ public class DrawRectFilter extends Filter {
         super(name);
     }
 
+    @Override
     public String[] getInputNames() {
         return new String[] { "image", "box" };
     }
 
+    @Override
     public String[] getOutputNames() {
         return new String[] { "image" };
     }
 
+    @Override
     public boolean acceptsInputFormat(int index, FrameFormat format) {
         switch(index) {
             case 0: { // image
@@ -85,14 +88,17 @@ public class DrawRectFilter extends Filter {
         return false;
     }
 
+    @Override
     public FrameFormat getOutputFormat(int index) {
         return getInputFormat(0);
     }
 
+    @Override
     public void prepare(FilterContext env) {
         mProgram = new ShaderProgram(mVertexShader, mFixedColorFragmentShader);
     }
 
+    @Override
     public int process(FilterContext env) {
         // Get input frame
         Frame imageFrame = pullInput(0);

@@ -98,6 +98,7 @@ public class Point {
         return this.minus(center).rotated(radians).plus(center);
     }
 
+    @Override
     public String toString() {
         return "(" + x + ", " + y + ")";
     }

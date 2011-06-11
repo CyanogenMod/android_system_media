@@ -31,14 +31,17 @@ public class ToUpperCase extends Filter {
         super(name);
     }
 
+    @Override
     public String[] getInputNames() {
         return new String[] { "mixedcase" };
     }
 
+    @Override
     public String[] getOutputNames() {
         return new String[] { "uppercase" };
     }
 
+    @Override
     public boolean acceptsInputFormat(int index, FrameFormat format) {
         // TODO: Check meta-property ObjectClass
         if (format.getBaseType() == FrameFormat.TYPE_OBJECT) {
@@ -48,10 +51,12 @@ public class ToUpperCase extends Filter {
         return false;
     }
 
+    @Override
     public FrameFormat getOutputFormat(int index) {
         return mOutputFormat;
     }
 
+    @Override
     public int process(FilterContext env) {
         Frame input = pullInput(0);
         String inputString = (String)input.getObjectValue();

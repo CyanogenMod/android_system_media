@@ -19,11 +19,9 @@ package android.filterfw;
 
 import android.content.Context;
 import android.filterfw.core.AsyncRunner;
-import android.filterfw.core.CachedFrameManager;
 import android.filterfw.core.FilterGraph;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.FrameManager;
-import android.filterfw.core.GLEnvironment;
 import android.filterfw.core.GraphRunner;
 import android.filterfw.core.SimpleScheduler;
 import android.filterfw.core.SyncRunner;
@@ -78,7 +76,7 @@ public class GraphEnvironment extends MffEnvironment {
             }
             return mSyncRunner;
         }
-    };
+    }
 
     /**
      * Create a new GraphEnvironment with default components.

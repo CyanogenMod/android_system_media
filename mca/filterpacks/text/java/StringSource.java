@@ -37,23 +37,28 @@ public class StringSource extends Filter {
         super(name);
     }
 
+    @Override
     public String[] getInputNames() {
         return null;
     }
 
+    @Override
     public String[] getOutputNames() {
         return new String[] { "string" };
     }
 
+    @Override
     public boolean acceptsInputFormat(int index, FrameFormat format) {
         return false;
     }
 
+    @Override
     public FrameFormat getOutputFormat(int index) {
         mOutputFormat = new FrameFormat(FrameFormat.TYPE_OBJECT, FrameFormat.TARGET_JAVA);
         return mOutputFormat;
     }
 
+    @Override
     public int process(FilterContext env) {
         Frame output = env.getFrameManager().newEmptyFrame(mOutputFormat);
         output.setObjectValue(mString);

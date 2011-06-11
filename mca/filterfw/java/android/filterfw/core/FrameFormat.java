@@ -157,6 +157,7 @@ public class FrameFormat {
         return result;
     }
 
+    @Override
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -174,6 +175,7 @@ public class FrameFormat {
                 format.mMetaData.equals(mMetaData);
     }
 
+    @Override
     public int hashCode() {
         return 4211 ^ mBaseType ^ mBytesPerSample ^ getSize();
     }
@@ -267,6 +269,7 @@ public class FrameFormat {
         }
     }
 
+    @Override
     public String toString() {
         return "Format {  BaseType: " + baseTypeToString(mBaseType)
             + ", Target: " + targetToString(mTarget)

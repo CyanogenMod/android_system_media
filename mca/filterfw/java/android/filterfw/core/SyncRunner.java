@@ -65,15 +65,18 @@ public class SyncRunner extends GraphRunner {
         graph.setupFilters(mFilterContext);
     }
 
+    @Override
     protected void finalize() throws Throwable {
         // TODO: Is this the best place to do this, or should we make it explicit?
         getGraph().tearDownFilters(mFilterContext);
     }
 
+    @Override
     public FilterGraph getGraph() {
         return mScheduler != null ? mScheduler.getGraph() : null;
     }
 
+    @Override
     public FilterContext getContext() {
         return mFilterContext;
     }
@@ -94,6 +97,7 @@ public class SyncRunner extends GraphRunner {
         getGraph().closeFilters(mFilterContext);
     }
 
+    @Override
     public void run() {
         // Open filters
         open();
@@ -115,14 +119,17 @@ public class SyncRunner extends GraphRunner {
     }
 
 
+    @Override
     public boolean isRunning() {
         return false;
     }
 
+    @Override
     public void setDoneCallback(OnRunnerDoneListener listener) {
         mDoneListener = listener;
     }
 
+    @Override
     public void stop() {
         throw new RuntimeException("SyncRunner does not support stopping a graph!");
     }

@@ -56,12 +56,14 @@ public class ToGrayFilter extends ImageFilter {
         super(name);
     }
 
+    @Override
     public FrameFormat getOutputFormat(int index) {
         mOutputFormat = getInputFormat(0).mutableCopy();
         mOutputFormat.setBytesPerSample(mOutChannels);
         return mOutputFormat;
     }
 
+    @Override
     public void createProgram(int target) {
         mInputChannels = getInputFormat(0).getBytesPerSample();
         switch (target) {
@@ -102,6 +104,7 @@ public class ToGrayFilter extends ImageFilter {
         }
     }
 
+    @Override
     public int process(FilterContext env) {
         // Get input frame
         Frame input = pullInput(0);

@@ -26,13 +26,9 @@ import java.lang.String;
 import java.lang.reflect.Field;
 import java.lang.annotation.Annotation;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-import android.util.Log;
 
 // TODO: Rename to FilterProtocol as it is quite specific to filters (given the updatable flag)?
 //       ...or to ParameterProtocol?
@@ -153,6 +149,7 @@ public class Protocol {
         return result;
     }
 
+    @Override
     public String toString() {
         StringWriter writer = new StringWriter();
         writer.append("Protocol { \n");

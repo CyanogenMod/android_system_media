@@ -56,14 +56,17 @@ public class ToPackedGrayFilter extends Filter {
         super(name);
     }
 
+    @Override
     public String[] getInputNames() {
         return new String[] { "image" };
     }
 
+    @Override
     public String[] getOutputNames() {
         return new String[] { "image" };
     }
 
+    @Override
     public boolean acceptsInputFormat(int index, FrameFormat format) {
         switch (index) {
             case 0:
@@ -82,6 +85,7 @@ public class ToPackedGrayFilter extends Filter {
         }
     }
 
+    @Override
     public FrameFormat getOutputFormat(int index) {
         switch (index) {
             case 0:
@@ -110,10 +114,12 @@ public class ToPackedGrayFilter extends Filter {
         }
     }
 
+    @Override
     public void prepare(FilterContext environment) {
         mProgram = new ShaderProgram(mColorToPackedGrayShader);
     }
 
+    @Override
     public int process(FilterContext env) {
         FrameFormat outputFormat = getOutputFormat(0);
         checkOutputDimensions();

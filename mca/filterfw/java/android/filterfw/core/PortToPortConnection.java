@@ -17,11 +17,7 @@
 
 package android.filterfw.core;
 
-import java.util.HashSet;
-
-import android.filterfw.core.Filter;
 import android.filterfw.core.FilterConnection;
-import android.filterfw.core.FrameFormat;
 
 public class PortToPortConnection extends FilterConnection {
 
@@ -51,10 +47,12 @@ public class PortToPortConnection extends FilterConnection {
         return true;
     }
 
+    @Override
     public final FilterPort getSourcePort() {
         return mSourcePort;
     }
 
+    @Override
     public final FilterPort getTargetPort() {
         return mTargetPort;
     }

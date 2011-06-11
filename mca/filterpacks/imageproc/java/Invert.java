@@ -40,7 +40,7 @@ public class Invert extends ImageFilter {
             "  gl_FragColor.g = 1.0 - color.g;\n" +
             "  gl_FragColor.b = 1.0 - color.b;\n" +
             "  gl_FragColor.a = color.a;\n" +
-            "}\n";;
+            "}\n";
 
     public Invert(String name) {
         super(name);

@@ -26,9 +26,11 @@ public class SimpleScheduler extends Scheduler {
         super(graph);
     }
 
+    @Override
     public void reset() {
     }
 
+    @Override
     public Filter scheduleNextNode() {
         for (Filter filter : getGraph().getFilters()) {
             if (filter.canProcess())

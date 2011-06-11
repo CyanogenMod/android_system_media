@@ -79,6 +79,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
         super(name);
     }
 
+    @Override
     protected void finalize() throws Throwable {
         if (mSurfaceView != null) {
             mSurfaceView.unbind();
@@ -239,6 +240,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
         }
     }
 
+    @Override
     public synchronized void surfaceDestroyed() {
         // We do nothing here but declare this synchronized so that the surface is not destroyed
         // behind our backs.
@@ -275,7 +277,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
                                                1.0f / relativeAspectRatio, 1.0f);
                     }
                     break;
-            };
+            }
         }
     }
 }

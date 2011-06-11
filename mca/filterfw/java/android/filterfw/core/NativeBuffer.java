@@ -64,6 +64,7 @@ public class NativeBuffer {
         return 1;
     }
 
+    @Override
     protected void finalize() {
         deallocate(mOwnsData);
         if (mAttachedFrame != null) {

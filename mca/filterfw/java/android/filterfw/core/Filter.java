@@ -17,16 +17,13 @@
 
 package android.filterfw.core;
 
-import android.content.Context;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterPort;
-import android.filterfw.core.FrameManager;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.Protocol;
 import android.filterfw.core.ProtocolException;
 import android.filterfw.io.TextGraphReader;
 import android.filterfw.io.GraphIOException;
-import android.util.Log;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

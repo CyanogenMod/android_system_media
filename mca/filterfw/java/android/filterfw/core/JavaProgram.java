@@ -29,12 +29,15 @@ public abstract class JavaProgram extends Program {
         mHostVariables = new KeyValueMap();
     }
 
+    @Override
     public abstract void process(Frame[] inputs, Frame output);
 
+    @Override
     public void setHostValue(String variableName, Object value) {
         mHostVariables.put(variableName, value);
     }
 
+    @Override
     public Object getHostValue(String variableName) {
         return mHostVariables.get(variableName);
     }

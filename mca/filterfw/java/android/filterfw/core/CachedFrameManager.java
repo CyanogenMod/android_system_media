@@ -19,15 +19,10 @@ package android.filterfw.core;
 
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
-import android.filterfw.core.FrameManager;
-import android.filterfw.core.GLFrame;
-import android.filterfw.core.NativeFrame;
-import android.filterfw.core.JavaFrame;
 import android.filterfw.core.SimpleFrameManager;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
-import java.util.HashMap;
 
 public class CachedFrameManager extends SimpleFrameManager {
 
@@ -40,6 +35,7 @@ public class CachedFrameManager extends SimpleFrameManager {
         mAvailableFrames = new LinkedList<Frame>();
     }
 
+    @Override
     public Frame newFrame(FrameFormat format) {
         Frame result = findAvailableFrame(format, Frame.NO_BINDING, 0);
         if (result == null) {
@@ -48,10 +44,12 @@ public class CachedFrameManager extends SimpleFrameManager {
         return result;
     }
 
+    @Override
     public Frame newEmptyFrame(FrameFormat format) {
         return super.newEmptyFrame(format);
     }
 
+    @Override
     public Frame newBoundFrame(FrameFormat format, int bindingType, long bindingId) {
         Frame result = findAvailableFrame(format, bindingType, bindingId);
         if (result == null) {
@@ -60,15 +58,18 @@ public class CachedFrameManager extends SimpleFrameManager {
         return result;
     }
 
+    @Override
     public Frame duplicateFrame(Frame frame) {
         // TODO
         return null;
     }
 
+    @Override
     public Frame retainFrame(Frame frame) {
         return super.retainFrame(frame);
     }
 
+    @Override
     public Frame releaseFrame(Frame frame) {
         if (frame.isReusable()) {
             int refCount = frame.decRefCount();
