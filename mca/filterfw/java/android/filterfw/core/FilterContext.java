@@ -38,6 +38,7 @@ public class FilterContext {
         mStoredFrames = new HashMap<String, Frame>();
     }
 
+    @Override
     protected void finalize() {
         for (Frame frame : mStoredFrames.values()) {
             frame.release();

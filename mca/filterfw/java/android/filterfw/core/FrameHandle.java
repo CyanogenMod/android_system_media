@@ -18,7 +18,6 @@
 package android.filterfw.core;
 
 import android.filterfw.core.Frame;
-import android.util.Log;
 
 public class FrameHandle {
 
@@ -28,6 +27,7 @@ public class FrameHandle {
         mFrame = frame.retain();
     }
 
+    @Override
     protected void finalize() {
         release();
     }

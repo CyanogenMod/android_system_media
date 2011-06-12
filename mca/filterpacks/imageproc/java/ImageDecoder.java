@@ -54,6 +54,7 @@ public class ImageDecoder extends Filter {
         super(name);
     }
 
+    @Override
     public void initFilter() {
         int target = FrameFormat.TARGET_NATIVE;
         if (mTargetString != null) {
@@ -79,22 +80,27 @@ public class ImageDecoder extends Filter {
                                            target);
     }
 
+    @Override
     public String[] getInputNames() {
         return null;
     }
 
+    @Override
     public String[] getOutputNames() {
         return new String[] { "image" };
     }
 
+    @Override
     public boolean acceptsInputFormat(int index, FrameFormat format) {
         return false;
     }
 
+    @Override
     public FrameFormat getOutputFormat(int index) {
         return mOutputFormat;
     }
 
+    @Override
     public int open(FilterContext env) {
         mImageFrame = env.getFrameManager().newFrame(mOutputFormat);
         mImageFrame.setBitmap(mBitmap);
@@ -102,6 +108,7 @@ public class ImageDecoder extends Filter {
         return Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
+    @Override
     public int process(FilterContext env) {
         putOutput(0, mImageFrame);
 
@@ -112,6 +119,7 @@ public class ImageDecoder extends Filter {
         }
     }
 
+    @Override
     public void close(FilterContext env) {
         mImageFrame.release();
         mImageFrame = null;

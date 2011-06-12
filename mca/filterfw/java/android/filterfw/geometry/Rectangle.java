@@ -75,10 +75,12 @@ public class Rectangle extends Quad {
         return p0.plus(p1).plus(p2).plus(p3).times(0.25f);
     }
 
+    @Override
     public Rectangle scaled(float s) {
         return new Rectangle(p0.times(s), p1.times(s), p2.times(s), p3.times(s));
     }
 
+    @Override
     public Rectangle scaled(float x, float y) {
         return new Rectangle(p0.mult(x, y), p1.mult(x, y), p2.mult(x, y), p3.mult(x, y));
     }

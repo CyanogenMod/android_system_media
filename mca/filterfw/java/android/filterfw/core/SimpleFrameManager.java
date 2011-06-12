@@ -31,15 +31,18 @@ public class SimpleFrameManager extends FrameManager {
     public SimpleFrameManager() {
     }
 
+    @Override
     public Frame newFrame(FrameFormat format) {
         //Log.v("FrameManager", "Creating new frame of format: " + format + ".");
         return createNewFrame(format, false);
     }
 
+    @Override
     public Frame newEmptyFrame(FrameFormat format) {
         return createNewFrame(format, true);
     }
 
+    @Override
     public Frame newBoundFrame(FrameFormat format, int bindingType, long bindingId) {
         Frame result = null;
         switch(format.getTarget()) {

@@ -47,24 +47,29 @@ public class ImageEncoder extends Filter {
         super(name);
     }
 
+    @Override
     public String[] getInputNames() {
         return new String[] { "image" };
     }
 
+    @Override
     public String[] getOutputNames() {
         return null;
     }
 
+    @Override
     public boolean acceptsInputFormat(int index, FrameFormat format) {
         FrameFormat requiredFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
                                                         FrameFormat.TARGET_UNSPECIFIED);
         return format.isCompatibleWith(requiredFormat);
     }
 
+    @Override
     public FrameFormat getOutputFormat(int index) {
         return null;
     }
 
+    @Override
     public int process(FilterContext env) {
         Frame input = pullInput(0);
         Bitmap bitmap = input.getBitmap();

@@ -17,14 +17,11 @@
 
 package android.filterfw;
 
-import android.filterfw.core.CachedFrameManager;
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterFactory;
 import android.filterfw.core.FilterFunction;
 import android.filterfw.core.FrameHandle;
 import android.filterfw.core.FrameManager;
-import android.filterfw.core.GLEnvironment;
 
 /**
  * A FilterFunctionEnvironment provides a simple functional front-end to manually executing

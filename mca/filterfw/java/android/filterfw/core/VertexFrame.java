@@ -20,11 +20,7 @@ package android.filterfw.core;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
-import android.filterfw.core.MutableFrameFormat;
-import android.filterfw.core.NativeFrame;
 import android.graphics.Bitmap;
-
-import android.graphics.Rect;
 
 import java.nio.ByteBuffer;
 
@@ -47,14 +43,17 @@ public class VertexFrame extends Frame {
         }
     }
 
+    @Override
     void dealloc() {
         deallocate();
     }
 
+    @Override
     public Object getObjectValue() {
         throw new RuntimeException("Vertex frames do not support reading data!");
     }
 
+    @Override
     public void setInts(int[] ints) {
         assertFrameMutable();
         if (!setNativeInts(ints)) {
@@ -62,10 +61,12 @@ public class VertexFrame extends Frame {
         }
     }
 
+    @Override
     public int[] getInts() {
         throw new RuntimeException("Vertex frames do not support reading data!");
     }
 
+    @Override
     public void setFloats(float[] floats) {
         assertFrameMutable();
         if (!setNativeFloats(floats)) {
@@ -73,10 +74,12 @@ public class VertexFrame extends Frame {
         }
     }
 
+    @Override
     public float[] getFloats() {
         throw new RuntimeException("Vertex frames do not support reading data!");
     }
 
+    @Override
     public void setData(ByteBuffer buffer, int offset, int length) {
         assertFrameMutable();
         byte[] bytes = buffer.array();
@@ -87,18 +90,22 @@ public class VertexFrame extends Frame {
         }
     }
 
+    @Override
     public ByteBuffer getData() {
         throw new RuntimeException("Vertex frames do not support reading data!");
     }
 
+    @Override
     public void setBitmap(Bitmap bitmap) {
         throw new RuntimeException("Unsupported: Cannot set vertex frame bitmap value!");
     }
 
+    @Override
     public Bitmap getBitmap() {
         throw new RuntimeException("Vertex frames do not support reading data!");
     }
 
+    @Override
     public void setDataFromFrame(Frame frame) {
         // TODO: Optimize
         super.setDataFromFrame(frame);

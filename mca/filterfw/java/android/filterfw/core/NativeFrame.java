@@ -47,14 +47,17 @@ public class NativeFrame extends Frame {
         setReusable(!isEmpty);
     }
 
+    @Override
     void dealloc() {
         deallocate();
     }
 
+    @Override
     public int getCapacity() {
         return getNativeCapacity();
     }
 
+    @Override
     public Object getObjectValue() {
         // If this is not a structured frame, return our data
         if (getFormat().getBaseType() != FrameFormat.TYPE_STRUCT) {
@@ -95,6 +98,7 @@ public class NativeFrame extends Frame {
         return structData;
     }
 
+    @Override
     public void setInts(int[] ints) {
         assertFrameMutable();
         if (ints.length * nativeIntSize() > getFormat().getSize()) {
@@ -106,10 +110,12 @@ public class NativeFrame extends Frame {
         }
     }
 
+    @Override
     public int[] getInts() {
         return getNativeInts(getFormat().getSize());
     }
 
+    @Override
     public void setFloats(float[] floats) {
         assertFrameMutable();
         if (floats.length * nativeFloatSize() > getFormat().getSize()) {
@@ -121,12 +127,14 @@ public class NativeFrame extends Frame {
         }
     }
 
+    @Override
     public float[] getFloats() {
         return getNativeFloats(getFormat().getSize());
     }
 
     // TODO: This function may be a bit confusing: Is the offset the target or source offset? Maybe
     // we should allow specifying both? (May be difficult for other frame types).
+    @Override
     public void setData(ByteBuffer buffer, int offset, int length) {
         assertFrameMutable();
         byte[] bytes = buffer.array();
@@ -143,10 +151,12 @@ public class NativeFrame extends Frame {
         }
     }
 
+    @Override
     public ByteBuffer getData() {
         return ByteBuffer.wrap(getNativeData(getFormat().getSize()));
     }
 
+    @Override
     public void setBitmap(Bitmap bitmap) {
         assertFrameMutable();
         if (getFormat().getNumberOfDimensions() != 2) {
@@ -162,6 +172,7 @@ public class NativeFrame extends Frame {
         }
     }
 
+    @Override
     public Bitmap getBitmap() {
         if (getFormat().getNumberOfDimensions() != 2) {
             throw new RuntimeException("Attempting to get Bitmap for non 2-dimensional native frame!");
@@ -175,6 +186,7 @@ public class NativeFrame extends Frame {
         return result;
     }
 
+    @Override
     public void setDataFromFrame(Frame frame) {
         // Make sure frame fits
         if (getFormat().getSize() < frame.getFormat().getSize()) {
@@ -195,6 +207,7 @@ public class NativeFrame extends Frame {
         }
     }
 
+    @Override
     public String toString() {
         return "NativeFrame (" + getFormat() + ") with native buffer of size " + getCapacity();
     }

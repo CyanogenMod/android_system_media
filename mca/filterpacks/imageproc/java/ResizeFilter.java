@@ -49,14 +49,17 @@ public class ResizeFilter extends Filter {
         super(name);
     }
 
+    @Override
     public String[] getInputNames() {
         return new String[] { "image" };
     }
 
+    @Override
     public String[] getOutputNames() {
         return new String[] { "image" };
     }
 
+    @Override
     public boolean acceptsInputFormat(int index, FrameFormat format) {
         if (format.isBinaryDataType()) {
             mOutputFormat = format.mutableCopy();
@@ -66,10 +69,12 @@ public class ResizeFilter extends Filter {
         return false;
     }
 
+    @Override
     public FrameFormat getOutputFormat(int index) {
         return mOutputFormat;
     }
 
+    @Override
     protected void prepare(FilterContext environment) {
         switch (mOutputFormat.getTarget()) {
             case FrameFormat.TARGET_NATIVE:
@@ -85,7 +90,7 @@ public class ResizeFilter extends Filter {
                 throw new RuntimeException("ResizeFilter could not create suitable program!");
         }
     }
-
+    @Override
     public int process(FilterContext env) {
         // Get input frame
         Frame input = pullInput(0);

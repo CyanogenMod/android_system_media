@@ -63,10 +63,12 @@ public class ShaderProgram extends Program {
         return program;
     }
 
+    @Override
     protected void finalize() throws Throwable {
         deallocate();
     }
 
+    @Override
     public void process(Frame[] inputs, Frame output) {
         if (mTimer.LOG_MFF_RUNNING_TIMES) {
           mTimer.start("glFinish");
@@ -103,6 +105,7 @@ public class ShaderProgram extends Program {
         }
     }
 
+    @Override
     public void setHostValue(String variableName, Object value) {
         if (!setUniformValue(variableName, value)) {
             throw new RuntimeException("Error setting uniform value for variable '" +
@@ -110,6 +113,7 @@ public class ShaderProgram extends Program {
         }
     }
 
+    @Override
     public Object getHostValue(String variableName) {
         return getUniformValue(variableName);
     }

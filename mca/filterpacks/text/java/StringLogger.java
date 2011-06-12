@@ -30,23 +30,28 @@ public class StringLogger extends Filter {
         super(name);
     }
 
+    @Override
     public String[] getInputNames() {
         return new String[] { "string" };
     }
 
+    @Override
     public String[] getOutputNames() {
         return null;
     }
 
+    @Override
     public boolean acceptsInputFormat(int index, FrameFormat format) {
         // TODO: Check meta-property ObjectClass
         return format.getBaseType() == FrameFormat.TYPE_OBJECT;
     }
 
+    @Override
     public FrameFormat getOutputFormat(int index) {
         return null;
     }
 
+    @Override
     public int process(FilterContext env) {
         Frame input = pullInput(0);
         String inputString = (String)input.getObjectValue();

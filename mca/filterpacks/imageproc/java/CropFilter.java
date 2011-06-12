@@ -48,15 +48,18 @@ public class CropFilter extends Filter {
         super(name);
     }
 
+    @Override
     public String[] getInputNames() {
         return new String[] { "image", "box" };
     }
 
+    @Override
     public String[] getOutputNames() {
         return new String[] { "image" };
     }
 
     // TODO: Support non-GPU image frames
+    @Override
     public boolean acceptsInputFormat(int index, FrameFormat format) {
         switch(index) {
             case 0: { // image
@@ -73,14 +76,17 @@ public class CropFilter extends Filter {
         return false;
     }
 
+    @Override
     public FrameFormat getOutputFormat(int index) {
         return getInputFormat(0);
     }
 
+    @Override
     public void prepare(FilterContext env) {
         mProgram = ShaderProgram.createIdentity();
     }
 
+    @Override
     public int process(FilterContext env) {
         // Get input frame
         Frame imageFrame = pullInput(0);

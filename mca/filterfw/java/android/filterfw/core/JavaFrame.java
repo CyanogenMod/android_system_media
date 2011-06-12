@@ -121,46 +121,56 @@ public class JavaFrame extends Frame {
         }
     }
 
+    @Override
     void dealloc() {
         mObject = null;
     }
 
+    @Override
     public Object getObjectValue() {
         return mObject;
     }
 
+    @Override
     public void setInts(int[] ints) {
         assertFrameMutable();
         setGenericObjectValue(ints);
     }
 
+    @Override
     public int[] getInts() {
         return (mObject instanceof int[]) ? (int[])mObject : null;
     }
 
+    @Override
     public void setFloats(float[] floats) {
         assertFrameMutable();
         setGenericObjectValue(floats);
     }
 
+    @Override
     public float[] getFloats() {
         return (mObject instanceof float[]) ? (float[])mObject : null;
     }
 
+    @Override
     public void setData(ByteBuffer buffer, int offset, int length) {
         assertFrameMutable();
         setGenericObjectValue(ByteBuffer.wrap(buffer.array(), offset, length));
     }
 
+    @Override
     public ByteBuffer getData() {
         return (mObject instanceof ByteBuffer) ? (ByteBuffer)mObject : null;
     }
 
+    @Override
     public void setBitmap(Bitmap bitmap) {
         assertFrameMutable();
         setGenericObjectValue(bitmap);
     }
 
+    @Override
     public Bitmap getBitmap() {
         return (mObject instanceof Bitmap) ? (Bitmap)mObject : null;
     }
@@ -171,6 +181,7 @@ public class JavaFrame extends Frame {
         setFormat(format);
     }
 
+    @Override
     protected void setGenericObjectValue(Object object) {
         // Update the FrameFormat class
         // TODO: Take this out! FrameFormats should not be modified and convenience formats used

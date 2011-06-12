@@ -263,6 +263,7 @@ public class CameraSource extends Filter {
 
     private SurfaceTexture.OnFrameAvailableListener onCameraFrameAvailableListener =
             new SurfaceTexture.OnFrameAvailableListener() {
+        @Override
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
             if (LOGV) Log.v(TAG, "New frame from camera");
             mNewFrameAvailable.open();

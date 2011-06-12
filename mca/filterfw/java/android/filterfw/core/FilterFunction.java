@@ -94,6 +94,7 @@ public class FilterFunction {
         return mFilter.getParameters().get(key);
     }
 
+    @Override
     public String toString() {
         return mFilter.getName();
     }

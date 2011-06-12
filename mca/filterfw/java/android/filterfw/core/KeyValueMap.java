@@ -20,7 +20,6 @@ package android.filterfw.core;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class KeyValueMap extends HashMap<String, Object> {
 

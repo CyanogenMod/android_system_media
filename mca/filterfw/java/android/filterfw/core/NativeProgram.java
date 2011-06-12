@@ -20,8 +20,6 @@ package android.filterfw.core;
 import android.filterfw.core.Frame;
 import android.filterfw.core.Program;
 
-import android.util.Log;
-
 public class NativeProgram extends Program {
 
     private int nativeProgramId;
@@ -67,13 +65,14 @@ public class NativeProgram extends Program {
         }
     }
 
+    @Override
     protected void finalize() throws Throwable {
         if (mHasTeardownFunction && !callNativeTeardown()) {
             throw new RuntimeException("Could not tear down NativeFrame!");
         }
         deallocate();
     }
-
+    @Override
     public void process(Frame[] inputs, Frame output) {
         NativeFrame[] nativeInputs = new NativeFrame[inputs.length];
         for (int i = 0; i < inputs.length; ++i) {
@@ -98,6 +97,7 @@ public class NativeProgram extends Program {
         }
     }
 
+    @Override
     public void setHostValue(String variableName, Object value) {
         if (!mHasSetValueFunction) {
             throw new RuntimeException("Attempting to set native variable, but native code does not " +
@@ -108,6 +108,7 @@ public class NativeProgram extends Program {
         }
     }
 
+    @Override
     public Object getHostValue(String variableName) {
         if (!mHasGetValueFunction) {
             throw new RuntimeException("Attempting to get native variable, but native code does not " +

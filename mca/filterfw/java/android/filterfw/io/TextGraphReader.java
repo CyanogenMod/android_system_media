@@ -20,12 +20,8 @@ package android.filterfw.io;
 import java.lang.Float;
 import java.lang.Integer;
 import java.lang.String;
-import java.lang.reflect.Constructor;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import android.filterfw.core.Filter;
@@ -57,6 +53,7 @@ public class TextGraphReader extends GraphReader {
             mPackageName = packageName;
         }
 
+        @Override
         public void execute(TextGraphReader reader) throws GraphIOException {
             try {
                 reader.mFactory.addPackage(mPackageName);
@@ -96,6 +93,7 @@ public class TextGraphReader extends GraphReader {
             mParams = params;
         }
 
+        @Override
         public void execute(TextGraphReader reader) throws GraphIOException {
             Filter filter = reader.mCurrentFilter;
             try {
@@ -123,11 +121,13 @@ public class TextGraphReader extends GraphReader {
             mTargetName = targetName;
         }
 
+        @Override
         public void execute(TextGraphReader reader) {
             reader.mCurrentGraph.connect(mSourceFilter, mSourcePort, mTargetFilter, mTargetName);
         }
     }
 
+    @Override
     public FilterGraph readGraphString(String graphString) throws GraphIOException {
         FilterGraph result = new FilterGraph();
 
@@ -313,6 +313,7 @@ public class TextGraphReader extends GraphReader {
         }
     }
 
+    @Override
     public KeyValueMap readKeyValueAssignments(String assignments) throws GraphIOException {
         final Pattern ignorePattern = Pattern.compile("\\s+");
         PatternScanner scanner = new PatternScanner(assignments, ignorePattern);

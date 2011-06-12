@@ -84,6 +84,7 @@ public class Quad {
         return Collections.max(ys) - Collections.min(ys);
     }
 
+    @Override
     public String toString() {
         return "{" + p0 + ", " + p1 + ", " + p2 + ", " + p3 + "}";
     }

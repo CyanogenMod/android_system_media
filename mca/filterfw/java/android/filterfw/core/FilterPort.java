@@ -17,8 +17,6 @@
 
 package android.filterfw.core;
 
-import java.util.HashSet;
-
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterConnection;
 import android.filterfw.core.FrameFormat;
@@ -120,6 +118,7 @@ public class FilterPort {
         return getConnection() != null;
     }
 
+    @Override
     public String toString() {
         switch(mType) {
             case INPUT_PORT:
