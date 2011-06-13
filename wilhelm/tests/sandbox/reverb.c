@@ -113,12 +113,12 @@ void slesutPrintEnvironmentalReverbSettings(const SLEnvironmentalReverbSettings 
 {
     printf("roomLevel: %d\n", settings->roomLevel);
     printf("roomHFLevel: %d\n", settings->roomHFLevel);
-    printf("decayTime: %ld\n", settings->decayTime);
+    printf("decayTime: %d\n", settings->decayTime);
     printf("decayHFRatio: %d\n", settings->decayHFRatio);
     printf("reflectionsLevel: %d\n", settings->reflectionsLevel);
-    printf("reflectionsDelay: %ld\n", settings->reflectionsDelay);
+    printf("reflectionsDelay: %d\n", settings->reflectionsDelay);
     printf("reverbLevel: %d\n", settings->reverbLevel);
-    printf("reverbDelay: %ld\n", settings->reverbDelay);
+    printf("reverbDelay: %d\n", settings->reverbDelay);
     printf("diffusion: %d\n", settings->diffusion);
     printf("density: %d\n", settings->density);
 }
@@ -301,7 +301,7 @@ int main(int argc, char **argv)
                 printf("Output mix preset reverb successfully changed to %u\n",
                         outputMixPresetNumber);
             } else {
-                printf("Unable to set output mix preset reverb to %u, result=%lu\n",
+                printf("Unable to set output mix preset reverb to %u, result=%u\n",
                         outputMixPresetNumber, result);
             }
         }
@@ -476,12 +476,12 @@ int main(int argc, char **argv)
                     assert(getPresetReverb == playerPresetNumber);
                     printf("Player preset reverb successfully changed to %u\n", playerPresetNumber);
                 } else {
-                    printf("Unable to set player preset reverb to %u, result=%lu\n",
+                    printf("Unable to set player preset reverb to %u, result=%u\n",
                             playerPresetNumber, result);
                 }
             }
         } else {
-            printf("Unable to get player default preset reverb, result=%lu\n", result);
+            printf("Unable to get player default preset reverb, result=%u\n", result);
         }
     }
 
@@ -523,7 +523,7 @@ int main(int argc, char **argv)
                 }
             }
         } else {
-            printf("Unable to get player default environmental reverb properties, result=%lu\n",
+            printf("Unable to get player default environmental reverb properties, result=%u\n",
                     result);
         }
     }

@@ -148,7 +148,7 @@ void StreamChangeCallback (XAStreamInformationItf caller,
         void * pContext )
 {
     if (XA_STREAMCBEVENT_PROPERTYCHANGE == eventId) {
-        LOGD("StreamChangeCallback called for stream %lu", streamIndex);
+        LOGD("StreamChangeCallback called for stream %u", streamIndex);
 
         XAuint32 domain;
         if (XA_RESULT_SUCCESS == (*caller)->QueryStreamType(caller, streamIndex, &domain)) {
@@ -156,7 +156,7 @@ void StreamChangeCallback (XAStreamInformationItf caller,
                 XAVideoStreamInformation videoInfo;
                 if (XA_RESULT_SUCCESS == (*caller)->QueryStreamInformation(caller, streamIndex,
                         &videoInfo)) {
-                    LOGI("Found video size %lu x %lu", videoInfo.width, videoInfo.height);
+                    LOGI("Found video size %u x %u", videoInfo.width, videoInfo.height);
                 }
             }
         }

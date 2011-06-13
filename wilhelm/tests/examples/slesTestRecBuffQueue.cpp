@@ -69,7 +69,7 @@ static FILE* gFp;
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stdout, "%lu error code encountered at line %d, exiting\n", result, line);
+        fprintf(stdout, "%u error code encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
 }
@@ -94,13 +94,13 @@ void RecCallback(
     if (SL_RECORDEVENT_HEADATNEWPOS & event) {
         SLmillisecond pMsec = 0;
         (*caller)->GetPosition(caller, &pMsec);
-        fprintf(stdout, "SL_RECORDEVENT_HEADATNEWPOS current position=%lums\n", pMsec);
+        fprintf(stdout, "SL_RECORDEVENT_HEADATNEWPOS current position=%ums\n", pMsec);
     }
 
     if (SL_RECORDEVENT_HEADATMARKER & event) {
         SLmillisecond pMsec = 0;
         (*caller)->GetPosition(caller, &pMsec);
-        fprintf(stdout, "SL_RECORDEVENT_HEADATMARKER current position=%lums\n", pMsec);
+        fprintf(stdout, "SL_RECORDEVENT_HEADATMARKER current position=%ums\n", pMsec);
     }
 }
 
@@ -130,7 +130,7 @@ void RecBufferQueueCallback(
     ExitOnError( (*queueItf)->GetState(queueItf, &recQueueState) );
 
     /*fprintf(stderr, "\tRecBufferQueueCallback now has pCntxt->pData=%p queue: "
-            "count=%lu playIndex=%lu\n",
+            "count=%u playIndex=%u\n",
             pCntxt->pData, recQueueState.count, recQueueState.index);*/
 }
 

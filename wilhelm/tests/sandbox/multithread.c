@@ -163,7 +163,7 @@ int main(int argc, char **argv)
         sleep(1);
         for (i = 0; i < MAX_THREAD; ++i) {
             ThreadArgument *ta = &thread_args[i];
-            printf("[%d]=%lu ", j, ta->mCounter);
+            printf("[%d]=%u ", j, ta->mCounter);
         }
         printf("\n");
     }
@@ -175,7 +175,7 @@ int main(int argc, char **argv)
         sleep(1);
         for (i = 0; i < MAX_THREAD; ++i) {
             ThreadArgument *ta = &thread_args[i];
-            printf("[%d]=%lu ", j, ta->mCounter);
+            printf("[%d]=%u ", j, ta->mCounter);
         }
         printf("\n");
     }

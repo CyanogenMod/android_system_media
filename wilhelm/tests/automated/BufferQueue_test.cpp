@@ -55,7 +55,7 @@ void CheckErr(SLresult res) {
         const char *str = slesutResultToString(res);
         if (NULL == str)
             str = "unknown";
-        fprintf(stderr, "CheckErr failure: %s (0x%lx), exiting\n", str, res);
+        fprintf(stderr, "CheckErr failure: %s (0x%x), exiting\n", str, res);
         //Fail the test case
         FAIL();
     }

@@ -38,7 +38,7 @@
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stderr, "%lu error code encountered at line %d, exiting\n", result, line);
+        fprintf(stderr, "%u error code encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
 }

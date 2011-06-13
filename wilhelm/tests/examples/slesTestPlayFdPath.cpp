@@ -38,7 +38,7 @@ static int testMode;
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stdout, "%lu error code encountered at line %d, exiting\n", result, line);
+        fprintf(stdout, "%u error code encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
 }

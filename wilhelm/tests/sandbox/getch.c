@@ -8,6 +8,7 @@ http://stackoverflow.com/questions/448944/c-non-blocking-keyboard-input
 #include <sys/select.h>
 #include <termios.h>
 #include <unistd.h>
+#include "getch.h"
 
 struct termios orig_termios;
 
