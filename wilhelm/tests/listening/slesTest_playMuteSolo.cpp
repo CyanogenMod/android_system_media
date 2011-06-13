@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <assert.h>
+#include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -44,6 +46,55 @@ void ExitOnErrorFunc( SLresult result , int line)
         fprintf(stdout, "%u error code encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
+}
+
+// These are extensions to OpenSL ES 1.0.1 values
+
+#define SL_PREFETCHSTATUS_UNKNOWN 0
+#define SL_PREFETCHSTATUS_ERROR   (-1)
+
+// Mutex and condition shared with main program to protect prefetch_status
+
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+SLuint32 prefetch_status = SL_PREFETCHSTATUS_UNKNOWN;
+
+/* used to detect errors likely to have occured when the OpenSL ES framework fails to open
+ * a resource, for instance because a file URI is invalid, or an HTTP server doesn't respond.
+ */
+#define PREFETCHEVENT_ERROR_CANDIDATE \
+        (SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE)
+
+// Prefetch status callback
+
+void prefetch_callback(SLPrefetchStatusItf caller, void *context, SLuint32 event)
+{
+    SLresult result;
+    assert(context == NULL);
+    SLpermille level;
+    result = (*caller)->GetFillLevel(caller, &level);
+    assert(SL_RESULT_SUCCESS == result);
+    SLuint32 status;
+    result = (*caller)->GetPrefetchStatus(caller, &status);
+    assert(SL_RESULT_SUCCESS == result);
+    SLuint32 new_prefetch_status;
+    if ((event & PREFETCHEVENT_ERROR_CANDIDATE) == PREFETCHEVENT_ERROR_CANDIDATE
+            && level == 0 && status == SL_PREFETCHSTATUS_UNDERFLOW) {
+        new_prefetch_status = SL_PREFETCHSTATUS_ERROR;
+    } else if (event == SL_PREFETCHEVENT_STATUSCHANGE &&
+            status == SL_PREFETCHSTATUS_SUFFICIENTDATA) {
+        new_prefetch_status = status;
+    } else {
+        return;
+    }
+    int ok;
+    ok = pthread_mutex_lock(&mutex);
+    assert(ok == 0);
+    prefetch_status = new_prefetch_status;
+    ok = pthread_cond_signal(&cond);
+    assert(ok == 0);
+    ok = pthread_mutex_unlock(&mutex);
+    assert(ok == 0);
 }
 
 //-----------------------------------------------------------------
@@ -114,7 +165,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     SLresult  result;
     SLEngineItf EngineItf;
 
-    /* Objects this application uses: one player and an ouput mix */
+    /* Objects this application uses: one player and an output mix */
     SLObjectItf  player, outputMix;
 
     /* Source of audio data to play */
@@ -196,20 +247,43 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     result = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf);
     ExitOnError(result);
 
+    // get the prefetch status interface
     result = (*player)->GetInterface(player, SL_IID_PREFETCHSTATUS, (void*)&prefetchItf);
     ExitOnError(result);
 
+    // enable prefetch status callbacks
+    result = (*prefetchItf)->RegisterCallback(prefetchItf, prefetch_callback, NULL);
+    assert(SL_RESULT_SUCCESS == result);
+    result = (*prefetchItf)->SetCallbackEventsMask(prefetchItf,
+            SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE);
+    assert(SL_RESULT_SUCCESS == result);
+
+    // get the mute solo interface
     result = (*player)->GetInterface(player, SL_IID_MUTESOLO, (void*)&muteSoloItf);
     ExitOnError(result);
 
+    // Attempt to get the duration before it is necessarily known.
+    // This should always return successfully.
+    // The reported duration may be either
+    // a particular duration or SL_TIME_UNKNOWN, depending on the platform.
+    SLmillisecond duration;
+    result = (*playItf)->GetDuration(playItf, &duration);
+    ExitOnError(result);
+    printf("GetDuration after Realize but before pre-fetch: result=%u, duration=%u\n",
+        result, duration);
+
     // Attempt to get the channel count before it is necessarily known.
-    // This may fail depending on the platform.
+    // This should either return successfully with a specific value (e.g. 1 or 2),
+    // or fail with SL_RESULT_PRECONDITIONS_VIOLATED, depending on the platform.
     SLuint8 numChannels = 123;
     result = (*muteSoloItf)->GetNumChannels(muteSoloItf, &numChannels);
     printf("GetNumChannels after Realize but before pre-fetch: result=%u, numChannels=%u\n",
         result, numChannels);
+    if (result != SL_RESULT_PRECONDITIONS_VIOLATED) {
+        ExitOnError(result);
+    }
 
-    /* Initialize a context for use by the callback */
+    /* Initialize a context for use by the play event callback */
     Context             context;
     context.playItf = playItf;
     context.muteSoloItf = muteSoloItf;
@@ -232,16 +306,28 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     result = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PAUSED );
     ExitOnError(result);
 
-    /* Wait until there's data to play */
-    SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
-    while (prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) {
-        usleep(100 * 1000);
-        (*prefetchItf)->GetPrefetchStatus(prefetchItf, &prefetchStatus);
+    // wait for prefetch status callback to indicate either sufficient data or error
+    pthread_mutex_lock(&mutex);
+    while (prefetch_status == SL_PREFETCHSTATUS_UNKNOWN) {
+        pthread_cond_wait(&cond, &mutex);
     }
+    pthread_mutex_unlock(&mutex);
+    if (prefetch_status == SL_PREFETCHSTATUS_ERROR) {
+        fprintf(stderr, "Error during prefetch, exiting\n");
+        goto destroyKillKill;
+    }
+
+    /* Query the duration */
+    result = (*playItf)->GetDuration(playItf, &duration);
+    printf("GetDuration after Realize and after pre-fetch: result=%u, duration=%u\n",
+        result, duration);
+    ExitOnError(result);
 
     /* Query the number of channels */
     numChannels = 123;
     result = (*muteSoloItf)->GetNumChannels(muteSoloItf, &numChannels);
+    printf("GetNumChannels after Realize and after pre-fetch: result=%u, numChannels=%u\n",
+        result, numChannels);
     ExitOnError(result);
     fprintf(stdout, "Content has %d channel(s)\n", numChannels);
 
