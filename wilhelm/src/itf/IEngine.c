@@ -206,9 +206,9 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     pAudioSrc = NULL;
                     pAudioSnk = NULL;
 
-                    // Check that the requested interfaces are compatible with the data source
-                    result = checkSourceFormatVsInterfacesCompatibility(&thiz->mDataSource,
-                            pCAudioPlayer_class, exposedMask);
+                    // Check that the requested interfaces are compatible with data source and sink
+                    result = checkSourceSinkVsInterfacesCompatibility(&thiz->mDataSource,
+                            &thiz->mDataSink, pCAudioPlayer_class, exposedMask);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }

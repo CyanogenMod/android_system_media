@@ -514,7 +514,7 @@ void audioPlayer_setInvalid(CAudioPlayer* ap) {
 
 //-----------------------------------------------------------------------------
 /*
- * returns true if the given data sink is supported by AudioPlayer that don't
+ * returns true if the given data sink is supported by AudioPlayer that doesn't
  *   play to an OutputMix object, false otherwise
  *
  * pre-condition: the locator of the audio sink is not SL_DATALOCATOR_OUTPUTMIX

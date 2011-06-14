@@ -590,10 +590,11 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
 
 
 /** \brief Check interface ID compatibility with respect to a particular source
- *         data locator format
+ *         and sink data locator format
  */
 
-SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pSrcDataLocatorFormat,
+SLresult checkSourceSinkVsInterfacesCompatibility(const DataLocatorFormat *pSrcDataLocatorFormat,
+        const DataLocatorFormat *pSinkDataLocatorFormat,
         const ClassTable *clazz, unsigned exposedMask) {
     int index;
     switch (pSrcDataLocatorFormat->mLocator.mLocatorType) {
@@ -603,6 +604,31 @@ SLresult checkSourceFormatVsInterfacesCompatibility(const DataLocatorFormat *pSr
 #endif
         // URIs and FD can be sources when "playing" to an OutputMix or a Buffer Queue for decode
         // so we don't prevent the retrieval of the BufferQueue interfaces for those sources
+        switch (pSinkDataLocatorFormat->mLocator.mLocatorType) {
+        case SL_DATALOCATOR_BUFFERQUEUE:
+#ifdef ANDROID
+        case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+#endif
+            break;
+        default:
+            // can't request SLBufferQueueItf or its alias SLAndroidSimpleBufferQueueItf
+            // if the data sink is not a buffer queue
+            index = clazz->mMPH_to_index[MPH_BUFFERQUEUE];
+#ifdef ANDROID
+            assert(index == clazz->mMPH_to_index[MPH_ANDROIDSIMPLEBUFFERQUEUE]);
+#endif
+            if (0 <= index) {
+                if (exposedMask & (1 << index)) {
+                    SL_LOGE("can't request SL_IID_BUFFERQUEUE "
+#ifdef ANDROID
+                            "or SL_IID_ANDROIDSIMPLEBUFFERQUEUE "
+#endif
+                            "with a non-buffer queue data sink");
+                    return SL_RESULT_FEATURE_UNSUPPORTED;
+                }
+            }
+            break;
+        }
         break;
 
     case SL_DATALOCATOR_BUFFERQUEUE:
