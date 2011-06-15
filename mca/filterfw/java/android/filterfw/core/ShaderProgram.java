@@ -178,6 +178,18 @@ public class ShaderProgram extends Program {
         }
     }
 
+    public void setBlendEnabled(boolean enable) {
+        if (!setShaderBlendEnabled(enable)) {
+            throw new RuntimeException("Could not set Blending " + enable + "!");
+        }
+    }
+
+    public void setBlendFunc(int sfactor, int dfactor) {
+        if (!setShaderBlendFunc(sfactor, dfactor)) {
+            throw new RuntimeException("Could not set BlendFunc " + sfactor +","+ dfactor + "!");
+        }
+    }
+
     public void setDrawMode(int drawMode) {
         if (!setShaderDrawMode(drawMode)) {
             throw new RuntimeException("Could not set GL draw-mode to " + drawMode + "!");
@@ -221,6 +233,10 @@ public class ShaderProgram extends Program {
     private static native ShaderProgram nativeCreateIdentity();
 
     private native boolean setShaderClearsOutput(boolean clears);
+
+    private native boolean setShaderBlendEnabled(boolean enable);
+
+    private native boolean setShaderBlendFunc(int sfactor, int dfactor);
 
     private native boolean setShaderClearColor(float r, float g, float b);
 

@@ -77,7 +77,10 @@ ShaderProgram::ShaderProgram(const std::string& fragment_shader)
     vertex_data_(NULL),
     vertex_count_(4),
     draw_mode_(GL_TRIANGLE_STRIP),
-    clears_(false) {
+    clears_(false),
+    blending_(false),
+    sfactor_(GL_SRC_ALPHA),
+    dfactor_(GL_ONE_MINUS_SRC_ALPHA) {
 }
 
 ShaderProgram::ShaderProgram(const std::string& vertex_shader,
@@ -91,7 +94,10 @@ ShaderProgram::ShaderProgram(const std::string& vertex_shader,
     vertex_data_(NULL),
     vertex_count_(4),
     draw_mode_(GL_TRIANGLE_STRIP),
-    clears_(false) {
+    clears_(false),
+    blending_(false),
+    sfactor_(GL_SRC_ALPHA),
+    dfactor_(GL_ONE_MINUS_SRC_ALPHA) {
 }
 
 ShaderProgram::~ShaderProgram() {
@@ -461,7 +467,10 @@ bool ShaderProgram::RenderFrame(const std::vector<GLuint>& textures,
     return false;
   }
 
-  glDisable(GL_BLEND);
+  if (blending_) {
+    glEnable(GL_BLEND);
+    glBlendFunc(sfactor_, dfactor_);
+  } else glDisable(GL_BLEND);
 
   if (LOG_EVERY_FRAME) {
     int fbo, program, buffer;

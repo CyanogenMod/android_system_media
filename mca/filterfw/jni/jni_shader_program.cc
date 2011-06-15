@@ -173,6 +173,29 @@ jboolean Java_android_filterfw_core_ShaderProgram_setShaderClearsOutput(JNIEnv* 
   return JNI_FALSE;
 }
 
+jboolean Java_android_filterfw_core_ShaderProgram_setShaderBlendEnabled(JNIEnv* env,
+                                                                        jobject thiz,
+                                                                        jboolean enable) {
+  ShaderProgram* program = ConvertFromJava<ShaderProgram>(env, thiz);
+  if (program) {
+    program->SetBlendEnabled(ToCppBool(enable));
+    return JNI_TRUE;
+  }
+  return JNI_FALSE;
+}
+
+jboolean Java_android_filterfw_core_ShaderProgram_setShaderBlendFunc(JNIEnv* env,
+                                                                     jobject thiz,
+                                                                     jint sfactor,
+                                                                     jint dfactor) {
+  ShaderProgram* program = ConvertFromJava<ShaderProgram>(env, thiz);
+  if (program) {
+    program->SetBlendFunc(sfactor, dfactor);
+    return JNI_TRUE;
+  }
+  return JNI_FALSE;
+}
+
 jboolean Java_android_filterfw_core_ShaderProgram_setShaderClearColor(JNIEnv* env,
                                                                       jobject thiz,
                                                                       jfloat r,
