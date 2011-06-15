@@ -340,6 +340,25 @@ class ShaderProgram {
     // must activate clearing by calling SetClearsOutput(true).
     void SetClearColor(float red, float green, float blue, float alpha);
 
+    // Enable or Disable Blending
+    // Set to true to enable, false to disable.
+    void SetBlendEnabled(bool enable) {
+      blending_ = enable;
+    }
+
+    // Specify pixel arithmetic for blending
+    // The values of sfactor and dfactor can be:
+    //  GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA,
+    //  GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
+    //  GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA_SATURATE
+    // Default values for blending are set to:
+    //  sfactor = GL_SRC_ALPHA
+    //  dfactor = GL_ONE_MINUS_SRC_ALPHA
+    void SetBlendFunc(int sfactor, int dfactor) {
+      sfactor_ = sfactor;
+      dfactor_ = dfactor;
+    }
+
     // Accessing the Compiled Program //////////////////////////////////////////
     // Use the compiled and linked program for rendering. You should not need
     // to call this, unless you are implementing your own rendering method.
@@ -472,6 +491,11 @@ class ShaderProgram {
 
     // The color used to clear the output frame.
     RGBAColor clear_color_;
+
+    // Set to true to enable blending.
+    bool blending_;
+    int sfactor_;
+    int dfactor_;
 
     // The default vertex data used by ShaderPrograms
     static GLBoundVariable<VertexFrame> s_default_vbo_;

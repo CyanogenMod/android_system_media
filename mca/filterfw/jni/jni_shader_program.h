@@ -94,6 +94,16 @@ Java_android_filterfw_core_ShaderProgram_setShaderClearColor(JNIEnv* env,
                                                              jfloat b);
 
 JNIEXPORT jboolean JNICALL
+Java_android_filterfw_core_ShaderProgram_setShaderBlendEnabled(JNIEnv* env,
+                                                               jobject thiz,
+                                                               jboolean enable);
+
+JNIEXPORT jboolean JNICALL
+Java_android_filterfw_core_ShaderProgram_setShaderBlendFunc(JNIEnv* env,
+                                                               jobject thiz,
+                                                               jint sfactor,
+                                                               jint dfactor);
+JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_ShaderProgram_setShaderDrawMode(JNIEnv* env,
                                                            jobject thiz,
                                                            jint draw_mode);
