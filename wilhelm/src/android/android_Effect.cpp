@@ -18,7 +18,11 @@
 #include "sles_allinclusive.h"
 #include "math.h"
 #include "utils/RefBase.h"
-#include "hardware/audio_effect.h"
+#include "media/EffectEqualizerApi.h"
+#include "media/EffectBassBoostApi.h"
+#include "media/EffectVirtualizerApi.h"
+#include "media/EffectPresetReverbApi.h"
+#include "media/EffectEnvironmentalReverbApi.h"
 
 #include <system/audio.h>
 
