@@ -629,8 +629,10 @@ AndroidObjectType audioPlayer_getAndroidObjectTypeForSourceSink(CAudioPlayer *ap
 
 
 //-----------------------------------------------------------------------------
-// Callback associated with an SfPlayer of an SL ES AudioPlayer that gets its data
-// from a URI or FD, for prepare and prefetch events
+/*
+ * Callback associated with an SfPlayer of an SL ES AudioPlayer that gets its data
+ * from a URI or FD, for prepare and prefetch events
+ */
 static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* user) {
     if (NULL == user) {
         return;
@@ -1544,6 +1546,173 @@ SLresult android_audioPlayer_getCapabilitiesOfRate(CAudioPlayer *ap,
     return SL_RESULT_SUCCESS;
 }
 
+
+//-----------------------------------------------------------------------------
+// precondition
+//  called with no lock held
+//  ap != NULL
+//  pItemCount != NULL
+SLresult android_audioPlayer_metadata_getItemCount(CAudioPlayer *ap, SLuint32 *pItemCount) {
+    if (ap->mAPlayer == 0) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+    switch(ap->mAndroidObjType) {
+      case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+        {
+            android::AudioSfDecoder* decoder =
+                    static_cast<android::AudioSfDecoder*>(ap->mAPlayer.get());
+            *pItemCount = decoder->getPcmFormatKeyCount();
+        }
+        break;
+      default:
+        *pItemCount = 0;
+        break;
+    }
+    return SL_RESULT_SUCCESS;
+}
+
+
+//-----------------------------------------------------------------------------
+// precondition
+//  called with no lock held
+//  ap != NULL
+//  pKeySize != NULL
+SLresult android_audioPlayer_metadata_getKeySize(CAudioPlayer *ap,
+        SLuint32 index, SLuint32 *pKeySize) {
+    if (ap->mAPlayer == 0) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+    SLresult res = SL_RESULT_SUCCESS;
+    switch(ap->mAndroidObjType) {
+      case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+        {
+            android::AudioSfDecoder* decoder =
+                    static_cast<android::AudioSfDecoder*>(ap->mAPlayer.get());
+            SLuint32 keyNameSize = 0;
+            if (!decoder->getPcmFormatKeySize(index, &keyNameSize)) {
+                res = SL_RESULT_PARAMETER_INVALID;
+            } else {
+                // *pKeySize is the size of the region used to store the key name AND
+                //   the information about the key (size, lang, encoding)
+                *pKeySize = keyNameSize + sizeof(SLMetadataInfo);
+            }
+        }
+        break;
+      default:
+        *pKeySize = 0;
+        res = SL_RESULT_PARAMETER_INVALID;
+        break;
+    }
+    return res;
+}
+
+
+//-----------------------------------------------------------------------------
+// precondition
+//  called with no lock held
+//  ap != NULL
+//  pKey != NULL
+SLresult android_audioPlayer_metadata_getKey(CAudioPlayer *ap,
+        SLuint32 index, SLuint32 size, SLMetadataInfo *pKey) {
+    if (ap->mAPlayer == 0) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+    SLresult res = SL_RESULT_SUCCESS;
+    switch(ap->mAndroidObjType) {
+      case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+        {
+            android::AudioSfDecoder* decoder =
+                    static_cast<android::AudioSfDecoder*>(ap->mAPlayer.get());
+            if ((size < sizeof(SLMetadataInfo) ||
+                    (!decoder->getPcmFormatKeyName(index, size - sizeof(SLMetadataInfo),
+                            (char*)pKey->data)))) {
+                res = SL_RESULT_PARAMETER_INVALID;
+            } else {
+                // successfully retrieved the key value, update the other fields
+                pKey->encoding = SL_CHARACTERENCODING_UTF8;
+                memcpy((char *) pKey->langCountry, "en", 3);
+                pKey->size = strlen((char*)pKey->data) + 1;
+            }
+        }
+        break;
+      default:
+        res = SL_RESULT_PARAMETER_INVALID;
+        break;
+    }
+    return res;
+}
+
+
+//-----------------------------------------------------------------------------
+// precondition
+//  called with no lock held
+//  ap != NULL
+//  pValueSize != NULL
+SLresult android_audioPlayer_metadata_getValueSize(CAudioPlayer *ap,
+        SLuint32 index, SLuint32 *pValueSize) {
+    if (ap->mAPlayer == 0) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+    SLresult res = SL_RESULT_SUCCESS;
+    switch(ap->mAndroidObjType) {
+      case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+        {
+            android::AudioSfDecoder* decoder =
+                    static_cast<android::AudioSfDecoder*>(ap->mAPlayer.get());
+            SLuint32 valueSize = 0;
+            if (!decoder->getPcmFormatValueSize(index, &valueSize)) {
+                res = SL_RESULT_PARAMETER_INVALID;
+            } else {
+                // *pValueSize is the size of the region used to store the key value AND
+                //   the information about the value (size, lang, encoding)
+                *pValueSize = valueSize + sizeof(SLMetadataInfo);
+            }
+        }
+        break;
+      default:
+          *pValueSize = 0;
+          res = SL_RESULT_PARAMETER_INVALID;
+          break;
+    }
+    return res;
+}
+
+
+//-----------------------------------------------------------------------------
+// precondition
+//  called with no lock held
+//  ap != NULL
+//  pValue != NULL
+SLresult android_audioPlayer_metadata_getValue(CAudioPlayer *ap,
+        SLuint32 index, SLuint32 size, SLMetadataInfo *pValue) {
+    if (ap->mAPlayer == 0) {
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+    SLresult res = SL_RESULT_SUCCESS;
+    switch(ap->mAndroidObjType) {
+      case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+        {
+            android::AudioSfDecoder* decoder =
+                    static_cast<android::AudioSfDecoder*>(ap->mAPlayer.get());
+            pValue->encoding = SL_CHARACTERENCODING_BINARY;
+            memcpy((char *) pValue->langCountry, "en", 3); // applicable here?
+            SLuint32 valueSize = 0;
+            if ((size < sizeof(SLMetadataInfo)
+                    || (!decoder->getPcmFormatValueSize(index, &valueSize))
+                    || (!decoder->getPcmFormatKeyValue(index, size - sizeof(SLMetadataInfo),
+                            (SLuint32*)pValue->data)))) {
+                res = SL_RESULT_PARAMETER_INVALID;
+            } else {
+                pValue->size = valueSize;
+            }
+        }
+        break;
+      default:
+        res = SL_RESULT_PARAMETER_INVALID;
+        break;
+    }
+    return res;
+}
 
 //-----------------------------------------------------------------------------
 void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {

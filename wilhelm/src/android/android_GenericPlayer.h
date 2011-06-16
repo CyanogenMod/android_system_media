@@ -63,6 +63,7 @@ public:
 
     virtual void getDurationMsec(int* msec); // ANDROID_UNKNOWN_TIME if unknown
     virtual void getPositionMsec(int* msec); // ANDROID_UNKNOWN_TIME if unknown
+    virtual void getSampleRate(uint32_t* hz);// ANDROID_UNKNOWN_SAMPLERATE if unknown
 
     void setVolume(bool mute, bool useStereoPos, XApermille stereoPos, XAmillibel volume);
 
@@ -140,6 +141,7 @@ protected:
     int mChannelCount; // this is used for the panning law, and is not exposed outside of the object
     int32_t mDurationMsec;
     int32_t mPositionMsec;
+    uint32_t mSampleRateHz;
 
     CacheStatus_t mCacheStatus;
     int16_t mCacheFill; // cache fill level + played back level in permille

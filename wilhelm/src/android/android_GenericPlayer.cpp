@@ -31,9 +31,10 @@ GenericPlayer::GenericPlayer(const AudioPlayback_Parameters* params) :
         mStateFlags(0),
         mLooperPriority(PRIORITY_DEFAULT),
         mPlaybackParams(*params),
-        mChannelCount(1),
+        mChannelCount(ANDROID_UNKNOWN_NUMCHANNELS),
         mDurationMsec(ANDROID_UNKNOWN_TIME),
         mPositionMsec(ANDROID_UNKNOWN_TIME),
+        mSampleRateHz(ANDROID_UNKNOWN_SAMPLERATE),
         mCacheStatus(kStatusEmpty),
         mCacheFill(0),
         mLastNotifiedCacheFill(0),
@@ -172,6 +173,10 @@ void GenericPlayer::getDurationMsec(int* msec) {
 
 void GenericPlayer::getPositionMsec(int* msec) {
     *msec = mPositionMsec;
+}
+
+void GenericPlayer::getSampleRate(uint* hz) {
+    *hz = mSampleRateHz;
 }
 
 //--------------------------------------------------

@@ -23,12 +23,16 @@ static SLresult IMetadataExtraction_GetItemCount(SLMetadataExtractionItf self, S
 {
     SL_ENTER_INTERFACE
 
-    //IMetadataExtraction *thiz = (IMetadataExtraction *) self;
     if (NULL == pItemCount) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        *pItemCount = 0;
-        result = SL_RESULT_SUCCESS;
+        IMetadataExtraction *thiz = (IMetadataExtraction *) self;
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+            result = android_audioPlayer_metadata_getItemCount((CAudioPlayer *)thiz->mThis,
+                    pItemCount);
+        } else {
+            result = SL_RESULT_PARAMETER_INVALID;
+        }
     }
 
     SL_LEAVE_INTERFACE
@@ -40,12 +44,16 @@ static SLresult IMetadataExtraction_GetKeySize(SLMetadataExtractionItf self,
 {
     SL_ENTER_INTERFACE
 
-    //IMetadataExtraction *thiz = (IMetadataExtraction *) self;
     if (NULL == pKeySize) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        *pKeySize = 0;
-        result = SL_RESULT_SUCCESS;
+        IMetadataExtraction *thiz = (IMetadataExtraction *) self;
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+            result = android_audioPlayer_metadata_getKeySize((CAudioPlayer *)thiz->mThis,
+                    index, pKeySize);
+        } else {
+            result = SL_RESULT_PARAMETER_INVALID;
+        }
     }
 
     SL_LEAVE_INTERFACE
@@ -57,17 +65,16 @@ static SLresult IMetadataExtraction_GetKey(SLMetadataExtractionItf self,
 {
     SL_ENTER_INTERFACE
 
-    //IMetadataExtraction *thiz = (IMetadataExtraction *) self;
     if (NULL == pKey) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        SLMetadataInfo key;
-        key.size = 1;
-        key.encoding = SL_CHARACTERENCODING_UTF8;
-        memcpy((char *) key.langCountry, "en", 3);
-        key.data[0] = 0;
-        *pKey = key;
-        result = SL_RESULT_SUCCESS;
+        IMetadataExtraction *thiz = (IMetadataExtraction *) self;
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+            result = android_audioPlayer_metadata_getKey((CAudioPlayer *)thiz->mThis,
+                    index, keySize, pKey);
+        } else {
+            result = SL_RESULT_PARAMETER_INVALID;
+        }
     }
 
     SL_LEAVE_INTERFACE
@@ -79,12 +86,16 @@ static SLresult IMetadataExtraction_GetValueSize(SLMetadataExtractionItf self,
 {
     SL_ENTER_INTERFACE
 
-    //IMetadataExtraction *thiz = (IMetadataExtraction *) self;
     if (NULL == pValueSize) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        *pValueSize = 0;
-        result = SL_RESULT_SUCCESS;
+        IMetadataExtraction *thiz = (IMetadataExtraction *) self;
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+            result = android_audioPlayer_metadata_getValueSize((CAudioPlayer *)thiz->mThis,
+                    index, pValueSize);
+        } else {
+            result = SL_RESULT_PARAMETER_INVALID;
+        }
     }
 
     SL_LEAVE_INTERFACE
@@ -96,17 +107,16 @@ static SLresult IMetadataExtraction_GetValue(SLMetadataExtractionItf self,
 {
     SL_ENTER_INTERFACE
 
-    //IMetadataExtraction *thiz = (IMetadataExtraction *) self;
     if (NULL == pValue) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        SLMetadataInfo value;
-        value.size = 1;
-        value.encoding = SL_CHARACTERENCODING_UTF8;
-        memcpy((char *) value.langCountry, "en", 3);
-        value.data[0] = 0;
-        *pValue = value;;
-        result = SL_RESULT_SUCCESS;
+        IMetadataExtraction *thiz = (IMetadataExtraction *) self;
+        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+            result = android_audioPlayer_metadata_getValue((CAudioPlayer *)thiz->mThis,
+                    index, valueSize, pValue);
+        } else {
+            result = SL_RESULT_PARAMETER_INVALID;
+        }
     }
 
     SL_LEAVE_INTERFACE

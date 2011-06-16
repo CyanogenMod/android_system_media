@@ -93,6 +93,34 @@ extern SLresult android_audioPlayer_setBufferingUpdateThresholdPerMille(CAudioPl
         SLpermille threshold);
 
 /**************************************************************************************************
+ * Metadata Extraction
+ ****************************/
+/*
+ * For all metadata extraction functions:
+ * Precondition:
+ *     no lock held
+ *     pAudioPlayer != NULL
+ *     input pointers != NULL (pItemCount, pKeySize, pKey, pValueSize, pValue)
+ * Return:
+ *     SL_RESULT_SUCCESS
+ *     SL_RESULT_PARAMETER_INVALID
+ */
+extern SLresult android_audioPlayer_metadata_getItemCount(CAudioPlayer *pAudioPlayer,
+        SLuint32 *pItemCount);
+
+extern SLresult android_audioPlayer_metadata_getKeySize(CAudioPlayer *pAudioPlayer,
+        SLuint32 index, SLuint32 *pKeySize);
+
+extern SLresult android_audioPlayer_metadata_getKey(CAudioPlayer *pAudioPlayer,
+        SLuint32 index, SLuint32 size, SLMetadataInfo *pKey);
+
+extern SLresult android_audioPlayer_metadata_getValueSize(CAudioPlayer *pAudioPlayer,
+        SLuint32 index, SLuint32 *pValueSize);
+
+extern SLresult android_audioPlayer_metadata_getValue(CAudioPlayer *pAudioPlayer,
+        SLuint32 index, SLuint32 size, SLMetadataInfo *pValue);
+
+/**************************************************************************************************
  * Playback control and events
  ****************************/
 extern void android_audioPlayer_setPlayState(CAudioPlayer *pAudioPlayer, bool lockAP);

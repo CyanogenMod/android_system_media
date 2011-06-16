@@ -92,6 +92,7 @@ LOCAL_SRC_FILES:=                     \
         itf/IEngineCapabilities.c         \
         itf/IEnvironmentalReverb.c        \
         itf/IEqualizer.c                  \
+        itf/IMetadataExtraction.c         \
         itf/IMuteSolo.c                   \
         itf/IObject.c                     \
         itf/IOutputMix.c                  \
@@ -124,7 +125,6 @@ EXCLUDE_SRC :=                            \
         itf/IMIDIMuteSolo.c               \
         itf/IMIDITempo.c                  \
         itf/IMIDITime.c                   \
-        itf/IMetadataExtraction.c         \
         itf/IMetadataTraversal.c          \
         itf/IPitch.c                      \
         itf/IRatePitch.c                  \
