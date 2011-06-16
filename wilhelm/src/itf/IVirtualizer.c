@@ -18,7 +18,7 @@
 
 #include "sles_allinclusive.h"
 #ifdef ANDROID
-#include "hardware/audio_effect.h"
+#include "media/EffectVirtualizerApi.h"
 #endif
 
 #define VIRTUALIZER_STRENGTH_MIN 0

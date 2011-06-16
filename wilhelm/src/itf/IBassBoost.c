@@ -18,7 +18,7 @@
 
 #include "sles_allinclusive.h"
 #ifdef ANDROID
-#include "hardware/audio_effect.h"
+#include "media/EffectBassBoostApi.h"
 #endif
 
 #define BASSBOOST_STRENGTH_MIN 0
