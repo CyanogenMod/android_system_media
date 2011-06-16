@@ -57,7 +57,6 @@ public class SyncRunner extends GraphRunner {
 
         // Add us to the specified context
         mFilterContext = context;
-        mFilterContext.addRunner(this);
 
         mTimer = new StopWatchMap();
 
@@ -161,7 +160,8 @@ public class SyncRunner extends GraphRunner {
         final ConditionVariable conditionToWake = mWakeCondition;
 
         mWakeExecutor.schedule(new Runnable() {
-            public void run() {
+          @Override 
+          public void run() {
                 filterToSchedule.unsetStatus(Filter.STATUS_SLEEP);
                 conditionToWake.open();
             }

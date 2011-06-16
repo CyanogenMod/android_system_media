@@ -21,20 +21,16 @@ import android.filterfw.core.Filter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameManager;
 import android.filterfw.core.GLEnvironment;
-import android.filterfw.core.GraphRunner;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class FilterContext {
 
     private FrameManager mFrameManager;
     private GLEnvironment mGLEnvironment;
-    private HashSet<GraphRunner> mRunners;
     private HashMap<String, Frame> mStoredFrames;
 
     public FilterContext() {
-        mRunners = new HashSet<GraphRunner>();
         mStoredFrames = new HashMap<String, Frame>();
     }
 
@@ -86,14 +82,5 @@ public class FilterContext {
             mStoredFrames.remove(key);
             frame.release();
         }
-    }
-
-    // Core internal methods /////////////////////////////////////////////////////////////////////////
-    void addRunner(GraphRunner runner) {
-        mRunners.add(runner);
-    }
-
-    void removeRunner(GraphRunner runner) {
-        mRunners.remove(runner);
     }
 }

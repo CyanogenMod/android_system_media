@@ -139,14 +139,17 @@ public class GLFrame extends Frame {
         }
     }
 
+    @Override
     void dealloc() {
         deallocate();
     }
 
+    @Override
     public Object getObjectValue() {
         return ByteBuffer.wrap(getNativeData());
     }
 
+    @Override
     public void setInts(int[] ints) {
         assertFrameMutable();
         if (!setNativeInts(ints)) {
@@ -154,11 +157,13 @@ public class GLFrame extends Frame {
         }
     }
 
+    @Override
     public int[] getInts() {
         flushGPU("getInts");
         return getNativeInts();
     }
 
+    @Override
     public void setFloats(float[] floats) {
         assertFrameMutable();
         if (!setNativeFloats(floats)) {
@@ -166,11 +171,13 @@ public class GLFrame extends Frame {
         }
     }
 
+    @Override
     public float[] getFloats() {
         flushGPU("getFloats");
         return getNativeFloats();
     }
 
+    @Override
     public void setData(ByteBuffer buffer, int offset, int length) {
         assertFrameMutable();
         byte[] bytes = buffer.array();
@@ -181,11 +188,13 @@ public class GLFrame extends Frame {
         }
     }
 
+    @Override
     public ByteBuffer getData() {
         flushGPU("getData");
         return ByteBuffer.wrap(getNativeData());
     }
 
+    @Override
     public void setBitmap(Bitmap bitmap) {
         assertFrameMutable();
         if (getFormat().getWidth()  != bitmap.getWidth() ||
@@ -199,6 +208,7 @@ public class GLFrame extends Frame {
         }
     }
 
+    @Override
     public Bitmap getBitmap() {
         flushGPU("getBitmap");
         Bitmap result = Bitmap.createBitmap(getFormat().getWidth(),
@@ -210,6 +220,7 @@ public class GLFrame extends Frame {
         return result;
     }
 
+    @Override
     public void setDataFromFrame(Frame frame) {
         // Make sure frame fits
         if (getFormat().getSize() < frame.getFormat().getSize()) {
@@ -269,6 +280,7 @@ public class GLFrame extends Frame {
         }
     }
 
+    @Override
     public String toString() {
         return "GLFrame (" + getFormat() + ") with texture ID " + getTextureId()
             + ", FBO ID " + getFboId();

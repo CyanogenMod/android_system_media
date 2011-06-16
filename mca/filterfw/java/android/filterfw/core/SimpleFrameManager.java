@@ -90,16 +90,19 @@ public class SimpleFrameManager extends FrameManager {
         return result;
     }
 
+    @Override
     public Frame duplicateFrame(Frame frame) {
         // TODO
         return null;
     }
 
+    @Override
     public Frame retainFrame(Frame frame) {
         frame.incRefCount();
         return frame;
     }
 
+    @Override
     public Frame releaseFrame(Frame frame) {
         int refCount = frame.decRefCount();
         if (refCount == 0) {
