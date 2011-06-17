@@ -77,6 +77,8 @@ public class CameraSource extends Filter {
     private ConditionVariable mNewFrameAvailable;
     private float[] mCameraTransform;
 
+    private Camera.Parameters mCameraParameters;
+
     private final String mFrameShader =
             "#extension GL_OES_EGL_image_external : require\n" +
             "precision mediump float;\n" +
@@ -147,19 +149,8 @@ public class CameraSource extends Filter {
         mCamera = Camera.open(mCameraId);
 
         // Set parameters
-        Camera.Parameters params = mCamera.getParameters();
-        params.setPreviewSize(mWidth, mHeight);
-
-        int closestRange[] = findClosestFpsRange(mFps, params);
-        if (LOGV) Log.v(TAG, "Closest frame rate range: ["
-                        + closestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] / 1000.
-                        + ","
-                        + closestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX] / 1000.
-                        + "]");
-
-        params.setPreviewFpsRange(closestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
-                                  closestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-        mCamera.setParameters(params);
+        getCameraParameters();
+        mCamera.setParameters(mCameraParameters);
 
         // Bind it to our camera frame
         mSurfaceTexture = new SurfaceTexture(mCameraFrame.getTextureId());
@@ -212,8 +203,8 @@ public class CameraSource extends Filter {
     public void close(FilterContext context) {
         if (LOGV) Log.v(TAG, "Closing");
 
-        mCamera.stopPreview();
         mCamera.release();
+        mCamera = null;
         mSurfaceTexture = null;
     }
 
@@ -227,22 +218,49 @@ public class CameraSource extends Filter {
     @Override
     public void parametersUpdated(Set<String> updated) {
         if (updated.contains("framerate")) {
-            Camera.Parameters params = mCamera.getParameters();
-            int closestRange[] = findClosestFpsRange(mFps, params);
-            params.setPreviewFpsRange(closestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
-                                      closestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-            mCamera.setParameters(params);
+            getCameraParameters();
+            int closestRange[] = findClosestFpsRange(mFps, mCameraParameters);
+            mCameraParameters.setPreviewFpsRange(closestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
+                                                 closestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+            mCamera.setParameters(mCameraParameters);
         }
     }
 
-    public Camera.Parameters getCameraParameters() {
-        return mCamera.getParameters();
+    synchronized public Camera.Parameters getCameraParameters() {
+        if (mCameraParameters == null) {
+            boolean closeCamera = false;
+            if (mCamera == null) {
+                mCamera = Camera.open(mCameraId);
+                closeCamera = true;
+            }
+            mCameraParameters = mCamera.getParameters();
+
+            mCameraParameters.setPreviewSize(mWidth, mHeight);
+            int closestRange[] = findClosestFpsRange(mFps, mCameraParameters);
+            if (LOGV) Log.v(TAG, "Closest frame rate range: ["
+                            + closestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] / 1000.
+                            + ","
+                            + closestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX] / 1000.
+                            + "]");
+
+            mCameraParameters.setPreviewFpsRange(closestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
+                                                 closestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+
+            if (closeCamera) {
+                mCamera.release();
+                mCamera = null;
+            }
+        }
+        return mCameraParameters;
     }
 
     /** Update camera parameters. Image resolution cannot be changed. */
-    public void setCameraParameters(Camera.Parameters params) {
+    synchronized public void setCameraParameters(Camera.Parameters params) {
         params.setPreviewSize(mWidth, mHeight);
-        mCamera.setParameters(params);
+        mCameraParameters = params;
+        if (isOpen()) {
+            mCamera.setParameters(mCameraParameters);
+        }
     }
 
     private int[] findClosestFpsRange(int fps, Camera.Parameters params) {
