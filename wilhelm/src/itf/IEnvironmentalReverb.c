@@ -18,7 +18,7 @@
 
 #include "sles_allinclusive.h"
 #ifdef ANDROID
-#include "media/EffectEnvironmentalReverbApi.h"
+#include <audio_effects/effect_environmentalreverb.h>
 #endif
 
 // Note: all Set operations use exclusive not poke,
