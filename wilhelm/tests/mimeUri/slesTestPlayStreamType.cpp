@@ -37,7 +37,7 @@
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stdout, "%lu error code encountered at line %d, exiting\n", result, line);
+        fprintf(stdout, "%u error code encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
 }
@@ -141,7 +141,7 @@ void TestStreamTypeConfiguration( SLObjectItf sl, const char* path, const SLint3
     result = (*configItf)->SetConfiguration(configItf,
             SL_ANDROID_KEY_STREAM_TYPE, &type, sizeof(SLint32));
     if (SL_RESULT_PARAMETER_INVALID == result) {
-        fprintf(stderr, "invalid stream type %ld\n", type);
+        fprintf(stderr, "invalid stream type %d\n", type);
     } else {
         ExitOnError(result);
     }
@@ -197,14 +197,14 @@ void TestStreamTypeConfiguration( SLObjectItf sl, const char* path, const SLint3
             SL_ANDROID_KEY_STREAM_TYPE, &valueSize, NULL);
     ExitOnError(result);
     if (valueSize != sizeof(SLint32)) {
-        fprintf(stderr, "ERROR: size for stream type is %lu, should be %u\n",
+        fprintf(stderr, "ERROR: size for stream type is %u, should be %u\n",
                 valueSize, sizeof(SLint32));
     }
     result = (*configItf)->GetConfiguration(configItf,
                 SL_ANDROID_KEY_STREAM_TYPE, &valueSize, &currentType);
     ExitOnError(result);
     if (currentType != type) {
-        fprintf(stderr, "ERROR: stream type is %lu, should be %lu\n", currentType, type);
+        fprintf(stderr, "ERROR: stream type is %u, should be %u\n", currentType, type);
     }
 #endif
 
@@ -221,7 +221,7 @@ void TestStreamTypeConfiguration( SLObjectItf sl, const char* path, const SLint3
             SL_ANDROID_KEY_STREAM_TYPE, &valueSize, &currentType);
     ExitOnError(result);
     if (currentType != type) {
-        fprintf(stderr, "ERROR: stream type is %lu, should be %lu\n", currentType, type);
+        fprintf(stderr, "ERROR: stream type is %u, should be %u\n", currentType, type);
     }
 #endif
 
@@ -247,7 +247,7 @@ int main(int argc, char* const argv[])
         fprintf(stdout, "Usage: \t%s url stream_type\n", argv[0]);
         fprintf(stdout, " where stream_type is one of the SL_ANDROID_STREAM_ constants.\n");
         fprintf(stdout, "Example: \"%s /sdcard/my.mp3 5\" \n", argv[0]);
-        fprintf(stdout, "Stream type %ld is the default (media or music), %ld is notifications\n",
+        fprintf(stdout, "Stream type %d is the default (media or music), %d is notifications\n",
             SL_ANDROID_STREAM_MEDIA, SL_ANDROID_STREAM_NOTIFICATION);
         return EXIT_FAILURE;
     }

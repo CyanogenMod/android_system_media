@@ -97,7 +97,7 @@ int main(int argc, char **argv)
     float hzRight = 440.0;
     for (format = formats; format->numChannels; ++format) {
 
-        printf("Channels: %d, sample rate: %lu, bits: %u\n", format->numChannels,
+        printf("Channels: %d, sample rate: %u, bits: %u\n", format->numChannels,
                 format->milliHz / 1000, format->bitsPerSample);
 
         // configure audio source
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
         result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audioSrc,
                 &audioSnk, numInterfaces, ids, req);
         if (SL_RESULT_SUCCESS != result) {
-            printf("failed %lu\n", result);
+            printf("failed %u\n", result);
             continue;
         }
 

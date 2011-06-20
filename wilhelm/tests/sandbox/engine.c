@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     result = slQueryNumSupportedEngineInterfaces(NULL);
     assert(SL_RESULT_PARAMETER_INVALID == result);
 
-    printf("Engine number of supported interfaces %lu\n", numSupportedInterfaces);
+    printf("Engine number of supported interfaces %u\n", numSupportedInterfaces);
     SLInterfaceID *engine_ids = calloc(numSupportedInterfaces+1, sizeof(SLInterfaceID));
     assert(engine_ids != NULL);
     SLboolean *engine_req = calloc(numSupportedInterfaces+1, sizeof(SLboolean));
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
         result = slQuerySupportedEngineInterfaces(index, &interfaceID);
         if (index < numSupportedInterfaces) {
             assert(SL_RESULT_SUCCESS == result);
-            printf("interface[%lu] ", index);
+            printf("interface[%u] ", index);
             slesutPrintIID(interfaceID);
             engine_ids[index] = interfaceID;
             engine_req[index] = SL_BOOLEAN_TRUE;
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
         void *interface = NULL;
         result = (*engineObject)->GetInterface(engineObject, engine_ids[index], &interface);
         assert(SL_RESULT_SUCCESS == result);
-        printf("interface[%lu] %p\n", index, interface);
+        printf("interface[%u] %p\n", index, interface);
         // Use a copy of the interface ID to make sure lookup is not purely relying on address
         void *interface_again = NULL;
         struct SLInterfaceID_ copy = *engine_ids[index];

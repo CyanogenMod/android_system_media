@@ -29,7 +29,7 @@
 void ExitOnError( SLresult result )
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stdout, "%lu error code encountered, exiting\n", result);
+        fprintf(stdout, "%u error code encountered, exiting\n", result);
         exit(EXIT_FAILURE);
     }
 }
@@ -221,7 +221,7 @@ void TestPlayUri( SLObjectItf sl, const char* path, const char* path2)
     if (durationInMsec == SL_TIME_UNKNOWN) {
         fprintf(stdout, "Content duration of first URI is unknown\n");
     } else {
-        fprintf(stdout, "Content duration of first URI is %lu ms\n", durationInMsec);
+        fprintf(stdout, "Content duration of first URI is %u ms\n", durationInMsec);
     }
 
     /* Wait as long as the duration of the first URI + 2s before stopping */

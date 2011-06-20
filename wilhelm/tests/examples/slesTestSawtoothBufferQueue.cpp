@@ -60,7 +60,7 @@ void CheckErr( SLresult res )
 {
     if ( res != SL_RESULT_SUCCESS )
         {
-            fprintf(stdout, "%lu SL failure, exiting\n", res);
+            fprintf(stdout, "%u SL failure, exiting\n", res);
             exit(EXIT_FAILURE);
         }
     else {

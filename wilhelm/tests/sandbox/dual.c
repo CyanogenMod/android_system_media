@@ -32,35 +32,35 @@ int main(int argc, char **argv)
 
     printf("xaCreateEngine\n");
     xaResult = xaCreateEngine(&xaEngineObject, 0, NULL, 0, NULL, NULL);
-    printf("xaResult = %ld\n", xaResult);
+    printf("xaResult = %d\n", xaResult);
     assert(XA_RESULT_SUCCESS == xaResult);
     printf("xaEngineObject = %p\n", xaEngineObject);
 
     printf("realize xaEngineObject\n");
     xaResult = (*xaEngineObject)->Realize(xaEngineObject, XA_BOOLEAN_FALSE);
-    printf("xaResult = %ld\n", xaResult);
+    printf("xaResult = %d\n", xaResult);
 
     printf("GetInterface for XA_IID_ENGINE\n");
     XAEngineItf xaEngineEngine;
     xaResult = (*xaEngineObject)->GetInterface(xaEngineObject, XA_IID_ENGINE, &xaEngineEngine);
-    printf("xaResult = %ld\n", xaResult);
+    printf("xaResult = %d\n", xaResult);
     printf("xaEngineEngine = %p\n", xaEngineEngine);
     assert(XA_RESULT_SUCCESS == xaResult);
 
     printf("slCreateEngine\n");
     slResult = slCreateEngine(&slEngineObject, 0, NULL, 0, NULL, NULL);
-    printf("slResult = %ld\n", slResult);
+    printf("slResult = %d\n", slResult);
     assert(SL_RESULT_SUCCESS == slResult);
     printf("slEngineObject = %p\n", slEngineObject);
 
     printf("realize slEngineObject\n");
     slResult = (*slEngineObject)->Realize(slEngineObject, SL_BOOLEAN_FALSE);
-    printf("slResult = %ld\n", slResult);
+    printf("slResult = %d\n", slResult);
 
     printf("GetInterface for SL_IID_ENGINE\n");
     SLEngineItf slEngineEngine;
     slResult = (*slEngineObject)->GetInterface(slEngineObject, SL_IID_ENGINE, &slEngineEngine);
-    printf("slResult = %ld\n", slResult);
+    printf("slResult = %d\n", slResult);
     printf("slEngineEngine = %p\n", slEngineEngine);
     assert(SL_RESULT_SUCCESS == slResult);
 

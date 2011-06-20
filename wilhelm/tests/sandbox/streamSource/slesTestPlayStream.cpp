@@ -61,7 +61,7 @@ typedef struct {
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stderr, "%lu error code encountered at line %d, exiting\n", result, line);
+        fprintf(stderr, "%u error code encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
 }
@@ -277,7 +277,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     if (durationInMsec == SL_TIME_UNKNOWN) {
         fprintf(stdout, "Content duration is unknown (before starting to prefetch)\n");
     } else {
-        fprintf(stdout, "Content duration is %lu ms (before starting to prefetch)\n",
+        fprintf(stdout, "Content duration is %u ms (before starting to prefetch)\n",
                 durationInMsec);
     }
 

@@ -43,14 +43,14 @@ int main(int argc, char **argv)
     result = (*engineEngine)->QueryNumSupportedInterfaces(engineEngine, SL_OBJECTID_OUTPUTMIX,
             &numSupportedInterfaces);
     assert(SL_RESULT_SUCCESS == result);
-    printf("Output mix supports %lu interfaces:\n", numSupportedInterfaces);
+    printf("Output mix supports %u interfaces:\n", numSupportedInterfaces);
     SLuint32 i;
     for (i = 0; i < numSupportedInterfaces; ++i) {
         SLInterfaceID interfaceID;
         result = (*engineEngine)->QuerySupportedInterfaces(engineEngine, SL_OBJECTID_OUTPUTMIX, i,
                 &interfaceID);
         assert(SL_RESULT_SUCCESS == result);
-        printf(" [%lu] = ", i);
+        printf(" [%u] = ", i);
         slesutPrintIID(interfaceID);
     }
     // create output mix, with no place to put the new object

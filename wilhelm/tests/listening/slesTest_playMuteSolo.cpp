@@ -41,7 +41,7 @@ typedef struct {
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stdout, "%lu error code encountered at line %d, exiting\n", result, line);
+        fprintf(stdout, "%u error code encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
 }
@@ -206,7 +206,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     // This may fail depending on the platform.
     SLuint8 numChannels = 123;
     result = (*muteSoloItf)->GetNumChannels(muteSoloItf, &numChannels);
-    printf("GetNumChannels after Realize but before pre-fetch: result=%lu, numChannels=%u\n",
+    printf("GetNumChannels after Realize but before pre-fetch: result=%u, numChannels=%u\n",
         result, numChannels);
 
     /* Initialize a context for use by the callback */

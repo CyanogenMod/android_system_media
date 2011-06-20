@@ -36,7 +36,7 @@
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stderr, "%lu error code encountered at line %d, exiting\n", result, line);
+        fprintf(stderr, "%u error code encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
 }
@@ -85,7 +85,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     SLpermille level = 0;
     (*caller)->GetFillLevel(caller, &level);
     SLuint32 status;
-    //fprintf(stdout, "\t\tPrefetchEventCallback: received event %lu\n", event);
+    //fprintf(stdout, "\t\tPrefetchEventCallback: received event %u\n", event);
     (*caller)->GetPrefetchStatus(caller, &status);
     if ((event & (SL_PREFETCHEVENT_STATUSCHANGE|SL_PREFETCHEVENT_FILLLEVELCHANGE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
@@ -96,7 +96,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
         fprintf(stdout, "\t\tPrefetchEventCallback: Buffer fill level is = %d\n", level);
     }
     if (event & SL_PREFETCHEVENT_STATUSCHANGE) {
-        fprintf(stdout, "\t\tPrefetchEventCallback: Prefetch Status is = %lu\n", status);
+        fprintf(stdout, "\t\tPrefetchEventCallback: Prefetch Status is = %u\n", status);
     }
 
 }
@@ -204,7 +204,7 @@ void TestSlowDownUri( SLObjectItf sl, const char* path)
     if (durationInMsec == SL_TIME_UNKNOWN) {
         fprintf(stdout, "Content duration is unknown (before starting to prefetch)\n");
     } else {
-        fprintf(stdout, "Content duration is %lu ms (before starting to prefetch)\n",
+        fprintf(stdout, "Content duration is %u ms (before starting to prefetch)\n",
                 durationInMsec);
     }
 
@@ -245,7 +245,7 @@ void TestSlowDownUri( SLObjectItf sl, const char* path)
     if (durationInMsec == SL_TIME_UNKNOWN) {
         fprintf(stdout, "Content duration is unknown (after prefetch completed)\n");
     } else {
-        fprintf(stdout, "Content duration is %lu ms (after prefetch completed)\n", durationInMsec);
+        fprintf(stdout, "Content duration is %u ms (after prefetch completed)\n", durationInMsec);
     }
 
     fprintf(stdout, "starting to play\n");

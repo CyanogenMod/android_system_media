@@ -31,10 +31,10 @@
     (unsigned) (x), (unsigned) (y)); assert((x) == (y)); } } while (0)
 
 // default values
-static SLuint32 rxBufCount = 1;     // -r#
+static SLuint32 rxBufCount = 2;     // -r#
 static SLuint32 txBufCount = 2;     // -t#
 static SLuint32 bufSizeInFrames = 512;  // -f#
-static SLuint32 channels = 2;       // -c#
+static SLuint32 channels = 1;       // -c#
 static SLuint32 sampleRate = 44100; // -s#
 static SLuint32 exitAfterSeconds = 60; // -e#
 static SLuint32 freeBufCount = 0;   // calculated
@@ -317,7 +317,7 @@ int main(int argc, char **argv)
     result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audiosrc, &audiosnk,
         1, ids_tx, flags_tx);
     if (SL_RESULT_CONTENT_UNSUPPORTED == result) {
-        fprintf(stderr, "Could not create audio player (result %lx), check sample rate\n", result);
+        fprintf(stderr, "Could not create audio player (result %x), check sample rate\n", result);
         goto cleanup;
     }
     ASSERT_EQ(SL_RESULT_SUCCESS, result);
@@ -354,7 +354,7 @@ int main(int argc, char **argv)
     result = (*engineEngine)->CreateAudioRecorder(engineEngine, &recorderObject, &audiosrc,
         &audiosnk, 1, ids_rx, flags_rx);
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stderr, "Could not create audio recorder (result %lx), "
+        fprintf(stderr, "Could not create audio recorder (result %x), "
                 "check sample rate and channel count\n", result);
         goto cleanup;
     }

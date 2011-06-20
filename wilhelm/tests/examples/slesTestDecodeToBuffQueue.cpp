@@ -84,7 +84,7 @@ android::Condition eosCondition;
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stdout, "%lu error code encountered at line %d, exiting\n", result, line);
+        fprintf(stdout, "%u error code encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
 }
@@ -112,7 +112,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     SLpermille level = 0;
     (*caller)->GetFillLevel(caller, &level);
     SLuint32 status;
-    //fprintf(stdout, "PrefetchEventCallback: received event %lu\n", event);
+    //fprintf(stdout, "PrefetchEventCallback: received event %u\n", event);
     (*caller)->GetPrefetchStatus(caller, &status);
     if ((PREFETCHEVENT_ERROR_CANDIDATE == (event & PREFETCHEVENT_ERROR_CANDIDATE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
@@ -136,13 +136,13 @@ void DecCallback(
     if (SL_PLAYEVENT_HEADATNEWPOS & event) {
         SLmillisecond pMsec = 0;
         (*caller)->GetPosition(caller, &pMsec);
-        fprintf(stdout, "SL_PLAYEVENT_HEADATNEWPOS current position=%lums\n", pMsec);
+        fprintf(stdout, "SL_PLAYEVENT_HEADATNEWPOS current position=%ums\n", pMsec);
     }
 
     if (SL_PLAYEVENT_HEADATMARKER & event) {
         SLmillisecond pMsec = 0;
         (*caller)->GetPosition(caller, &pMsec);
-        fprintf(stdout, "SL_PLAYEVENT_HEADATMARKER current position=%lums\n", pMsec);
+        fprintf(stdout, "SL_PLAYEVENT_HEADATMARKER current position=%ums\n", pMsec);
     }
 }
 
@@ -181,7 +181,7 @@ void DecBufferQueueCallback(
     ExitOnError( (*queueItf)->GetState(queueItf, &decQueueState) );
 
     fprintf(stderr, "\DecBufferQueueCallback now has pCntxt->pData=%p queue: "
-            "count=%lu playIndex=%lu\n",
+            "count=%u playIndex=%u\n",
             pCntxt->pData, decQueueState.count, decQueueState.index);
 */
 }

@@ -60,7 +60,7 @@
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stderr, "%lu error code encountered at line %d, exiting\n", result, line);
+        fprintf(stderr, "%u error code encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
 }
@@ -74,7 +74,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     SLpermille level = 0;
     (*caller)->GetFillLevel(caller, &level);
     SLuint32 status;
-    //fprintf(stdout, "PrefetchEventCallback: received event %lu\n", event);
+    //fprintf(stdout, "PrefetchEventCallback: received event %u\n", event);
     (*caller)->GetPrefetchStatus(caller, &status);
     if ((PREFETCHEVENT_ERROR_CANDIDATE == (event & PREFETCHEVENT_ERROR_CANDIDATE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
@@ -85,7 +85,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
         fprintf(stdout, "PrefetchEventCallback: Buffer fill level is = %d\n", level);
     }
     if (event & SL_PREFETCHEVENT_STATUSCHANGE) {
-        fprintf(stdout, "PrefetchEventCallback: Prefetch Status is = %lu\n", status);
+        fprintf(stdout, "PrefetchEventCallback: Prefetch Status is = %u\n", status);
     }
 }
 
@@ -105,13 +105,13 @@ void PlayEventCallback(
     if (SL_PLAYEVENT_HEADATNEWPOS & event) {
         SLmillisecond pMsec = 0;
         (*caller)->GetPosition(caller, &pMsec);
-        fprintf(stdout, "SL_PLAYEVENT_HEADATNEWPOS current position=%lums\n", pMsec);
+        fprintf(stdout, "SL_PLAYEVENT_HEADATNEWPOS current position=%ums\n", pMsec);
     }
 
     if (SL_PLAYEVENT_HEADATMARKER & event) {
         SLmillisecond pMsec = 0;
         (*caller)->GetPosition(caller, &pMsec);
-        fprintf(stdout, "SL_PLAYEVENT_HEADATMARKER current position=%lums\n", pMsec);
+        fprintf(stdout, "SL_PLAYEVENT_HEADATMARKER current position=%ums\n", pMsec);
     }
 }
 
@@ -228,7 +228,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     if (durationInMsec == SL_TIME_UNKNOWN) {
         fprintf(stdout, "Content duration is unknown (before starting to prefetch)\n");
     } else {
-        fprintf(stdout, "Content duration is %lu ms (before starting to prefetch)\n",
+        fprintf(stdout, "Content duration is %u ms (before starting to prefetch)\n",
                 durationInMsec);
     }
 
@@ -266,7 +266,7 @@ void TestPlayUri( SLObjectItf sl, const char* path)
     if (durationInMsec == SL_TIME_UNKNOWN) {
         fprintf(stdout, "Content duration is unknown (after prefetch completed)\n");
     } else {
-        fprintf(stdout, "Content duration is %lu ms (after prefetch completed)\n", durationInMsec);
+        fprintf(stdout, "Content duration is %u ms (after prefetch completed)\n", durationInMsec);
     }
 
     fprintf(stdout, "URI example: starting to play\n");

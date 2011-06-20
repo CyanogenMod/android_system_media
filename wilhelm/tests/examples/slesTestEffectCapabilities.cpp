@@ -38,7 +38,7 @@ static int testMode;
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stderr, "%lu error code encountered at line %d, exiting\n", result, line);
+        fprintf(stderr, "%u error code encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
 }
@@ -48,7 +48,7 @@ void guidToString(const SLInterfaceID guid, char *str) {
     if ((NULL == guid) || (NULL == str)) {
         return;
     }
-    snprintf(str, GUID_DISPLAY_LENGTH, "%08lx-%04x-%04x-%04x-%02x%02x%02x%02x%02x%02x",
+    snprintf(str, GUID_DISPLAY_LENGTH, "%08x-%04x-%04x-%04x-%02x%02x%02x%02x%02x%02x",
             guid->time_low,
             guid->time_mid,
             guid->time_hi_and_version,
@@ -115,7 +115,7 @@ void TestGenericFxCapabilities(  )
     SLuint32 nbEffects = 0;
     result = (*EffectLibItf)->QueryNumEffects(EffectLibItf, &nbEffects);
     ExitOnError(result);
-    fprintf(stdout, "Effect library contains %ld effects:\n", nbEffects);
+    fprintf(stdout, "Effect library contains %d effects:\n", nbEffects);
 
     SLchar effectName[FX_NAME_LENGTH+1];
     SLuint16 effectNameLength = FX_NAME_LENGTH;
@@ -124,7 +124,7 @@ void TestGenericFxCapabilities(  )
 
     SLInterfaceID effectType, effectImplementation;
     for (SLuint32 i = 0 ; i < nbEffects ; i++ ) {
-        fprintf(stdout,"- effect %ld: ", i);
+        fprintf(stdout,"- effect %d: ", i);
         memset(effectName, 'Z', FX_NAME_LENGTH+1);
         effectNameLength = FX_NAME_LENGTH;
         result = (*EffectLibItf)->QueryEffect(EffectLibItf, i,

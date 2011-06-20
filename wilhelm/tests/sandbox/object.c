@@ -45,7 +45,7 @@ int main(int arg, char **argv)
 #define FIRST_VALID SL_OBJECTID_ENGINE
 #define LAST_VALID  SL_OBJECTID_METADATAEXTRACTOR
     for (objectID = FIRST_VALID - 1; objectID <= LAST_VALID + 1; ++objectID) {
-        printf("object ID %lx", objectID);
+        printf("object ID %x", objectID);
         const char *string = slesutObjectIDToString(objectID);
         if (NULL != string)
             printf(" (%s)", string);
@@ -65,7 +65,7 @@ int main(int arg, char **argv)
             continue;
         }
         assert(SL_RESULT_SUCCESS == result);
-        printf("numSupportedInterfaces %lu\n", numSupportedInterfaces);
+        printf("numSupportedInterfaces %u\n", numSupportedInterfaces);
         for (i = 0; i < numSupportedInterfaces + 1; ++i) {
             result = (*engineEngine)->QuerySupportedInterfaces(engineEngine, objectID, i, NULL);
             assert(SL_RESULT_PARAMETER_INVALID == result);
@@ -73,7 +73,7 @@ int main(int arg, char **argv)
                     &interfaceID);
             if (i < numSupportedInterfaces) {
                 assert(SL_RESULT_SUCCESS == result);
-                printf("    interface %lu ", i);
+                printf("    interface %u ", i);
                 slesutPrintIID(interfaceID);
             } else {
                 assert(SL_RESULT_PARAMETER_INVALID == result);
@@ -86,7 +86,7 @@ int main(int arg, char **argv)
     SLuint32 numExtensions = 0x12345;
     result = (*engineEngine)->QueryNumSupportedExtensions(engineEngine, &numExtensions);
     assert(SL_RESULT_SUCCESS == result);
-    printf("numExtensions = %lu\n", numExtensions);
+    printf("numExtensions = %u\n", numExtensions);
     // query names of the extensions
     for (i = 0; i < numExtensions + 1; ++i) {
         SLchar extensionName[32];
@@ -96,7 +96,7 @@ int main(int arg, char **argv)
         result = (*engineEngine)->QuerySupportedExtension(engineEngine, i, NULL, &nameLength);
         if (i < numExtensions) {
             assert(SL_RESULT_SUCCESS == result);
-            printf("    extension[%lu] length = %u\n", i, nameLength);
+            printf("    extension[%u] length = %u\n", i, nameLength);
         } else {
             assert(SL_RESULT_PARAMETER_INVALID == result);
             assert(0 == nameLength);
@@ -136,7 +136,7 @@ int main(int arg, char **argv)
         if (i < numExtensions) {
             assert(SL_RESULT_SUCCESS == result);
             assert((1 <= nameLength) && (nameLength <= (SLint16) sizeof(extensionName)));
-            printf("    extension[%lu] = \"%.*s\"\n", i, nameLength, extensionName);
+            printf("    extension[%u] = \"%.*s\"\n", i, nameLength, extensionName);
         } else {
             assert(SL_RESULT_PARAMETER_INVALID == result);
             assert(0 == nameLength);
