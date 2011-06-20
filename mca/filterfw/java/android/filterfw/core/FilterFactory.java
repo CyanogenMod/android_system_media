@@ -21,6 +21,8 @@ import android.filterfw.core.Filter;
 import android.util.Log;
 
 import java.lang.reflect.Constructor;
+import java.lang.ClassLoader;
+import java.lang.Thread;
 import java.util.HashSet;
 
 /**
@@ -52,11 +54,13 @@ public class FilterFactory {
     public Filter createFilterByClassName(String className, String filterName) {
         Log.i("FilterFactory", "Looking up class " + className);
         Class filterClass = null;
+        // Get context's classloader; otherwise cannot load non-framework filters
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         // Look for the class in the imported packages
         for (String packageName : mPackages) {
             try {
                 Log.i("FilterFactory", "Trying "+packageName + "." + className);
-                filterClass = Class.forName(packageName + "." + className);
+                filterClass = contextClassLoader.loadClass(packageName + "." + className);
             } catch (ClassNotFoundException e) {
                 continue;
             }
