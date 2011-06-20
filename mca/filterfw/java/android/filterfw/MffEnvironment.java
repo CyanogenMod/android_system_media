@@ -38,7 +38,7 @@ public class MffEnvironment {
      * frame-manager and the filter-context. Passing in null for the frame-manager causes this
      * to be auto-created.
      *
-     * @param frameManager: The FrameManager to use or null to auto-create one.
+     * @param frameManager The FrameManager to use or null to auto-create one.
      */
     protected MffEnvironment(FrameManager frameManager) {
         // Get or create the frame manager

@@ -34,23 +34,3 @@ LOCAL_SHARED_LIBRARIES := libutils libfilterfw
 LOCAL_PRELINK_MODULE := false
 
 include $(BUILD_SHARED_LIBRARY)
-
-##
-# Build java lib
-##
-include $(CLEAR_VARS)
-
-LOCAL_MODULE_TAGS := optional
-
-LOCAL_SRC_FILES := $(call all-subdir-java-files)
-
-LOCAL_MODULE := filterpack_imageproc
-
-LOCAL_PROGUARD_ENABLED := disabled
-
-LOCAL_STATIC_JAVA_LIBRARIES := filterfw
-
-LOCAL_JNI_SHARED_LIBRARIES := libfilterpack_imageproc
-
-include $(BUILD_STATIC_JAVA_LIBRARY)
-

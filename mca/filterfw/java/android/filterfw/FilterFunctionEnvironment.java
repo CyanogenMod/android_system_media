@@ -60,7 +60,7 @@ public class FilterFunctionEnvironment extends MffEnvironment {
      *
      * @param filterClass   The class of the filter to wrap. This must be a Filter subclass.
      * @param parameters    An argument list of alternating key-value filter parameters.
-     * @returns             A new FilterFunction instance.
+     * @return             A new FilterFunction instance.
      */
     public FilterFunction createFunction(Class filterClass, Object... parameters) {
         String filterName = "FilterFunction(" + filterClass.getSimpleName() + ")";
@@ -75,7 +75,7 @@ public class FilterFunctionEnvironment extends MffEnvironment {
      * have any input ports) and the last filter (which may not have any output ports).
      *
      * @param functions A list of filter functions. The first filter must be a source filter.
-     * @returns         The result of the last filter executed, or null if the last filter did not
+     * @return         The result of the last filter executed, or null if the last filter did not
                         produce any output.
      *
     public Frame executeSequence(FilterFunction[] functions) {

@@ -62,7 +62,7 @@ public class MediaSource extends Filter {
      * overrides the sourceUrl field. Set to null to use the sourceUrl field
      * instead. */
     @GenerateFieldPort(name = "sourceAsset", hasDefault = true)
-    private AssetFileDescriptor mSourceAsset;
+    private AssetFileDescriptor mSourceAsset = null;
 
     /** Whether the filter will always wait for a new video frame, or whether it
      * will output an old frame again if a new frame isn't available. Defaults to true.

@@ -18,6 +18,7 @@
 package android.filterfw.core;
 
 import android.filterfw.core.Filter;
+import android.util.Log;
 
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
@@ -38,18 +39,23 @@ public class FilterFactory {
     }
 
     public void addPackage(String packageName) {
+        Log.i("FilterFactory", "Adding package " + packageName);
+        /*
         Package pkg = Package.getPackage(packageName);
         if (pkg == null) {
             throw new IllegalArgumentException("Unknown filter package '" + packageName + "'!");
         }
+        */
         mPackages.add(packageName);
     }
 
     public Filter createFilterByClassName(String className, String filterName) {
+        Log.i("FilterFactory", "Looking up class " + className);
         Class filterClass = null;
         // Look for the class in the imported packages
         for (String packageName : mPackages) {
             try {
+                Log.i("FilterFactory", "Trying "+packageName + "." + className);
                 filterClass = Class.forName(packageName + "." + className);
             } catch (ClassNotFoundException e) {
                 continue;
@@ -98,4 +104,3 @@ public class FilterFactory {
         return filter;
     }
 }
-

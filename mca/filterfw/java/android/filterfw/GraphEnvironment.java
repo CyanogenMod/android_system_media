@@ -126,7 +126,7 @@ public class GraphEnvironment extends MffEnvironment {
      *
      * @param context       The context in which to read the resource.
      * @param resourceId    The ID of the graph resource to load.
-     * @returns             A unique ID for the graph.
+     * @return              A unique ID for the graph.
      */
     public int loadGraph(Context context, int resourceId) {
         // Read the file into a graph
@@ -146,7 +146,7 @@ public class GraphEnvironment extends MffEnvironment {
      * a graph file.
      *
      * @param graph The graph to add to the environment.
-     * @returns     A unique ID for the added graph.
+     * @return      A unique ID for the added graph.
      */
     public int addGraph(FilterGraph graph) {
         GraphHandle graphHandle = new GraphHandle(graph);
@@ -160,7 +160,7 @@ public class GraphEnvironment extends MffEnvironment {
      * specified ID could be found.
      *
      * @param graphId   The ID of the graph to get.
-     * @returns         The graph with the specified ID.
+     * @return          The graph with the specified ID.
      */
     public FilterGraph getGraph(int graphId) {
         if (graphId < 0 || graphId >= mGraphs.size()) {
@@ -178,7 +178,7 @@ public class GraphEnvironment extends MffEnvironment {
      * @param graphId       The ID of the graph to get.
      * @param executionMode The mode of graph execution. Currently this can be either
                             MODE_SYNCHRONOUS or MODE_ASYNCHRONOUS.
-     * @returns             A GraphRunner instance for this graph.
+     * @return              A GraphRunner instance for this graph.
      */
     public GraphRunner getRunner(int graphId, int executionMode) {
         switch (executionMode) {

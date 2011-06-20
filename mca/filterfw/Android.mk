@@ -14,7 +14,7 @@
 #
 
 #####################
-# Build sublibraries
+# Build native sublibraries
 
 include $(all-subdir-makefiles)
 
@@ -47,4 +47,5 @@ LOCAL_SHARED_LIBRARIES := libstlport \
 LOCAL_PRELINK_MODULE := false
 
 include $(BUILD_SHARED_LIBRARY)
+
 

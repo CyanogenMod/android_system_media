@@ -13,7 +13,73 @@
 # limitations under the License.
 #
 
-TOP_LOCAL_PATH:= $(call my-dir)
+FILTERFW_PATH:= $(call my-dir)
 
+# for shared defintion of libfilterfw_to_document
+include $(FILTERFW_PATH)/Docs.mk
+
+#
+# Build all native libraries
+#
 include $(call all-subdir-makefiles)
 
+#
+# Build Java library from filterfw core and all open-source filterpacks
+#
+
+LOCAL_PATH := $(FILTERFW_PATH)
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_SRC_FILES := $(call libfilterfw_to_document,$(LOCAL_PATH))
+
+LOCAL_MODULE := filterfw
+
+LOCAL_JNI_SHARED_LIBRARIES := libfilterfw libfilterpack_imageproc
+
+LOCAL_PROGUARD_ENABLED := disabled
+
+include $(BUILD_JAVA_LIBRARY)
+
+#
+# Local droiddoc for faster libfilterfw docs testing
+#
+#
+# Run with:
+#     m libfilterfw-docs
+#
+# Main output:
+#     out/target/common/docs/libfilterfw/reference/packages.html
+#
+# All text for proofreading (or running tools over):
+#     out/target/common/docs/libfilterfw-proofread.txt
+#
+# TODO list of missing javadoc, etc:
+#     out/target/common/docs/libfilterfw-docs-todo.html
+#
+# Rerun:
+#     rm -rf out/target/common/docs/libfilterfw-timestamp && m libfilterfw-docs
+#
+
+LOCAL_PATH := $(FILTERFW_PATH)
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(call libfilterfw_to_document,$(LOCAL_PATH))
+
+# rerun doc generation without recompiling the java
+LOCAL_JAVA_LIBRARIES:=
+LOCAL_MODULE_CLASS:=JAVA_LIBRARIES
+
+LOCAL_MODULE := libfilterfw
+
+LOCAL_DROIDDOC_OPTIONS:= \
+ -offlinemode \
+ -title "libfilterfw" \
+ -proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
+ -todo ../$(LOCAL_MODULE)-docs-todo.html \
+ -hdf android.whichdoc offline
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+
+include $(BUILD_DROIDDOC)
