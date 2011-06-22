@@ -32,6 +32,11 @@ public class Point {
         this.y = y;
     }
 
+    public void set(float x, float y) {
+        this.x = x;
+        this.y = y;
+    }
+
     public boolean IsInUnitRange() {
         return x >= 0.0f && x <= 1.0f &&
                y >= 0.0f && y <= 1.0f;
