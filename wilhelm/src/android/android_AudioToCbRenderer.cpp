@@ -104,8 +104,10 @@ void AudioToCbRenderer::updateAudioSink() {
         sp<MetaData> meta = mAudioSource->getFormat();
 
         SL_LOGV("old sample rate = %d", mSampleRateHz);
-        CHECK(meta->findInt32(kKeyChannelCount, &mNumChannels));
-        CHECK(meta->findInt32(kKeySampleRate, &mSampleRateHz));
+        CHECK(meta->findInt32(kKeyChannelCount, &mChannelCount));
+        int32_t sr;
+        CHECK(meta->findInt32(kKeySampleRate, &sr));
+        mSampleRateHz = (uint32_t) sr;
         SL_LOGV("new sample rate = %d", mSampleRateHz);
 
     }

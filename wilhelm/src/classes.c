@@ -64,7 +64,7 @@ static const struct iid_vtable AudioPlayer_interfaces[INTERFACES_AudioPlayer] = 
     {MPH_BUFFERQUEUE, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mBufferQueue)},
     {MPH_EFFECTSEND, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mEffectSend)},
     {MPH_MUTESOLO, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mMuteSolo)},
-    {MPH_METADATAEXTRACTION, INTERFACE_DYNAMIC_GAME_MUSIC,
+    {MPH_METADATAEXTRACTION, INTERFACE_DYNAMIC,
         offsetof(CAudioPlayer, mMetadataExtraction)},
     {MPH_METADATATRAVERSAL, INTERFACE_DYNAMIC_GAME_MUSIC,
         offsetof(CAudioPlayer, mMetadataTraversal)},

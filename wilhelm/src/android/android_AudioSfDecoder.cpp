@@ -28,18 +28,27 @@
 
 namespace android {
 
+// keep in sync with the entries of kPcmDecodeMetadataKeys[] defined in android_AudioSfDecoder.h
+#define ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS   0
+#define ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC 1
+#define ANDROID_KEY_INDEX_PCMFORMAT_BITSPERSAMPLE 2
+#define ANDROID_KEY_INDEX_PCMFORMAT_CONTAINERSIZE 3
+#define ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK   4
+#define ANDROID_KEY_INDEX_PCMFORMAT_ENDIANNESS    5
+
 //--------------------------------------------------------------------------------------------------
 AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : GenericPlayer(params),
         mDataSource(0),
         mAudioSource(0),
         mBitrate(-1),
-        mNumChannels(1),
-        mSampleRateHz(0),
+        mChannelMask(ANDROID_UNKNOWN_CHANNELMASK),
         mDurationUsec(-1),
         mDecodeBuffer(NULL),
         mTimeDelta(-1),
         mSeekTimeMsec(0),
-        mLastDecodedPositionUs(-1)
+        mLastDecodedPositionUs(-1),
+        mPcmFormatKeyCount(0),
+        mGetPcmFormatKeyCount(false)
 {
     SL_LOGV("AudioSfDecoder::AudioSfDecoder()");
 
@@ -77,9 +86,87 @@ void AudioSfDecoder::startPrefetch_async() {
 
 
 //--------------------------------------------------
+uint32_t AudioSfDecoder::getPcmFormatKeyCount() {
+    android::Mutex::Autolock autoLock(mGetPcmFormatLockSingleton);
+    mGetPcmFormatKeyCount = false;
+    (new AMessage(kWhatGetPcmFormat, id()))->post();
+    {
+        android::Mutex::Autolock autoLock(mGetPcmFormatLock);
+        while (!mGetPcmFormatKeyCount) {
+            mGetPcmFormatCondition.wait(mGetPcmFormatLock);
+        }
+    }
+    mGetPcmFormatKeyCount = false;
+    return mPcmFormatKeyCount;
+}
+
+
+//--------------------------------------------------
+bool AudioSfDecoder::getPcmFormatKeySize(uint32_t index, uint32_t* pKeySize) {
+    uint32_t keyCount = getPcmFormatKeyCount();
+    if (index >= keyCount) {
+        return false;
+    } else {
+        *pKeySize = strlen(kPcmDecodeMetadataKeys[index]) +1;
+        return true;
+    }
+}
+
+
+//--------------------------------------------------
+bool AudioSfDecoder::getPcmFormatKeyName(uint32_t index, uint32_t keySize, char* keyName) {
+    uint32_t actualKeySize;
+    if (!getPcmFormatKeySize(index, &actualKeySize)) {
+        return false;
+    }
+    if (keySize < actualKeySize) {
+        return false;
+    }
+    strncpy(keyName, kPcmDecodeMetadataKeys[index], actualKeySize);
+    return true;
+}
+
+
+//--------------------------------------------------
+bool AudioSfDecoder::getPcmFormatValueSize(uint32_t index, uint32_t* pValueSize) {
+    uint32_t keyCount = getPcmFormatKeyCount();
+    if (index >= keyCount) {
+        *pValueSize = 0;
+        return false;
+    } else {
+        *pValueSize = sizeof(uint32_t);
+        return true;
+    }
+}
+
+
+//--------------------------------------------------
+bool AudioSfDecoder::getPcmFormatKeyValue(uint32_t index, uint32_t size, uint32_t* pValue) {
+    uint32_t valueSize = 0;
+    if (!getPcmFormatValueSize(index, &valueSize)) {
+        return false;
+    } else if (size == valueSize) {
+        // this ensures we are accessing mPcmFormatValues with a valid size for that index
+        return false;
+    } else {
+        *pValue = mPcmFormatValues[index];
+        return true;
+    }
+}
+
+
+//--------------------------------------------------
 // Event handlers
 void AudioSfDecoder::onPrepare() {
     SL_LOGD("AudioSfDecoder::onPrepare()");
+
+    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_BITSPERSAMPLE] = SL_PCMSAMPLEFORMAT_FIXED_16;
+    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CONTAINERSIZE] = 16;
+    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_ENDIANNESS] = SL_BYTEORDER_LITTLEENDIAN;
+    // initialization with the default values
+    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
+    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
+    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
 
     sp<DataSource> dataSource;
 
@@ -149,12 +236,18 @@ void AudioSfDecoder::onPrepare() {
     sp<MediaSource> source = extractor->getTrack(audioTrackIndex);
     sp<MetaData> meta = source->getFormat();
 
+    bool hasChannelCount = meta->findInt32(kKeyChannelCount, &mChannelCount);
+    if (hasChannelCount) {
+        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
+    }
+
     off64_t size;
     int64_t durationUs;
     if (dataSource->getSize(&size) == OK
             && meta->findInt64(kKeyDuration, &durationUs)) {
         mBitrate = size * 8000000ll / durationUs;  // in bits/sec
         mDurationUsec = durationUs;
+        mDurationMsec = durationUs / 1000;
     } else {
         mBitrate = -1;
         mDurationUsec = -1;
@@ -187,8 +280,21 @@ void AudioSfDecoder::onPrepare() {
     mDataSource = dataSource;
     mAudioSource = source;
 
-    CHECK(meta->findInt32(kKeyChannelCount, &mNumChannels));
-    CHECK(meta->findInt32(kKeySampleRate, &mSampleRateHz));
+    if (!hasChannelCount) {
+        // even though the channel count was already queried above, there are issues with some
+        // OMXCodecs (e.g. MP3 software decoder) not reporting the right count,
+        // we trust the first reported value.
+        CHECK(meta->findInt32(kKeyChannelCount, &mChannelCount));
+        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
+    }
+    int32_t sr;
+    CHECK(meta->findInt32(kKeySampleRate, &sr));
+    mSampleRateHz = (uint32_t) sr;
+    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
+    // FIXME add code below once channel mask support is in, currently initialized to default
+    //    if (meta->findInt32(kKeyChannelMask, &mChannelMask)) {
+    //        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
+    //    }
 
     if (!wantPrefetch()) {
         SL_LOGV("AudioSfDecoder::onPrepare: no need to prefetch");
@@ -247,6 +353,24 @@ void AudioSfDecoder::onLoop(const sp<AMessage> &msg) {
         //SL_LOGV("AudioSfDecoder::onLoop stop looping");
         mStateFlags &= ~kFlagLooping;
     }
+}
+
+
+void AudioSfDecoder::onGetPcmFormatKeyCount() {
+    SL_LOGV("AudioSfDecoder::onGetPcmFormatKeyCount");
+    {
+        android::Mutex::Autolock autoLock(mGetPcmFormatLock);
+
+        if (!(mStateFlags & kFlagPrepared)) {
+            mPcmFormatKeyCount = 0;
+        } else {
+            mPcmFormatKeyCount = NB_PCMMETADATA_KEYS;
+        }
+
+        mGetPcmFormatKeyCount = true;
+        mGetPcmFormatCondition.signal();
+    }
+
 }
 
 
@@ -428,6 +552,10 @@ void AudioSfDecoder::onMessageReceived(const sp<AMessage> &msg) {
 
         case kWhatPause:
             onPause();
+            break;
+
+        case kWhatGetPcmFormat:
+            onGetPcmFormatKeyCount();
             break;
 /*
         case kWhatSeek:

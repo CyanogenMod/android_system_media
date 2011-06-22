@@ -48,8 +48,9 @@ How to examine the output with Audacity:
 #include <SLES/OpenSLES_AndroidConfiguration.h>
 
 /* Explicitly requesting SL_IID_ANDROIDSIMPLEBUFFERQUEUE and SL_IID_PREFETCHSTATUS
- * on the AudioPlayer object */
-#define NUM_EXPLICIT_INTERFACES_FOR_PLAYER 2
+ * on the AudioPlayer object for decoding, SL_IID_METADATAEXTRACTION for retrieving the
+ * format of the decoded audio */
+#define NUM_EXPLICIT_INTERFACES_FOR_PLAYER 3
 
 /* Size of the decode buffer queue */
 #define NB_BUFFERS_IN_QUEUE 4
@@ -84,10 +85,13 @@ android::Condition eosCondition;
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stdout, "%u error code encountered at line %d, exiting\n", result, line);
+        fprintf(stdout, "Error code %u encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
 }
+
+/* Used to signal prefetching failures */
+bool prefetchError = false;
 
 //-----------------------------------------------------------------
 /* Structure for passing information to callback function */
@@ -117,6 +121,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     if ((PREFETCHEVENT_ERROR_CANDIDATE == (event & PREFETCHEVENT_ERROR_CANDIDATE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
         fprintf(stdout, "PrefetchEventCallback: Error while prefetching data, exiting\n");
+        prefetchError = true;
         SignalEos();
     }
 }
@@ -153,7 +158,7 @@ void DecBufferQueueCallback(
         void *pContext)
 {
     counter++;
-    fprintf(stdout, "DecBufferQueueCallback called (iteration %d)\n", counter);
+    fprintf(stdout, "DecBufferQueueCallback called (iteration %d)   ", counter);
 
     CallbackCntxt *pCntxt = (CallbackCntxt*)pContext;
 
@@ -176,14 +181,28 @@ void DecBufferQueueCallback(
     //  synchronize it with some other event, as the OpenSL ES framework will block until the
     //  buffer queue callback return to proceed with the decoding.
 
-/*
+#if 0
+    /* Example buffer queue state display */
     SLAndroidSimpleBufferQueueState decQueueState;
     ExitOnError( (*queueItf)->GetState(queueItf, &decQueueState) );
 
     fprintf(stderr, "\DecBufferQueueCallback now has pCntxt->pData=%p queue: "
             "count=%u playIndex=%u\n",
             pCntxt->pData, decQueueState.count, decQueueState.index);
-*/
+#endif
+
+#if 0
+    /* Example of duration display in callback where we use the callback context for the SLPlayItf*/
+    SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
+    SLresult result = (*pCntxt->playItf)->GetDuration(pCntxt->playItf, &durationInMsec);
+    ExitOnError(result);
+    if (durationInMsec == SL_TIME_UNKNOWN) {
+        fprintf(stdout, "Content duration is unknown (in dec callback)\n");
+    } else {
+        fprintf(stdout, "Content duration is %ums (in dec callback)\n",
+                durationInMsec);
+    }
+#endif
 }
 
 //-----------------------------------------------------------------
@@ -213,6 +232,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
     SLAndroidSimpleBufferQueueItf decBuffQueueItf;
     SLPrefetchStatusItf           prefetchItf;
     SLPlayItf                     playItf;
+    SLMetadataExtractionItf       mdExtrItf;
 
     /* Source of audio data for the decoding */
     SLDataSource      decSource;
@@ -247,6 +267,9 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
     /* Request the PrefetchStatus interface */
     required[1] = SL_BOOLEAN_TRUE;
     iidArray[1] = SL_IID_PREFETCHSTATUS;
+    /* Request the PrefetchStatus interface */
+    required[2] = SL_BOOLEAN_TRUE;
+    iidArray[2] = SL_IID_METADATAEXTRACTION;
 
     /* Setup the data source */
     decUri.locatorType = SL_DATALOCATOR_URI;
@@ -266,7 +289,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
     pcm.formatType = SL_DATAFORMAT_PCM;
     // FIXME valid value required but currently ignored
     pcm.numChannels = 1;
-    pcm.samplesPerSec = SL_SAMPLINGRATE_44_1;
+    pcm.samplesPerSec = SL_SAMPLINGRATE_8;
     pcm.bitsPerSample = SL_PCMSAMPLEFORMAT_FIXED_16;
     pcm.containerSize = 16;
     pcm.channelMask = SL_SPEAKER_FRONT_LEFT;
@@ -341,6 +364,72 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
     ExitOnError(result);
 
     /* ------------------------------------------------------ */
+    /* Prefetch the data so we can get information about the format before starting to decode */
+    /*     1/ cause the player to prefetch the data */
+    result = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PAUSED );
+    ExitOnError(result);
+    /*     2/ block until data has been prefetched */
+    SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+    SLuint32 timeOutIndex = 50; // time out prefetching after 5s
+    while ((prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) && (timeOutIndex > 0) &&
+            !prefetchError) {
+        usleep(10 * 1000);
+        (*prefetchItf)->GetPrefetchStatus(prefetchItf, &prefetchStatus);
+        timeOutIndex--;
+    }
+    if (timeOutIndex == 0 || prefetchError) {
+        fprintf(stderr, "Failure to prefetch data in time, exiting\n");
+        ExitOnError(SL_RESULT_CONTENT_NOT_FOUND);
+    }
+
+    /* ------------------------------------------------------ */
+    /* Display duration */
+    SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
+    result = (*playItf)->GetDuration(playItf, &durationInMsec);
+    ExitOnError(result);
+    if (durationInMsec == SL_TIME_UNKNOWN) {
+        fprintf(stdout, "Content duration is unknown\n");
+    } else {
+        fprintf(stdout, "Content duration is %ums\n", durationInMsec);
+    }
+
+    /* ------------------------------------------------------ */
+    /* Display the metadata obtained from the decoder */
+    //   This is for test / demonstration purposes only where we discover the key and value sizes
+    //   of a PCM decoder. An application that would want to directly get access to those values
+    //   can make assumptions about the size of the keys and their matching values (all SLuint32)
+    result = (*player)->GetInterface(player, SL_IID_METADATAEXTRACTION,
+            (void*)&mdExtrItf);
+    ExitOnError(result);
+    SLuint32 itemCount;
+    result = (*mdExtrItf)->GetItemCount(mdExtrItf, &itemCount);
+    SLuint32 i, keySize, valueSize;
+    SLMetadataInfo *keyInfo, *value;
+    for(i=0 ; i<itemCount ; i++) {
+        keyInfo = NULL; keySize = 0;
+        value = NULL;   valueSize = 0;
+        result = (*mdExtrItf)->GetKeySize(mdExtrItf, i, &keySize);
+        ExitOnError(result);
+        result = (*mdExtrItf)->GetValueSize(mdExtrItf, i, &valueSize);
+        ExitOnError(result);
+        keyInfo = (SLMetadataInfo*) malloc(keySize);
+        value   = (SLMetadataInfo*) malloc(valueSize);
+        if ((NULL != keyInfo) && (NULL != value)) {
+            result = (*mdExtrItf)->GetKey(mdExtrItf, i, keySize, keyInfo);
+            ExitOnError(result);
+            result = (*mdExtrItf)->GetValue(mdExtrItf, i, valueSize, value);
+            ExitOnError(result);
+            if ((value->encoding == SL_CHARACTERENCODING_BINARY)
+                    && (value->size == sizeof(SLuint32))) {
+                fprintf(stdout, "key[%d] size=%d, name=%s \tvalue size=%d value=%d\n",
+                        i, keyInfo->size, keyInfo->data, value->size, *((SLuint32*)value->data));
+            }
+            free(keyInfo);
+            free(value);
+        }
+    }
+
+    /* ------------------------------------------------------ */
     /* Start decoding */
     result = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_PLAYING);
     ExitOnError(result);
@@ -365,6 +454,8 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
 
     /* Destroy the AudioPlayer object */
     (*player)->Destroy(player);
+
+    //sleep(1);
 
     fclose(gFp);
 }

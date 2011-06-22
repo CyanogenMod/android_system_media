@@ -27,9 +27,17 @@
 #include "ThrottledSource.h"
 
 #include "android_GenericPlayer.h"
+#include "OpenSLES_AndroidMetadata.h"
 
 //--------------------------------------------------------------------------------------------------
 namespace android {
+
+// to keep in sync with the ANDROID_KEY_INDEX_PCMFORMAT_* constants in android_AudioSfDecoder.cpp
+static const char* const kPcmDecodeMetadataKeys[] = {
+        ANDROID_KEY_PCMFORMAT_NUMCHANNELS, ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC,
+        ANDROID_KEY_PCMFORMAT_BITSPERSAMPLE, ANDROID_KEY_PCMFORMAT_CONTAINERSIZE,
+        ANDROID_KEY_PCMFORMAT_CHANNELMASK, ANDROID_KEY_PCMFORMAT_ENDIANNESS };
+#define NB_PCMMETADATA_KEYS (sizeof(kPcmDecodeMetadataKeys)/sizeof(kPcmDecodeMetadataKeys[0]))
 
 class AudioSfDecoder : public GenericPlayer
 {
@@ -43,12 +51,19 @@ public:
 
     void startPrefetch_async();
 
+    uint32_t getPcmFormatKeyCount();
+    bool     getPcmFormatKeySize(uint32_t index, uint32_t* pKeySize);
+    bool     getPcmFormatKeyName(uint32_t index, uint32_t keySize, char* keyName);
+    bool     getPcmFormatValueSize(uint32_t index, uint32_t* pValueSize);
+    bool     getPcmFormatKeyValue(uint32_t index, uint32_t size, uint32_t* pValue);
+
 protected:
 
     enum {
-        kWhatDecode     = 'deco',
-        kWhatRender     = 'rend',
-        kWhatCheckCache = 'cach',
+        kWhatDecode       = 'deco',
+        kWhatRender       = 'rend',
+        kWhatCheckCache   = 'cach',
+        kWhatGetPcmFormat = 'gpcm'
     };
 
     // Async event handlers (called from the AudioSfDecoder's event loop)
@@ -62,6 +77,7 @@ protected:
     virtual void onPause();
     virtual void onSeek(const sp<AMessage> &msg);
     virtual void onLoop(const sp<AMessage> &msg);
+    virtual void onGetPcmFormatKeyCount();
 
     // overridden from GenericPlayer
     virtual void onNotify(const sp<AMessage> &msg);
@@ -78,15 +94,13 @@ protected:
 
     // negative values indicate invalid value
     int64_t mBitrate;  // in bits/sec
-    int32_t mNumChannels;
-    int32_t mSampleRateHz;
+    uint32_t mChannelMask;
     int64_t mDurationUsec;
 
     // buffer passed from decoder to renderer
     MediaBuffer *mDecodeBuffer;
     // mutex used to protect the decode buffer
     Mutex       mDecodeBufferLock;
-
 
 private:
 
@@ -98,6 +112,18 @@ private:
 
     // mutex used for seek flag and seek time read/write
     Mutex mSeekLock;
+
+    // informations that can be retrieved in the PCM format queries
+    //  these values are only written in the event loop
+    uint32_t mPcmFormatKeyCount;
+    uint32_t mPcmFormatValues[NB_PCMMETADATA_KEYS];
+    // for synchronous "get" calls on the PCM decode format:
+    //    prevents concurrent "getPcmFormat" calls
+    Mutex       mGetPcmFormatLockSingleton;
+    //    lock order 1/ mGetPcmFormatLockSingleton  2/ mGetPcmFormatLock
+    Mutex       mGetPcmFormatLock;
+    Condition   mGetPcmFormatCondition;
+    bool        mGetPcmFormatKeyCount;
 
     bool wantPrefetch();
     CacheStatus_t getCacheRemaining(bool *eos);

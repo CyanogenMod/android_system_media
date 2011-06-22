@@ -304,7 +304,6 @@ extern void
 
 #if !(USE_PROFILES & USE_PROFILES_MUSIC)
 #define IDynamicSource_init         NULL
-#define IMetadataExtraction_init    NULL
 #define IMetadataTraversal_init     NULL
 #define IVisualization_init         NULL
 #endif
