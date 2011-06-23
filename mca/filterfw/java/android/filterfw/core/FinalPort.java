@@ -17,29 +17,27 @@
 
 package android.filterfw.core;
 
-import android.filterfw.core.Frame;
+import java.lang.reflect.Field;
 
-public class FrameHandle {
+public class FinalPort extends FieldPort {
 
-    protected Frame mFrame;
-
-    FrameHandle(Frame frame) {
-        mFrame = frame.retain();
+    public FinalPort(Filter filter, String name, Field field, boolean hasDefault) {
+        super(filter, name, field, hasDefault);
     }
 
     @Override
-    protected void finalize() {
-        release();
-    }
-
-    public Frame getFrame() {
-        return mFrame;
-    }
-
-    public void release() {
-        if (mFrame != null) {
-            mFrame.release();
-            mFrame = null;
+    public void setFrame(Frame frame) {
+        if (mFilter.getStatus() != Filter.STATUS_PREINIT) {
+            throw new RuntimeException("Attempting to modify " + this + "!");
+        } else {
+            super.setFrame(frame);
+            super.transfer(null);
         }
     }
+
+    @Override
+    public String toString() {
+        return "final " + super.toString();
+    }
+
 }

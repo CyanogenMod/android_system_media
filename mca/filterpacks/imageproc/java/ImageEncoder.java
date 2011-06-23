@@ -20,9 +20,9 @@ package android.filterpacks.imageproc;
 import android.content.Context;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.format.ImageFormat;
 import android.graphics.Bitmap;
@@ -37,10 +37,10 @@ import java.io.IOException;
 
 public class ImageEncoder extends Filter {
 
-    @FilterParameter(name = "fileName", isOptional = false)
+    @GenerateFieldPort(name = "fileName")
     private String mOutputName;
 
-    @FilterParameter(name = "context", isOptional = false)
+    @GenerateFieldPort(name = "context")
     private Context mContext;
 
     public ImageEncoder(String name) {
@@ -48,30 +48,14 @@ public class ImageEncoder extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return new String[] { "image" };
+    public void setupPorts() {
+        addMaskedInputPort("image", ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                       FrameFormat.TARGET_UNSPECIFIED));
     }
 
     @Override
-    public String[] getOutputNames() {
-        return null;
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        FrameFormat requiredFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
-                                                        FrameFormat.TARGET_UNSPECIFIED);
-        return format.isCompatibleWith(requiredFormat);
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return null;
-    }
-
-    @Override
-    public int process(FilterContext env) {
-        Frame input = pullInput(0);
+    public void process(FilterContext env) {
+        Frame input = pullInput("image");
         Bitmap bitmap = input.getBitmap();
         FileOutputStream outStream = null;
 
@@ -91,8 +75,6 @@ public class ImageEncoder extends Filter {
             throw new RuntimeException("ImageEncoder: Could not write to file: " +
                                        mOutputName + "!");
         }
-
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS;
     }
 
 }

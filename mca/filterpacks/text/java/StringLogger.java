@@ -22,6 +22,7 @@ import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.JavaFrame;
+import android.filterfw.format.ObjectFormat;
 import android.util.Log;
 
 public class StringLogger extends Filter {
@@ -31,34 +32,15 @@ public class StringLogger extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return new String[] { "string" };
+    public void setupPorts() {
+        addMaskedInputPort("string", ObjectFormat.fromClass(String.class, FrameFormat.TARGET_JAVA));
     }
 
     @Override
-    public String[] getOutputNames() {
-        return null;
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        // TODO: Check meta-property ObjectClass
-        return format.getBaseType() == FrameFormat.TYPE_OBJECT;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return null;
-    }
-
-    @Override
-    public int process(FilterContext env) {
-        Frame input = pullInput(0);
+    public void process(FilterContext env) {
+        Frame input = pullInput("string");
         String inputString = (String)input.getObjectValue();
-
         Log.i("StringLogger", inputString);
-
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS;
     }
 
 }

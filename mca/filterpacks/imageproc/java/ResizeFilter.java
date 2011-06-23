@@ -19,9 +19,9 @@ package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.GLFrame;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
@@ -29,16 +29,17 @@ import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
+import android.filterfw.format.ImageFormat;
 
 import android.opengl.GLES20;
 
 public class ResizeFilter extends Filter {
 
-    @FilterParameter(name = "owidth", isOptional = false)
+    @GenerateFieldPort(name = "owidth")
     private int mOWidth;
-    @FilterParameter(name = "oheight", isOptional = false)
+    @GenerateFieldPort(name = "oheight")
     private int mOHeight;
-    @FilterParameter(name = "generateMipMap", isOptional = true)
+    @GenerateFieldPort(name = "generateMipMap")
     private boolean mGenerateMipMap = false;
 
     private Program mProgram;
@@ -50,33 +51,19 @@ public class ResizeFilter extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return new String[] { "image" };
+    public void setupPorts() {
+        addMaskedInputPort("image", ImageFormat.create(ImageFormat.COLORSPACE_RGBA));
+        addOutputBasedOnInput("image", "image");
     }
 
     @Override
-    public String[] getOutputNames() {
-        return new String[] { "image" };
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        if (format.isBinaryDataType()) {
-            mOutputFormat = format.mutableCopy();
-            mOutputFormat.setDimensions(mOWidth, mOHeight);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
+    public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
+        return inputFormat;
     }
 
     @Override
     protected void prepare(FilterContext environment) {
-        switch (mOutputFormat.getTarget()) {
+        switch (getInputFormat("image").getTarget()) {
             case FrameFormat.TARGET_NATIVE:
                 throw new RuntimeException("Native ResizeFilter not implemented yet!");
 
@@ -91,12 +78,14 @@ public class ResizeFilter extends Filter {
         }
     }
     @Override
-    public int process(FilterContext env) {
+    public void process(FilterContext env) {
         // Get input frame
-        Frame input = pullInput(0);
+        Frame input = pullInput("image");
 
         // Create output frame
-        Frame output = env.getFrameManager().newFrame(mOutputFormat);
+        MutableFrameFormat outputFormat = input.getFormat().mutableCopy();
+        outputFormat.setDimensions(mOWidth, mOHeight);
+        Frame output = env.getFrameManager().newFrame(outputFormat);
 
         // Process
         if (mGenerateMipMap) {
@@ -112,14 +101,10 @@ public class ResizeFilter extends Filter {
         }
 
         // Push output
-        putOutput(0, output);
+        pushOutput("image", output);
 
         // Release pushed frame
         output.release();
-
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
 

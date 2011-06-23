@@ -61,7 +61,7 @@ public class SyncRunner extends GraphRunner {
         mTimer = new StopWatchMap();
 
         // Setup graph filters
-        graph.setupFilters(mFilterContext);
+        graph.setupFilters();
     }
 
     @Override
@@ -80,15 +80,14 @@ public class SyncRunner extends GraphRunner {
         return mFilterContext;
     }
 
-    public void open() {
-        if (!getGraph().isOpen()) {
-            getGraph().openFilters(mFilterContext);
-        }
-    }
 
     public int step() {
         assertReadyToStep();
         return performStep(true);
+    }
+
+    public void beginProcessing() {
+        getGraph().beginProcessing();
     }
 
     public void close() {
@@ -99,7 +98,7 @@ public class SyncRunner extends GraphRunner {
     @Override
     public void run() {
         // Open filters
-        open();
+        beginProcessing();
 
         // Make sure we are ready to run
         assertReadyToStep();
@@ -116,7 +115,6 @@ public class SyncRunner extends GraphRunner {
             mDoneListener.onRunnerDone(status);
         }
     }
-
 
     @Override
     public boolean isRunning() {
@@ -144,9 +142,9 @@ public class SyncRunner extends GraphRunner {
     private void processFilterNode(Filter filter) {
         LogMCA.perFrame("Processing " + filter);
         filter.performProcess(mFilterContext);
-        if (filter.checkStatus(Filter.STATUS_ERROR)) {
+        if (filter.getStatus() == Filter.STATUS_ERROR) {
             throw new RuntimeException("There was an error executing " + filter + "!");
-        } else if (filter.checkStatus(Filter.STATUS_SLEEP)) {
+        } else if (filter.getStatus() == Filter.STATUS_SLEEPING) {
             scheduleFilterWake(filter, filter.getSleepDelay());
         }
     }
@@ -160,9 +158,9 @@ public class SyncRunner extends GraphRunner {
         final ConditionVariable conditionToWake = mWakeCondition;
 
         mWakeExecutor.schedule(new Runnable() {
-          @Override 
+          @Override
           public void run() {
-                filterToSchedule.unsetStatus(Filter.STATUS_SLEEP);
+                filterToSchedule.unsetStatus(Filter.STATUS_SLEEPING);
                 conditionToWake.open();
             }
         }, delay, TimeUnit.MILLISECONDS);
@@ -171,20 +169,17 @@ public class SyncRunner extends GraphRunner {
     private int determineGraphState() {
         boolean isBlocked = false;
         for (Filter filter : mScheduler.getGraph().getFilters()) {
-            if (filter.checkStatus(Filter.STATUS_SLEEP)) {
-                // If ANY node is sleeping, we return our state as sleeping
-                return RESULT_SLEEPING;
-            } else if (filter.checkStatus(Filter.STATUS_WAIT_FOR_ALL_INPUTS) ||
-                       filter.checkStatus(Filter.STATUS_WAIT_FOR_ONE_INPUT)) {
-                // Currently, we ignore waiting-for-input nodes
-                continue;
-            } else if (filter.checkStatus(Filter.STATUS_WAIT_FOR_FREE_OUTPUTS) ||
-                       filter.checkStatus(Filter.STATUS_WAIT_FOR_FREE_OUTPUT)) {
-                // If a node is blocked on output, we will report it if no node is sleeping.
-                isBlocked = true;
+            if (filter.isOpen()) {
+                if (filter.getStatus() == Filter.STATUS_SLEEPING) {
+                    // If ANY node is sleeping, we return our state as sleeping
+                    return RESULT_SLEEPING;
+                } else {
+                    // TODO: Be more precise whether this is blocked or starved
+                    return RESULT_BLOCKED;
+                }
             }
         }
-        return isBlocked ? RESULT_BLOCKED : RESULT_FINISHED;
+        return RESULT_FINISHED;
     }
 
     // Core internal methods ///////////////////////////////////////////////////////////////////////
@@ -205,7 +200,7 @@ public class SyncRunner extends GraphRunner {
             throw new RuntimeException("Attempting to run schedule with no scheduler in place!");
         } else if (getGraph() == null) {
             throw new RuntimeException("Calling step on scheduler with no graph in place!");
-        } else if (!getGraph().isOpen() ) {
+        } else if (!getGraph().isReady() ) {
             throw new RuntimeException("Trying to process graph that is not open!");
         }
     }

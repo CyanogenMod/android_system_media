@@ -19,44 +19,30 @@ package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
 
 public class FrameStore extends Filter {
 
-    @FilterParameter(name = "key", isOptional = false)
+    @GenerateFieldPort(name = "key")
     private String mKey;
 
     public FrameStore(String name) {
         super(name);
     }
 
-    public String[] getInputNames() {
-        return new String[] { "frame" };
+    @Override
+    public void setupPorts() {
+        addInputPort("frame");
     }
 
-    public String[] getOutputNames() {
-        return null;
-    }
-
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return true;
-    }
-
-    public FrameFormat getOutputFormat(int index) {
-        return null;
-    }
-
-    public int process(FilterContext context) {
+    public void process(FilterContext context) {
         // Get input frame
-        Frame input = pullInput(0);
+        Frame input = pullInput("frame");
 
         // Store frame
         context.storeFrame(mKey, input);
-
-        // Wait for next input
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS;
     }
 
 }

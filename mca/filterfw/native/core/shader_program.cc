@@ -1012,11 +1012,14 @@ bool ShaderProgram::PushAttributes() {
 }
 
 bool ShaderProgram::PopAttributes() {
+  // Disable vertex attributes
   for (VertexAttribMap::const_iterator iter = attrib_values_.begin();
        iter != attrib_values_.end();
        ++iter) {
     glDisableVertexAttribArray(iter->second.index);
   }
+  // Unbind buffer: Very important as this greatly affects what glVertexAttribPointer does!
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
   return !GLEnv::CheckGLError("Popping Vertex Attributes");
 }
 

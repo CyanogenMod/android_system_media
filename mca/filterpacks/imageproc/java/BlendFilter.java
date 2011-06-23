@@ -19,23 +19,18 @@ package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
-import android.filterfw.core.ProgramParameter;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 
 import java.util.Set;
 
-public class BlendFilter extends ImageFilter {
-
-    @ProgramParameter(name = "blend", type = float.class)
-    private Program mProgram;
+public class BlendFilter extends ImageCombineFilter {
 
     private final String mBlendShader =
             "precision mediump float;\n" +
@@ -50,36 +45,17 @@ public class BlendFilter extends ImageFilter {
             "}\n";
 
     public BlendFilter(String name) {
-        super(name);
+        super(name, new String[] { "left", "right" }, "blended", "blend");
     }
 
     @Override
-    public String[] getInputNames() {
-        return new String[] { "left", "right" };
+    protected Program getNativeProgram() {
+        throw new RuntimeException("TODO: Write native implementation for AlphaBlend!");
     }
 
     @Override
-    public String[] getOutputNames() {
-        return new String[] { "blended" };
+    protected Program getShaderProgram() {
+        return new ShaderProgram(mBlendShader);
     }
 
-    @Override
-    protected void createProgram(int target) {
-        switch (target) {
-            case FrameFormat.TARGET_NATIVE:
-                throw new RuntimeException("TODO: Write native implementation for Blend!");
-
-            case FrameFormat.TARGET_GPU:
-                mProgram = new ShaderProgram(mBlendShader);
-                break;
-
-            default:
-                throw new RuntimeException("BlendFilter could not create suitable program!");
-        }
-    }
-
-    @Override
-    protected Program getProgram() {
-        return mProgram;
-    }
 }

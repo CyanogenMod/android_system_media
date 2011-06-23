@@ -15,27 +15,15 @@
  */
 
 
-package android.filterpacks.base;
+package android.filterfw.core;
 
-import android.filterfw.core.Filter;
-import android.filterfw.core.FilterContext;
-import android.filterfw.core.Frame;
-import android.filterfw.core.FrameFormat;
+import java.lang.annotation.*;
 
-public class NullFilter extends Filter {
-
-    public NullFilter(String name) {
-        super(name);
-    }
-
-    @Override
-    public void setupPorts() {
-        addInputPort("frame");
-    }
-
-    @Override
-    public void process(FilterContext context) {
-        pullInput("frame");
-    }
-
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface GenerateProgramPort {
+    String  name();
+    Class   type();
+    String  variableName() default "";
+    boolean hasDefault() default false;
 }

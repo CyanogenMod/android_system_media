@@ -61,7 +61,7 @@ public class AsyncRunner extends GraphRunner{
         @Override
         protected void onPreExecute() {
             // Disable our GL context in the UI thread
-            disableUiGlContext();
+            disableGlContext();
         }
 
         @Override
@@ -71,13 +71,11 @@ public class AsyncRunner extends GraphRunner{
             }
 
             if (LOGV) Log.v(TAG, "Starting background graph processing.");
-            GLEnvironment glEnv = mFilterContext.getGLEnvironment();
-
-            glEnv.activate();
+            enableGlContext();
 
             boolean isDone = false;
-            if (LOGV) Log.v(TAG, "Opening filters.");
-            runner[0].open();
+            if (LOGV) Log.v(TAG, "Preparing filter graph for processing.");
+            runner[0].beginProcessing();
 
             if (LOGV) Log.v(TAG, "Running graph.");
             runner[0].assertReadyToStep();
@@ -92,7 +90,7 @@ public class AsyncRunner extends GraphRunner{
             if (LOGV) Log.v(TAG, "Closing filters.");
             runner[0].close();
 
-            glEnv.deactivate();
+            disableGlContext();
             if (LOGV) Log.v(TAG, "Done with background graph processing.");
             return isDone ? RESULT_FINISHED : RESULT_STOPPED;
         }
@@ -105,7 +103,7 @@ public class AsyncRunner extends GraphRunner{
         @Override
         protected void onPostExecute(Integer result) {
             if (LOGV) Log.v(TAG, "Starting post-execute.");
-            enableUiGlContext();
+            enableGlContext();
             if (mDoneListener != null) {
                 if (LOGV) Log.v(TAG, "Invoking graph done callback.");
                 mDoneListener.onRunnerDone(result);
@@ -141,8 +139,8 @@ public class AsyncRunner extends GraphRunner{
         }
     }
 
-    private static final boolean LOGV = false;
-    private static final boolean LOGVV = false;
+    private static final boolean LOGV = true;
+    private static final boolean LOGVV = true;
     private static final String TAG = "AsyncRunner";
 
     /** Create a new asynchronous graph runner with the given filter
@@ -249,18 +247,24 @@ public class AsyncRunner extends GraphRunner{
         mUiListener = uiListener;
     }
 
-    /** Deactivate GL context in the UI thread.
+    /** Deactivate GL context.
      */
-    private void disableUiGlContext() {
-        if (LOGV) Log.v(TAG, "Deactivating GL context in UI thread.");
-        mFilterContext.getGLEnvironment().deactivate();
+    private void disableGlContext() {
+        GLEnvironment glEnv = mFilterContext.getGLEnvironment();
+        if (glEnv != null) {
+            if (LOGV) Log.v(TAG, "Deactivating GL context.");
+            glEnv.deactivate();
+        }
     }
 
-    /** Activate GL context in the UI thread.
+    /** Activate GL context.
      */
-    private void enableUiGlContext() {
-        if (LOGV) Log.v(TAG, "Reactivating GL context in UI thread.");
-        mFilterContext.getGLEnvironment().activate();
+    private void enableGlContext() {
+        GLEnvironment glEnv = mFilterContext.getGLEnvironment();
+        if (glEnv != null) {
+            if (LOGV) Log.v(TAG, "Reactivating GL context.");
+            glEnv.activate();
+        }
     }
 
 }

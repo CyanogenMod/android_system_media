@@ -60,7 +60,7 @@ public class NativeFrame extends Frame {
     @Override
     public Object getObjectValue() {
         // If this is not a structured frame, return our data
-        if (getFormat().getBaseType() != FrameFormat.TYPE_STRUCT) {
+        if (getFormat().getBaseType() != FrameFormat.TYPE_OBJECT) {
             return getData();
         }
 

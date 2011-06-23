@@ -19,15 +19,16 @@ package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
+import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 
 public class RetargetFilter extends Filter {
 
-    @FilterParameter(name = "target", isOptional = false)
+    @GenerateFinalPort(name = "target", hasDefault = false)
     private String mTargetString;
 
     private MutableFrameFormat mOutputFormat;
@@ -37,31 +38,19 @@ public class RetargetFilter extends Filter {
         super(name);
     }
 
-    public void initFilter() {
-        if (mTargetString.equals("CPU") || mTargetString.equals("NATIVE")) {
-            mTarget = FrameFormat.TARGET_NATIVE;
-        } else if (mTargetString.equals("GPU")) {
-            mTarget = FrameFormat.TARGET_GPU;
-        } else {
-            throw new RuntimeException("Unknown or unsupported target type '" +
-                                       mTargetString + "'!");
-        }
+    @Override
+    public void setupPorts() {
+        // Setup target
+        mTarget = FrameFormat.readTargetString(mTargetString);
+
+        // Add ports
+        addInputPort("frame");
+        addOutputBasedOnInput("frame", "frame");
     }
 
-    public String[] getInputNames() {
-        return new String[] { "frame" };
-    }
-
-    public String[] getOutputNames() {
-        return new String[] { "frame" };
-    }
-
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return true;
-    }
-
-    public FrameFormat getOutputFormat(int index) {
-        return getRetargetedFormat(getInputFormat(0));
+    @Override
+    public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
+        return getRetargetedFormat(inputFormat);
     }
 
     public FrameFormat getRetargetedFormat(FrameFormat format) {
@@ -70,9 +59,10 @@ public class RetargetFilter extends Filter {
         return retargeted;
     }
 
-    public int process(FilterContext context) {
+    @Override
+    public void process(FilterContext context) {
         // Get input frame
-        Frame input = pullInput(0);
+        Frame input = pullInput("frame");
 
         // Create output frame
         FrameFormat outFormat = getRetargetedFormat(input.getFormat());
@@ -82,14 +72,10 @@ public class RetargetFilter extends Filter {
         output.setDataFromFrame(input);
 
         // Push output
-        putOutput(0, output);
+        pushOutput("frame", output);
 
         // Release pushed frame
         output.release();
-
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
 }

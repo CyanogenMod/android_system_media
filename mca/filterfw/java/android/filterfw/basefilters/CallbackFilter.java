@@ -19,9 +19,9 @@ package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
@@ -29,42 +29,29 @@ import android.filterfw.core.Program;
 
 public class CallbackFilter extends Filter {
 
-    @FilterParameter(name = "listener", isOptional = false, isUpdatable = true)
+    @GenerateFieldPort(name = "listener", hasDefault = true)
     private FilterContext.OnFrameReceivedListener mListener;
 
-    @FilterParameter(name = "userData", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "userData", hasDefault = true)
     private Object mUserData;
 
     public CallbackFilter(String name) {
         super(name);
     }
 
-    public String[] getInputNames() {
-        return new String[] { "frame" };
+    @Override
+    public void setupPorts() {
+        addInputPort("frame");
     }
 
-    public String[] getOutputNames() {
-        return null;
-    }
-
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return true;
-    }
-
-    public FrameFormat getOutputFormat(int index) {
-        return null;
-    }
-
-    public int process(FilterContext context) {
+    public void process(FilterContext context) {
         // Get frame and forward to listener
-        Frame input = pullInput(0);
+        Frame input = pullInput("frame");
         if (mListener != null) {
             mListener.onFrameReceived(this, input, mUserData);
         } else {
             throw new RuntimeException("CallbackFilter received frame, but no listener set!");
         }
-
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS;
     }
 
 }

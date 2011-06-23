@@ -19,15 +19,17 @@ package android.filterpacks.videosrc;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
-import android.filterfw.core.GLFrame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
+import android.filterfw.core.GenerateFieldPort;
+import android.filterfw.core.GenerateFinalPort;
+import android.filterfw.core.GLFrame;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.ShaderProgram;
+import android.filterfw.format.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.os.ConditionVariable;
@@ -72,17 +74,17 @@ public class SurfaceTextureSource extends Filter {
      * This callback may be called from an arbitrary thread, so it should not
      * assume it is running in the UI thread in particular.
      */
-    @FilterParameter(name = "sourceListener", isOptional = false, isUpdatable = false)
+    @GenerateFinalPort(name = "sourceListener")
     private SurfaceTextureSourceListener mSourceListener;
 
     /** The width of the output image frame. If the texture width for the
      * SurfaceTexture source is known, use it here to minimize resampling. */
-    @FilterParameter(name = "width", isOptional = false, isUpdatable = true)
+    @GenerateFieldPort(name = "width")
     private int mWidth;
 
     /** The height of the output image frame. If the texture height for the
      * SurfaceTexture source is known, use it here to minimize resampling. */
-    @FilterParameter(name = "height", isOptional = false, isUpdatable = true)
+    @GenerateFieldPort(name = "height")
     private int mHeight;
 
     /** Whether the filter will always wait for a new frame from its
@@ -90,13 +92,13 @@ public class SurfaceTextureSource extends Filter {
      * frame isn't available. The filter will always wait for the first frame,
      * to avoid outputting a blank frame. Defaults to true.
      */
-    @FilterParameter(name = "waitForNewFrame", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "waitForNewFrame", hasDefault = true)
     private boolean mWaitForNewFrame = true;
 
     /** Maximum timeout before signaling error when waiting for a new frame. Set
      * this to zero to disable the timeout and wait indefinitely. In milliseconds.
      */
-    @FilterParameter(name = "waitTimeout", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "waitTimeout", hasDefault = true)
     private int mWaitTimeout = 1000;
 
     // Variables for input->output conversion
@@ -134,40 +136,25 @@ public class SurfaceTextureSource extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return null;
+    public void setupPorts() {
+        // Add input port
+        addOutputPort("video", ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                  FrameFormat.TARGET_GPU));
     }
 
-    @Override
-    public String[] getOutputNames() {
-        return new String[] { "video" };
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        // Format matches that of a GLFrame, but don't want to access an OpenGL
-        // context yet
-        mOutputFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE,
-                                               FrameFormat.TARGET_GPU);
-        mOutputFormat.setBytesPerSample(4);
-        // Use user-specified dimensions, as SurfaceTexture does not provide a way to get
-        // its underlying size.
+    private void createFormats() {
+        mOutputFormat = ImageFormat.create(mWidth, mHeight,
+                                           ImageFormat.COLORSPACE_RGBA,
+                                           FrameFormat.TARGET_GPU);
         mMediaFormat = mOutputFormat.mutableCopy();
-        mMediaFormat.setDimensionCount(2);
         mMediaFormat.setMetaValue(GLFrame.USE_EXTERNAL_TEXTURE, true);
-
-        mOutputFormat.setDimensions(mWidth, mHeight);
-        return mOutputFormat;
     }
 
     @Override
     protected void prepare(FilterContext context) {
         if (LOGV) Log.v(TAG, "Preparing SurfaceTextureSource");
+
+        createFormats();
 
         // Prepare input
         mMediaFrame = (GLFrame)context.getFrameManager().newFrame(mMediaFormat);
@@ -180,7 +167,7 @@ public class SurfaceTextureSource extends Filter {
     }
 
     @Override
-    public int open(FilterContext context) {
+    public void open(FilterContext context) {
         if (LOGV) Log.v(TAG, "Opening SurfaceTextureSource");
         // Create SurfaceTexture anew each time - it can use substantial memory.
         mSurfaceTexture = new SurfaceTexture(mMediaFrame.getTextureId());
@@ -189,12 +176,10 @@ public class SurfaceTextureSource extends Filter {
         // Connect SurfaceTexture to callback
         mSurfaceTexture.setOnFrameAvailableListener(onFrameAvailableListener);
         mFirstFrame = true;
-
-        return Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
     @Override
-    public int process(FilterContext context) {
+    public void process(FilterContext context) {
         if (LOGVV) Log.v(TAG, "Processing new frame");
 
         // First, get new frame if available
@@ -203,8 +188,7 @@ public class SurfaceTextureSource extends Filter {
             if (mWaitTimeout != 0) {
                 gotNewFrame = mNewFrameAvailable.block(mWaitTimeout);
                 if (!gotNewFrame) {
-                    Log.e(TAG, "Timeout waiting for new frame");
-                    return Filter.STATUS_ERROR;
+                    throw new RuntimeException("Timeout waiting for new frame");
                 }
             } else {
                 mNewFrameAvailable.block();
@@ -223,10 +207,8 @@ public class SurfaceTextureSource extends Filter {
         Frame output = context.getFrameManager().newFrame(mOutputFormat);
         mFrameExtractor.process(mMediaFrame, output);
 
-        putOutput(0, output);
+        pushOutput("video", output);
         output.release();
-
-        return Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
     @Override
@@ -244,8 +226,8 @@ public class SurfaceTextureSource extends Filter {
     }
 
     @Override
-    public void parametersUpdated(Set<String> updated) {
-        if (updated.contains("width") || updated.contains("height") ) {
+    public void fieldPortValueUpdated(String name, FilterContext context) {
+        if (name.equals("width") || name.equals("height") ) {
             mOutputFormat.setDimensions(mWidth, mHeight);
         }
     }

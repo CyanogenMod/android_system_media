@@ -20,10 +20,11 @@ package android.filterpacks.imageproc;
 import android.content.Context;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
+import android.filterfw.core.GenerateFinalPort;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.NativeFrame;
@@ -33,95 +34,81 @@ import android.graphics.BitmapFactory;
 
 public class ImageDecoder extends Filter {
 
-    @FilterParameter(name = "resourceName", isOptional = false)
-    String mResourceName;
-
-    @FilterParameter(name = "context", isOptional = false)
-    Context mContext;
-
-    @FilterParameter(name = "target", isOptional = true)
+    @GenerateFinalPort(name = "target")
     String mTargetString;
 
-    @FilterParameter(name = "repeatFrame", isOptional = true)
-    boolean repeatFrame = false;
+    @GenerateFieldPort(name = "resourceName")
+    String mResourceName;
 
-    private String mFilePath;
-    private Bitmap mBitmap;
-    private MutableFrameFormat mOutputFormat;
+    @GenerateFieldPort(name = "context")
+    Context mContext;
+
+    @GenerateFieldPort(name = "repeatFrame", hasDefault = true)
+    boolean mRepeatFrame = false;
+
+    private int mTarget;
     private Frame mImageFrame;
 
     public ImageDecoder(String name) {
         super(name);
     }
 
-    @Override
-    public void initFilter() {
-        int target = FrameFormat.TARGET_NATIVE;
-        if (mTargetString != null) {
-            if (mTargetString.equals("CPU")) {
-                target = FrameFormat.TARGET_NATIVE;
-            } else if (mTargetString.equals("GPU")) {
-                target = FrameFormat.TARGET_GPU;
-            } else {
-                throw new RuntimeException("Unknown frame target: '" + mTargetString + "'!");
-            }
-        }
 
+    @Override
+    public void setupPorts() {
+        // Setup output format
+        mTarget = FrameFormat.readTargetString(mTargetString);
+        FrameFormat outputFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA, mTarget);
+
+        // Add output port
+        addOutputPort("image", outputFormat);
+    }
+
+    public void loadImage(FilterContext filterContext) {
         // Load image
         int resourceId = mContext.getResources().getIdentifier(mResourceName,
                                                                null,
                                                                mContext.getPackageName());
-        mBitmap = BitmapFactory.decodeResource(mContext.getResources(), resourceId);
+        Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), resourceId);
 
-        // Setup output format
-        mOutputFormat = ImageFormat.create(mBitmap.getWidth(),
-                                           mBitmap.getHeight(),
-                                           ImageFormat.COLORSPACE_RGBA,
-                                           target);
+        // Wrap in frame
+        FrameFormat outputFormat = ImageFormat.create(bitmap.getWidth(),
+                                                      bitmap.getHeight(),
+                                                      ImageFormat.COLORSPACE_RGBA,
+                                                      mTarget);
+        mImageFrame = filterContext.getFrameManager().newFrame(outputFormat);
+        mImageFrame.setBitmap(bitmap);
     }
 
     @Override
-    public String[] getInputNames() {
-        return null;
-    }
-
-    @Override
-    public String[] getOutputNames() {
-        return new String[] { "image" };
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
-    }
-
-    @Override
-    public int open(FilterContext env) {
-        mImageFrame = env.getFrameManager().newFrame(mOutputFormat);
-        mImageFrame.setBitmap(mBitmap);
-
-        return Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
-    }
-
-    @Override
-    public int process(FilterContext env) {
-        putOutput(0, mImageFrame);
-
-        if (repeatFrame) {
-            return Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
-        } else {
-            return Filter.STATUS_FINISHED;
+    public void fieldPortValueUpdated(String name, FilterContext context) {
+        // Clear image (to trigger reload) in case parameters have been changed
+        if (name.equals("resourceName") || name.equals("context")) {
+            if (mImageFrame != null) {
+                mImageFrame.release();
+                mImageFrame = null;
+            }
         }
     }
 
     @Override
-    public void close(FilterContext env) {
-        mImageFrame.release();
-        mImageFrame = null;
+    public void process(FilterContext context) {
+        if (mImageFrame == null) {
+            loadImage(context);
+        }
+
+        pushOutput("image", mImageFrame);
+
+        if (!mRepeatFrame) {
+            closeOutputPort("image");
+        }
+    }
+
+    @Override
+    public void tearDown(FilterContext env) {
+        if (mImageFrame != null) {
+            mImageFrame.release();
+            mImageFrame = null;
+        }
     }
 }

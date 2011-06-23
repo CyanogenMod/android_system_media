@@ -20,17 +20,19 @@ package android.filterpacks.videosrc;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
-import android.filterfw.core.GLFrame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
+import android.filterfw.core.GenerateFieldPort;
+import android.filterfw.core.GenerateFinalPort;
+import android.filterfw.core.GLFrame;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
+import android.filterfw.format.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.os.ConditionVariable;
@@ -50,23 +52,23 @@ public class MediaSource extends Filter {
 
     /** The source URL for the media source. Can be an http: link to a remote
      * resource, or a file: link to a local media file */
-    @FilterParameter(name = "sourceUrl", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "sourceUrl", hasDefault = true)
     private String mSourceUrl = "";
 
     /** An open asset file descriptor to a local media source. If set,
      * overrides the sourceUrl field. Set to null to use the sourceUrl field
      * instead. */
-    @FilterParameter(name = "sourceAsset", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "sourceAsset", hasDefault = true)
     private AssetFileDescriptor mSourceAsset;
 
     /** Whether the filter will always wait for a new video frame, or whether it
      * will output an old frame again if a new frame isn't available. Defaults to true.
      */
-    @FilterParameter(name = "waitForNewFrame", isOptional = true, isUpdatable = true)
+    @GenerateFinalPort(name = "waitForNewFrame", hasDefault = true)
     private boolean mWaitForNewFrame = true;
 
     /** Whether the media source should loop automatically or not. Defaults to true. */
-    @FilterParameter(name = "loop", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "loop", hasDefault = true)
     private boolean mLooping = true;
 
     private MediaPlayer mMediaPlayer;
@@ -105,79 +107,64 @@ public class MediaSource extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return null;
+    public void setupPorts() {
+        // Add input port
+        addOutputPort("video", ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                  FrameFormat.TARGET_GPU));
     }
 
-    @Override
-    public String[] getOutputNames() {
-        return new String[] { "video" };
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        // Format matches that of a GLFrame, but don't want to access an OpenGL
-        // context yet
-        mOutputFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE,
-                                               FrameFormat.TARGET_GPU);
-        mOutputFormat.setBytesPerSample(4);
-        // Don't know dimensions until we open the media file
-        mOutputFormat.setDimensions(0, 0);
-
+    private void createFormats() {
+        mOutputFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                           FrameFormat.TARGET_GPU);
         mMediaFormat = mOutputFormat.mutableCopy();
         mMediaFormat.setMetaValue(GLFrame.USE_EXTERNAL_TEXTURE, true);
-
-        return mOutputFormat;
     }
 
     @Override
     protected void prepare(FilterContext context) {
         if (LOGV) Log.v(TAG, "Preparing MediaSource");
 
-        mMediaFrame = (GLFrame)context.getFrameManager().newFrame(mMediaFormat);
-
         mFrameExtractor = new ShaderProgram(mFrameShader);
         // SurfaceTexture defines (0,0) to be bottom-left. The filter framework
         // defines (0,0) as top-left, so do the flip here.
         mFrameExtractor.setSourceRect(0, 1, 1, -1);
 
+        createFormats();
+
+        mMediaFrame = (GLFrame)context.getFrameManager().newFrame(mMediaFormat);
         mSurfaceTexture = new SurfaceTexture(mMediaFrame.getTextureId());
     }
 
     @Override
-    public int open(FilterContext context) {
+    public void open(FilterContext context) {
         if (LOGV) Log.v(TAG, "Opening MediaSource");
-        return setupMediaPlayer();
+        if (!setupMediaPlayer()) {
+            throw new RuntimeException("Error setting up MediaPlayer!");
+        }
     }
 
     @Override
-    public int process(FilterContext context) {
+    public void process(FilterContext context) {
         // Note: process is synchronized by its caller in the Filter base class
         if (LOGVV) Log.v(TAG, "Processing new frame");
 
         if (mMediaPlayer == null) {
             // Something went wrong in initialization or parameter updates
-            return Filter.STATUS_ERROR;
+            throw new NullPointerException("Unexpected null media player!");
         }
 
         if (!mPlaying) {
             int waitCount = 0;
             while (!mGotSize || !mPrepared) {
                 try {
-                    this.wait(100);
+                        this.wait(100);
                 } catch (InterruptedException e) {
                     // ignoring
                 }
                 waitCount++;
                 if (waitCount == 50) {
-                    Log.e(TAG, "MediaPlayer timed out while preparing");
                     mMediaPlayer.release();
-                    return Filter.STATUS_ERROR;
+                    throw new RuntimeException("MediaPlayer timed out while preparing!");
                 }
             }
             mMediaPlayer.start();
@@ -190,8 +177,7 @@ public class MediaSource extends Filter {
                 boolean gotNewFrame;
                 gotNewFrame = mNewFrameAvailable.block(1000);
                 if (!gotNewFrame) {
-                    Log.e(TAG, "Timeout waiting for new frame");
-                    return Filter.STATUS_ERROR;
+                    throw new RuntimeException("Timeout waiting for new frame!");
                 }
                 mNewFrameAvailable.close();
             }
@@ -205,12 +191,10 @@ public class MediaSource extends Filter {
         Frame output = context.getFrameManager().newFrame(mOutputFormat);
         mFrameExtractor.process(mMediaFrame, output);
 
-        putOutput(0, output);
+        pushOutput("video", output);
         output.release();
 
         mPlaying = true;
-
-        return Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
     @Override
@@ -231,13 +215,13 @@ public class MediaSource extends Filter {
     }
 
     @Override
-    public void parametersUpdated(Set<String> updated) {
-        if (updated.contains("sourceUrl") && mSourceAsset == null) {
+    public void fieldPortValueUpdated(String name, FilterContext context) {
+        if (name.equals("sourceUrl") && mSourceAsset == null) {
             if (isOpen()) {
                 if (LOGV) Log.v(TAG, "Opening new source URL");
                 setupMediaPlayer();
             }
-        } else if (updated.contains("sourceAsset") ) {
+        } else if (name.equals("sourceAsset") ) {
             if (isOpen()) {
                 if (LOGV) {
                     if (mSourceAsset == null) {
@@ -248,11 +232,9 @@ public class MediaSource extends Filter {
                 }
                 setupMediaPlayer();
             }
-        } else if (updated.contains("loop")) {
+        } else if (name.equals("loop")) {
             if (isOpen()) {
-                synchronized(this) {
-                    mMediaPlayer.setLooping(mLooping);
-                }
+                mMediaPlayer.setLooping(mLooping);
             }
         }
     }
@@ -269,7 +251,7 @@ public class MediaSource extends Filter {
     }
 
     /** Creates a media player, sets it up, and calls prepare */
-    synchronized private int setupMediaPlayer() {
+    synchronized private boolean setupMediaPlayer() {
         mPrepared = false;
         mGotSize = false;
         mPlaying = false;
@@ -285,7 +267,7 @@ public class MediaSource extends Filter {
 
         if (mMediaPlayer == null) {
             Log.e(TAG, "Unable to create a media player!");
-            return Filter.STATUS_ERROR;
+            return false;
         }
 
         // Set up data sources, etc
@@ -303,7 +285,7 @@ public class MediaSource extends Filter {
             }
             mMediaPlayer.release();
             mMediaPlayer = null;
-            return Filter.STATUS_ERROR;
+            return false;
         } catch(IllegalArgumentException e) {
             if (mSourceAsset == null) {
                 Log.e(TAG, "Unable to set media player source to " + mSourceUrl + ". Exception: " + e);
@@ -312,7 +294,7 @@ public class MediaSource extends Filter {
             }
             mMediaPlayer.release();
             mMediaPlayer = null;
-            return Filter.STATUS_ERROR;
+            return false;
         }
 
         mMediaPlayer.setLooping(mLooping);
@@ -332,7 +314,7 @@ public class MediaSource extends Filter {
         mMediaPlayer.prepareAsync();
 
         if (LOGV) Log.v(TAG, "MediaPlayer now preparing.");
-        return Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
+        return true;
     }
 
     private MediaPlayer.OnVideoSizeChangedListener onVideoSizeChangedListener =

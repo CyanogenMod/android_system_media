@@ -19,23 +19,18 @@ package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
-import android.filterfw.core.ProgramParameter;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 
 import java.util.Set;
 
-public class AlphaBlendFilter extends ImageFilter {
-
-    @ProgramParameter(name = "weight", type = float.class)
-    private Program mProgram;
+public class AlphaBlendFilter extends ImageCombineFilter {
 
     private final String mAlphaBlendShader =
             "precision mediump float;\n" +
@@ -52,37 +47,17 @@ public class AlphaBlendFilter extends ImageFilter {
             "}\n";
 
     public AlphaBlendFilter(String name) {
-        super(name);
+        super(name, new String[] { "source", "overlay", "mask" }, "blended", "weight");
     }
 
     @Override
-    public String[] getInputNames() {
-        return new String[] { "source", "overlay", "mask" };
+    protected Program getNativeProgram() {
+        throw new RuntimeException("TODO: Write native implementation for AlphaBlend!");
     }
 
     @Override
-    public String[] getOutputNames() {
-        return new String[] { "blended" };
-    }
-
-    @Override
-    protected void createProgram(int target) {
-        switch (target) {
-            case FrameFormat.TARGET_NATIVE:
-                throw new RuntimeException("TODO: Write native implementation for AlphaBlend!");
-
-            case FrameFormat.TARGET_GPU:
-                mProgram = new ShaderProgram(mAlphaBlendShader);
-                break;
-
-            default:
-                throw new RuntimeException("AlphaBlendFilter could not create suitable program!");
-        }
-    }
-
-    @Override
-    protected Program getProgram() {
-        return mProgram;
+    protected Program getShaderProgram() {
+        return new ShaderProgram(mAlphaBlendShader);
     }
 
 }

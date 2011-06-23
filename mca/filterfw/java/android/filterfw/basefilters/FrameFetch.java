@@ -19,54 +19,42 @@ package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
+import android.filterfw.core.GenerateFinalPort;
 
 import android.util.Log;
 
 public class FrameFetch extends Filter {
 
-    @FilterParameter(name = "key", isOptional = false)
-    private String mKey;
-
-    @FilterParameter(name = "format", isOptional = true)
+    @GenerateFinalPort(name = "format", hasDefault = true)
     private FrameFormat mFormat;
 
-    @FilterParameter(name = "repeatFrame", isOptional = true)
+    @GenerateFieldPort(name = "key")
+    private String mKey;
+
+    @GenerateFieldPort(name = "repeatFrame", hasDefault = true)
     private boolean mRepeatFrame = false;
 
     public FrameFetch(String name) {
         super(name);
     }
 
-    public String[] getInputNames() {
-        return null;
+    @Override
+    public void setupPorts() {
+        addOutputPort("frame", mFormat == null ? FrameFormat.unspecified() : mFormat);
     }
 
-    public String[] getOutputNames() {
-        return new String[] { "frame" };
-    }
-
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return false;
-    }
-
-    public FrameFormat getOutputFormat(int index) {
-        if (mFormat != null) {
-            return mFormat;
-        } else {
-            return new FrameFormat(FrameFormat.TYPE_UNSPECIFIED, FrameFormat.TARGET_UNSPECIFIED);
-        }
-    }
-
-    public int process(FilterContext context) {
+    public void process(FilterContext context) {
         Frame output = context.fetchFrame(mKey);
         if (output != null) {
-            putOutput(0, output);
-            return mRepeatFrame ? Filter.STATUS_WAIT_FOR_FREE_OUTPUTS : Filter.STATUS_FINISHED;
+            pushOutput("frame", output);
+            if (!mRepeatFrame) {
+                closeOutputPort("frame");
+            }
         } else {
-            return Filter.STATUS_SLEEP | Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
+            delayNextProcess(250);
         }
     }
 

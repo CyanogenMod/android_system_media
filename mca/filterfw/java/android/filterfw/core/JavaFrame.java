@@ -21,6 +21,7 @@ import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
 import android.filterfw.core.NativeBuffer;
+import android.filterfw.format.ObjectFormat;
 import android.graphics.Bitmap;
 
 import java.lang.reflect.Constructor;
@@ -38,13 +39,20 @@ public class JavaFrame extends Frame {
         setReusable(false);
     }
 
+    static JavaFrame wrapObject(Object object, FrameManager frameManager) {
+        FrameFormat format = ObjectFormat.fromObject(object, FrameFormat.TARGET_JAVA);
+        JavaFrame result = new JavaFrame(format, frameManager, true);
+        result.setObjectValue(object);
+        return result;
+    }
+
     private void initWithFormat(FrameFormat format) {
         final int count = format.getLength();
         final int baseType = format.getBaseType();
         if (baseType == FrameFormat.TYPE_OBJECT) {
             initWithObject(format.getObjectClass(), count);
-        } else if (baseType == FrameFormat.TYPE_STRUCT) {
-            initWithStruct(format.getObjectClass(), count);
+//        } else if (baseType == FrameFormat.TYPE_STRUCT) {
+//            initWithStruct(format.getObjectClass(), count);
         } else {
             if (count < 1) {
                 throw new IllegalArgumentException(
@@ -98,6 +106,7 @@ public class JavaFrame extends Frame {
         }
     }
 
+/*  TODO: Remove?
     private void initWithStruct(Class structClass, int count) {
         // Make sure we have an object class set
         if (structClass == null) {
@@ -120,6 +129,7 @@ public class JavaFrame extends Frame {
                                        structClass + "'!");
         }
     }
+*/
 
     @Override
     void dealloc() {

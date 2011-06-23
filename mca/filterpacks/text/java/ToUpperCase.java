@@ -22,6 +22,7 @@ import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.JavaFrame;
+import android.filterfw.format.ObjectFormat;
 
 public class ToUpperCase extends Filter {
 
@@ -32,42 +33,21 @@ public class ToUpperCase extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return new String[] { "mixedcase" };
+    public void setupPorts() {
+        mOutputFormat = ObjectFormat.fromClass(String.class, FrameFormat.TARGET_JAVA);
+        addMaskedInputPort("mixedcase", mOutputFormat);
+        addOutputPort("uppercase", mOutputFormat);
     }
 
     @Override
-    public String[] getOutputNames() {
-        return new String[] { "uppercase" };
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        // TODO: Check meta-property ObjectClass
-        if (format.getBaseType() == FrameFormat.TYPE_OBJECT) {
-            mOutputFormat = format;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
-    }
-
-    @Override
-    public int process(FilterContext env) {
-        Frame input = pullInput(0);
+    public void process(FilterContext env) {
+        Frame input = pullInput("mixedcase");
         String inputString = (String)input.getObjectValue();
 
         Frame output = env.getFrameManager().newEmptyFrame(mOutputFormat);
         output.setObjectValue(inputString.toUpperCase());
 
-        putOutput(0, output);
-
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
+        pushOutput("uppercase", output);
     }
 
 }

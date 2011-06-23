@@ -21,6 +21,7 @@ import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ProgramParameters {
-    ProgramParameter[] value();
+public @interface GenerateFinalPort {
+    String  name() default "";
+    boolean hasDefault() default false;
 }

@@ -72,6 +72,7 @@ public class NativeProgram extends Program {
         }
         deallocate();
     }
+
     @Override
     public void process(Frame[] inputs, Frame output) {
         NativeFrame[] nativeInputs = new NativeFrame[inputs.length];

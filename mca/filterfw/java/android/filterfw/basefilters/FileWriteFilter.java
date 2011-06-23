@@ -21,10 +21,10 @@ import android.content.Context;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.KeyValueMap;
+import android.filterfw.core.GenerateFieldPort;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -35,10 +35,10 @@ import java.util.Set;
 
 public class FileWriteFilter extends Filter {
 
-    @FilterParameter(name = "fileName", isOptional = false, isUpdatable = true)
+    @GenerateFieldPort(name = "fileName")
     private String mOutputName;
 
-    @FilterParameter(name = "context", isOptional = false)
+    @GenerateFieldPort(name = "context")
     private Context mActivityContext;
 
     private BufferedOutputStream mWriter;
@@ -48,34 +48,19 @@ public class FileWriteFilter extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return new String[] { "data" };
+    public void setupPorts() {
+        addInputPort("data");
     }
 
     @Override
-    public String[] getOutputNames() {
-        return null;
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return format.isBinaryDataType() || format.getObjectClass() == String.class;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return null;
-    }
-
-    @Override
-    public void parametersUpdated(Set<String> updated) {
+    public void fieldPortValueUpdated(String name, FilterContext context) {
         if (isOpen()) {
             throw new RuntimeException("Cannot update parameters while filter is open!");
         }
     }
 
     @Override
-    public int open(FilterContext context) {
+    public void open(FilterContext context) {
         FileOutputStream outStream = null;
         try {
             outStream = mActivityContext.openFileOutput(mOutputName, Context.MODE_PRIVATE);
@@ -84,13 +69,11 @@ public class FileWriteFilter extends Filter {
                                        exception.getMessage());
         }
         mWriter = new BufferedOutputStream(outStream);
-
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS;
     }
 
     @Override
-    public int process(FilterContext context) {
-        Frame input = pullInput(0);
+    public void process(FilterContext context) {
+        Frame input = pullInput("data");
         ByteBuffer data;
 
         if (input.getFormat().getObjectClass() == String.class) {
@@ -105,8 +88,6 @@ public class FileWriteFilter extends Filter {
         } catch (IOException exception) {
             throw new RuntimeException("FileWriter: Could not write to file: " + mOutputName + "!");
         }
-
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS;
     }
 
     @Override

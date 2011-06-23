@@ -19,9 +19,9 @@ package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
@@ -31,9 +31,9 @@ import android.util.Log;
 
 public class ToPackedGrayFilter extends Filter {
 
-    @FilterParameter(name = "owidth", isOptional = true)
+    @GenerateFieldPort(name = "owidth", hasDefault = true)
     private int mOWidth = FrameFormat.SIZE_UNSPECIFIED;
-    @FilterParameter(name = "oheight", isOptional = true)
+    @GenerateFieldPort(name = "oheight", hasDefault = true)
     private int mOHeight = FrameFormat.SIZE_UNSPECIFIED;
 
     private Program mProgram;
@@ -57,52 +57,15 @@ public class ToPackedGrayFilter extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return new String[] { "image" };
+    public void setupPorts() {
+        addMaskedInputPort("image", ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                       FrameFormat.TARGET_GPU));
+        addOutputBasedOnInput("image", "image");
     }
 
     @Override
-    public String[] getOutputNames() {
-        return new String[] { "image" };
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        switch (index) {
-            case 0:
-            FrameFormat requiredFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
-                                                            FrameFormat.TARGET_GPU);
-            if (!format.isCompatibleWith(requiredFormat)) {
-                Log.e("ToPackedGray", "Port with incompatible input: " + index);
-                Log.e("ToPackedGray", "Requires: " + requiredFormat.toString());
-                Log.e("ToPackedGray", "Received: " + format.toString());
-                return false;
-            }
-            return true;
-
-            default:
-            throw new RuntimeException("Invalid input stream index: " + index);
-        }
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        switch (index) {
-            case 0:
-            final FrameFormat inputFormat = getInputFormat(0);
-            if (mOWidth == FrameFormat.SIZE_UNSPECIFIED) {
-                mOWidth = inputFormat.getWidth();
-            }
-            if (mOHeight == FrameFormat.SIZE_UNSPECIFIED) {
-                mOHeight = inputFormat.getHeight();
-            }
-            return ImageFormat.create(mOWidth, mOHeight,
-                                      ImageFormat.COLORSPACE_GRAY,
-                                      FrameFormat.TARGET_NATIVE);
-
-            default:
-            throw new RuntimeException("Invalid output stream index: " + index);
-        }
+    public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
+        return convertInputFormat(inputFormat);
     }
 
     private void checkOutputDimensions() {
@@ -114,35 +77,45 @@ public class ToPackedGrayFilter extends Filter {
         }
     }
 
+    private FrameFormat convertInputFormat(FrameFormat inputFormat) {
+        if (mOWidth == FrameFormat.SIZE_UNSPECIFIED) {
+            mOWidth = inputFormat.getWidth();
+        }
+        if (mOHeight == FrameFormat.SIZE_UNSPECIFIED) {
+            mOHeight = inputFormat.getHeight();
+        }
+        return ImageFormat.create(mOWidth, mOHeight,
+                                  ImageFormat.COLORSPACE_GRAY,
+                                  FrameFormat.TARGET_NATIVE);
+    }
+
     @Override
-    public void prepare(FilterContext environment) {
+    public void prepare(FilterContext context) {
         mProgram = new ShaderProgram(mColorToPackedGrayShader);
     }
 
     @Override
-    public int process(FilterContext env) {
-        FrameFormat outputFormat = getOutputFormat(0);
+    public void process(FilterContext context) {
+        Frame input = pullInput("image");
+        FrameFormat inputFormat = input.getFormat();
+        FrameFormat outputFormat = convertInputFormat(inputFormat);
         checkOutputDimensions();
         mProgram.setHostValue("pix_stride", 1.0f / mOWidth);
 
         // Do the RGBA to luminance conversion.
-        Frame input = pullInput(0);
-        FrameFormat inputFormat = getInputFormat(0);
         MutableFrameFormat tempFrameFormat = inputFormat.mutableCopy();
         tempFrameFormat.setDimensions(mOWidth / 4, mOHeight);
-        Frame temp = env.getFrameManager().newFrame(tempFrameFormat);
+        Frame temp = context.getFrameManager().newFrame(tempFrameFormat);
         mProgram.process(input, temp);
 
         // Read frame from GPU to CPU.
-        Frame output = env.getFrameManager().newFrame(outputFormat);
+        Frame output = context.getFrameManager().newFrame(outputFormat);
         output.setDataFromFrame(temp);
         temp.release();
 
         // Push output and yield ownership.
-        putOutput(0, output);
+        pushOutput("image", output);
         output.release();
-
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS | Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
 }

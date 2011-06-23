@@ -19,44 +19,33 @@ package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.KeyValueMap;
 
-// TODO: Remove this eventually and replace with frame-independent versions such as ObjectSource.
-
+// TODO: Rename to FixedFrameSource and also add a (dynamic) FrameSource?
 public class StaticFrameFilter extends Filter {
 
-    @FilterParameter(name = "frame", isOptional = false)
+    @GenerateFinalPort(name = "frame")
     private Frame mFrame;
 
     public StaticFrameFilter(String name) {
         super(name);
     }
 
-    public String[] getInputNames() {
-        return null;
+    @Override
+    public void setupPorts() {
+        addOutputPort("frame", mFrame.getFormat());
     }
 
-    public String[] getOutputNames() {
-        return new String[] { "frame" };
-    }
-
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return false;
-    }
-
-    public FrameFormat getOutputFormat(int index) {
-        return mFrame.getFormat();
-    }
-
-    public int process(FilterContext context) {
+    @Override
+    public void process(FilterContext context) {
         // Push output
-        putOutput(0, mFrame);
+        pushOutput("frame", mFrame);
 
-        // Wait for free output
-        return Filter.STATUS_FINISHED;
+        // Close output port as we are done here
+        closeOutputPort("frame");
     }
 
 }

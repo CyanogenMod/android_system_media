@@ -35,12 +35,11 @@ public class ImageFormat {
                                             int colorspace,
                                             int bytesPerSample,
                                             int target) {
-        int baseType = FrameFormat.TYPE_BYTE;
-        MutableFrameFormat result = new MutableFrameFormat(baseType, target);
+        MutableFrameFormat result = new MutableFrameFormat(FrameFormat.TYPE_BYTE, target);
         result.setDimensions(width, height);
         result.setBytesPerSample(bytesPerSample);
-        // result.setMetaValue(COLORSPACE_KEY, colorspace);
-        if (baseType == FrameFormat.TYPE_OBJECT) {
+        result.setMetaValue(COLORSPACE_KEY, colorspace);
+        if (target == FrameFormat.TARGET_JAVA) {
             result.setObjectClass(Bitmap.class);
         }
         return result;
