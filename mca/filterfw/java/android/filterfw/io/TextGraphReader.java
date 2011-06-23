@@ -97,7 +97,7 @@ public class TextGraphReader extends GraphReader {
         public void execute(TextGraphReader reader) throws GraphIOException {
             Filter filter = reader.mCurrentFilter;
             try {
-                filter.initWithParameterMap(mParams);
+                filter.initWithValueMap(mParams);
             } catch (ProtocolException e) {
                 throw new GraphIOException(e.getMessage());
             }
@@ -435,9 +435,6 @@ public class TextGraphReader extends GraphReader {
                 } else {
                     throw new GraphIOException("Unknown autobranch setting: " + value + "!");
                 }
-            } else if (setting.equals("discardUnconnectedFilters")) {
-                expectSettingClass(setting, value, Boolean.class);
-                mCurrentGraph.setDiscardUnconnectedFilters((Boolean)value);
             } else if (setting.equals("discardUnconnectedOutputs")) {
                 expectSettingClass(setting, value, Boolean.class);
                 mCurrentGraph.setDiscardUnconnectedOutputs((Boolean)value);

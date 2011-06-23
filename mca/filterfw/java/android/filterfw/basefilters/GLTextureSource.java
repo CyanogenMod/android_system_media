@@ -19,9 +19,9 @@ package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.GLFrame;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.format.ImageFormat;
@@ -30,16 +30,15 @@ import java.util.Set;
 
 public class GLTextureSource extends Filter {
 
-    @FilterParameter(name = "texId", isOptional = false, isUpdatable = false)
+    @GenerateFieldPort(name = "texId")
     private int mTexId;
 
-    @FilterParameter(name = "width", isOptional = false, isUpdatable = false)
+    @GenerateFieldPort(name = "width")
     private int mWidth;
 
-    @FilterParameter(name = "height", isOptional = false, isUpdatable = false)
+    @GenerateFieldPort(name = "height")
     private int mHeight;
 
-    private MutableFrameFormat mOutputFormat;
     private Frame mFrame;
 
     public GLTextureSource(String name) {
@@ -47,46 +46,37 @@ public class GLTextureSource extends Filter {
     }
 
     @Override
-    public void initFilter() {
-        mOutputFormat = ImageFormat.create(mWidth, mHeight,
-                                           ImageFormat.COLORSPACE_RGBA,
-                                           FrameFormat.TARGET_GPU);
+    public void setupPorts() {
+        addOutputPort("frame", ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                  FrameFormat.TARGET_GPU));
     }
 
     @Override
-    public String[] getInputNames() {
-        return null;
+    public void fieldPortValueUpdated(String name, FilterContext context) {
+        // Release frame, so that it is recreated during the next process call
+        if (mFrame != null) {
+            mFrame.release();
+            mFrame = null;
+        }
     }
 
     @Override
-    public String[] getOutputNames() {
-        return new String[] { "frame" };
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
-    }
-
-    @Override
-    public int process(FilterContext context) {
+    public void process(FilterContext context) {
         // Generate frame if not generated already
         if (mFrame == null) {
-            mFrame = context.getFrameManager().newBoundFrame(mOutputFormat,
+            FrameFormat outputFormat = ImageFormat.create(mWidth, mHeight,
+                                                          ImageFormat.COLORSPACE_RGBA,
+                                                          FrameFormat.TARGET_GPU);
+            mFrame = context.getFrameManager().newBoundFrame(outputFormat,
                                                              GLFrame.EXISTING_TEXTURE_BINDING,
                                                              mTexId);
         }
 
         // Push output
-        putOutput(0, mFrame);
+        pushOutput("frame", mFrame);
 
-        // Wait for free output
-        return Filter.STATUS_FINISHED;
+        // Close output port as we are done here
+        closeOutputPort("frame");
     }
 
     @Override

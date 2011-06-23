@@ -19,17 +19,19 @@ package android.filterpacks.videosrc;
 
 import android.content.Context;
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
-import android.filterfw.core.GLFrame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
+import android.filterfw.core.GenerateFieldPort;
+import android.filterfw.core.GenerateFinalPort;
+import android.filterfw.core.GLFrame;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
+import android.filterfw.format.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.ConditionVariable;
@@ -45,19 +47,19 @@ public class CameraSource extends Filter {
     /** User-visible parameters */
 
     /** Camera ID to use for input. Defaults to 0. */
-    @FilterParameter(name = "id", isOptional = true, isUpdatable = false)
+    @GenerateFieldPort(name = "id", hasDefault = true)
     private int mCameraId = 0;
 
     /** Frame width to request from camera. Actual size may not match requested. */
-    @FilterParameter(name = "width", isOptional = true, isUpdatable = false)
+    @GenerateFieldPort(name = "width", hasDefault = true)
     private int mWidth = 320;
 
     /** Frame height to request from camera. Actual size may not match requested. */
-    @FilterParameter(name = "height", isOptional = true, isUpdatable = false)
+    @GenerateFieldPort(name = "height", hasDefault = true)
     private int mHeight = 240;
 
     /** Stream framerate to request from camera. Actual frame rate may not match requested. */
-    @FilterParameter(name = "framerate", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "framerate", hasDefault = true)
     private int mFps = 30;
 
     /** Whether the filter should always wait for a new frame from the camera
@@ -65,7 +67,7 @@ public class CameraSource extends Filter {
      * outputting the last frame it received from the camera if multiple process
      * calls are received before the next update from the Camera. Defaults to true.
      */
-    @FilterParameter(name = "waitForNewFrame", isOptional = true, isUpdatable = true)
+    @GenerateFinalPort(name = "waitForNewFrame", hasDefault = true)
     private boolean mWaitForNewFrame = true;
 
     private Camera mCamera;
@@ -79,7 +81,7 @@ public class CameraSource extends Filter {
 
     private Camera.Parameters mCameraParameters;
 
-    private final String mFrameShader =
+    private static final String mFrameShader =
             "#extension GL_OES_EGL_image_external : require\n" +
             "precision mediump float;\n" +
             "uniform mat4 camera_transform;\n" +
@@ -90,8 +92,8 @@ public class CameraSource extends Filter {
             "  gl_FragColor = texture2D(tex_sampler_0, transformed_texcoord);\n" +
             "}\n";
 
-    private static final boolean LOGV = false;
-    private static final boolean LOGVV = false;
+    private static final boolean LOGV = true;
+    private static final boolean LOGVV = true;
 
     private static final String TAG = "CameraSource";
 
@@ -102,39 +104,26 @@ public class CameraSource extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return null;
+    public void setupPorts() {
+        // Add input port
+        addOutputPort("video", ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                  FrameFormat.TARGET_GPU));
     }
 
-    @Override
-    public String[] getOutputNames() {
-        return new String[] { "video" };
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        mOutputFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE, FrameFormat.TARGET_GPU);
-        mOutputFormat.setDimensions(mWidth, mHeight);
-        mOutputFormat.setBytesPerSample(4);
-
+    private void createFormats() {
+        mOutputFormat = ImageFormat.create(mWidth, mHeight,
+                                           ImageFormat.COLORSPACE_RGBA,
+                                           FrameFormat.TARGET_GPU);
         mCameraFormat = mOutputFormat.mutableCopy();
         mCameraFormat.setMetaValue(GLFrame.USE_EXTERNAL_TEXTURE, true);
-
-        return mOutputFormat;
+        Log.v("CameraSource", "Camera Format: " + mCameraFormat);
+        Log.v("CameraSource", "Output Format: " + mOutputFormat);
     }
 
     @Override
     public void prepare(FilterContext context) {
         if (LOGV) Log.v(TAG, "Preparing");
-
-        // Create external camera frame
-        mCameraFrame = (GLFrame)context.getFrameManager().newFrame(mCameraFormat);
-
+        Log.i(TAG, "Creating frame extractor in thread: " + Thread.currentThread());
         // Compile shader TODO: Move to onGLEnvSomething?
         mFrameExtractor = new ShaderProgram(mFrameShader);
         // SurfaceTexture defines (0,0) to be bottom-left. The filter framework defines
@@ -143,16 +132,21 @@ public class CameraSource extends Filter {
     }
 
     @Override
-    public int open(FilterContext context) {
+    public void open(FilterContext context) {
         if (LOGV) Log.v(TAG, "Opening");
         // Open camera
+        Log.i("CameraSource", "Opening camera with ID: " + mCameraId);
         mCamera = Camera.open(mCameraId);
 
         // Set parameters
         getCameraParameters();
         mCamera.setParameters(mCameraParameters);
 
+        // Create frame formats
+        createFormats();
+
         // Bind it to our camera frame
+        mCameraFrame = (GLFrame)context.getFrameManager().newFrame(mCameraFormat);
         mSurfaceTexture = new SurfaceTexture(mCameraFrame.getTextureId());
         try {
             mCamera.setPreviewTexture(mSurfaceTexture);
@@ -165,12 +159,10 @@ public class CameraSource extends Filter {
         mSurfaceTexture.setOnFrameAvailableListener(onCameraFrameAvailableListener);
         // Start the preview
         mCamera.startPreview();
-
-        return Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
     @Override
-    public int process(FilterContext context) {
+    public void process(FilterContext context) {
         if (LOGVV) Log.v(TAG, "Processing new frame");
 
         if (mWaitForNewFrame) {
@@ -184,19 +176,19 @@ public class CameraSource extends Filter {
 
         mSurfaceTexture.updateTexImage();
 
+        Log.i(TAG, "Using frame extractor in thread: " + Thread.currentThread());
         mSurfaceTexture.getTransformMatrix(mCameraTransform);
         mFrameExtractor.setHostValue("camera_transform", mCameraTransform);
 
         Frame output = context.getFrameManager().newFrame(mOutputFormat);
         mFrameExtractor.process(mCameraFrame, output);
 
-        putOutput(0, output);
+        pushOutput("video", output);
 
         // Release pushed frame
         output.release();
 
         if (LOGVV) Log.v(TAG, "Done processing new frame");
-        return Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
     @Override
@@ -216,8 +208,8 @@ public class CameraSource extends Filter {
     }
 
     @Override
-    public void parametersUpdated(Set<String> updated) {
-        if (updated.contains("framerate")) {
+    public void fieldPortValueUpdated(String name, FilterContext context) {
+        if (name.equals("framerate")) {
             getCameraParameters();
             int closestRange[] = findClosestFpsRange(mFps, mCameraParameters);
             mCameraParameters.setPreviewFpsRange(closestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],

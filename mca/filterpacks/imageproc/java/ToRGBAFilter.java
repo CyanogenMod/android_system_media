@@ -27,78 +27,71 @@ import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
+import android.filterfw.format.ImageFormat;
 
 import android.util.Log;
 
-public class ToRGBAFilter extends ImageFilter {
+public class ToRGBAFilter extends Filter {
 
     private int mInputBPP;
     private Program mProgram;
-    private MutableFrameFormat mOutputFormat;
 
     public ToRGBAFilter(String name) {
         super(name);
     }
 
     @Override
-    public FrameFormat getOutputFormat(int index) {
-        mOutputFormat = getInputFormat(0).mutableCopy();
-        mOutputFormat.setBytesPerSample(4);
-        return mOutputFormat;
+    public void setupPorts() {
+        MutableFrameFormat mask = new MutableFrameFormat(FrameFormat.TYPE_BYTE,
+                                                         FrameFormat.TARGET_NATIVE);
+        mask.setDimensionCount(2);
+        addMaskedInputPort("image", mask);
+        addOutputBasedOnInput("image", "image");
     }
 
     @Override
-    public void createProgram(int target) {
-        mInputBPP = getInputFormat(0).getBytesPerSample();
-        switch (target) {
-            case FrameFormat.TARGET_NATIVE:
-                switch (mInputBPP) {
-                    case 1:
-                        mProgram = new NativeProgram("filterpack_imageproc", "gray_to_rgba");
-                        break;
-                    case 3:
-                        mProgram = new NativeProgram("filterpack_imageproc", "rgb_to_rgba");
-                        break;
-                    default:
-                        throw new RuntimeException("Unsupported BytesPerPixel: " + mInputBPP + "!");
-                }
+    public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
+        return getConvertedFormat(inputFormat);
+    }
+
+    public FrameFormat getConvertedFormat(FrameFormat format) {
+        MutableFrameFormat result = format.mutableCopy();
+        result.setMetaValue(ImageFormat.COLORSPACE_KEY, ImageFormat.COLORSPACE_RGBA);
+        result.setBytesPerSample(4);
+        return result;
+    }
+
+    @Override
+    public void prepare(FilterContext context) {
+        mInputBPP = getInputFormat("image").getBytesPerSample();
+        switch (mInputBPP) {
+            case 1:
+                mProgram = new NativeProgram("filterpack_imageproc", "gray_to_rgba");
                 break;
-
-            case FrameFormat.TARGET_GPU:
-                throw new RuntimeException("GPU ToRGBAFilter not implemented yet!");
-
+            case 3:
+                mProgram = new NativeProgram("filterpack_imageproc", "rgb_to_rgba");
+                break;
             default:
-                throw new RuntimeException("ToRGBAFilter could not create suitable program!");
+                throw new RuntimeException("Unsupported BytesPerPixel: " + mInputBPP + "!");
         }
     }
 
     @Override
-    public int process(FilterContext env) {
+    public void process(FilterContext context) {
         // Get input frame
-        Frame input = pullInput(0);
+        Frame input = pullInput("image");
 
         // Create output frame
-        MutableFrameFormat outputFormat = input.getFormat().mutableCopy();
-        outputFormat.setBytesPerSample(4);
-        Frame output = env.getFrameManager().newFrame(outputFormat);
+        Frame output = context.getFrameManager().newFrame(getConvertedFormat(input.getFormat()));
 
         // Process
         mProgram.process(input, output);
 
         // Push output
-        putOutput(0, output);
+        pushOutput("image", output);
 
         // Release pushed frame
         output.release();
-
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
-    }
-
-    @Override
-    protected Program getProgram() {
-        return mProgram;
     }
 
 }

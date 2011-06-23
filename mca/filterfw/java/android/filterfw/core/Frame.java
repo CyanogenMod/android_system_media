@@ -119,17 +119,19 @@ public abstract class Frame {
     }
 
     public Frame release() {
-        if (mFrameManager == null) {
-            throw new RuntimeException("Cannot release a frame not managed by a FrameManager!");
+        if (mFrameManager != null) {
+            return mFrameManager.releaseFrame(this);
+        } else {
+            return this;
         }
-        return mFrameManager.releaseFrame(this);
     }
 
     public Frame retain() {
-        if (mFrameManager == null) {
-            throw new RuntimeException("Cannot retain a frame not managed by a FrameManager!");
+        if (mFrameManager != null) {
+            return mFrameManager.retainFrame(this);
+        } else {
+            return this;
         }
-        return mFrameManager.retainFrame(this);
     }
 
     protected void assertFrameMutable() {

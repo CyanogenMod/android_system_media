@@ -21,6 +21,7 @@ import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 
 import java.util.Arrays;
+import java.util.Map.Entry;
 
 public class FrameFormat {
 
@@ -33,7 +34,6 @@ public class FrameFormat {
     public static final int TYPE_DOUBLE      = 6;
     public static final int TYPE_POINTER     = 7;
     public static final int TYPE_OBJECT      = 8;
-    public static final int TYPE_STRUCT      = 9;
 
     public static final int TARGET_UNSPECIFIED  = 0;
     public static final int TARGET_JAVA         = 1;
@@ -59,13 +59,16 @@ public class FrameFormat {
     protected Class mObjectClass;
 
     protected FrameFormat() {
-        mMetaData = new KeyValueMap();
     }
 
     public FrameFormat(int baseType, int target) {
         mBaseType = baseType;
         mTarget = target;
         initDefaults();
+    }
+
+    public static FrameFormat unspecified() {
+        return new FrameFormat(TYPE_UNSPECIFIED, TARGET_UNSPECIFIED);
     }
 
     public int getBaseType() {
@@ -78,6 +81,10 @@ public class FrameFormat {
 
     public int getBytesPerSample() {
         return mBytesPerSample;
+    }
+
+    public int getValuesPerSample() {
+        return mBytesPerSample / bytesPerSampleOf(mBaseType);
     }
 
     public int getTarget() {
@@ -153,7 +160,7 @@ public class FrameFormat {
         result.setBytesPerSample(getBytesPerSample());
         result.setDimensions(getDimensions());
         result.setObjectClass(getObjectClass());
-        result.mMetaData = mMetaData;
+        result.mMetaData = mMetaData == null ? null : (KeyValueMap)mMetaData.clone();
         return result;
     }
 
@@ -213,6 +220,14 @@ public class FrameFormat {
             }
         }
 
+        // Check class
+        if (specification.getObjectClass() != null) {
+            if (getObjectClass() == null
+                || !specification.getObjectClass().isAssignableFrom(getObjectClass())) {
+                return false;
+            }
+        }
+
         // Check meta-data
         if (specification.mMetaData != null) {
             for (String specKey : specification.mMetaData.keySet()) {
@@ -228,79 +243,120 @@ public class FrameFormat {
         return true;
     }
 
-    static String dimensionsToString(int[] dimensions) {
-        StringBuffer buffer = new StringBuffer("(");
+    public boolean mayBeCompatibleWith(FrameFormat specification) {
+        // TODO
+        return false;
+    }
+
+    public static int bytesPerSampleOf(int baseType) {
+        // Defaults based on base-type
+        switch (baseType) {
+            case TYPE_BIT:
+            case TYPE_BYTE:
+                return 1;
+            case TYPE_INT16:
+                return 2;
+            case TYPE_INT32:
+            case TYPE_FLOAT:
+            case TYPE_POINTER:
+                return 4;
+            case TYPE_DOUBLE:
+                return 8;
+            default:
+                return 1;
+        }
+    }
+
+    public static String dimensionsToString(int[] dimensions) {
+        StringBuffer buffer = new StringBuffer();
         if (dimensions != null) {
             int n = dimensions.length;
-            for (int i = 0; i < n - 1; ++i) {
-                buffer.append(String.valueOf(dimensions[i])).append(" x ");
+            for (int i = 0; i < n; ++i) {
+                if (dimensions[i] == SIZE_UNSPECIFIED) {
+                    buffer.append("[]");
+                } else {
+                    buffer.append("[" + String.valueOf(dimensions[i]) + "]");
+                }
             }
-            buffer.append(dimensions[n - 1]);
         }
-        buffer.append(")");
         return buffer.toString();
     }
 
-    static String baseTypeToString(int baseType) {
+    public static String baseTypeToString(int baseType) {
         switch (baseType) {
             case TYPE_UNSPECIFIED: return "unspecified";
             case TYPE_BIT:         return "bit";
             case TYPE_BYTE:        return "byte";
-            case TYPE_INT16:       return "int16";
-            case TYPE_INT32:       return "int32";
+            case TYPE_INT16:       return "int";
+            case TYPE_INT32:       return "int";
             case TYPE_FLOAT:       return "float";
             case TYPE_DOUBLE:      return "double";
             case TYPE_POINTER:     return "pointer";
             case TYPE_OBJECT:      return "object";
-            case TYPE_STRUCT:      return "struct";
             default:               return "unknown";
         }
     }
 
-    static String targetToString(int target) {
+    public static String targetToString(int target) {
         switch (target) {
             case TARGET_UNSPECIFIED:  return "unspecified";
-            case TARGET_JAVA:         return "Java";
-            case TARGET_NATIVE:       return "Native";
-            case TARGET_GPU:          return "GPU";
-            case TARGET_VERTEXBUFFER: return "VBO";
-            case TARGET_RS:           return "RenderScript";
+            case TARGET_JAVA:         return "java";
+            case TARGET_NATIVE:       return "native";
+            case TARGET_GPU:          return "gpu";
+            case TARGET_VERTEXBUFFER: return "vbo";
+            case TARGET_RS:           return "renderscript";
             default:                  return "unknown";
         }
     }
 
-    @Override
+    public static String metaDataToString(KeyValueMap metaData) {
+        if (metaData == null) {
+            return "";
+        } else {
+            StringBuffer buffer = new StringBuffer();
+            buffer.append("{ ");
+            for (Entry<String, Object> entry : metaData.entrySet()) {
+                buffer.append(entry.getKey() + ": " + entry.getValue() + " ");
+            }
+            buffer.append("}");
+            return buffer.toString();
+        }
+    }
+
+    public static int readTargetString(String targetString) {
+        if (targetString.equalsIgnoreCase("CPU") || targetString.equalsIgnoreCase("NATIVE")) {
+            return FrameFormat.TARGET_NATIVE;
+        } else if (targetString.equalsIgnoreCase("GPU")) {
+            return FrameFormat.TARGET_GPU;
+        } else if (targetString.equalsIgnoreCase("JAVA")) {
+            return FrameFormat.TARGET_JAVA;
+        } else if (targetString.equalsIgnoreCase("VERTEXBUFFER")) {
+            return FrameFormat.TARGET_VERTEXBUFFER;
+        } else if (targetString.equalsIgnoreCase("UNSPECIFIED")) {
+            return FrameFormat.TARGET_UNSPECIFIED;
+        } else {
+            throw new RuntimeException("Unknown target type '" + targetString + "'!");
+        }
+    }
+
+    // TODO: FromString
+
     public String toString() {
-        return "Format {  BaseType: " + baseTypeToString(mBaseType)
-            + ", Target: " + targetToString(mTarget)
-            + ", BytesPerSample: " + mBytesPerSample
-            + ", Dimensions: " + dimensionsToString(mDimensions)
-            + " }";
+        int valuesPerSample = getValuesPerSample();
+        String sampleCountString = valuesPerSample == 1 ? "" : String.valueOf(valuesPerSample);
+        String targetString = mTarget == TARGET_UNSPECIFIED ? "" : (targetToString(mTarget) + " ");
+        return targetString
+            + baseTypeToString(mBaseType)
+            + sampleCountString
+            + dimensionsToString(mDimensions)
+            + metaDataToString(mMetaData);
     }
 
     private void initDefaults() {
-        // Defaults based on base-type
-        switch (mBaseType) {
-            case TYPE_BIT:
-            case TYPE_BYTE:
-                mBytesPerSample = 1;
-                break;
-            case TYPE_INT16:
-                mBytesPerSample = 2;
-                break;
-            case TYPE_INT32:
-            case TYPE_FLOAT:
-                mBytesPerSample = 4;
-                break;
-            case TYPE_DOUBLE:
-                mBytesPerSample = 8;
-                break;
-            default:
-                mBytesPerSample = BYTES_PER_SAMPLE_UNSPECIFIED;
-                break;
-        }
+        mBytesPerSample = bytesPerSampleOf(mBaseType);
     }
-    // Core internal methods /////////////////////////////////////////////////////////////////////////
+
+    // Core internal methods ///////////////////////////////////////////////////////////////////////
     int calcSize(int[] dimensions) {
         if (dimensions != null && dimensions.length > 0) {
             int size = getBytesPerSample();

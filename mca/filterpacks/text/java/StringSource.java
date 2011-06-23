@@ -19,16 +19,17 @@ package android.filterpacks.text;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.JavaFrame;
+import android.filterfw.format.ObjectFormat;
 
 public class StringSource extends Filter {
 
-    @FilterParameter(name = "stringValue", isOptional = false)
+    @GenerateFieldPort(name = "stringValue")
     private String mString;
 
     private FrameFormat mOutputFormat;
@@ -38,32 +39,17 @@ public class StringSource extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return null;
+    public void setupPorts() {
+        mOutputFormat = ObjectFormat.fromClass(String.class, FrameFormat.TARGET_JAVA);
+        addOutputPort("string", mOutputFormat);
     }
 
     @Override
-    public String[] getOutputNames() {
-        return new String[] { "string" };
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        mOutputFormat = new FrameFormat(FrameFormat.TYPE_OBJECT, FrameFormat.TARGET_JAVA);
-        return mOutputFormat;
-    }
-
-    @Override
-    public int process(FilterContext env) {
+    public void process(FilterContext env) {
         Frame output = env.getFrameManager().newEmptyFrame(mOutputFormat);
         output.setObjectValue(mString);
-        putOutput(0, output);
-        return Filter.STATUS_FINISHED;
+        pushOutput("string", output);
+        closeOutputPort("string");
     }
 
 

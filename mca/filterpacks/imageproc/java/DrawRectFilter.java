@@ -19,9 +19,9 @@ package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.GLFrame;
 import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
@@ -29,20 +29,20 @@ import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.geometry.Quad;
 import android.filterfw.format.ImageFormat;
+import android.filterfw.format.ObjectFormat;
+
 import android.opengl.GLES20;
 
 public class DrawRectFilter extends Filter {
 
-    @FilterParameter(name = "colorRed", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "colorRed",  hasDefault = true)
     private float mColorRed = 0.8f;
 
-    @FilterParameter(name = "colorGreen", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "colorGreen", hasDefault = true)
     private float mColorGreen = 0.8f;
 
-    @FilterParameter(name = "colorBlue", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "colorBlue", hasDefault = true)
     private float mColorBlue = 0.0f;
-
-    private ShaderProgram mProgram;
 
     private final String mVertexShader =
         "attribute vec4 aPosition;\n" +
@@ -57,40 +57,24 @@ public class DrawRectFilter extends Filter {
         "  gl_FragColor = color;\n" +
         "}\n";
 
+    private ShaderProgram mProgram;
+
+
     public DrawRectFilter(String name) {
         super(name);
     }
 
     @Override
-    public String[] getInputNames() {
-        return new String[] { "image", "box" };
+    public void setupPorts() {
+        addMaskedInputPort("image", ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                       FrameFormat.TARGET_GPU));
+        addMaskedInputPort("box", ObjectFormat.fromClass(Quad.class, FrameFormat.TARGET_JAVA));
+        addOutputBasedOnInput("image", "image");
     }
 
     @Override
-    public String[] getOutputNames() {
-        return new String[] { "image" };
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        switch(index) {
-            case 0: { // image
-                FrameFormat requiredFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
-                                                                FrameFormat.TARGET_GPU);
-                return format.isCompatibleWith(requiredFormat);
-            }
-
-            case 1: // box
-                return (format.getTarget() == FrameFormat.TARGET_JAVA &&
-                        format.getBaseType() == FrameFormat.TYPE_OBJECT &&
-                        Quad.class.isAssignableFrom(format.getObjectClass()));
-        }
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return getInputFormat(0);
+    public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
+        return inputFormat;
     }
 
     @Override
@@ -99,10 +83,10 @@ public class DrawRectFilter extends Filter {
     }
 
     @Override
-    public int process(FilterContext env) {
+    public void process(FilterContext env) {
         // Get input frame
-        Frame imageFrame = pullInput(0);
-        Frame boxFrame = pullInput(1);
+        Frame imageFrame = pullInput("image");
+        Frame boxFrame = pullInput("box");
 
         // Get the box
         Quad box = (Quad)boxFrame.getObjectValue();
@@ -117,14 +101,10 @@ public class DrawRectFilter extends Filter {
         renderBox(box);
 
         // Push output
-        putOutput(0, output);
+        pushOutput("image", output);
 
         // Release pushed frame
         output.release();
-
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-               Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
     private void renderBox(Quad box) {

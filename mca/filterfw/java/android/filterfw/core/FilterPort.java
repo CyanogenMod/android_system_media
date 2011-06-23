@@ -18,27 +18,19 @@
 package android.filterfw.core;
 
 import android.filterfw.core.Filter;
-import android.filterfw.core.FilterConnection;
 import android.filterfw.core.FrameFormat;
-import android.filterfw.core.PortToPortConnection;
+import android.util.Log;
 
-public class FilterPort {
+public abstract class FilterPort {
 
-    public static final int UNATTACHED_PORT = 0;
-    public static final int INPUT_PORT      = 1;
-    public static final int OUTPUT_PORT     = 2;
+    protected Filter mFilter;
+    protected String mName;
+    protected FrameFormat mPortFormat;
+    protected boolean mIsBlocking = true;
+    protected boolean mIsOpen = false;
 
-    private int mType;
-
-    private Filter mFilter;
-
-    private int mIndex;
-
-    private FilterConnection mConnection;
-
-    public FilterPort(Filter filter, int type, int index) {
-        mType = type;
-        mIndex = index;
+    public FilterPort(Filter filter, String name) {
+        mName = name;
         mFilter = filter;
     }
 
@@ -46,87 +38,69 @@ public class FilterPort {
         return mFilter != null;
     }
 
-    public int getType() {
-        return mType;
+    public FrameFormat getPortFormat() {
+        return mPortFormat;
     }
 
-    public FrameFormat getFormat() {
-        return mConnection != null ? mConnection.getFormat() : null;
-    }
-
-    public void setFormat(FrameFormat format) {
-        if (mConnection == null) {
-            throw new RuntimeException("Attempting to set format on unconnected port!");
-        }
-        mConnection.setFormat(format);
+    public void setPortFormat(FrameFormat format) {
+        mPortFormat = format;
     }
 
     public Filter getFilter() {
         return mFilter;
     }
 
-    public Filter getSourceFilter() {
-        if (getType() != INPUT_PORT) {
-            throw new RuntimeException("Cannot get source port of non-input port!");
-        } else if (mConnection == null || mConnection.getSourcePort() == null) {
-            throw new RuntimeException("Attempting to get source of disconnected port!");
+    public String getName() {
+        return mName;
+    }
+
+    public void setBlocking(boolean blocking) {
+        mIsBlocking = blocking;
+    }
+
+    public void open() {
+        if (!mIsOpen) {
+            Log.v("FilterPort", "Opening " + this);
         }
-        return getConnection().getSourcePort().getFilter();
+        mIsOpen = true;
     }
 
-    public Filter getTargetFilter() {
-        if (getType() != OUTPUT_PORT) {
-            throw new RuntimeException("Cannot get target port of non-output port!");
-        } else if (mConnection == null || mConnection.getTargetPort() == null) {
-            throw new RuntimeException("Attempting to get target of disconnected port!");
+    public void close() {
+        if (mIsOpen) {
+            Log.v("FilterPort", "Closing " + this);
         }
-        return getConnection().getTargetPort().getFilter();
+        mIsOpen = false;
     }
 
-    public int getIndex() {
-        return mIndex;
+    public boolean isOpen() {
+        return mIsOpen;
     }
 
-    public FilterConnection getConnection() {
-        return mConnection;
+    public boolean isBlocking() {
+        return mIsBlocking;
     }
 
-    public void connectTo(FilterPort port) {
-        if (getConnection() != null) {
-            throw new RuntimeException("Attempting to connect already connected port!");
-        } else if (getType() != OUTPUT_PORT) {
-            throw new RuntimeException("Attempting to connect from non-output port!");
-        } else if (port == null) {
-            throw new RuntimeException("Attempting to connect to null port!");
-        } else if (port.getType() != INPUT_PORT) {
-            throw new RuntimeException("Attempting to connect to non-input port!");
-        }
-        PortToPortConnection connection = new PortToPortConnection();
-        connection.initWithConnection(this, port);
-    }
+    public abstract boolean filterMustClose();
 
-    public void setConnection(FilterConnection connection) {
-        if (connection == null) {
-            throw new IllegalArgumentException("Attempting to set null connection!");
-        } else if (mConnection != null) {
-            throw new RuntimeException("Attempting to set connection on already connected port!");
-        }
-        mConnection = connection;
-    }
+    public abstract boolean isReady();
 
-    public boolean isConnected() {
-        return getConnection() != null;
-    }
+    public abstract void pushFrame(Frame frame);
 
-    @Override
+    public abstract void setFrame(Frame frame);
+
+    public abstract Frame pullFrame();
+
+    public abstract boolean hasFrame();
+
+    public abstract void clear();
+
     public String toString() {
-        switch(mType) {
-            case INPUT_PORT:
-                return "input port " + mIndex + " of Filter " + mFilter;
-            case OUTPUT_PORT:
-                return "output port " + mIndex + " of Filter " + mFilter;
-            default:
-                return "unattached port";
+        return "port '" + mName + "' of " + mFilter;
+    }
+
+    protected void assertPortIsOpen() {
+        if (!isOpen()) {
+            throw new RuntimeException("Illegal operation on closed " + this + "!");
         }
     }
 }

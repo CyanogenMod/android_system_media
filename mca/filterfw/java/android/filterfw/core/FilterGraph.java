@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.Stack;
 
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterpacks.base.FrameBranch;
 import android.filterpacks.base.NullFilter;
@@ -36,18 +35,16 @@ import android.util.Log;
 public class FilterGraph {
 
     private HashSet<Filter> mFilters = new HashSet<Filter>();
-    private HashSet<Filter> mSourceFilters = new HashSet<Filter>();
     private HashMap<String, Filter> mNameMap = new HashMap<String, Filter>();
-    private HashMap<FilterPort, LinkedList<FilterPort>> mPreconnections = new
-            HashMap<FilterPort, LinkedList<FilterPort>>();
+    private HashMap<SourcePort, LinkedList<TargetPort>> mPreconnections = new
+            HashMap<SourcePort, LinkedList<TargetPort>>();
 
     public static final int AUTOBRANCH_OFF      = 0;
     public static final int AUTOBRANCH_SYNCED   = 1;
     public static final int AUTOBRANCH_UNSYNCED = 2;
 
-    private boolean mIsOpen = false;
+    private boolean mIsReady = false;
     private int mAutoBranchMode = AUTOBRANCH_OFF;
-    private boolean mDiscardUnconnectedFilters = false;
     private boolean mDiscardUnconnectedOutputs = false;
 
     public FilterGraph() {
@@ -57,9 +54,6 @@ public class FilterGraph {
         if (!containsFilter(filter)) {
             mFilters.add(filter);
             mNameMap.put(filter.getName(), filter);
-            if (filter.getNumberOfInputs() == 0) {
-                mSourceFilters.add(filter);
-            }
             return true;
         }
         return false;
@@ -83,8 +77,8 @@ public class FilterGraph {
             throw new RuntimeException("Attempting to connect filter not in graph!");
         }
 
-        FilterPort outPort = source.getOutputPort(outputName);
-        FilterPort inPort = target.getInputPort(inputName);
+        SourcePort outPort = source.getOutputPort(outputName);
+        TargetPort inPort = target.getInputPort(inputName);
         if (outPort == null) {
             throw new RuntimeException("Unknown output port '" + outputName + "' on Filter " +
                                        source + "!");
@@ -116,43 +110,51 @@ public class FilterGraph {
         return mFilters;
     }
 
-    public Set<Filter> getSourceFilters() {
-        return mSourceFilters;
-    }
-
-    public void openFilters(FilterContext context) {
+    public void beginProcessing() {
+        Log.v("FilterGraph", "Opening all filter connections...");
         for (Filter filter : mFilters) {
-            if (!filter.performOpen(context)) {
-                throw new RuntimeException("Failed to open filter " + filter + "!");
-            }
+            filter.beginProcessing();
         }
-        mIsOpen = true;
+        mIsReady = true;
     }
 
     public void closeFilters(FilterContext context) {
+        Log.v("FilterGraph", "Closing all filters...");
         for (Filter filter : mFilters) {
             filter.performClose(context);
         }
-        mIsOpen = false;
+        mIsReady = false;
     }
 
-    public boolean isOpen() {
-        return mIsOpen;
+    public boolean isReady() {
+        return mIsReady;
     }
 
     public void setAutoBranchMode(int autoBranchMode) {
         mAutoBranchMode = autoBranchMode;
     }
 
-    public void setDiscardUnconnectedFilters(boolean discard) {
-        mDiscardUnconnectedFilters = discard;
-    }
-
     public void setDiscardUnconnectedOutputs(boolean discard) {
         mDiscardUnconnectedOutputs = discard;
     }
 
-    private void setupPorts() {
+    private boolean readyForProcessing(Filter filter, Set<Filter> processed) {
+        // Check if this has been already processed
+        if (processed.contains(filter)) {
+            return false;
+        }
+
+        // Check if all dependencies have been processed
+        for (TargetPort port : filter.getInputPorts()) {
+            Filter dependency = port.getSourceFilter();
+            if (dependency != null && !processed.contains(dependency)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void runTypeCheck(boolean strict) {
         Stack<Filter> filterStack = new Stack<Filter>();
         Set<Filter> processedFilters = new HashSet<Filter>();
         filterStack.addAll(getSourceFilters());
@@ -162,14 +164,17 @@ public class FilterGraph {
             Filter filter = filterStack.pop();
             processedFilters.add(filter);
 
-            // Setup ports
-            setupInputPortsFor(filter);
-            setupOutputPortsFor(filter);
+            // Anchor output formats
+            updateOutputs(filter);
+
+            // Perform type check
+            Log.v("FilterGraph", "Running type check on " + filter + "...");
+            runTypeCheckOn(filter, strict);
 
             // Push connected filters onto stack
-            for (int i = 0; i < filter.getNumberOfOutputs(); ++i) {
-                Filter target = filter.getOutputPortAtIndex(i).getTargetFilter();
-                if (canSetupPortsFor(target, processedFilters)) {
+            for (SourcePort port : filter.getOutputPorts()) {
+                Filter target = port.getTargetFilter();
+                if (target != null && readyForProcessing(target, processedFilters)) {
                     filterStack.push(target);
                 }
             }
@@ -181,39 +186,37 @@ public class FilterGraph {
         }
     }
 
-    private boolean canSetupPortsFor(Filter filter, Set<Filter> processed) {
-        // Check if this has been already processed
-        if (processed.contains(filter)) {
-            return false;
-        }
-
-        // Check if all dependencies have been processed
-        for (int i = 0; i < filter.getNumberOfInputs(); ++i) {
-            Filter dep = filter.getInputPortAtIndex(i).getSourceFilter();
-            if (!processed.contains(dep)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void setupInputPortsFor(Filter filter) {
-        for (int i = 0; i < filter.getNumberOfInputs(); ++i) {
-            if (!filter.acceptsInputFormat(i, filter.getInputPortAtIndex(i).getFormat())) {
-                throw new RuntimeException("Filter " + filter + " does not accept the " +
-                                           "input given on port " + i + "!");
+    private void updateOutputs(Filter filter) {
+        for (SourcePort outputPort : filter.getOutputPorts()) {
+            TargetPort inputPort = outputPort.getBasePort();
+            if (inputPort != null) {
+                FrameFormat inputFormat = inputPort.getSourceFormat();
+                FrameFormat outputFormat = filter.getOutputFormat(outputPort.getName(),
+                                                                  inputFormat);
+                if (outputFormat == null) {
+                    throw new RuntimeException("Filter did not return an output format for "
+                        + outputPort + "!");
+                }
+                outputPort.setPortFormat(outputFormat);
             }
         }
     }
 
-    private void setupOutputPortsFor(Filter filter) {
-        for (int i = 0; i < filter.getNumberOfOutputs(); ++i) {
-            FrameFormat format = filter.getOutputFormat(i);
-            if (format == null) {
-                throw new RuntimeException("Filter " + filter + " did not produce an " +
-                                           "output format for port " + i + "!");
+    private void runTypeCheckOn(Filter filter, boolean strict) {
+        for (TargetPort inputPort : filter.getInputPorts()) {
+            Log.v("FilterGraph", "Type checking port " + inputPort);
+            FrameFormat sourceFormat = inputPort.getSourceFormat();
+            FrameFormat targetFormat = inputPort.getPortFormat();
+            if (sourceFormat != null && targetFormat != null) {
+                Log.v("FilterGraph", "Checking " + sourceFormat + " against " + targetFormat + ".");
+                boolean compatible = strict ? sourceFormat.isCompatibleWith(targetFormat)
+                                            : sourceFormat.mayBeCompatibleWith(targetFormat);
+                if (!compatible) {
+                    throw new RuntimeException("Type mismatch: Filter " + filter + " expects a "
+                        + "format of type " + targetFormat + " but got a format of type "
+                        + sourceFormat + "!");
+                }
             }
-            filter.getOutputPortAtIndex(i).setFormat(format);
         }
     }
 
@@ -221,52 +224,19 @@ public class FilterGraph {
         // TODO
     }
 
-    private void prepareFilters(FilterContext context) {
-      for (Filter filter : mFilters) {
-        filter.prepare(context);
-      }
-    }
-
-    private void discardUnconnectedFilters() {
-        // First, find all filters that are not fully connected and add them to the remove list.
-        Stack<Filter> filtersToRemove = new Stack<Filter>();
-        for (Filter filter : mFilters) {
-            if (!filter.allInputsConnected() || !filter.allOutputsConnected()) {
-                filtersToRemove.push(filter);
-            }
-        }
-
-        // Recursively remove the filters in the list and all filters connected
-        while (!filtersToRemove.empty()) {
-            Filter filter = filtersToRemove.pop();
-            if (mFilters.contains(filter)) {
-                for (Filter connected : filter.connectedFilters()) {
-                    filtersToRemove.push(connected);
-                }
-                Log.v("FilterGraph", "Discarding unconnected filter " + filter + "!");
-                removeFilter(filter);
-            }
-        }
-
-        if (mFilters.isEmpty()) {
-            throw new RuntimeException("Discarding unconnected filters caused all filters to be "
-                + "removed!");
-        }
-    }
-
     private void discardUnconnectedOutputs() {
         // Connect unconnected ports to Null filters
         LinkedList<Filter> addedFilters = new LinkedList<Filter>();
         for (Filter filter : mFilters) {
-            for (int i = 0; i < filter.getNumberOfOutputs(); ++i) {
-                FilterPort port = filter.getOutputPortAtIndex(i);
+            int id = 0;
+            for (SourcePort port : filter.getOutputPorts()) {
                 if (!port.isConnected()) {
-                    Log.v("FilterGraph", "Autoconnecting unconnected output port " + i + " of "
-                        + "filter " + filter + " to Null filter.");
-                    NullFilter nullFilter = new NullFilter(filter.getName() + "ToNull" + i);
+                    Log.v("FilterGraph", "Autoconnecting unconnected " + port + " to Null filter.");
+                    NullFilter nullFilter = new NullFilter(filter.getName() + "ToNull" + id);
                     nullFilter.init();
                     addedFilters.add(nullFilter);
                     port.connectTo(nullFilter.getInputPort("frame"));
+                    ++id;
                 }
             }
         }
@@ -278,15 +248,14 @@ public class FilterGraph {
 
     private void removeFilter(Filter filter) {
         mFilters.remove(filter);
-        mSourceFilters.remove(filter);
         mNameMap.remove(filter.getName());
     }
 
-    private void preconnect(FilterPort outPort, FilterPort inPort) {
-        LinkedList<FilterPort> targets;
+    private void preconnect(SourcePort outPort, TargetPort inPort) {
+        LinkedList<TargetPort> targets;
         targets = mPreconnections.get(outPort);
         if (targets == null) {
-            targets = new LinkedList<FilterPort>();
+            targets = new LinkedList<TargetPort>();
             mPreconnections.put(outPort, targets);
         }
         targets.add(inPort);
@@ -294,9 +263,9 @@ public class FilterGraph {
 
     private void connectPorts() {
         int branchId = 1;
-        for (Entry<FilterPort, LinkedList<FilterPort>> connection : mPreconnections.entrySet()) {
-            FilterPort sourcePort = connection.getKey();
-            LinkedList<FilterPort> targetPorts = connection.getValue();
+        for (Entry<SourcePort, LinkedList<TargetPort>> connection : mPreconnections.entrySet()) {
+            SourcePort sourcePort = connection.getKey();
+            LinkedList<TargetPort> targetPorts = connection.getValue();
             if (targetPorts.size() == 1) {
                 sourcePort.connectTo(targetPorts.get(0));
             } else if (mAutoBranchMode == AUTOBRANCH_OFF) {
@@ -311,30 +280,37 @@ public class FilterGraph {
                     throw new RuntimeException("TODO: Unsynced branches not implemented yet!");
                 }
                 KeyValueMap branchParams = new KeyValueMap();
-                branch.initWithParameterList("outputs", targetPorts.size());
+                branch.initWithAssignmentList("outputs", targetPorts.size());
                 addFilter(branch);
-                sourcePort.connectTo(branch.getInputPortAtIndex(0));
-                int portIndex = 0;
-                for (FilterPort targetPort : targetPorts) {
-                    branch.getOutputPortAtIndex(portIndex++).connectTo(targetPort);
+                sourcePort.connectTo(branch.getInputPort("in"));
+                Iterator<TargetPort> targetPortIter = targetPorts.iterator();
+                for (SourcePort branchOutPort : ((Filter)branch).getOutputPorts()) {
+                    branchOutPort.connectTo(targetPortIter.next());
                 }
             }
         }
         mPreconnections.clear();
     }
 
-    // Core internal methods /////////////////////////////////////////////////////////////////////////
-    void setupFilters(FilterContext context) {
-        if (mDiscardUnconnectedFilters) {
-            discardUnconnectedFilters();
+    private HashSet<Filter> getSourceFilters() {
+        HashSet<Filter> sourceFilters = new HashSet<Filter>();
+        for (Filter filter : getFilters()) {
+            if (filter.getNumberOfConnectedInputs() == 0) {
+                Log.v("FilterGraph", "Found source filter: " + filter);
+                sourceFilters.add(filter);
+            }
         }
+        return sourceFilters;
+    }
+
+    // Core internal methods /////////////////////////////////////////////////////////////////////////
+    void setupFilters() {
         if (mDiscardUnconnectedOutputs) {
             discardUnconnectedOutputs();
         }
         connectPorts();
         checkConnections();
-        setupPorts();
-        prepareFilters(context);
+        runTypeCheck(true); // TODO: allow non-strict type-checking
     }
 
     void tearDownFilters(FilterContext context) {

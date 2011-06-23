@@ -19,7 +19,6 @@ package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GLFrame;
@@ -29,6 +28,8 @@ import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.geometry.Quad;
 import android.filterfw.format.ImageFormat;
+import android.filterfw.format.ObjectFormat;
+
 import android.opengl.GLES20;
 
 public class DrawOverlayFilter extends Filter {
@@ -40,41 +41,18 @@ public class DrawOverlayFilter extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return new String[] { "source", "overlay", "box" };
+    public void setupPorts() {
+        FrameFormat imageFormatMask = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                         FrameFormat.TARGET_GPU);
+        addMaskedInputPort("source", imageFormatMask);
+        addMaskedInputPort("overlay", imageFormatMask);
+        addMaskedInputPort("box", ObjectFormat.fromClass(Quad.class, FrameFormat.TARGET_JAVA));
+        addOutputBasedOnInput("image", "source");
     }
 
     @Override
-    public String[] getOutputNames() {
-        return new String[] { "image" };
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        switch(index) {
-            case 0: { // source
-                FrameFormat requiredFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
-                                                                FrameFormat.TARGET_GPU);
-                return format.isCompatibleWith(requiredFormat);
-            }
-
-            case 1: { // overlay
-                FrameFormat requiredFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
-                                                                FrameFormat.TARGET_GPU);
-                return format.isCompatibleWith(requiredFormat);
-            }
-
-            case 2: // box
-                return (format.getTarget() == FrameFormat.TARGET_JAVA &&
-                        format.getBaseType() == FrameFormat.TYPE_OBJECT &&
-                        Quad.class.isAssignableFrom(format.getObjectClass()));
-        }
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return getInputFormat(0);
+    public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
+        return inputFormat;
     }
 
     @Override
@@ -83,11 +61,11 @@ public class DrawOverlayFilter extends Filter {
     }
 
     @Override
-    public int process(FilterContext env) {
+    public void process(FilterContext env) {
         // Get input frame
-        Frame sourceFrame = pullInput(0);
-        Frame overlayFrame = pullInput(1);
-        Frame boxFrame = pullInput(2);
+        Frame sourceFrame = pullInput("source");
+        Frame overlayFrame = pullInput("overlay");
+        Frame boxFrame = pullInput("box");
 
         // Get the box
         Quad box = (Quad)boxFrame.getObjectValue();
@@ -103,13 +81,9 @@ public class DrawOverlayFilter extends Filter {
         mProgram.process(overlayFrame, output);
 
         // Push output
-        putOutput(0, output);
+        pushOutput("image", output);
 
         // Release pushed frame
         output.release();
-
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-               Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 }

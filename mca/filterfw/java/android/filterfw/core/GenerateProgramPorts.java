@@ -21,10 +21,6 @@ import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ProgramParameter {
-    String  name();
-    Class   type();
-    String  exposedName() default "";
-    boolean isOptional() default false;
-    boolean isUpdatable() default true;
+public @interface GenerateProgramPorts {
+    GenerateProgramPort[] value();
 }

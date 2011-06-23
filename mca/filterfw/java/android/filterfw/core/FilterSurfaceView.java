@@ -55,7 +55,7 @@ public class FilterSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
         // Set GLEnv
         if (mGLEnv != null && mGLEnv != glEnv) {
-            throw new RuntimeException("FilterSurfaceView is already registered with a GLEnvironment!");
+            mGLEnv.unregisterSurfaceId(mSurfaceId);
         }
         mGLEnv = glEnv;
 

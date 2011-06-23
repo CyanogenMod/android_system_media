@@ -19,11 +19,12 @@ package android.filterpacks.ui;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.FilterSurfaceView;
 import android.filterfw.core.FilterSurfaceRenderer;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
+import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.GLEnvironment;
 import android.filterfw.core.GLFrame;
 import android.filterfw.core.KeyValueMap;
@@ -32,6 +33,7 @@ import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
+import android.filterfw.format.ImageFormat;
 
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -50,7 +52,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
     /** Required. Sets the destination filter surface view for this
      * node.
      */
-    @FilterParameter(name = "surfaceView", isOptional = false)
+    @GenerateFinalPort(name = "surfaceView")
     private FilterSurfaceView mSurfaceView;
 
     /** Optional. Control how the incoming frames are rendered onto the
@@ -61,13 +63,13 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
      * RENDERMODE_FILL_CROP: Keep aspect ratio and fit without black
      * bars. May crop.
      */
-    @FilterParameter(name = "renderMode", isOptional = true)
+    @GenerateFieldPort(name = "renderMode", hasDefault = true)
     private String mRenderModeString;
 
     private ShaderProgram mProgram;
     private GLFrame mScreen;
     private int mRenderMode = RENDERMODE_FIT;
-    private float mAspectRatio;
+    private float mAspectRatio = 1.f;
 
     private int mScreenWidth;
     private int mScreenHeight;
@@ -87,13 +89,17 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
     }
 
     @Override
-    public void initFilter() {
-        // SurfaceView
+    public void setupPorts() {
+        // Make sure we have a SurfaceView
         if (mSurfaceView == null) {
             throw new RuntimeException("NULL SurfaceView passed to SurfaceRenderFilter");
         }
 
-        // RenderMode
+        // Add input port
+        addMaskedInputPort("frame", ImageFormat.create(ImageFormat.COLORSPACE_RGBA));
+    }
+
+    public void updateRenderMode() {
         if (mRenderModeString != null) {
             if (mRenderModeString == "stretch") {
                 mRenderMode = RENDERMODE_STRETCH;
@@ -105,36 +111,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
                 throw new RuntimeException("Unknown render mode '" + mRenderModeString + "'!");
             }
         }
-
-        mAspectRatio = 1.f;
-    }
-
-    @Override
-    public String[] getInputNames() {
-        return new String[] { "frame" };
-    }
-
-    @Override
-    public String[] getOutputNames() {
-        return null;
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        if (format.isBinaryDataType() &&
-            format.getBytesPerSample() == 4 &&
-            format.getNumberOfDimensions() == 2 &&
-            (format.getTarget() == FrameFormat.TARGET_NATIVE ||
-             format.getTarget() == FrameFormat.TARGET_GPU)) {
-
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return null;
+        updateTargetRect();
     }
 
     @Override
@@ -146,7 +123,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
         mProgram.setClearsOutput(true);
         mProgram.setClearColor(0.0f, 0.0f, 0.0f);
 
-        updateTargetRect();
+        updateRenderMode();
 
         // Create a frame representing the screen
         MutableFrameFormat screenFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE,
@@ -154,24 +131,20 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
         screenFormat.setBytesPerSample(4);
         screenFormat.setDimensions(mSurfaceView.getWidth(), mSurfaceView.getHeight());
         mScreen = (GLFrame)context.getFrameManager().newBoundFrame(screenFormat,
-                                                                       GLFrame.EXISTING_FBO_BINDING,
-                                                                       0);
+                                                                   GLFrame.EXISTING_FBO_BINDING,
+                                                                   0);
     }
 
     @Override
-    public int open(FilterContext context) {
-
+    public void open(FilterContext context) {
         // Bind surface view to us. This will emit a surfaceChanged call that will update our
         // screen width and height.
         mSurfaceView.unbind();
         mSurfaceView.bindToRenderer(this, context.getGLEnvironment());
-
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
     @Override
-    public int process(FilterContext context) {
+    public void process(FilterContext context) {
         if (LOGV) Log.v(TAG, "Starting frame processing");
 
         GLEnvironment glEnv = mSurfaceView.getGLEnv();
@@ -181,7 +154,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
 
 
         // Get input frame
-        Frame input = pullInput(0);
+        Frame input = pullInput("frame");
         boolean createdFrame = false;
 
         float currentAspectRatio = (float)input.getFormat().getWidth() / input.getFormat().getHeight();
@@ -193,6 +166,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
 
         // See if we need to copy to GPU
         Frame gpuFrame = null;
+        Log.i("SurfaceRenderFilter", "Got input format: " + input.getFormat());
         if (input.getFormat().getTarget() == FrameFormat.TARGET_NATIVE) {
             MutableFrameFormat gpuFormat = input.getFormat().mutableCopy();
             gpuFormat.setTarget(FrameFormat.TARGET_GPU);
@@ -215,10 +189,11 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
         if (createdFrame) {
             gpuFrame.release();
         }
+    }
 
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
+    @Override
+    public void fieldPortValueUpdated(String name, FilterContext context) {
+        updateTargetRect();
     }
 
     @Override

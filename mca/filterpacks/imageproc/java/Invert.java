@@ -26,11 +26,9 @@ import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 
-public class Invert extends ImageFilter {
+public class Invert extends SimpleImageFilter {
 
-    private Program mProgram;
-
-    private final String mInvertShader =
+    private static final String mInvertShader =
             "precision mediump float;\n" +
             "uniform sampler2D tex_sampler_0;\n" +
             "varying vec2 v_texcoord;\n" +
@@ -43,25 +41,17 @@ public class Invert extends ImageFilter {
             "}\n";
 
     public Invert(String name) {
-        super(name);
+        super(name, null);
     }
 
     @Override
-    public void createProgram(int target) {
-        switch (target) {
-            case FrameFormat.TARGET_NATIVE:
-                mProgram = new NativeProgram("filterpack_imageproc", "invert");
-                break;
-
-            case FrameFormat.TARGET_GPU:
-                mProgram = new ShaderProgram(mInvertShader);
-                break;
-        }
+    protected Program getNativeProgram() {
+        return new NativeProgram("filterpack_imageproc", "invert");
     }
 
     @Override
-    protected Program getProgram() {
-        return mProgram;
+    protected Program getShaderProgram() {
+        return new ShaderProgram(mInvertShader);
     }
 
 }

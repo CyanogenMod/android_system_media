@@ -19,52 +19,41 @@ package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.KeyValueMap;
 
 public class FrameBranch extends Filter {
 
-    @FilterParameter(name = "outputs", isOptional = true)
+    @GenerateFinalPort(name = "outputs", hasDefault = true)
     private int mNumberOfOutputs = 2;
 
     public FrameBranch(String name) {
         super(name);
     }
 
-    public String[] getInputNames() {
-        return new String[] { "in" };
-    }
-
-    public String[] getOutputNames() {
-        String[] outNames = new String[mNumberOfOutputs];
+    @Override
+    public void setupPorts() {
+        addInputPort("in");
         for (int i = 0; i < mNumberOfOutputs; ++i) {
-            outNames[i] = "out" + i;
+            addOutputBasedOnInput("out" + i, "in");
         }
-        return outNames;
     }
 
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return true;
+    @Override
+    public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
+        return inputFormat;
     }
 
-    public FrameFormat getOutputFormat(int index) {
-        return getInputFormat(0);
-    }
-
-    public int process(FilterContext context) {
+    public void process(FilterContext context) {
         // Get input frame
-        Frame input = pullInput(0);
+        Frame input = pullInput("in");
 
         // Push output
         for (int i = 0; i < mNumberOfOutputs; ++i) {
-            putOutput(i, input);
+            pushOutput("out" + i, input);
         }
-
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
 }

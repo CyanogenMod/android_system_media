@@ -19,9 +19,9 @@ package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
@@ -32,13 +32,13 @@ import android.util.Log;
 
 import java.util.Set;
 
-public class FisheyeFilter extends ImageFilter {
+public class FisheyeFilter extends SimpleImageFilter {
     private static final String TAG = "FisheyeFilter";
 
     // This parameter has range between 0 and 1. It controls the effect of radial distortion.
     // The larger the value, the more prominent the distortion effect becomes (a straight line
     // becomes a curve).
-    @FilterParameter(name = "scale", isOptional = false, isUpdatable = true)
+    @GenerateFieldPort(name = "scale")
     private float mScale;
 
     // focus_x and focus_y are set to be the center of image for now.
@@ -47,9 +47,7 @@ public class FisheyeFilter extends ImageFilter {
     // @FilterParameter(name = "focus_y", isOptional = true, isUpdatable = false)
     private float mFocusY;
 
-    private Program mProgram;
-
-    private final String mFisheyeShader =
+    private static final String mFisheyeShader =
             "precision mediump float;\n" +
             "uniform sampler2D tex_sampler_0;\n" +
             "uniform vec2 center;\n" +
@@ -76,43 +74,25 @@ public class FisheyeFilter extends ImageFilter {
             "}\n";
 
     public FisheyeFilter(String name) {
-        super(name);
+        super(name, null);
     }
 
     @Override
-    protected void createProgram(int target) {
-        switch (target) {
-          /*
-            case FrameFormat.TARGET_NATIVE:
-                mProgram = new NativeProgram("filterpack_imageproc", "brightness");
-                break;
-          */
-
-            case FrameFormat.TARGET_GPU:
-                mProgram = new ShaderProgram(mFisheyeShader);
-                break;
-
-            default:
-                throw new RuntimeException("FisheyeFilter could not create suitable program!");
-        }
-
-        FrameFormat outFormat = getInputFormat(0);
-        mFocusX = (float) (0.5 * outFormat.getWidth());
-        mFocusY = (float) (0.5 * outFormat.getHeight());
-
-        float center[] = {mFocusX, mFocusY};
-
-        Log.e("Fisheye", "( " + center[0] + ", " + center[1] + " )");
-
-        // set uniforms in shader
-        mProgram.setHostValue("center", center);
-        mProgram.setHostValue("width", (float) outFormat.getWidth());
-        mProgram.setHostValue("height", (float) outFormat.getHeight());
-        mProgram.setHostValue("alpha", (float) (mScale * 2.0 + 0.75));
+    protected Program getNativeProgram() {
+        Program result = new NativeProgram("filterpack_imageproc", "fisheye");
+        initProgram(result);
+        return result;
     }
 
     @Override
-    public void parametersUpdated(Set<String> updated) {
+    protected Program getShaderProgram() {
+        Program result = new ShaderProgram(mFisheyeShader);
+        initProgram(result);
+        return result;
+    }
+
+    @Override
+    public void fieldPortValueUpdated(String name, FilterContext context) {
         if (mProgram != null) {
           Log.v(TAG, "alpha=" + (mScale * 2.0 + 0.75));
           mProgram.setHostValue("alpha", (float) (mScale * 2.0 + 0.75));
@@ -120,9 +100,9 @@ public class FisheyeFilter extends ImageFilter {
     }
 
     @Override
-    public int process(FilterContext env) {
+    public void process(FilterContext env) {
         // Get input frame
-        Frame input = pullInput(0);
+        Frame input = pullInput("image");
 
         // Create output frame
         // TODO: Use Frame Provider
@@ -138,6 +118,9 @@ public class FisheyeFilter extends ImageFilter {
 
         Log.e("Fisheye", "( " + center[0] + ", " + center[1] + " )");
 
+        // Make sure we have a program
+        updateProgramWithTarget(input.getFormat().getTarget());
+
         // set uniforms in shader
         mProgram.setHostValue("center", center);
         mProgram.setHostValue("width", (float) input.getFormat().getWidth());
@@ -147,18 +130,26 @@ public class FisheyeFilter extends ImageFilter {
         mProgram.process(input, output);
 
         // Push output
-        putOutput(0, output);
+        pushOutput("image", output);
 
         // Release output
         output.release();
-
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-                Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
-    @Override
-    protected Program getProgram() {
-        return mProgram;
+    private void initProgram(Program program) {
+        FrameFormat outFormat = getInputFormat("image");
+        mFocusX = (float) (0.5 * outFormat.getWidth());
+        mFocusY = (float) (0.5 * outFormat.getHeight());
+
+        float center[] = {mFocusX, mFocusY};
+
+        Log.e("Fisheye", "( " + center[0] + ", " + center[1] + " )");
+
+        // set uniforms in shader
+        program.setHostValue("center", center);
+        program.setHostValue("width", (float) outFormat.getWidth());
+        program.setHostValue("height", (float) outFormat.getHeight());
+        program.setHostValue("alpha", (float) (mScale * 2.0 + 0.75));
     }
+
 }

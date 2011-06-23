@@ -19,9 +19,9 @@ package android.filterpacks.base;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.GLFrame;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.format.ImageFormat;
@@ -30,10 +30,10 @@ import java.util.Set;
 
 public class GLTextureTarget extends Filter {
 
-    @FilterParameter(name = "texId", isOptional = false, isUpdatable = true)
+    @GenerateFinalPort(name = "texId")
     private int mTexId;
 
-    @FilterParameter(name = "createTex", isOptional = true)
+    @GenerateFinalPort(name = "createTex", hasDefault = true)
     private boolean mCreateTex = false;
 
     private MutableFrameFormat mFrameFormat;
@@ -44,45 +44,22 @@ public class GLTextureTarget extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return new String[] { "frame" };
+    public void setupPorts() {
+        addMaskedInputPort("frame", ImageFormat.create(ImageFormat.COLORSPACE_RGBA));
     }
 
     @Override
-    public String[] getOutputNames() {
-        return null;
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        FrameFormat acceptable = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
-                                                    FrameFormat.TARGET_UNSPECIFIED);
-        return format.isCompatibleWith(acceptable);
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return null;
-    }
-
-    @Override
-    public void parametersUpdated(Set<String> updated) {
-        if (mFrame != null) {
-            mFrame.release();
-            mFrame = null;
-        }
-    }
-
     public void prepare(FilterContext context) {
-        mFrameFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE, FrameFormat.TARGET_GPU);
-        mFrameFormat.setBytesPerSample(4);
-        mFrameFormat.setDimensions(getInputFormat(0).getDimensions());
+        mFrameFormat = ImageFormat.create(getInputFormat("frame").getWidth(),
+                                          getInputFormat("frame").getHeight(),
+                                          ImageFormat.COLORSPACE_RGBA,
+                                          FrameFormat.TARGET_GPU);
     }
 
     @Override
-    public int process(FilterContext context) {
+    public void process(FilterContext context) {
         // Get input frame
-        Frame input = pullInput(0);
+        Frame input = pullInput("frame");
 
         // Generate frame if not generated already
         if (mFrame == null) {
@@ -94,9 +71,6 @@ public class GLTextureTarget extends Filter {
 
         // Copy to our texture frame
         mFrame.setDataFromFrame(input);
-
-        // Wait for free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS;
     }
 
     @Override

@@ -21,81 +21,65 @@ import java.util.Set;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.MutableFrameFormat;
+import android.filterfw.format.ObjectFormat;
 
 public class ObjectSource extends Filter {
 
-    @FilterParameter(name = "object", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "object")
     private Object mObject;
 
-    @FilterParameter(name = "format", isOptional = false, isUpdatable = true)
-    private FrameFormat mFormat;
+    @GenerateFieldPort(name = "repeatFrame", hasDefault = true)
+    boolean mRepeatFrame = false;
 
-    @FilterParameter(name = "repeatFrame", isOptional = true)
-    boolean repeatFrame = false;
-
-    private MutableFrameFormat mOutputFormat;
     private Frame mFrame;
 
     public ObjectSource(String name) {
         super(name);
     }
 
-    public String[] getInputNames() {
-        return null;
+    @Override
+    public void setupPorts() {
+        addOutputPort("frame", FrameFormat.unspecified());
     }
 
-    public String[] getOutputNames() {
-        return new String[] { "frame" };
-    }
-
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return false;
-    }
-
-    public FrameFormat getOutputFormat(int index) {
-        updateOutputFormat();
-        return mOutputFormat;
-    }
-
-    private void updateOutputFormat() {
-        mOutputFormat = mFormat.mutableCopy();
-        if (mObject != null) {
-            mOutputFormat.setObjectClass(mObject.getClass());
-        }
-    }
-
-    public int process(FilterContext context) {
+    @Override
+    public void process(FilterContext context) {
         // If no frame has been created, create one now.
         if (mFrame == null) {
             if (mObject == null) {
                 throw new NullPointerException("ObjectSource producing frame with no object set!");
             }
-            updateOutputFormat();
-            mFrame = context.getFrameManager().newEmptyFrame(mOutputFormat);
+            FrameFormat outputFormat = ObjectFormat.fromObject(mObject, FrameFormat.TARGET_JAVA);
+            mFrame = context.getFrameManager().newEmptyFrame(outputFormat);
             mFrame.setObjectValue(mObject);
         }
 
         // Push output
-        putOutput(0, mFrame);
+        pushOutput("frame", mFrame);
 
         // Wait for free output
-        return repeatFrame ? Filter.STATUS_WAIT_FOR_FREE_OUTPUTS : Filter.STATUS_FINISHED;
+        if (!mRepeatFrame) {
+            closeOutputPort("frame");
+        }
     }
 
+    @Override
     public void tearDown(FilterContext context) {
         mFrame.release();
     }
 
     @Override
-    public void parametersUpdated(Set<String> updated) {
+    public void fieldPortValueUpdated(String name, FilterContext context) {
         // Release our internal frame, so that it is regenerated on the next call to process().
-        if (mFrame != null) {
-            mFrame.release();
-            mFrame = null;
+        if (name.equals("object")) {
+            if (mFrame != null) {
+                mFrame.release();
+                mFrame = null;
+            }
         }
     }
 }

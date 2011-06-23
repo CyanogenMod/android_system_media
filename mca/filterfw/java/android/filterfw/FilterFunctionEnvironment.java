@@ -20,7 +20,7 @@ package android.filterfw;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterFactory;
 import android.filterfw.core.FilterFunction;
-import android.filterfw.core.FrameHandle;
+import android.filterfw.core.Frame;
 import android.filterfw.core.FrameManager;
 
 /**
@@ -64,7 +64,7 @@ public class FilterFunctionEnvironment extends MffEnvironment {
     public FilterFunction createFunction(Class filterClass, Object... parameters) {
         String filterName = "FilterFunction(" + filterClass.getSimpleName() + ")";
         Filter filter = FilterFactory.sharedFactory().createFilterByClass(filterClass, filterName);
-        filter.initWithParameterList(parameters);
+        filter.initWithAssignmentList(parameters);
         return new FilterFunction(getContext(), filter);
     }
 
@@ -76,15 +76,15 @@ public class FilterFunctionEnvironment extends MffEnvironment {
      * @param functions A list of filter functions. The first filter must be a source filter.
      * @returns         The result of the last filter executed, or null if the last filter did not
                         produce any output.
-     */
-    public FrameHandle executeSequence(FilterFunction[] functions) {
-        FrameHandle oldFrame = null;
-        FrameHandle newFrame = null;
+     *
+    public Frame executeSequence(FilterFunction[] functions) {
+        Frame oldFrame = null;
+        Frame newFrame = null;
         for (FilterFunction filterFunction : functions) {
             if (oldFrame == null) {
-                newFrame = filterFunction.execute();
+                newFrame = filterFunction.executeWithArgList();
             } else {
-                newFrame = filterFunction.execute(oldFrame);
+                newFrame = filterFunction.executeWithArgList(oldFrame);
                 oldFrame.release();
             }
             oldFrame = newFrame;
@@ -93,6 +93,6 @@ public class FilterFunctionEnvironment extends MffEnvironment {
             oldFrame.release();
         }
         return newFrame;
-    }
+    }*/
 
 }

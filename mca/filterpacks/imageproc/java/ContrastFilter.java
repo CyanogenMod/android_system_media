@@ -19,24 +19,19 @@ package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
-import android.filterfw.core.ProgramParameter;
 import android.filterfw.core.ShaderProgram;
 
 import java.util.Set;
 
-public class ContrastFilter extends ImageFilter {
+public class ContrastFilter extends SimpleImageFilter {
 
-    @ProgramParameter(name = "contrast", type = float.class)
-    private Program mProgram;
-
-    private static final String sContrastShader =
+    private static final String mContrastShader =
             "precision mediump float;\n" +
             "uniform sampler2D tex_sampler_0;\n" +
             "uniform float contrast;\n" +
@@ -50,28 +45,17 @@ public class ContrastFilter extends ImageFilter {
             "}\n";
 
     public ContrastFilter(String name) {
-        super(name);
+        super(name, "contrast");
     }
 
     @Override
-    protected void createProgram(int target) {
-        switch (target) {
-            case FrameFormat.TARGET_NATIVE:
-                mProgram = new NativeProgram("filterpack_imageproc", "contrast");
-                break;
-
-            case FrameFormat.TARGET_GPU:
-                mProgram = new ShaderProgram(sContrastShader);
-                break;
-
-            default:
-                throw new RuntimeException("ContrastFilter could not create suitable program!");
-        }
+    protected Program getNativeProgram() {
+        return new NativeProgram("filterpack_imageproc", "contrast");
     }
 
     @Override
-    protected Program getProgram() {
-        return mProgram;
+    protected Program getShaderProgram() {
+        return new ShaderProgram(mContrastShader);
     }
 
 }

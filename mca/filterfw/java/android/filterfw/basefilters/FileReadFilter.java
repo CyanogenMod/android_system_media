@@ -22,9 +22,10 @@ import android.content.res.Resources;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
+import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 
@@ -40,16 +41,20 @@ import android.util.Log;
 
 public class FileReadFilter extends Filter {
 
-    @FilterParameter(name = "context", isOptional = false)
+    @GenerateFinalPort(name = "target")
+    private String mTarget;
+
+    @GenerateFieldPort(name = "context")
     private Context mActivityContext;
 
-    @FilterParameter(name = "format", isOptional = false)
+    @GenerateFieldPort(name = "format")
     private FrameFormat mFrameFormat;
 
-    @FilterParameter(name = "resourceId", isOptional = true)
+    // TODO: Split this into two (subclass) filters: FileReadFilter and ResourceReadFilter.
+    @GenerateFieldPort(name = "resourceId", hasDefault = true)
     private int mResourceId = -1;
 
-    @FilterParameter(name = "fileName", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "fileName", hasDefault = true)
     private String mFileInputName;
 
     private final int FILE_MODE_FILE      = 0;
@@ -65,10 +70,15 @@ public class FileReadFilter extends Filter {
     }
 
     @Override
-    public void initFilter() {
-        // Create mutable output format
-        mOutputFormat = mFrameFormat.mutableCopy();
+    public void setupPorts() {
+        int target = FrameFormat.readTargetString(mTarget);
+        mOutputFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE, target);
+        mOutputFormat.setDimensionCount(1);
+        addOutputPort("data", mOutputFormat);
+    }
 
+    @Override
+    public void open(FilterContext context) {
         // Read file input parameter
         if (mFileInputName != null) {
             mFileMode = FILE_MODE_FILE;
@@ -77,37 +87,8 @@ public class FileReadFilter extends Filter {
         } else {
             throw new RuntimeException("No input file specified! Please set fileName or resourceId!");
         }
-    }
 
-    @Override
-    public String[] getInputNames() {
-        return null;
-    }
-
-    @Override
-    public String[] getOutputNames() {
-        return new String[] { "data" };
-    }
-
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return mOutputFormat;
-    }
-
-    @Override
-    public void parametersUpdated(Set<String> updated) {
-        if (isOpen()) {
-            throw new RuntimeException("Cannot update parameters while filter is open!");
-        }
-    }
-
-    @Override
-    public int open(FilterContext context) {
+        // Open the file
         try {
             switch (mFileMode) {
                 case FILE_MODE_FILE:
@@ -121,11 +102,10 @@ public class FileReadFilter extends Filter {
         } catch (FileNotFoundException exception) {
             throw new RuntimeException("FileReader: Could not open file: " + mFileInputName + "!");
         }
-        return Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
     @Override
-    public int process(FilterContext context) {
+    public void process(FilterContext context) {
         int fileSize = 0;
         ByteBuffer byteBuffer = null;
 
@@ -150,12 +130,13 @@ public class FileReadFilter extends Filter {
         output.setData(byteBuffer);
 
         // Push output
-        putOutput(0, output);
+        pushOutput("data", output);
 
         // Release pushed frame
         output.release();
 
-        return Filter.STATUS_FINISHED;
+        // Close output port as we are done here
+        closeOutputPort("data");
     }
 
     @Override

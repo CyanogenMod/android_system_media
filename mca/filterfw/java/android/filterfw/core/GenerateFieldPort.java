@@ -21,8 +21,7 @@ import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface FilterParameter {
+public @interface GenerateFieldPort {
     String  name() default "";
-    boolean isOptional();
-    boolean isUpdatable() default false;
+    boolean hasDefault() default false;
 }

@@ -19,9 +19,9 @@ package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterParameter;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.NativeProgram;
@@ -31,17 +31,18 @@ import android.filterfw.core.ShaderProgram;
 import android.filterfw.geometry.Point;
 import android.filterfw.geometry.Quad;
 import android.filterfw.format.ImageFormat;
+import android.filterfw.format.ObjectFormat;
 
 import android.util.Log;
 
 public class CropFilter extends Filter {
 
-    private ShaderProgram mProgram;
+    private Program mProgram;
 
-    @FilterParameter(name = "owidth", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "owidth")
     private int mOutputWidth = -1;
 
-    @FilterParameter(name = "oheight", isOptional = true, isUpdatable = true)
+    @GenerateFieldPort(name = "oheight")
     private int mOutputHeight = -1;
 
     public CropFilter(String name) {
@@ -49,48 +50,39 @@ public class CropFilter extends Filter {
     }
 
     @Override
-    public String[] getInputNames() {
-        return new String[] { "image", "box" };
+    public void setupPorts() {
+        addMaskedInputPort("image", ImageFormat.create(ImageFormat.COLORSPACE_RGBA));
+        addMaskedInputPort("box", ObjectFormat.fromClass(Quad.class, FrameFormat.TARGET_JAVA));
+        addOutputBasedOnInput("image", "image");
     }
 
     @Override
-    public String[] getOutputNames() {
-        return new String[] { "image" };
-    }
-
-    // TODO: Support non-GPU image frames
-    @Override
-    public boolean acceptsInputFormat(int index, FrameFormat format) {
-        switch(index) {
-            case 0: { // image
-                FrameFormat requiredFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
-                                                                FrameFormat.TARGET_GPU);
-                return format.isCompatibleWith(requiredFormat);
-            }
-
-            case 1: // box
-                return (format.getTarget() == FrameFormat.TARGET_JAVA &&
-                        format.getBaseType() == FrameFormat.TYPE_OBJECT &&
-                        Quad.class.isAssignableFrom(format.getObjectClass()));
-        }
-        return false;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(int index) {
-        return getInputFormat(0);
+    public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
+        // Make sure output size is set to unspecified, as we do not know what we will be resizing
+        // to.
+        MutableFrameFormat outputFormat = inputFormat.mutableCopy();
+        outputFormat.setDimensions(FrameFormat.SIZE_UNSPECIFIED, FrameFormat.SIZE_UNSPECIFIED);
+        return outputFormat;
     }
 
     @Override
     public void prepare(FilterContext env) {
-        mProgram = ShaderProgram.createIdentity();
+        // TODO: Add CPU version
+        switch (getInputFormat("image").getTarget()) {
+            case FrameFormat.TARGET_GPU:
+                mProgram = ShaderProgram.createIdentity();
+                break;
+        }
+        if (mProgram == null) {
+            throw new RuntimeException("Could not create a program for crop filter " + this + "!");
+        }
     }
 
     @Override
-    public int process(FilterContext env) {
+    public void process(FilterContext env) {
         // Get input frame
-        Frame imageFrame = pullInput(0);
-        Frame boxFrame = pullInput(1);
+        Frame imageFrame = pullInput("image");
+        Frame boxFrame = pullInput("box");
 
         // Get the box
         Quad box = (Quad)boxFrame.getObjectValue();
@@ -103,18 +95,19 @@ public class CropFilter extends Filter {
         // Create output frame
         Frame output = env.getFrameManager().newFrame(outputFormat);
 
-        mProgram.setSourceRegion(box);
+        // Set the program parameters
+        if (mProgram instanceof ShaderProgram) {
+            ShaderProgram shaderProgram = (ShaderProgram)mProgram;
+            shaderProgram.setSourceRegion(box);
+        }
+
         mProgram.process(imageFrame, output);
 
         // Push output
-        putOutput(0, output);
+        pushOutput("image", output);
 
         // Release pushed frame
         output.release();
-
-        // Wait for next input and free output
-        return Filter.STATUS_WAIT_FOR_ALL_INPUTS |
-               Filter.STATUS_WAIT_FOR_FREE_OUTPUTS;
     }
 
 

@@ -39,6 +39,12 @@ public class KeyValueMap extends HashMap<String, Object> {
         }
     }
 
+    public static KeyValueMap fromKeyValues(Object... keyValues) {
+        KeyValueMap result = new KeyValueMap();
+        result.setKeyValues(keyValues);
+        return result;
+    }
+
     public String getString(String key) {
         Object result = get(key);
         return result != null ? (String)result : null;
