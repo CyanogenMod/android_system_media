@@ -39,7 +39,7 @@ public class ResizeFilter extends Filter {
     private int mOWidth;
     @GenerateFieldPort(name = "oheight")
     private int mOHeight;
-    @GenerateFieldPort(name = "generateMipMap")
+    @GenerateFieldPort(name = "generateMipMap", hasDefault = true)
     private boolean mGenerateMipMap = false;
 
     private Program mProgram;
