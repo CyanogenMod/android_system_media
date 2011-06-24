@@ -60,11 +60,16 @@ public abstract class Filter {
     private boolean mIsOpen = false;
     private int mSleepDelay;
 
+    private boolean mLogVerbose;
+    private final String TAG = "Filter";
+
     public Filter(String name) {
         mName = name;
         mFramesToRelease = new HashSet<Frame>();
         mFramesToSet = new HashMap<String, Frame>();
         mStatus = STATUS_PREINIT;
+
+        mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
 
     public final void initWithValueMap(KeyValueMap valueMap) {
@@ -119,7 +124,7 @@ public abstract class Filter {
     }
 
     public final void setInputValue(String inputName, Object value) {
-        Log.v("Filter", "Setting deferred value " + value + " for input '" + inputName + "'!");
+        if (mLogVerbose) Log.v(TAG, "Setting deferred value " + value + " for input '" + inputName + "'!");
         setInputFrame(inputName, JavaFrame.wrapObject(value, null));
     }
 
@@ -244,7 +249,7 @@ public abstract class Filter {
      */
     protected void addMaskedInputPort(String name, FrameFormat formatMask) {
         TargetPort port = new InputPort(this, name);
-        Log.v("Filter", "Filter " + this + " adding " + port);
+        if (mLogVerbose) Log.v(TAG, "Filter " + this + " adding " + port);
         mInputPorts.put(name, port);
         port.setPortFormat(formatMask);
     }
@@ -260,7 +265,7 @@ public abstract class Filter {
      */
     protected void addOutputPort(String name, FrameFormat format) {
         OutputPort port = new OutputPort(this, name);
-        Log.v("Filter", "Filter " + this + " adding " + port);
+        if (mLogVerbose) Log.v(TAG, "Filter " + this + " adding " + port);
         port.setPortFormat(format);
         mOutputPorts.put(name, port);
     }
@@ -278,7 +283,7 @@ public abstract class Filter {
      */
     protected void addOutputBasedOnInput(String outputName, String inputName) {
         OutputPort port = new OutputPort(this, outputName);
-        Log.v("Filter", "Filter " + this + " adding " + port);
+        if (mLogVerbose) Log.v(TAG, "Filter " + this + " adding " + port);
         port.setBasePort(getInputPort(inputName));
         mOutputPorts.put(outputName, port);
     }
@@ -296,7 +301,7 @@ public abstract class Filter {
             : new FieldPort(this, name, field, hasDefault);
 
         // Create format for this input
-        Log.v("Filter", "Filter " + this + " adding " + fieldPort);
+        if (mLogVerbose) Log.v(TAG, "Filter " + this + " adding " + fieldPort);
         MutableFrameFormat format = ObjectFormat.fromClass(field.getType(),
                                                            FrameFormat.TARGET_JAVA);
         fieldPort.setPortFormat(format);
@@ -317,7 +322,7 @@ public abstract class Filter {
         TargetPort programPort = new ProgramPort(this, name, varName, field, hasDefault);
 
         // Create format for this input
-        Log.v("Filter", "Filter " + this + " adding " + programPort);
+        if (mLogVerbose) Log.v(TAG, "Filter " + this + " adding " + programPort);
         MutableFrameFormat format = ObjectFormat.fromClass(varType,
                                                            FrameFormat.TARGET_JAVA);
         programPort.setPortFormat(format);
@@ -457,12 +462,12 @@ public abstract class Filter {
     final synchronized void performOpen(FilterContext context) {
         if (!mIsOpen) {
             if (mStatus == STATUS_UNPREPARED) {
-                Log.v("Filter", "Preparing " + this);
+                if (mLogVerbose) Log.v(TAG, "Preparing " + this);
                 prepare(context);
                 mStatus = STATUS_PREPARED;
             }
             if (mStatus == STATUS_PREPARED) {
-                Log.v("Filter", "Opening " + this);
+                if (mLogVerbose) Log.v(TAG, "Opening " + this);
                 open(context);
                 mStatus = STATUS_PROCESSING;
             }
@@ -479,7 +484,7 @@ public abstract class Filter {
         if (mStatus < STATUS_PROCESSING) {
             performOpen(context);
         }
-        Log.v("Filter", "Processing " + this);
+        if (mLogVerbose) Log.v(TAG, "Processing " + this);
         process(context);
         releasePulledFrames(context);
         if (filterMustClose()) {
@@ -489,7 +494,7 @@ public abstract class Filter {
 
     final synchronized void performClose(FilterContext context) {
         if (mIsOpen) {
-            Log.v("Filter", "Closing " + this);
+            if (mLogVerbose) Log.v(TAG, "Closing " + this);
             mIsOpen = false;
             mStatus = STATUS_PREPARED;
             close(context);
@@ -498,7 +503,7 @@ public abstract class Filter {
     }
 
     synchronized final boolean canProcess() {
-        Log.v("Filter", "Checking if can process: " + this + ".");
+        if (mLogVerbose) Log.v(TAG, "Checking if can process: " + this + ".");
         if (mStatus <= STATUS_PROCESSING) {
             return inputConditionsMet() && outputConditionsMet();
         } else {
@@ -507,7 +512,7 @@ public abstract class Filter {
     }
 
     final void openOutputs() {
-        Log.v("Filter", "Opening all output ports on " + this + "!");
+        if (mLogVerbose) Log.v(TAG, "Opening all output ports on " + this + "!");
         for (SourcePort outputPort : mOutputPorts.values()) {
             if (!outputPort.isOpen()) {
                 outputPort.open();
@@ -595,7 +600,7 @@ public abstract class Filter {
     }
 
     private final void setImmediateInputValue(String name, Object value) {
-        Log.v("Filter", "Setting immediate value " + value + " for port " + name + "!");
+        if (mLogVerbose) Log.v(TAG, "Setting immediate value " + value + " for port " + name + "!");
         FilterPort port = getInputPort(name);
         port.open();
         port.setFrame(JavaFrame.wrapObject(value, null));
@@ -617,7 +622,7 @@ public abstract class Filter {
     private final boolean inputConditionsMet() {
         for (FilterPort port : mInputPorts.values()) {
             if (!port.isReady()) {
-                Log.v("Filter", "Input condition not met: " + port + "!");
+                if (mLogVerbose) Log.v(TAG, "Input condition not met: " + port + "!");
                 return false;
             }
         }
@@ -627,7 +632,7 @@ public abstract class Filter {
     private final boolean outputConditionsMet() {
         for (FilterPort port : mOutputPorts.values()) {
             if (!port.isReady()) {
-                Log.v("Filter", "Output condition not met: " + port + "!");
+                if (mLogVerbose) Log.v(TAG, "Output condition not met: " + port + "!");
                 return false;
             }
         }
@@ -635,7 +640,7 @@ public abstract class Filter {
     }
 
     private final void closePorts() {
-        Log.v("Filter", "Closing all ports on " + this + "!");
+        if (mLogVerbose) Log.v(TAG, "Closing all ports on " + this + "!");
         for (TargetPort inputPort : mInputPorts.values()) {
             inputPort.close();
         }
@@ -647,17 +652,16 @@ public abstract class Filter {
     private final boolean filterMustClose() {
         for (TargetPort inputPort : mInputPorts.values()) {
             if (inputPort.filterMustClose()) {
-                Log.v("Filter", "Filter " + this + " must close due to port " + inputPort);
+                if (mLogVerbose) Log.v(TAG, "Filter " + this + " must close due to port " + inputPort);
                 return true;
             }
         }
         for (SourcePort outputPort : mOutputPorts.values()) {
             if (outputPort.filterMustClose()) {
-                Log.v("Filter", "Filter " + this + " must close due to port " + outputPort);
+                if (mLogVerbose) Log.v(TAG, "Filter " + this + " must close due to port " + outputPort);
                 return true;
             }
         }
         return false;
     }
 }
-

@@ -92,15 +92,15 @@ public class CameraSource extends Filter {
             "  gl_FragColor = texture2D(tex_sampler_0, transformed_texcoord);\n" +
             "}\n";
 
-    private static final boolean LOGV = true;
-    private static final boolean LOGVV = true;
-
+    private boolean mLogVerbose;
     private static final String TAG = "CameraSource";
 
     public CameraSource(String name) {
         super(name);
         mNewFrameAvailable = new ConditionVariable();
         mCameraTransform = new float[16];
+
+        mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
 
     @Override
@@ -116,13 +116,13 @@ public class CameraSource extends Filter {
                                            FrameFormat.TARGET_GPU);
         mCameraFormat = mOutputFormat.mutableCopy();
         mCameraFormat.setMetaValue(GLFrame.USE_EXTERNAL_TEXTURE, true);
-        Log.v("CameraSource", "Camera Format: " + mCameraFormat);
-        Log.v("CameraSource", "Output Format: " + mOutputFormat);
+        if (mLogVerbose) Log.v(TAG, "Camera Format: " + mCameraFormat);
+        if (mLogVerbose) Log.v(TAG, "Output Format: " + mOutputFormat);
     }
 
     @Override
     public void prepare(FilterContext context) {
-        if (LOGV) Log.v(TAG, "Preparing");
+        if (mLogVerbose) Log.v(TAG, "Preparing");
         Log.i(TAG, "Creating frame extractor in thread: " + Thread.currentThread());
         // Compile shader TODO: Move to onGLEnvSomething?
         mFrameExtractor = new ShaderProgram(mFrameShader);
@@ -133,9 +133,9 @@ public class CameraSource extends Filter {
 
     @Override
     public void open(FilterContext context) {
-        if (LOGV) Log.v(TAG, "Opening");
+        if (mLogVerbose) Log.v(TAG, "Opening");
         // Open camera
-        Log.i("CameraSource", "Opening camera with ID: " + mCameraId);
+        Log.i(TAG, "Opening camera with ID: " + mCameraId);
         mCamera = Camera.open(mCameraId);
 
         // Set parameters
@@ -163,7 +163,7 @@ public class CameraSource extends Filter {
 
     @Override
     public void process(FilterContext context) {
-        if (LOGVV) Log.v(TAG, "Processing new frame");
+        if (mLogVerbose) Log.v(TAG, "Processing new frame");
 
         if (mWaitForNewFrame) {
             boolean gotNewFrame;
@@ -176,7 +176,7 @@ public class CameraSource extends Filter {
 
         mSurfaceTexture.updateTexImage();
 
-        Log.i(TAG, "Using frame extractor in thread: " + Thread.currentThread());
+        if (mLogVerbose) Log.v(TAG, "Using frame extractor in thread: " + Thread.currentThread());
         mSurfaceTexture.getTransformMatrix(mCameraTransform);
         mFrameExtractor.setHostValue("camera_transform", mCameraTransform);
 
@@ -188,12 +188,12 @@ public class CameraSource extends Filter {
         // Release pushed frame
         output.release();
 
-        if (LOGVV) Log.v(TAG, "Done processing new frame");
+        if (mLogVerbose) Log.v(TAG, "Done processing new frame");
     }
 
     @Override
     public void close(FilterContext context) {
-        if (LOGV) Log.v(TAG, "Closing");
+        if (mLogVerbose) Log.v(TAG, "Closing");
 
         mCamera.release();
         mCamera = null;
@@ -229,7 +229,7 @@ public class CameraSource extends Filter {
 
             mCameraParameters.setPreviewSize(mWidth, mHeight);
             int closestRange[] = findClosestFpsRange(mFps, mCameraParameters);
-            if (LOGV) Log.v(TAG, "Closest frame rate range: ["
+            if (mLogVerbose) Log.v(TAG, "Closest frame rate range: ["
                             + closestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] / 1000.
                             + ","
                             + closestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX] / 1000.
@@ -275,7 +275,7 @@ public class CameraSource extends Filter {
             new SurfaceTexture.OnFrameAvailableListener() {
         @Override
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-            if (LOGV) Log.v(TAG, "New frame from camera");
+            if (mLogVerbose) Log.v(TAG, "New frame from camera");
             mNewFrameAvailable.open();
         }
     };

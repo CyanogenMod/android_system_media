@@ -41,7 +41,7 @@ public class AsyncRunner extends GraphRunner{
             new FilterContext.OnFrameReceivedListener() {
         @Override
         public void onFrameReceived(Filter filter, Frame frame, Object userData) {
-            if (LOGVV) Log.v(TAG, "Received callback at forwarding listener.");
+            if (mLogVerbose) Log.v(TAG, "Received callback at forwarding listener.");
             if (mRunTask != null) {
                 mRunTask.onFrameReceived(filter, frame, userData);
             }
@@ -70,14 +70,14 @@ public class AsyncRunner extends GraphRunner{
                 throw new RuntimeException("More than one callback data set received!");
             }
 
-            if (LOGV) Log.v(TAG, "Starting background graph processing.");
+            if (mLogVerbose) Log.v(TAG, "Starting background graph processing.");
             enableGlContext();
 
             boolean isDone = false;
-            if (LOGV) Log.v(TAG, "Preparing filter graph for processing.");
+            if (mLogVerbose) Log.v(TAG, "Preparing filter graph for processing.");
             runner[0].beginProcessing();
 
-            if (LOGV) Log.v(TAG, "Running graph.");
+            if (mLogVerbose) Log.v(TAG, "Running graph.");
             runner[0].assertReadyToStep();
             while (!isCancelled() && !isDone) {
                 int status = runner[0].performStep(true);
@@ -87,11 +87,11 @@ public class AsyncRunner extends GraphRunner{
                     isDone = true;
                 }
             }
-            if (LOGV) Log.v(TAG, "Closing filters.");
+            if (mLogVerbose) Log.v(TAG, "Closing filters.");
             runner[0].close();
 
             disableGlContext();
-            if (LOGV) Log.v(TAG, "Done with background graph processing.");
+            if (mLogVerbose) Log.v(TAG, "Done with background graph processing.");
             return isDone ? RESULT_FINISHED : RESULT_STOPPED;
         }
 
@@ -102,10 +102,10 @@ public class AsyncRunner extends GraphRunner{
 
         @Override
         protected void onPostExecute(Integer result) {
-            if (LOGV) Log.v(TAG, "Starting post-execute.");
+            if (mLogVerbose) Log.v(TAG, "Starting post-execute.");
             enableGlContext();
             if (mDoneListener != null) {
-                if (LOGV) Log.v(TAG, "Invoking graph done callback.");
+                if (mLogVerbose) Log.v(TAG, "Invoking graph done callback.");
                 mDoneListener.onRunnerDone(result);
             }
         }
@@ -139,8 +139,7 @@ public class AsyncRunner extends GraphRunner{
         }
     }
 
-    private static final boolean LOGV = true;
-    private static final boolean LOGVV = true;
+    private boolean mLogVerbose;
     private static final String TAG = "AsyncRunner";
 
     /** Create a new asynchronous graph runner with the given filter
@@ -151,6 +150,8 @@ public class AsyncRunner extends GraphRunner{
     public AsyncRunner(FilterContext context, Class schedulerClass) {
         mFilterContext = context;
         mSchedulerClass = schedulerClass;
+
+        mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
 
     /** Create a new asynchronous graph runner with the given filter
@@ -196,7 +197,7 @@ public class AsyncRunner extends GraphRunner{
     /** Execute the graph in a background thread. */
     @Override
     public void run() {
-        if (LOGV) Log.v(TAG, "Running graph.");
+        if (mLogVerbose) Log.v(TAG, "Running graph.");
         if (mRunTask != null &&
             mRunTask.getStatus() != AsyncTask.Status.FINISHED) {
             throw new RuntimeException("Graph is already running!");
@@ -214,7 +215,7 @@ public class AsyncRunner extends GraphRunner{
      * been completed. */
     @Override
     public void stop() {
-        if (LOGV) Log.v(TAG, "Stopping graph.");
+        if (mLogVerbose) Log.v(TAG, "Stopping graph.");
         if (mRunTask != null) {
             mRunTask.cancel(false);
         }
@@ -252,7 +253,7 @@ public class AsyncRunner extends GraphRunner{
     private void disableGlContext() {
         GLEnvironment glEnv = mFilterContext.getGLEnvironment();
         if (glEnv != null) {
-            if (LOGV) Log.v(TAG, "Deactivating GL context.");
+            if (mLogVerbose) Log.v(TAG, "Deactivating GL context.");
             glEnv.deactivate();
         }
     }
@@ -262,7 +263,7 @@ public class AsyncRunner extends GraphRunner{
     private void enableGlContext() {
         GLEnvironment glEnv = mFilterContext.getGLEnvironment();
         if (glEnv != null) {
-            if (LOGV) Log.v(TAG, "Reactivating GL context.");
+            if (mLogVerbose) Log.v(TAG, "Reactivating GL context.");
             glEnv.activate();
         }
     }

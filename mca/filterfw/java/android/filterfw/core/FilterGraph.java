@@ -47,7 +47,11 @@ public class FilterGraph {
     private int mAutoBranchMode = AUTOBRANCH_OFF;
     private boolean mDiscardUnconnectedOutputs = false;
 
+    private boolean mLogVerbose;
+    private String TAG = "FilterGraph";
+
     public FilterGraph() {
+        mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
 
     public boolean addFilter(Filter filter) {
@@ -111,7 +115,7 @@ public class FilterGraph {
     }
 
     public void beginProcessing() {
-        Log.v("FilterGraph", "Opening all filter connections...");
+        if (mLogVerbose) Log.v(TAG, "Opening all filter connections...");
         for (Filter filter : mFilters) {
             filter.openOutputs();
         }
@@ -119,7 +123,7 @@ public class FilterGraph {
     }
 
     public void closeFilters(FilterContext context) {
-        Log.v("FilterGraph", "Closing all filters...");
+        if (mLogVerbose) Log.v(TAG, "Closing all filters...");
         for (Filter filter : mFilters) {
             filter.performClose(context);
         }
@@ -168,7 +172,7 @@ public class FilterGraph {
             updateOutputs(filter);
 
             // Perform type check
-            Log.v("FilterGraph", "Running type check on " + filter + "...");
+            if (mLogVerbose) Log.v(TAG, "Running type check on " + filter + "...");
             runTypeCheckOn(filter, strict);
 
             // Push connected filters onto stack
@@ -204,11 +208,11 @@ public class FilterGraph {
 
     private void runTypeCheckOn(Filter filter, boolean strict) {
         for (TargetPort inputPort : filter.getInputPorts()) {
-            Log.v("FilterGraph", "Type checking port " + inputPort);
+            if (mLogVerbose) Log.v(TAG, "Type checking port " + inputPort);
             FrameFormat sourceFormat = inputPort.getSourceFormat();
             FrameFormat targetFormat = inputPort.getPortFormat();
             if (sourceFormat != null && targetFormat != null) {
-                Log.v("FilterGraph", "Checking " + sourceFormat + " against " + targetFormat + ".");
+                if (mLogVerbose) Log.v(TAG, "Checking " + sourceFormat + " against " + targetFormat + ".");
                 boolean compatible = strict ? sourceFormat.isCompatibleWith(targetFormat)
                                             : sourceFormat.mayBeCompatibleWith(targetFormat);
                 if (!compatible) {
@@ -231,7 +235,7 @@ public class FilterGraph {
             int id = 0;
             for (SourcePort port : filter.getOutputPorts()) {
                 if (!port.isConnected()) {
-                    Log.v("FilterGraph", "Autoconnecting unconnected " + port + " to Null filter.");
+                    if (mLogVerbose) Log.v(TAG, "Autoconnecting unconnected " + port + " to Null filter.");
                     NullFilter nullFilter = new NullFilter(filter.getName() + "ToNull" + id);
                     nullFilter.init();
                     addedFilters.add(nullFilter);
@@ -272,7 +276,7 @@ public class FilterGraph {
                 throw new RuntimeException("Attempting to connect " + sourcePort + " to multiple "
                                          + "filter ports! Enable auto-branching to allow this.");
             } else {
-                Log.v("FilterGraph", "Creating branch for " + sourcePort + "!");
+                if (mLogVerbose) Log.v(TAG, "Creating branch for " + sourcePort + "!");
                 FrameBranch branch = null;
                 if (mAutoBranchMode == AUTOBRANCH_SYNCED) {
                     branch = new FrameBranch("branch" + branchId++);
@@ -296,7 +300,7 @@ public class FilterGraph {
         HashSet<Filter> sourceFilters = new HashSet<Filter>();
         for (Filter filter : getFilters()) {
             if (filter.getNumberOfConnectedInputs() == 0) {
-                Log.v("FilterGraph", "Found source filter: " + filter);
+                if (mLogVerbose) Log.v(TAG, "Found source filter: " + filter);
                 sourceFilters.add(filter);
             }
         }

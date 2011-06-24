@@ -74,11 +74,13 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
     private int mScreenWidth;
     private int mScreenHeight;
 
-    private static final boolean LOGV = false;
+    private boolean mLogVerbose;
     private static final String TAG = "SurfaceRenderFilter";
 
     public SurfaceRenderFilter(String name) {
         super(name);
+
+        mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
 
     @Override
@@ -145,7 +147,7 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
 
     @Override
     public void process(FilterContext context) {
-        if (LOGV) Log.v(TAG, "Starting frame processing");
+        if (mLogVerbose) Log.v(TAG, "Starting frame processing");
 
         GLEnvironment glEnv = mSurfaceView.getGLEnv();
         if (glEnv != context.getGLEnvironment()) {
@@ -159,14 +161,14 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
 
         float currentAspectRatio = (float)input.getFormat().getWidth() / input.getFormat().getHeight();
         if (currentAspectRatio != mAspectRatio) {
-            if (LOGV) Log.v(TAG, "New aspect ratio: " + currentAspectRatio +", previously: " + mAspectRatio);
+            if (mLogVerbose) Log.v(TAG, "New aspect ratio: " + currentAspectRatio +", previously: " + mAspectRatio);
             mAspectRatio = currentAspectRatio;
             updateTargetRect();
         }
 
         // See if we need to copy to GPU
         Frame gpuFrame = null;
-        Log.i("SurfaceRenderFilter", "Got input format: " + input.getFormat());
+        if (mLogVerbose) Log.v("SurfaceRenderFilter", "Got input format: " + input.getFormat());
         if (input.getFormat().getTarget() == FrameFormat.TARGET_NATIVE) {
             MutableFrameFormat gpuFormat = input.getFormat().mutableCopy();
             gpuFormat.setTarget(FrameFormat.TARGET_GPU);
