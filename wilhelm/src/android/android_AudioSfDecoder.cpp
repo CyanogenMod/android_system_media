@@ -51,7 +51,6 @@ AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : Generic
         mGetPcmFormatKeyCount(false)
 {
     SL_LOGV("AudioSfDecoder::AudioSfDecoder()");
-
 }
 
 
@@ -607,7 +606,16 @@ void AudioSfDecoder::onNotify(const sp<AMessage> &msg) {
 // Private utility functions
 
 bool AudioSfDecoder::wantPrefetch() {
-    return (mDataSource->flags() & DataSource::kWantsPrefetching);
+    if (mDataSource != 0) {
+        return (mDataSource->flags() & DataSource::kWantsPrefetching);
+    } else {
+        // happens if an improper data locator was passed, if the media extractor couldn't be
+        //  initialized, if there is no audio track in the media, if the OMX decoder couldn't be
+        //  instantiated, if the source couldn't be opened, or if the MediaSource
+        //  couldn't be started
+        SL_LOGV("AudioSfDecoder::wantPrefetch() tries to access NULL mDataSource");
+        return false;
+    }
 }
 
 
