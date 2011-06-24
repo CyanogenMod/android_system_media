@@ -106,7 +106,6 @@ public class SurfaceTextureSource extends Filter {
     private ShaderProgram mFrameExtractor;
     private SurfaceTexture mSurfaceTexture;
     private MutableFrameFormat mOutputFormat;
-    private MutableFrameFormat mMediaFormat;
     private ConditionVariable mNewFrameAvailable;
     private float[] mFrameTransform;
     private boolean mFirstFrame;
@@ -146,8 +145,6 @@ public class SurfaceTextureSource extends Filter {
         mOutputFormat = ImageFormat.create(mWidth, mHeight,
                                            ImageFormat.COLORSPACE_RGBA,
                                            FrameFormat.TARGET_GPU);
-        mMediaFormat = mOutputFormat.mutableCopy();
-        mMediaFormat.setMetaValue(GLFrame.USE_EXTERNAL_TEXTURE, true);
     }
 
     @Override
@@ -157,7 +154,9 @@ public class SurfaceTextureSource extends Filter {
         createFormats();
 
         // Prepare input
-        mMediaFrame = (GLFrame)context.getFrameManager().newFrame(mMediaFormat);
+        mMediaFrame = (GLFrame)context.getFrameManager().newBoundFrame(mOutputFormat,
+                                                                       GLFrame.EXTERNAL_TEXTURE,
+                                                                       0);
 
         // Prepare output
         mFrameExtractor = new ShaderProgram(mRenderShader);

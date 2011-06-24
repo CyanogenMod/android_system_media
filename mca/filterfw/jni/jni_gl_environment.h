@@ -24,28 +24,28 @@ extern "C" {
 #endif
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLEnvironment_allocate(JNIEnv* env, jobject thiz);
+Java_android_filterfw_core_GLEnvironment_nativeAllocate(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLEnvironment_deallocate(JNIEnv* env, jobject thiz);
+Java_android_filterfw_core_GLEnvironment_nativeDeallocate(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLEnvironment_initWithNewContext(JNIEnv* env, jobject thiz);
+Java_android_filterfw_core_GLEnvironment_nativeInitWithNewContext(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLEnvironment_initWithCurrentContext(JNIEnv* env, jobject thiz);
+Java_android_filterfw_core_GLEnvironment_nativeInitWithCurrentContext(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLEnvironment_activate(JNIEnv* env, jobject thiz);
+Java_android_filterfw_core_GLEnvironment_nativeActivate(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLEnvironment_deactivate(JNIEnv* env, jobject thiz);
+Java_android_filterfw_core_GLEnvironment_nativeDeactivate(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jobject JNICALL
-Java_android_filterfw_core_GLEnvironment_activeEnvironment(JNIEnv* env, jclass clazz);
+Java_android_filterfw_core_GLEnvironment_nativeActiveEnvironment(JNIEnv* env, jclass clazz);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLEnvironment_swapBuffers(JNIEnv* env, jobject thiz);
+Java_android_filterfw_core_GLEnvironment_nativeSwapBuffers(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jint JNICALL
 Java_android_filterfw_core_GLEnvironment_nativeAddSurface(JNIEnv* env,
