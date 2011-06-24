@@ -28,10 +28,13 @@ public abstract class FilterPort {
     protected FrameFormat mPortFormat;
     protected boolean mIsBlocking = true;
     protected boolean mIsOpen = false;
+    private boolean mLogVerbose;
+    private static final String TAG = "FilterPort";
 
     public FilterPort(Filter filter, String name) {
         mName = name;
         mFilter = filter;
+        mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
 
     public boolean isAttached() {
@@ -60,14 +63,14 @@ public abstract class FilterPort {
 
     public void open() {
         if (!mIsOpen) {
-            Log.v("FilterPort", "Opening " + this);
+            if (mLogVerbose) Log.v(TAG, "Opening " + this);
         }
         mIsOpen = true;
     }
 
     public void close() {
         if (mIsOpen) {
-            Log.v("FilterPort", "Closing " + this);
+            if (mLogVerbose) Log.v(TAG, "Closing " + this);
         }
         mIsOpen = false;
     }
