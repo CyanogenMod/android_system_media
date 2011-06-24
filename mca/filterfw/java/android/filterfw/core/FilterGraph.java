@@ -113,7 +113,7 @@ public class FilterGraph {
     public void beginProcessing() {
         Log.v("FilterGraph", "Opening all filter connections...");
         for (Filter filter : mFilters) {
-            filter.beginProcessing();
+            filter.openOutputs();
         }
         mIsReady = true;
     }

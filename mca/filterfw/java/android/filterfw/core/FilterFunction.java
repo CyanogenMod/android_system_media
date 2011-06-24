@@ -62,7 +62,9 @@ public class FilterFunction {
         }
 
         // Process the filter
-        mFilter.beginProcessing();
+        if (mFilter.getStatus() != Filter.STATUS_PROCESSING) {
+            mFilter.openOutputs();
+        }
         mFilter.performProcess(mFilterContext);
 
         // Create result handle

@@ -39,7 +39,7 @@ public abstract class Filter {
 
     static final int STATUS_PREINIT               = 0;
     static final int STATUS_UNPREPARED            = 1;
-    static final int STATUS_READY                 = 2;
+    static final int STATUS_PREPARED              = 2;
     static final int STATUS_PROCESSING            = 3;
     static final int STATUS_SLEEPING              = 4;
     static final int STATUS_FINISHED              = 5;
@@ -459,9 +459,9 @@ public abstract class Filter {
             if (mStatus == STATUS_UNPREPARED) {
                 Log.v("Filter", "Preparing " + this);
                 prepare(context);
-                mStatus = STATUS_READY;
+                mStatus = STATUS_PREPARED;
             }
-            if (mStatus == STATUS_READY) {
+            if (mStatus == STATUS_PREPARED) {
                 Log.v("Filter", "Opening " + this);
                 open(context);
                 mStatus = STATUS_PROCESSING;
@@ -491,7 +491,7 @@ public abstract class Filter {
         if (mIsOpen) {
             Log.v("Filter", "Closing " + this);
             mIsOpen = false;
-            mStatus = STATUS_READY;
+            mStatus = STATUS_PREPARED;
             close(context);
             closePorts();
         }
@@ -506,15 +506,17 @@ public abstract class Filter {
         }
     }
 
-    final void beginProcessing() {
-        openOutputs();
-        if (mStatus >= STATUS_PROCESSING) {
-            mStatus = STATUS_READY;
+    final void openOutputs() {
+        Log.v("Filter", "Opening all output ports on " + this + "!");
+        for (SourcePort outputPort : mOutputPorts.values()) {
+            if (!outputPort.isOpen()) {
+                outputPort.open();
+            }
         }
     }
 
     final void notifyFieldPortValueUpdated(String name, FilterContext context) {
-        if (mStatus == STATUS_PROCESSING) {
+        if (mStatus == STATUS_PROCESSING || mStatus == STATUS_PREPARED) {
             fieldPortValueUpdated(name, context);
         }
     }
@@ -630,15 +632,6 @@ public abstract class Filter {
             }
         }
         return true;
-    }
-
-    private final void openOutputs() {
-        Log.v("Filter", "Opening all output ports on " + this + "!");
-        for (SourcePort outputPort : mOutputPorts.values()) {
-            if (!outputPort.isOpen()) {
-                outputPort.open();
-            }
-        }
     }
 
     private final void closePorts() {
