@@ -513,6 +513,12 @@ public abstract class Filter {
         }
     }
 
+    final void notifyFieldPortValueUpdated(String name, FilterContext context) {
+        if (mStatus == STATUS_PROCESSING) {
+            fieldPortValueUpdated(name, context);
+        }
+    }
+
     // Filter internal methods /////////////////////////////////////////////////////////////////////
     private final void initFinalPorts(KeyValueMap values) {
         mInputPorts = new HashMap<String, TargetPort>();

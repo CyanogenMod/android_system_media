@@ -60,7 +60,7 @@ public class FieldPort extends TargetPort {
             }
             mValue = null;
             if (context != null) {
-                mFilter.fieldPortValueUpdated(mName, context);
+                mFilter.notifyFieldPortValueUpdated(mName, context);
             }
         }
     }

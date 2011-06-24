@@ -36,7 +36,6 @@ public class GLTextureTarget extends Filter {
     @GenerateFinalPort(name = "createTex", hasDefault = true)
     private boolean mCreateTex = false;
 
-    private MutableFrameFormat mFrameFormat;
     private Frame mFrame;
 
     public GLTextureTarget(String name) {
@@ -49,24 +48,22 @@ public class GLTextureTarget extends Filter {
     }
 
     @Override
-    public void prepare(FilterContext context) {
-        mFrameFormat = ImageFormat.create(getInputFormat("frame").getWidth(),
-                                          getInputFormat("frame").getHeight(),
-                                          ImageFormat.COLORSPACE_RGBA,
-                                          FrameFormat.TARGET_GPU);
-    }
-
-    @Override
     public void process(FilterContext context) {
         // Get input frame
         Frame input = pullInput("frame");
 
         // Generate frame if not generated already
+        // TODO: Check if size has changed
         if (mFrame == null) {
+            FrameFormat format = ImageFormat.create(input.getFormat().getWidth(),
+                                                    input.getFormat().getHeight(),
+                                                    ImageFormat.COLORSPACE_RGBA,
+                                                    FrameFormat.TARGET_GPU);
+
             int binding = mCreateTex
                 ? GLFrame.NEW_TEXTURE_BINDING
                 : GLFrame.EXISTING_TEXTURE_BINDING;
-            mFrame = context.getFrameManager().newBoundFrame(mFrameFormat, binding, mTexId);
+            mFrame = context.getFrameManager().newBoundFrame(format, binding, mTexId);
         }
 
         // Copy to our texture frame
