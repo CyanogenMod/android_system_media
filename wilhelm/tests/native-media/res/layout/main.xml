@@ -56,6 +56,25 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     >
+    <Button
+        android:id="@+id/rewind_java"
+        android:text="@string/rewind_java"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        />
+    <Button
+        android:id="@+id/rewind_native"
+        android:text="@string/rewind_native"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        />
+</LinearLayout>
+
+<LinearLayout
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    >
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

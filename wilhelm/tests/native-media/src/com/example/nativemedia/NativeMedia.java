@@ -269,6 +269,20 @@ public class NativeMedia extends Activity {
 
         });
 
+        // Java MediaPlayer rewind
+
+        ((Button) findViewById(R.id.rewind_java)).setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View view) {
+                if (mMediaPlayerIsPrepared) {
+                    mMediaPlayer.seekTo(0);
+                }
+            }
+
+        });
+
+        // FIXME native MediaPlayer rewind
+
     }
 
     /** Called when the activity is about to be paused. */
