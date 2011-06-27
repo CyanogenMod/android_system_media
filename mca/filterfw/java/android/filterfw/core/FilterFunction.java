@@ -26,7 +26,7 @@ public class FilterFunction {
     private boolean mFilterIsSetup = false;
     private FrameHolderPort[] mResultHolders;
 
-    private class FrameHolderPort extends InputPort {
+    private class FrameHolderPort extends StreamPort {
         public FrameHolderPort() {
             super(null, "holder");
         }
@@ -100,7 +100,7 @@ public class FilterFunction {
     private void connectFilterOutputs() {
         int  i = 0;
         mResultHolders = new FrameHolderPort[mFilter.getNumberOfOutputs()];
-        for (SourcePort outputPort : mFilter.getOutputPorts()) {
+        for (OutputPort outputPort : mFilter.getOutputPorts()) {
             mResultHolders[i] = new FrameHolderPort();
             outputPort.connectTo(mResultHolders[i]);
             ++i;
