@@ -46,41 +46,43 @@ class NativeWindowHandle : public WindowHandle {
     ANativeWindow* window_;
 };
 
-jboolean Java_android_filterfw_core_GLEnvironment_allocate(JNIEnv* env, jobject thiz) {
+jboolean Java_android_filterfw_core_GLEnvironment_nativeAllocate(JNIEnv* env, jobject thiz) {
   return ToJBool(WrapObjectInJava(new GLEnv(), env, thiz, true));
 }
 
-jboolean Java_android_filterfw_core_GLEnvironment_deallocate(JNIEnv* env, jobject thiz) {
+jboolean Java_android_filterfw_core_GLEnvironment_nativeDeallocate(JNIEnv* env, jobject thiz) {
   return ToJBool(DeleteNativeObject<GLEnv>(env, thiz));
 }
 
-jboolean Java_android_filterfw_core_GLEnvironment_initWithNewContext(JNIEnv* env, jobject thiz) {
+jboolean Java_android_filterfw_core_GLEnvironment_nativeInitWithNewContext(JNIEnv* env,
+                                                                           jobject thiz) {
   GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
   return gl_env ? ToJBool(gl_env->InitWithNewContext()) : JNI_FALSE;
 }
 
-jboolean Java_android_filterfw_core_GLEnvironment_initWithCurrentContext(JNIEnv* env,
-                                                                         jobject thiz) {
+jboolean Java_android_filterfw_core_GLEnvironment_nativeInitWithCurrentContext(JNIEnv* env,
+                                                                               jobject thiz) {
   GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
   return gl_env ? ToJBool(gl_env->InitWithCurrentContext()) : JNI_FALSE;
 }
 
-jboolean Java_android_filterfw_core_GLEnvironment_activate(JNIEnv* env, jobject thiz) {
+jboolean Java_android_filterfw_core_GLEnvironment_nativeActivate(JNIEnv* env, jobject thiz) {
   GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
   return gl_env ? ToJBool(gl_env->Activate()) : JNI_FALSE;
 }
 
-jboolean Java_android_filterfw_core_GLEnvironment_deactivate(JNIEnv* env, jobject thiz) {
+jboolean Java_android_filterfw_core_GLEnvironment_nativeDeactivate(JNIEnv* env, jobject thiz) {
   GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
   return gl_env ? ToJBool(gl_env->Deactivate()) : JNI_FALSE;
 }
 
-jobject Java_android_filterfw_core_GLEnvironment_activeEnvironment(JNIEnv* env, jclass clazz) {
+jobject Java_android_filterfw_core_GLEnvironment_nativeActiveEnvironment(JNIEnv* env,
+                                                                         jclass clazz) {
   GLEnv* active = GLEnv::ActiveEnv();
   return active ? WrapNewObjectInJava(active, env, false) : NULL;
 }
 
-jboolean Java_android_filterfw_core_GLEnvironment_swapBuffers(JNIEnv* env, jobject thiz) {
+jboolean Java_android_filterfw_core_GLEnvironment_nativeSwapBuffers(JNIEnv* env, jobject thiz) {
   GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
   return gl_env ? ToJBool(gl_env->SwapBuffers()) : JNI_FALSE;
 }
