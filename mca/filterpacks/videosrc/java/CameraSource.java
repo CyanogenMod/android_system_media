@@ -75,6 +75,7 @@ public class CameraSource extends Filter {
     private SurfaceTexture mSurfaceTexture;
     private ShaderProgram mFrameExtractor;
     private MutableFrameFormat mOutputFormat;
+    private MutableFrameFormat mCameraFormat;
     private ConditionVariable mNewFrameAvailable;
     private float[] mCameraTransform;
 
@@ -113,6 +114,10 @@ public class CameraSource extends Filter {
         mOutputFormat = ImageFormat.create(mWidth, mHeight,
                                            ImageFormat.COLORSPACE_RGBA,
                                            FrameFormat.TARGET_GPU);
+        mCameraFormat = mOutputFormat.mutableCopy();
+        mCameraFormat.setMetaValue(GLFrame.USE_EXTERNAL_TEXTURE, true);
+        if (mLogVerbose) Log.v(TAG, "Camera Format: " + mCameraFormat);
+        if (mLogVerbose) Log.v(TAG, "Output Format: " + mOutputFormat);
     }
 
     @Override
@@ -130,6 +135,7 @@ public class CameraSource extends Filter {
     public void open(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Opening");
         // Open camera
+        Log.i(TAG, "Opening camera with ID: " + mCameraId);
         mCamera = Camera.open(mCameraId);
 
         // Set parameters
@@ -140,9 +146,7 @@ public class CameraSource extends Filter {
         createFormats();
 
         // Bind it to our camera frame
-        mCameraFrame = (GLFrame)context.getFrameManager().newBoundFrame(mOutputFormat,
-                                                                        GLFrame.EXTERNAL_TEXTURE,
-                                                                        0);
+        mCameraFrame = (GLFrame)context.getFrameManager().newFrame(mCameraFormat);
         mSurfaceTexture = new SurfaceTexture(mCameraFrame.getTextureId());
         try {
             mCamera.setPreviewTexture(mSurfaceTexture);

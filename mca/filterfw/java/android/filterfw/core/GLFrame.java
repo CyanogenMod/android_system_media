@@ -49,7 +49,9 @@ public class GLFrame extends Frame {
     public final static int EXISTING_FBO_BINDING     = 101;
     public final static int NEW_TEXTURE_BINDING      = 102;
     public final static int NEW_FBO_BINDING          = 103;
-    public final static int EXTERNAL_TEXTURE         = 104;
+
+    // GL-related meta-values
+    public final static String USE_EXTERNAL_TEXTURE = "UseExternalTexture";
 
     private int glFrameId;
 
@@ -78,11 +80,12 @@ public class GLFrame extends Frame {
         // Create correct frame
         int bindingType = getBindingType();
         if (bindingType == Frame.NO_BINDING) {
-            initNew(false);
-            setReusable(!isEmpty);
-        } else if (bindingType == EXTERNAL_TEXTURE) {
-            initNew(true);
-            setReusable(false);
+            boolean isExternal = false;
+            if (format.hasMetaKey(USE_EXTERNAL_TEXTURE, Boolean.class)) {
+                isExternal = (Boolean)format.getMetaValue(USE_EXTERNAL_TEXTURE);
+            }
+            initNew(isExternal);
+            setReusable(!isEmpty && !isExternal);
         } else if (bindingType == EXISTING_TEXTURE_BINDING) {
             initWithTexture((int)getBindingId(), false);
         } else if (bindingType == EXISTING_FBO_BINDING) {

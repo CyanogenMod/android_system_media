@@ -25,86 +25,48 @@ public class GLEnvironment {
     private int glEnvId;
 
     public GLEnvironment() {
-        nativeAllocate();
+        allocate();
     }
 
     private GLEnvironment(NativeAllocatorTag tag) {
     }
 
+    public static native GLEnvironment activeEnvironment();
+
     @Override
     protected void finalize() throws Throwable {
-        nativeDeallocate();
+        deallocate();
     }
 
-    public static GLEnvironment activeEnvironment() {
-        return nativeActiveEnvironment();
-    }
+    public native boolean initWithNewContext();
 
-    public void initWithNewContext() {
-        if (!nativeInitWithNewContext()) {
-            throw new RuntimeException("Could not initialize GLEnvironment with new context!");
-        }
-    }
+    public native boolean initWithCurrentContext();
 
-    public void initWithCurrentContext() {
-        if (!nativeInitWithCurrentContext()) {
-            throw new RuntimeException("Could not initialize GLEnvironment with current context!");
-        }
-    }
+    public native boolean activate();
 
-    public void activate() {
-        if (!nativeActivate()) {
-            throw new RuntimeException("Could not activate GLEnvironment!");
-        }
-    }
+    public native boolean deactivate();
 
-    public void deactivate() {
-        if (!nativeDeactivate()) {
-            throw new RuntimeException("Could not deactivate GLEnvironment!");
-        }
-    }
-
-    public void swapBuffers() {
-        if (!nativeSwapBuffers()) {
-            throw new RuntimeException("Error swapping EGL buffers!");
-        }
-    }
+    public native boolean swapBuffers();
 
     public int registerSurface(Surface surface) {
         return nativeAddSurface(surface);
     }
 
     public void activateSurfaceWithId(int surfaceId) {
-        if (!nativeActivateSurfaceId(surfaceId)) {
-            throw new RuntimeException("Could not activate surface " + surfaceId + "!");
-        }
+        nativeActivateSurfaceId(surfaceId);
     }
 
     public void unregisterSurfaceId(int surfaceId) {
-        if (!nativeRemoveSurfaceId(surfaceId)) {
-            throw new RuntimeException("Could not unregister surface " + surfaceId + "!");
-        }
+        nativeRemoveSurfaceId(surfaceId);
     }
 
     static {
         System.loadLibrary("filterfw");
     }
 
-    private native static GLEnvironment nativeActiveEnvironment();
+    private native boolean allocate();
 
-    private native boolean nativeInitWithNewContext();
-
-    private native boolean nativeInitWithCurrentContext();
-
-    private native boolean nativeActivate();
-
-    private native boolean nativeDeactivate();
-
-    private native boolean nativeSwapBuffers();
-
-    private native boolean nativeAllocate();
-
-    private native boolean nativeDeallocate();
+    private native boolean deallocate();
 
     private native int nativeAddSurface(Surface surface);
 
