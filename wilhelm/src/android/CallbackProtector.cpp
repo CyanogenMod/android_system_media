@@ -14,24 +14,35 @@
  * limitations under the License.
  */
 
-#include "AudioTrackProtector.h"
+#include "CallbackProtector.h"
+
+#include <media/stagefright/foundation/ADebug.h>
 
 //--------------------------------------------------------------------------------------------------
 namespace android {
 
 
-AudioTrackProtector::AudioTrackProtector() : RefBase(),
+CallbackProtector::CallbackProtector() : RefBase(),
         mSafeToEnterCb(true),
         mCbCount(0) {
 }
 
 
-AudioTrackProtector::~AudioTrackProtector() {
+CallbackProtector::~CallbackProtector() {
 
 }
 
 
-bool AudioTrackProtector::enterCb() {
+bool CallbackProtector::enterCbIfOk(const sp<CallbackProtector> &protector) {
+    if (protector != 0) {
+        return protector->enterCb();
+    } else {
+        return false;
+    }
+}
+
+
+bool CallbackProtector::enterCb() {
     Mutex::Autolock _l(mLock);
     if (mSafeToEnterCb) {
         mCbCount++;
@@ -40,18 +51,19 @@ bool AudioTrackProtector::enterCb() {
 }
 
 
-void AudioTrackProtector::exitCb() {
+void CallbackProtector::exitCb() {
     Mutex::Autolock _l(mLock);
-    if (mCbCount > 0) {
-        mCbCount--;
-    }
+
+    CHECK(mCbCount > 0);
+    mCbCount--;
+
     if (mCbCount == 0) {
         mCbExitedCondition.broadcast();
     }
 }
 
 
-void AudioTrackProtector::requestCbExitAndWait() {
+void CallbackProtector::requestCbExitAndWait() {
     Mutex::Autolock _l(mLock);
     mSafeToEnterCb = false;
     while (mCbCount) {

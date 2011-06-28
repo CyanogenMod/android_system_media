@@ -639,6 +639,10 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
     }
 
     CAudioPlayer *ap = (CAudioPlayer *)user;
+    if (!android::CallbackProtector::enterCbIfOk(ap->mCallbackProtector)) {
+        // it is not safe to enter the callback (the track is about to go away)
+        return;
+    }
     //SL_LOGV("received event %d, data %d from SfAudioPlayer", event, data1);
     switch(event) {
 
@@ -684,6 +688,7 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
 
 
         } else {
+
             object_lock_exclusive(&ap->mObject);
 
             if (AUDIOPLAYER_FROM_URIFD == ap->mAndroidObjType) {
@@ -702,7 +707,9 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
                 android_audioPlayer_setPlayRate(ap, ap->mPlaybackRate.mRate, false /*lockAP*/);
 #endif
             } else if (AUDIOPLAYER_FROM_PCM_BUFFERQUEUE == ap->mAndroidObjType) {
-                ((android::AudioToCbRenderer*)ap->mAPlayer.get())->startPrefetch_async();
+                if (ap->mAPlayer != 0) {
+                    ((android::AudioToCbRenderer*)ap->mAPlayer.get())->startPrefetch_async();
+                }
             } else if (AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE == ap->mAndroidObjType) {
                 SL_LOGD("Received SfPlayer::kEventPrepared from AVPlayer for CAudioPlayer %p", ap);
             }
@@ -778,6 +785,8 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
     default:
         break;
     }
+
+    ap->mCallbackProtector->exitCb();
 }
 
 
@@ -1004,7 +1013,7 @@ static void audioTrack_callBack_uri(int event, void* user, void *info) {
         pBuff->size = 0;
     } else if (NULL != user) {
         CAudioPlayer *ap = (CAudioPlayer *)user;
-        if (!ap->mAudioTrackProtector->enterCb()) {
+        if (!android::CallbackProtector::enterCbIfOk(ap->mCallbackProtector)) {
             // it is not safe to enter the callback (the track is about to go away)
             return;
         }
@@ -1026,7 +1035,7 @@ static void audioTrack_callBack_uri(int event, void* user, void *info) {
                         ap);
                 break;
         }
-        ap->mAudioTrackProtector->exitCb();
+        ap->mCallbackProtector->exitCb();
     }
 }
 
@@ -1036,7 +1045,7 @@ static void audioTrack_callBack_uri(int event, void* user, void *info) {
 static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *info) {
     CAudioPlayer *ap = (CAudioPlayer *)user;
 
-    if (!ap->mAudioTrackProtector->enterCb()) {
+    if (!android::CallbackProtector::enterCbIfOk(ap->mCallbackProtector)) {
         // it is not safe to enter the callback (the track is about to go away)
         return;
     }
@@ -1142,7 +1151,7 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
         break;
     }
 
-    ap->mAudioTrackProtector->exitCb();
+    ap->mCallbackProtector->exitCb();
 }
 
 
@@ -1161,7 +1170,7 @@ SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
         pAudioPlayer->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
         pAudioPlayer->mAudioTrack = NULL;
 
-        pAudioPlayer->mAudioTrackProtector = new android::AudioTrackProtector();
+        pAudioPlayer->mCallbackProtector = new android::CallbackProtector();
 
         pAudioPlayer->mSessionId = android::AudioSystem::newAudioSessionId();
 
@@ -1424,11 +1433,12 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
  * Called with a lock on AudioPlayer
  */
 SLresult android_audioPlayer_preDestroy(CAudioPlayer *pAudioPlayer) {
+    SL_LOGV("android_audioPlayer_preDestroy(%p)", pAudioPlayer);
     SLresult result = SL_RESULT_SUCCESS;
 
     object_unlock_exclusive(&pAudioPlayer->mObject);
-    if (pAudioPlayer->mAudioTrackProtector != 0) {
-        pAudioPlayer->mAudioTrackProtector->requestCbExitAndWait();
+    if (pAudioPlayer->mCallbackProtector != 0) {
+        pAudioPlayer->mCallbackProtector->requestCbExitAndWait();
     }
     object_lock_exclusive(&pAudioPlayer->mObject);
 
@@ -1463,13 +1473,13 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
         break;
     }
 
-    pAudioPlayer->mAudioTrackProtector.clear();
+    pAudioPlayer->mCallbackProtector.clear();
 
     // FIXME might not be needed
     pAudioPlayer->mAndroidObjType = INVALID_TYPE;
 
     // explicit destructor
-    pAudioPlayer->mAudioTrackProtector.~sp();
+    pAudioPlayer->mCallbackProtector.~sp();
     pAudioPlayer->mAuxEffect.~sp();
     pAudioPlayer->mAPlayer.~sp();
 

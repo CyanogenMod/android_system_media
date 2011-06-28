@@ -63,7 +63,7 @@ LOCAL_SRC_FILES:=                     \
         android/AudioPlayer_to_android.cpp    \
         android/AudioRecorder_to_android.cpp  \
         android/MediaPlayer_to_android.cpp    \
-        android/AudioTrackProtector.cpp       \
+        android/CallbackProtector.cpp         \
         android/OutputMix_to_android.cpp      \
         android/android_AudioSfDecoder.cpp    \
         android/android_AudioToCbRenderer.cpp \

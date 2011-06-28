@@ -19,26 +19,31 @@
 //--------------------------------------------------------------------------------------------------
 namespace android {
 
-class AudioTrackProtector : public RefBase {
+class CallbackProtector : public RefBase {
 
 public:
-    AudioTrackProtector();
-    virtual ~AudioTrackProtector();
+    CallbackProtector();
+    virtual ~CallbackProtector();
 
     /**
-     * Indicates whether it's safe to enter the AudioTrack callback. It would typically return
-     * false if the AudioTrack is about to be destroyed
+     * Indicates whether the CallbackProtector is valid and it's safe to enter the callback.
+     */
+    static bool enterCbIfOk(const sp<CallbackProtector> &protector);
+
+    /**
+     * Indicates whether it's safe to enter the callback. It would typically return
+     * false if the AudioTrack or AudioPlayer is about to be destroyed
      */
     bool enterCb();
 
     /**
-     * This method must be paired to each call to enterCb(), only if enterCb() returned that it is
-     * safe enter the callback;
+     * This method must be paired to each call to enterCb() or enterCbIfOk(),
+     * only it returned that it is safe enter the callback;
      */
     void exitCb();
 
     /**
-     * Called to signal the track is about to be destroyed, so whenever an AudioTrack callback is
+     * Called to signal the track is about to be destroyed, so whenever a callback is
      * entered (see enterCb) it will be notified it is pointless to process the callback. This will
      * return immediately if there are no callbacks, and will block until current callbacks exit.
      */
@@ -50,8 +55,13 @@ protected:
 
     bool mSafeToEnterCb;
 
-    /** Counts the number of AudioTrack callbacks actively locking the associated AudioPlayer */
+    /** Counts the number of callbacks actively locking the associated AudioPlayer */
     unsigned int mCbCount;
+
+private:
+    // disallow "evil" constructors
+    CallbackProtector(const CallbackProtector &);
+    CallbackProtector &operator=(const CallbackProtector &);
 };
 
 } // namespace android
