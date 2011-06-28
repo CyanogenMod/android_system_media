@@ -6,6 +6,9 @@
     <string name="start_java">Start/Pause Java MediaPlayer</string>
     <string name="start_native">Start/Pause native MediaPlayer</string>
 
+    <string name="rewind_java">Rewind Java MediaPlayer</string>
+    <string name="rewind_native">Rewind native MediaPlayer</string>
+
     <string name="source_select">Please select the media source</string>
     <string name="source_prompt">Media source</string>
     <string-array name="source_array">

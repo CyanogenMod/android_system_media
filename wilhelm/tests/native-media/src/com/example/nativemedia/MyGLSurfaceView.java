@@ -306,6 +306,7 @@ class MyRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvaila
          * so let's be safe and use synchronize. No OpenGL calls can be done here.
          */
         updateSurface = true;
+        //Log.v(TAG, "onFrameAvailable " + surface.getTimestamp());
     }
 
     private void doPhysics(long timestamp) {
