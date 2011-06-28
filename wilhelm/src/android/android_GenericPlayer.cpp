@@ -53,21 +53,33 @@ GenericPlayer::GenericPlayer(const AudioPlayback_Parameters* params) :
 GenericPlayer::~GenericPlayer() {
     SL_LOGV("GenericPlayer::~GenericPlayer()");
 
-    mLooper->stop();
-    mLooper->unregisterHandler(id());
-    mLooper.clear();
-
 }
 
 
 void GenericPlayer::init(const notif_cbf_t cbf, void* notifUser) {
     SL_LOGD("GenericPlayer::init()");
 
-    mNotifyClient = cbf;
-    mNotifyUser = notifUser;
+    {
+        android::Mutex::Autolock autoLock(mNotifyClientLock);
+        mNotifyClient = cbf;
+        mNotifyUser = notifUser;
+    }
 
     mLooper->registerHandler(this);
     mLooper->start(false /*runOnCallingThread*/, false /*canCallJava*/, mLooperPriority);
+}
+
+
+void GenericPlayer::preDestroy() {
+    SL_LOGD("GenericPlayer::preDestroy()");
+    {
+        android::Mutex::Autolock autoLock(mNotifyClientLock);
+        mNotifyClient = NULL;
+        mNotifyUser = NULL;
+    }
+
+    mLooper->stop();
+    mLooper->unregisterHandler(id());
 }
 
 
@@ -323,26 +335,34 @@ void GenericPlayer::onPrepare() {
 
 
 void GenericPlayer::onNotify(const sp<AMessage> &msg) {
-    if (NULL == mNotifyClient) {
-        return;
+    notif_cbf_t notifClient;
+    void*       notifUser;
+    {
+        android::Mutex::Autolock autoLock(mNotifyClientLock);
+        if (NULL == mNotifyClient) {
+            return;
+        } else {
+            notifClient = mNotifyClient;
+            notifUser   = mNotifyUser;
+        }
     }
 
     int32_t val1, val2;
     if (msg->findInt32(PLAYEREVENT_PREFETCHSTATUSCHANGE, &val1)) {
         SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_PREFETCHSTATUSCHANGE, val1);
-        mNotifyClient(kEventPrefetchStatusChange, val1, 0, mNotifyUser);
+        notifClient(kEventPrefetchStatusChange, val1, 0, notifUser);
     } else if (msg->findInt32(PLAYEREVENT_PREFETCHFILLLEVELUPDATE, &val1)) {
         SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_PREFETCHFILLLEVELUPDATE, val1);
-        mNotifyClient(kEventPrefetchFillLevelUpdate, val1, 0, mNotifyUser);
+        notifClient(kEventPrefetchFillLevelUpdate, val1, 0, notifUser);
     } else if (msg->findInt32(PLAYEREVENT_ENDOFSTREAM, &val1)) {
         SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_ENDOFSTREAM, val1);
-        mNotifyClient(kEventEndOfStream, val1, 0, mNotifyUser);
+        notifClient(kEventEndOfStream, val1, 0, notifUser);
     } else if (msg->findInt32(PLAYEREVENT_PREPARED, &val1)) {
         SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_PREPARED, val1);
-        mNotifyClient(kEventPrepared, val1, 0, mNotifyUser);
+        notifClient(kEventPrepared, val1, 0, notifUser);
     } else if (msg->findRect(PLAYEREVENT_VIDEO_SIZE_UPDATE, &val1, &val2, &val1, &val2)) {
         SL_LOGV("GenericPlayer notifying %s = %d, %d", PLAYEREVENT_VIDEO_SIZE_UPDATE, val1, val2);
-        mNotifyClient(kEventHasVideoSize, val1, val2, mNotifyUser);
+        notifClient(kEventHasVideoSize, val1, val2, notifUser);
     }
 }
 

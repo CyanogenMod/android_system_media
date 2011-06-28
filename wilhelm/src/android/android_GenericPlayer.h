@@ -49,6 +49,7 @@ public:
     virtual ~GenericPlayer();
 
     virtual void init(const notif_cbf_t cbf, void* notifUser);
+    virtual void preDestroy();
 
     virtual void setDataSource(const char *uri);
     virtual void setDataSource(int fd, int64_t offset, int64_t length);
@@ -120,6 +121,8 @@ protected:
     // Event notification from GenericPlayer to OpenSL ES / OpenMAX AL framework
     notif_cbf_t mNotifyClient;
     void*       mNotifyUser;
+    // lock to protect mNotifyClient and mNotifyUser updates
+    Mutex       mNotifyClientLock;
 
     enum {
         kFlagPrepared  = 1 <<0,
@@ -147,7 +150,6 @@ protected:
     int16_t mCacheFill; // cache fill level + played back level in permille
     int16_t mLastNotifiedCacheFill; // last cache fill level communicated to the listener
     int16_t mCacheFillNotifThreshold; // threshold in cache fill level for cache fill to be reported
-
 
 private:
     DISALLOW_EVIL_CONSTRUCTORS(GenericPlayer);

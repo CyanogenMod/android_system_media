@@ -40,6 +40,7 @@ namespace android {
 AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : GenericPlayer(params),
         mDataSource(0),
         mAudioSource(0),
+        mAudioSourceStarted(false),
         mBitrate(-1),
         mChannelMask(ANDROID_UNKNOWN_CHANNELMASK),
         mDurationUsec(-1),
@@ -56,8 +57,24 @@ AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : Generic
 
 AudioSfDecoder::~AudioSfDecoder() {
     SL_LOGV("AudioSfDecoder::~AudioSfDecoder()");
-    if (mAudioSource != 0) {
-        mAudioSource->stop();
+}
+
+
+void AudioSfDecoder::preDestroy() {
+    GenericPlayer::preDestroy();
+    SL_LOGD("AudioSfDecoder::preDestroy()");
+    {
+        Mutex::Autolock _l(mBufferSourceLock);
+
+        if (NULL != mDecodeBuffer) {
+            mDecodeBuffer->release();
+            mDecodeBuffer = NULL;
+        }
+
+        if ((mAudioSource != 0) && mAudioSourceStarted) {
+            mAudioSource->stop();
+            mAudioSourceStarted = false;
+        }
     }
 }
 
@@ -156,17 +173,30 @@ bool AudioSfDecoder::getPcmFormatKeyValue(uint32_t index, uint32_t size, uint32_
 
 //--------------------------------------------------
 // Event handlers
+//  it is strictly verboten to call those methods outside of the event loop
+
+// Initializes the data and audio sources, and update the PCM format info
+// post-condition: upon successful initialization based on the player data locator
+//    GenericPlayer::onPrepare() was called
+//    mDataSource != 0
+//    mAudioSource != 0
+//    mAudioSourceStarted == true
 void AudioSfDecoder::onPrepare() {
     SL_LOGD("AudioSfDecoder::onPrepare()");
+    Mutex::Autolock _l(mBufferSourceLock);
 
+    // Initialize the PCM format info with the known parameters before the start of the decode
     mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_BITSPERSAMPLE] = SL_PCMSAMPLEFORMAT_FIXED_16;
     mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CONTAINERSIZE] = 16;
     mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_ENDIANNESS] = SL_BYTEORDER_LITTLEENDIAN;
-    // initialization with the default values
+    //    initialization with the default values: they will be replaced by the actual values
+    //      once the decoder has figured them out
     mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
     mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
     mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
 
+    //---------------------------------
+    // Instantiate and initialize the data source for the decoder
     sp<DataSource> dataSource;
 
     switch (mDataLocatorType) {
@@ -201,6 +231,8 @@ void AudioSfDecoder::onPrepare() {
         TRESPASS();
     }
 
+    //---------------------------------
+    // Instanciate and initialize the decoder attached to the data source
     sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
     if (extractor == NULL) {
         SL_LOGE("AudioSfDecoder::onPrepare: Could not instantiate extractor.");
@@ -252,6 +284,7 @@ void AudioSfDecoder::onPrepare() {
         mDurationUsec = -1;
     }
 
+    // the audio content is not raw PCM, so we need a decoder
     if (!isRawAudio) {
         OMXClient client;
         CHECK_EQ(client.connect(), (status_t)OK);
@@ -276,8 +309,11 @@ void AudioSfDecoder::onPrepare() {
         return;
     }
 
+    //---------------------------------
+    // The data source, and audio source (a decoder if required) are ready to be used
     mDataSource = dataSource;
     mAudioSource = source;
+    mAudioSourceStarted = true;
 
     if (!hasChannelCount) {
         // even though the channel count was already queried above, there are issues with some
@@ -412,6 +448,7 @@ void AudioSfDecoder::onDecode() {
         // application set play state to paused which failed, then set play state to playing
         return;
     }
+
     if (wantPrefetch()
             && (getCacheRemaining(&eos) == kStatusLow)
             && !eos) {
@@ -439,11 +476,15 @@ void AudioSfDecoder::onDecode() {
     }
 
     {
-        Mutex::Autolock _l(mDecodeBufferLock);
+        Mutex::Autolock _l(mBufferSourceLock);
+
         if (NULL != mDecodeBuffer) {
             // the current decoded buffer hasn't been rendered, drop it
             mDecodeBuffer->release();
             mDecodeBuffer = NULL;
+        }
+        if(!mAudioSourceStarted) {
+            return;
         }
         err = mAudioSource->read(&mDecodeBuffer, &readOptions);
         if (err == OK) {
@@ -509,7 +550,7 @@ void AudioSfDecoder::onDecode() {
 void AudioSfDecoder::onRender() {
     //SL_LOGV("AudioSfDecoder::onRender");
 
-    Mutex::Autolock _l(mDecodeBufferLock);
+    Mutex::Autolock _l(mBufferSourceLock);
 
     if (NULL == mDecodeBuffer) {
         // nothing to render, move along
@@ -580,21 +621,29 @@ void AudioSfDecoder::notifyPrepared(status_t prepareRes) {
 
 
 void AudioSfDecoder::onNotify(const sp<AMessage> &msg) {
-    if (NULL == mNotifyClient) {
-        return;
+    notif_cbf_t notifyClient;
+    void*       notifyUser;
+    {
+        android::Mutex::Autolock autoLock(mNotifyClientLock);
+        if (NULL == mNotifyClient) {
+            return;
+        } else {
+            notifyClient = mNotifyClient;
+            notifyUser   = mNotifyUser;
+        }
     }
     int32_t val;
     if (msg->findInt32(PLAYEREVENT_PREFETCHSTATUSCHANGE, &val)) {
         SL_LOGV("\tASfPlayer notifying %s = %d", PLAYEREVENT_PREFETCHSTATUSCHANGE, val);
-        mNotifyClient(kEventPrefetchStatusChange, val, 0, mNotifyUser);
+        notifyClient(kEventPrefetchStatusChange, val, 0, notifyUser);
     }
     else if (msg->findInt32(PLAYEREVENT_PREFETCHFILLLEVELUPDATE, &val)) {
         SL_LOGV("\tASfPlayer notifying %s = %d", PLAYEREVENT_PREFETCHFILLLEVELUPDATE, val);
-        mNotifyClient(kEventPrefetchFillLevelUpdate, val, 0, mNotifyUser);
+        notifyClient(kEventPrefetchFillLevelUpdate, val, 0, notifyUser);
     }
     else if (msg->findInt32(PLAYEREVENT_ENDOFSTREAM, &val)) {
         SL_LOGV("\tASfPlayer notifying %s = %d", PLAYEREVENT_ENDOFSTREAM, val);
-        mNotifyClient(kEventEndOfStream, val, 0, mNotifyUser);
+        notifyClient(kEventEndOfStream, val, 0, notifyUser);
     }
     else {
         GenericPlayer::onNotify(msg);

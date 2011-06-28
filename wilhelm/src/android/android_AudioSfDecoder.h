@@ -46,6 +46,8 @@ public:
     AudioSfDecoder(const AudioPlayback_Parameters* params);
     virtual ~AudioSfDecoder();
 
+    virtual void preDestroy();
+
     // overridden from GenericPlayer
     virtual void play();
 
@@ -89,8 +91,10 @@ protected:
     virtual void startAudioSink() = 0;
     virtual void pauseAudioSink() = 0;
 
-    sp<DataSource> mDataSource;
-    sp<MediaSource> mAudioSource;
+    sp<DataSource>  mDataSource; // where the raw data comes from
+    sp<MediaSource> mAudioSource;// the decoder reading from the data source
+    // used to indicate mAudioSource was successfully started, but wasn't stopped
+    bool            mAudioSourceStarted;
 
     // negative values indicate invalid value
     int64_t mBitrate;  // in bits/sec
@@ -99,8 +103,9 @@ protected:
 
     // buffer passed from decoder to renderer
     MediaBuffer *mDecodeBuffer;
-    // mutex used to protect the decode buffer
-    Mutex       mDecodeBufferLock;
+
+    // mutex used to protect the decode buffer, the audio source and its running state
+    Mutex       mBufferSourceLock;
 
 private:
 
