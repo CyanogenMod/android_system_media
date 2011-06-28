@@ -17,72 +17,59 @@
 
 package android.filterfw.core;
 
-public class InputPort extends TargetPort {
+public abstract class InputPort extends FilterPort {
 
-    private Frame mFrame;
-    private boolean mPersistent;
+    protected OutputPort mSourcePort;
 
     public InputPort(Filter filter, String name) {
         super(filter, name);
     }
 
-    @Override
-    public void clear() {
-        if (mFrame != null) {
-            mFrame.release();
-            mFrame = null;
+    public void setSourcePort(OutputPort source) {
+        if (mSourcePort != null) {
+            throw new RuntimeException(this + " already connected to " + mSourcePort + "!");
+        }
+        mSourcePort = source;
+    }
+
+    public boolean isConnected() {
+        return mSourcePort != null;
+    }
+
+    public void open() {
+        super.open();
+        if (mSourcePort != null && !mSourcePort.isOpen()) {
+            mSourcePort.open();
         }
     }
 
-    @Override
-    public void setFrame(Frame frame) {
-        assignFrame(frame, true);
-    }
-
-    @Override
-    public void pushFrame(Frame frame) {
-        assignFrame(frame, false);
-    }
-
-    private void assignFrame(Frame frame, boolean persistent) {
-        assertPortIsOpen();
-        if (persistent) {
-            if (mFrame != null) {
-                mFrame.release();
-            }
-        } else if (mFrame != null) {
-            throw new RuntimeException(
-                "Attempting to push more than one frame on port: " + this + "!");
+    public void close() {
+        if (mSourcePort != null && mSourcePort.isOpen()) {
+            mSourcePort.close();
         }
-        mFrame = frame.retain();
-        mFrame.markReadOnly();
-        mPersistent = persistent;
+        super.close();
     }
 
-    @Override
-    public Frame pullFrame() {
-        // Make sure we have a frame
-        if (mFrame == null) {
-            throw new RuntimeException("No frame available to pull on port: " + this + "!");
-        }
-
-        // Return a retained result
-        Frame result = mFrame;
-        if (mPersistent) {
-            mFrame.retain();
-        } else {
-            mFrame = null;
-        }
-        return result;
+    public OutputPort getSourcePort() {
+        return mSourcePort;
     }
 
-    @Override
-    public boolean hasFrame() {
-        return mFrame != null;
+    public Filter getSourceFilter() {
+        return mSourcePort == null ? null : mSourcePort.getFilter();
     }
 
-    @Override
-    public String toString() {
-        return "input " + super.toString();
+    public FrameFormat getSourceFormat() {
+        return mSourcePort != null ? mSourcePort.getPortFormat() : getPortFormat();
+    }
+
+    public boolean filterMustClose() {
+        return !isOpen() && isBlocking() && !hasFrame();
+    }
+
+    public boolean isReady() {
+        return hasFrame() || !isBlocking();
+    }
+
+    public void transfer(FilterContext context) {
     }
 }

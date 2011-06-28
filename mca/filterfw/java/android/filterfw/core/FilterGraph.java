@@ -36,8 +36,8 @@ public class FilterGraph {
 
     private HashSet<Filter> mFilters = new HashSet<Filter>();
     private HashMap<String, Filter> mNameMap = new HashMap<String, Filter>();
-    private HashMap<SourcePort, LinkedList<TargetPort>> mPreconnections = new
-            HashMap<SourcePort, LinkedList<TargetPort>>();
+    private HashMap<OutputPort, LinkedList<InputPort>> mPreconnections = new
+            HashMap<OutputPort, LinkedList<InputPort>>();
 
     public static final int AUTOBRANCH_OFF      = 0;
     public static final int AUTOBRANCH_SYNCED   = 1;
@@ -81,8 +81,8 @@ public class FilterGraph {
             throw new RuntimeException("Attempting to connect filter not in graph!");
         }
 
-        SourcePort outPort = source.getOutputPort(outputName);
-        TargetPort inPort = target.getInputPort(inputName);
+        OutputPort outPort = source.getOutputPort(outputName);
+        InputPort inPort = target.getInputPort(inputName);
         if (outPort == null) {
             throw new RuntimeException("Unknown output port '" + outputName + "' on Filter " +
                                        source + "!");
@@ -149,7 +149,7 @@ public class FilterGraph {
         }
 
         // Check if all dependencies have been processed
-        for (TargetPort port : filter.getInputPorts()) {
+        for (InputPort port : filter.getInputPorts()) {
             Filter dependency = port.getSourceFilter();
             if (dependency != null && !processed.contains(dependency)) {
                 return false;
@@ -176,7 +176,7 @@ public class FilterGraph {
             runTypeCheckOn(filter, strict);
 
             // Push connected filters onto stack
-            for (SourcePort port : filter.getOutputPorts()) {
+            for (OutputPort port : filter.getOutputPorts()) {
                 Filter target = port.getTargetFilter();
                 if (target != null && readyForProcessing(target, processedFilters)) {
                     filterStack.push(target);
@@ -191,8 +191,8 @@ public class FilterGraph {
     }
 
     private void updateOutputs(Filter filter) {
-        for (SourcePort outputPort : filter.getOutputPorts()) {
-            TargetPort inputPort = outputPort.getBasePort();
+        for (OutputPort outputPort : filter.getOutputPorts()) {
+            InputPort inputPort = outputPort.getBasePort();
             if (inputPort != null) {
                 FrameFormat inputFormat = inputPort.getSourceFormat();
                 FrameFormat outputFormat = filter.getOutputFormat(outputPort.getName(),
@@ -207,7 +207,7 @@ public class FilterGraph {
     }
 
     private void runTypeCheckOn(Filter filter, boolean strict) {
-        for (TargetPort inputPort : filter.getInputPorts()) {
+        for (InputPort inputPort : filter.getInputPorts()) {
             if (mLogVerbose) Log.v(TAG, "Type checking port " + inputPort);
             FrameFormat sourceFormat = inputPort.getSourceFormat();
             FrameFormat targetFormat = inputPort.getPortFormat();
@@ -233,7 +233,7 @@ public class FilterGraph {
         LinkedList<Filter> addedFilters = new LinkedList<Filter>();
         for (Filter filter : mFilters) {
             int id = 0;
-            for (SourcePort port : filter.getOutputPorts()) {
+            for (OutputPort port : filter.getOutputPorts()) {
                 if (!port.isConnected()) {
                     if (mLogVerbose) Log.v(TAG, "Autoconnecting unconnected " + port + " to Null filter.");
                     NullFilter nullFilter = new NullFilter(filter.getName() + "ToNull" + id);
@@ -255,11 +255,11 @@ public class FilterGraph {
         mNameMap.remove(filter.getName());
     }
 
-    private void preconnect(SourcePort outPort, TargetPort inPort) {
-        LinkedList<TargetPort> targets;
+    private void preconnect(OutputPort outPort, InputPort inPort) {
+        LinkedList<InputPort> targets;
         targets = mPreconnections.get(outPort);
         if (targets == null) {
-            targets = new LinkedList<TargetPort>();
+            targets = new LinkedList<InputPort>();
             mPreconnections.put(outPort, targets);
         }
         targets.add(inPort);
@@ -267,16 +267,16 @@ public class FilterGraph {
 
     private void connectPorts() {
         int branchId = 1;
-        for (Entry<SourcePort, LinkedList<TargetPort>> connection : mPreconnections.entrySet()) {
-            SourcePort sourcePort = connection.getKey();
-            LinkedList<TargetPort> targetPorts = connection.getValue();
-            if (targetPorts.size() == 1) {
-                sourcePort.connectTo(targetPorts.get(0));
+        for (Entry<OutputPort, LinkedList<InputPort>> connection : mPreconnections.entrySet()) {
+            OutputPort outputPort = connection.getKey();
+            LinkedList<InputPort> inputPorts = connection.getValue();
+            if (inputPorts.size() == 1) {
+                outputPort.connectTo(inputPorts.get(0));
             } else if (mAutoBranchMode == AUTOBRANCH_OFF) {
-                throw new RuntimeException("Attempting to connect " + sourcePort + " to multiple "
+                throw new RuntimeException("Attempting to connect " + outputPort + " to multiple "
                                          + "filter ports! Enable auto-branching to allow this.");
             } else {
-                if (mLogVerbose) Log.v(TAG, "Creating branch for " + sourcePort + "!");
+                if (mLogVerbose) Log.v(TAG, "Creating branch for " + outputPort + "!");
                 FrameBranch branch = null;
                 if (mAutoBranchMode == AUTOBRANCH_SYNCED) {
                     branch = new FrameBranch("branch" + branchId++);
@@ -284,12 +284,12 @@ public class FilterGraph {
                     throw new RuntimeException("TODO: Unsynced branches not implemented yet!");
                 }
                 KeyValueMap branchParams = new KeyValueMap();
-                branch.initWithAssignmentList("outputs", targetPorts.size());
+                branch.initWithAssignmentList("outputs", inputPorts.size());
                 addFilter(branch);
-                sourcePort.connectTo(branch.getInputPort("in"));
-                Iterator<TargetPort> targetPortIter = targetPorts.iterator();
-                for (SourcePort branchOutPort : ((Filter)branch).getOutputPorts()) {
-                    branchOutPort.connectTo(targetPortIter.next());
+                outputPort.connectTo(branch.getInputPort("in"));
+                Iterator<InputPort> inputPortIter = inputPorts.iterator();
+                for (OutputPort branchOutPort : ((Filter)branch).getOutputPorts()) {
+                    branchOutPort.connectTo(inputPortIter.next());
                 }
             }
         }

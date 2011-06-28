@@ -19,7 +19,7 @@ package android.filterfw.core;
 
 import java.lang.reflect.Field;
 
-public class FieldPort extends TargetPort {
+public class FieldPort extends InputPort {
 
     protected Field mField;
     protected boolean mHasFrame;

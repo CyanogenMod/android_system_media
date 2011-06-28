@@ -50,8 +50,8 @@ public abstract class Filter {
     private int mInputCount = -1;
     private int mOutputCount = -1;
 
-    private HashMap<String, TargetPort> mInputPorts;
-    private HashMap<String, SourcePort> mOutputPorts;
+    private HashMap<String, InputPort> mInputPorts;
+    private HashMap<String, OutputPort> mOutputPorts;
 
     private HashSet<Frame> mFramesToRelease;
     private HashMap<String, Frame> mFramesToSet;
@@ -146,7 +146,7 @@ public abstract class Filter {
     }
 
     public final FrameFormat getInputFormat(String portName) {
-        TargetPort inputPort = getInputPort(portName);
+        InputPort inputPort = getInputPort(portName);
         return inputPort.getSourceFormat();
     }
 
@@ -167,7 +167,7 @@ public abstract class Filter {
 
     public final int getNumberOfConnectedInputs() {
         int c = 0;
-        for (TargetPort inputPort : mInputPorts.values()) {
+        for (InputPort inputPort : mInputPorts.values()) {
             if (inputPort.isConnected()) {
                 ++c;
             }
@@ -177,7 +177,7 @@ public abstract class Filter {
 
     public final int getNumberOfConnectedOutputs() {
         int c = 0;
-        for (SourcePort outputPort : mOutputPorts.values()) {
+        for (OutputPort outputPort : mOutputPorts.values()) {
             if (outputPort.isConnected()) {
                 ++c;
             }
@@ -193,8 +193,8 @@ public abstract class Filter {
         return mInputPorts == null ? 0 : mOutputPorts.size();
     }
 
-    public final TargetPort getInputPort(String portName) {
-        TargetPort result = mInputPorts.get(portName);
+    public final InputPort getInputPort(String portName) {
+        InputPort result = mInputPorts.get(portName);
         if (result == null) {
             throw new IllegalArgumentException("Unknown input port '" + portName + "' on filter "
                 + this + "!");
@@ -202,8 +202,8 @@ public abstract class Filter {
         return result;
     }
 
-    public final SourcePort getOutputPort(String portName) {
-        SourcePort result = mOutputPorts.get(portName);
+    public final OutputPort getOutputPort(String portName) {
+        OutputPort result = mOutputPorts.get(portName);
         if (result == null) {
             throw new IllegalArgumentException("Unknown output port '" + portName + "' on filter "
                 + this + "!");
@@ -248,7 +248,7 @@ public abstract class Filter {
      * @param formatMask a format mask, which filters the allowable input types
      */
     protected void addMaskedInputPort(String name, FrameFormat formatMask) {
-        TargetPort port = new InputPort(this, name);
+        InputPort port = new StreamPort(this, name);
         if (mLogVerbose) Log.v(TAG, "Filter " + this + " adding " + port);
         mInputPorts.put(name, port);
         port.setPortFormat(formatMask);
@@ -296,7 +296,7 @@ public abstract class Filter {
         field.setAccessible(true);
 
         // Create port for this input
-        TargetPort fieldPort = isFinal
+        InputPort fieldPort = isFinal
             ? new FinalPort(this, name, field, hasDefault)
             : new FieldPort(this, name, field, hasDefault);
 
@@ -319,7 +319,7 @@ public abstract class Filter {
         field.setAccessible(true);
 
         // Create port for this input
-        TargetPort programPort = new ProgramPort(this, name, varName, field, hasDefault);
+        InputPort programPort = new ProgramPort(this, name, varName, field, hasDefault);
 
         // Create format for this input
         if (mLogVerbose) Log.v(TAG, "Filter " + this + " adding " + programPort);
@@ -443,11 +443,11 @@ public abstract class Filter {
     }
 
     // Core internal methods ///////////////////////////////////////////////////////////////////////
-    final Collection<TargetPort> getInputPorts() {
+    final Collection<InputPort> getInputPorts() {
         return mInputPorts.values();
     }
 
-    final Collection<SourcePort> getOutputPorts() {
+    final Collection<OutputPort> getOutputPorts() {
         return mOutputPorts.values();
     }
 
@@ -513,7 +513,7 @@ public abstract class Filter {
 
     final void openOutputs() {
         if (mLogVerbose) Log.v(TAG, "Opening all output ports on " + this + "!");
-        for (SourcePort outputPort : mOutputPorts.values()) {
+        for (OutputPort outputPort : mOutputPorts.values()) {
             if (!outputPort.isOpen()) {
                 outputPort.open();
             }
@@ -528,8 +528,8 @@ public abstract class Filter {
 
     // Filter internal methods /////////////////////////////////////////////////////////////////////
     private final void initFinalPorts(KeyValueMap values) {
-        mInputPorts = new HashMap<String, TargetPort>();
-        mOutputPorts = new HashMap<String, SourcePort>();
+        mInputPorts = new HashMap<String, InputPort>();
+        mOutputPorts = new HashMap<String, OutputPort>();
         addAndSetFinalPorts(values);
     }
 
@@ -607,7 +607,7 @@ public abstract class Filter {
     }
 
     private final void transferInputFrames(FilterContext context) {
-        for (TargetPort inputPort : mInputPorts.values()) {
+        for (InputPort inputPort : mInputPorts.values()) {
             inputPort.transfer(context);
         }
     }
@@ -641,22 +641,22 @@ public abstract class Filter {
 
     private final void closePorts() {
         if (mLogVerbose) Log.v(TAG, "Closing all ports on " + this + "!");
-        for (TargetPort inputPort : mInputPorts.values()) {
+        for (InputPort inputPort : mInputPorts.values()) {
             inputPort.close();
         }
-        for (SourcePort outputPort : mOutputPorts.values()) {
+        for (OutputPort outputPort : mOutputPorts.values()) {
             outputPort.close();
         }
     }
 
     private final boolean filterMustClose() {
-        for (TargetPort inputPort : mInputPorts.values()) {
+        for (InputPort inputPort : mInputPorts.values()) {
             if (inputPort.filterMustClose()) {
                 if (mLogVerbose) Log.v(TAG, "Filter " + this + " must close due to port " + inputPort);
                 return true;
             }
         }
-        for (SourcePort outputPort : mOutputPorts.values()) {
+        for (OutputPort outputPort : mOutputPorts.values()) {
             if (outputPort.filterMustClose()) {
                 if (mLogVerbose) Log.v(TAG, "Filter " + this + " must close due to port " + outputPort);
                 return true;

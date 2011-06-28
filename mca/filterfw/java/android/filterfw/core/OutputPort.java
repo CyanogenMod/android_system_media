@@ -17,10 +17,63 @@
 
 package android.filterfw.core;
 
-public class OutputPort extends SourcePort {
+public class OutputPort extends FilterPort {
+
+    protected InputPort mTargetPort;
+    protected InputPort mBasePort;
 
     public OutputPort(Filter filter, String name) {
         super(filter, name);
+    }
+
+    public void connectTo(InputPort target) {
+        if (mTargetPort != null) {
+            throw new RuntimeException(this + " already connected to " + mTargetPort + "!");
+        }
+        mTargetPort = target;
+        mTargetPort.setSourcePort(this);
+    }
+
+    public boolean isConnected() {
+        return mTargetPort != null;
+    }
+
+    public void open() {
+        super.open();
+        if (mTargetPort != null && !mTargetPort.isOpen()) {
+            mTargetPort.open();
+        }
+    }
+
+    public void close() {
+        super.close();
+        if (mTargetPort != null && mTargetPort.isOpen()) {
+            mTargetPort.close();
+        }
+    }
+
+    public InputPort getTargetPort() {
+        return mTargetPort;
+    }
+
+    public Filter getTargetFilter() {
+        return mTargetPort == null ? null : mTargetPort.getFilter();
+    }
+
+    public void setBasePort(InputPort basePort) {
+        mBasePort = basePort;
+    }
+
+    public InputPort getBasePort() {
+        return mBasePort;
+    }
+
+    public boolean filterMustClose() {
+        return !isOpen() && isBlocking();
+    }
+
+    public boolean isReady() {
+        return (isOpen() && !hasFrame()) || !isBlocking();
     }
 
     @Override
