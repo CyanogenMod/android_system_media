@@ -20,8 +20,11 @@ package android.filterfw.core;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterGraph;
 
-// All methods are core internal methods as Scheduler internals are only used by the GraphRunner.
+/**
+ * @hide
+ */
 public abstract class Scheduler {
+    // All methods are core internal methods as Scheduler internals are only used by the GraphRunner.
 
     private FilterGraph mGraph;
 

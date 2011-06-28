@@ -30,6 +30,9 @@ import android.filterfw.format.ImageFormat;
 
 import java.util.Set;
 
+/**
+ * @hide
+ */
 public class AlphaBlendFilter extends ImageCombineFilter {
 
     private final String mAlphaBlendShader =

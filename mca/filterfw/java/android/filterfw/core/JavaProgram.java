@@ -21,6 +21,9 @@ import android.filterfw.core.Frame;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.Program;
 
+/**
+ * @hide
+ */
 public abstract class JavaProgram extends Program {
 
     private KeyValueMap mHostVariables;

@@ -17,6 +17,9 @@
 
 package android.filterfw.core;
 
+/**
+ * @hide
+ */
 public class OutputPort extends FilterPort {
 
     protected InputPort mTargetPort;

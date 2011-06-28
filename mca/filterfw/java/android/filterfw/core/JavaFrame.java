@@ -27,6 +27,9 @@ import android.graphics.Bitmap;
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 
+/**
+ * @hide
+ */
 public class JavaFrame extends Frame {
 
     private Object mObject;

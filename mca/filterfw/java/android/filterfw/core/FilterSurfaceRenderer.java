@@ -18,7 +18,9 @@
 package android.filterfw.core;
 
 // TODO: Turning more and more into SurfaceHolder.Callback!
-
+/**
+ * @hide
+ */
 public interface FilterSurfaceRenderer {
 
     public void surfaceChanged(int format, int width, int height);

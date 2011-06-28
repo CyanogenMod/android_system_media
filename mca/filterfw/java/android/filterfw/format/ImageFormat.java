@@ -21,6 +21,9 @@ import android.filterfw.core.FrameFormat;
 import android.filterfw.core.MutableFrameFormat;
 import android.graphics.Bitmap;
 
+/**
+ * @hide
+ */
 public class ImageFormat {
 
     public static final String COLORSPACE_KEY = "colorspace";

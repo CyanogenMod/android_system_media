@@ -26,6 +26,9 @@ import android.graphics.Bitmap;
 
 import java.nio.ByteBuffer;
 
+/**
+ * @hide
+ */
 public class NativeFrame extends Frame {
 
     private int nativeFrameId;

@@ -17,6 +17,9 @@
 
 package android.filterfw.core;
 
+/**
+ * @hide
+ */
 public class ProtocolException extends RuntimeException {
 
     public ProtocolException() {

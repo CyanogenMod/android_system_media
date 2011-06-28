@@ -20,6 +20,9 @@ package android.filterfw.core;
 import android.filterfw.core.Filter;
 import android.filterfw.core.Scheduler;
 
+/**
+ * @hide
+ */
 public class SimpleScheduler extends Scheduler {
 
     public SimpleScheduler(FilterGraph graph) {

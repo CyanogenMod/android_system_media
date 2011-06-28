@@ -22,6 +22,9 @@ import android.filterfw.core.KeyValueMap;
 
 import java.util.Arrays;
 
+/**
+ * @hide
+ */
 public class MutableFrameFormat extends FrameFormat {
 
     public MutableFrameFormat() {

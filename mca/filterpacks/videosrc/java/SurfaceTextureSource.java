@@ -55,6 +55,8 @@ import android.util.Log;
  * provide width and height information for the SurfaceTextureSource, which it
  * should obtain from wherever the SurfaceTexture data is coming from to avoid
  * unnecessary resampling.</p>
+ *
+ * @hide
  */
 public class SurfaceTextureSource extends Filter {
 

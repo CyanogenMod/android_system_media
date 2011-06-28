@@ -32,6 +32,7 @@ import android.filterfw.core.FrameManager;
  *   3. Wrap Filters into FilterFunctions by calling createFunction().
  *   4. Execute FilterFunctions individually and use the results for further processing.
  * Additionally, there is a convenience method to execute a number of filters in sequence.
+ * @hide
  */
 public class FilterFunctionEnvironment extends MffEnvironment {
 

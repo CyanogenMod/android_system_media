@@ -17,6 +17,9 @@
 
 package android.filterfw.core;
 
+/**
+ * @hide
+ */
 public abstract class GraphRunner {
 
     /** Interface for listeners waiting for the runner to complete. */

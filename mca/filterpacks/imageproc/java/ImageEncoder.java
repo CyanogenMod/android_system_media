@@ -35,6 +35,9 @@ import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+/**
+ * @hide
+ */
 public class ImageEncoder extends Filter {
 
     @GenerateFieldPort(name = "fileName")

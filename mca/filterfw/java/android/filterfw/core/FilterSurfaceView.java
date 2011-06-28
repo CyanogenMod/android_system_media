@@ -24,6 +24,9 @@ import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+/**
+ * @hide
+ */
 public class FilterSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     private SurfaceHolder mHolder;

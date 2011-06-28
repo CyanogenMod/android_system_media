@@ -21,6 +21,9 @@ import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.MutableFrameFormat;
 
+/**
+ * @hide
+ */
 public abstract class FrameManager {
 
     public abstract Frame newFrame(FrameFormat format);

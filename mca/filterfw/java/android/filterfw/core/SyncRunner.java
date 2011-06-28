@@ -23,6 +23,9 @@ import java.lang.reflect.Constructor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @hide
+ */
 public class SyncRunner extends GraphRunner {
 
     private Scheduler mScheduler = null;

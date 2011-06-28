@@ -21,6 +21,9 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @hide
+ */
 public class KeyValueMap extends HashMap<String, Object> {
 
     public void setKeyValues(Object... keyValues) {

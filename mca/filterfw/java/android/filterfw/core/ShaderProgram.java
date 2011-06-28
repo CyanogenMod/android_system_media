@@ -25,6 +25,9 @@ import android.filterfw.core.VertexFrame;
 import android.filterfw.geometry.Quad;
 import android.opengl.GLES20;
 
+/**
+ * @hide
+ */
 public class ShaderProgram extends Program {
 
     private int shaderProgramId;

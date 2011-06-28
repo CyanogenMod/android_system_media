@@ -26,6 +26,8 @@ import android.filterfw.core.GLEnvironment;
  * Base class for mobile filter framework (MFF) frontend environments. These convenience classes
  * allow using the filter framework without the requirement of performing manual setup of its
  * required components.
+ *
+ * @hide
  */
 public class MffEnvironment {
 

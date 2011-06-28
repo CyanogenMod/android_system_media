@@ -25,6 +25,9 @@ import android.filterfw.core.JavaFrame;
 import android.filterfw.format.ObjectFormat;
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class StringLogger extends Filter {
 
     public StringLogger(String name) {

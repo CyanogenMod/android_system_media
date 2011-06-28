@@ -32,6 +32,9 @@ import android.filterfw.format.ImageFormat;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+/**
+ * @hide
+ */
 public class ImageDecoder extends Filter {
 
     @GenerateFinalPort(name = "target")

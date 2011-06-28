@@ -35,6 +35,9 @@ import android.filterfw.format.ObjectFormat;
 
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class CropFilter extends Filter {
 
     private Program mProgram;

@@ -20,6 +20,9 @@ package android.filterfw.core;
 import android.filterfw.core.NativeAllocatorTag;
 import android.view.Surface;
 
+/**
+ * @hide
+ */
 public class GLEnvironment {
 
     private int glEnvId;

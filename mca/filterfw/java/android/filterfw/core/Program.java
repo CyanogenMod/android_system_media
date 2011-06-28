@@ -19,6 +19,9 @@ package android.filterfw.core;
 
 import android.filterfw.core.Frame;
 
+/**
+ * @hide
+ */
 public abstract class Program {
 
     public abstract void process(Frame[] inputs, Frame output);

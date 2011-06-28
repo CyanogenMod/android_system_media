@@ -43,6 +43,9 @@ import android.graphics.Rect;
 
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer {
 
     private final int RENDERMODE_STRETCH   = 0;

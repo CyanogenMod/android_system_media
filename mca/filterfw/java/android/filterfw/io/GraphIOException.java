@@ -17,6 +17,9 @@
 
 package android.filterfw.io;
 
+/**
+ * @hide
+ */
 public class GraphIOException extends Exception {
 
     public GraphIOException() {

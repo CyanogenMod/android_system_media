@@ -19,6 +19,9 @@ package android.filterfw.core;
 
 import android.filterfw.core.Frame;
 
+/**
+ * @hide
+ */
 public class NativeBuffer {
 
     // These are set by the native layer

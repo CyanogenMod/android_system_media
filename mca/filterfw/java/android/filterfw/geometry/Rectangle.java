@@ -20,6 +20,9 @@ package android.filterfw.geometry;
 import android.filterfw.geometry.Point;
 import android.filterfw.geometry.Quad;
 
+/**
+ * @hide
+ */
 public class Rectangle extends Quad {
 
     public Rectangle() {

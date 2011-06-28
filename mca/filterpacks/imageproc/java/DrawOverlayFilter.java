@@ -32,6 +32,9 @@ import android.filterfw.format.ObjectFormat;
 
 import android.opengl.GLES20;
 
+/**
+ * @hide
+ */
 public class DrawOverlayFilter extends Filter {
 
     private ShaderProgram mProgram;

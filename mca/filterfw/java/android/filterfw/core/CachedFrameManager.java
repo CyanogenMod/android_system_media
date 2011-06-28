@@ -24,6 +24,9 @@ import android.filterfw.core.SimpleFrameManager;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+/**
+ * @hide
+ */
 public class CachedFrameManager extends SimpleFrameManager {
 
     private LinkedList<Frame> mAvailableFrames;

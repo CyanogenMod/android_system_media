@@ -24,6 +24,9 @@ import android.filterfw.core.FrameFormat;
 import android.filterfw.core.JavaFrame;
 import android.filterfw.format.ObjectFormat;
 
+/**
+ * @hide
+ */
 public class ToUpperCase extends Filter {
 
     private FrameFormat mOutputFormat;

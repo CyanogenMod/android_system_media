@@ -20,6 +20,9 @@ package android.filterfw.io;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * @hide
+ */
 public class PatternScanner {
 
     private String mInput;

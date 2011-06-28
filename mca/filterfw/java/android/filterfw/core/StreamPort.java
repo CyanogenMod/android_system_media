@@ -17,6 +17,9 @@
 
 package android.filterfw.core;
 
+/**
+ * @hide
+ */
 public class StreamPort extends InputPort {
 
     private Frame mFrame;

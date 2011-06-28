@@ -27,6 +27,9 @@ import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 
+/**
+ * @hide
+ */
 public class CallbackFilter extends Filter {
 
     @GenerateFieldPort(name = "listener", hasDefault = true)

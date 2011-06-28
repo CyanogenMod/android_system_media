@@ -24,6 +24,9 @@ import android.filterfw.core.GLEnvironment;
 
 import java.util.HashMap;
 
+/**
+ * @hide
+ */
 public class FilterContext {
 
     private FrameManager mFrameManager;

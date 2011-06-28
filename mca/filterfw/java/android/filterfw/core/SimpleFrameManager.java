@@ -26,6 +26,9 @@ import android.filterfw.core.JavaFrame;
 import android.filterfw.core.VertexFrame;
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class SimpleFrameManager extends FrameManager {
 
     public SimpleFrameManager() {
