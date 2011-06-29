@@ -20,6 +20,9 @@ import android.os.SystemClock;
 import android.util.Log;
 import java.util.HashMap;
 
+/**
+ * @hide
+ */
 class StopWatch {
 
     private int STOP_WATCH_LOGGING_PERIOD = 200;

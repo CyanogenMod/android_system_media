@@ -31,6 +31,9 @@ import android.filterfw.format.ImageFormat;
 
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class ToRGBAFilter extends Filter {
 
     private int mInputBPP;

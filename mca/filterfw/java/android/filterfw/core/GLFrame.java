@@ -42,6 +42,9 @@ class GLFrameTimer {
 
 }
 
+/**
+ * @hide
+ */
 public class GLFrame extends Frame {
 
     // GL-related binding types

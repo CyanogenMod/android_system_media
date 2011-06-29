@@ -19,6 +19,9 @@ package android.filterfw.core;
 
 import java.lang.reflect.Field;
 
+/**
+ * @hide
+ */
 public class FieldPort extends InputPort {
 
     protected Field mField;

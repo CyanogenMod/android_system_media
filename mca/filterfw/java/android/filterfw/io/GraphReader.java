@@ -27,6 +27,9 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.StringWriter;
 
+/**
+ * @hide
+ */
 public abstract class GraphReader {
 
     protected KeyValueMap mReferences = new KeyValueMap();

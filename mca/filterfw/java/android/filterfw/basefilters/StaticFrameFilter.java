@@ -25,6 +25,9 @@ import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.KeyValueMap;
 
 // TODO: Rename to FixedFrameSource and also add a (dynamic) FrameSource?
+/**
+ * @hide
+ */
 public class StaticFrameFilter extends Filter {
 
     @GenerateFinalPort(name = "frame")

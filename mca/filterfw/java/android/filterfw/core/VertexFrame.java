@@ -24,6 +24,9 @@ import android.graphics.Bitmap;
 
 import java.nio.ByteBuffer;
 
+/**
+ * @hide
+ */
 public class VertexFrame extends Frame {
 
     private int vertexFrameId;

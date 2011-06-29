@@ -29,6 +29,9 @@ import android.filterfw.format.ImageFormat;
 
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class ToPackedGrayFilter extends Filter {
 
     @GenerateFieldPort(name = "owidth", hasDefault = true)

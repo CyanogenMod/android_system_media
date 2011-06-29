@@ -32,6 +32,9 @@ import android.filterfw.format.ImageFormat;
 
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class ToGrayFilter extends SimpleImageFilter {
 
     @GenerateFieldPort(name = "outputChannels")

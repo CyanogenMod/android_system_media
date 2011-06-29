@@ -19,6 +19,9 @@ package android.filterfw.geometry;
 
 import java.lang.Math;
 
+/**
+ * @hide
+ */
 public class Point {
 
     public float x;

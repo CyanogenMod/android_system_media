@@ -28,6 +28,9 @@ import android.filterfw.format.ImageFormat;
 
 import java.util.Set;
 
+/**
+ * @hide
+ */
 public class GLTextureSource extends Filter {
 
     @GenerateFieldPort(name = "texId")

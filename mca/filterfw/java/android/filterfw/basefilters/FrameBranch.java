@@ -24,6 +24,9 @@ import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.KeyValueMap;
 
+/**
+ * @hide
+ */
 public class FrameBranch extends Filter {
 
     @GenerateFinalPort(name = "outputs", hasDefault = true)

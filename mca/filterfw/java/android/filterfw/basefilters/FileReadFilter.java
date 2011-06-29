@@ -39,6 +39,9 @@ import java.util.Set;
 
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class FileReadFilter extends Filter {
 
     @GenerateFinalPort(name = "target")

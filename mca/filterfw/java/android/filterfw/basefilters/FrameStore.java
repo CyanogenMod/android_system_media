@@ -23,6 +23,9 @@ import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFieldPort;
 
+/**
+ * @hide
+ */
 public class FrameStore extends Filter {
 
     @GenerateFieldPort(name = "key")

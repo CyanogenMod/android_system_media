@@ -35,6 +35,9 @@ import java.util.Map.Entry;
 import java.util.LinkedList;
 import java.util.Set;
 
+/**
+ * @hide
+ */
 public abstract class Filter {
 
     static final int STATUS_PREINIT               = 0;

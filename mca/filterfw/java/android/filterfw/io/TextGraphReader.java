@@ -33,6 +33,9 @@ import android.filterfw.io.GraphReader;
 import android.filterfw.io.GraphIOException;
 import android.filterfw.io.PatternScanner;
 
+/**
+ * @hide
+ */
 public class TextGraphReader extends GraphReader {
 
     private ArrayList<Command> mCommands = new ArrayList<Command>();

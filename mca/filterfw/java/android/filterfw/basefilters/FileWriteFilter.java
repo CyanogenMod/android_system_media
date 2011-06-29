@@ -33,6 +33,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Set;
 
+/**
+ * @hide
+ */
 public class FileWriteFilter extends Filter {
 
     @GenerateFieldPort(name = "fileName")

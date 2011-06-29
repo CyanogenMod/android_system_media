@@ -29,6 +29,9 @@ import android.filterfw.core.ShaderProgram;
 
 import java.util.Set;
 
+/**
+ * @hide
+ */
 public class ContrastFilter extends SimpleImageFilter {
 
     private static final String mContrastShader =

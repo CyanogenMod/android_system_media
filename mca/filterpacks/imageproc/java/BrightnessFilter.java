@@ -27,6 +27,9 @@ import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 
+/**
+ * @hide
+ */
 public class BrightnessFilter extends SimpleImageFilter {
 
     private static final String mBrightnessShader =

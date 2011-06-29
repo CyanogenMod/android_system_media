@@ -42,6 +42,9 @@ import java.util.Set;
 
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class CameraSource extends Filter {
 
     /** User-visible parameters */

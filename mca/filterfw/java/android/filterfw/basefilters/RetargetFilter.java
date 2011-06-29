@@ -26,6 +26,9 @@ import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
 
+/**
+ * @hide
+ */
 public class RetargetFilter extends Filter {
 
     @GenerateFinalPort(name = "target", hasDefault = false)

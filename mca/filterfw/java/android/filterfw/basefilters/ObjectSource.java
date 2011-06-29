@@ -27,6 +27,9 @@ import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.format.ObjectFormat;
 
+/**
+ * @hide
+ */
 public class ObjectSource extends Filter {
 
     @GenerateFieldPort(name = "object")

@@ -24,6 +24,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * @hide
+ */
 public class Quad {
 
     public Point p0;

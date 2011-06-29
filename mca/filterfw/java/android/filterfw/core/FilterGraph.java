@@ -32,6 +32,9 @@ import android.filterpacks.base.NullFilter;
 
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class FilterGraph {
 
     private HashSet<Filter> mFilters = new HashSet<Filter>();

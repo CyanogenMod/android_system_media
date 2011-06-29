@@ -19,6 +19,9 @@ package android.filterfw.core;
 
 import java.lang.annotation.*;
 
+/**
+ * @hide
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface GenerateProgramPorts {

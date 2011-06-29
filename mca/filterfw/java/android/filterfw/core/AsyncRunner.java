@@ -27,6 +27,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @hide
+ */
 public class AsyncRunner extends GraphRunner{
 
     private FilterContext mFilterContext;

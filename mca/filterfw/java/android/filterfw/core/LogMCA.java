@@ -21,6 +21,8 @@ import android.util.Log;
 
 /**
  * Settings for MCA-specific logging.
+ *
+ * @hide
  */
 public class LogMCA {
 

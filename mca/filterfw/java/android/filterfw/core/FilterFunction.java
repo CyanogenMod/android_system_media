@@ -19,6 +19,9 @@ package android.filterfw.core;
 
 import java.util.Map.Entry;
 
+/**
+ * @hide
+ */
 public class FilterFunction {
 
     private Filter mFilter;

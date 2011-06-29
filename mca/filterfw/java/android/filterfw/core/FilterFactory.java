@@ -22,6 +22,9 @@ import android.filterfw.core.Filter;
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
 
+/**
+ * @hide
+ */
 public class FilterFactory {
 
     private static FilterFactory mSharedFactory;

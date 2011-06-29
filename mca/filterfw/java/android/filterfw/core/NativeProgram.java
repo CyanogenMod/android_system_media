@@ -20,6 +20,9 @@ package android.filterfw.core;
 import android.filterfw.core.Frame;
 import android.filterfw.core.Program;
 
+/**
+ * @hide
+ */
 public class NativeProgram extends Program {
 
     private int nativeProgramId;

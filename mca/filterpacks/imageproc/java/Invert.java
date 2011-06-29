@@ -26,6 +26,9 @@ import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 
+/**
+ * @hide
+ */
 public class Invert extends SimpleImageFilter {
 
     private static final String mInvertShader =

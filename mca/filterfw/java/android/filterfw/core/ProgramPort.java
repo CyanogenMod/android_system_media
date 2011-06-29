@@ -19,6 +19,9 @@ package android.filterfw.core;
 
 import java.lang.reflect.Field;
 
+/**
+ * @hide
+ */
 public class ProgramPort extends FieldPort {
 
     protected String mVarName;

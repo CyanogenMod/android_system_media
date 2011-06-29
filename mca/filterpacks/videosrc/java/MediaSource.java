@@ -46,6 +46,9 @@ import java.util.Set;
 
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class MediaSource extends Filter {
 
     /** User-visible parameters */

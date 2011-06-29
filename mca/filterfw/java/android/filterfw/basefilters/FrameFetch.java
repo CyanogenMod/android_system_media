@@ -26,6 +26,9 @@ import android.filterfw.core.GenerateFinalPort;
 
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class FrameFetch extends Filter {
 
     @GenerateFinalPort(name = "format", hasDefault = true)

@@ -23,6 +23,9 @@ import android.filterfw.core.MutableFrameFormat;
 import java.util.Arrays;
 import java.util.Map.Entry;
 
+/**
+ * @hide
+ */
 public class FrameFormat {
 
     public static final int TYPE_UNSPECIFIED = 0;

@@ -21,6 +21,9 @@ import android.filterfw.core.Filter;
 import android.filterfw.core.FrameFormat;
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public abstract class FilterPort {
 
     protected Filter mFilter;

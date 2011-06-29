@@ -32,6 +32,9 @@ import android.util.Log;
 
 import java.util.Set;
 
+/**
+ * @hide
+ */
 public class FisheyeFilter extends SimpleImageFilter {
     private static final String TAG = "FisheyeFilter";
 

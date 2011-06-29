@@ -33,6 +33,9 @@ import android.filterfw.format.ImageFormat;
 
 import android.opengl.GLES20;
 
+/**
+ * @hide
+ */
 public class ResizeFilter extends Filter {
 
     @GenerateFieldPort(name = "owidth")

@@ -40,6 +40,8 @@ import java.util.ArrayList;
  *   4. Obtain a GraphRunner instance using getRunner().
  *   5. Execute the obtained runner.
  * Note that it is possible to add multiple graphs and runners to a single GraphEnvironment.
+ *
+ * @hide
  */
 public class GraphEnvironment extends MffEnvironment {
 

@@ -22,6 +22,9 @@ import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.NativeBuffer;
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class ObjectFormat {
 
     public static MutableFrameFormat fromClass(Class clazz, int count, int target) {

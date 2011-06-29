@@ -22,6 +22,9 @@ import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 
+/**
+ * @hide
+ */
 public class NullFilter extends Filter {
 
     public NullFilter(String name) {

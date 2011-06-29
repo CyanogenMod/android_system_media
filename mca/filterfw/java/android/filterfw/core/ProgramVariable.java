@@ -17,6 +17,9 @@
 
 package android.filterfw.core;
 
+/**
+ * @hide
+ */
 public class ProgramVariable {
 
     private Program mProgram;

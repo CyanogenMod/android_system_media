@@ -33,6 +33,9 @@ import android.filterfw.format.ObjectFormat;
 
 import android.opengl.GLES20;
 
+/**
+ * @hide
+ */
 public class DrawRectFilter extends Filter {
 
     @GenerateFieldPort(name = "colorRed",  hasDefault = true)

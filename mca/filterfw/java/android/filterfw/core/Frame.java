@@ -22,6 +22,9 @@ import android.filterfw.core.FrameManager;
 import android.graphics.Bitmap;
 import java.nio.ByteBuffer;
 
+/**
+ * @hide
+ */
 public abstract class Frame {
 
     public final static int NO_BINDING = 0;
