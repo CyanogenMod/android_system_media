@@ -100,7 +100,7 @@ GLFrame::~GLFrame() {
 }
 
 bool GLFrame::GenerateMipMap() {
-  if (BindTexture()) {
+  if (FocusTexture()) {
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D,
                     GL_TEXTURE_MIN_FILTER,
@@ -111,7 +111,7 @@ bool GLFrame::GenerateMipMap() {
 }
 
 bool GLFrame::SetTextureParameter(GLenum pname, GLint value) {
-  if (BindTexture()) {
+  if (FocusTexture()) {
     glTexParameteri(GL_TEXTURE_2D, pname, value);
     return !GLEnv::CheckGLError("Setting texture parameter!");
   }
