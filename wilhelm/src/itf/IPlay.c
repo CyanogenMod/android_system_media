@@ -36,26 +36,29 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
             (CAudioPlayer *) thiz->mThis : NULL;
 #endif
         interface_lock_exclusive(thiz);
+        SLuint32 oldState = thiz->mState;
+        if (state != oldState) {
 #ifdef USE_OUTPUTMIXEXT
-        for (;; interface_cond_wait(thiz)) {
+          for (;; interface_cond_wait(thiz)) {
 
             // We are comparing the old state (left) vs. new state (right).
             // Note that the old state is 3 bits wide, but new state is only 2 bits wide.
             // That is why the old state is on the left and new state is on the right.
-            switch ((thiz->mState << 2) | state) {
+            switch ((oldState << 2) | state) {
 
             case (SL_PLAYSTATE_STOPPED  << 2) | SL_PLAYSTATE_STOPPED:
             case (SL_PLAYSTATE_PAUSED   << 2) | SL_PLAYSTATE_PAUSED:
             case (SL_PLAYSTATE_PLAYING  << 2) | SL_PLAYSTATE_PLAYING:
-               // no-op
+               // no-op, and unreachable due to earlier "if (state != oldState)"
                 break;
 
             case (SL_PLAYSTATE_STOPPED  << 2) | SL_PLAYSTATE_PLAYING:
             case (SL_PLAYSTATE_PAUSED   << 2) | SL_PLAYSTATE_PLAYING:
-                attr = ATTR_TRANSPORT;
+                attr = ATTR_PLAY_STATE;
                 // set enqueue attribute if queue is non-empty and state becomes PLAYING
                 if ((NULL != audioPlayer) && (audioPlayer->mBufferQueue.mFront !=
                     audioPlayer->mBufferQueue.mRear)) {
+                    // note that USE_OUTPUTMIXEXT does not support ATTR_ABQ_ENQUEUE
                     attr |= ATTR_BQ_ENQUEUE;
                 }
                 // fall through
@@ -90,12 +93,14 @@ static SLresult IPlay_SetPlayState(SLPlayItf self, SLuint32 state)
             }
 
             break;
-        }
+          }
 #else
-        // Here life looks easy for an Android, but there are other troubles in play land
-        thiz->mState = state;
-        attr = ATTR_TRANSPORT;
+          // Here life looks easy for an Android, but there are other troubles in play land
+          thiz->mState = state;
+          attr = ATTR_PLAY_STATE;
+          // no need to set ATTR_BQ_ENQUEUE or ATTR_ABQ_ENQUEUE
 #endif
+        }
         // SL_LOGD("set play state %d", state);
         interface_unlock_exclusive_attributes(thiz, attr);
         }

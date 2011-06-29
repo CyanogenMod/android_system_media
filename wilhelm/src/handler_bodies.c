@@ -81,11 +81,18 @@ unsigned handler_MidiPlayer_position(IObject *thiz)
 unsigned handler_AudioPlayer_transport(IObject *thiz)
 {
     CAudioPlayer *ap = (CAudioPlayer *) thiz;
-    // FIXME should only call when state changes
-    android_audioPlayer_setPlayState(ap, false /*lockAP*/);
-    // FIXME ditto, but for either eventflags or marker position
+    // FIXME should only call when either eventflags or marker position changes
     android_audioPlayer_useEventMask(ap);
     return ATTR_TRANSPORT;
+}
+
+
+// SL_OBJECTID_AUDIOPLAYER, ATTR_PLAY_STATE
+unsigned handler_AudioPlayer_play_state(IObject *thiz)
+{
+    CAudioPlayer *ap = (CAudioPlayer *) thiz;
+    android_audioPlayer_setPlayState(ap);
+    return ATTR_PLAY_STATE;
 }
 
 
@@ -98,7 +105,7 @@ unsigned handler_AudioRecorder_transport(IObject *thiz)
 }
 
 
-// XA_OBJECTID_MEDIAPLAYER, ATTR_TRANSPORT
+// XA_OBJECTID_MEDIAPLAYER, ATTR_TRANSPORT or ATTR_PLAY_STATE
 unsigned handler_MediaPlayer_transport(IObject *thiz)
 {
     CMediaPlayer *mp = (CMediaPlayer *) thiz;
@@ -106,7 +113,7 @@ unsigned handler_MediaPlayer_transport(IObject *thiz)
     if (avp != NULL) {
         android_Player_setPlayState(avp, mp->mPlay.mState, &(mp->mAndroidObjState));
     }
-    return ATTR_TRANSPORT;
+    return ATTR_TRANSPORT | ATTR_PLAY_STATE;
 }
 
 
@@ -115,9 +122,8 @@ unsigned handler_AudioPlayer_bq_enqueue(IObject *thiz)
 {
     // ( buffer queue count is non-empty and play state == PLAYING ) became true
     CAudioPlayer *ap = (CAudioPlayer *) thiz;
-    if (SL_PLAYSTATE_PLAYING == ap->mPlay.mState) {
-        android_audioPlayer_bufferQueue_onRefilled_l(ap);
-    }
+    assert(SL_PLAYSTATE_PLAYING == ap->mPlay.mState);
+    android_audioPlayer_bufferQueue_onRefilled_l(ap);
     return ATTR_BQ_ENQUEUE;
 }
 
@@ -127,9 +133,8 @@ unsigned handler_AudioPlayer_abq_enqueue(IObject *thiz)
 {
     // (Android buffer queue count is non-empty and play state == PLAYING ) became true
     CAudioPlayer *ap = (CAudioPlayer *) thiz;
-    if (SL_PLAYSTATE_PLAYING == ap->mPlay.mState) {
-        android_audioPlayer_androidBufferQueue_onRefilled_l(ap);
-    }
+    assert(SL_PLAYSTATE_PLAYING == ap->mPlay.mState);
+    android_audioPlayer_androidBufferQueue_onRefilled_l(ap);
     return ATTR_ABQ_ENQUEUE;
 }
 

@@ -29,11 +29,13 @@ extern unsigned handler_MediaPlayer_gain(IObject *thiz);
 extern unsigned handler_MediaPlayer_transport(IObject *thiz);
 extern unsigned handler_MediaPlayer_position(IObject *thiz);
 extern unsigned handler_MediaPlayer_abq_enqueue(IObject *thiz);
+#define handler_MediaPlayer_play_state handler_MediaPlayer_transport
 extern unsigned handler_AudioPlayer_gain(IObject *thiz);
 extern unsigned handler_AudioPlayer_transport(IObject *thiz);
 extern unsigned handler_AudioPlayer_position(IObject *thiz);
 extern unsigned handler_AudioPlayer_bq_enqueue(IObject *thiz);
 extern unsigned handler_AudioPlayer_abq_enqueue(IObject *thiz);
+extern unsigned handler_AudioPlayer_play_state(IObject *thiz);
 extern unsigned handler_AudioRecorder_transport(IObject *thiz);
 extern unsigned handler_MidiPlayer_gain(IObject *thiz);
 extern unsigned handler_MidiPlayer_position(IObject *thiz);
@@ -43,10 +45,12 @@ extern unsigned handler_OutputMix_gain(IObject *thiz);
 #define handler_MediaPlayer_transport   NULL
 #define handler_MediaPlayer_position    NULL
 #define handler_MediaPlayer_abq_enqueue NULL
+#define handler_MediaPlayer_play_state  NULL
 #define handler_AudioPlayer_transport   NULL
 #define handler_AudioPlayer_position    NULL
 #define handler_AudioPlayer_bq_enqueue  NULL
 #define handler_AudioPlayer_abq_enqueue NULL
+#define handler_AudioPlayer_play_state  NULL
 #define handler_AudioRecorder_transport NULL
 #define handler_MidiPlayer_gain         NULL
 #define handler_MidiPlayer_position     NULL
