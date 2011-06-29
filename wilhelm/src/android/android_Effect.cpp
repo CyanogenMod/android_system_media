@@ -449,7 +449,7 @@ android::status_t android_fxSend_attach(CAudioPlayer* ap, bool attach,
         return android::INVALID_OPERATION;
     }
 
-    if (NULL == ap->mAudioTrack) {
+    if (ap->mAudioTrack == 0) {
         // the player doesn't have an AudioTrack at the moment, so store this info to use it
         // when the AudioTrack becomes available
         if (attach) {
@@ -508,7 +508,7 @@ android::status_t android_fxSend_setSendLevel(CAudioPlayer* ap, SLmillibel sendL
     // we keep track of the send level, independently of the current audio player level
     ap->mAuxSendLevel = sendLevel - ap->mVolume.mLevel;
 
-    if (NULL == ap->mAudioTrack) {
+    if (ap->mAudioTrack == 0) {
         return android::NO_ERROR;
     }
 

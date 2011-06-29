@@ -184,7 +184,7 @@ int android_getMinFrameCount(uint32_t sampleRate) {
 static void android_audioPlayer_updateStereoVolume(CAudioPlayer* ap) {
     float leftVol = 1.0f, rightVol = 1.0f;
 
-    if (NULL == ap->mAudioTrack) {
+    if (ap->mAudioTrack == 0) {
         return;
     }
     // should not be used when muted
@@ -498,7 +498,7 @@ SLresult audioPlayer_getStreamType(CAudioPlayer* ap, SLint32 *pType) {
 
 //-----------------------------------------------------------------------------
 void audioPlayer_auxEffectUpdate(CAudioPlayer* ap) {
-    if ((NULL != ap->mAudioTrack) && (ap->mAuxEffect != 0)) {
+    if ((ap->mAudioTrack != 0) && (ap->mAuxEffect != 0)) {
         android_fxSend_attach(ap, true, ap->mAuxEffect, ap->mVolume.mLevel + ap->mAuxSendLevel);
     }
 }
@@ -651,10 +651,11 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
         if (PLAYER_SUCCESS != data1) {
             object_lock_exclusive(&ap->mObject);
 
-            ap->mAudioTrack = NULL;
-            ap->mNumChannels = 0;
-            ap->mSampleRateMilliHz = 0;
-            ap->mAndroidObjState = ANDROID_UNINITIALIZED;
+            // already initialized at object creation, and can only prepare once so never reset
+            assert(ap->mAudioTrack == 0);
+            assert(ap->mNumChannels == ANDROID_UNKNOWN_NUMCHANNELS);
+            assert(ap->mSampleRateMilliHz == ANDROID_UNKNOWN_SAMPLERATE);
+            assert(ap->mAndroidObjState == ANDROID_UNINITIALIZED);
 
             object_unlock_exclusive(&ap->mObject);
 
@@ -776,7 +777,7 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
 
     case android::GenericPlayer::kEventEndOfStream: {
         audioPlayer_dispatch_headAtEnd_lockPlay(ap, true /*set state to paused?*/, true);
-        if ((NULL != ap->mAudioTrack) && (!ap->mSeek.mLoopEnabled)) {
+        if ((ap->mAudioTrack != 0) && (!ap->mSeek.mLoopEnabled)) {
             ap->mAudioTrack->stop();
         }
         }
@@ -1165,21 +1166,28 @@ SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
 
+        // These initializations are in the same order as the field declarations in classes.h
+
+        // FIXME Consolidate initializations (many of these already in IEngine_CreateAudioPlayer)
         pAudioPlayer->mpLock = new android::Mutex();
+        // mAndroidObjType: see above comment
         pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
-        pAudioPlayer->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
-        pAudioPlayer->mAudioTrack = NULL;
-
-        pAudioPlayer->mCallbackProtector = new android::CallbackProtector();
-
         pAudioPlayer->mSessionId = android::AudioSystem::newAudioSessionId();
+        pAudioPlayer->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
 
+        // mAudioTrack
+        pAudioPlayer->mCallbackProtector = new android::CallbackProtector();
+        // mAPLayer
+        // mAuxEffect
+
+        pAudioPlayer->mAuxSendLevel = 0;
         pAudioPlayer->mAmplFromVolLevel = 1.0f;
         pAudioPlayer->mAmplFromStereoPos[0] = 1.0f;
         pAudioPlayer->mAmplFromStereoPos[1] = 1.0f;
-        pAudioPlayer->mDirectLevel = 0; // no attenuation
         pAudioPlayer->mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
-        pAudioPlayer->mAuxSendLevel = 0;
+        pAudioPlayer->mDeferredStart = false;
+        // Already initialized in IEngine_CreateAudioPlayer, to be consolidated
+        pAudioPlayer->mDirectLevel = 0; // no attenuation
 
         // initialize interface-specific fields that can be used regardless of whether the
         // interface is exposed on the AudioPlayer or not
@@ -1275,7 +1283,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         uint32_t sampleRate = sles_to_android_sampleRate(df_pcm->samplesPerSec);
 
-        pAudioPlayer->mAudioTrack = new android::AudioTrack(
+        pAudioPlayer->mAudioTrack = new android::AudioTrackProxy(new android::AudioTrack(
                 pAudioPlayer->mStreamType,                           // streamType
                 sampleRate,                                          // sampleRate
                 sles_to_android_sampleFormat(df_pcm->bitsPerSample), // format
@@ -1287,11 +1295,13 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                 (void *) pAudioPlayer,                               // user
                 0      // FIXME find appropriate frame count         // notificationFrame
                 , pAudioPlayer->mSessionId
-                );
+                ));
         android::status_t status = pAudioPlayer->mAudioTrack->initCheck();
         if (status != android::NO_ERROR) {
             SL_LOGE("AudioTrack::initCheck status %u", status);
             result = SL_RESULT_CONTENT_UNSUPPORTED;
+            pAudioPlayer->mAudioTrack.clear();
+            return result;
         }
 
         // initialize platform-independent CAudioPlayer fields
@@ -1307,10 +1317,10 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     case AUDIOPLAYER_FROM_URIFD: {
         object_lock_exclusive(&pAudioPlayer->mObject);
 
-        pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
-        pAudioPlayer->mNumChannels = 0;
-        pAudioPlayer->mSampleRateMilliHz = 0;
-        pAudioPlayer->mAudioTrack = NULL;
+        assert(pAudioPlayer->mAndroidObjState == ANDROID_UNINITIALIZED);
+        assert(pAudioPlayer->mNumChannels == ANDROID_UNKNOWN_NUMCHANNELS);
+        assert(pAudioPlayer->mSampleRateMilliHz == ANDROID_UNKNOWN_SAMPLERATE);
+        assert(pAudioPlayer->mAudioTrack == 0);
 
         AudioPlayback_Parameters app;
         app.sessionId = pAudioPlayer->mSessionId;
@@ -1459,10 +1469,10 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
 
     case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
         // We own the audio track for PCM buffer queue players
-        if (pAudioPlayer->mAudioTrack != NULL) {
+        if (pAudioPlayer->mAudioTrack != 0) {
             pAudioPlayer->mAudioTrack->stop();
-            delete pAudioPlayer->mAudioTrack;
-            pAudioPlayer->mAudioTrack = NULL;
+            // Note that there may still be another reference in post-unlock phase of SetPlayState
+            pAudioPlayer->mAudioTrack.clear();
         }
         break;
 
@@ -1484,6 +1494,8 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     pAudioPlayer->mAndroidObjType = INVALID_TYPE;
 
     // explicit destructor
+    pAudioPlayer->mAudioTrack.~sp();
+    // note that SetPlayState(PLAYING) may still hold a reference
     pAudioPlayer->mCallbackProtector.~sp();
     pAudioPlayer->mAuxEffect.~sp();
     pAudioPlayer->mAPlayer.~sp();
@@ -1509,7 +1521,7 @@ SLresult android_audioPlayer_setPlayRate(CAudioPlayer *ap, SLpermille rate, bool
         uint32_t contentRate = sles_to_android_sampleRate(ap->mSampleRateMilliHz);
         if (lockAP) { object_unlock_shared(&ap->mObject); }
         // apply the SL ES playback rate on the AudioTrack as a factor of its content sample rate
-        if (ap->mAudioTrack != NULL) {
+        if (ap->mAudioTrack != 0) {
             ap->mAudioTrack->setSampleRate(contentRate * (rate/1000.0f));
         }
         }
@@ -1744,20 +1756,21 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
         switch (playState) {
         case SL_PLAYSTATE_STOPPED:
             SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_STOPPED");
-            if (NULL != ap->mAudioTrack) {
+            if (ap->mAudioTrack != 0) {
                 ap->mAudioTrack->stop();
             }
             break;
         case SL_PLAYSTATE_PAUSED:
             SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PAUSED");
-            if (NULL != ap->mAudioTrack) {
+            if (ap->mAudioTrack != 0) {
                 ap->mAudioTrack->pause();
             }
             break;
         case SL_PLAYSTATE_PLAYING:
             SL_LOGV("setting AudioPlayer to SL_PLAYSTATE_PLAYING");
-            if (NULL != ap->mAudioTrack) {
-                ap->mAudioTrack->start();
+            if (ap->mAudioTrack != 0) {
+                // instead of ap->mAudioTrack->start();
+                ap->mDeferredStart = true;
             }
             break;
         default:
@@ -1787,7 +1800,7 @@ void android_audioPlayer_useEventMask(CAudioPlayer *ap) {
     /*switch(ap->mAndroidObjType) {
     case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:*/
 
-    if (NULL == ap->mAudioTrack) {
+    if (ap->mAudioTrack == 0) {
         return;
     }
 
@@ -1855,7 +1868,7 @@ void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
     switch(ap->mAndroidObjType) {
 
       case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
-        if ((ap->mSampleRateMilliHz == 0) || (NULL == ap->mAudioTrack)) {
+        if ((ap->mSampleRateMilliHz == ANDROID_UNKNOWN_SAMPLERATE) || (ap->mAudioTrack == 0)) {
             *pPosMsec = 0;
         } else {
             uint32_t positionInFrames;
@@ -1925,7 +1938,7 @@ static void android_audioPlayer_setMute(CAudioPlayer* ap) {
     switch(ap->mAndroidObjType) {
 
       case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
-        if (ap->mAudioTrack != NULL) {
+        if (ap->mAudioTrack != 0) {
             // when unmuting: volume levels have already been updated in IVolume_SetMute
             ap->mAudioTrack->mute(ap->mMute);
         }
@@ -1977,8 +1990,9 @@ void android_audioPlayer_bufferQueue_onRefilled_l(CAudioPlayer *ap) {
     // the AudioTrack associated with the AudioPlayer receiving audio from a PCM buffer
     // queue was stopped when the queue become empty, we restart as soon as a new buffer
     // has been enqueued since we're in playing state
-    if (NULL != ap->mAudioTrack) {
-        ap->mAudioTrack->start();
+    if (ap->mAudioTrack != 0) {
+        // instead of ap->mAudioTrack->start();
+        ap->mDeferredStart = true;
     }
 
     // when the queue became empty, an underflow on the prefetch status itf was sent. Now the queue
@@ -2001,7 +2015,7 @@ SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *ap) {
     //-----------------------------------
     // AudioTrack
     case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
-        if (NULL != ap->mAudioTrack) {
+        if (ap->mAudioTrack != 0) {
             ap->mAudioTrack->flush();
         }
         break;

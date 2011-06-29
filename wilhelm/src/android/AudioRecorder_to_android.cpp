@@ -540,7 +540,7 @@ void android_audioRecorder_getPosition(CAudioRecorder *ar, SLmillisecond *pPosMs
     } else {
         uint32_t positionInFrames;
         ar->mAudioRecord->getPosition(&positionInFrames);
-        if (ar->mSampleRateMilliHz == 0) {
+        if (ar->mSampleRateMilliHz == ANDROID_UNKNOWN_SAMPLERATE) {
             *pPosMsec = 0;
         } else {
             *pPosMsec = ((int64_t)positionInFrames * 1000) /
