@@ -123,7 +123,7 @@ extern SLresult android_audioPlayer_metadata_getValue(CAudioPlayer *pAudioPlayer
 /**************************************************************************************************
  * Playback control and events
  ****************************/
-extern void android_audioPlayer_setPlayState(CAudioPlayer *pAudioPlayer, bool lockAP);
+extern void android_audioPlayer_setPlayState(CAudioPlayer *pAudioPlayer);
 
 extern void android_audioPlayer_useEventMask(CAudioPlayer *pAudioPlayer);
 

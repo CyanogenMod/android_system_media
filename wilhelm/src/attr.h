@@ -21,14 +21,14 @@
 #define ATTR_INDEX_GAIN        0 // volume: volume, stereo position, mute
                                  // mute solo: channel mute, channel solo
                                  // effect send: set direct level
-#define ATTR_INDEX_TRANSPORT   1 // play: play state, looping, callback events mask,
+#define ATTR_INDEX_TRANSPORT   1 // play: looping, callback events mask,
                                  //       marker position, position update period
                                  // recorder: duration limit, events mask,
                                  //           marker position, position update period
 #define ATTR_INDEX_POSITION    2 // requested position (a.k.a. seek position)
 #define ATTR_INDEX_BQ_ENQUEUE  3 // (buffer queue non-empty and in playing state) became true
 #define ATTR_INDEX_ABQ_ENQUEUE 4 // Android buffer queue became non-empty and in playing state
-#define ATTR_INDEX_UNUSED5     5 // reserved for future use
+#define ATTR_INDEX_PLAY_STATE  5 // play: play state
 #define ATTR_INDEX_UNUSED6     6 // reserved for future use
 #define ATTR_INDEX_UNUSED7     7 // reserved for future use
 #define ATTR_INDEX_MAX         8 // total number of bits used so far
@@ -41,6 +41,6 @@
 #define ATTR_POSITION    (1 << ATTR_INDEX_POSITION)
 #define ATTR_BQ_ENQUEUE  (1 << ATTR_INDEX_BQ_ENQUEUE)
 #define ATTR_ABQ_ENQUEUE (1 << ATTR_INDEX_ABQ_ENQUEUE)
-#define ATTR_UNUSED5     (1 << ATTR_INDEX_UNUSED5)
+#define ATTR_PLAY_STATE  (1 << ATTR_INDEX_PLAY_STATE)
 #define ATTR_UNUSED6     (1 << ATTR_INDEX_UNUSED6)
 #define ATTR_UNUSED7     (1 << ATTR_INDEX_UNUSED7)

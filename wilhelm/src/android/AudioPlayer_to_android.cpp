@@ -1725,12 +1725,14 @@ SLresult android_audioPlayer_metadata_getValue(CAudioPlayer *ap,
 }
 
 //-----------------------------------------------------------------------------
-void android_audioPlayer_setPlayState(CAudioPlayer *ap, bool lockAP) {
+// preconditions
+//  ap != NULL
+//  mutex is locked
+//  play state has changed
+void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
 
-    if (lockAP) { object_lock_shared(&ap->mObject); }
     SLuint32 playState = ap->mPlay.mState;
     AndroidObjectState objState = ap->mAndroidObjState;
-    if (lockAP) { object_unlock_shared(&ap->mObject); }
 
     switch(ap->mAndroidObjType) {
     case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:

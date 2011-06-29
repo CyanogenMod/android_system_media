@@ -32,7 +32,8 @@ const AttributeHandler handlerTable[1 + XA_OBJECTID_CAMERADEVICE +
         [ATTR_INDEX_GAIN]        = handler_MediaPlayer_gain,
         [ATTR_INDEX_TRANSPORT]   = handler_MediaPlayer_transport,
         [ATTR_INDEX_POSITION]    = handler_MediaPlayer_position,
-        [ATTR_INDEX_ABQ_ENQUEUE] = handler_MediaPlayer_abq_enqueue},
+        [ATTR_INDEX_ABQ_ENQUEUE] = handler_MediaPlayer_abq_enqueue,
+        [ATTR_INDEX_PLAY_STATE]  = handler_MediaPlayer_play_state},
 
 // SL IDs need a little arithmetic to make them contiguous with XA IDs
 #define _(id) ((id) - SL_OBJECTID_ENGINE + XA_OBJECTID_CAMERADEVICE + 1)
@@ -42,7 +43,8 @@ const AttributeHandler handlerTable[1 + XA_OBJECTID_CAMERADEVICE +
         [ATTR_INDEX_TRANSPORT]   = handler_AudioPlayer_transport,
         [ATTR_INDEX_POSITION]    = handler_AudioPlayer_position,
         [ATTR_INDEX_BQ_ENQUEUE]  = handler_AudioPlayer_bq_enqueue,
-        [ATTR_INDEX_ABQ_ENQUEUE] = handler_AudioPlayer_abq_enqueue},
+        [ATTR_INDEX_ABQ_ENQUEUE] = handler_AudioPlayer_abq_enqueue,
+        [ATTR_INDEX_PLAY_STATE]  = handler_AudioPlayer_play_state},
 
     [_(SL_OBJECTID_AUDIORECORDER)] = {
         [ATTR_INDEX_TRANSPORT]   = handler_AudioRecorder_transport},
