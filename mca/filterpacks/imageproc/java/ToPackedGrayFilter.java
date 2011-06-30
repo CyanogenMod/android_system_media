@@ -38,6 +38,8 @@ public class ToPackedGrayFilter extends Filter {
     private int mOWidth = FrameFormat.SIZE_UNSPECIFIED;
     @GenerateFieldPort(name = "oheight", hasDefault = true)
     private int mOHeight = FrameFormat.SIZE_UNSPECIFIED;
+    @GenerateFieldPort(name = "keepAspectRatio", hasDefault = true)
+    private boolean mKeepAspectRatio = false;
 
     private Program mProgram;
 
@@ -86,6 +88,9 @@ public class ToPackedGrayFilter extends Filter {
         }
         if (mOHeight == FrameFormat.SIZE_UNSPECIFIED) {
             mOHeight = inputFormat.getHeight();
+        }
+        if (mKeepAspectRatio) {
+            mOHeight = mOWidth * inputFormat.getHeight() / inputFormat.getWidth();
         }
         return ImageFormat.create(mOWidth, mOHeight,
                                   ImageFormat.COLORSPACE_GRAY,

@@ -42,6 +42,8 @@ public class ResizeFilter extends Filter {
     private int mOWidth;
     @GenerateFieldPort(name = "oheight")
     private int mOHeight;
+    @GenerateFieldPort(name = "keepAspectRatio", hasDefault = true)
+    private boolean mKeepAspectRatio = false;
     @GenerateFieldPort(name = "generateMipMap", hasDefault = true)
     private boolean mGenerateMipMap = false;
 
@@ -87,6 +89,10 @@ public class ResizeFilter extends Filter {
 
         // Create output frame
         MutableFrameFormat outputFormat = input.getFormat().mutableCopy();
+        if (mKeepAspectRatio) {
+            FrameFormat inputFormat = input.getFormat();
+            mOHeight = mOWidth * inputFormat.getHeight() / inputFormat.getWidth();
+        }
         outputFormat.setDimensions(mOWidth, mOHeight);
         Frame output = env.getFrameManager().newFrame(outputFormat);
 
