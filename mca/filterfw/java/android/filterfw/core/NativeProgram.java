@@ -80,7 +80,7 @@ public class NativeProgram extends Program {
     public void process(Frame[] inputs, Frame output) {
         NativeFrame[] nativeInputs = new NativeFrame[inputs.length];
         for (int i = 0; i < inputs.length; ++i) {
-            if (inputs[i] instanceof NativeFrame) {
+            if (inputs[i] == null || inputs[i] instanceof NativeFrame) {
                 nativeInputs[i] = (NativeFrame)inputs[i];
             } else {
                 throw new RuntimeException("NativeProgram got non-native frame as input "+ i +"!");
@@ -89,7 +89,7 @@ public class NativeProgram extends Program {
 
         // Get the GL output frame
         NativeFrame nativeOutput = null;
-        if (output instanceof NativeFrame) {
+        if (output == null || output instanceof NativeFrame) {
             nativeOutput = (NativeFrame)output;
         } else {
             throw new RuntimeException("NativeProgram got non-native output frame!");
@@ -107,7 +107,7 @@ public class NativeProgram extends Program {
             throw new RuntimeException("Attempting to set native variable, but native code does not " +
                                        "define native setvalue function!");
         }
-        if (!callNativeSetValue(variableName, value)) {
+        if (!callNativeSetValue(variableName, value.toString())) {
             throw new RuntimeException("Error setting native value for variable '" + variableName + "'!");
         }
     }
@@ -140,8 +140,8 @@ public class NativeProgram extends Program {
     private native boolean bindTeardownFunction(String funcName);
 
     private native boolean callNativeInit();
-    private native boolean callNativeSetValue(String key, Object value);
-    private native Object  callNativeGetValue(String key);
+    private native boolean callNativeSetValue(String key, String value);
+    private native String  callNativeGetValue(String key);
     private native boolean callNativeProcess(NativeFrame[] inputs, NativeFrame output);
     private native boolean callNativeTeardown();
 }

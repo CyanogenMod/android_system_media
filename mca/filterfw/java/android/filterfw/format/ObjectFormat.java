@@ -20,7 +20,6 @@ package android.filterfw.format;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.NativeBuffer;
-import android.util.Log;
 
 /**
  * @hide
@@ -35,7 +34,6 @@ public class ObjectFormat {
             result.setDimensions(count);
         }
         result.setBytesPerSample(bytesPerSampleForClass(clazz, target));
-        Log.i("ObjectFormat", "Created new format: " + result + "!");
         return result;
     }
 

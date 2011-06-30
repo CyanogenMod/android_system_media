@@ -26,7 +26,7 @@
 #include <EGL/egl.h>
 
 #include "core/gl_env.h"
-#include "filter/value.h"
+#include "core/value.h"
 
 namespace android {
 namespace filterfw {

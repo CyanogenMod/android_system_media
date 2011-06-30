@@ -22,19 +22,15 @@
 
 #include "base/utilities.h"
 
-#include "filter/value.h"
-#include "filter/native_buffer.h"
-#include "filter/src/data_buffer.h"
-
 namespace android {
 namespace filterfw {
 
 class NativeFrame;
 
 typedef void (*InitFunctionPtr)(void**);
-typedef void (*SetValueFunctionPtr)(const char*, Value, void*);
-typedef Value (*GetValueFunctionPtr)(const char*, void*);
-typedef int (*ProcessFunctionPtr)(const NativeBuffer*, int, NativeBuffer, void*);
+typedef void (*SetValueFunctionPtr)(const char*, const char*, void*);
+typedef void (*GetValueFunctionPtr)(const char*, char*, int, void*);
+typedef int (*ProcessFunctionPtr)(const char**, const int*, int, char*, int, void*);
 typedef void (*TeardownFunctionPtr)(void*);
 
 class NativeProgram {
@@ -53,11 +49,12 @@ class NativeProgram {
     bool BindTeardownFunction(const std::string& func_name);
 
     bool CallInit();
-    bool CallSetValue(const std::string& key, Value value);
-    Value CallGetValue(const std::string& key);
-    bool CallProcess(const std::vector<DataBuffer*>& inputs,
-                     int size,
-                     DataBuffer* output);
+    bool CallSetValue(const std::string& key, const std::string& value);
+    std::string CallGetValue(const std::string& key);
+    bool CallProcess(const std::vector<const char*>& inputs,
+                     const std::vector<int>& input_sizes,
+                     char* output,
+                     int output_size);
     bool CallTeardown();
 
   private:

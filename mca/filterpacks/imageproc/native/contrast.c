@@ -17,9 +17,6 @@
 #include <android/log.h>
 #include <stdlib.h>
 
-#include <filter/native_buffer.h>
-#include <filter/value.h>
-
 #define  LOGI(...) __android_log_print(ANDROID_LOG_INFO, "MCA", __VA_ARGS__)
 #define  LOGW(...) __android_log_print(ANDROID_LOG_WARN, "MCA", __VA_ARGS__)
 #define  LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "MCA", __VA_ARGS__)
@@ -36,31 +33,38 @@ void contrast_teardown(void* user_data) {
   free(user_data);
 }
 
-void contrast_setvalue(const char* key, Value value, void* user_data) {
+void contrast_setvalue(const char* key, const char* value, void* user_data) {
   if (strcmp(key, "contrast") == 0)
-    ((ContrastParameters*)user_data)->contrast = GetFloatValue(value);
+    ((ContrastParameters*)user_data)->contrast = atof(value);
   else
     LOGE("Unknown parameter: %s!", key);
-  LOGI("Done!");
 }
 
-int contrast_process(const NativeBuffer* inputs,
+int contrast_process(const char** inputs,
+                     const int* input_sizes,
                      int input_count,
-                     NativeBuffer output,
+                     char* output,
+                     int output_size,
                      void* user_data) {
   // Make sure we have exactly one input
-  if (input_count != 1)
+  if (input_count != 1) {
+    LOGE("Contrast: Incorrect input count! Expected 1 but got %d!", input_count);
     return 0;
+  }
 
   // Make sure sizes match up
-  if (NativeBuffer_GetSize(inputs[0]) != NativeBuffer_GetSize(output))
+  if (input_sizes[0] != output_size) {
+    LOGE("Contrast: Input-output sizes do not match up. %d vs. %d!", input_sizes[0], output_size);
     return 0;
+  }
 
   // Get the input and output pointers
-  const char* input_ptr = NativeBuffer_GetData(inputs[0]);
-  char* output_ptr = NativeBuffer_GetMutableData(output);
-  if (!input_ptr || !output_ptr)
+  const char* input_ptr = inputs[0];
+  char* output_ptr = output;
+  if (!input_ptr || !output_ptr) {
+    LOGE("Contrast: No input or output pointer found!");
     return 0;
+  }
 
   // Get the parameters
   ContrastParameters* params = (ContrastParameters*)user_data;
@@ -68,7 +72,7 @@ int contrast_process(const NativeBuffer* inputs,
 
   // Run the contrast adjustment
   int i;
-  for (i = 0; i < NativeBuffer_GetSize(output); ++i) {
+  for (i = 0; i < output_size; ++i) {
     float px = *(input_ptr++) / 255.0;
     px -= 0.5;
     px *= contrast;

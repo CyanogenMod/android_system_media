@@ -19,8 +19,6 @@
 
 #include <jni.h>
 
-#include "native/filter/value.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -71,9 +69,9 @@ JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_NativeProgram_callNativeSetValue(JNIEnv* env,
                                                             jobject thiz,
                                                             jstring key,
-                                                            jobject value);
+                                                            jstring value);
 
-JNIEXPORT jobject JNICALL
+JNIEXPORT jstring JNICALL
 Java_android_filterfw_core_NativeProgram_callNativeGetValue(JNIEnv* env,
                                                             jobject thiz,
                                                             jstring key);

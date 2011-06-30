@@ -16,29 +16,29 @@
 
 #include <stdlib.h>
 
-#include <filter/native_buffer.h>
-
-int gray_to_rgb_process(const NativeBuffer* inputs,
+int gray_to_rgb_process(const char** inputs,
+                        const int* input_sizes,
                         int input_count,
-                        NativeBuffer output,
+                        char* output,
+                        int output_size,
                         void* user_data) {
   // Make sure we have exactly one input
   if (input_count != 1)
     return 0;
 
   // Make sure sizes match up
-  if (NativeBuffer_GetSize(inputs[0]) != NativeBuffer_GetSize(output)/3)
+  if (input_sizes[0] != output_size/3)
     return 0;
 
   // Get the input and output pointers
-  const char* input_ptr = NativeBuffer_GetData(inputs[0]);
-  char* output_ptr = NativeBuffer_GetMutableData(output);
+  const char* input_ptr = inputs[0];
+  char* output_ptr = output;
   if (!input_ptr || !output_ptr)
     return 0;
 
   // Run the conversion
   int i;
-  for (i = 0; i < NativeBuffer_GetSize(inputs[0]); ++i) {
+  for (i = 0; i < input_sizes[0]; ++i) {
     *(output_ptr++) = *(input_ptr);
     *(output_ptr++) = *(input_ptr);
     *(output_ptr++) = *(input_ptr++);
@@ -47,27 +47,29 @@ int gray_to_rgb_process(const NativeBuffer* inputs,
   return 1;
 }
 
-int rgba_to_rgb_process(const NativeBuffer* inputs,
+int rgba_to_rgb_process(const char** inputs,
+                        const int* input_sizes,
                         int input_count,
-                        NativeBuffer output,
+                        char* output,
+                        int output_size,
                         void* user_data) {
   // Make sure we have exactly one input
   if (input_count != 1)
     return 0;
 
   // Make sure sizes match up
-  if (NativeBuffer_GetSize(inputs[0])/4 != NativeBuffer_GetSize(output)/3)
+  if (input_sizes[0]/4 != output_size/3)
     return 0;
 
   // Get the input and output pointers
-  const char* input_ptr = NativeBuffer_GetData(inputs[0]);
-  char* output_ptr = NativeBuffer_GetMutableData(output);
+  const char* input_ptr = inputs[0];
+  char* output_ptr = output;
   if (!input_ptr || !output_ptr)
     return 0;
 
   // Run the conversion
   int i;
-  for (i = 0; i < NativeBuffer_GetSize(inputs[0]) / 4; ++i) {
+  for (i = 0; i < input_sizes[0] / 4; ++i) {
     *(output_ptr++) = *(input_ptr++);
     *(output_ptr++) = *(input_ptr++);
     *(output_ptr++) = *(input_ptr++);
@@ -77,27 +79,29 @@ int rgba_to_rgb_process(const NativeBuffer* inputs,
   return 1;
 }
 
-int gray_to_rgba_process(const NativeBuffer* inputs,
+int gray_to_rgba_process(const char** inputs,
+                         const int* input_sizes,
                          int input_count,
-                         NativeBuffer output,
+                         char* output,
+                         int output_size,
                          void* user_data) {
   // Make sure we have exactly one input
   if (input_count != 1)
     return 0;
 
   // Make sure sizes match up
-  if (NativeBuffer_GetSize(inputs[0]) != NativeBuffer_GetSize(output)/4)
+  if (input_sizes[0] != output_size/4)
     return 0;
 
   // Get the input and output pointers
-  const char* input_ptr = NativeBuffer_GetData(inputs[0]);
-  char* output_ptr = NativeBuffer_GetMutableData(output);
+  const char* input_ptr = inputs[0];
+  char* output_ptr = output;
   if (!input_ptr || !output_ptr)
     return 0;
 
   // Run the conversion
   int i;
-  for (i = 0; i < NativeBuffer_GetSize(inputs[0]); ++i) {
+  for (i = 0; i < input_sizes[0]; ++i) {
     *(output_ptr++) = *(input_ptr);
     *(output_ptr++) = *(input_ptr);
     *(output_ptr++) = *(input_ptr++);
@@ -107,27 +111,29 @@ int gray_to_rgba_process(const NativeBuffer* inputs,
   return 1;
 }
 
-int rgb_to_rgba_process(const NativeBuffer* inputs,
+int rgb_to_rgba_process(const char** inputs,
+                        const int* input_sizes,
                         int input_count,
-                        NativeBuffer output,
+                        char* output,
+                        int output_size,
                         void* user_data) {
   // Make sure we have exactly one input
   if (input_count != 1)
     return 0;
 
   // Make sure sizes match up
-  if (NativeBuffer_GetSize(inputs[0])/3 != NativeBuffer_GetSize(output)/4)
+  if (input_sizes[0]/3 != output_size/4)
     return 0;
 
   // Get the input and output pointers
-  const char* input_ptr = NativeBuffer_GetData(inputs[0]);
-  char* output_ptr = NativeBuffer_GetMutableData(output);
+  const char* input_ptr = inputs[0];
+  char* output_ptr = output;
   if (!input_ptr || !output_ptr)
     return 0;
 
   // Run the conversion
   int i;
-  for (i = 0; i < NativeBuffer_GetSize(output) / 4; ++i) {
+  for (i = 0; i < output_size / 4; ++i) {
     *(output_ptr++) = *(input_ptr++);
     *(output_ptr++) = *(input_ptr++);
     *(output_ptr++) = *(input_ptr++);

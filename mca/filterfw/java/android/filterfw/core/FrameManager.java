@@ -28,8 +28,6 @@ public abstract class FrameManager {
 
     public abstract Frame newFrame(FrameFormat format);
 
-    public abstract Frame newEmptyFrame(FrameFormat format);
-
     public abstract Frame newBoundFrame(FrameFormat format, int bindingType, long bindingId);
 
     public abstract Frame duplicateFrame(Frame frame);

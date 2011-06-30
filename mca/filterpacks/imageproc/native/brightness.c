@@ -17,9 +17,6 @@
 #include <android/log.h>
 #include <stdlib.h>
 
-#include <filter/native_buffer.h>
-#include <filter/value.h>
-
 #define  LOGI(...) __android_log_print(ANDROID_LOG_INFO, "MCA", __VA_ARGS__)
 #define  LOGW(...) __android_log_print(ANDROID_LOG_WARN, "MCA", __VA_ARGS__)
 #define  LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "MCA", __VA_ARGS__)
@@ -36,17 +33,18 @@ void brightness_teardown(void* user_data) {
   free(user_data);
 }
 
-void brightness_setvalue(const char* key, Value value, void* user_data) {
+void brightness_setvalue(const char* key, const char* value, void* user_data) {
   if (strcmp(key, "brightness") == 0)
-    ((BrightnessParameters*)user_data)->brightness = GetFloatValue(value);
+    ((BrightnessParameters*)user_data)->brightness = atof(value);
   else
     LOGE("Unknown parameter: %s!", key);
-  LOGI("Done!");
 }
 
-int brightness_process(const NativeBuffer* inputs,
+int brightness_process(const char** inputs,
+                       const int* input_sizes,
                        int input_count,
-                       NativeBuffer output,
+                       char* output,
+                       int output_size,
                        void* user_data) {
   // Make sure we have exactly one input
   if (input_count != 1) {
@@ -55,16 +53,14 @@ int brightness_process(const NativeBuffer* inputs,
   }
 
   // Make sure sizes match up
-  if (NativeBuffer_GetSize(inputs[0]) != NativeBuffer_GetSize(output)) {
-    LOGE("Brightness: Input-output sizes do not match up. %d vs. %d!",
-         NativeBuffer_GetSize(inputs[0]),
-         NativeBuffer_GetSize(output));
+  if (input_sizes[0] != output_size) {
+    LOGE("Brightness: Input-output sizes do not match up. %d vs. %d!", input_sizes[0], output_size);
     return 0;
   }
 
   // Get the input and output pointers
-  const char* input_ptr = NativeBuffer_GetData(inputs[0]);
-  char* output_ptr = NativeBuffer_GetMutableData(output);
+  const char* input_ptr = inputs[0];
+  char* output_ptr = output;
   if (!input_ptr || !output_ptr) {
     LOGE("Brightness: No input or output pointer found!");
     return 0;
@@ -78,7 +74,7 @@ int brightness_process(const NativeBuffer* inputs,
   int i;
   const int b = (int)(brightness * 255.0f);
   int val = 0;
-  for (i = 0; i < NativeBuffer_GetSize(output); ++i) {
+  for (i = 0; i < output_size; ++i) {
     val = (*(input_ptr++) * b) / 255;
     *(output_ptr++) = val > 255 ? 255 : val;
   }

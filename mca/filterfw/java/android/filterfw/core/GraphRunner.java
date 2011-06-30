@@ -22,6 +22,8 @@ package android.filterfw.core;
  */
 public abstract class GraphRunner {
 
+    protected FilterContext mFilterContext = null;
+
     /** Interface for listeners waiting for the runner to complete. */
     public interface OnRunnerDoneListener {
         /** Callback method to be called when the runner completes a
@@ -40,9 +42,35 @@ public abstract class GraphRunner {
     public static final int RESULT_BLOCKED  = 4;
     public static final int RESULT_STOPPED  = 5;
 
+    public GraphRunner(FilterContext context) {
+        mFilterContext = context;
+    }
+
     public abstract FilterGraph getGraph();
 
-    public abstract FilterContext getContext();
+    public FilterContext getContext() {
+        return mFilterContext;
+    }
+
+    /**
+     * Helper function for subclasses to activate the GL environment before running.
+     */
+    protected void activateGlContext() {
+        GLEnvironment glEnv = mFilterContext.getGLEnvironment();
+        if (glEnv != null) {
+            glEnv.activate();
+        }
+    }
+
+    /**
+     * Helper function for subclasses to deactivate the GL environment after running.
+     */
+    protected void deactivateGlContext() {
+        GLEnvironment glEnv = mFilterContext.getGLEnvironment();
+        if (glEnv != null) {
+            glEnv.deactivate();
+        }
+    }
 
     public abstract void run();
 

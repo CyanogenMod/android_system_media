@@ -55,6 +55,11 @@ public class FilterFunction {
             mFilterIsSetup = true;
         }
 
+        // Make sure GL environment is active
+        if (mFilterContext.getGLEnvironment() != null) {
+            mFilterContext.getGLEnvironment().activate();
+        }
+
         // Setup the inputs
         for (Entry<String, Object> entry : inputMap.entrySet()) {
             if (entry.getValue() instanceof Frame) {

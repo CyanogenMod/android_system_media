@@ -24,11 +24,6 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_MODULE := libfilterfw_native
 
-# Compile source files
-NDK_FILES = filter/src/data_buffer.cc \
-            filter/src/native_buffer.cc \
-            filter/src/value.cc
-
 LOCAL_SRC_FILES += core/geometry.cc \
                    core/gl_env.cc \
                    core/gl_frame.cc \
@@ -36,7 +31,7 @@ LOCAL_SRC_FILES += core/geometry.cc \
                    core/native_program.cc \
                    core/shader_program.cc \
                    core/vertex_frame.cc \
-                   $(NDK_FILES)
+                   core/value.cc
 
 # default to read .cc file as c++ file, need to set both variables.
 LOCAL_CPP_EXTENSION := .cc

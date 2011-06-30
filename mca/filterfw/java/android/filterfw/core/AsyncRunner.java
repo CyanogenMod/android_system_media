@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class AsyncRunner extends GraphRunner{
 
-    private FilterContext mFilterContext;
     private Class mSchedulerClass;
     private SyncRunner mRunner;
     private AsyncRunnerTask mRunTask;
@@ -62,19 +61,13 @@ public class AsyncRunner extends GraphRunner{
         private static final String TAG = "AsyncRunnerTask";
 
         @Override
-        protected void onPreExecute() {
-            // Disable our GL context in the UI thread
-            disableGlContext();
-        }
-
-        @Override
         protected Integer doInBackground(SyncRunner... runner) {
             if (runner.length > 1) {
                 throw new RuntimeException("More than one callback data set received!");
             }
 
             if (mLogVerbose) Log.v(TAG, "Starting background graph processing.");
-            enableGlContext();
+            activateGlContext();
 
             boolean isDone = false;
             if (mLogVerbose) Log.v(TAG, "Preparing filter graph for processing.");
@@ -92,8 +85,8 @@ public class AsyncRunner extends GraphRunner{
             }
             if (mLogVerbose) Log.v(TAG, "Closing filters.");
             runner[0].close();
+            deactivateGlContext();
 
-            disableGlContext();
             if (mLogVerbose) Log.v(TAG, "Done with background graph processing.");
             return isDone ? RESULT_FINISHED : RESULT_STOPPED;
         }
@@ -106,7 +99,6 @@ public class AsyncRunner extends GraphRunner{
         @Override
         protected void onPostExecute(Integer result) {
             if (mLogVerbose) Log.v(TAG, "Starting post-execute.");
-            enableGlContext();
             if (mDoneListener != null) {
                 if (mLogVerbose) Log.v(TAG, "Invoking graph done callback.");
                 mDoneListener.onRunnerDone(result);
@@ -151,9 +143,8 @@ public class AsyncRunner extends GraphRunner{
      * Must be created on the UI thread.
      */
     public AsyncRunner(FilterContext context, Class schedulerClass) {
-        mFilterContext = context;
+        super(context);
         mSchedulerClass = schedulerClass;
-
         mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
 
@@ -163,7 +154,7 @@ public class AsyncRunner extends GraphRunner{
      * Must be created on the UI thread.
      */
     public AsyncRunner(FilterContext context) {
-        mFilterContext = context;
+        super(context);
         mSchedulerClass = SimpleScheduler.class;
     }
 
@@ -190,11 +181,6 @@ public class AsyncRunner extends GraphRunner{
     @Override
     public FilterGraph getGraph() {
         return mRunner != null ? mRunner.getGraph() : null;
-    }
-
-    @Override
-    public FilterContext getContext() {
-        return mFilterContext;
     }
 
     /** Execute the graph in a background thread. */
@@ -249,26 +235,6 @@ public class AsyncRunner extends GraphRunner{
      * call release() when done with it. */
     public void setUiThreadCallback(FilterContext.OnFrameReceivedListener uiListener) {
         mUiListener = uiListener;
-    }
-
-    /** Deactivate GL context.
-     */
-    private void disableGlContext() {
-        GLEnvironment glEnv = mFilterContext.getGLEnvironment();
-        if (glEnv != null) {
-            if (mLogVerbose) Log.v(TAG, "Deactivating GL context.");
-            glEnv.deactivate();
-        }
-    }
-
-    /** Activate GL context.
-     */
-    private void enableGlContext() {
-        GLEnvironment glEnv = mFilterContext.getGLEnvironment();
-        if (glEnv != null) {
-            if (mLogVerbose) Log.v(TAG, "Reactivating GL context.");
-            glEnv.activate();
-        }
     }
 
 }

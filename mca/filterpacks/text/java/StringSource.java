@@ -49,7 +49,7 @@ public class StringSource extends Filter {
 
     @Override
     public void process(FilterContext env) {
-        Frame output = env.getFrameManager().newEmptyFrame(mOutputFormat);
+        Frame output = env.getFrameManager().newFrame(mOutputFormat);
         output.setObjectValue(mString);
         pushOutput("string", output);
         closeOutputPort("string");

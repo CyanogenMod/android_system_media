@@ -23,7 +23,6 @@
 #include "native/base/logging.h"
 #include "native/core/gl_frame.h"
 #include "native/core/native_frame.h"
-#include "native/filter/src/data_buffer.h"
 
 using android::filterfw::NativeFrame;
 using android::filterfw::GLFrame;
@@ -83,9 +82,8 @@ jboolean Java_android_filterfw_core_NativeFrame_getNativeBuffer(JNIEnv* env,
                                                                 jobject buffer) {
   NativeFrame* frame = ConvertFromJava<NativeFrame>(env, thiz);
   if (frame) {
-    uint8_t* data = frame->MutableData();
-    DataBuffer nbuffer(reinterpret_cast<char*>(data), frame->Size());
-    return ToJBool(nbuffer.AttachToJavaObject(env, buffer));
+    char* data = reinterpret_cast<char*>(frame->MutableData());
+    return ToJBool(AttachDataToJBuffer(env, buffer, data, frame->Size()));
   }
   return JNI_FALSE;
 }

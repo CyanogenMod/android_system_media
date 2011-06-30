@@ -47,7 +47,7 @@ public class ToUpperCase extends Filter {
         Frame input = pullInput("mixedcase");
         String inputString = (String)input.getObjectValue();
 
-        Frame output = env.getFrameManager().newEmptyFrame(mOutputFormat);
+        Frame output = env.getFrameManager().newFrame(mOutputFormat);
         output.setObjectValue(inputString.toUpperCase());
 
         pushOutput("uppercase", output);

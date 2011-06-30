@@ -73,7 +73,6 @@ public class MffEnvironment {
     public void createGLEnvironment() {
         GLEnvironment glEnvironment = new GLEnvironment();
         glEnvironment.initWithNewContext();
-        glEnvironment.activate();
         setGLEnvironment(glEnvironment);
     }
 

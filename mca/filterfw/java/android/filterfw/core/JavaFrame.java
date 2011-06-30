@@ -34,17 +34,15 @@ public class JavaFrame extends Frame {
 
     private Object mObject;
 
-    JavaFrame(FrameFormat format, FrameManager frameManager, boolean isEmpty) {
+    JavaFrame(FrameFormat format, FrameManager frameManager) {
         super(format, frameManager);
-        if (!isEmpty) {
-            initWithFormat(format);
-        }
+        initWithFormat(format);
         setReusable(false);
     }
 
     static JavaFrame wrapObject(Object object, FrameManager frameManager) {
         FrameFormat format = ObjectFormat.fromObject(object, FrameFormat.TARGET_JAVA);
-        JavaFrame result = new JavaFrame(format, frameManager, true);
+        JavaFrame result = new JavaFrame(format, frameManager);
         result.setObjectValue(object);
         return result;
     }
@@ -52,87 +50,27 @@ public class JavaFrame extends Frame {
     private void initWithFormat(FrameFormat format) {
         final int count = format.getLength();
         final int baseType = format.getBaseType();
-        if (baseType == FrameFormat.TYPE_OBJECT) {
-            initWithObject(format.getObjectClass(), count);
-//        } else if (baseType == FrameFormat.TYPE_STRUCT) {
-//            initWithStruct(format.getObjectClass(), count);
-        } else {
-            if (count < 1) {
-                throw new IllegalArgumentException(
-                    "Initializing non-empty object frame with no size specified! Did you forget " +
-                    "to set the dimensions?");
-            }
-            switch (baseType) {
-                case FrameFormat.TYPE_BYTE:
-                    mObject = new byte[count];
-                    break;
-                case FrameFormat.TYPE_INT16:
-                    mObject = new short[count];
-                    break;
-                case FrameFormat.TYPE_INT32:
-                    mObject = new int[count];
-                    break;
-                case FrameFormat.TYPE_FLOAT:
-                    mObject = new float[count];
-                    break;
-                case FrameFormat.TYPE_DOUBLE:
-                    mObject = new double[count];
-                    break;
-                default:
-                    throw new IllegalArgumentException(
-                        "Unsupported object frame type: " + baseType + "!");
-            }
+        switch (baseType) {
+            case FrameFormat.TYPE_BYTE:
+                mObject = new byte[count];
+                break;
+            case FrameFormat.TYPE_INT16:
+                mObject = new short[count];
+                break;
+            case FrameFormat.TYPE_INT32:
+                mObject = new int[count];
+                break;
+            case FrameFormat.TYPE_FLOAT:
+                mObject = new float[count];
+                break;
+            case FrameFormat.TYPE_DOUBLE:
+                mObject = new double[count];
+                break;
+            default:
+                mObject = null;
+                break;
         }
     }
-
-    private void initWithObject(Class objectClass, int count) {
-        // Make sure we have an object class set
-        if (objectClass == null) {
-            throw new RuntimeException(
-                "JavaFrame based on TYPE_OBJECT requires an object class!");
-        }
-
-        // Size must be 1 for custom objects
-        if (count != 1) {
-            throw new RuntimeException(
-                "JavaFrame does not support instantiating a frame based on " + objectClass + " " +
-                "with a size not equal to 1!");
-        }
-
-        // Instantiate a new empty instance of this class
-        try {
-          mObject = objectClass.newInstance();
-        } catch (Exception e) {
-          throw new RuntimeException("Could not instantiate new structure instance of type '" +
-                                     objectClass.getName() + "'. Make sure this class type has " +
-                                     "a public default constructor!");
-        }
-    }
-
-/*  TODO: Remove?
-    private void initWithStruct(Class structClass, int count) {
-        // Make sure we have an object class set
-        if (structClass == null) {
-            throw new RuntimeException(
-                "JavaFrame based on TYPE_STRUCT requires an object class!");
-        }
-
-        // Make sure it is a NativeBuffer subclass
-        if (!NativeBuffer.class.isAssignableFrom(structClass)) {
-            throw new RuntimeException("JavaFrame's class must be a subclass of " +
-                                       "NativeBuffer when using TYPE_STRUCT!");
-        }
-
-        // Instantiate a new empty instance of this class
-        try {
-            Constructor structConstructor = structClass.getConstructor(int.class);
-            mObject = structConstructor.newInstance(count);
-        } catch (Exception e) {
-            throw new RuntimeException("Could not instantiate new structure instance of type '" +
-                                       structClass + "'!");
-        }
-    }
-*/
 
     @Override
     void dealloc() {

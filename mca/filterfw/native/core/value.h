@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_FILTERFW_FILTER_VALUE_H
-#define ANDROID_FILTERFW_FILTER_VALUE_H
+#ifndef ANDROID_FILTERFW_CORE_VALUE_H
+#define ANDROID_FILTERFW_CORE_VALUE_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// TODO: As this is no longer part of the proposed NDK, should we make this object-oriented (C++)
+// instead? We can also probably clean this up a bit.
 
 // TODO: Change this to an opaque handle?
 typedef struct {

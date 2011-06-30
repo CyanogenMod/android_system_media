@@ -30,6 +30,7 @@ NativeProgram::NativeProgram()
     : lib_handle_(NULL),
       init_function_(NULL),
       setvalue_function_(NULL),
+      getvalue_function_(NULL),
       process_function_(NULL),
       teardown_function_(NULL),
       user_data_(NULL) {
@@ -91,13 +92,16 @@ bool NativeProgram::BindTeardownFunction(const std::string& func_name) {
   return teardown_function_ != NULL;
 }
 
-bool NativeProgram::CallProcess(const std::vector<DataBuffer*>& inputs,
-                                int size,
-                                DataBuffer* output) {
+bool NativeProgram::CallProcess(const std::vector<const char*>& inputs,
+                                const std::vector<int>& input_sizes,
+                                char* output,
+                                int output_size) {
   if (process_function_) {
-    return process_function_(reinterpret_cast<const NativeBuffer*>(&inputs[0]),
-                             size,
-                             reinterpret_cast<NativeBuffer>(output),
+    return process_function_(const_cast<const char**>(&inputs[0]),
+                             &input_sizes[0],
+                             inputs.size(),
+                             output,
+                             output_size,
                              user_data_) == 1;
   }
   return false;
@@ -111,20 +115,23 @@ bool NativeProgram::CallInit() {
   return false;
 }
 
-bool NativeProgram::CallSetValue(const std::string& key, Value value) {
+bool NativeProgram::CallSetValue(const std::string& key, const std::string& value) {
   if (setvalue_function_) {
-    setvalue_function_(key.c_str(), value, user_data_);
+    setvalue_function_(key.c_str(), value.c_str(), user_data_);
     return true;
   }
   return false;
 }
 
-Value NativeProgram::CallGetValue(const std::string& key) {
+std::string NativeProgram::CallGetValue(const std::string& key) {
   if (getvalue_function_) {
-    Value value = getvalue_function_(key.c_str(), user_data_);
-    return value;
+    static const int buffer_size = 1024;
+    char result[buffer_size];
+    result[buffer_size - 1] = '\0';
+    getvalue_function_(key.c_str(), result, buffer_size, user_data_);
+    return std::string(result);
   }
-  return MakeNullValue();
+  return std::string();
 }
 
 bool NativeProgram::CallTeardown() {
