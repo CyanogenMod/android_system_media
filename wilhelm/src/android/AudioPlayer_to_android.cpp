@@ -1433,8 +1433,13 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
  * Called with a lock on AudioPlayer
  */
 SLresult android_audioPlayer_preDestroy(CAudioPlayer *pAudioPlayer) {
-    SL_LOGV("android_audioPlayer_preDestroy(%p)", pAudioPlayer);
+    SL_LOGD("android_audioPlayer_preDestroy(%p)", pAudioPlayer);
     SLresult result = SL_RESULT_SUCCESS;
+
+    if (pAudioPlayer->mAPlayer != 0) {
+        pAudioPlayer->mAPlayer->preDestroy();
+    }
+    SL_LOGD("android_audioPlayer_preDestroy(%p) after mAPlayer->preDestroy()", pAudioPlayer);
 
     object_unlock_exclusive(&pAudioPlayer->mObject);
     if (pAudioPlayer->mCallbackProtector != 0) {

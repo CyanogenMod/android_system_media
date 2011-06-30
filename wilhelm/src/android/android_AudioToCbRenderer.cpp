@@ -53,9 +53,9 @@ void AudioToCbRenderer::onPrepare() {
 
 
 void AudioToCbRenderer::onRender() {
-    SL_LOGV("AudioToCbRenderer::onRender");
+    SL_LOGD("AudioToCbRenderer::onRender");
 
-    Mutex::Autolock _l(mDecodeBufferLock);
+    Mutex::Autolock _l(mBufferSourceLock);
 
     if (NULL == mDecodeBuffer) {
         // nothing to render, move along
@@ -93,14 +93,17 @@ void AudioToCbRenderer::onRender() {
 //--------------------------------------------------
 // Audio output
 void AudioToCbRenderer::createAudioSink() {
-    SL_LOGD("AudioToCbRenderer::createAudioSink()");
-    SL_LOGV("sample rate = %d nb channels = %d", mSampleRateHz, mNumChannels);
+    SL_LOGD("AudioToCbRenderer::createAudioSink() sample rate = %d, nb channels = %d",
+            mSampleRateHz, mChannelCount);
 }
 
 
 void AudioToCbRenderer::updateAudioSink() {
     SL_LOGD("AudioToCbRenderer::updateAudioSink()");
-    if (mAudioSource != 0) {
+
+    Mutex::Autolock _l(mBufferSourceLock);
+
+    if ((mAudioSource != 0) && mAudioSourceStarted) {
         sp<MetaData> meta = mAudioSource->getFormat();
 
         SL_LOGV("old sample rate = %d", mSampleRateHz);
