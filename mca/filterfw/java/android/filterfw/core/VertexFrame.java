@@ -31,17 +31,13 @@ public class VertexFrame extends Frame {
 
     private int vertexFrameId;
 
-    VertexFrame(FrameFormat format, FrameManager frameManager, boolean isEmpty) {
+    VertexFrame(FrameFormat format, FrameManager frameManager) {
         super(format, frameManager);
-        if (isEmpty) {
-            throw new RuntimeException("Instantiating empty vertex frames is not supported!");
+        if (getFormat().getSize() <= 0) {
+            throw new IllegalArgumentException("Initializing vertex frame with zero size!");
         } else {
-            if (getFormat().getSize() < 0) {
-                throw new IllegalArgumentException("Initializing vertex frame with zero size!");
-            } else {
-                if (!allocate(getFormat().getSize())) {
-                    throw new RuntimeException("Could not allocate vertex frame!");
-                }
+            if (!allocate(getFormat().getSize())) {
+                throw new RuntimeException("Could not allocate vertex frame!");
             }
         }
     }

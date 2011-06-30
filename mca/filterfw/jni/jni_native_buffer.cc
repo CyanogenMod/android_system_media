@@ -16,20 +16,51 @@
 
 #include "jni/jni_native_buffer.h"
 #include "jni/jni_util.h"
-#include "native/filter/src/data_buffer.h"
+
+char* GetJBufferData(JNIEnv* env, jobject buffer, int* size) {
+  jclass base_class = env->FindClass("android/filterfw/core/NativeBuffer");
+
+  // Get fields
+  jfieldID ptr_field = env->GetFieldID(base_class, "mDataPointer", "J");
+  jfieldID size_field = env->GetFieldID(base_class, "mSize", "I");
+
+  // Get their values
+  char* data = reinterpret_cast<char*>(env->GetLongField(buffer, ptr_field));
+  if (size) {
+    *size = env->GetIntField(buffer, size_field);
+  }
+
+  // Clean-up
+  env->DeleteLocalRef(base_class);
+
+  return data;
+}
+
+bool AttachDataToJBuffer(JNIEnv* env, jobject buffer, char* data, int size) {
+  jclass base_class = env->FindClass("android/filterfw/core/NativeBuffer");
+
+  // Get fields
+  jfieldID ptr_field = env->GetFieldID(base_class, "mDataPointer", "J");
+  jfieldID size_field = env->GetFieldID(base_class, "mSize", "I");
+
+  // Set their values
+  env->SetLongField(buffer, ptr_field, reinterpret_cast<jlong>(data));
+  env->SetIntField(buffer, size_field, size);
+
+  return true;
+}
 
 jboolean Java_android_filterfw_core_NativeBuffer_allocate(JNIEnv* env, jobject thiz, jint size) {
-  DataBuffer buffer(size);
-  return ToJBool(buffer.AttachToJavaObject(env, thiz));
+  char* data = new char[size];
+  return ToJBool(AttachDataToJBuffer(env, thiz, data, size));
 }
 
 jboolean Java_android_filterfw_core_NativeBuffer_deallocate(JNIEnv* env,
                                                             jobject thiz,
                                                             jboolean owns_data) {
   if (ToCppBool(owns_data)) {
-    DataBuffer buffer;
-    DataBuffer::FromJavaObject(env, thiz, &buffer);
-    buffer.DeleteData();
+    char* data = GetJBufferData(env, thiz, NULL);
+    delete[] data;
   }
   return JNI_TRUE;
 }
@@ -37,15 +68,17 @@ jboolean Java_android_filterfw_core_NativeBuffer_deallocate(JNIEnv* env,
 jboolean Java_android_filterfw_core_NativeBuffer_nativeCopyTo(JNIEnv* env,
                                                               jobject thiz,
                                                               jobject new_buffer) {
-  // Get this buffer
-  DataBuffer buffer;
-  DataBuffer::FromJavaObject(env, thiz, &buffer);
+  // Get source buffer
+  int size;
+  char* source_data = GetJBufferData(env, thiz, &size);
 
   // Make copy
-  DataBuffer buffer_copy;
-  if (buffer_copy.CopyFrom(buffer)) {
-    return ToJBool(buffer_copy.AttachToJavaObject(env, new_buffer));
-  } else
-    return JNI_FALSE;
+  char* target_data = new char[size];
+  memcpy(target_data, source_data, size);
+
+  // Attach it to new buffer
+  AttachDataToJBuffer(env, new_buffer, target_data, size);
+
+  return JNI_TRUE;
 }
 

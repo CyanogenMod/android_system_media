@@ -33,21 +33,11 @@ public class NativeFrame extends Frame {
 
     private int nativeFrameId;
 
-    NativeFrame(FrameFormat format, FrameManager frameManager, boolean isEmpty) {
+    NativeFrame(FrameFormat format, FrameManager frameManager) {
         super(format, frameManager);
         int capacity = format.getSize();
-        if (isEmpty && capacity != 0) {
-            throw new IllegalArgumentException(
-                "Initializing empty native frame with non-zero size! You must not specify any " +
-                "dimensions when allocating an empty frame!");
-        } else if (!isEmpty && capacity <= 0) {
-            throw new IllegalArgumentException(
-                "Initializing non-empty native frame with no size specified! Did you forget " +
-                "to set the dimensions?");
-        } else {
-            allocate(capacity);
-        }
-        setReusable(!isEmpty);
+        allocate(capacity);
+        setReusable(capacity != 0);
     }
 
     @Override
@@ -156,7 +146,8 @@ public class NativeFrame extends Frame {
 
     @Override
     public ByteBuffer getData() {
-        return ByteBuffer.wrap(getNativeData(getFormat().getSize()));
+        byte[] data = getNativeData(getFormat().getSize());
+        return data == null ? null : ByteBuffer.wrap(data);
     }
 
     @Override

@@ -48,11 +48,6 @@ public class CachedFrameManager extends SimpleFrameManager {
     }
 
     @Override
-    public Frame newEmptyFrame(FrameFormat format) {
-        return super.newEmptyFrame(format);
-    }
-
-    @Override
     public Frame newBoundFrame(FrameFormat format, int bindingType, long bindingId) {
         Frame result = findAvailableFrame(format, bindingType, bindingId);
         if (result == null) {

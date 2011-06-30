@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 public class SyncRunner extends GraphRunner {
 
     private Scheduler mScheduler = null;
-    private FilterContext mFilterContext = null;
 
     private OnRunnerDoneListener mDoneListener = null;
     private ScheduledThreadPoolExecutor mWakeExecutor = new ScheduledThreadPoolExecutor(1);
@@ -40,6 +39,8 @@ public class SyncRunner extends GraphRunner {
 
     // TODO: Provide factory based constructor?
     public SyncRunner(FilterContext context, FilterGraph graph, Class schedulerClass) {
+        super(context);
+
         // Create the scheduler
         if (Scheduler.class.isAssignableFrom(schedulerClass)) {
             try {
@@ -78,12 +79,6 @@ public class SyncRunner extends GraphRunner {
         return mScheduler != null ? mScheduler.getGraph() : null;
     }
 
-    @Override
-    public FilterContext getContext() {
-        return mFilterContext;
-    }
-
-
     public int step() {
         assertReadyToStep();
         return performStep(true);
@@ -100,18 +95,20 @@ public class SyncRunner extends GraphRunner {
 
     @Override
     public void run() {
-        // Open filters
+        // Preparation
         beginProcessing();
-
-        // Make sure we are ready to run
         assertReadyToStep();
+        activateGlContext();
 
         // Run
         int status = RESULT_RUNNING;
         while (status == RESULT_RUNNING) {
             status = performStep(false);
         }
+
+        // Close
         close();
+        deactivateGlContext();
 
         // Call completion callback if set
         if (mDoneListener != null) {

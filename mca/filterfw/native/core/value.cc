@@ -17,7 +17,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "filter/value.h"
+#include "value.h"
 
 #define NULL_VALUE_TYPE           0
 #define INT_VALUE_TYPE            1

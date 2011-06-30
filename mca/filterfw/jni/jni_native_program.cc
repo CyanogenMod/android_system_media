@@ -23,7 +23,6 @@
 #include "native/base/logging.h"
 #include "native/core/native_frame.h"
 #include "native/core/native_program.h"
-#include "native/filter/src/data_buffer.h"
 
 using android::filterfw::NativeFrame;
 using android::filterfw::NativeProgram;
@@ -97,30 +96,24 @@ jboolean Java_android_filterfw_core_NativeProgram_callNativeInit(JNIEnv* env, jo
 jboolean Java_android_filterfw_core_NativeProgram_callNativeSetValue(JNIEnv* env,
                                                                      jobject thiz,
                                                                      jstring key,
-                                                                     jobject value) {
+                                                                     jstring value) {
   if (!value) {
     LOGE("Native Program: Attempting to set null value for key %s!",
          ToCppString(env, key).c_str());
   }
   NativeProgram* program = ConvertFromJava<NativeProgram>(env, thiz);
-  const Value c_value = ToCValue(env, value);
+  const std::string c_value = ToCppString(env, value);
   const std::string c_key = ToCppString(env, key);
-  if (!ValueIsNull(c_value)) {
-    return ToJBool(program && program->CallSetValue(c_key, c_value));
-  } else {
-    LOGE("NativeProgram: Could not convert java object value passed for key '%s'!", c_key.c_str());
-    return JNI_FALSE;
-  }
+  return ToJBool(program && program->CallSetValue(c_key, c_value));
 }
 
-jobject Java_android_filterfw_core_NativeProgram_callNativeGetValue(JNIEnv* env,
+jstring Java_android_filterfw_core_NativeProgram_callNativeGetValue(JNIEnv* env,
                                                                     jobject thiz,
                                                                     jstring key) {
   NativeProgram* program = ConvertFromJava<NativeProgram>(env, thiz);
   const std::string c_key = ToCppString(env, key);
   if (program) {
-    Value result = program->CallGetValue(c_key);
-    return ToJObject(env, result);
+    return ToJString(env, program->CallGetValue(c_key));
   }
   return JNI_FALSE;
 }
@@ -134,64 +127,44 @@ jboolean Java_android_filterfw_core_NativeProgram_callNativeProcess(JNIEnv* env,
   // Sanity checks
   if (!program || !inputs) {
     return JNI_FALSE;
-  } else if (!output) {
-    LOGE("NativeProgram: Null-frame given as output!");
-    return JNI_FALSE;
   }
 
   // Get the input buffers
-  bool is_copy;
-  bool err = false;
   const int input_count = env->GetArrayLength(inputs);
-  std::vector<DataBuffer*> input_buffers(input_count, NULL);
+  std::vector<const char*> input_buffers(input_count, NULL);
+  std::vector<int> input_sizes(input_count, 0);
   for (int i = 0 ; i < input_count; ++i) {
+    const char* input_data = NULL;
+    int input_size = 0;
     jobject input = env->GetObjectArrayElement(inputs, i);
-    if (!input) {
-      LOGE("NativeProgram: Null-frame given as input %d!", i);
-      err = true;
-      break;
+    if (input) {
+        NativeFrame* native_frame = ConvertFromJava<NativeFrame>(env, input);
+        if (!native_frame) {
+          LOGE("NativeProgram: Could not grab NativeFrame input %d!", i);
+          return JNI_FALSE;
+        }
+        input_data = reinterpret_cast<const char*>(native_frame->Data());
+        input_size = native_frame->Size();
     }
-    NativeFrame* native_frame = ConvertFromJava<NativeFrame>(env, input);
-    if (!native_frame) {
-      LOGE("NativeProgram: Could not grab NativeFrame input %d!", i);
-      err = true;
-      break;
-    }
-    input_buffers[i] = new DataBuffer(reinterpret_cast<char*>(native_frame->MutableData()),
-                                      native_frame->Size());
+    input_buffers[i] = input_data;
+    input_sizes[i] = input_size;
   }
 
   // Get the output buffer
-  if (!err) {
-    DataBuffer output_buffer;
+  char* output_data = NULL;
+  int output_size = 0;
+  if (output) {
     NativeFrame* output_frame = ConvertFromJava<NativeFrame>(env, output);
     if (!output_frame) {
       LOGE("NativeProgram: Could not grab NativeFrame output!");
-      err = true;;
+      return JNI_FALSE;
     }
-
-    if (!err) {
-      output_buffer.SetData(reinterpret_cast<char*>(output_frame->MutableData()),
-                            output_frame->Size());
-      output_buffer.set_mutable(true);
-      const bool output_was_empty = (output_buffer.data() == NULL);
-
-      // Process the frames!
-      err = !program->CallProcess(input_buffers, input_count, &output_buffer);
-
-      // Attach buffer to output frame if this was allocated by the program
-      if (output_was_empty && output_buffer.data()) {
-        output_frame->SetData(reinterpret_cast<uint8_t*>(output_buffer.data()), output_buffer.size());
-      }
-    }
+    output_data = reinterpret_cast<char*>(output_frame->MutableData());
+    output_size = output_frame->Size();
   }
 
-  // Delete input objects
-  for (int i = 0; i < input_count; ++i) {
-    delete input_buffers[i];
-  }
-
-  return err ? JNI_FALSE : JNI_TRUE;
+  // Process the frames!
+  return ToJBool(program->CallProcess(input_buffers, input_sizes, output_data, output_size));
 }
 
 jboolean Java_android_filterfw_core_NativeProgram_callNativeTeardown(JNIEnv* env, jobject thiz) {

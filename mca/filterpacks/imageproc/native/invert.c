@@ -16,29 +16,29 @@
 
 #include <android/log.h>
 
-#include <filter/native_buffer.h>
-
-int invert_process(const NativeBuffer* inputs,
+int invert_process(const char** inputs,
+                   const int* input_sizes,
                    int input_count,
-                   NativeBuffer output,
+                   char* output,
+                   int output_size,
                    void* user_data) {
   // Make sure we have exactly one input
   if (input_count != 1)
     return 0;
 
   // Make sure sizes match up
-  if (NativeBuffer_GetSize(inputs[0]) != NativeBuffer_GetSize(output))
+  if (input_sizes[0] != output_size)
     return 0;
 
   // Get the input and output pointers
-  const char* input_ptr = NativeBuffer_GetData(inputs[0]);
-  char* output_ptr = NativeBuffer_GetMutableData(output);
+  const char* input_ptr = inputs[0];
+  char* output_ptr = output;
   if (!input_ptr || !output_ptr)
     return 0;
 
   // Run the inversion
   int i;
-  for (i = 0; i < NativeBuffer_GetSize(output); ++i)
+  for (i = 0; i < output_size; ++i)
     *(output_ptr++) = 255 - *(input_ptr++);
 
   return 1;

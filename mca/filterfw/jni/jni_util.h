@@ -20,7 +20,7 @@
 #include <string>
 
 #include "base/utilities.h"
-#include "filter/value.h"
+#include "core/value.h"
 
 #ifndef ANDROID_FILTERFW_JNI_JNI_UTIL_H
 #define ANDROID_FILTERFW_JNI_JNI_UTIL_H

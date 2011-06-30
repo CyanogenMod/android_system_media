@@ -19,10 +19,26 @@
 
 #include <jni.h>
 
+// Internal Buffer Unwrapping functions ////////////////////////////////////////////////////////////
+/**
+ * Given a Java NativeBuffer instance, get access to the underlying C pointer and its size. The
+ * size argument may be NULL, in which case the object is not queried for its size.
+ **/
+char* GetJBufferData(JNIEnv* env, jobject buffer, int* size);
+
+/**
+ * Attach a given C data buffer and its size to a given allocated Java NativeBuffer instance. After
+ * this call, the java instance will have the given C buffer as its backing. Note, that the Java
+ * instance contains the flag on whether or not it owns the buffer or not, so make sure it is what
+ * you expect.
+ **/
+bool AttachDataToJBuffer(JNIEnv* env, jobject buffer, char* data, int size);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+// JNI Wrappers ////////////////////////////////////////////////////////////////////////////////////
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_NativeBuffer_allocate(JNIEnv* env, jobject thiz, jint size);
 

@@ -64,13 +64,11 @@ public class GLFrame extends Frame {
         super(format, frameManager, bindingType, bindingId);
     }
 
-    void init(boolean isEmpty) {
+    void init() {
         FrameFormat format = getFormat();
 
         // Check that we have a valid format
-        if (isEmpty) {
-            throw new RuntimeException("Instantiating empty GL frames is not supported!");
-        } else if (format.getBytesPerSample() != 4) {
+        if (format.getBytesPerSample() != 4) {
             throw new IllegalArgumentException("GL frames must have 4 bytes per sample!");
         } else if (format.getDimensionCount() != 2) {
             throw new IllegalArgumentException("GL frames must be 2-dimensional!");
@@ -82,7 +80,7 @@ public class GLFrame extends Frame {
         int bindingType = getBindingType();
         if (bindingType == Frame.NO_BINDING) {
             initNew(false);
-            setReusable(!isEmpty);
+            setReusable(true);
         } else if (bindingType == EXTERNAL_TEXTURE) {
             initNew(true);
             setReusable(false);

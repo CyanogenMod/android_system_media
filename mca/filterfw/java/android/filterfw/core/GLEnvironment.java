@@ -74,7 +74,11 @@ public class GLEnvironment {
     }
 
     public int registerSurface(Surface surface) {
-        return nativeAddSurface(surface);
+        int result = nativeAddSurface(surface);
+        if (result < 0) {
+            throw new RuntimeException("Error registering surface " + surface + "!");
+        }
+        return result;
     }
 
     public void activateSurfaceWithId(int surfaceId) {

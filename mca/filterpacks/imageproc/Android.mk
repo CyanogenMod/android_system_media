@@ -33,8 +33,6 @@ LOCAL_SHARED_LIBRARIES := libutils libfilterfw
 
 LOCAL_PRELINK_MODULE := false
 
-include $(LOCAL_PATH)/../../filterfw/native/filterfw_ndk.mk
-
 include $(BUILD_SHARED_LIBRARY)
 
 ##

@@ -121,7 +121,6 @@ public class CameraSource extends Filter {
     @Override
     public void prepare(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Preparing");
-        Log.i(TAG, "Creating frame extractor in thread: " + Thread.currentThread());
         // Compile shader TODO: Move to onGLEnvSomething?
         mFrameExtractor = new ShaderProgram(mFrameShader);
         // SurfaceTexture defines (0,0) to be bottom-left. The filter framework defines

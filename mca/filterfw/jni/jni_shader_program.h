@@ -19,7 +19,7 @@
 
 #include <jni.h>
 
-#include "native/filter/value.h"
+#include "native/core/value.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -37,12 +37,7 @@ public class SimpleFrameManager extends FrameManager {
     @Override
     public Frame newFrame(FrameFormat format) {
         //Log.v("FrameManager", "Creating new frame of format: " + format + ".");
-        return createNewFrame(format, false);
-    }
-
-    @Override
-    public Frame newEmptyFrame(FrameFormat format) {
-        return createNewFrame(format, true);
+        return createNewFrame(format);
     }
 
     @Override
@@ -51,7 +46,7 @@ public class SimpleFrameManager extends FrameManager {
         switch(format.getTarget()) {
             case FrameFormat.TARGET_GPU: {
                 GLFrame glFrame = new GLFrame(format, this, bindingType, bindingId);
-                glFrame.init(false);
+                glFrame.init();
                 result = glFrame;
                 break;
             }
@@ -63,26 +58,26 @@ public class SimpleFrameManager extends FrameManager {
         return result;
     }
 
-    private Frame createNewFrame(FrameFormat format, boolean isEmpty) {
+    private Frame createNewFrame(FrameFormat format) {
         Frame result = null;
         switch(format.getTarget()) {
             case FrameFormat.TARGET_JAVA:
-                result = new JavaFrame(format, this, isEmpty);
+                result = new JavaFrame(format, this);
                 break;
 
             case FrameFormat.TARGET_NATIVE:
-                result = new NativeFrame(format, this, isEmpty);
+                result = new NativeFrame(format, this);
                 break;
 
             case FrameFormat.TARGET_GPU: {
                 GLFrame glFrame = new GLFrame(format, this);
-                glFrame.init(isEmpty);
+                glFrame.init();
                 result = glFrame;
                 break;
             }
 
             case FrameFormat.TARGET_VERTEXBUFFER: {
-                result = new VertexFrame(format, this, isEmpty);
+                result = new VertexFrame(format, this);
                 break;
             }
 

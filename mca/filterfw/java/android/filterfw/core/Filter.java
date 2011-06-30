@@ -197,6 +197,10 @@ public abstract class Filter {
     }
 
     public final InputPort getInputPort(String portName) {
+        if (mInputPorts == null) {
+            throw new NullPointerException("Attempting to access input port '" + portName
+                + "' of " + this + " before Filter has been initialized!");
+        }
         InputPort result = mInputPorts.get(portName);
         if (result == null) {
             throw new IllegalArgumentException("Unknown input port '" + portName + "' on filter "
@@ -206,6 +210,10 @@ public abstract class Filter {
     }
 
     public final OutputPort getOutputPort(String portName) {
+        if (mInputPorts == null) {
+            throw new NullPointerException("Attempting to access output port '" + portName
+                + "' of " + this + " before Filter has been initialized!");
+        }
         OutputPort result = mOutputPorts.get(portName);
         if (result == null) {
             throw new IllegalArgumentException("Unknown output port '" + portName + "' on filter "
