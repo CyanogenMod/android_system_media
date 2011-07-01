@@ -55,6 +55,13 @@ Java_android_filterfw_core_GLEnvironment_nativeAddSurface(JNIEnv* env,
                                                           jobject thiz,
                                                           jobject surface);
 
+JNIEXPORT jint JNICALL
+Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceTexture(JNIEnv* env,
+                                                                 jobject thiz,
+                                                                 jobject surface,
+                                                                 jint width,
+                                                                 jint height);
+
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLEnvironment_nativeActivateSurfaceId(JNIEnv* env,
                                                                  jobject thiz,

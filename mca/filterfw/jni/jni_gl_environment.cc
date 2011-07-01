@@ -146,6 +146,66 @@ jint Java_android_filterfw_core_GLEnvironment_nativeAddSurface(JNIEnv* env,
   return -1;
 }
 
+jint Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceTexture(JNIEnv* env,
+                                                                      jobject thiz,
+                                                                      jobject surfaceTexture,
+                                                                      jint width,
+                                                                      jint height) {
+  GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
+  if (!surfaceTexture) {
+    LOGE("GLEnvironment: Null SurfaceTexture passed!");
+    return -1;
+  } else if (gl_env) {
+    // Get the ANativeWindow
+    ANativeWindow* window = ANativeWindow_fromSurfaceTexture(env, surfaceTexture);
+    if (!window) {
+      LOGE("GLEnvironment: Error creating window!");
+      return -1;
+    }
+
+    // Don't care about format (will get overridden by SurfaceTexture
+    // anyway), but do care about width and height
+    ANativeWindow_setBuffersGeometry(window, width, height, 0);
+
+    NativeWindowHandle* winHandle = new NativeWindowHandle(window);
+    int result = gl_env->FindSurfaceIdForWindow(winHandle);
+    if (result == -1) {
+      // Configure surface
+      EGLConfig config;
+      EGLint numConfigs = -1;
+      EGLint configAttribs[] = {
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_NONE
+      };
+
+      eglChooseConfig(gl_env->display(), configAttribs, &config, 1, &numConfigs);
+      if (numConfigs < 1) {
+        LOGE("GLEnvironment: No suitable EGL configuration found for surface texture!");
+        return -1;
+      }
+
+      // Create the EGL surface
+      EGLSurface egl_surface = eglCreateWindowSurface(gl_env->display(),
+                                                      config,
+                                                      window,
+                                                      NULL);
+
+      if (GLEnv::CheckEGLError("eglCreateWindowSurface")) {
+        LOGE("GLEnvironment: Error creating window surface!");
+        return -1;
+      }
+
+      // Add it to GL Env and assign ID
+      result = gl_env->AddWindowSurface(egl_surface, winHandle);
+    } else {
+      delete winHandle;
+    }
+    return result;
+  }
+  return -1;
+}
+
 jboolean Java_android_filterfw_core_GLEnvironment_nativeActivateSurfaceId(JNIEnv* env,
                                                                           jobject thiz,
                                                                           jint surfaceId) {

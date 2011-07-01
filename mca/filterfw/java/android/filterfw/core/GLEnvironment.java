@@ -18,6 +18,7 @@
 package android.filterfw.core;
 
 import android.filterfw.core.NativeAllocatorTag;
+import android.graphics.SurfaceTexture;
 import android.view.Surface;
 
 /**
@@ -85,6 +86,14 @@ public class GLEnvironment {
         return result;
     }
 
+    public int registerSurfaceTexture(SurfaceTexture surfaceTexture, int width, int height) {
+        int result = nativeAddSurfaceTexture(surfaceTexture, width, height);
+        if (result < 0) {
+            throw new RuntimeException("Error registering surfaceTexture " + surfaceTexture + "!");
+        }
+        return result;
+    }
+
     public void activateSurfaceWithId(int surfaceId) {
         if (!nativeActivateSurfaceId(surfaceId)) {
             throw new RuntimeException("Could not activate surface " + surfaceId + "!");
@@ -120,6 +129,8 @@ public class GLEnvironment {
     private native boolean nativeDeallocate();
 
     private native int nativeAddSurface(Surface surface);
+
+    private native int nativeAddSurfaceTexture(SurfaceTexture surface, int width, int height);
 
     private native boolean nativeActivateSurfaceId(int surfaceId);
 
