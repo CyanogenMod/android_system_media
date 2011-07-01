@@ -131,10 +131,10 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
         updateRenderMode();
 
         // Create a frame representing the screen
-        MutableFrameFormat screenFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE,
-                                                                 FrameFormat.TARGET_GPU);
-        screenFormat.setBytesPerSample(4);
-        screenFormat.setDimensions(mSurfaceView.getWidth(), mSurfaceView.getHeight());
+        MutableFrameFormat screenFormat = ImageFormat.create(mSurfaceView.getWidth(),
+                                                             mSurfaceView.getHeight(),
+                                                             ImageFormat.COLORSPACE_RGBA,
+                                                             FrameFormat.TARGET_GPU);
         mScreen = (GLFrame)context.getFrameManager().newBoundFrame(screenFormat,
                                                                    GLFrame.EXISTING_FBO_BINDING,
                                                                    0);

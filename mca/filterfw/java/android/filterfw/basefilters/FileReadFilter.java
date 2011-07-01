@@ -28,6 +28,7 @@ import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
+import android.filterfw.format.PrimitiveFormat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -75,8 +76,7 @@ public class FileReadFilter extends Filter {
     @Override
     public void setupPorts() {
         int target = FrameFormat.readTargetString(mTarget);
-        mOutputFormat = new MutableFrameFormat(FrameFormat.TYPE_BYTE, target);
-        mOutputFormat.setDimensionCount(1);
+        mOutputFormat = PrimitiveFormat.createByteFormat(target);
         addOutputPort("data", mOutputFormat);
     }
 
