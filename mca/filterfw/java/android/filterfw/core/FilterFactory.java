@@ -33,15 +33,19 @@ public class FilterFactory {
     private static FilterFactory mSharedFactory;
     private HashSet<String> mPackages = new HashSet<String>();
 
+    private boolean mLogVerbose;
+    private static final String TAG = "FilterFactory";
+
     public static FilterFactory sharedFactory() {
         if (mSharedFactory == null) {
             mSharedFactory = new FilterFactory();
+            mSharedFactory.mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
         }
         return mSharedFactory;
     }
 
     public void addPackage(String packageName) {
-        Log.i("FilterFactory", "Adding package " + packageName);
+        if (mLogVerbose) Log.v(TAG, "Adding package " + packageName);
         /*
         Package pkg = Package.getPackage(packageName);
         if (pkg == null) {
@@ -52,14 +56,14 @@ public class FilterFactory {
     }
 
     public Filter createFilterByClassName(String className, String filterName) {
-        Log.i("FilterFactory", "Looking up class " + className);
+        if (mLogVerbose) Log.v(TAG, "Looking up class " + className);
         Class filterClass = null;
         // Get context's classloader; otherwise cannot load non-framework filters
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         // Look for the class in the imported packages
         for (String packageName : mPackages) {
             try {
-                Log.i("FilterFactory", "Trying "+packageName + "." + className);
+                if (mLogVerbose) Log.v(TAG, "Trying "+packageName + "." + className);
                 filterClass = contextClassLoader.loadClass(packageName + "." + className);
             } catch (ClassNotFoundException e) {
                 continue;

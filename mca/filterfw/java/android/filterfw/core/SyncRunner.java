@@ -18,6 +18,7 @@
 package android.filterfw.core;
 
 import android.os.ConditionVariable;
+import android.util.Log;
 
 import java.lang.reflect.Constructor;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -36,10 +37,16 @@ public class SyncRunner extends GraphRunner {
 
     private StopWatchMap mTimer = null;
 
+    private final boolean mLogVerbose;
+    private final static String TAG = "SyncRunner";
 
     // TODO: Provide factory based constructor?
     public SyncRunner(FilterContext context, FilterGraph graph, Class schedulerClass) {
         super(context);
+
+        mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
+
+        if (mLogVerbose) Log.v(TAG, "Initializing SyncRunner");
 
         // Create the scheduler
         if (Scheduler.class.isAssignableFrom(schedulerClass)) {
@@ -63,6 +70,8 @@ public class SyncRunner extends GraphRunner {
         mFilterContext = context;
 
         mTimer = new StopWatchMap();
+
+        if (mLogVerbose) Log.v(TAG, "Setting up filters");
 
         // Setup graph filters
         graph.setupFilters();
@@ -90,11 +99,14 @@ public class SyncRunner extends GraphRunner {
 
     public void close() {
         // Close filters
+        if (mLogVerbose) Log.v(TAG, "Closing graph.");
         getGraph().closeFilters(mFilterContext);
     }
 
     @Override
     public void run() {
+        if (mLogVerbose) Log.v(TAG, "Beginning run.");
+
         // Preparation
         beginProcessing();
         assertReadyToStep();
@@ -111,8 +123,10 @@ public class SyncRunner extends GraphRunner {
 
         // Call completion callback if set
         if (mDoneListener != null) {
+            if (mLogVerbose) Log.v(TAG, "Calling completion listener.");
             mDoneListener.onRunnerDone(determinePostRunState());
         }
+        if (mLogVerbose) Log.v(TAG, "Run complete");
     }
 
     @Override
@@ -135,11 +149,12 @@ public class SyncRunner extends GraphRunner {
     }
 
     protected void processFilterNode(Filter filter) {
-        LogMCA.perFrame("Processing " + filter);
+        if (mLogVerbose) Log.v(TAG, "Processing filter node");
         filter.performProcess(mFilterContext);
         if (filter.getStatus() == Filter.STATUS_ERROR) {
             throw new RuntimeException("There was an error executing " + filter + "!");
         } else if (filter.getStatus() == Filter.STATUS_SLEEPING) {
+            if (mLogVerbose) Log.v(TAG, "Scheduling filter wakeup");
             scheduleFilterWake(filter, filter.getSleepDelay());
         }
     }
@@ -179,6 +194,7 @@ public class SyncRunner extends GraphRunner {
 
     // Core internal methods ///////////////////////////////////////////////////////////////////////
     boolean performStep() {
+        if (mLogVerbose) Log.v(TAG, "Performing one step.");
         Filter filter = mScheduler.scheduleNextNode();
         if (filter != null) {
             mTimer.start(filter.getName());
