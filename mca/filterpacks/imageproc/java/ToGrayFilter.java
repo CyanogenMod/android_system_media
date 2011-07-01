@@ -102,17 +102,17 @@ public class ToGrayFilter extends SimpleImageFilter {
     }
 
     @Override
-    public void process(FilterContext env) {
+    public void process(FilterContext context) {
         // Get input frame
         Frame input = pullInput("image");
 
         // Create output frame
         MutableFrameFormat outputFormat = input.getFormat().mutableCopy();
         outputFormat.setBytesPerSample(mOutChannels);
-        Frame output = env.getFrameManager().newFrame(outputFormat);
+        Frame output = context.getFrameManager().newFrame(outputFormat);
 
         // Make sure we have a program
-        updateProgramWithTarget(input.getFormat().getTarget());
+        updateProgramWithTarget(input.getFormat().getTarget(), context);
 
         // Process
         mProgram.process(input, output);

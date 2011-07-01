@@ -239,6 +239,14 @@ public abstract class Filter {
     }
 
     /**
+     * Transfers any frame from an input port to its destination. This is useful to force a
+     * transfer from a FieldPort or ProgramPort to its connected target (field or program variable).
+     */
+    protected void transferInputPortFrame(String name, FilterContext context) {
+        getInputPort(name).transfer(context);
+    }
+
+    /**
      * Adds an input port to the filter. You should call this from within setupPorts, if your
      * filter has input ports. No type-checking is performed on the input. If you would like to
      * check against a type mask, use
