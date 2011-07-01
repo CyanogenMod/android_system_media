@@ -66,29 +66,38 @@ public class AsyncRunner extends GraphRunner{
                 throw new RuntimeException("More than one callback data set received!");
             }
 
+            // Preparation
             if (mLogVerbose) Log.v(TAG, "Starting background graph processing.");
             activateGlContext();
 
-            boolean isDone = false;
             if (mLogVerbose) Log.v(TAG, "Preparing filter graph for processing.");
             runner[0].beginProcessing();
 
             if (mLogVerbose) Log.v(TAG, "Running graph.");
             runner[0].assertReadyToStep();
-            while (!isCancelled() && !isDone) {
-                int status = runner[0].performStep(true);
-                if (status == GraphRunner.RESULT_SLEEPING) {
-                    runner[0].waitUntilWake();
-                } else if (status != GraphRunner.RESULT_RUNNING) {
-                    isDone = true;
+
+            // Run loop
+            int status = RESULT_RUNNING;
+            while (!isCancelled() && status == RESULT_RUNNING) {
+                if (!runner[0].performStep()) {
+                    status = runner[0].determinePostRunState();
+                    if (status == GraphRunner.RESULT_SLEEPING) {
+                        runner[0].waitUntilWake();
+                        status = RESULT_RUNNING;
+                    }
                 }
             }
-            if (mLogVerbose) Log.v(TAG, "Closing filters.");
-            runner[0].close();
+
+            // Cleanup
+            if (isCancelled()) {
+                if (mLogVerbose) Log.v(TAG, "Closing filters.");
+                runner[0].close();
+            }
+
             deactivateGlContext();
 
             if (mLogVerbose) Log.v(TAG, "Done with background graph processing.");
-            return isDone ? RESULT_FINISHED : RESULT_STOPPED;
+            return status;
         }
 
         @Override
