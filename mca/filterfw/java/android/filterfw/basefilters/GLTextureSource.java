@@ -42,6 +42,9 @@ public class GLTextureSource extends Filter {
     @GenerateFieldPort(name = "height")
     private int mHeight;
 
+    @GenerateFieldPort(name = "repeatFrame", hasDefault = true)
+    private boolean mRepeatFrame = false;
+
     private Frame mFrame;
 
     public GLTextureSource(String name) {
@@ -78,8 +81,10 @@ public class GLTextureSource extends Filter {
         // Push output
         pushOutput("frame", mFrame);
 
-        // Close output port as we are done here
-        closeOutputPort("frame");
+        if (!mRepeatFrame) {
+            // Close output port as we are done here
+            closeOutputPort("frame");
+        }
     }
 
     @Override
