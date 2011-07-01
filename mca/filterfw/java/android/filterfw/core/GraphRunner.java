@@ -36,6 +36,7 @@ public abstract class GraphRunner {
         public void onRunnerDone(int result);
     }
 
+    public static final int RESULT_UNKNOWN  = 0;
     public static final int RESULT_RUNNING  = 1;
     public static final int RESULT_FINISHED = 2;
     public static final int RESULT_SLEEPING = 3;
@@ -78,4 +79,5 @@ public abstract class GraphRunner {
     public abstract boolean isRunning();
 
     public abstract void stop();
+
 }

@@ -81,7 +81,7 @@ public class SyncRunner extends GraphRunner {
 
     public int step() {
         assertReadyToStep();
-        return performStep(true);
+        return performStep() ? RESULT_RUNNING : determinePostRunState();
     }
 
     public void beginProcessing() {
@@ -101,18 +101,17 @@ public class SyncRunner extends GraphRunner {
         activateGlContext();
 
         // Run
-        int status = RESULT_RUNNING;
-        while (status == RESULT_RUNNING) {
-            status = performStep(false);
+        boolean keepRunning = true;
+        while (keepRunning) {
+            keepRunning = performStep();
         }
 
-        // Close
-        close();
+        // Cleanup
         deactivateGlContext();
 
         // Call completion callback if set
         if (mDoneListener != null) {
-            mDoneListener.onRunnerDone(status);
+            mDoneListener.onRunnerDone(determinePostRunState());
         }
     }
 
@@ -131,15 +130,11 @@ public class SyncRunner extends GraphRunner {
         throw new RuntimeException("SyncRunner does not support stopping a graph!");
     }
 
-    public int getGraphState() {
-        return determineGraphState();
-    }
-
-    public void waitUntilWake() {
+    protected void waitUntilWake() {
         mWakeCondition.block();
     }
 
-    private void processFilterNode(Filter filter) {
+    protected void processFilterNode(Filter filter) {
         LogMCA.perFrame("Processing " + filter);
         filter.performProcess(mFilterContext);
         if (filter.getStatus() == Filter.STATUS_ERROR) {
@@ -149,7 +144,7 @@ public class SyncRunner extends GraphRunner {
         }
     }
 
-    private void scheduleFilterWake(Filter filter, int delay) {
+    protected void scheduleFilterWake(Filter filter, int delay) {
         // Close the wake condition
         mWakeCondition.close();
 
@@ -166,7 +161,7 @@ public class SyncRunner extends GraphRunner {
         }, delay, TimeUnit.MILLISECONDS);
     }
 
-    private int determineGraphState() {
+    protected int determinePostRunState() {
         boolean isBlocked = false;
         for (Filter filter : mScheduler.getGraph().getFilters()) {
             if (filter.isOpen()) {
@@ -174,7 +169,7 @@ public class SyncRunner extends GraphRunner {
                     // If ANY node is sleeping, we return our state as sleeping
                     return RESULT_SLEEPING;
                 } else {
-                    // TODO: Be more precise whether this is blocked or starved
+                    // If a node is still open, it is blocked (by input or output)
                     return RESULT_BLOCKED;
                 }
             }
@@ -183,15 +178,15 @@ public class SyncRunner extends GraphRunner {
     }
 
     // Core internal methods ///////////////////////////////////////////////////////////////////////
-    int performStep(boolean detailedState) {
+    boolean performStep() {
         Filter filter = mScheduler.scheduleNextNode();
         if (filter != null) {
             mTimer.start(filter.getName());
             processFilterNode(filter);
             mTimer.stop(filter.getName());
-            return RESULT_RUNNING;
+            return true;
         } else {
-            return detailedState ? determineGraphState() : RESULT_FINISHED;
+            return false;
         }
     }
 
