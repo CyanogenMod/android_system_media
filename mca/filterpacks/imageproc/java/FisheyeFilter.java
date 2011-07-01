@@ -103,13 +103,13 @@ public class FisheyeFilter extends SimpleImageFilter {
     }
 
     @Override
-    public void process(FilterContext env) {
+    public void process(FilterContext context) {
         // Get input frame
         Frame input = pullInput("image");
 
         // Create output frame
         // TODO: Use Frame Provider
-        Frame output = env.getFrameManager().newFrame(input.getFormat());
+        Frame output = context.getFrameManager().newFrame(input.getFormat());
 
         Log.e("Fisheye", "width: " + input.getFormat().getWidth() +
               ", height: " + input.getFormat().getHeight());
@@ -122,7 +122,7 @@ public class FisheyeFilter extends SimpleImageFilter {
         Log.e("Fisheye", "( " + center[0] + ", " + center[1] + " )");
 
         // Make sure we have a program
-        updateProgramWithTarget(input.getFormat().getTarget());
+        updateProgramWithTarget(input.getFormat().getTarget(), context);
 
         // set uniforms in shader
         mProgram.setHostValue("center", center);

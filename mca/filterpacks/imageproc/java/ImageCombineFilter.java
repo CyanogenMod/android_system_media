@@ -97,7 +97,7 @@ public abstract class ImageCombineFilter extends Filter {
         Frame output = context.getFrameManager().newFrame(inputs[0].getFormat());
 
         // Make sure we have a program
-        updateProgramWithTarget(inputs[0].getFormat().getTarget());
+        updateProgramWithTarget(inputs[0].getFormat().getTarget(), context);
 
         // Process
         mProgram.process(inputs, output);
@@ -109,7 +109,7 @@ public abstract class ImageCombineFilter extends Filter {
         output.release();
     }
 
-    protected void updateProgramWithTarget(int target) {
+    protected void updateProgramWithTarget(int target, FilterContext context) {
         if (target != mCurrentTarget) {
             switch (target) {
                 case FrameFormat.TARGET_NATIVE:
@@ -128,6 +128,7 @@ public abstract class ImageCombineFilter extends Filter {
                 throw new RuntimeException("Could not create a program for image filter "
                     + this + "!");
             }
+            transferInputPortFrame(mParameterName, context);
             mCurrentTarget = target;
         }
     }

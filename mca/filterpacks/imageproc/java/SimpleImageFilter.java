@@ -75,7 +75,7 @@ public abstract class SimpleImageFilter extends Filter {
         Frame output = context.getFrameManager().newFrame(inputFormat);
 
         // Create program if not created already
-        updateProgramWithTarget(inputFormat.getTarget());
+        updateProgramWithTarget(inputFormat.getTarget(), context);
 
         // Process
         mProgram.process(input, output);
@@ -87,7 +87,7 @@ public abstract class SimpleImageFilter extends Filter {
         output.release();
     }
 
-    protected void updateProgramWithTarget(int target) {
+    protected void updateProgramWithTarget(int target, FilterContext context) {
         if (target != mCurrentTarget) {
             switch (target) {
                 case FrameFormat.TARGET_NATIVE:
@@ -105,6 +105,7 @@ public abstract class SimpleImageFilter extends Filter {
             if (mProgram == null) {
                 throw new RuntimeException("Could not create a program for image filter " + this + "!");
             }
+            transferInputPortFrame(mParameterName, context);
             mCurrentTarget = target;
         }
     }
