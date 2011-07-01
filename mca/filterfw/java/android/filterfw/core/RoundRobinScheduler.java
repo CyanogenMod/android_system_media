@@ -35,6 +35,7 @@ public class RoundRobinScheduler extends Scheduler {
 
     @Override
     public void reset() {
+        mLastPos = -1;
     }
 
     @Override
