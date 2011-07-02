@@ -55,6 +55,10 @@ public class GLEnvironment {
         }
     }
 
+    public boolean isActive() {
+        return nativeIsActive();
+    }
+
     public void activate() {
         if (!nativeActivate()) {
             throw new RuntimeException("Could not activate GLEnvironment!");
@@ -102,6 +106,8 @@ public class GLEnvironment {
     private native boolean nativeInitWithNewContext();
 
     private native boolean nativeInitWithCurrentContext();
+
+    private native boolean nativeIsActive();
 
     private native boolean nativeActivate();
 

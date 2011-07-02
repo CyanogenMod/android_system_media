@@ -55,12 +55,16 @@ public abstract class GraphRunner {
 
     /**
      * Helper function for subclasses to activate the GL environment before running.
+     * @return true, if the GL environment was activated. Returns false, if the GL environment
+     *         was already active.
      */
-    protected void activateGlContext() {
+    protected boolean activateGlContext() {
         GLEnvironment glEnv = mFilterContext.getGLEnvironment();
-        if (glEnv != null) {
+        if (glEnv != null && !glEnv.isActive()) {
             glEnv.activate();
+            return true;
         }
+        return false;
     }
 
     /**
