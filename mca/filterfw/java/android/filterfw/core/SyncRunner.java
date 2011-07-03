@@ -110,7 +110,7 @@ public class SyncRunner extends GraphRunner {
         // Preparation
         beginProcessing();
         assertReadyToStep();
-        activateGlContext();
+        boolean glActivated = activateGlContext();
 
         // Run
         boolean keepRunning = true;
@@ -119,7 +119,9 @@ public class SyncRunner extends GraphRunner {
         }
 
         // Cleanup
-        deactivateGlContext();
+        if (glActivated) {
+            deactivateGlContext();
+        }
 
         // Call completion callback if set
         if (mDoneListener != null) {

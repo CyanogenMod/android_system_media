@@ -36,6 +36,9 @@ JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLEnvironment_nativeInitWithCurrentContext(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jboolean JNICALL
+Java_android_filterfw_core_GLEnvironment_nativeIsActive(JNIEnv* env, jobject thiz);
+
+JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLEnvironment_nativeActivate(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jboolean JNICALL

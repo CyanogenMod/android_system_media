@@ -66,6 +66,11 @@ jboolean Java_android_filterfw_core_GLEnvironment_nativeInitWithCurrentContext(J
   return gl_env ? ToJBool(gl_env->InitWithCurrentContext()) : JNI_FALSE;
 }
 
+jboolean Java_android_filterfw_core_GLEnvironment_nativeIsActive(JNIEnv* env, jobject thiz) {
+  GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
+  return gl_env ? ToJBool(gl_env->IsActive()) : JNI_FALSE;
+}
+
 jboolean Java_android_filterfw_core_GLEnvironment_nativeActivate(JNIEnv* env, jobject thiz) {
   GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
   return gl_env ? ToJBool(gl_env->Activate()) : JNI_FALSE;
