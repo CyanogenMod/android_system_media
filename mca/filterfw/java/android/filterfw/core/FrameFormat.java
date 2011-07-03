@@ -216,7 +216,7 @@ public class FrameFormat {
         }
 
         // Check dimensions
-        for (int i = 0; i < getDimensionCount(); ++i) {
+        for (int i = 0; i < specification.getDimensionCount(); ++i) {
             int specDim = specification.getDimension(i);
             if (specDim != SIZE_UNSPECIFIED && getDimension(i) != specDim) {
                 return false;

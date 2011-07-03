@@ -105,7 +105,9 @@ public abstract class SimpleImageFilter extends Filter {
             if (mProgram == null) {
                 throw new RuntimeException("Could not create a program for image filter " + this + "!");
             }
-            transferInputPortFrame(mParameterName, context);
+            if (mParameterName != null) {
+                transferInputPortFrame(mParameterName, context);
+            }
             mCurrentTarget = target;
         }
     }

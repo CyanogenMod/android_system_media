@@ -90,6 +90,7 @@ public class AsyncRunner extends GraphRunner{
 
             // Cleanup
             if (isCancelled()) {
+                status = RESULT_STOPPED;
                 if (mLogVerbose) Log.v(TAG, "Closing filters.");
                 runner[0].close();
             }
@@ -210,13 +211,21 @@ public class AsyncRunner extends GraphRunner{
 
     /** Stop graph execution. This is an asynchronous call; register a callback
      * with setDoneCallback to be notified of when the background processing has
-     * been completed. */
+     * been completed. Calling stop will close the filter graph. */
     @Override
-    public void stop() {
-        if (mLogVerbose) Log.v(TAG, "Stopping graph.");
-        if (mRunTask != null) {
+    synchronized public void stop() {
+        if (mRunTask != null && !mRunTask.isCancelled() ) {
+            if (mLogVerbose) Log.v(TAG, "Stopping graph.");
             mRunTask.cancel(false);
         }
+    }
+
+    @Override
+    synchronized public void close() {
+        if (isRunning()) {
+            throw new RuntimeException("Cannot close graph while it is running!");
+        }
+        mRunner.close();
     }
 
     /** Check if background processing is happening */

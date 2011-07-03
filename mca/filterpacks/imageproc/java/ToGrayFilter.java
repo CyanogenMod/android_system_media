@@ -32,13 +32,13 @@ import android.filterfw.format.ImageFormat;
 
 import android.util.Log;
 
+import java.lang.reflect.Field;
+
 /**
  * @hide
  */
 public class ToGrayFilter extends SimpleImageFilter {
 
-    @GenerateFieldPort(name = "outputChannels")
-    private int mOutChannels;
     @GenerateFieldPort(name = "invertSource", hasDefault = true)
     private boolean mInvertSource = false;
 
@@ -59,69 +59,28 @@ public class ToGrayFilter extends SimpleImageFilter {
     }
 
     @Override
+    public void setupPorts() {
+        addMaskedInputPort("image", ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                       FrameFormat.TARGET_GPU));
+        addOutputBasedOnInput("image", "image");
+    }
+
+    @Override
     protected Program getNativeProgram() {
-        /*switch (mOutChannels) {
-          case 1:
-          mProgram = new NativeProgram("filterpack_imageproc", "color_to_gray1");
-          break;
-          case 3:
-          mProgram = new NativeProgram("filterpack_imageproc", "color_to_gray3");
-          break;
-          case 4:
-          mProgram = new NativeProgram("filterpack_imageproc", "color_to_gray4");
-          break;
-          default:
-          throw new RuntimeException("Unsupported output channels: " + mOutChannels + "!");
-          }
-          mProgram.setHostValue("inputChannels", mInputChannels);
-          break;*/
         throw new RuntimeException("Native toGray not implemented yet!");
     }
 
     @Override
     protected Program getShaderProgram() {
         int inputChannels = getInputFormat("image").getBytesPerSample();
-        if (inputChannels != 4 || mOutChannels != 4) {
-            throw new RuntimeException("Unsupported GL channels: " + inputChannels + "/" +
-                                       mOutChannels +
-                                       "(in/out)! Both input and output channels " +
-                                       "must be 4!");
+        if (inputChannels != 4) {
+            throw new RuntimeException("Unsupported GL input channels: " +
+                                       inputChannels + "! Channels must be 4!");
         }
         ShaderProgram program = new ShaderProgram(mColorToGray4Shader);
         if (mInvertSource)
             program.setSourceRect(0.0f, 1.0f, 1.0f, -1.0f);
         return program;
-    }
-
-    @Override
-    public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
-        mOutputFormat = inputFormat.mutableCopy();
-        mOutputFormat.setBytesPerSample(mOutChannels);
-        mOutputFormat.setMetaValue(ImageFormat.COLORSPACE_KEY, ImageFormat.COLORSPACE_GRAY);
-        return mOutputFormat;
-    }
-
-    @Override
-    public void process(FilterContext context) {
-        // Get input frame
-        Frame input = pullInput("image");
-
-        // Create output frame
-        MutableFrameFormat outputFormat = input.getFormat().mutableCopy();
-        outputFormat.setBytesPerSample(mOutChannels);
-        Frame output = context.getFrameManager().newFrame(outputFormat);
-
-        // Make sure we have a program
-        updateProgramWithTarget(input.getFormat().getTarget(), context);
-
-        // Process
-        mProgram.process(input, output);
-
-        // Push output
-        pushOutput("image", output);
-
-        // Release pushed frame
-        output.release();
     }
 
 }

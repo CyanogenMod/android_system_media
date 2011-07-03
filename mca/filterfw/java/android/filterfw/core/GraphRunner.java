@@ -29,9 +29,11 @@ public abstract class GraphRunner {
         /** Callback method to be called when the runner completes a
          * {@link #run()} call.
          *
-         * @param result will be RESULT_FINISHED if the graph finished
-         *        running on its own, or RESULT_STOPPED if the runner was
-         *        stopped by a call to stop().
+         * @param result will be RESULT_FINISHED if the graph finished running
+         *        on its own, RESULT_STOPPED if the runner was stopped by a call
+         *        to stop(), RESULT_BLOCKED if no filters could run due to lack
+         *        of inputs or outputs or due to scheduling policies, and
+         *        RESULT_SLEEPING if a filter node requested sleep.
          */
         public void onRunnerDone(int result);
     }
@@ -77,11 +79,15 @@ public abstract class GraphRunner {
         }
     }
 
+    /** Starts running the graph. Will open the filters in the graph if they are not already open. */
     public abstract void run();
 
     public abstract void setDoneCallback(OnRunnerDoneListener listener);
     public abstract boolean isRunning();
 
+    /** Stops graph execution. As part of stopping, also closes the graph nodes. */
     public abstract void stop();
 
+    /** Closes the filters in a graph. Can only be called if the graph is not running. */
+    public abstract void close();
 }
