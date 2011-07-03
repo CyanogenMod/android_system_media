@@ -64,7 +64,7 @@ public abstract class Filter {
     private int mSleepDelay;
 
     private boolean mLogVerbose;
-    private final String TAG = "Filter";
+    private static final String TAG = "Filter";
 
     public Filter(String name) {
         mName = name;

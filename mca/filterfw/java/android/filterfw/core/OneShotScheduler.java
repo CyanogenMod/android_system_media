@@ -28,7 +28,7 @@ import java.util.HashMap;
  * @hide
  */
 public class OneShotScheduler extends RoundRobinScheduler {
-    private HashMap <String, Integer>  scheduled;
+    private HashMap <String, Integer> scheduled = new HashMap<String, Integer>();
 
     public OneShotScheduler(FilterGraph graph) {
         super(graph);
