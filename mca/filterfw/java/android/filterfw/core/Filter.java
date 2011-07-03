@@ -27,6 +27,7 @@ import android.util.Log;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.Thread;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,6 +74,27 @@ public abstract class Filter {
         mStatus = STATUS_PREINIT;
 
         mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
+    }
+
+    /** Tests to see if a given filter is installed on the system. Requires
+     * full filter package name, including filterpack.
+     */
+    public static final boolean isAvailable(String filterName) {
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        Class filterClass;
+        // First see if a class of that name exists
+        try {
+            filterClass = contextClassLoader.loadClass(filterName);
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+        // Then make sure it's a subclass of Filter.
+        try {
+            filterClass.asSubclass(Filter.class);
+        } catch (ClassCastException e) {
+            return false;
+        }
+        return true;
     }
 
     public final void initWithValueMap(KeyValueMap valueMap) {
