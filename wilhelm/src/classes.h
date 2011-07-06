@@ -15,6 +15,7 @@
  */
 
 #ifdef ANDROID
+#include "android/AudioTrackProxy.h"
 #include "android/CallbackProtector.h"
 #include "android/android_Effect.h"
 #include "android/android_GenericPlayer.h"
@@ -71,8 +72,9 @@
     // Formerly at IMuteSolo
     SLuint8 mMuteMask;      // Mask for which channels are muted: bit 0=left, 1=right
     SLuint8 mSoloMask;      // Mask for which channels are soloed: bit 0=left, 1=right
-    SLuint8 mNumChannels;   // 0 means unknown, then const once it is known, range 1 <= x <= 8
-    SLuint32 mSampleRateMilliHz;// 0 means unknown, then const once it is known
+    SLuint8 mNumChannels;   // initially ANDROID_UNKNOWN_NUMCHANNELS, then const once it is known,
+                            // range 1 <= x <= 8
+    SLuint32 mSampleRateMilliHz;// initially ANDROID_UNKNOWN_SAMPLERATE, then const once it is known
     // Formerly at IEffectSend
     /**
      * Dry volume modified by effect send interfaces: SLEffectSendItf and SLAndroidEffectSendItf
@@ -96,8 +98,9 @@
     int mSessionId;
     /** identifies the Android stream type playback will occur on */
     int mStreamType;
+    // FIXME consolidate the next several variables into one class to avoid placement new
     /** plays the PCM data for this player */
-    android::AudioTrack *mAudioTrack;                 // FIXME consolidate into one class
+    android::sp<android::AudioTrackProxy> mAudioTrack;
     android::sp<android::CallbackProtector> mCallbackProtector;
     android::sp<android::GenericPlayer> mAPlayer;
     /** aux effect the AudioTrack will be attached to if aux send enabled */
@@ -117,6 +120,8 @@
      * Attenuation factor derived from direct level
      */
     float mAmplFromDirectLevel;
+    /** whether to call AudioTrack::start() at the next safe opportunity */
+    bool mDeferredStart;
 #endif
 } /*CAudioPlayer*/;
 
@@ -147,8 +152,9 @@
     DataLocatorFormat mDataSource;
     DataLocatorFormat mDataSink;
     // cached data for this instance
-    SLuint8 mNumChannels;   // 0 means unknown, then const once it is known, range 1 <= x <= 8
-    SLuint32 mSampleRateMilliHz;// 0 means unknown, then const once it is known
+    SLuint8 mNumChannels;   // initially ANDROID_UNKNOWN_NUMCHANNELS, then const once it is known,
+                            // range 1 <= x <= 8
+    SLuint32 mSampleRateMilliHz;// initially ANDROID_UNKNOWN_SAMPLERATE, then const once it is known
     // implementation-specific data for this instance
 #ifdef ANDROID
     enum AndroidObjectType mAndroidObjType;

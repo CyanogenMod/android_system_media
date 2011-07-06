@@ -116,13 +116,14 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
 
     // make SL object IDs be contiguous with XA object IDs
     SLuint32 objectID = IObjectToObjectID(thiz);
-    if ((XA_OBJECTID_ENGINE <= objectID) && (objectID <= XA_OBJECTID_CAMERADEVICE)) {
+    SLuint32 index = objectID;
+    if ((XA_OBJECTID_ENGINE <= index) && (index <= XA_OBJECTID_CAMERADEVICE)) {
         ;
-    } else if ((SL_OBJECTID_ENGINE <= objectID) && (objectID <= SL_OBJECTID_METADATAEXTRACTOR)) {
-        objectID -= SL_OBJECTID_ENGINE - XA_OBJECTID_CAMERADEVICE - 1;
+    } else if ((SL_OBJECTID_ENGINE <= index) && (index <= SL_OBJECTID_METADATAEXTRACTOR)) {
+        index -= SL_OBJECTID_ENGINE - XA_OBJECTID_CAMERADEVICE - 1;
     } else {
         assert(false);
-        objectID = 0;
+        index = 0;
     }
 
     // first synchronously handle updates to attributes here, while object is still locked.
@@ -134,7 +135,7 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
         // ATTR_INDEX_MAX == next bit position after the last attribute
         assert(ATTR_INDEX_MAX > bit);
         // compute the entry in the handler table using object ID and bit number
-        AttributeHandler handler = handlerTable[objectID][bit];
+        AttributeHandler handler = handlerTable[index][bit];
         if (NULL != handler) {
             asynchronous &= ~(*handler)(thiz);
         }
@@ -150,6 +151,18 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
         }
     }
 
+#ifdef ANDROID
+    // hack to safely handle a post-unlock AudioTrack::start()
+    android::sp<android::AudioTrackProxy> audioTrack;
+    if (SL_OBJECTID_AUDIOPLAYER == objectID) {
+        CAudioPlayer *ap = (CAudioPlayer *) thiz;
+        if (ap->mDeferredStart) {
+            audioTrack = ap->mAudioTrack;
+            ap->mDeferredStart = false;
+        }
+    }
+#endif
+
 #ifdef USE_DEBUG
     memset(&thiz->mOwner, 0, sizeof(pthread_t));
     thiz->mFile = file;
@@ -157,6 +170,14 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
 #endif
     ok = pthread_mutex_unlock(&thiz->mMutex);
     assert(0 == ok);
+
+#ifdef ANDROID
+    // call AudioTrack::start() while not holding the mutex on AudioPlayer
+    if (audioTrack != 0) {
+        audioTrack->start();
+        audioTrack.clear();
+    }
+#endif
 
     // first update to this interface since previous sync
     if (ATTR_NONE != asynchronous) {

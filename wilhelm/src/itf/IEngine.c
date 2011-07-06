@@ -137,8 +137,8 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 
                     // Will be set soon for PCM buffer queues, or later by platform-specific code
                     // during Realize or Prefetch
-                    thiz->mNumChannels = 0;
-                    thiz->mSampleRateMilliHz = 0;
+                    thiz->mNumChannels = ANDROID_UNKNOWN_NUMCHANNELS;
+                    thiz->mSampleRateMilliHz = ANDROID_UNKNOWN_SAMPLERATE;
 
                     // More default values, in case destructor needs to be called early
                     thiz->mDirectLevel = 0;
@@ -160,10 +160,10 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 #ifdef ANDROID
                     // extra safe initializations of pointers, in case of incomplete construction
                     thiz->mpLock = NULL;
-                    thiz->mAudioTrack = NULL;
                     // placement new (explicit constructor)
                     // FIXME unnecessary once those fields are encapsulated in one class, rather
                     //   than a structure
+                    (void) new (&thiz->mAudioTrack) android::sp<android::AudioTrackProxy>();
                     (void) new (&thiz->mCallbackProtector)
                             android::sp<android::CallbackProtector>();
                     (void) new (&thiz->mAuxEffect) android::sp<android::AudioEffect>();
@@ -433,8 +433,8 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                     // These fields are set to real values by
                     // android_audioRecorder_checkSourceSinkSupport.  Note that the data sink is
                     // always PCM buffer queue, so we know the channel count and sample rate early.
-                    thiz->mNumChannels = 0;
-                    thiz->mSampleRateMilliHz = 0;
+                    thiz->mNumChannels = ANDROID_UNKNOWN_NUMCHANNELS;
+                    thiz->mSampleRateMilliHz = ANDROID_UNKNOWN_SAMPLERATE;
 #ifdef ANDROID
                     thiz->mAudioRecord = NULL;
                     thiz->mRecordSource = AUDIO_SOURCE_DEFAULT;
