@@ -21,6 +21,7 @@ import android.os.ConditionVariable;
 import android.util.Log;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -54,13 +55,15 @@ public class SyncRunner extends GraphRunner {
                 Constructor schedulerConstructor = schedulerClass.getConstructor(FilterGraph.class);
                 mScheduler = (Scheduler)schedulerConstructor.newInstance(graph);
             } catch (NoSuchMethodException e) {
-                throw new RuntimeException("Scheduler does not have constructor <init>(FilterGraph)!");
+                throw new RuntimeException("Scheduler does not have constructor <init>(FilterGraph)!", e);
             } catch (InstantiationException e) {
-                throw new RuntimeException("Could not instantiate the Scheduler instance!");
+                throw new RuntimeException("Could not instantiate the Scheduler instance!", e);
             } catch (IllegalAccessException e) {
-                throw new RuntimeException("Cannot access Scheduler constructor!");
+                throw new RuntimeException("Cannot access Scheduler constructor!", e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException("Scheduler constructor threw an exception", e);
             } catch (Exception e) {
-                throw new RuntimeException("Could not instantiate Scheduler: " + e.getMessage());
+                throw new RuntimeException("Could not instantiate Scheduler", e);
             }
         } else {
             throw new IllegalArgumentException("Class provided is not a Scheduler subclass!");
@@ -90,10 +93,14 @@ public class SyncRunner extends GraphRunner {
 
     public int step() {
         assertReadyToStep();
+        if (!getGraph().isReady() ) {
+            throw new RuntimeException("Trying to process graph that is not open!");
+        }
         return performStep() ? RESULT_RUNNING : determinePostRunState();
     }
 
     public void beginProcessing() {
+        mScheduler.reset();
         getGraph().beginProcessing();
     }
 
@@ -101,15 +108,17 @@ public class SyncRunner extends GraphRunner {
         // Close filters
         if (mLogVerbose) Log.v(TAG, "Closing graph.");
         getGraph().closeFilters(mFilterContext);
+        mScheduler.reset();
     }
 
     @Override
     public void run() {
         if (mLogVerbose) Log.v(TAG, "Beginning run.");
 
+        assertReadyToStep();
+
         // Preparation
         beginProcessing();
-        assertReadyToStep();
         boolean glActivated = activateGlContext();
 
         // Run
@@ -213,8 +222,6 @@ public class SyncRunner extends GraphRunner {
             throw new RuntimeException("Attempting to run schedule with no scheduler in place!");
         } else if (getGraph() == null) {
             throw new RuntimeException("Calling step on scheduler with no graph in place!");
-        } else if (!getGraph().isReady() ) {
-            throw new RuntimeException("Trying to process graph that is not open!");
         }
     }
 }
