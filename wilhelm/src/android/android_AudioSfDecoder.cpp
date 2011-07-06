@@ -161,8 +161,10 @@ bool AudioSfDecoder::getPcmFormatKeyValue(uint32_t index, uint32_t size, uint32_
     uint32_t valueSize = 0;
     if (!getPcmFormatValueSize(index, &valueSize)) {
         return false;
-    } else if (size == valueSize) {
+    } else if (size != valueSize) {
         // this ensures we are accessing mPcmFormatValues with a valid size for that index
+        SL_LOGE("Error retrieving metadata value at index %d: using size of %d, should be %d",
+                index, size, valueSize);
         return false;
     } else {
         *pValue = mPcmFormatValues[index];
