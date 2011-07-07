@@ -64,7 +64,7 @@ public:
 
     virtual void getDurationMsec(int* msec); // ANDROID_UNKNOWN_TIME if unknown
     virtual void getPositionMsec(int* msec); // ANDROID_UNKNOWN_TIME if unknown
-    virtual void getSampleRate(uint32_t* hz);// ANDROID_UNKNOWN_SAMPLERATE if unknown
+    virtual void getSampleRate(uint32_t* hz);// UNKNOWN_SAMPLERATE if unknown
 
     void setVolume(bool mute, bool useStereoPos, XApermille stereoPos, XAmillibel volume);
 
