@@ -62,13 +62,14 @@ public:
     virtual void loop(bool loop);
     virtual void setBufferingUpdateThreshold(int16_t thresholdPercent);
 
-    virtual void getDurationMsec(int* msec); // ANDROID_UNKNOWN_TIME if unknown
-    virtual void getPositionMsec(int* msec); // ANDROID_UNKNOWN_TIME if unknown
-    virtual void getSampleRate(uint32_t* hz);// UNKNOWN_SAMPLERATE if unknown
+    virtual void getDurationMsec(int* msec); //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
+    virtual void getPositionMsec(int* msec); //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
+    virtual void getSampleRate(uint32_t* hz);// hz  != NULL, UNKNOWN_SAMPLERATE if unknown
 
     void setVolume(bool mute, bool useStereoPos, XApermille stereoPos, XAmillibel volume);
 
 protected:
+    // mutex used for set vs use of volume and cache (fill, threshold) settings
     Mutex mSettingsLock;
 
     void resetDataLocator();
@@ -88,6 +89,7 @@ protected:
         kWhatVolumeUpdate    = 'volu',
         kWhatBufferingUpdate = 'bufu',
         kWhatBuffUpdateThres = 'buut',
+        kWhatMediaPlayerInfo = 'mpin'
     };
 
     // Send a notification to one of the event listeners
@@ -143,6 +145,7 @@ protected:
     AndroidAudioLevels mAndroidAudioLevels;
     int mChannelCount; // this is used for the panning law, and is not exposed outside of the object
     int32_t mDurationMsec;
+    // position is not protected by any lock in this generic class, may be different in subclasses
     int32_t mPositionMsec;
     uint32_t mSampleRateHz;
 

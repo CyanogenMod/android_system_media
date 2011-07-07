@@ -55,11 +55,19 @@ public:
     GenericMediaPlayer(const AudioPlayback_Parameters* params, bool hasVideo);
     virtual ~GenericMediaPlayer();
 
+    virtual void preDestroy();
+
+    // overridden from GenericPlayer
+    virtual void getPositionMsec(int* msec); // ANDROID_UNKNOWN_TIME if unknown
+
     virtual void setVideoSurface(const sp<Surface> &surface);
     virtual void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
 
 protected:
     friend class MediaPlayerNotificationClient;
+
+    // overridden from GenericPlayer
+    virtual void onMessageReceived(const sp<AMessage> &msg);
 
     // Async event handlers (called from GenericPlayer's event loop)
     virtual void onPrepare();
@@ -69,6 +77,7 @@ protected:
     virtual void onLoop(const sp<AMessage> &msg);
     virtual void onVolumeUpdate();
     virtual void onBufferingUpdate(const sp<AMessage> &msg);
+    virtual void onGetMediaPlayerInfo();
 
     bool mHasVideo;
     int32_t mSeekTimeMsec;
@@ -85,6 +94,14 @@ protected:
     sp<IMediaPlayerService> mMediaPlayerService;
 
     Parcel metadatafilter;
+
+    // for synchronous "getXXX" calls on misc MediaPlayer settings: currently querying:
+    //   - position (time): protects GenericPlayer::mPositionMsec
+    Mutex       mGetMediaPlayerInfoLock;
+    Condition   mGetMediaPlayerInfoCondition;
+    //  marks the current "generation" of MediaPlayer info,any change denotes more recent info,
+    //    protected by mGetMediaPlayerInfoLock
+    uint32_t    mGetMediaPlayerInfoGenCount;
 
 private:
     DISALLOW_EVIL_CONSTRUCTORS(GenericMediaPlayer);

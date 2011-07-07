@@ -99,7 +99,8 @@ GenericMediaPlayer::GenericMediaPlayer(const AudioPlayback_Parameters* params, b
     mVideoSurface(0),
     mVideoSurfaceTexture(0),
     mPlayer(0),
-    mPlayerClient(0)
+    mPlayerClient(0),
+    mGetMediaPlayerInfoGenCount(0)
 {
     SL_LOGD("GenericMediaPlayer::GenericMediaPlayer()");
 
@@ -114,7 +115,49 @@ GenericMediaPlayer::GenericMediaPlayer(const AudioPlayback_Parameters* params, b
 
 GenericMediaPlayer::~GenericMediaPlayer() {
     SL_LOGD("GenericMediaPlayer::~GenericMediaPlayer()");
+}
 
+void GenericMediaPlayer::preDestroy() {
+    // we might be in the middle of blocking for a getXXX call
+    {
+        android::Mutex::Autolock autoLock(mGetMediaPlayerInfoLock);
+        mGetMediaPlayerInfoGenCount++;
+        mGetMediaPlayerInfoCondition.broadcast();
+    }
+    GenericPlayer::preDestroy();
+}
+
+//--------------------------------------------------
+// overridden from GenericPlayer
+// pre-condition:
+//   msec != NULL
+// post-condition
+//   *msec == mPositionMsec ==
+//                  ANDROID_UNKNOWN_TIME if position is unknown at time of query,
+//               or the current MediaPlayer position
+void GenericMediaPlayer::getPositionMsec(int* msec) {
+    SL_LOGD("GenericMediaPlayer::getPositionMsec()");
+    uint32_t currentGen = 0;
+    {
+        android::Mutex::Autolock autoLock(mGetMediaPlayerInfoLock);
+        currentGen = mGetMediaPlayerInfoGenCount;
+    }
+    // send a message to update the MediaPlayer position in the event loop where it's safe to
+    //   access the MediaPlayer. We block until the message kWhatMediaPlayerInfo has been processed
+    (new AMessage(kWhatMediaPlayerInfo, id()))->post();
+    {
+        android::Mutex::Autolock autoLock(mGetMediaPlayerInfoLock);
+        // mGetMediaPlayerInfoGenCount will be incremented when the kWhatMediaPlayerInfo
+        //  gets processed.
+        while (currentGen == mGetMediaPlayerInfoGenCount) {
+            mGetMediaPlayerInfoCondition.wait(mGetMediaPlayerInfoLock);
+            // if multiple GetPosition calls were issued before any got processed on the event queue
+            // then they will all return the same "recent-enough" position
+        }
+        // at this point mPositionMsec has been updated
+        // so now updates msec from mPositionMsec, while holding the lock protecting it
+        GenericPlayer::getPositionMsec(msec);
+    }
 }
 
 //--------------------------------------------------
@@ -126,6 +169,18 @@ void GenericMediaPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfa
     mVideoSurfaceTexture = surfaceTexture;
 }
 
+//--------------------------------------------------
+void GenericMediaPlayer::onMessageReceived(const sp<AMessage> &msg) {
+    switch (msg->what()) {
+        case kWhatMediaPlayerInfo:
+            onGetMediaPlayerInfo();
+            break;
+
+        default:
+            GenericPlayer::onMessageReceived(msg);
+            break;
+    }
+}
 
 //--------------------------------------------------
 // Event handlers
@@ -270,6 +325,25 @@ void GenericMediaPlayer::onBufferingUpdate(const sp<AMessage> &msg) {
                 }
             }
         }
+    }
+}
+
+
+void GenericMediaPlayer::onGetMediaPlayerInfo() {
+    SL_LOGD("GenericMediaPlayer::onGetMediaPlayerInfo()");
+    {
+        android::Mutex::Autolock autoLock(mGetMediaPlayerInfoLock);
+
+        if ((!(mStateFlags & kFlagPrepared)) || (mPlayer == 0)) {
+            mPositionMsec = ANDROID_UNKNOWN_TIME;
+        } else {
+            mPlayer->getCurrentPosition(&mPositionMsec);
+        }
+
+        // the MediaPlayer info has been refreshed
+        mGetMediaPlayerInfoGenCount++;
+        // there might be multiple requests for MediaPlayer info, so use broadcast instead of signal
+        mGetMediaPlayerInfoCondition.broadcast();
     }
 }
 
