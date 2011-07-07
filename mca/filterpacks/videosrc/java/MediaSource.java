@@ -98,14 +98,15 @@ public class MediaSource extends Filter {
     private boolean mPlaying;
     private boolean mPaused;
 
-    private static final boolean LOGV = true;
-    private static final boolean LOGVV = false;
+    private final boolean mLogVerbose;
     private static final String TAG = "MediaSource";
 
     public MediaSource(String name) {
         super(name);
         mNewFrameAvailable = new ConditionVariable();
         mFrameTransform = new float[16];
+
+        mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
 
     @Override
@@ -122,7 +123,7 @@ public class MediaSource extends Filter {
 
     @Override
     protected void prepare(FilterContext context) {
-        if (LOGV) Log.v(TAG, "Preparing MediaSource");
+        if (mLogVerbose) Log.v(TAG, "Preparing MediaSource");
 
         mFrameExtractor = new ShaderProgram(mFrameShader);
         // SurfaceTexture defines (0,0) to be bottom-left. The filter framework
@@ -139,7 +140,7 @@ public class MediaSource extends Filter {
 
     @Override
     public void open(FilterContext context) {
-        if (LOGV) Log.v(TAG, "Opening MediaSource");
+        if (mLogVerbose) Log.v(TAG, "Opening MediaSource");
         if (!setupMediaPlayer()) {
             throw new RuntimeException("Error setting up MediaPlayer!");
         }
@@ -148,7 +149,7 @@ public class MediaSource extends Filter {
     @Override
     public void process(FilterContext context) {
         // Note: process is synchronized by its caller in the Filter base class
-        if (LOGVV) Log.v(TAG, "Processing new frame");
+        if (mLogVerbose) Log.v(TAG, "Processing new frame");
 
         if (mMediaPlayer == null) {
             // Something went wrong in initialization or parameter updates
@@ -193,6 +194,10 @@ public class MediaSource extends Filter {
         Frame output = context.getFrameManager().newFrame(mOutputFormat);
         mFrameExtractor.process(mMediaFrame, output);
 
+        long timestamp = mSurfaceTexture.getTimestamp();
+        if (mLogVerbose) Log.v(TAG, "Timestamp: " + (timestamp / 1000000000.0) + " s");
+        output.setTimestamp(timestamp);
+
         pushOutput("video", output);
         output.release();
 
@@ -206,7 +211,7 @@ public class MediaSource extends Filter {
         }
         mMediaPlayer.release();
         mMediaPlayer = null;
-        if (LOGV) Log.v(TAG, "MediaSource closed");
+        if (mLogVerbose) Log.v(TAG, "MediaSource closed");
     }
 
     @Override
@@ -220,14 +225,14 @@ public class MediaSource extends Filter {
     public void fieldPortValueUpdated(String name, FilterContext context) {
         if (name.equals("sourceUrl") && mSourceAsset == null) {
             if (isOpen()) {
-                if (LOGV) Log.v(TAG, "Opening new source URL");
+                if (mLogVerbose) Log.v(TAG, "Opening new source URL");
                 setupMediaPlayer();
             }
         } else if (name.equals("sourceAsset") ) {
             if (isOpen()) {
-                if (LOGV) {
+                if (mLogVerbose) {
                     if (mSourceAsset == null) {
-                        if (LOGV) Log.v(TAG, "Opening new source URL");
+                        if (mLogVerbose) Log.v(TAG, "Opening new source URL");
                     } else {
                         Log.v(TAG, "Opening new source FD");
                     }
@@ -315,14 +320,14 @@ public class MediaSource extends Filter {
 
         mMediaPlayer.prepareAsync();
 
-        if (LOGV) Log.v(TAG, "MediaPlayer now preparing.");
+        if (mLogVerbose) Log.v(TAG, "MediaPlayer now preparing.");
         return true;
     }
 
     private MediaPlayer.OnVideoSizeChangedListener onVideoSizeChangedListener =
             new MediaPlayer.OnVideoSizeChangedListener() {
         public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-            if (LOGV) Log.v(TAG, "MediaPlayer sent dimensions: " + width + " x " + height);
+            if (mLogVerbose) Log.v(TAG, "MediaPlayer sent dimensions: " + width + " x " + height);
             if (!mGotSize) {
                 mOutputFormat.setDimensions(width, height);
             } else {
@@ -341,7 +346,7 @@ public class MediaSource extends Filter {
     private MediaPlayer.OnPreparedListener onPreparedListener =
             new MediaPlayer.OnPreparedListener() {
         public void onPrepared(MediaPlayer mp) {
-            if (LOGV) Log.v(TAG, "MediaPlayer is prepared");
+            if (mLogVerbose) Log.v(TAG, "MediaPlayer is prepared");
             synchronized(this) {
                 mPrepared = true;
                 this.notify();
@@ -352,14 +357,14 @@ public class MediaSource extends Filter {
     private MediaPlayer.OnCompletionListener onCompletionListener =
             new MediaPlayer.OnCompletionListener() {
         public void onCompletion(MediaPlayer mp) {
-            if (LOGV) Log.v(TAG, "MediaPlayer has completed playback");
+            if (mLogVerbose) Log.v(TAG, "MediaPlayer has completed playback");
         }
     };
 
     private SurfaceTexture.OnFrameAvailableListener onMediaFrameAvailableListener =
             new SurfaceTexture.OnFrameAvailableListener() {
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-            if (LOGVV) Log.v(TAG, "New frame from media player");
+            if (mLogVerbose) Log.v(TAG, "New frame from media player");
             mNewFrameAvailable.open();
         }
     };

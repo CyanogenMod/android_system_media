@@ -208,6 +208,8 @@ public class SurfaceTextureSource extends Filter {
         Frame output = context.getFrameManager().newFrame(mOutputFormat);
         mFrameExtractor.process(mMediaFrame, output);
 
+        output.setTimestamp(mSurfaceTexture.getTimestamp());
+
         pushOutput("video", output);
         output.release();
     }

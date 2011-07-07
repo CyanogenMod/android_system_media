@@ -71,6 +71,7 @@ public class BitmapSource extends Filter {
                                                       mTarget);
         mImageFrame = filterContext.getFrameManager().newFrame(outputFormat);
         mImageFrame.setBitmap(mBitmap);
+        mImageFrame.setTimestamp(Frame.TIMESTAMP_UNKNOWN);
         mBitmap = null;
     }
 

@@ -63,6 +63,7 @@ public class ObjectSource extends Filter {
             FrameFormat outputFormat = ObjectFormat.fromObject(mObject, FrameFormat.TARGET_JAVA);
             mFrame = context.getFrameManager().newFrame(outputFormat);
             mFrame.setObjectValue(mObject);
+            mFrame.setTimestamp(Frame.TIMESTAMP_UNKNOWN);
         }
 
         // Push output

@@ -94,7 +94,7 @@ public class CameraSource extends Filter {
             "  gl_FragColor = texture2D(tex_sampler_0, transformed_texcoord);\n" +
             "}\n";
 
-    private boolean mLogVerbose;
+    private final boolean mLogVerbose;
     private static final String TAG = "CameraSource";
 
     public CameraSource(String name) {
@@ -180,6 +180,10 @@ public class CameraSource extends Filter {
 
         Frame output = context.getFrameManager().newFrame(mOutputFormat);
         mFrameExtractor.process(mCameraFrame, output);
+
+        long timestamp = mSurfaceTexture.getTimestamp();
+        if (mLogVerbose) Log.v(TAG, "Timestamp: " + (timestamp / 1000000000.0) + " s");
+        output.setTimestamp(timestamp);
 
         pushOutput("video", output);
 

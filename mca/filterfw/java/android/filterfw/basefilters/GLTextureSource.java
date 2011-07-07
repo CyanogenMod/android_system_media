@@ -76,6 +76,7 @@ public class GLTextureSource extends Filter {
             mFrame = context.getFrameManager().newBoundFrame(outputFormat,
                                                              GLFrame.EXISTING_TEXTURE_BINDING,
                                                              mTexId);
+            mFrame.setTimestamp(Frame.TIMESTAMP_UNKNOWN);
         }
 
         // Push output

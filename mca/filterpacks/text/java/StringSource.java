@@ -51,6 +51,7 @@ public class StringSource extends Filter {
     public void process(FilterContext env) {
         Frame output = env.getFrameManager().newFrame(mOutputFormat);
         output.setObjectValue(mString);
+        output.setTimestamp(Frame.TIMESTAMP_UNKNOWN);
         pushOutput("string", output);
         closeOutputPort("string");
     }

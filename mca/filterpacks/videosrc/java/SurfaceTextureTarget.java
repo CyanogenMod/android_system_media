@@ -185,6 +185,8 @@ public class SurfaceTextureTarget extends Filter {
         // Process
         mProgram.process(gpuFrame, mScreen);
 
+        glEnv.setSurfaceTimestamp(input.getTimestamp());
+
         // And swap buffers
         glEnv.swapBuffers();
 
