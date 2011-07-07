@@ -136,7 +136,8 @@ LOCAL_C_INCLUDES:=                                                  \
         system/media/wilhelm/include                                \
         frameworks/base/media/libstagefright                        \
         frameworks/base/media/libstagefright/include                \
-        frameworks/base/include/media/stagefright/openmax
+        frameworks/base/include/media/stagefright/openmax           \
+        system/media/audio_effects/include
 
 LOCAL_CFLAGS += -x c++ -Wno-multichar -Wno-invalid-offsetof
 
