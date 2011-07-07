@@ -78,7 +78,7 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
         result = IBufferQueue_Enqueue(caller, pBuffer, size);
         // not much we can do if the Enqueue fails, so we'll just drop the decoded data
         if (SL_RESULT_SUCCESS != result) {
-            SL_LOGE("enqueue failed 0x%lx", result);
+            SL_LOGE("enqueue failed 0x%x", result);
         }
     } else {
         thisAP->mPlay.mState = SL_PLAYSTATE_PAUSED;

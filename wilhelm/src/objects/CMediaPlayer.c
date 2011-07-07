@@ -27,11 +27,11 @@ using namespace android;
 
 XAresult CMediaPlayer_Realize(void *self, XAboolean async)
 {
-    CMediaPlayer *thiz = (CMediaPlayer *) self;
-
     XAresult result = XA_RESULT_SUCCESS;
 
 #ifdef ANDROID
+    CMediaPlayer *thiz = (CMediaPlayer *) self;
+
     // realize player
     result = android_Player_realize(thiz, async);
     if (XA_RESULT_SUCCESS == result) {
