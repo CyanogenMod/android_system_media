@@ -136,13 +136,6 @@ typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, void* user);
 
 
 /**
- * Constants to define unknown property values
- */
-#define ANDROID_UNKNOWN_NUMCHANNELS 0
-#define ANDROID_UNKNOWN_SAMPLERATE  0
-#define ANDROID_UNKNOWN_CHANNELMASK 0
-
-/**
  * Additional metadata keys
  *   the ANDROID_KEY_PCMFORMAT_* keys follow the fields of the SLDataFormat_PCM struct, and as such
  *     all corresponding values match SLuint32 size, and field definitions.

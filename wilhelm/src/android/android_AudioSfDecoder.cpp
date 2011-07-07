@@ -42,7 +42,7 @@ AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : Generic
         mAudioSource(0),
         mAudioSourceStarted(false),
         mBitrate(-1),
-        mChannelMask(ANDROID_UNKNOWN_CHANNELMASK),
+        mChannelMask(UNKNOWN_CHANNELMASK),
         mDurationUsec(-1),
         mDecodeBuffer(NULL),
         mTimeDelta(-1),

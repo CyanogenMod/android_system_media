@@ -137,8 +137,8 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 
                     // Will be set soon for PCM buffer queues, or later by platform-specific code
                     // during Realize or Prefetch
-                    thiz->mNumChannels = ANDROID_UNKNOWN_NUMCHANNELS;
-                    thiz->mSampleRateMilliHz = ANDROID_UNKNOWN_SAMPLERATE;
+                    thiz->mNumChannels = UNKNOWN_NUMCHANNELS;
+                    thiz->mSampleRateMilliHz = UNKNOWN_SAMPLERATE;
 
                     // More default values, in case destructor needs to be called early
                     thiz->mDirectLevel = 0;
@@ -433,8 +433,8 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
                     // These fields are set to real values by
                     // android_audioRecorder_checkSourceSinkSupport.  Note that the data sink is
                     // always PCM buffer queue, so we know the channel count and sample rate early.
-                    thiz->mNumChannels = ANDROID_UNKNOWN_NUMCHANNELS;
-                    thiz->mSampleRateMilliHz = ANDROID_UNKNOWN_SAMPLERATE;
+                    thiz->mNumChannels = UNKNOWN_NUMCHANNELS;
+                    thiz->mSampleRateMilliHz = UNKNOWN_SAMPLERATE;
 #ifdef ANDROID
                     thiz->mAudioRecord = NULL;
                     thiz->mRecordSource = AUDIO_SOURCE_DEFAULT;

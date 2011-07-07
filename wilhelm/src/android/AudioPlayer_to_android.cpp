@@ -653,8 +653,8 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
 
             // already initialized at object creation, and can only prepare once so never reset
             assert(ap->mAudioTrack == 0);
-            assert(ap->mNumChannels == ANDROID_UNKNOWN_NUMCHANNELS);
-            assert(ap->mSampleRateMilliHz == ANDROID_UNKNOWN_SAMPLERATE);
+            assert(ap->mNumChannels == UNKNOWN_NUMCHANNELS);
+            assert(ap->mSampleRateMilliHz == UNKNOWN_SAMPLERATE);
             assert(ap->mAndroidObjState == ANDROID_UNINITIALIZED);
 
             object_unlock_exclusive(&ap->mObject);
@@ -1318,8 +1318,8 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         object_lock_exclusive(&pAudioPlayer->mObject);
 
         assert(pAudioPlayer->mAndroidObjState == ANDROID_UNINITIALIZED);
-        assert(pAudioPlayer->mNumChannels == ANDROID_UNKNOWN_NUMCHANNELS);
-        assert(pAudioPlayer->mSampleRateMilliHz == ANDROID_UNKNOWN_SAMPLERATE);
+        assert(pAudioPlayer->mNumChannels == UNKNOWN_NUMCHANNELS);
+        assert(pAudioPlayer->mSampleRateMilliHz == UNKNOWN_SAMPLERATE);
         assert(pAudioPlayer->mAudioTrack == 0);
 
         AudioPlayback_Parameters app;
@@ -1868,7 +1868,7 @@ void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
     switch(ap->mAndroidObjType) {
 
       case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
-        if ((ap->mSampleRateMilliHz == ANDROID_UNKNOWN_SAMPLERATE) || (ap->mAudioTrack == 0)) {
+        if ((ap->mSampleRateMilliHz == UNKNOWN_SAMPLERATE) || (ap->mAudioTrack == 0)) {
             *pPosMsec = 0;
         } else {
             uint32_t positionInFrames;

@@ -52,7 +52,7 @@ void SndFile_Callback(SLBufferQueueItf caller, void *pContext)
     void *context = thisAP->mPlay.mContext;
     // make a copy of sample rate so we are absolutely sure we will not divide by zero
     SLuint32 sampleRateMilliHz = thisAP->mSampleRateMilliHz;
-    if (ANDROID_UNKNOWN_SAMPLERATE != sampleRateMilliHz) {
+    if (UNKNOWN_SAMPLERATE != sampleRateMilliHz) {
         // this will overflow after 49 days, but no fix possible as it's part of the API
         thisAP->mPlay.mPosition = (SLuint32) (((long long) thisAP->mPlay.mFramesSinceLastSeek *
             1000000LL) / sampleRateMilliHz) + thisAP->mPlay.mLastSeekPosition;
