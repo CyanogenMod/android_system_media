@@ -106,6 +106,12 @@ public class GLEnvironment {
         }
     }
 
+    public void setSurfaceTimestamp(long timestamp) {
+        if (!nativeSetSurfaceTimestamp(timestamp)) {
+            throw new RuntimeException("Could not set timestamp for current surface!");
+        }
+    }
+
     static {
         System.loadLibrary("filterfw");
     }
@@ -135,4 +141,6 @@ public class GLEnvironment {
     private native boolean nativeActivateSurfaceId(int surfaceId);
 
     private native boolean nativeRemoveSurfaceId(int surfaceId);
+
+    private native boolean nativeSetSurfaceTimestamp(long timestamp);
 }

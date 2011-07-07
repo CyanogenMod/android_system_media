@@ -64,6 +64,8 @@ public abstract class Filter {
     private boolean mIsOpen = false;
     private int mSleepDelay;
 
+    private long mCurrentTimestamp;
+
     private boolean mLogVerbose;
     private static final String TAG = "Filter";
 
@@ -245,12 +247,20 @@ public abstract class Filter {
     }
 
     protected final void pushOutput(String name, Frame frame) {
+        if (frame.getTimestamp() == Frame.TIMESTAMP_NOT_SET) {
+            if (mLogVerbose) Log.v(TAG, "Default-setting output Frame timestamp on port " + name + " to " + mCurrentTimestamp);
+            frame.setTimestamp(mCurrentTimestamp);
+        }
         getOutputPort(name).pushFrame(frame);
     }
 
     protected final Frame pullInput(String name) {
         Frame result = getInputPort(name).pullFrame();
+        if (mCurrentTimestamp == Frame.TIMESTAMP_UNKNOWN) {
+            if (mLogVerbose) Log.v(TAG, "Default-setting current timestamp from input port " + name + " to " + mCurrentTimestamp);
 
+            mCurrentTimestamp = result.getTimestamp();
+        }
         // As result is retained, we add it to the release pool here
         mFramesToRelease.add(result);
 
@@ -526,6 +536,7 @@ public abstract class Filter {
             performOpen(context);
         }
         if (mLogVerbose) Log.v(TAG, "Processing " + this);
+        mCurrentTimestamp = Frame.TIMESTAMP_UNKNOWN;
         process(context);
         releasePulledFrames(context);
         if (filterMustClose()) {

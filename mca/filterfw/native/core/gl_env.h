@@ -42,6 +42,8 @@ class WindowHandle {
     }
 
     virtual const void* InternalHandle() const = 0;
+
+    virtual void* InternalHandle() = 0;
 };
 
 // The GLEnv class provides functionality related to the EGL environment, which
@@ -118,6 +120,11 @@ class GLEnv {
     // surface. If this is the active surface, the environment will switch to
     // the default surface (0) first. You cannot release the default surface.
     bool ReleaseSurfaceId(int surface_id);
+
+    // Set the timestamp for the current surface. Must be called
+    // before swapBuffers to associate the timestamp with the frame
+    // resulting from swapBuffers.
+    bool SetSurfaceTimestamp(int64_t timestamp);
 
     // Looks for a surface with the associated window handle. Returns -1 if no
     // surface with such a window was found.

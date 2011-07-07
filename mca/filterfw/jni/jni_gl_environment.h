@@ -72,6 +72,11 @@ Java_android_filterfw_core_GLEnvironment_nativeRemoveSurfaceId(JNIEnv* env,
                                                                jobject thiz,
                                                                jint surfaceId);
 
+JNIEXPORT jboolean JNICALL
+Java_android_filterfw_core_GLEnvironment_nativeSetSurfaceTimestamp(JNIEnv* env,
+                                                                   jobject thiz,
+                                                                   jlong timestamp);
+
 #ifdef __cplusplus
 }
 #endif

@@ -29,6 +29,9 @@ public abstract class Frame {
 
     public final static int NO_BINDING = 0;
 
+    public final static long TIMESTAMP_NOT_SET = -2;
+    public final static long TIMESTAMP_UNKNOWN = -1;
+
     private FrameFormat mFormat;
     private FrameManager mFrameManager;
     private boolean mReadOnly = false;
@@ -36,6 +39,7 @@ public abstract class Frame {
     private int mRefCount = 1;
     private int mBindingType = NO_BINDING;
     private long mBindingId = 0;
+    private long mTimestamp = TIMESTAMP_NOT_SET;
 
     Frame(FrameFormat format, FrameManager frameManager) {
         mFormat = format.mutableCopy();
@@ -112,6 +116,14 @@ public abstract class Frame {
     public abstract void setBitmap(Bitmap bitmap);
 
     public abstract Bitmap getBitmap();
+
+    public void setTimestamp(long timestamp) {
+        mTimestamp = timestamp;
+    }
+
+    public long getTimestamp() {
+        return mTimestamp;
+    }
 
     public void setDataFromFrame(Frame frame) {
         setData(frame.getData());

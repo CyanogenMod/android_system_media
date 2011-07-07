@@ -48,6 +48,7 @@ public class CachedFrameManager extends SimpleFrameManager {
         if (result == null) {
             result = super.newFrame(format);
         }
+        result.setTimestamp(Frame.TIMESTAMP_NOT_SET);
         return result;
     }
 
@@ -57,6 +58,7 @@ public class CachedFrameManager extends SimpleFrameManager {
         if (result == null) {
             result = super.newBoundFrame(format, bindingType, bindingId);
         }
+        result.setTimestamp(Frame.TIMESTAMP_NOT_SET);
         return result;
     }
 

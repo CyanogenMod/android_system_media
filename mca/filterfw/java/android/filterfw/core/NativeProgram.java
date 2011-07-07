@@ -87,7 +87,7 @@ public class NativeProgram extends Program {
             }
         }
 
-        // Get the GL output frame
+        // Get the native output frame
         NativeFrame nativeOutput = null;
         if (output == null || output instanceof NativeFrame) {
             nativeOutput = (NativeFrame)output;

@@ -16,6 +16,7 @@
 
 #include "base/logging.h"
 #include "core/gl_env.h"
+#include "system/window.h"
 
 #include <map>
 #include <string>
@@ -221,6 +222,19 @@ bool GLEnv::ReleaseSurfaceId(int surface_id) {
         surface->second->Destroy();
         delete surface->second;
       }
+      return true;
+    }
+  }
+  return false;
+}
+
+bool GLEnv::SetSurfaceTimestamp(int64_t timestamp) {
+  if (surface_id_ > 0) {
+    std::map<int, SurfaceWindowPair>::iterator surfacePair = surfaces_.find(surface_id_);
+    if (surfacePair != surfaces_.end()) {
+      SurfaceWindowPair &surface = surfacePair->second;
+      ANativeWindow *window = static_cast<ANativeWindow*>(surface.second->InternalHandle());
+      native_window_set_buffers_timestamp(window, timestamp);
       return true;
     }
   }

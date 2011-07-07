@@ -42,6 +42,10 @@ class NativeWindowHandle : public WindowHandle {
       return window_;
     }
 
+    virtual void* InternalHandle() {
+      return window_;
+    }
+
   private:
     ANativeWindow* window_;
 };
@@ -218,4 +222,12 @@ jboolean Java_android_filterfw_core_GLEnvironment_nativeRemoveSurfaceId(JNIEnv* 
                                                                         jint surfaceId) {
   GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
   return gl_env ? ToJBool(gl_env->ReleaseSurfaceId(surfaceId)) : JNI_FALSE;
+}
+
+jboolean Java_android_filterfw_core_GLEnvironment_nativeSetSurfaceTimestamp(JNIEnv* env,
+                                                                            jobject thiz,
+                                                                            jlong timestamp) {
+  GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
+  int64_t timestamp_native = timestamp;
+  return gl_env ? ToJBool(gl_env->SetSurfaceTimestamp(timestamp_native)) : JNI_FALSE;
 }
