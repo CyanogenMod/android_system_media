@@ -24,18 +24,14 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_MODULE := libfilterfw_native
 
-LOCAL_SRC_FILES += core/geometry.cc \
-                   core/gl_env.cc \
-                   core/gl_frame.cc \
-                   core/native_frame.cc \
-                   core/native_program.cc \
-                   core/shader_program.cc \
-                   core/vertex_frame.cc \
-                   core/value.cc
-
-# default to read .cc file as c++ file, need to set both variables.
-LOCAL_CPP_EXTENSION := .cc
-LOCAL_DEFAULT_CPP_EXTENSION := .cc
+LOCAL_SRC_FILES += core/geometry.cpp \
+                   core/gl_env.cpp \
+                   core/gl_frame.cpp \
+                   core/native_frame.cpp \
+                   core/native_program.cpp \
+                   core/shader_program.cpp \
+                   core/vertex_frame.cpp \
+                   core/value.cpp
 
 # add local includes
 include $(LOCAL_PATH)/libfilterfw.mk

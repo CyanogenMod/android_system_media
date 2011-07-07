@@ -23,19 +23,15 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_MODULE    = libfilterfw_jni
 
-LOCAL_SRC_FILES = jni_init.cc \
-                  jni_gl_environment.cc \
-                  jni_gl_frame.cc \
-                  jni_native_buffer.cc \
-                  jni_native_frame.cc \
-                  jni_native_program.cc \
-                  jni_shader_program.cc \
-                  jni_util.cc \
-                  jni_vertex_frame.cc
-
-# default to read .cc file as c++ file, need to set both variables.
-LOCAL_CPP_EXTENSION = .cc
-LOCAL_DEFAULT_CPP_EXTENSION = .cc
+LOCAL_SRC_FILES = jni_init.cpp \
+                  jni_gl_environment.cpp \
+                  jni_gl_frame.cpp \
+                  jni_native_buffer.cpp \
+                  jni_native_frame.cpp \
+                  jni_native_program.cpp \
+                  jni_shader_program.cpp \
+                  jni_util.cpp \
+                  jni_vertex_frame.cpp
 
 # Need FilterFW lib
 include $(LOCAL_PATH)/../native/libfilterfw.mk
