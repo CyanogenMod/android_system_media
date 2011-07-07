@@ -66,6 +66,8 @@ public class AsyncRunner extends GraphRunner{
                 throw new RuntimeException("More than one callback data set received!");
             }
 
+            runner[0].assertReadyToStep();
+
             // Preparation
             if (mLogVerbose) Log.v(TAG, "Starting background graph processing.");
             activateGlContext();
@@ -74,7 +76,6 @@ public class AsyncRunner extends GraphRunner{
             runner[0].beginProcessing();
 
             if (mLogVerbose) Log.v(TAG, "Running graph.");
-            runner[0].assertReadyToStep();
 
             // Run loop
             int status = RESULT_RUNNING;
@@ -91,8 +92,6 @@ public class AsyncRunner extends GraphRunner{
             // Cleanup
             if (isCancelled()) {
                 status = RESULT_STOPPED;
-                if (mLogVerbose) Log.v(TAG, "Closing filters.");
-                runner[0].close();
             }
 
             deactivateGlContext();
@@ -109,6 +108,10 @@ public class AsyncRunner extends GraphRunner{
         @Override
         protected void onPostExecute(Integer result) {
             if (mLogVerbose) Log.v(TAG, "Starting post-execute.");
+            if (result == RESULT_STOPPED) {
+                if (mLogVerbose) Log.v(TAG, "Closing filters.");
+                mRunner.close();
+            }
             if (mDoneListener != null) {
                 if (mLogVerbose) Log.v(TAG, "Invoking graph done callback.");
                 mDoneListener.onRunnerDone(result);
@@ -166,6 +169,7 @@ public class AsyncRunner extends GraphRunner{
     public AsyncRunner(FilterContext context) {
         super(context);
         mSchedulerClass = SimpleScheduler.class;
+        mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
 
     /** Set a callback to be called in the UI thread once the AsyncRunner
@@ -225,6 +229,7 @@ public class AsyncRunner extends GraphRunner{
         if (isRunning()) {
             throw new RuntimeException("Cannot close graph while it is running!");
         }
+        if (mLogVerbose) Log.v(TAG, "Closing filters.");
         mRunner.close();
     }
 

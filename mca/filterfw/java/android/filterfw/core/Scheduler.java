@@ -30,7 +30,6 @@ public abstract class Scheduler {
 
     Scheduler(FilterGraph graph) {
         mGraph = graph;
-        reset();
     }
 
     FilterGraph getGraph() {

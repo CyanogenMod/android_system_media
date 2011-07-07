@@ -20,6 +20,7 @@ package android.filterfw.core;
 import android.filterfw.core.Filter;
 import android.filterfw.core.Scheduler;
 import android.filterfw.core.RoundRobinScheduler;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -28,10 +29,15 @@ import java.util.HashMap;
  * @hide
  */
 public class OneShotScheduler extends RoundRobinScheduler {
-    private HashMap <String, Integer> scheduled = new HashMap<String, Integer>();
+    private HashMap <String, Integer> scheduled;
+
+    private final boolean mLogVerbose;
+    private static final String TAG = "OneShotScheduler";
 
     public OneShotScheduler(FilterGraph graph) {
         super(graph);
+        scheduled = new HashMap<String, Integer>();
+        mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
 
     @Override
@@ -46,16 +52,23 @@ public class OneShotScheduler extends RoundRobinScheduler {
         // return the first filter that is not scheduled before.
         while (true) {
             Filter filter = super.scheduleNextNode();
-            if (filter == null) return null;
+            if (filter == null) {
+                if (mLogVerbose) Log.v(TAG, "No filters available to run.");
+                return null;
+            }
             if (!scheduled.containsKey(filter.getName())) {
                 scheduled.put(filter.getName(),1);
+                if (mLogVerbose) Log.v(TAG, "Scheduling filter \"" + filter.getName() + "\" of type " + filter.getFilterClassName());
                 return filter;
             }
             // if loop back, nothing available
-            if (first == filter) break;
+            if (first == filter) {
+                break;
+            }
             // save the first scheduled one
             if (first == null) first = filter;
         }
+        if (mLogVerbose) Log.v(TAG, "One pass through graph completed.");
         return null;
     }
 }
