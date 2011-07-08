@@ -30,6 +30,7 @@ import android.filterfw.core.ShaderProgram;
 
 import android.util.Log;
 
+import java.lang.Math;
 import java.util.Set;
 
 /**
@@ -44,34 +45,28 @@ public class FisheyeFilter extends SimpleImageFilter {
     @GenerateFieldPort(name = "scale")
     private float mScale;
 
-    // focus_x and focus_y are set to be the center of image for now.
-    // @FilterParameter(name = "focus_x", isOptional = true, isUpdatable = false)
-    private float mFocusX;
-    // @FilterParameter(name = "focus_y", isOptional = true, isUpdatable = false)
-    private float mFocusY;
+    private float mWidth;
+    private float mHeight;
 
     private static final String mFisheyeShader =
             "precision mediump float;\n" +
             "uniform sampler2D tex_sampler_0;\n" +
             "uniform vec2 center;\n" +
-            "uniform float height;\n" +
-            "uniform float width;\n" +
             "uniform float alpha;\n" +
+            "uniform float bound;\n" +
+            "uniform float radius2;\n" +
+            "uniform float factor;\n" +
+            "uniform float inv_height;\n" +
+            "uniform float inv_width;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
             "  const float m_pi_2 = 1.570963;\n" +
-            "  float bound = length(center);\n" +
-            "  float bound2 = bound * bound;\n" +
-            "  float radius = 1.15 * bound;\n" +
-            "  float radius2 =  radius * radius;\n" +
-            "  float max_radian = m_pi_2 - atan(alpha * sqrt(radius2 - bound2), bound);\n" +
             "  float dist = distance(gl_FragCoord.xy, center);\n" +
-            "  float dist2 = dist * dist;\n" +
-            "  float radian = m_pi_2 - atan(alpha * sqrt(radius2 - dist2), dist);\n" +
-            "  float scale = radian / max_radian * bound / dist;\n" +
+            "  float radian = m_pi_2 - atan(alpha * sqrt(radius2 - dist * dist), dist);\n" +
+            "  float scale = radian * factor / dist;\n" +
             "  vec2 new_coord = gl_FragCoord.xy * scale + (1.0 - scale) * center;\n" +
-            "  new_coord.x /= width;\n" +
-            "  new_coord.y /= height;\n" +
+            "  new_coord.x *= inv_width;\n" +
+            "  new_coord.y *= inv_height;\n" +
             "  vec4 color = texture2D(tex_sampler_0, new_coord);\n" +
             "  gl_FragColor = color;\n" +
             "}\n";
@@ -91,68 +86,45 @@ public class FisheyeFilter extends SimpleImageFilter {
     protected Program getShaderProgram() {
         Program result = new ShaderProgram(mFisheyeShader);
         initProgram(result);
+
         return result;
     }
 
     @Override
     public void fieldPortValueUpdated(String name, FilterContext context) {
         if (mProgram != null) {
-          Log.v(TAG, "alpha=" + (mScale * 2.0 + 0.75));
-          mProgram.setHostValue("alpha", (float) (mScale * 2.0 + 0.75));
+            updateProgram(mProgram);
         }
     }
 
-    @Override
-    public void process(FilterContext context) {
-        // Get input frame
-        Frame input = pullInput("image");
+    private void updateProgram(Program program) {
+        float pi = 3.14159265f;
 
-        // Create output frame
-        // TODO: Use Frame Provider
-        Frame output = context.getFrameManager().newFrame(input.getFormat());
+        float alpha = mScale * 2.0f + 0.75f;
+        float bound2 = 0.25f * (mWidth * mWidth  + mHeight * mHeight);
+        float bound = (float) Math.sqrt(bound2);
+        float radius = 1.15f * bound;
+        float radius2 = radius * radius;
+        float max_radian = 0.5f * pi -
+            (float) Math.atan(alpha / bound * (float) Math.sqrt(radius2 - bound2));
+        float factor = bound / max_radian;
 
-        Log.e("Fisheye", "width: " + input.getFormat().getWidth() +
-              ", height: " + input.getFormat().getHeight());
-
-        mFocusX = (float) (0.5 * input.getFormat().getWidth());
-        mFocusY = (float) (0.5 * input.getFormat().getHeight());
-
-        float center[] = {mFocusX, mFocusY};
-
-        Log.e("Fisheye", "( " + center[0] + ", " + center[1] + " )");
-
-        // Make sure we have a program
-        updateProgramWithTarget(input.getFormat().getTarget(), context);
-
-        // set uniforms in shader
-        mProgram.setHostValue("center", center);
-        mProgram.setHostValue("width", (float) input.getFormat().getWidth());
-        mProgram.setHostValue("height", (float) input.getFormat().getHeight());
-
-        // Process
-        mProgram.process(input, output);
-
-        // Push output
-        pushOutput("image", output);
-
-        // Release output
-        output.release();
+        program.setHostValue("radius2",radius2);
+        program.setHostValue("factor", factor);
+        program.setHostValue("alpha", (float) (mScale * 2.0 + 0.75));
     }
 
     private void initProgram(Program program) {
-        FrameFormat outFormat = getInputFormat("image");
-        mFocusX = (float) (0.5 * outFormat.getWidth());
-        mFocusY = (float) (0.5 * outFormat.getHeight());
+        Frame input = pullInput("image");
+        mWidth = (float) input.getFormat().getWidth();
+        mHeight = (float) input.getFormat().getHeight();
+        float center[] = {0.5f * mWidth, 0.5f * mHeight};
 
-        float center[] = {mFocusX, mFocusY};
-
-        Log.e("Fisheye", "( " + center[0] + ", " + center[1] + " )");
-
-        // set uniforms in shader
         program.setHostValue("center", center);
-        program.setHostValue("width", (float) outFormat.getWidth());
-        program.setHostValue("height", (float) outFormat.getHeight());
-        program.setHostValue("alpha", (float) (mScale * 2.0 + 0.75));
+        program.setHostValue("inv_width", 1.0f / mWidth);
+        program.setHostValue("inv_height", 1.0f / mHeight);
+
+        updateProgram(program);
     }
 
 }
