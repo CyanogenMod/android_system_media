@@ -24,6 +24,7 @@ import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFieldPort;
+import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.format.ObjectFormat;
 
@@ -34,6 +35,9 @@ public class ObjectSource extends Filter {
 
     @GenerateFieldPort(name = "object")
     private Object mObject;
+
+    @GenerateFinalPort(name = "format", hasDefault = true)
+    private FrameFormat mOutputFormat = FrameFormat.unspecified();
 
     @GenerateFieldPort(name = "repeatFrame", hasDefault = true)
     boolean mRepeatFrame = false;
@@ -46,7 +50,7 @@ public class ObjectSource extends Filter {
 
     @Override
     public void setupPorts() {
-        addOutputPort("frame", FrameFormat.unspecified());
+        addOutputPort("frame", mOutputFormat);
     }
 
     @Override

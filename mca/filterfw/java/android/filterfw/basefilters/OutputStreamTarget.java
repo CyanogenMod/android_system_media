@@ -17,61 +17,31 @@
 
 package android.filterpacks.base;
 
-import android.content.Context;
-
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
-import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.GenerateFieldPort;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.FileNotFoundException;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Set;
 
 /**
  * @hide
  */
-public class FileWriteFilter extends Filter {
+public class OutputStreamTarget extends Filter {
 
-    @GenerateFieldPort(name = "fileName")
-    private String mOutputName;
+    @GenerateFieldPort(name = "stream")
+    private OutputStream mOutputStream;
 
-    @GenerateFieldPort(name = "context")
-    private Context mActivityContext;
-
-    private BufferedOutputStream mWriter;
-
-    public FileWriteFilter(String name) {
+    public OutputStreamTarget(String name) {
         super(name);
     }
 
     @Override
     public void setupPorts() {
         addInputPort("data");
-    }
-
-    @Override
-    public void fieldPortValueUpdated(String name, FilterContext context) {
-        if (isOpen()) {
-            throw new RuntimeException("Cannot update parameters while filter is open!");
-        }
-    }
-
-    @Override
-    public void open(FilterContext context) {
-        FileOutputStream outStream = null;
-        try {
-            outStream = mActivityContext.openFileOutput(mOutputName, Context.MODE_PRIVATE);
-        } catch (FileNotFoundException exception) {
-            throw new RuntimeException("FileWriter: Could not open file: " + mOutputName + ": " +
-                                       exception.getMessage());
-        }
-        mWriter = new BufferedOutputStream(outStream);
     }
 
     @Override
@@ -86,19 +56,20 @@ public class FileWriteFilter extends Filter {
             data = input.getData();
         }
         try {
-            mWriter.write(data.array(), 0, data.limit());
-            mWriter.flush();
+            mOutputStream.write(data.array(), 0, data.limit());
+            mOutputStream.flush();
         } catch (IOException exception) {
-            throw new RuntimeException("FileWriter: Could not write to file: " + mOutputName + "!");
+            throw new RuntimeException(
+                "OutputStreamTarget: Could not write to stream: " + exception.getMessage() + "!");
         }
     }
 
     @Override
     public void close(FilterContext context) {
         try {
-            mWriter.close();
+            mOutputStream.close();
         } catch (IOException exception) {
-            throw new RuntimeException("FileWriter: Could not close file!");
+            throw new RuntimeException("OutputStreamTarget: Could not close stream!");
         }
     }
 }

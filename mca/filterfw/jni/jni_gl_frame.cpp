@@ -25,6 +25,31 @@
 using android::filterfw::GLFrame;
 using android::filterfw::NativeFrame;
 
+// Helper functions ////////////////////////////////////////////////////////////////////////////////
+void ConvertFloatsToRGBA(const float* floats, int length, uint8_t* result) {
+  for (int i = 0; i < length; ++i) {
+    result[i] = static_cast<uint8_t>(floats[i] * 255.0);
+  }
+}
+
+void ConvertRGBAToFloats(const uint8_t* rgba, int length, float* result) {
+  for (int i = 0; i < length; ++i) {
+    result[i] = rgba[i] / 255.0;
+  }
+}
+
+void ConvertIntsToRGBA(const int* ints, int length, uint8_t* result) {
+  for (int i = 0; i < length; ++i) {
+    result[i] = static_cast<uint8_t>(ints[i]);
+  }
+}
+
+void ConvertRGBAToInts(const uint8_t* rgba, int length, int* result) {
+  for (int i = 0; i < length; ++i) {
+    result[i] = rgba[i];
+  }
+}
+// GLFrame JNI implementation //////////////////////////////////////////////////////////////////////
 jboolean Java_android_filterfw_core_GLFrame_allocate(JNIEnv* env,
                                                      jobject thiz,
                                                      jint width,
@@ -85,10 +110,10 @@ jboolean Java_android_filterfw_core_GLFrame_deallocate(JNIEnv* env, jobject thiz
 }
 
 jboolean Java_android_filterfw_core_GLFrame_setNativeData(JNIEnv* env,
-                                                              jobject thiz,
-                                                              jbyteArray data,
-                                                              jint offset,
-                                                              jint length) {
+                                                          jobject thiz,
+                                                          jbyteArray data,
+                                                          jint offset,
+                                                          jint length) {
   GLFrame* frame = ConvertFromJava<GLFrame>(env, thiz);
   if (frame && data) {
     jbyte* bytes = env->GetByteArrayElements(data, NULL);
@@ -121,9 +146,16 @@ jboolean Java_android_filterfw_core_GLFrame_setNativeInts(JNIEnv* env,
     jint* int_ptr = env->GetIntArrayElements(ints, NULL);
     const int length = env->GetArrayLength(ints);
     if (int_ptr) {
-      const bool success = frame->WriteData(reinterpret_cast<const uint8_t*>(int_ptr),
-                                            length * sizeof(jint));
+      // Convert ints to RGBA buffer
+      uint8_t* rgba_buffer = new uint8_t[length];
+      ConvertIntsToRGBA(int_ptr, length, rgba_buffer);
       env->ReleaseIntArrayElements(ints, int_ptr, JNI_ABORT);
+
+      // Write RGBA buffer to frame
+      const bool success = frame->WriteData(rgba_buffer, length);
+
+      // Clean-up
+      delete[] rgba_buffer;
       return ToJBool(success);
     }
   }
@@ -132,11 +164,21 @@ jboolean Java_android_filterfw_core_GLFrame_setNativeInts(JNIEnv* env,
 
 jintArray Java_android_filterfw_core_GLFrame_getNativeInts(JNIEnv* env, jobject thiz) {
   GLFrame* frame = ConvertFromJava<GLFrame>(env, thiz);
-  if (frame && frame->Size() > 0 && (frame->Size() % sizeof(jint) == 0)) {
-    jintArray result = env->NewIntArray(frame->Size() / sizeof(jint));
-    jint* data = env->GetIntArrayElements(result, NULL);
-    frame->CopyDataTo(reinterpret_cast<uint8_t*>(data), frame->Size());
-    env->ReleaseIntArrayElements(result, data, 0);
+  if (frame && frame->Size() > 0) {
+    // Create the result array
+    jintArray result = env->NewIntArray(frame->Size());
+    jint* int_array = env->GetIntArrayElements(result, NULL);
+
+    // Read the frame pixels
+    uint8_t* pixels = new uint8_t[frame->Size()];
+    frame->CopyDataTo(pixels, frame->Size());
+
+    // Convert them to integers
+    ConvertRGBAToInts(pixels, frame->Size(), int_array);
+
+    // Clean-up
+    delete[] pixels;
+    env->ReleaseIntArrayElements(result, int_array, 0);
     return result;
   }
   return NULL;
@@ -150,9 +192,16 @@ jboolean Java_android_filterfw_core_GLFrame_setNativeFloats(JNIEnv* env,
     jfloat* float_ptr = env->GetFloatArrayElements(floats, NULL);
     const int length = env->GetArrayLength(floats);
     if (float_ptr) {
-      const bool success = frame->WriteData(reinterpret_cast<const uint8_t*>(float_ptr),
-                                            length * sizeof(jfloat));
+      // Convert floats to RGBA buffer
+      uint8_t* rgba_buffer = new uint8_t[length];
+      ConvertFloatsToRGBA(float_ptr, length, rgba_buffer);
       env->ReleaseFloatArrayElements(floats, float_ptr, JNI_ABORT);
+
+      // Write RGBA buffer to frame
+      const bool success = frame->WriteData(rgba_buffer, length);
+
+      // Clean-up
+      delete[] rgba_buffer;
       return ToJBool(success);
     }
   }
@@ -161,11 +210,21 @@ jboolean Java_android_filterfw_core_GLFrame_setNativeFloats(JNIEnv* env,
 
 jfloatArray Java_android_filterfw_core_GLFrame_getNativeFloats(JNIEnv* env, jobject thiz) {
   GLFrame* frame = ConvertFromJava<GLFrame>(env, thiz);
-  if (frame && frame->Size() > 0 && (frame->Size() % sizeof(jfloat) == 0)) {
-    jfloatArray result = env->NewFloatArray(frame->Size() / sizeof(jfloat));
-    jfloat* data = env->GetFloatArrayElements(result, NULL);
-    frame->CopyDataTo(reinterpret_cast<uint8_t*>(data), frame->Size());
-    env->ReleaseFloatArrayElements(result, data, 0);
+  if (frame && frame->Size() > 0) {
+    // Create the result array
+    jfloatArray result = env->NewFloatArray(frame->Size());
+    jfloat* float_array = env->GetFloatArrayElements(result, NULL);
+
+    // Read the frame pixels
+    uint8_t* pixels = new uint8_t[frame->Size()];
+    frame->CopyDataTo(pixels, frame->Size());
+
+    // Convert them to floats
+    ConvertRGBAToFloats(pixels, frame->Size(), float_array);
+
+    // Clean-up
+    delete[] pixels;
+    env->ReleaseFloatArrayElements(result, float_array, 0);
     return result;
   }
   return NULL;

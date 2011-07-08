@@ -17,9 +17,6 @@
 
 package android.filterpacks.base;
 
-import android.content.Context;
-import android.content.res.Resources;
-
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
@@ -32,79 +29,34 @@ import android.filterfw.format.PrimitiveFormat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.Set;
-
-import android.util.Log;
 
 /**
  * @hide
  */
-public class FileReadFilter extends Filter {
+public class InputStreamSource extends Filter {
 
     @GenerateFinalPort(name = "target")
     private String mTarget;
 
-    @GenerateFieldPort(name = "context")
-    private Context mActivityContext;
-
-    @GenerateFieldPort(name = "format")
-    private FrameFormat mFrameFormat;
-
-    // TODO: Split this into two (subclass) filters: FileReadFilter and ResourceReadFilter.
-    @GenerateFieldPort(name = "resourceId", hasDefault = true)
-    private int mResourceId = -1;
-
-    @GenerateFieldPort(name = "fileName", hasDefault = true)
-    private String mFileInputName;
-
-    private final int FILE_MODE_FILE      = 0;
-    private final int FILE_MODE_RESOURCE  = 1;
-
-    private MutableFrameFormat mOutputFormat;
-
+    @GenerateFieldPort(name = "stream")
     private InputStream mInputStream;
-    private int mFileMode = FILE_MODE_FILE;
 
-    public FileReadFilter(String name) {
+    @GenerateFinalPort(name = "format", hasDefault = true)
+    private MutableFrameFormat mOutputFormat = null;
+
+    public InputStreamSource(String name) {
         super(name);
     }
 
     @Override
     public void setupPorts() {
         int target = FrameFormat.readTargetString(mTarget);
-        mOutputFormat = PrimitiveFormat.createByteFormat(target);
+        if (mOutputFormat == null) {
+            mOutputFormat = PrimitiveFormat.createByteFormat(target);
+        }
         addOutputPort("data", mOutputFormat);
-    }
-
-    @Override
-    public void open(FilterContext context) {
-        // Read file input parameter
-        if (mFileInputName != null) {
-            mFileMode = FILE_MODE_FILE;
-        } else if (mResourceId >= 0) {
-            mFileMode = FILE_MODE_RESOURCE;
-        } else {
-            throw new RuntimeException("No input file specified! Please set fileName or resourceId!");
-        }
-
-        // Open the file
-        try {
-            switch (mFileMode) {
-                case FILE_MODE_FILE:
-                    mInputStream = mActivityContext.openFileInput(mFileInputName);
-                    break;
-                case FILE_MODE_RESOURCE:
-                    mInputStream = mActivityContext.getResources().openRawResource(mResourceId);
-                    break;
-            }
-            Log.i("FileReadFilter", "InputStream = " + mInputStream);
-        } catch (FileNotFoundException exception) {
-            throw new RuntimeException("FileReader: Could not open file: " + mFileInputName + "!");
-        }
     }
 
     @Override
@@ -123,8 +75,8 @@ public class FileReadFilter extends Filter {
             }
             byteBuffer = ByteBuffer.wrap(byteStream.toByteArray());
         } catch (IOException exception) {
-            throw new RuntimeException("FileReader: Could not read from file: " +
-                                       mFileInputName + "!");
+            throw new RuntimeException(
+                "InputStreamSource: Could not read stream: " + exception.getMessage() + "!");
         }
 
         // Put it into a frame
@@ -147,7 +99,7 @@ public class FileReadFilter extends Filter {
         try {
             mInputStream.close();
         } catch (IOException exception) {
-            throw new RuntimeException("FileReader: Could not close file!");
+            throw new RuntimeException("InputStreamSource: Could not close stream!");
         }
     }
 }

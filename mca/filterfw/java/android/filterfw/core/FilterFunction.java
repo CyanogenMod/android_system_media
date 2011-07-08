@@ -56,8 +56,11 @@ public class FilterFunction {
         }
 
         // Make sure GL environment is active
-        if (mFilterContext.getGLEnvironment() != null) {
-            mFilterContext.getGLEnvironment().activate();
+        boolean didActivateGLEnv = false;
+        GLEnvironment glEnv = mFilterContext.getGLEnvironment();
+        if (glEnv != null && !glEnv.isActive()) {
+            glEnv.activate();
+            didActivateGLEnv = true;
         }
 
         // Setup the inputs
@@ -79,6 +82,11 @@ public class FilterFunction {
         Frame result = null;
         if (filterOutCount == 1) {
             result = mResultHolders[0].pullFrame();
+        }
+
+        // Deactivate GL environment if activated
+        if (didActivateGLEnv) {
+            glEnv.deactivate();
         }
 
         return result;
