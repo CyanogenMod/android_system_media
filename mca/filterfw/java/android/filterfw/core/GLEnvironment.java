@@ -22,6 +22,7 @@ import android.graphics.SurfaceTexture;
 import android.os.Looper;
 import android.util.Log;
 import android.view.Surface;
+import android.media.MediaRecorder;
 
 /**
  * @hide
@@ -103,6 +104,15 @@ public class GLEnvironment {
         return result;
     }
 
+    public int registerSurfaceFromMediaRecorder(MediaRecorder mediaRecorder) {
+        int result = nativeAddSurfaceFromMediaRecorder(mediaRecorder);
+        if (result < 0) {
+            throw new RuntimeException("Error registering surface from "
+                                    + "MediaRecorder" + mediaRecorder + "!");
+        }
+        return result;
+    }
+
     public void activateSurfaceWithId(int surfaceId) {
         if (!nativeActivateSurfaceId(surfaceId)) {
             throw new RuntimeException("Could not activate surface " + surfaceId + "!");
@@ -148,6 +158,8 @@ public class GLEnvironment {
     private native int nativeAddSurface(Surface surface);
 
     private native int nativeAddSurfaceTexture(SurfaceTexture surface, int width, int height);
+
+    private native int nativeAddSurfaceFromMediaRecorder(MediaRecorder mediaRecorder);
 
     private native boolean nativeActivateSurfaceId(int surfaceId);
 
