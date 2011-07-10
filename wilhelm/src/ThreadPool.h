@@ -43,7 +43,7 @@ typedef struct {
     Closure *mClosureTypical[CLOSURE_TYPICAL+1];
     pthread_t *mThreadArray;    ///< The worker threads
 #ifdef ANDROID
-#define THREAD_TYPICAL 0
+#define THREAD_TYPICAL 2
 #else
 #define THREAD_TYPICAL 4
 #endif
