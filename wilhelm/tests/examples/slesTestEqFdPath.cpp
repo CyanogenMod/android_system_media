@@ -51,6 +51,7 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path
 #ifdef ANDROID
     , SLAint64 offset, SLAint64 size
 #endif
+    , bool alwaysOn
     )
 {
     SLresult  result;
@@ -236,22 +237,24 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path
         fprintf(stdout, "Band %d level = %dmB\n", b, level);
     }
 
-    /* Switch EQ on/off every TIME_S_BETWEEN_EQ_ON_OFF seconds */
-    SLboolean enabled = SL_BOOLEAN_TRUE;
-    result = (*eqItf)->SetEnabled(eqItf, enabled);
-    ExitOnError(result);
+    /* Switch EQ on/off every TIME_S_BETWEEN_EQ_ON_OFF seconds unless always on */
+    SLboolean previousEnabled = SL_BOOLEAN_FALSE;
     for(unsigned int j=0 ; j<(durationInMsec/(1000*TIME_S_BETWEEN_EQ_ON_OFF)) ; j++) {
-        usleep(TIME_S_BETWEEN_EQ_ON_OFF * 1000 * 1000);
+        SLboolean enabled;
         result = (*eqItf)->IsEnabled(eqItf, &enabled);
         ExitOnError(result);
-        enabled = enabled == SL_BOOLEAN_TRUE ? SL_BOOLEAN_FALSE : SL_BOOLEAN_TRUE;
-        result = (*eqItf)->SetEnabled(eqItf, enabled);
-        if (SL_BOOLEAN_TRUE == enabled) {
-            fprintf(stdout, "EQ on\n");
-        } else {
-            fprintf(stdout, "EQ off\n");
+        enabled = alwaysOn || !enabled;
+        if (enabled != previousEnabled) {
+            result = (*eqItf)->SetEnabled(eqItf, enabled);
+            ExitOnError(result);
+            previousEnabled = enabled;
+            if (SL_BOOLEAN_TRUE == enabled) {
+                fprintf(stdout, "EQ on\n");
+            } else {
+                fprintf(stdout, "EQ off\n");
+            }
         }
-        ExitOnError(result);
+        usleep(TIME_S_BETWEEN_EQ_ON_OFF * 1000 * 1000);
     }
 
     /* Make sure player is stopped */
@@ -273,16 +276,25 @@ void TestEQPathFromFD( SLObjectItf sl, const char* path
 //-----------------------------------------------------------------
 int main(int argc, char* const argv[])
 {
+    const char *programName = argv[0];
     SLresult    result;
     SLObjectItf sl;
 
-    fprintf(stdout, "OpenSL ES test %s: exercises SLEqualizerItf ", argv[0]);
+    fprintf(stdout, "OpenSL ES test %s: exercises SLEqualizerItf ", programName);
     fprintf(stdout, "and AudioPlayer with SLDataLocator_AndroidFD source / OutputMix sink\n");
     fprintf(stdout, "Plays the sound file designated by the given path, ");
     fprintf(stdout, "starting at the specified offset, and using the specified length.\n");
     fprintf(stdout, "Omit the length of the file for it to be computed by the system.\n");
-    fprintf(stdout, "Every %d seconds, the EQ will be turned on and off.\n",
+    fprintf(stdout, "Every %d seconds, the EQ will be turned on and off,\n",
             TIME_S_BETWEEN_EQ_ON_OFF);
+    fprintf(stdout, "unless the --always-on option is specified before the path.\n");
+
+    bool alwaysOn = false;
+    if (argc >= 2 && !strcmp(argv[1], "--always-on")) {
+        alwaysOn = true;
+        --argc;
+        ++argv;
+    }
 
 #ifdef ANDROID
     if (argc < 3)
@@ -290,8 +302,8 @@ int main(int argc, char* const argv[])
     if (argc < 1)
 #endif
     {
-        fprintf(stdout, "Usage: \t%s path offsetInBytes [sizeInBytes]\n", argv[0]);
-        fprintf(stdout, "Example: \"%s /sdcard/my.mp3 0 344460\" \n", argv[0]);
+        fprintf(stdout, "Usage: \t%s [--always-on] path offsetInBytes [sizeInBytes]\n", programName);
+        fprintf(stdout, "Example: \"%s /sdcard/my.mp3 0 344460\" \n", programName);
         exit(EXIT_FAILURE);
     }
 
@@ -310,9 +322,9 @@ int main(int argc, char* const argv[])
     if (argc == 3) {
         fprintf(stdout, "\nno file size given, using SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE\n\n");
         TestEQPathFromFD(sl, argv[1], (SLAint64)atoi(argv[2]),
-                SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE);
+                SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE, alwaysOn);
     } else {
-        TestEQPathFromFD(sl, argv[1], (SLAint64)atoi(argv[2]), (SLAint64)atoi(argv[3]));
+        TestEQPathFromFD(sl, argv[1], (SLAint64)atoi(argv[2]), (SLAint64)atoi(argv[3]), alwaysOn);
     }
 #else
     TestEQPathFromFD(sl, argv[1]);

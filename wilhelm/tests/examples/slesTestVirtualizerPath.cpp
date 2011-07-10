@@ -47,7 +47,8 @@ void ExitOnErrorFunc( SLresult result , int line)
 //-----------------------------------------------------------------
 
 /* Play an audio path by opening a file descriptor on that path  */
-void TestVirtualizerPathFromFD( SLObjectItf sl, const char* path, int16_t virtStrength)
+void TestVirtualizerPathFromFD( SLObjectItf sl, const char* path, int16_t virtStrength,
+        bool alwaysOn)
 {
     SLresult  result;
     SLEngineItf EngineItf;
@@ -209,22 +210,24 @@ void TestVirtualizerPathFromFD( SLObjectItf sl, const char* path, int16_t virtSt
     fprintf(stdout, "Rounded strength of virt = %d\n", strength);
 
 
-    /* Switch Virtualizer on/off every TIME_S_BETWEEN_VIRT_ON_OFF seconds */
-    SLboolean enabled = SL_BOOLEAN_TRUE;
-    result = (*virtItf)->SetEnabled(virtItf, enabled);
-    ExitOnError(result);
+    /* Switch Virtualizer on/off every TIME_S_BETWEEN_VIRT_ON_OFF seconds unless always on */
+    SLboolean previousEnabled = SL_BOOLEAN_FALSE;
     for(unsigned int j=0 ; j<(durationInMsec/(1000*TIME_S_BETWEEN_VIRT_ON_OFF)) ; j++) {
-        usleep(TIME_S_BETWEEN_VIRT_ON_OFF * 1000 * 1000);
+        SLboolean enabled;
         result = (*virtItf)->IsEnabled(virtItf, &enabled);
         ExitOnError(result);
-        enabled = enabled == SL_BOOLEAN_TRUE ? SL_BOOLEAN_FALSE : SL_BOOLEAN_TRUE;
-        result = (*virtItf)->SetEnabled(virtItf, enabled);
-        if (SL_BOOLEAN_TRUE == enabled) {
-            fprintf(stdout, "Virtualizer on\n");
-        } else {
-            fprintf(stdout, "Virtualizer off\n");
+        enabled = alwaysOn || !enabled;
+        if (enabled != previousEnabled) {
+            result = (*virtItf)->SetEnabled(virtItf, enabled);
+            ExitOnError(result);
+            previousEnabled = enabled;
+            if (SL_BOOLEAN_TRUE == enabled) {
+                fprintf(stdout, "Virtualizer on\n");
+            } else {
+                fprintf(stdout, "Virtualizer off\n");
+            }
         }
-        ExitOnError(result);
+        usleep(TIME_S_BETWEEN_VIRT_ON_OFF * 1000 * 1000);
     }
 
     /* Make sure player is stopped */
@@ -246,20 +249,29 @@ void TestVirtualizerPathFromFD( SLObjectItf sl, const char* path, int16_t virtSt
 //-----------------------------------------------------------------
 int main(int argc, char* const argv[])
 {
+    const char *programName = argv[0];
     SLresult    result;
     SLObjectItf sl;
 
-    fprintf(stdout, "OpenSL ES test %s: exercises SLVirtualizerItf ", argv[0]);
+    fprintf(stdout, "OpenSL ES test %s: exercises SLVirtualizerItf ", programName);
     fprintf(stdout, "and AudioPlayer with SLDataLocator_AndroidFD source / OutputMix sink\n");
     fprintf(stdout, "Plays the sound file designated by the given path, ");
     fprintf(stdout, "and applies a virtualization effect of the specified strength,\n");
     fprintf(stdout, "where strength is an integer value between 0 and 1000.\n");
-    fprintf(stdout, "Every %d seconds, the Virtualizer will be turned on and off.\n",
+    fprintf(stdout, "Every %d seconds, the Virtualizer will be turned on and off,\n",
             TIME_S_BETWEEN_VIRT_ON_OFF);
+    fprintf(stdout, "unless the --always-on option is specified before the path.\n");
+
+    bool alwaysOn = false;
+    if (argc >= 2 && !strcmp(argv[1], "--always-on")) {
+        alwaysOn = true;
+        --argc;
+        ++argv;
+    }
 
     if (argc < 3) {
-        fprintf(stdout, "Usage: \t%s path virtualization_strength\n", argv[0]);
-        fprintf(stdout, "Example: \"%s /sdcard/my.mp3 1000\" \n", argv[0]);
+        fprintf(stdout, "Usage: \t%s [--always-on] path virtualization_strength\n", programName);
+        fprintf(stdout, "Example: \"%s /sdcard/my.mp3 1000\" \n", programName);
         exit(EXIT_FAILURE);
     }
 
@@ -275,7 +287,7 @@ int main(int argc, char* const argv[])
     ExitOnError(result);
 
     // intentionally not checking that argv[2], the virtualizer strength, is between 0 and 1000
-    TestVirtualizerPathFromFD(sl, argv[1], (int16_t)atoi(argv[2]));
+    TestVirtualizerPathFromFD(sl, argv[1], (int16_t)atoi(argv[2]), alwaysOn);
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
