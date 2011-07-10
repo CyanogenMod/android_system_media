@@ -165,4 +165,26 @@ endif
 
 LOCAL_MODULE:= slesTest_manyPlayers
 
+# slesTest_getPositionUri
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_C_INCLUDES:= \
+	system/media/wilhelm/include
+
+LOCAL_SRC_FILES:= \
+	slesTestGetPositionUri.cpp
+
+LOCAL_SHARED_LIBRARIES := \
+	libutils \
+	libOpenSLES
+
+ifeq ($(TARGET_OS),linux)
+	LOCAL_CFLAGS += -DXP_UNIX
+endif
+
+LOCAL_MODULE:= slesTest_getPositionUri
+
 include $(BUILD_EXECUTABLE)
