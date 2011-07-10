@@ -21,34 +21,43 @@ import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.GenerateFinalPort;
-import android.filterfw.core.KeyValueMap;
 
-// TODO: Rename to FixedFrameSource and also add a (dynamic) FrameSource?
 /**
  * @hide
  */
-public class StaticFrameFilter extends Filter {
+public class FrameSource extends Filter {
 
-    @GenerateFinalPort(name = "frame")
-    private Frame mFrame;
+    @GenerateFinalPort(name = "format")
+    private FrameFormat mFormat;
 
-    public StaticFrameFilter(String name) {
+    @GenerateFieldPort(name = "frame", hasDefault = true)
+    private Frame mFrame = null;
+
+    @GenerateFieldPort(name = "repeatFrame", hasDefault = true)
+    private boolean mRepeatFrame = false;
+
+    public FrameSource(String name) {
         super(name);
     }
 
     @Override
     public void setupPorts() {
-        addOutputPort("frame", mFrame.getFormat());
+        addOutputPort("frame", mFormat);
     }
 
     @Override
     public void process(FilterContext context) {
-        // Push output
-        pushOutput("frame", mFrame);
+        if (mFrame != null) {
+            // Push output
+            pushOutput("frame", mFrame);
+        }
 
-        // Close output port as we are done here
-        closeOutputPort("frame");
+        if (!mRepeatFrame) {
+            // Close output port as we are done here
+            closeOutputPort("frame");
+        }
     }
 
 }

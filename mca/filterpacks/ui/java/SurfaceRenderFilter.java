@@ -172,11 +172,10 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
         // See if we need to copy to GPU
         Frame gpuFrame = null;
         if (mLogVerbose) Log.v("SurfaceRenderFilter", "Got input format: " + input.getFormat());
-        if (input.getFormat().getTarget() == FrameFormat.TARGET_NATIVE) {
-            MutableFrameFormat gpuFormat = input.getFormat().mutableCopy();
-            gpuFormat.setTarget(FrameFormat.TARGET_GPU);
-            gpuFrame = context.getFrameManager().newFrame(gpuFormat);
-            gpuFrame.setData(input.getData());
+        int target = input.getFormat().getTarget();
+        if (target != FrameFormat.TARGET_GPU) {
+            gpuFrame = context.getFrameManager().duplicateFrameToTarget(input,
+                                                                        FrameFormat.TARGET_GPU);
             createdFrame = true;
         } else {
             gpuFrame = input;

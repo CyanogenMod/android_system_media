@@ -30,21 +30,17 @@ import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.format.ImageFormat;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 /**
  * @hide
  */
-public class ImageDecoder extends Filter {
+public class BitmapSource extends Filter {
 
     @GenerateFinalPort(name = "target")
     String mTargetString;
 
-    @GenerateFieldPort(name = "resourceName")
-    String mResourceName;
-
-    @GenerateFieldPort(name = "context")
-    Context mContext;
+    @GenerateFieldPort(name = "bitmap")
+    private Bitmap mBitmap;
 
     @GenerateFieldPort(name = "repeatFrame", hasDefault = true)
     boolean mRepeatFrame = false;
@@ -52,7 +48,7 @@ public class ImageDecoder extends Filter {
     private int mTarget;
     private Frame mImageFrame;
 
-    public ImageDecoder(String name) {
+    public BitmapSource(String name) {
         super(name);
     }
 
@@ -68,25 +64,19 @@ public class ImageDecoder extends Filter {
     }
 
     public void loadImage(FilterContext filterContext) {
-        // Load image
-        int resourceId = mContext.getResources().getIdentifier(mResourceName,
-                                                               null,
-                                                               mContext.getPackageName());
-        Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), resourceId);
-
-        // Wrap in frame
-        FrameFormat outputFormat = ImageFormat.create(bitmap.getWidth(),
-                                                      bitmap.getHeight(),
+        FrameFormat outputFormat = ImageFormat.create(mBitmap.getWidth(),
+                                                      mBitmap.getHeight(),
                                                       ImageFormat.COLORSPACE_RGBA,
                                                       mTarget);
         mImageFrame = filterContext.getFrameManager().newFrame(outputFormat);
-        mImageFrame.setBitmap(bitmap);
+        mImageFrame.setBitmap(mBitmap);
+        mBitmap = null;
     }
 
     @Override
     public void fieldPortValueUpdated(String name, FilterContext context) {
         // Clear image (to trigger reload) in case parameters have been changed
-        if (name.equals("resourceName") || name.equals("context")) {
+        if (name.equals("bitmap") || name.equals("target")) {
             if (mImageFrame != null) {
                 mImageFrame.release();
                 mImageFrame = null;

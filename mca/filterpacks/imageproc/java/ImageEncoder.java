@@ -30,9 +30,7 @@ import android.graphics.Bitmap.CompressFormat;
 
 import android.util.Log;
 
-import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
+import java.io.OutputStream;
 import java.io.IOException;
 
 /**
@@ -40,11 +38,11 @@ import java.io.IOException;
  */
 public class ImageEncoder extends Filter {
 
-    @GenerateFieldPort(name = "fileName")
-    private String mOutputName;
+    @GenerateFieldPort(name = "stream")
+    private OutputStream mOutputStream;
 
-    @GenerateFieldPort(name = "context")
-    private Context mContext;
+    @GenerateFieldPort(name = "quality", hasDefault = true)
+    private int mQuality = 80;
 
     public ImageEncoder(String name) {
         super(name);
@@ -60,24 +58,7 @@ public class ImageEncoder extends Filter {
     public void process(FilterContext env) {
         Frame input = pullInput("image");
         Bitmap bitmap = input.getBitmap();
-        FileOutputStream outStream = null;
-
-        try {
-            outStream = mContext.openFileOutput(mOutputName, Context.MODE_PRIVATE);
-        } catch (FileNotFoundException exception) {
-            throw new RuntimeException("ImageEncoder: Could not open file: " + mOutputName + "!");
-        }
-
-        BufferedOutputStream bufferedStream = new BufferedOutputStream(outStream);
-        bitmap.compress(CompressFormat.JPEG, 80, bufferedStream);
-
-        try {
-            bufferedStream.flush();
-            bufferedStream.close();
-        } catch (IOException exception) {
-            throw new RuntimeException("ImageEncoder: Could not write to file: " +
-                                       mOutputName + "!");
-        }
+        bitmap.compress(CompressFormat.JPEG, mQuality, mOutputStream);
     }
 
 }
