@@ -47,7 +47,7 @@ void ExitOnErrorFunc( SLresult result , int line)
 //-----------------------------------------------------------------
 
 /* Play an audio path by opening a file descriptor on that path  */
-void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStrength)
+void TestBassBoostPathFromFD(SLObjectItf sl, const char* path, int16_t boostStrength, bool alwaysOn)
 {
     SLresult  result;
     SLEngineItf EngineItf;
@@ -208,22 +208,24 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
     fprintf(stdout, "Rounded strength of boost = %d\n", strength);
 
 
-    /* Switch BassBoost on/off every TIME_S_BETWEEN_BB_ON_OFF seconds */
-    SLboolean enabled = SL_BOOLEAN_TRUE;
-    result = (*bbItf)->SetEnabled(bbItf, enabled);
-    ExitOnError(result);
+    /* Switch BassBoost on/off every TIME_S_BETWEEN_BB_ON_OFF seconds unless always on */
+    SLboolean previousEnabled = SL_BOOLEAN_FALSE;
     for(unsigned int j=0 ; j<(durationInMsec/(1000*TIME_S_BETWEEN_BB_ON_OFF)) ; j++) {
-        usleep(TIME_S_BETWEEN_BB_ON_OFF * 1000 * 1000);
+        SLboolean enabled;
         result = (*bbItf)->IsEnabled(bbItf, &enabled);
         ExitOnError(result);
-        enabled = enabled == SL_BOOLEAN_TRUE ? SL_BOOLEAN_FALSE : SL_BOOLEAN_TRUE;
-        result = (*bbItf)->SetEnabled(bbItf, enabled);
-        if (SL_BOOLEAN_TRUE == enabled) {
-            fprintf(stdout, "BassBoost on\n");
-        } else {
-            fprintf(stdout, "BassBoost off\n");
+        enabled = alwaysOn || !enabled;
+        if (enabled != previousEnabled) {
+            result = (*bbItf)->SetEnabled(bbItf, enabled);
+            ExitOnError(result);
+            previousEnabled = enabled;
+            if (SL_BOOLEAN_TRUE == enabled) {
+                fprintf(stdout, "BassBoost on\n");
+            } else {
+                fprintf(stdout, "BassBoost off\n");
+            }
         }
-        ExitOnError(result);
+        usleep(TIME_S_BETWEEN_BB_ON_OFF * 1000 * 1000);
     }
 
     /* Make sure player is stopped */
@@ -245,20 +247,29 @@ void TestBassBoostPathFromFD( SLObjectItf sl, const char* path, int16_t boostStr
 //-----------------------------------------------------------------
 int main(int argc, char* const argv[])
 {
+    const char *programName = argv[0];
     SLresult    result;
     SLObjectItf sl;
 
-    fprintf(stdout, "OpenSL ES test %s: exercises SLBassBoostItf ", argv[0]);
+    fprintf(stdout, "OpenSL ES test %s: exercises SLBassBoostItf ", programName);
     fprintf(stdout, "and AudioPlayer with SLDataLocator_AndroidFD source / OutputMix sink\n");
     fprintf(stdout, "Plays the sound file designated by the given path, ");
     fprintf(stdout, "and applies a bass boost effect of the specified strength,\n");
     fprintf(stdout, "where strength is a integer value between 0 and 1000.\n");
-    fprintf(stdout, "Every %d seconds, the BassBoost will be turned on and off.\n",
+    fprintf(stdout, "Every %d seconds, the BassBoost will be turned on and off,\n",
             TIME_S_BETWEEN_BB_ON_OFF);
+    fprintf(stdout, "unless the --always-on option is specified before the path.\n");
+
+    bool alwaysOn = false;
+    if (argc >= 2 && !strcmp(argv[1], "--always-on")) {
+        alwaysOn = true;
+        --argc;
+        ++argv;
+    }
 
     if (argc < 3) {
-        fprintf(stdout, "Usage: \t%s path bass_boost_strength\n", argv[0]);
-        fprintf(stdout, "Example: \"%s /sdcard/my.mp3 1000\" \n", argv[0]);
+        fprintf(stdout, "Usage: \t%s [--always-on] path bass_boost_strength\n", programName);
+        fprintf(stdout, "Example: \"%s /sdcard/my.mp3 1000\" \n", programName);
         exit(EXIT_FAILURE);
     }
 
@@ -274,7 +285,7 @@ int main(int argc, char* const argv[])
     ExitOnError(result);
 
     // intentionally not checking that argv[2], the bassboost strength, is between 0 and 1000
-    TestBassBoostPathFromFD(sl, argv[1], (int16_t)atoi(argv[2]));
+    TestBassBoostPathFromFD(sl, argv[1], (int16_t)atoi(argv[2]), alwaysOn);
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
