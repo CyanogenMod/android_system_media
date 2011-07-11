@@ -413,3 +413,28 @@ extern LI_API SLresult liQueryNumSupportedInterfaces(SLuint32 *pNumSupportedInte
         const ClassTable *clazz);
 extern LI_API SLresult liQuerySupportedInterfaces(SLuint32 index, SLInterfaceID *pInterfaceId,
         const ClassTable *clazz);
+
+// The EnqueueAsyncCallback macros provide a safe way to asynchronously call an application-level
+// callback handler that is permitted to do almost anything, including block.  This is intended
+// primarily for "notification" callbacks such as play head progress.  Do not use for callbacks
+// which must be synchronous, such as buffer queue completions.  The enqueue may fail if
+// the callback queue is full.  This almost always indicates an application error such as blocking
+// for an excessive time within a callback handler or requesting too frequent callbacks.  The
+// recommended recovery is to either retry later, or log a warning or error as appropriate.
+// If the callback absolutely must be called, then you should be calling it directly instead.
+// Example usage:
+//  CAudioPlayer *ap;
+//  SLresult result = EnqueueAsyncCallback_ppi(ap, playCallback, &ap->mPlay.mItf, playContext,
+//       SL_PLAYEVENT_HEADATEND);
+//  if (SL_RESULT_SUCCESS != result) {
+//    LOGW("Callback %p(%p, %p, SL_PLAYEVENT_HEADATEND) dropped", playCallback, &ap->mPlay.mItf,
+//        playContext);
+//  }
+// which replaces:
+//  (*playCallback)(&ap->mPlay.mItf, playContext, SL_PLAYEVENT_HEADATEND);
+#define EnqueueAsyncCallback_ppi(object, handler, p1, p2, i1) \
+        ThreadPool_add_ppi(&(object)->mObject.mEngine->mThreadPool, \
+            (ClosureHandler_ppi) (handler), (p1), (p2), (i1))
+#define EnqueueAsyncCallback_ppii(object, handler, p1, p2, i1, i2) \
+        ThreadPool_add_ppii(&(object)->mObject.mEngine->mThreadPool, \
+            (ClosureHandler_ppii) (handler), (p1), (p2), (i1), (i2))

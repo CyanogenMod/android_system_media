@@ -374,9 +374,14 @@ void audioPlayer_dispatch_headAtEnd_lockPlay(CAudioPlayer *ap, bool setPlayState
     if (needToLock) {
         interface_unlock_exclusive(&ap->mPlay);
     }
-    // callback with no lock held
+    // enqueue callback with no lock held
     if (NULL != playCallback) {
-        (*playCallback)(&ap->mPlay.mItf, playContext, SL_PLAYEVENT_HEADATEND);
+        SLresult result = EnqueueAsyncCallback_ppi(ap, playCallback, &ap->mPlay.mItf, playContext,
+                SL_PLAYEVENT_HEADATEND);
+        if (SL_RESULT_SUCCESS != result) {
+            LOGW("Callback %p(%p, %p, SL_PLAYEVENT_HEADATEND) dropped", playCallback,
+                    &ap->mPlay.mItf, playContext);
+        }
     }
 
 }
