@@ -22,10 +22,15 @@ import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFieldPort;
+import android.filterfw.core.GenerateFinalPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
+import android.os.Handler;
+import android.os.Looper;
+
+import java.lang.Runnable;
 
 /**
  * @hide
@@ -38,6 +43,30 @@ public class CallbackFilter extends Filter {
     @GenerateFieldPort(name = "userData", hasDefault = true)
     private Object mUserData;
 
+    @GenerateFinalPort(name = "callUiThread", hasDefault = true)
+    private boolean mCallbacksOnUiThread = true;
+
+    private Handler mUiThreadHandler;
+
+    private class CallbackRunnable implements Runnable {
+        private Filter mFilter;
+        private Frame mFrame;
+        private Object mUserData;
+        private FilterContext.OnFrameReceivedListener mListener;
+
+        public CallbackRunnable(FilterContext.OnFrameReceivedListener listener, Filter filter, Frame frame, Object userData) {
+            mListener = listener;
+            mFilter = filter;
+            mFrame = frame;
+            mUserData = userData;
+        }
+
+        public void run() {
+            mListener.onFrameReceived(mFilter, mFrame, mUserData);
+            mFrame.release();
+        }
+    }
+
     public CallbackFilter(String name) {
         super(name);
     }
@@ -47,11 +76,25 @@ public class CallbackFilter extends Filter {
         addInputPort("frame");
     }
 
+    public void prepare(FilterContext context) {
+        if (mCallbacksOnUiThread) {
+            mUiThreadHandler = new Handler(Looper.getMainLooper());
+        }
+    }
+
     public void process(FilterContext context) {
         // Get frame and forward to listener
-        Frame input = pullInput("frame");
+        final Frame input = pullInput("frame");
         if (mListener != null) {
-            mListener.onFrameReceived(this, input, mUserData);
+            if (mCallbacksOnUiThread) {
+                input.retain();
+                CallbackRunnable uiRunnable = new CallbackRunnable(mListener, this, input, mUserData);
+                if (!mUiThreadHandler.post(uiRunnable)) {
+                    throw new RuntimeException("Unable to send callback to UI thread!");
+                }
+            } else {
+                mListener.onFrameReceived(this, input, mUserData);
+            }
         } else {
             throw new RuntimeException("CallbackFilter received frame, but no listener set!");
         }

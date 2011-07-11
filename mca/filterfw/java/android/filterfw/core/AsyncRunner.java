@@ -18,10 +18,12 @@
 package android.filterfw.core;
 
 import android.os.AsyncTask;
+import android.os.Handler;
 
 import android.util.Log;
 
 import java.lang.InterruptedException;
+import java.lang.Runnable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -36,34 +38,17 @@ public class AsyncRunner extends GraphRunner{
     private SyncRunner mRunner;
     private AsyncRunnerTask mRunTask;
 
-    private FilterContext.OnFrameReceivedListener mUiListener;
     private OnRunnerDoneListener mDoneListener;
+    private boolean isProcessing;
 
-    private FilterContext.OnFrameReceivedListener mBackgroundListener =
-            new FilterContext.OnFrameReceivedListener() {
-        @Override
-        public void onFrameReceived(Filter filter, Frame frame, Object userData) {
-            if (mLogVerbose) Log.v(TAG, "Received callback at forwarding listener.");
-            if (mRunTask != null) {
-                mRunTask.onFrameReceived(filter, frame, userData);
-            }
-        }
-    };
-
-    private class FrameReceivedContents {
-        public Filter filter;
-        public Frame frame;
-        public Object userData;
-    }
-
-    private class AsyncRunnerTask extends AsyncTask<SyncRunner, FrameReceivedContents, Integer> {
+    private class AsyncRunnerTask extends AsyncTask<SyncRunner, Void, Integer> {
 
         private static final String TAG = "AsyncRunnerTask";
 
         @Override
         protected Integer doInBackground(SyncRunner... runner) {
             if (runner.length > 1) {
-                throw new RuntimeException("More than one callback data set received!");
+                throw new RuntimeException("More than one runner received!");
             }
 
             runner[0].assertReadyToStep();
@@ -108,42 +93,17 @@ public class AsyncRunner extends GraphRunner{
         @Override
         protected void onPostExecute(Integer result) {
             if (mLogVerbose) Log.v(TAG, "Starting post-execute.");
+            setRunning(false);
+
             if (result == RESULT_STOPPED) {
                 if (mLogVerbose) Log.v(TAG, "Closing filters.");
                 mRunner.close();
             }
             if (mDoneListener != null) {
-                if (mLogVerbose) Log.v(TAG, "Invoking graph done callback.");
+                if (mLogVerbose) Log.v(TAG, "Calling graph done callback.");
                 mDoneListener.onRunnerDone(result);
             }
-        }
-
-        /** Runs in async thread to receive filter callbacks */
-        public void onFrameReceived(Filter filter, Frame frame, Object userData) {
-            if (mUiListener != null) {
-                FrameReceivedContents publishPacket = new FrameReceivedContents();
-                publishPacket.filter = filter;
-                publishPacket.frame = frame;
-                publishPacket.userData = userData;
-                // Sending frame across thread boundary, need to explicitly retain
-                publishPacket.frame.retain();
-                publishProgress(publishPacket);
-            }
-        }
-
-        /** Runs in UI thread to pass on frame callbacks */
-        @Override
-        public void onProgressUpdate(FrameReceivedContents... publishPacket) {
-            if (publishPacket.length > 1) {
-                throw new RuntimeException("More than one callback data set received!");
-            }
-            if (mUiListener != null) {
-                mUiListener.onFrameReceived(publishPacket[0].filter,
-                                            publishPacket[0].frame,
-                                            publishPacket[0].userData);
-            }
-            // Release frame now that we're done with it in UI thread.
-            publishPacket[0].frame.release();
+            if (mLogVerbose) Log.v(TAG, "Completed post-execute.");
         }
     }
 
@@ -157,6 +117,7 @@ public class AsyncRunner extends GraphRunner{
      */
     public AsyncRunner(FilterContext context, Class schedulerClass) {
         super(context);
+
         mSchedulerClass = schedulerClass;
         mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
@@ -168,6 +129,7 @@ public class AsyncRunner extends GraphRunner{
      */
     public AsyncRunner(FilterContext context) {
         super(context);
+
         mSchedulerClass = SimpleScheduler.class;
         mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
@@ -199,10 +161,9 @@ public class AsyncRunner extends GraphRunner{
 
     /** Execute the graph in a background thread. */
     @Override
-    public void run() {
+    synchronized public void run() {
         if (mLogVerbose) Log.v(TAG, "Running graph.");
-        if (mRunTask != null &&
-            mRunTask.getStatus() != AsyncTask.Status.FINISHED) {
+        if (isRunning()) {
             throw new RuntimeException("Graph is already running!");
         }
         if (mRunner == null) {
@@ -210,6 +171,7 @@ public class AsyncRunner extends GraphRunner{
         }
         mRunTask = this.new AsyncRunnerTask();
 
+        setRunning(true);
         mRunTask.execute(mRunner);
     }
 
@@ -235,29 +197,12 @@ public class AsyncRunner extends GraphRunner{
 
     /** Check if background processing is happening */
     @Override
-    public boolean isRunning() {
-        if (mRunTask == null) return false;
-        else return (mRunTask.getStatus() != AsyncTask.Status.FINISHED);
+    synchronized public boolean isRunning() {
+        return isProcessing;
     }
 
-    /** Get the forwarding listener to use for frame-producing callbacks such as
-     * the one from CallbackFilter. This listener will forward callbacks to the
-     * UI thread and call the callback set by
-     * {@link #setUiThreadCallback}. The listener returned by this method
-     * should only be invoked from within the graph running in this
-     * AsyncRunner. */
-    public FilterContext.OnFrameReceivedListener getForwardingCallback() {
-        return mBackgroundListener;
-    }
-
-    /** Set the UI thread listener for graph callbacks. This callback will be
-     * called in the UI thread when the forwarding listener given by
-     * {@link #getForwardingCallback} is called by a filter such as a
-     * CallbackFilter. If the frame needs to be kept around by the UI thread,
-     * make sure to call retain() on it before the callback exists, and then
-     * call release() when done with it. */
-    public void setUiThreadCallback(FilterContext.OnFrameReceivedListener uiListener) {
-        mUiListener = uiListener;
+    synchronized private void setRunning(boolean running) {
+        isProcessing = running;
     }
 
 }
