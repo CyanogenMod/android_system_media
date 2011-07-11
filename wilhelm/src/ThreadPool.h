@@ -16,12 +16,30 @@
 
 /** \file ThreadPool.h ThreadPool interface */
 
+/** Kind of closure */
+
+typedef enum {
+    CLOSURE_KIND_PPI,   // void *, void *, int
+    CLOSURE_KIND_PPII   // void *, void *, int, int
+} ClosureKind;
+
+/** Closure handlers */
+
+typedef void (*ClosureHandler_ppi)(void *context1, void *context2, int parameter1);
+typedef void (*ClosureHandler_ppii)(void *context1, void *context2, int parameter1, int parameter2);
+
 /** \brief Closure represents a deferred computation */
 
 typedef struct {
-    void (*mHandler)(void *, int);
-    void *mContext;
-    int mParameter;
+    union {
+        ClosureHandler_ppi mHandler_ppi;
+        ClosureHandler_ppii mHandler_ppii;
+    } mHandler;
+    ClosureKind mKind;
+    void *mContext1;
+    void *mContext2;
+    int mParameter1;
+    int mParameter2;
 } Closure;
 
 /** \brief ThreadPool manages a pool of worker threads that execute Closures */
@@ -52,6 +70,11 @@ typedef struct {
 
 extern SLresult ThreadPool_init(ThreadPool *tp, unsigned maxClosures, unsigned maxThreads);
 extern void ThreadPool_deinit(ThreadPool *tp);
-extern SLresult ThreadPool_add(ThreadPool *tp, void (*handler)(void *, int), void *context,
-    int parameter);
+extern SLresult ThreadPool_add(ThreadPool *tp, ClosureKind kind,
+    void (*handler)(void *, void *, int, int), void *context1,
+    void *context2, int parameter1, int parameter2);
 extern Closure *ThreadPool_remove(ThreadPool *tp);
+extern SLresult ThreadPool_add_ppi(ThreadPool *tp, ClosureHandler_ppi handler,
+    void *context1, void *context2, int parameter1);
+extern SLresult ThreadPool_add_ppii(ThreadPool *tp, ClosureHandler_ppii handler,
+    void *context1, void *context2, int parameter1, int parameter2);

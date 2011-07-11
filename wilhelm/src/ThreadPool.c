@@ -27,15 +27,40 @@ static void *ThreadPool_start(void *context)
     for (;;) {
         Closure *pClosure = ThreadPool_remove(tp);
         // closure is NULL when thread pool is being destroyed
-        if (NULL == pClosure)
+        if (NULL == pClosure) {
             break;
-        void (*handler)(void *, int);
-        handler = pClosure->mHandler;
-        void *context = pClosure->mContext;
-        int parameter = pClosure->mParameter;
+        }
+        // make a copy of parameters, then free the parameters
+        const Closure closure = *pClosure;
         free(pClosure);
-        assert(NULL != handler);
-        (*handler)(context, parameter);
+        // extract parameters and call the right method depending on kind
+        ClosureKind kind = closure.mKind;
+        void *context1 = closure.mContext1;
+        void *context2 = closure.mContext2;
+        int parameter1 = closure.mParameter1;
+        switch (kind) {
+        case CLOSURE_KIND_PPI:
+            {
+            ClosureHandler_ppi handler_ppi;
+            handler_ppi = closure.mHandler.mHandler_ppi;
+            assert(NULL != handler_ppi);
+            (*handler_ppi)(context1, context2, parameter1);
+            }
+            break;
+        case CLOSURE_KIND_PPII:
+            {
+            ClosureHandler_ppii handler_ppii;
+            handler_ppii = closure.mHandler.mHandler_ppii;
+            assert(NULL != handler_ppii);
+            int parameter2 = closure.mParameter2;
+            (*handler_ppii)(context1, context2, parameter1, parameter2);
+            }
+            break;
+        default:
+            SL_LOGE("Unexpected callback kind %d", kind);
+            assert(false);
+            break;
+        }
     }
     return NULL;
 }
@@ -213,17 +238,25 @@ void ThreadPool_deinit(ThreadPool *tp)
     ThreadPool_deinit_internal(tp, tp->mInitialized, tp->mMaxThreads);
 }
 
-// Enqueue a closure to be executed later by a worker thread
-SLresult ThreadPool_add(ThreadPool *tp, void (*handler)(void *, int), void *context, int parameter)
+// Enqueue a closure to be executed later by a worker thread.
+// Note that this raw interface requires an explicit "kind" and full parameter list.
+// There are convenience methods below that make this easier to use.
+SLresult ThreadPool_add(ThreadPool *tp, ClosureKind kind, ClosureHandler_ppii handler,
+        void *context1, void *context2, int parameter1, int parameter2)
 {
     assert(NULL != tp);
     assert(NULL != handler);
     Closure *closure = (Closure *) malloc(sizeof(Closure));
-    if (NULL == closure)
+    if (NULL == closure) {
         return SL_RESULT_RESOURCE_ERROR;
-    closure->mHandler = handler;
-    closure->mContext = context;
-    closure->mParameter = parameter;
+    }
+    closure->mKind = kind;
+    // note this will automagically assign to mHandler_ppi also
+    closure->mHandler.mHandler_ppii = handler;
+    closure->mContext1 = context1;
+    closure->mContext2 = context2;
+    closure->mParameter1 = parameter1;
+    closure->mParameter2 = parameter2;
     int ok;
     ok = pthread_mutex_lock(&tp->mMutex);
     assert(0 == ok);
@@ -314,4 +347,21 @@ Closure *ThreadPool_remove(ThreadPool *tp)
     ok = pthread_mutex_unlock(&tp->mMutex);
     assert(0 == ok);
     return pClosure;
+}
+
+// Convenience methods for applications
+SLresult ThreadPool_add_ppi(ThreadPool *tp, ClosureHandler_ppi handler,
+        void *context1, void *context2, int parameter1)
+{
+    // function pointers are the same size so this is a safe cast
+    return ThreadPool_add(tp, CLOSURE_KIND_PPI, (ClosureHandler_ppii) handler,
+            context1, context2, parameter1, 0);
+}
+
+SLresult ThreadPool_add_ppii(ThreadPool *tp, ClosureHandler_ppii handler,
+        void *context1, void *context2, int parameter1, int parameter2)
+{
+    // note that no cast is needed for handler because it is already the right type
+    return ThreadPool_add(tp, CLOSURE_KIND_PPII, handler, context1, context2, parameter1,
+            parameter2);
 }

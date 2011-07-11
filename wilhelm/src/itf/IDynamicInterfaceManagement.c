@@ -22,7 +22,7 @@
 // Called by a worker thread to handle an asynchronous AddInterface.
 // Parameter self is the DynamicInterface, and MPH specifies which interface to add.
 
-static void HandleAdd(void *self, int MPH)
+static void HandleAdd(void *self, void *ignored, int MPH)
 {
 
     // validate input parameters
@@ -135,8 +135,8 @@ static SLresult IDynamicInterfaceManagement_AddInterface(SLDynamicInterfaceManag
                     object_unlock_exclusive(thisObject);
 
                     // this section runs with mutex unlocked
-                    result = ThreadPool_add(&thisObject->mEngine->mThreadPool, HandleAdd, thiz,
-                        MPH);
+                    result = ThreadPool_add_ppi(&thisObject->mEngine->mThreadPool, HandleAdd, thiz,
+                        NULL, MPH);
                     if (SL_RESULT_SUCCESS != result) {
                         // Engine was destroyed during add, or insufficient memory,
                         // so restore mInterfaceStates state to prior value
@@ -278,7 +278,7 @@ static SLresult IDynamicInterfaceManagement_RemoveInterface(
 // Called by a worker thread to handle an asynchronous ResumeInterface.
 // Parameter self is the DynamicInterface, and MPH specifies which interface to resume.
 
-static void HandleResume(void *self, int MPH)
+static void HandleResume(void *self, void *ignored, int MPH)
 {
 
     // validate input parameters
@@ -383,8 +383,8 @@ static SLresult IDynamicInterfaceManagement_ResumeInterface(SLDynamicInterfaceMa
                     object_unlock_exclusive(thisObject);
 
                     // this section runs with mutex unlocked
-                    result = ThreadPool_add(&thisObject->mEngine->mThreadPool, HandleResume, thiz,
-                        MPH);
+                    result = ThreadPool_add_ppi(&thisObject->mEngine->mThreadPool, HandleResume,
+                        thiz, NULL, MPH);
                     if (SL_RESULT_SUCCESS != result) {
                         // Engine was destroyed during resume, or insufficient memory,
                         // so restore mInterfaceStates state to prior value

@@ -22,7 +22,7 @@
 // Called by a worker thread to handle an asynchronous Object.Realize.
 // Parameter self is the Object.
 
-static void HandleRealize(void *self, int unused)
+static void HandleRealize(void *self, void *ignored, int unused)
 {
 
     // validate input parameters
@@ -123,7 +123,7 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
         switch (state) {
         case SL_OBJECT_STATE_REALIZING_1: // asynchronous on non-Engine
             assert(async);
-            result = ThreadPool_add(&thiz->mEngine->mThreadPool, HandleRealize, thiz, 0);
+            result = ThreadPool_add_ppi(&thiz->mEngine->mThreadPool, HandleRealize, thiz, NULL, 0);
             if (SL_RESULT_SUCCESS != result) {
                 // Engine was destroyed during realize, or insufficient memory
                 object_lock_exclusive(thiz);
@@ -165,7 +165,7 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
 // Called by a worker thread to handle an asynchronous Object.Resume.
 // Parameter self is the Object.
 
-static void HandleResume(void *self, int unused)
+static void HandleResume(void *self, void *ignored, int unused)
 {
 
     // valid input parameters
@@ -251,7 +251,7 @@ static SLresult IObject_Resume(SLObjectItf self, SLboolean async)
         switch (state) {
         case SL_OBJECT_STATE_RESUMING_1: // asynchronous
             assert(async);
-            result = ThreadPool_add(&thiz->mEngine->mThreadPool, HandleResume, thiz, 0);
+            result = ThreadPool_add_ppi(&thiz->mEngine->mThreadPool, HandleResume, thiz, NULL, 0);
             if (SL_RESULT_SUCCESS != result) {
                 // Engine was destroyed during resume, or insufficient memory
                 object_lock_exclusive(thiz);
