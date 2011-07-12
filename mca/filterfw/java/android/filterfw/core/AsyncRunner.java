@@ -146,9 +146,8 @@ public class AsyncRunner extends GraphRunner{
     /** Sets the graph to be run. Will call prepare() on graph. Cannot be called
      * when a graph is already running.
      */
-    public void setGraph(FilterGraph graph) {
-        if (mRunTask != null &&
-            mRunTask.getStatus() != AsyncTask.Status.FINISHED) {
+    synchronized public void setGraph(FilterGraph graph) {
+        if (isRunning()) {
             throw new RuntimeException("Graph is already running!");
         }
         mRunner = new SyncRunner(mFilterContext, graph, mSchedulerClass);
