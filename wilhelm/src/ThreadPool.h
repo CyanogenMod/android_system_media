@@ -20,13 +20,16 @@
 
 typedef enum {
     CLOSURE_KIND_PPI,   // void *, void *, int
-    CLOSURE_KIND_PPII   // void *, void *, int, int
+    CLOSURE_KIND_PPII,  // void *, void *, int, int
+    CLOSURE_KIND_PIIPP  // void *, int, int, void *, void *
 } ClosureKind;
 
 /** Closure handlers */
 
-typedef void (*ClosureHandler_ppi)(void *context1, void *context2, int parameter1);
-typedef void (*ClosureHandler_ppii)(void *context1, void *context2, int parameter1, int parameter2);
+typedef void (*ClosureHandler_generic)(void *p1, void *p2, void *p3, int i1, int i2);
+typedef void (*ClosureHandler_ppi)    (void *p1, void *p2, int i1);
+typedef void (*ClosureHandler_ppii)   (void *p1, void *p2, int i1, int i2);
+typedef void (*ClosureHandler_piipp)  (void *p1, int i1, int i2, void *p2, void *p3);
 
 /** \brief Closure represents a deferred computation */
 
@@ -34,10 +37,12 @@ typedef struct {
     union {
         ClosureHandler_ppi mHandler_ppi;
         ClosureHandler_ppii mHandler_ppii;
+        ClosureHandler_piipp mHandler_piipp;
     } mHandler;
     ClosureKind mKind;
     void *mContext1;
     void *mContext2;
+    void *mContext3;
     int mParameter1;
     int mParameter2;
 } Closure;
@@ -71,10 +76,12 @@ typedef struct {
 extern SLresult ThreadPool_init(ThreadPool *tp, unsigned maxClosures, unsigned maxThreads);
 extern void ThreadPool_deinit(ThreadPool *tp);
 extern SLresult ThreadPool_add(ThreadPool *tp, ClosureKind kind,
-    void (*handler)(void *, void *, int, int), void *context1,
-    void *context2, int parameter1, int parameter2);
+        ClosureHandler_generic,
+        void *cntxt1, void *cntxt2, int param1, int param2);
 extern Closure *ThreadPool_remove(ThreadPool *tp);
 extern SLresult ThreadPool_add_ppi(ThreadPool *tp, ClosureHandler_ppi handler,
-    void *context1, void *context2, int parameter1);
+        void *cntxt1, void *cntxt2, int param1);
 extern SLresult ThreadPool_add_ppii(ThreadPool *tp, ClosureHandler_ppii handler,
-    void *context1, void *context2, int parameter1, int parameter2);
+        void *cntxt1, void *cntxt2, int param1, int param2);
+extern SLresult ThreadPool_add_piipp(ThreadPool *tp, ClosureHandler_piipp handler,
+        void *cntxt1, int param1, int param2, void *cntxt2, void *cntxt3);

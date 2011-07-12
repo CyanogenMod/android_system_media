@@ -39,24 +39,31 @@ static void *ThreadPool_start(void *context)
         void *context2 = closure.mContext2;
         int parameter1 = closure.mParameter1;
         switch (kind) {
-        case CLOSURE_KIND_PPI:
+          case CLOSURE_KIND_PPI:
             {
-            ClosureHandler_ppi handler_ppi;
-            handler_ppi = closure.mHandler.mHandler_ppi;
+            ClosureHandler_ppi handler_ppi = closure.mHandler.mHandler_ppi;
             assert(NULL != handler_ppi);
             (*handler_ppi)(context1, context2, parameter1);
             }
             break;
-        case CLOSURE_KIND_PPII:
+          case CLOSURE_KIND_PPII:
             {
-            ClosureHandler_ppii handler_ppii;
-            handler_ppii = closure.mHandler.mHandler_ppii;
+            ClosureHandler_ppii handler_ppii = closure.mHandler.mHandler_ppii;
             assert(NULL != handler_ppii);
             int parameter2 = closure.mParameter2;
             (*handler_ppii)(context1, context2, parameter1, parameter2);
             }
             break;
-        default:
+          case CLOSURE_KIND_PIIPP:
+            {
+            ClosureHandler_piipp handler_piipp = closure.mHandler.mHandler_piipp;
+            assert(NULL != handler_piipp);
+            int parameter2 = closure.mParameter2;
+            void *context3 = closure.mContext3;
+            (*handler_piipp)(context1, parameter1, parameter2, context2, context3);
+            }
+            break;
+          default:
             SL_LOGE("Unexpected callback kind %d", kind);
             assert(false);
             break;
@@ -241,8 +248,8 @@ void ThreadPool_deinit(ThreadPool *tp)
 // Enqueue a closure to be executed later by a worker thread.
 // Note that this raw interface requires an explicit "kind" and full parameter list.
 // There are convenience methods below that make this easier to use.
-SLresult ThreadPool_add(ThreadPool *tp, ClosureKind kind, ClosureHandler_ppii handler,
-        void *context1, void *context2, int parameter1, int parameter2)
+SLresult ThreadPool_add(ThreadPool *tp, ClosureKind kind, ClosureHandler_generic handler,
+        void *context1, void *context2, void *context3, int parameter1, int parameter2)
 {
     assert(NULL != tp);
     assert(NULL != handler);
@@ -251,10 +258,23 @@ SLresult ThreadPool_add(ThreadPool *tp, ClosureKind kind, ClosureHandler_ppii ha
         return SL_RESULT_RESOURCE_ERROR;
     }
     closure->mKind = kind;
-    // note this will automagically assign to mHandler_ppi also
-    closure->mHandler.mHandler_ppii = handler;
+    switch(kind) {
+      case CLOSURE_KIND_PPI:
+        closure->mHandler.mHandler_ppi = (ClosureHandler_ppi)handler;
+        break;
+      case CLOSURE_KIND_PPII:
+        closure->mHandler.mHandler_ppii = (ClosureHandler_ppii)handler;
+        break;
+      case CLOSURE_KIND_PIIPP:
+        closure->mHandler.mHandler_piipp = (ClosureHandler_piipp)handler;
+        break;
+      default:
+        SL_LOGE("ThreadPool_add() invalid closure kind %d", kind);
+        assert(false);
+    }
     closure->mContext1 = context1;
     closure->mContext2 = context2;
+    closure->mContext3 = context3;
     closure->mParameter1 = parameter1;
     closure->mParameter2 = parameter2;
     int ok;
@@ -354,14 +374,22 @@ SLresult ThreadPool_add_ppi(ThreadPool *tp, ClosureHandler_ppi handler,
         void *context1, void *context2, int parameter1)
 {
     // function pointers are the same size so this is a safe cast
-    return ThreadPool_add(tp, CLOSURE_KIND_PPI, (ClosureHandler_ppii) handler,
-            context1, context2, parameter1, 0);
+    return ThreadPool_add(tp, CLOSURE_KIND_PPI, (ClosureHandler_generic) handler,
+            context1, context2, NULL, parameter1, 0);
 }
 
 SLresult ThreadPool_add_ppii(ThreadPool *tp, ClosureHandler_ppii handler,
         void *context1, void *context2, int parameter1, int parameter2)
 {
-    // note that no cast is needed for handler because it is already the right type
-    return ThreadPool_add(tp, CLOSURE_KIND_PPII, handler, context1, context2, parameter1,
-            parameter2);
+    // function pointers are the same size so this is a safe cast
+    return ThreadPool_add(tp, CLOSURE_KIND_PPII, (ClosureHandler_generic) handler,
+            context1, context2, NULL, parameter1, parameter2);
+}
+
+SLresult ThreadPool_add_piipp(ThreadPool *tp, ClosureHandler_piipp handler,
+        void *cntxt1, int param1, int param2, void *cntxt2, void *cntxt3)
+{
+    // function pointers are the same size so this is a safe cast
+    return ThreadPool_add(tp, CLOSURE_KIND_PIIPP, (ClosureHandler_generic) handler,
+            cntxt1, cntxt2, cntxt3, param1, param2);
 }
