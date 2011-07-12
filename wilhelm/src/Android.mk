@@ -152,23 +152,8 @@ LOCAL_SHARED_LIBRARIES :=         \
         libstagefright            \
         libstagefright_foundation \
         libcutils                 \
-        libgui
-
-ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
-        LOCAL_LDLIBS += -lpthread -ldl
-        LOCAL_SHARED_LIBRARIES += libdvm
-        LOCAL_CPPFLAGS += -DANDROID_SIMULATOR
-endif
-
-ifneq ($(TARGET_SIMULATOR),true)
-        LOCAL_SHARED_LIBRARIES += libdl
-else
-        LOCAL_CFLAGS += -DTARGET_SIMULATOR
-endif
-
-ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
-        LOCAL_LDLIBS += -lpthread
-endif
+        libgui                    \
+        libdl
 
 
 
