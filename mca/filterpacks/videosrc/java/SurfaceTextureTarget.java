@@ -15,7 +15,7 @@
  */
 
 
-package android.filterpacks.ui;
+package android.filterpacks.videosrc;
 
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
