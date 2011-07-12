@@ -438,3 +438,6 @@ extern LI_API SLresult liQuerySupportedInterfaces(SLuint32 index, SLInterfaceID 
 #define EnqueueAsyncCallback_ppii(object, handler, p1, p2, i1, i2) \
         ThreadPool_add_ppii(&(object)->mObject.mEngine->mThreadPool, \
             (ClosureHandler_ppii) (handler), (p1), (p2), (i1), (i2))
+#define EnqueueAsyncCallback_piipp(object, handler, p1, i1, i2, p2, p3) \
+        ThreadPool_add_piipp(&(object)->mObject.mEngine->mThreadPool, \
+            (ClosureHandler_piipp) (handler), (p1), (i1), (i2), (p2), (p3))
