@@ -89,12 +89,6 @@ public class SimpleFrameManager extends FrameManager {
     }
 
     @Override
-    public Frame duplicateFrame(Frame frame) {
-        // TODO
-        return null;
-    }
-
-    @Override
     public Frame retainFrame(Frame frame) {
         frame.incRefCount();
         return frame;

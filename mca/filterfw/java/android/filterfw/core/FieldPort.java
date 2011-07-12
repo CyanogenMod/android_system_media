@@ -40,16 +40,12 @@ public class FieldPort extends InputPort {
 
     @Override
     public void pushFrame(Frame frame) {
-        setFrame(frame);
+        setFieldFrame(frame, false);
     }
 
     @Override
     public void setFrame(Frame frame) {
-        assertPortIsOpen();
-        mValue = frame.getObjectValue();
-        if (!mHasFrame) {
-            mHasFrame = true;
-        }
+        setFieldFrame(frame, true);
     }
 
     @Override
@@ -79,7 +75,20 @@ public class FieldPort extends InputPort {
     }
 
     @Override
+    public boolean acceptsFrame() {
+        return mValue == null;
+    }
+
+    @Override
     public String toString() {
         return "field " + super.toString();
+    }
+
+    protected void setFieldFrame(Frame frame, boolean isAssignment) {
+        assertPortIsOpen();
+        checkFrameType(frame, isAssignment);
+
+        mValue = frame.getObjectValue();
+        mHasFrame = true;
     }
 }

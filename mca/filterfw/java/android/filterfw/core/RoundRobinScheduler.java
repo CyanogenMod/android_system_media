@@ -47,12 +47,13 @@ public class RoundRobinScheduler extends Scheduler {
         int firstNdx = -1;
         for (Filter filter : all_filters) {
             if (filter.canProcess()) {
-                if (pos <= mLastPos && first == null) {
-                    // store the first available filter
-                    first = filter;
-                    firstNdx = pos;
-                }
-                else {
+                if (pos <= mLastPos) {
+                    if (first == null) {
+                        // store the first available filter
+                        first = filter;
+                        firstNdx = pos;
+                    }
+                } else {
                     // return the next available filter since last
                     mLastPos = pos;
                     return filter;

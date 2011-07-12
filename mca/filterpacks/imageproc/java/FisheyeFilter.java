@@ -27,6 +27,7 @@ import android.filterfw.core.NativeProgram;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
+import android.filterfw.format.ImageFormat;
 
 import android.util.Log;
 
@@ -36,7 +37,7 @@ import java.util.Set;
 /**
  * @hide
  */
-public class FisheyeFilter extends SimpleImageFilter {
+public class FisheyeFilter extends Filter {
     private static final String TAG = "FisheyeFilter";
 
     // This parameter has range between 0 and 1. It controls the effect of radial distortion.
@@ -45,8 +46,11 @@ public class FisheyeFilter extends SimpleImageFilter {
     @GenerateFieldPort(name = "scale")
     private float mScale;
 
-    private float mWidth;
-    private float mHeight;
+    private Program mProgram;
+
+    private int mWidth = 0;
+    private int mHeight = 0;
+    private int mTarget = FrameFormat.TARGET_UNSPECIFIED;
 
     private static final String mFisheyeShader =
             "precision mediump float;\n" +
@@ -72,33 +76,84 @@ public class FisheyeFilter extends SimpleImageFilter {
             "}\n";
 
     public FisheyeFilter(String name) {
-        super(name, null);
+        super(name);
     }
 
     @Override
-    protected Program getNativeProgram() {
-        Program result = new NativeProgram("filterpack_imageproc", "fisheye");
-        initProgram(result);
-        return result;
+    public void setupPorts() {
+        addMaskedInputPort("image", ImageFormat.create(ImageFormat.COLORSPACE_RGBA));
+        addOutputBasedOnInput("image", "image");
     }
 
     @Override
-    protected Program getShaderProgram() {
-        Program result = new ShaderProgram(mFisheyeShader);
-        initProgram(result);
+    public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
+        return inputFormat;
+    }
 
-        return result;
+    public void initProgram(int target) {
+        switch (target) {
+            case FrameFormat.TARGET_GPU:
+                mProgram = new ShaderProgram(mFisheyeShader);
+                break;
+
+            default:
+                throw new RuntimeException("Filter FisheyeFilter does not support frames of " +
+                    "target " + target + "!");
+        }
+        mTarget = target;
+    }
+
+    @Override
+    public void process(FilterContext context) {
+        // Get input frame
+        Frame input = pullInput("image");
+        FrameFormat inputFormat = input.getFormat();
+
+        // Create output frame
+        Frame output = context.getFrameManager().newFrame(inputFormat);
+
+        // Create program if not created already
+        if (mProgram == null || inputFormat.getTarget() != mTarget) {
+            initProgram(inputFormat.getTarget());
+        }
+
+        // Check if the frame size has changed
+        if (inputFormat.getWidth() != mWidth || inputFormat.getHeight() != mHeight) {
+            updateFrameSize(inputFormat.getWidth(), inputFormat.getHeight());
+        }
+
+        // Process
+        mProgram.process(input, output);
+
+        // Push output
+        pushOutput("image", output);
+
+        // Release pushed frame
+        output.release();
     }
 
     @Override
     public void fieldPortValueUpdated(String name, FilterContext context) {
         if (mProgram != null) {
-            updateProgram(mProgram);
+            updateProgramParams();
         }
     }
 
-    private void updateProgram(Program program) {
-        float pi = 3.14159265f;
+    private void updateFrameSize(int width, int height) {
+        float center[] = {0.5f * width, 0.5f * height};
+
+        mProgram.setHostValue("center", center);
+        mProgram.setHostValue("inv_width", 1.0f / width);
+        mProgram.setHostValue("inv_height", 1.0f / height);
+
+        mWidth = width;
+        mHeight = height;
+
+        updateProgramParams();
+    }
+
+    private void updateProgramParams() {
+        final float pi = 3.14159265f;
 
         float alpha = mScale * 2.0f + 0.75f;
         float bound2 = 0.25f * (mWidth * mWidth  + mHeight * mHeight);
@@ -109,22 +164,10 @@ public class FisheyeFilter extends SimpleImageFilter {
             (float) Math.atan(alpha / bound * (float) Math.sqrt(radius2 - bound2));
         float factor = bound / max_radian;
 
-        program.setHostValue("radius2",radius2);
-        program.setHostValue("factor", factor);
-        program.setHostValue("alpha", (float) (mScale * 2.0 + 0.75));
+        mProgram.setHostValue("radius2",radius2);
+        mProgram.setHostValue("factor", factor);
+        mProgram.setHostValue("alpha", (float) (mScale * 2.0 + 0.75));
     }
 
-    private void initProgram(Program program) {
-        Frame input = pullInput("image");
-        mWidth = (float) input.getFormat().getWidth();
-        mHeight = (float) input.getFormat().getHeight();
-        float center[] = {0.5f * mWidth, 0.5f * mHeight};
-
-        program.setHostValue("center", center);
-        program.setHostValue("inv_width", 1.0f / mWidth);
-        program.setHostValue("inv_height", 1.0f / mHeight);
-
-        updateProgram(program);
-    }
 
 }

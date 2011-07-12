@@ -26,13 +26,15 @@ $(patsubst ./%,%, \
 endef
 
 # List of mobile filter framework source files to include in the public API/SDK.
-# 
+#
 #
 # $(1): directory for search (to support use from frameworks/base)
 define libfilterfw_to_document
  $(call libfilterfw-all-java-files-under,$(1),
    filterfw/java \
    filterpacks/imageproc/java \
+   filterpacks/numeric/java \
+   filterpacks/performance/java \
    filterpacks/text/java \
    filterpacks/ui/java \
    filterpacks/videosrc/java )

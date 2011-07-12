@@ -21,21 +21,25 @@ import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.SimpleFrameManager;
 
-import java.util.LinkedList;
-import java.util.ListIterator;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import android.util.Log;
 
 /**
  * @hide
  */
 public class CachedFrameManager extends SimpleFrameManager {
 
-    private LinkedList<Frame> mAvailableFrames;
-    private int mStorageCapacity = 32 * 1024 * 1024; // Cap default storage to 32MB
+    private SortedMap<Integer, Frame> mAvailableFrames;
+    private int mStorageCapacity = 24 * 1024 * 1024; // Cap default storage to 24MB
     private int mStorageSize = 0;
+    private int mTimeStamp = 0;
 
     public CachedFrameManager() {
         super();
-        mAvailableFrames = new LinkedList<Frame>();
+        mAvailableFrames = new TreeMap<Integer, Frame>();
     }
 
     @Override
@@ -54,12 +58,6 @@ public class CachedFrameManager extends SimpleFrameManager {
             result = super.newBoundFrame(format, bindingType, bindingId);
         }
         return result;
-    }
-
-    @Override
-    public Frame duplicateFrame(Frame frame) {
-        // TODO
-        return null;
     }
 
     @Override
@@ -87,22 +85,40 @@ public class CachedFrameManager extends SimpleFrameManager {
 
     private boolean storeFrame(Frame frame) {
         synchronized(mAvailableFrames) {
-            int newStorageSize = mStorageSize + frame.getFormat().getSize();
-            if (newStorageSize <= mStorageCapacity) {
-                mStorageSize = newStorageSize;
-                mAvailableFrames.add(frame);
-                return true;
+            // Make sure this frame alone does not exceed capacity
+            int frameSize = frame.getFormat().getSize();
+            if (frameSize > mStorageCapacity) {
+                return false;
             }
-            return false;
+
+            // Drop frames if adding this frame would exceed capacity
+            int newStorageSize = mStorageSize + frameSize;
+            while (newStorageSize > mStorageCapacity) {
+                dropOldestFrame();
+                newStorageSize = mStorageSize + frameSize;
+            }
+
+            // Store new frame
+            mStorageSize = newStorageSize;
+            mAvailableFrames.put(mTimeStamp, frame);
+            ++mTimeStamp;
+            return true;
         }
+    }
+
+    private void dropOldestFrame() {
+        int oldest = mAvailableFrames.firstKey();
+        Frame frame = mAvailableFrames.get(oldest);
+        mStorageSize -= frame.getFormat().getSize();
+        frame.dealloc();
+        mAvailableFrames.remove(oldest);
     }
 
     private Frame findAvailableFrame(FrameFormat format, int bindingType, long bindingId) {
         // Look for a frame that is compatible with the requested format
         synchronized(mAvailableFrames) {
-            ListIterator<Frame> iter = mAvailableFrames.listIterator();
-            while (iter.hasNext()) {
-                Frame frame = iter.next();
+            for (Map.Entry<Integer, Frame> entry : mAvailableFrames.entrySet()) {
+                Frame frame = entry.getValue();
                 // Check that format is compatible
                 if (frame.getFormat().isReplaceableBy(format)) {
                     // Check that binding is compatible (if frame is bound)
@@ -112,7 +128,7 @@ public class CachedFrameManager extends SimpleFrameManager {
                         // We found one! Take it out of the set of available frames and attach the
                         // requested format to it.
                         super.retainFrame(frame);
-                        iter.remove();
+                        mAvailableFrames.remove(entry.getKey());
                         frame.reset(format);
                         mStorageSize -= format.getSize();
                         return frame;

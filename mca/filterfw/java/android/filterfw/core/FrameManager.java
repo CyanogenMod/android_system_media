@@ -30,7 +30,11 @@ public abstract class FrameManager {
 
     public abstract Frame newBoundFrame(FrameFormat format, int bindingType, long bindingId);
 
-    public abstract Frame duplicateFrame(Frame frame);
+    public Frame duplicateFrame(Frame frame) {
+        Frame result = newFrame(frame.getFormat());
+        result.setDataFromFrame(frame);
+        return result;
+    }
 
     public Frame duplicateFrameToTarget(Frame frame, int newTarget) {
         MutableFrameFormat newFormat = frame.getFormat().mutableCopy();

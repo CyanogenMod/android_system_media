@@ -29,11 +29,13 @@ public class FinalPort extends FieldPort {
     }
 
     @Override
-    public void setFrame(Frame frame) {
+    protected void setFieldFrame(Frame frame, boolean isAssignment) {
+        assertPortIsOpen();
+        checkFrameType(frame, isAssignment);
         if (mFilter.getStatus() != Filter.STATUS_PREINIT) {
             throw new RuntimeException("Attempting to modify " + this + "!");
         } else {
-            super.setFrame(frame);
+            super.setFieldFrame(frame, isAssignment);
             super.transfer(null);
         }
     }

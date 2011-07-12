@@ -316,7 +316,6 @@ bool GLFrame::BindTextureToFBO() {
     return true;
 
   // Otherwise check if the texture and fbo states are acceptable
-  // TODO: Is it okay to bind an FBO to a texture that has been allocated with pixels???
   if (texture_state_ != kStateGenerated
   && texture_state_ != kStateAllocated
   && fbo_state_ != kStateGenerated)
@@ -362,15 +361,6 @@ bool GLFrame::BindTextureToFBO() {
 }
 
 bool GLFrame::UploadTexturePixels(const uint8_t* pixels) {
-  if (fbo_state_ == kStateBound) {
-    // Get rid of FBO
-    // TODO: Is this necessary? Can we just leave the FBO?
-    glDeleteFramebuffers(1, &fbo_id_);
-    fbo_state_ = kStateUninitialized;
-    if (GLEnv::CheckGLError("Releasing FBO"))
-      return false;
-  }
-
   // Bind the texture object
   FocusTexture();
 

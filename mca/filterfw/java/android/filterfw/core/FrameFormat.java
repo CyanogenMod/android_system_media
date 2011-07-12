@@ -247,8 +247,63 @@ public class FrameFormat {
     }
 
     public boolean mayBeCompatibleWith(FrameFormat specification) {
-        // TODO
-        return false;
+        // Check base type
+        if (specification.getBaseType() != TYPE_UNSPECIFIED
+            && getBaseType() != TYPE_UNSPECIFIED
+            && getBaseType() != specification.getBaseType()) {
+            return false;
+        }
+
+        // Check target
+        if (specification.getTarget() != TARGET_UNSPECIFIED
+            && getTarget() != TARGET_UNSPECIFIED
+            && getTarget() != specification.getTarget()) {
+            return false;
+        }
+
+        // Check bytes per sample
+        if (specification.getBytesPerSample() != BYTES_PER_SAMPLE_UNSPECIFIED
+            && getBytesPerSample() != BYTES_PER_SAMPLE_UNSPECIFIED
+            && getBytesPerSample() != specification.getBytesPerSample()) {
+            return false;
+        }
+
+        // Check number of dimensions
+        if (specification.getDimensionCount() > 0
+            && getDimensionCount() > 0
+            && getDimensionCount() != specification.getDimensionCount()) {
+            return false;
+        }
+
+        // Check dimensions
+        for (int i = 0; i < specification.getDimensionCount(); ++i) {
+            int specDim = specification.getDimension(i);
+            if (specDim != SIZE_UNSPECIFIED
+                && getDimension(i) != SIZE_UNSPECIFIED
+                && getDimension(i) != specDim) {
+                return false;
+            }
+        }
+
+        // Check class
+        if (specification.getObjectClass() != null && getObjectClass() != null) {
+            if (!specification.getObjectClass().isAssignableFrom(getObjectClass())) {
+                return false;
+            }
+        }
+
+        // Check meta-data
+        if (specification.mMetaData != null && mMetaData != null) {
+            for (String specKey : specification.mMetaData.keySet()) {
+                if (mMetaData.containsKey(specKey)
+                    && !mMetaData.get(specKey).equals(specification.mMetaData.get(specKey))) {
+                    return false;
+                }
+            }
+        }
+
+        // Passed all the tests
+        return true;
     }
 
     public static int bytesPerSampleOf(int baseType) {
@@ -348,10 +403,15 @@ public class FrameFormat {
         int valuesPerSample = getValuesPerSample();
         String sampleCountString = valuesPerSample == 1 ? "" : String.valueOf(valuesPerSample);
         String targetString = mTarget == TARGET_UNSPECIFIED ? "" : (targetToString(mTarget) + " ");
+        String classString = mObjectClass == null
+            ? ""
+            : ("class(" + mObjectClass.getSimpleName() + ") ");
+
         return targetString
             + baseTypeToString(mBaseType)
             + sampleCountString
             + dimensionsToString(mDimensions)
+            + classString
             + metaDataToString(mMetaData);
     }
 
@@ -372,6 +432,8 @@ public class FrameFormat {
     }
 
     boolean isReplaceableBy(FrameFormat format) {
-        return mTarget == format.mTarget && getSize() == format.getSize();
+        return mTarget == format.mTarget
+            && getSize() == format.getSize()
+            && Arrays.equals(format.mDimensions, mDimensions);
     }
 }

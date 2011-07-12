@@ -25,6 +25,11 @@ typedef struct {
   float brightness;
 } BrightnessParameters;
 
+typedef union {
+    int value;
+    char rgba[4];
+} Pixel;
+
 void brightness_init(void** user_data) {
   (*user_data) = malloc(sizeof(BrightnessParameters));
 }
@@ -59,8 +64,9 @@ int brightness_process(const char** inputs,
   }
 
   // Get the input and output pointers
-  const char* input_ptr = inputs[0];
-  char* output_ptr = output;
+  const int* input_ptr = (int*)inputs[0];
+  int* output_ptr = (int*)output;
+  const int* end_ptr = input_ptr + (output_size / 4);
   if (!input_ptr || !output_ptr) {
     LOGE("Brightness: No input or output pointer found!");
     return 0;
@@ -71,12 +77,19 @@ int brightness_process(const char** inputs,
   const float brightness = params->brightness;
 
   // Run the brightness adjustment
-  int i;
-  const int b = (int)(brightness * 255.0f);
-  int val = 0;
-  for (i = 0; i < output_size; ++i) {
-    val = (*(input_ptr++) * b) / 255;
-    *(output_ptr++) = val > 255 ? 255 : val;
+  const int factor = (int)(brightness * 255.0f);
+  Pixel pixel;
+  while (input_ptr < end_ptr) {
+    pixel.value = *(input_ptr++);
+
+    const short r = (pixel.rgba[0] * factor) / 255;
+    const short g = (pixel.rgba[1] * factor) / 255;
+    const short b = (pixel.rgba[2] * factor) / 255;
+
+    *(output_ptr++) = (r > 255 ? 255 : r)
+                    | ((g > 255 ? 255 : g) << 8)
+                    | ((b > 255 ? 255 : b) << 16)
+                    | (pixel.rgba[3] << 24);
   }
 
   return 1;
