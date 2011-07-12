@@ -171,6 +171,7 @@ static SLresult IPlay_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
                 thiz->mDuration = duration;
             }
         }
+        //FIXME support GetDuration for XA_OBJECTID_MEDIAPLAYER
 #else
         // will be set by containing AudioPlayer or MidiPlayer object at Realize, if known,
         // otherwise the duration will be updated each time a new maximum position is detected
@@ -194,12 +195,18 @@ static SLresult IPlay_GetPosition(SLPlayItf self, SLmillisecond *pMsec)
         SLmillisecond position;
         interface_lock_shared(thiz);
 #ifdef ANDROID
-        // Android does not use the mPosition field for audio players
-        if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+        // Android does not use the mPosition field for audio and media players
+        //  and doesn't cache the position
+        switch (IObjectToObjectID((thiz)->mThis)) {
+          case SL_OBJECTID_AUDIOPLAYER:
             android_audioPlayer_getPosition(thiz, &position);
-            // note that we do not cache the position
-        } else {
-            position = thiz->mPosition;
+            break;
+          case XA_OBJECTID_MEDIAPLAYER:
+            android_Player_getPosition(thiz, &position);
+            break;
+          default:
+            // we shouldn'be here
+            assert(SL_BOOLEAN_FALSE);
         }
 #else
         // on other platforms we depend on periodic updates to the current position

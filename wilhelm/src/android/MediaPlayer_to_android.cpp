@@ -31,7 +31,7 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
     }
 
     CMediaPlayer* mp = (CMediaPlayer*) user;
-    //SL_LOGV("received event %d, data %d from AVPlayer", event, data1);
+    SL_LOGV("received event %d, data %d from AVPlayer", event, data1);
 
     switch(event) {
 
@@ -316,20 +316,50 @@ XAresult android_Player_getDuration(IPlay *pPlayItf, XAmillisecond *pDurMsec) {
 
     case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: // intended fall-through
     case AUDIOVIDEOPLAYER_FROM_URIFD: {
-        // FIXME implement for a MediaPlayer playing on URI or FD (on LocAVPlayer, returns -1)
         int dur = -1;
         if (avp->mAVPlayer != 0) {
             avp->mAVPlayer->getDurationMsec(&dur);
         }
-        if (dur < 0) {
-            *pDurMsec = SL_TIME_UNKNOWN;
+        if (dur == ANDROID_UNKNOWN_TIME) {
+            *pDurMsec = XA_TIME_UNKNOWN;
         } else {
             *pDurMsec = (XAmillisecond)dur;
         }
     } break;
 
     default:
-        *pDurMsec = XA_TIME_UNKNOWN;
+        // we shouldn't be here
+        assert(false);
+        break;
+    }
+
+    return result;
+}
+
+
+XAresult android_Player_getPosition(IPlay *pPlayItf, XAmillisecond *pPosMsec) {
+    SL_LOGD("android_Player_getPosition()");
+    XAresult result = XA_RESULT_SUCCESS;
+    CMediaPlayer *avp = (CMediaPlayer *)pPlayItf->mThis;
+
+    switch (avp->mAndroidObjType) {
+
+    case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: // intended fall-through
+    case AUDIOVIDEOPLAYER_FROM_URIFD: {
+        int pos = -1;
+        if (avp->mAVPlayer != 0) {
+            avp->mAVPlayer->getPositionMsec(&pos);
+        }
+        if (pos == ANDROID_UNKNOWN_TIME) {
+            *pPosMsec = XA_TIME_UNKNOWN;
+        } else {
+            *pPosMsec = (XAmillisecond)pos;
+        }
+    } break;
+
+    default:
+        // we shouldn't be here
+        assert(false);
         break;
     }
 

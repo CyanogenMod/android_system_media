@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-//#define USE_LOG SLAndroidLogLevel_Verbose
+#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
 #include "android_GenericMediaPlayer.h"
@@ -118,6 +118,7 @@ GenericMediaPlayer::~GenericMediaPlayer() {
 }
 
 void GenericMediaPlayer::preDestroy() {
+    SL_LOGD("GenericMediaPlayer::preDestroy()");
     // we might be in the middle of blocking for a getXXX call
     {
         android::Mutex::Autolock autoLock(mGetMediaPlayerInfoLock);

@@ -47,7 +47,14 @@ extern XAresult android_Player_setVideoSurfaceTexture(
         const android::sp<android::GenericPlayer> &gp,
         const android::sp<android::ISurfaceTexture> &surfaceTexture);
 
+/**
+ * pre-conditions:
+ *    pPlayItf != NULL
+ *    pDurMsec, pPosMsec ! = NULL
+ *    IObjectToObjectID( ((IPlay *) self)->mThis ) == XA_OBJECTID_MEDIAPLAYER
+ */
 extern XAresult android_Player_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
+extern XAresult android_Player_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
 
 /**
  * pre-condition: gp != 0, pVolItf != NULL

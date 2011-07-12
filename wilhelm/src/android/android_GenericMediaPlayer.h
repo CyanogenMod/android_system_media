@@ -17,7 +17,7 @@
 #ifndef __ANDROID_GENERICMEDIAPLAYER_H__
 #define __ANDROID_GENERICMEDIAPLAYER_H__
 
-#include "android_GenericMediaPlayer.h"
+#include "android_GenericPlayer.h"
 
 #include <binder/IServiceManager.h>
 #include <surfaceflinger/Surface.h>
