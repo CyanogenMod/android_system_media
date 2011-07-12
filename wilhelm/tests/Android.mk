@@ -1,6 +1,4 @@
 # Build the unit tests.
-ifneq ($(TARGET_SIMULATOR),true)
-
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -37,6 +35,5 @@ $(foreach file,$(test_src_files), \
     $(eval include $(BUILD_EXECUTABLE)) \
 )
 
-endif
 # Build the manual test programs.
 include $(call all-makefiles-under,$(LOCAL_PATH))
