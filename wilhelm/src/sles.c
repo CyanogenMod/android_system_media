@@ -269,8 +269,7 @@ extern void
     IVibra_init(void *),
     IVirtualizer_init(void *),
     IVisualization_init(void *),
-    IVolume_init(void *),
-    IStreamInformation_init(void*);
+    IVolume_init(void *);
 
 extern void
     I3DGrouping_deinit(void *),
@@ -285,8 +284,7 @@ extern void
     IObject_deinit(void *),
     IPresetReverb_deinit(void *),
     IThreadSync_deinit(void *),
-    IVirtualizer_deinit(void *),
-    IStreamInformation_deinit(void *);
+    IVirtualizer_deinit(void *);
 
 extern bool
     IAndroidEffectCapabilities_Expose(void *),
@@ -297,10 +295,17 @@ extern bool
     IVirtualizer_Expose(void *);
 
 extern void
-    IXAEngine_init(void *);
+    IXAEngine_init(void *),
+    IStreamInformation_init(void*),
+    IVideoDecoderCapabilities_init(void *);
 
 extern void
-    IXAEngine_deinit(void *);
+    IXAEngine_deinit(void *),
+    IStreamInformation_deinit(void *),
+    IVideoDecoderCapabilities_deinit(void *);
+
+extern bool
+    IVideoDecoderCapabilities_expose(void *);
 
 #if !(USE_PROFILES & USE_PROFILES_MUSIC)
 #define IDynamicSource_init         NULL
@@ -458,7 +463,8 @@ extern void
         NULL, NULL },
     { /* MPH_XATHREADSYNC */ NULL, NULL, NULL, NULL, NULL },
     { /* MPH_XAVIBRA */ NULL, NULL, NULL, NULL, NULL },
-    { /* MPH_XAVIDEODECODERCAPABILITIES */ NULL, NULL, NULL, NULL, NULL },
+    { /* MPH_XAVIDEODECODERCAPABILITIES */ IVideoDecoderCapabilities_init, NULL,
+            IVideoDecoderCapabilities_deinit, IVideoDecoderCapabilities_expose, NULL },
     { /* MPH_XAVIDEOENCODER */ NULL, NULL, NULL, NULL, NULL },
     { /* MPH_XAVIDEOENCODERCAPABILITIES */ NULL, NULL, NULL, NULL, NULL },
     { /* MPH_XAVIDEOPOSTPROCESSING */ NULL, NULL, NULL, NULL, NULL },

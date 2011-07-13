@@ -51,6 +51,9 @@ typedef struct {
 #define MAX_DECODERS 9 ///< (sizeof(Decoder_IDs) / sizeof(Decoder_IDs[0]))
 #define MAX_ENCODERS 9 ///< (sizeof(Encoder_IDs) / sizeof(Encoder_IDs[0]))
 
+extern const XAuint32 *VideoDecoderIds;
+extern const XAuint32 kMaxVideoDecoders;
+
 // For now, but encoders might be different than decoders later
 extern const SLuint32 *Decoder_IDs, *Encoder_IDs;
 
