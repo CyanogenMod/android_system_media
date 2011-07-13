@@ -42,6 +42,9 @@ public class BitmapSource extends Filter {
     @GenerateFieldPort(name = "bitmap")
     private Bitmap mBitmap;
 
+    @GenerateFieldPort(name = "recycleBitmap", hasDefault = true)
+    private boolean mRecycleBitmap = true;
+
     @GenerateFieldPort(name = "repeatFrame", hasDefault = true)
     boolean mRepeatFrame = false;
 
@@ -64,6 +67,7 @@ public class BitmapSource extends Filter {
     }
 
     public void loadImage(FilterContext filterContext) {
+        // Create frame with bitmap
         mTarget = FrameFormat.readTargetString(mTargetString);
         FrameFormat outputFormat = ImageFormat.create(mBitmap.getWidth(),
                                                       mBitmap.getHeight(),
@@ -72,6 +76,11 @@ public class BitmapSource extends Filter {
         mImageFrame = filterContext.getFrameManager().newFrame(outputFormat);
         mImageFrame.setBitmap(mBitmap);
         mImageFrame.setTimestamp(Frame.TIMESTAMP_UNKNOWN);
+
+        // Free up space used by bitmap
+        if (mRecycleBitmap) {
+            mBitmap.recycle();
+        }
         mBitmap = null;
     }
 

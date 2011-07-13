@@ -25,7 +25,6 @@ import android.filterfw.core.StopWatchMap;
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.graphics.Rect;
-import android.util.Log;
 
 import java.nio.ByteBuffer;
 
@@ -100,13 +99,10 @@ public class GLFrame extends Frame {
 
     private void initNew(boolean isExternal) {
         if (isExternal) {
-            Log.v("GLFrame", "Allocating external texture!");
             if (!allocateExternal()) {
                 throw new RuntimeException("Could not allocate external GL frame!");
             }
         } else {
-            Log.v("GLFrame", "Allocating texture (" + getFormat().getWidth() + " x "
-                    + getFormat().getHeight() + ")!");
             if (!allocate(getFormat().getWidth(), getFormat().getHeight())) {
                 throw new RuntimeException("Could not allocate GL frame!");
             }

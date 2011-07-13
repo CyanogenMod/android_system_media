@@ -152,8 +152,18 @@ public abstract class Filter {
     }
 
     public final void setInputValue(String inputName, Object value) {
-        if (mLogVerbose) Log.v(TAG, "Setting deferred value " + value + " for input '" + inputName + "'!");
-        setInputFrame(inputName, JavaFrame.wrapObject(value, null));
+        // Wrap the value in a Java frame
+        MutableFrameFormat inputFormat = ObjectFormat.fromObject(value, FrameFormat.TARGET_JAVA);
+        if (value == null) {
+            // If the value is null, the format cannot guess the class, so we adjust it to the
+            // class of the input port here
+            FrameFormat portFormat = getInputPort(inputName).getPortFormat();
+            Class portClass = (portFormat == null) ? null : portFormat.getObjectClass();
+            inputFormat.setObjectClass(portClass);
+        }
+        JavaFrame frame = new JavaFrame(inputFormat, null);
+        frame.setObjectValue(value);
+        setInputFrame(inputName, frame);
     }
 
     protected void prepare(FilterContext context) {

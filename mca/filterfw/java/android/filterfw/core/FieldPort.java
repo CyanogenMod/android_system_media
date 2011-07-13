@@ -26,6 +26,7 @@ public class FieldPort extends InputPort {
 
     protected Field mField;
     protected boolean mHasFrame;
+    protected boolean mValueWaiting = false;
     protected Object mValue;
 
     public FieldPort(Filter filter, String name, Field field, boolean hasDefault) {
@@ -50,14 +51,14 @@ public class FieldPort extends InputPort {
 
     @Override
     public void transfer(FilterContext context) {
-        if (mValue != null) {
+        if (mValueWaiting) {
             try {
                 mField.set(mFilter, mValue);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(
                     "Access to field '" + mField.getName() + "' was denied!");
             }
-            mValue = null;
+            mValueWaiting = false;
             if (context != null) {
                 mFilter.notifyFieldPortValueUpdated(mName, context);
             }
@@ -76,7 +77,7 @@ public class FieldPort extends InputPort {
 
     @Override
     public boolean acceptsFrame() {
-        return mValue == null;
+        return !mValueWaiting;
     }
 
     @Override
@@ -88,7 +89,14 @@ public class FieldPort extends InputPort {
         assertPortIsOpen();
         checkFrameType(frame, isAssignment);
 
-        mValue = frame.getObjectValue();
+        // Store the object value
+        Object value = frame.getObjectValue();
+        if (value != mValue) {
+            mValue = value;
+            mValueWaiting = true;
+        }
+
+        // Since a frame was set, mark this port as having a frame to pull
         mHasFrame = true;
     }
 }

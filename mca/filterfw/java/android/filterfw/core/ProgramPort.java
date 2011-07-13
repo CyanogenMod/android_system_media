@@ -42,13 +42,13 @@ public class ProgramPort extends FieldPort {
 
     @Override
     public void transfer(FilterContext context) {
-        if (mValue != null) {
+        if (mValueWaiting) {
             try {
                 Object fieldValue = mField.get(mFilter);
                 if (fieldValue != null) {
                     Program program = (Program)fieldValue;
                     program.setHostValue(mVarName, mValue);
-                    mValue = null;
+                    mValueWaiting = false;
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(

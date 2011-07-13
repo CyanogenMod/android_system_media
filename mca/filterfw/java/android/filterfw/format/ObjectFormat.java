@@ -42,11 +42,15 @@ public class ObjectFormat {
     }
 
     public static MutableFrameFormat fromObject(Object object, int target) {
-        return fromClass(object.getClass(), FrameFormat.SIZE_UNSPECIFIED, target);
+        return object == null
+            ? new MutableFrameFormat(FrameFormat.TYPE_OBJECT, target)
+            : fromClass(object.getClass(), FrameFormat.SIZE_UNSPECIFIED, target);
     }
 
     public static MutableFrameFormat fromObject(Object object, int count, int target) {
-        return fromClass(object.getClass(), count, target);
+        return object == null
+            ? new MutableFrameFormat(FrameFormat.TYPE_OBJECT, target)
+            : fromClass(object.getClass(), count, target);
     }
 
     private static int bytesPerSampleForClass(Class clazz, int target) {
