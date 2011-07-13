@@ -23,7 +23,6 @@
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
 #include "NuCachedSource2.h"
-#include "NuHTTPDataSource.h"
 #include "ThrottledSource.h"
 
 #include "android_GenericPlayer.h"
