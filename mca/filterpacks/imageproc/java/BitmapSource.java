@@ -36,7 +36,7 @@ import android.graphics.Bitmap;
  */
 public class BitmapSource extends Filter {
 
-    @GenerateFinalPort(name = "target")
+    @GenerateFieldPort(name = "target")
     String mTargetString;
 
     @GenerateFieldPort(name = "bitmap")
@@ -56,14 +56,15 @@ public class BitmapSource extends Filter {
     @Override
     public void setupPorts() {
         // Setup output format
-        mTarget = FrameFormat.readTargetString(mTargetString);
-        FrameFormat outputFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA, mTarget);
+        FrameFormat outputFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
+                                                      FrameFormat.TARGET_UNSPECIFIED);
 
         // Add output port
         addOutputPort("image", outputFormat);
     }
 
     public void loadImage(FilterContext filterContext) {
+        mTarget = FrameFormat.readTargetString(mTargetString);
         FrameFormat outputFormat = ImageFormat.create(mBitmap.getWidth(),
                                                       mBitmap.getHeight(),
                                                       ImageFormat.COLORSPACE_RGBA,

@@ -29,7 +29,7 @@ public class ObjectFormat {
     public static MutableFrameFormat fromClass(Class clazz, int count, int target) {
         // Create frame format
         MutableFrameFormat result = new MutableFrameFormat(FrameFormat.TYPE_OBJECT, target);
-        result.setObjectClass(clazz);
+        result.setObjectClass(getBoxedClass(clazz));
         if (count != FrameFormat.SIZE_UNSPECIFIED) {
             result.setDimensions(count);
         }
@@ -66,6 +66,36 @@ public class ObjectFormat {
             }
         } else {
             return FrameFormat.BYTES_PER_SAMPLE_UNSPECIFIED;
+        }
+    }
+
+    private static Class getBoxedClass(Class type) {
+        // Check if type is primitive
+        if (type.isPrimitive()) {
+            // Yes -> box it
+            if (type == boolean.class) {
+                return java.lang.Boolean.class;
+            } else if (type == byte.class) {
+                return java.lang.Byte.class;
+            } else if (type == char.class) {
+                return java.lang.Character.class;
+            } else if (type == short.class) {
+                return java.lang.Short.class;
+            } else if (type == int.class) {
+                return java.lang.Integer.class;
+            } else if (type == long.class) {
+                return java.lang.Long.class;
+            } else if (type == float.class) {
+                return java.lang.Float.class;
+            } else if (type == double.class) {
+                return java.lang.Double.class;
+            } else {
+                throw new IllegalArgumentException(
+                    "Unknown primitive type: " + type.getSimpleName() + "!");
+            }
+        } else {
+            // No -> return it
+            return type;
         }
     }
 }

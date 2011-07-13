@@ -49,6 +49,8 @@ public class StreamPort extends InputPort {
 
     private void assignFrame(Frame frame, boolean persistent) {
         assertPortIsOpen();
+        checkFrameType(frame, persistent);
+
         if (persistent) {
             if (mFrame != null) {
                 mFrame.release();

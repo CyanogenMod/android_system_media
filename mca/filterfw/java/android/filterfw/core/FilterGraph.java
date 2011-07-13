@@ -46,8 +46,13 @@ public class FilterGraph {
     public static final int AUTOBRANCH_SYNCED   = 1;
     public static final int AUTOBRANCH_UNSYNCED = 2;
 
+    public static final int TYPECHECK_OFF       = 0;
+    public static final int TYPECHECK_DYNAMIC   = 1;
+    public static final int TYPECHECK_STRICT    = 2;
+
     private boolean mIsReady = false;
     private int mAutoBranchMode = AUTOBRANCH_OFF;
+    private int mTypeCheckMode = TYPECHECK_STRICT;
     private boolean mDiscardUnconnectedOutputs = false;
 
     private boolean mLogVerbose;
@@ -125,6 +130,12 @@ public class FilterGraph {
         mIsReady = true;
     }
 
+    public void flushFrames() {
+        for (Filter filter : mFilters) {
+            filter.clearOutputs();
+        }
+    }
+
     public void closeFilters(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Closing all filters...");
         for (Filter filter : mFilters) {
@@ -145,6 +156,10 @@ public class FilterGraph {
         mDiscardUnconnectedOutputs = discard;
     }
 
+    public void setTypeCheckMode(int typeCheckMode) {
+        mTypeCheckMode = typeCheckMode;
+    }
+
     private boolean readyForProcessing(Filter filter, Set<Filter> processed) {
         // Check if this has been already processed
         if (processed.contains(filter)) {
@@ -161,7 +176,7 @@ public class FilterGraph {
         return true;
     }
 
-    private void runTypeCheck(boolean strict) {
+    private void runTypeCheck() {
         Stack<Filter> filterStack = new Stack<Filter>();
         Set<Filter> processedFilters = new HashSet<Filter>();
         filterStack.addAll(getSourceFilters());
@@ -176,7 +191,7 @@ public class FilterGraph {
 
             // Perform type check
             if (mLogVerbose) Log.v(TAG, "Running type check on " + filter + "...");
-            runTypeCheckOn(filter, strict);
+            runTypeCheckOn(filter);
 
             // Push connected filters onto stack
             for (OutputPort port : filter.getOutputPorts()) {
@@ -209,15 +224,29 @@ public class FilterGraph {
         }
     }
 
-    private void runTypeCheckOn(Filter filter, boolean strict) {
+    private void runTypeCheckOn(Filter filter) {
         for (InputPort inputPort : filter.getInputPorts()) {
             if (mLogVerbose) Log.v(TAG, "Type checking port " + inputPort);
             FrameFormat sourceFormat = inputPort.getSourceFormat();
             FrameFormat targetFormat = inputPort.getPortFormat();
             if (sourceFormat != null && targetFormat != null) {
                 if (mLogVerbose) Log.v(TAG, "Checking " + sourceFormat + " against " + targetFormat + ".");
-                boolean compatible = strict ? sourceFormat.isCompatibleWith(targetFormat)
-                                            : sourceFormat.mayBeCompatibleWith(targetFormat);
+
+                boolean compatible = true;
+                switch (mTypeCheckMode) {
+                    case TYPECHECK_OFF:
+                        inputPort.setChecksType(false);
+                        break;
+                    case TYPECHECK_DYNAMIC:
+                        compatible = sourceFormat.mayBeCompatibleWith(targetFormat);
+                        inputPort.setChecksType(true);
+                        break;
+                    case TYPECHECK_STRICT:
+                        compatible = sourceFormat.isCompatibleWith(targetFormat);
+                        inputPort.setChecksType(false);
+                        break;
+                }
+
                 if (!compatible) {
                     throw new RuntimeException("Type mismatch: Filter " + filter + " expects a "
                         + "format of type " + targetFormat + " but got a format of type "
@@ -317,7 +346,7 @@ public class FilterGraph {
         }
         connectPorts();
         checkConnections();
-        runTypeCheck(true); // TODO: allow non-strict type-checking
+        runTypeCheck();
     }
 
     void tearDownFilters(FilterContext context) {

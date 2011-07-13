@@ -48,6 +48,7 @@ public class ProgramPort extends FieldPort {
                 if (fieldValue != null) {
                     Program program = (Program)fieldValue;
                     program.setHostValue(mVarName, mValue);
+                    mValue = null;
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(

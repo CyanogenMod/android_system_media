@@ -23,7 +23,7 @@ import android.filterfw.core.FilterGraph;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.FrameManager;
 import android.filterfw.core.GraphRunner;
-import android.filterfw.core.SimpleScheduler;
+import android.filterfw.core.RoundRobinScheduler;
 import android.filterfw.core.SyncRunner;
 import android.filterfw.io.GraphIOException;
 import android.filterfw.io.GraphReader;
@@ -66,7 +66,7 @@ public class GraphEnvironment extends MffEnvironment {
 
         public AsyncRunner getAsyncRunner(FilterContext environment) {
             if (mAsyncRunner == null) {
-                mAsyncRunner = new AsyncRunner(environment, SimpleScheduler.class);
+                mAsyncRunner = new AsyncRunner(environment, RoundRobinScheduler.class);
                 mAsyncRunner.setGraph(mGraph);
             }
             return mAsyncRunner;
@@ -74,7 +74,7 @@ public class GraphEnvironment extends MffEnvironment {
 
         public GraphRunner getSyncRunner(FilterContext environment) {
             if (mSyncRunner == null) {
-                mSyncRunner = new SyncRunner(environment, mGraph, SimpleScheduler.class);
+                mSyncRunner = new SyncRunner(environment, mGraph, RoundRobinScheduler.class);
             }
             return mSyncRunner;
         }

@@ -73,6 +73,10 @@ public abstract class InputPort extends FilterPort {
         return hasFrame() || !isBlocking();
     }
 
+    public boolean acceptsFrame() {
+        return !hasFrame();
+    }
+
     public void transfer(FilterContext context) {
     }
 }

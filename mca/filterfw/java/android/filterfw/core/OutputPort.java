@@ -76,7 +76,7 @@ public class OutputPort extends FilterPort {
     }
 
     public boolean isReady() {
-        return (isOpen() && !hasFrame()) || !isBlocking();
+        return (isOpen() && mTargetPort.acceptsFrame()) || !isBlocking();
     }
 
     @Override

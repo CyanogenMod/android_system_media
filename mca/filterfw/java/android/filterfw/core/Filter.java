@@ -544,7 +544,7 @@ public abstract class Filter {
     }
 
     synchronized final boolean canProcess() {
-        if (mLogVerbose) Log.v(TAG, "Checking if can process: " + this + ".");
+        if (mLogVerbose) Log.v(TAG, "Checking if can process: " + this + " (" + mStatus + ").");
         if (mStatus <= STATUS_PROCESSING) {
             return inputConditionsMet() && outputConditionsMet();
         } else {
@@ -558,6 +558,12 @@ public abstract class Filter {
             if (!outputPort.isOpen()) {
                 outputPort.open();
             }
+        }
+    }
+
+    final void clearOutputs() {
+        for (OutputPort outputPort : mOutputPorts.values()) {
+            outputPort.clear();
         }
     }
 

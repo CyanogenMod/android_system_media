@@ -31,6 +31,7 @@ public abstract class FilterPort {
     protected FrameFormat mPortFormat;
     protected boolean mIsBlocking = true;
     protected boolean mIsOpen = false;
+    protected boolean mChecksType = false;
     private boolean mLogVerbose;
     private static final String TAG = "FilterPort";
 
@@ -62,6 +63,10 @@ public abstract class FilterPort {
 
     public void setBlocking(boolean blocking) {
         mIsBlocking = blocking;
+    }
+
+    public void setChecksType(boolean checksType) {
+        mChecksType = checksType;
     }
 
     public void open() {
@@ -109,4 +114,14 @@ public abstract class FilterPort {
             throw new RuntimeException("Illegal operation on closed " + this + "!");
         }
     }
+
+    protected void checkFrameType(Frame frame, boolean forceCheck) {
+        if ((mChecksType || forceCheck)
+            && mPortFormat != null
+            && !frame.getFormat().isCompatibleWith(mPortFormat)) {
+            throw new RuntimeException("Frame passed to " + this + " is of incorrect type! "
+                + "Expected " + mPortFormat + " but got " + frame.getFormat());
+        }
+    }
 }
+
