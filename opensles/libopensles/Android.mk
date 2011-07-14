@@ -122,6 +122,10 @@ LOCAL_C_INCLUDES += \
     frameworks/base/include/media/stagefright/openmax
 
 LOCAL_CFLAGS += -x c++ -Wno-multichar -Wno-invalid-offsetof
+# Needed when building for x86
+ifeq ($(TARGET_ARCH),x86)
+LOCAL_CFLAGS += -fno-rtti -fno-exceptions
+endif
 
 LOCAL_STATIC_LIBRARIES += \
         libopensles_helper        \
