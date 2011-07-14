@@ -397,108 +397,26 @@ public abstract class Filter {
         getOutputPort(name).close();
     }
 
-/*
-    protected final Field getParameterField(String name) {
-        // TODO: Add cache
-        Class filterClass = getClass();
-        FilterParameter param;
-        for (Field field : filterClass.getDeclaredFields()) {
-            if ((param = field.getAnnotation(FilterParameter.class)) != null) {
-                String paramName = param.name().isEmpty() ? field.getName() : param.name();
-                if (name.equals(paramName)) {
-                    return field;
-                }
-            }
-        }
-        return null;
+    /**
+     * Specifies whether the filter should not be scheduled until a frame is available on that
+     * input port. Note, that setting this to false, does not block a new frame from coming in
+     * (though there is no necessity to pull that frame for processing).
+     * @param portName the name of the input port.
+     * @param waits true, if the filter should wait for a frame on this port.
+     */
+    protected void setWaitsOnInputPort(String portName, boolean waits) {
+        getInputPort(portName).setBlocking(waits);
     }
 
-    protected final ProgramVariable getProgramVariable(String name) {
-        // TODO: Add cache
-        Class filterClass = getClass();
-        for (Field field : filterClass.getDeclaredFields()) {
-            ProgramParameter[] params = getProgramParameters(field);
-            for (ProgramParameter param : params) {
-                String varName = param.name();
-                String exposedName = param.exposedName().isEmpty() ? varName : param.exposedName();
-                if (name.equals(exposedName)) {
-                    field.setAccessible(true);
-                    try {
-                        return new ProgramVariable((Program)field.get(this), varName);
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(
-                            "Access to field '" + field.getName() + "' was denied!");
-                    } catch (ClassCastException e) {
-                        throw new RuntimeException(
-                            "Non Program field '" + field.getName() + "' annotated with "
-                            + " ProgramParameter!");
-                    }
-                }
-            }
-        }
-        return null;
+    /**
+     * Specifies whether the filter should not be scheduled until the output port is free, i.e.
+     * there is no frame waiting on that output.
+     * @param portName the name of the output port.
+     * @param waits true, if the filter should wait for the port to become free.
+     */
+    protected void setWaitsOnOutputPort(String portName, boolean waits) {
+        getOutputPort(portName).setBlocking(waits);
     }
-
-    protected final ProgramParameter[] getProgramParameters(Field field) {
-        Annotation annotation;
-        if ((annotation = field.getAnnotation(ProgramParameter.class)) != null) {
-            ProgramParameter[] result = new ProgramParameter[1];
-            result[0] = (ProgramParameter)annotation;
-            return result;
-        } else if ((annotation = field.getAnnotation(ProgramParameters.class)) != null) {
-            return ((ProgramParameters)annotation).value();
-        } else {
-            return new ProgramParameter[0];
-        }
-    }
-
-    protected final boolean setParameterField(String name, Object value) {
-        Field field = getParameterField(name);
-        if (field != null) {
-            field.setAccessible(true);
-            try {
-                field.set(this, value);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(
-                    "Access to field '" + field.getName() + "' was denied!");
-            }
-            return true;
-        }
-        return false;
-    }
-
-    protected final boolean setProgramVariable(String name, Object value, boolean isUpdate) {
-        ProgramVariable programVar = getProgramVariable(name);
-        if (programVar != null) {
-            // If this is not an update, postpone until process to ensure program is setup
-            if (!isUpdate) {
-                if (mUpdatedParams == null) {
-                    mUpdatedParams = new KeyValueMap();
-                }
-                mUpdatedParams.put(name, value);
-            } else {
-                programVar.setValue(value);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    protected final void setExposedParameters(KeyValueMap keyValueMap, boolean isUpdate) {
-        // Go through all parameter entries
-        for (Entry<String, Object> entry : keyValueMap.entrySet()) {
-            // Try setting filter field
-            if (!setParameterField(entry.getKey(), entry.getValue())) {
-                // If that fails, try setting a program variable
-                if (!setProgramVariable(entry.getKey(), entry.getValue(), isUpdate)) {
-                    // If that fails too, throw an exception
-                    throw new RuntimeException("Attempting to set unknown parameter '"
-                        + entry.getKey() + "' on filter " + this + "!");
-                }
-            }
-        }
-    }
-*/
 
     public String toString() {
         return "'" + getName() + "' (" + getFilterClassName() + ")";
@@ -591,6 +509,12 @@ public abstract class Filter {
             if (!outputPort.isOpen()) {
                 outputPort.open();
             }
+        }
+    }
+
+    final void clearInputs() {
+        for (InputPort inputPort : mInputPorts.values()) {
+            inputPort.clear();
         }
     }
 
