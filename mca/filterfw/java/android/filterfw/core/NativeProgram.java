@@ -30,6 +30,7 @@ public class NativeProgram extends Program {
     private boolean mHasTeardownFunction = false;
     private boolean mHasSetValueFunction = false;
     private boolean mHasGetValueFunction = false;
+    private boolean mTornDown = false;
 
     public NativeProgram(String nativeLibName, String nativeFunctionPrefix) {
         // Allocate the native instance
@@ -64,20 +65,29 @@ public class NativeProgram extends Program {
 
         // Initialize the native code
         if (mHasInitFunction && !callNativeInit()) {
-            throw new RuntimeException("Could not initialize NativeFrame!");
+            throw new RuntimeException("Could not initialize NativeProgram!");
         }
+    }
+
+    public  void tearDown() {
+        if (mTornDown) return;
+        if (mHasTeardownFunction && !callNativeTeardown()) {
+            throw new RuntimeException("Could not tear down NativeProgram!");
+        }
+        deallocate();
+        mTornDown = true;
     }
 
     @Override
     protected void finalize() throws Throwable {
-        if (mHasTeardownFunction && !callNativeTeardown()) {
-            throw new RuntimeException("Could not tear down NativeFrame!");
-        }
-        deallocate();
+        tearDown();
     }
 
     @Override
     public void process(Frame[] inputs, Frame output) {
+        if (mTornDown) {
+            throw new RuntimeException("NativeProgram already torn down!");
+        }
         NativeFrame[] nativeInputs = new NativeFrame[inputs.length];
         for (int i = 0; i < inputs.length; ++i) {
             if (inputs[i] == null || inputs[i] instanceof NativeFrame) {
@@ -103,6 +113,9 @@ public class NativeProgram extends Program {
 
     @Override
     public void setHostValue(String variableName, Object value) {
+        if (mTornDown) {
+            throw new RuntimeException("NativeProgram already torn down!");
+        }
         if (!mHasSetValueFunction) {
             throw new RuntimeException("Attempting to set native variable, but native code does not " +
                                        "define native setvalue function!");
@@ -114,6 +127,9 @@ public class NativeProgram extends Program {
 
     @Override
     public Object getHostValue(String variableName) {
+        if (mTornDown) {
+            throw new RuntimeException("NativeProgram already torn down!");
+        }
         if (!mHasGetValueFunction) {
             throw new RuntimeException("Attempting to get native variable, but native code does not " +
                                        "define native getvalue function!");

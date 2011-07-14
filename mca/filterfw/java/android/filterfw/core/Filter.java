@@ -48,6 +48,7 @@ public abstract class Filter {
     static final int STATUS_SLEEPING              = 4;
     static final int STATUS_FINISHED              = 5;
     static final int STATUS_ERROR                 = 6;
+    static final int STATUS_RELEASED              = 7;
 
     private String mName;
 
@@ -521,6 +522,9 @@ public abstract class Filter {
     }
 
     final synchronized void performProcess(FilterContext context) {
+        if (mStatus == STATUS_RELEASED) {
+            throw new RuntimeException("Filter " + this + " is already torn down!");
+        }
         transferInputFrames(context);
         if (mStatus < STATUS_PROCESSING) {
             performOpen(context);
@@ -540,6 +544,14 @@ public abstract class Filter {
             mStatus = STATUS_PREPARED;
             close(context);
             closePorts();
+        }
+    }
+
+    final synchronized void performTearDown(FilterContext context) {
+        performClose(context);
+        if (mStatus != STATUS_RELEASED) {
+            tearDown(context);
+            mStatus = STATUS_RELEASED;
         }
     }
 
