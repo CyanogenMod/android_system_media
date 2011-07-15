@@ -58,9 +58,7 @@ public class MediaSource extends Filter {
     @GenerateFieldPort(name = "sourceUrl", hasDefault = true)
     private String mSourceUrl = "";
 
-    /** An open asset file descriptor to a local media source. If set,
-     * overrides the sourceUrl field. Set to null to use the sourceUrl field
-     * instead. */
+    /** An open asset file descriptor to a local media source. Default is null */
     @GenerateFieldPort(name = "sourceAsset", hasDefault = true)
     private AssetFileDescriptor mSourceAsset = null;
 
@@ -73,6 +71,10 @@ public class MediaSource extends Filter {
     /** Whether the media source should loop automatically or not. Defaults to true. */
     @GenerateFieldPort(name = "loop", hasDefault = true)
     private boolean mLooping = true;
+
+    /** Whether the media source is a URL or an asset file descriptor. Defaults to false. */
+    @GenerateFieldPort(name = "sourceIsUrl", hasDefault = true)
+    private boolean mSelectedIsUrl = false;
 
     private MediaPlayer mMediaPlayer;
     private GLFrame mMediaFrame;
@@ -136,13 +138,21 @@ public class MediaSource extends Filter {
                                                                        GLFrame.EXTERNAL_TEXTURE,
                                                                        0);
         mSurfaceTexture = new SurfaceTexture(mMediaFrame.getTextureId());
+
     }
 
     @Override
     public void open(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Opening MediaSource");
-        if (!setupMediaPlayer()) {
-            throw new RuntimeException("Error setting up MediaPlayer!");
+        if (mLogVerbose) {
+          if (mSelectedIsUrl) {
+            Log.v(TAG, "Current URL is " + mSourceUrl);
+          } else {
+            Log.v(TAG, "Current source is Asset!");
+          }
+        }
+        if (!setupMediaPlayer(mSelectedIsUrl)) {
+          throw new RuntimeException("Error setting up MediaPlayer!");
         }
     }
 
@@ -221,27 +231,40 @@ public class MediaSource extends Filter {
         }
     }
 
+    // When updating the port values of the filter, users can update sourceIsUrl to switch
+    //   between using URL objects or Assets.
+    // If updating only sourceUrl/sourceAsset, MediaPlayer gets reset if the current player
+    //   uses Url objects/Asset.
+    // Otherwise the new sourceUrl/sourceAsset is stored and will be used when users switch
+    //   sourceIsUrl next time.
     @Override
     public void fieldPortValueUpdated(String name, FilterContext context) {
-        if (name.equals("sourceUrl") && mSourceAsset == null) {
-            if (isOpen()) {
+        if (name.equals("sourceUrl")) {
+           if (isOpen()) {
                 if (mLogVerbose) Log.v(TAG, "Opening new source URL");
-                setupMediaPlayer();
+                if (mSelectedIsUrl) {
+                    setupMediaPlayer(mSelectedIsUrl);
+                }
             }
         } else if (name.equals("sourceAsset") ) {
             if (isOpen()) {
-                if (mLogVerbose) {
-                    if (mSourceAsset == null) {
-                        if (mLogVerbose) Log.v(TAG, "Opening new source URL");
-                    } else {
-                        Log.v(TAG, "Opening new source FD");
-                    }
+                if (mLogVerbose) Log.v(TAG, "Opening new source FD");
+                if (!mSelectedIsUrl) {
+                    setupMediaPlayer(mSelectedIsUrl);
                 }
-                setupMediaPlayer();
             }
         } else if (name.equals("loop")) {
             if (isOpen()) {
                 mMediaPlayer.setLooping(mLooping);
+            }
+        } else if (name.equals("sourceIsUrl")) {
+            if (isOpen()){
+                if (mSelectedIsUrl){
+                    if (mLogVerbose) Log.v(TAG, "Opening new source URL");
+                } else {
+                    if (mLogVerbose) Log.v(TAG, "Opening new source Asset");
+                }
+                setupMediaPlayer(mSelectedIsUrl);
             }
         }
     }
@@ -258,7 +281,7 @@ public class MediaSource extends Filter {
     }
 
     /** Creates a media player, sets it up, and calls prepare */
-    synchronized private boolean setupMediaPlayer() {
+    synchronized private boolean setupMediaPlayer(boolean useUrl) {
         mPrepared = false;
         mGotSize = false;
         mPlaying = false;
@@ -279,13 +302,13 @@ public class MediaSource extends Filter {
 
         // Set up data sources, etc
         try {
-            if (mSourceAsset == null) {
+            if (useUrl) {
                 mMediaPlayer.setDataSource(mSourceUrl);
             } else {
                 mMediaPlayer.setDataSource(mSourceAsset.getFileDescriptor(), mSourceAsset.getStartOffset(), mSourceAsset.getLength());
             }
         } catch(IOException e) {
-            if (mSourceAsset == null) {
+            if (useUrl) {
                 Log.e(TAG, "Unable to set media player source to " + mSourceUrl + ". Exception: " + e);
             } else {
                 Log.e(TAG, "Unable to set media player source to " + mSourceAsset + ". Exception: " + e);
@@ -294,7 +317,7 @@ public class MediaSource extends Filter {
             mMediaPlayer = null;
             return false;
         } catch(IllegalArgumentException e) {
-            if (mSourceAsset == null) {
+            if (useUrl) {
                 Log.e(TAG, "Unable to set media player source to " + mSourceUrl + ". Exception: " + e);
             } else {
                 Log.e(TAG, "Unable to set media player source to " + mSourceAsset + ". Exception: " + e);
