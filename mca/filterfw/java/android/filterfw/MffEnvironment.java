@@ -64,7 +64,7 @@ public class MffEnvironment {
      * the environment.
      */
     public void setGLEnvironment(GLEnvironment glEnvironment) {
-        mContext.setGLEnvironment(glEnvironment);
+        mContext.initGLEnvironment(glEnvironment);
     }
 
     /**

@@ -90,10 +90,10 @@ public class FisheyeFilter extends Filter {
         return inputFormat;
     }
 
-    public void initProgram(int target) {
+    public void initProgram(FilterContext context, int target) {
         switch (target) {
             case FrameFormat.TARGET_GPU:
-                mProgram = new ShaderProgram(mFisheyeShader);
+                mProgram = new ShaderProgram(context, mFisheyeShader);
                 break;
 
             default:
@@ -114,7 +114,7 @@ public class FisheyeFilter extends Filter {
 
         // Create program if not created already
         if (mProgram == null || inputFormat.getTarget() != mTarget) {
-            initProgram(inputFormat.getTarget());
+            initProgram(context, inputFormat.getTarget());
         }
 
         // Check if the frame size has changed

@@ -69,11 +69,11 @@ public class CropFilter extends Filter {
     }
 
     @Override
-    public void prepare(FilterContext env) {
+    public void prepare(FilterContext context) {
         // TODO: Add CPU version
         switch (getInputFormat("image").getTarget()) {
             case FrameFormat.TARGET_GPU:
-                mProgram = ShaderProgram.createIdentity();
+                mProgram = ShaderProgram.createIdentity(context);
                 break;
         }
         if (mProgram == null) {

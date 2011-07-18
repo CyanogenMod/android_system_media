@@ -66,18 +66,18 @@ public class ToGrayFilter extends SimpleImageFilter {
     }
 
     @Override
-    protected Program getNativeProgram() {
+    protected Program getNativeProgram(FilterContext context) {
         throw new RuntimeException("Native toGray not implemented yet!");
     }
 
     @Override
-    protected Program getShaderProgram() {
+    protected Program getShaderProgram(FilterContext context) {
         int inputChannels = getInputFormat("image").getBytesPerSample();
         if (inputChannels != 4) {
             throw new RuntimeException("Unsupported GL input channels: " +
                                        inputChannels + "! Channels must be 4!");
         }
-        ShaderProgram program = new ShaderProgram(mColorToGray4Shader);
+        ShaderProgram program = new ShaderProgram(context, mColorToGray4Shader);
         if (mInvertSource)
             program.setSourceRect(0.0f, 1.0f, 1.0f, -1.0f);
         return program;

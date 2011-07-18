@@ -55,6 +55,10 @@ public class GLFrame extends Frame {
 
     private int glFrameId;
 
+    // Keep a reference to the GL environment, so that it does not get deallocated while there
+    // are still frames living in it.
+    private GLEnvironment mGLEnvironment;
+
     GLFrame(FrameFormat format, FrameManager frameManager) {
         super(format, frameManager);
     }
@@ -63,8 +67,9 @@ public class GLFrame extends Frame {
         super(format, frameManager, bindingType, bindingId);
     }
 
-    void init() {
+    void init(GLEnvironment glEnv) {
         FrameFormat format = getFormat();
+        mGLEnvironment = glEnv;
 
         // Check that we have a valid format
         if (format.getBytesPerSample() != 4) {
@@ -99,11 +104,11 @@ public class GLFrame extends Frame {
 
     private void initNew(boolean isExternal) {
         if (isExternal) {
-            if (!allocateExternal()) {
+            if (!allocateExternal(mGLEnvironment)) {
                 throw new RuntimeException("Could not allocate external GL frame!");
             }
         } else {
-            if (!allocate(getFormat().getWidth(), getFormat().getHeight())) {
+            if (!allocate(mGLEnvironment, getFormat().getWidth(), getFormat().getHeight())) {
                 throw new RuntimeException("Could not allocate GL frame!");
             }
         }
@@ -112,7 +117,7 @@ public class GLFrame extends Frame {
     private void initWithTexture(int texId, boolean isNew) {
         int width = getFormat().getWidth();
         int height = getFormat().getHeight();
-        if (!allocateWithTexture(texId, width, height, isNew, isNew)) {
+        if (!allocateWithTexture(mGLEnvironment, texId, width, height, isNew, isNew)) {
             throw new RuntimeException("Could not allocate texture backed GL frame!");
         }
         setReusable(isNew);
@@ -121,7 +126,7 @@ public class GLFrame extends Frame {
     private void initWithFbo(int fboId, boolean isNew) {
         int width = getFormat().getWidth();
         int height = getFormat().getHeight();
-        if (!allocateWithFbo(fboId, width, height, isNew, isNew)) {
+        if (!allocateWithFbo(mGLEnvironment, fboId, width, height, isNew, isNew)) {
             throw new RuntimeException("Could not allocate FBO backed GL frame!");
         }
         setReusable(isNew);
@@ -139,6 +144,10 @@ public class GLFrame extends Frame {
     @Override
     void dealloc() {
         deallocate();
+    }
+
+    public GLEnvironment getGLEnvironment() {
+        return mGLEnvironment;
     }
 
     @Override
@@ -287,21 +296,23 @@ public class GLFrame extends Frame {
         System.loadLibrary("filterfw");
     }
 
-    private native boolean allocate(int width, int height);
+    private native boolean allocate(GLEnvironment env, int width, int height);
 
-    private native boolean allocateWithTexture(int textureId,
+    private native boolean allocateWithTexture(GLEnvironment env,
+                                               int textureId,
                                                int width,
                                                int height,
                                                boolean owns,
                                                boolean create);
 
-    private native boolean allocateWithFbo(int fboId,
+    private native boolean allocateWithFbo(GLEnvironment env,
+                                           int fboId,
                                            int width,
                                            int height,
                                            boolean owns,
                                            boolean create);
 
-    private native boolean allocateExternal();
+    private native boolean allocateExternal(GLEnvironment env);
 
     private native boolean deallocate();
 

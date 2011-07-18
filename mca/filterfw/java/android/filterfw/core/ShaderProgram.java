@@ -31,6 +31,11 @@ import android.opengl.GLES20;
 public class ShaderProgram extends Program {
 
     private int shaderProgramId;
+
+    // Keep a reference to the GL environment, so that it does not get deallocated while there
+    // are still programs living in it.
+    private GLEnvironment mGLEnvironment;
+
     private StopWatchMap mTimer = null;
 
     private void setTimer() {
@@ -44,24 +49,26 @@ public class ShaderProgram extends Program {
     private ShaderProgram(NativeAllocatorTag tag) {
     }
 
-    public ShaderProgram(String fragmentShader) {
-        allocate(null, fragmentShader);
+    public ShaderProgram(FilterContext context, String fragmentShader) {
+        mGLEnvironment = getGLEnvironment(context);
+        allocate(mGLEnvironment, null, fragmentShader);
         if (!compileAndLink()) {
             throw new RuntimeException("Could not compile and link shader!");
         }
         this.setTimer();
     }
 
-    public ShaderProgram(String vertexShader, String fragmentShader) {
-        allocate(vertexShader, fragmentShader);
+    public ShaderProgram(FilterContext context, String vertexShader, String fragmentShader) {
+        mGLEnvironment = getGLEnvironment(context);
+        allocate(mGLEnvironment, vertexShader, fragmentShader);
         if (!compileAndLink()) {
             throw new RuntimeException("Could not compile and link shader!");
         }
         this.setTimer();
     }
 
-    public static ShaderProgram createIdentity() {
-        ShaderProgram program = nativeCreateIdentity();
+    public static ShaderProgram createIdentity(FilterContext context) {
+        ShaderProgram program = nativeCreateIdentity(getGLEnvironment(context));
         program.setTimer();
         return program;
     }
@@ -69,6 +76,10 @@ public class ShaderProgram extends Program {
     @Override
     protected void finalize() throws Throwable {
         deallocate();
+    }
+
+    public GLEnvironment getGLEnvironment() {
+        return mGLEnvironment;
     }
 
     @Override
@@ -211,11 +222,22 @@ public class ShaderProgram extends Program {
         }
     }
 
+    private static GLEnvironment getGLEnvironment(FilterContext context) {
+        GLEnvironment result = context != null ? context.getGLEnvironment() : null;
+        if (result == null) {
+            throw new NullPointerException("Attempting to create ShaderProgram with no GL "
+                + "environment in place!");
+        }
+        return result;
+    }
+
     static {
         System.loadLibrary("filterfw");
     }
 
-    private native boolean allocate(String vertexShader, String fragmentShader);
+    private native boolean allocate(GLEnvironment glEnv,
+                                    String vertexShader,
+                                    String fragmentShader);
 
     private native boolean deallocate();
 
@@ -233,7 +255,7 @@ public class ShaderProgram extends Program {
     private native boolean setShaderTargetRegion(float x0, float y0, float x1, float y1,
                                                  float x2, float y2, float x3, float y3);
 
-    private static native ShaderProgram nativeCreateIdentity();
+    private static native ShaderProgram nativeCreateIdentity(GLEnvironment glEnv);
 
     private native boolean setShaderClearsOutput(boolean clears);
 

@@ -19,6 +19,8 @@ package android.filterfw.core;
 
 import android.filterfw.core.NativeAllocatorTag;
 import android.graphics.SurfaceTexture;
+import android.os.Looper;
+import android.util.Log;
 import android.view.Surface;
 
 /**
@@ -40,10 +42,6 @@ public class GLEnvironment {
         nativeDeallocate();
     }
 
-    public static GLEnvironment activeEnvironment() {
-        return nativeActiveEnvironment();
-    }
-
     public void initWithNewContext() {
         if (!nativeInitWithNewContext()) {
             throw new RuntimeException("Could not initialize GLEnvironment with new context!");
@@ -61,6 +59,9 @@ public class GLEnvironment {
     }
 
     public void activate() {
+        if (Looper.myLooper() != null && Looper.myLooper().equals(Looper.getMainLooper())) {
+            Log.e("GLEnvironment", "Activating GL context in UI thread!");
+        }
         if (!nativeActivate()) {
             throw new RuntimeException("Could not activate GLEnvironment!");
         }
@@ -115,8 +116,6 @@ public class GLEnvironment {
     static {
         System.loadLibrary("filterfw");
     }
-
-    private native static GLEnvironment nativeActiveEnvironment();
 
     private native boolean nativeInitWithNewContext();
 

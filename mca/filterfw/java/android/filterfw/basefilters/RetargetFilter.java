@@ -53,11 +53,7 @@ public class RetargetFilter extends Filter {
 
     @Override
     public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
-        return getRetargetedFormat(inputFormat);
-    }
-
-    public FrameFormat getRetargetedFormat(FrameFormat format) {
-        MutableFrameFormat retargeted = format.mutableCopy();
+        MutableFrameFormat retargeted = inputFormat.mutableCopy();
         retargeted.setTarget(mTarget);
         return retargeted;
     }
@@ -68,11 +64,7 @@ public class RetargetFilter extends Filter {
         Frame input = pullInput("frame");
 
         // Create output frame
-        FrameFormat outFormat = getRetargetedFormat(input.getFormat());
-        Frame output = context.getFrameManager().newFrame(outFormat);
-
-        // Process
-        output.setDataFromFrame(input);
+        Frame output = context.getFrameManager().duplicateFrameToTarget(input, mTarget);
 
         // Push output
         pushOutput("frame", output);

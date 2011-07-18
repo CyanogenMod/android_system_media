@@ -99,7 +99,7 @@ public class ToPackedGrayFilter extends Filter {
 
     @Override
     public void prepare(FilterContext context) {
-        mProgram = new ShaderProgram(mColorToPackedGrayShader);
+        mProgram = new ShaderProgram(context, mColorToPackedGrayShader);
     }
 
     @Override

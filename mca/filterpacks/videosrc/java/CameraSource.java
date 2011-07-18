@@ -122,7 +122,7 @@ public class CameraSource extends Filter {
     public void prepare(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Preparing");
         // Compile shader TODO: Move to onGLEnvSomething?
-        mFrameExtractor = new ShaderProgram(mFrameShader);
+        mFrameExtractor = new ShaderProgram(context, mFrameShader);
         // SurfaceTexture defines (0,0) to be bottom-left. The filter framework defines
         // (0,0) as top-left, so do the flip here.
         mFrameExtractor.setSourceRect(0, 1, 1, -1);

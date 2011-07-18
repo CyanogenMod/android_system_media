@@ -81,8 +81,8 @@ public class DrawRectFilter extends Filter {
     }
 
     @Override
-    public void prepare(FilterContext env) {
-        mProgram = new ShaderProgram(mVertexShader, mFixedColorFragmentShader);
+    public void prepare(FilterContext context) {
+        mProgram = new ShaderProgram(context, mVertexShader, mFixedColorFragmentShader);
     }
 
     @Override

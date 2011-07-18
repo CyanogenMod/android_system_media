@@ -26,9 +26,13 @@
 
 #include <GLES2/gl2.h>
 #include <EGL/egl.h>
+#include <pthread.h>
 
 namespace android {
 namespace filterfw {
+
+class ShaderProgram;
+class VertexFrame;
 
 class WindowHandle {
   public:
@@ -61,12 +65,6 @@ class GLEnv {
     // Destructor. Tears down and deallocates any GL objects that were created
     // by this instance.
     ~GLEnv();
-
-    // Returns the currently active GL environment, which was activated using
-    // Activate().
-    static GLEnv* ActiveEnv() {
-      return active_env_;
-    }
 
     // Returns a globally unique id of this environment.
     int id() const {
@@ -164,8 +162,26 @@ class GLEnv {
     }
 
     // Inspecting the environment //////////////////////////////////////////////
-    // Returns true if the environment is the active (current) environment.
+    // Returns true if the environment is active in the current thread.
     bool IsActive() const;
+
+    // Attaching GL objects ////////////////////////////////////////////////////
+
+    // Attach a shader to the environment. The environment takes ownership of
+    // the shader.
+    void AttachShader(int key, ShaderProgram* shader);
+
+    // Attach a vertex frame to the environment. The environment takes ownership
+    // of the frame.
+    void AttachVertexFrame(int key, VertexFrame* frame);
+
+    // Return the shader with the specified key, or NULL if there is no such
+    // shader attached to this environment.
+    ShaderProgram* ShaderWithKey(int key);
+
+    // Return the vertex frame with the specified key, or NULL if there is no
+    // such frame attached to this environment.
+    VertexFrame* VertexFrameWithKey(int key);
 
     // Static methods //////////////////////////////////////////////////////////
     // These operate on the currently active environment!
@@ -200,8 +216,9 @@ class GLEnv {
     // instance.
     bool IsInitialized() const;
 
-    // (Weak) pointer to active environment. Managed by the GLEnv instances.
-    static GLEnv* active_env_;
+    // Outputs error messages specific to the operation eglMakeCurrent().
+    // Returns true if there was at least one error.
+    static bool CheckEGLMakeCurrentError();
 
     // The maximum id assigned to a GLEnv instance.
     static int max_id_;
@@ -224,53 +241,12 @@ class GLEnv {
     bool created_surface_;
     bool initialized_;
 
+    // Attachments that GL objects can add to the environment.
+    std::map<int, ShaderProgram*> attached_shaders_;
+    std::map<int, VertexFrame*> attached_vframes_;
+
     DISALLOW_COPY_AND_ASSIGN(GLEnv);
 };
-
-// Helper class for variables that are GL related, and thus bound to the active
-// environment. When setting a value, it will be bound to the currently active
-// GL environment. Getting a value will result in whatever value was set in
-// the current environment, or NULL if no value was set in that environment.
-// Note: We rely on the unique ID of the environment to determine the
-// association with any one particular GL environment. There may be a conflict
-// of IDs when the current process relaunches (and the static max_id_ resets),
-// however, in this case all dependant variables have been deallocated anyway
-// and will be reinitialized.
-template<typename T>
-class GLBoundVariable {
-  public:
-    // Set the value of this variable in the context of the currently active
-    // GL environment.
-    void SetValue(T* value);
-
-    // Get the value of this variable in the context of the currently active
-    // GL environment. Returns NULL if the variable was not set in this
-    // environment.
-    T* Value();
-
-  private:
-    typedef std::map<int, T*> GLVarMap;
-    GLVarMap variables_;
-};
-
-// GLBoundVariable implementation //////////////////////////////////////////////
-template<typename T>
-void GLBoundVariable<T>::SetValue(T* value) {
-  if (GLEnv::ActiveEnv())
-    variables_[GLEnv::ActiveEnv()->id()] = value;
-  else
-    LOGE("Attempting to set GL bound variable without an active context!");
-}
-
-template<typename T>
-T* GLBoundVariable<T>::Value() {
-  if (GLEnv::ActiveEnv()) {
-    return FindPtrOrNull(variables_, GLEnv::ActiveEnv()->id());
-  } else {
-    LOGE("Attempting to get GL bound variable without an active context!");
-    return NULL;
-  }
-}
 
 } // namespace filterfw
 } // namespace android

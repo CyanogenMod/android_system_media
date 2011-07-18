@@ -44,9 +44,6 @@ Java_android_filterfw_core_GLEnvironment_nativeActivate(JNIEnv* env, jobject thi
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLEnvironment_nativeDeactivate(JNIEnv* env, jobject thiz);
 
-JNIEXPORT jobject JNICALL
-Java_android_filterfw_core_GLEnvironment_nativeActiveEnvironment(JNIEnv* env, jclass clazz);
-
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLEnvironment_nativeSwapBuffers(JNIEnv* env, jobject thiz);
 

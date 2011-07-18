@@ -24,11 +24,16 @@ extern "C" {
 #endif
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLFrame_allocate(JNIEnv* env, jobject thiz, jint width, jint height);
+Java_android_filterfw_core_GLFrame_allocate(JNIEnv* env,
+                                            jobject thiz,
+                                            jobject gl_env,
+                                            jint width,
+                                            jint height);
 
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLFrame_allocateWithTexture(JNIEnv* env,
                                                        jobject thiz,
+                                                       jobject gl_env,
                                                        jint tex_id,
                                                        jint width,
                                                        jint height,
@@ -38,6 +43,7 @@ Java_android_filterfw_core_GLFrame_allocateWithTexture(JNIEnv* env,
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLFrame_allocateWithFbo(JNIEnv* env,
                                                    jobject thiz,
+                                                   jobject gl_env,
                                                    jint fbo_id,
                                                    jint width,
                                                    jint height,
@@ -45,7 +51,7 @@ Java_android_filterfw_core_GLFrame_allocateWithFbo(JNIEnv* env,
                                                    jboolean create);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLFrame_allocateExternal(JNIEnv* env, jobject thiz);
+Java_android_filterfw_core_GLFrame_allocateExternal(JNIEnv* env, jobject thiz, jobject gl_env);
 
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLFrame_deallocate(JNIEnv* env, jobject thiz);

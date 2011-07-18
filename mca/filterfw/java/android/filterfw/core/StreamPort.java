@@ -90,4 +90,11 @@ public class StreamPort extends InputPort {
     public String toString() {
         return "input " + super.toString();
     }
+
+    @Override
+    public void transfer(FilterContext context) {
+        if (mFrame != null) {
+            checkFrameManager(mFrame, context);
+        }
+    }
 }

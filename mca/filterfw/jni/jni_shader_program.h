@@ -28,6 +28,7 @@ extern "C" {
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_ShaderProgram_allocate(JNIEnv* env,
                                                   jobject thiz,
+                                                  jobject gl_env,
                                                   jstring vertex_shader,
                                                   jstring fragment_shader);
 
@@ -55,7 +56,9 @@ Java_android_filterfw_core_ShaderProgram_shaderProcess(JNIEnv* env,
                                                        jobject output);
 
 JNIEXPORT jobject JNICALL
-Java_android_filterfw_core_ShaderProgram_nativeCreateIdentity(JNIEnv* env, jclass clazz);
+Java_android_filterfw_core_ShaderProgram_nativeCreateIdentity(JNIEnv* env,
+                                                              jclass clazz,
+                                                              jobject gl_env);
 
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_ShaderProgram_setShaderSourceRegion(JNIEnv* env,

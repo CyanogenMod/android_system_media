@@ -149,6 +149,10 @@ public abstract class Frame {
         }
     }
 
+    public FrameManager getFrameManager() {
+        return mFrameManager;
+    }
+
     protected void assertFrameMutable() {
         if (isReadOnly()) {
             throw new RuntimeException("Attempting to modify read-only frame!");

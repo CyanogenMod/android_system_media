@@ -31,8 +31,9 @@
 namespace android {
 namespace filterfw {
 
-class GLTextureHandle;
+class GLFrame;
 class GLFrameBufferHandle;
+class GLTextureHandle;
 class Quad;
 class VertexFrame;
 
@@ -73,12 +74,20 @@ class ShaderProgram {
     // (and related) functions below.
     // This program will not be executable until you have compiled and linked
     // it.
-    explicit ShaderProgram(const std::string& fragment_shader);
+    // Note, that the ShaderProgram does NOT take ownership of the GLEnv. The
+    // caller must make sure the GLEnv stays valid as long as the GLFrame is
+    // alive.
+    explicit ShaderProgram(GLEnv* gl_env, const std::string& fragment_shader);
 
     // Create a new shader program with the given fragment and vertex shader
     // source code. This program will not be executable until you have compiled
     // and linked it.
-    ShaderProgram(const std::string& vertex_shader, const std::string& fragment_shader);
+    // Note, that the ShaderProgram does NOT take ownership of the GLEnv. The
+    // caller must make sure the GLEnv stays valid as long as the GLFrame is
+    // alive.
+    ShaderProgram(GLEnv* gl_env,
+                  const std::string& vertex_shader,
+                  const std::string& fragment_shader);
 
     // Destructor.
     ~ShaderProgram();
@@ -111,7 +120,7 @@ class ShaderProgram {
     // input to the output. Note that transformations may be applied to achieve
     // effects such as cropping, scaling or rotation.
     // The caller takes ownership of the result!
-    static ShaderProgram* CreateIdentity();
+    static ShaderProgram* CreateIdentity(GLEnv* env);
 
     // Geometry ////////////////////////////////////////////////////////////////
     // These functions modify the source and target regions used during
@@ -420,7 +429,7 @@ class ShaderProgram {
     };
 
     // Gets or creates the default vertex data.
-    static VertexFrame* DefaultVertexBuffer();
+    VertexFrame* DefaultVertexBuffer();
 
     // Binds the given input textures.
     bool BindInputTextures(const std::vector<GLuint>& textures,
@@ -469,6 +478,9 @@ class ShaderProgram {
     GLuint vertex_shader_;
     GLuint program_;
 
+    // The GL environment this shader lives in.
+    GLEnv* gl_env_;
+
     // The lowest texture unit this program will use
     GLuint base_texture_unit_;
 
@@ -496,12 +508,6 @@ class ShaderProgram {
     bool blending_;
     int sfactor_;
     int dfactor_;
-
-    // The default vertex data used by ShaderPrograms
-    static GLBoundVariable<VertexFrame> s_default_vbo_;
-
-    // Built-in shaders
-    static GLBoundVariable<ShaderProgram> s_identity_;
 };
 
 } // namespace filterfw
