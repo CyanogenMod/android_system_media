@@ -239,7 +239,7 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
         enabled = alwaysOn || !previousEnabled;
         if (enabled != previousEnabled) {
             result = (*reverbItf)->SetPreset(reverbItf, enabled ? preset : SL_REVERBPRESET_NONE);
-            fprintf(stdout, "SetPreset(%d)=%d", enabled ? preset : SL_REVERBPRESET_NONE, result);
+            fprintf(stdout, "SetPreset(%d)=%d\n", enabled ? preset : SL_REVERBPRESET_NONE, result);
             //ExitOnError(result);
             previousEnabled = enabled;
             if (enabled) {
