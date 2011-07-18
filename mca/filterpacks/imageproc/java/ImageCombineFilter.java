@@ -113,11 +113,11 @@ public abstract class ImageCombineFilter extends Filter {
         if (target != mCurrentTarget) {
             switch (target) {
                 case FrameFormat.TARGET_NATIVE:
-                    mProgram = getNativeProgram();
+                    mProgram = getNativeProgram(context);
                     break;
 
                 case FrameFormat.TARGET_GPU:
-                    mProgram = getShaderProgram();
+                    mProgram = getShaderProgram(context);
                     break;
 
                 default:
@@ -135,7 +135,7 @@ public abstract class ImageCombineFilter extends Filter {
         }
     }
 
-    protected abstract Program getNativeProgram();
+    protected abstract Program getNativeProgram(FilterContext context);
 
-    protected abstract Program getShaderProgram();
+    protected abstract Program getShaderProgram(FilterContext context);
 }

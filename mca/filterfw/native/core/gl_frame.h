@@ -24,6 +24,7 @@
 namespace android {
 namespace filterfw {
 
+class GLEnv;
 class ShaderProgram;
 
 // A GLFrame stores pixel data on the GPU. While pixel data may be uploaded to
@@ -32,8 +33,10 @@ class ShaderProgram;
 // processing from one GLFrame to another.
 class GLFrame : public GLBufferHandle {
   public:
-    // Create an empty GL frame.
-    GLFrame();
+    // Create an empty GL frame in the specified GL environment. Note, that the GLFrame does NOT
+    // take ownership. The caller must make sure the GLEnv stays valid as long as the GLFrame is
+    // alive.
+    GLFrame(GLEnv* gl_env);
 
     // Deallocate a GL frame.
     ~GLFrame();
@@ -145,6 +148,9 @@ class GLFrame : public GLBufferHandle {
     // Get the (cached) identity shader.
     ShaderProgram* GetIdentity() const;
 
+    // The GL environment this frame belongs to
+    GLEnv* gl_env_;
+
     // The width, height and format of the frame
     int width_;
     int height_;
@@ -168,9 +174,6 @@ class GLFrame : public GLBufferHandle {
 
     // Flag whether frame owns the texture and FBO
     bool owns_;
-
-    // The identity shader (cache).
-    mutable ShaderProgram* identity_cache_;
 };
 
 } // namespace filterfw

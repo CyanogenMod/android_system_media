@@ -47,13 +47,13 @@ public class BrightnessFilter extends SimpleImageFilter {
     }
 
     @Override
-    protected Program getNativeProgram() {
+    protected Program getNativeProgram(FilterContext context) {
         return new NativeProgram("filterpack_imageproc", "brightness");
     }
 
     @Override
-    protected Program getShaderProgram() {
-        return new ShaderProgram(mBrightnessShader);
+    protected Program getShaderProgram(FilterContext context) {
+        return new ShaderProgram(context, mBrightnessShader);
     }
 
 }

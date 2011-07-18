@@ -15,7 +15,10 @@
  */
 
 #include "base/logging.h"
+#include "base/utilities.h"
 #include "core/gl_env.h"
+#include "core/shader_program.h"
+#include "core/vertex_frame.h"
 #include "system/window.h"
 
 #include <map>
@@ -24,7 +27,6 @@
 namespace android {
 namespace filterfw {
 
-GLEnv* GLEnv::active_env_ = NULL;
 int GLEnv::max_id_ = 0;
 
 GLEnv::GLEnv()
@@ -39,10 +41,6 @@ GLEnv::GLEnv()
 }
 
 GLEnv::~GLEnv() {
-  // We are no longer active if torn down
-  if (active_env_ == this)
-    active_env_ = NULL;
-
   // Destroy surfaces
   for (std::map<int, SurfaceWindowPair>::iterator it = surfaces_.begin();
        it != surfaces_.end();
@@ -64,6 +62,10 @@ GLEnv::~GLEnv() {
       eglDestroyContext(display(), it->second);
   }
 
+  // Destroy attached shaders and frames
+  STLDeleteValues(&attached_shaders_);
+  STLDeleteValues(&attached_vframes_);
+
   // Destroy display
   if (initialized_)
     eglTerminate(display());
@@ -80,14 +82,12 @@ bool GLEnv::IsInitialized() const {
 }
 
 bool GLEnv::Deactivate() {
-  active_env_ = NULL;
   eglMakeCurrent(display(), EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
   return !CheckEGLError("eglMakeCurrent");
 }
 
 bool GLEnv::Activate() {
-  if (active_env_ != this ||
-      display()   != eglGetCurrentDisplay() ||
+  if (display()   != eglGetCurrentDisplay() ||
       context()   != eglGetCurrentContext() ||
       surface()   != eglGetCurrentSurface(EGL_DRAW)) {
     // Make sure we are initialized
@@ -97,15 +97,7 @@ bool GLEnv::Activate() {
     // Make our context current
     eglMakeCurrent(display(), surface(), surface(), context());
 
-    // We are no longer active now
-    active_env_ = NULL;
-
-    // Set active env to new environment if there was no error
-    if (!CheckEGLError("eglMakeCurrent")) {
-      active_env_ = this;
-      return true;
-    }
-    return false;
+    return !CheckEGLMakeCurrentError();
   }
   return true;
 }
@@ -123,13 +115,9 @@ bool GLEnv::InitWithCurrentContext() {
   contexts_[0] = eglGetCurrentContext();
   surfaces_[0] = SurfaceWindowPair(eglGetCurrentSurface(EGL_DRAW), NULL);
 
-  if ((context() != EGL_NO_CONTEXT) &&
-      (display() != EGL_NO_DISPLAY) &&
-      (surface() != EGL_NO_SURFACE)) {
-    active_env_ = this;
-    return true;
-  }
-  return false;
+  return (context() != EGL_NO_CONTEXT) &&
+         (display() != EGL_NO_DISPLAY) &&
+         (surface() != EGL_NO_SURFACE);
 }
 
 bool GLEnv::InitWithNewContext() {
@@ -215,7 +203,7 @@ bool GLEnv::ReleaseSurfaceId(int surface_id) {
     const SurfaceWindowPair* surface = FindOrNull(surfaces_, surface_id);
     if (surface) {
       surfaces_.erase(surface_id);
-      if (surface_id_ == surface_id && ActiveEnv() == this)
+      if (surface_id_ == surface_id && IsActive())
         SwitchToSurfaceId(0);
       eglDestroySurface(display(), surface->first);
       if (surface->second) {
@@ -277,7 +265,7 @@ void GLEnv::ReleaseContextId(int context_id) {
     const EGLContext* context = FindOrNull(contexts_, context_id);
     if (context) {
       contexts_.erase(context_id);
-      if (context_id_ == context_id && ActiveEnv() == this)
+      if (context_id_ == context_id && IsActive())
         SwitchToContextId(0);
       eglDestroyContext(display(), *context);
     }
@@ -303,6 +291,31 @@ bool GLEnv::CheckEGLError(const std::string& op) {
     LOGE("EGL Error: Operation '%s' caused EGL error (0x%x)\n",
          op.c_str(),
          error);
+    err = true;
+  }
+  return err;
+}
+
+bool GLEnv::CheckEGLMakeCurrentError() {
+  bool err = false;
+  for (EGLint error = eglGetError();
+       error != EGL_SUCCESS;
+       error = eglGetError()) {
+    switch (error) {
+      case EGL_BAD_DISPLAY:
+        LOGE("EGL Error: Attempting to activate context with bad display!");
+        break;
+      case EGL_BAD_SURFACE:
+        LOGE("EGL Error: Attempting to activate context with bad surface!");
+        break;
+      case EGL_BAD_ACCESS:
+        LOGE("EGL Error: Attempting to activate context, which is "
+             "already active in another thread!");
+        break;
+      default:
+        LOGE("EGL Error: Making EGL rendering context current caused "
+             "error: 0x%x\n", error);
+    }
     err = true;
   }
   return err;
@@ -345,6 +358,28 @@ int GLEnv::NumberOfComponents(GLenum type) {
     default:
       return 0;
   }
+}
+
+void GLEnv::AttachShader(int key, ShaderProgram* shader) {
+  ShaderProgram* existingShader = ShaderWithKey(key);
+  if (existingShader)
+    delete existingShader;
+  attached_shaders_[key] = shader;
+}
+
+void GLEnv::AttachVertexFrame(int key, VertexFrame* frame) {
+  VertexFrame* existingFrame = VertexFrameWithKey(key);
+  if (existingFrame)
+    delete existingFrame;
+  attached_vframes_[key] = frame;
+}
+
+ShaderProgram* GLEnv::ShaderWithKey(int key) {
+  return FindPtrOrNull(attached_shaders_, key);
+}
+
+VertexFrame* GLEnv::VertexFrameWithKey(int key) {
+  return FindPtrOrNull(attached_vframes_, key);
 }
 
 } // namespace filterfw

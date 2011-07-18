@@ -46,7 +46,7 @@ public class SimpleFrameManager extends FrameManager {
         switch(format.getTarget()) {
             case FrameFormat.TARGET_GPU: {
                 GLFrame glFrame = new GLFrame(format, this, bindingType, bindingId);
-                glFrame.init();
+                glFrame.init(getGLEnvironment());
                 result = glFrame;
                 break;
             }
@@ -71,7 +71,7 @@ public class SimpleFrameManager extends FrameManager {
 
             case FrameFormat.TARGET_GPU: {
                 GLFrame glFrame = new GLFrame(format, this);
-                glFrame.init();
+                glFrame.init(getGLEnvironment());
                 result = glFrame;
                 break;
             }

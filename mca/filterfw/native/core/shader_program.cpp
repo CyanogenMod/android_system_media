@@ -30,8 +30,8 @@
 namespace android {
 namespace filterfw {
 
-// Statics /////////////////////////////////////////////////////////////////////
-GLBoundVariable<VertexFrame> ShaderProgram::s_default_vbo_;
+// VBO attachment keys
+static const int kDefaultVboKey = 1;
 
 // The default vertices for our shader program. This assumes the draw primitive
 // GL_TRIANGLE_STRIP.
@@ -67,12 +67,13 @@ ShaderProgram::VertexAttrib::VertexAttrib()
 }
 
 // ShaderProgram implementation ////////////////////////////////////////////////
-ShaderProgram::ShaderProgram(const std::string& fragment_shader)
+ShaderProgram::ShaderProgram(GLEnv* gl_env, const std::string& fragment_shader)
   : fragment_shader_source_(fragment_shader),
     vertex_shader_source_(s_default_vertex_shader_source_),
     fragment_shader_(0),
     vertex_shader_(0),
     program_(0),
+    gl_env_(gl_env),
     base_texture_unit_(GL_TEXTURE0),
     vertex_data_(NULL),
     vertex_count_(4),
@@ -83,13 +84,15 @@ ShaderProgram::ShaderProgram(const std::string& fragment_shader)
     dfactor_(GL_ONE_MINUS_SRC_ALPHA) {
 }
 
-ShaderProgram::ShaderProgram(const std::string& vertex_shader,
+ShaderProgram::ShaderProgram(GLEnv* gl_env,
+                             const std::string& vertex_shader,
                              const std::string& fragment_shader)
   : fragment_shader_source_(fragment_shader),
     vertex_shader_source_(vertex_shader),
     fragment_shader_(0),
     vertex_shader_(0),
     program_(0),
+    gl_env_(gl_env),
     base_texture_unit_(GL_TEXTURE0),
     vertex_data_(NULL),
     vertex_count_(4),
@@ -113,16 +116,15 @@ ShaderProgram::~ShaderProgram() {
   }
 }
 
-ShaderProgram* ShaderProgram::CreateIdentity() {
-  static const char* s_id_fragment_shader =
+ShaderProgram* ShaderProgram::CreateIdentity(GLEnv* gl_env) {
+  const char* s_id_fragment_shader =
     "precision mediump float;\n"
     "uniform sampler2D tex_sampler_0;\n"
     "varying vec2 v_texcoord;\n"
     "void main() {\n"
     "  gl_FragColor = texture2D(tex_sampler_0, v_texcoord);\n"
     "}\n";
-
-  ShaderProgram* result = new ShaderProgram(s_id_fragment_shader);
+  ShaderProgram* result = new ShaderProgram(gl_env, s_id_fragment_shader);
   result->CompileAndLink();
   return result;
 }
@@ -350,16 +352,17 @@ GLuint ShaderProgram::LinkProgram(GLuint* shaders, GLuint count) {
 }
 
 VertexFrame* ShaderProgram::DefaultVertexBuffer() {
-  LOGI("In ShaderProgram::DefaultVertexBuffer()!");
-  if (!s_default_vbo_.Value()) {
+  VertexFrame* storedFrame = gl_env_->VertexFrameWithKey(kDefaultVboKey);
+  if (!storedFrame) {
     LOGI("Uploading Data to VBO!");
-    s_default_vbo_.SetValue(new VertexFrame(sizeof(s_default_vertices_)));
-    s_default_vbo_.Value()->WriteData(
+    storedFrame = new VertexFrame(sizeof(s_default_vertices_));
+    storedFrame->WriteData(
       reinterpret_cast<const uint8_t*>(s_default_vertices_),
       sizeof(s_default_vertices_)
     );
+    gl_env_->AttachVertexFrame(kDefaultVboKey, storedFrame);
   }
-  return s_default_vbo_.Value();
+  return storedFrame;
 }
 
 bool ShaderProgram::BindVertexValues(const std::string& varname,

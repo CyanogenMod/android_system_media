@@ -85,12 +85,6 @@ jboolean Java_android_filterfw_core_GLEnvironment_nativeDeactivate(JNIEnv* env, 
   return gl_env ? ToJBool(gl_env->Deactivate()) : JNI_FALSE;
 }
 
-jobject Java_android_filterfw_core_GLEnvironment_nativeActiveEnvironment(JNIEnv* env,
-                                                                         jclass clazz) {
-  GLEnv* active = GLEnv::ActiveEnv();
-  return active ? WrapNewObjectInJava(active, env, false) : NULL;
-}
-
 jboolean Java_android_filterfw_core_GLEnvironment_nativeSwapBuffers(JNIEnv* env, jobject thiz) {
   GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
   return gl_env ? ToJBool(gl_env->SwapBuffers()) : JNI_FALSE;

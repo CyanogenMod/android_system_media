@@ -25,6 +25,8 @@
 namespace android {
 namespace filterfw {
 
+static const int kIdentityShaderKey = 1;
+
 //
 // A GLFrame stores pixel data on the GPU. It uses two kinds of GL data
 // containers for this: Textures and Frame Buffer Objects (FBOs). Textures are
@@ -33,8 +35,9 @@ namespace filterfw {
 // target for shaders.
 //
 
-GLFrame::GLFrame()
-  : width_(0),
+GLFrame::GLFrame(GLEnv* gl_env)
+  : gl_env_(gl_env),
+    width_(0),
     height_(0),
     vp_x_(0),
     vp_y_(0),
@@ -45,8 +48,7 @@ GLFrame::GLFrame()
     texture_target_(GL_TEXTURE_2D),
     texture_state_(kStateUninitialized),
     fbo_state_(kStateUninitialized),
-    owns_(false),
-    identity_cache_(NULL) {
+    owns_(false) {
 }
 
 bool GLFrame::Init(int width, int height) {
@@ -96,7 +98,6 @@ GLFrame::~GLFrame() {
       glDeleteTextures(1, &texture_id_);
       glDeleteFramebuffers(1, &fbo_id_);
   }
-  delete identity_cache_;
 }
 
 bool GLFrame::GenerateMipMap() {
@@ -146,7 +147,7 @@ bool GLFrame::SetViewport(int x, int y, int width, int height) {
 }
 
 GLFrame* GLFrame::Clone() const {
-  GLFrame* target = new GLFrame();
+  GLFrame* target = new GLFrame(gl_env_);
   target->Init(width_, height_);
   target->CopyPixelsFrom(this);
   return target;
@@ -169,9 +170,12 @@ int GLFrame::Size() const {
 }
 
 ShaderProgram* GLFrame::GetIdentity() const {
-  if (!identity_cache_)
-    identity_cache_ = ShaderProgram::CreateIdentity();
-  return identity_cache_;
+  ShaderProgram* stored_shader = gl_env_->ShaderWithKey(kIdentityShaderKey);
+  if (!stored_shader) {
+    stored_shader = ShaderProgram::CreateIdentity(gl_env_);
+    gl_env_->AttachShader(kIdentityShaderKey, stored_shader);
+  }
+  return stored_shader;
 }
 
 bool GLFrame::BindFrameBuffer() const {
@@ -300,7 +304,7 @@ bool GLFrame::ReadTexturePixels(uint8_t* pixels) const {
   sources.push_back(this);
 
   // Create target frame
-  GLFrame target;
+  GLFrame target(gl_env_);
   target.Init(width_, height_);
 
   // Render the texture to the target

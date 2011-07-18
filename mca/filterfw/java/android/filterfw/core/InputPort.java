@@ -77,6 +77,5 @@ public abstract class InputPort extends FilterPort {
         return !hasFrame();
     }
 
-    public void transfer(FilterContext context) {
-    }
+    public abstract void transfer(FilterContext context);
 }

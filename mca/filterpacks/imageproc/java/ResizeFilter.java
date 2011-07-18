@@ -67,14 +67,14 @@ public class ResizeFilter extends Filter {
     }
 
     @Override
-    protected void prepare(FilterContext environment) {
+    protected void prepare(FilterContext context) {
         switch (getInputFormat("image").getTarget()) {
             case FrameFormat.TARGET_NATIVE:
                 throw new RuntimeException("Native ResizeFilter not implemented yet!");
 
 
             case FrameFormat.TARGET_GPU:
-                ShaderProgram prog = ShaderProgram.createIdentity();
+                ShaderProgram prog = ShaderProgram.createIdentity(context);
                 mProgram = prog;
                 break;
 

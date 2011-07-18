@@ -127,7 +127,7 @@ public class SurfaceTextureTarget extends Filter {
     public void prepare(FilterContext context) {
         // Create identity shader to render, and make sure to render upside-down, as textures
         // are stored internally bottom-to-top.
-        mProgram = ShaderProgram.createIdentity();
+        mProgram = ShaderProgram.createIdentity(context);
         mProgram.setSourceRect(0, 1, 1, -1);
         mProgram.setClearColor(0.0f, 0.0f, 0.0f);
 

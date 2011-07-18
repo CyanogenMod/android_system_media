@@ -125,7 +125,7 @@ public class MediaSource extends Filter {
     protected void prepare(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Preparing MediaSource");
 
-        mFrameExtractor = new ShaderProgram(mFrameShader);
+        mFrameExtractor = new ShaderProgram(context, mFrameShader);
         // SurfaceTexture defines (0,0) to be bottom-left. The filter framework
         // defines (0,0) as top-left, so do the flip here.
         mFrameExtractor.setSourceRect(0, 1, 1, -1);

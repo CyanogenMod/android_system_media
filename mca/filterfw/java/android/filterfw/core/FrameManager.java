@@ -26,6 +26,8 @@ import android.filterfw.core.MutableFrameFormat;
  */
 public abstract class FrameManager {
 
+    private FilterContext mContext;
+
     public abstract Frame newFrame(FrameFormat format);
 
     public abstract Frame newBoundFrame(FrameFormat format, int bindingType, long bindingId);
@@ -47,4 +49,16 @@ public abstract class FrameManager {
     public abstract Frame retainFrame(Frame frame);
 
     public abstract Frame releaseFrame(Frame frame);
+
+    public FilterContext getContext() {
+        return mContext;
+    }
+
+    public GLEnvironment getGLEnvironment() {
+        return mContext != null ? mContext.getGLEnvironment() : null;
+    }
+
+    void setContext(FilterContext context) {
+        mContext = context;
+    }
 }

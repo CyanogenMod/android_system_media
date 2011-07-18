@@ -52,15 +52,28 @@ public class FilterContext {
     }
 
     public void setFrameManager(FrameManager manager) {
-        mFrameManager = manager;
+        if (manager == null) {
+            throw new NullPointerException("Attempting to set null FrameManager!");
+        } else if (manager.getContext() != null) {
+            throw new IllegalArgumentException("Attempting to set FrameManager which is already "
+                + "bound to another FilterContext!");
+        } else {
+            mFrameManager = manager;
+            mFrameManager.setContext(this);
+        }
     }
 
     public GLEnvironment getGLEnvironment() {
         return mGLEnvironment;
     }
 
-    public void setGLEnvironment(GLEnvironment environment) {
-        mGLEnvironment = environment;
+    public void initGLEnvironment(GLEnvironment environment) {
+        if (mGLEnvironment == null) {
+            mGLEnvironment = environment;
+        } else {
+            throw new RuntimeException("Attempting to re-initialize GL Environment for " +
+                "FilterContext!");
+        }
     }
 
     public interface OnFrameReceivedListener {

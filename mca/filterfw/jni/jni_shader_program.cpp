@@ -22,10 +22,12 @@
 
 #include "native/base/logging.h"
 #include "native/core/geometry.h"
+#include "native/core/gl_env.h"
 #include "native/core/gl_frame.h"
 #include "native/core/shader_program.h"
 #include "native/core/vertex_frame.h"
 
+using android::filterfw::GLEnv;
 using android::filterfw::GLFrame;
 using android::filterfw::Point;
 using android::filterfw::ProgramVar;
@@ -35,21 +37,30 @@ using android::filterfw::VertexFrame;
 
 jboolean Java_android_filterfw_core_ShaderProgram_allocate(JNIEnv* env,
                                                            jobject thiz,
+                                                           jobject gl_env,
                                                            jstring vertex_shader,
                                                            jstring fragment_shader) {
-  if (!fragment_shader)
+  // Get the GLEnv pointer
+  GLEnv* gl_env_ptr = ConvertFromJava<GLEnv>(env, gl_env);
+
+  // Create the shader
+  if (!fragment_shader || !gl_env_ptr)
     return false;
   else if (!vertex_shader)
-    return ToJBool(WrapObjectInJava(new ShaderProgram(ToCppString(env, fragment_shader)),
-                                    env,
-                                    thiz,
-                                    true));
+    return ToJBool(WrapObjectInJava(new ShaderProgram(
+      gl_env_ptr,
+      ToCppString(env, fragment_shader)),
+      env,
+      thiz,
+      true));
   else
-    return ToJBool(WrapObjectInJava(new ShaderProgram(ToCppString(env, vertex_shader),
-                                                      ToCppString(env, fragment_shader)),
-                                    env,
-                                    thiz,
-                                    true));
+    return ToJBool(WrapObjectInJava(new ShaderProgram(
+      gl_env_ptr,
+      ToCppString(env, vertex_shader),
+      ToCppString(env, fragment_shader)),
+      env,
+      thiz,
+      true));
 }
 
 jboolean Java_android_filterfw_core_ShaderProgram_deallocate(JNIEnv* env, jobject thiz) {
@@ -121,9 +132,12 @@ jboolean Java_android_filterfw_core_ShaderProgram_shaderProcess(JNIEnv* env,
   return JNI_FALSE;
 }
 
-jobject Java_android_filterfw_core_ShaderProgram_nativeCreateIdentity(JNIEnv* env, jclass) {
-  ShaderProgram* program = ShaderProgram::CreateIdentity();
-  return program ? WrapNewObjectInJava(program, env, true) : NULL;
+jobject Java_android_filterfw_core_ShaderProgram_nativeCreateIdentity(JNIEnv* env,
+                                                                      jclass,
+                                                                      jobject gl_env) {
+  GLEnv* gl_env_ptr = ConvertFromJava<GLEnv>(env, gl_env);
+  ShaderProgram* program = gl_env_ptr ? ShaderProgram::CreateIdentity(gl_env_ptr) : NULL;
+  return program ? WrapNewObjectInJava(program, env, false) : NULL;
 }
 
 jboolean Java_android_filterfw_core_ShaderProgram_setShaderSourceRegion(JNIEnv* env,

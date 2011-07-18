@@ -161,7 +161,7 @@ public class SurfaceTextureSource extends Filter {
                                                                        0);
 
         // Prepare output
-        mFrameExtractor = new ShaderProgram(mRenderShader);
+        mFrameExtractor = new ShaderProgram(context, mRenderShader);
         // SurfaceTexture defines (0,0) to be bottom-left. The filter framework
         // defines (0,0) as top-left, so do the flip here.
         mFrameExtractor.setSourceRect(0, 1, 1, -1);

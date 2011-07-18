@@ -59,8 +59,8 @@ public class DrawOverlayFilter extends Filter {
     }
 
     @Override
-    public void prepare(FilterContext env) {
-        mProgram = ShaderProgram.createIdentity();
+    public void prepare(FilterContext context) {
+        mProgram = ShaderProgram.createIdentity(context);
     }
 
     @Override

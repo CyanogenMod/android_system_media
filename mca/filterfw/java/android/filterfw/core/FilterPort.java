@@ -123,5 +123,12 @@ public abstract class FilterPort {
                 + "Expected " + mPortFormat + " but got " + frame.getFormat());
         }
     }
+
+    protected void checkFrameManager(Frame frame, FilterContext context) {
+        if (frame.getFrameManager() != null
+            && frame.getFrameManager() != context.getFrameManager()) {
+            throw new RuntimeException("Frame " + frame + " is managed by foreign FrameManager! ");
+        }
+    }
 }
 

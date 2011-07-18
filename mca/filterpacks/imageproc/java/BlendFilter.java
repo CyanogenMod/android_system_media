@@ -52,13 +52,13 @@ public class BlendFilter extends ImageCombineFilter {
     }
 
     @Override
-    protected Program getNativeProgram() {
+    protected Program getNativeProgram(FilterContext context) {
         throw new RuntimeException("TODO: Write native implementation for AlphaBlend!");
     }
 
     @Override
-    protected Program getShaderProgram() {
-        return new ShaderProgram(mBlendShader);
+    protected Program getShaderProgram(FilterContext context) {
+        return new ShaderProgram(context, mBlendShader);
     }
 
 }

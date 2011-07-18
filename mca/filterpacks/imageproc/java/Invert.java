@@ -48,13 +48,13 @@ public class Invert extends SimpleImageFilter {
     }
 
     @Override
-    protected Program getNativeProgram() {
+    protected Program getNativeProgram(FilterContext context) {
         return new NativeProgram("filterpack_imageproc", "invert");
     }
 
     @Override
-    protected Program getShaderProgram() {
-        return new ShaderProgram(mInvertShader);
+    protected Program getShaderProgram(FilterContext context) {
+        return new ShaderProgram(context, mInvertShader);
     }
 
 }

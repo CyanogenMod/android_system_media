@@ -52,13 +52,13 @@ public class ContrastFilter extends SimpleImageFilter {
     }
 
     @Override
-    protected Program getNativeProgram() {
+    protected Program getNativeProgram(FilterContext context) {
         return new NativeProgram("filterpack_imageproc", "contrast");
     }
 
     @Override
-    protected Program getShaderProgram() {
-        return new ShaderProgram(mContrastShader);
+    protected Program getShaderProgram(FilterContext context) {
+        return new ShaderProgram(context, mContrastShader);
     }
 
 }
