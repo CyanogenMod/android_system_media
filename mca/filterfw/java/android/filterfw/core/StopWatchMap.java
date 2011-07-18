@@ -69,7 +69,7 @@ class StopWatch {
 
 public class StopWatchMap {
 
-    public boolean LOG_MFF_RUNNING_TIMES = true;
+    public boolean LOG_MFF_RUNNING_TIMES = false;
 
     private HashMap<String, StopWatch> mStopWatches = null;
 
