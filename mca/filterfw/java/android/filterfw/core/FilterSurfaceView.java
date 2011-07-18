@@ -18,8 +18,6 @@
 package android.filterfw.core;
 
 import android.content.Context;
-import android.filterfw.core.FilterSurfaceRenderer;
-import android.filterfw.core.GLEnvironment;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -29,12 +27,16 @@ import android.view.SurfaceView;
  */
 public class FilterSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
-    private SurfaceHolder mHolder;
-    private FilterSurfaceRenderer mRenderer;
+    private static int STATE_ALLOCATED      = 0;
+    private static int STATE_CREATED        = 1;
+    private static int STATE_INITIALIZED    = 2;
+
+    private int mState = STATE_ALLOCATED;
+    private SurfaceHolder.Callback mListener;
     private GLEnvironment mGLEnv;
-    private int mFormat = -1;
-    private int mWidth  = -1;
-    private int mHeight = -1;
+    private int mFormat;
+    private int mWidth;
+    private int mHeight;
     private int mSurfaceId = -1;
 
     public FilterSurfaceView(Context context) {
@@ -47,14 +49,18 @@ public class FilterSurfaceView extends SurfaceView implements SurfaceHolder.Call
         getHolder().addCallback(this);
     }
 
-    public synchronized void bindToRenderer(FilterSurfaceRenderer renderer, GLEnvironment glEnv) {
+    public synchronized void bindToListener(SurfaceHolder.Callback listener, GLEnvironment glEnv) {
         // Make sure we are not bound already
-        if (mRenderer != null && mRenderer != renderer) {
+        if (listener == null) {
+            throw new NullPointerException("Attempting to bind null filter to SurfaceView!");
+        } else if (mListener != null && mListener != listener) {
             throw new RuntimeException(
-                "Attempting to bind filter " + renderer + " to SurfaceView with another filter " +
-                mRenderer + " attached already!");
+                "Attempting to bind filter " + listener + " to SurfaceView with another open "
+                + "filter " + mListener + " attached already!");
         }
-        mRenderer = renderer;
+
+        // Set listener
+        mListener = listener;
 
         // Set GLEnv
         if (mGLEnv != null && mGLEnv != glEnv) {
@@ -63,26 +69,23 @@ public class FilterSurfaceView extends SurfaceView implements SurfaceHolder.Call
         mGLEnv = glEnv;
 
         // Check if surface has been created already
-        if (mHolder != null) {
+        if (mState >= STATE_CREATED) {
             // Register with env (double registration will be ignored by GLEnv, so we can simply
             // try to do it here).
-            mSurfaceId = mGLEnv.registerSurface(mHolder.getSurface());
+            registerSurface();
 
-            if (mSurfaceId < 0) {
-                throw new RuntimeException("Could not register Surface in FilterSurfaceView!");
-            }
+            // Forward surface created to listener
+            mListener.surfaceCreated(getHolder());
 
             // Forward surface changed to listener
-            if (mFormat != -1) {
-                mRenderer.surfaceChanged(mFormat, mWidth, mHeight);
+            if (mState == STATE_INITIALIZED) {
+                mListener.surfaceChanged(getHolder(), mFormat, mWidth, mHeight);
             }
         }
-
-
     }
 
     public synchronized void unbind() {
-        mRenderer = null;
+        mListener = null;
     }
 
     public synchronized int getSurfaceId() {
@@ -95,17 +98,16 @@ public class FilterSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
     @Override
     public synchronized void surfaceCreated(SurfaceHolder holder) {
-        mHolder = holder;
-        mFormat = -1;
+        mState = STATE_CREATED;
 
         // Register with GLEnvironment if we have it already
         if (mGLEnv != null) {
-            mSurfaceId = mGLEnv.registerSurface(mHolder.getSurface());
+            registerSurface();
+        }
 
-            if (mSurfaceId < 0) {
-                throw new RuntimeException("Could not register Surface: " + mHolder.getSurface() +
-                                           " in FilterSurfaceView!");
-            }
+        // Forward callback to listener
+        if (mListener != null) {
+            mListener.surfaceCreated(holder);
         }
     }
 
@@ -118,26 +120,34 @@ public class FilterSurfaceView extends SurfaceView implements SurfaceHolder.Call
         mFormat = format;
         mWidth = width;
         mHeight = height;
+        mState = STATE_INITIALIZED;
 
         // Forward to renderer
-        if (mRenderer != null) {
-            mRenderer.surfaceChanged(mFormat, mWidth, mHeight);
+        if (mListener != null) {
+            mListener.surfaceChanged(holder, format, width, height);
         }
     }
 
     @Override
     public synchronized void surfaceDestroyed(SurfaceHolder holder) {
+        mState = STATE_ALLOCATED;
+
         // Forward to renderer
-        if (mRenderer != null) {
-            mRenderer.surfaceDestroyed();
+        if (mListener != null) {
+            mListener.surfaceDestroyed(holder);
         }
 
         // Get rid of internal objects associated with this surface
         unregisterSurface();
-        mHolder = null;
-        mFormat = -1;
     }
 
+    private void registerSurface() {
+        mSurfaceId = mGLEnv.registerSurface(getHolder().getSurface());
+        if (mSurfaceId < 0) {
+            throw new RuntimeException("Could not register Surface: " + getHolder().getSurface() +
+                                       " in FilterSurfaceView!");
+        }
+    }
     private void unregisterSurface() {
         if (mGLEnv != null && mSurfaceId > 0) {
             mGLEnv.unregisterSurfaceId(mSurfaceId);
