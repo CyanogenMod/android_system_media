@@ -20,7 +20,6 @@ package android.filterpacks.ui;
 import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.FilterSurfaceView;
-import android.filterfw.core.FilterSurfaceRenderer;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFieldPort;
@@ -46,7 +45,7 @@ import android.util.Log;
 /**
  * @hide
  */
-public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer {
+public class SurfaceRenderFilter extends Filter implements SurfaceHolder.Callback {
 
     private final int RENDERMODE_STRETCH   = 0;
     private final int RENDERMODE_FIT       = 1;
@@ -68,6 +67,8 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
      */
     @GenerateFieldPort(name = "renderMode", hasDefault = true)
     private String mRenderModeString;
+
+    private boolean mIsBound = false;
 
     private ShaderProgram mProgram;
     private GLFrame mScreen;
@@ -142,14 +143,21 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
 
     @Override
     public void open(FilterContext context) {
-        // Bind surface view to us. This will emit a surfaceChanged call that will update our
-        // screen width and height.
+        // Bind surface view to us. This will emit a surfaceCreated and surfaceChanged call that
+        // will update our screen width and height.
         mSurfaceView.unbind();
-        mSurfaceView.bindToRenderer(this, context.getGLEnvironment());
+        mSurfaceView.bindToListener(this, context.getGLEnvironment());
     }
 
     @Override
     public void process(FilterContext context) {
+        // Make sure we are bound to a surface before rendering
+        if (!mIsBound) {
+            Log.w("SurfaceRenderFilter",
+                  this + ": Ignoring frame as there is no surface to render to!");
+            return;
+        }
+
         if (mLogVerbose) Log.v(TAG, "Starting frame processing");
 
         GLEnvironment glEnv = mSurfaceView.getGLEnv();
@@ -201,6 +209,11 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
     }
 
     @Override
+    public void close(FilterContext context) {
+        mSurfaceView.unbind();
+    }
+
+    @Override
     public void tearDown(FilterContext context) {
         if (mScreen != null) {
             mScreen.release();
@@ -208,7 +221,15 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
     }
 
     @Override
-    public synchronized void surfaceChanged(int format, int width, int height) {
+    public synchronized void surfaceCreated(SurfaceHolder holder) {
+        mIsBound = true;
+    }
+
+    @Override
+    public synchronized void surfaceChanged(SurfaceHolder holder,
+                                            int format,
+                                            int width,
+                                            int height) {
         // If the screen is null, we do not care about surface changes (yet). Once we have a
         // screen object, we need to keep track of these changes.
         if (mScreen != null) {
@@ -220,9 +241,8 @@ public class SurfaceRenderFilter extends Filter implements FilterSurfaceRenderer
     }
 
     @Override
-    public synchronized void surfaceDestroyed() {
-        // We do nothing here but declare this synchronized so that the surface is not destroyed
-        // behind our backs.
+    public synchronized void surfaceDestroyed(SurfaceHolder holder) {
+        mIsBound = false;
     }
 
     private void updateTargetRect() {

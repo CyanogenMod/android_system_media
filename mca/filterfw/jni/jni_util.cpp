@@ -133,7 +133,10 @@ jobject CreateJObject(JNIEnv* env, const std::string& class_name, const std::str
 Value ToCValue(JNIEnv* env, jobject object) {
   Value result = MakeNullValue();
   if (object != NULL) {
-    if (IsJavaInstanceOf(env, object, "java/lang/Integer")) {
+    if (IsJavaInstanceOf(env, object, "java/lang/Boolean")) {
+      jmethodID method = env->GetMethodID(env->GetObjectClass(object), "booleanValue", "()Z");
+      result = MakeIntValue(env->CallBooleanMethod(object, method) == JNI_TRUE ? 1 : 0);
+    } else if (IsJavaInstanceOf(env, object, "java/lang/Integer")) {
       jmethodID method = env->GetMethodID(env->GetObjectClass(object), "intValue", "()I");
       result = MakeIntValue(env->CallIntMethod(object, method));
     } else if (IsJavaInstanceOf(env, object, "java/lang/Float")) {
