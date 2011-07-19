@@ -27,17 +27,14 @@
 namespace android {
 namespace filterfw {
 
-int GLEnv::max_id_ = 0;
-
 GLEnv::GLEnv()
-  : id_(max_id_),
-    display_(EGL_NO_DISPLAY),
+  : display_(EGL_NO_DISPLAY),
     context_id_(0),
     surface_id_(0),
+    max_surface_id_(0),
     created_context_(false),
     created_surface_(false),
     initialized_(false) {
-  ++max_id_;
 }
 
 GLEnv::~GLEnv() {
@@ -177,7 +174,7 @@ bool GLEnv::IsActive() const {
 }
 
 int GLEnv::AddWindowSurface(const EGLSurface& surface, WindowHandle* window_handle) {
-  const int id = surfaces_.size();
+  const int id = ++max_surface_id_;
   surfaces_[id] = SurfaceWindowPair(surface, window_handle);
   return id;
 }
@@ -203,7 +200,7 @@ bool GLEnv::ReleaseSurfaceId(int surface_id) {
     const SurfaceWindowPair* surface = FindOrNull(surfaces_, surface_id);
     if (surface) {
       surfaces_.erase(surface_id);
-      if (surface_id_ == surface_id && IsActive())
+      if (surface_id_ == surface_id)
         SwitchToSurfaceId(0);
       eglDestroySurface(display(), surface->first);
       if (surface->second) {

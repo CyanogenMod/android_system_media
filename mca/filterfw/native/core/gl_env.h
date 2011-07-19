@@ -66,11 +66,6 @@ class GLEnv {
     // by this instance.
     ~GLEnv();
 
-    // Returns a globally unique id of this environment.
-    int id() const {
-      return id_;
-    }
-
     // Inits a new GL environment, including a new surface and context. You
     // must call Activate() before performing any GL operations.
     bool InitWithNewContext();
@@ -220,12 +215,6 @@ class GLEnv {
     // Returns true if there was at least one error.
     static bool CheckEGLMakeCurrentError();
 
-    // The maximum id assigned to a GLEnv instance.
-    static int max_id_;
-
-    // This GLEnv instance's id.
-    int id_;
-
     // The EGL display, contexts, and surfaces.
     EGLDisplay display_;
     std::map<int, EGLContext> contexts_;
@@ -234,6 +223,9 @@ class GLEnv {
     // The currently active context and surface ids.
     int context_id_;
     int surface_id_;
+
+    // The maximum suface id used.
+    int max_surface_id_;
 
     // These bools keep track of which objects this GLEnv has created (and
     // owns).
