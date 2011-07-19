@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define USE_LOG SLAndroidLogLevel_Verbose
+//#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
 #include "android_GenericMediaPlayer.h"
