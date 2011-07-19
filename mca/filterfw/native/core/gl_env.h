@@ -160,6 +160,13 @@ class GLEnv {
     // Returns true if the environment is active in the current thread.
     bool IsActive() const;
 
+    // Returns true if the environment's context is active in the curent thread.
+    bool IsContextActive() const;
+
+    // Returns true if there is any EGL context active in the current thread.
+    // This need not be a context created by a GLEnv instance.
+    static bool IsAnyContextActive();
+
     // Attaching GL objects ////////////////////////////////////////////////////
 
     // Attach a shader to the environment. The environment takes ownership of

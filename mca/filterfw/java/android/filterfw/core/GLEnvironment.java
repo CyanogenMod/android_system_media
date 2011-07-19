@@ -58,6 +58,14 @@ public class GLEnvironment {
         return nativeIsActive();
     }
 
+    public boolean isContextActive() {
+        return nativeIsContextActive();
+    }
+
+    public static boolean isAnyContextActive() {
+        return nativeIsAnyContextActive();
+    }
+
     public void activate() {
         if (Looper.myLooper() != null && Looper.myLooper().equals(Looper.getMainLooper())) {
             Log.e("GLEnvironment", "Activating GL context in UI thread!");
@@ -122,6 +130,10 @@ public class GLEnvironment {
     private native boolean nativeInitWithCurrentContext();
 
     private native boolean nativeIsActive();
+
+    private native boolean nativeIsContextActive();
+
+    private static native boolean nativeIsAnyContextActive();
 
     private native boolean nativeActivate();
 

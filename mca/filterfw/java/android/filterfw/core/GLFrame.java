@@ -152,12 +152,14 @@ public class GLFrame extends Frame {
 
     @Override
     public Object getObjectValue() {
+        assertGLEnvValid();
         return ByteBuffer.wrap(getNativeData());
     }
 
     @Override
     public void setInts(int[] ints) {
         assertFrameMutable();
+        assertGLEnvValid();
         if (!setNativeInts(ints)) {
             throw new RuntimeException("Could not set int values for GL frame!");
         }
@@ -165,6 +167,7 @@ public class GLFrame extends Frame {
 
     @Override
     public int[] getInts() {
+        assertGLEnvValid();
         flushGPU("getInts");
         return getNativeInts();
     }
@@ -172,6 +175,7 @@ public class GLFrame extends Frame {
     @Override
     public void setFloats(float[] floats) {
         assertFrameMutable();
+        assertGLEnvValid();
         if (!setNativeFloats(floats)) {
             throw new RuntimeException("Could not set int values for GL frame!");
         }
@@ -179,6 +183,7 @@ public class GLFrame extends Frame {
 
     @Override
     public float[] getFloats() {
+        assertGLEnvValid();
         flushGPU("getFloats");
         return getNativeFloats();
     }
@@ -186,6 +191,7 @@ public class GLFrame extends Frame {
     @Override
     public void setData(ByteBuffer buffer, int offset, int length) {
         assertFrameMutable();
+        assertGLEnvValid();
         byte[] bytes = buffer.array();
         if (getFormat().getSize() != bytes.length) {
             throw new RuntimeException("Data size in setData does not match GL frame size!");
@@ -196,6 +202,7 @@ public class GLFrame extends Frame {
 
     @Override
     public ByteBuffer getData() {
+        assertGLEnvValid();
         flushGPU("getData");
         return ByteBuffer.wrap(getNativeData());
     }
@@ -203,6 +210,7 @@ public class GLFrame extends Frame {
     @Override
     public void setBitmap(Bitmap bitmap) {
         assertFrameMutable();
+        assertGLEnvValid();
         if (getFormat().getWidth()  != bitmap.getWidth() ||
             getFormat().getHeight() != bitmap.getHeight()) {
             throw new RuntimeException("Bitmap dimensions do not match GL frame dimensions!");
@@ -216,6 +224,7 @@ public class GLFrame extends Frame {
 
     @Override
     public Bitmap getBitmap() {
+        assertGLEnvValid();
         flushGPU("getBitmap");
         Bitmap result = Bitmap.createBitmap(getFormat().getWidth(),
                                             getFormat().getHeight(),
@@ -228,6 +237,8 @@ public class GLFrame extends Frame {
 
     @Override
     public void setDataFromFrame(Frame frame) {
+        assertGLEnvValid();
+
         // Make sure frame fits
         if (getFormat().getSize() < frame.getFormat().getSize()) {
             throw new RuntimeException(
@@ -259,6 +270,7 @@ public class GLFrame extends Frame {
 
     public void generateMipMap() {
         assertFrameMutable();
+        assertGLEnvValid();
         if (!generateNativeMipMap()) {
             throw new RuntimeException("Could not generate mip-map for GL frame!");
         }
@@ -266,6 +278,7 @@ public class GLFrame extends Frame {
 
     public void setTextureParameter(int param, int value) {
         assertFrameMutable();
+        assertGLEnvValid();
         if (!setNativeTextureParam(param, value)) {
             throw new RuntimeException("Could not set texture value " + param + " = " + value + " " +
                                        "for GLFrame!");
@@ -290,6 +303,18 @@ public class GLFrame extends Frame {
     public String toString() {
         return "GLFrame (" + getFormat() + ") with texture ID " + getTextureId()
             + ", FBO ID " + getFboId();
+    }
+
+    private void assertGLEnvValid() {
+        if (!mGLEnvironment.isContextActive()) {
+            if (GLEnvironment.isAnyContextActive()) {
+                throw new RuntimeException("Attempting to access " + this + " with foreign GL " +
+                    "context active!");
+            } else {
+                throw new RuntimeException("Attempting to access " + this + " with no GL context " +
+                    " active!");
+            }
+        }
     }
 
     static {
