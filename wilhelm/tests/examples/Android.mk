@@ -7,7 +7,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include/SLES/
+	system/media/wilhelm/include
 
 LOCAL_SRC_FILES:= \
 	slesTestRecBuffQueue.cpp

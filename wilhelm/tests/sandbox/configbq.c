@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 
 typedef struct {
     SLuint8 numChannels;

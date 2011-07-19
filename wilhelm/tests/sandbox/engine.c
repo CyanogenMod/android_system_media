@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #include "OpenSLESUT.h"
 #include <assert.h>
 #include <stdio.h>

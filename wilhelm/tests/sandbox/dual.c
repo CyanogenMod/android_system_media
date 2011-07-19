@@ -19,8 +19,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "SLES/OpenSLES.h"
-#include "OMXAL/OpenMAXAL.h"
+#include <SLES/OpenSLES.h>
+#include <OMXAL/OpenMAXAL.h>
 
 int main(int argc, char **argv)
 {

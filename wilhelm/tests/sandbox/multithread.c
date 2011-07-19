@@ -16,7 +16,7 @@
 
 // Multiple threads create and destroy objects
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #include <assert.h>
 #include <pthread.h>
 //#include <string.h>

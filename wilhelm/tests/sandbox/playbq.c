@@ -23,7 +23,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #ifdef ANDROID
 #include "sndfile.h"
 #else

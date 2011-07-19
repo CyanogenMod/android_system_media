@@ -42,9 +42,9 @@ How to examine the output with Audacity:
 #include <sys/time.h>
 #include <fcntl.h>
 
-#include "OpenSLES.h"
-#include "OpenSLES_Android.h"
-#include "OpenSLES_AndroidConfiguration.h"
+#include <SLES/OpenSLES.h>
+#include <SLES/OpenSLES_Android.h>
+#include <SLES/OpenSLES_AndroidConfiguration.h>
 
 /* Explicitly requesting SL_IID_ANDROIDSIMPLEBUFFERQUEUE and SL_IID_ANDROIDCONFIGURATION
  * on the AudioRecorder object */

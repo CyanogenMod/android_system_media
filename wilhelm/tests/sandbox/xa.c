@@ -17,8 +17,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "OMXAL/OpenMAXAL.h"
-#include "OMXAL/OpenMAXAL_Android.h"
+#include <OMXAL/OpenMAXAL.h>
+#include <OMXAL/OpenMAXAL_Android.h>
 
 int main(int argc, char **argv)
 {

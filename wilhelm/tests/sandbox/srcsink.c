@@ -19,7 +19,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 
 int main(int argc, char **argv)
 {
