@@ -332,26 +332,25 @@ Closure *ThreadPool_remove(ThreadPool *tp)
     ok = pthread_mutex_lock(&tp->mMutex);
     assert(0 == ok);
     for (;;) {
+        // fail if thread pool is shutting down
+        if (tp->mShutdown) {
+            pClosure = NULL;
+            break;
+        }
         Closure **oldFront = tp->mClosureFront;
         // if closure circular buffer is empty, then wait for it to become non-empty
         if (oldFront == tp->mClosureRear) {
             ++tp->mWaitingNotEmpty;
             ok = pthread_cond_wait(&tp->mCondNotEmpty, &tp->mMutex);
             assert(0 == ok);
-            // fail if thread pool is shutting down
-            if (tp->mShutdown) {
-                assert(0 < tp->mWaitingNotEmpty);
-                --tp->mWaitingNotEmpty;
-                pClosure = NULL;
-                break;
-            }
             // try again
             continue;
         }
         // dequeue the closure at front of circular buffer
         Closure **newFront = oldFront;
-        if (++newFront == &tp->mClosureArray[tp->mMaxClosures + 1])
+        if (++newFront == &tp->mClosureArray[tp->mMaxClosures + 1]) {
             newFront = tp->mClosureArray;
+        }
         pClosure = *oldFront;
         assert(NULL != pClosure);
         *oldFront = NULL;
