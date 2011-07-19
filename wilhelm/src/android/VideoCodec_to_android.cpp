@@ -104,7 +104,6 @@ bool android_videoCodec_expose() {
 
 void android_videoCodec_deinit() {
     SL_LOGV("android_videoCodec_deinit()");
-    LOGE("android_videoCodec_deinit()");
     for (size_t m = 0 ; m < kNbVideoMimeTypes ; m++) {
         VideoDecoderCapabilities[m].clear();
     }
