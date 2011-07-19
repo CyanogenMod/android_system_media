@@ -30,6 +30,19 @@ typedef xa_int64_t             XAAint64;          /* 64 bit signed integer   */
 typedef xa_uint64_t            XAAuint64;         /* 64 bit unsigned integer */
 
 /*---------------------------------------------------------------------------*/
+/* Android common types                                                      */
+/*---------------------------------------------------------------------------*/
+
+#define XA_ANDROID_VIDEOCODEC_VP8            ((XAuint32) 0x00000006)
+
+#define XA_ANDROID_VIDEOPROFILE_VP8_MAIN     ((XAuint32) 0x00000001)
+
+#define XA_ANDROID_VIDEOLEVEL_VP8_VERSION0   ((XAuint32) 0x00000001)
+#define XA_ANDROID_VIDEOLEVEL_VP8_VERSION1   ((XAuint32) 0x00000002)
+#define XA_ANDROID_VIDEOLEVEL_VP8_VERSION2   ((XAuint32) 0x00000003)
+#define XA_ANDROID_VIDEOLEVEL_VP8_VERSION3   ((XAuint32) 0x00000004)
+
+/*---------------------------------------------------------------------------*/
 /* Android Buffer Queue Interface                                            */
 /*---------------------------------------------------------------------------*/
 

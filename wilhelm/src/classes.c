@@ -169,6 +169,8 @@ static const struct iid_vtable Engine_interfaces[INTERFACES_Engine] = {
     {MPH_ANDROIDEFFECTCAPABILITIES, INTERFACE_EXPLICIT,
         offsetof(CEngine, mAndroidEffectCapabilities)},
 #endif
+    {MPH_XAVIDEODECODERCAPABILITIES, INTERFACE_EXPLICIT,
+        offsetof(CEngine, mVideoDecoderCapabilities)},
 };
 
 static const ClassTable CEngine_class = {

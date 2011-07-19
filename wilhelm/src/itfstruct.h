@@ -600,6 +600,11 @@ typedef struct {
 #endif
 } IStreamInformation;
 
+typedef struct {
+    const struct XAVideoDecoderCapabilitiesItf_ *mItf;
+    IObject *mThis;
+} IVideoDecoderCapabilities;
+
 /* Class structures */
 
 /*typedef*/ struct C3DGroup_struct {

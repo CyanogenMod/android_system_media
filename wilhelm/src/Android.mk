@@ -63,8 +63,9 @@ LOCAL_SRC_FILES:=                     \
         android/AudioPlayer_to_android.cpp    \
         android/AudioRecorder_to_android.cpp  \
         android/MediaPlayer_to_android.cpp    \
-        android/CallbackProtector.cpp         \
         android/OutputMix_to_android.cpp      \
+        android/VideoCodec_to_android.cpp     \
+        android/CallbackProtector.cpp         \
         android/android_AudioSfDecoder.cpp    \
         android/android_AudioToCbRenderer.cpp \
         android/android_GenericMediaPlayer.cpp\
@@ -103,6 +104,7 @@ LOCAL_SRC_FILES:=                     \
         itf/IRecord.c                     \
         itf/ISeek.c                       \
         itf/IStreamInformation.cpp        \
+        itf/IVideoDecoderCapabilities.cpp \
         itf/IVirtualizer.c                \
         itf/IVolume.c
 

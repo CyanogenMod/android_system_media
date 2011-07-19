@@ -126,6 +126,23 @@ static const SLuint32 Codec_IDs[] = {
 const SLuint32 *Decoder_IDs = Codec_IDs;
 const SLuint32 *Encoder_IDs = Codec_IDs;
 
+static const SLuint32 VideoCodecIds[] = {
+        XA_VIDEOCODEC_MPEG2,
+        XA_VIDEOCODEC_H263,
+        XA_VIDEOCODEC_MPEG4,
+        XA_VIDEOCODEC_AVC,
+#ifndef ANDROID
+        XA_VIDEOCODEC_VC1,
+#endif
+#ifdef ANDROID
+        XA_ANDROID_VIDEOCODEC_VP8
+#endif
+};
+
+const SLuint32 *VideoDecoderIds = VideoCodecIds;
+
+const XAuint32 kMaxVideoDecoders = sizeof(VideoCodecIds) / sizeof(VideoCodecIds[0]);
+
 static const SLmilliHertz SamplingRates_A[] = {
     SL_SAMPLINGRATE_8,
     SL_SAMPLINGRATE_11_025,

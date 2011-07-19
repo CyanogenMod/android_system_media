@@ -267,3 +267,30 @@ endif
 LOCAL_MODULE:= slesTest_decodeToBuffQueue
 
 include $(BUILD_EXECUTABLE)
+
+#######################################
+# OpenMAX AL example code
+
+# xaVideoDecoderCapabilities
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_C_INCLUDES:= \
+	system/media/wilhelm/include
+
+LOCAL_SRC_FILES:= \
+	xaVideoDecoderCapabilities.cpp
+
+LOCAL_SHARED_LIBRARIES := \
+	libutils \
+	libOpenMAXAL
+
+ifeq ($(TARGET_OS),linux)
+	LOCAL_CFLAGS += -DXP_UNIX
+endif
+
+LOCAL_MODULE:= xaVideoDecoderCapabilities
+
+include $(BUILD_EXECUTABLE)

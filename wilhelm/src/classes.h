@@ -168,9 +168,9 @@
     // mandated implicit interfaces
     IObject mObject;
 #ifdef ANDROID
-#define INTERFACES_Engine 12 // see MPH_to_Engine in MPH_to.c for list of interfaces
+#define INTERFACES_Engine 13 // see MPH_to_Engine in MPH_to.c for list of interfaces
 #else
-#define INTERFACES_Engine 11 // see MPH_to_Engine in MPH_to.c for list of interfaces
+#define INTERFACES_Engine 12 // see MPH_to_Engine in MPH_to.c for list of interfaces
 #endif
     SLuint8 mInterfaceStates2[INTERFACES_Engine - INTERFACES_Default];
     IDynamicInterfaceManagement mDynamicInterfaceManagement;
@@ -189,6 +189,8 @@
 #ifdef ANDROID
     IAndroidEffectCapabilities mAndroidEffectCapabilities;
 #endif
+    // OpenMAX AL explicit interfaces
+    IVideoDecoderCapabilities mVideoDecoderCapabilities;
     // remaining are per-instance private fields not associated with an interface
     ThreadPool mThreadPool; // for asynchronous operations
     pthread_t mSyncThread;
