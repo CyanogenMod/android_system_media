@@ -22,8 +22,8 @@
 #define LOG_TAG "NativeMedia"
 #include <utils/Log.h>
 
-#include "OMXAL/OpenMAXAL.h"
-#include "OMXAL/OpenMAXAL_Android.h"
+#include <OMXAL/OpenMAXAL.h>
+#include <OMXAL/OpenMAXAL_Android.h>
 
 #include <android/native_window_jni.h>
 

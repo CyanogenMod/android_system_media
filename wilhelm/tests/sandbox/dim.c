@@ -21,9 +21,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #ifdef ANDROID
-#include "SLES/OpenSLES_Android.h"
+#include <SLES/OpenSLES_Android.h>
 #endif
 
 int main(int argc, char **argv)

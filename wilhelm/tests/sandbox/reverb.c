@@ -16,7 +16,7 @@
 
 // Demonstrate environmental reverb and preset reverb on an output mix and audio player
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>

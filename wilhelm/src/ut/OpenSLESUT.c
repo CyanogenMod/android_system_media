@@ -16,9 +16,9 @@
 
 /** \file OpenSLESUT.c OpenSL ES Utility Toolkit */
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #ifdef ANDROID
-#include "SLES/OpenSLES_Android.h"
+#include <SLES/OpenSLES_Android.h>
 #endif
 #include "OpenSLESUT.h"
 #include <stdio.h>

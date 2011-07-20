@@ -43,7 +43,7 @@
 #include <unistd.h>
 //#include <sys/time.h>
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 
 //#define TEST_VOLUME_ITF
 //#define TEST_COLD_START

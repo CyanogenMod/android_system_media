@@ -16,7 +16,7 @@
 
 // single-threaded, single-player monkey test
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>

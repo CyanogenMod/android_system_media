@@ -16,11 +16,11 @@
 
 /** \file sles_allinclusive.h Everything including the kitchen sink */
 
-#include "SLES/OpenSLES.h"
-#include "OMXAL/OpenMAXAL.h"
+#include <SLES/OpenSLES.h>
+#include <OMXAL/OpenMAXAL.h>
 #ifdef ANDROID
-#include "SLES/OpenSLES_Android.h"
-#include "OMXAL/OpenMAXAL_Android.h"
+#include <SLES/OpenSLES_Android.h>
+#include <OMXAL/OpenMAXAL_Android.h>
 #endif
 #include <stddef.h> // offsetof
 #include <stdlib.h> // malloc
@@ -86,7 +86,7 @@ typedef struct COutputMix_struct COutputMix;
 #ifdef ANDROID
 #include <utils/Log.h>
 #include <utils/KeyedVector.h>
-#include "SLES/OpenSLES_AndroidConfiguration.h"
+#include <SLES/OpenSLES_AndroidConfiguration.h>
 #include "media/AudioSystem.h"
 #include "media/mediarecorder.h"
 #include "media/AudioRecord.h"

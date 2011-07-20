@@ -21,8 +21,8 @@
 #include <sys/time.h>
 #include <fcntl.h>
 
-#include "OMXAL/OpenMAXAL.h"
-#include "OMXAL/OpenMAXAL_Android.h" // for VP8 definitions
+#include <OMXAL/OpenMAXAL.h>
+#include <OMXAL/OpenMAXAL_Android.h> // for VP8 definitions
 
 #define NUM_ENGINE_INTERFACES 1
 

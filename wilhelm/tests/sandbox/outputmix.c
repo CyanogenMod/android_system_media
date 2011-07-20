@@ -16,7 +16,7 @@
 
 // output mix interface tests
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #include "OpenSLESUT.h"
 #include <assert.h>
 #include <stdio.h>

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "SLES/OpenSLES.h"
-#include "OMXAL/OpenMAXAL.h"
+#include <SLES/OpenSLES.h>
+#include <OMXAL/OpenMAXAL.h>
 #include "attr.h"
 #include "handlers.h"
 

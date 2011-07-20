@@ -18,8 +18,8 @@
 // It will generate feedback (Larsen effect) if played through on-device speakers,
 // or acts as a delay if played through headset.
 
-#include "SLES/OpenSLES.h"
-#include "SLES/OpenSLES_Android.h"
+#include <SLES/OpenSLES.h>
+#include <SLES/OpenSLES_Android.h>
 #include <assert.h>
 #include <pthread.h>
 #include <stdio.h>

@@ -30,11 +30,11 @@
 /****************************************************************************/
 
 
-#include "SLES/OpenSLES.h"         /* SL Header */
-#include "OMXAL/OpenMAXAL.h"
+#include <SLES/OpenSLES.h>         /* SL Header */
+#include <OMXAL/OpenMAXAL.h>
 #ifdef ANDROID
-#include "SLES/OpenSLES_Android.h"  /* Android-specific SL Header */
-#include "OMXAL/OpenMAXAL_Android.h"/* Android-specific MAX AL Header */
+#include <SLES/OpenSLES_Android.h>  /* Android-specific SL Header */
+#include <OMXAL/OpenMAXAL_Android.h>/* Android-specific MAX AL Header */
 #endif
 #include "MPH.h"
 

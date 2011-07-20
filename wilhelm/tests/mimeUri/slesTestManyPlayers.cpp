@@ -19,7 +19,7 @@
 #include <unistd.h>
 //#include <sys/time.h>
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 
 
 #define MAX_NUMBER_INTERFACES 2

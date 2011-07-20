@@ -20,10 +20,10 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #ifdef ANDROID
-#include "SLES/OpenSLES_Android.h"
-#include "SLES/OpenSLES_AndroidConfiguration.h"
+#include <SLES/OpenSLES_Android.h>
+#include <SLES/OpenSLES_AndroidConfiguration.h>
 #endif
 
 

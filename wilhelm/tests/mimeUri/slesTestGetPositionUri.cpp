@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include <utils/threads.h>
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 
 /* tolerance in ms for this test in time difference between reported position and time since
  * playback was requested to start. This is reasonable for a local file.

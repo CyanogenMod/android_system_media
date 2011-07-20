@@ -21,8 +21,8 @@
 #include <unistd.h>
 //#include <sys/time.h>
 
-#include "SLES/OpenSLES.h"
-#include "SLES/OpenSLES_Android.h"
+#include <SLES/OpenSLES.h>
+#include <SLES/OpenSLES_Android.h>
 
 //#define TEST_DISPLAY_FIRST_BUFFER_ITEM
 //#define TEST_CLEAR

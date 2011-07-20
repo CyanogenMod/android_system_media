@@ -21,9 +21,9 @@
 #include <sys/time.h>
 #include <fcntl.h>
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #ifdef ANDROID
-#include "SLES/OpenSLES_Android.h"
+#include <SLES/OpenSLES_Android.h>
 #endif
 
 

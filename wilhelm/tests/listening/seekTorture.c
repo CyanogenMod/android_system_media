@@ -17,7 +17,7 @@
 // This test program tortures the seek APIs by positioning "randomly" in a file.
 // It needs as input a permuted .wav and .map produced by the permute tool.
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
