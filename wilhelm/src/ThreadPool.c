@@ -190,7 +190,6 @@ static void ThreadPool_deinit_internal(ThreadPool *tp, unsigned initialized, uns
         // Empty out the circular buffer of closures
         ok = pthread_mutex_lock(&tp->mMutex);
         assert(0 == ok);
-        assert(0 == tp->mWaitingNotEmpty);
         Closure **oldFront = tp->mClosureFront;
         while (oldFront != tp->mClosureRear) {
             Closure **newFront = oldFront;
