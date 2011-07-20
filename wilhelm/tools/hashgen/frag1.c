@@ -16,7 +16,7 @@
 
 // This program prepares the input to gperf for hashing IIDs
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #include "MPH.h"
 #include <stdio.h>
 #include <stdlib.h>

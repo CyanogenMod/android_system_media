@@ -18,7 +18,7 @@
 
 /** \file IID_to_MPH.c Interface ID to MPH mapping */
 
-#include "SLES/OpenSLES.h"
+#include <SLES/OpenSLES.h>
 #include "MPH.h"
 #include <assert.h>
 #include <string.h>
