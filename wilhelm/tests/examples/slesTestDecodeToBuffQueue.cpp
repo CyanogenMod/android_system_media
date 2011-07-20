@@ -47,6 +47,14 @@ How to examine the output with Audacity:
 #include <SLES/OpenSLES_Android.h>
 #include <SLES/OpenSLES_AndroidConfiguration.h>
 
+// FIXME copied from OpenSLES_AndroidMetadata.h until it's part of OpenSLES_Android.h
+#define ANDROID_KEY_PCMFORMAT_NUMCHANNELS   "AndroidPcmFormatNumChannels"
+#define ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC "AndroidPcmFormatSamplesPerSec"
+#define ANDROID_KEY_PCMFORMAT_BITSPERSAMPLE "AndroidPcmFormatBitsPerSample"
+#define ANDROID_KEY_PCMFORMAT_CONTAINERSIZE "AndroidPcmFormatContainerSize"
+#define ANDROID_KEY_PCMFORMAT_CHANNELMASK   "AndroidPcmFormatChannelMask"
+#define ANDROID_KEY_PCMFORMAT_ENDIANNESS    "AndroidPcmFormatEndianness"
+
 /* Explicitly requesting SL_IID_ANDROIDSIMPLEBUFFERQUEUE and SL_IID_PREFETCHSTATUS
  * on the AudioPlayer object for decoding, SL_IID_METADATAEXTRACTION for retrieving the
  * format of the decoded audio */
@@ -66,6 +74,19 @@ static FILE* gFp;
 
 /* to display the number of decode iterations */
 static int counter=0;
+
+/* metadata key index for the PCM format information we want to retrieve */
+static int channelCountKeyIndex = -1;
+static int sampleRateKeyIndex = -1;
+/* size of the struct to retrieve the PCM format metadata values: the values we're interested in
+ * are SLuint32, but it is saved in the data field of a SLMetadataInfo, hence the larger size.
+ * Nate that this size is queried and displayed at l.452 for demonstration/test purposes.
+ *  */
+#define PCM_METADATA_VALUE_SIZE 32
+/* used to query metadata values */
+static SLMetadataInfo *pcmMetaData = NULL;
+/* we only want to query / display the PCM format once */
+static bool formatQueried = false;
 
 /* to signal to the test app the end of the stream to decode has been reached */
 bool eos = false;
@@ -97,6 +118,7 @@ bool prefetchError = false;
 /* Structure for passing information to callback function */
 typedef struct CallbackCntxt_ {
     SLPlayItf playItf;
+    SLMetadataExtractionItf metaItf;
     SLuint32  size;
     SLint8*   pDataBase;    // Base address of local audio data storage
     SLint8*   pData;        // Current address of local audio data storage
@@ -182,7 +204,7 @@ void DecBufferQueueCallback(
     //  buffer queue callback return to proceed with the decoding.
 
 #if 0
-    /* Example buffer queue state display */
+    /* Example: buffer queue state display */
     SLAndroidSimpleBufferQueueState decQueueState;
     ExitOnError( (*queueItf)->GetState(queueItf, &decQueueState) );
 
@@ -192,7 +214,7 @@ void DecBufferQueueCallback(
 #endif
 
 #if 0
-    /* Example of duration display in callback where we use the callback context for the SLPlayItf*/
+    /* Example: display duration in callback where we use the callback context for the SLPlayItf*/
     SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
     SLresult result = (*pCntxt->playItf)->GetDuration(pCntxt->playItf, &durationInMsec);
     ExitOnError(result);
@@ -203,6 +225,22 @@ void DecBufferQueueCallback(
                 durationInMsec);
     }
 #endif
+
+    /* Example: query of the decoded PCM format */
+    if (formatQueried) {
+        return;
+    }
+    SLresult res = (*pCntxt->metaItf)->GetValue(pCntxt->metaItf, sampleRateKeyIndex,
+            PCM_METADATA_VALUE_SIZE, pcmMetaData);  ExitOnError(res);
+    // Note: here we could verify the following:
+    //         pcmMetaData->encoding == SL_CHARACTERENCODING_BINARY
+    //         pcmMetaData->size == sizeof(SLuint32)
+    //       but the call was successful for the PCM format keys, so those conditions are implied
+    fprintf(stdout, "sample rate = %dHz, ", *((SLuint32*)pcmMetaData->data));
+    res = (*pCntxt->metaItf)->GetValue(pCntxt->metaItf, channelCountKeyIndex,
+            PCM_METADATA_VALUE_SIZE, pcmMetaData);  ExitOnError(res);
+    fprintf(stdout, " channel count = %d\n", *((SLuint32*)pcmMetaData->data));
+    formatQueried = true;
 }
 
 //-----------------------------------------------------------------
@@ -257,6 +295,12 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
         iidArray[i] = SL_IID_NULL;
     }
 
+    /* allocate memory to receive the PCM format metadata */
+    if (!pcmMetaData) {
+        pcmMetaData = (SLMetadataInfo*) malloc(PCM_METADATA_VALUE_SIZE);
+    }
+
+    formatQueried = false;
 
     /* ------------------------------------------------------ */
     /* Configuration of the player  */
@@ -335,10 +379,15 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
     result = (*player)->GetInterface(player, SL_IID_PREFETCHSTATUS, (void*)&prefetchItf);
     ExitOnError(result);
 
+    /* Get the metadata extraction interface which was explicitly requested */
+    result = (*player)->GetInterface(player, SL_IID_METADATAEXTRACTION, (void*)&mdExtrItf);
+    ExitOnError(result);
+
     /* ------------------------------------------------------ */
     /* Initialize the callback and its context for the decoding buffer queue */
     CallbackCntxt cntxt;
     cntxt.playItf = playItf;
+    cntxt.metaItf = mdExtrItf;
     cntxt.pDataBase = (int8_t*)&pcmData;
     cntxt.pData = cntxt.pDataBase;
     cntxt.size = sizeof(pcmData);
@@ -398,9 +447,6 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
     //   This is for test / demonstration purposes only where we discover the key and value sizes
     //   of a PCM decoder. An application that would want to directly get access to those values
     //   can make assumptions about the size of the keys and their matching values (all SLuint32)
-    result = (*player)->GetInterface(player, SL_IID_METADATAEXTRACTION,
-            (void*)&mdExtrItf);
-    ExitOnError(result);
     SLuint32 itemCount;
     result = (*mdExtrItf)->GetItemCount(mdExtrItf, &itemCount);
     SLuint32 i, keySize, valueSize;
@@ -413,20 +459,31 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
         result = (*mdExtrItf)->GetValueSize(mdExtrItf, i, &valueSize);
         ExitOnError(result);
         keyInfo = (SLMetadataInfo*) malloc(keySize);
-        value   = (SLMetadataInfo*) malloc(valueSize);
-        if ((NULL != keyInfo) && (NULL != value)) {
+        if (NULL != keyInfo) {
             result = (*mdExtrItf)->GetKey(mdExtrItf, i, keySize, keyInfo);
             ExitOnError(result);
-            result = (*mdExtrItf)->GetValue(mdExtrItf, i, valueSize, value);
-            ExitOnError(result);
-            if ((value->encoding == SL_CHARACTERENCODING_BINARY)
-                    && (value->size == sizeof(SLuint32))) {
-                fprintf(stdout, "key[%d] size=%d, name=%s \tvalue size=%d value=%d\n",
-                        i, keyInfo->size, keyInfo->data, value->size, *((SLuint32*)value->data));
+            fprintf(stdout, "key[%d] size=%d, name=%s \tvalue size=%d \n",
+                    i, keyInfo->size, keyInfo->data, valueSize);
+            /* find out the key index of the metadata we're interested in */
+            if (!strcmp((char*)keyInfo->data, ANDROID_KEY_PCMFORMAT_NUMCHANNELS)) {
+                channelCountKeyIndex = i;
+            } else if (!strcmp((char*)keyInfo->data, ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC)) {
+                sampleRateKeyIndex = i;
             }
             free(keyInfo);
-            free(value);
         }
+    }
+    if (channelCountKeyIndex != -1) {
+        fprintf(stdout, "Key %s is at index %d\n",
+                ANDROID_KEY_PCMFORMAT_NUMCHANNELS, channelCountKeyIndex);
+    } else {
+        fprintf(stderr, "Unable to find key %s\n", ANDROID_KEY_PCMFORMAT_NUMCHANNELS);
+    }
+    if (sampleRateKeyIndex != -1) {
+        fprintf(stdout, "Key %s is at index %d\n",
+                ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC, sampleRateKeyIndex);
+    } else {
+        fprintf(stderr, "Unable to find key %s\n", ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC);
     }
 
     /* ------------------------------------------------------ */
@@ -455,9 +512,10 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
     /* Destroy the AudioPlayer object */
     (*player)->Destroy(player);
 
-    //sleep(1);
-
     fclose(gFp);
+
+    free(pcmMetaData);
+    pcmMetaData = NULL;
 }
 
 //-----------------------------------------------------------------
