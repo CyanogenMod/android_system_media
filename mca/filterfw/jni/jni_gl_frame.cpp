@@ -282,6 +282,11 @@ jboolean Java_android_filterfw_core_GLFrame_setNativeTextureParam(JNIEnv* env,
   return frame ? ToJBool(frame->SetTextureParameter(param, value)) : JNI_FALSE;
 }
 
+jboolean Java_android_filterfw_core_GLFrame_nativeResetParams(JNIEnv* env, jobject thiz) {
+  GLFrame* frame = ConvertFromJava<GLFrame>(env, thiz);
+  return frame ? ToJBool(frame->ResetParameters()) : JNI_FALSE;
+}
+
 jboolean Java_android_filterfw_core_GLFrame_nativeCopyFromNative(JNIEnv* env,
                                                                  jobject thiz,
                                                                  jobject frame) {

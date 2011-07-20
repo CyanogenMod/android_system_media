@@ -106,6 +106,9 @@ class GLFrame : public GLBufferHandle {
     // true iff the parameter was set successfully.
     bool SetTextureParameter(GLenum pname, GLint value);
 
+    // Reset any modifed texture parameters.
+    bool ResetParameters();
+
   private:
     // Type to keep track of texture and FBO states
     enum GLObjectState {
@@ -171,6 +174,9 @@ class GLFrame : public GLBufferHandle {
     // Flags whether or not frame holds a texture and FBO
     GLObjectState texture_state_;
     GLObjectState fbo_state_;
+
+    // Set of modified texture parameters
+    bool tex_params_modified_;
 
     // Flag whether frame owns the texture and FBO
     bool owns_;

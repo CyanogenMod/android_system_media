@@ -305,6 +305,14 @@ public class GLFrame extends Frame {
             + ", FBO ID " + getFboId();
     }
 
+    @Override
+    protected void reset(FrameFormat newFormat) {
+        if (!nativeResetParams()) {
+            throw new RuntimeException("Could not reset GLFrame texture parameters!");
+        }
+        super.reset(newFormat);
+    }
+
     private void assertGLEnvValid() {
         if (!mGLEnvironment.isContextActive()) {
             if (GLEnvironment.isAnyContextActive()) {
@@ -366,6 +374,8 @@ public class GLFrame extends Frame {
     private native boolean generateNativeMipMap();
 
     private native boolean setNativeTextureParam(int param, int value);
+
+    private native boolean nativeResetParams();
 
     private native boolean nativeCopyFromNative(NativeFrame frame);
 
