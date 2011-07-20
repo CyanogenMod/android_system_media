@@ -79,8 +79,15 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
         mGenericMediaPlayer->bufferingUpdate(ext1 * 10 /*fillLevelPerMille*/);
         break;
 
+      case MEDIA_ERROR:
+      case MEDIA_NOP:
+      case MEDIA_TIMED_TEXT:
+      case MEDIA_INFO:
+        break;
+
       default: { }
     }
+
 }
 
 //--------------------------------------------------
