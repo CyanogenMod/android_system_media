@@ -127,7 +127,7 @@ bool IVideoDecoderCapabilities_expose(void *self)
 
 void IVideoDecoderCapabilities_deinit(void *self)
 {
-    LOGE("IVideoDecoderCapabilities_deinit()");
+    SL_LOGV("IVideoDecoderCapabilities_deinit()");
 #ifdef ANDROID
     android::android_videoCodec_deinit();
 #endif
