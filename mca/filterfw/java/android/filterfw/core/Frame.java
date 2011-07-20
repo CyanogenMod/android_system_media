@@ -186,30 +186,30 @@ public abstract class Frame {
         }
     }
 
-    // Core internal methods ///////////////////////////////////////////////////////////////////////
-    abstract void dealloc();
-
-    int incRefCount() {
-        ++mRefCount;
-        return mRefCount;
-    }
-
-    int decRefCount() {
-        --mRefCount;
-        return mRefCount;
-    }
-
-    boolean isReusable() {
-        return mReusable;
-    }
-
-    void reset(FrameFormat format) {
-        mFormat = format;
+    protected void reset(FrameFormat newFormat) {
+        mFormat = newFormat;
         mReadOnly = false;
         mRefCount = 1;
     }
 
-    void markReadOnly() {
+    // Core internal methods ///////////////////////////////////////////////////////////////////////
+    abstract void dealloc();
+
+    final int incRefCount() {
+        ++mRefCount;
+        return mRefCount;
+    }
+
+    final int decRefCount() {
+        --mRefCount;
+        return mRefCount;
+    }
+
+    final boolean isReusable() {
+        return mReusable;
+    }
+
+    final void markReadOnly() {
         mReadOnly = true;
     }
 

@@ -48,6 +48,7 @@ GLFrame::GLFrame(GLEnv* gl_env)
     texture_target_(GL_TEXTURE_2D),
     texture_state_(kStateUninitialized),
     fbo_state_(kStateUninitialized),
+    tex_params_modified_(false),
     owns_(false) {
 }
 
@@ -103,9 +104,6 @@ GLFrame::~GLFrame() {
 bool GLFrame::GenerateMipMap() {
   if (FocusTexture()) {
     glGenerateMipmap(GL_TEXTURE_2D);
-    glTexParameteri(GL_TEXTURE_2D,
-                    GL_TEXTURE_MIN_FILTER,
-                    GL_LINEAR_MIPMAP_NEAREST);
     return !GLEnv::CheckGLError("Generating MipMap!");
   }
   return false;
@@ -114,9 +112,26 @@ bool GLFrame::GenerateMipMap() {
 bool GLFrame::SetTextureParameter(GLenum pname, GLint value) {
   if (FocusTexture()) {
     glTexParameteri(GL_TEXTURE_2D, pname, value);
+    tex_params_modified_ = true;
     return !GLEnv::CheckGLError("Setting texture parameter!");
   }
   return false;
+}
+
+bool GLFrame::ResetParameters() {
+  if (tex_params_modified_) {
+    if (BindTexture()) {
+      // Set default parameter values
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      tex_params_modified_ = false;
+    } else {
+      return false;
+    }
+  }
+  return !GLEnv::CheckGLError("Resetting texture parameters!");
 }
 
 bool GLFrame::CopyDataTo(uint8_t* buffer, int size) {

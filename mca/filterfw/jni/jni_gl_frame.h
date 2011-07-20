@@ -111,6 +111,9 @@ Java_android_filterfw_core_GLFrame_setNativeTextureParam(JNIEnv* env,
                                                          jint value);
 
 JNIEXPORT jboolean JNICALL
+Java_android_filterfw_core_GLFrame_nativeResetParams(JNIEnv* env, jobject thiz);
+
+JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLFrame_nativeCopyFromNative(JNIEnv* env,
                                                         jobject thiz,
                                                         jobject frame);
