@@ -29,8 +29,11 @@ typedef struct {
     SLObjectItf mPlayerObject;
     SLPlayItf mPlayerPlay;
     SLSeekItf mPlayerSeek;
+    SLPrefetchStatusItf mPlayerPrefetchStatus;
     SLVolumeItf mPlayerVolume;
     SLmillisecond mPlayerDuration;
+    SLboolean mPlayerErrorInCallback;
+    SLboolean mPlayerErrorReported;
 } Player;
 
 // Strings corresponding to result codes; FIXME should move to a common test library
@@ -80,6 +83,31 @@ void check2(SLresult result, int line)
 
 #define check(result) check2(result, __LINE__)
 
+// Prefetch status callback
+
+#define PREFETCHEVENT_ERROR_CANDIDATE \
+            (SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE)
+
+void prefetch_callback(SLPrefetchStatusItf caller, void *context, SLuint32 event)
+{
+    SLresult result;
+    assert(context != NULL);
+    Player *p = (Player *) context;
+    assert(p->mPlayerPrefetchStatus == caller);
+    SLpermille level;
+    result = (*caller)->GetFillLevel(caller, &level);
+    check(result);
+    SLuint32 status;
+    result = (*caller)->GetPrefetchStatus(caller, &status);
+    check(result);
+    //fprintf(stderr, "PrefetchEventCallback: received event %u, level %u, status %u\n",
+    //      event, level, status);
+    if ((PREFETCHEVENT_ERROR_CANDIDATE == (event & PREFETCHEVENT_ERROR_CANDIDATE))
+            && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
+        p->mPlayerErrorInCallback = SL_BOOLEAN_TRUE;
+    }
+}
+
 // Main program
 
 int main(int argc, char **argv)
@@ -107,9 +135,10 @@ int main(int argc, char **argv)
         fprintf(stderr, "usage: %s file.wav ...\n", argv[0]);
         return EXIT_FAILURE;
     }
-    if (numPlayers <= 0)
+    if (numPlayers <= 0) {
         numPlayers = numPathnames;
-    Player *players = (Player *) malloc(sizeof(Player) * numPlayers);
+    }
+    Player *players = (Player *) calloc(numPlayers, sizeof(Player));
     assert(NULL != players);
     char **pathnames = &argv[i];
     SLresult result;
@@ -150,8 +179,10 @@ int main(int argc, char **argv)
 
     // create all the players
     for (i = 0; i < numPlayers; ++i) {
-        const SLInterfaceID player_ids[] = {SL_IID_PLAY, SL_IID_VOLUME, SL_IID_SEEK};
-        const SLboolean player_req[] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+        const SLInterfaceID player_ids[] =
+                {SL_IID_PLAY, SL_IID_VOLUME, SL_IID_SEEK, SL_IID_PREFETCHSTATUS};
+        const SLboolean player_req[] =
+                {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
         p = &players[i];
         SLDataLocator_URI locURI = {SL_DATALOCATOR_URI, (SLchar *) pathnames[i % numPathnames]};
         SLDataFormat_MIME dfMIME = {SL_DATAFORMAT_MIME, NULL, SL_CONTAINERTYPE_UNSPECIFIED};
@@ -159,7 +190,7 @@ int main(int argc, char **argv)
         SLDataLocator_OutputMix locOutputMix = {SL_DATALOCATOR_OUTPUTMIX, mixObject};
         SLDataSink audioSnk = {&locOutputMix, NULL};
         result = (*engineEngine)->CreateAudioPlayer(engineEngine, &p->mPlayerObject, &audioSrc,
-            &audioSnk, 3, player_ids, player_req);
+            &audioSnk, sizeof(player_ids)/sizeof(player_ids[0]), player_ids, player_req);
         check(result);
         result = (*p->mPlayerObject)->Realize(p->mPlayerObject, SL_BOOLEAN_FALSE);
         check(result);
@@ -170,9 +201,15 @@ int main(int argc, char **argv)
         check(result);
         result = (*p->mPlayerObject)->GetInterface(p->mPlayerObject, SL_IID_SEEK, &p->mPlayerSeek);
         check(result);
-        result = (*p->mPlayerPlay)->GetDuration(p->mPlayerPlay, &p->mPlayerDuration);
+        result = (*p->mPlayerObject)->GetInterface(p->mPlayerObject, SL_IID_PREFETCHSTATUS,
+                &p->mPlayerPrefetchStatus);
         check(result);
-        printf("player %d duration %d\n", (int) i, (int) p->mPlayerDuration);
+        result = (*p->mPlayerPrefetchStatus)->RegisterCallback(p->mPlayerPrefetchStatus,
+                prefetch_callback, p);
+        check(result);
+        result = (*p->mPlayerPrefetchStatus)->SetCallbackEventsMask(p->mPlayerPrefetchStatus,
+                SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE);
+        check(result);
     }
 
     // now loop randomly doing things to the players
@@ -181,8 +218,21 @@ int main(int argc, char **argv)
         printf("sleep %u\n", (unsigned) delay);
         usleep(delay * 1000);
         i = (rand() & 0x7FFFFFFF) % numPlayers;
-        printf("player %d ", i);
         p = &players[i];
+        if (p->mPlayerErrorReported)
+            continue;
+        printf("player %d (%s): ", i, pathnames[i]);
+        if (p->mPlayerErrorInCallback && !p->mPlayerErrorReported) {
+            printf("error, ");
+            p->mPlayerErrorReported = SL_BOOLEAN_TRUE;
+        }
+        result = (*p->mPlayerPlay)->GetDuration(p->mPlayerPlay, &p->mPlayerDuration);
+        check(result);
+        if (p->mPlayerDuration == SL_TIME_UNKNOWN) {
+            printf("duration unknown, ");
+        } else {
+            printf("duration %d ms, ", (int) p->mPlayerDuration);
+        }
         SLuint32 state;
         result = (*p->mPlayerPlay)->GetPlayState(p->mPlayerPlay, &state);
         check(result);
