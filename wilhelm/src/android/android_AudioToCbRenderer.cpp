@@ -53,7 +53,7 @@ void AudioToCbRenderer::onPrepare() {
 
 
 void AudioToCbRenderer::onRender() {
-    SL_LOGD("AudioToCbRenderer::onRender");
+    SL_LOGV("AudioToCbRenderer::onRender");
 
     Mutex::Autolock _l(mBufferSourceLock);
 
@@ -100,20 +100,6 @@ void AudioToCbRenderer::createAudioSink() {
 
 void AudioToCbRenderer::updateAudioSink() {
     SL_LOGD("AudioToCbRenderer::updateAudioSink()");
-
-    Mutex::Autolock _l(mBufferSourceLock);
-
-    if ((mAudioSource != 0) && mAudioSourceStarted) {
-        sp<MetaData> meta = mAudioSource->getFormat();
-
-        SL_LOGV("old sample rate = %d", mSampleRateHz);
-        CHECK(meta->findInt32(kKeyChannelCount, &mChannelCount));
-        int32_t sr;
-        CHECK(meta->findInt32(kKeySampleRate, &sr));
-        mSampleRateHz = (uint32_t) sr;
-        SL_LOGV("new sample rate = %d", mSampleRateHz);
-
-    }
 }
 
 

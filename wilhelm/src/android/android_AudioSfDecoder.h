@@ -63,8 +63,7 @@ protected:
     enum {
         kWhatDecode       = 'deco',
         kWhatRender       = 'rend',
-        kWhatCheckCache   = 'cach',
-        kWhatGetPcmFormat = 'gpcm'
+        kWhatCheckCache   = 'cach'
     };
 
     // Async event handlers (called from the AudioSfDecoder's event loop)
@@ -78,15 +77,15 @@ protected:
     virtual void onPause();
     virtual void onSeek(const sp<AMessage> &msg);
     virtual void onLoop(const sp<AMessage> &msg);
-    virtual void onGetPcmFormatKeyCount();
 
     // overridden from GenericPlayer
     virtual void onNotify(const sp<AMessage> &msg);
     virtual void onMessageReceived(const sp<AMessage> &msg);
 
     // to be implemented by subclasses of AudioSfDecoder to do something with the audio samples
+    // (called from GenericPlayer's event loop)
     virtual void createAudioSink() = 0;
-    virtual void updateAudioSink() = 0;
+    virtual void updateAudioSink() = 0; // called with mBufferSourceLock held
     virtual void startAudioSink() = 0;
     virtual void pauseAudioSink() = 0;
 
@@ -121,17 +120,16 @@ private:
     //  these values are only written in the event loop
     uint32_t mPcmFormatKeyCount;
     uint32_t mPcmFormatValues[NB_PCMMETADATA_KEYS];
-    // for synchronous "get" calls on the PCM decode format:
-    //    prevents concurrent "getPcmFormat" calls
-    Mutex       mGetPcmFormatLockSingleton;
-    //    lock order 1/ mGetPcmFormatLockSingleton  2/ mGetPcmFormatLock
-    Mutex       mGetPcmFormatLock;
-    Condition   mGetPcmFormatCondition;
-    bool        mGetPcmFormatKeyCount;
+    // protects mPcmFormatKeyCount and mPcmFormatValues
+    Mutex    mPcmFormatLock;
 
     bool wantPrefetch();
     CacheStatus_t getCacheRemaining(bool *eos);
     int64_t getPositionUsec();
+
+    // convenience function to update internal state when decoding parameters have changed,
+    // called with a lock on mBufferSourceLock
+    void hasNewDecodeParams();
 
 private:
     DISALLOW_EVIL_CONSTRUCTORS(AudioSfDecoder);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-//#define USE_LOG SLAndroidLogLevel_Verbose
+//#define USE_LOG SLAndroidLogLevel_Debug
 
 #include "sles_allinclusive.h"
 #include "android/android_AudioSfDecoder.h"
@@ -48,15 +48,14 @@ AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : Generic
         mTimeDelta(-1),
         mSeekTimeMsec(0),
         mLastDecodedPositionUs(-1),
-        mPcmFormatKeyCount(0),
-        mGetPcmFormatKeyCount(false)
+        mPcmFormatKeyCount(0)
 {
-    SL_LOGV("AudioSfDecoder::AudioSfDecoder()");
+    SL_LOGD("AudioSfDecoder::AudioSfDecoder()");
 }
 
 
 AudioSfDecoder::~AudioSfDecoder() {
-    SL_LOGV("AudioSfDecoder::~AudioSfDecoder()");
+    SL_LOGD("AudioSfDecoder::~AudioSfDecoder()");
 }
 
 
@@ -81,7 +80,7 @@ void AudioSfDecoder::preDestroy() {
 
 //--------------------------------------------------
 void AudioSfDecoder::play() {
-    SL_LOGV("AudioSfDecoder::play");
+    SL_LOGD("AudioSfDecoder::play");
 
     GenericPlayer::play();
     (new AMessage(kWhatDecode, id()))->post();
@@ -103,16 +102,7 @@ void AudioSfDecoder::startPrefetch_async() {
 
 //--------------------------------------------------
 uint32_t AudioSfDecoder::getPcmFormatKeyCount() {
-    android::Mutex::Autolock autoLock(mGetPcmFormatLockSingleton);
-    mGetPcmFormatKeyCount = false;
-    (new AMessage(kWhatGetPcmFormat, id()))->post();
-    {
-        android::Mutex::Autolock autoLock(mGetPcmFormatLock);
-        while (!mGetPcmFormatKeyCount) {
-            mGetPcmFormatCondition.wait(mGetPcmFormatLock);
-        }
-    }
-    mGetPcmFormatKeyCount = false;
+    android::Mutex::Autolock autoLock(mPcmFormatLock);
     return mPcmFormatKeyCount;
 }
 
@@ -269,9 +259,13 @@ void AudioSfDecoder::onPrepare() {
     sp<MediaSource> source = extractor->getTrack(audioTrackIndex);
     sp<MetaData> meta = source->getFormat();
 
+    // we can't trust the OMXCodec (if there is one) to issue a INFO_FORMAT_CHANGED so we want
+    // to have some meaningful values as soon as possible.
     bool hasChannelCount = meta->findInt32(kKeyChannelCount, &mChannelCount);
-    if (hasChannelCount) {
-        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
+    int32_t sr;
+    bool hasSampleRate = meta->findInt32(kKeySampleRate, &sr);
+    if (hasSampleRate) {
+        mSampleRateHz = (uint32_t) sr;
     }
 
     off64_t size;
@@ -318,16 +312,13 @@ void AudioSfDecoder::onPrepare() {
     mAudioSourceStarted = true;
 
     if (!hasChannelCount) {
-        // even though the channel count was already queried above, there are issues with some
-        // OMXCodecs (e.g. MP3 software decoder) not reporting the right count,
-        // we trust the first reported value.
         CHECK(meta->findInt32(kKeyChannelCount, &mChannelCount));
-        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
     }
-    int32_t sr;
-    CHECK(meta->findInt32(kKeySampleRate, &sr));
-    mSampleRateHz = (uint32_t) sr;
-    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
+
+    if (!hasSampleRate) {
+        CHECK(meta->findInt32(kKeySampleRate, &sr));
+        mSampleRateHz = (uint32_t) sr;
+    }
     // FIXME add code below once channel mask support is in, currently initialized to default
     //    if (meta->findInt32(kKeyChannelMask, &mChannelMask)) {
     //        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
@@ -342,6 +333,13 @@ void AudioSfDecoder::onPrepare() {
         notifyCacheFill();
     }
 
+    {
+        android::Mutex::Autolock autoLock(mPcmFormatLock);
+        mPcmFormatKeyCount = NB_PCMMETADATA_KEYS;
+        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
+        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
+    }
+
     // at this point we have enough information about the source to create the sink that
     // will consume the data
     createAudioSink();
@@ -352,14 +350,14 @@ void AudioSfDecoder::onPrepare() {
 
 
 void AudioSfDecoder::onPause() {
-    SL_LOGD("AudioSfDecoder::onPause()");
+    SL_LOGV("AudioSfDecoder::onPause()");
     GenericPlayer::onPause();
     pauseAudioSink();
 }
 
 
 void AudioSfDecoder::onPlay() {
-    SL_LOGD("AudioSfDecoder::onPlay()");
+    SL_LOGV("AudioSfDecoder::onPlay()");
     GenericPlayer::onPlay();
     startAudioSink();
 }
@@ -390,24 +388,6 @@ void AudioSfDecoder::onLoop(const sp<AMessage> &msg) {
         //SL_LOGV("AudioSfDecoder::onLoop stop looping");
         mStateFlags &= ~kFlagLooping;
     }
-}
-
-
-void AudioSfDecoder::onGetPcmFormatKeyCount() {
-    SL_LOGV("AudioSfDecoder::onGetPcmFormatKeyCount");
-    {
-        android::Mutex::Autolock autoLock(mGetPcmFormatLock);
-
-        if (!(mStateFlags & kFlagPrepared)) {
-            mPcmFormatKeyCount = 0;
-        } else {
-            mPcmFormatKeyCount = NB_PCMMETADATA_KEYS;
-        }
-
-        mGetPcmFormatKeyCount = true;
-        mGetPcmFormatCondition.signal();
-    }
-
 }
 
 
@@ -522,7 +502,10 @@ void AudioSfDecoder::onDecode() {
             case INFO_FORMAT_CHANGED:
                 SL_LOGD("MediaSource::read encountered INFO_FORMAT_CHANGED");
                 // reconfigure output
-                updateAudioSink();
+                {
+                    Mutex::Autolock _l(mBufferSourceLock);
+                    hasNewDecodeParams();
+                }
                 continueDecoding = true;
                 break;
             case INFO_DISCONTINUITY:
@@ -596,9 +579,6 @@ void AudioSfDecoder::onMessageReceived(const sp<AMessage> &msg) {
             onPause();
             break;
 
-        case kWhatGetPcmFormat:
-            onGetPcmFormatKeyCount();
-            break;
 /*
         case kWhatSeek:
             onSeek(msg);
@@ -757,6 +737,31 @@ CacheStatus_t AudioSfDecoder::getCacheRemaining(bool *eos) {
     }
 
     return mCacheStatus;
+}
+
+
+void AudioSfDecoder::hasNewDecodeParams() {
+
+    if ((mAudioSource != 0) && mAudioSourceStarted) {
+        sp<MetaData> meta = mAudioSource->getFormat();
+
+        CHECK(meta->findInt32(kKeyChannelCount, &mChannelCount));
+
+        SL_LOGV("old sample rate = %d", mSampleRateHz);
+        int32_t sr;
+        CHECK(meta->findInt32(kKeySampleRate, &sr));
+        mSampleRateHz = (uint32_t) sr;
+        SL_LOGV("found new sample rate = %d", mSampleRateHz);
+
+        {
+            android::Mutex::Autolock autoLock(mPcmFormatLock);
+            mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
+            mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
+        }
+    }
+
+    // alert users of those params
+    updateAudioSink();
 }
 
 } // namespace android
