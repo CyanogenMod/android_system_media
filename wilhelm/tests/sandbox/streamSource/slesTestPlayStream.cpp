@@ -159,8 +159,8 @@ SLresult AndroidBufferQueueCallback(
                 SLAndroidBufferItem msgEos;
                 msgEos.itemKey = SL_ANDROID_ITEMKEY_EOS;
                 msgEos.itemSize = 0;
-                // EOS message has no parameters, so the total size of the message is the size of the key
-                //   plus the size if itemSize, both SLuint32
+                // EOS message has no parameters, so the total size of the message is the size of
+                //   the key plus the size if itemSize, both SLuint32
                 (*caller)->Enqueue(caller,  NULL /*pBufferContext*/,
                         NULL /*pData*/, 0 /*dataLength*/,
                         &msgEos /*pMsg*/,
@@ -383,7 +383,8 @@ int main(int argc, char* const argv[])
 
     fprintf(stdout, "OpenSL ES test %s: exercises SLPlayItf, SLVolumeItf, SLAndroidBufferQueue \n",
             argv[0]);
-    fprintf(stdout, "and AudioPlayer with SL_DATALOCATOR_ANDROIDBUFFERQUEUE source / OutputMix sink\n");
+    fprintf(stdout, "and AudioPlayer with SL_DATALOCATOR_ANDROIDBUFFERQUEUE source / OutputMix "
+            "sink\n");
     fprintf(stdout, "Plays a sound and stops after its reported duration\n\n");
 
     if (argc == 1) {

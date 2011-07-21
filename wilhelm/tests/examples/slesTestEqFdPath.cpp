@@ -302,7 +302,8 @@ int main(int argc, char* const argv[])
     if (argc < 1)
 #endif
     {
-        fprintf(stdout, "Usage: \t%s [--always-on] path offsetInBytes [sizeInBytes]\n", programName);
+        fprintf(stdout, "Usage: \t%s [--always-on] path offsetInBytes [sizeInBytes]\n",
+                programName);
         fprintf(stdout, "Example: \"%s /sdcard/my.mp3 0 344460\" \n", programName);
         exit(EXIT_FAILURE);
     }

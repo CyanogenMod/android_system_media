@@ -84,7 +84,8 @@ public class NativeMedia extends Activity {
         mSurfaceHolder1.addCallback(new SurfaceHolder.Callback() {
 
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                Log.v(TAG, "surfaceChanged format=" + format + ", width=" + width + ", height=" + height);
+                Log.v(TAG, "surfaceChanged format=" + format + ", width=" + width + ", height=" +
+                        height);
             }
 
             public void surfaceCreated(SurfaceHolder holder) {
@@ -105,7 +106,8 @@ public class NativeMedia extends Activity {
         mSurfaceHolder2.addCallback(new SurfaceHolder.Callback() {
 
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                Log.v(TAG, "surfaceChanged format=" + format + ", width=" + width + ", height=" + height);
+                Log.v(TAG, "surfaceChanged format=" + format + ", width=" + width + ", height=" +
+                        height);
             }
 
             public void surfaceCreated(SurfaceHolder holder) {
