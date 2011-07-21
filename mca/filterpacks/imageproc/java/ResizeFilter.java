@@ -48,6 +48,8 @@ public class ResizeFilter extends Filter {
     private boolean mGenerateMipMap = false;
 
     private Program mProgram;
+    private FrameFormat mLastFormat = null;
+
     private MutableFrameFormat mOutputFormat;
     private int mInputChannels;
 
@@ -66,9 +68,10 @@ public class ResizeFilter extends Filter {
         return inputFormat;
     }
 
-    @Override
-    protected void prepare(FilterContext context) {
-        switch (getInputFormat("image").getTarget()) {
+    protected void createProgram(FilterContext context, FrameFormat format) {
+        if (mLastFormat != null && mLastFormat.getTarget() == format.getTarget()) return;
+        mLastFormat = format;
+        switch (format.getTarget()) {
             case FrameFormat.TARGET_NATIVE:
                 throw new RuntimeException("Native ResizeFilter not implemented yet!");
 
@@ -86,6 +89,7 @@ public class ResizeFilter extends Filter {
     public void process(FilterContext env) {
         // Get input frame
         Frame input = pullInput("image");
+        createProgram(env, input.getFormat());
 
         // Create output frame
         MutableFrameFormat outputFormat = input.getFormat().mutableCopy();
