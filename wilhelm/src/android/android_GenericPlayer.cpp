@@ -325,11 +325,12 @@ void GenericPlayer::onMessageReceived(const sp<AMessage> &msg) {
 //  it is strictly verboten to call those methods outside of the event loop
 
 void GenericPlayer::onPrepare() {
-    SL_LOGD("GenericPlayer::onPrepare()");
-    if (!(mStateFlags & kFlagPrepared)) {
-        mStateFlags |= kFlagPrepared;
-        notify(PLAYEREVENT_PREPARED, PLAYER_SUCCESS, false /*async*/);
-    }
+    SL_LOGI("GenericPlayer::onPrepare()");
+    // Subclass is responsible for indicating whether prepare was successful or unsuccessful
+    // by updating mStateFlags accordingly.  It must set exactly one of these two flags.
+    assert(!(mStateFlags & kFlagPrepared) != !(mStateFlags & kFlagPreparedUnsuccessfully));
+    notify(PLAYEREVENT_PREPARED, mStateFlags & kFlagPrepared ? PLAYER_SUCCESS : PLAYER_FAILURE,
+            false /*async*/);
     SL_LOGD("GenericPlayer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
 }
 

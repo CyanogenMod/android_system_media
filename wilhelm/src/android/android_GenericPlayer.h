@@ -126,13 +126,15 @@ protected:
     // lock to protect mNotifyClient and mNotifyUser updates
     Mutex       mNotifyClientLock;
 
+    // Bits for mStateFlags
     enum {
-        kFlagPrepared  = 1 <<0,
-        kFlagPreparing = 1 <<1,
-        kFlagPlaying   = 1 <<2,
-        kFlagBuffering = 1 <<3,
-        kFlagSeeking   = 1 <<4,
-        kFlagLooping   = 1 <<5,
+        kFlagPrepared               = 1 << 0,   // use only for successful preparation
+        kFlagPreparing              = 1 << 1,
+        kFlagPlaying                = 1 << 2,
+        kFlagBuffering              = 1 << 3,
+        kFlagSeeking                = 1 << 4,
+        kFlagLooping                = 1 << 5,
+        kFlagPreparedUnsuccessfully = 1 << 6,
     };
 
     uint32_t mStateFlags;

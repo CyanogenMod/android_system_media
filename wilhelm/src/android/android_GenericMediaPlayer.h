@@ -37,13 +37,23 @@ public:
     // IMediaPlayerClient implementation
     virtual void notify(int msg, int ext1, int ext2, const Parcel *obj);
 
-    void blockUntilPlayerPrepared();
+    // Call before enqueuing a prepare event
+    void beforePrepare();
+
+    // Call after enqueueing the prepare event; returns true if the prepare
+    // completed successfully, or false if it completed unsuccessfully
+    bool blockUntilPlayerPrepared();
 
 private:
     Mutex mLock;
     GenericMediaPlayer* mGenericMediaPlayer;
     Condition mPlayerPreparedCondition;
-    bool mPlayerPrepared;
+    enum {
+        PREPARE_NOT_STARTED,
+        PREPARE_IN_PROGRESS,
+        PREPARE_COMPLETED_SUCCESSFULLY,
+        PREPARE_COMPLETED_UNSUCCESSFULLY
+    } mPlayerPrepared;
 };
 
 

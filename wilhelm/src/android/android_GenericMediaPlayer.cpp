@@ -36,7 +36,7 @@ static const char* const kDistantProtocolPrefix[] = { "http:", "https:", "ftp:",
 //--------------------------------------------------------------------------------------------------
 MediaPlayerNotificationClient::MediaPlayerNotificationClient(GenericMediaPlayer* gmp) :
     mGenericMediaPlayer(gmp),
-    mPlayerPrepared(false)
+    mPlayerPrepared(PREPARE_NOT_STARTED)
 {
 
 }
@@ -52,7 +52,7 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
 
     switch (msg) {
       case MEDIA_PREPARED:
-        mPlayerPrepared = true;
+        mPlayerPrepared = PREPARE_COMPLETED_SUCCESSFULLY;
         mPlayerPreparedCondition.signal();
         break;
 
@@ -80,6 +80,10 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
         break;
 
       case MEDIA_ERROR:
+        mPlayerPrepared = PREPARE_COMPLETED_UNSUCCESSFULLY;
+        mPlayerPreparedCondition.signal();
+        break;
+
       case MEDIA_NOP:
       case MEDIA_TIMED_TEXT:
       case MEDIA_INFO:
@@ -91,11 +95,23 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
 }
 
 //--------------------------------------------------
-void MediaPlayerNotificationClient::blockUntilPlayerPrepared() {
+void MediaPlayerNotificationClient::beforePrepare()
+{
     Mutex::Autolock _l(mLock);
-    while (!mPlayerPrepared) {
+    assert(mPlayerPrepared == PREPARE_NOT_STARTED);
+    mPlayerPrepared = PREPARE_IN_PROGRESS;
+}
+
+//--------------------------------------------------
+bool MediaPlayerNotificationClient::blockUntilPlayerPrepared() {
+    Mutex::Autolock _l(mLock);
+    assert(mPlayerPrepared != PREPARE_NOT_STARTED);
+    while (mPlayerPrepared == PREPARE_IN_PROGRESS) {
         mPlayerPreparedCondition.wait(mLock);
     }
+    assert(mPlayerPrepared == PREPARE_COMPLETED_SUCCESSFULLY ||
+            mPlayerPrepared == PREPARE_COMPLETED_UNSUCCESSFULLY);
+    return mPlayerPrepared == PREPARE_COMPLETED_SUCCESSFULLY;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -195,7 +211,8 @@ void GenericMediaPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
 void GenericMediaPlayer::onPrepare() {
     SL_LOGD("GenericMediaPlayer::onPrepare()");
-    if (!(mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
+    // Attempt to prepare at most once, and only if there is a MediaPlayer
+    if (!(mStateFlags & (kFlagPrepared | kFlagPreparedUnsuccessfully)) && (mPlayer != 0)) {
         if (mHasVideo) {
             if (mVideoSurface != 0) {
                 mPlayer->setVideoSurface(mVideoSurface);
@@ -204,8 +221,10 @@ void GenericMediaPlayer::onPrepare() {
             }
         }
         mPlayer->setAudioStreamType(mPlaybackParams.streamType);
+        mPlayerClient->beforePrepare();
         mPlayer->prepareAsync();
-        mPlayerClient->blockUntilPlayerPrepared();
+        mStateFlags |= mPlayerClient->blockUntilPlayerPrepared() ?
+                kFlagPrepared : kFlagPreparedUnsuccessfully;
         onAfterMediaPlayerPrepared();
         GenericPlayer::onPrepare();
     }
@@ -246,6 +265,8 @@ void GenericMediaPlayer::onSeek(const sp<AMessage> &msg) {
     if ((mStateFlags & kFlagSeeking) && (timeMsec == mSeekTimeMsec)) {
         // already seeking to the same time, cancel this command
         return;
+    } else if (mStateFlags & kFlagPreparedUnsuccessfully) {
+        // discard seeks after unsuccessful prepare
     } else if (!(mStateFlags & kFlagPrepared)) {
         // we are not ready to accept a seek command at this time, retry later
         msg->post(DEFAULT_COMMAND_DELAY_FOR_REPOST_US);
