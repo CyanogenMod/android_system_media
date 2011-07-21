@@ -219,6 +219,7 @@ XAresult android_Player_create(CMediaPlayer *mp) {
         break;
     }
 
+    // FIXME duplicates an initialization also done by higher level
     mp->mAndroidObjState = ANDROID_UNINITIALIZED;
     mp->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
     mp->mSessionId = android::AudioSystem::newAudioSessionId();

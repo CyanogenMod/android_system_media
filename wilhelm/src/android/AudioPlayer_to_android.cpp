@@ -666,7 +666,8 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
             assert(ap->mAudioTrack == 0);
             assert(ap->mNumChannels == UNKNOWN_NUMCHANNELS);
             assert(ap->mSampleRateMilliHz == UNKNOWN_SAMPLERATE);
-            assert(ap->mAndroidObjState == ANDROID_UNINITIALIZED);
+            assert(ap->mAndroidObjState == ANDROID_PREPARING);
+            ap->mAndroidObjState = ANDROID_READY;
 
             object_unlock_exclusive(&ap->mObject);
 
