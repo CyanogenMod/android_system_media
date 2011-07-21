@@ -41,6 +41,7 @@ import android.util.Log;
 public class CropFilter extends Filter {
 
     private Program mProgram;
+    private FrameFormat mLastFormat = null;
 
     @GenerateFieldPort(name = "owidth")
     private int mOutputWidth = -1;
@@ -68,10 +69,12 @@ public class CropFilter extends Filter {
         return outputFormat;
     }
 
-    @Override
-    public void prepare(FilterContext context) {
+    protected void createProgram(FilterContext context, FrameFormat format) {
         // TODO: Add CPU version
-        switch (getInputFormat("image").getTarget()) {
+        if (mLastFormat != null && mLastFormat.getTarget() == format.getTarget()) return;
+        mLastFormat = format;
+        mProgram = null;
+        switch (format.getTarget()) {
             case FrameFormat.TARGET_GPU:
                 mProgram = ShaderProgram.createIdentity(context);
                 break;
@@ -86,6 +89,8 @@ public class CropFilter extends Filter {
         // Get input frame
         Frame imageFrame = pullInput("image");
         Frame boxFrame = pullInput("box");
+
+        createProgram(env, imageFrame.getFormat());
 
         // Get the box
         Quad box = (Quad)boxFrame.getObjectValue();

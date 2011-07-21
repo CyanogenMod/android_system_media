@@ -38,6 +38,7 @@ public class ToRGBAFilter extends Filter {
 
     private int mInputBPP;
     private Program mProgram;
+    private FrameFormat mLastFormat = null;
 
     public ToRGBAFilter(String name) {
         super(name);
@@ -64,9 +65,10 @@ public class ToRGBAFilter extends Filter {
         return result;
     }
 
-    @Override
-    public void prepare(FilterContext context) {
-        mInputBPP = getInputFormat("image").getBytesPerSample();
+    public void createProgram(FilterContext context, FrameFormat format) {
+        mInputBPP = format.getBytesPerSample();
+        if (mLastFormat != null && mLastFormat.getBytesPerSample() == mInputBPP) return;
+        mLastFormat = format;
         switch (mInputBPP) {
             case 1:
                 mProgram = new NativeProgram("filterpack_imageproc", "gray_to_rgba");
@@ -83,6 +85,7 @@ public class ToRGBAFilter extends Filter {
     public void process(FilterContext context) {
         // Get input frame
         Frame input = pullInput("image");
+        createProgram(context, input.getFormat());
 
         // Create output frame
         Frame output = context.getFrameManager().newFrame(getConvertedFormat(input.getFormat()));
