@@ -648,7 +648,13 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
         // it is not safe to enter the callback (the track is about to go away)
         return;
     }
-    //SL_LOGV("received event %d, data %d from SfAudioPlayer", event, data1);
+    union {
+        char c[sizeof(int)];
+        int i;
+    } u;
+    u.i = event;
+    SL_LOGV("sfplayer_handlePrefetchEvent(event='%c%c%c%c' (%d), data1=%d, data2=%d, user=%p) from "
+            "SfAudioPlayer", u.c[3], u.c[2], u.c[1], u.c[0], event, data1, data2, user);
     switch(event) {
 
     case android::GenericPlayer::kEventPrepared: {
