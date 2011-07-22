@@ -43,7 +43,6 @@ import java.lang.IllegalArgumentException;
 import java.util.List;
 import java.util.Set;
 
-
 import android.util.Log;
 
 /**
@@ -62,6 +61,10 @@ public class MediaSource extends Filter {
     @GenerateFieldPort(name = "sourceAsset", hasDefault = true)
     private AssetFileDescriptor mSourceAsset = null;
 
+    /** Whether the media source is a URL or an asset file descriptor. Defaults to false. */
+    @GenerateFieldPort(name = "sourceIsUrl", hasDefault = true)
+    private boolean mSelectedIsUrl = false;
+
     /** Whether the filter will always wait for a new video frame, or whether it
      * will output an old frame again if a new frame isn't available. Defaults to true.
      */
@@ -72,9 +75,9 @@ public class MediaSource extends Filter {
     @GenerateFieldPort(name = "loop", hasDefault = true)
     private boolean mLooping = true;
 
-    /** Whether the media source is a URL or an asset file descriptor. Defaults to false. */
-    @GenerateFieldPort(name = "sourceIsUrl", hasDefault = true)
-    private boolean mSelectedIsUrl = false;
+    /** Volume control. Currently sound is piped directly to the speakers, so this defaults to mute. */
+    @GenerateFieldPort(name = "volume", hasDefault = true)
+    private float mVolume = 0.f;
 
     private MediaPlayer mMediaPlayer;
     private GLFrame mMediaFrame;
@@ -99,6 +102,7 @@ public class MediaSource extends Filter {
     private boolean mPrepared;
     private boolean mPlaying;
     private boolean mPaused;
+    private boolean mCompleted;
 
     private final boolean mLogVerbose;
     private static final String TAG = "MediaSource";
@@ -166,13 +170,24 @@ public class MediaSource extends Filter {
             throw new NullPointerException("Unexpected null media player!");
         }
 
+        if (mCompleted) {
+            // Video playback is done, so close us down
+            closeOutputPort("video");
+            return;
+        }
+
         if (!mPlaying) {
             int waitCount = 0;
             while (!mGotSize || !mPrepared) {
                 try {
-                        this.wait(100);
+                    this.wait(100);
                 } catch (InterruptedException e) {
                     // ignoring
+                }
+                if (mCompleted) {
+                    // Video playback is done, so close us down
+                    closeOutputPort("video");
+                    return;
                 }
                 waitCount++;
                 if (waitCount == 50) {
@@ -190,7 +205,13 @@ public class MediaSource extends Filter {
                 boolean gotNewFrame;
                 gotNewFrame = mNewFrameAvailable.block(1000);
                 if (!gotNewFrame) {
-                    throw new RuntimeException("Timeout waiting for new frame!");
+                    if (mCompleted) {
+                        // Video playback is done, so close us down
+                        closeOutputPort("video");
+                        return;
+                    } else {
+                        throw new RuntimeException("Timeout waiting for new frame!");
+                    }
                 }
                 mNewFrameAvailable.close();
             }
@@ -266,6 +287,10 @@ public class MediaSource extends Filter {
                 }
                 setupMediaPlayer(mSelectedIsUrl);
             }
+        } else if (name.equals("volume")) {
+            if (isOpen()) {
+                mMediaPlayer.setVolume(mVolume, mVolume);
+            }
         }
     }
 
@@ -286,48 +311,53 @@ public class MediaSource extends Filter {
         mGotSize = false;
         mPlaying = false;
         mPaused = false;
+        mCompleted = false;
+
+        if (mLogVerbose) Log.v(TAG, "Setting up playback.");
 
         if (mMediaPlayer != null) {
             // Clean up existing media player
+            if (mLogVerbose) Log.v(TAG, "Resetting existing MediaPlayer.");
             mMediaPlayer.reset();
         } else {
             // Create new media player
+            if (mLogVerbose) Log.v(TAG, "Creating new MediaPlayer.");
             mMediaPlayer = new MediaPlayer();
         }
 
         if (mMediaPlayer == null) {
-            Log.e(TAG, "Unable to create a media player!");
-            return false;
+            throw new RuntimeException("Unable to create a MediaPlayer!");
         }
 
         // Set up data sources, etc
         try {
             if (useUrl) {
+                if (mLogVerbose) Log.v(TAG, "Setting MediaPlayer source to URI " + mSourceUrl);
                 mMediaPlayer.setDataSource(mSourceUrl);
             } else {
+                if (mLogVerbose) Log.v(TAG, "Setting MediaPlayer source to asset " + mSourceAsset);
                 mMediaPlayer.setDataSource(mSourceAsset.getFileDescriptor(), mSourceAsset.getStartOffset(), mSourceAsset.getLength());
             }
         } catch(IOException e) {
-            if (useUrl) {
-                Log.e(TAG, "Unable to set media player source to " + mSourceUrl + ". Exception: " + e);
-            } else {
-                Log.e(TAG, "Unable to set media player source to " + mSourceAsset + ". Exception: " + e);
-            }
             mMediaPlayer.release();
             mMediaPlayer = null;
-            return false;
+            if (useUrl) {
+                throw new RuntimeException(String.format("Unable to set MediaPlayer to URL %s!", mSourceUrl), e);
+            } else {
+                throw new RuntimeException(String.format("Unable to set MediaPlayer to asset %s!", mSourceAsset), e);
+            }
         } catch(IllegalArgumentException e) {
-            if (useUrl) {
-                Log.e(TAG, "Unable to set media player source to " + mSourceUrl + ". Exception: " + e);
-            } else {
-                Log.e(TAG, "Unable to set media player source to " + mSourceAsset + ". Exception: " + e);
-            }
             mMediaPlayer.release();
             mMediaPlayer = null;
-            return false;
+            if (useUrl) {
+                throw new RuntimeException(String.format("Unable to set MediaPlayer to URL %s!", mSourceUrl), e);
+            } else {
+                throw new RuntimeException(String.format("Unable to set MediaPlayer to asset %s!", mSourceAsset), e);
+            }
         }
 
         mMediaPlayer.setLooping(mLooping);
+        mMediaPlayer.setVolume(mVolume, mVolume);
 
         // Bind it to our media frame
         mMediaPlayer.setTexture(mSurfaceTexture);
@@ -341,9 +371,9 @@ public class MediaSource extends Filter {
         // Connect SurfaceTexture to callback
         mSurfaceTexture.setOnFrameAvailableListener(onMediaFrameAvailableListener);
 
+        if (mLogVerbose) Log.v(TAG, "Preparing MediaPlayer.");
         mMediaPlayer.prepareAsync();
 
-        if (mLogVerbose) Log.v(TAG, "MediaPlayer now preparing.");
         return true;
     }
 
@@ -381,6 +411,9 @@ public class MediaSource extends Filter {
             new MediaPlayer.OnCompletionListener() {
         public void onCompletion(MediaPlayer mp) {
             if (mLogVerbose) Log.v(TAG, "MediaPlayer has completed playback");
+            synchronized(this) {
+                mCompleted = true;
+            }
         }
     };
 
