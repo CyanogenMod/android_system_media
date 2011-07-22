@@ -88,6 +88,8 @@ protected:
     virtual void onVolumeUpdate();
     virtual void onBufferingUpdate(const sp<AMessage> &msg);
     virtual void onGetMediaPlayerInfo();
+    virtual void onAttachAuxEffect(const sp<AMessage> &msg);
+    virtual void onSetAuxEffectSendLevel(const sp<AMessage> &msg);
 
     bool mHasVideo;
     int32_t mSeekTimeMsec;
