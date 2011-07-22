@@ -167,7 +167,7 @@ public class CameraSource extends Filter {
             boolean gotNewFrame;
             gotNewFrame = mNewFrameAvailable.block(1000);
             if (!gotNewFrame) {
-                throw new RuntimeException("Timeout waiting for new frame");
+                throw new RuntimeException("Timeout waiting for new frame from camera");
             }
             mNewFrameAvailable.close();
         }
@@ -221,30 +221,30 @@ public class CameraSource extends Filter {
     }
 
     synchronized public Camera.Parameters getCameraParameters() {
+        boolean closeCamera = false;
         if (mCameraParameters == null) {
-            boolean closeCamera = false;
             if (mCamera == null) {
                 mCamera = Camera.open(mCameraId);
                 closeCamera = true;
             }
             mCameraParameters = mCamera.getParameters();
 
-            mCameraParameters.setPreviewSize(mWidth, mHeight);
-            int closestRange[] = findClosestFpsRange(mFps, mCameraParameters);
-            if (mLogVerbose) Log.v(TAG, "Closest frame rate range: ["
-                            + closestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] / 1000.
-                            + ","
-                            + closestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX] / 1000.
-                            + "]");
-
-            mCameraParameters.setPreviewFpsRange(closestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
-                                                 closestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
-
             if (closeCamera) {
                 mCamera.release();
                 mCamera = null;
             }
         }
+
+        int closestSize[] = findClosestSize(mWidth, mHeight, mCameraParameters);
+        mWidth = closestSize[0];
+        mHeight = closestSize[1];
+        mCameraParameters.setPreviewSize(mWidth, mHeight);
+
+        int closestRange[] = findClosestFpsRange(mFps, mCameraParameters);
+
+        mCameraParameters.setPreviewFpsRange(closestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
+                                             closestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+
         return mCameraParameters;
     }
 
@@ -255,6 +255,46 @@ public class CameraSource extends Filter {
         if (isOpen()) {
             mCamera.setParameters(mCameraParameters);
         }
+    }
+
+    private int[] findClosestSize(int width, int height, Camera.Parameters parameters) {
+        List<Camera.Size> previewSizes = parameters.getSupportedPreviewSizes();
+        int closestWidth = -1;
+        int closestHeight = -1;
+        int smallestWidth = previewSizes.get(0).width;
+        int smallestHeight =  previewSizes.get(0).height;
+        for (Camera.Size size : previewSizes) {
+            // Best match defined as not being larger in either dimension than
+            // the requested size, but as close as possible. The below isn't a
+            // stable selection (reording the size list can give different
+            // results), but since this is a fallback nicety, that's acceptable.
+            if ( size.width < width &&
+                 size.height < height &&
+                 size.width >= closestWidth &&
+                 size.height >= closestHeight) {
+                closestWidth = size.width;
+                closestHeight = size.height;
+            }
+            if ( size.width < smallestWidth &&
+                 size.height < smallestHeight) {
+                smallestWidth = size.width;
+                smallestHeight = size.height;
+            }
+        }
+        if (closestWidth == -1) {
+            // Requested size is smaller than any listed size; match with smallest possible
+            closestWidth = smallestWidth;
+            closestHeight = smallestHeight;
+        }
+
+        if (mLogVerbose) {
+            Log.v(TAG,
+                  "Requested resolution: (" + width + ", " + height
+                  + "). Closest match: (" + closestWidth + ", "
+                  + closestHeight + ").");
+        }
+        int[] closestSize = {closestWidth, closestHeight};
+        return closestSize;
     }
 
     private int[] findClosestFpsRange(int fps, Camera.Parameters params) {
@@ -270,6 +310,13 @@ public class CameraSource extends Filter {
                 closestRange = range;
             }
         }
+        if (mLogVerbose) Log.v(TAG, "Requested fps: " + fps
+                               + ".Closest frame rate range: ["
+                               + closestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] / 1000.
+                               + ","
+                               + closestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX] / 1000.
+                               + "]");
+
         return closestRange;
     }
 
