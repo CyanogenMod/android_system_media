@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -27,9 +28,9 @@
 #endif
 
 
-#define MAX_NUMBER_INTERFACES 3
+#define MAX_NUMBER_INTERFACES 4
 
-#define TIME_S_BETWEEN_SETTING_CHANGE 5
+#define TIME_S_BETWEEN_SETTING_CHANGE 3
 
 //-----------------------------------------------------------------
 /* Exits the application if an error is encountered */
@@ -43,12 +44,34 @@ void ExitOnErrorFunc( SLresult result , int line)
     }
 }
 
+// Prefetch status callback
+
+#define PREFETCHEVENT_ERROR_CANDIDATE \
+            (SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE)
+
+SLboolean errorInPrefetchCallback = SL_BOOLEAN_FALSE;
+
+void prefetch_callback(SLPrefetchStatusItf caller, void *context, SLuint32 event)
+{
+    SLresult result;
+    assert(context == NULL);
+    SLpermille level;
+    result = (*caller)->GetFillLevel(caller, &level);
+    ExitOnError(result);
+    SLuint32 status;
+    result = (*caller)->GetPrefetchStatus(caller, &status);
+    ExitOnError(result);
+    if ((PREFETCHEVENT_ERROR_CANDIDATE == (event & PREFETCHEVENT_ERROR_CANDIDATE))
+            && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
+        errorInPrefetchCallback = SL_BOOLEAN_TRUE;
+    }
+}
 
 //-----------------------------------------------------------------
 
 /* Play an audio path and feed a global reverb  */
 void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmillibel directLevel,
-        SLmillibel sendLevel, bool alwaysOn)
+        SLmillibel sendLevel, bool alwaysOn, bool useFd, bool loop)
 {
     SLresult  result;
     SLEngineItf EngineItf;
@@ -60,9 +83,8 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
     SLDataSource            audioSource;
 #ifdef ANDROID
     SLDataLocator_AndroidFD locatorFd;
-#else
-    SLDataLocator_URI       locatorUri;
 #endif
+    SLDataLocator_URI       locatorUri;
     SLDataFormat_MIME       mime;
 
     /* Data sinks for the audio player */
@@ -73,6 +95,7 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
     SLPlayItf              playItf;
     SLPrefetchStatusItf    prefetchItf;
     SLEffectSendItf        effectSendItf;
+    SLSeekItf              seekItf;
 
     /* Interface for the output mix */
     SLPresetReverbItf      reverbItf;
@@ -142,21 +165,29 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
     iidArray[0] = SL_IID_PREFETCHSTATUS;
     required[1] = SL_BOOLEAN_TRUE;
     iidArray[1] = SL_IID_EFFECTSEND;
+    required[2] = SL_BOOLEAN_TRUE;
+    iidArray[2] = SL_IID_SEEK;
 
-#ifdef ANDROID
-    /* Setup the data source structure for the URI */
-    locatorFd.locatorType = SL_DATALOCATOR_ANDROIDFD;
-    int fd = open(path, O_RDONLY);
-    if (fd == -1) {
-        ExitOnError(SL_RESULT_RESOURCE_ERROR);
-    }
-    locatorFd.fd = (SLint32) fd;
-    locatorFd.length = SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE;
-    locatorFd.offset = 0;
-#else
     locatorUri.locatorType = SL_DATALOCATOR_URI;
     locatorUri.URI = (SLchar *) path;
+    audioSource.pLocator = (void*)&locatorUri;
+    if (useFd) {
+#ifdef ANDROID
+        /* Setup the data source structure for the URI */
+        locatorFd.locatorType = SL_DATALOCATOR_ANDROIDFD;
+        int fd = open(path, O_RDONLY);
+        if (fd == -1) {
+            perror(path);
+            exit(EXIT_FAILURE);
+        }
+        locatorFd.fd = (SLint32) fd;
+        locatorFd.length = SL_DATALOCATOR_ANDROIDFD_USE_FILE_SIZE;
+        locatorFd.offset = 0;
+        audioSource.pLocator = (void*)&locatorFd;
+#else
+        fprintf(stderr, "option --fd is not supported\n");
 #endif
+    }
 
     mime.formatType = SL_DATAFORMAT_MIME;
     /*     this is how ignored mime information is specified, according to OpenSL ES spec
@@ -165,14 +196,9 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
     mime.containerType = SL_CONTAINERTYPE_UNSPECIFIED;
 
     audioSource.pFormat  = (void*)&mime;
-#ifdef ANDROID
-    audioSource.pLocator = (void*)&locatorFd;
-#else
-    audioSource.pLocator = (void*)&locatorUri;
-#endif
 
     /* Create the audio player */
-    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink, 2,
+    result = (*EngineItf)->CreateAudioPlayer(EngineItf, &player, &audioSource, &audioSink, 3,
             iidArray, required);
     ExitOnError(result);
 
@@ -186,8 +212,16 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
 
     result = (*player)->GetInterface(player, SL_IID_PREFETCHSTATUS, (void*)&prefetchItf);
     ExitOnError(result);
+    result = (*prefetchItf)->RegisterCallback(prefetchItf, prefetch_callback, NULL);
+    ExitOnError(result);
+    result = (*prefetchItf)->SetCallbackEventsMask(prefetchItf,
+            SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE);
+    ExitOnError(result);
 
     result = (*player)->GetInterface(player, SL_IID_EFFECTSEND, (void*)&effectSendItf);
+    ExitOnError(result);
+
+    result = (*player)->GetInterface(player, SL_IID_SEEK, (void*)&seekItf);
     ExitOnError(result);
 
     fprintf(stdout, "Player configured\n");
@@ -202,6 +236,10 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
     /* Wait until there's data to play */
     SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
     while (prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) {
+        if (errorInPrefetchCallback) {
+            fprintf(stderr, "Error during prefetch, exiting\n");
+            exit(EXIT_FAILURE);
+        }
         usleep(100 * 1000);
         (*prefetchItf)->GetPrefetchStatus(prefetchItf, &prefetchStatus);
         ExitOnError(result);
@@ -212,7 +250,10 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
     result = (*playItf)->GetDuration(playItf, &durationInMsec);
     ExitOnError(result);
     if (durationInMsec == SL_TIME_UNKNOWN) {
+        printf("Duration unknown, assuming 10 seconds\n");
         durationInMsec = 10000;
+    } else {
+        printf("Duration is %.1f seconds\n", durationInMsec / 1000.0);
     }
 
     /* Feed the output mix' reverb from the audio player using the given send level */
@@ -228,19 +269,30 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
     ExitOnError(result);
     fprintf(stdout, "Set send level to %dmB\n", sendLevel);
 
+    /* Enable looping */
+    if (loop) {
+        result = (*seekItf)->SetLoop(seekItf, SL_BOOLEAN_TRUE, (SLmillisecond) 0, SL_TIME_UNKNOWN);
+        ExitOnError(result);
+    }
+
     /* Start playback */
     result = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PLAYING );
     ExitOnError(result);
 
     /* Disable preset reverb every TIME_S_BETWEEN_SETTING_CHANGE seconds unless always on */
     SLboolean previousEnabled = SL_BOOLEAN_FALSE;
-    for(unsigned int j=0 ; j<(durationInMsec/(1000*TIME_S_BETWEEN_SETTING_CHANGE)) ; j++) {
+    SLuint32 playState;
+    for (;;) {
+        result = (*playItf)->GetPlayState(playItf, &playState);
+        ExitOnError(result);
+        if (playState != SL_PLAYSTATE_PLAYING)
+            break;
         SLboolean enabled;
         enabled = alwaysOn || !previousEnabled;
         if (enabled != previousEnabled) {
             result = (*reverbItf)->SetPreset(reverbItf, enabled ? preset : SL_REVERBPRESET_NONE);
             fprintf(stdout, "SetPreset(%d)=%d\n", enabled ? preset : SL_REVERBPRESET_NONE, result);
-            //ExitOnError(result);
+            ExitOnError(result);
             previousEnabled = enabled;
             if (enabled) {
                 fprintf(stdout, "Reverb on\n");
@@ -252,9 +304,12 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
     }
 
     /* Make sure player is stopped */
+    assert(playState == SL_PLAYSTATE_STOPPED);
+#if 0
     fprintf(stdout, "Stopping playback\n");
     result = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_STOPPED);
     ExitOnError(result);
+#endif
 
     /* Destroy the player */
     (*player)->Destroy(player);
@@ -263,7 +318,8 @@ void TestSendToPresetReverb( SLObjectItf sl, const char* path, int preset, SLmil
     (*outputMix)->Destroy(outputMix);
 
 #ifdef ANDROID
-    close(fd);
+    if (useFd)
+        close(locatorFd.fd);
 #endif
 }
 
@@ -279,20 +335,32 @@ int main(int argc, char* const argv[])
     fprintf(stdout, "Plays the sound file designated by the given path, ");
     fprintf(stdout, "and sends a specified amount of energy to a global reverb\n");
     fprintf(stdout, "(sendLevel in mB), with a given direct level (in mB).\n");
-    fprintf(stdout, "Every %d seconds, the reverb turned on and off,\n",
+    fprintf(stdout, "Every %d seconds, the reverb is turned on and off,\n",
             TIME_S_BETWEEN_SETTING_CHANGE);
     fprintf(stdout, "unless the --always-on option is specified before the path.\n");
 
     bool alwaysOn = false;
-    if (argc >= 2 && !strcmp(argv[1], "--always-on")) {
-        alwaysOn = true;
-        --argc;
-        ++argv;
+    bool useFd = false;
+    bool loop = false;
+    int i;
+    for (i = 1; i < argc; ++i) {
+        const char *arg = argv[i];
+        if (arg[0] != '-')
+            break;
+        if (!strcmp(arg, "--always-on")) {
+            alwaysOn = true;
+        } else if (!strcmp(arg, "--fd")) {
+            useFd = true;
+        } else if (!strcmp(arg, "--loop")) {
+            loop = true;
+        } else {
+            fprintf(stderr, "unknown option %s ignored\n", arg);
+        }
     }
 
-    if (argc < 5) {
-        fprintf(stdout, "Usage: \t%s [--always-on] path preset directLevel sendLevel\n",
-                programName);
+    if (argc - i != 4) {
+        fprintf(stdout, "Usage: \t%s [--always-on] [--fd] [--loop] path preset directLevel "
+                "sendLevel\n", programName);
         fprintf(stdout, "Example: \"%s /sdcard/my.mp3 6 -2000 0\" \n", programName);
         exit(EXIT_FAILURE);
     }
@@ -309,8 +377,8 @@ int main(int argc, char* const argv[])
     ExitOnError(result);
 
     // intentionally not checking that levels are of correct value
-    TestSendToPresetReverb(sl, argv[1], atoi(argv[2]), (SLmillibel)atoi(argv[3]),
-            (SLmillibel)atoi(argv[4]), alwaysOn);
+    TestSendToPresetReverb(sl, argv[i], atoi(argv[i+1]), (SLmillibel)atoi(argv[i+2]),
+            (SLmillibel)atoi(argv[i+3]), alwaysOn, useFd, loop);
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
