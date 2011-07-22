@@ -84,6 +84,7 @@ void GenericPlayer::preDestroy() {
 
 
 void GenericPlayer::setDataSource(const char *uri) {
+    SL_LOGV("GenericPlayer::setDataSource(uri=%s)", uri);
     resetDataLocator();
 
     mDataLocator.uriRef = uri;
@@ -93,6 +94,7 @@ void GenericPlayer::setDataSource(const char *uri) {
 
 
 void GenericPlayer::setDataSource(int fd, int64_t offset, int64_t length) {
+    SL_LOGV("GenericPlayer::setDataSource(fd=%d, offset=%lld, length=%lld)", fd, offset, length);
     resetDataLocator();
 
     mDataLocator.fdi.fd = fd;
@@ -165,6 +167,7 @@ void GenericPlayer::seek(int64_t timeMsec) {
 
 
 void GenericPlayer::loop(bool loop) {
+    SL_LOGV("GenericPlayer::loop %s", loop ? "true" : "false");
     sp<AMessage> msg = new AMessage(kWhatLoop, id());
     msg->setInt32(WHATPARAM_LOOP_LOOPING, (int32_t)loop);
     msg->post();
@@ -172,6 +175,7 @@ void GenericPlayer::loop(bool loop) {
 
 
 void GenericPlayer::setBufferingUpdateThreshold(int16_t thresholdPercent) {
+    SL_LOGV("GenericPlayer::setBufferingUpdateThreshold %d", thresholdPercent);
     sp<AMessage> msg = new AMessage(kWhatBuffUpdateThres, id());
     msg->setInt32(WHATPARAM_BUFFERING_UPDATETHRESHOLD_PERCENT, (int32_t)thresholdPercent);
     msg->post();
@@ -194,6 +198,8 @@ void GenericPlayer::getSampleRate(uint* hz) {
 //--------------------------------------------------
 void GenericPlayer::setVolume(bool mute, bool useStereoPos,
         XApermille stereoPos, XAmillibel volume) {
+    SL_LOGV("GenericPlayer::setVolume mute=%s, useStereoPos=%s, stereoPos=%d, volume=%d",
+            mute ?  "true" : "false", useStereoPos ? "true" : "false", stereoPos, volume);
 
     // compute amplification as the combination of volume level and stereo position
     float leftVol = 1.0f, rightVol = 1.0f;
@@ -244,11 +250,14 @@ void GenericPlayer::setVolume(bool mute, bool useStereoPos,
  *
  */
 void GenericPlayer::resetDataLocator() {
+    SL_LOGV("GenericPlayer::resetDataLocator()");
     mDataLocatorType = kDataLocatorNone;
 }
 
 
 void GenericPlayer::notify(const char* event, int data, bool async) {
+    SL_LOGV("GenericPlayer::notify(event=%s, data=%d, async=%s)", event, data,
+            async ? "true" : "false");
     sp<AMessage> msg = new AMessage(kWhatNotif, id());
     msg->setInt32(event, (int32_t)data);
     if (async) {
@@ -260,6 +269,8 @@ void GenericPlayer::notify(const char* event, int data, bool async) {
 
 
 void GenericPlayer::notify(const char* event, int data1, int data2, bool async) {
+    SL_LOGV("GenericPlayer::notify(event=%s, data1=%d, data2=%d, async=%s)", event, data1, data2,
+            async ? "true" : "false");
     sp<AMessage> msg = new AMessage(kWhatNotif, id());
     msg->setRect(event, 0, 0, (int32_t)data1, (int32_t)data2);
     if (async) {
@@ -273,48 +284,60 @@ void GenericPlayer::notify(const char* event, int data1, int data2, bool async) 
 //--------------------------------------------------
 // AHandler implementation
 void GenericPlayer::onMessageReceived(const sp<AMessage> &msg) {
+    SL_LOGV("GenericPlayer::onMessageReceived()");
     switch (msg->what()) {
         case kWhatPrepare:
+            SL_LOGD("kWhatPrepare");
             onPrepare();
             break;
 
         case kWhatNotif:
+            SL_LOGI("kWhatNotif");
             onNotify(msg);
             break;
 
         case kWhatPlay:
+            SL_LOGV("kWhatPlay");
             onPlay();
             break;
 
         case kWhatPause:
+            SL_LOGV("kWhatPause");
             onPause();
             break;
 
         case kWhatSeek:
+            SL_LOGV("kWhatSeek");
             onSeek(msg);
             break;
 
         case kWhatLoop:
+            SL_LOGV("kWhatLoop");
             onLoop(msg);
             break;
 
         case kWhatVolumeUpdate:
+            SL_LOGV("kWhatVolumeUpdate");
             onVolumeUpdate();
             break;
 
         case kWhatSeekComplete:
+            SL_LOGV("kWhatSeekComplete");
             onSeekComplete();
             break;
 
         case kWhatBufferingUpdate:
+            SL_LOGV("kWhatBufferingUpdate");
             onBufferingUpdate(msg);
             break;
 
         case kWhatBuffUpdateThres:
+            SL_LOGV("kWhatBuffUpdateThres");
             onSetBufferingUpdateThreshold(msg);
             break;
 
         default:
+            SL_LOGV("kWhatPlay");
             TRESPASS();
     }
 }
@@ -335,6 +358,7 @@ void GenericPlayer::onPrepare() {
 
 
 void GenericPlayer::onNotify(const sp<AMessage> &msg) {
+    SL_LOGV("GenericPlayer::onNotify()");
     notif_cbf_t notifClient;
     void*       notifUser;
     {
@@ -363,6 +387,8 @@ void GenericPlayer::onNotify(const sp<AMessage> &msg) {
     } else if (msg->findRect(PLAYEREVENT_VIDEO_SIZE_UPDATE, &val1, &val2, &val1, &val2)) {
         SL_LOGV("GenericPlayer notifying %s = %d, %d", PLAYEREVENT_VIDEO_SIZE_UPDATE, val1, val2);
         notifClient(kEventHasVideoSize, val1, val2, notifUser);
+    } else {
+        SL_LOGV("GenericPlayer notifying unknown");
     }
 }
 
@@ -397,7 +423,7 @@ void GenericPlayer::onLoop(const sp<AMessage> &msg) {
 
 
 void GenericPlayer::onVolumeUpdate() {
-
+    SL_LOGV("GenericPlayer::onVolumeUpdate");
 }
 
 
@@ -408,11 +434,12 @@ void GenericPlayer::onSeekComplete() {
 
 
 void GenericPlayer::onBufferingUpdate(const sp<AMessage> &msg) {
-
+    SL_LOGV("GenericPlayer::onBufferingUpdate");
 }
 
 
 void GenericPlayer::onSetBufferingUpdateThreshold(const sp<AMessage> &msg) {
+    SL_LOGV("GenericPlayer::onSetBufferingUpdateThreshold");
     int32_t thresholdPercent = 0;
     if (msg->findInt32(WHATPARAM_BUFFERING_UPDATETHRESHOLD_PERCENT, &thresholdPercent)) {
         Mutex::Autolock _l(mSettingsLock);
@@ -423,23 +450,27 @@ void GenericPlayer::onSetBufferingUpdateThreshold(const sp<AMessage> &msg) {
 
 //-------------------------------------------------
 void GenericPlayer::notifyStatus() {
+    SL_LOGV("GenericPlayer::notifyStatus");
     notify(PLAYEREVENT_PREFETCHSTATUSCHANGE, (int32_t)mCacheStatus, true /*async*/);
 }
 
 
 void GenericPlayer::notifyCacheFill() {
+    SL_LOGV("GenericPlayer::notifyCacheFill");
     mLastNotifiedCacheFill = mCacheFill;
     notify(PLAYEREVENT_PREFETCHFILLLEVELUPDATE, (int32_t)mLastNotifiedCacheFill, true/*async*/);
 }
 
 
 void GenericPlayer::seekComplete() {
+    SL_LOGV("GenericPlayer::seekComplete");
     sp<AMessage> msg = new AMessage(kWhatSeekComplete, id());
     msg->post();
 }
 
 
 void GenericPlayer::bufferingUpdate(int16_t fillLevelPerMille) {
+    SL_LOGV("GenericPlayer::bufferingUpdate");
     sp<AMessage> msg = new AMessage(kWhatBufferingUpdate, id());
     msg->setInt32(WHATPARAM_BUFFERING_UPDATE, fillLevelPerMille);
     msg->post();

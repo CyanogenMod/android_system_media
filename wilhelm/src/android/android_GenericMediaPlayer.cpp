@@ -38,17 +38,38 @@ MediaPlayerNotificationClient::MediaPlayerNotificationClient(GenericMediaPlayer*
     mGenericMediaPlayer(gmp),
     mPlayerPrepared(false)
 {
-
+    SL_LOGV("MediaPlayerNotificationClient::MediaPlayerNotificationClient()");
 }
 
 MediaPlayerNotificationClient::~MediaPlayerNotificationClient() {
+    SL_LOGV("MediaPlayerNotificationClient::~MediaPlayerNotificationClient()");
+}
 
+// Map a MEDIA_* enum to a string
+static const char *media_to_string(int msg)
+{
+    switch (msg) {
+#define _(x) case MEDIA_##x: return "MEDIA_" #x;
+      _(PREPARED)
+      _(SET_VIDEO_SIZE)
+      _(SEEK_COMPLETE)
+      _(PLAYBACK_COMPLETE)
+      _(BUFFERING_UPDATE)
+      _(ERROR)
+      _(NOP)
+      _(TIMED_TEXT)
+      _(INFO)
+#undef _
+    default:
+        return NULL;
+    }
 }
 
 //--------------------------------------------------
 // IMediaPlayerClient implementation
 void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Parcel *obj) {
-    SL_LOGV("MediaPlayerNotificationClient::notify(msg=%d, ext1=%d, ext2=%d)", msg, ext1, ext2);
+    SL_LOGV("MediaPlayerNotificationClient::notify(msg=%s (%d), ext1=%d, ext2=%d)",
+            media_to_string(msg), msg, ext1, ext2);
 
     switch (msg) {
       case MEDIA_PREPARED:
@@ -170,15 +191,18 @@ void GenericMediaPlayer::getPositionMsec(int* msec) {
 
 //--------------------------------------------------
 void GenericMediaPlayer::setVideoSurface(const sp<Surface> &surface) {
+    SL_LOGV("GenericMediaPlayer::setVideoSurface()");
     mVideoSurface = surface;
 }
 
 void GenericMediaPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {
+    SL_LOGV("GenericMediaPlayer::setVideoSurfaceTexture()");
     mVideoSurfaceTexture = surfaceTexture;
 }
 
 //--------------------------------------------------
 void GenericMediaPlayer::onMessageReceived(const sp<AMessage> &msg) {
+    SL_LOGV("GenericMediaPlayer::onMessageReceived()");
     switch (msg->what()) {
         case kWhatMediaPlayerInfo:
             onGetMediaPlayerInfo();
@@ -333,6 +357,8 @@ void GenericMediaPlayer::onBufferingUpdate(const sp<AMessage> &msg) {
                 }
             }
         }
+    } else {
+        SL_LOGV("GenericMediaPlayer::onBufferingUpdate(fillLevel=unknown)");
     }
 }
 
@@ -362,6 +388,7 @@ void GenericMediaPlayer::onGetMediaPlayerInfo() {
  * pre-condition: mPlayer is prepared
  */
 void GenericMediaPlayer::onAfterMediaPlayerPrepared() {
+    SL_LOGV("GenericMediaPlayer::onAfterMediaPlayerPrepared()");
     // the MediaPlayer mPlayer is prepared, retrieve its duration
     // FIXME retrieve channel count
     {
