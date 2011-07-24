@@ -18,6 +18,7 @@
 
 #include <SLES/OpenSLES.h>
 #include <assert.h>
+#include <pthread.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -167,11 +168,61 @@ void printEnvNames(void)
     }
 }
 
+// These are extensions to OpenSL ES 1.0.1 values
+
+#define SL_PREFETCHSTATUS_UNKNOWN 0
+#define SL_PREFETCHSTATUS_ERROR   (-1)
+
+// Mutex and condition shared with main program to protect prefetch_status
+
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+SLuint32 prefetch_status = SL_PREFETCHSTATUS_UNKNOWN;
+
+/* used to detect errors likely to have occured when the OpenSL ES framework fails to open
+ * a resource, for instance because a file URI is invalid, or an HTTP server doesn't respond.
+ */
+#define PREFETCHEVENT_ERROR_CANDIDATE \
+        (SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE)
+
+// Prefetch status callback
+
+void prefetch_callback(SLPrefetchStatusItf caller, void *context, SLuint32 event)
+{
+    SLresult result;
+    assert(context == NULL);
+    SLpermille level;
+    result = (*caller)->GetFillLevel(caller, &level);
+    assert(SL_RESULT_SUCCESS == result);
+    SLuint32 status;
+    result = (*caller)->GetPrefetchStatus(caller, &status);
+    assert(SL_RESULT_SUCCESS == result);
+    SLuint32 new_prefetch_status;
+    if ((event & PREFETCHEVENT_ERROR_CANDIDATE) == PREFETCHEVENT_ERROR_CANDIDATE
+            && level == 0 && status == SL_PREFETCHSTATUS_UNDERFLOW) {
+        new_prefetch_status = SL_PREFETCHSTATUS_ERROR;
+    } else if (event == SL_PREFETCHEVENT_STATUSCHANGE &&
+            status == SL_PREFETCHSTATUS_SUFFICIENTDATA) {
+        new_prefetch_status = status;
+    } else {
+        return;
+    }
+    int ok;
+    ok = pthread_mutex_lock(&mutex);
+    assert(ok == 0);
+    prefetch_status = new_prefetch_status;
+    ok = pthread_cond_signal(&cond);
+    assert(ok == 0);
+    ok = pthread_mutex_unlock(&mutex);
+    assert(ok == 0);
+}
+
 // Main program
 
 int main(int argc, char **argv)
 {
     SLresult result;
+    bool loop = false;
 
     // process command line parameters
     char *prog = argv[0];
@@ -217,6 +268,8 @@ int main(int argc, char **argv)
             } else {
                 bad = true;
             }
+        } else if (!strcmp(arg, "--loop")) {
+            loop = true;
         } else {
             bad = true;
         }
@@ -226,7 +279,7 @@ int main(int argc, char **argv)
     }
     if (argc - i != 1) {
         fprintf(stderr, "usage: %s --mix-preset=# --mix-name=I3DL2 --player-preset=# "
-                "--player-name=I3DL2 filename\n", prog);
+                "--player-name=I3DL2 --loop filename\n", prog);
         return EXIT_FAILURE;
     }
     char *pathname = argv[i];
@@ -351,8 +404,8 @@ int main(int argc, char **argv)
     SLDataSource audioSrc = {&locURI, &dfMIME};
     SLDataLocator_OutputMix locOutputMix = {SL_DATALOCATOR_OUTPUTMIX, mixObject};
     SLDataSink audioSnk = {&locOutputMix, NULL};
-    SLInterfaceID player_ids[4];
-    SLboolean player_req[4];
+    SLInterfaceID player_ids[5];
+    SLboolean player_req[5];
     count = 0;
     if (playerPresetItfRequested) {
         player_req[count] = SL_BOOLEAN_TRUE;
@@ -365,6 +418,10 @@ int main(int argc, char **argv)
     if (outputMixPresetItfRequested || outputMixEnvironmentalItfRequested) {
         player_req[count] = SL_BOOLEAN_TRUE;
         player_ids[count++] = SL_IID_EFFECTSEND;
+    }
+    if (loop) {
+        player_req[count] = SL_BOOLEAN_TRUE;
+        player_ids[count++] = SL_IID_SEEK;
     }
     player_req[count] = SL_BOOLEAN_TRUE;
     player_ids[count++] = SL_IID_PREFETCHSTATUS;
@@ -543,16 +600,22 @@ int main(int argc, char **argv)
             &playerPrefetchStatus);
     assert(SL_RESULT_SUCCESS == result);
 
-    // poll prefetch status to detect when it completes
-    SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
-    SLuint32 timeOutIndex = 100; // 10s
-    while ((prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) && (timeOutIndex > 0)) {
-        usleep(100 * 1000);
-        (*playerPrefetchStatus)->GetPrefetchStatus(playerPrefetchStatus, &prefetchStatus);
-        timeOutIndex--;
+    // enable prefetch status callbacks
+    result = (*playerPrefetchStatus)->RegisterCallback(playerPrefetchStatus, prefetch_callback,
+            NULL);
+    assert(SL_RESULT_SUCCESS == result);
+    result = (*playerPrefetchStatus)->SetCallbackEventsMask(playerPrefetchStatus,
+            SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE);
+    assert(SL_RESULT_SUCCESS == result);
+
+    // wait for prefetch status callback to indicate either sufficient data or error
+    pthread_mutex_lock(&mutex);
+    while (prefetch_status == SL_PREFETCHSTATUS_UNKNOWN) {
+        pthread_cond_wait(&cond, &mutex);
     }
-    if (timeOutIndex == 0) {
-        fprintf(stderr, "\nWe\'re done waiting, failed to prefetch data in time, exiting\n");
+    pthread_mutex_unlock(&mutex);
+    if (prefetch_status == SL_PREFETCHSTATUS_ERROR) {
+        fprintf(stderr, "Error during prefetch, exiting\n");
         goto destroyRes;
     }
 
@@ -564,6 +627,16 @@ int main(int argc, char **argv)
         printf("duration: unknown\n");
     } else {
         printf("duration: %.1f seconds\n", duration / 1000.0);
+    }
+
+    // enable looping
+    if (loop) {
+        SLSeekItf playerSeek;
+        result = (*playerObject)->GetInterface(playerObject, SL_IID_SEEK, &playerSeek);
+        assert(SL_RESULT_SUCCESS == result);
+        result = (*playerSeek)->SetLoop(playerSeek, SL_BOOLEAN_TRUE, (SLmillisecond) 0,
+                SL_TIME_UNKNOWN);
+        assert(SL_RESULT_SUCCESS == result);
     }
 
     // start audio playing
