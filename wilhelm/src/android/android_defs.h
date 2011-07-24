@@ -42,13 +42,13 @@ enum AndroidObjectType {
 
 /**
  * Used to define the states of the OpenSL ES / OpenMAX AL object initialization and preparation
- * with regards to the Android-side of the data
+ * with regards to the Android-side of the data, in particular as affected by the play state.
  */
 enum AndroidObjectState {
-    ANDROID_UNINITIALIZED = -1,
-    ANDROID_PREPARING,
-    ANDROID_READY,
-    NUM_ANDROID_STATES
+    ANDROID_UNINITIALIZED = -1, // never called SetPlayState(PAUSED or PLAYING)
+    ANDROID_PREPARING,          // currently preparing due to first SetPlayState(PAUSED or PLAYING)
+    ANDROID_READY,              // preparation has completed, and will not be attempted again
+    // NUM_ANDROID_STATES       // unused
 };
 
 
