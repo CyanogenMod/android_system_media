@@ -449,6 +449,22 @@ android::status_t android_fxSend_attach(CAudioPlayer* ap, bool attach,
         return android::INVALID_OPERATION;
     }
 
+    // There are 3 cases:
+    //  mAPlayer != 0 && mAudioTrack == 0 means playing decoded audio
+    //  mAPlayer == 0 && mAudioTrack != 0 means playing PCM audio
+    //  mAPlayer == 0 && mAudioTrack == 0 means player not fully configured yet
+    // The asserts document and verify this.
+    if (ap->mAPlayer != 0) {
+        assert(ap->mAudioTrack == 0);
+        if (attach) {
+            ap->mAPlayer->attachAuxEffect(pFx->id());
+            ap->mAPlayer->setAuxEffectSendLevel( sles_to_android_amplification(sendLevel) );
+        } else {
+            ap->mAPlayer->attachAuxEffect(0);
+        }
+        return android::NO_ERROR;
+    }
+
     if (ap->mAudioTrack == 0) {
         // the player doesn't have an AudioTrack at the moment, so store this info to use it
         // when the AudioTrack becomes available
@@ -507,6 +523,12 @@ SLresult android_fxSend_attachToAux(CAudioPlayer* ap, SLInterfaceID pUuid, SLboo
 android::status_t android_fxSend_setSendLevel(CAudioPlayer* ap, SLmillibel sendLevel) {
     // we keep track of the send level, independently of the current audio player level
     ap->mAuxSendLevel = sendLevel - ap->mVolume.mLevel;
+
+    if (ap->mAPlayer != 0) {
+        assert(ap->mAudioTrack == 0);
+        ap->mAPlayer->setAuxEffectSendLevel( sles_to_android_amplification(sendLevel) );
+        return android::NO_ERROR;
+    }
 
     if (ap->mAudioTrack == 0) {
         return android::NO_ERROR;

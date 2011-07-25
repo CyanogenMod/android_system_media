@@ -339,6 +339,34 @@ void GenericMediaPlayer::onVolumeUpdate() {
 }
 
 
+void GenericMediaPlayer::onAttachAuxEffect(const sp<AMessage> &msg) {
+    SL_LOGD("GenericMediaPlayer::onAttachAuxEffect()");
+    int32_t effectId = 0;
+    if (msg->findInt32(WHATPARAM_ATTACHAUXEFFECT, &effectId)) {
+        if (mPlayer != 0) {
+            status_t status;
+            status = mPlayer->attachAuxEffect(effectId);
+            // attachAuxEffect returns a status but we have no way to report it back to app
+            (void) status;
+        }
+    }
+}
+
+
+void GenericMediaPlayer::onSetAuxEffectSendLevel(const sp<AMessage> &msg) {
+    SL_LOGD("GenericMediaPlayer::onSetAuxEffectSendLevel()");
+    float level = 0.0f;
+    if (msg->findFloat(WHATPARAM_SETAUXEFFECTSENDLEVEL, &level)) {
+        if (mPlayer != 0) {
+            status_t status;
+            status = mPlayer->setAuxEffectSendLevel(level);
+            // setAuxEffectSendLevel returns a status but we have no way to report it back to app
+            (void) status;
+        }
+    }
+}
+
+
 void GenericMediaPlayer::onBufferingUpdate(const sp<AMessage> &msg) {
     int32_t fillLevel = 0;
     if (msg->findInt32(WHATPARAM_BUFFERING_UPDATE, &fillLevel)) {

@@ -245,6 +245,26 @@ void GenericPlayer::setVolume(bool mute, bool useStereoPos,
 
 
 //--------------------------------------------------
+void GenericPlayer::attachAuxEffect(int32_t effectId)
+{
+    SL_LOGV("GenericPlayer::attachAuxEffect(id=%d)", effectId);
+    sp<AMessage> msg = new AMessage(kWhatAttachAuxEffect, id());
+    msg->setInt32(WHATPARAM_ATTACHAUXEFFECT, effectId);
+    msg->post();
+}
+
+
+//--------------------------------------------------
+void GenericPlayer::setAuxEffectSendLevel(float level)
+{
+    SL_LOGV("GenericPlayer::setAuxEffectSendLevel(level=%g)", level);
+    sp<AMessage> msg = new AMessage(kWhatSetAuxEffectSendLevel, id());
+    msg->setFloat(WHATPARAM_SETAUXEFFECTSENDLEVEL, level);
+    msg->post();
+}
+
+
+//--------------------------------------------------
 /*
  * post-condition: mDataLocatorType == kDataLocatorNone
  *
@@ -334,6 +354,16 @@ void GenericPlayer::onMessageReceived(const sp<AMessage> &msg) {
         case kWhatBuffUpdateThres:
             SL_LOGV("kWhatBuffUpdateThres");
             onSetBufferingUpdateThreshold(msg);
+            break;
+
+        case kWhatAttachAuxEffect:
+            SL_LOGV("kWhatAttachAuxEffect");
+            onAttachAuxEffect(msg);
+            break;
+
+        case kWhatSetAuxEffectSendLevel:
+            SL_LOGV("kWhatSetAuxEffectSendLevel");
+            onSetAuxEffectSendLevel(msg);
             break;
 
         default:
@@ -446,6 +476,16 @@ void GenericPlayer::onSetBufferingUpdateThreshold(const sp<AMessage> &msg) {
         Mutex::Autolock _l(mSettingsLock);
         mCacheFillNotifThreshold = (int16_t)thresholdPercent;
     }
+}
+
+
+void GenericPlayer::onAttachAuxEffect(const sp<AMessage> &msg) {
+    SL_LOGV("GenericPlayer::onAttachAuxEffect()");
+}
+
+
+void GenericPlayer::onSetAuxEffectSendLevel(const sp<AMessage> &msg) {
+    SL_LOGV("GenericPlayer::onSetAuxEffectSendLevel()");
 }
 
 

@@ -29,6 +29,8 @@
 #define WHATPARAM_LOOP_LOOPING                      "looping"
 #define WHATPARAM_BUFFERING_UPDATE                  "bufferingUpdate"
 #define WHATPARAM_BUFFERING_UPDATETHRESHOLD_PERCENT "buffUpdateThreshold"
+#define WHATPARAM_ATTACHAUXEFFECT                   "attachAuxEffect"
+#define WHATPARAM_SETAUXEFFECTSENDLEVEL             "setAuxEffectSendLevel"
 
 namespace android {
 
@@ -67,6 +69,8 @@ public:
     virtual void getSampleRate(uint32_t* hz);// hz  != NULL, UNKNOWN_SAMPLERATE if unknown
 
     void setVolume(bool mute, bool useStereoPos, XApermille stereoPos, XAmillibel volume);
+    void attachAuxEffect(int32_t effectId);
+    void setAuxEffectSendLevel(float level);
 
 protected:
     // mutex used for set vs use of volume and cache (fill, threshold) settings
@@ -89,7 +93,9 @@ protected:
         kWhatVolumeUpdate    = 'volu',
         kWhatBufferingUpdate = 'bufu',
         kWhatBuffUpdateThres = 'buut',
-        kWhatMediaPlayerInfo = 'mpin'
+        kWhatMediaPlayerInfo = 'mpin',
+        kWhatAttachAuxEffect = 'aaux',
+        kWhatSetAuxEffectSendLevel = 'saux',
     };
 
     // Send a notification to one of the event listeners
@@ -110,6 +116,8 @@ protected:
     virtual void onSeekComplete();
     virtual void onBufferingUpdate(const sp<AMessage> &msg);
     virtual void onSetBufferingUpdateThreshold(const sp<AMessage> &msg);
+    virtual void onAttachAuxEffect(const sp<AMessage> &msg);
+    virtual void onSetAuxEffectSendLevel(const sp<AMessage> &msg);
 
     // Convenience methods
     //   for async notifications of prefetch status and cache fill level, needs to be called
