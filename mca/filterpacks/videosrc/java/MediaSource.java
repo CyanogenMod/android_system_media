@@ -84,8 +84,13 @@ public class MediaSource extends Filter {
     private SurfaceTexture mSurfaceTexture;
     private ShaderProgram mFrameExtractor;
     private MutableFrameFormat mOutputFormat;
-    private ConditionVariable mNewFrameAvailable;
     private float[] mFrameTransform;
+
+    // Total timeouts will be PREP_TIMEOUT*PREP_TIMEOUT_REPEAT
+    private static final int PREP_TIMEOUT = 100; // ms
+    private static final int PREP_TIMEOUT_REPEAT = 50;
+    private static final int NEWFRAME_TIMEOUT = 100; //ms
+    private static final int NEWFRAME_TIMEOUT_REPEAT = 10;
 
     private final String mFrameShader =
             "#extension GL_OES_EGL_image_external : require\n" +
@@ -101,6 +106,7 @@ public class MediaSource extends Filter {
     private boolean mGotSize;
     private boolean mPrepared;
     private boolean mPlaying;
+    private boolean mNewFrameAvailable;
     private boolean mPaused;
     private boolean mCompleted;
 
@@ -109,7 +115,7 @@ public class MediaSource extends Filter {
 
     public MediaSource(String name) {
         super(name);
-        mNewFrameAvailable = new ConditionVariable();
+        mNewFrameAvailable = false;
         mFrameTransform = new float[16];
 
         mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
@@ -178,9 +184,10 @@ public class MediaSource extends Filter {
 
         if (!mPlaying) {
             int waitCount = 0;
+            if (mLogVerbose) Log.v(TAG, "Waiting for preparation to complete");
             while (!mGotSize || !mPrepared) {
                 try {
-                    this.wait(100);
+                    this.wait(PREP_TIMEOUT);
                 } catch (InterruptedException e) {
                     // ignoring
                 }
@@ -190,11 +197,12 @@ public class MediaSource extends Filter {
                     return;
                 }
                 waitCount++;
-                if (waitCount == 50) {
+                if (waitCount == PREP_TIMEOUT_REPEAT) {
                     mMediaPlayer.release();
                     throw new RuntimeException("MediaPlayer timed out while preparing!");
                 }
             }
+            if (mLogVerbose) Log.v(TAG, "Starting playback");
             mMediaPlayer.start();
         }
 
@@ -202,18 +210,29 @@ public class MediaSource extends Filter {
         // we want at least one valid frame before pausing
         if (!mPaused || !mPlaying) {
             if (mWaitForNewFrame) {
-                boolean gotNewFrame;
-                gotNewFrame = mNewFrameAvailable.block(1000);
-                if (!gotNewFrame) {
-                    if (mCompleted) {
-                        // Video playback is done, so close us down
-                        closeOutputPort("video");
-                        return;
-                    } else {
-                        throw new RuntimeException("Timeout waiting for new frame!");
+                if (mLogVerbose) Log.v(TAG, "Waiting for new frame");
+
+                int waitCount = 0;
+                while (!mNewFrameAvailable) {
+                    if (waitCount == NEWFRAME_TIMEOUT_REPEAT) {
+                        if (mCompleted) {
+                            // Video playback is done, so close us down
+                            closeOutputPort("video");
+                            return;
+                        } else {
+                            throw new RuntimeException("Timeout waiting for new frame!");
+                        }
                     }
+                    try {
+                        this.wait(NEWFRAME_TIMEOUT);
+                    } catch (InterruptedException e) {
+                        if (mLogVerbose) Log.v(TAG, "interrupted");
+                        // ignoring
+                    }
+                    waitCount++;
                 }
-                mNewFrameAvailable.close();
+                mNewFrameAvailable = false;
+                if (mLogVerbose) Log.v(TAG, "Got new frame");
             }
 
             mSurfaceTexture.updateTexImage();
@@ -260,6 +279,7 @@ public class MediaSource extends Filter {
     //   sourceIsUrl next time.
     @Override
     public void fieldPortValueUpdated(String name, FilterContext context) {
+        if (mLogVerbose) Log.v(TAG, "Parameter update");
         if (name.equals("sourceUrl")) {
            if (isOpen()) {
                 if (mLogVerbose) Log.v(TAG, "Opening new source URL");
@@ -312,11 +332,12 @@ public class MediaSource extends Filter {
         mPlaying = false;
         mPaused = false;
         mCompleted = false;
+        mNewFrameAvailable = false;
 
         if (mLogVerbose) Log.v(TAG, "Setting up playback.");
 
         if (mMediaPlayer != null) {
-            // Clean up existing media player
+            // Clean up existing media players
             if (mLogVerbose) Log.v(TAG, "Resetting existing MediaPlayer.");
             mMediaPlayer.reset();
         } else {
@@ -389,9 +410,9 @@ public class MediaSource extends Filter {
                     Log.e(TAG, "Multiple video size change events received!");
                 }
             }
-            synchronized(this) {
+            synchronized(MediaSource.this) {
                 mGotSize = true;
-                this.notify();
+                MediaSource.this.notify();
             }
         }
     };
@@ -400,9 +421,9 @@ public class MediaSource extends Filter {
             new MediaPlayer.OnPreparedListener() {
         public void onPrepared(MediaPlayer mp) {
             if (mLogVerbose) Log.v(TAG, "MediaPlayer is prepared");
-            synchronized(this) {
+            synchronized(MediaSource.this) {
                 mPrepared = true;
-                this.notify();
+                MediaSource.this.notify();
             }
         }
     };
@@ -411,7 +432,7 @@ public class MediaSource extends Filter {
             new MediaPlayer.OnCompletionListener() {
         public void onCompletion(MediaPlayer mp) {
             if (mLogVerbose) Log.v(TAG, "MediaPlayer has completed playback");
-            synchronized(this) {
+            synchronized(MediaSource.this) {
                 mCompleted = true;
             }
         }
@@ -421,7 +442,12 @@ public class MediaSource extends Filter {
             new SurfaceTexture.OnFrameAvailableListener() {
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
             if (mLogVerbose) Log.v(TAG, "New frame from media player");
-            mNewFrameAvailable.open();
+            synchronized(MediaSource.this) {
+                if (mLogVerbose) Log.v(TAG, "New frame: notify");
+                mNewFrameAvailable = true;
+                MediaSource.this.notify();
+                if (mLogVerbose) Log.v(TAG, "New frame: notify done");
+            }
         }
     };
 
