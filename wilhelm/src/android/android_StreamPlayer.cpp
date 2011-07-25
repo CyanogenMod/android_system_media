@@ -146,6 +146,11 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
                 msg->setInt64(IStreamListener::kKeyResumeAtPTS,
                         (int64_t)oldFront->mItems.mTsCmdData.mPts);
                 receivedCmd_l(IStreamListener::DISCONTINUITY, msg /*msg*/);
+            } else if (oldFront->mItems.mTsCmdData.mTsCmdCode & ANDROID_MP2TSEVENT_FORMAT_CHANGE) {
+                sp<AMessage> msg = new AMessage();
+                // positive value for format change key makes the discontinuity "hard", see key def
+                msg->setInt32(IStreamListener::kKeyFormatChange, (int32_t) 1);
+                receivedCmd_l(IStreamListener::DISCONTINUITY, msg /*msg*/);
             }
             oldFront->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
         }

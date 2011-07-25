@@ -134,6 +134,8 @@ typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, void* user);
 // buffer marks a discontinuity with previous TS data, resume display upon reaching the
 // associated presentation time stamp
 #define ANDROID_MP2TSEVENT_DISCON_NEWPTS ((SLuint32) 0x1 << 2)
+// buffer marks a format change with previous TS data, resume display as soon as possible
+#define ANDROID_MP2TSEVENT_FORMAT_CHANGE ((SLuint32) 0x1 << 3)
 
 
 /**

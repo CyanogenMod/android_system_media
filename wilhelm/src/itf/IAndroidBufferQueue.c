@@ -72,10 +72,14 @@ static void setItems(const SLAndroidBufferItem *pItems, SLuint32 itemsLength,
           case kAndroidBufferTypeMpeg2Ts: {
             SLuint32 index = 0;
             // supported Mpeg2Ts commands are mutually exclusive
-            if (SL_ANDROID_ITEMKEY_EOS == pItems->itemKey) {
+            switch (pItems->itemKey) {
+
+              case SL_ANDROID_ITEMKEY_EOS:
                 pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_EOS;
                 //SL_LOGD("Found EOS event=%d", pBuff->mItems.mTsCmdData.mTsCmdCode);
-            } else if (SL_ANDROID_ITEMKEY_DISCONTINUITY == pItems->itemKey) {
+                break;
+
+              case SL_ANDROID_ITEMKEY_DISCONTINUITY:
                 if (pItems->itemSize == 0) {
                     pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_DISCONTINUITY;
                     //SL_LOGD("Found DISCONTINUITYevent=%d", pBuff->mItems.mTsCmdData.mTsCmdCode);
@@ -87,15 +91,25 @@ static void setItems(const SLAndroidBufferItem *pItems, SLuint32 itemsLength,
                     SL_LOGE("Invalid size for MPEG-2 PTS, ignoring value");
                     pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_DISCONTINUITY;
                 }
-            } else {
+                break;
+
+              case SL_ANDROID_ITEMKEY_FORMAT_CHANGE:
+                pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_FORMAT_CHANGE;
+                if (pItems->itemSize != 0) {
+                    SL_LOGE("Invalid item parameter size for format change, ignoring value");
+                }
+                break;
+
+              default:
+                // no event with this buffer
                 pBuff->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
-            }
-            break;
-          }
+                break;
+            }// switch (pItems->itemKey)
+          } break;
 
           default:
             return;
-        }
+        }// switch (bufferType)
     }
 }
 
