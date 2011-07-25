@@ -329,12 +329,8 @@ void GenericMediaPlayer::onVolumeUpdate() {
     // use settings lock to read the volume settings
     Mutex::Autolock _l(mSettingsLock);
     if (mPlayer != 0) {
-        if (mAndroidAudioLevels.mMute) {
-            mPlayer->setVolume(0.0f, 0.0f);
-        } else {
-            mPlayer->setVolume(mAndroidAudioLevels.mFinalVolume[0],
-                    mAndroidAudioLevels.mFinalVolume[1]);
-        }
+        mPlayer->setVolume(mAndroidAudioLevels.mFinalVolume[0],
+                mAndroidAudioLevels.mFinalVolume[1]);
     }
 }
 
@@ -433,13 +429,29 @@ void GenericMediaPlayer::onGetMediaPlayerInfo() {
 
 //--------------------------------------------------
 /**
- * called from the event handling loop
- * pre-condition: mPlayer is prepared
+ * called from the event handling loop after the MediaPlayer mPlayer is prepared
+ * pre-conditions:
+ *  mPlayer != 0
+ *  mPlayer is prepared
  */
 void GenericMediaPlayer::onAfterMediaPlayerPrepared() {
     SL_LOGV("GenericMediaPlayer::onAfterMediaPlayerPrepared()");
-    // the MediaPlayer mPlayer is prepared, retrieve its duration
-    // FIXME retrieve channel count
+    assert(mPlayer != 0);
+    // retrieve channel count
+    assert(UNKNOWN_NUMCHANNELS == mChannelCount);
+    Parcel *reply = new Parcel();
+    status_t status = mPlayer->getParameter(KEY_PARAMETER_AUDIO_CHANNEL_COUNT, reply);
+    if (status == NO_ERROR) {
+        mChannelCount = reply->readInt32();
+        if (UNKNOWN_NUMCHANNELS != mChannelCount) {
+            // now that we know the channel count, re-calculate the volumes
+            notify(PLAYEREVENT_CHANNEL_COUNT, mChannelCount, true /*async*/);
+        } else {
+            LOGW("channel count is still unknown after prepare");
+        }
+    }
+    delete reply;
+    // retrieve duration
     {
         Mutex::Autolock _l(mSettingsLock);
         int msec = 0;

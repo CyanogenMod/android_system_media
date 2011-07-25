@@ -181,70 +181,77 @@ int android_getMinFrameCount(uint32_t sampleRate) {
 #define LEFT_CHANNEL_MASK  0x1 << 0
 #define RIGHT_CHANNEL_MASK 0x1 << 1
 
-static void android_audioPlayer_updateStereoVolume(CAudioPlayer* ap) {
-    float leftVol = 1.0f, rightVol = 1.0f;
+void android_audioPlayer_volumeUpdate(CAudioPlayer* ap)
+{
+    assert(ap != NULL);
 
-    if (ap->mAudioTrack == 0) {
-        return;
-    }
-    // should not be used when muted
-    if (SL_BOOLEAN_TRUE == ap->mMute) {
-        return;
-    }
-
+    // the source's channel count, where zero means unknown
     int channelCount = ap->mNumChannels;
 
-    // mute has priority over solo
-    int leftAudibilityFactor = 1, rightAudibilityFactor = 1;
+    // whether each channel is audible
+    bool leftAudibilityFactor, rightAudibilityFactor;
 
+    // mute has priority over solo
     if (channelCount >= STEREO_CHANNELS) {
         if (ap->mMuteMask & LEFT_CHANNEL_MASK) {
             // left muted
-            leftAudibilityFactor = 0;
+            leftAudibilityFactor = false;
         } else {
             // left not muted
             if (ap->mSoloMask & LEFT_CHANNEL_MASK) {
                 // left soloed
-                leftAudibilityFactor = 1;
+                leftAudibilityFactor = true;
             } else {
                 // left not soloed
                 if (ap->mSoloMask & RIGHT_CHANNEL_MASK) {
                     // right solo silences left
-                    leftAudibilityFactor = 0;
+                    leftAudibilityFactor = false;
                 } else {
                     // left and right are not soloed, and left is not muted
-                    leftAudibilityFactor = 1;
+                    leftAudibilityFactor = true;
                 }
             }
         }
 
         if (ap->mMuteMask & RIGHT_CHANNEL_MASK) {
             // right muted
-            rightAudibilityFactor = 0;
+            rightAudibilityFactor = false;
         } else {
             // right not muted
             if (ap->mSoloMask & RIGHT_CHANNEL_MASK) {
                 // right soloed
-                rightAudibilityFactor = 1;
+                rightAudibilityFactor = true;
             } else {
                 // right not soloed
                 if (ap->mSoloMask & LEFT_CHANNEL_MASK) {
                     // left solo silences right
-                    rightAudibilityFactor = 0;
+                    rightAudibilityFactor = false;
                 } else {
                     // left and right are not soloed, and right is not muted
-                    rightAudibilityFactor = 1;
+                    rightAudibilityFactor = true;
                 }
             }
         }
+
+    // channel mute and solo are ignored for mono and unknown channel count sources
+    } else {
+        leftAudibilityFactor = true;
+        rightAudibilityFactor = true;
+    }
+
+    // apply player mute factor
+    // note that AudioTrack has mute() but not MediaPlayer, so it's easier to use volume
+    if (ap->mVolume.mMute) {
+        leftAudibilityFactor = false;
+        rightAudibilityFactor = false;
     }
 
     // compute amplification as the combination of volume level and stereo position
     //   amplification from volume level
     ap->mAmplFromVolLevel = sles_to_android_amplification(ap->mVolume.mLevel);
     //   amplification from direct level (changed in SLEffectSendtItf and SLAndroidEffectSendItf)
-    leftVol  *= ap->mAmplFromVolLevel * ap->mAmplFromDirectLevel;
-    rightVol *= ap->mAmplFromVolLevel * ap->mAmplFromDirectLevel;
+    float leftVol  = ap->mAmplFromVolLevel * ap->mAmplFromDirectLevel;
+    float rightVol = ap->mAmplFromVolLevel * ap->mAmplFromDirectLevel;
 
     // amplification from stereo position
     if (ap->mVolume.mEnableStereoPosition) {
@@ -254,6 +261,7 @@ static void android_audioPlayer_updateStereoVolume(CAudioPlayer* ap) {
             double theta = (1000+ap->mVolume.mStereoPosition)*M_PI_4/1000.0f; // 0 <= theta <= Pi/2
             ap->mAmplFromStereoPos[0] = cos(theta);
             ap->mAmplFromStereoPos[1] = sin(theta);
+        // channel count is 0 (unknown), 2 (stereo), or > 2 (multi-channel)
         } else {
             // stereo balance
             if (ap->mVolume.mStereoPosition > 0) {
@@ -268,7 +276,20 @@ static void android_audioPlayer_updateStereoVolume(CAudioPlayer* ap) {
         rightVol *= ap->mAmplFromStereoPos[1];
     }
 
-    ap->mAudioTrack->setVolume(leftVol * leftAudibilityFactor, rightVol * rightAudibilityFactor);
+    // apply audibility factors
+    if (!leftAudibilityFactor) {
+        leftVol = 0.0;
+    }
+    if (!rightAudibilityFactor) {
+        rightVol = 0.0;
+    }
+
+    // set volume on the underlying media player or audio track
+    if (ap->mAPlayer != 0) {
+        ap->mAPlayer->setVolume(leftVol, rightVol);
+    } else if (ap->mAudioTrack != 0) {
+        ap->mAudioTrack->setVolume(leftVol, rightVol);
+    }
 
     // changes in the AudioPlayer volume must be reflected in the send level:
     //  in SLEffectSendItf or in SLAndroidEffectSendItf?
@@ -792,6 +813,16 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
         if ((ap->mAudioTrack != 0) && (!ap->mSeek.mLoopEnabled)) {
             ap->mAudioTrack->stop();
         }
+        }
+        break;
+
+    case android::GenericPlayer::kEventChannelCount: {
+        object_lock_exclusive(&ap->mObject);
+        if (UNKNOWN_NUMCHANNELS == ap->mNumChannels && UNKNOWN_NUMCHANNELS != data1) {
+            ap->mNumChannels = data1;
+            android_audioPlayer_volumeUpdate(ap);
+        }
+        object_unlock_exclusive(&ap->mObject);
         }
         break;
 
@@ -1935,46 +1966,6 @@ void android_audioPlayer_loop(CAudioPlayer *ap, SLboolean loopEnable) {
     if ((AUDIOPLAYER_FROM_URIFD == ap->mAndroidObjType) && (ap->mAPlayer != 0)) {
         ap->mAPlayer->loop((bool)loopEnable);
     }
-}
-
-
-//-----------------------------------------------------------------------------
-/*
- * Mutes or unmutes the Android media framework object associated with the CAudioPlayer that carries
- * the IVolume interface.
- * Pre-condition:
- *   if ap->mMute is SL_BOOLEAN_FALSE, a call to this function was preceded by a call
- *   to android_audioPlayer_volumeUpdate()
- */
-static void android_audioPlayer_setMute(CAudioPlayer* ap) {
-    switch(ap->mAndroidObjType) {
-
-      case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
-        if (ap->mAudioTrack != 0) {
-            // when unmuting: volume levels have already been updated in IVolume_SetMute
-            ap->mAudioTrack->mute(ap->mMute);
-        }
-        break;
-
-      case AUDIOPLAYER_FROM_URIFD:                    // intended fall-through
-      case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE:
-        if ( (ap->mAPlayer != 0) && (NULL != &ap->mVolume) ) {
-            android_Player_volumeUpdate(ap->mAPlayer, &ap->mVolume);
-        }
-        break;
-
-      case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE: // intented fall-through
-      default:
-        break;
-    }
-}
-
-
-//-----------------------------------------------------------------------------
-SLresult android_audioPlayer_volumeUpdate(CAudioPlayer* ap) {
-    android_audioPlayer_updateStereoVolume(ap);
-    android_audioPlayer_setMute(ap);
-    return SL_RESULT_SUCCESS;
 }
 
 

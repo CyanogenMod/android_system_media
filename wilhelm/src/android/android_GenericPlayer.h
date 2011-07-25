@@ -43,7 +43,8 @@ public:
         kEventHasVideoSize            = 'vsiz',
         kEventPrefetchStatusChange    = 'pfsc',
         kEventPrefetchFillLevelUpdate = 'pflu',
-        kEventEndOfStream             = 'eos'
+        kEventEndOfStream             = 'eos',
+        kEventChannelCount            = 'ccnt',
     };
 
 
@@ -68,7 +69,7 @@ public:
     virtual void getPositionMsec(int* msec); //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
     virtual void getSampleRate(uint32_t* hz);// hz  != NULL, UNKNOWN_SAMPLERATE if unknown
 
-    void setVolume(bool mute, bool useStereoPos, XApermille stereoPos, XAmillibel volume);
+    void setVolume(float leftVol, float rightVol);
     void attachAuxEffect(int32_t effectId);
     void setAuxEffectSendLevel(float level);
 

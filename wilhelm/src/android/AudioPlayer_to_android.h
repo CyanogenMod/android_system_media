@@ -87,7 +87,7 @@ extern SLresult android_audioPlayer_getCapabilitiesOfRate(CAudioPlayer *pAudioPl
 
 extern SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMsec);
 
-extern SLresult android_audioPlayer_volumeUpdate(CAudioPlayer *pAudioPlayer);
+extern void android_audioPlayer_volumeUpdate(CAudioPlayer *pAudioPlayer);
 
 extern SLresult android_audioPlayer_setBufferingUpdateThresholdPerMille(CAudioPlayer *pAudioPlayer,
         SLpermille threshold);

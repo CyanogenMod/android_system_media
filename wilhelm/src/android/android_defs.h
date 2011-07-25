@@ -74,10 +74,6 @@ typedef struct AudioPlayback_Parameters_struct {
  */
 typedef struct AndroidAudioLevels_t {
     /**
-     * Is this player muted
-     */
-    bool mMute;
-    /**
      * Send level to aux effect, there's a single aux bus, so there's a single level
      */
     // FIXME not used yet, will be used when supporting effects in OpenMAX AL
@@ -116,6 +112,7 @@ typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, void* user);
 #define PLAYEREVENT_PREFETCHFILLLEVELUPDATE "pflu"
 #define PLAYEREVENT_ENDOFSTREAM             "eos"
 #define PLAYEREVENT_VIDEO_SIZE_UPDATE       "vsiz"
+#define PLAYEREVENT_CHANNEL_COUNT           "ccnt"  // channel count is now known
 
 
 /**

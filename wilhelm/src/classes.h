@@ -68,7 +68,6 @@
     DataLocatorFormat mDataSource;
     DataLocatorFormat mDataSink;
     // cached data for this instance
-    SLuint8 /*SLboolean*/ mMute;
     // Formerly at IMuteSolo
     SLuint8 mMuteMask;      // Mask for which channels are muted: bit 0=left, 1=right
     SLuint8 mSoloMask;      // Mask for which channels are soloed: bit 0=left, 1=right

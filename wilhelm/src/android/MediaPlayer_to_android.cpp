@@ -394,8 +394,11 @@ XAresult android_Player_volumeUpdate(const android::sp<android::GenericPlayer> &
 {
     XAresult result = XA_RESULT_SUCCESS;
 
+    // FIXME broken
+#if 0
     gp->setVolume((bool)pVolItf->mMute, (bool)pVolItf->mEnableStereoPosition,
             pVolItf->mStereoPosition, pVolItf->mLevel);
+#endif
 
     return result;
 }

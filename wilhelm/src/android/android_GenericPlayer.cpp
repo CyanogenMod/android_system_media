@@ -44,7 +44,6 @@ GenericPlayer::GenericPlayer(const AudioPlayback_Parameters* params) :
 
     mLooper = new android::ALooper();
 
-    mAndroidAudioLevels.mMute = false;
     mAndroidAudioLevels.mFinalVolume[0] = 1.0f;
     mAndroidAudioLevels.mFinalVolume[1] = 1.0f;
 }
@@ -196,49 +195,13 @@ void GenericPlayer::getSampleRate(uint* hz) {
 }
 
 //--------------------------------------------------
-void GenericPlayer::setVolume(bool mute, bool useStereoPos,
-        XApermille stereoPos, XAmillibel volume) {
-    SL_LOGV("GenericPlayer::setVolume mute=%s, useStereoPos=%s, stereoPos=%d, volume=%d",
-            mute ?  "true" : "false", useStereoPos ? "true" : "false", stereoPos, volume);
-
-    // compute amplification as the combination of volume level and stereo position
-    float leftVol = 1.0f, rightVol = 1.0f;
-    //   amplification from volume level
-    leftVol  *= sles_to_android_amplification(volume);
-    rightVol = leftVol;
-
-    //   amplification from direct level (changed in SLEffectSendtItf and SLAndroidEffectSendItf)
-    // FIXME use calculation below when supporting effects
-    //leftVol  *= mAndroidAudioLevels.mAmplFromDirectLevel;
-    //rightVol *= mAndroidAudioLevels.mAmplFromDirectLevel;
-
-    // amplification from stereo position
-    if (useStereoPos) {
-        // panning law depends on number of channels of content: stereo panning vs 2ch. balance
-        if (1 == mChannelCount) {
-            // stereo panning
-            double theta = (1000 + stereoPos) * M_PI_4 / 1000.0f; // 0 <= theta <= Pi/2
-            leftVol  *= cos(theta);
-            rightVol *= sin(theta);
-        } else {
-            // stereo balance
-            if (stereoPos > 0) {
-                leftVol  *= (1000 - stereoPos) / 1000.0f;
-                rightVol *= 1.0f;
-            } else {
-                leftVol  *= 1.0f;
-                rightVol *= (1000 + stereoPos) / 1000.0f;
-            }
-        }
-    }
-
+void GenericPlayer::setVolume(float leftVol, float rightVol)
+{
     {
         Mutex::Autolock _l(mSettingsLock);
-        mAndroidAudioLevels.mMute = mute;
         mAndroidAudioLevels.mFinalVolume[0] = leftVol;
         mAndroidAudioLevels.mFinalVolume[1] = rightVol;
     }
-
     // send a message for the volume to be updated by the object which implements the volume
     (new AMessage(kWhatVolumeUpdate, id()))->post();
 }
@@ -307,12 +270,12 @@ void GenericPlayer::onMessageReceived(const sp<AMessage> &msg) {
     SL_LOGV("GenericPlayer::onMessageReceived()");
     switch (msg->what()) {
         case kWhatPrepare:
-            SL_LOGD("kWhatPrepare");
+            SL_LOGV("kWhatPrepare");
             onPrepare();
             break;
 
         case kWhatNotif:
-            SL_LOGI("kWhatNotif");
+            SL_LOGV("kWhatNotif");
             onNotify(msg);
             break;
 
@@ -378,7 +341,7 @@ void GenericPlayer::onMessageReceived(const sp<AMessage> &msg) {
 //  it is strictly verboten to call those methods outside of the event loop
 
 void GenericPlayer::onPrepare() {
-    SL_LOGI("GenericPlayer::onPrepare()");
+    SL_LOGV("GenericPlayer::onPrepare()");
     // Subclass is responsible for indicating whether prepare was successful or unsuccessful
     // by updating mStateFlags accordingly.  It must set exactly one of these two flags.
     assert(!(mStateFlags & kFlagPrepared) != !(mStateFlags & kFlagPreparedUnsuccessfully));
@@ -415,6 +378,9 @@ void GenericPlayer::onNotify(const sp<AMessage> &msg) {
     } else if (msg->findInt32(PLAYEREVENT_PREPARED, &val1)) {
         SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_PREPARED, val1);
         notifClient(kEventPrepared, val1, 0, notifUser);
+    } else if (msg->findInt32(PLAYEREVENT_CHANNEL_COUNT, &val1)) {
+        SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_CHANNEL_COUNT, val1);
+        notifClient(kEventChannelCount, val1, 0, notifUser);
     } else if (msg->findRect(PLAYEREVENT_VIDEO_SIZE_UPDATE, &val1, &val2, &val1, &val2)) {
         SL_LOGV("GenericPlayer notifying %s = %d, %d", PLAYEREVENT_VIDEO_SIZE_UPDATE, val1, val2);
         notifClient(kEventHasVideoSize, val1, val2, notifUser);
