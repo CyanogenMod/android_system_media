@@ -50,7 +50,7 @@ public class FieldPort extends InputPort {
     }
 
     @Override
-    public void transfer(FilterContext context) {
+    public synchronized void transfer(FilterContext context) {
         if (mValueWaiting) {
             try {
                 mField.set(mFilter, mValue);
@@ -66,17 +66,17 @@ public class FieldPort extends InputPort {
     }
 
     @Override
-    public Frame pullFrame() {
+    public synchronized Frame pullFrame() {
         throw new RuntimeException("Cannot pull frame on " + this + "!");
     }
 
     @Override
-    public boolean hasFrame() {
+    public synchronized boolean hasFrame() {
         return mHasFrame;
     }
 
     @Override
-    public boolean acceptsFrame() {
+    public synchronized boolean acceptsFrame() {
         return !mValueWaiting;
     }
 
@@ -85,7 +85,7 @@ public class FieldPort extends InputPort {
         return "field " + super.toString();
     }
 
-    protected void setFieldFrame(Frame frame, boolean isAssignment) {
+    protected synchronized void setFieldFrame(Frame frame, boolean isAssignment) {
         assertPortIsOpen();
         checkFrameType(frame, isAssignment);
 

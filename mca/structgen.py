@@ -1,5 +1,21 @@
 #!/usr/bin/env python
 
+#
+# Copyright (C) 2011 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 import os
 import sys
 
@@ -101,7 +117,10 @@ class FieldType_BasePOD:
     return "  %s %s;" % (self.ctype, self.name)
 
   def javaGetter(self):
-    return "    public native %s get%s(int index);" % (self.ctype, ToJavaName(self.name, 0))
+    return "    public %s get%s(int index) {\n"\
+           "        assertReadable();\n"\
+           "        return nativeGet%s(index);\n"\
+           "    }" % (self.ctype, ToJavaName(self.name, 0), ToJavaName(self.name, 0))
 
   def javaSetter(self):
     return "    public void set%s(int index, %s value) {\n"\
@@ -109,18 +128,22 @@ class FieldType_BasePOD:
            "        nativeSet%s(index, value);\n"\
            "    }" % (ToJavaName(self.name, 0), self.ctype, ToJavaName(self.name, 0))
 
+  def javaNativeGetter(self):
+    return "    private native %s nativeGet%s(int index);"\
+           % (self.ctype, ToJavaName(self.name, 0))
+
   def javaNativeSetter(self):
     return "    private native boolean nativeSet%s(int index, %s value);"\
            % (ToJavaName(self.name, 0), self.ctype)
 
   def jniGetterDefString(self):
     return "JNIEXPORT %s JNICALL\n" \
-           "Java_%s_get%s(JNIEnv* env, jobject thiz, jint index);" \
+           "Java_%s_nativeGet%s(JNIEnv* env, jobject thiz, jint index);" \
            % (self.jtype, ToJNIPackage(self.package, self.jclassname), ToJavaName(self.name, 0))
 
   def jniGetterImplString(self):
     return \
-      "%s Java_%s_get%s(JNIEnv* env, jobject thiz, jint index) {\n"\
+      "%s Java_%s_nativeGet%s(JNIEnv* env, jobject thiz, jint index) {\n"\
       "  %s* instance = Get%sAtIndex(env, thiz, index);\n"\
       "  return instance ? instance->%s : %s;\n"\
       "}\n" % (self.jtype, ToJNIPackage(self.package, self.jclassname), ToJavaName(self.name, 0),\
@@ -241,6 +264,7 @@ class StructSpec:
     jgetters = [f.javaGetter() for f in self.fields]
     jsetters = [f.javaSetter() for f in self.fields]
     jnativesetters = [f.javaNativeSetter() for f in self.fields]
+    jnativegetters = [f.javaNativeGetter() for f in self.fields]
     return "public class %s extends NativeBuffer {\n\n"\
            "    public %s() {\n"\
            "        super();\n"\
@@ -255,6 +279,7 @@ class StructSpec:
            "%s\n\n"\
            "%s\n\n"\
            "%s\n\n"\
+           "%s\n\n"\
            "    static {\n"\
            "        System.loadLibrary(\"%s\");\n"\
            "    }\n"\
@@ -264,6 +289,7 @@ class StructSpec:
                      self.jclassname,\
                      "\n\n".join(jgetters),\
                      "\n\n".join(jsetters),\
+                     "\n\n".join(jnativegetters),\
                      "\n\n".join(jnativesetters),\
                      self.libname)
 

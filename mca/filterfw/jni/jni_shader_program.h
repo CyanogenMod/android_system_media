@@ -112,6 +112,12 @@ Java_android_filterfw_core_ShaderProgram_setShaderDrawMode(JNIEnv* env,
                                                            jint draw_mode);
 
 JNIEXPORT jboolean JNICALL
+Java_android_filterfw_core_ShaderProgram_setShaderTileCounts(JNIEnv* env,
+                                                             jobject thiz,
+                                                             jint x_count,
+                                                             jint y_count);
+
+JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_ShaderProgram_setShaderVertexCount(JNIEnv* env,
                                                               jobject thiz,
                                                               jint vertex_count);

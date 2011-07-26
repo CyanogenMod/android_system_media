@@ -349,6 +349,11 @@ class ShaderProgram {
     // must activate clearing by calling SetClearsOutput(true).
     void SetClearColor(float red, float green, float blue, float alpha);
 
+    // Set the number of tiles to split rendering into. Higher tile numbers
+    // will affect performance negatively, but will allow other GPU threads
+    // to render more frequently. Defaults to 1, 1.
+    void SetTileCounts(int x_count, int y_count);
+
     // Enable or Disable Blending
     // Set to true to enable, false to disable.
     void SetBlendEnabled(bool enable) {
@@ -428,18 +433,30 @@ class ShaderProgram {
       }
     };
 
-    // Gets or creates the default vertex data.
-    VertexFrame* DefaultVertexBuffer();
-
     // Binds the given input textures.
     bool BindInputTextures(const std::vector<GLuint>& textures,
                            const std::vector<GLenum>& targets);
 
-    // Binds the given vertex values..
-    bool BindVertexValues(const std::string& varname, int stride, int offset);
+    // Sets the default source and target coordinates.
+    void SetDefaultCoords();
 
-    // Binds the internal vertex and texture coordinates.
-    bool BindVertexData();
+    // Pushes the specified coordinates to the shader attribute.
+    bool PushCoords(ProgramVar attr, float* coords);
+
+    // Pushes the source coordinates.
+    bool PushSourceCoords(float* coords);
+
+    // Pushes the target coordinates.
+    bool PushTargetCoords(float* coords);
+
+    // Performs (simple) GL drawing.
+    bool Draw();
+
+    // Performs tiled GL drawing.
+    bool DrawTiled();
+
+    // Yields to other GPU threads.
+    void Yield();
 
     // Helper method to assert that the variable value passed has the correct
     // total size.
@@ -484,10 +501,16 @@ class ShaderProgram {
     // The lowest texture unit this program will use
     GLuint base_texture_unit_;
 
-    // If the vertex data is modified by the user, it will be moved to host
-    // memory. This pointer holds the host vertex data. It is owned by the
-    // shader program.
-    float* vertex_data_;
+    // The current source and target coordinates to render from/to.
+    float* source_coords_;
+    float* target_coords_;
+
+    // True, if the program has control over both source and target coordinates.
+    bool manage_coordinates_;
+
+    // The number of tiles to split rendering into.
+    int tile_x_count_;
+    int tile_y_count_;
 
     // List of attribute data that we need to set before rendering
     VertexAttribMap attrib_values_;

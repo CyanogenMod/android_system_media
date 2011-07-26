@@ -53,7 +53,7 @@ public class GLFrame extends Frame {
     public final static int NEW_FBO_BINDING          = 103;
     public final static int EXTERNAL_TEXTURE         = 104;
 
-    private int glFrameId;
+    private int glFrameId = -1;
 
     // Keep a reference to the GL environment, so that it does not get deallocated while there
     // are still frames living in it.
@@ -104,11 +104,11 @@ public class GLFrame extends Frame {
 
     private void initNew(boolean isExternal) {
         if (isExternal) {
-            if (!allocateExternal(mGLEnvironment)) {
+            if (!nativeAllocateExternal(mGLEnvironment)) {
                 throw new RuntimeException("Could not allocate external GL frame!");
             }
         } else {
-            if (!allocate(mGLEnvironment, getFormat().getWidth(), getFormat().getHeight())) {
+            if (!nativeAllocate(mGLEnvironment, getFormat().getWidth(), getFormat().getHeight())) {
                 throw new RuntimeException("Could not allocate GL frame!");
             }
         }
@@ -117,7 +117,7 @@ public class GLFrame extends Frame {
     private void initWithTexture(int texId, boolean isNew) {
         int width = getFormat().getWidth();
         int height = getFormat().getHeight();
-        if (!allocateWithTexture(mGLEnvironment, texId, width, height, isNew, isNew)) {
+        if (!nativeAllocateWithTexture(mGLEnvironment, texId, width, height, isNew, isNew)) {
             throw new RuntimeException("Could not allocate texture backed GL frame!");
         }
         setReusable(isNew);
@@ -126,7 +126,7 @@ public class GLFrame extends Frame {
     private void initWithFbo(int fboId, boolean isNew) {
         int width = getFormat().getWidth();
         int height = getFormat().getHeight();
-        if (!allocateWithFbo(mGLEnvironment, fboId, width, height, isNew, isNew)) {
+        if (!nativeAllocateWithFbo(mGLEnvironment, fboId, width, height, isNew, isNew)) {
             throw new RuntimeException("Could not allocate FBO backed GL frame!");
         }
         setReusable(isNew);
@@ -142,8 +142,14 @@ public class GLFrame extends Frame {
     }
 
     @Override
-    void dealloc() {
-        deallocate();
+    protected synchronized boolean hasNativeAllocation() {
+        return glFrameId != -1;
+    }
+
+    @Override
+    protected synchronized void releaseNativeAllocation() {
+        glFrameId = -1;
+        nativeDeallocate();
     }
 
     public GLEnvironment getGLEnvironment() {
@@ -301,8 +307,8 @@ public class GLFrame extends Frame {
 
     @Override
     public String toString() {
-        return "GLFrame (" + getFormat() + ") with texture ID " + getTextureId()
-            + ", FBO ID " + getFboId();
+        return "GLFrame id: " + glFrameId + " (" + getFormat() + ") with texture ID "
+            + getTextureId() + ", FBO ID " + getFboId();
     }
 
     @Override
@@ -329,25 +335,25 @@ public class GLFrame extends Frame {
         System.loadLibrary("filterfw");
     }
 
-    private native boolean allocate(GLEnvironment env, int width, int height);
+    private native boolean nativeAllocate(GLEnvironment env, int width, int height);
 
-    private native boolean allocateWithTexture(GLEnvironment env,
+    private native boolean nativeAllocateWithTexture(GLEnvironment env,
                                                int textureId,
                                                int width,
                                                int height,
                                                boolean owns,
                                                boolean create);
 
-    private native boolean allocateWithFbo(GLEnvironment env,
+    private native boolean nativeAllocateWithFbo(GLEnvironment env,
                                            int fboId,
                                            int width,
                                            int height,
                                            boolean owns,
                                            boolean create);
 
-    private native boolean allocateExternal(GLEnvironment env);
+    private native boolean nativeAllocateExternal(GLEnvironment env);
 
-    private native boolean deallocate();
+    private native boolean nativeDeallocate();
 
     private native boolean setNativeData(byte[] data, int offset, int length);
 

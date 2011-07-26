@@ -29,22 +29,28 @@ import java.nio.ByteBuffer;
  */
 public class VertexFrame extends Frame {
 
-    private int vertexFrameId;
+    private int vertexFrameId = -1;
 
     VertexFrame(FrameFormat format, FrameManager frameManager) {
         super(format, frameManager);
         if (getFormat().getSize() <= 0) {
             throw new IllegalArgumentException("Initializing vertex frame with zero size!");
         } else {
-            if (!allocate(getFormat().getSize())) {
+            if (!nativeAllocate(getFormat().getSize())) {
                 throw new RuntimeException("Could not allocate vertex frame!");
             }
         }
     }
 
     @Override
-    void dealloc() {
-        deallocate();
+    protected synchronized boolean hasNativeAllocation() {
+        return vertexFrameId != -1;
+    }
+
+    @Override
+    protected synchronized void releaseNativeAllocation() {
+        vertexFrameId = -1;
+        nativeDeallocate();
     }
 
     @Override
@@ -114,13 +120,18 @@ public class VertexFrame extends Frame {
         return getNativeVboId();
     }
 
+    @Override
+    public String toString() {
+        return "VertexFrame (" + getFormat() + ") with VBO ID " + getVboId();
+    }
+
     static {
         System.loadLibrary("filterfw");
     }
 
-    private native boolean allocate(int size);
+    private native boolean nativeAllocate(int size);
 
-    private native boolean deallocate();
+    private native boolean nativeDeallocate();
 
     private native boolean setNativeData(byte[] data, int offset, int length);
 

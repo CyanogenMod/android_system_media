@@ -24,10 +24,10 @@ extern "C" {
 #endif
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_NativeFrame_allocate(JNIEnv* env, jobject thiz, jint size);
+Java_android_filterfw_core_NativeFrame_nativeAllocate(JNIEnv* env, jobject thiz, jint size);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_NativeFrame_deallocate(JNIEnv* env, jobject thiz);
+Java_android_filterfw_core_NativeFrame_nativeDeallocate(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jint JNICALL
 Java_android_filterfw_core_NativeFrame_nativeIntSize(JNIEnv* env, jclass clazz);

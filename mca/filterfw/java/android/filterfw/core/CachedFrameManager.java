@@ -71,9 +71,9 @@ public class CachedFrameManager extends SimpleFrameManager {
     public Frame releaseFrame(Frame frame) {
         if (frame.isReusable()) {
             int refCount = frame.decRefCount();
-            if (refCount == 0) {
+            if (refCount == 0 && frame.hasNativeAllocation()) {
                 if (!storeFrame(frame)) {
-                    frame.dealloc();
+                    frame.releaseNativeAllocation();
                 }
                 return null;
             } else if (refCount < 0) {
@@ -112,7 +112,7 @@ public class CachedFrameManager extends SimpleFrameManager {
         int oldest = mAvailableFrames.firstKey();
         Frame frame = mAvailableFrames.get(oldest);
         mStorageSize -= frame.getFormat().getSize();
-        frame.dealloc();
+        frame.releaseNativeAllocation();
         mAvailableFrames.remove(oldest);
     }
 

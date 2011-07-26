@@ -41,11 +41,11 @@ void ConvertRGBAToFloats(const uint8_t* rgba, int length, float* result) {
 }
 
 // GLFrame JNI implementation //////////////////////////////////////////////////////////////////////
-jboolean Java_android_filterfw_core_GLFrame_allocate(JNIEnv* env,
-                                                     jobject thiz,
-                                                     jobject gl_env,
-                                                     jint width,
-                                                     jint height) {
+jboolean Java_android_filterfw_core_GLFrame_nativeAllocate(JNIEnv* env,
+                                                           jobject thiz,
+                                                           jobject gl_env,
+                                                           jint width,
+                                                           jint height) {
   GLEnv* gl_env_ptr = ConvertFromJava<GLEnv>(env, gl_env);
   if (!gl_env_ptr) return JNI_FALSE;
   GLFrame* frame = new GLFrame(gl_env_ptr);
@@ -57,14 +57,14 @@ jboolean Java_android_filterfw_core_GLFrame_allocate(JNIEnv* env,
   }
 }
 
-jboolean Java_android_filterfw_core_GLFrame_allocateWithTexture(JNIEnv* env,
-                                                                jobject thiz,
-                                                                jobject gl_env,
-                                                                jint tex_id,
-                                                                jint width,
-                                                                jint height,
-                                                                jboolean owns,
-                                                                jboolean create) {
+jboolean Java_android_filterfw_core_GLFrame_nativeAllocateWithTexture(JNIEnv* env,
+                                                                      jobject thiz,
+                                                                      jobject gl_env,
+                                                                      jint tex_id,
+                                                                      jint width,
+                                                                      jint height,
+                                                                      jboolean owns,
+                                                                      jboolean create) {
   GLEnv* gl_env_ptr = ConvertFromJava<GLEnv>(env, gl_env);
   if (!gl_env_ptr) return JNI_FALSE;
   GLFrame* frame = new GLFrame(gl_env_ptr);
@@ -76,14 +76,14 @@ jboolean Java_android_filterfw_core_GLFrame_allocateWithTexture(JNIEnv* env,
   }
 }
 
-jboolean Java_android_filterfw_core_GLFrame_allocateWithFbo(JNIEnv* env,
-                                                            jobject thiz,
-                                                            jobject gl_env,
-                                                            jint fbo_id,
-                                                            jint width,
-                                                            jint height,
-                                                            jboolean owns,
-                                                            jboolean create) {
+jboolean Java_android_filterfw_core_GLFrame_nativeAllocateWithFbo(JNIEnv* env,
+                                                                  jobject thiz,
+                                                                  jobject gl_env,
+                                                                  jint fbo_id,
+                                                                  jint width,
+                                                                  jint height,
+                                                                  jboolean owns,
+                                                                  jboolean create) {
   GLEnv* gl_env_ptr = ConvertFromJava<GLEnv>(env, gl_env);
   if (!gl_env_ptr) return JNI_FALSE;
   GLFrame* frame = new GLFrame(gl_env_ptr);
@@ -95,9 +95,9 @@ jboolean Java_android_filterfw_core_GLFrame_allocateWithFbo(JNIEnv* env,
   }
 }
 
-jboolean Java_android_filterfw_core_GLFrame_allocateExternal(JNIEnv* env,
-                                                             jobject thiz,
-                                                             jobject gl_env) {
+jboolean Java_android_filterfw_core_GLFrame_nativeAllocateExternal(JNIEnv* env,
+                                                                   jobject thiz,
+                                                                   jobject gl_env) {
   GLEnv* gl_env_ptr = ConvertFromJava<GLEnv>(env, gl_env);
   if (!gl_env_ptr) return JNI_FALSE;
   GLFrame* frame = new GLFrame(gl_env_ptr);
@@ -109,7 +109,7 @@ jboolean Java_android_filterfw_core_GLFrame_allocateExternal(JNIEnv* env,
   }
 }
 
-jboolean Java_android_filterfw_core_GLFrame_deallocate(JNIEnv* env, jobject thiz) {
+jboolean Java_android_filterfw_core_GLFrame_nativeDeallocate(JNIEnv* env, jobject thiz) {
   return ToJBool(DeleteNativeObject<GLFrame>(env, thiz));
 }
 
@@ -284,7 +284,7 @@ jboolean Java_android_filterfw_core_GLFrame_setNativeTextureParam(JNIEnv* env,
 
 jboolean Java_android_filterfw_core_GLFrame_nativeResetParams(JNIEnv* env, jobject thiz) {
   GLFrame* frame = ConvertFromJava<GLFrame>(env, thiz);
-  return frame ? ToJBool(frame->ResetParameters()) : JNI_FALSE;
+  return frame ? ToJBool(frame->ResetTexParameters()) : JNI_FALSE;
 }
 
 jboolean Java_android_filterfw_core_GLFrame_nativeCopyFromNative(JNIEnv* env,

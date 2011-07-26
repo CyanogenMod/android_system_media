@@ -41,7 +41,7 @@ public class ProgramPort extends FieldPort {
     }
 
     @Override
-    public void transfer(FilterContext context) {
+    public synchronized void transfer(FilterContext context) {
         if (mValueWaiting) {
             try {
                 Object fieldValue = mField.get(mFilter);

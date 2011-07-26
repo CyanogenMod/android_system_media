@@ -405,7 +405,7 @@ public class FrameFormat {
         String targetString = mTarget == TARGET_UNSPECIFIED ? "" : (targetToString(mTarget) + " ");
         String classString = mObjectClass == null
             ? ""
-            : ("class(" + mObjectClass.getSimpleName() + ") ");
+            : (" class(" + mObjectClass.getSimpleName() + ") ");
 
         return targetString
             + baseTypeToString(mBaseType)

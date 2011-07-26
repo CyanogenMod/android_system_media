@@ -93,7 +93,9 @@ public class FisheyeFilter extends Filter {
     public void initProgram(FilterContext context, int target) {
         switch (target) {
             case FrameFormat.TARGET_GPU:
-                mProgram = new ShaderProgram(context, mFisheyeShader);
+                ShaderProgram shaderProgram = new ShaderProgram(context, mFisheyeShader);
+                shaderProgram.setMaximumTileSize(512);
+                mProgram = shaderProgram;
                 break;
 
             default:

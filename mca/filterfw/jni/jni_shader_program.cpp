@@ -234,6 +234,18 @@ jboolean Java_android_filterfw_core_ShaderProgram_setShaderDrawMode(JNIEnv* env,
   return JNI_FALSE;
 }
 
+jboolean Java_android_filterfw_core_ShaderProgram_setShaderTileCounts(JNIEnv* env,
+                                                                      jobject thiz,
+                                                                      jint x_count,
+                                                                      jint y_count) {
+  ShaderProgram* program = ConvertFromJava<ShaderProgram>(env, thiz);
+  if (program) {
+    program->SetTileCounts(x_count, y_count);
+    return JNI_TRUE;
+  }
+  return JNI_FALSE;
+}
+
 jboolean Java_android_filterfw_core_ShaderProgram_setShaderVertexCount(JNIEnv* env,
                                                                        jobject thiz,
                                                                        jint vertex_count) {

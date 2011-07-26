@@ -24,10 +24,10 @@ extern "C" {
 #endif
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_VertexFrame_allocate(JNIEnv* env, jobject thiz, jint size);
+Java_android_filterfw_core_VertexFrame_nativeAllocate(JNIEnv* env, jobject thiz, jint size);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_VertexFrame_deallocate(JNIEnv* env, jobject thiz);
+Java_android_filterfw_core_VertexFrame_nativeDeallocate(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_VertexFrame_setNativeInts(JNIEnv* env, jobject thiz, jintArray ints);

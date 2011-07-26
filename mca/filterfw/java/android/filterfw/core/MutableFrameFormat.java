@@ -37,6 +37,7 @@ public class MutableFrameFormat extends FrameFormat {
 
     public void setBaseType(int baseType) {
         mBaseType = baseType;
+        mBytesPerSample = bytesPerSampleOf(baseType);
     }
 
     public void setTarget(int target) {

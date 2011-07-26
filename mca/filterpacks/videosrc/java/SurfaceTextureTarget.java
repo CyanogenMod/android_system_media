@@ -93,10 +93,6 @@ public class SurfaceTextureTarget extends Filter {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-    }
-
-    @Override
     public void setupPorts() {
         // Make sure we have a SurfaceView
         if (mSurfaceTexture == null) {

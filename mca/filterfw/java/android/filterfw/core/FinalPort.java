@@ -29,7 +29,7 @@ public class FinalPort extends FieldPort {
     }
 
     @Override
-    protected void setFieldFrame(Frame frame, boolean isAssignment) {
+    protected synchronized void setFieldFrame(Frame frame, boolean isAssignment) {
         assertPortIsOpen();
         checkFrameType(frame, isAssignment);
         if (mFilter.getStatus() != Filter.STATUS_PREINIT) {

@@ -24,37 +24,39 @@ extern "C" {
 #endif
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLFrame_allocate(JNIEnv* env,
-                                            jobject thiz,
-                                            jobject gl_env,
-                                            jint width,
-                                            jint height);
+Java_android_filterfw_core_GLFrame_nativeAllocate(JNIEnv* env,
+                                                  jobject thiz,
+                                                  jobject gl_env,
+                                                  jint width,
+                                                  jint height);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLFrame_allocateWithTexture(JNIEnv* env,
-                                                       jobject thiz,
-                                                       jobject gl_env,
-                                                       jint tex_id,
-                                                       jint width,
-                                                       jint height,
-                                                       jboolean owns,
-                                                       jboolean create);
+Java_android_filterfw_core_GLFrame_nativeAllocateWithTexture(JNIEnv* env,
+                                                             jobject thiz,
+                                                             jobject gl_env,
+                                                             jint tex_id,
+                                                             jint width,
+                                                             jint height,
+                                                             jboolean owns,
+                                                             jboolean create);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLFrame_allocateWithFbo(JNIEnv* env,
-                                                   jobject thiz,
-                                                   jobject gl_env,
-                                                   jint fbo_id,
-                                                   jint width,
-                                                   jint height,
-                                                   jboolean owns,
-                                                   jboolean create);
+Java_android_filterfw_core_GLFrame_nativeAllocateWithFbo(JNIEnv* env,
+                                                         jobject thiz,
+                                                         jobject gl_env,
+                                                         jint fbo_id,
+                                                         jint width,
+                                                         jint height,
+                                                         jboolean owns,
+                                                         jboolean create);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLFrame_allocateExternal(JNIEnv* env, jobject thiz, jobject gl_env);
+Java_android_filterfw_core_GLFrame_nativeAllocateExternal(JNIEnv* env,
+                                                          jobject thiz,
+                                                          jobject gl_env);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_GLFrame_deallocate(JNIEnv* env, jobject thiz);
+Java_android_filterfw_core_GLFrame_nativeDeallocate(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLFrame_setNativeInts(JNIEnv* env, jobject thiz, jintArray ints);

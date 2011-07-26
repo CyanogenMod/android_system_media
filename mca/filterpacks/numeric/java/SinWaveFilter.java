@@ -60,6 +60,7 @@ public class SinWaveFilter extends Filter {
         output.setObjectValue(((float)Math.sin(mValue) + 1.0f) / 2.0f);
         pushOutput("value", output);
         mValue += mStepSize;
+        output.release();
     }
 
 

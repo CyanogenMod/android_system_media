@@ -32,6 +32,8 @@ public class ShaderProgram extends Program {
 
     private int shaderProgramId;
 
+    private int mMaxTileSize = 0;
+
     // Keep a reference to the GL environment, so that it does not get deallocated while there
     // are still programs living in it.
     private GLEnvironment mGLEnvironment;
@@ -107,6 +109,13 @@ public class ShaderProgram extends Program {
             glOutput = (GLFrame)output;
         } else {
             throw new RuntimeException("ShaderProgram got non-GL output frame!");
+        }
+
+        // Adjust tiles to meet maximum tile size requirement
+        if (mMaxTileSize > 0) {
+            int xTiles = (output.getFormat().getWidth() + mMaxTileSize - 1) / mMaxTileSize;
+            int yTiles = (output.getFormat().getHeight() + mMaxTileSize - 1) / mMaxTileSize;
+            setShaderTileCounts(xTiles, yTiles);
         }
 
         // Process!
@@ -216,6 +225,10 @@ public class ShaderProgram extends Program {
         }
     }
 
+    public void setMaximumTileSize(int size) {
+        mMaxTileSize = size;
+    }
+
     public void beginDrawing() {
         if (!beginShaderDrawing()) {
             throw new RuntimeException("Could not prepare shader-program for drawing!");
@@ -266,6 +279,8 @@ public class ShaderProgram extends Program {
     private native boolean setShaderClearColor(float r, float g, float b);
 
     private native boolean setShaderDrawMode(int drawMode);
+
+    private native boolean setShaderTileCounts(int xCount, int yCount);
 
     private native boolean setShaderVertexCount(int vertexCount);
 

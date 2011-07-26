@@ -33,16 +33,6 @@ namespace filterfw {
 // VBO attachment keys
 static const int kDefaultVboKey = 1;
 
-// The default vertices for our shader program. This assumes the draw primitive
-// GL_TRIANGLE_STRIP.
-static float s_default_vertices_[16] = {
-  // pos //////     // tex ////
-  -1.0f, -1.0f,     0.0f, 0.0f,
-   1.0f, -1.0f,     1.0f, 0.0f,
-  -1.0f,  1.0f,     0.0f, 1.0f,
-   1.0f,  1.0f,     1.0f, 1.0f
-};
-
 static const char* s_default_vertex_shader_source_ =
   "attribute vec4 a_position;\n"
   "attribute vec2 a_texcoord;\n"
@@ -51,6 +41,23 @@ static const char* s_default_vertex_shader_source_ =
   "  gl_Position = a_position;\n"
   "  v_texcoord = a_texcoord;\n"
   "}\n";
+
+// Helper Functions ////////////////////////////////////////////////////////////
+// Maps coordinates x,y in the unit rectangle over to the quadrangle specified
+// by the four points in b. The result coordinates are written to xt and yt.
+static void GetTileCoords(const float* b, float x, float y, float* xt, float* yt) {
+  const float w0 =  (1.0f - x) * (1.0f - y);
+  const float w1 =  x * (1.0f - y);
+  const float w2 =  (1.0f - x) * y;
+  const float w3 =  x * y;
+
+  *xt = w0 * b[0] + w1 * b[2] + w2 * b[4] + w3 * b[6];
+  *yt = w0 * b[1] + w1 * b[3] + w2 * b[5] + w3 * b[7];
+}
+
+static inline float AdjustRatio(float current, float next) {
+  return (current + next) / 2.0;
+}
 
 // VertexAttrib implementation /////////////////////////////////////////////////
 ShaderProgram::VertexAttrib::VertexAttrib()
@@ -75,13 +82,18 @@ ShaderProgram::ShaderProgram(GLEnv* gl_env, const std::string& fragment_shader)
     program_(0),
     gl_env_(gl_env),
     base_texture_unit_(GL_TEXTURE0),
-    vertex_data_(NULL),
+    source_coords_(NULL),
+    target_coords_(NULL),
+    manage_coordinates_(false),
+    tile_x_count_(1),
+    tile_y_count_(1),
     vertex_count_(4),
     draw_mode_(GL_TRIANGLE_STRIP),
     clears_(false),
     blending_(false),
     sfactor_(GL_SRC_ALPHA),
     dfactor_(GL_ONE_MINUS_SRC_ALPHA) {
+  SetDefaultCoords();
 }
 
 ShaderProgram::ShaderProgram(GLEnv* gl_env,
@@ -94,18 +106,24 @@ ShaderProgram::ShaderProgram(GLEnv* gl_env,
     program_(0),
     gl_env_(gl_env),
     base_texture_unit_(GL_TEXTURE0),
-    vertex_data_(NULL),
+    source_coords_(NULL),
+    target_coords_(NULL),
+    manage_coordinates_(false),
+    tile_x_count_(1),
+    tile_y_count_(1),
     vertex_count_(4),
     draw_mode_(GL_TRIANGLE_STRIP),
     clears_(false),
     blending_(false),
     sfactor_(GL_SRC_ALPHA),
     dfactor_(GL_ONE_MINUS_SRC_ALPHA) {
+  SetDefaultCoords();
 }
 
 ShaderProgram::~ShaderProgram() {
   // Delete our vertex data
-  delete[] vertex_data_;
+  delete[] source_coords_;
+  delete[] target_coords_;
 
   // Delete any owned attribute data
   VertexAttribMap::const_iterator iter;
@@ -114,6 +132,32 @@ ShaderProgram::~ShaderProgram() {
     if (attrib.owned_data)
       delete[] attrib.owned_data;
   }
+}
+
+void ShaderProgram::SetDefaultCoords() {
+  if (!source_coords_)
+    source_coords_ = new float[8];
+  if (!target_coords_)
+    target_coords_ = new float[8];
+
+  source_coords_[0] = 0.0f;
+  source_coords_[1] = 0.0f;
+  source_coords_[2] = 1.0f;
+  source_coords_[3] = 0.0f;
+  source_coords_[4] = 0.0f;
+  source_coords_[5] = 1.0f;
+  source_coords_[6] = 1.0f;
+  source_coords_[7] = 1.0f;
+
+  target_coords_[0] = -1.0f;
+  target_coords_[1] = -1.0f;
+  target_coords_[2] =  1.0f;
+  target_coords_[3] = -1.0f;
+  target_coords_[4] = -1.0f;
+  target_coords_[5] =  1.0f;
+  target_coords_[6] =  1.0f;
+  target_coords_[7] =  1.0f;
+
 }
 
 ShaderProgram* ShaderProgram::CreateIdentity(GLEnv* gl_env) {
@@ -192,18 +236,10 @@ void ShaderProgram::SetSourceRect(float x, float y, float width, float height) {
 }
 
 void ShaderProgram::SetSourceRegion(const Quad& quad) {
-  // Create vertex data and bind it, if we haven't yet done so
-  if (!vertex_data_) {
-    vertex_data_ = new float[16];
-    std::copy(s_default_vertices_, s_default_vertices_ + 16, vertex_data_);
-    BindVertexData();
-  }
-
-  // Set texture coordinate values
-  int index = 2;
-  for (int i = 0; i < 4; ++i, index += 4) {
-    vertex_data_[index]   = quad.point(i).x();
-    vertex_data_[index+1] = quad.point(i).y();
+  int index = 0;
+  for (int i = 0; i < 4; ++i, index += 2) {
+    source_coords_[index]   = quad.point(i).x();
+    source_coords_[index+1] = quad.point(i).y();
   }
 }
 
@@ -216,18 +252,10 @@ void ShaderProgram::SetTargetRect(float x, float y, float width, float height) {
 }
 
 void ShaderProgram::SetTargetRegion(const Quad& quad) {
-  // Create vertex data and bind it, if we haven't yet done so
-  if (!vertex_data_) {
-    vertex_data_ = new float[16];
-    std::copy(s_default_vertices_, s_default_vertices_ + 16, vertex_data_);
-    BindVertexData();
-  }
-
-  // Set vertex coordinate values
   int index = 0;
-  for (int i = 0; i < 4; ++i, index += 4) {
-    vertex_data_[index]   = (quad.point(i).x() * 2.0) - 1.0;
-    vertex_data_[index+1] = (quad.point(i).y() * 2.0) - 1.0;
+  for (int i = 0; i < 4; ++i, index += 2) {
+    target_coords_[index]   = (quad.point(i).x() * 2.0) - 1.0;
+    target_coords_[index+1] = (quad.point(i).y() * 2.0) - 1.0;
   }
 }
 
@@ -256,12 +284,11 @@ bool ShaderProgram::CompileAndLink() {
   GLuint shaders[2] = { vertex_shader_, fragment_shader_ };
   program_ = LinkProgram(shaders, 2);
 
-  // Bind vertex values
+  // Check if we manage all coordinates
   if (program_ != 0) {
-    if (!BindVertexData()) {
-      LOGE("ShaderProgram: Could not bind vertex data!");
-      return false;
-    }
+    ProgramVar tex_coord_attr = glGetAttribLocation(program_, TexCoordAttributeName().c_str());
+    ProgramVar pos_coord_attr = glGetAttribLocation(program_, PositionAttributeName().c_str());
+    manage_coordinates_ = (tex_coord_attr >= 0 && pos_coord_attr >= 0);
   } else {
     LOGE("Could not link shader program!");
     return false;
@@ -312,7 +339,6 @@ GLuint ShaderProgram::CompileShader(GLenum shader_type, const char* source) {
       shader = 0;
     }
   }
-  LOGI("Compiled source to shader %d!", shader);
   return shader;
 }
 
@@ -347,60 +373,30 @@ GLuint ShaderProgram::LinkProgram(GLuint* shaders, GLuint count) {
       program = 0;
     }
   }
-  LOGI("Compiled and linked to program %d!", program);
   return program;
 }
 
-VertexFrame* ShaderProgram::DefaultVertexBuffer() {
-  VertexFrame* storedFrame = gl_env_->VertexFrameWithKey(kDefaultVboKey);
-  if (!storedFrame) {
-    LOGI("Uploading Data to VBO!");
-    storedFrame = new VertexFrame(sizeof(s_default_vertices_));
-    storedFrame->WriteData(
-      reinterpret_cast<const uint8_t*>(s_default_vertices_),
-      sizeof(s_default_vertices_)
-    );
-    gl_env_->AttachVertexFrame(kDefaultVboKey, storedFrame);
-  }
-  return storedFrame;
-}
-
-bool ShaderProgram::BindVertexValues(const std::string& varname,
-                                     int stride,
-                                     int offset) {
-  // As the user may have specified a shader, first check if we have a variable
-  // to bind. If not, we simply do nothing (not an error).
-  ProgramVar attr = GetAttribute(varname);
+bool ShaderProgram::PushCoords(ProgramVar attr, float* coords) {
+  // If the shader does not define these, we simply ignore the coordinates, and assume that the
+  // user is managing coordinates.
   if (attr >= 0) {
-    // Use mutable vertex data if user has requested custom input vectors. Use
-    // a constant VBO otherwise (more efficient).
-    if (vertex_data_) {
-      const uint8_t* data = reinterpret_cast<const uint8_t*>(vertex_data_);
-      return SetAttributeValues(attr,           // the program attribute
-                                data,           // The vertex buffer
-                                GL_FLOAT,       // Type is float
-                                2,              // 2 components per vertex
-                                stride,         // Stride
-                                offset,         // Offset
-                                false);         // Do not normalize
-    } else {
-      VertexFrame* vbo = DefaultVertexBuffer();
-      return SetAttributeValues(attr,           // the program attribute
-                                vbo,            // The VBO that holds the data
-                                GL_FLOAT,       // Type is float
-                                2,              // 2 components per vertex
-                                stride,         // Stride
-                                offset,         // Offset
-                                false);         // Do not normalize
-    }
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(coords);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glVertexAttribPointer(attr, 2, GL_FLOAT, false, 2 * sizeof(float), data);
+    glEnableVertexAttribArray(attr);
+    return !GLEnv::CheckGLError("Pushing vertex coordinates");
   }
   return true;
 }
 
-bool ShaderProgram::BindVertexData() {
-  return BindVertexValues(PositionAttributeName(), 4 * sizeof(float), 0)
-    &&   BindVertexValues(TexCoordAttributeName(), 4 * sizeof(float),
-                                                   2 * sizeof(float));
+bool ShaderProgram::PushSourceCoords(float* coords) {
+  ProgramVar tex_coord_attr = glGetAttribLocation(program_, TexCoordAttributeName().c_str());
+  return PushCoords(tex_coord_attr, coords);
+}
+
+bool ShaderProgram::PushTargetCoords(float* coords) {
+  ProgramVar pos_coord_attr = glGetAttribLocation(program_, PositionAttributeName().c_str());
+  return PushCoords(pos_coord_attr, coords);
 }
 
 std::string ShaderProgram::InputTextureUniformName(int index) {
@@ -484,12 +480,66 @@ bool ShaderProgram::RenderFrame(const std::vector<GLuint>& textures,
   }
 
   // Render!
-  glDrawArrays(draw_mode_, 0, vertex_count_);
+  const bool requestTile = (tile_x_count_ != 1 || tile_y_count_ != 1);
+  const bool success = (!requestTile || !manage_coordinates_  || vertex_count_ != 4)
+      ? Draw()
+      : DrawTiled();
 
   // Pop vertex attributes
   PopAttributes();
 
-  return !GLEnv::CheckGLError("Rendering");
+  return success && !GLEnv::CheckGLError("Rendering");
+}
+
+bool ShaderProgram::Draw() {
+  if (PushSourceCoords(source_coords_) && PushTargetCoords(target_coords_)) {
+    glDrawArrays(draw_mode_, 0, vertex_count_);
+    return true;
+  }
+  return false;
+}
+
+bool ShaderProgram::DrawTiled() {
+  // Target coordinate step size
+  float s[8];
+  float t[8];
+
+  // Step sizes
+  const float xs = 1.0f / static_cast<float>(tile_x_count_);
+  const float ys = 1.0f / static_cast<float>(tile_y_count_);
+
+  // Tile drawing loop
+  for (int i = 0; i < tile_x_count_; ++i) {
+    for (int j = 0; j < tile_y_count_; ++j) {
+      // Current coordinates in unit rectangle
+      const float x = i / static_cast<float>(tile_x_count_);
+      const float y = j / static_cast<float>(tile_y_count_);
+
+      // Source coords
+      GetTileCoords(source_coords_, x, y, &s[0], &s[1]);
+      GetTileCoords(source_coords_, x + xs, y, &s[2], &s[3]);
+      GetTileCoords(source_coords_, x, y + ys, &s[4], &s[5]);
+      GetTileCoords(source_coords_, x + xs, y + ys, &s[6], &s[7]);
+
+      // Target coords
+      GetTileCoords(target_coords_, x, y, &t[0], &t[1]);
+      GetTileCoords(target_coords_, x + xs, y, &t[2], &t[3]);
+      GetTileCoords(target_coords_, x, y + ys, &t[4], &t[5]);
+      GetTileCoords(target_coords_, x + xs, y + ys, &t[6], &t[7]);
+
+      if (PushSourceCoords(s) && PushTargetCoords(t)) {
+        glDrawArrays(draw_mode_, 0, vertex_count_);
+        Yield();
+      } else {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+void ShaderProgram::Yield() {
+  glFinish();
 }
 
 bool ShaderProgram::BeginDraw() {
@@ -535,6 +585,11 @@ void ShaderProgram::SetClearColor(float red, float green, float blue, float alph
   clear_color_.green = green;
   clear_color_.blue = blue;
   clear_color_.alpha = alpha;
+}
+
+void ShaderProgram::SetTileCounts(int x_count, int y_count) {
+  tile_x_count_ = x_count;
+  tile_y_count_ = y_count;
 }
 
 // Variable Value Setting Helpers //////////////////////////////////////////////
@@ -845,7 +900,7 @@ Value ShaderProgram::GetUniformValue(const std::string& name) {
   return MakeNullValue();
 }
 
-// Attributes //////////////////////////////////////////////////////////////////
+// Attributes //////////////////////////////////////////////////////////////////////////////////////
 int ShaderProgram::MaxAttributeCount() {
   GLint result;
   glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &result);
@@ -856,6 +911,8 @@ ProgramVar ShaderProgram::GetAttribute(const std::string& name) const {
   if (!IsExecutable()) {
     LOGE("ShaderProgram: Error: Must link program before querying attributes!");
     return -1;
+  } else if (name == PositionAttributeName() || name == TexCoordAttributeName()) {
+    LOGW("ShaderProgram: Attempting to overwrite internal vertex attribute '%s'!", name.c_str());
   }
   return glGetAttribLocation(program_, name.c_str());
 }

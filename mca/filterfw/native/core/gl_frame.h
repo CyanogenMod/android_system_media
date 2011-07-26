@@ -17,6 +17,8 @@
 #ifndef ANDROID_FILTERFW_CORE_GL_FRAME_H
 #define ANDROID_FILTERFW_CORE_GL_FRAME_H
 
+#include <map>
+
 #include <GLES2/gl2.h>
 
 #include "core/gl_buffer_interface.h"
@@ -107,7 +109,7 @@ class GLFrame : public GLBufferHandle {
     bool SetTextureParameter(GLenum pname, GLint value);
 
     // Reset any modifed texture parameters.
-    bool ResetParameters();
+    bool ResetTexParameters();
 
   private:
     // Type to keep track of texture and FBO states
@@ -148,6 +150,18 @@ class GLFrame : public GLBufferHandle {
     // Binds the internal texture to the internal FBO.
     bool BindTextureToFBO();
 
+    // Update the texture parameters to the user specified parameters
+    bool UpdateTexParameters();
+
+    // Returns true if the current texture parameters are not the GLES2
+    // default parameters.
+    bool TexParametersModifed();
+
+    // Sets the current texture parameters to the GLES2 default
+    // parameters. This still requires a call to UpdateTexParameters()
+    // for the changes to take effect.
+    void SetDefaultTexParameters();
+
     // Get the (cached) identity shader.
     ShaderProgram* GetIdentity() const;
 
@@ -175,8 +189,8 @@ class GLFrame : public GLBufferHandle {
     GLObjectState texture_state_;
     GLObjectState fbo_state_;
 
-    // Set of modified texture parameters
-    bool tex_params_modified_;
+    // Set of current texture parameters
+    std::map<GLenum, GLint> tex_params_;
 
     // Flag whether frame owns the texture and FBO
     bool owns_;

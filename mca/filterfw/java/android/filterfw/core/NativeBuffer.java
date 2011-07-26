@@ -31,6 +31,7 @@ public class NativeBuffer {
     private Frame mAttachedFrame;
 
     private boolean mOwnsData = false;
+    private int mRefCount = 1;
 
     public NativeBuffer() {
     }
@@ -67,11 +68,31 @@ public class NativeBuffer {
         return 1;
     }
 
-    @Override
-    protected void finalize() {
-        deallocate(mOwnsData);
+    public NativeBuffer retain() {
         if (mAttachedFrame != null) {
-            mAttachedFrame.release();
+            mAttachedFrame.retain();
+        } else if (mOwnsData) {
+            ++mRefCount;
+        }
+        return this;
+    }
+
+    public NativeBuffer release() {
+        // Decrement refcount
+        boolean doDealloc = false;
+        if (mAttachedFrame != null) {
+            doDealloc = (mAttachedFrame.release() == null);
+        } else if (mOwnsData) {
+            --mRefCount;
+            doDealloc = (mRefCount == 0);
+        }
+
+        // Deallocate if necessary
+        if (doDealloc) {
+            deallocate(mOwnsData);
+            return null;
+        } else {
+            return this;
         }
     }
 
@@ -84,7 +105,16 @@ public class NativeBuffer {
     }
 
     void attachToFrame(Frame frame) {
-        mAttachedFrame = frame.retain();
+        // We do not auto-retain. We expect the user to call retain() if they want to hold on to
+        // the frame.
+        mAttachedFrame = frame;
+    }
+
+    protected void assertReadable() {
+        if (mDataPointer == 0 || mSize == 0
+        || (mAttachedFrame != null && !mAttachedFrame.hasNativeAllocation())) {
+            throw new NullPointerException("Attempting to read from null data frame!");
+        }
     }
 
     protected void assertWritable() {

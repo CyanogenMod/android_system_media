@@ -68,7 +68,7 @@ public class GLEnvironment {
 
     public void activate() {
         if (Looper.myLooper() != null && Looper.myLooper().equals(Looper.getMainLooper())) {
-            Log.e("GLEnvironment", "Activating GL context in UI thread!");
+            Log.e("FilterFramework", "Activating GL context in UI thread!");
         }
         if (!nativeActivate()) {
             throw new RuntimeException("Could not activate GLEnvironment!");
