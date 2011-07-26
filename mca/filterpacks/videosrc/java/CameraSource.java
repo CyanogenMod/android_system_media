@@ -78,8 +78,12 @@ public class CameraSource extends Filter {
     private SurfaceTexture mSurfaceTexture;
     private ShaderProgram mFrameExtractor;
     private MutableFrameFormat mOutputFormat;
-    private ConditionVariable mNewFrameAvailable;
     private float[] mCameraTransform;
+
+    private static final int NEWFRAME_TIMEOUT = 100; //ms
+    private static final int NEWFRAME_TIMEOUT_REPEAT = 10;
+
+    private boolean mNewFrameAvailable;
 
     private Camera.Parameters mCameraParameters;
 
@@ -99,7 +103,6 @@ public class CameraSource extends Filter {
 
     public CameraSource(String name) {
         super(name);
-        mNewFrameAvailable = new ConditionVariable();
         mCameraTransform = new float[16];
 
         mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
@@ -156,6 +159,7 @@ public class CameraSource extends Filter {
         // Connect SurfaceTexture to callback
         mSurfaceTexture.setOnFrameAvailableListener(onCameraFrameAvailableListener);
         // Start the preview
+        mNewFrameAvailable = false;
         mCamera.startPreview();
     }
 
@@ -164,12 +168,19 @@ public class CameraSource extends Filter {
         if (mLogVerbose) Log.v(TAG, "Processing new frame");
 
         if (mWaitForNewFrame) {
-            boolean gotNewFrame;
-            gotNewFrame = mNewFrameAvailable.block(1000);
-            if (!gotNewFrame) {
-                throw new RuntimeException("Timeout waiting for new frame from camera");
+            int waitCount = 0;
+            while (!mNewFrameAvailable) {
+                if (waitCount == NEWFRAME_TIMEOUT_REPEAT) {
+                    throw new RuntimeException("Timeout waiting for new frame");
+                }
+                try {
+                    this.wait(NEWFRAME_TIMEOUT);
+                } catch (InterruptedException e) {
+                    if (mLogVerbose) Log.v(TAG, "Interrupted while waiting for new frame");
+                }
             }
-            mNewFrameAvailable.close();
+            mNewFrameAvailable = false;
+            if (mLogVerbose) Log.v(TAG, "Got new frame");
         }
 
         mSurfaceTexture.updateTexImage();
@@ -325,7 +336,10 @@ public class CameraSource extends Filter {
         @Override
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
             if (mLogVerbose) Log.v(TAG, "New frame from camera");
-            mNewFrameAvailable.open();
+            synchronized(CameraSource.this) {
+                mNewFrameAvailable = true;
+                CameraSource.this.notify();
+            }
         }
     };
 
