@@ -150,13 +150,16 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
 
 //-----------------------------------------------------------------
 /* Callback for "playback" events, i.e. event happening during decoding */
-void DecCallback(
+void DecProgressCallback(
         SLPlayItf caller,
         void *pContext,
         SLuint32 event)
 {
     if (SL_PLAYEVENT_HEADATEND & event) {
         fprintf(stdout, "SL_PLAYEVENT_HEADATEND reached\n");
+        SLmillisecond pMsec = 0;
+        SLresult res = (*caller)->GetPosition(caller, &pMsec); ExitOnError(res);
+        fprintf(stdout, "Position when SL_PLAYEVENT_HEADATEND received is %ums\n", pMsec);
         SignalEos();
     }
 
@@ -175,12 +178,12 @@ void DecCallback(
 
 //-----------------------------------------------------------------
 /* Callback for decoding buffer queue events */
-void DecBufferQueueCallback(
+void DecPlayCallback(
         SLAndroidSimpleBufferQueueItf queueItf,
         void *pContext)
 {
     counter++;
-    fprintf(stdout, "DecBufferQueueCallback called (iteration %d)   ", counter);
+    fprintf(stdout, "DecPlayCallback called (iteration %d)   ", counter);
 
     CallbackCntxt *pCntxt = (CallbackCntxt*)pContext;
 
@@ -223,6 +226,19 @@ void DecBufferQueueCallback(
     } else {
         fprintf(stdout, "Content duration is %ums (in dec callback)\n",
                 durationInMsec);
+    }
+#endif
+
+#if 0
+    /* Example: display position in callback where we use the callback context for the SLPlayItf*/
+    SLmillisecond posMsec = SL_TIME_UNKNOWN;
+    SLresult result = (*pCntxt->playItf)->GetPosition(pCntxt->playItf, &posMsec);
+    ExitOnError(result);
+    if (posMsec == SL_TIME_UNKNOWN) {
+        fprintf(stdout, "Content position is unknown (in dec callback)\n");
+    } else {
+        fprintf(stdout, "Content position is %ums (in dec callback)\n",
+                posMsec);
     }
 #endif
 
@@ -366,7 +382,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
     result = (*playItf)->SetCallbackEventsMask(playItf,
             SL_PLAYEVENT_HEADATMARKER | SL_PLAYEVENT_HEADATNEWPOS | SL_PLAYEVENT_HEADATEND);
     ExitOnError(result);
-    result = (*playItf)->RegisterCallback(playItf, DecCallback, NULL);
+    result = (*playItf)->RegisterCallback(playItf, DecProgressCallback, NULL);
     ExitOnError(result);
     fprintf(stdout, "Play callback registered\n");
 
@@ -391,7 +407,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
     cntxt.pDataBase = (int8_t*)&pcmData;
     cntxt.pData = cntxt.pDataBase;
     cntxt.size = sizeof(pcmData);
-    result = (*decBuffQueueItf)->RegisterCallback(decBuffQueueItf, DecBufferQueueCallback, &cntxt);
+    result = (*decBuffQueueItf)->RegisterCallback(decBuffQueueItf, DecPlayCallback, &cntxt);
     ExitOnError(result);
 
     /* Enqueue buffers to map the region of memory allocated to store the decoded data */

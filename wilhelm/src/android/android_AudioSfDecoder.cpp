@@ -43,11 +43,10 @@ AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : Generic
         mAudioSourceStarted(false),
         mBitrate(-1),
         mChannelMask(UNKNOWN_CHANNELMASK),
-        mDurationUsec(-1),
+        mDurationUsec(ANDROID_UNKNOWN_TIME),
         mDecodeBuffer(NULL),
-        mTimeDelta(-1),
         mSeekTimeMsec(0),
-        mLastDecodedPositionUs(-1),
+        mLastDecodedPositionUs(ANDROID_UNKNOWN_TIME),
         mPcmFormatKeyCount(0)
 {
     SL_LOGD("AudioSfDecoder::AudioSfDecoder()");
@@ -84,6 +83,17 @@ void AudioSfDecoder::play() {
 
     GenericPlayer::play();
     (new AMessage(kWhatDecode, id()))->post();
+}
+
+
+void AudioSfDecoder::getPositionMsec(int* msec) {
+    int64_t timeUsec = getPositionUsec();
+    if (timeUsec == ANDROID_UNKNOWN_TIME) {
+        *msec = ANDROID_UNKNOWN_TIME;
+    } else {
+        mPositionMsec = timeUsec / 1000;
+        *msec = mPositionMsec;
+    }
 }
 
 
@@ -272,12 +282,17 @@ void AudioSfDecoder::onPrepare() {
     int64_t durationUs;
     if (dataSource->getSize(&size) == OK
             && meta->findInt64(kKeyDuration, &durationUs)) {
-        mBitrate = size * 8000000ll / durationUs;  // in bits/sec
+        if (durationUs != 0) {
+            mBitrate = size * 8000000ll / durationUs;  // in bits/sec
+        } else {
+            mBitrate = -1;
+        }
         mDurationUsec = durationUs;
         mDurationMsec = durationUs / 1000;
     } else {
         mBitrate = -1;
-        mDurationUsec = -1;
+        mDurationUsec = ANDROID_UNKNOWN_TIME;
+        mDurationMsec = ANDROID_UNKNOWN_TIME;
     }
 
     // the audio content is not raw PCM, so we need a decoder
@@ -368,11 +383,10 @@ void AudioSfDecoder::onSeek(const sp<AMessage> &msg) {
     int64_t timeMsec;
     CHECK(msg->findInt64(WHATPARAM_SEEK_SEEKTIME_MS, &timeMsec));
 
-    Mutex::Autolock _l(mSeekLock);
+    Mutex::Autolock _l(mTimeLock);
     mStateFlags |= kFlagSeeking;
     mSeekTimeMsec = timeMsec;
-    mTimeDelta = -1;
-    mLastDecodedPositionUs = -1;
+    mLastDecodedPositionUs = ANDROID_UNKNOWN_TIME;
 }
 
 
@@ -410,7 +424,6 @@ void AudioSfDecoder::onCheckCache(const sp<AMessage> &msg) {
             mStateFlags &= ~kFlagPreparing;
         }
 
-        mTimeDelta = -1;
         if (mStateFlags & kFlagPlaying) {
             (new AMessage(kWhatDecode, id()))->post();
         }
@@ -454,9 +467,11 @@ void AudioSfDecoder::onDecode() {
     status_t err;
     MediaSource::ReadOptions readOptions;
     if (mStateFlags & kFlagSeeking) {
+        assert(mSeekTimeMsec != ANDROID_UNKNOWN_TIME);
         readOptions.setSeekTo(mSeekTimeMsec * 1000);
     }
 
+    int64_t timeUsec = ANDROID_UNKNOWN_TIME;
     {
         Mutex::Autolock _l(mBufferSourceLock);
 
@@ -470,14 +485,18 @@ void AudioSfDecoder::onDecode() {
         }
         err = mAudioSource->read(&mDecodeBuffer, &readOptions);
         if (err == OK) {
-            CHECK(mDecodeBuffer->meta_data()->findInt64(kKeyTime, &mLastDecodedPositionUs));
+            CHECK(mDecodeBuffer->meta_data()->findInt64(kKeyTime, &timeUsec));
         }
     }
 
     {
-        Mutex::Autolock _l(mSeekLock);
+        Mutex::Autolock _l(mTimeLock);
         if (mStateFlags & kFlagSeeking) {
             mStateFlags &= ~kFlagSeeking;
+            mSeekTimeMsec = ANDROID_UNKNOWN_TIME;
+        }
+        if (timeUsec != ANDROID_UNKNOWN_TIME) {
+            mLastDecodedPositionUs = timeUsec;
         }
     }
 
@@ -487,6 +506,7 @@ void AudioSfDecoder::onDecode() {
         switch(err) {
             case ERROR_END_OF_STREAM:
                 if (0 < mDurationUsec) {
+                    Mutex::Autolock _l(mTimeLock);
                     mLastDecodedPositionUs = mDurationUsec;
                 }
                 // handle notification and looping at end of stream
@@ -651,12 +671,12 @@ bool AudioSfDecoder::wantPrefetch() {
 
 
 int64_t AudioSfDecoder::getPositionUsec() {
-    Mutex::Autolock _l(mSeekLock);
+    Mutex::Autolock _l(mTimeLock);
     if (mStateFlags & kFlagSeeking) {
         return mSeekTimeMsec * 1000;
     } else {
         if (mLastDecodedPositionUs < 0) {
-            return 0;
+            return ANDROID_UNKNOWN_TIME;
         } else {
             return mLastDecodedPositionUs;
         }
@@ -692,8 +712,16 @@ CacheStatus_t AudioSfDecoder::getCacheRemaining(bool *eos) {
             //   fill level is ratio of how much has been played + how much is
             //   cached, divided by total duration
             uint32_t currentPositionUsec = getPositionUsec();
-            mCacheFill = (int16_t) ((1000.0
-                    * (double)(currentPositionUsec + dataRemainingUs) / mDurationUsec));
+            if (currentPositionUsec == ANDROID_UNKNOWN_TIME) {
+                // if we don't know where we are, assume the worst for the fill ratio
+                currentPositionUsec = 0;
+            }
+            if (mDurationUsec > 0) {
+                mCacheFill = (int16_t) ((1000.0
+                        * (double)(currentPositionUsec + dataRemainingUs) / mDurationUsec));
+            } else {
+                mCacheFill = 0;
+            }
             //SL_LOGV("cacheFill = %d", mCacheFill);
 
             //   cache status is evaluated against duration thresholds
