@@ -49,6 +49,7 @@ public:
 
     // overridden from GenericPlayer
     virtual void play();
+    virtual void getPositionMsec(int* msec); //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
 
     void startPrefetch_async();
 
@@ -97,7 +98,7 @@ protected:
     // negative values indicate invalid value
     int64_t mBitrate;  // in bits/sec
     uint32_t mChannelMask;
-    int64_t mDurationUsec;
+    int64_t mDurationUsec; // ANDROID_UNKNOWN_TIME if unknown
 
     // buffer passed from decoder to renderer
     MediaBuffer *mDecodeBuffer;
@@ -109,12 +110,11 @@ private:
 
     void notifyPrepared(status_t prepareRes);
 
-    int64_t mTimeDelta;
     int64_t mSeekTimeMsec;
-    int64_t mLastDecodedPositionUs;
-
-    // mutex used for seek flag and seek time read/write
-    Mutex mSeekLock;
+    int64_t mLastDecodedPositionUs; // ANDROID_UNKNOWN_TIME if unknown
+    // mutex used for seek flag, seek time (mSeekTimeMsec),
+    //   and last decoded position (mLastDecodedPositionUs)
+    Mutex mTimeLock;
 
     // informations that can be retrieved in the PCM format queries
     //  these values are only written in the event loop
@@ -125,7 +125,7 @@ private:
 
     bool wantPrefetch();
     CacheStatus_t getCacheRemaining(bool *eos);
-    int64_t getPositionUsec();
+    int64_t getPositionUsec(); // ANDROID_UNKNOWN_TIME if unknown
 
     // convenience function to update internal state when decoding parameters have changed,
     // called with a lock on mBufferSourceLock
