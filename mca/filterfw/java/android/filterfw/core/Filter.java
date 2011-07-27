@@ -143,7 +143,7 @@ public abstract class Filter {
         return mIsOpen;
     }
 
-    public synchronized void setInputFrame(String inputName, Frame frame) {
+    public void setInputFrame(String inputName, Frame frame) {
         FilterPort port = getInputPort(inputName);
         if (!port.isOpen()) {
             port.open();
@@ -152,18 +152,7 @@ public abstract class Filter {
     }
 
     public final void setInputValue(String inputName, Object value) {
-        // Wrap the value in a Java frame
-        MutableFrameFormat inputFormat = ObjectFormat.fromObject(value, FrameFormat.TARGET_JAVA);
-        if (value == null) {
-            // If the value is null, the format cannot guess the class, so we adjust it to the
-            // class of the input port here
-            FrameFormat portFormat = getInputPort(inputName).getPortFormat();
-            Class portClass = (portFormat == null) ? null : portFormat.getObjectClass();
-            inputFormat.setObjectClass(portClass);
-        }
-        JavaFrame frame = new JavaFrame(inputFormat, null);
-        frame.setObjectValue(value);
-        setInputFrame(inputName, frame);
+        setInputFrame(inputName, wrapInputValue(inputName, value));
     }
 
     protected void prepare(FilterContext context) {
@@ -530,6 +519,18 @@ public abstract class Filter {
         }
     }
 
+    final synchronized void pushInputFrame(String inputName, Frame frame) {
+        FilterPort port = getInputPort(inputName);
+        if (!port.isOpen()) {
+            port.open();
+        }
+        port.pushFrame(frame);
+    }
+
+    final synchronized void pushInputValue(String inputName, Object value) {
+        pushInputFrame(inputName, wrapInputValue(inputName, value));
+    }
+
     // Filter internal methods /////////////////////////////////////////////////////////////////////
     private final void initFinalPorts(KeyValueMap values) {
         mInputPorts = new HashMap<String, InputPort>();
@@ -614,6 +615,20 @@ public abstract class Filter {
         for (InputPort inputPort : mInputPorts.values()) {
             inputPort.transfer(context);
         }
+    }
+
+    private final Frame wrapInputValue(String inputName, Object value) {
+        MutableFrameFormat inputFormat = ObjectFormat.fromObject(value, FrameFormat.TARGET_JAVA);
+        if (value == null) {
+            // If the value is null, the format cannot guess the class, so we adjust it to the
+            // class of the input port here
+            FrameFormat portFormat = getInputPort(inputName).getPortFormat();
+            Class portClass = (portFormat == null) ? null : portFormat.getObjectClass();
+            inputFormat.setObjectClass(portClass);
+        }
+        JavaFrame frame = new JavaFrame(inputFormat, null);
+        frame.setObjectValue(value);
+        return frame;
     }
 
     private final void releasePulledFrames(FilterContext context) {

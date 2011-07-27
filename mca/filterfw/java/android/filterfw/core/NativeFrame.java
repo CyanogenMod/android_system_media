@@ -24,6 +24,8 @@ import android.filterfw.core.GLFrame;
 import android.filterfw.core.NativeBuffer;
 import android.graphics.Bitmap;
 
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -31,18 +33,24 @@ import java.nio.ByteBuffer;
  */
 public class NativeFrame extends Frame {
 
-    private int nativeFrameId;
+    private int nativeFrameId = -1;
 
     NativeFrame(FrameFormat format, FrameManager frameManager) {
         super(format, frameManager);
         int capacity = format.getSize();
-        allocate(capacity);
+        nativeAllocate(capacity);
         setReusable(capacity != 0);
     }
 
     @Override
-    void dealloc() {
-        deallocate();
+    protected synchronized void releaseNativeAllocation() {
+        nativeFrameId = -1;
+        nativeDeallocate();
+    }
+
+    @Override
+    protected synchronized boolean hasNativeAllocation() {
+        return nativeFrameId != -1;
     }
 
     @Override
@@ -50,6 +58,15 @@ public class NativeFrame extends Frame {
         return getNativeCapacity();
     }
 
+    /**
+     * Returns the native frame's Object value.
+     *
+     * If the frame's base-type is not TYPE_OBJECT, this returns a data buffer containing the native
+     * data (this is equivalent to calling getData().
+     * If the frame is based on an object type, this type is expected to be a subclass of
+     * NativeBuffer. The NativeBuffer returned is only valid for as long as the frame is alive. If
+     * you need to hold on to the returned value, you must retain it.
+     */
     @Override
     public Object getObjectValue() {
         // If this is not a structured frame, return our data
@@ -84,8 +101,7 @@ public class NativeFrame extends Frame {
             throw new RuntimeException("Could not get the native structured data for frame!");
         }
 
-        // Attach this frame to it, so that we do not get deallocated while the NativeBuffer is
-        // accessing our data.
+        // Attach this frame to it
         structData.attachToFrame(this);
 
         return structData;
@@ -203,16 +219,17 @@ public class NativeFrame extends Frame {
 
     @Override
     public String toString() {
-        return "NativeFrame (" + getFormat() + ") with native buffer of size " + getCapacity();
+        return "NativeFrame id: " + nativeFrameId + " (" + getFormat() + ") of size "
+            + getCapacity();
     }
 
     static {
         System.loadLibrary("filterfw");
     }
 
-    private native boolean allocate(int capacity);
+    private native boolean nativeAllocate(int capacity);
 
-    private native boolean deallocate();
+    private native boolean nativeDeallocate();
 
     private native int getNativeCapacity();
 

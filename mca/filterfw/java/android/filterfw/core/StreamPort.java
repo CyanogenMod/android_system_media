@@ -47,7 +47,7 @@ public class StreamPort extends InputPort {
         assignFrame(frame, false);
     }
 
-    private void assignFrame(Frame frame, boolean persistent) {
+    protected synchronized void assignFrame(Frame frame, boolean persistent) {
         assertPortIsOpen();
         checkFrameType(frame, persistent);
 
@@ -65,7 +65,7 @@ public class StreamPort extends InputPort {
     }
 
     @Override
-    public Frame pullFrame() {
+    public synchronized Frame pullFrame() {
         // Make sure we have a frame
         if (mFrame == null) {
             throw new RuntimeException("No frame available to pull on port: " + this + "!");
@@ -82,7 +82,7 @@ public class StreamPort extends InputPort {
     }
 
     @Override
-    public boolean hasFrame() {
+    public synchronized boolean hasFrame() {
         return mFrame != null;
     }
 
@@ -92,7 +92,7 @@ public class StreamPort extends InputPort {
     }
 
     @Override
-    public void transfer(FilterContext context) {
+    public synchronized void transfer(FilterContext context) {
         if (mFrame != null) {
             checkFrameManager(mFrame, context);
         }

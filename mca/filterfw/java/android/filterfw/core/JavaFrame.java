@@ -73,8 +73,12 @@ public class JavaFrame extends Frame {
     }
 
     @Override
-    void dealloc() {
-        mObject = null;
+    protected boolean hasNativeAllocation() {
+        return false;
+    }
+
+    @Override
+    protected void releaseNativeAllocation() {
     }
 
     @Override
@@ -148,5 +152,10 @@ public class JavaFrame extends Frame {
 
         // Set the object value
         mObject = object;
+    }
+
+    @Override
+    public String toString() {
+        return "JavaFrame (" + getFormat() + ")";
     }
 }

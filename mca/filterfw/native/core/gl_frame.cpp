@@ -48,8 +48,8 @@ GLFrame::GLFrame(GLEnv* gl_env)
     texture_target_(GL_TEXTURE_2D),
     texture_state_(kStateUninitialized),
     fbo_state_(kStateUninitialized),
-    tex_params_modified_(false),
     owns_(false) {
+  SetDefaultTexParameters();
 }
 
 bool GLFrame::Init(int width, int height) {
@@ -110,28 +110,51 @@ bool GLFrame::GenerateMipMap() {
 }
 
 bool GLFrame::SetTextureParameter(GLenum pname, GLint value) {
-  if (FocusTexture()) {
-    glTexParameteri(GL_TEXTURE_2D, pname, value);
-    tex_params_modified_ = true;
-    return !GLEnv::CheckGLError("Setting texture parameter!");
+  if (value != tex_params_[pname]) {
+    if (FocusTexture()) {
+      glTexParameteri(GL_TEXTURE_2D, pname, value);
+      if (!GLEnv::CheckGLError("Setting texture parameter!")) {
+        tex_params_[pname] = value;
+        return true;
+      }
+    }
+  } else {
+    return true;
   }
   return false;
 }
 
-bool GLFrame::ResetParameters() {
-  if (tex_params_modified_) {
-    if (BindTexture()) {
-      // Set default parameter values
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      tex_params_modified_ = false;
-    } else {
-      return false;
-    }
-  }
+bool GLFrame::UpdateTexParameters() {
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, tex_params_[GL_TEXTURE_MAG_FILTER]);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, tex_params_[GL_TEXTURE_MIN_FILTER]);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, tex_params_[GL_TEXTURE_WRAP_S]);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, tex_params_[GL_TEXTURE_WRAP_T]);
   return !GLEnv::CheckGLError("Resetting texture parameters!");
+}
+
+bool GLFrame::TexParametersModifed() {
+  return tex_params_[GL_TEXTURE_MAG_FILTER] != GL_LINEAR
+    ||   tex_params_[GL_TEXTURE_MIN_FILTER] != GL_LINEAR
+    ||   tex_params_[GL_TEXTURE_WRAP_S] != GL_CLAMP_TO_EDGE
+    ||   tex_params_[GL_TEXTURE_WRAP_T] != GL_CLAMP_TO_EDGE;
+}
+
+void GLFrame::SetDefaultTexParameters() {
+  tex_params_[GL_TEXTURE_MAG_FILTER] = GL_LINEAR;
+  tex_params_[GL_TEXTURE_MIN_FILTER] = GL_LINEAR;
+  tex_params_[GL_TEXTURE_WRAP_S] = GL_CLAMP_TO_EDGE;
+  tex_params_[GL_TEXTURE_WRAP_T] = GL_CLAMP_TO_EDGE;
+}
+
+bool GLFrame::ResetTexParameters() {
+  if (TexParametersModifed()) {
+    if (BindTexture()) {
+      SetDefaultTexParameters();
+      return UpdateTexParameters();
+    }
+    return false;
+  }
+  return true;
 }
 
 bool GLFrame::CopyDataTo(uint8_t* buffer, int size) {
@@ -356,8 +379,9 @@ bool GLFrame::BindTextureToFBO() {
                  GL_RGBA,
                  GL_UNSIGNED_BYTE,
                  NULL);
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+    // Set the user specified texture parameters
+    UpdateTexParameters();
 
     // Bind the texture to the frame buffer
     LOG_FRAME("Binding tex %d w %d h %d to fbo %d", texture_id_, width_, height_, fbo_id_);
@@ -387,9 +411,8 @@ bool GLFrame::UploadTexturePixels(const uint8_t* pixels) {
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width_, height_,
                0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
-  // Set the filtering mode
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  // Set the user specified texture parameters
+  UpdateTexParameters();
 
   if (GLEnv::CheckGLError("Texture Pixel Upload"))
     return false;

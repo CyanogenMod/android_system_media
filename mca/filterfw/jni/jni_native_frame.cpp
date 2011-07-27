@@ -27,11 +27,13 @@
 using android::filterfw::NativeFrame;
 using android::filterfw::GLFrame;
 
-jboolean Java_android_filterfw_core_NativeFrame_allocate(JNIEnv* env, jobject thiz, jint size) {
+jboolean Java_android_filterfw_core_NativeFrame_nativeAllocate(JNIEnv* env,
+                                                               jobject thiz,
+                                                               jint size) {
   return ToJBool(WrapObjectInJava(new NativeFrame(size), env, thiz, true));
 }
 
-jboolean Java_android_filterfw_core_NativeFrame_deallocate(JNIEnv* env, jobject thiz) {
+jboolean Java_android_filterfw_core_NativeFrame_nativeDeallocate(JNIEnv* env, jobject thiz) {
   return ToJBool(DeleteNativeObject<NativeFrame>(env, thiz));
 }
 

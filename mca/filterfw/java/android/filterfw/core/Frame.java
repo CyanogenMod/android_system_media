@@ -20,6 +20,8 @@ package android.filterfw.core;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
 import android.graphics.Bitmap;
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -133,6 +135,10 @@ public abstract class Frame {
         return false;
     }
 
+    public int getRefCount() {
+        return mRefCount;
+    }
+
     public Frame release() {
         if (mFrameManager != null) {
             return mFrameManager.releaseFrame(this);
@@ -192,8 +198,19 @@ public abstract class Frame {
         mRefCount = 1;
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        if (hasNativeAllocation()) {
+            Log.e("FilterFramework", "Frame " + this + " leaking. (Reference count = "
+                + mRefCount + "). Deallocating now!");
+            releaseNativeAllocation();
+        }
+    }
+
     // Core internal methods ///////////////////////////////////////////////////////////////////////
-    abstract void dealloc();
+    protected abstract boolean hasNativeAllocation();
+
+    protected abstract void releaseNativeAllocation();
 
     final int incRefCount() {
         ++mRefCount;

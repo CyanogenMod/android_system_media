@@ -21,11 +21,13 @@
 
 using android::filterfw::VertexFrame;
 
-jboolean Java_android_filterfw_core_VertexFrame_allocate(JNIEnv* env, jobject thiz, jint size) {
+jboolean Java_android_filterfw_core_VertexFrame_nativeAllocate(JNIEnv* env,
+                                                               jobject thiz,
+                                                               jint size) {
   return ToJBool(WrapObjectInJava(new VertexFrame(size), env, thiz, true));
 }
 
-jboolean Java_android_filterfw_core_VertexFrame_deallocate(JNIEnv* env, jobject thiz) {
+jboolean Java_android_filterfw_core_VertexFrame_nativeDeallocate(JNIEnv* env, jobject thiz) {
   return ToJBool(DeleteNativeObject<VertexFrame>(env, thiz));
 }
 

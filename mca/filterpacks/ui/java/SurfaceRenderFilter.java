@@ -88,13 +88,6 @@ public class SurfaceRenderFilter extends Filter implements SurfaceHolder.Callbac
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        if (mSurfaceView != null) {
-            mSurfaceView.unbind();
-        }
-    }
-
-    @Override
     public void setupPorts() {
         // Make sure we have a SurfaceView
         if (mSurfaceView == null) {

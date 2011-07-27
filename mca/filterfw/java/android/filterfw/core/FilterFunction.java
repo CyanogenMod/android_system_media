@@ -66,9 +66,9 @@ public class FilterFunction {
         // Setup the inputs
         for (Entry<String, Object> entry : inputMap.entrySet()) {
             if (entry.getValue() instanceof Frame) {
-                mFilter.setInputFrame(entry.getKey(), (Frame)entry.getValue());
+                mFilter.pushInputFrame(entry.getKey(), (Frame)entry.getValue());
             } else {
-                mFilter.setInputValue(entry.getKey(), entry.getValue());
+                mFilter.pushInputValue(entry.getKey(), entry.getValue());
             }
         }
 
@@ -76,11 +76,12 @@ public class FilterFunction {
         if (mFilter.getStatus() != Filter.STATUS_PROCESSING) {
             mFilter.openOutputs();
         }
+
         mFilter.performProcess(mFilterContext);
 
         // Create result handle
         Frame result = null;
-        if (filterOutCount == 1) {
+        if (filterOutCount == 1 && mResultHolders[0].hasFrame()) {
             result = mResultHolders[0].pullFrame();
         }
 

@@ -96,8 +96,7 @@ public class DrawRectFilter extends Filter {
         box = box.scaled(2.0f).translated(-1.0f, -1.0f);
 
         // Create output frame with copy of input
-        GLFrame output = (GLFrame)env.getFrameManager().newFrame(imageFrame.getFormat());
-        output.setDataFromFrame(imageFrame);
+        GLFrame output = (GLFrame)env.getFrameManager().duplicateFrame(imageFrame);
 
         // Draw onto output
         output.focus();

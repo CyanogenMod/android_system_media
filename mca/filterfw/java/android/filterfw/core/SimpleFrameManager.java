@@ -97,8 +97,8 @@ public class SimpleFrameManager extends FrameManager {
     @Override
     public Frame releaseFrame(Frame frame) {
         int refCount = frame.decRefCount();
-        if (refCount == 0) {
-            frame.dealloc();
+        if (refCount == 0 && frame.hasNativeAllocation()) {
+            frame.releaseNativeAllocation();
             return null;
         } else if (refCount < 0) {
             throw new RuntimeException("Frame reference count dropped below 0!");
