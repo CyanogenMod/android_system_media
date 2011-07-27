@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-//#define USE_LOG SLAndroidLogLevel_Debug
+//#define USE_LOG SLAndroidLogLevel_Verbose
 
 #include "sles_allinclusive.h"
 #include "android/android_AudioSfDecoder.h"
@@ -27,14 +27,6 @@
 #define SIZE_CACHED_LOW_BYTES   400000
 
 namespace android {
-
-// keep in sync with the entries of kPcmDecodeMetadataKeys[] defined in android_AudioSfDecoder.h
-#define ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS   0
-#define ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC 1
-#define ANDROID_KEY_INDEX_PCMFORMAT_BITSPERSAMPLE 2
-#define ANDROID_KEY_INDEX_PCMFORMAT_CONTAINERSIZE 3
-#define ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK   4
-#define ANDROID_KEY_INDEX_PCMFORMAT_ENDIANNESS    5
 
 //--------------------------------------------------------------------------------------------------
 AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : GenericPlayer(params),
@@ -361,6 +353,7 @@ void AudioSfDecoder::onPrepare() {
 
     // signal successful completion of prepare
     mStateFlags |= kFlagPrepared;
+
     GenericPlayer::onPrepare();
     SL_LOGD("AudioSfDecoder::onPrepare() done, mStateFlags=0x%x", mStateFlags);
 }
@@ -786,13 +779,14 @@ void AudioSfDecoder::hasNewDecodeParams() {
     if ((mAudioSource != 0) && mAudioSourceStarted) {
         sp<MetaData> meta = mAudioSource->getFormat();
 
-        CHECK(meta->findInt32(kKeyChannelCount, &mChannelCount));
+        SL_LOGV("old sample rate = %d, channel count = %d", mSampleRateHz, mChannelCount);
 
-        SL_LOGV("old sample rate = %d", mSampleRateHz);
+        CHECK(meta->findInt32(kKeyChannelCount, &mChannelCount));
         int32_t sr;
         CHECK(meta->findInt32(kKeySampleRate, &sr));
         mSampleRateHz = (uint32_t) sr;
-        SL_LOGV("found new sample rate = %d", mSampleRateHz);
+        SL_LOGV("format changed: new sample rate = %d, channel count = %d",
+                mSampleRateHz, mChannelCount);
 
         {
             android::Mutex::Autolock autoLock(mPcmFormatLock);

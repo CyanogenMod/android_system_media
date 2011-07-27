@@ -658,6 +658,19 @@ SLresult checkSourceSinkVsInterfacesCompatibility(const DataLocatorFormat *pSrcD
 
 #ifdef ANDROID
     case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
+        // if the source is SLAndroidBufferQueueItf for AAC decode, the sink must be a buffer queue
+        switch (pSinkDataLocatorFormat->mLocator.mLocatorType) {
+        case SL_DATALOCATOR_BUFFERQUEUE:
+        case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+            break;
+        default:
+            // FIXME more mph index business to worry about?
+            // FIXME does this break OpenMAX AL?
+            SL_LOGE("Source is SL_DATALOCATOR_ANDROIDBUFFERQUEUE, sink is not a buffer queue");
+            return SL_RESULT_FEATURE_UNSUPPORTED;
+            break;
+        }
+        break;
 #endif
     case SL_DATALOCATOR_ADDRESS:
     case SL_DATALOCATOR_MIDIBUFFERQUEUE:

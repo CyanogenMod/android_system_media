@@ -66,7 +66,9 @@ LOCAL_SRC_FILES:=                     \
         android/MediaPlayer_to_android.cpp    \
         android/OutputMix_to_android.cpp      \
         android/VideoCodec_to_android.cpp     \
+        android/BufferQueueSource.cpp         \
         android/CallbackProtector.cpp         \
+        android/AacBqToPcmCbRenderer.cpp      \
         android/android_AudioSfDecoder.cpp    \
         android/android_AudioToCbRenderer.cpp \
         android/android_GenericMediaPlayer.cpp\
@@ -74,6 +76,7 @@ LOCAL_SRC_FILES:=                     \
         android/android_LocAVPlayer.cpp       \
         android/android_StreamPlayer.cpp      \
         android/android_Effect.cpp            \
+        android/util/AacAdtsExtractor.cpp     \
         autogen/IID_to_MPH.c                  \
         objects/C3DGroup.c                    \
         objects/CAudioPlayer.c                \

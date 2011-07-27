@@ -18,6 +18,99 @@
 
 #include "sles_allinclusive.h"
 
+
+/* Utility functions */
+
+static SLresult initializeBufferQueueMembers(CAudioPlayer *ap) {
+    // inline allocation of circular mArray, up to a typical max
+    if (BUFFER_HEADER_TYPICAL >= ap->mBufferQueue.mNumBuffers) {
+        ap->mBufferQueue.mArray = ap->mBufferQueue.mTypical;
+    } else {
+        // Avoid possible integer overflow during multiplication; this arbitrary
+        // maximum is big enough to not interfere with real applications, but
+        // small enough to not overflow.
+        if (ap->mBufferQueue.mNumBuffers >= 256) {
+            return SL_RESULT_MEMORY_FAILURE;
+        }
+        ap->mBufferQueue.mArray = (BufferHeader *)
+                malloc((ap->mBufferQueue.mNumBuffers + 1) * sizeof(BufferHeader));
+        if (NULL == ap->mBufferQueue.mArray) {
+            return SL_RESULT_MEMORY_FAILURE;
+        }
+    }
+    ap->mBufferQueue.mFront = ap->mBufferQueue.mArray;
+    ap->mBufferQueue.mRear = ap->mBufferQueue.mArray;
+    return SL_RESULT_SUCCESS;
+}
+
+#ifdef ANDROID
+static SLresult initializeAndroidBufferQueueMembers(CAudioPlayer *ap) {
+    // Avoid possible integer overflow during multiplication; this arbitrary
+    // maximum is big enough to not interfere with real applications, but
+    // small enough to not overflow.
+    if (ap->mAndroidBufferQueue.mNumBuffers >= 256) {
+        return SL_RESULT_MEMORY_FAILURE;
+    }
+    ap->mAndroidBufferQueue.mBufferArray = (AdvancedBufferHeader *)
+            malloc( (ap->mAndroidBufferQueue.mNumBuffers + 1) * sizeof(AdvancedBufferHeader));
+    if (NULL == ap->mAndroidBufferQueue.mBufferArray) {
+        return SL_RESULT_MEMORY_FAILURE;
+    } else {
+
+        // initialize ABQ buffer type
+        // assert below has been checked in android_audioPlayer_checkSourceSink
+        assert(SL_DATAFORMAT_MIME == ap->mDataSource.mFormat.mFormatType);
+        switch(ap->mDataSource.mFormat.mMIME.containerType) {
+          case SL_CONTAINERTYPE_MPEG_TS:
+            ap->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeMpeg2Ts;
+            break;
+          case SL_CONTAINERTYPE_AAC:
+          case SL_CONTAINERTYPE_RAW: {
+            const char* mime = (char*)ap->mDataSource.mFormat.mMIME.mimeType;
+            if ((mime != NULL) && !(strcasecmp(mime, ANDROID_MIME_AACADTS) &&
+                    strcasecmp(mime, ANDROID_MIME_AACADTS_ANDROID_FRAMEWORK))) {
+                ap->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeAacadts;
+            } else {
+                ap->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeInvalid;
+                SL_LOGE("CreateAudioPlayer: Invalid buffer type in Android Buffer Queue");
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+          } break;
+          default:
+            ap->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeInvalid;
+            SL_LOGE("CreateAudioPlayer: Invalid buffer type in Android Buffer Queue");
+            return SL_RESULT_CONTENT_UNSUPPORTED;
+        }
+
+        // initialize ABQ memory
+        for (SLuint16 i=0 ; i<(ap->mAndroidBufferQueue.mNumBuffers + 1) ; i++) {
+            AdvancedBufferHeader *pBuf = &ap->mAndroidBufferQueue.mBufferArray[i];
+            pBuf->mDataBuffer = NULL;
+            pBuf->mDataSize = 0;
+            pBuf->mDataSizeConsumed = 0;
+            pBuf->mBufferContext = NULL;
+            pBuf->mBufferState = SL_ANDROIDBUFFERQUEUEEVENT_NONE;
+            switch (ap->mAndroidBufferQueue.mBufferType) {
+              case kAndroidBufferTypeMpeg2Ts:
+                pBuf->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
+                pBuf->mItems.mTsCmdData.mPts = 0;
+                break;
+              case kAndroidBufferTypeAacadts:
+                pBuf->mItems.mTsCmdData.mTsCmdCode = ANDROID_ADTSEVENT_NONE;
+                break;
+              default:
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+        }
+        ap->mAndroidBufferQueue.mFront = ap->mAndroidBufferQueue.mBufferArray;
+        ap->mAndroidBufferQueue.mRear  = ap->mAndroidBufferQueue.mBufferArray;
+    }
+
+    return SL_RESULT_SUCCESS;
+}
+#endif
+
+
 static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, SLuint32 deviceID,
     SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired)
 {
@@ -216,11 +309,15 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     // we have already range-checked the value down to a smaller width
                     SLuint16 nbBuffers = 0;
                     bool usesAdvancedBufferHeaders = false;
+                    bool usesSimpleBufferQueue = false;
+                    // creating an AudioPlayer which decodes AAC ADTS buffers to a PCM buffer queue
+                    //  will cause usesAdvancedBufferHeaders and usesSimpleBufferQueue to be true
                     switch (thiz->mDataSource.mLocator.mLocatorType) {
                     case SL_DATALOCATOR_BUFFERQUEUE:
 #ifdef ANDROID
                     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
 #endif
+                        usesSimpleBufferQueue = true;
                         nbBuffers = (SLuint16) thiz->mDataSource.mLocator.mBufferQueue.numBuffers;
                         assert(SL_DATAFORMAT_PCM == thiz->mDataSource.mFormat.mFormatType);
                         thiz->mNumChannels = thiz->mDataSource.mFormat.mPCM.numChannels;
@@ -228,8 +325,8 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                         break;
 #ifdef ANDROID
                     case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
-                        nbBuffers = (SLuint16) thiz->mDataSource.mLocator.mABQ.numBuffers;
                         usesAdvancedBufferHeaders = true;
+                        nbBuffers = (SLuint16) thiz->mDataSource.mLocator.mABQ.numBuffers;
                         thiz->mAndroidBufferQueue.mNumBuffers = nbBuffers;
                         break;
 #endif
@@ -241,6 +338,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     switch(thiz->mDataSink.mLocator.mLocatorType) {
                     case SL_DATALOCATOR_BUFFERQUEUE:
                     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
+                        usesSimpleBufferQueue = true;
                         nbBuffers = thiz->mDataSink.mLocator.mBufferQueue.numBuffers;
                         assert(SL_DATAFORMAT_PCM == thiz->mDataSink.mFormat.mFormatType);
                         // FIXME The values specified by the app are meaningless. We get the
@@ -285,85 +383,16 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     if (usesAdvancedBufferHeaders) {
 #ifdef ANDROID
                         // locator is SL_DATALOCATOR_ANDROIDBUFFERQUEUE
-                        // Avoid possible integer overflow during multiplication; this arbitrary
-                        // maximum is big enough to not interfere with real applications, but
-                        // small enough to not overflow.
-                        if (thiz->mAndroidBufferQueue.mNumBuffers >= 256) {
-                            result = SL_RESULT_MEMORY_FAILURE;
-                            break;
-                        }
-                        thiz->mAndroidBufferQueue.mBufferArray = (AdvancedBufferHeader *)
-                                malloc( (thiz->mAndroidBufferQueue.mNumBuffers + 1)
-                                        * sizeof(AdvancedBufferHeader));
-                        if (NULL == thiz->mAndroidBufferQueue.mBufferArray) {
-                            result = SL_RESULT_MEMORY_FAILURE;
-                            break;
-                        } else {
-
-                            // initialize ABQ buffer type
-                            // assert below has been checked in android_audioPlayer_checkSourceSink
-                            assert(SL_DATAFORMAT_MIME == thiz->mDataSource.mFormat.mFormatType);
-                            if (SL_CONTAINERTYPE_MPEG_TS ==
-                                    thiz->mDataSource.mFormat.mMIME.containerType) {
-                                thiz->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeMpeg2Ts;
-                            } else {
-                                thiz->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeInvalid;
-                                SL_LOGE("Invalid buffer type in Android Buffer Queue");
-                                result = SL_RESULT_CONTENT_UNSUPPORTED;
-                            }
-
-                            // initialize ABQ memory
-                            for (SLuint16 i=0 ; i<(thiz->mAndroidBufferQueue.mNumBuffers + 1) ;
-                                    i++) {
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mDataBuffer = NULL;
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mDataSize = 0;
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mDataSizeConsumed = 0;
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mBufferContext = NULL;
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mBufferState =
-                                        SL_ANDROIDBUFFERQUEUEEVENT_NONE;
-                                switch (thiz->mAndroidBufferQueue.mBufferType) {
-                                  case kAndroidBufferTypeMpeg2Ts:
-                                    thiz->mAndroidBufferQueue.mBufferArray[i].mItems.mTsCmdData.
-                                             mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
-                                    thiz->mAndroidBufferQueue.mBufferArray[i].mItems.mTsCmdData.
-                                             mPts = 0;
-                                    break;
-                                  default:
-                                    result = SL_RESULT_CONTENT_UNSUPPORTED;
-                                    break;
-                                }
-                            }
-                            thiz->mAndroidBufferQueue.mFront =
-                                    thiz->mAndroidBufferQueue.mBufferArray;
-                            thiz->mAndroidBufferQueue.mRear =
-                                    thiz->mAndroidBufferQueue.mBufferArray;
-                        }
+                        result = initializeAndroidBufferQueueMembers(thiz);
 #else
                         assert(false);
 #endif
-                    } else {
+                    }
+
+                    if (usesSimpleBufferQueue) {
                         // locator is SL_DATALOCATOR_BUFFERQUEUE
                         //         or SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE
-                        // inline allocation of circular mArray, up to a typical max
-                        if (BUFFER_HEADER_TYPICAL >= thiz->mBufferQueue.mNumBuffers) {
-                            thiz->mBufferQueue.mArray = thiz->mBufferQueue.mTypical;
-                        } else {
-                            // Avoid possible integer overflow during multiplication; this arbitrary
-                            // maximum is big enough to not interfere with real applications, but
-                            // small enough to not overflow.
-                            if (thiz->mBufferQueue.mNumBuffers >= 256) {
-                                result = SL_RESULT_MEMORY_FAILURE;
-                                break;
-                            }
-                            thiz->mBufferQueue.mArray = (BufferHeader *) malloc((thiz->mBufferQueue.
-                                    mNumBuffers + 1) * sizeof(BufferHeader));
-                            if (NULL == thiz->mBufferQueue.mArray) {
-                                result = SL_RESULT_MEMORY_FAILURE;
-                                break;
-                            }
-                        }
-                        thiz->mBufferQueue.mFront = thiz->mBufferQueue.mArray;
-                        thiz->mBufferQueue.mRear = thiz->mBufferQueue.mArray;
+                        result = initializeBufferQueueMembers(thiz);
                     }
 
                     // used to store the data source of our audio player

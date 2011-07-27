@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef AUDIO_TO_CB_RENDERER_H_
+#define AUDIO_TO_CB_RENDERER_H_
+
 #include "android/android_AudioSfDecoder.h"
 
 //--------------------------------------------------------------------------------------------------
@@ -51,3 +54,5 @@ private:
 };
 
 } // namespace android
+
+#endif //AUDIO_TO_CB_RENDERER_H_

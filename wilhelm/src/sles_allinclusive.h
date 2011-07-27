@@ -234,11 +234,18 @@ typedef struct {
     SLAuint64 mPts;
 } Mpeg2TsCommands;
 
+// Holds information about all commands that can be passed alongside an AAC ADTS buffer
+// Is used with buffers of type kAndroidBufferTypeAacadts
+typedef struct {
+    SLuint32 mAdtsCmdCode;
+} AdtsCommands;
+
 // Union of the different structures to hold items stored in an AdvancedBufferHeader
 //   when an item comes from an AndroidBufferQueue as the data source, it's a command
 //   when an item is output to an AndroidBufferQueue as the data sink, it's a message (or metadata)
 typedef union {
     Mpeg2TsCommands mTsCmdData;
+    AdtsCommands    mAdtsCmdData;
 } AdvancedBufferItems;
 
 // AdvancedBufferHeader describes each element of an AndroidBufferQueue, other than the data
