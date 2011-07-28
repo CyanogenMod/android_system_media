@@ -30,7 +30,7 @@ endef
 #
 # $(1): directory for search (to support use from frameworks/base)
 define libfilterfw_to_document
- $(call libfilterfw-all-java-files-under,$(1),
+ $(call libfilterfw-all-java-files-under,$(1), \
    filterfw/java \
    filterpacks/imageproc/java \
    filterpacks/numeric/java \
@@ -39,4 +39,3 @@ define libfilterfw_to_document
    filterpacks/ui/java \
    filterpacks/videosrc/java )
 endef
-
