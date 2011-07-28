@@ -279,8 +279,8 @@ public class CameraSource extends Filter {
             // the requested size, but as close as possible. The below isn't a
             // stable selection (reording the size list can give different
             // results), but since this is a fallback nicety, that's acceptable.
-            if ( size.width < width &&
-                 size.height < height &&
+            if ( size.width <= width &&
+                 size.height <= height &&
                  size.width >= closestWidth &&
                  size.height >= closestHeight) {
                 closestWidth = size.width;
