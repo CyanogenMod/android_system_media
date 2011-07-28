@@ -186,7 +186,7 @@ void android_audioPlayer_volumeUpdate(CAudioPlayer* ap)
     assert(ap != NULL);
 
     // the source's channel count, where zero means unknown
-    int channelCount = ap->mNumChannels;
+    SLuint8 channelCount = ap->mNumChannels;
 
     // whether each channel is audible
     bool leftAudibilityFactor, rightAudibilityFactor;
@@ -239,50 +239,12 @@ void android_audioPlayer_volumeUpdate(CAudioPlayer* ap)
         rightAudibilityFactor = true;
     }
 
-    // apply player mute factor
-    // note that AudioTrack has mute() but not MediaPlayer, so it's easier to use volume
-    if (ap->mVolume.mMute) {
-        leftAudibilityFactor = false;
-        rightAudibilityFactor = false;
-    }
-
-    // compute amplification as the combination of volume level and stereo position
-    //   amplification from volume level
-    ap->mAmplFromVolLevel = sles_to_android_amplification(ap->mVolume.mLevel);
-    //   amplification from direct level (changed in SLEffectSendtItf and SLAndroidEffectSendItf)
-    float leftVol  = ap->mAmplFromVolLevel * ap->mAmplFromDirectLevel;
-    float rightVol = ap->mAmplFromVolLevel * ap->mAmplFromDirectLevel;
-
-    // amplification from stereo position
-    if (ap->mVolume.mEnableStereoPosition) {
-        // panning law depends on number of channels of content: stereo panning vs 2ch. balance
-        if(1 == channelCount) {
-            // stereo panning
-            double theta = (1000+ap->mVolume.mStereoPosition)*M_PI_4/1000.0f; // 0 <= theta <= Pi/2
-            ap->mAmplFromStereoPos[0] = cos(theta);
-            ap->mAmplFromStereoPos[1] = sin(theta);
-        // channel count is 0 (unknown), 2 (stereo), or > 2 (multi-channel)
-        } else {
-            // stereo balance
-            if (ap->mVolume.mStereoPosition > 0) {
-                ap->mAmplFromStereoPos[0] = (1000-ap->mVolume.mStereoPosition)/1000.0f;
-                ap->mAmplFromStereoPos[1] = 1.0f;
-            } else {
-                ap->mAmplFromStereoPos[0] = 1.0f;
-                ap->mAmplFromStereoPos[1] = (1000+ap->mVolume.mStereoPosition)/1000.0f;
-            }
-        }
-        leftVol  *= ap->mAmplFromStereoPos[0];
-        rightVol *= ap->mAmplFromStereoPos[1];
-    }
-
-    // apply audibility factors
-    if (!leftAudibilityFactor) {
-        leftVol = 0.0;
-    }
-    if (!rightAudibilityFactor) {
-        rightVol = 0.0;
-    }
+    // compute volumes without setting
+    const bool audibilityFactors[2] = {leftAudibilityFactor, rightAudibilityFactor};
+    float volumes[2];
+    android_player_volumeUpdate(volumes, &ap->mVolume, channelCount, ap->mAmplFromDirectLevel,
+            audibilityFactors);
+    float leftVol = volumes[0], rightVol = volumes[1];
 
     // set volume on the underlying media player or audio track
     if (ap->mAPlayer != 0) {
@@ -307,6 +269,81 @@ void android_audioPlayer_volumeUpdate(CAudioPlayer* ap)
     } else if (NULL != ap->mAndroidEffectSend.mItf) {
         android_fxSend_setSendLevel(ap, ap->mAndroidEffectSend.mSendLevel + ap->mVolume.mLevel);
     }
+}
+
+// Called by android_audioPlayer_volumeUpdate and android_mediaPlayer_volumeUpdate to compute
+// volumes, but setting volumes is handled by the caller.
+
+void android_player_volumeUpdate(float *pVolumes /*[2]*/, const IVolume *volumeItf, unsigned
+channelCount, float amplFromDirectLevel, const bool *audibilityFactors /*[2]*/)
+{
+    assert(pVolumes != NULL);
+    assert(volumeItf != NULL);
+    // OK for audibilityFactors to be NULL
+
+    bool leftAudibilityFactor, rightAudibilityFactor;
+
+    // apply player mute factor
+    // note that AudioTrack has mute() but not MediaPlayer, so it's easier to use volume
+    // to mute for both rather than calling mute() for AudioTrack
+
+    // player is muted
+    if (volumeItf->mMute) {
+        leftAudibilityFactor = false;
+        rightAudibilityFactor = false;
+    // player isn't muted, and channel mute/solo audibility factors are available (AudioPlayer)
+    } else if (audibilityFactors != NULL) {
+        leftAudibilityFactor = audibilityFactors[0];
+        rightAudibilityFactor = audibilityFactors[1];
+    // player isn't muted, and channel mute/solo audibility factors aren't available (MediaPlayer)
+    } else {
+        leftAudibilityFactor = true;
+        rightAudibilityFactor = true;
+    }
+
+    // compute amplification as the combination of volume level and stereo position
+    //   amplification (or attenuation) from volume level
+    float amplFromVolLevel = sles_to_android_amplification(volumeItf->mLevel);
+    //   amplification from direct level (changed in SLEffectSendtItf and SLAndroidEffectSendItf)
+    float leftVol  = amplFromVolLevel * amplFromDirectLevel;
+    float rightVol = leftVol;
+
+    // amplification from stereo position
+    if (volumeItf->mEnableStereoPosition) {
+        // Left/right amplification (can be attenuations) factors derived for the StereoPosition
+        float amplFromStereoPos[STEREO_CHANNELS];
+        // panning law depends on content channel count: mono to stereo panning vs stereo balance
+        if (1 == channelCount) {
+            // mono to stereo panning
+            double theta = (1000+volumeItf->mStereoPosition)*M_PI_4/1000.0f; // 0 <= theta <= Pi/2
+            amplFromStereoPos[0] = cos(theta);
+            amplFromStereoPos[1] = sin(theta);
+        // channel count is 0 (unknown), 2 (stereo), or > 2 (multi-channel)
+        } else {
+            // stereo balance
+            if (volumeItf->mStereoPosition > 0) {
+                amplFromStereoPos[0] = (1000-volumeItf->mStereoPosition)/1000.0f;
+                amplFromStereoPos[1] = 1.0f;
+            } else {
+                amplFromStereoPos[0] = 1.0f;
+                amplFromStereoPos[1] = (1000+volumeItf->mStereoPosition)/1000.0f;
+            }
+        }
+        leftVol  *= amplFromStereoPos[0];
+        rightVol *= amplFromStereoPos[1];
+    }
+
+    // apply audibility factors
+    if (!leftAudibilityFactor) {
+        leftVol = 0.0;
+    }
+    if (!rightAudibilityFactor) {
+        rightVol = 0.0;
+    }
+
+    // return the computed volumes
+    pVolumes[0] = leftVol;
+    pVolumes[1] = rightVol;
 }
 
 //-----------------------------------------------------------------------------
@@ -1224,9 +1261,6 @@ SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
         // mAuxEffect
 
         pAudioPlayer->mAuxSendLevel = 0;
-        pAudioPlayer->mAmplFromVolLevel = 1.0f;
-        pAudioPlayer->mAmplFromStereoPos[0] = 1.0f;
-        pAudioPlayer->mAmplFromStereoPos[1] = 1.0f;
         pAudioPlayer->mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
         pAudioPlayer->mDeferredStart = false;
         // Already initialized in IEngine_CreateAudioPlayer, to be consolidated

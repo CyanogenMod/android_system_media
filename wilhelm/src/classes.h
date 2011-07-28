@@ -73,6 +73,7 @@
     SLuint8 mSoloMask;      // Mask for which channels are soloed: bit 0=left, 1=right
     SLuint8 mNumChannels;   // initially UNKNOWN_NUMCHANNELS, then const once it is known,
                             // range 1 <= x <= 8
+    // End of former IMuteSolo fields
     SLuint32 mSampleRateMilliHz;// initially UNKNOWN_SAMPLERATE, then const once it is known
     // Formerly at IEffectSend
     /**
@@ -107,14 +108,6 @@
     // FIXME all levels below need to be encapsulated in a field of type AndroidAudioLevels
     /** send level to aux effect, there's a single aux bus, so there's a single level */
     SLmillibel mAuxSendLevel;
-    /**
-     * Amplification (can be attenuation) factor derived for the VolumeLevel
-     */
-    float mAmplFromVolLevel;
-    /**
-     * Left/right amplification (can be attenuations) factors derived for the StereoPosition
-     */
-    float mAmplFromStereoPos[STEREO_CHANNELS];
     /**
      * Attenuation factor derived from direct level
      */
@@ -337,10 +330,8 @@ typedef struct CMediaPlayer_struct {
     DataLocatorFormat mImageVideoSink;
     DataLocatorFormat mVibraSink;
     DataLocatorFormat mLEDArraySink;
-    /**
-     * Dry volume modified by effect send interfaces: SLEffectSendItf and SLAndroidEffectSendItf
-     */
-    SLmillibel mDirectLevel;
+    SLuint8 mNumChannels;   // initially UNKNOWN_NUMCHANNELS, then const once it is known,
+                            // range 1 <= x <= 8
 #ifdef ANDROID
     android::sp<android::GenericPlayer> mAVPlayer;
     enum AndroidObjectType mAndroidObjType;

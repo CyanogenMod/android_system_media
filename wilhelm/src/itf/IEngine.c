@@ -1068,7 +1068,7 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                     thiz->mImageVideoSink.mFormat.mFormatType = XA_DATAFORMAT_NULL;
 
                     // More default values, in case destructor needs to be called early
-                    thiz->mDirectLevel = 0;
+                    thiz->mNumChannels = UNKNOWN_NUMCHANNELS;
 
                     // (assume calloc or memset 0 during allocation)
                     // placement new

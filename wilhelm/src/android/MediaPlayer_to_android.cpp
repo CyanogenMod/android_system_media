@@ -123,6 +123,28 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
         break;
       }
 
+      case android::GenericPlayer::kEventChannelCount: {
+        SL_LOGV("kEventChannelCount channels = %d", data1);
+        object_lock_exclusive(&mp->mObject);
+        if (UNKNOWN_NUMCHANNELS == mp->mNumChannels && UNKNOWN_NUMCHANNELS != data1) {
+            mp->mNumChannels = data1;
+            android_Player_volumeUpdate(mp);
+        }
+        object_unlock_exclusive(&mp->mObject);
+      }
+      break;
+
+      case android::GenericPlayer::kEventPrefetchFillLevelUpdate: {
+        SL_LOGV("kEventPrefetchFillLevelUpdate");
+      }
+      break;
+
+      case android::GenericPlayer::kEventPrefetchStatusChange: {
+        SL_LOGV("kEventPrefetchStatusChange");
+      }
+      break;
+
+
       default: {
         SL_LOGE("Received unknown event %d, data %d from AVPlayer", event, data1);
       }
@@ -223,8 +245,6 @@ XAresult android_Player_create(CMediaPlayer *mp) {
     mp->mAndroidObjState = ANDROID_UNINITIALIZED;
     mp->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
     mp->mSessionId = android::AudioSystem::newAudioSessionId();
-
-    mp->mDirectLevel = 0; // no attenuation
 
     return result;
 }
@@ -387,20 +407,18 @@ XAresult android_Player_getPosition(IPlay *pPlayItf, XAmillisecond *pPosMsec) {
 
 //-----------------------------------------------------------------------------
 /**
- * pre-condition: avp != 0, pVolItf != NULL
+ * pre-condition: mp != NULL
  */
-XAresult android_Player_volumeUpdate(const android::sp<android::GenericPlayer> &gp,
-        IVolume *pVolItf)
+void android_Player_volumeUpdate(CMediaPlayer* mp)
 {
-    XAresult result = XA_RESULT_SUCCESS;
-
-    // FIXME broken
-#if 0
-    gp->setVolume((bool)pVolItf->mMute, (bool)pVolItf->mEnableStereoPosition,
-            pVolItf->mStereoPosition, pVolItf->mLevel);
-#endif
-
-    return result;
+    android::GenericPlayer* avp = mp->mAVPlayer.get();
+    if (avp != NULL) {
+        float volumes[2];
+        // MediaPlayer does not currently support EffectSend or MuteSolo
+        android_player_volumeUpdate(volumes, &mp->mVolume, mp->mNumChannels, 1.0f, NULL);
+        float leftVol = volumes[0], rightVol = volumes[1];
+        avp->setVolume(leftVol, rightVol);
+    }
 }
 
 //-----------------------------------------------------------------------------

@@ -57,10 +57,9 @@ extern XAresult android_Player_getDuration(IPlay *pPlayItf, SLmillisecond *pDurM
 extern XAresult android_Player_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
 
 /**
- * pre-condition: gp != 0, pVolItf != NULL
+ * pre-condition: mp != NULL
  */
-extern XAresult android_Player_volumeUpdate(
-        const android::sp<android::GenericPlayer> &gp, IVolume *pVolItf);
+extern void android_Player_volumeUpdate(CMediaPlayer *mp);
 
 /**************************************************************************************************
  * Playback control and events
