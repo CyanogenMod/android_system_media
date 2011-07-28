@@ -117,7 +117,7 @@ protected:
 
 private:
     DISALLOW_EVIL_CONSTRUCTORS(GenericMediaPlayer);
-    void onAfterMediaPlayerPrepared();
+    void afterMediaPlayerPreparedSuccessfully();
 };
 
 } // namespace android

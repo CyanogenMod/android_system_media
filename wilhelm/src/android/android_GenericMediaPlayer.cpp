@@ -247,9 +247,12 @@ void GenericMediaPlayer::onPrepare() {
         mPlayer->setAudioStreamType(mPlaybackParams.streamType);
         mPlayerClient->beforePrepare();
         mPlayer->prepareAsync();
-        mStateFlags |= mPlayerClient->blockUntilPlayerPrepared() ?
-                kFlagPrepared : kFlagPreparedUnsuccessfully;
-        onAfterMediaPlayerPrepared();
+        if (mPlayerClient->blockUntilPlayerPrepared()) {
+            mStateFlags |= kFlagPrepared;
+            afterMediaPlayerPreparedSuccessfully();
+        } else {
+            mStateFlags |= kFlagPreparedUnsuccessfully;
+        }
         GenericPlayer::onPrepare();
     }
     SL_LOGD("GenericMediaPlayer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
@@ -429,14 +432,15 @@ void GenericMediaPlayer::onGetMediaPlayerInfo() {
 
 //--------------------------------------------------
 /**
- * called from the event handling loop after the MediaPlayer mPlayer is prepared
+ * called from GenericMediaPlayer::onPrepare after the MediaPlayer mPlayer is prepared successfully
  * pre-conditions:
  *  mPlayer != 0
- *  mPlayer is prepared
+ *  mPlayer is prepared successfully
  */
-void GenericMediaPlayer::onAfterMediaPlayerPrepared() {
-    SL_LOGV("GenericMediaPlayer::onAfterMediaPlayerPrepared()");
+void GenericMediaPlayer::afterMediaPlayerPreparedSuccessfully() {
+    SL_LOGV("GenericMediaPlayer::afterMediaPlayerPrepared()");
     assert(mPlayer != 0);
+    assert(mStateFlags & kFlagPrepared);
     // retrieve channel count
     assert(UNKNOWN_NUMCHANNELS == mChannelCount);
     Parcel *reply = new Parcel();
