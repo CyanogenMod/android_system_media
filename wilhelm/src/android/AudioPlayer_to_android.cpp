@@ -872,6 +872,9 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
       }
       break;
 
+    case android::GenericPlayer::kEventHasVideoSize:
+        //SL_LOGW("Unexpected kEventHasVideoSize");
+        break;
 
     default:
         break;
@@ -1235,6 +1238,9 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
         audioTrack_handleUnderrun_lockPlay(ap);
         break;
 
+    case android::AudioTrack::EVENT_BUFFER_END:
+    case android::AudioTrack::EVENT_LOOP_END:
+        // These are unexpected so fall through
     default:
         // FIXME where does the notification of SL_PLAYEVENT_HEADMOVING fit?
         SL_LOGE("Encountered unknown AudioTrack event %d for CAudioPlayer %p", event,

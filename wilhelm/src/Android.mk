@@ -24,6 +24,7 @@ LOCAL_C_INCLUDES:= \
 LOCAL_CFLAGS += -Wno-override-init
 # -Wno-missing-field-initializers
 # optional, see comments in MPH_to.c: -DUSE_DESIGNATED_INITIALIZERS -S
+# and also see ../tools/mphgen/Makefile
 LOCAL_CFLAGS += -DUSE_DESIGNATED_INITIALIZERS -UNDEBUG
 
 LOCAL_SRC_FILES:=                     \
@@ -56,7 +57,7 @@ LOCAL_CFLAGS += -UNDEBUG
 LOCAL_CFLAGS += -DUSE_LOG=SLAndroidLogLevel_Info
 # or -DUSE_LOG=SLAndroidLogLevel_Verbose for verbose logging
 
-# log all API entries and exits
+# log all API entries and exits (also requires Debug or Verbose log level)
 # LOCAL_CFLAGS += -DSL_TRACE_DEFAULT=SL_TRACE_ALL
 # (otherwise a warning log on error results only)
 

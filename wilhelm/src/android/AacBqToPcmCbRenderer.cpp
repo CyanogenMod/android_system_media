@@ -243,6 +243,7 @@ void AacBqToPcmCbRenderer::onPrepare() {
     // signal successful completion of prepare
     mStateFlags |= kFlagPrepared;
 
+    // skipping past AudioToCbRenderer and AudioSfDecoder
     GenericPlayer::onPrepare();
 
     SL_LOGD("AacBqToPcmCbRenderer::onPrepare() done, mStateFlags=0x%x", mStateFlags);

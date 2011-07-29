@@ -113,6 +113,7 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
         contInfo.containerInfo.numStreams = 1;
         ssize_t index = mp->mStreamInfo.mStreamInfoTable.add(streamInfo);
 
+        // callback is unconditional; there is no bitmask of enabled events
         xaStreamEventChangeCallback callback = mp->mStreamInfo.mCallback;
         void* callbackPContext = mp->mStreamInfo.mContext;
 

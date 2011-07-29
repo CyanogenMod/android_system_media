@@ -40,6 +40,7 @@
 
 namespace android {
 
+// abstract base class
 class GenericPlayer : public AHandler
 {
 public:
@@ -98,14 +99,14 @@ protected:
     // Constants used to identify the messages in this player's AHandler message loop
     //   in onMessageReceived()
     enum {
-        kWhatPrepare         = 'prep',
-        kWhatNotif           = 'noti',
-        kWhatPlay            = 'play',
-        kWhatPause           = 'paus',
-        kWhatSeek            = 'seek',
-        kWhatSeekComplete    = 'skcp',
-        kWhatLoop            = 'loop',
-        kWhatVolumeUpdate    = 'volu',
+        kWhatPrepare         = 'prep',  // start preparation
+        kWhatNotif           = 'noti',  // send a notification to client
+        kWhatPlay            = 'play',  // start player
+        kWhatPause           = 'paus',  // pause or stop player
+        kWhatSeek            = 'seek',  // request a seek to specified position
+        kWhatSeekComplete    = 'skcp',  // seek request has completed
+        kWhatLoop            = 'loop',  // set the player's looping status
+        kWhatVolumeUpdate    = 'volu',  // set the channel gains to specified values
         kWhatBufferingUpdate = 'bufu',
         kWhatBuffUpdateThres = 'buut',
         kWhatAttachAuxEffect = 'aaux',
@@ -169,12 +170,14 @@ protected:
         kFlagPreparedUnsuccessfully = 1 << 6,
     };
 
+    // Only accessed from event loop, does not need a mutex
     uint32_t mStateFlags;
 
     sp<ALooper> mLooper;
 
     const AudioPlayback_Parameters mPlaybackParams;
 
+    // protected by mSettingsLock after construction
     AndroidAudioLevels mAndroidAudioLevels;
 
     // protected by mSettingsLock
