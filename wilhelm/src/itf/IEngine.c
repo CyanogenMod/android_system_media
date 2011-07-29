@@ -243,8 +243,14 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
                         nbBuffers = thiz->mDataSink.mLocator.mBufferQueue.numBuffers;
                         assert(SL_DATAFORMAT_PCM == thiz->mDataSink.mFormat.mFormatType);
-                        thiz->mNumChannels = thiz->mDataSink.mFormat.mPCM.numChannels;
-                        thiz->mSampleRateMilliHz = thiz->mDataSink.mFormat.mPCM.samplesPerSec;
+                        // FIXME The values specified by the app are meaningless. We get the
+                        // real values from the decoder.  But the data sink checks currently require
+                        // that the app specify these useless values.  Needs doc/fix.
+                        // Instead use the "unknown" values, as needed by prepare completion.
+                        // thiz->mNumChannels = thiz->mDataSink.mFormat.mPCM.numChannels;
+                        // thiz->mSampleRateMilliHz = thiz->mDataSink.mFormat.mPCM.samplesPerSec;
+                        thiz->mNumChannels = UNKNOWN_NUMCHANNELS;
+                        thiz->mSampleRateMilliHz = UNKNOWN_SAMPLERATE;
                         break;
                     default:
                         // leave nbBuffers unchanged

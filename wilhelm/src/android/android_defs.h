@@ -54,8 +54,8 @@ enum AndroidObjectState {
 
 #define ANDROID_DEFAULT_OUTPUT_STREAM_TYPE AUDIO_STREAM_MUSIC
 
-#define PLAYER_FAILURE 0
-#define PLAYER_SUCCESS 1
+#define PLAYER_FAILURE ((int32_t) android::UNKNOWN_ERROR)
+#define PLAYER_SUCCESS ((int32_t) android::NO_ERROR)
 
 #define PLAYER_FD_FIND_FILE_SIZE ((int64_t)0xFFFFFFFFFFFFFFFFll)
 

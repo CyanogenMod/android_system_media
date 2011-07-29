@@ -183,6 +183,7 @@ bool AudioSfDecoder::getPcmFormatKeyValue(uint32_t index, uint32_t size, uint32_
 //    mDataSource != 0
 //    mAudioSource != 0
 //    mAudioSourceStarted == true
+// All error returns from this method are via notifyPrepared(status) followed by "return".
 void AudioSfDecoder::onPrepare() {
     SL_LOGD("AudioSfDecoder::onPrepare()");
     Mutex::Autolock _l(mBufferSourceLock);
@@ -359,6 +360,8 @@ void AudioSfDecoder::onPrepare() {
     // will consume the data
     createAudioSink();
 
+    // signal successful completion of prepare
+    mStateFlags |= kFlagPrepared;
     GenericPlayer::onPrepare();
     SL_LOGD("AudioSfDecoder::onPrepare() done, mStateFlags=0x%x", mStateFlags);
 }
@@ -617,8 +620,19 @@ void AudioSfDecoder::onMessageReceived(const sp<AMessage> &msg) {
 //--------------------------------------------------
 // Prepared state, prefetch status notifications
 void AudioSfDecoder::notifyPrepared(status_t prepareRes) {
+    assert(!(mStateFlags & (kFlagPrepared | kFlagPreparedUnsuccessfully)));
+    if (NO_ERROR == prepareRes) {
+        // The "then" fork is not currently used, but is kept here to make it easier
+        // to replace by a new signalPrepareCompletion(status) if we re-visit this later.
+        mStateFlags |= kFlagPrepared;
+    } else {
+        mStateFlags |= kFlagPreparedUnsuccessfully;
+    }
+    // Do not call the superclass onPrepare to notify, because it uses a default error
+    // status code but we can provide a more specific one.
+    // GenericPlayer::onPrepare();
     notify(PLAYEREVENT_PREPARED, (int32_t)prepareRes, true);
-
+    SL_LOGD("AudioSfDecoder::onPrepare() done, mStateFlags=0x%x", mStateFlags);
 }
 
 
