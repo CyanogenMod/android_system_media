@@ -19,11 +19,19 @@
 
 #include "jni/jni_gl_environment.h"
 #include "jni/jni_util.h"
-
+#include <media/mediarecorder.h>
 #include "native/core/gl_env.h"
+
+#include <gui/ISurfaceTexture.h>
+#include <gui/SurfaceTextureClient.h>
 
 using android::filterfw::GLEnv;
 using android::filterfw::WindowHandle;
+using android::MediaRecorder;
+using android::sp;
+using android::ISurfaceTexture;
+using android::SurfaceTextureClient;
+
 
 class NativeWindowHandle : public WindowHandle {
   public:
@@ -100,6 +108,24 @@ jboolean Java_android_filterfw_core_GLEnvironment_nativeSwapBuffers(JNIEnv* env,
   return gl_env ? ToJBool(gl_env->SwapBuffers()) : JNI_FALSE;
 }
 
+// Get the native mediarecorder object corresponding to the java object
+static sp<MediaRecorder> getMediaRecorder(JNIEnv* env, jobject jmediarecorder) {
+    jclass clazz = env->FindClass("android/media/MediaRecorder");
+    if (clazz == NULL) {
+        return NULL;
+    }
+
+    jfieldID context = env->GetFieldID(clazz, "mNativeContext", "I");
+    if (context == NULL) {
+        return NULL;
+    }
+
+    MediaRecorder* const p = (MediaRecorder*)env->GetIntField(jmediarecorder, context);
+    env->DeleteLocalRef(clazz);
+    return sp<MediaRecorder>(p);
+}
+
+
 jint Java_android_filterfw_core_GLEnvironment_nativeAddSurface(JNIEnv* env,
                                                                jobject thiz,
                                                                jobject surface) {
@@ -173,6 +199,9 @@ jint Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceTexture(JNIEnv* en
 
     // Don't care about format (will get overridden by SurfaceTexture
     // anyway), but do care about width and height
+    // TODO: Probably, this should be just be
+    // ANativeWindow_setBuffersDimensions. The pixel format is
+    // set during the eglCreateWindowSurface
     ANativeWindow_setBuffersGeometry(window, width, height, 0);
 
     NativeWindowHandle* winHandle = new NativeWindowHandle(window);
@@ -212,6 +241,98 @@ jint Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceTexture(JNIEnv* en
     return result;
   }
   return -1;
+}
+
+// nativeAddSurfaceFromMediaRecorder gets an EGLSurface
+// using a MediaRecorder object.
+// When Mediarecorder is used for recording GL Frames, it
+// will have a reference to a Native Handle (a SurfaceTexureClient)
+// which talks to the StageFrightRecorder in mediaserver via
+// a binder interface.
+jint Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceFromMediaRecorder(
+                                                      JNIEnv* env,
+                                                      jobject thiz,
+                                                      jobject jmediarecorder) {
+    GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
+    if (!gl_env) {
+        return -1;
+    }
+    // get a native mediarecorder object from the java object
+    sp<MediaRecorder> mr = getMediaRecorder(env, jmediarecorder);
+    if (mr == NULL) {
+        LOGE("GLEnvironment: Error- MediaRecorder could not be initialized!");
+        return -1;
+    }
+
+    // Ask the mediarecorder to return a handle to a surfacemediasource
+    // This will talk to the StageFrightRecorder via MediaRecorderClient
+    // over binder calls
+    sp<ISurfaceTexture> surfaceMS = mr->querySurfaceMediaSourceFromMediaServer();
+    if (surfaceMS == NULL) {
+      LOGE("GLEnvironment: Error- MediaRecorder returned a null \
+              <ISurfaceTexture> handle.");
+      return -1;
+    }
+    sp<SurfaceTextureClient> surfaceTC = new SurfaceTextureClient(surfaceMS);
+    // Get the ANativeWindow
+    sp<ANativeWindow> window = surfaceTC;
+
+
+    if (window == NULL) {
+      LOGE("GLEnvironment: Error creating window!");
+      return -1;
+    }
+
+    // In case of encoding, no need to set the dimensions
+    // on the buffers. The dimensions for the final encoding are set by
+    // the consumer side.
+    // The pixel format is dictated by the GL, and set during the
+    // eglCreateWindowSurface
+
+    NativeWindowHandle* winHandle = new NativeWindowHandle(window.get());
+    int result = gl_env->FindSurfaceIdForWindow(winHandle);
+    // If we find a surface with that window handle, just return that id
+    if (result != -1) {
+        delete winHandle;
+        return result;
+    }
+    // If we do not find a surface with that window handle, create
+    // one and assign to it the handle
+    // Configure surface
+    EGLConfig config;
+    EGLint numConfigs = -1;
+    EGLint configAttribs[] = {
+          EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+          EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+          EGL_RED_SIZE, 8,
+          EGL_GREEN_SIZE, 8,
+          EGL_BLUE_SIZE, 8,
+          EGL_ANDROID_recordable, EGL_TRUE,
+          EGL_NONE
+    };
+
+    eglChooseConfig(gl_env->display(), configAttribs, &config, 1, &numConfigs);
+    if (numConfigs < 1) {
+      LOGE("GLEnvironment: No suitable EGL configuration found for surface texture!");
+      delete winHandle;
+      return -1;
+    }
+
+    // Create the EGL surface
+    EGLSurface egl_surface = eglCreateWindowSurface(gl_env->display(),
+                                                    config,
+                                                    window.get(),
+                                                    NULL);
+
+    if (GLEnv::CheckEGLError("eglCreateWindowSurface")) {
+      LOGE("GLEnvironment: Error creating window surface!");
+      delete winHandle;
+      return -1;
+    }
+
+    // Add it to GL Env and assign ID
+    result = gl_env->AddWindowSurface(egl_surface, winHandle);
+    return result;
 }
 
 jboolean Java_android_filterfw_core_GLEnvironment_nativeActivateSurfaceId(JNIEnv* env,

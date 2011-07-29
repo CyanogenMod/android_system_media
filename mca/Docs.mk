@@ -37,6 +37,7 @@ define libfilterfw_to_document
    filterpacks/performance/java \
    filterpacks/text/java \
    filterpacks/ui/java \
-   filterpacks/videosrc/java )
+   filterpacks/videosrc/java \
+   filterpacks/videosink/java )
 endef
 
