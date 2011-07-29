@@ -32,8 +32,9 @@ static SLresult IVolume_SetVolumeLevel(SLVolumeItf self, SLmillibel level)
         if (oldLevel != level) {
             thiz->mLevel = level;
             interface_unlock_exclusive_attributes(thiz, ATTR_GAIN);
-        } else
+        } else {
             interface_unlock_exclusive(thiz);
+        }
         result = SL_RESULT_SUCCESS;
     }
 
@@ -86,8 +87,9 @@ static SLresult IVolume_SetMute(SLVolumeItf self, SLboolean mute)
     if (oldMute != mute) {
         thiz->mMute = (SLuint8) mute;
         interface_unlock_exclusive_attributes(thiz, ATTR_GAIN);
-    } else
+    } else {
         interface_unlock_exclusive(thiz);
+    }
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -165,8 +167,9 @@ static SLresult IVolume_SetStereoPosition(SLVolumeItf self, SLpermille stereoPos
         if (oldStereoPosition != stereoPosition) {
             thiz->mStereoPosition = stereoPosition;
             interface_unlock_exclusive_attributes(thiz, ATTR_GAIN);
-        } else
+        } else {
             interface_unlock_exclusive(thiz);
+        }
         result = SL_RESULT_SUCCESS;
     }
 
