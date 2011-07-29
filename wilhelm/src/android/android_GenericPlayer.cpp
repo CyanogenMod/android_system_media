@@ -33,12 +33,17 @@ GenericPlayer::GenericPlayer(const AudioPlayback_Parameters* params) :
         mPlaybackParams(*params),
         mChannelCount(UNKNOWN_NUMCHANNELS),
         mDurationMsec(ANDROID_UNKNOWN_TIME),
-        mPositionMsec(ANDROID_UNKNOWN_TIME),
         mSampleRateHz(UNKNOWN_SAMPLERATE),
         mCacheStatus(kStatusEmpty),
         mCacheFill(0),
         mLastNotifiedCacheFill(0),
-        mCacheFillNotifThreshold(100)
+        mCacheFillNotifThreshold(100),
+        mEventFlags(0),
+        mMarkerPositionMs(ANDROID_UNKNOWN_TIME),
+        mPositionUpdatePeriodMs(1000), // per spec
+        mOneShotGeneration(0),
+        mDeliveredNewPosMs(ANDROID_UNKNOWN_TIME),
+        mObservedPositionMs(ANDROID_UNKNOWN_TIME)
 {
     SL_LOGD("GenericPlayer::GenericPlayer()");
 
@@ -186,10 +191,6 @@ void GenericPlayer::getDurationMsec(int* msec) {
     *msec = mDurationMsec;
 }
 
-void GenericPlayer::getPositionMsec(int* msec) {
-    *msec = mPositionMsec;
-}
-
 void GenericPlayer::getSampleRate(uint* hz) {
     *hz = mSampleRateHz;
 }
@@ -223,6 +224,30 @@ void GenericPlayer::setAuxEffectSendLevel(float level)
     SL_LOGV("GenericPlayer::setAuxEffectSendLevel(level=%g)", level);
     sp<AMessage> msg = new AMessage(kWhatSetAuxEffectSendLevel, id());
     msg->setFloat(WHATPARAM_SETAUXEFFECTSENDLEVEL, level);
+    msg->post();
+}
+
+
+//--------------------------------------------------
+// Call after changing any of the IPlay settings related to SL_PLAYEVENT_*
+void GenericPlayer::setPlayEvents(int32_t eventFlags, int32_t markerPositionMs,
+        int32_t positionUpdatePeriodMs)
+{
+    // Normalize ms that are within the valid unsigned range, but not in the int32_t range
+    if (markerPositionMs < 0) {
+        markerPositionMs = ANDROID_UNKNOWN_TIME;
+    }
+    if (positionUpdatePeriodMs < 0) {
+        positionUpdatePeriodMs = ANDROID_UNKNOWN_TIME;
+    }
+    // markers are delivered accurately, but new position updates are limited to every 100 ms
+    if (positionUpdatePeriodMs < 100) {
+        positionUpdatePeriodMs = 100;
+    }
+    sp<AMessage> msg = new AMessage(kWhatSetPlayEvents, id());
+    msg->setInt32(WHATPARAM_SETPLAYEVENTS_FLAGS, eventFlags);
+    msg->setInt32(WHATPARAM_SETPLAYEVENTS_MARKER, markerPositionMs);
+    msg->setInt32(WHATPARAM_SETPLAYEVENTS_UPDATE, positionUpdatePeriodMs);
     msg->post();
 }
 
@@ -329,8 +354,18 @@ void GenericPlayer::onMessageReceived(const sp<AMessage> &msg) {
             onSetAuxEffectSendLevel(msg);
             break;
 
+        case kWhatSetPlayEvents:
+            SL_LOGV("kWhatSetPlayEvents");
+            onSetPlayEvents(msg);
+            break;
+
+        case kWhatOneShot:
+            SL_LOGV("kWhatOneShot");
+            onOneShot(msg);
+            break;
+
         default:
-            SL_LOGV("kWhatPlay");
+            SL_LOGE("GenericPlayer::onMessageReceived unknown message %d", msg->what());
             TRESPASS();
     }
 }
@@ -384,6 +419,9 @@ void GenericPlayer::onNotify(const sp<AMessage> &msg) {
     } else if (msg->findRect(PLAYEREVENT_VIDEO_SIZE_UPDATE, &val1, &val2, &val1, &val2)) {
         SL_LOGV("GenericPlayer notifying %s = %d, %d", PLAYEREVENT_VIDEO_SIZE_UPDATE, val1, val2);
         notifClient(kEventHasVideoSize, val1, val2, notifUser);
+    } else if (msg->findInt32(PLAYEREVENT_PLAY, &val1)) {
+        SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_PLAY, val1);
+        notifClient(kEventPlay, val1, 0, notifUser);
     } else {
         SL_LOGV("GenericPlayer notifying unknown");
     }
@@ -392,19 +430,20 @@ void GenericPlayer::onNotify(const sp<AMessage> &msg) {
 
 void GenericPlayer::onPlay() {
     SL_LOGD("GenericPlayer::onPlay()");
-    if ((mStateFlags & kFlagPrepared)) {
+    if ((mStateFlags & (kFlagPrepared | kFlagPlaying)) == kFlagPrepared) {
         SL_LOGD("starting player");
         mStateFlags |= kFlagPlaying;
-    } else {
-        SL_LOGV("NOT starting player mStateFlags=0x%x", mStateFlags);
+        updateOneShot();
     }
 }
 
 
 void GenericPlayer::onPause() {
     SL_LOGD("GenericPlayer::onPause()");
-    if ((mStateFlags & kFlagPrepared)) {
+    if (!(~mStateFlags & (kFlagPrepared | kFlagPlaying))) {
+        SL_LOGV("pausing player");
         mStateFlags &= ~kFlagPlaying;
+        updateOneShot();
     }
 }
 
@@ -427,6 +466,10 @@ void GenericPlayer::onVolumeUpdate() {
 void GenericPlayer::onSeekComplete() {
     SL_LOGD("GenericPlayer::onSeekComplete()");
     mStateFlags &= ~kFlagSeeking;
+    // avoid spurious or lost events caused by seeking past a marker
+    mDeliveredNewPosMs = ANDROID_UNKNOWN_TIME;
+    mObservedPositionMs = ANDROID_UNKNOWN_TIME;
+    updateOneShot();
 }
 
 
@@ -452,6 +495,34 @@ void GenericPlayer::onAttachAuxEffect(const sp<AMessage> &msg) {
 
 void GenericPlayer::onSetAuxEffectSendLevel(const sp<AMessage> &msg) {
     SL_LOGV("GenericPlayer::onSetAuxEffectSendLevel()");
+}
+
+
+void GenericPlayer::onSetPlayEvents(const sp<AMessage> &msg) {
+    SL_LOGV("GenericPlayer::onSetPlayEvents()");
+    int32_t eventFlags, markerPositionMs, positionUpdatePeriodMs;
+    if (msg->findInt32(WHATPARAM_SETPLAYEVENTS_FLAGS, &eventFlags) &&
+            msg->findInt32(WHATPARAM_SETPLAYEVENTS_MARKER, &markerPositionMs) &&
+            msg->findInt32(WHATPARAM_SETPLAYEVENTS_UPDATE, &positionUpdatePeriodMs)) {
+        mEventFlags = eventFlags;
+        mMarkerPositionMs = markerPositionMs;
+        mPositionUpdatePeriodMs = positionUpdatePeriodMs;
+        updateOneShot();
+    }
+}
+
+
+void GenericPlayer::onOneShot(const sp<AMessage> &msg) {
+    SL_LOGV("GenericPlayer::onOneShot()");
+    int32_t generation;
+    if (msg->findInt32(WHATPARAM_ONESHOT_GENERATION, &generation)) {
+        if (generation != mOneShotGeneration) {
+            SL_LOGV("GenericPlayer::onOneShot() generation %d cancelled; latest is %d",
+                    generation, mOneShotGeneration);
+            return;
+        }
+        updateOneShot();
+    }
 }
 
 
@@ -481,6 +552,105 @@ void GenericPlayer::bufferingUpdate(int16_t fillLevelPerMille) {
     sp<AMessage> msg = new AMessage(kWhatBufferingUpdate, id());
     msg->setInt32(WHATPARAM_BUFFERING_UPDATE, fillLevelPerMille);
     msg->post();
+}
+
+
+// For the meaning of positionMs, see comment in declaration at android_GenericPlayer.h
+void GenericPlayer::updateOneShot(int positionMs)
+{
+    SL_LOGV("GenericPlayer::updateOneShot");
+
+    // nop until prepared
+    if (!(mStateFlags & kFlagPrepared)) {
+        return;
+    }
+
+    // cancel any pending one-shot(s)
+    ++mOneShotGeneration;
+
+    // don't restart one-shot if player is paused or stopped
+    if (!(mStateFlags & kFlagPlaying)) {
+        return;
+    }
+
+    // get current player position in milliseconds
+    if (positionMs < 0) {
+        positionMs = ANDROID_UNKNOWN_TIME;
+    }
+    if (positionMs == ANDROID_UNKNOWN_TIME) {
+        getPositionMsec(&positionMs);
+        // normalize it
+        if (positionMs < 0) {
+            positionMs = ANDROID_UNKNOWN_TIME;
+        }
+        if (ANDROID_UNKNOWN_TIME == positionMs) {
+            // we can't proceed if we don't know where we are now
+            return;
+        }
+    }
+
+    // default one-shot delay is infinity
+    int64_t delayUs = -1;
+    // is there a marker?
+    if ((mEventFlags & SL_PLAYEVENT_HEADATMARKER) && (mMarkerPositionMs != ANDROID_UNKNOWN_TIME)) {
+        // check to see if we have observed the position passing through the marker
+        if (mObservedPositionMs <= mMarkerPositionMs && mMarkerPositionMs <= positionMs) {
+            notify(PLAYEREVENT_PLAY, (int32_t) SL_PLAYEVENT_HEADATMARKER, true /*async*/);
+        } else if (positionMs < mMarkerPositionMs) {
+            delayUs = (mMarkerPositionMs - positionMs) * 1000LL;
+        }
+    }
+    // are periodic position updates needed?
+    if ((mEventFlags & SL_PLAYEVENT_HEADATNEWPOS) &&
+            (mPositionUpdatePeriodMs != ANDROID_UNKNOWN_TIME)) {
+        // check to see if we have observed the position passing through a virtual marker, where the
+        // virtual marker is at the previously delivered new position plus position update period
+        int32_t virtualMarkerMs;
+        if (mDeliveredNewPosMs != ANDROID_UNKNOWN_TIME) {
+            virtualMarkerMs = mDeliveredNewPosMs + mPositionUpdatePeriodMs;
+        } else if (mObservedPositionMs != ANDROID_UNKNOWN_TIME) {
+            virtualMarkerMs = mObservedPositionMs + mPositionUpdatePeriodMs;
+        } else {
+            virtualMarkerMs = positionMs + mPositionUpdatePeriodMs;
+        }
+        if (mObservedPositionMs <= virtualMarkerMs && virtualMarkerMs <= positionMs) {
+            mDeliveredNewPosMs = virtualMarkerMs;
+            virtualMarkerMs += mPositionUpdatePeriodMs;
+            // re-synchronize if we missed an update
+            if (virtualMarkerMs <= positionMs) {
+                virtualMarkerMs = positionMs + mPositionUpdatePeriodMs;
+            }
+            notify(PLAYEREVENT_PLAY, (int32_t) SL_PLAYEVENT_HEADATNEWPOS, true /*async*/);
+        }
+        // note that if arithmetic overflow occurred, virtualMarkerMs will be negative
+        if (positionMs < virtualMarkerMs) {
+            int64_t trialDelayUs;
+            trialDelayUs = (virtualMarkerMs - positionMs) * 1000LL;
+            if (trialDelayUs > 0 && (delayUs == -1 || trialDelayUs < delayUs)) {
+                delayUs = trialDelayUs;
+            }
+        }
+    }
+
+    // we have a new observed position
+    mObservedPositionMs = positionMs;
+
+    // post the new one-shot message if needed
+    if (delayUs >= 0) {
+        // 20 ms min delay to avoid near busy waiting
+        if (delayUs < 20000LL) {
+            delayUs = 20000LL;
+        }
+        // 1 minute max delay avoids indefinite memory leaks caused by cancelled one-shots
+        if (delayUs > 60000000LL) {
+            delayUs = 60000000LL;
+        }
+        //SL_LOGI("delayUs = %lld", delayUs);
+        sp<AMessage> msg = new AMessage(kWhatOneShot, id());
+        msg->setInt32(WHATPARAM_ONESHOT_GENERATION, mOneShotGeneration);
+        msg->post(delayUs);
+    }
+
 }
 
 } // namespace android

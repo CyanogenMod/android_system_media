@@ -122,9 +122,9 @@ static SLresult IPlay_GetPlayState(SLPlayItf self, SLuint32 *pState)
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPlay *thiz = (IPlay *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLuint32 state = thiz->mState;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         result = SL_RESULT_SUCCESS;
 #ifdef USE_OUTPUTMIXEXT
         switch (state) {
@@ -282,9 +282,9 @@ static SLresult IPlay_GetCallbackEventsMask(SLPlayItf self, SLuint32 *pEventFlag
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPlay *thiz = (IPlay *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLuint32 eventFlags = thiz->mEventFlags;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pEventFlags = eventFlags;
         result = SL_RESULT_SUCCESS;
     }
@@ -298,9 +298,15 @@ static SLresult IPlay_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
     SL_ENTER_INTERFACE
 
     IPlay *thiz = (IPlay *) self;
+    bool significant = false;
     interface_lock_exclusive(thiz);
     if (thiz->mMarkerPosition != mSec) {
         thiz->mMarkerPosition = mSec;
+        if (thiz->mEventFlags & SL_PLAYEVENT_HEADATMARKER) {
+            significant = true;
+        }
+    }
+    if (significant) {
         interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
     } else
         interface_unlock_exclusive(thiz);
@@ -315,14 +321,20 @@ static SLresult IPlay_ClearMarkerPosition(SLPlayItf self)
     SL_ENTER_INTERFACE
 
     IPlay *thiz = (IPlay *) self;
+    bool significant = false;
     interface_lock_exclusive(thiz);
-#ifdef ANDROID
-    if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
-        // clearing the marker position is equivalent to setting the marker at 0
-        thiz->mMarkerPosition = 0;
+    // clearing the marker position is equivalent to setting the marker to SL_TIME_UNKNOWN
+    if (thiz->mMarkerPosition != SL_TIME_UNKNOWN) {
+        thiz->mMarkerPosition = SL_TIME_UNKNOWN;
+        if (thiz->mEventFlags & SL_PLAYEVENT_HEADATMARKER) {
+            significant = true;
+        }
     }
-#endif
-    interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
+    if (significant) {
+        interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
+    } else {
+        interface_unlock_exclusive(thiz);
+    }
     result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
@@ -337,9 +349,9 @@ static SLresult IPlay_GetMarkerPosition(SLPlayItf self, SLmillisecond *pMsec)
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPlay *thiz = (IPlay *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLmillisecond markerPosition = thiz->mMarkerPosition;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pMsec = markerPosition;
         result = SL_RESULT_SUCCESS;
     }
@@ -356,14 +368,10 @@ static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPlay *thiz = (IPlay *) self;
+        bool significant = false;
         interface_lock_exclusive(thiz);
         if (thiz->mPositionUpdatePeriod != mSec) {
             thiz->mPositionUpdatePeriod = mSec;
-#ifdef ANDROID
-            if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
-                // result = android_audioPlayer_useEventMask(thiz, thiz->mEventFlags);
-            }
-#endif
 #ifdef USE_OUTPUTMIXEXT
             if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
                 CAudioPlayer *audioPlayer = (CAudioPlayer *) thiz->mThis;
@@ -376,6 +384,11 @@ static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec
                 thiz->mFramesSincePositionUpdate = 0;
             }
 #endif
+            if (thiz->mEventFlags & SL_PLAYEVENT_HEADATNEWPOS) {
+                significant = true;
+            }
+        }
+        if (significant) {
             interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
         } else
             interface_unlock_exclusive(thiz);
@@ -394,9 +407,9 @@ static SLresult IPlay_GetPositionUpdatePeriod(SLPlayItf self, SLmillisecond *pMs
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPlay *thiz = (IPlay *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLmillisecond positionUpdatePeriod = thiz->mPositionUpdatePeriod;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pMsec = positionUpdatePeriod;
         result = SL_RESULT_SUCCESS;
     }
@@ -430,8 +443,8 @@ void IPlay_init(void *self)
     thiz->mCallback = NULL;
     thiz->mContext = NULL;
     thiz->mEventFlags = 0;
-    thiz->mMarkerPosition = 0;
-    thiz->mPositionUpdatePeriod = 1000;
+    thiz->mMarkerPosition = SL_TIME_UNKNOWN;
+    thiz->mPositionUpdatePeriod = 1000; // per spec
 #ifdef USE_OUTPUTMIXEXT
     thiz->mFrameUpdatePeriod = 0;   // because we don't know the sample rate yet
     thiz->mLastSeekPosition = 0;

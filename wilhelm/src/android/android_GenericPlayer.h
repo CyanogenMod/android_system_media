@@ -31,6 +31,12 @@
 #define WHATPARAM_BUFFERING_UPDATETHRESHOLD_PERCENT "buffUpdateThreshold"
 #define WHATPARAM_ATTACHAUXEFFECT                   "attachAuxEffect"
 #define WHATPARAM_SETAUXEFFECTSENDLEVEL             "setAuxEffectSendLevel"
+// Parameters for kWhatSetPlayEvents
+#define WHATPARAM_SETPLAYEVENTS_FLAGS               "setPlayEventsFlags"
+#define WHATPARAM_SETPLAYEVENTS_MARKER              "setPlayEventsMarker"
+#define WHATPARAM_SETPLAYEVENTS_UPDATE              "setPlayEventsUpdate"
+// Parameters for kWhatOneShot (see explanation at definition of kWhatOneShot below)
+#define WHATPARAM_ONESHOT_GENERATION                "oneShotGeneration"
 
 namespace android {
 
@@ -45,6 +51,7 @@ public:
         kEventPrefetchFillLevelUpdate = 'pflu',
         kEventEndOfStream             = 'eos',
         kEventChannelCount            = 'ccnt',
+        kEventPlay                    = 'play', // SL_PLAYEVENT_*
     };
 
 
@@ -66,12 +73,15 @@ public:
     virtual void setBufferingUpdateThreshold(int16_t thresholdPercent);
 
     virtual void getDurationMsec(int* msec); //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
-    virtual void getPositionMsec(int* msec); //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
+    virtual void getPositionMsec(int* msec) = 0; //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
     virtual void getSampleRate(uint32_t* hz);// hz  != NULL, UNKNOWN_SAMPLERATE if unknown
 
     void setVolume(float leftVol, float rightVol);
     void attachAuxEffect(int32_t effectId);
     void setAuxEffectSendLevel(float level);
+
+    // Call after changing any of the IPlay settings related to SL_PLAYEVENT_*
+    void setPlayEvents(int32_t eventFlags, int32_t markerPosition, int32_t positionUpdatePeriod);
 
 protected:
     // mutex used for set vs use of volume and cache (fill, threshold) settings
@@ -94,9 +104,16 @@ protected:
         kWhatVolumeUpdate    = 'volu',
         kWhatBufferingUpdate = 'bufu',
         kWhatBuffUpdateThres = 'buut',
-        kWhatMediaPlayerInfo = 'mpin',
         kWhatAttachAuxEffect = 'aaux',
         kWhatSetAuxEffectSendLevel = 'saux',
+        kWhatSetPlayEvents   = 'spev',  // process new IPlay settings related to SL_PLAYEVENT_*
+        kWhatOneShot         = 'ones',  // deferred (non-0 timeout) handler for SL_PLAYEVENT_*
+        // As used here, "one-shot" is the software equivalent of a "retriggerable monostable
+        // multivibrator" from electronics.  Briefly, a one-shot is a timer that can be triggered
+        // to fire at some point in the future.  It is "retriggerable" because while the timer
+        // is active, it is possible to replace the current timeout value by a new value.
+        // This is done by cancelling the current timer (using a generation count),
+        // and then posting another timer with the new desired value.
     };
 
     // Send a notification to one of the event listeners
@@ -119,6 +136,8 @@ protected:
     virtual void onSetBufferingUpdateThreshold(const sp<AMessage> &msg);
     virtual void onAttachAuxEffect(const sp<AMessage> &msg);
     virtual void onSetAuxEffectSendLevel(const sp<AMessage> &msg);
+    void onSetPlayEvents(const sp<AMessage> &msg);
+    void onOneShot(const sp<AMessage> &msg);
 
     // Convenience methods
     //   for async notifications of prefetch status and cache fill level, needs to be called
@@ -156,8 +175,6 @@ protected:
     AndroidAudioLevels mAndroidAudioLevels;
     int mChannelCount; // this is used for the panning law, and is not exposed outside of the object
     int32_t mDurationMsec;
-    // position is not protected by any lock in this generic class, may be different in subclasses
-    int32_t mPositionMsec;
     uint32_t mSampleRateHz;
 
     CacheStatus_t mCacheStatus;
@@ -166,6 +183,33 @@ protected:
     int16_t mCacheFillNotifThreshold; // threshold in cache fill level for cache fill to be reported
 
 private:
+
+    // Our copy of some important IPlay member variables, except in Android units
+    int32_t mEventFlags;
+    int32_t mMarkerPositionMs;
+    int32_t mPositionUpdatePeriodMs;
+
+    // We need to be able to cancel any pending one-shot event(s) prior to posting
+    // a new one-shot.  As AMessage does not currently support cancellation by
+    // "what" category, we simulate this by keeping a generation counter for
+    // one-shots.  When a one-shot event is delivered, it checks to see if it is
+    // still the current one-shot.  If not, it returns immediately, thus
+    // effectively cancelling itself.  Note that counter wrap-around is possible
+    // but unlikely and benign.
+    int32_t mOneShotGeneration;
+
+    // Play position at time of the most recently delivered SL_PLAYEVENT_HEADATNEWPOS,
+    // or ANDROID_UNKNOWN_TIME if a SL_PLAYEVENT_HEADATNEWPOS has never been delivered.
+    int32_t mDeliveredNewPosMs;
+
+    // Play position most recently observed by updateOneShot, or ANDROID_UNKNOWN_TIME
+    // if the play position has never been observed.
+    int32_t mObservedPositionMs;
+
+    // Call any time any of the IPlay copies, current position, or play state changes, and
+    // supply the latest known position or ANDROID_UNKNOWN_TIME if position is unknown to caller.
+    void updateOneShot(int positionMs = ANDROID_UNKNOWN_TIME);
+
     DISALLOW_EVIL_CONSTRUCTORS(GenericPlayer);
 };
 

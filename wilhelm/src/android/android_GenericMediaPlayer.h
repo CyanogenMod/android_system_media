@@ -76,9 +76,6 @@ public:
 protected:
     friend class MediaPlayerNotificationClient;
 
-    // overridden from GenericPlayer
-    virtual void onMessageReceived(const sp<AMessage> &msg);
-
     // Async event handlers (called from GenericPlayer's event loop)
     virtual void onPrepare();
     virtual void onPlay();
@@ -87,7 +84,6 @@ protected:
     virtual void onLoop(const sp<AMessage> &msg);
     virtual void onVolumeUpdate();
     virtual void onBufferingUpdate(const sp<AMessage> &msg);
-    virtual void onGetMediaPlayerInfo();
     virtual void onAttachAuxEffect(const sp<AMessage> &msg);
     virtual void onSetAuxEffectSendLevel(const sp<AMessage> &msg);
 
@@ -107,17 +103,14 @@ protected:
 
     Parcel metadatafilter;
 
-    // for synchronous "getXXX" calls on misc MediaPlayer settings: currently querying:
-    //   - position (time): protects GenericPlayer::mPositionMsec
-    Mutex       mGetMediaPlayerInfoLock;
-    Condition   mGetMediaPlayerInfoCondition;
-    //  marks the current "generation" of MediaPlayer info,any change denotes more recent info,
-    //    protected by mGetMediaPlayerInfoLock
-    uint32_t    mGetMediaPlayerInfoGenCount;
-
 private:
     DISALLOW_EVIL_CONSTRUCTORS(GenericMediaPlayer);
     void afterMediaPlayerPreparedSuccessfully();
+
+    Mutex mPlayerPreparedLock;          // protects mPlayerPrepared
+    sp<IMediaPlayer> mPlayerPrepared;   // non-NULL if MediaPlayer exists and prepared, write once
+    void getPlayerPrepared(sp<IMediaPlayer> &playerPrepared);   // safely read mPlayerPrepared
+
 };
 
 } // namespace android
