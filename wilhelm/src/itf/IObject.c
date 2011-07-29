@@ -775,6 +775,7 @@ void IObject_init(void *self)
     memset(&thiz->mOwner, 0, sizeof(pthread_t));
     thiz->mFile = NULL;
     thiz->mLine = 0;
+    thiz->mGeneration = 0;
 #endif
     ok = pthread_cond_init(&thiz->mCond, (const pthread_condattr_t *) NULL);
     assert(0 == ok);

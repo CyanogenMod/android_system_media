@@ -15,6 +15,17 @@
  */
 
 #include "sles_allinclusive.h"
+#include <bionic_pthread.h>
+
+
+// Use this macro to validate a pthread_t before passing it into __pthread_gettid.
+// One of the common reasons for deadlock is trying to lock a mutex for an object
+// which has been destroyed (which does memset to 0x00 or 0x55 as the final step).
+// To avoid crashing with a SIGSEGV right before we're about to log a deadlock warning,
+// we check that the pthread_t is probably valid.  Note that it is theoretically
+// possible for something to look like a valid pthread_t but not actually be valid.
+// So we might still crash, but only in the case where a deadlock was imminent anyway.
+#define LIKELY_VALID(ptr) (((ptr) != (pthread_t) 0) && ((((size_t) (ptr)) & 3) == 0))
 
 
 /** \brief Exclusively lock an object */
@@ -25,39 +36,75 @@ void object_lock_exclusive_(IObject *thiz, const char *file, int line)
     int ok;
     ok = pthread_mutex_trylock(&thiz->mMutex);
     if (0 != ok) {
-        // pthread_mutex_timedlock_np is not available, but wait up to 100 ms
-        static const useconds_t backoffs[] = {1, 10000, 20000, 30000, 40000};
+        // not android_atomic_acquire_load because we don't care about relative load/load ordering
+        int32_t oldGeneration = thiz->mGeneration;
+        // wait up to a total of 250 ms
+        static const unsigned backoffs[] = {10, 20, 30, 40, 50, 100};
         unsigned i = 0;
         for (;;) {
-            usleep(backoffs[i]);
-            ok = pthread_mutex_trylock(&thiz->mMutex);
-            if (0 == ok)
+            // the Android version is in ms not timespec, and isn't named pthread_mutex_timedlock_np
+            ok = pthread_mutex_lock_timeout_np(&thiz->mMutex, backoffs[i]);
+            if (0 == ok) {
                 break;
+            }
+            if (EBUSY == ok) {
+                // this is the expected return value for timeout, and will be handled below
+            } else if (EDEADLK == ok) {
+                // we don't use the kind of mutex that can return this error, but just in case
+                SL_LOGE("%s:%d: recursive lock detected", file, line);
+            } else {
+                // some other return value
+                SL_LOGE("%s:%d: pthread_mutex_lock_timeout_np returned %d", file, line, ok);
+            }
+            // is anyone else making forward progress?
+            int32_t newGeneration = thiz->mGeneration;
+            if (newGeneration != oldGeneration) {
+                // if we ever see forward progress then lock without timeout (more efficient)
+                goto forward_progress;
+            }
+            // no, then continue trying to lock but with increasing timeouts
             if (++i >= (sizeof(backoffs) / sizeof(backoffs[0]))) {
-                SL_LOGW("%s:%d: object %p was locked by %p at %s:%d\n",
-                    file, line, thiz, *(void **)&thiz->mOwner, thiz->mFile, thiz->mLine);
-                // attempt one more time; maybe this time we will be successful
+                // the extra block avoids a C++ compiler error about goto past initialization
+                {
+                    pthread_t me = pthread_self();
+                    pthread_t owner = thiz->mOwner;
+                    // unlikely, but this could result in a memory fault if owner is corrupt
+                    pid_t ownerTid = LIKELY_VALID(owner) ? __pthread_gettid(owner) : -1;
+                    SL_LOGW("%s:%d: pthread %p (tid %d) sees object %p was locked by pthread %p"
+                            " (tid %d) at %s:%d\n", file, line, *(void **)&me, gettid(), thiz,
+                            *(void **)&owner, ownerTid, thiz->mFile, thiz->mLine);
+                }
+forward_progress:
+                // attempt one more time without timeout; maybe this time we will be successful
                 ok = pthread_mutex_lock(&thiz->mMutex);
                 assert(0 == ok);
                 break;
             }
         }
     }
+    // here if mutex was successfully locked
     pthread_t zero;
     memset(&zero, 0, sizeof(pthread_t));
     if (0 != memcmp(&zero, &thiz->mOwner, sizeof(pthread_t))) {
-        if (pthread_equal(pthread_self(), thiz->mOwner)) {
-            SL_LOGE("%s:%d: object %p was recursively locked by %p at %s:%d\n",
-                file, line, thiz, *(void **)&thiz->mOwner, thiz->mFile, thiz->mLine);
+        pthread_t me = pthread_self();
+        pthread_t owner = thiz->mOwner;
+        pid_t ownerTid = LIKELY_VALID(owner) ? __pthread_gettid(owner) : -1;
+        if (pthread_equal(pthread_self(), owner)) {
+            SL_LOGE("%s:%d: pthread %p (tid %d) sees object %p was recursively locked by pthread"
+                    " %p (tid %d) at %s:%d\n", file, line, *(void **)&me, gettid(), thiz,
+                    *(void **)&owner, ownerTid, thiz->mFile, thiz->mLine);
         } else {
-            SL_LOGE("%s:%d: object %p was left unlocked in unexpected state by %p at %s:%d\n",
-                file, line, thiz, *(void **)&thiz->mOwner, thiz->mFile, thiz->mLine);
+            SL_LOGE("%s:%d: pthread %p (tid %d) sees object %p was left unlocked in unexpected"
+                    " state by pthread %p (tid %d) at %s:%d\n", file, line, *(void **)&me, gettid(),
+                    thiz, *(void **)&owner, ownerTid, thiz->mFile, thiz->mLine);
         }
         assert(false);
     }
     thiz->mOwner = pthread_self();
     thiz->mFile = file;
     thiz->mLine = line;
+    // not android_atomic_inc because we are already holding a mutex
+    ++thiz->mGeneration;
 }
 #else
 void object_lock_exclusive(IObject *thiz)
