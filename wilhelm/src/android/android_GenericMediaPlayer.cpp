@@ -313,12 +313,14 @@ void GenericMediaPlayer::onLoop(const sp<AMessage> &msg) {
     SL_LOGV("GenericMediaPlayer::onLoop");
     int32_t loop = 0;
     if (msg->findInt32(WHATPARAM_LOOP_LOOPING, &loop)) {
-        if (mPlayer != 0 && OK == mPlayer->setLooping(loop)) {
-            if (loop) {
-                mStateFlags |= kFlagLooping;
-            } else {
-                mStateFlags &= ~kFlagLooping;
-            }
+        if (loop) {
+            mStateFlags |= kFlagLooping;
+        } else {
+            mStateFlags &= ~kFlagLooping;
+        }
+        // if we have a MediaPlayer then tell it now, otherwise we'll tell it after it's created
+        if (mPlayer != 0) {
+            (void) mPlayer->setLooping(loop);
         }
     }
 }
@@ -458,6 +460,10 @@ void GenericMediaPlayer::onAfterMediaPlayerPrepared() {
         if (OK == mPlayer->getDuration(&msec)) {
             mDurationMsec = msec;
         }
+    }
+    // now that we have a MediaPlayer, set the looping flag
+    if (mStateFlags & kFlagLooping) {
+        (void) mPlayer->setLooping(1);
     }
     // when the MediaPlayer mPlayer is prepared, there is "sufficient data" in the playback buffers
     // if the data source was local, and the buffers are considered full so we need to notify that
