@@ -65,6 +65,10 @@ public abstract class InputPort extends FilterPort {
         return mSourcePort != null ? mSourcePort.getPortFormat() : getPortFormat();
     }
 
+    public Object getTarget() {
+        return null;
+    }
+
     public boolean filterMustClose() {
         return !isOpen() && isBlocking() && !hasFrame();
     }
