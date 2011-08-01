@@ -284,6 +284,9 @@ bool ShaderProgram::CompileAndLink() {
   GLuint shaders[2] = { vertex_shader_, fragment_shader_ };
   program_ = LinkProgram(shaders, 2);
 
+  // Scan for all uniforms in the program
+  ScanUniforms();
+
   // Check if we manage all coordinates
   if (program_ != 0) {
     ProgramVar tex_coord_attr = glGetAttribLocation(program_, TexCoordAttributeName().c_str());
@@ -374,6 +377,21 @@ GLuint ShaderProgram::LinkProgram(GLuint* shaders, GLuint count) {
     }
   }
   return program;
+}
+
+void ShaderProgram::ScanUniforms() {
+  int uniform_count;
+  int buffer_size;
+  GLenum type;
+  GLint capacity;
+  glGetProgramiv(program_, GL_ACTIVE_UNIFORMS, &uniform_count);
+  glGetProgramiv(program_, GL_ACTIVE_UNIFORM_MAX_LENGTH, &buffer_size);
+  std::vector<GLchar> name(buffer_size);
+  for (int i = 0; i < uniform_count; ++i) {
+    glGetActiveUniform(program_, i, buffer_size, NULL, &capacity, &type, &name[0]);
+    ProgramVar uniform_id = glGetUniformLocation(program_, &name[0]);
+    uniform_indices_[uniform_id] = i;
+  }
 }
 
 bool ShaderProgram::PushCoords(ProgramVar attr, float* coords) {
@@ -624,13 +642,21 @@ bool ShaderProgram::CheckValueMult(const std::string& var_type,
 
 bool ShaderProgram::CheckVarValid(ProgramVar var) {
   if (!IsVarValid(var)) {
-    LOGE("Shader Program: Attempting to set invalid variable!");
+    LOGE("Shader Program: Attempting to access invalid variable!");
     return false;
   }
   return true;
 }
 
 // Uniforms ////////////////////////////////////////////////////////////////////
+bool ShaderProgram::CheckUniformValid(ProgramVar var) {
+  if (!IsVarValid(var) || uniform_indices_.find(var) == uniform_indices_.end()) {
+    LOGE("Shader Program: Attempting to access unknown uniform %d!", var);
+    return false;
+  }
+  return true;
+}
+
 int ShaderProgram::MaxUniformCount() {
   // Here we return the minimum of the max uniform count for fragment and vertex
   // shaders.
@@ -675,7 +701,7 @@ bool ShaderProgram::SetUniformValue(ProgramVar var, float value) {
 bool ShaderProgram::SetUniformValue(ProgramVar var,
                                     const int* values,
                                     int count) {
-  if (!CheckVarValid(var))
+  if (!CheckUniformValid(var))
     return false;
 
   // Make sure we have values at all
@@ -688,7 +714,7 @@ bool ShaderProgram::SetUniformValue(ProgramVar var,
     GLint capacity;
     GLenum type;
     char name[128];
-    glGetActiveUniform(program_, var, 128, NULL, &capacity, &type, name);
+    glGetActiveUniform(program_, IndexOfUniform(var), 128, NULL, &capacity, &type, name);
 
     // Make sure passed values are compatible
     const int components = GLEnv::NumberOfComponents(type);
@@ -726,7 +752,7 @@ bool ShaderProgram::SetUniformValue(ProgramVar var,
 bool ShaderProgram::SetUniformValue(ProgramVar var,
                                     const float* values,
                                     int count) {
-  if (!CheckVarValid(var))
+  if (!CheckUniformValid(var))
     return false;
 
   // Make sure we have values at all
@@ -739,7 +765,7 @@ bool ShaderProgram::SetUniformValue(ProgramVar var,
     GLint capacity;
     GLenum type;
     char name[128];
-    glGetActiveUniform(program_, var, 128, NULL, &capacity, &type, name);
+    glGetActiveUniform(program_, IndexOfUniform(var), 128, NULL, &capacity, &type, name);
 
     // Make sure passed values are compatible
     const int components = GLEnv::NumberOfComponents(type);
@@ -810,11 +836,11 @@ bool ShaderProgram::SetUniformValue(const std::string& name, const Value& value)
 
 Value ShaderProgram::GetUniformValue(const std::string& name) {
   ProgramVar var = GetUniform(name);
-  if (IsVarValid(var)) {
+  if (CheckUniformValid(var)) {
     // Get uniform information
     GLint capacity;
     GLenum type;
-    glGetActiveUniform(program_, var, 0, NULL, &capacity, &type, NULL);
+    glGetActiveUniform(program_, IndexOfUniform(var), 0, NULL, &capacity, &type, NULL);
     if (!GLEnv::CheckGLError("Get Active Uniform")) {
       // Get value based on type, and wrap in value object
       switch(type) {
@@ -898,6 +924,10 @@ Value ShaderProgram::GetUniformValue(const std::string& name) {
     }
   }
   return MakeNullValue();
+}
+
+GLuint ShaderProgram::IndexOfUniform(ProgramVar var) {
+  return uniform_indices_[var];
 }
 
 // Attributes //////////////////////////////////////////////////////////////////////////////////////
