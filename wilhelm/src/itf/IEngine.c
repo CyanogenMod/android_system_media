@@ -847,7 +847,11 @@ static SLresult IEngine_QuerySupportedInterfaces(SLEngineItf self,
 
 static const char * const extensionNames[] = {
 #ifdef ANDROID
-    "ANDROID_SDK_LEVEL_12", // Android 3.0+ aka "Honeycomb MR1"
+#define _(n) #n
+#define __(n) _(n)
+    "ANDROID_SDK_LEVEL_" __(PLATFORM_SDK_VERSION),
+#undef _
+#undef __
 #else
     "WILHELM_DESKTOP",
 #endif

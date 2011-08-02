@@ -43,6 +43,7 @@ LOCAL_CFLAGS += -DUSE_PROFILES=0 -DUSE_TRACE -DUSE_DEBUG -UNDEBUG \
    -DUSE_LOG=SLAndroidLogLevel_Info
 # trace all the OpenSL ES method enter/exit in the logs
 #LOCAL_CFLAGS += -DSL_TRACE_DEFAULT=SL_TRACE_ALL
+LOCAL_CFLAGS += -DPLATFORM_SDK_VERSION=$(PLATFORM_SDK_VERSION)
 
 # Reduce size of .so and hide internal global symbols
 LOCAL_CFLAGS += -fvisibility=hidden -DLI_API='__attribute__((visibility("default")))'
