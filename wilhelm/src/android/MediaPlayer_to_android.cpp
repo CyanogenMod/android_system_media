@@ -233,7 +233,7 @@ XAresult android_Player_create(CMediaPlayer *mp) {
 //-----------------------------------------------------------------------------
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
 XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
-    SL_LOGI("android_Player_realize_l(%p)", mp);
+    SL_LOGV("android_Player_realize_l(%p)", mp);
     XAresult result = XA_RESULT_SUCCESS;
 
     const SLDataSource *pDataSrc = &mp->mDataSource.u.mSource;
@@ -287,7 +287,7 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
 
 //-----------------------------------------------------------------------------
 XAresult android_Player_destroy(CMediaPlayer *mp) {
-    SL_LOGI("android_Player_destroy(%p)", mp);
+    SL_LOGV("android_Player_destroy(%p)", mp);
     XAresult result = XA_RESULT_SUCCESS;
 
     if (mp->mAVPlayer != 0) {

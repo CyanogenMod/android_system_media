@@ -182,7 +182,7 @@ static XAresult IStreamInformation_RegisterStreamChangeCallback( XAStreamInforma
     switch (InterfaceToObjectID(thiz)) {
 
     case XA_OBJECTID_MEDIAPLAYER:
-        SL_LOGI("IStreamInformation_RegisterStreamChangeCallback()");
+        SL_LOGV("IStreamInformation_RegisterStreamChangeCallback()");
         result = SL_RESULT_SUCCESS;
         break;
     default:
