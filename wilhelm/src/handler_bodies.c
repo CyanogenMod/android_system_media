@@ -51,10 +51,7 @@ unsigned handler_MidiPlayer_gain(IObject *thiz)
 unsigned handler_MediaPlayer_gain(IObject *thiz)
 {
     CMediaPlayer *mp = (CMediaPlayer *) thiz;
-    android::GenericPlayer* avp = mp->mAVPlayer.get();
-    if (avp != NULL) {
-        android_Player_volumeUpdate(avp, &mp->mVolume);
-    }
+    android_Player_volumeUpdate(mp);
     return ATTR_GAIN;
 }
 

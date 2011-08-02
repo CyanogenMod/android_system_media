@@ -171,4 +171,7 @@ private:
 
 } // namespace android
 
+extern void android_player_volumeUpdate(float *pVolumes /*[2]*/, const IVolume *volumeItf,
+        unsigned channelCount, float amplFromDirectLevel, const bool *audibilityFactors /*[2]*/);
+
 #endif /* __ANDROID_GENERICPLAYER_H__ */
