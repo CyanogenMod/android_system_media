@@ -27,7 +27,7 @@
 // FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
 
 void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_cbf_t cbf, void* notifUser) {
-    SL_LOGI("android_StreamPlayer_realize_l(%p)", ap);
+    SL_LOGV("android_StreamPlayer_realize_l(%p)", ap);
 
     AudioPlayback_Parameters ap_params;
     ap_params.sessionId = ap->mSessionId;
@@ -52,7 +52,7 @@ StreamSourceAppProxy::StreamSourceAppProxy(
     mAppContext(context),
     mCaller(caller)
 {
-    SL_LOGI("StreamSourceAppProxy::StreamSourceAppProxy()");
+    SL_LOGV("StreamSourceAppProxy::StreamSourceAppProxy()");
 
     if (mUserIsAudioPlayer) {
         mAndroidBufferQueue = &((CAudioPlayer*)mUser)->mAndroidBufferQueue;

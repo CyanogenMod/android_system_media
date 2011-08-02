@@ -134,7 +134,7 @@ static SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf sel
             android_audioPlayer_androidBufferQueue_registerCallback_l((CAudioPlayer*) thiz->mThis);
             break;
           case XA_OBJECTID_MEDIAPLAYER:
-            SL_LOGI("IAndroidBufferQueue_RegisterCallback()");
+            SL_LOGV("IAndroidBufferQueue_RegisterCallback()");
             result = SL_RESULT_SUCCESS;
             android_Player_androidBufferQueue_registerCallback_l((CMediaPlayer*) thiz->mThis);
             break;
