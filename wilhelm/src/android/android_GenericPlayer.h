@@ -141,7 +141,7 @@ protected:
         kFlagPreparing              = 1 << 1,
         kFlagPlaying                = 1 << 2,
         kFlagBuffering              = 1 << 3,
-        kFlagSeeking                = 1 << 4,
+        kFlagSeeking                = 1 << 4,   // set if we (not Stagefright) initiated a seek
         kFlagLooping                = 1 << 5,   // set if looping is enabled
         kFlagPreparedUnsuccessfully = 1 << 6,
     };
