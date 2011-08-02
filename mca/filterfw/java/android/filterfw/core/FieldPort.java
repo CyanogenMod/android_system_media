@@ -50,6 +50,15 @@ public class FieldPort extends InputPort {
     }
 
     @Override
+    public Object getTarget() {
+        try {
+            return mField.get(mFilter);
+        } catch (IllegalAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
     public synchronized void transfer(FilterContext context) {
         if (mValueWaiting) {
             try {

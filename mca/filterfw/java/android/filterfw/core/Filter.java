@@ -279,6 +279,20 @@ public abstract class Filter {
     }
 
     /**
+     * Assigns all program variables to the ports they are connected to. Call this after
+     * constructing a Program instance with attached ProgramPorts.
+     */
+    protected void initProgramInputs(Program program, FilterContext context) {
+        if (program != null) {
+            for (InputPort inputPort : mInputPorts.values()) {
+                if (inputPort.getTarget() == program) {
+                    inputPort.transfer(context);
+                }
+            }
+        }
+    }
+
+    /**
      * Adds an input port to the filter. You should call this from within setupPorts, if your
      * filter has input ports. No type-checking is performed on the input. If you would like to
      * check against a type mask, use
