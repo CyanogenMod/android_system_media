@@ -58,6 +58,9 @@ public abstract class FrameManager {
         return mContext != null ? mContext.getGLEnvironment() : null;
     }
 
+    public void tearDown() {
+    }
+
     void setContext(FilterContext context) {
         mContext = context;
     }

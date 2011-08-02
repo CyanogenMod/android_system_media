@@ -105,8 +105,17 @@ public class FilterFunction {
         return mFilterContext;
     }
 
+    public Filter getFilter() {
+        return mFilter;
+    }
+
     public void setInputValue(String input, Object value) {
         mFilter.setInputValue(input, value);
+    }
+
+    public void tearDown() {
+        mFilter.performTearDown(mFilterContext);
+        mFilter = null;
     }
 
     @Override

@@ -38,9 +38,16 @@ public class GLEnvironment {
     private GLEnvironment(NativeAllocatorTag tag) {
     }
 
+    public synchronized void tearDown() {
+        if (glEnvId != -1) {
+            nativeDeallocate();
+            glEnvId = -1;
+        }
+    }
+
     @Override
     protected void finalize() throws Throwable {
-        nativeDeallocate();
+        tearDown();
     }
 
     public void initWithNewContext() {

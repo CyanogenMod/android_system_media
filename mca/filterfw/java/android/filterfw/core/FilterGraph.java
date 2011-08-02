@@ -51,7 +51,6 @@ public class FilterGraph {
     public static final int TYPECHECK_STRICT    = 2;
 
     private boolean mIsReady = false;
-    private boolean mTornDown = false;
     private int mAutoBranchMode = AUTOBRANCH_OFF;
     private int mTypeCheckMode = TYPECHECK_STRICT;
     private boolean mDiscardUnconnectedOutputs = false;
@@ -124,9 +123,6 @@ public class FilterGraph {
     }
 
     public void beginProcessing() {
-        if (mTornDown) {
-            throw new RuntimeException("Can't start processing on torn-down graph!");
-        }
         if (mLogVerbose) Log.v(TAG, "Opening all filter connections...");
         for (Filter filter : mFilters) {
             filter.openOutputs();
@@ -164,13 +160,16 @@ public class FilterGraph {
         mTypeCheckMode = typeCheckMode;
     }
 
-    public void tearDownFilters(FilterContext context) {
-        flushFrames();
-        for (Filter filter : mFilters) {
-            filter.performTearDown(context);
+    public void tearDown(FilterContext context) {
+        if (!mFilters.isEmpty()) {
+            flushFrames();
+            for (Filter filter : mFilters) {
+                filter.performTearDown(context);
+            }
+            mFilters.clear();
+            mNameMap.clear();
+            mIsReady = false;
         }
-        mTornDown = true;
-        mIsReady = false;
     }
 
     private boolean readyForProcessing(Filter filter, Set<Filter> processed) {

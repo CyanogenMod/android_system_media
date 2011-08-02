@@ -51,10 +51,10 @@ class GLFrame : public GLBufferHandle {
     bool InitWithExternalTexture();
 
     // Initialize using an existing texture.
-    bool InitWithTexture(GLint texture_id, int width, int height, bool owns, bool create_tex);
+    bool InitWithTexture(GLint texture_id, int width, int height);
 
     // Initialize using an existing FBO.
-    bool InitWithFbo(GLint fbo_id, int width, int height, bool owns, bool create_fbo);
+    bool InitWithFbo(GLint fbo_id, int width, int height);
 
     // Write the data with the given size in bytes to the frame. The frame size must match the
     // size of the data.
@@ -116,8 +116,7 @@ class GLFrame : public GLBufferHandle {
     enum GLObjectState {
       kStateUninitialized,  // Not yet initialized
       kStateGenerated,      // Tex/FBO id is generated
-      kStateBound,          // Tex/FBO are bound
-      kStateAllocated       // Tex is allocated with (pixel) data
+      kStateComplete        // FBO has valid attachment / Tex has valid pixel data
     };
 
     // Sets the frame and viewport dimensions.
@@ -147,8 +146,8 @@ class GLFrame : public GLBufferHandle {
     // Binds the internal FBO.
     bool BindFrameBuffer() const;
 
-    // Binds the internal texture to the internal FBO.
-    bool BindTextureToFBO();
+    // Attaches the internal texture to the internal FBO.
+    bool AttachTextureToFBO();
 
     // Update the texture parameters to the user specified parameters
     bool UpdateTexParameters();
@@ -193,7 +192,8 @@ class GLFrame : public GLBufferHandle {
     std::map<GLenum, GLint> tex_params_;
 
     // Flag whether frame owns the texture and FBO
-    bool owns_;
+    bool owns_texture_;
+    bool owns_fbo_;
 };
 
 } // namespace filterfw

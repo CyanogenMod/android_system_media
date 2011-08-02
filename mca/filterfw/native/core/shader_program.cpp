@@ -466,11 +466,6 @@ bool ShaderProgram::RenderFrame(const std::vector<GLuint>& textures,
     return false;
   }
 
-  if (blending_) {
-    glEnable(GL_BLEND);
-    glBlendFunc(sfactor_, dfactor_);
-  } else glDisable(GL_BLEND);
-
   if (LOG_EVERY_FRAME) {
     int fbo, program, buffer;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
@@ -558,6 +553,12 @@ bool ShaderProgram::BeginDraw() {
                  clear_color_.alpha);
     glClear(GL_COLOR_BUFFER_BIT);
   }
+
+  // Enable/Disable blending
+  if (blending_) {
+    glEnable(GL_BLEND);
+    glBlendFunc(sfactor_, dfactor_);
+  } else glDisable(GL_BLEND);
 
   return true;
 }

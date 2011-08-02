@@ -69,8 +69,9 @@ public class SyncRunner extends GraphRunner {
             throw new IllegalArgumentException("Class provided is not a Scheduler subclass!");
         }
 
-        // Add us to the specified context
+        // Associate this runner and the graph with the context
         mFilterContext = context;
+        mFilterContext.addGraph(graph);
 
         mTimer = new StopWatchMap();
 
@@ -78,12 +79,6 @@ public class SyncRunner extends GraphRunner {
 
         // Setup graph filters
         graph.setupFilters();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        // TODO: Is this the best place to do this, or should we make it explicit?
-        getGraph().tearDownFilters(mFilterContext);
     }
 
     @Override

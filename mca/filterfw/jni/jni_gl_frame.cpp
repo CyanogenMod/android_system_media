@@ -62,13 +62,11 @@ jboolean Java_android_filterfw_core_GLFrame_nativeAllocateWithTexture(JNIEnv* en
                                                                       jobject gl_env,
                                                                       jint tex_id,
                                                                       jint width,
-                                                                      jint height,
-                                                                      jboolean owns,
-                                                                      jboolean create) {
+                                                                      jint height) {
   GLEnv* gl_env_ptr = ConvertFromJava<GLEnv>(env, gl_env);
   if (!gl_env_ptr) return JNI_FALSE;
   GLFrame* frame = new GLFrame(gl_env_ptr);
-  if (frame->InitWithTexture(tex_id, width, height, ToCppBool(owns), ToCppBool(create))) {
+  if (frame->InitWithTexture(tex_id, width, height)) {
     return ToJBool(WrapObjectInJava(frame, env, thiz, true));
   } else {
     delete frame;
@@ -81,13 +79,11 @@ jboolean Java_android_filterfw_core_GLFrame_nativeAllocateWithFbo(JNIEnv* env,
                                                                   jobject gl_env,
                                                                   jint fbo_id,
                                                                   jint width,
-                                                                  jint height,
-                                                                  jboolean owns,
-                                                                  jboolean create) {
+                                                                  jint height) {
   GLEnv* gl_env_ptr = ConvertFromJava<GLEnv>(env, gl_env);
   if (!gl_env_ptr) return JNI_FALSE;
   GLFrame* frame = new GLFrame(gl_env_ptr);
-  if (frame->InitWithFbo(fbo_id, width, height, ToCppBool(owns), ToCppBool(create))) {
+  if (frame->InitWithFbo(fbo_id, width, height)) {
     return ToJBool(WrapObjectInJava(frame, env, thiz, true));
   } else {
     delete frame;

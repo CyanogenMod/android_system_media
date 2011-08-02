@@ -36,9 +36,7 @@ Java_android_filterfw_core_GLFrame_nativeAllocateWithTexture(JNIEnv* env,
                                                              jobject gl_env,
                                                              jint tex_id,
                                                              jint width,
-                                                             jint height,
-                                                             jboolean owns,
-                                                             jboolean create);
+                                                             jint height);
 
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLFrame_nativeAllocateWithFbo(JNIEnv* env,
@@ -46,9 +44,7 @@ Java_android_filterfw_core_GLFrame_nativeAllocateWithFbo(JNIEnv* env,
                                                          jobject gl_env,
                                                          jint fbo_id,
                                                          jint width,
-                                                         jint height,
-                                                         jboolean owns,
-                                                         jboolean create);
+                                                         jint height);
 
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLFrame_nativeAllocateExternal(JNIEnv* env,

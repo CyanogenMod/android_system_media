@@ -48,7 +48,8 @@ GLFrame::GLFrame(GLEnv* gl_env)
     texture_target_(GL_TEXTURE_2D),
     texture_state_(kStateUninitialized),
     fbo_state_(kStateUninitialized),
-    owns_(false) {
+    owns_texture_(false),
+    owns_fbo_(false) {
   SetDefaultTexParameters();
 }
 
@@ -56,25 +57,22 @@ bool GLFrame::Init(int width, int height) {
   // Make sure we haven't been initialized already
   if (width_ == 0 && height_ == 0) {
     InitDimensions(width, height);
-    owns_ = true;
     return true;
   }
   return false;
 }
 
-bool GLFrame::InitWithTexture(GLint texture_id, int width, int height, bool owns, bool create_tex) {
+bool GLFrame::InitWithTexture(GLint texture_id, int width, int height) {
   texture_id_ = texture_id;
-  texture_state_ = create_tex ? kStateGenerated : kStateAllocated;
+  texture_state_ = glIsTexture(texture_id) ? kStateComplete : kStateGenerated;
   InitDimensions(width, height);
-  owns_ = owns;
   return true;
 }
 
-bool GLFrame::InitWithFbo(GLint fbo_id, int width, int height, bool owns, bool create_fbo) {
+bool GLFrame::InitWithFbo(GLint fbo_id, int width, int height) {
   fbo_id_ = fbo_id;
-  fbo_state_ = create_fbo ? kStateGenerated : kStateBound;
+  fbo_state_ = glIsFramebuffer(fbo_id) ? kStateComplete : kStateGenerated;
   InitDimensions(width, height);
-  owns_ = owns;
   return true;
 }
 
@@ -82,7 +80,6 @@ bool GLFrame::InitWithExternalTexture() {
   texture_target_ = GL_TEXTURE_EXTERNAL_OES;
   width_ = 0;
   height_ = 0;
-  owns_ = true;
   return CreateTexture();
 }
 
@@ -94,10 +91,18 @@ void GLFrame::InitDimensions(int width, int height) {
 }
 
 GLFrame::~GLFrame() {
-  LOGV("Deleting texture %d and fbo %d", texture_id_, fbo_id_);
-  if (owns_) {
-      glDeleteTextures(1, &texture_id_);
-      glDeleteFramebuffers(1, &fbo_id_);
+  // Delete texture
+  if (owns_texture_) {
+    // Bind FBO so that texture is unbound from it during deletion
+    if (fbo_state_ == kStateComplete) {
+      glBindFramebuffer(GL_FRAMEBUFFER, fbo_id_);
+    }
+    glDeleteTextures(1, &texture_id_);
+  }
+
+  // Delete FBO
+  if (owns_fbo_) {
+    glDeleteFramebuffers(1, &fbo_id_);
   }
 }
 
@@ -164,9 +169,9 @@ bool GLFrame::CopyDataTo(uint8_t* buffer, int size) {
 }
 
 bool GLFrame::CopyPixelsTo(uint8_t* buffer) {
-  if (texture_state_ == kStateAllocated)
+  if (texture_state_ == kStateComplete)
     return ReadTexturePixels(buffer);
-  else if (fbo_state_ == kStateBound)
+  else if (fbo_state_ == kStateComplete)
     return ReadFboPixels(buffer);
   else
     return false;
@@ -236,8 +241,8 @@ bool GLFrame::FocusFrameBuffer() {
   }
 
   // Create and bind FBO to texture if necessary
-  if (fbo_state_ != kStateBound) {
-    if (!CreateFBO() || !BindTextureToFBO())
+  if (fbo_state_ != kStateComplete) {
+    if (!CreateFBO() || !AttachTextureToFBO())
       return false;
   }
 
@@ -285,6 +290,7 @@ bool GLFrame::CreateTexture() {
     if (GLEnv::CheckGLError("Texture Generation"))
       return false;
     texture_state_ = kStateGenerated;
+    owns_texture_ = true;
   }
 
   return true;
@@ -303,13 +309,14 @@ bool GLFrame::CreateFBO() {
     if (GLEnv::CheckGLError("FBO Generation"))
       return false;
     fbo_state_ = kStateGenerated;
+    owns_fbo_ = true;
   }
 
   return true;
 }
 
 bool GLFrame::ReadFboPixels(uint8_t* pixels) const {
-  if (fbo_state_ == kStateBound) {
+  if (fbo_state_ == kStateComplete) {
     BindFrameBuffer();
     glReadPixels(0,
                  0,
@@ -352,15 +359,14 @@ bool GLFrame::ReadTexturePixels(uint8_t* pixels) const {
   return target.ReadFboPixels(pixels);
 }
 
-bool GLFrame::BindTextureToFBO() {
+bool GLFrame::AttachTextureToFBO() {
   // Check if we are already bound
-  if (texture_state_ == kStateBound && fbo_state_ == kStateBound)
+  if (fbo_state_ == kStateComplete)
     return true;
 
   // Otherwise check if the texture and fbo states are acceptable
-  if (texture_state_ != kStateGenerated
-  && texture_state_ != kStateAllocated
-  && fbo_state_ != kStateGenerated)
+  if ((texture_state_ != kStateGenerated && texture_state_ != kStateComplete)
+  ||  (fbo_state_     != kStateGenerated))
     return false;
 
   // Bind the frame buffer, and check if we it is already bound
@@ -399,7 +405,8 @@ bool GLFrame::BindTextureToFBO() {
   if (GLEnv::CheckGLError("Texture Binding to FBO"))
     return false;
 
-  texture_state_ = fbo_state_ = kStateBound;
+  // FBO is now complete
+  fbo_state_ = kStateComplete;
   return true;
 }
 
@@ -417,7 +424,7 @@ bool GLFrame::UploadTexturePixels(const uint8_t* pixels) {
   if (GLEnv::CheckGLError("Texture Pixel Upload"))
     return false;
 
-  texture_state_ = kStateAllocated;
+  texture_state_ = kStateComplete;
   return true;
 }
 

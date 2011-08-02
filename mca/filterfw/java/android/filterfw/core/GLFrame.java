@@ -49,8 +49,8 @@ public class GLFrame extends Frame {
     // GL-related binding types
     public final static int EXISTING_TEXTURE_BINDING = 100;
     public final static int EXISTING_FBO_BINDING     = 101;
-    public final static int NEW_TEXTURE_BINDING      = 102;
-    public final static int NEW_FBO_BINDING          = 103;
+    public final static int NEW_TEXTURE_BINDING      = 102; // TODO: REMOVE THIS
+    public final static int NEW_FBO_BINDING          = 103; // TODO: REMOVE THIS
     public final static int EXTERNAL_TEXTURE         = 104;
 
     private int glFrameId = -1;
@@ -89,13 +89,13 @@ public class GLFrame extends Frame {
             initNew(true);
             setReusable(false);
         } else if (bindingType == EXISTING_TEXTURE_BINDING) {
-            initWithTexture((int)getBindingId(), false);
+            initWithTexture((int)getBindingId());
         } else if (bindingType == EXISTING_FBO_BINDING) {
-            initWithFbo((int)getBindingId(), false);
+            initWithFbo((int)getBindingId());
         } else if (bindingType == NEW_TEXTURE_BINDING) {
-            initWithTexture((int)getBindingId(), true);
+            initWithTexture((int)getBindingId());
         } else if (bindingType == NEW_FBO_BINDING) {
-            initWithFbo((int)getBindingId(), true);
+            initWithFbo((int)getBindingId());
         } else {
             throw new RuntimeException("Attempting to create GL frame with unknown binding type "
                 + bindingType + "!");
@@ -114,22 +114,23 @@ public class GLFrame extends Frame {
         }
     }
 
-    private void initWithTexture(int texId, boolean isNew) {
+    private void initWithTexture(int texId) {
         int width = getFormat().getWidth();
         int height = getFormat().getHeight();
-        if (!nativeAllocateWithTexture(mGLEnvironment, texId, width, height, isNew, isNew)) {
+        if (!nativeAllocateWithTexture(mGLEnvironment, texId, width, height)) {
             throw new RuntimeException("Could not allocate texture backed GL frame!");
         }
-        setReusable(isNew);
+        setReusable(true);
+        markReadOnly();
     }
 
-    private void initWithFbo(int fboId, boolean isNew) {
+    private void initWithFbo(int fboId) {
         int width = getFormat().getWidth();
         int height = getFormat().getHeight();
-        if (!nativeAllocateWithFbo(mGLEnvironment, fboId, width, height, isNew, isNew)) {
+        if (!nativeAllocateWithFbo(mGLEnvironment, fboId, width, height)) {
             throw new RuntimeException("Could not allocate FBO backed GL frame!");
         }
-        setReusable(isNew);
+        setReusable(true);
     }
 
     void flushGPU(String message) {
@@ -148,8 +149,8 @@ public class GLFrame extends Frame {
 
     @Override
     protected synchronized void releaseNativeAllocation() {
-        glFrameId = -1;
         nativeDeallocate();
+        glFrameId = -1;
     }
 
     public GLEnvironment getGLEnvironment() {
@@ -340,16 +341,12 @@ public class GLFrame extends Frame {
     private native boolean nativeAllocateWithTexture(GLEnvironment env,
                                                int textureId,
                                                int width,
-                                               int height,
-                                               boolean owns,
-                                               boolean create);
+                                               int height);
 
     private native boolean nativeAllocateWithFbo(GLEnvironment env,
                                            int fboId,
                                            int width,
-                                           int height,
-                                           boolean owns,
-                                           boolean create);
+                                           int height);
 
     private native boolean nativeAllocateExternal(GLEnvironment env);
 
