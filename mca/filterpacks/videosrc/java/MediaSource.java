@@ -88,7 +88,7 @@ public class MediaSource extends Filter {
 
     // Total timeouts will be PREP_TIMEOUT*PREP_TIMEOUT_REPEAT
     private static final int PREP_TIMEOUT = 100; // ms
-    private static final int PREP_TIMEOUT_REPEAT = 50;
+    private static final int PREP_TIMEOUT_REPEAT = 100;
     private static final int NEWFRAME_TIMEOUT = 100; //ms
     private static final int NEWFRAME_TIMEOUT_REPEAT = 10;
 
