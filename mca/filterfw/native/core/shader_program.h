@@ -433,6 +433,13 @@ class ShaderProgram {
       }
     };
 
+    // Scans for all uniforms in the shader and creates index -> id map.
+    void ScanUniforms();
+
+    // Returns the index of the given uniform. The caller must make sure
+    // that the variable id passed is valid.
+    GLuint IndexOfUniform(ProgramVar var);
+
     // Binds the given input textures.
     bool BindInputTextures(const std::vector<GLuint>& textures,
                            const std::vector<GLenum>& targets);
@@ -476,6 +483,10 @@ class ShaderProgram {
     // Checks that the variable is valid. Logs an error and returns false if
     // not.
     static bool CheckVarValid(ProgramVar var);
+
+    // Returns true if the uniform specified by var is an active uniform in the
+    // program.
+    bool CheckUniformValid(ProgramVar var);
 
     // Store an attribute to use when rendering.
     bool StoreAttribute(VertexAttrib attrib);
@@ -531,6 +542,9 @@ class ShaderProgram {
     bool blending_;
     int sfactor_;
     int dfactor_;
+
+    // Map from uniform ids to indices
+    std::map<ProgramVar, GLuint> uniform_indices_;
 };
 
 } // namespace filterfw
