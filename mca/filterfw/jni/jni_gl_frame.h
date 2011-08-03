@@ -124,6 +124,12 @@ Java_android_filterfw_core_GLFrame_nativeCopyFromGL(JNIEnv* env,
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLFrame_nativeFocus(JNIEnv* env, jobject thiz);
 
+JNIEXPORT jboolean JNICALL
+Java_android_filterfw_core_GLFrame_nativeReattachTexToFbo(JNIEnv* env, jobject thiz);
+
+JNIEXPORT jboolean JNICALL
+Java_android_filterfw_core_GLFrame_nativeDetachTexFromFbo(JNIEnv* env, jobject thiz);
+
 #ifdef __cplusplus
 }
 #endif

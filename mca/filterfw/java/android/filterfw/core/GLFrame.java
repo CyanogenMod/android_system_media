@@ -55,8 +55,16 @@ public class GLFrame extends Frame {
 
     private int glFrameId = -1;
 
-    // Keep a reference to the GL environment, so that it does not get deallocated while there
-    // are still frames living in it.
+    /**
+     * Flag whether we own the texture or not. If we do not, we must be careful when caching or
+     * storing the frame, as the user may delete, and regenerate it.
+     */
+    private boolean mOwnsTexture = true;
+
+    /**
+     * Keep a reference to the GL environment, so that it does not get deallocated while there
+     * are still frames living in it.
+     */
     private GLEnvironment mGLEnvironment;
 
     GLFrame(FrameFormat format, FrameManager frameManager) {
@@ -82,12 +90,12 @@ public class GLFrame extends Frame {
 
         // Create correct frame
         int bindingType = getBindingType();
+        boolean reusable = true;
         if (bindingType == Frame.NO_BINDING) {
             initNew(false);
-            setReusable(true);
         } else if (bindingType == EXTERNAL_TEXTURE) {
             initNew(true);
-            setReusable(false);
+            reusable = false;
         } else if (bindingType == EXISTING_TEXTURE_BINDING) {
             initWithTexture((int)getBindingId());
         } else if (bindingType == EXISTING_FBO_BINDING) {
@@ -100,6 +108,7 @@ public class GLFrame extends Frame {
             throw new RuntimeException("Attempting to create GL frame with unknown binding type "
                 + bindingType + "!");
         }
+        setReusable(reusable);
     }
 
     private void initNew(boolean isExternal) {
@@ -120,7 +129,7 @@ public class GLFrame extends Frame {
         if (!nativeAllocateWithTexture(mGLEnvironment, texId, width, height)) {
             throw new RuntimeException("Could not allocate texture backed GL frame!");
         }
-        setReusable(true);
+        mOwnsTexture = false;
         markReadOnly();
     }
 
@@ -130,7 +139,6 @@ public class GLFrame extends Frame {
         if (!nativeAllocateWithFbo(mGLEnvironment, fboId, width, height)) {
             throw new RuntimeException("Could not allocate FBO backed GL frame!");
         }
-        setReusable(true);
     }
 
     void flushGPU(String message) {
@@ -320,6 +328,23 @@ public class GLFrame extends Frame {
         super.reset(newFormat);
     }
 
+    @Override
+    protected void onFrameStore() {
+        if (!mOwnsTexture) {
+            // Detach texture from FBO in case user manipulates it.
+            nativeDetachTexFromFbo();
+        }
+    }
+
+    @Override
+    protected void onFrameFetch() {
+        if (!mOwnsTexture) {
+            // Reattach texture to FBO when using frame again. This may reallocate the texture
+            // in case it has become invalid.
+            nativeReattachTexToFbo();
+        }
+    }
+
     private void assertGLEnvValid() {
         if (!mGLEnvironment.isContextActive()) {
             if (GLEnvironment.isAnyContextActive()) {
@@ -385,4 +410,8 @@ public class GLFrame extends Frame {
     private native boolean nativeCopyFromGL(GLFrame frame);
 
     private native boolean nativeFocus();
+
+    private native boolean nativeReattachTexToFbo();
+
+    private native boolean nativeDetachTexFromFbo();
 }

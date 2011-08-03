@@ -306,6 +306,17 @@ jboolean Java_android_filterfw_core_GLFrame_nativeCopyFromGL(JNIEnv* env,
 }
 
 jboolean Java_android_filterfw_core_GLFrame_nativeFocus(JNIEnv* env, jobject thiz) {
-    GLFrame* frame = ConvertFromJava<GLFrame>(env, thiz);
-    return ToJBool(frame && frame->FocusFrameBuffer());
+  GLFrame* frame = ConvertFromJava<GLFrame>(env, thiz);
+  return ToJBool(frame && frame->FocusFrameBuffer());
 }
+
+jboolean Java_android_filterfw_core_GLFrame_nativeReattachTexToFbo(JNIEnv* env, jobject thiz) {
+  GLFrame* frame = ConvertFromJava<GLFrame>(env, thiz);
+  return ToJBool(frame && frame->ReattachTextureToFbo());
+}
+
+jboolean Java_android_filterfw_core_GLFrame_nativeDetachTexFromFbo(JNIEnv* env, jobject thiz) {
+  GLFrame* frame = ConvertFromJava<GLFrame>(env, thiz);
+  return ToJBool(frame && frame->DetachTextureFromFbo());
+}
+

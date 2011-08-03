@@ -111,6 +111,7 @@ public class CachedFrameManager extends SimpleFrameManager {
             }
 
             // Store new frame
+            frame.onFrameStore();
             mStorageSize = newStorageSize;
             mAvailableFrames.put(mTimeStamp, frame);
             ++mTimeStamp;
@@ -140,6 +141,7 @@ public class CachedFrameManager extends SimpleFrameManager {
                         // requested format to it.
                         super.retainFrame(frame);
                         mAvailableFrames.remove(entry.getKey());
+                        frame.onFrameFetch();
                         frame.reset(format);
                         mStorageSize -= format.getSize();
                         return frame;

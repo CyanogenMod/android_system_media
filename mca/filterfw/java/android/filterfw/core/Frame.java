@@ -198,6 +198,18 @@ public abstract class Frame {
         mRefCount = 1;
     }
 
+    /**
+     * Called just before a frame is stored, such as when storing to a cache or context.
+     */
+    protected void onFrameStore() {
+    }
+
+    /**
+     * Called when a frame is fetched from an internal store such as a cache.
+     */
+    protected void onFrameFetch() {
+    }
+
     @Override
     protected void finalize() throws Throwable {
         if (hasNativeAllocation()) {
