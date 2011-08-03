@@ -24,7 +24,6 @@ import android.filterfw.core.GLFrame;
 import android.filterfw.core.NativeFrame;
 import android.filterfw.core.JavaFrame;
 import android.filterfw.core.VertexFrame;
-import android.util.Log;
 
 /**
  * @hide
@@ -36,7 +35,6 @@ public class SimpleFrameManager extends FrameManager {
 
     @Override
     public Frame newFrame(FrameFormat format) {
-        //Log.v("FrameManager", "Creating new frame of format: " + format + ".");
         return createNewFrame(format);
     }
 

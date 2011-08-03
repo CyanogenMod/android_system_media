@@ -49,8 +49,8 @@ public class VertexFrame extends Frame {
 
     @Override
     protected synchronized void releaseNativeAllocation() {
-        vertexFrameId = -1;
         nativeDeallocate();
+        vertexFrameId = -1;
     }
 
     @Override

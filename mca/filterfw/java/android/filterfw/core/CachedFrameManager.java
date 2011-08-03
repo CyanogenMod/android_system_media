@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import android.util.Log;
-
 /**
  * @hide
  */
@@ -85,6 +83,18 @@ public class CachedFrameManager extends SimpleFrameManager {
         return frame;
     }
 
+    public void clearCache() {
+        for (Frame frame : mAvailableFrames.values()) {
+            frame.releaseNativeAllocation();
+        }
+        mAvailableFrames.clear();
+    }
+
+    @Override
+    public void tearDown() {
+        clearCache();
+    }
+
     private boolean storeFrame(Frame frame) {
         synchronized(mAvailableFrames) {
             // Make sure this frame alone does not exceed capacity
@@ -124,9 +134,8 @@ public class CachedFrameManager extends SimpleFrameManager {
                 // Check that format is compatible
                 if (frame.getFormat().isReplaceableBy(format)) {
                     // Check that binding is compatible (if frame is bound)
-                    if (bindingType == Frame.NO_BINDING
-                        || (bindingId == frame.getBindingId()
-                            && bindingType == frame.getBindingType())) {
+                    if ((bindingType == frame.getBindingType())
+                        && (bindingType == Frame.NO_BINDING || bindingId == frame.getBindingId())) {
                         // We found one! Take it out of the set of available frames and attach the
                         // requested format to it.
                         super.retainFrame(frame);
@@ -140,4 +149,5 @@ public class CachedFrameManager extends SimpleFrameManager {
         }
         return null;
     }
+
 }

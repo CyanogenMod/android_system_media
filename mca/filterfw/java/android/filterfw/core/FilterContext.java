@@ -23,6 +23,8 @@ import android.filterfw.core.FrameManager;
 import android.filterfw.core.GLEnvironment;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @hide
@@ -31,21 +33,8 @@ public class FilterContext {
 
     private FrameManager mFrameManager;
     private GLEnvironment mGLEnvironment;
-    private HashMap<String, Frame> mStoredFrames;
-
-    public FilterContext() {
-        mStoredFrames = new HashMap<String, Frame>();
-    }
-
-    @Override
-    protected void finalize() {
-        for (Frame frame : mStoredFrames.values()) {
-            frame.release();
-        }
-        synchronized(mStoredFrames) {
-            mStoredFrames.clear();
-        }
-    }
+    private HashMap<String, Frame> mStoredFrames = new HashMap<String, Frame>();
+    private Set<FilterGraph> mGraphs = new HashSet<FilterGraph>();
 
     public FrameManager getFrameManager() {
         return mFrameManager;
@@ -98,5 +87,35 @@ public class FilterContext {
             mStoredFrames.remove(key);
             frame.release();
         }
+    }
+
+    public synchronized void tearDown() {
+        // Release stored frames
+        for (Frame frame : mStoredFrames.values()) {
+            frame.release();
+        }
+        mStoredFrames.clear();
+
+        // Release graphs
+        for (FilterGraph graph : mGraphs) {
+            graph.tearDown(this);
+        }
+        mGraphs.clear();
+
+        // Release frame manager
+        if (mFrameManager != null) {
+            mFrameManager.tearDown();
+            mFrameManager = null;
+        }
+
+        // Release GL context
+        if (mGLEnvironment != null) {
+            mGLEnvironment.tearDown();
+            mGLEnvironment = null;
+        }
+    }
+
+    final void addGraph(FilterGraph graph) {
+        mGraphs.add(graph);
     }
 }

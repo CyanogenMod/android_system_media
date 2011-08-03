@@ -44,8 +44,8 @@ public class NativeFrame extends Frame {
 
     @Override
     protected synchronized void releaseNativeAllocation() {
-        nativeFrameId = -1;
         nativeDeallocate();
+        nativeFrameId = -1;
     }
 
     @Override
