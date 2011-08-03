@@ -34,6 +34,9 @@ import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 
+import android.filterfw.geometry.Quad;
+import android.filterfw.geometry.Point;
+
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -51,6 +54,7 @@ public class SurfaceTextureTarget extends Filter {
     private final int RENDERMODE_STRETCH   = 0;
     private final int RENDERMODE_FIT       = 1;
     private final int RENDERMODE_FILL_CROP = 2;
+    private final int RENDERMODE_CUSTOMIZE = 3;
 
     /** Required. Sets the destination surfaceTexture.
      */
@@ -65,6 +69,7 @@ public class SurfaceTextureTarget extends Filter {
     @GenerateFinalPort(name = "height")
     private int mScreenHeight;
 
+
     /** Optional. Control how the incoming frames are rendered onto the
      * output. Default is FIT.
      * RENDERMODE_STRETCH: Just fill the output surfaceView.
@@ -75,6 +80,18 @@ public class SurfaceTextureTarget extends Filter {
      */
     @GenerateFieldPort(name = "renderMode", hasDefault = true)
     private String mRenderModeString;
+
+    @GenerateFieldPort(name = "sourceQuad", hasDefault = true)
+    private Quad mSourceQuad = new Quad(new Point(0.0f, 1.0f),
+                                        new Point(1.0f, 1.0f),
+                                        new Point(0.0f, 0.0f),
+                                        new Point(1.0f, 0.0f));
+
+    @GenerateFieldPort(name = "targetQuad", hasDefault = true)
+    private Quad mTargetQuad = new Quad(new Point(0.0f, 0.0f),
+                                        new Point(1.0f, 0.0f),
+                                        new Point(0.0f, 1.0f),
+                                        new Point(1.0f, 1.0f));
 
     private int mSurfaceId;
 
@@ -105,12 +122,14 @@ public class SurfaceTextureTarget extends Filter {
 
     public void updateRenderMode() {
         if (mRenderModeString != null) {
-            if (mRenderModeString == "stretch") {
+            if (mRenderModeString.equals("stretch")) {
                 mRenderMode = RENDERMODE_STRETCH;
-            } else if (mRenderModeString == "fit") {
+            } else if (mRenderModeString.equals("fit")) {
                 mRenderMode = RENDERMODE_FIT;
-            } else if (mRenderModeString == "fill_crop") {
+            } else if (mRenderModeString.equals("fill_crop")) {
                 mRenderMode = RENDERMODE_FILL_CROP;
+            } else if (mRenderModeString.equals("customize")) {
+                mRenderMode = RENDERMODE_CUSTOMIZE;
             } else {
                 throw new RuntimeException("Unknown render mode '" + mRenderModeString + "'!");
             }
@@ -192,7 +211,7 @@ public class SurfaceTextureTarget extends Filter {
 
     @Override
     public void fieldPortValueUpdated(String name, FilterContext context) {
-        updateTargetRect();
+        updateRenderMode();
     }
 
     @Override
@@ -207,39 +226,56 @@ public class SurfaceTextureTarget extends Filter {
             float screenAspectRatio = (float)mScreenWidth / mScreenHeight;
             float relativeAspectRatio = screenAspectRatio / mAspectRatio;
 
-            if (relativeAspectRatio == 1.0f) {
+            if (relativeAspectRatio == 1.0f && mRenderMode != RENDERMODE_CUSTOMIZE) {
                 mProgram.setClearsOutput(false);
             } else {
                 switch (mRenderMode) {
                     case RENDERMODE_STRETCH:
                         mProgram.setTargetRect(0, 0, 1, 1);
+                        mTargetQuad.p0.set(0f, 0.0f);
+                        mTargetQuad.p1.set(1f, 0.0f);
+                        mTargetQuad.p2.set(0f, 1.0f);
+                        mTargetQuad.p3.set(1f, 1.0f);
                         mProgram.setClearsOutput(false);
                         break;
                     case RENDERMODE_FIT:
                         if (relativeAspectRatio > 1.0f) {
                             // Screen is wider than the camera, scale down X
-                            mProgram.setTargetRect(0.5f - 0.5f / relativeAspectRatio, 0.0f,
-                                                   1.0f / relativeAspectRatio, 1.0f);
+                            mTargetQuad.p0.set(0.5f - 0.5f / relativeAspectRatio, 0.0f);
+                            mTargetQuad.p1.set(0.5f + 0.5f / relativeAspectRatio, 0.0f);
+                            mTargetQuad.p2.set(0.5f - 0.5f / relativeAspectRatio, 1.0f);
+                            mTargetQuad.p3.set(0.5f + 0.5f / relativeAspectRatio, 1.0f);
+
                         } else {
                             // Screen is taller than the camera, scale down Y
-                            mProgram.setTargetRect(0.0f, 0.5f - 0.5f * relativeAspectRatio,
-                                                   1.0f, relativeAspectRatio);
+                            mTargetQuad.p0.set(0.0f, 0.5f - 0.5f * relativeAspectRatio);
+                            mTargetQuad.p1.set(1.0f, 0.5f - 0.5f * relativeAspectRatio);
+                            mTargetQuad.p2.set(0.0f, 0.5f + 0.5f * relativeAspectRatio);
+                            mTargetQuad.p3.set(1.0f, 0.5f + 0.5f * relativeAspectRatio);
                         }
                         mProgram.setClearsOutput(true);
                         break;
                     case RENDERMODE_FILL_CROP:
                         if (relativeAspectRatio > 1) {
                             // Screen is wider than the camera, crop in Y
-                            mProgram.setTargetRect(0.0f, 0.5f - 0.5f * relativeAspectRatio,
-                                                   1.0f, relativeAspectRatio);
+                            mTargetQuad.p0.set(0.0f, 0.5f - 0.5f * relativeAspectRatio);
+                            mTargetQuad.p1.set(1.0f, 0.5f - 0.5f * relativeAspectRatio);
+                            mTargetQuad.p2.set(0.0f, 0.5f + 0.5f * relativeAspectRatio);
+                            mTargetQuad.p3.set(1.0f, 0.5f + 0.5f * relativeAspectRatio);
                         } else {
                             // Screen is taller than the camera, crop in X
-                            mProgram.setTargetRect(0.5f - 0.5f / relativeAspectRatio, 0.0f,
-                                                   1.0f / relativeAspectRatio, 1.0f);
+                            mTargetQuad.p0.set(0.5f - 0.5f / relativeAspectRatio, 0.0f);
+                            mTargetQuad.p1.set(0.5f + 0.5f / relativeAspectRatio, 0.0f);
+                            mTargetQuad.p2.set(0.5f - 0.5f / relativeAspectRatio, 1.0f);
+                            mTargetQuad.p3.set(0.5f + 0.5f / relativeAspectRatio, 1.0f);
                         }
                         mProgram.setClearsOutput(true);
                         break;
+                    case RENDERMODE_CUSTOMIZE:
+                        ((ShaderProgram) mProgram).setSourceRegion(mSourceQuad);
+                        break;
                 }
+                ((ShaderProgram) mProgram).setTargetRegion(mTargetQuad);
             }
         }
     }
