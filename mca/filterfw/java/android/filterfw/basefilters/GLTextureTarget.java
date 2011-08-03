@@ -21,7 +21,7 @@ import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
-import android.filterfw.core.GenerateFinalPort;
+import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.GLFrame;
 import android.filterfw.core.MutableFrameFormat;
 import android.filterfw.format.ImageFormat;
@@ -33,13 +33,8 @@ import java.util.Set;
  */
 public class GLTextureTarget extends Filter {
 
-    @GenerateFinalPort(name = "texId")
+    @GenerateFieldPort(name = "texId")
     private int mTexId;
-
-    @GenerateFinalPort(name = "createTex", hasDefault = true)
-    private boolean mCreateTex = false;
-
-    private Frame mFrame;
 
     public GLTextureTarget(String name) {
         super(name);
@@ -55,28 +50,15 @@ public class GLTextureTarget extends Filter {
         // Get input frame
         Frame input = pullInput("frame");
 
-        // Generate frame if not generated already
-        // TODO: Check if size has changed
-        if (mFrame == null) {
-            FrameFormat format = ImageFormat.create(input.getFormat().getWidth(),
-                                                    input.getFormat().getHeight(),
-                                                    ImageFormat.COLORSPACE_RGBA,
-                                                    FrameFormat.TARGET_GPU);
+        FrameFormat format = ImageFormat.create(input.getFormat().getWidth(),
+                                                input.getFormat().getHeight(),
+                                                ImageFormat.COLORSPACE_RGBA,
+                                                FrameFormat.TARGET_GPU);
 
-            int binding = mCreateTex
-                ? GLFrame.NEW_TEXTURE_BINDING
-                : GLFrame.EXISTING_TEXTURE_BINDING;
-            mFrame = context.getFrameManager().newBoundFrame(format, binding, mTexId);
-        }
+        Frame frame = context.getFrameManager().newBoundFrame(format, GLFrame.EXISTING_TEXTURE_BINDING, mTexId);
 
         // Copy to our texture frame
-        mFrame.setDataFromFrame(input);
-    }
-
-    @Override
-    public void tearDown(FilterContext context) {
-        if (mFrame != null) {
-            mFrame.release();
-        }
+        frame.setDataFromFrame(input);
+        frame.release();
     }
 }
