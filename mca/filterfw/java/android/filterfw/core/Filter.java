@@ -25,10 +25,10 @@ import android.filterfw.io.GraphIOException;
 import android.filterfw.format.ObjectFormat;
 import android.util.Log;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.Thread;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -640,7 +640,17 @@ public abstract class Filter {
             Class portClass = (portFormat == null) ? null : portFormat.getObjectClass();
             inputFormat.setObjectClass(portClass);
         }
-        JavaFrame frame = new JavaFrame(inputFormat, null);
+
+        // Serialize if serializable, and type is not an immutable primitive.
+        boolean shouldSerialize = !(value instanceof Number)
+            && !(value instanceof Boolean)
+            && !(value instanceof String)
+            && value instanceof Serializable;
+
+        // Create frame wrapper
+        Frame frame = shouldSerialize
+            ? new SerializedFrame(inputFormat, null)
+            : new JavaFrame(inputFormat, null);
         frame.setObjectValue(value);
         return frame;
     }
