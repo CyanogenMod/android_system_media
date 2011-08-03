@@ -63,7 +63,7 @@ public class EffectContext {
      * The EffectFactory returned from this method allows instantiating new effects within this
      * context.
      *
-     * @returns The EffectFactory instance for this context.
+     * @return The EffectFactory instance for this context.
      */
     public EffectFactory getFactory() {
         return mFactory;

@@ -35,27 +35,24 @@ public class EffectFactory {
     private EffectContext mEffectContext;
 
     private final static String[] EFFECT_PACKAGES = {
-        "android.media.effect.effects",  // Default effect package
-        ""                               // Allows specifying full class path
+        "android.media.effect.effects.",  // Default effect package
+        ""                                // Allows specifying full class path
     };
 
     /** List of Effects */
     /**
-     * Effect: Brightness<br/>
      * Adjusts the brightness of the image.<br/>
      * Parameters: brightness (float): The factor by which to multiply the color channels.
      */
     public final static String EFFECT_BRIGHTNESS = "BrightnessEffect";
 
     /**
-     * Effect: Contrast<br/>
      * Adjusts the contrast of the image.<br/>
      * Parameters: contrast (float): The strength of the color contrast.
      */
     public final static String EFFECT_CONTRAST = "ContrastEffect";
 
     /**
-     * Effect: Fisheye<br/>
      * Applies a fisheye lens distortion to the image.<br/>
      * Parameters: scale (float): The scale of the distortion.
      */
@@ -73,7 +70,7 @@ public class EffectFactory {
      * The effect's parameters will be set to their default values.
      *
      * @param effectName The name of the effect to create.
-     * @returns A new Effect instance.
+     * @return A new Effect instance.
      * @throws IllegalArgumentException if the effect with the specified name is not supported or
      *         not known.
      */
@@ -93,7 +90,7 @@ public class EffectFactory {
      * instantiating an effect to make sure it is supported.
      *
      * @param effectName The name of the effect.
-     * @returns true, if the effect is supported on this platform.
+     * @return true, if the effect is supported on this platform.
      * @throws IllegalArgumentException if the effect name is not known.
      */
     public boolean isEffectSupported(String effectName) {
@@ -109,7 +106,7 @@ public class EffectFactory {
         // Look for the class in the imported packages
         for (String packageName : EFFECT_PACKAGES) {
             try {
-                effectClass = contextClassLoader.loadClass(packageName + "." + className);
+                effectClass = contextClassLoader.loadClass(packageName + className);
             } catch (ClassNotFoundException e) {
                 continue;
             }
@@ -127,7 +124,7 @@ public class EffectFactory {
             effectClass.asSubclass(Effect.class);
         } catch (ClassCastException e) {
             throw new IllegalArgumentException("Attempting to allocate effect '" + effectClass
-                + "' which is not a subclass of Effect!");
+                + "' which is not a subclass of Effect!", e);
         }
 
         // Look for the correct constructor
@@ -136,7 +133,7 @@ public class EffectFactory {
             effectConstructor = effectClass.getConstructor(EffectContext.class, String.class);
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("The effect class '" + effectClass + "' does not have "
-                + "the required constructor.");
+                + "the required constructor.", e);
         }
 
         // Construct the effect
@@ -144,7 +141,8 @@ public class EffectFactory {
         try {
             effect = (Effect)effectConstructor.newInstance(mEffectContext, name);
         } catch (Throwable t) {
-            // Condition checked below
+            throw new RuntimeException("There was an error constructing the effect '" + effectClass
+                + "'!", t);
         }
 
         return effect;

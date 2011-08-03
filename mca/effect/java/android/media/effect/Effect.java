@@ -33,7 +33,7 @@ public abstract class Effect {
      * Returns the unique name of the effect, which matches the name used for instantiating this
      * effect by the EffectFactory.
      *
-     * @returns The name of the effect.
+     * @return The name of the effect.
      */
     public abstract String getName();
 
