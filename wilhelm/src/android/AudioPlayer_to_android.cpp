@@ -26,6 +26,9 @@ template class android::KeyedVector<SLuint32, android::AudioEffect* > ;
 
 #define KEY_STREAM_TYPE_PARAMSIZE  sizeof(SLint32)
 
+#define AUDIOTRACK_MIN_PLAYBACKRATE_PERMILLE  500
+#define AUDIOTRACK_MAX_PLAYBACKRATE_PERMILLE 2000
+
 //-----------------------------------------------------------------------------
 // FIXME this method will be absorbed into android_audioPlayer_setPlayState() once
 //       bufferqueue and uri/fd playback are moved under the GenericPlayer C++ object
@@ -571,7 +574,6 @@ void audioPlayer_auxEffectUpdate(CAudioPlayer* ap) {
 void audioPlayer_setInvalid(CAudioPlayer* ap) {
     ap->mAndroidObjType = INVALID_TYPE;
     ap->mpLock = NULL;
-    ap->mPlaybackRate.mCapabilities = 0;
 }
 
 
@@ -1266,9 +1268,21 @@ SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
         // Already initialized in IEngine_CreateAudioPlayer, to be consolidated
         pAudioPlayer->mDirectLevel = 0; // no attenuation
 
-        // initialize interface-specific fields that can be used regardless of whether the
-        // interface is exposed on the AudioPlayer or not
-        // (empty section, as all initializations are the same as the defaults)
+        // This section re-initializes interface-specific fields that
+        // can be set or used regardless of whether the interface is
+        // exposed on the AudioPlayer or not
+
+        // Only AudioTrack supports a non-trivial playback rate
+        switch (pAudioPlayer->mAndroidObjType) {
+        case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
+            pAudioPlayer->mPlaybackRate.mMinRate = AUDIOTRACK_MIN_PLAYBACKRATE_PERMILLE;
+            pAudioPlayer->mPlaybackRate.mMaxRate = AUDIOTRACK_MAX_PLAYBACKRATE_PERMILLE;
+            break;
+        default:
+            // use the default range
+            break;
+        }
+
     }
 
     return result;
@@ -1587,67 +1601,35 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
 
 
 //-----------------------------------------------------------------------------
-SLresult android_audioPlayer_setPlayRate(CAudioPlayer *ap, SLpermille rate, bool lockAP) {
+SLresult android_audioPlayer_setPlaybackRateAndConstraints(CAudioPlayer *ap, SLpermille rate,
+        SLuint32 constraints) {
     SLresult result = SL_RESULT_SUCCESS;
-    uint32_t contentRate = 0;
     switch(ap->mAndroidObjType) {
-    case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
-    case AUDIOPLAYER_FROM_URIFD: {
+    case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE: {
+        // these asserts were already checked by the platform-independent layer
+        assert((AUDIOTRACK_MIN_PLAYBACKRATE_PERMILLE <= rate) &&
+                (rate <= AUDIOTRACK_MAX_PLAYBACKRATE_PERMILLE));
+        assert(constraints & SL_RATEPROP_NOPITCHCORAUDIO);
         // get the content sample rate
-        if (lockAP) { object_lock_shared(&ap->mObject); }
         uint32_t contentRate = sles_to_android_sampleRate(ap->mSampleRateMilliHz);
-        if (lockAP) { object_unlock_shared(&ap->mObject); }
         // apply the SL ES playback rate on the AudioTrack as a factor of its content sample rate
         if (ap->mAudioTrack != 0) {
             ap->mAudioTrack->setSampleRate(contentRate * (rate/1000.0f));
         }
         }
         break;
+    case AUDIOPLAYER_FROM_URIFD:
+        assert(rate == 1000);
+        assert(constraints & SL_RATEPROP_NOPITCHCORAUDIO);
+        // that was easy
+        break;
 
     default:
         SL_LOGE("Unexpected object type %d", ap->mAndroidObjType);
-        result = SL_RESULT_INTERNAL_ERROR;
+        result = SL_RESULT_FEATURE_UNSUPPORTED;
         break;
     }
     return result;
-}
-
-
-//-----------------------------------------------------------------------------
-// called with no lock held
-SLresult android_audioPlayer_setPlaybackRateBehavior(CAudioPlayer *ap,
-        SLuint32 constraints) {
-    SLresult result = SL_RESULT_SUCCESS;
-    switch(ap->mAndroidObjType) {
-    case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
-    case AUDIOPLAYER_FROM_URIFD:
-        if (constraints != (constraints & SL_RATEPROP_NOPITCHCORAUDIO)) {
-            result = SL_RESULT_FEATURE_UNSUPPORTED;
-        }
-        break;
-    default:
-        SL_LOGE("Unexpected object type %d", ap->mAndroidObjType);
-        result = SL_RESULT_INTERNAL_ERROR;
-        break;
-    }
-    return result;
-}
-
-
-//-----------------------------------------------------------------------------
-// called with no lock held
-SLresult android_audioPlayer_getCapabilitiesOfRate(CAudioPlayer *ap,
-        SLuint32 *pCapabilities) {
-    switch(ap->mAndroidObjType) {
-    case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
-    case AUDIOPLAYER_FROM_URIFD:
-        *pCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
-        break;
-    default:
-        *pCapabilities = 0;
-        break;
-    }
-    return SL_RESULT_SUCCESS;
 }
 
 

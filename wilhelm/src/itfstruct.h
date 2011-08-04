@@ -479,7 +479,7 @@ typedef struct {
     IObject *mThis;
     SLpermille mRate;
     SLuint32 mProperties;
-    // const
+    // const after initialization
     SLpermille mMinRate;
     SLpermille mMaxRate;
     SLpermille mStepSize;

@@ -29,19 +29,21 @@ static SLresult IPlaybackRate_SetRate(SLPlaybackRateItf self, SLpermille rate)
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         interface_lock_exclusive(thiz);
-        thiz->mRate = rate;
-        interface_unlock_exclusive(thiz);
 #ifdef ANDROID
         CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
                 (CAudioPlayer *) thiz->mThis : NULL;
         if (NULL != ap) {
-            result = android_audioPlayer_setPlayRate(ap, rate, true);
+            result = android_audioPlayer_setPlaybackRateAndConstraints(ap, rate, thiz->mProperties);
         } else {
-            result = SL_RESULT_PARAMETER_INVALID;
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
         }
 #else
         result = SL_RESULT_SUCCESS;
 #endif
+        if (SL_RESULT_SUCCESS == result) {
+            thiz->mRate = rate;
+        }
+        interface_unlock_exclusive(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -56,9 +58,9 @@ static SLresult IPlaybackRate_GetRate(SLPlaybackRateItf self, SLpermille *pRate)
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPlaybackRate *thiz = (IPlaybackRate *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLpermille rate = thiz->mRate;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pRate = rate;
         result = SL_RESULT_SUCCESS;
     }
@@ -72,25 +74,32 @@ static SLresult IPlaybackRate_SetPropertyConstraints(SLPlaybackRateItf self, SLu
     SL_ENTER_INTERFACE
 
     IPlaybackRate *thiz = (IPlaybackRate *) self;
-    thiz->mProperties = constraints;
-#ifdef ANDROID
-    // verify property support before storing
-    CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
-            (CAudioPlayer *) thiz->mThis : NULL;
-    if (NULL != ap) {
-        result = android_audioPlayer_setPlaybackRateBehavior(ap, constraints);
-    } else {
+    if (constraints & ~(SL_RATEPROP_SILENTAUDIO | SL_RATEPROP_STAGGEREDAUDIO |
+            SL_RATEPROP_NOPITCHCORAUDIO | SL_RATEPROP_PITCHCORAUDIO)) {
         result = SL_RESULT_PARAMETER_INVALID;
-    }
-
+    // const, so no lock needed
+    } else if (!(thiz->mCapabilities & constraints)) {
+        result = SL_RESULT_FEATURE_UNSUPPORTED;
+    } else {
+        interface_lock_exclusive(thiz);
+#ifdef ANDROID
+        // verify property support before storing
+        CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
+                (CAudioPlayer *) thiz->mThis : NULL;
+        if (NULL != ap) {
+            result = android_audioPlayer_setPlaybackRateAndConstraints(ap, thiz->mRate,
+                    constraints);
+        } else {
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+        }
 #else
-    result = SL_RESULT_SUCCESS;
+        result = SL_RESULT_SUCCESS;
 #endif
-    interface_lock_poke(thiz);
-    if (result == SL_RESULT_SUCCESS) {
-        thiz->mProperties = constraints;
+        if (result == SL_RESULT_SUCCESS) {
+            thiz->mProperties = constraints;
+        }
+        interface_unlock_exclusive(thiz);
     }
-    interface_unlock_poke(thiz);
 
     SL_LEAVE_INTERFACE
 }
@@ -104,9 +113,9 @@ static SLresult IPlaybackRate_GetProperties(SLPlaybackRateItf self, SLuint32 *pP
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPlaybackRate *thiz = (IPlaybackRate *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLuint32 properties = thiz->mProperties;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pProperties = properties;
         result = SL_RESULT_SUCCESS;
     }
@@ -124,23 +133,16 @@ static SLresult IPlaybackRate_GetCapabilitiesOfRate(SLPlaybackRateItf self,
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPlaybackRate *thiz = (IPlaybackRate *) self;
+        SLuint32 capabilities;
         // const, so no lock needed
         if (!(thiz->mMinRate <= rate && rate <= thiz->mMaxRate)) {
+            capabilities = 0;
             result = SL_RESULT_PARAMETER_INVALID;
         } else {
-            SLuint32 capabilities = 0;
-#ifdef ANDROID
-            CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
-                    (CAudioPlayer *) thiz->mThis : NULL;
-            if (NULL != ap) {
-                android_audioPlayer_getCapabilitiesOfRate(ap, &capabilities);
-            }
-#else
             capabilities = thiz->mCapabilities;
-#endif
-            *pCapabilities = capabilities;
             result = SL_RESULT_SUCCESS;
         }
+        *pCapabilities = capabilities;
     }
 
     SL_LEAVE_INTERFACE
@@ -158,12 +160,11 @@ static SLresult IPlaybackRate_GetRateRange(SLPlaybackRateItf self, SLuint8 index
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPlaybackRate *thiz = (IPlaybackRate *) self;
-        interface_lock_shared(thiz);
+        // const, so no lock needed
         SLpermille minRate = thiz->mMinRate;
         SLpermille maxRate = thiz->mMaxRate;
         SLpermille stepSize = thiz->mStepSize;
         SLuint32 capabilities = thiz->mCapabilities;
-        interface_unlock_shared(thiz);
         *pMinRate = minRate;
         *pMaxRate = maxRate;
         *pStepSize = stepSize;
@@ -190,16 +191,11 @@ void IPlaybackRate_init(void *self)
     thiz->mItf = &IPlaybackRate_Itf;
     thiz->mProperties = SL_RATEPROP_NOPITCHCORAUDIO;
     thiz->mRate = 1000;
-    // const
-    thiz->mMinRate = 500;
-    thiz->mMaxRate = 2000;
+    // const after initialization; these are default values which may be overwritten
+    // during object creation but will not be modified after that
+    // (e.g. for an Android AudioPlayer, see sles_to_android_audioPlayerCreate)
+    thiz->mMinRate = 1000;
+    thiz->mMaxRate = 1000;
     thiz->mStepSize = 0;
-#ifdef ANDROID
-    // for an AudioPlayer, mCapabilities will be initialized in sles_to_android_audioPlayerCreate
-#endif
-    // The generic implementation sets no capabilities because the generic
-    // implementation alone doesn't support any.
-    thiz->mCapabilities = 0;
-    // SL_RATEPROP_SILENTAUDIO | SL_RATEPROP_STAGGEREDAUDIO | SL_RATEPROP_NOPITCHCORAUDIO |
-    // SL_RATEPROP_PITCHCORAUDIO
+    thiz->mCapabilities = SL_RATEPROP_NOPITCHCORAUDIO;
 }
