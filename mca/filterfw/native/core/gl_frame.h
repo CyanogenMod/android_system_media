@@ -111,9 +111,16 @@ class GLFrame : public GLBufferHandle {
     // Reset any modifed texture parameters.
     bool ResetTexParameters();
 
+    // Detaches the internal texture from the FBO.
+    bool DetachTextureFromFbo();
+
+    // Reattaches the internal texture to the FBO after detachment.
+    bool ReattachTextureToFbo();
+
   private:
     // Type to keep track of texture and FBO states
     enum GLObjectState {
+      kStateUnmanaged,      // We do not manage this object (externally managed)
       kStateUninitialized,  // Not yet initialized
       kStateGenerated,      // Tex/FBO id is generated
       kStateComplete        // FBO has valid attachment / Tex has valid pixel data
@@ -122,11 +129,14 @@ class GLFrame : public GLBufferHandle {
     // Sets the frame and viewport dimensions.
     void InitDimensions(int width, int height);
 
-    // Creates the internal texture.
-    bool CreateTexture();
+    // Generates the internal texture name.
+    bool GenerateTextureName();
+
+    // Allocates the internal texture.
+    bool AllocateTexture();
 
     // Creates the internal FBO.
-    bool CreateFBO();
+    bool GenerateFboName();
 
     // Copies pixels from texture or FBO to the specified buffer.
     bool CopyPixelsTo(uint8_t* buffer);
@@ -147,7 +157,7 @@ class GLFrame : public GLBufferHandle {
     bool BindFrameBuffer() const;
 
     // Attaches the internal texture to the internal FBO.
-    bool AttachTextureToFBO();
+    bool AttachTextureToFbo();
 
     // Update the texture parameters to the user specified parameters
     bool UpdateTexParameters();
@@ -160,6 +170,11 @@ class GLFrame : public GLBufferHandle {
     // parameters. This still requires a call to UpdateTexParameters()
     // for the changes to take effect.
     void SetDefaultTexParameters();
+
+    // Returns true if the texture we assume to be allocated has been
+    // deleted externally. In this case we assume the texture name is
+    // still valid (otherwise we were provided with a bad texture id).
+    bool TextureWasDeleted() const;
 
     // Get the (cached) identity shader.
     ShaderProgram* GetIdentity() const;

@@ -72,6 +72,7 @@ bool GLFrame::InitWithTexture(GLint texture_id, int width, int height) {
 bool GLFrame::InitWithFbo(GLint fbo_id, int width, int height) {
   fbo_id_ = fbo_id;
   fbo_state_ = glIsFramebuffer(fbo_id) ? kStateComplete : kStateGenerated;
+  texture_state_ = kStateUnmanaged;
   InitDimensions(width, height);
   return true;
 }
@@ -80,7 +81,7 @@ bool GLFrame::InitWithExternalTexture() {
   texture_target_ = GL_TEXTURE_EXTERNAL_OES;
   width_ = 0;
   height_ = 0;
-  return CreateTexture();
+  return GenerateTextureName();
 }
 
 void GLFrame::InitDimensions(int width, int height) {
@@ -236,13 +237,13 @@ bool GLFrame::BindFrameBuffer() const {
 bool GLFrame::FocusFrameBuffer() {
   // Create texture backing if necessary
   if (texture_state_ == kStateUninitialized) {
-    if (!CreateTexture())
+    if (!GenerateTextureName())
       return false;
   }
 
   // Create and bind FBO to texture if necessary
   if (fbo_state_ != kStateComplete) {
-    if (!CreateFBO() || !AttachTextureToFBO())
+    if (!GenerateFboName() || !AttachTextureToFbo())
       return false;
   }
 
@@ -267,7 +268,7 @@ GLuint GLFrame::GetFboId() const {
 
 bool GLFrame::FocusTexture() {
   // Make sure we have a texture
-  if (!CreateTexture())
+  if (!GenerateTextureName())
     return false;
 
   // Bind the texture
@@ -277,7 +278,7 @@ bool GLFrame::FocusTexture() {
   return !GLEnv::CheckGLError("Texture Binding");
 }
 
-bool GLFrame::CreateTexture() {
+bool GLFrame::GenerateTextureName() {
   if (texture_state_ == kStateUninitialized) {
     // Make sure texture not in use already
     if (glIsTexture(texture_id_)) {
@@ -296,7 +297,33 @@ bool GLFrame::CreateTexture() {
   return true;
 }
 
-bool GLFrame::CreateFBO() {
+bool GLFrame::AllocateTexture() {
+  // Allocate or re-allocate (if texture was deleted externally).
+  if (texture_state_ == kStateGenerated || TextureWasDeleted()) {
+    LOG_FRAME("GLFrame: Allocating texture: %d", texture_id_);
+    glBindTexture(GL_TEXTURE_2D, texture_id_);
+    glTexImage2D(GL_TEXTURE_2D,
+               0,
+               GL_RGBA,
+               width_,
+               height_,
+               0,
+               GL_RGBA,
+               GL_UNSIGNED_BYTE,
+               NULL);
+    if (!GLEnv::CheckGLError("Texture Allocation")) {
+      UpdateTexParameters();
+      texture_state_ = kStateComplete;
+    }
+  }
+  return texture_state_ == kStateComplete;
+}
+
+bool GLFrame::TextureWasDeleted() const {
+  return texture_state_ == kStateComplete && !glIsTexture(texture_id_);
+}
+
+bool GLFrame::GenerateFboName() {
   if (fbo_state_ == kStateUninitialized) {
     // Make sure FBO not in use already
     if (glIsFramebuffer(fbo_id_)) {
@@ -359,44 +386,29 @@ bool GLFrame::ReadTexturePixels(uint8_t* pixels) const {
   return target.ReadFboPixels(pixels);
 }
 
-bool GLFrame::AttachTextureToFBO() {
-  // Check if we are already bound
-  if (fbo_state_ == kStateComplete)
+bool GLFrame::AttachTextureToFbo() {
+  // Check FBO and texture state. We do not do anything if we are not managing the texture.
+  if (fbo_state_ == kStateComplete || texture_state_ == kStateUnmanaged) {
     return true;
+  } else if (fbo_state_ != kStateGenerated) {
+    LOGE("Attempting to attach texture to FBO with no FBO in place!");
+    return false;
+  }
 
-  // Otherwise check if the texture and fbo states are acceptable
-  if ((texture_state_ != kStateGenerated && texture_state_ != kStateComplete)
-  ||  (fbo_state_     != kStateGenerated))
+  // If texture has been generated, make sure it is allocated.
+  if (!AllocateTexture())
     return false;
 
   // Bind the frame buffer, and check if we it is already bound
   glBindFramebuffer(GL_FRAMEBUFFER, fbo_id_);
-  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-    // Bind texture
-    glBindTexture(GL_TEXTURE_2D, texture_id_);
 
-    // Set the texture format
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGBA,
-                 width_,
-                 height_,
-                 0,
-                 GL_RGBA,
-                 GL_UNSIGNED_BYTE,
-                 NULL);
-
-    // Set the user specified texture parameters
-    UpdateTexParameters();
-
-    // Bind the texture to the frame buffer
-    LOG_FRAME("Binding tex %d w %d h %d to fbo %d", texture_id_, width_, height_, fbo_id_);
-    glFramebufferTexture2D(GL_FRAMEBUFFER,
-                           GL_COLOR_ATTACHMENT0,
-                           GL_TEXTURE_2D,
-                           texture_id_,
-                           0);
-  }
+  // Bind the texture to the frame buffer
+  LOG_FRAME("Attaching tex %d w %d h %d to fbo %d", texture_id_, width_, height_, fbo_id_);
+  glFramebufferTexture2D(GL_FRAMEBUFFER,
+                         GL_COLOR_ATTACHMENT0,
+                         GL_TEXTURE_2D,
+                         texture_id_,
+                         0);
 
   // Cleanup
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -404,9 +416,30 @@ bool GLFrame::AttachTextureToFBO() {
 
   if (GLEnv::CheckGLError("Texture Binding to FBO"))
     return false;
+  else
+    fbo_state_ = kStateComplete;
 
-  // FBO is now complete
-  fbo_state_ = kStateComplete;
+  return true;
+}
+
+bool GLFrame::ReattachTextureToFbo() {
+  return (fbo_state_ == kStateGenerated) ? AttachTextureToFbo() : true;
+}
+
+bool GLFrame::DetachTextureFromFbo() {
+  if (fbo_state_ == kStateComplete && texture_state_ == kStateComplete) {
+    LOG_FRAME("Detaching tex %d w %d h %d from fbo %d", texture_id_, width_, height_, fbo_id_);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_id_);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_2D,
+                           0,
+                           0);
+    if (GLEnv::CheckGLError("Detaching texture to FBO"))
+      return false;
+    else
+      fbo_state_ = kStateGenerated;
+  }
   return true;
 }
 

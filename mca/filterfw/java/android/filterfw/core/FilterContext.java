@@ -74,11 +74,16 @@ public class FilterContext {
         if (storedFrame != null) {
             storedFrame.release();
         }
+        frame.onFrameStore();
         mStoredFrames.put(key, frame.retain());
     }
 
     public synchronized Frame fetchFrame(String key) {
-        return mStoredFrames.get(key);
+        Frame frame = mStoredFrames.get(key);
+        if (frame != null) {
+            frame.onFrameFetch();
+        }
+        return frame;
     }
 
     public synchronized void removeFrame(String key) {
