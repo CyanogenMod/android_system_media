@@ -93,13 +93,4 @@ public class InputStreamSource extends Filter {
         // Close output port as we are done here
         closeOutputPort("data");
     }
-
-    @Override
-    public void close(FilterContext context) {
-        try {
-            mInputStream.close();
-        } catch (IOException exception) {
-            throw new RuntimeException("InputStreamSource: Could not close stream!");
-        }
-    }
 }

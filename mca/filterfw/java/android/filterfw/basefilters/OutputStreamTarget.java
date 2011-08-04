@@ -63,13 +63,4 @@ public class OutputStreamTarget extends Filter {
                 "OutputStreamTarget: Could not write to stream: " + exception.getMessage() + "!");
         }
     }
-
-    @Override
-    public void close(FilterContext context) {
-        try {
-            mOutputStream.close();
-        } catch (IOException exception) {
-            throw new RuntimeException("OutputStreamTarget: Could not close stream!");
-        }
-    }
 }
