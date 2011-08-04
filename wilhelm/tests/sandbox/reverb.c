@@ -590,10 +590,6 @@ int main(int argc, char **argv)
     result = (*playerObject)->GetInterface(playerObject, SL_IID_PLAY, &playerPlay);
     assert(SL_RESULT_SUCCESS == result);
 
-    // set play state to paused to enable pre-fetch so we can get a more reliable duration
-    result = (*playerPlay)->SetPlayState(playerPlay, SL_PLAYSTATE_PAUSED);
-    assert(SL_RESULT_SUCCESS == result);
-
     // get the prefetch status interface
     SLPrefetchStatusItf playerPrefetchStatus;
     result = (*playerObject)->GetInterface(playerObject, SL_IID_PREFETCHSTATUS,
@@ -606,6 +602,10 @@ int main(int argc, char **argv)
     assert(SL_RESULT_SUCCESS == result);
     result = (*playerPrefetchStatus)->SetCallbackEventsMask(playerPrefetchStatus,
             SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE);
+    assert(SL_RESULT_SUCCESS == result);
+
+    // set play state to paused to enable pre-fetch so we can get a more reliable duration
+    result = (*playerPlay)->SetPlayState(playerPlay, SL_PLAYSTATE_PAUSED);
     assert(SL_RESULT_SUCCESS == result);
 
     // wait for prefetch status callback to indicate either sufficient data or error
