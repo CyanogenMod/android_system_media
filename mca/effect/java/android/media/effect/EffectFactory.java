@@ -93,11 +93,11 @@ public class EffectFactory {
      * @return true, if the effect is supported on this platform.
      * @throws IllegalArgumentException if the effect name is not known.
      */
-    public boolean isEffectSupported(String effectName) {
+    public static boolean isEffectSupported(String effectName) {
         return getEffectClassByName(effectName) != null;
     }
 
-    private Class getEffectClassByName(String className) {
+    private static Class getEffectClassByName(String className) {
         Class effectClass = null;
 
         // Get context's classloader; otherwise cannot load non-framework effects
