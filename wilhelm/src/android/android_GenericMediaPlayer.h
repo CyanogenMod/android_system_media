@@ -85,6 +85,7 @@ protected:
     virtual void onPause();
     virtual void onSeek(const sp<AMessage> &msg);
     virtual void onLoop(const sp<AMessage> &msg);
+    virtual void onSeekComplete();
     virtual void onVolumeUpdate();
     virtual void onBufferingUpdate(const sp<AMessage> &msg);
     virtual void onGetMediaPlayerInfo();

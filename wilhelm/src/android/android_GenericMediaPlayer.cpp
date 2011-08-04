@@ -87,7 +87,7 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
         break;
 
       case MEDIA_SEEK_COMPLETE:
-          mGenericMediaPlayer->seekComplete();
+        mGenericMediaPlayer->seekComplete();
         break;
 
       case MEDIA_PLAYBACK_COMPLETE:
@@ -278,6 +278,24 @@ void GenericMediaPlayer::onPause() {
         mStateFlags &= ~kFlagPlaying;
     }
 }
+
+
+void GenericMediaPlayer::onSeekComplete() {
+    SL_LOGV("GenericMediaPlayer::onSeekComplete()");
+    // did we initiate the seek?
+    if (!(mStateFlags & kFlagSeeking)) {
+        // no, are we looping?
+        if (mStateFlags & kFlagLooping) {
+            // yes, per OpenSL ES 1.0.1 and 1.1 do NOT report it to client
+            // notify(PLAYEREVENT_ENDOFSTREAM, 1, true /*async*/);
+        // no, well that's surprising, but it's probably just a benign race condition
+        } else {
+            SL_LOGW("Unexpected seek complete event ignored");
+        }
+    }
+    GenericPlayer::onSeekComplete();
+}
+
 
 /**
  * pre-condition: WHATPARAM_SEEK_SEEKTIME_MS parameter value >= 0
