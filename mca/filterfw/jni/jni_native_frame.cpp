@@ -27,6 +27,11 @@
 using android::filterfw::NativeFrame;
 using android::filterfw::GLFrame;
 
+typedef union {
+    uint32_t value;
+    uint8_t  rgba[4];
+} Pixel;
+
 jboolean Java_android_filterfw_core_NativeFrame_nativeAllocate(JNIEnv* env,
                                                                jobject thiz,
                                                                jint size) {
@@ -161,14 +166,48 @@ jfloatArray Java_android_filterfw_core_NativeFrame_getNativeFloats(JNIEnv* env,
 jboolean Java_android_filterfw_core_NativeFrame_setNativeBitmap(JNIEnv* env,
                                                                 jobject thiz,
                                                                 jobject bitmap,
-                                                                jint size) {
+                                                                jint size,
+                                                                jint bytes_per_sample) {
   NativeFrame* frame = ConvertFromJava<NativeFrame>(env, thiz);
   if (frame && bitmap) {
-    uint8_t* pixels;
-    const int result = AndroidBitmap_lockPixels(env, bitmap, reinterpret_cast<void**>(&pixels));
+    // Make sure frame size matches bitmap size
+    if ((size / 4) != (frame->Size() / bytes_per_sample)) {
+      LOGE("Size mismatch in native setBitmap()!");
+      return JNI_FALSE;
+    }
+
+    Pixel* src_ptr;
+    const int result = AndroidBitmap_lockPixels(env, bitmap, reinterpret_cast<void**>(&src_ptr));
     if (result == ANDROID_BITMAP_RESUT_SUCCESS) {
-      const bool success = frame->WriteData(pixels, 0, size);
-      return (AndroidBitmap_unlockPixels(env, bitmap) == ANDROID_BITMAP_RESUT_SUCCESS) && success;
+      // Create destination pointers
+      uint8_t* dst_ptr = reinterpret_cast<uint8_t*>(frame->MutableData());
+      const uint8_t* end_ptr = dst_ptr + frame->Size();
+      switch (bytes_per_sample) {
+        case 1: { // RGBA -> GRAY
+          while (dst_ptr < end_ptr) {
+            const Pixel pixel = *(src_ptr++);
+            *(dst_ptr++) = (pixel.rgba[0] + pixel.rgba[1] + pixel.rgba[2]) / 3;
+          }
+          break;
+        }
+        case 3: { // RGBA -> RGB
+          while (dst_ptr < end_ptr) {
+            const Pixel pixel = *(src_ptr++);
+            *(dst_ptr++) = pixel.rgba[0];
+            *(dst_ptr++) = pixel.rgba[1];
+            *(dst_ptr++) = pixel.rgba[2];
+          }
+          break;
+        }
+        case 4: { // RGBA -> RGBA
+          memcpy(dst_ptr, src_ptr, frame->Size());
+          break;
+        }
+        default:
+          LOGE("Unsupported bytes-per-pixel %d in setBitmap!", bytes_per_sample);
+          break;
+      }
+      return (AndroidBitmap_unlockPixels(env, bitmap) == ANDROID_BITMAP_RESUT_SUCCESS);
     }
   }
   return JNI_FALSE;
@@ -176,13 +215,50 @@ jboolean Java_android_filterfw_core_NativeFrame_setNativeBitmap(JNIEnv* env,
 
 jboolean Java_android_filterfw_core_NativeFrame_getNativeBitmap(JNIEnv* env,
                                                                 jobject thiz,
-                                                                jobject bitmap) {
+                                                                jobject bitmap,
+                                                                jint size,
+                                                                jint bytes_per_sample) {
   NativeFrame* frame = ConvertFromJava<NativeFrame>(env, thiz);
   if (frame && bitmap) {
-    uint8_t* pixels;
-    const int result = AndroidBitmap_lockPixels(env, bitmap, reinterpret_cast<void**>(&pixels));
+    Pixel* dst_ptr;
+    const int result = AndroidBitmap_lockPixels(env, bitmap, reinterpret_cast<void**>(&dst_ptr));
     if (result == ANDROID_BITMAP_RESUT_SUCCESS) {
-      memcpy(pixels, frame->Data(), frame->Size());
+      // Make sure frame size matches bitmap size
+      if ((size / 4) != (frame->Size() / bytes_per_sample)) {
+        LOGE("Size mismatch in native getBitmap()!");
+        return JNI_FALSE;
+      }
+
+      const uint8_t* src_ptr = frame->Data();
+      const uint8_t* end_ptr = src_ptr + frame->Size();
+      switch (bytes_per_sample) {
+        case 1: { // GRAY -> RGBA
+          while (src_ptr < end_ptr) {
+            const uint8_t value = *(src_ptr++);
+            dst_ptr->rgba[0] = dst_ptr->rgba[1] = dst_ptr->rgba[2] = value;
+            dst_ptr->rgba[3] = 255;
+            ++dst_ptr;
+          }
+          break;
+        }
+        case 3: { // RGB -> RGBA
+          while (src_ptr < end_ptr) {
+            dst_ptr->rgba[0] = *(src_ptr++);
+            dst_ptr->rgba[1] = *(src_ptr++);
+            dst_ptr->rgba[2] = *(src_ptr++);
+            dst_ptr->rgba[3] = 255;
+            ++dst_ptr;
+          }
+          break;
+        }
+        case 4: { // RGBA -> RGBA
+          memcpy(dst_ptr, src_ptr, frame->Size());
+          break;
+        }
+        default:
+          LOGE("Unsupported bytes-per-pixel %d in getBitmap!", bytes_per_sample);
+          break;
+      }
       return (AndroidBitmap_unlockPixels(env, bitmap) == ANDROID_BITMAP_RESUT_SUCCESS);
     }
   }

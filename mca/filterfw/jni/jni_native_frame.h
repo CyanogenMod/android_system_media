@@ -64,10 +64,15 @@ JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_NativeFrame_setNativeBitmap(JNIEnv* env,
                                                        jobject thiz,
                                                        jobject bitmap,
-                                                       jint size);
+                                                       jint size,
+                                                       jint bytes_per_sample);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_NativeFrame_getNativeBitmap(JNIEnv* env, jobject thiz, jobject bitmap);
+Java_android_filterfw_core_NativeFrame_getNativeBitmap(JNIEnv* env,
+                                                       jobject thiz,
+                                                       jobject bitmap,
+                                                       jint size,
+                                                       jint bytes_per_sample);
 
 JNIEXPORT jint JNICALL
 Java_android_filterfw_core_NativeFrame_getNativeCapacity(JNIEnv* env, jobject thiz);
