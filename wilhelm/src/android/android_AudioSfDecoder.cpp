@@ -91,8 +91,7 @@ void AudioSfDecoder::getPositionMsec(int* msec) {
     if (timeUsec == ANDROID_UNKNOWN_TIME) {
         *msec = ANDROID_UNKNOWN_TIME;
     } else {
-        mPositionMsec = timeUsec / 1000;
-        *msec = mPositionMsec;
+        *msec = timeUsec / 1000;
     }
 }
 

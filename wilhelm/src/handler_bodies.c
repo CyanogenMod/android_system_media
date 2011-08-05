@@ -78,7 +78,6 @@ unsigned handler_MidiPlayer_position(IObject *thiz)
 unsigned handler_AudioPlayer_transport(IObject *thiz)
 {
     CAudioPlayer *ap = (CAudioPlayer *) thiz;
-    // FIXME should only call when either eventflags or marker position changes
     android_audioPlayer_useEventMask(ap);
     return ATTR_TRANSPORT;
 }

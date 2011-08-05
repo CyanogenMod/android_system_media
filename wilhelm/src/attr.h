@@ -21,8 +21,9 @@
 #define ATTR_INDEX_GAIN        0 // volume: volume, stereo position, mute
                                  // mute solo: channel mute, channel solo
                                  // effect send: set direct level
-#define ATTR_INDEX_TRANSPORT   1 // play: looping, callback events mask,
+#define ATTR_INDEX_TRANSPORT   1 // play: callback events mask,
                                  //       marker position, position update period
+                                 //       (currently looping is done differently, not by attributes)
                                  // recorder: duration limit, events mask,
                                  //           marker position, position update period
 #define ATTR_INDEX_POSITION    2 // requested position (a.k.a. seek position)

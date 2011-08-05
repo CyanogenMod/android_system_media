@@ -694,7 +694,7 @@ AndroidObjectType audioPlayer_getAndroidObjectTypeForSourceSink(CAudioPlayer *ap
 //-----------------------------------------------------------------------------
 /*
  * Callback associated with an SfPlayer of an SL ES AudioPlayer that gets its data
- * from a URI or FD, for prepare and prefetch events
+ * from a URI or FD, for prepare, prefetch, and play events
  */
 static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* user) {
     if (NULL == user) {
@@ -860,6 +860,33 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
             android_audioPlayer_volumeUpdate(ap);
         }
         object_unlock_exclusive(&ap->mObject);
+        }
+        break;
+
+    case android::GenericPlayer::kEventPlay: {
+        slPlayCallback callback = NULL;
+        void* callbackPContext = NULL;
+
+        interface_lock_shared(&ap->mPlay);
+        callback = ap->mPlay.mCallback;
+        callbackPContext = ap->mPlay.mContext;
+        interface_unlock_shared(&ap->mPlay);
+
+        if (NULL != callback) {
+            SLuint32 event = (SLuint32) data1;  // SL_PLAYEVENT_HEAD*
+#ifndef USE_ASYNCHRONOUS_PLAY_CALLBACK
+            // synchronous callback requires a synchronous GetPosition implementation
+            (*callback)(&ap->mPlay.mItf, callbackPContext, event);
+#else
+            // asynchronous callback works with any GetPosition implementation
+            SLresult result = EnqueueAsyncCallback_ppi(ap, callback, &ap->mPlay.mItf,
+                    callbackPContext, event);
+            if (SL_RESULT_SUCCESS != result) {
+                LOGW("Callback %p(%p, %p, 0x%x) dropped", callback,
+                        &ap->mPlay.mItf, callbackPContext, event);
+            }
+#endif
+        }
         }
         break;
 
@@ -1871,11 +1898,19 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
 
 
 //-----------------------------------------------------------------------------
+// call when either player event flags, marker position, or position update period changes
 void android_audioPlayer_useEventMask(CAudioPlayer *ap) {
     IPlay *pPlayItf = &ap->mPlay;
     SLuint32 eventFlags = pPlayItf->mEventFlags;
     /*switch(ap->mAndroidObjType) {
     case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:*/
+
+    if (ap->mAPlayer != 0) {
+        assert(ap->mAudioTrack == 0);
+        ap->mAPlayer->setPlayEvents((int32_t) eventFlags, (int32_t) pPlayItf->mMarkerPosition,
+                (int32_t) pPlayItf->mPositionUpdatePeriod);
+        return;
+    }
 
     if (ap->mAudioTrack == 0) {
         return;

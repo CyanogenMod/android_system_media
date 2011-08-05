@@ -143,8 +143,7 @@ GenericMediaPlayer::GenericMediaPlayer(const AudioPlayback_Parameters* params, b
     mVideoSurface(0),
     mVideoSurfaceTexture(0),
     mPlayer(0),
-    mPlayerClient(0),
-    mGetMediaPlayerInfoGenCount(0)
+    mPlayerClient(0)
 {
     SL_LOGD("GenericMediaPlayer::GenericMediaPlayer()");
 
@@ -163,12 +162,6 @@ GenericMediaPlayer::~GenericMediaPlayer() {
 
 void GenericMediaPlayer::preDestroy() {
     SL_LOGD("GenericMediaPlayer::preDestroy()");
-    // we might be in the middle of blocking for a getXXX call
-    {
-        android::Mutex::Autolock autoLock(mGetMediaPlayerInfoLock);
-        mGetMediaPlayerInfoGenCount++;
-        mGetMediaPlayerInfoCondition.broadcast();
-    }
     GenericPlayer::preDestroy();
 }
 
@@ -177,31 +170,16 @@ void GenericMediaPlayer::preDestroy() {
 // pre-condition:
 //   msec != NULL
 // post-condition
-//   *msec == mPositionMsec ==
+//   *msec ==
 //                  ANDROID_UNKNOWN_TIME if position is unknown at time of query,
 //               or the current MediaPlayer position
 void GenericMediaPlayer::getPositionMsec(int* msec) {
     SL_LOGD("GenericMediaPlayer::getPositionMsec()");
-    uint32_t currentGen = 0;
-    {
-        android::Mutex::Autolock autoLock(mGetMediaPlayerInfoLock);
-        currentGen = mGetMediaPlayerInfoGenCount;
-    }
-    // send a message to update the MediaPlayer position in the event loop where it's safe to
-    //   access the MediaPlayer. We block until the message kWhatMediaPlayerInfo has been processed
-    (new AMessage(kWhatMediaPlayerInfo, id()))->post();
-    {
-        android::Mutex::Autolock autoLock(mGetMediaPlayerInfoLock);
-        // mGetMediaPlayerInfoGenCount will be incremented when the kWhatMediaPlayerInfo
-        //  gets processed.
-        while (currentGen == mGetMediaPlayerInfoGenCount) {
-            mGetMediaPlayerInfoCondition.wait(mGetMediaPlayerInfoLock);
-            // if multiple GetPosition calls were issued before any got processed on the event queue
-            // then they will all return the same "recent-enough" position
-        }
-        // at this point mPositionMsec has been updated
-        // so now updates msec from mPositionMsec, while holding the lock protecting it
-        GenericPlayer::getPositionMsec(msec);
+    sp<IMediaPlayer> player;
+    getPlayerPrepared(player);
+    // To avoid deadlock, directly call the MediaPlayer object
+    if (player == 0 || player->getCurrentPosition(msec) != NO_ERROR) {
+        *msec = ANDROID_UNKNOWN_TIME;
     }
 }
 
@@ -216,19 +194,6 @@ void GenericMediaPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfa
     mVideoSurfaceTexture = surfaceTexture;
 }
 
-//--------------------------------------------------
-void GenericMediaPlayer::onMessageReceived(const sp<AMessage> &msg) {
-    SL_LOGV("GenericMediaPlayer::onMessageReceived()");
-    switch (msg->what()) {
-        case kWhatMediaPlayerInfo:
-            onGetMediaPlayerInfo();
-            break;
-
-        default:
-            GenericPlayer::onMessageReceived(msg);
-            break;
-    }
-}
 
 //--------------------------------------------------
 // Event handlers
@@ -261,22 +226,19 @@ void GenericMediaPlayer::onPrepare() {
 
 void GenericMediaPlayer::onPlay() {
     SL_LOGD("GenericMediaPlayer::onPlay()");
-    if ((mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
-        SL_LOGD("starting player");
+    if (((mStateFlags & (kFlagPrepared | kFlagPlaying)) == kFlagPrepared) && (mPlayer != 0)) {
         mPlayer->start();
-        mStateFlags |= kFlagPlaying;
-    } else {
-        SL_LOGV("NOT starting player mStateFlags=0x%x", mStateFlags);
     }
+    GenericPlayer::onPlay();
 }
 
 
 void GenericMediaPlayer::onPause() {
     SL_LOGD("GenericMediaPlayer::onPause()");
-    if ((mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
+    if (!(~mStateFlags & (kFlagPrepared | kFlagPlaying)) && (mPlayer != 0)) {
         mPlayer->pause();
-        mStateFlags &= ~kFlagPlaying;
     }
+    GenericPlayer::onPause();
 }
 
 
@@ -322,8 +284,6 @@ void GenericMediaPlayer::onSeek(const sp<AMessage> &msg) {
             if (OK != mPlayer->seekTo(timeMsec)) {
                 mStateFlags &= ~kFlagSeeking;
                 mSeekTimeMsec = ANDROID_UNKNOWN_TIME;
-            } else {
-                mPositionMsec = mSeekTimeMsec;
             }
         }
     }
@@ -431,25 +391,6 @@ void GenericMediaPlayer::onBufferingUpdate(const sp<AMessage> &msg) {
 }
 
 
-void GenericMediaPlayer::onGetMediaPlayerInfo() {
-    SL_LOGD("GenericMediaPlayer::onGetMediaPlayerInfo()");
-    {
-        android::Mutex::Autolock autoLock(mGetMediaPlayerInfoLock);
-
-        if ((!(mStateFlags & kFlagPrepared)) || (mPlayer == 0)) {
-            mPositionMsec = ANDROID_UNKNOWN_TIME;
-        } else {
-            mPlayer->getCurrentPosition(&mPositionMsec);
-        }
-
-        // the MediaPlayer info has been refreshed
-        mGetMediaPlayerInfoGenCount++;
-        // there might be multiple requests for MediaPlayer info, so use broadcast instead of signal
-        mGetMediaPlayerInfoCondition.broadcast();
-    }
-}
-
-
 //--------------------------------------------------
 /**
  * called from GenericMediaPlayer::onPrepare after the MediaPlayer mPlayer is prepared successfully
@@ -461,6 +402,12 @@ void GenericMediaPlayer::afterMediaPlayerPreparedSuccessfully() {
     SL_LOGV("GenericMediaPlayer::afterMediaPlayerPrepared()");
     assert(mPlayer != 0);
     assert(mStateFlags & kFlagPrepared);
+    // Mark this player as prepared successfully, so safe to directly call getCurrentPosition
+    {
+        Mutex::Autolock _l(mPlayerPreparedLock);
+        assert(mPlayerPrepared == 0);
+        mPlayerPrepared = mPlayer;
+    }
     // retrieve channel count
     assert(UNKNOWN_NUMCHANNELS == mChannelCount);
     Parcel *reply = new Parcel();
@@ -514,6 +461,15 @@ void GenericMediaPlayer::afterMediaPlayerPreparedSuccessfully() {
     } else {
         SL_LOGD("media player prepared on non-local source");
     }
+}
+
+
+//--------------------------------------------------
+// If player is prepared successfully, set output parameter to that reference, otherwise NULL
+void GenericMediaPlayer::getPlayerPrepared(sp<IMediaPlayer> &playerPrepared)
+{
+    Mutex::Autolock _l(mPlayerPreparedLock);
+    playerPrepared = mPlayerPrepared;
 }
 
 } // namespace android
