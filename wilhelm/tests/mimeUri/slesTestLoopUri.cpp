@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <assert.h>
+#include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -26,6 +28,23 @@
 #define MAX_NUMBER_INTERFACES 2
 
 #define REPETITIONS 4
+
+// These are extensions to OpenSL ES 1.0.1 values
+
+#define SL_PREFETCHSTATUS_UNKNOWN 0
+#define SL_PREFETCHSTATUS_ERROR   (-1)
+
+// Mutex and condition shared with main program to protect prefetch_status
+
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+SLuint32 prefetch_status = SL_PREFETCHSTATUS_UNKNOWN;
+
+/* used to detect errors likely to have occured when the OpenSL ES framework fails to open
+ * a resource, for instance because a file URI is invalid, or an HTTP server doesn't respond.
+ */
+#define PREFETCHEVENT_ERROR_CANDIDATE \
+        (SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE)
 
 //-----------------------------------------------------------------
 //* Exits the application if an error is encountered */
@@ -41,25 +60,59 @@ void ExitOnErrorFunc( SLresult result , int line)
 
 //-----------------------------------------------------------------
 /* PrefetchStatusItf callback for an audio player */
-void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint32 event)
+void PrefetchEventCallback( SLPrefetchStatusItf caller, void *pContext, SLuint32 event)
 {
+    SLresult result;
+    // pContext is unused here, so we pass NULL
+    assert(pContext == NULL);
     SLpermille level = 0;
-    (*caller)->GetFillLevel(caller, &level);
+    result = (*caller)->GetFillLevel(caller, &level);
+    CheckErr(result);
     SLuint32 status;
-    //fprintf(stdout, "\t\tPrefetchEventCallback: received event %u\n", event);
-    (*caller)->GetPrefetchStatus(caller, &status);
-    if ((event & (SL_PREFETCHEVENT_STATUSCHANGE|SL_PREFETCHEVENT_FILLLEVELCHANGE))
-            && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
-        fprintf(stdout, "\t\tPrefetchEventCallback: Error while prefetching data, exiting\n");
-        //exit(EXIT_FAILURE);
-    }
+    result = (*caller)->GetPrefetchStatus(caller, &status);
+    CheckErr(result);
     if (event & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
         fprintf(stdout, "\t\tPrefetchEventCallback: Buffer fill level is = %d\n", level);
     }
     if (event & SL_PREFETCHEVENT_STATUSCHANGE) {
         fprintf(stdout, "\t\tPrefetchEventCallback: Prefetch Status is = %u\n", status);
     }
+    SLuint32 new_prefetch_status;
+    if ((event & PREFETCHEVENT_ERROR_CANDIDATE) == PREFETCHEVENT_ERROR_CANDIDATE
+            && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
+        fprintf(stdout, "\t\tPrefetchEventCallback: Error while prefetching data, exiting\n");
+        new_prefetch_status = SL_PREFETCHSTATUS_ERROR;
+    } else if (event == SL_PREFETCHEVENT_STATUSCHANGE &&
+            status == SL_PREFETCHSTATUS_SUFFICIENTDATA) {
+        new_prefetch_status = status;
+    } else {
+        return;
+    }
+    int ok;
+    ok = pthread_mutex_lock(&mutex);
+    assert(ok == 0);
+    prefetch_status = new_prefetch_status;
+    ok = pthread_cond_signal(&cond);
+    assert(ok == 0);
+    ok = pthread_mutex_unlock(&mutex);
+    assert(ok == 0);
+}
 
+
+//-----------------------------------------------------------------
+/* PlayItf callback for playback events */
+void PlayEventCallback(
+        SLPlayItf caller,
+        void *pContext,
+        SLuint32 event)
+{
+    // pContext is unused here, so we pass NULL
+    assert(NULL == pContext);
+    if (SL_PLAYEVENT_HEADATEND == event) {
+        printf("SL_PLAYEVENT_HEADATEND reached\n");
+    } else {
+        fprintf(stderr, "Unexpected play event 0x%x", event);
+    }
 }
 
 
@@ -149,7 +202,7 @@ void TestLoopUri( SLObjectItf sl, const char* path)
 
     res = (*player)->GetInterface(player, SL_IID_PREFETCHSTATUS, (void*)&prefetchItf);
     CheckErr(res);
-    res = (*prefetchItf)->RegisterCallback(prefetchItf, PrefetchEventCallback, &prefetchItf);
+    res = (*prefetchItf)->RegisterCallback(prefetchItf, PrefetchEventCallback, NULL);
     CheckErr(res);
     res = (*prefetchItf)->SetCallbackEventsMask(prefetchItf,
             SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE);
@@ -157,6 +210,12 @@ void TestLoopUri( SLObjectItf sl, const char* path)
 
     /* Configure fill level updates every 5 percent */
     (*prefetchItf)->SetFillUpdatePeriod(prefetchItf, 50);
+
+    /* Set up the player callback to get head-at-end events */
+    res = (*playItf)->SetCallbackEventsMask(playItf, SL_PLAYEVENT_HEADATEND);
+    CheckErr(res);
+    res = (*playItf)->RegisterCallback(playItf, PlayEventCallback, NULL);
+    CheckErr(res);
 
     /* Display duration */
     SLmillisecond durationInMsec = SL_TIME_UNKNOWN;
@@ -178,18 +237,14 @@ void TestLoopUri( SLObjectItf sl, const char* path)
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PAUSED );
     CheckErr(res);
 
-    /*     wait until there's data to play */
-    //SLpermille fillLevel = 0;
-    SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
-    SLuint32 timeOutIndex = 100; // 10s
-    while ((prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) && (timeOutIndex > 0)) {
-        usleep(100 * 1000);
-        (*prefetchItf)->GetPrefetchStatus(prefetchItf, &prefetchStatus);
-        timeOutIndex--;
+    // wait for prefetch status callback to indicate either sufficient data or error
+    pthread_mutex_lock(&mutex);
+    while (prefetch_status == SL_PREFETCHSTATUS_UNKNOWN) {
+        pthread_cond_wait(&cond, &mutex);
     }
-
-    if (timeOutIndex == 0) {
-        fprintf(stderr, "\nWe\'re done waiting, failed to prefetch data in time, exiting\n");
+    pthread_mutex_unlock(&mutex);
+    if (prefetch_status == SL_PREFETCHSTATUS_ERROR) {
+        fprintf(stderr, "Error during prefetch, exiting\n");
         goto destroyRes;
     }
 
@@ -202,6 +257,7 @@ void TestLoopUri( SLObjectItf sl, const char* path)
         fprintf(stdout, "Content duration is %u ms (after prefetch completed)\n", durationInMsec);
     }
 
+    /* Start playing */
     fprintf(stdout, "starting to play\n");
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PLAYING );
     CheckErr(res);

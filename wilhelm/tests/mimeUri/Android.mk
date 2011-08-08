@@ -16,6 +16,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libOpenSLES
 
+LOCAL_CFLAGS += -UNDEBUG
+
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
@@ -39,6 +41,8 @@ LOCAL_SRC_FILES:= \
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libOpenSLES
+
+LOCAL_CFLAGS += -UNDEBUG
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -64,6 +68,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libOpenSLES
 
+LOCAL_CFLAGS += -UNDEBUG
+
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
@@ -87,6 +93,8 @@ LOCAL_SRC_FILES:= \
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libOpenSLES
+
+LOCAL_CFLAGS += -UNDEBUG
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
@@ -112,6 +120,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libOpenSLES
 
+LOCAL_CFLAGS += -UNDEBUG
+
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
@@ -136,12 +146,15 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libOpenSLES
 
+LOCAL_CFLAGS += -UNDEBUG
+
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
 
 LOCAL_MODULE:= slesTest_slowDownUri
 
+include $(BUILD_EXECUTABLE)
 
 # slesTest_manyPlayers
 
@@ -159,11 +172,15 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libOpenSLES
 
+LOCAL_CFLAGS += -UNDEBUG
+
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
 
 LOCAL_MODULE:= slesTest_manyPlayers
+
+include $(BUILD_EXECUTABLE)
 
 # slesTest_getPositionUri
 
@@ -180,6 +197,8 @@ LOCAL_SRC_FILES:= \
 LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libOpenSLES
+
+LOCAL_CFLAGS += -UNDEBUG
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
