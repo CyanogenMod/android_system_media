@@ -1306,20 +1306,15 @@ SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
 SLresult android_audioPlayer_setConfig(CAudioPlayer *ap, const SLchar *configKey,
         const void *pConfigValue, SLuint32 valueSize) {
 
-    SLresult result = SL_RESULT_SUCCESS;
+    SLresult result;
 
-    if (NULL == ap) {
-        result = SL_RESULT_INTERNAL_ERROR;
-    } else if (NULL == pConfigValue) {
-        SL_LOGE(ERROR_CONFIG_NULL_PARAM);
-        result = SL_RESULT_PARAMETER_INVALID;
-
-    } else if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_STREAM_TYPE) == 0) {
+    assert(NULL != ap && NULL != configKey && NULL != pConfigValue);
+    if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_STREAM_TYPE) == 0) {
 
         // stream type
         if (KEY_STREAM_TYPE_PARAMSIZE > valueSize) {
             SL_LOGE(ERROR_CONFIG_VALUESIZE_TOO_LOW);
-            result = SL_RESULT_PARAMETER_INVALID;
+            result = SL_RESULT_BUFFER_INSUFFICIENT;
         } else {
             result = audioPlayer_setStreamType(ap, *(SLuint32*)pConfigValue);
         }
@@ -1337,26 +1332,21 @@ SLresult android_audioPlayer_setConfig(CAudioPlayer *ap, const SLchar *configKey
 SLresult android_audioPlayer_getConfig(CAudioPlayer* ap, const SLchar *configKey,
         SLuint32* pValueSize, void *pConfigValue) {
 
-    SLresult result = SL_RESULT_SUCCESS;
+    SLresult result;
 
-    if (NULL == ap) {
-        return SL_RESULT_INTERNAL_ERROR;
-    } else if (NULL == pValueSize) {
-        SL_LOGE(ERROR_CONFIG_NULL_PARAM);
-        result = SL_RESULT_PARAMETER_INVALID;
-
-    } else if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_STREAM_TYPE) == 0) {
+    assert(NULL != ap && NULL != configKey && NULL != pValueSize);
+    if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_STREAM_TYPE) == 0) {
 
         // stream type
-        if (KEY_STREAM_TYPE_PARAMSIZE > *pValueSize) {
+        if (NULL == pConfigValue) {
+            result = SL_RESULT_SUCCESS;
+        } else if (KEY_STREAM_TYPE_PARAMSIZE > *pValueSize) {
             SL_LOGE(ERROR_CONFIG_VALUESIZE_TOO_LOW);
-            result = SL_RESULT_PARAMETER_INVALID;
+            result = SL_RESULT_BUFFER_INSUFFICIENT;
         } else {
-            *pValueSize = KEY_STREAM_TYPE_PARAMSIZE;
-            if (NULL != pConfigValue) {
-                result = audioPlayer_getStreamType(ap, (SLint32*)pConfigValue);
-            }
+            result = audioPlayer_getStreamType(ap, (SLint32*)pConfigValue);
         }
+        *pValueSize = KEY_STREAM_TYPE_PARAMSIZE;
 
     } else {
         SL_LOGE(ERROR_CONFIG_UNKNOWN_KEY);

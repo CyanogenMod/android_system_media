@@ -325,20 +325,15 @@ SLresult android_audioRecorder_create(CAudioRecorder* ar) {
 SLresult android_audioRecorder_setConfig(CAudioRecorder* ar, const SLchar *configKey,
         const void *pConfigValue, SLuint32 valueSize) {
 
-    SLresult result = SL_RESULT_SUCCESS;
+    SLresult result;
 
-    if (NULL == ar) {
-        result = SL_RESULT_INTERNAL_ERROR;
-    } else if (NULL == pConfigValue) {
-        SL_LOGE(ERROR_CONFIG_NULL_PARAM);
-        result = SL_RESULT_PARAMETER_INVALID;
-
-    } else if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_PRESET) == 0) {
+    assert(NULL != ar && NULL != configKey && NULL != pConfigValue);
+    if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_PRESET) == 0) {
 
         // recording preset
         if (KEY_RECORDING_PRESET_PARAMSIZE > valueSize) {
             SL_LOGE(ERROR_CONFIG_VALUESIZE_TOO_LOW);
-            result = SL_RESULT_PARAMETER_INVALID;
+            result = SL_RESULT_BUFFER_INSUFFICIENT;
         } else {
             result = audioRecorder_setPreset(ar, *(SLuint32*)pConfigValue);
         }
@@ -356,26 +351,21 @@ SLresult android_audioRecorder_setConfig(CAudioRecorder* ar, const SLchar *confi
 SLresult android_audioRecorder_getConfig(CAudioRecorder* ar, const SLchar *configKey,
         SLuint32* pValueSize, void *pConfigValue) {
 
-    SLresult result = SL_RESULT_SUCCESS;
+    SLresult result;
 
-    if (NULL == ar) {
-        return SL_RESULT_INTERNAL_ERROR;
-    } else if (NULL == pValueSize) {
-        SL_LOGE(ERROR_CONFIG_NULL_PARAM);
-        result = SL_RESULT_PARAMETER_INVALID;
-
-    } else if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_PRESET) == 0) {
+    assert(NULL != ar && NULL != configKey && NULL != pValueSize);
+    if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_PRESET) == 0) {
 
         // recording preset
-        if (KEY_RECORDING_PRESET_PARAMSIZE > *pValueSize) {
+        if (NULL == pConfigValue) {
+            result = SL_RESULT_SUCCESS;
+        } else if (KEY_RECORDING_PRESET_PARAMSIZE > *pValueSize) {
             SL_LOGE(ERROR_CONFIG_VALUESIZE_TOO_LOW);
-            result = SL_RESULT_PARAMETER_INVALID;
+            result = SL_RESULT_BUFFER_INSUFFICIENT;
         } else {
-            *pValueSize = KEY_RECORDING_PRESET_PARAMSIZE;
-            if (NULL != pConfigValue) {
-                result = audioRecorder_getPreset(ar, (SLuint32*)pConfigValue);
-            }
+            result = audioRecorder_getPreset(ar, (SLuint32*)pConfigValue);
         }
+        *pValueSize = KEY_RECORDING_PRESET_PARAMSIZE;
 
     } else {
         SL_LOGE(ERROR_CONFIG_UNKNOWN_KEY);
