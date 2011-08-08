@@ -186,12 +186,28 @@ void GenericMediaPlayer::getPositionMsec(int* msec) {
 //--------------------------------------------------
 void GenericMediaPlayer::setVideoSurface(const sp<Surface> &surface) {
     SL_LOGV("GenericMediaPlayer::setVideoSurface()");
+    // FIXME bug - race condition, should do in looper
+    if (mVideoSurface.get() == surface.get()) {
+        return;
+    }
+    if ((mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
+        mPlayer->setVideoSurface(surface);
+    }
     mVideoSurface = surface;
+    mVideoSurfaceTexture = NULL;
 }
 
 void GenericMediaPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {
     SL_LOGV("GenericMediaPlayer::setVideoSurfaceTexture()");
+    // FIXME bug - race condition, should do in looper
+    if (mVideoSurfaceTexture.get() == surfaceTexture.get()) {
+        return;
+    }
+    if ((mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
+        mPlayer->setVideoSurfaceTexture(surfaceTexture);
+    }
     mVideoSurfaceTexture = surfaceTexture;
+    mVideoSurface = NULL;
 }
 
 

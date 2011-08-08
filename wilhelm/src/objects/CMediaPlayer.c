@@ -34,52 +34,10 @@ XAresult CMediaPlayer_Realize(void *self, XAboolean async)
 
     // realize player
     result = android_Player_realize(thiz, async);
-    if (XA_RESULT_SUCCESS == result) {
-
-        // if there is a video sink
-        if (XA_DATALOCATOR_NATIVEDISPLAY ==
-                thiz->mImageVideoSink.mLocator.mLocatorType) {
-            ANativeWindow *nativeWindow = (ANativeWindow *)
-                    thiz->mImageVideoSink.mLocator.mNativeDisplay.hWindow;
-            // we already verified earlier that hWindow is non-NULL
-            assert(nativeWindow != NULL);
-            int err;
-            int value;
-            // this could crash if app passes in a bad parameter, but that's OK
-            err = (*nativeWindow->query)(nativeWindow, NATIVE_WINDOW_CONCRETE_TYPE, &value);
-            if (0 != err) {
-                SL_LOGE("Query NATIVE_WINDOW_CONCRETE_TYPE on ANativeWindow * %p failed; "
-                        "errno %d", nativeWindow, err);
-            } else {
-                // thiz->mAVPlayer != 0 is implied by success after android_Player_realize()
-                switch (value) {
-                case NATIVE_WINDOW_SURFACE: {                // Surface
-                    sp<Surface> nativeSurface(static_cast<Surface *>(nativeWindow));
-                    result = android_Player_setVideoSurface(thiz->mAVPlayer, nativeSurface);
-                    } break;
-                case NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT: { // SurfaceTextureClient
-                    sp<SurfaceTextureClient> surfaceTextureClient(
-                            static_cast<SurfaceTextureClient *>(nativeWindow));
-                    sp<ISurfaceTexture> nativeSurfaceTexture(
-                            surfaceTextureClient->getISurfaceTexture());
-                    result = android_Player_setVideoSurfaceTexture(thiz->mAVPlayer,
-                            nativeSurfaceTexture);
-                    } break;
-                case NATIVE_WINDOW_FRAMEBUFFER:              // FramebufferNativeWindow
-                    // fall through
-                default:
-                    SL_LOGE("ANativeWindow * %p has unknown or unsupported concrete type %d",
-                            nativeWindow, value);
-                    break;
-                }
-            }
-        }
-    }
 #endif
 
     return result;
 }
-
 
 XAresult CMediaPlayer_Resume(void *self, XAboolean async)
 {

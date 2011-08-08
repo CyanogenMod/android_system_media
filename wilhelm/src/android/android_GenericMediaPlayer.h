@@ -91,6 +91,7 @@ protected:
     bool mHasVideo;
     int32_t mSeekTimeMsec;
 
+    // at most one of mVideoSurface and mVideoSurfaceTexture is non-NULL
     sp<Surface> mVideoSurface;
     sp<ISurfaceTexture> mVideoSurfaceTexture;
 

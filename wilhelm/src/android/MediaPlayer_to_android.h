@@ -33,19 +33,15 @@ extern XAresult android_Player_destroy(CMediaPlayer *mp);
 /**************************************************************************************************
  * Configuration
  ****************************/
-/**
- * pre-conditions: gp != 0, surface != 0
- */
-extern XAresult android_Player_setVideoSurface(
-        const android::sp<android::GenericPlayer> &gp,
-        const android::sp<android::Surface> &surface);
 
 /**
- * pre-conditions: gp != 0, surfaceTexture != 0
+ *  pre-conditions:
+ *      pMediaPlayer != NULL
+ *      pMediaPlayer->mAVPlayer != 0 (player is realized)
+ *      nativeWindow can be NULL, but if NULL it is treated as an error
  */
-extern XAresult android_Player_setVideoSurfaceTexture(
-        const android::sp<android::GenericPlayer> &gp,
-        const android::sp<android::ISurfaceTexture> &surfaceTexture);
+extern SLresult android_Player_setNativeWindow(CMediaPlayer *pMediaPlayer,
+        ANativeWindow *nativeWindow);
 
 /**
  * pre-conditions:
@@ -74,7 +70,7 @@ extern XAresult android_Player_setPlayState(const android::sp<android::GenericPl
 /**
  * for all functions below: pre-condition: mp != NULL
  */
-extern XAresult android_Player_seek(CMediaPlayer *ap, SLmillisecond posMsec);
+extern XAresult android_Player_seek(CMediaPlayer *mp, SLmillisecond posMsec);
 extern XAresult android_Player_loop(CMediaPlayer *mp, SLboolean loopEnable);
 
 
