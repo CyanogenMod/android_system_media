@@ -42,6 +42,7 @@ short *buffers;
 
 static void callback(SLBufferQueueItf bufq, void *param)
 {
+    assert(NULL == param);
     if (!eof) {
         short *buffer = &buffers[framesPerBuffer * sfinfo.channels * which];
         sf_count_t count;
@@ -61,6 +62,7 @@ static void callback(SLBufferQueueItf bufq, void *param)
 int main(int argc, char **argv)
 {
     SLboolean enableReverb = SL_BOOLEAN_FALSE;
+    SLpermille rate = 1000;
 
     // process command-line options
     int i;
@@ -72,6 +74,8 @@ int main(int argc, char **argv)
             framesPerBuffer = atoi(&arg[2]);
         } else if (!strncmp(arg, "-n", 2)) {
             numBuffers = atoi(&arg[2]);
+        } else if (!strncmp(arg, "-p", 2)) {
+            rate = atoi(&arg[2]);
         } else if (!strcmp(arg, "-r")) {
             enableReverb = SL_BOOLEAN_TRUE;
         } else {
@@ -80,7 +84,7 @@ int main(int argc, char **argv)
     }
 
     if (argc - i != 1) {
-        fprintf(stderr, "usage: [-r] %s filename\n", argv[0]);
+        fprintf(stderr, "usage: [-f#] [-n] [-p#] [-r] %s filename\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -197,11 +201,11 @@ int main(int argc, char **argv)
     audioSnk.pFormat = NULL;
 
     // create audio player
-    SLInterfaceID ids2[2] = {SL_IID_BUFFERQUEUE, SL_IID_EFFECTSEND};
-    SLboolean req2[2] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+    SLInterfaceID ids2[3] = {SL_IID_BUFFERQUEUE, SL_IID_PLAYBACKRATE, SL_IID_EFFECTSEND};
+    SLboolean req2[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
     SLObjectItf playerObject;
     result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audioSrc,
-            &audioSnk, enableReverb ? 2 : 1, ids2, req2);
+            &audioSnk, enableReverb ? 3 : 2, ids2, req2);
     assert(SL_RESULT_SUCCESS == result);
 
     // realize the player
@@ -216,6 +220,28 @@ int main(int argc, char **argv)
         result = (*playerEffectSend)->EnableEffectSend(playerEffectSend, mixEnvironmentalReverb,
                 SL_BOOLEAN_TRUE, (SLmillibel) 0);
         assert(SL_RESULT_SUCCESS == result);
+    }
+
+    // get the playback rate interface and configure the rate
+    SLPlaybackRateItf playerPlaybackRate;
+    result = (*playerObject)->GetInterface(playerObject, SL_IID_PLAYBACKRATE, &playerPlaybackRate);
+    assert(SL_RESULT_SUCCESS == result);
+    SLpermille defaultRate;
+    result = (*playerPlaybackRate)->GetRate(playerPlaybackRate, &defaultRate);
+    assert(SL_RESULT_SUCCESS == result);
+    SLuint32 defaultProperties;
+    result = (*playerPlaybackRate)->GetProperties(playerPlaybackRate, &defaultProperties);
+    assert(SL_RESULT_SUCCESS == result);
+    printf("default playback rate %d per mille, properties 0x%x\n", defaultRate, defaultProperties);
+    if (rate != defaultRate) {
+        result = (*playerPlaybackRate)->SetRate(playerPlaybackRate, rate);
+        if (SL_RESULT_FEATURE_UNSUPPORTED == result) {
+            fprintf(stderr, "playback rate %d is unsupported\n", rate);
+        } else if (SL_RESULT_PARAMETER_INVALID == result) {
+            fprintf(stderr, "playback rate %d is invalid", rate);
+        } else {
+            assert(SL_RESULT_SUCCESS == result);
+        }
     }
 
     // get the play interface
