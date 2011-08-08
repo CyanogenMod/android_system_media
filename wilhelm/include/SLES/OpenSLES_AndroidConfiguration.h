@@ -19,6 +19,7 @@
 
 #ifdef __cplusplus
 extern "C" {
+#endif
 
 /*---------------------------------------------------------------------------*/
 /* Android AudioRecorder configuration                                       */
@@ -65,6 +66,7 @@ extern "C" {
 
 
 
+#ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
