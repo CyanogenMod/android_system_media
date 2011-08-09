@@ -176,7 +176,9 @@ public class NativeFrame extends Frame {
             throw new RuntimeException("Bitmap dimensions do not match native frame dimensions!");
         } else {
             Bitmap rgbaBitmap = convertBitmapToRGBA(bitmap);
-            if (!setNativeBitmap(rgbaBitmap, rgbaBitmap.getByteCount())) {
+            int byteCount = rgbaBitmap.getByteCount();
+            int bps = getFormat().getBytesPerSample();
+            if (!setNativeBitmap(rgbaBitmap, byteCount, bps)) {
                 throw new RuntimeException("Could not set native frame bitmap data!");
             }
         }
@@ -190,7 +192,9 @@ public class NativeFrame extends Frame {
         Bitmap result = Bitmap.createBitmap(getFormat().getWidth(),
                                             getFormat().getHeight(),
                                             Bitmap.Config.ARGB_8888);
-        if (!getNativeBitmap(result)) {
+        int byteCount = result.getByteCount();
+        int bps = getFormat().getBytesPerSample();
+        if (!getNativeBitmap(result, byteCount, bps)) {
             throw new RuntimeException("Could not get bitmap data from native frame!");
         }
         return result;
@@ -251,9 +255,9 @@ public class NativeFrame extends Frame {
 
     private native float[] getNativeFloats(int byteCount);
 
-    private native boolean setNativeBitmap(Bitmap bitmap, int size);
+    private native boolean setNativeBitmap(Bitmap bitmap, int size, int bytesPerSample);
 
-    private native boolean getNativeBitmap(Bitmap bitmap);
+    private native boolean getNativeBitmap(Bitmap bitmap, int size, int bytesPerSample);
 
     private native boolean nativeCopyFromNative(NativeFrame frame);
 
