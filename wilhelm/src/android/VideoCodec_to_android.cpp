@@ -162,11 +162,18 @@ SLresult android_videoCodec_getProfileLevelCombination(XAuint32 decoderId, XAuin
             }
             // we only look at the first codec, OpenMAX AL doesn't let you expose the capabilities
             //  of multiple codecs
+            //     set the fields we know about
             pDescr->codecId = decoderId;
             pDescr->profileSetting = convertOpenMaxIlToAl(VideoDecoderCapabilities[decoderIndex].
                     itemAt(0).mProfileLevels.itemAt(plIndex).mProfile);
             pDescr->levelSetting =  convertOpenMaxIlToAl(VideoDecoderCapabilities[decoderIndex].
                     itemAt(0).mProfileLevels.itemAt(plIndex).mLevel);
+            //     initialize the fields we don't know about
+            pDescr->maxWidth = 0;
+            pDescr->maxHeight = 0;
+            pDescr->maxFrameRate = 0;
+            pDescr->maxBitRate = 0;
+            pDescr->rateControlSupported = 0;
             break;
         }
         decoderIndex++;
