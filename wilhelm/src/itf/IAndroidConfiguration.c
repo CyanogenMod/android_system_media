@@ -26,26 +26,35 @@ static SLresult IAndroidConfiguration_SetConfiguration(SLAndroidConfigurationItf
 {
     SL_ENTER_INTERFACE
 
-    IAndroidConfiguration *thiz = (IAndroidConfiguration *) self;
-
-    interface_lock_exclusive(thiz);
-
-    // route configuration to the appropriate object
-    if (SL_OBJECTID_AUDIORECORDER == IObjectToObjectID((thiz)->mThis)) {
-        SL_LOGV("SetConfiguration issued for AudioRecorder key=%s valueSize=%u",
-                configKey, valueSize);
-        result = android_audioRecorder_setConfig((CAudioRecorder *) thiz->mThis, configKey,
-                pConfigValue, valueSize);
-    } else if (SL_OBJECTID_AUDIOPLAYER == IObjectToObjectID((thiz)->mThis)) {
-        SL_LOGV("SetConfiguration issued for AudioPlayer key=%s valueSize=%u",
-                configKey, valueSize);
-        result = android_audioPlayer_setConfig((CAudioPlayer *) thiz->mThis, configKey,
-                pConfigValue, valueSize);
-    } else {
+    // object-specific code will check that valueSize is large enough for the key
+    if (NULL == configKey || NULL == pConfigValue || valueSize == 0) {
         result = SL_RESULT_PARAMETER_INVALID;
-    }
 
-    interface_unlock_exclusive(thiz);
+    } else {
+        IAndroidConfiguration *thiz = (IAndroidConfiguration *) self;
+        interface_lock_exclusive(thiz);
+
+        // route configuration to the appropriate object
+        switch (IObjectToObjectID((thiz)->mThis)) {
+        case SL_OBJECTID_AUDIORECORDER:
+            SL_LOGV("SetConfiguration issued for AudioRecorder key=%s valueSize=%u",
+                    configKey, valueSize);
+            result = android_audioRecorder_setConfig((CAudioRecorder *) thiz->mThis, configKey,
+                    pConfigValue, valueSize);
+            break;
+        case SL_OBJECTID_AUDIOPLAYER:
+            SL_LOGV("SetConfiguration issued for AudioPlayer key=%s valueSize=%u",
+                    configKey, valueSize);
+            result = android_audioPlayer_setConfig((CAudioPlayer *) thiz->mThis, configKey,
+                    pConfigValue, valueSize);
+            break;
+        default:
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+            break;
+        }
+
+        interface_unlock_exclusive(thiz);
+    }
 
     SL_LEAVE_INTERFACE
 }
@@ -58,24 +67,26 @@ static SLresult IAndroidConfiguration_GetConfiguration(SLAndroidConfigurationItf
 {
     SL_ENTER_INTERFACE
 
-    // having value size is required, but pConfigValue being NULL is allowed to allow properties
-    // to report their actual value size (if applicable)
-    if (NULL == pValueSize) {
+    // non-NULL pValueSize is required, but a NULL pConfigValue is allowed, so
+    // that we can report the actual value size without returning the value itself
+    if (NULL == configKey || NULL == pValueSize) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IAndroidConfiguration *thiz = (IAndroidConfiguration *) self;
-
         interface_lock_exclusive(thiz);
 
         // route configuration request to the appropriate object
-        if (SL_OBJECTID_AUDIORECORDER == IObjectToObjectID((thiz)->mThis)) {
+        switch (IObjectToObjectID((thiz)->mThis)) {
+        case SL_OBJECTID_AUDIORECORDER:
             result = android_audioRecorder_getConfig((CAudioRecorder *) thiz->mThis, configKey,
                     pValueSize, pConfigValue);
-        } else if (SL_OBJECTID_AUDIOPLAYER == IObjectToObjectID((thiz)->mThis)) {
+            break;
+        case SL_OBJECTID_AUDIOPLAYER:
             result = android_audioPlayer_getConfig((CAudioPlayer *) thiz->mThis, configKey,
                     pValueSize, pConfigValue);
-        } else {
-            result = SL_RESULT_PARAMETER_INVALID;
+        default:
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+            break;
         }
 
         interface_unlock_exclusive(thiz);
