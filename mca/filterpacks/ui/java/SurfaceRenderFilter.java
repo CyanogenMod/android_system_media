@@ -100,11 +100,11 @@ public class SurfaceRenderFilter extends Filter implements SurfaceHolder.Callbac
 
     public void updateRenderMode() {
         if (mRenderModeString != null) {
-            if (mRenderModeString == "stretch") {
+            if (mRenderModeString.equals("stretch")) {
                 mRenderMode = RENDERMODE_STRETCH;
-            } else if (mRenderModeString == "fit") {
+            } else if (mRenderModeString.equals("fit")) {
                 mRenderMode = RENDERMODE_FIT;
-            } else if (mRenderModeString == "fill_crop") {
+            } else if (mRenderModeString.equals("fill_crop")) {
                 mRenderMode = RENDERMODE_FILL_CROP;
             } else {
                 throw new RuntimeException("Unknown render mode '" + mRenderModeString + "'!");
