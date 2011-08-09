@@ -100,7 +100,7 @@ public class FieldPort extends InputPort {
 
         // Store the object value
         Object value = frame.getObjectValue();
-        if (value != mValue) {
+        if ((value == null && mValue != null) || !value.equals(mValue)) {
             mValue = value;
             mValueWaiting = true;
         }

@@ -109,6 +109,10 @@ public class FilterFunction {
         return mFilter;
     }
 
+    public void setInputFrame(String input, Frame frame) {
+        mFilter.setInputFrame(input, frame);
+    }
+
     public void setInputValue(String input, Object value) {
         mFilter.setInputValue(input, value);
     }
