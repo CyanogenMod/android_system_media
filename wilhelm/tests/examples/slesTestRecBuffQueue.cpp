@@ -46,6 +46,9 @@ How to examine the output with Audacity:
 #include <SLES/OpenSLES_Android.h>
 #include <SLES/OpenSLES_AndroidConfiguration.h>
 
+/* Preset number to use for recording */
+SLuint32 presetValue = SL_ANDROID_RECORDING_PRESET_NONE;
+
 /* Explicitly requesting SL_IID_ANDROIDSIMPLEBUFFERQUEUE and SL_IID_ANDROIDCONFIGURATION
  * on the AudioRecorder object */
 #define NUM_EXPLICIT_INTERFACES_FOR_RECORDER 2
@@ -221,19 +224,24 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
     ExitOnError(result);
 
     /* Use the configuration interface to configure the recorder before it's realized */
-    SLuint32 presetValue = SL_ANDROID_RECORDING_PRESET_CAMCORDER;
-    result = (*configItf)->SetConfiguration(configItf, SL_ANDROID_KEY_RECORDING_PRESET,
-            &presetValue, sizeof(SLuint32));
-    ExitOnError(result);
-    fprintf(stdout, "Recorder parametrized\n");
+    if (presetValue != SL_ANDROID_RECORDING_PRESET_NONE) {
+        result = (*configItf)->SetConfiguration(configItf, SL_ANDROID_KEY_RECORDING_PRESET,
+                &presetValue, sizeof(SLuint32));
+        ExitOnError(result);
+        fprintf(stdout, "Recorder parameterized with preset %u\n", presetValue);
+    } else {
+        printf("Using default record preset\n");
+    }
 
-    presetValue = SL_ANDROID_RECORDING_PRESET_NONE;
+    SLuint32 presetRetrieved = SL_ANDROID_RECORDING_PRESET_NONE;
     SLuint32 presetSize = 2*sizeof(SLuint32); // intentionally too big
     result = (*configItf)->GetConfiguration(configItf, SL_ANDROID_KEY_RECORDING_PRESET,
-            &presetSize, (void*)&presetValue);
+            &presetSize, (void*)&presetRetrieved);
     ExitOnError(result);
-    if (presetValue != SL_ANDROID_RECORDING_PRESET_CAMCORDER) {
-        fprintf(stderr, "Error retrieved recording preset\n");
+    if (presetValue == SL_ANDROID_RECORDING_PRESET_NONE) {
+        printf("The default record preset appears to be %u\n", presetRetrieved);
+    } else if (presetValue != presetRetrieved) {
+        fprintf(stderr, "Error retrieving recording preset as %u instead of %u\n", presetRetrieved, presetValue);
         ExitOnError(SL_RESULT_INTERNAL_ERROR);
     }
 
@@ -315,13 +323,30 @@ int main(int argc, char* const argv[])
     SLresult    result;
     SLObjectItf sl;
 
+    const char *prog = argv[0];
     fprintf(stdout, "OpenSL ES test %s: exercises SLRecordItf and SLAndroidSimpleBufferQueueItf ",
-            argv[0]);
+            prog);
     fprintf(stdout, "on an AudioRecorder object\n");
 
-    if (argc < 2) {
-        fprintf(stdout, "Usage: \t%s destination_file duration_in_seconds\n", argv[0]);
-        fprintf(stdout, "Example: \"%s /sdcard/myrec.raw 4\" \n", argv[0]);
+    int i;
+    for (i = 1; i < argc; ++i) {
+        const char *arg = argv[i];
+        if (arg[0] != '-') {
+            break;
+        }
+        switch (arg[1]) {
+        case 'p':   // preset number
+            presetValue = atoi(&arg[2]);
+            break;
+        default:
+            fprintf(stderr, "%s: unknown option %s\n", prog, arg);
+            break;
+        }
+    }
+
+    if (argc-i < 2) {
+        fprintf(stdout, "Usage: \t%s [-p#] destination_file duration_in_seconds\n", prog);
+        fprintf(stdout, "Example: \"%s /sdcard/myrec.raw 4\" \n", prog);
         exit(EXIT_FAILURE);
     }
 
@@ -336,7 +361,7 @@ int main(int argc, char* const argv[])
     result = (*sl)->Realize(sl, SL_BOOLEAN_FALSE);
     ExitOnError(result);
 
-    TestRecToBuffQueue(sl, argv[1], (SLAint64)atoi(argv[2]));
+    TestRecToBuffQueue(sl, argv[i], (SLAint64)atoi(argv[i+1]));
 
     /* Shutdown OpenSL ES */
     (*sl)->Destroy(sl);
