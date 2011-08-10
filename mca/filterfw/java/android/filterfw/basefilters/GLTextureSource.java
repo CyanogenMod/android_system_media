@@ -45,6 +45,14 @@ public class GLTextureSource extends Filter {
     @GenerateFieldPort(name = "repeatFrame", hasDefault = true)
     private boolean mRepeatFrame = false;
 
+    /* This timestamp will be used for all output frames from this source.  They
+     * represent nanoseconds, and should be positive and monotonically
+     * increasing.  Set to Frame.TIMESTAMP_UNKNOWN if timestamps are not
+     * meaningful for these textures.
+     */
+    @GenerateFieldPort(name = "timestamp", hasDefault = true)
+    private long mTimestamp = Frame.TIMESTAMP_UNKNOWN;
+
     private Frame mFrame;
 
     public GLTextureSource(String name) {
@@ -76,7 +84,7 @@ public class GLTextureSource extends Filter {
             mFrame = context.getFrameManager().newBoundFrame(outputFormat,
                                                              GLFrame.EXISTING_TEXTURE_BINDING,
                                                              mTexId);
-            mFrame.setTimestamp(Frame.TIMESTAMP_UNKNOWN);
+            mFrame.setTimestamp(mTimestamp);
         }
 
         // Push output
