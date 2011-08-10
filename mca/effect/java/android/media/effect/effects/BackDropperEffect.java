@@ -42,21 +42,23 @@ public class BackDropperEffect extends FilterGraphEffect {
     private static final String mGraphDefinition =
             "@import android.filterpacks.base;\n" +
             "@import android.filterpacks.videoproc;\n" +
+            "@import android.filterpacks.videosrc;\n" +
             "\n" +
             "@filter GLTextureSource foreground {\n" +
             "  texId = 0;\n" + // Will be set by base class
             "  width = 0;\n" +
             "  height = 0;\n" +
+            "  repeatFrame = true;\n" +
             "}\n" +
             "\n" +
             "@filter MediaSource background {\n" +
-            "  sourceUrl = no_file_specified;\n" +
+            "  sourceUrl = \"no_file_specified\";\n" +
             "  waitForNewFrame = false;\n" +
             "  sourceIsUrl = true;\n" +
             "}\n" +
             "\n" +
             "@filter BackDropperFilter replacer {\n" +
-            "  learningDoneListener = $learningListener;\n" +
+            "  autowbToggle = 1;\n" +
             "}\n" +
             "\n" +
             "@filter GLTextureTarget output {\n" +
@@ -87,8 +89,8 @@ public class BackDropperEffect extends FilterGraphEffect {
     @Override
     public void setParameter(String parameterKey, Object value) {
         if (parameterKey.equals("source")) {
-            Filter replacer = mGraph.getFilter("replacer");
-            replacer.setInputValue("sourceUrl", value);
+            Filter background = mGraph.getFilter("background");
+            background.setInputValue("sourceUrl", value);
         }
     }
 
