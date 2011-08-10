@@ -37,6 +37,35 @@ SF_INFO sfinfo;
 unsigned which; // which buffer to use next
 SLboolean eof;  // whether we have hit EOF on input yet
 short *buffers;
+SLuint32 byteOrder; // desired to use for PCM buffers
+SLuint32 nativeByteOrder;   // of platform
+SLuint32 bitsPerSample = 16;
+
+// swap adjacent bytes; this would normally be in <unistd.h> but is missing here
+static void swab(const void *from, void *to, ssize_t n)
+{
+    // from and to as char pointers
+    const char *from_ch = (const char *) from;
+    char *to_ch = (char *) to;
+    // note that we don't swap the last odd byte
+    while (n >= 2) {
+        to_ch[0] = from_ch[1];
+        to_ch[1] = from_ch[0];
+        to_ch += 2;
+        from_ch += 2;
+        n -= 2;
+    }
+}
+
+// squeeze 16-bit signed PCM samples down to 8-bit unsigned PCM samples by truncation; no dithering
+static void squeeze(const short *from, unsigned char *to, ssize_t n)
+{
+    // note that we don't squeeze the last odd byte
+    while (n >= 2) {
+        *to++ = (*from++ + 32768) >> 8;
+        n -= 2;
+    }
+}
 
 // This callback is called each time a buffer finishes playing
 
@@ -50,8 +79,15 @@ static void callback(SLBufferQueueItf bufq, void *param)
         if (0 >= count) {
             eof = SL_BOOLEAN_TRUE;
         } else {
-            SLresult result = (*bufq)->Enqueue(bufq, buffer, count * sfinfo.channels *
-                    sizeof(short));
+            SLuint32 nbytes = count * sfinfo.channels * sizeof(short);
+            if (byteOrder != nativeByteOrder) {
+                swab(buffer, buffer, nbytes);
+            }
+            if (bitsPerSample == 8) {
+                squeeze(buffer, (unsigned char *) buffer, nbytes);
+                nbytes /= 2;
+            }
+            SLresult result = (*bufq)->Enqueue(bufq, buffer, nbytes);
             assert(SL_RESULT_SUCCESS == result);
             if (++which >= numBuffers)
                 which = 0;
@@ -61,6 +97,22 @@ static void callback(SLBufferQueueItf bufq, void *param)
 
 int main(int argc, char **argv)
 {
+    // Determine the native byte order (SL_BYTEORDER_NATIVE not available until 1.1)
+    union {
+        short s;
+        char c[2];
+    } u;
+    u.s = 0x1234;
+    if (u.c[0] == 0x34) {
+        nativeByteOrder = SL_BYTEORDER_LITTLEENDIAN;
+    } else if (u.c[0] == 0x12) {
+        nativeByteOrder = SL_BYTEORDER_BIGENDIAN;
+    } else {
+        fprintf(stderr, "Unable to determine native byte order\n");
+        return EXIT_FAILURE;
+    }
+    byteOrder = nativeByteOrder;
+
     SLboolean enableReverb = SL_BOOLEAN_FALSE;
     SLpermille rate = 1000;
 
@@ -70,7 +122,13 @@ int main(int argc, char **argv)
         char *arg = argv[i];
         if (arg[0] != '-')
             break;
-        if (!strncmp(arg, "-f", 2)) {
+        if (!strcmp(arg, "-b")) {
+            byteOrder = SL_BYTEORDER_BIGENDIAN;
+        } else if (!strcmp(arg, "-l")) {
+            byteOrder = SL_BYTEORDER_LITTLEENDIAN;
+        } else if (!strcmp(arg, "-8")) {
+            bitsPerSample = 8;
+        } else if (!strncmp(arg, "-f", 2)) {
             framesPerBuffer = atoi(&arg[2]);
         } else if (!strncmp(arg, "-n", 2)) {
             numBuffers = atoi(&arg[2]);
@@ -84,7 +142,7 @@ int main(int argc, char **argv)
     }
 
     if (argc - i != 1) {
-        fprintf(stderr, "usage: [-f#] [-n] [-p#] [-r] %s filename\n", argv[0]);
+        fprintf(stderr, "usage: [-b/l] [-8] [-f#] [-n#] [-p#] [-r] %s filename\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -183,11 +241,11 @@ int main(int argc, char **argv)
     format_pcm.formatType = SL_DATAFORMAT_PCM;
     format_pcm.numChannels = sfinfo.channels;
     format_pcm.samplesPerSec = sfinfo.samplerate * 1000;
-    format_pcm.bitsPerSample = 16;
+    format_pcm.bitsPerSample = bitsPerSample;
     format_pcm.containerSize = format_pcm.bitsPerSample;
     format_pcm.channelMask = 1 == format_pcm.numChannels ? SL_SPEAKER_FRONT_CENTER :
             SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
-    format_pcm.endianness = SL_BYTEORDER_LITTLEENDIAN;
+    format_pcm.endianness = byteOrder;
     SLDataSource audioSrc;
     audioSrc.pLocator = &loc_bufq;
     audioSrc.pFormat = &format_pcm;
@@ -267,8 +325,15 @@ int main(int argc, char **argv)
         }
 
         // enqueue a buffer
-        result = (*playerBufferQueue)->Enqueue(playerBufferQueue, buffer, count * sfinfo.channels *
-                sizeof(short));
+        SLuint32 nbytes = count * sfinfo.channels * sizeof(short);
+        if (byteOrder != nativeByteOrder) {
+            swab(buffer, buffer, nbytes);
+        }
+        if (bitsPerSample == 8) {
+            squeeze(buffer, (unsigned char *) buffer, nbytes);
+            nbytes /= 2;
+        }
+        result = (*playerBufferQueue)->Enqueue(playerBufferQueue, buffer, nbytes);
         assert(SL_RESULT_SUCCESS == result);
     }
     if (which >= numBuffers)
