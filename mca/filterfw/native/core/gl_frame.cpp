@@ -170,10 +170,12 @@ bool GLFrame::CopyDataTo(uint8_t* buffer, int size) {
 }
 
 bool GLFrame::CopyPixelsTo(uint8_t* buffer) {
-  if (texture_state_ == kStateComplete)
-    return ReadTexturePixels(buffer);
-  else if (fbo_state_ == kStateComplete)
+  // Use one of the pixel reading methods below, ordered from most
+  // efficient to least efficient.
+  if (fbo_state_ == kStateComplete)
     return ReadFboPixels(buffer);
+  else if (texture_state_ == kStateComplete)
+    return ReadTexturePixels(buffer);
   else
     return false;
 }
