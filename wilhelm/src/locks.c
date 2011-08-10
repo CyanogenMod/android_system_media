@@ -152,10 +152,20 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
     }
 
 #ifdef ANDROID
-    // hack to safely handle a post-unlock AudioTrack::start()
+    // FIXME hack to safely handle a post-unlock PrefetchStatus callback and/or AudioTrack::start()
+    slPrefetchCallback prefetchCallback = NULL;
+    void *prefetchContext = NULL;
+    SLuint32 prefetchEvents = SL_PREFETCHEVENT_NONE;
     android::sp<android::AudioTrackProxy> audioTrack;
     if (SL_OBJECTID_AUDIOPLAYER == objectID) {
         CAudioPlayer *ap = (CAudioPlayer *) thiz;
+        prefetchCallback = ap->mPrefetchStatus.mDeferredPrefetchCallback;
+        prefetchContext  = ap->mPrefetchStatus.mDeferredPrefetchContext;
+        prefetchEvents   = ap->mPrefetchStatus.mDeferredPrefetchEvents;
+        ap->mPrefetchStatus.mDeferredPrefetchCallback = NULL;
+        // clearing these next two fields is not required, but avoids stale data during debugging
+        ap->mPrefetchStatus.mDeferredPrefetchContext  = NULL;
+        ap->mPrefetchStatus.mDeferredPrefetchEvents   = SL_PREFETCHEVENT_NONE;
         if (ap->mDeferredStart) {
             audioTrack = ap->mAudioTrack;
             ap->mDeferredStart = false;
@@ -172,6 +182,22 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
     assert(0 == ok);
 
 #ifdef ANDROID
+    // FIXME call the prefetch status callback while not holding the mutex on AudioPlayer
+    if (NULL != prefetchCallback) {
+        // note these are synchronous by the application's thread as it is about to return from API
+        assert(prefetchEvents != SL_PREFETCHEVENT_NONE);
+        CAudioPlayer *ap = (CAudioPlayer *) thiz;
+        // spec requires separate callbacks for each event
+        if (SL_PREFETCHEVENT_STATUSCHANGE & prefetchEvents) {
+            (*prefetchCallback)(&ap->mPrefetchStatus.mItf, prefetchContext,
+                    SL_PREFETCHEVENT_STATUSCHANGE);
+        }
+        if (SL_PREFETCHEVENT_FILLLEVELCHANGE & prefetchEvents) {
+            (*prefetchCallback)(&ap->mPrefetchStatus.mItf, prefetchContext,
+                    SL_PREFETCHEVENT_FILLLEVELCHANGE);
+        }
+    }
+
     // call AudioTrack::start() while not holding the mutex on AudioPlayer
     if (audioTrack != 0) {
         audioTrack->start();

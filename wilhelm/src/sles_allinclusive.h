@@ -441,3 +441,5 @@ extern LI_API SLresult liQuerySupportedInterfaces(SLuint32 index, SLInterfaceID 
 #define EnqueueAsyncCallback_piipp(object, handler, p1, i1, i2, p2, p3) \
         ThreadPool_add_piipp(&(object)->mObject.mEngine->mThreadPool, \
             (ClosureHandler_piipp) (handler), (p1), (i1), (i2), (p2), (p3))
+
+#define SL_PREFETCHEVENT_NONE ((SLuint32) 0)    // placeholder for non-existent SL_PREFETCHEVENT_*

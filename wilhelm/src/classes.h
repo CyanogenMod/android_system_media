@@ -112,7 +112,7 @@
      * Attenuation factor derived from direct level
      */
     float mAmplFromDirectLevel;
-    /** whether to call AudioTrack::start() at the next safe opportunity */
+    /** FIXME whether to call AudioTrack::start() at the next safe opportunity */
     bool mDeferredStart;
 #endif
 } /*CAudioPlayer*/;
