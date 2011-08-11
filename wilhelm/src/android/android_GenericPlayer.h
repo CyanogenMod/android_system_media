@@ -61,8 +61,8 @@ public:
     virtual void init(const notif_cbf_t cbf, void* notifUser);
     virtual void preDestroy();
 
-    virtual void setDataSource(const char *uri);
-    virtual void setDataSource(int fd, int64_t offset, int64_t length);
+    void setDataSource(const char *uri);
+    void setDataSource(int fd, int64_t offset, int64_t length, bool closeAfterUse = false);
 
             void prepare();
     virtual void play();

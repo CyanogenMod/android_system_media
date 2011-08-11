@@ -59,6 +59,12 @@ void LocAVPlayer::onPrepare() {
             if (mPlayer == NULL) {
                 SL_LOGE("media player service failed to create player by FD");
             }
+            // Binder dups the fd for use by mediaserver, so if we own the fd then OK to close now
+            if (mDataLocator.fdi.mCloseAfterUse) {
+                (void) ::close(mDataLocator.fdi.fd);
+                mDataLocator.fdi.fd = -1;
+                mDataLocator.fdi.mCloseAfterUse = false;
+            }
             break;
         case kDataLocatorNone:
             SL_LOGE("no data locator for MediaPlayer object");

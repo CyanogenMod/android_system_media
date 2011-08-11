@@ -57,6 +57,7 @@ GenericPlayer::GenericPlayer(const AudioPlayback_Parameters* params) :
 GenericPlayer::~GenericPlayer() {
     SL_LOGV("GenericPlayer::~GenericPlayer()");
 
+    resetDataLocator();
 }
 
 
@@ -97,8 +98,9 @@ void GenericPlayer::setDataSource(const char *uri) {
 }
 
 
-void GenericPlayer::setDataSource(int fd, int64_t offset, int64_t length) {
-    SL_LOGV("GenericPlayer::setDataSource(fd=%d, offset=%lld, length=%lld)", fd, offset, length);
+void GenericPlayer::setDataSource(int fd, int64_t offset, int64_t length, bool closeAfterUse) {
+    SL_LOGV("GenericPlayer::setDataSource(fd=%d, offset=%lld, length=%lld, closeAfterUse=%s)", fd,
+            offset, length, closeAfterUse ? "true" : "false");
     resetDataLocator();
 
     mDataLocator.fdi.fd = fd;
@@ -123,6 +125,8 @@ void GenericPlayer::setDataSource(int fd, int64_t offset, int64_t length) {
     } else {
         mDataLocator.fdi.length = length;
     }
+
+    mDataLocator.fdi.mCloseAfterUse = closeAfterUse;
 
     mDataLocatorType = kDataLocatorFd;
 }
@@ -262,6 +266,12 @@ void GenericPlayer::setPlayEvents(int32_t eventFlags, int32_t markerPositionMs,
  */
 void GenericPlayer::resetDataLocator() {
     SL_LOGV("GenericPlayer::resetDataLocator()");
+    if (mDataLocatorType == kDataLocatorFd && mDataLocator.fdi.mCloseAfterUse) {
+        (void) ::close(mDataLocator.fdi.fd);
+        // would be redundant, as we're about to invalidate the union mDataLocator
+        //mDataLocator.fdi.fd = -1;
+        //mDataLocator.fdi.mCloseAfterUse = false;
+    }
     mDataLocatorType = kDataLocatorNone;
 }
 

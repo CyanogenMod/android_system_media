@@ -211,8 +211,15 @@ void AudioSfDecoder::onPrepare() {
 
     case kDataLocatorFd:
     {
-        dataSource = new FileSource(
-                mDataLocator.fdi.fd, mDataLocator.fdi.offset, mDataLocator.fdi.length);
+        // As FileSource unconditionally takes ownership of the fd and closes it, then
+        // we have to make a dup for FileSource if the app wants to keep ownership itself
+        int fd = mDataLocator.fdi.fd;
+        if (mDataLocator.fdi.mCloseAfterUse) {
+            mDataLocator.fdi.mCloseAfterUse = false;
+        } else {
+            fd = ::dup(fd);
+        }
+        dataSource = new FileSource(fd, mDataLocator.fdi.offset, mDataLocator.fdi.length);
         status_t err = dataSource->initCheck();
         if (err != OK) {
             notifyPrepared(err);
