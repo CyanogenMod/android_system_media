@@ -80,25 +80,25 @@ static SLresult IEqualizer_IsEnabled(SLEqualizerItf self, SLboolean *pEnabled)
 {
     SL_ENTER_INTERFACE
 
-      if (NULL == pEnabled) {
-          result = SL_RESULT_PARAMETER_INVALID;
-      } else {
-          IEqualizer *thiz = (IEqualizer *) self;
-          interface_lock_exclusive(thiz);
-          SLboolean enabled = thiz->mEnabled;
+    if (NULL == pEnabled) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IEqualizer *thiz = (IEqualizer *) self;
+        interface_lock_exclusive(thiz);
+        SLboolean enabled = thiz->mEnabled;
  #if !defined(ANDROID)
-          *pEnabled = enabled;
-          result = SL_RESULT_SUCCESS;
+        *pEnabled = enabled;
+        result = SL_RESULT_SUCCESS;
  #else
-          if (NO_EQ(thiz)) {
-              result = SL_RESULT_CONTROL_LOST;
-          } else {
-              *pEnabled = (SLboolean) thiz->mEqEffect->getEnabled();
-              result = SL_RESULT_SUCCESS;
-          }
+        if (NO_EQ(thiz)) {
+            result = SL_RESULT_CONTROL_LOST;
+        } else {
+            *pEnabled = (SLboolean) thiz->mEqEffect->getEnabled();
+            result = SL_RESULT_SUCCESS;
+        }
  #endif
-          interface_unlock_exclusive(thiz);
-      }
+        interface_unlock_exclusive(thiz);
+    }
 
       SL_LEAVE_INTERFACE
 }

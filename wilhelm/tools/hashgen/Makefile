@@ -58,7 +58,7 @@ part5gen : part5gen.o OpenSLES_IID.o interfaces.o
 
 clean :
 	$(RM) part5gen frag1 *.o
-	$(RM) part23in.gperf part5gen.c part23in.c 
+	$(RM) part23in.gperf part5gen.c part23in.c
 	$(RM) part2.c part3.c part5.c part7.c
 
 distclean : clean

@@ -64,27 +64,27 @@ static SLresult IVirtualizer_IsEnabled(SLVirtualizerItf self, SLboolean *pEnable
 {
     SL_ENTER_INTERFACE
 
-     if (NULL == pEnabled) {
-         result = SL_RESULT_PARAMETER_INVALID;
-     } else {
-         IVirtualizer *thiz = (IVirtualizer *) self;
-         interface_lock_exclusive(thiz);
-         SLboolean enabled = thiz->mEnabled;
+    if (NULL == pEnabled) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IVirtualizer *thiz = (IVirtualizer *) self;
+        interface_lock_exclusive(thiz);
+        SLboolean enabled = thiz->mEnabled;
 #if !defined(ANDROID)
-         *pEnabled = enabled;
-         result = SL_RESULT_SUCCESS;
+        *pEnabled = enabled;
+        result = SL_RESULT_SUCCESS;
 #else
-         if (NO_VIRTUALIZER(thiz)) {
-             result = SL_RESULT_CONTROL_LOST;
-         } else {
-             *pEnabled = (SLboolean) thiz->mVirtualizerEffect->getEnabled();
-             result = SL_RESULT_SUCCESS;
-         }
+        if (NO_VIRTUALIZER(thiz)) {
+            result = SL_RESULT_CONTROL_LOST;
+        } else {
+            *pEnabled = (SLboolean) thiz->mVirtualizerEffect->getEnabled();
+            result = SL_RESULT_SUCCESS;
+        }
 #endif
-         interface_unlock_exclusive(thiz);
-     }
+        interface_unlock_exclusive(thiz);
+    }
 
-     SL_LEAVE_INTERFACE
+    SL_LEAVE_INTERFACE
 }
 
 
@@ -92,27 +92,27 @@ static SLresult IVirtualizer_SetStrength(SLVirtualizerItf self, SLpermille stren
 {
     SL_ENTER_INTERFACE
 
-     if ((VIRTUALIZER_STRENGTH_MIN > strength) || (VIRTUALIZER_STRENGTH_MAX < strength)) {
-         result = SL_RESULT_PARAMETER_INVALID;
-     } else {
-         IVirtualizer *thiz = (IVirtualizer *) self;
-         interface_lock_exclusive(thiz);
+    if ((VIRTUALIZER_STRENGTH_MIN > strength) || (VIRTUALIZER_STRENGTH_MAX < strength)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IVirtualizer *thiz = (IVirtualizer *) self;
+        interface_lock_exclusive(thiz);
 #if !defined(ANDROID)
-         thiz->mStrength = strength;
-         result = SL_RESULT_SUCCESS;
+        thiz->mStrength = strength;
+        result = SL_RESULT_SUCCESS;
 #else
-         if (NO_VIRTUALIZER(thiz)) {
-             result = SL_RESULT_CONTROL_LOST;
-         } else {
-             android::status_t status = android_virt_setParam(thiz->mVirtualizerEffect,
-                     VIRTUALIZER_PARAM_STRENGTH, &strength);
-             result = android_fx_statusToResult(status);
-         }
+        if (NO_VIRTUALIZER(thiz)) {
+            result = SL_RESULT_CONTROL_LOST;
+        } else {
+            android::status_t status = android_virt_setParam(thiz->mVirtualizerEffect,
+                    VIRTUALIZER_PARAM_STRENGTH, &strength);
+            result = android_fx_statusToResult(status);
+        }
 #endif
-         interface_unlock_exclusive(thiz);
-     }
+        interface_unlock_exclusive(thiz);
+    }
 
-     SL_LEAVE_INTERFACE
+    SL_LEAVE_INTERFACE
 }
 
 

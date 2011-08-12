@@ -445,7 +445,7 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
 
     // start the playback
     res = (*playerPlayItf)->SetPlayState(playerPlayItf, XA_PLAYSTATE_PLAYING);
-        assert(XA_RESULT_SUCCESS == res);
+    assert(XA_RESULT_SUCCESS == res);
 
     return JNI_TRUE;
 }

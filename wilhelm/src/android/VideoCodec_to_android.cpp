@@ -181,7 +181,7 @@ SLresult android_videoCodec_getProfileLevelCombination(XAuint32 decoderId, XAuin
             pDescr->codecId = decoderId;
             pDescr->profileSetting = convertOpenMaxIlToAl(VideoDecoderCapabilities[decoderIndex].
                     itemAt(0).mProfileLevels.itemAt(plIndex).mProfile);
-            pDescr->levelSetting =  convertOpenMaxIlToAl(VideoDecoderCapabilities[decoderIndex].
+            pDescr->levelSetting = convertOpenMaxIlToAl(VideoDecoderCapabilities[decoderIndex].
                     itemAt(0).mProfileLevels.itemAt(plIndex).mLevel);
             //     initialize the fields we don't know about
             pDescr->maxWidth = 0;
