@@ -64,7 +64,7 @@ public:
     virtual void setDataSource(const char *uri);
     virtual void setDataSource(int fd, int64_t offset, int64_t length);
 
-    virtual void prepare();
+            void prepare();
     virtual void play();
     virtual void pause();
     virtual void stop();

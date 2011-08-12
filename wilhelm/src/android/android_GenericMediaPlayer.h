@@ -98,11 +98,10 @@ protected:
     // Receives Android MediaPlayer events from mPlayer
     sp<MediaPlayerNotificationClient> mPlayerClient;
 
-    sp<IServiceManager> mServiceManager;
-    sp<IBinder> mBinder;
-    sp<IMediaPlayerService> mMediaPlayerService;
-
-    Parcel metadatafilter;
+    // Return a reference to the media player service, or LOGE and return NULL after retries fail
+    static const sp<IMediaPlayerService> getMediaPlayerService() {
+        return IMediaDeathNotifier::getMediaPlayerService();
+    }
 
 private:
     DISALLOW_EVIL_CONSTRUCTORS(GenericMediaPlayer);

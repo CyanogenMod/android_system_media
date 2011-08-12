@@ -316,14 +316,22 @@ void StreamPlayer::onPrepare() {
     SL_LOGD("StreamPlayer::onPrepare()");
     Mutex::Autolock _l(mAppProxyLock);
     if (mAppProxy != 0) {
-        mPlayer = mMediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
-                mAppProxy /*IStreamSource*/, mPlaybackParams.sessionId);
-        // blocks until mPlayer is prepared
-        GenericMediaPlayer::onPrepare();
-        SL_LOGD("StreamPlayer::onPrepare() done");
+        sp<IMediaPlayerService> mediaPlayerService(getMediaPlayerService());
+        if (mediaPlayerService != NULL) {
+            mPlayer = mediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
+                    mAppProxy /*IStreamSource*/, mPlaybackParams.sessionId);
+            if (mPlayer == NULL) {
+                SL_LOGE("media player service failed to create player by app proxy");
+            }
+        }
     } else {
         SL_LOGE("Nothing to do here because there is no registered callback");
     }
+    if (mPlayer == NULL) {
+        mStateFlags |= kFlagPreparedUnsuccessfully;
+    }
+    GenericMediaPlayer::onPrepare();
+    SL_LOGD("StreamPlayer::onPrepare() done");
 }
 
 
