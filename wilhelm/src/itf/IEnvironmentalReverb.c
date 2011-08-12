@@ -76,7 +76,7 @@ static SLresult IEnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self,
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
@@ -90,7 +90,7 @@ static SLresult IEnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self,
 #endif
         *pRoom = thiz->mProperties.roomLevel;
 
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
 
     }
 
@@ -138,7 +138,7 @@ static SLresult IEnvironmentalReverb_GetRoomHFLevel(
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
@@ -152,7 +152,7 @@ static SLresult IEnvironmentalReverb_GetRoomHFLevel(
 #endif
         *pRoomHF = thiz->mProperties.roomHFLevel;
 
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -197,7 +197,7 @@ static SLresult IEnvironmentalReverb_GetDecayTime(
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
@@ -211,7 +211,7 @@ static SLresult IEnvironmentalReverb_GetDecayTime(
 #endif
         *pDecayTime = thiz->mProperties.decayTime;
 
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -256,7 +256,7 @@ static SLresult IEnvironmentalReverb_GetDecayHFRatio(
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
@@ -270,7 +270,7 @@ static SLresult IEnvironmentalReverb_GetDecayHFRatio(
 #endif
         *pDecayHFRatio = thiz->mProperties.decayHFRatio;
 
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -317,7 +317,7 @@ static SLresult IEnvironmentalReverb_GetReflectionsLevel(
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
@@ -331,7 +331,7 @@ static SLresult IEnvironmentalReverb_GetReflectionsLevel(
 #endif
         *pReflectionsLevel = thiz->mProperties.reflectionsLevel;
 
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -376,7 +376,7 @@ static SLresult IEnvironmentalReverb_GetReflectionsDelay(
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
@@ -390,7 +390,7 @@ static SLresult IEnvironmentalReverb_GetReflectionsDelay(
 #endif
         *pReflectionsDelay = thiz->mProperties.reflectionsDelay;
 
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -437,7 +437,7 @@ static SLresult IEnvironmentalReverb_GetReverbLevel(
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
@@ -451,7 +451,7 @@ static SLresult IEnvironmentalReverb_GetReverbLevel(
 #endif
         *pReverbLevel = thiz->mProperties.reverbLevel;
 
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -496,7 +496,7 @@ static SLresult IEnvironmentalReverb_GetReverbDelay(
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
@@ -510,7 +510,7 @@ static SLresult IEnvironmentalReverb_GetReverbDelay(
 #endif
         *pReverbDelay = thiz->mProperties.reverbDelay;
 
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -555,7 +555,7 @@ static SLresult IEnvironmentalReverb_GetDiffusion(SLEnvironmentalReverbItf self,
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
@@ -569,7 +569,7 @@ static SLresult IEnvironmentalReverb_GetDiffusion(SLEnvironmentalReverbItf self,
 #endif
         *pDiffusion = thiz->mProperties.diffusion;
 
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -613,7 +613,7 @@ static SLresult IEnvironmentalReverb_GetDensity(SLEnvironmentalReverbItf self,
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
@@ -627,7 +627,7 @@ static SLresult IEnvironmentalReverb_GetDensity(SLEnvironmentalReverbItf self,
 #endif
         *pDensity = thiz->mProperties.density;
 
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
     }
 
     SL_LEAVE_INTERFACE

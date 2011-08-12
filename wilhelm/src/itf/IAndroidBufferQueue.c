@@ -323,9 +323,9 @@ static SLresult IAndroidBufferQueue_GetCallbackEventsMask(SLAndroidBufferQueueIt
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IAndroidBufferQueue *thiz = (IAndroidBufferQueue *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLuint32 callbackEventsMask = thiz->mCallbackEventsMask;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pEventFlags = callbackEventsMask;
         result = SL_RESULT_SUCCESS;
     }

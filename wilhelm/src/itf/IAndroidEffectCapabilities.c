@@ -28,12 +28,12 @@ static SLresult IAndroidEffectCapabilities_QueryNumEffects(SLAndroidEffectCapabi
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IAndroidEffectCapabilities *thiz = (IAndroidEffectCapabilities *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
 
         *pNumSupportedAudioEffects = thiz->mNumFx;
         result = SL_RESULT_SUCCESS;
 
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
     }
 
     SL_LEAVE_INTERFACE
@@ -50,7 +50,7 @@ static SLresult IAndroidEffectCapabilities_QueryEffect(SLAndroidEffectCapabiliti
     if (index > thiz->mNumFx) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         if (NULL != pEffectType) {
             *pEffectType = (SLInterfaceID) &thiz->mFxDescriptors[index].type;
         }
@@ -63,7 +63,7 @@ static SLresult IAndroidEffectCapabilities_QueryEffect(SLAndroidEffectCapabiliti
                     *pNameSize > len ? len : *pNameSize );
             *pNameSize = len;
         }
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         result = SL_RESULT_SUCCESS;
     }
 

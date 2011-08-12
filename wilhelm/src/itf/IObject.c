@@ -289,10 +289,9 @@ static SLresult IObject_GetState(SLObjectItf self, SLuint32 *pState)
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IObject *thiz = (IObject *) self;
-        // Note that the state is immediately obsolete, so a peek lock is safe
-        object_lock_peek(thiz);
+        object_lock_shared(thiz);
         SLuint8 state = thiz->mState;
-        object_unlock_peek(thiz);
+        object_unlock_shared(thiz);
         // Re-map the realizing, resuming, and suspending states
         switch (state) {
         case SL_OBJECT_STATE_REALIZING_1:
