@@ -205,11 +205,6 @@ public class BackDropperFilter extends Filter {
             "const float min_variance = inv_var_scale *" + MIN_VARIANCE + "/ 256.;\n" +
             "const float auto_wb_scale = " + DEFAULT_AUTO_WB_SCALE + ";\n" +
             "\n" +
-            // Weighted sum of variance between current pixel value and background model
-            "float gauss_dist(vec3 x, vec3 mean, vec3 variance) {\n" +
-            "  vec3 dist = (x - mean) * (x - mean) / variance;\n" +
-            "  return dot(dist, yuv_weights.rgg);\n" +
-            "}\n" +
             // Variance distance in luminance between current pixel and background model
             "float gauss_dist_y(float y, float mean, float variance) {\n" +
             "  float dist = (y - mean) * (y - mean) / variance;\n" +
