@@ -19,6 +19,7 @@
 #include "android/android_AudioToCbRenderer.h"
 #include "android/android_StreamPlayer.h"
 #include "android/android_LocAVPlayer.h"
+#include "android/include/AacBqToPcmCbRenderer.h"
 
 #include <system/audio.h>
 
@@ -633,6 +634,7 @@ AndroidObjectType audioPlayer_getAndroidObjectTypeForSourceSink(CAudioPlayer *ap
     //     SL_DATALOCATOR_URI                        / SL_DATALOCATOR_OUTPUTMIX
     //     SL_DATALOCATOR_ANDROIDFD                  / SL_DATALOCATOR_OUTPUTMIX
     //     SL_DATALOCATOR_ANDROIDBUFFERQUEUE         / SL_DATALOCATOR_OUTPUTMIX
+    //     SL_DATALOCATOR_ANDROIDBUFFERQUEUE         / SL_DATALOCATOR_BUFFERQUEUE
     //     SL_DATALOCATOR_URI                        / SL_DATALOCATOR_BUFFERQUEUE
     //     SL_DATALOCATOR_ANDROIDFD                  / SL_DATALOCATOR_BUFFERQUEUE
     //     SL_DATALOCATOR_URI                        / SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE
@@ -675,6 +677,11 @@ AndroidObjectType audioPlayer_getAndroidObjectTypeForSourceSink(CAudioPlayer *ap
         case SL_DATALOCATOR_URI:
         case SL_DATALOCATOR_ANDROIDFD:
             type = AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE;
+            break;
+
+        //   AAC ADTS Android buffer queue decoded to PCM in a buffer queue
+        case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
+            type = AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE;
             break;
 
         default:
@@ -1076,9 +1083,33 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
         case SL_DATAFORMAT_MIME:
         {
             SLDataFormat_MIME *df_mime = (SLDataFormat_MIME *) pAudioSrc->pFormat;
-            if (SL_CONTAINERTYPE_MPEG_TS != df_mime->containerType) {
+            if (NULL == df_mime) {
+                SL_LOGE("MIME type null invalid");
+                return SL_RESULT_CONTENT_UNSUPPORTED;
+            }
+            SL_LOGD("source MIME is %s", (char*)df_mime->mimeType);
+            switch(df_mime->containerType) {
+            case SL_CONTAINERTYPE_MPEG_TS:
+                if (strcasecmp((char*)df_mime->mimeType, ANDROID_MIME_MP2TS)) {
+                    SL_LOGE("Invalid MIME (%s) for container SL_CONTAINERTYPE_MPEG_TS, expects %s",
+                            (char*)df_mime->mimeType, ANDROID_MIME_MP2TS);
+                    return SL_RESULT_CONTENT_UNSUPPORTED;
+                }
+                break;
+            case SL_CONTAINERTYPE_RAW:
+            case SL_CONTAINERTYPE_AAC:
+                if (strcasecmp((char*)df_mime->mimeType, ANDROID_MIME_AACADTS) &&
+                        strcasecmp((char*)df_mime->mimeType,
+                                ANDROID_MIME_AACADTS_ANDROID_FRAMEWORK)) {
+                    SL_LOGE("Invalid MIME (%s) for container type %d, expects %s",
+                            (char*)df_mime->mimeType, df_mime->containerType,
+                            ANDROID_MIME_AACADTS);
+                    return SL_RESULT_CONTENT_UNSUPPORTED;
+                }
+                break;
+            default:
                 SL_LOGE("Cannot create player with SL_DATALOCATOR_ANDROIDBUFFERQUEUE data source "
-                        "that is not fed MPEG-2 TS data");
+                                        "that is not fed MPEG-2 TS data or AAC ADTS data");
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
         }
@@ -1485,7 +1516,9 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         android::AudioToCbRenderer* decoder = new android::AudioToCbRenderer(&app);
         pAudioPlayer->mAPlayer = decoder;
+        // configures the callback for the sink buffer queue
         decoder->setDataPushListener(adecoder_writeToBufferQueue, (void*)pAudioPlayer);
+        // configures the callback for the notifications coming from the SF code
         decoder->init(sfplayer_handlePrefetchEvent, (void*)pAudioPlayer);
 
         switch (pAudioPlayer->mDataSource.mLocator.mLocatorType) {
@@ -1506,6 +1539,27 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
             SL_LOGE(ERROR_PLAYERREALIZE_UNKNOWN_DATASOURCE_LOCATOR);
             break;
         }
+
+        object_unlock_exclusive(&pAudioPlayer->mObject);
+        }
+        break;
+    //-----------------------------------
+    // AacBqToPcmCbRenderer
+    case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE: {
+        object_lock_exclusive(&pAudioPlayer->mObject);
+
+        AudioPlayback_Parameters app;
+        app.sessionId = pAudioPlayer->mSessionId;
+        app.streamType = pAudioPlayer->mStreamType;
+        app.trackcb = NULL;
+        app.trackcbUser = NULL;
+        android::AacBqToPcmCbRenderer* bqtobq = new android::AacBqToPcmCbRenderer(&app);
+        // configures the callback for the sink buffer queue
+        bqtobq->setDataPushListener(adecoder_writeToBufferQueue, (void*)pAudioPlayer);
+        pAudioPlayer->mAPlayer = bqtobq;
+        // configures the callback for the notifications coming from the SF code,
+        // but also implicitly configures the AndroidBufferQueue from which ADTS data is read
+        pAudioPlayer->mAPlayer->init(sfplayer_handlePrefetchEvent, (void*)pAudioPlayer);
 
         object_unlock_exclusive(&pAudioPlayer->mObject);
         }
@@ -1586,7 +1640,8 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
 
     case AUDIOPLAYER_FROM_URIFD:     // intended fall-through
     case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE:    // intended fall-through
-    case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+    case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE: // intended fall-through
+    case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
         pAudioPlayer->mAPlayer.clear();
         break;
     //-----------------------------------
@@ -1857,7 +1912,8 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
 
     case AUDIOPLAYER_FROM_URIFD:      // intended fall-through
     case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE:     // intended fall-through
-    case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+    case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:  // intended fall-through
+    case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
         // FIXME report and use the return code to the lock mechanism, which is where play state
         //   changes are updated (see object_unlock_exclusive_attributes())
         aplayer_setPlayState(ap->mAPlayer, playState, &(ap->mAndroidObjState));
@@ -2073,14 +2129,31 @@ SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *ap) {
 
 
 //-----------------------------------------------------------------------------
-void android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer *ap) {
-    if ((ap->mAndroidObjType == AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE) && (ap->mAPlayer != 0)) {
-        android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(ap->mAPlayer.get());
-        splr->registerQueueCallback(
-                (const void*)ap, true /*userIsAudioPlayer*/,
-                ap->mAndroidBufferQueue.mContext,
-                (const void*)&(ap->mAndroidBufferQueue.mItf));
+SLresult android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer *ap) {
+    SLresult result = SL_RESULT_SUCCESS;
+    assert(ap->mAPlayer != 0);
+    switch (ap->mAndroidObjType) {
+      case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: {
+          android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(ap->mAPlayer.get());
+          splr->registerQueueCallback(
+                  (const void*)ap /*user*/, true /*userIsAudioPlayer*/,
+                  ap->mAndroidBufferQueue.mContext /*context*/,
+                  (const void*)&(ap->mAndroidBufferQueue.mItf) /*caller*/);
+        } break;
+      case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE: {
+          android::AacBqToPcmCbRenderer* dec =
+                  static_cast<android::AacBqToPcmCbRenderer*>(ap->mAPlayer.get());
+          dec->registerSourceQueueCallback((const void*)ap /*user*/,
+                  ap->mAndroidBufferQueue.mContext /*context*/,
+                  (const void*)&(ap->mAndroidBufferQueue.mItf) /*caller*/);
+        } break;
+      default:
+        SL_LOGE("Error registering AndroidBufferQueue callback: unexpected object type %d",
+                ap->mAndroidObjType);
+        result = SL_RESULT_INTERNAL_ERROR;
+        break;
     }
+    return result;
 }
 
 //-----------------------------------------------------------------------------

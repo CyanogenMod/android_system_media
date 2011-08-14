@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef AUDIO_SF_DECODER_H_
+#define AUDIO_SF_DECODER_H_
+
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/FileSource.h>
@@ -30,6 +33,14 @@
 
 //--------------------------------------------------------------------------------------------------
 namespace android {
+
+// keep in sync with the entries of kPcmDecodeMetadataKeys[]
+#define ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS   0
+#define ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC 1
+#define ANDROID_KEY_INDEX_PCMFORMAT_BITSPERSAMPLE 2
+#define ANDROID_KEY_INDEX_PCMFORMAT_CONTAINERSIZE 3
+#define ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK   4
+#define ANDROID_KEY_INDEX_PCMFORMAT_ENDIANNESS    5
 
 // to keep in sync with the ANDROID_KEY_INDEX_PCMFORMAT_* constants in android_AudioSfDecoder.cpp
 static const char* const kPcmDecodeMetadataKeys[] = {
@@ -106,8 +117,6 @@ protected:
     // mutex used to protect the decode buffer, the audio source and its running state
     Mutex       mBufferSourceLock;
 
-private:
-
     void notifyPrepared(status_t prepareRes);
 
     int64_t mSeekTimeMsec;
@@ -123,6 +132,7 @@ private:
     // protects mPcmFormatKeyCount and mPcmFormatValues
     Mutex    mPcmFormatLock;
 
+private:
     bool wantPrefetch();
     CacheStatus_t getCacheRemaining(bool *eos);
     int64_t getPositionUsec(); // ANDROID_UNKNOWN_TIME if unknown
@@ -137,3 +147,5 @@ private:
 };
 
 } // namespace android
+
+#endif // AUDIO_SF_DECODER_H_

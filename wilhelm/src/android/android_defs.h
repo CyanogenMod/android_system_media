@@ -36,6 +36,9 @@ enum AndroidObjectType {
     // audio recorder, recording from an input device data source, streamed into a
     //   PCM buffer queue data sink
     AUDIORECORDER_FROM_MIC_TO_PCM_BUFFERQUEUE   = 6,
+    // audio player, decoding from an Android buffer queue with ADTS data,
+    //   to a buffer queue data sink in PCM format
+    AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE = 7,
     NUM_AUDIOPLAYER_MAP_TYPES
 };
 
@@ -135,6 +138,12 @@ typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, void* user);
 // buffer marks a format change with previous TS data, resume display as soon as possible
 #define ANDROID_MP2TSEVENT_FORMAT_CHANGE ((SLuint32) 0x1 << 3)
 
+/**
+ * Event mask for AAC ADTS events associated with ADTS data
+ */
+#define ANDROID_ADTSEVENT_NONE           ANDROID_MP2TSEVENT_NONE
+// buffer is at End Of Stream
+#define ANDROID_ADTSEVENT_EOS            ANDROID_MP2TSEVENT_EOS
 
 /**
  * Additional metadata keys
@@ -156,7 +165,17 @@ typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, void* user);
 enum AndroidBufferType_type {
     kAndroidBufferTypeInvalid = ((SLuint16) 0x0),
     kAndroidBufferTypeMpeg2Ts = ((SLuint16) 0x1),
+    kAndroidBufferTypeAacadts = ((SLuint16) 0x2),
 };
+
+/**
+ * MIME types required for data in Android Buffer Queues
+ */
+#define ANDROID_MIME_MP2TS                     "video/mp2ts"
+// the MIME type used elsewhere in the Android framework for AAC ADTS
+#define ANDROID_MIME_AACADTS_ANDROID_FRAMEWORK "audio/aac-adts"
+// the MIME type applications should use for AAC ADTS
+#define ANDROID_MIME_AACADTS                   "audio/vnd.android.aac-adts"
 
 /**
  * Notification thresholds relative to content duration in the cache

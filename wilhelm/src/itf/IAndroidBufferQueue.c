@@ -16,8 +16,11 @@
 
 /* AndroidBufferQueue implementation */
 
-#include "sles_allinclusive.h"
+//#define USE_LOG SLAndroidLogLevel_Verbose
 
+#include "sles_allinclusive.h"
+// for AAC ADTS verification on enqueue:
+#include "android/include/AacBqToPcmCbRenderer.h"
 
 /**
  * Determine the state of the audio player or audio recorder associated with a buffer queue.
@@ -130,12 +133,13 @@ static SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf sel
 
         switch (InterfaceToObjectID(thiz)) {
           case SL_OBJECTID_AUDIOPLAYER:
-            result = SL_RESULT_SUCCESS;
-            android_audioPlayer_androidBufferQueue_registerCallback_l((CAudioPlayer*) thiz->mThis);
+            result = android_audioPlayer_androidBufferQueue_registerCallback_l(
+                    (CAudioPlayer*) thiz->mThis);
             break;
           case XA_OBJECTID_MEDIAPLAYER:
             SL_LOGV("IAndroidBufferQueue_RegisterCallback()");
             result = SL_RESULT_SUCCESS;
+            //FIXME return error code
             android_Player_androidBufferQueue_registerCallback_l((CMediaPlayer*) thiz->mThis);
             break;
           default:
@@ -214,6 +218,7 @@ static SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
         SLuint32 itemsLength)
 {
     SL_ENTER_INTERFACE
+    SL_LOGD("IAndroidBufferQueue_Enqueue pData=%p dataLength=%d", pData, dataLength);
 
     if ( ((NULL == pData) || (0 == dataLength))
             && ((NULL == pItems) || (0 == itemsLength))) {
@@ -229,9 +234,20 @@ static SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
             if (dataLength % MPEG2_TS_BLOCK_SIZE == 0) {
                 break;
             }
-            // intended fall-through if test failed
             SL_LOGE("Error enqueueing MPEG-2 TS data: size must be a multiple of %d (block size)",
                     MPEG2_TS_BLOCK_SIZE);
+            result = SL_RESULT_PARAMETER_INVALID;
+            SL_LEAVE_INTERFACE
+            break;
+          case kAndroidBufferTypeAacadts:
+            // FIXME allow commands as for mp2ts
+            if (!android::AacBqToPcmCbRenderer::validateBufferStartEndOnFrameBoundaries(
+                    pData, dataLength)) {
+                SL_LOGE("Error enqueueing ADTS data: data must start and end on frame boundaries");
+                result = SL_RESULT_PARAMETER_INVALID;
+                SL_LEAVE_INTERFACE
+            }
+            break;
           case kAndroidBufferTypeInvalid:
           default:
             result = SL_RESULT_PARAMETER_INVALID;
