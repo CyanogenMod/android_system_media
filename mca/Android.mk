@@ -40,6 +40,9 @@ LOCAL_JNI_SHARED_LIBRARIES := libfilterfw libfilterpack_imageproc
 
 LOCAL_PROGUARD_ENABLED := disabled
 
+LOCAL_NO_STANDARD_LIBRARIES := true
+LOCAL_JAVA_LIBRARIES := core core-junit ext framework # to avoid circular dependency
+
 include $(BUILD_JAVA_LIBRARY)
 
 #
