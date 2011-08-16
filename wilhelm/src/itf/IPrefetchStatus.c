@@ -27,9 +27,9 @@ static SLresult IPrefetchStatus_GetPrefetchStatus(SLPrefetchStatusItf self, SLui
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPrefetchStatus *thiz = (IPrefetchStatus *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLuint32 status = thiz->mStatus;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pStatus = status;
         result = SL_RESULT_SUCCESS;
     }
@@ -46,9 +46,9 @@ static SLresult IPrefetchStatus_GetFillLevel(SLPrefetchStatusItf self, SLpermill
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPrefetchStatus *thiz = (IPrefetchStatus *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLpermille level = thiz->mLevel;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pLevel = level;
         result = SL_RESULT_SUCCESS;
     }
@@ -77,11 +77,17 @@ static SLresult IPrefetchStatus_SetCallbackEventsMask(SLPrefetchStatusItf self, 
 {
     SL_ENTER_INTERFACE
 
-    IPrefetchStatus *thiz = (IPrefetchStatus *) self;
-    interface_lock_poke(thiz);
-    thiz->mCallbackEventsMask = eventFlags;
-    interface_unlock_poke(thiz);
-    result = SL_RESULT_SUCCESS;
+    if (eventFlags & ~(SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE)) {
+        result = SL_RESULT_PARAMETER_INVALID;
+
+    } else {
+        IPrefetchStatus *thiz = (IPrefetchStatus *) self;
+        interface_lock_exclusive(thiz);
+        thiz->mCallbackEventsMask = eventFlags;
+        interface_unlock_exclusive(thiz);
+        result = SL_RESULT_SUCCESS;
+
+    }
 
     SL_LEAVE_INTERFACE
 }
@@ -96,9 +102,9 @@ static SLresult IPrefetchStatus_GetCallbackEventsMask(SLPrefetchStatusItf self,
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPrefetchStatus *thiz = (IPrefetchStatus *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLuint32 callbackEventsMask = thiz->mCallbackEventsMask;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pEventFlags = callbackEventsMask;
         result = SL_RESULT_SUCCESS;
     }
@@ -115,7 +121,7 @@ static SLresult IPrefetchStatus_SetFillUpdatePeriod(SLPrefetchStatusItf self, SL
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPrefetchStatus *thiz = (IPrefetchStatus *) self;
-        interface_lock_poke(thiz);
+        interface_lock_exclusive(thiz);
         thiz->mFillUpdatePeriod = period;
 #ifdef ANDROID
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
@@ -123,7 +129,7 @@ static SLresult IPrefetchStatus_SetFillUpdatePeriod(SLPrefetchStatusItf self, SL
             android_audioPlayer_setBufferingUpdateThresholdPerMille(ap, period);
         }
 #endif
-        interface_unlock_poke(thiz);
+        interface_unlock_exclusive(thiz);
         result = SL_RESULT_SUCCESS;
     }
 
@@ -139,9 +145,9 @@ static SLresult IPrefetchStatus_GetFillUpdatePeriod(SLPrefetchStatusItf self, SL
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPrefetchStatus *thiz = (IPrefetchStatus *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLpermille fillUpdatePeriod = thiz->mFillUpdatePeriod;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pPeriod = fillUpdatePeriod;
         result = SL_RESULT_SUCCESS;
     }
@@ -170,4 +176,9 @@ void IPrefetchStatus_init(void *self)
     thiz->mContext = NULL;
     thiz->mCallbackEventsMask = 0;
     thiz->mFillUpdatePeriod = 100;
+#ifdef ANDROID
+    thiz->mDeferredPrefetchCallback = NULL;
+    thiz->mDeferredPrefetchContext  = NULL;
+    thiz->mDeferredPrefetchEvents   = SL_PREFETCHEVENT_NONE;
+#endif
 }

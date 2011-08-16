@@ -495,6 +495,12 @@ typedef struct {
     void *mContext;
     SLuint32 mCallbackEventsMask;
     SLpermille mFillUpdatePeriod;
+#ifdef ANDROID
+    /** FIXME used to call PrefetchStatus callback with object unlocked prior to return from API */
+    slPrefetchCallback mDeferredPrefetchCallback;
+    void *mDeferredPrefetchContext;
+    SLuint32 mDeferredPrefetchEvents;
+#endif
 } IPrefetchStatus;
 
 typedef struct {

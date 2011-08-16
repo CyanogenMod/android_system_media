@@ -1197,6 +1197,9 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
     case android::AudioTrack::EVENT_MORE_DATA: {
         //SL_LOGV("received event EVENT_MORE_DATA from AudioTrack TID=%d", gettid());
         slBufferQueueCallback callback = NULL;
+        slPrefetchCallback prefetchCallback = NULL;
+        void *prefetchContext = NULL;
+        SLuint32 prefetchEvents = SL_PREFETCHEVENT_NONE;
         android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
 
         // retrieve data from the buffer queue
@@ -1254,8 +1257,15 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
 
             // signal underflow to prefetch status itf
             if (IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
-                audioPlayer_dispatch_prefetchStatus_lockPrefetch(ap, SL_PREFETCHSTATUS_UNDERFLOW,
-                    false);
+                ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+                ap->mPrefetchStatus.mLevel = 0;
+                // callback or no callback?
+                prefetchEvents = ap->mPrefetchStatus.mCallbackEventsMask &
+                        (SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE);
+                if (SL_PREFETCHEVENT_NONE != prefetchEvents) {
+                    prefetchCallback = ap->mPrefetchStatus.mCallback;
+                    prefetchContext  = ap->mPrefetchStatus.mContext;
+                }
             }
 
             // stop the track so it restarts playing faster when new data is enqueued
@@ -1264,6 +1274,18 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
         interface_unlock_exclusive(&ap->mBufferQueue);
 
         // notify client
+        if (NULL != prefetchCallback) {
+            assert(SL_PREFETCHEVENT_NONE != prefetchEvents);
+            // spec requires separate callbacks for each event
+            if (prefetchEvents & SL_PREFETCHEVENT_STATUSCHANGE) {
+                (*prefetchCallback)(&ap->mPrefetchStatus.mItf, prefetchContext,
+                        SL_PREFETCHEVENT_STATUSCHANGE);
+            }
+            if (prefetchEvents & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
+                (*prefetchCallback)(&ap->mPrefetchStatus.mItf, prefetchContext,
+                        SL_PREFETCHEVENT_FILLLEVELCHANGE);
+            }
+        }
         if (NULL != callback) {
             (*callback)(&ap->mBufferQueue.mItf, callbackPContext);
         }
@@ -1323,6 +1345,7 @@ SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
         pAudioPlayer->mAuxSendLevel = 0;
         pAudioPlayer->mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
         pAudioPlayer->mDeferredStart = false;
+
         // Already initialized in IEngine_CreateAudioPlayer, to be consolidated
         pAudioPlayer->mDirectLevel = 0; // no attenuation
 
@@ -2098,8 +2121,19 @@ void android_audioPlayer_bufferQueue_onRefilled_l(CAudioPlayer *ap) {
     // when the queue became empty, an underflow on the prefetch status itf was sent. Now the queue
     // has received new data, signal it has sufficient data
     if (IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
-        audioPlayer_dispatch_prefetchStatus_lockPrefetch(ap, SL_PREFETCHSTATUS_SUFFICIENTDATA,
-            true);
+        // we wouldn't have been called unless we were previously in the underflow state
+        assert(SL_PREFETCHSTATUS_UNDERFLOW == ap->mPrefetchStatus.mStatus);
+        assert(0 == ap->mPrefetchStatus.mLevel);
+        ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
+        ap->mPrefetchStatus.mLevel = 1000;
+        // callback or no callback?
+        SLuint32 prefetchEvents = ap->mPrefetchStatus.mCallbackEventsMask &
+                (SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE);
+        if (SL_PREFETCHEVENT_NONE != prefetchEvents) {
+            ap->mPrefetchStatus.mDeferredPrefetchCallback = ap->mPrefetchStatus.mCallback;
+            ap->mPrefetchStatus.mDeferredPrefetchContext  = ap->mPrefetchStatus.mContext;
+            ap->mPrefetchStatus.mDeferredPrefetchEvents   = prefetchEvents;
+        }
     }
 }
 
