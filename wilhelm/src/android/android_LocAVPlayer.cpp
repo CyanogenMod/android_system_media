@@ -42,22 +42,34 @@ LocAVPlayer::~LocAVPlayer() {
 // Event handlers
 void LocAVPlayer::onPrepare() {
     SL_LOGD("LocAVPlayer::onPrepare()");
-    switch (mDataLocatorType) {
-    case kDataLocatorUri:
-        mPlayer = mMediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
-                mDataLocator.uriRef /*url*/, NULL /*headers*/, mPlaybackParams.sessionId);
-        break;
-    case kDataLocatorFd:
-        mPlayer = mMediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
-                mDataLocator.fdi.fd, mDataLocator.fdi.offset, mDataLocator.fdi.length,
-                mPlaybackParams.sessionId);
-        break;
-    case kDataLocatorNone:
-        SL_LOGE("no data locator for MediaPlayer object");
-        break;
-    default:
-        SL_LOGE("unsupported data locator %d for MediaPlayer object", mDataLocatorType);
-        break;
+    sp<IMediaPlayerService> mediaPlayerService(getMediaPlayerService());
+    if (mediaPlayerService != NULL) {
+        switch (mDataLocatorType) {
+        case kDataLocatorUri:
+            mPlayer = mediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
+                    mDataLocator.uriRef /*url*/, NULL /*headers*/, mPlaybackParams.sessionId);
+            if (mPlayer == NULL) {
+                SL_LOGE("media player service failed to create player by URI");
+            }
+            break;
+        case kDataLocatorFd:
+            mPlayer = mediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
+                    mDataLocator.fdi.fd, mDataLocator.fdi.offset, mDataLocator.fdi.length,
+                    mPlaybackParams.sessionId);
+            if (mPlayer == NULL) {
+                SL_LOGE("media player service failed to create player by FD");
+            }
+            break;
+        case kDataLocatorNone:
+            SL_LOGE("no data locator for MediaPlayer object");
+            break;
+        default:
+            SL_LOGE("unsupported data locator %d for MediaPlayer object", mDataLocatorType);
+            break;
+        }
+    }
+    if (mPlayer == NULL) {
+        mStateFlags |= kFlagPreparedUnsuccessfully;
     }
     // blocks until mPlayer is prepared
     GenericMediaPlayer::onPrepare();

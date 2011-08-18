@@ -147,12 +147,6 @@ GenericMediaPlayer::GenericMediaPlayer(const AudioPlayback_Parameters* params, b
 {
     SL_LOGD("GenericMediaPlayer::GenericMediaPlayer()");
 
-    mServiceManager = defaultServiceManager();
-    mBinder = mServiceManager->getService(String16("media.player"));
-    mMediaPlayerService = interface_cast<IMediaPlayerService>(mBinder);
-
-    CHECK(mMediaPlayerService.get() != NULL);
-
     mPlayerClient = new MediaPlayerNotificationClient(this);
 }
 
@@ -198,6 +192,7 @@ void GenericMediaPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfa
 //--------------------------------------------------
 // Event handlers
 
+// blocks until mPlayer is prepared
 void GenericMediaPlayer::onPrepare() {
     SL_LOGD("GenericMediaPlayer::onPrepare()");
     // Attempt to prepare at most once, and only if there is a MediaPlayer
@@ -218,8 +213,8 @@ void GenericMediaPlayer::onPrepare() {
         } else {
             mStateFlags |= kFlagPreparedUnsuccessfully;
         }
-        GenericPlayer::onPrepare();
     }
+    GenericPlayer::onPrepare();
     SL_LOGD("GenericMediaPlayer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
 }
 

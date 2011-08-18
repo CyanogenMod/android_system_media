@@ -130,8 +130,11 @@ void GenericPlayer::setDataSource(int fd, int64_t offset, int64_t length) {
 
 void GenericPlayer::prepare() {
     SL_LOGD("GenericPlayer::prepare()");
-    sp<AMessage> msg = new AMessage(kWhatPrepare, id());
-    msg->post();
+    // do not attempt prepare more than once
+    if (!(mStateFlags & (kFlagPrepared | kFlagPreparedUnsuccessfully))) {
+        sp<AMessage> msg = new AMessage(kWhatPrepare, id());
+        msg->post();
+    }
 }
 
 
