@@ -41,22 +41,71 @@ public class EffectFactory {
 
     /** List of Effects */
     /**
-     * Adjusts the brightness of the image.<br/>
-     * Parameters: brightness (float): The factor by which to multiply the color channels.
+     * <p>Adjusts the brightness of the image.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>brightness</code></td>
+     *     <td>The brightness multiplier.</td>
+     *     <td>Positive float. 1.0 means no change;
+               larger values will increase brightness.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_BRIGHTNESS = "BrightnessEffect";
 
     /**
-     * Adjusts the contrast of the image.<br/>
-     * Parameters: contrast (float): The strength of the color contrast.
+     * <p>Adjusts the contrast of the image.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>contrast</code></td>
+     *     <td>The contrast multiplier.</td>
+     *     <td>Float. 1.0 means no change;
+               larger values will increase contrast.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_CONTRAST = "ContrastEffect";
 
     /**
-     * Applies a fisheye lens distortion to the image.<br/>
-     * Parameters: scale (float): The scale of the distortion.
+     * <p>Applies a fisheye lens distortion to the image.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>scale</code></td>
+     *     <td>The scale of the distortion.</td>
+     *     <td>Float, between 0 and 1. Zero means no distortion.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_FISHEYE = "FisheyeEffect";
+
+    /**
+     * <p>Replaces the background of the input frames with frames from a
+     * selected video.  Requires an initial learning period with only the
+     * background visible before the effect becomes active. The effect will wait
+     * until it does not see any motion in the scene before learning the
+     * background and starting the effect.</p>
+     *
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>source</code></td>
+     *     <td>A URI for the background video to use. This parameter must be
+     *         supplied before calling apply() for the first time.</td>
+     *     <td>String, such as from
+     *         {@link android.net.Uri#toString Uri.toString()}</td>
+     * </tr>
+     * </table>
+
+     * <p>If the update listener is set for this effect using
+     * {@link Effect#setUpdateListener}, it will be called when the effect has
+     * finished learning the background, with a null value for the info
+     * parameter.</p>
+     * @hide
+     */
+    public final static String EFFECT_BACKDROPPER = "BackDropperEffect";
 
     /** ...Many more effects to follow ... */
 
@@ -148,4 +197,3 @@ public class EffectFactory {
         return effect;
     }
 }
-
