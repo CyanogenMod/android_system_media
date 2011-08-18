@@ -40,7 +40,7 @@ static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self, SLuint16 preset)
     case SL_REVERBPRESET_MEDIUMHALL:
     case SL_REVERBPRESET_LARGEHALL:
     case SL_REVERBPRESET_PLATE:
-        interface_lock_poke(thiz);
+        interface_lock_exclusive(thiz);
         thiz->mPreset = preset;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
@@ -52,7 +52,7 @@ static SLresult IPresetReverb_SetPreset(SLPresetReverbItf self, SLuint16 preset)
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_poke(thiz);
+        interface_unlock_exclusive(thiz);
         break;
     default:
         result = SL_RESULT_PARAMETER_INVALID;
@@ -70,7 +70,7 @@ static SLresult IPresetReverb_GetPreset(SLPresetReverbItf self, SLuint16 *pPrese
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IPresetReverb *thiz = (IPresetReverb *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLuint16 preset = SL_REVERBPRESET_NONE;
 #if !defined(ANDROID)
         preset = thiz->mPreset;
@@ -83,7 +83,7 @@ static SLresult IPresetReverb_GetPreset(SLPresetReverbItf self, SLuint16 *pPrese
             result = android_fx_statusToResult(status);
         }
 #endif
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pPreset = preset;
     }
 

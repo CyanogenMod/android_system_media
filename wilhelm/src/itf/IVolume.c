@@ -49,9 +49,9 @@ static SLresult IVolume_GetVolumeLevel(SLVolumeItf self, SLmillibel *pLevel)
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IVolume *thiz = (IVolume *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLmillibel level = thiz->mLevel;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pLevel = level;
         result = SL_RESULT_SUCCESS;
     }
@@ -102,9 +102,9 @@ static SLresult IVolume_GetMute(SLVolumeItf self, SLboolean *pMute)
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IVolume *thiz = (IVolume *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLboolean mute = thiz->mMute;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pMute = mute;
         result = SL_RESULT_SUCCESS;
     }
@@ -141,9 +141,9 @@ static SLresult IVolume_IsEnabledStereoPosition(SLVolumeItf self, SLboolean *pEn
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IVolume *thiz = (IVolume *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLboolean enable = thiz->mEnableStereoPosition;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pEnable = enable;
         result = SL_RESULT_SUCCESS;
     }
@@ -182,9 +182,9 @@ static SLresult IVolume_GetStereoPosition(SLVolumeItf self, SLpermille *pStereoP
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IVolume *thiz = (IVolume *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         SLpermille stereoPosition = thiz->mStereoPosition;
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
         *pStereoPosition = stereoPosition;
         result = SL_RESULT_SUCCESS;
     }

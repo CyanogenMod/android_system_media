@@ -122,7 +122,7 @@ static SLresult IAndroidEffectSend_GetDirectLevel(SLAndroidEffectSendItf self,
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
         IAndroidEffectSend *thiz = (IAndroidEffectSend *) self;
-        interface_lock_peek(thiz);
+        interface_lock_shared(thiz);
         CAudioPlayer *ap = (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) ?
                 (CAudioPlayer *) thiz->mThis : NULL;
         if (NULL != ap) {
@@ -132,7 +132,7 @@ static SLresult IAndroidEffectSend_GetDirectLevel(SLAndroidEffectSendItf self,
             SL_LOGE("invalid interface: not attached to an AudioPlayer");
             result = SL_RESULT_PARAMETER_INVALID;
         }
-        interface_unlock_peek(thiz);
+        interface_unlock_shared(thiz);
     }
 
     SL_LEAVE_INTERFACE
