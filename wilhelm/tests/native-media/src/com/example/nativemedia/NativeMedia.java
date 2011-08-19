@@ -281,7 +281,17 @@ public class NativeMedia extends Activity {
 
         });
 
-        // FIXME native MediaPlayer rewind
+        // native MediaPlayer rewind
+
+        ((Button) findViewById(R.id.rewind_native)).setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View view) {
+                if (mNativeMediaPlayerVideoSink != null) {
+                    rewindStreamingMediaPlayer();
+                }
+            }
+
+        });
 
     }
 
@@ -320,6 +330,7 @@ public class NativeMedia extends Activity {
     public static native void shutdown();
     public static native void setSurface(Surface surface);
     public static native void setSurfaceTexture(SurfaceTexture surfaceTexture);
+    public static native void rewindStreamingMediaPlayer();
 
     /** Load jni .so on initialization */
     static {
