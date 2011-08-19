@@ -76,6 +76,9 @@ public:
     virtual void getPositionMsec(int* msec) = 0; //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
     virtual void getSampleRate(uint32_t* hz);// hz  != NULL, UNKNOWN_SAMPLERATE if unknown
 
+    virtual void setVideoSurface(const sp<Surface> &surface) {}
+    virtual void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {}
+
     void setVolume(float leftVol, float rightVol);
     void attachAuxEffect(int32_t effectId);
     void setAuxEffectSendLevel(float level);

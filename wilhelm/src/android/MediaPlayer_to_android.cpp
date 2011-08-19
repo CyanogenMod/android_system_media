@@ -302,6 +302,20 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
         break;
     }
 
+    if (XA_RESULT_SUCCESS == result) {
+
+        // if there is a video sink
+        if (XA_DATALOCATOR_NATIVEDISPLAY ==
+                mp->mImageVideoSink.mLocator.mLocatorType) {
+            ANativeWindow *nativeWindow = (ANativeWindow *)
+                    mp->mImageVideoSink.mLocator.mNativeDisplay.hWindow;
+            // we already verified earlier that hWindow is non-NULL
+            assert(nativeWindow != NULL);
+            result = android_Player_setNativeWindow(mp, nativeWindow);
+        }
+
+    }
+
     return result;
 }
 
@@ -313,34 +327,6 @@ XAresult android_Player_destroy(CMediaPlayer *mp) {
     if (mp->mAVPlayer != 0) {
         mp->mAVPlayer.clear();
     }
-
-    return result;
-}
-
-//-----------------------------------------------------------------------------
-/**
- * pre-conditions: gp != 0, surface != 0
- */
-XAresult android_Player_setVideoSurface(const android::sp<android::GenericPlayer> &gp,
-        const android::sp<android::Surface> &surface) {
-    XAresult result = XA_RESULT_SUCCESS;
-
-    android::GenericMediaPlayer* gmp = static_cast<android::GenericMediaPlayer*>(gp.get());
-    gmp->setVideoSurface(surface);
-
-    return result;
-}
-
-
-/**
- * pre-conditions: gp != 0, surfaceTexture != 0
- */
-XAresult android_Player_setVideoSurfaceTexture(const android::sp<android::GenericPlayer> &gp,
-        const android::sp<android::ISurfaceTexture> &surfaceTexture) {
-    XAresult result = XA_RESULT_SUCCESS;
-
-    android::GenericMediaPlayer* gmp = static_cast<android::GenericMediaPlayer*>(gp.get());
-    gmp->setVideoSurfaceTexture(surfaceTexture);
 
     return result;
 }
@@ -555,4 +541,55 @@ void android_Player_androidBufferQueue_onRefilled_l(CMediaPlayer *mp) {
 }
 
 
-
+/*
+ *  pre-conditions:
+ *      mp != NULL
+ *      mp->mAVPlayer != 0 (player is realized)
+ *      nativeWindow can be NULL, but if NULL it is treated as an error
+ */
+SLresult android_Player_setNativeWindow(CMediaPlayer *mp, ANativeWindow *nativeWindow)
+{
+    assert(mp != NULL);
+    assert(mp->mAVPlayer != 0);
+    if (nativeWindow == NULL) {
+        SL_LOGE("ANativeWindow is NULL");
+        return SL_RESULT_PARAMETER_INVALID;
+    }
+    SLresult result;
+    int err;
+    int value;
+    // this could crash if app passes in a bad parameter, but that's OK
+    err = (*nativeWindow->query)(nativeWindow, NATIVE_WINDOW_CONCRETE_TYPE, &value);
+    if (0 != err) {
+        SL_LOGE("Query NATIVE_WINDOW_CONCRETE_TYPE on ANativeWindow * %p failed; "
+                "errno %d", nativeWindow, err);
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        switch (value) {
+        case NATIVE_WINDOW_SURFACE: {                // Surface
+            SL_LOGV("Displaying on ANativeWindow of type NATIVE_WINDOW_SURFACE");
+            android::sp<android::Surface> nativeSurface(
+                    static_cast<android::Surface *>(nativeWindow));
+            mp->mAVPlayer->setVideoSurface(nativeSurface);
+            result = SL_RESULT_SUCCESS;
+            } break;
+        case NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT: { // SurfaceTextureClient
+            SL_LOGV("Displaying on ANativeWindow of type NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT");
+            android::sp<android::SurfaceTextureClient> surfaceTextureClient(
+                    static_cast<android::SurfaceTextureClient *>(nativeWindow));
+            android::sp<android::ISurfaceTexture> nativeSurfaceTexture(
+                    surfaceTextureClient->getISurfaceTexture());
+            mp->mAVPlayer->setVideoSurfaceTexture(nativeSurfaceTexture);
+            result = SL_RESULT_SUCCESS;
+            } break;
+        case NATIVE_WINDOW_FRAMEBUFFER:              // FramebufferNativeWindow
+            // fall through
+        default:
+            SL_LOGE("ANativeWindow * %p has unknown or unsupported concrete type %d",
+                    nativeWindow, value);
+            result = SL_RESULT_PARAMETER_INVALID;
+            break;
+        }
+    }
+    return result;
+}
