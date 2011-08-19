@@ -110,25 +110,25 @@ public class BackDropperFilter extends Filter {
     // Maximum distance (in standard deviations) for considering a pixel as background
     private static final float DEFAULT_ACCEPT_STDDEV = 0.9f;
     // Variance threshold scale factor for large scale of hierarchy
-    private static final float DEFAULT_HIER_LRG_SCALE = 1.0f;
+    private static final float DEFAULT_HIER_LRG_SCALE = 1.5f;
     // Variance threshold scale factor for medium scale of hierarchy
-    private static final float DEFAULT_HIER_MID_SCALE = 0.55f;
+    private static final float DEFAULT_HIER_MID_SCALE = 1.0f;
     // Variance threshold scale factor for small scale of hierarchy
-    private static final float DEFAULT_HIER_SML_SCALE = 0.16f;
+    private static final float DEFAULT_HIER_SML_SCALE = 0.5f;
     // Area over which to average for large scale (# pixels = 2^HIERARCHY_*_EXPONENT)
     private static final float DEFAULT_HIER_LRG_EXPONENT = 3.0f;
     // Area over which to average for medium scale
-    private static final float DEFAULT_HIER_MID_EXPONENT = 1.0f;
+    private static final float DEFAULT_HIER_MID_EXPONENT = 2.0f;
     // Area over which to average for small scale
     private static final float DEFAULT_HIER_SML_EXPONENT = 0.0f;
     // Scale factor for luminance channel in distance calculations (larger = more significant)
-    private static final float DEFAULT_Y_SCALE_FACTOR = 0.7f;
+    private static final float DEFAULT_Y_SCALE_FACTOR = 0.5f;
     // Scale factor for chroma channels in distance calculations
-    private static final float DEFAULT_UV_SCALE_FACTOR = 1.0f;
+    private static final float DEFAULT_UV_SCALE_FACTOR = 1.25f;
     // Mask value to start blending away from background
-    private static final float DEFAULT_MASK_BLEND_BG = 0.7f;
+    private static final float DEFAULT_MASK_BLEND_BG = 0.65f;
     // Mask value to start blending away from foreground
-    private static final float DEFAULT_MASK_BLEND_FG = 0.9f;
+    private static final float DEFAULT_MASK_BLEND_FG = 0.95f;
     // Exposure stop number to change the brightness of foreground
     private static final float DEFAULT_EXPOSURE_CHANGE = 1.0f;
     // White balance change in Red channel for foreground
@@ -146,7 +146,10 @@ public class BackDropperFilter extends Filter {
     // Default rate at which to learn bg model from new foreground pixels
     private static final float DEFAULT_ADAPT_RATE_FG = 0.0f;
     // Default rate at which to verify whether background is stable
-    private static final float DEFAULT_MASK_VERIFY_RATE = 0.2f;
+    private static final float DEFAULT_MASK_VERIFY_RATE = 0.25f;
+    // Default rate at which to verify whether background is stable
+    private static final int   DEFAULT_LEARNING_DONE_THRESHOLD = 20;
+
     // Default 3x3 matrix, column major, for fitting background 1:1
     private static final float[] DEFAULT_BG_FIT_TRANSFORM = new float[] {
         1.0f, 0.0f, 0.0f,
@@ -157,7 +160,7 @@ public class BackDropperFilter extends Filter {
     /** Default algorithm parameter values, for shader use */
 
     // Area over which to blur binary mask values (# pixels = 2^MASK_SMOOTH_EXPONENT)
-    private static final String MASK_SMOOTH_EXPONENT = "3.0";
+    private static final String MASK_SMOOTH_EXPONENT = "2.0";
     // Scale value for mapping variance distance to fit nicely to 0-1, 8-bit
     private static final String DISTANCE_STORAGE_SCALE = "0.6";
     // Scale value for mapping variance to fit nicely to 0-1, 8-bit
@@ -263,6 +266,9 @@ public class BackDropperFilter extends Filter {
             "  return ( ((yuv_weights.y * dist_yc.y) < accept_variance) && \n" +
             "           ((yuv_weights.x * dist_yc.x) < accept_variance));\n" +
             "}\n" +
+            "bool is_fg(vec2 dist_yc, float accept_variance) {\n" +
+            "  return ( dot(yuv_weights, dist_yc) >= accept_variance );\n" +
+            "}\n" +
             "\n" +
             "void main() {\n" +
             "  vec4 dist_lrg_sc = texture2D(tex_sampler_0, v_texcoord, exp_lrg);\n" +
@@ -272,13 +278,21 @@ public class BackDropperFilter extends Filter {
             "  vec2 dist_mid = inv_dist_scale * dist_mid_sc.ba;\n" +
             "  vec2 dist_sml = inv_dist_scale * dist_sml_sc.ba;\n" +
             "  vec2 norm_dist = 0.75 * dist_sml / accept_variance;\n" + // For debug viz
-            "  gl_FragColor = is_bg(dist_lrg, accept_variance * scale_lrg) ? \n" +
-            "                    vec4(0.0, norm_dist, 0.0) :\n" +
-            "                 is_bg(dist_mid, accept_variance * scale_mid) ? \n" +
-            "                    vec4(0.5, norm_dist, 0.0) :\n" +
-            "                 is_bg(dist_sml, accept_variance * scale_sml) ? \n" +
-            "                    vec4(0.8, norm_dist, 0.0) :\n" +
-            "                    vec4(1.0, norm_dist, 1.0);\n" +
+            //            "  gl_FragColor = is_bg(dist_lrg, accept_variance * scale_lrg) ? \n" +
+            //            "                    vec4(0.0, norm_dist, 0.0) :\n" +
+            //            "                 is_bg(dist_mid, accept_variance * scale_mid) ? \n" +
+            //            "                    vec4(0.5, norm_dist, 0.0) :\n" +
+            //            "                 is_bg(dist_sml, accept_variance * scale_sml) ? \n" +
+            //            "                    vec4(0.8, norm_dist, 0.0) :\n" +
+            //            "                    vec4(1.0, norm_dist, 1.0);\n" +
+            "  gl_FragColor = is_fg(dist_lrg, accept_variance * scale_lrg) ? \n" +
+            "                    vec4(1.0, norm_dist, 1.0) :\n" +
+            "                 is_fg(dist_mid, accept_variance * scale_mid) ? \n" +
+            "                    vec4(0.8, norm_dist, 1.0) :\n" +
+            "                 is_fg(dist_sml, accept_variance * scale_sml) ? \n" +
+            "                    vec4(0.5, norm_dist, 1.0) :\n" +
+            "                    vec4(0.0, norm_dist, 0.0);\n" +
+
             "}\n";
 
     // Automatic White Balance parameter decision shader
@@ -684,7 +698,7 @@ public class BackDropperFilter extends Filter {
                 int bi = (int)(mask_average[3] & 0xFF);
                 if (mLogVerbose) Log.v(TAG, String.format("Mask_average is %d", bi));
 
-                if (bi>=2) {
+                if (bi >= DEFAULT_LEARNING_DONE_THRESHOLD) {
                     mStartLearning = true;                                      // Restart learning
                 } else {
                   if (mLogVerbose) Log.v(TAG, "Learning done");
@@ -748,7 +762,7 @@ public class BackDropperFilter extends Filter {
     private long startTime = -1;
 
     public void close(FilterContext context) {
-        Log.v(TAG, "Filter Closing!");
+        if (mLogVerbose) Log.v(TAG, "Filter Closing!");
         for (int i = 0; i < 2; i++) {
             mBgMean[i].release();
             mBgVariance[i].release();
