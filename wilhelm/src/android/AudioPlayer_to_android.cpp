@@ -970,9 +970,6 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             }
             switch (df_pcm->bitsPerSample) {
             case SL_PCMSAMPLEFORMAT_FIXED_8:
-                // FIXME We should support this
-                //SL_LOGE("Cannot create audio player: unsupported 8-bit data");
-                //return SL_RESULT_CONTENT_UNSUPPORTED;
             case SL_PCMSAMPLEFORMAT_FIXED_16:
                 break;
                 // others
@@ -992,11 +989,8 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
                     (unsigned) df_pcm->containerSize);
                 return SL_RESULT_CONTENT_UNSUPPORTED;
             }
-            switch (df_pcm->channelMask) {
-                // FIXME needs work
-            default:
-                break;
-            }
+            // df_pcm->channelMask: the earlier platform-independent check and the
+            //     upcoming check by sles_to_android_channelMaskOut are sufficient
             switch (df_pcm->endianness) {
             case SL_BYTEORDER_LITTLEENDIAN:
                 break;
@@ -1212,16 +1206,15 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
             BufferHeader *oldFront = ap->mBufferQueue.mFront;
             BufferHeader *newFront = &oldFront[1];
 
-            // FIXME handle 8bit based on buffer format
-            short *pSrc = (short*)((char *)oldFront->mBuffer
-                    + ap->mBufferQueue.mSizeConsumed);
+            // declared as void * because this code supports both 8-bit and 16-bit PCM data
+            void *pSrc = (char *)oldFront->mBuffer + ap->mBufferQueue.mSizeConsumed;
             if (ap->mBufferQueue.mSizeConsumed + pBuff->size < oldFront->mSize) {
                 // can't consume the whole or rest of the buffer in one shot
                 ap->mBufferQueue.mSizeConsumed += pBuff->size;
                 // leave pBuff->size untouched
                 // consume data
                 // FIXME can we avoid holding the lock during the copy?
-                memcpy (pBuff->i16, pSrc, pBuff->size);
+                memcpy (pBuff->raw, pSrc, pBuff->size);
             } else {
                 // finish consuming the buffer or consume the buffer in one shot
                 pBuff->size = oldFront->mSize - ap->mBufferQueue.mSizeConsumed;
@@ -1240,7 +1233,7 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
 
                 // consume data
                 // FIXME can we avoid holding the lock during the copy?
-                memcpy (pBuff->i16, pSrc, pBuff->size);
+                memcpy (pBuff->raw, pSrc, pBuff->size);
 
                 // data has been consumed, and the buffer queue state has been updated
                 // we will notify the client if applicable
