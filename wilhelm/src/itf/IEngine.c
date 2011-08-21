@@ -1144,7 +1144,8 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                     }
 
                     result = checkDataSink("pImageVideoSnk", (const SLDataSink *) pImageVideoSnk,
-                            &thiz->mImageVideoSink, DATALOCATOR_MASK_NATIVEDISPLAY,
+                            &thiz->mImageVideoSink,
+                            DATALOCATOR_MASK_NULL | DATALOCATOR_MASK_NATIVEDISPLAY,
                             DATAFORMAT_MASK_NULL);
                     if (XA_RESULT_SUCCESS != result) {
                         break;
