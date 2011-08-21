@@ -42,6 +42,9 @@ public class ToGrayFilter extends SimpleImageFilter {
     @GenerateFieldPort(name = "invertSource", hasDefault = true)
     private boolean mInvertSource = false;
 
+    @GenerateFieldPort(name = "tile_size", hasDefault = true)
+    private int mTileSize = 640;
+
     private MutableFrameFormat mOutputFormat;
 
     private static final String mColorToGray4Shader =
@@ -78,6 +81,7 @@ public class ToGrayFilter extends SimpleImageFilter {
                                        inputChannels + "! Channels must be 4!");
         }
         ShaderProgram program = new ShaderProgram(context, mColorToGray4Shader);
+        program.setMaximumTileSize(mTileSize);
         if (mInvertSource)
             program.setSourceRect(0.0f, 1.0f, 1.0f, -1.0f);
         return program;

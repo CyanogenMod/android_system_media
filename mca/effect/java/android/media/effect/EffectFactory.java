@@ -17,10 +17,6 @@
 
 package android.media.effect;
 
-import android.media.effect.effects.BrightnessEffect;
-import android.media.effect.effects.ContrastEffect;
-import android.media.effect.effects.FisheyeEffect;
-
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
@@ -40,6 +36,7 @@ public class EffectFactory {
     };
 
     /** List of Effects */
+
     /**
      * <p>Adjusts the brightness of the image.</p>
      * <p>Available parameters:</p>
@@ -106,6 +103,169 @@ public class EffectFactory {
      * @hide
      */
     public final static String EFFECT_BACKDROPPER = "BackDropperEffect";
+
+    /**
+     * Applies histogram equalization on the image.<br/>
+     * Parameters: scale (float): the scale of histogram equalization.
+     * @hide
+     */
+    public final static String EFFECT_AUTOFIX = "AutoFixEffect";
+
+    /**
+     * Adjusts the range of minimal and maximal values of color pixels.<br/>
+     * Parameters: black (float): the value of the minimal pixel.
+     * Parameters: white (float): the value of the maximal pixel.
+     * @hide
+     */
+    public final static String EFFECT_BLACKWHITE = "BlackWhiteEffect";
+
+    /**
+     * Crops an upright rectangular area from the image.<br/>
+     * Parameters: xorigin (int): xorigin.
+     *             yorigin (int): yorigin.
+     *             width (int): rectangle width.
+     *             height (int): rectangle height.
+     * @hide
+     */
+    public final static String EFFECT_CROP = "CropEffect";
+
+    /**
+     * Applies cross process effect on image.<br/>
+     * Parameters: contrast (float): The strength of the color contrast.
+     * @hide
+     */
+    public final static String EFFECT_CROSSPROCESS = "CrossProcessEffect";
+
+    /**
+     * Applies documentary effect on image.<br/>
+     * Parameters: contrast (float): The strength of the color contrast.
+     * @hide
+     */
+    public final static String EFFECT_DOCUMENTARY = "DocumentaryEffect";
+
+    /**
+     * Attaches doodles to image.<br/>
+     * Parameters: contrast (float): The strength of the color contrast.
+     * @hide
+     */
+    public final static String EFFECT_DOODLE = "DoodleEffect";
+
+    /**
+     * Applies duotone effect on image.<br/>
+     * Parameters: first_color (float): first color in duotone.
+     * Parameters: second_color (float): second color in duotone.
+     * @hide
+     */
+    public final static String EFFECT_DUOTONE = "DuotoneEffect";
+
+    /**
+     * Adds backlight to the image.<br/>
+     * Parameters: backlight (float): The scale of the distortion.
+     * @hide
+     */
+    public final static String EFFECT_FILLLIGHT = "FillLightEffect";
+
+    /**
+     * Flips image vertically and/or horizontally.<br/>
+     * Parameters: vertical (boolean): flip image vertically.
+     * Parameters: horizontal (boolean): flip image horizontally.
+     * @hide
+     */
+    public final static String EFFECT_FLIP = "FlipEffect";
+
+    /**
+     * Applies film grain effect on image.<br/>
+     * @hide
+     */
+    public final static String EFFECT_GRAIN = "GrainEffect";
+
+    /**
+     * Converts image to grayscale.<br/>
+     * @hide
+     */
+    public final static String EFFECT_GRAYSCALE = "GrayscaleEffect";
+
+    /**
+     * Applies lomoish effect on image.<br/>
+     * @hide
+     */
+    public final static String EFFECT_LOMOISH = "LomoishEffect";
+
+    /**
+     * Applies negative film effect on image.<br/>
+     * Parameters: scale (float): the degree of film grain.
+     * @hide
+     */
+    public final static String EFFECT_NEGATIVE = "NegativeEffect";
+
+    /**
+     * Applied posterized effect on image.<br/>
+     * @hide
+     */
+    public final static String EFFECT_POSTERIZE = "PosterizeEffect";
+
+    /**
+     * Removes red eyes on specified region.<br/>
+     * Parameters: intensity (float): threshold used to indentify red eyes.
+     *             redeye (Bitmap): bitmap specifies red eye regions.
+     * @hide
+     */
+    public final static String EFFECT_REDEYE = "RedEyeEffect";
+
+    /**
+     * Rotates the image.<br/>
+     * Parameters: degree (float): the degree of rotation. shoule be a multiple of 90.
+     * @hide
+     */
+    public final static String EFFECT_ROTATE = "RotateEffect";
+
+    /**
+     * Adjusts color saturation on image.<br/>
+     * Parameters: scale (float): The scale of color saturation.
+     * @hide
+     */
+    public final static String EFFECT_SATURATE = "SaturateEffect";
+
+    /**
+     * Converts image to sepia tone.<br/>
+     * @hide
+     */
+    public final static String EFFECT_SEPIA = "SepiaEffect";
+
+    /**
+     * Sharpens the image.<br/>
+     * Parameters: scale (float): The degree of sharpening.
+     * @hide
+     */
+    public final static String EFFECT_SHARPEN = "SharpenEffect";
+
+    /**
+     * Rotates and resizes the image accroding to specified angle.<br/>
+     * Parameters: scale (angle): the angle of rotation.
+     * @hide
+     */
+    public final static String EFFECT_STRAIGHTEN = "StraightenEffect";
+
+    /**
+     * Adjusts color temperature in the image.<br/>
+     * Parameters: scale (float): the value of color temperature.
+     * @hide
+     */
+    public final static String EFFECT_TEMPERATURE = "ColorTemperatureEffect";
+
+    /**
+     * Applies tine effect on image.<br/>
+     * @hide
+     */
+    public final static String EFFECT_TINT = "TintEffect";
+
+    /**
+     * Appliies vignette effect on image.<br/>
+     * Parameters: range (float): The range of vignetting.
+     * @hide
+     */
+    public final static String EFFECT_VIGNETTE = "VignetteEffect";
+
 
     /** ...Many more effects to follow ... */
 
