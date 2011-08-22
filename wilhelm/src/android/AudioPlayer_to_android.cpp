@@ -1943,7 +1943,7 @@ void android_audioPlayer_setPlayState(CAudioPlayer *ap) {
 
 //-----------------------------------------------------------------------------
 // call when either player event flags, marker position, or position update period changes
-void android_audioPlayer_useEventMask(CAudioPlayer *ap) {
+void android_audioPlayer_usePlayEventMask(CAudioPlayer *ap) {
     IPlay *pPlayItf = &ap->mPlay;
     SLuint32 eventFlags = pPlayItf->mEventFlags;
     /*switch(ap->mAndroidObjType) {

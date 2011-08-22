@@ -56,6 +56,7 @@ extern XAresult android_Player_getPosition(IPlay *pPlayItf, SLmillisecond *pPosM
  * pre-condition: mp != NULL
  */
 extern void android_Player_volumeUpdate(CMediaPlayer *mp);
+extern void android_Player_usePlayEventMask(CMediaPlayer *mp);
 
 /**************************************************************************************************
  * Playback control and events

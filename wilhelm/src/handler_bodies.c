@@ -78,7 +78,7 @@ unsigned handler_MidiPlayer_position(IObject *thiz)
 unsigned handler_AudioPlayer_transport(IObject *thiz)
 {
     CAudioPlayer *ap = (CAudioPlayer *) thiz;
-    android_audioPlayer_useEventMask(ap);
+    android_audioPlayer_usePlayEventMask(ap);
     return ATTR_TRANSPORT;
 }
 
@@ -96,20 +96,29 @@ unsigned handler_AudioPlayer_play_state(IObject *thiz)
 unsigned handler_AudioRecorder_transport(IObject *thiz)
 {
     CAudioRecorder* ar = (CAudioRecorder *) thiz;
-    android_audioRecorder_useEventMask(ar);
+    android_audioRecorder_useRecordEventMask(ar);
     return ATTR_TRANSPORT;
 }
 
 
-// XA_OBJECTID_MEDIAPLAYER, ATTR_TRANSPORT or ATTR_PLAY_STATE
+// XA_OBJECTID_MEDIAPLAYER, ATTR_TRANSPORT
 unsigned handler_MediaPlayer_transport(IObject *thiz)
+{
+    CMediaPlayer *mp = (CMediaPlayer *) thiz;
+    android_Player_usePlayEventMask(mp);
+    return ATTR_TRANSPORT;
+}
+
+
+// XA_OBJECTID_MEDIAPLAYER, ATTR_PLAY_STATE
+unsigned handler_MediaPlayer_play_state(IObject *thiz)
 {
     CMediaPlayer *mp = (CMediaPlayer *) thiz;
     android::GenericPlayer* avp = mp->mAVPlayer.get();
     if (avp != NULL) {
         android_Player_setPlayState(avp, mp->mPlay.mState, &(mp->mAndroidObjState));
     }
-    return ATTR_TRANSPORT | ATTR_PLAY_STATE;
+    return ATTR_PLAY_STATE;
 }
 
 
