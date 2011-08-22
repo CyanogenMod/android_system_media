@@ -706,6 +706,9 @@ AndroidObjectType audioPlayer_getAndroidObjectTypeForSourceSink(CAudioPlayer *ap
  * from a URI or FD, for prepare, prefetch, and play events
  */
 static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* user) {
+
+    // FIXME see similar code and comment in player_handleMediaPlayerEventNotifications
+
     if (NULL == user) {
         return;
     }

@@ -253,8 +253,9 @@ const signed char MPH_to_MediaPlayer[MPH_MAX] = {
     [MPH_XASTREAMINFORMATION] = 3,
     [MPH_XAVOLUME] = 4,
     [MPH_XASEEK] = 5,
+    [MPH_XAPREFETCHSTATUS] = 6,
 #ifdef ANDROID
-    [MPH_ANDROIDBUFFERQUEUE] = 6,
+    [MPH_ANDROIDBUFFERQUEUE] = 7,
 #endif
 #else
 #include "MPH_to_MediaPlayer.h"
