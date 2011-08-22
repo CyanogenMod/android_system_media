@@ -333,14 +333,12 @@ XAresult android_Player_destroy(CMediaPlayer *mp) {
 
 
 XAresult android_Player_getDuration(IPlay *pPlayItf, XAmillisecond *pDurMsec) {
-    XAresult result = XA_RESULT_SUCCESS;
     CMediaPlayer *avp = (CMediaPlayer *)pPlayItf->mThis;
 
     switch (avp->mAndroidObjType) {
 
-    case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: // intended fall-through
     case AUDIOVIDEOPLAYER_FROM_URIFD: {
-        int dur = -1;
+        int dur = ANDROID_UNKNOWN_TIME;
         if (avp->mAVPlayer != 0) {
             avp->mAVPlayer->getDurationMsec(&dur);
         }
@@ -351,13 +349,13 @@ XAresult android_Player_getDuration(IPlay *pPlayItf, XAmillisecond *pDurMsec) {
         }
     } break;
 
+    case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: // intended fall-through
     default:
-        // we shouldn't be here
-        assert(false);
+        *pDurMsec = XA_TIME_UNKNOWN;
         break;
     }
 
-    return result;
+    return XA_RESULT_SUCCESS;
 }
 
 

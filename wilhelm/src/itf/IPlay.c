@@ -162,16 +162,24 @@ static SLresult IPlay_GetDuration(SLPlayItf self, SLmillisecond *pMsec)
         interface_lock_exclusive(thiz);
         SLmillisecond duration = thiz->mDuration;
 #ifdef ANDROID
-        if ((SL_TIME_UNKNOWN == duration) &&
-            (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz))) {
+        if (SL_TIME_UNKNOWN == duration) {
             SLmillisecond temp;
-            result = android_audioPlayer_getDuration(thiz, &temp);
+            switch (InterfaceToObjectID(thiz)) {
+            case SL_OBJECTID_AUDIOPLAYER:
+                result = android_audioPlayer_getDuration(thiz, &temp);
+                break;
+            case XA_OBJECTID_MEDIAPLAYER:
+                result = android_Player_getDuration(thiz, &temp);
+                break;
+            default:
+                result = SL_RESULT_FEATURE_UNSUPPORTED;
+                break;
+            }
             if (SL_RESULT_SUCCESS == result) {
                 duration = temp;
                 thiz->mDuration = duration;
             }
         }
-        //FIXME support GetDuration for XA_OBJECTID_MEDIAPLAYER
 #else
         // will be set by containing AudioPlayer or MidiPlayer object at Realize, if known,
         // otherwise the duration will be updated each time a new maximum position is detected
