@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// #define LOG_NDEBUG 0
 
 #include "base/logging.h"
 #include "base/utilities.h"
@@ -23,6 +24,7 @@
 
 #include <map>
 #include <string>
+#include <EGL/eglext.h>
 
 namespace android {
 namespace filterfw {
@@ -84,6 +86,7 @@ bool GLEnv::Deactivate() {
 }
 
 bool GLEnv::Activate() {
+  LOGV("Activate()");
   if (display()   != eglGetCurrentDisplay() ||
       context()   != eglGetCurrentContext() ||
       surface()   != eglGetCurrentSurface(EGL_DRAW)) {
@@ -92,6 +95,7 @@ bool GLEnv::Activate() {
       return false;
 
     // Make our context current
+    LOGV("eglMakeCurrent");
     eglMakeCurrent(display(), surface(), surface(), context());
 
     return !CheckEGLMakeCurrentError();
@@ -137,9 +141,15 @@ bool GLEnv::InitWithNewContext() {
   EGLint numConfigs = -1;
 
   // TODO(renn): Do we need the window bit here?
+  // TODO: Currently choosing the config that includes all
+  // This is not needed if the encoding is not being used
   EGLint configAttribs[] = {
-    EGL_SURFACE_TYPE, EGL_PBUFFER_BIT | EGL_WINDOW_BIT,
+    EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
     EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+    EGL_RED_SIZE, 8,
+    EGL_GREEN_SIZE, 8,
+    EGL_BLUE_SIZE, 8,
+    EGL_RECORDABLE_ANDROID, EGL_TRUE,
     EGL_NONE
   };
 
@@ -168,6 +178,7 @@ bool GLEnv::InitWithNewContext() {
 }
 
 bool GLEnv::IsActive() const {
+  LOGV("IsActive()");
   return context() == eglGetCurrentContext()
     &&   display() == eglGetCurrentDisplay()
     &&   surface() == eglGetCurrentSurface(EGL_DRAW);
@@ -192,6 +203,7 @@ int GLEnv::AddSurface(const EGLSurface& surface) {
 }
 
 bool GLEnv::SwitchToSurfaceId(int surface_id) {
+  LOGV("SwitchToSurfaceId");
   if (surface_id_ != surface_id) {
     const SurfaceWindowPair* surface = FindOrNull(surfaces_, surface_id);
     if (surface) {

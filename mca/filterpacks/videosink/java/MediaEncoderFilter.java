@@ -65,13 +65,13 @@ public class MediaEncoderFilter extends Filter {
 
     /** Filename to save the output. */
     @GenerateFieldPort(name = "outputFile", hasDefault = true)
-    private String mOutputFile = new String("/sdcard/MediaEncoderOut.3gp");
+    private String mOutputFile = new String("/sdcard/MediaEncoderOut.mp4");
 
     /** The output format to encode the frames in.
      * Choose an output format from the options in
      * android.media.MediaRecorder.OutputFormat */
     @GenerateFieldPort(name = "outputFormat", hasDefault = true)
-    private int mOutputFormat = MediaRecorder.OutputFormat.THREE_GPP;
+    private int mOutputFormat = MediaRecorder.OutputFormat.MPEG_4;
 
     /** The videoencoder to encode the frames with.
      * Choose a videoencoder from the options in
@@ -163,8 +163,9 @@ public class MediaEncoderFilter extends Filter {
         // register the surface. The native window handle needed to create
         // the surface is initiated in start()
         mMediaRecorder.start();
+        Log.v(TAG, "ME Filter: Open: registering surface from Mediarecorder");
         mSurfaceId = context.getGLEnvironment().
-                registerSurfaceFromMediaRecorder(mMediaRecorder);
+                 registerSurfaceFromMediaRecorder(mMediaRecorder);
     }
 
     @Override
@@ -188,6 +189,8 @@ public class MediaEncoderFilter extends Filter {
     @Override
     public void close(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Closing");
+        GLEnvironment glEnv = context.getGLEnvironment();
+        glEnv.disconnectSurfaceMediaSource(mMediaRecorder);
         mMediaRecorder.stop();
         context.getGLEnvironment().unregisterSurfaceId(mSurfaceId);
     }

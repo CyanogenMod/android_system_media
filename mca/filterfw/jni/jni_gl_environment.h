@@ -74,6 +74,12 @@ Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceFromMediaRecorder(
                                                       JNIEnv* env,
                                                       jobject thiz,
                                                       jobject mediarecorder);
+JNIEXPORT jboolean JNICALL
+Java_android_filterfw_core_GLEnvironment_nativeDisconnectSurfaceMediaSource(
+                                                      JNIEnv* env,
+                                                      jobject thiz,
+                                                      jobject jmediarecorder);
+
 
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_GLEnvironment_nativeActivateSurfaceId(JNIEnv* env,

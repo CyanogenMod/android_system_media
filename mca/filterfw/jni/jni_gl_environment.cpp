@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// #define LOG_NDEBUG 0
 
 #include <stdint.h>
 #include <android/native_window_jni.h>
@@ -24,6 +25,9 @@
 
 #include <gui/ISurfaceTexture.h>
 #include <gui/SurfaceTextureClient.h>
+#include <utils/Errors.h>
+#include <system/window.h>
+
 
 using android::filterfw::GLEnv;
 using android::filterfw::WindowHandle;
@@ -150,8 +154,14 @@ jint Java_android_filterfw_core_GLEnvironment_nativeAddSurface(JNIEnv* env,
       EGLint configAttribs[] = {
         EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_RECORDABLE_ANDROID, EGL_TRUE,
         EGL_NONE
       };
+
+
 
       eglChooseConfig(gl_env->display(), configAttribs, &config, 1, &numConfigs);
       if (numConfigs < 1) {
@@ -213,8 +223,14 @@ jint Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceTexture(JNIEnv* en
       EGLint configAttribs[] = {
         EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_RECORDABLE_ANDROID, EGL_TRUE,
         EGL_NONE
       };
+
+
 
       eglChooseConfig(gl_env->display(), configAttribs, &config, 1, &numConfigs);
       if (numConfigs < 1) {
@@ -253,6 +269,97 @@ jint Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceFromMediaRecorder(
                                                       JNIEnv* env,
                                                       jobject thiz,
                                                       jobject jmediarecorder) {
+    LOGV("GLEnv Jni: nativeAddSurfaceFromMediaRecorder");
+    GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
+    if (!gl_env) {
+        return -1;
+    }
+    // get a native mediarecorder object from the java object
+    sp<MediaRecorder> mr = getMediaRecorder(env, jmediarecorder);
+    if (mr == NULL) {
+        LOGE("GLEnvironment: Error- MediaRecorder could not be initialized!");
+        return -1;
+    }
+
+    // Ask the mediarecorder to return a handle to a surfacemediasource
+    // This will talk to the StageFrightRecorder via MediaRecorderClient
+    // over binder calls
+    sp<ISurfaceTexture> surfaceMS = mr->querySurfaceMediaSourceFromMediaServer();
+    if (surfaceMS == NULL) {
+      LOGE("GLEnvironment: Error- MediaRecorder returned a null \
+              <ISurfaceTexture> handle.");
+      return -1;
+    }
+    sp<SurfaceTextureClient> surfaceTC = new SurfaceTextureClient(surfaceMS);
+    // Get the ANativeWindow
+    sp<ANativeWindow> window = surfaceTC;
+
+
+    if (window == NULL) {
+      LOGE("GLEnvironment: Error creating window!");
+      return -1;
+    }
+    window->incStrong((void*)ANativeWindow_acquire);
+
+    // In case of encoding, no need to set the dimensions
+    // on the buffers. The dimensions for the final encoding are set by
+    // the consumer side.
+    // The pixel format is dictated by the GL, and set during the
+    // eglCreateWindowSurface
+
+    NativeWindowHandle* winHandle = new NativeWindowHandle(window.get());
+    int result = gl_env->FindSurfaceIdForWindow(winHandle);
+    // If we find a surface with that window handle, just return that id
+    if (result != -1) {
+        delete winHandle;
+        return result;
+    }
+    // If we do not find a surface with that window handle, create
+    // one and assign to it the handle
+    // Configure surface
+    EGLConfig config;
+    EGLint numConfigs = -1;
+    EGLint configAttribs[] = {
+          EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+          EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+          EGL_RED_SIZE, 8,
+          EGL_GREEN_SIZE, 8,
+          EGL_BLUE_SIZE, 8,
+          EGL_RECORDABLE_ANDROID, EGL_TRUE,
+          EGL_NONE
+    };
+
+
+    eglChooseConfig(gl_env->display(), configAttribs, &config, 1, &numConfigs);
+    if (numConfigs < 1) {
+      LOGE("GLEnvironment: No suitable EGL configuration found for surface texture!");
+      delete winHandle;
+      return -1;
+    }
+
+    // Create the EGL surface
+    EGLSurface egl_surface = eglCreateWindowSurface(gl_env->display(),
+                                                    config,
+                                                    window.get(),
+                                                    NULL);
+
+    if (GLEnv::CheckEGLError("eglCreateWindowSurface")) {
+      LOGE("GLEnvironment: Error creating window surface!");
+      delete winHandle;
+      return -1;
+    }
+
+    // Add it to GL Env and assign ID
+    result = gl_env->AddWindowSurface(egl_surface, winHandle);
+    return result;
+}
+
+
+jboolean  Java_android_filterfw_core_GLEnvironment_nativeDisconnectSurfaceMediaSource(
+                                                      JNIEnv* env,
+                                                      jobject thiz,
+                                                      jobject jmediarecorder) {
+    LOGV("GLEnv Jni: native disconnect SurfaceMediaSource");
     GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
     if (!gl_env) {
         return -1;
@@ -283,57 +390,17 @@ jint Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceFromMediaRecorder(
       return -1;
     }
 
-    // In case of encoding, no need to set the dimensions
-    // on the buffers. The dimensions for the final encoding are set by
-    // the consumer side.
-    // The pixel format is dictated by the GL, and set during the
-    // eglCreateWindowSurface
-
-    NativeWindowHandle* winHandle = new NativeWindowHandle(window.get());
-    int result = gl_env->FindSurfaceIdForWindow(winHandle);
-    // If we find a surface with that window handle, just return that id
-    if (result != -1) {
-        delete winHandle;
-        return result;
+    if (android::NO_ERROR != native_window_api_disconnect(window.get(), NATIVE_WINDOW_API_EGL)) {
+        return JNI_FALSE;
     }
-    // If we do not find a surface with that window handle, create
-    // one and assign to it the handle
-    // Configure surface
-    EGLConfig config;
-    EGLint numConfigs = -1;
-    EGLint configAttribs[] = {
-          EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-          EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-          EGL_RED_SIZE, 8,
-          EGL_GREEN_SIZE, 8,
-          EGL_BLUE_SIZE, 8,
-          EGL_ANDROID_recordable, EGL_TRUE,
-          EGL_NONE
-    };
-
-    eglChooseConfig(gl_env->display(), configAttribs, &config, 1, &numConfigs);
-    if (numConfigs < 1) {
-      LOGE("GLEnvironment: No suitable EGL configuration found for surface texture!");
-      delete winHandle;
-      return -1;
-    }
-
-    // Create the EGL surface
-    EGLSurface egl_surface = eglCreateWindowSurface(gl_env->display(),
-                                                    config,
-                                                    window.get(),
-                                                    NULL);
-
-    if (GLEnv::CheckEGLError("eglCreateWindowSurface")) {
-      LOGE("GLEnvironment: Error creating window surface!");
-      delete winHandle;
-      return -1;
-    }
-
-    // Add it to GL Env and assign ID
-    result = gl_env->AddWindowSurface(egl_surface, winHandle);
-    return result;
+    return JNI_TRUE;
 }
+
+
+
+
+
+
 
 jboolean Java_android_filterfw_core_GLEnvironment_nativeActivateSurfaceId(JNIEnv* env,
                                                                           jobject thiz,

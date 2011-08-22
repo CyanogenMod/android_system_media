@@ -120,6 +120,12 @@ public class GLEnvironment {
         return result;
     }
 
+    public void disconnectSurfaceMediaSource(MediaRecorder mediaRecorder) {
+        if (!nativeDisconnectSurfaceMediaSource(mediaRecorder)) {
+            throw new RuntimeException("Error disconnecting SurfaceMediaSource");
+        }
+    }
+
     public void activateSurfaceWithId(int surfaceId) {
         if (!nativeActivateSurfaceId(surfaceId)) {
             throw new RuntimeException("Could not activate surface " + surfaceId + "!");
@@ -167,6 +173,8 @@ public class GLEnvironment {
     private native int nativeAddSurfaceTexture(SurfaceTexture surface, int width, int height);
 
     private native int nativeAddSurfaceFromMediaRecorder(MediaRecorder mediaRecorder);
+
+    private native boolean  nativeDisconnectSurfaceMediaSource(MediaRecorder mediaRecorder);
 
     private native boolean nativeActivateSurfaceId(int surfaceId);
 
