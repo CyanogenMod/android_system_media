@@ -66,6 +66,19 @@ public class TextGraphReader extends GraphReader {
         }
     }
 
+    private class AddLibraryCommand implements Command {
+        private String mLibraryName;
+
+        public AddLibraryCommand(String libraryName) {
+            mLibraryName = libraryName;
+        }
+
+        @Override
+        public void execute(TextGraphReader reader) {
+            reader.mFactory.addFilterLibrary(mLibraryName);
+        }
+    }
+
     private class AllocateFilterCommand implements Command {
         private String mClassName;
         private String mFilterName;
@@ -159,6 +172,7 @@ public class TextGraphReader extends GraphReader {
         final Pattern curlyOpenPattern = Pattern.compile("\\{");
         final Pattern ignorePattern = Pattern.compile("(\\s+|//[^\\n]*\\n)+");
         final Pattern packageNamePattern = Pattern.compile("[a-zA-Z\\.]+");
+        final Pattern libraryNamePattern = Pattern.compile("[a-zA-Z\\./:]+");
         final Pattern portPattern = Pattern.compile("\\[[a-zA-Z0-9\\-_]+\\]");
         final Pattern rightArrowPattern = Pattern.compile("=>");
         final Pattern semicolonPattern = Pattern.compile(";");
@@ -166,20 +180,21 @@ public class TextGraphReader extends GraphReader {
 
         final int STATE_COMMAND           = 0;
         final int STATE_IMPORT_PKG        = 1;
-        final int STATE_FILTER_CLASS      = 2;
-        final int STATE_FILTER_NAME       = 3;
-        final int STATE_CURLY_OPEN        = 4;
-        final int STATE_PARAMETERS        = 5;
-        final int STATE_CURLY_CLOSE       = 6;
-        final int STATE_SOURCE_FILTERNAME = 7;
-        final int STATE_SOURCE_PORT       = 8;
-        final int STATE_RIGHT_ARROW       = 9;
-        final int STATE_TARGET_FILTERNAME = 10;
-        final int STATE_TARGET_PORT       = 11;
-        final int STATE_ASSIGNMENT        = 12;
-        final int STATE_EXTERNAL          = 13;
-        final int STATE_SETTING           = 14;
-        final int STATE_SEMICOLON         = 15;
+        final int STATE_ADD_LIBRARY       = 2;
+        final int STATE_FILTER_CLASS      = 3;
+        final int STATE_FILTER_NAME       = 4;
+        final int STATE_CURLY_OPEN        = 5;
+        final int STATE_PARAMETERS        = 6;
+        final int STATE_CURLY_CLOSE       = 7;
+        final int STATE_SOURCE_FILTERNAME = 8;
+        final int STATE_SOURCE_PORT       = 9;
+        final int STATE_RIGHT_ARROW       = 10;
+        final int STATE_TARGET_FILTERNAME = 11;
+        final int STATE_TARGET_PORT       = 12;
+        final int STATE_ASSIGNMENT        = 13;
+        final int STATE_EXTERNAL          = 14;
+        final int STATE_SETTING           = 15;
+        final int STATE_SEMICOLON         = 16;
 
         int state = STATE_COMMAND;
         PatternScanner scanner = new PatternScanner(graphString, ignorePattern);
@@ -197,6 +212,8 @@ public class TextGraphReader extends GraphReader {
                     String curCommand = scanner.eat(commandPattern, "<command>");
                     if (curCommand.equals("@import")) {
                         state = STATE_IMPORT_PKG;
+                    } else if (curCommand.equals("@library")) {
+                        state = STATE_ADD_LIBRARY;
                     } else if (curCommand.equals("@filter")) {
                         state = STATE_FILTER_CLASS;
                     } else if (curCommand.equals("@connect")) {
@@ -216,6 +233,13 @@ public class TextGraphReader extends GraphReader {
                 case STATE_IMPORT_PKG: {
                     String packageName = scanner.eat(packageNamePattern, "<package-name>");
                     mCommands.add(new ImportPackageCommand(packageName));
+                    state = STATE_SEMICOLON;
+                    break;
+                }
+
+                case STATE_ADD_LIBRARY: {
+                    String libraryName = scanner.eat(libraryNamePattern, "<library-name>");
+                    mCommands.add(new AddLibraryCommand(libraryName));
                     state = STATE_SEMICOLON;
                     break;
                 }
