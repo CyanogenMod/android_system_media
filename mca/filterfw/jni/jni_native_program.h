@@ -58,6 +58,11 @@ Java_android_filterfw_core_NativeProgram_bindProcessFunction(JNIEnv* env,
                                                              jstring func_name);
 
 JNIEXPORT jboolean JNICALL
+Java_android_filterfw_core_NativeProgram_bindResetFunction(JNIEnv* env,
+                                                           jobject thiz,
+                                                           jstring func_name);
+
+JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_NativeProgram_bindTeardownFunction(JNIEnv* env,
                                                               jobject thiz,
                                                               jstring func_name);
@@ -81,6 +86,9 @@ Java_android_filterfw_core_NativeProgram_callNativeProcess(JNIEnv* env,
                                                            jobject thiz,
                                                            jobjectArray inputs,
                                                            jobject output);
+
+JNIEXPORT jboolean JNICALL
+Java_android_filterfw_core_NativeProgram_callNativeReset(JNIEnv* env, jobject thiz);
 
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_NativeProgram_callNativeTeardown(JNIEnv* env, jobject thiz);
