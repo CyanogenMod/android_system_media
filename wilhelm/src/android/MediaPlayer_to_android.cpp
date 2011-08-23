@@ -106,6 +106,7 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
             playCallback = mp->mPlay.mCallback;
             playContext = mp->mPlay.mContext;
         }
+        mp->mPlay.mState = XA_PLAYSTATE_PAUSED;
         object_unlock_exclusive(&mp->mObject);
 
         // enqueue callback with no lock held
