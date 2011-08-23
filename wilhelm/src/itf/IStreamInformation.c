@@ -23,19 +23,24 @@ static XAresult IStreamInformation_QueryMediaContainerInformation( XAStreamInfor
 {
     XA_ENTER_INTERFACE
 
+    if (NULL == info) {
+        result = XA_RESULT_PARAMETER_INVALID;
+        XA_LEAVE_INTERFACE
+    }
+
 #ifdef ANDROID
     IStreamInformation *thiz = (IStreamInformation *) self;
     interface_lock_exclusive(thiz);
     // always storing container info at index 0, as per spec
-    info = (XAMediaContainerInformation*)&(thiz->mStreamInfoTable.itemAt(0).containerInfo);
+    *info = thiz->mStreamInfoTable.itemAt(0).containerInfo;
     interface_unlock_exclusive(thiz);
     // even though the pointer to the media container info is returned, the values aren't set
     //  for the actual container in this version, they are simply initialized to defaults
     //  (see IStreamInformation_init)
-    result = XA_RESULT_CONTENT_UNSUPPORTED;
+    result = XA_RESULT_SUCCESS;
 #else
     SL_LOGE("QueryMediaContainerInformation is unsupported");
-    info = NULL;
+    memset(info, 0, sizeof(XAMediaContainerInformation));
     result = XA_RESULT_CONTENT_UNSUPPORTED;
 #endif
 
@@ -60,6 +65,7 @@ static XAresult IStreamInformation_QueryStreamType( XAStreamInformationItf self,
     if (0 == streamIndex) {
         // stream 0 is reserved for the container
         result = XA_RESULT_PARAMETER_INVALID;
+        *domain = XA_DOMAINTYPE_UNKNOWN;
     } else {
         IStreamInformation *thiz = (IStreamInformation *) self;
 
@@ -103,7 +109,7 @@ static XAresult IStreamInformation_QueryStreamInformation( XAStreamInformationIt
         interface_lock_exclusive(thiz);
 
         XAuint32 nbStreams = thiz->mStreamInfoTable.itemAt(0).containerInfo.numStreams;
-        // streams in the container are numbered 1..nbStreams
+        // stream 0 is the container, and other streams in the container are numbered 1..nbStreams
         if (streamIndex <= nbStreams) {
             result = XA_RESULT_SUCCESS;
             const StreamInfo& streamInfo = thiz->mStreamInfoTable.itemAt((size_t)streamIndex);
@@ -160,7 +166,7 @@ static XAresult IStreamInformation_QueryStreamName( XAStreamInformationItf self,
     XA_ENTER_INTERFACE
 
     SL_LOGE("unsupported XAStreamInformationItf function");
-    result = XA_RESULT_CONTENT_UNSUPPORTED;
+    result = XA_RESULT_FEATURE_UNSUPPORTED;
 
     XA_LEAVE_INTERFACE
 }
@@ -178,17 +184,7 @@ static XAresult IStreamInformation_RegisterStreamChangeCallback( XAStreamInforma
 
     thiz->mCallback = callback;
     thiz->mContext = pContext;
-
-    switch (InterfaceToObjectID(thiz)) {
-
-    case XA_OBJECTID_MEDIAPLAYER:
-        SL_LOGV("IStreamInformation_RegisterStreamChangeCallback()");
-        result = SL_RESULT_SUCCESS;
-        break;
-    default:
-        result = SL_RESULT_PARAMETER_INVALID;
-        break;
-    }
+    result = SL_RESULT_SUCCESS;
 
     interface_unlock_exclusive(thiz);
 

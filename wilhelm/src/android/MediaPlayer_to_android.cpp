@@ -65,6 +65,7 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
         streamInfo.videoInfo.width = (XAuint32)data1;
         streamInfo.videoInfo.height = (XAuint32)data2;
         streamInfo.videoInfo.bitRate = 0;// unknown, we don't have that info FIXME
+        streamInfo.videoInfo.frameRate = 0;
         streamInfo.videoInfo.duration = XA_TIME_UNKNOWN;
         StreamInfo &contInfo = mp->mStreamInfo.mStreamInfoTable.editItemAt(0);
         contInfo.containerInfo.numStreams = 1;
