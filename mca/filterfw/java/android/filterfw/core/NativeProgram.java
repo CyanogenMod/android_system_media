@@ -30,6 +30,7 @@ public class NativeProgram extends Program {
     private boolean mHasTeardownFunction = false;
     private boolean mHasSetValueFunction = false;
     private boolean mHasGetValueFunction = false;
+    private boolean mHasResetFunction = false;
     private boolean mTornDown = false;
 
     public NativeProgram(String nativeLibName, String nativeFunctionPrefix) {
@@ -63,19 +64,29 @@ public class NativeProgram extends Program {
         String getValueFuncName = nativeFunctionPrefix + "_getvalue";
         mHasGetValueFunction = bindGetValueFunction(getValueFuncName);
 
+        String resetFuncName = nativeFunctionPrefix + "_reset";
+        mHasResetFunction = bindResetFunction(resetFuncName);
+
         // Initialize the native code
         if (mHasInitFunction && !callNativeInit()) {
             throw new RuntimeException("Could not initialize NativeProgram!");
         }
     }
 
-    public  void tearDown() {
+    public void tearDown() {
         if (mTornDown) return;
         if (mHasTeardownFunction && !callNativeTeardown()) {
             throw new RuntimeException("Could not tear down NativeProgram!");
         }
         deallocate();
         mTornDown = true;
+    }
+
+    @Override
+    public void reset() {
+        if (mHasResetFunction && !callNativeReset()) {
+            throw new RuntimeException("Could not reset NativeProgram!");
+        }
     }
 
     @Override
@@ -153,11 +164,13 @@ public class NativeProgram extends Program {
     private native boolean bindSetValueFunction(String funcName);
     private native boolean bindGetValueFunction(String funcName);
     private native boolean bindProcessFunction(String funcName);
+    private native boolean bindResetFunction(String funcName);
     private native boolean bindTeardownFunction(String funcName);
 
     private native boolean callNativeInit();
     private native boolean callNativeSetValue(String key, String value);
     private native String  callNativeGetValue(String key);
     private native boolean callNativeProcess(NativeFrame[] inputs, NativeFrame output);
+    private native boolean callNativeReset();
     private native boolean callNativeTeardown();
 }

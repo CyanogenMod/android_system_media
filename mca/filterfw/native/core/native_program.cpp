@@ -32,6 +32,7 @@ NativeProgram::NativeProgram()
       setvalue_function_(NULL),
       getvalue_function_(NULL),
       process_function_(NULL),
+      reset_function_(NULL),
       teardown_function_(NULL),
       user_data_(NULL) {
 }
@@ -85,6 +86,13 @@ bool NativeProgram::BindGetValueFunction(const std::string& func_name) {
   return getvalue_function_ != NULL;
 }
 
+bool NativeProgram::BindResetFunction(const std::string& func_name) {
+  if (!lib_handle_)
+    return false;
+  reset_function_ = reinterpret_cast<ResetFunctionPtr>(dlsym(lib_handle_, func_name.c_str()));
+  return reset_function_ != NULL;
+}
+
 bool NativeProgram::BindTeardownFunction(const std::string& func_name) {
   if (!lib_handle_)
     return false;
@@ -132,6 +140,14 @@ std::string NativeProgram::CallGetValue(const std::string& key) {
     return std::string(result);
   }
   return std::string();
+}
+
+bool NativeProgram::CallReset() {
+  if (reset_function_) {
+    reset_function_(user_data_);
+    return true;
+  }
+  return false;
 }
 
 bool NativeProgram::CallTeardown() {

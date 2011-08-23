@@ -31,6 +31,7 @@ typedef void (*InitFunctionPtr)(void**);
 typedef void (*SetValueFunctionPtr)(const char*, const char*, void*);
 typedef void (*GetValueFunctionPtr)(const char*, char*, int, void*);
 typedef int (*ProcessFunctionPtr)(const char**, const int*, int, char*, int, void*);
+typedef void (*ResetFunctionPtr)(void*);
 typedef void (*TeardownFunctionPtr)(void*);
 
 class NativeProgram {
@@ -46,6 +47,7 @@ class NativeProgram {
     bool BindSetValueFunction(const std::string& func_name);
     bool BindGetValueFunction(const std::string& func_name);
     bool BindProcessFunction(const std::string& func_name);
+    bool BindResetFunction(const std::string& func_name);
     bool BindTeardownFunction(const std::string& func_name);
 
     bool CallInit();
@@ -55,6 +57,7 @@ class NativeProgram {
                      const std::vector<int>& input_sizes,
                      char* output,
                      int output_size);
+    bool CallReset();
     bool CallTeardown();
 
   private:
@@ -66,6 +69,7 @@ class NativeProgram {
     SetValueFunctionPtr setvalue_function_;
     GetValueFunctionPtr getvalue_function_;
     ProcessFunctionPtr process_function_;
+    ResetFunctionPtr reset_function_;
     TeardownFunctionPtr teardown_function_;
 
     // Pointer to user data

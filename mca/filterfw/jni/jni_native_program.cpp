@@ -79,6 +79,15 @@ jboolean Java_android_filterfw_core_NativeProgram_bindProcessFunction(JNIEnv* en
   return ToJBool(program && func_name && program->BindProcessFunction(ToCppString(env, func_name)));
 }
 
+jboolean Java_android_filterfw_core_NativeProgram_bindResetFunction(JNIEnv* env,
+                                                                    jobject thiz,
+                                                                    jstring func_name) {
+  NativeProgram* program = ConvertFromJava<NativeProgram>(env, thiz);
+  return ToJBool(program &&
+                 func_name &&
+                 program->BindResetFunction(ToCppString(env, func_name)));
+}
+
 jboolean Java_android_filterfw_core_NativeProgram_bindTeardownFunction(JNIEnv* env,
                                                                        jobject thiz,
                                                                        jstring func_name) {
@@ -165,6 +174,11 @@ jboolean Java_android_filterfw_core_NativeProgram_callNativeProcess(JNIEnv* env,
 
   // Process the frames!
   return ToJBool(program->CallProcess(input_buffers, input_sizes, output_data, output_size));
+}
+
+jboolean Java_android_filterfw_core_NativeProgram_callNativeReset(JNIEnv* env, jobject thiz) {
+  NativeProgram* program = ConvertFromJava<NativeProgram>(env, thiz);
+  return ToJBool(program && program->CallReset());
 }
 
 jboolean Java_android_filterfw_core_NativeProgram_callNativeTeardown(JNIEnv* env, jobject thiz) {

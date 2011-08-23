@@ -35,4 +35,7 @@ public abstract class Program {
     public abstract void setHostValue(String variableName, Object value);
 
     public abstract Object getHostValue(String variableName);
+
+    public void reset() {
+    }
 }
