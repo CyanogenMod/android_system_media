@@ -119,7 +119,7 @@ extern SLresult android_audioPlayer_metadata_getValue(CAudioPlayer *pAudioPlayer
  ****************************/
 extern void android_audioPlayer_setPlayState(CAudioPlayer *pAudioPlayer);
 
-extern void android_audioPlayer_useEventMask(CAudioPlayer *pAudioPlayer);
+extern void android_audioPlayer_usePlayEventMask(CAudioPlayer *pAudioPlayer);
 
 extern void android_audioPlayer_seek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec);
 

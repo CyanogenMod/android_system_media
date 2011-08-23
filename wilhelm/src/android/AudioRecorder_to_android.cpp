@@ -471,7 +471,7 @@ void android_audioRecorder_setRecordState(CAudioRecorder* ar, SLuint32 state) {
 
 
 //-----------------------------------------------------------------------------
-void android_audioRecorder_useEventMask(CAudioRecorder *ar) {
+void android_audioRecorder_useRecordEventMask(CAudioRecorder *ar) {
     IRecord *pRecordItf = &ar->mRecord;
     SLuint32 eventFlags = pRecordItf->mCallbackEventsMask;
 

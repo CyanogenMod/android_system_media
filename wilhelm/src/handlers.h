@@ -29,7 +29,7 @@ extern unsigned handler_MediaPlayer_gain(IObject *thiz);
 extern unsigned handler_MediaPlayer_transport(IObject *thiz);
 extern unsigned handler_MediaPlayer_position(IObject *thiz);
 extern unsigned handler_MediaPlayer_abq_enqueue(IObject *thiz);
-#define handler_MediaPlayer_play_state handler_MediaPlayer_transport
+extern unsigned handler_MediaPlayer_play_state(IObject *thiz);
 extern unsigned handler_AudioPlayer_gain(IObject *thiz);
 extern unsigned handler_AudioPlayer_transport(IObject *thiz);
 extern unsigned handler_AudioPlayer_position(IObject *thiz);

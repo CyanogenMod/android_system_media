@@ -145,6 +145,19 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
       }
       break;
 
+      case android::GenericPlayer::kEventPlay: {
+        SL_LOGV("kEventPlay");
+
+        interface_lock_shared(&mp->mPlay);
+        slPlayCallback callback = mp->mPlay.mCallback;
+        void* callbackPContext = mp->mPlay.mContext;
+        interface_unlock_shared(&mp->mPlay);
+
+        if (NULL != callback) {
+            (*callback)(&mp->mPlay.mItf, callbackPContext, (SLuint32) data1); // SL_PLAYEVENT_HEAD*
+        }
+      }
+      break;
 
       default: {
         SL_LOGE("Received unknown event %d, data %d from AVPlayer", event, data1);
@@ -330,6 +343,15 @@ XAresult android_Player_destroy(CMediaPlayer *mp) {
     }
 
     return result;
+}
+
+
+void android_Player_usePlayEventMask(CMediaPlayer *mp) {
+    if (mp->mAVPlayer != 0) {
+        IPlay *pPlayItf = &mp->mPlay;
+        mp->mAVPlayer->setPlayEvents((int32_t) pPlayItf->mEventFlags,
+                (int32_t) pPlayItf->mMarkerPosition, (int32_t) pPlayItf->mPositionUpdatePeriod);
+    }
 }
 
 
