@@ -347,6 +347,8 @@ XAresult android_Player_create(CMediaPlayer *mp) {
     mp->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
     mp->mSessionId = android::AudioSystem::newAudioSessionId();
 
+    mp->mCallbackProtector = new android::CallbackProtector();
+
     return result;
 }
 
@@ -405,6 +407,9 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
 
     if (XA_RESULT_SUCCESS == result) {
 
+        // inform GenericPlayer of the associated callback protector
+        mp->mAVPlayer->setCallbackProtector(mp->mCallbackProtector);
+
         // if there is a video sink
         if (XA_DATALOCATOR_NATIVEDISPLAY ==
                 mp->mImageVideoSink.mLocator.mLocatorType) {
@@ -420,16 +425,35 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
     return result;
 }
 
+// Called with a lock on MediaPlayer, and blocks until safe to destroy
+XAresult android_Player_preDestroy(CMediaPlayer *mp) {
+    SL_LOGV("android_Player_preDestroy(%p)", mp);
+    if (mp->mAVPlayer != 0) {
+        mp->mAVPlayer->preDestroy();
+    }
+    SL_LOGV("android_Player_preDestroy(%p) after mAVPlayer->preDestroy()", mp);
+
+    object_unlock_exclusive(&mp->mObject);
+    if (mp->mCallbackProtector != 0) {
+        mp->mCallbackProtector->requestCbExitAndWait();
+    }
+    object_lock_exclusive(&mp->mObject);
+
+    return XA_RESULT_SUCCESS;
+}
+
 //-----------------------------------------------------------------------------
 XAresult android_Player_destroy(CMediaPlayer *mp) {
     SL_LOGV("android_Player_destroy(%p)", mp);
-    XAresult result = XA_RESULT_SUCCESS;
 
-    if (mp->mAVPlayer != 0) {
-        mp->mAVPlayer.clear();
-    }
+    mp->mAVPlayer.clear();
+    mp->mCallbackProtector.clear();
 
-    return result;
+    // explicit destructor
+    mp->mAVPlayer.~sp();
+    mp->mCallbackProtector.~sp();
+
+    return XA_RESULT_SUCCESS;
 }
 
 

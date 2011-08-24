@@ -33,6 +33,7 @@ CallbackProtector::~CallbackProtector() {
 }
 
 
+// static
 bool CallbackProtector::enterCbIfOk(const sp<CallbackProtector> &protector) {
     if (protector != 0) {
         return protector->enterCb();

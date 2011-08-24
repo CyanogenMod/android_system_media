@@ -335,6 +335,7 @@ typedef struct CMediaPlayer_struct {
                             // range 1 <= x <= 8
 #ifdef ANDROID
     android::sp<android::GenericPlayer> mAVPlayer;
+    android::sp<android::CallbackProtector> mCallbackProtector;
     enum AndroidObjectType mAndroidObjType;
     /** identifies the initialization and preparation state */
     enum AndroidObjectState mAndroidObjState;

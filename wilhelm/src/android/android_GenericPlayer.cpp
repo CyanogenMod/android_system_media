@@ -666,4 +666,10 @@ void GenericPlayer::updateOneShot(int positionMs)
 
 }
 
+void GenericPlayer::setCallbackProtector(const sp<CallbackProtector> &callbackProtector)
+{
+    assert(mCallbackProtector == NULL && callbackProtector != NULL);
+    mCallbackProtector = callbackProtector;
+}
+
 } // namespace android

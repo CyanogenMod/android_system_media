@@ -64,5 +64,9 @@ void CMediaPlayer_Destroy(void *self)
 
 predestroy_t CMediaPlayer_PreDestroy(void *self)
 {
+    CMediaPlayer *thiz = (CMediaPlayer *) self;
+#ifdef ANDROID
+    android_Player_preDestroy(thiz);
+#endif
     return predestroy_ok;
 }

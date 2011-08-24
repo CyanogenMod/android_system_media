@@ -31,7 +31,8 @@ public:
     StreamSourceAppProxy(
             const void* user, bool userIsAudioPlayer,
             void *appContext,
-            const void *caller);
+            const void *caller,
+            const sp<CallbackProtector> &callbackProtector);
     virtual ~StreamSourceAppProxy();
 
     // store an item structure to indicate a processed buffer
@@ -64,6 +65,8 @@ private:
 
     void *mAppContext;
     const void *mCaller;
+
+    sp<CallbackProtector> mCallbackProtector;
 
     DISALLOW_EVIL_CONSTRUCTORS(StreamSourceAppProxy);
 };

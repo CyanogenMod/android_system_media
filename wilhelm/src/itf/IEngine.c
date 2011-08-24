@@ -1112,9 +1112,12 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                     // (assume calloc or memset 0 during allocation)
                     // placement new
 #ifdef ANDROID
+                    // placement new (explicit constructor)
                     // FIXME unnecessary once those fields are encapsulated in one class, rather
                     //   than a structure
                     (void) new (&thiz->mAVPlayer) android::sp<android::GenericPlayer>();
+                    (void) new (&thiz->mCallbackProtector)
+                            android::sp<android::CallbackProtector>();
 #endif
 
                     // Check the source and sink parameters against generic constraints

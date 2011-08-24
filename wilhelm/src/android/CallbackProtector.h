@@ -26,13 +26,13 @@ public:
     virtual ~CallbackProtector();
 
     /**
-     * Indicates whether the CallbackProtector is valid and it's safe to enter the callback.
+     * Indicates whether the CallbackProtector is non-NULL and it's safe to enter the callback.
      */
     static bool enterCbIfOk(const sp<CallbackProtector> &protector);
 
     /**
-     * Indicates whether it's safe to enter the callback. It would typically return
-     * false if the AudioTrack or AudioPlayer is about to be destroyed
+     * Indicates whether it's safe to enter the callback. It would typically return false
+     * if the associated object (AudioTrack, AudioPlayer, MediaPlayer) is about to be destroyed.
      */
     bool enterCb();
 
@@ -43,13 +43,13 @@ public:
     void exitCb();
 
     /**
-     * Called to signal the track is about to be destroyed, so whenever a callback is
+     * Called to signal the associated object is about to be destroyed, so whenever a callback is
      * entered (see enterCb) it will be notified it is pointless to process the callback. This will
      * return immediately if there are no callbacks, and will block until current callbacks exit.
      */
     void requestCbExitAndWait();
 
-protected:
+private:
     Mutex mLock;
     Condition mCbExitedCondition;
 
@@ -58,7 +58,6 @@ protected:
     /** Counts the number of callbacks actively locking the associated AudioPlayer */
     unsigned int mCbCount;
 
-private:
     // disallow "evil" constructors
     CallbackProtector(const CallbackProtector &);
     CallbackProtector &operator=(const CallbackProtector &);

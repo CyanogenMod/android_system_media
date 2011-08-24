@@ -168,6 +168,9 @@ GenericMediaPlayer::~GenericMediaPlayer() {
 
 void GenericMediaPlayer::preDestroy() {
     SL_LOGD("GenericMediaPlayer::preDestroy()");
+    if (mPlayer != 0) {
+        mPlayer->stop();
+    }
     GenericPlayer::preDestroy();
 }
 

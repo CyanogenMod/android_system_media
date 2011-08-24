@@ -45,12 +45,13 @@ namespace android {
 
 StreamSourceAppProxy::StreamSourceAppProxy(
         const void* user, bool userIsAudioPlayer,
-        void *context, const void *caller) :
+        void *context, const void *caller, const sp<CallbackProtector> &callbackProtector) :
     mUser(user),
     mUserIsAudioPlayer(userIsAudioPlayer),
     mAndroidBufferQueue(NULL),
     mAppContext(context),
-    mCaller(caller)
+    mCaller(caller),
+    mCallbackProtector(callbackProtector)
 {
     SL_LOGV("StreamSourceAppProxy::StreamSourceAppProxy()");
 
@@ -116,6 +117,8 @@ void StreamSourceAppProxy::receivedBuffer_l(size_t buffIndex, size_t buffLength)
 //--------------------------------------------------
 // consumption from ABQ
 void StreamSourceAppProxy::pullFromBuffQueue() {
+
+  if (android::CallbackProtector::enterCbIfOk(mCallbackProtector)) {
 
     size_t bufferId;
     void* bufferLoc;
@@ -245,6 +248,9 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
                 (SLAndroidBufferItem*)(&kItemProcessed) /* pItems */,
                 3*sizeof(SLuint32) /* itemsLength */ );
     }
+
+    mCallbackProtector->exitCb();
+  } // enterCbIfOk
 }
 
 
@@ -288,7 +294,7 @@ void StreamPlayer::registerQueueCallback(
 
     mAppProxy = new StreamSourceAppProxy(
             user, userIsAudioPlayer,
-            context, caller);
+            context, caller, mCallbackProtector);
 
     CHECK(mAppProxy != 0);
     SL_LOGD("StreamPlayer::registerQueueCallback end");
