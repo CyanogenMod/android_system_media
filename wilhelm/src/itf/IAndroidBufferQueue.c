@@ -57,29 +57,53 @@ static SLuint32 getAssociatedState(IAndroidBufferQueue *thiz)
 static void setItems(const SLAndroidBufferItem *pItems, SLuint32 itemsLength,
         SLuint16 bufferType, AdvancedBufferHeader *pBuff)
 {
-    if ((NULL == pItems) || (0 == itemsLength)) {
-        // no item data, reset item structure based on type
-        switch (bufferType) {
-          case kAndroidBufferTypeMpeg2Ts:
-            pBuff->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
-            pBuff->mItems.mTsCmdData.mPts = 0;
+    // reset item structure based on type
+    switch (bufferType) {
+      case kAndroidBufferTypeMpeg2Ts:
+        pBuff->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
+        pBuff->mItems.mTsCmdData.mPts = 0;
+        break;
+      case kAndroidBufferTypeAacadts:
+        pBuff->mItems.mAdtsCmdData.mAdtsCmdCode = ANDROID_ADTSEVENT_NONE;
+        break;
+      case kAndroidBufferTypeInvalid:
+      default:
+        // shouldn't happen, but just in case clear out the item structure
+        memset(&pBuff->mItems, 0, sizeof(AdvancedBufferItems));
+        return;
+    }
+
+    // process all items in the array; if no items then we break out of loop immediately
+    while (itemsLength > 0) {
+
+        // remaining length must be large enough for one full item without any associated data
+        if (itemsLength < sizeof(SLAndroidBufferItem)) {
+            SL_LOGE("Partial item at end of array ignored");
             break;
-          case kAndroidBufferTypeInvalid:
-          default:
-            return;
         }
-    } else {
+        itemsLength -= sizeof(SLAndroidBufferItem);
+
+        // remaining length must be large enough for data with current item and alignment padding
+        SLuint32 itemDataSizeWithAlignmentPadding = (pItems->itemSize + 3) & ~3;
+        if (itemsLength < itemDataSizeWithAlignmentPadding) {
+            SL_LOGE("Partial item data at end of array ignored");
+            break;
+        }
+        itemsLength -= itemDataSizeWithAlignmentPadding;
+
         // parse item data based on type
         switch (bufferType) {
 
           case kAndroidBufferTypeMpeg2Ts: {
-            SLuint32 index = 0;
-            // supported Mpeg2Ts commands are mutually exclusive
             switch (pItems->itemKey) {
 
               case SL_ANDROID_ITEMKEY_EOS:
                 pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_EOS;
                 //SL_LOGD("Found EOS event=%d", pBuff->mItems.mTsCmdData.mTsCmdCode);
+                if (pItems->itemSize != 0) {
+                    SL_LOGE("Invalid item parameter size %u for EOS, ignoring value",
+                            pItems->itemSize);
+                }
                 break;
 
               case SL_ANDROID_ITEMKEY_DISCONTINUITY:
@@ -91,7 +115,8 @@ static void setItems(const SLAndroidBufferItem *pItems, SLuint32 itemsLength,
                     pBuff->mItems.mTsCmdData.mPts = *((SLAuint64*)pItems->itemData);
                     //SL_LOGD("Found PTS=%lld", pBuff->mItems.mTsCmdData.mPts);
                 } else {
-                    SL_LOGE("Invalid size for MPEG-2 PTS, ignoring value");
+                    SL_LOGE("Invalid item parameter size %u for MPEG-2 PTS, ignoring value",
+                            pItems->itemSize);
                     pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_DISCONTINUITY;
                 }
                 break;
@@ -99,21 +124,83 @@ static void setItems(const SLAndroidBufferItem *pItems, SLuint32 itemsLength,
               case SL_ANDROID_ITEMKEY_FORMAT_CHANGE:
                 pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_FORMAT_CHANGE;
                 if (pItems->itemSize != 0) {
-                    SL_LOGE("Invalid item parameter size for format change, ignoring value");
+                    SL_LOGE("Invalid item parameter size %u for format change, ignoring value",
+                            pItems->itemSize);
                 }
                 break;
 
               default:
-                // no event with this buffer
-                pBuff->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
+                // unknown item key
+                SL_LOGE("Unknown item key %u with size %u ignored", pItems->itemKey,
+                        pItems->itemSize);
                 break;
+
             }// switch (pItems->itemKey)
           } break;
 
+          case kAndroidBufferTypeAacadts: {
+            switch (pItems->itemKey) {
+
+              case SL_ANDROID_ITEMKEY_EOS:
+                pBuff->mItems.mAdtsCmdData.mAdtsCmdCode |= ANDROID_ADTSEVENT_EOS;
+                if (pItems->itemSize != 0) {
+                    SL_LOGE("Invalid item parameter size %u for EOS, ignoring value",
+                            pItems->itemSize);
+                }
+                break;
+
+              default:
+                // unknown item key
+                SL_LOGE("Unknown item key %u with size %u ignored", pItems->itemKey,
+                        pItems->itemSize);
+                break;
+
+            }// switch (pItems->itemKey)
+          } break;
+
+          case kAndroidBufferTypeInvalid:
           default:
+            // not reachable as we checked this earlier
             return;
+
         }// switch (bufferType)
+
+        // skip past this item, including data with alignment padding
+        pItems = (SLAndroidBufferItem *) ((char *) pItems +
+                sizeof(SLAndroidBufferItem) + itemDataSizeWithAlignmentPadding);
     }
+
+    // now check for invalid combinations of items
+    switch (bufferType) {
+
+      case kAndroidBufferTypeMpeg2Ts: {
+        // supported Mpeg2Ts commands are mutually exclusive
+        switch (pBuff->mItems.mTsCmdData.mTsCmdCode) {
+          // single items are allowed
+          case ANDROID_MP2TSEVENT_NONE:
+          case ANDROID_MP2TSEVENT_EOS:
+          case ANDROID_MP2TSEVENT_DISCONTINUITY:
+          case ANDROID_MP2TSEVENT_DISCON_NEWPTS:
+          case ANDROID_MP2TSEVENT_FORMAT_CHANGE:
+            break;
+          // no combinations are allowed
+          default:
+            SL_LOGE("Invalid combination of items; all ignored");
+            pBuff->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
+            break;
+        }
+      } break;
+
+      case kAndroidBufferTypeAacadts: {
+        // only one item supported, and thus no combination check needed
+      } break;
+
+      case kAndroidBufferTypeInvalid:
+      default:
+        // not reachable as we checked this earlier
+        return;
+    }
+
 }
 
 
@@ -183,6 +270,9 @@ static SLresult IAndroidBufferQueue_Clear(SLAndroidBufferQueueItf self)
             thiz->mBufferArray[i].mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
             thiz->mBufferArray[i].mItems.mTsCmdData.mPts = 0;
             break;
+          case kAndroidBufferTypeAacadts:
+            thiz->mBufferArray[i].mItems.mAdtsCmdData.mAdtsCmdCode = ANDROID_ADTSEVENT_NONE;
+            break;
           default:
             result = SL_RESULT_CONTENT_UNSUPPORTED;
         }
@@ -220,11 +310,20 @@ static SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
     SL_ENTER_INTERFACE
     SL_LOGD("IAndroidBufferQueue_Enqueue pData=%p dataLength=%d", pData, dataLength);
 
-    if ( ((NULL == pData) || (0 == dataLength))
-            && ((NULL == pItems) || (0 == itemsLength))) {
+    if ((dataLength > 0) && (NULL == pData)) {
+        SL_LOGE("Enqueue failure: non-zero data length %u but NULL data pointer", dataLength);
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else if ((itemsLength > 0) && (NULL == pItems)) {
+        SL_LOGE("Enqueue failure: non-zero items length %u but NULL items pointer", itemsLength);
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else if ((0 == dataLength) && (0 == itemsLength)) {
         // no data and no msg
         SL_LOGE("Enqueue failure: trying to enqueue buffer with no data and no items.");
         result = SL_RESULT_PARAMETER_INVALID;
+    // Note that a non-NULL data pointer with zero data length is allowed.
+    // We track that data pointer as it moves through the queue
+    // to assist the application in accounting for data buffers.
+    // A non-NULL items pointer with zero items length is also allowed, but has no value.
     } else {
         IAndroidBufferQueue *thiz = (IAndroidBufferQueue *) self;
 
@@ -240,12 +339,15 @@ static SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
             SL_LEAVE_INTERFACE
             break;
           case kAndroidBufferTypeAacadts:
-            // FIXME allow commands as for mp2ts
-            if (!android::AacBqToPcmCbRenderer::validateBufferStartEndOnFrameBoundaries(
-                    pData, dataLength)) {
-                SL_LOGE("Error enqueueing ADTS data: data must start and end on frame boundaries");
-                result = SL_RESULT_PARAMETER_INVALID;
-                SL_LEAVE_INTERFACE
+            // non-zero dataLength is permitted in case of EOS command only
+            if (dataLength > 0) {
+                result = android::AacBqToPcmCbRenderer::validateBufferStartEndOnFrameBoundaries(
+                    pData, dataLength);
+                if (SL_RESULT_SUCCESS != result) {
+                    SL_LOGE("Error enqueueing ADTS data: data must start and end on frame "
+                            "boundaries");
+                    SL_LEAVE_INTERFACE
+                }
             }
             break;
           case kAndroidBufferTypeInvalid:
@@ -270,6 +372,7 @@ static SLresult IAndroidBufferQueue_Enqueue(SLAndroidBufferQueueItf self,
             oldRear->mBufferState = SL_ANDROIDBUFFERQUEUEEVENT_NONE;
             thiz->mRear = newRear;
             ++thiz->mState.count;
+            // set oldRear->mItems based on items
             setItems(pItems, itemsLength, thiz->mBufferType, oldRear);
             result = SL_RESULT_SUCCESS;
         }

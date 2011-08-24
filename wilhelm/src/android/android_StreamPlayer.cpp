@@ -125,8 +125,9 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
     size_t buffSize;
 
     slAndroidBufferQueueCallback callback = NULL;
-    void* callbackPContext = NULL;
+    void* pBufferContext, *pBufferData, *callbackPContext = NULL;
     AdvancedBufferHeader *oldFront = NULL;
+    uint32_t dataSize /* , dataUsed */;
 
     // retrieve data from the buffer queue
     interface_lock_exclusive(mAndroidBufferQueue);
@@ -140,6 +141,7 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
 
         // consume events when starting to read data from a buffer for the first time
         if (oldFront->mDataSizeConsumed == 0) {
+            // note this code assumes at most one event per buffer; see IAndroidBufferQueue_Enqueue
             if (oldFront->mItems.mTsCmdData.mTsCmdCode & ANDROID_MP2TSEVENT_EOS) {
                 receivedCmd_l(IStreamListener::EOS);
             } else if (oldFront->mItems.mTsCmdData.mTsCmdCode & ANDROID_MP2TSEVENT_DISCONTINUITY) {
@@ -210,8 +212,13 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
                     if (mAndroidBufferQueue->mCallbackEventsMask &
                             SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED) {
                         callback = mAndroidBufferQueue->mCallback;
-                        // save callback data
+                        // save callback data while under lock
                         callbackPContext = mAndroidBufferQueue->mContext;
+                        pBufferContext = (void *)oldFront->mBufferContext;
+                        pBufferData    = (void *)oldFront->mDataBuffer;
+                        dataSize       = oldFront->mDataSize;
+                        // here a buffer is only dequeued when fully consumed
+                        //dataUsed     = oldFront->mDataSizeConsumed;
                     }
                 }
                 //SL_LOGD("onBufferAvailable() %d buffers available after enqueue",
@@ -237,16 +244,11 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
     // notify client
     if (NULL != callback) {
         (*callback)(&mAndroidBufferQueue->mItf, callbackPContext,
-                // oldFront was only initialized in the code path where callback is initialized
-                //    so no need to check if it's valid
-                (void *)oldFront->mBufferContext, /* pBufferContext */
-                (void *)oldFront->mDataBuffer,/* pBufferData  */
-                oldFront->mDataSize, /* dataSize  */
-                // here a buffer is only dequeued when fully consumed
-                oldFront->mDataSize, /* dataUsed  */
+                pBufferContext, pBufferData, dataSize,
+                dataSize, /* dataUsed  */
                 // no messages during playback other than marking the buffer as processed
-                (SLAndroidBufferItem*)(&kItemProcessed) /* pItems */,
-                3*sizeof(SLuint32) /* itemsLength */ );
+                (const SLAndroidBufferItem*)(&kItemProcessed) /* pItems */,
+                NB_BUFFEREVENT_ITEM_FIELDS *sizeof(SLuint32) /* itemsLength */ );
     }
 
     mCallbackProtector->exitCb();

@@ -52,9 +52,15 @@ static size_t getFrameSize(const sp<DataSource> &source, off64_t offset) {
     const uint8_t *syncword = syncHeader;
     const uint8_t *header = syncHeader + 3;
 
-    if (source->readAt(offset, &syncHeader, ADTS_HEADER_SIZE_UP_TO_FRAMESIZE)
-            != ADTS_HEADER_SIZE_UP_TO_FRAMESIZE) {
-        SL_LOGE("AacAdtsExtractor:: getFrameSize() returns 0 (syncword and header read error)");
+    ssize_t readSize = source->readAt(offset, &syncHeader, ADTS_HEADER_SIZE_UP_TO_FRAMESIZE);
+    if (readSize == 0) {
+        // EOS is normal, not an error
+        SL_LOGV("AacAdtsExtractor::getFrameSize EOS");
+        return 0;
+    }
+    if (readSize != ADTS_HEADER_SIZE_UP_TO_FRAMESIZE) {
+        SL_LOGE("AacAdtsExtractor:: getFrameSize() returns %d (syncword and header read error)",
+                (int) readSize);
         return 0;
     }
 
@@ -241,7 +247,7 @@ status_t AacAdtsSource::read(
     size_t frameSize, frameSizeWithoutHeader;
     SL_LOGV("AacAdtsSource::read() offset=%lld", mOffset);
     if ((frameSize = getFrameSize(mDataSource, mOffset)) == 0) {
-        LOGE("AacAdtsSource::read() returns EOS");
+        SL_LOGV("AacAdtsSource::read() returns EOS");
         return ERROR_END_OF_STREAM;
         // FIXME if we return EOS here, verify we can restart decoding when we get new data
         //  with start()
@@ -256,7 +262,7 @@ status_t AacAdtsSource::read(
     }
 
     frameSizeWithoutHeader = frameSize - ADTS_HEADER_LENGTH;
-    size_t readSize = mDataSource->readAt(mOffset + ADTS_HEADER_LENGTH, buffer->data(),
+    ssize_t readSize = mDataSource->readAt(mOffset + ADTS_HEADER_LENGTH, buffer->data(),
             frameSizeWithoutHeader);
     //SL_LOGV("AacAdtsSource::read() readAt returned %u bytes", readSize);
     if (readSize != (ssize_t)frameSizeWithoutHeader) {
