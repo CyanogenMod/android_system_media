@@ -66,8 +66,18 @@ typedef struct {
     Closure *mClosureTypical[CLOSURE_TYPICAL+1];
     pthread_t *mThreadArray;    ///< The worker threads
 #ifdef ANDROID
-#define THREAD_TYPICAL 2
+// Note: if you set THREAD_TYPICAL to a non-zero value because you
+// want to use asynchronous callbacks, be aware that any value greater
+// than 1 can result in out-of-order callbacks on a given player, in the
+// current implementation.  Thus you should probably configure 1 total or
+// change the implementation so that it uses at most 1 thread per player.
+#if defined(USE_ASYNCHRONOUS_PLAY_CALLBACK) || \
+        defined(USE_ASYNCHRONOUS_STREAMCBEVENT_PROPERTYCHANGE_CALLBACK)
+#define THREAD_TYPICAL 1
 #else
+#define THREAD_TYPICAL 0
+#endif
+#else // !ANDROID
 #define THREAD_TYPICAL 4
 #endif
     pthread_t mThreadTypical[THREAD_TYPICAL];

@@ -116,7 +116,7 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
 
         // enqueue notification (outside of lock) that the stream information has been updated
         if ((NULL != callback) && (index >= 0)) {
-#ifdef XA_SYNCHRONOUS_STREAMCBEVENT_PROPERTYCHANGE
+#ifndef USE_ASYNCHRONOUS_STREAMCBEVENT_PROPERTYCHANGE_CALLBACK
             (*callback)(&mp->mStreamInfo.mItf, XA_STREAMCBEVENT_PROPERTYCHANGE /*eventId*/,
                     1 /*streamIndex, only one stream supported here, 0 is reserved*/,
                     NULL /*pEventData, always NULL in OpenMAX AL 1.0.1*/,
@@ -128,6 +128,9 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
                     /*i2*/ 1 /*streamIndex, only one stream supported here, 0 is reserved*/,
                     /*p2*/ NULL /*pEventData, always NULL in OpenMAX AL 1.0.1*/,
                     /*p3*/ callbackPContext /*pContext*/);
+            LOGW_IF(SL_RESULT_SUCCESS != res,
+                        "Callback %p(%p, XA_STREAMCBEVENT_PROPERTYCHANGE, 1, NULL, %p) dropped",
+                        callback, &mp->mStreamInfo.mItf, callbackPContext);
 #endif
         }
         break;
@@ -150,7 +153,7 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
 
         // enqueue callback with no lock held
         if (NULL != playCallback) {
-#ifdef USE_SYNCHRONOUS_PLAY_CALLBACK
+#ifndef USE_ASYNCHRONOUS_PLAY_CALLBACK
             (*playCallback)(&mp->mPlay.mItf, playContext, XA_PLAYEVENT_HEADATEND);
 #else
             SLresult res = EnqueueAsyncCallback_ppi(mp, playCallback, &mp->mPlay.mItf, playContext,
