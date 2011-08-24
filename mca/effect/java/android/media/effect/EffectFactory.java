@@ -49,7 +49,8 @@ public class EffectFactory {
      * </tr>
      * </table>
      */
-    public final static String EFFECT_BRIGHTNESS = "BrightnessEffect";
+    public final static String EFFECT_BRIGHTNESS =
+            "android.media.effect.effects.BrightnessEffect";
 
     /**
      * <p>Adjusts the contrast of the image.</p>
@@ -63,7 +64,8 @@ public class EffectFactory {
      * </tr>
      * </table>
      */
-    public final static String EFFECT_CONTRAST = "ContrastEffect";
+    public final static String EFFECT_CONTRAST =
+            "android.media.effect.effects.ContrastEffect";
 
     /**
      * <p>Applies a fisheye lens distortion to the image.</p>
@@ -76,7 +78,8 @@ public class EffectFactory {
      * </tr>
      * </table>
      */
-    public final static String EFFECT_FISHEYE = "FisheyeEffect";
+    public final static String EFFECT_FISHEYE =
+            "android.media.effect.effects.FisheyeEffect";
 
     /**
      * <p>Replaces the background of the input frames with frames from a
@@ -95,29 +98,29 @@ public class EffectFactory {
      *         {@link android.net.Uri#toString Uri.toString()}</td>
      * </tr>
      * </table>
-
+     *
      * <p>If the update listener is set for this effect using
      * {@link Effect#setUpdateListener}, it will be called when the effect has
      * finished learning the background, with a null value for the info
      * parameter.</p>
-     * @hide
      */
-    public final static String EFFECT_BACKDROPPER = "BackDropperEffect";
+    public final static String EFFECT_BACKDROPPER =
+            "android.media.effect.effects.BackDropperEffect";
 
     /**
      * Applies histogram equalization on the image.<br/>
      * Parameters: scale (float): the scale of histogram equalization.
-     * @hide
      */
-    public final static String EFFECT_AUTOFIX = "AutoFixEffect";
+    public final static String EFFECT_AUTOFIX =
+            "android.media.effect.effects.AutoFixEffect";
 
     /**
      * Adjusts the range of minimal and maximal values of color pixels.<br/>
      * Parameters: black (float): the value of the minimal pixel.
      * Parameters: white (float): the value of the maximal pixel.
-     * @hide
      */
-    public final static String EFFECT_BLACKWHITE = "BlackWhiteEffect";
+    public final static String EFFECT_BLACKWHITE =
+            "android.media.effect.effects.BlackWhiteEffect";
 
     /**
      * Crops an upright rectangular area from the image.<br/>
@@ -125,149 +128,146 @@ public class EffectFactory {
      *             yorigin (int): yorigin.
      *             width (int): rectangle width.
      *             height (int): rectangle height.
-     * @hide
      */
-    public final static String EFFECT_CROP = "CropEffect";
+    public final static String EFFECT_CROP =
+            "android.media.effect.effects.CropEffect";
 
     /**
      * Applies cross process effect on image.<br/>
      * Parameters: contrast (float): The strength of the color contrast.
-     * @hide
      */
-    public final static String EFFECT_CROSSPROCESS = "CrossProcessEffect";
+    public final static String EFFECT_CROSSPROCESS =
+            "android.media.effect.effects.CrossProcessEffect";
 
     /**
      * Applies documentary effect on image.<br/>
      * Parameters: contrast (float): The strength of the color contrast.
-     * @hide
      */
-    public final static String EFFECT_DOCUMENTARY = "DocumentaryEffect";
+    public final static String EFFECT_DOCUMENTARY =
+            "android.media.effect.effects.DocumentaryEffect";
 
     /**
      * Attaches doodles to image.<br/>
      * Parameters: contrast (float): The strength of the color contrast.
-     * @hide
      */
-    public final static String EFFECT_DOODLE = "DoodleEffect";
+    public final static String EFFECT_DOODLE =
+            "android.media.effect.effects.DoodleEffect";
 
     /**
      * Applies duotone effect on image.<br/>
-     * Parameters: first_color (float): first color in duotone.
-     * Parameters: second_color (float): second color in duotone.
-     * @hide
+     * Parameters: first_color (int): first color in duotone.
+     * Parameters: second_color (int): second color in duotone.
      */
-    public final static String EFFECT_DUOTONE = "DuotoneEffect";
+    public final static String EFFECT_DUOTONE =
+            "android.media.effect.effects.DuotoneEffect";
 
     /**
      * Adds backlight to the image.<br/>
      * Parameters: backlight (float): The scale of the distortion.
-     * @hide
      */
-    public final static String EFFECT_FILLLIGHT = "FillLightEffect";
+    public final static String EFFECT_FILLLIGHT =
+            "android.media.effect.effects.FillLightEffect";
 
     /**
      * Flips image vertically and/or horizontally.<br/>
      * Parameters: vertical (boolean): flip image vertically.
      * Parameters: horizontal (boolean): flip image horizontally.
-     * @hide
      */
-    public final static String EFFECT_FLIP = "FlipEffect";
+    public final static String EFFECT_FLIP =
+            "android.media.effect.effects.FlipEffect";
 
     /**
      * Applies film grain effect on image.<br/>
-     * @hide
      */
-    public final static String EFFECT_GRAIN = "GrainEffect";
+    public final static String EFFECT_GRAIN =
+            "android.media.effect.effects.GrainEffect";
 
     /**
      * Converts image to grayscale.<br/>
-     * @hide
      */
-    public final static String EFFECT_GRAYSCALE = "GrayscaleEffect";
+    public final static String EFFECT_GRAYSCALE =
+            "android.media.effect.effects.GrayscaleEffect";
 
     /**
      * Applies lomoish effect on image.<br/>
-     * @hide
      */
-    public final static String EFFECT_LOMOISH = "LomoishEffect";
+    public final static String EFFECT_LOMOISH =
+            "android.media.effect.effects.LomoishEffect";
 
     /**
      * Applies negative film effect on image.<br/>
      * Parameters: scale (float): the degree of film grain.
-     * @hide
      */
-    public final static String EFFECT_NEGATIVE = "NegativeEffect";
+    public final static String EFFECT_NEGATIVE =
+            "android.media.effect.effects.NegativeEffect";
 
     /**
      * Applied posterized effect on image.<br/>
-     * @hide
      */
-    public final static String EFFECT_POSTERIZE = "PosterizeEffect";
+    public final static String EFFECT_POSTERIZE =
+            "android.media.effect.effects.PosterizeEffect";
 
     /**
      * Removes red eyes on specified region.<br/>
      * Parameters: intensity (float): threshold used to indentify red eyes.
      *             redeye (Bitmap): bitmap specifies red eye regions.
-     * @hide
      */
-    public final static String EFFECT_REDEYE = "RedEyeEffect";
+    public final static String EFFECT_REDEYE =
+            "android.media.effect.effects.RedEyeEffect";
 
     /**
      * Rotates the image.<br/>
      * Parameters: degree (float): the degree of rotation. shoule be a multiple of 90.
-     * @hide
      */
-    public final static String EFFECT_ROTATE = "RotateEffect";
+    public final static String EFFECT_ROTATE =
+            "android.media.effect.effects.RotateEffect";
 
     /**
      * Adjusts color saturation on image.<br/>
      * Parameters: scale (float): The scale of color saturation.
-     * @hide
      */
-    public final static String EFFECT_SATURATE = "SaturateEffect";
+    public final static String EFFECT_SATURATE =
+            "android.media.effect.effects.SaturateEffect";
 
     /**
      * Converts image to sepia tone.<br/>
-     * @hide
      */
-    public final static String EFFECT_SEPIA = "SepiaEffect";
+    public final static String EFFECT_SEPIA =
+            "android.media.effect.effects.SepiaEffect";
 
     /**
      * Sharpens the image.<br/>
      * Parameters: scale (float): The degree of sharpening.
-     * @hide
      */
-    public final static String EFFECT_SHARPEN = "SharpenEffect";
+    public final static String EFFECT_SHARPEN =
+            "android.media.effect.effects.SharpenEffect";
 
     /**
      * Rotates and resizes the image accroding to specified angle.<br/>
      * Parameters: scale (angle): the angle of rotation.
-     * @hide
      */
-    public final static String EFFECT_STRAIGHTEN = "StraightenEffect";
+    public final static String EFFECT_STRAIGHTEN =
+            "android.media.effect.effects.StraightenEffect";
 
     /**
      * Adjusts color temperature in the image.<br/>
      * Parameters: scale (float): the value of color temperature.
-     * @hide
      */
-    public final static String EFFECT_TEMPERATURE = "ColorTemperatureEffect";
+    public final static String EFFECT_TEMPERATURE =
+            "android.media.effect.effects.ColorTemperatureEffect";
 
     /**
      * Applies tine effect on image.<br/>
-     * @hide
      */
-    public final static String EFFECT_TINT = "TintEffect";
+    public final static String EFFECT_TINT =
+            "android.media.effect.effects.TintEffect";
 
     /**
      * Appliies vignette effect on image.<br/>
      * Parameters: range (float): The range of vignetting.
-     * @hide
      */
-    public final static String EFFECT_VIGNETTE = "VignetteEffect";
-
-
-    /** ...Many more effects to follow ... */
+    public final static String EFFECT_VIGNETTE =
+            "android.media.effect.effects.VignetteEffect";
 
     EffectFactory(EffectContext effectContext) {
         mEffectContext = effectContext;
