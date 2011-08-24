@@ -48,6 +48,9 @@
 // The usual Android LOGx macros are not available, so we use the lower-level APIs.
 extern const char slLogTag[];
 
+// can't disable SL_LOGF
+#define SL_LOGF(...) __android_log_print(SLAndroidLogLevel_Fatal, slLogTag, __VA_ARGS__)
+
 #if (USE_LOG <= SLAndroidLogLevel_Error)
 #define SL_LOGE(...) __android_log_print(SLAndroidLogLevel_Error, slLogTag, __VA_ARGS__)
 #else
