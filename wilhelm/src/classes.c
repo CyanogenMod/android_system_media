@@ -410,6 +410,7 @@ static const struct iid_vtable MediaPlayer_interfaces[INTERFACES_MediaPlayer] = 
     {MPH_XASTREAMINFORMATION, INTERFACE_EXPLICIT, offsetof(CMediaPlayer, mStreamInfo)},
     {MPH_XAVOLUME, INTERFACE_IMPLICIT, offsetof(CMediaPlayer, mVolume)},
     {MPH_XASEEK, INTERFACE_EXPLICIT, offsetof(CMediaPlayer, mSeek)},
+    {MPH_XAPREFETCHSTATUS, INTERFACE_EXPLICIT, offsetof(CMediaPlayer, mPrefetchStatus)},
 #ifdef ANDROID
     {MPH_ANDROIDBUFFERQUEUE, INTERFACE_EXPLICIT, offsetof(CMediaPlayer, mAndroidBufferQueue)},
 #endif

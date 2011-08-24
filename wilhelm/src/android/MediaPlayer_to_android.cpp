@@ -26,22 +26,60 @@
 //-----------------------------------------------------------------------------
 static void player_handleMediaPlayerEventNotifications(int event, int data1, int data2, void* user)
 {
+
+    // FIXME This code is derived from similar code in sfplayer_handlePrefetchEvent.  The two
+    // versions are quite similar, but still different enough that they need to be separate.
+    // At some point they should be re-factored and merged if feasible.
+    // As with other OpenMAX AL implementation code, this copy mostly uses SL_ symbols
+    // rather than XA_ unless the difference is significant.
+
     if (NULL == user) {
         return;
     }
 
     CMediaPlayer* mp = (CMediaPlayer*) user;
-    SL_LOGV("received event %d, data %d from AVPlayer", event, data1);
-
+    union {
+        char c[sizeof(int)];
+        int i;
+    } u;
+    u.i = event;
+    SL_LOGV("player_handleMediaPlayerEventNotifications(event='%c%c%c%c' (%d), data1=%d, data2=%d, "
+            "user=%p) from AVPlayer", u.c[3], u.c[2], u.c[1], u.c[0], event, data1, data2, user);
     switch(event) {
 
       case android::GenericPlayer::kEventPrepared: {
-        if (PLAYER_SUCCESS == data1) {
-            object_lock_exclusive(&mp->mObject);
-            SL_LOGV("Received AVPlayer::kEventPrepared from AVPlayer for CMediaPlayer %p", mp);
-            mp->mAndroidObjState = ANDROID_READY;
-            object_unlock_exclusive(&mp->mObject);
+
+        SL_LOGV("Received AVPlayer::kEventPrepared for CMediaPlayer %p", mp);
+
+        // assume no callback
+        slPrefetchCallback callback = NULL;
+        void* callbackPContext = NULL;
+
+        object_lock_exclusive(&mp->mObject);
+        // mark object as prepared; same state is used for successfully or unsuccessful prepare
+        mp->mAndroidObjState = ANDROID_READY;
+
+        // AVPlayer prepare() failed prefetching, there is no event in XAPrefetchStatus to
+        //  indicate a prefetch error, so we signal it by sending simulataneously two events:
+        //  - SL_PREFETCHEVENT_FILLLEVELCHANGE with a level of 0
+        //  - SL_PREFETCHEVENT_STATUSCHANGE with a status of SL_PREFETCHSTATUS_UNDERFLOW
+        if (PLAYER_SUCCESS != data1 && IsInterfaceInitialized(&mp->mObject, MPH_XAPREFETCHSTATUS)) {
+            mp->mPrefetchStatus.mLevel = 0;
+            mp->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+            if (!(~mp->mPrefetchStatus.mCallbackEventsMask &
+                    (SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE))) {
+                callback = mp->mPrefetchStatus.mCallback;
+                callbackPContext = mp->mPrefetchStatus.mContext;
+            }
         }
+        object_unlock_exclusive(&mp->mObject);
+
+        // callback with no lock held
+        if (NULL != callback) {
+            (*callback)(&mp->mPrefetchStatus.mItf, callbackPContext,
+                    SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE);
+        }
+
         break;
       }
 
@@ -112,13 +150,13 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
 
         // enqueue callback with no lock held
         if (NULL != playCallback) {
-#ifdef XA_SYNCHRONOUS_PLAYEVENT_HEADATEND
+#ifdef USE_SYNCHRONOUS_PLAY_CALLBACK
             (*playCallback)(&mp->mPlay.mItf, playContext, XA_PLAYEVENT_HEADATEND);
 #else
             SLresult res = EnqueueAsyncCallback_ppi(mp, playCallback, &mp->mPlay.mItf, playContext,
                     XA_PLAYEVENT_HEADATEND);
             LOGW_IF(SL_RESULT_SUCCESS != res,
-                    "Callback %p(%p, %p, XA_PLAYEVENT_HEADATEND) dropped", playCallback,
+                    "Callback %p(%p, %p, SL_PLAYEVENT_HEADATEND) dropped", playCallback,
                     &mp->mPlay.mItf, playContext);
 #endif
         }
@@ -138,11 +176,56 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
 
       case android::GenericPlayer::kEventPrefetchFillLevelUpdate: {
         SL_LOGV("kEventPrefetchFillLevelUpdate");
+        if (!IsInterfaceInitialized(&mp->mObject, MPH_XAPREFETCHSTATUS)) {
+            break;
+        }
+        slPrefetchCallback callback = NULL;
+        void* callbackPContext = NULL;
+
+        // SLPrefetchStatusItf callback or no callback?
+        interface_lock_exclusive(&mp->mPrefetchStatus);
+        if (mp->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
+            callback = mp->mPrefetchStatus.mCallback;
+            callbackPContext = mp->mPrefetchStatus.mContext;
+        }
+        mp->mPrefetchStatus.mLevel = (SLpermille)data1;
+        interface_unlock_exclusive(&mp->mPrefetchStatus);
+
+        // callback with no lock held
+        if (NULL != callback) {
+            (*callback)(&mp->mPrefetchStatus.mItf, callbackPContext,
+                    SL_PREFETCHEVENT_FILLLEVELCHANGE);
+        }
       }
       break;
 
       case android::GenericPlayer::kEventPrefetchStatusChange: {
         SL_LOGV("kEventPrefetchStatusChange");
+        if (!IsInterfaceInitialized(&mp->mObject, MPH_XAPREFETCHSTATUS)) {
+            break;
+        }
+        slPrefetchCallback callback = NULL;
+        void* callbackPContext = NULL;
+
+        // SLPrefetchStatusItf callback or no callback?
+        object_lock_exclusive(&mp->mObject);
+        if (mp->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_STATUSCHANGE) {
+            callback = mp->mPrefetchStatus.mCallback;
+            callbackPContext = mp->mPrefetchStatus.mContext;
+        }
+        if (data1 >= android::kStatusIntermediate) {
+            mp->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
+            // FIXME copied from AudioPlayer, but probably wrong
+            mp->mAndroidObjState = ANDROID_READY;
+        } else if (data1 < android::kStatusIntermediate) {
+            mp->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+        }
+        object_unlock_exclusive(&mp->mObject);
+
+        // callback with no lock held
+        if (NULL != callback) {
+            (*callback)(&mp->mPrefetchStatus.mItf, callbackPContext, SL_PREFETCHEVENT_STATUSCHANGE);
+        }
       }
       break;
 
