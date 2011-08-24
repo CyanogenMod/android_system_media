@@ -257,9 +257,9 @@ public abstract class Filter {
     protected final Frame pullInput(String name) {
         Frame result = getInputPort(name).pullFrame();
         if (mCurrentTimestamp == Frame.TIMESTAMP_UNKNOWN) {
-            if (mLogVerbose) Log.v(TAG, "Default-setting current timestamp from input port " + name + " to " + mCurrentTimestamp);
-
             mCurrentTimestamp = result.getTimestamp();
+
+            if (mLogVerbose) Log.v(TAG, "Default-setting current timestamp from input port " + name + " to " + mCurrentTimestamp);
         }
         // As result is retained, we add it to the release pool here
         mFramesToRelease.add(result);
