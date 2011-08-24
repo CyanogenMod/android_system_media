@@ -209,6 +209,7 @@ struct FdInfo {
     int fd;
     int64_t offset;
     int64_t length;
+    bool mCloseAfterUse;    // whether to close fd after last reference to fd
 };
 
 // TODO currently used by SfPlayer, to replace by DataLocator2

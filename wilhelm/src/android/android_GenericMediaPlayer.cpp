@@ -24,14 +24,26 @@
 #include <surfaceflinger/SurfaceComposerClient.h>
 #include <media/stagefright/foundation/ADebug.h>
 
-namespace android {
-
 // default delay in Us used when reposting an event when the player is not ready to accept
 // the command yet. This is for instance used when seeking on a MediaPlayer that's still preparing
 #define DEFAULT_COMMAND_DELAY_FOR_REPOST_US (100*1000) // 100ms
 
-static const char* const kDistantProtocolPrefix[] = { "http:", "https:", "ftp:", "rtp:", "rtsp:"};
+// table of prefixes for known distant protocols; these are immediately dispatched to mediaserver
+static const char* const kDistantProtocolPrefix[] = { "http://", "https://", "rtsp://"};
 #define NB_DISTANT_PROTOCOLS (sizeof(kDistantProtocolPrefix)/sizeof(kDistantProtocolPrefix[0]))
+
+// is the specified URI a known distant protocol?
+bool isDistantProtocol(const char *uri)
+{
+    for (unsigned int i = 0; i < NB_DISTANT_PROTOCOLS; i++) {
+        if (!strncasecmp(uri, kDistantProtocolPrefix[i], strlen(kDistantProtocolPrefix[i]))) {
+            return true;
+        }
+    }
+    return false;
+}
+
+namespace android {
 
 //--------------------------------------------------------------------------------------------------
 MediaPlayerNotificationClient::MediaPlayerNotificationClient(GenericMediaPlayer* gmp) :
@@ -452,13 +464,7 @@ void GenericMediaPlayer::afterMediaPlayerPreparedSuccessfully() {
     // if the data source was local, and the buffers are considered full so we need to notify that
     bool isLocalSource = true;
     if (kDataLocatorUri == mDataLocatorType) {
-        for (unsigned int i = 0 ; i < NB_DISTANT_PROTOCOLS ; i++) {
-            if (!strncasecmp(mDataLocator.uriRef,
-                    kDistantProtocolPrefix[i], strlen(kDistantProtocolPrefix[i]))) {
-                isLocalSource = false;
-                break;
-            }
-        }
+        isLocalSource = !isDistantProtocol(mDataLocator.uriRef);
     }
     if (isLocalSource) {
         SL_LOGD("media player prepared on local source");

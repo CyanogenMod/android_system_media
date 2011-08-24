@@ -116,4 +116,7 @@ private:
 
 } // namespace android
 
+// is the specified URI a known distant protocol?
+bool isDistantProtocol(const char *uri);
+
 #endif /* __ANDROID_GENERICMEDIAPLAYER_H__ */
