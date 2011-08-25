@@ -24,8 +24,11 @@ import android.util.Log;
 
 import java.util.HashMap;
 
-// This OneShotScheduler only schedules filters at most once.
 /**
+ * This OneShotScheduler only schedules source filters at most once. All other
+ * filters will be scheduled, and possibly repeatedly, until there is no filter
+ * that can be scheduled.
+ *
  * @hide
  */
 public class OneShotScheduler extends RoundRobinScheduler {
@@ -57,7 +60,8 @@ public class OneShotScheduler extends RoundRobinScheduler {
                 return null;
             }
             if (!scheduled.containsKey(filter.getName())) {
-                scheduled.put(filter.getName(),1);
+                if (filter.getNumberOfConnectedInputs() == 0)
+                    scheduled.put(filter.getName(),1);
                 if (mLogVerbose) Log.v(TAG, "Scheduling filter \"" + filter.getName() + "\" of type " + filter.getFilterClassName());
                 return filter;
             }
