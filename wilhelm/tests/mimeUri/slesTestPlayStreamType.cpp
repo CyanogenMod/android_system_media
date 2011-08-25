@@ -23,7 +23,6 @@
 #include <SLES/OpenSLES.h>
 #ifdef ANDROID
 #include <SLES/OpenSLES_Android.h>
-#include <SLES/OpenSLES_AndroidConfiguration.h>
 #endif
 
 

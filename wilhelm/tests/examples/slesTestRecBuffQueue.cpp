@@ -44,7 +44,6 @@ How to examine the output with Audacity:
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
-#include <SLES/OpenSLES_AndroidConfiguration.h>
 
 /* Preset number to use for recording */
 SLuint32 presetValue = SL_ANDROID_RECORDING_PRESET_NONE;

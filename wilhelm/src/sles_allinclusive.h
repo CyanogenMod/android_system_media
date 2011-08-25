@@ -86,7 +86,6 @@ typedef struct COutputMix_struct COutputMix;
 #ifdef ANDROID
 #include <utils/Log.h>
 #include <utils/KeyedVector.h>
-#include <SLES/OpenSLES_AndroidConfiguration.h>
 #include "media/AudioSystem.h"
 #include "media/mediarecorder.h"
 #include "media/AudioRecord.h"
