@@ -69,8 +69,7 @@ public class SingleFilterEffect extends FilterEffect {
 
     @Override
     public void apply(int inputTexId, int width, int height, int outputTexId) {
-        mEffectContext.assertValidGLState();
-        mEffectContext.saveGLState();
+        beginGLEffect();
 
         Frame inputFrame = frameFromTexture(inputTexId, width, height);
         Frame outputFrame = frameFromTexture(outputTexId, width, height);
@@ -83,7 +82,7 @@ public class SingleFilterEffect extends FilterEffect {
         outputFrame.release();
         resultFrame.release();
 
-        mEffectContext.restoreGLState();
+        endGLEffect();
     }
 
     @Override

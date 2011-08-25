@@ -45,8 +45,7 @@ public class SizeChangeEffect extends SingleFilterEffect {
 
     @Override
     public void apply(int inputTexId, int width, int height, int outputTexId) {
-        mEffectContext.assertValidGLState();
-        mEffectContext.saveGLState();
+        beginGLEffect();
 
         Frame inputFrame = frameFromTexture(inputTexId, width, height);
         Frame resultFrame = mFunction.executeWithArgList(mInputName, inputFrame);
@@ -61,6 +60,6 @@ public class SizeChangeEffect extends SingleFilterEffect {
         outputFrame.release();
         resultFrame.release();
 
-        mEffectContext.restoreGLState();
+        endGLEffect();
     }
 }

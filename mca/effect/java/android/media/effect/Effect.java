@@ -19,11 +19,20 @@ package android.media.effect;
 
 
 /**
- * Effects are high-performance transformations that can be applied to image frames. These are
- * passed in the form of OpenGLES2 texture names. Typical frames could be images loaded from disk,
- * or frames from the camera or other video stream.
+ * <p>Effects are high-performance transformations that can be applied to image frames. These are
+ * passed in the form of OpenGL ES 2.0 texture names. Typical frames could be images loaded from
+ * disk, or frames from the camera or other video streams.</p>
  *
- * Effects are created using the EffectFactory class.
+ * <p>To create an Effect you must first create an EffectContext. You can obtain an instance of the
+ * context's EffectFactory by calling
+ * {@link android.media.effect.EffectContext#getFactory() getFactory()}. The EffectFactory allows
+ * you to instantiate specific Effects.</p>
+ *
+ * <p>The application is responsible for creating an EGL context, and making it current before
+ * applying an effect. An effect is bound to a single EffectContext, which in turn is bound to a
+ * single EGL context. If your EGL context is destroyed, the EffectContext becomes invalid and any
+ * effects bound to this context can no longer be used.</p>
+ *
  */
 public abstract class Effect {
 
@@ -40,14 +49,24 @@ public abstract class Effect {
     /**
      * Apply an effect to GL textures.
      *
-     * Apply the Effect on the specified input GL texture, and write the result into the
-     * output GL texture. The texture names passed must be valid in the current GL context. The
-     * input texture must be a fully allocated texture with the given width and height. If the
-     * output texture has not been allocated, it will be allocated by the effect, and have the same
-     * size as the input. If the output texture was allocated already, and its size does not match
-     * the input texture size, the result will be stretched to fit.
+     * <p>Apply the Effect on the specified input GL texture, and write the result into the
+     * output GL texture. The texture names passed must be valid in the current GL context.</p>
      *
-     * @param inputTexId The GL texture name of the allocated input texture.
+     * <p>The input texture must be a valid texture name with the given width and height and must be
+     * bound to a GL_TEXTURE_2D texture image (usually done by calling the glTexImage2D() function).
+     * Multiple mipmap levels may be provided.</p>
+     *
+     * <p>If the output texture has not been bound to a texture image, it will be automatically
+     * bound by the effect as a GL_TEXTURE_2D. It will contain one mipmap level (0), which will have
+     * the same size as the input. No other mipmap levels are defined. If the output texture was
+     * bound already, and its size does not match the input texture size, the result may be clipped
+     * or only partially fill the texture.</p>
+     *
+     * <p>Note, that regardless of whether a texture image was originally provided or not, both the
+     * input and output textures are owned by the caller. That is, the caller is responsible for
+     * calling glDeleteTextures() to deallocate the input and output textures.</p>
+     *
+     * @param inputTexId The GL texture name of a valid and bound input texture.
      * @param width The width of the input texture in pixels.
      * @param height The height of the input texture in pixels.
      * @param outputTexId The GL texture name of the output texture.
@@ -80,9 +99,12 @@ public abstract class Effect {
     /**
      * Release an effect.
      *
-     * Releases the effect and any resources associated with it. You may call this if you need to
+     * <p>Releases the effect and any resources associated with it. You may call this if you need to
      * make sure acquired resources are no longer held by the effect. Releasing an effect makes it
-     * invalid for reuse.
+     * invalid for reuse.</p>
+     *
+     * <p>Note that this method must be called with the EffectContext and EGL context current, as
+     * the effect may release internal GL resources.</p>
      */
     public abstract void release();
 }
