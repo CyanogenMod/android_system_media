@@ -21,10 +21,10 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 
 /**
- * The EffectFactory class defines the list of available Effects, and provides functionality to
+ * <p>The EffectFactory class defines the list of available Effects, and provides functionality to
  * inspect and instantiate them. Some effects may not be available on all platforms, so before
  * creating a certain effect, the application should confirm that the effect is supported on this
- * platform by calling {@link #isEffectSupported(String)}.
+ * platform by calling {@link #isEffectSupported(String)}.</p>
  */
 public class EffectFactory {
 
@@ -36,6 +36,11 @@ public class EffectFactory {
     };
 
     /** List of Effects */
+    /**
+     * <p>Copies the input texture to the output.</p>
+     * @hide
+     */
+    public final static String EFFECT_IDENTITY = "IdentityEffect";
 
     /**
      * <p>Adjusts the brightness of the image.</p>
@@ -276,7 +281,11 @@ public class EffectFactory {
     /**
      * Instantiate a new effect with the given effect name.
      *
-     * The effect's parameters will be set to their default values.
+     * <p>The effect's parameters will be set to their default values.</p>
+     *
+     * <p>Note that the EGL context associated with the current EffectContext need not be made
+     * current when creating an effect. This allows the host application to instantiate effects
+     * before any EGL context has become current.</p>
      *
      * @param effectName The name of the effect to create.
      * @return A new Effect instance.
@@ -295,8 +304,8 @@ public class EffectFactory {
     /**
      * Check if an effect is supported on this platform.
      *
-     * Some effects may only be available on certain platforms. Use this method before
-     * instantiating an effect to make sure it is supported.
+     * <p>Some effects may only be available on certain platforms. Use this method before
+     * instantiating an effect to make sure it is supported.</p>
      *
      * @param effectName The name of the effect.
      * @return true, if the effect is supported on this platform.

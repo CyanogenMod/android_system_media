@@ -60,6 +60,22 @@ public abstract class FilterEffect extends Effect {
 
     // Helper Methods for subclasses ///////////////////////////////////////////////////////////////
     /**
+     * Call this before manipulating the GL context. Will assert that the GL environment is in a
+     * valid state, and save it.
+     */
+    protected void beginGLEffect() {
+        mEffectContext.assertValidGLState();
+        mEffectContext.saveGLState();
+    }
+
+    /**
+     * Call this after manipulating the GL context. Restores the previous GL state.
+     */
+    protected void endGLEffect() {
+        mEffectContext.restoreGLState();
+    }
+
+    /**
      * Returns the active filter context for this effect.
      */
     protected FilterContext getFilterContext() {

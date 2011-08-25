@@ -26,9 +26,14 @@ import android.filterfw.core.FrameManager;
 import android.opengl.GLES20;
 
 /**
- * An EffectContext keeps all necessary state information to run Effects within a OpenGLES2 context.
- * Every EffectContext is bound to one GL context. If you switch to another GL context, you must
- * create a new EffectContext. An EffectContext is required to create and execute effects.
+ * <p>An EffectContext keeps all necessary state information to run Effects within a Open GL ES 2.0
+ * context.</p>
+ *
+ * <p>Every EffectContext is bound to one GL context. The application is responsible for creating
+ * this EGL context, and making it current before applying any effect. If your EGL context is
+ * destroyed, the EffectContext becomes invalid and any effects bound to this context can no longer
+ * be used. If you switch to another EGL context, you must create a new EffectContext. Each Effect
+ * is bound to a single EffectContext, and can only be executed in that context.</p>
  */
 public class EffectContext {
 
@@ -46,10 +51,10 @@ public class EffectContext {
     /**
      * Creates a context within the current GL context.
      *
-     * Binds the EffectContext to the current OpenGL context. All subsequent calls to the
+     * <p>Binds the EffectContext to the current OpenGL context. All subsequent calls to the
      * EffectContext must be made in the GL context that was active during creation.
      * When you have finished using a context, you must call {@link #release()}. to dispose of all
-     * resources associated with this context.
+     * resources associated with this context.</p>
      */
     public static EffectContext createWithCurrentGlContext() {
         EffectContext result = new EffectContext();
@@ -60,8 +65,8 @@ public class EffectContext {
     /**
      * Returns the EffectFactory for this context.
      *
-     * The EffectFactory returned from this method allows instantiating new effects within this
-     * context.
+     * <p>The EffectFactory returned from this method allows instantiating new effects within this
+     * context.</p>
      *
      * @return The EffectFactory instance for this context.
      */
@@ -72,8 +77,12 @@ public class EffectContext {
     /**
      * Releases the context.
      *
-     * Releases all the resources associated with the EffectContext. This renders the context
-     * invalid. You must no longer use the context after calling release().
+     * <p>Releases all the resources and effects associated with the EffectContext. This renders the
+     * context and all the effects bound to this context invalid. You must no longer use the context
+     * or any of its bound effects after calling release().</p>
+     *
+     * <p>Note that this method must be called with the proper EGL context made current, as the
+     * EffectContext and its effects may release internal GL resources.</p>
      */
     public void release() {
         mFilterContext.tearDown();

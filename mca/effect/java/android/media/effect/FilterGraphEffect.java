@@ -85,8 +85,7 @@ public class FilterGraphEffect extends FilterEffect {
 
     @Override
     public void apply(int inputTexId, int width, int height, int outputTexId) {
-        mEffectContext.assertValidGLState();
-        mEffectContext.saveGLState();
+        beginGLEffect();
         Filter src = mGraph.getFilter(mInputName);
         if (src != null) {
             src.setInputValue("texId", inputTexId);
@@ -106,7 +105,7 @@ public class FilterGraphEffect extends FilterEffect {
         } catch (RuntimeException e) {
             throw new RuntimeException("Internal error applying effect: ", e);
         }
-        mEffectContext.restoreGLState();
+        endGLEffect();
     }
 
     @Override
