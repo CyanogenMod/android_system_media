@@ -65,11 +65,3 @@ extern void slTraceLeaveInterfaceVoid(const char *function);
 #define XA_LEAVE_INTERFACE slTraceLeaveInterface(__FUNCTION__, result); return result;
 
 #endif
-
-#ifdef USE_OUTPUTMIXEXT
-
-#define SL_PLAYSTATE_STOPPING ((SLuint32) 0x4) // Play::Stop while PLAYING
-// If we needed it, could have PLAYING mean mixer is currently reading from front buffer,
-// while PLAYABLE would mean application requested PLAYING, but buffer queue is empty
-
-#endif

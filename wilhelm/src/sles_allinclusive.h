@@ -363,6 +363,7 @@ extern predestroy_t CMediaPlayer_PreDestroy(void *self);
 extern void SDL_open(IEngine *thisEngine);
 extern void SDL_close(void);
 #endif
+
 #define SL_OBJECT_STATE_REALIZING_1  ((SLuint32) 0x4) // async realize on work queue
 #define SL_OBJECT_STATE_REALIZING_2  ((SLuint32) 0x5) // sync realize, or async realize hook
 #define SL_OBJECT_STATE_RESUMING_1   ((SLuint32) 0x6) // async resume on work queue
@@ -371,6 +372,13 @@ extern void SDL_close(void);
 #define SL_OBJECT_STATE_REALIZING_1A ((SLuint32) 0x9) // abort while async realize on work queue
 #define SL_OBJECT_STATE_RESUMING_1A  ((SLuint32) 0xA) // abort while async resume on work queue
 #define SL_OBJECT_STATE_DESTROYING   ((SLuint32) 0xB) // destroy object when no strong references
+
+#ifdef USE_OUTPUTMIXEXT
+#define SL_PLAYSTATE_STOPPING ((SLuint32) 0x4) // Play::Stop while PLAYING
+// If we needed it, could have PLAYING mean mixer is currently reading from front buffer,
+// while PLAYABLE would mean application requested PLAYING, but buffer queue is empty
+#endif
+
 #ifndef ANDROID
 extern void *sync_start(void *arg);
 #endif
