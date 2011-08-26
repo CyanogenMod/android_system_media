@@ -146,20 +146,6 @@ typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, void* user);
 #define ANDROID_ADTSEVENT_EOS            ANDROID_MP2TSEVENT_EOS
 
 /**
- * Additional metadata keys
- *   the ANDROID_KEY_PCMFORMAT_* keys follow the fields of the SLDataFormat_PCM struct, and as such
- *     all corresponding values match SLuint32 size, and field definitions.
- * FIXME these values are candidates to be included in OpenSLES_Android.h as official metadata
- *     keys supported on the platform.
- */
-#define ANDROID_KEY_PCMFORMAT_NUMCHANNELS   "AndroidPcmFormatNumChannels"
-#define ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC "AndroidPcmFormatSamplesPerSec"
-#define ANDROID_KEY_PCMFORMAT_BITSPERSAMPLE "AndroidPcmFormatBitsPerSample"
-#define ANDROID_KEY_PCMFORMAT_CONTAINERSIZE "AndroidPcmFormatContainerSize"
-#define ANDROID_KEY_PCMFORMAT_CHANNELMASK   "AndroidPcmFormatChannelMask"
-#define ANDROID_KEY_PCMFORMAT_ENDIANNESS    "AndroidPcmFormatEndianness"
-
-/**
  * Types of buffers stored in Android Buffer Queues, see IAndroidBufferQueue.mBufferType
  */
 enum AndroidBufferType_type {

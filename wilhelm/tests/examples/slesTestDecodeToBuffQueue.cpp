@@ -45,15 +45,6 @@ How to examine the output with Audacity:
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
-#include <SLES/OpenSLES_AndroidConfiguration.h>
-
-// FIXME copied from OpenSLES_AndroidMetadata.h until it's part of OpenSLES_Android.h
-#define ANDROID_KEY_PCMFORMAT_NUMCHANNELS   "AndroidPcmFormatNumChannels"
-#define ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC "AndroidPcmFormatSamplesPerSec"
-#define ANDROID_KEY_PCMFORMAT_BITSPERSAMPLE "AndroidPcmFormatBitsPerSample"
-#define ANDROID_KEY_PCMFORMAT_CONTAINERSIZE "AndroidPcmFormatContainerSize"
-#define ANDROID_KEY_PCMFORMAT_CHANNELMASK   "AndroidPcmFormatChannelMask"
-#define ANDROID_KEY_PCMFORMAT_ENDIANNESS    "AndroidPcmFormatEndianness"
 
 /* Explicitly requesting SL_IID_ANDROIDSIMPLEBUFFERQUEUE and SL_IID_PREFETCHSTATUS
  * on the AudioPlayer object for decoding, SL_IID_METADATAEXTRACTION for retrieving the

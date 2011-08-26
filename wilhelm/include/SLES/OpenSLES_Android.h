@@ -17,6 +17,9 @@
 #ifndef OPENSL_ES_ANDROID_H_
 #define OPENSL_ES_ANDROID_H_
 
+#include "OpenSLES_AndroidConfiguration.h"
+#include "OpenSLES_AndroidMetadata.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
