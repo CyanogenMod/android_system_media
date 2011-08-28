@@ -1774,6 +1774,7 @@ SLresult android_audioPlayer_metadata_getItemCount(CAudioPlayer *ap, SLuint32 *p
     }
     switch(ap->mAndroidObjType) {
       case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+      case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
         {
             android::AudioSfDecoder* decoder =
                     static_cast<android::AudioSfDecoder*>(ap->mAPlayer.get());
@@ -1801,6 +1802,7 @@ SLresult android_audioPlayer_metadata_getKeySize(CAudioPlayer *ap,
     SLresult res = SL_RESULT_SUCCESS;
     switch(ap->mAndroidObjType) {
       case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+      case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
         {
             android::AudioSfDecoder* decoder =
                     static_cast<android::AudioSfDecoder*>(ap->mAPlayer.get());
@@ -1836,6 +1838,7 @@ SLresult android_audioPlayer_metadata_getKey(CAudioPlayer *ap,
     SLresult res = SL_RESULT_SUCCESS;
     switch(ap->mAndroidObjType) {
       case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+      case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
         {
             android::AudioSfDecoder* decoder =
                     static_cast<android::AudioSfDecoder*>(ap->mAPlayer.get());
@@ -1872,6 +1875,7 @@ SLresult android_audioPlayer_metadata_getValueSize(CAudioPlayer *ap,
     SLresult res = SL_RESULT_SUCCESS;
     switch(ap->mAndroidObjType) {
       case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+      case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
         {
             android::AudioSfDecoder* decoder =
                     static_cast<android::AudioSfDecoder*>(ap->mAPlayer.get());
@@ -1907,6 +1911,7 @@ SLresult android_audioPlayer_metadata_getValue(CAudioPlayer *ap,
     SLresult res = SL_RESULT_SUCCESS;
     switch(ap->mAndroidObjType) {
       case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+      case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
         {
             android::AudioSfDecoder* decoder =
                     static_cast<android::AudioSfDecoder*>(ap->mAPlayer.get());

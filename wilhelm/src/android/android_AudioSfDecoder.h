@@ -64,7 +64,7 @@ public:
 
     void startPrefetch_async();
 
-    uint32_t getPcmFormatKeyCount();
+    uint32_t getPcmFormatKeyCount() const;
     bool     getPcmFormatKeySize(uint32_t index, uint32_t* pKeySize);
     bool     getPcmFormatKeyName(uint32_t index, uint32_t keySize, char* keyName);
     bool     getPcmFormatValueSize(uint32_t index, uint32_t* pValueSize);
@@ -127,9 +127,8 @@ protected:
 
     // informations that can be retrieved in the PCM format queries
     //  these values are only written in the event loop
-    uint32_t mPcmFormatKeyCount;
     uint32_t mPcmFormatValues[NB_PCMMETADATA_KEYS];
-    // protects mPcmFormatKeyCount and mPcmFormatValues
+    // protects mPcmFormatValues
     Mutex    mPcmFormatLock;
 
 private:

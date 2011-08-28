@@ -38,8 +38,7 @@ AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : Generic
         mDurationUsec(ANDROID_UNKNOWN_TIME),
         mDecodeBuffer(NULL),
         mSeekTimeMsec(0),
-        mLastDecodedPositionUs(ANDROID_UNKNOWN_TIME),
-        mPcmFormatKeyCount(0)
+        mLastDecodedPositionUs(ANDROID_UNKNOWN_TIME)
 {
     SL_LOGD("AudioSfDecoder::AudioSfDecoder()");
 }
@@ -102,16 +101,14 @@ void AudioSfDecoder::startPrefetch_async() {
 
 
 //--------------------------------------------------
-uint32_t AudioSfDecoder::getPcmFormatKeyCount() {
-    android::Mutex::Autolock autoLock(mPcmFormatLock);
-    return mPcmFormatKeyCount;
+uint32_t AudioSfDecoder::getPcmFormatKeyCount() const {
+    return NB_PCMMETADATA_KEYS;
 }
 
 
 //--------------------------------------------------
 bool AudioSfDecoder::getPcmFormatKeySize(uint32_t index, uint32_t* pKeySize) {
-    uint32_t keyCount = getPcmFormatKeyCount();
-    if (index >= keyCount) {
+    if (index >= NB_PCMMETADATA_KEYS) {
         return false;
     } else {
         *pKeySize = strlen(kPcmDecodeMetadataKeys[index]) +1;
@@ -136,8 +133,7 @@ bool AudioSfDecoder::getPcmFormatKeyName(uint32_t index, uint32_t keySize, char*
 
 //--------------------------------------------------
 bool AudioSfDecoder::getPcmFormatValueSize(uint32_t index, uint32_t* pValueSize) {
-    uint32_t keyCount = getPcmFormatKeyCount();
-    if (index >= keyCount) {
+    if (index >= NB_PCMMETADATA_KEYS) {
         *pValueSize = 0;
         return false;
     } else {
@@ -158,6 +154,7 @@ bool AudioSfDecoder::getPcmFormatKeyValue(uint32_t index, uint32_t size, uint32_
                 index, size, valueSize);
         return false;
     } else {
+        android::Mutex::Autolock autoLock(mPcmFormatLock);
         *pValue = mPcmFormatValues[index];
         return true;
     }
@@ -179,6 +176,8 @@ void AudioSfDecoder::onPrepare() {
     SL_LOGD("AudioSfDecoder::onPrepare()");
     Mutex::Autolock _l(mBufferSourceLock);
 
+    {
+    android::Mutex::Autolock autoLock(mPcmFormatLock);
     // Initialize the PCM format info with the known parameters before the start of the decode
     mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_BITSPERSAMPLE] = SL_PCMSAMPLEFORMAT_FIXED_16;
     mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CONTAINERSIZE] = 16;
@@ -188,6 +187,7 @@ void AudioSfDecoder::onPrepare() {
     mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
     mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
     mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
+    }
 
     //---------------------------------
     // Instantiate and initialize the data source for the decoder
@@ -349,7 +349,6 @@ void AudioSfDecoder::onPrepare() {
 
     {
         android::Mutex::Autolock autoLock(mPcmFormatLock);
-        mPcmFormatKeyCount = NB_PCMMETADATA_KEYS;
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
     }
