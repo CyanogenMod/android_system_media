@@ -2056,7 +2056,8 @@ SLresult android_audioPlayer_getDuration(IPlay *pPlayItf, SLmillisecond *pDurMse
       }
 
       case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: // intended fall-through
-      case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:       // intended fall-through
+      case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
+      case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
       default: {
         *pDurMsec = SL_TIME_UNKNOWN;
       }
@@ -2082,8 +2083,9 @@ void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
         break;
 
       case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE:    // intended fall-through
-      case AUDIOPLAYER_FROM_URIFD:                    // intended fall-through
-      case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE: {
+      case AUDIOPLAYER_FROM_URIFD:
+      case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+      case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE: {
         int32_t posMsec = ANDROID_UNKNOWN_TIME;
         if (ap->mAPlayer != 0) {
             ap->mAPlayer->getPositionMsec(&posMsec);
@@ -2099,12 +2101,15 @@ void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
 
 
 //-----------------------------------------------------------------------------
-void android_audioPlayer_seek(CAudioPlayer *ap, SLmillisecond posMsec) {
+SLresult android_audioPlayer_seek(CAudioPlayer *ap, SLmillisecond posMsec) {
+    SLresult result = SL_RESULT_SUCCESS;
 
     switch(ap->mAndroidObjType) {
 
       case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:      // intended fall-through
       case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE:
+      case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
+        result = SL_RESULT_FEATURE_UNSUPPORTED;
         break;
 
       case AUDIOPLAYER_FROM_URIFD:                   // intended fall-through
@@ -2117,15 +2122,27 @@ void android_audioPlayer_seek(CAudioPlayer *ap, SLmillisecond posMsec) {
       default:
         break;
     }
+    return result;
 }
 
 
 //-----------------------------------------------------------------------------
-void android_audioPlayer_loop(CAudioPlayer *ap, SLboolean loopEnable) {
+SLresult android_audioPlayer_loop(CAudioPlayer *ap, SLboolean loopEnable) {
+    SLresult result = SL_RESULT_SUCCESS;
 
-    if ((AUDIOPLAYER_FROM_URIFD == ap->mAndroidObjType) && (ap->mAPlayer != 0)) {
+    switch (ap->mAndroidObjType) {
+    case AUDIOPLAYER_FROM_URIFD:
+    // case AUDIOPLAY_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+    //      would actually work, but what's the point?
+      if (ap->mAPlayer != 0) {
         ap->mAPlayer->loop((bool)loopEnable);
+      }
+      break;
+    default:
+      result = SL_RESULT_FEATURE_UNSUPPORTED;
+      break;
     }
+    return result;
 }
 
 
@@ -2232,15 +2249,29 @@ SLresult android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer 
 
 //-----------------------------------------------------------------------------
 void android_audioPlayer_androidBufferQueue_clear_l(CAudioPlayer *ap) {
-    if ((ap->mAndroidObjType == AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE) && (ap->mAPlayer != 0)) {
+    switch (ap->mAndroidObjType) {
+    case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE:
+      if (ap->mAPlayer != 0) {
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(ap->mAPlayer.get());
         splr->appClear_l();
+      } break;
+    case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
+      // nothing to do here, fall through
+    default:
+      break;
     }
 }
 
 void android_audioPlayer_androidBufferQueue_onRefilled_l(CAudioPlayer *ap) {
-    if ((ap->mAndroidObjType == AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE) && (ap->mAPlayer != 0)) {
+    switch (ap->mAndroidObjType) {
+    case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE:
+      if (ap->mAPlayer != 0) {
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(ap->mAPlayer.get());
         splr->queueRefilled_l();
+      } break;
+    case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
+      // FIXME this may require waking up the decoder if it is currently starved and isn't polling
+    default:
+      break;
     }
 }

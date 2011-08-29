@@ -61,7 +61,8 @@ unsigned handler_AudioPlayer_position(IObject *thiz)
 {
     CAudioPlayer *ap;
     ap = (CAudioPlayer *) thiz;
-    android_audioPlayer_seek(ap, ap->mSeek.mPos);
+    // FIXME provide means to return result for invalid use cases (e.g. buffer queue data source)
+    (void) android_audioPlayer_seek(ap, ap->mSeek.mPos);
     return ATTR_POSITION;
 }
 
@@ -158,7 +159,8 @@ unsigned handler_MediaPlayer_abq_enqueue(IObject *thiz)
 unsigned handler_MediaPlayer_position(IObject *thiz)
 {
     CMediaPlayer *mp = (CMediaPlayer *) thiz;
-    android_Player_seek(mp, mp->mSeek.mPos);
+    // FIXME provide means to return result for invalid use cases (e.g. buffer queue data source)
+    (void) android_Player_seek(mp, mp->mSeek.mPos);
     return ATTR_POSITION;
 }
 

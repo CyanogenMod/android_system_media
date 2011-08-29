@@ -614,7 +614,7 @@ XAresult android_Player_seek(CMediaPlayer *mp, SLmillisecond posMsec) {
         break;
       case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: // intended fall-through
       default: {
-          result = XA_RESULT_PARAMETER_INVALID;
+          result = XA_RESULT_FEATURE_UNSUPPORTED;
       }
     }
     return result;
@@ -634,7 +634,7 @@ XAresult android_Player_loop(CMediaPlayer *mp, SLboolean loopEnable) {
         break;
       case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: // intended fall-through
       default: {
-          result = XA_RESULT_PARAMETER_INVALID;
+          result = XA_RESULT_FEATURE_UNSUPPORTED;
       }
     }
     return result;
