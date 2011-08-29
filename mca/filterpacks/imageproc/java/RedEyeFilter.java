@@ -28,9 +28,10 @@ import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 import android.graphics.Bitmap;
-
-import java.util.Set;
-
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PointF;
 import android.util.Log;
 
 /**
@@ -38,19 +39,23 @@ import android.util.Log;
  */
 public class RedEyeFilter extends Filter {
 
-    @GenerateFieldPort(name = "intensity")
-    private float mIntensity;
+    private static final float RADIUS_RATIO = 0.06f;
+    private static final float MIN_RADIUS = 10.0f;
+    private static final float DEFAULT_RED_INTENSITY = 1.30f;
 
-    @GenerateFieldPort(name = "redeye")
-    private Bitmap mRedEyeBitmap = null;
-
-    @GenerateFieldPort(name = "update")
-    private boolean mUpdate;
+    @GenerateFieldPort(name = "centers")
+    private float[] mCenters;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;
 
     private Frame mRedEyeFrame;
+    private Bitmap mRedEyeBitmap;
+
+    private final Canvas mCanvas = new Canvas();
+    private final Paint mPaint = new Paint();
+
+    private float mRadius;
 
     private int mWidth = 0;
     private int mHeight = 0;
@@ -111,9 +116,9 @@ public class RedEyeFilter extends Filter {
 
     @Override
     public void tearDown(FilterContext context) {
-        if (mRedEyeFrame != null) {
-            mRedEyeFrame.release();
-            mRedEyeFrame = null;
+        if (mRedEyeBitmap != null) {
+            mRedEyeBitmap.recycle();
+            mRedEyeBitmap = null;
         }
     }
 
@@ -131,8 +136,15 @@ public class RedEyeFilter extends Filter {
             initProgram(context, inputFormat.getTarget());
         }
 
-        if (mUpdate)
-            updateProgramParams(context);
+        // Check if the frame size has changed
+        if (inputFormat.getWidth() != mWidth || inputFormat.getHeight() != mHeight) {
+            mWidth = inputFormat.getWidth();
+            mHeight = inputFormat.getHeight();
+
+            createRedEyeBitmap();
+        }
+
+        createRedEyeFrame(context);
 
         // Process
         Frame[] inputs = {input, mRedEyeFrame};
@@ -143,24 +155,55 @@ public class RedEyeFilter extends Filter {
 
         // Release pushed frame
         output.release();
+
+        // Release unused frame
+        mRedEyeFrame.release();
+        mRedEyeFrame = null;
+    }
+
+    @Override
+    public void fieldPortValueUpdated(String name, FilterContext context) {
+         if (mProgram != null) {
+            updateProgramParams(context);
+        }
+    }
+
+    private void createRedEyeBitmap() {
+        if (mRedEyeBitmap != null) {
+            mRedEyeBitmap.recycle();
+        }
+
+        int bitmapWidth = mWidth / 2;
+        int bitmapHeight = mHeight / 2;
+
+        mRedEyeBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+        mCanvas.setBitmap(mRedEyeBitmap);
+        mPaint.setColor(Color.WHITE);
+        mRadius = Math.max(MIN_RADIUS, RADIUS_RATIO * Math.min(bitmapWidth, bitmapHeight));
+    }
+
+    private void createRedEyeFrame(FilterContext context) {
+        FrameFormat format = ImageFormat.create(mRedEyeBitmap.getWidth() ,
+                                                mRedEyeBitmap.getHeight(),
+                                                ImageFormat.COLORSPACE_RGBA,
+                                                FrameFormat.TARGET_GPU);
+        mRedEyeFrame = context.getFrameManager().newFrame(format);
+        mRedEyeFrame.setBitmap(mRedEyeBitmap);
     }
 
     private void updateProgramParams(FilterContext context) {
-        mProgram.setHostValue("intensity", mIntensity);
+        mProgram.setHostValue("intensity", DEFAULT_RED_INTENSITY);
+
+        if ( mCenters.length % 2 == 1) {
+            throw new RuntimeException("The size of center array must be even.");
+        }
 
         if (mRedEyeBitmap != null) {
-
-            // TODO(rslin): Can I reuse the existing frame instead of creating
-            // a new frame each time?
-            FrameFormat format = ImageFormat.create(mRedEyeBitmap.getWidth(),
-                                                    mRedEyeBitmap.getHeight(),
-                                                    ImageFormat.COLORSPACE_RGBA,
-                                                    FrameFormat.TARGET_GPU);
-            if (mRedEyeFrame != null) {
-                mRedEyeFrame.release();
+            for (int i = 0; i < mCenters.length; i += 2) {
+                mCanvas.drawCircle(mCenters[i] * mRedEyeBitmap.getWidth(),
+                                   mCenters[i + 1] * mRedEyeBitmap.getHeight(),
+                                   mRadius, mPaint);
             }
-            mRedEyeFrame = context.getFrameManager().newFrame(format);
-            mRedEyeFrame.setBitmap(mRedEyeBitmap);
         }
     }
 }

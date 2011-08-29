@@ -34,6 +34,8 @@ import java.util.Random;
 
 public class GrainFilter extends Filter {
 
+    private static final int RAND_THRESHOLD = 128;
+
     @GenerateFieldPort(name = "scale")
     private float mScale;
 
@@ -65,12 +67,11 @@ public class GrainFilter extends Filter {
             "  noise += 0.4448;\n" +
             "  noise *= scale;\n" +
             "  vec4 color = texture2D(tex_sampler_0, v_texcoord);\n" +
-            "  float energy = color.r + color.g + color.b;\n" +
-            "  float mask = 1.733 - sqrt(energy);\n" +
-            "  float weight = 1.0 - mask * noise;\n" +
+            "  float energy = 0.33333 * color.r + 0.33333 * color.g + 0.33333 * color.b;\n" +
+            "  float mask = (1.0 - sqrt(energy));\n" +
+            "  float weight = 1.0 - 1.333 * mask * noise;\n" +
             "  gl_FragColor = vec4(color.rgb * weight, color.a);\n" +
             "}\n";
-
 
     public GrainFilter(String name) {
         super(name);
@@ -158,7 +159,8 @@ public class GrainFilter extends Filter {
 
             int[] buffer = new int[mWidth * mHeight];
             for (int i = 0; i < mWidth * mHeight; ++i) {
-                buffer[i] = mRandom.nextInt(255);
+                buffer[i] = (mRandom.nextInt(256) < RAND_THRESHOLD) ?
+                    mRandom.nextInt(256) : 0;
             }
             FrameFormat format = ImageFormat.create(mWidth, mHeight,
                                                     ImageFormat.COLORSPACE_RGBA,
