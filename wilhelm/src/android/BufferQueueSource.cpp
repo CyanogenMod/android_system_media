@@ -146,11 +146,15 @@ ssize_t BufferQueueSource::readAt(off64_t offset, void *data, size_t size) {
 
     // notify client
     if (NULL != callback) {
-        (*callback)(&mAndroidBufferQueueSource->mItf, callbackPContext,
+        SLresult result = (*callback)(&mAndroidBufferQueueSource->mItf, callbackPContext,
                 pBufferContext, pBufferData, dataSize, dataUsed,
                 // no messages during playback other than marking the buffer as processed
                 (const SLAndroidBufferItem*)(&kItemProcessed) /* pItems */,
                 NB_BUFFEREVENT_ITEM_FIELDS * sizeof(SLuint32) /* itemsLength */ );
+        if (SL_RESULT_SUCCESS != result) {
+            // Reserved for future use
+            SL_LOGW("Unsuccessful result %d returned from AndroidBufferQueueCallback", result);
+        }
     }
 
     return readSize;
