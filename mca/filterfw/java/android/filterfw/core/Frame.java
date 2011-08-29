@@ -170,7 +170,7 @@ public abstract class Frame {
     }
 
     protected void setFormat(FrameFormat format) {
-        mFormat = format;
+        mFormat = format.mutableCopy();
     }
 
     protected void setGenericObjectValue(Object value) {
@@ -193,7 +193,7 @@ public abstract class Frame {
     }
 
     protected void reset(FrameFormat newFormat) {
-        mFormat = newFormat;
+        mFormat = newFormat.mutableCopy();
         mReadOnly = false;
         mRefCount = 1;
     }
