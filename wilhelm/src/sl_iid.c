@@ -80,7 +80,7 @@ const SLInterfaceID SL_IID_ANDROIDSIMPLEBUFFERQUEUE = &SL_IID_array[MPH_ANDROIDS
 
 // Android API level 12 extended interfaces
 // GUID and MPH are shared by SL and XA
-const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUE = &SL_IID_array[MPH_ANDROIDBUFFERQUEUE];
+const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUESOURCE = &SL_IID_array[MPH_ANDROIDBUFFERQUEUESOURCE];
 
 #ifdef __cplusplus
 }

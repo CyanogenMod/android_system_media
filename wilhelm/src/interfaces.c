@@ -79,7 +79,7 @@ const char * const interface_names[MPH_MAX] = {
     "ANDROIDSIMPLEBUFFERQUEUE",
 
     // Android API level 12 extended interfaces
-    "ANDROIDBUFFERQUEUE",
+    "ANDROIDBUFFERQUEUESOURCE",
 
     // OpenMAX AL 1.0.1 interfaces
     "XAAUDIODECODERCAPABILITIES",

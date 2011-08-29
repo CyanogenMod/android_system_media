@@ -211,7 +211,9 @@ struct SLAndroidSimpleBufferQueueItf_ {
 /* Android Buffer Queue Interface                                            */
 /*---------------------------------------------------------------------------*/
 
-extern SL_API const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUE;
+extern SL_API const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUESOURCE;
+// FIXME temporary definition to be removed
+#define SL_IID_ANDROIDBUFFERQUEUE SL_IID_ANDROIDBUFFERQUEUESOURCE
 
 struct SLAndroidBufferQueueItf_;
 typedef const struct SLAndroidBufferQueueItf_ * const * SLAndroidBufferQueueItf;

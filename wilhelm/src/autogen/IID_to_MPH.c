@@ -144,7 +144,7 @@ int IID_to_MPH(const SLInterfaceID iid)
         -1,
         MPH_BUFFERQUEUE,
         -1,
-        MPH_ANDROIDBUFFERQUEUE,
+        MPH_ANDROIDBUFFERQUEUESOURCE,
         MPH_PLAY,
         -1,
         MPH_XAMETADATAINSERTION,
