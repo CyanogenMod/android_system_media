@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
@@ -29,8 +28,6 @@ import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
-
-import android.util.Log;
 
 /**
  * @hide
@@ -112,10 +109,12 @@ public class FlipFilter extends Filter {
     }
 
     private void updateParameters() {
-        float x_origin = (mVertical) ? 1.0f : 0.0f;
-        float y_origin = (mHorizontal) ? 1.0f : 0.0f;
-        float width  = (mVertical) ? -1.0f : 1.0f;
-        float height  = (mHorizontal) ? -1.0f : 1.0f;
+        float x_origin = (mHorizontal) ? 1.0f : 0.0f;
+        float y_origin = (mVertical) ? 1.0f : 0.0f;
+
+        float width  = (mHorizontal) ? -1.0f : 1.0f;
+        float height  = (mVertical) ? -1.0f : 1.0f;
+
         ((ShaderProgram) mProgram).setSourceRect(x_origin, y_origin, width, height);
     }
 }

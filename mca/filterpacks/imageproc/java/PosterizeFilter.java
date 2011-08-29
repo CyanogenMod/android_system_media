@@ -43,8 +43,6 @@ public class PosterizeFilter extends Filter {
             "void main() {\n" +
             "  vec4 color = texture2D(tex_sampler_0, v_texcoord);\n" +
             "  vec3 pcolor;\n" +
-            // TODO(rslin): step function doesn't work properly in IMG devices.
-            // "  vec3 pcolor = 0.5 * step(0.5, color.rgb) + 0.25;\n" +
             "  pcolor.r = (color.r >= 0.5) ? 0.75 : 0.25;\n" +
             "  pcolor.g = (color.g >= 0.5) ? 0.75 : 0.25;\n" +
             "  pcolor.b = (color.b >= 0.5) ? 0.75 : 0.25;\n" +

@@ -47,7 +47,7 @@ public class BlackWhiteFilter extends Filter {
     private int mHeight = 0;
     private int mTarget = FrameFormat.TARGET_UNSPECIFIED;
 
-    private Frame mNoiseFrame;
+    private Frame mNoiseFrame = null;
     private Random mRandom;
 
     private final String mBlackWhiteShader =
@@ -140,8 +140,9 @@ public class BlackWhiteFilter extends Filter {
             mWidth = inputFormat.getWidth();
             mHeight = inputFormat.getHeight();
 
-            if (mNoiseFrame != null)
+            if (mNoiseFrame != null) {
                 mNoiseFrame.release();
+            }
 
             int[] buffer = new int[mWidth * mHeight];
             for (int i = 0; i < mWidth * mHeight; ++i) {
