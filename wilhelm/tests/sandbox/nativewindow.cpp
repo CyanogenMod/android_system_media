@@ -76,9 +76,19 @@ ANativeWindow *getNativeWindow_()
     return surface.get();
 }
 
+void disposeNativeWindow_()
+{
+    gComposerClient->dispose();
+}
+
 } // namespace android
 
 ANativeWindow *getNativeWindow()
 {
     return android::getNativeWindow_();
+}
+
+void disposeNativeWindow()
+{
+    android::disposeNativeWindow_();
 }

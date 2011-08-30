@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 extern ANativeWindow *getNativeWindow();
+extern void disposeNativeWindow();
 
 #ifdef __cplusplus
 }
