@@ -36,6 +36,7 @@ import android.filterfw.format.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.os.ConditionVariable;
+import android.view.Surface;
 
 import java.io.IOException;
 import java.io.FileDescriptor;
@@ -381,7 +382,9 @@ public class MediaSource extends Filter {
         mMediaPlayer.setVolume(mVolume, mVolume);
 
         // Bind it to our media frame
-        mMediaPlayer.setTexture(mSurfaceTexture);
+        Surface surface = new Surface(mSurfaceTexture);
+        mMediaPlayer.setSurface(surface);
+        surface.release();
 
         // Connect Media Player to callbacks
 
