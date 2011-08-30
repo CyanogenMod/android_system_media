@@ -49,9 +49,30 @@ public class CropFilter extends Filter {
     @GenerateFieldPort(name = "oheight")
     private int mOutputHeight = -1;
 
+    @GenerateFieldPort(name = "fillblack")
+    private boolean mFillBlack = false;
+
     public CropFilter(String name) {
         super(name);
     }
+
+    private final String mFragShader =
+      "precision mediump float;\n" +
+      "uniform sampler2D tex_sampler_0;\n" +
+      "varying vec2 v_texcoord;\n" +
+      "void main() {\n" +
+      "  const vec2 lo = vec2(0.0, 0.0);\n" +
+      "  const vec2 hi = vec2(1.0, 1.0);\n" +
+      "  const vec4 black = vec4(0.0, 0.0, 0.0, 1.0);\n" +
+      "  bool out_of_bounds =\n" +
+      "    any(lessThan(v_texcoord, lo)) ||\n" +
+      "    any(greaterThan(v_texcoord, hi));\n" +
+      "  if (out_of_bounds) {\n" +
+      "    gl_FragColor = black;\n" +
+      "  } else {\n" +
+      "    gl_FragColor = texture2D(tex_sampler_0, v_texcoord);\n" +
+      "  }\n" +
+      "}\n";
 
     @Override
     public void setupPorts() {
@@ -76,7 +97,11 @@ public class CropFilter extends Filter {
         mProgram = null;
         switch (format.getTarget()) {
             case FrameFormat.TARGET_GPU:
+              if(mFillBlack)
+                mProgram = new ShaderProgram(context, mFragShader);
+              else
                 mProgram = ShaderProgram.createIdentity(context);
+
                 break;
         }
         if (mProgram == null) {
