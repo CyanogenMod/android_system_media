@@ -77,7 +77,7 @@ public class CropFilter extends Filter {
     @Override
     public void setupPorts() {
         addMaskedInputPort("image", ImageFormat.create(ImageFormat.COLORSPACE_RGBA));
-        addMaskedInputPort("box", ObjectFormat.fromClass(Quad.class, FrameFormat.TARGET_JAVA));
+        addMaskedInputPort("box", ObjectFormat.fromClass(Quad.class, FrameFormat.TARGET_SIMPLE));
         addOutputBasedOnInput("image", "image");
     }
 

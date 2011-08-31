@@ -21,7 +21,6 @@ import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
-import android.filterfw.core.JavaFrame;
 import android.filterfw.format.ObjectFormat;
 import android.util.Log;
 
@@ -36,7 +35,8 @@ public class StringLogger extends Filter {
 
     @Override
     public void setupPorts() {
-        addMaskedInputPort("string", ObjectFormat.fromClass(String.class, FrameFormat.TARGET_JAVA));
+        addMaskedInputPort("string", ObjectFormat.fromClass(String.class,
+                                                            FrameFormat.TARGET_SIMPLE));
     }
 
     @Override

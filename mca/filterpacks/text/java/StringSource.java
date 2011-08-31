@@ -24,7 +24,6 @@ import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFieldPort;
 import android.filterfw.core.KeyValueMap;
 import android.filterfw.core.MutableFrameFormat;
-import android.filterfw.core.JavaFrame;
 import android.filterfw.format.ObjectFormat;
 
 /**
@@ -43,7 +42,7 @@ public class StringSource extends Filter {
 
     @Override
     public void setupPorts() {
-        mOutputFormat = ObjectFormat.fromClass(String.class, FrameFormat.TARGET_JAVA);
+        mOutputFormat = ObjectFormat.fromClass(String.class, FrameFormat.TARGET_SIMPLE);
         addOutputPort("string", mOutputFormat);
     }
 

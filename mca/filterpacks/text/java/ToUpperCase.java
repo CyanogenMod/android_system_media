@@ -21,7 +21,6 @@ import android.filterfw.core.Filter;
 import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
-import android.filterfw.core.JavaFrame;
 import android.filterfw.format.ObjectFormat;
 
 /**
@@ -37,7 +36,7 @@ public class ToUpperCase extends Filter {
 
     @Override
     public void setupPorts() {
-        mOutputFormat = ObjectFormat.fromClass(String.class, FrameFormat.TARGET_JAVA);
+        mOutputFormat = ObjectFormat.fromClass(String.class, FrameFormat.TARGET_SIMPLE);
         addMaskedInputPort("mixedcase", mOutputFormat);
         addOutputPort("uppercase", mOutputFormat);
     }

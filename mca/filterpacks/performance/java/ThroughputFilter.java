@@ -22,7 +22,6 @@ import android.filterfw.core.FilterContext;
 import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.GenerateFieldPort;
-import android.filterfw.core.JavaFrame;
 import android.filterfw.format.ObjectFormat;
 import android.os.SystemClock;
 
@@ -51,7 +50,7 @@ public class ThroughputFilter extends Filter {
         addInputPort("frame");
 
         // Add output ports
-        mOutputFormat = ObjectFormat.fromClass(Throughput.class, FrameFormat.TARGET_JAVA);
+        mOutputFormat = ObjectFormat.fromClass(Throughput.class, FrameFormat.TARGET_SIMPLE);
         addOutputBasedOnInput("frame", "frame");
         addOutputPort("throughput", mOutputFormat);
     }

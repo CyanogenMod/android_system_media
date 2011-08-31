@@ -49,7 +49,7 @@ public class DrawOverlayFilter extends Filter {
                                                          FrameFormat.TARGET_GPU);
         addMaskedInputPort("source", imageFormatMask);
         addMaskedInputPort("overlay", imageFormatMask);
-        addMaskedInputPort("box", ObjectFormat.fromClass(Quad.class, FrameFormat.TARGET_JAVA));
+        addMaskedInputPort("box", ObjectFormat.fromClass(Quad.class, FrameFormat.TARGET_SIMPLE));
         addOutputBasedOnInput("image", "source");
     }
 
