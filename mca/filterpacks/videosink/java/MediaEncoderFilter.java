@@ -34,6 +34,7 @@ import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
 import android.os.ConditionVariable;
 import android.media.MediaRecorder;
+import android.media.CamcorderProfile;
 import android.filterfw.core.GLEnvironment;
 
 import java.io.IOException;
@@ -47,25 +48,67 @@ public class MediaEncoderFilter extends Filter {
 
     /** User-visible parameters */
 
-    /** Frame width to be encoded.
-     * Actual received frame size has to match this */
-    @GenerateFieldPort(name = "width", hasDefault = false)
-    private int mWidth;
+    /** Recording state. When set to false, recording will stop, or will not
+     * start if not yet running the graph. Instead, frames are simply ignored.
+     * When switched back to true, recording will restart. This allows a single
+     * graph to both provide preview and to record video. If this is false,
+     * recording settings can be updated while the graph is running.
+     */
+    @GenerateFieldPort(name = "recording", hasDefault = true)
+    private boolean mRecording = true;
 
-    /** Frame height to to be encoded.
+    /** Filename to save the output. */
+    @GenerateFieldPort(name = "outputFile", hasDefault = true)
+    private String mOutputFile = new String("/sdcard/MediaEncoderOut.mp4");
+
+    /** Input audio source. If not set, no audio will be recorded.
+     * Select from the values in MediaRecorder.AudioSource
+     */
+    @GenerateFieldPort(name = "audioSource", hasDefault = true)
+    private int mAudioSource = NO_AUDIO_SOURCE;
+
+    /** Media recorder info listener, which needs to implement
+     * MediaRecorder.onInfoListener. Set this to receive notifications about
+     * recording events.
+     */
+    @GenerateFieldPort(name = "infoListener", hasDefault = true)
+    private MediaRecorder.OnInfoListener mInfoListener = null;
+
+    /** Media recorder error listener, which needs to implement
+     * MediaRecorder.onErrorListener. Set this to receive notifications about
+     * recording errors.
+     */
+    @GenerateFieldPort(name = "errorListener", hasDefault = true)
+    private MediaRecorder.OnErrorListener mErrorListener = null;
+
+    /** Orientation hint. Used for indicating proper video playback orientation.
+     * Units are in degrees of clockwise rotation, valid values are (0, 90, 180,
+     * 270).
+     */
+    @GenerateFieldPort(name = "orientationHint", hasDefault = true)
+    private int mOrientationHint = 0;
+
+    /** Camcorder profile to use. Select from the profiles available in
+     * android.media.CamcorderProfile. If this field is set, it overrides
+     * settings to width, height, framerate, outputFormat, and videoEncoder.
+     */
+    @GenerateFieldPort(name = "recordingProfile", hasDefault = true)
+    private CamcorderProfile mProfile = null;
+
+    /** Frame width to be encoded, defaults to 320.
+     * Actual received frame size has to match this */
+    @GenerateFieldPort(name = "width", hasDefault = true)
+    private int mWidth = 320;
+
+    /** Frame height to to be encoded, defaults to 240.
      * Actual received frame size has to match */
-    @GenerateFieldPort(name = "height", hasDefault = false)
-    private int mHeight;
+    @GenerateFieldPort(name = "height", hasDefault = true)
+    private int mHeight = 240;
 
     /** Stream framerate to encode the frames at.
      * By default, frames are encoded at 30 FPS*/
     @GenerateFieldPort(name = "framerate", hasDefault = true)
     private int mFps = 30;
-
-
-    /** Filename to save the output. */
-    @GenerateFieldPort(name = "outputFile", hasDefault = true)
-    private String mOutputFile = new String("/sdcard/MediaEncoderOut.mp4");
 
     /** The output format to encode the frames in.
      * Choose an output format from the options in
@@ -81,15 +124,19 @@ public class MediaEncoderFilter extends Filter {
 
     // End of user visible parameters
 
+    private static final int NO_AUDIO_SOURCE = -1;
+
     private int mSurfaceId;
     private ShaderProgram mProgram;
     private GLFrame mScreen;
+
+    private boolean mRecordingActive = false;
 
     private boolean mLogVerbose;
     private static final String TAG = "MediaEncoderFilter";
 
     // Our hook to the encoder
-    private MediaRecorder mMediaRecorder = new MediaRecorder();
+    private MediaRecorder mMediaRecorder;
 
     public MediaEncoderFilter(String name) {
         super(name);
@@ -105,11 +152,13 @@ public class MediaEncoderFilter extends Filter {
 
     @Override
     public void fieldPortValueUpdated(String name, FilterContext context) {
-        if (isOpen()) {
-            throw new RuntimeException("Cannot change filter parameter"
-                                    + "values when the filter is open!");
+        if (mLogVerbose) Log.v(TAG, "Port " + name + " has been updated");
+        if (name.equals("recording")) return;
+
+        if (isOpen() && mRecordingActive) {
+            throw new RuntimeException("Cannot change recording parameters"
+                                       + " when the filter is recording!");
         }
-        updateMediaRecorderParams();
     }
 
     // update the MediaRecorderParams based on the variables.
@@ -118,18 +167,26 @@ public class MediaEncoderFilter extends Filter {
     private void updateMediaRecorderParams() {
         final int GRALLOC_BUFFER = 2;
         mMediaRecorder.setVideoSource(GRALLOC_BUFFER);
-        mMediaRecorder.setOutputFormat(mOutputFormat);
-        mMediaRecorder.setVideoEncoder(mVideoEncoder);
+        if (mAudioSource != NO_AUDIO_SOURCE) {
+            mMediaRecorder.setAudioSource(mAudioSource);
+        }
+        if (mProfile != null) {
+            mMediaRecorder.setProfile(mProfile);
+        } else {
+            mMediaRecorder.setOutputFormat(mOutputFormat);
+            mMediaRecorder.setVideoEncoder(mVideoEncoder);
+            mMediaRecorder.setVideoSize(mWidth, mHeight);
+            mMediaRecorder.setVideoFrameRate(mFps);
+        }
+        mMediaRecorder.setOrientationHint(mOrientationHint);
+        mMediaRecorder.setOnInfoListener(mInfoListener);
+        mMediaRecorder.setOnErrorListener(mErrorListener);
         mMediaRecorder.setOutputFile(mOutputFile);
-        mMediaRecorder.setVideoSize(mWidth, mHeight);
-        mMediaRecorder.setVideoFrameRate(mFps);
     }
 
     @Override
     public void prepare(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Preparing");
-        // Setup the MediaRecorder correctly
-        updateMediaRecorderParams();
 
         // Create identity shader to render, and make sure to render upside-down, as textures
         // are stored internally bottom-to-top.
@@ -143,11 +200,22 @@ public class MediaEncoderFilter extends Filter {
         screenFormat.setDimensions(mWidth, mHeight);
         mScreen = (GLFrame)context.getFrameManager().newBoundFrame(
                            screenFormat, GLFrame.EXISTING_FBO_BINDING, 0);
+
+        mRecordingActive = false;
     }
 
     @Override
     public void open(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Opening");
+        if (mRecording) startRecording(context);
+    }
+
+    private void startRecording(FilterContext context) {
+        if (mLogVerbose) Log.v(TAG, "Starting recording");
+
+        mMediaRecorder = new MediaRecorder();
+        updateMediaRecorderParams();
+
         try {
             mMediaRecorder.prepare();
         } catch (IllegalStateException e) {
@@ -165,7 +233,9 @@ public class MediaEncoderFilter extends Filter {
         mMediaRecorder.start();
         Log.v(TAG, "ME Filter: Open: registering surface from Mediarecorder");
         mSurfaceId = context.getGLEnvironment().
-                 registerSurfaceFromMediaRecorder(mMediaRecorder);
+                registerSurfaceFromMediaRecorder(mMediaRecorder);
+
+        mRecordingActive = true;
     }
 
     @Override
@@ -176,23 +246,46 @@ public class MediaEncoderFilter extends Filter {
         // Get input frame
         Frame input = pullInput("videoframe");
 
+        // Check if recording needs to start
+        if (!mRecordingActive && mRecording) {
+            startRecording(context);
+        }
+        // Check if recording needs to stop
+        if (mRecordingActive && !mRecording) {
+            stopRecording(context);
+        }
+
+        if (!mRecordingActive) return;
+
         // Activate our surface
         glEnv.activateSurfaceWithId(mSurfaceId);
 
         // Process
         mProgram.process(input, mScreen);
 
+        // Set timestamp from input
+        glEnv.setSurfaceTimestamp(input.getTimestamp());
         // And swap buffers
         glEnv.swapBuffers();
+    }
+
+    private void stopRecording(FilterContext context) {
+        if (mLogVerbose) Log.v(TAG, "Stopping recording");
+
+        GLEnvironment glEnv = context.getGLEnvironment();
+        glEnv.disconnectSurfaceMediaSource(mMediaRecorder);
+        mMediaRecorder.stop();
+        glEnv.unregisterSurfaceId(mSurfaceId);
+        mMediaRecorder.release();
+        mMediaRecorder = null;
+
+        mRecordingActive = false;
     }
 
     @Override
     public void close(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Closing");
-        GLEnvironment glEnv = context.getGLEnvironment();
-        glEnv.disconnectSurfaceMediaSource(mMediaRecorder);
-        mMediaRecorder.stop();
-        context.getGLEnvironment().unregisterSurfaceId(mSurfaceId);
+        if (mRecordingActive) stopRecording(context);
     }
 
     @Override
