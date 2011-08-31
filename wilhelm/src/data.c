@@ -443,8 +443,10 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
                     }
                     break;
                 case 0:
+                    // The default of front left rather than center for mono may be non-intuitive,
+                    // but the left channel is the first channel for stereo or multichannel content.
                     pDataFormat->mPCM.channelMask = pDataFormat->mPCM.numChannels == 2 ?
-                        SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT : SL_SPEAKER_FRONT_CENTER;
+                        SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT : SL_SPEAKER_FRONT_LEFT;
                     break;
                 default:
                     result = SL_RESULT_PARAMETER_INVALID;

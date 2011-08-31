@@ -334,9 +334,11 @@ void AudioSfDecoder::onPrepare() {
         mSampleRateHz = (uint32_t) sr;
     }
     // FIXME add code below once channel mask support is in, currently initialized to default
-    //    if (meta->findInt32(kKeyChannelMask, &mChannelMask)) {
-    //        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
+    //       value computed from the channel count
+    //    if (!hasChannelMask) {
+    //        CHECK(meta->findInt32(kKeyChannelMask, &mChannelMask));
     //    }
+    mChannelMask = channelCountToMask(mChannelCount);
 
     if (!wantPrefetch()) {
         SL_LOGV("AudioSfDecoder::onPrepare: no need to prefetch");
@@ -351,6 +353,7 @@ void AudioSfDecoder::onPrepare() {
         android::Mutex::Autolock autoLock(mPcmFormatLock);
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
+        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
     }
 
     // at this point we have enough information about the source to create the sink that
@@ -794,10 +797,14 @@ void AudioSfDecoder::hasNewDecodeParams() {
         SL_LOGV("format changed: new sample rate = %d, channel count = %d",
                 mSampleRateHz, mChannelCount);
 
+        // FIXME similar to onPrepare()
+        mChannelMask = channelCountToMask(mChannelCount);
+
         {
             android::Mutex::Autolock autoLock(mPcmFormatLock);
             mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
             mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
+            mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
         }
     }
 
