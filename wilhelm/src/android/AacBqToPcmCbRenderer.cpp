@@ -66,34 +66,36 @@ static size_t getAdtsFrameSize(const uint8_t *data, off64_t offset, size_t size)
  * Returns whether a block of memory starts and ends on AAC ADTS frame boundaries
  * @param data pointer to the compressed audio data
  * @param size the size in bytes of the data block to validate
- * @return true if there is AAC ADTS data, and it starts and ends on frame boundaries,
- *    false otherwise
+ * @return SL_RESULT_SUCCESS if there is AAC ADTS data, and it starts and ends on frame boundaries,
+ *    or an appropriate error code otherwise:
+ *      SL_RESULT_PARAMETER_INVALID if not possible to attempt validation of even one frame
+ *      SL_RESULT_CONTENT_CORRUPTED if the frame contents are otherwise invalid
  */
-bool AacBqToPcmCbRenderer::validateBufferStartEndOnFrameBoundaries(void* data, size_t size)
+SLresult AacBqToPcmCbRenderer::validateBufferStartEndOnFrameBoundaries(void* data, size_t size)
 {
     off64_t offset = 0;
     size_t frameSize = 0;
 
     if ((NULL == data) || (size == 0)) {
         SL_LOGE("No ADTS to validate");
-        return false;
+        return SL_RESULT_PARAMETER_INVALID;
     }
 
     while (offset < size) {
         if ((frameSize = getAdtsFrameSize((uint8_t *)data, offset, size)) == 0) {
             SL_LOGE("found ADTS frame of size 0 at offset %llu", offset);
-            return false;
+            return SL_RESULT_CONTENT_CORRUPTED;
         }
         //SL_LOGV("last good offset %llu", offset);
         offset += frameSize;
         if (offset > size) {
             SL_LOGE("found incomplete ADTS frame at end of data");
-            return false;
+            return SL_RESULT_CONTENT_CORRUPTED;
         }
     }
     if (offset != size) { SL_LOGE("ADTS parsing error: reached end of incomplete frame"); }
     assert(offset == size);
-    return true;
+    return SL_RESULT_SUCCESS;
 }
 
 //--------------------------------------------------------------------------------------------------

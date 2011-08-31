@@ -42,7 +42,7 @@ public:
     // This is for instance used whenever ADTS data is being enqueued through an
     // SL / XA AndroidBufferQueue interface so only parseable ADTS data goes in
     // the buffer queue, and no ADTS frame is stored across two buffers.
-    static bool validateBufferStartEndOnFrameBoundaries(void* data, size_t size);
+    static SLresult validateBufferStartEndOnFrameBoundaries(void* data, size_t size);
 
 protected:
 

@@ -96,7 +96,7 @@ static SLresult initializeAndroidBufferQueueMembers(CAudioPlayer *ap) {
                 pBuf->mItems.mTsCmdData.mPts = 0;
                 break;
               case kAndroidBufferTypeAacadts:
-                pBuf->mItems.mTsCmdData.mTsCmdCode = ANDROID_ADTSEVENT_NONE;
+                pBuf->mItems.mAdtsCmdData.mAdtsCmdCode = ANDROID_ADTSEVENT_NONE;
                 break;
               default:
                 return SL_RESULT_CONTENT_UNSUPPORTED;
