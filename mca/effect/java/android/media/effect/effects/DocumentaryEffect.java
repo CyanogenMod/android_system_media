@@ -16,49 +16,15 @@
 
 package android.media.effect.effects;
 
-import android.filterfw.core.Filter;
-import android.filterfw.core.OneShotScheduler;
 import android.media.effect.EffectContext;
-import android.media.effect.FilterGraphEffect;
+import android.media.effect.SingleFilterEffect;
+import android.filterpacks.imageproc.DocumentaryFilter;
 
 /**
  * @hide
  */
-public class DocumentaryEffect extends FilterGraphEffect {
-    private static final String mGraphDefinition =
-            "@import android.filterpacks.base;\n" +
-            "@import android.filterpacks.imageproc;\n" +
-            "\n" +
-            "@filter GLTextureSource input {\n" +
-            "  texId = 0;\n" + // Will be set by base class
-            "  width = 0;\n" +
-            "  height = 0;\n" +
-            "  repeatFrame = true;\n" +
-            "}\n" +
-            "\n" +
-            "@filter BlackWhiteFilter blackwhite {\n" +
-            "  white = 0.5;\n" +
-            "  black = 0.0;\n" +
-            "}\n" +
-            "\n" +
-            "@filter ToGrayFilter grayscale {\n" +
-            "}\n" +
-            "\n" +
-            "@filter VignetteFilter vignette {\n" +
-            "  range = 0.83;\n" +
-            "}\n" +
-            "\n" +
-            "@filter GLTextureTarget output {\n" +
-            "  texId = 0;\n" +
-            "}\n" +
-            "\n" +
-            "@connect input[frame]  => blackwhite[image];\n" +
-            "@connect blackwhite[image] => grayscale[image];\n" +
-            "@connect grayscale[image] => vignette[image];\n" +
-            "@connect vignette[image] => output[frame];\n";
-
-
+public class DocumentaryEffect extends SingleFilterEffect {
     public DocumentaryEffect(EffectContext context, String name) {
-        super(context, name, mGraphDefinition, "input", "output", OneShotScheduler.class);
+        super(context, name, DocumentaryFilter.class, "image", "image");
     }
 }

@@ -164,7 +164,7 @@ public class RedEyeFilter extends Filter {
     @Override
     public void fieldPortValueUpdated(String name, FilterContext context) {
          if (mProgram != null) {
-            updateProgramParams(context);
+            updateProgramParams();
         }
     }
 
@@ -180,6 +180,8 @@ public class RedEyeFilter extends Filter {
         mCanvas.setBitmap(mRedEyeBitmap);
         mPaint.setColor(Color.WHITE);
         mRadius = Math.max(MIN_RADIUS, RADIUS_RATIO * Math.min(bitmapWidth, bitmapHeight));
+
+        updateProgramParams();
     }
 
     private void createRedEyeFrame(FilterContext context) {
@@ -191,7 +193,7 @@ public class RedEyeFilter extends Filter {
         mRedEyeFrame.setBitmap(mRedEyeBitmap);
     }
 
-    private void updateProgramParams(FilterContext context) {
+    private void updateProgramParams() {
         mProgram.setHostValue("intensity", DEFAULT_RED_INTENSITY);
 
         if ( mCenters.length % 2 == 1) {
