@@ -144,7 +144,7 @@ void AacBqToPcmCbRenderer::onPrepare() {
         //    initialization with the default values: they will be replaced by the actual values
         //      once the decoder has figured them out
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
-        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
+        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE] = mSampleRateHz;
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
     }
 
@@ -211,7 +211,7 @@ void AacBqToPcmCbRenderer::onPrepare() {
 
     {
             android::Mutex::Autolock autoLock(mPcmFormatLock);
-            mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
+            mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE] = mSampleRateHz;
             mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
             mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
     }

@@ -537,7 +537,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
             /* find out the key index of the metadata we're interested in */
             if (!strcmp((char*)keyInfo->data, ANDROID_KEY_PCMFORMAT_NUMCHANNELS)) {
                 channelCountKeyIndex = i;
-            } else if (!strcmp((char*)keyInfo->data, ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC)) {
+            } else if (!strcmp((char*)keyInfo->data, ANDROID_KEY_PCMFORMAT_SAMPLERATE)) {
                 sampleRateKeyIndex = i;
             } else if (!strcmp((char*)keyInfo->data, ANDROID_KEY_PCMFORMAT_BITSPERSAMPLE)) {
                 bitsPerSampleKeyIndex = i;
@@ -561,9 +561,9 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     }
     if (sampleRateKeyIndex != -1) {
         printf("Key %s is at index %d\n",
-                ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC, sampleRateKeyIndex);
+                ANDROID_KEY_PCMFORMAT_SAMPLERATE, sampleRateKeyIndex);
     } else {
-        fprintf(stderr, "Unable to find key %s\n", ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC);
+        fprintf(stderr, "Unable to find key %s\n", ANDROID_KEY_PCMFORMAT_SAMPLERATE);
     }
     if (bitsPerSampleKeyIndex != -1) {
         printf("Key %s is at index %d\n",

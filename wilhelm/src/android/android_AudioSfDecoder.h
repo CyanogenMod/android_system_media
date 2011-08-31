@@ -29,14 +29,13 @@
 #include "ThrottledSource.h"
 
 #include "android_GenericPlayer.h"
-#include "OpenSLES_AndroidMetadata.h"
 
 //--------------------------------------------------------------------------------------------------
 namespace android {
 
 // keep in sync with the entries of kPcmDecodeMetadataKeys[]
 #define ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS   0
-#define ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC 1
+#define ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE    1
 #define ANDROID_KEY_INDEX_PCMFORMAT_BITSPERSAMPLE 2
 #define ANDROID_KEY_INDEX_PCMFORMAT_CONTAINERSIZE 3
 #define ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK   4
@@ -44,7 +43,7 @@ namespace android {
 
 // to keep in sync with the ANDROID_KEY_INDEX_PCMFORMAT_* constants in android_AudioSfDecoder.cpp
 static const char* const kPcmDecodeMetadataKeys[] = {
-        ANDROID_KEY_PCMFORMAT_NUMCHANNELS, ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC,
+        ANDROID_KEY_PCMFORMAT_NUMCHANNELS, ANDROID_KEY_PCMFORMAT_SAMPLERATE,
         ANDROID_KEY_PCMFORMAT_BITSPERSAMPLE, ANDROID_KEY_PCMFORMAT_CONTAINERSIZE,
         ANDROID_KEY_PCMFORMAT_CHANNELMASK, ANDROID_KEY_PCMFORMAT_ENDIANNESS };
 #define NB_PCMMETADATA_KEYS (sizeof(kPcmDecodeMetadataKeys)/sizeof(kPcmDecodeMetadataKeys[0]))
