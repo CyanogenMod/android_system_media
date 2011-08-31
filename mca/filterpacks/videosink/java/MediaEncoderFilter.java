@@ -193,14 +193,6 @@ public class MediaEncoderFilter extends Filter {
         mProgram = ShaderProgram.createIdentity(context);
         mProgram.setSourceRect(0, 1, 1, -1);
 
-        // Create a frame representing the screen
-        MutableFrameFormat screenFormat = new MutableFrameFormat(
-                              FrameFormat.TYPE_BYTE, FrameFormat.TARGET_GPU);
-        screenFormat.setBytesPerSample(4);
-        screenFormat.setDimensions(mWidth, mHeight);
-        mScreen = (GLFrame)context.getFrameManager().newBoundFrame(
-                           screenFormat, GLFrame.EXISTING_FBO_BINDING, 0);
-
         mRecordingActive = false;
     }
 
@@ -212,6 +204,25 @@ public class MediaEncoderFilter extends Filter {
 
     private void startRecording(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Starting recording");
+
+        // Create a frame representing the screen
+        MutableFrameFormat screenFormat = new MutableFrameFormat(
+                              FrameFormat.TYPE_BYTE, FrameFormat.TARGET_GPU);
+        screenFormat.setBytesPerSample(4);
+
+        int width, height;
+        if (mProfile != null) {
+            width = mProfile.videoFrameWidth;
+            height = mProfile.videoFrameHeight;
+        } else {
+            width = mWidth;
+            height = mHeight;
+        }
+        screenFormat.setDimensions(width, height);
+        mScreen = (GLFrame)context.getFrameManager().newBoundFrame(
+                           screenFormat, GLFrame.EXISTING_FBO_BINDING, 0);
+
+        // Initialize the media recorder
 
         mMediaRecorder = new MediaRecorder();
         updateMediaRecorderParams();
@@ -280,6 +291,8 @@ public class MediaEncoderFilter extends Filter {
         mMediaRecorder = null;
 
         mRecordingActive = false;
+        mScreen.release();
+        mScreen = null;
     }
 
     @Override
@@ -298,6 +311,7 @@ public class MediaEncoderFilter extends Filter {
         if (mScreen != null) {
             mScreen.release();
         }
+
     }
 
 }
