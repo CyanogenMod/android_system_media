@@ -47,17 +47,23 @@ void LocAVPlayer::onPrepare() {
         switch (mDataLocatorType) {
         case kDataLocatorUri:
             mPlayer = mediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
-                    mDataLocator.uriRef /*url*/, NULL /*headers*/, mPlaybackParams.sessionId);
+                    mPlaybackParams.sessionId);
             if (mPlayer == NULL) {
                 SL_LOGE("media player service failed to create player by URI");
+            } else if (mPlayer->setDataSource(mDataLocator.uriRef, NULL /*headers*/) != NO_ERROR) {
+                SL_LOGE("setDataSource failed");
+                mPlayer.clear();
             }
             break;
         case kDataLocatorFd:
             mPlayer = mediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
-                    mDataLocator.fdi.fd, mDataLocator.fdi.offset, mDataLocator.fdi.length,
                     mPlaybackParams.sessionId);
             if (mPlayer == NULL) {
                 SL_LOGE("media player service failed to create player by FD");
+            } else if (mPlayer->setDataSource(mDataLocator.fdi.fd, mDataLocator.fdi.offset,
+                    mDataLocator.fdi.length) != NO_ERROR) {
+                SL_LOGE("setDataSource failed");
+                mPlayer.clear();
             }
             // Binder dups the fd for use by mediaserver, so if we own the fd then OK to close now
             if (mDataLocator.fdi.mCloseAfterUse) {

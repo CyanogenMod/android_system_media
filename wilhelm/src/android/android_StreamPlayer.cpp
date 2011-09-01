@@ -331,9 +331,12 @@ void StreamPlayer::onPrepare() {
         sp<IMediaPlayerService> mediaPlayerService(getMediaPlayerService());
         if (mediaPlayerService != NULL) {
             mPlayer = mediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
-                    mAppProxy /*IStreamSource*/, mPlaybackParams.sessionId);
+                    mPlaybackParams.sessionId);
             if (mPlayer == NULL) {
                 SL_LOGE("media player service failed to create player by app proxy");
+            } else if (mPlayer->setDataSource(mAppProxy /*IStreamSource*/) != NO_ERROR) {
+                SL_LOGE("setDataSource failed");
+                mPlayer.clear();
             }
         }
     } else {
