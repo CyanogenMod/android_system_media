@@ -61,18 +61,6 @@ struct echo_reference {
 };
 
 
-// container_of is used to retrieve the containing struct echo_reference of
-// a struct buffer_provider passed to echo_reference_get_next_buffer() or
-// echo_reference_release_buffer()
-// - ptr: pointer to the contained member
-// - type: type of the containing struct
-// - member: name of the member in the containing struct
-#ifndef container_of
-#define container_of(ptr, type, member) ({                      \
-        const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
-            (type *)( (char *)__mptr - offsetof(type,member) );})
-#endif
-
 int echo_reference_get_next_buffer(struct resampler_buffer_provider *buffer_provider,
                                    struct resampler_buffer* buffer)
 {
@@ -82,7 +70,8 @@ int echo_reference_get_next_buffer(struct resampler_buffer_provider *buffer_prov
         return -EINVAL;
     }
 
-    er = container_of(buffer_provider, struct echo_reference, provider);
+    er = (struct echo_reference *)((char *)buffer_provider -
+                                      offsetof(struct echo_reference, provider));
 
     if (er->wr_src_buf == NULL || er->wr_frames_in == 0) {
         buffer->raw = NULL;
@@ -106,7 +95,8 @@ void echo_reference_release_buffer(struct resampler_buffer_provider *buffer_prov
         return;
     }
 
-    er = container_of(buffer_provider, struct echo_reference, provider);
+    er = (struct echo_reference *)((char *)buffer_provider -
+                                      offsetof(struct echo_reference, provider));
 
     er->wr_frames_in -= buffer->frame_count;
 }
