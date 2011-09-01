@@ -218,8 +218,10 @@ public class AutoFixFilter extends Filter {
 
     @Override
     public void tearDown(FilterContext context) {
-        mDensityFrame.release();
-        mDensityFrame = null;
+        if (mDensityFrame != null) {
+            mDensityFrame.release();
+            mDensityFrame = null;
+        }
 
         if (mHistFrame != null) {
             mHistFrame.release();
