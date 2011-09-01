@@ -502,12 +502,12 @@ XAresult android_Player_getPosition(IPlay *pPlayItf, XAmillisecond *pPosMsec) {
 
     case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: // intended fall-through
     case AUDIOVIDEOPLAYER_FROM_URIFD: {
-        int pos = -1;
+        int pos = ANDROID_UNKNOWN_TIME;
         if (avp->mAVPlayer != 0) {
             avp->mAVPlayer->getPositionMsec(&pos);
         }
         if (pos == ANDROID_UNKNOWN_TIME) {
-            *pPosMsec = XA_TIME_UNKNOWN;
+            *pPosMsec = 0;
         } else {
             *pPosMsec = (XAmillisecond)pos;
         }
