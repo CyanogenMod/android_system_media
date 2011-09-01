@@ -96,7 +96,7 @@ void StreamSourceAppProxy::onBufferAvailable(size_t index) {
         Mutex::Autolock _l(mLock);
         mAvailableBuffers.push_back(index);
     }
-//SL_LOGD("onBufferAvailable() now %d buffers available in queue", mAvailableBuffers.size());
+    //SL_LOGD("onBufferAvailable() now %d buffers available in queue", mAvailableBuffers.size());
 
     // a new shared mem buffer is available: let's try to fill immediately
     pullFromBuffQueue();
@@ -340,6 +340,16 @@ void StreamPlayer::onPrepare() {
     }
     GenericMediaPlayer::onPrepare();
     SL_LOGD("StreamPlayer::onPrepare() done");
+}
+
+
+void StreamPlayer::onPlay() {
+    SL_LOGD("StreamPlayer::onPlay()");
+    // enqueue a message that will cause StreamAppProxy to consume from the queue (again if the
+    // player had starved the shared memory)
+    queueRefilled_l();
+
+    GenericMediaPlayer::onPlay();
 }
 
 
