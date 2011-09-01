@@ -60,12 +60,23 @@ public class BackDropperFilter extends Filter {
     private float mHierarchyMidScale = DEFAULT_HIER_MID_SCALE;
     @GenerateFieldPort(name = "hierSmlScale", hasDefault = true)
     private float mHierarchySmlScale = DEFAULT_HIER_SML_SCALE;
+
+    // Dimensions of foreground / background mask. Optimum value should take into account only
+    // image contents, NOT dimensions of input video stream.
+    @GenerateFieldPort(name = "maskWidthExp", hasDefault = true)
+    private int mMaskWidthExp = DEFAULT_MASK_WIDTH_EXPONENT;
+    @GenerateFieldPort(name = "maskHeightExp", hasDefault = true)
+    private int mMaskHeightExp = DEFAULT_MASK_HEIGHT_EXPONENT;
+
+    // Levels at which to compute foreground / background decision. Think of them as are deltas
+    // SUBTRACTED from maskWidthExp and maskHeightExp.
     @GenerateFieldPort(name = "hierLrgExp", hasDefault = true)
-    private float mHierarchyLrgExp = DEFAULT_HIER_LRG_EXPONENT;
+    private int mHierarchyLrgExp = DEFAULT_HIER_LRG_EXPONENT;
     @GenerateFieldPort(name = "hierMidExp", hasDefault = true)
-    private float mHierarchyMidExp = DEFAULT_HIER_MID_EXPONENT;
+    private int mHierarchyMidExp = DEFAULT_HIER_MID_EXPONENT;
     @GenerateFieldPort(name = "hierSmlExp", hasDefault = true)
-    private float mHierarchySmlExp = DEFAULT_HIER_SML_EXPONENT;
+    private int mHierarchySmlExp = DEFAULT_HIER_SML_EXPONENT;
+
     @GenerateFieldPort(name = "lumScale", hasDefault = true)
     private float mLumScale = DEFAULT_Y_SCALE_FACTOR;
     @GenerateFieldPort(name = "chromaScale", hasDefault = true)
@@ -115,12 +126,16 @@ public class BackDropperFilter extends Filter {
     private static final float DEFAULT_HIER_MID_SCALE = 1.0f;
     // Variance threshold scale factor for small scale of hierarchy
     private static final float DEFAULT_HIER_SML_SCALE = 0.5f;
-    // Area over which to average for large scale (# pixels = 2^HIERARCHY_*_EXPONENT)
-    private static final float DEFAULT_HIER_LRG_EXPONENT = 3.0f;
+    // Width of foreground / background mask.
+    private static final int DEFAULT_MASK_WIDTH_EXPONENT = 8;
+    // Height of foreground / background mask.
+    private static final int DEFAULT_MASK_HEIGHT_EXPONENT = 8;
+    // Area over which to average for large scale (length in pixels = 2^HIERARCHY_*_EXPONENT)
+    private static final int DEFAULT_HIER_LRG_EXPONENT = 3;
     // Area over which to average for medium scale
-    private static final float DEFAULT_HIER_MID_EXPONENT = 2.0f;
+    private static final int DEFAULT_HIER_MID_EXPONENT = 2;
     // Area over which to average for small scale
-    private static final float DEFAULT_HIER_SML_EXPONENT = 0.0f;
+    private static final int DEFAULT_HIER_SML_EXPONENT = 0;
     // Scale factor for luminance channel in distance calculations (larger = more significant)
     private static final float DEFAULT_Y_SCALE_FACTOR = 0.5f;
     // Scale factor for chroma channels in distance calculations
@@ -159,7 +174,7 @@ public class BackDropperFilter extends Filter {
 
     /** Default algorithm parameter values, for shader use */
 
-    // Area over which to blur binary mask values (# pixels = 2^MASK_SMOOTH_EXPONENT)
+    // Area over which to blur binary mask values (length in pixels = 2^MASK_SMOOTH_EXPONENT)
     private static final String MASK_SMOOTH_EXPONENT = "2.0";
     // Scale value for mapping variance distance to fit nicely to 0-1, 8-bit
     private static final String DISTANCE_STORAGE_SCALE = "0.6";
@@ -188,6 +203,7 @@ public class BackDropperFilter extends Filter {
 
     private FrameFormat mOutputFormat;
     private MutableFrameFormat mMemoryFormat;
+    private MutableFrameFormat mMaskFormat;
     private MutableFrameFormat mAverageFormat;
 
     private final boolean mLogVerbose;
@@ -230,13 +246,19 @@ public class BackDropperFilter extends Filter {
     //   measured in variances from the mean background value. For chroma, the distance is the sum
     //   of the two individual color channel distances. The distances are output on the b and alpha
     //   channels, r and g are for debug information.
+    // Inputs:
+    //   tex_sampler_0: Mip-map for foreground (live) video frame.
+    //   tex_sampler_1: Background mean mask.
+    //   tex_sampler_2: Background variance mask.
+    //   subsample_level: Level on foreground frame's mip-map.
     private static final String mBgDistanceShader =
             "uniform sampler2D tex_sampler_0;\n" +
             "uniform sampler2D tex_sampler_1;\n" +
             "uniform sampler2D tex_sampler_2;\n" +
+            "uniform float subsample_level;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
-            "  vec4 fg = coeff_yuv * texture2D(tex_sampler_0, v_texcoord);\n" +
+            "  vec4 fg = coeff_yuv * texture2D(tex_sampler_0, v_texcoord, subsample_level);\n" +
             "  vec4 mean = texture2D(tex_sampler_1, v_texcoord);\n" +
             "  vec4 variance = inv_var_scale * texture2D(tex_sampler_2, v_texcoord);\n" +
             "\n" +
@@ -300,15 +322,19 @@ public class BackDropperFilter extends Filter {
     //   channel will be a common gray value.
     // To match the white balance of foreground and background, the average of R, G, B channel of
     //   two videos should match.
+    // Inputs:
+    //   tex_sampler_0: Mip-map for foreground (live) video frame.
+    //   tex_sampler_1: Mip-map for background (playback) video frame.
+    //   pyramid_depth: Depth of input frames' mip-maps.
     private static final String mAutomaticWhiteBalance =
             "uniform sampler2D tex_sampler_0;\n" +
             "uniform sampler2D tex_sampler_1;\n" +
-            "uniform float subsample_level;\n" +
+            "uniform float pyramid_depth;\n" +
             "uniform bool autowb_toggle;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
-            "   vec4 mean_video = texture2D(tex_sampler_0, v_texcoord, subsample_level);\n"+
-            "   vec4 mean_bg = texture2D(tex_sampler_1, v_texcoord, subsample_level);\n" +
+            "   vec4 mean_video = texture2D(tex_sampler_0, v_texcoord, pyramid_depth);\n"+
+            "   vec4 mean_bg = texture2D(tex_sampler_1, v_texcoord, pyramid_depth);\n" +
             // If Auto WB is toggled off, the return texture will be a unicolor texture of value 1
             // If Auto WB is toggled on, the return texture will be a unicolor texture with
             //   adjustment parameters for R and B channels stored in the corresponding channel
@@ -321,6 +347,11 @@ public class BackDropperFilter extends Filter {
 
     // Background subtraction shader. Uses a mipmap of the binary mask map to blend smoothly between
     //   foreground and background
+    // Inputs:
+    //   tex_sampler_0: Foreground (live) video frame.
+    //   tex_sampler_1: Background (playback) video frame.
+    //   tex_sampler_2: Foreground/background mask.
+    //   tex_sampler_3: Auto white-balance factors.
     private static final String mBgSubtractShader =
             "uniform mat3 bg_fit_transform;\n" +
             "uniform float mask_blend_bg;\n" +
@@ -371,13 +402,19 @@ public class BackDropperFilter extends Filter {
     // Background model mean update shader. Skews the current model mean toward the most recent pixel
     //   value for a pixel, weighted by the learning rate and by whether the pixel is classified as
     //   foreground or background.
+    // Inputs:
+    //   tex_sampler_0: Mip-map for foreground (live) video frame.
+    //   tex_sampler_1: Background mean mask.
+    //   tex_sampler_2: Foreground/background mask.
+    //   subsample_level: Level on foreground frame's mip-map.
     private static final String mUpdateBgModelMeanShader =
             "uniform sampler2D tex_sampler_0;\n" +
             "uniform sampler2D tex_sampler_1;\n" +
             "uniform sampler2D tex_sampler_2;\n" +
+            "uniform float subsample_level;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
-            "  vec4 fg = coeff_yuv * texture2D(tex_sampler_0, v_texcoord);\n" +
+            "  vec4 fg = coeff_yuv * texture2D(tex_sampler_0, v_texcoord, subsample_level);\n" +
             "  vec4 mean = texture2D(tex_sampler_1, v_texcoord);\n" +
             "  vec4 mask = texture2D(tex_sampler_2, v_texcoord, \n" +
             "                      " + MASK_SMOOTH_EXPONENT + ");\n" +
@@ -390,14 +427,23 @@ public class BackDropperFilter extends Filter {
     // Background model variance update shader. Skews the current model variance toward the most
     //   recent variance for the pixel, weighted by the learning rate and by whether the pixel is
     //   classified as foreground or background.
+    // Inputs:
+    //   tex_sampler_0: Mip-map for foreground (live) video frame.
+    //   tex_sampler_1: Background mean mask.
+    //   tex_sampler_2: Background variance mask.
+    //   tex_sampler_3: Foreground/background mask.
+    //   subsample_level: Level on foreground frame's mip-map.
+    // TODO: to improve efficiency, use single mark for mean + variance, then merge this into
+    // mUpdateBgModelMeanShader.
     private static final String mUpdateBgModelVarianceShader =
             "uniform sampler2D tex_sampler_0;\n" +
             "uniform sampler2D tex_sampler_1;\n" +
             "uniform sampler2D tex_sampler_2;\n" +
             "uniform sampler2D tex_sampler_3;\n" +
+            "uniform float subsample_level;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
-            "  vec4 fg = coeff_yuv * texture2D(tex_sampler_0, v_texcoord);\n" +
+            "  vec4 fg = coeff_yuv * texture2D(tex_sampler_0, v_texcoord, subsample_level);\n" +
             "  vec4 mean = texture2D(tex_sampler_1, v_texcoord);\n" +
             "  vec4 variance = inv_var_scale * texture2D(tex_sampler_2, v_texcoord);\n" +
             "  vec4 mask = texture2D(tex_sampler_3, v_texcoord, \n" +
@@ -456,6 +502,8 @@ public class BackDropperFilter extends Filter {
     private boolean mStartLearning;
     private boolean mBackgroundFitModeChanged;
     private float mRelativeAspect;
+    private int mPyramidDepth;
+    private int mSubsampleLevel;
 
     /** Learning listener object */
 
@@ -508,18 +556,26 @@ public class BackDropperFilter extends Filter {
     }
 
     public void createMemoryFormat(FrameFormat inputFormat) {
-        mMemoryFormat = inputFormat.mutableCopy();
-        int memWidth, memHeight;
-        if (mMemoryFormat.getWidth() != 0) {
-            // Round dimensions for memory frames to nearest power of two, for GPU efficiency when mipmapping
-            memWidth = (int)Math.pow(2, Math.floor( Math.log10(mMemoryFormat.getWidth()) / Math.log10(2) - 1) );
-            memHeight = (int)Math.pow(2, Math.floor( Math.log10(mMemoryFormat.getHeight()) / Math.log10(2) - 1) );
-        } else {
-            memWidth = 256;
-            memHeight = 128;
+        mMaskFormat = inputFormat.mutableCopy();
+        int maskWidth = (int)Math.pow(2, mMaskWidthExp);
+        int maskHeight = (int)Math.pow(2, mMaskHeightExp);
+        mMaskFormat.setDimensions(maskWidth, maskHeight);
+        if (mLogVerbose)
+            Log.v(TAG, "Mask frames will have size " + maskWidth + " x " + maskHeight);
+
+        mPyramidDepth = Math.max(mMaskWidthExp, mMaskHeightExp);
+        mMemoryFormat = mMaskFormat.mutableCopy();
+        if (inputFormat.getWidth() > 0 && inputFormat.getHeight() > 0) {
+            int widthExp = Math.max(mMaskWidthExp, pyramidLevel(inputFormat.getWidth()));
+            int heightExp = Math.max(mMaskHeightExp, pyramidLevel(inputFormat.getHeight()));
+            mPyramidDepth = Math.max(widthExp, heightExp);
+            int memWidth = Math.max(maskWidth, (int)Math.pow(2, widthExp));
+            int memHeight = Math.max(maskHeight, (int)Math.pow(2, heightExp));
+            mMemoryFormat.setDimensions(memWidth, memHeight);
+            if (mLogVerbose)
+                Log.v(TAG, "Memory frames will have size " + memWidth + " x " + memHeight);
         }
-        mMemoryFormat.setDimensions(memWidth, memHeight);
-        if (mLogVerbose) Log.v(TAG, "Memory frames will have size " + memWidth + " x " + memHeight);
+        mSubsampleLevel = mPyramidDepth - Math.max(mMaskWidthExp, mMaskHeightExp);
 
         mAverageFormat = inputFormat.mutableCopy();
         mAverageFormat.setDimensions(1,1);
@@ -550,28 +606,29 @@ public class BackDropperFilter extends Filter {
 
         // Get frames to store background model in
         for (int i = 0; i < 2; i++) {
-            mBgMean[i] = (GLFrame)context.getFrameManager().newFrame(mMemoryFormat);
+            mBgMean[i] = (GLFrame)context.getFrameManager().newFrame(mMaskFormat);
             mBgMean[i].setData(initialBgMean, 0, numBytes);
 
-            mBgVariance[i] = (GLFrame)context.getFrameManager().newFrame(mMemoryFormat);
+            mBgVariance[i] = (GLFrame)context.getFrameManager().newFrame(mMaskFormat);
             mBgVariance[i].setData(initialBgVariance, 0, numBytes);
 
-            mMaskVerify[i] = (GLFrame)context.getFrameManager().newFrame(mMemoryFormat);
+            mMaskVerify[i] = (GLFrame)context.getFrameManager().newFrame(mMaskFormat);
             mMaskVerify[i].setData(initialMaskVerify, 0, numBytes);
         }
 
         // Get frames to store other textures in
         if (mLogVerbose) Log.v(TAG, "Done allocating texture for Mean and Variance objects!");
 
-        mDistance = (GLFrame)context.getFrameManager().newFrame(mMemoryFormat);
-        mMask = (GLFrame)context.getFrameManager().newFrame(mMemoryFormat);
-        mAutoWB = (GLFrame)context.getFrameManager().newFrame(mMemoryFormat);
+        mDistance = (GLFrame)context.getFrameManager().newFrame(mMaskFormat);
+        mMask = (GLFrame)context.getFrameManager().newFrame(mMaskFormat);
+        mAutoWB = (GLFrame)context.getFrameManager().newFrame(mAverageFormat);
         mVideoInput = (GLFrame)context.getFrameManager().newFrame(mMemoryFormat);
         mBgInput = (GLFrame)context.getFrameManager().newFrame(mMemoryFormat);
         mMaskAverage = (GLFrame)context.getFrameManager().newFrame(mAverageFormat);
 
         // Create shader programs
         mBgDistProgram = new ShaderProgram(context, mSharedUtilShader + mBgDistanceShader);
+        mBgDistProgram.setHostValue("subsample_level", (float)mSubsampleLevel);
 
         mBgMaskProgram = new ShaderProgram(context, mSharedUtilShader + mBgMaskShader);
         mBgMaskProgram.setHostValue("accept_variance", mAcceptStddev * mAcceptStddev);
@@ -580,9 +637,9 @@ public class BackDropperFilter extends Filter {
         mBgMaskProgram.setHostValue("scale_lrg", mHierarchyLrgScale);
         mBgMaskProgram.setHostValue("scale_mid", mHierarchyMidScale);
         mBgMaskProgram.setHostValue("scale_sml", mHierarchySmlScale);
-        mBgMaskProgram.setHostValue("exp_lrg", mHierarchyLrgExp);
-        mBgMaskProgram.setHostValue("exp_mid", mHierarchyMidExp);
-        mBgMaskProgram.setHostValue("exp_sml", mHierarchySmlExp);
+        mBgMaskProgram.setHostValue("exp_lrg", (float)(mSubsampleLevel + mHierarchyLrgExp));
+        mBgMaskProgram.setHostValue("exp_mid", (float)(mSubsampleLevel + mHierarchyMidExp));
+        mBgMaskProgram.setHostValue("exp_sml", (float)(mSubsampleLevel + mHierarchySmlExp));
 
         if (mUseTheForce) {
             mBgSubtractProgram = new ShaderProgram(context, mSharedUtilShader + mBgSubtractShader + mBgSubtractForceShader);
@@ -598,12 +655,15 @@ public class BackDropperFilter extends Filter {
 
 
         mBgUpdateMeanProgram = new ShaderProgram(context, mSharedUtilShader + mUpdateBgModelMeanShader);
+        mBgUpdateMeanProgram.setHostValue("subsample_level", (float)mSubsampleLevel);
+
         mBgUpdateVarianceProgram = new ShaderProgram(context, mSharedUtilShader + mUpdateBgModelVarianceShader);
+        mBgUpdateVarianceProgram.setHostValue("subsample_level", (float)mSubsampleLevel);
 
         mCopyOutProgram = ShaderProgram.createIdentity(context);
 
         mAutomaticWhiteBalanceProgram = new ShaderProgram(context, mSharedUtilShader + mAutomaticWhiteBalance);
-        mAutomaticWhiteBalanceProgram.setHostValue("subsample_level", (float)( Math.log10((float)mMemoryFormat.getWidth()) / Math.log10(2)) );
+        mAutomaticWhiteBalanceProgram.setHostValue("pyramid_depth", (float)mPyramidDepth);
         mAutomaticWhiteBalanceProgram.setHostValue("autowb_toggle", mAutoWBToggle);
 
         mMaskVerifyProgram = new ShaderProgram(context, mSharedUtilShader + mMaskVerifyShader);
@@ -649,20 +709,24 @@ public class BackDropperFilter extends Filter {
         copyShaderProgram.process(background, mBgInput);
 
         mVideoInput.generateMipMap();
-        mVideoInput.setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST);
+        mVideoInput.setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER,
+                                        GLES20.GL_LINEAR_MIPMAP_NEAREST);
 
         mBgInput.generateMipMap();
-        mBgInput.setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST);
+        mBgInput.setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER,
+                                     GLES20.GL_LINEAR_MIPMAP_NEAREST);
 
         // Process shaders
-        Frame[] distInputs = { video, mBgMean[inputIndex], mBgVariance[inputIndex] };
+        Frame[] distInputs = { mVideoInput, mBgMean[inputIndex], mBgVariance[inputIndex] };
         mBgDistProgram.process(distInputs, mDistance);
         mDistance.generateMipMap();
-        mDistance.setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST);
+        mDistance.setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER,
+                                      GLES20.GL_LINEAR_MIPMAP_NEAREST);
 
         mBgMaskProgram.process(mDistance, mMask);
         mMask.generateMipMap();
-        mMask.setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST);
+        mMask.setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER,
+                                  GLES20.GL_LINEAR_MIPMAP_NEAREST);
 
         Frame[] autoWBInputs = { mVideoInput, mBgInput };
         mAutomaticWhiteBalanceProgram.process(autoWBInputs, mAutoWB);
@@ -686,7 +750,8 @@ public class BackDropperFilter extends Filter {
                 Frame[] maskVerifyInputs = {mMaskVerify[inputIndex], mMask};
                 mMaskVerifyProgram.process(maskVerifyInputs, mMaskVerify[outputIndex]);
                 mMaskVerify[outputIndex].generateMipMap();
-                mMaskVerify[outputIndex].setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST);
+                mMaskVerify[outputIndex].setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER,
+                                                             GLES20.GL_LINEAR_MIPMAP_NEAREST);
             }
 
             if (mFrameCount == mLearningDuration) {
@@ -709,22 +774,24 @@ public class BackDropperFilter extends Filter {
             }
         } else {
             Frame output = context.getFrameManager().newFrame(video.getFormat());
-            Frame[] subtractInputs = { video, background, mMask , mAutoWB };
+            Frame[] subtractInputs = { video, background, mMask, mAutoWB };
             mBgSubtractProgram.process(subtractInputs, output);
             pushOutput("video", output);
             output.release();
         }
 
         // Compute mean and variance of the background
-        Frame[] meanUpdateInputs = { video, mBgMean[inputIndex], mMask };
+        Frame[] meanUpdateInputs = { mVideoInput, mBgMean[inputIndex], mMask };
         mBgUpdateMeanProgram.process(meanUpdateInputs, mBgMean[outputIndex]);
         mBgMean[outputIndex].generateMipMap();
-        mBgMean[outputIndex].setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST);
+        mBgMean[outputIndex].setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER,
+                                                 GLES20.GL_LINEAR_MIPMAP_NEAREST);
 
-        Frame[] varianceUpdateInputs = { video, mBgMean[inputIndex], mBgVariance[inputIndex], mMask };
+        Frame[] varianceUpdateInputs = { mVideoInput, mBgMean[inputIndex], mBgVariance[inputIndex], mMask };
         mBgUpdateVarianceProgram.process(varianceUpdateInputs, mBgVariance[outputIndex]);
         mBgVariance[outputIndex].generateMipMap();
-        mBgVariance[outputIndex].setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST);
+        mBgVariance[outputIndex].setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER,
+                                                     GLES20.GL_LINEAR_MIPMAP_NEAREST);
 
         // Provide debug output to two smaller viewers
         if (mProvideDebugOutputs) {
@@ -796,11 +863,11 @@ public class BackDropperFilter extends Filter {
         } else if (name.equals("hierSmlScale")) {
             mBgMaskProgram.setHostValue("scale_sml", mHierarchySmlScale);
         } else if (name.equals("hierLrgExp")) {
-            mBgMaskProgram.setHostValue("exp_lrg", mHierarchyLrgExp);
+            mBgMaskProgram.setHostValue("exp_lrg", (float)(mSubsampleLevel + mHierarchyLrgExp));
         } else if (name.equals("hierMidExp")) {
-            mBgMaskProgram.setHostValue("exp_mid", mHierarchyMidExp);
+            mBgMaskProgram.setHostValue("exp_mid", (float)(mSubsampleLevel + mHierarchyMidExp));
         } else if (name.equals("hierSmlExp")) {
-            mBgMaskProgram.setHostValue("exp_sml", mHierarchySmlExp);
+            mBgMaskProgram.setHostValue("exp_sml", (float)(mSubsampleLevel + mHierarchySmlExp));
         } else if (name.equals("lumScale") || name.equals("chromaScale")) {
             float[] yuvWeights = { mLumScale, mChromaScale };
             mBgMaskProgram.setHostValue("yuv_weights", yuvWeights );
@@ -863,4 +930,9 @@ public class BackDropperFilter extends Filter {
             mBgSubtractProgram.setHostValue("bg_fit_transform", bgTransform);
         }
     }
+
+    private int pyramidLevel(int size) {
+        return (int)Math.floor(Math.log10(size) / Math.log10(2));
+    }
+
 }
