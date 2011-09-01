@@ -367,7 +367,7 @@ public abstract class Filter {
         // Create format for this input
         if (mLogVerbose) Log.v(TAG, "Filter " + this + " adding " + fieldPort);
         MutableFrameFormat format = ObjectFormat.fromClass(field.getType(),
-                                                           FrameFormat.TARGET_JAVA);
+                                                           FrameFormat.TARGET_SIMPLE);
         fieldPort.setPortFormat(format);
 
         // Add port
@@ -388,7 +388,7 @@ public abstract class Filter {
         // Create format for this input
         if (mLogVerbose) Log.v(TAG, "Filter " + this + " adding " + programPort);
         MutableFrameFormat format = ObjectFormat.fromClass(varType,
-                                                           FrameFormat.TARGET_JAVA);
+                                                           FrameFormat.TARGET_SIMPLE);
         programPort.setPortFormat(format);
 
         // Add port
@@ -621,7 +621,7 @@ public abstract class Filter {
         if (mLogVerbose) Log.v(TAG, "Setting immediate value " + value + " for port " + name + "!");
         FilterPort port = getInputPort(name);
         port.open();
-        port.setFrame(JavaFrame.wrapObject(value, null));
+        port.setFrame(SimpleFrame.wrapObject(value, null));
     }
 
     private final void transferInputFrames(FilterContext context) {
@@ -631,7 +631,7 @@ public abstract class Filter {
     }
 
     private final Frame wrapInputValue(String inputName, Object value) {
-        MutableFrameFormat inputFormat = ObjectFormat.fromObject(value, FrameFormat.TARGET_JAVA);
+        MutableFrameFormat inputFormat = ObjectFormat.fromObject(value, FrameFormat.TARGET_SIMPLE);
         if (value == null) {
             // If the value is null, the format cannot guess the class, so we adjust it to the
             // class of the input port here
@@ -649,7 +649,7 @@ public abstract class Filter {
         // Create frame wrapper
         Frame frame = shouldSerialize
             ? new SerializedFrame(inputFormat, null)
-            : new JavaFrame(inputFormat, null);
+            : new SimpleFrame(inputFormat, null);
         frame.setObjectValue(value);
         return frame;
     }

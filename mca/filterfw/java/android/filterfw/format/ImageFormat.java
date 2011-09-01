@@ -42,7 +42,7 @@ public class ImageFormat {
         result.setDimensions(width, height);
         result.setBytesPerSample(bytesPerSample);
         result.setMetaValue(COLORSPACE_KEY, colorspace);
-        if (target == FrameFormat.TARGET_JAVA) {
+        if (target == FrameFormat.TARGET_SIMPLE) {
             result.setObjectClass(Bitmap.class);
         }
         return result;

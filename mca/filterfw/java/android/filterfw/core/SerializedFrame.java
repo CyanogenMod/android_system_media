@@ -182,7 +182,7 @@ public class SerializedFrame extends Frame {
     }
 
     static SerializedFrame wrapObject(Object object, FrameManager frameManager) {
-        FrameFormat format = ObjectFormat.fromObject(object, FrameFormat.TARGET_JAVA);
+        FrameFormat format = ObjectFormat.fromObject(object, FrameFormat.TARGET_SIMPLE);
         SerializedFrame result = new SerializedFrame(format, frameManager);
         result.setObjectValue(object);
         return result;

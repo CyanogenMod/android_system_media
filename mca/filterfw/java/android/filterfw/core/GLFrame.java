@@ -266,7 +266,7 @@ public class GLFrame extends Frame {
             nativeCopyFromNative((NativeFrame)frame);
         } else if (frame instanceof GLFrame) {
             nativeCopyFromGL((GLFrame)frame);
-        } else if (frame instanceof JavaFrame) {
+        } else if (frame instanceof SimpleFrame) {
             setObjectValue(frame.getObjectValue());
         } else {
             super.setDataFromFrame(frame);

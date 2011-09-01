@@ -22,7 +22,7 @@ import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
 import android.filterfw.core.GLFrame;
 import android.filterfw.core.NativeFrame;
-import android.filterfw.core.JavaFrame;
+import android.filterfw.core.SimpleFrame;
 import android.filterfw.core.VertexFrame;
 
 /**
@@ -59,8 +59,8 @@ public class SimpleFrameManager extends FrameManager {
     private Frame createNewFrame(FrameFormat format) {
         Frame result = null;
         switch(format.getTarget()) {
-            case FrameFormat.TARGET_JAVA:
-                result = new JavaFrame(format, this);
+            case FrameFormat.TARGET_SIMPLE:
+                result = new SimpleFrame(format, this);
                 break;
 
             case FrameFormat.TARGET_NATIVE:

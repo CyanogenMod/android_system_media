@@ -71,7 +71,7 @@ public class DrawRectFilter extends Filter {
     public void setupPorts() {
         addMaskedInputPort("image", ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
                                                        FrameFormat.TARGET_GPU));
-        addMaskedInputPort("box", ObjectFormat.fromClass(Quad.class, FrameFormat.TARGET_JAVA));
+        addMaskedInputPort("box", ObjectFormat.fromClass(Quad.class, FrameFormat.TARGET_SIMPLE));
         addOutputBasedOnInput("image", "image");
     }
 

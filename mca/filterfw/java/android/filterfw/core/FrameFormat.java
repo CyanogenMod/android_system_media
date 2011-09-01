@@ -39,7 +39,7 @@ public class FrameFormat {
     public static final int TYPE_OBJECT      = 8;
 
     public static final int TARGET_UNSPECIFIED  = 0;
-    public static final int TARGET_JAVA         = 1;
+    public static final int TARGET_SIMPLE       = 1;
     public static final int TARGET_NATIVE       = 2;
     public static final int TARGET_GPU          = 3;
     public static final int TARGET_VERTEXBUFFER = 4;
@@ -358,7 +358,7 @@ public class FrameFormat {
     public static String targetToString(int target) {
         switch (target) {
             case TARGET_UNSPECIFIED:  return "unspecified";
-            case TARGET_JAVA:         return "java";
+            case TARGET_SIMPLE:       return "simple";
             case TARGET_NATIVE:       return "native";
             case TARGET_GPU:          return "gpu";
             case TARGET_VERTEXBUFFER: return "vbo";
@@ -386,8 +386,8 @@ public class FrameFormat {
             return FrameFormat.TARGET_NATIVE;
         } else if (targetString.equalsIgnoreCase("GPU")) {
             return FrameFormat.TARGET_GPU;
-        } else if (targetString.equalsIgnoreCase("JAVA")) {
-            return FrameFormat.TARGET_JAVA;
+        } else if (targetString.equalsIgnoreCase("SIMPLE")) {
+            return FrameFormat.TARGET_SIMPLE;
         } else if (targetString.equalsIgnoreCase("VERTEXBUFFER")) {
             return FrameFormat.TARGET_VERTEXBUFFER;
         } else if (targetString.equalsIgnoreCase("UNSPECIFIED")) {

@@ -60,7 +60,7 @@ public class ObjectSource extends Filter {
             if (mObject == null) {
                 throw new NullPointerException("ObjectSource producing frame with no object set!");
             }
-            FrameFormat outputFormat = ObjectFormat.fromObject(mObject, FrameFormat.TARGET_JAVA);
+            FrameFormat outputFormat = ObjectFormat.fromObject(mObject, FrameFormat.TARGET_SIMPLE);
             mFrame = context.getFrameManager().newFrame(outputFormat);
             mFrame.setObjectValue(mObject);
             mFrame.setTimestamp(Frame.TIMESTAMP_UNKNOWN);

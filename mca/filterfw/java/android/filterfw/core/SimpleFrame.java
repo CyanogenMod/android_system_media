@@ -30,19 +30,19 @@ import java.nio.ByteBuffer;
 /**
  * @hide
  */
-public class JavaFrame extends Frame {
+public class SimpleFrame extends Frame {
 
     private Object mObject;
 
-    JavaFrame(FrameFormat format, FrameManager frameManager) {
+    SimpleFrame(FrameFormat format, FrameManager frameManager) {
         super(format, frameManager);
         initWithFormat(format);
         setReusable(false);
     }
 
-    static JavaFrame wrapObject(Object object, FrameManager frameManager) {
-        FrameFormat format = ObjectFormat.fromObject(object, FrameFormat.TARGET_JAVA);
-        JavaFrame result = new JavaFrame(format, frameManager);
+    static SimpleFrame wrapObject(Object object, FrameManager frameManager) {
+        FrameFormat format = ObjectFormat.fromObject(object, FrameFormat.TARGET_SIMPLE);
+        SimpleFrame result = new SimpleFrame(format, frameManager);
         result.setObjectValue(object);
         return result;
     }
@@ -147,7 +147,7 @@ public class JavaFrame extends Frame {
         } else if (!format.getObjectClass().isAssignableFrom(object.getClass())) {
             throw new RuntimeException(
                 "Attempting to set object value of type '" + object.getClass() + "' on " +
-                "JavaFrame of type '" + format.getObjectClass() + "'!");
+                "SimpleFrame of type '" + format.getObjectClass() + "'!");
         }
 
         // Set the object value
@@ -156,6 +156,6 @@ public class JavaFrame extends Frame {
 
     @Override
     public String toString() {
-        return "JavaFrame (" + getFormat() + ")";
+        return "SimpleFrame (" + getFormat() + ")";
     }
 }
