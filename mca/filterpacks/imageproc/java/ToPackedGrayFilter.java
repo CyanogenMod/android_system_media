@@ -29,6 +29,7 @@ import android.filterfw.format.ImageFormat;
 
 import android.util.Log;
 
+import java.lang.Math;
 /**
  * @hide
  */
@@ -73,26 +74,37 @@ public class ToPackedGrayFilter extends Filter {
         return convertInputFormat(inputFormat);
     }
 
-    private void checkOutputDimensions() {
-        if (mOWidth % 4 != 0) {
-            throw new RuntimeException("Output width not divisible by four: " + mOWidth);
-        }
-        if (mOWidth <= 0 || mOHeight <= 0) {
-            throw new RuntimeException("Invalid output dimensions: " + mOWidth + " " + mOHeight);
+    private void checkOutputDimensions(int outputWidth, int outputHeight) {
+        if (outputWidth <= 0 || outputHeight <= 0) {
+            throw new RuntimeException("Invalid output dimensions: " +
+                                       outputWidth + " " + outputHeight);
         }
     }
 
     private FrameFormat convertInputFormat(FrameFormat inputFormat) {
+        int ow = mOWidth;
+        int oh = mOHeight;
+        int w = inputFormat.getWidth();
+        int h = inputFormat.getHeight();
         if (mOWidth == FrameFormat.SIZE_UNSPECIFIED) {
-            mOWidth = inputFormat.getWidth();
+            ow = w;
         }
         if (mOHeight == FrameFormat.SIZE_UNSPECIFIED) {
-            mOHeight = inputFormat.getHeight();
+            oh = h;
         }
         if (mKeepAspectRatio) {
-            mOHeight = mOWidth * inputFormat.getHeight() / inputFormat.getWidth();
+            // if keep aspect ratio, use the bigger dimension to determine the
+            // final output size
+            if (w > h) {
+                ow = Math.max(ow, oh);
+                oh = ow * h / w;
+            } else {
+                oh = Math.max(ow, oh);
+                ow = oh * w / h;
+            }
         }
-        return ImageFormat.create(mOWidth, mOHeight,
+        ow = (ow / 4) * 4; // ensure width is multiply of 4
+        return ImageFormat.create(ow, oh,
                                   ImageFormat.COLORSPACE_GRAY,
                                   FrameFormat.TARGET_NATIVE);
     }
@@ -107,12 +119,14 @@ public class ToPackedGrayFilter extends Filter {
         Frame input = pullInput("image");
         FrameFormat inputFormat = input.getFormat();
         FrameFormat outputFormat = convertInputFormat(inputFormat);
-        checkOutputDimensions();
-        mProgram.setHostValue("pix_stride", 1.0f / mOWidth);
+        int ow = outputFormat.getWidth();
+        int oh = outputFormat.getHeight();
+        checkOutputDimensions(ow, oh);
+        mProgram.setHostValue("pix_stride", 1.0f / ow);
 
         // Do the RGBA to luminance conversion.
         MutableFrameFormat tempFrameFormat = inputFormat.mutableCopy();
-        tempFrameFormat.setDimensions(mOWidth / 4, mOHeight);
+        tempFrameFormat.setDimensions(ow / 4, oh);
         Frame temp = context.getFrameManager().newFrame(tempFrameFormat);
         mProgram.process(input, temp);
 
