@@ -159,10 +159,12 @@ bool GLEnv::InitWithNewContext() {
     return false;
   }
 
-  // Create dummy surface
-  EGLint pb_attribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
-  surfaces_[0] = SurfaceWindowPair(eglCreatePbufferSurface(display(), config, pb_attribs), NULL);
-  if (CheckEGLError("eglCreatePbufferSurface")) return false;
+  // Create dummy surface using a SurfaceTexture
+  sp<SurfaceTexture> st = new SurfaceTexture(0, false);
+  window_ = new SurfaceTextureClient(st);
+
+  surfaces_[0] = SurfaceWindowPair(eglCreateWindowSurface(display(), config, window_.get(), NULL), NULL);
+  if (CheckEGLError("eglCreateWindowSurface")) return false;
 
   // Create context
   EGLint context_attribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };

@@ -27,6 +27,9 @@
 #include <GLES2/gl2.h>
 #include <EGL/egl.h>
 
+#include <gui/ISurfaceTexture.h>
+#include <gui/SurfaceTextureClient.h>
+
 namespace android {
 namespace filterfw {
 
@@ -230,7 +233,10 @@ class GLEnv {
     int context_id_;
     int surface_id_;
 
-    // The maximum suface id used.
+    // Dummy surface for context
+    sp<ANativeWindow> window_;
+
+    // The maximum surface id used.
     int max_surface_id_;
 
     // These bools keep track of which objects this GLEnv has created (and
