@@ -79,8 +79,8 @@ const XAInterfaceID XA_IID_VOLUME = (XAInterfaceID) &SL_IID_array[MPH_XAVOLUME];
 
 // OpenMAX AL 1.0.1 Android API level 12 extended interfaces
 // GUID and MPH are shared by SL and XA
-const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUE =
-        (XAInterfaceID) &SL_IID_array[MPH_ANDROIDBUFFERQUEUE];
+const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUESOURCE =
+        (XAInterfaceID) &SL_IID_array[MPH_ANDROIDBUFFERQUEUESOURCE];
 
 #ifdef __cplusplus
 }

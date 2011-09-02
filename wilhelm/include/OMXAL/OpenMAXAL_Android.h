@@ -46,7 +46,9 @@ typedef xa_uint64_t            XAAuint64;         /* 64 bit unsigned integer */
 /* Android Buffer Queue Interface                                            */
 /*---------------------------------------------------------------------------*/
 
-extern XA_API const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUE;
+extern XA_API const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUESOURCE;
+// FIXME temporary definition to be removed
+#define XA_IID_ANDROIDBUFFERQUEUE XA_IID_ANDROIDBUFFERQUEUESOURCE
 
 struct XAAndroidBufferQueueItf_;
 typedef const struct XAAndroidBufferQueueItf_ * const * XAAndroidBufferQueueItf;

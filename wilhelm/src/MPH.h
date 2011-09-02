@@ -81,7 +81,7 @@
 
 // Android API level 12 extended interfaces
 // GUID and MPH are shared by SL and XA, but currently documented for XA only
-#define MPH_ANDROIDBUFFERQUEUE         50
+#define MPH_ANDROIDBUFFERQUEUESOURCE   50
 
 // OpenMAX AL 1.0.1 interfaces
 #define MPH_XAAUDIODECODERCAPABILITIES   51

@@ -165,7 +165,7 @@ const struct SLInterfaceID_ SL_IID_array[MPH_MAX] = {
 // Android API level 12 extended interfaces
 // GUID and MPH shared by SL and XA, but currently documented for XA only
 
-    // SL_IID_ANDROIDBUFFERQUEUE
+    // SL_IID_ANDROIDBUFFERQUEUESOURCE
     { 0x7fc1a460, 0xeec1, 0x11df, 0xa306, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
 
 // OpenMAX AL 1.0.1 interfaces

@@ -347,7 +347,7 @@ reinitialize:    ;
     // create media player
     XAObjectItf playerObject;
     XAInterfaceID ids[4] = {XA_IID_STREAMINFORMATION, XA_IID_PREFETCHSTATUS, XA_IID_SEEK,
-            XA_IID_ANDROIDBUFFERQUEUE};
+            XA_IID_ANDROIDBUFFERQUEUESOURCE};
     XAboolean req[4] = {XA_BOOLEAN_TRUE, XA_BOOLEAN_TRUE, XA_BOOLEAN_TRUE, XA_BOOLEAN_TRUE};
     result = (*engineEngine)->CreateMediaPlayer(engineEngine, &playerObject, &dataSrc, NULL,
             &audioSnk, nativeWindow != NULL ? &imageVideoSink : NULL, NULL, NULL, abq ? 4 : 3, ids,
@@ -362,7 +362,7 @@ reinitialize:    ;
 
         // get the Android buffer queue interface
         XAAndroidBufferQueueItf playerAndroidBufferQueue;
-        result = (*playerObject)->GetInterface(playerObject, XA_IID_ANDROIDBUFFERQUEUE,
+        result = (*playerObject)->GetInterface(playerObject, XA_IID_ANDROIDBUFFERQUEUESOURCE,
                 &playerAndroidBufferQueue);
         assert(XA_RESULT_SUCCESS == result);
 

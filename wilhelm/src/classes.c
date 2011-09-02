@@ -89,7 +89,7 @@ static const struct iid_vtable AudioPlayer_interfaces[INTERFACES_AudioPlayer] = 
     {MPH_ANDROIDEFFECTSEND, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidEffectSend)},
     {MPH_ANDROIDCONFIGURATION, INTERFACE_EXPLICIT_PREREALIZE,
             offsetof(CAudioPlayer, mAndroidConfiguration)},
-    {MPH_ANDROIDBUFFERQUEUE, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidBufferQueue)},
+    {MPH_ANDROIDBUFFERQUEUESOURCE, INTERFACE_EXPLICIT, offsetof(CAudioPlayer, mAndroidBufferQueue)},
 #endif
 };
 
@@ -412,7 +412,7 @@ static const struct iid_vtable MediaPlayer_interfaces[INTERFACES_MediaPlayer] = 
     {MPH_XASEEK, INTERFACE_EXPLICIT, offsetof(CMediaPlayer, mSeek)},
     {MPH_XAPREFETCHSTATUS, INTERFACE_EXPLICIT, offsetof(CMediaPlayer, mPrefetchStatus)},
 #ifdef ANDROID
-    {MPH_ANDROIDBUFFERQUEUE, INTERFACE_EXPLICIT, offsetof(CMediaPlayer, mAndroidBufferQueue)},
+    {MPH_ANDROIDBUFFERQUEUESOURCE, INTERFACE_EXPLICIT, offsetof(CMediaPlayer, mAndroidBufferQueue)},
 #endif
 };
 

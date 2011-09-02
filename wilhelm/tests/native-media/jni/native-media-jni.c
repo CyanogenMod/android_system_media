@@ -363,7 +363,8 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     XAboolean     required[NB_MAXAL_INTERFACES]
                            = {XA_BOOLEAN_TRUE, XA_BOOLEAN_TRUE,           XA_BOOLEAN_TRUE};
     XAInterfaceID iidArray[NB_MAXAL_INTERFACES]
-                           = {XA_IID_PLAY,     XA_IID_ANDROIDBUFFERQUEUE, XA_IID_STREAMINFORMATION};
+                           = {XA_IID_PLAY,     XA_IID_ANDROIDBUFFERQUEUESOURCE,
+                                               XA_IID_STREAMINFORMATION};
 
 
     // create media player
@@ -394,7 +395,7 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     assert(XA_RESULT_SUCCESS == res);
 
     // get the Android buffer queue interface
-    res = (*playerObj)->GetInterface(playerObj, XA_IID_ANDROIDBUFFERQUEUE, &playerBQItf);
+    res = (*playerObj)->GetInterface(playerObj, XA_IID_ANDROIDBUFFERQUEUESOURCE, &playerBQItf);
     assert(XA_RESULT_SUCCESS == res);
 
     // specify which events we want to be notified of

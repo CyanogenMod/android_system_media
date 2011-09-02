@@ -221,7 +221,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
     required[0] = SL_BOOLEAN_TRUE;
     iidArray[0] = SL_IID_VOLUME;
     required[1] = SL_BOOLEAN_TRUE;
-    iidArray[1] = SL_IID_ANDROIDBUFFERQUEUE;
+    iidArray[1] = SL_IID_ANDROIDBUFFERQUEUESOURCE;
     // Create Output Mix object to be used by player
     res = (*EngineItf)->CreateOutputMix(EngineItf, &OutputMix, 0,
             iidArray, required); CheckErr(res);
@@ -259,7 +259,7 @@ void TestPlayStream( SLObjectItf sl, const char* path)
 
     res = (*player)->GetInterface(player, SL_IID_VOLUME,  (void*)&volItf); CheckErr(res);
 
-    res = (*player)->GetInterface(player, SL_IID_ANDROIDBUFFERQUEUE, (void*)&abqItf);
+    res = (*player)->GetInterface(player, SL_IID_ANDROIDBUFFERQUEUESOURCE, (void*)&abqItf);
     CheckErr(res);
 
     res = (*abqItf)->RegisterCallback(abqItf, AndroidBufferQueueCallback,
