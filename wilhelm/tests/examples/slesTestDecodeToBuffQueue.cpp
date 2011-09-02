@@ -97,7 +97,7 @@ android::Condition eosCondition;
 void ExitOnErrorFunc( SLresult result , int line)
 {
     if (SL_RESULT_SUCCESS != result) {
-        fprintf(stdout, "Error code %u encountered at line %d, exiting\n", result, line);
+        fprintf(stderr, "Error code %u encountered at line %d, exiting\n", result, line);
         exit(EXIT_FAILURE);
     }
 }
@@ -127,10 +127,13 @@ void SignalEos() {
 void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint32 event)
 {
     SLpermille level = 0;
-    (*caller)->GetFillLevel(caller, &level);
+    SLresult result;
+    result = (*caller)->GetFillLevel(caller, &level);
+    ExitOnError(result);
     SLuint32 status;
     //fprintf(stdout, "PrefetchEventCallback: received event %u\n", event);
-    (*caller)->GetPrefetchStatus(caller, &status);
+    result = (*caller)->GetPrefetchStatus(caller, &status);
+    ExitOnError(result);
     if ((PREFETCHEVENT_ERROR_CANDIDATE == (event & PREFETCHEVENT_ERROR_CANDIDATE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
         fprintf(stdout, "PrefetchEventCallback: Error while prefetching data, exiting\n");
@@ -139,31 +142,28 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
     }
 }
 
-//-----------------------------------------------------------------
 /* Callback for "playback" events, i.e. event happening during decoding */
 void DecProgressCallback(
         SLPlayItf caller,
         void *pContext,
         SLuint32 event)
 {
+    SLresult result;
+    SLmillisecond msec;
+    result = (*caller)->GetPosition(caller, &msec);
+    ExitOnError(result);
+
     if (SL_PLAYEVENT_HEADATEND & event) {
-        fprintf(stdout, "SL_PLAYEVENT_HEADATEND reached\n");
-        SLmillisecond pMsec = 0;
-        SLresult res = (*caller)->GetPosition(caller, &pMsec); ExitOnError(res);
-        fprintf(stdout, "Position when SL_PLAYEVENT_HEADATEND received is %ums\n", pMsec);
+        fprintf(stdout, "SL_PLAYEVENT_HEADATEND current position=%u ms\n", msec);
         SignalEos();
     }
 
     if (SL_PLAYEVENT_HEADATNEWPOS & event) {
-        SLmillisecond pMsec = 0;
-        (*caller)->GetPosition(caller, &pMsec);
-        fprintf(stdout, "SL_PLAYEVENT_HEADATNEWPOS current position=%ums\n", pMsec);
+        fprintf(stdout, "SL_PLAYEVENT_HEADATNEWPOS current position=%u ms\n", msec);
     }
 
     if (SL_PLAYEVENT_HEADATMARKER & event) {
-        SLmillisecond pMsec = 0;
-        (*caller)->GetPosition(caller, &pMsec);
-        fprintf(stdout, "SL_PLAYEVENT_HEADATMARKER current position=%ums\n", pMsec);
+        fprintf(stdout, "SL_PLAYEVENT_HEADATMARKER current position=%u ms\n", msec);
     }
 }
 
@@ -174,9 +174,15 @@ void DecPlayCallback(
         void *pContext)
 {
     counter++;
-    fprintf(stdout, "DecPlayCallback called (iteration %d)   ", counter);
 
     CallbackCntxt *pCntxt = (CallbackCntxt*)pContext;
+
+    if (counter % 1000 == 0) {
+        SLmillisecond msec;
+        SLresult result = (*pCntxt->playItf)->GetPosition(pCntxt->playItf, &msec);
+        ExitOnError(result);
+        printf("DecPlayCallback called (iteration %d): current position=%u ms\n", counter, msec);
+    }
 
     /* Save the decoded data  */
     if (fwrite(pCntxt->pDataBase, 1, BUFFER_SIZE_IN_BYTES, gFp) < BUFFER_SIZE_IN_BYTES) {
@@ -404,7 +410,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char* path)
     /* Enqueue buffers to map the region of memory allocated to store the decoded data */
     fprintf(stdout,"Enqueueing buffer ");
     for(int i = 0 ; i < NB_BUFFERS_IN_QUEUE ; i++) {
-        fprintf(stdout,"%d \n", i);
+        fprintf(stdout,"%d ", i);
         result = (*decBuffQueueItf)->Enqueue(decBuffQueueItf, cntxt.pData, BUFFER_SIZE_IN_BYTES);
         ExitOnError(result);
         cntxt.pData += BUFFER_SIZE_IN_BYTES;
