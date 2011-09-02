@@ -597,13 +597,16 @@ void GenericPlayer::updateOneShot(int positionMs)
             positionMs = ANDROID_UNKNOWN_TIME;
         }
         if (ANDROID_UNKNOWN_TIME == positionMs) {
-            // we can't proceed if we don't know where we are now
+            // getPositionMsec is not working for some reason, give up
+            //LOGV("Does anyone really know what time it is?");
             return;
         }
     }
 
-    // default one-shot delay is infinity
+    // delayUs is the expected delay between current position and marker;
+    // the default is infinity in case there are no upcoming marker(s)
     int64_t delayUs = -1;
+
     // is there a marker?
     if ((mEventFlags & SL_PLAYEVENT_HEADATMARKER) && (mMarkerPositionMs != ANDROID_UNKNOWN_TIME)) {
         // check to see if we have observed the position passing through the marker
@@ -613,6 +616,7 @@ void GenericPlayer::updateOneShot(int positionMs)
             delayUs = (mMarkerPositionMs - positionMs) * 1000LL;
         }
     }
+
     // are periodic position updates needed?
     if ((mEventFlags & SL_PLAYEVENT_HEADATNEWPOS) &&
             (mPositionUpdatePeriodMs != ANDROID_UNKNOWN_TIME)) {
@@ -623,22 +627,36 @@ void GenericPlayer::updateOneShot(int positionMs)
             virtualMarkerMs = mDeliveredNewPosMs + mPositionUpdatePeriodMs;
         } else if (mObservedPositionMs != ANDROID_UNKNOWN_TIME) {
             virtualMarkerMs = mObservedPositionMs + mPositionUpdatePeriodMs;
+            // pretend there has been an update in the past
+            mDeliveredNewPosMs = mObservedPositionMs;
         } else {
             virtualMarkerMs = positionMs + mPositionUpdatePeriodMs;
+            // pretend there has been an update in the past
+            mDeliveredNewPosMs = positionMs;
         }
+        // nextVirtualMarkerMs will be set to the position of the next upcoming virtual marker
+        int32_t nextVirtualMarkerMs;
         if (mObservedPositionMs <= virtualMarkerMs && virtualMarkerMs <= positionMs) {
+            // we did pass through the virtual marker, now compute the next virtual marker
             mDeliveredNewPosMs = virtualMarkerMs;
-            virtualMarkerMs += mPositionUpdatePeriodMs;
+            nextVirtualMarkerMs = virtualMarkerMs + mPositionUpdatePeriodMs;
             // re-synchronize if we missed an update
-            if (virtualMarkerMs <= positionMs) {
-                virtualMarkerMs = positionMs + mPositionUpdatePeriodMs;
+            if (nextVirtualMarkerMs <= positionMs) {
+                SL_LOGW("Missed SL_PLAYEVENT_HEADATNEWPOS for position %d; current position %d",
+                        nextVirtualMarkerMs, positionMs);
+                // try to catch up by setting next goal to current position plus update period
+                mDeliveredNewPosMs = positionMs;
+                nextVirtualMarkerMs = positionMs + mPositionUpdatePeriodMs;
             }
             notify(PLAYEREVENT_PLAY, (int32_t) SL_PLAYEVENT_HEADATNEWPOS, true /*async*/);
+        } else {
+            // we did not pass through the virtual marker yet, so use same marker again
+            nextVirtualMarkerMs = virtualMarkerMs;
         }
-        // note that if arithmetic overflow occurred, virtualMarkerMs will be negative
-        if (positionMs < virtualMarkerMs) {
+        // note that if arithmetic overflow occurred, nextVirtualMarkerMs will be negative
+        if (positionMs < nextVirtualMarkerMs) {
             int64_t trialDelayUs;
-            trialDelayUs = (virtualMarkerMs - positionMs) * 1000LL;
+            trialDelayUs = (nextVirtualMarkerMs - positionMs) * 1000LL;
             if (trialDelayUs > 0 && (delayUs == -1 || trialDelayUs < delayUs)) {
                 delayUs = trialDelayUs;
             }
