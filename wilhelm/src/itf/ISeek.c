@@ -66,9 +66,7 @@ static SLresult ISeek_SetLoop(SLSeekItf self, SLboolean loopEnable,
               case SL_OBJECTID_AUDIOPLAYER: {
                 CAudioPlayer *ap = InterfaceToCAudioPlayer(thiz);
                 if (NULL != ap) {
-                    // FIXME should return a result
-                    android_audioPlayer_loop(ap, loopEnable);
-                    result = SL_RESULT_SUCCESS;
+                    result = android_audioPlayer_loop(ap, loopEnable);
                 } else {
                     result = SL_RESULT_PARAMETER_INVALID;
                 }

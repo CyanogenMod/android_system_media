@@ -121,9 +121,9 @@ extern void android_audioPlayer_setPlayState(CAudioPlayer *pAudioPlayer);
 
 extern void android_audioPlayer_usePlayEventMask(CAudioPlayer *pAudioPlayer);
 
-extern void android_audioPlayer_seek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec);
+extern SLresult android_audioPlayer_seek(CAudioPlayer *pAudioPlayer, SLmillisecond posMsec);
 
-extern void android_audioPlayer_loop(CAudioPlayer *pAudioPlayer, SLboolean loopEnable);
+extern SLresult android_audioPlayer_loop(CAudioPlayer *pAudioPlayer, SLboolean loopEnable);
 
 extern void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec);
 
