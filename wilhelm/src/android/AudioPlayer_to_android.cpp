@@ -2267,7 +2267,7 @@ void android_audioPlayer_androidBufferQueue_onRefilled_l(CAudioPlayer *ap) {
     case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE:
       if (ap->mAPlayer != 0) {
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(ap->mAPlayer.get());
-        splr->queueRefilled_l();
+        splr->queueRefilled();
       } break;
     case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
       // FIXME this may require waking up the decoder if it is currently starved and isn't polling

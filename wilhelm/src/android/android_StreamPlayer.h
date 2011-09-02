@@ -26,13 +26,16 @@
 namespace android {
 
 //--------------------------------------------------------------------------------------------------
+class StreamPlayer;
+
 class StreamSourceAppProxy : public BnStreamSource {
 public:
     StreamSourceAppProxy(
             const void* user, bool userIsAudioPlayer,
             void *appContext,
             const void *caller,
-            const sp<CallbackProtector> &callbackProtector);
+            const sp<CallbackProtector> &callbackProtector,
+            const sp<StreamPlayer> &player);
     virtual ~StreamSourceAppProxy();
 
     // store an item structure to indicate a processed buffer
@@ -67,6 +70,7 @@ private:
     const void *mCaller;
 
     sp<CallbackProtector> mCallbackProtector;
+    const sp<StreamPlayer> mPlayer;
 
     DISALLOW_EVIL_CONSTRUCTORS(StreamSourceAppProxy);
 };
@@ -86,14 +90,18 @@ public:
             const void* user, bool userIsAudioPlayer,
             void *context,
             const void *caller);
-    void queueRefilled_l();
+    void queueRefilled();
     void appClear_l();
 
 protected:
 
     enum {
-        // message to asynchronously notify mAppProxy the Android Buffer Queue was refilled
-        kWhatQueueRefilled = 'qrfi'
+        // message to asynchronously notify mAppProxy it should try to pull from the Android
+        //    Buffer Queue and push to shared memory (media server), either because the buffer queue
+        //    was refilled, or because during playback, the shared memory buffers should remain
+        //    filled to prevent it from draining (this can happen if the ABQ is not ready
+        //    whenever a shared memory buffer becomes available)
+        kWhatPullFromAbq = 'plfq'
     };
 
     sp<StreamSourceAppProxy> mAppProxy; // application proxy for the android buffer queue source
@@ -102,7 +110,7 @@ protected:
     virtual void onPrepare();
     virtual void onPlay();
 
-    void onQueueRefilled();
+    void onPullFromAndroidBufferQueue();
 
     Mutex mAppProxyLock;
 

@@ -45,13 +45,15 @@ namespace android {
 
 StreamSourceAppProxy::StreamSourceAppProxy(
         const void* user, bool userIsAudioPlayer,
-        void *context, const void *caller, const sp<CallbackProtector> &callbackProtector) :
+        void *context, const void *caller, const sp<CallbackProtector> &callbackProtector,
+        const sp<StreamPlayer> &player) :
     mUser(user),
     mUserIsAudioPlayer(userIsAudioPlayer),
     mAndroidBufferQueue(NULL),
     mAppContext(context),
     mCaller(caller),
-    mCallbackProtector(callbackProtector)
+    mCallbackProtector(callbackProtector),
+    mPlayer(player)
 {
     SL_LOGV("StreamSourceAppProxy::StreamSourceAppProxy()");
 
@@ -115,7 +117,7 @@ void StreamSourceAppProxy::receivedBuffer_l(size_t buffIndex, size_t buffLength)
 }
 
 //--------------------------------------------------
-// consumption from ABQ
+// consumption from ABQ: pull from the ABQ, and push to shared memory (media server)
 void StreamSourceAppProxy::pullFromBuffQueue() {
 
   if (android::CallbackProtector::enterCbIfOk(mCallbackProtector)) {
@@ -221,8 +223,12 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
                         //dataUsed     = oldFront->mDataSizeConsumed;
                     }
                 }
-                //SL_LOGD("onBufferAvailable() %d buffers available after enqueue",
-                //     mAvailableBuffers.size());
+                //SL_LOGD("%d buffers available after enqueue", mAvailableBuffers.size());
+                if (!mAvailableBuffers.empty()) {
+                    // there is still room in the shared memory, recheck later if we can pull
+                    // data from the buffer queue and write it to shared memory
+                    mPlayer->queueRefilled();
+                }
             }
         }
 
@@ -280,8 +286,8 @@ StreamPlayer::~StreamPlayer() {
 
 void StreamPlayer::onMessageReceived(const sp<AMessage> &msg) {
     switch (msg->what()) {
-        case kWhatQueueRefilled:
-            onQueueRefilled();
+        case kWhatPullFromAbq:
+            onPullFromAndroidBufferQueue();
             break;
 
         default:
@@ -300,7 +306,7 @@ void StreamPlayer::registerQueueCallback(
 
     mAppProxy = new StreamSourceAppProxy(
             user, userIsAudioPlayer,
-            context, caller, mCallbackProtector);
+            context, caller, mCallbackProtector, this);
 
     CHECK(mAppProxy != 0);
     SL_LOGD("StreamPlayer::registerQueueCallback end");
@@ -308,11 +314,12 @@ void StreamPlayer::registerQueueCallback(
 
 
 /**
- * Called with a lock on ABQ
+ * Asynchronously notify the player that the queue is ready to be pulled from.
  */
-void StreamPlayer::queueRefilled_l() {
-    // async notification that the ABQ was refilled
-    (new AMessage(kWhatQueueRefilled, id()))->post();
+void StreamPlayer::queueRefilled() {
+    // async notification that the ABQ was refilled: the player should pull from the ABQ, and
+    //    and push to shared memory (to the media server)
+    (new AMessage(kWhatPullFromAbq, id()))->post();
 }
 
 
@@ -351,13 +358,13 @@ void StreamPlayer::onPlay() {
     SL_LOGD("StreamPlayer::onPlay()");
     // enqueue a message that will cause StreamAppProxy to consume from the queue (again if the
     // player had starved the shared memory)
-    queueRefilled_l();
+    queueRefilled();
 
     GenericMediaPlayer::onPlay();
 }
 
 
-void StreamPlayer::onQueueRefilled() {
+void StreamPlayer::onPullFromAndroidBufferQueue() {
     //SL_LOGD("StreamPlayer::onQueueRefilled()");
     Mutex::Autolock _l(mAppProxyLock);
     if (mAppProxy != 0) {
