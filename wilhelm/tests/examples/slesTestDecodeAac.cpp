@@ -19,6 +19,15 @@
 First run the program from shell:
   # slesTestDecodeAac /sdcard/myFile.adts
 
+Expected output:
+  OpenSL ES test slesTestDecodeAac: decodes a file containing AAC ADTS data
+  Player created
+  Player realized
+  Enqueueing initial empty buffers to receive decoded PCM data 0 1
+  Enqueueing initial full buffers of encoded ADTS data 0 1
+  Starting to decode
+  Frame counters: encoded=4579 decoded=4579
+
 These use adb on host to retrieve the decoded file:
   % adb pull /sdcard/myFile.adts.raw myFile.raw
 
@@ -76,6 +85,10 @@ static FILE* outputFp;
 /* metadata key index for the PCM format information we want to retrieve */
 static int channelCountKeyIndex = -1;
 static int sampleRateKeyIndex = -1;
+static int bitsPerSampleKeyIndex = -1;
+static int containerSizeKeyIndex = -1;
+static int channelMaskKeyIndex = -1;
+static int endiannessKeyIndex = -1;
 /* size of the struct to retrieve the PCM format metadata values: the values we're interested in
  * are SLuint32, but it is saved in the data field of a SLMetadataInfo, hence the larger size.
  * Note that this size is queried and displayed at l.XXX for demonstration/test purposes.
@@ -121,6 +134,7 @@ typedef struct CallbackCntxt_ {
 #ifdef QUERY_METADATA
     SLMetadataExtractionItf metaItf;
 #endif
+    SLPlayItf playItf;
     SLint8*   pDataBase;    // Base address of local audio data storage
     SLint8*   pData;        // Current address of local audio data storage
 } CallbackCntxt;
@@ -231,16 +245,46 @@ void DecPlayCallback(
         //         u.pcmMetaData->encoding == SL_CHARACTERENCODING_BINARY
         //         u.pcmMetaData->size == sizeof(SLuint32)
         //      but the call was successful for the PCM format keys, so those conditions are implied
-        printf("sample rate = %dHz, ", *((SLuint32*)u.pcmMetaData.data));
+        printf("sample rate = %d\n", *((SLuint32*)u.pcmMetaData.data));
         res = (*pCntxt->metaItf)->GetValue(pCntxt->metaItf, channelCountKeyIndex,
                 PCM_METADATA_VALUE_SIZE, &u.pcmMetaData);  ExitOnError(res);
-        printf(" channel count = %d\n", *((SLuint32*)u.pcmMetaData.data));
+        printf("channel count = %d\n", *((SLuint32*)u.pcmMetaData.data));
+        res = (*pCntxt->metaItf)->GetValue(pCntxt->metaItf, bitsPerSampleKeyIndex,
+                PCM_METADATA_VALUE_SIZE, &u.pcmMetaData);  ExitOnError(res);
+        printf("bits per sample = %d bits\n", *((SLuint32*)u.pcmMetaData.data));
+        res = (*pCntxt->metaItf)->GetValue(pCntxt->metaItf, containerSizeKeyIndex,
+                PCM_METADATA_VALUE_SIZE, &u.pcmMetaData);  ExitOnError(res);
+        printf("container size = %d bits\n", *((SLuint32*)u.pcmMetaData.data));
+        res = (*pCntxt->metaItf)->GetValue(pCntxt->metaItf, channelMaskKeyIndex,
+                PCM_METADATA_VALUE_SIZE, &u.pcmMetaData);  ExitOnError(res);
+        printf("channel mask = 0x%X (0x3=front left | front right, 0x4=front center)\n",
+                *((SLuint32*)u.pcmMetaData.data));
+        res = (*pCntxt->metaItf)->GetValue(pCntxt->metaItf, endiannessKeyIndex,
+                PCM_METADATA_VALUE_SIZE, &u.pcmMetaData);  ExitOnError(res);
+        printf("endianness = %d (1=big, 2=little)\n", *((SLuint32*)u.pcmMetaData.data));
         formatQueried = true;
     }
 #endif
 
     ++decodedFrames;
     decodedSamples += SAMPLES_PER_AAC_FRAME;
+
+    /* Periodically ask for position and duration */
+    if ((decodedFrames % 1000 == 0) || endOfEncodedStream) {
+        SLmillisecond position;
+        res = (*pCntxt->playItf)->GetPosition(pCntxt->playItf, &position);
+        ExitOnError(res);
+        SLmillisecond duration;
+        res = (*pCntxt->playItf)->GetDuration(pCntxt->playItf, &duration);
+        ExitOnError(res);
+        if (duration == SL_TIME_UNKNOWN) {
+            printf("After %u decoded frames: position is %u ms, duration is unknown as expected\n",
+                    decodedFrames, position);
+        } else {
+            printf("After %u decoded frames: position is %u ms, duration is surprisingly %u ms\n",
+                    decodedFrames, position, duration);
+        }
+    }
 
     if (endOfEncodedStream && decodedSamples >= encodedSamples) {
         eos = true;
@@ -380,6 +424,28 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     res = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf);
     ExitOnError(res);
 
+    /* Get the position before prefetch; should be zero */
+    SLmillisecond position;
+    res = (*playItf)->GetPosition(playItf, &position);
+    ExitOnError(res);
+    if (position == 0) {
+        printf("The position before prefetch is zero as expected\n");
+    } else if (position == SL_TIME_UNKNOWN) {
+        printf("That's surprising the position before prefetch is unknown");
+    } else {
+        printf("That's surprising the position before prefetch is %u ms\n", position);
+    }
+
+    /* Get the duration before prefetch; should be unknown */
+    SLmillisecond duration;
+    res = (*playItf)->GetDuration(playItf, &duration);
+    ExitOnError(res);
+    if (duration == SL_TIME_UNKNOWN) {
+        printf("The duration before prefetch is unknown as expected\n");
+    } else {
+        printf("That's surprising the duration before prefetch is %u ms\n", duration);
+    }
+
     /* Get the buffer queue interface which was explicitly requested */
     res = (*player)->GetInterface(player, SL_IID_ANDROIDSIMPLEBUFFERQUEUE, (void*)&decBuffQueueItf);
     ExitOnError(res);
@@ -397,6 +463,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     /* ------------------------------------------------------ */
     /* Initialize the callback and its context for the buffer queue of the decoded PCM */
     CallbackCntxt sinkCntxt;
+    sinkCntxt.playItf = playItf;
 #ifdef QUERY_METADATA
     sinkCntxt.metaItf = mdExtrItf;
 #endif
@@ -436,6 +503,8 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
         ExitOnError(res);
         frame += framelen;
         filelen -= framelen;
+        ++encodedFrames;
+        encodedSamples += SAMPLES_PER_AAC_FRAME;
     }
     printf("\n");
 
@@ -470,6 +539,16 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
                 channelCountKeyIndex = i;
             } else if (!strcmp((char*)keyInfo->data, ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC)) {
                 sampleRateKeyIndex = i;
+            } else if (!strcmp((char*)keyInfo->data, ANDROID_KEY_PCMFORMAT_BITSPERSAMPLE)) {
+                bitsPerSampleKeyIndex = i;
+            } else if (!strcmp((char*)keyInfo->data, ANDROID_KEY_PCMFORMAT_CONTAINERSIZE)) {
+                containerSizeKeyIndex = i;
+            } else if (!strcmp((char*)keyInfo->data, ANDROID_KEY_PCMFORMAT_CHANNELMASK)) {
+                channelMaskKeyIndex = i;
+            } else if (!strcmp((char*)keyInfo->data, ANDROID_KEY_PCMFORMAT_ENDIANNESS)) {
+                endiannessKeyIndex = i;
+            } else {
+                printf("Unknown key %s ignored\n", (char *)keyInfo->data);
             }
             free(keyInfo);
         }
@@ -485,6 +564,30 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
                 ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC, sampleRateKeyIndex);
     } else {
         fprintf(stderr, "Unable to find key %s\n", ANDROID_KEY_PCMFORMAT_SAMPLESPERSEC);
+    }
+    if (bitsPerSampleKeyIndex != -1) {
+        printf("Key %s is at index %d\n",
+                ANDROID_KEY_PCMFORMAT_BITSPERSAMPLE, bitsPerSampleKeyIndex);
+    } else {
+        fprintf(stderr, "Unable to find key %s\n", ANDROID_KEY_PCMFORMAT_BITSPERSAMPLE);
+    }
+    if (containerSizeKeyIndex != -1) {
+        printf("Key %s is at index %d\n",
+                ANDROID_KEY_PCMFORMAT_CONTAINERSIZE, containerSizeKeyIndex);
+    } else {
+        fprintf(stderr, "Unable to find key %s\n", ANDROID_KEY_PCMFORMAT_CONTAINERSIZE);
+    }
+    if (channelMaskKeyIndex != -1) {
+        printf("Key %s is at index %d\n",
+                ANDROID_KEY_PCMFORMAT_CHANNELMASK, channelMaskKeyIndex);
+    } else {
+        fprintf(stderr, "Unable to find key %s\n", ANDROID_KEY_PCMFORMAT_CHANNELMASK);
+    }
+    if (endiannessKeyIndex != -1) {
+        printf("Key %s is at index %d\n",
+                ANDROID_KEY_PCMFORMAT_ENDIANNESS, endiannessKeyIndex);
+    } else {
+        fprintf(stderr, "Unable to find key %s\n", ANDROID_KEY_PCMFORMAT_ENDIANNESS);
     }
 #endif
 
@@ -506,7 +609,19 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
 
     pthread_mutex_lock(&eosLock);
     printf("Frame counters: encoded=%u decoded=%u\n", encodedFrames, decodedFrames);
+    printf("Sample counters: encoded=%u decoded=%u\n", encodedSamples, decodedSamples);
     pthread_mutex_unlock(&eosLock);
+
+    /* Get the final position and duration */
+    res = (*playItf)->GetPosition(playItf, &position);
+    ExitOnError(res);
+    res = (*playItf)->GetDuration(playItf, &duration);
+    ExitOnError(res);
+    if (duration == SL_TIME_UNKNOWN) {
+        printf("The final position is %u ms, duration is unknown\n", position);
+    } else {
+        printf("The final position is %u ms, duration is %u ms\n", position, duration);
+    }
 
     /* ------------------------------------------------------ */
     /* End of decoding */
