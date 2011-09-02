@@ -108,7 +108,7 @@ protected:
 
     // negative values indicate invalid value
     int64_t mBitrate;  // in bits/sec
-    uint32_t mChannelMask;
+    uint32_t mChannelMask; // UNKNOWN_CHANNEL_MASK if unknown
     int64_t mDurationUsec; // ANDROID_UNKNOWN_TIME if unknown
 
     // buffer passed from decoder to renderer

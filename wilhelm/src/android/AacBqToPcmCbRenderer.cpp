@@ -141,11 +141,11 @@ void AacBqToPcmCbRenderer::onPrepare() {
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CONTAINERSIZE] = 16;
         //FIXME not true on all platforms
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_ENDIANNESS] = SL_BYTEORDER_LITTLEENDIAN;
-        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = 0;
         //    initialization with the default values: they will be replaced by the actual values
         //      once the decoder has figured them out
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
+        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
     }
 
     sp<DataSource> dataSource;
@@ -206,10 +206,14 @@ void AacBqToPcmCbRenderer::onPrepare() {
     int32_t sr;
     CHECK(meta->findInt32(kKeySampleRate, &sr));
     mSampleRateHz = (uint32_t) sr;
+    // FIXME similar to AudioSfDecoder::onPrepare()
+    mChannelMask = channelCountToMask(mChannelCount);
+
     {
             android::Mutex::Autolock autoLock(mPcmFormatLock);
             mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLESPERSEC] = mSampleRateHz;
             mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
+            mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
     }
     SL_LOGV("AacBqToPcmCbRenderer::onPrepare() channel count=%d SR=%d",
             mChannelCount, mSampleRateHz);

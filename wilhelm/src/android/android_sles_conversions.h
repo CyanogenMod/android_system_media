@@ -82,3 +82,20 @@ static inline float sles_to_android_amplification(SLmillibel level) {
     // FIXME use the FX Framework conversions
     return pow(10, (float)level/2000);
 }
+
+
+static inline uint32_t channelCountToMask(uint32_t channelCount)
+{
+    // FIXME channel mask is not yet implemented by Stagefright, so use a reasonable default
+    //       that is computed from the channel count
+    uint32_t channelMask;
+    switch (channelCount) {
+    case 1:
+        // see explanation in data.c re: default channel mask for mono
+        return SL_SPEAKER_FRONT_LEFT;
+    case 2:
+        return SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+    default:
+        return UNKNOWN_CHANNELMASK;
+    }
+}
