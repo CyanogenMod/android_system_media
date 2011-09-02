@@ -183,7 +183,7 @@ public class BackDropperFilter extends Filter {
     // Default scale of auto white balance parameters
     private static final String DEFAULT_AUTO_WB_SCALE = "0.25";
     // Minimum variance (0-255 scale)
-    private static final String MIN_VARIANCE = "1.0";
+    private static final String MIN_VARIANCE = "3.0";
     // Column-major array for 4x4 matrix converting RGB to YCbCr, JPEG definition (no pedestal)
     private static final String RGB_TO_YUV_MATRIX = "0.299, -0.168736,  0.5,      0.000, " +
                                                     "0.587, -0.331264, -0.418688, 0.000, " +
@@ -542,43 +542,50 @@ public class BackDropperFilter extends Filter {
 
     @Override
     public FrameFormat getOutputFormat(String portName, FrameFormat inputFormat) {
-        // Create memory format based on video input
-        if (mMemoryFormat == null) {
-            createMemoryFormat(inputFormat);
+        // Create memory format based on video input.
+        MutableFrameFormat format = inputFormat.mutableCopy();
+        // Is this a debug output port? If so, leave dimensions unspecified.
+        if (!Arrays.asList(mOutputNames).contains(portName)) {
+            format.setDimensions(FrameFormat.SIZE_UNSPECIFIED, FrameFormat.SIZE_UNSPECIFIED);
         }
-
-        // Return output format
-        if (Arrays.asList(mOutputNames).contains(portName)) {
-            return inputFormat;
-        } else {
-            return mMemoryFormat;
-        }
+        return format;
     }
 
-    public void createMemoryFormat(FrameFormat inputFormat) {
+    private boolean createMemoryFormat(FrameFormat inputFormat) {
+        // We can't resize because that would require re-learning.
+        if (mMemoryFormat != null) {
+            return false;
+        }
+
+        if (inputFormat.getWidth() == FrameFormat.SIZE_UNSPECIFIED ||
+            inputFormat.getHeight() == FrameFormat.SIZE_UNSPECIFIED) {
+            throw new RuntimeException("Attempting to process input frame with unknown size");
+        }
+
         mMaskFormat = inputFormat.mutableCopy();
         int maskWidth = (int)Math.pow(2, mMaskWidthExp);
         int maskHeight = (int)Math.pow(2, mMaskHeightExp);
         mMaskFormat.setDimensions(maskWidth, maskHeight);
-        if (mLogVerbose)
-            Log.v(TAG, "Mask frames will have size " + maskWidth + " x " + maskHeight);
 
         mPyramidDepth = Math.max(mMaskWidthExp, mMaskHeightExp);
         mMemoryFormat = mMaskFormat.mutableCopy();
-        if (inputFormat.getWidth() > 0 && inputFormat.getHeight() > 0) {
-            int widthExp = Math.max(mMaskWidthExp, pyramidLevel(inputFormat.getWidth()));
-            int heightExp = Math.max(mMaskHeightExp, pyramidLevel(inputFormat.getHeight()));
-            mPyramidDepth = Math.max(widthExp, heightExp);
-            int memWidth = Math.max(maskWidth, (int)Math.pow(2, widthExp));
-            int memHeight = Math.max(maskHeight, (int)Math.pow(2, heightExp));
-            mMemoryFormat.setDimensions(memWidth, memHeight);
-            if (mLogVerbose)
-                Log.v(TAG, "Memory frames will have size " + memWidth + " x " + memHeight);
-        }
+        int widthExp = Math.max(mMaskWidthExp, pyramidLevel(inputFormat.getWidth()));
+        int heightExp = Math.max(mMaskHeightExp, pyramidLevel(inputFormat.getHeight()));
+        mPyramidDepth = Math.max(widthExp, heightExp);
+        int memWidth = Math.max(maskWidth, (int)Math.pow(2, widthExp));
+        int memHeight = Math.max(maskHeight, (int)Math.pow(2, heightExp));
+        mMemoryFormat.setDimensions(memWidth, memHeight);
         mSubsampleLevel = mPyramidDepth - Math.max(mMaskWidthExp, mMaskHeightExp);
+
+        if (mLogVerbose) {
+            Log.v(TAG, "Mask frames size " + maskWidth + " x " + maskHeight);
+            Log.v(TAG, "Pyramid levels " + widthExp + " x " + heightExp);
+            Log.v(TAG, "Memory frames size " + memWidth + " x " + memHeight);
+        }
 
         mAverageFormat = inputFormat.mutableCopy();
         mAverageFormat.setDimensions(1,1);
+        return true;
     }
 
     public void prepare(FilterContext context){
@@ -590,11 +597,14 @@ public class BackDropperFilter extends Filter {
         copyShaderProgram = ShaderProgram.createIdentity(context);
     }
 
-    public void open(FilterContext context) {
-        if (mLogVerbose) Log.v(TAG, "Opening new BackDropperFilter");
+    private void allocateFrames(FrameFormat inputFormat, FilterContext context) {
+        if (!createMemoryFormat(inputFormat)) {
+            return;  // All set.
+        }
+        if (mLogVerbose) Log.v(TAG, "Allocating BackDropperFilter frames");
 
         // Create initial background model values
-        int numBytes = mMemoryFormat.getSize();
+        int numBytes = mMaskFormat.getSize();
         byte[] initialBgMean = new byte[numBytes];
         byte[] initialBgVariance = new byte[numBytes];
         byte[] initialMaskVerify = new byte[numBytes];
@@ -678,6 +688,10 @@ public class BackDropperFilter extends Filter {
     }
 
     public void process(FilterContext context) {
+        // Grab inputs and ready intermediate frames and outputs.
+        Frame video = pullInput("video");
+        Frame background = pullInput("background");
+        allocateFrames(video.getFormat(), context);
 
         // Update learning rate after initial learning period
         if (mStartLearning) {
@@ -694,10 +708,6 @@ public class BackDropperFilter extends Filter {
         int inputIndex = mPingPong ? 0 : 1;
         int outputIndex = mPingPong ? 1 : 0;
         mPingPong = !mPingPong;
-
-        // Grab inputs and ready output
-        Frame video = pullInput("video");
-        Frame background = pullInput("background");
 
         // Check relative aspect ratios
         updateBgScaling(video, background, mBackgroundFitModeChanged);
@@ -829,6 +839,10 @@ public class BackDropperFilter extends Filter {
     private long startTime = -1;
 
     public void close(FilterContext context) {
+        if (mMemoryFormat == null) {
+            return;
+        }
+
         if (mLogVerbose) Log.v(TAG, "Filter Closing!");
         for (int i = 0; i < 2; i++) {
             mBgMean[i].release();
@@ -841,6 +855,8 @@ public class BackDropperFilter extends Filter {
         mVideoInput.release();
         mBgInput.release();
         mMaskAverage.release();
+
+        mMemoryFormat = null;
     }
 
     // Relearn background model
@@ -932,7 +948,7 @@ public class BackDropperFilter extends Filter {
     }
 
     private int pyramidLevel(int size) {
-        return (int)Math.floor(Math.log10(size) / Math.log10(2));
+        return (int)Math.floor(Math.log10(size) / Math.log10(2)) - 1;
     }
 
 }
