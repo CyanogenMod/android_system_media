@@ -100,6 +100,7 @@ protected:
 
     // overridden from GenericMediaPlayer
     virtual void onPrepare();
+    virtual void onPlay();
 
     void onQueueRefilled();
 
