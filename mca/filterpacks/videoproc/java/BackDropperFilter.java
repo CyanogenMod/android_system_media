@@ -366,13 +366,7 @@ public class BackDropperFilter extends Filter {
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
             "  vec2 bg_texcoord = (bg_fit_transform * vec3(v_texcoord, 1.)).xy;\n" +
-            "  vec4 bg_rgb;\n" +
-            "  if ( (bg_texcoord.x < 0.) || (bg_texcoord.x > 1.) || \n "+
-            "       (bg_texcoord.y < 0.) || (bg_texcoord.y > 1.) ) { \n" +
-            "    bg_rgb = vec4(0., 0., 0., 1.);\n" +
-            "  } else { \n" +
-            "    bg_rgb = texture2D(tex_sampler_1, bg_texcoord);\n" +
-            "  }\n" +
+            "  vec4 bg_rgb = texture2D(tex_sampler_1, bg_texcoord);\n" +
             // The foreground texture is modified by multiplying both manual and auto white balance changes in R and B
             //   channel and multiplying exposure change in all R, G, B channels.
             "  vec4 wb_auto_scale = texture2D(tex_sampler_3, v_texcoord) * exposure_change / auto_wb_scale;\n" +
@@ -791,17 +785,22 @@ public class BackDropperFilter extends Filter {
         }
 
         // Compute mean and variance of the background
-        Frame[] meanUpdateInputs = { mVideoInput, mBgMean[inputIndex], mMask };
-        mBgUpdateMeanProgram.process(meanUpdateInputs, mBgMean[outputIndex]);
-        mBgMean[outputIndex].generateMipMap();
-        mBgMean[outputIndex].setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER,
-                                                 GLES20.GL_LINEAR_MIPMAP_NEAREST);
-
-        Frame[] varianceUpdateInputs = { mVideoInput, mBgMean[inputIndex], mBgVariance[inputIndex], mMask };
-        mBgUpdateVarianceProgram.process(varianceUpdateInputs, mBgVariance[outputIndex]);
-        mBgVariance[outputIndex].generateMipMap();
-        mBgVariance[outputIndex].setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER,
+        if (mFrameCount < mLearningDuration - mLearningVerifyDuration ||
+            mAdaptRateBg > 0.0 || mAdaptRateFg > 0.0) {
+            Frame[] meanUpdateInputs = { mVideoInput, mBgMean[inputIndex], mMask };
+            mBgUpdateMeanProgram.process(meanUpdateInputs, mBgMean[outputIndex]);
+            mBgMean[outputIndex].generateMipMap();
+            mBgMean[outputIndex].setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER,
                                                      GLES20.GL_LINEAR_MIPMAP_NEAREST);
+
+            Frame[] varianceUpdateInputs = {
+              mVideoInput, mBgMean[inputIndex], mBgVariance[inputIndex], mMask
+            };
+            mBgUpdateVarianceProgram.process(varianceUpdateInputs, mBgVariance[outputIndex]);
+            mBgVariance[outputIndex].generateMipMap();
+            mBgVariance[outputIndex].setTextureParameter(GLES20.GL_TEXTURE_MIN_FILTER,
+                                                         GLES20.GL_LINEAR_MIPMAP_NEAREST);
+        }
 
         // Provide debug output to two smaller viewers
         if (mProvideDebugOutputs) {
