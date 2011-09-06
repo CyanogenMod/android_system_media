@@ -668,7 +668,7 @@ void android_Player_androidBufferQueue_onRefilled_l(CMediaPlayer *mp) {
     if ((mp->mAndroidObjType == AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE)
             && (mp->mAVPlayer != 0)) {
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
-        splr->queueRefilled_l();
+        splr->queueRefilled();
     }
 }
 
