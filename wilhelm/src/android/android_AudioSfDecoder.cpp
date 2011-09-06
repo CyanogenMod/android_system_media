@@ -38,7 +38,8 @@ AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : Generic
         mDurationUsec(ANDROID_UNKNOWN_TIME),
         mDecodeBuffer(NULL),
         mSeekTimeMsec(0),
-        mLastDecodedPositionUs(ANDROID_UNKNOWN_TIME)
+        // play event logic depends on the initial time being zero not ANDROID_UNKNOWN_TIME
+        mLastDecodedPositionUs(0)
 {
     SL_LOGD("AudioSfDecoder::AudioSfDecoder()");
 }
@@ -390,7 +391,11 @@ void AudioSfDecoder::onSeek(const sp<AMessage> &msg) {
     Mutex::Autolock _l(mTimeLock);
     mStateFlags |= kFlagSeeking;
     mSeekTimeMsec = timeMsec;
-    mLastDecodedPositionUs = ANDROID_UNKNOWN_TIME;
+    // don't set mLastDecodedPositionUs to ANDROID_UNKNOWN_TIME; getPositionUsec
+    // ignores mLastDecodedPositionUs while seeking, and substitutes the seek goal instead
+
+    // nop for now
+    GenericPlayer::onSeek(msg);
 }
 
 
@@ -406,6 +411,9 @@ void AudioSfDecoder::onLoop(const sp<AMessage> &msg) {
         //SL_LOGV("AudioSfDecoder::onLoop stop looping");
         mStateFlags &= ~kFlagLooping;
     }
+
+    // nop for now
+    GenericPlayer::onLoop(msg);
 }
 
 
@@ -575,10 +583,6 @@ void AudioSfDecoder::onRender() {
 
 void AudioSfDecoder::onMessageReceived(const sp<AMessage> &msg) {
     switch (msg->what()) {
-        case kWhatPrepare:
-            onPrepare();
-            break;
-
         case kWhatDecode:
             onDecode();
             break;
@@ -591,27 +595,6 @@ void AudioSfDecoder::onMessageReceived(const sp<AMessage> &msg) {
             onCheckCache(msg);
             break;
 
-        case kWhatNotif:
-            onNotify(msg);
-            break;
-
-        case kWhatPlay:
-            onPlay();
-            break;
-
-        case kWhatPause:
-            onPause();
-            break;
-
-/*
-        case kWhatSeek:
-            onSeek(msg);
-            break;
-
-        case kWhatLoop:
-            onLoop(msg);
-            break;
-*/
         default:
             GenericPlayer::onMessageReceived(msg);
             break;
@@ -690,11 +673,7 @@ int64_t AudioSfDecoder::getPositionUsec() {
     if (mStateFlags & kFlagSeeking) {
         return mSeekTimeMsec * 1000;
     } else {
-        if (mLastDecodedPositionUs < 0) {
-            return ANDROID_UNKNOWN_TIME;
-        } else {
-            return mLastDecodedPositionUs;
-        }
+        return mLastDecodedPositionUs;
     }
 }
 
