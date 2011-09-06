@@ -144,24 +144,26 @@ public class MediaSource extends Filter {
         mFrameExtractor.setSourceRect(0, 1, 1, -1);
 
         createFormats();
-
-        mMediaFrame = (GLFrame)context.getFrameManager().newBoundFrame(mOutputFormat,
-                                                                       GLFrame.EXTERNAL_TEXTURE,
-                                                                       0);
-        mSurfaceTexture = new SurfaceTexture(mMediaFrame.getTextureId());
-
     }
 
     @Override
     public void open(FilterContext context) {
-        if (mLogVerbose) Log.v(TAG, "Opening MediaSource");
         if (mLogVerbose) {
-          if (mSelectedIsUrl) {
-            Log.v(TAG, "Current URL is " + mSourceUrl);
-          } else {
-            Log.v(TAG, "Current source is Asset!");
-          }
+            Log.v(TAG, "Opening MediaSource");
+            if (mSelectedIsUrl) {
+                Log.v(TAG, "Current URL is " + mSourceUrl);
+            } else {
+                Log.v(TAG, "Current source is Asset!");
+            }
         }
+
+        mMediaFrame = (GLFrame)context.getFrameManager().newBoundFrame(
+                mOutputFormat,
+                GLFrame.EXTERNAL_TEXTURE,
+                0);
+
+        mSurfaceTexture = new SurfaceTexture(mMediaFrame.getTextureId());
+
         if (!setupMediaPlayer(mSelectedIsUrl)) {
           throw new RuntimeException("Error setting up MediaPlayer!");
         }
