@@ -210,15 +210,6 @@ public abstract class Frame {
     protected void onFrameFetch() {
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        if (hasNativeAllocation()) {
-            Log.e("FilterFramework", "Frame " + this + " leaking. (Reference count = "
-                + mRefCount + "). Deallocating now!");
-            releaseNativeAllocation();
-        }
-    }
-
     // Core internal methods ///////////////////////////////////////////////////////////////////////
     protected abstract boolean hasNativeAllocation();
 
