@@ -262,6 +262,8 @@ public class MediaSource extends Filter {
         }
         mMediaPlayer.release();
         mMediaPlayer = null;
+        mSurfaceTexture.release();
+        mSurfaceTexture = null;
         if (mLogVerbose) Log.v(TAG, "MediaSource closed");
     }
 

@@ -210,6 +210,7 @@ public class CameraSource extends Filter {
 
         mCamera.release();
         mCamera = null;
+        mSurfaceTexture.release();
         mSurfaceTexture = null;
     }
 

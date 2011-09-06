@@ -103,6 +103,12 @@ public class SurfaceTextureSource extends Filter {
     @GenerateFieldPort(name = "waitTimeout", hasDefault = true)
     private int mWaitTimeout = 1000;
 
+    /** Whether a timeout is an exception-causing failure, or just causes the
+     * filter to close.
+     */
+    @GenerateFieldPort(name = "closeOnTimeout", hasDefault = true)
+    private boolean mCloseOnTimeout = false;
+
     // Variables for input->output conversion
     private GLFrame mMediaFrame;
     private ShaderProgram mFrameExtractor;
@@ -126,9 +132,8 @@ public class SurfaceTextureSource extends Filter {
 
     // Variables for logging
 
-    private static final boolean LOGV = true;
-    private static final boolean LOGVV = false;
     private static final String TAG = "SurfaceTextureSource";
+    private static final boolean mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
 
     public SurfaceTextureSource(String name) {
         super(name);
@@ -151,7 +156,7 @@ public class SurfaceTextureSource extends Filter {
 
     @Override
     protected void prepare(FilterContext context) {
-        if (LOGV) Log.v(TAG, "Preparing SurfaceTextureSource");
+        if (mLogVerbose) Log.v(TAG, "Preparing SurfaceTextureSource");
 
         createFormats();
 
@@ -169,7 +174,7 @@ public class SurfaceTextureSource extends Filter {
 
     @Override
     public void open(FilterContext context) {
-        if (LOGV) Log.v(TAG, "Opening SurfaceTextureSource");
+        if (mLogVerbose) Log.v(TAG, "Opening SurfaceTextureSource");
         // Create SurfaceTexture anew each time - it can use substantial memory.
         mSurfaceTexture = new SurfaceTexture(mMediaFrame.getTextureId());
         // Connect SurfaceTexture to source
@@ -181,7 +186,7 @@ public class SurfaceTextureSource extends Filter {
 
     @Override
     public void process(FilterContext context) {
-        if (LOGVV) Log.v(TAG, "Processing new frame");
+        if (mLogVerbose) Log.v(TAG, "Processing new frame");
 
         // First, get new frame if available
         if (mWaitForNewFrame || mFirstFrame) {
@@ -189,7 +194,13 @@ public class SurfaceTextureSource extends Filter {
             if (mWaitTimeout != 0) {
                 gotNewFrame = mNewFrameAvailable.block(mWaitTimeout);
                 if (!gotNewFrame) {
-                    throw new RuntimeException("Timeout waiting for new frame");
+                    if (!mCloseOnTimeout) {
+                        throw new RuntimeException("Timeout waiting for new frame");
+                    } else {
+                        if (mLogVerbose) Log.v(TAG, "Timeout waiting for a new frame. Closing.");
+                        closeOutputPort("video");
+                        return;
+                    }
                 }
             } else {
                 mNewFrameAvailable.block();
@@ -216,8 +227,9 @@ public class SurfaceTextureSource extends Filter {
 
     @Override
     public void close(FilterContext context) {
-        if (LOGV) Log.v(TAG, "SurfaceTextureSource closed");
+        if (mLogVerbose) Log.v(TAG, "SurfaceTextureSource closed");
         mSourceListener.onSurfaceTextureSourceReady(null);
+        mSurfaceTexture.release();
         mSurfaceTexture = null;
     }
 
@@ -238,7 +250,7 @@ public class SurfaceTextureSource extends Filter {
     private SurfaceTexture.OnFrameAvailableListener onFrameAvailableListener =
             new SurfaceTexture.OnFrameAvailableListener() {
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-            if (LOGVV) Log.v(TAG, "New frame from SurfaceTextureSource");
+            if (mLogVerbose) Log.v(TAG, "New frame from SurfaceTextureSource");
             mNewFrameAvailable.open();
         }
     };
