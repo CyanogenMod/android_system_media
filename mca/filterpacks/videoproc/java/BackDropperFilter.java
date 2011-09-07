@@ -119,7 +119,7 @@ public class BackDropperFilter extends Filter {
     // Frame count for learning verification
     private static final int DEFAULT_LEARNING_VERIFY_DURATION = 10;
     // Maximum distance (in standard deviations) for considering a pixel as background
-    private static final float DEFAULT_ACCEPT_STDDEV = 0.9f;
+    private static final float DEFAULT_ACCEPT_STDDEV = 1.1f;
     // Variance threshold scale factor for large scale of hierarchy
     private static final float DEFAULT_HIER_LRG_SCALE = 1.5f;
     // Variance threshold scale factor for medium scale of hierarchy
@@ -137,7 +137,7 @@ public class BackDropperFilter extends Filter {
     // Area over which to average for small scale
     private static final int DEFAULT_HIER_SML_EXPONENT = 0;
     // Scale factor for luminance channel in distance calculations (larger = more significant)
-    private static final float DEFAULT_Y_SCALE_FACTOR = 0.5f;
+    private static final float DEFAULT_Y_SCALE_FACTOR = 0.45f;
     // Scale factor for chroma channels in distance calculations
     private static final float DEFAULT_UV_SCALE_FACTOR = 1.25f;
     // Mask value to start blending away from background
