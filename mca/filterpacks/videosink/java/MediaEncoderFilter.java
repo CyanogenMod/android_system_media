@@ -284,9 +284,13 @@ public class MediaEncoderFilter extends Filter {
         if (mLogVerbose) Log.v(TAG, "Stopping recording");
 
         GLEnvironment glEnv = context.getGLEnvironment();
-        glEnv.disconnectSurfaceMediaSource(mMediaRecorder);
-        mMediaRecorder.stop();
+        // The following call will switch the surface_id to 0
+        // (thus, calling eglMakeCurrent on surface with id 0) and
+        // then call eglDestroy on the surface. Hence, this will
+        // call disconnect the SurfaceMediaSource, which is needed to
+        // be called before calling Stop on the mediarecorder
         glEnv.unregisterSurfaceId(mSurfaceId);
+        mMediaRecorder.stop();
         mMediaRecorder.release();
         mMediaRecorder = null;
 

@@ -120,12 +120,6 @@ public class GLEnvironment {
         return result;
     }
 
-    public void disconnectSurfaceMediaSource(MediaRecorder mediaRecorder) {
-        if (!nativeDisconnectSurfaceMediaSource(mediaRecorder)) {
-            throw new RuntimeException("Error disconnecting SurfaceMediaSource");
-        }
-    }
-
     public void activateSurfaceWithId(int surfaceId) {
         if (!nativeActivateSurfaceId(surfaceId)) {
             throw new RuntimeException("Could not activate surface " + surfaceId + "!");
