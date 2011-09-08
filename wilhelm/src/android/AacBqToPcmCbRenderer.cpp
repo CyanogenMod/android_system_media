@@ -55,7 +55,16 @@ static size_t getAdtsFrameSize(const uint8_t *data, off64_t offset, size_t size)
     const uint8_t* header = data + offset + 3;
     frameSize = (header[0] & 0x3) << 11 | header[1] << 3 | header[2] >> 5;
     // the frame size read already contains the size of the header, so no need to add it here
-    frameSize += protectionAbsent ? 0 : 2;
+
+    // protectionAbsent is 0 if there is CRC
+    static const size_t kAdtsHeaderLengthNoCrc = 7;
+    static const size_t kAdtsHeaderLengthWithCrc = 9;
+    size_t headSize = protectionAbsent ? kAdtsHeaderLengthNoCrc : kAdtsHeaderLengthWithCrc;
+    if (headSize > frameSize) {
+        SL_LOGE("AacBqToPcmCbRenderer::getAdtsFrameSize() returns 0 (frameSize %u < headSize %u)",
+                frameSize, headSize);
+        return 0;
+    }
 
     SL_LOGV("AacBqToPcmCbRenderer::getAdtsFrameSize() returns %u", frameSize);
 
