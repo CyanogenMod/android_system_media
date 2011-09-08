@@ -354,59 +354,11 @@ jint Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceFromMediaRecorder(
     return result;
 }
 
-
-jboolean  Java_android_filterfw_core_GLEnvironment_nativeDisconnectSurfaceMediaSource(
-                                                      JNIEnv* env,
-                                                      jobject thiz,
-                                                      jobject jmediarecorder) {
-    LOGV("GLEnv Jni: native disconnect SurfaceMediaSource");
-    GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
-    if (!gl_env) {
-        return -1;
-    }
-    // get a native mediarecorder object from the java object
-    sp<MediaRecorder> mr = getMediaRecorder(env, jmediarecorder);
-    if (mr == NULL) {
-        LOGE("GLEnvironment: Error- MediaRecorder could not be initialized!");
-        return -1;
-    }
-
-    // Ask the mediarecorder to return a handle to a surfacemediasource
-    // This will talk to the StageFrightRecorder via MediaRecorderClient
-    // over binder calls
-    sp<ISurfaceTexture> surfaceMS = mr->querySurfaceMediaSourceFromMediaServer();
-    if (surfaceMS == NULL) {
-      LOGE("GLEnvironment: Error- MediaRecorder returned a null \
-              <ISurfaceTexture> handle.");
-      return -1;
-    }
-    sp<SurfaceTextureClient> surfaceTC = new SurfaceTextureClient(surfaceMS);
-    // Get the ANativeWindow
-    sp<ANativeWindow> window = surfaceTC;
-
-
-    if (window == NULL) {
-      LOGE("GLEnvironment: Error creating window!");
-      return -1;
-    }
-
-    if (android::NO_ERROR != native_window_api_disconnect(window.get(), NATIVE_WINDOW_API_EGL)) {
-        return JNI_FALSE;
-    }
-    return JNI_TRUE;
-}
-
-
-
-
-
-
-
 jboolean Java_android_filterfw_core_GLEnvironment_nativeActivateSurfaceId(JNIEnv* env,
                                                                           jobject thiz,
                                                                           jint surfaceId) {
   GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
-  return gl_env ? ToJBool(gl_env->SwitchToSurfaceId(surfaceId)) : JNI_FALSE;
+  return gl_env ? ToJBool(gl_env->SwitchToSurfaceId(surfaceId) && gl_env->Activate()) : JNI_FALSE;
 }
 
 jboolean Java_android_filterfw_core_GLEnvironment_nativeRemoveSurfaceId(JNIEnv* env,
