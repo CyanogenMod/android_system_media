@@ -78,19 +78,20 @@ ssize_t BufferQueueSource::readAt(off64_t offset, void *data, size_t size) {
         oldFront = mAndroidBufferQueueSource->mFront;
         AdvancedBufferHeader *newFront = &oldFront[1];
 
-        // consume events when starting to read data from a buffer for the first time
-        if (oldFront->mDataSizeConsumed == 0) {
-            if (oldFront->mItems.mAdtsCmdData.mAdtsCmdCode & ANDROID_ADTSEVENT_EOS) {
-                // FIXME handle EOS
-                SL_LOGE("---> FIXME: handle ANDROID_ADTSEVENT_EOS <---");
-            }
-            oldFront->mItems.mAdtsCmdData.mAdtsCmdCode = ANDROID_ADTSEVENT_NONE;
-        }
-
         // where to read from
         char *pSrc = NULL;
         // can this read operation cause us to call the buffer queue callback
+        // (either because there was a command with no data, or all the data has been consumed)
         bool queueCallbackCandidate = false;
+
+        // consume events when starting to read data from a buffer for the first time
+        if (oldFront->mDataSizeConsumed == 0) {
+            if (oldFront->mItems.mAdtsCmdData.mAdtsCmdCode & ANDROID_ADTSEVENT_EOS) {
+                // EOS has no associated data
+                queueCallbackCandidate = true;
+            }
+            oldFront->mItems.mAdtsCmdData.mAdtsCmdCode = ANDROID_ADTSEVENT_NONE;
+        }
 
         //assert(mStreamToBqOffset <= offset);
         CHECK(mStreamToBqOffset <= offset);
