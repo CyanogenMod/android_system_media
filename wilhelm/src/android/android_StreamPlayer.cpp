@@ -245,21 +245,10 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
     } else { // empty queue
         SL_LOGD("ABQ empty, starving!");
     }
-#if 0
-        // signal we're at the end of the content, but don't pause (see note in function)
-        if (mUserIsAudioPlayer) {
-            // FIXME declare this external
-            //audioPlayer_dispatch_headAtEnd_lockPlay((CAudioPlayer*)user,
-            //        false /*set state to paused?*/, false);
-        } else {
-            // FIXME implement headAtEnd dispatch for CMediaPlayer
-        }
-    }
-#endif
 
     interface_unlock_exclusive(mAndroidBufferQueue);
 
-    // notify client
+    // notify client of buffer processed
     if (NULL != callback) {
         SLresult result = (*callback)(&mAndroidBufferQueue->mItf, callbackPContext,
                 pBufferContext, pBufferData, dataSize,

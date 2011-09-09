@@ -81,6 +81,13 @@ jboolean discontinuity = JNI_FALSE;
 
 static jboolean enqueueInitialBuffers(jboolean discontinuity);
 
+// Callback for XAPlayItf through which we receive the XA_PLAYEVENT_HEADATEND event */
+void PlayCallback(XAPlayItf caller, void *pContext, XAuint32 event) {
+    if (event & XA_PLAYEVENT_HEADATEND) {
+        LOGV("XA_PLAYEVENT_HEADATEND received, all MP2TS data has been decoded\n");
+    }
+}
+
 // AndroidBufferQueueItf callback for an audio player
 XAresult AndroidBufferQueueCallback(
         XAAndroidBufferQueueItf caller,
@@ -407,6 +414,13 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
 
     // specify which events we want to be notified of
     res = (*playerBQItf)->SetCallbackEventsMask(playerBQItf, XA_ANDROIDBUFFERQUEUEEVENT_PROCESSED);
+
+    // use the play interface to set up a callback for the XA_PLAYEVENT_HEADATEND event */
+    res = (*playerPlayItf)->SetCallbackEventsMask(playerPlayItf, XA_PLAYEVENT_HEADATEND);
+    assert(XA_RESULT_SUCCESS == res);
+    res = (*playerPlayItf)->RegisterCallback(playerPlayItf,
+            PlayCallback /*callback*/, NULL /*pContext*/);
+    assert(XA_RESULT_SUCCESS == res);
 
     // register the callback from which OpenMAX AL can retrieve the data to play
     res = (*playerBQItf)->RegisterCallback(playerBQItf, AndroidBufferQueueCallback, NULL);
