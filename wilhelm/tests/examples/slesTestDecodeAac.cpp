@@ -112,6 +112,9 @@ size_t encodedSamples = 0;
 size_t decodedFrames = 0;
 size_t decodedSamples = 0;
 
+/* constant to identify a buffer context which is the end of the stream to decode */
+static const int kEosBufferCntxt = 1980; // a magic value we can compare against
+
 /* protects shared variables */
 pthread_mutex_t eosLock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t eosCondition = PTHREAD_COND_INITIALIZER;
@@ -155,6 +158,15 @@ SLresult AndroidBufferQueueCallback(
     pthread_mutex_lock(&eosLock);
     SLresult res;
 
+    // for demonstration purposes:
+    // verify what type of information was enclosed in the processed buffer
+    if (NULL != pBufferContext) {
+        const int processedCommand = *(int *)pBufferContext;
+        if (kEosBufferCntxt == processedCommand) {
+            fprintf(stdout, "EOS was processed\n");
+        }
+    }
+
     if (endOfEncodedStream) {
         // we continue to receive acknowledgement after each buffer was processed
     } else if (filelen == 0) {
@@ -164,7 +176,7 @@ SLresult AndroidBufferQueueCallback(
         msgEos.itemSize = 0;
         // EOS message has no parameters, so the total size of the message is the size of the key
         //   plus the size of itemSize, both SLuint32
-        res = (*caller)->Enqueue(caller, NULL /*pBufferContext*/,
+        res = (*caller)->Enqueue(caller, (void *)&kEosBufferCntxt /*pBufferContext*/,
                 NULL /*pData*/, 0 /*dataLength*/,
                 &msgEos /*pMsg*/,
                 sizeof(SLuint32)*2 /*msgLength*/);
