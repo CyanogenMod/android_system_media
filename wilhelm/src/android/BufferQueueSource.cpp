@@ -38,7 +38,8 @@ const SLuint32 BufferQueueSource::kItemProcessed[NB_BUFFEREVENT_ITEM_FIELDS] = {
 
 BufferQueueSource::BufferQueueSource(const void* user, void *context,  const void *caller) :
           mAndroidBufferQueueSource(NULL),
-          mStreamToBqOffset(0)
+          mStreamToBqOffset(0),
+          mEosReached(false)
 {
     if (NULL != user) {
         mAndroidBufferQueueSource = &((CAudioPlayer*)user)->mAndroidBufferQueue;
@@ -61,6 +62,11 @@ status_t BufferQueueSource::initCheck() const {
 
 ssize_t BufferQueueSource::readAt(off64_t offset, void *data, size_t size) {
     SL_LOGD("BufferQueueSource::readAt(offset=%lld, data=%p, size=%d)", offset, data, size);
+
+    if (mEosReached) {
+        // once EOS has been received from the buffer queue, you can't read anymore
+        return 0;
+    }
 
     ssize_t readSize = 0;
     slAndroidBufferQueueCallback callback = NULL;
@@ -87,6 +93,7 @@ ssize_t BufferQueueSource::readAt(off64_t offset, void *data, size_t size) {
         // consume events when starting to read data from a buffer for the first time
         if (oldFront->mDataSizeConsumed == 0) {
             if (oldFront->mItems.mAdtsCmdData.mAdtsCmdCode & ANDROID_ADTSEVENT_EOS) {
+                mEosReached = true;
                 // EOS has no associated data
                 queueCallbackCandidate = true;
             }

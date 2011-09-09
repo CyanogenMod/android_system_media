@@ -57,6 +57,9 @@ private:
     // of the stream, to an offset in each buffer from the buffer queue source
     off64_t mStreamToBqOffset;
 
+    // indicates whether an EOS command has been reached when consuming the buffers in the queue
+    bool mEosReached;
+
     BufferQueueSource(const BufferQueueSource &);
     BufferQueueSource &operator=(const BufferQueueSource &);
 };
