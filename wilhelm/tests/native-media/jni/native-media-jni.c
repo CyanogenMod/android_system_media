@@ -69,6 +69,9 @@ FILE *file;
 // has the app reached the end of the file
 jboolean reachedEof = JNI_FALSE;
 
+// constant to identify a buffer context which is the end of the stream to decode
+static const int kEosBufferCntxt = 1980; // a magic value we can compare against
+
 // for mutual exclusion between callback thread and application thread(s)
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
@@ -118,10 +121,14 @@ XAresult AndroidBufferQueueCallback(
         goto exit;
     }
 
-    if (pBufferData == NULL) {
-        // this is the case when our buffer with the EOS message has been consumed
-        assert(0 == dataSize);
-        goto exit;
+    if ((pBufferData == NULL) && (pBufferContext != NULL)) {
+        const int processedCommand = *(int *)pBufferContext;
+        if (kEosBufferCntxt == processedCommand) {
+            LOGV("EOS was processed\n");
+            // our buffer with the EOS message has been consumed
+            assert(0 == dataSize);
+            goto exit;
+        }
     }
 
     // pBufferData is a pointer to a buffer that we previously Enqueued
@@ -192,7 +199,7 @@ XAresult AndroidBufferQueueCallback(
         msgEos[0].itemSize = 0;
         // EOS message has no parameters, so the total size of the message is the size of the key
         //   plus the size if itemSize, both XAuint32
-        res = (*caller)->Enqueue(caller, NULL /*pBufferContext*/,
+        res = (*caller)->Enqueue(caller, (void *)&kEosBufferCntxt /*pBufferContext*/,
                 NULL /*pData*/, 0 /*dataLength*/,
                 msgEos /*pMsg*/,
                 // FIXME == sizeof(BufferItem)? */

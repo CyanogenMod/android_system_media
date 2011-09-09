@@ -134,6 +134,10 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
     // retrieve data from the buffer queue
     interface_lock_exclusive(mAndroidBufferQueue);
 
+    // can this read operation cause us to call the buffer queue callback
+    // (either because there was a command with no data, or all the data has been consumed)
+    bool queueCallbackCandidate = false;
+
     if (mAndroidBufferQueue->mState.count != 0) {
         // SL_LOGD("nbBuffers in ABQ = %u, buffSize=%u",abq->mState.count, buffSize);
         assert(mAndroidBufferQueue->mFront != mAndroidBufferQueue->mRear);
@@ -146,6 +150,8 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
             // note this code assumes at most one event per buffer; see IAndroidBufferQueue_Enqueue
             if (oldFront->mItems.mTsCmdData.mTsCmdCode & ANDROID_MP2TSEVENT_EOS) {
                 receivedCmd_l(IStreamListener::EOS);
+                // EOS has no associated data
+                queueCallbackCandidate = true;
             } else if (oldFront->mItems.mTsCmdData.mTsCmdCode & ANDROID_MP2TSEVENT_DISCONTINUITY) {
                 receivedCmd_l(IStreamListener::DISCONTINUITY);
             } else if (oldFront->mItems.mTsCmdData.mTsCmdCode & ANDROID_MP2TSEVENT_DISCON_NEWPTS) {
@@ -211,30 +217,35 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
 
                     // data has been consumed, and the buffer queue state has been updated
                     // we will notify the client if applicable
-                    if (mAndroidBufferQueue->mCallbackEventsMask &
-                            SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED) {
-                        callback = mAndroidBufferQueue->mCallback;
-                        // save callback data while under lock
-                        callbackPContext = mAndroidBufferQueue->mContext;
-                        pBufferContext = (void *)oldFront->mBufferContext;
-                        pBufferData    = (void *)oldFront->mDataBuffer;
-                        dataSize       = oldFront->mDataSize;
-                        // here a buffer is only dequeued when fully consumed
-                        //dataUsed     = oldFront->mDataSizeConsumed;
-                    }
+                    queueCallbackCandidate = true;
                 }
-                //SL_LOGD("%d buffers available after enqueue", mAvailableBuffers.size());
-                if (!mAvailableBuffers.empty()) {
-                    // there is still room in the shared memory, recheck later if we can pull
-                    // data from the buffer queue and write it to shared memory
-                    mPlayer->queueRefilled();
+            }
+
+            if (queueCallbackCandidate) {
+                if (mAndroidBufferQueue->mCallbackEventsMask &
+                        SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED) {
+                    callback = mAndroidBufferQueue->mCallback;
+                    // save callback data while under lock
+                    callbackPContext = mAndroidBufferQueue->mContext;
+                    pBufferContext = (void *)oldFront->mBufferContext;
+                    pBufferData    = (void *)oldFront->mDataBuffer;
+                    dataSize       = oldFront->mDataSize;
+                    // here a buffer is only dequeued when fully consumed
+                    //dataUsed     = oldFront->mDataSizeConsumed;
                 }
+            }
+            //SL_LOGD("%d buffers available after reading from queue", mAvailableBuffers.size());
+            if (!mAvailableBuffers.empty()) {
+                // there is still room in the shared memory, recheck later if we can pull
+                // data from the buffer queue and write it to shared memory
+                mPlayer->queueRefilled();
             }
         }
 
-
     } else { // empty queue
         SL_LOGD("ABQ empty, starving!");
+    }
+#if 0
         // signal we're at the end of the content, but don't pause (see note in function)
         if (mUserIsAudioPlayer) {
             // FIXME declare this external
@@ -244,6 +255,7 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
             // FIXME implement headAtEnd dispatch for CMediaPlayer
         }
     }
+#endif
 
     interface_unlock_exclusive(mAndroidBufferQueue);
 
