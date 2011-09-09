@@ -370,7 +370,8 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
 
     switch(mp->mAndroidObjType) {
     case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: {
-        mp->mAVPlayer = new android::StreamPlayer(&ap_params, true /*hasVideo*/);
+        mp->mAVPlayer = new android::StreamPlayer(&ap_params, true /*hasVideo*/,
+                &mp->mAndroidBufferQueue, mp->mCallbackProtector);
         mp->mAVPlayer->init(player_handleMediaPlayerEventNotifications, (void*)mp);
         }
         break;
@@ -406,9 +407,6 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
     }
 
     if (XA_RESULT_SUCCESS == result) {
-
-        // inform GenericPlayer of the associated callback protector
-        mp->mAVPlayer->setCallbackProtector(mp->mCallbackProtector);
 
         // if there is a video sink
         if (XA_DATALOCATOR_NATIVEDISPLAY ==
@@ -647,10 +645,7 @@ void android_Player_androidBufferQueue_registerCallback_l(CMediaPlayer *mp) {
             && (mp->mAVPlayer != 0)) {
         SL_LOGD("android_Player_androidBufferQueue_registerCallback_l");
         android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
-        splr->registerQueueCallback(
-                (const void*)mp, false /*userIsAudioPlayer*/,
-                mp->mAndroidBufferQueue.mContext, (const void*)&(mp->mAndroidBufferQueue.mItf));
-
+        splr->registerQueueCallback(&mp->mAndroidBufferQueue);
     }
 }
 

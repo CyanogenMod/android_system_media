@@ -31,9 +31,7 @@ class StreamPlayer;
 class StreamSourceAppProxy : public BnStreamSource {
 public:
     StreamSourceAppProxy(
-            const void* user, bool userIsAudioPlayer,
-            void *appContext,
-            const void *caller,
+            IAndroidBufferQueue *androidBufferQueue,
             const sp<CallbackProtector> &callbackProtector,
             const sp<StreamPlayer> &player);
     virtual ~StreamSourceAppProxy();
@@ -61,15 +59,10 @@ private:
     // list of available buffers in shared memory, identified by their index
     List<size_t> mAvailableBuffers;
 
-    const void* mUser;
-    bool mUserIsAudioPlayer;
     // the Android Buffer Queue from which data is consumed and written to shared memory
     IAndroidBufferQueue* mAndroidBufferQueue;
 
-    void *mAppContext;
-    const void *mCaller;
-
-    sp<CallbackProtector> mCallbackProtector;
+    const sp<CallbackProtector> mCallbackProtector;
     const sp<StreamPlayer> mPlayer;
 
     DISALLOW_EVIL_CONSTRUCTORS(StreamSourceAppProxy);
@@ -80,16 +73,14 @@ private:
 class StreamPlayer : public GenericMediaPlayer
 {
 public:
-    StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo);
+    StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo,
+           IAndroidBufferQueue *androidBufferQueue, const sp<CallbackProtector> &callbackProtector);
     virtual ~StreamPlayer();
 
     // overridden from GenericPlayer
     virtual void onMessageReceived(const sp<AMessage> &msg);
 
-    void registerQueueCallback(
-            const void* user, bool userIsAudioPlayer,
-            void *context,
-            const void *caller);
+    void registerQueueCallback(IAndroidBufferQueue *androidBufferQueue);
     void queueRefilled();
     void appClear_l();
 
@@ -104,7 +95,7 @@ protected:
         kWhatPullFromAbq = 'plfq'
     };
 
-    sp<StreamSourceAppProxy> mAppProxy; // application proxy for the android buffer queue source
+    const sp<StreamSourceAppProxy> mAppProxy; // application proxy for the shared memory source
 
     // overridden from GenericMediaPlayer
     virtual void onPrepare();
@@ -112,19 +103,8 @@ protected:
 
     void onPullFromAndroidBufferQueue();
 
-    Mutex mAppProxyLock;
-
-
 private:
     DISALLOW_EVIL_CONSTRUCTORS(StreamPlayer);
 };
 
 } // namespace android
-
-
-//--------------------------------------------------------------------------------------------------
-/*
- * xxx_l functions are called with a lock on the CAudioPlayer mObject
- */
-extern void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_cbf_t cbf,
-        void* notifUser);

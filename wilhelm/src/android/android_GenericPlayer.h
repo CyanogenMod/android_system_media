@@ -86,10 +86,6 @@ public:
     // Call after changing any of the IPlay settings related to SL_PLAYEVENT_*
     void setPlayEvents(int32_t eventFlags, int32_t markerPosition, int32_t positionUpdatePeriod);
 
-    // Inform us of the callback protector associated with this object; call at most once
-    // immediately after object construction, from the same thread that did the construction.
-    void setCallbackProtector(const sp<CallbackProtector> &callbackProtector);
-
 protected:
     // mutex used for set vs use of volume and cache (fill, threshold) settings
     Mutex mSettingsLock;
@@ -189,8 +185,7 @@ protected:
     int16_t mLastNotifiedCacheFill; // last cache fill level communicated to the listener
     int16_t mCacheFillNotifThreshold; // threshold in cache fill level for cache fill to be reported
 
-    // set at most once immediately after construction, and then read-only
-    sp<CallbackProtector> mCallbackProtector;
+    const sp<CallbackProtector> mCallbackProtector;
 
 private:
 

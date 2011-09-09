@@ -23,45 +23,19 @@
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/foundation/ADebug.h>
 
-//--------------------------------------------------------------------------------------------------
-// FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
-
-void android_StreamPlayer_realize_l(CAudioPlayer *ap, const notif_cbf_t cbf, void* notifUser) {
-    SL_LOGV("android_StreamPlayer_realize_l(%p)", ap);
-
-    AudioPlayback_Parameters ap_params;
-    ap_params.sessionId = ap->mSessionId;
-    ap_params.streamType = ap->mStreamType;
-    ap_params.trackcb = NULL;
-    ap_params.trackcbUser = NULL;
-    android::StreamPlayer* splr = new android::StreamPlayer(&ap_params, false /*hasVideo*/);
-    ap->mAPlayer = splr;
-    splr->init(cbf, notifUser);
-}
-
 
 //--------------------------------------------------------------------------------------------------
 namespace android {
 
 StreamSourceAppProxy::StreamSourceAppProxy(
-        const void* user, bool userIsAudioPlayer,
-        void *context, const void *caller, const sp<CallbackProtector> &callbackProtector,
+        IAndroidBufferQueue *androidBufferQueue,
+        const sp<CallbackProtector> &callbackProtector,
         const sp<StreamPlayer> &player) :
-    mUser(user),
-    mUserIsAudioPlayer(userIsAudioPlayer),
-    mAndroidBufferQueue(NULL),
-    mAppContext(context),
-    mCaller(caller),
+    mAndroidBufferQueue(androidBufferQueue),
     mCallbackProtector(callbackProtector),
     mPlayer(player)
 {
     SL_LOGV("StreamSourceAppProxy::StreamSourceAppProxy()");
-
-    if (mUserIsAudioPlayer) {
-        mAndroidBufferQueue = &((CAudioPlayer*)mUser)->mAndroidBufferQueue;
-    } else {
-        mAndroidBufferQueue = &((CMediaPlayer*)mUser)->mAndroidBufferQueue;
-    }
 }
 
 StreamSourceAppProxy::~StreamSourceAppProxy() {
@@ -268,9 +242,10 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
 
 
 //--------------------------------------------------------------------------------------------------
-StreamPlayer::StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo) :
+StreamPlayer::StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo,
+        IAndroidBufferQueue *androidBufferQueue, const sp<CallbackProtector> &callbackProtector) :
         GenericMediaPlayer(params, hasVideo),
-        mAppProxy(0)
+        mAppProxy(new StreamSourceAppProxy(androidBufferQueue, callbackProtector, this))
 {
     SL_LOGD("StreamPlayer::StreamPlayer()");
 
@@ -280,8 +255,6 @@ StreamPlayer::StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo) :
 
 StreamPlayer::~StreamPlayer() {
     SL_LOGD("StreamPlayer::~StreamPlayer()");
-
-    mAppProxy.clear();
 }
 
 
@@ -298,19 +271,8 @@ void StreamPlayer::onMessageReceived(const sp<AMessage> &msg) {
 }
 
 
-void StreamPlayer::registerQueueCallback(
-        const void* user, bool userIsAudioPlayer,
-        void *context,
-        const void *caller) {
+void StreamPlayer::registerQueueCallback(IAndroidBufferQueue *androidBufferQueue) {
     SL_LOGD("StreamPlayer::registerQueueCallback");
-    Mutex::Autolock _l(mAppProxyLock);
-
-    mAppProxy = new StreamSourceAppProxy(
-            user, userIsAudioPlayer,
-            context, caller, mCallbackProtector, this);
-
-    CHECK(mAppProxy != 0);
-    SL_LOGD("StreamPlayer::registerQueueCallback end");
 }
 
 
@@ -334,8 +296,6 @@ void StreamPlayer::appClear_l() {
 // Event handlers
 void StreamPlayer::onPrepare() {
     SL_LOGD("StreamPlayer::onPrepare()");
-    Mutex::Autolock _l(mAppProxyLock);
-    if (mAppProxy != 0) {
         sp<IMediaPlayerService> mediaPlayerService(getMediaPlayerService());
         if (mediaPlayerService != NULL) {
             mPlayer = mediaPlayerService->create(getpid(), mPlayerClient /*IMediaPlayerClient*/,
@@ -347,9 +307,6 @@ void StreamPlayer::onPrepare() {
                 mPlayer.clear();
             }
         }
-    } else {
-        SL_LOGE("Nothing to do here because there is no registered callback");
-    }
     if (mPlayer == NULL) {
         mStateFlags |= kFlagPreparedUnsuccessfully;
     }
@@ -369,11 +326,8 @@ void StreamPlayer::onPlay() {
 
 
 void StreamPlayer::onPullFromAndroidBufferQueue() {
-    //SL_LOGD("StreamPlayer::onQueueRefilled()");
-    Mutex::Autolock _l(mAppProxyLock);
-    if (mAppProxy != 0) {
-        mAppProxy->pullFromBuffQueue();
-    }
+    SL_LOGD("StreamPlayer::onPullFromAndroidBufferQueue()");
+    mAppProxy->pullFromBuffQueue();
 }
 
 } // namespace android

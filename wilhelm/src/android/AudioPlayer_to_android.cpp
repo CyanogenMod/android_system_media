@@ -1429,6 +1429,7 @@ SLresult android_audioPlayer_getConfig(CAudioPlayer* ap, const SLchar *configKey
 
 
 //-----------------------------------------------------------------------------
+// FIXME abstract out the diff between CMediaPlayer and CAudioPlayer
 SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async) {
 
     SLresult result = SL_RESULT_SUCCESS;
@@ -1551,8 +1552,17 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     //-----------------------------------
     // StreamPlayer
     case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: {
-        android_StreamPlayer_realize_l(pAudioPlayer, sfplayer_handlePrefetchEvent,
-                (void*)pAudioPlayer);
+        object_lock_exclusive(&pAudioPlayer->mObject);
+        AudioPlayback_Parameters ap_params;
+        ap_params.sessionId = pAudioPlayer->mSessionId;
+        ap_params.streamType = pAudioPlayer->mStreamType;
+        ap_params.trackcb = NULL;
+        ap_params.trackcbUser = NULL;
+        android::StreamPlayer* splr = new android::StreamPlayer(&ap_params, false /*hasVideo*/,
+                &pAudioPlayer->mAndroidBufferQueue, pAudioPlayer->mCallbackProtector);
+        pAudioPlayer->mAPlayer = splr;
+        splr->init(sfplayer_handlePrefetchEvent, (void*)pAudioPlayer);
+        object_unlock_exclusive(&pAudioPlayer->mObject);
         }
         break;
     //-----------------------------------
@@ -2211,10 +2221,7 @@ SLresult android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer 
     switch (ap->mAndroidObjType) {
       case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: {
           android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(ap->mAPlayer.get());
-          splr->registerQueueCallback(
-                  (const void*)ap /*user*/, true /*userIsAudioPlayer*/,
-                  ap->mAndroidBufferQueue.mContext /*context*/,
-                  (const void*)&(ap->mAndroidBufferQueue.mItf) /*caller*/);
+          splr->registerQueueCallback(&ap->mAndroidBufferQueue);
         } break;
       case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE: {
           android::AacBqToPcmCbRenderer* dec =
