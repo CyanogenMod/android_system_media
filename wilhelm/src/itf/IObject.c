@@ -42,10 +42,9 @@ static void HandleRealize(void *self, void *ignored, int unused)
     case SL_OBJECT_STATE_REALIZING_1:   // normal case
         if (NULL != realize) {
             thiz->mState = SL_OBJECT_STATE_REALIZING_2;
-            object_unlock_exclusive(thiz);
-            // Note that the mutex is unlocked during the realize hook
+            // Note that the mutex is locked on entry to and exit from the realize hook,
+            // but the hook is permitted to temporarily unlock the mutex (e.g. for async).
             result = (*realize)(thiz, SL_BOOLEAN_TRUE);
-            object_lock_exclusive(thiz);
             assert(SL_OBJECT_STATE_REALIZING_2 == thiz->mState);
             state = SL_RESULT_SUCCESS == result ? SL_OBJECT_STATE_REALIZED :
                 SL_OBJECT_STATE_UNREALIZED;
@@ -119,9 +118,9 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
             state = SL_OBJECT_STATE_REALIZING_2;
         }
         thiz->mState = state;
-        object_unlock_exclusive(thiz);
         switch (state) {
         case SL_OBJECT_STATE_REALIZING_1: // asynchronous on non-Engine
+            object_unlock_exclusive(thiz);
             assert(async);
             result = ThreadPool_add_ppi(&thiz->mEngine->mThreadPool, HandleRealize, thiz, NULL, 0);
             if (SL_RESULT_SUCCESS != result) {
@@ -134,9 +133,9 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
         case SL_OBJECT_STATE_REALIZING_2: // synchronous, or asynchronous on Engine
             {
             AsyncHook realize = clazz->mRealize;
-            // Note that the mutex is unlocked during the realize hook
+            // Note that the mutex is locked on entry to and exit from the realize hook,
+            // but the hook is permitted to temporarily unlock the mutex (e.g. for async).
             result = (NULL != realize) ? (*realize)(thiz, async) : SL_RESULT_SUCCESS;
-            object_lock_exclusive(thiz);
             assert(SL_OBJECT_STATE_REALIZING_2 == thiz->mState);
             state = (SL_RESULT_SUCCESS == result) ? SL_OBJECT_STATE_REALIZED :
                 SL_OBJECT_STATE_UNREALIZED;
@@ -153,6 +152,7 @@ static SLresult IObject_Realize(SLObjectItf self, SLboolean async)
             }
             break;
         default:                          // impossible
+            object_unlock_exclusive(thiz);
             assert(SL_BOOLEAN_FALSE);
             break;
         }
@@ -185,10 +185,9 @@ static void HandleResume(void *self, void *ignored, int unused)
     case SL_OBJECT_STATE_RESUMING_1:    // normal case
         if (NULL != resume) {
             thiz->mState = SL_OBJECT_STATE_RESUMING_2;
-            object_unlock_exclusive(thiz);
-            // Note that the mutex is unlocked during the resume hook
+            // Note that the mutex is locked on entry to and exit from the resume hook,
+            // but the hook is permitted to temporarily unlock the mutex (e.g. for async).
             result = (*resume)(thiz, SL_BOOLEAN_TRUE);
-            object_lock_exclusive(thiz);
             assert(SL_OBJECT_STATE_RESUMING_2 == thiz->mState);
             state = SL_RESULT_SUCCESS == result ? SL_OBJECT_STATE_REALIZED :
                 SL_OBJECT_STATE_SUSPENDED;
@@ -247,9 +246,9 @@ static SLresult IObject_Resume(SLObjectItf self, SLboolean async)
             state = SL_OBJECT_STATE_RESUMING_2;
         }
         thiz->mState = state;
-        object_unlock_exclusive(thiz);
         switch (state) {
         case SL_OBJECT_STATE_RESUMING_1: // asynchronous
+            object_unlock_exclusive(thiz);
             assert(async);
             result = ThreadPool_add_ppi(&thiz->mEngine->mThreadPool, HandleResume, thiz, NULL, 0);
             if (SL_RESULT_SUCCESS != result) {
@@ -262,9 +261,9 @@ static SLresult IObject_Resume(SLObjectItf self, SLboolean async)
         case SL_OBJECT_STATE_RESUMING_2: // synchronous
             {
             AsyncHook resume = clazz->mResume;
-            // Note that the mutex is unlocked during the resume hook
+            // Note that the mutex is locked on entry to and exit from the resume hook,
+            // but the hook is permitted to temporarily unlock the mutex (e.g. for async).
             result = (NULL != resume) ? (*resume)(thiz, SL_BOOLEAN_FALSE) : SL_RESULT_SUCCESS;
-            object_lock_exclusive(thiz);
             assert(SL_OBJECT_STATE_RESUMING_2 == thiz->mState);
             thiz->mState = (SL_RESULT_SUCCESS == result) ? SL_OBJECT_STATE_REALIZED :
                 SL_OBJECT_STATE_SUSPENDED;
@@ -272,6 +271,7 @@ static SLresult IObject_Resume(SLObjectItf self, SLboolean async)
             }
             break;
         default:                        // impossible
+            object_unlock_exclusive(thiz);
             assert(SL_BOOLEAN_FALSE);
             break;
         }

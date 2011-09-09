@@ -1480,8 +1480,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     //-----------------------------------
     // MediaPlayer
     case AUDIOPLAYER_FROM_URIFD: {
-        object_lock_exclusive(&pAudioPlayer->mObject);
-
         assert(pAudioPlayer->mAndroidObjState == ANDROID_UNINITIALIZED);
         assert(pAudioPlayer->mNumChannels == UNKNOWN_NUMCHANNELS);
         assert(pAudioPlayer->mSampleRateMilliHz == UNKNOWN_SAMPLERATE);
@@ -1496,8 +1494,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         pAudioPlayer->mAPlayer = new android::LocAVPlayer(&app, false /*hasVideo*/);
         pAudioPlayer->mAPlayer->init(sfplayer_handlePrefetchEvent,
                         (void*)pAudioPlayer /*notifUSer*/);
-
-        object_unlock_exclusive(&pAudioPlayer->mObject);
 
         switch (pAudioPlayer->mDataSource.mLocator.mLocatorType) {
             case SL_DATALOCATOR_URI: {
@@ -1555,19 +1551,13 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     //-----------------------------------
     // StreamPlayer
     case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: {
-        object_lock_exclusive(&pAudioPlayer->mObject);
-
         android_StreamPlayer_realize_l(pAudioPlayer, sfplayer_handlePrefetchEvent,
                 (void*)pAudioPlayer);
-
-        object_unlock_exclusive(&pAudioPlayer->mObject);
         }
         break;
     //-----------------------------------
     // AudioToCbRenderer
     case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE: {
-        object_lock_exclusive(&pAudioPlayer->mObject);
-
         AudioPlayback_Parameters app;
         app.sessionId = pAudioPlayer->mSessionId;
         app.streamType = pAudioPlayer->mStreamType;
@@ -1598,14 +1588,11 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
             break;
         }
 
-        object_unlock_exclusive(&pAudioPlayer->mObject);
         }
         break;
     //-----------------------------------
     // AacBqToPcmCbRenderer
     case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE: {
-        object_lock_exclusive(&pAudioPlayer->mObject);
-
         AudioPlayback_Parameters app;
         app.sessionId = pAudioPlayer->mSessionId;
         app.streamType = pAudioPlayer->mStreamType;
@@ -1618,8 +1605,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         // configures the callback for the notifications coming from the SF code,
         // but also implicitly configures the AndroidBufferQueue from which ADTS data is read
         pAudioPlayer->mAPlayer->init(sfplayer_handlePrefetchEvent, (void*)pAudioPlayer);
-
-        object_unlock_exclusive(&pAudioPlayer->mObject);
         }
         break;
     //-----------------------------------
@@ -1660,7 +1645,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
 //-----------------------------------------------------------------------------
 /**
- * Called with a lock on AudioPlayer
+ * Called with a lock on AudioPlayer, and blocks until safe to destroy
  */
 SLresult android_audioPlayer_preDestroy(CAudioPlayer *pAudioPlayer) {
     SL_LOGD("android_audioPlayer_preDestroy(%p)", pAudioPlayer);
