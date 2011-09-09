@@ -284,14 +284,9 @@ public class BackDropperFilter extends Filter {
             // Decide whether pixel is foreground or background based on Y and UV
             //   distance and maximum acceptable variance.
             // yuv_weights.x is smaller than yuv_weights.y to discount the influence of shadow
-            "bool is_bg(vec2 dist_yc, float accept_variance) {\n" +
-            "  return ( ((yuv_weights.y * dist_yc.y) < accept_variance) && \n" +
-            "           ((yuv_weights.x * dist_yc.x) < accept_variance));\n" +
-            "}\n" +
             "bool is_fg(vec2 dist_yc, float accept_variance) {\n" +
             "  return ( dot(yuv_weights, dist_yc) >= accept_variance );\n" +
             "}\n" +
-            "\n" +
             "void main() {\n" +
             "  vec4 dist_lrg_sc = texture2D(tex_sampler_0, v_texcoord, exp_lrg);\n" +
             "  vec4 dist_mid_sc = texture2D(tex_sampler_0, v_texcoord, exp_mid);\n" +
@@ -300,21 +295,12 @@ public class BackDropperFilter extends Filter {
             "  vec2 dist_mid = inv_dist_scale * dist_mid_sc.ba;\n" +
             "  vec2 dist_sml = inv_dist_scale * dist_sml_sc.ba;\n" +
             "  vec2 norm_dist = 0.75 * dist_sml / accept_variance;\n" + // For debug viz
-            //            "  gl_FragColor = is_bg(dist_lrg, accept_variance * scale_lrg) ? \n" +
-            //            "                    vec4(0.0, norm_dist, 0.0) :\n" +
-            //            "                 is_bg(dist_mid, accept_variance * scale_mid) ? \n" +
-            //            "                    vec4(0.5, norm_dist, 0.0) :\n" +
-            //            "                 is_bg(dist_sml, accept_variance * scale_sml) ? \n" +
-            //            "                    vec4(0.8, norm_dist, 0.0) :\n" +
-            //            "                    vec4(1.0, norm_dist, 1.0);\n" +
-            "  gl_FragColor = is_fg(dist_lrg, accept_variance * scale_lrg) ? \n" +
-            "                    vec4(1.0, norm_dist, 1.0) :\n" +
-            "                 is_fg(dist_mid, accept_variance * scale_mid) ? \n" +
-            "                    vec4(0.8, norm_dist, 1.0) :\n" +
-            "                 is_fg(dist_sml, accept_variance * scale_sml) ? \n" +
-            "                    vec4(0.5, norm_dist, 1.0) :\n" +
-            "                    vec4(0.0, norm_dist, 0.0);\n" +
-
+            "  bool is_fg_lrg = is_fg(dist_lrg, accept_variance * scale_lrg);\n" +
+            "  bool is_fg_mid = is_fg_lrg || is_fg(dist_mid, accept_variance * scale_mid);\n" +
+            "  float is_fg_sml =\n" +
+            "      float(is_fg_mid || is_fg(dist_sml, accept_variance * scale_sml));\n" +
+            "  float alpha = 0.5 * is_fg_sml + 0.3 * float(is_fg_mid) + 0.2 * float(is_fg_lrg);\n" +
+            "  gl_FragColor = vec4(alpha, norm_dist, is_fg_sml);\n" +
             "}\n";
 
     // Automatic White Balance parameter decision shader
