@@ -249,10 +249,6 @@ status_t AacAdtsSource::read(
     if ((frameSize = getFrameSize(mDataSource, mOffset)) == 0) {
         SL_LOGV("AacAdtsSource::read() returns EOS");
         return ERROR_END_OF_STREAM;
-        // FIXME if we return EOS here, verify we can restart decoding when we get new data
-        //  with start()
-        //LOGE("AacAdtsSource::read() should return EOS, but returning OK");
-        //return OK;
     }
 
     MediaBuffer *buffer;

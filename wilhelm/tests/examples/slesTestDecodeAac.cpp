@@ -143,6 +143,14 @@ typedef struct CallbackCntxt_ {
 } CallbackCntxt;
 
 //-----------------------------------------------------------------
+/* Callback for SLPlayItf through which we receive the SL_PLAYEVENT_HEADATEND event */
+void PlayCallback(SLPlayItf caller, void *pContext, SLuint32 event) {
+    if (event & SL_PLAYEVENT_HEADATEND) {
+        fprintf(stdout, "SL_PLAYEVENT_HEADATEND received, all decoded data has been received\n");
+    }
+}
+
+//-----------------------------------------------------------------
 /* Callback for AndroidBufferQueueItf through which we supply ADTS buffers */
 SLresult AndroidBufferQueueCallback(
         SLAndroidBufferQueueItf caller,
@@ -434,6 +442,12 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
 
     /* Get the play interface which is implicit */
     res = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf);
+    ExitOnError(res);
+
+    /* Use the play interface to set up a callback for the SL_PLAYEVENT_HEADATEND event */
+    res = (*playItf)->SetCallbackEventsMask(playItf, SL_PLAYEVENT_HEADATEND);
+    ExitOnError(res);
+    res = (*playItf)->RegisterCallback(playItf, PlayCallback /*callback*/, NULL /*pContext*/);
     ExitOnError(res);
 
     /* Get the position before prefetch; should be zero */
