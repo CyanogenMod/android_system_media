@@ -30,10 +30,10 @@ static XAresult IStreamInformation_QueryMediaContainerInformation( XAStreamInfor
 
 #ifdef ANDROID
     IStreamInformation *thiz = (IStreamInformation *) self;
-    interface_lock_exclusive(thiz);
+    interface_lock_shared(thiz);
     // always storing container info at index 0, as per spec
     *info = thiz->mStreamInfoTable.itemAt(0).containerInfo;
-    interface_unlock_exclusive(thiz);
+    interface_unlock_shared(thiz);
     // even though the pointer to the media container info is returned, the values aren't set
     //  for the actual container in this version, they are simply initialized to defaults
     //  (see IStreamInformation_init)
@@ -41,7 +41,7 @@ static XAresult IStreamInformation_QueryMediaContainerInformation( XAStreamInfor
 #else
     SL_LOGE("QueryMediaContainerInformation is unsupported");
     memset(info, 0, sizeof(XAMediaContainerInformation));
-    result = XA_RESULT_CONTENT_UNSUPPORTED;
+    result = XA_RESULT_FEATURE_UNSUPPORTED;
 #endif
 
     XA_LEAVE_INTERFACE
@@ -69,7 +69,7 @@ static XAresult IStreamInformation_QueryStreamType( XAStreamInformationItf self,
     } else {
         IStreamInformation *thiz = (IStreamInformation *) self;
 
-        interface_lock_exclusive(thiz);
+        interface_lock_shared(thiz);
 
         XAuint32 nbStreams = thiz->mStreamInfoTable.itemAt(0).containerInfo.numStreams;
         // streams in the container are numbered 1..nbStreams
@@ -82,7 +82,7 @@ static XAresult IStreamInformation_QueryStreamType( XAStreamInformationItf self,
             result = XA_RESULT_PARAMETER_INVALID;
         }
 
-        interface_unlock_exclusive(thiz);
+        interface_unlock_shared(thiz);
     }
 #endif
 
@@ -106,7 +106,7 @@ static XAresult IStreamInformation_QueryStreamInformation( XAStreamInformationIt
 
         IStreamInformation *thiz = (IStreamInformation *) self;
 
-        interface_lock_exclusive(thiz);
+        interface_lock_shared(thiz);
 
         XAuint32 nbStreams = thiz->mStreamInfoTable.itemAt(0).containerInfo.numStreams;
         // stream 0 is the container, and other streams in the container are numbered 1..nbStreams
@@ -149,7 +149,7 @@ static XAresult IStreamInformation_QueryStreamInformation( XAStreamInformationIt
             result = XA_RESULT_PARAMETER_INVALID;
         }
 
-        interface_unlock_exclusive(thiz);
+        interface_unlock_shared(thiz);
 #endif
 
     }
@@ -165,8 +165,46 @@ static XAresult IStreamInformation_QueryStreamName( XAStreamInformationItf self,
 {
     XA_ENTER_INTERFACE
 
-    SL_LOGE("unsupported XAStreamInformationItf function");
-    result = XA_RESULT_FEATURE_UNSUPPORTED;
+    if (NULL == pNameSize || streamIndex == 0) {
+        result = XA_RESULT_PARAMETER_INVALID;
+    } else {
+#ifdef ANDROID
+        IStreamInformation *thiz = (IStreamInformation *) self;
+        interface_lock_shared(thiz);
+
+        XAuint32 nbStreams = thiz->mStreamInfoTable.itemAt(0).containerInfo.numStreams;
+        // streams in the container are numbered 1..nbStreams
+        if (streamIndex <= nbStreams) {
+            char streamName[16];        // large enough for the fixed format in next line
+            snprintf(streamName, sizeof(streamName), "stream%u", streamIndex);
+            size_t actualNameLength = strlen(streamName);
+            if (NULL == pName) {
+                // application is querying the name length in order to allocate a buffer
+                result = XA_RESULT_SUCCESS;
+            } else {
+                SLuint16 availableNameLength = *pNameSize;
+                if (actualNameLength > availableNameLength) {
+                    memcpy(pName, streamName, availableNameLength);
+                    result = XA_RESULT_BUFFER_INSUFFICIENT;
+                } else if (actualNameLength == availableNameLength) {
+                    memcpy(pName, streamName, availableNameLength);
+                    result = XA_RESULT_SUCCESS;
+                } else { // actualNameLength < availableNameLength
+                    memcpy(pName, streamName, actualNameLength + 1);
+                    result = XA_RESULT_SUCCESS;
+                }
+            }
+            *pNameSize = actualNameLength;
+        } else {
+            result = XA_RESULT_PARAMETER_INVALID;
+        }
+
+        interface_unlock_shared(thiz);
+#else
+        SL_LOGE("unsupported XAStreamInformationItf function");
+        result = XA_RESULT_FEATURE_UNSUPPORTED;
+#endif
+    }
 
     XA_LEAVE_INTERFACE
 }
@@ -203,15 +241,18 @@ static XAresult IStreamInformation_QueryActiveStreams( XAStreamInformationItf se
         XA_LEAVE_INTERFACE;
     }
 
+#ifdef ANDROID
     IStreamInformation *thiz = (IStreamInformation *) self;
-
-    interface_lock_exclusive(thiz);
+    interface_lock_shared(thiz);
 
     result = XA_RESULT_SUCCESS;
     *numStreams = thiz->mStreamInfoTable.itemAt(0).containerInfo.numStreams;
     activeStreams = thiz->mActiveStreams;
 
-    interface_unlock_exclusive(thiz);
+    interface_unlock_shared(thiz);
+#else
+    result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
 
     XA_LEAVE_INTERFACE
 }
