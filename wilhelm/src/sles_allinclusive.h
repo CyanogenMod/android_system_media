@@ -213,10 +213,10 @@ typedef struct {
     SLuint16 mSLObjectID;   // OpenSL ES object ID
     XAuint16 mXAObjectID;   // OpenMAX AL object ID
     // hooks
-    AsyncHook mRealize;
-    AsyncHook mResume;
-    VoidHook mDestroy;
-    PreDestroyHook mPreDestroy;
+    AsyncHook mRealize;     // called with mutex locked; can temporarily unlock mutex (for async)
+    AsyncHook mResume;      // called with mutex locked; can temporarily unlock mutex (for async)
+    VoidHook mDestroy;      // called with mutex locked and must keep mutex locked throughout
+    PreDestroyHook mPreDestroy; // called with mutex locked; can temporarily unlock mutex (for wait)
 } ClassTable;
 
 // BufferHeader describes each element of a BufferQueue, other than the data
