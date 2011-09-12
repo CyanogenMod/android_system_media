@@ -29,7 +29,7 @@ public:
     AudioToCbRenderer(AudioPlayback_Parameters* params);
     virtual ~AudioToCbRenderer();
 
-    void setDataPushListener(const data_push_cbf_t pushCbf, void* pushUser);
+    void setDataPushListener(const data_push_cbf_t pushCbf, CAudioPlayer* pushUser);
 
 protected:
 
@@ -46,7 +46,7 @@ protected:
 private:
 
     data_push_cbf_t mDecodeCbf;
-    void*           mDecodeUser;
+    CAudioPlayer*   mDecodeUser;
 
 private:
     DISALLOW_EVIL_CONSTRUCTORS(AudioToCbRenderer);

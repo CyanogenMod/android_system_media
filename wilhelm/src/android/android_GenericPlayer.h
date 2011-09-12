@@ -185,8 +185,6 @@ protected:
     int16_t mLastNotifiedCacheFill; // last cache fill level communicated to the listener
     int16_t mCacheFillNotifThreshold; // threshold in cache fill level for cache fill to be reported
 
-    const sp<CallbackProtector> mCallbackProtector;
-
     // Call any time any of the IPlay copies, current position, or play state changes, and
     // supply the latest known position or ANDROID_UNKNOWN_TIME if position is unknown to caller.
     void updateOneShot(int positionMs = ANDROID_UNKNOWN_TIME);

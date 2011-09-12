@@ -49,6 +49,11 @@ public:
      */
     void requestCbExitAndWait();
 
+    /**
+     * Similar to requestCbExitAndWait, but does not wait for current callbacks to exit.
+     */
+    void requestCbExit();
+
 private:
     Mutex mLock;
     Condition mCbExitedCondition;
@@ -57,6 +62,13 @@ private:
 
     /** Counts the number of callbacks actively locking the associated AudioPlayer */
     unsigned int mCbCount;
+
+#ifdef USE_DEBUG
+    pthread_t mCallbackThread;
+    pid_t mCallbackTid;
+    pthread_t mRequesterThread;
+    pid_t mRequesterTid;
+#endif
 
     // disallow "evil" constructors
     CallbackProtector(const CallbackProtector &);

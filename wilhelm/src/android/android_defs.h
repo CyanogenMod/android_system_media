@@ -103,7 +103,7 @@ typedef void (*notif_cbf_t)(int event, int data1, int data2, void* notifUser);
 /**
  * Audio data push callback from Android objects to SL ES framework
  */
-typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, void* user);
+typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, CAudioPlayer* ap);
 
 
 /**

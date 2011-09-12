@@ -97,13 +97,13 @@ SLresult aplayer_setPlayState(const android::sp<android::GenericPlayer> &ap, SLu
 //-----------------------------------------------------------------------------
 // Callback associated with a AudioToCbRenderer of an SL ES AudioPlayer that gets its data
 // from a URI or FD, to write the decoded audio data to a buffer queue
-static size_t adecoder_writeToBufferQueue(const uint8_t *data, size_t size, void* user) {
-    size_t sizeConsumed = 0;
-    if (NULL == user) {
-        return sizeConsumed;
+static size_t adecoder_writeToBufferQueue(const uint8_t *data, size_t size, CAudioPlayer* ap) {
+    if (!android::CallbackProtector::enterCbIfOk(ap->mCallbackProtector)) {
+        // it is not safe to enter the callback (the player is about to go away)
+        return 0;
     }
+    size_t sizeConsumed = 0;
     SL_LOGD("received %d bytes from decoder", size);
-    CAudioPlayer *ap = (CAudioPlayer *)user;
     slBufferQueueCallback callback = NULL;
     void * callbackPContext = NULL;
 
@@ -156,6 +156,7 @@ static size_t adecoder_writeToBufferQueue(const uint8_t *data, size_t size, void
         (*callback)(&ap->mBufferQueue.mItf, callbackPContext);
     }
 
+    ap->mCallbackProtector->exitCb();
     return sizeConsumed;
 }
 
@@ -1575,7 +1576,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         android::AudioToCbRenderer* decoder = new android::AudioToCbRenderer(&app);
         pAudioPlayer->mAPlayer = decoder;
         // configures the callback for the sink buffer queue
-        decoder->setDataPushListener(adecoder_writeToBufferQueue, (void*)pAudioPlayer);
+        decoder->setDataPushListener(adecoder_writeToBufferQueue, pAudioPlayer);
         // configures the callback for the notifications coming from the SF code
         decoder->init(sfplayer_handlePrefetchEvent, (void*)pAudioPlayer);
 
@@ -1610,7 +1611,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         app.trackcbUser = NULL;
         android::AacBqToPcmCbRenderer* bqtobq = new android::AacBqToPcmCbRenderer(&app);
         // configures the callback for the sink buffer queue
-        bqtobq->setDataPushListener(adecoder_writeToBufferQueue, (void*)pAudioPlayer);
+        bqtobq->setDataPushListener(adecoder_writeToBufferQueue, pAudioPlayer);
         pAudioPlayer->mAPlayer = bqtobq;
         // configures the callback for the notifications coming from the SF code,
         // but also implicitly configures the AndroidBufferQueue from which ADTS data is read
@@ -1661,16 +1662,39 @@ SLresult android_audioPlayer_preDestroy(CAudioPlayer *pAudioPlayer) {
     SL_LOGD("android_audioPlayer_preDestroy(%p)", pAudioPlayer);
     SLresult result = SL_RESULT_SUCCESS;
 
-    if (pAudioPlayer->mAPlayer != 0) {
-        pAudioPlayer->mAPlayer->preDestroy();
-    }
-    SL_LOGD("android_audioPlayer_preDestroy(%p) after mAPlayer->preDestroy()", pAudioPlayer);
+  bool disableCallbacksBeforePreDestroy;
+  switch (pAudioPlayer->mAndroidObjType) {
+  // Not yet clear why this order is important, but it reduces detected deadlocks
+  case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+    disableCallbacksBeforePreDestroy = true;
+    break;
+  // Use the old behavior for all other use cases until proven
+  // case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
+  default:
+    disableCallbacksBeforePreDestroy = false;
+    break;
+  }
 
+  if (disableCallbacksBeforePreDestroy) {
     object_unlock_exclusive(&pAudioPlayer->mObject);
     if (pAudioPlayer->mCallbackProtector != 0) {
         pAudioPlayer->mCallbackProtector->requestCbExitAndWait();
     }
     object_lock_exclusive(&pAudioPlayer->mObject);
+  }
+
+    if (pAudioPlayer->mAPlayer != 0) {
+        pAudioPlayer->mAPlayer->preDestroy();
+    }
+    SL_LOGD("android_audioPlayer_preDestroy(%p) after mAPlayer->preDestroy()", pAudioPlayer);
+
+  if (!disableCallbacksBeforePreDestroy) {
+    object_unlock_exclusive(&pAudioPlayer->mObject);
+    if (pAudioPlayer->mCallbackProtector != 0) {
+        pAudioPlayer->mCallbackProtector->requestCbExitAndWait();
+    }
+    object_lock_exclusive(&pAudioPlayer->mObject);
+  }
 
     return result;
 }

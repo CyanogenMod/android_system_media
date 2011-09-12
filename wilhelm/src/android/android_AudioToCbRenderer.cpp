@@ -38,7 +38,7 @@ AudioToCbRenderer::~AudioToCbRenderer() {
 
 }
 
-void AudioToCbRenderer::setDataPushListener(const data_push_cbf_t pushCbf, void* pushUser) {
+void AudioToCbRenderer::setDataPushListener(const data_push_cbf_t pushCbf, CAudioPlayer* pushUser) {
     mDecodeCbf = pushCbf;
     mDecodeUser = pushUser;
 }
