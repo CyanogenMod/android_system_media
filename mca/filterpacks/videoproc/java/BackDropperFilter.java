@@ -501,9 +501,10 @@ public class BackDropperFilter extends Filter {
 
     @Override
     public void setupPorts() {
-        // Inputs
+        // Inputs.
+        // TODO: Target should be GPU, but relaxed for now.
         FrameFormat imageFormat = ImageFormat.create(ImageFormat.COLORSPACE_RGBA,
-                                                     FrameFormat.TARGET_GPU);
+                                                     FrameFormat.TARGET_UNSPECIFIED);
         for (String inputName : mInputNames) {
             addMaskedInputPort(inputName, imageFormat);
         }
