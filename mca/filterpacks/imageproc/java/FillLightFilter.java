@@ -36,8 +36,8 @@ public class FillLightFilter extends Filter {
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;
 
-    @GenerateFieldPort(name = "backlight")
-    private float mBacklight;
+    @GenerateFieldPort(name = "strength", hasDefault = true)
+    private float mBacklight = 0f;
 
     private Program mProgram;
 

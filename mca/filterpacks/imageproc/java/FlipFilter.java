@@ -34,11 +34,11 @@ import android.filterfw.format.ImageFormat;
  */
 public class FlipFilter extends Filter {
 
-    @GenerateFieldPort(name = "vertical")
-    private boolean mVertical;
+    @GenerateFieldPort(name = "vertical", hasDefault = true)
+    private boolean mVertical = false;
 
-    @GenerateFieldPort(name = "horizontal")
-    private boolean mHorizontal;
+    @GenerateFieldPort(name = "horizontal", hasDefault = true)
+    private boolean mHorizontal = false;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;

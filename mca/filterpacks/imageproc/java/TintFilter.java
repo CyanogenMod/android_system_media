@@ -27,13 +27,12 @@ import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
-
+import android.graphics.Color;
 
 public class TintFilter extends Filter {
 
-    // TODO(rslin): extract rgb values from 4 byte integer
-    @GenerateFieldPort(name = "tint")
-    private int mTint;
+    @GenerateFieldPort(name = "tint", hasDefault = true)
+    private int mTint = 0xFF0000FF;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;
@@ -124,9 +123,9 @@ public class TintFilter extends Filter {
     }
 
     private void updateParameters() {
-        float tint_color[] = {(float) ((mTint >> 16) & 0xff) / 256f,
-                              (float) ((mTint >> 8) & 0xff) / 256f,
-                              (float) (mTint & 0xff) / 256f };
+        float tint_color[] = {Color.red(mTint) / 255f,
+                              Color.green(mTint) / 255f,
+                              Color.blue(mTint) / 255f };
 
         mProgram.setHostValue("tint", tint_color);
     }

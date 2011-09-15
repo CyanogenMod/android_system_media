@@ -27,16 +27,15 @@ import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
-
+import android.graphics.Color;
 
 public class DuotoneFilter extends Filter {
 
-    // TODO(rslin): extract rgb values from 4 byte integer
-    @GenerateFieldPort(name = "first_color")
-    private int mFirstColor;
+    @GenerateFieldPort(name = "first_color", hasDefault = true)
+    private int mFirstColor = 0xFFFF0000;
 
-    @GenerateFieldPort(name = "second_color")
-    private int mSecondColor;
+    @GenerateFieldPort(name = "second_color", hasDefault = true)
+    private int mSecondColor = 0xFFFFFF00;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;
@@ -99,8 +98,8 @@ public class DuotoneFilter extends Filter {
         // Create program if not created already
         if (mProgram == null || inputFormat.getTarget() != mTarget) {
             initProgram(context, inputFormat.getTarget());
-            initParameters();
         }
+        updateParameters();
 
         // Process
         mProgram.process(input, output);
@@ -112,9 +111,13 @@ public class DuotoneFilter extends Filter {
         output.release();
     }
 
-    private void initParameters() {
-        float first[] = { 0f / 255f, 68f / 255f, 136f / 255f};
-        float second[] = { 1.0f, 1.0f, 0.0f};
+    private void updateParameters() {
+        float first[] = { Color.red(mFirstColor)/255f,
+                Color.green(mFirstColor)/255f,
+                Color.blue(mFirstColor)/255f };
+        float second[] = { Color.red(mSecondColor)/255f,
+                Color.green(mSecondColor)/255f,
+                Color.blue(mSecondColor)/255f };
 
         mProgram.setHostValue("first", first);
         mProgram.setHostValue("second", second);

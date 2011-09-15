@@ -32,11 +32,11 @@ import java.util.Random;
 
 public class BlackWhiteFilter extends Filter {
 
-    @GenerateFieldPort(name = "black")
-    private float mBlack;
+    @GenerateFieldPort(name = "black", hasDefault = true)
+    private float mBlack = 0f;
 
-    @GenerateFieldPort(name = "white")
-    private float mWhite;
+    @GenerateFieldPort(name = "white", hasDefault = true)
+    private float mWhite = 1f;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;

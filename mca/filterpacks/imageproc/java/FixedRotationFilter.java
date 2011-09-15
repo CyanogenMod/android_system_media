@@ -35,7 +35,7 @@ import android.filterfw.geometry.Quad;
  */
 public class FixedRotationFilter extends Filter {
 
-    @GenerateFieldPort(name = "rotation")
+    @GenerateFieldPort(name = "rotation", hasDefault = true)
     private int mRotation = 0;
 
     private ShaderProgram mProgram = null;
@@ -77,19 +77,20 @@ public class FixedRotationFilter extends Filter {
         Point p3 = new Point(0.0f, 1.0f);
         Point p4 = new Point(1.0f, 1.0f);
         Quad sourceRegion;
-        switch (mRotation) {
-            case 90:
+        switch (((int)Math.round(mRotation / 90f)) % 4) {
+            case 1:
                 sourceRegion = new Quad(p3,p1,p4,p2);
                 outputFormat.setDimensions(height, width);
                 break;
-            case 180:
+            case 2:
                 sourceRegion = new Quad(p4,p3,p2,p1);
                 break;
-            case 270:
+            case 3:
                 sourceRegion = new Quad(p2,p4,p1,p3);
                 outputFormat.setDimensions(height, width);
                 break;
-            default: // no rotation
+            case 0:
+            default:
                 sourceRegion = new Quad(p1,p2,p3,p4);
                 break;
         }

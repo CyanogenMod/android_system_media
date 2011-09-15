@@ -38,11 +38,11 @@ import android.util.Log;
  */
 public class StraightenFilter extends Filter {
 
-    @GenerateFieldPort(name = "angle")
-    private float mAngle;
+    @GenerateFieldPort(name = "angle", hasDefault = true)
+    private float mAngle = 0f;
 
-    @GenerateFieldPort(name = "maxAngle")
-    private float mMaxAngle;
+    @GenerateFieldPort(name = "maxAngle", hasDefault = true)
+    private float mMaxAngle = 45f;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;

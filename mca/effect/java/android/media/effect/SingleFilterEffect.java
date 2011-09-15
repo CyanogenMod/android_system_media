@@ -63,7 +63,6 @@ public class SingleFilterEffect extends FilterEffect {
         Filter filter = factory.createFilterByClass(filterClass, filterName);
         filter.initWithAssignmentList(finalParameters);
 
-        // TODO: Context needs to be moved out of constructor!!!
         mFunction = new FilterFunction(getFilterContext(), filter);
     }
 

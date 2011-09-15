@@ -38,6 +38,7 @@ public class EffectFactory {
     /** List of Effects */
     /**
      * <p>Copies the input texture to the output.</p>
+     * <p>Available parameters: None</p>
      * @hide
      */
     public final static String EFFECT_IDENTITY = "IdentityEffect";
@@ -113,43 +114,80 @@ public class EffectFactory {
             "android.media.effect.effects.BackDropperEffect";
 
     /**
-     * Applies histogram equalization on the image.<br/>
-     * Parameters: scale (float): the scale of histogram equalization.
+     * <p>Attempts to auto-fix the image based on histogram equalization.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>scale</code></td>
+     *     <td>The scale of the adjustment.</td>
+     *     <td>Float, between 0 and 1. Zero means no adjustment, while 1 indicates the maximum
+     *     amount of adjustment.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_AUTOFIX =
             "android.media.effect.effects.AutoFixEffect";
 
     /**
-     * Adjusts the range of minimal and maximal values of color pixels.<br/>
-     * Parameters: black (float): the value of the minimal pixel.
-     * Parameters: white (float): the value of the maximal pixel.
+     * <p>Adjusts the range of minimal and maximal color pixel intensities.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>black</code></td>
+     *     <td>The value of the minimal pixel.</td>
+     *     <td>Float, between 0 and 1.</td>
+     * </tr>
+     * <tr><td><code>white</code></td>
+     *     <td>The value of the maximal pixel.</td>
+     *     <td>Float, between 0 and 1.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_BLACKWHITE =
             "android.media.effect.effects.BlackWhiteEffect";
 
     /**
-     * Crops an upright rectangular area from the image.<br/>
-     * Parameters: xorigin (int): xorigin.
-     *             yorigin (int): yorigin.
-     *             width (int): rectangle width.
-     *             height (int): rectangle height.
+     * <p>Crops an upright rectangular area from the image. If the crop region falls outside of
+     * the image bounds, the results are undefined.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>xorigin</code></td>
+     *     <td>The origin's x-value.</td>
+     *     <td>Integer, between 0 and width of the image.</td>
+     * </tr>
+     * <tr><td><code>yorigin</code></td>
+     *     <td>The origin's y-value.</td>
+     *     <td>Integer, between 0 and height of the image.</td>
+     * </tr>
+     * <tr><td><code>width</code></td>
+     *     <td>The width of the cropped image.</td>
+     *     <td>Integer, between 1 and the width of the image minus xorigin.</td>
+     * </tr>
+     * <tr><td><code>height</code></td>
+     *     <td>The height of the cropped image.</td>
+     *     <td>Integer, between 1 and the height of the image minus yorigin.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_CROP =
             "android.media.effect.effects.CropEffect";
 
     /**
-     * Applies cross process effect on image.<br/>
-     * Parameters: contrast (float): The strength of the color contrast.
+     * <p>Applies a cross process effect on image, in which the red and green channels are
+     * enhanced while the blue channel is restricted.</p>
+     * <p>Available parameters: None</p>
      */
     public final static String EFFECT_CROSSPROCESS =
             "android.media.effect.effects.CrossProcessEffect";
 
     /**
-     * Applies documentary effect on image.<br/>
-     * Parameters: contrast (float): The strength of the color contrast.
+     * <p>Applies black and white documentary style effect on image..</p>
+     * <p>Available parameters: None</p>
      */
     public final static String EFFECT_DOCUMENTARY =
             "android.media.effect.effects.DocumentaryEffect";
+
 
     /**
      * <p>Overlays a bitmap (with premultiplied alpha channel) onto the input image. The bitmap
@@ -167,117 +205,220 @@ public class EffectFactory {
             "android.media.effect.effects.BitmapOverlayEffect";
 
     /**
-     * Applies duotone effect on image.<br/>
-     * Parameters: first_color (int): first color in duotone.
-     * Parameters: second_color (int): second color in duotone.
+     * <p>Representation of photo using only two color tones.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>first_color</code></td>
+     *     <td>The first color tone.</td>
+     *     <td>Integer, representing an ARGB color with 8 bits per channel. May be created using
+     *     {@link android.graphics.Color Color} class.</td>
+     * </tr>
+     * <tr><td><code>second_color</code></td>
+     *     <td>The second color tone.</td>
+     *     <td>Integer, representing an ARGB color with 8 bits per channel. May be created using
+     *     {@link android.graphics.Color Color} class.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_DUOTONE =
             "android.media.effect.effects.DuotoneEffect";
 
     /**
-     * Adds backlight to the image.<br/>
-     * Parameters: backlight (float): The scale of the distortion.
+     * <p>Applies back-light filling to the image.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>strength</code></td>
+     *     <td>The strength of the backlight.</td>
+     *     <td>Float, between 0 and 1. Zero means no change.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_FILLLIGHT =
             "android.media.effect.effects.FillLightEffect";
 
     /**
-     * Flips image vertically and/or horizontally.<br/>
-     * Parameters: vertical (boolean): flip image vertically.
-     * Parameters: horizontal (boolean): flip image horizontally.
+     * <p>Flips image vertically and/or horizontally.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>vertical</code></td>
+     *     <td>Whether to flip image vertically.</td>
+     *     <td>Boolean</td>
+     * </tr>
+     * <tr><td><code>horizontal</code></td>
+     *     <td>Whether to flip image horizontally.</td>
+     *     <td>Boolean</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_FLIP =
             "android.media.effect.effects.FlipEffect";
 
     /**
-     * Applies film grain effect on image.<br/>
+     * <p>Applies film grain effect to image.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>strength</code></td>
+     *     <td>The strength of the grain effect.</td>
+     *     <td>Float, between 0 and 1. Zero means no change.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_GRAIN =
             "android.media.effect.effects.GrainEffect";
 
     /**
-     * Converts image to grayscale.<br/>
+     * <p>Converts image to grayscale.</p>
+     * <p>Available parameters: None</p>
      */
     public final static String EFFECT_GRAYSCALE =
             "android.media.effect.effects.GrayscaleEffect";
 
     /**
-     * Applies lomoish effect on image.<br/>
+     * <p>Applies lomo-camera style effect to image.</p>
+     * <p>Available parameters: None</p>
      */
     public final static String EFFECT_LOMOISH =
             "android.media.effect.effects.LomoishEffect";
 
     /**
-     * Applies negative film effect on image.<br/>
-     * Parameters: scale (float): the degree of film grain.
+     * <p>Inverts the image colors.</p>
+     * <p>Available parameters: None</p>
      */
     public final static String EFFECT_NEGATIVE =
             "android.media.effect.effects.NegativeEffect";
 
     /**
-     * Applied posterized effect on image.<br/>
+     * <p>Applies posterization effect to image.</p>
+     * <p>Available parameters: None</p>
      */
     public final static String EFFECT_POSTERIZE =
             "android.media.effect.effects.PosterizeEffect";
 
     /**
-     * Removes red eyes on specified region.<br/>
-     * Parameters: intensity (float): threshold used to indentify red eyes.
-     *             redeye (Bitmap): bitmap specifies red eye regions.
+     * <p>Removes red eyes on specified region.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>centers</code></td>
+     *     <td>Multiple center points (x, y) of the red eye regions.</td>
+     *     <td>An array of floats, where (f[2*i], f[2*i+1]) specifies the center of the i'th eye.
+     *     Coordinate values are expected to be normalized between 0 and 1.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_REDEYE =
             "android.media.effect.effects.RedEyeEffect";
 
     /**
-     * Rotates the image.<br/>
-     * Parameters: degree (float): the degree of rotation. shoule be a multiple of 90.
+     * <p>Rotates the image. The output frame size must be able to fit the rotated version of
+     * the input image. Note that the rotation snaps to a the closest multiple of 90 degrees.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>angle</code></td>
+     *     <td>The angle of rotation in degrees.</td>
+     *     <td>Integer value. This will be rounded to the nearest multiple of 90.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_ROTATE =
             "android.media.effect.effects.RotateEffect";
 
     /**
-     * Adjusts color saturation on image.<br/>
-     * Parameters: scale (float): The scale of color saturation.
+     * <p>Adjusts color saturation of image.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>scale</code></td>
+     *     <td>The scale of color saturation.</td>
+     *     <td>Float, between -1 and 1. 0 means no change, while -1 indicates full desaturation,
+     *     i.e. grayscale.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_SATURATE =
             "android.media.effect.effects.SaturateEffect";
 
     /**
-     * Converts image to sepia tone.<br/>
+     * <p>Converts image to sepia tone.</p>
+     * <p>Available parameters: None</p>
      */
     public final static String EFFECT_SEPIA =
             "android.media.effect.effects.SepiaEffect";
 
     /**
-     * Sharpens the image.<br/>
-     * Parameters: scale (float): The degree of sharpening.
+     * <p>Sharpens the image.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>scale</code></td>
+     *     <td>The degree of sharpening.</td>
+     *     <td>Float, between 0 and 1. 0 means no change.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_SHARPEN =
             "android.media.effect.effects.SharpenEffect";
 
     /**
-     * Rotates and resizes the image accroding to specified angle.<br/>
-     * Parameters: scale (angle): the angle of rotation.
+     * <p>Rotates the image according to the specified angle, and crops the image so that no
+     * non-image portions are visible.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>angle</code></td>
+     *     <td>The angle of rotation.</td>
+     *     <td>Float, between -45 and +45.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_STRAIGHTEN =
             "android.media.effect.effects.StraightenEffect";
 
     /**
-     * Adjusts color temperature in the image.<br/>
-     * Parameters: scale (float): the value of color temperature.
+     * <p>Adjusts color temperature of the image.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>scale</code></td>
+     *     <td>The value of color temperature.</td>
+     *     <td>Float, between 0 and 1, with 0 indicating cool, and 1 indicating warm. A value of
+     *     of 0.5 indicates no change.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_TEMPERATURE =
             "android.media.effect.effects.ColorTemperatureEffect";
 
     /**
-     * Applies tine effect on image.<br/>
+     * <p>Tints the photo with specified color.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>tint</code></td>
+     *     <td>The color of the tint.</td>
+     *     <td>Integer, representing an ARGB color with 8 bits per channel. May be created using
+     *     {@link android.graphics.Color Color} class.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_TINT =
             "android.media.effect.effects.TintEffect";
 
     /**
-     * Appliies vignette effect on image.<br/>
-     * Parameters: range (float): The range of vignetting.
+     * <p>Adds a vignette effect to image, i.e. fades away the outer image edges.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>scale</code></td>
+     *     <td>The scale of vignetting.</td>
+     *     <td>Float, between 0 and 1. 0 means no change.</td>
+     * </tr>
+     * </table>
      */
     public final static String EFFECT_VIGNETTE =
             "android.media.effect.effects.VignetteEffect";

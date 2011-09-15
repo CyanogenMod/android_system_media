@@ -35,22 +35,22 @@ import android.util.Log;
 /**
  * @hide
  */
-public class DoodleFilter extends Filter {
+public class BitmapOverlayFilter extends Filter {
 
-    @GenerateFieldPort(name = "doodle")
-    private Bitmap mDoodleBitmap;
+    @GenerateFieldPort(name = "bitmap")
+    private Bitmap mBitmap;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;
 
     private Program mProgram;
-    private Frame mDoodleFrame;
+    private Frame mFrame;
 
     private int mWidth = 0;
     private int mHeight = 0;
     private int mTarget = FrameFormat.TARGET_UNSPECIFIED;
 
-    private final String mDoodleShader =
+    private final String mOverlayShader =
             "precision mediump float;\n" +
             "uniform sampler2D tex_sampler_0;\n" +
             "uniform sampler2D tex_sampler_1;\n" +
@@ -61,7 +61,7 @@ public class DoodleFilter extends Filter {
             "  gl_FragColor = vec4(original.rgb * (1.0 - mask.a) + mask.rgb, 1.0);\n" +
             "}\n";
 
-    public DoodleFilter(String name) {
+    public BitmapOverlayFilter(String name) {
         super(name);
     }
 
@@ -79,7 +79,7 @@ public class DoodleFilter extends Filter {
     public void initProgram(FilterContext context, int target) {
         switch (target) {
             case FrameFormat.TARGET_GPU:
-                ShaderProgram shaderProgram = new ShaderProgram(context, mDoodleShader);
+                ShaderProgram shaderProgram = new ShaderProgram(context, mOverlayShader);
                 shaderProgram.setMaximumTileSize(mTileSize);
                 mProgram = shaderProgram;
                 break;
@@ -93,9 +93,9 @@ public class DoodleFilter extends Filter {
 
     @Override
     public void tearDown(FilterContext context) {
-        if (mDoodleFrame != null) {
-            mDoodleFrame.release();
-            mDoodleFrame = null;
+        if (mFrame != null) {
+            mFrame.release();
+            mFrame = null;
         }
     }
 
@@ -118,11 +118,11 @@ public class DoodleFilter extends Filter {
             mWidth = inputFormat.getWidth();
             mHeight = inputFormat.getHeight();
 
-            createDoodleFrame(context);
+            createBitmapFrame(context);
         }
 
         // Process
-        Frame[] inputs = {input, mDoodleFrame};
+        Frame[] inputs = {input, mFrame};
         mProgram.process(inputs, output);
 
         // Push output
@@ -132,25 +132,22 @@ public class DoodleFilter extends Filter {
         output.release();
     }
 
-    private void createDoodleFrame(FilterContext context) {
-        if (mDoodleBitmap != null) {
-            Log.e("DoodleFilter", "create doodle frame " +
-                  mDoodleBitmap.getWidth() + " " + mDoodleBitmap.getHeight());
-
-            FrameFormat format = ImageFormat.create(mDoodleBitmap.getWidth(),
-                                                    mDoodleBitmap.getHeight(),
+    private void createBitmapFrame(FilterContext context) {
+        if (mBitmap != null) {
+            FrameFormat format = ImageFormat.create(mBitmap.getWidth(),
+                                                    mBitmap.getHeight(),
                                                     ImageFormat.COLORSPACE_RGBA,
                                                     FrameFormat.TARGET_GPU);
 
-            if (mDoodleFrame != null) {
-                mDoodleFrame.release();
+            if (mFrame != null) {
+                mFrame.release();
             }
 
-            mDoodleFrame = context.getFrameManager().newFrame(format);
-            mDoodleFrame.setBitmap(mDoodleBitmap);
+            mFrame = context.getFrameManager().newFrame(format);
+            mFrame.setBitmap(mBitmap);
 
-            mDoodleBitmap.recycle();
-            mDoodleBitmap = null;
+            mBitmap.recycle();
+            mBitmap = null;
         }
     }
 }

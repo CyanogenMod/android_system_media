@@ -36,8 +36,8 @@ public class GrainFilter extends Filter {
 
     private static final int RAND_THRESHOLD = 128;
 
-    @GenerateFieldPort(name = "scale")
-    private float mScale;
+    @GenerateFieldPort(name = "strength", hasDefault = true)
+    private float mScale = 0f;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;

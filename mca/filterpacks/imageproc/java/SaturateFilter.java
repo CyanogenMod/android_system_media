@@ -30,8 +30,8 @@ import android.filterfw.format.ImageFormat;
 
 public class SaturateFilter extends Filter {
 
-    @GenerateFieldPort(name = "scale")
-    private float mScale;
+    @GenerateFieldPort(name = "scale", hasDefault = true)
+    private float mScale = 0f;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;

@@ -43,8 +43,8 @@ public class FisheyeFilter extends Filter {
     // This parameter has range between 0 and 1. It controls the effect of radial distortion.
     // The larger the value, the more prominent the distortion effect becomes (a straight line
     // becomes a curve).
-    @GenerateFieldPort(name = "scale")
-    private float mScale;
+    @GenerateFieldPort(name = "scale", hasDefault = true)
+    private float mScale = 0f;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;

@@ -38,8 +38,8 @@ import android.util.Log;
  */
 public class RotateFilter extends Filter {
 
-    @GenerateFieldPort(name = "degree")
-    private float mAngle;
+    @GenerateFieldPort(name = "angle")
+    private int mAngle;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;
@@ -133,7 +133,7 @@ public class RotateFilter extends Filter {
                 cosTheta = (mAngle % 360 == 0) ? 1f:-1f;
             } else {
                 cosTheta = 0f;
-                sinTheta = ((mAngle + 90f) % 360 == 0) ? -1f:1f;
+                sinTheta = ((mAngle + 90) % 360 == 0) ? -1f:1f;
 
                 mOutputWidth = mHeight;
                 mOutputHeight = mWidth;

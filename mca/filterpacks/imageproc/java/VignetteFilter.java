@@ -30,8 +30,8 @@ import android.filterfw.format.ImageFormat;
 
 public class VignetteFilter extends Filter {
 
-    @GenerateFieldPort(name = "range")
-    private float mRange;
+    @GenerateFieldPort(name = "scale", hasDefault = true)
+    private float mRange = 0f;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;

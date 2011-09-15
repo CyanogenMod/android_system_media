@@ -20,13 +20,13 @@ package android.media.effect.effects;
 
 import android.media.effect.EffectContext;
 import android.media.effect.SingleFilterEffect;
-import android.filterpacks.imageproc.DoodleFilter;
+import android.filterpacks.imageproc.BitmapOverlayFilter;
 
 /**
  * @hide
  */
-public class DoodleEffect extends SingleFilterEffect {
-    public DoodleEffect(EffectContext context, String name) {
-        super(context, name, DoodleFilter.class, "image", "image");
+public class BitmapOverlayEffect extends SingleFilterEffect {
+    public BitmapOverlayEffect(EffectContext context, String name) {
+        super(context, name, BitmapOverlayFilter.class, "image", "image");
     }
 }
