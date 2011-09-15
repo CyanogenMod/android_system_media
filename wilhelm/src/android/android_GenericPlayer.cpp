@@ -667,7 +667,7 @@ void GenericPlayer::updateOneShot(int positionMs)
     mObservedPositionMs = positionMs;
 
     // post the new one-shot message if needed
-    if (delayUs >= 0) {
+    if (advancesPositionInRealTime() && delayUs >= 0) {
         // 20 ms min delay to avoid near busy waiting
         if (delayUs < 20000LL) {
             delayUs = 20000LL;

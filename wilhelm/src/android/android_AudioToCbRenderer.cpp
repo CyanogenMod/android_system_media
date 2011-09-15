@@ -87,6 +87,8 @@ void AudioToCbRenderer::onRender() {
 
     mDecodeBuffer->release();
     mDecodeBuffer = NULL;
+
+    updateOneShot();
 }
 
 

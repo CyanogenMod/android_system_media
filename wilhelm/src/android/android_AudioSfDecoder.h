@@ -48,6 +48,7 @@ static const char* const kPcmDecodeMetadataKeys[] = {
         ANDROID_KEY_PCMFORMAT_CHANNELMASK, ANDROID_KEY_PCMFORMAT_ENDIANNESS };
 #define NB_PCMMETADATA_KEYS (sizeof(kPcmDecodeMetadataKeys)/sizeof(kPcmDecodeMetadataKeys[0]))
 
+// abstract base class for AudioToCbRenderer and it's subclasses
 class AudioSfDecoder : public GenericPlayer
 {
 public:
@@ -80,7 +81,7 @@ protected:
     // Async event handlers (called from the AudioSfDecoder's event loop)
     void onDecode();
     void onCheckCache(const sp<AMessage> &msg);
-    virtual void onRender();
+    virtual void onRender() = 0;
 
     // Async event handlers (called from GenericPlayer's event loop)
     virtual void onPrepare();
@@ -129,6 +130,8 @@ protected:
     uint32_t mPcmFormatValues[NB_PCMMETADATA_KEYS];
     // protects mPcmFormatValues
     Mutex    mPcmFormatLock;
+
+    virtual bool advancesPositionInRealTime() const { return false; }
 
 private:
     bool wantPrefetch();
