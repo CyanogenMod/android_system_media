@@ -62,7 +62,8 @@ enum AndroidObjectState {
 
 #define PLAYER_FD_FIND_FILE_SIZE ((int64_t)0xFFFFFFFFFFFFFFFFll)
 
-#define MPEG2_TS_BLOCK_SIZE 188
+#define MPEG2_TS_PACKET_SIZE 188
+#define MPEG2_TS_PACKET_SYNC 0x47
 
 struct AudioPlayback_Parameters {
     int streamType;
