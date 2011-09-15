@@ -35,14 +35,14 @@ public class StringLogger extends Filter {
 
     @Override
     public void setupPorts() {
-        addMaskedInputPort("string", ObjectFormat.fromClass(String.class,
+        addMaskedInputPort("string", ObjectFormat.fromClass(Object.class,
                                                             FrameFormat.TARGET_SIMPLE));
     }
 
     @Override
     public void process(FilterContext env) {
         Frame input = pullInput("string");
-        String inputString = (String)input.getObjectValue();
+        String inputString = input.getObjectValue().toString();
         Log.i("StringLogger", inputString);
     }
 

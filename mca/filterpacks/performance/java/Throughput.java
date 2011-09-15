@@ -54,4 +54,8 @@ public class Throughput {
         double frameTimeInNanos = (mPeriodTime / (double)mPeriodFrames) * 1000000.0;
         return (float)(frameTimeInNanos / mPixels);
     }
+
+    public String toString() {
+        return getFramesPerSecond() + " FPS";
+    }
 }
