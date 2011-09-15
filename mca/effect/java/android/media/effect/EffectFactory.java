@@ -152,11 +152,19 @@ public class EffectFactory {
             "android.media.effect.effects.DocumentaryEffect";
 
     /**
-     * Attaches doodles to image.<br/>
-     * Parameters: contrast (float): The strength of the color contrast.
+     * <p>Overlays a bitmap (with premultiplied alpha channel) onto the input image. The bitmap
+     * is stretched to fit the input image.</p>
+     * <p>Available parameters:</p>
+     * <table>
+     * <tr><td>Parameter name</td><td>Meaning</td><td>Valid values</td></tr>
+     * <tr><td><code>bitmap</code></td>
+     *     <td>The overlay bitmap.</td>
+     *     <td>A non-null Bitmap instance.</td>
+     * </tr>
+     * </table>
      */
-    public final static String EFFECT_DOODLE =
-            "android.media.effect.effects.DoodleEffect";
+    public final static String EFFECT_BITMAPOVERLAY =
+            "android.media.effect.effects.BitmapOverlayEffect";
 
     /**
      * Applies duotone effect on image.<br/>
