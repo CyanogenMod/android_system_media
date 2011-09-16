@@ -299,11 +299,6 @@ void StreamPlayer::onStopForDestroy() {
 }
 
 
-void StreamPlayer::registerQueueCallback(IAndroidBufferQueue *androidBufferQueue) {
-    SL_LOGD("StreamPlayer::registerQueueCallback");
-}
-
-
 /**
  * Asynchronously notify the player that the queue is ready to be pulled from.
  */

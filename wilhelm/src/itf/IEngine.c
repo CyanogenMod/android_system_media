@@ -249,8 +249,6 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     memset(thiz->mSndFile.mBuffer, 0, sizeof(thiz->mSndFile.mBuffer));
 #endif
 #ifdef ANDROID
-                    // extra safe initializations of pointers, in case of incomplete construction
-                    thiz->mpLock = NULL;
                     // placement new (explicit constructor)
                     // FIXME unnecessary once those fields are encapsulated in one class, rather
                     //   than a structure

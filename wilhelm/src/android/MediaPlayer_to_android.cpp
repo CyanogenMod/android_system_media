@@ -363,8 +363,6 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
     AudioPlayback_Parameters ap_params;
     ap_params.sessionId = mp->mSessionId;
     ap_params.streamType = mp->mStreamType;
-    ap_params.trackcb = NULL;
-    ap_params.trackcbUser = NULL;
 
     switch(mp->mAndroidObjType) {
     case AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: {
@@ -638,16 +636,6 @@ XAresult android_Player_loop(CMediaPlayer *mp, SLboolean loopEnable) {
 
 
 //-----------------------------------------------------------------------------
-void android_Player_androidBufferQueue_registerCallback_l(CMediaPlayer *mp) {
-    if ((mp->mAndroidObjType == AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE)
-            && (mp->mAVPlayer != 0)) {
-        SL_LOGD("android_Player_androidBufferQueue_registerCallback_l");
-        android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(mp->mAVPlayer.get());
-        splr->registerQueueCallback(&mp->mAndroidBufferQueue);
-    }
-}
-
-
 void android_Player_androidBufferQueue_clear_l(CMediaPlayer *mp) {
     if ((mp->mAndroidObjType == AUDIOVIDEOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE)
             && (mp->mAVPlayer != 0)) {

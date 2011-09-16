@@ -37,9 +37,6 @@ static SLuint32 getAssociatedState(IAndroidBufferQueue *thiz)
       case SL_OBJECTID_AUDIOPLAYER:
         state = ((CAudioPlayer *) thiz->mThis)->mPlay.mState;
         break;
-      case SL_OBJECTID_AUDIORECORDER:
-        state = ((CAudioRecorder *) thiz->mThis)->mRecord.mState;
-        break;
       default:
         // unreachable, but just in case we will assume it is stopped
         assert(SL_BOOLEAN_FALSE);
@@ -218,16 +215,14 @@ static SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf sel
         thiz->mCallback = callback;
         thiz->mContext = pContext;
 
+        // FIXME investigate why these two cases are not handled symmetrically any more
         switch (InterfaceToObjectID(thiz)) {
           case SL_OBJECTID_AUDIOPLAYER:
             result = android_audioPlayer_androidBufferQueue_registerCallback_l(
                     (CAudioPlayer*) thiz->mThis);
             break;
           case XA_OBJECTID_MEDIAPLAYER:
-            SL_LOGV("IAndroidBufferQueue_RegisterCallback()");
             result = SL_RESULT_SUCCESS;
-            //FIXME return error code
-            android_Player_androidBufferQueue_registerCallback_l((CMediaPlayer*) thiz->mThis);
             break;
           default:
             result = SL_RESULT_PARAMETER_INVALID;

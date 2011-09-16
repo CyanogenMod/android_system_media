@@ -88,19 +88,6 @@ void AudioSfDecoder::getPositionMsec(int* msec) {
 }
 
 
-void AudioSfDecoder::startPrefetch_async() {
-    SL_LOGV("AudioSfDecoder::startPrefetch_async()");
-
-    if (wantPrefetch()) {
-        SL_LOGV("AudioSfDecoder::startPrefetch_async(): sending check cache msg");
-
-        mStateFlags |= kFlagPreparing | kFlagBuffering;
-
-        (new AMessage(kWhatCheckCache, id()))->post();
-    }
-}
-
-
 //--------------------------------------------------
 uint32_t AudioSfDecoder::getPcmFormatKeyCount() const {
     return NB_PCMMETADATA_KEYS;

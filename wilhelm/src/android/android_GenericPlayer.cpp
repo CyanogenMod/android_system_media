@@ -29,7 +29,6 @@ GenericPlayer::GenericPlayer(const AudioPlayback_Parameters* params) :
         mNotifyClient(NULL),
         mNotifyUser(NULL),
         mStateFlags(0),
-        mLooperPriority(PRIORITY_DEFAULT),
         mPlaybackParams(*params),
         mChannelCount(UNKNOWN_NUMCHANNELS),
         mDurationMsec(ANDROID_UNKNOWN_TIME),
@@ -71,7 +70,7 @@ void GenericPlayer::init(const notif_cbf_t cbf, void* notifUser) {
     }
 
     mLooper->registerHandler(this);
-    mLooper->start(false /*runOnCallingThread*/, false /*canCallJava*/, mLooperPriority);
+    mLooper->start(false /*runOnCallingThread*/, false /*canCallJava*/, PRIORITY_DEFAULT);
 }
 
 

@@ -64,12 +64,9 @@ enum AndroidObjectState {
 
 #define MPEG2_TS_BLOCK_SIZE 188
 
-// FIXME separate the cases where we don't need an AudioTrack callback
 typedef struct AudioPlayback_Parameters_struct {
     int streamType;
     int sessionId;
-    android::AudioTrack::callback_t trackcb;
-    void* trackcbUser;
 } AudioPlayback_Parameters;
 
 /**

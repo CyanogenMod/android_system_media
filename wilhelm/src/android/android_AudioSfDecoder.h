@@ -62,8 +62,6 @@ public:
     virtual void play();
     virtual void getPositionMsec(int* msec); //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
 
-    void startPrefetch_async();
-
     uint32_t getPcmFormatKeyCount() const;
     bool     getPcmFormatKeySize(uint32_t index, uint32_t* pKeySize);
     bool     getPcmFormatKeyName(uint32_t index, uint32_t keySize, char* keyName);

@@ -90,7 +90,6 @@
     struct SndFile mSndFile;
 #endif // USE_SNDFILE
 #ifdef ANDROID
-    android::Mutex          *mpLock;
     enum AndroidObjectType mAndroidObjType;
     /** identifies the initialization and preparation state */
     enum AndroidObjectState mAndroidObjState;

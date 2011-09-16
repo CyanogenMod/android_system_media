@@ -81,7 +81,6 @@ public:
     virtual void onMessageReceived(const sp<AMessage> &msg);
     virtual void preDestroy();
 
-    void registerQueueCallback(IAndroidBufferQueue *androidBufferQueue);
     void queueRefilled();
     void appClear_l();
 

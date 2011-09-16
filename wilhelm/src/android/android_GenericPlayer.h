@@ -171,7 +171,6 @@ protected:
     uint32_t mStateFlags;
 
     sp<ALooper> mLooper;
-    int32_t mLooperPriority;
 
     AudioPlayback_Parameters mPlaybackParams;
 

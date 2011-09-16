@@ -582,7 +582,6 @@ void audioPlayer_auxEffectUpdate(CAudioPlayer* ap) {
 //-----------------------------------------------------------------------------
 void audioPlayer_setInvalid(CAudioPlayer* ap) {
     ap->mAndroidObjType = INVALID_TYPE;
-    ap->mpLock = NULL;
 }
 
 
@@ -782,29 +781,7 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
 
             object_lock_exclusive(&ap->mObject);
 
-            if (AUDIOPLAYER_FROM_URIFD == ap->mAndroidObjType) {
-                //**************************************
-                // FIXME move under GenericMediaPlayer
-#if 0
-                ap->mAudioTrack = ap->mSfPlayer->getAudioTrack();
-                ap->mNumChannels = ap->mSfPlayer->getNumChannels();
-                ap->mSampleRateMilliHz =
-                        android_to_sles_sampleRate(ap->mSfPlayer->getSampleRateHz());
-                ap->mSfPlayer->startPrefetch_async();
-                // update the new track with the current settings
-                audioPlayer_auxEffectUpdate(ap);
-                android_audioPlayer_useEventMask(ap);
-                android_audioPlayer_volumeUpdate(ap);
-                android_audioPlayer_setPlayRate(ap, ap->mPlaybackRate.mRate, false /*lockAP*/);
-#endif
-            } else if (AUDIOPLAYER_FROM_PCM_BUFFERQUEUE == ap->mAndroidObjType) {
-                if (ap->mAPlayer != 0) {
-                    ((android::AudioToCbRenderer*)ap->mAPlayer.get())->startPrefetch_async();
-                }
-            } else if (AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE == ap->mAndroidObjType) {
-                SL_LOGD("Received SfPlayer::kEventPrepared from AVPlayer for CAudioPlayer %p", ap);
-            }
-
+            // Most of successful prepare completion is handled by a subclass.
             ap->mAndroidObjState = ANDROID_READY;
 
             object_unlock_exclusive(&ap->mObject);
@@ -1145,45 +1122,6 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
 }
 
 
-
-//-----------------------------------------------------------------------------
-static void audioTrack_callBack_uri(int event, void* user, void *info) {
-    // EVENT_MORE_DATA needs to be handled with priority over the other events
-    // because it will be called the most often during playback
-
-    if (event == android::AudioTrack::EVENT_MORE_DATA) {
-        //SL_LOGV("received event EVENT_MORE_DATA from AudioTrack");
-        // set size to 0 to signal we're not using the callback to write more data
-        android::AudioTrack::Buffer* pBuff = (android::AudioTrack::Buffer*)info;
-        pBuff->size = 0;
-    } else if (NULL != user) {
-        CAudioPlayer *ap = (CAudioPlayer *)user;
-        if (!android::CallbackProtector::enterCbIfOk(ap->mCallbackProtector)) {
-            // it is not safe to enter the callback (the track is about to go away)
-            return;
-        }
-        switch (event) {
-            case android::AudioTrack::EVENT_MARKER :
-                audioTrack_handleMarker_lockPlay(ap);
-                break;
-            case android::AudioTrack::EVENT_NEW_POS :
-                audioTrack_handleNewPos_lockPlay(ap);
-                break;
-            case android::AudioTrack::EVENT_UNDERRUN :
-                audioTrack_handleUnderrun_lockPlay(ap);
-                break;
-            case android::AudioTrack::EVENT_BUFFER_END :
-            case android::AudioTrack::EVENT_LOOP_END :
-                break;
-            default:
-                SL_LOGE("Encountered unknown AudioTrack event %d for CAudioPlayer %p", event,
-                        ap);
-                break;
-        }
-        ap->mCallbackProtector->exitCb();
-    }
-}
-
 //-----------------------------------------------------------------------------
 // Callback associated with an AudioTrack of an SL ES AudioPlayer that gets its data
 // from a buffer queue. This will not be called once the AudioTrack has been destroyed.
@@ -1334,7 +1272,6 @@ SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
         // These initializations are in the same order as the field declarations in classes.h
 
         // FIXME Consolidate initializations (many of these already in IEngine_CreateAudioPlayer)
-        pAudioPlayer->mpLock = new android::Mutex();
         // mAndroidObjType: see above comment
         pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
         pAudioPlayer->mSessionId = android::AudioSystem::newAudioSessionId();
@@ -1490,8 +1427,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         AudioPlayback_Parameters app;
         app.sessionId = pAudioPlayer->mSessionId;
         app.streamType = pAudioPlayer->mStreamType;
-        app.trackcb = audioTrack_callBack_uri;
-        app.trackcbUser = (void *) pAudioPlayer;
 
         pAudioPlayer->mAPlayer = new android::LocAVPlayer(&app, false /*hasVideo*/);
         pAudioPlayer->mAPlayer->init(sfplayer_handlePrefetchEvent,
@@ -1557,8 +1492,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         AudioPlayback_Parameters ap_params;
         ap_params.sessionId = pAudioPlayer->mSessionId;
         ap_params.streamType = pAudioPlayer->mStreamType;
-        ap_params.trackcb = NULL;
-        ap_params.trackcbUser = NULL;
         android::StreamPlayer* splr = new android::StreamPlayer(&ap_params, false /*hasVideo*/,
                 &pAudioPlayer->mAndroidBufferQueue, pAudioPlayer->mCallbackProtector);
         pAudioPlayer->mAPlayer = splr;
@@ -1607,8 +1540,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         AudioPlayback_Parameters app;
         app.sessionId = pAudioPlayer->mSessionId;
         app.streamType = pAudioPlayer->mStreamType;
-        app.trackcb = NULL;
-        app.trackcbUser = NULL;
         android::AacBqToPcmCbRenderer* bqtobq = new android::AacBqToPcmCbRenderer(&app);
         // configures the callback for the sink buffer queue
         bqtobq->setDataPushListener(adecoder_writeToBufferQueue, pAudioPlayer);
@@ -1739,11 +1670,6 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     pAudioPlayer->mCallbackProtector.~sp();
     pAudioPlayer->mAuxEffect.~sp();
     pAudioPlayer->mAPlayer.~sp();
-
-    if (pAudioPlayer->mpLock != NULL) {
-        delete pAudioPlayer->mpLock;
-        pAudioPlayer->mpLock = NULL;
-    }
 
     return result;
 }
@@ -2242,10 +2168,9 @@ SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *ap) {
 SLresult android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer *ap) {
     SLresult result = SL_RESULT_SUCCESS;
     assert(ap->mAPlayer != 0);
+    // FIXME investigate why these two cases are not handled symmetrically any more
     switch (ap->mAndroidObjType) {
       case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: {
-          android::StreamPlayer* splr = static_cast<android::StreamPlayer*>(ap->mAPlayer.get());
-          splr->registerQueueCallback(&ap->mAndroidBufferQueue);
         } break;
       case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE: {
           android::AacBqToPcmCbRenderer* dec =
