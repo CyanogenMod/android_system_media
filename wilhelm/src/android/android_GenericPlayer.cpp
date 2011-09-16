@@ -279,7 +279,7 @@ void GenericPlayer::notify(const char* event, int data, bool async) {
     if (async) {
         msg->post();
     } else {
-        this->onNotify(msg);
+        onNotify(msg);
     }
 }
 
@@ -292,7 +292,7 @@ void GenericPlayer::notify(const char* event, int data1, int data2, bool async) 
     if (async) {
         msg->post();
     } else {
-        this->onNotify(msg);
+        onNotify(msg);
     }
 }
 
