@@ -851,7 +851,6 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
         }
         if (data1 >= android::kStatusIntermediate) {
             ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
-            ap->mAndroidObjState = ANDROID_READY;
         } else if (data1 < android::kStatusIntermediate) {
             ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
         }
@@ -1475,6 +1474,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         pAudioPlayer->mNumChannels = df_pcm->numChannels;
         pAudioPlayer->mSampleRateMilliHz = df_pcm->samplesPerSec; // Note: bad field name in SL ES
 
+        // This use case does not have a separate "prepare" step
         pAudioPlayer->mAndroidObjState = ANDROID_READY;
         }
         break;
