@@ -45,9 +45,9 @@ public:
     bool blockUntilPlayerPrepared();
 
 private:
-    Mutex mLock;
-    GenericMediaPlayer* mGenericMediaPlayer;
-    Condition mPlayerPreparedCondition;
+    const wp<GenericMediaPlayer> mGenericMediaPlayer;
+    Mutex mLock;                        // protects mPlayerPrepared
+    Condition mPlayerPreparedCondition; // signalled when mPlayerPrepared is changed
     enum {
         PREPARE_NOT_STARTED,
         PREPARE_IN_PROGRESS,
@@ -88,7 +88,7 @@ protected:
     virtual void onAttachAuxEffect(const sp<AMessage> &msg);
     virtual void onSetAuxEffectSendLevel(const sp<AMessage> &msg);
 
-    bool mHasVideo;
+    const bool mHasVideo;   // const allows MediaPlayerNotificationClient::notify to safely access
     int32_t mSeekTimeMsec;
 
     // at most one of mVideoSurface and mVideoSurfaceTexture is non-NULL
@@ -97,7 +97,7 @@ protected:
 
     sp<IMediaPlayer> mPlayer;
     // Receives Android MediaPlayer events from mPlayer
-    sp<MediaPlayerNotificationClient> mPlayerClient;
+    const sp<MediaPlayerNotificationClient> mPlayerClient;
 
     // Return a reference to the media player service, or LOGE and return NULL after retries fail
     static const sp<IMediaPlayerService> getMediaPlayerService() {
