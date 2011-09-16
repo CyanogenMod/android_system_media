@@ -187,6 +187,12 @@ protected:
 
     const sp<CallbackProtector> mCallbackProtector;
 
+    // Call any time any of the IPlay copies, current position, or play state changes, and
+    // supply the latest known position or ANDROID_UNKNOWN_TIME if position is unknown to caller.
+    void updateOneShot(int positionMs = ANDROID_UNKNOWN_TIME);
+
+    virtual bool advancesPositionInRealTime() const { return true; }
+
 private:
 
     // Our copy of some important IPlay member variables, except in Android units
@@ -210,10 +216,6 @@ private:
     // Play position most recently observed by updateOneShot, or ANDROID_UNKNOWN_TIME
     // if the play position has never been observed.
     int32_t mObservedPositionMs;
-
-    // Call any time any of the IPlay copies, current position, or play state changes, and
-    // supply the latest known position or ANDROID_UNKNOWN_TIME if position is unknown to caller.
-    void updateOneShot(int positionMs = ANDROID_UNKNOWN_TIME);
 
     DISALLOW_EVIL_CONSTRUCTORS(GenericPlayer);
 };

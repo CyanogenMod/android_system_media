@@ -508,6 +508,10 @@ void AudioSfDecoder::onDecode() {
             mSeekTimeMsec = ANDROID_UNKNOWN_TIME;
         }
         if (timeUsec != ANDROID_UNKNOWN_TIME) {
+            // Note that though we've decoded this position, we haven't rendered it yet.
+            // So a GetPosition called after this point will observe the advanced position,
+            // even though the PCM may not have been supplied to the sink.  That's OK as
+            // we don't claim to provide frame-accurate (let alone sample-accurate) GetPosition.
             mLastDecodedPositionUs = timeUsec;
         }
     }
@@ -561,22 +565,6 @@ void AudioSfDecoder::onDecode() {
     //-------------------------------- Render
     sp<AMessage> msg = new AMessage(kWhatRender, id());
     msg->post();
-}
-
-
-void AudioSfDecoder::onRender() {
-    //SL_LOGV("AudioSfDecoder::onRender");
-
-    Mutex::Autolock _l(mBufferSourceLock);
-
-    if (NULL == mDecodeBuffer) {
-        // nothing to render, move along
-        SL_LOGV("AudioSfDecoder::onRender NULL buffer, exiting");
-        return;
-    }
-
-    mDecodeBuffer->release();
-    mDecodeBuffer = NULL;
 
 }
 
