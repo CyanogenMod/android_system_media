@@ -195,7 +195,7 @@ void AacBqToPcmCbRenderer::onPrepare() {
             source);
 
     if (source == NULL) {
-        SL_LOGE("AudioSfDecoder::onPrepare: Could not instantiate decoder.");
+        SL_LOGE("AacBqToPcmCbRenderer::onPrepare: Could not instantiate decoder.");
         notifyPrepared(ERROR_UNSUPPORTED);
         return;
     }
