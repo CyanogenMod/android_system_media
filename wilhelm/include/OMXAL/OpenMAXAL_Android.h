@@ -47,8 +47,6 @@ typedef xa_uint64_t            XAAuint64;         /* 64 bit unsigned integer */
 /*---------------------------------------------------------------------------*/
 
 extern XA_API const XAInterfaceID XA_IID_ANDROIDBUFFERQUEUESOURCE;
-// FIXME temporary definition to be removed
-#define XA_IID_ANDROIDBUFFERQUEUE XA_IID_ANDROIDBUFFERQUEUESOURCE
 
 struct XAAndroidBufferQueueItf_;
 typedef const struct XAAndroidBufferQueueItf_ * const * XAAndroidBufferQueueItf;
@@ -61,11 +59,13 @@ typedef const struct XAAndroidBufferQueueItf_ * const * XAAndroidBufferQueueItf;
 
 #define XA_ANDROIDBUFFERQUEUEEVENT_NONE        ((XAuint32) 0x00000000)
 #define XA_ANDROIDBUFFERQUEUEEVENT_PROCESSED   ((XAuint32) 0x00000001)
+#if 0   // reserved for future use
 #define XA_ANDROIDBUFFERQUEUEEVENT_UNREALIZED  ((XAuint32) 0x00000002)
 #define XA_ANDROIDBUFFERQUEUEEVENT_CLEARED     ((XAuint32) 0x00000004)
 #define XA_ANDROIDBUFFERQUEUEEVENT_STOPPED     ((XAuint32) 0x00000008)
 #define XA_ANDROIDBUFFERQUEUEEVENT_ERROR       ((XAuint32) 0x00000010)
 #define XA_ANDROIDBUFFERQUEUEEVENT_CONTENT_END ((XAuint32) 0x00000020)
+#endif
 
 typedef struct XAAndroidBufferItem_ {
     XAuint32 itemKey;  // identifies the item
@@ -158,6 +158,11 @@ typedef struct XADataLocator_AndroidFD_ {
     XAAint64        offset;
     XAAint64        length;
 } XADataLocator_AndroidFD;
+
+/**
+ * MIME types required for data in Android Buffer Queues
+ */
+#define XA_ANDROID_MIME_MP2TS              ((XAchar *) "video/mp2ts")
 
 #ifdef __cplusplus
 }

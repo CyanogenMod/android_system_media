@@ -434,7 +434,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     iidArray[0] = SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
     /* Request the AndroidBufferQueue interface */
     required[1] = SL_BOOLEAN_TRUE;
-    iidArray[1] = SL_IID_ANDROIDBUFFERQUEUE;
+    iidArray[1] = SL_IID_ANDROIDBUFFERQUEUESOURCE;
 #ifdef QUERY_METADATA
     /* Request the MetadataExtraction interface */
     required[2] = SL_BOOLEAN_TRUE;
@@ -447,7 +447,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
             NB_BUFFERS_IN_ADTS_QUEUE          /*numBuffers*/};
     SLDataFormat_MIME format_srcMime = {
             SL_DATAFORMAT_MIME         /*formatType*/,
-            (SLchar *)"audio/aac-adts" /*mimeType*/,
+            SL_ANDROID_MIME_AACADTS    /*mimeType*/,
             SL_CONTAINERTYPE_RAW       /*containerType*/};
     SLDataSource decSource = {&loc_srcAbq /*pLocator*/, &format_srcMime /*pFormat*/};
 
@@ -526,7 +526,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     ExitOnError(res);
 
     /* Get the Android buffer queue interface which was explicitly requested */
-    res = (*player)->GetInterface(player, SL_IID_ANDROIDBUFFERQUEUE, (void*)&aacBuffQueueItf);
+    res = (*player)->GetInterface(player, SL_IID_ANDROIDBUFFERQUEUESOURCE, (void*)&aacBuffQueueItf);
     ExitOnError(res);
 
 #ifdef QUERY_METADATA

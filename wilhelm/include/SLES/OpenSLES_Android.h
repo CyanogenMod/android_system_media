@@ -212,8 +212,6 @@ struct SLAndroidSimpleBufferQueueItf_ {
 /*---------------------------------------------------------------------------*/
 
 extern SL_API const SLInterfaceID SL_IID_ANDROIDBUFFERQUEUESOURCE;
-// FIXME temporary definition to be removed
-#define SL_IID_ANDROIDBUFFERQUEUE SL_IID_ANDROIDBUFFERQUEUESOURCE
 
 struct SLAndroidBufferQueueItf_;
 typedef const struct SLAndroidBufferQueueItf_ * const * SLAndroidBufferQueueItf;
@@ -226,11 +224,13 @@ typedef const struct SLAndroidBufferQueueItf_ * const * SLAndroidBufferQueueItf;
 
 #define SL_ANDROIDBUFFERQUEUEEVENT_NONE        ((SLuint32) 0x00000000)
 #define SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED   ((SLuint32) 0x00000001)
+#if 0   // reserved for future use
 #define SL_ANDROIDBUFFERQUEUEEVENT_UNREALIZED  ((SLuint32) 0x00000002)
 #define SL_ANDROIDBUFFERQUEUEEVENT_CLEARED     ((SLuint32) 0x00000004)
 #define SL_ANDROIDBUFFERQUEUEEVENT_STOPPED     ((SLuint32) 0x00000008)
 #define SL_ANDROIDBUFFERQUEUEEVENT_ERROR       ((SLuint32) 0x00000010)
 #define SL_ANDROIDBUFFERQUEUEEVENT_CONTENT_END ((SLuint32) 0x00000020)
+#endif
 
 typedef struct SLAndroidBufferItem_ {
     SLuint32 itemKey;  // identifies the item
@@ -336,6 +336,11 @@ typedef struct SLDataLocator_AndroidBufferQueue_ {
     SLuint32    locatorType;
     SLuint32    numBuffers;
 } SLDataLocator_AndroidBufferQueue;
+
+/**
+ * MIME types required for data in Android Buffer Queues
+ */
+#define SL_ANDROID_MIME_AACADTS            ((SLchar *) "audio/vnd.android.aac-adts")
 
 #ifdef __cplusplus
 }

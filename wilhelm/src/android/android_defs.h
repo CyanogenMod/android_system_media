@@ -154,11 +154,9 @@ enum AndroidBufferType_type {
 /**
  * MIME types required for data in Android Buffer Queues
  */
-#define ANDROID_MIME_MP2TS                     "video/mp2ts"
-// the MIME type used elsewhere in the Android framework for AAC ADTS
+// The preferred MIME types for new applications are in ../../include/*/OpenMAXAL_Android.h
+// The legacy MIME type used elsewhere in the Android framework for AAC ADTS is below:
 #define ANDROID_MIME_AACADTS_ANDROID_FRAMEWORK "audio/aac-adts"
-// the MIME type applications should use for AAC ADTS
-#define ANDROID_MIME_AACADTS                   "audio/vnd.android.aac-adts"
 
 /**
  * Notification thresholds relative to content duration in the cache

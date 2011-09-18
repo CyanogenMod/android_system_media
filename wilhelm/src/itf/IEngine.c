@@ -67,7 +67,7 @@ static SLresult initializeAndroidBufferQueueMembers(CAudioPlayer *ap) {
           case SL_CONTAINERTYPE_AAC:
           case SL_CONTAINERTYPE_RAW: {
             const char* mime = (char*)ap->mDataSource.mFormat.mMIME.mimeType;
-            if ((mime != NULL) && !(strcasecmp(mime, ANDROID_MIME_AACADTS) &&
+            if ((mime != NULL) && !(strcasecmp(mime, (const char *)SL_ANDROID_MIME_AACADTS) &&
                     strcasecmp(mime, ANDROID_MIME_AACADTS_ANDROID_FRAMEWORK))) {
                 ap->mAndroidBufferQueue.mBufferType = kAndroidBufferTypeAacadts;
             } else {
