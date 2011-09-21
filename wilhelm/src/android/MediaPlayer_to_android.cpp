@@ -218,8 +218,6 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
         }
         if (data1 >= android::kStatusIntermediate) {
             mp->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_SUFFICIENTDATA;
-            // FIXME copied from AudioPlayer, but probably wrong
-            mp->mAndroidObjState = ANDROID_READY;
         } else if (data1 < android::kStatusIntermediate) {
             mp->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
         }
