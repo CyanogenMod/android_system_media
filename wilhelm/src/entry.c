@@ -81,7 +81,7 @@ LI_API SLresult liCreateEngine(SLObjectItf *pEngine, SLuint32 numOptions,
         unsigned exposedMask;
         assert(NULL != pCEngine_class);
         result = checkInterfaces(pCEngine_class, numInterfaces,
-            pInterfaceIds, pInterfaceRequired, &exposedMask);
+            pInterfaceIds, pInterfaceRequired, &exposedMask, NULL);
         if (SL_RESULT_SUCCESS != result) {
             break;
         }

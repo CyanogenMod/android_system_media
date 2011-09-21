@@ -598,7 +598,7 @@ static SLresult checkDataFormat(const char *name, void *pFormat, DataFormat *pDa
 
 SLresult checkSourceSinkVsInterfacesCompatibility(const DataLocatorFormat *pSrcDataLocatorFormat,
         const DataLocatorFormat *pSinkDataLocatorFormat,
-        const ClassTable *clazz, unsigned exposedMask) {
+        const ClassTable *clazz, unsigned requiredMask) {
     int index;
     switch (pSrcDataLocatorFormat->mLocator.mLocatorType) {
     case SL_DATALOCATOR_URI:
@@ -614,15 +614,15 @@ SLresult checkSourceSinkVsInterfacesCompatibility(const DataLocatorFormat *pSrcD
 #endif
             break;
         default:
-            // can't request SLBufferQueueItf or its alias SLAndroidSimpleBufferQueueItf
+            // can't require SLBufferQueueItf or its alias SLAndroidSimpleBufferQueueItf
             // if the data sink is not a buffer queue
             index = clazz->mMPH_to_index[MPH_BUFFERQUEUE];
 #ifdef ANDROID
             assert(index == clazz->mMPH_to_index[MPH_ANDROIDSIMPLEBUFFERQUEUE]);
 #endif
             if (0 <= index) {
-                if (exposedMask & (1 << index)) {
-                    SL_LOGE("can't request SL_IID_BUFFERQUEUE "
+                if (requiredMask & (1 << index)) {
+                    SL_LOGE("can't require SL_IID_BUFFERQUEUE "
 #ifdef ANDROID
                             "or SL_IID_ANDROIDSIMPLEBUFFERQUEUE "
 #endif
@@ -638,21 +638,21 @@ SLresult checkSourceSinkVsInterfacesCompatibility(const DataLocatorFormat *pSrcD
 #ifdef ANDROID
     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
 #endif
-        // can't request SLSeekItf if data source is a buffer queue
+        // can't require SLSeekItf if data source is a buffer queue
         index = clazz->mMPH_to_index[MPH_SEEK];
         if (0 <= index) {
-            if (exposedMask & (1 << index)) {
-                SL_LOGE("can't request SL_IID_SEEK with a buffer queue data source");
+            if (requiredMask & (1 << index)) {
+                SL_LOGE("can't require SL_IID_SEEK with a buffer queue data source");
                 return SL_RESULT_FEATURE_UNSUPPORTED;
             }
         }
-        // can't request SLMuteSoloItf if data source is a mono buffer queue
+        // can't require SLMuteSoloItf if data source is a mono buffer queue
         index = clazz->mMPH_to_index[MPH_MUTESOLO];
         if (0 <= index) {
-            if ((exposedMask & (1 << index)) &&
+            if ((requiredMask & (1 << index)) &&
                     (SL_DATAFORMAT_PCM == pSrcDataLocatorFormat->mFormat.mFormatType) &&
                     (1 == pSrcDataLocatorFormat->mFormat.mPCM.numChannels)) {
-                SL_LOGE("can't request SL_IID_MUTESOLO with a mono buffer queue data source");
+                SL_LOGE("can't require SL_IID_MUTESOLO with a mono buffer queue data source");
                 return SL_RESULT_FEATURE_UNSUPPORTED;
             }
         }
@@ -679,15 +679,15 @@ SLresult checkSourceSinkVsInterfacesCompatibility(const DataLocatorFormat *pSrcD
     case XA_DATALOCATOR_NATIVEDISPLAY:
         // any special checks here???
     default:
-        // can't request SLBufferQueueItf or its alias SLAndroidSimpleBufferQueueItf
+        // can't require SLBufferQueueItf or its alias SLAndroidSimpleBufferQueueItf
         // if the data source is not a buffer queue
         index = clazz->mMPH_to_index[MPH_BUFFERQUEUE];
 #ifdef ANDROID
         assert(index == clazz->mMPH_to_index[MPH_ANDROIDSIMPLEBUFFERQUEUE]);
 #endif
         if (0 <= index) {
-            if (exposedMask & (1 << index)) {
-                SL_LOGE("can't request SL_IID_BUFFERQUEUE "
+            if (requiredMask & (1 << index)) {
+                SL_LOGE("can't require SL_IID_BUFFERQUEUE "
 #ifdef ANDROID
                         "or SL_IID_ANDROIDSIMPLEBUFFERQUEUE "
 #endif

@@ -148,11 +148,13 @@ SLresult err_to_result(int err)
 /** \brief Check the interface IDs passed into a Create operation */
 
 SLresult checkInterfaces(const ClassTable *clazz, SLuint32 numInterfaces,
-    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired, unsigned *pExposedMask)
+    const SLInterfaceID *pInterfaceIds, const SLboolean *pInterfaceRequired,
+    unsigned *pExposedMask, unsigned *pRequiredMask)
 {
     assert(NULL != clazz && NULL != pExposedMask);
     // Initially no interfaces are exposed
     unsigned exposedMask = 0;
+    unsigned requiredMask = 0;
     const struct iid_vtable *interfaces = clazz->mInterfaces;
     SLuint32 interfaceCount = clazz->mInterfaceCount;
     SLuint32 i;
@@ -187,6 +189,7 @@ SLresult checkInterfaces(const ClassTable *clazz, SLuint32 numInterfaces,
             if (NULL == iid) {
                 return SL_RESULT_PARAMETER_INVALID;
             }
+            SLboolean isRequired = pInterfaceRequired[i];
             int MPH, index;
             if ((0 > (MPH = IID_to_MPH(iid))) ||
                     // there must be an initialization hook present
@@ -194,7 +197,7 @@ SLresult checkInterfaces(const ClassTable *clazz, SLuint32 numInterfaces,
                     (0 > (index = clazz->mMPH_to_index[MPH])) ||
                     (INTERFACE_UNAVAILABLE == interfaces[index].mInterface)) {
                 // Here if interface was not found, or is not available for this object type
-                if (pInterfaceRequired[i]) {
+                if (isRequired) {
                     // Application said it required the interface, so give up
                     SL_LOGE("class %s interface %u required but unavailable MPH=%d",
                             clazz->mName, i, MPH);
@@ -205,6 +208,9 @@ SLresult checkInterfaces(const ClassTable *clazz, SLuint32 numInterfaces,
                         clazz->mName, i, MPH);
                 continue;
             }
+            if (isRequired) {
+                requiredMask |= (1 << index);
+            }
             // The requested interface was both found and available, so expose it
             exposedMask |= (1 << index);
             // Note that we ignore duplicate requests, including equal and aliased IDs
@@ -214,6 +220,9 @@ SLresult checkInterfaces(const ClassTable *clazz, SLuint32 numInterfaces,
         }
     }
     *pExposedMask = exposedMask;
+    if (NULL != pRequiredMask) {
+        *pRequiredMask = requiredMask;
+    }
     return SL_RESULT_SUCCESS;
 }
 

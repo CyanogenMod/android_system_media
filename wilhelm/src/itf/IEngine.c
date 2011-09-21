@@ -127,7 +127,7 @@ static SLresult IEngine_CreateLEDDevice(SLEngineItf self, SLObjectItf *pDevice, 
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             result = checkInterfaces(pCLEDDevice_class, numInterfaces, pInterfaceIds,
-                pInterfaceRequired, &exposedMask);
+                pInterfaceRequired, &exposedMask, NULL);
         }
         if (SL_RESULT_SUCCESS == result) {
             CLEDDevice *thiz = (CLEDDevice *) construct(pCLEDDevice_class, exposedMask, self);
@@ -165,7 +165,7 @@ static SLresult IEngine_CreateVibraDevice(SLEngineItf self, SLObjectItf *pDevice
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             result = checkInterfaces(pCVibraDevice_class, numInterfaces,
-                pInterfaceIds, pInterfaceRequired, &exposedMask);
+                pInterfaceIds, pInterfaceRequired, &exposedMask, NULL);
         }
         if (SL_RESULT_SUCCESS == result) {
             CVibraDevice *thiz = (CVibraDevice *) construct(pCVibraDevice_class, exposedMask, self);
@@ -197,11 +197,11 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
        result = SL_RESULT_PARAMETER_INVALID;
     } else {
         *pPlayer = NULL;
-        unsigned exposedMask;
+        unsigned exposedMask, requiredMask;
         const ClassTable *pCAudioPlayer_class = objectIDtoClass(SL_OBJECTID_AUDIOPLAYER);
         assert(NULL != pCAudioPlayer_class);
         result = checkInterfaces(pCAudioPlayer_class, numInterfaces,
-            pInterfaceIds, pInterfaceRequired, &exposedMask);
+            pInterfaceIds, pInterfaceRequired, &exposedMask, &requiredMask);
         if (SL_RESULT_SUCCESS == result) {
 
             // Construct our new AudioPlayer instance
@@ -299,7 +299,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
 
                     // Check that the requested interfaces are compatible with data source and sink
                     result = checkSourceSinkVsInterfacesCompatibility(&thiz->mDataSource,
-                            &thiz->mDataSink, pCAudioPlayer_class, exposedMask);
+                            &thiz->mDataSink, pCAudioPlayer_class, requiredMask);
                     if (SL_RESULT_SUCCESS != result) {
                         break;
                     }
@@ -439,7 +439,7 @@ static SLresult IEngine_CreateAudioRecorder(SLEngineItf self, SLObjectItf *pReco
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             result = checkInterfaces(pCAudioRecorder_class, numInterfaces,
-                    pInterfaceIds, pInterfaceRequired, &exposedMask);
+                    pInterfaceIds, pInterfaceRequired, &exposedMask, NULL);
         }
 
         if (SL_RESULT_SUCCESS == result) {
@@ -577,7 +577,7 @@ static SLresult IEngine_CreateMidiPlayer(SLEngineItf self, SLObjectItf *pPlayer,
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             result = checkInterfaces(pCMidiPlayer_class, numInterfaces,
-                pInterfaceIds, pInterfaceRequired, &exposedMask);
+                pInterfaceIds, pInterfaceRequired, &exposedMask, NULL);
         }
         if (SL_RESULT_SUCCESS == result) {
             CMidiPlayer *thiz = (CMidiPlayer *) construct(pCMidiPlayer_class, exposedMask, self);
@@ -623,7 +623,7 @@ static SLresult IEngine_CreateListener(SLEngineItf self, SLObjectItf *pListener,
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             result = checkInterfaces(pCListener_class, numInterfaces,
-                pInterfaceIds, pInterfaceRequired, &exposedMask);
+                pInterfaceIds, pInterfaceRequired, &exposedMask, NULL);
         }
         if (SL_RESULT_SUCCESS == result) {
             CListener *thiz = (CListener *) construct(pCListener_class, exposedMask, self);
@@ -660,7 +660,7 @@ static SLresult IEngine_Create3DGroup(SLEngineItf self, SLObjectItf *pGroup, SLu
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             result = checkInterfaces(pC3DGroup_class, numInterfaces,
-                pInterfaceIds, pInterfaceRequired, &exposedMask);
+                pInterfaceIds, pInterfaceRequired, &exposedMask, NULL);
         }
         if (SL_RESULT_SUCCESS == result) {
             C3DGroup *thiz = (C3DGroup *) construct(pC3DGroup_class, exposedMask, self);
@@ -695,7 +695,7 @@ static SLresult IEngine_CreateOutputMix(SLEngineItf self, SLObjectItf *pMix, SLu
         const ClassTable *pCOutputMix_class = objectIDtoClass(SL_OBJECTID_OUTPUTMIX);
         assert(NULL != pCOutputMix_class);
         result = checkInterfaces(pCOutputMix_class, numInterfaces,
-            pInterfaceIds, pInterfaceRequired, &exposedMask);
+            pInterfaceIds, pInterfaceRequired, &exposedMask, NULL);
         if (SL_RESULT_SUCCESS == result) {
             COutputMix *thiz = (COutputMix *) construct(pCOutputMix_class, exposedMask, self);
             if (NULL == thiz) {
@@ -749,7 +749,7 @@ static SLresult IEngine_CreateMetadataExtractor(SLEngineItf self, SLObjectItf *p
             result = SL_RESULT_FEATURE_UNSUPPORTED;
         } else {
             result = checkInterfaces(pCMetadataExtractor_class, numInterfaces,
-                pInterfaceIds, pInterfaceRequired, &exposedMask);
+                pInterfaceIds, pInterfaceRequired, &exposedMask, NULL);
         }
         if (SL_RESULT_SUCCESS == result) {
             CMetadataExtractor *thiz = (CMetadataExtractor *)
@@ -1082,7 +1082,7 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
         const ClassTable *pCMediaPlayer_class = objectIDtoClass(XA_OBJECTID_MEDIAPLAYER);
         assert(NULL != pCMediaPlayer_class);
         result = checkInterfaces(pCMediaPlayer_class, numInterfaces,
-                (const SLInterfaceID *) pInterfaceIds, pInterfaceRequired, &exposedMask);
+                (const SLInterfaceID *) pInterfaceIds, pInterfaceRequired, &exposedMask, NULL);
         if (XA_RESULT_SUCCESS == result) {
 
             // Construct our new MediaPlayer instance

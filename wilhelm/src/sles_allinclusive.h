@@ -295,7 +295,7 @@ extern /*static*/ int IID_to_MPH(const SLInterfaceID iid);
 extern /*static*/ const struct MPH_init MPH_init_table[MPH_MAX];
 extern SLresult checkInterfaces(const ClassTable *clazz,
     SLuint32 numInterfaces, const SLInterfaceID *pInterfaceIds,
-    const SLboolean *pInterfaceRequired, unsigned *pExposedMask);
+    const SLboolean *pInterfaceRequired, unsigned *pExposedMask, unsigned *pRequiredMask);
 extern IObject *construct(const ClassTable *clazz,
     unsigned exposedMask, SLEngineItf engine);
 extern const ClassTable *objectIDtoClass(SLuint32 objectID);
