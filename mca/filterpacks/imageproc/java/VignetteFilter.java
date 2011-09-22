@@ -31,7 +31,7 @@ import android.filterfw.format.ImageFormat;
 public class VignetteFilter extends Filter {
 
     @GenerateFieldPort(name = "scale", hasDefault = true)
-    private float mRange = 0f;
+    private float mScale = 0f;
 
     @GenerateFieldPort(name = "tile_size", hasDefault = true)
     private int mTileSize = 640;
@@ -107,9 +107,11 @@ public class VignetteFilter extends Filter {
     }
 
     private void updateParameters() {
-        mProgram.setHostValue("range", mRange);
+        // The 'range' is between 1.3 to 0.6. When scale is zero then range is 1.3
+        // which means no vignette at all because the luminousity difference is
+        // less than 1/256 and will cause nothing.
+        mProgram.setHostValue("range", 1.30f - (float) Math.sqrt(mScale) * 0.7f);
     }
-
 
     @Override
     public void fieldPortValueUpdated(String name, FilterContext context) {
