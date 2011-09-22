@@ -394,7 +394,7 @@ void GenericPlayer::onPrepare() {
     // by updating mStateFlags accordingly.  It must set exactly one of these two flags.
     assert(!(mStateFlags & kFlagPrepared) != !(mStateFlags & kFlagPreparedUnsuccessfully));
     notify(PLAYEREVENT_PREPARED, mStateFlags & kFlagPrepared ? PLAYER_SUCCESS : PLAYER_FAILURE,
-            false /*async*/);
+            true /*async*/);
     SL_LOGD("GenericPlayer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
 }
 
