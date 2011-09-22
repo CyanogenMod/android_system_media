@@ -79,6 +79,7 @@ public:
 
     // overridden from GenericPlayer
     virtual void onMessageReceived(const sp<AMessage> &msg);
+    virtual void preDestroy();
 
     void registerQueueCallback(IAndroidBufferQueue *androidBufferQueue);
     void queueRefilled();
@@ -92,7 +93,8 @@ protected:
         //    was refilled, or because during playback, the shared memory buffers should remain
         //    filled to prevent it from draining (this can happen if the ABQ is not ready
         //    whenever a shared memory buffer becomes available)
-        kWhatPullFromAbq = 'plfq'
+        kWhatPullFromAbq    = 'plfq',
+        kWhatStopForDestroy = 's4ds'
     };
 
     const sp<StreamSourceAppProxy> mAppProxy; // application proxy for the shared memory source
@@ -104,6 +106,12 @@ protected:
     void onPullFromAndroidBufferQueue();
 
 private:
+    void onStopForDestroy();
+
+    Mutex mStopForDestroyLock;
+    Condition mStopForDestroyCondition;
+    bool mStopForDestroyCompleted;
+
     DISALLOW_EVIL_CONSTRUCTORS(StreamPlayer);
 };
 

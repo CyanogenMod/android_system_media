@@ -245,7 +245,8 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
 StreamPlayer::StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo,
         IAndroidBufferQueue *androidBufferQueue, const sp<CallbackProtector> &callbackProtector) :
         GenericMediaPlayer(params, hasVideo),
-        mAppProxy(new StreamSourceAppProxy(androidBufferQueue, callbackProtector, this))
+        mAppProxy(new StreamSourceAppProxy(androidBufferQueue, callbackProtector, this)),
+        mStopForDestroyCompleted(false)
 {
     SL_LOGD("StreamPlayer::StreamPlayer()");
 
@@ -264,10 +265,37 @@ void StreamPlayer::onMessageReceived(const sp<AMessage> &msg) {
             onPullFromAndroidBufferQueue();
             break;
 
+        case kWhatStopForDestroy:
+            onStopForDestroy();
+            break;
+
         default:
             GenericMediaPlayer::onMessageReceived(msg);
             break;
     }
+}
+
+
+void StreamPlayer::preDestroy() {
+    // FIXME NuPlayerDriver is currently not thread-safe, so stop() must be called by looper
+    (new AMessage(kWhatStopForDestroy, id()))->post();
+    {
+        Mutex::Autolock _l(mStopForDestroyLock);
+        while (!mStopForDestroyCompleted) {
+            mStopForDestroyCondition.wait(mStopForDestroyLock);
+        }
+    }
+    // skipping past GenericMediaPlayer::preDestroy
+    GenericPlayer::preDestroy();
+}
+
+
+void StreamPlayer::onStopForDestroy() {
+    if (mPlayer != 0) {
+        mPlayer->stop();
+    }
+    mStopForDestroyCompleted = true;
+    mStopForDestroyCondition.signal();
 }
 
 
