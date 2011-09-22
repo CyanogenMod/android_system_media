@@ -44,6 +44,7 @@ public abstract class GraphRunner {
     public static final int RESULT_SLEEPING = 3;
     public static final int RESULT_BLOCKED  = 4;
     public static final int RESULT_STOPPED  = 5;
+    public static final int RESULT_ERROR    = 6;
 
     public GraphRunner(FilterContext context) {
         mFilterContext = context;
