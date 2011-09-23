@@ -41,67 +41,84 @@ public class AsyncRunner extends GraphRunner{
     private OnRunnerDoneListener mDoneListener;
     private boolean isProcessing;
 
-    private class AsyncRunnerTask extends AsyncTask<SyncRunner, Void, Integer> {
+    private Exception mException;
+
+    private class RunnerResult {
+        public int status = RESULT_UNKNOWN;
+        public Exception exception;
+    }
+
+    private class AsyncRunnerTask extends AsyncTask<SyncRunner, Void, RunnerResult> {
 
         private static final String TAG = "AsyncRunnerTask";
 
         @Override
-        protected Integer doInBackground(SyncRunner... runner) {
-            if (runner.length > 1) {
-                throw new RuntimeException("More than one runner received!");
-            }
+        protected RunnerResult doInBackground(SyncRunner... runner) {
+            RunnerResult result = new RunnerResult();
+            try {
+                if (runner.length > 1) {
+                    throw new RuntimeException("More than one runner received!");
+                }
 
-            runner[0].assertReadyToStep();
+                runner[0].assertReadyToStep();
 
-            // Preparation
-            if (mLogVerbose) Log.v(TAG, "Starting background graph processing.");
-            activateGlContext();
+                // Preparation
+                if (mLogVerbose) Log.v(TAG, "Starting background graph processing.");
+                activateGlContext();
 
-            if (mLogVerbose) Log.v(TAG, "Preparing filter graph for processing.");
-            runner[0].beginProcessing();
+                if (mLogVerbose) Log.v(TAG, "Preparing filter graph for processing.");
+                runner[0].beginProcessing();
 
-            if (mLogVerbose) Log.v(TAG, "Running graph.");
+                if (mLogVerbose) Log.v(TAG, "Running graph.");
 
-            // Run loop
-            int status = RESULT_RUNNING;
-            while (!isCancelled() && status == RESULT_RUNNING) {
-                if (!runner[0].performStep()) {
-                    status = runner[0].determinePostRunState();
-                    if (status == GraphRunner.RESULT_SLEEPING) {
-                        runner[0].waitUntilWake();
-                        status = RESULT_RUNNING;
+                // Run loop
+                result.status = RESULT_RUNNING;
+                while (!isCancelled() && result.status == RESULT_RUNNING) {
+                    if (!runner[0].performStep()) {
+                        result.status = runner[0].determinePostRunState();
+                        if (result.status == GraphRunner.RESULT_SLEEPING) {
+                            runner[0].waitUntilWake();
+                            result.status = RESULT_RUNNING;
+                        }
                     }
                 }
+
+                // Cleanup
+                if (isCancelled()) {
+                    result.status = RESULT_STOPPED;
+                }
+
+                deactivateGlContext();
+            } catch (Exception exception) {
+                result.exception = exception;
+                result.status = RESULT_ERROR;
             }
-
-            // Cleanup
-            if (isCancelled()) {
-                status = RESULT_STOPPED;
-            }
-
-            deactivateGlContext();
-
             if (mLogVerbose) Log.v(TAG, "Done with background graph processing.");
-            return status;
+            return result;
         }
 
         @Override
-        protected void onCancelled(Integer result) {
+        protected void onCancelled(RunnerResult result) {
             onPostExecute(result);
         }
 
         @Override
-        protected void onPostExecute(Integer result) {
+        protected void onPostExecute(RunnerResult result) {
             if (mLogVerbose) Log.v(TAG, "Starting post-execute.");
             setRunning(false);
-
-            if (result == RESULT_STOPPED) {
+            setException(result.exception);
+            if (result.status == RESULT_STOPPED || result.status == RESULT_ERROR) {
                 if (mLogVerbose) Log.v(TAG, "Closing filters.");
-                mRunner.close();
+                try {
+                    mRunner.close();
+                } catch (Exception exception) {
+                    result.status = RESULT_ERROR;
+                    setException(exception);
+                }
             }
             if (mDoneListener != null) {
                 if (mLogVerbose) Log.v(TAG, "Calling graph done callback.");
-                mDoneListener.onRunnerDone(result);
+                mDoneListener.onRunnerDone(result.status);
             }
             if (mLogVerbose) Log.v(TAG, "Completed post-execute.");
         }
@@ -162,6 +179,8 @@ public class AsyncRunner extends GraphRunner{
     @Override
     synchronized public void run() {
         if (mLogVerbose) Log.v(TAG, "Running graph.");
+        setException(null);
+
         if (isRunning()) {
             throw new RuntimeException("Graph is already running!");
         }
@@ -200,8 +219,16 @@ public class AsyncRunner extends GraphRunner{
         return isProcessing;
     }
 
+    synchronized public Exception getError() {
+        return mException;
+    }
+
     synchronized private void setRunning(boolean running) {
         isProcessing = running;
+    }
+
+    synchronized private void setException(Exception exception) {
+        mException = exception;
     }
 
 }
