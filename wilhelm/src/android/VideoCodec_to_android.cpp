@@ -140,11 +140,12 @@ SLresult android_videoCodec_getProfileLevelCombinationNb(XAuint32 decoderId, XAu
     while (decoderIndex < kNbVideoMimeTypes) {
         if (decoderId == VideoDecoderIds[decoderIndex]) {
             *pNb = VideoDecoderNbProfLevel[decoderIndex];
+            break;
         }
         decoderIndex++;
     }
 
-    return *pNb > 0 ? XA_RESULT_SUCCESS : XA_RESULT_PARAMETER_INVALID;
+    return XA_RESULT_SUCCESS;
 }
 
 

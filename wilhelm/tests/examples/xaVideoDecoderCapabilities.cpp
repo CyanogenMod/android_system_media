@@ -105,7 +105,7 @@ void TestVideoDecoderCapabilities() {
         XAuint32 nbCombinations = 0;
         /* get the number of profile / level combinations */
         res = (*decItf)->GetVideoDecoderCapabilities(decItf, decoderIds[i], &nbCombinations, NULL);
-        //ExitOnError(res);
+        ExitOnError(res);
         fprintf(stdout, "decoder %s has %d profile/level combinations:\n\t",
                 videoCodecIdToString(decoderIds[i]), nbCombinations);
         /* display the profile / level combinations */

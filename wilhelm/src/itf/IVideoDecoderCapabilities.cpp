@@ -78,7 +78,6 @@ static XAresult IVideoDecoderCapabilities_GetVideoDecoderCapabilities(
 #ifdef ANDROID
             result = android::android_videoCodec_getProfileLevelCombinationNb(decoderId, pIndex);
 #else
-            pIndex = 0;
             SL_LOGE("Generic implementation has no video decoder capabilities");
             result = XA_RESULT_PARAMETER_INVALID;
 #endif
