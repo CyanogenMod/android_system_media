@@ -55,6 +55,7 @@ How to examine the output with Audacity:
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <cpustats/CentralTendencyStatistics.h>
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
@@ -111,6 +112,10 @@ size_t encodedFrames = 0;
 size_t encodedSamples = 0;
 size_t decodedFrames = 0;
 size_t decodedSamples = 0;
+size_t totalEncodeCompletions = 0;     // number of Enqueue completions received
+CentralTendencyStatistics frameStats;
+size_t pauseFrame = 0;              // pause after this many decoded frames, zero means don't pause
+SLboolean createRaw = SL_BOOLEAN_FALSE; // whether to create a .raw file containing PCM data
 
 /* constant to identify a buffer context which is the end of the stream to decode */
 static const int kEosBufferCntxt = 1980; // a magic value we can compare against
@@ -145,8 +150,18 @@ typedef struct CallbackCntxt_ {
 //-----------------------------------------------------------------
 /* Callback for SLPlayItf through which we receive the SL_PLAYEVENT_HEADATEND event */
 void PlayCallback(SLPlayItf caller, void *pContext, SLuint32 event) {
+    SLmillisecond position;
+    SLresult res = (*caller)->GetPosition(caller, &position);
+    ExitOnError(res);
+    if (event & SL_PLAYEVENT_HEADATMARKER) {
+        printf("SL_PLAYEVENT_HEADATMARKER position=%u ms\n", position);
+    }
+    if (event & SL_PLAYEVENT_HEADATNEWPOS) {
+        printf("SL_PLAYEVENT_HEADATNEWPOS position=%u ms\n", position);
+    }
     if (event & SL_PLAYEVENT_HEADATEND) {
-        fprintf(stdout, "SL_PLAYEVENT_HEADATEND received, all decoded data has been received\n");
+        printf("SL_PLAYEVENT_HEADATEND position=%u ms, all decoded data has been received\n",
+                position);
     }
 }
 
@@ -175,10 +190,22 @@ SLresult AndroidBufferQueueCallback(
         }
     }
 
+    ++totalEncodeCompletions;
     if (endOfEncodedStream) {
         // we continue to receive acknowledgement after each buffer was processed
+        if (pBufferContext == (void *) kEosBufferCntxt) {
+            printf("Received EOS completion after EOS\n");
+        } else if (pBufferContext == NULL) {
+            printf("Received ADTS completion after EOS\n");
+        } else {
+            fprintf(stderr, "Received acknowledgement after EOS with unexpected context %p\n",
+                    pBufferContext);
+        }
     } else if (filelen == 0) {
         // signal EOS to the decoder rather than just starving it
+        printf("Enqueue EOS: encoded frames=%u, decoded frames=%u\n", encodedFrames, decodedFrames);
+        printf("You should now see %u ADTS completion%s followed by 1 EOS completion\n",
+                NB_BUFFERS_IN_ADTS_QUEUE - 1, NB_BUFFERS_IN_ADTS_QUEUE != 2 ? "s" : "");
         SLAndroidBufferItem msgEos;
         msgEos.itemKey = SL_ANDROID_ITEMKEY_EOS;
         msgEos.itemSize = 0;
@@ -192,6 +219,10 @@ SLresult AndroidBufferQueueCallback(
         endOfEncodedStream = true;
     // verify that we are at start of an ADTS frame
     } else if (!(filelen < 7 || frame[0] != 0xFF || (frame[1] & 0xF0) != 0xF0)) {
+        if (pBufferContext != NULL) {
+            fprintf(stderr, "Received acknowledgement before EOS with unexpected context %p\n",
+                    pBufferContext);
+        }
         unsigned framelen = ((frame[3] & 3) << 11) | (frame[4] << 3) | (frame[5] >> 5);
         if (framelen <= filelen) {
             // push more data to the queue
@@ -202,6 +233,7 @@ SLresult AndroidBufferQueueCallback(
             filelen -= framelen;
             ++encodedFrames;
             encodedSamples += SAMPLES_PER_AAC_FRAME;
+            frameStats.sample(framelen);
         } else {
             fprintf(stderr,
                     "partial ADTS frame at EOF discarded; offset=%u, framelen=%u, filelen=%u\n",
@@ -232,7 +264,8 @@ void DecPlayCallback(
     CallbackCntxt *pCntxt = (CallbackCntxt*)pContext;
 
     /* Save the decoded data to output file */
-    if (fwrite(pCntxt->pData, 1, BUFFER_SIZE_IN_BYTES, outputFp) < BUFFER_SIZE_IN_BYTES) {
+    if (outputFp != NULL && fwrite(pCntxt->pData, 1, BUFFER_SIZE_IN_BYTES, outputFp)
+                < BUFFER_SIZE_IN_BYTES) {
         fprintf(stderr, "Error writing to output file");
     }
 
@@ -298,11 +331,13 @@ void DecPlayCallback(
         res = (*pCntxt->playItf)->GetDuration(pCntxt->playItf, &duration);
         ExitOnError(res);
         if (duration == SL_TIME_UNKNOWN) {
-            printf("After %u decoded frames: position is %u ms, duration is unknown as expected\n",
-                    decodedFrames, position);
+            printf("After %u encoded %u decoded frames: position is %u ms, duration is "
+                    "unknown as expected\n",
+                    encodedFrames, decodedFrames, position);
         } else {
-            printf("After %u decoded frames: position is %u ms, duration is surprisingly %u ms\n",
-                    decodedFrames, position, duration);
+            printf("After %u encoded %u decoded frames: position is %u ms, duration is "
+                    "surprisingly %u ms\n",
+                    encodedFrames, decodedFrames, position, duration);
         }
     }
 
@@ -343,16 +378,21 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     filelen = statbuf.st_size;
 
     // create PCM .raw file
-    size_t len = strlen((const char *) path);
-    char* outputPath = (char*) malloc(len + 4 + 1); // save room to concatenate ".raw"
-    if (NULL == outputPath) {
-        ExitOnError(SL_RESULT_RESOURCE_ERROR);
-    }
-    memcpy(outputPath, path, len + 1);
-    strcat(outputPath, ".raw");
-    outputFp = fopen(outputPath, "w");
-    if (NULL == outputFp) {
-        ExitOnError(SL_RESULT_RESOURCE_ERROR);
+    if (createRaw) {
+        size_t len = strlen((const char *) path);
+        char* outputPath = (char*) malloc(len + 4 + 1); // save room to concatenate ".raw"
+        if (NULL == outputPath) {
+            ExitOnError(SL_RESULT_RESOURCE_ERROR);
+        }
+        memcpy(outputPath, path, len + 1);
+        strcat(outputPath, ".raw");
+        outputFp = fopen(outputPath, "w");
+        if (NULL == outputFp) {
+            // issue an error message, but continue the decoding anyway
+            perror(outputPath);
+        }
+    } else {
+        outputFp = NULL;
     }
 
     SLresult res;
@@ -444,8 +484,17 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     res = (*player)->GetInterface(player, SL_IID_PLAY, (void*)&playItf);
     ExitOnError(res);
 
-    /* Use the play interface to set up a callback for the SL_PLAYEVENT_HEADATEND event */
-    res = (*playItf)->SetCallbackEventsMask(playItf, SL_PLAYEVENT_HEADATEND);
+    /* Enable callback when position passes through a marker (SL_PLAYEVENT_HEADATMARKER) */
+    res = (*playItf)->SetMarkerPosition(playItf, 5000);
+    ExitOnError(res);
+
+    /* Enable callback for periodic position updates (SL_PLAYEVENT_HEADATNEWPOS) */
+    res = (*playItf)->SetPositionUpdatePeriod(playItf, 3000);
+    ExitOnError(res);
+
+    /* Use the play interface to set up a callback for the SL_PLAYEVENT_HEAD* events */
+    res = (*playItf)->SetCallbackEventsMask(playItf,
+            SL_PLAYEVENT_HEADATMARKER | SL_PLAYEVENT_HEADATNEWPOS | SL_PLAYEVENT_HEADATEND);
     ExitOnError(res);
     res = (*playItf)->RegisterCallback(playItf, PlayCallback /*callback*/, NULL /*pContext*/);
     ExitOnError(res);
@@ -531,6 +580,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
         filelen -= framelen;
         ++encodedFrames;
         encodedSamples += SAMPLES_PER_AAC_FRAME;
+        frameStats.sample(framelen);
     }
     printf("\n");
 
@@ -626,16 +676,38 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     /* Decode until the end of the stream is reached */
     pthread_mutex_lock(&eosLock);
     while (!eos) {
-        pthread_cond_wait(&eosCondition, &eosLock);
+        if (pauseFrame > 0) {
+            if (decodedFrames >= pauseFrame) {
+                pauseFrame = 0;
+                printf("Pausing after decoded frame %u for 10 seconds\n", decodedFrames);
+                pthread_mutex_unlock(&eosLock);
+                res = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_PAUSED);
+                ExitOnError(res);
+                sleep(10);
+                printf("Resuming\n");
+                res = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_PLAYING);
+                ExitOnError(res);
+                pthread_mutex_lock(&eosLock);
+            } else {
+                pthread_mutex_unlock(&eosLock);
+                usleep(10*1000);
+                pthread_mutex_lock(&eosLock);
+            }
+        } else {
+            pthread_cond_wait(&eosCondition, &eosLock);
+        }
     }
     pthread_mutex_unlock(&eosLock);
 
     /* This just means done enqueueing; there may still more data in decode queue! */
+    // FIXME here is where we should wait for HEADATEND
     usleep(100 * 1000);
 
     pthread_mutex_lock(&eosLock);
     printf("Frame counters: encoded=%u decoded=%u\n", encodedFrames, decodedFrames);
     printf("Sample counters: encoded=%u decoded=%u\n", encodedSamples, decodedSamples);
+    printf("Total encode completions received: actual=%u, expected=%u\n",
+            totalEncodeCompletions, encodedFrames+1/*EOS*/);
     pthread_mutex_unlock(&eosLock);
 
     /* Get the final position and duration */
@@ -649,6 +721,13 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
         printf("The final position is %u ms, duration is %u ms\n", position, duration);
     }
 
+    printf("Frame length statistics:\n");
+    printf("  n = %u frames\n", frameStats.n());
+    printf("  mean = %.1f bytes\n", frameStats.mean());
+    printf("  minimum = %.1f bytes\n", frameStats.minimum());
+    printf("  maximum = %.1f bytes\n", frameStats.maximum());
+    printf("  stddev = %.1f bytes\n", frameStats.stddev());
+
     /* ------------------------------------------------------ */
     /* End of decoding */
 
@@ -656,7 +735,9 @@ destroyRes:
     /* Destroy the AudioPlayer object */
     (*player)->Destroy(player);
 
-    fclose(outputFp);
+    if (outputFp != NULL) {
+        fclose(outputFp);
+    }
 
     // unmap the ADTS AAC file from memory
     ok = munmap(ptr, statbuf.st_size);

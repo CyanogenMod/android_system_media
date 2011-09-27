@@ -285,6 +285,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libOpenSLES
 
+LOCAL_STATIC_LIBRARIES := libcpustats
+
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
