@@ -72,10 +72,13 @@ bool prefetchError = false;
 void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint32 event)
 {
     SLpermille level = 0;
-    (*caller)->GetFillLevel(caller, &level);
+    SLresult result;
+    result = (*caller)->GetFillLevel(caller, &level);
+    CheckErr(result);
     SLuint32 status;
     //fprintf(stdout, "PrefetchEventCallback: received event %u\n", event);
-    (*caller)->GetPrefetchStatus(caller, &status);
+    result = (*caller)->GetPrefetchStatus(caller, &status);
+    CheckErr(result);
     if ((PREFETCHEVENT_ERROR_CANDIDATE == (event & PREFETCHEVENT_ERROR_CANDIDATE))
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
         fprintf(stdout, "PrefetchEventCallback: Error while prefetching data, exiting\n");
