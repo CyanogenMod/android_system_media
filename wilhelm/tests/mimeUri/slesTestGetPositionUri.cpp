@@ -74,6 +74,7 @@ void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint3
             && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
         fprintf(stdout, "PrefetchEventCallback: Error while prefetching data, exiting\n");
         prefetchError = true;
+        return;
     }
     if (event & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
         fprintf(stdout, "PrefetchEventCallback: Buffer fill level is = %d\n", level);
