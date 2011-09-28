@@ -180,7 +180,8 @@ static SLresult IMuteSolo_GetNumChannels(SLMuteSoloItf self, SLuint8 *pNumChanne
             SLuint8 numChannels = ap->mNumChannels;
             object_unlock_shared(thisObject);
             *pNumChannels = numChannels;
-            result = 0 < numChannels ? SL_RESULT_SUCCESS : SL_RESULT_PRECONDITIONS_VIOLATED;
+            // spec errata says to return 0 (== UNKNOWN_NUMCHANNELS) if channel count is unknown
+            result = SL_RESULT_SUCCESS;
         }
     }
 
