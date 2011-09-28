@@ -293,7 +293,7 @@ endif
 
 LOCAL_CFLAGS += -UNDEBUG
 
-LOCAL_MODULE:= slesTestDecodeAac
+LOCAL_MODULE:= slesTest_decodeAac
 
 include $(BUILD_EXECUTABLE)
 

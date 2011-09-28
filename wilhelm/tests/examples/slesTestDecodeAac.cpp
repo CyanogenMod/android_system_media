@@ -45,6 +45,7 @@ How to examine the output with Audacity:
 
 #define QUERY_METADATA
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -64,7 +65,7 @@ How to examine the output with Audacity:
  * on the AudioPlayer object for decoding, and
  * SL_IID_METADATAEXTRACTION for retrieving the format of the decoded audio.
  */
-#define NUM_EXPLICIT_INTERFACES_FOR_PLAYER 3
+#define NUM_EXPLICIT_INTERFACES_FOR_PLAYER 4
 
 /* Number of decoded samples produced by one AAC frame; defined by the standard */
 #define SAMPLES_PER_AAC_FRAME 1024
@@ -115,7 +116,7 @@ size_t decodedSamples = 0;
 size_t totalEncodeCompletions = 0;     // number of Enqueue completions received
 CentralTendencyStatistics frameStats;
 size_t pauseFrame = 0;              // pause after this many decoded frames, zero means don't pause
-SLboolean createRaw = SL_BOOLEAN_FALSE; // whether to create a .raw file containing PCM data
+SLboolean createRaw = SL_BOOLEAN_TRUE; // whether to create a .raw file containing PCM data
 
 /* constant to identify a buffer context which is the end of the stream to decode */
 static const int kEosBufferCntxt = 1980; // a magic value we can compare against
@@ -123,6 +124,23 @@ static const int kEosBufferCntxt = 1980; // a magic value we can compare against
 /* protects shared variables */
 pthread_mutex_t eosLock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t eosCondition = PTHREAD_COND_INITIALIZER;
+
+// These are extensions to OpenMAX AL 1.0.1 values
+
+#define PREFETCHSTATUS_UNKNOWN ((SLuint32) 0)
+#define PREFETCHSTATUS_ERROR   ((SLuint32) (-1))
+
+// Mutex and condition shared with main program to protect prefetch_status
+
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+SLuint32 prefetch_status = PREFETCHSTATUS_UNKNOWN;
+
+/* used to detect errors likely to have occured when the OpenSL ES framework fails to open
+ * a resource, for instance because a file URI is invalid, or an HTTP server doesn't respond.
+ */
+#define PREFETCHEVENT_ERROR_CANDIDATE \
+        (SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE)
 
 //-----------------------------------------------------------------
 /* Exits the application if an error is encountered */
@@ -137,6 +155,40 @@ void ExitOnErrorFunc( SLresult result , int line)
 }
 
 //-----------------------------------------------------------------
+/* Callback for "prefetch" events, here used to detect audio resource opening errors */
+void PrefetchEventCallback(SLPrefetchStatusItf caller, void *pContext, SLuint32 event)
+{
+    // pContext is unused here, so we pass NULL
+    assert(pContext == NULL);
+    SLpermille level = 0;
+    SLresult result;
+    result = (*caller)->GetFillLevel(caller, &level);
+    ExitOnError(result);
+    SLuint32 status;
+    result = (*caller)->GetPrefetchStatus(caller, &status);
+    ExitOnError(result);
+    printf("prefetch level=%d status=0x%x event=%d\n", level, status, event);
+    SLuint32 new_prefetch_status;
+    if ((PREFETCHEVENT_ERROR_CANDIDATE == (event & PREFETCHEVENT_ERROR_CANDIDATE))
+            && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
+        printf("PrefetchEventCallback: Error while prefetching data, exiting\n");
+        new_prefetch_status = PREFETCHSTATUS_ERROR;
+    } else if (event == SL_PREFETCHEVENT_STATUSCHANGE) {
+        new_prefetch_status = status;
+    } else {
+        return;
+    }
+    int ok;
+    ok = pthread_mutex_lock(&mutex);
+    assert(ok == 0);
+    prefetch_status = new_prefetch_status;
+    ok = pthread_cond_signal(&cond);
+    assert(ok == 0);
+    ok = pthread_mutex_unlock(&mutex);
+    assert(ok == 0);
+}
+
+//-----------------------------------------------------------------
 /* Structure for passing information to callback function */
 typedef struct CallbackCntxt_ {
 #ifdef QUERY_METADATA
@@ -146,6 +198,11 @@ typedef struct CallbackCntxt_ {
     SLint8*   pDataBase;    // Base address of local audio data storage
     SLint8*   pData;        // Current address of local audio data storage
 } CallbackCntxt;
+
+// used to notify when SL_PLAYEVENT_HEADATEND event is received
+static pthread_mutex_t head_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t head_cond = PTHREAD_COND_INITIALIZER;
+static SLboolean head_atend = SL_BOOLEAN_FALSE;
 
 //-----------------------------------------------------------------
 /* Callback for SLPlayItf through which we receive the SL_PLAYEVENT_HEADATEND event */
@@ -162,6 +219,10 @@ void PlayCallback(SLPlayItf caller, void *pContext, SLuint32 event) {
     if (event & SL_PLAYEVENT_HEADATEND) {
         printf("SL_PLAYEVENT_HEADATEND position=%u ms, all decoded data has been received\n",
                 position);
+        pthread_mutex_lock(&head_mutex);
+        head_atend = SL_BOOLEAN_TRUE;
+        pthread_cond_signal(&head_cond);
+        pthread_mutex_unlock(&head_mutex);
     }
 }
 
@@ -184,8 +245,7 @@ SLresult AndroidBufferQueueCallback(
     // for demonstration purposes:
     // verify what type of information was enclosed in the processed buffer
     if (NULL != pBufferContext) {
-        const int processedCommand = *(int *)pBufferContext;
-        if (kEosBufferCntxt == processedCommand) {
+        if (&kEosBufferCntxt == pBufferContext) {
             fprintf(stdout, "EOS was processed\n");
         }
     }
@@ -193,7 +253,7 @@ SLresult AndroidBufferQueueCallback(
     ++totalEncodeCompletions;
     if (endOfEncodedStream) {
         // we continue to receive acknowledgement after each buffer was processed
-        if (pBufferContext == (void *) kEosBufferCntxt) {
+        if (pBufferContext == (void *) &kEosBufferCntxt) {
             printf("Received EOS completion after EOS\n");
         } else if (pBufferContext == NULL) {
             printf("Received ADTS completion after EOS\n");
@@ -411,6 +471,8 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     SLAndroidSimpleBufferQueueItf decBuffQueueItf;
     /*   to queue the AAC data to decode */
     SLAndroidBufferQueueItf       aacBuffQueueItf;
+    /*   for prefetch status */
+    SLPrefetchStatusItf           prefetchItf;
 
     SLboolean required[NUM_EXPLICIT_INTERFACES_FOR_PLAYER];
     SLInterfaceID iidArray[NUM_EXPLICIT_INTERFACES_FOR_PLAYER];
@@ -435,10 +497,13 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     /* Request the AndroidBufferQueue interface */
     required[1] = SL_BOOLEAN_TRUE;
     iidArray[1] = SL_IID_ANDROIDBUFFERQUEUESOURCE;
+    /* Request the PrefetchStatus interface */
+    required[2] = SL_BOOLEAN_TRUE;
+    iidArray[2] = SL_IID_PREFETCHSTATUS;
 #ifdef QUERY_METADATA
     /* Request the MetadataExtraction interface */
-    required[2] = SL_BOOLEAN_TRUE;
-    iidArray[2] = SL_IID_METADATAEXTRACTION;
+    required[3] = SL_BOOLEAN_TRUE;
+    iidArray[3] = SL_IID_METADATAEXTRACTION;
 #endif
 
     /* Setup the data source for queueing AAC buffers of ADTS data */
@@ -529,6 +594,10 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     res = (*player)->GetInterface(player, SL_IID_ANDROIDBUFFERQUEUESOURCE, (void*)&aacBuffQueueItf);
     ExitOnError(res);
 
+    /* Get the prefetch status interface which was explicitly requested */
+    res = (*player)->GetInterface(player, SL_IID_PREFETCHSTATUS, (void*)&prefetchItf);
+    ExitOnError(res);
+
 #ifdef QUERY_METADATA
     /* Get the metadata extraction interface which was explicitly requested */
     res = (*player)->GetInterface(player, SL_IID_METADATAEXTRACTION, (void*)&mdExtrItf);
@@ -561,6 +630,13 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     }
     printf("\n");
 
+    /* ------------------------------------------------------ */
+    /* Initialize the callback for prefetch errors, if we can't open the resource to decode */
+    res = (*prefetchItf)->RegisterCallback(prefetchItf, PrefetchEventCallback, NULL);
+    ExitOnError(res);
+    res = (*prefetchItf)->SetCallbackEventsMask(prefetchItf, PREFETCHEVENT_ERROR_CANDIDATE);
+    ExitOnError(res);
+
     /* Initialize the callback for the Android buffer queue of the encoded data */
     res = (*aacBuffQueueItf)->RegisterCallback(aacBuffQueueItf, AndroidBufferQueueCallback, NULL);
     ExitOnError(res);
@@ -569,10 +645,14 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
        we don't want to starve the player initially */
     printf("Enqueueing initial full buffers of encoded ADTS data");
     for (i=0 ; i < NB_BUFFERS_IN_ADTS_QUEUE ; i++) {
-        if (filelen < 7 || frame[0] != 0xFF || (frame[1] & 0xF0) != 0xF0)
+        if (filelen < 7 || frame[0] != 0xFF || (frame[1] & 0xF0) != 0xF0) {
+            printf("\ncorrupt ADTS frame encountered; offset %zu bytes\n",
+                    frame - (unsigned char *) ptr);
+            // Note that prefetch will detect this error soon when it gets a premature EOF
             break;
+        }
         unsigned framelen = ((frame[3] & 3) << 11) | (frame[4] << 3) | (frame[5] >> 5);
-        printf(" %d", i);
+        printf(" %d (%u bytes)", i, framelen);
         res = (*aacBuffQueueItf)->Enqueue(aacBuffQueueItf, NULL /*pBufferContext*/,
                 frame, framelen, NULL, 0);
         ExitOnError(res);
@@ -586,10 +666,12 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
 
 #ifdef QUERY_METADATA
     /* ------------------------------------------------------ */
-    /* Display the metadata obtained from the decoder */
+    /* Get and display the metadata key names for the decoder */
     //   This is for test / demonstration purposes only where we discover the key and value sizes
     //   of a PCM decoder. An application that would want to directly get access to those values
-    //   can make assumptions about the size of the keys and their matching values (all SLuint32)
+    //   can make assumptions about the size of the keys and their matching values (all SLuint32),
+    //   but it should not make assumptions about the key indices as these are subject to change.
+    //   Note that we don't get the metadata values yet; that happens in the first decode callback.
     SLuint32 itemCount;
     res = (*mdExtrItf)->GetItemCount(mdExtrItf, &itemCount);
     ExitOnError(res);
@@ -667,6 +749,24 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     }
 #endif
 
+    // set the player's state to paused, to start prefetching
+    printf("Setting play state to PAUSED\n");
+    res = (*playItf)->SetPlayState(playItf, SL_PLAYSTATE_PAUSED);
+    ExitOnError(res);
+
+    // wait for prefetch status callback to indicate either sufficient data or error
+    printf("Awaiting prefetch complete\n");
+    pthread_mutex_lock(&mutex);
+    while (prefetch_status == PREFETCHSTATUS_UNKNOWN) {
+        pthread_cond_wait(&cond, &mutex);
+    }
+    pthread_mutex_unlock(&mutex);
+    if (prefetch_status == PREFETCHSTATUS_ERROR) {
+        fprintf(stderr, "Error during prefetch, exiting\n");
+        goto destroyRes;
+    }
+    printf("Prefetch is complete\n");
+
     /* ------------------------------------------------------ */
     /* Start decoding */
     printf("Starting to decode\n");
@@ -674,6 +774,7 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
     ExitOnError(res);
 
     /* Decode until the end of the stream is reached */
+    printf("Awaiting notification that all encoded buffers have been enqueued\n");
     pthread_mutex_lock(&eosLock);
     while (!eos) {
         if (pauseFrame > 0) {
@@ -698,10 +799,15 @@ void TestDecToBuffQueue( SLObjectItf sl, const char *path, int fd)
         }
     }
     pthread_mutex_unlock(&eosLock);
+    printf("All encoded buffers have now been enqueued, but there's still more to do\n");
 
     /* This just means done enqueueing; there may still more data in decode queue! */
-    // FIXME here is where we should wait for HEADATEND
-    usleep(100 * 1000);
+    pthread_mutex_lock(&head_mutex);
+    while (!head_atend) {
+        pthread_cond_wait(&head_cond, &head_mutex);
+    }
+    pthread_mutex_unlock(&head_mutex);
+    printf("Decode is now finished\n");
 
     pthread_mutex_lock(&eosLock);
     printf("Frame counters: encoded=%u decoded=%u\n", encodedFrames, decodedFrames);
