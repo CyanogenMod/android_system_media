@@ -77,7 +77,7 @@ static SLresult IEnvironmentalReverb_GetRoomLevel(SLEnvironmentalReverbItf self,
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_shared(thiz);
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_ENVREVERB(thiz)) {
@@ -139,7 +139,7 @@ static SLresult IEnvironmentalReverb_GetRoomHFLevel(
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_shared(thiz);
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_ENVREVERB(thiz)) {
@@ -170,7 +170,7 @@ static SLresult IEnvironmentalReverb_SetDecayTime(
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_exclusive(thiz);
         thiz->mProperties.decayTime = decayTime;
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_ENVREVERB(thiz)) {
@@ -198,7 +198,7 @@ static SLresult IEnvironmentalReverb_GetDecayTime(
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_shared(thiz);
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_ENVREVERB(thiz)) {
@@ -257,7 +257,7 @@ static SLresult IEnvironmentalReverb_GetDecayHFRatio(
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_shared(thiz);
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_ENVREVERB(thiz)) {
@@ -318,7 +318,7 @@ static SLresult IEnvironmentalReverb_GetReflectionsLevel(
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_shared(thiz);
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_ENVREVERB(thiz)) {
@@ -377,7 +377,7 @@ static SLresult IEnvironmentalReverb_GetReflectionsDelay(
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_shared(thiz);
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_ENVREVERB(thiz)) {
@@ -438,7 +438,7 @@ static SLresult IEnvironmentalReverb_GetReverbLevel(
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_shared(thiz);
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_ENVREVERB(thiz)) {
@@ -497,7 +497,7 @@ static SLresult IEnvironmentalReverb_GetReverbDelay(
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_shared(thiz);
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_ENVREVERB(thiz)) {
@@ -556,7 +556,7 @@ static SLresult IEnvironmentalReverb_GetDiffusion(SLEnvironmentalReverbItf self,
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_shared(thiz);
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_ENVREVERB(thiz)) {
@@ -615,7 +615,7 @@ static SLresult IEnvironmentalReverb_GetDensity(SLEnvironmentalReverbItf self,
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_shared(thiz);
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_ENVREVERB(thiz)) {
@@ -699,7 +699,7 @@ static SLresult IEnvironmentalReverb_GetEnvironmentalReverbProperties(
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_shared(thiz);
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_ENVREVERB(thiz)) {
