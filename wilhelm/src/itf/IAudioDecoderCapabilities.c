@@ -27,15 +27,18 @@ static SLresult IAudioDecoderCapabilities_GetAudioDecoders(SLAudioDecoderCapabil
     if (NULL == pNumDecoders) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        if (NULL == pDecoderIds) {
-            *pNumDecoders = MAX_DECODERS;
-        } else {
+        result = SL_RESULT_SUCCESS;
+        if (NULL != pDecoderIds) {
             SLuint32 numDecoders = *pNumDecoders;
-            if (MAX_DECODERS <= numDecoders)
-                *pNumDecoders = numDecoders = MAX_DECODERS;
+            if (numDecoders > MAX_DECODERS) {
+                numDecoders = MAX_DECODERS;
+            } else if (numDecoders < MAX_DECODERS) {
+                // FIXME starting in 1.1 this will be SL_RESULT_BUFFER_INSUFFICIENT
+                result = SL_RESULT_PARAMETER_INVALID;
+            }
             memcpy(pDecoderIds, Decoder_IDs, numDecoders * sizeof(SLuint32));
         }
-        result = SL_RESULT_SUCCESS;
+        *pNumDecoders = MAX_DECODERS;
     }
 
     SL_LEAVE_INTERFACE

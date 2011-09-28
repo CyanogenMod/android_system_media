@@ -27,15 +27,18 @@ static SLresult IAudioEncoderCapabilities_GetAudioEncoders(SLAudioEncoderCapabil
     if (NULL == pNumEncoders) {
         result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        if (NULL == pEncoderIds) {
-            *pNumEncoders = MAX_ENCODERS;
-        } else {
+        result = SL_RESULT_SUCCESS;
+        if (NULL != pEncoderIds) {
             SLuint32 numEncoders = *pNumEncoders;
-            if (MAX_ENCODERS <= numEncoders)
-                *pNumEncoders = numEncoders = MAX_ENCODERS;
+            if (numEncoders > MAX_ENCODERS) {
+                numEncoders = MAX_ENCODERS;
+            } else if (numEncoders < MAX_ENCODERS) {
+                // FIXME starting in 1.1 this will be SL_RESULT_BUFFER_INSUFFICIENT
+                result = SL_RESULT_PARAMETER_INVALID;
+            }
             memcpy(pEncoderIds, Encoder_IDs, numEncoders * sizeof(SLuint32));
         }
-        result = SL_RESULT_SUCCESS;
+        *pNumEncoders = MAX_ENCODERS;
     }
 
     SL_LEAVE_INTERFACE
