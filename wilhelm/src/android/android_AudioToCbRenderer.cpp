@@ -45,12 +45,6 @@ void AudioToCbRenderer::setDataPushListener(const data_push_cbf_t pushCbf, CAudi
 
 //--------------------------------------------------
 // Event handlers
-void AudioToCbRenderer::onPrepare() {
-    SL_LOGD("AudioToCbRenderer::onPrepare()");
-    AudioSfDecoder::onPrepare();
-    SL_LOGD("AudioToCbRenderer::onPrepare() done, mStateFlags=0x%x", mStateFlags);
-}
-
 
 void AudioToCbRenderer::onRender() {
     SL_LOGV("AudioToCbRenderer::onRender");

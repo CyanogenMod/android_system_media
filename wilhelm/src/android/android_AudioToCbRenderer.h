@@ -34,7 +34,6 @@ public:
 protected:
 
     // Async event handlers (called from GenericPlayer's event loop)
-    virtual void onPrepare();
     virtual void onRender();
 
     // overridden from AudioSfDecoder

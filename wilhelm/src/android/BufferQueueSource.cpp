@@ -68,11 +68,10 @@ ssize_t BufferQueueSource::readAt(off64_t offset, void *data, size_t size) {
         return 0;
     }
 
-    ssize_t readSize = 0;
+    ssize_t readSize;
     slAndroidBufferQueueCallback callback = NULL;
-    void* pBufferContext, *pBufferData, *callbackPContext = NULL;
-    AdvancedBufferHeader *oldFront = NULL;
-    uint32_t dataSize, dataUsed = 0;
+    void* pBufferContext, *pBufferData, *callbackPContext;
+    uint32_t dataSize, dataUsed;
 
     interface_lock_exclusive(mAndroidBufferQueueSource);
 
@@ -81,7 +80,7 @@ ssize_t BufferQueueSource::readAt(off64_t offset, void *data, size_t size) {
     } else {
         assert(mAndroidBufferQueueSource->mFront != mAndroidBufferQueueSource->mRear);
 
-        oldFront = mAndroidBufferQueueSource->mFront;
+        AdvancedBufferHeader *oldFront = mAndroidBufferQueueSource->mFront;
         AdvancedBufferHeader *newFront = &oldFront[1];
 
         // where to read from

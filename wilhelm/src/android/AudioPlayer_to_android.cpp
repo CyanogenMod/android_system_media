@@ -458,42 +458,6 @@ void audioPlayer_dispatch_headAtEnd_lockPlay(CAudioPlayer *ap, bool setPlayState
 
 
 //-----------------------------------------------------------------------------
-/**
- * pre-condition: AudioPlayer has SLPrefetchStatusItf initialized
- * post-condition:
- *  - ap->mPrefetchStatus.mStatus == status
- *  - the prefetch status callback, if any, has been notified if a change occurred
- *
- */
-void audioPlayer_dispatch_prefetchStatus_lockPrefetch(CAudioPlayer *ap, SLuint32 status,
-        bool needToLock) {
-    slPrefetchCallback prefetchCallback = NULL;
-    void * prefetchContext = NULL;
-
-    if (needToLock) {
-        interface_lock_exclusive(&ap->mPrefetchStatus);
-    }
-    // status change?
-    if (ap->mPrefetchStatus.mStatus != status) {
-        ap->mPrefetchStatus.mStatus = status;
-        // callback or no callback?
-        if (ap->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_STATUSCHANGE) {
-            prefetchCallback = ap->mPrefetchStatus.mCallback;
-            prefetchContext  = ap->mPrefetchStatus.mContext;
-        }
-    }
-    if (needToLock) {
-        interface_unlock_exclusive(&ap->mPrefetchStatus);
-    }
-
-    // callback with no lock held
-    if (NULL != prefetchCallback) {
-        (*prefetchCallback)(&ap->mPrefetchStatus.mItf, prefetchContext, status);
-    }
-}
-
-
-//-----------------------------------------------------------------------------
 SLresult audioPlayer_setStreamType(CAudioPlayer* ap, SLint32 type) {
     SLresult result = SL_RESULT_SUCCESS;
     SL_LOGV("type %d", type);
