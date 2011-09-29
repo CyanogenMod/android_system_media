@@ -23,6 +23,7 @@
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
 #include <media/stagefright/foundation/ADebug.h>
+#include <media/mediaplayer.h>  // media_event_type media_error_type media_info_type
 
 // default delay in Us used when reposting an event when the player is not ready to accept
 // the command yet. This is for instance used when seeking on a MediaPlayer that's still preparing
@@ -57,20 +58,53 @@ MediaPlayerNotificationClient::~MediaPlayerNotificationClient() {
     SL_LOGV("MediaPlayerNotificationClient::~MediaPlayerNotificationClient()");
 }
 
-// Map a MEDIA_* enum to a string
-static const char *media_to_string(int msg)
+// Map a media_event_type enum (the msg of an IMediaPlayerClient::notify) to a string or NULL
+static const char *media_event_type_to_string(media_event_type msg)
 {
     switch (msg) {
-#define _(x) case MEDIA_##x: return "MEDIA_" #x;
-      _(PREPARED)
-      _(SET_VIDEO_SIZE)
-      _(SEEK_COMPLETE)
-      _(PLAYBACK_COMPLETE)
-      _(BUFFERING_UPDATE)
-      _(ERROR)
-      _(NOP)
-      _(TIMED_TEXT)
-      _(INFO)
+#define _(code) case code: return #code;
+    _(MEDIA_NOP)
+    _(MEDIA_PREPARED)
+    _(MEDIA_PLAYBACK_COMPLETE)
+    _(MEDIA_BUFFERING_UPDATE)
+    _(MEDIA_SEEK_COMPLETE)
+    _(MEDIA_SET_VIDEO_SIZE)
+    _(MEDIA_TIMED_TEXT)
+    _(MEDIA_ERROR)
+    _(MEDIA_INFO)
+#undef _
+    default:
+        return NULL;
+    }
+}
+
+// Map a media_error_type enum (the ext1 of a MEDIA_ERROR event) to a string or NULL
+static const char *media_error_type_to_string(media_error_type err)
+{
+    switch (err) {
+#define _(code, msg) case code: return msg;
+    _(MEDIA_ERROR_UNKNOWN,                              "Unknown media error")
+    _(MEDIA_ERROR_SERVER_DIED,                          "Server died")
+    _(MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK,   "Not valid for progressive playback")
+#undef _
+    default:
+        return NULL;
+    }
+}
+
+// Map a media_info_type enum (the ext1 of a MEDIA_INFO event) to a string or NULL
+static const char *media_info_type_to_string(media_info_type info)
+{
+    switch (info) {
+#define _(code, msg) case code: return msg;
+    _(MEDIA_INFO_UNKNOWN,             "Unknown info")
+    _(MEDIA_INFO_VIDEO_TRACK_LAGGING, "Video track lagging")
+    _(MEDIA_INFO_BUFFERING_START,     "Buffering start")
+    _(MEDIA_INFO_BUFFERING_END,       "Buffering end")
+    _(MEDIA_INFO_NETWORK_BANDWIDTH,   "Network bandwidth")
+    _(MEDIA_INFO_BAD_INTERLEAVING,    "Bad interleaving")
+    _(MEDIA_INFO_NOT_SEEKABLE,        "Not seekable")
+    _(MEDIA_INFO_METADATA_UPDATE,     "Metadata update")
 #undef _
     default:
         return NULL;
@@ -81,7 +115,7 @@ static const char *media_to_string(int msg)
 // IMediaPlayerClient implementation
 void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Parcel *obj) {
     SL_LOGV("MediaPlayerNotificationClient::notify(msg=%s (%d), ext1=%d, ext2=%d)",
-            media_to_string(msg), msg, ext1, ext2);
+            media_event_type_to_string((enum media_event_type) msg), msg, ext1, ext2);
 
     sp<GenericMediaPlayer> genericMediaPlayer(mGenericMediaPlayer.promote());
     if (genericMediaPlayer == NULL) {
@@ -89,7 +123,7 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
         return;
     }
 
-    switch (msg) {
+    switch ((media_event_type) msg) {
       case MEDIA_PREPARED:
         {
         Mutex::Autolock _l(mLock);
@@ -105,9 +139,9 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
         // so it would normally be racy to access fields within genericMediaPlayer.
         // But in this case mHasVideo is const, so it is safe to access.
         // Or alternatively, we could notify unconditionally and let it decide whether to handle.
-        if (genericMediaPlayer->mHasVideo) {
+        if (genericMediaPlayer->mHasVideo && (ext1 != 0 || ext2 != 0)) {
             genericMediaPlayer->notify(PLAYEREVENT_VIDEO_SIZE_UPDATE,
-                    (int32_t)ext1, (int32_t)ext2, true /*async*/);
+                    (int32_t)ext1 /*width*/, (int32_t)ext2 /*height*/, true /*async*/);
         }
         break;
 
@@ -120,6 +154,14 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
         break;
 
       case MEDIA_BUFFERING_UPDATE:
+        // if we receive any out-of-range data, then clamp it to reduce further harm
+        if (ext1 < 0) {
+            SL_LOGE("MEDIA_BUFFERING_UPDATE %d%% < 0", ext1);
+            ext1 = 0;
+        } else if (ext1 > 100) {
+            SL_LOGE("MEDIA_BUFFERING_UPDATE %d%% > 100", ext1);
+            ext1 = 100;
+        }
         // values received from Android framework for buffer fill level use percent,
         //   while SL/XA use permille, so does GenericPlayer
         genericMediaPlayer->bufferingUpdate(ext1 * 10 /*fillLevelPerMille*/);
@@ -127,6 +169,8 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
 
       case MEDIA_ERROR:
         {
+        SL_LOGV("MediaPlayerNotificationClient::notify(msg=MEDIA_ERROR, ext1=%s (%d), ext2=%d)",
+                media_error_type_to_string((media_error_type) ext1), ext1, ext2);
         Mutex::Autolock _l(mLock);
         mPlayerPrepared = PREPARE_COMPLETED_UNSUCCESSFULLY;
         mPlayerPreparedCondition.signal();
@@ -135,10 +179,31 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
 
       case MEDIA_NOP:
       case MEDIA_TIMED_TEXT:
-      case MEDIA_INFO:
         break;
 
-      default: { }
+      case MEDIA_INFO:
+        SL_LOGV("MediaPlayerNotificationClient::notify(msg=MEDIA_INFO, ext1=%s (%d), ext2=%d)",
+                media_info_type_to_string((media_info_type) ext1), ext1, ext2);
+        switch (ext1) {
+        case MEDIA_INFO_VIDEO_TRACK_LAGGING:
+            SL_LOGV("MEDIA_INFO_VIDEO_TRACK_LAGGING by %d ms", ext1);
+            break;
+        case MEDIA_INFO_NETWORK_BANDWIDTH:
+            SL_LOGV("MEDIA_INFO_NETWORK_BANDWIDTH %d kbps", ext2);
+            break;
+        case MEDIA_INFO_UNKNOWN:
+        case MEDIA_INFO_BUFFERING_START:
+        case MEDIA_INFO_BUFFERING_END:
+        case MEDIA_INFO_BAD_INTERLEAVING:
+        case MEDIA_INFO_NOT_SEEKABLE:
+        case MEDIA_INFO_METADATA_UPDATE:
+        default:
+            break;
+        }
+        break;
+
+      default:
+        break;
     }
 
 }
