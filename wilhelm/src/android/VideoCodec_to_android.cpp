@@ -16,8 +16,6 @@
 
 #include "sles_allinclusive.h"
 
-#include <binder/IServiceManager.h>
-#include <utils/RefBase.h>
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
@@ -59,12 +57,9 @@ XAuint32 convertOpenMaxIlToAl(OMX_U32 ilVideoProfileOrLevel) {
 bool android_videoCodec_expose() {
     SL_LOGV("android_videoCodec_expose()");
 
-    sp<IServiceManager> sm = defaultServiceManager();
-    sp<IBinder> binder = sm->getService(String16("media.player"));
-    sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
-
-    if (service.get() == NULL) {
-        LOGE("android_videoCodec_expose() couldn't access media player service");
+    sp<IMediaPlayerService> service(IMediaDeathNotifier::getMediaPlayerService());
+    if (service == NULL) {
+        // no need to SL_LOGE; getMediaPlayerService already will have done so
         return false;
     }
 
