@@ -68,6 +68,7 @@ public:
     virtual void play();
     virtual void pause();
     virtual void stop();
+    // timeMsec must be >= 0 or == ANDROID_UNKNOWN_TIME (used by StreamPlayer after discontinuity)
     virtual void seek(int64_t timeMsec);
     virtual void loop(bool loop);
     virtual void setBufferingUpdateThreshold(int16_t thresholdPercent);

@@ -295,8 +295,9 @@ void GenericMediaPlayer::onSeek(const sp<AMessage> &msg) {
         // invalid command, drop it
         return;
     }
-    if ((mStateFlags & kFlagSeeking) && (timeMsec == mSeekTimeMsec)) {
-        // already seeking to the same time, cancel this command
+    if ((mStateFlags & kFlagSeeking) && (timeMsec == mSeekTimeMsec) &&
+            (timeMsec != ANDROID_UNKNOWN_TIME)) {
+        // already seeking to the same non-unknown time, cancel this command
         return;
     } else if (mStateFlags & kFlagPreparedUnsuccessfully) {
         // discard seeks after unsuccessful prepare
@@ -307,7 +308,12 @@ void GenericMediaPlayer::onSeek(const sp<AMessage> &msg) {
         if (msg->findInt64(WHATPARAM_SEEK_SEEKTIME_MS, &timeMsec) && (mPlayer != 0)) {
             mStateFlags |= kFlagSeeking;
             mSeekTimeMsec = (int32_t)timeMsec;
-            if (OK != mPlayer->seekTo(timeMsec)) {
+            // seek to unknown time is used by StreamPlayer after discontinuity
+            if (timeMsec == ANDROID_UNKNOWN_TIME) {
+                // FIXME simulate a MEDIA_SEEK_COMPLETE event in 250 ms;
+                // this is a terrible hack to make up for mediaserver not sending one
+                (new AMessage(kWhatSeekComplete, id()))->post(250000);
+            } else if (OK != mPlayer->seekTo(timeMsec)) {
                 mStateFlags &= ~kFlagSeeking;
                 mSeekTimeMsec = ANDROID_UNKNOWN_TIME;
             }
