@@ -91,4 +91,10 @@ public abstract class GraphRunner {
 
     /** Closes the filters in a graph. Can only be called if the graph is not running. */
     public abstract void close();
+
+    /**
+     * Returns the last exception that happened during an asynchronous run. Returns null if
+     * there is nothing to report.
+     */
+    public abstract Exception getError();
 }

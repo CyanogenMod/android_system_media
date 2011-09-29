@@ -46,7 +46,7 @@ bool NativeProgram::OpenLibrary(const std::string& lib_name) {
   if (!lib_handle_) {
     lib_handle_ = dlopen(lib_name.c_str(), RTLD_NOW);
     if (!lib_handle_) {
-      LOGE("NativeProgram: Could not find library: '%s'!", lib_name.c_str());
+      LOGE("NativeProgram: Error opening library: '%s': %s", lib_name.c_str(), dlerror());
       return false;
     }
     return true;
