@@ -1519,7 +1519,8 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     //-----------------------------------
     // AacBqToPcmCbRenderer
     case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE: {
-        android::AacBqToPcmCbRenderer* bqtobq = new android::AacBqToPcmCbRenderer(&app);
+        android::AacBqToPcmCbRenderer* bqtobq = new android::AacBqToPcmCbRenderer(&app,
+                &pAudioPlayer->mAndroidBufferQueue);
         // configures the callback for the sink buffer queue
         bqtobq->setDataPushListener(adecoder_writeToBufferQueue, pAudioPlayer);
         pAudioPlayer->mAPlayer = bqtobq;
@@ -2142,30 +2143,6 @@ SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *ap) {
     return result;
 }
 
-
-//-----------------------------------------------------------------------------
-SLresult android_audioPlayer_androidBufferQueue_registerCallback_l(CAudioPlayer *ap) {
-    SLresult result = SL_RESULT_SUCCESS;
-    assert(ap->mAPlayer != 0);
-    // FIXME investigate why these two cases are not handled symmetrically any more
-    switch (ap->mAndroidObjType) {
-      case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: {
-        } break;
-      case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE: {
-          android::AacBqToPcmCbRenderer* dec =
-                  static_cast<android::AacBqToPcmCbRenderer*>(ap->mAPlayer.get());
-          dec->registerSourceQueueCallback((const void*)ap /*user*/,
-                  ap->mAndroidBufferQueue.mContext /*context*/,
-                  (const void*)&(ap->mAndroidBufferQueue.mItf) /*caller*/);
-        } break;
-      default:
-        SL_LOGE("Error registering AndroidBufferQueue callback: unexpected object type %d",
-                ap->mAndroidObjType);
-        result = SL_RESULT_INTERNAL_ERROR;
-        break;
-    }
-    return result;
-}
 
 //-----------------------------------------------------------------------------
 void android_audioPlayer_androidBufferQueue_clear_l(CAudioPlayer *ap) {
