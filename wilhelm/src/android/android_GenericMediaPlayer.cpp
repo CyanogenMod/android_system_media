@@ -83,38 +83,54 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
     SL_LOGV("MediaPlayerNotificationClient::notify(msg=%s (%d), ext1=%d, ext2=%d)",
             media_to_string(msg), msg, ext1, ext2);
 
+    sp<GenericMediaPlayer> genericMediaPlayer(mGenericMediaPlayer.promote());
+    if (genericMediaPlayer == NULL) {
+        SL_LOGW("MediaPlayerNotificationClient::notify after GenericMediaPlayer destroyed");
+        return;
+    }
+
     switch (msg) {
       case MEDIA_PREPARED:
+        {
+        Mutex::Autolock _l(mLock);
         mPlayerPrepared = PREPARE_COMPLETED_SUCCESSFULLY;
         mPlayerPreparedCondition.signal();
+        }
         break;
 
       case MEDIA_SET_VIDEO_SIZE:
         // only send video size updates if the player was flagged as having video, to avoid
         // sending video size updates of (0,0)
-        if (mGenericMediaPlayer->mHasVideo) {
-            mGenericMediaPlayer->notify(PLAYEREVENT_VIDEO_SIZE_UPDATE,
+        // We're running on a different thread than genericMediaPlayer's ALooper thread,
+        // so it would normally be racy to access fields within genericMediaPlayer.
+        // But in this case mHasVideo is const, so it is safe to access.
+        // Or alternatively, we could notify unconditionally and let it decide whether to handle.
+        if (genericMediaPlayer->mHasVideo) {
+            genericMediaPlayer->notify(PLAYEREVENT_VIDEO_SIZE_UPDATE,
                     (int32_t)ext1, (int32_t)ext2, true /*async*/);
         }
         break;
 
       case MEDIA_SEEK_COMPLETE:
-        mGenericMediaPlayer->seekComplete();
+        genericMediaPlayer->seekComplete();
         break;
 
       case MEDIA_PLAYBACK_COMPLETE:
-        mGenericMediaPlayer->notify(PLAYEREVENT_ENDOFSTREAM, 1, true /*async*/);
+        genericMediaPlayer->notify(PLAYEREVENT_ENDOFSTREAM, 1, true /*async*/);
         break;
 
       case MEDIA_BUFFERING_UPDATE:
         // values received from Android framework for buffer fill level use percent,
         //   while SL/XA use permille, so does GenericPlayer
-        mGenericMediaPlayer->bufferingUpdate(ext1 * 10 /*fillLevelPerMille*/);
+        genericMediaPlayer->bufferingUpdate(ext1 * 10 /*fillLevelPerMille*/);
         break;
 
       case MEDIA_ERROR:
+        {
+        Mutex::Autolock _l(mLock);
         mPlayerPrepared = PREPARE_COMPLETED_UNSUCCESSFULLY;
         mPlayerPreparedCondition.signal();
+        }
         break;
 
       case MEDIA_NOP:
@@ -155,11 +171,10 @@ GenericMediaPlayer::GenericMediaPlayer(const AudioPlayback_Parameters* params, b
     mVideoSurface(0),
     mVideoSurfaceTexture(0),
     mPlayer(0),
-    mPlayerClient(0)
+    mPlayerClient(new MediaPlayerNotificationClient(this))
 {
     SL_LOGD("GenericMediaPlayer::GenericMediaPlayer()");
 
-    mPlayerClient = new MediaPlayerNotificationClient(this);
 }
 
 GenericMediaPlayer::~GenericMediaPlayer() {
