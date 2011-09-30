@@ -75,7 +75,6 @@ public:
 
     virtual void getDurationMsec(int* msec); //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
     virtual void getPositionMsec(int* msec) = 0; //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
-    virtual void getSampleRate(uint32_t* hz);// hz  != NULL, UNKNOWN_SAMPLERATE if unknown
 
     virtual void setVideoSurface(const sp<Surface> &surface) {}
     virtual void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {}
@@ -176,9 +175,7 @@ protected:
     AudioPlayback_Parameters mPlaybackParams;
 
     AndroidAudioLevels mAndroidAudioLevels;
-    int mChannelCount; // this is used for the panning law, and is not exposed outside of the object
     int32_t mDurationMsec;
-    uint32_t mSampleRateHz;
 
     CacheStatus_t mCacheStatus;
     int16_t mCacheFill; // cache fill level + played back level in permille

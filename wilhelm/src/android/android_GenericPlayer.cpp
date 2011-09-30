@@ -30,9 +30,7 @@ GenericPlayer::GenericPlayer(const AudioPlayback_Parameters* params) :
         mNotifyUser(NULL),
         mStateFlags(0),
         mPlaybackParams(*params),
-        mChannelCount(UNKNOWN_NUMCHANNELS),
         mDurationMsec(ANDROID_UNKNOWN_TIME),
-        mSampleRateHz(UNKNOWN_SAMPLERATE),
         mCacheStatus(kStatusEmpty),
         mCacheFill(0),
         mLastNotifiedCacheFill(0),
@@ -195,10 +193,6 @@ void GenericPlayer::setBufferingUpdateThreshold(int16_t thresholdPercent) {
 //--------------------------------------------------
 void GenericPlayer::getDurationMsec(int* msec) {
     *msec = mDurationMsec;
-}
-
-void GenericPlayer::getSampleRate(uint* hz) {
-    *hz = mSampleRateHz;
 }
 
 //--------------------------------------------------

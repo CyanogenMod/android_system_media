@@ -34,7 +34,6 @@ AudioSfDecoder::AudioSfDecoder(const AudioPlayback_Parameters* params) : Generic
         mAudioSource(0),
         mAudioSourceStarted(false),
         mBitrate(-1),
-        mChannelMask(UNKNOWN_CHANNELMASK),
         mDurationUsec(ANDROID_UNKNOWN_TIME),
         mDecodeBuffer(NULL),
         mSeekTimeMsec(0),
@@ -172,9 +171,9 @@ void AudioSfDecoder::onPrepare() {
     mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_ENDIANNESS] = SL_BYTEORDER_LITTLEENDIAN;
     //    initialization with the default values: they will be replaced by the actual values
     //      once the decoder has figured them out
-    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
-    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE] = mSampleRateHz;
-    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
+    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = UNKNOWN_NUMCHANNELS;
+    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE] = UNKNOWN_SAMPLERATE;
+    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = UNKNOWN_CHANNELMASK;
     }
 
     //---------------------------------
@@ -258,12 +257,10 @@ void AudioSfDecoder::onPrepare() {
 
     // we can't trust the OMXCodec (if there is one) to issue a INFO_FORMAT_CHANGED so we want
     // to have some meaningful values as soon as possible.
-    bool hasChannelCount = meta->findInt32(kKeyChannelCount, &mChannelCount);
+    int32_t channelCount;
+    bool hasChannelCount = meta->findInt32(kKeyChannelCount, &channelCount);
     int32_t sr;
     bool hasSampleRate = meta->findInt32(kKeySampleRate, &sr);
-    if (hasSampleRate) {
-        mSampleRateHz = (uint32_t) sr;
-    }
 
     off64_t size;
     int64_t durationUs;
@@ -314,19 +311,17 @@ void AudioSfDecoder::onPrepare() {
     mAudioSourceStarted = true;
 
     if (!hasChannelCount) {
-        CHECK(meta->findInt32(kKeyChannelCount, &mChannelCount));
+        CHECK(meta->findInt32(kKeyChannelCount, &channelCount));
     }
 
     if (!hasSampleRate) {
         CHECK(meta->findInt32(kKeySampleRate, &sr));
-        mSampleRateHz = (uint32_t) sr;
     }
     // FIXME add code below once channel mask support is in, currently initialized to default
     //       value computed from the channel count
     //    if (!hasChannelMask) {
-    //        CHECK(meta->findInt32(kKeyChannelMask, &mChannelMask));
+    //        CHECK(meta->findInt32(kKeyChannelMask, &channelMask));
     //    }
-    mChannelMask = channelCountToMask(mChannelCount);
 
     if (!wantPrefetch()) {
         SL_LOGV("AudioSfDecoder::onPrepare: no need to prefetch");
@@ -339,9 +334,10 @@ void AudioSfDecoder::onPrepare() {
 
     {
         android::Mutex::Autolock autoLock(mPcmFormatLock);
-        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE] = mSampleRateHz;
-        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
-        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
+        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE] = sr;
+        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = channelCount;
+        mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] =
+                channelCountToMask(channelCount);
     }
 
     // at this point we have enough information about the source to create the sink that
@@ -742,23 +738,22 @@ void AudioSfDecoder::hasNewDecodeParams() {
     if ((mAudioSource != 0) && mAudioSourceStarted) {
         sp<MetaData> meta = mAudioSource->getFormat();
 
-        SL_LOGV("old sample rate = %d, channel count = %d", mSampleRateHz, mChannelCount);
-
-        CHECK(meta->findInt32(kKeyChannelCount, &mChannelCount));
+        int32_t channelCount;
+        CHECK(meta->findInt32(kKeyChannelCount, &channelCount));
         int32_t sr;
         CHECK(meta->findInt32(kKeySampleRate, &sr));
-        mSampleRateHz = (uint32_t) sr;
-        SL_LOGV("format changed: new sample rate = %d, channel count = %d",
-                mSampleRateHz, mChannelCount);
 
         // FIXME similar to onPrepare()
-        mChannelMask = channelCountToMask(mChannelCount);
-
         {
             android::Mutex::Autolock autoLock(mPcmFormatLock);
-            mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = mChannelCount;
-            mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE] = mSampleRateHz;
-            mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = mChannelMask;
+            SL_LOGV("format changed: old sr=%d, channels=%d; new sr=%d, channels=%d",
+                    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE],
+                    mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS],
+                    sr, channelCount);
+            mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_NUMCHANNELS] = channelCount;
+            mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE] = sr;
+            mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] =
+                    channelCountToMask(channelCount);
         }
     }
 
