@@ -52,36 +52,45 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
     switch(event) {
 
       case android::GenericPlayer::kEventPrepared: {
-
-        SL_LOGV("Received AVPlayer::kEventPrepared for CMediaPlayer %p", mp);
+        SL_LOGV("Received GenericPlayer::kEventPrepared for CMediaPlayer %p", mp);
 
         // assume no callback
         slPrefetchCallback callback = NULL;
-        void* callbackPContext = NULL;
+        void* callbackPContext;
+        XAuint32 events;
 
         object_lock_exclusive(&mp->mObject);
-        // mark object as prepared; same state is used for successfully or unsuccessful prepare
+
+        // mark object as prepared; same state is used for successful or unsuccessful prepare
+        assert(mp->mAndroidObjState == ANDROID_PREPARING);
         mp->mAndroidObjState = ANDROID_READY;
 
-        // AVPlayer prepare() failed prefetching, there is no event in XAPrefetchStatus to
-        //  indicate a prefetch error, so we signal it by sending simulataneously two events:
-        //  - SL_PREFETCHEVENT_FILLLEVELCHANGE with a level of 0
-        //  - SL_PREFETCHEVENT_STATUSCHANGE with a status of SL_PREFETCHSTATUS_UNDERFLOW
-        if (PLAYER_SUCCESS != data1 && IsInterfaceInitialized(&mp->mObject, MPH_XAPREFETCHSTATUS)) {
-            mp->mPrefetchStatus.mLevel = 0;
-            mp->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
-            if (!(~mp->mPrefetchStatus.mCallbackEventsMask &
-                    (SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE))) {
-                callback = mp->mPrefetchStatus.mCallback;
-                callbackPContext = mp->mPrefetchStatus.mContext;
+        if (PLAYER_SUCCESS == data1) {
+            // Most of successful prepare completion for mp->mAVPlayer
+            // is handled by GenericPlayer and its subclasses.
+        } else {
+            // AVPlayer prepare() failed prefetching, there is no event in XAPrefetchStatus to
+            //  indicate a prefetch error, so we signal it by sending simultaneously two events:
+            //  - SL_PREFETCHEVENT_FILLLEVELCHANGE with a level of 0
+            //  - SL_PREFETCHEVENT_STATUSCHANGE with a status of SL_PREFETCHSTATUS_UNDERFLOW
+            SL_LOGE(ERROR_PLAYER_PREFETCH_d, data1);
+            if (IsInterfaceInitialized(&mp->mObject, MPH_XAPREFETCHSTATUS)) {
+                mp->mPrefetchStatus.mLevel = 0;
+                mp->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+                if (!(~mp->mPrefetchStatus.mCallbackEventsMask &
+                        (SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE))) {
+                    callback = mp->mPrefetchStatus.mCallback;
+                    callbackPContext = mp->mPrefetchStatus.mContext;
+                    events = SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE;
+                }
             }
         }
+
         object_unlock_exclusive(&mp->mObject);
 
         // callback with no lock held
         if (NULL != callback) {
-            (*callback)(&mp->mPrefetchStatus.mItf, callbackPContext,
-                    SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE);
+            (*callback)(&mp->mPrefetchStatus.mItf, callbackPContext, events);
         }
 
         break;

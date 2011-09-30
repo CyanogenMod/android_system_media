@@ -713,7 +713,8 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
         ap->mAndroidObjState = ANDROID_READY;
 
         if (PLAYER_SUCCESS == data1) {
-            // Most of successful prepare completion is handled by a subclass.
+            // Most of successful prepare completion for ap->mAPlayer
+            // is handled by GenericPlayer and its subclasses.
         } else {
             // SfPlayer prepare() failed prefetching, there is no event in SLPrefetchStatus to
             //  indicate a prefetch error, so we signal it by sending simultaneously two events:
