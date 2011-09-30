@@ -180,15 +180,25 @@ static SLresult IRecord_SetMarkerPosition(SLRecordItf self, SLmillisecond mSec)
 {
     SL_ENTER_INTERFACE
 
-    IRecord *thiz = (IRecord *) self;
-    interface_lock_exclusive(thiz);
-    if (thiz->mMarkerPosition != mSec) {
-        thiz->mMarkerPosition = mSec;
-        interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
+    if (SL_TIME_UNKNOWN == mSec) {
+        result = SL_RESULT_PARAMETER_INVALID;
     } else {
-        interface_unlock_exclusive(thiz);
+        IRecord *thiz = (IRecord *) self;
+        bool significant = false;
+        interface_lock_exclusive(thiz);
+        if (thiz->mMarkerPosition != mSec) {
+            thiz->mMarkerPosition = mSec;
+            if (thiz->mCallbackEventsMask & SL_PLAYEVENT_HEADATMARKER) {
+                significant = true;
+            }
+        }
+        if (significant) {
+            interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
+        } else {
+            interface_unlock_exclusive(thiz);
+        }
+        result = SL_RESULT_SUCCESS;
     }
-    result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
 }
@@ -199,9 +209,16 @@ static SLresult IRecord_ClearMarkerPosition(SLRecordItf self)
     SL_ENTER_INTERFACE
 
     IRecord *thiz = (IRecord *) self;
+    bool significant = false;
     interface_lock_exclusive(thiz);
-    if (thiz->mMarkerPosition != 0) {
-        thiz->mMarkerPosition = 0;
+    // clearing the marker position is equivalent to setting the marker to SL_TIME_UNKNOWN
+    if (thiz->mMarkerPosition != SL_TIME_UNKNOWN) {
+        thiz->mMarkerPosition = SL_TIME_UNKNOWN;
+        if (thiz->mCallbackEventsMask & SL_PLAYEVENT_HEADATMARKER) {
+            significant = true;
+        }
+    }
+    if (significant) {
         interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
     } else {
         interface_unlock_exclusive(thiz);
@@ -224,7 +241,11 @@ static SLresult IRecord_GetMarkerPosition(SLRecordItf self, SLmillisecond *pMsec
         SLmillisecond markerPosition = thiz->mMarkerPosition;
         interface_unlock_shared(thiz);
         *pMsec = markerPosition;
-        result = SL_RESULT_SUCCESS;
+        if (SL_TIME_UNKNOWN == markerPosition) {
+            result = SL_RESULT_PRECONDITIONS_VIOLATED;
+        } else {
+            result = SL_RESULT_SUCCESS;
+        }
     }
 
     SL_LEAVE_INTERFACE
@@ -293,10 +314,10 @@ void IRecord_init(void *self)
     thiz->mItf = &IRecord_Itf;
     thiz->mState = SL_RECORDSTATE_STOPPED;
     thiz->mDurationLimit = 0;
-    thiz->mPosition = 0;
+    thiz->mPosition = (SLmillisecond) 0;
     thiz->mCallback = NULL;
     thiz->mContext = NULL;
     thiz->mCallbackEventsMask = 0;
-    thiz->mMarkerPosition = 0;
-    thiz->mPositionUpdatePeriod = 1000;
+    thiz->mMarkerPosition = SL_TIME_UNKNOWN;
+    thiz->mPositionUpdatePeriod = 1000; // per spec
 }

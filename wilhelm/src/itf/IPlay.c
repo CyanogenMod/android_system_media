@@ -273,8 +273,9 @@ static SLresult IPlay_SetCallbackEventsMask(SLPlayItf self, SLuint32 eventFlags)
 #endif
             thiz->mEventFlags = eventFlags;
             interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
-        } else
+        } else {
             interface_unlock_exclusive(thiz);
+        }
         result = SL_RESULT_SUCCESS;
     }
 
@@ -305,20 +306,25 @@ static SLresult IPlay_SetMarkerPosition(SLPlayItf self, SLmillisecond mSec)
 {
     SL_ENTER_INTERFACE
 
-    IPlay *thiz = (IPlay *) self;
-    bool significant = false;
-    interface_lock_exclusive(thiz);
-    if (thiz->mMarkerPosition != mSec) {
-        thiz->mMarkerPosition = mSec;
-        if (thiz->mEventFlags & SL_PLAYEVENT_HEADATMARKER) {
-            significant = true;
+    if (SL_TIME_UNKNOWN == mSec) {
+        result = SL_RESULT_PARAMETER_INVALID;
+    } else {
+        IPlay *thiz = (IPlay *) self;
+        bool significant = false;
+        interface_lock_exclusive(thiz);
+        if (thiz->mMarkerPosition != mSec) {
+            thiz->mMarkerPosition = mSec;
+            if (thiz->mEventFlags & SL_PLAYEVENT_HEADATMARKER) {
+                significant = true;
+            }
         }
+        if (significant) {
+            interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
+        } else {
+            interface_unlock_exclusive(thiz);
+        }
+        result = SL_RESULT_SUCCESS;
     }
-    if (significant) {
-        interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
-    } else
-        interface_unlock_exclusive(thiz);
-    result = SL_RESULT_SUCCESS;
 
     SL_LEAVE_INTERFACE
 }
@@ -361,7 +367,11 @@ static SLresult IPlay_GetMarkerPosition(SLPlayItf self, SLmillisecond *pMsec)
         SLmillisecond markerPosition = thiz->mMarkerPosition;
         interface_unlock_shared(thiz);
         *pMsec = markerPosition;
-        result = SL_RESULT_SUCCESS;
+        if (SL_TIME_UNKNOWN == markerPosition) {
+            result = SL_RESULT_PRECONDITIONS_VIOLATED;
+        } else {
+            result = SL_RESULT_SUCCESS;
+        }
     }
 
     SL_LEAVE_INTERFACE
@@ -398,8 +408,9 @@ static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec
         }
         if (significant) {
             interface_unlock_exclusive_attributes(thiz, ATTR_TRANSPORT);
-        } else
+        } else {
             interface_unlock_exclusive(thiz);
+        }
         result = SL_RESULT_SUCCESS;
     }
 
