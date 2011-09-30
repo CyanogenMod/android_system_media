@@ -192,6 +192,7 @@ void GenericPlayer::setBufferingUpdateThreshold(int16_t thresholdPercent) {
 
 //--------------------------------------------------
 void GenericPlayer::getDurationMsec(int* msec) {
+    Mutex::Autolock _l(mSettingsLock);
     *msec = mDurationMsec;
 }
 

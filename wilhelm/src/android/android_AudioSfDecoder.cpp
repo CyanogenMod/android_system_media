@@ -262,8 +262,10 @@ void AudioSfDecoder::onPrepare() {
     int32_t sr;
     bool hasSampleRate = meta->findInt32(kKeySampleRate, &sr);
 
+    // first compute the duration
     off64_t size;
     int64_t durationUs;
+    int32_t durationMsec;
     if (dataSource->getSize(&size) == OK
             && meta->findInt64(kKeyDuration, &durationUs)) {
         if (durationUs != 0) {
@@ -272,11 +274,17 @@ void AudioSfDecoder::onPrepare() {
             mBitrate = -1;
         }
         mDurationUsec = durationUs;
-        mDurationMsec = durationUs / 1000;
+        durationMsec = durationUs / 1000;
     } else {
         mBitrate = -1;
         mDurationUsec = ANDROID_UNKNOWN_TIME;
-        mDurationMsec = ANDROID_UNKNOWN_TIME;
+        durationMsec = ANDROID_UNKNOWN_TIME;
+    }
+
+    // then assign the duration under the settings lock
+    {
+        Mutex::Autolock _l(mSettingsLock);
+        mDurationMsec = durationMsec;
     }
 
     // the audio content is not raw PCM, so we need a decoder

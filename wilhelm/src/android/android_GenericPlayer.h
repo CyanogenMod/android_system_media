@@ -87,7 +87,7 @@ public:
     void setPlayEvents(int32_t eventFlags, int32_t markerPosition, int32_t positionUpdatePeriod);
 
 protected:
-    // mutex used for set vs use of volume and cache (fill, threshold) settings
+    // mutex used for set vs use of volume, duration, and cache (fill, threshold) settings
     Mutex mSettingsLock;
 
     void resetDataLocator();
@@ -175,6 +175,8 @@ protected:
     AudioPlayback_Parameters mPlaybackParams;
 
     AndroidAudioLevels mAndroidAudioLevels;
+
+    // protected by mSettingsLock
     int32_t mDurationMsec;
 
     CacheStatus_t mCacheStatus;

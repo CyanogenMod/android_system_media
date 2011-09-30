@@ -495,9 +495,9 @@ void GenericMediaPlayer::afterMediaPlayerPreparedSuccessfully() {
     delete reply;
     // retrieve duration
     {
-        Mutex::Autolock _l(mSettingsLock);
         int msec = 0;
         if (OK == mPlayer->getDuration(&msec)) {
+            Mutex::Autolock _l(mSettingsLock);
             mDurationMsec = msec;
         }
     }
