@@ -319,7 +319,7 @@ void GenericMediaPlayer::onSeek(const sp<AMessage> &msg) {
         // we are not ready to accept a seek command at this time, retry later
         msg->post(DEFAULT_COMMAND_DELAY_FOR_REPOST_US);
     } else {
-        if (msg->findInt64(WHATPARAM_SEEK_SEEKTIME_MS, &timeMsec) && (mPlayer != 0)) {
+        if (mPlayer != 0) {
             mStateFlags |= kFlagSeeking;
             mSeekTimeMsec = (int32_t)timeMsec;
             if (OK != mPlayer->seekTo(timeMsec)) {
