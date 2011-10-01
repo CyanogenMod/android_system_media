@@ -140,16 +140,16 @@ jobject Java_android_filterfw_core_ShaderProgram_nativeCreateIdentity(JNIEnv* en
   return program ? WrapNewObjectInJava(program, env, false) : NULL;
 }
 
-jboolean Java_android_filterfw_core_ShaderProgram_setShaderSourceRegion(JNIEnv* env,
-                                                                        jobject thiz,
-                                                                        jfloat x0,
-                                                                        jfloat y0,
-                                                                        jfloat x1,
-                                                                        jfloat y1,
-                                                                        jfloat x2,
-                                                                        jfloat y2,
-                                                                        jfloat x3,
-                                                                        jfloat y3) {
+jboolean Java_android_filterfw_core_ShaderProgram_setSourceRegion(JNIEnv* env,
+                                                                  jobject thiz,
+                                                                  jfloat x0,
+                                                                  jfloat y0,
+                                                                  jfloat x1,
+                                                                  jfloat y1,
+                                                                  jfloat x2,
+                                                                  jfloat y2,
+                                                                  jfloat x3,
+                                                                  jfloat y3) {
   ShaderProgram* program = ConvertFromJava<ShaderProgram>(env, thiz);
   if (program) {
     program->SetSourceRegion(Quad(Point(x0, y0), Point(x1, y1), Point(x2, y2), Point(x3, y3)));
@@ -158,16 +158,16 @@ jboolean Java_android_filterfw_core_ShaderProgram_setShaderSourceRegion(JNIEnv* 
   return JNI_FALSE;
 }
 
-jboolean Java_android_filterfw_core_ShaderProgram_setShaderTargetRegion(JNIEnv* env,
-                                                                     jobject thiz,
-                                                                     jfloat x0,
-                                                                     jfloat y0,
-                                                                     jfloat x1,
-                                                                     jfloat y1,
-                                                                     jfloat x2,
-                                                                     jfloat y2,
-                                                                     jfloat x3,
-                                                                     jfloat y3) {
+jboolean Java_android_filterfw_core_ShaderProgram_setTargetRegion(JNIEnv* env,
+                                                                  jobject thiz,
+                                                                  jfloat x0,
+                                                                  jfloat y0,
+                                                                  jfloat x1,
+                                                                  jfloat y1,
+                                                                  jfloat x2,
+                                                                  jfloat y2,
+                                                                  jfloat x3,
+                                                                  jfloat y3) {
   ShaderProgram* program = ConvertFromJava<ShaderProgram>(env, thiz);
   if (program) {
     program->SetTargetRegion(Quad(Point(x0, y0), Point(x1, y1), Point(x2, y2), Point(x3, y3)));

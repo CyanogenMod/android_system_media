@@ -36,6 +36,7 @@ import android.filterfw.format.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.os.ConditionVariable;
+import android.opengl.Matrix;
 import android.view.Surface;
 
 import java.io.IOException;
@@ -54,7 +55,8 @@ public class MediaSource extends Filter {
     /** User-visible parameters */
 
     /** The source URL for the media source. Can be an http: link to a remote
-     * resource, or a file: link to a local media file */
+     * resource, or a file: link to a local media file
+     */
     @GenerateFieldPort(name = "sourceUrl", hasDefault = true)
     private String mSourceUrl = "";
 
@@ -62,30 +64,43 @@ public class MediaSource extends Filter {
     @GenerateFieldPort(name = "sourceAsset", hasDefault = true)
     private AssetFileDescriptor mSourceAsset = null;
 
-    /** Whether the media source is a URL or an asset file descriptor. Defaults to false. */
+    /** Whether the media source is a URL or an asset file descriptor. Defaults
+     * to false.
+     */
     @GenerateFieldPort(name = "sourceIsUrl", hasDefault = true)
     private boolean mSelectedIsUrl = false;
 
     /** Whether the filter will always wait for a new video frame, or whether it
-     * will output an old frame again if a new frame isn't available. Defaults to true.
+     * will output an old frame again if a new frame isn't available. Defaults
+     * to true.
      */
     @GenerateFinalPort(name = "waitForNewFrame", hasDefault = true)
     private boolean mWaitForNewFrame = true;
 
-    /** Whether the media source should loop automatically or not. Defaults to true. */
+    /** Whether the media source should loop automatically or not. Defaults to
+     * true.
+     */
     @GenerateFieldPort(name = "loop", hasDefault = true)
     private boolean mLooping = true;
 
-    /** Volume control. Currently sound is piped directly to the speakers, so this defaults to mute. */
+    /** Volume control. Currently sound is piped directly to the speakers, so
+     * this defaults to mute.
+     */
     @GenerateFieldPort(name = "volume", hasDefault = true)
     private float mVolume = 0.f;
+
+    /** Orientation. This controls the output orientation of the video. Valid
+     * values are 0, 90, 180, 270
+     */
+    @GenerateFieldPort(name = "orientation", hasDefault = true)
+    private int mOrientation = 0;
 
     private MediaPlayer mMediaPlayer;
     private GLFrame mMediaFrame;
     private SurfaceTexture mSurfaceTexture;
     private ShaderProgram mFrameExtractor;
     private MutableFrameFormat mOutputFormat;
-    private float[] mFrameTransform;
+    private int mWidth, mHeight;
 
     // Total timeouts will be PREP_TIMEOUT*PREP_TIMEOUT_REPEAT
     private static final int PREP_TIMEOUT = 100; // ms
@@ -93,21 +108,40 @@ public class MediaSource extends Filter {
     private static final int NEWFRAME_TIMEOUT = 100; //ms
     private static final int NEWFRAME_TIMEOUT_REPEAT = 10;
 
+    // This is an identity shader; not using the default identity
+    // shader because reading from a SurfaceTexture requires the
+    // GL_OES_EGL_image_external extension.
     private final String mFrameShader =
             "#extension GL_OES_EGL_image_external : require\n" +
             "precision mediump float;\n" +
-            "uniform mat4 frame_transform;\n" +
             "uniform samplerExternalOES tex_sampler_0;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
-            "  vec2 transformed_texcoord = (frame_transform * vec4(v_texcoord, 0., 1.) ).xy;" +
-            "  gl_FragColor = texture2D(tex_sampler_0, transformed_texcoord);\n" +
+            "  gl_FragColor = texture2D(tex_sampler_0, v_texcoord);\n" +
             "}\n";
+
+    private static final float[] mSourceCoords_0 = { 1, 1, 0, 1,
+                                                     0, 1, 0, 1,
+                                                     1, 0, 0, 1,
+                                                     0, 0, 0, 1 };
+    private static final float[] mSourceCoords_90 = { 0, 1, 0, 1,
+                                                      0, 0, 0, 1,
+                                                      1, 1, 0, 1,
+                                                      1, 0, 0, 1 };
+    private static final float[] mSourceCoords_180 = { 0, 0, 0, 1,
+                                                       1, 0, 0, 1,
+                                                       0, 1, 0, 1,
+                                                       1, 1, 0, 1 };
+    private static final float[] mSourceCoords_270 = { 1, 0, 0, 1,
+                                                       1, 1, 0, 1,
+                                                       0, 0, 0, 1,
+                                                       0, 1, 0, 1 };
 
     private boolean mGotSize;
     private boolean mPrepared;
     private boolean mPlaying;
     private boolean mNewFrameAvailable;
+    private boolean mOrientationUpdated;
     private boolean mPaused;
     private boolean mCompleted;
 
@@ -117,7 +151,6 @@ public class MediaSource extends Filter {
     public MediaSource(String name) {
         super(name);
         mNewFrameAvailable = false;
-        mFrameTransform = new float[16];
 
         mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
@@ -239,9 +272,41 @@ public class MediaSource extends Filter {
             }
 
             mSurfaceTexture.updateTexImage();
+            mOrientationUpdated = true;
+        }
+        if (mOrientationUpdated) {
+            float[] surfaceTransform = new float[16];
+            mSurfaceTexture.getTransformMatrix(surfaceTransform);
 
-            mSurfaceTexture.getTransformMatrix(mFrameTransform);
-            mFrameExtractor.setHostValue("frame_transform", mFrameTransform);
+            float[] sourceCoords = new float[16];
+            switch (mOrientation) {
+                default:
+                case 0:
+                    Matrix.multiplyMM(sourceCoords, 0,
+                                      surfaceTransform, 0,
+                                      mSourceCoords_0, 0);
+                    break;
+                case 90:
+                    Matrix.multiplyMM(sourceCoords, 0,
+                                      surfaceTransform, 0,
+                                      mSourceCoords_90, 0);
+                    break;
+                case 180:
+                    Matrix.multiplyMM(sourceCoords, 0,
+                                      surfaceTransform, 0,
+                                      mSourceCoords_180, 0);
+                    break;
+                case 270:
+                    Matrix.multiplyMM(sourceCoords, 0,
+                                      surfaceTransform, 0,
+                                      mSourceCoords_270, 0);
+                    break;
+            }
+            mFrameExtractor.setSourceRegion(sourceCoords[0], sourceCoords[1],
+                                            sourceCoords[4], sourceCoords[5],
+                                            sourceCoords[8], sourceCoords[9],
+                                            sourceCoords[12], sourceCoords[13]);
+            mOrientationUpdated = false;
         }
 
         Frame output = context.getFrameManager().newFrame(mOutputFormat);
@@ -262,6 +327,13 @@ public class MediaSource extends Filter {
         if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.stop();
         }
+        mPrepared = false;
+        mGotSize = false;
+        mPlaying = false;
+        mPaused = false;
+        mCompleted = false;
+        mNewFrameAvailable = false;
+
         mMediaPlayer.release();
         mMediaPlayer = null;
         mSurfaceTexture.release();
@@ -316,6 +388,13 @@ public class MediaSource extends Filter {
             if (isOpen()) {
                 mMediaPlayer.setVolume(mVolume, mVolume);
             }
+        } else if (name.equals("orientation") && mGotSize) {
+            if (mOrientation == 0 || mOrientation == 180) {
+                mOutputFormat.setDimensions(mWidth, mHeight);
+            } else {
+                mOutputFormat.setDimensions(mHeight, mWidth);
+            }
+            mOrientationUpdated = true;
         }
     }
 
@@ -410,7 +489,13 @@ public class MediaSource extends Filter {
         public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
             if (mLogVerbose) Log.v(TAG, "MediaPlayer sent dimensions: " + width + " x " + height);
             if (!mGotSize) {
-                mOutputFormat.setDimensions(width, height);
+                if (mOrientation == 0 || mOrientation == 180) {
+                    mOutputFormat.setDimensions(width, height);
+                } else {
+                    mOutputFormat.setDimensions(height, width);
+                }
+                mWidth = width;
+                mHeight = height;
             } else {
                 if (mOutputFormat.getWidth() != width ||
                     mOutputFormat.getHeight() != height) {
