@@ -218,6 +218,12 @@ void AacBqToPcmCbRenderer::onPrepare() {
     // FIXME similar to AudioSfDecoder::onPrepare()
     mChannelMask = channelCountToMask(mChannelCount);
 
+    // already "good to go" (compare to AudioSfDecoder::onPrepare)
+    mCacheStatus = kStatusHigh;
+    mCacheFill = 1000;
+    notifyStatus();
+    notifyCacheFill();
+
     {
             android::Mutex::Autolock autoLock(mPcmFormatLock);
             mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_SAMPLERATE] = mSampleRateHz;
