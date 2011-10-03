@@ -484,7 +484,12 @@ void AudioSfDecoder::onDecode() {
         }
         err = mAudioSource->read(&mDecodeBuffer, &readOptions);
         if (err == OK) {
-            CHECK(mDecodeBuffer->meta_data()->findInt64(kKeyTime, &timeUsec));
+            // FIXME workaround apparent bug in AAC decoder: kKeyTime is 3 frames old if length is 0
+            if (mDecodeBuffer->range_length() == 0) {
+                timeUsec = ANDROID_UNKNOWN_TIME;
+            } else {
+                CHECK(mDecodeBuffer->meta_data()->findInt64(kKeyTime, &timeUsec));
+            }
         }
     }
 
