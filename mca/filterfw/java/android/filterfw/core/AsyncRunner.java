@@ -87,12 +87,19 @@ public class AsyncRunner extends GraphRunner{
                 if (isCancelled()) {
                     result.status = RESULT_STOPPED;
                 }
+            } catch (Exception exception) {
+                result.exception = exception;
+                result.status = RESULT_ERROR;
+            }
 
+            // Deactivate context.
+            try {
                 deactivateGlContext();
             } catch (Exception exception) {
                 result.exception = exception;
                 result.status = RESULT_ERROR;
             }
+
             if (mLogVerbose) Log.v(TAG, "Done with background graph processing.");
             return result;
         }
@@ -219,6 +226,7 @@ public class AsyncRunner extends GraphRunner{
         return isProcessing;
     }
 
+    @Override
     synchronized public Exception getError() {
         return mException;
     }

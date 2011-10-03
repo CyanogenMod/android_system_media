@@ -150,6 +150,11 @@ public class SyncRunner extends GraphRunner {
         throw new RuntimeException("SyncRunner does not support stopping a graph!");
     }
 
+    @Override
+    synchronized public Exception getError() {
+        return null;
+    }
+
     protected void waitUntilWake() {
         mWakeCondition.block();
     }
