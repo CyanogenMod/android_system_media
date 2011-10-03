@@ -328,7 +328,7 @@ SLresult android_audioRecorder_setConfig(CAudioRecorder* ar, const SLchar *confi
     SLresult result;
 
     assert(NULL != ar && NULL != configKey && NULL != pConfigValue);
-    if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_PRESET) == 0) {
+    if (strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_PRESET) == 0) {
 
         // recording preset
         if (KEY_RECORDING_PRESET_PARAMSIZE > valueSize) {
@@ -354,7 +354,7 @@ SLresult android_audioRecorder_getConfig(CAudioRecorder* ar, const SLchar *confi
     SLresult result;
 
     assert(NULL != ar && NULL != configKey && NULL != pValueSize);
-    if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_PRESET) == 0) {
+    if (strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_PRESET) == 0) {
 
         // recording preset
         if (NULL == pConfigValue) {
