@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package android.filterpacks.imageproc;
 
 import android.filterfw.core.Filter;
@@ -31,6 +30,8 @@ import android.filterfw.format.ImageFormat;
 import java.util.Set;
 
 /**
+ * The filter linearly blends "left" and "right" frames. The blending weight is
+ * the multiplication of parameter "blend" and the alpha value in "right" frame.
  * @hide
  */
 public class BlendFilter extends ImageCombineFilter {
@@ -44,7 +45,8 @@ public class BlendFilter extends ImageCombineFilter {
             "void main() {\n" +
             "  vec4 colorL = texture2D(tex_sampler_0, v_texcoord);\n" +
             "  vec4 colorR = texture2D(tex_sampler_1, v_texcoord);\n" +
-            "  gl_FragColor = colorL * (1.0 - blend) + colorR * blend;\n" +
+            "  float weight = colorR.a * blend;\n" +
+            "  gl_FragColor = mix(colorL, colorR, weight);\n" +
             "}\n";
 
     public BlendFilter(String name) {
@@ -53,12 +55,11 @@ public class BlendFilter extends ImageCombineFilter {
 
     @Override
     protected Program getNativeProgram(FilterContext context) {
-        throw new RuntimeException("TODO: Write native implementation for AlphaBlend!");
+        throw new RuntimeException("TODO: Write native implementation for Blend!");
     }
 
     @Override
     protected Program getShaderProgram(FilterContext context) {
         return new ShaderProgram(context, mBlendShader);
     }
-
 }
