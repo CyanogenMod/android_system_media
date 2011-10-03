@@ -62,7 +62,7 @@ bool CallbackProtector::enterCb() {
         mCbCount++;
 #ifdef USE_DEBUG
         if (mCbCount > 1) {
-            SL_LOGW("Callback protector allowed multiple or nested callback entry");
+            SL_LOGV("Callback protector allowed multiple or nested callback entry: %u", mCbCount);
         } else {
             mCallbackThread = pthread_self();
             mCallbackTid = gettid();
@@ -70,12 +70,12 @@ bool CallbackProtector::enterCb() {
 #endif
     } else {
 #ifdef USE_DEBUG
-        SL_LOGI("Callback protector denied callback entry by thread %p tid %d during destroy"
+        SL_LOGV("Callback protector denied callback entry by thread %p tid %d during destroy"
                 " requested by thread %p tid %d",
                 (void *) pthread_self(), gettid(),
                 (void *) mRequesterThread, mRequesterTid);
 #else
-        SL_LOGI("Callback protector denied callback entry during destroy");
+        SL_LOGV("Callback protector denied callback entry during destroy");
 #endif
     }
     return mSafeToEnterCb;
@@ -91,12 +91,12 @@ void CallbackProtector::exitCb() {
     if (mCbCount == 0) {
         if (!mSafeToEnterCb) {
 #ifdef USE_DEBUG
-            SL_LOGI("Callback protector detected return from callback by thread %p tid %d during"
+            SL_LOGV("Callback protector detected return from callback by thread %p tid %d during"
                     " destroy requested by thread %p tid %d",
                     (void *) mCallbackThread, mCallbackTid,
                     (void *) mRequesterThread, mRequesterTid);
 #else
-            SL_LOGI("Callback protector detected return from callback during destroy");
+            SL_LOGV("Callback protector detected return from callback during destroy");
 #endif
             mCbExitedCondition.broadcast();
         }
@@ -117,12 +117,12 @@ void CallbackProtector::requestCbExitAndWait() {
 #endif
     while (mCbCount) {
 #ifdef USE_DEBUG
-        SL_LOGI("Callback protector detected in-progress callback by thread %p tid %d during"
+        SL_LOGV("Callback protector detected in-progress callback by thread %p tid %d during"
                 " blocking destroy requested by thread %p tid %d",
                 (void *) mCallbackThread, mCallbackTid,
                 (void *) pthread_self(), gettid());
 #else
-        SL_LOGI("Callback protector detected in-progress callback during blocking destroy");
+        SL_LOGV("Callback protector detected in-progress callback during blocking destroy");
 #endif
         mCbExitedCondition.wait(mLock);
     }
@@ -138,12 +138,12 @@ void CallbackProtector::requestCbExit() {
 #endif
     if (mCbCount) {
 #ifdef USE_DEBUG
-        SL_LOGI("Callback protector detected in-progress callback by thread %p tid %d during"
+        SL_LOGV("Callback protector detected in-progress callback by thread %p tid %d during"
                 " non-blocking destroy requested by thread %p tid %d",
                 (void *) mCallbackThread, mCallbackTid,
                 (void *) pthread_self(), gettid());
 #else
-        SL_LOGI("Callback protector detected in-progress callback during non-blocking destroy");
+        SL_LOGV("Callback protector detected in-progress callback during non-blocking destroy");
 #endif
     }
 }
