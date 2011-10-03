@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <assert.h>
+#include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -28,6 +30,23 @@
 #define REPETITIONS 4  // 4 repetitions, but will stop the looping before the end
 
 #define INITIAL_RATE 2000 // 2x normal playback speed
+
+// These are extensions to OpenSL ES 1.0.1 values
+
+#define SL_PREFETCHSTATUS_UNKNOWN 0
+#define SL_PREFETCHSTATUS_ERROR   (-1)
+
+// Mutex and condition shared with main program to protect prefetch_status
+
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+SLuint32 prefetch_status = SL_PREFETCHSTATUS_UNKNOWN;
+
+/* used to detect errors likely to have occured when the OpenSL ES framework fails to open
+ * a resource, for instance because a file URI is invalid, or an HTTP server doesn't respond.
+ */
+#define PREFETCHEVENT_ERROR_CANDIDATE \
+        (SL_PREFETCHEVENT_STATUSCHANGE | SL_PREFETCHEVENT_FILLLEVELCHANGE)
 
 //-----------------------------------------------------------------
 //* Exits the application if an error is encountered */
@@ -51,9 +70,10 @@ void PlayEventCallback( SLPlayItf caller,  void *pContext, SLuint32 event)
         /* slow playback down by 2x for next loop,  if possible */
         SLpermille minRate, maxRate, stepSize, rate = 1000;
         SLuint32 capa;
-        SLPlaybackRateItf* pRateItf = (SLPlaybackRateItf*)pContext;
-        SLresult res = (**pRateItf)->GetRate(*pRateItf, &rate); CheckErr(res);
-        res = (**pRateItf)->GetRateRange(*pRateItf, 0, &minRate, &maxRate, &stepSize, &capa);
+        assert(NULL != pContext);
+        SLPlaybackRateItf pRateItf = (SLPlaybackRateItf)pContext;
+        SLresult res = (*pRateItf)->GetRate(pRateItf, &rate); CheckErr(res);
+        res = (*pRateItf)->GetRateRange(pRateItf, 0, &minRate, &maxRate, &stepSize, &capa);
         CheckErr(res);
         fprintf(stdout, "old rate = %d, minRate=%d, maxRate=%d\n", rate, minRate, maxRate);
         rate /= 2;
@@ -61,7 +81,12 @@ void PlayEventCallback( SLPlayItf caller,  void *pContext, SLuint32 event)
             rate = minRate;
         }
         fprintf(stdout, "new rate = %d\n", rate);
-        res = (**pRateItf)->SetRate(*pRateItf, rate); CheckErr(res);
+        res = (*pRateItf)->SetRate(pRateItf, rate); CheckErr(res);
+        if (res == SL_RESULT_FEATURE_UNSUPPORTED) {
+            fprintf(stderr, "new playback rate %d per mille is unsupported\n", rate);
+        } else {
+            CheckErr(res);
+        }
     }
     if (event & SL_PLAYEVENT_HEADATMARKER) {
         fprintf(stdout, "SL_PLAYEVENT_HEADATMARKER ");
@@ -82,25 +107,70 @@ void PlayEventCallback( SLPlayItf caller,  void *pContext, SLuint32 event)
 /* PrefetchStatusItf callback for an audio player */
 void PrefetchEventCallback( SLPrefetchStatusItf caller,  void *pContext, SLuint32 event)
 {
-    SLpermille level = 0;
-    (*caller)->GetFillLevel(caller, &level);
-    SLuint32 status;
     //fprintf(stdout, "\t\tPrefetchEventCallback: received event %u\n", event);
-    (*caller)->GetPrefetchStatus(caller, &status);
-    if ((event & (SL_PREFETCHEVENT_STATUSCHANGE|SL_PREFETCHEVENT_FILLLEVELCHANGE))
-            && (level == 0) && (status == SL_PREFETCHSTATUS_UNDERFLOW)) {
-        fprintf(stdout, "\t\tPrefetchEventCallback: Error while prefetching data, exiting\n");
-        //exit(EXIT_FAILURE);
-    }
+    SLresult result;
+    assert(pContext == NULL);
+    SLpermille level = 0;
+    result = (*caller)->GetFillLevel(caller, &level);
+    CheckErr(result);
+    SLuint32 status;
+    result = (*caller)->GetPrefetchStatus(caller, &status);
+    CheckErr(result);
     if (event & SL_PREFETCHEVENT_FILLLEVELCHANGE) {
         fprintf(stdout, "\t\tPrefetchEventCallback: Buffer fill level is = %d\n", level);
     }
     if (event & SL_PREFETCHEVENT_STATUSCHANGE) {
         fprintf(stdout, "\t\tPrefetchEventCallback: Prefetch Status is = %u\n", status);
     }
-
+    SLuint32 new_prefetch_status;
+    if ((event & PREFETCHEVENT_ERROR_CANDIDATE) == PREFETCHEVENT_ERROR_CANDIDATE
+            && level == 0 && status == SL_PREFETCHSTATUS_UNDERFLOW) {
+        fprintf(stdout, "\t\tPrefetchEventCallback: Error while prefetching data, exiting\n");
+        new_prefetch_status = SL_PREFETCHSTATUS_ERROR;
+    } else if (event == SL_PREFETCHEVENT_STATUSCHANGE &&
+            status == SL_PREFETCHSTATUS_SUFFICIENTDATA) {
+        new_prefetch_status = status;
+    } else {
+        return;
+    }
+    int ok;
+    ok = pthread_mutex_lock(&mutex);
+    assert(ok == 0);
+    prefetch_status = new_prefetch_status;
+    ok = pthread_cond_signal(&cond);
+    assert(ok == 0);
+    ok = pthread_mutex_unlock(&mutex);
+    assert(ok == 0);
 }
 
+// Display rate capabilities in a nicely formatted way
+
+void printCapabilities(SLuint32 capabilities)
+{
+    bool needBar = false;
+    printf("0x%x (", capabilities);
+#define _(x)                             \
+    if (capabilities & SL_RATEPROP_##x) { \
+        if (needBar)                     \
+            printf("|");                 \
+        printf("SL_RATEPROP_" #x);        \
+        needBar = true;                  \
+        capabilities &= ~SL_RATEPROP_##x; \
+    }
+    _(SILENTAUDIO)
+    _(STAGGEREDAUDIO)
+    _(NOPITCHCORAUDIO)
+    _(PITCHCORAUDIO)
+    if (capabilities != 0) {
+        if (needBar)
+            printf("|");
+        printf("0x%x", capabilities);
+        needBar = true;
+    }
+    if (!needBar)
+        printf("N/A");
+    printf(")");
+}
 
 //-----------------------------------------------------------------
 
@@ -190,7 +260,7 @@ void TestSlowDownUri( SLObjectItf sl, const char* path)
 
     res = (*player)->GetInterface(player, SL_IID_PREFETCHSTATUS, (void*)&prefetchItf);
     CheckErr(res);
-    res = (*prefetchItf)->RegisterCallback(prefetchItf, PrefetchEventCallback, &prefetchItf);
+    res = (*prefetchItf)->RegisterCallback(prefetchItf, PrefetchEventCallback, NULL);
     CheckErr(res);
     res = (*prefetchItf)->SetCallbackEventsMask(prefetchItf,
             SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE);  CheckErr(res);
@@ -212,31 +282,69 @@ void TestSlowDownUri( SLObjectItf sl, const char* path)
     res = (*seekItf)->SetLoop(seekItf, SL_BOOLEAN_TRUE, 0, SL_TIME_UNKNOWN);  CheckErr(res);
 
     /* Set up marker and position callbacks */
-    res = (*playItf)->RegisterCallback(playItf, PlayEventCallback, &rateItf);  CheckErr(res);
+    res = (*playItf)->RegisterCallback(playItf, PlayEventCallback, (void *) rateItf);  CheckErr(res);
     res = (*playItf)->SetCallbackEventsMask(playItf,
             SL_PLAYEVENT_HEADATEND | SL_PLAYEVENT_HEADATMARKER | SL_PLAYEVENT_HEADATNEWPOS);
     res = (*playItf)->SetMarkerPosition(playItf, 1500); CheckErr(res);
     res = (*playItf)->SetPositionUpdatePeriod(playItf, 500); CheckErr(res);
 
+    /* Get the default rate */
+    SLpermille rate = 1234;
+    res = (*rateItf)->GetRate(rateItf, &rate); CheckErr(res);
+    printf("default rate = %d per mille\n", rate);
+    assert(1000 == rate);
+
+    /* Get the default rate properties */
+    SLuint32 properties = 0;
+    res = (*rateItf)->GetProperties(rateItf, &properties); CheckErr(res);
+    printf("default rate properties: ");
+    printCapabilities(properties);
+    printf("\n");
+    assert(SL_RATEPROP_NOPITCHCORAUDIO == properties);
+
+    /* Get all supported playback rate ranges */
+    SLuint8 index;
+    for (index = 0; ; ++index) {
+        SLpermille minRate, maxRate, stepSize;
+        SLuint32 capabilities;
+        res = (*rateItf)->GetRateRange(rateItf, index, &minRate, &maxRate, &stepSize, &capabilities);
+        if (res == SL_RESULT_PARAMETER_INVALID) {
+            if (index == 0) {
+                fprintf(stderr, "implementation supports no rate ranges\n");
+            }
+            break;
+        }
+        CheckErr(res);
+        if (index == 255) {
+            fprintf(stderr, "implementation supports way too many rate ranges, I'm giving up\n");
+            break;
+        }
+        printf("range[%u]: min=%d, max=%d, capabilities=", index, minRate, maxRate);
+        printCapabilities(capabilities);
+        printf("\n");
+    }
+
     /* Change the playback rate before playback */
-    res = (*rateItf)->SetRate(rateItf, INITIAL_RATE);  CheckErr(res);
+    res = (*rateItf)->SetRate(rateItf, INITIAL_RATE);
+    if (res == SL_RESULT_FEATURE_UNSUPPORTED || res == SL_RESULT_PARAMETER_INVALID) {
+        fprintf(stderr, "initial playback rate %d per mille is unsupported\n", INITIAL_RATE);
+    } else {
+        CheckErr(res);
+    }
 
     /******************************************************/
     /* Play the URI */
     /*     first cause the player to prefetch the data */
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PAUSED ); CheckErr(res);
 
-    /*     wait until there's data to play */
-    SLuint32 prefetchStatus = SL_PREFETCHSTATUS_UNDERFLOW;
-    SLuint32 timeOutIndex = 100; // 10s
-    while ((prefetchStatus != SL_PREFETCHSTATUS_SUFFICIENTDATA) && (timeOutIndex > 0)) {
-        usleep(100 * 1000);
-        (*prefetchItf)->GetPrefetchStatus(prefetchItf, &prefetchStatus);
-        timeOutIndex--;
+    // wait for prefetch status callback to indicate either sufficient data or error
+    pthread_mutex_lock(&mutex);
+    while (prefetch_status == SL_PREFETCHSTATUS_UNKNOWN) {
+        pthread_cond_wait(&cond, &mutex);
     }
-
-    if (timeOutIndex == 0) {
-        fprintf(stderr, "\nWe\'re done waiting, failed to prefetch data in time, exiting\n");
+    pthread_mutex_unlock(&mutex);
+    if (prefetch_status == SL_PREFETCHSTATUS_ERROR) {
+        fprintf(stderr, "Error during prefetch, exiting\n");
         goto destroyRes;
     }
 
@@ -248,12 +356,22 @@ void TestSlowDownUri( SLObjectItf sl, const char* path)
         fprintf(stdout, "Content duration is %u ms (after prefetch completed)\n", durationInMsec);
     }
 
+    /* Start playing */
     fprintf(stdout, "starting to play\n");
     res = (*playItf)->SetPlayState( playItf, SL_PLAYSTATE_PLAYING ); CheckErr(res);
 
     /* Wait as long as the duration of the content, times the repetitions,
      * before stopping the loop */
+#if 1
     usleep( (REPETITIONS-1) * durationInMsec * 1100);
+#else
+    int ii;
+    for (ii = 0; ii < REPETITIONS; ++ii) {
+        usleep(durationInMsec * 1100);
+        PlayEventCallback(playItf, (void *) rateItf, SL_PLAYEVENT_HEADATEND);
+    }
+#endif
+
     res = (*seekItf)->SetLoop(seekItf, SL_BOOLEAN_FALSE, 0, SL_TIME_UNKNOWN); CheckErr(res);
     fprintf(stdout, "As of now, stopped looping (sound shouldn't repeat from now on)\n");
     /* wait some more to make sure it doesn't repeat */
