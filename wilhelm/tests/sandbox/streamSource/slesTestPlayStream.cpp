@@ -387,8 +387,8 @@ int main(int argc, char* const argv[])
     fprintf(stdout, "Plays a sound and stops after its reported duration\n\n");
 
     if (argc == 1) {
-        fprintf(stdout, "Usage: %s path \n\t%s url\n", argv[0], argv[0]);
-        fprintf(stdout, "Example: \"%s /sdcard/my.mp3\"  or \"%s file:///sdcard/my.mp3\"\n",
+        fprintf(stdout, "Usage: %s path \n", argv[0]);
+        fprintf(stdout, "Example: \"%s /sdcard/my.ts\n",
                 argv[0], argv[0]);
         exit(EXIT_FAILURE);
     }
