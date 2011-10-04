@@ -33,6 +33,7 @@ import android.filterfw.format.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.os.ConditionVariable;
+import android.opengl.Matrix;
 
 import java.io.IOException;
 import java.io.FileDescriptor;
@@ -115,19 +116,24 @@ public class SurfaceTextureSource extends Filter {
     private SurfaceTexture mSurfaceTexture;
     private MutableFrameFormat mOutputFormat;
     private ConditionVariable mNewFrameAvailable;
-    private float[] mFrameTransform;
     private boolean mFirstFrame;
 
+    private float[] mFrameTransform;
+    private float[] mMappedCoords;
+    // These default source coordinates perform the necessary flip
+    // for converting from MFF/Bitmap origin to OpenGL origin.
+    private static final float[] mSourceCoords = { 0, 1, 0, 1,
+                                                   1, 1, 0, 1,
+                                                   0, 0, 0, 1,
+                                                   1, 0, 0, 1 };
     // Shader for output
     private final String mRenderShader =
             "#extension GL_OES_EGL_image_external : require\n" +
             "precision mediump float;\n" +
-            "uniform mat4 frame_transform;\n" +
             "uniform samplerExternalOES tex_sampler_0;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
-            "  vec2 transformed_texcoord = (frame_transform * vec4(v_texcoord, 0., 1.) ).xy;" +
-            "  gl_FragColor = texture2D(tex_sampler_0, transformed_texcoord);\n" +
+            "  gl_FragColor = texture2D(tex_sampler_0, v_texcoord);\n" +
             "}\n";
 
     // Variables for logging
@@ -139,6 +145,7 @@ public class SurfaceTextureSource extends Filter {
         super(name);
         mNewFrameAvailable = new ConditionVariable();
         mFrameTransform = new float[16];
+        mMappedCoords = new float[16];
     }
 
     @Override
@@ -167,9 +174,6 @@ public class SurfaceTextureSource extends Filter {
 
         // Prepare output
         mFrameExtractor = new ShaderProgram(context, mRenderShader);
-        // SurfaceTexture defines (0,0) to be bottom-left. The filter framework
-        // defines (0,0) as top-left, so do the flip here.
-        mFrameExtractor.setSourceRect(0, 1, 1, -1);
     }
 
     @Override
@@ -212,10 +216,14 @@ public class SurfaceTextureSource extends Filter {
         mSurfaceTexture.updateTexImage();
 
         mSurfaceTexture.getTransformMatrix(mFrameTransform);
-
+        Matrix.multiplyMM(mMappedCoords, 0,
+                          mFrameTransform, 0,
+                          mSourceCoords, 0);
+        mFrameExtractor.setSourceRegion(mMappedCoords[0], mMappedCoords[1],
+                                        mMappedCoords[4], mMappedCoords[5],
+                                        mMappedCoords[8], mMappedCoords[9],
+                                        mMappedCoords[12], mMappedCoords[13]);
         // Next, render to output
-        mFrameExtractor.setHostValue("frame_transform", mFrameTransform);
-
         Frame output = context.getFrameManager().newFrame(mOutputFormat);
         mFrameExtractor.process(mMediaFrame, output);
 

@@ -35,6 +35,7 @@ import android.filterfw.format.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.ConditionVariable;
+import android.opengl.Matrix;
 
 import java.io.IOException;
 import java.util.List;
@@ -78,7 +79,15 @@ public class CameraSource extends Filter {
     private SurfaceTexture mSurfaceTexture;
     private ShaderProgram mFrameExtractor;
     private MutableFrameFormat mOutputFormat;
+
     private float[] mCameraTransform;
+    private float[] mMappedCoords;
+    // These default source coordinates perform the necessary flip
+    // for converting from OpenGL origin to MFF/Bitmap origin.
+    private static final float[] mSourceCoords = { 0, 1, 0, 1,
+                                                   1, 1, 0, 1,
+                                                   0, 0, 0, 1,
+                                                   1, 0, 0, 1 };
 
     private static final int NEWFRAME_TIMEOUT = 100; //ms
     private static final int NEWFRAME_TIMEOUT_REPEAT = 10;
@@ -90,12 +99,10 @@ public class CameraSource extends Filter {
     private static final String mFrameShader =
             "#extension GL_OES_EGL_image_external : require\n" +
             "precision mediump float;\n" +
-            "uniform mat4 camera_transform;\n" +
             "uniform samplerExternalOES tex_sampler_0;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
-            "  vec2 transformed_texcoord = (camera_transform * vec4(v_texcoord, 0., 1.) ).xy;" +
-            "  gl_FragColor = texture2D(tex_sampler_0, transformed_texcoord);\n" +
+            "  gl_FragColor = texture2D(tex_sampler_0, v_texcoord);\n" +
             "}\n";
 
     private final boolean mLogVerbose;
@@ -104,6 +111,7 @@ public class CameraSource extends Filter {
     public CameraSource(String name) {
         super(name);
         mCameraTransform = new float[16];
+        mMappedCoords = new float[16];
 
         mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
@@ -126,9 +134,6 @@ public class CameraSource extends Filter {
         if (mLogVerbose) Log.v(TAG, "Preparing");
         // Compile shader TODO: Move to onGLEnvSomething?
         mFrameExtractor = new ShaderProgram(context, mFrameShader);
-        // SurfaceTexture defines (0,0) to be bottom-left. The filter framework defines
-        // (0,0) as top-left, so do the flip here.
-        mFrameExtractor.setSourceRect(0, 1, 1, -1);
     }
 
     @Override
@@ -187,7 +192,13 @@ public class CameraSource extends Filter {
 
         if (mLogVerbose) Log.v(TAG, "Using frame extractor in thread: " + Thread.currentThread());
         mSurfaceTexture.getTransformMatrix(mCameraTransform);
-        mFrameExtractor.setHostValue("camera_transform", mCameraTransform);
+        Matrix.multiplyMM(mMappedCoords, 0,
+                          mCameraTransform, 0,
+                          mSourceCoords, 0);
+        mFrameExtractor.setSourceRegion(mMappedCoords[0], mMappedCoords[1],
+                                        mMappedCoords[4], mMappedCoords[5],
+                                        mMappedCoords[8], mMappedCoords[9],
+                                        mMappedCoords[12], mMappedCoords[13]);
 
         Frame output = context.getFrameManager().newFrame(mOutputFormat);
         mFrameExtractor.process(mCameraFrame, output);

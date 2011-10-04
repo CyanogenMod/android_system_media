@@ -168,25 +168,25 @@ public class ShaderProgram extends Program {
     }
 
     public void setSourceRegion(Quad region) {
-        setShaderSourceRegion(region.p0.x, region.p0.y,
-                              region.p1.x, region.p1.y,
-                              region.p2.x, region.p2.y,
-                              region.p3.x, region.p3.y);
+        setSourceRegion(region.p0.x, region.p0.y,
+                        region.p1.x, region.p1.y,
+                        region.p2.x, region.p2.y,
+                        region.p3.x, region.p3.y);
     }
 
     public void setTargetRegion(Quad region) {
-        setShaderTargetRegion(region.p0.x, region.p0.y,
-                              region.p1.x, region.p1.y,
-                              region.p2.x, region.p2.y,
-                              region.p3.x, region.p3.y);
+        setTargetRegion(region.p0.x, region.p0.y,
+                        region.p1.x, region.p1.y,
+                        region.p2.x, region.p2.y,
+                        region.p3.x, region.p3.y);
     }
 
     public void setSourceRect(float x, float y, float width, float height) {
-        setShaderSourceRegion(x, y, x + width, y, x, y + height, x + width, y + height);
+        setSourceRegion(x, y, x + width, y, x, y + height, x + width, y + height);
     }
 
     public void setTargetRect(float x, float y, float width, float height) {
-        setShaderTargetRegion(x, y, x + width, y, x, y + height, x + width, y + height);
+        setTargetRegion(x, y, x + width, y, x, y + height, x + width, y + height);
     }
 
     public void setClearsOutput(boolean clears) {
@@ -262,11 +262,11 @@ public class ShaderProgram extends Program {
 
     private native Object getUniformValue(String name);
 
-    private native boolean setShaderSourceRegion(float x0, float y0, float x1, float y1,
-                                                 float x2, float y2, float x3, float y3);
+    public native boolean setSourceRegion(float x0, float y0, float x1, float y1,
+                                          float x2, float y2, float x3, float y3);
 
-    private native boolean setShaderTargetRegion(float x0, float y0, float x1, float y1,
-                                                 float x2, float y2, float x3, float y3);
+    private native boolean setTargetRegion(float x0, float y0, float x1, float y1,
+                                           float x2, float y2, float x3, float y3);
 
     private static native ShaderProgram nativeCreateIdentity(GLEnvironment glEnv);
 

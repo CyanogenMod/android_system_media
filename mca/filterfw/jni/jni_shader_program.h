@@ -61,28 +61,28 @@ Java_android_filterfw_core_ShaderProgram_nativeCreateIdentity(JNIEnv* env,
                                                               jobject gl_env);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_ShaderProgram_setShaderSourceRegion(JNIEnv* env,
-                                                               jobject thiz,
-                                                               jfloat x0,
-                                                               jfloat y0,
-                                                               jfloat x1,
-                                                               jfloat y1,
-                                                               jfloat x2,
-                                                               jfloat y2,
-                                                               jfloat x3,
-                                                               jfloat y3);
+Java_android_filterfw_core_ShaderProgram_setSourceRegion(JNIEnv* env,
+                                                         jobject thiz,
+                                                         jfloat x0,
+                                                         jfloat y0,
+                                                         jfloat x1,
+                                                         jfloat y1,
+                                                         jfloat x2,
+                                                         jfloat y2,
+                                                         jfloat x3,
+                                                         jfloat y3);
 
 JNIEXPORT jboolean JNICALL
-Java_android_filterfw_core_ShaderProgram_setShaderTargetRegion(JNIEnv* env,
-                                                               jobject thiz,
-                                                               jfloat x0,
-                                                               jfloat y0,
-                                                               jfloat x1,
-                                                               jfloat y1,
-                                                               jfloat x2,
-                                                               jfloat y2,
-                                                               jfloat x3,
-                                                               jfloat y3);
+Java_android_filterfw_core_ShaderProgram_setTargetRegion(JNIEnv* env,
+                                                         jobject thiz,
+                                                         jfloat x0,
+                                                         jfloat y0,
+                                                         jfloat x1,
+                                                         jfloat y1,
+                                                         jfloat x2,
+                                                         jfloat y2,
+                                                         jfloat x3,
+                                                         jfloat y3);
 
 JNIEXPORT jboolean JNICALL
 Java_android_filterfw_core_ShaderProgram_setShaderClearsOutput(JNIEnv* env,
