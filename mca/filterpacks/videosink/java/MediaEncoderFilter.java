@@ -32,6 +32,8 @@ import android.filterfw.core.NativeFrame;
 import android.filterfw.core.Program;
 import android.filterfw.core.ShaderProgram;
 import android.filterfw.format.ImageFormat;
+import android.filterfw.geometry.Point;
+import android.filterfw.geometry.Quad;
 import android.os.ConditionVariable;
 import android.media.MediaRecorder;
 import android.media.CamcorderProfile;
@@ -122,6 +124,14 @@ public class MediaEncoderFilter extends Filter {
     @GenerateFieldPort(name = "videoEncoder", hasDefault = true)
     private int mVideoEncoder = MediaRecorder.VideoEncoder.H264;
 
+    /** The input region to read from the frame. The corners of this quad are
+     * mapped to the output rectangle. The input frame ranges from (0,0)-(1,1),
+     * top-left to bottom-right. The corners of the quad are specified in the
+     * order bottom-left, bottom-right, top-left, top-right.
+     */
+    @GenerateFieldPort(name = "inputRegion", hasDefault = true)
+    private Quad mSourceRegion;
+
     // End of user visible parameters
 
     private static final int NO_AUDIO_SOURCE = -1;
@@ -140,6 +150,11 @@ public class MediaEncoderFilter extends Filter {
 
     public MediaEncoderFilter(String name) {
         super(name);
+        Point bl = new Point(0, 0);
+        Point br = new Point(1, 0);
+        Point tl = new Point(0, 1);
+        Point tr = new Point(1, 1);
+        mSourceRegion = new Quad(bl, br, tl, tr);
         mLogVerbose = Log.isLoggable(TAG, Log.VERBOSE);
     }
 
@@ -154,11 +169,24 @@ public class MediaEncoderFilter extends Filter {
     public void fieldPortValueUpdated(String name, FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Port " + name + " has been updated");
         if (name.equals("recording")) return;
-
+        if (name.equals("inputRegion")) {
+            if (isOpen()) updateSourceRegion();
+            return;
+        }
         if (isOpen() && mRecordingActive) {
             throw new RuntimeException("Cannot change recording parameters"
                                        + " when the filter is recording!");
         }
+    }
+
+    private void updateSourceRegion() {
+        // Flip source quad to map to OpenGL origin
+        Quad flippedRegion = new Quad();
+        flippedRegion.p0 = mSourceRegion.p2;
+        flippedRegion.p1 = mSourceRegion.p3;
+        flippedRegion.p2 = mSourceRegion.p0;
+        flippedRegion.p3 = mSourceRegion.p1;
+        mProgram.setSourceRegion(flippedRegion);
     }
 
     // update the MediaRecorderParams based on the variables.
@@ -188,10 +216,7 @@ public class MediaEncoderFilter extends Filter {
     public void prepare(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Preparing");
 
-        // Create identity shader to render, and make sure to render upside-down, as textures
-        // are stored internally bottom-to-top.
         mProgram = ShaderProgram.createIdentity(context);
-        mProgram.setSourceRect(0, 1, 1, -1);
 
         mRecordingActive = false;
     }
@@ -199,6 +224,7 @@ public class MediaEncoderFilter extends Filter {
     @Override
     public void open(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Opening");
+        updateSourceRegion();
         if (mRecording) startRecording(context);
     }
 
