@@ -93,8 +93,12 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
       case MEDIA_PREPARED:
         {
         Mutex::Autolock _l(mLock);
-        mPlayerPrepared = PREPARE_COMPLETED_SUCCESSFULLY;
-        mPlayerPreparedCondition.signal();
+        if (PREPARE_IN_PROGRESS == mPlayerPrepared) {
+            mPlayerPrepared = PREPARE_COMPLETED_SUCCESSFULLY;
+            mPlayerPreparedCondition.signal();
+        } else {
+            SL_LOGE("Unexpected MEDIA_PREPARED");
+        }
         }
         break;
 
@@ -128,8 +132,12 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
       case MEDIA_ERROR:
         {
         Mutex::Autolock _l(mLock);
-        mPlayerPrepared = PREPARE_COMPLETED_UNSUCCESSFULLY;
-        mPlayerPreparedCondition.signal();
+        if (PREPARE_IN_PROGRESS == mPlayerPrepared) {
+            mPlayerPrepared = PREPARE_COMPLETED_UNSUCCESSFULLY;
+            mPlayerPreparedCondition.signal();
+        } else {
+            // FIXME Currently no mechanism to inform client of errors after preparation
+        }
         }
         break;
 
