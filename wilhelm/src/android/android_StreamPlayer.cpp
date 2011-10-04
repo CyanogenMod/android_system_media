@@ -139,6 +139,11 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
                 msg->setInt32(IStreamListener::kKeyFormatChange, (int32_t) 1);
                 receivedCmd_l(IStreamListener::DISCONTINUITY, msg /*msg*/);
             }
+            if (oldFront->mItems.mTsCmdData.mTsCmdCode & (ANDROID_MP2TSEVENT_DISCONTINUITY |
+                    ANDROID_MP2TSEVENT_DISCON_NEWPTS | ANDROID_MP2TSEVENT_FORMAT_CHANGE)) {
+                // FIXME see note at onSeek
+                mPlayer->seek(ANDROID_UNKNOWN_TIME);
+            }
             oldFront->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
         }
 

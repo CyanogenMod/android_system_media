@@ -166,7 +166,7 @@ void GenericPlayer::stop() {
 
 void GenericPlayer::seek(int64_t timeMsec) {
     SL_LOGV("GenericPlayer::seek %lld", timeMsec);
-    if (timeMsec < 0) {
+    if (timeMsec < 0 && timeMsec != ANDROID_UNKNOWN_TIME) {
         SL_LOGE("GenericPlayer::seek error, can't seek to negative time %lldms", timeMsec);
         return;
     }
