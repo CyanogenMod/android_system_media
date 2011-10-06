@@ -77,10 +77,15 @@ static SLresult IPresetReverb_GetPreset(SLPresetReverbItf self, SLuint16 *pPrese
         result = SL_RESULT_SUCCESS;
 #else
         if (NO_PRESETREVERB(thiz)) {
+            preset = thiz->mPreset;
             result = SL_RESULT_CONTROL_LOST;
         } else {
             android::status_t status = android_prev_getPreset(thiz->mPresetReverbEffect, &preset);
             result = android_fx_statusToResult(status);
+        }
+        // OpenSL ES 1.0.1 spec and conformance test do not permit SL_RESULT_CONTROL_LOST
+        if (SL_RESULT_CONTROL_LOST == result) {
+            result = SL_RESULT_SUCCESS;
         }
 #endif
         interface_unlock_shared(thiz);
