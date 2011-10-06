@@ -586,6 +586,7 @@ static SLresult IEnvironmentalReverb_SetDensity(SLEnvironmentalReverbItf self,
     } else {
         IEnvironmentalReverb *thiz = (IEnvironmentalReverb *) self;
         interface_lock_exclusive(thiz);
+        thiz->mProperties.density = density;
 #if !defined(ANDROID)
         result = SL_RESULT_SUCCESS;
 #else
