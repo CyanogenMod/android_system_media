@@ -121,13 +121,14 @@ AacAdtsExtractor::AacAdtsExtractor(const sp<DataSource> &source)
 
     mMeta = MakeAACCodecSpecificData(profile, sf_index, channel);
 
-    off64_t offset = 0;
-    off64_t streamSize, numFrames = 0;
-    size_t frameSize = 0;
-    int64_t duration = 0;
+    // Round up and get the duration of each frame
+    mFrameDurationUs = (1024 * 1000000ll + (sr - 1)) / sr;
 
+    off64_t streamSize;
     if (mDataSource->getSize(&streamSize) == OK) {
+        off64_t offset = 0, numFrames = 0;
         while (offset < streamSize) {
+            size_t frameSize;
             if ((frameSize = getFrameSize(mDataSource, offset)) == 0) {
                 //SL_LOGV("AacAdtsExtractor() querying framesize at offset=%lld", offset);
                 return;
@@ -137,9 +138,8 @@ AacAdtsExtractor::AacAdtsExtractor(const sp<DataSource> &source)
             numFrames ++;
         }
 
-        // Round up and get the duration
-        mFrameDurationUs = (1024 * 1000000ll + (sr - 1)) / sr;
-        duration = numFrames * mFrameDurationUs;
+        // Compute total duration
+        int64_t duration = numFrames * mFrameDurationUs;
         mMeta->setInt64(kKeyDuration, duration);
     }
 

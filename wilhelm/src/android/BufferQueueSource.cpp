@@ -172,7 +172,7 @@ status_t BufferQueueSource::getSize(off64_t *size) {
     SL_LOGD("BufferQueueSource::getSize()");
     // we're streaming, we don't know how much there is
     *size = 0;
-    return OK;
+    return ERROR_UNSUPPORTED;
 }
 
 }  // namespace android
