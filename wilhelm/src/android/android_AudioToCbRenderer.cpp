@@ -24,7 +24,8 @@
 namespace android {
 
 //--------------------------------------------------------------------------------------------------
-AudioToCbRenderer::AudioToCbRenderer(AudioPlayback_Parameters* params) : AudioSfDecoder(params),
+AudioToCbRenderer::AudioToCbRenderer(const AudioPlayback_Parameters* params) :
+        AudioSfDecoder(params),
         mDecodeCbf(NULL),
         mDecodeUser(NULL)
 {

@@ -22,7 +22,7 @@ namespace android {
 class LocAVPlayer : public GenericMediaPlayer
 {
 public:
-    LocAVPlayer(AudioPlayback_Parameters* params, bool hasVideo);
+    LocAVPlayer(const AudioPlayback_Parameters* params, bool hasVideo);
     virtual ~LocAVPlayer();
 
 protected:

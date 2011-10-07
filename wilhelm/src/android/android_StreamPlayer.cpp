@@ -279,16 +279,13 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
 
 
 //--------------------------------------------------------------------------------------------------
-StreamPlayer::StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo,
+StreamPlayer::StreamPlayer(const AudioPlayback_Parameters* params, bool hasVideo,
         IAndroidBufferQueue *androidBufferQueue, const sp<CallbackProtector> &callbackProtector) :
         GenericMediaPlayer(params, hasVideo),
         mAppProxy(new StreamSourceAppProxy(androidBufferQueue, callbackProtector, this)),
         mStopForDestroyCompleted(false)
 {
     SL_LOGD("StreamPlayer::StreamPlayer()");
-
-    mPlaybackParams = *params;
-
 }
 
 StreamPlayer::~StreamPlayer() {

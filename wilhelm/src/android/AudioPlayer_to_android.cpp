@@ -1359,7 +1359,12 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     SLresult result = SL_RESULT_SUCCESS;
     SL_LOGV("Realize pAudioPlayer=%p", pAudioPlayer);
 
+    AudioPlayback_Parameters app;
+    app.sessionId = pAudioPlayer->mSessionId;
+    app.streamType = pAudioPlayer->mStreamType;
+
     switch (pAudioPlayer->mAndroidObjType) {
+
     //-----------------------------------
     // AudioTrack
     case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
@@ -1403,18 +1408,10 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         pAudioPlayer->mAndroidObjState = ANDROID_READY;
         }
         break;
+
     //-----------------------------------
     // MediaPlayer
     case AUDIOPLAYER_FROM_URIFD: {
-        assert(pAudioPlayer->mAndroidObjState == ANDROID_UNINITIALIZED);
-        assert(pAudioPlayer->mNumChannels == UNKNOWN_NUMCHANNELS);
-        assert(pAudioPlayer->mSampleRateMilliHz == UNKNOWN_SAMPLERATE);
-        assert(pAudioPlayer->mAudioTrack == 0);
-
-        AudioPlayback_Parameters app;
-        app.sessionId = pAudioPlayer->mSessionId;
-        app.streamType = pAudioPlayer->mStreamType;
-
         pAudioPlayer->mAPlayer = new android::LocAVPlayer(&app, false /*hasVideo*/);
         pAudioPlayer->mAPlayer->init(sfplayer_handlePrefetchEvent,
                         (void*)pAudioPlayer /*notifUSer*/);
@@ -1472,25 +1469,20 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         }
         break;
+
     //-----------------------------------
     // StreamPlayer
     case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: {
-        AudioPlayback_Parameters ap_params;
-        ap_params.sessionId = pAudioPlayer->mSessionId;
-        ap_params.streamType = pAudioPlayer->mStreamType;
-        android::StreamPlayer* splr = new android::StreamPlayer(&ap_params, false /*hasVideo*/,
+        android::StreamPlayer* splr = new android::StreamPlayer(&app, false /*hasVideo*/,
                 &pAudioPlayer->mAndroidBufferQueue, pAudioPlayer->mCallbackProtector);
         pAudioPlayer->mAPlayer = splr;
         splr->init(sfplayer_handlePrefetchEvent, (void*)pAudioPlayer);
         }
         break;
+
     //-----------------------------------
     // AudioToCbRenderer
     case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE: {
-        AudioPlayback_Parameters app;
-        app.sessionId = pAudioPlayer->mSessionId;
-        app.streamType = pAudioPlayer->mStreamType;
-
         android::AudioToCbRenderer* decoder = new android::AudioToCbRenderer(&app);
         pAudioPlayer->mAPlayer = decoder;
         // configures the callback for the sink buffer queue
@@ -1519,12 +1511,10 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         }
         break;
+
     //-----------------------------------
     // AacBqToPcmCbRenderer
     case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE: {
-        AudioPlayback_Parameters app;
-        app.sessionId = pAudioPlayer->mSessionId;
-        app.streamType = pAudioPlayer->mStreamType;
         android::AacBqToPcmCbRenderer* bqtobq = new android::AacBqToPcmCbRenderer(&app);
         // configures the callback for the sink buffer queue
         bqtobq->setDataPushListener(adecoder_writeToBufferQueue, pAudioPlayer);
@@ -1534,13 +1524,13 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         pAudioPlayer->mAPlayer->init(sfplayer_handlePrefetchEvent, (void*)pAudioPlayer);
         }
         break;
+
     //-----------------------------------
     default:
         SL_LOGE(ERROR_PLAYERREALIZE_UNEXPECTED_OBJECT_TYPE_D, pAudioPlayer->mAndroidObjType);
         result = SL_RESULT_INTERNAL_ERROR;
         break;
     }
-
 
     // proceed with effect initialization
     // initialize EQ

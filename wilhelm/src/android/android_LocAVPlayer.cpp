@@ -24,7 +24,7 @@
 namespace android {
 
 //--------------------------------------------------------------------------------------------------
-LocAVPlayer::LocAVPlayer(AudioPlayback_Parameters* params, bool hasVideo) :
+LocAVPlayer::LocAVPlayer(const AudioPlayback_Parameters* params, bool hasVideo) :
         GenericMediaPlayer(params, hasVideo)
 {
     SL_LOGD("LocAVPlayer::LocAVPlayer()");

@@ -64,15 +64,15 @@ enum AndroidObjectState {
 
 #define MPEG2_TS_BLOCK_SIZE 188
 
-typedef struct AudioPlayback_Parameters_struct {
+struct AudioPlayback_Parameters {
     int streamType;
     int sessionId;
-} AudioPlayback_Parameters;
+};
 
 /**
  * Structure to maintain the set of audio levels about a player
  */
-typedef struct AndroidAudioLevels_t {
+struct AndroidAudioLevels {
     /**
      * Send level to aux effect, there's a single aux bus, so there's a single level
      */
@@ -89,7 +89,7 @@ typedef struct AndroidAudioLevels_t {
      * (or attenuation) represented as a float from 0.0f to 1.0f
      */
     float mFinalVolume[STEREO_CHANNELS];
-} AndroidAudioLevels;
+};
 
 
 /**

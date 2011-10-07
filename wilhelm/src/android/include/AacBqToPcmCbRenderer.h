@@ -33,7 +33,7 @@ class AacBqToPcmCbRenderer : public AudioToCbRenderer
 {
 public:
 
-    AacBqToPcmCbRenderer(AudioPlayback_Parameters* params);
+    AacBqToPcmCbRenderer(const AudioPlayback_Parameters* params);
     virtual ~AacBqToPcmCbRenderer();
 
     void registerSourceQueueCallback(const void* user, void *context,  const void *caller);

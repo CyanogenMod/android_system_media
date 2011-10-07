@@ -81,7 +81,7 @@ private:
 class StreamPlayer : public GenericMediaPlayer
 {
 public:
-    StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo,
+    StreamPlayer(const AudioPlayback_Parameters* params, bool hasVideo,
            IAndroidBufferQueue *androidBufferQueue, const sp<CallbackProtector> &callbackProtector);
     virtual ~StreamPlayer();
 

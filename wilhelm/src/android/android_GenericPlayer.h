@@ -173,7 +173,7 @@ protected:
 
     sp<ALooper> mLooper;
 
-    AudioPlayback_Parameters mPlaybackParams;
+    const AudioPlayback_Parameters mPlaybackParams;
 
     AndroidAudioLevels mAndroidAudioLevels;
 

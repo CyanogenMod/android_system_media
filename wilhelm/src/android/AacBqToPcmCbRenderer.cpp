@@ -108,7 +108,7 @@ SLresult AacBqToPcmCbRenderer::validateBufferStartEndOnFrameBoundaries(void* dat
 }
 
 //--------------------------------------------------------------------------------------------------
-AacBqToPcmCbRenderer::AacBqToPcmCbRenderer(AudioPlayback_Parameters* params) :
+AacBqToPcmCbRenderer::AacBqToPcmCbRenderer(const AudioPlayback_Parameters* params) :
         AudioToCbRenderer(params),
         mBqSource(0)
 {
