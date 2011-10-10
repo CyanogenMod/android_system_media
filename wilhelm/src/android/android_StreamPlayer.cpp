@@ -22,6 +22,7 @@
 #include <media/IStreamSource.h>
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/foundation/ADebug.h>
+#include <binder/IPCThreadState.h>
 
 
 //--------------------------------------------------------------------------------------------------
@@ -30,7 +31,12 @@ namespace android {
 StreamSourceAppProxy::StreamSourceAppProxy(
         IAndroidBufferQueue *androidBufferQueue,
         const sp<CallbackProtector> &callbackProtector,
-        const sp<StreamPlayer> &player) :
+        // sp<StreamPlayer> would cause StreamPlayer's destructor to run during it's own
+        // construction.   If you pass in a sp<> to 'this' inside a constructor, then first the
+        // refcount is increased from 0 to 1, then decreased from 1 to 0, which causes the object's
+        // destructor to run from inside it's own constructor.
+        StreamPlayer * /* const sp<StreamPlayer> & */ player) :
+    mBuffersHasBeenSet(false),
     mAndroidBufferQueue(androidBufferQueue),
     mCallbackProtector(callbackProtector),
     mPlayer(player)
@@ -39,9 +45,9 @@ StreamSourceAppProxy::StreamSourceAppProxy(
 }
 
 StreamSourceAppProxy::~StreamSourceAppProxy() {
-    SL_LOGD("StreamSourceAppProxy::~StreamSourceAppProxy()");
-    mListener.clear();
-    mBuffers.clear();
+    // FIXME make this an SL_LOGV later; this just proves that the bug is fixed
+    SL_LOGI("StreamSourceAppProxy::~StreamSourceAppProxy()");
+    disconnect();
 }
 
 const SLuint32 StreamSourceAppProxy::kItemProcessed[NB_BUFFEREVENT_ITEM_FIELDS] = {
@@ -53,26 +59,34 @@ const SLuint32 StreamSourceAppProxy::kItemProcessed[NB_BUFFEREVENT_ITEM_FIELDS] 
 //--------------------------------------------------
 // IStreamSource implementation
 void StreamSourceAppProxy::setListener(const sp<IStreamListener> &listener) {
+    assert(listener != NULL);
     Mutex::Autolock _l(mLock);
+    assert(mListener == NULL);
     mListener = listener;
 }
 
 void StreamSourceAppProxy::setBuffers(const Vector<sp<IMemory> > &buffers) {
+    Mutex::Autolock _l(mLock);
+    assert(!mBuffersHasBeenSet);
     mBuffers = buffers;
+    mBuffersHasBeenSet = true;
 }
 
 void StreamSourceAppProxy::onBufferAvailable(size_t index) {
     //SL_LOGD("StreamSourceAppProxy::onBufferAvailable(%d)", index);
 
-    CHECK_LT(index, mBuffers.size());
-    sp<IMemory> mem = mBuffers.itemAt(index);
-    SLAint64 length = (SLAint64) mem->size();
-
     {
         Mutex::Autolock _l(mLock);
+        // assert not needed because if not set, size() will be zero and the CHECK_LT will also fail
+        // assert(mBuffersHasBeenSet);
+        CHECK_LT(index, mBuffers.size());
+#if 0   // enable if needed for debugging
+        sp<IMemory> mem = mBuffers.itemAt(index);
+        SLAint64 length = (SLAint64) mem->size();
+#endif
         mAvailableBuffers.push_back(index);
+        //SL_LOGD("onBufferAvailable() now %d buffers available in queue", mAvailableBuffers.size());
     }
-    //SL_LOGD("onBufferAvailable() now %d buffers available in queue", mAvailableBuffers.size());
 
     // a new shared mem buffer is available: let's try to fill immediately
     pullFromBuffQueue();
@@ -88,6 +102,18 @@ void StreamSourceAppProxy::receivedBuffer_l(size_t buffIndex, size_t buffLength)
     if (mListener != 0) {
         mListener->queueBuffer(buffIndex, buffLength);
     }
+}
+
+void StreamSourceAppProxy::disconnect() {
+    Mutex::Autolock _l(mLock);
+    mListener.clear();
+    // Force binder to push the decremented reference count for sp<IStreamListener>.
+    // mediaserver and client both have sp<> to the other. When you decrement an sp<>
+    // reference count, binder doesn't push that to the other process immediately.
+    IPCThreadState::self()->flushCommands();
+    mBuffers.clear();
+    mBuffersHasBeenSet = false;
+    mAvailableBuffers.clear();
 }
 
 //--------------------------------------------------
@@ -141,8 +167,11 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
             }
             if (oldFront->mItems.mTsCmdData.mTsCmdCode & (ANDROID_MP2TSEVENT_DISCONTINUITY |
                     ANDROID_MP2TSEVENT_DISCON_NEWPTS | ANDROID_MP2TSEVENT_FORMAT_CHANGE)) {
-                // FIXME see note at onSeek
-                mPlayer->seek(ANDROID_UNKNOWN_TIME);
+                const sp<StreamPlayer> player(mPlayer.promote());
+                if (player != NULL) {
+                    // FIXME see note at onSeek
+                    player->seek(ANDROID_UNKNOWN_TIME);
+                }
             }
             oldFront->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
         }
@@ -217,7 +246,10 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
             if (!mAvailableBuffers.empty()) {
                 // there is still room in the shared memory, recheck later if we can pull
                 // data from the buffer queue and write it to shared memory
-                mPlayer->queueRefilled();
+                const sp<StreamPlayer> player(mPlayer.promote());
+                if (player != NULL) {
+                    player->queueRefilled();
+                }
             }
         }
 
@@ -261,6 +293,7 @@ StreamPlayer::StreamPlayer(AudioPlayback_Parameters* params, bool hasVideo,
 
 StreamPlayer::~StreamPlayer() {
     SL_LOGD("StreamPlayer::~StreamPlayer()");
+    mAppProxy->disconnect();
 }
 
 
@@ -290,14 +323,24 @@ void StreamPlayer::preDestroy() {
             mStopForDestroyCondition.wait(mStopForDestroyLock);
         }
     }
-    // skipping past GenericMediaPlayer::preDestroy
-    GenericPlayer::preDestroy();
+    // GenericMediaPlayer::preDestroy will repeat some of what we've done, but that's benign
+    GenericMediaPlayer::preDestroy();
 }
 
 
 void StreamPlayer::onStopForDestroy() {
     if (mPlayer != 0) {
         mPlayer->stop();
+        // causes CHECK failure in Nuplayer
+        //mPlayer->setDataSource(NULL);
+        mPlayer->setVideoSurface(NULL);
+        mPlayer->disconnect();
+        mPlayer.clear();
+        {
+            // FIXME ugh make this a method
+            Mutex::Autolock _l(mPreparedPlayerLock);
+            mPreparedPlayer.clear();
+        }
     }
     mStopForDestroyCompleted = true;
     mStopForDestroyCondition.signal();

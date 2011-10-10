@@ -33,37 +33,45 @@ public:
     StreamSourceAppProxy(
             IAndroidBufferQueue *androidBufferQueue,
             const sp<CallbackProtector> &callbackProtector,
-            const sp<StreamPlayer> &player);
+            StreamPlayer *player);
     virtual ~StreamSourceAppProxy();
 
     // store an item structure to indicate a processed buffer
     static const SLuint32 kItemProcessed[NB_BUFFEREVENT_ITEM_FIELDS];
 
     // IStreamSource implementation
-    virtual void setListener(const sp<IStreamListener> &listener);
-    virtual void setBuffers(const Vector<sp<IMemory> > &buffers);
+    virtual void setListener(const sp<IStreamListener> &listener); // mediaserver calls exactly once
+    virtual void setBuffers(const Vector<sp<IMemory> > &buffers);  // mediaserver calls exactly once
     virtual void onBufferAvailable(size_t index);
 
     // Consumption from ABQ
     void pullFromBuffQueue();
 
+private:
     void receivedCmd_l(IStreamListener::Command cmd, const sp<AMessage> &msg = NULL);
     void receivedBuffer_l(size_t buffIndex, size_t buffLength);
 
+public:
+    // Call at least once prior to releasing the last strong reference to this object. It causes
+    // the player to release all of its resources, similar to android.media.MediaPlayer disconnect.
+    void disconnect();
+
 private:
-    // for mListener and mAvailableBuffers
+    // protects mListener, mBuffers, mBuffersHasBeenSet, and mAvailableBuffers
     Mutex mLock;
+
     sp<IStreamListener> mListener;
     // array of shared memory buffers
     Vector<sp<IMemory> > mBuffers;
+    bool mBuffersHasBeenSet;
     // list of available buffers in shared memory, identified by their index
     List<size_t> mAvailableBuffers;
 
     // the Android Buffer Queue from which data is consumed and written to shared memory
-    IAndroidBufferQueue* mAndroidBufferQueue;
+    IAndroidBufferQueue* const mAndroidBufferQueue;
 
     const sp<CallbackProtector> mCallbackProtector;
-    const sp<StreamPlayer> mPlayer;
+    const wp<StreamPlayer> mPlayer;
 
     DISALLOW_EVIL_CONSTRUCTORS(StreamSourceAppProxy);
 };

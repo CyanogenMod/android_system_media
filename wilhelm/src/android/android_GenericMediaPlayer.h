@@ -95,6 +95,7 @@ protected:
     sp<Surface> mVideoSurface;
     sp<ISurfaceTexture> mVideoSurfaceTexture;
 
+    // only safe to access from within Realize and looper
     sp<IMediaPlayer> mPlayer;
     // Receives Android MediaPlayer events from mPlayer
     const sp<MediaPlayerNotificationClient> mPlayerClient;
@@ -108,9 +109,11 @@ private:
     DISALLOW_EVIL_CONSTRUCTORS(GenericMediaPlayer);
     void afterMediaPlayerPreparedSuccessfully();
 
-    Mutex mPlayerPreparedLock;          // protects mPlayerPrepared
-    sp<IMediaPlayer> mPlayerPrepared;   // non-NULL if MediaPlayer exists and prepared, write once
-    void getPlayerPrepared(sp<IMediaPlayer> &playerPrepared);   // safely read mPlayerPrepared
+protected:  // FIXME temporary
+    Mutex mPreparedPlayerLock;          // protects mPreparedPlayer
+    sp<IMediaPlayer> mPreparedPlayer;   // non-NULL if MediaPlayer exists and prepared, write once
+private:
+    void getPreparedPlayer(sp<IMediaPlayer> &preparedPlayer);   // safely read mPreparedPlayer
 
 };
 

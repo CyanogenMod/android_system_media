@@ -190,9 +190,22 @@ GenericMediaPlayer::~GenericMediaPlayer() {
 }
 
 void GenericMediaPlayer::preDestroy() {
-    SL_LOGD("GenericMediaPlayer::preDestroy()");
-    if (mPlayer != 0) {
-        mPlayer->stop();
+    // FIXME can't access mPlayer from outside the looper (no mutex!) so using mPreparedPlayer
+    sp<IMediaPlayer> player;
+    getPreparedPlayer(player);
+    if (player != NULL) {
+        player->stop();
+        // causes CHECK failure in Nuplayer, but commented out in the subclass preDestroy
+        player->setDataSource(NULL);
+        player->setVideoSurface(NULL);
+        player->disconnect();
+        // release all references to the IMediaPlayer
+        // FIXME illegal if not on looper
+        //mPlayer.clear();
+        {
+            Mutex::Autolock _l(mPreparedPlayerLock);
+            mPreparedPlayer.clear();
+        }
     }
     GenericPlayer::preDestroy();
 }
@@ -208,7 +221,7 @@ void GenericMediaPlayer::preDestroy() {
 void GenericMediaPlayer::getPositionMsec(int* msec) {
     SL_LOGD("GenericMediaPlayer::getPositionMsec()");
     sp<IMediaPlayer> player;
-    getPlayerPrepared(player);
+    getPreparedPlayer(player);
     // To avoid deadlock, directly call the MediaPlayer object
     if (player == 0 || player->getCurrentPosition(msec) != NO_ERROR) {
         *msec = ANDROID_UNKNOWN_TIME;
@@ -459,9 +472,9 @@ void GenericMediaPlayer::afterMediaPlayerPreparedSuccessfully() {
     assert(mStateFlags & kFlagPrepared);
     // Mark this player as prepared successfully, so safe to directly call getCurrentPosition
     {
-        Mutex::Autolock _l(mPlayerPreparedLock);
-        assert(mPlayerPrepared == 0);
-        mPlayerPrepared = mPlayer;
+        Mutex::Autolock _l(mPreparedPlayerLock);
+        assert(mPreparedPlayer == 0);
+        mPreparedPlayer = mPlayer;
     }
     // retrieve channel count
     assert(UNKNOWN_NUMCHANNELS == mChannelCount);
@@ -515,10 +528,10 @@ void GenericMediaPlayer::afterMediaPlayerPreparedSuccessfully() {
 
 //--------------------------------------------------
 // If player is prepared successfully, set output parameter to that reference, otherwise NULL
-void GenericMediaPlayer::getPlayerPrepared(sp<IMediaPlayer> &playerPrepared)
+void GenericMediaPlayer::getPreparedPlayer(sp<IMediaPlayer> &preparedPlayer)
 {
-    Mutex::Autolock _l(mPlayerPreparedLock);
-    playerPrepared = mPlayerPrepared;
+    Mutex::Autolock _l(mPreparedPlayerLock);
+    preparedPlayer = mPreparedPlayer;
 }
 
 } // namespace android
