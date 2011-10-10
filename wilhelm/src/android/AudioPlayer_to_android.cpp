@@ -1452,7 +1452,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
     //-----------------------------------
     // StreamPlayer
     case AUDIOPLAYER_FROM_TS_ANDROIDBUFFERQUEUE: {
-        object_lock_exclusive(&pAudioPlayer->mObject);
         AudioPlayback_Parameters ap_params;
         ap_params.sessionId = pAudioPlayer->mSessionId;
         ap_params.streamType = pAudioPlayer->mStreamType;
@@ -1460,7 +1459,6 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                 &pAudioPlayer->mAndroidBufferQueue, pAudioPlayer->mCallbackProtector);
         pAudioPlayer->mAPlayer = splr;
         splr->init(sfplayer_handlePrefetchEvent, (void*)pAudioPlayer);
-        object_unlock_exclusive(&pAudioPlayer->mObject);
         }
         break;
     //-----------------------------------

@@ -660,15 +660,25 @@ SLresult checkSourceSinkVsInterfacesCompatibility(const DataLocatorFormat *pSrcD
 
 #ifdef ANDROID
     case SL_DATALOCATOR_ANDROIDBUFFERQUEUE:
-        // if the source is SLAndroidBufferQueueItf for AAC decode, the sink must be a buffer queue
+        // can't require SLSeekItf if data source is an Android buffer queue
+        index = clazz->mMPH_to_index[MPH_SEEK];
+        if (0 <= index) {
+            if (requiredMask & (1 << index)) {
+                SL_LOGE("can't require SL_IID_SEEK with a SL_DATALOCATOR_ANDROIDBUFFERQUEUE "\
+                        "source");
+                return SL_RESULT_FEATURE_UNSUPPORTED;
+            }
+        }
         switch (pSinkDataLocatorFormat->mLocator.mLocatorType) {
+        // for use-case AAC decode from SLAndroidBufferQueueItf with AAC ADTS data
         case SL_DATALOCATOR_BUFFERQUEUE:
         case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
             break;
+        // for use-case audio playback from SLAndroidBufferQueueItf with MP2TS data
+        case SL_DATALOCATOR_OUTPUTMIX:
+            break;
         default:
-            // FIXME more mph index business to worry about?
-            // FIXME does this break OpenMAX AL?
-            SL_LOGE("Source is SL_DATALOCATOR_ANDROIDBUFFERQUEUE, sink is not a buffer queue");
+            SL_LOGE("Invalid sink for SL_DATALOCATOR_ANDROIDBUFFERQUEUE source");
             return SL_RESULT_FEATURE_UNSUPPORTED;
             break;
         }
