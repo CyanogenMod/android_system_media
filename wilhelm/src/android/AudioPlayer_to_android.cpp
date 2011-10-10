@@ -699,56 +699,44 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
     switch(event) {
 
     case android::GenericPlayer::kEventPrepared: {
+        SL_LOGV("Received GenericPlayer::kEventPrepared for CAudioPlayer %p", ap);
 
-        if (PLAYER_SUCCESS != data1) {
-            object_lock_exclusive(&ap->mObject);
+        // assume no callback
+        slPrefetchCallback callback = NULL;
+        void* callbackPContext;
+        SLuint32 events;
 
-            // already initialized at object creation, and can only prepare once so never reset
-            assert(ap->mAudioTrack == 0);
-            assert(ap->mNumChannels == UNKNOWN_NUMCHANNELS);
-            assert(ap->mSampleRateMilliHz == UNKNOWN_SAMPLERATE);
-            assert(ap->mAndroidObjState == ANDROID_PREPARING);
-            ap->mAndroidObjState = ANDROID_READY;
+        object_lock_exclusive(&ap->mObject);
 
-            object_unlock_exclusive(&ap->mObject);
+        // mark object as prepared; same state is used for successful or unsuccessful prepare
+        assert(ap->mAndroidObjState == ANDROID_PREPARING);
+        ap->mAndroidObjState = ANDROID_READY;
 
+        if (PLAYER_SUCCESS == data1) {
+            // Most of successful prepare completion is handled by a subclass.
+        } else {
             // SfPlayer prepare() failed prefetching, there is no event in SLPrefetchStatus to
-            //  indicate a prefetch error, so we signal it by sending simulataneously two events:
+            //  indicate a prefetch error, so we signal it by sending simultaneously two events:
             //  - SL_PREFETCHEVENT_FILLLEVELCHANGE with a level of 0
             //  - SL_PREFETCHEVENT_STATUSCHANGE with a status of SL_PREFETCHSTATUS_UNDERFLOW
             SL_LOGE(ERROR_PLAYER_PREFETCH_d, data1);
-            if (!IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
-                break;
+            if (IsInterfaceInitialized(&(ap->mObject), MPH_PREFETCHSTATUS)) {
+                ap->mPrefetchStatus.mLevel = 0;
+                ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+                if (!(~ap->mPrefetchStatus.mCallbackEventsMask &
+                        (SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE))) {
+                    callback = ap->mPrefetchStatus.mCallback;
+                    callbackPContext = ap->mPrefetchStatus.mContext;
+                    events = SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE;
+                }
             }
+        }
 
-            slPrefetchCallback callback = NULL;
-            void* callbackPContext = NULL;
+        object_unlock_exclusive(&ap->mObject);
 
-            interface_lock_exclusive(&ap->mPrefetchStatus);
-            ap->mPrefetchStatus.mLevel = 0;
-            ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
-            if ((ap->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_FILLLEVELCHANGE)
-                    && (ap->mPrefetchStatus.mCallbackEventsMask & SL_PREFETCHEVENT_STATUSCHANGE)) {
-                callback = ap->mPrefetchStatus.mCallback;
-                callbackPContext = ap->mPrefetchStatus.mContext;
-            }
-            interface_unlock_exclusive(&ap->mPrefetchStatus);
-
-            // callback with no lock held
-            if (NULL != callback) {
-                (*callback)(&ap->mPrefetchStatus.mItf, callbackPContext,
-                        SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE);
-            }
-
-
-        } else {
-
-            object_lock_exclusive(&ap->mObject);
-
-            // Most of successful prepare completion is handled by a subclass.
-            ap->mAndroidObjState = ANDROID_READY;
-
-            object_unlock_exclusive(&ap->mObject);
+        // callback with no lock held
+        if (NULL != callback) {
+            (*callback)(&ap->mPrefetchStatus.mItf, callbackPContext, events);
         }
 
     }
