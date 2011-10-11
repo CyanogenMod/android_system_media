@@ -477,18 +477,18 @@ void GenericMediaPlayer::afterMediaPlayerPreparedSuccessfully() {
         mPreparedPlayer = mPlayer;
     }
     // retrieve channel count
-    assert(UNKNOWN_NUMCHANNELS == mChannelCount);
+    int32_t channelCount;
     Parcel *reply = new Parcel();
     status_t status = mPlayer->getParameter(KEY_PARAMETER_AUDIO_CHANNEL_COUNT, reply);
     if (status == NO_ERROR) {
-        mChannelCount = reply->readInt32();
+        channelCount = reply->readInt32();
     } else {
         // FIXME MPEG-2 TS doesn't yet implement this key, so default to stereo
-        mChannelCount = 2;
+        channelCount = 2;
     }
-    if (UNKNOWN_NUMCHANNELS != mChannelCount) {
+    if (UNKNOWN_NUMCHANNELS != channelCount) {
         // now that we know the channel count, re-calculate the volumes
-        notify(PLAYEREVENT_CHANNEL_COUNT, mChannelCount, true /*async*/);
+        notify(PLAYEREVENT_CHANNEL_COUNT, channelCount, true /*async*/);
     } else {
         LOGW("channel count is still unknown after prepare");
     }

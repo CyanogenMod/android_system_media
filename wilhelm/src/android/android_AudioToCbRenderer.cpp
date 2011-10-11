@@ -89,8 +89,7 @@ void AudioToCbRenderer::onRender() {
 //--------------------------------------------------
 // Audio output
 void AudioToCbRenderer::createAudioSink() {
-    SL_LOGD("AudioToCbRenderer::createAudioSink() sample rate = %d, nb channels = %d",
-            mSampleRateHz, mChannelCount);
+    SL_LOGD("AudioToCbRenderer::createAudioSink()");
 }
 
 
