@@ -104,7 +104,9 @@ AacAdtsExtractor::AacAdtsExtractor(const sp<DataSource> &source)
     //    }
 
     uint8_t profile, sf_index, channel, header[2];
-    if (mDataSource->readAt(2, &header, 2) < 2) {
+    ssize_t readSize = mDataSource->readAt(2, &header, 2);
+    if (readSize != 2) {
+        SL_LOGE("Unable to determine sample rate");
         return;
     }
 
@@ -113,12 +115,14 @@ AacAdtsExtractor::AacAdtsExtractor(const sp<DataSource> &source)
     uint32_t sr = get_sample_rate(sf_index);
 
     if (sr == 0) {
+        SL_LOGE("Invalid sample rate");
         return;
     }
     channel = (header[0] & 0x1) << 2 | (header[1] >> 6);
 
     SL_LOGV("AacAdtsExtractor has found sr=%d channel=%d", sr, channel);
 
+    // Never fails
     mMeta = MakeAACCodecSpecificData(profile, sf_index, channel);
 
     off64_t offset = 0;
@@ -129,11 +133,19 @@ AacAdtsExtractor::AacAdtsExtractor(const sp<DataSource> &source)
     if (mDataSource->getSize(&streamSize) == OK) {
         while (offset < streamSize) {
             if ((frameSize = getFrameSize(mDataSource, offset)) == 0) {
-                //SL_LOGV("AacAdtsExtractor() querying framesize at offset=%lld", offset);
+                // Usually frameSize == 0 due to EOS is benign (and getFrameSize() doesn't SL_LOGE),
+                // but in this case we were told the total size of the data source and so an EOS
+                // should not happen.
+                SL_LOGE("AacAdtsExtractor() failed querying framesize at offset=%lld", offset);
                 return;
             }
 
             offset += frameSize;
+            if (offset > streamSize) {
+                SL_LOGE("AacAdtsExtractor() frame of size %zu at offset=%lld is beyond EOF %lld",
+                        frameSize, offset, streamSize);
+                return;
+            }
             numFrames ++;
         }
 
@@ -143,6 +155,7 @@ AacAdtsExtractor::AacAdtsExtractor(const sp<DataSource> &source)
         mMeta->setInt64(kKeyDuration, duration);
     }
 
+    // Any earlier "return" would leave mInitCheck as NO_INIT, causing later methods to fail quickly
     mInitCheck = OK;
 
 }
@@ -256,6 +269,7 @@ status_t AacAdtsSource::read(
     size_t frameSize, frameSizeWithoutHeader;
     SL_LOGV("AacAdtsSource::read() offset=%lld", mOffset);
     if ((frameSize = getFrameSize(mDataSource, mOffset)) == 0) {
+        // EOS is normal, not an error
         SL_LOGV("AacAdtsSource::read() returns EOS");
         return ERROR_END_OF_STREAM;
     }
