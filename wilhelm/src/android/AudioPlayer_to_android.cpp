@@ -1023,20 +1023,20 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
             SL_LOGD("source MIME is %s", (char*)df_mime->mimeType);
             switch(df_mime->containerType) {
             case SL_CONTAINERTYPE_MPEG_TS:
-                if (strcasecmp((char*)df_mime->mimeType, ANDROID_MIME_MP2TS)) {
+                if (strcasecmp((char*)df_mime->mimeType, (const char *)XA_ANDROID_MIME_MP2TS)) {
                     SL_LOGE("Invalid MIME (%s) for container SL_CONTAINERTYPE_MPEG_TS, expects %s",
-                            (char*)df_mime->mimeType, ANDROID_MIME_MP2TS);
+                            (char*)df_mime->mimeType, XA_ANDROID_MIME_MP2TS);
                     return SL_RESULT_CONTENT_UNSUPPORTED;
                 }
                 break;
             case SL_CONTAINERTYPE_RAW:
             case SL_CONTAINERTYPE_AAC:
-                if (strcasecmp((char*)df_mime->mimeType, ANDROID_MIME_AACADTS) &&
+                if (strcasecmp((char*)df_mime->mimeType, (const char *)SL_ANDROID_MIME_AACADTS) &&
                         strcasecmp((char*)df_mime->mimeType,
                                 ANDROID_MIME_AACADTS_ANDROID_FRAMEWORK)) {
                     SL_LOGE("Invalid MIME (%s) for container type %d, expects %s",
                             (char*)df_mime->mimeType, df_mime->containerType,
-                            ANDROID_MIME_AACADTS);
+                            SL_ANDROID_MIME_AACADTS);
                     return SL_RESULT_CONTENT_UNSUPPORTED;
                 }
                 break;

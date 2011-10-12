@@ -356,7 +356,7 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     // configure data source
     XADataLocator_AndroidBufferQueue loc_abq = { XA_DATALOCATOR_ANDROIDBUFFERQUEUE, NB_BUFFERS };
     XADataFormat_MIME format_mime = {
-            XA_DATAFORMAT_MIME, (XAchar *)"video/mp2ts", XA_CONTAINERTYPE_MPEG_TS };
+            XA_DATAFORMAT_MIME, XA_ANDROID_MIME_MP2TS, XA_CONTAINERTYPE_MPEG_TS };
     XADataSource dataSrc = {&loc_abq, &format_mime};
 
     // configure audio sink

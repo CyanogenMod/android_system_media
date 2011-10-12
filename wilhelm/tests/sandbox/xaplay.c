@@ -309,7 +309,7 @@ reinitialize:    ;
     XADataFormat_MIME fmtMime;
     fmtMime.formatType = XA_DATAFORMAT_MIME;
     if (abq) {
-        fmtMime.mimeType = (XAchar *) "video/mp2ts";
+        fmtMime.mimeType = (XAchar *) XA_ANDROID_MIME_MP2TS;
         fmtMime.containerType = XA_CONTAINERTYPE_MPEG_TS;
     } else {
         fmtMime.mimeType = NULL;
