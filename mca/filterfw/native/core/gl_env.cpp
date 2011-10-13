@@ -220,16 +220,16 @@ bool GLEnv::SwitchToSurfaceId(int surface_id) {
 
 bool GLEnv::ReleaseSurfaceId(int surface_id) {
   if (surface_id > 0) {
-    const SurfaceWindowPair* surface = FindOrNull(surfaces_, surface_id);
-    if (surface) {
-      surfaces_.erase(surface_id);
+    const SurfaceWindowPair* surface_window_pair = FindOrNull(surfaces_, surface_id);
+    if (surface_window_pair) {
       if (surface_id_ == surface_id)
         SwitchToSurfaceId(0);
-      eglDestroySurface(display(), surface->first);
-      if (surface->second) {
-        surface->second->Destroy();
-        delete surface->second;
+      eglDestroySurface(display(), surface_window_pair->first);
+      if (surface_window_pair->second) {
+        surface_window_pair->second->Destroy();
+        delete surface_window_pair->second;
       }
+      surfaces_.erase(surface_id);
       return true;
     }
   }
@@ -238,10 +238,11 @@ bool GLEnv::ReleaseSurfaceId(int surface_id) {
 
 bool GLEnv::SetSurfaceTimestamp(int64_t timestamp) {
   if (surface_id_ > 0) {
-    std::map<int, SurfaceWindowPair>::iterator surfacePair = surfaces_.find(surface_id_);
-    if (surfacePair != surfaces_.end()) {
-      SurfaceWindowPair &surface = surfacePair->second;
-      ANativeWindow *window = static_cast<ANativeWindow*>(surface.second->InternalHandle());
+    const SurfaceWindowPair* surface_window_pair = FindOrNull(surfaces_,
+            surface_id_);
+    if (surface_window_pair) {
+      ANativeWindow *window = static_cast<ANativeWindow*>(
+              surface_window_pair->second->InternalHandle());
       native_window_set_buffers_timestamp(window, timestamp);
       return true;
     }
