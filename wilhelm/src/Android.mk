@@ -164,6 +164,9 @@ LOCAL_C_INCLUDES:=                                                  \
         frameworks/base/include/media/stagefright/openmax           \
         system/media/audio_effects/include
 
+# __pthread_gettid
+LOCAL_C_INCLUDES += bionic/libc/private
+
 LOCAL_CFLAGS += -x c++ -Wno-multichar -Wno-invalid-offsetof
 
 LOCAL_STATIC_LIBRARIES += \
