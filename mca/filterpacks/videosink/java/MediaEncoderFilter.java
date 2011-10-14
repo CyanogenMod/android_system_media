@@ -40,6 +40,7 @@ import android.media.CamcorderProfile;
 import android.filterfw.core.GLEnvironment;
 
 import java.io.IOException;
+import java.io.FileDescriptor;
 import java.util.List;
 import java.util.Set;
 
@@ -62,6 +63,10 @@ public class MediaEncoderFilter extends Filter {
     /** Filename to save the output. */
     @GenerateFieldPort(name = "outputFile", hasDefault = true)
     private String mOutputFile = new String("/sdcard/MediaEncoderOut.mp4");
+
+    /** File Descriptor to save the output. */
+    @GenerateFieldPort(name = "outputFileDescriptor", hasDefault = true)
+    private FileDescriptor mFd = null;
 
     /** Input audio source. If not set, no audio will be recorded.
      * Select from the values in MediaRecorder.AudioSource
@@ -209,7 +214,11 @@ public class MediaEncoderFilter extends Filter {
         mMediaRecorder.setOrientationHint(mOrientationHint);
         mMediaRecorder.setOnInfoListener(mInfoListener);
         mMediaRecorder.setOnErrorListener(mErrorListener);
-        mMediaRecorder.setOutputFile(mOutputFile);
+        if (mFd != null) {
+            mMediaRecorder.setOutputFile(mFd);
+        } else {
+            mMediaRecorder.setOutputFile(mOutputFile);
+        }
     }
 
     @Override
