@@ -422,16 +422,18 @@ XAresult android_Player_realize(CMediaPlayer *mp, SLboolean async) {
 // Called with a lock on MediaPlayer, and blocks until safe to destroy
 XAresult android_Player_preDestroy(CMediaPlayer *mp) {
     SL_LOGV("android_Player_preDestroy(%p)", mp);
-    if (mp->mAVPlayer != 0) {
-        mp->mAVPlayer->preDestroy();
-    }
-    SL_LOGV("android_Player_preDestroy(%p) after mAVPlayer->preDestroy()", mp);
 
+    // Not yet clear why this order is important, but it reduces detected deadlocks
     object_unlock_exclusive(&mp->mObject);
     if (mp->mCallbackProtector != 0) {
         mp->mCallbackProtector->requestCbExitAndWait();
     }
     object_lock_exclusive(&mp->mObject);
+
+    if (mp->mAVPlayer != 0) {
+        mp->mAVPlayer->preDestroy();
+    }
+    SL_LOGV("android_Player_preDestroy(%p) after mAVPlayer->preDestroy()", mp);
 
     return XA_RESULT_SUCCESS;
 }
