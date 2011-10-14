@@ -143,6 +143,12 @@ public class MediaEncoderFilter extends Filter {
     @GenerateFieldPort(name = "inputRegion", hasDefault = true)
     private Quad mSourceRegion;
 
+    /** Sets the maximum filesize (in bytes) of the recording session.
+     * By default, it will be 0 and will be passed on to the MediaRecorder
+     * If the limit is zero or negative, MediaRecorder will disable the limit*/
+    @GenerateFieldPort(name = "maxFileSize", hasDefault = true)
+    private long mMaxFileSize = 0;
+
     // End of user visible parameters
 
     private static final int NO_AUDIO_SOURCE = -1;
@@ -190,6 +196,8 @@ public class MediaEncoderFilter extends Filter {
             if (isOpen()) updateSourceRegion();
             return;
         }
+        // TODO: Not sure if it is possible to update the maxFileSize
+        // when the recording is going on. For now, not doing that.
         if (isOpen() && mRecordingActive) {
             throw new RuntimeException("Cannot change recording parameters"
                                        + " when the filter is recording!");
@@ -230,6 +238,17 @@ public class MediaEncoderFilter extends Filter {
             mMediaRecorder.setOutputFile(mFd);
         } else {
             mMediaRecorder.setOutputFile(mOutputFile);
+        }
+        try {
+            mMediaRecorder.setMaxFileSize(mMaxFileSize);
+        } catch (Exception e) {
+            // Following the logic in  VideoCamera.java (in Camera app)
+            // We are going to ignore failure of setMaxFileSize here, as
+            // a) The composer selected may simply not support it, or
+            // b) The underlying media framework may not handle 64-bit range
+            // on the size restriction.
+            Log.w(TAG, "Setting maxFileSize on MediaRecorder unsuccessful! "
+                    + e.getMessage());
         }
     }
 
