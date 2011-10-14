@@ -37,9 +37,14 @@ typedef struct Object_interface {
 #endif
     pthread_mutex_t mMutex;
 #ifdef USE_DEBUG
+    // Only keep the pthread_t, not the kernel tid, because pthread_self() is very fast
+    // (typically just arithmetic on the stack pointer). But a gettid() is a kernel call
+    // and so too slow to do every time a mutex is acquired. However, we can determine
+    // the kernel tid from the pthread_t.
     pthread_t mOwner;
     const char *mFile;
     int mLine;
+    volatile int32_t mGeneration;   // read without a lock, incremented with a lock
 #endif
     pthread_cond_t mCond;
     SLuint8 mState;                 // really SLuint32, but SLuint8 to save space
