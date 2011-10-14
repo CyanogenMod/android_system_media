@@ -75,18 +75,24 @@ public class MediaEncoderFilter extends Filter {
     private int mAudioSource = NO_AUDIO_SOURCE;
 
     /** Media recorder info listener, which needs to implement
-     * MediaRecorder.onInfoListener. Set this to receive notifications about
+     * MediaRecorder.OnInfoListener. Set this to receive notifications about
      * recording events.
      */
     @GenerateFieldPort(name = "infoListener", hasDefault = true)
     private MediaRecorder.OnInfoListener mInfoListener = null;
 
     /** Media recorder error listener, which needs to implement
-     * MediaRecorder.onErrorListener. Set this to receive notifications about
+     * MediaRecorder.OnErrorListener. Set this to receive notifications about
      * recording errors.
      */
     @GenerateFieldPort(name = "errorListener", hasDefault = true)
     private MediaRecorder.OnErrorListener mErrorListener = null;
+
+    /** Media recording done callback, which needs to implement OnRecordingDoneListener.
+     * Set this to finalize media upon completion of media recording.
+     */
+    @GenerateFieldPort(name = "recordingDoneListener", hasDefault = true)
+    private OnRecordingDoneListener mRecordingDoneListener = null;
 
     /** Orientation hint. Used for indicating proper video playback orientation.
      * Units are in degrees of clockwise rotation, valid values are (0, 90, 180,
@@ -152,6 +158,12 @@ public class MediaEncoderFilter extends Filter {
 
     // Our hook to the encoder
     private MediaRecorder mMediaRecorder;
+
+    /** Callback to be called when media recording completes. */
+
+    public interface OnRecordingDoneListener {
+        public void onRecordingDone();
+    }
 
     public MediaEncoderFilter(String name) {
         super(name);
@@ -337,6 +349,13 @@ public class MediaEncoderFilter extends Filter {
 
         mScreen.release();
         mScreen = null;
+
+        // Use an EffectsRecorder callback to forward a media finalization
+        // call so that it creates the video thumbnail, and whatever else needs
+        // to be done to finalize media.
+        if (mRecordingDoneListener != null) {
+            mRecordingDoneListener.onRecordingDone();
+        }
     }
 
     @Override
