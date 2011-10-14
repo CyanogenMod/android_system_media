@@ -258,7 +258,8 @@ public class BackDropperFilter extends Filter {
             "uniform float subsample_level;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
-            "  vec4 fg = coeff_yuv * texture2D(tex_sampler_0, v_texcoord, subsample_level);\n" +
+            "  vec4 fg_rgb = texture2D(tex_sampler_0, v_texcoord, subsample_level);\n" +
+            "  vec4 fg = coeff_yuv * vec4(fg_rgb.rgb, 1.);\n" +
             "  vec4 mean = texture2D(tex_sampler_1, v_texcoord);\n" +
             "  vec4 variance = inv_var_scale * texture2D(tex_sampler_2, v_texcoord);\n" +
             "\n" +
@@ -394,7 +395,8 @@ public class BackDropperFilter extends Filter {
             "uniform float subsample_level;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
-            "  vec4 fg = coeff_yuv * texture2D(tex_sampler_0, v_texcoord, subsample_level);\n" +
+            "  vec4 fg_rgb = texture2D(tex_sampler_0, v_texcoord, subsample_level);\n" +
+            "  vec4 fg = coeff_yuv * vec4(fg_rgb.rgb, 1.);\n" +
             "  vec4 mean = texture2D(tex_sampler_1, v_texcoord);\n" +
             "  vec4 mask = texture2D(tex_sampler_2, v_texcoord, \n" +
             "                      " + MASK_SMOOTH_EXPONENT + ");\n" +
@@ -423,7 +425,8 @@ public class BackDropperFilter extends Filter {
             "uniform float subsample_level;\n" +
             "varying vec2 v_texcoord;\n" +
             "void main() {\n" +
-            "  vec4 fg = coeff_yuv * texture2D(tex_sampler_0, v_texcoord, subsample_level);\n" +
+            "  vec4 fg_rgb = texture2D(tex_sampler_0, v_texcoord, subsample_level);\n" +
+            "  vec4 fg = coeff_yuv * vec4(fg_rgb.rgb, 1.);\n" +
             "  vec4 mean = texture2D(tex_sampler_1, v_texcoord);\n" +
             "  vec4 variance = inv_var_scale * texture2D(tex_sampler_2, v_texcoord);\n" +
             "  vec4 mask = texture2D(tex_sampler_3, v_texcoord, \n" +
