@@ -43,15 +43,16 @@ import java.lang.System;
 
 import android.util.AttributeSet;
 
-public class MyGLSurfaceView extends GLSurfaceView implements SensorEventListener {
+public class MyGLSurfaceView extends GLSurfaceView {
+
+    MyRenderer mRenderer;
+
+    public MyGLSurfaceView(Context context) {
+        super(context, null);
+    }
 
     public MyGLSurfaceView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
-        init(context);
-    }
-
-    public MyGLSurfaceView(Context context) {
-        super(context);
         init(context);
     }
 
@@ -59,105 +60,36 @@ public class MyGLSurfaceView extends GLSurfaceView implements SensorEventListene
         setEGLContextClientVersion(2);
         mRenderer = new MyRenderer(context);
         setRenderer(mRenderer);
-
-        mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
-        mAcceleration = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-    }
-
-    public boolean onTouchEvent(final MotionEvent event) {
-        queueEvent(new Runnable(){
-            public void run() {
-                mRenderer.setPosition(event.getX() / getWidth(),
-                                      event.getY() / getHeight());
-            }});
-        return true;
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-        mSensorManager.unregisterListener(this);
     }
 
     @Override
     public void onResume() {
-
-        queueEvent(new Runnable() {
-            public void run() {
-                }});
-
-        mSensorManager.registerListener(this, mAcceleration, SensorManager.SENSOR_DELAY_GAME);
         super.onResume();
     }
 
-    public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-            final float[] accelerationVector = event.values;
-            queueEvent(new Runnable(){
-                    public void run() {
-                        mRenderer.setAcceleration(accelerationVector);
-                    }});
-        }
-    }
-
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Ignoring sensor accuracy changes.
-    }
-
-    MyRenderer mRenderer;
-
-    SensorManager mSensorManager;
-    Sensor mAcceleration;
-
-    public SurfaceTexture getSurfaceTexture()
-    {
+    public SurfaceTexture getSurfaceTexture() {
         return mRenderer.getSurfaceTexture();
     }
-
 }
 
 class MyRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
+    private Context mContext;
 
     public MyRenderer(Context context) {
-
         mContext = context;
 
-        mTriangleVertices = ByteBuffer.allocateDirect(mTriangleVerticesData.length
+        mVertices = ByteBuffer.allocateDirect(mVerticesData.length
                 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        mTriangleVertices.put(mTriangleVerticesData).position(0);
+        mVertices.put(mVerticesData).position(0);
 
         Matrix.setIdentityM(mSTMatrix, 0);
         Matrix.setIdentityM(mMMatrix, 0);
-
-        float[] defaultAcceleration = {0.f,0.f,0.f};
-        setAcceleration(defaultAcceleration);
-        mPos[0] = 0.f;
-        mPos[1] = 0.f;
-        mPos[2] = 0.f;
-        mVel[0] = 0.f;
-        mVel[1] = 0.f;
-        mVel[2] = 0.f;
-
-    }
-
-    /* The following set methods are not synchronized, so should only
-     * be called within the rendering thread context. Use GLSurfaceView.queueEvent for safe access.
-     */
-    public void setPosition(float x, float y) {
-        /* Map from screen (0,0)-(1,1) to scene coordinates */
-        mPos[0] = (x*2-1)*mRatio;
-        mPos[1] = (-y)*2+1;
-        mPos[2] = 0.f;
-        mVel[0] = 0;
-        mVel[1] = 0;
-        mVel[2] = 0;
-    }
-
-    public void setAcceleration(float[] accelerationVector) {
-        mGForce[0] = accelerationVector[0];
-        mGForce[1] = accelerationVector[1];
-        mGForce[2] = accelerationVector[2];
+        Matrix.rotateM(mMMatrix, 0, 20, 0, 1, 0);
     }
 
     public void onDrawFrame(GL10 glUnused) {
@@ -166,11 +98,6 @@ class MyRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvaila
                 mSurface.updateTexImage();
 
                 mSurface.getTransformMatrix(mSTMatrix);
-                // Until timestamp support gets in (very soon)
-                //long timestamp = mSurface.getTimestamp();
-                long timestamp = System.nanoTime();
-                doPhysics(timestamp);
-
                 updateSurface = false;
             }
         }
@@ -184,16 +111,16 @@ class MyRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvaila
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTextureID);
 
-        mTriangleVertices.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
+        mVertices.position(VERTICES_DATA_POS_OFFSET);
         GLES20.glVertexAttribPointer(maPositionHandle, 3, GLES20.GL_FLOAT, false,
-                TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
+                VERTICES_DATA_STRIDE_BYTES, mVertices);
         checkGlError("glVertexAttribPointer maPosition");
         GLES20.glEnableVertexAttribArray(maPositionHandle);
         checkGlError("glEnableVertexAttribArray maPositionHandle");
 
-        mTriangleVertices.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
+        mVertices.position(VERTICES_DATA_UV_OFFSET);
         GLES20.glVertexAttribPointer(maTextureHandle, 3, GLES20.GL_FLOAT, false,
-                TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
+                VERTICES_DATA_STRIDE_BYTES, mVertices);
         checkGlError("glVertexAttribPointer maTextureHandle");
         GLES20.glEnableVertexAttribArray(maTextureHandle);
         checkGlError("glEnableVertexAttribArray maTextureHandle");
@@ -203,7 +130,6 @@ class MyRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvaila
 
         GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, mMVPMatrix, 0);
         GLES20.glUniformMatrix4fv(muSTMatrixHandle, 1, false, mSTMatrix, 0);
-        GLES20.glUniform1f(muCRatioHandle, mMediaPlayerRatio);
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         checkGlError("glDrawArrays");
@@ -254,7 +180,6 @@ class MyRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvaila
             throw new RuntimeException("Could not get attrib location for uSTMatrix");
         }
 
-        muCRatioHandle = GLES20.glGetUniformLocation(mProgram, "uCRatio");
         checkGlError("glGetUniformLocation uCRatio");
         if (muMVPMatrixHandle == -1) {
             throw new RuntimeException("Could not get attrib location for uCRatio");
@@ -291,9 +216,7 @@ class MyRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvaila
         mSurface = new SurfaceTexture(mTextureID);
         mSurface.setOnFrameAvailableListener(this);
 
-        Matrix.setLookAtM(mVMatrix, 0, 0, 0, 5f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-
-        mLastTime = 0;
+        Matrix.setLookAtM(mVMatrix, 0, 0, 0, 4f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
         synchronized(this) {
             updateSurface = false;
@@ -307,49 +230,6 @@ class MyRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvaila
          */
         updateSurface = true;
         //Log.v(TAG, "onFrameAvailable " + surface.getTimestamp());
-    }
-
-    private void doPhysics(long timestamp) {
-        /*
-         * Move the camera surface around based on some simple spring physics with drag
-         */
-
-        if (mLastTime == 0)
-            mLastTime = timestamp;
-
-        float deltaT = (timestamp - mLastTime)/1000000000.f; // To seconds
-
-        float springStrength = 20.f;
-        float frictionCoeff = 10.f;
-        float mass = 10.f;
-        float gMultiplier = 4.f;
-        /* Only update physics every 30 ms */
-        if (deltaT > 0.030f) {
-            mLastTime = timestamp;
-
-            float[] totalForce = new float[3];
-            totalForce[0] = -mPos[0] * springStrength - mVel[0]*frictionCoeff + gMultiplier*mGForce[0]*mass;
-            totalForce[1] = -mPos[1] * springStrength - mVel[1]*frictionCoeff + gMultiplier*mGForce[1]*mass;
-            totalForce[2] = -mPos[2] * springStrength - mVel[2]*frictionCoeff + gMultiplier*mGForce[2]*mass;
-
-            float[] accel = new float[3];
-            accel[0] = totalForce[0]/mass;
-            accel[1] = totalForce[1]/mass;
-            accel[2] = totalForce[2]/mass;
-
-            /* Not a very accurate integrator */
-            mVel[0] = mVel[0] + accel[0]*deltaT;
-            mVel[1] = mVel[1] + accel[1]*deltaT;
-            mVel[2] = mVel[2] + accel[2]*deltaT;
-
-            mPos[0] = mPos[0] + mVel[0]*deltaT;
-            mPos[1] = mPos[1] + mVel[1]*deltaT;
-            mPos[2] = mPos[2] + mVel[2]*deltaT;
-
-            Matrix.setIdentityM(mMMatrix, 0);
-            Matrix.translateM(mMMatrix, 0, mPos[0], mPos[1], mPos[2]);
-        }
-
     }
 
     private int loadShader(int shaderType, String source) {
@@ -407,10 +287,10 @@ class MyRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvaila
     }
 
     private static final int FLOAT_SIZE_BYTES = 4;
-    private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;
-    private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
-    private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
-    private final float[] mTriangleVerticesData = {
+    private static final int VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;
+    private static final int VERTICES_DATA_POS_OFFSET = 0;
+    private static final int VERTICES_DATA_UV_OFFSET = 3;
+    private final float[] mVerticesData = {
         // X, Y, Z, U, V
         -1.0f, -1.0f, 0, 0.f, 0.f,
         1.0f, -1.0f, 0, 1.f, 0.f,
@@ -418,33 +298,26 @@ class MyRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvaila
         1.0f,   1.0f, 0, 1.f, 1.f,
     };
 
-    private FloatBuffer mTriangleVertices;
+    private FloatBuffer mVertices;
 
     private final String mVertexShader =
         "uniform mat4 uMVPMatrix;\n" +
         "uniform mat4 uSTMatrix;\n" +
-        "uniform float uCRatio;\n" +
         "attribute vec4 aPosition;\n" +
         "attribute vec4 aTextureCoord;\n" +
         "varying vec2 vTextureCoord;\n" +
-        "varying vec2 vTextureNormCoord;\n" +
         "void main() {\n" +
-        "  vec4 scaledPos = aPosition;\n" +
-        "  scaledPos.x = scaledPos.x * uCRatio;\n" +
-        "  gl_Position = uMVPMatrix * scaledPos;\n" +
+        "  gl_Position = uMVPMatrix * aPosition;\n" +
         "  vTextureCoord = (uSTMatrix * aTextureCoord).xy;\n" +
-        "  vTextureNormCoord = aTextureCoord.xy;\n" +
         "}\n";
 
     private final String mFragmentShader =
         "#extension GL_OES_EGL_image_external : require\n" +
         "precision mediump float;\n" +
         "varying vec2 vTextureCoord;\n" +
-        "varying vec2 vTextureNormCoord;\n" +
         "uniform samplerExternalOES sTexture;\n" +
         "void main() {\n" +
         "  gl_FragColor = texture2D(sTexture, vTextureCoord);\n" +
-        "  gl_FragColor.a = 1.0-min(length(vTextureNormCoord-0.5)*2.0,1.0);\n" +
         "}\n";
 
     private float[] mMVPMatrix = new float[16];
@@ -457,30 +330,19 @@ class MyRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvaila
     private int mTextureID;
     private int muMVPMatrixHandle;
     private int muSTMatrixHandle;
-    private int muCRatioHandle;
     private int maPositionHandle;
     private int maTextureHandle;
 
     private float mRatio = 1.0f;
-    private float mMediaPlayerRatio = 1.0f;
-    private float[] mVel = new float[3];
-    private float[] mPos = new float[3];
-    private float[] mGForce = new float[3];
-
-    private long mLastTime;
-
     private SurfaceTexture mSurface;
     private boolean updateSurface = false;
 
-    private Context mContext;
     private static final String TAG = "MyRenderer";
 
     // Magic key
     private static final int GL_TEXTURE_EXTERNAL_OES = 0x8D65;
 
-    public SurfaceTexture getSurfaceTexture()
-    {
+    public SurfaceTexture getSurfaceTexture() {
         return mSurface;
     }
-
 }
