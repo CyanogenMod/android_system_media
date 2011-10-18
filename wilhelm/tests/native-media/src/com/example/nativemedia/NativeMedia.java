@@ -381,17 +381,10 @@ public class NativeMedia extends Activity {
         }
 
         void useAsSinkForJava(MediaPlayer mediaPlayer) {
-            // This API is @hide currently, so use reflection instead:
-            // mMediaPlayer.setTexture(surfaceTexture);
-            Class clazz = MediaPlayer.class;
-            Class[] types = new Class[] { SurfaceTexture.class };
-            Object[] arglist = new Object[] { mMyGLSurfaceView.getSurfaceTexture() };
-            try {
-                clazz.getMethod("setTexture", types).invoke(mediaPlayer, arglist);
-            } catch (NoSuchMethodException e) {
-            } catch (IllegalAccessException e) {
-            } catch (java.lang.reflect.InvocationTargetException e) {
-            }
+            SurfaceTexture st = mMyGLSurfaceView.getSurfaceTexture();
+            Surface s = new Surface(st);
+            mediaPlayer.setSurface(s);
+            s.release();
         }
 
         void useAsSinkForNative() {
