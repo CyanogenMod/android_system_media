@@ -143,11 +143,17 @@ public class MediaEncoderFilter extends Filter {
     @GenerateFieldPort(name = "inputRegion", hasDefault = true)
     private Quad mSourceRegion;
 
-    /** Sets the maximum filesize (in bytes) of the recording session.
+    /** The maximum filesize (in bytes) of the recording session.
      * By default, it will be 0 and will be passed on to the MediaRecorder
      * If the limit is zero or negative, MediaRecorder will disable the limit*/
     @GenerateFieldPort(name = "maxFileSize", hasDefault = true)
     private long mMaxFileSize = 0;
+
+    /** TimeLapse Interval between frames.
+     * By default, it will be 0. Whether the recording is timelapsed
+     * is inferred based on its value being greater than 0 */
+    @GenerateFieldPort(name = "timelapseRecordingIntervalUs", hasDefault = true)
+    private long mTimeBetweenTimeLapseFrameCaptureUs = 0;
 
     // End of user visible parameters
 
@@ -158,6 +164,12 @@ public class MediaEncoderFilter extends Filter {
     private GLFrame mScreen;
 
     private boolean mRecordingActive = false;
+    private long mTimestampNs = 0;
+    private long mLastTimeLapseFrameRealTimestampNs = 0;
+    private int mNumFramesEncoded = 0;
+    // Used to indicate whether recording is timelapsed.
+    // Inferred based on (mTimeBetweenTimeLapseFrameCaptureUs > 0)
+    private boolean mCaptureTimeLapse = false;
 
     private boolean mLogVerbose;
     private static final String TAG = "MediaEncoderFilter";
@@ -218,13 +230,15 @@ public class MediaEncoderFilter extends Filter {
     // These have to be in certain order as per the MediaRecorder
     // documentation
     private void updateMediaRecorderParams() {
+        mCaptureTimeLapse = mTimeBetweenTimeLapseFrameCaptureUs > 0;
         final int GRALLOC_BUFFER = 2;
         mMediaRecorder.setVideoSource(GRALLOC_BUFFER);
-        if (mAudioSource != NO_AUDIO_SOURCE) {
+        if (!mCaptureTimeLapse && (mAudioSource != NO_AUDIO_SOURCE)) {
             mMediaRecorder.setAudioSource(mAudioSource);
         }
         if (mProfile != null) {
             mMediaRecorder.setProfile(mProfile);
+            mFps = mProfile.videoFrameRate;
         } else {
             mMediaRecorder.setOutputFormat(mOutputFormat);
             mMediaRecorder.setVideoEncoder(mVideoEncoder);
@@ -308,11 +322,49 @@ public class MediaEncoderFilter extends Filter {
         // register the surface. The native window handle needed to create
         // the surface is initiated in start()
         mMediaRecorder.start();
-        Log.v(TAG, "ME Filter: Open: registering surface from Mediarecorder");
+        if (mLogVerbose) Log.v(TAG, "Open: registering surface from Mediarecorder");
         mSurfaceId = context.getGLEnvironment().
                 registerSurfaceFromMediaRecorder(mMediaRecorder);
-
+        mNumFramesEncoded = 0;
         mRecordingActive = true;
+    }
+
+    public boolean skipFrameAndModifyTimestamp(long timestampNs) {
+        // first frame- encode. Don't skip
+        if (mNumFramesEncoded == 0) {
+            mLastTimeLapseFrameRealTimestampNs = timestampNs;
+            mTimestampNs = timestampNs;
+            if (mLogVerbose) Log.v(TAG, "timelapse: FIRST frame, last real t= "
+                    + mLastTimeLapseFrameRealTimestampNs +
+                    ", setting t = " + mTimestampNs );
+            return false;
+        }
+
+        // Workaround to bypass the first 2 input frames for skipping.
+        // The first 2 output frames from the encoder are: decoder specific info and
+        // the compressed video frame data for the first input video frame.
+        if (mNumFramesEncoded >= 2 && timestampNs <
+            (mLastTimeLapseFrameRealTimestampNs +  1000L * mTimeBetweenTimeLapseFrameCaptureUs)) {
+            // If 2 frames have been already encoded,
+            // Skip all frames from last encoded frame until
+            // sufficient time (mTimeBetweenTimeLapseFrameCaptureUs) has passed.
+            if (mLogVerbose) Log.v(TAG, "timelapse: skipping intermediate frame");
+            return true;
+        } else {
+            // Desired frame has arrived after mTimeBetweenTimeLapseFrameCaptureUs time:
+            // - Reset mLastTimeLapseFrameRealTimestampNs to current time.
+            // - Artificially modify timestampNs to be one frame time (1/framerate) ahead
+            // of the last encoded frame's time stamp.
+            if (mLogVerbose) Log.v(TAG, "timelapse: encoding frame, Timestamp t = " + timestampNs +
+                    ", last real t= " + mLastTimeLapseFrameRealTimestampNs +
+                    ", interval = " + mTimeBetweenTimeLapseFrameCaptureUs);
+            mLastTimeLapseFrameRealTimestampNs = timestampNs;
+            mTimestampNs = mTimestampNs + (1000000000L / (long)mFps);
+            if (mLogVerbose) Log.v(TAG, "timelapse: encoding frame, setting t = "
+                    + mTimestampNs + ", delta t = " + (1000000000L / (long)mFps) +
+                    ", fps = " + mFps );
+            return false;
+        }
     }
 
     @Override
@@ -334,6 +386,14 @@ public class MediaEncoderFilter extends Filter {
 
         if (!mRecordingActive) return;
 
+        if (mCaptureTimeLapse) {
+            if (skipFrameAndModifyTimestamp(input.getTimestamp())) {
+                return;
+            }
+        } else {
+            mTimestampNs = input.getTimestamp();
+        }
+
         // Activate our surface
         glEnv.activateSurfaceWithId(mSurfaceId);
 
@@ -341,15 +401,18 @@ public class MediaEncoderFilter extends Filter {
         mProgram.process(input, mScreen);
 
         // Set timestamp from input
-        glEnv.setSurfaceTimestamp(input.getTimestamp());
+        glEnv.setSurfaceTimestamp(mTimestampNs);
         // And swap buffers
         glEnv.swapBuffers();
+        mNumFramesEncoded++;
+        if (mLogVerbose) Log.v(TAG, "numFramesEncoded = " + mNumFramesEncoded);
     }
 
     private void stopRecording(FilterContext context) {
         if (mLogVerbose) Log.v(TAG, "Stopping recording");
 
         mRecordingActive = false;
+        mNumFramesEncoded = 0;
         GLEnvironment glEnv = context.getGLEnvironment();
         // The following call will switch the surface_id to 0
         // (thus, calling eglMakeCurrent on surface with id 0) and
