@@ -144,10 +144,16 @@ public class MediaEncoderFilter extends Filter {
     private Quad mSourceRegion;
 
     /** The maximum filesize (in bytes) of the recording session.
-     * By default, it will be 0 and will be passed on to the MediaRecorder
+     * By default, it will be 0 and will be passed on to the MediaRecorder.
      * If the limit is zero or negative, MediaRecorder will disable the limit*/
     @GenerateFieldPort(name = "maxFileSize", hasDefault = true)
     private long mMaxFileSize = 0;
+
+    /** The maximum duration (in milliseconds) of the recording session.
+     * By default, it will be 0 and will be passed on to the MediaRecorder.
+     * If the limit is zero or negative, MediaRecorder will record indefinitely*/
+    @GenerateFieldPort(name = "maxDurationMs", hasDefault = true)
+    private int mMaxDurationMs = 0;
 
     /** TimeLapse Interval between frames.
      * By default, it will be 0. Whether the recording is timelapsed
@@ -264,6 +270,7 @@ public class MediaEncoderFilter extends Filter {
             Log.w(TAG, "Setting maxFileSize on MediaRecorder unsuccessful! "
                     + e.getMessage());
         }
+        mMediaRecorder.setMaxDuration(mMaxDurationMs);
     }
 
     @Override
