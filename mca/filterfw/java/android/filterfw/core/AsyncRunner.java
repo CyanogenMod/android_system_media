@@ -113,6 +113,11 @@ public class AsyncRunner extends GraphRunner{
         protected void onPostExecute(RunnerResult result) {
             if (mLogVerbose) Log.v(TAG, "Starting post-execute.");
             setRunning(false);
+            if (result == null) {
+                // Cancelled before got to doInBackground
+                result = new RunnerResult();
+                result.status = RESULT_STOPPED;
+            }
             setException(result.exception);
             if (result.status == RESULT_STOPPED || result.status == RESULT_ERROR) {
                 if (mLogVerbose) Log.v(TAG, "Closing filters.");
