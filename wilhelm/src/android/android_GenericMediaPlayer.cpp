@@ -196,7 +196,8 @@ void GenericMediaPlayer::preDestroy() {
     if (player != NULL) {
         player->stop();
         // causes CHECK failure in Nuplayer, but commented out in the subclass preDestroy
-        player->setDataSource(NULL);
+        // randomly causes a NPE in StagefrightPlayer, heap corruption, or app hang
+        //player->setDataSource(NULL);
         player->setVideoSurface(NULL);
         player->disconnect();
         // release all references to the IMediaPlayer
