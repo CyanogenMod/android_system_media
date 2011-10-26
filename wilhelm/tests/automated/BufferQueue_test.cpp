@@ -22,7 +22,7 @@
 #ifdef ANDROID
 #include <utils/Log.h>
 #else
-#define LOGV printf
+#define ALOGV printf
 #endif
 
 #include <assert.h>
@@ -284,13 +284,13 @@ protected:
         CheckErr(res);
         ASSERT_EQ((SLuint32) 1, bufferqueueState.count);
         ASSERT_EQ((SLuint32) 0, bufferqueueState.playIndex);
-        //LOGV("Before 1.5 sec");
+        //ALOGV("Before 1.5 sec");
         // wait 1.5 seconds
         usleep(1500000);
-        //LOGV("After 1.5 sec");
+        //ALOGV("After 1.5 sec");
         // state should still be playing
         res = (*playerPlay)->GetPlayState(playerPlay, &playerState);
-        //LOGV("GetPlayState");
+        //ALOGV("GetPlayState");
         CheckErr(res);
         ASSERT_EQ(SL_PLAYSTATE_PLAYING, playerState);
         // buffer should be removed from the queue
@@ -298,12 +298,12 @@ protected:
         CheckErr(res);
         ASSERT_EQ((SLuint32) 0, bufferqueueState.count);
         ASSERT_EQ((SLuint32) 1, bufferqueueState.playIndex);
-        //LOGV("TestEnd");
+        //ALOGV("TestEnd");
     }
 };
 
 TEST_F(TestBufferQueue, testInvalidBuffer){
-    //LOGV("Test Fixture: InvalidBuffer");
+    //ALOGV("Test Fixture: InvalidBuffer");
     InvalidBuffer();
 }
 

@@ -84,7 +84,7 @@ static jboolean enqueueInitialBuffers(jboolean discontinuity);
 // Callback for XAPlayItf through which we receive the XA_PLAYEVENT_HEADATEND event */
 void PlayCallback(XAPlayItf caller, void *pContext, XAuint32 event) {
     if (event & XA_PLAYEVENT_HEADATEND) {
-        LOGV("XA_PLAYEVENT_HEADATEND received, all MP2TS data has been decoded\n");
+        ALOGV("XA_PLAYEVENT_HEADATEND received, all MP2TS data has been decoded\n");
     }
 }
 
@@ -131,7 +131,7 @@ XAresult AndroidBufferQueueCallback(
     if ((pBufferData == NULL) && (pBufferContext != NULL)) {
         const int processedCommand = *(int *)pBufferContext;
         if (kEosBufferCntxt == processedCommand) {
-            LOGV("EOS was processed\n");
+            ALOGV("EOS was processed\n");
             // our buffer with the EOS message has been consumed
             assert(0 == dataSize);
             goto exit;
@@ -151,32 +151,32 @@ XAresult AndroidBufferQueueCallback(
     switch (state.index) {
     case 300:
         (*playerVolItf)->SetVolumeLevel(playerVolItf, -600); // -6dB
-        LOGV("setting volume to -6dB");
+        ALOGV("setting volume to -6dB");
         break;
     case 400:
         (*playerVolItf)->SetVolumeLevel(playerVolItf, -1200); // -12dB
-        LOGV("setting volume to -12dB");
+        ALOGV("setting volume to -12dB");
         break;
     case 500:
         (*playerVolItf)->SetVolumeLevel(playerVolItf, 0); // full volume
-        LOGV("setting volume to 0dB (full volume)");
+        ALOGV("setting volume to 0dB (full volume)");
         break;
     case 600:
         (*playerVolItf)->SetMute(playerVolItf, XA_BOOLEAN_TRUE); // mute
-        LOGV("muting player");
+        ALOGV("muting player");
         break;
     case 700:
         (*playerVolItf)->SetMute(playerVolItf, XA_BOOLEAN_FALSE); // unmute
-        LOGV("unmuting player");
+        ALOGV("unmuting player");
         break;
     case 800:
         (*playerVolItf)->SetStereoPosition(playerVolItf, -1000);
         (*playerVolItf)->EnableStereoPosition(playerVolItf, XA_BOOLEAN_TRUE);
-        LOGV("pan sound to the left (hard-left)");
+        ALOGV("pan sound to the left (hard-left)");
         break;
     case 900:
         (*playerVolItf)->EnableStereoPosition(playerVolItf, XA_BOOLEAN_FALSE);
-        LOGV("disabling stereo position");
+        ALOGV("disabling stereo position");
         break;
     default:
         break;
@@ -228,7 +228,7 @@ void StreamChangeCallback (XAStreamInformationItf caller,
         void * pEventData,
         void * pContext )
 {
-    LOGV("StreamChangeCallback called for stream %u", streamIndex);
+    ALOGV("StreamChangeCallback called for stream %u", streamIndex);
     // pContext was specified as NULL at RegisterStreamChangeCallback and is unused here
     assert(NULL == pContext);
     switch (eventId) {
@@ -305,7 +305,7 @@ static jboolean enqueueInitialBuffers(jboolean discontinuity)
         return JNI_FALSE;
     }
     assert(1 <= nbRead && nbRead <= NB_BUFFERS);
-    LOGV("Initially queueing %u buffers of %u bytes each", nbRead, BUFFER_SIZE);
+    ALOGV("Initially queueing %u buffers of %u bytes each", nbRead, BUFFER_SIZE);
 
     /* Enqueue the content of our cache before starting to play,
        we don't want to starve the player */

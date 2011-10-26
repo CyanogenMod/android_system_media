@@ -269,7 +269,7 @@ jint Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceFromMediaRecorder(
                                                       JNIEnv* env,
                                                       jobject thiz,
                                                       jobject jmediarecorder) {
-    LOGV("GLEnv Jni: nativeAddSurfaceFromMediaRecorder");
+    ALOGV("GLEnv Jni: nativeAddSurfaceFromMediaRecorder");
     GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
     if (!gl_env) {
         return -1;

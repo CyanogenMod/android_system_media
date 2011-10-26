@@ -103,7 +103,7 @@ void echo_reference_release_buffer(struct resampler_buffer_provider *buffer_prov
 
 static void echo_reference_reset_l(struct echo_reference *er)
 {
-    LOGV("echo_reference_reset_l()");
+    ALOGV("echo_reference_reset_l()");
     free(er->buffer);
     er->buffer = NULL;
     er->buf_size = 0;
@@ -128,18 +128,18 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
     pthread_mutex_lock(&er->lock);
 
     if (buffer == NULL) {
-        LOGV("echo_reference_write() stop write");
+        ALOGV("echo_reference_write() stop write");
         er->state &= ~ECHOREF_WRITING;
         echo_reference_reset_l(er);
         goto exit;
     }
 
-    LOGV("echo_reference_write() START trying to write %d frames", buffer->frame_count);
-    LOGV("echo_reference_write() playbackTimestamp:[%d].[%d], er->playback_delay:[%d]",
+    ALOGV("echo_reference_write() START trying to write %d frames", buffer->frame_count);
+    ALOGV("echo_reference_write() playbackTimestamp:[%d].[%d], er->playback_delay:[%d]",
             (int)buffer->time_stamp.tv_sec,
             (int)buffer->time_stamp.tv_nsec, er->playback_delay);
 
-    //LOGV("echo_reference_write() %d frames", buffer->frame_count);
+    //ALOGV("echo_reference_write() %d frames", buffer->frame_count);
     // discard writes until a valid time stamp is provided.
 
     if ((buffer->time_stamp.tv_sec == 0) && (buffer->time_stamp.tv_nsec == 0) &&
@@ -148,7 +148,7 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
     }
 
     if ((er->state & ECHOREF_WRITING) == 0) {
-        LOGV("echo_reference_write() start write");
+        ALOGV("echo_reference_write() start write");
         if (er->down_sampler != NULL) {
             er->down_sampler->reset(er->down_sampler);
         }
@@ -190,7 +190,7 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
         if (er->wr_sampling_rate != er->rd_sampling_rate) {
             if (er->down_sampler == NULL) {
                 int rc;
-                LOGV("echo_reference_write() new ReSampler(%d, %d)",
+                ALOGV("echo_reference_write() new ReSampler(%d, %d)",
                       er->wr_sampling_rate, er->rd_sampling_rate);
                 er->provider.get_next_buffer = echo_reference_get_next_buffer;
                 er->provider.release_buffer = echo_reference_release_buffer;
@@ -202,7 +202,7 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
                                  &er->down_sampler);
                 if (rc != 0) {
                     er->down_sampler = NULL;
-                    LOGV("echo_reference_write() failure to create resampler %d", rc);
+                    ALOGV("echo_reference_write() failure to create resampler %d", rc);
                     status = -ENODEV;
                     goto exit;
                 }
@@ -217,11 +217,11 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
             er->wr_frames_in = buffer->frame_count;
             // inFrames is always more than we need here to get frames remaining from previous runs
             // inFrames is updated by resample() with the number of frames produced
-            LOGV("echo_reference_write() ReSampling(%d, %d)",
+            ALOGV("echo_reference_write() ReSampling(%d, %d)",
                   er->wr_sampling_rate, er->rd_sampling_rate);
             er->down_sampler->resample_from_provider(er->down_sampler,
                                                      (int16_t *)er->wr_buf, &inFrames);
-            LOGV_IF(er->wr_frames_in != 0,
+            ALOGV_IF(er->wr_frames_in != 0,
                     "echo_reference_write() er->wr_frames_in not 0 (%d) after resampler",
                     er->wr_frames_in);
         }
@@ -232,7 +232,7 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
     }
 
     if (er->frames_in + inFrames > er->buf_size) {
-        LOGV("echo_reference_write() increasing buffer size from %d to %d",
+        ALOGV("echo_reference_write() increasing buffer size from %d to %d",
                 er->buf_size, er->frames_in + inFrames);
                 er->buf_size = er->frames_in + inFrames;
                 er->buffer = realloc(er->buffer, er->buf_size * er->rd_frame_size);
@@ -242,7 +242,7 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
            inFrames * er->rd_frame_size);
     er->frames_in += inFrames;
 
-    LOGV("EchoReference::write_log() inFrames:[%d], mFramesInOld:[%d], "\
+    ALOGV("EchoReference::write_log() inFrames:[%d], mFramesInOld:[%d], "\
          "mFramesInNew:[%d], er->buf_size:[%d], er->wr_render_time:[%d].[%d],"
          "er->playback_delay:[%d]",
          inFrames, er->frames_in - inFrames, er->frames_in, er->buf_size,
@@ -252,7 +252,7 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
     pthread_cond_signal(&er->cond);
 exit:
     pthread_mutex_unlock(&er->lock);
-    LOGV("echo_reference_write() END");
+    ALOGV("echo_reference_write() END");
     return status;
 }
 
@@ -272,16 +272,16 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
     pthread_mutex_lock(&er->lock);
 
     if (buffer == NULL) {
-        LOGV("EchoReference::read() stop read");
+        ALOGV("EchoReference::read() stop read");
         er->state &= ~ECHOREF_READING;
         goto exit;
     }
 
-    LOGV("EchoReference::read() START, delayCapture:[%d],er->frames_in:[%d],buffer->frame_count:[%d]",
+    ALOGV("EchoReference::read() START, delayCapture:[%d],er->frames_in:[%d],buffer->frame_count:[%d]",
     buffer->delay_ns, er->frames_in, buffer->frame_count);
 
     if ((er->state & ECHOREF_READING) == 0) {
-        LOGV("EchoReference::read() start read");
+        ALOGV("EchoReference::read() start read");
         echo_reference_reset_l(er);
         er->state |= ECHOREF_READING;
     }
@@ -292,7 +292,7 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
         goto exit;
     }
 
-//    LOGV("EchoReference::read() %d frames", buffer->frame_count);
+//    ALOGV("EchoReference::read() %d frames", buffer->frame_count);
 
     // allow some time for new frames to arrive if not enough frames are ready for read
     if (er->frames_in < buffer->frame_count) {
@@ -304,7 +304,7 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
         pthread_cond_timedwait_relative_np(&er->cond, &er->lock, &ts);
 
         if (er->frames_in < buffer->frame_count) {
-            LOGV("EchoReference::read() waited %d ms but still not enough frames"\
+            ALOGV("EchoReference::read() waited %d ms but still not enough frames"\
                  " er->frames_in: %d, buffer->frame_count = %d",
                 timeoutMs, er->frames_in, buffer->frame_count);
             buffer->frame_count = er->frames_in;
@@ -316,7 +316,7 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
 
     if ((er->wr_render_time.tv_sec == 0 && er->wr_render_time.tv_nsec == 0) ||
         (buffer->time_stamp.tv_sec == 0 && buffer->time_stamp.tv_nsec == 0)) {
-        LOGV("read: NEW:timestamp is zero---------setting timeDiff = 0, "\
+        ALOGV("read: NEW:timestamp is zero---------setting timeDiff = 0, "\
              "not updating delay this time");
         timeDiff = 0;
     } else {
@@ -331,7 +331,7 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
 
         int64_t expectedDelayNs =  er->playback_delay + buffer->delay_ns - timeDiff;
 
-        LOGV("expectedDelayNs[%lld] =  er->playback_delay[%d] + delayCapture[%d] - timeDiff[%lld]",
+        ALOGV("expectedDelayNs[%lld] =  er->playback_delay[%d] + delayCapture[%d] - timeDiff[%lld]",
         expectedDelayNs, er->playback_delay, buffer->delay_ns, timeDiff);
 
         if (expectedDelayNs > 0) {
@@ -344,14 +344,14 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
                     size_t previousFrameIn = er->frames_in;
                     er->frames_in = (expectedDelayNs * er->rd_sampling_rate)/1000000000;
                     int    offset = er->frames_in - previousFrameIn;
-                    LOGV("EchoReference::readlog: delayNs = NEGATIVE and ENOUGH : "\
+                    ALOGV("EchoReference::readlog: delayNs = NEGATIVE and ENOUGH : "\
                          "setting %d frames to zero er->frames_in: %d, previousFrameIn = %d",
                          offset, er->frames_in, previousFrameIn);
 
                     if (er->frames_in > er->buf_size) {
                         er->buf_size = er->frames_in;
                         er->buffer  = realloc(er->buffer, er->frames_in * er->rd_frame_size);
-                        LOGV("EchoReference::read: increasing buffer size to %d", er->buf_size);
+                        ALOGV("EchoReference::read: increasing buffer size to %d", er->buf_size);
                     }
 
                     if (offset > 0)
@@ -363,7 +363,7 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
                                            (int64_t)er->rd_sampling_rate)/1000000000);
                     int     offset = previousFrameIn - framesInInt;
 
-                    LOGV("EchoReference::readlog: delayNs = POSITIVE/ENOUGH :previousFrameIn: %d,"\
+                    ALOGV("EchoReference::readlog: delayNs = POSITIVE/ENOUGH :previousFrameIn: %d,"\
                          "framesInInt: [%d], offset:[%d], buffer->frame_count:[%d]",
                          previousFrameIn, framesInInt, offset, buffer->frame_count);
 
@@ -371,26 +371,26 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
                         if (framesInInt > 0) {
                             memset((char *)er->buffer + framesInInt * er->rd_frame_size,
                                    0, (buffer->frame_count-framesInInt) * er->rd_frame_size);
-                            LOGV("EchoReference::read: pushing [%d] zeros into ref buffer",
+                            ALOGV("EchoReference::read: pushing [%d] zeros into ref buffer",
                                  (buffer->frame_count-framesInInt));
                         } else {
-                            LOGV("framesInInt = %d", framesInInt);
+                            ALOGV("framesInInt = %d", framesInInt);
                         }
                         framesInInt = buffer->frame_count;
                     } else {
                         if (offset > 0) {
                             memcpy(er->buffer, (char *)er->buffer + (offset * er->rd_frame_size),
                                    framesInInt * er->rd_frame_size);
-                            LOGV("EchoReference::read: shifting ref buffer by [%d]",framesInInt);
+                            ALOGV("EchoReference::read: shifting ref buffer by [%d]",framesInInt);
                         }
                     }
                     er->frames_in = (size_t)framesInInt;
                 }
             } else {
-                LOGV("EchoReference::read: NOT ENOUGH samples to update %lld", delayNs);
+                ALOGV("EchoReference::read: NOT ENOUGH samples to update %lld", delayNs);
             }
         } else {
-            LOGV("NEGATIVE expectedDelayNs[%lld] =  "\
+            ALOGV("NEGATIVE expectedDelayNs[%lld] =  "\
                  "er->playback_delay[%d] + delayCapture[%d] - timeDiff[%lld]",
                  expectedDelayNs, er->playback_delay, buffer->delay_ns, timeDiff);
         }
@@ -408,7 +408,7 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
     // As the reference buffer is now time aligned to the microphone signal there is a zero delay
     buffer->delay_ns = 0;
 
-    LOGV("EchoReference::read() END %d frames, total frames in %d",
+    ALOGV("EchoReference::read() END %d frames, total frames in %d",
           buffer->frame_count, er->frames_in);
 
     pthread_cond_signal(&er->cond);
@@ -429,7 +429,7 @@ int create_echo_reference(audio_format_t rdFormat,
 {
     struct echo_reference *er;
 
-    LOGV("create_echo_reference()");
+    ALOGV("create_echo_reference()");
 
     if (echo_reference == NULL) {
         return -EINVAL;
@@ -478,7 +478,7 @@ void release_echo_reference(struct echo_reference_itfe *echo_reference) {
         return;
     }
 
-    LOGV("EchoReference dstor");
+    ALOGV("EchoReference dstor");
     echo_reference_reset_l(er);
     if (er->down_sampler != NULL) {
         release_resampler(er->down_sampler);

@@ -592,7 +592,7 @@ void GenericPlayer::updateOneShot(int positionMs)
         }
         if (ANDROID_UNKNOWN_TIME == positionMs) {
             // getPositionMsec is not working for some reason, give up
-            //LOGV("Does anyone really know what time it is?");
+            //ALOGV("Does anyone really know what time it is?");
             return;
         }
     }

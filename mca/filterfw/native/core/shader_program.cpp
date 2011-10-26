@@ -489,7 +489,7 @@ bool ShaderProgram::RenderFrame(const std::vector<GLuint>& textures,
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
     glGetIntegerv(GL_CURRENT_PROGRAM, &program);
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &buffer);
-    LOGV("RenderFrame: fbo %d prog %d buff %d", fbo, program, buffer);
+    ALOGV("RenderFrame: fbo %d prog %d buff %d", fbo, program, buffer);
   }
 
   // Render!

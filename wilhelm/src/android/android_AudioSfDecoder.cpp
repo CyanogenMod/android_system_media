@@ -705,12 +705,12 @@ CacheStatus_t AudioSfDecoder::getCacheRemaining(bool *eos) {
             //   cache status is evaluated against duration thresholds
             if (dataRemainingUs > DURATION_CACHED_HIGH_MS*1000) {
                 mCacheStatus = kStatusHigh;
-                //LOGV("high");
+                //ALOGV("high");
             } else if (dataRemainingUs > DURATION_CACHED_MED_MS*1000) {
-                //LOGV("enough");
+                //ALOGV("enough");
                 mCacheStatus = kStatusEnough;
             } else if (dataRemainingUs < DURATION_CACHED_LOW_MS*1000) {
-                //LOGV("low");
+                //ALOGV("low");
                 mCacheStatus = kStatusLow;
             } else {
                 mCacheStatus = kStatusIntermediate;

@@ -181,7 +181,7 @@ int resampler_resample_from_input(struct resampler_itfe *resampler,
                                                 outFrameCount);
     }
 
-    LOGV("resampler_resample_from_input() DONE in %d out % d", *inFrameCount, *outFrameCount);
+    ALOGV("resampler_resample_from_input() DONE in %d out % d", *inFrameCount, *outFrameCount);
 
     return 0;
 }
@@ -196,7 +196,7 @@ int create_resampler(uint32_t inSampleRate,
     int error;
     struct resampler *rsmp;
 
-    LOGV("create_resampler() In SR %d Out SR %d channels %d",
+    ALOGV("create_resampler() In SR %d Out SR %d channels %d",
          inSampleRate, outSampleRate, channelCount);
 
     if (resampler == NULL) {
@@ -241,7 +241,7 @@ int create_resampler(uint32_t inSampleRate,
     rsmp->speex_delay_ns += (int32_t)((1000000000 * (int64_t)frames) / rsmp->out_sample_rate);
 
     *resampler = &rsmp->itfe;
-    LOGV("create_resampler() DONE rsmp %p &rsmp->itfe %p speex %p",
+    ALOGV("create_resampler() DONE rsmp %p &rsmp->itfe %p speex %p",
          rsmp, &rsmp->itfe, rsmp->speex_resampler);
     return 0;
 }

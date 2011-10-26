@@ -86,7 +86,7 @@ bool GLEnv::Deactivate() {
 }
 
 bool GLEnv::Activate() {
-  LOGV("Activate()");
+  ALOGV("Activate()");
   if (display()   != eglGetCurrentDisplay() ||
       context()   != eglGetCurrentContext() ||
       surface()   != eglGetCurrentSurface(EGL_DRAW)) {
@@ -95,7 +95,7 @@ bool GLEnv::Activate() {
       return false;
 
     // Make our context current
-    LOGV("eglMakeCurrent");
+    ALOGV("eglMakeCurrent");
     eglMakeCurrent(display(), surface(), surface(), context());
 
     return !CheckEGLMakeCurrentError();
@@ -180,7 +180,7 @@ bool GLEnv::InitWithNewContext() {
 }
 
 bool GLEnv::IsActive() const {
-  LOGV("IsActive()");
+  ALOGV("IsActive()");
   return context() == eglGetCurrentContext()
     &&   display() == eglGetCurrentDisplay()
     &&   surface() == eglGetCurrentSurface(EGL_DRAW);
@@ -205,7 +205,7 @@ int GLEnv::AddSurface(const EGLSurface& surface) {
 }
 
 bool GLEnv::SwitchToSurfaceId(int surface_id) {
-  LOGV("SwitchToSurfaceId");
+  ALOGV("SwitchToSurfaceId");
   if (surface_id_ != surface_id) {
     const SurfaceWindowPair* surface = FindOrNull(surfaces_, surface_id);
     if (surface) {
