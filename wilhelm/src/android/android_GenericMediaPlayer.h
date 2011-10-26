@@ -70,7 +70,6 @@ public:
     // overridden from GenericPlayer
     virtual void getPositionMsec(int* msec); // ANDROID_UNKNOWN_TIME if unknown
 
-    virtual void setVideoSurface(const sp<Surface> &surface);
     virtual void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
 
 protected:
@@ -91,8 +90,6 @@ protected:
     const bool mHasVideo;   // const allows MediaPlayerNotificationClient::notify to safely access
     int32_t mSeekTimeMsec;
 
-    // at most one of mVideoSurface and mVideoSurfaceTexture is non-NULL
-    sp<Surface> mVideoSurface;
     sp<ISurfaceTexture> mVideoSurfaceTexture;
 
     // only safe to access from within Realize and looper
