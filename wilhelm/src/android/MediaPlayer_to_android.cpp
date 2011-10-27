@@ -38,6 +38,10 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
     }
 
     CMediaPlayer* mp = (CMediaPlayer*) user;
+    if (!android::CallbackProtector::enterCbIfOk(mp->mCallbackProtector)) {
+        // it is not safe to enter the callback (the media player is about to go away)
+        return;
+    }
     union {
         char c[sizeof(int)];
         int i;
@@ -248,6 +252,8 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
         SL_LOGE("Received unknown event %d, data %d from AVPlayer", event, data1);
       }
     }
+
+    mp->mCallbackProtector->exitCb();
 }
 
 
