@@ -136,7 +136,8 @@ void MediaPlayerNotificationClient::notify(int msg, int ext1, int ext2, const Pa
             mPlayerPrepared = PREPARE_COMPLETED_UNSUCCESSFULLY;
             mPlayerPreparedCondition.signal();
         } else {
-            // FIXME Currently no mechanism to inform client of errors after preparation
+            // inform client of errors after preparation
+            genericMediaPlayer->notify(PLAYEREVENT_ERRORAFTERPREPARE, ext1, true /*async*/);
         }
         }
         break;
