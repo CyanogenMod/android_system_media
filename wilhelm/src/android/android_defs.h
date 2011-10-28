@@ -114,6 +114,7 @@ typedef size_t (*data_push_cbf_t)(const uint8_t *data, size_t size, CAudioPlayer
 #define PLAYEREVENT_VIDEO_SIZE_UPDATE       "vsiz"
 #define PLAYEREVENT_CHANNEL_COUNT           "ccnt"  // channel count is now known
 #define PLAYEREVENT_PLAY                    "play"  // SL_PLAYEVENT_*
+#define PLAYEREVENT_ERRORAFTERPREPARE       "easp"  // error after successful prepare
 
 
 /**
