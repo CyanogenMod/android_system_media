@@ -429,6 +429,9 @@ void GenericPlayer::onNotify(const sp<AMessage> &msg) {
     } else if (msg->findInt32(PLAYEREVENT_PLAY, &val1)) {
         SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_PLAY, val1);
         notifClient(kEventPlay, val1, 0, notifUser);
+    } else if (msg->findInt32(PLAYEREVENT_ERRORAFTERPREPARE, &val1)) {
+        SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_ERRORAFTERPREPARE, val1);
+        notifClient(kEventErrorAfterPrepare, val1, 0, notifUser);
     } else {
         SL_LOGV("GenericPlayer notifying unknown");
     }
