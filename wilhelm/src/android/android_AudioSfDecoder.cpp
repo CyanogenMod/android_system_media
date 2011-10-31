@@ -237,12 +237,14 @@ void AudioSfDecoder::onPrepare() {
         CHECK(meta->findCString(kKeyMIMEType, &mime));
 
         if (!strncasecmp("audio/", mime, 6)) {
-            audioTrackIndex = i;
+            if (isSupportedCodec(mime)) {
+                audioTrackIndex = i;
 
-            if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_RAW, mime)) {
-                isRawAudio = true;
+                if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_RAW, mime)) {
+                    isRawAudio = true;
+                }
+                break;
             }
-            break;
         }
     }
 
@@ -764,6 +766,19 @@ void AudioSfDecoder::hasNewDecodeParams() {
 
     // alert users of those params
     updateAudioSink();
+}
+
+static const char* const kUnsupportedCodecs[] = { MEDIA_MIMETYPE_AUDIO_AMR_NB,
+        MEDIA_MIMETYPE_AUDIO_AMR_WB };
+#define NB_UNSUPPORTED_CODECS (sizeof(kUnsupportedCodecs)/sizeof(kUnsupportedCodecs[0]))
+
+bool AudioSfDecoder::isSupportedCodec(const char* mime) {
+    for (unsigned int i = 0 ; i < NB_UNSUPPORTED_CODECS ; i++) {
+        if (!strcasecmp(mime, kUnsupportedCodecs[i])) {
+            return false;
+        }
+    }
+    return true;
 }
 
 } // namespace android
