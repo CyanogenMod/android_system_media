@@ -838,6 +838,41 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
         }
         break;
 
+      case android::GenericPlayer::kEventErrorAfterPrepare: {
+        SL_LOGI("kEventErrorAfterPrepare");
+
+        // assume no callback
+        slPrefetchCallback callback = NULL;
+        void* callbackPContext = NULL;
+
+        object_lock_exclusive(&ap->mObject);
+        if (IsInterfaceInitialized(&ap->mObject, MPH_PREFETCHSTATUS)) {
+            SL_LOGI("inited");
+            ap->mPrefetchStatus.mLevel = 0;
+            ap->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+            if (!(~ap->mPrefetchStatus.mCallbackEventsMask &
+                    (SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE))) {
+                SL_LOGI("enabled");
+                callback = ap->mPrefetchStatus.mCallback;
+                callbackPContext = ap->mPrefetchStatus.mContext;
+            }
+        }
+        object_unlock_exclusive(&ap->mObject);
+
+        // FIXME there's interesting information in data1, but no API to convey it to client
+        SL_LOGE("Error after prepare: %d", data1);
+
+        // callback with no lock held
+        SL_LOGE("callback=%p context=%p", callback, callbackPContext);
+        if (NULL != callback) {
+            (*callback)(&ap->mPrefetchStatus.mItf, callbackPContext,
+                    SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE);
+        }
+
+      }
+      break;
+
+
     default:
         break;
     }

@@ -38,6 +38,10 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
     }
 
     CMediaPlayer* mp = (CMediaPlayer*) user;
+    if (!android::CallbackProtector::enterCbIfOk(mp->mCallbackProtector)) {
+        // it is not safe to enter the callback (the media player is about to go away)
+        return;
+    }
     union {
         char c[sizeof(int)];
         int i;
@@ -244,10 +248,43 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
       }
       break;
 
+      case android::GenericPlayer::kEventErrorAfterPrepare: {
+        SL_LOGV("kEventErrorAfterPrepare");
+
+        // assume no callback
+        slPrefetchCallback callback = NULL;
+        void* callbackPContext = NULL;
+
+        object_lock_exclusive(&mp->mObject);
+        if (IsInterfaceInitialized(&mp->mObject, MPH_XAPREFETCHSTATUS)) {
+            mp->mPrefetchStatus.mLevel = 0;
+            mp->mPrefetchStatus.mStatus = SL_PREFETCHSTATUS_UNDERFLOW;
+            if (!(~mp->mPrefetchStatus.mCallbackEventsMask &
+                    (SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE))) {
+                callback = mp->mPrefetchStatus.mCallback;
+                callbackPContext = mp->mPrefetchStatus.mContext;
+            }
+        }
+        object_unlock_exclusive(&mp->mObject);
+
+        // FIXME there's interesting information in data1, but no API to convey it to client
+        SL_LOGE("Error after prepare: %d", data1);
+
+        // callback with no lock held
+        if (NULL != callback) {
+            (*callback)(&mp->mPrefetchStatus.mItf, callbackPContext,
+                    SL_PREFETCHEVENT_FILLLEVELCHANGE | SL_PREFETCHEVENT_STATUSCHANGE);
+        }
+
+      }
+      break;
+
       default: {
         SL_LOGE("Received unknown event %d, data %d from AVPlayer", event, data1);
       }
     }
+
+    mp->mCallbackProtector->exitCb();
 }
 
 

@@ -52,6 +52,7 @@ public:
         kEventEndOfStream             = 'eos',
         kEventChannelCount            = 'ccnt',
         kEventPlay                    = 'play', // SL_PLAYEVENT_*
+        kEventErrorAfterPrepare       = 'easp', // error after successful prepare
     };
 
 
