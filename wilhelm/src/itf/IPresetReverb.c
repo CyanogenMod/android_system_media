@@ -72,7 +72,7 @@ static SLresult IPresetReverb_GetPreset(SLPresetReverbItf self, SLuint16 *pPrese
         IPresetReverb *thiz = (IPresetReverb *) self;
         interface_lock_shared(thiz);
         SLuint16 preset = SL_REVERBPRESET_NONE;
-#if !defined(ANDROID)
+#if 1 // !defined(ANDROID)
         preset = thiz->mPreset;
         result = SL_RESULT_SUCCESS;
 #else
