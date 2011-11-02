@@ -139,6 +139,8 @@ private:
     // called with a lock on mBufferSourceLock
     void hasNewDecodeParams();
 
+    static bool isSupportedCodec(const char* mime);
+
 private:
     DISALLOW_EVIL_CONSTRUCTORS(AudioSfDecoder);
 
