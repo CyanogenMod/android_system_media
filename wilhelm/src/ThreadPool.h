@@ -87,7 +87,7 @@ extern SLresult ThreadPool_init(ThreadPool *tp, unsigned maxClosures, unsigned m
 extern void ThreadPool_deinit(ThreadPool *tp);
 extern SLresult ThreadPool_add(ThreadPool *tp, ClosureKind kind,
         ClosureHandler_generic,
-        void *cntxt1, void *cntxt2, int param1, int param2);
+        void *cntxt1, void *cntxt2, void *cntxt3, int param1, int param2);
 extern Closure *ThreadPool_remove(ThreadPool *tp);
 extern SLresult ThreadPool_add_ppi(ThreadPool *tp, ClosureHandler_ppi handler,
         void *cntxt1, void *cntxt2, int param1);

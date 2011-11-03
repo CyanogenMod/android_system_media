@@ -28,8 +28,12 @@ static SLresult IMetadataExtraction_GetItemCount(SLMetadataExtractionItf self, S
     } else {
         IMetadataExtraction *thiz = (IMetadataExtraction *) self;
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+#ifdef ANDROID
             result = android_audioPlayer_metadata_getItemCount((CAudioPlayer *)thiz->mThis,
                     pItemCount);
+#else
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
         } else {
             result = SL_RESULT_PARAMETER_INVALID;
         }
@@ -49,8 +53,12 @@ static SLresult IMetadataExtraction_GetKeySize(SLMetadataExtractionItf self,
     } else {
         IMetadataExtraction *thiz = (IMetadataExtraction *) self;
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+#ifdef ANDROID
             result = android_audioPlayer_metadata_getKeySize((CAudioPlayer *)thiz->mThis,
                     index, pKeySize);
+#else
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
         } else {
             result = SL_RESULT_PARAMETER_INVALID;
         }
@@ -70,8 +78,12 @@ static SLresult IMetadataExtraction_GetKey(SLMetadataExtractionItf self,
     } else {
         IMetadataExtraction *thiz = (IMetadataExtraction *) self;
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+#ifdef ANDROID
             result = android_audioPlayer_metadata_getKey((CAudioPlayer *)thiz->mThis,
                     index, keySize, pKey);
+#else
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
         } else {
             result = SL_RESULT_PARAMETER_INVALID;
         }
@@ -91,8 +103,12 @@ static SLresult IMetadataExtraction_GetValueSize(SLMetadataExtractionItf self,
     } else {
         IMetadataExtraction *thiz = (IMetadataExtraction *) self;
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+#ifdef ANDROID
             result = android_audioPlayer_metadata_getValueSize((CAudioPlayer *)thiz->mThis,
                     index, pValueSize);
+#else
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
         } else {
             result = SL_RESULT_PARAMETER_INVALID;
         }
@@ -112,8 +128,12 @@ static SLresult IMetadataExtraction_GetValue(SLMetadataExtractionItf self,
     } else {
         IMetadataExtraction *thiz = (IMetadataExtraction *) self;
         if (SL_OBJECTID_AUDIOPLAYER == InterfaceToObjectID(thiz)) {
+#ifdef ANDROID
             result = android_audioPlayer_metadata_getValue((CAudioPlayer *)thiz->mThis,
                     index, valueSize, pValue);
+#else
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+#endif
         } else {
             result = SL_RESULT_PARAMETER_INVALID;
         }

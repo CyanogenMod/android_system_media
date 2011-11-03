@@ -245,7 +245,6 @@ int IID_to_MPH(const SLInterfaceID iid)
     if (&SL_IID_array[0] <= iid && &SL_IID_array[MPH_MAX] > iid)
         return iid - &SL_IID_array[0];
     if (NULL != iid) {
-        static const unsigned len = sizeof(struct SLInterfaceID_);
         unsigned key = asso_values[((unsigned char *)iid)[8]] +
             asso_values[((unsigned char *)iid)[0]];
         if (key <= MAX_HASH_VALUE) {

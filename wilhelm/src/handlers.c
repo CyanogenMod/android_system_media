@@ -19,6 +19,8 @@
 #include "attr.h"
 #include "handlers.h"
 
+#define NULL 0
+
 /* The entries in this table are sorted first by object ID, and second
  * by attribute mask. The holes in the table are deliberate to permit
  * direct lookup. Don't cross streams!
@@ -39,7 +41,9 @@ const AttributeHandler handlerTable[1 + XA_OBJECTID_CAMERADEVICE +
 #define _(id) ((id) - SL_OBJECTID_ENGINE + XA_OBJECTID_CAMERADEVICE + 1)
 
     [_(SL_OBJECTID_AUDIOPLAYER)] = {
+#ifdef ANDROID
         [ATTR_INDEX_GAIN]        = handler_AudioPlayer_gain,
+#endif
         [ATTR_INDEX_TRANSPORT]   = handler_AudioPlayer_transport,
         [ATTR_INDEX_POSITION]    = handler_AudioPlayer_position,
         [ATTR_INDEX_BQ_ENQUEUE]  = handler_AudioPlayer_bq_enqueue,
