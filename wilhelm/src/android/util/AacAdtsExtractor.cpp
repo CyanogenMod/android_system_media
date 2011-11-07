@@ -125,13 +125,14 @@ AacAdtsExtractor::AacAdtsExtractor(const sp<DataSource> &source)
     // Never fails
     mMeta = MakeAACCodecSpecificData(profile, sf_index, channel);
 
-    off64_t offset = 0;
-    off64_t streamSize, numFrames = 0;
-    size_t frameSize = 0;
-    int64_t duration = 0;
+    // Round up and get the duration of each frame
+    mFrameDurationUs = (1024 * 1000000ll + (sr - 1)) / sr;
 
+    off64_t streamSize;
     if (mDataSource->getSize(&streamSize) == OK) {
+        off64_t offset = 0, numFrames = 0;
         while (offset < streamSize) {
+            size_t frameSize;
             if ((frameSize = getFrameSize(mDataSource, offset)) == 0) {
                 // Usually frameSize == 0 due to EOS is benign (and getFrameSize() doesn't SL_LOGE),
                 // but in this case we were told the total size of the data source and so an EOS
@@ -149,9 +150,8 @@ AacAdtsExtractor::AacAdtsExtractor(const sp<DataSource> &source)
             numFrames ++;
         }
 
-        // Round up and get the duration
-        mFrameDurationUs = (1024 * 1000000ll + (sr - 1)) / sr;
-        duration = numFrames * mFrameDurationUs;
+        // Compute total duration
+        int64_t duration = numFrames * mFrameDurationUs;
         mMeta->setInt64(kKeyDuration, duration);
     }
 
