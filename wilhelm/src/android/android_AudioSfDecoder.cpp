@@ -19,6 +19,7 @@
 #include "sles_allinclusive.h"
 #include "android/android_AudioSfDecoder.h"
 
+#include <binder/IServiceManager.h>
 #include <media/stagefright/foundation/ADebug.h>
 
 
@@ -776,17 +777,25 @@ void AudioSfDecoder::hasNewDecodeParams() {
     updateAudioSink();
 }
 
-static const char* const kUnsupportedCodecs[] = { MEDIA_MIMETYPE_AUDIO_AMR_NB,
+static const char* const kPlaybackOnlyCodecs[] = { MEDIA_MIMETYPE_AUDIO_AMR_NB,
         MEDIA_MIMETYPE_AUDIO_AMR_WB };
-#define NB_UNSUPPORTED_CODECS (sizeof(kUnsupportedCodecs)/sizeof(kUnsupportedCodecs[0]))
+#define NB_PLAYBACK_ONLY_CODECS (sizeof(kPlaybackOnlyCodecs)/sizeof(kPlaybackOnlyCodecs[0]))
 
 bool AudioSfDecoder::isSupportedCodec(const char* mime) {
-    for (unsigned int i = 0 ; i < NB_UNSUPPORTED_CODECS ; i++) {
-        if (!strcasecmp(mime, kUnsupportedCodecs[i])) {
-            return false;
+    bool codecRequiresPermission = false;
+    for (unsigned int i = 0 ; i < NB_PLAYBACK_ONLY_CODECS ; i++) {
+        if (!strcasecmp(mime, kPlaybackOnlyCodecs[i])) {
+            codecRequiresPermission = true;
+            break;
         }
     }
-    return true;
+    if (codecRequiresPermission) {
+        // verify only the system can decode, for playback only
+        return checkCallingPermission(
+                String16("android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK"));
+    } else {
+        return true;
+    }
 }
 
 } // namespace android
