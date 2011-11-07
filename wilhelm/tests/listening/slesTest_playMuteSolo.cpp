@@ -274,13 +274,16 @@ void TestPlayUri( SLObjectItf sl, const char* path)
 
     // Attempt to get the channel count before it is necessarily known.
     // This should either return successfully with a specific value (e.g. 1 or 2),
-    // or fail with SL_RESULT_PRECONDITIONS_VIOLATED, depending on the platform.
+    // or return zero, depending on whether the channel count is known yet.
     SLuint8 numChannels = 123;
     result = (*muteSoloItf)->GetNumChannels(muteSoloItf, &numChannels);
     printf("GetNumChannels after Realize but before pre-fetch: result=%u, numChannels=%u\n",
         result, numChannels);
     if (result != SL_RESULT_PRECONDITIONS_VIOLATED) {
         ExitOnError(result);
+    } else {
+        printf("Warning: returning SL_RESULT_PRECONDITIONS_VIOLATED for unknown channel count is "
+                "obsolete; now it should return SL_RESULT_SUCCESS and zero count if unknown\n");
     }
 
     /* Initialize a context for use by the play event callback */
