@@ -240,7 +240,8 @@ void TestRecToBuffQueue( SLObjectItf sl, const char* path, SLAint64 durationInSe
     if (presetValue == SL_ANDROID_RECORDING_PRESET_NONE) {
         printf("The default record preset appears to be %u\n", presetRetrieved);
     } else if (presetValue != presetRetrieved) {
-        fprintf(stderr, "Error retrieving recording preset as %u instead of %u\n", presetRetrieved, presetValue);
+        fprintf(stderr, "Error retrieving recording preset as %u instead of %u\n", presetRetrieved,
+                presetValue);
         ExitOnError(SL_RESULT_INTERNAL_ERROR);
     }
 
@@ -344,8 +345,20 @@ int main(int argc, char* const argv[])
     }
 
     if (argc-i < 2) {
-        fprintf(stdout, "Usage: \t%s [-p#] destination_file duration_in_seconds\n", prog);
-        fprintf(stdout, "Example: \"%s /sdcard/myrec.raw 4\" \n", prog);
+        printf("Usage: \t%s [-p#] destination_file duration_in_seconds\n", prog);
+        printf("  -p# is the preset value which defaults to SL_ANDROID_RECORDING_PRESET_NONE\n");
+        printf("  possible values are:\n");
+        printf("    -p%d SL_ANDROID_RECORDING_PRESET_NONE\n",
+                SL_ANDROID_RECORDING_PRESET_NONE);
+        printf("    -p%d SL_ANDROID_RECORDING_PRESET_GENERIC\n",
+                SL_ANDROID_RECORDING_PRESET_GENERIC);
+        printf("    -p%d SL_ANDROID_RECORDING_PRESET_CAMCORDER\n",
+                SL_ANDROID_RECORDING_PRESET_CAMCORDER);
+        printf("    -p%d SL_ANDROID_RECORDING_PRESET_VOICE_RECOGNITION\n",
+                SL_ANDROID_RECORDING_PRESET_VOICE_RECOGNITION);
+        printf("    -p%d SL_ANDROID_RECORDING_PRESET_VOICE_COMMUNICATION\n",
+                SL_ANDROID_RECORDING_PRESET_VOICE_COMMUNICATION);
+        printf("Example: \"%s /sdcard/myrec.raw 4\" \n", prog);
         exit(EXIT_FAILURE);
     }
 

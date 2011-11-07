@@ -111,7 +111,8 @@ void TestVideoDecoderCapabilities() {
         /* display the profile / level combinations */
         for(XAuint32 pl = 0 ; pl < nbCombinations ; pl++) {
             XAVideoCodecDescriptor decDescriptor;
-            res = (*decItf)->GetVideoDecoderCapabilities(decItf, decoderIds[i], &pl, &decDescriptor);
+            res = (*decItf)->GetVideoDecoderCapabilities(decItf, decoderIds[i], &pl,
+                    &decDescriptor);
             ExitOnError(res);
             fprintf(stdout, "%u/%u ", decDescriptor.profileSetting, decDescriptor.levelSetting);
             ExitOnError(res);
