@@ -354,6 +354,7 @@ void GenericMediaPlayer::onSeek(const sp<AMessage> &msg) {
             } else if (OK != mPlayer->seekTo(timeMsec)) {
                 mStateFlags &= ~kFlagSeeking;
                 mSeekTimeMsec = ANDROID_UNKNOWN_TIME;
+                // don't call updateOneShot because seek not yet done
             }
         }
     }
@@ -379,9 +380,9 @@ void GenericMediaPlayer::onLoop(const sp<AMessage> &msg) {
 
 void GenericMediaPlayer::onVolumeUpdate() {
     SL_LOGD("GenericMediaPlayer::onVolumeUpdate()");
-    // use settings lock to read the volume settings
-    Mutex::Autolock _l(mSettingsLock);
     if (mPlayer != 0) {
+        // use settings lock to read the volume settings
+        Mutex::Autolock _l(mSettingsLock);
         mPlayer->setVolume(mAndroidAudioLevels.mFinalVolume[0],
                 mAndroidAudioLevels.mFinalVolume[1]);
     }

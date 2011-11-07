@@ -367,7 +367,7 @@ void android_prev_init(IPresetReverb* ipr) {
     uint16_t preset;
     if (android::NO_ERROR == android_prev_getPreset(ipr->mPresetReverbEffect, &preset)) {
         ipr->mPreset = preset;
-        // enable the effect is it has a effective preset loaded
+        // enable the effect if it has a preset loaded
         ipr->mPresetReverbEffect->setEnabled(SL_REVERBPRESET_NONE != preset);
     }
 }
@@ -442,6 +442,16 @@ android::status_t android_erev_getParam(android::sp<android::AudioEffect> pFx,
 
 
 //-----------------------------------------------------------------------------
+/**
+ * pre-condition:
+ *    ap != NULL
+ *    for media players:
+ *      ap->mAPlayer != 0
+ *      ap->mAudioTrack == 0
+ *    for buffer queue players:
+ *      ap->mAPlayer == 0
+ *      ap->mAudioTrack != 0 is optional; if no track yet then the setting is deferred
+ */
 android::status_t android_fxSend_attach(CAudioPlayer* ap, bool attach,
         android::sp<android::AudioEffect> pFx, SLmillibel sendLevel) {
 
@@ -520,6 +530,16 @@ SLresult android_fxSend_attachToAux(CAudioPlayer* ap, SLInterfaceID pUuid, SLboo
 }
 
 //-----------------------------------------------------------------------------
+/**
+ * pre-condition:
+ *    ap != NULL
+ *    for media players:
+ *      ap->mAPlayer != 0
+ *      ap->mAudioTrack == 0
+ *    for buffer queue players:
+ *      ap->mAPlayer == 0
+ *      ap->mAudioTrack != 0 is optional; if no track yet then the setting is deferred
+ */
 android::status_t android_fxSend_setSendLevel(CAudioPlayer* ap, SLmillibel sendLevel) {
     // we keep track of the send level, independently of the current audio player level
     ap->mAuxSendLevel = sendLevel - ap->mVolume.mLevel;

@@ -215,12 +215,14 @@ void AudioSfDecoder::onPrepare() {
         break;
     }
 
+    // AndroidBufferQueue data source is handled by a subclass,
+    // which does not call up to this method.  Hence, the missing case.
     default:
         TRESPASS();
     }
 
     //---------------------------------
-    // Instanciate and initialize the decoder attached to the data source
+    // Instantiate and initialize the decoder attached to the data source
     sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
     if (extractor == NULL) {
         SL_LOGE("AudioSfDecoder::onPrepare: Could not instantiate extractor.");
@@ -496,6 +498,8 @@ void AudioSfDecoder::onDecode() {
             } else {
                 CHECK(mDecodeBuffer->meta_data()->findInt64(kKeyTime, &timeUsec));
             }
+        } else {
+            // errors are handled below
         }
     }
 
@@ -509,7 +513,7 @@ void AudioSfDecoder::onDecode() {
             // Note that though we've decoded this position, we haven't rendered it yet.
             // So a GetPosition called after this point will observe the advanced position,
             // even though the PCM may not have been supplied to the sink.  That's OK as
-            // we don't claim to provide frame-accurate (let alone sample-accurate) GetPosition.
+            // we don't claim to provide AAC frame-accurate (let alone sample-accurate) GetPosition.
             mLastDecodedPositionUs = timeUsec;
         }
     }
@@ -525,7 +529,7 @@ void AudioSfDecoder::onDecode() {
                 }
                 // handle notification and looping at end of stream
                 if (mStateFlags & kFlagPlaying) {
-                    notify(PLAYEREVENT_ENDOFSTREAM, 1, true);
+                    notify(PLAYEREVENT_ENDOFSTREAM, 1, true /*async*/);
                 }
                 if (mStateFlags & kFlagLooping) {
                     seek(0);
@@ -601,7 +605,7 @@ void AudioSfDecoder::notifyPrepared(status_t prepareRes) {
     // Do not call the superclass onPrepare to notify, because it uses a default error
     // status code but we can provide a more specific one.
     // GenericPlayer::onPrepare();
-    notify(PLAYEREVENT_PREPARED, (int32_t)prepareRes, true);
+    notify(PLAYEREVENT_PREPARED, (int32_t)prepareRes, true /*async*/);
     SL_LOGD("AudioSfDecoder::onPrepare() done, mStateFlags=0x%x", mStateFlags);
 }
 
@@ -770,6 +774,8 @@ void AudioSfDecoder::hasNewDecodeParams() {
             mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] =
                     channelCountToMask(channelCount);
         }
+        // there's no need to do a notify of PLAYEREVENT_CHANNEL_COUNT,
+        // because the only listener is for volume updates, and decoders don't support that
     }
 
     // alert users of those params

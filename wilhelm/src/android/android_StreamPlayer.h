@@ -90,6 +90,8 @@ public:
     virtual void preDestroy();
 
     void queueRefilled();
+    // Called after AndroidBufferQueue::Clear.
+    // The "_l" indicates the caller still has it's (now empty) AndroidBufferQueue locked.
     void appClear_l();
 
 protected:

@@ -46,6 +46,7 @@ GenericPlayer::GenericPlayer(const AudioPlayback_Parameters* params) :
 
     mLooper = new android::ALooper();
 
+    // Post-construction accesses need to be protected by mSettingsLock
     mAndroidAudioLevels.mFinalVolume[0] = 1.0f;
     mAndroidAudioLevels.mFinalVolume[1] = 1.0f;
 }
@@ -411,6 +412,7 @@ void GenericPlayer::onNotify(const sp<AMessage> &msg) {
     if (msg->findInt32(PLAYEREVENT_PREFETCHSTATUSCHANGE, &val1)) {
         SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_PREFETCHSTATUSCHANGE, val1);
         notifClient(kEventPrefetchStatusChange, val1, 0, notifUser);
+    // There is exactly one notification per message, hence "else if" instead of "if"
     } else if (msg->findInt32(PLAYEREVENT_PREFETCHFILLLEVELUPDATE, &val1)) {
         SL_LOGV("GenericPlayer notifying %s = %d", PLAYEREVENT_PREFETCHFILLLEVELUPDATE, val1);
         notifClient(kEventPrefetchFillLevelUpdate, val1, 0, notifUser);

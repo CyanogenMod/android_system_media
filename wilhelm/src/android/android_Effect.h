@@ -107,6 +107,7 @@ extern android::status_t android_fxSend_attach(CAudioPlayer* ap, bool attach,
 /**
  * sendLevel is the total energy going to the send bus. This implies that the volume attenuation
  *   should be combined with the send level for the aux level to follow volume changes.
+ *   This one is used by Android-specific APIs, not portable Khronos APIs.
  */
 extern SLresult android_fxSend_attachToAux(CAudioPlayer* ap, SLInterfaceID pUuid,
         SLboolean attach, SLmillibel sendLevel);

@@ -85,7 +85,8 @@ void StreamSourceAppProxy::onBufferAvailable(size_t index) {
         SLAint64 length = (SLAint64) mem->size();
 #endif
         mAvailableBuffers.push_back(index);
-        //SL_LOGD("onBufferAvailable() now %d buffers available in queue", mAvailableBuffers.size());
+        //SL_LOGD("onBufferAvailable() now %d buffers available in queue",
+        //         mAvailableBuffers.size());
     }
 
     // a new shared mem buffer is available: let's try to fill immediately

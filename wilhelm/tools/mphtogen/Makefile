@@ -8,6 +8,8 @@ $(ALL) : mphtogen
 	./mphtogen
 
 mphtogen : mphtogen.c MPH_to.c MPH.h MPH_to.h
+# Add -DANDROID if both (a) building for Android, and (b) not
+# using -DUSE_DESIGNATED_INITIALIZERS in ../../src/Android.mk
 	gcc -o $@ -DUSE_DESIGNATED_INITIALIZERS mphtogen.c MPH_to.c
 
 clean :
