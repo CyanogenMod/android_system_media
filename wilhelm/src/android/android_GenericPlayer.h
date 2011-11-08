@@ -77,7 +77,6 @@ public:
     virtual void getDurationMsec(int* msec); //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
     virtual void getPositionMsec(int* msec) = 0; //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
 
-    virtual void setVideoSurface(const sp<Surface> &surface) {}
     virtual void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {}
 
     void setVolume(float leftVol, float rightVol);
