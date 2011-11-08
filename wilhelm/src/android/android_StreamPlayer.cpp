@@ -333,7 +333,7 @@ void StreamPlayer::onStopForDestroy() {
         mPlayer->stop();
         // causes CHECK failure in Nuplayer
         //mPlayer->setDataSource(NULL);
-        mPlayer->setVideoSurface(NULL);
+        mPlayer->setVideoSurfaceTexture(NULL);
         mPlayer->disconnect();
         mPlayer.clear();
         {
