@@ -177,7 +177,6 @@ GenericMediaPlayer::GenericMediaPlayer(const AudioPlayback_Parameters* params, b
     GenericPlayer(params),
     mHasVideo(hasVideo),
     mSeekTimeMsec(0),
-    mVideoSurface(0),
     mVideoSurfaceTexture(0),
     mPlayer(0),
     mPlayerClient(new MediaPlayerNotificationClient(this))
@@ -199,7 +198,7 @@ void GenericMediaPlayer::preDestroy() {
         // causes CHECK failure in Nuplayer, but commented out in the subclass preDestroy
         // randomly causes a NPE in StagefrightPlayer, heap corruption, or app hang
         //player->setDataSource(NULL);
-        player->setVideoSurface(NULL);
+        player->setVideoSurfaceTexture(NULL);
         player->disconnect();
         // release all references to the IMediaPlayer
         // FIXME illegal if not on looper
@@ -231,19 +230,6 @@ void GenericMediaPlayer::getPositionMsec(int* msec) {
 }
 
 //--------------------------------------------------
-void GenericMediaPlayer::setVideoSurface(const sp<Surface> &surface) {
-    SL_LOGV("GenericMediaPlayer::setVideoSurface()");
-    // FIXME bug - race condition, should do in looper
-    if (mVideoSurface.get() == surface.get()) {
-        return;
-    }
-    if ((mStateFlags & kFlagPrepared) && (mPlayer != 0)) {
-        mPlayer->setVideoSurface(surface);
-    }
-    mVideoSurface = surface;
-    mVideoSurfaceTexture = NULL;
-}
-
 void GenericMediaPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {
     SL_LOGV("GenericMediaPlayer::setVideoSurfaceTexture()");
     // FIXME bug - race condition, should do in looper
@@ -254,7 +240,6 @@ void GenericMediaPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfa
         mPlayer->setVideoSurfaceTexture(surfaceTexture);
     }
     mVideoSurfaceTexture = surfaceTexture;
-    mVideoSurface = NULL;
 }
 
 
@@ -267,9 +252,7 @@ void GenericMediaPlayer::onPrepare() {
     // Attempt to prepare at most once, and only if there is a MediaPlayer
     if (!(mStateFlags & (kFlagPrepared | kFlagPreparedUnsuccessfully)) && (mPlayer != 0)) {
         if (mHasVideo) {
-            if (mVideoSurface != 0) {
-                mPlayer->setVideoSurface(mVideoSurface);
-            } else if (mVideoSurfaceTexture != 0) {
+            if (mVideoSurfaceTexture != 0) {
                 mPlayer->setVideoSurfaceTexture(mVideoSurfaceTexture);
             }
         }
