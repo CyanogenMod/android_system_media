@@ -302,10 +302,10 @@ public class MediaSource extends Filter {
                                       mSourceCoords_270, 0);
                     break;
             }
-            mFrameExtractor.setSourceRegion(sourceCoords[0], sourceCoords[1],
-                                            sourceCoords[4], sourceCoords[5],
-                                            sourceCoords[8], sourceCoords[9],
-                                            sourceCoords[12], sourceCoords[13]);
+            mFrameExtractor.setSourceRegion(sourceCoords[4], sourceCoords[5],
+                    sourceCoords[0], sourceCoords[1],
+                    sourceCoords[12], sourceCoords[13],
+                    sourceCoords[8], sourceCoords[9]);
             mOrientationUpdated = false;
         }
 
