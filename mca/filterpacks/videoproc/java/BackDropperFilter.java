@@ -112,6 +112,16 @@ public class BackDropperFilter extends Filter {
     @GenerateFinalPort(name = "provideDebugOutputs", hasDefault = true)
     private boolean mProvideDebugOutputs = false;
 
+    // Whether to mirror the background or not. For ex, the Camera app
+    // would mirror the preview for the front camera
+    @GenerateFieldPort(name = "mirrorBg", hasDefault = true)
+    private boolean mMirrorBg = false;
+
+    // The orientation of the display. This will change the flipping
+    // coordinates, if we were to mirror the background
+    @GenerateFieldPort(name = "orientation", hasDefault = true)
+    private int mOrientation = 0;
+
     /** Default algorithm parameter values, for non-shader use */
 
     // Frame count for learning bg model
@@ -929,6 +939,29 @@ public class BackDropperFilter extends Filter {
                     }
                     break;
             }
+            // If mirroring is required (for ex. the camera mirrors the preview
+            // in the front camera)
+            // TODO: Backdropper does not attempt to apply any other transformation
+            // than just flipping. However, in the current state, it's "x-axis" is always aligned
+            // with the Camera's width. Hence, we need to define the mirroring based on the camera
+            // orientation. In the future, a cleaner design would be to cast away all the rotation
+            // in a separate place.
+            if (mMirrorBg) {
+                if (mLogVerbose) Log.v(TAG, "Mirroring the background!");
+                // Mirroring in portrait
+                if (mOrientation == 0 || mOrientation == 180) {
+                    xWidth = -xWidth;
+                    xMin = 1.0f - xMin;
+                } else {
+                    // Mirroring in landscape
+                    yWidth = -yWidth;
+                    yMin = 1.0f - yMin;
+                }
+            }
+            if (mLogVerbose) Log.v(TAG, "bgTransform: xMin, yMin, xWidth, yWidth : " +
+                    xMin + ", " + yMin + ", " + xWidth + ", " + yWidth +
+                    ", mRelAspRatio = " + mRelativeAspect);
+            // The following matrix is the transpose of the actual matrix
             float[] bgTransform = {xWidth, 0.f, 0.f,
                                    0.f, yWidth, 0.f,
                                    xMin, yMin,  1.f};
