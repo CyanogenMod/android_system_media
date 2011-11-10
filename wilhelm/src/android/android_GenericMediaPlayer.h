@@ -32,7 +32,6 @@ class MediaPlayerNotificationClient : public BnMediaPlayerClient
 {
 public:
     MediaPlayerNotificationClient(GenericMediaPlayer* gmp);
-    virtual ~MediaPlayerNotificationClient();
 
     // IMediaPlayerClient implementation
     virtual void notify(int msg, int ext1, int ext2, const Parcel *obj);
@@ -44,6 +43,9 @@ public:
     // completed successfully, or false if it completed unsuccessfully
     bool blockUntilPlayerPrepared();
 
+protected:
+    virtual ~MediaPlayerNotificationClient();
+
 private:
     const wp<GenericMediaPlayer> mGenericMediaPlayer;
     Mutex mLock;                        // protects mPlayerPrepared
@@ -54,6 +56,24 @@ private:
         PREPARE_COMPLETED_SUCCESSFULLY,
         PREPARE_COMPLETED_UNSUCCESSFULLY
     } mPlayerPrepared;
+};
+
+
+class MediaPlayerDeathNotifier : public IMediaDeathNotifier {
+public:
+    MediaPlayerDeathNotifier(const sp<MediaPlayerNotificationClient> playerClient) :
+        mPlayerClient(playerClient) {
+    }
+
+    void died() {
+        mPlayerClient->notify(MEDIA_ERROR, MEDIA_ERROR_SERVER_DIED, 0, NULL);
+    }
+
+protected:
+    virtual ~MediaPlayerDeathNotifier() { }
+
+private:
+    const sp<MediaPlayerNotificationClient> mPlayerClient;
 };
 
 
@@ -96,6 +116,9 @@ protected:
     sp<IMediaPlayer> mPlayer;
     // Receives Android MediaPlayer events from mPlayer
     const sp<MediaPlayerNotificationClient> mPlayerClient;
+
+    // Receives notifications about death of media.player service
+    const sp<MediaPlayerDeathNotifier> mPlayerDeathNotifier;
 
     // Return a reference to the media player service, or LOGE and return NULL after retries fail
     static const sp<IMediaPlayerService> getMediaPlayerService() {
