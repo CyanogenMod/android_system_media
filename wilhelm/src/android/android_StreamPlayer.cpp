@@ -340,7 +340,10 @@ void StreamPlayer::onStopForDestroy() {
             mPreparedPlayer.clear();
         }
     }
-    mStopForDestroyCompleted = true;
+    {
+        Mutex::Autolock _l(mStopForDestroyLock);
+        mStopForDestroyCompleted = true;
+    }
     mStopForDestroyCondition.signal();
 }
 
