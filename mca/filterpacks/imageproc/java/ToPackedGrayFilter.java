@@ -103,7 +103,7 @@ public class ToPackedGrayFilter extends Filter {
                 ow = oh * w / h;
             }
         }
-        ow = (ow / 4) * 4; // ensure width is multiply of 4
+        ow = (ow > 0 && ow < 4) ? 4 : (ow / 4) * 4; // ensure width is multiple of 4
         return ImageFormat.create(ow, oh,
                                   ImageFormat.COLORSPACE_GRAY,
                                   FrameFormat.TARGET_NATIVE);
