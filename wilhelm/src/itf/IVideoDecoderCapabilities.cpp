@@ -42,16 +42,15 @@ static XAresult IVideoDecoderCapabilities_GetVideoDecoders(XAVideoDecoderCapabil
             // If pDecodersIds is non-NULL, as an input pNumDecoders specifies the size of the
             // pDecoderIds array and as an output it specifies the number of decoder IDs available
             // within the pDecoderIds array.
-#ifdef ANDROID
             XAuint32 numDecoders = *pNumDecoders;
+#ifdef ANDROID
             const XAuint32 androidNbDecoders = android::android_videoCodec_getNbDecoders();
-            if (androidNbDecoders <= numDecoders) {
+            if (androidNbDecoders < numDecoders) {
                 *pNumDecoders = numDecoders = androidNbDecoders;
             }
             android::android_videoCodec_getDecoderIds(numDecoders, pDecoderIds);
 #else
-            XAuint32 numDecoders = *pNumDecoders;
-            if (kMaxVideoDecoders <= numDecoders) {
+            if (kMaxVideoDecoders < numDecoders) {
                 *pNumDecoders = numDecoders = kMaxVideoDecoders;
             }
             memcpy(pDecoderIds, VideoDecoderIds, numDecoders * sizeof(XAuint32));
@@ -78,6 +77,11 @@ static XAresult IVideoDecoderCapabilities_GetVideoDecoderCapabilities(
 #ifdef ANDROID
             result = android::android_videoCodec_getProfileLevelCombinationNb(decoderId, pIndex);
 #else
+            // Generic implementation has zero profile/level combinations for all codecs,
+            // but this is not allowed per spec:
+            //    "Each decoder must support at least one profile/mode pair
+            //    and therefore have at least one Codec Descriptor."
+            *pIndex = 0;
             SL_LOGE("Generic implementation has no video decoder capabilities");
             result = XA_RESULT_PARAMETER_INVALID;
 #endif
@@ -87,7 +91,10 @@ static XAresult IVideoDecoderCapabilities_GetVideoDecoderCapabilities(
             result = android::android_videoCodec_getProfileLevelCombination(decoderId, *pIndex,
                     pDescriptor);
 #else
+            // For the generic implementation, any index >= 0 is out of range
+#if 1   // not sure if this is needed, it's not being done for the Android case
             pDescriptor->codecId = decoderId;
+#endif
             SL_LOGE("Generic implementation has no video decoder capabilities");
             result = XA_RESULT_PARAMETER_INVALID;
 #endif
