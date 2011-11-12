@@ -104,7 +104,9 @@ public class GLEnvironment {
     }
 
     public int registerSurfaceTexture(SurfaceTexture surfaceTexture, int width, int height) {
-        int result = nativeAddSurfaceTexture(surfaceTexture, width, height);
+        Surface surface = new Surface(surfaceTexture);
+        int result = nativeAddSurfaceWidthHeight(surface, width, height);
+        surface.release();
         if (result < 0) {
             throw new RuntimeException("Error registering surfaceTexture " + surfaceTexture + "!");
         }
@@ -164,7 +166,7 @@ public class GLEnvironment {
 
     private native int nativeAddSurface(Surface surface);
 
-    private native int nativeAddSurfaceTexture(SurfaceTexture surface, int width, int height);
+    private native int nativeAddSurfaceWidthHeight(Surface surface, int width, int height);
 
     private native int nativeAddSurfaceFromMediaRecorder(MediaRecorder mediaRecorder);
 

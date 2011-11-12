@@ -331,7 +331,6 @@ public class NativeMedia extends Activity {
     public static native void setPlayingStreamingMediaPlayer(boolean isPlaying);
     public static native void shutdown();
     public static native void setSurface(Surface surface);
-    public static native void setSurfaceTexture(SurfaceTexture surfaceTexture);
     public static native void rewindStreamingMediaPlayer();
 
     /** Load jni .so on initialization */
@@ -390,7 +389,9 @@ public class NativeMedia extends Activity {
         }
 
         void useAsSinkForNative() {
-            setSurfaceTexture(mMyGLSurfaceView.getSurfaceTexture());
+            Surface surface = new Surface(mMyGLSurfaceView.getSurfaceTexture());
+            setSurface(surface);
+            surface.release();
         }
 
     }

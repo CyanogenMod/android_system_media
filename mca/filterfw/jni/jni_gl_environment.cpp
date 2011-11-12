@@ -190,18 +190,18 @@ jint Java_android_filterfw_core_GLEnvironment_nativeAddSurface(JNIEnv* env,
   return -1;
 }
 
-jint Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceTexture(JNIEnv* env,
+jint Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceWidthHeight(JNIEnv* env,
                                                                       jobject thiz,
-                                                                      jobject surfaceTexture,
+                                                                      jobject surface,
                                                                       jint width,
                                                                       jint height) {
   GLEnv* gl_env = ConvertFromJava<GLEnv>(env, thiz);
-  if (!surfaceTexture) {
+  if (!surface) {
     LOGE("GLEnvironment: Null SurfaceTexture passed!");
     return -1;
   } else if (gl_env) {
     // Get the ANativeWindow
-    ANativeWindow* window = ANativeWindow_fromSurfaceTexture(env, surfaceTexture);
+    ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
     if (!window) {
       LOGE("GLEnvironment: Error creating window!");
       return -1;

@@ -59,7 +59,7 @@ Java_android_filterfw_core_GLEnvironment_nativeAddSurface(JNIEnv* env,
                                                           jobject surface);
 
 JNIEXPORT jint JNICALL
-Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceTexture(JNIEnv* env,
+Java_android_filterfw_core_GLEnvironment_nativeAddSurfaceWidthHeight(JNIEnv* env,
                                                                  jobject thiz,
                                                                  jobject surface,
                                                                  jint width,
