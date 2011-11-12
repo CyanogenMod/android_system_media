@@ -120,11 +120,25 @@ public class MediaSource extends Filter {
             "  gl_FragColor = texture2D(tex_sampler_0, v_texcoord);\n" +
             "}\n";
 
+    // The following transforms enable rotation of the decoded source.
+    // These are multiplied with the transform obtained from the
+    // SurfaceTexture to get the final transform to be set on the media source.
+    // Currently, given a device orientation, the MediaSource rotates in such a way
+    // that the source is displayed upright. A particular use case
+    // is "Background Replacement" feature in the Camera app
+    // where the MediaSource rotates the source to align with the camera feed and pass it
+    // on to the backdropper filter. The backdropper only does the blending
+    // and does not have to do any rotation
+    // (except for mirroring in case of front camera).
+    // TODO: Currently the rotations are spread over a bunch of stages in the
+    // pipeline. A cleaner design
+    // could be to cast away all the rotation in a separate filter or attach a transform
+    // to the frame so that MediaSource itself need not know about any rotation.
     private static final float[] mSourceCoords_0 = { 1, 1, 0, 1,
                                                      0, 1, 0, 1,
                                                      1, 0, 0, 1,
                                                      0, 0, 0, 1 };
-    private static final float[] mSourceCoords_90 = { 0, 1, 0, 1,
+    private static final float[] mSourceCoords_270 = { 0, 1, 0, 1,
                                                       0, 0, 0, 1,
                                                       1, 1, 0, 1,
                                                       1, 0, 0, 1 };
@@ -132,7 +146,7 @@ public class MediaSource extends Filter {
                                                        1, 0, 0, 1,
                                                        0, 1, 0, 1,
                                                        1, 1, 0, 1 };
-    private static final float[] mSourceCoords_270 = { 1, 0, 0, 1,
+    private static final float[] mSourceCoords_90 = { 1, 0, 0, 1,
                                                        1, 1, 0, 1,
                                                        0, 0, 0, 1,
                                                        0, 1, 0, 1 };
@@ -301,6 +315,13 @@ public class MediaSource extends Filter {
                                       surfaceTransform, 0,
                                       mSourceCoords_270, 0);
                     break;
+            }
+            if (mLogVerbose) {
+                Log.v(TAG, "OrientationHint = " + mOrientation);
+                String temp = String.format("SetSourceRegion: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f",
+                        sourceCoords[4], sourceCoords[5],sourceCoords[0], sourceCoords[1],
+                        sourceCoords[12], sourceCoords[13],sourceCoords[8], sourceCoords[9]);
+                Log.v(TAG, temp);
             }
             mFrameExtractor.setSourceRegion(sourceCoords[4], sourceCoords[5],
                     sourceCoords[0], sourceCoords[1],
