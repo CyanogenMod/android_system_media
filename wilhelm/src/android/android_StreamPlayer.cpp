@@ -45,8 +45,7 @@ StreamSourceAppProxy::StreamSourceAppProxy(
 }
 
 StreamSourceAppProxy::~StreamSourceAppProxy() {
-    // FIXME make this an SL_LOGV later; this just proves that the bug is fixed
-    SL_LOGI("StreamSourceAppProxy::~StreamSourceAppProxy()");
+    SL_LOGV("StreamSourceAppProxy::~StreamSourceAppProxy()");
     disconnect();
 }
 

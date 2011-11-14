@@ -179,7 +179,8 @@ GenericMediaPlayer::GenericMediaPlayer(const AudioPlayback_Parameters* params, b
     mSeekTimeMsec(0),
     mVideoSurfaceTexture(0),
     mPlayer(0),
-    mPlayerClient(new MediaPlayerNotificationClient(this))
+    mPlayerClient(new MediaPlayerNotificationClient(this)),
+    mPlayerDeathNotifier(new MediaPlayerDeathNotifier(mPlayerClient))
 {
     SL_LOGD("GenericMediaPlayer::GenericMediaPlayer()");
 
