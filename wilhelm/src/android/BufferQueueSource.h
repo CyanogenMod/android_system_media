@@ -33,7 +33,7 @@ public:
     // store an item structure to indicate a processed buffer
     static const SLuint32 kItemProcessed[NB_BUFFEREVENT_ITEM_FIELDS];
 
-    BufferQueueSource(const void* user, void *context,  const void *caller);
+    BufferQueueSource(IAndroidBufferQueue *androidBufferQueue);
 
     virtual status_t initCheck() const;
 
@@ -45,7 +45,7 @@ public:
 
 private:
     // the Android Buffer Queue from which data is consumed
-    IAndroidBufferQueue* mAndroidBufferQueueSource;
+    IAndroidBufferQueue* const mAndroidBufferQueueSource;
 
     // a monotonically increasing offset used to translate an offset from the beginning
     // of the stream, to an offset in each buffer from the buffer queue source

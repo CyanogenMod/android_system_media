@@ -33,10 +33,9 @@ class AacBqToPcmCbRenderer : public AudioToCbRenderer
 {
 public:
 
-    AacBqToPcmCbRenderer(const AudioPlayback_Parameters* params);
+    AacBqToPcmCbRenderer(const AudioPlayback_Parameters* params,
+            IAndroidBufferQueue *androidBufferQueue);
     virtual ~AacBqToPcmCbRenderer();
-
-    void registerSourceQueueCallback(const void* user, void *context,  const void *caller);
 
     // verifies the given memory starts and ends on ADTS frame boundaries.
     // This is for instance used whenever ADTS data is being enqueued through an
@@ -51,9 +50,7 @@ protected:
 
 
 private:
-    // mutex used to protect mBqSource
-    Mutex                 mBqSourceLock;
-    sp<BufferQueueSource> mBqSource;
+    const sp<BufferQueueSource> mBqSource;
 
 private:
     DISALLOW_EVIL_CONSTRUCTORS(AacBqToPcmCbRenderer);

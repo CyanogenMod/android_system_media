@@ -108,32 +108,18 @@ SLresult AacBqToPcmCbRenderer::validateBufferStartEndOnFrameBoundaries(void* dat
 }
 
 //--------------------------------------------------------------------------------------------------
-AacBqToPcmCbRenderer::AacBqToPcmCbRenderer(const AudioPlayback_Parameters* params) :
+AacBqToPcmCbRenderer::AacBqToPcmCbRenderer(const AudioPlayback_Parameters* params,
+        IAndroidBufferQueue *androidBufferQueue) :
         AudioToCbRenderer(params),
-        mBqSource(0)
+        mBqSource(new BufferQueueSource(androidBufferQueue))
 {
     SL_LOGD("AacBqToPcmCbRenderer::AacBqToPcmCbRenderer()");
-
 }
 
 
 AacBqToPcmCbRenderer::~AacBqToPcmCbRenderer() {
     SL_LOGD("AacBqToPcmCbRenderer::~AacBqToPcmCbRenderer()");
 
-}
-
-
-//--------------------------------------------------
-void AacBqToPcmCbRenderer::registerSourceQueueCallback(
-        const void* user, void *context,  const void *caller) {
-    SL_LOGD("AacBqToPcmCbRenderer::registerQueueCallback");
-
-    Mutex::Autolock _l(mBqSourceLock);
-
-    mBqSource = new BufferQueueSource(user, context, caller);
-
-    CHECK(mBqSource != 0);
-    SL_LOGD("AacBqToPcmCbRenderer::registerSourceQueueCallback end");
 }
 
 
@@ -157,23 +143,7 @@ void AacBqToPcmCbRenderer::onPrepare() {
         mPcmFormatValues[ANDROID_KEY_INDEX_PCMFORMAT_CHANNELMASK] = UNKNOWN_CHANNELMASK;
     }
 
-    sp<DataSource> dataSource;
-    {
-        Mutex::Autolock _l(mBqSourceLock);
-        dataSource = mBqSource;
-    }
-    if (dataSource == 0) {
-        SL_LOGE("AacBqToPcmCbRenderer::onPrepare(): Error no data source");
-        notifyPrepared(MEDIA_ERROR_BASE);
-        return;
-    }
-
-    sp<MediaExtractor> extractor = new AacAdtsExtractor(dataSource);
-    if (extractor == 0) {
-        SL_LOGE("AacBqToPcmCbRenderer::onPrepare: Could not instantiate AAC extractor.");
-        notifyPrepared(ERROR_UNSUPPORTED);
-        return;
-    }
+    sp<MediaExtractor> extractor = new AacAdtsExtractor(mBqSource);
 
     // only decoding a single track of data
     const size_t kTrackToDecode = 0;
@@ -235,7 +205,7 @@ void AacBqToPcmCbRenderer::onPrepare() {
 
     //---------------------------------
     // The data source, and audio source (a decoder) are ready to be used
-    mDataSource = dataSource;
+    mDataSource = mBqSource;
     mAudioSource = source;
     mAudioSourceStarted = true;
 

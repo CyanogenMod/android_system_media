@@ -214,19 +214,7 @@ static SLresult IAndroidBufferQueue_RegisterCallback(SLAndroidBufferQueueItf sel
     if (SL_PLAYSTATE_STOPPED == getAssociatedState(thiz)) {
         thiz->mCallback = callback;
         thiz->mContext = pContext;
-
-        // FIXME investigate why these two cases are not handled symmetrically any more
-        switch (InterfaceToObjectID(thiz)) {
-          case SL_OBJECTID_AUDIOPLAYER:
-            result = android_audioPlayer_androidBufferQueue_registerCallback_l(
-                    (CAudioPlayer*) thiz->mThis);
-            break;
-          case XA_OBJECTID_MEDIAPLAYER:
-            result = SL_RESULT_SUCCESS;
-            break;
-          default:
-            result = SL_RESULT_PARAMETER_INVALID;
-        }
+        result = SL_RESULT_SUCCESS;
 
     } else {
         result = SL_RESULT_PRECONDITIONS_VIOLATED;

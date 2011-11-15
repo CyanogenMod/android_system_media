@@ -138,9 +138,6 @@ extern SLresult android_audioPlayer_bufferQueue_onClear(CAudioPlayer *pAudioPlay
  * Android Buffer Queue
  ****************************/
 /* must be called with a lock on pAudioPlayer->mThis */
-extern SLresult android_audioPlayer_androidBufferQueue_registerCallback_l(
-        CAudioPlayer *pAudioPlayer);
-/* must be called with a lock on pAudioPlayer->mThis */
 extern void android_audioPlayer_androidBufferQueue_clear_l(CAudioPlayer *pAudioPlayer);
 /* must be called with a lock on pAudioPlayer->mThis */
 extern void android_audioPlayer_androidBufferQueue_onRefilled_l(CAudioPlayer *pAudioPlayer);

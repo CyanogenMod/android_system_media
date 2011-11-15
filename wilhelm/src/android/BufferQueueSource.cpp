@@ -36,17 +36,11 @@ const SLuint32 BufferQueueSource::kItemProcessed[NB_BUFFEREVENT_ITEM_FIELDS] = {
 };
 
 
-BufferQueueSource::BufferQueueSource(const void* user, void *context,  const void *caller) :
-          mAndroidBufferQueueSource(NULL),
+BufferQueueSource::BufferQueueSource(IAndroidBufferQueue *androidBufferQueue) :
+          mAndroidBufferQueueSource(androidBufferQueue),
           mStreamToBqOffset(0),
           mEosReached(false)
 {
-    if (NULL != user) {
-        mAndroidBufferQueueSource = &((CAudioPlayer*)user)->mAndroidBufferQueue;
-    } else {
-        SL_LOGE("Can't create BufferQueueSource with NULL user");
-    }
-
 }
 
 
