@@ -15,7 +15,6 @@
  */
 
 #ifdef ANDROID
-#include "android/AudioTrackProxy.h"
 #include "android/CallbackProtector.h"
 #include "android/android_Effect.h"
 #include "android/android_GenericPlayer.h"
@@ -99,7 +98,7 @@
     int mStreamType;
     // FIXME consolidate the next several variables into one class to avoid placement new
     /** plays the PCM data for this player */
-    android::sp<android::AudioTrackProxy> mAudioTrack;
+    android::sp<android::AudioTrack> mAudioTrack;
     android::sp<android::CallbackProtector> mCallbackProtector;
     android::sp<android::GenericPlayer> mAPlayer;
     /** aux effect the AudioTrack will be attached to if aux send enabled */

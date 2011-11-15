@@ -203,7 +203,7 @@ void object_unlock_exclusive_attributes(IObject *thiz, unsigned attributes)
     slPrefetchCallback prefetchCallback = NULL;
     void *prefetchContext = NULL;
     SLuint32 prefetchEvents = SL_PREFETCHEVENT_NONE;
-    android::sp<android::AudioTrackProxy> audioTrack;
+    android::sp<android::AudioTrack> audioTrack;
     if (SL_OBJECTID_AUDIOPLAYER == objectID) {
         CAudioPlayer *ap = (CAudioPlayer *) thiz;
         prefetchCallback = ap->mPrefetchStatus.mDeferredPrefetchCallback;
