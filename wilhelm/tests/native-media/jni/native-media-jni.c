@@ -518,15 +518,6 @@ void Java_com_example_nativemedia_NativeMedia_setSurface(JNIEnv *env, jclass cla
 }
 
 
-// set the surface texture
-void Java_com_example_nativemedia_NativeMedia_setSurfaceTexture(JNIEnv *env, jclass clazz,
-        jobject surfaceTexture)
-{
-    // obtain a native window from a Java surface texture
-    theNativeWindow = ANativeWindow_fromSurfaceTexture(env, surfaceTexture);
-}
-
-
 // rewind the streaming media player
 void Java_com_example_nativemedia_NativeMedia_rewindStreamingMediaPlayer(JNIEnv *env, jclass clazz)
 {
