@@ -544,12 +544,6 @@ void audioPlayer_auxEffectUpdate(CAudioPlayer* ap) {
 
 
 //-----------------------------------------------------------------------------
-void audioPlayer_setInvalid(CAudioPlayer* ap) {
-    ap->mAndroidObjType = INVALID_TYPE;
-}
-
-
-//-----------------------------------------------------------------------------
 /*
  * returns true if the given data sink is supported by AudioPlayer that doesn't
  *   play to an OutputMix object, false otherwise
@@ -1251,53 +1245,48 @@ static void audioTrack_callBack_pullFromBuffQueue(int event, void* user, void *i
 
 
 //-----------------------------------------------------------------------------
-SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
+void android_audioPlayer_create(CAudioPlayer *pAudioPlayer) {
 
-    SLresult result = SL_RESULT_SUCCESS;
-    // pAudioPlayer->mAndroidObjType has been set in audioPlayer_getAndroidObjectTypeForSourceSink()
-    if (INVALID_TYPE == pAudioPlayer->mAndroidObjType) {
-        audioPlayer_setInvalid(pAudioPlayer);
-        result = SL_RESULT_PARAMETER_INVALID;
-    } else {
+    // pAudioPlayer->mAndroidObjType has been set in android_audioPlayer_checkSourceSink()
+    // and if it was == INVALID_TYPE, then IEngine_CreateAudioPlayer would never call us
+    assert(INVALID_TYPE != pAudioPlayer->mAndroidObjType);
 
-        // These initializations are in the same order as the field declarations in classes.h
+    // These initializations are in the same order as the field declarations in classes.h
 
-        // FIXME Consolidate initializations (many of these already in IEngine_CreateAudioPlayer)
-        // mAndroidObjType: see above comment
-        pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
-        pAudioPlayer->mSessionId = android::AudioSystem::newAudioSessionId();
-        pAudioPlayer->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
+    // FIXME Consolidate initializations (many of these already in IEngine_CreateAudioPlayer)
+    // mAndroidObjType: see above comment
+    pAudioPlayer->mAndroidObjState = ANDROID_UNINITIALIZED;
+    pAudioPlayer->mSessionId = android::AudioSystem::newAudioSessionId();
 
-        // mAudioTrack
-        pAudioPlayer->mCallbackProtector = new android::CallbackProtector();
-        // mAPLayer
-        // mAuxEffect
+    // placeholder: not necessary yet as session ID lifetime doesn't extend beyond player
+    // android::AudioSystem::acquireAudioSessionId(pAudioPlayer->mSessionId);
 
-        pAudioPlayer->mAuxSendLevel = 0;
-        pAudioPlayer->mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
-        pAudioPlayer->mDeferredStart = false;
+    pAudioPlayer->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
 
-        // Already initialized in IEngine_CreateAudioPlayer, to be consolidated
-        pAudioPlayer->mDirectLevel = 0; // no attenuation
+    // mAudioTrack
+    pAudioPlayer->mCallbackProtector = new android::CallbackProtector();
+    // mAPLayer
+    // mAuxEffect
 
-        // This section re-initializes interface-specific fields that
-        // can be set or used regardless of whether the interface is
-        // exposed on the AudioPlayer or not
+    pAudioPlayer->mAuxSendLevel = 0;
+    pAudioPlayer->mAmplFromDirectLevel = 1.0f; // matches initial mDirectLevel value
+    pAudioPlayer->mDeferredStart = false;
 
-        // Only AudioTrack supports a non-trivial playback rate
-        switch (pAudioPlayer->mAndroidObjType) {
-        case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
-            pAudioPlayer->mPlaybackRate.mMinRate = AUDIOTRACK_MIN_PLAYBACKRATE_PERMILLE;
-            pAudioPlayer->mPlaybackRate.mMaxRate = AUDIOTRACK_MAX_PLAYBACKRATE_PERMILLE;
-            break;
-        default:
-            // use the default range
-            break;
-        }
+    // This section re-initializes interface-specific fields that
+    // can be set or used regardless of whether the interface is
+    // exposed on the AudioPlayer or not
 
+    // Only AudioTrack supports a non-trivial playback rate
+    switch (pAudioPlayer->mAndroidObjType) {
+    case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
+        pAudioPlayer->mPlaybackRate.mMinRate = AUDIOTRACK_MIN_PLAYBACKRATE_PERMILLE;
+        pAudioPlayer->mPlaybackRate.mMaxRate = AUDIOTRACK_MAX_PLAYBACKRATE_PERMILLE;
+        break;
+    default:
+        // use the default range
+        break;
     }
 
-    return result;
 }
 
 
@@ -1639,10 +1628,10 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
         break;
     }
 
-    pAudioPlayer->mCallbackProtector.clear();
+    // placeholder: not necessary yet as session ID lifetime doesn't extend beyond player
+    // android::AudioSystem::releaseAudioSessionId(pAudioPlayer->mSessionId);
 
-    // FIXME might not be needed
-    pAudioPlayer->mAndroidObjType = INVALID_TYPE;
+    pAudioPlayer->mCallbackProtector.clear();
 
     // explicit destructor
     pAudioPlayer->mAudioTrack.~sp();

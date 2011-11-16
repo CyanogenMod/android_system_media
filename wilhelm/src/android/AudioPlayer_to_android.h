@@ -28,14 +28,9 @@
 extern SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer);
 
 /*
- * Determines the Android media framework object that maps to the given audio source and sink.
- * Return
- *     SL_RESULT_SUCCESS if the Android resources were successfully created
- *     SL_PARAMETER_INVALID if the Android resources couldn't be created due to an invalid or
- *         unsupported parameter or value
- *     SL_RESULT_CONTENT_UNSUPPORTED if a format is not supported (e.g. sample rate too high)
+ * Finish the Android-specific pre-Realize initialization of a CAudioPlayer.
  */
-extern SLresult android_audioPlayer_create(CAudioPlayer *pAudioPlayer);
+extern void android_audioPlayer_create(CAudioPlayer *pAudioPlayer);
 
 /*
  * Allocates and initializes the Android media framework objects intended to be used with the

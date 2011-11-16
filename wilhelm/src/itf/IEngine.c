@@ -212,7 +212,7 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                     thiz->mSampleRateMilliHz = UNKNOWN_SAMPLERATE;
 
                     // More default values, in case destructor needs to be called early
-                    thiz->mDirectLevel = 0;
+                    thiz->mDirectLevel = 0; // no attenuation
 #ifdef USE_OUTPUTMIXEXT
                     thiz->mTrack = NULL;
                     thiz->mGains[0] = 1.0f;
@@ -237,6 +237,8 @@ static SLresult IEngine_CreateAudioPlayer(SLEngineItf self, SLObjectItf *pPlayer
                             android::sp<android::CallbackProtector>();
                     (void) new (&thiz->mAuxEffect) android::sp<android::AudioEffect>();
                     (void) new (&thiz->mAPlayer) android::sp<android::GenericPlayer>();
+                    // Android-specific POD fields are initialized in android_audioPlayer_create,
+                    // and assume calloc or memset 0 during allocation
 #endif
 
                     // Check the source and sink parameters against generic constraints,
@@ -1087,8 +1089,6 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                     // More default values, in case destructor needs to be called early
                     thiz->mNumChannels = UNKNOWN_NUMCHANNELS;
 
-                    // (assume calloc or memset 0 during allocation)
-                    // placement new
 #ifdef ANDROID
                     // placement new (explicit constructor)
                     // FIXME unnecessary once those fields are encapsulated in one class, rather
@@ -1096,6 +1096,8 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                     (void) new (&thiz->mAVPlayer) android::sp<android::GenericPlayer>();
                     (void) new (&thiz->mCallbackProtector)
                             android::sp<android::CallbackProtector>();
+                    // Android-specific POD fields are initialized in android_Player_create,
+                    // and assume calloc or memset 0 during allocation
 #endif
 
                     // Check the source and sink parameters against generic constraints
