@@ -181,10 +181,10 @@ public class SurfaceTextureSource extends Filter {
         if (mLogVerbose) Log.v(TAG, "Opening SurfaceTextureSource");
         // Create SurfaceTexture anew each time - it can use substantial memory.
         mSurfaceTexture = new SurfaceTexture(mMediaFrame.getTextureId());
-        // Connect SurfaceTexture to source
-        mSourceListener.onSurfaceTextureSourceReady(mSurfaceTexture);
         // Connect SurfaceTexture to callback
         mSurfaceTexture.setOnFrameAvailableListener(onFrameAvailableListener);
+        // Connect SurfaceTexture to source
+        mSourceListener.onSurfaceTextureSourceReady(mSurfaceTexture);
         mFirstFrame = true;
     }
 
@@ -258,7 +258,7 @@ public class SurfaceTextureSource extends Filter {
     private SurfaceTexture.OnFrameAvailableListener onFrameAvailableListener =
             new SurfaceTexture.OnFrameAvailableListener() {
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-            if (mLogVerbose) Log.v(TAG, "New frame from SurfaceTextureSource");
+            if (mLogVerbose) Log.v(TAG, "New frame from SurfaceTexture");
             mNewFrameAvailable.open();
         }
     };
