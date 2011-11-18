@@ -672,6 +672,7 @@ typedef struct {
     AndroidBufferType_type mBufferType;
     AdvancedBufferHeader *mBufferArray;
     AdvancedBufferHeader *mFront, *mRear;
+    bool mEOS;  // whether EOS has been enqueued; never reset
 } IAndroidBufferQueue;
 
 #endif

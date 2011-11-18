@@ -82,26 +82,6 @@ static SLresult initializeAndroidBufferQueueMembers(CAudioPlayer *ap) {
             return SL_RESULT_CONTENT_UNSUPPORTED;
         }
 
-        // initialize ABQ memory
-        for (SLuint16 i=0 ; i<(ap->mAndroidBufferQueue.mNumBuffers + 1) ; i++) {
-            AdvancedBufferHeader *pBuf = &ap->mAndroidBufferQueue.mBufferArray[i];
-            pBuf->mDataBuffer = NULL;
-            pBuf->mDataSize = 0;
-            pBuf->mDataSizeConsumed = 0;
-            pBuf->mBufferContext = NULL;
-            pBuf->mBufferState = SL_ANDROIDBUFFERQUEUEEVENT_NONE;
-            switch (ap->mAndroidBufferQueue.mBufferType) {
-              case kAndroidBufferTypeMpeg2Ts:
-                pBuf->mItems.mTsCmdData.mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
-                pBuf->mItems.mTsCmdData.mPts = 0;
-                break;
-              case kAndroidBufferTypeAacadts:
-                pBuf->mItems.mAdtsCmdData.mAdtsCmdCode = ANDROID_ADTSEVENT_NONE;
-                break;
-              default:
-                return SL_RESULT_CONTENT_UNSUPPORTED;
-            }
-        }
         ap->mAndroidBufferQueue.mFront = ap->mAndroidBufferQueue.mBufferArray;
         ap->mAndroidBufferQueue.mRear  = ap->mAndroidBufferQueue.mBufferArray;
     }
@@ -1229,25 +1209,6 @@ static XAresult IEngine_CreateMediaPlayer(XAEngineItf self, XAObjectItf *pPlayer
                             result = SL_RESULT_MEMORY_FAILURE;
                             break;
                         } else {
-                            for (XAuint16 i=0 ; i<(nbBuffers + 1) ; i++) {
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mDataBuffer = NULL;
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mDataSize = 0;
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mDataSizeConsumed = 0;
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mBufferContext = NULL;
-                                thiz->mAndroidBufferQueue.mBufferArray[i].mBufferState =
-                                        XA_ANDROIDBUFFERQUEUEEVENT_NONE;
-                                switch (thiz->mAndroidBufferQueue.mBufferType) {
-                                  case kAndroidBufferTypeMpeg2Ts:
-                                    thiz->mAndroidBufferQueue.mBufferArray[i].mItems.mTsCmdData.
-                                            mTsCmdCode = ANDROID_MP2TSEVENT_NONE;
-                                    thiz->mAndroidBufferQueue.mBufferArray[i].mItems.mTsCmdData.
-                                            mPts = 0;
-                                    break;
-                                  default:
-                                    result = SL_RESULT_CONTENT_UNSUPPORTED;
-                                    break;
-                                }
-                            }
                             thiz->mAndroidBufferQueue.mFront =
                                     thiz->mAndroidBufferQueue.mBufferArray;
                             thiz->mAndroidBufferQueue.mRear =

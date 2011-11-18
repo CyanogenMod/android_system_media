@@ -255,7 +255,8 @@ typedef struct {
     SLuint32 mDataSizeConsumed;
     AdvancedBufferItems mItems;
     const void *mBufferContext;
-    SLuint32 mBufferState;
+    // mBufferState will be used for the other ABQ events we'll support in the future
+    // SLuint32 mBufferState;
 } AdvancedBufferHeader;
 #endif
 
