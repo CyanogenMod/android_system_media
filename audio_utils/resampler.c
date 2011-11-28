@@ -88,7 +88,7 @@ int resampler_resample_from_provider(struct resampler_itfe *resampler,
     // update and cache the number of frames needed at the input sampling rate to produce
     // the number of frames requested at the output sampling rate
     if (framesRq != rsmp->frames_rq) {
-        rsmp->frames_needed = (framesRq * rsmp->out_sample_rate) / rsmp->in_sample_rate + 1;
+        rsmp->frames_needed = (framesRq * rsmp->in_sample_rate) / rsmp->out_sample_rate + 1;
         rsmp->frames_rq = framesRq;
     }
 
