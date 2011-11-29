@@ -159,17 +159,27 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
                 msg->setInt64(IStreamListener::kKeyResumeAtPTS,
                         (int64_t)oldFront->mItems.mTsCmdData.mPts);
                 receivedCmd_l(IStreamListener::DISCONTINUITY, msg /*msg*/);
-            } else if (oldFront->mItems.mTsCmdData.mTsCmdCode & ANDROID_MP2TSEVENT_FORMAT_CHANGE) {
+            } else if (oldFront->mItems.mTsCmdData.mTsCmdCode
+                    & ANDROID_MP2TSEVENT_FORMAT_CHANGE_FULL) {
                 sp<AMessage> msg = new AMessage();
-                // positive value for format change key makes the discontinuity "hard", see key def
                 msg->setInt32(
                         IStreamListener::kKeyDiscontinuityMask,
                         ATSParser::DISCONTINUITY_FORMATCHANGE);
-
+                receivedCmd_l(IStreamListener::DISCONTINUITY, msg /*msg*/);
+            } else if (oldFront->mItems.mTsCmdData.mTsCmdCode
+                    & ANDROID_MP2TSEVENT_FORMAT_CHANGE_VIDEO) {
+                sp<AMessage> msg = new AMessage();
+                msg->setInt32(
+                        IStreamListener::kKeyDiscontinuityMask,
+                        ATSParser::DISCONTINUITY_VIDEO_FORMAT);
                 receivedCmd_l(IStreamListener::DISCONTINUITY, msg /*msg*/);
             }
+            // note that here we are intentionally only supporting
+            //   ANDROID_MP2TSEVENT_FORMAT_CHANGE_VIDEO, see IAndroidBufferQueue.c
+
+            // some commands may introduce a time discontinuity, reevaluate position if needed
             if (oldFront->mItems.mTsCmdData.mTsCmdCode & (ANDROID_MP2TSEVENT_DISCONTINUITY |
-                    ANDROID_MP2TSEVENT_DISCON_NEWPTS | ANDROID_MP2TSEVENT_FORMAT_CHANGE)) {
+                    ANDROID_MP2TSEVENT_DISCON_NEWPTS | ANDROID_MP2TSEVENT_FORMAT_CHANGE_FULL)) {
                 const sp<StreamPlayer> player(mPlayer.promote());
                 if (player != NULL) {
                     // FIXME see note at onSeek
