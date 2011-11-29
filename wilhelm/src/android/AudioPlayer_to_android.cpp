@@ -1382,7 +1382,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         uint32_t sampleRate = sles_to_android_sampleRate(df_pcm->samplesPerSec);
 
-        pAudioPlayer->mAudioTrack = new android::AudioTrackProxy(new android::AudioTrack(
+        pAudioPlayer->mAudioTrack = new android::AudioTrack(
                 pAudioPlayer->mStreamType,                           // streamType
                 sampleRate,                                          // sampleRate
                 sles_to_android_sampleFormat(df_pcm->bitsPerSample), // format
@@ -1394,7 +1394,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                 (void *) pAudioPlayer,                               // user
                 0      // FIXME find appropriate frame count         // notificationFrame
                 , pAudioPlayer->mSessionId
-                ));
+                );
         android::status_t status = pAudioPlayer->mAudioTrack->initCheck();
         if (status != android::NO_ERROR) {
             SL_LOGE("AudioTrack::initCheck status %u", status);
