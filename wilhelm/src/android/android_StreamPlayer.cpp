@@ -24,6 +24,7 @@
 #include <media/stagefright/foundation/ADebug.h>
 #include <binder/IPCThreadState.h>
 
+#include "mpeg2ts/ATSParser.h"
 
 //--------------------------------------------------------------------------------------------------
 namespace android {
@@ -161,7 +162,10 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
             } else if (oldFront->mItems.mTsCmdData.mTsCmdCode & ANDROID_MP2TSEVENT_FORMAT_CHANGE) {
                 sp<AMessage> msg = new AMessage();
                 // positive value for format change key makes the discontinuity "hard", see key def
-                msg->setInt32(IStreamListener::kKeyFormatChange, (int32_t) 1);
+                msg->setInt32(
+                        IStreamListener::kKeyDiscontinuityMask,
+                        ATSParser::DISCONTINUITY_FORMATCHANGE);
+
                 receivedCmd_l(IStreamListener::DISCONTINUITY, msg /*msg*/);
             }
             if (oldFront->mItems.mTsCmdData.mTsCmdCode & (ANDROID_MP2TSEVENT_DISCONTINUITY |
