@@ -123,9 +123,10 @@ static const SLuint32 Codec_IDs[] = {
     SL_AUDIOCODEC_VORBIS
 };
 
-const SLuint32 *Decoder_IDs = Codec_IDs;
-const SLuint32 *Encoder_IDs = Codec_IDs;
+const SLuint32 * const Decoder_IDs = Codec_IDs;
+const SLuint32 * const Encoder_IDs = Codec_IDs;
 
+// for ANDROID, must match size and order of kVideoMimeTypes
 static const SLuint32 VideoCodecIds[] = {
         XA_VIDEOCODEC_MPEG2,
         XA_VIDEOCODEC_H263,
@@ -139,8 +140,9 @@ static const SLuint32 VideoCodecIds[] = {
 #endif
 };
 
-const SLuint32 *VideoDecoderIds = VideoCodecIds;
+const SLuint32 * const VideoDecoderIds = VideoCodecIds;
 
+// for ANDROID, must == kNbVideoMimeTypes
 const XAuint32 kMaxVideoDecoders = sizeof(VideoCodecIds) / sizeof(VideoCodecIds[0]);
 
 static const SLmilliHertz SamplingRates_A[] = {
