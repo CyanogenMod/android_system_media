@@ -600,6 +600,12 @@ void GenericPlayer::updateOneShot(int positionMs)
         }
     }
 
+    // if we observe the player position going backwards, even without without a seek, then recover
+    if (mObservedPositionMs != ANDROID_UNKNOWN_TIME && positionMs < mObservedPositionMs) {
+        mDeliveredNewPosMs = ANDROID_UNKNOWN_TIME;
+        mObservedPositionMs = positionMs;
+    }
+
     // delayUs is the expected delay between current position and marker;
     // the default is infinity in case there are no upcoming marker(s)
     int64_t delayUs = -1;
