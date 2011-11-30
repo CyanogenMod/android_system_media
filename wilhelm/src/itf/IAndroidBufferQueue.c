@@ -119,10 +119,29 @@ static void setItems(const SLAndroidBufferItem *pItems, SLuint32 itemsLength,
                 break;
 
               case SL_ANDROID_ITEMKEY_FORMAT_CHANGE:
-                pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_FORMAT_CHANGE;
-                if (pItems->itemSize != 0) {
-                    SL_LOGE("Invalid item parameter size %u for format change, ignoring value",
-                            pItems->itemSize);
+                // distinguish between a "full" format change and one where it says what changed
+                if (pItems->itemSize == 0) {
+                    SL_LOGV("Received format change with no data == full format change");
+                    pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_FORMAT_CHANGE_FULL;
+                } else if (pItems->itemSize == sizeof(SLuint32)) {
+                    XAuint32 formatData = *((XAuint32*)pItems->itemData);
+                    // intentionally only supporting video change when reading which specific
+                    //    stream has changed, interpret other changes as full change
+                    if (formatData == XA_ANDROID_FORMATCHANGE_ITEMDATA_VIDEO) {
+                        pBuff->mItems.mTsCmdData.mTsCmdCode |=
+                                ANDROID_MP2TSEVENT_FORMAT_CHANGE_VIDEO;
+                        SL_LOGV("Received video format change");
+                    } else {
+                        // note that we don't support specifying
+                        //    ANDROID_MP2TSEVENT_FORMAT_CHANGE_FULL by having all bits of
+                        //    the data mask set, we default to it with unsupported masks
+                        SL_LOGE("Received format change with unsupported data, ignoring data");
+                        pBuff->mItems.mTsCmdData.mTsCmdCode |=
+                                ANDROID_MP2TSEVENT_FORMAT_CHANGE_FULL;
+                    }
+                } else {
+                    SL_LOGE("Received format change with invalid data size, ignoring data");
+                    pBuff->mItems.mTsCmdData.mTsCmdCode |= ANDROID_MP2TSEVENT_FORMAT_CHANGE_FULL;
                 }
                 break;
 
@@ -178,7 +197,8 @@ static void setItems(const SLAndroidBufferItem *pItems, SLuint32 itemsLength,
           case ANDROID_MP2TSEVENT_EOS:
           case ANDROID_MP2TSEVENT_DISCONTINUITY:
           case ANDROID_MP2TSEVENT_DISCON_NEWPTS:
-          case ANDROID_MP2TSEVENT_FORMAT_CHANGE:
+          case ANDROID_MP2TSEVENT_FORMAT_CHANGE_FULL:
+          case ANDROID_MP2TSEVENT_FORMAT_CHANGE_VIDEO:
             break;
           // no combinations are allowed
           default:
