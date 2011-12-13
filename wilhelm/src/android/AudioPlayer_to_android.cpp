@@ -1844,14 +1844,17 @@ SLresult android_audioPlayer_metadata_getValue(CAudioPlayer *ap,
                     static_cast<android::AudioSfDecoder*>(ap->mAPlayer.get());
             pValue->encoding = SL_CHARACTERENCODING_BINARY;
             memcpy((char *) pValue->langCountry, "en", 3); // applicable here?
+	    SLuint32 valueData;
             SLuint32 valueSize = 0;
+	    memcpy(&valueData, &pValue->data, sizeof(SLuint32));
             if ((size < sizeof(SLMetadataInfo)
                     || (!decoder->getPcmFormatValueSize(index, &valueSize))
                     || (!decoder->getPcmFormatKeyValue(index, size - sizeof(SLMetadataInfo),
-                            (SLuint32*)pValue->data)))) {
+                            &valueData)))) {
                 res = SL_RESULT_PARAMETER_INVALID;
             } else {
                 pValue->size = valueSize;
+		memcpy(&pValue->data, &valueData, sizeof(pValue->data));
             }
         }
         break;

@@ -50,7 +50,7 @@ StreamSourceAppProxy::~StreamSourceAppProxy() {
     disconnect();
 }
 
-const SLuint32 StreamSourceAppProxy::kItemProcessed[NB_BUFFEREVENT_ITEM_FIELDS] = {
+const SLuint32 StreamSourceAppProxy::kItemProcessed[NB_BUFFEREVENT_ITEM_FIELDS] __attribute__((may_alias)) = {
         SL_ANDROID_ITEMKEY_BUFFERQUEUEEVENT, // item key
         sizeof(SLuint32),                    // item size
         SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED // item data
@@ -278,7 +278,7 @@ void StreamSourceAppProxy::pullFromBuffQueue() {
                 pBufferContext, pBufferData, dataSize,
                 dataSize, /* dataUsed  */
                 // no messages during playback other than marking the buffer as processed
-                (const SLAndroidBufferItem*)(&kItemProcessed) /* pItems */,
+                (const SLAndroidBufferItem*)((const void*)(&kItemProcessed)) /* pItems */,
                 NB_BUFFEREVENT_ITEM_FIELDS *sizeof(SLuint32) /* itemsLength */ );
         if (SL_RESULT_SUCCESS != result) {
             // Reserved for future use
