@@ -29,7 +29,7 @@
 namespace android {
 
 
-const SLuint32 BufferQueueSource::kItemProcessed[NB_BUFFEREVENT_ITEM_FIELDS] = {
+const SLuint32 BufferQueueSource::kItemProcessed[NB_BUFFEREVENT_ITEM_FIELDS] __attribute__((may_alias)) = {
         SL_ANDROID_ITEMKEY_BUFFERQUEUEEVENT, // item key
         sizeof(SLuint32),                    // item size
         SL_ANDROIDBUFFERQUEUEEVENT_PROCESSED // item data
@@ -156,7 +156,7 @@ ssize_t BufferQueueSource::readAt(off64_t offset, void *data, size_t size) {
         SLresult result = (*callback)(&mAndroidBufferQueueSource->mItf, callbackPContext,
                 pBufferContext, pBufferData, dataSize, dataUsed,
                 // no messages during playback other than marking the buffer as processed
-                (const SLAndroidBufferItem*)(&kItemProcessed) /* pItems */,
+                (SLAndroidBufferItem*)((void*)&kItemProcessed) /* pItems */,
                 NB_BUFFEREVENT_ITEM_FIELDS * sizeof(SLuint32) /* itemsLength */ );
         if (SL_RESULT_SUCCESS != result) {
             // Reserved for future use

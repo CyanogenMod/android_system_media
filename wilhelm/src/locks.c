@@ -66,13 +66,21 @@ void object_lock_exclusive_(IObject *thiz, const char *file, int line)
             if (++i >= (sizeof(backoffs) / sizeof(backoffs[0]))) {
                 // the extra block avoids a C++ compiler error about goto past initialization
                 {
-                    pthread_t me = pthread_self();
-                    pthread_t owner = thiz->mOwner;
+                    union {
+                        pthread_t me;
+                        void *pMe;
+                    };
+                    me = pthread_self();
+                    union {
+                        pthread_t owner;
+                        void *pOwner;
+                    };
+                    owner = thiz->mOwner;
                     // unlikely, but this could result in a memory fault if owner is corrupt
                     pid_t ownerTid = LIKELY_VALID(owner) ? __pthread_gettid(owner) : -1;
                     SL_LOGW("%s:%d: pthread %p (tid %d) sees object %p was locked by pthread %p"
-                            " (tid %d) at %s:%d\n", file, line, *(void **)&me, gettid(), thiz,
-                            *(void **)&owner, ownerTid, thiz->mFile, thiz->mLine);
+                            " (tid %d) at %s:%d\n", file, line, pMe, gettid(), thiz,
+                            pOwner, ownerTid, thiz->mFile, thiz->mLine);
                 }
 forward_progress:
                 // attempt one more time without timeout; maybe this time we will be successful
@@ -86,17 +94,25 @@ forward_progress:
     pthread_t zero;
     memset(&zero, 0, sizeof(pthread_t));
     if (0 != memcmp(&zero, &thiz->mOwner, sizeof(pthread_t))) {
-        pthread_t me = pthread_self();
-        pthread_t owner = thiz->mOwner;
+        union {
+            pthread_t me;
+            void *pMe;
+        };
+        me = pthread_self();
+        union {
+            pthread_t owner;
+            void *pOwner;
+        };
+        owner = thiz->mOwner;
         pid_t ownerTid = LIKELY_VALID(owner) ? __pthread_gettid(owner) : -1;
         if (pthread_equal(pthread_self(), owner)) {
             SL_LOGE("%s:%d: pthread %p (tid %d) sees object %p was recursively locked by pthread"
-                    " %p (tid %d) at %s:%d\n", file, line, *(void **)&me, gettid(), thiz,
-                    *(void **)&owner, ownerTid, thiz->mFile, thiz->mLine);
+                    " %p (tid %d) at %s:%d\n", file, line, pMe, gettid(), thiz,
+                    pOwner, ownerTid, thiz->mFile, thiz->mLine);
         } else {
             SL_LOGE("%s:%d: pthread %p (tid %d) sees object %p was left unlocked in unexpected"
-                    " state by pthread %p (tid %d) at %s:%d\n", file, line, *(void **)&me, gettid(),
-                    thiz, *(void **)&owner, ownerTid, thiz->mFile, thiz->mLine);
+                    " state by pthread %p (tid %d) at %s:%d\n", file, line, pMe, gettid(),
+                    thiz, pOwner, ownerTid, thiz->mFile, thiz->mLine);
         }
         assert(false);
     }
