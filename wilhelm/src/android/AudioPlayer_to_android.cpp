@@ -1308,7 +1308,7 @@ SLresult android_audioPlayer_setConfig(CAudioPlayer *ap, const SLchar *configKey
     SLresult result;
 
     assert(NULL != ap && NULL != configKey && NULL != pConfigValue);
-    if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_STREAM_TYPE) == 0) {
+    if (strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_STREAM_TYPE) == 0) {
 
         // stream type
         if (KEY_STREAM_TYPE_PARAMSIZE > valueSize) {
@@ -1334,7 +1334,7 @@ SLresult android_audioPlayer_getConfig(CAudioPlayer* ap, const SLchar *configKey
     SLresult result;
 
     assert(NULL != ap && NULL != configKey && NULL != pValueSize);
-    if(strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_STREAM_TYPE) == 0) {
+    if (strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_STREAM_TYPE) == 0) {
 
         // stream type
         if (NULL == pConfigValue) {

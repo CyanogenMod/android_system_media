@@ -488,7 +488,7 @@ void AudioSfDecoder::onDecode() {
             mDecodeBuffer->release();
             mDecodeBuffer = NULL;
         }
-        if(!mAudioSourceStarted) {
+        if (!mAudioSourceStarted) {
             return;
         }
         err = mAudioSource->read(&mDecodeBuffer, &readOptions);
