@@ -395,8 +395,9 @@ static SLresult IPlay_SetPositionUpdatePeriod(SLPlayItf self, SLmillisecond mSec
                 CAudioPlayer *audioPlayer = (CAudioPlayer *) thiz->mThis;
                 SLuint32 frameUpdatePeriod = ((long long) mSec *
                     (long long) audioPlayer->mSampleRateMilliHz) / 1000000LL;
-                if (0 == frameUpdatePeriod)
+                if (0 == frameUpdatePeriod) {
                     frameUpdatePeriod = ~0;
+                }
                 thiz->mFrameUpdatePeriod = frameUpdatePeriod;
                 // setting a new update period postpones the next callback
                 thiz->mFramesSincePositionUpdate = 0;

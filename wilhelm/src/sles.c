@@ -58,8 +58,9 @@ SLuint32 IObjectToObjectID(IObject *thiz)
     const ClassTable *clazz = thiz->mClass;
     assert(NULL != clazz);
     SLuint32 id = clazz->mSLObjectID;
-    if (!id)
+    if (!id) {
         id = clazz->mXAObjectID;
+    }
     return id;
 }
 
