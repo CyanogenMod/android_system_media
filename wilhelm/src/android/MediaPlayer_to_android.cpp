@@ -382,6 +382,7 @@ XAresult android_Player_create(CMediaPlayer *mp) {
         break;
     case XA_DATALOCATOR_ADDRESS: // intended fall-through
     default:
+        mp->mAndroidObjType = INVALID_TYPE;
         SL_LOGE("Unable to create MediaPlayer for data source locator 0x%x", sourceLocator);
         result = XA_RESULT_PARAMETER_INVALID;
         break;
@@ -391,6 +392,9 @@ XAresult android_Player_create(CMediaPlayer *mp) {
     mp->mAndroidObjState = ANDROID_UNINITIALIZED;
     mp->mStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
     mp->mSessionId = android::AudioSystem::newAudioSessionId();
+
+    // placeholder: not necessary yet as session ID lifetime doesn't extend beyond player
+    // android::AudioSystem::acquireAudioSessionId(mp->mSessionId);
 
     mp->mCallbackProtector = new android::CallbackProtector();
 
@@ -490,6 +494,10 @@ XAresult android_Player_destroy(CMediaPlayer *mp) {
     SL_LOGV("android_Player_destroy(%p)", mp);
 
     mp->mAVPlayer.clear();
+
+    // placeholder: not necessary yet as session ID lifetime doesn't extend beyond player
+    // android::AudioSystem::releaseAudioSessionId(mp->mSessionId);
+
     mp->mCallbackProtector.clear();
 
     // explicit destructor
