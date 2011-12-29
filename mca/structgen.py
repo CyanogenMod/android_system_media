@@ -104,11 +104,12 @@ class ParseError:
     return "On line %d: %s" % (self.lineno, self.message)
 
 class FieldType_BasePOD:
-  def __init__(self, name, structname, jclassname, package, ctype, jtype, defval):
+  def __init__(self, name, structname, jclassname, package, javatype, ctype, jtype, defval):
     self.name = name
     self.structname = structname
     self.jclassname = jclassname
     self.package = package
+    self.javatype = javatype
     self.ctype = ctype
     self.jtype = jtype
     self.defval = defval
@@ -120,21 +121,21 @@ class FieldType_BasePOD:
     return "    public %s get%s(int index) {\n"\
            "        assertReadable();\n"\
            "        return nativeGet%s(index);\n"\
-           "    }" % (self.ctype, ToJavaName(self.name, 0), ToJavaName(self.name, 0))
+           "    }" % (self.javatype, ToJavaName(self.name, 0), ToJavaName(self.name, 0))
 
   def javaSetter(self):
     return "    public void set%s(int index, %s value) {\n"\
            "        assertWritable();\n"\
            "        nativeSet%s(index, value);\n"\
-           "    }" % (ToJavaName(self.name, 0), self.ctype, ToJavaName(self.name, 0))
+           "    }" % (ToJavaName(self.name, 0), self.javatype, ToJavaName(self.name, 0))
 
   def javaNativeGetter(self):
     return "    private native %s nativeGet%s(int index);"\
-           % (self.ctype, ToJavaName(self.name, 0))
+           % (self.javatype, ToJavaName(self.name, 0))
 
   def javaNativeSetter(self):
     return "    private native boolean nativeSet%s(int index, %s value);"\
-           % (ToJavaName(self.name, 0), self.ctype)
+           % (ToJavaName(self.name, 0), self.javatype)
 
   def jniGetterDefString(self):
     return "JNIEXPORT %s JNICALL\n" \
@@ -168,11 +169,15 @@ class FieldType_BasePOD:
 
 class FieldType_Float(FieldType_BasePOD):
   def __init__(self, name, structname, jclassname, package):
-    FieldType_BasePOD.__init__(self, name, structname, jclassname, package, "float", "jfloat", "0.0")
+    FieldType_BasePOD.__init__(self, name, structname, jclassname, package, "float", "float", "jfloat", "0.0")
 
 class FieldType_Int(FieldType_BasePOD):
   def __init__(self, name, structname, jclassname, package):
-    FieldType_BasePOD.__init__(self, name, structname, jclassname, package, "int", "jint", "0")
+    FieldType_BasePOD.__init__(self, name, structname, jclassname, package, "int", "int", "jint", "0")
+
+class FieldType_Long(FieldType_BasePOD):
+  def __init__(self, name, structname, jclassname, package):
+    FieldType_BasePOD.__init__(self, name, structname, jclassname, package, "long", "long long", "jlong", "0")
 
 class StructSpec:
 
@@ -222,6 +227,8 @@ class StructSpec:
         typestr = linecomps[1]
         if typestr == "int":
           fieldtype = FieldType_Int(linecomps[2], self.structname, self.jclassname, self.package)
+        elif typestr == "long":
+          fieldtype = FieldType_Long(linecomps[2], self.structname, self.jclassname, self.package)
         elif typestr == "float":
           fieldtype = FieldType_Float(linecomps[2], self.structname, self.jclassname, self.package)
         else:
