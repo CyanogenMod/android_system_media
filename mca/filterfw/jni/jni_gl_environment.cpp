@@ -46,7 +46,7 @@ class NativeWindowHandle : public WindowHandle {
     }
 
     virtual void Destroy() {
-      LOGI("Releasing ANativeWindow!");
+      ALOGI("Releasing ANativeWindow!");
       ANativeWindow_release(window_);
     }
 

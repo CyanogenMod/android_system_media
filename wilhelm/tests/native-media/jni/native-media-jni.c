@@ -248,7 +248,7 @@ void StreamChangeCallback (XAStreamInformationItf caller,
             XAVideoStreamInformation videoInfo;
             res = (*caller)->QueryStreamInformation(caller, streamIndex, &videoInfo);
             assert(XA_RESULT_SUCCESS == res);
-            LOGI("Found video size %u x %u, codec ID=%u, frameRate=%u, bitRate=%u, duration=%u ms",
+            ALOGI("Found video size %u x %u, codec ID=%u, frameRate=%u, bitRate=%u, duration=%u ms",
                         videoInfo.width, videoInfo.height, videoInfo.codecId, videoInfo.frameRate,
                         videoInfo.bitRate, videoInfo.duration);
         } break;
