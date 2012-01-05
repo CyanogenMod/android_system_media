@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <SLES/OpenSLES.h>
@@ -29,6 +30,9 @@
 #else
 #include <sndfile.h>
 #endif
+
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
 
 unsigned numBuffers = 2;
 int framesPerBuffer = 512;
@@ -114,14 +118,18 @@ int main(int argc, char **argv)
     byteOrder = nativeByteOrder;
 
     SLboolean enableReverb = SL_BOOLEAN_FALSE;
-    SLpermille rate = 1000;
+    SLpermille initialRate = 0;
+    SLpermille finalRate = 0;
+    SLpermille deltaRate = 1;
+    SLmillisecond deltaRateMs = 0;
 
     // process command-line options
     int i;
     for (i = 1; i < argc; ++i) {
         char *arg = argv[i];
-        if (arg[0] != '-')
+        if (arg[0] != '-') {
             break;
+        }
         if (!strcmp(arg, "-b")) {
             byteOrder = SL_BYTEORDER_BIGENDIAN;
         } else if (!strcmp(arg, "-l")) {
@@ -133,7 +141,17 @@ int main(int argc, char **argv)
         } else if (!strncmp(arg, "-n", 2)) {
             numBuffers = atoi(&arg[2]);
         } else if (!strncmp(arg, "-p", 2)) {
-            rate = atoi(&arg[2]);
+            initialRate = atoi(&arg[2]);
+        } else if (!strncmp(arg, "-P", 2)) {
+            finalRate = atoi(&arg[2]);
+        } else if (!strncmp(arg, "-q", 2)) {
+            deltaRate = atoi(&arg[2]);
+            // deltaRate is a magnitude, so take absolute value
+            if (deltaRate < 0) {
+                deltaRate = -deltaRate;
+            }
+        } else if (!strncmp(arg, "-Q", 2)) {
+            deltaRateMs = atoi(&arg[2]);
         } else if (!strcmp(arg, "-r")) {
             enableReverb = SL_BOOLEAN_TRUE;
         } else {
@@ -143,6 +161,16 @@ int main(int argc, char **argv)
 
     if (argc - i != 1) {
         fprintf(stderr, "usage: [-b/l] [-8] [-f#] [-n#] [-p#] [-r] %s filename\n", argv[0]);
+        fprintf(stderr, "    -b  force big-endian byte order (default is native byte order)\n");
+        fprintf(stderr, "    -l  force little-endian byte order (default is native byte order)\n");
+        fprintf(stderr, "    -8  output 8-bits per sample (default is 16-bits per sample)\n");
+        fprintf(stderr, "    -f# frames per buffer (default 512)\n");
+        fprintf(stderr, "    -n# number of buffers (default 2)\n");
+        fprintf(stderr, "    -p# initial playback rate in per mille (default 1000)\n");
+        fprintf(stderr, "    -P# final playback rate in per mille (default same as -p#)\n");
+        fprintf(stderr, "    -q# magnitude of playback rate changes in per mille (default 1)\n");
+        fprintf(stderr, "    -Q# period between playback rate changes in ms (default 50)\n");
+        fprintf(stderr, "    -r  enable reverb (default disabled)\n");
         return EXIT_FAILURE;
     }
 
@@ -162,8 +190,9 @@ int main(int argc, char **argv)
         break;
     default:
         fprintf(stderr, "unsupported channel count %d\n", sfinfo.channels);
-        break;
+        goto close_sndfile;
     }
+
     switch (sfinfo.samplerate) {
     case  8000:
     case 11025:
@@ -177,15 +206,17 @@ int main(int argc, char **argv)
         break;
     default:
         fprintf(stderr, "unsupported sample rate %d\n", sfinfo.samplerate);
-        break;
+        goto close_sndfile;
     }
+
     switch (sfinfo.format & SF_FORMAT_TYPEMASK) {
     case SF_FORMAT_WAV:
         break;
     default:
         fprintf(stderr, "unsupported format type 0x%x\n", sfinfo.format & SF_FORMAT_TYPEMASK);
-        break;
+        goto close_sndfile;
     }
+
     switch (sfinfo.format & SF_FORMAT_SUBMASK) {
     case SF_FORMAT_PCM_16:
     case SF_FORMAT_PCM_U8:
@@ -195,7 +226,7 @@ int main(int argc, char **argv)
         break;
     default:
         fprintf(stderr, "unsupported sub-format 0x%x\n", sfinfo.format & SF_FORMAT_SUBMASK);
-        break;
+        goto close_sndfile;
     }
 
     buffers = (short *) malloc(framesPerBuffer * sfinfo.channels * sizeof(short) * numBuffers);
@@ -264,7 +295,10 @@ int main(int argc, char **argv)
     SLObjectItf playerObject;
     result = (*engineEngine)->CreateAudioPlayer(engineEngine, &playerObject, &audioSrc,
             &audioSnk, enableReverb ? 3 : 2, ids2, req2);
-    assert(SL_RESULT_SUCCESS == result);
+    if (SL_RESULT_SUCCESS != result) {
+        fprintf(stderr, "can't create audio player\n");
+        goto no_player;
+    }
 
     // realize the player
     result = (*playerObject)->Realize(playerObject, SL_BOOLEAN_FALSE);
@@ -291,14 +325,29 @@ int main(int argc, char **argv)
     result = (*playerPlaybackRate)->GetProperties(playerPlaybackRate, &defaultProperties);
     assert(SL_RESULT_SUCCESS == result);
     printf("default playback rate %d per mille, properties 0x%x\n", defaultRate, defaultProperties);
-    if (rate != defaultRate) {
-        result = (*playerPlaybackRate)->SetRate(playerPlaybackRate, rate);
+    if (initialRate <= 0) {
+        initialRate = defaultRate;
+    }
+    if (finalRate <= 0) {
+        finalRate = initialRate;
+    }
+    SLpermille currentRate = defaultRate;
+    if (finalRate == initialRate) {
+        deltaRate = 0;
+    } else if (finalRate < initialRate) {
+        deltaRate = -deltaRate;
+    }
+    if (initialRate != defaultRate) {
+        result = (*playerPlaybackRate)->SetRate(playerPlaybackRate, initialRate);
         if (SL_RESULT_FEATURE_UNSUPPORTED == result) {
-            fprintf(stderr, "playback rate %d is unsupported\n", rate);
+            fprintf(stderr, "initial playback rate %d is unsupported\n", initialRate);
+            deltaRate = 0;
         } else if (SL_RESULT_PARAMETER_INVALID == result) {
-            fprintf(stderr, "playback rate %d is invalid", rate);
+            fprintf(stderr, "initial playback rate %d is invalid\n", initialRate);
+            deltaRate = 0;
         } else {
             assert(SL_RESULT_SUCCESS == result);
+            currentRate = initialRate;
         }
     }
 
@@ -336,8 +385,9 @@ int main(int argc, char **argv)
         result = (*playerBufferQueue)->Enqueue(playerBufferQueue, buffer, nbytes);
         assert(SL_RESULT_SUCCESS == result);
     }
-    if (which >= numBuffers)
+    if (which >= numBuffers) {
         which = 0;
+    }
 
     // register a callback on the buffer queue
     result = (*playerBufferQueue)->RegisterCallback(playerBufferQueue, callback, NULL);
@@ -347,6 +397,12 @@ int main(int argc, char **argv)
     result = (*playerPlay)->SetPlayState(playerPlay, SL_PLAYSTATE_PLAYING);
     assert(SL_RESULT_SUCCESS == result);
 
+    // get the initial time
+    struct timespec prevTs;
+    clock_gettime(CLOCK_MONOTONIC, &prevTs);
+    long elapsedNs = 0;
+    long deltaRateNs = deltaRateMs * 1000000;
+
     // wait until the buffer queue is empty
     SLBufferQueueState bufqstate;
     for (;;) {
@@ -355,17 +411,54 @@ int main(int argc, char **argv)
         if (0 >= bufqstate.count) {
             break;
         }
-        sleep(1);
+        if (deltaRate == 0) {
+            sleep(1);
+        } else {
+            struct timespec curTs;
+            clock_gettime(CLOCK_MONOTONIC, &curTs);
+            elapsedNs += (curTs.tv_sec - prevTs.tv_sec) * 1000000000 +
+                    // this term can be negative
+                    (curTs.tv_nsec - prevTs.tv_nsec);
+            prevTs = curTs;
+            if (elapsedNs < deltaRateNs) {
+                usleep((deltaRateNs - elapsedNs) / 1000);
+                continue;
+            }
+            elapsedNs -= deltaRateNs;
+            SLpermille nextRate = currentRate + deltaRate;
+            result = (*playerPlaybackRate)->SetRate(playerPlaybackRate, nextRate);
+            if (SL_RESULT_SUCCESS != result) {
+                fprintf(stderr, "next playback rate %d is unsupported\n", nextRate);
+            } else if (SL_RESULT_PARAMETER_INVALID == result) {
+                fprintf(stderr, "next playback rate %d is invalid\n", nextRate);
+            } else {
+                assert(SL_RESULT_SUCCESS == result);
+            }
+            currentRate = nextRate;
+            if (currentRate >= max(initialRate, finalRate)) {
+                currentRate = max(initialRate, finalRate);
+                deltaRate = -abs(deltaRate);
+            } else if (currentRate <= min(initialRate, finalRate)) {
+                currentRate = min(initialRate, finalRate);
+                deltaRate = abs(deltaRate);
+            }
+        }
     }
 
     // destroy audio player
     (*playerObject)->Destroy(playerObject);
+
+no_player:
 
     // destroy output mix
     (*outputMixObject)->Destroy(outputMixObject);
 
     // destroy engine
     (*engineObject)->Destroy(engineObject);
+
+close_sndfile:
+
+    (void) sf_close(sndfile);
 
     return EXIT_SUCCESS;
 }
