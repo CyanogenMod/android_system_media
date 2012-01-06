@@ -66,7 +66,7 @@ enum AndroidObjectState {
 #define MPEG2_TS_PACKET_SYNC 0x47
 
 struct AudioPlayback_Parameters {
-    int streamType;
+    audio_stream_type_t streamType;
     int sessionId;
 };
 

@@ -95,7 +95,7 @@
     /** identifies which group of effects ("session") this player belongs to */
     int mSessionId;
     /** identifies the Android stream type playback will occur on */
-    int mStreamType;
+    audio_stream_type_t mStreamType;
     // FIXME consolidate the next several variables into one class to avoid placement new
     /** plays the PCM data for this player */
     android::sp<android::AudioTrack> mAudioTrack;
@@ -340,6 +340,6 @@ typedef struct CMediaPlayer_struct {
     /** identifies which group of effects ("session") this player belongs to */
     int mSessionId;
     /** identifies the Android stream type playback will occur on */
-    int mStreamType;
+    audio_stream_type_t mStreamType;
 #endif
 } CMediaPlayer;

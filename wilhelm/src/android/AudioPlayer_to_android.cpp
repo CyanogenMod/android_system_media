@@ -462,7 +462,7 @@ SLresult audioPlayer_setStreamType(CAudioPlayer* ap, SLint32 type) {
     SLresult result = SL_RESULT_SUCCESS;
     SL_LOGV("type %d", type);
 
-    int newStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
+    audio_stream_type_t newStreamType = ANDROID_DEFAULT_OUTPUT_STREAM_TYPE;
     switch(type) {
     case SL_ANDROID_STREAM_VOICE:
         newStreamType = AUDIO_STREAM_VOICE_CALL;
