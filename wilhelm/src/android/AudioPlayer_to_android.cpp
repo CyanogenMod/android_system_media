@@ -448,7 +448,7 @@ void audioPlayer_dispatch_headAtEnd_lockPlay(CAudioPlayer *ap, bool setPlayState
         SLresult result = EnqueueAsyncCallback_ppi(ap, playCallback, &ap->mPlay.mItf, playContext,
                 SL_PLAYEVENT_HEADATEND);
         if (SL_RESULT_SUCCESS != result) {
-            LOGW("Callback %p(%p, %p, SL_PLAYEVENT_HEADATEND) dropped", playCallback,
+            ALOGW("Callback %p(%p, %p, SL_PLAYEVENT_HEADATEND) dropped", playCallback,
                     &ap->mPlay.mItf, playContext);
         }
 #endif
@@ -825,7 +825,7 @@ static void sfplayer_handlePrefetchEvent(int event, int data1, int data2, void* 
             SLresult result = EnqueueAsyncCallback_ppi(ap, callback, &ap->mPlay.mItf,
                     callbackPContext, event);
             if (SL_RESULT_SUCCESS != result) {
-                LOGW("Callback %p(%p, %p, 0x%x) dropped", callback,
+                ALOGW("Callback %p(%p, %p, 0x%x) dropped", callback,
                         &ap->mPlay.mItf, callbackPContext, event);
             }
 #endif

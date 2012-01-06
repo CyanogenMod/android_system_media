@@ -439,17 +439,17 @@ int create_echo_reference(audio_format_t rdFormat,
 
     if (rdFormat != AUDIO_FORMAT_PCM_16_BIT ||
             rdFormat != wrFormat) {
-        LOGW("create_echo_reference bad format rd %d, wr %d", rdFormat, wrFormat);
+        ALOGW("create_echo_reference bad format rd %d, wr %d", rdFormat, wrFormat);
         return -EINVAL;
     }
     if ((rdChannelCount != 1 && rdChannelCount != 2) ||
             wrChannelCount != 2) {
-        LOGW("create_echo_reference bad channel count rd %d, wr %d", rdChannelCount, wrChannelCount);
+        ALOGW("create_echo_reference bad channel count rd %d, wr %d", rdChannelCount, wrChannelCount);
         return -EINVAL;
     }
 
     if (wrSamplingRate < rdSamplingRate) {
-        LOGW("create_echo_reference bad smp rate rd %d, wr %d", rdSamplingRate, wrSamplingRate);
+        ALOGW("create_echo_reference bad smp rate rd %d, wr %d", rdSamplingRate, wrSamplingRate);
         return -EINVAL;
     }
 

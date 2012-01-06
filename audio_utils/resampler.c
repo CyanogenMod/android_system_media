@@ -135,7 +135,7 @@ int resampler_resample_from_provider(struct resampler_itfe *resampler,
         }
         framesWr += outFrames;
         rsmp->frames_in -= inFrames;
-        LOGW_IF((framesWr != framesRq) && (rsmp->frames_in != 0),
+        ALOGW_IF((framesWr != framesRq) && (rsmp->frames_in != 0),
                 "ReSampler::resample() remaining %d frames in and %d frames out",
                 rsmp->frames_in, (framesRq - framesWr));
     }
@@ -217,7 +217,7 @@ int create_resampler(uint32_t inSampleRate,
                                       quality,
                                       &error);
     if (rsmp->speex_resampler == NULL) {
-        LOGW("ReSampler: Cannot create speex resampler: %s", speex_resampler_strerror(error));
+        ALOGW("ReSampler: Cannot create speex resampler: %s", speex_resampler_strerror(error));
         return -ENODEV;
     }
 

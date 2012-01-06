@@ -542,7 +542,7 @@ void GenericMediaPlayer::afterMediaPlayerPreparedSuccessfully() {
         // now that we know the channel count, re-calculate the volumes
         notify(PLAYEREVENT_CHANNEL_COUNT, channelCount, true /*async*/);
     } else {
-        LOGW("channel count is still unknown after prepare");
+        ALOGW("channel count is still unknown after prepare");
     }
     delete reply;
     // retrieve duration

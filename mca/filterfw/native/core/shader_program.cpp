@@ -943,7 +943,7 @@ ProgramVar ShaderProgram::GetAttribute(const std::string& name) const {
     LOGE("ShaderProgram: Error: Must link program before querying attributes!");
     return -1;
   } else if (name == PositionAttributeName() || name == TexCoordAttributeName()) {
-    LOGW("ShaderProgram: Attempting to overwrite internal vertex attribute '%s'!", name.c_str());
+    ALOGW("ShaderProgram: Attempting to overwrite internal vertex attribute '%s'!", name.c_str());
   }
   return glGetAttribLocation(program_, name.c_str());
 }

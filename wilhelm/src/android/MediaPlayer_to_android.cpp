@@ -142,7 +142,7 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
                     /*i2*/ 1 /*streamIndex, only one stream supported here, 0 is reserved*/,
                     /*p2*/ NULL /*pEventData, always NULL in OpenMAX AL 1.0.1*/,
                     /*p3*/ callbackPContext /*pContext*/);
-            LOGW_IF(SL_RESULT_SUCCESS != res,
+            ALOGW_IF(SL_RESULT_SUCCESS != res,
                         "Callback %p(%p, XA_STREAMCBEVENT_PROPERTYCHANGE, 1, NULL, %p) dropped",
                         callback, &mp->mStreamInfo.mItf, callbackPContext);
 #endif
@@ -172,7 +172,7 @@ static void player_handleMediaPlayerEventNotifications(int event, int data1, int
 #else
             SLresult res = EnqueueAsyncCallback_ppi(mp, playCallback, &mp->mPlay.mItf, playContext,
                     XA_PLAYEVENT_HEADATEND);
-            LOGW_IF(SL_RESULT_SUCCESS != res,
+            ALOGW_IF(SL_RESULT_SUCCESS != res,
                     "Callback %p(%p, %p, SL_PLAYEVENT_HEADATEND) dropped", playCallback,
                     &mp->mPlay.mItf, playContext);
 #endif

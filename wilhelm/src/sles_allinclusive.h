@@ -442,7 +442,7 @@ extern LI_API SLresult liQuerySupportedInterfaces(SLuint32 index, SLInterfaceID 
 //  SLresult result = EnqueueAsyncCallback_ppi(ap, playCallback, &ap->mPlay.mItf, playContext,
 //       SL_PLAYEVENT_HEADATEND);
 //  if (SL_RESULT_SUCCESS != result) {
-//    LOGW("Callback %p(%p, %p, SL_PLAYEVENT_HEADATEND) dropped", playCallback, &ap->mPlay.mItf,
+//    ALOGW("Callback %p(%p, %p, SL_PLAYEVENT_HEADATEND) dropped", playCallback, &ap->mPlay.mItf,
 //        playContext);
 //  }
 // which replaces:

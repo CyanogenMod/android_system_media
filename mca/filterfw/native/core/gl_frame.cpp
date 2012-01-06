@@ -367,9 +367,9 @@ bool GLFrame::ReadTexturePixels(uint8_t* pixels) const {
   // and unnecessary (this can only happen if the user is reading out data
   // that was just set, and not run through a filter), we warn the user about
   // this here.
-  LOGW("Warning: Reading pixel data from unfiltered GL frame. This is highly "
-       "inefficient. Please consider using your original pixel buffer "
-       "instead!");
+  ALOGW("Warning: Reading pixel data from unfiltered GL frame. This is highly "
+        "inefficient. Please consider using your original pixel buffer "
+        "instead!");
 
   // Create source frame set (unfortunately this requires an ugly const-cast,
   // as we need to wrap ourselves in a frame-set. Still, as this set is used
