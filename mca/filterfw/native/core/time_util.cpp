@@ -63,7 +63,7 @@ void NamedStopWatch::Stop() {
         mTotalUSec += stopUSec - mStartUSec;
         if (mNumCalls % mLoggingPeriodInFrames == 0) {
             const float mSec = TotalUSec() * 1.0E-3f / NumCalls();
-            LOGE("%s: %f ms", Name().c_str(), mSec);
+            ALOGE("%s: %f ms", Name().c_str(), mSec);
         }
     }
     mStartUSec = 0;

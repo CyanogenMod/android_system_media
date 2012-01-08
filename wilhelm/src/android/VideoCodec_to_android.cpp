@@ -65,7 +65,7 @@ bool android_videoCodec_expose() {
 
     sp<IOMX> omx(service->getOMX());
     if (omx.get() == NULL) {
-        LOGE("android_videoCodec_expose() couldn't access OMX interface");
+        ALOGE("android_videoCodec_expose() couldn't access OMX interface");
         return false;
     }
 

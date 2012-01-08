@@ -107,7 +107,7 @@ jboolean Java_android_filterfw_core_NativeProgram_callNativeSetValue(JNIEnv* env
                                                                      jstring key,
                                                                      jstring value) {
   if (!value) {
-    LOGE("Native Program: Attempting to set null value for key %s!",
+    ALOGE("Native Program: Attempting to set null value for key %s!",
          ToCppString(env, key).c_str());
   }
   NativeProgram* program = ConvertFromJava<NativeProgram>(env, thiz);
@@ -149,7 +149,7 @@ jboolean Java_android_filterfw_core_NativeProgram_callNativeProcess(JNIEnv* env,
     if (input) {
         NativeFrame* native_frame = ConvertFromJava<NativeFrame>(env, input);
         if (!native_frame) {
-          LOGE("NativeProgram: Could not grab NativeFrame input %d!", i);
+          ALOGE("NativeProgram: Could not grab NativeFrame input %d!", i);
           return JNI_FALSE;
         }
         input_data = reinterpret_cast<const char*>(native_frame->Data());
@@ -165,7 +165,7 @@ jboolean Java_android_filterfw_core_NativeProgram_callNativeProcess(JNIEnv* env,
   if (output) {
     NativeFrame* output_frame = ConvertFromJava<NativeFrame>(env, output);
     if (!output_frame) {
-      LOGE("NativeProgram: Could not grab NativeFrame output!");
+      ALOGE("NativeProgram: Could not grab NativeFrame output!");
       return JNI_FALSE;
     }
     output_data = reinterpret_cast<char*>(output_frame->MutableData());

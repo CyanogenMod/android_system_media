@@ -46,7 +46,7 @@ bool NativeProgram::OpenLibrary(const std::string& lib_name) {
   if (!lib_handle_) {
     lib_handle_ = dlopen(lib_name.c_str(), RTLD_NOW);
     if (!lib_handle_) {
-      LOGE("NativeProgram: Error opening library: '%s': %s", lib_name.c_str(), dlerror());
+      ALOGE("NativeProgram: Error opening library: '%s': %s", lib_name.c_str(), dlerror());
       return false;
     }
     return true;
@@ -59,7 +59,7 @@ bool NativeProgram::BindProcessFunction(const std::string& func_name) {
     return false;
   process_function_ = reinterpret_cast<ProcessFunctionPtr>(dlsym(lib_handle_, func_name.c_str()));
   if (!process_function_) {
-    LOGE("NativeProgram: Could not find process function symbol: '%s'!", func_name.c_str());
+    ALOGE("NativeProgram: Could not find process function symbol: '%s'!", func_name.c_str());
     return false;
   }
   return true;

@@ -301,7 +301,7 @@ static jboolean enqueueInitialBuffers(jboolean discontinuity)
     nbRead = fread(dataCache, BUFFER_SIZE, NB_BUFFERS, file);
     if (nbRead <= 0) {
         // could be premature EOF or I/O error
-        LOGE("Error filling cache, exiting\n");
+        ALOGE("Error filling cache, exiting\n");
         return JNI_FALSE;
     }
     assert(1 <= nbRead && nbRead <= NB_BUFFERS);
@@ -349,7 +349,7 @@ jboolean Java_com_example_nativemedia_NativeMedia_createStreamingMediaPlayer(JNI
     // open the file to play
     file = fopen(utf8, "rb");
     if (file == NULL) {
-        LOGE("Failed to open %s", utf8);
+        ALOGE("Failed to open %s", utf8);
         return JNI_FALSE;
     }
 

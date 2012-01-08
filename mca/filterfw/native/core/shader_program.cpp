@@ -185,13 +185,13 @@ bool ShaderProgram::Process(const std::vector<const GLTextureHandle*>& input,
 
   // Abort if program did not successfully compile and link
   if (!IsExecutable()) {
-    LOGE("ShaderProgram: unexecutable program!");
+    ALOGE("ShaderProgram: unexecutable program!");
     return false;
   }
 
   // Focus the FBO of the output
   if (!output->FocusFrameBuffer()) {
-    LOGE("Unable to focus frame buffer");
+    ALOGE("Unable to focus frame buffer");
     return false;
   }
 
@@ -205,7 +205,7 @@ bool ShaderProgram::Process(const std::vector<const GLTextureHandle*>& input,
       const GLuint tex_id = input[i]->GetTextureId();
       const GLenum target = input[i]->GetTextureTarget();
       if (tex_id == 0) {
-        LOGE("ShaderProgram: invalid texture id at input: %d!", i);
+        ALOGE("ShaderProgram: invalid texture id at input: %d!", i);
         return false;
       }
       textures.push_back(tex_id);
@@ -215,7 +215,7 @@ bool ShaderProgram::Process(const std::vector<const GLTextureHandle*>& input,
 
   // And render!
   if (!RenderFrame(textures, targets)) {
-    LOGE("Unable to render frame");
+    ALOGE("Unable to render frame");
     return false;
   }
   return true;
@@ -262,7 +262,7 @@ void ShaderProgram::SetTargetRegion(const Quad& quad) {
 bool ShaderProgram::CompileAndLink() {
   // Make sure we haven't compiled and linked already
   if (vertex_shader_ != 0 || fragment_shader_ != 0 || program_ != 0) {
-    LOGE("Attempting to re-compile shaders!");
+    ALOGE("Attempting to re-compile shaders!");
     return false;
   }
 
@@ -270,7 +270,7 @@ bool ShaderProgram::CompileAndLink() {
   vertex_shader_ = CompileShader(GL_VERTEX_SHADER,
                                  vertex_shader_source_.c_str());
   if (!vertex_shader_) {
-    LOGE("Shader compilation failed!");
+    ALOGE("Shader compilation failed!");
     return false;
   }
 
@@ -293,7 +293,7 @@ bool ShaderProgram::CompileAndLink() {
     ProgramVar pos_coord_attr = glGetAttribLocation(program_, PositionAttributeName().c_str());
     manage_coordinates_ = (tex_coord_attr >= 0 && pos_coord_attr >= 0);
   } else {
-    LOGE("Could not link shader program!");
+    ALOGE("Could not link shader program!");
     return false;
   }
 
@@ -315,18 +315,18 @@ GLuint ShaderProgram::CompileShader(GLenum shader_type, const char* source) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
     if (!compiled) {
       // Log the compilation error messages
-      LOGE("Problem compiling shader! Source:");
-      LOGE("%s", source);
+      ALOGE("Problem compiling shader! Source:");
+      ALOGE("%s", source);
       std::string src(source);
       unsigned int cur_pos = 0;
       unsigned int next_pos = 0;
       int line_number = 1;
       while ( (next_pos = src.find_first_of('\n', cur_pos)) != std::string::npos) {
-        LOGE("%03d : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
+        ALOGE("%03d : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
         cur_pos = next_pos + 1;
         line_number++;
       }
-      LOGE("%03d : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
+      ALOGE("%03d : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
 
       GLint log_length = 0;
       glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
@@ -334,7 +334,7 @@ GLuint ShaderProgram::CompileShader(GLenum shader_type, const char* source) {
         char* error_log = new char[log_length];
         if (error_log) {
           glGetShaderInfoLog(shader, log_length, NULL, error_log);
-          LOGE("Shader compilation error %d:\n%s\n", shader_type, error_log);
+          ALOGE("Shader compilation error %d:\n%s\n", shader_type, error_log);
           delete[] error_log;
         }
       }
@@ -368,7 +368,7 @@ GLuint ShaderProgram::LinkProgram(GLuint* shaders, GLuint count) {
         char* error_log = new char[log_length];
         if (error_log) {
           glGetProgramInfoLog(program, log_length, NULL, error_log);
-          LOGE("Program Linker Error:\n%s\n", error_log);
+          ALOGE("Program Linker Error:\n%s\n", error_log);
           delete[] error_log;
         }
       }
@@ -442,7 +442,7 @@ bool ShaderProgram::BindInputTextures(const std::vector<GLuint>& textures,
     if (tex_var >= 0) {
       glUniform1i(tex_var, i);
     } else {
-      LOGE("ShaderProgram: Shader does not seem to support %d number of "
+      ALOGE("ShaderProgram: Shader does not seem to support %d number of "
            "inputs! Missing uniform 'tex_sampler_%d'!", textures.size(), i);
       return false;
     }
@@ -467,20 +467,20 @@ bool ShaderProgram::RenderFrame(const std::vector<GLuint>& textures,
                                 const std::vector<GLenum>& targets) {
   // Make sure we have enough texture units to accomodate the textures
   if (textures.size() > static_cast<unsigned>(MaxTextureUnits())) {
-    LOGE("ShaderProgram: Number of input textures is unsupported on this "
+    ALOGE("ShaderProgram: Number of input textures is unsupported on this "
          "platform!");
     return false;
   }
 
   // Prepare to render
   if (!BeginDraw()) {
-    LOGE("ShaderProgram: couldn't initialize gl for drawing!");
+    ALOGE("ShaderProgram: couldn't initialize gl for drawing!");
     return false;
   }
 
   // Bind input textures
   if (!BindInputTextures(textures, targets)) {
-    LOGE("BindInputTextures failed");
+    ALOGE("BindInputTextures failed");
     return false;
   }
 
@@ -618,7 +618,7 @@ bool ShaderProgram::CheckValueCount(const std::string& var_type,
                                     int components,
                                     int value_size) {
   if (expected_count != (value_size / components)) {
-    LOGE("Shader Program: %s Value Error (%s): Expected value length %d "
+    ALOGE("Shader Program: %s Value Error (%s): Expected value length %d "
          "(%d components), but received length of %d (%d components)!",
          var_type.c_str(), var_name.c_str(),
          expected_count, components * expected_count,
@@ -633,7 +633,7 @@ bool ShaderProgram::CheckValueMult(const std::string& var_type,
                                    int components,
                                    int value_size) {
   if (value_size % components != 0) {
-    LOGE("Shader Program: %s Value Error (%s): Value must be multiple of %d, "
+    ALOGE("Shader Program: %s Value Error (%s): Value must be multiple of %d, "
          "but %d elements were passed!", var_type.c_str(), var_name.c_str(),
          components, value_size);
     return false;
@@ -643,7 +643,7 @@ bool ShaderProgram::CheckValueMult(const std::string& var_type,
 
 bool ShaderProgram::CheckVarValid(ProgramVar var) {
   if (!IsVarValid(var)) {
-    LOGE("Shader Program: Attempting to access invalid variable!");
+    ALOGE("Shader Program: Attempting to access invalid variable!");
     return false;
   }
   return true;
@@ -652,7 +652,7 @@ bool ShaderProgram::CheckVarValid(ProgramVar var) {
 // Uniforms ////////////////////////////////////////////////////////////////////
 bool ShaderProgram::CheckUniformValid(ProgramVar var) {
   if (!IsVarValid(var) || uniform_indices_.find(var) == uniform_indices_.end()) {
-    LOGE("Shader Program: Attempting to access unknown uniform %d!", var);
+    ALOGE("Shader Program: Attempting to access unknown uniform %d!", var);
     return false;
   }
   return true;
@@ -669,7 +669,7 @@ int ShaderProgram::MaxUniformCount() {
 
 ProgramVar ShaderProgram::GetUniform(const std::string& name) const {
   if (!IsExecutable()) {
-    LOGE("ShaderProgram: Error: Must link program before querying uniforms!");
+    ALOGE("ShaderProgram: Error: Must link program before querying uniforms!");
     return -1;
   }
   return glGetUniformLocation(program_, name.c_str());
@@ -940,7 +940,7 @@ int ShaderProgram::MaxAttributeCount() {
 
 ProgramVar ShaderProgram::GetAttribute(const std::string& name) const {
   if (!IsExecutable()) {
-    LOGE("ShaderProgram: Error: Must link program before querying attributes!");
+    ALOGE("ShaderProgram: Error: Must link program before querying attributes!");
     return -1;
   } else if (name == PositionAttributeName() || name == TexCoordAttributeName()) {
     ALOGW("ShaderProgram: Attempting to overwrite internal vertex attribute '%s'!", name.c_str());
@@ -1014,7 +1014,7 @@ bool ShaderProgram::SetAttributeValues(ProgramVar var,
 
   // Make sure the passed data vector has a valid size
   if (total  % components != 0) {
-    LOGE("ShaderProgram: Invalid attribute vector given! Specified a component "
+    ALOGE("ShaderProgram: Invalid attribute vector given! Specified a component "
          "count of %d, but passed a non-multiple vector of size %d!",
          components, total);
     return false;

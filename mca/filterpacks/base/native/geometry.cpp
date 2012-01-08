@@ -137,7 +137,7 @@ bool SlantedRect::FromCenterAxisAndLengths(const Point& center,
                                            const Point& lengths) {
   Point dy = vert_axis;
   if (!dy.ScaleTo(lengths.y() / 2.0f)) {
-    LOGE("Illegal axis: %f %f", vert_axis.x(), vert_axis.y());
+    ALOGE("Illegal axis: %f %f", vert_axis.x(), vert_axis.y());
     return false;
   }
 

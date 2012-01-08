@@ -120,7 +120,7 @@ protected:
     // Receives notifications about death of media.player service
     const sp<MediaPlayerDeathNotifier> mPlayerDeathNotifier;
 
-    // Return a reference to the media player service, or LOGE and return NULL after retries fail
+    // Return a reference to the media player service, or ALOGE and return NULL after retries fail
     static const sp<IMediaPlayerService> getMediaPlayerService() {
         return IMediaDeathNotifier::getMediaPlayerService();
     }

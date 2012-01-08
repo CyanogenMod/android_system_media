@@ -55,7 +55,7 @@ void JavaObject::Retain() {
   if (ref_count_)
     ++(*ref_count_);
   else
-    LOGE("JavaObject: Reference count is NULL! JavaObject may be corrupted.");
+    ALOGE("JavaObject: Reference count is NULL! JavaObject may be corrupted.");
 }
 
 void JavaObject::Release() {
@@ -65,14 +65,14 @@ void JavaObject::Release() {
     if (*ref_count_ == 0) {
       JNIEnv* env = GetCurrentJNIEnv();
       if (!env)
-        LOGE("JavaObject: Releasing outside of Java thread. Will just leak!");
+        ALOGE("JavaObject: Releasing outside of Java thread. Will just leak!");
       else if (object_)
         env->DeleteGlobalRef(object_);
       delete ref_count_;
       ref_count_ = NULL;
     }
   } else {
-    LOGE("JavaObject: Reference count is NULL! JavaObject may be corrupted.");
+    ALOGE("JavaObject: Reference count is NULL! JavaObject may be corrupted.");
   }
 }
 

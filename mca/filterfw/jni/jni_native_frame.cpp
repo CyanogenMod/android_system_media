@@ -172,7 +172,7 @@ jboolean Java_android_filterfw_core_NativeFrame_setNativeBitmap(JNIEnv* env,
   if (frame && bitmap) {
     // Make sure frame size matches bitmap size
     if ((size / 4) != (frame->Size() / bytes_per_sample)) {
-      LOGE("Size mismatch in native setBitmap()!");
+      ALOGE("Size mismatch in native setBitmap()!");
       return JNI_FALSE;
     }
 
@@ -204,7 +204,7 @@ jboolean Java_android_filterfw_core_NativeFrame_setNativeBitmap(JNIEnv* env,
           break;
         }
         default:
-          LOGE("Unsupported bytes-per-pixel %d in setBitmap!", bytes_per_sample);
+          ALOGE("Unsupported bytes-per-pixel %d in setBitmap!", bytes_per_sample);
           break;
       }
       return (AndroidBitmap_unlockPixels(env, bitmap) == ANDROID_BITMAP_RESUT_SUCCESS);
@@ -225,7 +225,7 @@ jboolean Java_android_filterfw_core_NativeFrame_getNativeBitmap(JNIEnv* env,
     if (result == ANDROID_BITMAP_RESUT_SUCCESS) {
       // Make sure frame size matches bitmap size
       if ((size / 4) != (frame->Size() / bytes_per_sample)) {
-        LOGE("Size mismatch in native getBitmap()!");
+        ALOGE("Size mismatch in native getBitmap()!");
         return JNI_FALSE;
       }
 
@@ -256,7 +256,7 @@ jboolean Java_android_filterfw_core_NativeFrame_getNativeBitmap(JNIEnv* env,
           break;
         }
         default:
-          LOGE("Unsupported bytes-per-pixel %d in getBitmap!", bytes_per_sample);
+          ALOGE("Unsupported bytes-per-pixel %d in getBitmap!", bytes_per_sample);
           break;
       }
       return (AndroidBitmap_unlockPixels(env, bitmap) == ANDROID_BITMAP_RESUT_SUCCESS);

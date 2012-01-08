@@ -47,7 +47,7 @@ bool VertexFrame::WriteData(const uint8_t* data, int size) {
   // Create buffer if not created already
   const bool first_upload = !HasVBO();
   if (first_upload && !CreateBuffer()) {
-    LOGE("VertexFrame: Could not create vertex buffer!");
+    ALOGE("VertexFrame: Could not create vertex buffer!");
     return false;
   }
 
@@ -61,7 +61,7 @@ bool VertexFrame::WriteData(const uint8_t* data, int size) {
   else if (!first_upload && size <= size_)
     glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
   else {
-    LOGE("VertexFrame: Attempting to upload more data (%d bytes) than fits "
+    ALOGE("VertexFrame: Attempting to upload more data (%d bytes) than fits "
          "inside the vertex frame (%d bytes)!", size, size_);
     return false;
   }

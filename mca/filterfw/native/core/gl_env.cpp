@@ -71,7 +71,7 @@ GLEnv::~GLEnv() {
 
   // Log error if this did not work
   if (CheckEGLError("TearDown!"))
-    LOGE("GLEnv: Error tearing down GL Environment!");
+    ALOGE("GLEnv: Error tearing down GL Environment!");
 }
 
 bool GLEnv::IsInitialized() const {
@@ -123,7 +123,7 @@ bool GLEnv::InitWithCurrentContext() {
 
 bool GLEnv::InitWithNewContext() {
   if (IsInitialized()) {
-    LOGE("GLEnv: Attempting to reinitialize environment!");
+    ALOGE("GLEnv: Attempting to reinitialize environment!");
     return false;
   }
 
@@ -155,7 +155,7 @@ bool GLEnv::InitWithNewContext() {
 
   eglChooseConfig(display(), configAttribs, &config, 1, &numConfigs);
   if (numConfigs < 1) {
-    LOGE("GLEnv::Init: No suitable EGL configuration found!");
+    ALOGE("GLEnv::Init: No suitable EGL configuration found!");
     return false;
   }
 
@@ -296,7 +296,7 @@ void GLEnv::ReleaseContextId(int context_id) {
 bool GLEnv::CheckGLError(const std::string& op) {
   bool err = false;
   for (GLint error = glGetError(); error; error = glGetError()) {
-    LOGE("GL Error: Operation '%s' caused GL error (0x%x)\n",
+    ALOGE("GL Error: Operation '%s' caused GL error (0x%x)\n",
          op.c_str(),
          error);
     err = true;
@@ -309,7 +309,7 @@ bool GLEnv::CheckEGLError(const std::string& op) {
   for (EGLint error = eglGetError();
        error != EGL_SUCCESS;
        error = eglGetError()) {
-    LOGE("EGL Error: Operation '%s' caused EGL error (0x%x)\n",
+    ALOGE("EGL Error: Operation '%s' caused EGL error (0x%x)\n",
          op.c_str(),
          error);
     err = true;
@@ -324,17 +324,17 @@ bool GLEnv::CheckEGLMakeCurrentError() {
        error = eglGetError()) {
     switch (error) {
       case EGL_BAD_DISPLAY:
-        LOGE("EGL Error: Attempting to activate context with bad display!");
+        ALOGE("EGL Error: Attempting to activate context with bad display!");
         break;
       case EGL_BAD_SURFACE:
-        LOGE("EGL Error: Attempting to activate context with bad surface!");
+        ALOGE("EGL Error: Attempting to activate context with bad surface!");
         break;
       case EGL_BAD_ACCESS:
-        LOGE("EGL Error: Attempting to activate context, which is "
+        ALOGE("EGL Error: Attempting to activate context, which is "
              "already active in another thread!");
         break;
       default:
-        LOGE("EGL Error: Making EGL rendering context current caused "
+        ALOGE("EGL Error: Making EGL rendering context current caused "
              "error: 0x%x\n", error);
     }
     err = true;

@@ -82,7 +82,7 @@ jboolean Java_android_filterfw_core_ShaderProgram_setUniformValue(JNIEnv* env,
   if (c_value.value) {
     return ToJBool(program && program->SetUniformValue(c_key, c_value));
   } else {
-    LOGE("ShaderProgram: Could not convert java object value passed for key '%s'!", c_key.c_str());
+    ALOGE("ShaderProgram: Could not convert java object value passed for key '%s'!", c_key.c_str());
     return JNI_FALSE;
   }
 }
@@ -108,7 +108,7 @@ jboolean Java_android_filterfw_core_ShaderProgram_shaderProcess(JNIEnv* env,
       jobject input = env->GetObjectArrayElement(inputs, i);
       const GLFrame* input_frame = ConvertFromJava<GLFrame>(env, input);
       if (!input || !input_frame) {
-        LOGE("ShaderProgram: invalid input frame %d!", i);
+        ALOGE("ShaderProgram: invalid input frame %d!", i);
         return JNI_FALSE;
       }
       input_frames.push_back(input_frame);
@@ -117,13 +117,13 @@ jboolean Java_android_filterfw_core_ShaderProgram_shaderProcess(JNIEnv* env,
     // Get the output frame
     GLFrame* output_frame = ConvertFromJava<GLFrame>(env, output);
     if (!output_frame) {
-      LOGE("ShaderProgram: no output frame found!");
+      ALOGE("ShaderProgram: no output frame found!");
       return JNI_FALSE;
     }
 
     // Process the frames!
     if (!program->Process(input_frames, output_frame)) {
-      LOGE("ShaderProgram: error processing shader!");
+      ALOGE("ShaderProgram: error processing shader!");
       return JNI_FALSE;
     }
 
