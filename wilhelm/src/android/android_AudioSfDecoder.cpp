@@ -696,7 +696,7 @@ CacheStatus_t AudioSfDecoder::getCacheRemaining(bool *eos) {
 
             //   fill level is ratio of how much has been played + how much is
             //   cached, divided by total duration
-            uint32_t currentPositionUsec = getPositionUsec();
+            int64_t currentPositionUsec = getPositionUsec();
             if (currentPositionUsec == ANDROID_UNKNOWN_TIME) {
                 // if we don't know where we are, assume the worst for the fill ratio
                 currentPositionUsec = 0;
