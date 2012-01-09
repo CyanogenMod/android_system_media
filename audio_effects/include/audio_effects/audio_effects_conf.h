@@ -40,13 +40,15 @@
 #define FLOAT_TAG "float"
 #define BOOL_TAG "bool"
 #define STRING_TAG "string"
-#define MIC_SRC_TAG "mic"
-#define VOICE_UL_SRC_TAG "voice_uplink"
-#define VOICE_DL_SRC_TAG "voice_downlink"
-#define VOICE_CALL_SRC_TAG "voice_call"
-#define CAMCORDER_SRC_TAG "camcorder"
-#define VOICE_REC_SRC_TAG "voice_recognition"
-#define VOICE_COMM_SRC_TAG "voice_communication"
+
+// audio_source_t
+#define MIC_SRC_TAG "mic"                           // AUDIO_SOURCE_MIC
+#define VOICE_UL_SRC_TAG "voice_uplink"             // AUDIO_SOURCE_VOICE_UPLINK
+#define VOICE_DL_SRC_TAG "voice_downlink"           // AUDIO_SOURCE_VOICE_DOWNLINK
+#define VOICE_CALL_SRC_TAG "voice_call"             // AUDIO_SOURCE_VOICE_CALL
+#define CAMCORDER_SRC_TAG "camcorder"               // AUDIO_SOURCE_CAMCORDER
+#define VOICE_REC_SRC_TAG "voice_recognition"       // AUDIO_SOURCE_VOICE_RECOGNITION
+#define VOICE_COMM_SRC_TAG "voice_communication"    // AUDIO_SOURCE_VOICE_COMMUNICATION
 
 
 #endif  // ANDROID_AUDIO_EFFECTS_CONF_H
