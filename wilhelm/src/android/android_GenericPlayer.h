@@ -60,22 +60,22 @@ public:
     GenericPlayer(const AudioPlayback_Parameters* params);
     virtual ~GenericPlayer();
 
-    virtual void init(const notif_cbf_t cbf, void* notifUser);
+    void init(const notif_cbf_t cbf, void* notifUser);
     virtual void preDestroy();
 
     void setDataSource(const char *uri);
     void setDataSource(int fd, int64_t offset, int64_t length, bool closeAfterUse = false);
 
-            void prepare();
+    void prepare();
     virtual void play();
-    virtual void pause();
-    virtual void stop();
+    void pause();
+    void stop();
     // timeMsec must be >= 0 or == ANDROID_UNKNOWN_TIME (used by StreamPlayer after discontinuity)
-    virtual void seek(int64_t timeMsec);
-    virtual void loop(bool loop);
-    virtual void setBufferingUpdateThreshold(int16_t thresholdPercent);
+    void seek(int64_t timeMsec);
+    void loop(bool loop);
+    void setBufferingUpdateThreshold(int16_t thresholdPercent);
 
-    virtual void getDurationMsec(int* msec); //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
+    void getDurationMsec(int* msec); //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
     virtual void getPositionMsec(int* msec) = 0; //msec != NULL, ANDROID_UNKNOWN_TIME if unknown
 
     virtual void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {}
