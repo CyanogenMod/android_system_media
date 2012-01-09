@@ -129,7 +129,7 @@ bool Rect::ScaleWithLengthLimit(float factor, float max_length) {
 }
 
 const Point& Quad::point(int ix) const {
-  LOG_ASSERT(ix < static_cast<int>(points_.size()), "Access out of bounds");
+  ALOG_ASSERT(ix < static_cast<int>(points_.size()), "Access out of bounds");
   return points_[ix];
 }
 

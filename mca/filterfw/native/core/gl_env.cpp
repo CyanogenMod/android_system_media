@@ -345,7 +345,7 @@ bool GLEnv::CheckEGLMakeCurrentError() {
 GLuint GLEnv::GetCurrentProgram() {
   GLint result;
   glGetIntegerv(GL_CURRENT_PROGRAM, &result);
-  LOG_ASSERT(result >= 0);
+  ALOG_ASSERT(result >= 0);
   return static_cast<GLuint>(result);
 }
 
