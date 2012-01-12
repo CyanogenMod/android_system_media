@@ -44,7 +44,7 @@ static inline uint32_t sles_to_android_sampleRate(SLuint32 sampleRateMilliHertz)
     return (uint32_t)(sampleRateMilliHertz / 1000);
 }
 
-static inline int sles_to_android_sampleFormat(SLuint32 pcmFormat) {
+static inline audio_format_t sles_to_android_sampleFormat(SLuint32 pcmFormat) {
     switch (pcmFormat) {
         case SL_PCMSAMPLEFORMAT_FIXED_16:
             return AUDIO_FORMAT_PCM_16_BIT;
