@@ -29,3 +29,12 @@ void ditherAndClamp(int32_t* out, int32_t const *sums, size_t c)
         *out++ = (r<<16) | (l & 0xFFFF);
     }
 }
+
+void memcpy_to_i16_from_u8(int16_t *dst, const uint8_t *src, size_t count)
+{
+    dst += count;
+    src += count;
+    while (count--) {
+        *--dst = (int16_t)(*--src - 0x80) << 8;
+    }
+}

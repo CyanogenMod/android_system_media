@@ -34,6 +34,16 @@ __BEGIN_DECLS
  */
 void ditherAndClamp(int32_t* out, const int32_t *sums, size_t c);
 
+/* Expand and copy samples from unsigned 8-bit offset by 0x80 to signed 16-bit.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ */
+void memcpy_to_i16_from_u8(int16_t *dst, const uint8_t *src, size_t count);
+
 /**
  * Clamp (aka hard limit or clip) a signed 32-bit sample to 16-bit range.
  */
