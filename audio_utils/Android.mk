@@ -6,6 +6,7 @@ LOCAL_MODULE := libaudioutils
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES:= \
+	fixedfft.cpp.arm \
 	primitives.c \
 	resampler.c \
 	echo_reference.c
