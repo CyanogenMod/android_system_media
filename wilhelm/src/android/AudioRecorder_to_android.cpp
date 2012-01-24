@@ -39,7 +39,7 @@ static FILE* gMonitorFp = NULL;
 SLresult audioRecorder_setPreset(CAudioRecorder* ar, SLuint32 recordPreset) {
     SLresult result = SL_RESULT_SUCCESS;
 
-    int newRecordSource = AUDIO_SOURCE_DEFAULT;
+    audio_source_t newRecordSource = AUDIO_SOURCE_DEFAULT;
     switch (recordPreset) {
     case SL_ANDROID_RECORDING_PRESET_GENERIC:
         newRecordSource = AUDIO_SOURCE_DEFAULT;

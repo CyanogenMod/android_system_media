@@ -149,7 +149,7 @@
 #ifdef ANDROID
     enum AndroidObjectType mAndroidObjType;
     android::AudioRecord *mAudioRecord; //FIXME candidate to be encapsulated in a ARecorder subclass
-    int mRecordSource;                  //FIXME candidate to be encapsulated in a ARecorder subclass
+    audio_source_t mRecordSource;       //FIXME candidate to be encapsulated in a ARecorder subclass
 #endif
 } /*CAudioRecorder*/;
 
