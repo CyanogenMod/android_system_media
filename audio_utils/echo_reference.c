@@ -56,7 +56,7 @@ struct echo_reference {
     int32_t  playback_delay;        // playback buffer delay indicated by last write()
     pthread_mutex_t lock;                      // mutex protecting read/write concurrency
     pthread_cond_t cond;                       // condition signaled when data is ready to read
-    struct resampler_itfe *down_sampler;       // input resampler
+    struct resampler_itfe *resampler;          // input resampler
     struct resampler_buffer_provider provider; // resampler buffer provider
 };
 
@@ -115,6 +115,11 @@ static void echo_reference_reset_l(struct echo_reference *er)
     er->wr_render_time.tv_nsec = 0;
 }
 
+/* additional space in resampler buffer allowing for extra samples to be returned
+ * by speex resampler when sample rates ratio is not an integer.
+ */
+#define RESAMPLER_HEADROOM_SAMPLES   10
+
 static int echo_reference_write(struct echo_reference_itfe *echo_reference,
                          struct echo_reference_buffer *buffer)
 {
@@ -149,8 +154,8 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
 
     if ((er->state & ECHOREF_WRITING) == 0) {
         ALOGV("echo_reference_write() start write");
-        if (er->down_sampler != NULL) {
-            er->down_sampler->reset(er->down_sampler);
+        if (er->resampler != NULL) {
+            er->resampler->reset(er->resampler);
         }
         er->state |= ECHOREF_WRITING;
     }
@@ -169,14 +174,14 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
     // do stereo to mono and down sampling if necessary
     if (er->rd_channel_count != er->wr_channel_count ||
             er->rd_sampling_rate != er->wr_sampling_rate) {
-        if (er->wr_buf_size < buffer->frame_count) {
-            er->wr_buf_size = buffer->frame_count;
-            //max buffer size is normally function of read sampling rate but as write sampling rate
-            //is always more than read sampling rate this works
+
+        inFrames = (buffer->frame_count * er->rd_sampling_rate) / er->wr_sampling_rate +
+                                                RESAMPLER_HEADROOM_SAMPLES;
+        if (er->wr_buf_size < inFrames) {
+            er->wr_buf_size = inFrames;
             er->wr_buf = realloc(er->wr_buf, er->wr_buf_size * er->rd_frame_size);
         }
 
-        inFrames = buffer->frame_count;
         if (er->rd_channel_count != er->wr_channel_count) {
             // must be stereo to mono
             int16_t *src16 = (int16_t *)buffer->raw;
@@ -188,7 +193,7 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
             }
         }
         if (er->wr_sampling_rate != er->rd_sampling_rate) {
-            if (er->down_sampler == NULL) {
+            if (er->resampler == NULL) {
                 int rc;
                 ALOGV("echo_reference_write() new ReSampler(%d, %d)",
                       er->wr_sampling_rate, er->rd_sampling_rate);
@@ -199,9 +204,9 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
                                  er->rd_channel_count,
                                  RESAMPLER_QUALITY_VOIP,
                                  &er->provider,
-                                 &er->down_sampler);
+                                 &er->resampler);
                 if (rc != 0) {
-                    er->down_sampler = NULL;
+                    er->resampler = NULL;
                     ALOGV("echo_reference_write() failure to create resampler %d", rc);
                     status = -ENODEV;
                     goto exit;
@@ -219,9 +224,9 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
             // inFrames is updated by resample() with the number of frames produced
             ALOGV("echo_reference_write() ReSampling(%d, %d)",
                   er->wr_sampling_rate, er->rd_sampling_rate);
-            er->down_sampler->resample_from_provider(er->down_sampler,
+            er->resampler->resample_from_provider(er->resampler,
                                                      (int16_t *)er->wr_buf, &inFrames);
-            ALOGV_IF(er->wr_frames_in != 0,
+            ALOGW_IF(er->wr_frames_in != 0,
                     "echo_reference_write() er->wr_frames_in not 0 (%d) after resampler",
                     er->wr_frames_in);
         }
@@ -480,8 +485,8 @@ void release_echo_reference(struct echo_reference_itfe *echo_reference) {
 
     ALOGV("EchoReference dstor");
     echo_reference_reset_l(er);
-    if (er->down_sampler != NULL) {
-        release_resampler(er->down_sampler);
+    if (er->resampler != NULL) {
+        release_resampler(er->resampler);
     }
     free(er);
 }
