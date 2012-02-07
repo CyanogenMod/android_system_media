@@ -13,7 +13,43 @@
 # limitations under the License.
 #
 
-TOP_LOCAL_PATH:= $(call my-dir)
+LOCAL_PATH := $(call my-dir)
 
-include $(call all-subdir-makefiles)
+##
+# base
+##
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_MODULE := libfilterpack_base
+LOCAL_SRC_FILES := native/base/geometry.cpp \
+                   native/base/time_util.cpp
+
+LOCAL_CFLAGS := -DANDROID
+
+include external/stlport/libstlport.mk
+
+include $(BUILD_STATIC_LIBRARY)
+
+##
+# filterpack_imageproc
+##
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_MODULE := libfilterpack_imageproc
+
+LOCAL_SRC_FILES += native/imageproc/brightness.c \
+                   native/imageproc/contrast.c \
+                   native/imageproc/invert.c \
+                   native/imageproc/to_rgba.c
+
+LOCAL_SHARED_LIBRARIES := libutils libfilterfw
+
+LOCAL_PRELINK_MODULE := false
+
+include $(BUILD_SHARED_LIBRARY)
+
 

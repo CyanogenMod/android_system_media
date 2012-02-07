@@ -33,12 +33,5 @@ define libfilterfw_to_document
  $(call libfilterfw-all-java-files-under,$(1), \
    filterfw/java \
    effect/java \
-   filterpacks/imageproc/java \
-   filterpacks/numeric/java \
-   filterpacks/performance/java \
-   filterpacks/text/java \
-   filterpacks/ui/java \
-   filterpacks/videosrc/java \
-   filterpacks/videoproc/java \
-   filterpacks/videosink/java )
+   filterpacks/java )
 endef
