@@ -19,7 +19,7 @@
 #include "sles_allinclusive.h"
 #include "android/BufferQueueSource.h"
 
-#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -94,7 +94,7 @@ ssize_t BufferQueueSource::readAt(off64_t offset, void *data, size_t size) {
         }
 
         //assert(mStreamToBqOffset <= offset);
-        CHECK(mStreamToBqOffset <= offset);
+        CHECK_LE(mStreamToBqOffset, offset);
 
         if (offset + size <= mStreamToBqOffset + oldFront->mDataSize) {
             pSrc = ((char*)oldFront->mDataBuffer) + (offset - mStreamToBqOffset);
