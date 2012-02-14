@@ -218,6 +218,7 @@ int create_resampler(uint32_t inSampleRate,
                                       &error);
     if (rsmp->speex_resampler == NULL) {
         ALOGW("ReSampler: Cannot create speex resampler: %s", speex_resampler_strerror(error));
+        free(rsmp);
         return -ENODEV;
     }
 
