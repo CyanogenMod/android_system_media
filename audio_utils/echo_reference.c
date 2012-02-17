@@ -174,11 +174,24 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
     // do stereo to mono and down sampling if necessary
     if (er->rd_channel_count != er->wr_channel_count ||
             er->rd_sampling_rate != er->wr_sampling_rate) {
+        size_t wrBufSize = buffer->frame_count;
 
-        inFrames = (buffer->frame_count * er->rd_sampling_rate) / er->wr_sampling_rate +
-                                                RESAMPLER_HEADROOM_SAMPLES;
-        if (er->wr_buf_size < inFrames) {
-            er->wr_buf_size = inFrames;
+        inFrames = buffer->frame_count;
+
+        if (er->rd_sampling_rate != er->wr_sampling_rate) {
+            inFrames = (buffer->frame_count * er->rd_sampling_rate) / er->wr_sampling_rate +
+                                                    RESAMPLER_HEADROOM_SAMPLES;
+            // wr_buf is not only used as resampler output but also for stereo to mono conversion
+            // output so buffer size is driven by both write and read sample rates
+            if (inFrames > wrBufSize) {
+                wrBufSize = inFrames;
+            }
+        }
+
+        if (er->wr_buf_size < wrBufSize) {
+            ALOGV("echo_reference_write() increasing write buffer size from %d to %d",
+                    er->wr_buf_size, wrBufSize);
+            er->wr_buf_size = wrBufSize;
             er->wr_buf = realloc(er->wr_buf, er->wr_buf_size * er->rd_frame_size);
         }
 
@@ -450,11 +463,6 @@ int create_echo_reference(audio_format_t rdFormat,
     if ((rdChannelCount != 1 && rdChannelCount != 2) ||
             wrChannelCount != 2) {
         ALOGW("create_echo_reference bad channel count rd %d, wr %d", rdChannelCount, wrChannelCount);
-        return -EINVAL;
-    }
-
-    if (wrSamplingRate < rdSamplingRate) {
-        ALOGW("create_echo_reference bad smp rate rd %d, wr %d", rdSamplingRate, wrSamplingRate);
         return -EINVAL;
     }
 
