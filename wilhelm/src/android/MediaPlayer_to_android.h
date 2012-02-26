@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-#include <surfaceflinger/Surface.h>
-#include <gui/ISurfaceTexture.h>
-
+#include <system/window.h>
 
 /**************************************************************************************************
  * Player lifecycle

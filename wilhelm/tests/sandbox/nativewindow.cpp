@@ -20,8 +20,8 @@
 // that are not part of the NDK supported APIs, and are subject to change at any time.
 
 #include <binder/ProcessState.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
+#include <gui/Surface.h>
+#include <gui/SurfaceComposerClient.h>
 #include <utils/String8.h>
 
 #include "nativewindow.h"

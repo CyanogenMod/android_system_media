@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+#include <system/window.h>
+#include <utils/StrongPointer.h>
+#include <gui/Surface.h>
+
 #include "sles_allinclusive.h"
-#include "utils/RefBase.h"
 #include "android_prompts.h"
 // LocAVPlayer and StreamPlayer derive from GenericMediaPlayer,
 //    so no need to #include "android_GenericMediaPlayer.h"
 #include "android_LocAVPlayer.h"
 #include "android_StreamPlayer.h"
-
 
 //-----------------------------------------------------------------------------
 static void player_handleMediaPlayerEventNotifications(int event, int data1, int data2, void* user)

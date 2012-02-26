@@ -19,7 +19,6 @@
 #include "sles_allinclusive.h"
 
 #ifdef ANDROID
-#include <gui/SurfaceTextureClient.h>
 #include "android/android_GenericMediaPlayer.h"
 using namespace android;
 #endif

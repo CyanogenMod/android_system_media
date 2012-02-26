@@ -19,9 +19,9 @@
 #include "sles_allinclusive.h"
 #include "android_GenericMediaPlayer.h"
 
+#include <system/window.h>
+
 #include <media/IMediaPlayerService.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/mediaplayer.h>  // media_event_type media_error_type media_info_type
 
