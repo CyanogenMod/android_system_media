@@ -240,7 +240,9 @@ jboolean Java_android_filterfw_core_ShaderProgram_setShaderTileCounts(JNIEnv* en
                                                                       jint y_count) {
   ShaderProgram* program = ConvertFromJava<ShaderProgram>(env, thiz);
   if (program) {
+#ifndef EXYNOS4210_ENHANCEMENTS // This causes rendering issues with Galaxy S II and similar
     program->SetTileCounts(x_count, y_count);
+#endif
     return JNI_TRUE;
   }
   return JNI_FALSE;
