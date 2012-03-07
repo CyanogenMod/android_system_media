@@ -1378,7 +1378,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                 sles_to_android_channelMaskOut(df_pcm->numChannels, df_pcm->channelMask),
                                                                      //channel mask
                 0,                                                   // frameCount (here min)
-                0,                                                   // flags
+                AUDIO_POLICY_OUTPUT_FLAG_NONE,                       // flags
                 audioTrack_callBack_pullFromBuffQueue,               // callback
                 (void *) pAudioPlayer,                               // user
                 0      // FIXME find appropriate frame count         // notificationFrame
