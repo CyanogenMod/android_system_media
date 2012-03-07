@@ -401,7 +401,7 @@ SLresult android_audioRecorder_realize(CAudioRecorder* ar, SLboolean async) {
             sles_to_android_channelMaskIn(ar->mNumChannels, 0 /*no channel mask*/),
                                    // channel config
             0,                     //frameCount min
-            0,                     // flags
+            (android::AudioRecord::record_flags) 0, // flags
             audioRecorder_callback,// callback_t
             (void*)ar,             // user, callback data, here the AudioRecorder
             0,                     // notificationFrames
