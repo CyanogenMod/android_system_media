@@ -7,7 +7,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	seekTorture.c
@@ -31,7 +31,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	slesTest_playMuteSolo.cpp

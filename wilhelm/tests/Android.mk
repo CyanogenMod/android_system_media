@@ -18,7 +18,7 @@ c_includes := \
     bionic \
     bionic/libstdc++/include \
     external/gtest/include \
-    system/media/wilhelm/include \
+    $(call include-path-for, wilhelm) \
     external/stlport/stlport
 
 module_tags := tests

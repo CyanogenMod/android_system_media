@@ -7,7 +7,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
     intbufq.c \
@@ -35,7 +35,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	multiplay.c
@@ -61,8 +61,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include \
-	system/media/wilhelm/src/ut
+	$(call include-path-for, wilhelm) \
+	$(call include-path-for, wilhelm-ut)
 
 LOCAL_SRC_FILES:= \
 	engine.c
@@ -91,8 +91,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include \
-    system/media/wilhelm/src/ut
+	$(call include-path-for, wilhelm) \
+	$(call include-path-for, wilhelm-ut)
 
 LOCAL_SRC_FILES:= \
 	object.c
@@ -121,7 +121,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	configbq.c
@@ -147,7 +147,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	reverb.c
@@ -176,7 +176,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	srcsink.c
@@ -205,8 +205,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include \
-	system/media/wilhelm/src/ut
+	$(call include-path-for, wilhelm) \
+	$(call include-path-for, wilhelm-ut)
 
 LOCAL_SRC_FILES:= \
 	outputmix.c
@@ -235,7 +235,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	urimime.c
@@ -264,7 +264,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	dim.c
@@ -293,7 +293,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	multithread.c
@@ -322,7 +322,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	playbq.c
@@ -353,7 +353,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	monkey.c
@@ -382,7 +382,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	xa.c
@@ -411,7 +411,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	dual.c
@@ -441,7 +441,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	xaplay.c nativewindow.cpp

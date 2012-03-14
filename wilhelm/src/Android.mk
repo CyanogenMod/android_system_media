@@ -8,7 +8,7 @@ LOCAL_SRC_FILES :=     \
         ut/slesutResult.c
 
 LOCAL_C_INCLUDES:= \
-        system/media/wilhelm/include
+        $(call include-path-for, wilhelm)
 
 LOCAL_CFLAGS += -fvisibility=hidden -UNDEBUG
 
@@ -19,7 +19,7 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_C_INCLUDES:= \
-        system/media/wilhelm/include
+        $(call include-path-for, wilhelm)
 
 LOCAL_CFLAGS += -Wno-override-init
 # -Wno-missing-field-initializers
@@ -159,11 +159,11 @@ EXCLUDE_SRC :=                            \
         itf/IVisualization.c
 
 LOCAL_C_INCLUDES:=                                                  \
-        system/media/wilhelm/include                                \
+        $(call include-path-for, wilhelm)                           \
         frameworks/base/media/libstagefright                        \
         frameworks/base/media/libstagefright/include                \
         frameworks/native/include/media/openmax                     \
-        system/media/audio_effects/include
+        $(call include-path-for, audio-effects)
 
 # __pthread_gettid
 LOCAL_C_INCLUDES += bionic/libc/private
@@ -199,7 +199,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES := sl_entry.c sl_iid.c assert.c
 LOCAL_C_INCLUDES:=                                                  \
-        system/media/wilhelm/include                                \
+        $(call include-path-for, wilhelm)                           \
         frameworks/base/media/libstagefright                        \
         frameworks/base/media/libstagefright/include                \
         frameworks/native/include/media/openmax
@@ -214,7 +214,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES := xa_entry.c xa_iid.c assert.c
 LOCAL_C_INCLUDES:=                                                  \
-        system/media/wilhelm/include                                \
+        $(call include-path-for, wilhelm)                           \
         frameworks/base/media/libstagefright                        \
         frameworks/base/media/libstagefright/include                \
         frameworks/native/include/media/openmax
