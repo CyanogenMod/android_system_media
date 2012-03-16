@@ -177,6 +177,7 @@ LOCAL_STATIC_LIBRARIES += \
 LOCAL_SHARED_LIBRARIES :=         \
         libutils                  \
         libmedia                  \
+        libmedia_native           \
         libbinder                 \
         libstagefright            \
         libstagefright_foundation \
