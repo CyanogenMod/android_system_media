@@ -60,7 +60,7 @@ static XAresult IStreamInformation_QueryStreamType( XAStreamInformationItf self,
     }
 
 #ifndef ANDROID
-    *domain =  XA_DOMAINTYPE_UNKNOWN;
+    *domain = XA_DOMAINTYPE_UNKNOWN;
 #else
     if (0 == streamIndex) {
         // stream 0 is reserved for the container

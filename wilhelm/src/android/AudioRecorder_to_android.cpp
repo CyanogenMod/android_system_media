@@ -192,7 +192,7 @@ SLresult android_audioRecorder_checkSourceSinkSupport(CAudioRecorder* ar) {
     } else {
 
         // check it's an input device
-        SLDataLocator_IODevice *dl_iod =  (SLDataLocator_IODevice *) pAudioSrc->pLocator;
+        SLDataLocator_IODevice *dl_iod = (SLDataLocator_IODevice *) pAudioSrc->pLocator;
         if (SL_IODEVICE_AUDIOINPUT != dl_iod->deviceType) {
             SL_LOGE(ERROR_RECORDER_IODEVICE_MUST_BE_AUDIOINPUT);
             return SL_RESULT_PARAMETER_INVALID;
@@ -244,7 +244,7 @@ static void audioRecorder_callback(int event, void* user, void *info) {
                 // finish pushing the buffer or push the buffer in one shot
                 pBuff->size = oldFront->mSize - ar->mBufferQueue.mSizeConsumed;
                 ar->mBufferQueue.mSizeConsumed = 0;
-                if (newFront ==  &ar->mBufferQueue.mArray[ar->mBufferQueue.mNumBuffers + 1]) {
+                if (newFront == &ar->mBufferQueue.mArray[ar->mBufferQueue.mNumBuffers + 1]) {
                     newFront = ar->mBufferQueue.mArray;
                 }
                 ar->mBufferQueue.mFront = newFront;

@@ -129,7 +129,7 @@ static size_t adecoder_writeToBufferQueue(const uint8_t *data, size_t size, CAud
 
             // the buffer at the head of the buffer queue is full, update the state
             ap->mBufferQueue.mSizeConsumed = 0;
-            if (newFront ==  &ap->mBufferQueue.mArray[ap->mBufferQueue.mNumBuffers + 1]) {
+            if (newFront == &ap->mBufferQueue.mArray[ap->mBufferQueue.mNumBuffers + 1]) {
                 newFront = ap->mBufferQueue.mArray;
             }
             ap->mBufferQueue.mFront = newFront;
@@ -900,7 +900,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     case SL_DATALOCATOR_BUFFERQUEUE:
     case SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE:
         {
-        SLDataLocator_BufferQueue *dl_bq =  (SLDataLocator_BufferQueue *) pAudioSrc->pLocator;
+        SLDataLocator_BufferQueue *dl_bq = (SLDataLocator_BufferQueue *) pAudioSrc->pLocator;
 
         // Buffer format
         switch (sourceFormatType) {
@@ -990,7 +990,7 @@ SLresult android_audioPlayer_checkSourceSink(CAudioPlayer *pAudioPlayer)
     //   URI
     case SL_DATALOCATOR_URI:
         {
-        SLDataLocator_URI *dl_uri =  (SLDataLocator_URI *) pAudioSrc->pLocator;
+        SLDataLocator_URI *dl_uri = (SLDataLocator_URI *) pAudioSrc->pLocator;
         if (NULL == dl_uri->URI) {
             return SL_RESULT_PARAMETER_INVALID;
         }
@@ -1364,7 +1364,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
         {
         // initialize platform-specific CAudioPlayer fields
 
-        SLDataLocator_BufferQueue *dl_bq =  (SLDataLocator_BufferQueue *)
+        SLDataLocator_BufferQueue *dl_bq = (SLDataLocator_BufferQueue *)
                 pAudioPlayer->mDynamicSource.mDataSource;
         SLDataFormat_PCM *df_pcm = (SLDataFormat_PCM *)
                 pAudioPlayer->mDynamicSource.mDataSource->pFormat;
@@ -1562,39 +1562,39 @@ SLresult android_audioPlayer_preDestroy(CAudioPlayer *pAudioPlayer) {
     SL_LOGD("android_audioPlayer_preDestroy(%p)", pAudioPlayer);
     SLresult result = SL_RESULT_SUCCESS;
 
-  bool disableCallbacksBeforePreDestroy;
-  switch (pAudioPlayer->mAndroidObjType) {
-  // Not yet clear why this order is important, but it reduces detected deadlocks
-  case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
-    disableCallbacksBeforePreDestroy = true;
-    break;
-  // Use the old behavior for all other use cases until proven
-  // case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
-  default:
-    disableCallbacksBeforePreDestroy = false;
-    break;
-  }
-
-  if (disableCallbacksBeforePreDestroy) {
-    object_unlock_exclusive(&pAudioPlayer->mObject);
-    if (pAudioPlayer->mCallbackProtector != 0) {
-        pAudioPlayer->mCallbackProtector->requestCbExitAndWait();
+    bool disableCallbacksBeforePreDestroy;
+    switch (pAudioPlayer->mAndroidObjType) {
+    // Not yet clear why this order is important, but it reduces detected deadlocks
+    case AUDIOPLAYER_FROM_URIFD_TO_PCM_BUFFERQUEUE:
+        disableCallbacksBeforePreDestroy = true;
+        break;
+    // Use the old behavior for all other use cases until proven
+    // case AUDIOPLAYER_FROM_ADTS_ABQ_TO_PCM_BUFFERQUEUE:
+    default:
+        disableCallbacksBeforePreDestroy = false;
+        break;
     }
-    object_lock_exclusive(&pAudioPlayer->mObject);
-  }
+
+    if (disableCallbacksBeforePreDestroy) {
+        object_unlock_exclusive(&pAudioPlayer->mObject);
+        if (pAudioPlayer->mCallbackProtector != 0) {
+            pAudioPlayer->mCallbackProtector->requestCbExitAndWait();
+        }
+        object_lock_exclusive(&pAudioPlayer->mObject);
+    }
 
     if (pAudioPlayer->mAPlayer != 0) {
         pAudioPlayer->mAPlayer->preDestroy();
     }
     SL_LOGD("android_audioPlayer_preDestroy(%p) after mAPlayer->preDestroy()", pAudioPlayer);
 
-  if (!disableCallbacksBeforePreDestroy) {
-    object_unlock_exclusive(&pAudioPlayer->mObject);
-    if (pAudioPlayer->mCallbackProtector != 0) {
-        pAudioPlayer->mCallbackProtector->requestCbExitAndWait();
+    if (!disableCallbacksBeforePreDestroy) {
+        object_unlock_exclusive(&pAudioPlayer->mObject);
+        if (pAudioPlayer->mCallbackProtector != 0) {
+            pAudioPlayer->mCallbackProtector->requestCbExitAndWait();
+        }
+        object_lock_exclusive(&pAudioPlayer->mObject);
     }
-    object_lock_exclusive(&pAudioPlayer->mObject);
-  }
 
     return result;
 }
