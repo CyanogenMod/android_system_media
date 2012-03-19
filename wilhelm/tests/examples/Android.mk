@@ -7,7 +7,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	slesTestRecBuffQueue.cpp
@@ -31,7 +31,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	slesTestPlayFdPath.cpp
@@ -55,7 +55,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
     slesTestFeedback.cpp
@@ -82,7 +82,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	slesTestSawtoothBufferQueue.cpp
@@ -107,7 +107,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	slesTestEqFdPath.cpp
@@ -131,7 +131,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	slesTestEqOutputPath.cpp
@@ -155,7 +155,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	slesTestBassBoostPath.cpp
@@ -179,7 +179,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	slesTestVirtualizerPath.cpp
@@ -203,7 +203,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	slesTestEffectCapabilities.cpp
@@ -227,7 +227,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	slesTestSendToPresetReverb.cpp
@@ -251,7 +251,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	slesTestDecodeToBuffQueue.cpp
@@ -276,7 +276,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	slesTestDecodeAac.cpp
@@ -307,7 +307,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_C_INCLUDES:= \
-	system/media/wilhelm/include
+	$(call include-path-for, wilhelm)
 
 LOCAL_SRC_FILES:= \
 	xaVideoDecoderCapabilities.cpp

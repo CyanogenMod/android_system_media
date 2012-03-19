@@ -8,9 +8,9 @@ LOCAL_C_INCLUDES:= \
     bionic \
     bionic/libstdc++/include \
     external/gtest/include \
-    system/media/wilhelm/include \
+    $(call include-path-for, wilhelm) \
     external/stlport/stlport \
-    system/media/wilhelm/src/ut
+    $(call include-path-for, wilhelm-ut)
 
 LOCAL_SRC_FILES:= \
     BufferQueue_test.cpp

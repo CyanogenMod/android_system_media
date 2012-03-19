@@ -14,7 +14,7 @@ LOCAL_SRC_FILES:= \
 LOCAL_C_INCLUDES += $(call include-path-for, speex)
 LOCAL_C_INCLUDES += \
 	$(call include-path-for, speex) \
-	system/media/audio_utils/include
+	$(call include-path-for, audio-utils)
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
