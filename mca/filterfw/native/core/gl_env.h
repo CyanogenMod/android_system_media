@@ -236,6 +236,9 @@ class GLEnv {
     // Dummy surface for context
     sp<ANativeWindow> window_;
 
+    // Dummy SurfaceTexture for context
+    sp<SurfaceTexture> surfaceTexture_;
+
     // The maximum surface id used.
     int max_surface_id_;
 

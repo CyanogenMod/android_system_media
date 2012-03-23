@@ -160,8 +160,9 @@ bool GLEnv::InitWithNewContext() {
   }
 
   // Create dummy surface using a SurfaceTexture
-  sp<ISurfaceTexture> bq = new BufferQueue(false);
-  window_ = new SurfaceTextureClient(bq);
+  surfaceTexture_ = new SurfaceTexture(0);
+  window_ = new SurfaceTextureClient(static_cast<sp<ISurfaceTexture> >(
+          surfaceTexture_->getBufferQueue()));
 
   surfaces_[0] = SurfaceWindowPair(eglCreateWindowSurface(display(), config, window_.get(), NULL), NULL);
   if (CheckEGLError("eglCreateWindowSurface")) return false;
