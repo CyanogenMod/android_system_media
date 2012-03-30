@@ -50,10 +50,14 @@ struct echo_reference {
     void *wr_buf;                   // buffer for input conversions
     size_t wr_buf_size;             // size of conversion buffer in frames
     size_t wr_frames_in;            // number of frames in conversion buffer
+    size_t wr_curr_frame_size;      // number of frames given to current write() function
     void *wr_src_buf;               // resampler input buf (either wr_buf or buffer used by write())
     struct timespec wr_render_time; // latest render time indicated by write()
                                     // default ALSA gettimeofday() format
     int32_t  playback_delay;        // playback buffer delay indicated by last write()
+    int16_t prev_delta_sign;        // sign of previous delay difference:
+                                    //  1: positive, -1: negative, 0: unknown
+    uint16_t delta_count;           // number of consecutive delay differences with same sign
     pthread_mutex_t lock;                      // mutex protecting read/write concurrency
     pthread_cond_t cond;                       // condition signaled when data is ready to read
     struct resampler_itfe *resampler;          // input resampler
@@ -81,7 +85,7 @@ int echo_reference_get_next_buffer(struct resampler_buffer_provider *buffer_prov
 
     buffer->frame_count = (buffer->frame_count > er->wr_frames_in) ? er->wr_frames_in : buffer->frame_count;
     // this is er->rd_channel_count here as we resample after stereo to mono conversion if any
-    buffer->i16 = (int16_t *)er->wr_src_buf + (er->wr_buf_size - er->wr_frames_in) * er->rd_channel_count;
+    buffer->i16 = (int16_t *)er->wr_src_buf + (er->wr_curr_frame_size - er->wr_frames_in) * er->rd_channel_count;
 
     return 0;
 }
@@ -113,6 +117,8 @@ static void echo_reference_reset_l(struct echo_reference *er)
     er->wr_buf_size = 0;
     er->wr_render_time.tv_sec = 0;
     er->wr_render_time.tv_nsec = 0;
+    er->delta_count = 0;
+    er->prev_delta_sign = 0;
 }
 
 /* additional space in resampler buffer allowing for extra samples to be returned
@@ -169,6 +175,9 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
 
     er->playback_delay = buffer->delay_ns;
 
+    // this will be used in the get_next_buffer, to support variable input buffer sizes
+    er->wr_curr_frame_size = buffer->frame_count;
+
     void *srcBuf;
     size_t inFrames;
     // do stereo to mono and down sampling if necessary
@@ -215,7 +224,7 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
                 rc = create_resampler(er->wr_sampling_rate,
                                  er->rd_sampling_rate,
                                  er->rd_channel_count,
-                                 RESAMPLER_QUALITY_VOIP,
+                                 RESAMPLER_QUALITY_DEFAULT,
                                  &er->provider,
                                  &er->resampler);
                 if (rc != 0) {
@@ -239,7 +248,7 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
                   er->wr_sampling_rate, er->rd_sampling_rate);
             er->resampler->resample_from_provider(er->resampler,
                                                      (int16_t *)er->wr_buf, &inFrames);
-            ALOGW_IF(er->wr_frames_in != 0,
+            ALOGV_IF(er->wr_frames_in != 0,
                     "echo_reference_write() er->wr_frames_in not 0 (%d) after resampler",
                     er->wr_frames_in);
         }
@@ -260,12 +269,10 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
            inFrames * er->rd_frame_size);
     er->frames_in += inFrames;
 
-    ALOGV("EchoReference::write_log() inFrames:[%d], mFramesInOld:[%d], "\
-         "mFramesInNew:[%d], er->buf_size:[%d], er->wr_render_time:[%d].[%d],"
-         "er->playback_delay:[%d]",
-         inFrames, er->frames_in - inFrames, er->frames_in, er->buf_size,
-         (int)er->wr_render_time.tv_sec,
-         (int)er->wr_render_time.tv_nsec, er->playback_delay);
+    ALOGV("echo_reference_write() frames written:[%d], frames total:[%d] buffer size:[%d]\n"
+          "                       er->wr_render_time:[%d].[%d], er->playback_delay:[%d]",
+          inFrames, er->frames_in, er->buf_size,
+          (int)er->wr_render_time.tv_sec, (int)er->wr_render_time.tv_nsec, er->playback_delay);
 
     pthread_cond_signal(&er->cond);
 exit:
@@ -274,8 +281,11 @@ exit:
     return status;
 }
 
-#define MIN_DELAY_UPDATE_NS 62500 // delay jump threshold to update ref buffer
-                                  // 0.5 samples at 8kHz in nsecs
+// delay jump threshold to update ref buffer: 6 samples at 8kHz in nsecs
+#define MIN_DELAY_DELTA_NS (375000*2)
+// number of consecutive delta with same sign between expected and actual delay before adjusting
+// the buffer
+#define MIN_DELTA_NUM 4
 
 
 static int echo_reference_read(struct echo_reference_itfe *echo_reference,
@@ -290,16 +300,17 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
     pthread_mutex_lock(&er->lock);
 
     if (buffer == NULL) {
-        ALOGV("EchoReference::read() stop read");
+        ALOGV("echo_reference_read() stop read");
         er->state &= ~ECHOREF_READING;
         goto exit;
     }
 
-    ALOGV("EchoReference::read() START, delayCapture:[%d],er->frames_in:[%d],buffer->frame_count:[%d]",
+    ALOGV("echo_reference_read() START, delayCapture:[%d], "
+            "er->frames_in:[%d],buffer->frame_count:[%d]",
     buffer->delay_ns, er->frames_in, buffer->frame_count);
 
     if ((er->state & ECHOREF_READING) == 0) {
-        ALOGV("EchoReference::read() start read");
+        ALOGV("echo_reference_read() start read");
         echo_reference_reset_l(er);
         er->state |= ECHOREF_READING;
     }
@@ -310,7 +321,7 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
         goto exit;
     }
 
-//    ALOGV("EchoReference::read() %d frames", buffer->frame_count);
+//    ALOGV("echo_reference_read() %d frames", buffer->frame_count);
 
     // allow some time for new frames to arrive if not enough frames are ready for read
     if (er->frames_in < buffer->frame_count) {
@@ -321,12 +332,10 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
         ts.tv_nsec = timeoutMs%1000;
         pthread_cond_timedwait_relative_np(&er->cond, &er->lock, &ts);
 
-        if (er->frames_in < buffer->frame_count) {
-            ALOGV("EchoReference::read() waited %d ms but still not enough frames"\
+        ALOGV_IF((er->frames_in < buffer->frame_count),
+                 "echo_reference_read() waited %d ms but still not enough frames"\
                  " er->frames_in: %d, buffer->frame_count = %d",
-                timeoutMs, er->frames_in, buffer->frame_count);
-            buffer->frame_count = er->frames_in;
-        }
+                 timeoutMs, er->frames_in, buffer->frame_count);
     }
 
     int64_t timeDiff;
@@ -334,7 +343,7 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
 
     if ((er->wr_render_time.tv_sec == 0 && er->wr_render_time.tv_nsec == 0) ||
         (buffer->time_stamp.tv_sec == 0 && buffer->time_stamp.tv_nsec == 0)) {
-        ALOGV("read: NEW:timestamp is zero---------setting timeDiff = 0, "\
+        ALOGV("echo_reference_read(): NEW:timestamp is zero---------setting timeDiff = 0, "\
              "not updating delay this time");
         timeDiff = 0;
     } else {
@@ -349,69 +358,91 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
 
         int64_t expectedDelayNs =  er->playback_delay + buffer->delay_ns - timeDiff;
 
-        ALOGV("expectedDelayNs[%lld] =  er->playback_delay[%d] + delayCapture[%d] - timeDiff[%lld]",
-        expectedDelayNs, er->playback_delay, buffer->delay_ns, timeDiff);
+        if (er->resampler != NULL) {
+            // Resampler already compensates part of the delay
+            int32_t rsmp_delay = er->resampler->delay_ns(er->resampler);
+            expectedDelayNs -= rsmp_delay;
+        }
+
+        ALOGV("echo_reference_read(): expectedDelayNs[%lld] = "
+                "er->playback_delay[%d] + delayCapture[%d] - timeDiff[%lld]",
+                expectedDelayNs, er->playback_delay, buffer->delay_ns, timeDiff);
 
         if (expectedDelayNs > 0) {
             int64_t delayNs = ((int64_t)er->frames_in * 1000000000) / er->rd_sampling_rate;
 
-            delayNs -= expectedDelayNs;
+            int64_t  deltaNs = delayNs - expectedDelayNs;
 
-            if (abs(delayNs) >= MIN_DELAY_UPDATE_NS) {
-                if (delayNs < 0) {
-                    size_t previousFrameIn = er->frames_in;
-                    er->frames_in = (expectedDelayNs * er->rd_sampling_rate)/1000000000;
-                    int    offset = er->frames_in - previousFrameIn;
-                    ALOGV("EchoReference::readlog: delayNs = NEGATIVE and ENOUGH : "\
-                         "setting %d frames to zero er->frames_in: %d, previousFrameIn = %d",
-                         offset, er->frames_in, previousFrameIn);
-
-                    if (er->frames_in > er->buf_size) {
-                        er->buf_size = er->frames_in;
-                        er->buffer  = realloc(er->buffer, er->frames_in * er->rd_frame_size);
-                        ALOGV("EchoReference::read: increasing buffer size to %d", er->buf_size);
-                    }
-
-                    if (offset > 0)
-                        memset((char *)er->buffer + previousFrameIn * er->rd_frame_size,
-                               0, offset * er->rd_frame_size);
+            ALOGV("echo_reference_read(): EchoPathDelayDeviation between reference and DMA [%lld]", deltaNs);
+            if (abs(deltaNs) >= MIN_DELAY_DELTA_NS) {
+                // smooth the variation and update the reference buffer only
+                // if a deviation in the same direction is observed for more than MIN_DELTA_NUM
+                // consecutive reads.
+                int16_t delay_sign = (deltaNs >= 0) ? 1 : -1;
+                if (delay_sign == er->prev_delta_sign) {
+                    er->delta_count++;
                 } else {
-                    size_t  previousFrameIn = er->frames_in;
-                    int     framesInInt = (int)(((int64_t)expectedDelayNs *
-                                           (int64_t)er->rd_sampling_rate)/1000000000);
-                    int     offset = previousFrameIn - framesInInt;
+                    er->delta_count = 1;
+                }
+                er->prev_delta_sign = delay_sign;
 
-                    ALOGV("EchoReference::readlog: delayNs = POSITIVE/ENOUGH :previousFrameIn: %d,"\
-                         "framesInInt: [%d], offset:[%d], buffer->frame_count:[%d]",
-                         previousFrameIn, framesInInt, offset, buffer->frame_count);
+                if (er->delta_count > MIN_DELTA_NUM) {
+                    size_t previousFrameIn = er->frames_in;
+                    er->frames_in = (size_t)((expectedDelayNs * er->rd_sampling_rate)/1000000000);
+                    int offset = er->frames_in - previousFrameIn;
 
-                    if (framesInInt < (int)buffer->frame_count) {
-                        if (framesInInt > 0) {
-                            memset((char *)er->buffer + framesInInt * er->rd_frame_size,
-                                   0, (buffer->frame_count-framesInInt) * er->rd_frame_size);
-                            ALOGV("EchoReference::read: pushing [%d] zeros into ref buffer",
-                                 (buffer->frame_count-framesInInt));
-                        } else {
-                            ALOGV("framesInInt = %d", framesInInt);
+                    ALOGV("echo_reference_read(): deltaNs ENOUGH and %s: "
+                            "er->frames_in: %d, previousFrameIn = %d",
+                         delay_sign ? "positive" : "negative", er->frames_in, previousFrameIn);
+
+                    if (deltaNs < 0) {
+                        // Less data available in the reference buffer than expected
+                        if (er->frames_in > er->buf_size) {
+                            er->buf_size = er->frames_in;
+                            er->buffer  = realloc(er->buffer, er->buf_size * er->rd_frame_size);
+                            ALOGV("echo_reference_read(): increasing buffer size to %d",
+                                  er->buf_size);
                         }
-                        framesInInt = buffer->frame_count;
+
+                        if (offset > 0) {
+                            memset((char *)er->buffer + previousFrameIn * er->rd_frame_size,
+                                   0, offset * er->rd_frame_size);
+                            ALOGV("echo_reference_read(): pushing ref buffer by [%d]", offset);
+                        }
                     } else {
+                        // More data available in the reference buffer than expected
+                        offset = -offset;
                         if (offset > 0) {
                             memcpy(er->buffer, (char *)er->buffer + (offset * er->rd_frame_size),
-                                   framesInInt * er->rd_frame_size);
-                            ALOGV("EchoReference::read: shifting ref buffer by [%d]",framesInInt);
+                                   er->frames_in * er->rd_frame_size);
+                            ALOGV("echo_reference_read(): shifting ref buffer by [%d]",
+                                  er->frames_in);
                         }
                     }
-                    er->frames_in = (size_t)framesInInt;
                 }
             } else {
-                ALOGV("EchoReference::read: NOT ENOUGH samples to update %lld", delayNs);
+                er->delta_count = 0;
+                er->prev_delta_sign = 0;
+                ALOGV("echo_reference_read(): Constant EchoPathDelay - difference "
+                        "between reference and DMA %lld", deltaNs);
             }
         } else {
-            ALOGV("NEGATIVE expectedDelayNs[%lld] =  "\
+            ALOGV("echo_reference_read(): NEGATIVE expectedDelayNs[%lld] =  "\
                  "er->playback_delay[%d] + delayCapture[%d] - timeDiff[%lld]",
                  expectedDelayNs, er->playback_delay, buffer->delay_ns, timeDiff);
         }
+    }
+
+    if (er->frames_in < buffer->frame_count) {
+        if (buffer->frame_count > er->buf_size) {
+            er->buf_size = buffer->frame_count;
+            er->buffer  = realloc(er->buffer, er->buf_size * er->rd_frame_size);
+            ALOGV("echo_reference_read(): increasing buffer size to %d", er->buf_size);
+        }
+        // filling up the reference buffer with 0s to match the expected delay.
+        memset((char *)er->buffer + er->frames_in * er->rd_frame_size,
+            0, (buffer->frame_count - er->frames_in) * er->rd_frame_size);
+        er->frames_in = buffer->frame_count;
     }
 
     memcpy(buffer->raw,
@@ -426,7 +457,7 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
     // As the reference buffer is now time aligned to the microphone signal there is a zero delay
     buffer->delay_ns = 0;
 
-    ALOGV("EchoReference::read() END %d frames, total frames in %d",
+    ALOGV("echo_reference_read() END %d frames, total frames in %d",
           buffer->frame_count, er->frames_in);
 
     pthread_cond_signal(&er->cond);
