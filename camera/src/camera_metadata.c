@@ -16,10 +16,14 @@
 
 #include <system/camera_metadata.h>
 #include <cutils/log.h>
+#define _GNU_SOURCE // for fdprintf
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
 
-#define OK    0
-#define ERROR 1
-
+#define OK         0
+#define ERROR      1
+#define NOT_FOUND -ENOENT
 /**
  * A single metadata entry, storing an array of values of a given type. If the
  * array is no larger than 4 bytes in size, it is stored in the data.value[]
@@ -73,6 +77,8 @@ typedef struct camera_metadata_entry {
  */
 struct camera_metadata {
     size_t                   size;
+    uint32_t                 version;
+    uint32_t                 flags;
     size_t                   entry_count;
     size_t                   entry_capacity;
     camera_metadata_entry_t *entries;
@@ -81,6 +87,14 @@ struct camera_metadata {
     uint8_t                 *data;
     uint8_t                  reserved[0];
 };
+
+/** Versioning information */
+#define CURRENT_METADATA_VERSION 1
+
+/** Flag definitions */
+#define FLAG_SORTED 0x00000001
+
+/** Tag information */
 
 typedef struct tag_info {
     const char *tag_name;
@@ -128,6 +142,8 @@ camera_metadata_t *place_camera_metadata(void *dst,
     if (memory_needed > dst_size) return NULL;
 
     camera_metadata_t *metadata = (camera_metadata_t*)dst;
+    metadata->version = CURRENT_METADATA_VERSION;
+    metadata->flags = 0;
     metadata->entry_count = 0;
     metadata->entry_capacity = entry_capacity;
     metadata->entries = (camera_metadata_entry_t*)(metadata + 1);
@@ -202,6 +218,8 @@ camera_metadata_t* copy_camera_metadata(void *dst, size_t dst_size,
                                            src->data_capacity);
 
     camera_metadata_t *metadata = (camera_metadata_t*)dst;
+    metadata->version = CURRENT_METADATA_VERSION;
+    metadata->flags = src->flags;
     metadata->entry_count = src->entry_count;
     metadata->entry_capacity = src->entry_count;
     metadata->entries = (camera_metadata_entry_t*)
@@ -246,6 +264,7 @@ int append_camera_metadata(camera_metadata_t *dst,
     }
     dst->entry_count += src->entry_count;
     dst->data_count += src->data_count;
+    dst->flags &= ~FLAG_SORTED;
 
     return OK;
 }
@@ -258,7 +277,7 @@ size_t calculate_camera_metadata_entry_data_size(uint8_t type,
     return data_bytes <= 4 ? 0 : data_bytes;
 }
 
-int add_camera_metadata_entry_raw(camera_metadata_t *dst,
+static int add_camera_metadata_entry_raw(camera_metadata_t *dst,
         uint32_t tag,
         uint8_t  type,
         const void *data,
@@ -285,6 +304,7 @@ int add_camera_metadata_entry_raw(camera_metadata_t *dst,
         dst->data_count += data_bytes;
     }
     dst->entry_count++;
+    dst->flags &= ~FLAG_SORTED;
     return OK;
 }
 
@@ -295,7 +315,7 @@ int add_camera_metadata_entry(camera_metadata_t *dst,
 
     int type = get_camera_metadata_tag_type(tag);
     if (type == -1) {
-        ALOGE("Unknown tag %04x (can't find type)", tag);
+        ALOGE("%s: Unknown tag %04x.", __FUNCTION__, tag);
         return ERROR;
     }
 
@@ -306,6 +326,26 @@ int add_camera_metadata_entry(camera_metadata_t *dst,
             data_count);
 }
 
+static int compare_entry_tags(const void *p1, const void *p2) {
+    uint32_t tag1 = ((camera_metadata_entry_t*)p1)->tag;
+    uint32_t tag2 = ((camera_metadata_entry_t*)p2)->tag;
+    return  tag1 < tag2 ? -1 :
+            tag1 == tag2 ? 0 :
+            1;
+}
+
+int sort_camera_metadata(camera_metadata_t *dst) {
+    if (dst == NULL) return ERROR;
+    if (dst->flags & FLAG_SORTED) return OK;
+
+    qsort(dst->entries, dst->entry_count,
+            sizeof(camera_metadata_entry_t),
+            compare_entry_tags);
+    dst->flags |= FLAG_SORTED;
+
+    return OK;
+}
+
 int get_camera_metadata_entry(camera_metadata_t *src,
         uint32_t index,
         uint32_t *tag,
@@ -313,22 +353,60 @@ int get_camera_metadata_entry(camera_metadata_t *src,
         void **data,
         size_t *data_count) {
     if (src == NULL ) return ERROR;
-    if (tag == NULL) return ERROR;
-    if (type == NULL ) return ERROR;
-    if (data == NULL) return ERROR;
-    if (data_count == NULL) return ERROR;
-
     if (index >= src->entry_count) return ERROR;
 
     camera_metadata_entry_t *entry = src->entries + index;
 
-    *tag = entry->tag;
-    *type = entry->type;
-    *data_count = entry->count;
-    if (entry->count * camera_metadata_type_size[entry->type] > 4) {
-        *data = src->data + entry->data.offset;
+    if (tag != NULL) *tag = entry->tag;
+    if (type != NULL) *type = entry->type;
+    if (data_count != NULL) *data_count = entry->count;
+    if (data != NULL) {
+        if (entry->count * camera_metadata_type_size[entry->type] > 4) {
+            *data = src->data + entry->data.offset;
+        } else {
+            *data = entry->data.value;
+        }
+    }
+    return OK;
+}
+
+int find_camera_metadata_entry(camera_metadata_t *src,
+        uint32_t tag,
+        uint8_t *type,
+        void **data,
+        size_t *data_count) {
+    if (src == NULL) return ERROR;
+
+    camera_metadata_entry_t *entry = NULL;
+    if (src->flags & FLAG_SORTED) {
+        // Sorted entries, do a binary search
+        camera_metadata_entry_t key;
+        key.tag = tag;
+        entry = bsearch(&key,
+                src->entries,
+                src->entry_count,
+                sizeof(camera_metadata_entry_t),
+                compare_entry_tags);
     } else {
-        *data = entry->data.value;
+        // Not sorted, linear search
+        unsigned int i;
+        for (i = 0; i < src->entry_count; i++) {
+            if (src->entries[i].tag == tag) {
+                entry = src->entries + i;
+                break;
+            }
+        }
+    }
+    if (entry == NULL) return NOT_FOUND;
+
+    if (type != NULL) *type = entry->type;
+    if (data_count != NULL) *data_count = entry->count;
+    if (data != NULL) {
+        if (entry->count * camera_metadata_type_size[entry->type] > 4) {
+            *data = src->data + entry->data.offset;
+        } else {
+            *data = entry->data.value;
+        }
     }
     return OK;
 }
@@ -338,7 +416,9 @@ static const vendor_tag_query_ops_t *vendor_tag_ops = NULL;
 const char *get_camera_metadata_section_name(uint32_t tag) {
     uint32_t tag_section = tag >> 16;
     if (tag_section >= VENDOR_SECTION && vendor_tag_ops != NULL) {
-        return vendor_tag_ops->get_camera_vendor_section_name(tag);
+        return vendor_tag_ops->get_camera_vendor_section_name(
+            vendor_tag_ops,
+            tag);
     }
     if (tag_section >= ANDROID_SECTION_COUNT) {
         return NULL;
@@ -349,7 +429,9 @@ const char *get_camera_metadata_section_name(uint32_t tag) {
 const char *get_camera_metadata_tag_name(uint32_t tag) {
     uint32_t tag_section = tag >> 16;
     if (tag_section >= VENDOR_SECTION && vendor_tag_ops != NULL) {
-        return vendor_tag_ops->get_camera_vendor_tag_name(tag);
+        return vendor_tag_ops->get_camera_vendor_tag_name(
+            vendor_tag_ops,
+            tag);
     }
     if (tag_section >= ANDROID_SECTION_COUNT ||
         tag >= camera_metadata_section_bounds[tag_section][1] ) {
@@ -362,7 +444,9 @@ const char *get_camera_metadata_tag_name(uint32_t tag) {
 int get_camera_metadata_tag_type(uint32_t tag) {
     uint32_t tag_section = tag >> 16;
     if (tag_section >= VENDOR_SECTION && vendor_tag_ops != NULL) {
-        return vendor_tag_ops->get_camera_vendor_tag_type(tag);
+        return vendor_tag_ops->get_camera_vendor_tag_type(
+            vendor_tag_ops,
+            tag);
     }
     if (tag_section >= ANDROID_SECTION_COUNT ||
             tag >= camera_metadata_section_bounds[tag_section][1] ) {
@@ -377,18 +461,24 @@ int set_camera_metadata_vendor_tag_ops(const vendor_tag_query_ops_t *query_ops) 
     return OK;
 }
 
-void print_data(const uint8_t *data_ptr, int type, int count);
+static void print_data(int fd, const uint8_t *data_ptr, int type, int count);
 
-void dump_camera_metadata(const camera_metadata_t *metadata, int verbosity) {
+void dump_camera_metadata(const camera_metadata_t *metadata,
+        int fd,
+        int verbosity) {
     if (metadata == NULL) {
-        ALOGE("Metadata is null.");
+        ALOGE("%s: Metadata is null.", __FUNCTION__);
         return;
     }
     unsigned int i;
-    ALOGD("Dumping camera metadata array. %d entries, %d bytes of extra data.",
+    fdprintf(fd,
+            "Dumping camera metadata array. %d entries, "
+            "%d bytes of extra data.\n",
             metadata->entry_count, metadata->data_count);
-    ALOGD("  (%d entries and %d bytes data reserved)",
+    fdprintf(fd, "  (%d entries and %d bytes data reserved)\n",
             metadata->entry_capacity, metadata->data_capacity);
+    fdprintf(fd, "  Version: %d, Flags: %08x\n",
+            metadata->version, metadata->flags);
     for (i=0; i < metadata->entry_count; i++) {
         camera_metadata_entry_t *entry = metadata->entries + i;
 
@@ -407,7 +497,7 @@ void dump_camera_metadata(const camera_metadata_t *metadata, int verbosity) {
         } else {
             type_name = camera_metadata_type_names[entry->type];
         }
-        ALOGD("Tag: %s.%s (%05x): %s[%d]",
+        fdprintf(fd, "Tag: %s.%s (%05x): %s[%d]\n",
              tag_section,
              tag_name,
              entry->tag,
@@ -422,9 +512,10 @@ void dump_camera_metadata(const camera_metadata_t *metadata, int verbosity) {
         uint8_t *data_ptr;
         if ( type_size * entry->count > 4 ) {
             if (entry->data.offset >= metadata->data_count) {
-                ALOGE("Malformed entry data offset: %d (max %d)",
-                     entry->data.offset,
-                     metadata->data_count);
+                ALOGE("%s: Malformed entry data offset: %d (max %d)",
+                        __FUNCTION__,
+                        entry->data.offset,
+                        metadata->data_count);
                 continue;
             }
             data_ptr = metadata->data + entry->data.offset;
@@ -434,11 +525,11 @@ void dump_camera_metadata(const camera_metadata_t *metadata, int verbosity) {
         int count = entry->count;
         if (verbosity < 2 && count > 16) count = 16;
 
-        print_data(data_ptr, entry->type, count);
+        print_data(fd, data_ptr, entry->type, count);
     }
 }
 
-void print_data(const uint8_t *data_ptr, int type, int count) {
+static void print_data(int fd, const uint8_t *data_ptr, int type, int count) {
     static int values_per_line[NUM_TYPES] = {
         [TYPE_BYTE]     = 16,
         [TYPE_INT32]    = 4,
@@ -452,49 +543,46 @@ void print_data(const uint8_t *data_ptr, int type, int count) {
     int lines = count / values_per_line[type];
     if (count % values_per_line[type] != 0) lines++;
 
-    char tmp1[80], tmp2[80];
-
     int index = 0;
     int j, k;
     for (j = 0; j < lines; j++) {
-        tmp1[0] = 0;
+        fdprintf(fd, " [");
         for (k = 0;
              k < values_per_line[type] && count > 0;
              k++, count--, index += type_size) {
 
             switch (type) {
                 case TYPE_BYTE:
-                    snprintf(tmp2, sizeof(tmp2), "%hhu ",
+                    fdprintf(fd, "%hhu ",
                             *(data_ptr + index));
                     break;
                 case TYPE_INT32:
-                    snprintf(tmp2, sizeof(tmp2), "%d ",
+                    fdprintf(fd, "%d ",
                             *(int32_t*)(data_ptr + index));
                     break;
                 case TYPE_FLOAT:
-                    snprintf(tmp2, sizeof(tmp2), "%0.2f ",
+                    fdprintf(fd, "%0.2f ",
                             *(float*)(data_ptr + index));
                     break;
                 case TYPE_INT64:
-                    snprintf(tmp2, sizeof(tmp2), "%lld ",
+                    fdprintf(fd, "%lld ",
                             *(int64_t*)(data_ptr + index));
                     break;
                 case TYPE_DOUBLE:
-                    snprintf(tmp2, sizeof(tmp2), "%0.2f ",
+                    fdprintf(fd, "%0.2f ",
                             *(float*)(data_ptr + index));
                     break;
                 case TYPE_RATIONAL: {
                     int32_t numerator = *(int32_t*)(data_ptr + index);
                     int32_t denominator = *(int32_t*)(data_ptr + index + 4);
-                    snprintf(tmp2, sizeof(tmp2), "(%d / %d) ",
+                    fdprintf(fd, "(%d / %d) ",
                             numerator, denominator);
                     break;
                 }
                 default:
-                    snprintf(tmp2, sizeof(tmp2), "??? ");
+                    fdprintf(fd, "??? ");
             }
-            strncat(tmp1, tmp2, sizeof(tmp1));
         }
-        ALOGD(" [ %s]", tmp1);
+        fdprintf(fd, "]\n");
     }
 }

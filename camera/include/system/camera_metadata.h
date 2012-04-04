@@ -208,7 +208,8 @@ camera_metadata_t *copy_camera_metadata(void *dst, size_t dst_size,
 /**
  * Append camera metadata in src to an existing metadata structure in dst.  This
  * does not resize the destination structure, so if it is too small, a non-zero
- * value is returned. On success, 0 is returned.
+ * value is returned. On success, 0 is returned. Appending onto a sorted
+ * structure results in a non-sorted combined structure.
  */
 ANDROID_API
 int append_camera_metadata(camera_metadata_t *dst, const camera_metadata_t *src);
@@ -229,7 +230,9 @@ size_t calculate_camera_metadata_entry_data_size(uint8_t type,
  * left to add the entry, or if the tag is unknown.  data_count is the number of
  * entries in the data array of the tag's type, not a count of
  * bytes. Vendor-defined tags can not be added using this method, unless
- * set_vendor_tag_query_ops() has been called first.
+ * set_vendor_tag_query_ops() has been called first. Entries are always added to
+ * the end of the structure (highest index), so after addition, a
+ * previously-sorted array will be marked as unsorted.
  */
 ANDROID_API
 int add_camera_metadata_entry(camera_metadata_t *dst,
@@ -238,18 +241,43 @@ int add_camera_metadata_entry(camera_metadata_t *dst,
         size_t data_count);
 
 /**
+ * Sort the metadata buffer for fast searching. If already sorted, does
+ * nothing. Adding or appending entries to the buffer will place the buffer back
+ * into an unsorted state.
+ */
+ANDROID_API
+int sort_camera_metadata(camera_metadata_t *dst);
+
+/**
  * Get pointers to the fields for a metadata entry at position index in the
  * entry array.  The data pointer points either to the entry's data.value field
  * or to the right offset in camera_metadata_t.data. Returns 0 on
  * success. Data_count is the number of entries in the data array when cast to
  * the tag's type, not a count of bytes.
  *
- * src and index are inputs; tag, type, data, and data_count are outputs.
+ * src and index are inputs; tag, type, data, and data_count are outputs. Any of
+ * the outputs can be set to NULL to skip reading that value.
  */
 ANDROID_API
 int get_camera_metadata_entry(camera_metadata_t *src,
         uint32_t index,
         uint32_t *tag,
+        uint8_t *type,
+        void **data,
+        size_t *data_count);
+
+/**
+ * Find an entry with given tag value. If not found, returns -ENOENT. Otherwise,
+ * returns entry contents like get_camera_metadata_entry. Any of
+ * the outputs can be set to NULL to skip reading that value.
+ *
+ * Note: Returns only the first entry with a given tag. To speed up searching
+ * for tags, sort the metadata structure first by calling
+ * sort_camera_metadata().
+ */
+ANDROID_API
+int find_camera_metadata_entry(camera_metadata_t *src,
+        uint32_t tag,
         uint8_t *type,
         void **data,
         size_t *data_count);
@@ -284,7 +312,8 @@ int get_camera_metadata_tag_type(uint32_t tag);
  * get_camera_metadata_section_name, _tag_name, and _tag_type methods with
  * vendor tags. Returns 0 on success.
  */
-typedef struct vendor_tag_query_ops {
+typedef struct vendor_tag_query_ops vendor_tag_query_ops_t;
+struct vendor_tag_query_ops {
     /**
      * Get vendor section name for a vendor-specified entry tag. Only called for
      * tags >= 0x80000000. The section name must start with the name of the
@@ -292,20 +321,26 @@ typedef struct vendor_tag_query_ops {
      * their sections with "com.camerazoom." Must return NULL if the tag is
      * outside the bounds of vendor-defined sections.
      */
-    const char *(*get_camera_vendor_section_name)(uint32_t tag);
+    const char *(*get_camera_vendor_section_name)(
+        const vendor_tag_query_ops_t *v,
+        uint32_t tag);
     /**
      * Get tag name for a vendor-specified entry tag. Only called for tags >=
      * 0x80000000. Must return NULL if the tag is outside the bounds of
      * vendor-defined sections.
      */
-    const char *(*get_camera_vendor_tag_name)(uint32_t tag);
+    const char *(*get_camera_vendor_tag_name)(
+        const vendor_tag_query_ops_t *v,
+        uint32_t tag);
     /**
      * Get tag type for a vendor-specified entry tag. Only called for tags >=
      * 0x80000000. Must return -1 if the tag is outside the bounds of
      * vendor-defined sections.
      */
-    int         (*get_camera_vendor_tag_type)(uint32_t tag);
-} vendor_tag_query_ops_t;
+    int (*get_camera_vendor_tag_type)(
+        const vendor_tag_query_ops_t *v,
+        uint32_t tag);
+};
 
 ANDROID_API
 int set_camera_metadata_vendor_tag_ops(const vendor_tag_query_ops_t *query_ops);
@@ -318,6 +353,7 @@ int set_camera_metadata_vendor_tag_ops(const vendor_tag_query_ops_t *query_ops);
  */
 ANDROID_API
 void dump_camera_metadata(const camera_metadata_t *metadata,
+        int fd,
         int verbosity);
 
 #ifdef __cplusplus

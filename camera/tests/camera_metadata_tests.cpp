@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <errno.h>
+
 #include "gtest/gtest.h"
 #include "system/camera_metadata.h"
 
@@ -24,6 +26,7 @@
 
 #define OK    0
 #define ERROR 1
+#define NOT_FOUND (-ENOENT)
 
 TEST(camera_metadata, allocate_normal) {
     camera_metadata_t *m = NULL;
@@ -270,7 +273,7 @@ TEST(camera_metadata, add_get_normal) {
     EXPECT_EQ(calculate_camera_metadata_size(entries_used, data_used),
             get_camera_metadata_compact_size(m) );
 
-    dump_camera_metadata(m, 2);
+    dump_camera_metadata(m, 0, 2);
 
     free_camera_metadata(m);
 }
@@ -342,7 +345,7 @@ TEST(camera_metadata, add_get_toomany) {
     EXPECT_EQ((size_t)0, data_count);
     EXPECT_EQ(NULL, data_int32);
 
-    dump_camera_metadata(m, 2);
+    dump_camera_metadata(m, 0, 2);
 
     free_camera_metadata(m);
 }
@@ -823,7 +826,100 @@ TEST(camera_metadata, add_all_tags) {
         }
     }
 
-    dump_camera_metadata(m, 2);
+    dump_camera_metadata(m, 0, 2);
+
+    free_camera_metadata(m);
+}
+
+TEST(camera_metadata, sort_metadata) {
+    camera_metadata_t *m = NULL;
+    const size_t entry_capacity = 5;
+    const size_t data_capacity = 100;
+
+    int result;
+
+    m = allocate_camera_metadata(entry_capacity, data_capacity);
+
+    // Add several unique entries in non-sorted order
+
+    float colorTransform[9] = {
+        0.9f, 0.0f, 0.0f,
+        0.2f, 0.5f, 0.0f,
+        0.0f, 0.1f, 0.7f
+    };
+    result = add_camera_metadata_entry(m,
+            ANDROID_COLOR_TRANSFORM,
+            colorTransform, 9);
+    EXPECT_EQ(OK, result);
+
+    float focus_distance = 0.5f;
+    result = add_camera_metadata_entry(m,
+            ANDROID_LENS_FOCUS_DISTANCE,
+            &focus_distance, 1);
+    EXPECT_EQ(OK, result);
+
+    int64_t exposure_time = 1000000000;
+    result = add_camera_metadata_entry(m,
+            ANDROID_SENSOR_EXPOSURE_TIME,
+            &exposure_time, 1);
+    EXPECT_EQ(OK, result);
+
+    int32_t sensitivity = 800;
+    result = add_camera_metadata_entry(m,
+            ANDROID_SENSOR_SENSITIVITY,
+            &sensitivity, 1);
+    EXPECT_EQ(OK, result);
+
+    // Test unsorted find
+    uint8_t type;
+    float  *f;
+    size_t  data_count;
+    result = find_camera_metadata_entry(m,
+            ANDROID_LENS_FOCUS_DISTANCE,
+            &type,
+            (void**)&f,
+            &data_count);
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ(TYPE_FLOAT, type);
+    EXPECT_EQ(1, (int)data_count);
+    EXPECT_EQ(focus_distance, *f);
+
+    result = find_camera_metadata_entry(m,
+            ANDROID_NOISE_STRENGTH,
+            &type,
+            (void**)&f,
+            &data_count);
+    EXPECT_EQ(NOT_FOUND, result);
+
+    // Sort
+    std::cout << "Pre-sorted metadata" << std::endl;
+    dump_camera_metadata(m, 0, 2);
+
+    result = sort_camera_metadata(m);
+    EXPECT_EQ(OK, result);
+
+    std::cout << "Sorted metadata" << std::endl;
+    dump_camera_metadata(m, 0, 2);
+
+    // Test sorted find
+
+    result = find_camera_metadata_entry(m,
+            ANDROID_LENS_FOCUS_DISTANCE,
+            &type,
+            (void**)&f,
+            &data_count);
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ(TYPE_FLOAT, type);
+    EXPECT_EQ(1, (int)data_count);
+    EXPECT_EQ(focus_distance, *f);
+
+    result = find_camera_metadata_entry(m,
+            ANDROID_NOISE_STRENGTH,
+            &type,
+            (void**)&f,
+            &data_count);
+    EXPECT_EQ(NOT_FOUND, result);
+
 
     free_camera_metadata(m);
 }

@@ -139,7 +139,7 @@ tag_info_t android_sensor_info[ANDROID_SENSOR_INFO_END -
         ANDROID_SENSOR_INFO_START] = {
     { "exposureTimeRange",      TYPE_INT64 },
     { "maxFrameDuration",       TYPE_INT64 },
-    { "sensitivityRange",       TYPE_INT32 },
+    { "availableSensitivities", TYPE_INT32 },
     { "colorFilterArrangement", TYPE_BYTE },
     { "pixelArraySize",         TYPE_INT32 },
     { "activeArraySize",        TYPE_INT32 },

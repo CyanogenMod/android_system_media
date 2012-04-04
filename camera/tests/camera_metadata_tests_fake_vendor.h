@@ -104,7 +104,22 @@ vendor_tag_info_t *fakevendor_tag_info[FAKEVENDOR_SECTION_COUNT] = {
     fakevendor_scaler
 };
 
-const char *get_fakevendor_section_name(uint32_t tag) {
+const char *get_fakevendor_section_name(const vendor_tag_query_ops_t *v,
+        uint32_t tag);
+const char *get_fakevendor_tag_name(const vendor_tag_query_ops_t *v,
+        uint32_t tag);
+int get_fakevendor_tag_type(const vendor_tag_query_ops_t *v,
+        uint32_t tag);
+
+static const vendor_tag_query_ops_t fakevendor_query_ops = {
+    get_fakevendor_section_name,
+    get_fakevendor_tag_name,
+    get_fakevendor_tag_type
+};
+
+const char *get_fakevendor_section_name(const vendor_tag_query_ops_t *v,
+        uint32_t tag) {
+    if (v != &fakevendor_query_ops) return NULL;
     int tag_section = (tag >> 16) - VENDOR_SECTION;
     if (tag_section < 0 ||
             tag_section >= FAKEVENDOR_SECTION_COUNT) return NULL;
@@ -112,7 +127,9 @@ const char *get_fakevendor_section_name(uint32_t tag) {
     return fakevendor_section_names[tag_section];
 }
 
-const char *get_fakevendor_tag_name(uint32_t tag) {
+const char *get_fakevendor_tag_name(const vendor_tag_query_ops_t *v,
+        uint32_t tag) {
+    if (v != &fakevendor_query_ops) return NULL;
     int tag_section = (tag >> 16) - VENDOR_SECTION;
     if (tag_section < 0
             || tag_section >= FAKEVENDOR_SECTION_COUNT
@@ -121,7 +138,9 @@ const char *get_fakevendor_tag_name(uint32_t tag) {
     return fakevendor_tag_info[tag_section][tag_index].tag_name;
 }
 
-int get_fakevendor_tag_type(uint32_t tag) {
+int get_fakevendor_tag_type(const vendor_tag_query_ops_t *v,
+        uint32_t tag) {
+    if (v != &fakevendor_query_ops) return -1;
     int tag_section = (tag >> 16) - VENDOR_SECTION;
     if (tag_section < 0
             || tag_section >= FAKEVENDOR_SECTION_COUNT
@@ -130,10 +149,5 @@ int get_fakevendor_tag_type(uint32_t tag) {
     return fakevendor_tag_info[tag_section][tag_index].tag_type;
 }
 
-static const vendor_tag_query_ops_t fakevendor_query_ops = {
-    get_fakevendor_section_name,
-    get_fakevendor_tag_name,
-    get_fakevendor_tag_type
-};
 
 #endif
