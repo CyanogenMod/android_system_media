@@ -32,10 +32,15 @@ const effect_uuid_t * const SL_IID_VISUALIZATION = &SL_IID_VISUALIZATION_;
 #define VISUALIZER_CAPTURE_SIZE_MAX 1024  // maximum capture size in samples
 #define VISUALIZER_CAPTURE_SIZE_MIN 128   // minimum capture size in samples
 
+// to keep in sync with frameworks/base/media/java/android/media/audiofx/Visualizer.java
+#define VISUALIZER_SCALING_MODE_NORMALIZED 0
+#define VISUALIZER_SCALING_MODE_AS_PLAYED  1
+
 /* enumerated parameters for Visualizer effect */
 typedef enum
 {
-    VISUALIZER_PARAM_CAPTURE_SIZE,        // Sets the number PCM samples in the capture.
+    VISUALIZER_PARAM_CAPTURE_SIZE, // Sets the number PCM samples in the capture.
+    VISUALIZER_PARAM_SCALING_MODE, // Sets the way the captured data is scaled
 } t_visualizer_params;
 
 /* commands */
