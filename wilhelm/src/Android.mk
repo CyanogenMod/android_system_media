@@ -207,7 +207,7 @@ LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_TAGS := optional
 LOCAL_CFLAGS += -x c++ -DLI_API= -fvisibility=hidden -UNDEBUG \
                 -DSL_API='__attribute__((visibility("default")))'
-LOCAL_SHARED_LIBRARIES := libwilhelm
+LOCAL_SHARED_LIBRARIES := libwilhelm liblog
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -222,5 +222,5 @@ LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_TAGS := optional
 LOCAL_CFLAGS += -x c++ -DLI_API= -fvisibility=hidden -UNDEBUG \
                 -DXA_API='__attribute__((visibility("default")))'
-LOCAL_SHARED_LIBRARIES := libwilhelm
+LOCAL_SHARED_LIBRARIES := libwilhelm liblog
 include $(BUILD_SHARED_LIBRARY)
