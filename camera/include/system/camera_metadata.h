@@ -71,10 +71,32 @@ typedef struct camera_metadata_rational {
 } camera_metadata_rational_t;
 
 /**
+ * A reference to a metadata entry in a buffer.
+ *
+ * The data union pointers point to the real data in the buffer, and can be
+ * modified in-place if the count does not need to change. The count is the
+ * number of entries in data of the entry's type, not a count of bytes.
+ */
+typedef struct camera_metadata_entry {
+    size_t   index;
+    uint32_t tag;
+    uint8_t  type;
+    size_t   count;
+    union {
+        uint8_t *u8;
+        int32_t *i32;
+        float   *f;
+        int64_t *i64;
+        double  *d;
+        camera_metadata_rational_t *r;
+    } data;
+} camera_metadata_entry_t;
+
+/**
  * Size in bytes of each entry type
  */
 ANDROID_API
-extern size_t camera_metadata_type_sizes[NUM_TYPES];
+extern size_t camera_metadata_type_size[NUM_TYPES];
 
 /**
  * Main definitions for the metadata entry and array structures
@@ -90,9 +112,9 @@ extern size_t camera_metadata_type_sizes[NUM_TYPES];
  * calculate_camera_metadata_entry_data_size() provides the amount of data
  * capacity that would be used up by an entry.
  *
- * Entries are not sorted, and are not forced to be unique - multiple entries
- * with the same tag are allowed. The packet will not dynamically resize when
- * full.
+ * Entries are not sorted by default, and are not forced to be unique - multiple
+ * entries with the same tag are allowed. The packet will not dynamically resize
+ * when full.
  *
  * The packet is contiguous in memory, with size in bytes given by
  * get_camera_metadata_size(). Therefore, it can be copied safely with memcpy()
@@ -241,46 +263,63 @@ int add_camera_metadata_entry(camera_metadata_t *dst,
         size_t data_count);
 
 /**
- * Sort the metadata buffer for fast searching. If already sorted, does
- * nothing. Adding or appending entries to the buffer will place the buffer back
- * into an unsorted state.
+ * Sort the metadata buffer for fast searching. If already marked as sorted,
+ * does nothing. Adding or appending entries to the buffer will place the buffer
+ * back into an unsorted state.
  */
 ANDROID_API
 int sort_camera_metadata(camera_metadata_t *dst);
 
 /**
- * Get pointers to the fields for a metadata entry at position index in the
- * entry array.  The data pointer points either to the entry's data.value field
- * or to the right offset in camera_metadata_t.data. Returns 0 on
- * success. Data_count is the number of entries in the data array when cast to
- * the tag's type, not a count of bytes.
+ * Get metadata entry at position index in the metadata buffer.
  *
- * src and index are inputs; tag, type, data, and data_count are outputs. Any of
- * the outputs can be set to NULL to skip reading that value.
+ * src and index are inputs; the passed-in entry is updated with the details of
+ * the entry. The data pointer points to the real data in the buffer, and can be
+ * updated as long as the data count does not change.
  */
 ANDROID_API
 int get_camera_metadata_entry(camera_metadata_t *src,
-        uint32_t index,
-        uint32_t *tag,
-        uint8_t *type,
-        void **data,
-        size_t *data_count);
+        size_t index,
+        camera_metadata_entry_t *entry);
 
 /**
  * Find an entry with given tag value. If not found, returns -ENOENT. Otherwise,
- * returns entry contents like get_camera_metadata_entry. Any of
- * the outputs can be set to NULL to skip reading that value.
+ * returns entry contents like get_camera_metadata_entry.
  *
- * Note: Returns only the first entry with a given tag. To speed up searching
- * for tags, sort the metadata structure first by calling
- * sort_camera_metadata().
+ * If multiple entries with the same tag exist, does not have any guarantees on
+ * which is returned. To speed up searching for tags, sort the metadata
+ * structure first by calling sort_camera_metadata().
  */
 ANDROID_API
 int find_camera_metadata_entry(camera_metadata_t *src,
         uint32_t tag,
-        uint8_t *type,
-        void **data,
-        size_t *data_count);
+        camera_metadata_entry_t *entry);
+
+/**
+ * Delete an entry at given index. This is an expensive operation, since it
+ * requires repacking entries and possibly entry data. This also invalidates any
+ * existing camera_metadata_entry.data pointers to this buffer. Sorting is
+ * maintained.
+ */
+ANDROID_API
+int delete_camera_metadata_entry(camera_metadata_t *dst,
+        size_t index);
+
+/**
+ * Updates a metadata entry with new data. If the data size is changing, may
+ * need to adjust the data array, making this an O(N) operation. If the data
+ * size is the same or still fits in the entry space, this is O(1). Maintains
+ * sorting, but invalidates camera_metadata_entry instances that point to the
+ * updated entry. If a non-NULL value is passed in to entry, the entry structure
+ * is updated to match the new buffer state.  Returns a non-zero value if there
+ * is no room for the new data in the buffer.
+ */
+ANDROID_API
+int update_camera_metadata_entry(camera_metadata_t *dst,
+        size_t index,
+        const void *data,
+        size_t data_count,
+        camera_metadata_entry_t *updated_entry);
 
 /**
  * Retrieve human-readable name of section the tag is in. Returns NULL if
