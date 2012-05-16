@@ -346,14 +346,8 @@ tag_info_t android_edge_info[ANDROID_EDGE_INFO_END -
 
 tag_info_t android_scaler[ANDROID_SCALER_END -
         ANDROID_SCALER_START] = {
-    TIDX(SCALER, SIZE) =
-    { "size",       TYPE_INT32 },
-    TIDX(SCALER, FORMAT) =
-    { "format",     TYPE_BYTE },
     TIDX(SCALER, CROP_REGION) =
-    { "cropRegion", TYPE_INT32 },
-    TIDX(SCALER, ROTATION) =
-    { "rotation",   TYPE_INT32 },
+    { "cropRegion", TYPE_INT32 }
 };
 
 tag_info_t android_scaler_info[ANDROID_SCALER_INFO_END -
@@ -435,8 +429,16 @@ tag_info_t android_stats_info[ANDROID_STATS_INFO_END -
 
 tag_info_t android_control[ANDROID_CONTROL_END -
         ANDROID_CONTROL_START] = {
+    TIDX(CONTROL, CAPTURE_INTENT) =
+    { "captureIntent",               TYPE_BYTE },
     TIDX(CONTROL, MODE) =
     { "mode",                        TYPE_BYTE },
+    TIDX(CONTROL, EFFECT_MODE) =
+    { "effectMode",                  TYPE_BYTE },
+    TIDX(CONTROL, SCENE_MODE) =
+    { "sceneMode",                   TYPE_BYTE },
+    TIDX(CONTROL, VIDEO_STABILIZATION_MODE) =
+    { "videoStabilizationMode",      TYPE_BYTE },
     TIDX(CONTROL, AE_MODE) =
     { "aeMode",                      TYPE_BYTE },
     TIDX(CONTROL, AE_REGIONS) =
@@ -447,20 +449,20 @@ tag_info_t android_control[ANDROID_CONTROL_END -
     { "aeTargetFpsRange",            TYPE_INT32 },
     TIDX(CONTROL, AE_ANTIBANDING_MODE) =
     { "aeAntibandingMode",           TYPE_BYTE },
+    TIDX(CONTROL, AE_STATE) =
+    { "aeState",                     TYPE_BYTE },
     TIDX(CONTROL, AWB_MODE) =
     { "awbMode",                     TYPE_BYTE },
     TIDX(CONTROL, AWB_REGIONS) =
     { "awbRegions",                  TYPE_INT32 },
+    TIDX(CONTROL, AWB_STATE) =
+    { "awbState",                    TYPE_BYTE },
     TIDX(CONTROL, AF_MODE) =
     { "afMode",                      TYPE_BYTE },
     TIDX(CONTROL, AF_REGIONS) =
     { "afRegions",                   TYPE_INT32 },
-    TIDX(CONTROL, AF_TRIGGER) =
-    { "afTrigger",                   TYPE_BYTE },
     TIDX(CONTROL, AF_STATE) =
-    { "afState",                     TYPE_BYTE },
-    TIDX(CONTROL, VIDEO_STABILIZATION_MODE) =
-    { "videoStabilizationMode",      TYPE_BYTE }
+    { "afState",                     TYPE_BYTE }
 };
 
 tag_info_t android_control_info[ANDROID_CONTROL_INFO_END -
