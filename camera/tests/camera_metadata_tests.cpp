@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#define LOG_NDEBUG 1
+#define LOG_TAG "camera_metadata_tests"
+#include "cutils/log.h"
+
 #include <errno.h>
 
 #include "gtest/gtest.h"
@@ -226,45 +230,43 @@ TEST(camera_metadata, add_get_normal) {
 
     // Check added entries
 
-    uint32_t tag = 0;
-    uint8_t type = 0;
-    int32_t *data_int32;
-    int64_t *data_int64;
-    float *data_float;
-    size_t data_count = 0;
+    camera_metadata_entry entry;
+    result = get_camera_metadata_entry(m,
+            0, &entry);
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ(0, (int)entry.index);
+    EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, entry.tag);
+    EXPECT_EQ(TYPE_INT64, entry.type);
+    EXPECT_EQ((size_t)1, entry.count);
+    EXPECT_EQ(exposure_time, *entry.data.i64);
 
     result = get_camera_metadata_entry(m,
-            0, &tag, &type, (void**)&data_int64, &data_count);
+            1, &entry);
     EXPECT_EQ(OK, result);
-    EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, tag);
-    EXPECT_EQ(TYPE_INT64, type);
-    EXPECT_EQ((size_t)1, data_count);
-    EXPECT_EQ(exposure_time, *data_int64);
+    EXPECT_EQ((size_t)1, entry.index);
+    EXPECT_EQ(ANDROID_SENSOR_SENSITIVITY, entry.tag);
+    EXPECT_EQ(TYPE_INT32, entry.type);
+    EXPECT_EQ((size_t)1, entry.count);
+    EXPECT_EQ(sensitivity, *entry.data.i32);
 
     result = get_camera_metadata_entry(m,
-            1, &tag, &type, (void**)&data_int32, &data_count);
+            2, &entry);
     EXPECT_EQ(OK, result);
-    EXPECT_EQ(ANDROID_SENSOR_SENSITIVITY, tag);
-    EXPECT_EQ(TYPE_INT32, type);
-    EXPECT_EQ((size_t)1, data_count);
-    EXPECT_EQ(sensitivity, *data_int32);
+    EXPECT_EQ((size_t)2, entry.index);
+    EXPECT_EQ(ANDROID_LENS_FOCUS_DISTANCE, entry.tag);
+    EXPECT_EQ(TYPE_FLOAT, entry.type);
+    EXPECT_EQ((size_t)1, entry.count);
+    EXPECT_EQ(focusDistance, *entry.data.f);
 
     result = get_camera_metadata_entry(m,
-            2, &tag, &type, (void**)&data_float, &data_count);
+            3, &entry);
     EXPECT_EQ(OK, result);
-    EXPECT_EQ(ANDROID_LENS_FOCUS_DISTANCE, tag);
-    EXPECT_EQ(TYPE_FLOAT, type);
-    EXPECT_EQ((size_t)1, data_count);
-    EXPECT_EQ(focusDistance, *data_float);
-
-    result = get_camera_metadata_entry(m,
-            3, &tag, &type, (void**)&data_float, &data_count);
-    EXPECT_EQ(OK, result);
-    EXPECT_EQ(ANDROID_COLOR_TRANSFORM, tag);
-    EXPECT_EQ(TYPE_FLOAT, type);
-    EXPECT_EQ((size_t)9, data_count);
-    for (unsigned int i=0; i < data_count; i++) {
-        EXPECT_EQ(colorTransform[i], data_float[i] );
+    EXPECT_EQ((size_t)3, entry.index);
+    EXPECT_EQ(ANDROID_COLOR_TRANSFORM, entry.tag);
+    EXPECT_EQ(TYPE_FLOAT, entry.type);
+    EXPECT_EQ((size_t)9, entry.count);
+    for (unsigned int i=0; i < entry.count; i++) {
+        EXPECT_EQ(colorTransform[i], entry.data.f[i] );
     }
 
     EXPECT_EQ(calculate_camera_metadata_size(entry_capacity, data_capacity),
@@ -273,7 +275,9 @@ TEST(camera_metadata, add_get_normal) {
     EXPECT_EQ(calculate_camera_metadata_size(entries_used, data_used),
             get_camera_metadata_compact_size(m) );
 
-    dump_camera_metadata(m, 0, 2);
+    IF_ALOGV() {
+        dump_camera_metadata(m, 0, 2);
+    }
 
     free_camera_metadata(m);
 }
@@ -319,33 +323,33 @@ TEST(camera_metadata, add_get_toomany) {
 
     EXPECT_EQ(ERROR, result);
 
-    uint32_t tag = 0;
-    uint8_t type = 0;
-    int32_t *data_int32;
-    size_t data_count = 0;
+    camera_metadata_entry entry;
     for (unsigned int i=0; i < entry_capacity; i++) {
         int64_t exposure_time = 100 + i * 100;
         result = get_camera_metadata_entry(m,
-                i, &tag, &type, (void**)&data_int32, &data_count);
+                i, &entry);
         EXPECT_EQ(OK, result);
-        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, tag);
-        EXPECT_EQ(TYPE_INT64, type);
-        EXPECT_EQ((size_t)1, data_count);
-        EXPECT_EQ(exposure_time, *data_int32);
+        EXPECT_EQ(i, entry.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, entry.tag);
+        EXPECT_EQ(TYPE_INT64, entry.type);
+        EXPECT_EQ((size_t)1, entry.count);
+        EXPECT_EQ(exposure_time, *entry.data.i64);
     }
-    tag = 0;
-    type = 0;
-    data_int32 = NULL;
-    data_count = 0;
+    entry.tag = 1234;
+    entry.type = 56;
+    entry.data.u8 = NULL;
+    entry.count = 7890;
     result = get_camera_metadata_entry(m,
-            entry_capacity, &tag, &type, (void**)&data_int32, &data_count);
+            entry_capacity, &entry);
     EXPECT_EQ(ERROR, result);
-    EXPECT_EQ((uint32_t)0, tag);
-    EXPECT_EQ((uint8_t)0, type);
-    EXPECT_EQ((size_t)0, data_count);
-    EXPECT_EQ(NULL, data_int32);
+    EXPECT_EQ((uint32_t)1234, entry.tag);
+    EXPECT_EQ((uint8_t)56, entry.type);
+    EXPECT_EQ(NULL, entry.data.u8);
+    EXPECT_EQ((size_t)7890, entry.count);
 
-    dump_camera_metadata(m, 0, 2);
+    IF_ALOGV() {
+        dump_camera_metadata(m, 0, 2);
+    }
 
     free_camera_metadata(m);
 }
@@ -380,23 +384,20 @@ TEST(camera_metadata, copy_metadata) {
             get_camera_metadata_data_count(m2));
 
     for (unsigned int i=0; i < get_camera_metadata_entry_count(m); i++) {
-        uint32_t tag, tag2;
-        uint8_t type, type2;
-        uint8_t *data, *data2;
-        size_t   data_count, data_count2;
-
+        camera_metadata_entry e1, e2;
         int result;
-        result = get_camera_metadata_entry(m,
-                i, &tag, &type, (void**)&data, &data_count);
+        result = get_camera_metadata_entry(m, i, &e1);
         EXPECT_EQ(OK, result);
-        result = get_camera_metadata_entry(m2,
-                i, &tag2, &type2, (void**)&data2, &data_count2);
+        result = get_camera_metadata_entry(m2, i, &e2);
         EXPECT_EQ(OK, result);
-        EXPECT_EQ(tag, tag2);
-        EXPECT_EQ(type, type2);
-        EXPECT_EQ(data_count, data_count2);
-        for (unsigned int j=0; j < data_count; j++) {
-            EXPECT_EQ(data[j], data2[j]);
+        EXPECT_EQ(e1.index, e2.index);
+        EXPECT_EQ(e1.tag, e2.tag);
+        EXPECT_EQ(e1.type, e2.type);
+        EXPECT_EQ(e1.count, e2.count);
+        for (unsigned int j=0;
+             j < e1.count * camera_metadata_type_size[e1.type];
+             j++) {
+            EXPECT_EQ(e1.data.u8[j], e2.data.u8[j]);
         }
     }
 
@@ -440,23 +441,22 @@ TEST(camera_metadata, copy_metadata_extraspace) {
             (uint8_t*)m2 + get_camera_metadata_size(m2) );
 
     for (unsigned int i=0; i < get_camera_metadata_entry_count(m); i++) {
-        uint32_t tag, tag2;
-        uint8_t type, type2;
-        uint8_t *data, *data2;
-        size_t   data_count, data_count2;
+        camera_metadata_entry e1, e2;
 
         int result;
-        result = get_camera_metadata_entry(m,
-                i, &tag, &type, (void**)&data, &data_count);
+        result = get_camera_metadata_entry(m, i, &e1);
         EXPECT_EQ(OK, result);
-        result = get_camera_metadata_entry(m2,
-                i, &tag2, &type2, (void**)&data2, &data_count2);
+        EXPECT_EQ(i, e1.index);
+        result = get_camera_metadata_entry(m2, i, &e2);
         EXPECT_EQ(OK, result);
-        EXPECT_EQ(tag, tag2);
-        EXPECT_EQ(type, type2);
-        EXPECT_EQ(data_count, data_count2);
-        for (unsigned int j=0; j < data_count; j++) {
-            EXPECT_EQ(data[j], data2[j]);
+        EXPECT_EQ(e1.index, e2.index);
+        EXPECT_EQ(e1.tag, e2.tag);
+        EXPECT_EQ(e1.type, e2.type);
+        EXPECT_EQ(e1.count, e2.count);
+        for (unsigned int j=0;
+             j < e1.count * camera_metadata_type_size[e1.type];
+             j++) {
+            EXPECT_EQ(e1.data.u8[j], e2.data.u8[j]);
         }
     }
 
@@ -512,29 +512,29 @@ TEST(camera_metadata, append_metadata) {
 
     EXPECT_EQ(OK, result);
 
-    EXPECT_EQ(get_camera_metadata_entry_count(m), get_camera_metadata_entry_count(m2));
-    EXPECT_EQ(get_camera_metadata_data_count(m),  get_camera_metadata_data_count(m2));
+    EXPECT_EQ(get_camera_metadata_entry_count(m),
+            get_camera_metadata_entry_count(m2));
+    EXPECT_EQ(get_camera_metadata_data_count(m),
+            get_camera_metadata_data_count(m2));
     EXPECT_EQ(entry_capacity*2, get_camera_metadata_entry_capacity(m2));
     EXPECT_EQ(data_capacity*2,  get_camera_metadata_data_capacity(m2));
 
     for (unsigned int i=0; i < get_camera_metadata_entry_count(m); i++) {
-        uint32_t tag, tag2;
-        uint8_t type, type2;
-        uint8_t *data, *data2;
-        size_t   data_count, data_count2;
-
+        camera_metadata_entry e1, e2;
         int result;
-        result = get_camera_metadata_entry(m,
-                i, &tag, &type, (void**)&data, &data_count);
+        result = get_camera_metadata_entry(m, i, &e1);
         EXPECT_EQ(OK, result);
-        result = get_camera_metadata_entry(m2,
-                i, &tag2, &type2, (void**)&data2, &data_count2);
+        EXPECT_EQ(i, e1.index);
+        result = get_camera_metadata_entry(m2, i, &e2);
         EXPECT_EQ(OK, result);
-        EXPECT_EQ(tag, tag2);
-        EXPECT_EQ(type, type2);
-        EXPECT_EQ(data_count, data_count2);
-        for (unsigned int j=0; j < data_count; j++) {
-            EXPECT_EQ(data[j], data2[j]);
+        EXPECT_EQ(e1.index, e2.index);
+        EXPECT_EQ(e1.tag, e2.tag);
+        EXPECT_EQ(e1.type, e2.type);
+        EXPECT_EQ(e1.count, e2.count);
+        for (unsigned int j=0;
+             j < e1.count * camera_metadata_type_size[e1.type];
+             j++) {
+            EXPECT_EQ(e1.data.u8[j], e2.data.u8[j]);
         }
     }
 
@@ -542,29 +542,32 @@ TEST(camera_metadata, append_metadata) {
 
     EXPECT_EQ(OK, result);
 
-    EXPECT_EQ(get_camera_metadata_entry_count(m)*2, get_camera_metadata_entry_count(m2));
-    EXPECT_EQ(get_camera_metadata_data_count(m)*2,  get_camera_metadata_data_count(m2));
+    EXPECT_EQ(get_camera_metadata_entry_count(m)*2,
+            get_camera_metadata_entry_count(m2));
+    EXPECT_EQ(get_camera_metadata_data_count(m)*2,
+            get_camera_metadata_data_count(m2));
     EXPECT_EQ(entry_capacity*2, get_camera_metadata_entry_capacity(m2));
     EXPECT_EQ(data_capacity*2,  get_camera_metadata_data_capacity(m2));
 
     for (unsigned int i=0; i < get_camera_metadata_entry_count(m2); i++) {
-        uint32_t tag, tag2;
-        uint8_t type, type2;
-        uint8_t *data, *data2;
-        size_t   data_count, data_count2;
+        camera_metadata_entry e1, e2;
 
         int result;
         result = get_camera_metadata_entry(m,
-                i % entry_capacity, &tag, &type, (void**)&data, &data_count);
+                i % entry_capacity, &e1);
         EXPECT_EQ(OK, result);
+        EXPECT_EQ(i % entry_capacity, e1.index);
         result = get_camera_metadata_entry(m2,
-                i, &tag2, &type2, (void**)&data2, &data_count2);
+                i, &e2);
         EXPECT_EQ(OK, result);
-        EXPECT_EQ(tag, tag2);
-        EXPECT_EQ(type, type2);
-        EXPECT_EQ(data_count, data_count2);
-        for (unsigned int j=0; j < data_count; j++) {
-            EXPECT_EQ(data[j], data2[j]);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(e1.tag, e2.tag);
+        EXPECT_EQ(e1.type, e2.type);
+        EXPECT_EQ(e1.count, e2.count);
+        for (unsigned int j=0;
+             j < e1.count * camera_metadata_type_size[e1.type];
+             j++) {
+            EXPECT_EQ(e1.data.u8[j], e2.data.u8[j]);
         }
     }
 
@@ -619,29 +622,30 @@ TEST(camera_metadata, append_metadata_onespace) {
 
     EXPECT_EQ(OK, result);
 
-    EXPECT_EQ(get_camera_metadata_entry_count(m), get_camera_metadata_entry_count(m2));
-    EXPECT_EQ(get_camera_metadata_data_count(m),  get_camera_metadata_data_count(m2));
+    EXPECT_EQ(get_camera_metadata_entry_count(m),
+            get_camera_metadata_entry_count(m2));
+    EXPECT_EQ(get_camera_metadata_data_count(m),
+            get_camera_metadata_data_count(m2));
     EXPECT_EQ(entry_capacity2, get_camera_metadata_entry_capacity(m2));
     EXPECT_EQ(data_capacity2,  get_camera_metadata_data_capacity(m2));
 
     for (unsigned int i=0; i < get_camera_metadata_entry_count(m); i++) {
-        uint32_t tag, tag2;
-        uint8_t type, type2;
-        uint8_t *data, *data2;
-        size_t   data_count, data_count2;
+        camera_metadata_entry e1, e2;
 
         int result;
-        result = get_camera_metadata_entry(m,
-                i, &tag, &type, (void**)&data, &data_count);
+        result = get_camera_metadata_entry(m, i, &e1);
         EXPECT_EQ(OK, result);
-        result = get_camera_metadata_entry(m2,
-                i, &tag2, &type2, (void**)&data2, &data_count2);
+        EXPECT_EQ(i, e1.index);
+        result = get_camera_metadata_entry(m2, i, &e2);
         EXPECT_EQ(OK, result);
-        EXPECT_EQ(tag, tag2);
-        EXPECT_EQ(type, type2);
-        EXPECT_EQ(data_count, data_count2);
-        for (unsigned int j=0; j < data_count; j++) {
-            EXPECT_EQ(data[j], data2[j]);
+        EXPECT_EQ(e1.index, e2.index);
+        EXPECT_EQ(e1.tag, e2.tag);
+        EXPECT_EQ(e1.type, e2.type);
+        EXPECT_EQ(e1.count, e2.count);
+        for (unsigned int j=0;
+             j < e1.count * camera_metadata_type_size[e1.type];
+             j++) {
+            EXPECT_EQ(e1.data.u8[j], e2.data.u8[j]);
         }
     }
 
@@ -655,23 +659,23 @@ TEST(camera_metadata, append_metadata_onespace) {
     EXPECT_EQ(data_capacity2,  get_camera_metadata_data_capacity(m2));
 
     for (unsigned int i=0; i < get_camera_metadata_entry_count(m2); i++) {
-        uint32_t tag, tag2;
-        uint8_t type, type2;
-        uint8_t *data, *data2;
-        size_t   data_count, data_count2;
+        camera_metadata_entry e1, e2;
 
         int result;
         result = get_camera_metadata_entry(m,
-                i % entry_capacity, &tag, &type, (void**)&data, &data_count);
+                i % entry_capacity, &e1);
         EXPECT_EQ(OK, result);
-        result = get_camera_metadata_entry(m2,
-                i, &tag2, &type2, (void**)&data2, &data_count2);
+        EXPECT_EQ(i % entry_capacity, e1.index);
+        result = get_camera_metadata_entry(m2, i, &e2);
         EXPECT_EQ(OK, result);
-        EXPECT_EQ(tag, tag2);
-        EXPECT_EQ(type, type2);
-        EXPECT_EQ(data_count, data_count2);
-        for (unsigned int j=0; j < data_count; j++) {
-            EXPECT_EQ(data[j], data2[j]);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(e1.tag, e2.tag);
+        EXPECT_EQ(e1.type, e2.type);
+        EXPECT_EQ(e1.count, e2.count);
+        for (unsigned int j=0;
+             j < e1.count * camera_metadata_type_size[e1.type];
+             j++) {
+            EXPECT_EQ(e1.data.u8[j], e2.data.u8[j]);
         }
     }
 
@@ -763,9 +767,11 @@ TEST(camera_metadata, add_all_tags) {
     float *data_float   = (float *)data;
     int64_t *data_int64 = (int64_t *)data;
     double *data_double = (double *)data;
-    camera_metadata_rational_t *data_rational = (camera_metadata_rational_t *)data;
+    camera_metadata_rational_t *data_rational =
+            (camera_metadata_rational_t *)data;
 
-    camera_metadata_t *m = allocate_camera_metadata(total_tag_count, conservative_data_space);
+    camera_metadata_t *m = allocate_camera_metadata(total_tag_count,
+            conservative_data_space);
 
     ASSERT_NE((void*)NULL, (void*)m);
 
@@ -826,7 +832,9 @@ TEST(camera_metadata, add_all_tags) {
         }
     }
 
-    dump_camera_metadata(m, 0, 2);
+    IF_ALOGV() {
+        dump_camera_metadata(m, 0, 2);
+    }
 
     free_camera_metadata(m);
 }
@@ -871,55 +879,672 @@ TEST(camera_metadata, sort_metadata) {
     EXPECT_EQ(OK, result);
 
     // Test unsorted find
-    uint8_t type;
-    float  *f;
-    size_t  data_count;
+    camera_metadata_entry_t entry;
     result = find_camera_metadata_entry(m,
             ANDROID_LENS_FOCUS_DISTANCE,
-            &type,
-            (void**)&f,
-            &data_count);
+            &entry);
     EXPECT_EQ(OK, result);
-    EXPECT_EQ(TYPE_FLOAT, type);
-    EXPECT_EQ(1, (int)data_count);
-    EXPECT_EQ(focus_distance, *f);
+    EXPECT_EQ(ANDROID_LENS_FOCUS_DISTANCE, entry.tag);
+    EXPECT_EQ((size_t)1, entry.index);
+    EXPECT_EQ(TYPE_FLOAT, entry.type);
+    EXPECT_EQ((size_t)1, entry.count);
+    EXPECT_EQ(focus_distance, *entry.data.f);
 
     result = find_camera_metadata_entry(m,
             ANDROID_NOISE_STRENGTH,
-            &type,
-            (void**)&f,
-            &data_count);
+            &entry);
     EXPECT_EQ(NOT_FOUND, result);
+    EXPECT_EQ((size_t)1, entry.index);
+    EXPECT_EQ(ANDROID_LENS_FOCUS_DISTANCE, entry.tag);
+    EXPECT_EQ(TYPE_FLOAT, entry.type);
+    EXPECT_EQ((size_t)1, entry.count);
+    EXPECT_EQ(focus_distance, *entry.data.f);
 
     // Sort
-    std::cout << "Pre-sorted metadata" << std::endl;
-    dump_camera_metadata(m, 0, 2);
+    IF_ALOGV() {
+        std::cout << "Pre-sorted metadata" << std::endl;
+        dump_camera_metadata(m, 0, 2);
+    }
 
     result = sort_camera_metadata(m);
     EXPECT_EQ(OK, result);
 
-    std::cout << "Sorted metadata" << std::endl;
-    dump_camera_metadata(m, 0, 2);
+    IF_ALOGV() {
+        std::cout << "Sorted metadata" << std::endl;
+        dump_camera_metadata(m, 0, 2);
+    }
 
     // Test sorted find
 
     result = find_camera_metadata_entry(m,
             ANDROID_LENS_FOCUS_DISTANCE,
-            &type,
-            (void**)&f,
-            &data_count);
+            &entry);
     EXPECT_EQ(OK, result);
-    EXPECT_EQ(TYPE_FLOAT, type);
-    EXPECT_EQ(1, (int)data_count);
-    EXPECT_EQ(focus_distance, *f);
+    EXPECT_EQ((size_t)0, entry.index);
+    EXPECT_EQ(ANDROID_LENS_FOCUS_DISTANCE, entry.tag);
+    EXPECT_EQ(TYPE_FLOAT, entry.type);
+    EXPECT_EQ((size_t)1, (size_t)entry.count);
+    EXPECT_EQ(focus_distance, *entry.data.f);
 
     result = find_camera_metadata_entry(m,
             ANDROID_NOISE_STRENGTH,
-            &type,
-            (void**)&f,
-            &data_count);
+            &entry);
     EXPECT_EQ(NOT_FOUND, result);
+    EXPECT_EQ((size_t)0, entry.index);
+    EXPECT_EQ(ANDROID_LENS_FOCUS_DISTANCE, entry.tag);
+    EXPECT_EQ(TYPE_FLOAT, entry.type);
+    EXPECT_EQ((size_t)1, entry.count);
+    EXPECT_EQ(focus_distance, *entry.data.f);
 
 
     free_camera_metadata(m);
+}
+
+TEST(camera_metadata, delete_metadata) {
+    camera_metadata_t *m = NULL;
+    const size_t entry_capacity = 50;
+    const size_t data_capacity = 450;
+
+    int result;
+
+    m = allocate_camera_metadata(entry_capacity, data_capacity);
+
+    size_t num_entries = 5;
+    size_t data_per_entry =
+            calculate_camera_metadata_entry_data_size(TYPE_INT64, 1);
+    size_t num_data = num_entries * data_per_entry;
+
+    // Delete an entry with data
+
+    add_test_metadata(m, num_entries);
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+
+    result = delete_camera_metadata_entry(m, 1);
+    EXPECT_EQ(OK, result);
+    num_entries--;
+    num_data -= data_per_entry;
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(entry_capacity, get_camera_metadata_entry_capacity(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+    EXPECT_EQ(data_capacity, get_camera_metadata_data_capacity(m));
+
+    result = delete_camera_metadata_entry(m, 4);
+    EXPECT_EQ(ERROR, result);
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(entry_capacity, get_camera_metadata_entry_capacity(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+    EXPECT_EQ(data_capacity, get_camera_metadata_data_capacity(m));
+
+    for (size_t i = 0; i < num_entries; i++) {
+        camera_metadata_entry e;
+        result = get_camera_metadata_entry(m, i, &e);
+        EXPECT_EQ(OK, result);
+        EXPECT_EQ(i, e.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e.tag);
+        EXPECT_EQ(TYPE_INT64, e.type);
+        int64_t exposureTime = i < 1 ? 100 : 200 + 100 * i;
+        EXPECT_EQ(exposureTime, *e.data.i64);
+    }
+
+    // Delete an entry with no data, at end of array
+
+    int32_t frameCount = 12;
+    result = add_camera_metadata_entry(m,
+            ANDROID_REQUEST_FRAME_COUNT,
+            &frameCount, 1);
+    EXPECT_EQ(OK, result);
+    num_entries++;
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(entry_capacity, get_camera_metadata_entry_capacity(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+    EXPECT_EQ(data_capacity, get_camera_metadata_data_capacity(m));
+
+    camera_metadata_entry e;
+    result = get_camera_metadata_entry(m, 4, &e);
+    EXPECT_EQ(OK, result);
+
+    EXPECT_EQ((size_t)4, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(frameCount, *e.data.i32);
+
+    result = delete_camera_metadata_entry(m, 4);
+    EXPECT_EQ(OK, result);
+
+    num_entries--;
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(entry_capacity, get_camera_metadata_entry_capacity(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+    EXPECT_EQ(data_capacity, get_camera_metadata_data_capacity(m));
+
+    result = delete_camera_metadata_entry(m, 4);
+    EXPECT_EQ(ERROR, result);
+
+    result = get_camera_metadata_entry(m, 4, &e);
+    EXPECT_EQ(ERROR, result);
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(entry_capacity, get_camera_metadata_entry_capacity(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+    EXPECT_EQ(data_capacity, get_camera_metadata_data_capacity(m));
+
+    // Delete with extra data on end of array
+    result = delete_camera_metadata_entry(m, 3);
+    EXPECT_EQ(OK, result);
+    num_entries--;
+    num_data -= data_per_entry;
+
+    for (size_t i = 0; i < num_entries; i++) {
+        camera_metadata_entry e2;
+        result = get_camera_metadata_entry(m, i, &e2);
+        EXPECT_EQ(OK, result);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e2.tag);
+        EXPECT_EQ(TYPE_INT64, e2.type);
+        int64_t exposureTime = i < 1 ? 100 : 200 + 100 * i;
+        EXPECT_EQ(exposureTime, *e2.data.i64);
+    }
+
+    // Delete without extra data in front of array
+
+    frameCount = 1001;
+    result = add_camera_metadata_entry(m,
+            ANDROID_REQUEST_FRAME_COUNT,
+            &frameCount, 1);
+    EXPECT_EQ(OK, result);
+    num_entries++;
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(entry_capacity, get_camera_metadata_entry_capacity(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+    EXPECT_EQ(data_capacity, get_camera_metadata_data_capacity(m));
+
+    result = sort_camera_metadata(m);
+    EXPECT_EQ(OK, result);
+
+    result = find_camera_metadata_entry(m,
+            ANDROID_REQUEST_FRAME_COUNT, &e);
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(frameCount, *e.data.i32);
+
+    result = delete_camera_metadata_entry(m, e.index);
+    EXPECT_EQ(OK, result);
+    num_entries--;
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(entry_capacity, get_camera_metadata_entry_capacity(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+    EXPECT_EQ(data_capacity, get_camera_metadata_data_capacity(m));
+
+    for (size_t i = 0; i < num_entries; i++) {
+        camera_metadata_entry e2;
+        result = get_camera_metadata_entry(m, i, &e2);
+        EXPECT_EQ(OK, result);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e2.tag);
+        EXPECT_EQ(TYPE_INT64, e2.type);
+        int64_t exposureTime = i < 1 ? 100 : 200 + 100 * i;
+        EXPECT_EQ(exposureTime, *e2.data.i64);
+    }
+}
+
+TEST(camera_metadata, update_metadata) {
+    camera_metadata_t *m = NULL;
+    const size_t entry_capacity = 50;
+    const size_t data_capacity = 450;
+
+    int result;
+
+    m = allocate_camera_metadata(entry_capacity, data_capacity);
+
+    size_t num_entries = 5;
+    size_t data_per_entry =
+            calculate_camera_metadata_entry_data_size(TYPE_INT64, 1);
+    size_t num_data = num_entries * data_per_entry;
+
+    add_test_metadata(m, num_entries);
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+
+    // Update with same-size data, doesn't fit in entry
+
+    int64_t newExposureTime = 1000;
+    camera_metadata_entry_t e;
+    result = update_camera_metadata_entry(m,
+            0, &newExposureTime, 1, &e);
+    EXPECT_EQ(OK, result);
+
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e.tag);
+    EXPECT_EQ(TYPE_INT64, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newExposureTime, *e.data.i64);
+
+    e.count = 0;
+    result = get_camera_metadata_entry(m,
+            0, &e);
+
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e.tag);
+    EXPECT_EQ(TYPE_INT64, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newExposureTime, *e.data.i64);
+
+    for (size_t i = 1; i < num_entries; i++) {
+        camera_metadata_entry e2;
+        result = get_camera_metadata_entry(m, i, &e2);
+        EXPECT_EQ(OK, result);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e2.tag);
+        EXPECT_EQ(TYPE_INT64, e2.type);
+        int64_t exposureTime = 100 + 100 * i;
+        EXPECT_EQ(exposureTime, *e2.data.i64);
+    }
+
+    // Update with larger data
+    int64_t newExposures[2] = { 5000, 6000 };
+    result = update_camera_metadata_entry(m,
+            0, newExposures, 2, &e);
+    EXPECT_EQ(OK, result);
+    num_data += data_per_entry;
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e.tag);
+    EXPECT_EQ(TYPE_INT64, e.type);
+    EXPECT_EQ((size_t)2, e.count);
+    EXPECT_EQ(newExposures[0], e.data.i64[0]);
+    EXPECT_EQ(newExposures[1], e.data.i64[1]);
+
+    e.count = 0;
+    result = get_camera_metadata_entry(m,
+            0, &e);
+
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e.tag);
+    EXPECT_EQ(TYPE_INT64, e.type);
+    EXPECT_EQ((size_t)2, e.count);
+    EXPECT_EQ(newExposures[0], e.data.i64[0]);
+    EXPECT_EQ(newExposures[1], e.data.i64[1]);
+
+    for (size_t i = 1; i < num_entries; i++) {
+        camera_metadata_entry e2;
+        result = get_camera_metadata_entry(m, i, &e2);
+        EXPECT_EQ(OK, result);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e2.tag);
+        EXPECT_EQ(TYPE_INT64, e2.type);
+        int64_t exposureTime = 100 + 100 * i;
+        EXPECT_EQ(exposureTime, *e2.data.i64);
+    }
+
+    // Update with smaller data
+    newExposureTime = 100;
+    result = update_camera_metadata_entry(m,
+            0, &newExposureTime, 1, &e);
+    EXPECT_EQ(OK, result);
+
+    num_data -= data_per_entry;
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e.tag);
+    EXPECT_EQ(TYPE_INT64, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newExposureTime, *e.data.i64);
+
+    e.count = 0;
+    result = get_camera_metadata_entry(m,
+            0, &e);
+
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e.tag);
+    EXPECT_EQ(TYPE_INT64, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newExposureTime, *e.data.i64);
+
+    for (size_t i = 1; i < num_entries; i++) {
+        camera_metadata_entry e2;
+        result = get_camera_metadata_entry(m, i, &e2);
+        EXPECT_EQ(OK, result);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e2.tag);
+        EXPECT_EQ(TYPE_INT64, e2.type);
+        int64_t exposureTime = 100 + 100 * i;
+        EXPECT_EQ(exposureTime, *e2.data.i64);
+    }
+
+    // Update with size fitting in entry
+
+    int32_t frameCount = 1001;
+    result = add_camera_metadata_entry(m,
+            ANDROID_REQUEST_FRAME_COUNT,
+            &frameCount, 1);
+    EXPECT_EQ(OK, result);
+    num_entries++;
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(entry_capacity, get_camera_metadata_entry_capacity(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+    EXPECT_EQ(data_capacity, get_camera_metadata_data_capacity(m));
+
+    result = sort_camera_metadata(m);
+    EXPECT_EQ(OK, result);
+
+    result = find_camera_metadata_entry(m,
+            ANDROID_REQUEST_FRAME_COUNT, &e);
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(frameCount, *e.data.i32);
+
+    int32_t newFrameCount = 0x12349876;
+    result = update_camera_metadata_entry(m,
+            0, &newFrameCount, 1, &e);
+
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newFrameCount, *e.data.i32);
+
+    result = find_camera_metadata_entry(m,
+            ANDROID_REQUEST_FRAME_COUNT, &e);
+
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newFrameCount, *e.data.i32);
+
+    for (size_t i = 1; i < num_entries; i++) {
+        camera_metadata_entry e2;
+        result = get_camera_metadata_entry(m, i, &e2);
+        EXPECT_EQ(OK, result);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e2.tag);
+        EXPECT_EQ(TYPE_INT64, e2.type);
+        int64_t exposureTime = 100 * i;
+        EXPECT_EQ(exposureTime, *e2.data.i64);
+    }
+
+    // Update to bigger than entry
+
+    int32_t newFrameCounts[4] = { 0x0, 0x1, 0x10, 0x100 };
+
+    result = update_camera_metadata_entry(m,
+            0, &newFrameCounts, 4, &e);
+
+    EXPECT_EQ(OK, result);
+
+    num_data += calculate_camera_metadata_entry_data_size(TYPE_INT32,
+            4);
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)4, e.count);
+    EXPECT_EQ(newFrameCounts[0], e.data.i32[0]);
+    EXPECT_EQ(newFrameCounts[1], e.data.i32[1]);
+    EXPECT_EQ(newFrameCounts[2], e.data.i32[2]);
+    EXPECT_EQ(newFrameCounts[3], e.data.i32[3]);
+
+    e.count = 0;
+
+    result = find_camera_metadata_entry(m,
+            ANDROID_REQUEST_FRAME_COUNT, &e);
+
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)4, e.count);
+    EXPECT_EQ(newFrameCounts[0], e.data.i32[0]);
+    EXPECT_EQ(newFrameCounts[1], e.data.i32[1]);
+    EXPECT_EQ(newFrameCounts[2], e.data.i32[2]);
+    EXPECT_EQ(newFrameCounts[3], e.data.i32[3]);
+
+    for (size_t i = 1; i < num_entries; i++) {
+        camera_metadata_entry e2;
+        result = get_camera_metadata_entry(m, i, &e2);
+        EXPECT_EQ(OK, result);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e2.tag);
+        EXPECT_EQ(TYPE_INT64, e2.type);
+        int64_t exposureTime = 100 * i;
+        EXPECT_EQ(exposureTime, *e2.data.i64);
+    }
+
+    // Update to smaller than entry
+    result = update_camera_metadata_entry(m,
+            0, &newFrameCount, 1, &e);
+
+    EXPECT_EQ(OK, result);
+
+    num_data -= camera_metadata_type_size[TYPE_INT32] * 4;
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newFrameCount, *e.data.i32);
+
+    result = find_camera_metadata_entry(m,
+            ANDROID_REQUEST_FRAME_COUNT, &e);
+
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newFrameCount, *e.data.i32);
+
+    for (size_t i = 1; i < num_entries; i++) {
+        camera_metadata_entry_t e2;
+        result = get_camera_metadata_entry(m, i, &e2);
+        EXPECT_EQ(OK, result);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e2.tag);
+        EXPECT_EQ(TYPE_INT64, e2.type);
+        int64_t exposureTime = 100 * i;
+        EXPECT_EQ(exposureTime, *e2.data.i64);
+    }
+
+    // Setup new buffer with no spare data space
+
+    result = update_camera_metadata_entry(m,
+            1, newExposures, 2, &e);
+    EXPECT_EQ(OK, result);
+
+    num_data += data_per_entry;
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+
+    EXPECT_EQ((size_t)1, e.index);
+    EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e.tag);
+    EXPECT_EQ(TYPE_INT64, e.type);
+    EXPECT_EQ((size_t)2, e.count);
+    EXPECT_EQ(newExposures[0], e.data.i64[0]);
+    EXPECT_EQ(newExposures[1], e.data.i64[1]);
+
+    camera_metadata_t *m2;
+    m2 = allocate_camera_metadata(get_camera_metadata_entry_count(m),
+            get_camera_metadata_data_count(m));
+    EXPECT_NOT_NULL(m2);
+
+    result = append_camera_metadata(m2, m);
+    EXPECT_EQ(OK, result);
+
+    result = find_camera_metadata_entry(m2,
+            ANDROID_REQUEST_FRAME_COUNT, &e);
+
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newFrameCount, *e.data.i32);
+
+    // Update when there's no more room
+
+    result = update_camera_metadata_entry(m2,
+            0, &newFrameCounts, 4, &e);
+    EXPECT_EQ(ERROR, result);
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m2));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m2));
+
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newFrameCount, *e.data.i32);
+
+    // Update when there's no data room, but change fits into entry
+
+    newFrameCount = 5;
+    result = update_camera_metadata_entry(m2,
+            0, &newFrameCount, 1, &e);
+    EXPECT_EQ(OK, result);
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m2));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m2));
+
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newFrameCount, *e.data.i32);
+
+    result = find_camera_metadata_entry(m2,
+            ANDROID_REQUEST_FRAME_COUNT, &e);
+
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newFrameCount, *e.data.i32);
+
+    result = get_camera_metadata_entry(m2, 1, &e);
+    EXPECT_EQ((size_t)1, e.index);
+    EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e.tag);
+    EXPECT_EQ(TYPE_INT64, e.type);
+    EXPECT_EQ((size_t)2, e.count);
+    EXPECT_EQ(newExposures[0], e.data.i64[0]);
+    EXPECT_EQ(newExposures[1], e.data.i64[1]);
+
+    for (size_t i = 2; i < num_entries; i++) {
+        camera_metadata_entry_t e2;
+        result = get_camera_metadata_entry(m2, i, &e2);
+        EXPECT_EQ(OK, result);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e2.tag);
+        EXPECT_EQ(TYPE_INT64, e2.type);
+        int64_t exposureTime = 100 * i;
+        EXPECT_EQ(exposureTime, *e2.data.i64);
+    }
+
+    // Update when there's no data room, but data size doesn't change
+
+    newExposures[0] = 1000;
+
+    result = update_camera_metadata_entry(m2,
+            1, newExposures, 2, &e);
+    EXPECT_EQ(OK, result);
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m2));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m2));
+
+    EXPECT_EQ((size_t)1, e.index);
+    EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e.tag);
+    EXPECT_EQ(TYPE_INT64, e.type);
+    EXPECT_EQ((size_t)2, e.count);
+    EXPECT_EQ(newExposures[0], e.data.i64[0]);
+    EXPECT_EQ(newExposures[1], e.data.i64[1]);
+
+    result = find_camera_metadata_entry(m2,
+            ANDROID_REQUEST_FRAME_COUNT, &e);
+
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newFrameCount, *e.data.i32);
+
+    for (size_t i = 2; i < num_entries; i++) {
+        camera_metadata_entry_t e2;
+        result = get_camera_metadata_entry(m2, i, &e2);
+        EXPECT_EQ(OK, result);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e2.tag);
+        EXPECT_EQ(TYPE_INT64, e2.type);
+        int64_t exposureTime = 100 * i;
+        EXPECT_EQ(exposureTime, *e2.data.i64);
+    }
+
+    // Update when there's no data room, but data size shrinks
+
+    result = update_camera_metadata_entry(m2,
+            1, &newExposureTime, 1, &e);
+    EXPECT_EQ(OK, result);
+
+    num_data -= calculate_camera_metadata_entry_data_size(TYPE_INT64, 2);
+    num_data += calculate_camera_metadata_entry_data_size(TYPE_INT64, 1);
+
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m2));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m2));
+
+    EXPECT_EQ((size_t)1, e.index);
+    EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e.tag);
+    EXPECT_EQ(TYPE_INT64, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newExposureTime, e.data.i64[0]);
+
+    result = find_camera_metadata_entry(m2,
+            ANDROID_REQUEST_FRAME_COUNT, &e);
+
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ((size_t)0, e.index);
+    EXPECT_EQ(ANDROID_REQUEST_FRAME_COUNT, e.tag);
+    EXPECT_EQ(TYPE_INT32, e.type);
+    EXPECT_EQ((size_t)1, e.count);
+    EXPECT_EQ(newFrameCount, *e.data.i32);
+
+    for (size_t i = 2; i < num_entries; i++) {
+        camera_metadata_entry_t e2;
+        result = get_camera_metadata_entry(m2, i, &e2);
+        EXPECT_EQ(OK, result);
+        EXPECT_EQ(i, e2.index);
+        EXPECT_EQ(ANDROID_SENSOR_EXPOSURE_TIME, e2.tag);
+        EXPECT_EQ(TYPE_INT64, e2.type);
+        int64_t exposureTime = 100 * i;
+        EXPECT_EQ(exposureTime, *e2.data.i64);
+    }
+
 }
