@@ -84,6 +84,7 @@ struct camera_metadata {
     size_t                   data_count;
     size_t                   data_capacity;
     uint8_t                 *data;
+    void                    *user; // User set pointer, not copied with buffer
     uint8_t                  reserved[0];
 };
 
@@ -156,6 +157,7 @@ camera_metadata_t *place_camera_metadata(void *dst,
     } else {
         metadata->data = NULL;
     }
+    metadata->user = NULL;
 
     return metadata;
 }
@@ -236,6 +238,7 @@ camera_metadata_t* copy_camera_metadata(void *dst, size_t dst_size,
             sizeof(camera_metadata_buffer_entry_t[metadata->entry_count]));
     memcpy(metadata->data, src->data,
             sizeof(uint8_t[metadata->data_count]));
+    metadata->user = NULL;
 
     return metadata;
 }
@@ -514,6 +517,18 @@ int update_camera_metadata_entry(camera_metadata_t *dst,
                 updated_entry);
     }
 
+    return OK;
+}
+
+int set_camera_metadata_user_pointer(camera_metadata_t *dst, void* user) {
+    if (dst == NULL) return ERROR;
+    dst->user = user;
+    return OK;
+}
+
+int get_camera_metadata_user_pointer(camera_metadata_t *dst, void** user) {
+    if (dst == NULL) return ERROR;
+    *user = dst->user;
     return OK;
 }
 

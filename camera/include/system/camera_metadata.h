@@ -322,6 +322,21 @@ int update_camera_metadata_entry(camera_metadata_t *dst,
         camera_metadata_entry_t *updated_entry);
 
 /**
+ * Set user pointer in buffer. This can be used for linking the metadata buffer
+ * with other associated data. This user pointer is not copied with
+ * copy_camera_metadata, and is unaffected by append or any other methods.
+ */
+ANDROID_API
+int set_camera_metadata_user_pointer(camera_metadata_t *dst, void* user);
+
+/**
+ * Retrieve user pointer in buffer. Returns NULL in user if
+ * set_camera_metadata_user_pointer has not been called with this buffer.
+ */
+ANDROID_API
+int get_camera_metadata_user_pointer(camera_metadata_t *dst, void** user);
+
+/**
  * Retrieve human-readable name of section the tag is in. Returns NULL if
  * no such tag is defined. Returns NULL for tags in the vendor section, unless
  * set_vendor_tag_query_ops() has been used.

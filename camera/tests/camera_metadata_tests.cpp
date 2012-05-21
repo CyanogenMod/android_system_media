@@ -1548,3 +1548,51 @@ TEST(camera_metadata, update_metadata) {
     }
 
 }
+
+TEST(camera_metadata, user_pointer) {
+    camera_metadata_t *m = NULL;
+    const size_t entry_capacity = 50;
+    const size_t data_capacity = 450;
+
+    int result;
+
+    m = allocate_camera_metadata(entry_capacity, data_capacity);
+
+    size_t num_entries = 5;
+    size_t data_per_entry =
+            calculate_camera_metadata_entry_data_size(TYPE_INT64, 1);
+    size_t num_data = num_entries * data_per_entry;
+
+    add_test_metadata(m, num_entries);
+    EXPECT_EQ(num_entries, get_camera_metadata_entry_count(m));
+    EXPECT_EQ(num_data, get_camera_metadata_data_count(m));
+
+    void* ptr;
+    result = get_camera_metadata_user_pointer(m, &ptr);
+    EXPECT_EQ(OK, result);
+    EXPECT_NULL(ptr);
+
+    int testValue = 10;
+    result = set_camera_metadata_user_pointer(m, &testValue);
+    EXPECT_EQ(OK, result);
+
+    result = get_camera_metadata_user_pointer(m, &ptr);
+    EXPECT_EQ(OK, result);
+    EXPECT_EQ(&testValue, (int*)ptr);
+    EXPECT_EQ(testValue, *(int*)ptr);
+
+    size_t buf_size = get_camera_metadata_compact_size(m);
+    EXPECT_LT((size_t)0, buf_size);
+
+    uint8_t *buf = (uint8_t*)malloc(buf_size);
+    EXPECT_NOT_NULL(buf);
+
+    camera_metadata_t *m2 = copy_camera_metadata(buf, buf_size, m);
+    EXPECT_NOT_NULL(m2);
+
+    result = get_camera_metadata_user_pointer(m2, &ptr);
+    EXPECT_NULL(ptr);
+
+    free(buf);
+    free_camera_metadata(m);
+}
