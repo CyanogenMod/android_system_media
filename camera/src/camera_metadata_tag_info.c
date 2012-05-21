@@ -162,6 +162,8 @@ tag_info_t android_lens_info[ANDROID_LENS_INFO_END -
         ANDROID_LENS_INFO_START] = {
     TIIDX(LENS, MINIMUM_FOCUS_DISTANCE)  =
     { "minimumFocusDistance",               TYPE_FLOAT },
+    TIIDX(LENS, HYPERFOCAL_DISTANCE) =
+    { "hyperfocalDistance",                 TYPE_FLOAT },
     TIIDX(LENS, AVAILABLE_FOCAL_LENGTHS) =
     { "availableFocalLengths",              TYPE_FLOAT },
     TIIDX(LENS, AVAILABLE_APERTURES) =
@@ -170,8 +172,12 @@ tag_info_t android_lens_info[ANDROID_LENS_INFO_END -
     { "availableFilterDensities",           TYPE_FLOAT },
     TIIDX(LENS, AVAILABLE_OPTICAL_STABILIZATION) =
     { "availableOpticalStabilizationModes", TYPE_BYTE },
+    TIIDX(LENS, SHADING_MAP_SIZE) =
+    { "shadingMapSize",                     TYPE_INT32 },
     TIIDX(LENS, SHADING_MAP) =
     { "shadingMap",                         TYPE_FLOAT },
+    TIIDX(LENS, GEOMETRIC_CORRECTION_MAP_SIZE) =
+    { "geometricCorrectionMapSize",         TYPE_INT32 },
     TIIDX(LENS, GEOMETRIC_CORRECTION_MAP) =
     { "geometricCorrectionMap",             TYPE_FLOAT },
     TIIDX(LENS, FACING) =
@@ -202,6 +208,8 @@ tag_info_t android_sensor_info[ANDROID_SENSOR_INFO_END -
     { "availableSensitivities", TYPE_INT32 },
     TIIDX(SENSOR, COLOR_FILTER_ARRANGEMENT) =
     { "colorFilterArrangement", TYPE_BYTE },
+    TIIDX(SENSOR, PHYSICAL_SIZE) =
+    { "physicalSize",           TYPE_FLOAT },
     TIIDX(SENSOR, PIXEL_ARRAY_SIZE) =
     { "pixelArraySize",         TYPE_INT32 },
     TIIDX(SENSOR, ACTIVE_ARRAY_SIZE) =
@@ -248,7 +256,7 @@ tag_info_t android_flash[ANDROID_FLASH_END -
 
 tag_info_t android_flash_info[ANDROID_FLASH_INFO_END -
         ANDROID_FLASH_INFO_START] = {
-    TIIDX(FLASH, AVAILABLE_MODES) =
+    TIIDX(FLASH, AVAILABLE) =
     { "available",      TYPE_BYTE },
     TIIDX(FLASH, CHARGE_DURATION) =
     { "chargeDuration", TYPE_INT64 },
@@ -310,10 +318,7 @@ tag_info_t android_color[ANDROID_COLOR_END -
 };
 
 tag_info_t android_color_info[ANDROID_COLOR_INFO_END -
-        ANDROID_COLOR_INFO_START] = {
-    TIIDX(COLOR, AVAILABLE_MODES) =
-    { "availableModes", TYPE_INT32 }
-};
+        ANDROID_COLOR_INFO_START];
 
 tag_info_t android_tonemap[ANDROID_TONEMAP_END -
         ANDROID_TONEMAP_START] = {
@@ -353,15 +358,21 @@ tag_info_t android_scaler[ANDROID_SCALER_END -
 tag_info_t android_scaler_info[ANDROID_SCALER_INFO_END -
         ANDROID_SCALER_INFO_START] = {
     TIIDX(SCALER, AVAILABLE_FORMATS) =
-    { "availableFormats",           TYPE_INT32 },
-    TIIDX(SCALER, AVAILABLE_SIZES_PER_FORMAT) =
-    { "availableSizesPerFormat",    TYPE_INT32 },
-    TIIDX(SCALER, AVAILABLE_SIZES) =
-    { "availableSizes",             TYPE_INT32 },
-    TIIDX(SCALER, AVAILABLE_MIN_FRAME_DURATIONS) =
-    { "availableMinFrameDurations", TYPE_INT64 },
+    { "availableFormats",          TYPE_INT32 },
+    TIIDX(SCALER, AVAILABLE_RAW_SIZES) =
+    { "availableRawSizes",         TYPE_INT32 },
+    TIIDX(SCALER, AVAILABLE_RAW_MIN_DURATIONS) =
+    { "availableRawMinDurations",  TYPE_INT64 },
+    TIIDX(SCALER, AVAILABLE_PROCESSED_SIZES) =
+    { "availableProcessedSizes",   TYPE_INT32 },
+    TIIDX(SCALER, AVAILABLE_PROCESSED_MIN_DURATIONS) =
+    { "availableProcessedMinDurations", TYPE_INT64 },
+    TIIDX(SCALER, AVAILABLE_JPEG_SIZES) =
+    { "availableJpegSizes",        TYPE_INT32 },
+    TIIDX(SCALER, AVAILABLE_JPEG_MIN_DURATIONS) =
+    { "availableJpegMinDurations", TYPE_INT64 },
     TIIDX(SCALER, AVAILABLE_MAX_ZOOM) =
-    { "availableMaxDigitalZoom",    TYPE_INT32 }
+    { "availableMaxDigitalZoom",   TYPE_INT32 }
 };
 
 tag_info_t android_jpeg[ANDROID_JPEG_END -
@@ -467,8 +478,10 @@ tag_info_t android_control[ANDROID_CONTROL_END -
 
 tag_info_t android_control_info[ANDROID_CONTROL_INFO_END -
         ANDROID_CONTROL_INFO_START] = {
-    TIIDX(CONTROL, AVAILABLE_MODES) =
-    { "availableModes",              TYPE_BYTE },
+    TIIDX(CONTROL, AVAILABLE_SCENE_MODES) =
+    { "availableSceneModes",         TYPE_BYTE },
+    TIIDX(CONTROL, AVAILABLE_EFFECTS) =
+    { "availableEffects",            TYPE_BYTE },
     TIIDX(CONTROL, MAX_REGIONS) =
     { "maxRegions",                  TYPE_INT32 },
     TIIDX(CONTROL, AE_AVAILABLE_MODES) =
@@ -484,7 +497,9 @@ tag_info_t android_control_info[ANDROID_CONTROL_INFO_END -
     TIIDX(CONTROL, AWB_AVAILABLE_MODES) =
     { "awbAvailableModes",           TYPE_BYTE },
     TIIDX(CONTROL, AF_AVAILABLE_MODES) =
-    { "afAvailableModes",            TYPE_BYTE }
+    { "afAvailableModes",            TYPE_BYTE },
+    TIIDX(CONTROL, AVAILABLE_VIDEO_STABILIZATION_MODES) =
+    { "availableVideoStabilizationModes", TYPE_BYTE }
 };
 
 #undef TIDX
