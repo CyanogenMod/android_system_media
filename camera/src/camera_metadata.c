@@ -103,7 +103,7 @@ typedef struct tag_info {
 
 #include "camera_metadata_tag_info.c"
 
-size_t camera_metadata_type_size[NUM_TYPES] = {
+const size_t camera_metadata_type_size[NUM_TYPES] = {
     [TYPE_BYTE]     = sizeof(uint8_t),
     [TYPE_INT32]    = sizeof(int32_t),
     [TYPE_FLOAT]    = sizeof(float),
@@ -112,7 +112,7 @@ size_t camera_metadata_type_size[NUM_TYPES] = {
     [TYPE_RATIONAL] = sizeof(camera_metadata_rational_t)
 };
 
-char *camera_metadata_type_names[NUM_TYPES] = {
+const char *camera_metadata_type_names[NUM_TYPES] = {
     [TYPE_BYTE]     = "byte",
     [TYPE_INT32]    = "int32",
     [TYPE_FLOAT]    = "float",
@@ -278,6 +278,21 @@ int append_camera_metadata(camera_metadata_t *dst,
     dst->data_count += src->data_count;
 
     return OK;
+}
+
+camera_metadata_t *clone_camera_metadata(camera_metadata_t *src) {
+    int res;
+    camera_metadata_t *clone = allocate_camera_metadata(
+        get_camera_metadata_entry_count(src),
+        get_camera_metadata_data_count(src));
+    if (clone != NULL) {
+        res = append_camera_metadata(clone, src);
+        if (res != OK) {
+            free_camera_metadata(clone);
+            clone = NULL;
+        }
+    }
+    return clone;
 }
 
 size_t calculate_camera_metadata_entry_data_size(uint8_t type,

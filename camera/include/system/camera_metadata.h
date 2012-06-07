@@ -96,7 +96,13 @@ typedef struct camera_metadata_entry {
  * Size in bytes of each entry type
  */
 ANDROID_API
-extern size_t camera_metadata_type_size[NUM_TYPES];
+extern const size_t camera_metadata_type_size[NUM_TYPES];
+
+/**
+ * Human-readable name of each entry type
+ */
+ANDROID_API
+extern const char* camera_metadata_type_names[NUM_TYPES];
 
 /**
  * Main definitions for the metadata entry and array structures
@@ -235,6 +241,15 @@ camera_metadata_t *copy_camera_metadata(void *dst, size_t dst_size,
  */
 ANDROID_API
 int append_camera_metadata(camera_metadata_t *dst, const camera_metadata_t *src);
+
+/**
+ * Clone an existing metadata buffer, compacting along the way. This is
+ * equivalent to allocating a new buffer of the minimum needed size, then
+ * appending the buffer to be cloned into the new buffer. The resulting buffer
+ * can be freed with free_camera_metadata(). Returns NULL if cloning failed.
+ */
+ANDROID_API
+camera_metadata_t *clone_camera_metadata(camera_metadata_t *src);
 
 /**
  * Calculate the number of bytes of extra data a given metadata entry will take
