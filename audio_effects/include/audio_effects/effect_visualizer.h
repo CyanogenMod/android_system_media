@@ -41,6 +41,7 @@ typedef enum
 {
     VISUALIZER_PARAM_CAPTURE_SIZE, // Sets the number PCM samples in the capture.
     VISUALIZER_PARAM_SCALING_MODE, // Sets the way the captured data is scaled
+    VISUALIZER_PARAM_LATENCY,      // Informs the visualizer about the downstream latency
 } t_visualizer_params;
 
 /* commands */
