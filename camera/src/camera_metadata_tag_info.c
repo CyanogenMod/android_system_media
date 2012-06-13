@@ -396,7 +396,9 @@ tag_info_t android_jpeg[ANDROID_JPEG_END -
 tag_info_t android_jpeg_info[ANDROID_JPEG_INFO_END -
         ANDROID_JPEG_INFO_START] = {
     TIIDX(JPEG, AVAILABLE_THUMBNAIL_SIZES) =
-    { "availableThumbnailSizes", TYPE_INT32 }
+    { "availableThumbnailSizes", TYPE_INT32 },
+    TIIDX(JPEG, MAX_SIZE) =
+    { "maxSize", TYPE_INT32 }
 };
 
 tag_info_t android_stats[ANDROID_STATS_END -
