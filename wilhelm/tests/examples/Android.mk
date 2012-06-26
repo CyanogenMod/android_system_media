@@ -260,8 +260,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libOpenSLES
 
-LOCAL_CFLAGS += -fno-strict-aliasing
-
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
 endif
@@ -288,8 +286,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libOpenSLES
 
 LOCAL_STATIC_LIBRARIES := libcpustats
-
-LOCAL_CFLAGS := -fno-strict-aliasing
 
 ifeq ($(TARGET_OS),linux)
 	LOCAL_CFLAGS += -DXP_UNIX
