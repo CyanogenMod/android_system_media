@@ -38,3 +38,21 @@ void memcpy_to_i16_from_u8(int16_t *dst, const uint8_t *src, size_t count)
         *--dst = (int16_t)(*--src - 0x80) << 8;
     }
 }
+
+void downmix_to_mono_i16_from_stereo_i16(int16_t *dst, const int16_t *src, size_t count)
+{
+    while (count--) {
+        *dst++ = (int16_t)(((int32_t)src[0] + (int32_t)src[1]) >> 1);
+        src += 2;
+    }
+}
+
+void upmix_to_stereo_i16_from_mono_i16(int16_t *dst, const int16_t *src, size_t count)
+{
+    while (count--) {
+        int32_t temp = *src++;
+        dst[0] = temp;
+        dst[1] = temp;
+        dst += 2;
+    }
+}

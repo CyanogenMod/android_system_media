@@ -44,6 +44,26 @@ void ditherAndClamp(int32_t* out, const int32_t *sums, size_t c);
  */
 void memcpy_to_i16_from_u8(int16_t *dst, const uint8_t *src, size_t count);
 
+/* Downmix pairs of interleaved stereo input 16-bit samples to mono output 16-bit samples.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of stereo frames to downmix
+ * The destination and source buffers must be completely separate (non-overlapping).
+ * The current implementation truncates the sum rather than dither, but this may change.
+ */
+void downmix_to_mono_i16_from_stereo_i16(int16_t *dst, const int16_t *src, size_t count);
+
+/* Upmix mono input 16-bit samples to pairs of interleaved stereo output 16-bit samples by
+ * duplicating.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of mono samples to upmix
+ * The destination and source buffers must be completely separate (non-overlapping).
+ */
+void upmix_to_stereo_i16_from_mono_i16(int16_t *dst, const int16_t *src, size_t count);
+
 /**
  * Clamp (aka hard limit or clip) a signed 32-bit sample to 16-bit range.
  */
