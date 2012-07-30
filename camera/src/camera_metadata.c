@@ -597,23 +597,31 @@ int set_camera_metadata_vendor_tag_ops(const vendor_tag_query_ops_t *query_ops) 
     return OK;
 }
 
-static void print_data(int fd, const uint8_t *data_ptr, int type, int count);
+static void print_data(int fd, const uint8_t *data_ptr, int type, int count,
+        int indentation);
 
 void dump_camera_metadata(const camera_metadata_t *metadata,
         int fd,
         int verbosity) {
+    dump_indented_camera_metadata(metadata, fd, verbosity, 0);
+}
+
+void dump_indented_camera_metadata(const camera_metadata_t *metadata,
+        int fd,
+        int verbosity,
+        int indentation) {
     if (metadata == NULL) {
         ALOGE("%s: Metadata is null.", __FUNCTION__);
         return;
     }
     unsigned int i;
     fdprintf(fd,
-            "Dumping camera metadata array. %d entries, "
-            "%d bytes of extra data.\n",
-            metadata->entry_count, metadata->data_count);
-    fdprintf(fd, "  (%d entries and %d bytes data reserved)\n",
-            metadata->entry_capacity, metadata->data_capacity);
-    fdprintf(fd, "  Version: %d, Flags: %08x\n",
+            "%*sDumping camera metadata array. %d / %d entries, "
+            "%d / %d bytes of extra data.\n", indentation, "",
+            metadata->entry_count, metadata->entry_capacity,
+            metadata->data_count, metadata->data_capacity);
+    fdprintf(fd, "%*sVersion: %d, Flags: %08x\n",
+            indentation + 2, "",
             metadata->version, metadata->flags);
     for (i=0; i < metadata->entry_count; i++) {
         camera_metadata_buffer_entry_t *entry = metadata->entries + i;
@@ -633,7 +641,8 @@ void dump_camera_metadata(const camera_metadata_t *metadata,
         } else {
             type_name = camera_metadata_type_names[entry->type];
         }
-        fdprintf(fd, "Tag: %s.%s (%05x): %s[%d]\n",
+        fdprintf(fd, "%*s%s.%s (%05x): %s[%d]\n",
+             indentation + 2, "",
              tag_section,
              tag_name,
              entry->tag,
@@ -661,11 +670,12 @@ void dump_camera_metadata(const camera_metadata_t *metadata,
         int count = entry->count;
         if (verbosity < 2 && count > 16) count = 16;
 
-        print_data(fd, data_ptr, entry->type, count);
+        print_data(fd, data_ptr, entry->type, count, indentation);
     }
 }
 
-static void print_data(int fd, const uint8_t *data_ptr, int type, int count) {
+static void print_data(int fd, const uint8_t *data_ptr,
+        int type, int count, int indentation) {
     static int values_per_line[NUM_TYPES] = {
         [TYPE_BYTE]     = 16,
         [TYPE_INT32]    = 4,
@@ -682,7 +692,7 @@ static void print_data(int fd, const uint8_t *data_ptr, int type, int count) {
     int index = 0;
     int j, k;
     for (j = 0; j < lines; j++) {
-        fdprintf(fd, " [");
+        fdprintf(fd, "%*s[", indentation + 4, "");
         for (k = 0;
              k < values_per_line[type] && count > 0;
              k++, count--, index += type_size) {

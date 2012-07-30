@@ -425,6 +425,16 @@ void dump_camera_metadata(const camera_metadata_t *metadata,
         int fd,
         int verbosity);
 
+/**
+ * Print fields in the metadata to the log; adds indentation parameter, which
+ * specifies the number of spaces to insert before each line of the dump
+ */
+ANDROID_API
+void dump_indented_camera_metadata(const camera_metadata_t *metadata,
+        int fd,
+        int verbosity,
+        int indentation);
+
 #ifdef __cplusplus
 }
 #endif
