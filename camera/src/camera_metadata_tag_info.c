@@ -464,6 +464,8 @@ tag_info_t android_control[ANDROID_CONTROL_END -
     { "aeAntibandingMode",           TYPE_BYTE },
     TIDX(CONTROL, AE_STATE) =
     { "aeState",                     TYPE_BYTE },
+    TIDX(CONTROL, AE_PRECAPTURE_ID) =
+    { "aePrecaptureId",              TYPE_INT32},
     TIDX(CONTROL, AWB_MODE) =
     { "awbMode",                     TYPE_BYTE },
     TIDX(CONTROL, AWB_REGIONS) =
@@ -475,7 +477,9 @@ tag_info_t android_control[ANDROID_CONTROL_END -
     TIDX(CONTROL, AF_REGIONS) =
     { "afRegions",                   TYPE_INT32 },
     TIDX(CONTROL, AF_STATE) =
-    { "afState",                     TYPE_BYTE }
+    { "afState",                     TYPE_BYTE },
+    TIDX(CONTROL, AF_TRIGGER_ID) =
+    { "afTriggerId",                 TYPE_INT32 }
 };
 
 tag_info_t android_control_info[ANDROID_CONTROL_INFO_END -
