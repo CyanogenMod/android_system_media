@@ -123,6 +123,8 @@ const char *camera_metadata_type_names[NUM_TYPES] = {
 
 camera_metadata_t *allocate_camera_metadata(size_t entry_capacity,
                                             size_t data_capacity) {
+    if (entry_capacity == 0) return NULL;
+
     size_t memory_needed = calculate_camera_metadata_size(entry_capacity,
                                                           data_capacity);
     void *buffer = malloc(memory_needed);
@@ -280,8 +282,9 @@ int append_camera_metadata(camera_metadata_t *dst,
     return OK;
 }
 
-camera_metadata_t *clone_camera_metadata(camera_metadata_t *src) {
+camera_metadata_t *clone_camera_metadata(const camera_metadata_t *src) {
     int res;
+    if (src == NULL) return NULL;
     camera_metadata_t *clone = allocate_camera_metadata(
         get_camera_metadata_entry_count(src),
         get_camera_metadata_data_count(src));
@@ -424,6 +427,14 @@ int find_camera_metadata_entry(camera_metadata_t *src,
     return get_camera_metadata_entry(src, index,
             entry);
 }
+
+int find_camera_metadata_ro_entry(const camera_metadata_t *src,
+        uint32_t tag,
+        camera_metadata_ro_entry_t *entry) {
+    return find_camera_metadata_entry((camera_metadata_t*)src, tag,
+            (camera_metadata_entry_t*)entry);
+}
+
 
 int delete_camera_metadata_entry(camera_metadata_t *dst,
         size_t index) {
@@ -611,12 +622,13 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
         int verbosity,
         int indentation) {
     if (metadata == NULL) {
-        ALOGE("%s: Metadata is null.", __FUNCTION__);
+        fdprintf(fd, "%*sDumping camera metadata array: Not allocated",
+                indentation, "");
         return;
     }
     unsigned int i;
     fdprintf(fd,
-            "%*sDumping camera metadata array. %d / %d entries, "
+            "%*sDumping camera metadata array: %d / %d entries, "
             "%d / %d bytes of extra data.\n", indentation, "",
             metadata->entry_count, metadata->entry_capacity,
             metadata->data_count, metadata->data_capacity);

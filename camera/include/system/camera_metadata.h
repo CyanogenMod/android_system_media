@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef SYSTEM_CORE_INCLUDE_ANDROID_CAMERA_METADATA_H
-#define SYSTEM_CORE_INCLUDE_ANDROID_CAMERA_METADATA_H
+#ifndef SYSTEM_MEDIA_INCLUDE_ANDROID_CAMERA_METADATA_H
+#define SYSTEM_MEDIA_INCLUDE_ANDROID_CAMERA_METADATA_H
 
 #include <string.h>
 #include <stdint.h>
@@ -91,6 +91,25 @@ typedef struct camera_metadata_entry {
         camera_metadata_rational_t *r;
     } data;
 } camera_metadata_entry_t;
+
+/**
+ * A read-only reference to a metadata entry in a buffer. Identical to
+ * camera_metadata_entry in layout
+ */
+typedef struct camera_metadata_ro_entry {
+    size_t   index;
+    uint32_t tag;
+    uint8_t  type;
+    size_t   count;
+    union {
+        const uint8_t *u8;
+        const int32_t *i32;
+        const float   *f;
+        const int64_t *i64;
+        const double  *d;
+        const camera_metadata_rational_t *r;
+    } data;
+} camera_metadata_ro_entry_t;
 
 /**
  * Size in bytes of each entry type
@@ -249,7 +268,7 @@ int append_camera_metadata(camera_metadata_t *dst, const camera_metadata_t *src)
  * can be freed with free_camera_metadata(). Returns NULL if cloning failed.
  */
 ANDROID_API
-camera_metadata_t *clone_camera_metadata(camera_metadata_t *src);
+camera_metadata_t *clone_camera_metadata(const camera_metadata_t *src);
 
 /**
  * Calculate the number of bytes of extra data a given metadata entry will take
@@ -309,6 +328,14 @@ ANDROID_API
 int find_camera_metadata_entry(camera_metadata_t *src,
         uint32_t tag,
         camera_metadata_entry_t *entry);
+
+/**
+ * Find an entry with given tag value, but disallow editing the data
+ */
+ANDROID_API
+int find_camera_metadata_ro_entry(const camera_metadata_t *src,
+        uint32_t tag,
+        camera_metadata_ro_entry_t *entry);
 
 /**
  * Delete an entry at given index. This is an expensive operation, since it
