@@ -134,10 +134,14 @@ tag_info_t android_request[ANDROID_REQUEST_END -
         ANDROID_REQUEST_START] = {
     TIDX(REQUEST, ID)             =
     { "id",            TYPE_INT32 },
+    TIDX(REQUEST, TYPE)  =
+    { "type",          TYPE_BYTE },
     TIDX(REQUEST, METADATA_MODE)  =
     { "metadataMode",  TYPE_BYTE },
     TIDX(REQUEST, OUTPUT_STREAMS) =
     { "outputStreams", TYPE_BYTE },
+    TIDX(REQUEST, INPUT_STREAMS) =
+    { "inputStreams", TYPE_BYTE },
     TIDX(REQUEST, FRAME_COUNT)    =
     { "frameCount",    TYPE_INT32 }
 };
