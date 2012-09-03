@@ -458,6 +458,8 @@ tag_info_t android_control[ANDROID_CONTROL_END -
     { "videoStabilizationMode",      TYPE_BYTE },
     TIDX(CONTROL, AE_MODE) =
     { "aeMode",                      TYPE_BYTE },
+    TIDX(CONTROL, AE_LOCK) =
+    { "aeLock",                      TYPE_BYTE },
     TIDX(CONTROL, AE_REGIONS) =
     { "aeRegions",                   TYPE_INT32 },
     TIDX(CONTROL, AE_EXP_COMPENSATION) =
@@ -472,6 +474,8 @@ tag_info_t android_control[ANDROID_CONTROL_END -
     { "aePrecaptureId",              TYPE_INT32},
     TIDX(CONTROL, AWB_MODE) =
     { "awbMode",                     TYPE_BYTE },
+    TIDX(CONTROL, AWB_LOCK) =
+    { "awbLock",                     TYPE_BYTE },
     TIDX(CONTROL, AWB_REGIONS) =
     { "awbRegions",                  TYPE_INT32 },
     TIDX(CONTROL, AWB_STATE) =
