@@ -394,7 +394,9 @@ tag_info_t android_jpeg[ANDROID_JPEG_END -
     TIDX(JPEG, GPS_TIMESTAMP) =
     { "gpsTimestamp",        TYPE_INT64 },
     TIDX(JPEG, ORIENTATION) =
-    { "orientation",         TYPE_INT32 }
+    { "orientation",         TYPE_INT32 },
+    TIDX(JPEG, SIZE) =
+    { "size",                TYPE_INT32 }
 };
 
 tag_info_t android_jpeg_info[ANDROID_JPEG_INFO_END -
