@@ -55,7 +55,8 @@ const char *camera_metadata_section_names[ANDROID_SECTION_COUNT] = {
     [ANDROID_STATS]          = "android.statistics",
     [ANDROID_STATS_INFO]     = "android.statistics.info",
     [ANDROID_CONTROL]        = "android.control",
-    [ANDROID_CONTROL_INFO]   = "android.control.info"
+    [ANDROID_CONTROL_INFO]   = "android.control.info",
+    [ANDROID_QUIRKS_INFO]    = "android.quirks.info"
 };
 
 unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
@@ -120,7 +121,9 @@ unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
     [ANDROID_CONTROL]        = { ANDROID_CONTROL_START,
                                  ANDROID_CONTROL_END },
     [ANDROID_CONTROL_INFO]   = { ANDROID_CONTROL_INFO_START,
-                                 ANDROID_CONTROL_INFO_END }
+                                 ANDROID_CONTROL_INFO_END },
+    [ANDROID_QUIRKS_INFO]    = { ANDROID_QUIRKS_INFO_START,
+                                 ANDROID_QUIRKS_INFO_END }
 };
 
 // Shortcut defines to make succint names for field definitions
@@ -515,7 +518,17 @@ tag_info_t android_control_info[ANDROID_CONTROL_INFO_END -
     TIIDX(CONTROL, AF_AVAILABLE_MODES) =
     { "afAvailableModes",            TYPE_BYTE },
     TIIDX(CONTROL, AVAILABLE_VIDEO_STABILIZATION_MODES) =
-    { "availableVideoStabilizationModes", TYPE_BYTE }
+    { "availableVideoStabilizationModes", TYPE_BYTE },
+    TIIDX(CONTROL, SCENE_MODE_OVERRIDES) =
+    { "sceneModeOverrides", TYPE_BYTE }
+};
+
+tag_info_t android_quirks_info[ANDROID_QUIRKS_INFO_END -
+        ANDROID_QUIRKS_INFO_START] = {
+    TIIDX(QUIRKS, TRIGGER_AF_WITH_AUTO) =
+    { "triggerAfWithAuto", TYPE_BYTE },
+    TIIDX(QUIRKS, USE_ZSL_FORMAT) =
+    { "useZslFormat", TYPE_BYTE }
 };
 
 #undef TIDX
@@ -552,5 +565,6 @@ tag_info_t *tag_info[ANDROID_SECTION_COUNT] = {
     android_stats,
     android_stats_info,
     android_control,
-    android_control_info
+    android_control_info,
+    android_quirks_info
 };

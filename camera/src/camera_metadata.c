@@ -622,7 +622,7 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
         int verbosity,
         int indentation) {
     if (metadata == NULL) {
-        fdprintf(fd, "%*sDumping camera metadata array: Not allocated",
+        fdprintf(fd, "%*sDumping camera metadata array: Not allocated\n",
                 indentation, "");
         return;
     }
