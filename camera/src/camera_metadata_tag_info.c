@@ -528,7 +528,9 @@ tag_info_t android_quirks_info[ANDROID_QUIRKS_INFO_END -
     TIIDX(QUIRKS, TRIGGER_AF_WITH_AUTO) =
     { "triggerAfWithAuto", TYPE_BYTE },
     TIIDX(QUIRKS, USE_ZSL_FORMAT) =
-    { "useZslFormat", TYPE_BYTE }
+    { "useZslFormat", TYPE_BYTE },
+    TIIDX(QUIRKS, METERING_CROP_REGION) =
+    { "meteringCropRegion", TYPE_BYTE },
 };
 
 #undef TIDX
