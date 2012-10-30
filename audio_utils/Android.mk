@@ -21,3 +21,16 @@ LOCAL_SHARED_LIBRARIES := \
 	libspeexresampler
 
 include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libsndfile
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_SRC_FILES := \
+	tinysndfile.c
+
+LOCAL_C_INCLUDES += \
+	$(call include-path-for, audio-utils)
+
+include $(BUILD_STATIC_LIBRARY)
