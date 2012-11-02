@@ -24,7 +24,8 @@ extern "C" {
 #endif
 
 #ifndef OPENSL_ES_H_
-static const effect_uuid_t SL_IID_ENVIRONMENTALREVERB_ = { 0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac, { 0x4e, 0x23, 0x4d, 0x6, 0x83, 0x9e } };
+static const effect_uuid_t SL_IID_ENVIRONMENTALREVERB_ = { 0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac,
+        { 0x4e, 0x23, 0x4d, 0x6, 0x83, 0x9e } };
 const effect_uuid_t * const SL_IID_ENVIRONMENTALREVERB = &SL_IID_ENVIRONMENTALREVERB_;
 #endif //OPENSL_ES_H_
 
