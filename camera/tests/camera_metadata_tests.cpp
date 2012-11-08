@@ -302,7 +302,7 @@ void add_test_metadata(camera_metadata_t *m, int entry_count) {
     }
     EXPECT_EQ(data_used, get_camera_metadata_data_count(m));
     EXPECT_EQ(entries_used, get_camera_metadata_entry_count(m));
-    EXPECT_GT(get_camera_metadata_data_capacity(m),
+    EXPECT_GE(get_camera_metadata_data_capacity(m),
             get_camera_metadata_data_count(m));
 }
 
@@ -350,6 +350,26 @@ TEST(camera_metadata, add_get_toomany) {
     IF_ALOGV() {
         dump_camera_metadata(m, 0, 2);
     }
+
+    free_camera_metadata(m);
+}
+
+TEST(camera_metadata, add_too_much_data) {
+    camera_metadata_t *m = NULL;
+    const size_t entry_capacity = 5;
+    int result;
+    size_t data_used = entry_capacity * calculate_camera_metadata_entry_data_size(
+        get_camera_metadata_tag_type(ANDROID_SENSOR_EXPOSURE_TIME), 1);
+    m = allocate_camera_metadata(entry_capacity + 1, data_used);
+
+
+    add_test_metadata(m, entry_capacity);
+
+    int64_t exposure_time = 12345;
+    result = add_camera_metadata_entry(m,
+            ANDROID_SENSOR_EXPOSURE_TIME,
+            &exposure_time, 1);
+    EXPECT_EQ(ERROR, result);
 
     free_camera_metadata(m);
 }

@@ -23,6 +23,19 @@
 #define OK         0
 #define ERROR      1
 #define NOT_FOUND -ENOENT
+
+#define _Alignas(T) \
+    ({struct _AlignasStruct { char c; T field; };       \
+        offsetof(struct _AlignasStruct, field); })
+
+// Align entry buffers as the compiler would
+#define ENTRY_ALIGNMENT _Alignas(camera_metadata_buffer_entry_t)
+// Align data buffer to largest supported data type
+#define DATA_ALIGNMENT _Alignas(camera_metadata_rational_t)
+
+#define ALIGN_TO(val, alignment) \
+    (typeof(val))(((uint32_t)(val) + ((alignment) - 1)) & ~((alignment) - 1))
+
 /**
  * A single metadata entry, storing an array of values of a given type. If the
  * array is no larger than 4 bytes in size, it is stored in the data.value[]
@@ -38,7 +51,7 @@ typedef struct camera_metadata_buffer_entry {
     } data;
     uint8_t  type;
     uint8_t  reserved[3];
-} __attribute__((packed)) camera_metadata_buffer_entry_t;
+} camera_metadata_buffer_entry_t;
 
 /**
  * A packet of metadata. This is a list of entries, each of which may point to
@@ -149,13 +162,15 @@ camera_metadata_t *place_camera_metadata(void *dst,
     metadata->flags = 0;
     metadata->entry_count = 0;
     metadata->entry_capacity = entry_capacity;
-    metadata->entries = (camera_metadata_buffer_entry_t*)(metadata + 1);
+    camera_metadata_buffer_entry_t* entries_unaligned =
+        (camera_metadata_buffer_entry_t*)(metadata + 1);
+    metadata->entries = ALIGN_TO(entries_unaligned, ENTRY_ALIGNMENT);
     metadata->data_count = 0;
     metadata->data_capacity = data_capacity;
     metadata->size = memory_needed;
     if (metadata->data_capacity != 0) {
-        metadata->data =
-                (uint8_t*)(metadata->entries + metadata->entry_capacity);
+        uint8_t *data_unaligned = (uint8_t*)(metadata->entries + metadata->entry_capacity);
+        metadata->data = ALIGN_TO(data_unaligned, DATA_ALIGNMENT);
     } else {
         metadata->data = NULL;
     }
@@ -170,7 +185,11 @@ void free_camera_metadata(camera_metadata_t *metadata) {
 size_t calculate_camera_metadata_size(size_t entry_count,
                                       size_t data_count) {
     size_t memory_needed = sizeof(camera_metadata_t);
+    // Start entry list at aligned boundary
+    memory_needed = ALIGN_TO(memory_needed, ENTRY_ALIGNMENT);
     memory_needed += sizeof(camera_metadata_buffer_entry_t[entry_count]);
+    // Start buffer list at aligned boundary
+    memory_needed = ALIGN_TO(memory_needed, DATA_ALIGNMENT);
     memory_needed += sizeof(uint8_t[data_count]);
     return memory_needed;
 }
@@ -303,7 +322,7 @@ size_t calculate_camera_metadata_entry_data_size(uint8_t type,
     if (type >= NUM_TYPES) return 0;
     size_t data_bytes = data_count *
             camera_metadata_type_size[type];
-    return data_bytes <= 4 ? 0 : data_bytes;
+    return data_bytes <= 4 ? 0 : ALIGN_TO(data_bytes, DATA_ALIGNMENT);
 }
 
 static int add_camera_metadata_entry_raw(camera_metadata_t *dst,
@@ -318,7 +337,10 @@ static int add_camera_metadata_entry_raw(camera_metadata_t *dst,
 
     size_t data_bytes =
             calculate_camera_metadata_entry_data_size(type, data_count);
+    if (data_bytes + dst->data_count > dst->data_capacity) return ERROR;
 
+    size_t data_payload_bytes =
+            data_count * camera_metadata_type_size[type];
     camera_metadata_buffer_entry_t *entry = dst->entries + dst->entry_count;
     entry->tag = tag;
     entry->type = type;
@@ -326,10 +348,11 @@ static int add_camera_metadata_entry_raw(camera_metadata_t *dst,
 
     if (data_bytes == 0) {
         memcpy(entry->data.value, data,
-                data_count * camera_metadata_type_size[type] );
+                data_payload_bytes);
     } else {
         entry->data.offset = dst->data_count;
-        memcpy(dst->data + entry->data.offset, data, data_bytes);
+        memcpy(dst->data + entry->data.offset, data,
+                data_payload_bytes);
         dst->data_count += data_bytes;
     }
     dst->entry_count++;
@@ -487,6 +510,9 @@ int update_camera_metadata_entry(camera_metadata_t *dst,
     size_t data_bytes =
             calculate_camera_metadata_entry_data_size(entry->type,
                     data_count);
+    size_t data_payload_bytes =
+            data_count * camera_metadata_type_size[entry->type];
+
     size_t entry_bytes =
             calculate_camera_metadata_entry_data_size(entry->type,
                     entry->count);
@@ -521,18 +547,18 @@ int update_camera_metadata_entry(camera_metadata_t *dst,
             // Append new data
             entry->data.offset = dst->data_count;
 
-            memcpy(dst->data + entry->data.offset, data, data_bytes);
+            memcpy(dst->data + entry->data.offset, data, data_payload_bytes);
             dst->data_count += data_bytes;
         }
     } else if (data_bytes != 0) {
         // data size unchanged, reuse same data location
-        memcpy(dst->data + entry->data.offset, data, data_bytes);
+        memcpy(dst->data + entry->data.offset, data, data_payload_bytes);
     }
 
     if (data_bytes == 0) {
         // Data fits into entry
         memcpy(entry->data.value, data,
-                data_count * camera_metadata_type_size[entry->type]);
+                data_payload_bytes);
     }
 
     entry->count = data_count;
@@ -728,7 +754,7 @@ static void print_data(int fd, const uint8_t *data_ptr,
                     break;
                 case TYPE_DOUBLE:
                     fdprintf(fd, "%0.2f ",
-                            *(float*)(data_ptr + index));
+                            *(double*)(data_ptr + index));
                     break;
                 case TYPE_RATIONAL: {
                     int32_t numerator = *(int32_t*)(data_ptr + index);
