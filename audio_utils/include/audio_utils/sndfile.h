@@ -24,9 +24,15 @@
 // no guarantee that it will stay exactly source-code compatible with other libraries.
 
 #include <stdio.h>
+#include <sys/cdefs.h>
+
+__BEGIN_DECLS
 
 // visible to clients
+typedef int sf_count_t;
+
 typedef struct {
+    sf_count_t frames;
     int samplerate;
     int channels;
     int format;
@@ -34,8 +40,6 @@ typedef struct {
 
 // opaque to clients
 typedef struct SNDFILE_ SNDFILE;
-
-typedef unsigned sf_count_t;
 
 // Access modes
 #define SFM_READ   1
@@ -54,6 +58,8 @@ SNDFILE *sf_open(const char *path, int mode, SF_INFO *info);
 void sf_close(SNDFILE *handle);
 
 // Read interleaved frames and return actual number of frames read
-ssize_t sf_readf_short(SNDFILE *handle, short *ptr, size_t desired);
+sf_count_t sf_readf_short(SNDFILE *handle, short *ptr, sf_count_t desired);
+
+__END_DECLS
 
 #endif /* __AUDIO_UTIL_SNDFILE_H */

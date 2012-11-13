@@ -15,6 +15,7 @@
  */
 
 #include <audio_utils/sndfile.h>
+#include <audio_utils/primitives.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -86,7 +87,7 @@ SNDFILE *sf_open(const char *path, int mode, SF_INFO *info)
         // ignore byte rate
         // ignore block alignment
         unsigned bitsPerSample = little2u(&wav[34]);
-        if (/*bitsPerSample != 8 &&*/ bitsPerSample != 16)
+        if (bitsPerSample != 8 && bitsPerSample != 16)
             break;
         unsigned bytesPerFrame = (bitsPerSample >> 3) * channels;
         if (memcmp(&wav[36], "data", 4))
@@ -96,9 +97,14 @@ SNDFILE *sf_open(const char *path, int mode, SF_INFO *info)
         handle->stream = stream;
         handle->bytesPerFrame = bytesPerFrame;
         handle->remaining = dataSize / bytesPerFrame;
+        handle->info.frames = handle->remaining;
         handle->info.samplerate = samplerate;
         handle->info.channels = channels;
-        handle->info.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+        handle->info.format = SF_FORMAT_WAV;
+        if (bitsPerSample == 8)
+            handle->info.format |= SF_FORMAT_PCM_U8;
+        else
+            handle->info.format |= SF_FORMAT_PCM_16;
         *info = handle->info;
         return handle;
     }
@@ -114,18 +120,25 @@ void sf_close(SNDFILE *handle)
     handle->remaining = 0;
 }
 
-ssize_t sf_readf_short(SNDFILE *handle, short *ptr, size_t desiredFrames)
+sf_count_t sf_readf_short(SNDFILE *handle, short *ptr, sf_count_t desiredFrames)
 {
-    if (handle == NULL || ptr == NULL || !handle->remaining)
+    if (handle == NULL || ptr == NULL || !handle->remaining || desiredFrames <= 0)
         return 0;
-    if (handle->remaining < desiredFrames)
+    if (handle->remaining < (size_t) desiredFrames)
         desiredFrames = handle->remaining;
     size_t desiredBytes = desiredFrames * handle->bytesPerFrame;
     // does not check for numeric overflow
     size_t actualBytes = fread(ptr, sizeof(char), desiredBytes, handle->stream);
     size_t actualFrames = actualBytes / handle->bytesPerFrame;
     handle->remaining -= actualFrames;
-    if (!isLittleEndian())
-        swab(ptr, actualFrames * handle->info.channels);
+    switch (handle->info.format & SF_FORMAT_SUBMASK) {
+    case SF_FORMAT_PCM_U8:
+        memcpy_to_i16_from_u8(ptr, (unsigned char *) ptr, actualFrames * handle->info.channels);
+        break;
+    case SF_FORMAT_PCM_16:
+        if (!isLittleEndian())
+            swab(ptr, actualFrames * handle->info.channels);
+        break;
+    }
     return actualFrames;
 }
