@@ -1616,3 +1616,99 @@ TEST(camera_metadata, user_pointer) {
     free(buf);
     free_camera_metadata(m);
 }
+
+TEST(camera_metadata, memcpy) {
+    camera_metadata_t *m = NULL;
+    const size_t entry_capacity = 50;
+    const size_t data_capacity = 450;
+
+    int result;
+
+    m = allocate_camera_metadata(entry_capacity, data_capacity);
+
+    add_test_metadata(m, 5);
+
+    uint8_t *dst = new uint8_t[get_camera_metadata_size(m)];
+
+    memcpy(dst, m, get_camera_metadata_size(m));
+
+    camera_metadata_t *m2 = reinterpret_cast<camera_metadata_t*>(dst);
+
+    ASSERT_EQ(get_camera_metadata_size(m),
+            get_camera_metadata_size(m2));
+    EXPECT_EQ(get_camera_metadata_compact_size(m),
+            get_camera_metadata_compact_size(m2));
+    ASSERT_EQ(get_camera_metadata_entry_count(m),
+            get_camera_metadata_entry_count(m2));
+    EXPECT_EQ(get_camera_metadata_entry_capacity(m),
+            get_camera_metadata_entry_capacity(m2));
+    EXPECT_EQ(get_camera_metadata_data_count(m),
+            get_camera_metadata_data_count(m2));
+    EXPECT_EQ(get_camera_metadata_data_capacity(m),
+            get_camera_metadata_data_capacity(m2));
+
+    camera_metadata_entry_t e1, e2;
+    for (size_t i = 0; i < get_camera_metadata_entry_count(m); i++) {
+        result = get_camera_metadata_entry(m, i, &e1);
+        ASSERT_EQ(OK, result);
+        result = get_camera_metadata_entry(m2, i, &e2);
+        ASSERT_EQ(OK, result);
+
+        EXPECT_EQ(e1.index, e2.index);
+        EXPECT_EQ(e1.tag, e2.tag);
+        ASSERT_EQ(e1.type, e2.type);
+        ASSERT_EQ(e1.count, e2.count);
+
+        ASSERT_TRUE(!memcmp(e1.data.u8, e2.data.u8,
+                        camera_metadata_type_size[e1.type] * e1.count));
+    }
+
+    // Make sure updating one metadata buffer doesn't change the other
+
+    int64_t double_exposure_time[] = { 100, 200 };
+
+    result = update_camera_metadata_entry(m, 0,
+            double_exposure_time,
+            sizeof(double_exposure_time)/sizeof(int64_t), NULL);
+    EXPECT_EQ(OK, result);
+
+    result = get_camera_metadata_entry(m, 0, &e1);
+    ASSERT_EQ(OK, result);
+    result = get_camera_metadata_entry(m2, 0, &e2);
+    ASSERT_EQ(OK, result);
+
+    EXPECT_EQ(e1.index, e2.index);
+    EXPECT_EQ(e1.tag, e2.tag);
+    ASSERT_EQ(e1.type, e2.type);
+    ASSERT_EQ((size_t)2, e1.count);
+    ASSERT_EQ((size_t)1, e2.count);
+    EXPECT_EQ(100, e1.data.i64[0]);
+    EXPECT_EQ(200, e1.data.i64[1]);
+    EXPECT_EQ(100, e2.data.i64[0]);
+
+    // And in the reverse direction as well
+
+    double_exposure_time[0] = 300;
+    result = update_camera_metadata_entry(m2, 0,
+            double_exposure_time,
+            sizeof(double_exposure_time)/sizeof(int64_t), NULL);
+    EXPECT_EQ(OK, result);
+
+    result = get_camera_metadata_entry(m, 0, &e1);
+    ASSERT_EQ(OK, result);
+    result = get_camera_metadata_entry(m2, 0, &e2);
+    ASSERT_EQ(OK, result);
+
+    EXPECT_EQ(e1.index, e2.index);
+    EXPECT_EQ(e1.tag, e2.tag);
+    ASSERT_EQ(e1.type, e2.type);
+    ASSERT_EQ((size_t)2, e1.count);
+    ASSERT_EQ((size_t)2, e2.count);
+    EXPECT_EQ(100, e1.data.i64[0]);
+    EXPECT_EQ(200, e1.data.i64[1]);
+    EXPECT_EQ(300, e2.data.i64[0]);
+    EXPECT_EQ(200, e2.data.i64[1]);
+
+    delete dst;
+    free_camera_metadata(m);
+}
