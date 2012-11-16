@@ -17,6 +17,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_CFLAGS += \
 	-Wall \
 	-fvisibility=hidden \
+	-std=c99
 
 
 include $(BUILD_SHARED_LIBRARY)

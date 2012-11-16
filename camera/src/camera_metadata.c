@@ -34,7 +34,7 @@
 #define DATA_ALIGNMENT _Alignas(camera_metadata_rational_t)
 
 #define ALIGN_TO(val, alignment) \
-    (typeof(val))(((uint32_t)(val) + ((alignment) - 1)) & ~((alignment) - 1))
+    (((uint32_t)(val) + ((alignment) - 1)) & ~((alignment) - 1))
 
 /**
  * A single metadata entry, storing an array of values of a given type. If the
@@ -93,10 +93,10 @@ struct camera_metadata {
     uint32_t                 flags;
     size_t                   entry_count;
     size_t                   entry_capacity;
-    camera_metadata_buffer_entry_t *entries;
+    ptrdiff_t                entries_start; // Offset from camera_metadata
     size_t                   data_count;
     size_t                   data_capacity;
-    uint8_t                 *data;
+    ptrdiff_t                data_start; // Offset from camera_metadata
     void                    *user; // User set pointer, not copied with buffer
     uint8_t                  reserved[0];
 };
@@ -134,6 +134,16 @@ const char *camera_metadata_type_names[NUM_TYPES] = {
     [TYPE_RATIONAL] = "rational"
 };
 
+static camera_metadata_buffer_entry_t *get_entries(
+        const camera_metadata_t *metadata) {
+    return (camera_metadata_buffer_entry_t*)
+            ((uint8_t*)metadata + metadata->entries_start);
+}
+
+static uint8_t *get_data(const camera_metadata_t *metadata) {
+    return (uint8_t*)metadata + metadata->data_start;
+}
+
 camera_metadata_t *allocate_camera_metadata(size_t entry_capacity,
                                             size_t data_capacity) {
     if (entry_capacity == 0) return NULL;
@@ -162,17 +172,17 @@ camera_metadata_t *place_camera_metadata(void *dst,
     metadata->flags = 0;
     metadata->entry_count = 0;
     metadata->entry_capacity = entry_capacity;
-    camera_metadata_buffer_entry_t* entries_unaligned =
-        (camera_metadata_buffer_entry_t*)(metadata + 1);
-    metadata->entries = ALIGN_TO(entries_unaligned, ENTRY_ALIGNMENT);
+    metadata->entries_start =
+            ALIGN_TO(sizeof(camera_metadata_t), ENTRY_ALIGNMENT);
     metadata->data_count = 0;
     metadata->data_capacity = data_capacity;
     metadata->size = memory_needed;
     if (metadata->data_capacity != 0) {
-        uint8_t *data_unaligned = (uint8_t*)(metadata->entries + metadata->entry_capacity);
-        metadata->data = ALIGN_TO(data_unaligned, DATA_ALIGNMENT);
+        size_t data_unaligned = (uint8_t*)(get_entries(metadata) +
+                metadata->entry_capacity) - (uint8_t*)metadata;
+        metadata->data_start = ALIGN_TO(data_unaligned, DATA_ALIGNMENT);
     } else {
-        metadata->data = NULL;
+        metadata->data_start = 0;
     }
     metadata->user = NULL;
 
@@ -203,12 +213,8 @@ size_t get_camera_metadata_size(const camera_metadata_t *metadata) {
 size_t get_camera_metadata_compact_size(const camera_metadata_t *metadata) {
     if (metadata == NULL) return ERROR;
 
-    ptrdiff_t reserved_size = metadata->size -
-            calculate_camera_metadata_size(metadata->entry_capacity,
-                                           metadata->data_capacity);
-
     return calculate_camera_metadata_size(metadata->entry_count,
-                                          metadata->data_count) + reserved_size;
+                                          metadata->data_count);
 }
 
 size_t get_camera_metadata_entry_count(const camera_metadata_t *metadata) {
@@ -234,30 +240,16 @@ camera_metadata_t* copy_camera_metadata(void *dst, size_t dst_size,
     if (dst == NULL) return NULL;
     if (dst_size < memory_needed) return NULL;
 
-    // If copying a newer version of the structure, there may be additional
-    // header fields we don't know about but need to copy
-    ptrdiff_t reserved_size = src->size -
-            calculate_camera_metadata_size(src->entry_capacity,
-                                           src->data_capacity);
+    camera_metadata_t *metadata =
+        place_camera_metadata(dst, dst_size, src->entry_count, src->data_count);
 
-    camera_metadata_t *metadata = (camera_metadata_t*)dst;
-    metadata->version = CURRENT_METADATA_VERSION;
     metadata->flags = src->flags;
     metadata->entry_count = src->entry_count;
-    metadata->entry_capacity = src->entry_count;
-    metadata->entries = (camera_metadata_buffer_entry_t*)
-             ((uint8_t *)(metadata + 1) + reserved_size);
     metadata->data_count = src->data_count;
-    metadata->data_capacity = src->data_count;
-    metadata->data = (uint8_t *)(metadata->entries + metadata->entry_capacity);
-    metadata->size = memory_needed;
 
-    if (reserved_size > 0) {
-        memcpy(metadata->reserved, src->reserved, reserved_size);
-    }
-    memcpy(metadata->entries, src->entries,
+    memcpy(get_entries(metadata), get_entries(src),
             sizeof(camera_metadata_buffer_entry_t[metadata->entry_count]));
-    memcpy(metadata->data, src->data,
+    memcpy(get_data(metadata), get_data(src),
             sizeof(uint8_t[metadata->data_count]));
     metadata->user = NULL;
 
@@ -271,17 +263,15 @@ int append_camera_metadata(camera_metadata_t *dst,
     if (dst->entry_capacity < src->entry_count + dst->entry_count) return ERROR;
     if (dst->data_capacity < src->data_count + dst->data_count) return ERROR;
 
-    memcpy(dst->entries + dst->entry_count, src->entries,
+    memcpy(get_entries(dst) + dst->entry_count, get_entries(src),
             sizeof(camera_metadata_buffer_entry_t[src->entry_count]));
-    memcpy(dst->data + dst->data_count, src->data,
+    memcpy(get_data(dst) + dst->data_count, get_data(src),
             sizeof(uint8_t[src->data_count]));
     if (dst->data_count != 0) {
-        unsigned int i;
-        for (i = dst->entry_count;
-             i < dst->entry_count + src->entry_count;
-             i++) {
-            camera_metadata_buffer_entry_t *entry = dst->entries + i;
-            if ( camera_metadata_type_size[entry->type] * entry->count > 4 ) {
+        camera_metadata_buffer_entry_t *entry = get_entries(dst) + dst->entry_count;
+        for (size_t i = 0; i < src->entry_count; i++, entry++) {
+            if ( calculate_camera_metadata_entry_data_size(entry->type,
+                            entry->count) > 0 ) {
                 entry->data.offset += dst->data_count;
             }
         }
@@ -341,7 +331,7 @@ static int add_camera_metadata_entry_raw(camera_metadata_t *dst,
 
     size_t data_payload_bytes =
             data_count * camera_metadata_type_size[type];
-    camera_metadata_buffer_entry_t *entry = dst->entries + dst->entry_count;
+    camera_metadata_buffer_entry_t *entry = get_entries(dst) + dst->entry_count;
     entry->tag = tag;
     entry->type = type;
     entry->count = data_count;
@@ -351,7 +341,7 @@ static int add_camera_metadata_entry_raw(camera_metadata_t *dst,
                 data_payload_bytes);
     } else {
         entry->data.offset = dst->data_count;
-        memcpy(dst->data + entry->data.offset, data,
+        memcpy(get_data(dst) + entry->data.offset, data,
                 data_payload_bytes);
         dst->data_count += data_bytes;
     }
@@ -390,7 +380,7 @@ int sort_camera_metadata(camera_metadata_t *dst) {
     if (dst == NULL) return ERROR;
     if (dst->flags & FLAG_SORTED) return OK;
 
-    qsort(dst->entries, dst->entry_count,
+    qsort(get_entries(dst), dst->entry_count,
             sizeof(camera_metadata_buffer_entry_t),
             compare_entry_tags);
     dst->flags |= FLAG_SORTED;
@@ -404,7 +394,7 @@ int get_camera_metadata_entry(camera_metadata_t *src,
     if (src == NULL || entry == NULL) return ERROR;
     if (index >= src->entry_count) return ERROR;
 
-    camera_metadata_buffer_entry_t *buffer_entry = src->entries + index;
+    camera_metadata_buffer_entry_t *buffer_entry = get_entries(src) + index;
 
     entry->index = index;
     entry->tag = buffer_entry->tag;
@@ -412,7 +402,7 @@ int get_camera_metadata_entry(camera_metadata_t *src,
     entry->count = buffer_entry->count;
     if (buffer_entry->count *
             camera_metadata_type_size[buffer_entry->type] > 4) {
-        entry->data.u8 = src->data + buffer_entry->data.offset;
+        entry->data.u8 = get_data(src) + buffer_entry->data.offset;
     } else {
         entry->data.u8 = buffer_entry->data.value;
     }
@@ -431,16 +421,17 @@ int find_camera_metadata_entry(camera_metadata_t *src,
         camera_metadata_buffer_entry_t key;
         key.tag = tag;
         search_entry = bsearch(&key,
-                src->entries,
+                get_entries(src),
                 src->entry_count,
                 sizeof(camera_metadata_buffer_entry_t),
                 compare_entry_tags);
         if (search_entry == NULL) return NOT_FOUND;
-        index = search_entry - src->entries;
+        index = search_entry - get_entries(src);
     } else {
         // Not sorted, linear search
-        for (index = 0; index < src->entry_count; index++) {
-            if (src->entries[index].tag == tag) {
+        camera_metadata_buffer_entry_t *search_entry = get_entries(src);
+        for (index = 0; index < src->entry_count; index++, search_entry++) {
+            if (search_entry->tag == tag) {
                 break;
             }
         }
@@ -464,19 +455,19 @@ int delete_camera_metadata_entry(camera_metadata_t *dst,
     if (dst == NULL) return ERROR;
     if (index >= dst->entry_count) return ERROR;
 
-    camera_metadata_buffer_entry_t *entry = dst->entries + index;
+    camera_metadata_buffer_entry_t *entry = get_entries(dst) + index;
     size_t data_bytes = calculate_camera_metadata_entry_data_size(entry->type,
             entry->count);
 
     if (data_bytes > 0) {
         // Shift data buffer to overwrite deleted data
-        uint8_t *start = dst->data + entry->data.offset;
+        uint8_t *start = get_data(dst) + entry->data.offset;
         uint8_t *end = start + data_bytes;
         size_t length = dst->data_count - entry->data.offset - data_bytes;
         memmove(start, end, length);
 
         // Update all entry indices to account for shift
-        camera_metadata_buffer_entry_t *e = dst->entries;
+        camera_metadata_buffer_entry_t *e = get_entries(dst);
         size_t i;
         for (i = 0; i < dst->entry_count; i++) {
             if (calculate_camera_metadata_entry_data_size(
@@ -505,7 +496,7 @@ int update_camera_metadata_entry(camera_metadata_t *dst,
     if (dst == NULL) return ERROR;
     if (index >= dst->entry_count) return ERROR;
 
-    camera_metadata_buffer_entry_t *entry = dst->entries + index;
+    camera_metadata_buffer_entry_t *entry = get_entries(dst) + index;
 
     size_t data_bytes =
             calculate_camera_metadata_entry_data_size(entry->type,
@@ -524,14 +515,14 @@ int update_camera_metadata_entry(camera_metadata_t *dst,
         }
         if (entry_bytes != 0) {
             // Remove old data
-            uint8_t *start = dst->data + entry->data.offset;
+            uint8_t *start = get_data(dst) + entry->data.offset;
             uint8_t *end = start + entry_bytes;
             size_t length = dst->data_count - entry->data.offset - entry_bytes;
             memmove(start, end, length);
             dst->data_count -= entry_bytes;
 
             // Update all entry indices to account for shift
-            camera_metadata_buffer_entry_t *e = dst->entries;
+            camera_metadata_buffer_entry_t *e = get_entries(dst);
             size_t i;
             for (i = 0; i < dst->entry_count; i++) {
                 if (calculate_camera_metadata_entry_data_size(
@@ -547,12 +538,12 @@ int update_camera_metadata_entry(camera_metadata_t *dst,
             // Append new data
             entry->data.offset = dst->data_count;
 
-            memcpy(dst->data + entry->data.offset, data, data_payload_bytes);
+            memcpy(get_data(dst) + entry->data.offset, data, data_payload_bytes);
             dst->data_count += data_bytes;
         }
     } else if (data_bytes != 0) {
         // data size unchanged, reuse same data location
-        memcpy(dst->data + entry->data.offset, data, data_payload_bytes);
+        memcpy(get_data(dst) + entry->data.offset, data, data_payload_bytes);
     }
 
     if (data_bytes == 0) {
@@ -661,8 +652,8 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
     fdprintf(fd, "%*sVersion: %d, Flags: %08x\n",
             indentation + 2, "",
             metadata->version, metadata->flags);
-    for (i=0; i < metadata->entry_count; i++) {
-        camera_metadata_buffer_entry_t *entry = metadata->entries + i;
+    camera_metadata_buffer_entry_t *entry = get_entries(metadata);
+    for (i=0; i < metadata->entry_count; i++, entry++) {
 
         const char *tag_name, *tag_section;
         tag_section = get_camera_metadata_section_name(entry->tag);
@@ -701,7 +692,7 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
                         metadata->data_count);
                 continue;
             }
-            data_ptr = metadata->data + entry->data.offset;
+            data_ptr = get_data(metadata) + entry->data.offset;
         } else {
             data_ptr = entry->data.value;
         }
