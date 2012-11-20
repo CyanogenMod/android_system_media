@@ -1495,11 +1495,24 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </controls>
       <static>
         <entry name="availableFormats" type="enum"
-        type_notes="Enum, values from HAL_PIXEL_FORMAT_* in /system/core/include/system/graphics.h"
+        type_notes="values from HAL_PIXEL_FORMAT_* in /system/core/include/system/graphics.h"
         container="array">
           <array>
             <size>n</size>
           </array>
+          <enum>
+            <value id="0x20">RAW_SENSOR
+            </value>
+            <value id="0x32315659">YV12
+                <notes>YCrCb 4:2:0 Planar</notes>
+            </value>
+            <value id="0x11">YCbCr_420_SP
+                <notes>NV21</notes>
+            </value>
+            <value id="0x21">JPEG
+                <notes>BLOB</notes>
+            </value>
+          </enum>
           <description>List of app-visible formats</description>
           <tag id="BC" />
         </entry>

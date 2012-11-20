@@ -107,8 +107,8 @@
 
     <complexType name="EntryType">
         <sequence>
-            <element name="enum" type="tns:EnumType" maxOccurs="1" minOccurs="0"></element>
             <element name="array" type="tns:ArrayType" maxOccurs="1" minOccurs="0"></element>
+            <element name="enum" type="tns:EnumType" maxOccurs="1" minOccurs="0"></element>
             <element name="tuple" type="tns:TupleType" maxOccurs="1" minOccurs="0"></element>
 
             <group ref="tns:BaseEntryGroup" />
@@ -171,7 +171,7 @@
                 </restriction>
             </simpleType>
         </attribute>
-        <attribute name="id" type="int" />
+        <attribute name="id" type="string" />
     </complexType>
 
     <complexType name="CloneType">

@@ -88,7 +88,8 @@
                     <value /> <!-- intentionally generated empty. manually fix -->
                   % endfor
                 </tuple>
-              % elif prop.type == 'enum':
+              % endif
+              % if prop.type == 'enum':
                 <enum>
                   % for value in prop.enum.values:
                       <value

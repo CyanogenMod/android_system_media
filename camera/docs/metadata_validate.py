@@ -33,6 +33,7 @@ Dependencies:
 """
 
 from bs4 import BeautifulSoup
+from bs4 import Tag
 import sys
 
 
@@ -89,6 +90,62 @@ def find_parent_by_name(element, names):
     return matching_parents[0]
   else:
     return None
+
+def find_all_child_tags(element, tag):
+    """
+    Finds all the children that are a Tag (as opposed to a NavigableString),
+    with a name of tag. This is useful to filter out the NavigableString out
+    of the children.
+
+    Args:
+      element: A BeautifulSoup Tag corresponding to an XML node
+      tag: A string representing the name of the tag
+
+    Returns:
+      A list of Tag instances
+
+      For example, given the following XML structure:
+        <enum>                    # This is the variable el
+          Hello world             # NavigableString
+          <value>Apple</value>    # this is the variale apple (Tag)
+          <value>Orange</value>   # this is the variable orange (Tag)
+          Hello world again       # NavigableString
+        </enum>
+
+        lst = find_all_child_tags(el, 'value')
+        # lst is [apple, orange]
+
+    """
+    matching_tags = [i for i in element.children if isinstance(i, Tag) and i.name == tag]
+    return matching_tags
+
+def find_child_tag(element, tag):
+    """
+    Finds the first child that is a Tag with the matching name.
+
+    Args:
+      element: a BeautifulSoup Tag
+      tag: A String representing the name of the tag
+
+    Returns:
+      An instance of a Tag, or None if there was no matches.
+
+      For example, given the following XML structure:
+        <enum>                    # This is the variable el
+          Hello world             # NavigableString
+          <value>Apple</value>    # this is the variale apple (Tag)
+          <value>Orange</value>   # this is the variable orange (Tag)
+          Hello world again       # NavigableString
+        </enum>
+
+        res = find_child_tag(el, 'value')
+        # res is apple
+    """
+    matching_tags = find_all_child_tags(element, tag)
+    if matching_tags:
+        return matching_tags[0]
+    else:
+        return None
 
 def find_kind(element):
   """
@@ -150,10 +207,14 @@ def validate_clones(soup):
   return success
 
 # All <entry> elements with container=$foo have a <$foo> child
+# If type="enum", <enum> tag is present
+# In <enum> for all <value id="$x">, $x is numeric
 def validate_entries(soup):
   """
   Validate all <entry> elements with the following rules:
     * If there is a container="$foo" attribute, there is a <$foo> child
+    * If there is a type="enum" attribute, there is an <enum> child
+    * In the <enum> child, all <value id="$x"> have a numeric $x
 
   Args:
     soup - an instance of BeautifulSoup
@@ -175,8 +236,28 @@ def validate_entries(soup):
                  %(fully_qualified_name(entry), find_kind(entry),       \
                  entry_container, entry_container))
 
-  return success
+    typ = entry.attrs.get('type')
+    if typ == 'enum':
+      if entry.enum is None:
+        validate_error(("Entry '%s' in kind '%s' is missing enum")     \
+                               % (fully_qualified_name(entry), find_kind(entry),
+                                  ))
 
+      if typ == 'enum' and entry.enum is not None:
+
+        for value in entry.enum.find_all('value'):
+          value_id = value.attrs.get('id')
+
+          if value_id is not None:
+            try:
+              id_int = int(value_id, 0) #autoguess base
+            except ValueError:
+              validate_error(("Entry '%s' has id '%s', which is not" + \
+                                        " numeric.")                   \
+                             %(fully_qualified_name(entry), value_id))
+              success = False
+
+  return success
 
 def validate_xml(file_name):
   """
