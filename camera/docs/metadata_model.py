@@ -1024,6 +1024,17 @@ class Entry(Node):
     """
     return self.get_name_as_list()[-1]
 
+  def get_path_without_name(self):
+    """
+    Returns a string path to the entry, with the name component excluded.
+
+    For example:
+      entry.name is 'android.lens.info.shading'
+      entry.get_path_without_name() == 'android.lens.info'
+    """
+    return ".".join(self.get_name_as_list()[0:-1])
+
+
 class Clone(Entry):
   """
   A Node corresponding to a <clone> element. It has all the attributes of an

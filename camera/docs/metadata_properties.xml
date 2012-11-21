@@ -867,23 +867,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </controls>
     </section>
-    <section name="hotPIxel">
-      <static>
-        <namespace name="info">
-          <entry name="map" type="int32"
-          type_notes="list of coordinates based on android.sensor.pixelArraySize"
-          container="array">
-            <array>
-              <size>2</size>
-              <size>n</size>
-            </array>
-            <description>Location of hot/defective pixels on
-            sensor</description>
-            <tag id="ADV" />
-          </entry>
-        </namespace>
-      </static>
-    </section>
     <section name="hotPixel">
       <controls>
         <entry name="mode" type="enum">
@@ -903,6 +886,21 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="V1" />
         </entry>
       </controls>
+      <static>
+        <namespace name="info">
+          <entry name="map" type="int32"
+          type_notes="list of coordinates based on android.sensor.pixelArraySize"
+          container="array">
+            <array>
+              <size>2</size>
+              <size>n</size>
+            </array>
+            <description>Location of hot/defective pixels on
+            sensor</description>
+            <tag id="ADV" />
+          </entry>
+        </namespace>
+      </static>
       <dynamic>
         <clone entry="android.hotPixel.mode" kind="controls">
           <tag id="V1" />
