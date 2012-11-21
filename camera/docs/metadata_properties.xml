@@ -19,19 +19,19 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
   <tags>
     <tag id="AWB">
-      <!-- TODO: fill the tag description -->
+        Needed for auto white balance
     </tag>
     <tag id="BC">
-      <!-- TODO: fill the tag description -->
+        Needed for backwards compatibility with old Java API
     </tag>
     <tag id="V1">
-      <!-- TODO: fill the tag description -->
+        New features for first camera 2 release (API1)
     </tag>
     <tag id="ADV">
       <!-- TODO: fill the tag description -->
     </tag>
     <tag id="DNG">
-      <!-- TODO: fill the tag description -->
+        Needed for DNG file support
     </tag>
     <tag id="EXIF">
       <!-- TODO: fill the tag description -->
@@ -43,23 +43,25 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="mode" type="enum">
           <enum>
             <value>TRANSFORM_MATRIX
-            <notes>Use the android.colorCorrection.transform matrix
-            to do color conversion</notes></value>
+              <notes>Use the android.colorCorrection.transform matrix
+              to do color conversion</notes>
+            </value>
             <value>FAST
-            <notes>Must not slow down frame rate relative to raw
-            bayer output</notes></value>
+              <notes>Must not slow down frame rate relative to raw
+              bayer output</notes>
+            </value>
             <value>HIGH_QUALITY
-            <notes>Frame rate may be reduced by high
-            quality</notes></value>
+              <notes>Frame rate may be reduced by high
+              quality</notes>
+            </value>
           </enum>
-          <description>enum</description>
-          <units>enum:</units>
         </entry>
         <entry name="transform" type="float"
         type_notes="3x3 float matrix in row-major order"
         container="array">
           <array>
-            <size>9</size>
+            <size>3</size>
+            <size>3</size>
           </array>
           <description>A transform matrix to chromatically adapt
           pixels in the CIE XYZ (1931) color space from the scene
@@ -121,11 +123,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="aeMode" type="enum">
           <enum>
             <value>OFF
-            <notes>Autoexposure is disabled; sensor.exposureTime
-            and sensor.sensitivity are used</notes></value>
+              <notes>Autoexposure is disabled; sensor.exposureTime
+              and sensor.sensitivity are used</notes>
+            </value>
             <value>ON
-            <notes>Autoexposure is active, no flash
-            control</notes></value>
+              <notes>Autoexposure is active, no flash
+              control</notes>
+            </value>
             <value>ON_AUTO_FLASH
             <notes>if flash exists Autoexposure is active, auto
             flash control; flash may be fired when precapture
@@ -709,7 +713,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Controls the quality of the demosaicing
           processing</description>
-          <units>Enum:</units>
           <tag id="V1" />
         </entry>
       </controls>
@@ -729,7 +732,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Operation mode for edge
           enhancement</description>
-          <units>enum:</units>
         </entry>
         <entry name="strength" type="byte">
           <description>Control the amount of edge enhancement
@@ -776,7 +778,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             firingPower</notes></value>
           </enum>
           <description>Select flash operation mode</description>
-          <units>enum</units>
           <tag id="BC" />
         </entry>
       </controls>
@@ -837,7 +838,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Current state of the flash
           unit</description>
-          <units>enum</units>
         </entry>
       </dynamic>
     </section>
@@ -857,7 +857,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Operating mode of geometric
           correction</description>
-          <units>enum:</units>
         </entry>
         <entry name="strength" type="byte">
           <description>Control the amount of shading correction
@@ -901,7 +900,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Set operational mode for hot pixel
           correction</description>
-          <units>Enum:</units>
           <tag id="V1" />
         </entry>
       </controls>
@@ -1061,7 +1059,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether optical image stabilization is
           enabled.</description>
-          <units>enum</units>
           <range>android.lens.availableOpticalStabilization</range>
           <notes>Will not be supported on most devices.</notes>
           <tag id="V1" />
@@ -1204,8 +1201,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Direction the camera faces relative to
           device screen</description>
-          <units>enum</units>
-          <notes>}</notes>
         </entry>
         <entry name="opticalAxisAngle" type="float"
         type_notes="degrees. First defines the angle of separation between the perpendicular to the screen and the camera optical axis. The second then defines the clockwise rotation of the optical axis from native device up."
@@ -1287,7 +1282,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Mode of operation for the noise reduction
           algorithm</description>
-          <units>enum:</units>
           <range>android.noiseReduction.availableModes</range>
           <tag id="V1" />
         </entry>
@@ -1388,7 +1382,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>How much metadata to produce on
           output</description>
-          <units>Enum:</units>
         </entry>
         <entry name="outputStreams" type="byte">
           <description>Lists which camera output streams image data
@@ -1415,7 +1408,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>The type of the request; either CAPTURE or
           REPROCESS</description>
-          <units>Enum:</units>
         </entry>
       </controls>
       <static>
@@ -1924,7 +1916,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Quality of lens shading correction applied
           to the image data</description>
-          <units>enum:</units>
         </entry>
         <entry name="strength" type="byte">
           <description>Control the amount of shading correction
@@ -1953,7 +1944,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>State of the face detector
           unit</description>
-          <units>enum</units>
           <range>
           android.statistics.availableFaceDetectModes</range>
           <tag id="BC" />
@@ -1965,7 +1955,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Operating mode for histogram
           generation</description>
-          <units>enum</units>
           <tag id="V1" />
         </entry>
         <entry name="sharpnessMapMode" type="enum">
@@ -1975,7 +1964,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Operating mode for sharpness map
           generation</description>
-          <units>enum</units>
           <tag id="V1" />
         </entry>
       </controls>
@@ -2146,7 +2134,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <notes>Frame rate may be reduced by high
             quality</notes></value>
           </enum>
-          <units>enum:</units>
         </entry>
       </controls>
       <static>

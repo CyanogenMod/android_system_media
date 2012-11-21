@@ -248,7 +248,7 @@ class Metadata(Node):
     """
     tag_ids = [tg.name for tg in self.tags if tg.name == tag]
     if not tag_ids:
-      self._tags.append(Tag(tag, self))
+      self._tags.append(Tag(tag, self, description))
 
   def insert_entry(self, entry):
     """

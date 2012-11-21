@@ -16,6 +16,7 @@
      limitations under the License.
 -->
 <head>
+  <!-- automatically generated from html.mako. do NOT edit directly -->
   <meta charset="utf-8" />
   <title>Android Camera HAL2.0 Properties</title>
   <style type="text/css">
@@ -56,14 +57,35 @@
     /* TODO for each x.y.z try to link it to the entry */
 
   </style>
+
+  <style>
+
+    {
+      /* broken...
+         supposedly there is a bug in chrome that it lays out tables before
+         it knows its being printed, so the page-break-* styles are ignored
+         */
+        tr { page-break-after: always; page-break-inside: avoid; }
+    }
+
+  </style>
 </head>
 
 <%!
   # insert word break hints for the browser
-  #    e.g. X/Y/Z -> X/<wbr>Y/<wbr>/Z. also for X.Y.Z, X_Y_Z.
   def wbr(text):
-    replace_chars=['.', '/', '_', ',']
     new_txt = text
+
+    # for johnyOrange.appleCider.redGuardian also insert wbr before the caps
+    # => johny<wbr>Orange.apple<wbr>Cider.red<wbr>Guardian
+    for words in text.split(" "):
+      if len(words.split(".")) >= 3: # match only x.y.z
+        addwbr = lambda x: i.isupper() and ("<wbr>" + i) or i
+        new_word = "".join([addwbr(i) for i in words])
+        new_txt = new_txt.replace(words, new_word)
+
+    # e.g. X/Y/Z -> X/<wbr>Y/<wbr>/Z. also for X.Y.Z, X_Y_Z.
+    replace_chars=['.', '/', '_', ',']
     for i in replace_chars:
       new_txt = new_txt.replace(i, i + "<wbr>")
 
