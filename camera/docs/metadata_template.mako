@@ -21,7 +21,11 @@
 
 <tags>
 % for tag in metadata.tags:
+  % if tag.description and tag.description.strip():
+  <tag id="${tag.id}">${tag.description}</tag>
+  % else:
   <tag id="${tag.id}"><!-- TODO: fill the tag description --></tag>
+  % endif
 % endfor
 </tags>
 
