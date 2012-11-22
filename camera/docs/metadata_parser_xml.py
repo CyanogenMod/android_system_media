@@ -36,15 +36,20 @@ Dependencies:
 """
 
 import sys
+import os
+import StringIO
 
 from bs4 import BeautifulSoup
 from bs4 import NavigableString
 
 from mako.template import Template
+from mako.lookup import TemplateLookup
+from mako.runtime import Context
 
 from metadata_model import *
 import metadata_model
 from metadata_validate import *
+import metadata_helpers
 
 class MetadataParserXml:
   """
@@ -212,12 +217,29 @@ class MetadataParserXml:
     """
     Render the metadata model using a Mako template as the view.
 
+    The template gets the metadata as an argument, as well as all
+    public attributes from the metadata_helpers module.
+
     Args:
       template: path to a Mako template file
       output_name: path to the output file, or None to use stdout
     """
-    tpl = Template(filename=template)
-    tpl_data = tpl.render(metadata=self.metadata, metadata_model=metadata_model)
+    buf = StringIO.StringIO()
+    metadata_helpers._context_buf = buf
+
+    helpers = [(i, getattr(metadata_helpers, i))
+                for i in dir(metadata_helpers) if not i.startswith('_')]
+    helpers = dict(helpers)
+
+    lookup = TemplateLookup(directories=[os.getcwd()])
+    tpl = Template(filename=template, lookup=lookup)
+
+    ctx = Context(buf, metadata=self.metadata, **helpers)
+    tpl.render_context(ctx)
+
+    tpl_data = buf.getvalue()
+    metadata_helpers._context_buf = None
+    buf.close()
 
     if output_name is None:
       print tpl_data

@@ -27,75 +27,6 @@
  * Generated automatically from camera_metadata_tags.mako
  */
 
-<%!
-  import metadata_model
-
-  def _is_sec_or_ins(x):
-    return isinstance(x, metadata_model.Section) or    \
-           isinstance(x, metadata_model.InnerNamespace)
-
-  ##
-  ## Metadata Helpers
-  ##
-
-  def find_all_sections(root):
-    return root.find_all(_is_sec_or_ins)
-
-  def find_parent_section(entry):
-    return entry.find_parent_first(_is_sec_or_ins)
-
-  # find uniquely named entries (w/o recursing through inner namespaces)
-  def find_unique_entries(node):
-    if not isinstance(node, metadata_model.Section) and    \
-       not isinstance(node, metadata_model.InnerNamespace):
-      raise TypeError("expected node to be a Section or InnerNamespace")
-
-    d = {}
-    # remove the 'kinds' from the path between sec and the closest entries
-    # then search the immediate children of the search path
-    search_path = isinstance(node, metadata_model.Section) and node.kinds \
-                  or [node]
-    for i in search_path:
-        for entry in i.entries:
-            d[entry.name] = entry
-
-    for k,v in d.iteritems():
-        yield v
-
-  def path_name(node):
-    isa = lambda x,y: isinstance(x, y)
-    fltr = lambda x: not isa(x, metadata_model.Metadata) and \
-                     not isa(x, metadata_model.Kind)
-
-    path = node.find_parents(fltr)
-    path = list(path)
-    path.reverse()
-    path.append(node)
-
-    return ".".join((i.name for i in path))
-
-  ##
-  ## Filters
-  ##
-
-  # abcDef.xyz -> ABC_DEF_XYZ
-  def csym(name):
-    newstr = name
-    newstr = "".join([i.isupper() and ("_" + i) or i for i in newstr]).upper()
-    newstr = newstr.replace(".", "_")
-    return newstr
-
-  # pad with spaces to make string len == size. add new line if too big
-  def ljust(size, indent=4):
-    def inner(what):
-        newstr = what.ljust(size)
-        if len(newstr) > size:
-            return what + "\n" + "".ljust(indent + size)
-        else:
-            return newstr
-    return inner
-%>
-
 /** TODO: Nearly every enum in this file needs a description */
 
 /**
@@ -119,7 +50,7 @@ typedef enum camera_metadata_section {
  */
 typedef enum camera_metadata_section_start {
   % for i in find_all_sections(metadata):
-    ${path_name(i) + '.start' | csym,ljust(30)} = ${path_name(i) | csym,ljust(25)} << 16,
+    ${path_name(i) + '.start' | csym,ljust(30)} = ${path_name(i) | csym,pad(64)} << 16,
   % endfor
     VENDOR_SECTION_START           = VENDOR_SECTION            << 16
 } camera_metadata_section_start_t;
@@ -157,7 +88,7 @@ typedef enum camera_metadata_enum_${csym(entry.name).lower()} {
         % if val.id is None:
     ${entry.name | csym}_${val.name},
         % else:
-    ${'%s_%s'%(csym(entry.name), val.name) | ljust(30)} = ${val.id},
+    ${'%s_%s'%(csym(entry.name), val.name) | pad(65)} = ${val.id},
         % endif
       % endfor
 } camera_metadata_enum_${csym(entry.name).lower()}_t;
@@ -166,3 +97,38 @@ typedef enum camera_metadata_enum_${csym(entry.name).lower()} {
   % endfor
 
 %endfor
+
+int camera_metadata_enum_snprint(uint32_t tag,
+                                 uint32_t value,
+                                 char *dst,
+                                 size_t size) {
+    const char *msg = "error: not an enum";
+    int ret = -1;
+
+    switch(tag) {
+    % for sec in find_all_sections(metadata):
+      % for idx,entry in enumerate(find_unique_entries(sec)):
+        case ${entry.name | csym}: {
+          % if entry.type == 'enum':
+            switch (value) {
+              % for val in entry.enum.values:
+                case ${entry.name | csym}_${val.name}:
+                    msg = "${val.name}";
+                    ret = 0;
+                    break;
+              % endfor
+                default:
+                    msg = "error: enum value out of range";
+            }
+          % endif
+            break;
+        }
+      % endfor
+
+    %endfor
+    }
+
+    snprintf(dst, size, msg);
+    return ret;
+}
+
