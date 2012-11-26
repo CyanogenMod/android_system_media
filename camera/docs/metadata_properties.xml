@@ -84,10 +84,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       <controls>
         <entry name="aeAntibandingMode" type="enum">
           <enum>
-            <value>ANTIBANDING_OFF</value>
-            <value>ANTIBANDING_50HZ</value>
-            <value>ANTIBANDING_60HZ</value>
-            <value>ANTIBANDING_AUTO</value>
+            <value>OFF</value>
+            <value>50HZ</value>
+            <value>60HZ</value>
+            <value>AUTO</value>
           </enum>
           <description>Enum for controlling
           antibanding</description>
@@ -338,24 +338,24 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="captureIntent" type="enum">
           <enum>
-            <value>INTENT_CUSTOM
+            <value>CUSTOM
             <notes>This request doesn't fall into the other
             categories. Default to preview-like
             behavior.</notes></value>
-            <value>INTENT_PREVIEW
+            <value>PREVIEW
             <notes>This request is for a preview-like usecase. The
             precapture trigger may be used to start off a metering
             w/flash sequence</notes></value>
-            <value>INTENT_STILL_CAPTURE
+            <value>STILL_CAPTURE
             <notes>This request is for a still capture-type
             usecase.</notes></value>
-            <value>INTENT_VIDEO_RECORD
+            <value>VIDEO_RECORD
             <notes>This request is for a video recording
             usecase.</notes></value>
-            <value>INTENT_VIDEO_SNAPSHOT
+            <value>VIDEO_SNAPSHOT
             <notes>This request is for a video snapshot (still
             image while recording video) usecase</notes></value>
-            <value>INTENT_ZERO_SHUTTER_LAG
+            <value>ZERO_SHUTTER_LAG
             <notes>This request is for a ZSL usecase; the
             application will stream full-resolution images and
             reprocess one or several later for a final
@@ -370,15 +370,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="effectMode" type="enum">
           <enum>
-            <value>EFFECT_OFF</value>
-            <value optional="true">EFFECT_MONO</value>
-            <value optional="true">EFFECT_NEGATIVE</value>
-            <value optional="true">EFFECT_SOLARIZE</value>
-            <value optional="true">EFFECT_SEPIA</value>
-            <value optional="true">EFFECT_POSTERIZE</value>
-            <value optional="true">EFFECT_WHITEBOARD</value>
-            <value optional="true">EFFECT_BLACKBOARD</value>
-            <value optional="true">EFFECT_AQUA</value>
+            <value>OFF</value>
+            <value optional="true">MONO</value>
+            <value optional="true">NEGATIVE</value>
+            <value optional="true">SOLARIZE</value>
+            <value optional="true">SEPIA</value>
+            <value optional="true">POSTERIZE</value>
+            <value optional="true">WHITEBOARD</value>
+            <value optional="true">BLACKBOARD</value>
+            <value optional="true">AQUA</value>
           </enum>
           <description>Whether any special color effect is in use.
           Only used if android.control.mode != OFF</description>
@@ -412,7 +412,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="sceneMode" type="enum">
           <enum>
-            <value>SCENE_MODE_FACE_PRIORITY
+            <value id="0">UNSUPPORTED</value>
+            <value>FACE_PRIORITY
             <notes>if face detection support exists Use face
             detection data to drive 3A routines. If face detection
             statistics are disabled, should still operate correctly
@@ -421,22 +422,21 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             awbMode, and afMode remain active when FACE_PRIORITY is
             set. This is due to compatibility concerns with the old
             camera API</notes></value>
-            <value optional="true">SCENE_MODE_ACTION</value>
-            <value optional="true">SCENE_MODE_PORTRAIT</value>
-            <value optional="true">SCENE_MODE_LANDSCAPE</value>
-            <value optional="true">SCENE_MODE_NIGHT</value>
-            <value optional="true">
-            SCENE_MODE_NIGHT_PORTRAIT</value>
-            <value optional="true">SCENE_MODE_THEATRE</value>
-            <value optional="true">SCENE_MODE_BEACH</value>
-            <value optional="true">SCENE_MODE_SNOW</value>
-            <value optional="true">SCENE_MODE_SUNSET</value>
-            <value optional="true">SCENE_MODE_STEADYPHOTO</value>
-            <value optional="true">SCENE_MODE_FIREWORKS</value>
-            <value optional="true">SCENE_MODE_SPORTS</value>
-            <value optional="true">SCENE_MODE_PARTY</value>
-            <value optional="true">SCENE_MODE_CANDLELIGHT</value>
-            <value optional="true">SCENE_MODE_BARCODE</value>
+            <value optional="true">ACTION</value>
+            <value optional="true">PORTRAIT</value>
+            <value optional="true">LANDSCAPE</value>
+            <value optional="true">NIGHT</value>
+            <value optional="true">NIGHT_PORTRAIT</value>
+            <value optional="true">THEATRE</value>
+            <value optional="true">BEACH</value>
+            <value optional="true">SNOW</value>
+            <value optional="true">SUNSET</value>
+            <value optional="true">STEADYPHOTO</value>
+            <value optional="true">FIREWORKS</value>
+            <value optional="true">SPORTS</value>
+            <value optional="true">PARTY</value>
+            <value optional="true">CANDLELIGHT</value>
+            <value optional="true">BARCODE</value>
           </enum>
           <description>Which scene mode is active when
           android.control.mode = SCENE_MODE</description>
@@ -652,11 +652,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <notes>if AUTO or MACRO modes are supported AF is doing
             an AF scan because it was triggered by AF
             trigger</notes></value>
-            <value>AF_FOCUSED_LOCKED
+            <value>FOCUSED_LOCKED
             <notes>if any AF mode besides OFF is supported AF
             believes it is focused correctly and is
             locked</notes></value>
-            <value>AF_NOT_FOCUSED_LOCKED
+            <value>NOT_FOCUSED_LOCKED
             <notes>if any AF mode besides OFF is supported AF has
             failed to focus successfully and is
             locked</notes></value>
@@ -1194,8 +1194,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </namespace>
         <entry name="facing" type="enum">
           <enum>
-            <value>FACING_FRONT</value>
-            <value>FACING_BACK</value>
+            <value>FRONT</value>
+            <value>BACK</value>
           </enum>
           <description>Direction the camera faces relative to
           device screen</description>
@@ -1521,6 +1521,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>Must include: - sensor maximum resolution Should
           include: - half/quarter max resolution</range>
           <tag id="BC" />
+        </entry>
+        <entry name="availableMaxDigitalZoom" type="int32">
+          <description>TODO: have a real description here</description>
         </entry>
         <entry name="availableProcessedMinDurations" type="int64"
         container="array">
