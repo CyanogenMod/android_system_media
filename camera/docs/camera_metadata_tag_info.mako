@@ -60,3 +60,40 @@ tag_info_t *tag_info[ANDROID_SECTION_COUNT] = {
     ${path_name(i) | csyml},
   % endfor
 };
+
+int camera_metadata_enum_snprint(uint32_t tag,
+                                 uint32_t value,
+                                 char *dst,
+                                 size_t size) {
+    const char *msg = "error: not an enum";
+    int ret = -1;
+
+    switch(tag) {
+    % for sec in find_all_sections(metadata):
+      % for idx,entry in enumerate(find_unique_entries(sec)):
+        case ${entry.name | csym}: {
+          % if entry.type == 'enum':
+            switch (value) {
+              % for val in entry.enum.values:
+                case ${entry.name | csym}_${val.name}:
+                    msg = "${val.name}";
+                    ret = 0;
+                    break;
+              % endfor
+                default:
+                    msg = "error: enum value out of range";
+            }
+          % endif
+            break;
+        }
+      % endfor
+
+    %endfor
+    }
+
+    strncpy(dst, msg, size - 1);
+    dst[size - 1] = '\0';
+
+    return ret;
+}
+
