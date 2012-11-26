@@ -61,7 +61,7 @@ typedef enum camera_metadata_section_start {
  * addition, the name and type of the tag needs to be added to
  * system/media/camera/src/camera_metadata_tag_info.c
  */
-enum camera_metadata_tag {
+typedef enum camera_metadata_tag {
     % for sec in find_all_sections(metadata):
       % for idx,entry in enumerate(find_unique_entries(sec)):
         % if idx == 0:

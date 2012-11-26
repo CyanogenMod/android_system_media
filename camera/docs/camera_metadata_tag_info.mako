@@ -49,7 +49,11 @@ static tag_info_t ${path_name(sec) | csyml}[${path_name(sec) | csym}_END -
         ${path_name(sec) | csym}_START] = {
   % for entry in find_unique_entries(sec):
     [ ${entry.name | csym} - ${path_name(sec) | csym}_START ] =
+    % if entry.name == "android.scaler.availableFormats": #FIXME: support enums separately from the data type?
+    { ${'"%s",' %(entry.name_short) | pad(40)} ${"int32" | ctype_enum,ljust(11)} },
+    % else:
     { ${'"%s",' %(entry.name_short) | pad(40)} ${entry.type | ctype_enum,ljust(11)} },
+    % endif
   % endfor
 };
 
