@@ -32,6 +32,11 @@
 #define ERROR 1
 #define NOT_FOUND (-ENOENT)
 
+#define _Alignas(T) \
+    ({struct _AlignasStruct { char c; T field; };       \
+        offsetof(struct _AlignasStruct, field); })
+
+
 TEST(camera_metadata, allocate_normal) {
     camera_metadata_t *m = NULL;
     const size_t entry_capacity = 5;
@@ -1711,4 +1716,95 @@ TEST(camera_metadata, memcpy) {
 
     delete dst;
     free_camera_metadata(m);
+}
+
+TEST(camera_metadata, data_alignment) {
+    // Verify that when we store the data, the data aligned as we expect
+    camera_metadata_t *m = NULL;
+    const size_t entry_capacity = 50;
+    const size_t data_capacity = 450;
+    char dummy_data[data_capacity] = {0,};
+
+    int m_types[] = {
+        TYPE_BYTE,
+        TYPE_INT32,
+        TYPE_FLOAT,
+        TYPE_INT64,
+        TYPE_DOUBLE,
+        TYPE_RATIONAL
+    };
+    const size_t (&m_type_sizes)[NUM_TYPES] = camera_metadata_type_size;
+    size_t m_type_align[] = {
+        _Alignas(uint8_t),                    // BYTE
+        _Alignas(int32_t),                    // INT32
+        _Alignas(float),                      // FLOAT
+        _Alignas(int64_t),                    // INT64
+        _Alignas(double),                     // DOUBLE
+        _Alignas(camera_metadata_rational_t), // RATIONAL
+    };
+    /* arbitrary tags. the important thing is that their type
+       corresponds to m_type_sizes[i]
+       */
+    int m_type_tags[] = {
+        ANDROID_REQUEST_TYPE,
+        ANDROID_REQUEST_ID,
+        ANDROID_LENS_FOCUS_DISTANCE,
+        ANDROID_SENSOR_EXPOSURE_TIME,
+        ANDROID_JPEG_GPS_COORDINATES,
+        ANDROID_CONTROL_AE_EXP_COMPENSATION_STEP
+    };
+
+    /*
+    if the asserts fail, its because we added more types.
+        this means the test should be updated to include more types.
+    */
+    ASSERT_EQ((size_t)NUM_TYPES, sizeof(m_types)/sizeof(m_types[0]));
+    ASSERT_EQ((size_t)NUM_TYPES, sizeof(m_type_align)/sizeof(m_type_align[0]));
+    ASSERT_EQ((size_t)NUM_TYPES, sizeof(m_type_tags)/sizeof(m_type_tags[0]));
+
+    for (int m_type = 0; m_type < (int)NUM_TYPES; ++m_type) {
+
+        ASSERT_EQ(m_types[m_type],
+            get_camera_metadata_tag_type(m_type_tags[m_type]));
+
+        // misalignment possibilities are [0,type_size) for any type pointer
+        for (size_t i = 0; i < m_type_sizes[m_type]; ++i) {
+
+            /* data_count = 1, we may store data in the index.
+               data_count = 10, we will store data separately
+             */
+            for (int data_count = 1; data_count <= 10; data_count += 9) {
+
+                m = allocate_camera_metadata(entry_capacity, data_capacity);
+
+                // add dummy data to test various different padding requirements
+                ASSERT_EQ(OK,
+                    add_camera_metadata_entry(m,
+                                              m_type_tags[TYPE_BYTE],
+                                              &dummy_data[0],
+                                              data_count + i));
+                // insert the type we care to test
+                ASSERT_EQ(OK,
+                    add_camera_metadata_entry(m, m_type_tags[m_type],
+                                             &dummy_data[0], data_count));
+
+                // now check the alignment for our desired type. it should be ok
+                camera_metadata_ro_entry_t entry = camera_metadata_ro_entry_t();
+                ASSERT_EQ(OK,
+                    find_camera_metadata_ro_entry(m, m_type_tags[m_type],
+                                                 &entry));
+
+                void* data_ptr = (void*)entry.data.u8;
+                void* aligned_ptr = (void*)((uintptr_t)data_ptr & ~(m_type_align[m_type] - 1));
+                EXPECT_EQ(aligned_ptr, data_ptr) <<
+                    "Wrong alignment for type " <<
+                    camera_metadata_type_names[m_type] <<
+                    " with " << (data_count + i) << " dummy bytes and " <<
+                    " data_count " << data_count <<
+                    " expected alignment was: " << m_type_align[m_type];
+
+                free_camera_metadata(m);
+            }
+        }
+    }
 }

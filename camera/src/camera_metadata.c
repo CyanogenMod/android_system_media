@@ -31,7 +31,7 @@
 // Align entry buffers as the compiler would
 #define ENTRY_ALIGNMENT _Alignas(camera_metadata_buffer_entry_t)
 // Align data buffer to largest supported data type
-#define DATA_ALIGNMENT _Alignas(camera_metadata_rational_t)
+#define DATA_ALIGNMENT _Alignas(camera_metadata_data_t)
 
 #define ALIGN_TO(val, alignment) \
     (((uint32_t)(val) + ((alignment) - 1)) & ~((alignment) - 1))
@@ -100,6 +100,21 @@ struct camera_metadata {
     void                    *user; // User set pointer, not copied with buffer
     uint8_t                  reserved[0];
 };
+
+/**
+ * A datum of metadata. This corresponds to camera_metadata_entry_t::data
+ * with the difference that each element is not a pointer. We need to have a
+ * non-pointer type description in order to figure out the largest alignment
+ * requirement for data (DATA_ALIGNMENT).
+ */
+typedef union camera_metadata_data {
+    uint8_t u8;
+    int32_t i32;
+    float   f;
+    int64_t i64;
+    double  d;
+    camera_metadata_rational_t r;
+} camera_metadata_data_t;
 
 /** Versioning information */
 #define CURRENT_METADATA_VERSION 1
