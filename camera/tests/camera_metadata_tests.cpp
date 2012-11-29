@@ -20,6 +20,8 @@
 
 #include <errno.h>
 
+#include <vector>
+#include <algorithm>
 #include "gtest/gtest.h"
 #include "system/camera_metadata.h"
 
@@ -226,11 +228,11 @@ TEST(camera_metadata, add_get_normal) {
         0.0f, 0.1f, 0.7f
     };
     result = add_camera_metadata_entry(m,
-            ANDROID_COLOR_TRANSFORM,
+            ANDROID_COLOR_CORRECTION_TRANSFORM,
             colorTransform, 9);
     EXPECT_EQ(OK, result);
     data_used += calculate_camera_metadata_entry_data_size(
-            get_camera_metadata_tag_type(ANDROID_COLOR_TRANSFORM), 9);
+           get_camera_metadata_tag_type(ANDROID_COLOR_CORRECTION_TRANSFORM), 9);
     entries_used++;
 
     // Check added entries
@@ -267,7 +269,7 @@ TEST(camera_metadata, add_get_normal) {
             3, &entry);
     EXPECT_EQ(OK, result);
     EXPECT_EQ((size_t)3, entry.index);
-    EXPECT_EQ(ANDROID_COLOR_TRANSFORM, entry.tag);
+    EXPECT_EQ(ANDROID_COLOR_CORRECTION_TRANSFORM, entry.tag);
     EXPECT_EQ(TYPE_FLOAT, entry.type);
     EXPECT_EQ((size_t)9, entry.count);
     for (unsigned int i=0; i < entry.count; i++) {
@@ -881,7 +883,7 @@ TEST(camera_metadata, sort_metadata) {
         0.0f, 0.1f, 0.7f
     };
     result = add_camera_metadata_entry(m,
-            ANDROID_COLOR_TRANSFORM,
+            ANDROID_COLOR_CORRECTION_TRANSFORM,
             colorTransform, 9);
     EXPECT_EQ(OK, result);
 
@@ -916,7 +918,7 @@ TEST(camera_metadata, sort_metadata) {
     EXPECT_EQ(focus_distance, *entry.data.f);
 
     result = find_camera_metadata_entry(m,
-            ANDROID_NOISE_STRENGTH,
+            ANDROID_NOISE_REDUCTION_STRENGTH,
             &entry);
     EXPECT_EQ(NOT_FOUND, result);
     EXPECT_EQ((size_t)1, entry.index);
@@ -940,22 +942,35 @@ TEST(camera_metadata, sort_metadata) {
     }
 
     // Test sorted find
+    size_t lensFocusIndex = -1;
+    {
+        std::vector<uint32_t> tags;
+        tags.push_back(ANDROID_COLOR_CORRECTION_TRANSFORM);
+        tags.push_back(ANDROID_LENS_FOCUS_DISTANCE);
+        tags.push_back(ANDROID_SENSOR_EXPOSURE_TIME);
+        tags.push_back(ANDROID_SENSOR_SENSITIVITY);
+        std::sort(tags.begin(), tags.end());
+
+        lensFocusIndex =
+            std::find(tags.begin(), tags.end(), ANDROID_LENS_FOCUS_DISTANCE)
+            - tags.begin();
+    }
 
     result = find_camera_metadata_entry(m,
             ANDROID_LENS_FOCUS_DISTANCE,
             &entry);
     EXPECT_EQ(OK, result);
-    EXPECT_EQ((size_t)0, entry.index);
+    EXPECT_EQ(lensFocusIndex, entry.index);
     EXPECT_EQ(ANDROID_LENS_FOCUS_DISTANCE, entry.tag);
     EXPECT_EQ(TYPE_FLOAT, entry.type);
     EXPECT_EQ((size_t)1, (size_t)entry.count);
     EXPECT_EQ(focus_distance, *entry.data.f);
 
     result = find_camera_metadata_entry(m,
-            ANDROID_NOISE_STRENGTH,
+            ANDROID_NOISE_REDUCTION_STRENGTH,
             &entry);
     EXPECT_EQ(NOT_FOUND, result);
-    EXPECT_EQ((size_t)0, entry.index);
+    EXPECT_EQ(lensFocusIndex, entry.index);
     EXPECT_EQ(ANDROID_LENS_FOCUS_DISTANCE, entry.tag);
     EXPECT_EQ(TYPE_FLOAT, entry.type);
     EXPECT_EQ((size_t)1, entry.count);
