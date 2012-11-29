@@ -21,7 +21,7 @@ A parser for metadata_properties.xml can also render the resulting model
 over a Mako template.
 
 Usage:
-  metadata_parser_xml.py <filename.xml>
+  metadata_parser_xml.py <filename.xml> <template.mako>
   - outputs the resulting template to stdout
 
 Module:
@@ -43,6 +43,7 @@ from bs4 import NavigableString
 from mako.template import Template
 
 from metadata_model import *
+import metadata_model
 from metadata_validate import *
 
 class MetadataParserXml:
@@ -216,7 +217,7 @@ class MetadataParserXml:
       output_name: path to the output file, or None to use stdout
     """
     tpl = Template(filename=template)
-    tpl_data = tpl.render(metadata=self.metadata)
+    tpl_data = tpl.render(metadata=self.metadata, metadata_model=metadata_model)
 
     if output_name is None:
       print tpl_data
@@ -228,11 +229,13 @@ class MetadataParserXml:
 
 if __name__ == "__main__":
   if len(sys.argv) <= 1:
-    print >> sys.stderr, "Usage: %s <filename.xml>" % (sys.argv[0])
+    print >> sys.stderr, "Usage: %s <filename.xml> <template.mako>"            \
+                        % (sys.argv[0])
     sys.exit(0)
 
   file_name = sys.argv[1]
+  template_name = sys.argv[2]
   parser = MetadataParserXml(file_name)
-  parser.render("metadata_template.mako")
+  parser.render(template_name)
 
   sys.exit(0)

@@ -89,7 +89,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Enum for controlling
           antibanding</description>
-          <units>Enum</units>
           <range>
           android.control.aeAvailableAntibandingModes</range>
         </entry>
@@ -114,7 +113,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether AE is currently locked to its latest
           calculated values</description>
-          <units>Enum</units>
           <notes>Note that even when AE is locked, the flash may be
           fired if the AE mode is ON_AUTO_FLASH / ON_ALWAYS_FLASH /
           ON_AUTO_FLASH_REDEYE.</notes>
@@ -146,7 +144,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether AE is currently updating the sensor
           exposure and sensitivity fields</description>
-          <units>Enum</units>
           <range>android.control.aeAvailableModes</range>
           <notes>Only effective if android.control.mode =
           AUTO</notes>
@@ -154,7 +151,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="aeRegions" type="int32" container="array">
           <array>
-            <size>5 per area</size>
+            <size>5</size>
+            <size>area_count</size>
           </array>
           <description>List of areas to use for
           metering</description>
@@ -251,12 +249,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether AF is currently enabled, and what
           mode it is set to</description>
-          <units>Enum</units>
           <tag id="BC" />
         </entry>
         <entry name="afRegions" type="int32" container="array">
           <array>
-            <size>5 per area</size>
+            <size>5</size>
+            <size>area_count</size>
           </array>
           <description>List of areas to use for focus
           estimation</description>
@@ -288,7 +286,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether AWB is currently locked to its
           latest calculated values</description>
-          <units>Enum</units>
           <notes>Note that AWB lock is only meaningful for AUTO
           mode; in other modes, AWB is already fixed to a specific
           setting</notes>
@@ -309,14 +306,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Whether AWB is currently setting the color
           transform fields, and what its illumination target
           is</description>
-          <units>Enum</units>
           <notes>[BC - AWB lock,AWB modes]</notes>
           <tag id="BC" />
           <tag id="AWB" />
         </entry>
         <entry name="awbRegions" type="int32" container="array">
           <array>
-            <size>5 per area</size>
+            <size>5</size>
+            <size>area_count</size>
           </array>
           <description>List of areas to use for illuminant
           estimation</description>
@@ -363,7 +360,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Information to 3A routines about the purpose
           of this capture, to help decide optimal 3A
           strategy</description>
-          <units>Enum</units>
           <range>all must be supported</range>
           <notes>Only used if android.control.mode != OFF.</notes>
           <tag id="BC" />
@@ -382,7 +378,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether any special color effect is in use.
           Only used if android.control.mode != OFF</description>
-          <units>Enum</units>
           <range>android.control.availableEffects</range>
           <tag id="BC" />
         </entry>
@@ -408,7 +403,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Overall mode of 3A control
           routines</description>
-          <units>Enum</units>
           <range>all must be supported</range>
           <tag id="BC" />
         </entry>
@@ -442,7 +436,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Which scene mode is active when
           android.control.mode = SCENE_MODE</description>
-          <units>Enum</units>
           <range>android.control.availableSceneModes</range>
           <tag id="BC" />
         </entry>
@@ -453,7 +446,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether video stabilization is
           active</description>
-          <units>Enum</units>
           <notes>If enabled, video stabilization can modify the
           android.scaler.cropRegion to keep the video stream
           stabilized</notes>
@@ -552,7 +544,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="awbAvailableModes" type="byte">
-          <units>List of enums</units>
+          <units>List of enums (android.control.awbMode)</units>
           <range>OFF, AUTO must be included</range>
           <tag id="BC" />
         </entry>
@@ -631,7 +623,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             FLASH_REQUIRED as appropriate</notes></value>
           </enum>
           <description>Current state of AE algorithm</description>
-          <units>Enum</units>
           <notes>Whenever the AE algorithm state changes, a
           MSG_AUTOEXPOSURE notification must be send if a
           notification callback is registered.</notes>
@@ -667,7 +658,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             locked</notes></value>
           </enum>
           <description>Current state of AF algorithm</description>
-          <units>Enum</units>
           <notes>Whenever the AF algorithm state changes, a
           MSG_AUTOFOCUS notification must be send if a notification
           callback is registered.</notes>
@@ -698,7 +688,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             LOCKED)</notes></value>
           </enum>
           <description>Current state of AWB algorithm</description>
-          <units>Enum</units>
           <notes>Whenever the AWB algorithm state changes, a
           MSG_AUTOWHITEBALANCE notification must be send if a
           notification callback is registered.</notes>
@@ -1684,7 +1673,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>Arrangement of color filters on sensor;
             represents the colors in the top-left 2x2 section of
             the sensor, in reading order</description>
-            <units>Enum</units>
             <tag id="DNG" />
           </entry>
           <entry name="exposureTimeRange" type="int64"
@@ -1892,7 +1880,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Light source used to define transform
           1</description>
-          <units>Enum</units>
           <notes>[EXIF LightSource tag] Must all these be
           supported? Need CCT for each!</notes>
           <tag id="DNG" />
