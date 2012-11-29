@@ -34,7 +34,7 @@ tmp_out=$(mktemp)
 tmp_tidy1=$(mktemp)
 tmp_tidy2=$(mktemp)
 
-$thisdir/metadata_parser_xml.py $thisdir/metadata_properties.xml  > $tmp_out
+$thisdir/metadata_parser_xml.py $thisdir/metadata_properties.xml $thisdir/metadata_template.mako > $tmp_out
 tidy -indent -xml -quiet $thisdir/metadata_properties.xml > $tmp_tidy1
 tidy -indent -xml -quiet $tmp_out > $tmp_tidy2
 

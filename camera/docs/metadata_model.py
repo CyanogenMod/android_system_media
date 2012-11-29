@@ -342,6 +342,9 @@ class Metadata(Node):
         if tag not in p._tags:
           p._tags.append(tag)
 
+        if p not in tag.entries:
+          tag._entries.append(p)
+
   def _construct_clones(self):
     for p in self._clones:
       target_kind = p.target_kind
@@ -553,7 +556,7 @@ class Tag(Node):
     self._parent      = parent
 
     # all entries that have this tag, including clones
-    self._entries     = []
+    self._entries     = []  # filled in by Metadata#construct_tags
 
   @property
   def id(self):
@@ -641,6 +644,7 @@ class Kind(Node):
     parent: An edge to the parent, which is always a Section  instance.
     namespaces: A sequence of InnerNamespace children.
     entries: A sequence of Entry/Clone children.
+    merged_entries: A sequence of MergedEntry virtual nodes from entries
   """
   def __init__(self, name, parent):
     self._name = name
@@ -657,6 +661,11 @@ class Kind(Node):
   @property
   def entries(self):
     return self._entries
+
+  @property
+  def merged_entries(self):
+    for i in self.entries:
+      yield i.merge()
 
   def sort_children(self):
     self._namespaces.sort(key=self._get_name())
@@ -678,6 +687,7 @@ class InnerNamespace(Node):
     parent: An edge to the parent, which is an InnerNamespace or a Kind.
     namespaces: A sequence of InnerNamespace children.
     entries: A sequence of Entry/Clone children.
+    merged_entries: A sequence of MergedEntry virtual nodes from entries
   """
   def __init__(self, name, parent):
     self._name        = name
@@ -693,6 +703,11 @@ class InnerNamespace(Node):
   @property
   def entries(self):
     return self._entries
+
+  @property
+  def merged_entries(self):
+    for i in self.entries:
+      yield i.merge()
 
   def sort_children(self):
     self._namespaces.sort(key=self._get_name())
@@ -934,8 +949,17 @@ class Entry(Node):
 
     if self._type == 'enum':
       self._enum = Enum(self, enum_values, enum_ids, enum_optionals, enum_notes)
+    else:
+      self._enum = None
 
     self._property_keys = kwargs
+
+  def merge(self):
+    """
+    Copy the attributes into a new entry, merging it with the target entry
+    if it's a clone.
+    """
+    return MergedEntry(self)
 
   # Helpers for accessing less than the fully qualified name
 
@@ -1077,6 +1101,42 @@ class Clone(Entry):
     """
     return True
 
+class MergedEntry(Entry):
+  """
+  A MergedEntry has all the attributes of a Clone and its target Entry merged
+  together.
 
+  Remarks:
+    Useful when we want to 'unfold' a clone into a real entry by copying out
+    the target entry data. In this case we don't care about distinguishing
+    a clone vs an entry.
+  """
+  def __init__(self, entry):
+    """
+    Create a new instance of MergedEntry.
 
+    Args:
+      entry: An Entry or Clone instance
+    """
+    props_distinct = ['description', 'units', 'range', 'notes', 'tags', 'kind']
+
+    for p in props_distinct:
+      if entry.is_clone():
+        setattr(self, '_' + p, getattr(entry, p) or getattr(entry.entry, p))
+      else:
+        setattr(self, '_' + p, getattr(entry, p))
+
+    props_common = ['parent', 'name', 'name_short', 'container',
+                    'container_sizes', 'enum',
+                    'tuple_values',
+                    'type',
+                    'type_notes',
+                    'enum'
+                   ]
+
+    for p in props_common:
+      if entry.is_clone():
+        setattr(self, '_' + p, getattr(entry.entry, p))
+      else:
+        setattr(self, '_' + p, getattr(entry, p))
 
