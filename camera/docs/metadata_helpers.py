@@ -19,6 +19,7 @@ A set of helpers for rendering Mako templates with a Metadata model.
 """
 
 import metadata_model
+from collections import OrderedDict
 
 _context_buf = None
 
@@ -76,7 +77,7 @@ def find_unique_entries(node):
      not isinstance(node, metadata_model.InnerNamespace):
       raise TypeError("expected node to be a Section or InnerNamespace")
 
-  d = {}
+  d = OrderedDict()
   # remove the 'kinds' from the path between sec and the closest entries
   # then search the immediate children of the search path
   search_path = isinstance(node, metadata_model.Section) and node.kinds \

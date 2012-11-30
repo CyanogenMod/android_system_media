@@ -34,6 +34,7 @@ metadata_properties.xml file.
 """
 
 import sys
+from collections import OrderedDict
 
 class Node(object):
   """
@@ -152,7 +153,7 @@ class Node(object):
 
   @staticmethod
   def _dictionary_by_name(values):
-    d = {}
+    d = OrderedDict()
     for i in values:
       d[i.name] = i
 
@@ -205,6 +206,7 @@ class Metadata(Node):
     self._entries = []
     # kind => { name => entry }
     self._entry_map = { 'static': {}, 'dynamic': {}, 'controls': {} }
+    self._entries_ordered = [] # list of ordered Entry/Clone instances
     self._clones = []
 
 # Public (Read Only)
@@ -265,6 +267,7 @@ class Metadata(Node):
     e = Entry(**entry)
     self._entries.append(e)
     self._entry_map[e.kind][e.name] = e
+    self._entries_ordered.append(e)
 
   def insert_clone(self, clone):
     """
@@ -285,6 +288,7 @@ class Metadata(Node):
     c = Clone(entry, **clone)
     self._entry_map[c.kind][c.name] = c
     self._clones.append(c)
+    self._entries_ordered.append(c)
 
   def prune_clones(self):
     """
@@ -311,6 +315,7 @@ class Metadata(Node):
       # remove from global list
       self._clones.remove(p)
       self._entry_map[p.kind].pop(p.name)
+      self._entries_ordered.remove(p)
 
 
   # After all entries/clones are inserted,
@@ -367,7 +372,7 @@ class Metadata(Node):
     for ons_name, ons in root.iteritems():
       ons._leafs = []
 
-    for p in self._get_properties():
+    for p in self._entries_ordered:
       ons_name = p.get_outer_namespace()
       ons = root.get(ons_name, OuterNamespace(ons_name, self))
       root[ons_name] = ons
@@ -380,7 +385,6 @@ class Metadata(Node):
       ons.validate_tree()
 
       self._construct_sections(ons)
-      ons.sort_children()
 
       if ons not in self._outer_namespaces:
         self._outer_namespaces.append(ons)
@@ -414,7 +418,6 @@ class Metadata(Node):
                              %(sec)
 
       self._construct_kinds(sec)
-      sec.sort_children()
 
       if sec not in outer_namespace.sections:
         outer_namespace._sections.append(sec)
@@ -457,7 +460,6 @@ class Metadata(Node):
       self._construct_inner_namespaces(kind)
       kind.validate_tree()
       self._construct_entries(kind)
-      kind.sort_children()
       kind.validate_tree()
 
       if kind not in section.kinds:
@@ -495,7 +497,6 @@ class Metadata(Node):
       ins.validate_tree()
       # construct children entries
       self._construct_entries(ins, depth + 1)
-      ins.sort_children()
 
       if ins not in parent.namespaces:
         parent._namespaces.append(ins)

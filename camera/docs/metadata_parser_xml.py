@@ -107,34 +107,36 @@ class MetadataParserXml:
       for tag in tags.find_all('tag'):
         self.metadata.insert_tag(tag['id'], tag.string)
 
-    for entry in self.soup.find_all("entry"):
-      d = {
-         'name': fully_qualified_name(entry),
-         'type': entry['type'],
-         'kind': find_kind(entry),
-         'type_notes': entry.attrs.get('type_notes')
-      }
+    # add all entries, preserving the ordering of the XML file
+    # this is important for future ABI compatibility when generating code
+    entry_filter = lambda x: x.name == 'entry' or x.name == 'clone'
+    for entry in self.soup.find_all(entry_filter):
+      if entry.name == 'entry':
+        d = {
+              'name': fully_qualified_name(entry),
+              'type': entry['type'],
+              'kind': find_kind(entry),
+              'type_notes': entry.attrs.get('type_notes')
+            }
 
-      d2 = self._parse_entry(entry)
+        d2 = self._parse_entry(entry)
+        insert = self.metadata.insert_entry
+      else:
+        d = {
+           'name': entry['entry'],
+           'kind': find_kind(entry),
+           'target_kind': entry['kind'],
+          # no type since its the same
+          # no type_notes since its the same
+        }
+        d2 = {}
+
+        insert = self.metadata.insert_clone
+
       d3 = self._parse_entry_optional(entry)
 
       entry_dict = dict(d.items() + d2.items() + d3.items())
-      self.metadata.insert_entry(entry_dict)
-
-    entry = None
-
-    for clone in self.soup.find_all("clone"):
-      d = {
-         'name': clone['entry'],
-         'kind': find_kind(clone),
-         'target_kind': clone['kind'],
-        # no type since its the same
-        # no type_notes since its the same
-      }
-
-      d2 = self._parse_entry_optional(clone)
-      clone_dict = dict(d.items() + d2.items())
-      self.metadata.insert_clone(clone_dict)
+      insert(entry_dict)
 
     self.metadata.construct_graph()
 
