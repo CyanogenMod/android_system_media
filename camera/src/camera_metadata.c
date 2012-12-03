@@ -640,7 +640,8 @@ int set_camera_metadata_vendor_tag_ops(const vendor_tag_query_ops_t *query_ops) 
     return OK;
 }
 
-static void print_data(int fd, const uint8_t *data_ptr, int type, int count,
+static void print_data(int fd, const uint8_t *data_ptr, uint32_t tag, int type,
+        int count,
         int indentation);
 
 void dump_camera_metadata(const camera_metadata_t *metadata,
@@ -714,11 +715,11 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
         int count = entry->count;
         if (verbosity < 2 && count > 16) count = 16;
 
-        print_data(fd, data_ptr, entry->type, count, indentation);
+        print_data(fd, data_ptr, entry->tag, entry->type, count, indentation);
     }
 }
 
-static void print_data(int fd, const uint8_t *data_ptr,
+static void print_data(int fd, const uint8_t *data_ptr, uint32_t tag,
         int type, int count, int indentation) {
     static int values_per_line[NUM_TYPES] = {
         [TYPE_BYTE]     = 16,
@@ -729,6 +730,8 @@ static void print_data(int fd, const uint8_t *data_ptr,
         [TYPE_RATIONAL] = 2,
     };
     size_t type_size = camera_metadata_type_size[type];
+    char value_string_tmp[CAMERA_METADATA_ENUM_STRING_MAX_SIZE];
+    uint32_t value;
 
     int lines = count / values_per_line[type];
     if (count % values_per_line[type] != 0) lines++;
@@ -743,12 +746,31 @@ static void print_data(int fd, const uint8_t *data_ptr,
 
             switch (type) {
                 case TYPE_BYTE:
-                    fdprintf(fd, "%hhu ",
-                            *(data_ptr + index));
+                    value = *(data_ptr + index);
+                    if (camera_metadata_enum_snprint(tag,
+                                                     value,
+                                                     value_string_tmp,
+                                                     sizeof(value_string_tmp))
+                        == OK) {
+                        fdprintf(fd, "%s ", value_string_tmp);
+                    } else {
+                        fdprintf(fd, "%hhu ",
+                                *(data_ptr + index));
+                    }
                     break;
                 case TYPE_INT32:
-                    fdprintf(fd, "%d ",
-                            *(int32_t*)(data_ptr + index));
+                    value =
+                            *(int32_t*)(data_ptr + index);
+                    if (camera_metadata_enum_snprint(tag,
+                                                     value,
+                                                     value_string_tmp,
+                                                     sizeof(value_string_tmp))
+                        == OK) {
+                        fdprintf(fd, "%s ", value_string_tmp);
+                    } else {
+                        fdprintf(fd, "%d ",
+                                *(int32_t*)(data_ptr + index));
+                    }
                     break;
                 case TYPE_FLOAT:
                     fdprintf(fd, "%0.2f ",
