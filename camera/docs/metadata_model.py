@@ -720,7 +720,7 @@ class InnerNamespace(Node):
     for i in self.entries:
       yield i
 
-class EnumValue(object):
+class EnumValue(Node):
   """
   A class corresponding to a <value> element within an <enum> within an <entry>.
 
@@ -729,16 +729,14 @@ class EnumValue(object):
     id: An optional numeric string, e.g. '0' or '0xFF'
     optional: A boolean
     notes: A string describing the notes, or None.
+    parent: An edge to the parent, always an Enum instance.
   """
-  def __init__(self, name, id=None, optional=False, notes=None):
+  def __init__(self, name, parent, id=None, optional=False, notes=None):
     self._name = name                    # str, e.g. 'ON' or 'OFF'
     self._id = id                        # int, e.g. '0'
     self._optional = optional            # bool
     self._notes = notes                  # None or str
-
-  @property
-  def name(self):
-    return self._name
+    self._parent = parent
 
   @property
   def id(self):
@@ -752,7 +750,10 @@ class EnumValue(object):
   def notes(self):
     return self._notes
 
-class Enum(object):
+  def _get_children(self):
+    return None
+
+class Enum(Node):
   """
   A class corresponding to an <enum> element within an <entry>.
 
@@ -762,17 +763,17 @@ class Enum(object):
   """
   def __init__(self, parent, values, ids={}, optionals=[], notes={}):
     self._values =                                                             \
-      [ EnumValue(val, ids.get(val), val in optionals, notes.get(val))         \
+      [ EnumValue(val, self, ids.get(val), val in optionals, notes.get(val))   \
         for val in values ]
 
     self._parent = parent
-
-  @property
-  def parent(self):
-    return self._parent
+    self._name = None
 
   @property
   def values(self):
+    return (i for i in self._values)
+
+  def _get_children(self):
     return (i for i in self._values)
 
 class Entry(Node):
@@ -910,7 +911,8 @@ class Entry(Node):
     return self._enum
 
   def _get_children(self):
-    return None
+    if self.enum:
+      yield self.enum
 
   def sort_children(self):
     return None

@@ -1775,3 +1775,5 @@ int camera_metadata_enum_snprint(uint32_t tag,
 }
 
 
+#define CAMERA_METADATA_ENUM_STRING_MAX_SIZE 23
+

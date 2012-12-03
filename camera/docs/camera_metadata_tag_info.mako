@@ -101,3 +101,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
     return ret;
 }
 
+<%
+  find_values = lambda x: isinstance(x, metadata_model.EnumValue)
+  enum_values = metadata.find_all(find_values)
+  enum_value_max_len = max([len(value.name) for value in enum_values]) + 1
+%>
+#define CAMERA_METADATA_ENUM_STRING_MAX_SIZE ${enum_value_max_len}
