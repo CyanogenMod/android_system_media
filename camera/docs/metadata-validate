@@ -16,12 +16,8 @@
 # limitations under the License.
 #
 
-xmllint=$(which xmllint)
-if [[ $? -ne 0 ]]
-then
-    echo "Missing xmllint binary, please install with 'sudo apt-get install libxml2-utils'" 1>&2
-    exit 1
-fi
+thisdir=$(dirname $(readlink -f $0))
+$thisdir/metadata-check-dependencies || exit 1
 
 if [[ $# -lt 1 ]]
 then
@@ -29,11 +25,9 @@ then
     exit
 fi
 
-thisdir=$(dirname $(readlink -f $0))
-
 schema=$thisdir/metadata_properties.xsd
 doc=$1
 
 xmllint --noout --schema $schema $out $doc || exit 1
-$thisdir/metadata_validate.py $doc || exit 1
+python $thisdir/metadata_validate.py $doc || exit 1
 
