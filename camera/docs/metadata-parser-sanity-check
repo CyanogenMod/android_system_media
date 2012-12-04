@@ -21,20 +21,15 @@
 # as the original parsed data.
 #
 
-tidy=$(which tidy)
-if [[ $? -ne 0 ]]
-then
-    echo "Missing tidy binary, please install with 'sudo apt-get install tidy'" 1>&2
-    exit 1
-fi
-
 thisdir=$(dirname $(readlink -f $0))
+
+$thisdir/metadata-check-dependencies || exit 1
 
 tmp_out=$(mktemp)
 tmp_tidy1=$(mktemp)
 tmp_tidy2=$(mktemp)
 
-$thisdir/metadata_parser_xml.py $thisdir/metadata_properties.xml $thisdir/metadata_template.mako > $tmp_out || exit 1
+python $thisdir/metadata_parser_xml.py $thisdir/metadata_properties.xml $thisdir/metadata_template.mako > $tmp_out || exit 1
 tidy -indent -xml -quiet $thisdir/metadata_properties.xml > $tmp_tidy1
 tidy -indent -xml -quiet $tmp_out > $tmp_tidy2
 
