@@ -34,6 +34,7 @@ metadata_properties.xml file.
 """
 
 import sys
+import itertools
 from collections import OrderedDict
 
 class Node(object):
@@ -429,41 +430,34 @@ class Metadata(Node):
 
   # 'controls', 'static' 'dynamic'. etc
   def _construct_kinds(self, section):
-
-    kinds_dict = self._dictionary_by_name(section.kinds)
-    for name, kind in kinds_dict.iteritems():
+    for kind in section.kinds:
       kind._leafs = []
       section.validate_tree()
 
-    for p in section._leafs:
-      kind = kinds_dict.get(p.kind, Kind(p.kind, section))
-      kinds_dict[p.kind] = kind
-      section.validate_tree()
+    group_entry_by_kind = itertools.groupby(section._leafs, lambda x: x.kind)
+    leaf_it = ((k, g) for k, g in group_entry_by_kind)
 
-      if p not in kind._leafs:
-        kind._leafs.append(p)
+    # allow multiple kinds with the same name. merge if adjacent
+    # e.g. dynamic,dynamic,static,static,dynamic -> dynamic,static,dynamic
+    # this helps maintain ABI compatibility when adding an entry in a new kind
+    for idx, (kind_name, entry_it) in enumerate(leaf_it):
+      if idx >= len(section._kinds):
+        kind = Kind(kind_name, section)
+        section._kinds.append(kind)
+        section.validate_tree()
 
-    if len(kinds_dict) > 3:
-      sec = section
-      if sec is not None:
-        sec_name = sec.name
-      else:
-        sec_name = "Unknown"
+      kind = section._kinds[idx]
 
-      print >> sys.stderr, ("ERROR: Kind '%s' has too many children(%d) " +    \
-                            "in section '%s'") %(name, len(kc), sec_name)
+      for p in entry_it:
+        if p not in kind._leafs:
+          kind._leafs.append(p)
 
-
-    for name, kind in kinds_dict.iteritems():
-
+    for kind in section._kinds:
       kind.validate_tree()
       self._construct_inner_namespaces(kind)
       kind.validate_tree()
       self._construct_entries(kind)
       kind.validate_tree()
-
-      if kind not in section.kinds:
-        section._kinds.append(kind)
 
       if not section.validate_tree():
         print >> sys.stderr, ("ERROR: Failed to validate tree in " +           \
@@ -604,6 +598,8 @@ class Section(Node):
     parent: An edge to the parent, which is always an OuterNamespace instance.
     description: A string description of the section, or None.
     kinds: A sequence of Kind children.
+    merged_kinds: A sequence of virtual Kind children,
+                  with each Kind's children merged by the kind.name
   """
   def __init__(self, name, parent, description=None, kinds=[]):
     self._name = name
@@ -634,6 +630,27 @@ class Section(Node):
 
   def _get_children(self):
     return (i for i in self.kinds)
+
+  @property
+  def merged_kinds(self):
+
+    def aggregate_by_name(acc, el):
+      existing = [i for i in acc if i.name == el.name]
+      if existing:
+        k = existing[0]
+      else:
+        k = Kind(el.name, el.parent)
+        acc.append(k)
+
+      k._namespaces.extend(el._namespaces)
+      k._entries.extend(el._entries)
+
+      return acc
+
+    new_kinds_lst = reduce(aggregate_by_name, self.kinds, [])
+
+    for k in new_kinds_lst:
+      yield k
 
 class Kind(Node):
   """
