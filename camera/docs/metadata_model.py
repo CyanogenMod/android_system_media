@@ -1154,22 +1154,23 @@ class MergedEntry(Entry):
     props_distinct = ['description', 'units', 'range', 'notes', 'tags', 'kind']
 
     for p in props_distinct:
+      p = '_' + p
       if entry.is_clone():
-        setattr(self, '_' + p, getattr(entry, p) or getattr(entry.entry, p))
+        setattr(self, p, getattr(entry, p) or getattr(entry.entry, p))
       else:
-        setattr(self, '_' + p, getattr(entry, p))
+        setattr(self, p, getattr(entry, p))
 
-    props_common = ['parent', 'name', 'name_short', 'container',
+    props_common = ['parent', 'name', 'container',
                     'container_sizes', 'enum',
                     'tuple_values',
                     'type',
                     'type_notes',
-                    'enum'
                    ]
 
     for p in props_common:
+      p = '_' + p
       if entry.is_clone():
-        setattr(self, '_' + p, getattr(entry.entry, p))
+        setattr(self, p, getattr(entry.entry, p))
       else:
-        setattr(self, '_' + p, getattr(entry, p))
+        setattr(self, p, getattr(entry, p))
 
