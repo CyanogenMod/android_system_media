@@ -1173,4 +1173,3 @@ class MergedEntry(Entry):
         setattr(self, p, getattr(entry.entry, p))
       else:
         setattr(self, p, getattr(entry, p))
-
