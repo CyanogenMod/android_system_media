@@ -42,6 +42,7 @@
 
     /* Entry type flair */
     .entry_type_name { color: darkgreen; font-weight: bold; }
+    .entry_type_name_enum:after { color: darkgreen; font-weight: bold; content:" (enum)" }
     .entry_type_enum_name { font-family: monospace; font-weight: bolder; }
     .entry_type_enum_notes:before { content:" - " }
     .entry_type_enum_value:before { content:" = " }
@@ -184,7 +185,11 @@
           <tr class="entry" id="${prop.kind}_${prop.name}">
             <td class="entry_name">${prop.name | wbr}</td>
             <td class="entry_type">
-              <span class="entry_type_name">${prop.type}</span>
+              % if prop.enum:
+                <span class="entry_type_name entry_type_name_enum">${prop.type}</span>
+              % else:
+                <span class="entry_type_name">${prop.type}</span>
+              % endif
               % if prop.container is not None:
                 <span class="entry_type_container">x</span>
               % endif
@@ -205,7 +210,7 @@
                 <div class="entry_type_notes">${prop.type_notes | wbr}</div>
               % endif
 
-              % if prop.type == 'enum':
+              % if prop.enum:
                 <ul class="entry_type_enum">
                   % for value in prop.enum.values:
                   <li>

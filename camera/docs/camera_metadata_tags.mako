@@ -81,7 +81,7 @@ typedef enum camera_metadata_tag {
 
 % for sec in find_all_sections(metadata):
   % for entry in find_unique_entries(sec):
-    % if entry.type == 'enum':
+    % if entry.enum:
 // ${entry.name | csym}
 typedef enum camera_metadata_enum_${csym(entry.name).lower()} {
       % for val in entry.enum.values:

@@ -124,7 +124,6 @@
                     <enumeration value="float" />
                     <enumeration value="double" />
                     <enumeration value="rational" />
-                    <enumeration value="enum" />
                 </restriction>
             </simpleType>
         </attribute>
@@ -134,6 +133,14 @@
                 <restriction base="string">
                     <enumeration value="array" />
                     <enumeration value="tuple" />
+                </restriction>
+            </simpleType>
+        </attribute>
+        <attribute name="enum">
+            <simpleType>
+                <restriction base="string">
+                    <enumeration value="true"></enumeration>
+                    <enumeration value="false"></enumeration>
                 </restriction>
             </simpleType>
         </attribute>

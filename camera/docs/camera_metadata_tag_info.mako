@@ -49,11 +49,7 @@ static tag_info_t ${path_name(sec) | csyml}[${path_name(sec) | csym}_END -
         ${path_name(sec) | csym}_START] = {
   % for entry in find_unique_entries(sec):
     [ ${entry.name | csym} - ${path_name(sec) | csym}_START ] =
-    % if entry.name == "android.scaler.availableFormats": #FIXME: support enums separately from the data type?
-    { ${'"%s",' %(entry.name_short) | pad(40)} ${"int32" | ctype_enum,ljust(11)} },
-    % else:
     { ${'"%s",' %(entry.name_short) | pad(40)} ${entry.type | ctype_enum,ljust(11)} },
-    % endif
   % endfor
 };
 
@@ -76,7 +72,7 @@ int camera_metadata_enum_snprint(uint32_t tag,
     % for sec in find_all_sections(metadata):
       % for idx,entry in enumerate(find_unique_entries(sec)):
         case ${entry.name | csym}: {
-          % if entry.type == 'enum':
+          % if entry.enum:
             switch (value) {
               % for val in entry.enum.values:
                 case ${entry.name | csym}_${val.name}:

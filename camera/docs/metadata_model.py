@@ -789,7 +789,7 @@ class Entry(Node):
           ancestor Kind#name
     container: The container attribute from <entry container="array">, or None.
     container_sizes: A sequence of size strings or None if container is None.
-    enum: An Enum instance if type is 'enum', None otherwise.
+    enum: An Enum instance if the enum attribute is true, None otherwise.
     tuple_values: A sequence of strings describing the tuple values,
                   None if container is not 'tuple'.
     description: A string description, or None.
@@ -821,7 +821,8 @@ class Entry(Node):
     Args (if container is 'tuple'):
       tuple_values: A list of tuple values, e.g. ['width', 'height']
 
-    Args (if type is 'enum'):
+    Args (if the 'enum' attribute is true):
+      enum: A boolean, True if this is an enum, False otherwise
       enum_values: A list of value strings, e.g. ['ON', 'OFF']
       enum_optionals: A list of optional enum values, e.g. ['OFF']
       enum_notes: A dictionary of value->notes strings.
@@ -950,7 +951,7 @@ class Entry(Node):
 
     self._type_notes = kwargs.get('type_notes')
 
-    if self._type == 'enum':
+    if kwargs.get('enum', False):
       self._enum = Enum(self, enum_values, enum_ids, enum_optionals, enum_notes)
     else:
       self._enum = None
@@ -1068,7 +1069,8 @@ class Clone(Entry):
     Args (if container is 'tuple'):
       tuple_values: A list of tuple values, e.g. ['width', 'height']
 
-    Args (if type is 'enum'):
+    Args (if the 'enum' attribute is true):
+      enum: A boolean, True if this is an enum, False otherwise
       enum_values: A list of value strings, e.g. ['ON', 'OFF']
       enum_optionals: A list of optional enum values, e.g. ['OFF']
       enum_notes: A dictionary of value->notes strings.
