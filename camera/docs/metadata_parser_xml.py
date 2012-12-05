@@ -146,7 +146,7 @@ class MetadataParserXml:
     #
     # Enum
     #
-    if entry['type'] == 'enum':
+    if entry.get('enum', 'false') == 'true':
 
       enum_values = []
       enum_optionals = []
@@ -171,6 +171,7 @@ class MetadataParserXml:
       d['enum_optionals'] = enum_optionals
       d['enum_notes'] = enum_notes
       d['enum_ids'] = enum_ids
+      d['enum'] = True
 
     #
     # Container (Array/Tuple)

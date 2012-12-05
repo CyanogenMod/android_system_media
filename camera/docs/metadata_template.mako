@@ -72,6 +72,9 @@
             </clone>
         % else:
             <entry name="${prop.name_short}" type="${prop.type}"
+          % if prop.enum:
+                enum="true"
+          % endif
           % if prop.type_notes is not None:
                 type_notes="${prop.type_notes}"
           % endif
@@ -93,7 +96,7 @@
                   % endfor
                 </tuple>
               % endif
-              % if prop.type == 'enum':
+              % if prop.enum:
                 <enum>
                   % for value in prop.enum.values:
                       <value

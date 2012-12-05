@@ -236,15 +236,15 @@ def validate_entries(soup):
                  %(fully_qualified_name(entry), find_kind(entry),       \
                  entry_container, entry_container))
 
-    typ = entry.attrs.get('type')
-    if typ == 'enum':
+    enum = entry.attrs.get('enum')
+    if enum and enum == 'true':
       if entry.enum is None:
         validate_error(("Entry '%s' in kind '%s' is missing enum")     \
                                % (fully_qualified_name(entry), find_kind(entry),
                                   ))
+        success = False
 
-      if typ == 'enum' and entry.enum is not None:
-
+      else:
         for value in entry.enum.find_all('value'):
           value_id = value.attrs.get('id')
 
@@ -256,6 +256,12 @@ def validate_entries(soup):
                                         " numeric.")                   \
                              %(fully_qualified_name(entry), value_id))
               success = False
+    else:
+      if entry.enum:
+        validate_error(("Entry '%s' kind '%s' has enum el, but no enum attr")  \
+                               % (fully_qualified_name(entry), find_kind(entry),
+                                  ))
+        success = False
 
   return success
 

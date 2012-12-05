@@ -235,12 +235,9 @@ def ctype_enum(what):
     ctype_enum('int32') == 'TYPE_INT32'
     ctype_enum('int64') == 'TYPE_INT64'
     ctype_enum('float') == 'TYPE_FLOAT'
-    ctype_enum('enum')  == 'TYPE_BYTE'
 
   Remarks:
     An enum is coerced to a byte since the rest of the camera_metadata
     code doesn't support enums directly yet.
   """
-  if what == 'enum':
-      return 'TYPE_BYTE'
   return 'TYPE_%s' %(what.upper())

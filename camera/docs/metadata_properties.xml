@@ -40,7 +40,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
   <namespace name="android">
     <section name="colorCorrection">
       <controls>
-        <entry name="mode" type="enum">
+        <entry name="mode" type="byte" enum="true">
           <enum>
             <value>TRANSFORM_MATRIX
               <notes>Use the android.colorCorrection.transform matrix
@@ -82,7 +82,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="control">
       <controls>
-        <entry name="aeAntibandingMode" type="enum">
+        <entry name="aeAntibandingMode" type="byte" enum="true">
           <enum>
             <value>OFF</value>
             <value>50HZ</value>
@@ -103,7 +103,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           compensation of -1</notes>
           <tag id="BC" />
         </entry>
-        <entry name="aeLock" type="enum">
+        <entry name="aeLock" type="byte" enum="true">
           <enum>
             <value>ON
             <notes>Autoexposure lock is enabled; the AE algorithm
@@ -120,7 +120,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           ON_AUTO_FLASH_REDEYE.</notes>
           <tag id="BC" />
         </entry>
-        <entry name="aeMode" type="enum">
+        <entry name="aeMode" type="byte" enum="true">
           <enum>
             <value>OFF
               <notes>Autoexposure is disabled; sensor.exposureTime
@@ -187,7 +187,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           of android.sensor.exposureTime</notes>
           <tag id="BC" />
         </entry>
-        <entry name="afMode" type="enum">
+        <entry name="afMode" type="byte" enum="true">
           <enum>
             <value>OFF
             <notes>The 3A routines do not control the lens;
@@ -277,7 +277,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           in the frame metadata</notes>
           <tag id="BC" />
         </entry>
-        <entry name="awbLock" type="enum">
+        <entry name="awbLock" type="byte" enum="true">
           <enum>
             <value>ON
             <notes>Auto-whitebalance lock is enabled; the AWB
@@ -295,7 +295,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           setting</notes>
           <tag id="BC" />
         </entry>
-        <entry name="awbMode" type="enum">
+        <entry name="awbMode" type="byte" enum="true">
           <enum>
             <value>OFF</value>
             <value>AUTO</value>
@@ -336,7 +336,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           in the frame metadata</notes>
           <tag id="BC" />
         </entry>
-        <entry name="captureIntent" type="enum">
+        <entry name="captureIntent" type="byte" enum="true">
           <enum>
             <value>CUSTOM
             <notes>This request doesn't fall into the other
@@ -368,7 +368,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <notes>Only used if android.control.mode != OFF.</notes>
           <tag id="BC" />
         </entry>
-        <entry name="effectMode" type="enum">
+        <entry name="effectMode" type="byte" enum="true">
           <enum>
             <value>OFF</value>
             <value optional="true">MONO</value>
@@ -385,7 +385,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>android.control.availableEffects</range>
           <tag id="BC" />
         </entry>
-        <entry name="mode" type="enum">
+        <entry name="mode" type="byte" enum="true">
           <enum>
             <value>OFF
             <notes>Full application control of pipeline. All 3A
@@ -410,7 +410,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>all must be supported</range>
           <tag id="BC" />
         </entry>
-        <entry name="sceneMode" type="enum">
+        <entry name="sceneMode" type="byte" enum="true">
           <enum>
             <value id="0">UNSUPPORTED</value>
             <value>FACE_PRIORITY
@@ -443,7 +443,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>android.control.availableSceneModes</range>
           <tag id="BC" />
         </entry>
-        <entry name="videoStabilizationMode" type="enum">
+        <entry name="videoStabilizationMode" type="byte" enum="true">
           <enum>
             <value>OFF</value>
             <value>ON</value>
@@ -601,7 +601,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <clone entry="android.control.aeRegions" kind="controls">
         </clone>
-        <entry name="aeState" type="enum">
+        <entry name="aeState" type="byte" enum="true">
           <enum>
             <value>INACTIVE
             <notes>AE is off</notes></value>
@@ -635,7 +635,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
         <clone entry="android.control.afRegions" kind="controls">
         </clone>
-        <entry name="afState" type="enum">
+        <entry name="afState" type="byte" enum="true">
           <enum>
             <value>INACTIVE
             <notes>AF off or has not yet tried to scan/been asked
@@ -677,7 +677,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
         <clone entry="android.control.awbRegions" kind="controls">
         </clone>
-        <entry name="awbState" type="enum">
+        <entry name="awbState" type="byte" enum="true">
           <enum>
             <value>INACTIVE
             <notes>AWB is not in auto mode</notes></value>
@@ -702,7 +702,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="demosaic">
       <controls>
-        <entry name="mode" type="enum">
+        <entry name="mode" type="byte" enum="true">
           <enum>
             <value>FAST
             <notes>Minimal or no slowdown of frame rate compared to
@@ -719,7 +719,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="edge">
       <controls>
-        <entry name="mode" type="enum">
+        <entry name="mode" type="byte" enum="true">
           <enum>
             <value>OFF
             <notes>No edge enhancement is applied</notes></value>
@@ -763,7 +763,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           duration).</notes>
           <tag id="V1" />
         </entry>
-        <entry name="mode" type="enum">
+        <entry name="mode" type="byte" enum="true">
           <enum>
             <value>OFF
             <notes>Do not fire the flash for this
@@ -822,7 +822,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <clone entry="android.flash.firingTime" kind="controls">
         </clone>
         <clone entry="android.flash.mode" kind="controls"></clone>
-        <entry name="state" type="enum">
+        <entry name="state" type="byte" enum="true">
           <enum>
             <value>UNAVAILABLE
             <notes>No flash on camera</notes></value>
@@ -843,7 +843,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="geometric">
       <controls>
-        <entry name="mode" type="enum">
+        <entry name="mode" type="byte" enum="true">
           <enum>
             <value>OFF
             <notes>No geometric correction is
@@ -869,7 +869,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="hotPixel">
       <controls>
-        <entry name="mode" type="enum">
+        <entry name="mode" type="byte" enum="true">
           <enum>
             <value>OFF
             <notes>No hot pixel correction can be
@@ -1050,7 +1050,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
           <tag id="V1" />
         </entry>
-        <entry name="opticalStabilizationMode" type="enum">
+        <entry name="opticalStabilizationMode" type="byte" enum="true">
           <enum>
             <value>OFF</value>
             <value optional="true">ON</value>
@@ -1192,7 +1192,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="V1" />
           </entry>
         </namespace>
-        <entry name="facing" type="enum">
+        <entry name="facing" type="byte" enum="true">
           <enum>
             <value>FRONT</value>
             <value>BACK</value>
@@ -1256,7 +1256,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         kind="controls">
           <tag id="V1" />
         </clone>
-        <entry name="state" type="enum">
+        <entry name="state" type="byte" enum="true">
           <enum>
             <value>STATIONARY</value>
           </enum>
@@ -1267,7 +1267,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="noiseReduction">
       <controls>
-        <entry name="mode" type="enum">
+        <entry name="mode" type="byte" enum="true">
           <enum>
             <value>OFF
             <notes>No noise reduction is applied</notes></value>
@@ -1362,7 +1362,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <notes>Only meaningful when android.request.type ==
           REPROCESS. Ignored otherwise</notes>
         </entry>
-        <entry name="metadataMode" type="enum">
+        <entry name="metadataMode" type="byte" enum="true">
           <enum>
             <value>NONE
             <notes>No metadata should be produced on output, except
@@ -1392,7 +1392,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           still be captured for metadata and statistics production,
           and the lens and flash must operate as requested.</notes>
         </entry>
-        <entry name="type" type="enum">
+        <entry name="type" type="byte" enum="true">
           <enum>
             <value>CAPTURE
             <notes>Capture a new image from the imaging hardware,
@@ -1473,7 +1473,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </controls>
       <static>
-        <entry name="availableFormats" type="enum"
+        <entry name="availableFormats" type="int32" enum="true"
         type_notes="values from HAL_PIXEL_FORMAT_* in /system/core/include/system/graphics.h"
         container="array">
           <array>
@@ -1652,7 +1652,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="BC" />
             <tag id="V1" />
           </entry>
-          <entry name="colorFilterArrangement" type="enum">
+          <entry name="colorFilterArrangement" type="byte" enum="true">
             <enum>
               <value>RGGB</value>
               <value>GRBG</value>
@@ -1844,7 +1844,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>0,90,180,270</range>
           <tag id="BC" />
         </entry>
-        <entry name="referenceIlluminant1" type="enum">
+        <entry name="referenceIlluminant1" type="byte" enum="true">
           <enum>
             <value id="1">DAYLIGHT</value>
             <value id="2">FLUORESCENT</value>
@@ -1904,7 +1904,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="shading">
       <controls>
-        <entry name="mode" type="enum">
+        <entry name="mode" type="byte" enum="true">
           <enum>
             <value>OFF
             <notes>No shading correction is applied</notes></value>
@@ -1933,7 +1933,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="statistics">
       <controls>
-        <entry name="faceDetectMode" type="enum">
+        <entry name="faceDetectMode" type="byte" enum="true">
           <enum>
             <value>OFF</value>
             <value>SIMPLE
@@ -1949,7 +1949,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.statistics.availableFaceDetectModes</range>
           <tag id="BC" />
         </entry>
-        <entry name="histogramMode" type="enum">
+        <entry name="histogramMode" type="byte" enum="true">
           <enum>
             <value>OFF</value>
             <value>ON</value>
@@ -1958,7 +1958,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           generation</description>
           <tag id="V1" />
         </entry>
-        <entry name="sharpnessMapMode" type="enum">
+        <entry name="sharpnessMapMode" type="byte" enum="true">
           <enum>
             <value>OFF</value>
             <value>ON</value>
@@ -2123,7 +2123,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           0.25, 0.3 -&gt; 0.5, 0.5 -&gt; 0.64</notes>
           <tag id="DNG" />
         </entry>
-        <entry name="mode" type="enum">
+        <entry name="mode" type="byte" enum="true">
           <enum>
             <value>CONTRAST_CURVE
             <notes>Use the tone mapping curve specified in
