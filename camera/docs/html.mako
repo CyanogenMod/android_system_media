@@ -137,7 +137,7 @@
       <tr class="description"><td>${section.description}</td></tr>
     % endif
 
-    % for kind in section.kinds: # dynamic,static,controls
+    % for kind in section.merged_kinds: # dynamic,static,controls
       <tr><td colspan="7" class="kind">${kind.name}</td></tr>
 
       <thead>
