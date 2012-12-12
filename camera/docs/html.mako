@@ -256,7 +256,7 @@
             </td>
 
             <td class="entry_tags">
-            % if list(prop.tags):
+            % if next(prop.tags, None):
               <ul class="entry_tags">
               % for tag in prop.tags:
                   <li><a href="#tag_${tag.id}">${tag.id}</a></li>
