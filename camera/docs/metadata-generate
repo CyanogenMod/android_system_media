@@ -33,7 +33,7 @@ function gen_file() {
     local in=$thisdir/$1
     local out=$thisdir/$2
 
-    python $thisdir/metadata_parser_xml.py $thisdir/metadata_properties.xml $in > $out
+    python $thisdir/metadata_parser_xml.py $thisdir/metadata_properties.xml $in $out
 
     local succ=$?
 

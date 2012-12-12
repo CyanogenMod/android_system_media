@@ -627,4 +627,3 @@ int camera_metadata_enum_snprint(uint32_t tag,
                                  uint32_t value,
                                  char *dst,
                                  size_t size);
-

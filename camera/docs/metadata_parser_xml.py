@@ -21,8 +21,8 @@ A parser for metadata_properties.xml can also render the resulting model
 over a Mako template.
 
 Usage:
-  metadata_parser_xml.py <filename.xml> <template.mako>
-  - outputs the resulting template to stdout
+  metadata_parser_xml.py <filename.xml> <template.mako> [<output_file>]
+  - outputs the resulting template to output_file (stdout if none specified)
 
 Module:
   The parser is also available as a module import (MetadataParserXml) to use
@@ -253,14 +253,16 @@ class MetadataParserXml:
 #####################
 
 if __name__ == "__main__":
-  if len(sys.argv) <= 1:
-    print >> sys.stderr, "Usage: %s <filename.xml> <template.mako>"            \
-                        % (sys.argv[0])
+  if len(sys.argv) <= 2:
+    print >> sys.stderr,                                                       \
+           "Usage: %s <filename.xml> <template.mako> [<output_file>]"          \
+           % (sys.argv[0])
     sys.exit(0)
 
   file_name = sys.argv[1]
   template_name = sys.argv[2]
+  output_name = sys.argv[3] if len(sys.argv) > 3 else None
   parser = MetadataParserXml(file_name)
-  parser.render(template_name)
+  parser.render(template_name, output_name)
 
   sys.exit(0)
