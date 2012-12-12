@@ -25,12 +25,26 @@
 
 thisdir=$(dirname $(readlink -f $0))
 
+function relpath() {
+    python -c "import os.path; print os.path.relpath('$1', '$PWD')"
+}
+
 function gen_file() {
     local in=$thisdir/$1
     local out=$thisdir/$2
 
     python $thisdir/metadata_parser_xml.py $thisdir/metadata_properties.xml $in > $out
-    return $?
+
+    local succ=$?
+
+    if [[ $succ -eq 0 ]]
+    then
+        echo "OK: Generated $(relpath "$out")"
+    else
+        echo "FAIL: Errors while generating $(relpath "$out")" >& 2
+    fi
+
+    return $succ
 }
 
 $thisdir/metadata-check-dependencies || exit 1

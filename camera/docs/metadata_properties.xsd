@@ -37,11 +37,13 @@
     </complexType>
 
     <complexType name="SectionType">
-        <all>
-            <element name="controls" type="tns:SectionKindType" maxOccurs="1" minOccurs="0"></element>
-            <element name="static" type="tns:SectionKindType" maxOccurs="1" minOccurs="0"></element>
-            <element name="dynamic" type="tns:SectionKindType" maxOccurs="1" minOccurs="0"></element>
-        </all>
+        <sequence>
+            <choice maxOccurs="unbounded">
+                <element name="controls" type="tns:SectionKindType" maxOccurs="unbounded" minOccurs="0"></element>
+                <element name="static" type="tns:SectionKindType" maxOccurs="unbounded" minOccurs="0"></element>
+                <element name="dynamic" type="tns:SectionKindType" maxOccurs="unbounded" minOccurs="0"></element>
+            </choice>
+        </sequence>
         <attribute name="name" type="string" use="required"></attribute>
     </complexType>
 
