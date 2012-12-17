@@ -18,6 +18,7 @@
 #define ANDROID_AUDIO_PRIMITIVES_H
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/cdefs.h>
 
 __BEGIN_DECLS
