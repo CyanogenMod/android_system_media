@@ -42,7 +42,8 @@ typedef struct {
 typedef struct SNDFILE_ SNDFILE;
 
 // Access modes
-#define SFM_READ   1
+#define SFM_READ    1
+#define SFM_WRITE   2
 
 // Format
 #define SF_FORMAT_TYPEMASK  1
@@ -59,6 +60,9 @@ void sf_close(SNDFILE *handle);
 
 // Read interleaved frames and return actual number of frames read
 sf_count_t sf_readf_short(SNDFILE *handle, short *ptr, sf_count_t desired);
+
+// Write interleaved frames and return actual number of frames written
+sf_count_t sf_writef_short(SNDFILE *handle, const short *ptr, sf_count_t desired);
 
 __END_DECLS
 
