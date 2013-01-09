@@ -35,7 +35,9 @@
 #define LOG_FFT_SIZE 10
 #define MAX_FFT_SIZE (1 << LOG_FFT_SIZE)
 
-static const int32_t twiddle[MAX_FFT_SIZE / 4] = {
+// Actually int32_t, but declare as uint32_t to avoid warnings due to overflow.
+// Be sure to cast all accesses before use, for example "(int32_t) twiddle[...]".
+static const uint32_t twiddle[MAX_FFT_SIZE / 4] = {
     0x00008000, 0xff378001, 0xfe6e8002, 0xfda58006, 0xfcdc800a, 0xfc13800f,
     0xfb4a8016, 0xfa81801e, 0xf9b88027, 0xf8ef8032, 0xf827803e, 0xf75e804b,
     0xf6958059, 0xf5cd8068, 0xf5058079, 0xf43c808b, 0xf374809e, 0xf2ac80b2,
@@ -132,7 +134,7 @@ void fixed_fft(int n, int32_t *v)
         for (r = 1; r < p; ++r) {
             int32_t w = MAX_FFT_SIZE / 4 - (r << scale);
             i = w >> 31;
-            w = twiddle[(w ^ i) - i] ^ (i << 16);
+            w = ((int32_t) twiddle[(w ^ i) - i]) ^ (i << 16);
             for (i = r; i < n; i += p << 1) {
                 int32_t x = half(v[i]);
                 int32_t y = mult(w, v[i + p]);
@@ -157,7 +159,7 @@ void fixed_fft_real(int n, int32_t *v)
         int32_t z = half(v[n - i]);
         int32_t y = z - (x ^ 0xFFFF);
         x = half(x + (z ^ 0xFFFF));
-        y = mult(y, twiddle[i << scale]);
+        y = mult(y, ((int32_t) twiddle[i << scale]));
         v[i] = x - y;
         v[n - i] = (x + y) ^ 0xFFFF;
     }
