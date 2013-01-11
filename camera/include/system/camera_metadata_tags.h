@@ -323,8 +323,8 @@ typedef enum camera_metadata_enum_android_control_ae_antibanding_mode {
 
 // ANDROID_CONTROL_AE_LOCK
 typedef enum camera_metadata_enum_android_control_ae_lock {
-    ANDROID_CONTROL_AE_LOCK_ON,
     ANDROID_CONTROL_AE_LOCK_OFF,
+    ANDROID_CONTROL_AE_LOCK_ON,
 } camera_metadata_enum_android_control_ae_lock_t;
 
 // ANDROID_CONTROL_AE_MODE
@@ -348,8 +348,8 @@ typedef enum camera_metadata_enum_android_control_af_mode {
 
 // ANDROID_CONTROL_AWB_LOCK
 typedef enum camera_metadata_enum_android_control_awb_lock {
-    ANDROID_CONTROL_AWB_LOCK_ON,
     ANDROID_CONTROL_AWB_LOCK_OFF,
+    ANDROID_CONTROL_AWB_LOCK_ON,
 } camera_metadata_enum_android_control_awb_lock_t;
 
 // ANDROID_CONTROL_AWB_MODE

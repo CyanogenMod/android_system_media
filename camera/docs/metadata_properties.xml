@@ -105,13 +105,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="aeLock" type="byte" enum="true">
           <enum>
+            <value>OFF
+            <notes>Autoexposure lock is disabled; the AE algorithm
+            is free to update its parameters.</notes></value>
             <value>ON
             <notes>Autoexposure lock is enabled; the AE algorithm
             must not update the exposure and sensitivity parameters
             while the lock is active</notes></value>
-            <value>OFF
-            <notes>Autoexposure lock is disabled; the AE algorithm
-            is free to update its parameters.</notes></value>
           </enum>
           <description>Whether AE is currently locked to its latest
           calculated values</description>
@@ -279,14 +279,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="awbLock" type="byte" enum="true">
           <enum>
-            <value>ON
-            <notes>Auto-whitebalance lock is enabled; the AWB
-            algorithm must not update the exposure and sensitivity
-            parameters while the lock is active</notes></value>
             <value>OFF
             <notes>Auto-whitebalance lock is disabled; the AWB
             algorithm is free to update its parameters if in AUTO
             mode.</notes></value>
+            <value>ON
+            <notes>Auto-whitebalance lock is enabled; the AWB
+            algorithm must not update the exposure and sensitivity
+            parameters while the lock is active</notes></value>
           </enum>
           <description>Whether AWB is currently locked to its
           latest calculated values</description>
@@ -2092,13 +2092,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="tonemap">
       <controls>
-        <entry name="curveBlue" type="byte">
+        <entry name="curveBlue" type="float">
           <description>Table mapping blue input values to output
           values</description>
           <units>same as android.tonemap.curveRed</units>
           <range>same as android.tonemap.curveRed</range>
         </entry>
-        <entry name="curveGreen" type="byte">
+        <entry name="curveGreen" type="float">
           <description>Table mapping green input values to output
           values</description>
           <units>same as android.tonemap.curveRed</units>

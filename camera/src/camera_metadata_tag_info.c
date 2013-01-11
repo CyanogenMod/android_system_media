@@ -489,9 +489,9 @@ static tag_info_t android_statistics_info[ANDROID_STATISTICS_INFO_END -
 static tag_info_t android_tonemap[ANDROID_TONEMAP_END -
         ANDROID_TONEMAP_START] = {
     [ ANDROID_TONEMAP_CURVE_BLUE - ANDROID_TONEMAP_START ] =
-    { "curveBlue",                     TYPE_BYTE   },
+    { "curveBlue",                     TYPE_FLOAT  },
     [ ANDROID_TONEMAP_CURVE_GREEN - ANDROID_TONEMAP_START ] =
-    { "curveGreen",                    TYPE_BYTE   },
+    { "curveGreen",                    TYPE_FLOAT  },
     [ ANDROID_TONEMAP_CURVE_RED - ANDROID_TONEMAP_START ] =
     { "curveRed",                      TYPE_FLOAT  },
     [ ANDROID_TONEMAP_MODE - ANDROID_TONEMAP_START ] =
@@ -585,12 +585,12 @@ int camera_metadata_enum_snprint(uint32_t tag,
         }
         case ANDROID_CONTROL_AE_LOCK: {
             switch (value) {
-                case ANDROID_CONTROL_AE_LOCK_ON:
-                    msg = "ON";
-                    ret = 0;
-                    break;
                 case ANDROID_CONTROL_AE_LOCK_OFF:
                     msg = "OFF";
+                    ret = 0;
+                    break;
+                case ANDROID_CONTROL_AE_LOCK_ON:
+                    msg = "ON";
                     ret = 0;
                     break;
                 default:
@@ -667,12 +667,12 @@ int camera_metadata_enum_snprint(uint32_t tag,
         }
         case ANDROID_CONTROL_AWB_LOCK: {
             switch (value) {
-                case ANDROID_CONTROL_AWB_LOCK_ON:
-                    msg = "ON";
-                    ret = 0;
-                    break;
                 case ANDROID_CONTROL_AWB_LOCK_OFF:
                     msg = "OFF";
+                    ret = 0;
+                    break;
+                case ANDROID_CONTROL_AWB_LOCK_ON:
+                    msg = "ON";
                     ret = 0;
                     break;
                 default:
