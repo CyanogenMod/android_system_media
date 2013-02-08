@@ -318,6 +318,33 @@ static int path_apply(struct audio_route *ar, struct mixer_path *path)
     return 0;
 }
 
+static int path_reset(struct audio_route *ar, struct mixer_path *path)
+{
+    unsigned int i;
+    unsigned int j;
+    unsigned int ctl_index;
+
+    for (i = 0; i < path->length; i++) {
+        struct mixer_ctl *ctl = path->setting[i].ctl;
+
+        /* locate the mixer ctl in the list */
+        for (ctl_index = 0; ctl_index < ar->num_mixer_ctls; ctl_index++) {
+            if (ar->mixer_state[ctl_index].ctl == ctl)
+                break;
+        }
+
+        /* reset the value(s) */
+        for (j = 0; j < ar->mixer_state[ctl_index].num_values; j++) {
+            ar->mixer_state[ctl_index].new_value[j] = ar->mixer_state[ctl_index].reset_value[j];
+            if (ar->mixer_state[ctl_index].reset_linked)
+                break;
+        }
+        ar->mixer_state[ctl_index].new_linked = ar->mixer_state[ctl_index].reset_linked;
+    }
+
+    return 0;
+}
+
 /* mixer helper function */
 static int mixer_enum_string_to_value(struct mixer_ctl *ctl, const char *string)
 {
@@ -602,6 +629,27 @@ int audio_route_apply_path(struct audio_route *ar, const char *name)
     }
 
     path_apply(ar, path);
+
+    return 0;
+}
+
+/* Reset an audio route path by name */
+int audio_route_reset_path(struct audio_route *ar, const char *name)
+{
+    struct mixer_path *path;
+
+    if (!ar) {
+        ALOGE("invalid audio_route");
+        return -1;
+    }
+
+    path = path_get_by_name(ar, name);
+    if (!path) {
+        ALOGE("unable to find path '%s'", name);
+        return -1;
+    }
+
+    path_reset(ar, path);
 
     return 0;
 }
