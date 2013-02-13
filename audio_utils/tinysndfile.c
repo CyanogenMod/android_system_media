@@ -44,7 +44,8 @@ static int isLittleEndian(void)
     return *((const char *) &one) == 1;
 }
 
-static void swab(short *ptr, size_t numToSwap)
+// "swab" conflicts with OS X <string.h>
+static void my_swab(short *ptr, size_t numToSwap)
 {
     while (numToSwap > 0) {
         *ptr = little2u((unsigned char *) ptr);
@@ -214,7 +215,7 @@ sf_count_t sf_readf_short(SNDFILE *handle, short *ptr, sf_count_t desiredFrames)
         break;
     case SF_FORMAT_PCM_16:
         if (!isLittleEndian())
-            swab(ptr, actualFrames * handle->info.channels);
+            my_swab(ptr, actualFrames * handle->info.channels);
         break;
     }
     return actualFrames;
@@ -239,7 +240,7 @@ sf_count_t sf_writef_short(SNDFILE *handle, const short *ptr, sf_count_t desired
         } else {
             handle->temp = realloc(handle->temp, desiredBytes);
             memcpy(handle->temp, ptr, desiredBytes);
-            swab((short *) handle->temp, desiredFrames * handle->info.channels);
+            my_swab((short *) handle->temp, desiredFrames * handle->info.channels);
             actualBytes = fwrite(handle->temp, sizeof(char), desiredBytes, handle->stream);
         }
         break;
