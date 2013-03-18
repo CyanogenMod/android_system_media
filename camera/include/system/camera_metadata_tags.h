@@ -110,8 +110,10 @@ typedef enum camera_metadata_tag {
     ANDROID_CONTROL_AE_MODE,
     ANDROID_CONTROL_AE_REGIONS,
     ANDROID_CONTROL_AE_TARGET_FPS_RANGE,
+    ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER,
     ANDROID_CONTROL_AF_MODE,
     ANDROID_CONTROL_AF_REGIONS,
+    ANDROID_CONTROL_AF_TRIGGER,
     ANDROID_CONTROL_AWB_LOCK,
     ANDROID_CONTROL_AWB_MODE,
     ANDROID_CONTROL_AWB_REGIONS,
@@ -336,6 +338,12 @@ typedef enum camera_metadata_enum_android_control_ae_mode {
     ANDROID_CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE,
 } camera_metadata_enum_android_control_ae_mode_t;
 
+// ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER
+typedef enum camera_metadata_enum_android_control_ae_precapture_trigger {
+    ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER_IDLE,
+    ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER_START,
+} camera_metadata_enum_android_control_ae_precapture_trigger_t;
+
 // ANDROID_CONTROL_AF_MODE
 typedef enum camera_metadata_enum_android_control_af_mode {
     ANDROID_CONTROL_AF_MODE_OFF,
@@ -345,6 +353,13 @@ typedef enum camera_metadata_enum_android_control_af_mode {
     ANDROID_CONTROL_AF_MODE_CONTINUOUS_PICTURE,
     ANDROID_CONTROL_AF_MODE_EDOF,
 } camera_metadata_enum_android_control_af_mode_t;
+
+// ANDROID_CONTROL_AF_TRIGGER
+typedef enum camera_metadata_enum_android_control_af_trigger {
+    ANDROID_CONTROL_AF_TRIGGER_IDLE,
+    ANDROID_CONTROL_AF_TRIGGER_START,
+    ANDROID_CONTROL_AF_TRIGGER_CANCEL,
+} camera_metadata_enum_android_control_af_trigger_t;
 
 // ANDROID_CONTROL_AWB_LOCK
 typedef enum camera_metadata_enum_android_control_awb_lock {
