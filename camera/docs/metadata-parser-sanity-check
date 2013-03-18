@@ -21,13 +21,13 @@
 # as the original parsed data.
 #
 
-thisdir=$(dirname $(readlink -f $0))
+thisdir=$(cd "$(dirname "$0")"; pwd)
 
 $thisdir/metadata-check-dependencies || exit 1
 
-tmp_out=$(mktemp)
-tmp_tidy1=$(mktemp)
-tmp_tidy2=$(mktemp)
+tmp_out=$(mktemp -t tmp.XXXXXXXXXX)
+tmp_tidy1=$(mktemp -t tmp.XXXXXXXXXX)
+tmp_tidy2=$(mktemp -t tmp.XXXXXXXXXX)
 
 python $thisdir/metadata_parser_xml.py $thisdir/metadata_properties.xml $thisdir/metadata_template.mako $tmp_out || exit 1
 tidy -indent -xml -quiet $thisdir/metadata_properties.xml > $tmp_tidy1

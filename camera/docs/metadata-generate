@@ -23,7 +23,7 @@
 #   ../src/camera_metadata_tags.h
 #
 
-thisdir=$(dirname $(readlink -f $0))
+thisdir=$(cd "$(dirname "$0")"; pwd)
 
 function relpath() {
     python -c "import os.path; print os.path.relpath('$1', '$PWD')"
