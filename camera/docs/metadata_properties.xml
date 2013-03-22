@@ -187,6 +187,28 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           of android.sensor.exposureTime</notes>
           <tag id="BC" />
         </entry>
+        <entry name="aePrecaptureTrigger" type="byte" enum="true">
+          <enum>
+            <value>IDLE
+              <notes>The trigger is idle.</notes>
+            </value>
+            <value>START
+              <notes>The precapture metering sequence
+              must be started. The exact effect of the precapture
+              trigger depends on the current AE mode and
+              state.</notes>
+            </value>
+          </enum>
+          <description>Whether the HAL must trigger precapture
+          metering.</description>
+          <notes>This entry is normally set to IDLE, or is not
+          included at all in the request settings. When included and
+          set to START, the HAL must trigger the autoexposure
+          precapture metering sequence. The effect of AE precapture
+          trigger depends on the current AE mode and state; see the
+          camera HAL device v3 header for details.</notes>
+          <tag id="BC" />
+        </entry>
         <entry name="afMode" type="byte" enum="true">
           <enum>
             <value>OFF
@@ -275,6 +297,29 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.scaler.cropRegion, the HAL should ignore the
           sections outside the region and output the used sections
           in the frame metadata</notes>
+          <tag id="BC" />
+        </entry>
+        <entry name="afTrigger" type="byte" enum="true">
+          <enum>
+            <value>IDLE
+              <notes>The trigger is idle.</notes>
+            </value>
+            <value>START
+              <notes>Autofocus must trigger now.</notes>
+            </value>
+            <value>CANCEL
+              <notes>Autofocus must return to initial
+              state, and cancel any active trigger.</notes>
+            </value>
+          </enum>
+          <description>Whether the HAL must trigger autofocus.</description>
+          <notes>This entry is normally set to IDLE, or is not
+          included at all in the request settings. When included and
+          set to START, the HAL must trigger the autofocus
+          algorithm. The effect of AF trigger depends on the current
+          AF mode and state; see the camera HAL device v3 header for
+          details. When set to CANCEL, the HAL must cancel any active
+          trigger, and return to initial AF state.</notes>
           <tag id="BC" />
         </entry>
         <entry name="awbLock" type="byte" enum="true">

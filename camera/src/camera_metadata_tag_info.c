@@ -124,10 +124,14 @@ static tag_info_t android_control[ANDROID_CONTROL_END -
     { "aeRegions",                     TYPE_INT32  },
     [ ANDROID_CONTROL_AE_TARGET_FPS_RANGE - ANDROID_CONTROL_START ] =
     { "aeTargetFpsRange",              TYPE_INT32  },
+    [ ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER - ANDROID_CONTROL_START ] =
+    { "aePrecaptureTrigger",           TYPE_BYTE   },
     [ ANDROID_CONTROL_AF_MODE - ANDROID_CONTROL_START ] =
     { "afMode",                        TYPE_BYTE   },
     [ ANDROID_CONTROL_AF_REGIONS - ANDROID_CONTROL_START ] =
     { "afRegions",                     TYPE_INT32  },
+    [ ANDROID_CONTROL_AF_TRIGGER - ANDROID_CONTROL_START ] =
+    { "afTrigger",                     TYPE_BYTE   },
     [ ANDROID_CONTROL_AWB_LOCK - ANDROID_CONTROL_START ] =
     { "awbLock",                       TYPE_BYTE   },
     [ ANDROID_CONTROL_AWB_MODE - ANDROID_CONTROL_START ] =
@@ -631,6 +635,21 @@ int camera_metadata_enum_snprint(uint32_t tag,
         case ANDROID_CONTROL_AE_TARGET_FPS_RANGE: {
             break;
         }
+        case ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER: {
+            switch (value) {
+                case ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER_IDLE:
+                    msg = "IDLE";
+                    ret = 0;
+                    break;
+                case ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER_START:
+                    msg = "START";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
         case ANDROID_CONTROL_AF_MODE: {
             switch (value) {
                 case ANDROID_CONTROL_AF_MODE_OFF:
@@ -663,6 +682,25 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_CONTROL_AF_REGIONS: {
+            break;
+        }
+        case ANDROID_CONTROL_AF_TRIGGER: {
+            switch (value) {
+                case ANDROID_CONTROL_AF_TRIGGER_IDLE:
+                    msg = "IDLE";
+                    ret = 0;
+                    break;
+                case ANDROID_CONTROL_AF_TRIGGER_START:
+                    msg = "START";
+                    ret = 0;
+                    break;
+                case ANDROID_CONTROL_AF_TRIGGER_CANCEL:
+                    msg = "CANCEL";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
             break;
         }
         case ANDROID_CONTROL_AWB_LOCK: {

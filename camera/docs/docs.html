@@ -97,8 +97,10 @@
         <li><a href="#controls_android.control.aeMode">android.control.aeMode</a> (controls)</li>
         <li><a href="#controls_android.control.aeRegions">android.control.aeRegions</a> (controls)</li>
         <li><a href="#controls_android.control.aeTargetFpsRange">android.control.aeTargetFpsRange</a> (controls)</li>
+        <li><a href="#controls_android.control.aePrecaptureTrigger">android.control.aePrecaptureTrigger</a> (controls)</li>
         <li><a href="#controls_android.control.afMode">android.control.afMode</a> (controls)</li>
         <li><a href="#controls_android.control.afRegions">android.control.afRegions</a> (controls)</li>
+        <li><a href="#controls_android.control.afTrigger">android.control.afTrigger</a> (controls)</li>
         <li><a href="#controls_android.control.awbLock">android.control.awbLock</a> (controls)</li>
         <li><a href="#controls_android.control.awbMode">android.control.awbMode</a> (controls)</li>
         <li><a href="#controls_android.control.awbRegions">android.control.awbRegions</a> (controls)</li>
@@ -872,6 +874,58 @@
           </tr> <!-- end of entry -->
         
                 
+          <tr class="entry" id="controls_android.control.aePrecaptureTrigger">
+            <td class="entry_name">android.<wbr>control.<wbr>ae<wbr>Precapture<wbr>Trigger</td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">IDLE</span>
+                    <span class="entry_type_enum_notes">The trigger is idle.<wbr></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">START</span>
+                    <span class="entry_type_enum_notes">The precapture metering sequence
+              must be started.<wbr> The exact effect of the precapture
+              trigger depends on the current AE mode and
+              state.<wbr></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              Whether the HAL must trigger precapture
+          metering.<wbr>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+              This entry is normally set to IDLE,<wbr> or is not
+          included at all in the request settings.<wbr> When included and
+          set to START,<wbr> the HAL must trigger the autoexposure
+          precapture metering sequence.<wbr> The effect of AE precapture
+          trigger depends on the current AE mode and state; see the
+          camera HAL device v3 header for details.<wbr>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+                
           <tr class="entry" id="controls_android.control.afMode">
             <td class="entry_name">android.<wbr>control.<wbr>af<wbr>Mode</td>
             <td class="entry_type">
@@ -1019,6 +1073,60 @@
           android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL should ignore the
           sections outside the region and output the used sections
           in the frame metadata
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+                
+          <tr class="entry" id="controls_android.control.afTrigger">
+            <td class="entry_name">android.<wbr>control.<wbr>af<wbr>Trigger</td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">IDLE</span>
+                    <span class="entry_type_enum_notes">The trigger is idle.<wbr></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">START</span>
+                    <span class="entry_type_enum_notes">Autofocus must trigger now.<wbr></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">CANCEL</span>
+                    <span class="entry_type_enum_notes">Autofocus must return to initial
+              state,<wbr> and cancel any active trigger.<wbr></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              Whether the HAL must trigger autofocus.<wbr>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+              This entry is normally set to IDLE,<wbr> or is not
+          included at all in the request settings.<wbr> When included and
+          set to START,<wbr> the HAL must trigger the autofocus
+          algorithm.<wbr> The effect of AF trigger depends on the current
+          AF mode and state; see the camera HAL device v3 header for
+          details.<wbr> When set to CANCEL,<wbr> the HAL must cancel any active
+          trigger,<wbr> and return to initial AF state.<wbr>
             </td>
 
             <td class="entry_tags">
@@ -9782,8 +9890,10 @@
           <li><a href="#controls_android.control.aeMode">android.control.aeMode</a> (controls)</li>
           <li><a href="#controls_android.control.aeRegions">android.control.aeRegions</a> (controls)</li>
           <li><a href="#controls_android.control.aeTargetFpsRange">android.control.aeTargetFpsRange</a> (controls)</li>
+          <li><a href="#controls_android.control.aePrecaptureTrigger">android.control.aePrecaptureTrigger</a> (controls)</li>
           <li><a href="#controls_android.control.afMode">android.control.afMode</a> (controls)</li>
           <li><a href="#controls_android.control.afRegions">android.control.afRegions</a> (controls)</li>
+          <li><a href="#controls_android.control.afTrigger">android.control.afTrigger</a> (controls)</li>
           <li><a href="#controls_android.control.awbLock">android.control.awbLock</a> (controls)</li>
           <li><a href="#controls_android.control.awbMode">android.control.awbMode</a> (controls)</li>
           <li><a href="#controls_android.control.awbRegions">android.control.awbRegions</a> (controls)</li>
