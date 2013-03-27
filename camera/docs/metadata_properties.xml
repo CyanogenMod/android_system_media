@@ -649,7 +649,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="aeState" type="byte" enum="true">
           <enum>
             <value>INACTIVE
-            <notes>AE is off</notes></value>
+            <notes>AE is off.  When a camera device is opened, it starts in
+            this state.</notes></value>
             <value>SEARCHING
             <notes>AE doesn't yet have a good set of control values
             for the current scene</notes></value>
@@ -684,7 +685,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <enum>
             <value>INACTIVE
             <notes>AF off or has not yet tried to scan/been asked
-            to scan</notes></value>
+            to scan.  When a camera device is opened, it starts in
+            this state.</notes></value>
             <value>PASSIVE_SCAN
             <notes>if CONTINUOUS_* modes are supported AF is
             currently doing an AF scan initiated by a continuous
@@ -725,7 +727,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="awbState" type="byte" enum="true">
           <enum>
             <value>INACTIVE
-            <notes>AWB is not in auto mode</notes></value>
+            <notes>AWB is not in auto mode.  When a camera device is opened, it
+            starts in this state.</notes></value>
             <value>SEARCHING
             <notes>AWB doesn't yet have a good set of control
             values for the current scene</notes></value>
