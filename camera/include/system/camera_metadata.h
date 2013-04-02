@@ -462,6 +462,16 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
         int verbosity,
         int indentation);
 
+/**
+ * Prints the specified tag value as a string. Only works for enum tags.
+ * Returns 0 on success, -1 on failure.
+ */
+ANDROID_API
+int camera_metadata_enum_snprint(uint32_t tag,
+                                 uint32_t value,
+                                 char *dst,
+                                 size_t size);
+
 #ifdef __cplusplus
 }
 #endif

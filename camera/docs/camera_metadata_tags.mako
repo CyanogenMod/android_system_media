@@ -97,8 +97,3 @@ typedef enum camera_metadata_enum_${csym(entry.name).lower()} {
   % endfor
 
 %endfor
-
-int camera_metadata_enum_snprint(uint32_t tag,
-                                 uint32_t value,
-                                 char *dst,
-                                 size_t size);

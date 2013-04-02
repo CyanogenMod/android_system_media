@@ -637,8 +637,3 @@ typedef enum camera_metadata_enum_android_tonemap_mode {
 } camera_metadata_enum_android_tonemap_mode_t;
 
 
-
-int camera_metadata_enum_snprint(uint32_t tag,
-                                 uint32_t value,
-                                 char *dst,
-                                 size_t size);
