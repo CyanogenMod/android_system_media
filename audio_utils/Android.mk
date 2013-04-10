@@ -18,6 +18,7 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
+	liblog \
 	libspeexresampler
 
 include $(BUILD_SHARED_LIBRARY)

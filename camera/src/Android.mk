@@ -9,7 +9,8 @@ LOCAL_C_INCLUDES:= \
 	system/media/camera/include
 
 LOCAL_SHARED_LIBRARIES := \
-	libcutils
+	libcutils \
+	liblog
 
 LOCAL_MODULE := libcamera_metadata
 LOCAL_MODULE_TAGS := optional
@@ -21,5 +22,3 @@ LOCAL_CFLAGS += \
 
 
 include $(BUILD_SHARED_LIBRARY)
-
-
