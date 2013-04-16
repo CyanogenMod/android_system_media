@@ -6689,7 +6689,7 @@
                 <span class="entry_type_container">x</span>
 
                 <span class="entry_type_array">
-                  3
+                  4
                 </span>
 
 
@@ -6697,14 +6697,20 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Top-left corner and width of the output
-          region to select from the active pixel
-          array
+              (x,<wbr> y,<wbr> width,<wbr> height).<wbr>
+<br>
+<br>          A rectangle with the top-level corner of (x,<wbr>y) and size
+          (width,<wbr> height).<wbr> The region of the sensor that is used for
+          output.<wbr> Each stream must use this rectangle to produce its
+          output,<wbr> cropping to a smaller region if necessary to
+          maintain the stream's aspect ratio.<wbr>
+<br>
+<br>          HAL2.<wbr>x uses only (x,<wbr> y,<wbr> width)
             </td>
 
             <td class="entry_units">
-              (x,<wbr>y) of top-left corner,<wbr> width of region in
-          pixels; (0,<wbr>0) is top-left corner of
+              (x,<wbr>y) of top-left corner,<wbr> width and height of region
+          in pixels; (0,<wbr>0) is top-left corner of
           android.<wbr>sensor.<wbr>active<wbr>Pixel<wbr>Array
             </td>
 
@@ -6712,12 +6718,33 @@
             </td>
 
             <td class="entry_notes">
-              [BC - zoom] Height determined based on width and
-          aspect ratio of output stream.<wbr> Negative values for corner
-          are allowed for raw output if full pixel array is larger
-          than active pixel array.<wbr> Width may be rounded to nearest
-          larger supportable width,<wbr> especially for raw output,<wbr>
-          where only a few fixed scales may be possible
+              
+            Any additional per-stream cropping must be done to
+            maximize the final pixel area of the stream.<wbr>
+<br>
+<br>            For example,<wbr> if the crop region is set to a 4:3 aspect
+            ratio,<wbr> then 4:3 streams should use the exact crop
+            region.<wbr> 16:9 streams should further crop vertically
+            (letterbox).<wbr>
+<br>
+<br>            Conversely,<wbr> if the crop region is set to a 16:9,<wbr> then 4:3
+            outputs should crop horizontally (pillarbox),<wbr> and 16:9
+            streams should match exactly.<wbr> These additional crops must
+            be centered within the crop region.<wbr>
+<br>
+<br>            The output streams must maintain square pixels at all
+            times,<wbr> no matter what the relative aspect ratios of the
+            crop region and the stream are.<wbr>  Negative values for
+            corner are allowed for raw output if full pixel array is
+            larger than active pixel array.<wbr> Width and height may be
+            rounded to nearest larger supportable width,<wbr> especially
+            for raw output,<wbr> where only a few fixed scales may be
+            possible.<wbr> The width and height of the crop region cannot
+            be set to be smaller than floor( activePixelArray.<wbr>width /<wbr>
+            android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom ) and floor(
+            activePixelArray.<wbr>height /<wbr> android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom),<wbr>
+            respectively.<wbr>
+          
             </td>
 
             <td class="entry_tags">
@@ -7160,7 +7187,7 @@
                 <span class="entry_type_container">x</span>
 
                 <span class="entry_type_array">
-                  3
+                  4
                 </span>
 
 
@@ -7168,14 +7195,20 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Top-left corner and width of the output
-          region to select from the active pixel
-          array
+              (x,<wbr> y,<wbr> width,<wbr> height).<wbr>
+<br>
+<br>          A rectangle with the top-level corner of (x,<wbr>y) and size
+          (width,<wbr> height).<wbr> The region of the sensor that is used for
+          output.<wbr> Each stream must use this rectangle to produce its
+          output,<wbr> cropping to a smaller region if necessary to
+          maintain the stream's aspect ratio.<wbr>
+<br>
+<br>          HAL2.<wbr>x uses only (x,<wbr> y,<wbr> width)
             </td>
 
             <td class="entry_units">
-              (x,<wbr>y) of top-left corner,<wbr> width of region in
-          pixels; (0,<wbr>0) is top-left corner of
+              (x,<wbr>y) of top-left corner,<wbr> width and height of region
+          in pixels; (0,<wbr>0) is top-left corner of
           android.<wbr>sensor.<wbr>active<wbr>Pixel<wbr>Array
             </td>
 
@@ -7183,12 +7216,33 @@
             </td>
 
             <td class="entry_notes">
-              [BC - zoom] Height determined based on width and
-          aspect ratio of output stream.<wbr> Negative values for corner
-          are allowed for raw output if full pixel array is larger
-          than active pixel array.<wbr> Width may be rounded to nearest
-          larger supportable width,<wbr> especially for raw output,<wbr>
-          where only a few fixed scales may be possible
+              
+            Any additional per-stream cropping must be done to
+            maximize the final pixel area of the stream.<wbr>
+<br>
+<br>            For example,<wbr> if the crop region is set to a 4:3 aspect
+            ratio,<wbr> then 4:3 streams should use the exact crop
+            region.<wbr> 16:9 streams should further crop vertically
+            (letterbox).<wbr>
+<br>
+<br>            Conversely,<wbr> if the crop region is set to a 16:9,<wbr> then 4:3
+            outputs should crop horizontally (pillarbox),<wbr> and 16:9
+            streams should match exactly.<wbr> These additional crops must
+            be centered within the crop region.<wbr>
+<br>
+<br>            The output streams must maintain square pixels at all
+            times,<wbr> no matter what the relative aspect ratios of the
+            crop region and the stream are.<wbr>  Negative values for
+            corner are allowed for raw output if full pixel array is
+            larger than active pixel array.<wbr> Width and height may be
+            rounded to nearest larger supportable width,<wbr> especially
+            for raw output,<wbr> where only a few fixed scales may be
+            possible.<wbr> The width and height of the crop region cannot
+            be set to be smaller than floor( activePixelArray.<wbr>width /<wbr>
+            android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom ) and floor(
+            activePixelArray.<wbr>height /<wbr> android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom),<wbr>
+            respectively.<wbr>
+          
             </td>
 
             <td class="entry_tags">
