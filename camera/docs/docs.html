@@ -343,6 +343,13 @@
         <li><a href="#dynamic_android.tonemap.mode">android.tonemap.mode</a> (dynamic)</li>
     </ul>
     </li> <!-- toc_section -->
+    <li><p class="toc_section"><a href="#section_led">led</a></p>
+    <ul class="toc_section">
+        <li><a href="#controls_android.led.transmit">android.led.transmit</a> (controls)</li>
+        <li><a href="#dynamic_android.led.transmit">android.led.transmit</a> (dynamic)</li>
+        <li><a href="#static_android.led.availableLeds">android.led.availableLeds</a> (static)</li>
+    </ul>
+    </li> <!-- toc_section -->
   </ul>
 
   <h1>Properties</h1>
@@ -9849,6 +9856,233 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+
+  <!-- end of section -->
+  <tr><td colspan="7" id="section_led" class="section">led</td></tr>
+
+
+      <tr><td colspan="7" class="kind">controls</td></tr>
+
+      <thead>
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_notes">Notes</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="controls_android.led.transmit">
+            <td class="entry_name">android.<wbr>led.<wbr>transmit</td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              This LED is nominally used to indicate to the user
+          that the camera is powered on and may be streaming images back to the
+          Application Processor.<wbr> In certain rare circumstances,<wbr> the OS may
+          disable this when video is processed locally and not transmitted to
+          any untrusted applications.<wbr>
+<br>
+<br>          In particular,<wbr> the LED *must* always be on when the data could be
+          transmitted off the device.<wbr> The LED *should* always be on whenever
+          data is stored locally on the device.<wbr>
+<br>
+<br>          The LED *may* be off if a trusted application is using the data that
+          doesn't violate the above rules.<wbr>
+          
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+      <tr><td colspan="7" class="kind">dynamic</td></tr>
+
+      <thead>
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_notes">Notes</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="dynamic_android.led.transmit">
+            <td class="entry_name">android.<wbr>led.<wbr>transmit</td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              This LED is nominally used to indicate to the user
+          that the camera is powered on and may be streaming images back to the
+          Application Processor.<wbr> In certain rare circumstances,<wbr> the OS may
+          disable this when video is processed locally and not transmitted to
+          any untrusted applications.<wbr>
+<br>
+<br>          In particular,<wbr> the LED *must* always be on when the data could be
+          transmitted off the device.<wbr> The LED *should* always be on whenever
+          data is stored locally on the device.<wbr>
+<br>
+<br>          The LED *may* be off if a trusted application is using the data that
+          doesn't violate the above rules.<wbr>
+          
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+      <tr><td colspan="7" class="kind">static</td></tr>
+
+      <thead>
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_notes">Notes</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="static_android.led.availableLeds">
+            <td class="entry_name">android.<wbr>led.<wbr>available<wbr>Leds</td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">TRANSMIT</span>
+                    <span class="entry_type_enum_notes">android.<wbr>led.<wbr>transmit control is used</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              A list of camera LEDs that are available on this system.<wbr>
+          
             </td>
 
             <td class="entry_units">

@@ -73,6 +73,8 @@
 </head>
 
 <%!
+  import re
+
   # insert word break hints for the browser
   def wbr(text):
     new_txt = text
@@ -91,6 +93,10 @@
       new_txt = new_txt.replace(i, i + "<wbr>")
 
     return new_txt
+
+  # insert line breaks after every two \n\n
+  def br(text):
+    return re.sub(r"(\r?\n)(\r?\n)", r"\1<br>\2<br>", text)
 %>
 
 
@@ -233,7 +239,7 @@
 
             <td class="entry_description">
             % if prop.description is not None:
-              ${prop.description | wbr}
+              ${prop.description | wbr, br}
             % endif
             </td>
 
@@ -251,7 +257,7 @@
 
             <td class="entry_notes">
             % if prop.notes is not None:
-              ${prop.notes | wbr}
+              ${prop.notes | wbr, br}
             % endif
             </td>
 

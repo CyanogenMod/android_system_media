@@ -53,6 +53,7 @@ const char *camera_metadata_section_names[ANDROID_SECTION_COUNT] = {
     [ANDROID_STATISTICS]           = "android.statistics",
     [ANDROID_STATISTICS_INFO]      = "android.statistics.info",
     [ANDROID_TONEMAP]              = "android.tonemap",
+    [ANDROID_LED]                  = "android.led",
 };
 
 unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
@@ -100,6 +101,8 @@ unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
                                        ANDROID_STATISTICS_INFO_END },
     [ANDROID_TONEMAP]              = { ANDROID_TONEMAP_START,
                                        ANDROID_TONEMAP_END },
+    [ANDROID_LED]                  = { ANDROID_LED_START,
+                                       ANDROID_LED_END },
 };
 
 static tag_info_t android_color_correction[ANDROID_COLOR_CORRECTION_END -
@@ -504,6 +507,14 @@ static tag_info_t android_tonemap[ANDROID_TONEMAP_END -
     { "maxCurvePoints",                TYPE_INT32  },
 };
 
+static tag_info_t android_led[ANDROID_LED_END -
+        ANDROID_LED_START] = {
+    [ ANDROID_LED_TRANSMIT - ANDROID_LED_START ] =
+    { "transmit",                      TYPE_BYTE   },
+    [ ANDROID_LED_AVAILABLE_LEDS - ANDROID_LED_START ] =
+    { "availableLeds",                 TYPE_BYTE   },
+};
+
 
 tag_info_t *tag_info[ANDROID_SECTION_COUNT] = {
     android_color_correction,
@@ -528,6 +539,7 @@ tag_info_t *tag_info[ANDROID_SECTION_COUNT] = {
     android_statistics,
     android_statistics_info,
     android_tonemap,
+    android_led,
 };
 
 int camera_metadata_enum_snprint(uint32_t tag,
@@ -1801,6 +1813,33 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_TONEMAP_MAX_CURVE_POINTS: {
+            break;
+        }
+
+        case ANDROID_LED_TRANSMIT: {
+            switch (value) {
+                case ANDROID_LED_TRANSMIT_OFF:
+                    msg = "OFF";
+                    ret = 0;
+                    break;
+                case ANDROID_LED_TRANSMIT_ON:
+                    msg = "ON";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
+        case ANDROID_LED_AVAILABLE_LEDS: {
+            switch (value) {
+                case ANDROID_LED_AVAILABLE_LEDS_TRANSMIT:
+                    msg = "TRANSMIT";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
             break;
         }
 

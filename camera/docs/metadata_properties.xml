@@ -2203,5 +2203,45 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
       </dynamic>
     </section>
+    <section name="led">
+      <controls>
+        <entry name="transmit" type="byte" enum="true">
+          <enum>
+            <value>OFF</value>
+            <value>ON</value>
+          </enum>
+          <description>This LED is nominally used to indicate to the user
+          that the camera is powered on and may be streaming images back to the
+          Application Processor. In certain rare circumstances, the OS may
+          disable this when video is processed locally and not transmitted to
+          any untrusted applications.
+
+          In particular, the LED *must* always be on when the data could be
+          transmitted off the device. The LED *should* always be on whenever
+          data is stored locally on the device.
+
+          The LED *may* be off if a trusted application is using the data that
+          doesn't violate the above rules.
+          </description>
+        </entry>
+      </controls>
+      <dynamic>
+        <clone entry="android.led.transmit" kind="controls"></clone>
+      </dynamic>
+      <static>
+        <entry name="availableLeds" type="byte" enum="true" container="array">
+          <array>
+            <size>n</size>
+          </array>
+          <enum>
+            <value>TRANSMIT
+              <notes>android.led.transmit control is used</notes>
+            </value>
+          </enum>
+          <description>A list of camera LEDs that are available on this system.
+          </description>
+        </entry>
+      </static>
+    </section>
   </namespace>
 </metadata>
