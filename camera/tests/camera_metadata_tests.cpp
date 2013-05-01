@@ -38,6 +38,9 @@
     ({struct _AlignasStruct { char c; T field; };       \
         offsetof(struct _AlignasStruct, field); })
 
+#define FINISH_USING_CAMERA_METADATA(m)                         \
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL)); \
+    free_camera_metadata(m);                                    \
 
 TEST(camera_metadata, allocate_normal) {
     camera_metadata_t *m = NULL;
@@ -52,7 +55,7 @@ TEST(camera_metadata, allocate_normal) {
     EXPECT_EQ((size_t)0, get_camera_metadata_data_count(m));
     EXPECT_EQ(data_capacity, get_camera_metadata_data_capacity(m));
 
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, allocate_nodata) {
@@ -66,7 +69,7 @@ TEST(camera_metadata, allocate_nodata) {
     EXPECT_EQ((size_t)0, get_camera_metadata_data_count(m));
     EXPECT_EQ((size_t)0, get_camera_metadata_data_capacity(m));
 
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, allocate_nothing) {
@@ -100,6 +103,8 @@ TEST(camera_metadata, place_normal) {
     EXPECT_EQ(entry_capacity, get_camera_metadata_entry_capacity(m));
     EXPECT_EQ((size_t)0, get_camera_metadata_data_count(m));
     EXPECT_EQ(data_capacity, get_camera_metadata_data_capacity(m));
+
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, &buf_size));
 
     free(buf);
 }
@@ -157,6 +162,8 @@ TEST(camera_metadata, place_extraspace) {
     EXPECT_EQ(data_capacity, get_camera_metadata_data_capacity(m));
     EXPECT_EQ(buf + buf_size - extra_space, (uint8_t*)m + get_camera_metadata_size(m));
 
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, &buf_size));
+
     free(buf);
 }
 
@@ -173,7 +180,7 @@ TEST(camera_metadata, get_size) {
     EXPECT_EQ(calculate_camera_metadata_size(0,0),
             get_camera_metadata_compact_size(m) );
 
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, add_get_normal) {
@@ -182,6 +189,8 @@ TEST(camera_metadata, add_get_normal) {
     const size_t data_capacity = 80;
 
     m = allocate_camera_metadata(entry_capacity, data_capacity);
+
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
 
     int result;
     size_t data_used = 0;
@@ -198,6 +207,8 @@ TEST(camera_metadata, add_get_normal) {
             get_camera_metadata_tag_type(ANDROID_SENSOR_EXPOSURE_TIME), 1);
     entries_used++;
 
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
+
     // INT32
 
     int32_t sensitivity = 800;
@@ -209,6 +220,8 @@ TEST(camera_metadata, add_get_normal) {
             get_camera_metadata_tag_type(ANDROID_SENSOR_SENSITIVITY), 1);
     entries_used++;
 
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
+
     // FLOAT
 
     float focusDistance = 0.5f;
@@ -219,6 +232,8 @@ TEST(camera_metadata, add_get_normal) {
     data_used += calculate_camera_metadata_entry_data_size(
             get_camera_metadata_tag_type(ANDROID_LENS_FOCUS_DISTANCE), 1);
     entries_used++;
+
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
 
     // Array of FLOAT
 
@@ -234,6 +249,8 @@ TEST(camera_metadata, add_get_normal) {
     data_used += calculate_camera_metadata_entry_data_size(
            get_camera_metadata_tag_type(ANDROID_COLOR_CORRECTION_TRANSFORM), 9);
     entries_used++;
+
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
 
     // Check added entries
 
@@ -286,7 +303,7 @@ TEST(camera_metadata, add_get_normal) {
         dump_camera_metadata(m, 0, 2);
     }
 
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 void add_test_metadata(camera_metadata_t *m, int entry_count) {
@@ -358,7 +375,7 @@ TEST(camera_metadata, add_get_toomany) {
         dump_camera_metadata(m, 0, 2);
     }
 
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, add_too_much_data) {
@@ -378,7 +395,7 @@ TEST(camera_metadata, add_too_much_data) {
             &exposure_time, 1);
     EXPECT_EQ(ERROR, result);
 
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, copy_metadata) {
@@ -428,9 +445,10 @@ TEST(camera_metadata, copy_metadata) {
         }
     }
 
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m2, &buf_size));
     free(buf);
 
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, copy_metadata_extraspace) {
@@ -487,9 +505,10 @@ TEST(camera_metadata, copy_metadata_extraspace) {
         }
     }
 
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m2, &buf_size));
     free(buf);
 
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, copy_metadata_nospace) {
@@ -516,7 +535,7 @@ TEST(camera_metadata, copy_metadata_nospace) {
 
     free(buf);
 
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, append_metadata) {
@@ -598,8 +617,8 @@ TEST(camera_metadata, append_metadata) {
         }
     }
 
-    free_camera_metadata(m);
-    free_camera_metadata(m2);
+    FINISH_USING_CAMERA_METADATA(m);
+    FINISH_USING_CAMERA_METADATA(m2);
 }
 
 TEST(camera_metadata, append_metadata_nospace) {
@@ -624,8 +643,8 @@ TEST(camera_metadata, append_metadata_nospace) {
     EXPECT_EQ((size_t)0, get_camera_metadata_entry_count(m2));
     EXPECT_EQ((size_t)0, get_camera_metadata_data_count(m2));
 
-    free_camera_metadata(m);
-    free_camera_metadata(m2);
+    FINISH_USING_CAMERA_METADATA(m);
+    FINISH_USING_CAMERA_METADATA(m2);
 }
 
 TEST(camera_metadata, append_metadata_onespace) {
@@ -706,8 +725,8 @@ TEST(camera_metadata, append_metadata_onespace) {
         }
     }
 
-    free_camera_metadata(m);
-    free_camera_metadata(m2);
+    FINISH_USING_CAMERA_METADATA(m);
+    FINISH_USING_CAMERA_METADATA(m2);
 }
 
 TEST(camera_metadata, vendor_tags) {
@@ -723,11 +742,13 @@ TEST(camera_metadata, vendor_tags) {
             FAKEVENDOR_SENSOR_SUPERMODE,
             &superMode, 1);
     EXPECT_EQ(ERROR, result);
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
 
     result = add_camera_metadata_entry(m,
             ANDROID_REQUEST_METADATA_MODE,
             &superMode, 1);
     EXPECT_EQ(OK, result);
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
 
     EXPECT_NULL(get_camera_metadata_section_name(FAKEVENDOR_SENSOR_SUPERMODE));
     EXPECT_NULL(get_camera_metadata_tag_name(FAKEVENDOR_SENSOR_SUPERMODE));
@@ -739,16 +760,19 @@ TEST(camera_metadata, vendor_tags) {
             FAKEVENDOR_SENSOR_SUPERMODE,
             &superMode, 1);
     EXPECT_EQ(OK, result);
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
 
     result = add_camera_metadata_entry(m,
             ANDROID_REQUEST_METADATA_MODE,
             &superMode, 1);
     EXPECT_EQ(OK, result);
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
 
     result = add_camera_metadata_entry(m,
             FAKEVENDOR_SCALER_END,
             &superMode, 1);
     EXPECT_EQ(ERROR, result);
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
 
     EXPECT_STREQ("com.fakevendor.sensor",
             get_camera_metadata_section_name(FAKEVENDOR_SENSOR_SUPERMODE));
@@ -763,22 +787,35 @@ TEST(camera_metadata, vendor_tags) {
     EXPECT_EQ(-1, get_camera_metadata_tag_type(FAKEVENDOR_SCALER_END));
 
     set_camera_metadata_vendor_tag_ops(NULL);
+    // TODO: fix vendor ops. Then the below 3 validations should fail.
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
 
     result = add_camera_metadata_entry(m,
             FAKEVENDOR_SENSOR_SUPERMODE,
             &superMode, 1);
     EXPECT_EQ(ERROR, result);
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
 
     result = add_camera_metadata_entry(m,
             ANDROID_REQUEST_METADATA_MODE,
             &superMode, 1);
     EXPECT_EQ(OK, result);
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
 
     EXPECT_NULL(get_camera_metadata_section_name(FAKEVENDOR_SENSOR_SUPERMODE));
     EXPECT_NULL(get_camera_metadata_tag_name(FAKEVENDOR_SENSOR_SUPERMODE));
     EXPECT_EQ(-1, get_camera_metadata_tag_type(FAKEVENDOR_SENSOR_SUPERMODE));
 
-    free_camera_metadata(m);
+    // Remove all vendor entries so validation passes
+    {
+        camera_metadata_ro_entry_t entry;
+        EXPECT_EQ(OK, find_camera_metadata_ro_entry(m,
+                                                    FAKEVENDOR_SENSOR_SUPERMODE,
+                                                    &entry));
+        EXPECT_EQ(OK, delete_camera_metadata_entry(m, entry.index));
+    }
+
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, add_all_tags) {
@@ -863,7 +900,7 @@ TEST(camera_metadata, add_all_tags) {
         dump_camera_metadata(m, 0, 2);
     }
 
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, sort_metadata) {
@@ -977,7 +1014,7 @@ TEST(camera_metadata, sort_metadata) {
     EXPECT_EQ(focus_distance, *entry.data.f);
 
 
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, delete_metadata) {
@@ -1633,8 +1670,9 @@ TEST(camera_metadata, user_pointer) {
     result = get_camera_metadata_user_pointer(m2, &ptr);
     EXPECT_NULL(ptr);
 
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m2, &buf_size));
     free(buf);
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, memcpy) {
@@ -1648,9 +1686,10 @@ TEST(camera_metadata, memcpy) {
 
     add_test_metadata(m, 5);
 
-    uint8_t *dst = new uint8_t[get_camera_metadata_size(m)];
+    size_t m_size = get_camera_metadata_size(m);
+    uint8_t *dst = new uint8_t[m_size];
 
-    memcpy(dst, m, get_camera_metadata_size(m));
+    memcpy(dst, m, m_size);
 
     camera_metadata_t *m2 = reinterpret_cast<camera_metadata_t*>(dst);
 
@@ -1729,8 +1768,10 @@ TEST(camera_metadata, memcpy) {
     EXPECT_EQ(300, e2.data.i64[0]);
     EXPECT_EQ(200, e2.data.i64[1]);
 
+    EXPECT_EQ(OK, validate_camera_metadata_structure(m2, &m_size));
+
     delete dst;
-    free_camera_metadata(m);
+    FINISH_USING_CAMERA_METADATA(m);
 }
 
 TEST(camera_metadata, data_alignment) {
@@ -1818,7 +1859,7 @@ TEST(camera_metadata, data_alignment) {
                     " data_count " << data_count <<
                     " expected alignment was: " << m_type_align[m_type];
 
-                free_camera_metadata(m);
+                FINISH_USING_CAMERA_METADATA(m);
             }
         }
     }
