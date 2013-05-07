@@ -592,8 +592,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>OFF must be included</range>
           <tag id="BC" />
         </entry>
-        <entry name="awbAvailableModes" type="byte">
-          <units>List of enums (android.control.awbMode)</units>
+        <entry name="awbAvailableModes" type="byte"
+        type_notes="List of enums (android.control.awbMode)"
+        container="array">
+          <array>
+            <size>n</size>
+          </array>
           <range>OFF, AUTO must be included</range>
           <tag id="BC" />
         </entry>
