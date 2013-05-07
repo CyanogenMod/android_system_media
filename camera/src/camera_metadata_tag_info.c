@@ -368,7 +368,7 @@ static tag_info_t android_scaler[ANDROID_SCALER_END -
     [ ANDROID_SCALER_AVAILABLE_JPEG_SIZES - ANDROID_SCALER_START ] =
     { "availableJpegSizes",            TYPE_INT32  },
     [ ANDROID_SCALER_AVAILABLE_MAX_DIGITAL_ZOOM - ANDROID_SCALER_START ] =
-    { "availableMaxDigitalZoom",       TYPE_INT32  },
+    { "availableMaxDigitalZoom",       TYPE_FLOAT  },
     [ ANDROID_SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS - ANDROID_SCALER_START ] =
     { "availableProcessedMinDurations",
                                         TYPE_INT64  },
@@ -378,8 +378,6 @@ static tag_info_t android_scaler[ANDROID_SCALER_END -
     { "availableRawMinDurations",      TYPE_INT64  },
     [ ANDROID_SCALER_AVAILABLE_RAW_SIZES - ANDROID_SCALER_START ] =
     { "availableRawSizes",             TYPE_INT32  },
-    [ ANDROID_SCALER_MAX_DIGITAL_ZOOM - ANDROID_SCALER_START ] =
-    { "maxDigitalZoom",                TYPE_FLOAT  },
 };
 
 static tag_info_t android_sensor[ANDROID_SENSOR_END -
@@ -1487,9 +1485,6 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SCALER_AVAILABLE_RAW_SIZES: {
-            break;
-        }
-        case ANDROID_SCALER_MAX_DIGITAL_ZOOM: {
             break;
         }
 

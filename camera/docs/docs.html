@@ -265,7 +265,6 @@
         <li><a href="#static_android.scaler.availableProcessedSizes">android.scaler.availableProcessedSizes</a> (static)</li>
         <li><a href="#static_android.scaler.availableRawMinDurations">android.scaler.availableRawMinDurations</a> (static)</li>
         <li><a href="#static_android.scaler.availableRawSizes">android.scaler.availableRawSizes</a> (static)</li>
-        <li><a href="#static_android.scaler.maxDigitalZoom">android.scaler.maxDigitalZoom</a> (static)</li>
         <li><a href="#dynamic_android.scaler.cropRegion">android.scaler.cropRegion</a> (dynamic)</li>
     </ul>
     </li> <!-- toc_section -->
@@ -6904,7 +6903,7 @@
           <tr class="entry" id="static_android.scaler.availableMaxDigitalZoom">
             <td class="entry_name">android.<wbr>scaler.<wbr>available<wbr>Max<wbr>Digital<wbr>Zoom</td>
             <td class="entry_type">
-                <span class="entry_type_name">int32</span>
+                <span class="entry_type_name">float</span>
 
 
 
@@ -6912,19 +6911,26 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              TODO: have a real description here
+              The maximum ratio between active area width
+          and crop region width,<wbr> or between active area height and
+          crop region height,<wbr> if the crop region height is larger
+          than width
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
+              >=1
             </td>
 
             <td class="entry_notes">
             </td>
 
             <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
             </td>
 
           </tr> <!-- end of entry -->
@@ -7088,42 +7094,6 @@
             </td>
 
             <td class="entry_tags">
-            </td>
-
-          </tr> <!-- end of entry -->
-        
-                
-          <tr class="entry" id="static_android.scaler.maxDigitalZoom">
-            <td class="entry_name">android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom</td>
-            <td class="entry_type">
-                <span class="entry_type_name">float</span>
-
-
-
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              The maximum ratio between active area width
-          and crop region width,<wbr> or between active area height and
-          crop region height,<wbr> if the crop region height is larger
-          than width
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-              >=1
-            </td>
-
-            <td class="entry_notes">
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_BC">BC</a></li>
-              </ul>
             </td>
 
           </tr> <!-- end of entry -->
@@ -10171,10 +10141,10 @@
           <li><a href="#static_android.scaler.availableFormats">android.scaler.availableFormats</a> (static)</li>
           <li><a href="#static_android.scaler.availableJpegMinDurations">android.scaler.availableJpegMinDurations</a> (static)</li>
           <li><a href="#static_android.scaler.availableJpegSizes">android.scaler.availableJpegSizes</a> (static)</li>
+          <li><a href="#static_android.scaler.availableMaxDigitalZoom">android.scaler.availableMaxDigitalZoom</a> (static)</li>
           <li><a href="#static_android.scaler.availableProcessedMinDurations">android.scaler.availableProcessedMinDurations</a> (static)</li>
           <li><a href="#static_android.scaler.availableProcessedSizes">android.scaler.availableProcessedSizes</a> (static)</li>
           <li><a href="#static_android.scaler.availableRawMinDurations">android.scaler.availableRawMinDurations</a> (static)</li>
-          <li><a href="#static_android.scaler.maxDigitalZoom">android.scaler.maxDigitalZoom</a> (static)</li>
           <li><a href="#controls_android.sensor.frameDuration">android.sensor.frameDuration</a> (controls)</li>
           <li><a href="#static_android.sensor.info.availableSensitivities">android.sensor.info.availableSensitivities</a> (static)</li>
           <li><a href="#static_android.sensor.info.maxFrameDuration">android.sensor.info.maxFrameDuration</a> (static)</li>
