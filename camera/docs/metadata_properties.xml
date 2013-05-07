@@ -1570,8 +1570,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           include: - half/quarter max resolution</range>
           <tag id="BC" />
         </entry>
-        <entry name="availableMaxDigitalZoom" type="int32">
-          <description>TODO: have a real description here</description>
+        <entry name="availableMaxDigitalZoom" type="float">
+          <description>The maximum ratio between active area width
+          and crop region width, or between active area height and
+          crop region height, if the crop region height is larger
+          than width</description>
+          <range>&gt;=1</range>
+          <tag id="BC" />
         </entry>
         <entry name="availableProcessedMinDurations" type="int64"
         container="array">
@@ -1627,14 +1632,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           sensor output streams, listed as width,
           height</description>
           <range>Must include: - sensor maximum resolution</range>
-        </entry>
-        <entry name="maxDigitalZoom" type="float">
-          <description>The maximum ratio between active area width
-          and crop region width, or between active area height and
-          crop region height, if the crop region height is larger
-          than width</description>
-          <range>&gt;=1</range>
-          <tag id="BC" />
         </entry>
       </static>
       <dynamic>
