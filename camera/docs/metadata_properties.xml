@@ -1507,20 +1507,47 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       <controls>
         <entry name="cropRegion" type="int32" container="array">
           <array>
-            <size>3</size>
+            <size>4</size>
           </array>
-          <description>Top-left corner and width of the output
-          region to select from the active pixel
-          array</description>
-          <units>(x,y) of top-left corner, width of region in
-          pixels; (0,0) is top-left corner of
+          <description>(x, y, width, height).
+
+          A rectangle with the top-level corner of (x,y) and size
+          (width, height). The region of the sensor that is used for
+          output. Each stream must use this rectangle to produce its
+          output, cropping to a smaller region if necessary to
+          maintain the stream's aspect ratio.
+
+          HAL2.x uses only (x, y, width)</description>
+          <units>(x,y) of top-left corner, width and height of region
+          in pixels; (0,0) is top-left corner of
           android.sensor.activePixelArray</units>
-          <notes>[BC - zoom] Height determined based on width and
-          aspect ratio of output stream. Negative values for corner
-          are allowed for raw output if full pixel array is larger
-          than active pixel array. Width may be rounded to nearest
-          larger supportable width, especially for raw output,
-          where only a few fixed scales may be possible</notes>
+          <notes>
+            Any additional per-stream cropping must be done to
+            maximize the final pixel area of the stream.
+
+            For example, if the crop region is set to a 4:3 aspect
+            ratio, then 4:3 streams should use the exact crop
+            region. 16:9 streams should further crop vertically
+            (letterbox).
+
+            Conversely, if the crop region is set to a 16:9, then 4:3
+            outputs should crop horizontally (pillarbox), and 16:9
+            streams should match exactly. These additional crops must
+            be centered within the crop region.
+
+            The output streams must maintain square pixels at all
+            times, no matter what the relative aspect ratios of the
+            crop region and the stream are.  Negative values for
+            corner are allowed for raw output if full pixel array is
+            larger than active pixel array. Width and height may be
+            rounded to nearest larger supportable width, especially
+            for raw output, where only a few fixed scales may be
+            possible. The width and height of the crop region cannot
+            be set to be smaller than floor( activePixelArray.width /
+            android.scaler.maxDigitalZoom ) and floor(
+            activePixelArray.height / android.scaler.maxDigitalZoom),
+            respectively.
+          </notes>
           <tag id="BC" />
         </entry>
       </controls>
