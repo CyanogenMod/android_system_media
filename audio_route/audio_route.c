@@ -405,6 +405,11 @@ static void start_tag(void *data, const XML_Char *tag_name,
     else if (strcmp(tag_name, "ctl") == 0) {
         /* Obtain the mixer ctl and value */
         ctl = mixer_get_ctl_by_name(ar->mixer, attr_name);
+        if (ctl == NULL) {
+            ALOGE("Control '%s' doesn't exist - skipping", attr_name);
+            goto done;
+        }
+
         switch (mixer_ctl_get_type(ctl)) {
         case MIXER_CTL_TYPE_BOOL:
         case MIXER_CTL_TYPE_INT:
@@ -464,6 +469,7 @@ static void start_tag(void *data, const XML_Char *tag_name,
         }
     }
 
+done:
     state->level++;
 }
 
