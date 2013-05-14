@@ -1520,7 +1520,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           HAL2.x uses only (x, y, width)</description>
           <units>(x,y) of top-left corner, width and height of region
           in pixels; (0,0) is top-left corner of
-          android.sensor.activePixelArray</units>
+          android.sensor.activeArraySize</units>
           <notes>
             Any additional per-stream cropping must be done to
             maximize the final pixel area of the stream.
@@ -1543,9 +1543,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             rounded to nearest larger supportable width, especially
             for raw output, where only a few fixed scales may be
             possible. The width and height of the crop region cannot
-            be set to be smaller than floor( activePixelArray.width /
+            be set to be smaller than floor( activeArraySize.width /
             android.scaler.maxDigitalZoom ) and floor(
-            activePixelArray.height / android.scaler.maxDigitalZoom),
+            activeArraySize.height / android.scaler.maxDigitalZoom),
             respectively.
           </notes>
           <tag id="BC" />
