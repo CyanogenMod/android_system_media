@@ -1453,12 +1453,20 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "YV12";
                     ret = 0;
                     break;
-                case ANDROID_SCALER_AVAILABLE_FORMATS_YCbCr_420_SP:
-                    msg = "YCbCr_420_SP";
+                case ANDROID_SCALER_AVAILABLE_FORMATS_YCrCb_420_SP:
+                    msg = "YCrCb_420_SP";
                     ret = 0;
                     break;
-                case ANDROID_SCALER_AVAILABLE_FORMATS_JPEG:
-                    msg = "JPEG";
+                case ANDROID_SCALER_AVAILABLE_FORMATS_IMPLEMENTATION_DEFINED:
+                    msg = "IMPLEMENTATION_DEFINED";
+                    ret = 0;
+                    break;
+                case ANDROID_SCALER_AVAILABLE_FORMATS_YCbCr_420_888:
+                    msg = "YCbCr_420_888";
+                    ret = 0;
+                    break;
+                case ANDROID_SCALER_AVAILABLE_FORMATS_BLOB:
+                    msg = "BLOB";
                     ret = 0;
                     break;
                 default:

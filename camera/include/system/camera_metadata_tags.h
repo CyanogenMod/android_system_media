@@ -566,8 +566,10 @@ typedef enum camera_metadata_enum_android_request_type {
 typedef enum camera_metadata_enum_android_scaler_available_formats {
     ANDROID_SCALER_AVAILABLE_FORMATS_RAW_SENSOR                 = 0x20,
     ANDROID_SCALER_AVAILABLE_FORMATS_YV12                       = 0x32315659,
-    ANDROID_SCALER_AVAILABLE_FORMATS_YCbCr_420_SP               = 0x11,
-    ANDROID_SCALER_AVAILABLE_FORMATS_JPEG                       = 0x21,
+    ANDROID_SCALER_AVAILABLE_FORMATS_YCrCb_420_SP               = 0x11,
+    ANDROID_SCALER_AVAILABLE_FORMATS_IMPLEMENTATION_DEFINED     = 0x22,
+    ANDROID_SCALER_AVAILABLE_FORMATS_YCbCr_420_888              = 0x23,
+    ANDROID_SCALER_AVAILABLE_FORMATS_BLOB                       = 0x21,
 } camera_metadata_enum_android_scaler_available_formats_t;
 
 

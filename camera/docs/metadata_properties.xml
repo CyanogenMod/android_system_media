@@ -1564,11 +1564,20 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value id="0x32315659">YV12
                 <notes>YCrCb 4:2:0 Planar</notes>
             </value>
-            <value id="0x11">YCbCr_420_SP
+            <value id="0x11">YCrCb_420_SP
                 <notes>NV21</notes>
             </value>
-            <value id="0x21">JPEG
-                <notes>BLOB</notes>
+
+            <value id="0x22">IMPLEMENTATION_DEFINED
+                <notes>Hal Implementation Defined</notes>
+            </value>
+
+            <value id="0x23">YCbCr_420_888
+                <notes>Flexible YUV420 Format</notes>
+            </value>
+
+            <value id="0x21">BLOB
+                <notes>JPEG</notes>
             </value>
           </enum>
           <description>List of app-visible formats</description>
