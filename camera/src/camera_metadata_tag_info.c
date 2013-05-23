@@ -54,6 +54,7 @@ const char *camera_metadata_section_names[ANDROID_SECTION_COUNT] = {
     [ANDROID_STATISTICS_INFO]      = "android.statistics.info",
     [ANDROID_TONEMAP]              = "android.tonemap",
     [ANDROID_LED]                  = "android.led",
+    [ANDROID_INFO]                 = "android.info",
 };
 
 unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
@@ -103,6 +104,8 @@ unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
                                        ANDROID_TONEMAP_END },
     [ANDROID_LED]                  = { ANDROID_LED_START,
                                        ANDROID_LED_END },
+    [ANDROID_INFO]                 = { ANDROID_INFO_START,
+                                       ANDROID_INFO_END },
 };
 
 static tag_info_t android_color_correction[ANDROID_COLOR_CORRECTION_END -
@@ -513,6 +516,12 @@ static tag_info_t android_led[ANDROID_LED_END -
     { "availableLeds",                 TYPE_BYTE   },
 };
 
+static tag_info_t android_info[ANDROID_INFO_END -
+        ANDROID_INFO_START] = {
+    [ ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL - ANDROID_INFO_START ] =
+    { "supportedHardwareLevel",        TYPE_BYTE   },
+};
+
 
 tag_info_t *tag_info[ANDROID_SECTION_COUNT] = {
     android_color_correction,
@@ -538,6 +547,7 @@ tag_info_t *tag_info[ANDROID_SECTION_COUNT] = {
     android_statistics_info,
     android_tonemap,
     android_led,
+    android_info,
 };
 
 int camera_metadata_enum_snprint(uint32_t tag,
@@ -1838,6 +1848,22 @@ int camera_metadata_enum_snprint(uint32_t tag,
             switch (value) {
                 case ANDROID_LED_AVAILABLE_LEDS_TRANSMIT:
                     msg = "TRANSMIT";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
+
+        case ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL: {
+            switch (value) {
+                case ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED:
+                    msg = "LIMITED";
+                    ret = 0;
+                    break;
+                case ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_FULL:
+                    msg = "FULL";
                     ret = 0;
                     break;
                 default:

@@ -58,6 +58,7 @@ typedef enum camera_metadata_section {
     ANDROID_STATISTICS_INFO,
     ANDROID_TONEMAP,
     ANDROID_LED,
+    ANDROID_INFO,
     ANDROID_SECTION_COUNT,
 
     VENDOR_SECTION = 0x8000
@@ -91,6 +92,7 @@ typedef enum camera_metadata_section_start {
     ANDROID_STATISTICS_INFO_START  = ANDROID_STATISTICS_INFO   << 16,
     ANDROID_TONEMAP_START          = ANDROID_TONEMAP           << 16,
     ANDROID_LED_START              = ANDROID_LED               << 16,
+    ANDROID_INFO_START             = ANDROID_INFO              << 16,
     VENDOR_SECTION_START           = VENDOR_SECTION            << 16
 } camera_metadata_section_start_t;
 
@@ -305,6 +307,10 @@ typedef enum camera_metadata_tag {
     ANDROID_LED_TRANSMIT           = ANDROID_LED_START,
     ANDROID_LED_AVAILABLE_LEDS,
     ANDROID_LED_END,
+
+    ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL
+                                   = ANDROID_INFO_START,
+    ANDROID_INFO_END,
 
 } camera_metadata_tag_t;
 
@@ -654,5 +660,12 @@ typedef enum camera_metadata_enum_android_led_transmit {
 typedef enum camera_metadata_enum_android_led_available_leds {
     ANDROID_LED_AVAILABLE_LEDS_TRANSMIT,
 } camera_metadata_enum_android_led_available_leds_t;
+
+
+// ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL
+typedef enum camera_metadata_enum_android_info_supported_hardware_level {
+    ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED,
+    ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_FULL,
+} camera_metadata_enum_android_info_supported_hardware_level_t;
 
 
