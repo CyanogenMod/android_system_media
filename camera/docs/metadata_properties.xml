@@ -2280,5 +2280,26 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </static>
     </section>
+    <section name="info">
+      <static>
+        <entry name="supportedHardwareLevel" type="byte" enum="true">
+          <enum>
+            <value>LIMITED</value>
+            <value>FULL</value>
+          </enum>
+          <description>
+          The camera 3 HAL device can implement one of two possible operational modes;
+          limited and full. Full support is expected from new higher-end
+          devices. Limited mode has hardware requirements roughly in line with those
+          for a camera HAL device v1 implementation, and is expected from older or
+          inexpensive devices. Full is a strict superset of limited, and they share the
+          same essential operational flow.
+
+          For full details refer to "S3. Operational Modes" in camera3.h
+          </description>
+          <range>Optional. Default value is LIMITED.</range>
+        </entry>
+      </static>
+    </section>
   </namespace>
 </metadata>

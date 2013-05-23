@@ -349,6 +349,11 @@
         <li><a href="#static_android.led.availableLeds">android.led.availableLeds</a> (static)</li>
     </ul>
     </li> <!-- toc_section -->
+    <li><p class="toc_section"><a href="#section_info">info</a></p>
+    <ul class="toc_section">
+        <li><a href="#static_android.info.supportedHardwareLevel">android.info.supportedHardwareLevel</a> (static)</li>
+    </ul>
+    </li> <!-- toc_section -->
   </ul>
 
   <h1>Properties</h1>
@@ -10127,6 +10132,86 @@
             </td>
 
             <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+
+  <!-- end of section -->
+  <tr><td colspan="7" id="section_info" class="section">info</td></tr>
+
+
+      <tr><td colspan="7" class="kind">static</td></tr>
+
+      <thead>
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_notes">Notes</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="static_android.info.supportedHardwareLevel">
+            <td class="entry_name">android.<wbr>info.<wbr>supported<wbr>Hardware<wbr>Level</td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">LIMITED</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">FULL</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              
+          The camera 3 HAL device can implement one of two possible operational modes;
+          limited and full.<wbr> Full support is expected from new higher-end
+          devices.<wbr> Limited mode has hardware requirements roughly in line with those
+          for a camera HAL device v1 implementation,<wbr> and is expected from older or
+          inexpensive devices.<wbr> Full is a strict superset of limited,<wbr> and they share the
+          same essential operational flow.<wbr>
+<br>
+<br>          For full details refer to "S3.<wbr> Operational Modes" in camera3.<wbr>h
+          
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              Optional.<wbr> Default value is LIMITED.<wbr>
             </td>
 
             <td class="entry_notes">
