@@ -24,11 +24,13 @@
 #
 
 thisdir=$(cd "$(dirname "$0")"; pwd)
+out_files=()
 
 function relpath() {
     python -c "import os.path; print os.path.relpath('$1', '$PWD')"
 }
 
+# Generates a file. Appends to $out_files array as a side effect.
 function gen_file() {
     local in=$thisdir/$1
     local out=$thisdir/$2
@@ -40,11 +42,41 @@ function gen_file() {
     if [[ $succ -eq 0 ]]
     then
         echo "OK: Generated $(relpath "$out")"
+        out_files+=$'\n'" $out"
     else
         echo "FAIL: Errors while generating $(relpath "$out")" >& 2
     fi
 
     return $succ
+}
+
+# Print a list of git repository paths which were affected after file generation
+function affected_git_directories() {
+    local input_files=($@)
+    local git_directories=()
+
+    for file in "${input_files[@]}"; do
+        local dir_path="$(dirname "$file")"
+        echo "Trying to cd into $dir_path" >& /dev/null
+        # Absolute path to the git repository root of that file
+        local git_path="$(cd "$dir_path";
+                          git rev-parse --show-toplevel 2> /dev/null)"
+        if [[ $? -eq 0 ]]; then
+            # Both staged and unstaged changes
+            local diff_result="$(git status --porcelain | egrep -c -v '^[?][?]')"
+            echo "Diff result was $diff_result" >& /dev/null
+            echo "Diff result was $diff_result" >& /dev/null
+            if [[ $diff_result -eq 0 ]]; then
+                echo "No changes in ${git_path}"  >& /dev/null
+            else
+                echo "There are changes in ${git_path}" >& /dev/null
+                git_directories+=("$git_path")
+            fi
+        fi
+    done
+
+    # print as result the unique list of git directories affected
+    printf %s\\n "${git_directories}" | sort | uniq
 }
 
 $thisdir/metadata-check-dependencies || exit 1
@@ -54,6 +86,17 @@ gen_file html.mako docs.html || exit 1
 gen_file camera_metadata_tag_info.mako ../src/camera_metadata_tag_info.c || exit 1
 gen_file camera_metadata_tags.mako ../include/system/camera_metadata_tags.h || exit 1
 
+echo ""
+echo "===================================================="
 echo "Successfully generated all metadata source files"
+echo "===================================================="
+echo ""
+
+echo "****************************************************"
+echo "The following git repositories need to be committed:"
+echo "****************************************************"
+echo ""
+affected_git_directories "${out_files[@]}"
+echo ""
 
 exit 0
