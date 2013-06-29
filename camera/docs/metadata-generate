@@ -23,7 +23,13 @@
 #   ../src/camera_metadata_tags.h
 #
 
+if [[ -z $ANDROID_BUILD_TOP ]]; then
+    echo "Please source build/envsetup.sh before running script" >& 2
+    exit 1
+fi
+
 thisdir=$(cd "$(dirname "$0")"; pwd)
+fwkdir="$ANDROID_BUILD_TOP/frameworks/base/core/java/android/hardware/photography/"
 out_files=()
 
 function relpath() {
@@ -34,6 +40,14 @@ function relpath() {
 function gen_file() {
     local in=$thisdir/$1
     local out=$thisdir/$2
+
+    gen_file_abs "$in" "$out"
+    return $?
+}
+
+function gen_file_abs() {
+    local in="$1"
+    local out="$2"
 
     python $thisdir/metadata_parser_xml.py $thisdir/metadata_properties.xml $in $out
 
@@ -67,7 +81,7 @@ function affected_git_directories() {
             echo "Diff result was $diff_result" >& /dev/null
             echo "Diff result was $diff_result" >& /dev/null
             if [[ $diff_result -eq 0 ]]; then
-                echo "No changes in ${git_path}"  >& /dev/null
+                echo "No changes in ${git_path}" >& /dev/null
             else
                 echo "There are changes in ${git_path}" >& /dev/null
                 git_directories+=("$git_path")
@@ -76,7 +90,7 @@ function affected_git_directories() {
     done
 
     # print as result the unique list of git directories affected
-    printf %s\\n "${git_directories}" | sort | uniq
+    printf %s\\n "${git_directories[@]}" | sort | uniq
 }
 
 $thisdir/metadata-check-dependencies || exit 1
@@ -85,6 +99,9 @@ $thisdir/metadata-parser-sanity-check || exit 1
 gen_file html.mako docs.html || exit 1
 gen_file camera_metadata_tag_info.mako ../src/camera_metadata_tag_info.c || exit 1
 gen_file camera_metadata_tags.mako ../include/system/camera_metadata_tags.h || exit 1
+gen_file_abs CaptureResultKeys.mako "$fwkdir/CaptureResultKeys.java" || exit 1
+gen_file_abs CaptureRequestKeys.mako "$fwkdir/CaptureRequestKeys.java" || exit 1
+gen_file_abs CameraPropertiesKeys.mako "$fwkdir/CameraPropertiesKeys.java" || exit 1
 
 echo ""
 echo "===================================================="

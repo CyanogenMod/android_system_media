@@ -19,6 +19,7 @@ A set of helpers for rendering Mako templates with a Metadata model.
 """
 
 import metadata_model
+import re
 from collections import OrderedDict
 
 _context_buf = None
@@ -112,6 +113,66 @@ def path_name(node):
   path.append(node)
 
   return ".".join((i.name for i in path))
+
+def has_descendants_with_enums(node):
+  """
+  Determine whether or not the current node is or has any descendants with an
+  Enum node.
+
+  Args:
+    node: a Node instance
+
+  Returns:
+    True if it finds an Enum node in the subtree, False otherwise
+  """
+  return bool(node.find_first(lambda x: isinstance(x, metadata_model.Enum)))
+
+def get_children_by_throwing_away_kind(node, member='entries'):
+  """
+  Get the children of this node by compressing the subtree together by removing
+  the kind and then combining any children nodes with the same name together.
+
+  Args:
+    node: An instance of Section, InnerNamespace, or Kind
+
+  Returns:
+    An iterable over the combined children of the subtree of node,
+    as if the Kinds never existed.
+
+  Remarks:
+    Not recursive. Call this function repeatedly on each child.
+  """
+
+  if isinstance(node, metadata_model.Section):
+    # Note that this makes jump from Section to Kind,
+    # skipping the Kind entirely in the tree.
+    node_to_combine = node.combine_kinds_into_single_node()
+  else:
+    node_to_combine = node
+
+  combined_kind = node_to_combine.combine_children_by_name()
+
+  return (i for i in getattr(combined_kind, member))
+
+def get_children_by_filtering_kind(section, kind_name, member='entries'):
+  """
+  Takes a section and yields the children of the kind under this section.
+
+  Args:
+    section: An instance of Section
+    kind_name: A name of the kind, i.e. 'dynamic' or 'static' or 'controls'
+
+  Returns:
+    An iterable over the children of the specified kind.
+  """
+
+# TODO: test/use this function
+  matched_kind = next((i for i in section.kinds if i.name == kind_name), None)
+
+  if matched_kind:
+    return getattr(matched_kind, member)
+  else:
+    return ()
 
 ##
 ## Filters
@@ -241,3 +302,233 @@ def ctype_enum(what):
     code doesn't support enums directly yet.
   """
   return 'TYPE_%s' %(what.upper())
+
+def jtype(entry):
+  """
+  Calculate the Java type from an entry type string, to be used as a generic
+  type argument in Java. The type is guaranteed to inherit from Object.
+
+  Remarks:
+    Since Java generics cannot be instantiated with primitives, this version
+    will use boxed types when absolutely required.
+
+  Returns:
+    The string representing the Java type.
+  """
+
+  if not isinstance(entry, metadata_model.Entry):
+    raise ValueError("Expected entry to be an instance of Entry")
+
+  primitive_type = entry.type
+
+  if entry.enum:
+    name = entry.name
+
+    name_without_ons = entry.get_name_as_list()[1:]
+    base_type = ".".join([pascal_case(i) for i in name_without_ons]) + \
+                 "Key.Enum"
+  else:
+    mapping = {
+      'int32': 'Integer',
+      'int64': 'Long',
+      'float': 'Float',
+      'double': 'Double',
+      'byte': 'Byte',
+      'rational': 'Rational'
+    }
+
+    base_type = mapping[primitive_type]
+
+  if entry.container == 'array':
+    additional = '[]'
+
+    #unbox if it makes sense
+    if primitive_type != 'rational' and not entry.enum:
+      base_type = jtype_primitive(primitive_type)
+  else:
+    additional = ''
+
+  return "%s%s" %(base_type, additional)
+
+def jtype_primitive(what):
+  """
+  Calculate the Java type from an entry type string.
+
+  Remarks:
+    Makes a special exception for Rational, since it's a primitive in terms of
+    the C-library camera_metadata type system.
+
+  Returns:
+    The string representing the primitive type
+  """
+  mapping = {
+    'int32': 'int',
+    'int64': 'long',
+    'float': 'float',
+    'double': 'double',
+    'byte': 'byte',
+    'rational': 'Rational'
+  }
+
+  try:
+    return mapping[what]
+  except KeyError as e:
+    raise ValueError("Can't map '%s' to a primitive, not supported" %what)
+
+def jclass(entry):
+  """
+  Calculate the java Class reference string for an entry.
+
+  Args:
+    entry: an Entry node
+
+  Example:
+    <entry name="some_int" type="int32"/>
+    <entry name="some_int_array" type="int32" container='array'/>
+
+    jclass(some_int) == 'int.class'
+    jclass(some_int_array) == 'int[].class'
+
+  Returns:
+    The ClassName.class string
+  """
+  the_type = entry.type
+  try:
+    class_name = jtype_primitive(the_type)
+  except ValueError as e:
+    class_name = the_type
+
+  if entry.container == 'array':
+    class_name += "[]"
+
+  return "%s.class" %class_name
+
+def jidentifier(what):
+  """
+  Convert the input string into a valid Java identifier.
+
+  Args:
+    what: any identifier string
+
+  Returns:
+    String with added underscores if necessary.
+  """
+  if re.match("\d", what):
+    return "_%s" %what
+  else:
+    return what
+
+def enum_calculate_value_string(enum_value):
+  """
+  Calculate the value of the enum, even if it does not have one explicitly
+  defined.
+
+  This looks back for the first enum value that has a predefined value and then
+  applies addition until we get the right value, using C-enum semantics.
+
+  Args:
+    enum_value: an EnumValue node with a valid Enum parent
+
+  Example:
+    <enum>
+      <value>X</value>
+      <value id="5">Y</value>
+      <value>Z</value>
+    </enum>
+
+    enum_calculate_value_string(X) == '0'
+    enum_calculate_Value_string(Y) == '5'
+    enum_calculate_value_string(Z) == '6'
+
+  Returns:
+    String that represents the enum value as an integer literal.
+  """
+
+  enum_value_siblings = list(enum_value.parent.values)
+  this_index = enum_value_siblings.index(enum_value)
+
+  def is_hex_string(instr):
+    return bool(re.match('0x[a-f0-9]+$', instr, re.IGNORECASE))
+
+  base_value = 0
+  base_offset = 0
+  emit_as_hex = False
+
+  this_id = enum_value_siblings[this_index].id
+  while this_index != 0 and not this_id:
+    this_index -= 1
+    base_offset += 1
+    this_id = enum_value_siblings[this_index].id
+
+  if this_id:
+    base_value = int(this_id, 0)  # guess base
+    emit_as_hex = is_hex_string(this_id)
+
+  if emit_as_hex:
+    return "0x%X" %(base_value + base_offset)
+  else:
+    return "%d" %(base_value + base_offset)
+
+def enumerate_with_last(iterable):
+  """
+  Enumerate a sequence of iterable, while knowing if this element is the last in
+  the sequence or not.
+
+  Args:
+    iterable: an Iterable of some sequence
+
+  Yields:
+    (element, bool) where the bool is True iff the element is last in the seq.
+  """
+  it = (i for i in iterable)
+
+  first = next(it)  # OK: raises exception if it is empty
+
+  second = first  # for when we have only 1 element in iterable
+
+  try:
+    while True:
+      second = next(it)
+      # more elements remaining.
+      yield (first, False)
+      first = second
+  except StopIteration:
+    # last element. no more elements left
+    yield (second, True)
+
+def pascal_case(what):
+  """
+  Convert the first letter of a string to uppercase, to make the identifier
+  conform to PascalCase.
+
+  Args:
+    what: a string representing some identifier
+
+  Returns:
+    String with first letter capitalized
+
+  Example:
+    pascal_case("helloWorld") == "HelloWorld"
+    pascal_case("foo") == "Foo"
+  """
+  return what[0:1].upper() + what[1:]
+
+def jenum(enum):
+  """
+  Calculate the Java symbol referencing an enum value (in Java).
+
+  Args:
+    enum: An Enum node
+
+  Returns:
+    String representing the Java symbol
+  """
+
+  entry = enum.parent
+  name = entry.name
+
+  name_without_ons = entry.get_name_as_list()[1:]
+  jenum_name = ".".join([pascal_case(i) for i in name_without_ons]) + "Key.Enum"
+
+  return jenum_name
+

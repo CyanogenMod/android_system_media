@@ -23,12 +23,13 @@ metadata_properties.xml file.
   Node: Base class for most nodes.
   Entry: A node corresponding to <entry> elements.
   Clone: A node corresponding to <clone> elements.
+  MergedEntry: A node corresponding to either <entry> or <clone> elements.
   Kind: A node corresponding to <dynamic>, <static>, <controls> elements.
   InnerNamespace: A node corresponding to a <namespace> nested under a <kind>.
   OuterNamespace: A node corresponding to a <namespace> with <kind> children.
   Section: A node corresponding to a <section> element.
   Enum: A class corresponding an <enum> element within an <entry>
-  Value: A class corresponding to a <value> element within an Enum
+  EnumValue: A class corresponding to a <value> element within an Enum
   Metadata: Root node that also provides tree construction functionality.
   Tag: A node corresponding to a top level <tag> element.
 """
@@ -79,7 +80,6 @@ class Node(object):
     for i in self._get_children():
       for j in i.find_all(pred):
         yield j
-
 
   def find_first(self, pred):
     """
@@ -147,7 +147,7 @@ class Node(object):
 
   def _children_name_map_matching(self, match=lambda x: True):
     d = {}
-    for i in _get_children():
+    for i in self._get_children():
       if match(i):
         d[i.name] = i
     return d
@@ -283,7 +283,6 @@ class Metadata(Node):
       (they will be ignored). Also the target entry need not be inserted
       ahead of the clone entry.
     """
-    entry_name = clone['name']
     # figure out corresponding entry later. allow clone insert, entry insert
     entry = None
     c = Clone(entry, **clone)
@@ -310,7 +309,7 @@ class Metadata(Node):
       if p.parent is not None:
         p.parent._entries.remove(p)
       # remove from parents' _leafs list
-      for ancestor in p.find_parents(lambda x: not isinstance(x, MetadataSet)):
+      for ancestor in p.find_parents(lambda x: not isinstance(x, Metadata)):
         ancestor._leafs.remove(p)
 
       # remove from global list
@@ -652,6 +651,37 @@ class Section(Node):
     for k in new_kinds_lst:
       yield k
 
+  def combine_kinds_into_single_node(self):
+    r"""
+    Combines the section's Kinds into a single node.
+
+    Combines all the children (kinds) of this section into a single
+    virtual Kind node.
+
+    Returns:
+      A new Kind node that collapses all Kind siblings into one, combining
+      all their children together.
+
+      For example, given self.kinds == [ x, y ]
+
+        x  y               z
+      / |  | \    -->   / | | \
+      a b  c d          a b c d
+
+      a new instance z is returned in this example.
+
+    Remarks:
+      The children of the kinds are the same references as before, that is
+      their parents will point to the old parents and not to the new parent.
+    """
+    combined = Kind(name="combined", parent=self)
+
+    for k in self._get_children():
+      combined._namespaces.extend(k.namespaces)
+      combined._entries.extend(k.entries)
+
+    return combined
+
 class Kind(Node):
   """
   A node corresponding to one of: <static>,<dynamic>,<controls> under a
@@ -695,6 +725,63 @@ class Kind(Node):
     for i in self.entries:
       yield i
 
+  def combine_children_by_name(self):
+    r"""
+    Combine multiple children with the same name into a single node.
+
+    Returns:
+      A new Kind where all of the children with the same name were combined.
+
+      For example:
+
+      Given a Kind k:
+
+              k
+            / | \
+            a b c
+            | | |
+            d e f
+
+      a.name == "foo"
+      b.name == "foo"
+      c.name == "bar"
+
+      The returned Kind will look like this:
+
+             k'
+            /  \
+            a' c'
+          / |  |
+          d e  f
+
+    Remarks:
+      This operation is not recursive. To combine the grandchildren and other
+      ancestors, call this method on the ancestor nodes.
+    """
+    return Kind._combine_children_by_name(self, new_type=type(self))
+
+  # new_type is either Kind or InnerNamespace
+  @staticmethod
+  def _combine_children_by_name(self, new_type):
+    new_ins_dict = OrderedDict()
+    new_ent_dict = OrderedDict()
+
+    for ins in self.namespaces:
+      new_ins = new_ins_dict.setdefault(ins.name,
+                                        InnerNamespace(ins.name, parent=self))
+      new_ins._namespaces.extend(ins.namespaces)
+      new_ins._entries.extend(ins.entries)
+
+    for ent in self.entries:
+      new_ent = new_ent_dict.setdefault(ent.name,
+                                        ent.merge())
+
+    kind = new_type(self.name, self.parent)
+    kind._namespaces = new_ins_dict.values()
+    kind._entries = new_ent_dict.values()
+
+    return kind
+
 class InnerNamespace(Node):
   """
   A node corresponding to a <namespace> which is an ancestor of a Kind.
@@ -737,6 +824,42 @@ class InnerNamespace(Node):
     for i in self.entries:
       yield i
 
+  def combine_children_by_name(self):
+    r"""
+    Combine multiple children with the same name into a single node.
+
+    Returns:
+      A new InnerNamespace where all of the children with the same name were
+      combined.
+
+      For example:
+
+      Given an InnerNamespace i:
+
+              i
+            / | \
+            a b c
+            | | |
+            d e f
+
+      a.name == "foo"
+      b.name == "foo"
+      c.name == "bar"
+
+      The returned InnerNamespace will look like this:
+
+             i'
+            /  \
+            a' c'
+          / |  |
+          d e  f
+
+    Remarks:
+      This operation is not recursive. To combine the grandchildren and other
+      ancestors, call this method on the ancestor nodes.
+    """
+    return Kind._combine_children_by_name(self, new_type=type(self))
+
 class EnumValue(Node):
   """
   A class corresponding to a <value> element within an <enum> within an <entry>.
@@ -777,6 +900,8 @@ class Enum(Node):
   Attributes (Read-Only):
     parent: An edge to the parent, always an Entry instance.
     values: A sequence of EnumValue children.
+    has_values_with_id: A boolean representing if any of the children have a
+        non-empty id property.
   """
   def __init__(self, parent, values, ids={}, optionals=[], notes={}):
     self._values =                                                             \
@@ -789,6 +914,10 @@ class Enum(Node):
   @property
   def values(self):
     return (i for i in self._values)
+
+  @property
+  def has_values_with_id(self):
+    return bool(any(i for i in self.values if i.id))
 
   def _get_children(self):
     return (i for i in self._values)
@@ -954,8 +1083,8 @@ class Entry(Node):
     # access these via the 'enum' prop
     enum_values = kwargs.get('enum_values')
     enum_optionals = kwargs.get('enum_optionals')
-    enum_notes = kwargs.get('enum_notes') # { value => notes }
-    enum_ids = kwargs.get('enum_ids') # { value => notes }
+    enum_notes = kwargs.get('enum_notes')  # { value => notes }
+    enum_ids = kwargs.get('enum_ids')  # { value => notes }
     self._tuple_values = kwargs.get('tuple_values')
 
     self._description = kwargs.get('description')
@@ -964,7 +1093,7 @@ class Entry(Node):
     self._notes = kwargs.get('notes')
 
     self._tag_ids = kwargs.get('tag_ids', [])
-    self._tags = None # Filled in by MetadataSet::_construct_tags
+    self._tags = None  # Filled in by MetadataSet::_construct_tags
 
     self._type_notes = kwargs.get('type_notes')
 
@@ -1106,9 +1235,9 @@ class Clone(Entry):
       Note that type is not specified since it has to be the same as the
       entry.type.
     """
-    self._entry = entry # Entry object
+    self._entry = entry  # Entry object
     self._target_kind = kwargs['target_kind']
-    self._name = kwargs['name'] # same as entry.name
+    self._name = kwargs['name']  # same as entry.name
     self._kind = kwargs['kind']
 
     # illegal to override the type, it should be the same as the entry
