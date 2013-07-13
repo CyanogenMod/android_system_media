@@ -936,6 +936,12 @@ class Entry(Node):
     container: The container attribute from <entry container="array">, or None.
     container_sizes: A sequence of size strings or None if container is None.
     enum: An Enum instance if the enum attribute is true, None otherwise.
+    visibility: The visibility of this entry ('system', 'hidden', 'public')
+                across the system. System entries are only visible in native code
+                headers. Hidden entries are marked @hide in managed code, while
+                public entries are visible in the Android SDK.
+    applied_visibility: As visibility, but always valid, defaulting to 'system'
+                        if no visibility is given for an entry.
     tuple_values: A sequence of strings describing the tuple values,
                   None if container is not 'tuple'.
     description: A string description, or None.
@@ -981,6 +987,8 @@ class Entry(Node):
       notes: A string with the notes for the entry
       tag_ids: A list of tag ID strings, e.g. ['BC', 'V1']
       type_notes: A string with the notes for the type
+      visibility: A string describing the visibility, eg 'system', 'hidden',
+                  'public'
     """
 
     if kwargs.get('type') is None:
@@ -1003,6 +1011,14 @@ class Entry(Node):
   @property
   def kind(self):
     return self._kind
+
+  @property
+  def visibility(self):
+    return self._visibility
+
+  @property
+  def applied_visibility(self):
+    return self._visibility or 'system'
 
   @property
   def name_short(self):
@@ -1101,6 +1117,8 @@ class Entry(Node):
       self._enum = Enum(self, enum_values, enum_ids, enum_optionals, enum_notes)
     else:
       self._enum = None
+
+    self._visibility = kwargs.get('visibility')
 
     self._property_keys = kwargs
 
@@ -1294,6 +1312,7 @@ class MergedEntry(Entry):
                     'tuple_values',
                     'type',
                     'type_notes',
+                    'visibility'
                    ]
 
     for p in props_common:

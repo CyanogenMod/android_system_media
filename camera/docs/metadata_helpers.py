@@ -532,3 +532,39 @@ def jenum(enum):
 
   return jenum_name
 
+def any_visible(section, kind_name, visibilities):
+  """
+  Determine if entries in this section have an applied visibility that's in
+  the list of given visibilities.
+
+  Args:
+    section: A section of metadata
+    kind_name: A name of the kind, i.e. 'dynamic' or 'static' or 'controls'
+    visibilities: An iterable of visibilities to match against
+
+  Returns:
+    True if the section has any entries with any of the given visibilities. False otherwise.
+  """
+
+  for inner_namespace in get_children_by_filtering_kind(section, kind_name,
+                                                        'namespaces'):
+    if any(filter_visibility(inner_namespace.merged_entries, visibilities)):
+      return True
+
+  return any(filter_visibility(get_children_by_filtering_kind(section, kind_name,
+                                                              'merged_entries'),
+                               visibilities))
+
+
+def filter_visibility(entries, visibilities):
+  """
+  Remove entries whose applied visibility is not in the supplied visibilities.
+
+  Args:
+    entries: An iterable of Entry nodes
+    visibilities: An iterable of visibilities to filter against
+
+  Yields:
+    An iterable of Entry nodes
+  """
+  return (e for e in entries if e.applied_visibility in visibilities)

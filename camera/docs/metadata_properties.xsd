@@ -146,6 +146,15 @@
                 </restriction>
             </simpleType>
         </attribute>
+        <attribute name="visibility">
+            <simpleType>
+                <restriction base="string">
+                    <enumeration value="system" />
+                    <enumeration value="hidden" />
+                    <enumeration value="public" />
+                </restriction>
+            </simpleType>
+        </attribute>
     </complexType>
 
     <complexType name="EnumType">

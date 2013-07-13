@@ -42,6 +42,11 @@ import static android.hardware.photography.CameraMetadata.Key;
 ##
 ## Function to generate an enum
 <%def name="generate_enum(entry)">
+            % if entry.applied_visibility == 'hidden':
+            /**
+             * @hide
+             */
+            %endif
             public static final class ${entry.get_name_minimal() | pascal_case}Key extends Key<${jtype(entry)}> {
                 public enum Enum {
                   % for value,last in enumerate_with_last(entry.enum.values):
@@ -75,37 +80,65 @@ import static android.hardware.photography.CameraMetadata.Key;
 public final class ${java_name}Keys {
 % for outer_namespace in metadata.outer_namespaces: ## assumes single 'android' namespace
   % for section in outer_namespace.sections:
-    % if section.find_first(lambda x: isinstance(x, metadata_model.Entry) and x.kind == xml_name):
+    % if section.find_first(lambda x: isinstance(x, metadata_model.Entry) and x.kind == xml_name) and \
+         any_visible(section, xml_name, ('public','hidden') ):
+    % if not any_visible(section, xml_name, ('public')):
+    /**
+     * @hide
+     */
+    %endif
     public static final class ${section.name | pascal_case} {
       % for inner_namespace in get_children_by_filtering_kind(section, xml_name, 'namespaces'):
 ## We only support 1 level of inner namespace, i.e. android.a.b and android.a.b.c works, but not android.a.b.c.d
 ## If we need to support more, we should use a recursive function here instead.. but the indentation gets trickier.
         public static final class ${inner_namespace.name| pascal_case} {
-          % for entry in inner_namespace.merged_entries:
+          % for entry in filter_visibility(inner_namespace.merged_entries, ('hidden','public')):
             % if entry.enum:
 ${generate_enum(entry)}
+            % if entry.applied_visibility == 'hidden':
+            /**
+             * @hide
+             */
+            %endif
             public static final Key<${jtype(entry)}> ${entry.get_name_minimal() | csym} =
                     new ${entry.get_name_minimal() | pascal_case}Key("${entry.name}");
             % else:
+            % if entry.applied_visibility == 'hidden':
+            /**
+             * @hide
+             */
+            %endif
             public static final Key<${jtype(entry)}> ${entry.get_name_minimal() | csym} =
                     new Key<${jtype(entry)}>("${entry.name}", ${jclass(entry)});
             % endif
           % endfor
         }
       % endfor
-
-      % for entry in get_children_by_filtering_kind(section, xml_name, 'merged_entries'):
+      % for entry in filter_visibility( \
+          get_children_by_filtering_kind(section, xml_name, 'merged_entries'), \
+                                         ('hidden', 'public')):
         % if entry.enum:
 ${generate_enum(entry)}
+          % if entry.applied_visibility == 'hidden':
+        /**
+         * @hide
+         */
+          %endif
         public static final Key<${jtype(entry)}> ${entry.get_name_minimal() | csym} =
                 new ${entry.get_name_minimal() | pascal_case}Key("${entry.name}");
         % else:
+          % if entry.applied_visibility == 'hidden':
+        /**
+         * @hide
+         */
+          %endif
         public static final Key<${jtype(entry)}> ${entry.get_name_minimal() | csym} =
                 new Key<${jtype(entry)}>("${entry.name}", ${jclass(entry)});
         % endif
       % endfor
 
     }
+
     % endif
   % endfor
 % endfor

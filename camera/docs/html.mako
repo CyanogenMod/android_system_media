@@ -18,7 +18,7 @@
 <head>
   <!-- automatically generated from html.mako. do NOT edit directly -->
   <meta charset="utf-8" />
-  <title>Android Camera HAL2.0 Properties</title>
+  <title>Android Camera HAL3.0 Properties</title>
   <style type="text/css">
     .section { font-size: 1.5em; font-weight: bold; background-color: beige; padding: 0.5em 0em 0.5em 0.1em }
     .kind { font-size: 1.2em; font-weight: bold; padding-left: 0.5em; background-color: gray }
@@ -32,6 +32,7 @@
     .th_tags { width: 5% }
     .th_notes { width: 30% }
     .th_type { width: 20% }
+    .th_visibility { width: 10% }
     td { font-size: 0.9em; }
 
     /* hide the first thead, we need it there only to enforce column sizes */
@@ -39,6 +40,7 @@
 
     /* Entry flair */
     .entry_name { font-family: monospace; font-style: italic; }
+    .entry_visibility { text-align: center; }
 
     /* Entry type flair */
     .entry_type_name { color: darkgreen; font-weight: bold; }
@@ -101,7 +103,7 @@
 
 
 <body>
-  <h1>Android Camera HAL2.0 Properties</h1>
+  <h1>Android Camera HAL3.0 Properties</h1>
 
   <h2>Table of Contents</h2>
   <ul class="toc">
@@ -126,6 +128,7 @@
       <tr>
         <th class="th_name">Property Name</th>
         <th class="th_type">Type</th>
+        <th class="th_visibilty">Visibility</th>
         <th class="th_description">Description</th>
         <th class="th_units">Units</th>
         <th class="th_range">Range</th>
@@ -150,6 +153,7 @@
         <tr>
           <th class="th_name">Property Name</th>
           <th class="th_type">Type</th>
+          <th class="th_visibility">Visibility</th>
           <th class="th_description">Description</th>
           <th class="th_units">Units</th>
           <th class="th_range">Range</th>
@@ -236,6 +240,8 @@
               % endif
 
             </td> <!-- entry_type -->
+
+            <td class="entry_visibility">${prop.applied_visibility | wbr}</td>
 
             <td class="entry_description">
             % if prop.description is not None:

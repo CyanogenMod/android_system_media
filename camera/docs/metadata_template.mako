@@ -72,6 +72,9 @@
             </clone>
         % else:
             <entry name="${prop.name_short}" type="${prop.type}"
+          % if prop.visibility:
+                visibility="${prop.visibility}"
+          % endif
           % if prop.enum:
                 enum="true"
           % endif

@@ -144,6 +144,11 @@ class MetadataParserXml:
     d = {}
 
     #
+    # Visibility
+    #
+    d['visibility'] = entry.get('visibility')
+
+    #
     # Enum
     #
     if entry.get('enum', 'false') == 'true':

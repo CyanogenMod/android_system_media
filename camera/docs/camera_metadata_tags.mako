@@ -27,6 +27,18 @@
  * Generated automatically from camera_metadata_tags.mako
  */
 
+<%!
+  def annotated_type(entry):
+    if entry.enum:
+       type = 'enum'
+    else:
+       type = entry.type
+    if entry.container == 'array':
+       type += '[]'
+
+    return type
+%>\
+\
 /** TODO: Nearly every enum in this file needs a description */
 
 /**
@@ -65,9 +77,10 @@ typedef enum camera_metadata_tag {
     % for sec in find_all_sections(metadata):
       % for idx,entry in enumerate(find_unique_entries(sec)):
         % if idx == 0:
-    ${entry.name | csym,ljust(30)} = ${path_name(find_parent_section(entry)) | csym}_START,
+    ${entry.name + " = " | csym,ljust(50)}// ${annotated_type(entry) | ljust(12)} | ${entry.applied_visibility}
+            ${path_name(find_parent_section(entry)) | csym}_START,
         % else:
-    ${entry.name | csym},
+    ${entry.name + "," | csym,ljust(50)}// ${annotated_type(entry) | ljust(12)} | ${entry.applied_visibility}
         % endif
       % endfor
     ${path_name(sec) | csym}_END,
