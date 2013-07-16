@@ -166,18 +166,20 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>List of areas to use for
           metering</description>
           <notes>Each area is a rectangle plus weight: xmin, ymin,
-          xmax, ymax, weight. The coordinate system is based on the
-          active pixel array, with (0,0) being the top-left of the
-          active pixel array, and
+          xmax, ymax, weight.
+
+          The coordinate system is based on the active pixel array,
+          with (0,0) being the top-left of the active pixel array, and
           (android.sensor.info.activeArraySize.width,
           android.sensor.info.activeArraySize.height) being the
           bottom-right point of the active pixel array. The weight
-          should be nonnegative. If all regions have 0 weight, then
-          no specific metering area needs to be used by the HAL. If
-          the metering region is outside the current
-          android.scaler.cropRegion, the HAL should ignore the
-          sections outside the region and output the used sections
-          in the frame metadata</notes>
+          should be nonnegative.
+
+          If all regions have 0 weight, then no specific metering area
+          needs to be used by the HAL. If the metering region is
+          outside the current android.scaler.cropRegion, the HAL
+          should ignore the sections outside the region and output the
+          used sections in the frame metadata</notes>
           <tag id="BC" />
         </entry>
         <entry name="aeTargetFpsRange" type="int32" visibility="public"
@@ -210,9 +212,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <notes>This entry is normally set to IDLE, or is not
           included at all in the request settings. When included and
           set to START, the HAL must trigger the autoexposure
-          precapture metering sequence. The effect of AE precapture
-          trigger depends on the current AE mode and state; see the
-          camera HAL device v3 header for details.</notes>
+          precapture metering sequence.
+
+          The effect of AE precapture trigger depends on the current
+          AE mode and state; see the camera HAL device v3 header for
+          details.</notes>
           <tag id="BC" />
         </entry>
         <entry name="afMode" type="byte" visibility="public" enum="true">
@@ -222,58 +226,65 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             android.lens.focusPosition is controlled by the
             application</notes></value>
             <value>AUTO
-            <notes>if lens is not fixed focus. Use
-            android.lens.minimumFocusDistance to determine if lens
-            is fixed focus In this mode, the lens does not move
-            unless the autofocus trigger action is called. When
-            that trigger is activated, AF must transition to
-            ACTIVE_SCAN, then to the outcome of the scan (FOCUSED
-            or NOT_FOCUSED). Triggering cancel AF resets the lens
-            position to default, and sets the AF state to
-            INACTIVE.</notes></value>
+            <notes>if lens is not fixed focus.
+
+            Use android.lens.minimumFocusDistance to determine if lens
+            is fixed focus In this mode, the lens does not move unless
+            the autofocus trigger action is called. When that trigger
+            is activated, AF must transition to ACTIVE_SCAN, then to
+            the outcome of the scan (FOCUSED or
+            NOT_FOCUSED).
+
+            Triggering cancel AF resets the lens position to default,
+            and sets the AF state to INACTIVE.</notes></value>
             <value>MACRO
             <notes>In this mode, the lens does not move unless the
-            autofocus trigger action is called. When that trigger
-            is activated, AF must transition to ACTIVE_SCAN, then
-            to the outcome of the scan (FOCUSED or NOT_FOCUSED).
-            Triggering cancel AF resets the lens position to
-            default, and sets the AF state to
+            autofocus trigger action is called.
+
+            When that trigger is activated, AF must transition to
+            ACTIVE_SCAN, then to the outcome of the scan (FOCUSED or
+            NOT_FOCUSED).  Triggering cancel AF resets the lens
+            position to default, and sets the AF state to
             INACTIVE.</notes></value>
             <value>CONTINUOUS_VIDEO
             <notes>In this mode, the AF algorithm modifies the lens
             position continually to attempt to provide a
-            constantly-in-focus image stream. The focusing behavior
-            should be suitable for good quality video recording;
-            typically this means slower focus movement and no
-            overshoots. When the AF trigger is not involved, the AF
-            algorithm should start in INACTIVE state, and then
-            transition into PASSIVE_SCAN and PASSIVE_FOCUSED states
-            as appropriate. When the AF trigger is activated, the
-            algorithm should immediately transition into AF_FOCUSED
-            or AF_NOT_FOCUSED as appropriate, and lock the lens
-            position until a cancel AF trigger is received. Once
-            cancel is received, the algorithm should transition
-            back to INACTIVE and resume passive scan. Note that
-            this behavior is not identical to CONTINUOUS_PICTURE,
-            since an ongoing PASSIVE_SCAN must immediately be
+            constantly-in-focus image stream.
+
+            The focusing behavior should be suitable for good quality
+            video recording; typically this means slower focus
+            movement and no overshoots. When the AF trigger is not
+            involved, the AF algorithm should start in INACTIVE state,
+            and then transition into PASSIVE_SCAN and PASSIVE_FOCUSED
+            states as appropriate. When the AF trigger is activated,
+            the algorithm should immediately transition into
+            AF_FOCUSED or AF_NOT_FOCUSED as appropriate, and lock the
+            lens position until a cancel AF trigger is received.
+
+            Once cancel is received, the algorithm should transition
+            back to INACTIVE and resume passive scan. Note that this
+            behavior is not identical to CONTINUOUS_PICTURE, since an
+            ongoing PASSIVE_SCAN must immediately be
             canceled.</notes></value>
             <value>CONTINUOUS_PICTURE
             <notes>In this mode, the AF algorithm modifies the lens
             position continually to attempt to provide a
-            constantly-in-focus image stream. The focusing behavior
-            should be suitable for still image capture; typically
-            this means focusing as fast as possible. When the AF
-            trigger is not involved, the AF algorithm should start
-            in INACTIVE state, and then transition into
-            PASSIVE_SCAN and PASSIVE_FOCUSED states as appropriate
-            as it attempts to maintain focus. When the AF trigger
-            is activated, the algorithm should finish its
+            constantly-in-focus image stream.
+
+            The focusing behavior should be suitable for still image
+            capture; typically this means focusing as fast as
+            possible. When the AF trigger is not involved, the AF
+            algorithm should start in INACTIVE state, and then
+            transition into PASSIVE_SCAN and PASSIVE_FOCUSED states as
+            appropriate as it attempts to maintain focus. When the AF
+            trigger is activated, the algorithm should finish its
             PASSIVE_SCAN if active, and then transition into
-            AF_FOCUSED or AF_NOT_FOCUSED as appropriate, and lock
-            the lens position until a cancel AF trigger is
-            received. When the AF cancel trigger is activated, the
-            algorithm should transition back to INACTIVE and then
-            act as if it has just been started.</notes></value>
+            AF_FOCUSED or AF_NOT_FOCUSED as appropriate, and lock the
+            lens position until a cancel AF trigger is received.
+
+            When the AF cancel trigger is activated, the algorithm
+            should transition back to INACTIVE and then act as if it
+            has just been started.</notes></value>
             <value>EDOF
             <notes>Extended depth of field (digital focus). AF
             trigger is ignored, AF state should always be
@@ -292,18 +303,20 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>List of areas to use for focus
           estimation</description>
           <notes>Each area is a rectangle plus weight: xmin, ymin,
-          xmax, ymax, weight. The coordinate system is based on the
-          active pixel array, with (0,0) being the top-left of the
-          active pixel array, and
+          xmax, ymax, weight.
+
+          The coordinate system is based on the active pixel array,
+          with (0,0) being the top-left of the active pixel array, and
           (android.sensor.info.activeArraySize.width,
           android.sensor.info.activeArraySize.height) being the
           bottom-right point of the active pixel array. The weight
-          should be nonnegative. If all regions have 0 weight, then
-          no specific focus area needs to be used by the HAL. If
-          the focusing region is outside the current
-          android.scaler.cropRegion, the HAL should ignore the
-          sections outside the region and output the used sections
-          in the frame metadata</notes>
+          should be nonnegative.
+
+          If all regions have 0 weight, then no specific focus area
+          needs to be used by the HAL. If the focusing region is
+          outside the current android.scaler.cropRegion, the HAL
+          should ignore the sections outside the region and output the
+          used sections in the frame metadata</notes>
           <tag id="BC" />
         </entry>
         <entry name="afTrigger" type="byte" visibility="public" enum="true">
@@ -321,12 +334,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether the HAL must trigger autofocus.</description>
           <notes>This entry is normally set to IDLE, or is not
-          included at all in the request settings. When included and
-          set to START, the HAL must trigger the autofocus
-          algorithm. The effect of AF trigger depends on the current
-          AF mode and state; see the camera HAL device v3 header for
-          details. When set to CANCEL, the HAL must cancel any active
-          trigger, and return to initial AF state.</notes>
+          included at all in the request settings.
+
+          When included and set to START, the HAL must trigger the
+          autofocus algorithm. The effect of AF trigger depends on the
+          current AF mode and state; see the camera HAL device v3
+          header for details. When set to CANCEL, the HAL must cancel
+          any active trigger, and return to initial AF state.</notes>
           <tag id="BC" />
         </entry>
         <entry name="awbLock" type="byte" visibility="public" enum="true">
@@ -374,19 +388,21 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>List of areas to use for illuminant
           estimation</description>
-          <notes>Only used in AUTO mode. Each area is a rectangle
-          plus weight: xmin, ymin, xmax, ymax, weight. The
-          coordinate system is based on the active pixel array,
-          with (0,0) being the top-left of the active pixel array,
-          and (android.sensor.info.activeArraySize.width,
+          <notes>Only used in AUTO mode.
+
+          Each area is a rectangle plus weight: xmin, ymin, xmax,
+          ymax, weight. The coordinate system is based on the active
+          pixel array, with (0,0) being the top-left of the active
+          pixel array, and (android.sensor.info.activeArraySize.width,
           android.sensor.info.activeArraySize.height) being the
           bottom-right point of the active pixel array. The weight
-          should be nonnegative. If all regions have 0 weight, then
-          no specific metering area needs to be used by the HAL. If
-          the metering region is outside the current
-          android.scaler.cropRegion, the HAL should ignore the
-          sections outside the region and output the used sections
-          in the frame metadata</notes>
+          should be nonnegative.
+
+          If all regions have 0 weight, then no specific metering area
+          needs to be used by the HAL. If the metering region is
+          outside the current android.scaler.cropRegion, the HAL
+          should ignore the sections outside the region and output the
+          used sections in the frame metadata</notes>
           <tag id="BC" />
         </entry>
         <entry name="captureIntent" type="byte" visibility="public" enum="true">
@@ -471,10 +487,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             detection data to drive 3A routines. If face detection
             statistics are disabled, should still operate correctly
             (but not return face detection statistics to the
-            framework). Unlike the other scene modes, aeMode,
-            awbMode, and afMode remain active when FACE_PRIORITY is
-            set. This is due to compatibility concerns with the old
-            camera API</notes></value>
+            framework).
+
+            Unlike the other scene modes, aeMode, awbMode, and afMode
+            remain active when FACE_PRIORITY is set. This is due to
+            compatibility concerns with the old camera
+            API</notes></value>
             <value optional="true">ACTION</value>
             <value optional="true">PORTRAIT</value>
             <value optional="true">LANDSCAPE</value>
@@ -620,31 +638,35 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                container="array">
           <array>
             <size>3</size>
-            <size>lengthavailablescenemodes</size>
+            <size>length(availableSceneModes)</size>
           </array>
           <description>List of AE, AWB, and AF modes to use for
           each available scene mode</description>
           <range>For each listed scene mode, lists the aeMode,
           awbMode, and afMode that the HAL wants to use for that
-          scene mode. For each entry, the order is {aeMode,
-          awbMode, afMode} in order of increasing index</range>
+          scene mode.
+
+          For each entry, the order is {aeMode, awbMode, afMode} in
+          order of increasing index</range>
           <notes>When a scene mode is enabled, the HAL is expected
           to override aeMode, awbMode, and afMode with its
-          preferred settings for that scene mode. To simplify
-          communication with old camera API applications, the
-          service wants this override list in the static metadata.
-          The order of this list matches that of
-          availableSceneModes, with 3 entires for each scene mode.
-          The overrides listed for SCENE_MODE_FACE_PRIORITY are
-          ignored, since for that mode, the application-set aeMode,
-          awbMode, and afMode are used instead, like they are when
-          android.control.mode is AUTO. It is recommended that for
-          FACE_PRIORITY, the overrides should be set to 0. As an
-          example, if availableSceneModes is { FACE_PRIORITY,
-          ACTION, NIGHT }, then the service expects this field to
-          have 9 entries; for example { 0 , 0, 0, ON_AUTO_FLASH,
-          AUTO, CONTINUOUS_PICTURE, ON_AUTO_FLASH, INCANDESCENT,
-          AUTO }</notes>
+          preferred settings for that scene mode.
+
+          To simplify communication with old camera API applications,
+          the service wants this override list in the static metadata.
+          The order of this list matches that of availableSceneModes,
+          with 3 entires for each scene mode.  The overrides listed
+          for SCENE_MODE_FACE_PRIORITY are ignored, since for that
+          mode, the application-set aeMode, awbMode, and afMode are
+          used instead, like they are when android.control.mode is
+          AUTO.
+
+          It is recommended that for FACE_PRIORITY, the overrides
+          should be set to 0. As an example, if availableSceneModes is
+          { FACE_PRIORITY, ACTION, NIGHT }, then the service expects
+          this field to have 9 entries; for example { 0 , 0, 0,
+          ON_AUTO_FLASH, AUTO, CONTINUOUS_PICTURE, ON_AUTO_FLASH,
+          INCANDESCENT, AUTO }</notes>
           <tag id="BC" />
         </entry>
       </static>
@@ -1062,13 +1084,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           bytes</description>
           <range>&gt;= 0</range>
           <notes>If no JPEG output is produced for the request,
-          this must be 0. Otherwise, this describes the real size
-          of the compressed JPEG image placed in the output stream.
-          More specifically, if android.jpeg.maxSize = 1000000, and
-          a specific capture has android.jpeg.size = 500000, then
-          the output buffer from the JPEG stream will be 1000000
-          bytes, of which the first 500000 make up the real
-          data.</notes>
+          this must be 0.
+
+          Otherwise, this describes the real size of the compressed
+          JPEG image placed in the output stream.  More specifically,
+          if android.jpeg.maxSize = 1000000, and a specific capture
+          has android.jpeg.size = 500000, then the output buffer from
+          the JPEG stream will be 1000000 bytes, of which the first
+          500000 make up the real data.</notes>
         </entry>
         <clone entry="android.jpeg.thumbnailQuality"
         kind="controls"></clone>
@@ -1272,12 +1295,18 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Relative angle of camera optical axis to the
           perpendicular axis from the display</description>
           <range>[0-90) for first angle, [0-360) for second</range>
-          <notes>Examples: (0,0) means that the camera optical axis
-          is perpendicular to the display surface; (45,0) means
-          that the camera points 45 degrees up when device is held
-          upright; (45,90) means the camera points 45 degrees to
-          the right when the device is held upright. Use FACING
-          field to determine perpendicular outgoing
+          <notes>Examples:
+
+          (0,0) means that the camera optical axis
+          is perpendicular to the display surface;
+
+          (45,0) means that the camera points 45 degrees up when
+          device is held upright;
+
+          (45,90) means the camera points 45 degrees to the right when
+          the device is held upright.
+
+          Use FACING field to determine perpendicular outgoing
           direction</notes>
           <tag id="ADV" />
         </entry>
@@ -1367,11 +1396,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           and output (face rectangles).</description>
           <notes>Normalized coordinates refer to those in the
           (-1000,1000) range mentioned in the
-          android.hardware.Camera API. HAL implementations should
-          instead always use and emit sensor array-relative
-          coordinates for all region data. Does not need to be
-          listed in static metadata. Support will be removed in
-          future versions of camera service.</notes>
+          android.hardware.Camera API.
+
+          HAL implementations should instead always use and emit
+          sensor array-relative coordinates for all region data. Does
+          not need to be listed in static metadata. Support will be
+          removed in future versions of camera service.</notes>
         </entry>
         <entry name="triggerAfWithAuto" type="byte" visibility="system">
           <description>If set to 1, then the camera service always
@@ -1422,10 +1452,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           for the source of reprocessing data.</description>
           <units>List of camera reprocess stream IDs</units>
           <range>Typically, only one entry allowed, must be a valid
-          reprocess stream ID. If android.jpeg.needsThumbnail is
-          set, then multiple reprocess streams may be included in a
-          single request; they must be different scaled versions of
-          the same image.</range>
+          reprocess stream ID.
+
+          If android.jpeg.needsThumbnail is set, then multiple
+          reprocess streams may be included in a single request; they
+          must be different scaled versions of the same image.</range>
           <notes>Only meaningful when android.request.type ==
           REPROCESS. Ignored otherwise</notes>
           <tag id="HAL2" />
@@ -2316,12 +2347,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>FULL</value>
           </enum>
           <description>
-          The camera 3 HAL device can implement one of two possible operational modes;
-          limited and full. Full support is expected from new higher-end
-          devices. Limited mode has hardware requirements roughly in line with those
-          for a camera HAL device v1 implementation, and is expected from older or
-          inexpensive devices. Full is a strict superset of limited, and they share the
-          same essential operational flow.
+          The camera 3 HAL device can implement one of two possible
+          operational modes; limited and full. Full support is
+          expected from new higher-end devices. Limited mode has
+          hardware requirements roughly in line with those for a
+          camera HAL device v1 implementation, and is expected from
+          older or inexpensive devices. Full is a strict superset of
+          limited, and they share the same essential operational flow.
 
           For full details refer to "S3. Operational Modes" in camera3.h
           </description>
