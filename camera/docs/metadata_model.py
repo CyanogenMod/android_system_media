@@ -32,6 +32,7 @@ metadata_properties.xml file.
   EnumValue: A class corresponding to a <value> element within an Enum
   Metadata: Root node that also provides tree construction functionality.
   Tag: A node corresponding to a top level <tag> element.
+  Typedef: A node corresponding to a <typedef> element under <types>.
 """
 
 import sys
@@ -195,6 +196,7 @@ class Metadata(Node):
     parent: An edge to the parent Node. This is always None for Metadata.
     outer_namespaces: A sequence of immediate OuterNamespace children.
     tags: A sequence of all Tag instances available in the graph.
+    types: An iterable of all Typedef instances available in the graph.
   """
 
   def __init__(self):
@@ -214,6 +216,7 @@ class Metadata(Node):
     self._parent = None
     self._outer_namespaces = None
     self._tags = []
+    self._types = []
 
   @property
   def outer_namespaces(self):
@@ -225,6 +228,10 @@ class Metadata(Node):
   @property
   def tags(self):
     return (i for i in self._tags)
+
+  @property
+  def types(self):
+    return (i for i in self._types)
 
   def _get_properties(self):
 
@@ -252,6 +259,33 @@ class Metadata(Node):
     tag_ids = [tg.name for tg in self.tags if tg.name == tag]
     if not tag_ids:
       self._tags.append(Tag(tag, self, description))
+
+  def insert_type(self, type_name, type_selector="typedef", **kwargs):
+    """
+    Insert a type into the metadata.
+
+    Args:
+      type_name: A type's name
+      type_selector: The selector for the type, e.g. 'typedef'
+
+    Args (if type_selector == 'typedef'):
+      languages: A map of 'language name' -> 'fully qualified class path'
+
+    Example:
+      metadata.insert_type('rectangle', 'typedef',
+                           { 'java': 'android.graphics.Rect' })
+
+    Remarks:
+      Subsequent calls to insert_type with the same type name are safe (they
+      will be ignored)
+    """
+
+    if type_selector != 'typedef':
+      raise ValueError("Unsupported type_selector given " + type_selector)
+
+    type_names = [tp.name for tp in self.types if tp.name == tp]
+    if not type_names:
+      self._types.append(Typedef(type_name, self, kwargs.get('languages')))
 
   def insert_entry(self, entry):
     """
@@ -332,6 +366,8 @@ class Metadata(Node):
     self.validate_tree()
     self._construct_tags()
     self.validate_tree()
+    self._construct_types()
+    self.validate_tree()
     self._construct_clones()
     self.validate_tree()
     self._construct_outer_namespaces()
@@ -349,6 +385,16 @@ class Metadata(Node):
 
         if p not in tag.entries:
           tag._entries.append(p)
+
+  def _construct_types(self):
+    type_dict = self._dictionary_by_name(self.types)
+    for p in self._get_properties():
+      if p._type_name:
+        type_node = type_dict.get(p._type_name)
+        p._typedef = type_node
+
+        if p not in type_node.entries:
+          type_node._entries.append(p)
 
   def _construct_clones(self):
     for p in self._clones:
@@ -559,6 +605,36 @@ class Tag(Node):
   @property
   def description(self):
     return self._description
+
+  @property
+  def entries(self):
+    return (i for i in self._entries)
+
+  def _get_children(self):
+    return None
+
+class Typedef(Node):
+  """
+  A typedef Node corresponding to a <typedef> element under a top-level <types>.
+
+  Attributes (Read-Only):
+    name: The name of this typedef as a string.
+    languages: A dictionary of 'language name' -> 'fully qualified class'.
+    parent: An edge to the parent, which is always the Metadata root node.
+    entries: An iterable over all entries which reference this typedef.
+  """
+  def __init__(self, name, parent, languages=None):
+    self._name        = name
+    self._parent      = parent
+
+    # all entries that have this typedef
+    self._entries     = []  # filled in by Metadata#construct_types
+
+    self._languages   = languages or {}
+
+  @property
+  def languages(self):
+    return self._languages
 
   @property
   def entries(self):
@@ -949,6 +1025,7 @@ class Entry(Node):
     units: A string units, or None.
     tags: A sequence of Tag nodes associated with this Entry.
     type_notes: A string describing notes for the type, or None.
+    typedef: A Typedef associated with this Entry, or None.
 
   Remarks:
     Subclass Clone can be used interchangeable with an Entry,
@@ -989,6 +1066,7 @@ class Entry(Node):
       type_notes: A string with the notes for the type
       visibility: A string describing the visibility, eg 'system', 'hidden',
                   'public'
+      typedef: A string corresponding to a typedef's name attribute.
     """
 
     if kwargs.get('type') is None:
@@ -1070,6 +1148,10 @@ class Entry(Node):
     return self._type_notes
 
   @property
+  def typedef(self):
+    return self._typedef
+
+  @property
   def enum(self):
     return self._enum
 
@@ -1091,7 +1173,7 @@ class Entry(Node):
 
   def _init_common(self, **kwargs):
 
-    self._parent = None # filled in by MetadataSet::_construct_entries
+    self._parent = None # filled in by Metadata::_construct_entries
 
     self._container = kwargs.get('container')
     self._container_sizes = kwargs.get('container_sizes')
@@ -1109,9 +1191,11 @@ class Entry(Node):
     self._notes = kwargs.get('notes')
 
     self._tag_ids = kwargs.get('tag_ids', [])
-    self._tags = None  # Filled in by MetadataSet::_construct_tags
+    self._tags = None  # Filled in by Metadata::_construct_tags
 
     self._type_notes = kwargs.get('type_notes')
+    self._type_name = kwargs.get('type_name')
+    self._typedef = None # Filled in by Metadata::_construct_types
 
     if kwargs.get('enum', False):
       self._enum = Enum(self, enum_values, enum_ids, enum_optionals, enum_notes)
@@ -1312,7 +1396,8 @@ class MergedEntry(Entry):
                     'tuple_values',
                     'type',
                     'type_notes',
-                    'visibility'
+                    'visibility',
+                    'typedef'
                    ]
 
     for p in props_common:

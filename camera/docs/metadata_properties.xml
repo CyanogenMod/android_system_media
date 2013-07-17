@@ -40,6 +40,22 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         Tag only used by camera device HAL 2.x
     </tag>
   </tags>
+
+  <types>
+    <typedef name="rectangle">
+      <language name="java">android.graphics.Rect</language>
+    </typedef>
+    <typedef name="size">
+      <language name="java">android.hardware.photography.Size</language>
+    </typedef>
+    <typedef name="string">
+      <language name="java">String</language>
+    </typedef>
+    <typedef name="boolean">
+      <language name="java">boolean</language>
+    </typedef>
+  </types>
+
   <namespace name="android">
     <section name="colorCorrection">
       <controls>
@@ -130,7 +146,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           compensation of -1</notes>
           <tag id="BC" />
         </entry>
-        <entry name="aeLock" type="byte" visibility="public" enum="true">
+        <entry name="aeLock" type="byte" visibility="public" enum="true"
+               typedef="boolean">
           <enum>
             <value>OFF
             <notes>Autoexposure lock is disabled; the AE algorithm
@@ -366,7 +383,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           any active trigger, and return to initial AF state.</notes>
           <tag id="BC" />
         </entry>
-        <entry name="awbLock" type="byte" visibility="public" enum="true">
+        <entry name="awbLock" type="byte" visibility="public" enum="true"
+               typedef="boolean">
           <enum>
             <value>OFF
             <notes>Auto-whitebalance lock is disabled; the AWB
@@ -538,7 +556,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="videoStabilizationMode" type="byte" visibility="public"
-               enum="true">
+               enum="true" typedef="boolean">
           <enum>
             <value>OFF</value>
             <value>ON</value>
@@ -1026,7 +1044,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>(-180 - 180], [-90,90], [-inf, inf]</range>
           <tag id="BC" />
         </entry>
-        <entry name="gpsProcessingMethod" type="byte" visibility="public">
+        <entry name="gpsProcessingMethod" type="byte" visibility="public"
+               typedef="string">
           <description>32 characters describing GPS algorithm to
           include in EXIF</description>
           <units>UTF-8 null-terminated string</units>
@@ -1059,7 +1078,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="thumbnailSize" type="int32" visibility="public"
-        container="array">
+        container="array" typedef="size">
           <array>
             <size>2</size>
           </array>
@@ -1071,7 +1090,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </controls>
       <static>
         <entry name="availableThumbnailSizes" type="int32" visibility="public"
-        type_notes="list of resolution pairs" container="array">
+        type_notes="list of resolution pairs" container="array" typedef="size">
           <array>
             <size>2</size>
             <size>n</size>
@@ -1245,7 +1264,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </entry>
           <entry name="geometricCorrectionMapSize" type="int32"
           type_notes="width and height of geometric correction map"
-          container="array">
+          container="array" typedef="size">
             <array>
               <size>2</size>
             </array>
@@ -1273,8 +1292,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="V1" />
           </entry>
           <entry name="shadingMapSize" type="int32" visibility="public"
-          type_notes="width and height of lens shading map provided by the HAL. (N, M)"
-          container="array">
+                 type_notes="width and height of lens shading map provided by the HAL. (N, M)"
+                 container="array" typedef="size">
             <array>
               <size>2</size>
             </array>
@@ -1566,7 +1585,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <section name="scaler">
       <controls>
         <entry name="cropRegion" type="int32" visibility="public"
-               container="array">
+               container="array" typedef="rectangle">
           <array>
             <size>4</size>
           </array>
@@ -1661,7 +1680,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="availableJpegSizes" type="int32" visibility="public"
-        container="array">
+        container="array" typedef="size">
           <array>
             <size>n</size>
             <size>2</size>
@@ -1696,7 +1715,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="availableProcessedSizes" type="int32" visibility="public"
-        container="array">
+        container="array" typedef="size">
           <array>
             <size>n</size>
             <size>2</size>
@@ -1725,7 +1744,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="availableRawSizes" type="int32"
-        container="array">
+        container="array" typedef="size">
           <array>
             <size>n</size>
             <size>2</size>
@@ -1776,7 +1795,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <namespace name="info">
           <entry name="activeArraySize" type="int32" visibility="public"
           type_notes="Four ints defining the active pixel rectangle"
-          container="array">
+          container="array"
+          typedef="rectangle">
             <array>
               <size>4</size>
             </array>
@@ -1840,7 +1860,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </entry>
           <entry name="physicalSize" type="float" visibility="public"
           type_notes="width x height in millimeters"
-          container="array">
+          container="array" typedef="size">
             <array>
               <size>2</size>
             </array>
@@ -1851,7 +1871,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="BC" />
           </entry>
           <entry name="pixelArraySize" type="int32"
-          container="array">
+          container="array" typedef="size">
             <array>
               <size>2</size>
             </array>
@@ -2101,7 +2121,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.statistics.info.availableFaceDetectModes.</notes>
           <tag id="BC" />
         </entry>
-        <entry name="histogramMode" type="byte" enum="true">
+        <entry name="histogramMode" type="byte" enum="true" typedef="boolean">
           <enum>
             <value>OFF</value>
             <value>ON</value>
@@ -2110,7 +2130,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           generation</description>
           <tag id="V1" />
         </entry>
-        <entry name="sharpnessMapMode" type="byte" enum="true">
+        <entry name="sharpnessMapMode" type="byte" enum="true" typedef="boolean">
           <enum>
             <value>OFF</value>
             <value>ON</value>
@@ -2167,7 +2187,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             region.</description>
           </entry>
           <entry name="sharpnessMapSize" type="int32"
-          type_notes="width x height" container="array">
+          type_notes="width x height" container="array" typedef="size">
             <array>
               <size>2</size>
             </array>
@@ -2203,7 +2223,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="faceRectangles" type="int32" visibility="public"
         type_notes="(xmin, ymin, xmax, ymax). (0,0) is top-left of active pixel area"
-        container="array">
+        container="array" typedef="rectangle">
           <array>
             <size>n</size>
             <size>4</size>
@@ -2407,7 +2427,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="led">
       <controls>
-        <entry name="transmit" type="byte" visibility="hidden" enum="true">
+        <entry name="transmit" type="byte" visibility="hidden" enum="true"
+               typedef="boolean">
           <enum>
             <value>OFF</value>
             <value>ON</value>
@@ -2471,7 +2492,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="blackLevel">
       <controls>
-        <entry name="lock" type="byte" visibility="public" enum="true">
+        <entry name="lock" type="byte" visibility="public" enum="true"
+               typedef="boolean">
           <enum>
             <value>OFF</value>
             <value>ON</value>

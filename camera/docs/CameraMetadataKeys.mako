@@ -47,7 +47,7 @@ import static android.hardware.photography.CameraMetadata.Key;
              * @hide
              */
             %endif
-            public static final class ${entry.get_name_minimal() | pascal_case}Key extends Key<${jtype(entry)}> {
+            public static final class ${entry.get_name_minimal() | pascal_case}Key extends Key<${jtype_boxed(entry)}> {
                 public enum Enum {
                   % for value,last in enumerate_with_last(entry.enum.values):
                     ${value.name | jidentifier}${"," if not last else ";"}
@@ -60,7 +60,7 @@ import static android.hardware.photography.CameraMetadata.Key;
 
                 // TODO: remove requirement for constructor by making Key an interface
                 private ${entry.get_name_minimal() | pascal_case}Key(String name) {
-                    super(name, ${jtype(entry)}.class);
+                    super(name, ${jtype_boxed(entry)}.class);
                 }
 
               % if entry.enum.has_values_with_id:
@@ -93,14 +93,14 @@ public final class ${java_name}Keys {
 ## If we need to support more, we should use a recursive function here instead.. but the indentation gets trickier.
         public static final class ${inner_namespace.name| pascal_case} {
           % for entry in filter_visibility(inner_namespace.merged_entries, ('hidden','public')):
-            % if entry.enum:
+            % if entry.enum and not (entry.typedef and not entry.typedef.languages.get('java')):
 ${generate_enum(entry)}
             % if entry.applied_visibility == 'hidden':
             /**
              * @hide
              */
             %endif
-            public static final Key<${jtype(entry)}> ${entry.get_name_minimal() | csym} =
+            public static final Key<${jtype_boxed(entry)}> ${entry.get_name_minimal() | csym} =
                     new ${entry.get_name_minimal() | pascal_case}Key("${entry.name}");
             % else:
             % if entry.applied_visibility == 'hidden':
@@ -108,8 +108,8 @@ ${generate_enum(entry)}
              * @hide
              */
             %endif
-            public static final Key<${jtype(entry)}> ${entry.get_name_minimal() | csym} =
-                    new Key<${jtype(entry)}>("${entry.name}", ${jclass(entry)});
+            public static final Key<${jtype_boxed(entry)}> ${entry.get_name_minimal() | csym} =
+                    new Key<${jtype_boxed(entry)}>("${entry.name}", ${jclass(entry)});
             % endif
           % endfor
         }
@@ -117,14 +117,14 @@ ${generate_enum(entry)}
       % for entry in filter_visibility( \
           get_children_by_filtering_kind(section, xml_name, 'merged_entries'), \
                                          ('hidden', 'public')):
-        % if entry.enum:
+        % if entry.enum and not (entry.typedef and entry.typedef.languages.get('java')):
 ${generate_enum(entry)}
           % if entry.applied_visibility == 'hidden':
         /**
          * @hide
          */
           %endif
-        public static final Key<${jtype(entry)}> ${entry.get_name_minimal() | csym} =
+        public static final Key<${jtype_boxed(entry)}> ${entry.get_name_minimal() | csym} =
                 new ${entry.get_name_minimal() | pascal_case}Key("${entry.name}");
         % else:
           % if entry.applied_visibility == 'hidden':
@@ -132,8 +132,8 @@ ${generate_enum(entry)}
          * @hide
          */
           %endif
-        public static final Key<${jtype(entry)}> ${entry.get_name_minimal() | csym} =
-                new Key<${jtype(entry)}>("${entry.name}", ${jclass(entry)});
+        public static final Key<${jtype_boxed(entry)}> ${entry.get_name_minimal() | csym} =
+                new Key<${jtype_boxed(entry)}>("${entry.name}", ${jclass(entry)});
         % endif
       % endfor
 

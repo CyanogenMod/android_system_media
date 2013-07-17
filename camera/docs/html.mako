@@ -242,7 +242,7 @@ ${          insert_toc_body(kind)}\
                 % endfor
                 </ul>
               % endif
-              <span class="entry_type_visibility"> [${prop.applied_visibility}]</span>
+              <span class="entry_type_visibility"> [${prop.applied_visibility}${" as %s" %prop.typedef.name if prop.typedef else ""}]</span>
               % if prop.type_notes is not None:
                 <div class="entry_type_notes">${prop.type_notes | wbr}</div>
               % endif

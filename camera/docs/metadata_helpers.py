@@ -303,54 +303,122 @@ def ctype_enum(what):
   """
   return 'TYPE_%s' %(what.upper())
 
-def jtype(entry):
+
+# Calculate a java type name from an entry with a Typedef node
+def _jtypedef_type(entry):
+  typedef = entry.typedef
+  additional = ''
+
+  # Hacky way to deal with arrays. Assume that if we have
+  # size 'Constant x N' the Constant is part of the Typedef size.
+  # So something sized just 'Constant', 'Constant1 x Constant2', etc
+  # is not treated as a real java array.
+  if entry.container == 'array':
+    has_variable_size = False
+    for size in entry.container_sizes:
+      try:
+        size_int = int(size)
+      except ValueError:
+        has_variable_size = True
+
+    if has_variable_size:
+      additional = '[]'
+
+  try:
+    name = typedef.languages['java']
+
+    return "%s%s" %(name, additional)
+  except KeyError:
+    return None
+
+# Box if primitive. Otherwise leave unboxed.
+def _jtype_box(type_name):
+  mapping = {
+    'boolean': 'Boolean',
+    'byte': 'Byte',
+    'int': 'Integer',
+    'float': 'Float',
+    'double': 'Double',
+    'long': 'Long'
+  }
+
+  return mapping.get(type_name, type_name)
+
+def jtype_unboxed(entry):
+  """
+  Calculate the Java type from an entry type string, to be used whenever we
+  need the regular type in Java. It's not boxed, so it can't be used as a
+  generic type argument when the entry type happens to resolve to a primitive.
+
+  Remarks:
+    Since Java generics cannot be instantiated with primitives, this version
+    is not applicable in that case. Use jtype_boxed instead for that.
+
+  Returns:
+    The string representing the Java type.
+  """
+  if not isinstance(entry, metadata_model.Entry):
+    raise ValueError("Expected entry to be an instance of Entry")
+
+  metadata_type = entry.type
+
+  java_type = None
+
+  if entry.typedef:
+    typedef_name = _jtypedef_type(entry)
+    if typedef_name:
+      java_type = typedef_name # already takes into account arrays
+
+  if not java_type:
+    if not java_type and entry.enum:
+      name = entry.name
+
+      name_without_ons = entry.get_name_as_list()[1:]
+      base_type = ".".join([pascal_case(i) for i in name_without_ons]) + \
+                   "Key.Enum"
+
+    else:
+      mapping = {
+        'int32': 'int',
+        'int64': 'long',
+        'float': 'float',
+        'double': 'double',
+        'byte': 'byte',
+        'rational': 'Rational'
+      }
+
+      base_type = mapping[metadata_type]
+
+    # Convert to array (enums, basic types)
+    if entry.container == 'array':
+      additional = '[]'
+    else:
+      additional = ''
+
+    java_type = '%s%s' %(base_type, additional)
+
+  # Now box this sucker.
+  return java_type
+
+def jtype_boxed(entry):
   """
   Calculate the Java type from an entry type string, to be used as a generic
   type argument in Java. The type is guaranteed to inherit from Object.
+
+  It will only box when absolutely necessary, i.e. int -> Integer[], but
+  int[] -> int[].
 
   Remarks:
     Since Java generics cannot be instantiated with primitives, this version
     will use boxed types when absolutely required.
 
   Returns:
-    The string representing the Java type.
+    The string representing the boxed Java type.
   """
+  unboxed_type = jtype_unboxed(entry)
+  return _jtype_box(unboxed_type)
 
-  if not isinstance(entry, metadata_model.Entry):
-    raise ValueError("Expected entry to be an instance of Entry")
-
-  primitive_type = entry.type
-
-  if entry.enum:
-    name = entry.name
-
-    name_without_ons = entry.get_name_as_list()[1:]
-    base_type = ".".join([pascal_case(i) for i in name_without_ons]) + \
-                 "Key.Enum"
-  else:
-    mapping = {
-      'int32': 'Integer',
-      'int64': 'Long',
-      'float': 'Float',
-      'double': 'Double',
-      'byte': 'Byte',
-      'rational': 'Rational'
-    }
-
-    base_type = mapping[primitive_type]
-
-  if entry.container == 'array':
-    additional = '[]'
-
-    #unbox if it makes sense
-    if primitive_type != 'rational' and not entry.enum:
-      base_type = jtype_primitive(primitive_type)
-  else:
-    additional = ''
-
-  return "%s%s" %(base_type, additional)
-
-def jtype_primitive(what):
+def _jtype_primitive(what):
   """
   Calculate the Java type from an entry type string.
 
@@ -392,16 +460,8 @@ def jclass(entry):
   Returns:
     The ClassName.class string
   """
-  the_type = entry.type
-  try:
-    class_name = jtype_primitive(the_type)
-  except ValueError as e:
-    class_name = the_type
 
-  if entry.container == 'array':
-    class_name += "[]"
-
-  return "%s.class" %class_name
+  return "%s.class" %jtype_unboxed(entry)
 
 def jidentifier(what):
   """

@@ -29,6 +29,16 @@
 % endfor
 </tags>
 
+<types>
+% for typedef in metadata.types:
+  <typedef name="${typedef.name}">
+    % for (language, klass) in typedef.languages.iteritems():
+      <language name="${language}">${klass}</language>
+    % endfor
+  </typedef>
+% endfor
+</types>
+
 % for root in metadata.outer_namespaces:
 <namespace name="${root.name}">
   % for section in root.sections:
@@ -83,6 +93,10 @@
           % endif
           % if prop.container is not None:
                 container="${prop.container}"
+          % endif
+
+          % if prop.typedef is not None:
+                typedef="${prop.typedef.name}"
           % endif
             >
 

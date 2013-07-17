@@ -77,7 +77,8 @@ function affected_git_directories() {
                           git rev-parse --show-toplevel 2> /dev/null)"
         if [[ $? -eq 0 ]]; then
             # Both staged and unstaged changes
-            local diff_result="$(git status --porcelain | egrep -c -v '^[?][?]')"
+            local diff_result="$(cd "$dir_path";
+                                 git status --porcelain | egrep -c -v '^[?][?]')"
             echo "Diff result was $diff_result" >& /dev/null
             echo "Diff result was $diff_result" >& /dev/null
             if [[ $diff_result -eq 0 ]]; then
