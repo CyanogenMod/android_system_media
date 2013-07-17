@@ -104,12 +104,14 @@
           <ul class="toc_section">
             <li><a href="#controls_android.colorCorrection.mode">android.colorCorrection.mode</a></li>
             <li><a href="#controls_android.colorCorrection.transform">android.colorCorrection.transform</a></li>
+            <li><a href="#controls_android.colorCorrection.gains">android.colorCorrection.gains</a></li>
           </ul>
         </li>
         <li>
           <span class="toc_kind_header">dynamic</span>
           <ul class="toc_section">
-            <li><a href="#dynamic_android.colorCorrection.mode">android.colorCorrection.mode</a></li>
+            <li><a href="#dynamic_android.colorCorrection.transform">android.colorCorrection.transform</a></li>
+            <li><a href="#dynamic_android.colorCorrection.gains">android.colorCorrection.gains</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -336,7 +338,6 @@
             <li><a href="#static_android.lens.info.geometricCorrectionMapSize">android.lens.info.geometricCorrectionMapSize</a></li>
             <li><a href="#static_android.lens.info.hyperfocalDistance">android.lens.info.hyperfocalDistance</a></li>
             <li><a href="#static_android.lens.info.minimumFocusDistance">android.lens.info.minimumFocusDistance</a></li>
-            <li><a href="#static_android.lens.info.shadingMap">android.lens.info.shadingMap</a></li>
             <li><a href="#static_android.lens.info.shadingMapSize">android.lens.info.shadingMapSize</a></li>
 
             <li><a href="#static_android.lens.facing">android.lens.facing</a></li>
@@ -467,7 +468,7 @@
           <ul class="toc_section">
 
             <li><a href="#static_android.sensor.info.activeArraySize">android.sensor.info.activeArraySize</a></li>
-            <li><a href="#static_android.sensor.info.availableSensitivities">android.sensor.info.availableSensitivities</a></li>
+            <li><a href="#static_android.sensor.info.sensitivityRange">android.sensor.info.sensitivityRange</a></li>
             <li><a href="#static_android.sensor.info.colorFilterArrangement">android.sensor.info.colorFilterArrangement</a></li>
             <li><a href="#static_android.sensor.info.exposureTimeRange">android.sensor.info.exposureTimeRange</a></li>
             <li><a href="#static_android.sensor.info.maxFrameDuration">android.sensor.info.maxFrameDuration</a></li>
@@ -528,6 +529,7 @@
             <li><a href="#controls_android.statistics.faceDetectMode">android.statistics.faceDetectMode</a></li>
             <li><a href="#controls_android.statistics.histogramMode">android.statistics.histogramMode</a></li>
             <li><a href="#controls_android.statistics.sharpnessMapMode">android.statistics.sharpnessMapMode</a></li>
+            <li><a href="#controls_android.statistics.lensShadingMapMode">android.statistics.lensShadingMapMode</a></li>
           </ul>
         </li>
         <li>
@@ -555,6 +557,10 @@
             <li><a href="#dynamic_android.statistics.histogramMode">android.statistics.histogramMode</a></li>
             <li><a href="#dynamic_android.statistics.sharpnessMap">android.statistics.sharpnessMap</a></li>
             <li><a href="#dynamic_android.statistics.sharpnessMapMode">android.statistics.sharpnessMapMode</a></li>
+            <li><a href="#dynamic_android.statistics.lensShadingMap">android.statistics.lensShadingMap</a></li>
+            <li><a href="#dynamic_android.statistics.predictedColorGains">android.statistics.predictedColorGains</a></li>
+            <li><a href="#dynamic_android.statistics.predictedColorTransform">android.statistics.predictedColorTransform</a></li>
+            <li><a href="#dynamic_android.statistics.sceneFlicker">android.statistics.sceneFlicker</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -622,6 +628,23 @@
         </li>
       </ul> <!-- toc_section -->
     </li>
+    <li>
+      <span class="toc_section_header"><a href="#section_blackLevel">blackLevel</a></span>
+      <ul class="toc_section">
+        <li>
+          <span class="toc_kind_header">controls</span>
+          <ul class="toc_section">
+            <li><a href="#controls_android.blackLevel.lock">android.blackLevel.lock</a></li>
+          </ul>
+        </li>
+        <li>
+          <span class="toc_kind_header">dynamic</span>
+          <ul class="toc_section">
+            <li><a href="#dynamic_android.blackLevel.lock">android.blackLevel.lock</a></li>
+          </ul>
+        </li>
+      </ul> <!-- toc_section -->
+    </li>
   </ul>
 
 
@@ -680,7 +703,7 @@
                   <li>
                     <span class="entry_type_enum_name">TRANSFORM_MATRIX</span>
                     <span class="entry_type_enum_notes">Use the android.<wbr>color<wbr>Correction.<wbr>transform matrix
-              to do color conversion</span>
+              and android.<wbr>color<wbr>Correction.<wbr>gains to do color conversion</span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
@@ -717,23 +740,22 @@
           <tr class="entry" id="controls_android.colorCorrection.transform">
             <td class="entry_name">android.<wbr>color<wbr>Correction.<wbr>transform</td>
             <td class="entry_type">
-                <span class="entry_type_name">float</span>
+                <span class="entry_type_name">rational</span>
                 <span class="entry_type_container">x</span>
 
                 <span class="entry_type_array">
                   3 x 3
                 </span>
               <span class="entry_type_visibility"> [public]</span>
-                <div class="entry_type_notes">3x3 float matrix in row-major order</div>
+                <div class="entry_type_notes">3x3 rational matrix in row-major order</div>
 
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              A transform matrix to chromatically adapt
-          pixels in the CIE XYZ (1931) color space from the scene
-          illuminant to the sRGB-standard
-          D65-illuminant
+              A color transform matrix to use to transform
+          from sensor RGB color space to output linear sRGB color space
+          
             </td>
 
             <td class="entry_units">
@@ -745,10 +767,58 @@
             </td>
 
             <td class="entry_notes">
-              Values outside (0,<wbr>1) should be clamped.<wbr> Need to
-          provide utilities to go from CCT (+hue?),<wbr> or (x,<wbr>y) white
-          point,<wbr> (or AWB mode) to matrix; use linear Bradford
-          algorithm.<wbr>
+              This matrix is either set by HAL when the request
+          android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
+          directly by the application in the request when the
+          androird.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr>
+          In the latter case,<wbr> the HAL may round the matrix to account
+          for precision issues; the final rounded matrix should be
+          reported back in this matrix result metadata.<wbr>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+                
+          <tr class="entry" id="controls_android.colorCorrection.gains">
+            <td class="entry_name">android.<wbr>color<wbr>Correction.<wbr>gains</td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">A 1D array of floats for 4 color channel gains</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              Gains applying to Bayer color channels for
+          white-balance
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+              The 4-channel white-balance gains are defined in
+          the order of [R G_<wbr>even G_<wbr>odd B],<wbr> where G_<wbr>even is the gain
+          for green pixels on even rows of the output,<wbr> and G_<wbr>odd
+          is the gain for greenpixels on the odd rows.<wbr> if a HAL
+          does not support a separate gain for even/<wbr>odd green channels,<wbr>
+          it should use the G_<wbr>even value,<wbr>and write G_<wbr>odd equal to
+          G_<wbr>even in the output result metadata.<wbr>
+<br>
+<br>          The ouput should be the gains actually applied by the HAL to
+          the current frame.<wbr>
             </td>
 
             <td class="entry_tags">
@@ -785,34 +855,69 @@
         
 
                 
-          <tr class="entry" id="dynamic_android.colorCorrection.mode">
-            <td class="entry_name">android.<wbr>color<wbr>Correction.<wbr>mode</td>
+          <tr class="entry" id="dynamic_android.colorCorrection.transform">
+            <td class="entry_name">android.<wbr>color<wbr>Correction.<wbr>transform</td>
             <td class="entry_type">
-                <span class="entry_type_name entry_type_name_enum">byte</span>
+                <span class="entry_type_name">rational</span>
+                <span class="entry_type_container">x</span>
 
+                <span class="entry_type_array">
+                  3 x 3
+                </span>
               <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">3x3 rational matrix in row-major order</div>
 
-                <ul class="entry_type_enum">
-                  <li>
-                    <span class="entry_type_enum_name">TRANSFORM_MATRIX</span>
-                    <span class="entry_type_enum_notes">Use the android.<wbr>color<wbr>Correction.<wbr>transform matrix
-              to do color conversion</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Must not slow down frame rate relative to raw
-              bayer output</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">Frame rate may be reduced by high
-              quality</span>
-                  </li>
-                </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
+              A color transform matrix to use to transform
+          from sensor RGB color space to output linear sRGB color space
+          
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              Output values are expected to be in the range
+          (0,<wbr>1)
+            </td>
+
+            <td class="entry_notes">
+              This matrix is either set by HAL when the request
+          android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
+          directly by the application in the request when the
+          androird.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr>
+          In the latter case,<wbr> the HAL may round the matrix to account
+          for precision issues; the final rounded matrix should be
+          reported back in this matrix result metadata.<wbr>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.colorCorrection.gains">
+            <td class="entry_name">android.<wbr>color<wbr>Correction.<wbr>gains</td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">A 1D array of floats for 4 color channel gains</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              Gains applying to Bayer color channels for
+          white-balance
             </td>
 
             <td class="entry_units">
@@ -822,6 +927,16 @@
             </td>
 
             <td class="entry_notes">
+              The 4-channel white-balance gains are defined in
+          the order of [R G_<wbr>even G_<wbr>odd B],<wbr> where G_<wbr>even is the gain
+          for green pixels on even rows of the output,<wbr> and G_<wbr>odd
+          is the gain for greenpixels on the odd rows.<wbr> if a HAL
+          does not support a separate gain for even/<wbr>odd green channels,<wbr>
+          it should use the G_<wbr>even value,<wbr>and write G_<wbr>odd equal to
+          G_<wbr>even in the output result metadata.<wbr>
+<br>
+<br>          The ouput should be the gains actually applied by the HAL to
+          the current frame.<wbr>
             </td>
 
             <td class="entry_tags">
@@ -1005,8 +1120,8 @@
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">Autoexposure is disabled; sensor.<wbr>exposureTime
-              and sensor.<wbr>sensitivity are used</span>
+                    <span class="entry_type_enum_notes">Autoexposure is disabled; sensor.<wbr>exposureTime,<wbr>
+              sensor.<wbr>sensitivity and sensor.<wbr>frameDuration are used</span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON</span>
@@ -1221,7 +1336,7 @@
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
                     <span class="entry_type_enum_notes">The 3A routines do not control the lens;
-            android.<wbr>lens.<wbr>focus<wbr>Position is controlled by the
+            android.<wbr>lens.<wbr>focus<wbr>Distance is controlled by the
             application</span>
                   </li>
                   <li>
@@ -2653,7 +2768,7 @@
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
                     <span class="entry_type_enum_notes">The 3A routines do not control the lens;
-            android.<wbr>lens.<wbr>focus<wbr>Position is controlled by the
+            android.<wbr>lens.<wbr>focus<wbr>Distance is controlled by the
             application</span>
                   </li>
                   <li>
@@ -5564,49 +5679,6 @@
           </tr> <!-- end of entry -->
         
                 
-          <tr class="entry" id="static_android.lens.info.shadingMap">
-            <td class="entry_name">android.<wbr>lens.<wbr>info.<wbr>shading<wbr>Map</td>
-            <td class="entry_type">
-                <span class="entry_type_name">float</span>
-                <span class="entry_type_container">x</span>
-
-                <span class="entry_type_array">
-                  3 x n x m
-                </span>
-              <span class="entry_type_visibility"> [system]</span>
-                <div class="entry_type_notes">2D array of float gain factors per channel to correct for lens falloff.<wbr> Should be on the order of 3x40x30</div>
-
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              A low-resolution map of lens shading,<wbr> per
-            color channel
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-              Each gain factor is >= 1
-            </td>
-
-            <td class="entry_notes">
-              Assume bilinear interpolation of map.<wbr> The least
-            shaded section of the image should have a gain factor
-            of 1; all other sections should have gains above
-            1.<wbr>
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
-              </ul>
-            </td>
-
-          </tr> <!-- end of entry -->
-        
-                
           <tr class="entry" id="static_android.lens.info.shadingMapSize">
             <td class="entry_name">android.<wbr>lens.<wbr>info.<wbr>shading<wbr>Map<wbr>Size</td>
             <td class="entry_type">
@@ -5617,7 +5689,7 @@
                   2
                 </span>
               <span class="entry_type_visibility"> [public]</span>
-                <div class="entry_type_notes">width and height of lens shading map</div>
+                <div class="entry_type_notes">width and height of lens shading map provided by the HAL.<wbr> (N,<wbr> M)</div>
 
 
             </td> <!-- entry_type -->
@@ -7215,8 +7287,8 @@
               The minimum frame duration that is supported
           for each resolution in availableJpegSizes.<wbr> Should
           correspond to the frame duration when only that JPEG
-          stream is active,<wbr> with all processing set to
-          FAST
+          stream is active and captured in a burst,<wbr> with all
+          processing set to FAST
             </td>
 
             <td class="entry_units">
@@ -7796,17 +7868,17 @@
           </tr> <!-- end of entry -->
         
                 
-          <tr class="entry" id="static_android.sensor.info.availableSensitivities">
-            <td class="entry_name">android.<wbr>sensor.<wbr>info.<wbr>available<wbr>Sensitivities</td>
+          <tr class="entry" id="static_android.sensor.info.sensitivityRange">
+            <td class="entry_name">android.<wbr>sensor.<wbr>info.<wbr>sensitivity<wbr>Range</td>
             <td class="entry_type">
                 <span class="entry_type_name">int32</span>
                 <span class="entry_type_container">x</span>
 
                 <span class="entry_type_array">
-                  n
+                  2
                 </span>
               <span class="entry_type_visibility"> [public]</span>
-                <div class="entry_type_notes">List of supported sensitivity values</div>
+                <div class="entry_type_notes">Range of supported sensitivities</div>
 
 
             </td> <!-- entry_type -->
@@ -7819,8 +7891,7 @@
             </td>
 
             <td class="entry_range">
-              Must at least include 100,<wbr> 200,<wbr> 400,<wbr> 800,<wbr>
-            1600
+              Min <= 100,<wbr> Max >= 1600
             </td>
 
             <td class="entry_notes">
@@ -7941,7 +8012,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Maximum frame duration (minimum frame
+              Maximum possible frame duration (minimum frame
             rate)
             </td>
 
@@ -7956,7 +8027,9 @@
             <td class="entry_notes">
               Minimum duration is a function of resolution,<wbr>
             processing settings.<wbr> See
-            android.<wbr>scaler.<wbr>info.<wbr>available<wbr>Min<wbr>Frame<wbr>Durations
+            android.<wbr>scaler.<wbr>available<wbr>Processed<wbr>Min<wbr>Durations
+            android.<wbr>scaler.<wbr>available<wbr>Jpeg<wbr>Min<wbr>Durations
+            android.<wbr>scaler.<wbr>available<wbr>Raw<wbr>Min<wbr>Durations
             </td>
 
             <td class="entry_tags">
@@ -9101,10 +9174,14 @@
 
             <td class="entry_range">
               
-          android.<wbr>statistics.<wbr>available<wbr>Face<wbr>Detect<wbr>Modes
+          android.<wbr>statistics.<wbr>info.<wbr>available<wbr>Face<wbr>Detect<wbr>Modes
             </td>
 
             <td class="entry_notes">
+              Whether face detection is enabled,<wbr> and whether it
+          should output just the basic fields or the full set of
+          fields.<wbr> Value must be one of the
+          android.<wbr>statistics.<wbr>info.<wbr>available<wbr>Face<wbr>Detect<wbr>Modes.<wbr>
             </td>
 
             <td class="entry_tags">
@@ -9197,6 +9274,47 @@
 
           </tr> <!-- end of entry -->
         
+                
+          <tr class="entry" id="controls_android.statistics.lensShadingMapMode">
+            <td class="entry_name">android.<wbr>statistics.<wbr>lens<wbr>Shading<wbr>Map<wbr>Mode</td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              Whether the HAL needs to output the lens
+          shading map in output result metadata
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+              When set to ON,<wbr>
+          android.<wbr>statistics.<wbr>lens<wbr>Shading<wbr>Map must be provided in
+          the output result metdata.<wbr>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr> <!-- end of entry -->
+        
         
 
       <!-- end of kind -->
@@ -9238,7 +9356,7 @@
                   n
                 </span>
               <span class="entry_type_visibility"> [public]</span>
-                <div class="entry_type_notes">List of enums</div>
+                <div class="entry_type_notes">List of enums from android.<wbr>statistics.<wbr>face<wbr>Detect<wbr>Mode</div>
 
 
             </td> <!-- entry_type -->
@@ -9249,13 +9367,27 @@
             </td>
 
             <td class="entry_units">
+              List of enum:
+            OFF
+            SIMPLE
+            FULL
             </td>
 
             <td class="entry_range">
-              OFF
             </td>
 
             <td class="entry_notes">
+              OFF means face detection is disabled,<wbr> it must
+            be included in the list.<wbr>
+<br>
+<br>            SIMPLE means the device supports the
+            android.<wbr>statistics.<wbr>face<wbr>Rectangles and
+            android.<wbr>statistics.<wbr>face<wbr>Scores outputs.<wbr>
+<br>
+<br>            FULL means the device additionally supports the
+            android.<wbr>statistics.<wbr>face<wbr>Ids and
+            android.<wbr>statistics.<wbr>face<wbr>Landmarks outputs.<wbr>
+            
             </td>
 
             <td class="entry_tags">
@@ -9306,8 +9438,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              If face detection is supported,<wbr> how many
-            faces can be detected at once
+              Maximum number of simultaneously detectable
+            faces
             </td>
 
             <td class="entry_units">
@@ -9489,10 +9621,14 @@
 
             <td class="entry_range">
               
-          android.<wbr>statistics.<wbr>available<wbr>Face<wbr>Detect<wbr>Modes
+          android.<wbr>statistics.<wbr>info.<wbr>available<wbr>Face<wbr>Detect<wbr>Modes
             </td>
 
             <td class="entry_notes">
+              Whether face detection is enabled,<wbr> and whether it
+          should output just the basic fields or the full set of
+          fields.<wbr> Value must be one of the
+          android.<wbr>statistics.<wbr>info.<wbr>available<wbr>Face<wbr>Detect<wbr>Modes.<wbr>
             </td>
 
             <td class="entry_tags">
@@ -9818,6 +9954,182 @@
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
               </ul>
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.statistics.lensShadingMap">
+            <td class="entry_name">android.<wbr>statistics.<wbr>lens<wbr>Shading<wbr>Map</td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4 x n x m
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">2D array of float gain factors per channel to correct lens shading</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              A low-resolution map of lens shading,<wbr> per
+          color channel
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              Each gain factor is >= 1
+            </td>
+
+            <td class="entry_notes">
+              Assume bilinear interpolation of map.<wbr> The least
+          shaded section of the image should have a gain factor
+          of 1; all other sections should have gains above 1.<wbr>
+          the map should be on the order of 30-40 rows,<wbr> and
+          must be smaller than 64x64.<wbr>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.statistics.predictedColorGains">
+            <td class="entry_name">android.<wbr>statistics.<wbr>predicted<wbr>Color<wbr>Gains</td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">A 1D array of floats for 4 color channel gains</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              The best-fit color channel gains calculated
+          by the HAL's statistics units for the current output frame
+          
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+              
+          This may be different than the gains used for this frame,<wbr>
+          since statistics processing on data from a new frame
+          typically completes after the transform has already been
+          applied to that frame.<wbr>
+<br>
+<br>          The 4 channel gains are defined in Bayer domain,<wbr>
+          see android.<wbr>color<wbr>Correction.<wbr>gains for details.<wbr>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.statistics.predictedColorTransform">
+            <td class="entry_name">android.<wbr>statistics.<wbr>predicted<wbr>Color<wbr>Transform</td>
+            <td class="entry_type">
+                <span class="entry_type_name">rational</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  3 x 3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">3x3 rational matrix in row-major order</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              The best-fit color transform matrix estimate
+          calculated by the HAL's statistics units for the current
+          output frame
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+              The HAL must provide the estimate from its
+          statistics unit on the white balance transforms to use
+          for the next frame.<wbr> These are the values the HAL believes
+          are the best fit for the current output frame.<wbr> This may
+          be different than the transform used for this frame,<wbr> since
+          statistics processing on data from a new frame typically
+          completes after the transform has already been applied to
+          that frame.<wbr>
+<br>
+<br>          These estimates must be provided for all frames,<wbr> even if
+          capture settings and color transforms are set by the application.<wbr>
+          
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.statistics.sceneFlicker">
+            <td class="entry_name">android.<wbr>statistics.<wbr>scene<wbr>Flicker</td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">NONE</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">50HZ</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">60HZ</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              The HAL estimated scene illumination lighting
+          frequency
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+              Report NONE if there doesn't appear to be flickering
+          illumination
+            </td>
+
+            <td class="entry_tags">
             </td>
 
           </tr> <!-- end of entry -->
@@ -10566,6 +10878,167 @@
       </tbody>
 
   <!-- end of section -->
+  <tr><td colspan="7" id="section_blackLevel" class="section">blackLevel</td></tr>
+
+
+      <tr><td colspan="7" class="kind">controls</td></tr>
+
+      <thead class="entries_header">
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_notes">Notes</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="controls_android.blackLevel.lock">
+            <td class="entry_name">android.<wbr>black<wbr>Level.<wbr>lock</td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+               Whether black-level compensation is locked
+          to its current values,<wbr> or is free to vary
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+              When set to ON,<wbr> the values used for black-level
+          compensation must not change until the lock is set to
+          OFF
+<br>
+<br>          Since changes to certain capture parameters (such as
+          exposure time) may require resetting of black level
+          compensation,<wbr> the HAL must report whether setting the
+          black level lock was successful in the output result
+          metadata.<wbr>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_HAL2">HAL2</a></li>
+              </ul>
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+      <tr><td colspan="7" class="kind">dynamic</td></tr>
+
+      <thead class="entries_header">
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_notes">Notes</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="dynamic_android.blackLevel.lock">
+            <td class="entry_name">android.<wbr>black<wbr>Level.<wbr>lock</td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+               Whether black-level compensation is locked
+          to its current values,<wbr> or is free to vary
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_notes">
+              When set to ON,<wbr> the values used for black-level
+          compensation must not change until the lock is set to
+          OFF
+<br>
+<br>          Since changes to certain capture parameters (such as
+          exposure time) may require resetting of black level
+          compensation,<wbr> the HAL must report whether setting the
+          black level lock was successful in the output result
+          metadata.<wbr>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_HAL2">HAL2</a></li>
+              </ul>
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+
+  <!-- end of section -->
 <!-- </namespace> -->
   </table>
 
@@ -10633,7 +11106,7 @@
           <li><a href="#static_android.scaler.availableProcessedSizes">android.scaler.availableProcessedSizes</a> (static)</li>
           <li><a href="#static_android.scaler.availableRawMinDurations">android.scaler.availableRawMinDurations</a> (static)</li>
           <li><a href="#controls_android.sensor.frameDuration">android.sensor.frameDuration</a> (controls)</li>
-          <li><a href="#static_android.sensor.info.availableSensitivities">android.sensor.info.availableSensitivities</a> (static)</li>
+          <li><a href="#static_android.sensor.info.sensitivityRange">android.sensor.info.sensitivityRange</a> (static)</li>
           <li><a href="#static_android.sensor.info.maxFrameDuration">android.sensor.info.maxFrameDuration</a> (static)</li>
           <li><a href="#static_android.sensor.info.physicalSize">android.sensor.info.physicalSize</a> (static)</li>
           <li><a href="#static_android.sensor.info.pixelArraySize">android.sensor.info.pixelArraySize</a> (static)</li>
@@ -10676,7 +11149,7 @@
           <li><a href="#controls_android.sensor.exposureTime">android.sensor.exposureTime</a> (controls)</li>
           <li><a href="#controls_android.sensor.frameDuration">android.sensor.frameDuration</a> (controls)</li>
           <li><a href="#controls_android.sensor.sensitivity">android.sensor.sensitivity</a> (controls)</li>
-          <li><a href="#static_android.sensor.info.availableSensitivities">android.sensor.info.availableSensitivities</a> (static)</li>
+          <li><a href="#static_android.sensor.info.sensitivityRange">android.sensor.info.sensitivityRange</a> (static)</li>
           <li><a href="#static_android.sensor.info.exposureTimeRange">android.sensor.info.exposureTimeRange</a> (static)</li>
           <li><a href="#static_android.sensor.info.maxFrameDuration">android.sensor.info.maxFrameDuration</a> (static)</li>
           <li><a href="#static_android.sensor.info.physicalSize">android.sensor.info.physicalSize</a> (static)</li>
@@ -10708,7 +11181,6 @@
     
         <ul class="tags_entries">
           <li><a href="#static_android.lens.info.geometricCorrectionMap">android.lens.info.geometricCorrectionMap</a> (static)</li>
-          <li><a href="#static_android.lens.info.shadingMap">android.lens.info.shadingMap</a> (static)</li>
           <li><a href="#static_android.sensor.info.activeArraySize">android.sensor.info.activeArraySize</a> (static)</li>
           <li><a href="#static_android.sensor.info.colorFilterArrangement">android.sensor.info.colorFilterArrangement</a> (static)</li>
           <li><a href="#static_android.sensor.info.pixelArraySize">android.sensor.info.pixelArraySize</a> (static)</li>
@@ -10736,6 +11208,7 @@
           <li><a href="#controls_android.request.inputStreams">android.request.inputStreams</a> (controls)</li>
           <li><a href="#controls_android.request.outputStreams">android.request.outputStreams</a> (controls)</li>
           <li><a href="#controls_android.request.type">android.request.type</a> (controls)</li>
+          <li><a href="#controls_android.blackLevel.lock">android.blackLevel.lock</a> (controls)</li>
         </ul>
       </li> <!-- tag_HAL2 -->
     </ul>

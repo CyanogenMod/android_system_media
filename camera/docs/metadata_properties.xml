@@ -47,7 +47,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <enum>
             <value>TRANSFORM_MATRIX
               <notes>Use the android.colorCorrection.transform matrix
-              to do color conversion</notes>
+              and android.colorCorrection.gains to do color conversion</notes>
             </value>
             <value>FAST
               <notes>Must not slow down frame rate relative to raw
@@ -59,28 +59,51 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </value>
           </enum>
         </entry>
-        <entry name="transform" type="float" visibility="public"
-               type_notes="3x3 float matrix in row-major order"
+        <entry name="transform" type="rational" visibility="public"
+               type_notes="3x3 rational matrix in row-major order"
                container="array">
           <array>
             <size>3</size>
             <size>3</size>
           </array>
-          <description>A transform matrix to chromatically adapt
-          pixels in the CIE XYZ (1931) color space from the scene
-          illuminant to the sRGB-standard
-          D65-illuminant</description>
+          <description>A color transform matrix to use to transform
+          from sensor RGB color space to output linear sRGB color space
+          </description>
           <range>Output values are expected to be in the range
           (0,1)</range>
-          <notes>Values outside (0,1) should be clamped. Need to
-          provide utilities to go from CCT (+hue?), or (x,y) white
-          point, (or AWB mode) to matrix; use linear Bradford
-          algorithm.</notes>
+          <notes>This matrix is either set by HAL when the request
+          android.colorCorrection.mode is not TRANSFORM_MATRIX, or
+          directly by the application in the request when the
+          androird.colorCorrection.mode is TRANSFORM_MATRIX.
+          In the latter case, the HAL may round the matrix to account
+          for precision issues; the final rounded matrix should be
+          reported back in this matrix result metadata.</notes>
+        </entry>
+        <entry name="gains" type="float" visibility="public"
+               type_notes="A 1D array of floats for 4 color channel gains"
+               container="array">
+          <array>
+            <size>4</size>
+          </array>
+          <description>Gains applying to Bayer color channels for
+          white-balance</description>
+          <notes>The 4-channel white-balance gains are defined in
+          the order of [R G_even G_odd B], where G_even is the gain
+          for green pixels on even rows of the output, and G_odd
+          is the gain for greenpixels on the odd rows. if a HAL
+          does not support a separate gain for even/odd green channels,
+          it should use the G_even value,and write G_odd equal to
+          G_even in the output result metadata.
+
+          The ouput should be the gains actually applied by the HAL to
+          the current frame.</notes>
         </entry>
       </controls>
       <dynamic>
-        <clone entry="android.colorCorrection.mode"
-        kind="controls"></clone>
+        <clone entry="android.colorCorrection.transform" kind="controls">
+        </clone>
+        <clone entry="android.colorCorrection.gains" kind="controls">
+        </clone>
       </dynamic>
     </section>
     <section name="control">
@@ -127,8 +150,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="aeMode" type="byte" visibility="public" enum="true">
           <enum>
             <value>OFF
-              <notes>Autoexposure is disabled; sensor.exposureTime
-              and sensor.sensitivity are used</notes>
+              <notes>Autoexposure is disabled; sensor.exposureTime,
+              sensor.sensitivity and sensor.frameDuration are used</notes>
             </value>
             <value>ON
               <notes>Autoexposure is active, no flash
@@ -223,7 +246,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <enum>
             <value>OFF
             <notes>The 3A routines do not control the lens;
-            android.lens.focusPosition is controlled by the
+            android.lens.focusDistance is controlled by the
             application</notes></value>
             <value>AUTO
             <notes>if lens is not fixed focus.
@@ -1249,25 +1272,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             0</notes>
             <tag id="V1" />
           </entry>
-          <entry name="shadingMap" type="float"
-          type_notes="2D array of float gain factors per channel to correct for lens falloff. Should be on the order of 3x40x30"
-          container="array">
-            <array>
-              <size>3</size>
-              <size>n</size>
-              <size>m</size>
-            </array>
-            <description>A low-resolution map of lens shading, per
-            color channel</description>
-            <range>Each gain factor is &gt;= 1</range>
-            <notes>Assume bilinear interpolation of map. The least
-            shaded section of the image should have a gain factor
-            of 1; all other sections should have gains above
-            1.</notes>
-            <tag id="DNG" />
-          </entry>
           <entry name="shadingMapSize" type="int32" visibility="public"
-          type_notes="width and height of lens shading map"
+          type_notes="width and height of lens shading map provided by the HAL. (N, M)"
           container="array">
             <array>
               <size>2</size>
@@ -1647,8 +1653,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The minimum frame duration that is supported
           for each resolution in availableJpegSizes. Should
           correspond to the frame duration when only that JPEG
-          stream is active, with all processing set to
-          FAST</description>
+          stream is active and captured in a burst, with all
+          processing set to FAST</description>
           <notes>When multiple streams are configured, the minimum
           frame duration will be &gt;= max(individual stream min
           durations)</notes>
@@ -1781,15 +1787,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             pixel array is (0,0)</units>
             <tag id="DNG" />
           </entry>
-          <entry name="availableSensitivities" type="int32" visibility="public"
-          type_notes="List of supported sensitivity values"
+          <entry name="sensitivityRange" type="int32" visibility="public"
+          type_notes="Range of supported sensitivities"
           container="array">
             <array>
-              <size>n</size>
+              <size>2</size>
             </array>
             <description>Range of valid sensitivities</description>
-            <range>Must at least include 100, 200, 400, 800,
-            1600</range>
+            <range>Min &lt;= 100, Max &gt;= 1600</range>
             <tag id="BC" />
             <tag id="V1" />
           </entry>
@@ -1821,13 +1826,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="V1" />
           </entry>
           <entry name="maxFrameDuration" type="int64" visibility="public">
-            <description>Maximum frame duration (minimum frame
+            <description>Maximum possible frame duration (minimum frame
             rate)</description>
             <units>nanoseconds</units>
             <range>&gt;= 30e9</range>
             <notes>Minimum duration is a function of resolution,
             processing settings. See
-            android.scaler.info.availableMinFrameDurations</notes>
+            android.scaler.availableProcessedMinDurations
+            android.scaler.availableJpegMinDurations
+            android.scaler.availableRawMinDurations</notes>
             <tag id="BC" />
             <tag id="V1" />
           </entry>
@@ -2087,7 +2094,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>State of the face detector
           unit</description>
           <range>
-          android.statistics.availableFaceDetectModes</range>
+          android.statistics.info.availableFaceDetectModes</range>
+          <notes>Whether face detection is enabled, and whether it
+          should output just the basic fields or the full set of
+          fields. Value must be one of the
+          android.statistics.info.availableFaceDetectModes.</notes>
           <tag id="BC" />
         </entry>
         <entry name="histogramMode" type="byte" enum="true">
@@ -2112,14 +2123,29 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       <static>
         <namespace name="info">
           <entry name="availableFaceDetectModes" type="byte"
-          visibility="public"
-          type_notes="List of enums" container="array">
+                 visibility="public"
+                 type_notes="List of enums from android.statistics.faceDetectMode"
+                 container="array">
             <array>
               <size>n</size>
             </array>
             <description>Which face detection modes are available,
             if any</description>
-            <range>OFF</range>
+            <units>List of enum:
+            OFF
+            SIMPLE
+            FULL</units>
+            <notes>OFF means face detection is disabled, it must
+            be included in the list.
+
+            SIMPLE means the device supports the
+            android.statistics.faceRectangles and
+            android.statistics.faceScores outputs.
+
+            FULL means the device additionally supports the
+            android.statistics.faceIds and
+            android.statistics.faceLandmarks outputs.
+            </notes>
           </entry>
           <entry name="histogramBucketCount" type="int32">
             <description>Number of histogram buckets
@@ -2127,8 +2153,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <range>&gt;= 64</range>
           </entry>
           <entry name="maxFaceCount" type="int32" visibility="public" >
-            <description>If face detection is supported, how many
-            faces can be detected at once</description>
+            <description>Maximum number of simultaneously detectable
+            faces</description>
             <range>&gt;= 4 if availableFaceDetectionModes lists
             modes besides OFF, otherwise 0</range>
           </entry>
@@ -2230,7 +2256,89 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <clone entry="android.statistics.sharpnessMapMode"
         kind="controls"></clone>
+        <entry name="lensShadingMap" type="float" visibility="public"
+               type_notes="2D array of float gain factors per channel to correct lens shading"
+               container="array">
+          <array>
+            <size>4</size>
+            <size>n</size>
+            <size>m</size>
+          </array>
+          <description>A low-resolution map of lens shading, per
+          color channel</description>
+          <range>Each gain factor is &gt;= 1</range>
+          <notes>Assume bilinear interpolation of map. The least
+          shaded section of the image should have a gain factor
+          of 1; all other sections should have gains above 1.
+          the map should be on the order of 30-40 rows, and
+          must be smaller than 64x64.</notes>
+        </entry>
+        <entry name="predictedColorGains" type="float" visibility="public"
+               type_notes="A 1D array of floats for 4 color channel gains"
+               container="array">
+          <array>
+            <size>4</size>
+          </array>
+          <description>The best-fit color channel gains calculated
+          by the HAL's statistics units for the current output frame
+          </description>
+          <notes>
+          This may be different than the gains used for this frame,
+          since statistics processing on data from a new frame
+          typically completes after the transform has already been
+          applied to that frame.
+
+          The 4 channel gains are defined in Bayer domain,
+          see android.colorCorrection.gains for details.</notes>
+        </entry>
+        <entry name="predictedColorTransform" type="rational" visibility="public"
+               type_notes="3x3 rational matrix in row-major order"
+               container="array">
+          <array>
+            <size>3</size>
+            <size>3</size>
+          </array>
+          <description>The best-fit color transform matrix estimate
+          calculated by the HAL's statistics units for the current
+          output frame</description>
+          <notes>The HAL must provide the estimate from its
+          statistics unit on the white balance transforms to use
+          for the next frame. These are the values the HAL believes
+          are the best fit for the current output frame. This may
+          be different than the transform used for this frame, since
+          statistics processing on data from a new frame typically
+          completes after the transform has already been applied to
+          that frame.
+
+          These estimates must be provided for all frames, even if
+          capture settings and color transforms are set by the application.
+          </notes>
+        </entry>
+        <entry name="sceneFlicker" type="byte" visibility="public" enum="true">
+          <enum>
+            <value>NONE</value>
+            <value>50HZ</value>
+            <value>60HZ</value>
+          </enum>
+          <description>The HAL estimated scene illumination lighting
+          frequency</description>
+          <notes>Report NONE if there doesn't appear to be flickering
+          illumination</notes>
+        </entry>
       </dynamic>
+      <controls>
+        <entry name="lensShadingMapMode" type="byte" visibility="public" enum="true">
+          <enum>
+            <value>OFF</value>
+            <value>ON</value>
+          </enum>
+          <description>Whether the HAL needs to output the lens
+          shading map in output result metadata</description>
+          <notes>When set to ON,
+          android.statistics.lensShadingMap must be provided in
+          the output result metdata.</notes>
+        </entry>
+      </controls>
     </section>
     <section name="tonemap">
       <controls>
@@ -2360,6 +2468,32 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>Optional. Default value is LIMITED.</range>
         </entry>
       </static>
+    </section>
+    <section name="blackLevel">
+      <controls>
+        <entry name="lock" type="byte" visibility="public" enum="true">
+          <enum>
+            <value>OFF</value>
+            <value>ON</value>
+          </enum>
+          <description> Whether black-level compensation is locked
+          to its current values, or is free to vary</description>
+          <notes>When set to ON, the values used for black-level
+          compensation must not change until the lock is set to
+          OFF
+
+          Since changes to certain capture parameters (such as
+          exposure time) may require resetting of black level
+          compensation, the HAL must report whether setting the
+          black level lock was successful in the output result
+          metadata.</notes>
+          <tag id="HAL2" />
+        </entry>
+      </controls>
+      <dynamic>
+        <clone entry="android.blackLevel.lock"
+        kind="controls"></clone>
+      </dynamic>
     </section>
   </namespace>
 </metadata>
