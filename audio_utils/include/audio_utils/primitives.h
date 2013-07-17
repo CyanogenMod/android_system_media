@@ -32,6 +32,8 @@ __BEGIN_DECLS
  * For mono, c is the number of samples / 2, and out is an array of 16-bit samples.
  * The name "dither" is a misnomer; the current implementation does not actually dither
  * but uses truncation.  This may change.
+ * The out and sums buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
 void ditherAndClamp(int32_t* out, const int32_t *sums, size_t c);
 
