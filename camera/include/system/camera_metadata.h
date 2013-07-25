@@ -165,6 +165,18 @@ camera_metadata_t *allocate_camera_metadata(size_t entry_capacity,
         size_t data_capacity);
 
 /**
+ * Allocate a new camera_metadata structure of size src_size. Copy the data,
+ * ignoring alignment, and then attempt validation. If validation
+ * fails, free the memory and return NULL. Otherwise return the pointer.
+ *
+ * The resulting pointer can be freed with free_camera_metadata().
+ */
+ANDROID_API
+camera_metadata_t *allocate_copy_camera_metadata_checked(
+        const camera_metadata_t *src,
+        size_t src_size);
+
+/**
  * Place a camera metadata structure into an existing buffer. Returns NULL if
  * the buffer is too small for the requested number of reserved entries and
  * bytes of data. The entry_capacity is measured in entry counts, and
@@ -251,6 +263,23 @@ size_t get_camera_metadata_data_capacity(const camera_metadata_t *metadata);
 ANDROID_API
 camera_metadata_t *copy_camera_metadata(void *dst, size_t dst_size,
         const camera_metadata_t *src);
+
+/**
+ * Validate that a metadata is structurally sane. That is, its internal
+ * state is such that we won't get buffer overflows or run into other
+ * 'impossible' issues when calling the other API functions.
+ *
+ * This is useful in particular after copying the binary metadata blob
+ * from an untrusted source, since passing this check means the data is at least
+ * consistent.
+ *
+ * The expected_size argument is optional.
+ *
+ * Returns 0 on success. A non-0 value is returned on error.
+ */
+ANDROID_API
+int validate_camera_metadata_structure(const camera_metadata_t *metadata,
+                                       const size_t *expected_size);
 
 /**
  * Append camera metadata in src to an existing metadata structure in dst.  This
@@ -461,6 +490,16 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
         int fd,
         int verbosity,
         int indentation);
+
+/**
+ * Prints the specified tag value as a string. Only works for enum tags.
+ * Returns 0 on success, -1 on failure.
+ */
+ANDROID_API
+int camera_metadata_enum_snprint(uint32_t tag,
+                                 uint32_t value,
+                                 char *dst,
+                                 size_t size);
 
 #ifdef __cplusplus
 }

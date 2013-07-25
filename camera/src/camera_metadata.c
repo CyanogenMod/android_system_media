@@ -15,6 +15,8 @@
  */
 #define _GNU_SOURCE // for fdprintf
 #include <system/camera_metadata.h>
+
+#define LOG_TAG "camera_metadata"
 #include <cutils/log.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,7 +36,9 @@
 #define DATA_ALIGNMENT _Alignas(camera_metadata_data_t)
 
 #define ALIGN_TO(val, alignment) \
-    (((uint32_t)(val) + ((alignment) - 1)) & ~((alignment) - 1))
+    (((uintptr_t)(val) + ((alignment) - 1)) & ~((alignment) - 1))
+
+typedef size_t uptrdiff_t;
 
 /**
  * A single metadata entry, storing an array of values of a given type. If the
@@ -93,10 +97,10 @@ struct camera_metadata {
     uint32_t                 flags;
     size_t                   entry_count;
     size_t                   entry_capacity;
-    ptrdiff_t                entries_start; // Offset from camera_metadata
+    uptrdiff_t               entries_start; // Offset from camera_metadata
     size_t                   data_count;
     size_t                   data_capacity;
-    ptrdiff_t                data_start; // Offset from camera_metadata
+    uptrdiff_t               data_start; // Offset from camera_metadata
     void                    *user; // User set pointer, not copied with buffer
     uint8_t                  reserved[0];
 };
@@ -159,6 +163,26 @@ static uint8_t *get_data(const camera_metadata_t *metadata) {
     return (uint8_t*)metadata + metadata->data_start;
 }
 
+camera_metadata_t *allocate_copy_camera_metadata_checked(
+        const camera_metadata_t *src,
+        size_t src_size) {
+
+    if (src == NULL) {
+        return NULL;
+    }
+
+    void *buffer = malloc(src_size);
+    memcpy(buffer, src, src_size);
+
+    camera_metadata_t *metadata = (camera_metadata_t*) buffer;
+    if (validate_camera_metadata_structure(metadata, &src_size) != OK) {
+        free(buffer);
+        return NULL;
+    }
+
+    return metadata;
+}
+
 camera_metadata_t *allocate_camera_metadata(size_t entry_capacity,
                                             size_t data_capacity) {
     if (entry_capacity == 0) return NULL;
@@ -192,13 +216,9 @@ camera_metadata_t *place_camera_metadata(void *dst,
     metadata->data_count = 0;
     metadata->data_capacity = data_capacity;
     metadata->size = memory_needed;
-    if (metadata->data_capacity != 0) {
-        size_t data_unaligned = (uint8_t*)(get_entries(metadata) +
-                metadata->entry_capacity) - (uint8_t*)metadata;
-        metadata->data_start = ALIGN_TO(data_unaligned, DATA_ALIGNMENT);
-    } else {
-        metadata->data_start = 0;
-    }
+    size_t data_unaligned = (uint8_t*)(get_entries(metadata) +
+            metadata->entry_capacity) - (uint8_t*)metadata;
+    metadata->data_start = ALIGN_TO(data_unaligned, DATA_ALIGNMENT);
     metadata->user = NULL;
 
     return metadata;
@@ -269,6 +289,155 @@ camera_metadata_t* copy_camera_metadata(void *dst, size_t dst_size,
     metadata->user = NULL;
 
     return metadata;
+}
+
+int validate_camera_metadata_structure(const camera_metadata_t *metadata,
+                                       const size_t *expected_size) {
+
+    if (metadata == NULL) {
+        return ERROR;
+    }
+
+    // Check that the metadata pointer is well-aligned first.
+    {
+        struct {
+            const char *name;
+            size_t alignment;
+        } alignments[] = {
+            {
+                .name = "camera_metadata",
+                .alignment = _Alignas(struct camera_metadata)
+            },
+            {
+                .name = "camera_metadata_buffer_entry",
+                .alignment = _Alignas(struct camera_metadata_buffer_entry)
+            },
+            {
+                .name = "camera_metadata_data",
+                .alignment = _Alignas(union camera_metadata_data)
+            },
+        };
+
+        for (size_t i = 0; i < sizeof(alignments)/sizeof(alignments[0]); ++i) {
+            uintptr_t aligned_ptr = ALIGN_TO(metadata, alignments[i].alignment);
+
+            if ((uintptr_t)metadata != aligned_ptr) {
+                ALOGE("%s: Metadata pointer is not aligned (actual %p, "
+                      "expected %p) to type %s",
+                      __FUNCTION__, metadata,
+                      (void*)aligned_ptr, alignments[i].name);
+                return ERROR;
+            }
+        }
+    }
+
+    /**
+     * Check that the metadata contents are correct
+     */
+
+    if (expected_size != NULL && metadata->size > *expected_size) {
+        ALOGE("%s: Metadata size (%u) should be <= expected size (%u)",
+              __FUNCTION__, metadata->size, *expected_size);
+        return ERROR;
+    }
+
+    if (metadata->entry_count > metadata->entry_capacity) {
+        ALOGE("%s: Entry count (%u) should be <= entry capacity (%u)",
+              __FUNCTION__, metadata->entry_count, metadata->entry_capacity);
+        return ERROR;
+    }
+
+    uptrdiff_t entries_end = metadata->entries_start + metadata->entry_capacity;
+    if (entries_end < metadata->entries_start || // overflow check
+        entries_end > metadata->data_start) {
+
+        ALOGE("%s: Entry start + capacity (%u) should be <= data start (%u)",
+               __FUNCTION__,
+              (metadata->entries_start + metadata->entry_capacity),
+              metadata->data_start);
+        return ERROR;
+    }
+
+    uptrdiff_t data_end = metadata->data_start + metadata->data_capacity;
+    if (data_end < metadata->data_start || // overflow check
+        data_end > metadata->size) {
+
+        ALOGE("%s: Data start + capacity (%u) should be <= total size (%u)",
+               __FUNCTION__,
+              (metadata->data_start + metadata->data_capacity),
+              metadata->size);
+        return ERROR;
+    }
+
+    // Validate each entry
+    size_t entry_count = metadata->entry_count;
+    camera_metadata_buffer_entry_t *entries = get_entries(metadata);
+
+    for (size_t i = 0; i < entry_count; ++i) {
+
+        if ((uintptr_t)&entries[i] != ALIGN_TO(&entries[i], ENTRY_ALIGNMENT)) {
+            ALOGE("%s: Entry index %u had bad alignment (address %p),"
+                  " expected alignment %d",
+                  __FUNCTION__, i, &entries[i], ENTRY_ALIGNMENT);
+            return ERROR;
+        }
+
+        camera_metadata_buffer_entry_t entry = entries[i];
+
+        if (entry.type >= NUM_TYPES) {
+            ALOGE("%s: Entry index %u had a bad type %d",
+                  __FUNCTION__, i, entry.type);
+            return ERROR;
+        }
+
+        // TODO: fix vendor_tag_ops across processes so we don't need to special
+        //       case vendor-specific tags
+        uint32_t tag_section = entry.tag >> 16;
+        int tag_type = get_camera_metadata_tag_type(entry.tag);
+        if (tag_type != (int)entry.type && tag_section < VENDOR_SECTION) {
+            ALOGE("%s: Entry index %u had tag type %d, but the type was %d",
+                  __FUNCTION__, i, tag_type, entry.type);
+            return ERROR;
+        }
+
+        size_t data_size =
+                calculate_camera_metadata_entry_data_size(entry.type,
+                                                          entry.count);
+
+        if (data_size != 0) {
+            camera_metadata_data_t *data =
+                    (camera_metadata_data_t*) (get_data(metadata) +
+                                               entry.data.offset);
+
+            if ((uintptr_t)data != ALIGN_TO(data, DATA_ALIGNMENT)) {
+                ALOGE("%s: Entry index %u had bad data alignment (address %p),"
+                      " expected align %d, (tag name %s, data size %u)",
+                      __FUNCTION__, i, data, DATA_ALIGNMENT,
+                      get_camera_metadata_tag_name(entry.tag) ?: "unknown",
+                      data_size);
+                return ERROR;
+            }
+
+            size_t data_entry_end = entry.data.offset + data_size;
+            if (data_entry_end < entry.data.offset || // overflow check
+                data_entry_end > metadata->data_capacity) {
+
+                ALOGE("%s: Entry index %u data ends (%u) beyond the capacity "
+                      "%u", __FUNCTION__, i, data_entry_end,
+                      metadata->data_capacity);
+                return ERROR;
+            }
+
+        } else if (entry.count == 0) {
+            if (entry.data.offset != 0) {
+                ALOGE("%s: Entry index %u had 0 items, but offset was non-0 "
+                     "(%u)", __FUNCTION__, i, entry.data.offset);
+                return ERROR;
+            }
+        } // else data stored inline, so we look at value which can be anything.
+    }
+
+    return OK;
 }
 
 int append_camera_metadata(camera_metadata_t *dst,
@@ -640,7 +809,8 @@ int set_camera_metadata_vendor_tag_ops(const vendor_tag_query_ops_t *query_ops) 
     return OK;
 }
 
-static void print_data(int fd, const uint8_t *data_ptr, int type, int count,
+static void print_data(int fd, const uint8_t *data_ptr, uint32_t tag, int type,
+        int count,
         int indentation);
 
 void dump_camera_metadata(const camera_metadata_t *metadata,
@@ -714,11 +884,11 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
         int count = entry->count;
         if (verbosity < 2 && count > 16) count = 16;
 
-        print_data(fd, data_ptr, entry->type, count, indentation);
+        print_data(fd, data_ptr, entry->tag, entry->type, count, indentation);
     }
 }
 
-static void print_data(int fd, const uint8_t *data_ptr,
+static void print_data(int fd, const uint8_t *data_ptr, uint32_t tag,
         int type, int count, int indentation) {
     static int values_per_line[NUM_TYPES] = {
         [TYPE_BYTE]     = 16,
@@ -729,6 +899,8 @@ static void print_data(int fd, const uint8_t *data_ptr,
         [TYPE_RATIONAL] = 2,
     };
     size_t type_size = camera_metadata_type_size[type];
+    char value_string_tmp[CAMERA_METADATA_ENUM_STRING_MAX_SIZE];
+    uint32_t value;
 
     int lines = count / values_per_line[type];
     if (count % values_per_line[type] != 0) lines++;
@@ -743,12 +915,31 @@ static void print_data(int fd, const uint8_t *data_ptr,
 
             switch (type) {
                 case TYPE_BYTE:
-                    fdprintf(fd, "%hhu ",
-                            *(data_ptr + index));
+                    value = *(data_ptr + index);
+                    if (camera_metadata_enum_snprint(tag,
+                                                     value,
+                                                     value_string_tmp,
+                                                     sizeof(value_string_tmp))
+                        == OK) {
+                        fdprintf(fd, "%s ", value_string_tmp);
+                    } else {
+                        fdprintf(fd, "%hhu ",
+                                *(data_ptr + index));
+                    }
                     break;
                 case TYPE_INT32:
-                    fdprintf(fd, "%d ",
-                            *(int32_t*)(data_ptr + index));
+                    value =
+                            *(int32_t*)(data_ptr + index);
+                    if (camera_metadata_enum_snprint(tag,
+                                                     value,
+                                                     value_string_tmp,
+                                                     sizeof(value_string_tmp))
+                        == OK) {
+                        fdprintf(fd, "%s ", value_string_tmp);
+                    } else {
+                        fdprintf(fd, "%d ",
+                                *(int32_t*)(data_ptr + index));
+                    }
                     break;
                 case TYPE_FLOAT:
                     fdprintf(fd, "%0.2f ",

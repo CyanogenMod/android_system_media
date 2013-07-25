@@ -83,9 +83,11 @@ int echo_reference_get_next_buffer(struct resampler_buffer_provider *buffer_prov
         return -ENODATA;
     }
 
-    buffer->frame_count = (buffer->frame_count > er->wr_frames_in) ? er->wr_frames_in : buffer->frame_count;
+    buffer->frame_count = (buffer->frame_count > er->wr_frames_in) ?
+            er->wr_frames_in : buffer->frame_count;
     // this is er->rd_channel_count here as we resample after stereo to mono conversion if any
-    buffer->i16 = (int16_t *)er->wr_src_buf + (er->wr_curr_frame_size - er->wr_frames_in) * er->rd_channel_count;
+    buffer->i16 = (int16_t *)er->wr_src_buf + (er->wr_curr_frame_size - er->wr_frames_in) *
+            er->rd_channel_count;
 
     return 0;
 }
@@ -234,8 +236,8 @@ static int echo_reference_write(struct echo_reference_itfe *echo_reference,
                     goto exit;
                 }
             }
-            // er->wr_src_buf and er->wr_frames_in are used by getNexBuffer() called by the resampler
-            // to get new frames
+            // er->wr_src_buf and er->wr_frames_in are used by getNexBuffer() called by the
+            // resampler to get new frames
             if (er->rd_channel_count != er->wr_channel_count) {
                 er->wr_src_buf = er->wr_buf;
             } else {
@@ -373,7 +375,8 @@ static int echo_reference_read(struct echo_reference_itfe *echo_reference,
 
             int64_t  deltaNs = delayNs - expectedDelayNs;
 
-            ALOGV("echo_reference_read(): EchoPathDelayDeviation between reference and DMA [%lld]", deltaNs);
+            ALOGV("echo_reference_read(): EchoPathDelayDeviation between reference and DMA [%lld]",
+                    deltaNs);
             if (abs(deltaNs) >= MIN_DELAY_DELTA_NS) {
                 // smooth the variation and update the reference buffer only
                 // if a deviation in the same direction is observed for more than MIN_DELTA_NUM
@@ -493,7 +496,8 @@ int create_echo_reference(audio_format_t rdFormat,
     }
     if ((rdChannelCount != 1 && rdChannelCount != 2) ||
             wrChannelCount != 2) {
-        ALOGW("create_echo_reference bad channel count rd %d, wr %d", rdChannelCount, wrChannelCount);
+        ALOGW("create_echo_reference bad channel count rd %d, wr %d", rdChannelCount,
+                wrChannelCount);
         return -EINVAL;
     }
 

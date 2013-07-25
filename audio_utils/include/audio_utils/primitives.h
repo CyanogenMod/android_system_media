@@ -18,6 +18,7 @@
 #define ANDROID_AUDIO_PRIMITIVES_H
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/cdefs.h>
 
 __BEGIN_DECLS
@@ -43,6 +44,17 @@ void ditherAndClamp(int32_t* out, const int32_t *sums, size_t c);
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
 void memcpy_to_i16_from_u8(int16_t *dst, const uint8_t *src, size_t count);
+
+/* Shrink and copy samples from signed 16-bit to unsigned 8-bit offset by 0x80.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ * The conversion is done by truncation, without dithering, so it loses resolution.
+ */
+void memcpy_to_u8_from_i16(uint8_t *dst, const int16_t *src, size_t count);
 
 /* Downmix pairs of interleaved stereo input 16-bit samples to mono output 16-bit samples.
  * Parameters:
