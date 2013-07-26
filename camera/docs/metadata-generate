@@ -29,7 +29,7 @@ if [[ -z $ANDROID_BUILD_TOP ]]; then
 fi
 
 thisdir=$(cd "$(dirname "$0")"; pwd)
-fwkdir="$ANDROID_BUILD_TOP/frameworks/base/core/java/android/hardware/photography/"
+fwkdir="$ANDROID_BUILD_TOP/frameworks/base/core/java/android/hardware/camera2/"
 out_files=()
 
 function relpath() {

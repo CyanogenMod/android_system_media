@@ -46,7 +46,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       <language name="java">android.graphics.Rect</language>
     </typedef>
     <typedef name="size">
-      <language name="java">android.hardware.photography.Size</language>
+      <language name="java">android.hardware.camera2.Size</language>
     </typedef>
     <typedef name="string">
       <language name="java">String</language>
