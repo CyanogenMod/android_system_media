@@ -16,7 +16,7 @@
 
 #include <audio_utils/primitives.h>
 
-void ditherAndClamp(int32_t* out, int32_t const *sums, size_t c)
+void ditherAndClamp(int32_t* out, const int32_t *sums, size_t c)
 {
     size_t i;
     for (i=0 ; i<c ; i++) {
