@@ -561,6 +561,10 @@ def pascal_case(what):
   Convert the first letter of a string to uppercase, to make the identifier
   conform to PascalCase.
 
+  If there are dots, remove the dots, and capitalize the letter following
+  where the dot was. Letters that weren't following dots are left unchanged,
+  except for the first letter of the string (which is made upper-case).
+
   Args:
     what: a string representing some identifier
 
@@ -570,8 +574,29 @@ def pascal_case(what):
   Example:
     pascal_case("helloWorld") == "HelloWorld"
     pascal_case("foo") == "Foo"
+    pascal_case("hello.world") = "HelloWorld"
+    pascal_case("fooBar.fooBar") = "FooBarFooBar"
   """
-  return what[0:1].upper() + what[1:]
+  return "".join([s[0:1].upper() + s[1:] for s in what.split('.')])
+
+def jkey_identifier(what):
+  """
+  Return a Java identifier from a property name.
+
+  Args:
+    what: a string representing a property name.
+
+  Returns:
+    Java identifier corresponding to the property name. May need to be
+    prepended with the appropriate Java class name by the caller of this
+    function. Note that the outer namespace is stripped from the property
+    name.
+
+  Example:
+    jkey_identifier("android.lens.facing") == "Lens.FACING"
+  """
+  tokens = what.split('.')
+  return ".".join(map(pascal_case, tokens[1:-1])) + "." + csym(tokens[-1])
 
 def jenum(enum):
   """

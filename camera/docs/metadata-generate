@@ -21,7 +21,7 @@
 #   docs.html
 #   ../src/camera_metadata_tag_info.c
 #   ../src/camera_metadata_tags.h
-#
+#   ../../../../cts/tests/tests/hardware/src/android/hardware/camera2/cts/CameraPropertiesTest.java
 
 if [[ -z $ANDROID_BUILD_TOP ]]; then
     echo "Please source build/envsetup.sh before running script" >& 2
@@ -30,6 +30,8 @@ fi
 
 thisdir=$(cd "$(dirname "$0")"; pwd)
 fwkdir="$ANDROID_BUILD_TOP/frameworks/base/core/java/android/hardware/camera2/"
+ctsdir="$ANDROID_BUILD_TOP/cts/tests/tests/hardware/src/android/hardware/camera2/cts"
+
 out_files=()
 
 function relpath() {
@@ -103,6 +105,7 @@ gen_file camera_metadata_tags.mako ../include/system/camera_metadata_tags.h || e
 gen_file_abs CaptureResultKeys.mako "$fwkdir/CaptureResultKeys.java" || exit 1
 gen_file_abs CaptureRequestKeys.mako "$fwkdir/CaptureRequestKeys.java" || exit 1
 gen_file_abs CameraPropertiesKeys.mako "$fwkdir/CameraPropertiesKeys.java" || exit 1
+gen_file_abs CameraPropertiesTest.mako "$ctsdir/CameraPropertiesTest.java" || exit 1
 
 echo ""
 echo "===================================================="
