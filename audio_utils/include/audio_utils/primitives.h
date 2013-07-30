@@ -58,6 +58,29 @@ void memcpy_to_i16_from_u8(int16_t *dst, const uint8_t *src, size_t count);
  */
 void memcpy_to_u8_from_i16(uint8_t *dst, const int16_t *src, size_t count);
 
+/* Shrink and copy samples from signed 32-bit fixed-point Q0.31 to signed 16-bit Q0.15.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ * The conversion is done by truncation, without dithering, so it loses resolution.
+ */
+void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count);
+
+/* Shrink and copy samples from single-precision floating-point to signed 16-bit.
+ * Each float should be in the range -1.0 to 1.0.  Values outside that range are clamped.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ * The conversion is done by truncation, without dithering, so it loses resolution.
+ */
+void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count);
+
 /* Downmix pairs of interleaved stereo input 16-bit samples to mono output 16-bit samples.
  * Parameters:
  *  dst     Destination buffer
