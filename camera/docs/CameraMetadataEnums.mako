@@ -15,41 +15,37 @@
 ## limitations under the License.
 ##
 \
-## These sections of metadata Key definitions are inserted into the middle of
-## android.hardware.camera2.CameraProperties, CaptureRequest, and CaptureResult.
-<%page args="java_class, xml_kind" />\
+## This section of enum integer definitions is inserted into
+## android.hardware.camera2.CameraMetadata.
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
-     * The key entries below this point are generated from metadata
+     * The enum values below this point are generated from metadata
      * definitions in /system/media/camera/docs. Do not modify by hand or
      * modify the comment blocks at the start or end.
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~*/
-
 ##
-## Generate a single key and docs
-<%def name="generate_key(entry)">\
+## Generate an enum's integers
+<%def name="generate_enum(entry, target_class)">\
+    //
+    // Enumeration values for ${target_class}#${entry.name | jkey_identifier}
+    //
+
+  % for value in entry.enum.values:
     /**
-  % if entry.description:
-${entry.description | javadoc}\
-  % endif
-  % if entry.notes:
-${entry.notes | javadoc}\
-  % endif
-  % if entry.enum and not (entry.typedef and entry.typedef.languages.get('java')):
-    % for value in entry.enum.values:
-     * @see #${jenum_value(entry, value)}
-    % endfor
-  % endif
-  % if entry.applied_visibility == 'hidden':
-     *
+    % if value.notes:
+${value.notes | javadoc}\
+    % endif
+     * @see ${target_class}#${entry.name | jkey_identifier}
+    % if entry.applied_visibility == 'hidden':
      * @hide
-  % endif
+    %endif
      */
-    public static final Key<${jtype_boxed(entry)}> ${entry.name | jkey_identifier} =
-            new Key<${jtype_boxed(entry)}>("${entry.name}", ${jclass(entry)});
+    public static final int ${jenum_value(entry, value)} = ${enum_calculate_value_string(value)};
+
+  % endfor
 </%def>\
 ##
 ## Generate a list of only Static, Controls, or Dynamic properties.
-<%def name="single_kind_keys(java_name, xml_name)">\
+<%def name="single_kind_keys(xml_name, target_class)">\
 % for outer_namespace in metadata.outer_namespaces: ## assumes single 'android' namespace
   % for section in outer_namespace.sections:
     % if section.find_first(lambda x: isinstance(x, metadata_model.Entry) and x.kind == xml_name) and \
@@ -57,29 +53,37 @@ ${entry.notes | javadoc}\
       % for inner_namespace in get_children_by_filtering_kind(section, xml_name, 'namespaces'):
 ## We only support 1 level of inner namespace, i.e. android.a.b and android.a.b.c works, but not android.a.b.c.d
 ## If we need to support more, we should use a recursive function here instead.. but the indentation gets trickier.
-        % for entry in filter_visibility(inner_namespace.merged_entries, ('hidden','public')):
-${generate_key(entry)}
-       % endfor
-    % endfor
-    % for entry in filter_visibility( \
-        get_children_by_filtering_kind(section, xml_name, 'merged_entries'), \
+        % for entry in filter_visibility(inner_namespace.entries, ('hidden','public')):
+          % if entry.enum \
+              and not (entry.typedef and entry.typedef.languages.get('java')) \
+              and not entry.is_clone():
+${generate_enum(entry, target_class)}\
+          % endif
+        % endfor
+      % endfor
+      % for entry in filter_visibility( \
+          get_children_by_filtering_kind(section, xml_name, 'entries'), \
                                          ('hidden', 'public')):
-${generate_key(entry)}
-    % endfor
+        % if entry.enum \
+             and not (entry.typedef and entry.typedef.languages.get('java')) \
+             and not entry.is_clone():
+${generate_enum(entry, target_class)}\
+        % endif
+      % endfor
     % endif
   % endfor
 % endfor
 </%def>\
+
 ##
 ## Static properties only
-##${single_kind_keys('CameraPropertiesKeys', 'static')}
+${single_kind_keys('static','CameraProperties')}\
 ##
 ## Controls properties only
-##${single_kind_keys('CaptureRequestKeys', 'controls')}
+${single_kind_keys('controls','CaptureRequest')}\
 ##
 ## Dynamic properties only
-##${single_kind_keys('CaptureResultKeys', 'dynamic')}
-${single_kind_keys(java_class, xml_kind)}\
+${single_kind_keys('dynamic','CaptureResult')}\
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/

@@ -54,6 +54,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <typedef name="boolean">
       <language name="java">boolean</language>
     </typedef>
+    <typedef name="imageFormat">
+      <language name="java">int</language>
+    </typedef>
   </types>
 
   <namespace name="android">
@@ -1635,7 +1638,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="availableFormats" type="int32"
         visibility="public" enum="true"
         type_notes="values from HAL_PIXEL_FORMAT_* in /system/core/include/system/graphics.h"
-        container="array">
+        container="array" typedef="imageFormat">
           <array>
             <size>n</size>
           </array>

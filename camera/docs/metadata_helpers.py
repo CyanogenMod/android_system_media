@@ -371,11 +371,8 @@ def jtype_unboxed(entry):
 
   if not java_type:
     if not java_type and entry.enum:
-      name = entry.name
-
-      name_without_ons = entry.get_name_as_list()[1:]
-      base_type = ".".join([pascal_case(i) for i in name_without_ons]) + \
-                   "Key.Enum"
+      # Always map enums to Java ints, unless there's a typedef override
+      base_type = 'int'
 
     else:
       mapping = {
@@ -593,29 +590,78 @@ def jkey_identifier(what):
     name.
 
   Example:
-    jkey_identifier("android.lens.facing") == "Lens.FACING"
+    jkey_identifier("android.lens.facing") == "LENS_FACING"
   """
-  tokens = what.split('.')
-  return ".".join(map(pascal_case, tokens[1:-1])) + "." + csym(tokens[-1])
+  return csym(what[what.find('.') + 1:])
 
-def jenum(enum):
+def jenum_value(enum_entry, enum_value):
   """
-  Calculate the Java symbol referencing an enum value (in Java).
+  Calculate the Java name for an integer enum value
 
   Args:
-    enum: An Enum node
+    enum: An enum-typed Entry node
+    value: An EnumValue node for the enum
 
   Returns:
     String representing the Java symbol
   """
 
-  entry = enum.parent
-  name = entry.name
+  cname = csym(enum_entry.name)
+  return cname[cname.find('_') + 1:] + '_' + enum_value.name
 
-  name_without_ons = entry.get_name_as_list()[1:]
-  jenum_name = ".".join([pascal_case(i) for i in name_without_ons]) + "Key.Enum"
+def javadoc(text, indent = 4):
+  """
+  Format text block as a javadoc comment section
 
-  return jenum_name
+  Args:
+    text: A multi-line string to format
+    indent: baseline level of indentation for javadoc block
+  Returns:
+    String with:
+    - Indent and * for insertion into a Javadoc comment block
+    - Leading/trailing whitespace removed
+    - Paragraph tags added on newlines between paragraphs
+
+  Example:
+    "This is a comment for Javadoc\n" +
+    "     with multiple lines, that should be   \n" +
+    "     formatted better\n" +
+    "\n" +
+    "    That covers multiple lines as well\n"
+
+    transforms to
+    "    * <p>\n" +
+    "    * This is a comment for Javadoc\n" +
+    "    * with multiple lines, that should be\n" +
+    "    * formatted better\n" +
+    "    * </p><p>\n" +
+    "    * That covers multiple lines as well\n" +
+    "    * </p>\n"
+  """
+  comment_prefix = " " * indent + " * ";
+  comment_para = comment_prefix + "</p><p>\n";
+  javatext = comment_prefix + "<p>\n";
+
+  in_body = False # Eat empty lines at start
+  first_paragraph = True
+  for line in ( line.strip() for line in text.splitlines() ):
+    if not line:
+      in_body = False # collapse multi-blank lines into one
+    else:
+      # Insert para end/start after a span of blank lines except for
+      # the first paragraph, which got a para start already
+      if not in_body and not first_paragraph:
+        javatext = javatext + comment_para
+
+      in_body = True
+      first_paragraph = False
+
+      javatext = javatext + comment_prefix + line + "\n";
+
+  # Close last para tag
+  javatext = javatext + comment_prefix + "</p>\n";
+
+  return javatext
 
 def any_visible(section, kind_name, visibilities):
   """

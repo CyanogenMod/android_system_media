@@ -29,7 +29,6 @@ import android.content.Context;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraProperties;
-import android.hardware.camera2.CameraPropertiesKeys;
 import android.test.AndroidTestCase;
 
 /**
@@ -73,7 +72,7 @@ public class CameraPropertiesTest extends AndroidTestCase {
             assertNotNull(String.format("Can't get camera properties from: ID %s", ids[i]),
                                         props);
             assertNotNull("Invalid property: ${entry.name}",
-                    props.get(CameraPropertiesKeys.${jkey_identifier(entry.name)}));
+                    props.get(CameraProperties.${jkey_identifier(entry.name)}));
         }
     }
         % endif
