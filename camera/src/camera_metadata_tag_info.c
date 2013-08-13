@@ -430,6 +430,8 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     { "referenceIlluminant2",          TYPE_BYTE   },
     [ ANDROID_SENSOR_TIMESTAMP - ANDROID_SENSOR_START ] =
     { "timestamp",                     TYPE_INT64  },
+    [ ANDROID_SENSOR_TEMPERATURE - ANDROID_SENSOR_START ] =
+    { "temperature",                   TYPE_FLOAT  },
 };
 
 static tag_info_t android_sensor_info[ANDROID_SENSOR_INFO_END -
@@ -1657,6 +1659,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SENSOR_TIMESTAMP: {
+            break;
+        }
+        case ANDROID_SENSOR_TEMPERATURE: {
             break;
         }
 

@@ -276,6 +276,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_REFERENCE_ILLUMINANT1,             // enum         | system
     ANDROID_SENSOR_REFERENCE_ILLUMINANT2,             // byte         | system
     ANDROID_SENSOR_TIMESTAMP,                         // int64        | public
+    ANDROID_SENSOR_TEMPERATURE,                       // float        | public
     ANDROID_SENSOR_END,
 
     ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE =           // int32[]      | public

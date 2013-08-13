@@ -77,6 +77,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               quality</notes>
             </value>
           </enum>
+
+          <notes>When android.sensor.awbMode is not OFF, TRANSFORM_MATRIX
+          should be ignored.</notes>
         </entry>
         <entry name="transform" type="rational" visibility="public"
                type_notes="3x3 rational matrix in row-major order"
@@ -93,7 +96,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <notes>This matrix is either set by HAL when the request
           android.colorCorrection.mode is not TRANSFORM_MATRIX, or
           directly by the application in the request when the
-          androird.colorCorrection.mode is TRANSFORM_MATRIX.
+          android.colorCorrection.mode is TRANSFORM_MATRIX.
+
           In the latter case, the HAL may round the matrix to account
           for precision issues; the final rounded matrix should be
           reported back in this matrix result metadata.</notes>
@@ -113,6 +117,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           does not support a separate gain for even/odd green channels,
           it should use the G_even value,and write G_odd equal to
           G_even in the output result metadata.
+
+          This array is either set by HAL when the request
+          android.colorCorrection.mode is not TRANSFORM_MATRIX, or
+          directly by the application in the request when the
+          android.colorCorrection.mode is TRANSFORM_MATRIX.
 
           The ouput should be the gains actually applied by the HAL to
           the current frame.</notes>
@@ -1767,7 +1776,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       <controls>
         <entry name="exposureTime" type="int64" visibility="public">
           <description>Duration each pixel is exposed to
-          light</description>
+          light.
+
+          If the sensor can't expose this exact duration, it should shorten the
+          duration exposed to the nearest possible value (rather than expose longer).
+          </description>
           <units>nanoseconds</units>
           <range>android.sensor.info.exposureTimeRange</range>
           <notes>1/10000 - 30 sec range. No bulb mode</notes>
@@ -1787,7 +1800,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="sensitivity" type="int32" visibility="public">
           <description>Gain applied to image data. Must be
           implemented through analog gain only if set to values
-          below 'maximum analog sensitivity'.</description>
+          below 'maximum analog sensitivity'.
+
+          If the sensor can't apply this exact gain, it should lessen the
+          gain to the nearest possible value (rather than gain more).
+          </description>
           <units>ISO arithmetic units</units>
           <range>android.sensor.info.sensitivityRange</range>
           <notes>ISO 12232:2006 REI method</notes>
@@ -2071,6 +2088,17 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           system</notes>
           <tag id="BC" />
         </entry>
+        <entry name="temperature" type="float" visibility="public">
+          <description>The temperature of the sensor, sampled at the time
+          exposure began for this frame.
+
+          The thermal diode being queried should be inside the sensor PCB, or
+          somewhere close to it.
+          </description>
+
+          <units>celsius</units>
+          <range>Optional. This value is missing if no temperature is available.</range>
+        </entry>
       </dynamic>
     </section>
     <section name="shading">
@@ -2243,7 +2271,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>List of the face confidence scores for
           detected faces</description>
           <range>0-100</range>
-          <notes>Only available if faceDetectMode != OFF</notes>
+          <notes>Only available if faceDetectMode != OFF. The value should be
+          meaningful (for example, setting 100 at all times is illegal).</notes>
           <tag id="BC" />
         </entry>
         <entry name="histogram" type="int32"
@@ -2294,7 +2323,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           shaded section of the image should have a gain factor
           of 1; all other sections should have gains above 1.
           the map should be on the order of 30-40 rows, and
-          must be smaller than 64x64.</notes>
+          must be smaller than 64x64.
+
+          When android.colorCorrection.mode = TRANSFORM_MATRIX, the map
+          must take into account the colorCorrection settings.
+          </notes>
         </entry>
         <entry name="predictedColorGains" type="float" visibility="public"
                type_notes="A 1D array of floats for 4 color channel gains"
@@ -2312,7 +2345,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           applied to that frame.
 
           The 4 channel gains are defined in Bayer domain,
-          see android.colorCorrection.gains for details.</notes>
+          see android.colorCorrection.gains for details.
+
+          This value should always be calculated by the AWB block,
+          regardless of the android.control.* current values.
+          </notes>
         </entry>
         <entry name="predictedColorTransform" type="rational" visibility="public"
                type_notes="3x3 rational matrix in row-major order"
@@ -2335,6 +2372,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           These estimates must be provided for all frames, even if
           capture settings and color transforms are set by the application.
+
+          This value should always be calculated by the AWB block,
+          regardless of the android.control.* current values.
           </notes>
         </entry>
         <entry name="sceneFlicker" type="byte" visibility="public" enum="true">
@@ -2511,7 +2551,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           exposure time) may require resetting of black level
           compensation, the HAL must report whether setting the
           black level lock was successful in the output result
-          metadata.</notes>
+          metadata.
+
+          The black level locking must happen at the sensor, and not at the ISP.
+          If for some reason black level locking is no longer legal (for example,
+          the analog gain has changed, which forces black levels to be
+          recalculated), then the HAL is free to override this request (and it
+          must report 'OFF' when this does happen) until the next time locking
+          is legal again.</notes>
           <tag id="HAL2" />
         </entry>
       </controls>

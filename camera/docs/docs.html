@@ -498,6 +498,7 @@
             <li><a href="#dynamic_android.sensor.frameDuration">android.sensor.frameDuration</a></li>
             <li><a href="#dynamic_android.sensor.sensitivity">android.sensor.sensitivity</a></li>
             <li><a href="#dynamic_android.sensor.timestamp">android.sensor.timestamp</a></li>
+            <li><a href="#dynamic_android.sensor.temperature">android.sensor.temperature</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -729,6 +730,8 @@
             </td>
 
             <td class="entry_notes">
+              When android.<wbr>sensor.<wbr>awb<wbr>Mode is not OFF,<wbr> TRANSFORM_<wbr>MATRIX
+          should be ignored.<wbr>
             </td>
 
             <td class="entry_tags">
@@ -770,8 +773,9 @@
               This matrix is either set by HAL when the request
           android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
           directly by the application in the request when the
-          androird.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr>
-          In the latter case,<wbr> the HAL may round the matrix to account
+          android.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr>
+<br>
+<br>          In the latter case,<wbr> the HAL may round the matrix to account
           for precision issues; the final rounded matrix should be
           reported back in this matrix result metadata.<wbr>
             </td>
@@ -816,6 +820,11 @@
           does not support a separate gain for even/<wbr>odd green channels,<wbr>
           it should use the G_<wbr>even value,<wbr>and write G_<wbr>odd equal to
           G_<wbr>even in the output result metadata.<wbr>
+<br>
+<br>          This array is either set by HAL when the request
+          android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
+          directly by the application in the request when the
+          android.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr>
 <br>
 <br>          The ouput should be the gains actually applied by the HAL to
           the current frame.<wbr>
@@ -888,8 +897,9 @@
               This matrix is either set by HAL when the request
           android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
           directly by the application in the request when the
-          androird.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr>
-          In the latter case,<wbr> the HAL may round the matrix to account
+          android.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr>
+<br>
+<br>          In the latter case,<wbr> the HAL may round the matrix to account
           for precision issues; the final rounded matrix should be
           reported back in this matrix result metadata.<wbr>
             </td>
@@ -934,6 +944,11 @@
           does not support a separate gain for even/<wbr>odd green channels,<wbr>
           it should use the G_<wbr>even value,<wbr>and write G_<wbr>odd equal to
           G_<wbr>even in the output result metadata.<wbr>
+<br>
+<br>          This array is either set by HAL when the request
+          android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
+          directly by the application in the request when the
+          android.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr>
 <br>
 <br>          The ouput should be the gains actually applied by the HAL to
           the current frame.<wbr>
@@ -7697,7 +7712,11 @@
 
             <td class="entry_description">
               Duration each pixel is exposed to
-          light
+          light.<wbr>
+<br>
+<br>          If the sensor can't expose this exact duration,<wbr> it should shorten the
+          duration exposed to the nearest possible value (rather than expose longer).<wbr>
+          
             </td>
 
             <td class="entry_units">
@@ -7774,6 +7793,10 @@
               Gain applied to image data.<wbr> Must be
           implemented through analog gain only if set to values
           below 'maximum analog sensitivity'.<wbr>
+<br>
+<br>          If the sensor can't apply this exact gain,<wbr> it should lessen the
+          gain to the nearest possible value (rather than gain more).<wbr>
+          
             </td>
 
             <td class="entry_units">
@@ -8781,7 +8804,11 @@
 
             <td class="entry_description">
               Duration each pixel is exposed to
-          light
+          light.<wbr>
+<br>
+<br>          If the sensor can't expose this exact duration,<wbr> it should shorten the
+          duration exposed to the nearest possible value (rather than expose longer).<wbr>
+          
             </td>
 
             <td class="entry_units">
@@ -8858,6 +8885,10 @@
               Gain applied to image data.<wbr> Must be
           implemented through analog gain only if set to values
           below 'maximum analog sensitivity'.<wbr>
+<br>
+<br>          If the sensor can't apply this exact gain,<wbr> it should lessen the
+          gain to the nearest possible value (rather than gain more).<wbr>
+          
             </td>
 
             <td class="entry_units">
@@ -8913,6 +8944,42 @@
               <ul class="entry_tags">
                   <li><a href="#tag_BC">BC</a></li>
               </ul>
+            </td>
+
+          </tr> <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.sensor.temperature">
+            <td class="entry_name">android.<wbr>sensor.<wbr>temperature</td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              The temperature of the sensor,<wbr> sampled at the time
+          exposure began for this frame.<wbr>
+<br>
+<br>          The thermal diode being queried should be inside the sensor PCB,<wbr> or
+          somewhere close to it.<wbr>
+          
+            </td>
+
+            <td class="entry_units">
+              celsius
+            </td>
+
+            <td class="entry_range">
+              Optional.<wbr> This value is missing if no temperature is available.<wbr>
+            </td>
+
+            <td class="entry_notes">
+            </td>
+
+            <td class="entry_tags">
             </td>
 
           </tr> <!-- end of entry -->
@@ -9783,7 +9850,8 @@
             </td>
 
             <td class="entry_notes">
-              Only available if faceDetectMode != OFF
+              Only available if faceDetectMode != OFF.<wbr> The value should be
+          meaningful (for example,<wbr> setting 100 at all times is illegal).<wbr>
             </td>
 
             <td class="entry_tags">
@@ -9992,6 +10060,10 @@
           of 1; all other sections should have gains above 1.<wbr>
           the map should be on the order of 30-40 rows,<wbr> and
           must be smaller than 64x64.<wbr>
+<br>
+<br>          When android.<wbr>color<wbr>Correction.<wbr>mode = TRANSFORM_<wbr>MATRIX,<wbr> the map
+          must take into account the colorCorrection settings.<wbr>
+          
             </td>
 
             <td class="entry_tags">
@@ -10036,6 +10108,10 @@
 <br>
 <br>          The 4 channel gains are defined in Bayer domain,<wbr>
           see android.<wbr>color<wbr>Correction.<wbr>gains for details.<wbr>
+<br>
+<br>          This value should always be calculated by the AWB block,<wbr>
+          regardless of the android.<wbr>control.<wbr>* current values.<wbr>
+          
             </td>
 
             <td class="entry_tags">
@@ -10083,6 +10159,9 @@
 <br>
 <br>          These estimates must be provided for all frames,<wbr> even if
           capture settings and color transforms are set by the application.<wbr>
+<br>
+<br>          This value should always be calculated by the AWB block,<wbr>
+          regardless of the android.<wbr>control.<wbr>* current values.<wbr>
           
             </td>
 
@@ -10945,6 +11024,13 @@
           compensation,<wbr> the HAL must report whether setting the
           black level lock was successful in the output result
           metadata.<wbr>
+<br>
+<br>          The black level locking must happen at the sensor,<wbr> and not at the ISP.<wbr>
+          If for some reason black level locking is no longer legal (for example,<wbr>
+          the analog gain has changed,<wbr> which forces black levels to be
+          recalculated),<wbr> then the HAL is free to override this request (and it
+          must report 'OFF' when this does happen) until the next time locking
+          is legal again.<wbr>
             </td>
 
             <td class="entry_tags">
@@ -11023,6 +11109,13 @@
           compensation,<wbr> the HAL must report whether setting the
           black level lock was successful in the output result
           metadata.<wbr>
+<br>
+<br>          The black level locking must happen at the sensor,<wbr> and not at the ISP.<wbr>
+          If for some reason black level locking is no longer legal (for example,<wbr>
+          the analog gain has changed,<wbr> which forces black levels to be
+          recalculated),<wbr> then the HAL is free to override this request (and it
+          must report 'OFF' when this does happen) until the next time locking
+          is legal again.<wbr>
             </td>
 
             <td class="entry_tags">
