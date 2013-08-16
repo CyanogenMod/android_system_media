@@ -1863,7 +1863,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </entry>
           <entry name="physicalSize" type="float" visibility="public"
           type_notes="width x height in millimeters"
-          container="array" typedef="size">
+          container="array">
             <array>
               <size>2</size>
             </array>
