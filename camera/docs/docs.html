@@ -10251,8 +10251,13 @@
             <td class="entry_name">android.<wbr>tonemap.<wbr>curve<wbr>Blue</td>
             <td class="entry_type">
                 <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
 
+                <span class="entry_type_array">
+                  n x 2
+                </span>
               <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">1D array of float pairs (P_<wbr>IN,<wbr> P_<wbr>OUT).<wbr> The maximum number of pairs is specified by android.<wbr>tonemap.<wbr>max<wbr>Curve<wbr>Points.<wbr></div>
 
 
             </td> <!-- entry_type -->
@@ -10271,6 +10276,10 @@
             </td>
 
             <td class="entry_notes">
+              Tonemapping /<wbr> contrast /<wbr> gamma curve for the blue
+          channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr>
+<br>
+<br>          See android.<wbr>tonemap.<wbr>curve<wbr>Red for more details.<wbr>
             </td>
 
             <td class="entry_tags">
@@ -10283,8 +10292,13 @@
             <td class="entry_name">android.<wbr>tonemap.<wbr>curve<wbr>Green</td>
             <td class="entry_type">
                 <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
 
+                <span class="entry_type_array">
+                  n x 2
+                </span>
               <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">1D array of float pairs (P_<wbr>IN,<wbr> P_<wbr>OUT).<wbr> The maximum number of pairs is specified by android.<wbr>tonemap.<wbr>max<wbr>Curve<wbr>Points.<wbr></div>
 
 
             </td> <!-- entry_type -->
@@ -10303,6 +10317,10 @@
             </td>
 
             <td class="entry_notes">
+              Tonemapping /<wbr> contrast /<wbr> gamma curve for the green
+          channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr>
+<br>
+<br>          See android.<wbr>tonemap.<wbr>curve<wbr>Red for more details.<wbr>
             </td>
 
             <td class="entry_tags">
@@ -10321,7 +10339,7 @@
                   n x 2
                 </span>
               <span class="entry_type_visibility"> [public]</span>
-                <div class="entry_type_notes">A 1D array of pairs of floats.<wbr> mapping a 0-1 input range to a 0-1 output range.<wbr></div>
+                <div class="entry_type_notes">1D array of float pairs (P_<wbr>IN,<wbr> P_<wbr>OUT).<wbr> The maximum number of pairs is specified by android.<wbr>tonemap.<wbr>max<wbr>Curve<wbr>Points.<wbr></div>
 
 
             </td> <!-- entry_type -->
@@ -10335,14 +10353,21 @@
             </td>
 
             <td class="entry_range">
-              0-1 on input and output coordinates.<wbr> Max entry
-          count speciied by android.<wbr>tonemap.<wbr>max<wbr>Curve<wbr>Points
+              0-1 on input and output coordinates.<wbr>
             </td>
 
             <td class="entry_notes">
-              .<wbr>The input range must be monotonically increasing
-          with N,<wbr> and values between entries should be linearly
-          interpolated.<wbr> For example,<wbr> if the array is: [0.<wbr>0,<wbr> 0.<wbr>0,<wbr>
+              Tonemapping /<wbr> contrast /<wbr> gamma curve for the red
+          channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr>
+<br>
+<br>          Since the input and output ranges may vary depending on
+          the camera pipeline,<wbr> the input and output pixel values
+          are represented by normalized floating-point values
+          between 0 and 1,<wbr> with 0 == black and 1 == white.<wbr>
+<br>
+<br>          The curve should be linearly interpolated between the
+          defined points.<wbr> The points will be listed in increasing
+          order of P_<wbr>IN.<wbr> For example,<wbr> if the array is: [0.<wbr>0,<wbr> 0.<wbr>0,<wbr>
           0.<wbr>3,<wbr> 0.<wbr>5,<wbr> 1.<wbr>0,<wbr> 1.<wbr>0],<wbr> then the input->output mapping
           for a few sample points would be: 0 -> 0,<wbr> 0.<wbr>15 ->
           0.<wbr>25,<wbr> 0.<wbr>3 -> 0.<wbr>5,<wbr> 0.<wbr>5 -> 0.<wbr>64
@@ -10493,8 +10518,13 @@
             <td class="entry_name">android.<wbr>tonemap.<wbr>curve<wbr>Blue</td>
             <td class="entry_type">
                 <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
 
+                <span class="entry_type_array">
+                  n x 2
+                </span>
               <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">1D array of float pairs (P_<wbr>IN,<wbr> P_<wbr>OUT).<wbr> The maximum number of pairs is specified by android.<wbr>tonemap.<wbr>max<wbr>Curve<wbr>Points.<wbr></div>
 
 
             </td> <!-- entry_type -->
@@ -10513,6 +10543,10 @@
             </td>
 
             <td class="entry_notes">
+              Tonemapping /<wbr> contrast /<wbr> gamma curve for the blue
+          channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr>
+<br>
+<br>          See android.<wbr>tonemap.<wbr>curve<wbr>Red for more details.<wbr>
             </td>
 
             <td class="entry_tags">
@@ -10525,8 +10559,13 @@
             <td class="entry_name">android.<wbr>tonemap.<wbr>curve<wbr>Green</td>
             <td class="entry_type">
                 <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
 
+                <span class="entry_type_array">
+                  n x 2
+                </span>
               <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">1D array of float pairs (P_<wbr>IN,<wbr> P_<wbr>OUT).<wbr> The maximum number of pairs is specified by android.<wbr>tonemap.<wbr>max<wbr>Curve<wbr>Points.<wbr></div>
 
 
             </td> <!-- entry_type -->
@@ -10545,6 +10584,10 @@
             </td>
 
             <td class="entry_notes">
+              Tonemapping /<wbr> contrast /<wbr> gamma curve for the green
+          channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr>
+<br>
+<br>          See android.<wbr>tonemap.<wbr>curve<wbr>Red for more details.<wbr>
             </td>
 
             <td class="entry_tags">
@@ -10563,7 +10606,7 @@
                   n x 2
                 </span>
               <span class="entry_type_visibility"> [public]</span>
-                <div class="entry_type_notes">A 1D array of pairs of floats.<wbr> mapping a 0-1 input range to a 0-1 output range.<wbr></div>
+                <div class="entry_type_notes">1D array of float pairs (P_<wbr>IN,<wbr> P_<wbr>OUT).<wbr> The maximum number of pairs is specified by android.<wbr>tonemap.<wbr>max<wbr>Curve<wbr>Points.<wbr></div>
 
 
             </td> <!-- entry_type -->
@@ -10577,14 +10620,21 @@
             </td>
 
             <td class="entry_range">
-              0-1 on input and output coordinates.<wbr> Max entry
-          count speciied by android.<wbr>tonemap.<wbr>max<wbr>Curve<wbr>Points
+              0-1 on input and output coordinates.<wbr>
             </td>
 
             <td class="entry_notes">
-              .<wbr>The input range must be monotonically increasing
-          with N,<wbr> and values between entries should be linearly
-          interpolated.<wbr> For example,<wbr> if the array is: [0.<wbr>0,<wbr> 0.<wbr>0,<wbr>
+              Tonemapping /<wbr> contrast /<wbr> gamma curve for the red
+          channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr>
+<br>
+<br>          Since the input and output ranges may vary depending on
+          the camera pipeline,<wbr> the input and output pixel values
+          are represented by normalized floating-point values
+          between 0 and 1,<wbr> with 0 == black and 1 == white.<wbr>
+<br>
+<br>          The curve should be linearly interpolated between the
+          defined points.<wbr> The points will be listed in increasing
+          order of P_<wbr>IN.<wbr> For example,<wbr> if the array is: [0.<wbr>0,<wbr> 0.<wbr>0,<wbr>
           0.<wbr>3,<wbr> 0.<wbr>5,<wbr> 1.<wbr>0,<wbr> 1.<wbr>0],<wbr> then the input->output mapping
           for a few sample points would be: 0 -> 0,<wbr> 0.<wbr>15 ->
           0.<wbr>25,<wbr> 0.<wbr>3 -> 0.<wbr>5,<wbr> 0.<wbr>5 -> 0.<wbr>64

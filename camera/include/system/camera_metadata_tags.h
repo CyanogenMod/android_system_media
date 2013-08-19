@@ -322,9 +322,9 @@ typedef enum camera_metadata_tag {
     ANDROID_STATISTICS_INFO_SHARPNESS_MAP_SIZE,       // int32[]      | system
     ANDROID_STATISTICS_INFO_END,
 
-    ANDROID_TONEMAP_CURVE_BLUE =                      // float        | public
+    ANDROID_TONEMAP_CURVE_BLUE =                      // float[]      | public
             ANDROID_TONEMAP_START,
-    ANDROID_TONEMAP_CURVE_GREEN,                      // float        | public
+    ANDROID_TONEMAP_CURVE_GREEN,                      // float[]      | public
     ANDROID_TONEMAP_CURVE_RED,                        // float[]      | public
     ANDROID_TONEMAP_MODE,                             // enum         | public
     ANDROID_TONEMAP_MAX_CURVE_POINTS,                 // int32        | public
