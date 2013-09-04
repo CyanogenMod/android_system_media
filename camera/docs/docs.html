@@ -1221,13 +1221,14 @@
 
             <td class="entry_notes">
               Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
-          xmax,<wbr> ymax,<wbr> weight.<wbr>
+          xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
+          specified coordinates.<wbr>
 <br>
 <br>          The coordinate system is based on the active pixel array,<wbr>
-          with (0,<wbr>0) being the top-left of the active pixel array,<wbr> and
-          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width,<wbr>
-          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height) being the
-          bottom-right point of the active pixel array.<wbr> The weight
+          with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
+          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
+          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
+          bottom-right pixel in the active pixel array.<wbr> The weight
           should be nonnegative.<wbr>
 <br>
 <br>          If all regions have 0 weight,<wbr> then no specific metering area
@@ -1482,13 +1483,14 @@
 
             <td class="entry_notes">
               Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
-          xmax,<wbr> ymax,<wbr> weight.<wbr>
+          xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
+          specified coordinates.<wbr>
 <br>
 <br>          The coordinate system is based on the active pixel array,<wbr>
-          with (0,<wbr>0) being the top-left of the active pixel array,<wbr> and
-          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width,<wbr>
-          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height) being the
-          bottom-right point of the active pixel array.<wbr> The weight
+          with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
+          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
+          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
+          bottom-right pixel in the active pixel array.<wbr> The weight
           should be nonnegative.<wbr>
 <br>
 <br>          If all regions have 0 weight,<wbr> then no specific focus area
@@ -1705,12 +1707,15 @@
             <td class="entry_notes">
               Only used in AUTO mode.<wbr>
 <br>
-<br>          Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr> xmax,<wbr>
-          ymax,<wbr> weight.<wbr> The coordinate system is based on the active
-          pixel array,<wbr> with (0,<wbr>0) being the top-left of the active
-          pixel array,<wbr> and (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width,<wbr>
-          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height) being the
-          bottom-right point of the active pixel array.<wbr> The weight
+<br>          Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
+          xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
+          specified coordinates.<wbr>
+<br>
+<br>          The coordinate system is based on the active pixel array,<wbr>
+          with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
+          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
+          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
+          bottom-right pixel in the active pixel array.<wbr> The weight
           should be nonnegative.<wbr>
 <br>
 <br>          If all regions have 0 weight,<wbr> then no specific metering area
@@ -2678,13 +2683,14 @@
 
             <td class="entry_notes">
               Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
-          xmax,<wbr> ymax,<wbr> weight.<wbr>
+          xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
+          specified coordinates.<wbr>
 <br>
 <br>          The coordinate system is based on the active pixel array,<wbr>
-          with (0,<wbr>0) being the top-left of the active pixel array,<wbr> and
-          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width,<wbr>
-          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height) being the
-          bottom-right point of the active pixel array.<wbr> The weight
+          with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
+          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
+          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
+          bottom-right pixel in the active pixel array.<wbr> The weight
           should be nonnegative.<wbr>
 <br>
 <br>          If all regions have 0 weight,<wbr> then no specific metering area
@@ -2914,13 +2920,14 @@
 
             <td class="entry_notes">
               Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
-          xmax,<wbr> ymax,<wbr> weight.<wbr>
+          xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
+          specified coordinates.<wbr>
 <br>
 <br>          The coordinate system is based on the active pixel array,<wbr>
-          with (0,<wbr>0) being the top-left of the active pixel array,<wbr> and
-          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width,<wbr>
-          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height) being the
-          bottom-right point of the active pixel array.<wbr> The weight
+          with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
+          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
+          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
+          bottom-right pixel in the active pixel array.<wbr> The weight
           should be nonnegative.<wbr>
 <br>
 <br>          If all regions have 0 weight,<wbr> then no specific focus area
@@ -3135,12 +3142,15 @@
             <td class="entry_notes">
               Only used in AUTO mode.<wbr>
 <br>
-<br>          Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr> xmax,<wbr>
-          ymax,<wbr> weight.<wbr> The coordinate system is based on the active
-          pixel array,<wbr> with (0,<wbr>0) being the top-left of the active
-          pixel array,<wbr> and (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width,<wbr>
-          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height) being the
-          bottom-right point of the active pixel array.<wbr> The weight
+<br>          Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
+          xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
+          specified coordinates.<wbr>
+<br>
+<br>          The coordinate system is based on the active pixel array,<wbr>
+          with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
+          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
+          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
+          bottom-right pixel in the active pixel array.<wbr> The weight
           should be nonnegative.<wbr>
 <br>
 <br>          If all regions have 0 weight,<wbr> then no specific metering area
