@@ -78,7 +78,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </value>
           </enum>
 
-          <notes>When android.sensor.awbMode is not OFF, TRANSFORM_MATRIX
+          <notes>When android.control.awbMode is not OFF, TRANSFORM_MATRIX
           should be ignored.</notes>
         </entry>
         <entry name="transform" type="rational" visibility="public"
