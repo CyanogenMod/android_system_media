@@ -351,11 +351,11 @@ static tag_info_t android_request[ANDROID_REQUEST_END -
     [ ANDROID_REQUEST_ID - ANDROID_REQUEST_START ] =
     { "id",                            TYPE_INT32  },
     [ ANDROID_REQUEST_INPUT_STREAMS - ANDROID_REQUEST_START ] =
-    { "inputStreams",                  TYPE_BYTE   },
+    { "inputStreams",                  TYPE_INT32  },
     [ ANDROID_REQUEST_METADATA_MODE - ANDROID_REQUEST_START ] =
     { "metadataMode",                  TYPE_BYTE   },
     [ ANDROID_REQUEST_OUTPUT_STREAMS - ANDROID_REQUEST_START ] =
-    { "outputStreams",                 TYPE_BYTE   },
+    { "outputStreams",                 TYPE_INT32  },
     [ ANDROID_REQUEST_TYPE - ANDROID_REQUEST_START ] =
     { "type",                          TYPE_BYTE   },
     [ ANDROID_REQUEST_MAX_NUM_OUTPUT_STREAMS - ANDROID_REQUEST_START ] =
