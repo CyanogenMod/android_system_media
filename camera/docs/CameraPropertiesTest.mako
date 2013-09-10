@@ -58,7 +58,7 @@ public class CameraPropertiesTest extends AndroidTestCase {
         % if entry.kind == 'static' and entry.visibility == "public":
 
     public void testCameraProperties${pascal_case(entry.name)}() throws Exception {
-        String[] ids = mCameraManager.getDeviceIdList();
+        String[] ids = mCameraManager.getCameraIdList();
         for (int i = 0; i < ids.length; i++) {
             CameraDevice camera = mCameraManager.openCamera(ids[i]);
             assertNotNull("Failed to open camera", camera);
