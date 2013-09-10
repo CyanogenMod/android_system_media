@@ -1474,7 +1474,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       <controls>
         <entry name="frameCount" type="int32" visibility="system">
           <description>A frame counter set by the framework. Must
-          be maintained unchanged in output frame</description>
+          be maintained unchanged in output frame. This value monotonically
+          increases with every new result (that is, each new result has a unique
+          frameCount value).
+          </description>
           <units>incrementing integer</units>
           <range>Any int</range>
         </entry>
@@ -1587,8 +1590,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </static>
       <dynamic>
         <entry name="frameCount" type="int32" visibility="public">
-          <description>Number of frames captured since
-          open()</description>
+          <description>A frame counter set by the framework. This value monotonically
+          increases with every new result (that is, each new result has a unique
+          frameCount value).</description>
           <units>count of frames</units>
           <range>&gt; 0</range>
           <notes>Reset on release()</notes>

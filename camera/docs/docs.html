@@ -6553,7 +6553,10 @@
 
             <td class="entry_description">
               A frame counter set by the framework.<wbr> Must
-          be maintained unchanged in output frame
+          be maintained unchanged in output frame.<wbr> This value monotonically
+          increases with every new result (that is,<wbr> each new result has a unique
+          frameCount value).<wbr>
+          
             </td>
 
             <td class="entry_units">
@@ -6943,8 +6946,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Number of frames captured since
-          open()
+              A frame counter set by the framework.<wbr> This value monotonically
+          increases with every new result (that is,<wbr> each new result has a unique
+          frameCount value).<wbr>
             </td>
 
             <td class="entry_units">
