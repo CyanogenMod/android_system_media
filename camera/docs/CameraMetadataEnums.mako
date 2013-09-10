@@ -77,7 +77,7 @@ ${generate_enum(entry, target_class)}\
 
 ##
 ## Static properties only
-${single_kind_keys('static','CameraProperties')}\
+${single_kind_keys('static','CameraCharacteristics')}\
 ##
 ## Controls properties only
 ${single_kind_keys('controls','CaptureRequest')}\

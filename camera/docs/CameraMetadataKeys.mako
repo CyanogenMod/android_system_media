@@ -16,7 +16,7 @@
 ##
 \
 ## These sections of metadata Key definitions are inserted into the middle of
-## android.hardware.camera2.CameraProperties, CaptureRequest, and CaptureResult.
+## android.hardware.camera2.CameraCharacteristics, CaptureRequest, and CaptureResult.
 <%page args="java_class, xml_kind" />\
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * The key entries below this point are generated from metadata
@@ -72,7 +72,7 @@ ${generate_key(entry)}
 </%def>\
 ##
 ## Static properties only
-##${single_kind_keys('CameraPropertiesKeys', 'static')}
+##${single_kind_keys('CameraCharacteristicsKeys', 'static')}
 ##
 ## Controls properties only
 ##${single_kind_keys('CaptureRequestKeys', 'controls')}
