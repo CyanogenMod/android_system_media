@@ -156,18 +156,17 @@ def get_children_by_throwing_away_kind(node, member='entries'):
 
 def get_children_by_filtering_kind(section, kind_name, member='entries'):
   """
-  Takes a section and yields the children of the kind under this section.
+  Takes a section and yields the children of the merged kind under this section.
 
   Args:
     section: An instance of Section
     kind_name: A name of the kind, i.e. 'dynamic' or 'static' or 'controls'
 
   Returns:
-    An iterable over the children of the specified kind.
+    An iterable over the children of the specified merged kind.
   """
 
-# TODO: test/use this function
-  matched_kind = next((i for i in section.kinds if i.name == kind_name), None)
+  matched_kind = next((i for i in section.merged_kinds if i.name == kind_name), None)
 
   if matched_kind:
     return getattr(matched_kind, member)
