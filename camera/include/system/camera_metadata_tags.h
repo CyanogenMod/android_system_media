@@ -573,6 +573,7 @@ typedef enum camera_metadata_enum_android_lens_facing {
 // ANDROID_LENS_STATE
 typedef enum camera_metadata_enum_android_lens_state {
     ANDROID_LENS_STATE_STATIONARY,
+    ANDROID_LENS_STATE_MOVING,
 } camera_metadata_enum_android_lens_state_t;
 
 

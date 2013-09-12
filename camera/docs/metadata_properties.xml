@@ -1393,6 +1393,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="state" type="byte" visibility="public" enum="true">
           <enum>
             <value>STATIONARY</value>
+            <value>MOVING</value>
           </enum>
           <description>Current lens status</description>
           <tag id="V1" />
