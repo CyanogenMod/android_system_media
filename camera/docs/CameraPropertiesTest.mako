@@ -29,6 +29,7 @@ import android.content.Context;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraProperties;
+import android.os.Handler;
 import android.test.AndroidTestCase;
 
 /**
@@ -36,6 +37,9 @@ import android.test.AndroidTestCase;
  */
 public class CameraPropertiesTest extends AndroidTestCase {
     private CameraManager mCameraManager;
+
+    private CameraTestThread mLooperThread;
+    private Handler mHandler;
 
     @Override
     public void setContext(Context context) {
@@ -47,10 +51,16 @@ public class CameraPropertiesTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
+        mLooperThread = new CameraTestThread();
+        mHandler = mLooperThread.start();
     }
 
     @Override
     protected void tearDown() throws Exception {
+        mLooperThread.close();
+        mHandler = null;
+
         super.tearDown();
     }
     % for sec in find_all_sections(metadata):
@@ -60,7 +70,7 @@ public class CameraPropertiesTest extends AndroidTestCase {
     public void testCameraProperties${pascal_case(entry.name)}() throws Exception {
         String[] ids = mCameraManager.getCameraIdList();
         for (int i = 0; i < ids.length; i++) {
-            CameraDevice camera = mCameraManager.openCamera(ids[i]);
+            CameraDevice camera = CameraTestUtils.openCamera(mCameraManager, ids[i], mHandler);
             assertNotNull("Failed to open camera", camera);
             CameraProperties props;
             try {
