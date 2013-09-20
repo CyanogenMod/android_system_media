@@ -36,23 +36,34 @@ const effect_uuid_t * const SL_IID_VISUALIZATION = &SL_IID_VISUALIZATION_;
 #define VISUALIZER_SCALING_MODE_NORMALIZED 0
 #define VISUALIZER_SCALING_MODE_AS_PLAYED  1
 
+#define MEASUREMENT_MODE_NONE      0x0
+#define MEASUREMENT_MODE_PEAK_RMS  0x1
+
+#define MEASUREMENT_IDX_PEAK 0
+#define MEASUREMENT_IDX_RMS  1
+
 /* enumerated parameters for Visualizer effect */
 typedef enum
 {
     VISUALIZER_PARAM_CAPTURE_SIZE, // Sets the number PCM samples in the capture.
     VISUALIZER_PARAM_SCALING_MODE, // Sets the way the captured data is scaled
     VISUALIZER_PARAM_LATENCY,      // Informs the visualizer about the downstream latency
+    VISUALIZER_PARAM_MEASUREMENT_MODE, // Sets which measurements are to be made
 } t_visualizer_params;
 
 /* commands */
 typedef enum
 {
     VISUALIZER_CMD_CAPTURE = EFFECT_CMD_FIRST_PROPRIETARY, // Gets the latest PCM capture.
+    VISUALIZER_CMD_MEASURE, // Gets the current measurements
 }t_visualizer_cmds;
 
 // VISUALIZER_CMD_CAPTURE retrieves the latest PCM snapshot captured by the visualizer engine.
 // It returns the number of samples specified by VISUALIZER_PARAM_CAPTURE_SIZE
 // in 8 bit unsigned format (0 = 0x80)
+
+// VISUALIZER_CMD_MEASURE retrieves the lastest measurements as int32_t saved in the
+// MEASUREMENT_IDX_* array index order.
 
 #if __cplusplus
 }  // extern "C"
