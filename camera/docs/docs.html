@@ -2962,33 +2962,39 @@
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PASSIVE_SCAN</span>
-                    <span class="entry_type_enum_notes">if CONTINUOUS_<wbr>* modes are supported AF is
+                    <span class="entry_type_enum_notes">if CONTINUOUS_<wbr>* modes are supported.<wbr> AF is
             currently doing an AF scan initiated by a continuous
             autofocus mode</span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PASSIVE_FOCUSED</span>
-                    <span class="entry_type_enum_notes">if CONTINUOUS_<wbr>* modes are supported AF currently
+                    <span class="entry_type_enum_notes">if CONTINUOUS_<wbr>* modes are supported.<wbr> AF currently
             believes it is in focus,<wbr> but may restart scanning at
             any time.<wbr></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ACTIVE_SCAN</span>
-                    <span class="entry_type_enum_notes">if AUTO or MACRO modes are supported AF is doing
+                    <span class="entry_type_enum_notes">if AUTO or MACRO modes are supported.<wbr> AF is doing
             an AF scan because it was triggered by AF
             trigger</span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FOCUSED_LOCKED</span>
-                    <span class="entry_type_enum_notes">if any AF mode besides OFF is supported AF
+                    <span class="entry_type_enum_notes">if any AF mode besides OFF is supported.<wbr> AF
             believes it is focused correctly and is
             locked</span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">NOT_FOCUSED_LOCKED</span>
-                    <span class="entry_type_enum_notes">if any AF mode besides OFF is supported AF has
+                    <span class="entry_type_enum_notes">if any AF mode besides OFF is supported.<wbr> AF has
             failed to focus successfully and is
             locked</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">PASSIVE_UNFOCUSED</span>
+                    <span class="entry_type_enum_notes">if CONTINUOUS_<wbr>* modes are supported.<wbr> AF finished a
+            passive scan without finding focus,<wbr> and may restart
+            scanning at any time.<wbr></span>
                   </li>
                 </ul>
 
