@@ -497,6 +497,7 @@ typedef enum camera_metadata_enum_android_control_af_state {
     ANDROID_CONTROL_AF_STATE_ACTIVE_SCAN,
     ANDROID_CONTROL_AF_STATE_FOCUSED_LOCKED,
     ANDROID_CONTROL_AF_STATE_NOT_FOCUSED_LOCKED,
+    ANDROID_CONTROL_AF_STATE_PASSIVE_UNFOCUSED,
 } camera_metadata_enum_android_control_af_state_t;
 
 // ANDROID_CONTROL_AWB_STATE

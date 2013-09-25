@@ -1090,6 +1090,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "NOT_FOCUSED_LOCKED";
                     ret = 0;
                     break;
+                case ANDROID_CONTROL_AF_STATE_PASSIVE_UNFOCUSED:
+                    msg = "PASSIVE_UNFOCUSED";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
