@@ -27,9 +27,7 @@ package android.hardware.camera2.cts;
 
 import android.content.Context;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
-import android.os.Handler;
 import android.test.AndroidTestCase;
 
 /**
@@ -37,9 +35,6 @@ import android.test.AndroidTestCase;
  */
 public class CameraCharacteristicsTest extends AndroidTestCase {
     private CameraManager mCameraManager;
-
-    private CameraTestThread mLooperThread;
-    private Handler mHandler;
 
     @Override
     public void setContext(Context context) {
@@ -51,16 +46,10 @@ public class CameraCharacteristicsTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
-        mLooperThread = new CameraTestThread();
-        mHandler = mLooperThread.start();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        mLooperThread.close();
-        mHandler = null;
-
         super.tearDown();
     }
     % for sec in find_all_sections(metadata):
@@ -70,16 +59,8 @@ public class CameraCharacteristicsTest extends AndroidTestCase {
     public void testCameraCharacteristics${pascal_case(entry.name)}() throws Exception {
         String[] ids = mCameraManager.getCameraIdList();
         for (int i = 0; i < ids.length; i++) {
-            CameraDevice camera = CameraTestUtils.openCamera(mCameraManager, ids[i], mHandler);
-            assertNotNull("Failed to open camera", camera);
-            CameraCharacteristics props;
-            try {
-                props = camera.getProperties();
-            }
-            finally {
-                camera.close();
-            }
-            assertNotNull(String.format("Can't get camera properties from: ID %s", ids[i]),
+            CameraCharacteristics props = mCameraManager.getCameraCharacteristics(ids[i]);
+            assertNotNull(String.format("Can't get camera characteristics from: ID %s", ids[i]),
                                         props);
             assertNotNull("Invalid property: ${entry.name}",
                     props.get(CameraCharacteristics.${jkey_identifier(entry.name)}));
