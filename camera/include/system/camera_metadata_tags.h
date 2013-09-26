@@ -208,7 +208,7 @@ typedef enum camera_metadata_tag {
     ANDROID_LENS_FACING,                              // enum         | public
     ANDROID_LENS_OPTICAL_AXIS_ANGLE,                  // float[]      | system
     ANDROID_LENS_POSITION,                            // float[]      | system
-    ANDROID_LENS_FOCUS_RANGE,                         // float        | public
+    ANDROID_LENS_FOCUS_RANGE,                         // float[]      | public
     ANDROID_LENS_STATE,                               // enum         | public
     ANDROID_LENS_END,
 

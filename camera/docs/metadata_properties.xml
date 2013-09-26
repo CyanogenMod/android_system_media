@@ -1380,7 +1380,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <notes>Should be zero for fixed-focus cameras</notes>
           <tag id="BC" />
         </clone>
-        <entry name="focusRange" type="float" visibility="public">
+        <entry name="focusRange" type="float" visibility="public"
+        type_notes="Range of scene distances that are in focus"
+        container="array">
+          <array>
+            <size>2</size>
+          </array>
           <description>The range of scene distances that are in
           sharp focus (depth of field)</description>
           <units>pair of focus distances in diopters: (near,
