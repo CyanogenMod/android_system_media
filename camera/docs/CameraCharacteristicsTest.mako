@@ -28,13 +28,18 @@ package android.hardware.camera2.cts;
 import android.content.Context;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata.Key;
 import android.test.AndroidTestCase;
+import android.util.Log;
+
+import java.util.List;
 
 /**
  * Auto-generated CTS test for CameraCharacteristics fields.
  */
 public class CameraCharacteristicsTest extends AndroidTestCase {
     private CameraManager mCameraManager;
+    private static final String TAG = "CameraCharacteristicsTest";
 
     @Override
     public void setContext(Context context) {
@@ -64,6 +69,12 @@ public class CameraCharacteristicsTest extends AndroidTestCase {
                                         props);
             assertNotNull("Invalid property: ${entry.name}",
                     props.get(CameraCharacteristics.${jkey_identifier(entry.name)}));
+
+            List<Key<?>> allKeys = props.getKeys();
+            assertNotNull(String.format("Can't get camera characteristics keys from: ID %s", ids[i],
+                                        props));
+            assertTrue("Key not in keys list: ${entry.name}",
+                    allKeys.contains(CameraCharacteristics.${jkey_identifier(entry.name)}));
         }
     }
         % endif
