@@ -2296,7 +2296,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>List of the face confidence scores for
           detected faces</description>
-          <range>0-100</range>
+          <range>1-100</range>
           <notes>Only available if faceDetectMode != OFF. The value should be
           meaningful (for example, setting 100 at all times is illegal).</notes>
           <tag id="BC" />
