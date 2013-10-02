@@ -1018,6 +1018,11 @@ class Entry(Node):
                 public entries are visible in the Android SDK.
     applied_visibility: As visibility, but always valid, defaulting to 'system'
                         if no visibility is given for an entry.
+    optional: a bool representing the optional attribute, which denotes the entry
+              is required for hardware level full devices, but optional for other
+              hardware levels.  None if not present.
+    applied_optional: As optional but always valid, defaulting to False if no
+                      optional attribute is present.
     tuple_values: A sequence of strings describing the tuple values,
                   None if container is not 'tuple'.
     description: A string description, or None.
@@ -1066,6 +1071,7 @@ class Entry(Node):
       type_notes: A string with the notes for the type
       visibility: A string describing the visibility, eg 'system', 'hidden',
                   'public'
+      optional: A bool to mark whether optional for non-full hardware devices
       typedef: A string corresponding to a typedef's name attribute.
     """
 
@@ -1097,6 +1103,14 @@ class Entry(Node):
   @property
   def applied_visibility(self):
     return self._visibility or 'system'
+
+  @property
+  def optional(self):
+    return self._optional
+
+  @property
+  def applied_optional(self):
+    return self._optional or False
 
   @property
   def name_short(self):
@@ -1203,6 +1217,7 @@ class Entry(Node):
       self._enum = None
 
     self._visibility = kwargs.get('visibility')
+    self._optional = kwargs.get('optional')
 
     self._property_keys = kwargs
 
@@ -1397,6 +1412,7 @@ class MergedEntry(Entry):
                     'type',
                     'type_notes',
                     'visibility',
+                    'optional',
                     'typedef'
                    ]
 

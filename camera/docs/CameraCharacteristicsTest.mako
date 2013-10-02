@@ -67,14 +67,26 @@ public class CameraCharacteristicsTest extends AndroidTestCase {
             CameraCharacteristics props = mCameraManager.getCameraCharacteristics(ids[i]);
             assertNotNull(String.format("Can't get camera characteristics from: ID %s", ids[i]),
                                         props);
-            assertNotNull("Invalid property: ${entry.name}",
-                    props.get(CameraCharacteristics.${jkey_identifier(entry.name)}));
 
-            List<Key<?>> allKeys = props.getKeys();
-            assertNotNull(String.format("Can't get camera characteristics keys from: ID %s", ids[i],
-                                        props));
-            assertTrue("Key not in keys list: ${entry.name}",
-                    allKeys.contains(CameraCharacteristics.${jkey_identifier(entry.name)}));
+          % if entry.applied_optional:
+            Integer hwLevel = props.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+            assertNotNull("No hardware level reported! android.info.supportedHardwareLevel",
+                    hwLevel);
+            if (hwLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_FULL)
+          % endif
+            {
+
+                assertNotNull("Invalid property: ${entry.name}",
+                        props.get(CameraCharacteristics.${jkey_identifier(entry.name)}));
+
+                List<Key<?>> allKeys = props.getKeys();
+                assertNotNull(String.format("Can't get camera characteristics keys from: ID %s",
+                        ids[i], props));
+                assertTrue("Key not in keys list: ${entry.name}", allKeys.contains(
+                        CameraCharacteristics.${jkey_identifier(entry.name)}));
+
+            }
+
         }
     }
         % endif
