@@ -22,6 +22,7 @@
 #   ../src/camera_metadata_tag_info.c
 #   ../src/camera_metadata_tags.h
 #   ../../../../cts/tests/tests/hardware/src/android/hardware/camera2/cts/CameraCharacteristicsTest.java
+#   ../../../../cts/tests/tests/hardware/src/android/hardware/camera2/cts/CameraCaptureResultTest.java
 #   ../../../../frameworks/base/core/java/android/hardware/camera2/CameraCharacteristics.java
 #   ../../../../frameworks/base/core/java/android/hardware/camera2/CaptureRequest.java
 #   ../../../../frameworks/base/core/java/android/hardware/camera2/CaptureResult.java
@@ -169,6 +170,7 @@ gen_file_abs CameraMetadataEnums.mako "$outdir/CameraMetadataEnums.java.part" no
 gen_file_abs CameraCharacteristicsKeys.mako "$outdir/CameraCharacteristicsKeys.java.part" no || exit 1
 gen_file_abs CaptureRequestKeys.mako "$outdir/CaptureRequestKeys.java.part" no || exit 1
 gen_file_abs CaptureResultKeys.mako "$outdir/CaptureResultKeys.java.part" no || exit 1
+gen_file_abs CameraCaptureResultTest.mako "$outdir/CameraCaptureResultTest.java.part" no || exit 1
 
 insert_file "$outdir/CameraMetadataEnums.java.part" "$fwkdir/CameraMetadata.java" || exit 1
 insert_file "$outdir/CameraCharacteristicsKeys.java.part" "$fwkdir/CameraCharacteristics.java" || exit 1
@@ -177,6 +179,7 @@ insert_file "$outdir/CaptureResultKeys.java.part" "$fwkdir/CaptureResult.java" |
 
 # Generate CTS tests
 gen_file_abs CameraCharacteristicsTest.mako "$ctsdir/CameraCharacteristicsTest.java" || exit 1
+insert_file "$outdir/CameraCaptureResultTest.java.part" "$ctsdir/CameraCaptureResultTest.java" || exit 1
 
 echo ""
 echo "===================================================="
