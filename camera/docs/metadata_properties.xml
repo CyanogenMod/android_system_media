@@ -2266,7 +2266,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       <dynamic>
         <clone entry="android.statistics.faceDetectMode"
         kind="controls"></clone>
-        <entry name="faceIds" type="int32" visibility="public" container="array">
+        <entry name="faceIds" type="int32" visibility="hidden" container="array">
           <array>
             <size>n</size>
           </array>
@@ -2275,7 +2275,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <notes>Only available if faceDetectMode == FULL</notes>
           <tag id="BC" />
         </entry>
-        <entry name="faceLandmarks" type="int32" visibility="public"
+        <entry name="faceLandmarks" type="int32" visibility="hidden"
         type_notes="(leftEyeX, leftEyeY, rightEyeX, rightEyeY, mouthX, mouthY)"
         container="array">
           <array>
@@ -2287,7 +2287,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <notes>Only available if faceDetectMode == FULL</notes>
           <tag id="BC" />
         </entry>
-        <entry name="faceRectangles" type="int32" visibility="public"
+        <entry name="faceRectangles" type="int32" visibility="hidden"
         type_notes="(xmin, ymin, xmax, ymax). (0,0) is top-left of active pixel area"
         container="array" typedef="rectangle">
           <array>
@@ -2299,7 +2299,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <notes>Only available if faceDetectMode != OFF</notes>
           <tag id="BC" />
         </entry>
-        <entry name="faceScores" type="byte" visibility="public" container="array">
+        <entry name="faceScores" type="byte" visibility="hidden" container="array">
           <array>
             <size>n</size>
           </array>

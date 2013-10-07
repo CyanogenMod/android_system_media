@@ -299,10 +299,10 @@ typedef enum camera_metadata_tag {
             ANDROID_STATISTICS_START,
     ANDROID_STATISTICS_HISTOGRAM_MODE,                // enum         | system
     ANDROID_STATISTICS_SHARPNESS_MAP_MODE,            // enum         | system
-    ANDROID_STATISTICS_FACE_IDS,                      // int32[]      | public
-    ANDROID_STATISTICS_FACE_LANDMARKS,                // int32[]      | public
-    ANDROID_STATISTICS_FACE_RECTANGLES,               // int32[]      | public
-    ANDROID_STATISTICS_FACE_SCORES,                   // byte[]       | public
+    ANDROID_STATISTICS_FACE_IDS,                      // int32[]      | hidden
+    ANDROID_STATISTICS_FACE_LANDMARKS,                // int32[]      | hidden
+    ANDROID_STATISTICS_FACE_RECTANGLES,               // int32[]      | hidden
+    ANDROID_STATISTICS_FACE_SCORES,                   // byte[]       | hidden
     ANDROID_STATISTICS_HISTOGRAM,                     // int32[]      | system
     ANDROID_STATISTICS_SHARPNESS_MAP,                 // int32[]      | system
     ANDROID_STATISTICS_LENS_SHADING_MAP,              // float[]      | public
