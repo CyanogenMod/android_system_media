@@ -39,6 +39,16 @@ ${entry.notes | javadoc}\
      * @see #${jenum_value(entry, value)}
     % endfor
   % endif
+  % if entry.optional:
+     *
+     * <b>Optional</b> - This value may be null on some devices.
+  % endif
+  % if any(tag.name == 'FULL' for tag in entry.tags):
+     *
+     * <b>{@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL}</b> -
+     * Present on all devices that report being FULL level hardware devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL HARDWARE_LEVEL} key.
+  % endif
   % if entry.applied_visibility == 'hidden':
      *
      * @hide

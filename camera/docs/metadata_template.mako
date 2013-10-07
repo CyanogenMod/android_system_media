@@ -85,6 +85,9 @@
           % if prop.visibility:
                 visibility="${prop.visibility}"
           % endif
+          % if prop.optional:
+                optional="${str(prop.optional).lower()}"
+          % endif
           % if prop.enum:
                 enum="true"
           % endif

@@ -158,6 +158,11 @@ class MetadataParserXml:
     d['visibility'] = entry.get('visibility')
 
     #
+    # Optional for non-full hardware level devices
+    #
+    d['optional'] = entry.get('optional') == 'true'
+
+    #
     # Typedef
     #
     d['type_name'] = entry.get('typedef')
