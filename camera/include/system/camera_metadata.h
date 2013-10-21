@@ -223,6 +223,9 @@ size_t get_camera_metadata_compact_size(const camera_metadata_t *metadata);
 
 /**
  * Get the current number of entries in the metadata packet.
+ *
+ * metadata packet must be valid, which can be checked before the call with
+ * validate_camera_metadata_structure().
  */
 ANDROID_API
 size_t get_camera_metadata_entry_count(const camera_metadata_t *metadata);
@@ -335,15 +338,27 @@ int sort_camera_metadata(camera_metadata_t *dst);
 
 /**
  * Get metadata entry at position index in the metadata buffer.
+ * Index must be less than entry count, which is returned by
+ * get_camera_metadata_entry_count().
  *
  * src and index are inputs; the passed-in entry is updated with the details of
  * the entry. The data pointer points to the real data in the buffer, and can be
  * updated as long as the data count does not change.
+ *
+ * Returns 0 on success. A non-0 value is returned on error.
  */
 ANDROID_API
 int get_camera_metadata_entry(camera_metadata_t *src,
         size_t index,
         camera_metadata_entry_t *entry);
+
+/**
+ * Get metadata entry at position index, but disallow editing the data.
+ */
+ANDROID_API
+int get_camera_metadata_ro_entry(const camera_metadata_t *src,
+        size_t index,
+        camera_metadata_ro_entry_t *entry);
 
 /**
  * Find an entry with given tag value. If not found, returns -ENOENT. Otherwise,
