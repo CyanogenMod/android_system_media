@@ -152,6 +152,9 @@ typedef struct camera_metadata camera_metadata_t;
 /**
  * Functions for manipulating camera metadata
  * =============================================================================
+ *
+ * NOTE: Unless otherwise specified, functions that return type "int"
+ * return 0 on success, and non-0 value on error.
  */
 
 /**
@@ -321,6 +324,8 @@ size_t calculate_camera_metadata_entry_data_size(uint8_t type,
  * set_vendor_tag_query_ops() has been called first. Entries are always added to
  * the end of the structure (highest index), so after addition, a
  * previously-sorted array will be marked as unsorted.
+ *
+ * Returns 0 on success. A non-0 value is returned on error.
  */
 ANDROID_API
 int add_camera_metadata_entry(camera_metadata_t *dst,
@@ -332,6 +337,8 @@ int add_camera_metadata_entry(camera_metadata_t *dst,
  * Sort the metadata buffer for fast searching. If already marked as sorted,
  * does nothing. Adding or appending entries to the buffer will place the buffer
  * back into an unsorted state.
+ *
+ * Returns 0 on success. A non-0 value is returned on error.
  */
 ANDROID_API
 int sort_camera_metadata(camera_metadata_t *dst);
