@@ -18,37 +18,53 @@
 <head>
   <!-- automatically generated from html.mako. do NOT edit directly -->
   <meta charset="utf-8" />
-  <title>Android Camera HAL2.0 Properties</title>
+  <title>Android Camera HAL3.0 Properties</title>
   <style type="text/css">
-    .section { font-size: 1.5em; font-weight: bold; background-color: beige; padding: 0.5em 0em 0.5em 0.1em }
-    .kind { font-size: 1.2em; font-weight: bold; padding-left: 0.5em; background-color: gray }
-    .entry { background-color: burlywood }
+     body { background-color: #f7f7f7; font-family: Roboto, sans-serif;}
+     h1 { color: #333333; }
+     h2 { color: #333333; }
+     a:link { color: #258aaf; text-decoration: none}
+     a:hover { color: #459aaf; text-decoration: underline }
+     a:visited { color: #154a5f; text-decoration: none}
+    .section { color: #eeeeee; font-size: 1.5em; font-weight: bold; background-color: #888888; padding: 0.5em 0em 0.5em 0.5em; border-width: thick thin thin thin; border-color: #111111 #777777 #777777 #777777}
+    .kind { color: #eeeeee; font-size: 1.2em; font-weight: bold; padding-left: 1.5em; background-color: #aaaaaa }
+    .entry { background-color: #f0f0f0 }
+    .entries_header { background-color: #dddddd; text-align: center}
+
+    /* toc style */
+    .toc_section_header { font-size:1.3em;  }
+    .toc_kind_header { font-size:1.2em;  }
 
     /* table column sizes */
-    table { table-layout: fixed; width: 100%; word-wrap: break-word }
-    td,th { border: 1px solid;  }
+    table { border-collapse:collapse; table-layout: fixed; width: 100%; word-wrap: break-word }
+    td,th { border: 1px solid; border-color: #aaaaaa; padding-left: 0.5em; padding-right: 0.5em }
     .th_name { width: 20% }
     .th_units { width: 10% }
     .th_tags { width: 5% }
-    .th_notes { width: 30% }
+    .th_notes { width: 25% }
     .th_type { width: 20% }
+    .th_description { width: 20% }
+    .th_range { width: 10% }
     td { font-size: 0.9em; }
 
     /* hide the first thead, we need it there only to enforce column sizes */
     .thead_dummy { visibility: hidden; }
 
     /* Entry flair */
-    .entry_name { font-family: monospace; font-style: italic; }
+    .entry_name { color: #333333; padding-left:1.0em; font-size:1.1em; font-family: monospace; }
 
     /* Entry type flair */
-    .entry_type_name { color: darkgreen; font-weight: bold; }
-    .entry_type_name_enum:after { color: darkgreen; font-weight: bold; content:" (enum)" }
+    .entry_type_name { font-size:1.1em; color: #669900; font-weight: bold;}
+    .entry_type_name_enum:after { color: #669900; font-weight: bold; content:" (enum)" }
+    .entry_type_visibility { font-weight: bolder; padding-left:1em}
     .entry_type_enum_name { font-family: monospace; font-weight: bolder; }
     .entry_type_enum_notes:before { content:" - " }
     .entry_type_enum_value:before { content:" = " }
     .entry_type_enum_value { font-family: monospace; }
     .entry ul { margin: 0 0 0 0; list-style-position: inside; padding-left: 0.5em; }
     .entry ul li { padding: 0 0 0 0; margin: 0 0 0 0;}
+
+    /* Entry visibility flair */
 
     /* Entry tags flair */
     .entry_tags ul { list-style-type: none; }
@@ -99,25 +115,40 @@
     return re.sub(r"(\r?\n)(\r?\n)", r"\1<br>\2<br>", text)
 %>
 
-
 <body>
-  <h1>Android Camera HAL2.0 Properties</h1>
+  <h1>Android Camera HAL3.0 Properties</h1>
+\
+<%def name="insert_toc_body(node)">
+  % for nested in node.namespaces:
+${    insert_toc_body(nested)}
+  % endfor
+  % for entry in node.merged_entries:
+            <li><a href="#${entry.kind}_${entry.name}">${entry.name}</a></li>
+  % endfor
+</%def>
 
   <h2>Table of Contents</h2>
   <ul class="toc">
-    <li><a href="#tag_index">Tags</a></li>
-
-
-    % for section in metadata.find_all(lambda x: isinstance(x, metadata_model.Section)):
-    <li><p class="toc_section"><a href="#section_${section.name}">${section.name}</a></p>
-    <ul class="toc_section">
-      % for prop in section.find_all(lambda x: isinstance(x, metadata_model.Entry)):
-        <li><a href="#${prop.kind}_${prop.name}">${prop.name}</a> (${prop.kind})</li>
+    <li><a href="#tag_index" class="toc_section_header">Tags</a></li>
+% for root in metadata.outer_namespaces:
+  % for section in root.sections:
+    <li>
+      <span class="toc_section_header"><a href="#section_${section.name}">${section.name}</a></span>
+      <ul class="toc_section">
+      % for kind in section.merged_kinds: # dynamic,static,controls
+        <li>
+          <span class="toc_kind_header">${kind.name}</span>
+          <ul class="toc_section">\
+${          insert_toc_body(kind)}\
+          </ul>
+        </li>
       % endfor
-    </ul>
-    </li> <!-- toc_section -->
-    % endfor
+      </ul> <!-- toc_section -->
+    </li>
+  % endfor
+% endfor
   </ul>
+
 
   <h1>Properties</h1>
   <table class="properties">
@@ -146,7 +177,7 @@
     % for kind in section.merged_kinds: # dynamic,static,controls
       <tr><td colspan="7" class="kind">${kind.name}</td></tr>
 
-      <thead>
+      <thead class="entries_header">
         <tr>
           <th class="th_name">Property Name</th>
           <th class="th_type">Type</th>
@@ -211,7 +242,7 @@
                 % endfor
                 </ul>
               % endif
-
+              <span class="entry_type_visibility"> [${prop.applied_visibility}${" as %s" %prop.typedef.name if prop.typedef else ""}]</span>
               % if prop.type_notes is not None:
                 <div class="entry_type_notes">${prop.type_notes | wbr}</div>
               % endif

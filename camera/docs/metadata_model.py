@@ -23,14 +23,16 @@ metadata_properties.xml file.
   Node: Base class for most nodes.
   Entry: A node corresponding to <entry> elements.
   Clone: A node corresponding to <clone> elements.
+  MergedEntry: A node corresponding to either <entry> or <clone> elements.
   Kind: A node corresponding to <dynamic>, <static>, <controls> elements.
   InnerNamespace: A node corresponding to a <namespace> nested under a <kind>.
   OuterNamespace: A node corresponding to a <namespace> with <kind> children.
   Section: A node corresponding to a <section> element.
   Enum: A class corresponding an <enum> element within an <entry>
-  Value: A class corresponding to a <value> element within an Enum
+  EnumValue: A class corresponding to a <value> element within an Enum
   Metadata: Root node that also provides tree construction functionality.
   Tag: A node corresponding to a top level <tag> element.
+  Typedef: A node corresponding to a <typedef> element under <types>.
 """
 
 import sys
@@ -79,7 +81,6 @@ class Node(object):
     for i in self._get_children():
       for j in i.find_all(pred):
         yield j
-
 
   def find_first(self, pred):
     """
@@ -147,7 +148,7 @@ class Node(object):
 
   def _children_name_map_matching(self, match=lambda x: True):
     d = {}
-    for i in _get_children():
+    for i in self._get_children():
       if match(i):
         d[i.name] = i
     return d
@@ -195,6 +196,7 @@ class Metadata(Node):
     parent: An edge to the parent Node. This is always None for Metadata.
     outer_namespaces: A sequence of immediate OuterNamespace children.
     tags: A sequence of all Tag instances available in the graph.
+    types: An iterable of all Typedef instances available in the graph.
   """
 
   def __init__(self):
@@ -214,6 +216,7 @@ class Metadata(Node):
     self._parent = None
     self._outer_namespaces = None
     self._tags = []
+    self._types = []
 
   @property
   def outer_namespaces(self):
@@ -225,6 +228,10 @@ class Metadata(Node):
   @property
   def tags(self):
     return (i for i in self._tags)
+
+  @property
+  def types(self):
+    return (i for i in self._types)
 
   def _get_properties(self):
 
@@ -252,6 +259,33 @@ class Metadata(Node):
     tag_ids = [tg.name for tg in self.tags if tg.name == tag]
     if not tag_ids:
       self._tags.append(Tag(tag, self, description))
+
+  def insert_type(self, type_name, type_selector="typedef", **kwargs):
+    """
+    Insert a type into the metadata.
+
+    Args:
+      type_name: A type's name
+      type_selector: The selector for the type, e.g. 'typedef'
+
+    Args (if type_selector == 'typedef'):
+      languages: A map of 'language name' -> 'fully qualified class path'
+
+    Example:
+      metadata.insert_type('rectangle', 'typedef',
+                           { 'java': 'android.graphics.Rect' })
+
+    Remarks:
+      Subsequent calls to insert_type with the same type name are safe (they
+      will be ignored)
+    """
+
+    if type_selector != 'typedef':
+      raise ValueError("Unsupported type_selector given " + type_selector)
+
+    type_names = [tp.name for tp in self.types if tp.name == tp]
+    if not type_names:
+      self._types.append(Typedef(type_name, self, kwargs.get('languages')))
 
   def insert_entry(self, entry):
     """
@@ -283,7 +317,6 @@ class Metadata(Node):
       (they will be ignored). Also the target entry need not be inserted
       ahead of the clone entry.
     """
-    entry_name = clone['name']
     # figure out corresponding entry later. allow clone insert, entry insert
     entry = None
     c = Clone(entry, **clone)
@@ -310,7 +343,7 @@ class Metadata(Node):
       if p.parent is not None:
         p.parent._entries.remove(p)
       # remove from parents' _leafs list
-      for ancestor in p.find_parents(lambda x: not isinstance(x, MetadataSet)):
+      for ancestor in p.find_parents(lambda x: not isinstance(x, Metadata)):
         ancestor._leafs.remove(p)
 
       # remove from global list
@@ -333,6 +366,8 @@ class Metadata(Node):
     self.validate_tree()
     self._construct_tags()
     self.validate_tree()
+    self._construct_types()
+    self.validate_tree()
     self._construct_clones()
     self.validate_tree()
     self._construct_outer_namespaces()
@@ -350,6 +385,16 @@ class Metadata(Node):
 
         if p not in tag.entries:
           tag._entries.append(p)
+
+  def _construct_types(self):
+    type_dict = self._dictionary_by_name(self.types)
+    for p in self._get_properties():
+      if p._type_name:
+        type_node = type_dict.get(p._type_name)
+        p._typedef = type_node
+
+        if p not in type_node.entries:
+          type_node._entries.append(p)
 
   def _construct_clones(self):
     for p in self._clones:
@@ -568,6 +613,36 @@ class Tag(Node):
   def _get_children(self):
     return None
 
+class Typedef(Node):
+  """
+  A typedef Node corresponding to a <typedef> element under a top-level <types>.
+
+  Attributes (Read-Only):
+    name: The name of this typedef as a string.
+    languages: A dictionary of 'language name' -> 'fully qualified class'.
+    parent: An edge to the parent, which is always the Metadata root node.
+    entries: An iterable over all entries which reference this typedef.
+  """
+  def __init__(self, name, parent, languages=None):
+    self._name        = name
+    self._parent      = parent
+
+    # all entries that have this typedef
+    self._entries     = []  # filled in by Metadata#construct_types
+
+    self._languages   = languages or {}
+
+  @property
+  def languages(self):
+    return self._languages
+
+  @property
+  def entries(self):
+    return (i for i in self._entries)
+
+  def _get_children(self):
+    return None
+
 class OuterNamespace(Node):
   """
   A node corresponding to a <namespace> element under <metadata>
@@ -652,6 +727,37 @@ class Section(Node):
     for k in new_kinds_lst:
       yield k
 
+  def combine_kinds_into_single_node(self):
+    r"""
+    Combines the section's Kinds into a single node.
+
+    Combines all the children (kinds) of this section into a single
+    virtual Kind node.
+
+    Returns:
+      A new Kind node that collapses all Kind siblings into one, combining
+      all their children together.
+
+      For example, given self.kinds == [ x, y ]
+
+        x  y               z
+      / |  | \    -->   / | | \
+      a b  c d          a b c d
+
+      a new instance z is returned in this example.
+
+    Remarks:
+      The children of the kinds are the same references as before, that is
+      their parents will point to the old parents and not to the new parent.
+    """
+    combined = Kind(name="combined", parent=self)
+
+    for k in self._get_children():
+      combined._namespaces.extend(k.namespaces)
+      combined._entries.extend(k.entries)
+
+    return combined
+
 class Kind(Node):
   """
   A node corresponding to one of: <static>,<dynamic>,<controls> under a
@@ -695,6 +801,63 @@ class Kind(Node):
     for i in self.entries:
       yield i
 
+  def combine_children_by_name(self):
+    r"""
+    Combine multiple children with the same name into a single node.
+
+    Returns:
+      A new Kind where all of the children with the same name were combined.
+
+      For example:
+
+      Given a Kind k:
+
+              k
+            / | \
+            a b c
+            | | |
+            d e f
+
+      a.name == "foo"
+      b.name == "foo"
+      c.name == "bar"
+
+      The returned Kind will look like this:
+
+             k'
+            /  \
+            a' c'
+          / |  |
+          d e  f
+
+    Remarks:
+      This operation is not recursive. To combine the grandchildren and other
+      ancestors, call this method on the ancestor nodes.
+    """
+    return Kind._combine_children_by_name(self, new_type=type(self))
+
+  # new_type is either Kind or InnerNamespace
+  @staticmethod
+  def _combine_children_by_name(self, new_type):
+    new_ins_dict = OrderedDict()
+    new_ent_dict = OrderedDict()
+
+    for ins in self.namespaces:
+      new_ins = new_ins_dict.setdefault(ins.name,
+                                        InnerNamespace(ins.name, parent=self))
+      new_ins._namespaces.extend(ins.namespaces)
+      new_ins._entries.extend(ins.entries)
+
+    for ent in self.entries:
+      new_ent = new_ent_dict.setdefault(ent.name,
+                                        ent.merge())
+
+    kind = new_type(self.name, self.parent)
+    kind._namespaces = new_ins_dict.values()
+    kind._entries = new_ent_dict.values()
+
+    return kind
+
 class InnerNamespace(Node):
   """
   A node corresponding to a <namespace> which is an ancestor of a Kind.
@@ -737,6 +900,42 @@ class InnerNamespace(Node):
     for i in self.entries:
       yield i
 
+  def combine_children_by_name(self):
+    r"""
+    Combine multiple children with the same name into a single node.
+
+    Returns:
+      A new InnerNamespace where all of the children with the same name were
+      combined.
+
+      For example:
+
+      Given an InnerNamespace i:
+
+              i
+            / | \
+            a b c
+            | | |
+            d e f
+
+      a.name == "foo"
+      b.name == "foo"
+      c.name == "bar"
+
+      The returned InnerNamespace will look like this:
+
+             i'
+            /  \
+            a' c'
+          / |  |
+          d e  f
+
+    Remarks:
+      This operation is not recursive. To combine the grandchildren and other
+      ancestors, call this method on the ancestor nodes.
+    """
+    return Kind._combine_children_by_name(self, new_type=type(self))
+
 class EnumValue(Node):
   """
   A class corresponding to a <value> element within an <enum> within an <entry>.
@@ -777,6 +976,8 @@ class Enum(Node):
   Attributes (Read-Only):
     parent: An edge to the parent, always an Entry instance.
     values: A sequence of EnumValue children.
+    has_values_with_id: A boolean representing if any of the children have a
+        non-empty id property.
   """
   def __init__(self, parent, values, ids={}, optionals=[], notes={}):
     self._values =                                                             \
@@ -789,6 +990,10 @@ class Enum(Node):
   @property
   def values(self):
     return (i for i in self._values)
+
+  @property
+  def has_values_with_id(self):
+    return bool(any(i for i in self.values if i.id))
 
   def _get_children(self):
     return (i for i in self._values)
@@ -807,6 +1012,17 @@ class Entry(Node):
     container: The container attribute from <entry container="array">, or None.
     container_sizes: A sequence of size strings or None if container is None.
     enum: An Enum instance if the enum attribute is true, None otherwise.
+    visibility: The visibility of this entry ('system', 'hidden', 'public')
+                across the system. System entries are only visible in native code
+                headers. Hidden entries are marked @hide in managed code, while
+                public entries are visible in the Android SDK.
+    applied_visibility: As visibility, but always valid, defaulting to 'system'
+                        if no visibility is given for an entry.
+    optional: a bool representing the optional attribute, which denotes the entry
+              is required for hardware level full devices, but optional for other
+              hardware levels.  None if not present.
+    applied_optional: As optional but always valid, defaulting to False if no
+                      optional attribute is present.
     tuple_values: A sequence of strings describing the tuple values,
                   None if container is not 'tuple'.
     description: A string description, or None.
@@ -814,6 +1030,7 @@ class Entry(Node):
     units: A string units, or None.
     tags: A sequence of Tag nodes associated with this Entry.
     type_notes: A string describing notes for the type, or None.
+    typedef: A Typedef associated with this Entry, or None.
 
   Remarks:
     Subclass Clone can be used interchangeable with an Entry,
@@ -852,6 +1069,10 @@ class Entry(Node):
       notes: A string with the notes for the entry
       tag_ids: A list of tag ID strings, e.g. ['BC', 'V1']
       type_notes: A string with the notes for the type
+      visibility: A string describing the visibility, eg 'system', 'hidden',
+                  'public'
+      optional: A bool to mark whether optional for non-full hardware devices
+      typedef: A string corresponding to a typedef's name attribute.
     """
 
     if kwargs.get('type') is None:
@@ -874,6 +1095,22 @@ class Entry(Node):
   @property
   def kind(self):
     return self._kind
+
+  @property
+  def visibility(self):
+    return self._visibility
+
+  @property
+  def applied_visibility(self):
+    return self._visibility or 'system'
+
+  @property
+  def optional(self):
+    return self._optional
+
+  @property
+  def applied_optional(self):
+    return self._optional or False
 
   @property
   def name_short(self):
@@ -925,6 +1162,10 @@ class Entry(Node):
     return self._type_notes
 
   @property
+  def typedef(self):
+    return self._typedef
+
+  @property
   def enum(self):
     return self._enum
 
@@ -946,7 +1187,7 @@ class Entry(Node):
 
   def _init_common(self, **kwargs):
 
-    self._parent = None # filled in by MetadataSet::_construct_entries
+    self._parent = None # filled in by Metadata::_construct_entries
 
     self._container = kwargs.get('container')
     self._container_sizes = kwargs.get('container_sizes')
@@ -954,8 +1195,8 @@ class Entry(Node):
     # access these via the 'enum' prop
     enum_values = kwargs.get('enum_values')
     enum_optionals = kwargs.get('enum_optionals')
-    enum_notes = kwargs.get('enum_notes') # { value => notes }
-    enum_ids = kwargs.get('enum_ids') # { value => notes }
+    enum_notes = kwargs.get('enum_notes')  # { value => notes }
+    enum_ids = kwargs.get('enum_ids')  # { value => notes }
     self._tuple_values = kwargs.get('tuple_values')
 
     self._description = kwargs.get('description')
@@ -964,14 +1205,19 @@ class Entry(Node):
     self._notes = kwargs.get('notes')
 
     self._tag_ids = kwargs.get('tag_ids', [])
-    self._tags = None # Filled in by MetadataSet::_construct_tags
+    self._tags = None  # Filled in by Metadata::_construct_tags
 
     self._type_notes = kwargs.get('type_notes')
+    self._type_name = kwargs.get('type_name')
+    self._typedef = None # Filled in by Metadata::_construct_types
 
     if kwargs.get('enum', False):
       self._enum = Enum(self, enum_values, enum_ids, enum_optionals, enum_notes)
     else:
       self._enum = None
+
+    self._visibility = kwargs.get('visibility')
+    self._optional = kwargs.get('optional')
 
     self._property_keys = kwargs
 
@@ -1106,9 +1352,9 @@ class Clone(Entry):
       Note that type is not specified since it has to be the same as the
       entry.type.
     """
-    self._entry = entry # Entry object
+    self._entry = entry  # Entry object
     self._target_kind = kwargs['target_kind']
-    self._name = kwargs['name'] # same as entry.name
+    self._name = kwargs['name']  # same as entry.name
     self._kind = kwargs['kind']
 
     # illegal to override the type, it should be the same as the entry
@@ -1165,6 +1411,9 @@ class MergedEntry(Entry):
                     'tuple_values',
                     'type',
                     'type_notes',
+                    'visibility',
+                    'optional',
+                    'typedef'
                    ]
 
     for p in props_common:

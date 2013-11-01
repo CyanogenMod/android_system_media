@@ -465,6 +465,21 @@ struct vendor_tag_query_ops {
     int (*get_camera_vendor_tag_type)(
         const vendor_tag_query_ops_t *v,
         uint32_t tag);
+    /**
+     * Get the number of vendor tags supported on this platform. Used to
+     * calculate the size of buffer needed for holding the array of all tags
+     * returned by get_camera_vendor_tags().
+     */
+    int (*get_camera_vendor_tag_count)(
+        const vendor_tag_query_ops_t *v);
+    /**
+     * Fill an array with all the supported vendor tags on this platform.
+     * get_camera_vendor_tag_count() returns the number of tags supported, and
+     * tag_array should be allocated with enough space to hold all of the tags.
+     */
+    void (*get_camera_vendor_tags)(
+        const vendor_tag_query_ops_t *v,
+        uint32_t *tag_array);
 };
 
 ANDROID_API

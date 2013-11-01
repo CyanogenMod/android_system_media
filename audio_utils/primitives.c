@@ -16,7 +16,7 @@
 
 #include <audio_utils/primitives.h>
 
-void ditherAndClamp(int32_t* out, int32_t const *sums, size_t c)
+void ditherAndClamp(int32_t* out, const int32_t *sums, size_t c)
 {
     size_t i;
     for (i=0 ; i<c ; i++) {
@@ -43,6 +43,30 @@ void memcpy_to_u8_from_i16(uint8_t *dst, const int16_t *src, size_t count)
 {
     while (count--) {
         *dst++ = (*src++ >> 8) + 0x80;
+    }
+}
+
+void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count)
+{
+    while (count--) {
+        *dst++ = *src++ >> 16;
+    }
+}
+
+void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count)
+{
+    while (count--) {
+        float f = *src++;
+        int16_t i;
+        if (f > 1.0) {
+            i = 32767;
+        } else if (f < -1.0) {
+            i = -32768;
+        } else {
+            // does not specifically handle NaN
+            i = f * 32767.0;
+        }
+        *dst++ = i;
     }
 }
 

@@ -28,6 +28,6 @@ fi
 schema=$thisdir/metadata_properties.xsd
 doc=$1
 
-xmllint --noout --schema $schema $out $doc || exit 1
+xmllint --noout --schema $schema $doc || exit 1
 python $thisdir/metadata_validate.py $doc || exit 1
 

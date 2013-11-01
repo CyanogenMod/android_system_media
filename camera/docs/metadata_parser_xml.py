@@ -107,6 +107,15 @@ class MetadataParserXml:
       for tag in tags.find_all('tag'):
         self.metadata.insert_tag(tag['id'], tag.string)
 
+    types = self.soup.types
+    if types is not None:
+      for tp in types.find_all('typedef'):
+        languages = {}
+        for lang in tp.find_all('language'):
+          languages[lang['name']] = lang.string
+
+        self.metadata.insert_type(tp['name'], 'typedef', languages=languages)
+
     # add all entries, preserving the ordering of the XML file
     # this is important for future ABI compatibility when generating code
     entry_filter = lambda x: x.name == 'entry' or x.name == 'clone'
@@ -142,6 +151,21 @@ class MetadataParserXml:
 
   def _parse_entry(self, entry):
     d = {}
+
+    #
+    # Visibility
+    #
+    d['visibility'] = entry.get('visibility')
+
+    #
+    # Optional for non-full hardware level devices
+    #
+    d['optional'] = entry.get('optional') == 'true'
+
+    #
+    # Typedef
+    #
+    d['type_name'] = entry.get('typedef')
 
     #
     # Enum

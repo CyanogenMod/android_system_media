@@ -431,7 +431,8 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
         } else if (entry.count == 0) {
             if (entry.data.offset != 0) {
                 ALOGE("%s: Entry index %u had 0 items, but offset was non-0 "
-                     "(%u)", __FUNCTION__, i, entry.data.offset);
+                     "(%u), tag name: %s", __FUNCTION__, i, entry.data.offset,
+                        get_camera_metadata_tag_name(entry.tag) ?: "unknown");
                 return ERROR;
             }
         } // else data stored inline, so we look at value which can be anything.
@@ -516,6 +517,7 @@ static int add_camera_metadata_entry_raw(camera_metadata_t *dst,
     size_t data_payload_bytes =
             data_count * camera_metadata_type_size[type];
     camera_metadata_buffer_entry_t *entry = get_entries(dst) + dst->entry_count;
+    memset(entry, 0, sizeof(camera_metadata_buffer_entry_t));
     entry->tag = tag;
     entry->type = type;
     entry->count = data_count;

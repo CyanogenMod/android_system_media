@@ -59,6 +59,7 @@ typedef enum camera_metadata_section {
     ANDROID_TONEMAP,
     ANDROID_LED,
     ANDROID_INFO,
+    ANDROID_BLACK_LEVEL,
     ANDROID_SECTION_COUNT,
 
     VENDOR_SECTION = 0x8000
@@ -93,6 +94,7 @@ typedef enum camera_metadata_section_start {
     ANDROID_TONEMAP_START          = ANDROID_TONEMAP           << 16,
     ANDROID_LED_START              = ANDROID_LED               << 16,
     ANDROID_INFO_START             = ANDROID_INFO              << 16,
+    ANDROID_BLACK_LEVEL_START      = ANDROID_BLACK_LEVEL       << 16,
     VENDOR_SECTION_START           = VENDOR_SECTION            << 16
 } camera_metadata_section_start_t;
 
@@ -103,214 +105,243 @@ typedef enum camera_metadata_section_start {
  * system/media/camera/src/camera_metadata_tag_info.c
  */
 typedef enum camera_metadata_tag {
-    ANDROID_COLOR_CORRECTION_MODE  = ANDROID_COLOR_CORRECTION_START,
-    ANDROID_COLOR_CORRECTION_TRANSFORM,
+    ANDROID_COLOR_CORRECTION_MODE =                   // enum         | public
+            ANDROID_COLOR_CORRECTION_START,
+    ANDROID_COLOR_CORRECTION_TRANSFORM,               // rational[]   | public
+    ANDROID_COLOR_CORRECTION_GAINS,                   // float[]      | public
     ANDROID_COLOR_CORRECTION_END,
 
-    ANDROID_CONTROL_AE_ANTIBANDING_MODE
-                                   = ANDROID_CONTROL_START,
-    ANDROID_CONTROL_AE_EXPOSURE_COMPENSATION,
-    ANDROID_CONTROL_AE_LOCK,
-    ANDROID_CONTROL_AE_MODE,
-    ANDROID_CONTROL_AE_REGIONS,
-    ANDROID_CONTROL_AE_TARGET_FPS_RANGE,
-    ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER,
-    ANDROID_CONTROL_AF_MODE,
-    ANDROID_CONTROL_AF_REGIONS,
-    ANDROID_CONTROL_AF_TRIGGER,
-    ANDROID_CONTROL_AWB_LOCK,
-    ANDROID_CONTROL_AWB_MODE,
-    ANDROID_CONTROL_AWB_REGIONS,
-    ANDROID_CONTROL_CAPTURE_INTENT,
-    ANDROID_CONTROL_EFFECT_MODE,
-    ANDROID_CONTROL_MODE,
-    ANDROID_CONTROL_SCENE_MODE,
-    ANDROID_CONTROL_VIDEO_STABILIZATION_MODE,
-    ANDROID_CONTROL_AE_AVAILABLE_ANTIBANDING_MODES,
-    ANDROID_CONTROL_AE_AVAILABLE_MODES,
-    ANDROID_CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES,
-    ANDROID_CONTROL_AE_COMPENSATION_RANGE,
-    ANDROID_CONTROL_AE_COMPENSATION_STEP,
-    ANDROID_CONTROL_AF_AVAILABLE_MODES,
-    ANDROID_CONTROL_AVAILABLE_EFFECTS,
-    ANDROID_CONTROL_AVAILABLE_SCENE_MODES,
+    ANDROID_CONTROL_AE_ANTIBANDING_MODE =             // enum         | public
+            ANDROID_CONTROL_START,
+    ANDROID_CONTROL_AE_EXPOSURE_COMPENSATION,         // int32        | public
+    ANDROID_CONTROL_AE_LOCK,                          // enum         | public
+    ANDROID_CONTROL_AE_MODE,                          // enum         | public
+    ANDROID_CONTROL_AE_REGIONS,                       // int32[]      | public
+    ANDROID_CONTROL_AE_TARGET_FPS_RANGE,              // int32[]      | public
+    ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER,            // enum         | public
+    ANDROID_CONTROL_AF_MODE,                          // enum         | public
+    ANDROID_CONTROL_AF_REGIONS,                       // int32[]      | public
+    ANDROID_CONTROL_AF_TRIGGER,                       // enum         | public
+    ANDROID_CONTROL_AWB_LOCK,                         // enum         | public
+    ANDROID_CONTROL_AWB_MODE,                         // enum         | public
+    ANDROID_CONTROL_AWB_REGIONS,                      // int32[]      | public
+    ANDROID_CONTROL_CAPTURE_INTENT,                   // enum         | public
+    ANDROID_CONTROL_EFFECT_MODE,                      // enum         | public
+    ANDROID_CONTROL_MODE,                             // enum         | public
+    ANDROID_CONTROL_SCENE_MODE,                       // enum         | public
+    ANDROID_CONTROL_VIDEO_STABILIZATION_MODE,         // enum         | public
+    ANDROID_CONTROL_AE_AVAILABLE_ANTIBANDING_MODES,   // byte[]       | public
+    ANDROID_CONTROL_AE_AVAILABLE_MODES,               // byte[]       | system
+    ANDROID_CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES,   // int32[]      | public
+    ANDROID_CONTROL_AE_COMPENSATION_RANGE,            // int32[]      | public
+    ANDROID_CONTROL_AE_COMPENSATION_STEP,             // rational     | public
+    ANDROID_CONTROL_AF_AVAILABLE_MODES,               // byte[]       | public
+    ANDROID_CONTROL_AVAILABLE_EFFECTS,                // byte[]       | public
+    ANDROID_CONTROL_AVAILABLE_SCENE_MODES,            // byte[]       | public
     ANDROID_CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES,
-    ANDROID_CONTROL_AWB_AVAILABLE_MODES,
-    ANDROID_CONTROL_MAX_REGIONS,
-    ANDROID_CONTROL_SCENE_MODE_OVERRIDES,
-    ANDROID_CONTROL_AE_PRECAPTURE_ID,
-    ANDROID_CONTROL_AE_STATE,
-    ANDROID_CONTROL_AF_STATE,
-    ANDROID_CONTROL_AF_TRIGGER_ID,
-    ANDROID_CONTROL_AWB_STATE,
+                                                      // byte[]       | public
+    ANDROID_CONTROL_AWB_AVAILABLE_MODES,              // byte[]       | public
+    ANDROID_CONTROL_MAX_REGIONS,                      // int32        | public
+    ANDROID_CONTROL_SCENE_MODE_OVERRIDES,             // byte[]       | system
+    ANDROID_CONTROL_AE_PRECAPTURE_ID,                 // int32        | hidden
+    ANDROID_CONTROL_AE_STATE,                         // enum         | public
+    ANDROID_CONTROL_AF_STATE,                         // enum         | public
+    ANDROID_CONTROL_AF_TRIGGER_ID,                    // int32        | hidden
+    ANDROID_CONTROL_AWB_STATE,                        // enum         | public
     ANDROID_CONTROL_END,
 
-    ANDROID_DEMOSAIC_MODE          = ANDROID_DEMOSAIC_START,
+    ANDROID_DEMOSAIC_MODE =                           // enum         | system
+            ANDROID_DEMOSAIC_START,
     ANDROID_DEMOSAIC_END,
 
-    ANDROID_EDGE_MODE              = ANDROID_EDGE_START,
-    ANDROID_EDGE_STRENGTH,
+    ANDROID_EDGE_MODE =                               // enum         | public
+            ANDROID_EDGE_START,
+    ANDROID_EDGE_STRENGTH,                            // byte         | system
     ANDROID_EDGE_END,
 
-    ANDROID_FLASH_FIRING_POWER     = ANDROID_FLASH_START,
-    ANDROID_FLASH_FIRING_TIME,
-    ANDROID_FLASH_MODE,
-    ANDROID_FLASH_COLOR_TEMPERATURE,
-    ANDROID_FLASH_MAX_ENERGY,
-    ANDROID_FLASH_STATE,
+    ANDROID_FLASH_FIRING_POWER =                      // byte         | system
+            ANDROID_FLASH_START,
+    ANDROID_FLASH_FIRING_TIME,                        // int64        | system
+    ANDROID_FLASH_MODE,                               // enum         | public
+    ANDROID_FLASH_COLOR_TEMPERATURE,                  // byte         | system
+    ANDROID_FLASH_MAX_ENERGY,                         // byte         | system
+    ANDROID_FLASH_STATE,                              // enum         | public
     ANDROID_FLASH_END,
 
-    ANDROID_FLASH_INFO_AVAILABLE   = ANDROID_FLASH_INFO_START,
-    ANDROID_FLASH_INFO_CHARGE_DURATION,
+    ANDROID_FLASH_INFO_AVAILABLE =                    // byte         | public
+            ANDROID_FLASH_INFO_START,
+    ANDROID_FLASH_INFO_CHARGE_DURATION,               // int64        | system
     ANDROID_FLASH_INFO_END,
 
-    ANDROID_GEOMETRIC_MODE         = ANDROID_GEOMETRIC_START,
-    ANDROID_GEOMETRIC_STRENGTH,
+    ANDROID_GEOMETRIC_MODE =                          // enum         | system
+            ANDROID_GEOMETRIC_START,
+    ANDROID_GEOMETRIC_STRENGTH,                       // byte         | system
     ANDROID_GEOMETRIC_END,
 
-    ANDROID_HOT_PIXEL_MODE         = ANDROID_HOT_PIXEL_START,
+    ANDROID_HOT_PIXEL_MODE =                          // enum         | system
+            ANDROID_HOT_PIXEL_START,
     ANDROID_HOT_PIXEL_END,
 
-    ANDROID_HOT_PIXEL_INFO_MAP     = ANDROID_HOT_PIXEL_INFO_START,
+    ANDROID_HOT_PIXEL_INFO_MAP =                      // int32[]      | system
+            ANDROID_HOT_PIXEL_INFO_START,
     ANDROID_HOT_PIXEL_INFO_END,
 
-    ANDROID_JPEG_GPS_COORDINATES   = ANDROID_JPEG_START,
-    ANDROID_JPEG_GPS_PROCESSING_METHOD,
-    ANDROID_JPEG_GPS_TIMESTAMP,
-    ANDROID_JPEG_ORIENTATION,
-    ANDROID_JPEG_QUALITY,
-    ANDROID_JPEG_THUMBNAIL_QUALITY,
-    ANDROID_JPEG_THUMBNAIL_SIZE,
-    ANDROID_JPEG_AVAILABLE_THUMBNAIL_SIZES,
-    ANDROID_JPEG_MAX_SIZE,
-    ANDROID_JPEG_SIZE,
+    ANDROID_JPEG_GPS_COORDINATES =                    // double[]     | public
+            ANDROID_JPEG_START,
+    ANDROID_JPEG_GPS_PROCESSING_METHOD,               // byte         | public
+    ANDROID_JPEG_GPS_TIMESTAMP,                       // int64        | public
+    ANDROID_JPEG_ORIENTATION,                         // int32        | public
+    ANDROID_JPEG_QUALITY,                             // byte         | public
+    ANDROID_JPEG_THUMBNAIL_QUALITY,                   // byte         | public
+    ANDROID_JPEG_THUMBNAIL_SIZE,                      // int32[]      | public
+    ANDROID_JPEG_AVAILABLE_THUMBNAIL_SIZES,           // int32[]      | public
+    ANDROID_JPEG_MAX_SIZE,                            // int32        | system
+    ANDROID_JPEG_SIZE,                                // int32        | system
     ANDROID_JPEG_END,
 
-    ANDROID_LENS_APERTURE          = ANDROID_LENS_START,
-    ANDROID_LENS_FILTER_DENSITY,
-    ANDROID_LENS_FOCAL_LENGTH,
-    ANDROID_LENS_FOCUS_DISTANCE,
-    ANDROID_LENS_OPTICAL_STABILIZATION_MODE,
-    ANDROID_LENS_FACING,
-    ANDROID_LENS_OPTICAL_AXIS_ANGLE,
-    ANDROID_LENS_POSITION,
-    ANDROID_LENS_FOCUS_RANGE,
-    ANDROID_LENS_STATE,
+    ANDROID_LENS_APERTURE =                           // float        | public
+            ANDROID_LENS_START,
+    ANDROID_LENS_FILTER_DENSITY,                      // float        | public
+    ANDROID_LENS_FOCAL_LENGTH,                        // float        | public
+    ANDROID_LENS_FOCUS_DISTANCE,                      // float        | public
+    ANDROID_LENS_OPTICAL_STABILIZATION_MODE,          // enum         | public
+    ANDROID_LENS_FACING,                              // enum         | public
+    ANDROID_LENS_OPTICAL_AXIS_ANGLE,                  // float[]      | system
+    ANDROID_LENS_POSITION,                            // float[]      | system
+    ANDROID_LENS_FOCUS_RANGE,                         // float[]      | public
+    ANDROID_LENS_STATE,                               // enum         | public
     ANDROID_LENS_END,
 
-    ANDROID_LENS_INFO_AVAILABLE_APERTURES
-                                   = ANDROID_LENS_INFO_START,
-    ANDROID_LENS_INFO_AVAILABLE_FILTER_DENSITIES,
-    ANDROID_LENS_INFO_AVAILABLE_FOCAL_LENGTHS,
-    ANDROID_LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION,
-    ANDROID_LENS_INFO_GEOMETRIC_CORRECTION_MAP,
-    ANDROID_LENS_INFO_GEOMETRIC_CORRECTION_MAP_SIZE,
-    ANDROID_LENS_INFO_HYPERFOCAL_DISTANCE,
-    ANDROID_LENS_INFO_MINIMUM_FOCUS_DISTANCE,
-    ANDROID_LENS_INFO_SHADING_MAP,
-    ANDROID_LENS_INFO_SHADING_MAP_SIZE,
+    ANDROID_LENS_INFO_AVAILABLE_APERTURES =           // float[]      | public
+            ANDROID_LENS_INFO_START,
+    ANDROID_LENS_INFO_AVAILABLE_FILTER_DENSITIES,     // float[]      | public
+    ANDROID_LENS_INFO_AVAILABLE_FOCAL_LENGTHS,        // float[]      | public
+    ANDROID_LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION,// byte[]       | public
+    ANDROID_LENS_INFO_GEOMETRIC_CORRECTION_MAP,       // float[]      | system
+    ANDROID_LENS_INFO_GEOMETRIC_CORRECTION_MAP_SIZE,  // int32[]      | system
+    ANDROID_LENS_INFO_HYPERFOCAL_DISTANCE,            // float        | public
+    ANDROID_LENS_INFO_MINIMUM_FOCUS_DISTANCE,         // float        | public
+    ANDROID_LENS_INFO_SHADING_MAP_SIZE,               // int32[]      | public
     ANDROID_LENS_INFO_END,
 
-    ANDROID_NOISE_REDUCTION_MODE   = ANDROID_NOISE_REDUCTION_START,
-    ANDROID_NOISE_REDUCTION_STRENGTH,
+    ANDROID_NOISE_REDUCTION_MODE =                    // enum         | public
+            ANDROID_NOISE_REDUCTION_START,
+    ANDROID_NOISE_REDUCTION_STRENGTH,                 // byte         | system
     ANDROID_NOISE_REDUCTION_END,
 
-    ANDROID_QUIRKS_METERING_CROP_REGION
-                                   = ANDROID_QUIRKS_START,
-    ANDROID_QUIRKS_TRIGGER_AF_WITH_AUTO,
-    ANDROID_QUIRKS_USE_ZSL_FORMAT,
+    ANDROID_QUIRKS_METERING_CROP_REGION =             // byte         | system
+            ANDROID_QUIRKS_START,
+    ANDROID_QUIRKS_TRIGGER_AF_WITH_AUTO,              // byte         | system
+    ANDROID_QUIRKS_USE_ZSL_FORMAT,                    // byte         | system
     ANDROID_QUIRKS_END,
 
-    ANDROID_REQUEST_FRAME_COUNT    = ANDROID_REQUEST_START,
-    ANDROID_REQUEST_ID,
-    ANDROID_REQUEST_INPUT_STREAMS,
-    ANDROID_REQUEST_METADATA_MODE,
-    ANDROID_REQUEST_OUTPUT_STREAMS,
-    ANDROID_REQUEST_TYPE,
-    ANDROID_REQUEST_MAX_NUM_OUTPUT_STREAMS,
-    ANDROID_REQUEST_MAX_NUM_REPROCESS_STREAMS,
+    ANDROID_REQUEST_FRAME_COUNT =                     // int32        | public
+            ANDROID_REQUEST_START,
+    ANDROID_REQUEST_ID,                               // int32        | hidden
+    ANDROID_REQUEST_INPUT_STREAMS,                    // int32[]      | system
+    ANDROID_REQUEST_METADATA_MODE,                    // enum         | system
+    ANDROID_REQUEST_OUTPUT_STREAMS,                   // int32[]      | system
+    ANDROID_REQUEST_TYPE,                             // enum         | system
+    ANDROID_REQUEST_MAX_NUM_OUTPUT_STREAMS,           // int32[]      | public
+    ANDROID_REQUEST_MAX_NUM_REPROCESS_STREAMS,        // int32[]      | system
     ANDROID_REQUEST_END,
 
-    ANDROID_SCALER_CROP_REGION     = ANDROID_SCALER_START,
-    ANDROID_SCALER_AVAILABLE_FORMATS,
-    ANDROID_SCALER_AVAILABLE_JPEG_MIN_DURATIONS,
-    ANDROID_SCALER_AVAILABLE_JPEG_SIZES,
-    ANDROID_SCALER_AVAILABLE_MAX_DIGITAL_ZOOM,
-    ANDROID_SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS,
-    ANDROID_SCALER_AVAILABLE_PROCESSED_SIZES,
-    ANDROID_SCALER_AVAILABLE_RAW_MIN_DURATIONS,
-    ANDROID_SCALER_AVAILABLE_RAW_SIZES,
+    ANDROID_SCALER_CROP_REGION =                      // int32[]      | public
+            ANDROID_SCALER_START,
+    ANDROID_SCALER_AVAILABLE_FORMATS,                 // enum[]       | public
+    ANDROID_SCALER_AVAILABLE_JPEG_MIN_DURATIONS,      // int64[]      | public
+    ANDROID_SCALER_AVAILABLE_JPEG_SIZES,              // int32[]      | public
+    ANDROID_SCALER_AVAILABLE_MAX_DIGITAL_ZOOM,        // float        | public
+    ANDROID_SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS, // int64[]      | public
+    ANDROID_SCALER_AVAILABLE_PROCESSED_SIZES,         // int32[]      | public
+    ANDROID_SCALER_AVAILABLE_RAW_MIN_DURATIONS,       // int64[]      | system
+    ANDROID_SCALER_AVAILABLE_RAW_SIZES,               // int32[]      | system
     ANDROID_SCALER_END,
 
-    ANDROID_SENSOR_EXPOSURE_TIME   = ANDROID_SENSOR_START,
-    ANDROID_SENSOR_FRAME_DURATION,
-    ANDROID_SENSOR_SENSITIVITY,
-    ANDROID_SENSOR_BASE_GAIN_FACTOR,
-    ANDROID_SENSOR_BLACK_LEVEL_PATTERN,
-    ANDROID_SENSOR_CALIBRATION_TRANSFORM1,
-    ANDROID_SENSOR_CALIBRATION_TRANSFORM2,
-    ANDROID_SENSOR_COLOR_TRANSFORM1,
-    ANDROID_SENSOR_COLOR_TRANSFORM2,
-    ANDROID_SENSOR_FORWARD_MATRIX1,
-    ANDROID_SENSOR_FORWARD_MATRIX2,
-    ANDROID_SENSOR_MAX_ANALOG_SENSITIVITY,
-    ANDROID_SENSOR_NOISE_MODEL_COEFFICIENTS,
-    ANDROID_SENSOR_ORIENTATION,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT1,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT2,
-    ANDROID_SENSOR_TIMESTAMP,
+    ANDROID_SENSOR_EXPOSURE_TIME =                    // int64        | public
+            ANDROID_SENSOR_START,
+    ANDROID_SENSOR_FRAME_DURATION,                    // int64        | public
+    ANDROID_SENSOR_SENSITIVITY,                       // int32        | public
+    ANDROID_SENSOR_BASE_GAIN_FACTOR,                  // rational     | public
+    ANDROID_SENSOR_BLACK_LEVEL_PATTERN,               // int32[]      | system
+    ANDROID_SENSOR_CALIBRATION_TRANSFORM1,            // rational[]   | system
+    ANDROID_SENSOR_CALIBRATION_TRANSFORM2,            // rational[]   | system
+    ANDROID_SENSOR_COLOR_TRANSFORM1,                  // rational[]   | system
+    ANDROID_SENSOR_COLOR_TRANSFORM2,                  // rational[]   | system
+    ANDROID_SENSOR_FORWARD_MATRIX1,                   // rational[]   | system
+    ANDROID_SENSOR_FORWARD_MATRIX2,                   // rational[]   | system
+    ANDROID_SENSOR_MAX_ANALOG_SENSITIVITY,            // int32        | public
+    ANDROID_SENSOR_NOISE_MODEL_COEFFICIENTS,          // float[]      | system
+    ANDROID_SENSOR_ORIENTATION,                       // int32        | public
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1,             // enum         | system
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT2,             // byte         | system
+    ANDROID_SENSOR_TIMESTAMP,                         // int64        | public
+    ANDROID_SENSOR_TEMPERATURE,                       // float        | public
     ANDROID_SENSOR_END,
 
-    ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE
-                                   = ANDROID_SENSOR_INFO_START,
-    ANDROID_SENSOR_INFO_AVAILABLE_SENSITIVITIES,
-    ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT,
-    ANDROID_SENSOR_INFO_EXPOSURE_TIME_RANGE,
-    ANDROID_SENSOR_INFO_MAX_FRAME_DURATION,
-    ANDROID_SENSOR_INFO_PHYSICAL_SIZE,
-    ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE,
-    ANDROID_SENSOR_INFO_WHITE_LEVEL,
+    ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE =           // int32[]      | public
+            ANDROID_SENSOR_INFO_START,
+    ANDROID_SENSOR_INFO_SENSITIVITY_RANGE,            // int32[]      | public
+    ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT,     // enum         | system
+    ANDROID_SENSOR_INFO_EXPOSURE_TIME_RANGE,          // int64[]      | public
+    ANDROID_SENSOR_INFO_MAX_FRAME_DURATION,           // int64        | public
+    ANDROID_SENSOR_INFO_PHYSICAL_SIZE,                // float[]      | public
+    ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE,             // int32[]      | system
+    ANDROID_SENSOR_INFO_WHITE_LEVEL,                  // int32        | system
     ANDROID_SENSOR_INFO_END,
 
-    ANDROID_SHADING_MODE           = ANDROID_SHADING_START,
-    ANDROID_SHADING_STRENGTH,
+    ANDROID_SHADING_MODE =                            // enum         | system
+            ANDROID_SHADING_START,
+    ANDROID_SHADING_STRENGTH,                         // byte         | system
     ANDROID_SHADING_END,
 
-    ANDROID_STATISTICS_FACE_DETECT_MODE
-                                   = ANDROID_STATISTICS_START,
-    ANDROID_STATISTICS_HISTOGRAM_MODE,
-    ANDROID_STATISTICS_SHARPNESS_MAP_MODE,
-    ANDROID_STATISTICS_FACE_IDS,
-    ANDROID_STATISTICS_FACE_LANDMARKS,
-    ANDROID_STATISTICS_FACE_RECTANGLES,
-    ANDROID_STATISTICS_FACE_SCORES,
-    ANDROID_STATISTICS_HISTOGRAM,
-    ANDROID_STATISTICS_SHARPNESS_MAP,
+    ANDROID_STATISTICS_FACE_DETECT_MODE =             // enum         | public
+            ANDROID_STATISTICS_START,
+    ANDROID_STATISTICS_HISTOGRAM_MODE,                // enum         | system
+    ANDROID_STATISTICS_SHARPNESS_MAP_MODE,            // enum         | system
+    ANDROID_STATISTICS_FACE_IDS,                      // int32[]      | public
+    ANDROID_STATISTICS_FACE_LANDMARKS,                // int32[]      | public
+    ANDROID_STATISTICS_FACE_RECTANGLES,               // int32[]      | public
+    ANDROID_STATISTICS_FACE_SCORES,                   // byte[]       | public
+    ANDROID_STATISTICS_HISTOGRAM,                     // int32[]      | system
+    ANDROID_STATISTICS_SHARPNESS_MAP,                 // int32[]      | system
+    ANDROID_STATISTICS_LENS_SHADING_MAP,              // float[]      | public
+    ANDROID_STATISTICS_PREDICTED_COLOR_GAINS,         // float[]      | public
+    ANDROID_STATISTICS_PREDICTED_COLOR_TRANSFORM,     // rational[]   | public
+    ANDROID_STATISTICS_SCENE_FLICKER,                 // enum         | public
+    ANDROID_STATISTICS_LENS_SHADING_MAP_MODE,         // enum         | public
     ANDROID_STATISTICS_END,
 
-    ANDROID_STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES
-                                   = ANDROID_STATISTICS_INFO_START,
-    ANDROID_STATISTICS_INFO_HISTOGRAM_BUCKET_COUNT,
-    ANDROID_STATISTICS_INFO_MAX_FACE_COUNT,
-    ANDROID_STATISTICS_INFO_MAX_HISTOGRAM_COUNT,
-    ANDROID_STATISTICS_INFO_MAX_SHARPNESS_MAP_VALUE,
-    ANDROID_STATISTICS_INFO_SHARPNESS_MAP_SIZE,
+    ANDROID_STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES = 
+                                                      // byte[]       | public
+            ANDROID_STATISTICS_INFO_START,
+    ANDROID_STATISTICS_INFO_HISTOGRAM_BUCKET_COUNT,   // int32        | system
+    ANDROID_STATISTICS_INFO_MAX_FACE_COUNT,           // int32        | public
+    ANDROID_STATISTICS_INFO_MAX_HISTOGRAM_COUNT,      // int32        | system
+    ANDROID_STATISTICS_INFO_MAX_SHARPNESS_MAP_VALUE,  // int32        | system
+    ANDROID_STATISTICS_INFO_SHARPNESS_MAP_SIZE,       // int32[]      | system
     ANDROID_STATISTICS_INFO_END,
 
-    ANDROID_TONEMAP_CURVE_BLUE     = ANDROID_TONEMAP_START,
-    ANDROID_TONEMAP_CURVE_GREEN,
-    ANDROID_TONEMAP_CURVE_RED,
-    ANDROID_TONEMAP_MODE,
-    ANDROID_TONEMAP_MAX_CURVE_POINTS,
+    ANDROID_TONEMAP_CURVE_BLUE =                      // float[]      | public
+            ANDROID_TONEMAP_START,
+    ANDROID_TONEMAP_CURVE_GREEN,                      // float[]      | public
+    ANDROID_TONEMAP_CURVE_RED,                        // float[]      | public
+    ANDROID_TONEMAP_MODE,                             // enum         | public
+    ANDROID_TONEMAP_MAX_CURVE_POINTS,                 // int32        | public
     ANDROID_TONEMAP_END,
 
-    ANDROID_LED_TRANSMIT           = ANDROID_LED_START,
-    ANDROID_LED_AVAILABLE_LEDS,
+    ANDROID_LED_TRANSMIT =                            // enum         | hidden
+            ANDROID_LED_START,
+    ANDROID_LED_AVAILABLE_LEDS,                       // enum[]       | hidden
     ANDROID_LED_END,
 
-    ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL
-                                   = ANDROID_INFO_START,
+    ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL =           // enum         | public
+            ANDROID_INFO_START,
     ANDROID_INFO_END,
+
+    ANDROID_BLACK_LEVEL_LOCK =                        // enum         | public
+            ANDROID_BLACK_LEVEL_START,
+    ANDROID_BLACK_LEVEL_END,
 
 } camera_metadata_tag_t;
 
@@ -466,6 +497,7 @@ typedef enum camera_metadata_enum_android_control_af_state {
     ANDROID_CONTROL_AF_STATE_ACTIVE_SCAN,
     ANDROID_CONTROL_AF_STATE_FOCUSED_LOCKED,
     ANDROID_CONTROL_AF_STATE_NOT_FOCUSED_LOCKED,
+    ANDROID_CONTROL_AF_STATE_PASSIVE_UNFOCUSED,
 } camera_metadata_enum_android_control_af_state_t;
 
 // ANDROID_CONTROL_AWB_STATE
@@ -542,6 +574,7 @@ typedef enum camera_metadata_enum_android_lens_facing {
 // ANDROID_LENS_STATE
 typedef enum camera_metadata_enum_android_lens_state {
     ANDROID_LENS_STATE_STATIONARY,
+    ANDROID_LENS_STATE_MOVING,
 } camera_metadata_enum_android_lens_state_t;
 
 
@@ -640,6 +673,19 @@ typedef enum camera_metadata_enum_android_statistics_sharpness_map_mode {
     ANDROID_STATISTICS_SHARPNESS_MAP_MODE_ON,
 } camera_metadata_enum_android_statistics_sharpness_map_mode_t;
 
+// ANDROID_STATISTICS_SCENE_FLICKER
+typedef enum camera_metadata_enum_android_statistics_scene_flicker {
+    ANDROID_STATISTICS_SCENE_FLICKER_NONE,
+    ANDROID_STATISTICS_SCENE_FLICKER_50HZ,
+    ANDROID_STATISTICS_SCENE_FLICKER_60HZ,
+} camera_metadata_enum_android_statistics_scene_flicker_t;
+
+// ANDROID_STATISTICS_LENS_SHADING_MAP_MODE
+typedef enum camera_metadata_enum_android_statistics_lens_shading_map_mode {
+    ANDROID_STATISTICS_LENS_SHADING_MAP_MODE_OFF,
+    ANDROID_STATISTICS_LENS_SHADING_MAP_MODE_ON,
+} camera_metadata_enum_android_statistics_lens_shading_map_mode_t;
+
 
 
 // ANDROID_TONEMAP_MODE
@@ -667,5 +713,12 @@ typedef enum camera_metadata_enum_android_info_supported_hardware_level {
     ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED,
     ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_FULL,
 } camera_metadata_enum_android_info_supported_hardware_level_t;
+
+
+// ANDROID_BLACK_LEVEL_LOCK
+typedef enum camera_metadata_enum_android_black_level_lock {
+    ANDROID_BLACK_LEVEL_LOCK_OFF,
+    ANDROID_BLACK_LEVEL_LOCK_ON,
+} camera_metadata_enum_android_black_level_lock_t;
 
 

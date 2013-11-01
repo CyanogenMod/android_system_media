@@ -110,11 +110,15 @@ const char *get_fakevendor_tag_name(const vendor_tag_query_ops_t *v,
         uint32_t tag);
 int get_fakevendor_tag_type(const vendor_tag_query_ops_t *v,
         uint32_t tag);
+int get_fakevendor_tag_count(const vendor_tag_query_ops_t *v);
+void get_fakevendor_tags(const vendor_tag_query_ops_t *v, uint32_t *tag_array);
 
 static const vendor_tag_query_ops_t fakevendor_query_ops = {
     get_fakevendor_section_name,
     get_fakevendor_tag_name,
-    get_fakevendor_tag_type
+    get_fakevendor_tag_type,
+    get_fakevendor_tag_count,
+    get_fakevendor_tags
 };
 
 const char *get_fakevendor_section_name(const vendor_tag_query_ops_t *v,
@@ -149,5 +153,32 @@ int get_fakevendor_tag_type(const vendor_tag_query_ops_t *v,
     return fakevendor_tag_info[tag_section][tag_index].tag_type;
 }
 
+int get_fakevendor_tag_count(const vendor_tag_query_ops_t *v) {
+    int section;
+    unsigned int start, end;
+    int count = 0;
+
+    if (v != &fakevendor_query_ops) return -1;
+    for (section = 0; section < FAKEVENDOR_SECTION_COUNT; section++) {
+        start = fakevendor_section_bounds[section][0];
+        end = fakevendor_section_bounds[section][1];
+        count += end - start;
+    }
+    return count;
+}
+
+void get_fakevendor_tags(const vendor_tag_query_ops_t *v, uint32_t *tag_array) {
+    int section;
+    unsigned int start, end, tag;
+
+    if (v != &fakevendor_query_ops || tag_array == NULL) return;
+    for (section = 0; section < FAKEVENDOR_SECTION_COUNT; section++) {
+        start = fakevendor_section_bounds[section][0];
+        end = fakevendor_section_bounds[section][1];
+        for (tag = start; tag < end; tag++) {
+            *tag_array++ = tag;
+        }
+    }
+}
 
 #endif

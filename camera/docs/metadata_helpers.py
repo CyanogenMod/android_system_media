@@ -19,6 +19,7 @@ A set of helpers for rendering Mako templates with a Metadata model.
 """
 
 import metadata_model
+import re
 from collections import OrderedDict
 
 _context_buf = None
@@ -112,6 +113,65 @@ def path_name(node):
   path.append(node)
 
   return ".".join((i.name for i in path))
+
+def has_descendants_with_enums(node):
+  """
+  Determine whether or not the current node is or has any descendants with an
+  Enum node.
+
+  Args:
+    node: a Node instance
+
+  Returns:
+    True if it finds an Enum node in the subtree, False otherwise
+  """
+  return bool(node.find_first(lambda x: isinstance(x, metadata_model.Enum)))
+
+def get_children_by_throwing_away_kind(node, member='entries'):
+  """
+  Get the children of this node by compressing the subtree together by removing
+  the kind and then combining any children nodes with the same name together.
+
+  Args:
+    node: An instance of Section, InnerNamespace, or Kind
+
+  Returns:
+    An iterable over the combined children of the subtree of node,
+    as if the Kinds never existed.
+
+  Remarks:
+    Not recursive. Call this function repeatedly on each child.
+  """
+
+  if isinstance(node, metadata_model.Section):
+    # Note that this makes jump from Section to Kind,
+    # skipping the Kind entirely in the tree.
+    node_to_combine = node.combine_kinds_into_single_node()
+  else:
+    node_to_combine = node
+
+  combined_kind = node_to_combine.combine_children_by_name()
+
+  return (i for i in getattr(combined_kind, member))
+
+def get_children_by_filtering_kind(section, kind_name, member='entries'):
+  """
+  Takes a section and yields the children of the merged kind under this section.
+
+  Args:
+    section: An instance of Section
+    kind_name: A name of the kind, i.e. 'dynamic' or 'static' or 'controls'
+
+  Returns:
+    An iterable over the children of the specified merged kind.
+  """
+
+  matched_kind = next((i for i in section.merged_kinds if i.name == kind_name), None)
+
+  if matched_kind:
+    return getattr(matched_kind, member)
+  else:
+    return ()
 
 ##
 ## Filters
@@ -241,3 +301,400 @@ def ctype_enum(what):
     code doesn't support enums directly yet.
   """
   return 'TYPE_%s' %(what.upper())
+
+
+# Calculate a java type name from an entry with a Typedef node
+def _jtypedef_type(entry):
+  typedef = entry.typedef
+  additional = ''
+
+  # Hacky way to deal with arrays. Assume that if we have
+  # size 'Constant x N' the Constant is part of the Typedef size.
+  # So something sized just 'Constant', 'Constant1 x Constant2', etc
+  # is not treated as a real java array.
+  if entry.container == 'array':
+    has_variable_size = False
+    for size in entry.container_sizes:
+      try:
+        size_int = int(size)
+      except ValueError:
+        has_variable_size = True
+
+    if has_variable_size:
+      additional = '[]'
+
+  try:
+    name = typedef.languages['java']
+
+    return "%s%s" %(name, additional)
+  except KeyError:
+    return None
+
+# Box if primitive. Otherwise leave unboxed.
+def _jtype_box(type_name):
+  mapping = {
+    'boolean': 'Boolean',
+    'byte': 'Byte',
+    'int': 'Integer',
+    'float': 'Float',
+    'double': 'Double',
+    'long': 'Long'
+  }
+
+  return mapping.get(type_name, type_name)
+
+def jtype_unboxed(entry):
+  """
+  Calculate the Java type from an entry type string, to be used whenever we
+  need the regular type in Java. It's not boxed, so it can't be used as a
+  generic type argument when the entry type happens to resolve to a primitive.
+
+  Remarks:
+    Since Java generics cannot be instantiated with primitives, this version
+    is not applicable in that case. Use jtype_boxed instead for that.
+
+  Returns:
+    The string representing the Java type.
+  """
+  if not isinstance(entry, metadata_model.Entry):
+    raise ValueError("Expected entry to be an instance of Entry")
+
+  metadata_type = entry.type
+
+  java_type = None
+
+  if entry.typedef:
+    typedef_name = _jtypedef_type(entry)
+    if typedef_name:
+      java_type = typedef_name # already takes into account arrays
+
+  if not java_type:
+    if not java_type and entry.enum:
+      # Always map enums to Java ints, unless there's a typedef override
+      base_type = 'int'
+
+    else:
+      mapping = {
+        'int32': 'int',
+        'int64': 'long',
+        'float': 'float',
+        'double': 'double',
+        'byte': 'byte',
+        'rational': 'Rational'
+      }
+
+      base_type = mapping[metadata_type]
+
+    # Convert to array (enums, basic types)
+    if entry.container == 'array':
+      additional = '[]'
+    else:
+      additional = ''
+
+    java_type = '%s%s' %(base_type, additional)
+
+  # Now box this sucker.
+  return java_type
+
+def jtype_boxed(entry):
+  """
+  Calculate the Java type from an entry type string, to be used as a generic
+  type argument in Java. The type is guaranteed to inherit from Object.
+
+  It will only box when absolutely necessary, i.e. int -> Integer[], but
+  int[] -> int[].
+
+  Remarks:
+    Since Java generics cannot be instantiated with primitives, this version
+    will use boxed types when absolutely required.
+
+  Returns:
+    The string representing the boxed Java type.
+  """
+  unboxed_type = jtype_unboxed(entry)
+  return _jtype_box(unboxed_type)
+
+def _jtype_primitive(what):
+  """
+  Calculate the Java type from an entry type string.
+
+  Remarks:
+    Makes a special exception for Rational, since it's a primitive in terms of
+    the C-library camera_metadata type system.
+
+  Returns:
+    The string representing the primitive type
+  """
+  mapping = {
+    'int32': 'int',
+    'int64': 'long',
+    'float': 'float',
+    'double': 'double',
+    'byte': 'byte',
+    'rational': 'Rational'
+  }
+
+  try:
+    return mapping[what]
+  except KeyError as e:
+    raise ValueError("Can't map '%s' to a primitive, not supported" %what)
+
+def jclass(entry):
+  """
+  Calculate the java Class reference string for an entry.
+
+  Args:
+    entry: an Entry node
+
+  Example:
+    <entry name="some_int" type="int32"/>
+    <entry name="some_int_array" type="int32" container='array'/>
+
+    jclass(some_int) == 'int.class'
+    jclass(some_int_array) == 'int[].class'
+
+  Returns:
+    The ClassName.class string
+  """
+
+  return "%s.class" %jtype_unboxed(entry)
+
+def jidentifier(what):
+  """
+  Convert the input string into a valid Java identifier.
+
+  Args:
+    what: any identifier string
+
+  Returns:
+    String with added underscores if necessary.
+  """
+  if re.match("\d", what):
+    return "_%s" %what
+  else:
+    return what
+
+def enum_calculate_value_string(enum_value):
+  """
+  Calculate the value of the enum, even if it does not have one explicitly
+  defined.
+
+  This looks back for the first enum value that has a predefined value and then
+  applies addition until we get the right value, using C-enum semantics.
+
+  Args:
+    enum_value: an EnumValue node with a valid Enum parent
+
+  Example:
+    <enum>
+      <value>X</value>
+      <value id="5">Y</value>
+      <value>Z</value>
+    </enum>
+
+    enum_calculate_value_string(X) == '0'
+    enum_calculate_Value_string(Y) == '5'
+    enum_calculate_value_string(Z) == '6'
+
+  Returns:
+    String that represents the enum value as an integer literal.
+  """
+
+  enum_value_siblings = list(enum_value.parent.values)
+  this_index = enum_value_siblings.index(enum_value)
+
+  def is_hex_string(instr):
+    return bool(re.match('0x[a-f0-9]+$', instr, re.IGNORECASE))
+
+  base_value = 0
+  base_offset = 0
+  emit_as_hex = False
+
+  this_id = enum_value_siblings[this_index].id
+  while this_index != 0 and not this_id:
+    this_index -= 1
+    base_offset += 1
+    this_id = enum_value_siblings[this_index].id
+
+  if this_id:
+    base_value = int(this_id, 0)  # guess base
+    emit_as_hex = is_hex_string(this_id)
+
+  if emit_as_hex:
+    return "0x%X" %(base_value + base_offset)
+  else:
+    return "%d" %(base_value + base_offset)
+
+def enumerate_with_last(iterable):
+  """
+  Enumerate a sequence of iterable, while knowing if this element is the last in
+  the sequence or not.
+
+  Args:
+    iterable: an Iterable of some sequence
+
+  Yields:
+    (element, bool) where the bool is True iff the element is last in the seq.
+  """
+  it = (i for i in iterable)
+
+  first = next(it)  # OK: raises exception if it is empty
+
+  second = first  # for when we have only 1 element in iterable
+
+  try:
+    while True:
+      second = next(it)
+      # more elements remaining.
+      yield (first, False)
+      first = second
+  except StopIteration:
+    # last element. no more elements left
+    yield (second, True)
+
+def pascal_case(what):
+  """
+  Convert the first letter of a string to uppercase, to make the identifier
+  conform to PascalCase.
+
+  If there are dots, remove the dots, and capitalize the letter following
+  where the dot was. Letters that weren't following dots are left unchanged,
+  except for the first letter of the string (which is made upper-case).
+
+  Args:
+    what: a string representing some identifier
+
+  Returns:
+    String with first letter capitalized
+
+  Example:
+    pascal_case("helloWorld") == "HelloWorld"
+    pascal_case("foo") == "Foo"
+    pascal_case("hello.world") = "HelloWorld"
+    pascal_case("fooBar.fooBar") = "FooBarFooBar"
+  """
+  return "".join([s[0:1].upper() + s[1:] for s in what.split('.')])
+
+def jkey_identifier(what):
+  """
+  Return a Java identifier from a property name.
+
+  Args:
+    what: a string representing a property name.
+
+  Returns:
+    Java identifier corresponding to the property name. May need to be
+    prepended with the appropriate Java class name by the caller of this
+    function. Note that the outer namespace is stripped from the property
+    name.
+
+  Example:
+    jkey_identifier("android.lens.facing") == "LENS_FACING"
+  """
+  return csym(what[what.find('.') + 1:])
+
+def jenum_value(enum_entry, enum_value):
+  """
+  Calculate the Java name for an integer enum value
+
+  Args:
+    enum: An enum-typed Entry node
+    value: An EnumValue node for the enum
+
+  Returns:
+    String representing the Java symbol
+  """
+
+  cname = csym(enum_entry.name)
+  return cname[cname.find('_') + 1:] + '_' + enum_value.name
+
+def javadoc(text, indent = 4):
+  """
+  Format text block as a javadoc comment section
+
+  Args:
+    text: A multi-line string to format
+    indent: baseline level of indentation for javadoc block
+  Returns:
+    String with:
+    - Indent and * for insertion into a Javadoc comment block
+    - Leading/trailing whitespace removed
+    - Paragraph tags added on newlines between paragraphs
+
+  Example:
+    "This is a comment for Javadoc\n" +
+    "     with multiple lines, that should be   \n" +
+    "     formatted better\n" +
+    "\n" +
+    "    That covers multiple lines as well\n"
+
+    transforms to
+    "    * <p>\n" +
+    "    * This is a comment for Javadoc\n" +
+    "    * with multiple lines, that should be\n" +
+    "    * formatted better\n" +
+    "    * </p><p>\n" +
+    "    * That covers multiple lines as well\n" +
+    "    * </p>\n"
+  """
+  comment_prefix = " " * indent + " * ";
+  comment_para = comment_prefix + "</p><p>\n";
+  javatext = comment_prefix + "<p>\n";
+
+  in_body = False # Eat empty lines at start
+  first_paragraph = True
+  for line in ( line.strip() for line in text.splitlines() ):
+    if not line:
+      in_body = False # collapse multi-blank lines into one
+    else:
+      # Insert para end/start after a span of blank lines except for
+      # the first paragraph, which got a para start already
+      if not in_body and not first_paragraph:
+        javatext = javatext + comment_para
+
+      in_body = True
+      first_paragraph = False
+
+      javatext = javatext + comment_prefix + line + "\n";
+
+  # Close last para tag
+  javatext = javatext + comment_prefix + "</p>\n";
+
+  return javatext
+
+def any_visible(section, kind_name, visibilities):
+  """
+  Determine if entries in this section have an applied visibility that's in
+  the list of given visibilities.
+
+  Args:
+    section: A section of metadata
+    kind_name: A name of the kind, i.e. 'dynamic' or 'static' or 'controls'
+    visibilities: An iterable of visibilities to match against
+
+  Returns:
+    True if the section has any entries with any of the given visibilities. False otherwise.
+  """
+
+  for inner_namespace in get_children_by_filtering_kind(section, kind_name,
+                                                        'namespaces'):
+    if any(filter_visibility(inner_namespace.merged_entries, visibilities)):
+      return True
+
+  return any(filter_visibility(get_children_by_filtering_kind(section, kind_name,
+                                                              'merged_entries'),
+                               visibilities))
+
+
+def filter_visibility(entries, visibilities):
+  """
+  Remove entries whose applied visibility is not in the supplied visibilities.
+
+  Args:
+    entries: An iterable of Entry nodes
+    visibilities: An iterable of visibilities to filter against
+
+  Yields:
+    An iterable of Entry nodes
+  """
+  return (e for e in entries if e.applied_visibility in visibilities)
