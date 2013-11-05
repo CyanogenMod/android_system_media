@@ -342,6 +342,10 @@ static tag_info_t android_quirks[ANDROID_QUIRKS_END -
     { "triggerAfWithAuto",             TYPE_BYTE   },
     [ ANDROID_QUIRKS_USE_ZSL_FORMAT - ANDROID_QUIRKS_START ] =
     { "useZslFormat",                  TYPE_BYTE   },
+    [ ANDROID_QUIRKS_USE_PARTIAL_RESULT - ANDROID_QUIRKS_START ] =
+    { "usePartialResult",              TYPE_BYTE   },
+    [ ANDROID_QUIRKS_PARTIAL_RESULT - ANDROID_QUIRKS_START ] =
+    { "partialResult",                 TYPE_BYTE   },
 };
 
 static tag_info_t android_request[ANDROID_REQUEST_END -
@@ -1430,6 +1434,24 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_QUIRKS_USE_ZSL_FORMAT: {
+            break;
+        }
+        case ANDROID_QUIRKS_USE_PARTIAL_RESULT: {
+            break;
+        }
+        case ANDROID_QUIRKS_PARTIAL_RESULT: {
+            switch (value) {
+                case ANDROID_QUIRKS_PARTIAL_RESULT_FINAL:
+                    msg = "FINAL";
+                    ret = 0;
+                    break;
+                case ANDROID_QUIRKS_PARTIAL_RESULT_PARTIAL:
+                    msg = "PARTIAL";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
             break;
         }
 
