@@ -1480,7 +1480,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           metadata. Support will be removed in future versions of
           camera service.</notes>
         </entry>
-        <entry name="usePartialResult" type="byte" visibility="system" optional="true">
+        <entry name="usePartialResult" type="byte" visibility="hidden" optional="true">
           <description>If set to 1, the HAL will always split result
           metadata for a single capture into multiple buffers,
           returned using multiple process_capture_result calls.
@@ -1495,7 +1495,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
       </static>
       <dynamic>
-        <entry name="partialResult" type="byte" visibility="system" optional="true" enum="true" typedef="boolean">
+        <entry name="partialResult" type="byte" visibility="hidden" optional="true" enum="true" typedef="boolean">
           <enum>
             <value>FINAL
             <notes>The last or only metadata result buffer

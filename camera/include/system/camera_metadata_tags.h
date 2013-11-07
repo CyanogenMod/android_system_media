@@ -233,8 +233,8 @@ typedef enum camera_metadata_tag {
             ANDROID_QUIRKS_START,
     ANDROID_QUIRKS_TRIGGER_AF_WITH_AUTO,              // byte         | system
     ANDROID_QUIRKS_USE_ZSL_FORMAT,                    // byte         | system
-    ANDROID_QUIRKS_USE_PARTIAL_RESULT,                // byte         | system
-    ANDROID_QUIRKS_PARTIAL_RESULT,                    // enum         | system
+    ANDROID_QUIRKS_USE_PARTIAL_RESULT,                // byte         | hidden
+    ANDROID_QUIRKS_PARTIAL_RESULT,                    // enum         | hidden
     ANDROID_QUIRKS_END,
 
     ANDROID_REQUEST_FRAME_COUNT =                     // int32        | public
