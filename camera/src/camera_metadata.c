@@ -18,6 +18,7 @@
 
 #define LOG_TAG "camera_metadata"
 #include <cutils/log.h>
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -221,6 +222,7 @@ camera_metadata_t *place_camera_metadata(void *dst,
     metadata->data_start = ALIGN_TO(data_unaligned, DATA_ALIGNMENT);
     metadata->user = NULL;
 
+    assert(validate_camera_metadata_structure(metadata, NULL) == OK);
     return metadata;
 }
 void free_camera_metadata(camera_metadata_t *metadata) {
@@ -288,6 +290,7 @@ camera_metadata_t* copy_camera_metadata(void *dst, size_t dst_size,
             sizeof(uint8_t[metadata->data_count]));
     metadata->user = NULL;
 
+    assert(validate_camera_metadata_structure(metadata, NULL) == OK);
     return metadata;
 }
 
@@ -473,6 +476,7 @@ int append_camera_metadata(camera_metadata_t *dst,
     dst->entry_count += src->entry_count;
     dst->data_count += src->data_count;
 
+    assert(validate_camera_metadata_structure(dst, NULL) == OK);
     return OK;
 }
 
@@ -489,6 +493,7 @@ camera_metadata_t *clone_camera_metadata(const camera_metadata_t *src) {
             clone = NULL;
         }
     }
+    assert(validate_camera_metadata_structure(clone, NULL) == OK);
     return clone;
 }
 
@@ -533,6 +538,7 @@ static int add_camera_metadata_entry_raw(camera_metadata_t *dst,
     }
     dst->entry_count++;
     dst->flags &= ~FLAG_SORTED;
+    assert(validate_camera_metadata_structure(dst, NULL) == OK);
     return OK;
 }
 
@@ -571,6 +577,7 @@ int sort_camera_metadata(camera_metadata_t *dst) {
             compare_entry_tags);
     dst->flags |= FLAG_SORTED;
 
+    assert(validate_camera_metadata_structure(dst, NULL) == OK);
     return OK;
 }
 
@@ -678,6 +685,7 @@ int delete_camera_metadata_entry(camera_metadata_t *dst,
             (dst->entry_count - index - 1) );
     dst->entry_count -= 1;
 
+    assert(validate_camera_metadata_structure(dst, NULL) == OK);
     return OK;
 }
 
@@ -753,6 +761,7 @@ int update_camera_metadata_entry(camera_metadata_t *dst,
                 updated_entry);
     }
 
+    assert(validate_camera_metadata_structure(dst, NULL) == OK);
     return OK;
 }
 
