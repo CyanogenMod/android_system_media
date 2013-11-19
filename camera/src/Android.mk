@@ -25,4 +25,6 @@ ifneq ($(filter userdebug eng,$(TARGET_BUILD_VARIANT)),)
     LOCAL_CFLAGS += -UNDEBUG -DLOG_NDEBUG=1
 endif
 
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/../include
+
 include $(BUILD_SHARED_LIBRARY)
