@@ -186,7 +186,6 @@ camera_metadata_t *allocate_copy_camera_metadata_checked(
 
 camera_metadata_t *allocate_camera_metadata(size_t entry_capacity,
                                             size_t data_capacity) {
-    if (entry_capacity == 0) return NULL;
 
     size_t memory_needed = calculate_camera_metadata_size(entry_capacity,
                                                           data_capacity);
@@ -201,7 +200,6 @@ camera_metadata_t *place_camera_metadata(void *dst,
                                          size_t entry_capacity,
                                          size_t data_capacity) {
     if (dst == NULL) return NULL;
-    if (entry_capacity == 0) return NULL;
 
     size_t memory_needed = calculate_camera_metadata_size(entry_capacity,
                                                           data_capacity);
@@ -298,6 +296,7 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
                                        const size_t *expected_size) {
 
     if (metadata == NULL) {
+        ALOGE("%s: metadata is null!", __FUNCTION__);
         return ERROR;
     }
 

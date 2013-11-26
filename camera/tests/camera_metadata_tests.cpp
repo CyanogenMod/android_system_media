@@ -73,12 +73,34 @@ TEST(camera_metadata, allocate_nodata) {
     FINISH_USING_CAMERA_METADATA(m);
 }
 
+TEST(camera_metadata, clone_nodata) {
+    camera_metadata_t *src = NULL;
+    camera_metadata_t *copy = NULL;
+
+    src = allocate_camera_metadata(10, 0);
+
+    ASSERT_NE((void*)NULL, (void*)src);
+    copy = clone_camera_metadata(src);
+    ASSERT_NE((void*)NULL, (void*)copy);
+    EXPECT_EQ((size_t)0, get_camera_metadata_entry_count(copy));
+    EXPECT_EQ((size_t)0, get_camera_metadata_entry_capacity(copy));
+    EXPECT_EQ((size_t)0, get_camera_metadata_data_count(copy));
+    EXPECT_EQ((size_t)0, get_camera_metadata_data_capacity(copy));
+
+    FINISH_USING_CAMERA_METADATA(src);
+    FINISH_USING_CAMERA_METADATA(copy);
+}
+
 TEST(camera_metadata, allocate_nothing) {
     camera_metadata_t *m = NULL;
 
     m = allocate_camera_metadata(0, 0);
 
-    EXPECT_NULL(m);
+    ASSERT_NE((void*)NULL, (void*)m);
+    EXPECT_EQ((size_t)0, get_camera_metadata_entry_count(m));
+    EXPECT_EQ((size_t)0, get_camera_metadata_entry_capacity(m));
+    EXPECT_EQ((size_t)0, get_camera_metadata_data_count(m));
+    EXPECT_EQ((size_t)0, get_camera_metadata_data_capacity(m));
 }
 
 TEST(camera_metadata, place_normal) {
