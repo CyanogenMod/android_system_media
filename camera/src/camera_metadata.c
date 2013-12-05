@@ -164,6 +164,23 @@ static uint8_t *get_data(const camera_metadata_t *metadata) {
     return (uint8_t*)metadata + metadata->data_start;
 }
 
+size_t get_camera_metadata_alignment() {
+    size_t alignments[] = {
+            _Alignas(struct camera_metadata),
+            _Alignas(struct camera_metadata_buffer_entry),
+            _Alignas(union camera_metadata_data)
+    };
+    size_t max_alignment = alignments[0];
+
+    for (size_t i = 1; i < sizeof(alignments)/sizeof(alignments[0]); ++i) {
+        if (max_alignment < alignments[i]) {
+            max_alignment = alignments[i];
+        }
+    }
+
+    return max_alignment;
+}
+
 camera_metadata_t *allocate_copy_camera_metadata_checked(
         const camera_metadata_t *src,
         size_t src_size) {

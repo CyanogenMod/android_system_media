@@ -168,6 +168,14 @@ camera_metadata_t *allocate_camera_metadata(size_t entry_capacity,
         size_t data_capacity);
 
 /**
+ * Get the required alignment of a packet of camera metadata, which is the
+ * maximal alignment of the embedded camera_metadata, camera_metadata_buffer_entry,
+ * and camera_metadata_data.
+ */
+ANDROID_API
+size_t get_camera_metadata_alignment();
+
+/**
  * Allocate a new camera_metadata structure of size src_size. Copy the data,
  * ignoring alignment, and then attempt validation. If validation
  * fails, free the memory and return NULL. Otherwise return the pointer.
