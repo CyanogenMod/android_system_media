@@ -1444,7 +1444,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="quirks">
       <static>
-        <entry name="meteringCropRegion" type="byte" visibility="system">
+        <entry name="meteringCropRegion" type="byte" visibility="system" optional="true">
           <description>If set to 1, the camera service does not
           scale 'normalized' coordinates with respect to the crop
           region. This applies to metering input (a{e,f,wb}Region
@@ -1458,7 +1458,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           not need to be listed in static metadata. Support will be
           removed in future versions of camera service.</notes>
         </entry>
-        <entry name="triggerAfWithAuto" type="byte" visibility="system">
+        <entry name="triggerAfWithAuto" type="byte" visibility="system" optional="true">
           <description>If set to 1, then the camera service always
           switches to FOCUS_MODE_AUTO before issuing a AF
           trigger.</description>
@@ -1468,7 +1468,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           not need to be listed in static metadata. Support will be
           removed in future versions of camera service</notes>
         </entry>
-        <entry name="useZslFormat" type="byte" visibility="system">
+        <entry name="useZslFormat" type="byte" visibility="system" optional="true">
           <description>If set to 1, the camera service uses
           CAMERA2_PIXEL_FORMAT_ZSL instead of
           HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED for the zero
@@ -1480,7 +1480,51 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           metadata. Support will be removed in future versions of
           camera service.</notes>
         </entry>
+        <entry name="usePartialResult" type="byte" visibility="hidden" optional="true">
+          <description>If set to 1, the HAL will always split result
+          metadata for a single capture into multiple buffers,
+          returned using multiple process_capture_result calls.
+          </description>
+          <notes>Does not need to be listed in static
+          metadata. Support for partial results will be reworked in
+          future versions of camera service. This quirk will stop
+          working at that point; DO NOT USE without careful
+          consideration of future support.
+          </notes>
+        </entry>
+
       </static>
+      <dynamic>
+        <entry name="partialResult" type="byte" visibility="hidden" optional="true" enum="true" typedef="boolean">
+          <enum>
+            <value>FINAL
+            <notes>The last or only metadata result buffer
+            for this capture.</notes>
+            </value>
+            <value>PARTIAL
+            <notes>A partial buffer of result metadata for this
+            capture. More result buffers for this capture will be sent
+            by the HAL, the last of which will be marked
+            FINAL.</notes>
+            </value>
+          </enum>
+          <description>Whether a result given to the framework is the
+          final one for the capture, or only a partial that contains a
+          subset of the full set of dynamic metadata
+          values.</description>
+          <range>Optional. Default value is FINAL.</range>
+          <notes>The entries in the result metadata buffers for a
+          single capture may not overlap, except for this entry. The
+          FINAL buffers must retain FIFO ordering relative to the
+          requests that generate them, so the FINAL buffer for frame 3 must
+          always be sent to the framework after the FINAL buffer for frame 2, and
+          before the FINAL buffer for frame 4. PARTIAL buffers may be returned
+          in any order relative to other frames, but all PARTIAL buffers for a given
+          capture must arrive before the FINAL buffer for that capture. This entry may
+          only be used by the HAL if quirks.usePartialResult is set to 1.
+          </notes>
+        </entry>
+      </dynamic>
     </section>
     <section name="request">
       <controls>
