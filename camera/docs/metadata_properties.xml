@@ -282,7 +282,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             android.lens.focusDistance is controlled by the
             application</notes></value>
             <value>AUTO
-            <notes>if lens is not fixed focus.
+            <notes>
+            If lens is not fixed focus.
 
             Use android.lens.minimumFocusDistance to determine if lens
             is fixed focus In this mode, the lens does not move unless
@@ -2659,6 +2660,29 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           black level lock was successful in the output result
           metadata.
 
+          For example, if a sequence of requests is as follows:
+
+          * Request 1: Exposure = 10ms, Black level lock = OFF
+          * Request 2: Exposure = 10ms, Black level lock = ON
+          * Request 3: Exposure = 10ms, Black level lock = ON
+          * Request 4: Exposure = 20ms, Black level lock = ON
+          * Request 5: Exposure = 20ms, Black level lock = ON
+          * Request 6: Exposure = 20ms, Black level lock = ON
+
+          And the exposure change in Request 4 requires resetting the black
+          level offsets, then the output result metadata is expected to be:
+
+          * Result 1: Exposure = 10ms, Black level lock = OFF
+          * Result 2: Exposure = 10ms, Black level lock = ON
+          * Result 3: Exposure = 10ms, Black level lock = ON
+          * Result 4: Exposure = 20ms, Black level lock = OFF
+          * Result 5: Exposure = 20ms, Black level lock = ON
+          * Result 6: Exposure = 20ms, Black level lock = ON
+
+          This indicates to the application that on frame 4, black levels were
+          reset due to exposure value changes, and pixel values may not be
+          consistent across captures.
+
           The black level locking must happen at the sensor, and not at the ISP.
           If for some reason black level locking is no longer legal (for example,
           the analog gain has changed, which forces black levels to be
@@ -2670,7 +2694,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </controls>
       <dynamic>
         <clone entry="android.blackLevel.lock"
-        kind="controls"></clone>
+          kind="controls">
+          <notes>
+            Whether the black level offset was locked for this frame.
+            Should be ON if android.blackLevel.lock was ON in the capture request,
+            unless a change in capture settings forced a black level reset.
+          </notes>
+        </clone>
       </dynamic>
     </section>
   </namespace>

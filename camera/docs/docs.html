@@ -737,8 +737,8 @@
             </td>
 
             <td class="entry_notes">
-              When android.<wbr>control.<wbr>awb<wbr>Mode is not OFF,<wbr> TRANSFORM_<wbr>MATRIX
-          should be ignored.<wbr>
+              <p>When android.<wbr>control.<wbr>awb<wbr>Mode is not OFF,<wbr> TRANSFORM_<wbr>MATRIX
+should be ignored.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -763,9 +763,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              A color transform matrix to use to transform
-          from sensor RGB color space to output linear sRGB color space
-          
+              <p>A color transform matrix to use to transform
+from sensor RGB color space to output linear sRGB color space</p>
             </td>
 
             <td class="entry_units">
@@ -777,14 +776,13 @@
             </td>
 
             <td class="entry_notes">
-              This matrix is either set by HAL when the request
-          android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
-          directly by the application in the request when the
-          android.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr>
-<br>
-<br>          In the latter case,<wbr> the HAL may round the matrix to account
-          for precision issues; the final rounded matrix should be
-          reported back in this matrix result metadata.<wbr>
+              <p>This matrix is either set by HAL when the request
+android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
+directly by the application in the request when the
+android.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr></p>
+<p>In the latter case,<wbr> the HAL may round the matrix to account
+for precision issues; the final rounded matrix should be
+reported back in this matrix result metadata.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -809,8 +807,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Gains applying to Bayer color channels for
-          white-balance
+              <p>Gains applying to Bayer color channels for
+white-balance</p>
             </td>
 
             <td class="entry_units">
@@ -820,21 +818,19 @@
             </td>
 
             <td class="entry_notes">
-              The 4-channel white-balance gains are defined in
-          the order of [R G_<wbr>even G_<wbr>odd B],<wbr> where G_<wbr>even is the gain
-          for green pixels on even rows of the output,<wbr> and G_<wbr>odd
-          is the gain for greenpixels on the odd rows.<wbr> if a HAL
-          does not support a separate gain for even/<wbr>odd green channels,<wbr>
-          it should use the G_<wbr>even value,<wbr>and write G_<wbr>odd equal to
-          G_<wbr>even in the output result metadata.<wbr>
-<br>
-<br>          This array is either set by HAL when the request
-          android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
-          directly by the application in the request when the
-          android.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr>
-<br>
-<br>          The ouput should be the gains actually applied by the HAL to
-          the current frame.<wbr>
+              <p>The 4-channel white-balance gains are defined in
+the order of [R G_<wbr>even G_<wbr>odd B],<wbr> where G_<wbr>even is the gain
+for green pixels on even rows of the output,<wbr> and G_<wbr>odd
+is the gain for greenpixels on the odd rows.<wbr> if a HAL
+does not support a separate gain for even/<wbr>odd green channels,<wbr>
+it should use the G_<wbr>even value,<wbr>and write G_<wbr>odd equal to
+G_<wbr>even in the output result metadata.<wbr></p>
+<p>This array is either set by HAL when the request
+android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
+directly by the application in the request when the
+android.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr></p>
+<p>The ouput should be the gains actually applied by the HAL to
+the current frame.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -887,9 +883,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              A color transform matrix to use to transform
-          from sensor RGB color space to output linear sRGB color space
-          
+              <p>A color transform matrix to use to transform
+from sensor RGB color space to output linear sRGB color space</p>
             </td>
 
             <td class="entry_units">
@@ -901,14 +896,13 @@
             </td>
 
             <td class="entry_notes">
-              This matrix is either set by HAL when the request
-          android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
-          directly by the application in the request when the
-          android.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr>
-<br>
-<br>          In the latter case,<wbr> the HAL may round the matrix to account
-          for precision issues; the final rounded matrix should be
-          reported back in this matrix result metadata.<wbr>
+              <p>This matrix is either set by HAL when the request
+android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
+directly by the application in the request when the
+android.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr></p>
+<p>In the latter case,<wbr> the HAL may round the matrix to account
+for precision issues; the final rounded matrix should be
+reported back in this matrix result metadata.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -933,8 +927,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Gains applying to Bayer color channels for
-          white-balance
+              <p>Gains applying to Bayer color channels for
+white-balance</p>
             </td>
 
             <td class="entry_units">
@@ -944,21 +938,19 @@
             </td>
 
             <td class="entry_notes">
-              The 4-channel white-balance gains are defined in
-          the order of [R G_<wbr>even G_<wbr>odd B],<wbr> where G_<wbr>even is the gain
-          for green pixels on even rows of the output,<wbr> and G_<wbr>odd
-          is the gain for greenpixels on the odd rows.<wbr> if a HAL
-          does not support a separate gain for even/<wbr>odd green channels,<wbr>
-          it should use the G_<wbr>even value,<wbr>and write G_<wbr>odd equal to
-          G_<wbr>even in the output result metadata.<wbr>
-<br>
-<br>          This array is either set by HAL when the request
-          android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
-          directly by the application in the request when the
-          android.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr>
-<br>
-<br>          The ouput should be the gains actually applied by the HAL to
-          the current frame.<wbr>
+              <p>The 4-channel white-balance gains are defined in
+the order of [R G_<wbr>even G_<wbr>odd B],<wbr> where G_<wbr>even is the gain
+for green pixels on even rows of the output,<wbr> and G_<wbr>odd
+is the gain for greenpixels on the odd rows.<wbr> if a HAL
+does not support a separate gain for even/<wbr>odd green channels,<wbr>
+it should use the G_<wbr>even value,<wbr>and write G_<wbr>odd equal to
+G_<wbr>even in the output result metadata.<wbr></p>
+<p>This array is either set by HAL when the request
+android.<wbr>color<wbr>Correction.<wbr>mode is not TRANSFORM_<wbr>MATRIX,<wbr> or
+directly by the application in the request when the
+android.<wbr>color<wbr>Correction.<wbr>mode is TRANSFORM_<wbr>MATRIX.<wbr></p>
+<p>The ouput should be the gains actually applied by the HAL to
+the current frame.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -1025,8 +1017,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Enum for controlling
-          antibanding
+              <p>Enum for controlling
+antibanding</p>
             </td>
 
             <td class="entry_units">
@@ -1057,8 +1049,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Adjustment to AE target image
-          brightness
+              <p>Adjustment to AE target image
+brightness</p>
             </td>
 
             <td class="entry_units">
@@ -1069,9 +1061,9 @@
             </td>
 
             <td class="entry_notes">
-              For example,<wbr> if EV step is 0.<wbr>333,<wbr> '6' will mean an
-          exposure compensation of +2 EV; -3 will mean an exposure
-          compensation of -1
+              <p>For example,<wbr> if EV step is 0.<wbr>333,<wbr> '6' will mean an
+exposure compensation of +2 EV; -3 will mean an exposure
+compensation of -1</p>
             </td>
 
             <td class="entry_tags">
@@ -1107,8 +1099,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether AE is currently locked to its latest
-          calculated values
+              <p>Whether AE is currently locked to its latest
+calculated values</p>
             </td>
 
             <td class="entry_units">
@@ -1118,9 +1110,9 @@
             </td>
 
             <td class="entry_notes">
-              Note that even when AE is locked,<wbr> the flash may be
-          fired if the AE mode is ON_<wbr>AUTO_<wbr>FLASH /<wbr> ON_<wbr>ALWAYS_<wbr>FLASH /<wbr>
-          ON_<wbr>AUTO_<wbr>FLASH_<wbr>REDEYE.<wbr>
+              <p>Note that even when AE is locked,<wbr> the flash may be
+fired if the AE mode is ON_<wbr>AUTO_<wbr>FLASH /<wbr> ON_<wbr>ALWAYS_<wbr>FLASH /<wbr>
+ON_<wbr>AUTO_<wbr>FLASH_<wbr>REDEYE.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -1176,8 +1168,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether AE is currently updating the sensor
-          exposure and sensitivity fields
+              <p>Whether AE is currently updating the sensor
+exposure and sensitivity fields</p>
             </td>
 
             <td class="entry_units">
@@ -1188,8 +1180,8 @@
             </td>
 
             <td class="entry_notes">
-              Only effective if android.<wbr>control.<wbr>mode =
-          AUTO
+              <p>Only effective if android.<wbr>control.<wbr>mode =
+AUTO</p>
             </td>
 
             <td class="entry_tags">
@@ -1216,8 +1208,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of areas to use for
-          metering
+              <p>List of areas to use for
+metering</p>
             </td>
 
             <td class="entry_units">
@@ -1227,22 +1219,20 @@
             </td>
 
             <td class="entry_notes">
-              Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
-          xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
-          specified coordinates.<wbr>
-<br>
-<br>          The coordinate system is based on the active pixel array,<wbr>
-          with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
-          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
-          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
-          bottom-right pixel in the active pixel array.<wbr> The weight
-          should be nonnegative.<wbr>
-<br>
-<br>          If all regions have 0 weight,<wbr> then no specific metering area
-          needs to be used by the HAL.<wbr> If the metering region is
-          outside the current android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL
-          should ignore the sections outside the region and output the
-          used sections in the frame metadata
+              <p>Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
+xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
+specified coordinates.<wbr></p>
+<p>The coordinate system is based on the active pixel array,<wbr>
+with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
+(android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
+android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
+bottom-right pixel in the active pixel array.<wbr> The weight
+should be nonnegative.<wbr></p>
+<p>If all regions have 0 weight,<wbr> then no specific metering area
+needs to be used by the HAL.<wbr> If the metering region is
+outside the current android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL
+should ignore the sections outside the region and output the
+used sections in the frame metadata</p>
             </td>
 
             <td class="entry_tags">
@@ -1269,8 +1259,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Range over which fps can be adjusted to
-          maintain exposure
+              <p>Range over which fps can be adjusted to
+maintain exposure</p>
             </td>
 
             <td class="entry_units">
@@ -1281,8 +1271,8 @@
             </td>
 
             <td class="entry_notes">
-              Only constrains AE algorithm,<wbr> not manual control
-          of android.<wbr>sensor.<wbr>exposure<wbr>Time
+              <p>Only constrains AE algorithm,<wbr> not manual control
+of android.<wbr>sensor.<wbr>exposure<wbr>Time</p>
             </td>
 
             <td class="entry_tags">
@@ -1318,8 +1308,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether the HAL must trigger precapture
-          metering.<wbr>
+              <p>Whether the HAL must trigger precapture
+metering.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -1329,14 +1319,13 @@
             </td>
 
             <td class="entry_notes">
-              This entry is normally set to IDLE,<wbr> or is not
-          included at all in the request settings.<wbr> When included and
-          set to START,<wbr> the HAL must trigger the autoexposure
-          precapture metering sequence.<wbr>
-<br>
-<br>          The effect of AE precapture trigger depends on the current
-          AE mode and state; see the camera HAL device v3 header for
-          details.<wbr>
+              <p>This entry is normally set to IDLE,<wbr> or is not
+included at all in the request settings.<wbr> When included and
+set to START,<wbr> the HAL must trigger the autoexposure
+precapture metering sequence.<wbr></p>
+<p>The effect of AE precapture trigger depends on the current
+AE mode and state; see the camera HAL device v3 header for
+details.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -1364,7 +1353,8 @@
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
-                    <span class="entry_type_enum_notes">if lens is not fixed focus.<wbr>
+                    <span class="entry_type_enum_notes">
+            If lens is not fixed focus.<wbr>
 
             Use android.<wbr>lens.<wbr>minimum<wbr>Focus<wbr>Distance to determine if lens
             is fixed focus In this mode,<wbr> the lens does not move unless
@@ -1441,8 +1431,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether AF is currently enabled,<wbr> and what
-          mode it is set to
+              <p>Whether AF is currently enabled,<wbr> and what
+mode it is set to</p>
             </td>
 
             <td class="entry_units">
@@ -1478,8 +1468,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of areas to use for focus
-          estimation
+              <p>List of areas to use for focus
+estimation</p>
             </td>
 
             <td class="entry_units">
@@ -1489,22 +1479,20 @@
             </td>
 
             <td class="entry_notes">
-              Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
-          xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
-          specified coordinates.<wbr>
-<br>
-<br>          The coordinate system is based on the active pixel array,<wbr>
-          with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
-          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
-          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
-          bottom-right pixel in the active pixel array.<wbr> The weight
-          should be nonnegative.<wbr>
-<br>
-<br>          If all regions have 0 weight,<wbr> then no specific focus area
-          needs to be used by the HAL.<wbr> If the focusing region is
-          outside the current android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL
-          should ignore the sections outside the region and output the
-          used sections in the frame metadata
+              <p>Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
+xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
+specified coordinates.<wbr></p>
+<p>The coordinate system is based on the active pixel array,<wbr>
+with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
+(android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
+android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
+bottom-right pixel in the active pixel array.<wbr> The weight
+should be nonnegative.<wbr></p>
+<p>If all regions have 0 weight,<wbr> then no specific focus area
+needs to be used by the HAL.<wbr> If the focusing region is
+outside the current android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL
+should ignore the sections outside the region and output the
+used sections in the frame metadata</p>
             </td>
 
             <td class="entry_tags">
@@ -1542,7 +1530,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether the HAL must trigger autofocus.<wbr>
+              <p>Whether the HAL must trigger autofocus.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -1552,14 +1540,13 @@
             </td>
 
             <td class="entry_notes">
-              This entry is normally set to IDLE,<wbr> or is not
-          included at all in the request settings.<wbr>
-<br>
-<br>          When included and set to START,<wbr> the HAL must trigger the
-          autofocus algorithm.<wbr> The effect of AF trigger depends on the
-          current AF mode and state; see the camera HAL device v3
-          header for details.<wbr> When set to CANCEL,<wbr> the HAL must cancel
-          any active trigger,<wbr> and return to initial AF state.<wbr>
+              <p>This entry is normally set to IDLE,<wbr> or is not
+included at all in the request settings.<wbr></p>
+<p>When included and set to START,<wbr> the HAL must trigger the
+autofocus algorithm.<wbr> The effect of AF trigger depends on the
+current AF mode and state; see the camera HAL device v3
+header for details.<wbr> When set to CANCEL,<wbr> the HAL must cancel
+any active trigger,<wbr> and return to initial AF state.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -1596,8 +1583,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether AWB is currently locked to its
-          latest calculated values
+              <p>Whether AWB is currently locked to its
+latest calculated values</p>
             </td>
 
             <td class="entry_units">
@@ -1607,9 +1594,9 @@
             </td>
 
             <td class="entry_notes">
-              Note that AWB lock is only meaningful for AUTO
-          mode; in other modes,<wbr> AWB is already fixed to a specific
-          setting
+              <p>Note that AWB lock is only meaningful for AUTO
+mode; in other modes,<wbr> AWB is already fixed to a specific
+setting</p>
             </td>
 
             <td class="entry_tags">
@@ -1661,9 +1648,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether AWB is currently setting the color
-          transform fields,<wbr> and what its illumination target
-          is
+              <p>Whether AWB is currently setting the color
+transform fields,<wbr> and what its illumination target
+is</p>
             </td>
 
             <td class="entry_units">
@@ -1673,7 +1660,7 @@
             </td>
 
             <td class="entry_notes">
-              [BC - AWB lock,<wbr>AWB modes]
+              <p>[BC - AWB lock,<wbr>AWB modes]</p>
             </td>
 
             <td class="entry_tags">
@@ -1701,8 +1688,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of areas to use for illuminant
-          estimation
+              <p>List of areas to use for illuminant
+estimation</p>
             </td>
 
             <td class="entry_units">
@@ -1712,24 +1699,21 @@
             </td>
 
             <td class="entry_notes">
-              Only used in AUTO mode.<wbr>
-<br>
-<br>          Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
-          xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
-          specified coordinates.<wbr>
-<br>
-<br>          The coordinate system is based on the active pixel array,<wbr>
-          with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
-          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
-          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
-          bottom-right pixel in the active pixel array.<wbr> The weight
-          should be nonnegative.<wbr>
-<br>
-<br>          If all regions have 0 weight,<wbr> then no specific metering area
-          needs to be used by the HAL.<wbr> If the metering region is
-          outside the current android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL
-          should ignore the sections outside the region and output the
-          used sections in the frame metadata
+              <p>Only used in AUTO mode.<wbr></p>
+<p>Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
+xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
+specified coordinates.<wbr></p>
+<p>The coordinate system is based on the active pixel array,<wbr>
+with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
+(android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
+android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
+bottom-right pixel in the active pixel array.<wbr> The weight
+should be nonnegative.<wbr></p>
+<p>If all regions have 0 weight,<wbr> then no specific metering area
+needs to be used by the HAL.<wbr> If the metering region is
+outside the current android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL
+should ignore the sections outside the region and output the
+used sections in the frame metadata</p>
             </td>
 
             <td class="entry_tags">
@@ -1788,9 +1772,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Information to 3A routines about the purpose
-          of this capture,<wbr> to help decide optimal 3A
-          strategy
+              <p>Information to 3A routines about the purpose
+of this capture,<wbr> to help decide optimal 3A
+strategy</p>
             </td>
 
             <td class="entry_units">
@@ -1801,7 +1785,7 @@
             </td>
 
             <td class="entry_notes">
-              Only used if android.<wbr>control.<wbr>mode != OFF.<wbr>
+              <p>Only used if android.<wbr>control.<wbr>mode != OFF.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -1861,8 +1845,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether any special color effect is in use.<wbr>
-          Only used if android.<wbr>control.<wbr>mode != OFF
+              <p>Whether any special color effect is in use.<wbr>
+Only used if android.<wbr>control.<wbr>mode != OFF</p>
             </td>
 
             <td class="entry_units">
@@ -1920,8 +1904,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Overall mode of 3A control
-          routines
+              <p>Overall mode of 3A control
+routines</p>
             </td>
 
             <td class="entry_units">
@@ -2033,8 +2017,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Which scene mode is active when
-          android.<wbr>control.<wbr>mode = SCENE_<wbr>MODE
+              <p>Which scene mode is active when
+android.<wbr>control.<wbr>mode = SCENE_<wbr>MODE</p>
             </td>
 
             <td class="entry_units">
@@ -2075,8 +2059,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether video stabilization is
-          active
+              <p>Whether video stabilization is
+active</p>
             </td>
 
             <td class="entry_units">
@@ -2086,9 +2070,9 @@
             </td>
 
             <td class="entry_notes">
-              If enabled,<wbr> video stabilization can modify the
-          android.<wbr>scaler.<wbr>crop<wbr>Region to keep the video stream
-          stabilized
+              <p>If enabled,<wbr> video stabilization can modify the
+android.<wbr>scaler.<wbr>crop<wbr>Region to keep the video stream
+stabilized</p>
             </td>
 
             <td class="entry_tags">
@@ -2144,8 +2128,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Which set of antibanding modes are
-          supported
+              <p>Which set of antibanding modes are
+supported</p>
             </td>
 
             <td class="entry_units">
@@ -2179,8 +2163,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Which subset of AE modes is
-          supported
+              <p>Which subset of AE modes is
+supported</p>
             </td>
 
             <td class="entry_units">
@@ -2217,8 +2201,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of frame rate ranges supported by the
-          AE algorithm/<wbr>hardware
+              <p>List of frame rate ranges supported by the
+AE algorithm/<wbr>hardware</p>
             </td>
 
             <td class="entry_units">
@@ -2251,9 +2235,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Maximum and minimum exposure compensation
-          setting,<wbr> in counts of
-          android.<wbr>control.<wbr>ae<wbr>Compensation<wbr>Step<wbr>Size
+              <p>Maximum and minimum exposure compensation
+setting,<wbr> in counts of
+android.<wbr>control.<wbr>ae<wbr>Compensation<wbr>Step<wbr>Size</p>
             </td>
 
             <td class="entry_units">
@@ -2287,8 +2271,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Smallest step by which exposure compensation
-          can be changed
+              <p>Smallest step by which exposure compensation
+can be changed</p>
             </td>
 
             <td class="entry_units">
@@ -2326,8 +2310,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of AF modes that can be
-          selected
+              <p>List of AF modes that can be
+selected</p>
             </td>
 
             <td class="entry_units">
@@ -2366,8 +2350,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              what subset of the full color effect enum
-          list is supported
+              <p>what subset of the full color effect enum
+list is supported</p>
             </td>
 
             <td class="entry_units">
@@ -2405,8 +2389,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              what subset of the scene mode enum list is
-          supported.<wbr>
+              <p>what subset of the scene mode enum list is
+supported.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -2445,8 +2429,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of video stabilization modes that can
-          be supported
+              <p>List of video stabilization modes that can
+be supported</p>
             </td>
 
             <td class="entry_units">
@@ -2516,8 +2500,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              For AE,<wbr> AWB,<wbr> and AF,<wbr> how many individual
-          regions can be listed for metering?
+              <p>For AE,<wbr> AWB,<wbr> and AF,<wbr> how many individual
+regions can be listed for metering?</p>
             </td>
 
             <td class="entry_units">
@@ -2554,8 +2538,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of AE,<wbr> AWB,<wbr> and AF modes to use for
-          each available scene mode
+              <p>List of AE,<wbr> AWB,<wbr> and AF modes to use for
+each available scene mode</p>
             </td>
 
             <td class="entry_units">
@@ -2571,25 +2555,23 @@
             </td>
 
             <td class="entry_notes">
-              When a scene mode is enabled,<wbr> the HAL is expected
-          to override aeMode,<wbr> awbMode,<wbr> and afMode with its
-          preferred settings for that scene mode.<wbr>
-<br>
-<br>          To simplify communication with old camera API applications,<wbr>
-          the service wants this override list in the static metadata.<wbr>
-          The order of this list matches that of availableSceneModes,<wbr>
-          with 3 entires for each scene mode.<wbr>  The overrides listed
-          for SCENE_<wbr>MODE_<wbr>FACE_<wbr>PRIORITY are ignored,<wbr> since for that
-          mode,<wbr> the application-set aeMode,<wbr> awbMode,<wbr> and afMode are
-          used instead,<wbr> like they are when android.<wbr>control.<wbr>mode is
-          AUTO.<wbr>
-<br>
-<br>          It is recommended that for FACE_<wbr>PRIORITY,<wbr> the overrides
-          should be set to 0.<wbr> As an example,<wbr> if availableSceneModes is
-          { FACE_<wbr>PRIORITY,<wbr> ACTION,<wbr> NIGHT },<wbr> then the service expects
-          this field to have 9 entries; for example { 0 ,<wbr> 0,<wbr> 0,<wbr>
-          ON_<wbr>AUTO_<wbr>FLASH,<wbr> AUTO,<wbr> CONTINUOUS_<wbr>PICTURE,<wbr> ON_<wbr>AUTO_<wbr>FLASH,<wbr>
-          INCANDESCENT,<wbr> AUTO }
+              <p>When a scene mode is enabled,<wbr> the HAL is expected
+to override aeMode,<wbr> awbMode,<wbr> and afMode with its
+preferred settings for that scene mode.<wbr></p>
+<p>To simplify communication with old camera API applications,<wbr>
+the service wants this override list in the static metadata.<wbr>
+The order of this list matches that of availableSceneModes,<wbr>
+with 3 entires for each scene mode.<wbr>  The overrides listed
+for SCENE_<wbr>MODE_<wbr>FACE_<wbr>PRIORITY are ignored,<wbr> since for that
+mode,<wbr> the application-set aeMode,<wbr> awbMode,<wbr> and afMode are
+used instead,<wbr> like they are when android.<wbr>control.<wbr>mode is
+AUTO.<wbr></p>
+<p>It is recommended that for FACE_<wbr>PRIORITY,<wbr> the overrides
+should be set to 0.<wbr> As an example,<wbr> if availableSceneModes is
+{ FACE_<wbr>PRIORITY,<wbr> ACTION,<wbr> NIGHT },<wbr> then the service expects
+this field to have 9 entries; for example { 0 ,<wbr> 0,<wbr> 0,<wbr>
+ON_<wbr>AUTO_<wbr>FLASH,<wbr> AUTO,<wbr> CONTINUOUS_<wbr>PICTURE,<wbr> ON_<wbr>AUTO_<wbr>FLASH,<wbr>
+INCANDESCENT,<wbr> AUTO }</p>
             </td>
 
             <td class="entry_tags">
@@ -2640,8 +2622,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The ID sent with the latest
-          CAMERA2_<wbr>TRIGGER_<wbr>PRECAPTURE_<wbr>METERING call
+              <p>The ID sent with the latest
+CAMERA2_<wbr>TRIGGER_<wbr>PRECAPTURE_<wbr>METERING call</p>
             </td>
 
             <td class="entry_units">
@@ -2651,10 +2633,10 @@
             </td>
 
             <td class="entry_notes">
-              Must be 0 if no
-          CAMERA2_<wbr>TRIGGER_<wbr>PRECAPTURE_<wbr>METERING trigger received yet
-          by HAL.<wbr> Always updated even if AE algorithm ignores the
-          trigger
+              <p>Must be 0 if no
+CAMERA2_<wbr>TRIGGER_<wbr>PRECAPTURE_<wbr>METERING trigger received yet
+by HAL.<wbr> Always updated even if AE algorithm ignores the
+trigger</p>
             </td>
 
             <td class="entry_tags">
@@ -2678,8 +2660,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of areas to use for
-          metering
+              <p>List of areas to use for
+metering</p>
             </td>
 
             <td class="entry_units">
@@ -2689,22 +2671,20 @@
             </td>
 
             <td class="entry_notes">
-              Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
-          xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
-          specified coordinates.<wbr>
-<br>
-<br>          The coordinate system is based on the active pixel array,<wbr>
-          with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
-          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
-          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
-          bottom-right pixel in the active pixel array.<wbr> The weight
-          should be nonnegative.<wbr>
-<br>
-<br>          If all regions have 0 weight,<wbr> then no specific metering area
-          needs to be used by the HAL.<wbr> If the metering region is
-          outside the current android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL
-          should ignore the sections outside the region and output the
-          used sections in the frame metadata
+              <p>Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
+xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
+specified coordinates.<wbr></p>
+<p>The coordinate system is based on the active pixel array,<wbr>
+with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
+(android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
+android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
+bottom-right pixel in the active pixel array.<wbr> The weight
+should be nonnegative.<wbr></p>
+<p>If all regions have 0 weight,<wbr> then no specific metering area
+needs to be used by the HAL.<wbr> If the metering region is
+outside the current android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL
+should ignore the sections outside the region and output the
+used sections in the frame metadata</p>
             </td>
 
             <td class="entry_tags">
@@ -2764,7 +2744,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Current state of AE algorithm
+              <p>Current state of AE algorithm</p>
             </td>
 
             <td class="entry_units">
@@ -2774,9 +2754,9 @@
             </td>
 
             <td class="entry_notes">
-              Whenever the AE algorithm state changes,<wbr> a
-          MSG_<wbr>AUTOEXPOSURE notification must be send if a
-          notification callback is registered.<wbr>
+              <p>Whenever the AE algorithm state changes,<wbr> a
+MSG_<wbr>AUTOEXPOSURE notification must be send if a
+notification callback is registered.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -2801,7 +2781,8 @@
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
-                    <span class="entry_type_enum_notes">if lens is not fixed focus.<wbr>
+                    <span class="entry_type_enum_notes">
+            If lens is not fixed focus.<wbr>
 
             Use android.<wbr>lens.<wbr>minimum<wbr>Focus<wbr>Distance to determine if lens
             is fixed focus In this mode,<wbr> the lens does not move unless
@@ -2878,8 +2859,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether AF is currently enabled,<wbr> and what
-          mode it is set to
+              <p>Whether AF is currently enabled,<wbr> and what
+mode it is set to</p>
             </td>
 
             <td class="entry_units">
@@ -2915,8 +2896,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of areas to use for focus
-          estimation
+              <p>List of areas to use for focus
+estimation</p>
             </td>
 
             <td class="entry_units">
@@ -2926,22 +2907,20 @@
             </td>
 
             <td class="entry_notes">
-              Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
-          xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
-          specified coordinates.<wbr>
-<br>
-<br>          The coordinate system is based on the active pixel array,<wbr>
-          with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
-          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
-          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
-          bottom-right pixel in the active pixel array.<wbr> The weight
-          should be nonnegative.<wbr>
-<br>
-<br>          If all regions have 0 weight,<wbr> then no specific focus area
-          needs to be used by the HAL.<wbr> If the focusing region is
-          outside the current android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL
-          should ignore the sections outside the region and output the
-          used sections in the frame metadata
+              <p>Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
+xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
+specified coordinates.<wbr></p>
+<p>The coordinate system is based on the active pixel array,<wbr>
+with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
+(android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
+android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
+bottom-right pixel in the active pixel array.<wbr> The weight
+should be nonnegative.<wbr></p>
+<p>If all regions have 0 weight,<wbr> then no specific focus area
+needs to be used by the HAL.<wbr> If the focusing region is
+outside the current android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL
+should ignore the sections outside the region and output the
+used sections in the frame metadata</p>
             </td>
 
             <td class="entry_tags">
@@ -3008,7 +2987,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Current state of AF algorithm
+              <p>Current state of AF algorithm</p>
             </td>
 
             <td class="entry_units">
@@ -3018,9 +2997,9 @@
             </td>
 
             <td class="entry_notes">
-              Whenever the AF algorithm state changes,<wbr> a
-          MSG_<wbr>AUTOFOCUS notification must be send if a notification
-          callback is registered.<wbr>
+              <p>Whenever the AF algorithm state changes,<wbr> a
+MSG_<wbr>AUTOFOCUS notification must be send if a notification
+callback is registered.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -3040,8 +3019,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The ID sent with the latest
-          CAMERA2_<wbr>TRIGGER_<wbr>AUTOFOCUS call
+              <p>The ID sent with the latest
+CAMERA2_<wbr>TRIGGER_<wbr>AUTOFOCUS call</p>
             </td>
 
             <td class="entry_units">
@@ -3051,9 +3030,9 @@
             </td>
 
             <td class="entry_notes">
-              Must be 0 if no CAMERA2_<wbr>TRIGGER_<wbr>AUTOFOCUS trigger
-          received yet by HAL.<wbr> Always updated even if AF algorithm
-          ignores the trigger
+              <p>Must be 0 if no CAMERA2_<wbr>TRIGGER_<wbr>AUTOFOCUS trigger
+received yet by HAL.<wbr> Always updated even if AF algorithm
+ignores the trigger</p>
             </td>
 
             <td class="entry_tags">
@@ -3102,9 +3081,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether AWB is currently setting the color
-          transform fields,<wbr> and what its illumination target
-          is
+              <p>Whether AWB is currently setting the color
+transform fields,<wbr> and what its illumination target
+is</p>
             </td>
 
             <td class="entry_units">
@@ -3114,7 +3093,7 @@
             </td>
 
             <td class="entry_notes">
-              [BC - AWB lock,<wbr>AWB modes]
+              <p>[BC - AWB lock,<wbr>AWB modes]</p>
             </td>
 
             <td class="entry_tags">
@@ -3142,8 +3121,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of areas to use for illuminant
-          estimation
+              <p>List of areas to use for illuminant
+estimation</p>
             </td>
 
             <td class="entry_units">
@@ -3153,24 +3132,21 @@
             </td>
 
             <td class="entry_notes">
-              Only used in AUTO mode.<wbr>
-<br>
-<br>          Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
-          xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
-          specified coordinates.<wbr>
-<br>
-<br>          The coordinate system is based on the active pixel array,<wbr>
-          with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
-          (android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
-          android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
-          bottom-right pixel in the active pixel array.<wbr> The weight
-          should be nonnegative.<wbr>
-<br>
-<br>          If all regions have 0 weight,<wbr> then no specific metering area
-          needs to be used by the HAL.<wbr> If the metering region is
-          outside the current android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL
-          should ignore the sections outside the region and output the
-          used sections in the frame metadata
+              <p>Only used in AUTO mode.<wbr></p>
+<p>Each area is a rectangle plus weight: xmin,<wbr> ymin,<wbr>
+xmax,<wbr> ymax,<wbr> weight.<wbr> The rectangle is defined inclusive of the
+specified coordinates.<wbr></p>
+<p>The coordinate system is based on the active pixel array,<wbr>
+with (0,<wbr>0) being the top-left pixel in the active pixel array,<wbr> and
+(android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>width - 1,<wbr>
+android.<wbr>sensor.<wbr>info.<wbr>active<wbr>Array<wbr>Size.<wbr>height - 1) being the
+bottom-right pixel in the active pixel array.<wbr> The weight
+should be nonnegative.<wbr></p>
+<p>If all regions have 0 weight,<wbr> then no specific metering area
+needs to be used by the HAL.<wbr> If the metering region is
+outside the current android.<wbr>scaler.<wbr>crop<wbr>Region,<wbr> the HAL
+should ignore the sections outside the region and output the
+used sections in the frame metadata</p>
             </td>
 
             <td class="entry_tags">
@@ -3215,7 +3191,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Current state of AWB algorithm
+              <p>Current state of AWB algorithm</p>
             </td>
 
             <td class="entry_units">
@@ -3225,9 +3201,9 @@
             </td>
 
             <td class="entry_notes">
-              Whenever the AWB algorithm state changes,<wbr> a
-          MSG_<wbr>AUTOWHITEBALANCE notification must be send if a
-          notification callback is registered.<wbr>
+              <p>Whenever the AWB algorithm state changes,<wbr> a
+MSG_<wbr>AUTOWHITEBALANCE notification must be send if a
+notification callback is registered.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -3272,8 +3248,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Overall mode of 3A control
-          routines
+              <p>Overall mode of 3A control
+routines</p>
             </td>
 
             <td class="entry_units">
@@ -3351,8 +3327,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Controls the quality of the demosaicing
-          processing
+              <p>Controls the quality of the demosaicing
+processing</p>
             </td>
 
             <td class="entry_units">
@@ -3433,8 +3409,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Operation mode for edge
-          enhancement
+              <p>Operation mode for edge
+enhancement</p>
             </td>
 
             <td class="entry_units">
@@ -3463,8 +3439,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Control the amount of edge enhancement
-          applied to the images
+              <p>Control the amount of edge enhancement
+applied to the images</p>
             </td>
 
             <td class="entry_units">
@@ -3538,8 +3514,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Operation mode for edge
-          enhancement
+              <p>Operation mode for edge
+enhancement</p>
             </td>
 
             <td class="entry_units">
@@ -3601,7 +3577,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Power for flash firing/<wbr>torch
+              <p>Power for flash firing/<wbr>torch</p>
             </td>
 
             <td class="entry_units">
@@ -3613,9 +3589,9 @@
             </td>
 
             <td class="entry_notes">
-              Power for snapshot may use a different scale than
-          for torch mode.<wbr> Only one entry for torch mode will be
-          used
+              <p>Power for snapshot may use a different scale than
+for torch mode.<wbr> Only one entry for torch mode will be
+used</p>
             </td>
 
             <td class="entry_tags">
@@ -3638,8 +3614,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Firing time of flash relative to start of
-          exposure
+              <p>Firing time of flash relative to start of
+exposure</p>
             </td>
 
             <td class="entry_units">
@@ -3651,8 +3627,8 @@
             </td>
 
             <td class="entry_notes">
-              Clamped to (0,<wbr> exposure time - flash
-          duration).<wbr>
+              <p>Clamped to (0,<wbr> exposure time - flash
+duration).<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -3694,7 +3670,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Select flash operation mode
+              <p>Select flash operation mode</p>
             </td>
 
             <td class="entry_units">
@@ -3756,8 +3732,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether this camera has a
-            flash
+              <p>Whether this camera has a
+flash</p>
             </td>
 
             <td class="entry_units">
@@ -3768,8 +3744,8 @@
             </td>
 
             <td class="entry_notes">
-              If no flash,<wbr> none of the flash controls do
-            anything.<wbr> All other metadata should return 0
+              <p>If no flash,<wbr> none of the flash controls do
+anything.<wbr> All other metadata should return 0</p>
             </td>
 
             <td class="entry_tags">
@@ -3792,8 +3768,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Time taken before flash can fire
-            again
+              <p>Time taken before flash can fire
+again</p>
             </td>
 
             <td class="entry_units">
@@ -3805,8 +3781,8 @@
             </td>
 
             <td class="entry_notes">
-              1 second too long/<wbr>too short for recharge? Should
-            this be power-dependent?
+              <p>1 second too long/<wbr>too short for recharge? Should
+this be power-dependent?</p>
             </td>
 
             <td class="entry_tags">
@@ -3832,8 +3808,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The x,<wbr>y whitepoint of the
-          flash
+              <p>The x,<wbr>y whitepoint of the
+flash</p>
             </td>
 
             <td class="entry_units">
@@ -3867,8 +3843,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Max energy output of the flash for a full
-          power single flash
+              <p>Max energy output of the flash for a full
+power single flash</p>
             </td>
 
             <td class="entry_units">
@@ -3930,7 +3906,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Power for flash firing/<wbr>torch
+              <p>Power for flash firing/<wbr>torch</p>
             </td>
 
             <td class="entry_units">
@@ -3942,9 +3918,9 @@
             </td>
 
             <td class="entry_notes">
-              Power for snapshot may use a different scale than
-          for torch mode.<wbr> Only one entry for torch mode will be
-          used
+              <p>Power for snapshot may use a different scale than
+for torch mode.<wbr> Only one entry for torch mode will be
+used</p>
             </td>
 
             <td class="entry_tags">
@@ -3967,8 +3943,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Firing time of flash relative to start of
-          exposure
+              <p>Firing time of flash relative to start of
+exposure</p>
             </td>
 
             <td class="entry_units">
@@ -3980,8 +3956,8 @@
             </td>
 
             <td class="entry_notes">
-              Clamped to (0,<wbr> exposure time - flash
-          duration).<wbr>
+              <p>Clamped to (0,<wbr> exposure time - flash
+duration).<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -4023,7 +3999,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Select flash operation mode
+              <p>Select flash operation mode</p>
             </td>
 
             <td class="entry_units">
@@ -4076,8 +4052,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Current state of the flash
-          unit
+              <p>Current state of the flash
+unit</p>
             </td>
 
             <td class="entry_units">
@@ -4156,8 +4132,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Operating mode of geometric
-          correction
+              <p>Operating mode of geometric
+correction</p>
             </td>
 
             <td class="entry_units">
@@ -4186,8 +4162,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Control the amount of shading correction
-          applied to the images
+              <p>Control the amount of shading correction
+applied to the images</p>
             </td>
 
             <td class="entry_units">
@@ -4271,8 +4247,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Set operational mode for hot pixel
-          correction
+              <p>Set operational mode for hot pixel
+correction</p>
             </td>
 
             <td class="entry_units">
@@ -4339,8 +4315,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Location of hot/<wbr>defective pixels on
-            sensor
+              <p>Location of hot/<wbr>defective pixels on
+sensor</p>
             </td>
 
             <td class="entry_units">
@@ -4420,8 +4396,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Set operational mode for hot pixel
-          correction
+              <p>Set operational mode for hot pixel
+correction</p>
             </td>
 
             <td class="entry_units">
@@ -4491,8 +4467,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              GPS coordinates to include in output JPEG
-          EXIF
+              <p>GPS coordinates to include in output JPEG
+EXIF</p>
             </td>
 
             <td class="entry_units">
@@ -4525,8 +4501,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              32 characters describing GPS algorithm to
-          include in EXIF
+              <p>32 characters describing GPS algorithm to
+include in EXIF</p>
             </td>
 
             <td class="entry_units">
@@ -4559,8 +4535,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Time GPS fix was made to include in
-          EXIF
+              <p>Time GPS fix was made to include in
+EXIF</p>
             </td>
 
             <td class="entry_units">
@@ -4593,8 +4569,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Orientation of JPEG image to
-          write
+              <p>Orientation of JPEG image to
+write</p>
             </td>
 
             <td class="entry_units">
@@ -4628,8 +4604,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Compression quality of the final JPEG
-          image
+              <p>Compression quality of the final JPEG
+image</p>
             </td>
 
             <td class="entry_units">
@@ -4640,7 +4616,7 @@
             </td>
 
             <td class="entry_notes">
-              85-95 is typical usage range
+              <p>85-95 is typical usage range</p>
             </td>
 
             <td class="entry_tags">
@@ -4663,8 +4639,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Compression quality of JPEG
-          thumbnail
+              <p>Compression quality of JPEG
+thumbnail</p>
             </td>
 
             <td class="entry_units">
@@ -4701,8 +4677,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Resolution of embedded JPEG
-          thumbnail
+              <p>Resolution of embedded JPEG
+thumbnail</p>
             </td>
 
             <td class="entry_units">
@@ -4768,8 +4744,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Supported resolutions for the JPEG
-          thumbnail
+              <p>Supported resolutions for the JPEG
+thumbnail</p>
             </td>
 
             <td class="entry_units">
@@ -4803,8 +4779,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Maximum size in bytes for the compressed
-          JPEG buffer
+              <p>Maximum size in bytes for the compressed
+JPEG buffer</p>
             </td>
 
             <td class="entry_units">
@@ -4816,8 +4792,8 @@
             </td>
 
             <td class="entry_notes">
-              This is used for sizing the gralloc buffers for
-          JPEG
+              <p>This is used for sizing the gralloc buffers for
+JPEG</p>
             </td>
 
             <td class="entry_tags">
@@ -4870,8 +4846,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              GPS coordinates to include in output JPEG
-          EXIF
+              <p>GPS coordinates to include in output JPEG
+EXIF</p>
             </td>
 
             <td class="entry_units">
@@ -4904,8 +4880,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              32 characters describing GPS algorithm to
-          include in EXIF
+              <p>32 characters describing GPS algorithm to
+include in EXIF</p>
             </td>
 
             <td class="entry_units">
@@ -4938,8 +4914,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Time GPS fix was made to include in
-          EXIF
+              <p>Time GPS fix was made to include in
+EXIF</p>
             </td>
 
             <td class="entry_units">
@@ -4972,8 +4948,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Orientation of JPEG image to
-          write
+              <p>Orientation of JPEG image to
+write</p>
             </td>
 
             <td class="entry_units">
@@ -5007,8 +4983,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Compression quality of the final JPEG
-          image
+              <p>Compression quality of the final JPEG
+image</p>
             </td>
 
             <td class="entry_units">
@@ -5019,7 +4995,7 @@
             </td>
 
             <td class="entry_notes">
-              85-95 is typical usage range
+              <p>85-95 is typical usage range</p>
             </td>
 
             <td class="entry_tags">
@@ -5042,8 +5018,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The size of the compressed JPEG image,<wbr> in
-          bytes
+              <p>The size of the compressed JPEG image,<wbr> in
+bytes</p>
             </td>
 
             <td class="entry_units">
@@ -5054,15 +5030,14 @@
             </td>
 
             <td class="entry_notes">
-              If no JPEG output is produced for the request,<wbr>
-          this must be 0.<wbr>
-<br>
-<br>          Otherwise,<wbr> this describes the real size of the compressed
-          JPEG image placed in the output stream.<wbr>  More specifically,<wbr>
-          if android.<wbr>jpeg.<wbr>max<wbr>Size = 1000000,<wbr> and a specific capture
-          has android.<wbr>jpeg.<wbr>size = 500000,<wbr> then the output buffer from
-          the JPEG stream will be 1000000 bytes,<wbr> of which the first
-          500000 make up the real data.<wbr>
+              <p>If no JPEG output is produced for the request,<wbr>
+this must be 0.<wbr></p>
+<p>Otherwise,<wbr> this describes the real size of the compressed
+JPEG image placed in the output stream.<wbr>  More specifically,<wbr>
+if android.<wbr>jpeg.<wbr>max<wbr>Size = 1000000,<wbr> and a specific capture
+has android.<wbr>jpeg.<wbr>size = 500000,<wbr> then the output buffer from
+the JPEG stream will be 1000000 bytes,<wbr> of which the first
+500000 make up the real data.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -5082,8 +5057,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Compression quality of JPEG
-          thumbnail
+              <p>Compression quality of JPEG
+thumbnail</p>
             </td>
 
             <td class="entry_units">
@@ -5120,8 +5095,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Resolution of embedded JPEG
-          thumbnail
+              <p>Resolution of embedded JPEG
+thumbnail</p>
             </td>
 
             <td class="entry_units">
@@ -5187,7 +5162,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Size of the lens aperture
+              <p>Size of the lens aperture</p>
             </td>
 
             <td class="entry_units">
@@ -5199,8 +5174,8 @@
             </td>
 
             <td class="entry_notes">
-              Will not be supported on most devices.<wbr> Can only
-          pick from supported list
+              <p>Will not be supported on most devices.<wbr> Can only
+pick from supported list</p>
             </td>
 
             <td class="entry_tags">
@@ -5223,8 +5198,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              State of lens neutral density
-          filter(s)
+              <p>State of lens neutral density
+filter(s)</p>
             </td>
 
             <td class="entry_units">
@@ -5236,8 +5211,8 @@
             </td>
 
             <td class="entry_notes">
-              Will not be supported on most devices.<wbr> Can only
-          pick from supported list
+              <p>Will not be supported on most devices.<wbr> Can only
+pick from supported list</p>
             </td>
 
             <td class="entry_tags">
@@ -5260,7 +5235,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Lens optical zoom setting
+              <p>Lens optical zoom setting</p>
             </td>
 
             <td class="entry_units">
@@ -5272,7 +5247,7 @@
             </td>
 
             <td class="entry_notes">
-              Will not be supported on most devices.<wbr>
+              <p>Will not be supported on most devices.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -5295,8 +5270,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Distance to plane of sharpest focus,<wbr>
-          measured from frontmost surface of the lens
+              <p>Distance to plane of sharpest focus,<wbr>
+measured from frontmost surface of the lens</p>
             </td>
 
             <td class="entry_units">
@@ -5308,8 +5283,8 @@
             </td>
 
             <td class="entry_notes">
-              0 = infinity focus.<wbr> Used value should be clamped
-          to (0,<wbr>minimum focus distance)
+              <p>0 = infinity focus.<wbr> Used value should be clamped
+to (0,<wbr>minimum focus distance)</p>
             </td>
 
             <td class="entry_tags">
@@ -5342,8 +5317,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether optical image stabilization is
-          enabled.<wbr>
+              <p>Whether optical image stabilization is
+enabled.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -5354,7 +5329,7 @@
             </td>
 
             <td class="entry_notes">
-              Will not be supported on most devices.<wbr>
+              <p>Will not be supported on most devices.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -5411,8 +5386,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of supported aperture
-            values
+              <p>List of supported aperture
+values</p>
             </td>
 
             <td class="entry_units">
@@ -5423,8 +5398,8 @@
             </td>
 
             <td class="entry_notes">
-              If variable aperture not available,<wbr> only setting
-            should be for the fixed aperture
+              <p>If variable aperture not available,<wbr> only setting
+should be for the fixed aperture</p>
             </td>
 
             <td class="entry_tags">
@@ -5451,8 +5426,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of supported ND filter
-            values
+              <p>List of supported ND filter
+values</p>
             </td>
 
             <td class="entry_units">
@@ -5463,10 +5438,10 @@
             </td>
 
             <td class="entry_notes">
-              If not available,<wbr> only setting is 0.<wbr> Otherwise,<wbr>
-            lists the available exposure index values for dimming
-            (2 would mean the filter is set to reduce incoming
-            light by two stops)
+              <p>If not available,<wbr> only setting is 0.<wbr> Otherwise,<wbr>
+lists the available exposure index values for dimming
+(2 would mean the filter is set to reduce incoming
+light by two stops)</p>
             </td>
 
             <td class="entry_tags">
@@ -5494,9 +5469,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              If fitted with optical zoom,<wbr> what focal
-            lengths are available.<wbr> If not,<wbr> the static focal
-            length
+              <p>If fitted with optical zoom,<wbr> what focal
+lengths are available.<wbr> If not,<wbr> the static focal
+length</p>
             </td>
 
             <td class="entry_units">
@@ -5507,8 +5482,8 @@
             </td>
 
             <td class="entry_notes">
-              If optical zoom not supported,<wbr> only one value
-            should be reported
+              <p>If optical zoom not supported,<wbr> only one value
+should be reported</p>
             </td>
 
             <td class="entry_tags">
@@ -5537,8 +5512,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of supported optical image
-            stabilization modes
+              <p>List of supported optical image
+stabilization modes</p>
             </td>
 
             <td class="entry_units">
@@ -5575,9 +5550,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              A low-resolution map for correction of
-            geometric distortions and chromatic aberrations,<wbr> per
-            color channel
+              <p>A low-resolution map for correction of
+geometric distortions and chromatic aberrations,<wbr> per
+color channel</p>
             </td>
 
             <td class="entry_units">
@@ -5588,11 +5563,11 @@
             </td>
 
             <td class="entry_notes">
-              [DNG wants a function instead].<wbr> What's easiest
-            for implementers? With an array size (M,<wbr> N),<wbr> entry (i,<wbr>
-            j) provides the destination for pixel (i/<wbr>(M-1) * width,<wbr>
-            j/<wbr>(N-1) * height).<wbr> Data is row-major,<wbr> with each array
-            entry being ( (X,<wbr> Y)_<wbr>r,<wbr> (X,<wbr> Y)_<wbr>g,<wbr> (X,<wbr> Y)_<wbr>b ) )
+              <p>[DNG wants a function instead].<wbr> What's easiest
+for implementers? With an array size (M,<wbr> N),<wbr> entry (i,<wbr>
+j) provides the destination for pixel (i/<wbr>(M-1) * width,<wbr>
+j/<wbr>(N-1) * height).<wbr> Data is row-major,<wbr> with each array
+entry being ( (X,<wbr> Y)_<wbr>r,<wbr> (X,<wbr> Y)_<wbr>g,<wbr> (X,<wbr> Y)_<wbr>b ) )</p>
             </td>
 
             <td class="entry_tags">
@@ -5620,8 +5595,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Dimensions of geometric correction
-            map
+              <p>Dimensions of geometric correction
+map</p>
             </td>
 
             <td class="entry_units">
@@ -5654,8 +5629,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Hyperfocal distance for this lens; set to
-            0 if fixed focus
+              <p>Hyperfocal distance for this lens; set to
+0 if fixed focus</p>
             </td>
 
             <td class="entry_units">
@@ -5667,8 +5642,8 @@
             </td>
 
             <td class="entry_notes">
-              The hyperfocal distance is used for the old
-            API's 'fixed' setting
+              <p>The hyperfocal distance is used for the old
+API's 'fixed' setting</p>
             </td>
 
             <td class="entry_tags">
@@ -5691,8 +5666,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Shortest distance from frontmost surface
-            of the lens that can be focused correctly
+              <p>Shortest distance from frontmost surface
+of the lens that can be focused correctly</p>
             </td>
 
             <td class="entry_units">
@@ -5704,8 +5679,8 @@
             </td>
 
             <td class="entry_notes">
-              If the lens is fixed-focus,<wbr> this should be
-            0
+              <p>If the lens is fixed-focus,<wbr> this should be
+0</p>
             </td>
 
             <td class="entry_tags">
@@ -5733,8 +5708,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Dimensions of lens shading
-            map
+              <p>Dimensions of lens shading
+map</p>
             </td>
 
             <td class="entry_units">
@@ -5778,8 +5753,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Direction the camera faces relative to
-          device screen
+              <p>Direction the camera faces relative to
+device screen</p>
             </td>
 
             <td class="entry_units">
@@ -5813,8 +5788,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Relative angle of camera optical axis to the
-          perpendicular axis from the display
+              <p>Relative angle of camera optical axis to the
+perpendicular axis from the display</p>
             </td>
 
             <td class="entry_units">
@@ -5825,19 +5800,15 @@
             </td>
 
             <td class="entry_notes">
-              Examples:
-<br>
-<br>          (0,<wbr>0) means that the camera optical axis
-          is perpendicular to the display surface;
-<br>
-<br>          (45,<wbr>0) means that the camera points 45 degrees up when
-          device is held upright;
-<br>
-<br>          (45,<wbr>90) means the camera points 45 degrees to the right when
-          the device is held upright.<wbr>
-<br>
-<br>          Use FACING field to determine perpendicular outgoing
-          direction
+              <p>Examples:</p>
+<p>(0,<wbr>0) means that the camera optical axis
+is perpendicular to the display surface;</p>
+<p>(45,<wbr>0) means that the camera points 45 degrees up when
+device is held upright;</p>
+<p>(45,<wbr>90) means the camera points 45 degrees to the right when
+the device is held upright.<wbr></p>
+<p>Use FACING field to determine perpendicular outgoing
+direction</p>
             </td>
 
             <td class="entry_tags">
@@ -5865,8 +5836,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Coordinates of camera optical axis on
-          device
+              <p>Coordinates of camera optical axis on
+device</p>
             </td>
 
             <td class="entry_units">
@@ -5926,7 +5897,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Size of the lens aperture
+              <p>Size of the lens aperture</p>
             </td>
 
             <td class="entry_units">
@@ -5938,8 +5909,8 @@
             </td>
 
             <td class="entry_notes">
-              Will not be supported on most devices.<wbr> Can only
-          pick from supported list
+              <p>Will not be supported on most devices.<wbr> Can only
+pick from supported list</p>
             </td>
 
             <td class="entry_tags">
@@ -5962,8 +5933,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              State of lens neutral density
-          filter(s)
+              <p>State of lens neutral density
+filter(s)</p>
             </td>
 
             <td class="entry_units">
@@ -5975,8 +5946,8 @@
             </td>
 
             <td class="entry_notes">
-              Will not be supported on most devices.<wbr> Can only
-          pick from supported list
+              <p>Will not be supported on most devices.<wbr> Can only
+pick from supported list</p>
             </td>
 
             <td class="entry_tags">
@@ -5999,7 +5970,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Lens optical zoom setting
+              <p>Lens optical zoom setting</p>
             </td>
 
             <td class="entry_units">
@@ -6011,7 +5982,7 @@
             </td>
 
             <td class="entry_notes">
-              Will not be supported on most devices.<wbr>
+              <p>Will not be supported on most devices.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -6034,8 +6005,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Distance to plane of sharpest focus,<wbr>
-          measured from frontmost surface of the lens
+              <p>Distance to plane of sharpest focus,<wbr>
+measured from frontmost surface of the lens</p>
             </td>
 
             <td class="entry_units">
@@ -6047,7 +6018,7 @@
             </td>
 
             <td class="entry_notes">
-              Should be zero for fixed-focus cameras
+              <p>Should be zero for fixed-focus cameras</p>
             </td>
 
             <td class="entry_tags">
@@ -6075,8 +6046,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The range of scene distances that are in
-          sharp focus (depth of field)
+              <p>The range of scene distances that are in
+sharp focus (depth of field)</p>
             </td>
 
             <td class="entry_units">
@@ -6089,8 +6060,8 @@
             </td>
 
             <td class="entry_notes">
-              If variable focus not supported,<wbr> can still report
-          fixed depth of field range
+              <p>If variable focus not supported,<wbr> can still report
+fixed depth of field range</p>
             </td>
 
             <td class="entry_tags">
@@ -6122,8 +6093,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether optical image stabilization is
-          enabled.<wbr>
+              <p>Whether optical image stabilization is
+enabled.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -6134,7 +6105,7 @@
             </td>
 
             <td class="entry_notes">
-              Will not be supported on most devices.<wbr>
+              <p>Will not be supported on most devices.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -6165,7 +6136,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Current lens status
+              <p>Current lens status</p>
             </td>
 
             <td class="entry_units">
@@ -6246,8 +6217,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Mode of operation for the noise reduction
-          algorithm
+              <p>Mode of operation for the noise reduction
+algorithm</p>
             </td>
 
             <td class="entry_units">
@@ -6280,8 +6251,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Control the amount of noise reduction
-          applied to the images
+              <p>Control the amount of noise reduction
+applied to the images</p>
             </td>
 
             <td class="entry_units">
@@ -6356,8 +6327,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Mode of operation for the noise reduction
-          algorithm
+              <p>Mode of operation for the noise reduction
+algorithm</p>
             </td>
 
             <td class="entry_units">
@@ -6423,10 +6394,10 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              If set to 1,<wbr> the camera service does not
-          scale 'normalized' coordinates with respect to the crop
-          region.<wbr> This applies to metering input (a{e,<wbr>f,<wbr>wb}Region
-          and output (face rectangles).<wbr>
+              <p>If set to 1,<wbr> the camera service does not
+scale 'normalized' coordinates with respect to the crop
+region.<wbr> This applies to metering input (a{e,<wbr>f,<wbr>wb}Region
+and output (face rectangles).<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -6436,14 +6407,13 @@
             </td>
 
             <td class="entry_notes">
-              Normalized coordinates refer to those in the
-          (-1000,<wbr>1000) range mentioned in the
-          android.<wbr>hardware.<wbr><wbr>Camera API.<wbr>
-<br>
-<br>          HAL implementations should instead always use and emit
-          sensor array-relative coordinates for all region data.<wbr> Does
-          not need to be listed in static metadata.<wbr> Support will be
-          removed in future versions of camera service.<wbr>
+              <p>Normalized coordinates refer to those in the
+(-1000,<wbr>1000) range mentioned in the
+android.<wbr>hardware.<wbr><wbr>Camera API.<wbr></p>
+<p>HAL implementations should instead always use and emit
+sensor array-relative coordinates for all region data.<wbr> Does
+not need to be listed in static metadata.<wbr> Support will be
+removed in future versions of camera service.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -6463,9 +6433,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              If set to 1,<wbr> then the camera service always
-          switches to FOCUS_<wbr>MODE_<wbr>AUTO before issuing a AF
-          trigger.<wbr>
+              <p>If set to 1,<wbr> then the camera service always
+switches to FOCUS_<wbr>MODE_<wbr>AUTO before issuing a AF
+trigger.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -6475,11 +6445,11 @@
             </td>
 
             <td class="entry_notes">
-              HAL implementations should implement AF trigger
-          modes for AUTO,<wbr> MACRO,<wbr> CONTINUOUS_<wbr>FOCUS,<wbr> and
-          CONTINUOUS_<wbr>PICTURE modes instead of using this flag.<wbr> Does
-          not need to be listed in static metadata.<wbr> Support will be
-          removed in future versions of camera service
+              <p>HAL implementations should implement AF trigger
+modes for AUTO,<wbr> MACRO,<wbr> CONTINUOUS_<wbr>FOCUS,<wbr> and
+CONTINUOUS_<wbr>PICTURE modes instead of using this flag.<wbr> Does
+not need to be listed in static metadata.<wbr> Support will be
+removed in future versions of camera service</p>
             </td>
 
             <td class="entry_tags">
@@ -6499,10 +6469,10 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              If set to 1,<wbr> the camera service uses
-          CAMERA2_<wbr>PIXEL_<wbr>FORMAT_<wbr>ZSL instead of
-          HAL_<wbr>PIXEL_<wbr>FORMAT_<wbr>IMPLEMENTATION_<wbr>DEFINED for the zero
-          shutter lag stream
+              <p>If set to 1,<wbr> the camera service uses
+CAMERA2_<wbr>PIXEL_<wbr>FORMAT_<wbr>ZSL instead of
+HAL_<wbr>PIXEL_<wbr>FORMAT_<wbr>IMPLEMENTATION_<wbr>DEFINED for the zero
+shutter lag stream</p>
             </td>
 
             <td class="entry_units">
@@ -6512,12 +6482,12 @@
             </td>
 
             <td class="entry_notes">
-              HAL implementations should use gralloc usage flags
-          to determine that a stream will be used for
-          zero-shutter-lag,<wbr> instead of relying on an explicit
-          format setting.<wbr> Does not need to be listed in static
-          metadata.<wbr> Support will be removed in future versions of
-          camera service.<wbr>
+              <p>HAL implementations should use gralloc usage flags
+to determine that a stream will be used for
+zero-shutter-lag,<wbr> instead of relying on an explicit
+format setting.<wbr> Does not need to be listed in static
+metadata.<wbr> Support will be removed in future versions of
+camera service.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -6537,10 +6507,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              If set to 1,<wbr> the HAL will always split result
-          metadata for a single capture into multiple buffers,<wbr>
-          returned using multiple process_<wbr>capture_<wbr>result calls.<wbr>
-          
+              <p>If set to 1,<wbr> the HAL will always split result
+metadata for a single capture into multiple buffers,<wbr>
+returned using multiple process_<wbr>capture_<wbr>result calls.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -6550,12 +6519,11 @@
             </td>
 
             <td class="entry_notes">
-              Does not need to be listed in static
-          metadata.<wbr> Support for partial results will be reworked in
-          future versions of camera service.<wbr> This quirk will stop
-          working at that point; DO NOT USE without careful
-          consideration of future support.<wbr>
-          
+              <p>Does not need to be listed in static
+metadata.<wbr> Support for partial results will be reworked in
+future versions of camera service.<wbr> This quirk will stop
+working at that point; DO NOT USE without careful
+consideration of future support.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -6617,10 +6585,10 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether a result given to the framework is the
-          final one for the capture,<wbr> or only a partial that contains a
-          subset of the full set of dynamic metadata
-          values.<wbr>
+              <p>Whether a result given to the framework is the
+final one for the capture,<wbr> or only a partial that contains a
+subset of the full set of dynamic metadata
+values.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -6631,16 +6599,15 @@
             </td>
 
             <td class="entry_notes">
-              The entries in the result metadata buffers for a
-          single capture may not overlap,<wbr> except for this entry.<wbr> The
-          FINAL buffers must retain FIFO ordering relative to the
-          requests that generate them,<wbr> so the FINAL buffer for frame 3 must
-          always be sent to the framework after the FINAL buffer for frame 2,<wbr> and
-          before the FINAL buffer for frame 4.<wbr> PARTIAL buffers may be returned
-          in any order relative to other frames,<wbr> but all PARTIAL buffers for a given
-          capture must arrive before the FINAL buffer for that capture.<wbr> This entry may
-          only be used by the HAL if quirks.<wbr>usePartialResult is set to 1.<wbr>
-          
+              <p>The entries in the result metadata buffers for a
+single capture may not overlap,<wbr> except for this entry.<wbr> The
+FINAL buffers must retain FIFO ordering relative to the
+requests that generate them,<wbr> so the FINAL buffer for frame 3 must
+always be sent to the framework after the FINAL buffer for frame 2,<wbr> and
+before the FINAL buffer for frame 4.<wbr> PARTIAL buffers may be returned
+in any order relative to other frames,<wbr> but all PARTIAL buffers for a given
+capture must arrive before the FINAL buffer for that capture.<wbr> This entry may
+only be used by the HAL if quirks.<wbr>usePartialResult is set to 1.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -6693,11 +6660,10 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              A frame counter set by the framework.<wbr> Must
-          be maintained unchanged in output frame.<wbr> This value monotonically
-          increases with every new result (that is,<wbr> each new result has a unique
-          frameCount value).<wbr>
-          
+              <p>A frame counter set by the framework.<wbr> Must
+be maintained unchanged in output frame.<wbr> This value monotonically
+increases with every new result (that is,<wbr> each new result has a unique
+frameCount value).<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -6728,9 +6694,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              An application-specified ID for the current
-          request.<wbr> Must be maintained unchanged in output
-          frame
+              <p>An application-specified ID for the current
+request.<wbr> Must be maintained unchanged in output
+frame</p>
             </td>
 
             <td class="entry_units">
@@ -6768,8 +6734,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List which camera reprocess stream is used
-          for the source of reprocessing data.<wbr>
+              <p>List which camera reprocess stream is used
+for the source of reprocessing data.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -6786,8 +6752,8 @@
             </td>
 
             <td class="entry_notes">
-              Only meaningful when android.<wbr>request.<wbr>type ==
-          REPROCESS.<wbr> Ignored otherwise
+              <p>Only meaningful when android.<wbr>request.<wbr>type ==
+REPROCESS.<wbr> Ignored otherwise</p>
             </td>
 
             <td class="entry_tags">
@@ -6829,8 +6795,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              How much metadata to produce on
-          output
+              <p>How much metadata to produce on
+output</p>
             </td>
 
             <td class="entry_units">
@@ -6863,8 +6829,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Lists which camera output streams image data
-          from this capture must be sent to
+              <p>Lists which camera output streams image data
+from this capture must be sent to</p>
             </td>
 
             <td class="entry_units">
@@ -6877,10 +6843,10 @@
             </td>
 
             <td class="entry_notes">
-              If no output streams are listed,<wbr> then the image
-          data should simply be discarded.<wbr> The image data must
-          still be captured for metadata and statistics production,<wbr>
-          and the lens and flash must operate as requested.<wbr>
+              <p>If no output streams are listed,<wbr> then the image
+data should simply be discarded.<wbr> The image data must
+still be captured for metadata and statistics production,<wbr>
+and the lens and flash must operate as requested.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -6918,8 +6884,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The type of the request; either CAPTURE or
-          REPROCESS.<wbr> For HAL3,<wbr> this tag is redundant.<wbr>
+              <p>The type of the request; either CAPTURE or
+REPROCESS.<wbr> For HAL3,<wbr> this tag is redundant.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -6983,8 +6949,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              How many output streams can be allocated at
-          the same time for each type of stream
+              <p>How many output streams can be allocated at
+the same time for each type of stream</p>
             </td>
 
             <td class="entry_units">
@@ -6999,9 +6965,9 @@
             </td>
 
             <td class="entry_notes">
-              Video snapshot with preview callbacks requires 3
-          processed streams (preview,<wbr> record,<wbr> app callbacks) and
-          one JPEG stream (snapshot)
+              <p>Video snapshot with preview callbacks requires 3
+processed streams (preview,<wbr> record,<wbr> app callbacks) and
+one JPEG stream (snapshot)</p>
             </td>
 
             <td class="entry_tags">
@@ -7028,8 +6994,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              How many reprocessing streams of any type
-          can be allocated at the same time
+              <p>How many reprocessing streams of any type
+can be allocated at the same time</p>
             </td>
 
             <td class="entry_units">
@@ -7087,9 +7053,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              A frame counter set by the framework.<wbr> This value monotonically
-          increases with every new result (that is,<wbr> each new result has a unique
-          frameCount value).<wbr>
+              <p>A frame counter set by the framework.<wbr> This value monotonically
+increases with every new result (that is,<wbr> each new result has a unique
+frameCount value).<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -7101,7 +7067,7 @@
             </td>
 
             <td class="entry_notes">
-              Reset on release()
+              <p>Reset on release()</p>
             </td>
 
             <td class="entry_tags">
@@ -7121,9 +7087,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              An application-specified ID for the current
-          request.<wbr> Must be maintained unchanged in output
-          frame
+              <p>An application-specified ID for the current
+request.<wbr> Must be maintained unchanged in output
+frame</p>
             </td>
 
             <td class="entry_units">
@@ -7176,8 +7142,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              How much metadata to produce on
-          output
+              <p>How much metadata to produce on
+output</p>
             </td>
 
             <td class="entry_units">
@@ -7210,8 +7176,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Lists which camera output streams image data
-          from this capture must be sent to
+              <p>Lists which camera output streams image data
+from this capture must be sent to</p>
             </td>
 
             <td class="entry_units">
@@ -7224,10 +7190,10 @@
             </td>
 
             <td class="entry_notes">
-              If no output streams are listed,<wbr> then the image
-          data should simply be discarded.<wbr> The image data must
-          still be captured for metadata and statistics production,<wbr>
-          and the lens and flash must operate as requested.<wbr>
+              <p>If no output streams are listed,<wbr> then the image
+data should simply be discarded.<wbr> The image data must
+still be captured for metadata and statistics production,<wbr>
+and the lens and flash must operate as requested.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -7287,15 +7253,13 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              (x,<wbr> y,<wbr> width,<wbr> height).<wbr>
-<br>
-<br>          A rectangle with the top-level corner of (x,<wbr>y) and size
-          (width,<wbr> height).<wbr> The region of the sensor that is used for
-          output.<wbr> Each stream must use this rectangle to produce its
-          output,<wbr> cropping to a smaller region if necessary to
-          maintain the stream's aspect ratio.<wbr>
-<br>
-<br>          HAL2.<wbr>x uses only (x,<wbr> y,<wbr> width)
+              <p>(x,<wbr> y,<wbr> width,<wbr> height).<wbr></p>
+<p>A rectangle with the top-level corner of (x,<wbr>y) and size
+(width,<wbr> height).<wbr> The region of the sensor that is used for
+output.<wbr> Each stream must use this rectangle to produce its
+output,<wbr> cropping to a smaller region if necessary to
+maintain the stream's aspect ratio.<wbr></p>
+<p><wbr>H<wbr>A<wbr>L2.<wbr>x uses only (x,<wbr> y,<wbr> width)</p>
             </td>
 
             <td class="entry_units">
@@ -7308,33 +7272,28 @@
             </td>
 
             <td class="entry_notes">
-              
-            Any additional per-stream cropping must be done to
-            maximize the final pixel area of the stream.<wbr>
-<br>
-<br>            For example,<wbr> if the crop region is set to a 4:3 aspect
-            ratio,<wbr> then 4:3 streams should use the exact crop
-            region.<wbr> 16:9 streams should further crop vertically
-            (letterbox).<wbr>
-<br>
-<br>            Conversely,<wbr> if the crop region is set to a 16:9,<wbr> then 4:3
-            outputs should crop horizontally (pillarbox),<wbr> and 16:9
-            streams should match exactly.<wbr> These additional crops must
-            be centered within the crop region.<wbr>
-<br>
-<br>            The output streams must maintain square pixels at all
-            times,<wbr> no matter what the relative aspect ratios of the
-            crop region and the stream are.<wbr>  Negative values for
-            corner are allowed for raw output if full pixel array is
-            larger than active pixel array.<wbr> Width and height may be
-            rounded to nearest larger supportable width,<wbr> especially
-            for raw output,<wbr> where only a few fixed scales may be
-            possible.<wbr> The width and height of the crop region cannot
-            be set to be smaller than floor( activeArraySize.<wbr>width /<wbr>
-            android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom ) and floor(
-            activeArraySize.<wbr>height /<wbr> android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom),<wbr>
-            respectively.<wbr>
-          
+              <p>Any additional per-stream cropping must be done to
+maximize the final pixel area of the stream.<wbr></p>
+<p>For example,<wbr> if the crop region is set to a 4:3 aspect
+ratio,<wbr> then 4:3 streams should use the exact crop
+region.<wbr> 16:9 streams should further crop vertically
+(letterbox).<wbr></p>
+<p>Conversely,<wbr> if the crop region is set to a 16:9,<wbr> then 4:3
+outputs should crop horizontally (pillarbox),<wbr> and 16:9
+streams should match exactly.<wbr> These additional crops must
+be centered within the crop region.<wbr></p>
+<p>The output streams must maintain square pixels at all
+times,<wbr> no matter what the relative aspect ratios of the
+crop region and the stream are.<wbr>  Negative values for
+corner are allowed for raw output if full pixel array is
+larger than active pixel array.<wbr> Width and height may be
+rounded to nearest larger supportable width,<wbr> especially
+for raw output,<wbr> where only a few fixed scales may be
+possible.<wbr> The width and height of the crop region cannot
+be set to be smaller than floor( activeArraySize.<wbr>width /<wbr>
+android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom ) and floor(
+activeArraySize.<wbr>height /<wbr> android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom),<wbr>
+respectively.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -7421,7 +7380,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of app-visible formats
+              <p>List of app-visible formats</p>
             </td>
 
             <td class="entry_units">
@@ -7457,11 +7416,11 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The minimum frame duration that is supported
-          for each resolution in availableJpegSizes.<wbr> Should
-          correspond to the frame duration when only that JPEG
-          stream is active and captured in a burst,<wbr> with all
-          processing set to FAST
+              <p>The minimum frame duration that is supported
+for each resolution in availableJpegSizes.<wbr> Should
+correspond to the frame duration when only that JPEG
+stream is active and captured in a burst,<wbr> with all
+processing set to FAST</p>
             </td>
 
             <td class="entry_units">
@@ -7471,9 +7430,9 @@
             </td>
 
             <td class="entry_notes">
-              When multiple streams are configured,<wbr> the minimum
-          frame duration will be >= max(individual stream min
-          durations)
+              <p>When multiple streams are configured,<wbr> the minimum
+frame duration will be &gt;= max(individual stream min
+durations)</p>
             </td>
 
             <td class="entry_tags">
@@ -7500,8 +7459,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The resolutions available for output from
-          the JPEG block.<wbr> Listed as width x height
+              <p>The resolutions available for output from
+the JPEG block.<wbr> Listed as width x height</p>
             </td>
 
             <td class="entry_units">
@@ -7535,10 +7494,10 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The maximum ratio between active area width
-          and crop region width,<wbr> or between active area height and
-          crop region height,<wbr> if the crop region height is larger
-          than width
+              <p>The maximum ratio between active area width
+and crop region width,<wbr> or between active area height and
+crop region height,<wbr> if the crop region height is larger
+than width</p>
             </td>
 
             <td class="entry_units">
@@ -7575,11 +7534,11 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The minimum frame duration that is supported
-          for each resolution in availableProcessedSizes.<wbr> Should
-          correspond to the frame duration when only that processed
-          stream is active,<wbr> with all processing set to
-          FAST
+              <p>The minimum frame duration that is supported
+for each resolution in availableProcessedSizes.<wbr> Should
+correspond to the frame duration when only that processed
+stream is active,<wbr> with all processing set to
+FAST</p>
             </td>
 
             <td class="entry_units">
@@ -7589,9 +7548,9 @@
             </td>
 
             <td class="entry_notes">
-              When multiple streams are configured,<wbr> the minimum
-          frame duration will be >= max(individual stream min
-          durations)
+              <p>When multiple streams are configured,<wbr> the minimum
+frame duration will be &gt;= max(individual stream min
+durations)</p>
             </td>
 
             <td class="entry_tags">
@@ -7618,10 +7577,10 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The resolutions available for use with
-          processed output streams,<wbr> such as YV12,<wbr> NV12,<wbr> and
-          platform opaque YUV/<wbr>RGB streams to the GPU or video
-          encoders.<wbr> Listed as width,<wbr> height
+              <p>The resolutions available for use with
+processed output streams,<wbr> such as YV12,<wbr> NV12,<wbr> and
+platform opaque YUV/<wbr>RGB streams to the GPU or video
+encoders.<wbr> Listed as width,<wbr> height</p>
             </td>
 
             <td class="entry_units">
@@ -7634,13 +7593,12 @@
             </td>
 
             <td class="entry_notes">
-              The actual supported resolution list may be limited by
-          consumer end points for different use cases.<wbr> For example,<wbr> for
-          recording use case,<wbr> the largest supported resolution may be
-          limited by max supported size from encoder,<wbr> for preview use
-          case,<wbr> the largest supported resolution may be limited by max
-          resolution SurfaceTexture/<wbr>SurfaceView can support.<wbr>
-          
+              <p>The actual supported resolution list may be limited by
+consumer end points for different use cases.<wbr> For example,<wbr> for
+recording use case,<wbr> the largest supported resolution may be
+limited by max supported size from encoder,<wbr> for preview use
+case,<wbr> the largest supported resolution may be limited by max
+resolution SurfaceTexture/<wbr>SurfaceView can support.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -7667,10 +7625,10 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The minimum frame duration that is supported
-          for each raw resolution in availableRawSizes.<wbr> Should
-          correspond to the frame duration when only the raw stream
-          is active.<wbr>
+              <p>The minimum frame duration that is supported
+for each raw resolution in availableRawSizes.<wbr> Should
+correspond to the frame duration when only the raw stream
+is active.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -7680,9 +7638,9 @@
             </td>
 
             <td class="entry_notes">
-              When multiple streams are configured,<wbr> the minimum
-          frame duration will be >= max(individual stream min
-          durations)
+              <p>When multiple streams are configured,<wbr> the minimum
+frame duration will be &gt;= max(individual stream min
+durations)</p>
             </td>
 
             <td class="entry_tags">
@@ -7709,9 +7667,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The resolutions available for use with raw
-          sensor output streams,<wbr> listed as width,<wbr>
-          height
+              <p>The resolutions available for use with raw
+sensor output streams,<wbr> listed as width,<wbr>
+height</p>
             </td>
 
             <td class="entry_units">
@@ -7773,15 +7731,13 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              (x,<wbr> y,<wbr> width,<wbr> height).<wbr>
-<br>
-<br>          A rectangle with the top-level corner of (x,<wbr>y) and size
-          (width,<wbr> height).<wbr> The region of the sensor that is used for
-          output.<wbr> Each stream must use this rectangle to produce its
-          output,<wbr> cropping to a smaller region if necessary to
-          maintain the stream's aspect ratio.<wbr>
-<br>
-<br>          HAL2.<wbr>x uses only (x,<wbr> y,<wbr> width)
+              <p>(x,<wbr> y,<wbr> width,<wbr> height).<wbr></p>
+<p>A rectangle with the top-level corner of (x,<wbr>y) and size
+(width,<wbr> height).<wbr> The region of the sensor that is used for
+output.<wbr> Each stream must use this rectangle to produce its
+output,<wbr> cropping to a smaller region if necessary to
+maintain the stream's aspect ratio.<wbr></p>
+<p><wbr>H<wbr>A<wbr>L2.<wbr>x uses only (x,<wbr> y,<wbr> width)</p>
             </td>
 
             <td class="entry_units">
@@ -7794,33 +7750,28 @@
             </td>
 
             <td class="entry_notes">
-              
-            Any additional per-stream cropping must be done to
-            maximize the final pixel area of the stream.<wbr>
-<br>
-<br>            For example,<wbr> if the crop region is set to a 4:3 aspect
-            ratio,<wbr> then 4:3 streams should use the exact crop
-            region.<wbr> 16:9 streams should further crop vertically
-            (letterbox).<wbr>
-<br>
-<br>            Conversely,<wbr> if the crop region is set to a 16:9,<wbr> then 4:3
-            outputs should crop horizontally (pillarbox),<wbr> and 16:9
-            streams should match exactly.<wbr> These additional crops must
-            be centered within the crop region.<wbr>
-<br>
-<br>            The output streams must maintain square pixels at all
-            times,<wbr> no matter what the relative aspect ratios of the
-            crop region and the stream are.<wbr>  Negative values for
-            corner are allowed for raw output if full pixel array is
-            larger than active pixel array.<wbr> Width and height may be
-            rounded to nearest larger supportable width,<wbr> especially
-            for raw output,<wbr> where only a few fixed scales may be
-            possible.<wbr> The width and height of the crop region cannot
-            be set to be smaller than floor( activeArraySize.<wbr>width /<wbr>
-            android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom ) and floor(
-            activeArraySize.<wbr>height /<wbr> android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom),<wbr>
-            respectively.<wbr>
-          
+              <p>Any additional per-stream cropping must be done to
+maximize the final pixel area of the stream.<wbr></p>
+<p>For example,<wbr> if the crop region is set to a 4:3 aspect
+ratio,<wbr> then 4:3 streams should use the exact crop
+region.<wbr> 16:9 streams should further crop vertically
+(letterbox).<wbr></p>
+<p>Conversely,<wbr> if the crop region is set to a 16:9,<wbr> then 4:3
+outputs should crop horizontally (pillarbox),<wbr> and 16:9
+streams should match exactly.<wbr> These additional crops must
+be centered within the crop region.<wbr></p>
+<p>The output streams must maintain square pixels at all
+times,<wbr> no matter what the relative aspect ratios of the
+crop region and the stream are.<wbr>  Negative values for
+corner are allowed for raw output if full pixel array is
+larger than active pixel array.<wbr> Width and height may be
+rounded to nearest larger supportable width,<wbr> especially
+for raw output,<wbr> where only a few fixed scales may be
+possible.<wbr> The width and height of the crop region cannot
+be set to be smaller than floor( activeArraySize.<wbr>width /<wbr>
+android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom ) and floor(
+activeArraySize.<wbr>height /<wbr> android.<wbr>scaler.<wbr>max<wbr>Digital<wbr>Zoom),<wbr>
+respectively.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -7876,12 +7827,10 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Duration each pixel is exposed to
-          light.<wbr>
-<br>
-<br>          If the sensor can't expose this exact duration,<wbr> it should shorten the
-          duration exposed to the nearest possible value (rather than expose longer).<wbr>
-          
+              <p>Duration each pixel is exposed to
+light.<wbr></p>
+<p>If the sensor can't expose this exact duration,<wbr> it should shorten the
+duration exposed to the nearest possible value (rather than expose longer).<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -7893,7 +7842,7 @@
             </td>
 
             <td class="entry_notes">
-              1/<wbr>10000 - 30 sec range.<wbr> No bulb mode
+              <p>1/<wbr>10000 - 30 sec range.<wbr> No bulb mode</p>
             </td>
 
             <td class="entry_tags">
@@ -7916,8 +7865,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Duration from start of frame exposure to
-          start of next frame exposure
+              <p>Duration from start of frame exposure to
+start of next frame exposure</p>
             </td>
 
             <td class="entry_units">
@@ -7930,8 +7879,8 @@
             </td>
 
             <td class="entry_notes">
-              Exposure time has priority,<wbr> so duration is set to
-          max(duration,<wbr> exposure time + overhead)
+              <p>Exposure time has priority,<wbr> so duration is set to
+max(duration,<wbr> exposure time + overhead)</p>
             </td>
 
             <td class="entry_tags">
@@ -7955,13 +7904,11 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Gain applied to image data.<wbr> Must be
-          implemented through analog gain only if set to values
-          below 'maximum analog sensitivity'.<wbr>
-<br>
-<br>          If the sensor can't apply this exact gain,<wbr> it should lessen the
-          gain to the nearest possible value (rather than gain more).<wbr>
-          
+              <p>Gain applied to image data.<wbr> Must be
+implemented through analog gain only if set to values
+below 'maximum analog sensitivity'.<wbr></p>
+<p>If the sensor can't apply this exact gain,<wbr> it should lessen the
+gain to the nearest possible value (rather than gain more).<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -7973,7 +7920,7 @@
             </td>
 
             <td class="entry_notes">
-              ISO 12232:2006 REI method
+              <p>ISO 12232:2006 REI method</p>
             </td>
 
             <td class="entry_tags">
@@ -8031,9 +7978,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Area of raw data which corresponds to only
-            active pixels; smaller or equal to
-            pixelArraySize.<wbr>
+              <p>Area of raw data which corresponds to only
+active pixels; smaller or equal to
+pixelArraySize.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -8072,7 +8019,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Range of valid sensitivities
+              <p>Range of valid sensitivities</p>
             </td>
 
             <td class="entry_units">
@@ -8126,9 +8073,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Arrangement of color filters on sensor;
-            represents the colors in the top-left 2x2 section of
-            the sensor,<wbr> in reading order
+              <p>Arrangement of color filters on sensor;
+represents the colors in the top-left 2x2 section of
+the sensor,<wbr> in reading order</p>
             </td>
 
             <td class="entry_units">
@@ -8165,8 +8112,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Range of valid exposure
-            times
+              <p>Range of valid exposure
+times</p>
             </td>
 
             <td class="entry_units">
@@ -8200,8 +8147,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Maximum possible frame duration (minimum frame
-            rate)
+              <p>Maximum possible frame duration (minimum frame
+rate)</p>
             </td>
 
             <td class="entry_units">
@@ -8213,11 +8160,11 @@
             </td>
 
             <td class="entry_notes">
-              Minimum duration is a function of resolution,<wbr>
-            processing settings.<wbr> See
-            android.<wbr>scaler.<wbr>available<wbr>Processed<wbr>Min<wbr>Durations
-            android.<wbr>scaler.<wbr>available<wbr>Jpeg<wbr>Min<wbr>Durations
-            android.<wbr>scaler.<wbr>available<wbr>Raw<wbr>Min<wbr>Durations
+              <p>Minimum duration is a function of resolution,<wbr>
+processing settings.<wbr> <wbr>See
+android.<wbr>scaler.<wbr>available<wbr>Processed<wbr>Min<wbr>Durations
+android.<wbr>scaler.<wbr>available<wbr>Jpeg<wbr>Min<wbr>Durations
+android.<wbr>scaler.<wbr>available<wbr>Raw<wbr>Min<wbr>Durations</p>
             </td>
 
             <td class="entry_tags">
@@ -8246,8 +8193,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The physical dimensions of the full pixel
-            array
+              <p>The physical dimensions of the full pixel
+array</p>
             </td>
 
             <td class="entry_units">
@@ -8257,7 +8204,7 @@
             </td>
 
             <td class="entry_notes">
-              Needed for FOV calculation for old API
+              <p>Needed for FOV calculation for old API</p>
             </td>
 
             <td class="entry_tags">
@@ -8285,8 +8232,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Dimensions of full pixel array,<wbr> possibly
-            including black calibration pixels
+              <p>Dimensions of full pixel array,<wbr> possibly
+including black calibration pixels</p>
             </td>
 
             <td class="entry_units">
@@ -8296,9 +8243,9 @@
             </td>
 
             <td class="entry_notes">
-              Maximum output resolution for raw format must
-            match this in
-            android.<wbr>scaler.<wbr>info.<wbr>available<wbr>Sizes<wbr>Per<wbr>Format
+              <p>Maximum output resolution for raw format must
+match this in
+android.<wbr>scaler.<wbr>info.<wbr>available<wbr>Sizes<wbr>Per<wbr>Format</p>
             </td>
 
             <td class="entry_tags">
@@ -8322,8 +8269,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Maximum raw value output by
-            sensor
+              <p>Maximum raw value output by
+sensor</p>
             </td>
 
             <td class="entry_units">
@@ -8334,8 +8281,8 @@
             </td>
 
             <td class="entry_notes">
-              Defines sensor bit depth (10-14 bits is
-            expected)
+              <p>Defines sensor bit depth (10-14 bits is
+expected)</p>
             </td>
 
             <td class="entry_tags">
@@ -8361,8 +8308,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Gain factor from electrons to raw units when
-          ISO=100
+              <p>Gain factor from electrons to raw units when
+ISO=100</p>
             </td>
 
             <td class="entry_units">
@@ -8400,8 +8347,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              A fixed black level offset for each of the
-          Bayer mosaic channels
+              <p>A fixed black level offset for each of the
+Bayer mosaic channels</p>
             </td>
 
             <td class="entry_units">
@@ -8412,8 +8359,8 @@
             </td>
 
             <td class="entry_notes">
-              As per DNG BlackLevelRepeatDim /<wbr> BlackLevel
-          tags
+              <p>As per DNG BlackLevelRepeatDim /<wbr> BlackLevel
+tags</p>
             </td>
 
             <td class="entry_tags">
@@ -8441,8 +8388,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Per-device calibration on top of color space
-          transform 1
+              <p>Per-device calibration on top of color space
+transform 1</p>
             </td>
 
             <td class="entry_units">
@@ -8479,8 +8426,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Per-device calibration on top of color space
-          transform 2
+              <p>Per-device calibration on top of color space
+transform 2</p>
             </td>
 
             <td class="entry_units">
@@ -8517,9 +8464,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Linear mapping from XYZ (D50) color space to
-          reference linear sensor color,<wbr> for first reference
-          illuminant
+              <p>Linear mapping from XYZ (D50) color space to
+reference linear sensor color,<wbr> for first reference
+illuminant</p>
             </td>
 
             <td class="entry_units">
@@ -8529,9 +8476,9 @@
             </td>
 
             <td class="entry_notes">
-              Use as follows XYZ = inv(transform) * clip( (raw -
-          black level(raw) ) /<wbr> ( white level - max black level) ).<wbr>
-          At least in the simple case
+              <p>Use as follows XYZ = inv(transform) * clip( (raw -
+black level(raw) ) /<wbr> ( white level - max black level) ).<wbr>
+At least in the simple case</p>
             </td>
 
             <td class="entry_tags">
@@ -8559,9 +8506,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Linear mapping from XYZ (D50) color space to
-          reference linear sensor color,<wbr> for second reference
-          illuminant
+              <p>Linear mapping from XYZ (D50) color space to
+reference linear sensor color,<wbr> for second reference
+illuminant</p>
             </td>
 
             <td class="entry_units">
@@ -8598,8 +8545,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Used by DNG for better WB
-          adaptation
+              <p>Used by DNG for better WB
+adaptation</p>
             </td>
 
             <td class="entry_units">
@@ -8636,8 +8583,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Used by DNG for better WB
-          adaptation
+              <p>Used by DNG for better WB
+adaptation</p>
             </td>
 
             <td class="entry_units">
@@ -8669,8 +8616,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Maximum sensitivity that is implemented
-          purely through analog gain
+              <p>Maximum sensitivity that is implemented
+purely through analog gain</p>
             </td>
 
             <td class="entry_units">
@@ -8680,10 +8627,10 @@
             </td>
 
             <td class="entry_notes">
-              For android.<wbr>sensor.<wbr>sensitivity values less than or
-          equal to this,<wbr> all applied gain must be analog.<wbr> For
-          values above this,<wbr> it can be a mix of analog and
-          digital
+              <p>For android.<wbr>sensor.<wbr>sensitivity values less than or
+equal to this,<wbr> all applied gain must be analog.<wbr> For
+values above this,<wbr> it can be a mix of analog and
+digital</p>
             </td>
 
             <td class="entry_tags">
@@ -8712,8 +8659,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Estimation of sensor noise
-          characteristics
+              <p>Estimation of sensor noise
+characteristics</p>
             </td>
 
             <td class="entry_units">
@@ -8726,11 +8673,11 @@
             </td>
 
             <td class="entry_notes">
-              A represents sensor read noise before analog
-          amplification; B represents noise from A/<wbr>D conversion and
-          other circuits after amplification.<wbr> Both noise sources
-          are assumed to be gaussian,<wbr> independent,<wbr> and not to vary
-          across the sensor
+              <p>A represents sensor read noise before analog
+amplification; B represents noise from A/<wbr>D conversion and
+other circuits after amplification.<wbr> Both noise sources
+are assumed to be gaussian,<wbr> independent,<wbr> and not to vary
+across the sensor</p>
             </td>
 
             <td class="entry_tags">
@@ -8753,11 +8700,11 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Clockwise angle through which the output
-          image needs to be rotated to be upright on the device
-          screen in its native orientation.<wbr> Also defines the
-          direction of rolling shutter readout,<wbr> which is from top
-          to bottom in the sensor's coordinate system
+              <p>Clockwise angle through which the output
+image needs to be rotated to be upright on the device
+screen in its native orientation.<wbr> Also defines the
+direction of rolling shutter readout,<wbr> which is from top
+to bottom in the sensor's coordinate system</p>
             </td>
 
             <td class="entry_units">
@@ -8875,8 +8822,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Light source used to define transform
-          1
+              <p>Light source used to define transform
+1</p>
             </td>
 
             <td class="entry_units">
@@ -8886,8 +8833,8 @@
             </td>
 
             <td class="entry_notes">
-              [EXIF LightSource tag] Must all these be
-          supported? Need CCT for each!
+              <p>[EXIF LightSource tag] Must all these be
+supported? Need CCT for each!</p>
             </td>
 
             <td class="entry_tags">
@@ -8911,8 +8858,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Light source used to define transform
-          2
+              <p>Light source used to define transform
+2</p>
             </td>
 
             <td class="entry_units">
@@ -8970,12 +8917,10 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Duration each pixel is exposed to
-          light.<wbr>
-<br>
-<br>          If the sensor can't expose this exact duration,<wbr> it should shorten the
-          duration exposed to the nearest possible value (rather than expose longer).<wbr>
-          
+              <p>Duration each pixel is exposed to
+light.<wbr></p>
+<p>If the sensor can't expose this exact duration,<wbr> it should shorten the
+duration exposed to the nearest possible value (rather than expose longer).<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -8987,7 +8932,7 @@
             </td>
 
             <td class="entry_notes">
-              1/<wbr>10000 - 30 sec range.<wbr> No bulb mode
+              <p>1/<wbr>10000 - 30 sec range.<wbr> No bulb mode</p>
             </td>
 
             <td class="entry_tags">
@@ -9010,8 +8955,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Duration from start of frame exposure to
-          start of next frame exposure
+              <p>Duration from start of frame exposure to
+start of next frame exposure</p>
             </td>
 
             <td class="entry_units">
@@ -9024,8 +8969,8 @@
             </td>
 
             <td class="entry_notes">
-              Exposure time has priority,<wbr> so duration is set to
-          max(duration,<wbr> exposure time + overhead)
+              <p>Exposure time has priority,<wbr> so duration is set to
+max(duration,<wbr> exposure time + overhead)</p>
             </td>
 
             <td class="entry_tags">
@@ -9049,13 +8994,11 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Gain applied to image data.<wbr> Must be
-          implemented through analog gain only if set to values
-          below 'maximum analog sensitivity'.<wbr>
-<br>
-<br>          If the sensor can't apply this exact gain,<wbr> it should lessen the
-          gain to the nearest possible value (rather than gain more).<wbr>
-          
+              <p>Gain applied to image data.<wbr> Must be
+implemented through analog gain only if set to values
+below 'maximum analog sensitivity'.<wbr></p>
+<p>If the sensor can't apply this exact gain,<wbr> it should lessen the
+gain to the nearest possible value (rather than gain more).<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -9067,7 +9010,7 @@
             </td>
 
             <td class="entry_notes">
-              ISO 12232:2006 REI method
+              <p>ISO 12232:2006 REI method</p>
             </td>
 
             <td class="entry_tags">
@@ -9090,8 +9033,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Time at start of exposure of first
-          row
+              <p>Time at start of exposure of first
+row</p>
             </td>
 
             <td class="entry_units">
@@ -9103,8 +9046,8 @@
             </td>
 
             <td class="entry_notes">
-              Monotonic,<wbr> should be synced to other timestamps in
-          system
+              <p>Monotonic,<wbr> should be synced to other timestamps in
+system</p>
             </td>
 
             <td class="entry_tags">
@@ -9127,12 +9070,10 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The temperature of the sensor,<wbr> sampled at the time
-          exposure began for this frame.<wbr>
-<br>
-<br>          The thermal diode being queried should be inside the sensor PCB,<wbr> or
-          somewhere close to it.<wbr>
-          
+              <p>The temperature of the sensor,<wbr> sampled at the time
+exposure began for this frame.<wbr></p>
+<p>The thermal diode being queried should be inside the sensor PCB,<wbr> or
+somewhere close to it.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -9215,8 +9156,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Quality of lens shading correction applied
-          to the image data
+              <p>Quality of lens shading correction applied
+to the image data</p>
             </td>
 
             <td class="entry_units">
@@ -9245,8 +9186,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Control the amount of shading correction
-          applied to the images
+              <p>Control the amount of shading correction
+applied to the images</p>
             </td>
 
             <td class="entry_units">
@@ -9324,8 +9265,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Quality of lens shading correction applied
-          to the image data
+              <p>Quality of lens shading correction applied
+to the image data</p>
             </td>
 
             <td class="entry_units">
@@ -9402,8 +9343,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              State of the face detector
-          unit
+              <p>State of the face detector
+unit</p>
             </td>
 
             <td class="entry_units">
@@ -9415,10 +9356,10 @@
             </td>
 
             <td class="entry_notes">
-              Whether face detection is enabled,<wbr> and whether it
-          should output just the basic fields or the full set of
-          fields.<wbr> Value must be one of the
-          android.<wbr>statistics.<wbr>info.<wbr>available<wbr>Face<wbr>Detect<wbr>Modes.<wbr>
+              <p>Whether face detection is enabled,<wbr> and whether it
+should output just the basic fields or the full set of
+fields.<wbr> Value must be one of the
+android.<wbr>statistics.<wbr>info.<wbr>available<wbr>Face<wbr>Detect<wbr>Modes.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -9449,8 +9390,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Operating mode for histogram
-          generation
+              <p>Operating mode for histogram
+generation</p>
             </td>
 
             <td class="entry_units">
@@ -9490,8 +9431,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Operating mode for sharpness map
-          generation
+              <p>Operating mode for sharpness map
+generation</p>
             </td>
 
             <td class="entry_units">
@@ -9531,8 +9472,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Whether the HAL needs to output the lens
-          shading map in output result metadata
+              <p>Whether the HAL needs to output the lens
+shading map in output result metadata</p>
             </td>
 
             <td class="entry_units">
@@ -9542,9 +9483,9 @@
             </td>
 
             <td class="entry_notes">
-              When set to ON,<wbr>
-          android.<wbr>statistics.<wbr>lens<wbr>Shading<wbr>Map must be provided in
-          the output result metdata.<wbr>
+              <p>When set to <wbr>O<wbr>N,<wbr>
+android.<wbr>statistics.<wbr>lens<wbr>Shading<wbr>Map must be provided in
+the output result metdata.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -9599,8 +9540,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Which face detection modes are available,<wbr>
-            if any
+              <p>Which face detection modes are available,<wbr>
+if any</p>
             </td>
 
             <td class="entry_units">
@@ -9614,17 +9555,14 @@
             </td>
 
             <td class="entry_notes">
-              OFF means face detection is disabled,<wbr> it must
-            be included in the list.<wbr>
-<br>
-<br>            SIMPLE means the device supports the
-            android.<wbr>statistics.<wbr>face<wbr>Rectangles and
-            android.<wbr>statistics.<wbr>face<wbr>Scores outputs.<wbr>
-<br>
-<br>            FULL means the device additionally supports the
-            android.<wbr>statistics.<wbr>face<wbr>Ids and
-            android.<wbr>statistics.<wbr>face<wbr>Landmarks outputs.<wbr>
-            
+              <p>OFF means face detection is disabled,<wbr> it must
+be included in the list.<wbr></p>
+<p>SIMPLE means the device supports the
+android.<wbr>statistics.<wbr>face<wbr>Rectangles and
+android.<wbr>statistics.<wbr>face<wbr>Scores outputs.<wbr></p>
+<p>FULL means the device additionally supports the
+android.<wbr>statistics.<wbr>face<wbr>Ids and
+android.<wbr>statistics.<wbr>face<wbr>Landmarks outputs.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -9644,8 +9582,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Number of histogram buckets
-            supported
+              <p>Number of histogram buckets
+supported</p>
             </td>
 
             <td class="entry_units">
@@ -9675,8 +9613,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Maximum number of simultaneously detectable
-            faces
+              <p>Maximum number of simultaneously detectable
+faces</p>
             </td>
 
             <td class="entry_units">
@@ -9707,8 +9645,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Maximum value possible for a histogram
-            bucket
+              <p>Maximum value possible for a histogram
+bucket</p>
             </td>
 
             <td class="entry_units">
@@ -9737,8 +9675,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Maximum value possible for a sharpness map
-            region.<wbr>
+              <p>Maximum value possible for a sharpness map
+region.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -9772,8 +9710,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Dimensions of the sharpness
-            map
+              <p>Dimensions of the sharpness
+map</p>
             </td>
 
             <td class="entry_units">
@@ -9849,8 +9787,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              State of the face detector
-          unit
+              <p>State of the face detector
+unit</p>
             </td>
 
             <td class="entry_units">
@@ -9862,10 +9800,10 @@
             </td>
 
             <td class="entry_notes">
-              Whether face detection is enabled,<wbr> and whether it
-          should output just the basic fields or the full set of
-          fields.<wbr> Value must be one of the
-          android.<wbr>statistics.<wbr>info.<wbr>available<wbr>Face<wbr>Detect<wbr>Modes.<wbr>
+              <p>Whether face detection is enabled,<wbr> and whether it
+should output just the basic fields or the full set of
+fields.<wbr> Value must be one of the
+android.<wbr>statistics.<wbr>info.<wbr>available<wbr>Face<wbr>Detect<wbr>Modes.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -9892,8 +9830,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of unique IDs for detected
-          faces
+              <p>List of unique IDs for detected
+faces</p>
             </td>
 
             <td class="entry_units">
@@ -9903,7 +9841,7 @@
             </td>
 
             <td class="entry_notes">
-              Only available if faceDetectMode == FULL
+              <p>Only available if faceDetectMode == FULL</p>
             </td>
 
             <td class="entry_tags">
@@ -9931,8 +9869,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of landmarks for detected
-          faces
+              <p>List of landmarks for detected
+faces</p>
             </td>
 
             <td class="entry_units">
@@ -9942,7 +9880,7 @@
             </td>
 
             <td class="entry_notes">
-              Only available if faceDetectMode == FULL
+              <p>Only available if faceDetectMode == FULL</p>
             </td>
 
             <td class="entry_tags">
@@ -9970,8 +9908,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of the bounding rectangles for detected
-          faces
+              <p>List of the bounding rectangles for detected
+faces</p>
             </td>
 
             <td class="entry_units">
@@ -9981,7 +9919,7 @@
             </td>
 
             <td class="entry_notes">
-              Only available if faceDetectMode != OFF
+              <p>Only available if faceDetectMode != OFF</p>
             </td>
 
             <td class="entry_tags">
@@ -10008,8 +9946,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              List of the face confidence scores for
-          detected faces
+              <p>List of the face confidence scores for
+detected faces</p>
             </td>
 
             <td class="entry_units">
@@ -10020,8 +9958,8 @@
             </td>
 
             <td class="entry_notes">
-              Only available if faceDetectMode != OFF.<wbr> The value should be
-          meaningful (for example,<wbr> setting 100 at all times is illegal).<wbr>
+              <p>Only available if faceDetectMode != OFF.<wbr> The value should be
+meaningful (for example,<wbr> setting 100 at all times is illegal).<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -10049,8 +9987,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              A 3-channel histogram based on the raw
-          sensor data
+              <p>A 3-channel histogram based on the raw
+sensor data</p>
             </td>
 
             <td class="entry_units">
@@ -10060,10 +9998,10 @@
             </td>
 
             <td class="entry_notes">
-              The k'th bucket (0-based) covers the input range
-          (with w = android.<wbr>sensor.<wbr>info.<wbr>white<wbr>Level) of [ k * w/<wbr>N,<wbr>
-          (k + 1) * w /<wbr> N ).<wbr> If only a monochrome sharpness map is
-          supported,<wbr> all channels should have the same data
+              <p>The k'th bucket (0-based) covers the input range
+(with w = android.<wbr>sensor.<wbr>info.<wbr>white<wbr>Level) of [ k * w/<wbr>N,<wbr>
+(k + 1) * w /<wbr> N ).<wbr> If only a monochrome sharpness map is
+supported,<wbr> all channels should have the same data</p>
             </td>
 
             <td class="entry_tags">
@@ -10094,8 +10032,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Operating mode for histogram
-          generation
+              <p>Operating mode for histogram
+generation</p>
             </td>
 
             <td class="entry_units">
@@ -10132,8 +10070,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              A 3-channel sharpness map,<wbr> based on the raw
-          sensor data
+              <p>A 3-channel sharpness map,<wbr> based on the raw
+sensor data</p>
             </td>
 
             <td class="entry_units">
@@ -10143,8 +10081,8 @@
             </td>
 
             <td class="entry_notes">
-              If only a monochrome sharpness map is supported,<wbr>
-          all channels should have the same data
+              <p>If only a monochrome sharpness map is supported,<wbr>
+all channels should have the same data</p>
             </td>
 
             <td class="entry_tags">
@@ -10175,8 +10113,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Operating mode for sharpness map
-          generation
+              <p>Operating mode for sharpness map
+generation</p>
             </td>
 
             <td class="entry_units">
@@ -10213,8 +10151,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              A low-resolution map of lens shading,<wbr> per
-          color channel
+              <p>A low-resolution map of lens shading,<wbr> per
+color channel</p>
             </td>
 
             <td class="entry_units">
@@ -10225,15 +10163,13 @@
             </td>
 
             <td class="entry_notes">
-              Assume bilinear interpolation of map.<wbr> The least
-          shaded section of the image should have a gain factor
-          of 1; all other sections should have gains above 1.<wbr>
-          the map should be on the order of 30-40 rows,<wbr> and
-          must be smaller than 64x64.<wbr>
-<br>
-<br>          When android.<wbr>color<wbr>Correction.<wbr>mode = TRANSFORM_<wbr>MATRIX,<wbr> the map
-          must take into account the colorCorrection settings.<wbr>
-          
+              <p>Assume bilinear interpolation of map.<wbr> The least
+shaded section of the image should have a gain factor
+of 1; all other sections should have gains above 1.<wbr>
+the map should be on the order of 30-40 rows,<wbr> and
+must be smaller than 64x64.<wbr></p>
+<p>When android.<wbr>color<wbr>Correction.<wbr>mode = TRANSFORM_<wbr>MATRIX,<wbr> the map
+must take into account the colorCorrection settings.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -10258,9 +10194,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The best-fit color channel gains calculated
-          by the HAL's statistics units for the current output frame
-          
+              <p>The best-fit color channel gains calculated
+by the HAL's statistics units for the current output frame</p>
             </td>
 
             <td class="entry_units">
@@ -10270,18 +10205,14 @@
             </td>
 
             <td class="entry_notes">
-              
-          This may be different than the gains used for this frame,<wbr>
-          since statistics processing on data from a new frame
-          typically completes after the transform has already been
-          applied to that frame.<wbr>
-<br>
-<br>          The 4 channel gains are defined in Bayer domain,<wbr>
-          see android.<wbr>color<wbr>Correction.<wbr>gains for details.<wbr>
-<br>
-<br>          This value should always be calculated by the AWB block,<wbr>
-          regardless of the android.<wbr>control.<wbr>* current values.<wbr>
-          
+              <p>This may be different than the gains used for this frame,<wbr>
+since statistics processing on data from a new frame
+typically completes after the transform has already been
+applied to that frame.<wbr></p>
+<p>The 4 channel gains are defined in Bayer domain,<wbr>
+see android.<wbr>color<wbr>Correction.<wbr>gains for details.<wbr></p>
+<p>This value should always be calculated by the AWB block,<wbr>
+regardless of the android.<wbr>control.<wbr>* current values.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -10306,9 +10237,9 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The best-fit color transform matrix estimate
-          calculated by the HAL's statistics units for the current
-          output frame
+              <p>The best-fit color transform matrix estimate
+calculated by the HAL's statistics units for the current
+output frame</p>
             </td>
 
             <td class="entry_units">
@@ -10318,21 +10249,18 @@
             </td>
 
             <td class="entry_notes">
-              The HAL must provide the estimate from its
-          statistics unit on the white balance transforms to use
-          for the next frame.<wbr> These are the values the HAL believes
-          are the best fit for the current output frame.<wbr> This may
-          be different than the transform used for this frame,<wbr> since
-          statistics processing on data from a new frame typically
-          completes after the transform has already been applied to
-          that frame.<wbr>
-<br>
-<br>          These estimates must be provided for all frames,<wbr> even if
-          capture settings and color transforms are set by the application.<wbr>
-<br>
-<br>          This value should always be calculated by the AWB block,<wbr>
-          regardless of the android.<wbr>control.<wbr>* current values.<wbr>
-          
+              <p>The HAL must provide the estimate from its
+statistics unit on the white balance transforms to use
+for the next frame.<wbr> These are the values the HAL believes
+are the best fit for the current output frame.<wbr> This may
+be different than the transform used for this frame,<wbr> since
+statistics processing on data from a new frame typically
+completes after the transform has already been applied to
+that frame.<wbr></p>
+<p>These estimates must be provided for all frames,<wbr> even if
+capture settings and color transforms are set by the application.<wbr></p>
+<p>This value should always be calculated by the AWB block,<wbr>
+regardless of the android.<wbr>control.<wbr>* current values.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -10363,8 +10291,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              The HAL estimated scene illumination lighting
-          frequency
+              <p>The HAL estimated scene illumination lighting
+frequency</p>
             </td>
 
             <td class="entry_units">
@@ -10374,8 +10302,8 @@
             </td>
 
             <td class="entry_notes">
-              Report NONE if there doesn't appear to be flickering
-          illumination
+              <p>Report NONE if there doesn't appear to be flickering
+illumination</p>
             </td>
 
             <td class="entry_tags">
@@ -10433,8 +10361,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Table mapping blue input values to output
-          values
+              <p>Table mapping blue input values to output
+values</p>
             </td>
 
             <td class="entry_units">
@@ -10446,10 +10374,9 @@
             </td>
 
             <td class="entry_notes">
-              Tonemapping /<wbr> contrast /<wbr> gamma curve for the blue
-          channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr>
-<br>
-<br>          See android.<wbr>tonemap.<wbr>curve<wbr>Red for more details.<wbr>
+              <p>Tonemapping /<wbr> contrast /<wbr> gamma curve for the blue
+channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr></p>
+<p>See android.<wbr>tonemap.<wbr>curve<wbr>Red for more details.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -10474,8 +10401,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Table mapping green input values to output
-          values
+              <p>Table mapping green input values to output
+values</p>
             </td>
 
             <td class="entry_units">
@@ -10487,10 +10414,9 @@
             </td>
 
             <td class="entry_notes">
-              Tonemapping /<wbr> contrast /<wbr> gamma curve for the green
-          channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr>
-<br>
-<br>          See android.<wbr>tonemap.<wbr>curve<wbr>Red for more details.<wbr>
+              <p>Tonemapping /<wbr> contrast /<wbr> gamma curve for the green
+channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr></p>
+<p>See android.<wbr>tonemap.<wbr>curve<wbr>Red for more details.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -10515,8 +10441,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Table mapping red input values to output
-          values
+              <p>Table mapping red input values to output
+values</p>
             </td>
 
             <td class="entry_units">
@@ -10527,20 +10453,18 @@
             </td>
 
             <td class="entry_notes">
-              Tonemapping /<wbr> contrast /<wbr> gamma curve for the red
-          channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr>
-<br>
-<br>          Since the input and output ranges may vary depending on
-          the camera pipeline,<wbr> the input and output pixel values
-          are represented by normalized floating-point values
-          between 0 and 1,<wbr> with 0 == black and 1 == white.<wbr>
-<br>
-<br>          The curve should be linearly interpolated between the
-          defined points.<wbr> The points will be listed in increasing
-          order of P_<wbr>IN.<wbr> For example,<wbr> if the array is: [0.<wbr>0,<wbr> 0.<wbr>0,<wbr>
-          0.<wbr>3,<wbr> 0.<wbr>5,<wbr> 1.<wbr>0,<wbr> 1.<wbr>0],<wbr> then the input->output mapping
-          for a few sample points would be: 0 -> 0,<wbr> 0.<wbr>15 ->
-          0.<wbr>25,<wbr> 0.<wbr>3 -> 0.<wbr>5,<wbr> 0.<wbr>5 -> 0.<wbr>64
+              <p>Tonemapping /<wbr> contrast /<wbr> gamma curve for the red
+channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr></p>
+<p>Since the input and output ranges may vary depending on
+the camera pipeline,<wbr> the input and output pixel values
+are represented by normalized floating-point values
+between 0 and 1,<wbr> with 0 == black and 1 == white.<wbr></p>
+<p>The curve should be linearly interpolated between the
+defined points.<wbr> The points will be listed in increasing
+order of P_<wbr>IN.<wbr> For example,<wbr> if the array is: [0.<wbr>0,<wbr> 0.<wbr>0,<wbr>
+0.<wbr>3,<wbr> 0.<wbr>5,<wbr> 1.<wbr>0,<wbr> 1.<wbr>0],<wbr> then the input-&gt;output mapping
+for a few sample points would be: 0 -&gt; 0,<wbr> 0.<wbr>15 -&gt;
+0.<wbr>25,<wbr> 0.<wbr>3 -&gt; 0.<wbr>5,<wbr> 0.<wbr>5 -&gt; 0.<wbr>64</p>
             </td>
 
             <td class="entry_tags">
@@ -10636,8 +10560,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Maximum number of supported points in the
-          tonemap curve
+              <p>Maximum number of supported points in the
+tonemap curve</p>
             </td>
 
             <td class="entry_units">
@@ -10700,8 +10624,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Table mapping blue input values to output
-          values
+              <p>Table mapping blue input values to output
+values</p>
             </td>
 
             <td class="entry_units">
@@ -10713,10 +10637,9 @@
             </td>
 
             <td class="entry_notes">
-              Tonemapping /<wbr> contrast /<wbr> gamma curve for the blue
-          channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr>
-<br>
-<br>          See android.<wbr>tonemap.<wbr>curve<wbr>Red for more details.<wbr>
+              <p>Tonemapping /<wbr> contrast /<wbr> gamma curve for the blue
+channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr></p>
+<p>See android.<wbr>tonemap.<wbr>curve<wbr>Red for more details.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -10741,8 +10664,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Table mapping green input values to output
-          values
+              <p>Table mapping green input values to output
+values</p>
             </td>
 
             <td class="entry_units">
@@ -10754,10 +10677,9 @@
             </td>
 
             <td class="entry_notes">
-              Tonemapping /<wbr> contrast /<wbr> gamma curve for the green
-          channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr>
-<br>
-<br>          See android.<wbr>tonemap.<wbr>curve<wbr>Red for more details.<wbr>
+              <p>Tonemapping /<wbr> contrast /<wbr> gamma curve for the green
+channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr></p>
+<p>See android.<wbr>tonemap.<wbr>curve<wbr>Red for more details.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -10782,8 +10704,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              Table mapping red input values to output
-          values
+              <p>Table mapping red input values to output
+values</p>
             </td>
 
             <td class="entry_units">
@@ -10794,20 +10716,18 @@
             </td>
 
             <td class="entry_notes">
-              Tonemapping /<wbr> contrast /<wbr> gamma curve for the red
-          channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr>
-<br>
-<br>          Since the input and output ranges may vary depending on
-          the camera pipeline,<wbr> the input and output pixel values
-          are represented by normalized floating-point values
-          between 0 and 1,<wbr> with 0 == black and 1 == white.<wbr>
-<br>
-<br>          The curve should be linearly interpolated between the
-          defined points.<wbr> The points will be listed in increasing
-          order of P_<wbr>IN.<wbr> For example,<wbr> if the array is: [0.<wbr>0,<wbr> 0.<wbr>0,<wbr>
-          0.<wbr>3,<wbr> 0.<wbr>5,<wbr> 1.<wbr>0,<wbr> 1.<wbr>0],<wbr> then the input->output mapping
-          for a few sample points would be: 0 -> 0,<wbr> 0.<wbr>15 ->
-          0.<wbr>25,<wbr> 0.<wbr>3 -> 0.<wbr>5,<wbr> 0.<wbr>5 -> 0.<wbr>64
+              <p>Tonemapping /<wbr> contrast /<wbr> gamma curve for the red
+channel,<wbr> to use when android.<wbr>tonemap.<wbr>mode is CONTRAST_<wbr>CURVE.<wbr></p>
+<p>Since the input and output ranges may vary depending on
+the camera pipeline,<wbr> the input and output pixel values
+are represented by normalized floating-point values
+between 0 and 1,<wbr> with 0 == black and 1 == white.<wbr></p>
+<p>The curve should be linearly interpolated between the
+defined points.<wbr> The points will be listed in increasing
+order of P_<wbr>IN.<wbr> For example,<wbr> if the array is: [0.<wbr>0,<wbr> 0.<wbr>0,<wbr>
+0.<wbr>3,<wbr> 0.<wbr>5,<wbr> 1.<wbr>0,<wbr> 1.<wbr>0],<wbr> then the input-&gt;output mapping
+for a few sample points would be: 0 -&gt; 0,<wbr> 0.<wbr>15 -&gt;
+0.<wbr>25,<wbr> 0.<wbr>3 -&gt; 0.<wbr>5,<wbr> 0.<wbr>5 -&gt; 0.<wbr>64</p>
             </td>
 
             <td class="entry_tags">
@@ -10916,19 +10836,16 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              This LED is nominally used to indicate to the user
-          that the camera is powered on and may be streaming images back to the
-          Application Processor.<wbr> In certain rare circumstances,<wbr> the OS may
-          disable this when video is processed locally and not transmitted to
-          any untrusted applications.<wbr>
-<br>
-<br>          In particular,<wbr> the LED *must* always be on when the data could be
-          transmitted off the device.<wbr> The LED *should* always be on whenever
-          data is stored locally on the device.<wbr>
-<br>
-<br>          The LED *may* be off if a trusted application is using the data that
-          doesn't violate the above rules.<wbr>
-          
+              <p>This LED is nominally used to indicate to the user
+that the camera is powered on and may be streaming images back to the
+Application Processor.<wbr> In certain rare circumstances,<wbr> the OS may
+disable this when video is processed locally and not transmitted to
+any untrusted applications.<wbr></p>
+<p>In particular,<wbr> the LED <em>must</em> always be on when the data could be
+transmitted off the device.<wbr> The LED <em>should</em> always be on whenever
+data is stored locally on the device.<wbr></p>
+<p>The LED <em>may</em> be off if a trusted application is using the data that
+doesn't violate the above rules.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -10993,19 +10910,16 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              This LED is nominally used to indicate to the user
-          that the camera is powered on and may be streaming images back to the
-          Application Processor.<wbr> In certain rare circumstances,<wbr> the OS may
-          disable this when video is processed locally and not transmitted to
-          any untrusted applications.<wbr>
-<br>
-<br>          In particular,<wbr> the LED *must* always be on when the data could be
-          transmitted off the device.<wbr> The LED *should* always be on whenever
-          data is stored locally on the device.<wbr>
-<br>
-<br>          The LED *may* be off if a trusted application is using the data that
-          doesn't violate the above rules.<wbr>
-          
+              <p>This LED is nominally used to indicate to the user
+that the camera is powered on and may be streaming images back to the
+Application Processor.<wbr> In certain rare circumstances,<wbr> the OS may
+disable this when video is processed locally and not transmitted to
+any untrusted applications.<wbr></p>
+<p>In particular,<wbr> the LED <em>must</em> always be on when the data could be
+transmitted off the device.<wbr> The LED <em>should</em> always be on whenever
+data is stored locally on the device.<wbr></p>
+<p>The LED <em>may</em> be off if a trusted application is using the data that
+doesn't violate the above rules.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -11072,8 +10986,7 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              A list of camera LEDs that are available on this system.<wbr>
-          
+              <p>A list of camera LEDs that are available on this system.<wbr></p>
             </td>
 
             <td class="entry_units">
@@ -11143,17 +11056,14 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              
-          The camera 3 HAL device can implement one of two possible
-          operational modes; limited and full.<wbr> Full support is
-          expected from new higher-end devices.<wbr> Limited mode has
-          hardware requirements roughly in line with those for a
-          camera HAL device v1 implementation,<wbr> and is expected from
-          older or inexpensive devices.<wbr> Full is a strict superset of
-          limited,<wbr> and they share the same essential operational flow.<wbr>
-<br>
-<br>          For full details refer to "S3.<wbr> Operational Modes" in camera3.<wbr>h
-          
+              <p>The camera 3 HAL device can implement one of two possible
+operational modes; limited and full.<wbr> Full support is
+expected from new higher-end devices.<wbr> Limited mode has
+hardware requirements roughly in line with those for a
+camera HAL device v1 implementation,<wbr> and is expected from
+older or inexpensive devices.<wbr> Full is a strict superset of
+limited,<wbr> and they share the same essential operational flow.<wbr></p>
+<p>For full details refer to "S3.<wbr> Operational Modes" in camera3.<wbr>h</p>
             </td>
 
             <td class="entry_units">
@@ -11224,8 +11134,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-               Whether black-level compensation is locked
-          to its current values,<wbr> or is free to vary
+              <p>Whether black-level compensation is locked
+to its current values,<wbr> or is free to vary</p>
             </td>
 
             <td class="entry_units">
@@ -11235,22 +11145,42 @@
             </td>
 
             <td class="entry_notes">
-              When set to ON,<wbr> the values used for black-level
-          compensation must not change until the lock is set to
-          OFF
-<br>
-<br>          Since changes to certain capture parameters (such as
-          exposure time) may require resetting of black level
-          compensation,<wbr> the HAL must report whether setting the
-          black level lock was successful in the output result
-          metadata.<wbr>
-<br>
-<br>          The black level locking must happen at the sensor,<wbr> and not at the ISP.<wbr>
-          If for some reason black level locking is no longer legal (for example,<wbr>
-          the analog gain has changed,<wbr> which forces black levels to be
-          recalculated),<wbr> then the HAL is free to override this request (and it
-          must report 'OFF' when this does happen) until the next time locking
-          is legal again.<wbr>
+              <p>When set to ON,<wbr> the values used for black-level
+compensation must not change until the lock is set to
+OFF</p>
+<p>Since changes to certain capture parameters (such as
+exposure time) may require resetting of black level
+compensation,<wbr> the HAL must report whether setting the
+black level lock was successful in the output result
+metadata.<wbr></p>
+<p>For example,<wbr> if a sequence of requests is as follows:</p>
+<ul>
+<li>Request 1: Exposure = 10ms,<wbr> Black level lock = OFF</li>
+<li>Request 2: Exposure = 10ms,<wbr> Black level lock = ON</li>
+<li>Request 3: Exposure = 10ms,<wbr> Black level lock = ON</li>
+<li>Request 4: Exposure = 20ms,<wbr> Black level lock = ON</li>
+<li>Request 5: Exposure = 20ms,<wbr> Black level lock = ON</li>
+<li>Request 6: Exposure = 20ms,<wbr> Black level lock = ON</li>
+</ul>
+<p>And the exposure change in Request 4 requires resetting the black
+level offsets,<wbr> then the output result metadata is expected to be:</p>
+<ul>
+<li>Result 1: Exposure = 10ms,<wbr> Black level lock = OFF</li>
+<li>Result 2: Exposure = 10ms,<wbr> Black level lock = ON</li>
+<li>Result 3: Exposure = 10ms,<wbr> Black level lock = ON</li>
+<li>Result 4: Exposure = 20ms,<wbr> Black level lock = OFF</li>
+<li>Result 5: Exposure = 20ms,<wbr> Black level lock = ON</li>
+<li>Result 6: Exposure = 20ms,<wbr> Black level lock = ON</li>
+</ul>
+<p>This indicates to the application that on frame 4,<wbr> black levels were
+reset due to exposure value changes,<wbr> and pixel values may not be
+consistent across captures.<wbr></p>
+<p>The black level locking must happen at the sensor,<wbr> and not at the ISP.<wbr>
+If for some reason black level locking is no longer legal (for example,<wbr>
+the analog gain has changed,<wbr> which forces black levels to be
+recalculated),<wbr> then the HAL is free to override this request (and it
+must report 'OFF' when this does happen) until the next time locking
+is legal again.<wbr></p>
             </td>
 
             <td class="entry_tags">
@@ -11309,8 +11239,8 @@
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-               Whether black-level compensation is locked
-          to its current values,<wbr> or is free to vary
+              <p>Whether black-level compensation is locked
+to its current values,<wbr> or is free to vary</p>
             </td>
 
             <td class="entry_units">
@@ -11320,22 +11250,9 @@
             </td>
 
             <td class="entry_notes">
-              When set to ON,<wbr> the values used for black-level
-          compensation must not change until the lock is set to
-          OFF
-<br>
-<br>          Since changes to certain capture parameters (such as
-          exposure time) may require resetting of black level
-          compensation,<wbr> the HAL must report whether setting the
-          black level lock was successful in the output result
-          metadata.<wbr>
-<br>
-<br>          The black level locking must happen at the sensor,<wbr> and not at the ISP.<wbr>
-          If for some reason black level locking is no longer legal (for example,<wbr>
-          the analog gain has changed,<wbr> which forces black levels to be
-          recalculated),<wbr> then the HAL is free to override this request (and it
-          must report 'OFF' when this does happen) until the next time locking
-          is legal again.<wbr>
+              <p>Whether the black level offset was locked for this frame.<wbr>
+Should be ON if android.<wbr>black<wbr>Level.<wbr>lock was ON in the capture request,<wbr>
+unless a change in capture settings forced a black level reset.<wbr></p>
             </td>
 
             <td class="entry_tags">
