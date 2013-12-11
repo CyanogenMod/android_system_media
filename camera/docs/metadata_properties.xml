@@ -1317,14 +1317,17 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="V1" />
           </entry>
           <entry name="shadingMapSize" type="int32" visibility="public"
-                 type_notes="width and height of lens shading map provided by the HAL. (N, M)"
+                 type_notes="width and height of lens shading map provided by the HAL. (N x M)"
                  container="array" typedef="size">
             <array>
               <size>2</size>
             </array>
-            <description>Dimensions of lens shading
-            map</description>
+            <description>Dimensions of lens shading map.</description>
             <range>Both values &gt;= 1</range>
+            <notes>
+            The map should be on the order of 30-40 rows and columns, and
+            must be smaller than 64x64.
+            </notes>
             <tag id="V1" />
           </entry>
         </namespace>
@@ -2396,17 +2399,56 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>n</size>
             <size>m</size>
           </array>
-          <description>A low-resolution map of lens shading, per
-          color channel</description>
+          <description>The shading map is a low-resolution floating-point map
+          that lists the coefficients used to correct for vignetting, for each
+          Bayer color channel.</description>
           <range>Each gain factor is &gt;= 1</range>
-          <notes>Assume bilinear interpolation of map. The least
-          shaded section of the image should have a gain factor
+          <notes>The least shaded section of the image should have a gain factor
           of 1; all other sections should have gains above 1.
-          the map should be on the order of 30-40 rows, and
-          must be smaller than 64x64.
 
           When android.colorCorrection.mode = TRANSFORM_MATRIX, the map
           must take into account the colorCorrection settings.
+
+          The shading map is for the entire active pixel array, and is not
+          affected by the crop region specified in the request. Each shading map
+          entry is the value of the shading compensation map over a specific
+          pixel on the sensor.  Specifically, with a (N x M) resolution shading
+          map, and an active pixel array size (W x H), shading map entry
+          (x,y) ϵ (0 ... N-1, 0 ... M-1) is the value of the shading map at
+          pixel ( ((W-1)/(N-1)) * x, ((H-1)/(M-1)) * y) for the four color channels.
+          The map is assumed to be bilinearly interpolated between the sample points.
+
+          The channel order is [R, Geven, Godd, B], where Geven is the green
+          channel for the even rows of a Bayer pattern, and Godd is the odd rows.
+          The shading map is stored in a fully interleaved format, and its size
+          is provided in the camera static metadata by android.lens.info.shadingMapSize.
+
+          The shading map should have on the order of 30-40 rows and columns,
+          and must be smaller than 64x64.
+
+          As an example, given a very small map defined as:
+
+              android.lens.info.shadingMapSize = [ 4, 3 ]
+              android.statistics.lensShadingMap =
+              [ 1.3, 1.2, 1.15, 1.2,  1.2, 1.2, 1.15, 1.2,
+                  1.1, 1.2, 1.2, 1.2,  1.3, 1.2, 1.3, 1.3,
+                1.2, 1.2, 1.25, 1.1,  1.1, 1.1, 1.1, 1.0,
+                  1.0, 1.0, 1.0, 1.0,  1.2, 1.3, 1.25, 1.2,
+                1.3, 1.2, 1.2, 1.3,   1.2, 1.15, 1.1, 1.2,
+                  1.2, 1.1, 1.0, 1.2,  1.3, 1.15, 1.2, 1.3 ]
+
+          The low-resolution scaling map images for each channel are
+          (displayed using nearest-neighbor interpolation):
+
+          ![Red lens shading map](android.statistics.lensShadingMap/red_shading.png)
+          ![Green (even rows) lens shading map](android.statistics.lensShadingMap/green_e_shading.png)
+          ![Green (odd rows) lens shading map](android.statistics.lensShadingMap/green_o_shading.png)
+          ![Blue lens shading map](android.statistics.lensShadingMap/blue_shading.png)
+
+          As a visualization only, inverting the full-color map to recover an
+          image of a gray wall (using bicubic interpolation for visual quality) as captured by the sensor gives:
+
+          ![Image of a uniform white wall (inverse shading map)](android.statistics.lensShadingMap/inv_shading.png)
           </notes>
         </entry>
         <entry name="predictedColorGains" type="float" visibility="public"
@@ -2479,7 +2521,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           shading map in output result metadata</description>
           <notes>When set to ON,
           android.statistics.lensShadingMap must be provided in
-          the output result metdata.</notes>
+          the output result metadata.</notes>
         </entry>
       </controls>
     </section>

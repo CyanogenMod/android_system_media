@@ -34,6 +34,7 @@ fi
 
 thisdir=$(cd "$(dirname "$0")"; pwd)
 fwkdir="$ANDROID_BUILD_TOP/frameworks/base/core/java/android/hardware/camera2/"
+fwkdir_html="$ANDROID_BUILD_TOP/frameworks/base/docs/html"
 ctsdir="$ANDROID_BUILD_TOP/cts/tests/tests/hardware/src/android/hardware/camera2/cts"
 outdir="$ANDROID_PRODUCT_OUT/obj/ETC/system-media-camera-docs_intermediates"
 out_files=()
@@ -153,6 +154,32 @@ function insert_file() {
     out_files+=$'\n'" $dst_file"
 }
 
+# Recursively copy a directory tree from $1 to $2. Pretty-prints status.
+function copy_directory() {
+    local src="$thisdir/$1" # Relative to directory of this script
+    local dst="$2" # Absolute path
+
+    if ! [[ -d $src ]]; then
+        echo "FAIL: Source directory $src does not exist" >& 2
+        return 1
+    fi
+    if ! [[ -d $dst ]]; then
+        echo "FAIL: Destination directory $dst does not exist" >& 2
+        return 1
+    fi
+
+    cp -R "$src" "$dst"
+    local retval=$?
+
+    if [[ $retval -ne 0 ]]; then
+        echo "ERROR: Failed to copy $(relpath "$src") to $(relpath "$dst")" >& 2
+    else
+        echo "OK: Copied $(relpath "$src") to $(relpath "$dst")"
+    fi
+
+    return $retval
+}
+
 $thisdir/metadata-check-dependencies || exit 1
 $thisdir/metadata-validate $thisdir/metadata_properties.xml || exit 1
 $thisdir/metadata-parser-sanity-check || exit 1
@@ -176,6 +203,9 @@ insert_file "$outdir/CameraMetadataEnums.java.part" "$fwkdir/CameraMetadata.java
 insert_file "$outdir/CameraCharacteristicsKeys.java.part" "$fwkdir/CameraCharacteristics.java" || exit 1
 insert_file "$outdir/CaptureRequestKeys.java.part" "$fwkdir/CaptureRequest.java" || exit 1
 insert_file "$outdir/CaptureResultKeys.java.part" "$fwkdir/CaptureResult.java" || exit 1
+
+# Copy ./images directory into javadoc directory
+copy_directory "images" "$fwkdir_html" || exit 1
 
 # Generate CTS tests
 gen_file_abs CameraCharacteristicsTest.mako "$ctsdir/CameraCharacteristicsTest.java" || exit 1

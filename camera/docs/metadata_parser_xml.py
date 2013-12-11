@@ -247,6 +247,8 @@ class MetadataParserXml:
     The template gets the metadata as an argument, as well as all
     public attributes from the metadata_helpers module.
 
+    The output file is encoded with UTF-8.
+
     Args:
       template: path to a Mako template file
       output_name: path to the output file, or None to use stdout
@@ -271,7 +273,7 @@ class MetadataParserXml:
     if output_name is None:
       print tpl_data
     else:
-      file(output_name, "w").write(tpl_data)
+      file(output_name, "w").write(tpl_data.encode('utf-8'))
 
 #####################
 #####################

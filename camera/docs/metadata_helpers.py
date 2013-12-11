@@ -25,6 +25,12 @@ import textwrap
 
 from collections import OrderedDict
 
+# Relative path from HTML file to the base directory used by <img> tags
+IMAGE_SRC_METADATA="images/camera2/metadata/"
+
+# Prepend this path to each <img src="foo"> in javadocs
+JAVADOC_IMAGE_SRC_METADATA="../../../../" + IMAGE_SRC_METADATA
+
 _context_buf = None
 
 def _is_sec_or_ins(x):
@@ -640,7 +646,7 @@ def javadoc(text, indent = 4):
   comment_prefix = " " * indent + " * ";
 
   # render with markdown => HTML
-  javatext = md(text)
+  javatext = md(text, JAVADOC_IMAGE_SRC_METADATA)
 
   def line_filter(line):
     # Indent each line
@@ -653,13 +659,20 @@ def javadoc(text, indent = 4):
 
   return javatext
 
-def md(text):
+def md(text, img_src_prefix=""):
     """
     Run text through markdown to produce HTML.
 
     This also removes all common indentation from every line but the 0th.
     This will avoid getting <code> blocks in markdown.
     Ignoring the 0th line will also allow the 0th line not to be aligned.
+
+    Args:
+      text: A markdown-syntax using block of text to format.
+      img_src_prefix: An optional string to prepend to each <img src="target"/>
+
+    Returns:
+      String rendered by markdown and other rules applied (see above).
 
     For example, this avoids the following situation:
 
@@ -692,8 +705,13 @@ def md(text):
     text_not_first = "\n".join(text_lines[1:])
     text_not_first = textwrap.dedent(text_not_first)
     text = text_lines[0] + "\n" + text_not_first
+
     # render with markdown
-    return markdown.markdown(text)
+    text = markdown.markdown(text)
+
+    # prepend a prefix to each <img src="foo"> -> <img src="${prefix}foo">
+    text = re.sub(r'src="([^"]*)"', 'src="' + img_src_prefix + r'\1"', text)
+    return text
 
 def any_visible(section, kind_name, visibilities):
   """
