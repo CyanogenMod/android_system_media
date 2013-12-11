@@ -90,6 +90,7 @@
 
 <%!
   import re
+  import textwrap
 
   # insert word break hints for the browser
   def wbr(text):
@@ -104,9 +105,8 @@
         new_txt = new_txt.replace(words, new_word)
 
     # e.g. X/Y/Z -> X/<wbr>Y/<wbr>/Z. also for X.Y.Z, X_Y_Z.
-    replace_chars=['.', '/', '_', ',']
-    for i in replace_chars:
-      new_txt = new_txt.replace(i, i + "<wbr>")
+    # but don't insert <wbr> for HTML, e.g. </p> stays </p>
+    new_txt = re.sub(r'([^<])([.|/|_/,])', r"\1\2<wbr>", new_txt)
 
     return new_txt
 
@@ -270,7 +270,7 @@ ${          insert_toc_body(kind)}\
 
             <td class="entry_description">
             % if prop.description is not None:
-              ${prop.description | wbr, br}
+              ${prop.description | md, wbr}
             % endif
             </td>
 
@@ -288,7 +288,7 @@ ${          insert_toc_body(kind)}\
 
             <td class="entry_notes">
             % if prop.notes is not None:
-              ${prop.notes | wbr, br}
+              ${prop.notes | md, wbr}
             % endif
             </td>
 

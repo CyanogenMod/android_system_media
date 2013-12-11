@@ -20,6 +20,9 @@ A set of helpers for rendering Mako templates with a Metadata model.
 
 import metadata_model
 import re
+import markdown
+import textwrap
+
 from collections import OrderedDict
 
 _context_buf = None
@@ -610,7 +613,7 @@ def jenum_value(enum_entry, enum_value):
 
 def javadoc(text, indent = 4):
   """
-  Format text block as a javadoc comment section
+  Format markdown syntax text block as a javadoc comment section
 
   Args:
     text: A multi-line string to format
@@ -618,8 +621,8 @@ def javadoc(text, indent = 4):
   Returns:
     String with:
     - Indent and * for insertion into a Javadoc comment block
-    - Leading/trailing whitespace removed
-    - Paragraph tags added on newlines between paragraphs
+    - Trailing whitespace removed
+    - Entire body rendered via markdown to generate HTML
 
   Example:
     "This is a comment for Javadoc\n" +
@@ -629,38 +632,68 @@ def javadoc(text, indent = 4):
     "    That covers multiple lines as well\n"
 
     transforms to
-    "    * <p>\n" +
-    "    * This is a comment for Javadoc\n" +
+    "    * <p>This is a comment for Javadoc\n" +
     "    * with multiple lines, that should be\n" +
-    "    * formatted better\n" +
-    "    * </p><p>\n" +
-    "    * That covers multiple lines as well\n" +
-    "    * </p>\n"
+    "    * formatted better</p>\n" +
+    "    * <p>That covers multiple lines as well</p>\n" +
   """
   comment_prefix = " " * indent + " * ";
-  comment_para = comment_prefix + "</p><p>\n";
-  javatext = comment_prefix + "<p>\n";
 
-  in_body = False # Eat empty lines at start
-  first_paragraph = True
-  for line in ( line.strip() for line in text.splitlines() ):
-    if not line:
-      in_body = False # collapse multi-blank lines into one
-    else:
-      # Insert para end/start after a span of blank lines except for
-      # the first paragraph, which got a para start already
-      if not in_body and not first_paragraph:
-        javatext = javatext + comment_para
+  # render with markdown => HTML
+  javatext = md(text)
 
-      in_body = True
-      first_paragraph = False
+  def line_filter(line):
+    # Indent each line
+    # Add ' * ' to it for stylistic reasons
+    # Strip right side of trailing whitespace
+    return (comment_prefix + line).rstrip()
 
-      javatext = javatext + comment_prefix + line + "\n";
-
-  # Close last para tag
-  javatext = javatext + comment_prefix + "</p>\n";
+  # Process each line with above filter
+  javatext = "\n".join(line_filter(i) for i in javatext.split("\n")) + "\n"
 
   return javatext
+
+def md(text):
+    """
+    Run text through markdown to produce HTML.
+
+    This also removes all common indentation from every line but the 0th.
+    This will avoid getting <code> blocks in markdown.
+    Ignoring the 0th line will also allow the 0th line not to be aligned.
+
+    For example, this avoids the following situation:
+
+      <!-- Input -->
+
+      <!--- can't use dedent directly since 'foo' has no indent -->
+      <notes>foo
+          bar
+          bar
+      </notes>
+
+      <!-- Bad Output -- >
+      <!-- if no dedent is done generated code looks like -->
+      <p>foo
+        <code><pre>
+          bar
+          bar</pre></code>
+      </p>
+
+    Instead we get the more natural expected result:
+
+      <!-- Good Output -->
+      <p>foo
+      bar
+      bar</p>
+
+    """
+    text = textwrap.dedent(text)
+    text_lines = text.split('\n')
+    text_not_first = "\n".join(text_lines[1:])
+    text_not_first = textwrap.dedent(text_not_first)
+    text = text_lines[0] + "\n" + text_not_first
+    # render with markdown
+    return markdown.markdown(text)
 
 def any_visible(section, kind_name, visibilities):
   """
