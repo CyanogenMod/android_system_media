@@ -4723,18 +4723,21 @@ thumbnail<wbr></wbr></p></body></html>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <html><body><p>Resolution of embedded JPEG
-thumbnail<wbr></wbr></p></body></html>
+              <html><body><p>Resolution of embedded JPEG thumbnail<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <html><body><p>from android.jpeg.availableThumbnailSizes<wbr></wbr></p></body></html>
+              <html><body><p>Size must be one of the size from android.jpeg.availableThumbnailSizes<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_notes">
+              <html><body><p>When set to (0, 0) value, the JPEG EXIF must not contain thumbnail,
+but the captured JPEG must still be a valid image.</p>
+<p>When a jpeg image capture is issued, the thumbnail size selected should have
+the same aspect ratio as the jpeg image.<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_tags">
@@ -4784,14 +4787,12 @@ thumbnail<wbr></wbr></p></body></html>
                   2 x n
                 </span>
               <span class="entry_type_visibility"> [public as size]</span>
-                <div class="entry_type_notes"><html><body><p>list of resolution pairs<wbr></wbr></p></body></html></div>
 
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <html><body><p>Supported resolutions for the JPEG
-thumbnail<wbr></wbr></p></body></html>
+              <html><body><p>Supported resolutions for the JPEG thumbnail<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_units">
@@ -4799,10 +4800,23 @@ thumbnail<wbr></wbr></p></body></html>
 
             <td class="entry_range">
               <html><body><p>Must include at least one valid resolution, plus
-          (0,0) for no thumbnail generation<wbr></wbr></p></body></html>
+          (0,0) for no thumbnail generation, and each size must be distinct.<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_notes">
+              <html><body><p>Below condiditions must be satisfied for this size list:</p>
+<ul>
+<li>The sizes must be sorted by increasing pixel area (width x height).
+If several resolutions have the same area, they must be sorted by increasing width.</li>
+<li>The aspect ratio of the largest thumbnail size must be same as the
+aspect ratio of largest size in android.scaler.availableJpegSizes.
+The largest size is defined as the size that has the largest pixel area
+in a given size list.</li>
+<li>Each size in android.scaler.availableJpegSizes must have at least
+one corresponding size that has the same aspect ratio in availableThumbnailSizes,
+and vice versa.</li>
+<li>All non (0, 0) sizes must have non-zero widths and heights.</li>
+<wbr></wbr></ul></body></html>
             </td>
 
             <td class="entry_tags">
@@ -5141,18 +5155,21 @@ thumbnail<wbr></wbr></p></body></html>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <html><body><p>Resolution of embedded JPEG
-thumbnail<wbr></wbr></p></body></html>
+              <html><body><p>Resolution of embedded JPEG thumbnail<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <html><body><p>from android.jpeg.availableThumbnailSizes<wbr></wbr></p></body></html>
+              <html><body><p>Size must be one of the size from android.jpeg.availableThumbnailSizes<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_notes">
+              <html><body><p>When set to (0, 0) value, the JPEG EXIF must not contain thumbnail,
+but the captured JPEG must still be a valid image.</p>
+<p>When a jpeg image capture is issued, the thumbnail size selected should have
+the same aspect ratio as the jpeg image.<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_tags">

@@ -1142,23 +1142,38 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <array>
             <size>2</size>
           </array>
-          <description>Resolution of embedded JPEG
-          thumbnail</description>
-          <range>from android.jpeg.availableThumbnailSizes</range>
+          <description>Resolution of embedded JPEG thumbnail</description>
+          <range>Size must be one of the size from android.jpeg.availableThumbnailSizes</range>
+          <notes>When set to (0, 0) value, the JPEG EXIF must not contain thumbnail,
+          but the captured JPEG must still be a valid image.
+
+          When a jpeg image capture is issued, the thumbnail size selected should have
+          the same aspect ratio as the jpeg image.</notes>
           <tag id="BC" />
         </entry>
       </controls>
       <static>
         <entry name="availableThumbnailSizes" type="int32" visibility="public"
-        type_notes="list of resolution pairs" container="array" typedef="size">
+        container="array" typedef="size">
           <array>
             <size>2</size>
             <size>n</size>
           </array>
-          <description>Supported resolutions for the JPEG
-          thumbnail</description>
+          <description>Supported resolutions for the JPEG thumbnail</description>
           <range>Must include at least one valid resolution, plus
-          (0,0) for no thumbnail generation</range>
+          (0,0) for no thumbnail generation, and each size must be distinct.</range>
+          <notes>Below condiditions must be satisfied for this size list:
+
+          * The sizes must be sorted by increasing pixel area (width x height).
+          If several resolutions have the same area, they must be sorted by increasing width.
+          * The aspect ratio of the largest thumbnail size must be same as the
+          aspect ratio of largest size in android.scaler.availableJpegSizes.
+          The largest size is defined as the size that has the largest pixel area
+          in a given size list.
+          * Each size in android.scaler.availableJpegSizes must have at least
+          one corresponding size that has the same aspect ratio in availableThumbnailSizes,
+          and vice versa.
+          * All non (0, 0) sizes must have non-zero widths and heights.</notes>
           <tag id="BC" />
         </entry>
         <entry name="maxSize" type="int32" visibility="system">
