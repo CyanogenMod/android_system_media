@@ -1143,20 +1143,20 @@ ON_AUTO_FLASH_REDEYE.<wbr></wbr></p></body></html>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON_AUTO_FLASH</span>
-                    <span class="entry_type_enum_notes"><html><body><p>if flash exists Autoexposure is active, auto
+                    <span class="entry_type_enum_notes"><html><body><p>If autoexposure is active and flash exists, auto
             flash control; flash may be fired when precapture
             trigger is activated, and for captures for which
             captureIntent = STILL_CAPTURE<wbr></wbr></p></body></html></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON_ALWAYS_FLASH</span>
-                    <span class="entry_type_enum_notes"><html><body><p>if flash exists Autoexposure is active, auto
+                    <span class="entry_type_enum_notes"><html><body><p>If autoexposure is active and flash exists, auto
             flash control for precapture trigger and always flash
             when captureIntent = STILL_CAPTURE<wbr></wbr></p></body></html></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON_AUTO_FLASH_REDEYE</span>
-                    <span class="entry_type_enum_notes"><html><body><p>optional Automatic red eye reduction with flash.
+                    <span class="entry_type_enum_notes"><html><body><p>Optional. Automatic red eye reduction with flash.
             If deemed necessary, red eye reduction sequence should
             fire when precapture trigger is activated, and final
             flash should fire when captureIntent =
@@ -1179,8 +1179,15 @@ exposure and sensitivity fields<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_notes">
-              <html><body><p>Only effective if android.control.mode =
-AUTO<wbr></wbr></p></body></html>
+              <html><body><p>Only effective if android.control.mode = AUTO.</p>
+<p>If auto-exposure is active, HAL auto-focus routine is enabled,
+then HAL auto-exposure routine overrides the control variables
+that relate to auto-exposure routine, and these override values
+are then available in the result metadata for that capture.</p>
+<p>For example, if auto-exposure is enabled in a request, the HAL should
+overwrite the exposure, gain, and frame duration fields (and potentially
+the flash fields, depending on AE mode) of the request.  The overridden
+values are then provided back to the user in the corresponding result.<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_tags">
@@ -1346,7 +1353,7 @@ details.<wbr></wbr></p></body></html>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes"><html><body><p>The 3A routines do not control the lens;
+                    <span class="entry_type_enum_notes"><html><body><p>The auto-focus routine does not control the lens;
             android.lens.focusDistance is controlled by the
             application<wbr></wbr></p></body></html></span>
                   </li>
@@ -1354,14 +1361,13 @@ details.<wbr></wbr></p></body></html>
                     <span class="entry_type_enum_name">AUTO</span>
                     <span class="entry_type_enum_notes"><html><body><p>If lens is not fixed focus.
 
-            Use android.lens.minimumFocusDistance to determine if lens
-            is fixed focus In this mode, the lens does not move unless
+            Use android.lens.info.minimumFocusDistance to determine if lens
+            is fixed-focus. In this mode, the lens does not move unless
             the autofocus trigger action is called. When that trigger
             is activated, AF must transition to ACTIVE_SCAN, then to
-            the outcome of the scan (FOCUSED or
-            NOT_FOCUSED).
+            the outcome of the scan (FOCUSED or NOT_FOCUSED).
 
-            Triggering cancel AF resets the lens position to default,
+            Triggering AF_CANCEL resets the lens position to default,
             and sets the AF state to INACTIVE.<wbr></wbr></p></body></html></span>
                   </li>
                   <li>
@@ -1440,6 +1446,10 @@ mode it is set to<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_notes">
+              <html><body><p>Only effective if android.control.mode = AUTO.</p>
+<p>If lens is controlled by HAL auto-focus algorithm, the HAL should
+report the current AF status in android.control.afState in
+result metadata.<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_tags">
@@ -1658,7 +1668,8 @@ is<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_notes">
-              <html><body><p>[BC - AWB lock,AWB modes]<wbr></wbr></p></body></html>
+              <html><body><p>[BC - AWB lock,AWB modes]</p>
+<p>Only effective if android.control.mode = AUTO.<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_tags">
@@ -1914,6 +1925,16 @@ routines<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_notes">
+              <html><body><p>High-level 3A control. When set to OFF, all 3A control
+by the HAL is disabled. The application must set the fields for
+capture parameters itself.</p>
+<p>When set to AUTO, the individual algorithm controls in
+android.control.* are in effect, such as android.control.afMode.</p>
+<p>When set to USE_SCENE_MODE, the individual controls in
+android.control.* are mostly disabled, and the HAL implements
+one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
+as it wishes. The HAL scene mode 3A settings are provided by
+android.control.sceneModeOverrides.<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_tags">
@@ -2773,7 +2794,7 @@ notification callback is registered.<wbr></wbr></p></body></html>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes"><html><body><p>The 3A routines do not control the lens;
+                    <span class="entry_type_enum_notes"><html><body><p>The auto-focus routine does not control the lens;
             android.lens.focusDistance is controlled by the
             application<wbr></wbr></p></body></html></span>
                   </li>
@@ -2781,14 +2802,13 @@ notification callback is registered.<wbr></wbr></p></body></html>
                     <span class="entry_type_enum_name">AUTO</span>
                     <span class="entry_type_enum_notes"><html><body><p>If lens is not fixed focus.
 
-            Use android.lens.minimumFocusDistance to determine if lens
-            is fixed focus In this mode, the lens does not move unless
+            Use android.lens.info.minimumFocusDistance to determine if lens
+            is fixed-focus. In this mode, the lens does not move unless
             the autofocus trigger action is called. When that trigger
             is activated, AF must transition to ACTIVE_SCAN, then to
-            the outcome of the scan (FOCUSED or
-            NOT_FOCUSED).
+            the outcome of the scan (FOCUSED or NOT_FOCUSED).
 
-            Triggering cancel AF resets the lens position to default,
+            Triggering AF_CANCEL resets the lens position to default,
             and sets the AF state to INACTIVE.<wbr></wbr></p></body></html></span>
                   </li>
                   <li>
@@ -2867,6 +2887,10 @@ mode it is set to<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_notes">
+              <html><body><p>Only effective if android.control.mode = AUTO.</p>
+<p>If lens is controlled by HAL auto-focus algorithm, the HAL should
+report the current AF status in android.control.afState in
+result metadata.<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_tags">
@@ -3090,7 +3114,8 @@ is<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_notes">
-              <html><body><p>[BC - AWB lock,AWB modes]<wbr></wbr></p></body></html>
+              <html><body><p>[BC - AWB lock,AWB modes]</p>
+<p>Only effective if android.control.mode = AUTO.<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_tags">
@@ -3257,6 +3282,16 @@ routines<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_notes">
+              <html><body><p>High-level 3A control. When set to OFF, all 3A control
+by the HAL is disabled. The application must set the fields for
+capture parameters itself.</p>
+<p>When set to AUTO, the individual algorithm controls in
+android.control.* are in effect, such as android.control.afMode.</p>
+<p>When set to USE_SCENE_MODE, the individual controls in
+android.control.* are mostly disabled, and the HAL implements
+one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
+as it wishes. The HAL scene mode 3A settings are provided by
+android.control.sceneModeOverrides.<wbr></wbr></p></body></html>
             </td>
 
             <td class="entry_tags">

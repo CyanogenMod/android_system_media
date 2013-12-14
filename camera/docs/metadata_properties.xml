@@ -190,16 +190,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               control</notes>
             </value>
             <value>ON_AUTO_FLASH
-            <notes>if flash exists Autoexposure is active, auto
+            <notes>If autoexposure is active and flash exists, auto
             flash control; flash may be fired when precapture
             trigger is activated, and for captures for which
             captureIntent = STILL_CAPTURE</notes></value>
             <value>ON_ALWAYS_FLASH
-            <notes>if flash exists Autoexposure is active, auto
+            <notes>If autoexposure is active and flash exists, auto
             flash control for precapture trigger and always flash
             when captureIntent = STILL_CAPTURE</notes></value>
             <value>ON_AUTO_FLASH_REDEYE
-            <notes>optional Automatic red eye reduction with flash.
+            <notes>Optional. Automatic red eye reduction with flash.
             If deemed necessary, red eye reduction sequence should
             fire when precapture trigger is activated, and final
             flash should fire when captureIntent =
@@ -208,8 +208,17 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Whether AE is currently updating the sensor
           exposure and sensitivity fields</description>
           <range>android.control.aeAvailableModes</range>
-          <notes>Only effective if android.control.mode =
-          AUTO</notes>
+          <notes>Only effective if android.control.mode = AUTO.
+
+          If auto-exposure is active, HAL auto-focus routine is enabled,
+          then HAL auto-exposure routine overrides the control variables
+          that relate to auto-exposure routine, and these override values
+          are then available in the result metadata for that capture.
+
+          For example, if auto-exposure is enabled in a request, the HAL should
+          overwrite the exposure, gain, and frame duration fields (and potentially
+          the flash fields, depending on AE mode) of the request.  The overridden
+          values are then provided back to the user in the corresponding result.</notes>
           <tag id="BC" />
         </entry>
         <entry name="aeRegions" type="int32" visibility="public"
@@ -278,21 +287,20 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="afMode" type="byte" visibility="public" enum="true">
           <enum>
             <value>OFF
-            <notes>The 3A routines do not control the lens;
+            <notes>The auto-focus routine does not control the lens;
             android.lens.focusDistance is controlled by the
             application</notes></value>
             <value>AUTO
             <notes>
             If lens is not fixed focus.
 
-            Use android.lens.minimumFocusDistance to determine if lens
-            is fixed focus In this mode, the lens does not move unless
+            Use android.lens.info.minimumFocusDistance to determine if lens
+            is fixed-focus. In this mode, the lens does not move unless
             the autofocus trigger action is called. When that trigger
             is activated, AF must transition to ACTIVE_SCAN, then to
-            the outcome of the scan (FOCUSED or
-            NOT_FOCUSED).
+            the outcome of the scan (FOCUSED or NOT_FOCUSED).
 
-            Triggering cancel AF resets the lens position to default,
+            Triggering AF_CANCEL resets the lens position to default,
             and sets the AF state to INACTIVE.</notes></value>
             <value>MACRO
             <notes>In this mode, the lens does not move unless the
@@ -349,6 +357,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether AF is currently enabled, and what
           mode it is set to</description>
+          <notes>Only effective if android.control.mode = AUTO.
+
+          If lens is controlled by HAL auto-focus algorithm, the HAL should
+          report the current AF status in android.control.afState in
+          result metadata.</notes>
           <tag id="BC" />
         </entry>
         <entry name="afRegions" type="int32" visibility="public"
@@ -435,7 +448,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Whether AWB is currently setting the color
           transform fields, and what its illumination target
           is</description>
-          <notes>[BC - AWB lock,AWB modes]</notes>
+          <notes>[BC - AWB lock,AWB modes]
+
+          Only effective if android.control.mode = AUTO.</notes>
           <tag id="BC" />
           <tag id="AWB" />
         </entry>
@@ -539,6 +554,18 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Overall mode of 3A control
           routines</description>
           <range>all must be supported</range>
+          <notes>High-level 3A control. When set to OFF, all 3A control
+          by the HAL is disabled. The application must set the fields for
+          capture parameters itself.
+
+          When set to AUTO, the individual algorithm controls in
+          android.control.* are in effect, such as android.control.afMode.
+
+          When set to USE_SCENE_MODE, the individual controls in
+          android.control.* are mostly disabled, and the HAL implements
+          one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
+          as it wishes. The HAL scene mode 3A settings are provided by
+          android.control.sceneModeOverrides.</notes>
           <tag id="BC" />
         </entry>
         <entry name="sceneMode" type="byte" visibility="public" enum="true">
