@@ -900,14 +900,22 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>OFF
             <notes>No edge enhancement is applied</notes></value>
             <value>FAST
-            <notes>Must not slow down frame rate relative to raw
-            bayer output</notes></value>
+            <notes>Must not slow down frame rate relative to sensor
+            output</notes></value>
             <value>HIGH_QUALITY
             <notes>Frame rate may be reduced by high
             quality</notes></value>
           </enum>
           <description>Operation mode for edge
           enhancement</description>
+          <notes>Edge/sharpness/detail enhancement. OFF means no
+          enhancement will be applied by the HAL.
+
+          FAST/HIGH_QUALITY both mean HAL-determined enhancement
+          will be applied. HIGH_QUALITY mode indicates that the
+          HAL should use the highest-quality enhancement algorithms,
+          even if it slows down capture rate. FAST means the HAL should
+          not slow down capture rate when applying edge enhancement.</notes>
         </entry>
         <entry name="strength" type="byte">
           <description>Control the amount of edge enhancement
@@ -1450,8 +1458,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>OFF
             <notes>No noise reduction is applied</notes></value>
             <value>FAST
-            <notes>Must not slow down frame rate relative to raw
-            bayer output</notes></value>
+            <notes>Must not slow down frame rate relative to sensor
+            output</notes></value>
             <value>HIGH_QUALITY
             <notes>May slow down frame rate to provide highest
             quality</notes></value>
@@ -1459,6 +1467,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Mode of operation for the noise reduction
           algorithm</description>
           <range>android.noiseReduction.availableModes</range>
+          <notes>Noise filtering control. OFF means no noise reduction
+          will be applied by the HAL.
+
+          FAST/HIGH_QUALITY both mean HAL-determined noise filtering
+          will be applied. HIGH_QUALITY mode indicates that the HAL
+          should use the highest-quality noise filtering algorithms,
+          even if it slows down capture rate. FAST means the HAL should not
+          slow down capture rate when applying noise filtering.</notes>
           <tag id="V1" />
         </entry>
         <entry name="strength" type="byte">
