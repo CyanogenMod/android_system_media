@@ -29,6 +29,7 @@
     .section { color: #eeeeee; font-size: 1.5em; font-weight: bold; background-color: #888888; padding: 0.5em 0em 0.5em 0.5em; border-width: thick thin thin thin; border-color: #111111 #777777 #777777 #777777}
     .kind { color: #eeeeee; font-size: 1.2em; font-weight: bold; padding-left: 1.5em; background-color: #aaaaaa }
     .entry { background-color: #f0f0f0 }
+    .entry_cont { background-color: #f0f0f0 }
     .entries_header { background-color: #dddddd; text-align: center}
 
     /* toc style */
@@ -41,7 +42,7 @@
     .th_name { width: 20% }
     .th_units { width: 10% }
     .th_tags { width: 5% }
-    .th_notes { width: 25% }
+    .th_details { width: 25% }
     .th_type { width: 20% }
     .th_description { width: 20% }
     .th_range { width: 10% }
@@ -51,7 +52,7 @@
     .thead_dummy { visibility: hidden; }
 
     /* Entry flair */
-    .entry_name { color: #333333; padding-left:1.0em; font-size:1.1em; font-family: monospace; }
+    .entry_name { color: #333333; padding-left:1.0em; font-size:1.1em; font-family: monospace; vertical-align:top; }
 
     /* Entry type flair */
     .entry_type_name { font-size:1.1em; color: #669900; font-weight: bold;}
@@ -64,11 +65,15 @@
     .entry ul { margin: 0 0 0 0; list-style-position: inside; padding-left: 0.5em; }
     .entry ul li { padding: 0 0 0 0; margin: 0 0 0 0;}
 
-    /* Entry visibility flair */
-
     /* Entry tags flair */
     .entry_tags ul { list-style-type: none; }
 
+    /* Entry details (full docs) flair */
+    .entry_details_header { font-weight: bold; background-color: #dddddd;
+      text-align: center; font-size: 1.1em; margin-left: 0em; margin-right: 0em; }
+
+    /* Entry spacer flair */
+    .entry_spacer { background-color: transparent; border-style: none; height: 0.5em; }
 
     /* TODO: generate abbr element for each tag link? */
     /* TODO for each x.y.z try to link it to the entry */
@@ -187,7 +192,6 @@ ${          insert_toc_body(kind)}\
         <th class="th_description">Description</th>
         <th class="th_units">Units</th>
         <th class="th_range">Range</th>
-        <th class="th_notes">Notes</th>
         <th class="th_tags">Tags</th>
       </tr>
     </thead> <!-- so that the first occurrence of thead is not
@@ -195,14 +199,14 @@ ${          insert_toc_body(kind)}\
 % for root in metadata.outer_namespaces:
 <!-- <namespace name="${root.name}"> -->
   % for section in root.sections:
-  <tr><td colspan="7" id="section_${section.name}" class="section">${section.name}</td></tr>
+  <tr><td colspan="6" id="section_${section.name}" class="section">${section.name}</td></tr>
 
     % if section.description is not None:
       <tr class="description"><td>${section.description}</td></tr>
     % endif
 
     % for kind in section.merged_kinds: # dynamic,static,controls
-      <tr><td colspan="7" class="kind">${kind.name}</td></tr>
+      <tr><td colspan="6" class="kind">${kind.name}</td></tr>
 
       <thead class="entries_header">
         <tr>
@@ -211,7 +215,6 @@ ${          insert_toc_body(kind)}\
           <th class="th_description">Description</th>
           <th class="th_units">Units</th>
           <th class="th_range">Range</th>
-          <th class="th_notes">Notes</th>
           <th class="th_tags">Tags</th>
         </tr>
       </thead>
@@ -247,7 +250,11 @@ ${          insert_toc_body(kind)}\
             </clone>
         % else:
           <tr class="entry" id="${prop.kind}_${prop.name}">
-            <td class="entry_name">${prop.name | wbr}</td>
+            <td class="entry_name"
+                % if prop.notes is not None:
+                  rowspan="3"
+                % endif
+                >${prop.name | wbr}</td>
             <td class="entry_type">
               % if prop.enum:
                 <span class="entry_type_name entry_type_name_enum">${prop.type}</span>
@@ -313,12 +320,6 @@ ${          insert_toc_body(kind)}\
             % endif
             </td>
 
-            <td class="entry_notes">
-            % if prop.notes is not None:
-              ${prop.notes | md_html, wbr}
-            % endif
-            </td>
-
             <td class="entry_tags">
             % if next(prop.tags, None):
               <ul class="entry_tags">
@@ -329,7 +330,19 @@ ${          insert_toc_body(kind)}\
             % endif
             </td>
 
-          </tr> <!-- end of entry -->
+          </tr>
+          % if prop.notes is not None:
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              ${prop.notes | md_html, wbr}
+            </td>
+          </tr>
+          % endif
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
         % endif
         </%def>
 
