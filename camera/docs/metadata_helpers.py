@@ -22,6 +22,9 @@ import metadata_model
 import re
 import markdown
 import textwrap
+import bs4
+# Monkey-patch BS4. WBR element must not have an end tag.
+bs4.builder.HTMLTreeBuilder.empty_element_tags.add("wbr")
 
 from collections import OrderedDict
 
@@ -749,3 +752,63 @@ def filter_visibility(entries, visibilities):
     An iterable of Entry nodes
   """
   return (e for e in entries if e.applied_visibility in visibilities)
+
+def wbr(text):
+  """
+  Insert word break hints for the browser in the form of <wbr> HTML tags.
+
+  Word breaks are inserted inside an HTML node only, so the nodes themselves
+  will not be changed. Attributes are also left unchanged.
+
+  The following rules apply to insert word breaks:
+  - For characters in [ '.', '/', '_' ]
+  - For uppercase letters inside a multi-word X.Y.Z (at least 3 parts)
+
+  Args:
+    text: A string of text containing HTML content.
+
+  Returns:
+    A string with <wbr> inserted by the above rules.
+  """
+  SPLIT_CHARS_LIST = ['.', '_', '/']
+  SPLIT_CHARS = r'([.|/|_/,]+)' # split by these characters
+  CAP_LETTER_MIN = 3 # at least 3 components split by above chars, i.e. x.y.z
+  def wbr_filter(text):
+      new_txt = text
+
+      # for johnyOrange.appleCider.redGuardian also insert wbr before the caps
+      # => johny<wbr>Orange.apple<wbr>Cider.red<wbr>Guardian
+      for words in text.split(" "):
+        for char in SPLIT_CHARS_LIST:
+          # match at least x.y.z, don't match x or x.y
+          if len(words.split(char)) >= CAP_LETTER_MIN:
+            new_word = re.sub(r"([a-z])([A-Z])", r"\1<wbr>\2", words)
+            new_txt = new_txt.replace(words, new_word)
+
+      # e.g. X/Y/Z -> X/<wbr>Y/<wbr>/Z. also for X.Y.Z, X_Y_Z.
+      new_txt = re.sub(SPLIT_CHARS, r"\1<wbr>", new_txt)
+
+      return new_txt
+
+  # Do not mangle HTML when doing the replace by using BeatifulSoup
+  # - Use the 'html.parser' to avoid inserting <html><body> when decoding
+  soup = bs4.BeautifulSoup(text, features='html.parser')
+  wbr_tag = lambda: soup.new_tag('wbr') # must generate new tag every time
+
+  for navigable_string in soup.findAll(text=True):
+      parent = navigable_string.parent
+
+      # Insert each '$text<wbr>$foo' before the old '$text$foo'
+      split_by_wbr_list = wbr_filter(navigable_string).split("<wbr>")
+      for (split_string, last) in enumerate_with_last(split_by_wbr_list):
+          navigable_string.insert_before(split_string)
+
+          if not last:
+            # Note that 'insert' will move existing tags to this spot
+            # so make a new tag instead
+            navigable_string.insert_before(wbr_tag())
+
+      # Remove the old unmodified text
+      navigable_string.extract()
+
+  return soup.decode()

@@ -29,6 +29,24 @@ tmp_out=$(mktemp -t tmp.XXXXXXXXXX)
 tmp_tidy1=$(mktemp -t tmp.XXXXXXXXXX)
 tmp_tidy2=$(mktemp -t tmp.XXXXXXXXXX)
 
+function check_test
+{
+    local file="$1"
+    local results
+    results="$(python "$file" 2>&1)"
+    local retval=$?
+    if [[ $retval -ne 0 ]]
+    then
+        echo "$results" >& 2
+        echo "FAILED: Unit tests $file"
+    else
+        echo "SUCCESS: Unit tests $file"
+    fi
+    return $retval
+}
+
+check_test "$thisdir/metadata_model_test.py" || exit 1
+check_test "$thisdir/metadata_helpers_test.py" || exit 1
 python $thisdir/metadata_parser_xml.py $thisdir/metadata_properties.xml $thisdir/metadata_template.mako $tmp_out || exit 1
 tidy -indent -xml -quiet $thisdir/metadata_properties.xml > $tmp_tidy1
 tidy -indent -xml -quiet $tmp_out > $tmp_tidy2

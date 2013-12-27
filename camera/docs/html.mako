@@ -95,47 +95,9 @@
 
 <%!
   import re
-  import textwrap
   from metadata_helpers import md
   from metadata_helpers import IMAGE_SRC_METADATA
-
-  import bs4
-
-  # insert word break hints for the browser
-  def wbr(text):
-    def wbr_filter(text):
-        new_txt = text
-
-        # for johnyOrange.appleCider.redGuardian also insert wbr before the caps
-        # => johny<wbr>Orange.apple<wbr>Cider.red<wbr>Guardian
-        for words in text.split(" "):
-          if len(words.split(".")) >= 3: # match only x.y.z
-            addwbr = lambda x: i.isupper() and ("<wbr>" + i) or i
-            new_word = "".join([addwbr(i) for i in words])
-            new_txt = new_txt.replace(words, new_word)
-
-        # e.g. X/Y/Z -> X/<wbr>Y/<wbr>/Z. also for X.Y.Z, X_Y_Z.
-        # but don't insert <wbr> for HTML, e.g. </p> stays </p>
-        new_txt = re.sub(r'([^<])([.|/|_/,])', r"\1\2<wbr>", new_txt)
-
-        return new_txt
-
-    # Do not mangle HTML when doing the replace.
-    soup = bs4.BeautifulSoup(text)
-    wbr_tag = soup.new_tag('wbr')
-
-    for navigable_string in soup.findAll(text=True):
-        parent = navigable_string.parent
-
-        # Insert each 'text<wbr>foo' before the old '$text$foo'
-        for split_string in wbr_filter(navigable_string).split("<wbr>"):
-            navigable_string.insert_before(split_string)
-            navigable_string.insert_before(wbr_tag)
-
-        # Remove the old unmodified text
-        navigable_string.extract()
-
-    return soup.decode()
+  from metadata_helpers import wbr
 
   # insert line breaks after every two \n\n
   def br(text):
