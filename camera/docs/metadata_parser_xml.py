@@ -225,7 +225,7 @@ class MetadataParserXml:
   def _parse_entry_optional(self, entry):
     d = {}
 
-    optional_elements = ['description', 'range', 'units', 'notes']
+    optional_elements = ['description', 'range', 'units', 'details', 'hal_details']
     for i in optional_elements:
       prop = find_child_tag(entry, i)
 

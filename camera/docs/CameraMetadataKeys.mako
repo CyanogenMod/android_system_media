@@ -31,8 +31,8 @@
   % if entry.description:
 ${entry.description | javadoc}\
   % endif
-  % if entry.notes:
-${entry.notes | javadoc}\
+  % if entry.details:
+${entry.details | javadoc}\
   % endif
   % if entry.enum and not (entry.typedef and entry.typedef.languages.get('java')):
     % for value in entry.enum.values:

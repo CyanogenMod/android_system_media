@@ -1066,7 +1066,8 @@ class Entry(Node):
       description: A string with a description of the entry.
       range: A string with the range of the values of the entry, e.g. '>= 0'
       units: A string with the units of the values, e.g. 'inches'
-      notes: A string with the notes for the entry
+      details: A string with the detailed documentation for the entry
+      hal_details: A string with the HAL implementation details for the entry
       tag_ids: A list of tag ID strings, e.g. ['BC', 'V1']
       type_notes: A string with the notes for the type
       visibility: A string describing the visibility, eg 'system', 'hidden',
@@ -1147,8 +1148,12 @@ class Entry(Node):
     return self._units
 
   @property
-  def notes(self):
-    return self._notes
+  def details(self):
+    return self._details
+
+  @property
+  def hal_details(self):
+    return self._hal_details
 
   @property
   def tags(self):
@@ -1202,7 +1207,8 @@ class Entry(Node):
     self._description = kwargs.get('description')
     self._range = kwargs.get('range')
     self._units = kwargs.get('units')
-    self._notes = kwargs.get('notes')
+    self._details = kwargs.get('details')
+    self._hal_details = kwargs.get('hal_details')
 
     self._tag_ids = kwargs.get('tag_ids', [])
     self._tags = None  # Filled in by Metadata::_construct_tags
@@ -1344,7 +1350,8 @@ class Clone(Entry):
       description: A string with a description of the entry.
       range: A string with the range of the values of the entry, e.g. '>= 0'
       units: A string with the units of the values, e.g. 'inches'
-      notes: A string with the notes for the entry
+      details: A string with the detailed documentation for the entry
+      hal_details: A string with the HAL implementation details for the entry
       tag_ids: A list of tag ID strings, e.g. ['BC', 'V1']
       type_notes: A string with the notes for the type
 
@@ -1397,7 +1404,8 @@ class MergedEntry(Entry):
     Args:
       entry: An Entry or Clone instance
     """
-    props_distinct = ['description', 'units', 'range', 'notes', 'tags', 'kind']
+    props_distinct = ['description', 'units', 'range', 'details',
+                      'hal_details', 'tags', 'kind']
 
     for p in props_distinct:
       p = '_' + p

@@ -81,8 +81,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </value>
           </enum>
 
-          <notes>When android.control.awbMode is not OFF, TRANSFORM_MATRIX
-          should be ignored.</notes>
+          <details>When android.control.awbMode is not OFF, TRANSFORM_MATRIX
+          should be ignored.</details>
         </entry>
         <entry name="transform" type="rational" visibility="public"
                type_notes="3x3 rational matrix in row-major order"
@@ -96,14 +96,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </description>
           <range>Output values are expected to be in the range
           (0,1)</range>
-          <notes>This matrix is either set by HAL when the request
+          <details>This matrix is either set by HAL when the request
           android.colorCorrection.mode is not TRANSFORM_MATRIX, or
           directly by the application in the request when the
           android.colorCorrection.mode is TRANSFORM_MATRIX.
 
           In the latter case, the HAL may round the matrix to account
           for precision issues; the final rounded matrix should be
-          reported back in this matrix result metadata.</notes>
+          reported back in this matrix result metadata.</details>
         </entry>
         <entry name="gains" type="float" visibility="public"
                type_notes="A 1D array of floats for 4 color channel gains"
@@ -113,7 +113,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>Gains applying to Bayer color channels for
           white-balance</description>
-          <notes>The 4-channel white-balance gains are defined in
+          <details>The 4-channel white-balance gains are defined in
           the order of [R G_even G_odd B], where G_even is the gain
           for green pixels on even rows of the output, and G_odd
           is the gain for greenpixels on the odd rows. if a HAL
@@ -127,7 +127,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.colorCorrection.mode is TRANSFORM_MATRIX.
 
           The ouput should be the gains actually applied by the HAL to
-          the current frame.</notes>
+          the current frame.</details>
         </entry>
       </controls>
       <dynamic>
@@ -156,9 +156,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Adjustment to AE target image
           brightness</description>
           <units>count of positive/negative EV steps</units>
-          <notes>For example, if EV step is 0.333, '6' will mean an
+          <details>For example, if EV step is 0.333, '6' will mean an
           exposure compensation of +2 EV; -3 will mean an exposure
-          compensation of -1</notes>
+          compensation of -1</details>
           <tag id="BC" />
         </entry>
         <entry name="aeLock" type="byte" visibility="public" enum="true"
@@ -174,9 +174,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether AE is currently locked to its latest
           calculated values</description>
-          <notes>Note that even when AE is locked, the flash may be
+          <details>Note that even when AE is locked, the flash may be
           fired if the AE mode is ON_AUTO_FLASH / ON_ALWAYS_FLASH /
-          ON_AUTO_FLASH_REDEYE.</notes>
+          ON_AUTO_FLASH_REDEYE.</details>
           <tag id="BC" />
         </entry>
         <entry name="aeMode" type="byte" visibility="public" enum="true">
@@ -208,7 +208,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Whether AE is currently updating the sensor
           exposure and sensitivity fields</description>
           <range>android.control.aeAvailableModes</range>
-          <notes>Only effective if android.control.mode = AUTO.
+          <details>Only effective if android.control.mode = AUTO.
 
           If auto-exposure is active, HAL auto-focus routine is enabled,
           then HAL auto-exposure routine overrides the control variables
@@ -218,7 +218,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           For example, if auto-exposure is enabled in a request, the HAL should
           overwrite the exposure, gain, and frame duration fields (and potentially
           the flash fields, depending on AE mode) of the request.  The overridden
-          values are then provided back to the user in the corresponding result.</notes>
+          values are then provided back to the user in the corresponding result.</details>
           <tag id="BC" />
         </entry>
         <entry name="aeRegions" type="int32" visibility="public"
@@ -229,7 +229,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>List of areas to use for
           metering</description>
-          <notes>Each area is a rectangle plus weight: xmin, ymin,
+          <details>Each area is a rectangle plus weight: xmin, ymin,
           xmax, ymax, weight. The rectangle is defined inclusive of the
           specified coordinates.
 
@@ -244,7 +244,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           needs to be used by the HAL. If the metering region is
           outside the current android.scaler.cropRegion, the HAL
           should ignore the sections outside the region and output the
-          used sections in the frame metadata</notes>
+          used sections in the frame metadata</details>
           <tag id="BC" />
         </entry>
         <entry name="aeTargetFpsRange" type="int32" visibility="public"
@@ -255,8 +255,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Range over which fps can be adjusted to
           maintain exposure</description>
           <range>android.control.aeAvailableTargetFpsRanges</range>
-          <notes>Only constrains AE algorithm, not manual control
-          of android.sensor.exposureTime</notes>
+          <details>Only constrains AE algorithm, not manual control
+          of android.sensor.exposureTime</details>
           <tag id="BC" />
         </entry>
         <entry name="aePrecaptureTrigger" type="byte" visibility="public"
@@ -274,14 +274,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether the HAL must trigger precapture
           metering.</description>
-          <notes>This entry is normally set to IDLE, or is not
+          <details>This entry is normally set to IDLE, or is not
           included at all in the request settings. When included and
           set to START, the HAL must trigger the autoexposure
           precapture metering sequence.
 
           The effect of AE precapture trigger depends on the current
           AE mode and state; see the camera HAL device v3 header for
-          details.</notes>
+          details.</details>
           <tag id="BC" />
         </entry>
         <entry name="afMode" type="byte" visibility="public" enum="true">
@@ -357,11 +357,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether AF is currently enabled, and what
           mode it is set to</description>
-          <notes>Only effective if android.control.mode = AUTO.
+          <details>Only effective if android.control.mode = AUTO.
 
           If lens is controlled by HAL auto-focus algorithm, the HAL should
           report the current AF status in android.control.afState in
-          result metadata.</notes>
+          result metadata.</details>
           <tag id="BC" />
         </entry>
         <entry name="afRegions" type="int32" visibility="public"
@@ -372,7 +372,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>List of areas to use for focus
           estimation</description>
-          <notes>Each area is a rectangle plus weight: xmin, ymin,
+          <details>Each area is a rectangle plus weight: xmin, ymin,
           xmax, ymax, weight. The rectangle is defined inclusive of the
           specified coordinates.
 
@@ -387,7 +387,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           needs to be used by the HAL. If the focusing region is
           outside the current android.scaler.cropRegion, the HAL
           should ignore the sections outside the region and output the
-          used sections in the frame metadata</notes>
+          used sections in the frame metadata</details>
           <tag id="BC" />
         </entry>
         <entry name="afTrigger" type="byte" visibility="public" enum="true">
@@ -404,14 +404,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </value>
           </enum>
           <description>Whether the HAL must trigger autofocus.</description>
-          <notes>This entry is normally set to IDLE, or is not
+          <details>This entry is normally set to IDLE, or is not
           included at all in the request settings.
 
           When included and set to START, the HAL must trigger the
           autofocus algorithm. The effect of AF trigger depends on the
           current AF mode and state; see the camera HAL device v3
           header for details. When set to CANCEL, the HAL must cancel
-          any active trigger, and return to initial AF state.</notes>
+          any active trigger, and return to initial AF state.</details>
           <tag id="BC" />
         </entry>
         <entry name="awbLock" type="byte" visibility="public" enum="true"
@@ -428,9 +428,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether AWB is currently locked to its
           latest calculated values</description>
-          <notes>Note that AWB lock is only meaningful for AUTO
+          <details>Note that AWB lock is only meaningful for AUTO
           mode; in other modes, AWB is already fixed to a specific
-          setting</notes>
+          setting</details>
           <tag id="BC" />
         </entry>
         <entry name="awbMode" type="byte" visibility="public" enum="true">
@@ -448,9 +448,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Whether AWB is currently setting the color
           transform fields, and what its illumination target
           is</description>
-          <notes>[BC - AWB lock,AWB modes]
+          <details>[BC - AWB lock,AWB modes]
 
-          Only effective if android.control.mode = AUTO.</notes>
+          Only effective if android.control.mode = AUTO.</details>
           <tag id="BC" />
           <tag id="AWB" />
         </entry>
@@ -462,7 +462,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>List of areas to use for illuminant
           estimation</description>
-          <notes>Only used in AUTO mode.
+          <details>Only used in AUTO mode.
 
           Each area is a rectangle plus weight: xmin, ymin,
           xmax, ymax, weight. The rectangle is defined inclusive of the
@@ -479,7 +479,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           needs to be used by the HAL. If the metering region is
           outside the current android.scaler.cropRegion, the HAL
           should ignore the sections outside the region and output the
-          used sections in the frame metadata</notes>
+          used sections in the frame metadata</details>
           <tag id="BC" />
         </entry>
         <entry name="captureIntent" type="byte" visibility="public" enum="true">
@@ -511,7 +511,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           of this capture, to help decide optimal 3A
           strategy</description>
           <range>all must be supported</range>
-          <notes>Only used if android.control.mode != OFF.</notes>
+          <details>Only used if android.control.mode != OFF.</details>
           <tag id="BC" />
         </entry>
         <entry name="effectMode" type="byte" visibility="public" enum="true">
@@ -554,7 +554,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Overall mode of 3A control
           routines</description>
           <range>all must be supported</range>
-          <notes>High-level 3A control. When set to OFF, all 3A control
+          <details>High-level 3A control. When set to OFF, all 3A control
           by the HAL is disabled. The application must set the fields for
           capture parameters itself.
 
@@ -565,7 +565,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.control.* are mostly disabled, and the HAL implements
           one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
           as it wishes. The HAL scene mode 3A settings are provided by
-          android.control.sceneModeOverrides.</notes>
+          android.control.sceneModeOverrides.</details>
           <tag id="BC" />
         </entry>
         <entry name="sceneMode" type="byte" visibility="public" enum="true">
@@ -611,9 +611,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether video stabilization is
           active</description>
-          <notes>If enabled, video stabilization can modify the
+          <details>If enabled, video stabilization can modify the
           android.scaler.cropRegion to keep the video stream
-          stabilized</notes>
+          stabilized</details>
           <tag id="BC" />
         </entry>
       </controls>
@@ -737,7 +737,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           For each entry, the order is {aeMode, awbMode, afMode} in
           order of increasing index</range>
-          <notes>When a scene mode is enabled, the HAL is expected
+          <details>When a scene mode is enabled, the HAL is expected
           to override aeMode, awbMode, and afMode with its
           preferred settings for that scene mode.
 
@@ -755,7 +755,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           { FACE_PRIORITY, ACTION, NIGHT }, then the service expects
           this field to have 9 entries; for example { 0 , 0, 0,
           ON_AUTO_FLASH, AUTO, CONTINUOUS_PICTURE, ON_AUTO_FLASH,
-          INCANDESCENT, AUTO }</notes>
+          INCANDESCENT, AUTO }</details>
           <tag id="BC" />
         </entry>
       </static>
@@ -763,10 +763,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="aePrecaptureId" type="int32" visibility="hidden">
           <description>The ID sent with the latest
           CAMERA2_TRIGGER_PRECAPTURE_METERING call</description>
-          <notes>Must be 0 if no
+          <details>Must be 0 if no
           CAMERA2_TRIGGER_PRECAPTURE_METERING trigger received yet
           by HAL. Always updated even if AE algorithm ignores the
-          trigger</notes>
+          trigger</details>
         </entry>
         <clone entry="android.control.aeRegions" kind="controls">
         </clone>
@@ -797,9 +797,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             FLASH_REQUIRED as appropriate</notes></value>
           </enum>
           <description>Current state of AE algorithm</description>
-          <notes>Whenever the AE algorithm state changes, a
+          <details>Whenever the AE algorithm state changes, a
           MSG_AUTOEXPOSURE notification must be send if a
-          notification callback is registered.</notes>
+          notification callback is registered.</details>
         </entry>
         <clone entry="android.control.afMode" kind="controls">
         </clone>
@@ -837,16 +837,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             scanning at any time.</notes></value>
           </enum>
           <description>Current state of AF algorithm</description>
-          <notes>Whenever the AF algorithm state changes, a
+          <details>Whenever the AF algorithm state changes, a
           MSG_AUTOFOCUS notification must be send if a notification
-          callback is registered.</notes>
+          callback is registered.</details>
         </entry>
         <entry name="afTriggerId" type="int32" visibility="hidden">
           <description>The ID sent with the latest
           CAMERA2_TRIGGER_AUTOFOCUS call</description>
-          <notes>Must be 0 if no CAMERA2_TRIGGER_AUTOFOCUS trigger
+          <details>Must be 0 if no CAMERA2_TRIGGER_AUTOFOCUS trigger
           received yet by HAL. Always updated even if AF algorithm
-          ignores the trigger</notes>
+          ignores the trigger</details>
         </entry>
         <clone entry="android.control.awbMode" kind="controls">
         </clone>
@@ -868,9 +868,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             LOCKED)</notes></value>
           </enum>
           <description>Current state of AWB algorithm</description>
-          <notes>Whenever the AWB algorithm state changes, a
+          <details>Whenever the AWB algorithm state changes, a
           MSG_AUTOWHITEBALANCE notification must be send if a
-          notification callback is registered.</notes>
+          notification callback is registered.</details>
         </entry>
         <clone entry="android.control.mode" kind="controls">
         </clone>
@@ -908,14 +908,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Operation mode for edge
           enhancement</description>
-          <notes>Edge/sharpness/detail enhancement. OFF means no
+          <details>Edge/sharpness/detail enhancement. OFF means no
           enhancement will be applied by the HAL.
 
           FAST/HIGH_QUALITY both mean HAL-determined enhancement
           will be applied. HIGH_QUALITY mode indicates that the
           HAL should use the highest-quality enhancement algorithms,
           even if it slows down capture rate. FAST means the HAL should
-          not slow down capture rate when applying edge enhancement.</notes>
+          not slow down capture rate when applying edge enhancement.</details>
         </entry>
         <entry name="strength" type="byte">
           <description>Control the amount of edge enhancement
@@ -933,9 +933,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Power for flash firing/torch</description>
           <units>10 is max power; 0 is no flash. Linear</units>
           <range>0 - 10</range>
-          <notes>Power for snapshot may use a different scale than
+          <details>Power for snapshot may use a different scale than
           for torch mode. Only one entry for torch mode will be
-          used</notes>
+          used</details>
           <tag id="V1" />
         </entry>
         <entry name="firingTime" type="int64">
@@ -943,8 +943,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           exposure</description>
           <units>nanoseconds</units>
           <range>0-(exposure time-flash duration)</range>
-          <notes>Clamped to (0, exposure time - flash
-          duration).</notes>
+          <details>Clamped to (0, exposure time - flash
+          duration).</details>
           <tag id="V1" />
         </entry>
         <entry name="mode" type="byte" visibility="public" enum="true">
@@ -971,8 +971,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>Whether this camera has a
             flash</description>
             <units>boolean (0 = false, otherwise true)</units>
-            <notes>If no flash, none of the flash controls do
-            anything. All other metadata should return 0</notes>
+            <details>If no flash, none of the flash controls do
+            anything. All other metadata should return 0</details>
             <tag id="BC" />
           </entry>
           <entry name="chargeDuration" type="int64">
@@ -980,8 +980,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             again</description>
             <units>nanoseconds</units>
             <range>0-1e9</range>
-            <notes>1 second too long/too short for recharge? Should
-            this be power-dependent?</notes>
+            <details>1 second too long/too short for recharge? Should
+            this be power-dependent?</details>
             <tag id="V1" />
           </entry>
         </namespace>
@@ -1128,7 +1128,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Compression quality of the final JPEG
           image</description>
           <range>1-100; larger is higher quality</range>
-          <notes>85-95 is typical usage range</notes>
+          <details>85-95 is typical usage range</details>
           <tag id="BC" />
         </entry>
         <entry name="thumbnailQuality" type="byte" visibility="public">
@@ -1144,11 +1144,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>Resolution of embedded JPEG thumbnail</description>
           <range>Size must be one of the size from android.jpeg.availableThumbnailSizes</range>
-          <notes>When set to (0, 0) value, the JPEG EXIF must not contain thumbnail,
+          <details>When set to (0, 0) value, the JPEG EXIF must not contain thumbnail,
           but the captured JPEG must still be a valid image.
 
           When a jpeg image capture is issued, the thumbnail size selected should have
-          the same aspect ratio as the jpeg image.</notes>
+          the same aspect ratio as the jpeg image.</details>
           <tag id="BC" />
         </entry>
       </controls>
@@ -1162,7 +1162,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Supported resolutions for the JPEG thumbnail</description>
           <range>Must include at least one valid resolution, plus
           (0,0) for no thumbnail generation, and each size must be distinct.</range>
-          <notes>Below condiditions must be satisfied for this size list:
+          <details>Below condiditions must be satisfied for this size list:
 
           * The sizes must be sorted by increasing pixel area (width x height).
           If several resolutions have the same area, they must be sorted by increasing width.
@@ -1173,7 +1173,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           * Each size in android.scaler.availableJpegSizes must have at least
           one corresponding size that has the same aspect ratio in availableThumbnailSizes,
           and vice versa.
-          * All non (0, 0) sizes must have non-zero widths and heights.</notes>
+          * All non (0, 0) sizes must have non-zero widths and heights.</details>
           <tag id="BC" />
         </entry>
         <entry name="maxSize" type="int32" visibility="system">
@@ -1181,8 +1181,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           JPEG buffer</description>
           <range>Must be large enough to fit any JPEG produced by
           the camera</range>
-          <notes>This is used for sizing the gralloc buffers for
-          JPEG</notes>
+          <details>This is used for sizing the gralloc buffers for
+          JPEG</details>
         </entry>
       </static>
       <dynamic>
@@ -1200,7 +1200,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The size of the compressed JPEG image, in
           bytes</description>
           <range>&gt;= 0</range>
-          <notes>If no JPEG output is produced for the request,
+          <details>If no JPEG output is produced for the request,
           this must be 0.
 
           Otherwise, this describes the real size of the compressed
@@ -1208,7 +1208,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           if android.jpeg.maxSize = 1000000, and a specific capture
           has android.jpeg.size = 500000, then the output buffer from
           the JPEG stream will be 1000000 bytes, of which the first
-          500000 make up the real data.</notes>
+          500000 make up the real data.</details>
         </entry>
         <clone entry="android.jpeg.thumbnailQuality"
         kind="controls"></clone>
@@ -1222,8 +1222,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Size of the lens aperture</description>
           <units>f-number (f/NNN)</units>
           <range>android.lens.info.availableApertures</range>
-          <notes>Will not be supported on most devices. Can only
-          pick from supported list</notes>
+          <details>Will not be supported on most devices. Can only
+          pick from supported list</details>
           <tag id="V1" />
         </entry>
         <entry name="filterDensity" type="float" visibility="public">
@@ -1231,15 +1231,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           filter(s)</description>
           <units>number of stops of filtering</units>
           <range>android.lens.info.availableFilterDensities</range>
-          <notes>Will not be supported on most devices. Can only
-          pick from supported list</notes>
+          <details>Will not be supported on most devices. Can only
+          pick from supported list</details>
           <tag id="V1" />
         </entry>
         <entry name="focalLength" type="float" visibility="public">
           <description>Lens optical zoom setting</description>
           <units>focal length in mm</units>
           <range>&gt; 0</range>
-          <notes>Will not be supported on most devices.</notes>
+          <details>Will not be supported on most devices.</details>
           <tag id="V1" />
         </entry>
         <entry name="focusDistance" type="float" visibility="public">
@@ -1247,8 +1247,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           measured from frontmost surface of the lens</description>
           <units>diopters (1/m)</units>
           <range>&gt;= 0</range>
-          <notes>0 = infinity focus. Used value should be clamped
-          to (0,minimum focus distance)</notes>
+          <details>0 = infinity focus. Used value should be clamped
+          to (0,minimum focus distance)</details>
           <tag id="BC" />
           <tag id="V1" />
         </entry>
@@ -1261,7 +1261,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Whether optical image stabilization is
           enabled.</description>
           <range>android.lens.availableOpticalStabilization</range>
-          <notes>Will not be supported on most devices.</notes>
+          <details>Will not be supported on most devices.</details>
           <tag id="V1" />
         </entry>
       </controls>
@@ -1275,8 +1275,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>List of supported aperture
             values</description>
             <range>one entry required, &gt; 0</range>
-            <notes>If variable aperture not available, only setting
-            should be for the fixed aperture</notes>
+            <details>If variable aperture not available, only setting
+            should be for the fixed aperture</details>
             <tag id="V1" />
           </entry>
           <entry name="availableFilterDensities" type="float" visibility="public"
@@ -1287,10 +1287,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>List of supported ND filter
             values</description>
             <range>one entry required, &gt;= 0</range>
-            <notes>If not available, only setting is 0. Otherwise,
+            <details>If not available, only setting is 0. Otherwise,
             lists the available exposure index values for dimming
             (2 would mean the filter is set to reduce incoming
-            light by two stops)</notes>
+            light by two stops)</details>
             <tag id="V1" />
           </entry>
           <entry name="availableFocalLengths" type="float" visibility="public"
@@ -1303,8 +1303,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             lengths are available. If not, the static focal
             length</description>
             <range>&gt; 0</range>
-            <notes>If optical zoom not supported, only one value
-            should be reported</notes>
+            <details>If optical zoom not supported, only one value
+            should be reported</details>
             <tag id="BC" />
             <tag id="V1" />
           </entry>
@@ -1330,11 +1330,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             geometric distortions and chromatic aberrations, per
             color channel</description>
             <range>N, M &gt;= 2</range>
-            <notes>[DNG wants a function instead]. What's easiest
+            <details>[DNG wants a function instead]. What's easiest
             for implementers? With an array size (M, N), entry (i,
             j) provides the destination for pixel (i/(M-1) * width,
             j/(N-1) * height). Data is row-major, with each array
-            entry being ( (X, Y)_r, (X, Y)_g, (X, Y)_b ) )</notes>
+            entry being ( (X, Y)_r, (X, Y)_g, (X, Y)_b ) )</details>
             <tag id="DNG" />
           </entry>
           <entry name="geometricCorrectionMapSize" type="int32"
@@ -1353,8 +1353,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             0 if fixed focus</description>
             <units>diopters</units>
             <range>&gt;= 0</range>
-            <notes>The hyperfocal distance is used for the old
-            API's 'fixed' setting</notes>
+            <details>The hyperfocal distance is used for the old
+            API's 'fixed' setting</details>
             <tag id="BC" />
           </entry>
           <entry name="minimumFocusDistance" type="float" visibility="public">
@@ -1362,8 +1362,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             of the lens that can be focused correctly</description>
             <units>diopters</units>
             <range>&gt;= 0</range>
-            <notes>If the lens is fixed-focus, this should be
-            0</notes>
+            <details>If the lens is fixed-focus, this should be
+            0</details>
             <tag id="V1" />
           </entry>
           <entry name="shadingMapSize" type="int32" visibility="public"
@@ -1374,10 +1374,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </array>
             <description>Dimensions of lens shading map.</description>
             <range>Both values &gt;= 1</range>
-            <notes>
+            <details>
             The map should be on the order of 30-40 rows and columns, and
             must be smaller than 64x64.
-            </notes>
+            </details>
             <tag id="V1" />
           </entry>
         </namespace>
@@ -1398,7 +1398,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Relative angle of camera optical axis to the
           perpendicular axis from the display</description>
           <range>[0-90) for first angle, [0-360) for second</range>
-          <notes>Examples:
+          <details>Examples:
 
           (0,0) means that the camera optical axis
           is perpendicular to the display surface;
@@ -1410,7 +1410,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           the device is held upright.
 
           Use FACING field to determine perpendicular outgoing
-          direction</notes>
+          direction</details>
           <tag id="ADV" />
         </entry>
         <entry name="position" type="float" container="array">
@@ -1434,7 +1434,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </clone>
         <clone entry="android.lens.focusDistance" kind="controls">
-          <notes>Should be zero for fixed-focus cameras</notes>
+          <details>Should be zero for fixed-focus cameras</details>
           <tag id="BC" />
         </clone>
         <entry name="focusRange" type="float" visibility="public"
@@ -1448,8 +1448,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <units>pair of focus distances in diopters: (near,
           far)</units>
           <range>&gt;=0</range>
-          <notes>If variable focus not supported, can still report
-          fixed depth of field range</notes>
+          <details>If variable focus not supported, can still report
+          fixed depth of field range</details>
           <tag id="BC" />
         </entry>
         <clone entry="android.lens.opticalStabilizationMode"
@@ -1482,14 +1482,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Mode of operation for the noise reduction
           algorithm</description>
           <range>android.noiseReduction.availableModes</range>
-          <notes>Noise filtering control. OFF means no noise reduction
+          <details>Noise filtering control. OFF means no noise reduction
           will be applied by the HAL.
 
           FAST/HIGH_QUALITY both mean HAL-determined noise filtering
           will be applied. HIGH_QUALITY mode indicates that the HAL
           should use the highest-quality noise filtering algorithms,
           even if it slows down capture rate. FAST means the HAL should not
-          slow down capture rate when applying noise filtering.</notes>
+          slow down capture rate when applying noise filtering.</details>
           <tag id="V1" />
         </entry>
         <entry name="strength" type="byte">
@@ -1511,48 +1511,48 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           scale 'normalized' coordinates with respect to the crop
           region. This applies to metering input (a{e,f,wb}Region
           and output (face rectangles).</description>
-          <notes>Normalized coordinates refer to those in the
+          <details>Normalized coordinates refer to those in the
           (-1000,1000) range mentioned in the
           android.hardware.Camera API.
 
           HAL implementations should instead always use and emit
           sensor array-relative coordinates for all region data. Does
           not need to be listed in static metadata. Support will be
-          removed in future versions of camera service.</notes>
+          removed in future versions of camera service.</details>
         </entry>
         <entry name="triggerAfWithAuto" type="byte" visibility="system" optional="true">
           <description>If set to 1, then the camera service always
           switches to FOCUS_MODE_AUTO before issuing a AF
           trigger.</description>
-          <notes>HAL implementations should implement AF trigger
+          <details>HAL implementations should implement AF trigger
           modes for AUTO, MACRO, CONTINUOUS_FOCUS, and
           CONTINUOUS_PICTURE modes instead of using this flag. Does
           not need to be listed in static metadata. Support will be
-          removed in future versions of camera service</notes>
+          removed in future versions of camera service</details>
         </entry>
         <entry name="useZslFormat" type="byte" visibility="system" optional="true">
           <description>If set to 1, the camera service uses
           CAMERA2_PIXEL_FORMAT_ZSL instead of
           HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED for the zero
           shutter lag stream</description>
-          <notes>HAL implementations should use gralloc usage flags
+          <details>HAL implementations should use gralloc usage flags
           to determine that a stream will be used for
           zero-shutter-lag, instead of relying on an explicit
           format setting. Does not need to be listed in static
           metadata. Support will be removed in future versions of
-          camera service.</notes>
+          camera service.</details>
         </entry>
         <entry name="usePartialResult" type="byte" visibility="hidden" optional="true">
           <description>If set to 1, the HAL will always split result
           metadata for a single capture into multiple buffers,
           returned using multiple process_capture_result calls.
           </description>
-          <notes>Does not need to be listed in static
+          <details>Does not need to be listed in static
           metadata. Support for partial results will be reworked in
           future versions of camera service. This quirk will stop
           working at that point; DO NOT USE without careful
           consideration of future support.
-          </notes>
+          </details>
         </entry>
 
       </static>
@@ -1575,7 +1575,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           subset of the full set of dynamic metadata
           values.</description>
           <range>Optional. Default value is FINAL.</range>
-          <notes>The entries in the result metadata buffers for a
+          <details>The entries in the result metadata buffers for a
           single capture may not overlap, except for this entry. The
           FINAL buffers must retain FIFO ordering relative to the
           requests that generate them, so the FINAL buffer for frame 3 must
@@ -1584,7 +1584,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           in any order relative to other frames, but all PARTIAL buffers for a given
           capture must arrive before the FINAL buffer for that capture. This entry may
           only be used by the HAL if quirks.usePartialResult is set to 1.
-          </notes>
+          </details>
         </entry>
       </dynamic>
     </section>
@@ -1621,8 +1621,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           If android.jpeg.needsThumbnail is set, then multiple
           reprocess streams may be included in a single request; they
           must be different scaled versions of the same image.</range>
-          <notes>Only meaningful when android.request.type ==
-          REPROCESS. Ignored otherwise</notes>
+          <details>Only meaningful when android.request.type ==
+          REPROCESS. Ignored otherwise</details>
           <tag id="HAL2" />
         </entry>
         <entry name="metadataMode" type="byte" visibility="system"
@@ -1655,10 +1655,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <units>List of camera stream IDs</units>
           <range>List must only include streams that have been
           created</range>
-          <notes>If no output streams are listed, then the image
+          <details>If no output streams are listed, then the image
           data should simply be discarded. The image data must
           still be captured for metadata and statistics production,
-          and the lens and flash must operate as requested.</notes>
+          and the lens and flash must operate as requested.</details>
           <tag id="HAL2" />
         </entry>
         <entry name="type" type="byte" visibility="system" enum="true">
@@ -1691,9 +1691,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           JPEG-compressed streams</units>
           <range>&gt;=1 for Raw and JPEG-compressed stream. &gt;= 3
           for processed, uncompressed streams</range>
-          <notes>Video snapshot with preview callbacks requires 3
+          <details>Video snapshot with preview callbacks requires 3
           processed streams (preview, record, app callbacks) and
-          one JPEG stream (snapshot)</notes>
+          one JPEG stream (snapshot)</details>
           <tag id="BC" />
         </entry>
         <entry name="maxNumReprocessStreams" type="int32" visibility="system"
@@ -1713,7 +1713,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           frameCount value).</description>
           <units>count of frames</units>
           <range>&gt; 0</range>
-          <notes>Reset on release()</notes>
+          <details>Reset on release()</details>
         </entry>
         <clone entry="android.request.id" kind="controls"></clone>
         <clone entry="android.request.metadataMode"
@@ -1741,7 +1741,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <units>(x,y) of top-left corner, width and height of region
           in pixels; (0,0) is top-left corner of
           android.sensor.activeArraySize</units>
-          <notes>
+          <details>
             Any additional per-stream cropping must be done to
             maximize the final pixel area of the stream.
 
@@ -1767,7 +1767,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             android.scaler.maxDigitalZoom ) and floor(
             activeArraySize.height / android.scaler.maxDigitalZoom),
             respectively.
-          </notes>
+          </details>
           <tag id="BC" />
         </entry>
       </controls>
@@ -1814,9 +1814,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           correspond to the frame duration when only that JPEG
           stream is active and captured in a burst, with all
           processing set to FAST</description>
-          <notes>When multiple streams are configured, the minimum
+          <details>When multiple streams are configured, the minimum
           frame duration will be &gt;= max(individual stream min
-          durations)</notes>
+          durations)</details>
           <tag id="BC" />
         </entry>
         <entry name="availableJpegSizes" type="int32" visibility="public"
@@ -1849,9 +1849,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           correspond to the frame duration when only that processed
           stream is active, with all processing set to
           FAST</description>
-          <notes>When multiple streams are configured, the minimum
+          <details>When multiple streams are configured, the minimum
           frame duration will be &gt;= max(individual stream min
-          durations)</notes>
+          durations)</details>
           <tag id="BC" />
         </entry>
         <entry name="availableProcessedSizes" type="int32" visibility="public"
@@ -1867,13 +1867,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>Must include: - sensor maximum resolution -
           standard QCIF, 240p, 480p, 720p, and 1080p
           resolutions</range>
-          <notes>The actual supported resolution list may be limited by
+          <details>The actual supported resolution list may be limited by
           consumer end points for different use cases. For example, for
           recording use case, the largest supported resolution may be
           limited by max supported size from encoder, for preview use
           case, the largest supported resolution may be limited by max
           resolution SurfaceTexture/SurfaceView can support.
-          </notes>
+          </details>
           <tag id="BC" />
         </entry>
         <entry name="availableRawMinDurations" type="int64"
@@ -1885,9 +1885,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           for each raw resolution in availableRawSizes. Should
           correspond to the frame duration when only the raw stream
           is active.</description>
-          <notes>When multiple streams are configured, the minimum
+          <details>When multiple streams are configured, the minimum
           frame duration will be &gt;= max(individual stream min
-          durations)</notes>
+          durations)</details>
           <tag id="BC" />
         </entry>
         <entry name="availableRawSizes" type="int32"
@@ -1918,7 +1918,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </description>
           <units>nanoseconds</units>
           <range>android.sensor.info.exposureTimeRange</range>
-          <notes>1/10000 - 30 sec range. No bulb mode</notes>
+          <details>1/10000 - 30 sec range. No bulb mode</details>
           <tag id="V1" />
         </entry>
         <entry name="frameDuration" type="int64" visibility="public">
@@ -1927,8 +1927,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <units>nanoseconds</units>
           <range>see android.sensor.info.maxFrameDuration,
           android.scaler.info.availableMinFrameDurations</range>
-          <notes>Exposure time has priority, so duration is set to
-          max(duration, exposure time + overhead)</notes>
+          <details>Exposure time has priority, so duration is set to
+          max(duration, exposure time + overhead)</details>
           <tag id="V1" />
           <tag id="BC" />
         </entry>
@@ -1942,7 +1942,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </description>
           <units>ISO arithmetic units</units>
           <range>android.sensor.info.sensitivityRange</range>
-          <notes>ISO 12232:2006 REI method</notes>
+          <details>ISO 12232:2006 REI method</details>
           <tag id="V1" />
         </entry>
       </controls>
@@ -2005,11 +2005,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             rate)</description>
             <units>nanoseconds</units>
             <range>&gt;= 30e9</range>
-            <notes>Minimum duration is a function of resolution,
+            <details>Minimum duration is a function of resolution,
             processing settings. See
             android.scaler.availableProcessedMinDurations
             android.scaler.availableJpegMinDurations
-            android.scaler.availableRawMinDurations</notes>
+            android.scaler.availableRawMinDurations</details>
             <tag id="BC" />
             <tag id="V1" />
           </entry>
@@ -2021,7 +2021,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </array>
             <description>The physical dimensions of the full pixel
             array</description>
-            <notes>Needed for FOV calculation for old API</notes>
+            <details>Needed for FOV calculation for old API</details>
             <tag id="V1" />
             <tag id="BC" />
           </entry>
@@ -2032,9 +2032,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </array>
             <description>Dimensions of full pixel array, possibly
             including black calibration pixels</description>
-            <notes>Maximum output resolution for raw format must
+            <details>Maximum output resolution for raw format must
             match this in
-            android.scaler.info.availableSizesPerFormat</notes>
+            android.scaler.info.availableSizesPerFormat</details>
             <tag id="DNG" />
             <tag id="BC" />
           </entry>
@@ -2042,8 +2042,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>Maximum raw value output by
             sensor</description>
             <range>&gt; 1024 (10-bit output)</range>
-            <notes>Defines sensor bit depth (10-14 bits is
-            expected)</notes>
+            <details>Defines sensor bit depth (10-14 bits is
+            expected)</details>
             <tag id="DNG" />
           </entry>
         </namespace>
@@ -2062,8 +2062,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>A fixed black level offset for each of the
           Bayer mosaic channels</description>
           <range>&gt;= 0 each</range>
-          <notes>As per DNG BlackLevelRepeatDim / BlackLevel
-          tags</notes>
+          <details>As per DNG BlackLevelRepeatDim / BlackLevel
+          tags</details>
           <tag id="DNG" />
         </entry>
         <entry name="calibrationTransform1" type="rational"
@@ -2095,9 +2095,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Linear mapping from XYZ (D50) color space to
           reference linear sensor color, for first reference
           illuminant</description>
-          <notes>Use as follows XYZ = inv(transform) * clip( (raw -
+          <details>Use as follows XYZ = inv(transform) * clip( (raw -
           black level(raw) ) / ( white level - max black level) ).
-          At least in the simple case</notes>
+          At least in the simple case</details>
           <tag id="DNG" />
         </entry>
         <entry name="colorTransform2" type="rational"
@@ -2135,10 +2135,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         optional="true">
           <description>Maximum sensitivity that is implemented
           purely through analog gain</description>
-          <notes>For android.sensor.sensitivity values less than or
+          <details>For android.sensor.sensitivity values less than or
           equal to this, all applied gain must be analog. For
           values above this, it can be a mix of analog and
-          digital</notes>
+          digital</details>
           <tag id="V1" />
           <tag id="FULL" />
         </entry>
@@ -2153,11 +2153,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <units>var(raw pixel value) = electrons * (baseGainFactor
           * iso/100)^2 + A * (baseGainFactor * iso/100)^2 +
           B</units>
-          <notes>A represents sensor read noise before analog
+          <details>A represents sensor read noise before analog
           amplification; B represents noise from A/D conversion and
           other circuits after amplification. Both noise sources
           are assumed to be gaussian, independent, and not to vary
-          across the sensor</notes>
+          across the sensor</details>
           <tag id="V1" />
         </entry>
         <entry name="orientation" type="int32" visibility="public">
@@ -2200,8 +2200,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Light source used to define transform
           1</description>
-          <notes>[EXIF LightSource tag] Must all these be
-          supported? Need CCT for each!</notes>
+          <details>[EXIF LightSource tag] Must all these be
+          supported? Need CCT for each!</details>
           <tag id="DNG" />
           <tag id="EXIF" />
         </entry>
@@ -2223,8 +2223,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           row</description>
           <units>nanoseconds</units>
           <range>&gt; 0</range>
-          <notes>Monotonic, should be synced to other timestamps in
-          system</notes>
+          <details>Monotonic, should be synced to other timestamps in
+          system</details>
           <tag id="BC" />
         </entry>
         <entry name="temperature" type="float" visibility="public"
@@ -2287,10 +2287,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           unit</description>
           <range>
           android.statistics.info.availableFaceDetectModes</range>
-          <notes>Whether face detection is enabled, and whether it
+          <details>Whether face detection is enabled, and whether it
           should output just the basic fields or the full set of
           fields. Value must be one of the
-          android.statistics.info.availableFaceDetectModes.</notes>
+          android.statistics.info.availableFaceDetectModes.</details>
           <tag id="BC" />
         </entry>
         <entry name="histogramMode" type="byte" enum="true" typedef="boolean">
@@ -2327,7 +2327,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             OFF
             SIMPLE
             FULL</units>
-            <notes>OFF means face detection is disabled, it must
+            <details>OFF means face detection is disabled, it must
             be included in the list.
 
             SIMPLE means the device supports the
@@ -2337,7 +2337,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             FULL means the device additionally supports the
             android.statistics.faceIds and
             android.statistics.faceLandmarks outputs.
-            </notes>
+            </details>
           </entry>
           <entry name="histogramBucketCount" type="int32">
             <description>Number of histogram buckets
@@ -2378,7 +2378,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>List of unique IDs for detected
           faces</description>
-          <notes>Only available if faceDetectMode == FULL</notes>
+          <details>Only available if faceDetectMode == FULL</details>
           <tag id="BC" />
         </entry>
         <entry name="faceLandmarks" type="int32" visibility="hidden"
@@ -2390,7 +2390,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>List of landmarks for detected
           faces</description>
-          <notes>Only available if faceDetectMode == FULL</notes>
+          <details>Only available if faceDetectMode == FULL</details>
           <tag id="BC" />
         </entry>
         <entry name="faceRectangles" type="int32" visibility="hidden"
@@ -2402,7 +2402,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>List of the bounding rectangles for detected
           faces</description>
-          <notes>Only available if faceDetectMode != OFF</notes>
+          <details>Only available if faceDetectMode != OFF</details>
           <tag id="BC" />
         </entry>
         <entry name="faceScores" type="byte" visibility="hidden" container="array">
@@ -2412,8 +2412,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>List of the face confidence scores for
           detected faces</description>
           <range>1-100</range>
-          <notes>Only available if faceDetectMode != OFF. The value should be
-          meaningful (for example, setting 100 at all times is illegal).</notes>
+          <details>Only available if faceDetectMode != OFF. The value should be
+          meaningful (for example, setting 100 at all times is illegal).</details>
           <tag id="BC" />
         </entry>
         <entry name="histogram" type="int32"
@@ -2425,10 +2425,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>A 3-channel histogram based on the raw
           sensor data</description>
-          <notes>The k'th bucket (0-based) covers the input range
+          <details>The k'th bucket (0-based) covers the input range
           (with w = android.sensor.info.whiteLevel) of [ k * w/N,
           (k + 1) * w / N ). If only a monochrome sharpness map is
-          supported, all channels should have the same data</notes>
+          supported, all channels should have the same data</details>
           <tag id="V1" />
         </entry>
         <clone entry="android.statistics.histogramMode"
@@ -2443,8 +2443,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>A 3-channel sharpness map, based on the raw
           sensor data</description>
-          <notes>If only a monochrome sharpness map is supported,
-          all channels should have the same data</notes>
+          <details>If only a monochrome sharpness map is supported,
+          all channels should have the same data</details>
           <tag id="V1" />
         </entry>
         <clone entry="android.statistics.sharpnessMapMode"
@@ -2461,7 +2461,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           that lists the coefficients used to correct for vignetting, for each
           Bayer color channel.</description>
           <range>Each gain factor is &gt;= 1</range>
-          <notes>The least shaded section of the image should have a gain factor
+          <details>The least shaded section of the image should have a gain factor
           of 1; all other sections should have gains above 1.
 
           When android.colorCorrection.mode = TRANSFORM_MATRIX, the map
@@ -2507,7 +2507,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           image of a gray wall (using bicubic interpolation for visual quality) as captured by the sensor gives:
 
           ![Image of a uniform white wall (inverse shading map)](android.statistics.lensShadingMap/inv_shading.png)
-          </notes>
+          </details>
         </entry>
         <entry name="predictedColorGains" type="float" visibility="public"
                type_notes="A 1D array of floats for 4 color channel gains"
@@ -2518,7 +2518,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The best-fit color channel gains calculated
           by the HAL's statistics units for the current output frame
           </description>
-          <notes>
+          <details>
           This may be different than the gains used for this frame,
           since statistics processing on data from a new frame
           typically completes after the transform has already been
@@ -2529,7 +2529,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           This value should always be calculated by the AWB block,
           regardless of the android.control.* current values.
-          </notes>
+          </details>
         </entry>
         <entry name="predictedColorTransform" type="rational" visibility="public"
                type_notes="3x3 rational matrix in row-major order"
@@ -2541,7 +2541,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The best-fit color transform matrix estimate
           calculated by the HAL's statistics units for the current
           output frame</description>
-          <notes>The HAL must provide the estimate from its
+          <details>The HAL must provide the estimate from its
           statistics unit on the white balance transforms to use
           for the next frame. These are the values the HAL believes
           are the best fit for the current output frame. This may
@@ -2555,7 +2555,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           This value should always be calculated by the AWB block,
           regardless of the android.control.* current values.
-          </notes>
+          </details>
         </entry>
         <entry name="sceneFlicker" type="byte" visibility="public" enum="true">
           <enum>
@@ -2565,8 +2565,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>The HAL estimated scene illumination lighting
           frequency</description>
-          <notes>Report NONE if there doesn't appear to be flickering
-          illumination</notes>
+          <details>Report NONE if there doesn't appear to be flickering
+          illumination</details>
         </entry>
       </dynamic>
       <controls>
@@ -2577,9 +2577,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether the HAL needs to output the lens
           shading map in output result metadata</description>
-          <notes>When set to ON,
+          <details>When set to ON,
           android.statistics.lensShadingMap must be provided in
-          the output result metadata.</notes>
+          the output result metadata.</details>
         </entry>
       </controls>
     </section>
@@ -2596,10 +2596,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           values</description>
           <units>same as android.tonemap.curveRed</units>
           <range>same as android.tonemap.curveRed</range>
-          <notes>Tonemapping / contrast / gamma curve for the blue
+          <details>Tonemapping / contrast / gamma curve for the blue
           channel, to use when android.tonemap.mode is CONTRAST_CURVE.
 
-          See android.tonemap.curveRed for more details.</notes>
+          See android.tonemap.curveRed for more details.</details>
         </entry>
         <entry name="curveGreen" type="float" visibility="public"
         type_notes="1D array of float pairs (P_IN, P_OUT). The maximum number of pairs is specified by android.tonemap.maxCurvePoints."
@@ -2612,10 +2612,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           values</description>
           <units>same as android.tonemap.curveRed</units>
           <range>same as android.tonemap.curveRed</range>
-          <notes>Tonemapping / contrast / gamma curve for the green
+          <details>Tonemapping / contrast / gamma curve for the green
           channel, to use when android.tonemap.mode is CONTRAST_CURVE.
 
-          See android.tonemap.curveRed for more details.</notes>
+          See android.tonemap.curveRed for more details.</details>
         </entry>
         <entry name="curveRed" type="float" visibility="public"
         type_notes="1D array of float pairs (P_IN, P_OUT). The maximum number of pairs is specified by android.tonemap.maxCurvePoints."
@@ -2627,7 +2627,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Table mapping red input values to output
           values</description>
           <range>0-1 on input and output coordinates.</range>
-          <notes>Tonemapping / contrast / gamma curve for the red
+          <details>Tonemapping / contrast / gamma curve for the red
           channel, to use when android.tonemap.mode is CONTRAST_CURVE.
 
           Since the input and output ranges may vary depending on
@@ -2640,7 +2640,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           order of P_IN. For example, if the array is: [0.0, 0.0,
           0.3, 0.5, 1.0, 1.0], then the input-&gt;output mapping
           for a few sample points would be: 0 -&gt; 0, 0.15 -&gt;
-          0.25, 0.3 -&gt; 0.5, 0.5 -&gt; 0.64</notes>
+          0.25, 0.3 -&gt; 0.5, 0.5 -&gt; 0.64</details>
           <tag id="DNG" />
         </entry>
         <entry name="mode" type="byte" visibility="public" enum="true">
@@ -2750,7 +2750,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description> Whether black-level compensation is locked
           to its current values, or is free to vary</description>
-          <notes>When set to ON, the values used for black-level
+          <details>When set to ON, the values used for black-level
           compensation must not change until the lock is set to
           OFF
 
@@ -2788,18 +2788,18 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           the analog gain has changed, which forces black levels to be
           recalculated), then the HAL is free to override this request (and it
           must report 'OFF' when this does happen) until the next time locking
-          is legal again.</notes>
+          is legal again.</details>
           <tag id="HAL2" />
         </entry>
       </controls>
       <dynamic>
         <clone entry="android.blackLevel.lock"
           kind="controls">
-          <notes>
+          <details>
             Whether the black level offset was locked for this frame.
             Should be ON if android.blackLevel.lock was ON in the capture request,
             unless a change in capture settings forced a black level reset.
-          </notes>
+          </details>
         </clone>
       </dynamic>
     </section>

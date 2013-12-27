@@ -139,7 +139,10 @@
             <element name="range" type="string" maxOccurs="1"
                 minOccurs="0">
             </element>
-            <element name="notes" type="string" maxOccurs="1"
+            <element name="details" type="string" maxOccurs="1"
+                minOccurs="0">
+            </element>
+            <element name="hal_details" type="string" maxOccurs="1"
                 minOccurs="0">
             </element>
 

@@ -71,8 +71,12 @@
         % if prop.is_clone():
             <clone entry="${prop.name}" kind="${prop.target_kind}">
 
-              % if prop.notes is not None:
-                <notes>${prop.notes}</notes>
+              % if prop.details is not None:
+                <details>${prop.details}</details>
+              % endif
+
+              % if prop.hal_details is not None:
+                <hal_details>${prop.hal_details}</hal_details>
               % endif
 
               % for tag in prop.tags:
@@ -147,8 +151,12 @@
                 <range>${prop.range | x}</range>
               % endif
 
-              % if prop.notes is not None:
-                <notes>${prop.notes | x}</notes>
+              % if prop.details is not None:
+                <details>${prop.details | x}</details>
+              % endif
+
+              % if prop.hal_details is not None:
+                <hal_details>${prop.hal_details | x}</hal_details>
               % endif
 
               % for tag in prop.tags:

@@ -145,6 +145,13 @@
   def md_html(text):
     # prepend the image directory path to each <img src="...">
     return md(text, IMAGE_SRC_METADATA)
+
+  # Number of rows an entry will span
+  def entry_cols(prop):
+    cols = 1
+    if prop.details: cols = cols + 2
+    if prop.hal_details: cols = cols + 2
+    return cols
 %>
 
 <body>
@@ -236,25 +243,10 @@ ${          insert_toc_body(kind)}\
         </%def>
 
         <%def name="insert_entry(prop)">
-        % if False: #prop.is_clone():
-            <clone entry="${prop.name}" kind="${prop.target_kind}">
-
-              % if prop.notes is not None:
-                <notes>${prop.notes | h,wbr}</notes>
-              % endif
-
-              % for tag in prop.tags:
-                <tag id="${tag.id}" />
-              % endfor
-
-            </clone>
-        % else:
           <tr class="entry" id="${prop.kind}_${prop.name}">
-            <td class="entry_name"
-                % if prop.notes is not None:
-                  rowspan="3"
-                % endif
-                >${prop.name | wbr}</td>
+            <td class="entry_name" rowspan="${entry_cols(prop)}">
+              ${prop.name | wbr}
+            </td>
             <td class="entry_type">
               % if prop.enum:
                 <span class="entry_type_name entry_type_name_enum">${prop.type}</span>
@@ -331,19 +323,30 @@ ${          insert_toc_body(kind)}\
             </td>
 
           </tr>
-          % if prop.notes is not None:
+          % if prop.details is not None:
           <tr class="entries_header">
             <th class="th_details" colspan="5">Details</th>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              ${prop.notes | md_html, wbr}
+              ${prop.details | md_html, wbr}
             </td>
           </tr>
           % endif
+
+          % if prop.hal_details is not None:
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              ${prop.hal_details | md_html, wbr}
+            </td>
+          </tr>
+          % endif
+
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
-        % endif
         </%def>
 
         ${insert_body(kind)}
