@@ -142,15 +142,84 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="aeAntibandingMode" type="byte" visibility="public"
                enum="true" >
           <enum>
-            <value>OFF</value>
-            <value>50HZ</value>
-            <value>60HZ</value>
-            <value>AUTO</value>
+            <value>OFF
+              <notes>
+                The camera device will not adjust exposure duration to
+                avoid banding problems.
+              </notes>
+            </value>
+            <value>50HZ
+              <notes>
+                The camera device will adjust exposure duration to
+                avoid banding problems with 50Hz illumination sources.
+              </notes>
+            </value>
+            <value>60HZ
+              <notes>
+                The camera device will adjust exposure duration to
+                avoid banding problems with 60Hz illumination
+                sources.
+              </notes>
+            </value>
+            <value>AUTO
+              <notes>
+                The camera device will automatically adapt its
+                antibanding routine to the current illumination
+                conditions. This is the default.
+              </notes>
+            </value>
           </enum>
-          <description>Enum for controlling
-          antibanding</description>
+          <description>
+            The desired setting for the camera device's auto-exposure
+            algorithm's antibanding compensation.
+          </description>
           <range>
-          android.control.aeAvailableAntibandingModes</range>
+            android.control.aeAvailableAntibandingModes
+          </range>
+          <details>
+            Some kinds of lighting fixtures, such as some fluorescent
+            lights, flicker at the rate of the power supply frequency
+            (60Hz or 50Hz, depending on country). While this is
+            typically not noticeable to a person, it can be visible to
+            a camera device. If a camera sets its exposure time to the
+            wrong value, the flicker may become visible in the
+            viewfinder as flicker or in a final captured image, as a
+            set of variable-brightness bands across the image.
+
+            Therefore, the auto-exposure routines of camera devices
+            include antibanding routines that ensure that the chosen
+            exposure value will not cause such banding. The choice of
+            exposure time depends on the rate of flicker, which the
+            camera device can detect automatically, or the expected
+            rate can be selected by the application using this
+            control.
+
+            A given camera device may not support all of the possible
+            options for the antibanding mode. The
+            android.control.aeAvailableAntibandingModes key contains
+            the available modes for a given camera device.
+
+            The default mode is AUTO, which must be supported by all
+            camera devices.
+
+            If manual exposure control is enabled (by setting
+            android.control.aeMode or android.control.mode to OFF),
+            then this setting has no effect, and the application must
+            ensure it selects exposure times that do not cause banding
+            issues. The android.statistics.sceneFlicker key can assist
+            the application in this.
+          </details>
+          <hal_details>
+            For all capture request templates, this field must be set
+            to AUTO.  AUTO is the only mode that must supported;
+            OFF, 50HZ, 60HZ are all optional.
+
+            If manual exposure control is enabled (by setting
+            android.control.aeMode or android.control.mode to OFF),
+            then the exposure values provided by the application must not be
+            adjusted for antibanding.
+          </hal_details>
+          <tag id="BC" />
         </entry>
         <entry name="aeExposureCompensation" type="int32" visibility="public">
           <description>Adjustment to AE target image
@@ -623,8 +692,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <array>
             <size>n</size>
           </array>
-          <description>Which set of antibanding modes are
-          supported</description>
+          <description>
+            The set of auto-exposure antibanding modes that are
+            supported by this camera device.
+          </description>
+          <details>
+            Not all of the auto-exposure anti-banding modes may be
+            supported by a given camera device. This field lists the
+            valid anti-banding modes that the application may request
+            for this camera device; they must include AUTO.
+          </details>
         </entry>
         <entry name="aeAvailableModes" type="byte"
         type_notes="list of enums" container="array">

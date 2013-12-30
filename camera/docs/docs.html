@@ -1044,7 +1044,7 @@ the current frame.<wbr/></p>
 
                 
           <tr class="entry" id="controls_android.control.aeAntibandingMode">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="5">
               android.<wbr/>control.<wbr/>ae<wbr/>Antibanding<wbr/>Mode
             </td>
             <td class="entry_type">
@@ -1055,23 +1055,41 @@ the current frame.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
+                    <span class="entry_type_enum_notes">
+                The camera device will not adjust exposure duration to
+                avoid banding problems.<wbr/>
+              </span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">50HZ</span>
+                    <span class="entry_type_enum_notes">
+                The camera device will adjust exposure duration to
+                avoid banding problems with 50Hz illumination sources.<wbr/>
+              </span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">60HZ</span>
+                    <span class="entry_type_enum_notes">
+                The camera device will adjust exposure duration to
+                avoid banding problems with 60Hz illumination
+                sources.<wbr/>
+              </span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
+                    <span class="entry_type_enum_notes">
+                The camera device will automatically adapt its
+                antibanding routine to the current illumination
+                conditions.<wbr/> This is the default.<wbr/>
+              </span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Enum for controlling
-antibanding</p>
+              <p>The desired setting for the camera device's auto-exposure
+algorithm's antibanding compensation.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -1082,10 +1100,61 @@ antibanding</p>
             </td>
 
             <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
             </td>
 
           </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Some kinds of lighting fixtures,<wbr/> such as some fluorescent
+lights,<wbr/> flicker at the rate of the power supply frequency
+(60Hz or 50Hz,<wbr/> depending on country).<wbr/> While this is
+typically not noticeable to a person,<wbr/> it can be visible to
+a camera device.<wbr/> If a camera sets its exposure time to the
+wrong value,<wbr/> the flicker may become visible in the
+viewfinder as flicker or in a final captured image,<wbr/> as a
+set of variable-brightness bands across the image.<wbr/></p>
+<p>Therefore,<wbr/> the auto-exposure routines of camera devices
+include antibanding routines that ensure that the chosen
+exposure value will not cause such banding.<wbr/> The choice of
+exposure time depends on the rate of flicker,<wbr/> which the
+camera device can detect automatically,<wbr/> or the expected
+rate can be selected by the application using this
+control.<wbr/></p>
+<p>A given camera device may not support all of the possible
+options for the antibanding mode.<wbr/> The
+<a href="#static_android.control.aeAvailableAntibandingModes">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Antibanding<wbr/>Modes</a> key contains
+the available modes for a given camera device.<wbr/></p>
+<p>The default mode is AUTO,<wbr/> which must be supported by all
+camera devices.<wbr/></p>
+<p>If manual exposure control is enabled (by setting
+<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> or <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> to OFF),<wbr/>
+then this setting has no effect,<wbr/> and the application must
+ensure it selects exposure times that do not cause banding
+issues.<wbr/> The <a href="#dynamic_android.statistics.sceneFlicker">android.<wbr/>statistics.<wbr/>scene<wbr/>Flicker</a> key can assist
+the application in this.<wbr/></p>
+            </td>
+          </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For all capture request templates,<wbr/> this field must be set
+to AUTO.<wbr/>  AUTO is the only mode that must supported;
+OFF,<wbr/> 50HZ,<wbr/> 60HZ are all optional.<wbr/></p>
+<p>If manual exposure control is enabled (by setting
+<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> or <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> to OFF),<wbr/>
+then the exposure values provided by the application must not be
+adjusted for antibanding.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -2342,7 +2411,7 @@ stabilized</p>
 
                 
           <tr class="entry" id="static_android.control.aeAvailableAntibandingModes">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Antibanding<wbr/>Modes
             </td>
             <td class="entry_type">
@@ -2359,8 +2428,8 @@ stabilized</p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Which set of antibanding modes are
-supported</p>
+              <p>The set of auto-exposure antibanding modes that are
+supported by this camera device.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -2372,6 +2441,17 @@ supported</p>
             <td class="entry_tags">
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Not all of the auto-exposure anti-banding modes may be
+supported by a given camera device.<wbr/> This field lists the
+valid anti-banding modes that the application may request
+for this camera device; they must include AUTO.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -12894,6 +12974,7 @@ possible again.<wbr/></p>
         Needed for backwards compatibility with old Java API
     
         <ul class="tags_entries">
+          <li><a href="#controls_android.control.aeAntibandingMode">android.control.aeAntibandingMode</a> (controls)</li>
           <li><a href="#controls_android.control.aeExposureCompensation">android.control.aeExposureCompensation</a> (controls)</li>
           <li><a href="#controls_android.control.aeLock">android.control.aeLock</a> (controls)</li>
           <li><a href="#controls_android.control.aeMode">android.control.aeMode</a> (controls)</li>
