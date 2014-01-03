@@ -53,7 +53,7 @@ import metadata_helpers
 
 class MetadataParserXml:
   """
-  A class to parse any XML file that passes validation with metadata-validate.
+  A class to parse any XML block that passes validation with metadata-validate.
   It builds a metadata_model.Metadata graph and then renders it over a
   Mako template.
 
@@ -61,25 +61,42 @@ class MetadataParserXml:
     soup: an instance of BeautifulSoup corresponding to the XML contents
     metadata: a constructed instance of metadata_model.Metadata
   """
-  def __init__(self, file_name):
+  def __init__(self, xml, file_name):
     """
     Construct a new MetadataParserXml, immediately try to parse it into a
     metadata model.
 
     Args:
-      file_name: path to an XML file that passes metadata-validate
+      xml: The XML block to use for the metadata
+      file_name: Source of the XML block, only for debugging/errors
 
     Raises:
-      ValueError: if the XML file failed to pass metadata_validate.py
+      ValueError: if the XML block failed to pass metadata_validate.py
     """
-    self._soup = validate_xml(file_name)
+    self._soup = validate_xml(xml)
 
     if self._soup is None:
-      raise ValueError("%s has an invalid XML file" %(file_name))
+      raise ValueError("%s has an invalid XML file" % (file_name))
 
     self._metadata = Metadata()
     self._parse()
     self._metadata.construct_graph()
+
+  @staticmethod
+  def create_from_file(file_name):
+    """
+    Construct a new MetadataParserXml by loading and parsing an XML file.
+
+    Args:
+      file_name: Name of the XML file to load and parse.
+
+    Raises:
+      ValueError: if the XML file failed to pass metadata_validate.py
+
+    Returns:
+      MetadataParserXml instance representing the XML file.
+    """
+    return MetadataParserXml(file(file_name).read(), file_name)
 
   @property
   def soup(self):
@@ -288,7 +305,7 @@ if __name__ == "__main__":
   file_name = sys.argv[1]
   template_name = sys.argv[2]
   output_name = sys.argv[3] if len(sys.argv) > 3 else None
-  parser = MetadataParserXml(file_name)
+  parser = MetadataParserXml.create_from_file(file_name)
   parser.render(template_name, output_name)
 
   sys.exit(0)

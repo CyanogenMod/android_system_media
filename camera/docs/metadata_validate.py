@@ -265,19 +265,18 @@ def validate_entries(soup):
 
   return success
 
-def validate_xml(file_name):
+def validate_xml(xml):
   """
   Validate all XML nodes according to the rules in validate_clones and
   validate_entries.
 
   Args:
-    file_name - a string path to an XML file we wish to validate
+    xml - A string containing a block of XML to validate
 
   Returns:
     a BeautifulSoup instance if validation succeeds, None otherwise
   """
 
-  xml = file(file_name).read()
   soup = BeautifulSoup(xml, features='xml')
 
   succ = validate_clones(soup)

@@ -22,6 +22,7 @@ import metadata_model
 import re
 import markdown
 import textwrap
+import sys
 import bs4
 # Monkey-patch BS4. WBR element must not have an end tag.
 bs4.builder.HTMLTreeBuilder.empty_element_tags.add("wbr")
@@ -620,18 +621,22 @@ def jenum_value(enum_entry, enum_value):
   cname = csym(enum_entry.name)
   return cname[cname.find('_') + 1:] + '_' + enum_value.name
 
-def javadoc(text, indent = 4):
+def javadoc(metadata, indent = 4):
   """
-  Format markdown syntax text block as a javadoc comment section
+  Returns a function to format a markdown syntax text block as a
+  javadoc comment section, given a set of metadata
 
   Args:
-    text: A multi-line string to format
+    metadata: A Metadata instance, representing the the top-level root
+      of the metadata for cross-referencing
     indent: baseline level of indentation for javadoc block
   Returns:
-    String with:
+    A function that transforms a String text block as follows:
     - Indent and * for insertion into a Javadoc comment block
     - Trailing whitespace removed
     - Entire body rendered via markdown to generate HTML
+    - All tag names converted to appropriate Javadoc {@link} with @see
+      for each tag
 
   Example:
     "This is a comment for Javadoc\n" +
@@ -639,28 +644,65 @@ def javadoc(text, indent = 4):
     "     formatted better\n" +
     "\n" +
     "    That covers multiple lines as well\n"
+    "    And references android.control.mode\n"
 
     transforms to
     "    * <p>This is a comment for Javadoc\n" +
     "    * with multiple lines, that should be\n" +
     "    * formatted better</p>\n" +
     "    * <p>That covers multiple lines as well</p>\n" +
+    "    * and references {@link CaptureRequest#CONTROL_MODE android.control.mode}\n" +
+    "    *\n" +
+    "    * @see CaptureRequest#CONTROL_MODE\n"
   """
-  comment_prefix = " " * indent + " * ";
+  def javadoc_formatter(text):
+    comment_prefix = " " * indent + " * ";
 
-  # render with markdown => HTML
-  javatext = md(text, JAVADOC_IMAGE_SRC_METADATA)
+    # render with markdown => HTML
+    javatext = md(text, JAVADOC_IMAGE_SRC_METADATA)
 
-  def line_filter(line):
-    # Indent each line
-    # Add ' * ' to it for stylistic reasons
-    # Strip right side of trailing whitespace
-    return (comment_prefix + line).rstrip()
+    # Crossref tag names
+    kind_mapping = {
+        'static': 'CameraCharacteristics',
+        'dynamic': 'CaptureResult',
+        'controls': 'CaptureRequest' }
 
-  # Process each line with above filter
-  javatext = "\n".join(line_filter(i) for i in javatext.split("\n")) + "\n"
+    # Convert metadata entry "android.x.y.z" to form
+    # "{@link CaptureRequest#X_Y_Z android.x.y.z}"
+    def javadoc_crossref_filter(node):
+      if node.applied_visibility == 'public':
+        return '{@link %s#%s %s}' % (kind_mapping[node.kind],
+                                     jkey_identifier(node.name),
+                                     node.name)
+      else:
+        return node.name
 
-  return javatext
+    # For each public tag "android.x.y.z" referenced, add a
+    # "@see CaptureRequest#X_Y_Z"
+    def javadoc_see_filter(node_set):
+      node_set = (x for x in node_set if x.applied_visibility == 'public')
+
+      text = '\n'
+      for node in node_set:
+        text = text + '\n@see %s#%s' % (kind_mapping[node.kind],
+                                      jkey_identifier(node.name))
+
+      return text if text != '\n' else ''
+
+    javatext = filter_tags(javatext, metadata, javadoc_crossref_filter, javadoc_see_filter)
+
+    def line_filter(line):
+      # Indent each line
+      # Add ' * ' to it for stylistic reasons
+      # Strip right side of trailing whitespace
+      return (comment_prefix + line.lstrip()).rstrip()
+
+    # Process each line with above filter
+    javatext = "\n".join(line_filter(i) for i in javatext.split("\n")) + "\n"
+
+    return javatext
+
+  return javadoc_formatter
 
 def md(text, img_src_prefix=""):
     """
@@ -715,6 +757,70 @@ def md(text, img_src_prefix=""):
     # prepend a prefix to each <img src="foo"> -> <img src="${prefix}foo">
     text = re.sub(r'src="([^"]*)"', 'src="' + img_src_prefix + r'\1"', text)
     return text
+
+def filter_tags(text, metadata, filter_function, summary_function = None):
+    """
+    Find all references to tags in the form outer_namespace.xxx.yyy[.zzz] in
+    the provided text, and pass them through filter_function and summary_function.
+
+    Used to linkify entry names in HMTL, javadoc output.
+
+    Args:
+      text: A string representing a block of text destined for output
+      metadata: A Metadata instance, the root of the metadata properties tree
+      filter_function: A Node->string function to apply to each node
+        when found in text; the string returned replaces the tag name in text.
+      summary_function: A Node set->string function that is provided the set of
+        tag nodes found in text, and which must return a string that is then appended
+        to the end of the text.
+    """
+
+    tag_set = set()
+    def name_match(name):
+      return lambda node: node.name == name
+
+    # Match outer_namespace.x.y or outer_namespace.x.y.z, making sure
+    # to grab .z and not just outer_namespace.x.y.  (sloppy, but since we
+    # check for validity, a few false positives don't hurt)
+    for outer_namespace in metadata.outer_namespaces:
+
+      tag_match = outer_namespace.name + \
+        r"\.([a-zA-Z0-9\n]+)\.([a-zA-Z0-9\n]+)(\.[a-zA-Z0-9\n]+)?[^/]"
+
+      def filter_sub(match):
+        whole_match = match.group(0)
+        section1 = match.group(1)
+        section2 = match.group(2)
+        section3 = match.group(3)
+
+        # First try a two-level match
+        candidate = "%s.%s.%s" % (outer_namespace.name, section1, section2)
+        got_two_level = False
+
+        node = metadata.find_first(name_match(candidate.replace('\n','')))
+
+        if node:
+          got_two_level = True
+
+        # Then a three-level match
+        if not got_two_level and section3:
+          candidate = "%s%s" % (candidate, section3)
+          node = metadata.find_first(name_match(candidate.replace('\n','')))
+
+        if node:
+          tag_set.add(node)
+          return whole_match.replace(candidate,filter_function(node))
+        else:
+          print >> sys.stderr,\
+            "  WARNING: Could not crossref likely reference {%s}" % (match.group(0))
+          return whole_match
+
+      text = re.sub(tag_match, filter_sub, text)
+
+    if summary_function is not None:
+      return text + summary_function(tag_set)
+    else:
+      return text
 
 def any_visible(section, kind_name, visibilities):
   """

@@ -750,7 +750,7 @@
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>When android.<wbr/>control.<wbr/>awb<wbr/>Mode is not OFF,<wbr/> TRANSFORM_<wbr/>MATRIX
+              <p>When <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> is not OFF,<wbr/> TRANSFORM_<wbr/>MATRIX
 should be ignored.<wbr/></p>
             </td>
           </tr>
@@ -786,8 +786,8 @@ from sensor RGB color space to output linear sRGB color space</p>
             </td>
 
             <td class="entry_range">
-              Output values are expected to be in the range
-          (0,<wbr/>1)
+              <p>Output values are expected to be in the range
+(0,<wbr/>1)</p>
             </td>
 
             <td class="entry_tags">
@@ -800,9 +800,9 @@ from sensor RGB color space to output linear sRGB color space</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>This matrix is either set by HAL when the request
-android.<wbr/>color<wbr/>Correction.<wbr/>mode is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
+<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
 directly by the application in the request when the
-android.<wbr/>color<wbr/>Correction.<wbr/>mode is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
+<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
 <p>In the latter case,<wbr/> the HAL may round the matrix to account
 for precision issues; the final rounded matrix should be
 reported back in this matrix result metadata.<wbr/></p>
@@ -859,9 +859,9 @@ does not support a separate gain for even/<wbr/>odd green channels,<wbr/>
 it should use the G_<wbr/>even value,<wbr/>and write G_<wbr/>odd equal to
 G_<wbr/>even in the output result metadata.<wbr/></p>
 <p>This array is either set by HAL when the request
-android.<wbr/>color<wbr/>Correction.<wbr/>mode is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
+<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
 directly by the application in the request when the
-android.<wbr/>color<wbr/>Correction.<wbr/>mode is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
+<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
 <p>The ouput should be the gains actually applied by the HAL to
 the current frame.<wbr/></p>
             </td>
@@ -925,8 +925,8 @@ from sensor RGB color space to output linear sRGB color space</p>
             </td>
 
             <td class="entry_range">
-              Output values are expected to be in the range
-          (0,<wbr/>1)
+              <p>Output values are expected to be in the range
+(0,<wbr/>1)</p>
             </td>
 
             <td class="entry_tags">
@@ -939,9 +939,9 @@ from sensor RGB color space to output linear sRGB color space</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>This matrix is either set by HAL when the request
-android.<wbr/>color<wbr/>Correction.<wbr/>mode is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
+<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
 directly by the application in the request when the
-android.<wbr/>color<wbr/>Correction.<wbr/>mode is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
+<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
 <p>In the latter case,<wbr/> the HAL may round the matrix to account
 for precision issues; the final rounded matrix should be
 reported back in this matrix result metadata.<wbr/></p>
@@ -998,9 +998,9 @@ does not support a separate gain for even/<wbr/>odd green channels,<wbr/>
 it should use the G_<wbr/>even value,<wbr/>and write G_<wbr/>odd equal to
 G_<wbr/>even in the output result metadata.<wbr/></p>
 <p>This array is either set by HAL when the request
-android.<wbr/>color<wbr/>Correction.<wbr/>mode is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
+<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
 directly by the application in the request when the
-android.<wbr/>color<wbr/>Correction.<wbr/>mode is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
+<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
 <p>The ouput should be the gains actually applied by the HAL to
 the current frame.<wbr/></p>
             </td>
@@ -1078,8 +1078,7 @@ antibanding</p>
             </td>
 
             <td class="entry_range">
-              
-          android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Antibanding<wbr/>Modes
+              <p><a href="#static_android.control.aeAvailableAntibandingModes">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Antibanding<wbr/>Modes</a></p>
             </td>
 
             <td class="entry_tags">
@@ -1252,7 +1251,7 @@ exposure and sensitivity fields</p>
             </td>
 
             <td class="entry_range">
-              android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Modes
+              <p><a href="#static_android.control.aeAvailableModes">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Modes</a></p>
             </td>
 
             <td class="entry_tags">
@@ -1267,7 +1266,7 @@ exposure and sensitivity fields</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only effective if android.<wbr/>control.<wbr/>mode = AUTO.<wbr/></p>
+              <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO.<wbr/></p>
 <p>If auto-exposure is active,<wbr/> HAL auto-focus routine is enabled,<wbr/>
 then HAL auto-exposure routine overrides the control variables
 that relate to auto-exposure routine,<wbr/> and these override values
@@ -1328,13 +1327,13 @@ xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined inclusive of the
 specified coordinates.<wbr/></p>
 <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
-(android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>width - 1,<wbr/>
-android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>height - 1) being the
+(<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
 needs to be used by the HAL.<wbr/> If the metering region is
-outside the current android.<wbr/>scaler.<wbr/>crop<wbr/>Region,<wbr/> the HAL
+outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
 should ignore the sections outside the region and output the
 used sections in the frame metadata</p>
             </td>
@@ -1370,7 +1369,7 @@ maintain exposure</p>
             </td>
 
             <td class="entry_range">
-              android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Target<wbr/>Fps<wbr/>Ranges
+              <p><a href="#static_android.control.aeAvailableTargetFpsRanges">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Target<wbr/>Fps<wbr/>Ranges</a></p>
             </td>
 
             <td class="entry_tags">
@@ -1386,7 +1385,7 @@ maintain exposure</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Only constrains AE algorithm,<wbr/> not manual control
-of android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</p>
+of <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a></p>
             </td>
           </tr>
 
@@ -1575,9 +1574,9 @@ mode it is set to</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only effective if android.<wbr/>control.<wbr/>mode = AUTO.<wbr/></p>
+              <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO.<wbr/></p>
 <p>If lens is controlled by HAL auto-focus algorithm,<wbr/> the HAL should
-report the current AF status in android.<wbr/>control.<wbr/>af<wbr/>State in
+report the current AF status in <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a> in
 result metadata.<wbr/></p>
             </td>
           </tr>
@@ -1631,13 +1630,13 @@ xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined inclusive of the
 specified coordinates.<wbr/></p>
 <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
-(android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>width - 1,<wbr/>
-android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>height - 1) being the
+(<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific focus area
 needs to be used by the HAL.<wbr/> If the focusing region is
-outside the current android.<wbr/>scaler.<wbr/>crop<wbr/>Region,<wbr/> the HAL
+outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
 should ignore the sections outside the region and output the
 used sections in the frame metadata</p>
             </td>
@@ -1839,7 +1838,7 @@ is</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>[BC - AWB lock,<wbr/>AWB modes]</p>
-<p>Only effective if android.<wbr/>control.<wbr/>mode = AUTO.<wbr/></p>
+<p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO.<wbr/></p>
             </td>
           </tr>
 
@@ -1893,13 +1892,13 @@ xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined inclusive of the
 specified coordinates.<wbr/></p>
 <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
-(android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>width - 1,<wbr/>
-android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>height - 1) being the
+(<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
 needs to be used by the HAL.<wbr/> If the metering region is
-outside the current android.<wbr/>scaler.<wbr/>crop<wbr/>Region,<wbr/> the HAL
+outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
 should ignore the sections outside the region and output the
 used sections in the frame metadata</p>
             </td>
@@ -1968,7 +1967,7 @@ strategy</p>
             </td>
 
             <td class="entry_range">
-              all must be supported
+              <p>all must be supported</p>
             </td>
 
             <td class="entry_tags">
@@ -1983,7 +1982,7 @@ strategy</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only used if android.<wbr/>control.<wbr/>mode != OFF.<wbr/></p>
+              <p>Only used if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF.<wbr/></p>
             </td>
           </tr>
 
@@ -2043,14 +2042,14 @@ strategy</p>
 
             <td class="entry_description">
               <p>Whether any special color effect is in use.<wbr/>
-Only used if android.<wbr/>control.<wbr/>mode != OFF</p>
+Only used if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF</p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              android.<wbr/>control.<wbr/>available<wbr/>Effects
+              <p><a href="#static_android.control.availableEffects">android.<wbr/>control.<wbr/>available<wbr/>Effects</a></p>
             </td>
 
             <td class="entry_tags">
@@ -2112,7 +2111,7 @@ routines</p>
             </td>
 
             <td class="entry_range">
-              all must be supported
+              <p>all must be supported</p>
             </td>
 
             <td class="entry_tags">
@@ -2131,12 +2130,12 @@ routines</p>
 by the HAL is disabled.<wbr/> The application must set the fields for
 capture parameters itself.<wbr/></p>
 <p>When set to AUTO,<wbr/> the individual algorithm controls in
-android.<wbr/>control.<wbr/>* are in effect,<wbr/> such as android.<wbr/>control.<wbr/>af<wbr/>Mode.<wbr/></p>
+android.<wbr/>control.<wbr/>* are in effect,<wbr/> such as <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>.<wbr/></p>
 <p>When set to USE_<wbr/>SCENE_<wbr/>MODE,<wbr/> the individual controls in
 android.<wbr/>control.<wbr/>* are mostly disabled,<wbr/> and the HAL implements
 one of the scene mode settings (such as ACTION,<wbr/> SUNSET,<wbr/> or PARTY)
 as it wishes.<wbr/> The HAL scene mode 3A settings are provided by
-android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides.<wbr/></p>
+<a href="#static_android.control.sceneModeOverrides">android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides</a>.<wbr/></p>
             </td>
           </tr>
 
@@ -2238,14 +2237,14 @@ android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides.<wbr/></p>
 
             <td class="entry_description">
               <p>Which scene mode is active when
-android.<wbr/>control.<wbr/>mode = SCENE_<wbr/>MODE</p>
+<a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = SCENE_<wbr/>MODE</p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes
+              <p><a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a></p>
             </td>
 
             <td class="entry_tags">
@@ -2305,7 +2304,7 @@ active</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>If enabled,<wbr/> video stabilization can modify the
-android.<wbr/>scaler.<wbr/>crop<wbr/>Region to keep the video stream
+<a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> to keep the video stream
 stabilized</p>
             </td>
           </tr>
@@ -2406,9 +2405,9 @@ supported</p>
             </td>
 
             <td class="entry_range">
-              OFF,<wbr/> ON must be supported.<wbr/>
-          ON_<wbr/>AUTO_<wbr/>FLASH/<wbr/>ON_<wbr/>ALWAYS_<wbr/>FLASH must be supported if flash
-          unit is available
+              <p>OFF,<wbr/> ON must be supported.<wbr/>
+ON_<wbr/>AUTO_<wbr/>FLASH/<wbr/>ON_<wbr/>ALWAYS_<wbr/>FLASH must be supported if flash
+unit is available</p>
             </td>
 
             <td class="entry_tags">
@@ -2485,8 +2484,8 @@ android.<wbr/>control.<wbr/>ae<wbr/>Compensation<wbr/>Step<wbr/>Size</p>
             </td>
 
             <td class="entry_range">
-              At least (-2,<wbr/>2)/<wbr/>(exp compensation step
-          size)
+              <p>At least (-2,<wbr/>2)/<wbr/>(exp compensation step
+size)</p>
             </td>
 
             <td class="entry_tags">
@@ -2523,7 +2522,7 @@ can be changed</p>
             </td>
 
             <td class="entry_range">
-              &lt;= 1/<wbr/>2
+              <p>&lt;= 1/<wbr/>2</p>
             </td>
 
             <td class="entry_tags">
@@ -2565,8 +2564,8 @@ selected</p>
             </td>
 
             <td class="entry_range">
-              OFF must be included.<wbr/> AUTO must be supported if
-          lens allows for changing focus
+              <p>OFF must be included.<wbr/> AUTO must be supported if
+lens allows for changing focus</p>
             </td>
 
             <td class="entry_tags">
@@ -2608,7 +2607,7 @@ list is supported</p>
             </td>
 
             <td class="entry_range">
-              OFF must be listed
+              <p>OFF must be listed</p>
             </td>
 
             <td class="entry_tags">
@@ -2650,8 +2649,8 @@ supported.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              SCENE_<wbr/>MODE_<wbr/>FACE_<wbr/>PRIORITY must be supported if face
-          detection is supported
+              <p>SCENE_<wbr/>MODE_<wbr/>FACE_<wbr/>PRIORITY must be supported if face
+detection is supported</p>
             </td>
 
             <td class="entry_tags">
@@ -2693,7 +2692,7 @@ be supported</p>
             </td>
 
             <td class="entry_range">
-              OFF must be included
+              <p>OFF must be included</p>
             </td>
 
             <td class="entry_tags">
@@ -2733,7 +2732,7 @@ be supported</p>
             </td>
 
             <td class="entry_range">
-              OFF,<wbr/> AUTO must be included
+              <p>OFF,<wbr/> AUTO must be included</p>
             </td>
 
             <td class="entry_tags">
@@ -2770,7 +2769,9 @@ regions can be listed for metering?</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 1
+              <blockquote>
+<p>= 1</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -2811,12 +2812,11 @@ each available scene mode</p>
             </td>
 
             <td class="entry_range">
-              For each listed scene mode,<wbr/> lists the aeMode,<wbr/>
-          awbMode,<wbr/> and afMode that the HAL wants to use for that
-          scene mode.<wbr/>
-
-          For each entry,<wbr/> the order is {aeMode,<wbr/> awbMode,<wbr/> afMode} in
-          order of increasing index
+              <p>For each listed scene mode,<wbr/> lists the aeMode,<wbr/>
+awbMode,<wbr/> and afMode that the HAL wants to use for that
+scene mode.<wbr/></p>
+<p>For each entry,<wbr/> the order is {aeMode,<wbr/> awbMode,<wbr/> afMode} in
+order of increasing index</p>
             </td>
 
             <td class="entry_tags">
@@ -2840,7 +2840,7 @@ The order of this list matches that of availableSceneModes,<wbr/>
 with 3 entires for each scene mode.<wbr/>  The overrides listed
 for SCENE_<wbr/>MODE_<wbr/>FACE_<wbr/>PRIORITY are ignored,<wbr/> since for that
 mode,<wbr/> the application-set aeMode,<wbr/> awbMode,<wbr/> and afMode are
-used instead,<wbr/> like they are when android.<wbr/>control.<wbr/>mode is
+used instead,<wbr/> like they are when <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> is
 AUTO.<wbr/></p>
 <p>It is recommended that for FACE_<wbr/>PRIORITY,<wbr/> the overrides
 should be set to 0.<wbr/> As an example,<wbr/> if availableSceneModes is
@@ -2971,13 +2971,13 @@ xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined inclusive of the
 specified coordinates.<wbr/></p>
 <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
-(android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>width - 1,<wbr/>
-android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>height - 1) being the
+(<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
 needs to be used by the HAL.<wbr/> If the metering region is
-outside the current android.<wbr/>scaler.<wbr/>crop<wbr/>Region,<wbr/> the HAL
+outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
 should ignore the sections outside the region and output the
 used sections in the frame metadata</p>
             </td>
@@ -3184,9 +3184,9 @@ mode it is set to</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only effective if android.<wbr/>control.<wbr/>mode = AUTO.<wbr/></p>
+              <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO.<wbr/></p>
 <p>If lens is controlled by HAL auto-focus algorithm,<wbr/> the HAL should
-report the current AF status in android.<wbr/>control.<wbr/>af<wbr/>State in
+report the current AF status in <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a> in
 result metadata.<wbr/></p>
             </td>
           </tr>
@@ -3240,13 +3240,13 @@ xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined inclusive of the
 specified coordinates.<wbr/></p>
 <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
-(android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>width - 1,<wbr/>
-android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>height - 1) being the
+(<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific focus area
 needs to be used by the HAL.<wbr/> If the focusing region is
-outside the current android.<wbr/>scaler.<wbr/>crop<wbr/>Region,<wbr/> the HAL
+outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
 should ignore the sections outside the region and output the
 used sections in the frame metadata</p>
             </td>
@@ -3453,7 +3453,7 @@ is</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>[BC - AWB lock,<wbr/>AWB modes]</p>
-<p>Only effective if android.<wbr/>control.<wbr/>mode = AUTO.<wbr/></p>
+<p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO.<wbr/></p>
             </td>
           </tr>
 
@@ -3507,13 +3507,13 @@ xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined inclusive of the
 specified coordinates.<wbr/></p>
 <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
-(android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>width - 1,<wbr/>
-android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>height - 1) being the
+(<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
 needs to be used by the HAL.<wbr/> If the metering region is
-outside the current android.<wbr/>scaler.<wbr/>crop<wbr/>Region,<wbr/> the HAL
+outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
 should ignore the sections outside the region and output the
 used sections in the frame metadata</p>
             </td>
@@ -3634,7 +3634,7 @@ routines</p>
             </td>
 
             <td class="entry_range">
-              all must be supported
+              <p>all must be supported</p>
             </td>
 
             <td class="entry_tags">
@@ -3653,12 +3653,12 @@ routines</p>
 by the HAL is disabled.<wbr/> The application must set the fields for
 capture parameters itself.<wbr/></p>
 <p>When set to AUTO,<wbr/> the individual algorithm controls in
-android.<wbr/>control.<wbr/>* are in effect,<wbr/> such as android.<wbr/>control.<wbr/>af<wbr/>Mode.<wbr/></p>
+android.<wbr/>control.<wbr/>* are in effect,<wbr/> such as <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>.<wbr/></p>
 <p>When set to USE_<wbr/>SCENE_<wbr/>MODE,<wbr/> the individual controls in
 android.<wbr/>control.<wbr/>* are mostly disabled,<wbr/> and the HAL implements
 one of the scene mode settings (such as ACTION,<wbr/> SUNSET,<wbr/> or PARTY)
 as it wishes.<wbr/> The HAL scene mode 3A settings are provided by
-android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides.<wbr/></p>
+<a href="#static_android.control.sceneModeOverrides">android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides</a>.<wbr/></p>
             </td>
           </tr>
 
@@ -4019,7 +4019,7 @@ not slow down capture rate when applying edge enhancement.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              0 - 10
+              <p>0 - 10</p>
             </td>
 
             <td class="entry_tags">
@@ -4067,7 +4067,7 @@ exposure</p>
             </td>
 
             <td class="entry_range">
-              0-(exposure time-flash duration)
+              <p>0-(exposure time-flash duration)</p>
             </td>
 
             <td class="entry_tags">
@@ -4243,7 +4243,7 @@ again</p>
             </td>
 
             <td class="entry_range">
-              0-1e9
+              <p>0-1e9</p>
             </td>
 
             <td class="entry_tags">
@@ -4293,7 +4293,7 @@ flash</p>
             </td>
 
             <td class="entry_range">
-              0-1 for both
+              <p>0-1 for both</p>
             </td>
 
             <td class="entry_tags">
@@ -4331,7 +4331,9 @@ power single flash</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 0
+              <blockquote>
+<p>= 0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -4395,7 +4397,7 @@ power single flash</p>
             </td>
 
             <td class="entry_range">
-              0 - 10
+              <p>0 - 10</p>
             </td>
 
             <td class="entry_tags">
@@ -4443,7 +4445,7 @@ exposure</p>
             </td>
 
             <td class="entry_range">
-              0-(exposure time-flash duration)
+              <p>0-(exposure time-flash duration)</p>
             </td>
 
             <td class="entry_tags">
@@ -4992,7 +4994,7 @@ EXIF</p>
             </td>
 
             <td class="entry_range">
-              (-180 - 180],<wbr/> [-90,<wbr/>90],<wbr/> [-inf,<wbr/> inf]
+              <p>(-180 - 180],<wbr/> [-90,<wbr/>90],<wbr/> [-inf,<wbr/> inf]</p>
             </td>
 
             <td class="entry_tags">
@@ -5104,7 +5106,7 @@ write</p>
             </td>
 
             <td class="entry_range">
-              0,<wbr/> 90,<wbr/> 180,<wbr/> 270
+              <p>0,<wbr/> 90,<wbr/> 180,<wbr/> 270</p>
             </td>
 
             <td class="entry_tags">
@@ -5141,7 +5143,7 @@ image</p>
             </td>
 
             <td class="entry_range">
-              1-100; larger is higher quality
+              <p>1-100; larger is higher quality</p>
             </td>
 
             <td class="entry_tags">
@@ -5186,7 +5188,7 @@ thumbnail</p>
             </td>
 
             <td class="entry_range">
-              1-100; larger is higher quality
+              <p>1-100; larger is higher quality</p>
             </td>
 
             <td class="entry_tags">
@@ -5226,7 +5228,7 @@ thumbnail</p>
             </td>
 
             <td class="entry_range">
-              Size must be one of the size from android.<wbr/>jpeg.<wbr/>available<wbr/>Thumbnail<wbr/>Sizes
+              <p>Size must be one of the size from <a href="#static_android.jpeg.availableThumbnailSizes">android.<wbr/>jpeg.<wbr/>available<wbr/>Thumbnail<wbr/>Sizes</a></p>
             </td>
 
             <td class="entry_tags">
@@ -5304,8 +5306,8 @@ the same aspect ratio as the jpeg image.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              Must include at least one valid resolution,<wbr/> plus
-          (0,<wbr/>0) for no thumbnail generation,<wbr/> and each size must be distinct.<wbr/>
+              <p>Must include at least one valid resolution,<wbr/> plus
+(0,<wbr/>0) for no thumbnail generation,<wbr/> and each size must be distinct.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -5325,10 +5327,10 @@ the same aspect ratio as the jpeg image.<wbr/></p>
 <li>The sizes must be sorted by increasing pixel area (width x height).<wbr/>
 If several resolutions have the same area,<wbr/> they must be sorted by increasing width.<wbr/></li>
 <li>The aspect ratio of the largest thumbnail size must be same as the
-aspect ratio of largest size in android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Sizes.<wbr/>
+aspect ratio of largest size in <a href="#static_android.scaler.availableJpegSizes">android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Sizes</a>.<wbr/>
 The largest size is defined as the size that has the largest pixel area
 in a given size list.<wbr/></li>
-<li>Each size in android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Sizes must have at least
+<li>Each size in <a href="#static_android.scaler.availableJpegSizes">android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Sizes</a> must have at least
 one corresponding size that has the same aspect ratio in availableThumbnailSizes,<wbr/>
 and vice versa.<wbr/></li>
 <li>All non (0,<wbr/> 0) sizes must have non-zero widths and heights.<wbr/></li>
@@ -5362,8 +5364,8 @@ JPEG buffer</p>
             </td>
 
             <td class="entry_range">
-              Must be large enough to fit any JPEG produced by
-          the camera
+              <p>Must be large enough to fit any JPEG produced by
+the camera</p>
             </td>
 
             <td class="entry_tags">
@@ -5438,7 +5440,7 @@ EXIF</p>
             </td>
 
             <td class="entry_range">
-              (-180 - 180],<wbr/> [-90,<wbr/>90],<wbr/> [-inf,<wbr/> inf]
+              <p>(-180 - 180],<wbr/> [-90,<wbr/>90],<wbr/> [-inf,<wbr/> inf]</p>
             </td>
 
             <td class="entry_tags">
@@ -5550,7 +5552,7 @@ write</p>
             </td>
 
             <td class="entry_range">
-              0,<wbr/> 90,<wbr/> 180,<wbr/> 270
+              <p>0,<wbr/> 90,<wbr/> 180,<wbr/> 270</p>
             </td>
 
             <td class="entry_tags">
@@ -5587,7 +5589,7 @@ image</p>
             </td>
 
             <td class="entry_range">
-              1-100; larger is higher quality
+              <p>1-100; larger is higher quality</p>
             </td>
 
             <td class="entry_tags">
@@ -5632,7 +5634,9 @@ bytes</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 0
+              <blockquote>
+<p>= 0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -5648,8 +5652,8 @@ bytes</p>
 this must be 0.<wbr/></p>
 <p>Otherwise,<wbr/> this describes the real size of the compressed
 JPEG image placed in the output stream.<wbr/>  More specifically,<wbr/>
-if android.<wbr/>jpeg.<wbr/>max<wbr/>Size = 1000000,<wbr/> and a specific capture
-has android.<wbr/>jpeg.<wbr/>size = 500000,<wbr/> then the output buffer from
+if <a href="#static_android.jpeg.maxSize">android.<wbr/>jpeg.<wbr/>max<wbr/>Size</a> = 1000000,<wbr/> and a specific capture
+has <a href="#dynamic_android.jpeg.size">android.<wbr/>jpeg.<wbr/>size</a> = 500000,<wbr/> then the output buffer from
 the JPEG stream will be 1000000 bytes,<wbr/> of which the first
 500000 make up the real data.<wbr/></p>
             </td>
@@ -5681,7 +5685,7 @@ thumbnail</p>
             </td>
 
             <td class="entry_range">
-              1-100; larger is higher quality
+              <p>1-100; larger is higher quality</p>
             </td>
 
             <td class="entry_tags">
@@ -5721,7 +5725,7 @@ thumbnail</p>
             </td>
 
             <td class="entry_range">
-              Size must be one of the size from android.<wbr/>jpeg.<wbr/>available<wbr/>Thumbnail<wbr/>Sizes
+              <p>Size must be one of the size from <a href="#static_android.jpeg.availableThumbnailSizes">android.<wbr/>jpeg.<wbr/>available<wbr/>Thumbnail<wbr/>Sizes</a></p>
             </td>
 
             <td class="entry_tags">
@@ -5801,7 +5805,7 @@ the same aspect ratio as the jpeg image.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Apertures
+              <p><a href="#static_android.lens.info.availableApertures">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Apertures</a></p>
             </td>
 
             <td class="entry_tags">
@@ -5848,7 +5852,7 @@ filter(s)</p>
             </td>
 
             <td class="entry_range">
-              android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Filter<wbr/>Densities
+              <p><a href="#static_android.lens.info.availableFilterDensities">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Filter<wbr/>Densities</a></p>
             </td>
 
             <td class="entry_tags">
@@ -5894,7 +5898,9 @@ pick from supported list</p>
             </td>
 
             <td class="entry_range">
-              &gt; 0
+              <blockquote>
+<p>0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -5940,7 +5946,9 @@ measured from frontmost surface of the lens</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 0
+              <blockquote>
+<p>= 0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -5996,7 +6004,7 @@ enabled.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              android.<wbr/>lens.<wbr/>available<wbr/>Optical<wbr/>Stabilization
+              <p>android.<wbr/>lens.<wbr/>available<wbr/>Optical<wbr/>Stabilization</p>
             </td>
 
             <td class="entry_tags">
@@ -6074,7 +6082,7 @@ values</p>
             </td>
 
             <td class="entry_range">
-              one entry required,<wbr/> &gt; 0
+              <p>one entry required,<wbr/> &gt; 0</p>
             </td>
 
             <td class="entry_tags">
@@ -6124,7 +6132,7 @@ values</p>
             </td>
 
             <td class="entry_range">
-              one entry required,<wbr/> &gt;= 0
+              <p>one entry required,<wbr/> &gt;= 0</p>
             </td>
 
             <td class="entry_tags">
@@ -6178,7 +6186,9 @@ length</p>
             </td>
 
             <td class="entry_range">
-              &gt; 0
+              <blockquote>
+<p>0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -6272,7 +6282,7 @@ color channel</p>
             </td>
 
             <td class="entry_range">
-              N,<wbr/> M &gt;= 2
+              <p>N,<wbr/> M &gt;= 2</p>
             </td>
 
             <td class="entry_tags">
@@ -6326,7 +6336,7 @@ map</p>
             </td>
 
             <td class="entry_range">
-              Both values &gt;= 2
+              <p>Both values &gt;= 2</p>
             </td>
 
             <td class="entry_tags">
@@ -6364,7 +6374,9 @@ map</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 0
+              <blockquote>
+<p>= 0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -6411,7 +6423,9 @@ of the lens that can be focused correctly</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 0
+              <blockquote>
+<p>= 0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -6461,7 +6475,7 @@ of the lens that can be focused correctly</p>
             </td>
 
             <td class="entry_range">
-              Both values &gt;= 1
+              <p>Both values &gt;= 1</p>
             </td>
 
             <td class="entry_tags">
@@ -6556,7 +6570,7 @@ perpendicular axis from the display</p>
             </td>
 
             <td class="entry_range">
-              [0-90) for first angle,<wbr/> [0-360) for second
+              <p>[0-90) for first angle,<wbr/> [0-360) for second</p>
             </td>
 
             <td class="entry_tags">
@@ -6677,7 +6691,7 @@ device</p>
             </td>
 
             <td class="entry_range">
-              android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Apertures
+              <p><a href="#static_android.lens.info.availableApertures">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Apertures</a></p>
             </td>
 
             <td class="entry_tags">
@@ -6724,7 +6738,7 @@ filter(s)</p>
             </td>
 
             <td class="entry_range">
-              android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Filter<wbr/>Densities
+              <p><a href="#static_android.lens.info.availableFilterDensities">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Filter<wbr/>Densities</a></p>
             </td>
 
             <td class="entry_tags">
@@ -6770,7 +6784,9 @@ pick from supported list</p>
             </td>
 
             <td class="entry_range">
-              &gt; 0
+              <blockquote>
+<p>0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -6816,7 +6832,9 @@ measured from frontmost surface of the lens</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 0
+              <blockquote>
+<p>= 0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -6868,7 +6886,9 @@ sharp focus (depth of field)</p>
             </td>
 
             <td class="entry_range">
-              &gt;=0
+              <blockquote>
+<p>=0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -6923,7 +6943,7 @@ enabled.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              android.<wbr/>lens.<wbr/>available<wbr/>Optical<wbr/>Stabilization
+              <p>android.<wbr/>lens.<wbr/>available<wbr/>Optical<wbr/>Stabilization</p>
             </td>
 
             <td class="entry_tags">
@@ -7059,7 +7079,7 @@ algorithm</p>
             </td>
 
             <td class="entry_range">
-              android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Modes
+              <p>android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Modes</p>
             </td>
 
             <td class="entry_tags">
@@ -7111,7 +7131,7 @@ applied to the images</p>
             </td>
 
             <td class="entry_range">
-              1 - 10
+              <p>1 - 10</p>
             </td>
 
             <td class="entry_tags">
@@ -7188,7 +7208,7 @@ algorithm</p>
             </td>
 
             <td class="entry_range">
-              android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Modes
+              <p>android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Modes</p>
             </td>
 
             <td class="entry_tags">
@@ -7503,7 +7523,7 @@ values.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              Optional.<wbr/> Default value is FINAL.<wbr/>
+              <p>Optional.<wbr/> Default value is FINAL.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -7588,7 +7608,7 @@ frameCount value).<wbr/></p>
             </td>
 
             <td class="entry_range">
-              Any int
+              <p>Any int</p>
             </td>
 
             <td class="entry_tags">
@@ -7624,7 +7644,7 @@ frame</p>
             </td>
 
             <td class="entry_range">
-              Any int
+              <p>Any int</p>
             </td>
 
             <td class="entry_tags">
@@ -7666,12 +7686,11 @@ for the source of reprocessing data.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              Typically,<wbr/> only one entry allowed,<wbr/> must be a valid
-          reprocess stream ID.<wbr/>
-
-          If android.<wbr/>jpeg.<wbr/>needs<wbr/>Thumbnail is set,<wbr/> then multiple
-          reprocess streams may be included in a single request; they
-          must be different scaled versions of the same image.<wbr/>
+              <p>Typically,<wbr/> only one entry allowed,<wbr/> must be a valid
+reprocess stream ID.<wbr/></p>
+<p>If android.<wbr/>jpeg.<wbr/>needs<wbr/>Thumbnail is set,<wbr/> then multiple
+reprocess streams may be included in a single request; they
+must be different scaled versions of the same image.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -7686,7 +7705,7 @@ for the source of reprocessing data.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only meaningful when android.<wbr/>request.<wbr/>type ==
+              <p>Only meaningful when <a href="#controls_android.request.type">android.<wbr/>request.<wbr/>type</a> ==
 REPROCESS.<wbr/> Ignored otherwise</p>
             </td>
           </tr>
@@ -7774,8 +7793,8 @@ from this capture must be sent to</p>
             </td>
 
             <td class="entry_range">
-              List must only include streams that have been
-          created
+              <p>List must only include streams that have been
+created</p>
             </td>
 
             <td class="entry_tags">
@@ -7908,8 +7927,10 @@ the same time for each type of stream</p>
             </td>
 
             <td class="entry_range">
-              &gt;=1 for Raw and JPEG-compressed stream.<wbr/> &gt;= 3
-          for processed,<wbr/> uncompressed streams
+              <blockquote>
+<p>=1 for Raw and JPEG-compressed stream.<wbr/> &gt;= 3
+for processed,<wbr/> uncompressed streams</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -7960,7 +7981,9 @@ can be allocated at the same time</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 1
+              <blockquote>
+<p>= 1</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -8023,7 +8046,9 @@ frameCount value).<wbr/></p>
             </td>
 
             <td class="entry_range">
-              &gt; 0
+              <blockquote>
+<p>0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -8067,7 +8092,7 @@ frame</p>
             </td>
 
             <td class="entry_range">
-              Any int
+              <p>Any int</p>
             </td>
 
             <td class="entry_tags">
@@ -8161,8 +8186,8 @@ from this capture must be sent to</p>
             </td>
 
             <td class="entry_range">
-              List must only include streams that have been
-          created
+              <p>List must only include streams that have been
+created</p>
             </td>
 
             <td class="entry_tags">
@@ -8474,8 +8499,8 @@ the JPEG block.<wbr/> Listed as width x height</p>
             </td>
 
             <td class="entry_range">
-              Must include: - sensor maximum resolution Should
-          include: - half/<wbr/>quarter max resolution
+              <p>Must include: - sensor maximum resolution Should
+include: - half/<wbr/>quarter max resolution</p>
             </td>
 
             <td class="entry_tags">
@@ -8514,7 +8539,9 @@ than width</p>
             </td>
 
             <td class="entry_range">
-              &gt;=1
+              <blockquote>
+<p>=1</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -8610,9 +8637,9 @@ encoders.<wbr/> Listed as width,<wbr/> height</p>
             </td>
 
             <td class="entry_range">
-              Must include: - sensor maximum resolution -
-          standard QCIF,<wbr/> 240p,<wbr/> 480p,<wbr/> 720p,<wbr/> and 1080p
-          resolutions
+              <p>Must include: - sensor maximum resolution -
+standard QCIF,<wbr/> 240p,<wbr/> 480p,<wbr/> 720p,<wbr/> and 1080p
+resolutions</p>
             </td>
 
             <td class="entry_tags">
@@ -8719,7 +8746,7 @@ height</p>
             </td>
 
             <td class="entry_range">
-              Must include: - sensor maximum resolution
+              <p>Must include: - sensor maximum resolution</p>
             </td>
 
             <td class="entry_tags">
@@ -8892,7 +8919,7 @@ duration exposed to the nearest possible value (rather than expose longer).<wbr/
             </td>
 
             <td class="entry_range">
-              android.<wbr/>sensor.<wbr/>info.<wbr/>exposure<wbr/>Time<wbr/>Range
+              <p><a href="#static_android.sensor.info.exposureTimeRange">android.<wbr/>sensor.<wbr/>info.<wbr/>exposure<wbr/>Time<wbr/>Range</a></p>
             </td>
 
             <td class="entry_tags">
@@ -8938,8 +8965,8 @@ start of next frame exposure</p>
             </td>
 
             <td class="entry_range">
-              see android.<wbr/>sensor.<wbr/>info.<wbr/>max<wbr/>Frame<wbr/>Duration,<wbr/>
-          android.<wbr/>scaler.<wbr/>info.<wbr/>available<wbr/>Min<wbr/>Frame<wbr/>Durations
+              <p>see <a href="#static_android.sensor.info.maxFrameDuration">android.<wbr/>sensor.<wbr/>info.<wbr/>max<wbr/>Frame<wbr/>Duration</a>,<wbr/>
+android.<wbr/>scaler.<wbr/>info.<wbr/>available<wbr/>Min<wbr/>Frame<wbr/>Durations</p>
             </td>
 
             <td class="entry_tags">
@@ -8990,7 +9017,7 @@ gain to the nearest possible value (rather than gain more).<wbr/></p>
             </td>
 
             <td class="entry_range">
-              android.<wbr/>sensor.<wbr/>info.<wbr/>sensitivity<wbr/>Range
+              <p><a href="#static_android.sensor.info.sensitivityRange">android.<wbr/>sensor.<wbr/>info.<wbr/>sensitivity<wbr/>Range</a></p>
             </td>
 
             <td class="entry_tags">
@@ -9112,7 +9139,7 @@ pixelArraySize.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              Min &lt;= 100,<wbr/> Max &gt;= 1600
+              <p>Min &lt;= 100,<wbr/> Max &gt;= 1600</p>
             </td>
 
             <td class="entry_tags">
@@ -9212,8 +9239,8 @@ times</p>
             </td>
 
             <td class="entry_range">
-              Min &lt;= 100e3 (100 us),<wbr/> Max &gt;= 30e9 (30
-            sec)
+              <p>Min &lt;= 100e3 (100 us),<wbr/> Max &gt;= 30e9 (30
+sec)</p>
             </td>
 
             <td class="entry_tags">
@@ -9251,7 +9278,9 @@ rate)</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 30e9
+              <blockquote>
+<p>= 30e9</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -9271,7 +9300,7 @@ rate)</p>
 processing settings.<wbr/> See
 android.<wbr/>scaler.<wbr/>available<wbr/>Processed<wbr/>Min<wbr/>Durations
 android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Min<wbr/>Durations
-android.<wbr/>scaler.<wbr/>available<wbr/>Raw<wbr/>Min<wbr/>Durations</p>
+<a href="#static_android.scaler.availableRawMinDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Raw<wbr/>Min<wbr/>Durations</a></p>
             </td>
           </tr>
 
@@ -9402,7 +9431,9 @@ sensor</p>
             </td>
 
             <td class="entry_range">
-              &gt; 1024 (10-bit output)
+              <blockquote>
+<p>1024 (10-bit output)</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -9493,7 +9524,9 @@ Bayer mosaic channels</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 0 each
+              <blockquote>
+<p>= 0 each</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -9812,7 +9845,7 @@ purely through analog gain</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>For android.<wbr/>sensor.<wbr/>sensitivity values less than or
+              <p>For <a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> values less than or
 equal to this,<wbr/> all applied gain must be analog.<wbr/> For
 values above this,<wbr/> it can be a mix of analog and
 digital</p>
@@ -9906,7 +9939,7 @@ to bottom in the sensor's coordinate system</p>
             </td>
 
             <td class="entry_range">
-              0,<wbr/>90,<wbr/>180,<wbr/>270
+              <p>0,<wbr/>90,<wbr/>180,<wbr/>270</p>
             </td>
 
             <td class="entry_tags">
@@ -10136,7 +10169,7 @@ duration exposed to the nearest possible value (rather than expose longer).<wbr/
             </td>
 
             <td class="entry_range">
-              android.<wbr/>sensor.<wbr/>info.<wbr/>exposure<wbr/>Time<wbr/>Range
+              <p><a href="#static_android.sensor.info.exposureTimeRange">android.<wbr/>sensor.<wbr/>info.<wbr/>exposure<wbr/>Time<wbr/>Range</a></p>
             </td>
 
             <td class="entry_tags">
@@ -10182,8 +10215,8 @@ start of next frame exposure</p>
             </td>
 
             <td class="entry_range">
-              see android.<wbr/>sensor.<wbr/>info.<wbr/>max<wbr/>Frame<wbr/>Duration,<wbr/>
-          android.<wbr/>scaler.<wbr/>info.<wbr/>available<wbr/>Min<wbr/>Frame<wbr/>Durations
+              <p>see <a href="#static_android.sensor.info.maxFrameDuration">android.<wbr/>sensor.<wbr/>info.<wbr/>max<wbr/>Frame<wbr/>Duration</a>,<wbr/>
+android.<wbr/>scaler.<wbr/>info.<wbr/>available<wbr/>Min<wbr/>Frame<wbr/>Durations</p>
             </td>
 
             <td class="entry_tags">
@@ -10234,7 +10267,7 @@ gain to the nearest possible value (rather than gain more).<wbr/></p>
             </td>
 
             <td class="entry_range">
-              android.<wbr/>sensor.<wbr/>info.<wbr/>sensitivity<wbr/>Range
+              <p><a href="#static_android.sensor.info.sensitivityRange">android.<wbr/>sensor.<wbr/>info.<wbr/>sensitivity<wbr/>Range</a></p>
             </td>
 
             <td class="entry_tags">
@@ -10280,7 +10313,9 @@ row</p>
             </td>
 
             <td class="entry_range">
-              &gt; 0
+              <blockquote>
+<p>0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -10329,7 +10364,7 @@ somewhere close to it.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              Optional.<wbr/> This value is missing if no temperature is available.<wbr/>
+              <p>Optional.<wbr/> This value is missing if no temperature is available.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -10608,8 +10643,7 @@ unit</p>
             </td>
 
             <td class="entry_range">
-              
-          android.<wbr/>statistics.<wbr/>info.<wbr/>available<wbr/>Face<wbr/>Detect<wbr/>Modes
+              <p><a href="#static_android.statistics.info.availableFaceDetectModes">android.<wbr/>statistics.<wbr/>info.<wbr/>available<wbr/>Face<wbr/>Detect<wbr/>Modes</a></p>
             </td>
 
             <td class="entry_tags">
@@ -10627,7 +10661,7 @@ unit</p>
               <p>Whether face detection is enabled,<wbr/> and whether it
 should output just the basic fields or the full set of
 fields.<wbr/> Value must be one of the
-android.<wbr/>statistics.<wbr/>info.<wbr/>available<wbr/>Face<wbr/>Detect<wbr/>Modes.<wbr/></p>
+<a href="#static_android.statistics.info.availableFaceDetectModes">android.<wbr/>statistics.<wbr/>info.<wbr/>available<wbr/>Face<wbr/>Detect<wbr/>Modes</a>.<wbr/></p>
             </td>
           </tr>
 
@@ -10765,7 +10799,7 @@ shading map in output result metadata</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>When set to ON,<wbr/>
-android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map must be provided in
+<a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a> must be provided in
 the output result metadata.<wbr/></p>
             </td>
           </tr>
@@ -10848,11 +10882,11 @@ if any</p>
               <p>OFF means face detection is disabled,<wbr/> it must
 be included in the list.<wbr/></p>
 <p>SIMPLE means the device supports the
-android.<wbr/>statistics.<wbr/>face<wbr/>Rectangles and
-android.<wbr/>statistics.<wbr/>face<wbr/>Scores outputs.<wbr/></p>
+<a href="#dynamic_android.statistics.faceRectangles">android.<wbr/>statistics.<wbr/>face<wbr/>Rectangles</a> and
+<a href="#dynamic_android.statistics.faceScores">android.<wbr/>statistics.<wbr/>face<wbr/>Scores</a> outputs.<wbr/></p>
 <p>FULL means the device additionally supports the
-android.<wbr/>statistics.<wbr/>face<wbr/>Ids and
-android.<wbr/>statistics.<wbr/>face<wbr/>Landmarks outputs.<wbr/></p>
+<a href="#dynamic_android.statistics.faceIds">android.<wbr/>statistics.<wbr/>face<wbr/>Ids</a> and
+<a href="#dynamic_android.statistics.faceLandmarks">android.<wbr/>statistics.<wbr/>face<wbr/>Landmarks</a> outputs.<wbr/></p>
             </td>
           </tr>
 
@@ -10882,7 +10916,9 @@ supported</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 64
+              <blockquote>
+<p>= 64</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -10916,8 +10952,10 @@ faces</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 4 if availableFaceDetectionModes lists
-            modes besides OFF,<wbr/> otherwise 0
+              <blockquote>
+<p>= 4 if availableFaceDetectionModes lists
+modes besides OFF,<wbr/> otherwise 0</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -11022,7 +11060,7 @@ map</p>
             </td>
 
             <td class="entry_range">
-              Must be at least 32 x 32
+              <p>Must be at least 32 x 32</p>
             </td>
 
             <td class="entry_tags">
@@ -11101,8 +11139,7 @@ unit</p>
             </td>
 
             <td class="entry_range">
-              
-          android.<wbr/>statistics.<wbr/>info.<wbr/>available<wbr/>Face<wbr/>Detect<wbr/>Modes
+              <p><a href="#static_android.statistics.info.availableFaceDetectModes">android.<wbr/>statistics.<wbr/>info.<wbr/>available<wbr/>Face<wbr/>Detect<wbr/>Modes</a></p>
             </td>
 
             <td class="entry_tags">
@@ -11120,7 +11157,7 @@ unit</p>
               <p>Whether face detection is enabled,<wbr/> and whether it
 should output just the basic fields or the full set of
 fields.<wbr/> Value must be one of the
-android.<wbr/>statistics.<wbr/>info.<wbr/>available<wbr/>Face<wbr/>Detect<wbr/>Modes.<wbr/></p>
+<a href="#static_android.statistics.info.availableFaceDetectModes">android.<wbr/>statistics.<wbr/>info.<wbr/>available<wbr/>Face<wbr/>Detect<wbr/>Modes</a>.<wbr/></p>
             </td>
           </tr>
 
@@ -11300,7 +11337,7 @@ detected faces</p>
             </td>
 
             <td class="entry_range">
-              1-100
+              <p>1-100</p>
             </td>
 
             <td class="entry_tags">
@@ -11366,7 +11403,7 @@ sensor data</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>The k'th bucket (0-based) covers the input range
-(with w = android.<wbr/>sensor.<wbr/>info.<wbr/>white<wbr/>Level) of [ k * w/<wbr/>N,<wbr/>
+(with w = <a href="#static_android.sensor.info.whiteLevel">android.<wbr/>sensor.<wbr/>info.<wbr/>white<wbr/>Level</a>) of [ k * w/<wbr/>N,<wbr/>
 (k + 1) * w /<wbr/> N ).<wbr/> If only a monochrome sharpness map is
 supported,<wbr/> all channels should have the same data</p>
             </td>
@@ -11542,7 +11579,7 @@ Bayer color channel.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              Each gain factor is &gt;= 1
+              <p>Each gain factor is &gt;= 1</p>
             </td>
 
             <td class="entry_tags">
@@ -11556,7 +11593,7 @@ Bayer color channel.<wbr/></p>
             <td class="entry_details" colspan="5">
               <p>The least shaded section of the image should have a gain factor
 of 1; all other sections should have gains above 1.<wbr/></p>
-<p>When android.<wbr/>color<wbr/>Correction.<wbr/>mode = TRANSFORM_<wbr/>MATRIX,<wbr/> the map
+<p>When <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> = TRANSFORM_<wbr/>MATRIX,<wbr/> the map
 must take into account the colorCorrection settings.<wbr/></p>
 <p>The shading map is for the entire active pixel array,<wbr/> and is not
 affected by the crop region specified in the request.<wbr/> Each shading map
@@ -11569,12 +11606,12 @@ The map is assumed to be bilinearly interpolated between the sample points.<wbr/
 <p>The channel order is [R,<wbr/> Geven,<wbr/> Godd,<wbr/> B],<wbr/> where Geven is the green
 channel for the even rows of a Bayer pattern,<wbr/> and Godd is the odd rows.<wbr/>
 The shading map is stored in a fully interleaved format,<wbr/> and its size
-is provided in the camera static metadata by android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size.<wbr/></p>
+is provided in the camera static metadata by <a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a>.<wbr/></p>
 <p>The shading map should have on the order of 30-40 rows and columns,<wbr/>
 and must be smaller than 64x64.<wbr/></p>
 <p>As an example,<wbr/> given a very small map defined as:</p>
-<pre><code>android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size = [ 4,<wbr/> 3 ]
-android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map =
+<pre><code><a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a> = [ 4,<wbr/> 3 ]
+<a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a> =
 [ 1.<wbr/>3,<wbr/> 1.<wbr/>2,<wbr/> 1.<wbr/>15,<wbr/> 1.<wbr/>2,<wbr/>  1.<wbr/>2,<wbr/> 1.<wbr/>2,<wbr/> 1.<wbr/>15,<wbr/> 1.<wbr/>2,<wbr/>
     1.<wbr/>1,<wbr/> 1.<wbr/>2,<wbr/> 1.<wbr/>2,<wbr/> 1.<wbr/>2,<wbr/>  1.<wbr/>3,<wbr/> 1.<wbr/>2,<wbr/> 1.<wbr/>3,<wbr/> 1.<wbr/>3,<wbr/>
   1.<wbr/>2,<wbr/> 1.<wbr/>2,<wbr/> 1.<wbr/>25,<wbr/> 1.<wbr/>1,<wbr/>  1.<wbr/>1,<wbr/> 1.<wbr/>1,<wbr/> 1.<wbr/>1,<wbr/> 1.<wbr/>0,<wbr/>
@@ -11641,7 +11678,7 @@ since statistics processing on data from a new frame
 typically completes after the transform has already been
 applied to that frame.<wbr/></p>
 <p>The 4 channel gains are defined in Bayer domain,<wbr/>
-see android.<wbr/>color<wbr/>Correction.<wbr/>gains for details.<wbr/></p>
+see <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> for details.<wbr/></p>
 <p>This value should always be calculated by the AWB block,<wbr/>
 regardless of the android.<wbr/>control.<wbr/>* current values.<wbr/></p>
             </td>
@@ -11822,7 +11859,7 @@ values</p>
             </td>
 
             <td class="entry_range">
-              same as android.<wbr/>tonemap.<wbr/>curve<wbr/>Red
+              <p>same as <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a></p>
             </td>
 
             <td class="entry_tags">
@@ -11835,8 +11872,8 @@ values</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Tonemapping /<wbr/> contrast /<wbr/> gamma curve for the blue
-channel,<wbr/> to use when android.<wbr/>tonemap.<wbr/>mode is CONTRAST_<wbr/>CURVE.<wbr/></p>
-<p>See android.<wbr/>tonemap.<wbr/>curve<wbr/>Red for more details.<wbr/></p>
+channel,<wbr/> to use when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is CONTRAST_<wbr/>CURVE.<wbr/></p>
+<p>See <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a> for more details.<wbr/></p>
             </td>
           </tr>
 
@@ -11872,7 +11909,7 @@ values</p>
             </td>
 
             <td class="entry_range">
-              same as android.<wbr/>tonemap.<wbr/>curve<wbr/>Red
+              <p>same as <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a></p>
             </td>
 
             <td class="entry_tags">
@@ -11885,8 +11922,8 @@ values</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Tonemapping /<wbr/> contrast /<wbr/> gamma curve for the green
-channel,<wbr/> to use when android.<wbr/>tonemap.<wbr/>mode is CONTRAST_<wbr/>CURVE.<wbr/></p>
-<p>See android.<wbr/>tonemap.<wbr/>curve<wbr/>Red for more details.<wbr/></p>
+channel,<wbr/> to use when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is CONTRAST_<wbr/>CURVE.<wbr/></p>
+<p>See <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a> for more details.<wbr/></p>
             </td>
           </tr>
 
@@ -11921,7 +11958,7 @@ values</p>
             </td>
 
             <td class="entry_range">
-              0-1 on input and output coordinates.<wbr/>
+              <p>0-1 on input and output coordinates.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -11937,7 +11974,7 @@ values</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Tonemapping /<wbr/> contrast /<wbr/> gamma curve for the red
-channel,<wbr/> to use when android.<wbr/>tonemap.<wbr/>mode is CONTRAST_<wbr/>CURVE.<wbr/></p>
+channel,<wbr/> to use when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is CONTRAST_<wbr/>CURVE.<wbr/></p>
 <p>Since the input and output ranges may vary depending on
 the camera pipeline,<wbr/> the input and output pixel values
 are represented by normalized floating-point values
@@ -12052,7 +12089,9 @@ tonemap curve</p>
             </td>
 
             <td class="entry_range">
-              &gt;= 128
+              <blockquote>
+<p>= 128</p>
+</blockquote>
             </td>
 
             <td class="entry_tags">
@@ -12119,7 +12158,7 @@ values</p>
             </td>
 
             <td class="entry_range">
-              same as android.<wbr/>tonemap.<wbr/>curve<wbr/>Red
+              <p>same as <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a></p>
             </td>
 
             <td class="entry_tags">
@@ -12132,8 +12171,8 @@ values</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Tonemapping /<wbr/> contrast /<wbr/> gamma curve for the blue
-channel,<wbr/> to use when android.<wbr/>tonemap.<wbr/>mode is CONTRAST_<wbr/>CURVE.<wbr/></p>
-<p>See android.<wbr/>tonemap.<wbr/>curve<wbr/>Red for more details.<wbr/></p>
+channel,<wbr/> to use when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is CONTRAST_<wbr/>CURVE.<wbr/></p>
+<p>See <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a> for more details.<wbr/></p>
             </td>
           </tr>
 
@@ -12169,7 +12208,7 @@ values</p>
             </td>
 
             <td class="entry_range">
-              same as android.<wbr/>tonemap.<wbr/>curve<wbr/>Red
+              <p>same as <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a></p>
             </td>
 
             <td class="entry_tags">
@@ -12182,8 +12221,8 @@ values</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Tonemapping /<wbr/> contrast /<wbr/> gamma curve for the green
-channel,<wbr/> to use when android.<wbr/>tonemap.<wbr/>mode is CONTRAST_<wbr/>CURVE.<wbr/></p>
-<p>See android.<wbr/>tonemap.<wbr/>curve<wbr/>Red for more details.<wbr/></p>
+channel,<wbr/> to use when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is CONTRAST_<wbr/>CURVE.<wbr/></p>
+<p>See <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a> for more details.<wbr/></p>
             </td>
           </tr>
 
@@ -12218,7 +12257,7 @@ values</p>
             </td>
 
             <td class="entry_range">
-              0-1 on input and output coordinates.<wbr/>
+              <p>0-1 on input and output coordinates.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -12234,7 +12273,7 @@ values</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Tonemapping /<wbr/> contrast /<wbr/> gamma curve for the red
-channel,<wbr/> to use when android.<wbr/>tonemap.<wbr/>mode is CONTRAST_<wbr/>CURVE.<wbr/></p>
+channel,<wbr/> to use when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is CONTRAST_<wbr/>CURVE.<wbr/></p>
 <p>Since the input and output ranges may vary depending on
 the camera pipeline,<wbr/> the input and output pixel values
 are represented by normalized floating-point values
@@ -12594,7 +12633,7 @@ limited,<wbr/> and they share the same essential operational flow.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              Optional.<wbr/> Default value is LIMITED.<wbr/>
+              <p>Optional.<wbr/> Default value is LIMITED.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -12809,7 +12848,7 @@ to its current values,<wbr/> or is free to vary.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Whether the black level offset was locked for this frame.<wbr/>  Should be
-ON if android.<wbr/>black<wbr/>Level.<wbr/>lock was ON in the capture request,<wbr/> unless
+ON if <a href="#controls_android.blackLevel.lock">android.<wbr/>black<wbr/>Level.<wbr/>lock</a> was ON in the capture request,<wbr/> unless
 a change in other capture settings forced the camera device to
 perform a black level reset.<wbr/></p>
             </td>

@@ -204,7 +204,6 @@ class Metadata(Node):
     Initialize with no children. Use insert_* functions and then
     construct_graph() to build up the Metadata from some source.
     """
-
 # Private
     self._entries = []
     # kind => { name => entry }
@@ -213,6 +212,7 @@ class Metadata(Node):
     self._clones = []
 
 # Public (Read Only)
+    self._name = None
     self._parent = None
     self._outer_namespaces = None
     self._tags = []

@@ -3,6 +3,68 @@ import itertools
 from unittest import TestCase
 from metadata_model import *
 from metadata_helpers import *
+from metadata_parser_xml import *
+
+# Simple test metadata block used by the tests below
+test_metadata_xml = \
+'''
+<?xml version="1.0" encoding="utf-8"?>
+<metadata xmlns="http://schemas.android.com/service/camera/metadata/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata_properties.xsd">
+
+<namespace name="testOuter1">
+  <section name="testSection1">
+    <controls>
+      <entry name="control1" type="byte" visibility="public">
+      </entry>
+      <entry name="control2" type="byte" visibility="public">
+      </entry>
+    </controls>
+    <dynamic>
+      <entry name="dynamic1" type="byte" visibility="public">
+      </entry>
+      <entry name="dynamic2" type="byte" visibility="public">
+      </entry>
+      <clone entry="testOuter1.testSection1.control1" kind="controls">
+      </clone>
+    </dynamic>
+    <static>
+      <entry name="static1" type="byte" visibility="public">
+      </entry>
+      <entry name="static2" type="byte" visibility="public">
+      </entry>
+    </static>
+  </section>
+</namespace>
+<namespace name="testOuter2">
+  <section name="testSection2">
+    <controls>
+      <entry name="control1" type="byte" visibility="public">
+      </entry>
+      <entry name="control2" type="byte" visibility="public">
+      </entry>
+    </controls>
+    <dynamic>
+      <entry name="dynamic1" type="byte" visibility="public">
+      </entry>
+      <entry name="dynamic2" type="byte" visibility="public">
+      </entry>
+      <clone entry="testOuter1.testSection1.control1" kind="controls">
+      </clone>
+    </dynamic>
+    <static>
+      <namespace name="testInner2">
+        <entry name="static1" type="byte" visibility="public">
+        </entry>
+        <entry name="static2" type="byte" visibility="public">
+        </entry>
+      </namespace>
+    </static>
+  </section>
+</namespace>
+</metadata>
+'''
 
 class TestHelpers(TestCase):
 
@@ -56,6 +118,40 @@ class TestHelpers(TestCase):
     multiple_values = [4, 5, 6]
     lst = list(enumerate_with_last(multiple_values))
     self.assertListEqual([(4, False), (5, False), (6, True)], lst)
+
+  def test_filter_tags(self):
+    metadata = MetadataParserXml(test_metadata_xml, 'metadata_helpers_test.py').metadata
+
+    test_text = \
+'''
+In the unlikely event of a
+water landing, testOuter1.testSection1.control1 will deploy.
+If testOuter2.testSection2.testInner2.static1,
+then testOuter1.testSection1.
+dynamic1 will ensue. That should be avoided if testOuter2.testSection2.
+Barring issues, testOuter1.testSection1.dynamic1, and testOuter2.testSection2.control1.
+If the path foo/android.testOuter1.testSection1.control1/bar.txt exists, then oh well.
+'''
+    def filter_test(node):
+      return '*'
+
+    def summary_test(node_set):
+      text = "*" * len(node_set) + "\n"
+      return text
+
+    expected_text = \
+'''
+In the unlikely event of a
+water landing, * will deploy.
+If *,
+then * will ensue. That should be avoided if testOuter2.testSection2.
+Barring issues, *, and *.
+If the path foo/android.testOuter1.testSection1.control1/bar.txt exists, then oh well.
+****
+'''
+    result_text = filter_tags(test_text, metadata, filter_test, summary_test)
+
+    self.assertEqual(result_text, expected_text)
 
   def test_wbr(self):
     wbr_string = "<wbr/>"

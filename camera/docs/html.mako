@@ -97,16 +97,27 @@
   import re
   from metadata_helpers import md
   from metadata_helpers import IMAGE_SRC_METADATA
+  from metadata_helpers import filter_tags
   from metadata_helpers import wbr
 
   # insert line breaks after every two \n\n
   def br(text):
     return re.sub(r"(\r?\n)(\r?\n)", r"\1<br>\2<br>", text)
 
+  # Convert node name "x.y.z" of kind w to an HTML anchor of form
+  # <a href="#w_x.y.z">x.y.z</a>
+  def html_anchor(node):
+    return '<a href="#%s_%s">%s</a>' % (node.kind, node.name, node.name)
+
   # Render as markdown, and do HTML-doc-specific rewrites
   def md_html(text):
-    # prepend the image directory path to each <img src="...">
     return md(text, IMAGE_SRC_METADATA)
+
+  # linkify tag names such as "android.x.y.z" into html anchors
+  def linkify_tags(metadata):
+    def linkify_filter(text):
+      return filter_tags(text, metadata, html_anchor)
+    return linkify_filter
 
   # Number of rows an entry will span
   def entry_cols(prop):
@@ -124,7 +135,7 @@
 ${    insert_toc_body(nested)}
   % endfor
   % for entry in node.merged_entries:
-            <li><a href="#${entry.kind}_${entry.name}">${entry.name}</a></li>
+            <li>${html_anchor(entry)}</li>
   % endfor
 </%def>
 
@@ -258,7 +269,7 @@ ${          insert_toc_body(kind)}\
 
             <td class="entry_description">
             % if prop.description is not None:
-              ${prop.description | md_html, wbr}
+              ${prop.description | md_html, linkify_tags(metadata), wbr}
             % endif
             </td>
 
@@ -270,7 +281,7 @@ ${          insert_toc_body(kind)}\
 
             <td class="entry_range">
             % if prop.range is not None:
-              ${prop.range | wbr}
+              ${prop.range | md_html, linkify_tags(metadata), wbr}
             % endif
             </td>
 
@@ -291,7 +302,7 @@ ${          insert_toc_body(kind)}\
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              ${prop.details | md_html, wbr}
+              ${prop.details | md_html, linkify_tags(metadata), wbr}
             </td>
           </tr>
           % endif
@@ -302,7 +313,7 @@ ${          insert_toc_body(kind)}\
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              ${prop.hal_details | md_html, wbr}
+              ${prop.hal_details | md_html, linkify_tags(metadata), wbr}
             </td>
           </tr>
           % endif
@@ -330,7 +341,7 @@ ${          insert_toc_body(kind)}\
       <li id="tag_${tag.id}">${tag.id} - ${tag.description}
         <ul class="tags_entries">
         % for prop in tag.entries:
-          <li><a href="#${prop.kind}_${prop.name}">${prop.name}</a> (${prop.kind})</li>
+          <li>${html_anchor(prop)} (${prop.kind})</li>
         % endfor
         </ul>
       </li> <!-- tag_${tag.id} -->
