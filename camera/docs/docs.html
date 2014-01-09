@@ -168,6 +168,7 @@
           <span class="toc_kind_header">dynamic</span>
           <ul class="toc_section">
             <li><a href="#dynamic_android.control.aePrecaptureId">android.control.aePrecaptureId</a></li>
+            <li><a href="#dynamic_android.control.aeMode">android.control.aeMode</a></li>
             <li><a href="#dynamic_android.control.aeRegions">android.control.aeRegions</a></li>
             <li><a href="#dynamic_android.control.aeState">android.control.aeState</a></li>
             <li><a href="#dynamic_android.control.afMode">android.control.afMode</a></li>
@@ -1278,42 +1279,69 @@ ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">Autoexposure is disabled; sensor.<wbr/>exposureTime,<wbr/>
-              sensor.<wbr/>sensitivity and sensor.<wbr/>frameDuration are used</span>
+                    <span class="entry_type_enum_notes">
+                The camera device's autoexposure routine is disabled;
+                the application-selected android.<wbr/>sensor.<wbr/>exposure<wbr/>Time,<wbr/>
+                android.<wbr/>sensor.<wbr/>sensitivity and
+                android.<wbr/>sensor.<wbr/>frame<wbr/>Duration are used by the camera
+                device,<wbr/> along with android.<wbr/>flash.<wbr/>* fields,<wbr/> if there's
+                a flash unit for this camera device.<wbr/>
+              </span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON</span>
-                    <span class="entry_type_enum_notes">Autoexposure is active,<wbr/> no flash
-              control</span>
+                    <span class="entry_type_enum_notes">
+                The camera device's autoexposure routine is active,<wbr/>
+                with no flash control.<wbr/> The application's values for
+                android.<wbr/>sensor.<wbr/>exposure<wbr/>Time,<wbr/>
+                android.<wbr/>sensor.<wbr/>sensitivity,<wbr/> and
+                android.<wbr/>sensor.<wbr/>frame<wbr/>Duration are ignored.<wbr/> The
+                application has control over the various
+                android.<wbr/>flash.<wbr/>* fields.<wbr/>
+              </span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON_AUTO_FLASH</span>
-                    <span class="entry_type_enum_notes">If autoexposure is active and flash exists,<wbr/> auto
-            flash control; flash may be fired when precapture
-            trigger is activated,<wbr/> and for captures for which
-            captureIntent = STILL_<wbr/>CAPTURE</span>
+                    <span class="entry_type_enum_notes">
+                Like ON,<wbr/> except that the camera device also controls
+                the camera's flash unit,<wbr/> firing it in low-light
+                conditions.<wbr/> The flash may be fired during a
+                precapture sequence (triggered by
+                android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger) and may be fired
+                for captures for which the
+                android.<wbr/>control.<wbr/>capture<wbr/>Intent field is set to
+                STILL_<wbr/>CAPTURE
+              </span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON_ALWAYS_FLASH</span>
-                    <span class="entry_type_enum_notes">If autoexposure is active and flash exists,<wbr/> auto
-            flash control for precapture trigger and always flash
-            when captureIntent = STILL_<wbr/>CAPTURE</span>
+                    <span class="entry_type_enum_notes">
+                Like ON,<wbr/> except that the camera device also controls
+                the camera's flash unit,<wbr/> always firing it for still
+                captures.<wbr/> The flash may be fired during a precapture
+                sequence (triggered by
+                android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger) and will always
+                be fired for captures for which the
+                android.<wbr/>control.<wbr/>capture<wbr/>Intent field is set to
+                STILL_<wbr/>CAPTURE
+              </span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON_AUTO_FLASH_REDEYE</span>
-                    <span class="entry_type_enum_notes">Optional.<wbr/> Automatic red eye reduction with flash.<wbr/>
-            If deemed necessary,<wbr/> red eye reduction sequence should
-            fire when precapture trigger is activated,<wbr/> and final
-            flash should fire when captureIntent =
-            STILL_<wbr/>CAPTURE</span>
+                    <span class="entry_type_enum_notes">
+                Like ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/> but with automatic red eye
+                reduction.<wbr/> If deemed necessary by the camera device,<wbr/>
+                a red eye reduction flash will fire during the
+                precapture sequence.<wbr/>
+              </span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether AE is currently updating the sensor
-exposure and sensitivity fields</p>
+              <p>The desired mode for the camera device's
+auto-exposure routine.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -1335,15 +1363,24 @@ exposure and sensitivity fields</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO.<wbr/></p>
-<p>If auto-exposure is active,<wbr/> HAL auto-focus routine is enabled,<wbr/>
-then HAL auto-exposure routine overrides the control variables
-that relate to auto-exposure routine,<wbr/> and these override values
-are then available in the result metadata for that capture.<wbr/></p>
-<p>For example,<wbr/> if auto-exposure is enabled in a request,<wbr/> the HAL should
-overwrite the exposure,<wbr/> gain,<wbr/> and frame duration fields (and potentially
-the flash fields,<wbr/> depending on AE mode) of the request.<wbr/>  The overridden
-values are then provided back to the user in the corresponding result.<wbr/></p>
+              <p>This control is only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> is
+AUTO.<wbr/></p>
+<p>When set to any of the ON modes,<wbr/> the camera device's
+auto-exposure routine is enabled,<wbr/> overriding the
+application's selected exposure time,<wbr/> sensor sensitivity,<wbr/>
+and frame duration (<a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>,<wbr/>
+<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>,<wbr/> and
+<a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a>).<wbr/> If one of the FLASH modes
+is selected,<wbr/> the camera device's flash unit controls are
+also overridden.<wbr/></p>
+<p>The FLASH modes are only available if the camera device
+has a flash unit (<a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> is <code>true</code>).<wbr/></p>
+<p>If flash TORCH mode is desired,<wbr/> this field must be set to
+ON or OFF,<wbr/> and <a href="#controls_android.flash.mode">android.<wbr/>flash.<wbr/>mode</a> set to TORCH.<wbr/></p>
+<p>When set to any of the ON modes,<wbr/> the values chosen by the
+camera device auto-exposure routine for the overridden
+fields for a given capture will be available in its
+CaptureResult.<wbr/></p>
             </td>
           </tr>
 
@@ -2460,7 +2497,7 @@ for this camera device; they must include AUTO.<wbr/></p>
         
                 
           <tr class="entry" id="static_android.control.aeAvailableModes">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Modes
             </td>
             <td class="entry_type">
@@ -2470,29 +2507,46 @@ for this camera device; they must include AUTO.<wbr/></p>
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [system]</span>
+              <span class="entry_type_visibility"> [public]</span>
                 <div class="entry_type_notes">list of enums</div>
 
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Which subset of AE modes is
-supported</p>
+              <p>The set of auto-exposure modes that are supported by this
+camera device.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>OFF,<wbr/> ON must be supported.<wbr/>
-ON_<wbr/>AUTO_<wbr/>FLASH/<wbr/>ON_<wbr/>ALWAYS_<wbr/>FLASH must be supported if flash
-unit is available</p>
             </td>
 
             <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Not all the auto-exposure modes may be supported by a
+given camera device,<wbr/> especially if no flash unit is
+available.<wbr/> This entry lists the valid modes for
+<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> for this camera device.<wbr/></p>
+<p>All camera devices support ON,<wbr/> and all camera devices with
+flash units support ON_<wbr/>AUTO_<wbr/>FLASH and
+ON_<wbr/>ALWAYS_<wbr/>FLASH.<wbr/></p>
+<p>Full-capability camera devices always support OFF mode,<wbr/>
+which enables application control of camera exposure time,<wbr/>
+sensitivity,<wbr/> and frame duration.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -2999,6 +3053,128 @@ CAMERA2_<wbr/>TRIGGER_<wbr/>PRECAPTURE_<wbr/>METERING call</p>
 CAMERA2_<wbr/>TRIGGER_<wbr/>PRECAPTURE_<wbr/>METERING trigger received yet
 by HAL.<wbr/> Always updated even if AE algorithm ignores the
 trigger</p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.control.aeMode">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>control.<wbr/>ae<wbr/>Mode
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                    <span class="entry_type_enum_notes">
+                The camera device's autoexposure routine is disabled;
+                the application-selected android.<wbr/>sensor.<wbr/>exposure<wbr/>Time,<wbr/>
+                android.<wbr/>sensor.<wbr/>sensitivity and
+                android.<wbr/>sensor.<wbr/>frame<wbr/>Duration are used by the camera
+                device,<wbr/> along with android.<wbr/>flash.<wbr/>* fields,<wbr/> if there's
+                a flash unit for this camera device.<wbr/>
+              </span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON</span>
+                    <span class="entry_type_enum_notes">
+                The camera device's autoexposure routine is active,<wbr/>
+                with no flash control.<wbr/> The application's values for
+                android.<wbr/>sensor.<wbr/>exposure<wbr/>Time,<wbr/>
+                android.<wbr/>sensor.<wbr/>sensitivity,<wbr/> and
+                android.<wbr/>sensor.<wbr/>frame<wbr/>Duration are ignored.<wbr/> The
+                application has control over the various
+                android.<wbr/>flash.<wbr/>* fields.<wbr/>
+              </span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON_AUTO_FLASH</span>
+                    <span class="entry_type_enum_notes">
+                Like ON,<wbr/> except that the camera device also controls
+                the camera's flash unit,<wbr/> firing it in low-light
+                conditions.<wbr/> The flash may be fired during a
+                precapture sequence (triggered by
+                android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger) and may be fired
+                for captures for which the
+                android.<wbr/>control.<wbr/>capture<wbr/>Intent field is set to
+                STILL_<wbr/>CAPTURE
+              </span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON_ALWAYS_FLASH</span>
+                    <span class="entry_type_enum_notes">
+                Like ON,<wbr/> except that the camera device also controls
+                the camera's flash unit,<wbr/> always firing it for still
+                captures.<wbr/> The flash may be fired during a precapture
+                sequence (triggered by
+                android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger) and will always
+                be fired for captures for which the
+                android.<wbr/>control.<wbr/>capture<wbr/>Intent field is set to
+                STILL_<wbr/>CAPTURE
+              </span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON_AUTO_FLASH_REDEYE</span>
+                    <span class="entry_type_enum_notes">
+                Like ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/> but with automatic red eye
+                reduction.<wbr/> If deemed necessary by the camera device,<wbr/>
+                a red eye reduction flash will fire during the
+                precapture sequence.<wbr/>
+              </span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The desired mode for the camera device's
+auto-exposure routine.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p><a href="#static_android.control.aeAvailableModes">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Modes</a></p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This control is only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> is
+AUTO.<wbr/></p>
+<p>When set to any of the ON modes,<wbr/> the camera device's
+auto-exposure routine is enabled,<wbr/> overriding the
+application's selected exposure time,<wbr/> sensor sensitivity,<wbr/>
+and frame duration (<a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>,<wbr/>
+<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>,<wbr/> and
+<a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a>).<wbr/> If one of the FLASH modes
+is selected,<wbr/> the camera device's flash unit controls are
+also overridden.<wbr/></p>
+<p>The FLASH modes are only available if the camera device
+has a flash unit (<a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> is <code>true</code>).<wbr/></p>
+<p>If flash TORCH mode is desired,<wbr/> this field must be set to
+ON or OFF,<wbr/> and <a href="#controls_android.flash.mode">android.<wbr/>flash.<wbr/>mode</a> set to TORCH.<wbr/></p>
+<p>When set to any of the ON modes,<wbr/> the values chosen by the
+camera device auto-exposure routine for the overridden
+fields for a given capture will be available in its
+CaptureResult.<wbr/></p>
             </td>
           </tr>
 
@@ -12992,6 +13168,7 @@ possible again.<wbr/></p>
           <li><a href="#controls_android.control.mode">android.control.mode</a> (controls)</li>
           <li><a href="#controls_android.control.sceneMode">android.control.sceneMode</a> (controls)</li>
           <li><a href="#controls_android.control.videoStabilizationMode">android.control.videoStabilizationMode</a> (controls)</li>
+          <li><a href="#static_android.control.aeAvailableModes">android.control.aeAvailableModes</a> (static)</li>
           <li><a href="#static_android.control.aeCompensationRange">android.control.aeCompensationRange</a> (static)</li>
           <li><a href="#static_android.control.aeCompensationStep">android.control.aeCompensationStep</a> (static)</li>
           <li><a href="#static_android.control.afAvailableModes">android.control.afAvailableModes</a> (static)</li>

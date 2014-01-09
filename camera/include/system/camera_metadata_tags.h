@@ -131,7 +131,7 @@ typedef enum camera_metadata_tag {
     ANDROID_CONTROL_SCENE_MODE,                       // enum         | public
     ANDROID_CONTROL_VIDEO_STABILIZATION_MODE,         // enum         | public
     ANDROID_CONTROL_AE_AVAILABLE_ANTIBANDING_MODES,   // byte[]       | public
-    ANDROID_CONTROL_AE_AVAILABLE_MODES,               // byte[]       | system
+    ANDROID_CONTROL_AE_AVAILABLE_MODES,               // byte[]       | public
     ANDROID_CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES,   // int32[]      | public
     ANDROID_CONTROL_AE_COMPENSATION_RANGE,            // int32[]      | public
     ANDROID_CONTROL_AE_COMPENSATION_STEP,             // rational     | public
