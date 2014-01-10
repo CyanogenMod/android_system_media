@@ -424,6 +424,7 @@
             <li><a href="#static_android.request.maxNumOutputStreams">android.request.maxNumOutputStreams</a></li>
             <li><a href="#static_android.request.maxNumReprocessStreams">android.request.maxNumReprocessStreams</a></li>
             <li><a href="#static_android.request.pipelineMaxDepth">android.request.pipelineMaxDepth</a></li>
+            <li><a href="#static_android.request.partialResultCount">android.request.partialResultCount</a></li>
           </ul>
         </li>
         <li>
@@ -9172,6 +9173,56 @@ X frame intervals.<wbr/></p>
               <p>This value should be 4 or less.<wbr/></p>
             </td>
           </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.request.partialResultCount">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>request.<wbr/>partial<wbr/>Result<wbr/>Count
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Optional.<wbr/> Defaults to 1.<wbr/> Defines how many sub-components
+a result will be composed of.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>&gt;= 1</p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>In order to combat the pipeline latency,<wbr/> partial results
+may be delivered to the application layer from the camera device as
+soon as they are available.<wbr/></p>
+<p>A value of 1 means that partial results are not supported.<wbr/></p>
+<p>A typical use case for this might be: after requesting an AF lock the
+new AF state might be available 50% of the way through the pipeline.<wbr/>
+The camera device could then immediately dispatch this state via a
+partial result to the framework/<wbr/>application layer,<wbr/> and the rest of
+the metadata via later partial results.<wbr/></p>
+            </td>
+          </tr>
+
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
