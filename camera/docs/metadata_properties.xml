@@ -2453,7 +2453,48 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         kind="controls"></clone>
         <clone entry="android.request.outputStreams"
         kind="controls"></clone>
+        <entry name="pipelineDepth" type="byte" visibility="public">
+          <description>Specifies the number of pipeline stages the frame went
+          through from when it was exposed to when the final completed result
+          was available to the framework.</description>
+          <range>&amp;lt;= android.request.pipelineMaxDepth</range>
+          <details>Depending on what settings are used in the request, and
+          what streams are configured, the data may undergo less processing,
+          and some pipeline stages skipped.
+
+          See android.request.pipelineMaxDepth for more details.
+          </details>
+          <hal_details>
+          This value must always represent the accurate count of how many
+          pipeline stages were actually used.
+          </hal_details>
+        </entry>
       </dynamic>
+      <static>
+        <entry name="pipelineMaxDepth" type="byte" visibility="public">
+          <description>Specifies the number of maximum pipeline stages a frame
+          has to go through from when it's exposed to when it's available
+          to the framework.</description>
+          <details>A typical minimum value for this is 2 (one stage to expose,
+          one stage to readout) from the sensor. The ISP then usually adds
+          its own stages to do custom HW processing. Further stages may be
+          added by SW processing.
+
+          Depending on what settings are used (e.g. YUV, JPEG) and what
+          processing is enabled (e.g. face detection), the actual pipeline
+          depth (specified by android.request.pipelineDepth) may be less than
+          the max pipeline depth.
+
+          A pipeline depth of X stages is equivalent to a pipeline latency of
+          X frame intervals.
+
+          This value will be 8 or less.
+          </details>
+          <hal_details>
+          This value should be 4 or less.
+          </hal_details>
+        </entry>
+      </static>
     </section>
     <section name="scaler">
       <controls>
@@ -3119,6 +3160,175 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="FULL" />
         </entry>
       </dynamic>
+      <controls>
+        <entry name="testPatternData" type="int32" visibility="public" optional="true" container="array">
+          <array>
+            <size>4</size>
+          </array>
+          <description>
+            A pixel `[R, G_even, G_odd, B]` that supplies the test pattern
+            when android.sensor.testPatternMode is SOLID_COLOR.
+          </description>
+          <range>Optional.
+          Must be supported if android.sensor.availableTestPatternModes contains
+          SOLID_COLOR.</range>
+          <details>
+          Each color channel is treated as an unsigned 32-bit integer.
+          The camera device then uses the most significant X bits
+          that correspond to how many bits are in its Bayer raw sensor
+          output.
+
+          For example, a sensor with RAW10 Bayer output would use the
+          10 most significant bits from each color channel.
+          </details>
+          <hal_details>
+          </hal_details>
+        </entry>
+        <entry name="testPatternMode" type="int32" visibility="public" optional="true"
+          enum="true">
+          <enum>
+            <value>OFF
+              <notes>Default. No test pattern mode is used, and the camera
+              device returns captures from the image sensor.</notes>
+            </value>
+            <value>SOLID_COLOR
+              <notes>
+              Each pixel in `[R, G_even, G_odd, B]` is replaced by its
+              respective color channel provided in
+              android.sensor.testPatternData.
+
+              For example:
+
+                  android.testPatternData = [0, 0xFFFFFFFF, 0xFFFFFFFF, 0]
+
+              All green pixels are 100% green. All red/blue pixels are black.
+
+                  android.testPatternData = [0xFFFFFFFF, 0, 0xFFFFFFFF, 0]
+
+              All red pixels are 100% red. Only the odd green pixels
+              are 100% green. All blue pixels are 100% black.
+              </notes>
+            </value>
+            <value>COLOR_BARS
+              <notes>
+              All pixel data is replaced with an 8-bar color pattern.
+
+              The vertical bars (left-to-right) are as follows:
+
+              * 100% white
+              * yellow
+              * cyan
+              * green
+              * magenta
+              * red
+              * blue
+              * black
+
+              In general the image would look like the following:
+
+                 W Y C G M R B K
+                 W Y C G M R B K
+                 W Y C G M R B K
+                 W Y C G M R B K
+                 W Y C G M R B K
+                 . . . . . . . .
+                 . . . . . . . .
+                 . . . . . . . .
+
+                 (B = Blue, K = Black)
+
+             Each bar should take up 1/8 of the sensor pixel array width.
+             When this is not possible, the bar size should be rounded
+             down to the nearest integer and the pattern can repeat
+             on the right side.
+
+             Each bar's height must always take up the full sensor
+             pixel array height.
+
+             Each pixel in this test pattern must be set to either
+             0% intensity or 100% intensity.
+             </notes>
+            </value>
+            <value>COLOR_BARS_FADE_TO_GRAY
+              <notes>
+              The test pattern is similar to COLOR_BARS, except that
+              each bar should start at its specified color at the top,
+              and fade to gray at the bottom.
+
+              Furthermore each bar is further subdivided into a left and
+              right half. The left half should have a smooth gradient,
+              and the right half should have a quantized gradient.
+
+              In particular, the right half's should consist of blocks of the
+              same color for 1/16th active sensor pixel array width.
+
+              The least significant bits in the quantized gradient should
+              be copied from the most significant bits of the smooth gradient.
+
+              The height of each bar should always be a multiple of 128.
+              When this is not the case, the pattern should repeat at the bottom
+              of the image.
+              </notes>
+            </value>
+            <value>PN9
+              <notes>
+              All pixel data is replaced by a pseudo-random sequence
+              generated from a PN9 512-bit sequence (typically implemented
+              in hardware with a linear feedback shift register).
+
+              The generator should be reset at the beginning of each frame,
+              and thus each subsequent raw frame with this test pattern should
+              be exactly the same as the last.
+              </notes>
+            </value>
+            <value id="256">CUSTOM1
+              <notes>The first custom test pattern. All custom patterns that are
+              available only on this camera device are at least this numeric
+              value.
+
+              All of the custom test patterns will be static
+              (that is the raw image must not vary from frame to frame).
+              </notes>
+            </value>
+          </enum>
+          <description>When enabled, the sensor sends a test pattern instead of
+          doing a real exposure from the camera.
+          </description>
+          <range>Optional. Defaults to OFF. Value must be one of
+          android.sensor.availableTestPatternModes</range>
+          <details>
+          When a test pattern is enabled, all manual sensor controls specified
+          by android.sensor.* should be ignored. All other controls should
+          work as normal.
+
+          For example, if manual flash is enabled, flash firing should still
+          occur (and that the test pattern remain unmodified, since the flash
+          would not actually affect it).
+          </details>
+          <hal_details>
+          All test patterns are specified in the Bayer domain.
+
+          The HAL may choose to substitute test patterns from the sensor
+          with test patterns from on-device memory. In that case, it should be
+          indistinguishable to the ISP whether the data came from the
+          sensor interconnect bus (such as CSI2) or memory.
+          </hal_details>
+        </entry>
+      </controls>
+      <dynamic>
+        <clone entry="android.sensor.testPatternMode" kind="controls">
+        </clone>
+      </dynamic>
+      <static>
+        <entry name="availableTestPatternModes" type="byte" visibility="public"
+          optional="true">
+          <description>Optional. Defaults to [OFF]. Lists the supported test
+            pattern modes for android.test.patternMode.
+          </description>
+          <range>Must include OFF. All custom modes must be >= CUSTOM1</range>
+        </entry>
+
+      </static>
     </section>
     <section name="shading">
       <controls>

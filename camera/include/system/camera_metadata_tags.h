@@ -246,6 +246,8 @@ typedef enum camera_metadata_tag {
     ANDROID_REQUEST_TYPE,                             // enum         | system
     ANDROID_REQUEST_MAX_NUM_OUTPUT_STREAMS,           // int32[]      | public
     ANDROID_REQUEST_MAX_NUM_REPROCESS_STREAMS,        // int32[]      | system
+    ANDROID_REQUEST_PIPELINE_DEPTH,                   // byte         | public
+    ANDROID_REQUEST_PIPELINE_MAX_DEPTH,               // byte         | public
     ANDROID_REQUEST_END,
 
     ANDROID_SCALER_CROP_REGION =                      // int32[]      | public
@@ -279,6 +281,9 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_REFERENCE_ILLUMINANT2,             // byte         | system
     ANDROID_SENSOR_TIMESTAMP,                         // int64        | public
     ANDROID_SENSOR_TEMPERATURE,                       // float        | public
+    ANDROID_SENSOR_TEST_PATTERN_DATA,                 // int32[]      | public
+    ANDROID_SENSOR_TEST_PATTERN_MODE,                 // enum         | public
+    ANDROID_SENSOR_AVAILABLE_TEST_PATTERN_MODES,      // byte         | public
     ANDROID_SENSOR_END,
 
     ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE =           // int32[]      | public
@@ -642,6 +647,16 @@ typedef enum camera_metadata_enum_android_sensor_reference_illuminant1 {
     ANDROID_SENSOR_REFERENCE_ILLUMINANT1_D50                    = 23,
     ANDROID_SENSOR_REFERENCE_ILLUMINANT1_ISO_STUDIO_TUNGSTEN    = 24,
 } camera_metadata_enum_android_sensor_reference_illuminant1_t;
+
+// ANDROID_SENSOR_TEST_PATTERN_MODE
+typedef enum camera_metadata_enum_android_sensor_test_pattern_mode {
+    ANDROID_SENSOR_TEST_PATTERN_MODE_OFF,
+    ANDROID_SENSOR_TEST_PATTERN_MODE_SOLID_COLOR,
+    ANDROID_SENSOR_TEST_PATTERN_MODE_COLOR_BARS,
+    ANDROID_SENSOR_TEST_PATTERN_MODE_COLOR_BARS_FADE_TO_GRAY,
+    ANDROID_SENSOR_TEST_PATTERN_MODE_PN9,
+    ANDROID_SENSOR_TEST_PATTERN_MODE_CUSTOM1                    = 256,
+} camera_metadata_enum_android_sensor_test_pattern_mode_t;
 
 
 // ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT

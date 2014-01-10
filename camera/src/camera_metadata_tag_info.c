@@ -366,6 +366,10 @@ static tag_info_t android_request[ANDROID_REQUEST_END -
     { "maxNumOutputStreams",           TYPE_INT32  },
     [ ANDROID_REQUEST_MAX_NUM_REPROCESS_STREAMS - ANDROID_REQUEST_START ] =
     { "maxNumReprocessStreams",        TYPE_INT32  },
+    [ ANDROID_REQUEST_PIPELINE_DEPTH - ANDROID_REQUEST_START ] =
+    { "pipelineDepth",                 TYPE_BYTE   },
+    [ ANDROID_REQUEST_PIPELINE_MAX_DEPTH - ANDROID_REQUEST_START ] =
+    { "pipelineMaxDepth",              TYPE_BYTE   },
 };
 
 static tag_info_t android_scaler[ANDROID_SCALER_END -
@@ -436,6 +440,12 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     { "timestamp",                     TYPE_INT64  },
     [ ANDROID_SENSOR_TEMPERATURE - ANDROID_SENSOR_START ] =
     { "temperature",                   TYPE_FLOAT  },
+    [ ANDROID_SENSOR_TEST_PATTERN_DATA - ANDROID_SENSOR_START ] =
+    { "testPatternData",               TYPE_INT32  },
+    [ ANDROID_SENSOR_TEST_PATTERN_MODE - ANDROID_SENSOR_START ] =
+    { "testPatternMode",               TYPE_INT32  },
+    [ ANDROID_SENSOR_AVAILABLE_TEST_PATTERN_MODES - ANDROID_SENSOR_START ] =
+    { "availableTestPatternModes",     TYPE_BYTE   },
 };
 
 static tag_info_t android_sensor_info[ANDROID_SENSOR_INFO_END -
@@ -1503,6 +1513,12 @@ int camera_metadata_enum_snprint(uint32_t tag,
         case ANDROID_REQUEST_MAX_NUM_REPROCESS_STREAMS: {
             break;
         }
+        case ANDROID_REQUEST_PIPELINE_DEPTH: {
+            break;
+        }
+        case ANDROID_REQUEST_PIPELINE_MAX_DEPTH: {
+            break;
+        }
 
         case ANDROID_SCALER_CROP_REGION: {
             break;
@@ -1692,6 +1708,43 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SENSOR_TEMPERATURE: {
+            break;
+        }
+        case ANDROID_SENSOR_TEST_PATTERN_DATA: {
+            break;
+        }
+        case ANDROID_SENSOR_TEST_PATTERN_MODE: {
+            switch (value) {
+                case ANDROID_SENSOR_TEST_PATTERN_MODE_OFF:
+                    msg = "OFF";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_TEST_PATTERN_MODE_SOLID_COLOR:
+                    msg = "SOLID_COLOR";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_TEST_PATTERN_MODE_COLOR_BARS:
+                    msg = "COLOR_BARS";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_TEST_PATTERN_MODE_COLOR_BARS_FADE_TO_GRAY:
+                    msg = "COLOR_BARS_FADE_TO_GRAY";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_TEST_PATTERN_MODE_PN9:
+                    msg = "PN9";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_TEST_PATTERN_MODE_CUSTOM1:
+                    msg = "CUSTOM1";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
+        case ANDROID_SENSOR_AVAILABLE_TEST_PATTERN_MODES: {
             break;
         }
 
@@ -1997,4 +2050,4 @@ int camera_metadata_enum_snprint(uint32_t tag,
 }
 
 
-#define CAMERA_METADATA_ENUM_STRING_MAX_SIZE 23
+#define CAMERA_METADATA_ENUM_STRING_MAX_SIZE 24

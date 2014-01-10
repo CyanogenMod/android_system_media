@@ -423,6 +423,7 @@
           <ul class="toc_section">
             <li><a href="#static_android.request.maxNumOutputStreams">android.request.maxNumOutputStreams</a></li>
             <li><a href="#static_android.request.maxNumReprocessStreams">android.request.maxNumReprocessStreams</a></li>
+            <li><a href="#static_android.request.pipelineMaxDepth">android.request.pipelineMaxDepth</a></li>
           </ul>
         </li>
         <li>
@@ -432,6 +433,7 @@
             <li><a href="#dynamic_android.request.id">android.request.id</a></li>
             <li><a href="#dynamic_android.request.metadataMode">android.request.metadataMode</a></li>
             <li><a href="#dynamic_android.request.outputStreams">android.request.outputStreams</a></li>
+            <li><a href="#dynamic_android.request.pipelineDepth">android.request.pipelineDepth</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -475,6 +477,8 @@
             <li><a href="#controls_android.sensor.exposureTime">android.sensor.exposureTime</a></li>
             <li><a href="#controls_android.sensor.frameDuration">android.sensor.frameDuration</a></li>
             <li><a href="#controls_android.sensor.sensitivity">android.sensor.sensitivity</a></li>
+            <li><a href="#controls_android.sensor.testPatternData">android.sensor.testPatternData</a></li>
+            <li><a href="#controls_android.sensor.testPatternMode">android.sensor.testPatternMode</a></li>
           </ul>
         </li>
         <li>
@@ -503,6 +507,7 @@
             <li><a href="#static_android.sensor.orientation">android.sensor.orientation</a></li>
             <li><a href="#static_android.sensor.referenceIlluminant1">android.sensor.referenceIlluminant1</a></li>
             <li><a href="#static_android.sensor.referenceIlluminant2">android.sensor.referenceIlluminant2</a></li>
+            <li><a href="#static_android.sensor.availableTestPatternModes">android.sensor.availableTestPatternModes</a></li>
           </ul>
         </li>
         <li>
@@ -513,6 +518,7 @@
             <li><a href="#dynamic_android.sensor.sensitivity">android.sensor.sensitivity</a></li>
             <li><a href="#dynamic_android.sensor.timestamp">android.sensor.timestamp</a></li>
             <li><a href="#dynamic_android.sensor.temperature">android.sensor.temperature</a></li>
+            <li><a href="#dynamic_android.sensor.testPatternMode">android.sensor.testPatternMode</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -9093,6 +9099,66 @@ can be allocated at the same time</p>
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
         
+                
+          <tr class="entry" id="static_android.request.pipelineMaxDepth">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>request.<wbr/>pipeline<wbr/>Max<wbr/>Depth
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Specifies the number of maximum pipeline stages a frame
+has to go through from when it's exposed to when it's available
+to the framework.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>A typical minimum value for this is 2 (one stage to expose,<wbr/>
+one stage to readout) from the sensor.<wbr/> The ISP then usually adds
+its own stages to do custom HW processing.<wbr/> Further stages may be
+added by SW processing.<wbr/></p>
+<p>Depending on what settings are used (e.<wbr/>g.<wbr/> YUV,<wbr/> JPEG) and what
+processing is enabled (e.<wbr/>g.<wbr/> face detection),<wbr/> the actual pipeline
+depth (specified by <a href="#dynamic_android.request.pipelineDepth">android.<wbr/>request.<wbr/>pipeline<wbr/>Depth</a>) may be less than
+the max pipeline depth.<wbr/></p>
+<p>A pipeline depth of X stages is equivalent to a pipeline latency of
+X frame intervals.<wbr/></p>
+<p>This value will be 8 or less.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This value should be 4 or less.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
         
 
       <!-- end of kind -->
@@ -9305,6 +9371,61 @@ and the lens and flash must operate as requested.<wbr/></p>
             </td>
           </tr>
 
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.request.pipelineDepth">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>request.<wbr/>pipeline<wbr/>Depth
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Specifies the number of pipeline stages the frame went
+through from when it was exposed to when the final completed result
+was available to the framework.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>&lt;= <a href="#static_android.request.pipelineMaxDepth">android.<wbr/>request.<wbr/>pipeline<wbr/>Max<wbr/>Depth</a></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Depending on what settings are used in the request,<wbr/> and
+what streams are configured,<wbr/> the data may undergo less processing,<wbr/>
+and some pipeline stages skipped.<wbr/></p>
+<p>See <a href="#static_android.request.pipelineMaxDepth">android.<wbr/>request.<wbr/>pipeline<wbr/>Max<wbr/>Depth</a> for more details.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This value must always represent the accurate count of how many
+pipeline stages were actually used.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -10280,6 +10401,217 @@ gain to the nearest possible value (rather than gain more).<wbr/></p>
             </td>
           </tr>
 
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="controls_android.sensor.testPatternData">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Data
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A pixel <code>[R,<wbr/> G_<wbr/>even,<wbr/> G_<wbr/>odd,<wbr/> B]</code> that supplies the test pattern
+when <a href="#controls_android.sensor.testPatternMode">android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Mode</a> is SOLID_<wbr/>COLOR.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Optional.<wbr/>
+Must be supported if <a href="#static_android.sensor.availableTestPatternModes">android.<wbr/>sensor.<wbr/>available<wbr/>Test<wbr/>Pattern<wbr/>Modes</a> contains
+SOLID_<wbr/>COLOR.<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Each color channel is treated as an unsigned 32-bit integer.<wbr/>
+The camera device then uses the most significant X bits
+that correspond to how many bits are in its Bayer raw sensor
+output.<wbr/></p>
+<p>For example,<wbr/> a sensor with RAW10 Bayer output would use the
+10 most significant bits from each color channel.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="controls_android.sensor.testPatternMode">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Mode
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                    <span class="entry_type_enum_notes"><p>Default.<wbr/> No test pattern mode is used,<wbr/> and the camera
+device returns captures from the image sensor.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">SOLID_COLOR</span>
+                    <span class="entry_type_enum_notes"><p>Each pixel in <code>[R,<wbr/> G_<wbr/>even,<wbr/> G_<wbr/>odd,<wbr/> B]</code> is replaced by its
+respective color channel provided in
+<a href="#controls_android.sensor.testPatternData">android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Data</a>.<wbr/></p>
+<p>For example:</p>
+<pre><code>android.<wbr/>testPatternData = [0,<wbr/> 0xFFFFFFFF,<wbr/> 0xFFFFFFFF,<wbr/> 0]
+</code></pre>
+<p>All green pixels are 100% green.<wbr/> All red/<wbr/>blue pixels are black.<wbr/></p>
+<pre><code>android.<wbr/>testPatternData = [0xFFFFFFFF,<wbr/> 0,<wbr/> 0xFFFFFFFF,<wbr/> 0]
+</code></pre>
+<p>All red pixels are 100% red.<wbr/> Only the odd green pixels
+are 100% green.<wbr/> All blue pixels are 100% black.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">COLOR_BARS</span>
+                    <span class="entry_type_enum_notes"><p>All pixel data is replaced with an 8-bar color pattern.<wbr/></p>
+<p>The vertical bars (left-to-right) are as follows:</p>
+<ul>
+<li>100% white</li>
+<li>yellow</li>
+<li>cyan</li>
+<li>green</li>
+<li>magenta</li>
+<li>red</li>
+<li>blue</li>
+<li>black</li>
+</ul>
+<p>In general the image would look like the following:</p>
+<pre><code>W Y C G M R B K
+W Y C G M R B K
+W Y C G M R B K
+W Y C G M R B K
+W Y C G M R B K
+.<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/>
+.<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/>
+.<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/>
+
+(B = Blue,<wbr/> K = Black)
+</code></pre>
+<p>Each bar should take up 1/<wbr/>8 of the sensor pixel array width.<wbr/>
+When this is not possible,<wbr/> the bar size should be rounded
+down to the nearest integer and the pattern can repeat
+on the right side.<wbr/></p>
+<p>Each bar's height must always take up the full sensor
+pixel array height.<wbr/></p>
+<p>Each pixel in this test pattern must be set to either
+0% intensity or 100% intensity.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">COLOR_BARS_FADE_TO_GRAY</span>
+                    <span class="entry_type_enum_notes"><p>The test pattern is similar to COLOR_<wbr/>BARS,<wbr/> except that
+each bar should start at its specified color at the top,<wbr/>
+and fade to gray at the bottom.<wbr/></p>
+<p>Furthermore each bar is further subdivided into a left and
+right half.<wbr/> The left half should have a smooth gradient,<wbr/>
+and the right half should have a quantized gradient.<wbr/></p>
+<p>In particular,<wbr/> the right half's should consist of blocks of the
+same color for 1/<wbr/>16th active sensor pixel array width.<wbr/></p>
+<p>The least significant bits in the quantized gradient should
+be copied from the most significant bits of the smooth gradient.<wbr/></p>
+<p>The height of each bar should always be a multiple of 128.<wbr/>
+When this is not the case,<wbr/> the pattern should repeat at the bottom
+of the image.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">PN9</span>
+                    <span class="entry_type_enum_notes"><p>All pixel data is replaced by a pseudo-random sequence
+generated from a PN9 512-bit sequence (typically implemented
+in hardware with a linear feedback shift register).<wbr/></p>
+<p>The generator should be reset at the beginning of each frame,<wbr/>
+and thus each subsequent raw frame with this test pattern should
+be exactly the same as the last.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">CUSTOM1</span>
+                    <span class="entry_type_enum_value">256</span>
+                    <span class="entry_type_enum_notes"><p>The first custom test pattern.<wbr/> All custom patterns that are
+available only on this camera device are at least this numeric
+value.<wbr/></p>
+<p>All of the custom test patterns will be static
+(that is the raw image must not vary from frame to frame).<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>When enabled,<wbr/> the sensor sends a test pattern instead of
+doing a real exposure from the camera.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Optional.<wbr/> Defaults to OFF.<wbr/> Value must be one of
+<a href="#static_android.sensor.availableTestPatternModes">android.<wbr/>sensor.<wbr/>available<wbr/>Test<wbr/>Pattern<wbr/>Modes</a></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When a test pattern is enabled,<wbr/> all manual sensor controls specified
+by android.<wbr/>sensor.<wbr/>* should be ignored.<wbr/> All other controls should
+work as normal.<wbr/></p>
+<p>For example,<wbr/> if manual flash is enabled,<wbr/> flash firing should still
+occur (and that the test pattern remain unmodified,<wbr/> since the flash
+would not actually affect it).<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>All test patterns are specified in the Bayer domain.<wbr/></p>
+<p>The HAL may choose to substitute test patterns from the sensor
+with test patterns from on-device memory.<wbr/> In that case,<wbr/> it should be
+indistinguishable to the ISP whether the data came from the
+sensor interconnect bus (such as CSI2) or memory.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -11355,6 +11687,40 @@ supported? Need CCT for each!</p>
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
         
+                
+          <tr class="entry" id="static_android.sensor.availableTestPatternModes">
+            <td class="entry_name" rowspan="1">
+              android.<wbr/>sensor.<wbr/>available<wbr/>Test<wbr/>Pattern<wbr/>Modes
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Optional.<wbr/> Defaults to [OFF].<wbr/> Lists the supported test
+pattern modes for android.<wbr/>test.<wbr/>pattern<wbr/>Mode.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Must include OFF.<wbr/> All custom modes must be &gt;= CUSTOM1</p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
         
 
       <!-- end of kind -->
@@ -11693,6 +12059,156 @@ somewhere close to it.<wbr/></p>
 
           </tr>
 
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.sensor.testPatternMode">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Mode
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                    <span class="entry_type_enum_notes"><p>Default.<wbr/> No test pattern mode is used,<wbr/> and the camera
+device returns captures from the image sensor.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">SOLID_COLOR</span>
+                    <span class="entry_type_enum_notes"><p>Each pixel in <code>[R,<wbr/> G_<wbr/>even,<wbr/> G_<wbr/>odd,<wbr/> B]</code> is replaced by its
+respective color channel provided in
+<a href="#controls_android.sensor.testPatternData">android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Data</a>.<wbr/></p>
+<p>For example:</p>
+<pre><code>android.<wbr/>testPatternData = [0,<wbr/> 0xFFFFFFFF,<wbr/> 0xFFFFFFFF,<wbr/> 0]
+</code></pre>
+<p>All green pixels are 100% green.<wbr/> All red/<wbr/>blue pixels are black.<wbr/></p>
+<pre><code>android.<wbr/>testPatternData = [0xFFFFFFFF,<wbr/> 0,<wbr/> 0xFFFFFFFF,<wbr/> 0]
+</code></pre>
+<p>All red pixels are 100% red.<wbr/> Only the odd green pixels
+are 100% green.<wbr/> All blue pixels are 100% black.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">COLOR_BARS</span>
+                    <span class="entry_type_enum_notes"><p>All pixel data is replaced with an 8-bar color pattern.<wbr/></p>
+<p>The vertical bars (left-to-right) are as follows:</p>
+<ul>
+<li>100% white</li>
+<li>yellow</li>
+<li>cyan</li>
+<li>green</li>
+<li>magenta</li>
+<li>red</li>
+<li>blue</li>
+<li>black</li>
+</ul>
+<p>In general the image would look like the following:</p>
+<pre><code>W Y C G M R B K
+W Y C G M R B K
+W Y C G M R B K
+W Y C G M R B K
+W Y C G M R B K
+.<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/>
+.<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/>
+.<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/> .<wbr/>
+
+(B = Blue,<wbr/> K = Black)
+</code></pre>
+<p>Each bar should take up 1/<wbr/>8 of the sensor pixel array width.<wbr/>
+When this is not possible,<wbr/> the bar size should be rounded
+down to the nearest integer and the pattern can repeat
+on the right side.<wbr/></p>
+<p>Each bar's height must always take up the full sensor
+pixel array height.<wbr/></p>
+<p>Each pixel in this test pattern must be set to either
+0% intensity or 100% intensity.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">COLOR_BARS_FADE_TO_GRAY</span>
+                    <span class="entry_type_enum_notes"><p>The test pattern is similar to COLOR_<wbr/>BARS,<wbr/> except that
+each bar should start at its specified color at the top,<wbr/>
+and fade to gray at the bottom.<wbr/></p>
+<p>Furthermore each bar is further subdivided into a left and
+right half.<wbr/> The left half should have a smooth gradient,<wbr/>
+and the right half should have a quantized gradient.<wbr/></p>
+<p>In particular,<wbr/> the right half's should consist of blocks of the
+same color for 1/<wbr/>16th active sensor pixel array width.<wbr/></p>
+<p>The least significant bits in the quantized gradient should
+be copied from the most significant bits of the smooth gradient.<wbr/></p>
+<p>The height of each bar should always be a multiple of 128.<wbr/>
+When this is not the case,<wbr/> the pattern should repeat at the bottom
+of the image.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">PN9</span>
+                    <span class="entry_type_enum_notes"><p>All pixel data is replaced by a pseudo-random sequence
+generated from a PN9 512-bit sequence (typically implemented
+in hardware with a linear feedback shift register).<wbr/></p>
+<p>The generator should be reset at the beginning of each frame,<wbr/>
+and thus each subsequent raw frame with this test pattern should
+be exactly the same as the last.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">CUSTOM1</span>
+                    <span class="entry_type_enum_value">256</span>
+                    <span class="entry_type_enum_notes"><p>The first custom test pattern.<wbr/> All custom patterns that are
+available only on this camera device are at least this numeric
+value.<wbr/></p>
+<p>All of the custom test patterns will be static
+(that is the raw image must not vary from frame to frame).<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>When enabled,<wbr/> the sensor sends a test pattern instead of
+doing a real exposure from the camera.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Optional.<wbr/> Defaults to OFF.<wbr/> Value must be one of
+<a href="#static_android.sensor.availableTestPatternModes">android.<wbr/>sensor.<wbr/>available<wbr/>Test<wbr/>Pattern<wbr/>Modes</a></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When a test pattern is enabled,<wbr/> all manual sensor controls specified
+by android.<wbr/>sensor.<wbr/>* should be ignored.<wbr/> All other controls should
+work as normal.<wbr/></p>
+<p>For example,<wbr/> if manual flash is enabled,<wbr/> flash firing should still
+occur (and that the test pattern remain unmodified,<wbr/> since the flash
+would not actually affect it).<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>All test patterns are specified in the Bayer domain.<wbr/></p>
+<p>The HAL may choose to substitute test patterns from the sensor
+with test patterns from on-device memory.<wbr/> In that case,<wbr/> it should be
+indistinguishable to the ISP whether the data came from the
+sensor interconnect bus (such as CSI2) or memory.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
