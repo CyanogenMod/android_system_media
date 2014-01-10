@@ -69,20 +69,98 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <enum>
             <value>TRANSFORM_MATRIX
               <notes>Use the android.colorCorrection.transform matrix
-              and android.colorCorrection.gains to do color conversion</notes>
+                and android.colorCorrection.gains to do color conversion.
+
+                All advanced white balance adjustments (not specified
+                by our white balance pipeline) must be disabled.
+
+                If AWB is enabled with `android.control.awbMode != OFF`, then
+                TRANSFORM_MATRIX is ignored. The camera device will override
+                this value to either FAST or HIGH_QUALITY.
+              </notes>
             </value>
             <value>FAST
-              <notes>Must not slow down frame rate relative to raw
-              bayer output</notes>
+              <notes>Must not slow down capture rate relative to sensor raw
+              output.
+
+              Advanced white balance adjustments above and beyond
+              the specified white balance pipeline may be applied.
+
+              If AWB is enabled with `android.control.awbMode != OFF`, then
+              the camera device uses the last frame's AWB values
+              (or defaults if AWB has never been run).
+            </notes>
             </value>
             <value>HIGH_QUALITY
-              <notes>Frame rate may be reduced by high
-              quality</notes>
+              <notes>Capture rate (relative to sensor raw output)
+              may be reduced by high quality.
+
+              Advanced white balance adjustments above and beyond
+              the specified white balance pipeline may be applied.
+
+              If AWB is enabled with `android.control.awbMode != OFF`, then
+              the camera device uses the last frame's AWB values
+              (or defaults if AWB has never been run).
+            </notes>
             </value>
           </enum>
 
-          <details>When android.control.awbMode is not OFF, TRANSFORM_MATRIX
-          should be ignored.</details>
+          <description>
+          The mode control selects how the image data is converted from the
+          sensor's native color into linear sRGB color.
+          </description>
+          <details>
+          When auto-white balance is enabled with android.control.awbMode, this
+          control is overridden by the AWB routine. When AWB is disabled, the
+          application controls how the color mapping is performed.
+
+          We define the expected processing pipeline below. For consistency
+          across devices, this is always the case with TRANSFORM_MATRIX.
+
+          When either FULL or HIGH_QUALITY is used, the camera device may
+          do additional processing but android.colorCorrection.gains and
+          android.colorCorrection.transform will still be provided by the
+          camera device (in the results) and be roughly correct.
+
+          Switching to TRANSFORM_MATRIX and using the data provided from
+          FAST or HIGH_QUALITY will yield a picture with the same white point
+          as what was produced by the camera device in the earlier frame.
+
+          The expected processing pipeline is as follows:
+
+          ![White balance processing pipeline](android.colorCorrection.mode/processing_pipeline.png)
+
+          The white balance is encoded by two values, a 4-channel white-balance
+          gain vector (applied in the Bayer domain), and a 3x3 color transform
+          matrix (applied after demosaic).
+
+          The 4-channel white-balance gains are defined as:
+
+              android.colorCorrection.gains = [ R G_even G_odd B ]
+
+          where `G_even` is the gain for green pixels on even rows of the
+          output, and `G_odd` is the gain for green pixels on the odd rows.
+          These may be identical for a given camera device implementation; if
+          the camera device does not support a separate gain for even/odd green
+          channels, it will use the `G_even` value, and write `G_odd` equal to
+          `G_even` in the output result metadata.
+
+          The matrices for color transforms are defined as a 9-entry vector:
+
+              android.colorCorrection.transform = [ I0 I1 I2 I3 I4 I5 I6 I7 I8 ]
+
+          which define a transform from input sensor colors, `P_in = [ r g b ]`,
+          to output linear sRGB, `P_out = [ r' g' b' ]`,
+
+          with colors as follows:
+
+              r' = I0r + I1g + I2b
+              g' = I3r + I4g + I5b
+              b' = I6r + I7g + I8b
+
+          Both the input and output value ranges must match. Overflow/underflow
+          values are clipped to fit within the range.
+          </details>
         </entry>
         <entry name="transform" type="rational" visibility="public"
                type_notes="3x3 rational matrix in row-major order"
@@ -111,22 +189,22 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <array>
             <size>4</size>
           </array>
-          <description>Gains applying to Bayer color channels for
+          <description>Gains applying to Bayer raw color channels for
           white-balance</description>
           <details>The 4-channel white-balance gains are defined in
-          the order of [R G_even G_odd B], where G_even is the gain
-          for green pixels on even rows of the output, and G_odd
-          is the gain for greenpixels on the odd rows. if a HAL
+          the order of `[R G_even G_odd B]`, where `G_even` is the gain
+          for green pixels on even rows of the output, and `G_odd`
+          is the gain for green pixels on the odd rows. if a HAL
           does not support a separate gain for even/odd green channels,
-          it should use the G_even value,and write G_odd equal to
-          G_even in the output result metadata.
+          it should use the `G_even` value, and write `G_odd` equal to
+          `G_even` in the output result metadata.
 
           This array is either set by HAL when the request
           android.colorCorrection.mode is not TRANSFORM_MATRIX, or
           directly by the application in the request when the
           android.colorCorrection.mode is TRANSFORM_MATRIX.
 
-          The ouput should be the gains actually applied by the HAL to
+          The output should be the gains actually applied by the HAL to
           the current frame.</details>
         </entry>
       </controls>

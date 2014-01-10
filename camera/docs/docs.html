@@ -718,23 +718,40 @@
                   <li>
                     <span class="entry_type_enum_name">TRANSFORM_MATRIX</span>
                     <span class="entry_type_enum_notes"><p>Use the <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a> matrix
-and <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> to do color conversion</p></span>
+and <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> to do color conversion.<wbr/></p>
+<p>All advanced white balance adjustments (not specified
+by our white balance pipeline) must be disabled.<wbr/></p>
+<p>If AWB is enabled with <code><a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> != OFF</code>,<wbr/> then
+TRANSFORM_<wbr/>MATRIX is ignored.<wbr/> The camera device will override
+this value to either FAST or HIGH_<wbr/>QUALITY.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to raw
-bayer output</p></span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down capture rate relative to sensor raw
+output.<wbr/></p>
+<p>Advanced white balance adjustments above and beyond
+the specified white balance pipeline may be applied.<wbr/></p>
+<p>If AWB is enabled with <code><a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> != OFF</code>,<wbr/> then
+the camera device uses the last frame's AWB values
+(or defaults if AWB has never been run).<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
-quality</p></span>
+                    <span class="entry_type_enum_notes"><p>Capture rate (relative to sensor raw output)
+may be reduced by high quality.<wbr/></p>
+<p>Advanced white balance adjustments above and beyond
+the specified white balance pipeline may be applied.<wbr/></p>
+<p>If AWB is enabled with <code><a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> != OFF</code>,<wbr/> then
+the camera device uses the last frame's AWB values
+(or defaults if AWB has never been run).<wbr/></p></span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
+              <p>The mode control selects how the image data is converted from the
+sensor's native color into linear sRGB color.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -752,8 +769,44 @@ quality</p></span>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>When <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> is not OFF,<wbr/> TRANSFORM_<wbr/>MATRIX
-should be ignored.<wbr/></p>
+              <p>When auto-white balance is enabled with <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> this
+control is overridden by the AWB routine.<wbr/> When AWB is disabled,<wbr/> the
+application controls how the color mapping is performed.<wbr/></p>
+<p>We define the expected processing pipeline below.<wbr/> For consistency
+across devices,<wbr/> this is always the case with TRANSFORM_<wbr/>MATRIX.<wbr/></p>
+<p>When either FULL or HIGH_<wbr/>QUALITY is used,<wbr/> the camera device may
+do additional processing but <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> and
+<a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a> will still be provided by the
+camera device (in the results) and be roughly correct.<wbr/></p>
+<p>Switching to TRANSFORM_<wbr/>MATRIX and using the data provided from
+FAST or HIGH_<wbr/>QUALITY will yield a picture with the same white point
+as what was produced by the camera device in the earlier frame.<wbr/></p>
+<p>The expected processing pipeline is as follows:</p>
+<p><img alt="White balance processing pipeline" src="images/camera2/metadata/android.colorCorrection.mode/processing_pipeline.png"/></p>
+<p>The white balance is encoded by two values,<wbr/> a 4-channel white-balance
+gain vector (applied in the Bayer domain),<wbr/> and a 3x3 color transform
+matrix (applied after demosaic).<wbr/></p>
+<p>The 4-channel white-balance gains are defined as:</p>
+<pre><code><a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> = [ R G_<wbr/>even G_<wbr/>odd B ]
+</code></pre>
+<p>where <code>G_<wbr/>even</code> is the gain for green pixels on even rows of the
+output,<wbr/> and <code>G_<wbr/>odd</code> is the gain for green pixels on the odd rows.<wbr/>
+These may be identical for a given camera device implementation; if
+the camera device does not support a separate gain for even/<wbr/>odd green
+channels,<wbr/> it will use the <code>G_<wbr/>even</code> value,<wbr/> and write <code>G_<wbr/>odd</code> equal to
+<code>G_<wbr/>even</code> in the output result metadata.<wbr/></p>
+<p>The matrices for color transforms are defined as a 9-entry vector:</p>
+<pre><code><a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a> = [ I0 I1 I2 I3 I4 I5 I6 I7 I8 ]
+</code></pre>
+<p>which define a transform from input sensor colors,<wbr/> <code>P_<wbr/>in = [ r g b ]</code>,<wbr/>
+to output linear sRGB,<wbr/> <code>P_<wbr/>out = [ r' g' b' ]</code>,<wbr/></p>
+<p>with colors as follows:</p>
+<pre><code>r' = I0r + I1g + I2b
+g' = I3r + I4g + I5b
+b' = I6r + I7g + I8b
+</code></pre>
+<p>Both the input and output value ranges must match.<wbr/> Overflow/<wbr/>underflow
+values are clipped to fit within the range.<wbr/></p>
             </td>
           </tr>
 
@@ -834,7 +887,7 @@ reported back in this matrix result metadata.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Gains applying to Bayer color channels for
+              <p>Gains applying to Bayer raw color channels for
 white-balance</p>
             </td>
 
@@ -854,17 +907,17 @@ white-balance</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>The 4-channel white-balance gains are defined in
-the order of [R G_<wbr/>even G_<wbr/>odd B],<wbr/> where G_<wbr/>even is the gain
-for green pixels on even rows of the output,<wbr/> and G_<wbr/>odd
-is the gain for greenpixels on the odd rows.<wbr/> if a HAL
+the order of <code>[R G_<wbr/>even G_<wbr/>odd B]</code>,<wbr/> where <code>G_<wbr/>even</code> is the gain
+for green pixels on even rows of the output,<wbr/> and <code>G_<wbr/>odd</code>
+is the gain for green pixels on the odd rows.<wbr/> if a HAL
 does not support a separate gain for even/<wbr/>odd green channels,<wbr/>
-it should use the G_<wbr/>even value,<wbr/>and write G_<wbr/>odd equal to
-G_<wbr/>even in the output result metadata.<wbr/></p>
+it should use the <code>G_<wbr/>even</code> value,<wbr/> and write <code>G_<wbr/>odd</code> equal to
+<code>G_<wbr/>even</code> in the output result metadata.<wbr/></p>
 <p>This array is either set by HAL when the request
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
 directly by the application in the request when the
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
-<p>The ouput should be the gains actually applied by the HAL to
+<p>The output should be the gains actually applied by the HAL to
 the current frame.<wbr/></p>
             </td>
           </tr>
@@ -973,7 +1026,7 @@ reported back in this matrix result metadata.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Gains applying to Bayer color channels for
+              <p>Gains applying to Bayer raw color channels for
 white-balance</p>
             </td>
 
@@ -993,17 +1046,17 @@ white-balance</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>The 4-channel white-balance gains are defined in
-the order of [R G_<wbr/>even G_<wbr/>odd B],<wbr/> where G_<wbr/>even is the gain
-for green pixels on even rows of the output,<wbr/> and G_<wbr/>odd
-is the gain for greenpixels on the odd rows.<wbr/> if a HAL
+the order of <code>[R G_<wbr/>even G_<wbr/>odd B]</code>,<wbr/> where <code>G_<wbr/>even</code> is the gain
+for green pixels on even rows of the output,<wbr/> and <code>G_<wbr/>odd</code>
+is the gain for green pixels on the odd rows.<wbr/> if a HAL
 does not support a separate gain for even/<wbr/>odd green channels,<wbr/>
-it should use the G_<wbr/>even value,<wbr/>and write G_<wbr/>odd equal to
-G_<wbr/>even in the output result metadata.<wbr/></p>
+it should use the <code>G_<wbr/>even</code> value,<wbr/> and write <code>G_<wbr/>odd</code> equal to
+<code>G_<wbr/>even</code> in the output result metadata.<wbr/></p>
 <p>This array is either set by HAL when the request
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
 directly by the application in the request when the
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
-<p>The ouput should be the gains actually applied by the HAL to
+<p>The output should be the gains actually applied by the HAL to
 the current frame.<wbr/></p>
             </td>
           </tr>
