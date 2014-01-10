@@ -50,7 +50,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </entry>
       <entry name="dynamic2" type="byte" visibility="public">
       </entry>
-      <clone entry="testOuter1.testSection1.control1" kind="controls">
+      <clone entry="testOuter2.testSection2.control1" kind="controls">
       </clone>
     </dynamic>
     <static>

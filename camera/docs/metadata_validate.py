@@ -46,15 +46,26 @@ def fully_qualified_name(entry):
   to the root node.
 
   Args:
-    entry: a BeautifulSoup Tag corresponding to an <entry ...> XML node
+    entry: a BeautifulSoup Tag corresponding to an <entry ...> XML node,
+           or a <clone ...> XML node.
+
+  Raises:
+    ValueError: if entry does not correspond to one of the above XML nodes
 
   Returns:
     A string with the full name, e.g. "android.lens.info.availableApertureSizes"
   """
+
   filter_tags = ['namespace', 'section']
   parents = [i['name'] for i in entry.parents if i.name in filter_tags]
 
-  name = entry['name']
+  if entry.name == 'entry':
+    name = entry['name']
+  elif entry.name == 'clone':
+    name = entry['entry'].split(".")[-1] # "a.b.c" => "c"
+  else:
+    raise ValueError("Unsupported tag type '%s' for element '%s'" \
+                        %(entry.name, entry))
 
   parents.reverse()
   parents.append(name)
@@ -172,7 +183,7 @@ def validate_error(msg):
   Args:
     msg: a string you want to be printed
   """
-  print >> sys.stderr, "Validation error: " + msg
+  print >> sys.stderr, "ERROR: " + msg
 
 
 def validate_clones(soup):
@@ -201,6 +212,13 @@ def validate_clones(soup):
     if matching_entry is None:
       error_msg = ("Did not find corresponding clone entry '%s' " +    \
                "with kind '%s'") %(clone_entry, clone_kind)
+      validate_error(error_msg)
+      success = False
+
+    clone_name = fully_qualified_name(clone)
+    if clone_name != clone_entry:
+      error_msg = ("Clone entry target '%s' did not match fully qualified "  + \
+                   "name '%s'.") %(clone_entry, clone_name)
       validate_error(error_msg)
       success = False
 
@@ -296,7 +314,7 @@ if __name__ == "__main__":
     sys.exit(0)
 
   file_name = sys.argv[1]
-  succ = validate_xml(file_name) is not None
+  succ = validate_xml(file(file_name).read()) is not None
 
   if succ:
     print "%s: SUCCESS! Document validated" %(file_name)
