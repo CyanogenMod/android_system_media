@@ -797,7 +797,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="maxRegions" type="int32" visibility="public">
           <description>For AE, AWB, and AF, how many individual
           regions can be listed for metering?</description>
-          <range>&gt;= 1</range>
+          <range>&amp;gt;= 1</range>
           <tag id="BC" />
         </entry>
         <entry name="sceneModeOverrides" type="byte" visibility="system"
@@ -1073,7 +1073,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Max energy output of the flash for a full
           power single flash</description>
           <units>lumen-seconds</units>
-          <range>&gt;= 0</range>
+          <range>&amp;gt;= 0</range>
           <tag id="ADV" />
         </entry>
       </static>
@@ -1276,7 +1276,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="size" type="int32">
           <description>The size of the compressed JPEG image, in
           bytes</description>
-          <range>&gt;= 0</range>
+          <range>&amp;gt;= 0</range>
           <details>If no JPEG output is produced for the request,
           this must be 0.
 
@@ -1315,7 +1315,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="focalLength" type="float" visibility="public">
           <description>Lens optical zoom setting</description>
           <units>focal length in mm</units>
-          <range>&gt; 0</range>
+          <range>&amp;gt; 0</range>
           <details>Will not be supported on most devices.</details>
           <tag id="V1" />
         </entry>
@@ -1323,7 +1323,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Distance to plane of sharpest focus,
           measured from frontmost surface of the lens</description>
           <units>diopters (1/m)</units>
-          <range>&gt;= 0</range>
+          <range>&amp;gt;= 0</range>
           <details>0 = infinity focus. Used value should be clamped
           to (0,minimum focus distance)</details>
           <tag id="BC" />
@@ -1351,7 +1351,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </array>
             <description>List of supported aperture
             values</description>
-            <range>one entry required, &gt; 0</range>
+            <range>one entry required, &amp;gt; 0</range>
             <details>If variable aperture not available, only setting
             should be for the fixed aperture</details>
             <tag id="V1" />
@@ -1363,7 +1363,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </array>
             <description>List of supported ND filter
             values</description>
-            <range>one entry required, &gt;= 0</range>
+            <range>one entry required, &amp;gt;= 0</range>
             <details>If not available, only setting is 0. Otherwise,
             lists the available exposure index values for dimming
             (2 would mean the filter is set to reduce incoming
@@ -1379,7 +1379,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>If fitted with optical zoom, what focal
             lengths are available. If not, the static focal
             length</description>
-            <range>&gt; 0</range>
+            <range>&amp;gt; 0</range>
             <details>If optical zoom not supported, only one value
             should be reported</details>
             <tag id="BC" />
@@ -1406,7 +1406,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>A low-resolution map for correction of
             geometric distortions and chromatic aberrations, per
             color channel</description>
-            <range>N, M &gt;= 2</range>
+            <range>N, M &amp;gt;= 2</range>
             <details>[DNG wants a function instead]. What's easiest
             for implementers? With an array size (M, N), entry (i,
             j) provides the destination for pixel (i/(M-1) * width,
@@ -1422,14 +1422,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </array>
             <description>Dimensions of geometric correction
             map</description>
-            <range>Both values &gt;= 2</range>
+            <range>Both values &amp;gt;= 2</range>
             <tag id="V1" />
           </entry>
           <entry name="hyperfocalDistance" type="float" visibility="public">
             <description>Hyperfocal distance for this lens; set to
             0 if fixed focus</description>
             <units>diopters</units>
-            <range>&gt;= 0</range>
+            <range>&amp;gt;= 0</range>
             <details>The hyperfocal distance is used for the old
             API's 'fixed' setting</details>
             <tag id="BC" />
@@ -1438,7 +1438,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>Shortest distance from frontmost surface
             of the lens that can be focused correctly</description>
             <units>diopters</units>
-            <range>&gt;= 0</range>
+            <range>&amp;gt;= 0</range>
             <details>If the lens is fixed-focus, this should be
             0</details>
             <tag id="V1" />
@@ -1450,7 +1450,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               <size>2</size>
             </array>
             <description>Dimensions of lens shading map.</description>
-            <range>Both values &gt;= 1</range>
+            <range>Both values &amp;gt;= 1</range>
             <details>
             The map should be on the order of 30-40 rows and columns, and
             must be smaller than 64x64.
@@ -1524,7 +1524,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           sharp focus (depth of field)</description>
           <units>pair of focus distances in diopters: (near,
           far)</units>
-          <range>&gt;=0</range>
+          <range>&amp;gt;=0</range>
           <details>If variable focus not supported, can still report
           fixed depth of field range</details>
           <tag id="BC" />
@@ -1766,7 +1766,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <units>The number of raw sensor streams; the number of
           processed, uncompressed streams; and the number of
           JPEG-compressed streams</units>
-          <range>&gt;=1 for Raw and JPEG-compressed stream. &gt;= 3
+          <range>&amp;gt;=1 for Raw and JPEG-compressed stream. &amp;gt;= 3
           for processed, uncompressed streams</range>
           <details>Video snapshot with preview callbacks requires 3
           processed streams (preview, record, app callbacks) and
@@ -1780,7 +1780,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>How many reprocessing streams of any type
           can be allocated at the same time</description>
-          <range>&gt;= 1</range>
+          <range>&amp;gt;= 1</range>
         </entry>
       </static>
       <dynamic>
@@ -1789,7 +1789,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           increases with every new result (that is, each new result has a unique
           frameCount value).</description>
           <units>count of frames</units>
-          <range>&gt; 0</range>
+          <range>&amp;gt; 0</range>
           <details>Reset on release()</details>
         </entry>
         <clone entry="android.request.id" kind="controls"></clone>
@@ -1892,7 +1892,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           stream is active and captured in a burst, with all
           processing set to FAST</description>
           <details>When multiple streams are configured, the minimum
-          frame duration will be &gt;= max(individual stream min
+          frame duration will be &amp;gt;= max(individual stream min
           durations)</details>
           <tag id="BC" />
         </entry>
@@ -1913,7 +1913,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           and crop region width, or between active area height and
           crop region height, if the crop region height is larger
           than width</description>
-          <range>&gt;=1</range>
+          <range>&amp;gt;=1</range>
           <tag id="BC" />
         </entry>
         <entry name="availableProcessedMinDurations" type="int64" visibility="public"
@@ -1927,7 +1927,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           stream is active, with all processing set to
           FAST</description>
           <details>When multiple streams are configured, the minimum
-          frame duration will be &gt;= max(individual stream min
+          frame duration will be &amp;gt;= max(individual stream min
           durations)</details>
           <tag id="BC" />
         </entry>
@@ -1963,7 +1963,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           correspond to the frame duration when only the raw stream
           is active.</description>
           <details>When multiple streams are configured, the minimum
-          frame duration will be &gt;= max(individual stream min
+          frame duration will be &amp;gt;= max(individual stream min
           durations)</details>
           <tag id="BC" />
         </entry>
@@ -2046,7 +2046,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               <size>2</size>
             </array>
             <description>Range of valid sensitivities</description>
-            <range>Min &lt;= 100, Max &gt;= 1600</range>
+            <range>Min &lt;= 100, Max &amp;gt;= 1600</range>
             <tag id="BC" />
             <tag id="V1" />
           </entry>
@@ -2073,7 +2073,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </array>
             <description>Range of valid exposure
             times</description>
-            <range>Min &lt;= 100e3 (100 us), Max &gt;= 30e9 (30
+            <range>Min &lt;= 100e3 (100 us), Max &amp;gt;= 30e9 (30
             sec)</range>
             <tag id="V1" />
           </entry>
@@ -2081,7 +2081,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>Maximum possible frame duration (minimum frame
             rate)</description>
             <units>nanoseconds</units>
-            <range>&gt;= 30e9</range>
+            <range>&amp;gt;= 30e9</range>
             <details>Minimum duration is a function of resolution,
             processing settings. See
             android.scaler.availableProcessedMinDurations
@@ -2118,7 +2118,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <entry name="whiteLevel" type="int32">
             <description>Maximum raw value output by
             sensor</description>
-            <range>&gt; 1024 (10-bit output)</range>
+            <range>&amp;gt; 1024 (10-bit output)</range>
             <details>Defines sensor bit depth (10-14 bits is
             expected)</details>
             <tag id="DNG" />
@@ -2138,7 +2138,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>A fixed black level offset for each of the
           Bayer mosaic channels</description>
-          <range>&gt;= 0 each</range>
+          <range>&amp;gt;= 0 each</range>
           <details>As per DNG BlackLevelRepeatDim / BlackLevel
           tags</details>
           <tag id="DNG" />
@@ -2299,7 +2299,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Time at start of exposure of first
           row</description>
           <units>nanoseconds</units>
-          <range>&gt; 0</range>
+          <range>&amp;gt; 0</range>
           <details>Monotonic, should be synced to other timestamps in
           system</details>
           <tag id="BC" />
@@ -2419,12 +2419,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <entry name="histogramBucketCount" type="int32">
             <description>Number of histogram buckets
             supported</description>
-            <range>&gt;= 64</range>
+            <range>&amp;gt;= 64</range>
           </entry>
           <entry name="maxFaceCount" type="int32" visibility="public" >
             <description>Maximum number of simultaneously detectable
             faces</description>
-            <range>&gt;= 4 if availableFaceDetectionModes lists
+            <range>&amp;gt;= 4 if availableFaceDetectionModes lists
             modes besides OFF, otherwise 0</range>
           </entry>
           <entry name="maxHistogramCount" type="int32">
@@ -2537,7 +2537,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The shading map is a low-resolution floating-point map
           that lists the coefficients used to correct for vignetting, for each
           Bayer color channel.</description>
-          <range>Each gain factor is &gt;= 1</range>
+          <range>Each gain factor is &amp;gt;= 1</range>
           <details>The least shaded section of the image should have a gain factor
           of 1; all other sections should have gains above 1.
 
@@ -2715,9 +2715,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           The curve should be linearly interpolated between the
           defined points. The points will be listed in increasing
           order of P_IN. For example, if the array is: [0.0, 0.0,
-          0.3, 0.5, 1.0, 1.0], then the input-&gt;output mapping
-          for a few sample points would be: 0 -&gt; 0, 0.15 -&gt;
-          0.25, 0.3 -&gt; 0.5, 0.5 -&gt; 0.64</details>
+          0.3, 0.5, 1.0, 1.0], then the input-&amp;gt;output mapping
+          for a few sample points would be: 0 -&amp;gt; 0, 0.15 -&amp;gt;
+          0.25, 0.3 -&amp;gt; 0.5, 0.5 -&amp;gt; 0.64</details>
           <tag id="DNG" />
         </entry>
         <entry name="mode" type="byte" visibility="public" enum="true">
@@ -2738,7 +2738,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="maxCurvePoints" type="int32" visibility="public" >
           <description>Maximum number of supported points in the
           tonemap curve</description>
-          <range>&gt;= 128</range>
+          <range>&amp;gt;= 128</range>
         </entry>
       </static>
       <dynamic>
