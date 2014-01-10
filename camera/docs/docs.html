@@ -6047,7 +6047,8 @@ the same aspect ratio as the jpeg image.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Size of the lens aperture</p>
+              <p>The ratio of lens focal length to the effective
+aperture diameter.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -6070,8 +6071,20 @@ the same aspect ratio as the jpeg image.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Will not be supported on most devices.<wbr/> Can only
-pick from supported list</p>
+              <p>This will only be supported on the camera devices that
+have variable aperture lens.<wbr/> The aperture value can only be
+one of the values listed in <a href="#static_android.lens.info.availableApertures">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Apertures</a>.<wbr/></p>
+<p>When this is supported and <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is OFF,<wbr/>
+this can be set along with <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>,<wbr/>
+<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>,<wbr/> and android.<wbr/>sensor.<wbr/>frame<wbr/>Duration
+to achieve manual exposure control.<wbr/></p>
+<p>The requested aperture value may take several frames to reach the
+requested value; the camera device will report the current (intermediate)
+aperture size in capture result metadata while the aperture is changing.<wbr/></p>
+<p>When this is supported and <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is one of
+the ON modes,<wbr/> this will be overridden by the camera device
+auto-exposure algorithm,<wbr/> the overridden values are then provided
+back to the user in the corresponding result.<wbr/></p>
             </td>
           </tr>
 
@@ -6321,14 +6334,14 @@ enabled.<wbr/></p>
 
             <td class="entry_description">
               <p>List of supported aperture
-values</p>
+values.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>one entry required,<wbr/> &gt; 0</p>
+              <p>one entry required,<wbr/> &amp;&gt; 0</p>
             </td>
 
             <td class="entry_tags">
@@ -6343,8 +6356,10 @@ values</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>If variable aperture not available,<wbr/> only setting
-should be for the fixed aperture</p>
+              <p>If the camera device doesn't support variable apertures,<wbr/>
+listed value will be the fixed aperture.<wbr/></p>
+<p>If the camera device supports variable apertures,<wbr/> the aperture value
+in this list will be sorted in ascending order.<wbr/></p>
             </td>
           </tr>
 
@@ -6923,7 +6938,8 @@ device</p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Size of the lens aperture</p>
+              <p>The ratio of lens focal length to the effective
+aperture diameter.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -6946,8 +6962,20 @@ device</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Will not be supported on most devices.<wbr/> Can only
-pick from supported list</p>
+              <p>This will only be supported on the camera devices that
+have variable aperture lens.<wbr/> The aperture value can only be
+one of the values listed in <a href="#static_android.lens.info.availableApertures">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Apertures</a>.<wbr/></p>
+<p>When this is supported and <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is OFF,<wbr/>
+this can be set along with <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>,<wbr/>
+<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>,<wbr/> and android.<wbr/>sensor.<wbr/>frame<wbr/>Duration
+to achieve manual exposure control.<wbr/></p>
+<p>The requested aperture value may take several frames to reach the
+requested value; the camera device will report the current (intermediate)
+aperture size in capture result metadata while the aperture is changing.<wbr/></p>
+<p>When this is supported and <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is one of
+the ON modes,<wbr/> this will be overridden by the camera device
+auto-exposure algorithm,<wbr/> the overridden values are then provided
+back to the user in the corresponding result.<wbr/></p>
             </td>
           </tr>
 

@@ -1355,11 +1355,27 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <section name="lens">
       <controls>
         <entry name="aperture" type="float" visibility="public">
-          <description>Size of the lens aperture</description>
+          <description>The ratio of lens focal length to the effective
+          aperture diameter.</description>
           <units>f-number (f/NNN)</units>
           <range>android.lens.info.availableApertures</range>
-          <details>Will not be supported on most devices. Can only
-          pick from supported list</details>
+          <details>This will only be supported on the camera devices that
+          have variable aperture lens. The aperture value can only be
+          one of the values listed in android.lens.info.availableApertures.
+
+          When this is supported and android.control.aeMode is OFF,
+          this can be set along with android.sensor.exposureTime,
+          android.sensor.sensitivity, and android.sensor.frameDuration
+          to achieve manual exposure control.
+
+          The requested aperture value may take several frames to reach the
+          requested value; the camera device will report the current (intermediate)
+          aperture size in capture result metadata while the aperture is changing.
+
+          When this is supported and android.control.aeMode is one of
+          the ON modes, this will be overridden by the camera device
+          auto-exposure algorithm, the overridden values are then provided
+          back to the user in the corresponding result.</details>
           <tag id="V1" />
         </entry>
         <entry name="filterDensity" type="float" visibility="public">
@@ -1409,10 +1425,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               <size>n</size>
             </array>
             <description>List of supported aperture
-            values</description>
-            <range>one entry required, &amp;gt; 0</range>
-            <details>If variable aperture not available, only setting
-            should be for the fixed aperture</details>
+            values.</description>
+            <range>one entry required, &amp;&gt; 0</range>
+            <details>If the camera device doesn't support variable apertures,
+            listed value will be the fixed aperture.
+
+            If the camera device supports variable apertures, the aperture value
+            in this list will be sorted in ascending order.</details>
             <tag id="V1" />
           </entry>
           <entry name="availableFilterDensities" type="float" visibility="public"
