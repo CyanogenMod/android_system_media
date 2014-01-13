@@ -251,43 +251,86 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="aeMode" type="byte" visibility="public" enum="true">
           <enum>
             <value>OFF
-              <notes>Autoexposure is disabled; sensor.exposureTime,
-              sensor.sensitivity and sensor.frameDuration are used</notes>
+              <notes>
+                The camera device's autoexposure routine is disabled;
+                the application-selected android.sensor.exposureTime,
+                android.sensor.sensitivity and
+                android.sensor.frameDuration are used by the camera
+                device, along with android.flash.* fields, if there's
+                a flash unit for this camera device.
+              </notes>
             </value>
             <value>ON
-              <notes>Autoexposure is active, no flash
-              control</notes>
+              <notes>
+                The camera device's autoexposure routine is active,
+                with no flash control. The application's values for
+                android.sensor.exposureTime,
+                android.sensor.sensitivity, and
+                android.sensor.frameDuration are ignored. The
+                application has control over the various
+                android.flash.* fields.
+              </notes>
             </value>
             <value>ON_AUTO_FLASH
-            <notes>If autoexposure is active and flash exists, auto
-            flash control; flash may be fired when precapture
-            trigger is activated, and for captures for which
-            captureIntent = STILL_CAPTURE</notes></value>
+              <notes>
+                Like ON, except that the camera device also controls
+                the camera's flash unit, firing it in low-light
+                conditions. The flash may be fired during a
+                precapture sequence (triggered by
+                android.control.aePrecaptureTrigger) and may be fired
+                for captures for which the
+                android.control.captureIntent field is set to
+                STILL_CAPTURE
+              </notes>
+            </value>
             <value>ON_ALWAYS_FLASH
-            <notes>If autoexposure is active and flash exists, auto
-            flash control for precapture trigger and always flash
-            when captureIntent = STILL_CAPTURE</notes></value>
+              <notes>
+                Like ON, except that the camera device also controls
+                the camera's flash unit, always firing it for still
+                captures. The flash may be fired during a precapture
+                sequence (triggered by
+                android.control.aePrecaptureTrigger) and will always
+                be fired for captures for which the
+                android.control.captureIntent field is set to
+                STILL_CAPTURE
+              </notes>
+            </value>
             <value>ON_AUTO_FLASH_REDEYE
-            <notes>Optional. Automatic red eye reduction with flash.
-            If deemed necessary, red eye reduction sequence should
-            fire when precapture trigger is activated, and final
-            flash should fire when captureIntent =
-            STILL_CAPTURE</notes></value>
+              <notes>
+                Like ON_AUTO_FLASH, but with automatic red eye
+                reduction. If deemed necessary by the camera device,
+                a red eye reduction flash will fire during the
+                precapture sequence.
+              </notes>
+            </value>
           </enum>
-          <description>Whether AE is currently updating the sensor
-          exposure and sensitivity fields</description>
+          <description>The desired mode for the camera device's
+          auto-exposure routine.</description>
           <range>android.control.aeAvailableModes</range>
-          <details>Only effective if android.control.mode = AUTO.
+          <details>
+            This control is only effective if android.control.mode is
+            AUTO.
 
-          If auto-exposure is active, HAL auto-focus routine is enabled,
-          then HAL auto-exposure routine overrides the control variables
-          that relate to auto-exposure routine, and these override values
-          are then available in the result metadata for that capture.
+            When set to any of the ON modes, the camera device's
+            auto-exposure routine is enabled, overriding the
+            application's selected exposure time, sensor sensitivity,
+            and frame duration (android.sensor.exposureTime,
+            android.sensor.sensitivity, and
+            android.sensor.frameDuration). If one of the FLASH modes
+            is selected, the camera device's flash unit controls are
+            also overridden.
 
-          For example, if auto-exposure is enabled in a request, the HAL should
-          overwrite the exposure, gain, and frame duration fields (and potentially
-          the flash fields, depending on AE mode) of the request.  The overridden
-          values are then provided back to the user in the corresponding result.</details>
+            The FLASH modes are only available if the camera device
+            has a flash unit (android.flash.info.available is `true`).
+
+            If flash TORCH mode is desired, this field must be set to
+            ON or OFF, and android.flash.mode set to TORCH.
+
+            When set to any of the ON modes, the values chosen by the
+            camera device auto-exposure routine for the overridden
+            fields for a given capture will be available in its
+            CaptureResult.
+          </details>
           <tag id="BC" />
         </entry>
         <entry name="aeRegions" type="int32" visibility="public"
@@ -703,16 +746,30 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             for this camera device; they must include AUTO.
           </details>
         </entry>
-        <entry name="aeAvailableModes" type="byte"
-        type_notes="list of enums" container="array">
+        <entry name="aeAvailableModes" type="byte" visibility="public"
+               type_notes="list of enums" container="array">
           <array>
             <size>n</size>
           </array>
-          <description>Which subset of AE modes is
-          supported</description>
-          <range>OFF, ON must be supported.
-          ON_AUTO_FLASH/ON_ALWAYS_FLASH must be supported if flash
-          unit is available</range>
+          <description>
+            The set of auto-exposure modes that are supported by this
+            camera device.
+          </description>
+          <details>
+            Not all the auto-exposure modes may be supported by a
+            given camera device, especially if no flash unit is
+            available. This entry lists the valid modes for
+            android.control.aeMode for this camera device.
+
+            All camera devices support ON, and all camera devices with
+            flash units support ON_AUTO_FLASH and
+            ON_ALWAYS_FLASH.
+
+            Full-capability camera devices always support OFF mode,
+            which enables application control of camera exposure time,
+            sensitivity, and frame duration.
+          </details>
+          <tag id="BC" />
         </entry>
         <entry name="aeAvailableTargetFpsRanges" type="int32" visibility="public"
                type_notes="list of pairs of frame rates"
@@ -845,6 +902,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           by HAL. Always updated even if AE algorithm ignores the
           trigger</details>
         </entry>
+        <clone entry="android.control.aeMode" kind="controls">
+        </clone>
         <clone entry="android.control.aeRegions" kind="controls">
         </clone>
         <entry name="aeState" type="byte" visibility="public" enum="true">
