@@ -751,8 +751,10 @@ def md(text, img_src_prefix=""):
     text_not_first = textwrap.dedent(text_not_first)
     text = text_lines[0] + "\n" + text_not_first
 
+    # full list of extensions at http://pythonhosted.org/Markdown/extensions/
+    md_extensions = ['tables'] # make <table> with ASCII |_| tables
     # render with markdown
-    text = markdown.markdown(text)
+    text = markdown.markdown(text, md_extensions)
 
     # prepend a prefix to each <img src="foo"> -> <img src="${prefix}foo">
     text = re.sub(r'src="([^"]*)"', 'src="' + img_src_prefix + r'\1"', text)
