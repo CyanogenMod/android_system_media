@@ -471,9 +471,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           mode it is set to</description>
           <details>Only effective if android.control.mode = AUTO.
 
-          If lens is controlled by HAL auto-focus algorithm, the HAL should
-          report the current AF status in android.control.afState in
-          result metadata.</details>
+          If the lens is controlled by the camera device auto-focus algorithm,
+          the camera device will report the current AF status in android.control.afState
+          in result metadata.</details>
           <tag id="BC" />
         </entry>
         <entry name="afRegions" type="int32" visibility="public"
@@ -805,9 +805,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>n</size>
           </array>
           <description>List of AF modes that can be
-          selected</description>
-          <range>OFF must be included. AUTO must be supported if
-          lens allows for changing focus</range>
+          selected with android.control.afMode.</description>
+          <details>
+          Not all the auto-focus modes may be supported by a
+          given camera device. This entry lists the valid modes for
+          android.control.afMode for this camera device.
+
+          All camera devices will support OFF mode, and all camera devices with
+          adjustable focuser units (`android.lens.info.minimumFocusDistance &gt; 0`)
+          will support AUTO mode.
+          </details>
           <tag id="BC" />
         </entry>
         <entry name="availableEffects" type="byte" visibility="public"

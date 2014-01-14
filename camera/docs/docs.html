@@ -1681,9 +1681,9 @@ mode it is set to</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO.<wbr/></p>
-<p>If lens is controlled by HAL auto-focus algorithm,<wbr/> the HAL should
-report the current AF status in <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a> in
-result metadata.<wbr/></p>
+<p>If the lens is controlled by the camera device auto-focus algorithm,<wbr/>
+the camera device will report the current AF status in android.<wbr/>control.<wbr/>af<wbr/>State
+in result metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -2673,7 +2673,7 @@ can be changed</p>
         
                 
           <tr class="entry" id="static_android.control.afAvailableModes">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>control.<wbr/>af<wbr/>Available<wbr/>Modes
             </td>
             <td class="entry_type">
@@ -2691,15 +2691,13 @@ can be changed</p>
 
             <td class="entry_description">
               <p>List of AF modes that can be
-selected</p>
+selected with <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>OFF must be included.<wbr/> AUTO must be supported if
-lens allows for changing focus</p>
             </td>
 
             <td class="entry_tags">
@@ -2708,6 +2706,19 @@ lens allows for changing focus</p>
               </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Not all the auto-focus modes may be supported by a
+given camera device.<wbr/> This entry lists the valid modes for
+<a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> for this camera device.<wbr/></p>
+<p>All camera devices will support OFF mode,<wbr/> and all camera devices with
+adjustable focuser units (<code><a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> &gt; 0</code>)
+will support AUTO mode.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -3439,9 +3450,9 @@ mode it is set to</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO.<wbr/></p>
-<p>If lens is controlled by HAL auto-focus algorithm,<wbr/> the HAL should
-report the current AF status in <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a> in
-result metadata.<wbr/></p>
+<p>If the lens is controlled by the camera device auto-focus algorithm,<wbr/>
+the camera device will report the current AF status in android.<wbr/>control.<wbr/>af<wbr/>State
+in result metadata.<wbr/></p>
             </td>
           </tr>
 
