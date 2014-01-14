@@ -28,26 +28,36 @@
   ##
   ## Generate extra text blocks for the details field
   def generate_extra_detail(entry):
-    text = entry.details
-    if entry.optional:
-      text += '\n\n<b>Optional</b> - This value may be null on some devices.\n'
-    if any(tag.name == 'FULL' for tag in entry.tags):
-      text += \
-        '\n<b>Full capability</b> - \n' + \
-        'Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the\n' + \
-        'android.info.supportedHardwareLevel key\n'
-    return text
+    def inner(text):
+      if entry.optional:
+        text += '\n\n<b>Optional</b> - This value may be {@code null} on some devices.\n'
+      if any(tag.name == 'FULL' for tag in entry.tags):
+        text += \
+          '\n<b>Full capability</b> - \n' + \
+          'Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the\n' + \
+          'android.info.supportedHardwareLevel key\n'
+      return text
+    return inner
 %>
 ##
 ## Generate a single key and docs
 <%def name="generate_key(entry)">\
     /**
-  % if entry.description:
-${entry.description | javadoc(metadata)}\
-  % endif
-  % if entry.details:
-${generate_extra_detail(entry) | javadoc(metadata)}\
-  % endif
+<%
+    # Dedent fixes markdown not to generate code blocks. Then do the rest.
+    description = ""
+    if entry.description:
+        description = dedent(entry.description) + "\n\n"
+    details = ""
+    if entry.details:
+        details = dedent(entry.details)
+    # Unconditionally add extra information if necessary
+    extra_detail = generate_extra_detail(entry)("")
+
+    concatenated_info = description + details + extra_detail
+%>\
+## Glue description and details together before javadoc-izing. Otherwise @see in middle of javadoc.
+${concatenated_info | javadoc(metadata)}\
   % if entry.enum and not (entry.typedef and entry.typedef.languages.get('java')):
     % for value in entry.enum.values:
      * @see #${jenum_value(entry, value)}

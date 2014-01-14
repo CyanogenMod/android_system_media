@@ -201,5 +201,13 @@ If the path foo/android.testOuter1.testSection1.control1/bar.txt exists, then oh
     self.assertEquals("The overrides listed for SCENE_{0}MODE_{0}FACE_{0}PRIORITY are ignored".format(wbr_string),
                       wbr("The overrides listed for SCENE_MODE_FACE_PRIORITY are ignored"));
 
+  def test_dedent(self):
+    # Remove whitespace from 2nd and 3rd line (equal ws)
+    self.assertEquals("bar\nline1\nline2", dedent("bar\n  line1\n  line2"))
+    # Remove whitespace from all lines (1st line ws < 2/3 line ws)
+    self.assertEquals("bar\nline1\nline2", dedent(" bar\n  line1\n  line2"))
+    # Remove some whitespace from 2nd line, all whitespace from other lines
+    self.assertEquals("bar\n  line1\nline2", dedent(" bar\n    line1\n  line2"))
+
 if __name__ == '__main__':
     unittest.main()

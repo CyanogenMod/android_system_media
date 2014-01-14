@@ -704,6 +704,31 @@ def javadoc(metadata, indent = 4):
 
   return javadoc_formatter
 
+def dedent(text):
+  """
+  Remove all common indentation from every line but the 0th.
+  This will avoid getting <code> blocks when rendering text via markdown.
+  Ignoring the 0th line will also allow the 0th line not to be aligned.
+
+  Args:
+    text: A string of text to dedent.
+
+  Returns:
+    String dedented by above rules.
+
+  For example:
+    assertEquals("bar\nline1\nline2",   dedent("bar\n  line1\n  line2"))
+    assertEquals("bar\nline1\nline2",   dedent(" bar\n  line1\n  line2"))
+    assertEquals("bar\n  line1\nline2", dedent(" bar\n    line1\n  line2"))
+  """
+  text = textwrap.dedent(text)
+  text_lines = text.split('\n')
+  text_not_first = "\n".join(text_lines[1:])
+  text_not_first = textwrap.dedent(text_not_first)
+  text = text_lines[0] + "\n" + text_not_first
+
+  return text
+
 def md(text, img_src_prefix=""):
     """
     Run text through markdown to produce HTML.
@@ -745,11 +770,7 @@ def md(text, img_src_prefix=""):
       bar</p>
 
     """
-    text = textwrap.dedent(text)
-    text_lines = text.split('\n')
-    text_not_first = "\n".join(text_lines[1:])
-    text_not_first = textwrap.dedent(text_not_first)
-    text = text_lines[0] + "\n" + text_not_first
+    text = dedent(text)
 
     # full list of extensions at http://pythonhosted.org/Markdown/extensions/
     md_extensions = ['tables'] # make <table> with ASCII |_| tables
