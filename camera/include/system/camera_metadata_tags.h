@@ -308,8 +308,8 @@ typedef enum camera_metadata_tag {
     ANDROID_STATISTICS_HISTOGRAM,                     // int32[]      | system
     ANDROID_STATISTICS_SHARPNESS_MAP,                 // int32[]      | system
     ANDROID_STATISTICS_LENS_SHADING_MAP,              // float[]      | public
-    ANDROID_STATISTICS_PREDICTED_COLOR_GAINS,         // float[]      | public
-    ANDROID_STATISTICS_PREDICTED_COLOR_TRANSFORM,     // rational[]   | public
+    ANDROID_STATISTICS_PREDICTED_COLOR_GAINS,         // float[]      | hidden
+    ANDROID_STATISTICS_PREDICTED_COLOR_TRANSFORM,     // rational[]   | hidden
     ANDROID_STATISTICS_SCENE_FLICKER,                 // enum         | public
     ANDROID_STATISTICS_LENS_SHADING_MAP_MODE,         // enum         | public
     ANDROID_STATISTICS_END,

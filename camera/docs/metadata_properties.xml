@@ -2764,7 +2764,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           ![Image of a uniform white wall (inverse shading map)](android.statistics.lensShadingMap/inv_shading.png)
           </details>
         </entry>
-        <entry name="predictedColorGains" type="float" visibility="public"
+        <entry name="predictedColorGains" type="float"
+               visibility="hidden"
+               optional="true"
                type_notes="A 1D array of floats for 4 color channel gains"
                container="array">
           <array>
@@ -2773,6 +2775,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The best-fit color channel gains calculated
           by the HAL's statistics units for the current output frame
           </description>
+          <range>**Deprecated**. Do not use.</range>
           <details>
           This may be different than the gains used for this frame,
           since statistics processing on data from a new frame
@@ -2786,7 +2789,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           regardless of the android.control.* current values.
           </details>
         </entry>
-        <entry name="predictedColorTransform" type="rational" visibility="public"
+        <entry name="predictedColorTransform" type="rational"
+               visibility="hidden"
+               optional="true"
                type_notes="3x3 rational matrix in row-major order"
                container="array">
           <array>
@@ -2796,6 +2801,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The best-fit color transform matrix estimate
           calculated by the HAL's statistics units for the current
           output frame</description>
+          <range>**Deprecated**. Do not use.</range>
           <details>The HAL must provide the estimate from its
           statistics unit on the white balance transforms to use
           for the next frame. These are the values the HAL believes
