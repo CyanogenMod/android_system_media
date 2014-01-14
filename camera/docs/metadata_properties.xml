@@ -378,22 +378,21 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               <notes>The trigger is idle.</notes>
             </value>
             <value>START
-              <notes>The precapture metering sequence
-              must be started. The exact effect of the precapture
-              trigger depends on the current AE mode and
-              state.</notes>
+              <notes>The precapture metering sequence will be started
+              by the camera device. The exact effect of the precapture
+              trigger depends on the current AE mode and state.</notes>
             </value>
           </enum>
-          <description>Whether the HAL must trigger precapture
-          metering.</description>
+          <description>Whether the camera device will trigger a precapture
+          metering sequence when it processes this request.</description>
           <details>This entry is normally set to IDLE, or is not
           included at all in the request settings. When included and
-          set to START, the HAL must trigger the autoexposure
+          set to START, the camera device will trigger the autoexposure
           precapture metering sequence.
 
           The effect of AE precapture trigger depends on the current
-          AE mode and state; see the camera HAL device v3 header for
-          details.</details>
+          AE mode and state; see android.control.aeState for AE precapture
+          state transition details.</details>
           <tag id="BC" />
         </entry>
         <entry name="afMode" type="byte" visibility="public" enum="true">
@@ -509,22 +508,27 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               <notes>The trigger is idle.</notes>
             </value>
             <value>START
-              <notes>Autofocus must trigger now.</notes>
+              <notes>Autofocus will trigger now.</notes>
             </value>
             <value>CANCEL
-              <notes>Autofocus must return to initial
-              state, and cancel any active trigger.</notes>
+              <notes>Autofocus will return to its initial
+              state, and cancel any currently active trigger.</notes>
             </value>
           </enum>
-          <description>Whether the HAL must trigger autofocus.</description>
+          <description>
+          Whether the camera device will trigger autofocus for this request.
+          </description>
           <details>This entry is normally set to IDLE, or is not
           included at all in the request settings.
 
-          When included and set to START, the HAL must trigger the
-          autofocus algorithm. The effect of AF trigger depends on the
-          current AF mode and state; see the camera HAL device v3
-          header for details. When set to CANCEL, the HAL must cancel
-          any active trigger, and return to initial AF state.</details>
+          When included and set to START, the camera device will trigger the
+          autofocus algorithm. If autofocus is disabled, this trigger has no effect.
+
+          When set to CANCEL, the camera device will cancel any active trigger,
+          and return to its initial AF state.
+
+          See android.control.afState for what that means for each AF mode.
+          </details>
           <tag id="BC" />
         </entry>
         <entry name="awbLock" type="byte" visibility="public" enum="true"
@@ -1009,33 +1013,67 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="aeState" type="byte" visibility="public" enum="true">
           <enum>
             <value>INACTIVE
-            <notes>AE is off.  When a camera device is opened, it starts in
+            <notes>AE is off or recently reset. When a camera device is opened, it starts in
             this state.</notes></value>
             <value>SEARCHING
             <notes>AE doesn't yet have a good set of control values
-            for the current scene</notes></value>
+            for the current scene.</notes></value>
             <value>CONVERGED
             <notes>AE has a good set of control values for the
-            current scene</notes></value>
+            current scene.</notes></value>
             <value>LOCKED
-            <notes>AE has been locked (aeMode =
-            LOCKED)</notes></value>
+            <notes>AE has been locked.</notes></value>
             <value>FLASH_REQUIRED
             <notes>AE has a good set of control values, but flash
             needs to be fired for good quality still
-            capture</notes></value>
+            capture.</notes></value>
             <value>PRECAPTURE
             <notes>AE has been asked to do a precapture sequence
-            (through the
-            trigger_action(CAMERA2_TRIGGER_PRECAPTURE_METERING)
-            call), and is currently executing it. Once PRECAPTURE
+            (through the android.control.aePrecaptureTrigger START),
+            and is currently executing it. Once PRECAPTURE
             completes, AE will transition to CONVERGED or
-            FLASH_REQUIRED as appropriate</notes></value>
+            FLASH_REQUIRED as appropriate.</notes></value>
           </enum>
           <description>Current state of AE algorithm</description>
-          <details>Whenever the AE algorithm state changes, a
-          MSG_AUTOEXPOSURE notification must be send if a
-          notification callback is registered.</details>
+          <details>Switching between or enabling AE modes (android.control.aeMode) always
+          resets the AE state to INACTIVE. Similarly, switching between android.control.mode,
+          or android.control.sceneMode if `android.control.mode == USE_SCENE_MODE` resets all
+          the algorithm states to INACTIVE.
+
+          The camera device can do several state transitions between two results, if it is
+          allowed by the state transition table. For example: INACTIVE may never actually be
+          seen in a result.
+
+          The state in the result is the state for this image (in sync with this image): if
+          AE state becomes CONVERGED, then the image data associated with this result should
+          be good to use.
+
+          Below are state transition tables for different AE modes.
+
+            State       | Transition Cause | New State | Notes
+          :------------:|:----------------:|:---------:|:-----------------------:
+          INACTIVE      |                  | INACTIVE  | Camera device auto exposure algorithm is disabled
+
+          When android.control.aeMode is AE_MODE_ON_*:
+
+            State        | Transition Cause                             | New State      | Notes
+          :-------------:|:--------------------------------------------:|:--------------:|:-----------------:
+          INACTIVE       | Camera device initiates AE scan              | SEARCHING      | Values changing
+          INACTIVE       | android.control.aeLock is ON                 | LOCKED         | Values locked
+          SEARCHING      | Camera device finishes AE scan               | CONVERGED      | Good values, not changing
+          SEARCHING      | Camera device finishes AE scan               | FLASH_REQUIRED | Converged but too dark w/o flash
+          SEARCHING      | android.control.aeLock is ON                 | LOCKED         | Values locked
+          CONVERGED      | Camera device initiates AE scan              | SEARCHING      | Values changing
+          CONVERGED      | android.control.aeLock is ON                 | LOCKED         | Values locked
+          FLASH_REQUIRED | Camera device initiates AE scan              | SEARCHING      | Values changing
+          FLASH_REQUIRED | android.control.aeLock is ON                 | LOCKED         | Values locked
+          LOCKED         | android.control.aeLock is OFF                | SEARCHING      | Values not good after unlock
+          LOCKED         | android.control.aeLock is OFF                | CONVERGED      | Values good after unlock
+          LOCKED         | android.control.aeLock is OFF                | FLASH_REQUIRED | Exposure good, but too dark
+          PRECAPTURE     | Sequence done. android.control.aeLock is OFF | CONVERGED      | Ready for high-quality capture
+          PRECAPTURE     | Sequence done. android.control.aeLock is ON  | LOCKED         | Ready for high-quality capture
+          Any state      | android.control.aePrecaptureTrigger is START | PRECAPTURE     | Start AE precapture metering sequence
+          </details>
         </entry>
         <clone entry="android.control.afMode" kind="controls">
         </clone>
@@ -1073,9 +1111,82 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             scanning at any time.</notes></value>
           </enum>
           <description>Current state of AF algorithm</description>
-          <details>Whenever the AF algorithm state changes, a
-          MSG_AUTOFOCUS notification must be send if a notification
-          callback is registered.</details>
+          <details>
+          Switching between or enabling AF modes (android.control.afMode) always
+          resets the AF state to INACTIVE. Similarly, switching between android.control.mode,
+          or android.control.sceneMode if `android.control.mode == USE_SCENE_MODE` resets all
+          the algorithm states to INACTIVE.
+
+          The camera device can do several state transitions between two results, if it is
+          allowed by the state transition table. For example: INACTIVE may never actually be
+          seen in a result.
+
+          The state in the result is the state for this image (in sync with this image): if
+          AF state becomes FOCUSED, then the image data associated with this result should
+          be sharp.
+
+          Below are state transition tables for different AF modes.
+
+          When android.control.afMode is AF_MODE_OFF or AF_MODE_EDOF:
+
+            State       | Transition Cause | New State | Notes
+          :------------:|:----------------:|:---------:|:-----------:
+          INACTIVE      |                  | INACTIVE  | Never changes
+
+          When android.control.afMode is AF_MODE_AUTO or AF_MODE_MACRO:
+
+            State            | Transition Cause | New State          | Notes
+          :-----------------:|:----------------:|:------------------:|:--------------:
+          INACTIVE           | AF_TRIGGER       | ACTIVE_SCAN        | Start AF sweep, Lens now moving
+          ACTIVE_SCAN        | AF sweep done    | FOCUSED_LOCKED     | Focused, Lens now locked
+          ACTIVE_SCAN        | AF sweep done    | NOT_FOCUSED_LOCKED | Not focused, Lens now locked
+          ACTIVE_SCAN        | AF_CANCEL        | INACTIVE           | Cancel/reset AF, Lens now locked
+          FOCUSED_LOCKED     | AF_CANCEL        | INACTIVE           | Cancel/reset AF
+          FOCUSED_LOCKED     | AF_TRIGGER       | ACTIVE_SCAN        | Start new sweep, Lens now moving
+          NOT_FOCUSED_LOCKED | AF_CANCEL        | INACTIVE           | Cancel/reset AF
+          NOT_FOCUSED_LOCKED | AF_TRIGGER       | ACTIVE_SCAN        | Start new sweep, Lens now moving
+          Any state          | Mode change      | INACTIVE           |
+
+          When android.control.afMode is AF_MODE_CONTINUOUS_VIDEO:
+
+            State            | Transition Cause                    | New State          | Notes
+          :-----------------:|:-----------------------------------:|:------------------:|:--------------:
+          INACTIVE           | Camera device initiates new scan    | PASSIVE_SCAN       | Start AF scan, Lens now moving
+          INACTIVE           | AF_TRIGGER                          | NOT_FOCUSED_LOCKED | AF state query, Lens now locked
+          PASSIVE_SCAN       | Camera device completes current scan| PASSIVE_FOCUSED    | End AF scan, Lens now locked
+          PASSIVE_SCAN       | Camera device fails current scan    | PASSIVE_UNFOCUSED  | End AF scan, Lens now locked
+          PASSIVE_SCAN       | AF_TRIGGER                          | FOCUSED_LOCKED     | Immediate trans. If focus is good, Lens now locked
+          PASSIVE_SCAN       | AF_TRIGGER                          | NOT_FOCUSED_LOCKED | Immediate trans. if focus is bad, Lens now locked
+          PASSIVE_SCAN       | AF_CANCEL                           | INACTIVE           | Reset lens position, Lens now locked
+          PASSIVE_FOCUSED    | Camera device initiates new scan    | PASSIVE_SCAN       | Start AF scan, Lens now moving
+          PASSIVE_UNFOCUSED  | Camera device initiates new scan    | PASSIVE_SCAN       | Start AF scan, Lens now moving
+          PASSIVE_FOCUSED    | AF_TRIGGER                          | FOCUSED_LOCKED     | Immediate trans. Lens now locked
+          PASSIVE_UNFOCUSED  | AF_TRIGGER                          | NOT_FOCUSED_LOCKED | Immediate trans. Lens now locked
+          FOCUSED_LOCKED     | AF_TRIGGER                          | FOCUSED_LOCKED     | No effect
+          FOCUSED_LOCKED     | AF_CANCEL                           | INACTIVE           | Restart AF scan
+          NOT_FOCUSED_LOCKED | AF_TRIGGER                          | NOT_FOCUSED_LOCKED | No effect
+          NOT_FOCUSED_LOCKED | AF_CANCEL                           | INACTIVE           | Restart AF scan
+
+          When android.control.afMode is AF_MODE_CONTINUOUS_PICTURE:
+
+            State            | Transition Cause                     | New State          | Notes
+          :-----------------:|:------------------------------------:|:------------------:|:--------------:
+          INACTIVE           | Camera device initiates new scan     | PASSIVE_SCAN       | Start AF scan, Lens now moving
+          INACTIVE           | AF_TRIGGER                           | NOT_FOCUSED_LOCKED | AF state query, Lens now locked
+          PASSIVE_SCAN       | Camera device completes current scan | PASSIVE_FOCUSED    | End AF scan, Lens now locked
+          PASSIVE_SCAN       | Camera device fails current scan     | PASSIVE_UNFOCUSED  | End AF scan, Lens now locked
+          PASSIVE_SCAN       | AF_TRIGGER                           | FOCUSED_LOCKED     | Eventual trans. once focus good, Lens now locked
+          PASSIVE_SCAN       | AF_TRIGGER                           | NOT_FOCUSED_LOCKED | Eventual trans. if cannot focus, Lens now locked
+          PASSIVE_SCAN       | AF_CANCEL                            | INACTIVE           | Reset lens position, Lens now locked
+          PASSIVE_FOCUSED    | Camera device initiates new scan     | PASSIVE_SCAN       | Start AF scan, Lens now moving
+          PASSIVE_UNFOCUSED  | Camera device initiates new scan     | PASSIVE_SCAN       | Start AF scan, Lens now moving
+          PASSIVE_FOCUSED    | AF_TRIGGER                           | FOCUSED_LOCKED     | Immediate trans. Lens now locked
+          PASSIVE_UNFOCUSED  | AF_TRIGGER                           | NOT_FOCUSED_LOCKED | Immediate trans. Lens now locked
+          FOCUSED_LOCKED     | AF_TRIGGER                           | FOCUSED_LOCKED     | No effect
+          FOCUSED_LOCKED     | AF_CANCEL                            | INACTIVE           | Restart AF scan
+          NOT_FOCUSED_LOCKED | AF_TRIGGER                           | NOT_FOCUSED_LOCKED | No effect
+          NOT_FOCUSED_LOCKED | AF_CANCEL                            | INACTIVE           | Restart AF scan
+          </details>
         </entry>
         <entry name="afTriggerId" type="int32" visibility="hidden">
           <description>The ID sent with the latest
@@ -1095,18 +1206,49 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             starts in this state.</notes></value>
             <value>SEARCHING
             <notes>AWB doesn't yet have a good set of control
-            values for the current scene</notes></value>
+            values for the current scene.</notes></value>
             <value>CONVERGED
             <notes>AWB has a good set of control values for the
-            current scene</notes></value>
+            current scene.</notes></value>
             <value>LOCKED
-            <notes>AE has been locked (aeMode =
-            LOCKED)</notes></value>
+            <notes>AWB has been locked.
+            </notes></value>
           </enum>
           <description>Current state of AWB algorithm</description>
-          <details>Whenever the AWB algorithm state changes, a
-          MSG_AUTOWHITEBALANCE notification must be send if a
-          notification callback is registered.</details>
+          <details>Switching between or enabling AWB modes (android.control.awbMode) always
+          resets the AWB state to INACTIVE. Similarly, switching between android.control.mode,
+          or android.control.sceneMode if `android.control.mode == USE_SCENE_MODE` resets all
+          the algorithm states to INACTIVE.
+
+          The camera device can do several state transitions between two results, if it is
+          allowed by the state transition table. So INACTIVE may never actually be seen in
+          a result.
+
+          The state in the result is the state for this image (in sync with this image): if
+          AWB state becomes CONVERGED, then the image data associated with this result should
+          be good to use.
+
+          Below are state transition tables for different AWB modes.
+
+          When `android.control.awbMode != AWB_MODE_AUTO`:
+
+            State       | Transition Cause | New State | Notes
+          :------------:|:----------------:|:---------:|:-----------------------:
+          INACTIVE      |                  |INACTIVE   |Camera device auto white balance algorithm is disabled
+
+          When android.control.awbMode is AWB_MODE_AUTO:
+
+            State        | Transition Cause                 | New State     | Notes
+          :-------------:|:--------------------------------:|:-------------:|:-----------------:
+          INACTIVE       | Camera device initiates AWB scan | SEARCHING     | Values changing
+          INACTIVE       | android.control.awbLock is ON    | LOCKED        | Values locked
+          SEARCHING      | Camera device finishes AWB scan  | CONVERGED     | Good values, not changing
+          SEARCHING      | android.control.awbLock is ON    | LOCKED        | Values locked
+          CONVERGED      | Camera device initiates AWB scan | SEARCHING     | Values changing
+          CONVERGED      | android.control.awbLock is ON    | LOCKED        | Values locked
+          LOCKED         | android.control.awbLock is OFF   | SEARCHING     | Values not good after unlock
+          LOCKED         | android.control.awbLock is OFF   | CONVERGED     | Values good after unlock
+          </details>
         </entry>
         <clone entry="android.control.mode" kind="controls">
         </clone>

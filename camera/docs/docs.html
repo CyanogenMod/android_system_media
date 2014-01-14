@@ -1499,18 +1499,17 @@ of <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>ex
                   </li>
                   <li>
                     <span class="entry_type_enum_name">START</span>
-                    <span class="entry_type_enum_notes"><p>The precapture metering sequence
-must be started.<wbr/> The exact effect of the precapture
-trigger depends on the current AE mode and
-state.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>The precapture metering sequence will be started
+by the camera device.<wbr/> The exact effect of the precapture
+trigger depends on the current AE mode and state.<wbr/></p></span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether the HAL must trigger precapture
-metering.<wbr/></p>
+              <p>Whether the camera device will trigger a precapture
+metering sequence when it processes this request.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -1533,11 +1532,11 @@ metering.<wbr/></p>
             <td class="entry_details" colspan="5">
               <p>This entry is normally set to IDLE,<wbr/> or is not
 included at all in the request settings.<wbr/> When included and
-set to START,<wbr/> the HAL must trigger the autoexposure
+set to START,<wbr/> the camera device will trigger the autoexposure
 precapture metering sequence.<wbr/></p>
 <p>The effect of AE precapture trigger depends on the current
-AE mode and state; see the camera HAL device v3 header for
-details.<wbr/></p>
+AE mode and state; see <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> for AE precapture
+state transition details.<wbr/></p>
             </td>
           </tr>
 
@@ -1745,19 +1744,19 @@ used sections in the frame metadata</p>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">START</span>
-                    <span class="entry_type_enum_notes"><p>Autofocus must trigger now.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>Autofocus will trigger now.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CANCEL</span>
-                    <span class="entry_type_enum_notes"><p>Autofocus must return to initial
-state,<wbr/> and cancel any active trigger.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>Autofocus will return to its initial
+state,<wbr/> and cancel any currently active trigger.<wbr/></p></span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether the HAL must trigger autofocus.<wbr/></p>
+              <p>Whether the camera device will trigger autofocus for this request.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -1780,11 +1779,11 @@ state,<wbr/> and cancel any active trigger.<wbr/></p></span>
             <td class="entry_details" colspan="5">
               <p>This entry is normally set to IDLE,<wbr/> or is not
 included at all in the request settings.<wbr/></p>
-<p>When included and set to START,<wbr/> the HAL must trigger the
-autofocus algorithm.<wbr/> The effect of AF trigger depends on the
-current AF mode and state; see the camera HAL device v3
-header for details.<wbr/> When set to CANCEL,<wbr/> the HAL must cancel
-any active trigger,<wbr/> and return to initial AF state.<wbr/></p>
+<p>When included and set to START,<wbr/> the camera device will trigger the
+autofocus algorithm.<wbr/> If autofocus is disabled,<wbr/> this trigger has no effect.<wbr/></p>
+<p>When set to CANCEL,<wbr/> the camera device will cancel any active trigger,<wbr/>
+and return to its initial AF state.<wbr/></p>
+<p>See <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a> for what that means for each AF mode.<wbr/></p>
             </td>
           </tr>
 
@@ -3293,38 +3292,36 @@ used sections in the frame metadata</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">INACTIVE</span>
-                    <span class="entry_type_enum_notes"><p>AE is off.<wbr/>  When a camera device is opened,<wbr/> it starts in
+                    <span class="entry_type_enum_notes"><p>AE is off or recently reset.<wbr/> When a camera device is opened,<wbr/> it starts in
 this state.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SEARCHING</span>
                     <span class="entry_type_enum_notes"><p>AE doesn't yet have a good set of control values
-for the current scene</p></span>
+for the current scene.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CONVERGED</span>
                     <span class="entry_type_enum_notes"><p>AE has a good set of control values for the
-current scene</p></span>
+current scene.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">LOCKED</span>
-                    <span class="entry_type_enum_notes"><p>AE has been locked (aeMode =
-LOCKED)</p></span>
+                    <span class="entry_type_enum_notes"><p>AE has been locked.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FLASH_REQUIRED</span>
                     <span class="entry_type_enum_notes"><p>AE has a good set of control values,<wbr/> but flash
 needs to be fired for good quality still
-capture</p></span>
+capture.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PRECAPTURE</span>
                     <span class="entry_type_enum_notes"><p>AE has been asked to do a precapture sequence
-(through the
-trigger_<wbr/>action(CAMERA2_<wbr/>TRIGGER_<wbr/>PRECAPTURE_<wbr/>METERING)
-call),<wbr/> and is currently executing it.<wbr/> Once PRECAPTURE
+(through the <a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a> START),<wbr/>
+and is currently executing it.<wbr/> Once PRECAPTURE
 completes,<wbr/> AE will transition to CONVERGED or
-FLASH_<wbr/>REQUIRED as appropriate</p></span>
+FLASH_<wbr/>REQUIRED as appropriate.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -3349,9 +3346,138 @@ FLASH_<wbr/>REQUIRED as appropriate</p></span>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Whenever the AE algorithm state changes,<wbr/> a
-MSG_<wbr/>AUTOEXPOSURE notification must be send if a
-notification callback is registered.<wbr/></p>
+              <p>Switching between or enabling AE modes (<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>) always
+resets the AE state to INACTIVE.<wbr/> Similarly,<wbr/> switching between <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a>,<wbr/>
+or <a href="#controls_android.control.sceneMode">android.<wbr/>control.<wbr/>scene<wbr/>Mode</a> if <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == USE_<wbr/>SCENE_<wbr/>MODE</code> resets all
+the algorithm states to INACTIVE.<wbr/></p>
+<p>The camera device can do several state transitions between two results,<wbr/> if it is
+allowed by the state transition table.<wbr/> For example: INACTIVE may never actually be
+seen in a result.<wbr/></p>
+<p>The state in the result is the state for this image (in sync with this image): if
+AE state becomes CONVERGED,<wbr/> then the image data associated with this result should
+be good to use.<wbr/></p>
+<p>Below are state transition tables for different AE modes.<wbr/></p>
+<table>
+<thead>
+<tr>
+<th align="center">State</th>
+<th align="center">Transition Cause</th>
+<th align="center">New State</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center"></td>
+<td align="center">INACTIVE</td>
+<td align="center">Camera device auto exposure algorithm is disabled</td>
+</tr>
+</tbody>
+</table>
+<p>When <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is AE_<wbr/>MODE_<wbr/>ON_<wbr/>*:</p>
+<table>
+<thead>
+<tr>
+<th align="center">State</th>
+<th align="center">Transition Cause</th>
+<th align="center">New State</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center">Camera device initiates AE scan</td>
+<td align="center">SEARCHING</td>
+<td align="center">Values changing</td>
+</tr>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center"><a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> is ON</td>
+<td align="center">LOCKED</td>
+<td align="center">Values locked</td>
+</tr>
+<tr>
+<td align="center">SEARCHING</td>
+<td align="center">Camera device finishes AE scan</td>
+<td align="center">CONVERGED</td>
+<td align="center">Good values,<wbr/> not changing</td>
+</tr>
+<tr>
+<td align="center">SEARCHING</td>
+<td align="center">Camera device finishes AE scan</td>
+<td align="center">FLASH_<wbr/>REQUIRED</td>
+<td align="center">Converged but too dark w/<wbr/>o flash</td>
+</tr>
+<tr>
+<td align="center">SEARCHING</td>
+<td align="center"><a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> is ON</td>
+<td align="center">LOCKED</td>
+<td align="center">Values locked</td>
+</tr>
+<tr>
+<td align="center">CONVERGED</td>
+<td align="center">Camera device initiates AE scan</td>
+<td align="center">SEARCHING</td>
+<td align="center">Values changing</td>
+</tr>
+<tr>
+<td align="center">CONVERGED</td>
+<td align="center"><a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> is ON</td>
+<td align="center">LOCKED</td>
+<td align="center">Values locked</td>
+</tr>
+<tr>
+<td align="center">FLASH_<wbr/>REQUIRED</td>
+<td align="center">Camera device initiates AE scan</td>
+<td align="center">SEARCHING</td>
+<td align="center">Values changing</td>
+</tr>
+<tr>
+<td align="center">FLASH_<wbr/>REQUIRED</td>
+<td align="center"><a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> is ON</td>
+<td align="center">LOCKED</td>
+<td align="center">Values locked</td>
+</tr>
+<tr>
+<td align="center">LOCKED</td>
+<td align="center"><a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> is OFF</td>
+<td align="center">SEARCHING</td>
+<td align="center">Values not good after unlock</td>
+</tr>
+<tr>
+<td align="center">LOCKED</td>
+<td align="center"><a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> is OFF</td>
+<td align="center">CONVERGED</td>
+<td align="center">Values good after unlock</td>
+</tr>
+<tr>
+<td align="center">LOCKED</td>
+<td align="center"><a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> is OFF</td>
+<td align="center">FLASH_<wbr/>REQUIRED</td>
+<td align="center">Exposure good,<wbr/> but too dark</td>
+</tr>
+<tr>
+<td align="center">PRECAPTURE</td>
+<td align="center">Sequence done.<wbr/> <a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> is OFF</td>
+<td align="center">CONVERGED</td>
+<td align="center">Ready for high-quality capture</td>
+</tr>
+<tr>
+<td align="center">PRECAPTURE</td>
+<td align="center">Sequence done.<wbr/> <a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> is ON</td>
+<td align="center">LOCKED</td>
+<td align="center">Ready for high-quality capture</td>
+</tr>
+<tr>
+<td align="center">Any state</td>
+<td align="center"><a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a> is START</td>
+<td align="center">PRECAPTURE</td>
+<td align="center">Start AE precapture metering sequence</td>
+</tr>
+</tbody>
+</table>
             </td>
           </tr>
 
@@ -3618,9 +3744,309 @@ scanning at any time.<wbr/></p></span>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Whenever the AF algorithm state changes,<wbr/> a
-MSG_<wbr/>AUTOFOCUS notification must be send if a notification
-callback is registered.<wbr/></p>
+              <p>Switching between or enabling AF modes (<a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>) always
+resets the AF state to INACTIVE.<wbr/> Similarly,<wbr/> switching between <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a>,<wbr/>
+or <a href="#controls_android.control.sceneMode">android.<wbr/>control.<wbr/>scene<wbr/>Mode</a> if <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == USE_<wbr/>SCENE_<wbr/>MODE</code> resets all
+the algorithm states to INACTIVE.<wbr/></p>
+<p>The camera device can do several state transitions between two results,<wbr/> if it is
+allowed by the state transition table.<wbr/> For example: INACTIVE may never actually be
+seen in a result.<wbr/></p>
+<p>The state in the result is the state for this image (in sync with this image): if
+AF state becomes FOCUSED,<wbr/> then the image data associated with this result should
+be sharp.<wbr/></p>
+<p>Below are state transition tables for different AF modes.<wbr/></p>
+<p>When <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> is AF_<wbr/>MODE_<wbr/>OFF or AF_<wbr/>MODE_<wbr/>EDOF:</p>
+<table>
+<thead>
+<tr>
+<th align="center">State</th>
+<th align="center">Transition Cause</th>
+<th align="center">New State</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center"></td>
+<td align="center">INACTIVE</td>
+<td align="center">Never changes</td>
+</tr>
+</tbody>
+</table>
+<p>When <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> is AF_<wbr/>MODE_<wbr/>AUTO or AF_<wbr/>MODE_<wbr/>MACRO:</p>
+<table>
+<thead>
+<tr>
+<th align="center">State</th>
+<th align="center">Transition Cause</th>
+<th align="center">New State</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">ACTIVE_<wbr/>SCAN</td>
+<td align="center">Start AF sweep,<wbr/> Lens now moving</td>
+</tr>
+<tr>
+<td align="center">ACTIVE_<wbr/>SCAN</td>
+<td align="center">AF sweep done</td>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Focused,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">ACTIVE_<wbr/>SCAN</td>
+<td align="center">AF sweep done</td>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Not focused,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">ACTIVE_<wbr/>SCAN</td>
+<td align="center">AF_<wbr/>CANCEL</td>
+<td align="center">INACTIVE</td>
+<td align="center">Cancel/<wbr/>reset AF,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>CANCEL</td>
+<td align="center">INACTIVE</td>
+<td align="center">Cancel/<wbr/>reset AF</td>
+</tr>
+<tr>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">ACTIVE_<wbr/>SCAN</td>
+<td align="center">Start new sweep,<wbr/> Lens now moving</td>
+</tr>
+<tr>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>CANCEL</td>
+<td align="center">INACTIVE</td>
+<td align="center">Cancel/<wbr/>reset AF</td>
+</tr>
+<tr>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">ACTIVE_<wbr/>SCAN</td>
+<td align="center">Start new sweep,<wbr/> Lens now moving</td>
+</tr>
+<tr>
+<td align="center">Any state</td>
+<td align="center">Mode change</td>
+<td align="center">INACTIVE</td>
+<td align="center"></td>
+</tr>
+</tbody>
+</table>
+<p>When <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> is AF_<wbr/>MODE_<wbr/>CONTINUOUS_<wbr/>VIDEO:</p>
+<table>
+<thead>
+<tr>
+<th align="center">State</th>
+<th align="center">Transition Cause</th>
+<th align="center">New State</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center">Camera device initiates new scan</td>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">Start AF scan,<wbr/> Lens now moving</td>
+</tr>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF state query,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">Camera device completes current scan</td>
+<td align="center">PASSIVE_<wbr/>FOCUSED</td>
+<td align="center">End AF scan,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">Camera device fails current scan</td>
+<td align="center">PASSIVE_<wbr/>UNFOCUSED</td>
+<td align="center">End AF scan,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Immediate trans.<wbr/> If focus is good,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Immediate trans.<wbr/> if focus is bad,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">AF_<wbr/>CANCEL</td>
+<td align="center">INACTIVE</td>
+<td align="center">Reset lens position,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>FOCUSED</td>
+<td align="center">Camera device initiates new scan</td>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">Start AF scan,<wbr/> Lens now moving</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>UNFOCUSED</td>
+<td align="center">Camera device initiates new scan</td>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">Start AF scan,<wbr/> Lens now moving</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>FOCUSED</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Immediate trans.<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>UNFOCUSED</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Immediate trans.<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">No effect</td>
+</tr>
+<tr>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>CANCEL</td>
+<td align="center">INACTIVE</td>
+<td align="center">Restart AF scan</td>
+</tr>
+<tr>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">No effect</td>
+</tr>
+<tr>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>CANCEL</td>
+<td align="center">INACTIVE</td>
+<td align="center">Restart AF scan</td>
+</tr>
+</tbody>
+</table>
+<p>When <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> is AF_<wbr/>MODE_<wbr/>CONTINUOUS_<wbr/>PICTURE:</p>
+<table>
+<thead>
+<tr>
+<th align="center">State</th>
+<th align="center">Transition Cause</th>
+<th align="center">New State</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center">Camera device initiates new scan</td>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">Start AF scan,<wbr/> Lens now moving</td>
+</tr>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF state query,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">Camera device completes current scan</td>
+<td align="center">PASSIVE_<wbr/>FOCUSED</td>
+<td align="center">End AF scan,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">Camera device fails current scan</td>
+<td align="center">PASSIVE_<wbr/>UNFOCUSED</td>
+<td align="center">End AF scan,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Eventual trans.<wbr/> once focus good,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Eventual trans.<wbr/> if cannot focus,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">AF_<wbr/>CANCEL</td>
+<td align="center">INACTIVE</td>
+<td align="center">Reset lens position,<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>FOCUSED</td>
+<td align="center">Camera device initiates new scan</td>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">Start AF scan,<wbr/> Lens now moving</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>UNFOCUSED</td>
+<td align="center">Camera device initiates new scan</td>
+<td align="center">PASSIVE_<wbr/>SCAN</td>
+<td align="center">Start AF scan,<wbr/> Lens now moving</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>FOCUSED</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Immediate trans.<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">PASSIVE_<wbr/>UNFOCUSED</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Immediate trans.<wbr/> Lens now locked</td>
+</tr>
+<tr>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">No effect</td>
+</tr>
+<tr>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>CANCEL</td>
+<td align="center">INACTIVE</td>
+<td align="center">Restart AF scan</td>
+</tr>
+<tr>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">No effect</td>
+</tr>
+<tr>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>CANCEL</td>
+<td align="center">INACTIVE</td>
+<td align="center">Restart AF scan</td>
+</tr>
+</tbody>
+</table>
             </td>
           </tr>
 
@@ -3876,17 +4302,16 @@ starts in this state.<wbr/></p></span>
                   <li>
                     <span class="entry_type_enum_name">SEARCHING</span>
                     <span class="entry_type_enum_notes"><p>AWB doesn't yet have a good set of control
-values for the current scene</p></span>
+values for the current scene.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CONVERGED</span>
                     <span class="entry_type_enum_notes"><p>AWB has a good set of control values for the
-current scene</p></span>
+current scene.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">LOCKED</span>
-                    <span class="entry_type_enum_notes"><p>AE has been locked (aeMode =
-LOCKED)</p></span>
+                    <span class="entry_type_enum_notes"><p>AWB has been locked.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -3911,9 +4336,97 @@ LOCKED)</p></span>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Whenever the AWB algorithm state changes,<wbr/> a
-MSG_<wbr/>AUTOWHITEBALANCE notification must be send if a
-notification callback is registered.<wbr/></p>
+              <p>Switching between or enabling AWB modes (<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>) always
+resets the AWB state to INACTIVE.<wbr/> Similarly,<wbr/> switching between <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a>,<wbr/>
+or <a href="#controls_android.control.sceneMode">android.<wbr/>control.<wbr/>scene<wbr/>Mode</a> if <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == USE_<wbr/>SCENE_<wbr/>MODE</code> resets all
+the algorithm states to INACTIVE.<wbr/></p>
+<p>The camera device can do several state transitions between two results,<wbr/> if it is
+allowed by the state transition table.<wbr/> So INACTIVE may never actually be seen in
+a result.<wbr/></p>
+<p>The state in the result is the state for this image (in sync with this image): if
+AWB state becomes CONVERGED,<wbr/> then the image data associated with this result should
+be good to use.<wbr/></p>
+<p>Below are state transition tables for different AWB modes.<wbr/></p>
+<p>When <code><a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> != AWB_<wbr/>MODE_<wbr/>AUTO</code>:</p>
+<table>
+<thead>
+<tr>
+<th align="center">State</th>
+<th align="center">Transition Cause</th>
+<th align="center">New State</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center"></td>
+<td align="center">INACTIVE</td>
+<td align="center">Camera device auto white balance algorithm is disabled</td>
+</tr>
+</tbody>
+</table>
+<p>When <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> is AWB_<wbr/>MODE_<wbr/>AUTO:</p>
+<table>
+<thead>
+<tr>
+<th align="center">State</th>
+<th align="center">Transition Cause</th>
+<th align="center">New State</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center">Camera device initiates AWB scan</td>
+<td align="center">SEARCHING</td>
+<td align="center">Values changing</td>
+</tr>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center"><a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a> is ON</td>
+<td align="center">LOCKED</td>
+<td align="center">Values locked</td>
+</tr>
+<tr>
+<td align="center">SEARCHING</td>
+<td align="center">Camera device finishes AWB scan</td>
+<td align="center">CONVERGED</td>
+<td align="center">Good values,<wbr/> not changing</td>
+</tr>
+<tr>
+<td align="center">SEARCHING</td>
+<td align="center"><a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a> is ON</td>
+<td align="center">LOCKED</td>
+<td align="center">Values locked</td>
+</tr>
+<tr>
+<td align="center">CONVERGED</td>
+<td align="center">Camera device initiates AWB scan</td>
+<td align="center">SEARCHING</td>
+<td align="center">Values changing</td>
+</tr>
+<tr>
+<td align="center">CONVERGED</td>
+<td align="center"><a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a> is ON</td>
+<td align="center">LOCKED</td>
+<td align="center">Values locked</td>
+</tr>
+<tr>
+<td align="center">LOCKED</td>
+<td align="center"><a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a> is OFF</td>
+<td align="center">SEARCHING</td>
+<td align="center">Values not good after unlock</td>
+</tr>
+<tr>
+<td align="center">LOCKED</td>
+<td align="center"><a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a> is OFF</td>
+<td align="center">CONVERGED</td>
+<td align="center">Values good after unlock</td>
+</tr>
+</tbody>
+</table>
             </td>
           </tr>
 
