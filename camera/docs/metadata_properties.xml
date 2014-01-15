@@ -1047,33 +1047,45 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>3</size>
             <size>length(availableSceneModes)</size>
           </array>
-          <description>List of AE, AWB, and AF modes to use for
-          each available scene mode</description>
-          <range>For each listed scene mode, lists the aeMode,
-          awbMode, and afMode that the HAL wants to use for that
-          scene mode.
+          <description>
+          Ordered list of auto-exposure, auto-white balance, and auto-focus
+          settings to use with each available scene mode.
+          </description>
+          <range>
+          For each available scene mode, the list must contain three
+          entries containing the android.control.aeMode,
+          android.control.awbMode, and android.control.afMode values used
+          by the camera device. The entry order is `(aeMode, awbMode, afMode)`
+          where aeMode has the lowest index position.
+          </range>
+          <details>
+          When a scene mode is enabled, the camera device is expected
+          to override android.control.aeMode, android.control.awbMode,
+          and android.control.afMode with its preferred settings for
+          that scene mode.
 
-          For each entry, the order is {aeMode, awbMode, afMode} in
-          order of increasing index</range>
-          <details>When a scene mode is enabled, the HAL is expected
-          to override aeMode, awbMode, and afMode with its
-          preferred settings for that scene mode.
-
-          To simplify communication with old camera API applications,
-          the service wants this override list in the static metadata.
           The order of this list matches that of availableSceneModes,
-          with 3 entires for each scene mode.  The overrides listed
-          for SCENE_MODE_FACE_PRIORITY are ignored, since for that
-          mode, the application-set aeMode, awbMode, and afMode are
-          used instead, like they are when android.control.mode is
-          AUTO.
+          with 3 entries for each mode.  The overrides listed
+          for FACE_PRIORITY are ignored, since for that
+          mode the application-set android.control.aeMode,
+          android.control.awbMode, and android.control.afMode values are
+          used instead, matching the behavior when android.control.mode
+          is set to AUTO. It is recommended that the FACE_PRIORITY
+          overrides should be set to 0.
 
-          It is recommended that for FACE_PRIORITY, the overrides
-          should be set to 0. As an example, if availableSceneModes is
-          { FACE_PRIORITY, ACTION, NIGHT }, then the service expects
-          this field to have 9 entries; for example { 0 , 0, 0,
-          ON_AUTO_FLASH, AUTO, CONTINUOUS_PICTURE, ON_AUTO_FLASH,
-          INCANDESCENT, AUTO }</details>
+          For example, if availableSceneModes contains
+          `(FACE_PRIORITY, ACTION, NIGHT)`,  then the camera framework
+          expects sceneModeOverrides to have 9 entries formatted like:
+          `(0, 0, 0, ON_AUTO_FLASH, AUTO, CONTINUOUS_PICTURE,
+          ON_AUTO_FLASH, INCANDESCENT, AUTO)`.
+          </details>
+          <hal_details>
+          To maintain backward compatibility, this list will be made available
+          in the static metadata of the camera service.  The camera service will
+          use these values to set android.control.aeMode,
+          android.control.awbMode, and android.control.afMode when using a scene
+          mode other than FACE_PRIORITY.
+          </hal_details>
           <tag id="BC" />
         </entry>
       </static>

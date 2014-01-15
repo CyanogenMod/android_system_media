@@ -3023,7 +3023,7 @@ regions can be listed for metering?</p>
         
                 
           <tr class="entry" id="static_android.control.sceneModeOverrides">
-            <td class="entry_name" rowspan="3">
+            <td class="entry_name" rowspan="5">
               android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides
             </td>
             <td class="entry_type">
@@ -3039,19 +3039,19 @@ regions can be listed for metering?</p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>List of AE,<wbr/> AWB,<wbr/> and AF modes to use for
-each available scene mode</p>
+              <p>Ordered list of auto-exposure,<wbr/> auto-white balance,<wbr/> and auto-focus
+settings to use with each available scene mode.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>For each listed scene mode,<wbr/> lists the aeMode,<wbr/>
-awbMode,<wbr/> and afMode that the HAL wants to use for that
-scene mode.<wbr/></p>
-<p>For each entry,<wbr/> the order is {aeMode,<wbr/> awbMode,<wbr/> afMode} in
-order of increasing index</p>
+              <p>For each available scene mode,<wbr/> the list must contain three
+entries containing the <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> values used
+by the camera device.<wbr/> The entry order is <code>(aeMode,<wbr/> awbMode,<wbr/> afMode)</code>
+where aeMode has the lowest index position.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -3066,26 +3066,38 @@ order of increasing index</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>When a scene mode is enabled,<wbr/> the HAL is expected
-to override aeMode,<wbr/> awbMode,<wbr/> and afMode with its
-preferred settings for that scene mode.<wbr/></p>
-<p>To simplify communication with old camera API applications,<wbr/>
-the service wants this override list in the static metadata.<wbr/>
-The order of this list matches that of availableSceneModes,<wbr/>
-with 3 entires for each scene mode.<wbr/>  The overrides listed
-for SCENE_<wbr/>MODE_<wbr/>FACE_<wbr/>PRIORITY are ignored,<wbr/> since for that
-mode,<wbr/> the application-set aeMode,<wbr/> awbMode,<wbr/> and afMode are
-used instead,<wbr/> like they are when <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> is
-AUTO.<wbr/></p>
-<p>It is recommended that for FACE_<wbr/>PRIORITY,<wbr/> the overrides
-should be set to 0.<wbr/> As an example,<wbr/> if availableSceneModes is
-{ FACE_<wbr/>PRIORITY,<wbr/> ACTION,<wbr/> NIGHT },<wbr/> then the service expects
-this field to have 9 entries; for example { 0 ,<wbr/> 0,<wbr/> 0,<wbr/>
-ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/> AUTO,<wbr/> CONTINUOUS_<wbr/>PICTURE,<wbr/> ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/>
-INCANDESCENT,<wbr/> AUTO }</p>
+              <p>When a scene mode is enabled,<wbr/> the camera device is expected
+to override <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/> <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/>
+and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> with its preferred settings for
+that scene mode.<wbr/></p>
+<p>The order of this list matches that of availableSceneModes,<wbr/>
+with 3 entries for each mode.<wbr/>  The overrides listed
+for FACE_<wbr/>PRIORITY are ignored,<wbr/> since for that
+mode the application-set <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> values are
+used instead,<wbr/> matching the behavior when android.<wbr/>control.<wbr/>mode
+is set to AUTO.<wbr/> It is recommended that the FACE_<wbr/>PRIORITY
+overrides should be set to 0.<wbr/></p>
+<p>For example,<wbr/> if availableSceneModes contains
+<code>(FACE_<wbr/>PRIORITY,<wbr/> ACTION,<wbr/> NIGHT)</code>,<wbr/>  then the camera framework
+expects sceneModeOverrides to have 9 entries formatted like:
+<code>(0,<wbr/> 0,<wbr/> 0,<wbr/> ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/> AUTO,<wbr/> CONTINUOUS_<wbr/>PICTURE,<wbr/>
+ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/> INCANDESCENT,<wbr/> AUTO)</code>.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>To maintain backward compatibility,<wbr/> this list will be made available
+in the static metadata of the camera service.<wbr/>  The camera service will
+use these values to set <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> when using a scene
+mode other than FACE_<wbr/>PRIORITY.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
