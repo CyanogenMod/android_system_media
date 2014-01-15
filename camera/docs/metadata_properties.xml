@@ -469,6 +469,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether AF is currently enabled, and what
           mode it is set to</description>
+          <range>android.control.afAvailableModes</range>
           <details>Only effective if android.control.mode = AUTO.
 
           If the lens is controlled by the camera device auto-focus algorithm,
@@ -547,22 +548,101 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="awbMode" type="byte" visibility="public" enum="true">
           <enum>
-            <value>OFF</value>
-            <value>AUTO</value>
-            <value>INCANDESCENT</value>
-            <value>FLUORESCENT</value>
-            <value>WARM_FLUORESCENT</value>
-            <value>DAYLIGHT</value>
-            <value>CLOUDY_DAYLIGHT</value>
-            <value>TWILIGHT</value>
-            <value>SHADE</value>
+            <value>OFF
+            <notes>
+            The camera device's auto white balance routine is disabled;
+            the application-selected color transform matrix
+            (android.colorCorrection.transform) and gains
+            (android.colorCorrection.gains) are used by the camera
+            device for manual white balance control.
+            </notes>
+            </value>
+            <value>AUTO
+            <notes>
+            The camera device's auto white balance routine is active;
+            the application's values for android.colorCorrection.transform
+            and android.colorCorrection.gains are ignored.
+            </notes>
+            </value>
+            <value>INCANDESCENT
+            <notes>
+            The camera device's auto white balance routine is disabled;
+            the camera device uses incandescent light as the assumed scene
+            illumination for white balance. While the exact white balance
+            transforms are up to the camera device, they will approximately
+            match the CIE standard illuminant A.
+            </notes>
+            </value>
+            <value>FLUORESCENT
+            <notes>
+            The camera device's auto white balance routine is disabled;
+            the camera device uses fluorescent light as the assumed scene
+            illumination for white balance. While the exact white balance
+            transforms are up to the camera device, they will approximately
+            match the CIE standard illuminant F2.
+            </notes>
+            </value>
+            <value>WARM_FLUORESCENT
+            <notes>
+            The camera device's auto white balance routine is disabled;
+            the camera device uses warm fluorescent light as the assumed scene
+            illumination for white balance. While the exact white balance
+            transforms are up to the camera device, they will approximately
+            match the CIE standard illuminant F4.
+            </notes>
+            </value>
+            <value>DAYLIGHT
+            <notes>
+            The camera device's auto white balance routine is disabled;
+            the camera device uses daylight light as the assumed scene
+            illumination for white balance. While the exact white balance
+            transforms are up to the camera device, they will approximately
+            match the CIE standard illuminant D65.
+            </notes>
+            </value>
+            <value>CLOUDY_DAYLIGHT
+            <notes>
+            The camera device's auto white balance routine is disabled;
+            the camera device uses cloudy daylight light as the assumed scene
+            illumination for white balance.
+            </notes>
+            </value>
+            <value>TWILIGHT
+            <notes>
+            The camera device's auto white balance routine is disabled;
+            the camera device uses twilight light as the assumed scene
+            illumination for white balance.
+            </notes>
+            </value>
+            <value>SHADE
+            <notes>
+            The camera device's auto white balance routine is disabled;
+            the camera device uses shade light as the assumed scene
+            illumination for white balance.
+            </notes>
+            </value>
           </enum>
           <description>Whether AWB is currently setting the color
           transform fields, and what its illumination target
           is</description>
-          <details>[BC - AWB lock,AWB modes]
+          <range>android.control.awbAvailableModes</range>
+          <details>
+          This control is only effective if android.control.mode is AUTO.
 
-          Only effective if android.control.mode = AUTO.</details>
+          When set to the ON mode, the camera device's auto white balance
+          routine is enabled, overriding the application's selected
+          android.colorCorrection.transform, android.colorCorrection.gains and
+          android.colorCorrection.mode.
+
+          When set to the OFF mode, the camera device's auto white balance
+          routine is disabled. The applicantion manually controls the white
+          balance by android.colorCorrection.transform, android.colorCorrection.gains
+          and android.colorCorrection.mode.
+
+          When set to any other modes, the camera device's auto white balance
+          routine is disabled. The camera device uses each particular illumination
+          target for white balance adjustment.
+          </details>
           <tag id="BC" />
           <tag id="AWB" />
         </entry>
@@ -850,12 +930,25 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="awbAvailableModes" type="byte" visibility="public"
-               type_notes="List of enums (android.control.awbMode)"
+               type_notes="List of enums"
                container="array">
           <array>
             <size>n</size>
           </array>
-          <range>OFF, AUTO must be included</range>
+          <description>The set of auto-white-balance modes (android.control.awbMode)
+          that are supported by this camera device.</description>
+          <details>
+          Not all the auto-white-balance modes may be supported by a
+          given camera device. This entry lists the valid modes for
+          android.control.awbMode for this camera device.
+
+          All camera devices will support ON mode.
+
+          Full-capability camera devices will always support OFF mode,
+          which enables application control of white balance, by using
+          android.colorCorrection.transform and android.colorCorrection.gains
+          (android.colorCorrection.mode must be set to TRANSFORM_MATRIX).
+          </details>
           <tag id="BC" />
         </entry>
         <entry name="maxRegions" type="int32" visibility="public">
