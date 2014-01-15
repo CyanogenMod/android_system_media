@@ -3132,22 +3132,31 @@ which enables application control of white balance,<wbr/> by using
             </td>
             <td class="entry_type">
                 <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
 
+                <span class="entry_type_array">
+                  3
+                </span>
               <span class="entry_type_visibility"> [public]</span>
 
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>For AE,<wbr/> AWB,<wbr/> and AF,<wbr/> how many individual
-regions can be listed for metering?</p>
+              <p>List of the maximum number of regions that can be used for metering in
+auto-exposure (AE),<wbr/> auto-white balance (AWB),<wbr/> and auto-focus (AF);
+this corresponds to the the maximum number of elements in
+<a href="#controls_android.control.aeRegions">android.<wbr/>control.<wbr/>ae<wbr/>Regions</a>,<wbr/> <a href="#controls_android.control.awbRegions">android.<wbr/>control.<wbr/>awb<wbr/>Regions</a>,<wbr/>
+and <a href="#controls_android.control.afRegions">android.<wbr/>control.<wbr/>af<wbr/>Regions</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>&gt;= 1</p>
+              <p>Value must be &gt;= 0 for each element.<wbr/> For full-capability devices
+this value must be &gt;= 1 for AE and AF.<wbr/> The order of the elements is:
+<code>(AE,<wbr/> AWB,<wbr/> AF)</code>.<wbr/></p>
             </td>
 
             <td class="entry_tags">

@@ -1222,10 +1222,21 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="BC" />
         </entry>
-        <entry name="maxRegions" type="int32" visibility="public">
-          <description>For AE, AWB, and AF, how many individual
-          regions can be listed for metering?</description>
-          <range>&amp;gt;= 1</range>
+        <entry name="maxRegions" type="int32" visibility="public" container="array">
+          <array>
+            <size>3</size>
+          </array>
+          <description>
+          List of the maximum number of regions that can be used for metering in
+          auto-exposure (AE), auto-white balance (AWB), and auto-focus (AF);
+          this corresponds to the the maximum number of elements in
+          android.control.aeRegions, android.control.awbRegions,
+          and android.control.afRegions.
+          </description>
+          <range>
+          Value must be &amp;gt;= 0 for each element. For full-capability devices
+          this value must be &amp;gt;= 1 for AE and AF. The order of the elements is:
+          `(AE, AWB, AF)`.</range>
           <tag id="BC" />
         </entry>
         <entry name="sceneModeOverrides" type="byte" visibility="system"
