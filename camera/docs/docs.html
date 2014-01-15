@@ -2276,7 +2276,7 @@ as it wishes.<wbr/> The camera device scene mode 3A settings are provided by
         
                 
           <tr class="entry" id="controls_android.control.sceneMode">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="5">
               android.<wbr/>control.<wbr/>scene<wbr/>Mode
             </td>
             <td class="entry_type">
@@ -2286,88 +2286,113 @@ as it wishes.<wbr/> The camera device scene mode 3A settings are provided by
 
                 <ul class="entry_type_enum">
                   <li>
-                    <span class="entry_type_enum_name">UNSUPPORTED</span>
+                    <span class="entry_type_enum_name">DISABLED</span>
                     <span class="entry_type_enum_value">0</span>
+                    <span class="entry_type_enum_notes"><p>Indicates that no scene modes are set for a given capture request.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FACE_PRIORITY</span>
-                    <span class="entry_type_enum_notes"><p>if face detection support exists Use face
-detection data to drive 3A routines.<wbr/> If face detection
-statistics are disabled,<wbr/> should still operate correctly
-(but not return face detection statistics to the
-framework).<wbr/></p>
-<p>Unlike the other scene modes,<wbr/> aeMode,<wbr/> awbMode,<wbr/> and afMode
-remain active when FACE_<wbr/>PRIORITY is set.<wbr/> This is due to
-compatibility concerns with the old camera
-API</p></span>
+                    <span class="entry_type_enum_notes"><p>If face detection support exists,<wbr/> use face
+detection data for auto-focus,<wbr/> auto-white balance,<wbr/> and
+auto-exposure routines.<wbr/> If face detection statistics are
+disabled (i.<wbr/>e.<wbr/> <a href="#controls_android.statistics.faceDetectMode">android.<wbr/>statistics.<wbr/>face<wbr/>Detect<wbr/>Mode</a> is set to OFF),<wbr/>
+this should still operate correctly (but will not return
+face detection statistics to the framework).<wbr/></p>
+<p>Unlike the other scene modes,<wbr/> <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and android.<wbr/>control.<wbr/>af<wbr/>Mode
+remain active when FACE_<wbr/>PRIORITY is set.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ACTION</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for photos of quickly moving objects.<wbr/>
+Similar to SPORTS.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PORTRAIT</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for still photos of people.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">LANDSCAPE</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for photos of distant macroscopic objects.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">NIGHT</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for low-light settings.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">NIGHT_PORTRAIT</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for still photos of people in low-light
+settings.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">THEATRE</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for dim,<wbr/> indoor settings where flash must
+remain off.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">BEACH</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for bright,<wbr/> outdoor beach settings.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SNOW</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for bright,<wbr/> outdoor settings containing snow.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SUNSET</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for scenes of the setting sun.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">STEADYPHOTO</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized to avoid blurry photos due to small amounts of
+device motion (for example: due to hand shake).<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FIREWORKS</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for nighttime photos of fireworks.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SPORTS</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for photos of quickly moving people.<wbr/>
+Similar to ACTION.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PARTY</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for dim,<wbr/> indoor settings with multiple moving
+people.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CANDLELIGHT</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for dim settings where the main light source
+is a flame.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">BARCODE</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for accurately capturing a photo of barcode
+for use by camera applications that wish to read the
+barcode value.<wbr/></p></span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Which scene mode is active when
-<a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = SCENE_<wbr/>MODE</p>
+              <p>A camera mode optimized for conditions typical in a particular
+capture setting.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -2384,7 +2409,33 @@ API</p></span>
             </td>
 
           </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This is the mode that that is active when
+<code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == USE_<wbr/>SCENE_<wbr/>MODE</code>.<wbr/> Aside from FACE_<wbr/>PRIORITY,<wbr/>
+these modes will disable <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> while in use.<wbr/></p>
+<p>The interpretation and implementation of these scene modes is left
+to the implementor of the camera device.<wbr/> Their behavior will not be
+consistent across all devices,<wbr/> and any given device may only implement
+a subset of these modes.<wbr/></p>
+            </td>
+          </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>HAL implementations that include scene modes are expected to provide
+the per-scene settings to use for <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> in
+<a href="#static_android.control.sceneModeOverrides">android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides</a>.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->

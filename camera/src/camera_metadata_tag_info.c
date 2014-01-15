@@ -910,8 +910,8 @@ int camera_metadata_enum_snprint(uint32_t tag,
         }
         case ANDROID_CONTROL_SCENE_MODE: {
             switch (value) {
-                case ANDROID_CONTROL_SCENE_MODE_UNSUPPORTED:
-                    msg = "UNSUPPORTED";
+                case ANDROID_CONTROL_SCENE_MODE_DISABLED:
+                    msg = "DISABLED";
                     ret = 0;
                     break;
                 case ANDROID_CONTROL_SCENE_MODE_FACE_PRIORITY:
