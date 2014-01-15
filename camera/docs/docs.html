@@ -2087,16 +2087,17 @@ capture</p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Information to 3A routines about the purpose
-of this capture,<wbr/> to help decide optimal 3A
-strategy</p>
+              <p>Information to the camera device 3A (auto-exposure,<wbr/>
+auto-focus,<wbr/> auto-white balance) routines about the purpose
+of this capture,<wbr/> to help the camera device to decide optimal 3A
+strategy.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>all must be supported</p>
+              <p>All must be supported</p>
             </td>
 
             <td class="entry_tags">
@@ -2111,7 +2112,8 @@ strategy</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only used if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF.<wbr/></p>
+              <p>This control is only effective if <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF</code>
+and any 3A routine is active.<wbr/></p>
             </td>
           </tr>
 
@@ -4940,7 +4942,7 @@ duration).<wbr/></p>
         
                 
           <tr class="entry" id="controls_android.flash.mode">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>flash.<wbr/>mode
             </td>
             <td class="entry_type">
@@ -4951,27 +4953,24 @@ duration).<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes"><p>Do not fire the flash for this
-capture</p></span>
+                    <span class="entry_type_enum_notes"><p>Do not fire the flash for this capture.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SINGLE</span>
-                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Fire flash
-for this capture based on firingPower,<wbr/>
-firingTime.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>If the flash is available and charged,<wbr/> fire flash
+for this capture based on <a href="#controls_android.flash.firingPower">android.<wbr/>flash.<wbr/>firing<wbr/>Power</a> and
+<a href="#controls_android.flash.firingTime">android.<wbr/>flash.<wbr/>firing<wbr/>Time</a>.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">TORCH</span>
-                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Flash
-continuously on,<wbr/> power set by
-firingPower</p></span>
+                    <span class="entry_type_enum_notes"><p>Transition flash to continuously on.<wbr/></p></span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Select flash operation mode</p>
+              <p>The desired mode for for the camera device's flash control.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -4986,6 +4985,25 @@ firingPower</p></span>
               </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This control is only effective when flash unit is available
+(<code><a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> != 0</code>).<wbr/></p>
+<p>When this control is used,<wbr/> the <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> must be set to ON or OFF.<wbr/>
+Otherwise,<wbr/> the camera device auto-exposure related flash control (ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/>
+ON_<wbr/>ALWAYS_<wbr/>FLASH,<wbr/> or ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE) will override this control.<wbr/></p>
+<p>When set to OFF,<wbr/> the camera device will not fire flash for this capture.<wbr/></p>
+<p>When set to SINGLE,<wbr/> the camera device will fire flash regardless of the camera
+device's auto-exposure routine's result.<wbr/> When used in still capture case,<wbr/> this
+control should be used along with AE precapture metering sequence
+(<a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>),<wbr/> otherwise,<wbr/> the image may be incorrectly exposed.<wbr/></p>
+<p>When set to TORCH,<wbr/> the flash will be on continuously.<wbr/> This mode can be used
+for use cases such as preview,<wbr/> auto-focus assist,<wbr/> still capture,<wbr/> or video recording.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -5316,7 +5334,7 @@ duration).<wbr/></p>
         
                 
           <tr class="entry" id="dynamic_android.flash.mode">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>flash.<wbr/>mode
             </td>
             <td class="entry_type">
@@ -5327,27 +5345,24 @@ duration).<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes"><p>Do not fire the flash for this
-capture</p></span>
+                    <span class="entry_type_enum_notes"><p>Do not fire the flash for this capture.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SINGLE</span>
-                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Fire flash
-for this capture based on firingPower,<wbr/>
-firingTime.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>If the flash is available and charged,<wbr/> fire flash
+for this capture based on <a href="#controls_android.flash.firingPower">android.<wbr/>flash.<wbr/>firing<wbr/>Power</a> and
+<a href="#controls_android.flash.firingTime">android.<wbr/>flash.<wbr/>firing<wbr/>Time</a>.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">TORCH</span>
-                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Flash
-continuously on,<wbr/> power set by
-firingPower</p></span>
+                    <span class="entry_type_enum_notes"><p>Transition flash to continuously on.<wbr/></p></span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Select flash operation mode</p>
+              <p>The desired mode for for the camera device's flash control.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -5362,6 +5377,25 @@ firingPower</p></span>
               </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This control is only effective when flash unit is available
+(<code><a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> != 0</code>).<wbr/></p>
+<p>When this control is used,<wbr/> the <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> must be set to ON or OFF.<wbr/>
+Otherwise,<wbr/> the camera device auto-exposure related flash control (ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/>
+ON_<wbr/>ALWAYS_<wbr/>FLASH,<wbr/> or ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE) will override this control.<wbr/></p>
+<p>When set to OFF,<wbr/> the camera device will not fire flash for this capture.<wbr/></p>
+<p>When set to SINGLE,<wbr/> the camera device will fire flash regardless of the camera
+device's auto-exposure routine's result.<wbr/> When used in still capture case,<wbr/> this
+control should be used along with AE precapture metering sequence
+(<a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>),<wbr/> otherwise,<wbr/> the image may be incorrectly exposed.<wbr/></p>
+<p>When set to TORCH,<wbr/> the flash will be on continuously.<wbr/> This mode can be used
+for use cases such as preview,<wbr/> auto-focus assist,<wbr/> still capture,<wbr/> or video recording.<wbr/></p>
+            </td>
           </tr>
 
 

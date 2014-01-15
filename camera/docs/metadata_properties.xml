@@ -703,11 +703,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             reprocess one or several later for a final
             capture</notes></value>
           </enum>
-          <description>Information to 3A routines about the purpose
-          of this capture, to help decide optimal 3A
-          strategy</description>
-          <range>all must be supported</range>
-          <details>Only used if android.control.mode != OFF.</details>
+          <description>Information to the camera device 3A (auto-exposure,
+          auto-focus, auto-white balance) routines about the purpose
+          of this capture, to help the camera device to decide optimal 3A
+          strategy.</description>
+          <range>All must be supported</range>
+          <details>This control is only effective if `android.control.mode != OFF`
+          and any 3A routine is active.</details>
           <tag id="BC" />
         </entry>
         <entry name="effectMode" type="byte" visibility="public" enum="true">
@@ -1328,18 +1330,42 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="mode" type="byte" visibility="public" enum="true">
           <enum>
             <value>OFF
-            <notes>Do not fire the flash for this
-            capture</notes></value>
+              <notes>
+              Do not fire the flash for this capture.
+              </notes>
+            </value>
             <value>SINGLE
-            <notes>if android.flash.available is true Fire flash
-            for this capture based on firingPower,
-            firingTime.</notes></value>
+              <notes>
+              If the flash is available and charged, fire flash
+              for this capture based on android.flash.firingPower and
+              android.flash.firingTime.
+              </notes>
+            </value>
             <value>TORCH
-            <notes>if android.flash.available is true Flash
-            continuously on, power set by
-            firingPower</notes></value>
+              <notes>
+              Transition flash to continuously on.
+              </notes>
+            </value>
           </enum>
-          <description>Select flash operation mode</description>
+          <description>The desired mode for for the camera device's flash control.</description>
+          <details>
+          This control is only effective when flash unit is available
+          (`android.flash.info.available != 0`).
+
+          When this control is used, the android.control.aeMode must be set to ON or OFF.
+          Otherwise, the camera device auto-exposure related flash control (ON_AUTO_FLASH,
+          ON_ALWAYS_FLASH, or ON_AUTO_FLASH_REDEYE) will override this control.
+
+          When set to OFF, the camera device will not fire flash for this capture.
+
+          When set to SINGLE, the camera device will fire flash regardless of the camera
+          device's auto-exposure routine's result. When used in still capture case, this
+          control should be used along with AE precapture metering sequence
+          (android.control.aePrecaptureTrigger), otherwise, the image may be incorrectly exposed.
+
+          When set to TORCH, the flash will be on continuously. This mode can be used
+          for use cases such as preview, auto-focus assist, still capture, or video recording.
+          </details>
           <tag id="BC" />
         </entry>
       </controls>
