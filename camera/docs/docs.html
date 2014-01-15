@@ -11631,28 +11631,26 @@ somewhere close to it.<wbr/></p>
 
                 
           <tr class="entry" id="controls_android.shading.mode">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>shading.<wbr/>mode
             </td>
             <td class="entry_type">
                 <span class="entry_type_name entry_type_name_enum">byte</span>
 
-              <span class="entry_type_visibility"> [system]</span>
+              <span class="entry_type_visibility"> [hidden]</span>
 
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes"><p>No shading correction is applied</p></span>
+                    <span class="entry_type_enum_notes"><p>No lens shading correction is applied</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to raw
-bayer output</p></span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to sensor raw output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
-quality</p></span>
+                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high quality</p></span>
                   </li>
                 </ul>
 
@@ -11660,7 +11658,7 @@ quality</p></span>
 
             <td class="entry_description">
               <p>Quality of lens shading correction applied
-to the image data</p>
+to the image data.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -11672,6 +11670,31 @@ to the image data</p>
             <td class="entry_tags">
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When set to OFF mode,<wbr/> no lens shading correction will be applied by the
+camera device,<wbr/> and an identity lens shading map data will be provided
+if <code><a href="#controls_android.statistics.lensShadingMapMode">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map<wbr/>Mode</a> == ON</code>.<wbr/> For example,<wbr/> for lens
+shading map with size specified as <code><a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a> = [ 4,<wbr/> 3 ]</code>,<wbr/>
+the output <a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a> for this case will be an identity map
+shown below:</p>
+<pre><code>[ 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>
+    1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>
+  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>
+    1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>
+  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>   1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>
+    1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0 ]
+</code></pre>
+<p>When set to other modes,<wbr/> lens shading correction will be applied by the
+camera device.<wbr/> Applications can request lens shading map data by setting
+<a href="#controls_android.statistics.lensShadingMapMode">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map<wbr/>Mode</a> to ON,<wbr/> and then the camera device will provide
+lens shading map data in <a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a>,<wbr/> with size specified
+by <a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a>.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -11745,28 +11768,26 @@ applied to the images</p>
 
                 
           <tr class="entry" id="dynamic_android.shading.mode">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>shading.<wbr/>mode
             </td>
             <td class="entry_type">
                 <span class="entry_type_name entry_type_name_enum">byte</span>
 
-              <span class="entry_type_visibility"> [system]</span>
+              <span class="entry_type_visibility"> [hidden]</span>
 
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes"><p>No shading correction is applied</p></span>
+                    <span class="entry_type_enum_notes"><p>No lens shading correction is applied</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to raw
-bayer output</p></span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to sensor raw output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
-quality</p></span>
+                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high quality</p></span>
                   </li>
                 </ul>
 
@@ -11774,7 +11795,7 @@ quality</p></span>
 
             <td class="entry_description">
               <p>Quality of lens shading correction applied
-to the image data</p>
+to the image data.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -11786,6 +11807,31 @@ to the image data</p>
             <td class="entry_tags">
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When set to OFF mode,<wbr/> no lens shading correction will be applied by the
+camera device,<wbr/> and an identity lens shading map data will be provided
+if <code><a href="#controls_android.statistics.lensShadingMapMode">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map<wbr/>Mode</a> == ON</code>.<wbr/> For example,<wbr/> for lens
+shading map with size specified as <code><a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a> = [ 4,<wbr/> 3 ]</code>,<wbr/>
+the output <a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a> for this case will be an identity map
+shown below:</p>
+<pre><code>[ 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>
+    1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>
+  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>
+    1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>
+  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>   1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>
+    1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/>  1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0,<wbr/> 1.<wbr/>0 ]
+</code></pre>
+<p>When set to other modes,<wbr/> lens shading correction will be applied by the
+camera device.<wbr/> Applications can request lens shading map data by setting
+<a href="#controls_android.statistics.lensShadingMapMode">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map<wbr/>Mode</a> to ON,<wbr/> and then the camera device will provide
+lens shading map data in <a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a>,<wbr/> with size specified
+by <a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a>.<wbr/></p>
+            </td>
           </tr>
 
 
