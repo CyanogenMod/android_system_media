@@ -2176,7 +2176,7 @@ and any 3A routine is active.<wbr/></p>
         
                 
           <tr class="entry" id="controls_android.control.effectMode">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>control.<wbr/>effect<wbr/>Mode
             </td>
             <td class="entry_type">
@@ -2187,46 +2187,63 @@ and any 3A routine is active.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
+                    <span class="entry_type_enum_notes"><p>No color effect will be applied.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">MONO</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "monocolor" effect where the image is mapped into
+a single color.<wbr/>  This will typically be grayscale.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">NEGATIVE</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "photo-negative" effect where the image's colors
+are inverted.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SOLARIZE</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "solarisation" effect (Sabattier effect) where the
+image is wholly or partially reversed in
+tone.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SEPIA</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "sepia" effect where the image is mapped into warm
+gray,<wbr/> red,<wbr/> and brown tones.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">POSTERIZE</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "posterization" effect where the image uses
+discrete regions of tone rather than a continuous
+gradient of tones.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">WHITEBOARD</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "whiteboard" effect where the image is typically displayed
+as regions of white,<wbr/> with black or grey details.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">BLACKBOARD</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "blackboard" effect where the image is typically displayed
+as regions of black,<wbr/> with white or grey details.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AQUA</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>An "aqua" effect where a blue hue is added to the image.<wbr/></p></span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether any special color effect is in use.<wbr/>
-Only used if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF</p>
+              <p>A special color effect to apply.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -2242,6 +2259,21 @@ Only used if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr
               </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When this mode is set,<wbr/> a color effect will be applied
+to images produced by the camera device.<wbr/> The interpretation
+and implementation of these color effects is left to the
+implementor of the camera device,<wbr/> and should not be
+depended on to be consistent (or present) across all
+devices.<wbr/></p>
+<p>A color effect will only be applied if
+<a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -2804,7 +2836,7 @@ will support AUTO mode.<wbr/></p>
         
                 
           <tr class="entry" id="static_android.control.availableEffects">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>control.<wbr/>available<wbr/>Effects
             </td>
             <td class="entry_type">
@@ -2815,21 +2847,23 @@ will support AUTO mode.<wbr/></p>
                   n
                 </span>
               <span class="entry_type_visibility"> [public]</span>
-                <div class="entry_type_notes">list of enums</div>
+                <div class="entry_type_notes">List of enums (android.<wbr/>control.<wbr/>effect<wbr/>Mode).<wbr/></div>
 
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>what subset of the full color effect enum
-list is supported</p>
+              <p>List containing the subset of color effects
+specified in <a href="#controls_android.control.effectMode">android.<wbr/>control.<wbr/>effect<wbr/>Mode</a> that is supported by
+this device.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>OFF must be listed</p>
+              <p>Any subset of enums from those specified in
+<a href="#controls_android.control.effectMode">android.<wbr/>control.<wbr/>effect<wbr/>Mode</a>.<wbr/>  OFF must be included in any subset.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -2838,6 +2872,21 @@ list is supported</p>
               </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This list contains the color effect modes that can be applied to
+images produced by the camera device.<wbr/> Only modes that have
+been fully implemented for the current device may be included here.<wbr/>
+Implementations are not expected to be consistent across all devices.<wbr/>
+If no color effect modes are available for a device,<wbr/> this should
+simply be set to OFF.<wbr/></p>
+<p>A color effect will only be applied if
+<a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF.<wbr/></p>
+            </td>
           </tr>
 
 

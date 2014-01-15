@@ -792,19 +792,74 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="effectMode" type="byte" visibility="public" enum="true">
           <enum>
-            <value>OFF</value>
-            <value optional="true">MONO</value>
-            <value optional="true">NEGATIVE</value>
-            <value optional="true">SOLARIZE</value>
-            <value optional="true">SEPIA</value>
-            <value optional="true">POSTERIZE</value>
-            <value optional="true">WHITEBOARD</value>
-            <value optional="true">BLACKBOARD</value>
-            <value optional="true">AQUA</value>
+            <value>OFF
+              <notes>
+              No color effect will be applied.
+              </notes>
+            </value>
+            <value optional="true">MONO
+              <notes>
+              A "monocolor" effect where the image is mapped into
+              a single color.  This will typically be grayscale.
+              </notes>
+            </value>
+            <value optional="true">NEGATIVE
+              <notes>
+              A "photo-negative" effect where the image's colors
+              are inverted.
+              </notes>
+            </value>
+            <value optional="true">SOLARIZE
+              <notes>
+              A "solarisation" effect (Sabattier effect) where the
+              image is wholly or partially reversed in
+              tone.
+              </notes>
+            </value>
+            <value optional="true">SEPIA
+              <notes>
+              A "sepia" effect where the image is mapped into warm
+              gray, red, and brown tones.
+              </notes>
+            </value>
+            <value optional="true">POSTERIZE
+              <notes>
+              A "posterization" effect where the image uses
+              discrete regions of tone rather than a continuous
+              gradient of tones.
+              </notes>
+            </value>
+            <value optional="true">WHITEBOARD
+              <notes>
+              A "whiteboard" effect where the image is typically displayed
+              as regions of white, with black or grey details.
+              </notes>
+            </value>
+            <value optional="true">BLACKBOARD
+              <notes>
+              A "blackboard" effect where the image is typically displayed
+              as regions of black, with white or grey details.
+              </notes>
+            </value>
+            <value optional="true">AQUA
+              <notes>
+              An "aqua" effect where a blue hue is added to the image.
+              </notes>
+            </value>
           </enum>
-          <description>Whether any special color effect is in use.
-          Only used if android.control.mode != OFF</description>
+          <description>A special color effect to apply.</description>
           <range>android.control.availableEffects</range>
+          <details>
+          When this mode is set, a color effect will be applied
+          to images produced by the camera device. The interpretation
+          and implementation of these color effects is left to the
+          implementor of the camera device, and should not be
+          depended on to be consistent (or present) across all
+          devices.
+
+          A color effect will only be applied if
+          android.control.mode != OFF.
+          </details>
           <tag id="BC" />
         </entry>
         <entry name="mode" type="byte" visibility="public" enum="true">
@@ -982,13 +1037,30 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="availableEffects" type="byte" visibility="public"
-               type_notes="list of enums" container="array">
+               type_notes="List of enums (android.control.effectMode)." container="array">
           <array>
             <size>n</size>
           </array>
-          <description>what subset of the full color effect enum
-          list is supported</description>
-          <range>OFF must be listed</range>
+          <description>
+          List containing the subset of color effects
+          specified in android.control.effectMode that is supported by
+          this device.
+          </description>
+          <range>
+          Any subset of enums from those specified in
+          android.control.effectMode.  OFF must be included in any subset.
+          </range>
+          <details>
+          This list contains the color effect modes that can be applied to
+          images produced by the camera device. Only modes that have
+          been fully implemented for the current device may be included here.
+          Implementations are not expected to be consistent across all devices.
+          If no color effect modes are available for a device, this should
+          simply be set to OFF.
+
+          A color effect will only be applied if
+          android.control.mode != OFF.
+          </details>
           <tag id="BC" />
         </entry>
         <entry name="availableSceneModes" type="byte" visibility="public"
