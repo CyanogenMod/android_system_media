@@ -747,16 +747,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           routines</description>
           <range>all must be supported</range>
           <details>High-level 3A control. When set to OFF, all 3A control
-          by the HAL is disabled. The application must set the fields for
+          by the camera device is disabled. The application must set the fields for
           capture parameters itself.
 
           When set to AUTO, the individual algorithm controls in
           android.control.* are in effect, such as android.control.afMode.
 
           When set to USE_SCENE_MODE, the individual controls in
-          android.control.* are mostly disabled, and the HAL implements
+          android.control.* are mostly disabled, and the camera device implements
           one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
-          as it wishes. The HAL scene mode 3A settings are provided by
+          as it wishes. The camera device scene mode 3A settings are provided by
           android.control.sceneModeOverrides.</details>
           <tag id="BC" />
         </entry>
@@ -1147,10 +1147,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <details>Edge/sharpness/detail enhancement. OFF means no
           enhancement will be applied by the HAL.
 
-          FAST/HIGH_QUALITY both mean HAL-determined enhancement
+          FAST/HIGH_QUALITY both mean camera device determined enhancement
           will be applied. HIGH_QUALITY mode indicates that the
-          HAL should use the highest-quality enhancement algorithms,
-          even if it slows down capture rate. FAST means the HAL should
+          camera device will use the highest-quality enhancement algorithms,
+          even if it slows down capture rate. FAST means the camera device will
           not slow down capture rate when applying edge enhancement.</details>
         </entry>
         <entry name="strength" type="byte">
@@ -1380,8 +1380,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>Resolution of embedded JPEG thumbnail</description>
           <range>Size must be one of the size from android.jpeg.availableThumbnailSizes</range>
-          <details>When set to (0, 0) value, the JPEG EXIF must not contain thumbnail,
-          but the captured JPEG must still be a valid image.
+          <details>When set to (0, 0) value, the JPEG EXIF will not contain thumbnail,
+          but the captured JPEG will still be a valid image.
 
           When a jpeg image capture is issued, the thumbnail size selected should have
           the same aspect ratio as the jpeg image.</details>
@@ -1396,20 +1396,20 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>n</size>
           </array>
           <description>Supported resolutions for the JPEG thumbnail</description>
-          <range>Must include at least one valid resolution, plus
-          (0,0) for no thumbnail generation, and each size must be distinct.</range>
-          <details>Below condiditions must be satisfied for this size list:
+          <range>Will include at least one valid resolution, plus
+          (0,0) for no thumbnail generation, and each size will be distinct.</range>
+          <details>Below condiditions will be satisfied for this size list:
 
-          * The sizes must be sorted by increasing pixel area (width x height).
-          If several resolutions have the same area, they must be sorted by increasing width.
-          * The aspect ratio of the largest thumbnail size must be same as the
+          * The sizes will be sorted by increasing pixel area (width x height).
+          If several resolutions have the same area, they will be sorted by increasing width.
+          * The aspect ratio of the largest thumbnail size will be same as the
           aspect ratio of largest size in android.scaler.availableJpegSizes.
           The largest size is defined as the size that has the largest pixel area
           in a given size list.
-          * Each size in android.scaler.availableJpegSizes must have at least
+          * Each size in android.scaler.availableJpegSizes will have at least
           one corresponding size that has the same aspect ratio in availableThumbnailSizes,
           and vice versa.
-          * All non (0, 0) sizes must have non-zero widths and heights.</details>
+          * All non (0, 0) sizes will have non-zero widths and heights.</details>
           <tag id="BC" />
         </entry>
         <entry name="maxSize" type="int32" visibility="system">
@@ -1740,10 +1740,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <details>Noise filtering control. OFF means no noise reduction
           will be applied by the HAL.
 
-          FAST/HIGH_QUALITY both mean HAL-determined noise filtering
-          will be applied. HIGH_QUALITY mode indicates that the HAL
-          should use the highest-quality noise filtering algorithms,
-          even if it slows down capture rate. FAST means the HAL should not
+          FAST/HIGH_QUALITY both mean camera device determined noise filtering
+          will be applied. HIGH_QUALITY mode indicates that the camera device
+          will use the highest-quality noise filtering algorithms,
+          even if it slows down capture rate. FAST means the camera device should not
           slow down capture rate when applying noise filtering.</details>
           <tag id="V1" />
         </entry>

@@ -2257,14 +2257,14 @@ routines</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>High-level 3A control.<wbr/> When set to OFF,<wbr/> all 3A control
-by the HAL is disabled.<wbr/> The application must set the fields for
+by the camera device is disabled.<wbr/> The application must set the fields for
 capture parameters itself.<wbr/></p>
 <p>When set to AUTO,<wbr/> the individual algorithm controls in
 android.<wbr/>control.<wbr/>* are in effect,<wbr/> such as <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>.<wbr/></p>
 <p>When set to USE_<wbr/>SCENE_<wbr/>MODE,<wbr/> the individual controls in
-android.<wbr/>control.<wbr/>* are mostly disabled,<wbr/> and the HAL implements
+android.<wbr/>control.<wbr/>* are mostly disabled,<wbr/> and the camera device implements
 one of the scene mode settings (such as ACTION,<wbr/> SUNSET,<wbr/> or PARTY)
-as it wishes.<wbr/> The HAL scene mode 3A settings are provided by
+as it wishes.<wbr/> The camera device scene mode 3A settings are provided by
 <a href="#static_android.control.sceneModeOverrides">android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides</a>.<wbr/></p>
             </td>
           </tr>
@@ -3984,14 +3984,14 @@ routines</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>High-level 3A control.<wbr/> When set to OFF,<wbr/> all 3A control
-by the HAL is disabled.<wbr/> The application must set the fields for
+by the camera device is disabled.<wbr/> The application must set the fields for
 capture parameters itself.<wbr/></p>
 <p>When set to AUTO,<wbr/> the individual algorithm controls in
 android.<wbr/>control.<wbr/>* are in effect,<wbr/> such as <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>.<wbr/></p>
 <p>When set to USE_<wbr/>SCENE_<wbr/>MODE,<wbr/> the individual controls in
-android.<wbr/>control.<wbr/>* are mostly disabled,<wbr/> and the HAL implements
+android.<wbr/>control.<wbr/>* are mostly disabled,<wbr/> and the camera device implements
 one of the scene mode settings (such as ACTION,<wbr/> SUNSET,<wbr/> or PARTY)
-as it wishes.<wbr/> The HAL scene mode 3A settings are provided by
+as it wishes.<wbr/> The camera device scene mode 3A settings are provided by
 <a href="#static_android.control.sceneModeOverrides">android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides</a>.<wbr/></p>
             </td>
           </tr>
@@ -4163,10 +4163,10 @@ enhancement</p>
             <td class="entry_details" colspan="5">
               <p>Edge/<wbr/>sharpness/<wbr/>detail enhancement.<wbr/> OFF means no
 enhancement will be applied by the HAL.<wbr/></p>
-<p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean HAL-determined enhancement
+<p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined enhancement
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the
-HAL should use the highest-quality enhancement algorithms,<wbr/>
-even if it slows down capture rate.<wbr/> FAST means the HAL should
+camera device will use the highest-quality enhancement algorithms,<wbr/>
+even if it slows down capture rate.<wbr/> FAST means the camera device will
 not slow down capture rate when applying edge enhancement.<wbr/></p>
             </td>
           </tr>
@@ -4287,10 +4287,10 @@ enhancement</p>
             <td class="entry_details" colspan="5">
               <p>Edge/<wbr/>sharpness/<wbr/>detail enhancement.<wbr/> OFF means no
 enhancement will be applied by the HAL.<wbr/></p>
-<p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean HAL-determined enhancement
+<p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined enhancement
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the
-HAL should use the highest-quality enhancement algorithms,<wbr/>
-even if it slows down capture rate.<wbr/> FAST means the HAL should
+camera device will use the highest-quality enhancement algorithms,<wbr/>
+even if it slows down capture rate.<wbr/> FAST means the camera device will
 not slow down capture rate when applying edge enhancement.<wbr/></p>
             </td>
           </tr>
@@ -5575,8 +5575,8 @@ thumbnail</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>When set to (0,<wbr/> 0) value,<wbr/> the JPEG EXIF must not contain thumbnail,<wbr/>
-but the captured JPEG must still be a valid image.<wbr/></p>
+              <p>When set to (0,<wbr/> 0) value,<wbr/> the JPEG EXIF will not contain thumbnail,<wbr/>
+but the captured JPEG will still be a valid image.<wbr/></p>
 <p>When a jpeg image capture is issued,<wbr/> the thumbnail size selected should have
 the same aspect ratio as the jpeg image.<wbr/></p>
             </td>
@@ -5638,8 +5638,8 @@ the same aspect ratio as the jpeg image.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              <p>Must include at least one valid resolution,<wbr/> plus
-(0,<wbr/>0) for no thumbnail generation,<wbr/> and each size must be distinct.<wbr/></p>
+              <p>Will include at least one valid resolution,<wbr/> plus
+(0,<wbr/>0) for no thumbnail generation,<wbr/> and each size will be distinct.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -5654,18 +5654,18 @@ the same aspect ratio as the jpeg image.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Below condiditions must be satisfied for this size list:</p>
+              <p>Below condiditions will be satisfied for this size list:</p>
 <ul>
-<li>The sizes must be sorted by increasing pixel area (width x height).<wbr/>
-If several resolutions have the same area,<wbr/> they must be sorted by increasing width.<wbr/></li>
-<li>The aspect ratio of the largest thumbnail size must be same as the
+<li>The sizes will be sorted by increasing pixel area (width x height).<wbr/>
+If several resolutions have the same area,<wbr/> they will be sorted by increasing width.<wbr/></li>
+<li>The aspect ratio of the largest thumbnail size will be same as the
 aspect ratio of largest size in <a href="#static_android.scaler.availableJpegSizes">android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Sizes</a>.<wbr/>
 The largest size is defined as the size that has the largest pixel area
 in a given size list.<wbr/></li>
-<li>Each size in <a href="#static_android.scaler.availableJpegSizes">android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Sizes</a> must have at least
+<li>Each size in <a href="#static_android.scaler.availableJpegSizes">android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Sizes</a> will have at least
 one corresponding size that has the same aspect ratio in availableThumbnailSizes,<wbr/>
 and vice versa.<wbr/></li>
-<li>All non (0,<wbr/> 0) sizes must have non-zero widths and heights.<wbr/></li>
+<li>All non (0,<wbr/> 0) sizes will have non-zero widths and heights.<wbr/></li>
 </ul>
             </td>
           </tr>
@@ -6070,8 +6070,8 @@ thumbnail</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>When set to (0,<wbr/> 0) value,<wbr/> the JPEG EXIF must not contain thumbnail,<wbr/>
-but the captured JPEG must still be a valid image.<wbr/></p>
+              <p>When set to (0,<wbr/> 0) value,<wbr/> the JPEG EXIF will not contain thumbnail,<wbr/>
+but the captured JPEG will still be a valid image.<wbr/></p>
 <p>When a jpeg image capture is issued,<wbr/> the thumbnail size selected should have
 the same aspect ratio as the jpeg image.<wbr/></p>
             </td>
@@ -7438,10 +7438,10 @@ algorithm</p>
             <td class="entry_details" colspan="5">
               <p>Noise filtering control.<wbr/> OFF means no noise reduction
 will be applied by the HAL.<wbr/></p>
-<p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean HAL-determined noise filtering
-will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the HAL
-should use the highest-quality noise filtering algorithms,<wbr/>
-even if it slows down capture rate.<wbr/> FAST means the HAL should not
+<p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined noise filtering
+will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the camera device
+will use the highest-quality noise filtering algorithms,<wbr/>
+even if it slows down capture rate.<wbr/> FAST means the camera device should not
 slow down capture rate when applying noise filtering.<wbr/></p>
             </td>
           </tr>
@@ -7567,10 +7567,10 @@ algorithm</p>
             <td class="entry_details" colspan="5">
               <p>Noise filtering control.<wbr/> OFF means no noise reduction
 will be applied by the HAL.<wbr/></p>
-<p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean HAL-determined noise filtering
-will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the HAL
-should use the highest-quality noise filtering algorithms,<wbr/>
-even if it slows down capture rate.<wbr/> FAST means the HAL should not
+<p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined noise filtering
+will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the camera device
+will use the highest-quality noise filtering algorithms,<wbr/>
+even if it slows down capture rate.<wbr/> FAST means the camera device should not
 slow down capture rate when applying noise filtering.<wbr/></p>
             </td>
           </tr>
