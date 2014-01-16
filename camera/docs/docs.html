@@ -9250,7 +9250,7 @@ respectively.<wbr/></p>
 
                 
           <tr class="entry" id="static_android.scaler.availableFormats">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="5">
               android.<wbr/>scaler.<wbr/>available<wbr/>Formats
             </td>
             <td class="entry_type">
@@ -9261,27 +9261,29 @@ respectively.<wbr/></p>
                   n
                 </span>
               <span class="entry_type_visibility"> [public as imageFormat]</span>
-                <div class="entry_type_notes">values from HAL_<wbr/>PIXEL_<wbr/>FORMAT_<wbr/>* in /<wbr/>system/<wbr/>core/<wbr/>include/<wbr/>system/<wbr/>graphics.<wbr/>h</div>
 
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">RAW_SENSOR</span>
+                    <span class="entry_type_enum_optional">optional</span>
                     <span class="entry_type_enum_value">0x20</span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">YV12</span>
+                    <span class="entry_type_enum_optional">optional</span>
                     <span class="entry_type_enum_value">0x32315659</span>
                     <span class="entry_type_enum_notes"><p>YCrCb 4:2:0 Planar</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">YCrCb_420_SP</span>
+                    <span class="entry_type_enum_optional">optional</span>
                     <span class="entry_type_enum_value">0x11</span>
                     <span class="entry_type_enum_notes"><p>NV21</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">IMPLEMENTATION_DEFINED</span>
                     <span class="entry_type_enum_value">0x22</span>
-                    <span class="entry_type_enum_notes"><p>Hal Implementation Defined</p></span>
+                    <span class="entry_type_enum_notes"><p>System internal format,<wbr/> not application-accessible</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">YCbCr_420_888</span>
@@ -9291,14 +9293,15 @@ respectively.<wbr/></p>
                   <li>
                     <span class="entry_type_enum_name">BLOB</span>
                     <span class="entry_type_enum_value">0x21</span>
-                    <span class="entry_type_enum_notes"><p>JPEG</p></span>
+                    <span class="entry_type_enum_notes"><p>JPEG format</p></span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>List of app-visible formats</p>
+              <p>The list of image formats that are supported by this
+camera device.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -9314,7 +9317,33 @@ respectively.<wbr/></p>
             </td>
 
           </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>All camera devices will support JPEG and YUV_<wbr/>420_<wbr/>888 formats.<wbr/></p>
+<p>When set to YUV_<wbr/>420_<wbr/>888,<wbr/> application can access the YUV420 data directly.<wbr/></p>
+            </td>
+          </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>These format values are from HAL_<wbr/>PIXEL_<wbr/>FORMAT_<wbr/>* in
+system/<wbr/>core/<wbr/>include/<wbr/>system/<wbr/>graphics.<wbr/>h.<wbr/></p>
+<p>When IMPLEMENTATION_<wbr/>DEFINED is used,<wbr/> the platform
+gralloc module will select a format based on the usage flags provided
+by the camera HAL device and the other endpoint of the stream.<wbr/> It is
+usually used by preview and recording streams,<wbr/> where the application doesn't
+need access the image data.<wbr/></p>
+<p>YCb<wbr/>Cr_<wbr/>420_<wbr/>888 format must be supported by the HAL.<wbr/> When an image stream
+needs CPU/<wbr/>application direct access,<wbr/> this format will be used.<wbr/></p>
+<p>The BLOB format must be supported by the HAL.<wbr/> This is used for the JPEG stream.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -9374,7 +9403,7 @@ durations)</p>
         
                 
           <tr class="entry" id="static_android.scaler.availableJpegSizes">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="5">
               android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Sizes
             </td>
             <td class="entry_type">
@@ -9390,16 +9419,13 @@ durations)</p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>The resolutions available for output from
-the JPEG block.<wbr/> Listed as width x height</p>
+              <p>The JPEG resolutions that are supported by this camera device.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>Must include: - sensor maximum resolution Should
-include: - half/<wbr/>quarter max resolution</p>
             </td>
 
             <td class="entry_tags">
@@ -9409,7 +9435,26 @@ include: - half/<wbr/>quarter max resolution</p>
             </td>
 
           </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The resolutions are listed as <code>(width,<wbr/> height)</code> pairs.<wbr/> All camera devices will support
+sensor maximum resolution (defined by <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>).<wbr/></p>
+            </td>
+          </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL must include sensor maximum resolution
+(defined by <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>),<wbr/>
+and should include half/<wbr/>quarter of sensor maximum resolution.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -9508,7 +9553,7 @@ durations)</p>
         
                 
           <tr class="entry" id="static_android.scaler.availableProcessedSizes">
-            <td class="entry_name" rowspan="3">
+            <td class="entry_name" rowspan="5">
               android.<wbr/>scaler.<wbr/>available<wbr/>Processed<wbr/>Sizes
             </td>
             <td class="entry_type">
@@ -9527,16 +9572,13 @@ durations)</p>
               <p>The resolutions available for use with
 processed output streams,<wbr/> such as YV12,<wbr/> NV12,<wbr/> and
 platform opaque YUV/<wbr/>RGB streams to the GPU or video
-encoders.<wbr/> Listed as width,<wbr/> height</p>
+encoders.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>Must include: - sensor maximum resolution -
-standard QCIF,<wbr/> 240p,<wbr/> 480p,<wbr/> 720p,<wbr/> and 1080p
-resolutions</p>
             </td>
 
             <td class="entry_tags">
@@ -9551,15 +9593,37 @@ resolutions</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The actual supported resolution list may be limited by
-consumer end points for different use cases.<wbr/> For example,<wbr/> for
-recording use case,<wbr/> the largest supported resolution may be
-limited by max supported size from encoder,<wbr/> for preview use
-case,<wbr/> the largest supported resolution may be limited by max
-resolution SurfaceTexture/<wbr/>SurfaceView can support.<wbr/></p>
+              <p>The resolutions are listed as <code>(width,<wbr/> height)</code> pairs.<wbr/></p>
+<p>For a given use case,<wbr/> the actual maximum supported resolution
+may be lower than what is listed here,<wbr/> depending on the destination
+Surface for the image data.<wbr/> For example,<wbr/> for recording video,<wbr/>
+the video encoder chosen may have a maximum size limit (e.<wbr/>g.<wbr/> 1080p)
+smaller than what the camera (e.<wbr/>g.<wbr/> maximum resolution is 3264x2448)
+can provide.<wbr/></p>
+<p>Please reference the documentation for the image data destination to
+check if it limits the maximum size for image data.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For FULL capability devices (<code><a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == FULL</code>),<wbr/>
+the HAL must include all JPEG sizes listed in android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Sizes
+and each below resolution if it is smaller than or equal to the sensor
+maximum resolution (if they are not listed in JPEG sizes already):</p>
+<ul>
+<li>240p (320 x 240)</li>
+<li>480p (640 x 480)</li>
+<li>720p (1280 x 720)</li>
+<li>1080p (1920 x 1080)</li>
+</ul>
+<p>For LIMITED capability devices (<code><a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == LIMITED</code>),<wbr/>
+the HAL only has to list up to the maximum video size supported by the devices.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->

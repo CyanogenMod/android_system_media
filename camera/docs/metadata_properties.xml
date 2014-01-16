@@ -2216,23 +2216,22 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       <static>
         <entry name="availableFormats" type="int32"
         visibility="public" enum="true"
-        type_notes="values from HAL_PIXEL_FORMAT_* in /system/core/include/system/graphics.h"
         container="array" typedef="imageFormat">
           <array>
             <size>n</size>
           </array>
           <enum>
-            <value id="0x20">RAW_SENSOR
+            <value optional="true" id="0x20">RAW_SENSOR
             </value>
-            <value id="0x32315659">YV12
+            <value optional="true" id="0x32315659">YV12
                 <notes>YCrCb 4:2:0 Planar</notes>
             </value>
-            <value id="0x11">YCrCb_420_SP
+            <value optional="true" id="0x11">YCrCb_420_SP
                 <notes>NV21</notes>
             </value>
 
             <value id="0x22">IMPLEMENTATION_DEFINED
-                <notes>Hal Implementation Defined</notes>
+                <notes>System internal format, not application-accessible</notes>
             </value>
 
             <value id="0x23">YCbCr_420_888
@@ -2240,10 +2239,32 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </value>
 
             <value id="0x21">BLOB
-                <notes>JPEG</notes>
+                <notes>JPEG format</notes>
             </value>
           </enum>
-          <description>List of app-visible formats</description>
+          <description>The list of image formats that are supported by this
+          camera device.</description>
+          <details>
+          All camera devices will support JPEG and YUV_420_888 formats.
+
+          When set to YUV_420_888, application can access the YUV420 data directly.
+          </details>
+          <hal_details>
+          These format values are from HAL_PIXEL_FORMAT_* in
+          system/core/include/system/graphics.h.
+
+          When IMPLEMENTATION_DEFINED is used, the platform
+          gralloc module will select a format based on the usage flags provided
+          by the camera HAL device and the other endpoint of the stream. It is
+          usually used by preview and recording streams, where the application doesn't
+          need access the image data.
+
+          YCbCr_420_888 format must be supported by the HAL. When an image stream
+          needs CPU/application direct access, this format will be used.
+
+          The BLOB format must be supported by the HAL. This is used for the JPEG stream.
+
+          </hal_details>
           <tag id="BC" />
         </entry>
         <entry name="availableJpegMinDurations" type="int64" visibility="public"
@@ -2267,10 +2288,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>n</size>
             <size>2</size>
           </array>
-          <description>The resolutions available for output from
-          the JPEG block. Listed as width x height</description>
-          <range>Must include: - sensor maximum resolution Should
-          include: - half/quarter max resolution</range>
+          <description>The JPEG resolutions that are supported by this camera device.</description>
+          <details>
+          The resolutions are listed as `(width, height)` pairs. All camera devices will support
+          sensor maximum resolution (defined by android.sensor.info.activeArraySize).
+          </details>
+          <hal_details>
+          The HAL must include sensor maximum resolution
+          (defined by android.sensor.info.activeArraySize),
+          and should include half/quarter of sensor maximum resolution.
+          </hal_details>
           <tag id="BC" />
         </entry>
         <entry name="availableMaxDigitalZoom" type="float" visibility="public">
@@ -2305,17 +2332,34 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The resolutions available for use with
           processed output streams, such as YV12, NV12, and
           platform opaque YUV/RGB streams to the GPU or video
-          encoders. Listed as width, height</description>
-          <range>Must include: - sensor maximum resolution -
-          standard QCIF, 240p, 480p, 720p, and 1080p
-          resolutions</range>
-          <details>The actual supported resolution list may be limited by
-          consumer end points for different use cases. For example, for
-          recording use case, the largest supported resolution may be
-          limited by max supported size from encoder, for preview use
-          case, the largest supported resolution may be limited by max
-          resolution SurfaceTexture/SurfaceView can support.
+          encoders.</description>
+          <details>
+          The resolutions are listed as `(width, height)` pairs.
+
+          For a given use case, the actual maximum supported resolution
+          may be lower than what is listed here, depending on the destination
+          Surface for the image data. For example, for recording video,
+          the video encoder chosen may have a maximum size limit (e.g. 1080p)
+          smaller than what the camera (e.g. maximum resolution is 3264x2448)
+          can provide.
+
+          Please reference the documentation for the image data destination to
+          check if it limits the maximum size for image data.
           </details>
+          <hal_details>
+          For FULL capability devices (`android.info.supportedHardwareLevel == FULL`),
+          the HAL must include all JPEG sizes listed in android.scaler.availableJpegSizes
+          and each below resolution if it is smaller than or equal to the sensor
+          maximum resolution (if they are not listed in JPEG sizes already):
+
+          * 240p (320 x 240)
+          * 480p (640 x 480)
+          * 720p (1280 x 720)
+          * 1080p (1920 x 1080)
+
+          For LIMITED capability devices (`android.info.supportedHardwareLevel == LIMITED`),
+          the HAL only has to list up to the maximum video size supported by the devices.
+          </hal_details>
           <tag id="BC" />
         </entry>
         <entry name="availableRawMinDurations" type="int64"
