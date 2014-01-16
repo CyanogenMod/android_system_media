@@ -59,6 +59,7 @@
     .entry_type_visibility { font-weight: bolder; padding-left:1em}
     .entry_type_enum_name { font-family: monospace; font-weight: bolder; }
     .entry_type_enum_notes:before { content:" - " }
+    .entry_type_enum_notes>p:first-child { display:inline; }
     .entry_type_enum_value:before { content:" = " }
     .entry_type_enum_value { font-family: monospace; }
     .entry ul { margin: 0 0 0 0; list-style-position: inside; padding-left: 0.5em; }
@@ -716,18 +717,18 @@
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">TRANSFORM_MATRIX</span>
-                    <span class="entry_type_enum_notes">Use the android.<wbr/>color<wbr/>Correction.<wbr/>transform matrix
-              and android.<wbr/>color<wbr/>Correction.<wbr/>gains to do color conversion</span>
+                    <span class="entry_type_enum_notes"><p>Use the <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a> matrix
+and <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> to do color conversion</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Must not slow down frame rate relative to raw
-              bayer output</span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to raw
+bayer output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">Frame rate may be reduced by high
-              quality</span>
+                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
+quality</p></span>
                   </li>
                 </ul>
 
@@ -1056,33 +1057,25 @@ the current frame.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">
-                The camera device will not adjust exposure duration to
-                avoid banding problems.<wbr/>
-              </span>
+                    <span class="entry_type_enum_notes"><p>The camera device will not adjust exposure duration to
+avoid banding problems.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">50HZ</span>
-                    <span class="entry_type_enum_notes">
-                The camera device will adjust exposure duration to
-                avoid banding problems with 50Hz illumination sources.<wbr/>
-              </span>
+                    <span class="entry_type_enum_notes"><p>The camera device will adjust exposure duration to
+avoid banding problems with 50Hz illumination sources.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">60HZ</span>
-                    <span class="entry_type_enum_notes">
-                The camera device will adjust exposure duration to
-                avoid banding problems with 60Hz illumination
-                sources.<wbr/>
-              </span>
+                    <span class="entry_type_enum_notes"><p>The camera device will adjust exposure duration to
+avoid banding problems with 60Hz illumination
+sources.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
-                    <span class="entry_type_enum_notes">
-                The camera device will automatically adapt its
-                antibanding routine to the current illumination
-                conditions.<wbr/> This is the default.<wbr/>
-              </span>
+                    <span class="entry_type_enum_notes"><p>The camera device will automatically adapt its
+antibanding routine to the current illumination
+conditions.<wbr/> This is the default.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -1220,14 +1213,14 @@ compensation of -1</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">Autoexposure lock is disabled; the AE algorithm
-            is free to update its parameters.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>Autoexposure lock is disabled; the AE algorithm
+is free to update its parameters.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON</span>
-                    <span class="entry_type_enum_notes">Autoexposure lock is enabled; the AE algorithm
-            must not update the exposure and sensitivity parameters
-            while the lock is active</span>
+                    <span class="entry_type_enum_notes"><p>Autoexposure lock is enabled; the AE algorithm
+must not update the exposure and sensitivity parameters
+while the lock is active</p></span>
                   </li>
                 </ul>
 
@@ -1279,61 +1272,51 @@ ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">
-                The camera device's autoexposure routine is disabled;
-                the application-selected android.<wbr/>sensor.<wbr/>exposure<wbr/>Time,<wbr/>
-                android.<wbr/>sensor.<wbr/>sensitivity and
-                android.<wbr/>sensor.<wbr/>frame<wbr/>Duration are used by the camera
-                device,<wbr/> along with android.<wbr/>flash.<wbr/>* fields,<wbr/> if there's
-                a flash unit for this camera device.<wbr/>
-              </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's autoexposure routine is disabled;
+the application-selected <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>,<wbr/>
+<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> and
+<a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a> are used by the camera
+device,<wbr/> along with android.<wbr/>flash.<wbr/>* fields,<wbr/> if there's
+a flash unit for this camera device.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON</span>
-                    <span class="entry_type_enum_notes">
-                The camera device's autoexposure routine is active,<wbr/>
-                with no flash control.<wbr/> The application's values for
-                android.<wbr/>sensor.<wbr/>exposure<wbr/>Time,<wbr/>
-                android.<wbr/>sensor.<wbr/>sensitivity,<wbr/> and
-                android.<wbr/>sensor.<wbr/>frame<wbr/>Duration are ignored.<wbr/> The
-                application has control over the various
-                android.<wbr/>flash.<wbr/>* fields.<wbr/>
-              </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's autoexposure routine is active,<wbr/>
+with no flash control.<wbr/> The application's values for
+<a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>,<wbr/>
+<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>,<wbr/> and
+<a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a> are ignored.<wbr/> The
+application has control over the various
+android.<wbr/>flash.<wbr/>* fields.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON_AUTO_FLASH</span>
-                    <span class="entry_type_enum_notes">
-                Like ON,<wbr/> except that the camera device also controls
-                the camera's flash unit,<wbr/> firing it in low-light
-                conditions.<wbr/> The flash may be fired during a
-                precapture sequence (triggered by
-                android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger) and may be fired
-                for captures for which the
-                android.<wbr/>control.<wbr/>capture<wbr/>Intent field is set to
-                STILL_<wbr/>CAPTURE
-              </span>
+                    <span class="entry_type_enum_notes"><p>Like ON,<wbr/> except that the camera device also controls
+the camera's flash unit,<wbr/> firing it in low-light
+conditions.<wbr/> The flash may be fired during a
+precapture sequence (triggered by
+<a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>) and may be fired
+for captures for which the
+<a href="#controls_android.control.captureIntent">android.<wbr/>control.<wbr/>capture<wbr/>Intent</a> field is set to
+STILL_<wbr/>CAPTURE</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON_ALWAYS_FLASH</span>
-                    <span class="entry_type_enum_notes">
-                Like ON,<wbr/> except that the camera device also controls
-                the camera's flash unit,<wbr/> always firing it for still
-                captures.<wbr/> The flash may be fired during a precapture
-                sequence (triggered by
-                android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger) and will always
-                be fired for captures for which the
-                android.<wbr/>control.<wbr/>capture<wbr/>Intent field is set to
-                STILL_<wbr/>CAPTURE
-              </span>
+                    <span class="entry_type_enum_notes"><p>Like ON,<wbr/> except that the camera device also controls
+the camera's flash unit,<wbr/> always firing it for still
+captures.<wbr/> The flash may be fired during a precapture
+sequence (triggered by
+<a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>) and will always
+be fired for captures for which the
+<a href="#controls_android.control.captureIntent">android.<wbr/>control.<wbr/>capture<wbr/>Intent</a> field is set to
+STILL_<wbr/>CAPTURE</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON_AUTO_FLASH_REDEYE</span>
-                    <span class="entry_type_enum_notes">
-                Like ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/> but with automatic red eye
-                reduction.<wbr/> If deemed necessary by the camera device,<wbr/>
-                a red eye reduction flash will fire during the
-                precapture sequence.<wbr/>
-              </span>
+                    <span class="entry_type_enum_notes"><p>Like ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/> but with automatic red eye
+reduction.<wbr/> If deemed necessary by the camera device,<wbr/>
+a red eye reduction flash will fire during the
+precapture sequence.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -1512,14 +1495,14 @@ of <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>ex
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">IDLE</span>
-                    <span class="entry_type_enum_notes">The trigger is idle.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>The trigger is idle.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">START</span>
-                    <span class="entry_type_enum_notes">The precapture metering sequence
-              must be started.<wbr/> The exact effect of the precapture
-              trigger depends on the current AE mode and
-              state.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>The precapture metering sequence
+must be started.<wbr/> The exact effect of the precapture
+trigger depends on the current AE mode and
+state.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -1575,83 +1558,75 @@ details.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">The auto-focus routine does not control the lens;
-            android.<wbr/>lens.<wbr/>focus<wbr/>Distance is controlled by the
-            application</span>
+                    <span class="entry_type_enum_notes"><p>The auto-focus routine does not control the lens;
+<a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a> is controlled by the
+application</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
-                    <span class="entry_type_enum_notes">
-            If lens is not fixed focus.<wbr/>
-
-            Use android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance to determine if lens
-            is fixed-focus.<wbr/> In this mode,<wbr/> the lens does not move unless
-            the autofocus trigger action is called.<wbr/> When that trigger
-            is activated,<wbr/> AF must transition to ACTIVE_<wbr/>SCAN,<wbr/> then to
-            the outcome of the scan (FOCUSED or NOT_<wbr/>FOCUSED).<wbr/>
-
-            Triggering AF_<wbr/>CANCEL resets the lens position to default,<wbr/>
-            and sets the AF state to INACTIVE.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>If lens is not fixed focus.<wbr/></p>
+<p>Use <a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> to determine if lens
+is fixed-focus.<wbr/> In this mode,<wbr/> the lens does not move unless
+the autofocus trigger action is called.<wbr/> When that trigger
+is activated,<wbr/> AF must transition to ACTIVE_<wbr/>SCAN,<wbr/> then to
+the outcome of the scan (FOCUSED or NOT_<wbr/>FOCUSED).<wbr/></p>
+<p>Triggering AF_<wbr/>CANCEL resets the lens position to default,<wbr/>
+and sets the AF state to INACTIVE.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">MACRO</span>
-                    <span class="entry_type_enum_notes">In this mode,<wbr/> the lens does not move unless the
-            autofocus trigger action is called.<wbr/>
-
-            When that trigger is activated,<wbr/> AF must transition to
-            ACTIVE_<wbr/>SCAN,<wbr/> then to the outcome of the scan (FOCUSED or
-            NOT_<wbr/>FOCUSED).<wbr/>  Triggering cancel AF resets the lens
-            position to default,<wbr/> and sets the AF state to
-            INACTIVE.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>In this mode,<wbr/> the lens does not move unless the
+autofocus trigger action is called.<wbr/></p>
+<p>When that trigger is activated,<wbr/> AF must transition to
+ACTIVE_<wbr/>SCAN,<wbr/> then to the outcome of the scan (FOCUSED or
+NOT_<wbr/>FOCUSED).<wbr/>  Triggering cancel AF resets the lens
+position to default,<wbr/> and sets the AF state to
+INACTIVE.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CONTINUOUS_VIDEO</span>
-                    <span class="entry_type_enum_notes">In this mode,<wbr/> the AF algorithm modifies the lens
-            position continually to attempt to provide a
-            constantly-in-focus image stream.<wbr/>
-
-            The focusing behavior should be suitable for good quality
-            video recording; typically this means slower focus
-            movement and no overshoots.<wbr/> When the AF trigger is not
-            involved,<wbr/> the AF algorithm should start in INACTIVE state,<wbr/>
-            and then transition into PASSIVE_<wbr/>SCAN and PASSIVE_<wbr/>FOCUSED
-            states as appropriate.<wbr/> When the AF trigger is activated,<wbr/>
-            the algorithm should immediately transition into
-            AF_<wbr/>FOCUSED or AF_<wbr/>NOT_<wbr/>FOCUSED as appropriate,<wbr/> and lock the
-            lens position until a cancel AF trigger is received.<wbr/>
-
-            Once cancel is received,<wbr/> the algorithm should transition
-            back to INACTIVE and resume passive scan.<wbr/> Note that this
-            behavior is not identical to CONTINUOUS_<wbr/>PICTURE,<wbr/> since an
-            ongoing PASSIVE_<wbr/>SCAN must immediately be
-            canceled.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>In this mode,<wbr/> the AF algorithm modifies the lens
+position continually to attempt to provide a
+constantly-in-focus image stream.<wbr/></p>
+<p>The focusing behavior should be suitable for good quality
+video recording; typically this means slower focus
+movement and no overshoots.<wbr/> When the AF trigger is not
+involved,<wbr/> the AF algorithm should start in INACTIVE state,<wbr/>
+and then transition into PASSIVE_<wbr/>SCAN and PASSIVE_<wbr/>FOCUSED
+states as appropriate.<wbr/> When the AF trigger is activated,<wbr/>
+the algorithm should immediately transition into
+AF_<wbr/>FOCUSED or AF_<wbr/>NOT_<wbr/>FOCUSED as appropriate,<wbr/> and lock the
+lens position until a cancel AF trigger is received.<wbr/></p>
+<p>Once cancel is received,<wbr/> the algorithm should transition
+back to INACTIVE and resume passive scan.<wbr/> Note that this
+behavior is not identical to CONTINUOUS_<wbr/>PICTURE,<wbr/> since an
+ongoing PASSIVE_<wbr/>SCAN must immediately be
+canceled.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CONTINUOUS_PICTURE</span>
-                    <span class="entry_type_enum_notes">In this mode,<wbr/> the AF algorithm modifies the lens
-            position continually to attempt to provide a
-            constantly-in-focus image stream.<wbr/>
-
-            The focusing behavior should be suitable for still image
-            capture; typically this means focusing as fast as
-            possible.<wbr/> When the AF trigger is not involved,<wbr/> the AF
-            algorithm should start in INACTIVE state,<wbr/> and then
-            transition into PASSIVE_<wbr/>SCAN and PASSIVE_<wbr/>FOCUSED states as
-            appropriate as it attempts to maintain focus.<wbr/> When the AF
-            trigger is activated,<wbr/> the algorithm should finish its
-            PASSIVE_<wbr/>SCAN if active,<wbr/> and then transition into
-            AF_<wbr/>FOCUSED or AF_<wbr/>NOT_<wbr/>FOCUSED as appropriate,<wbr/> and lock the
-            lens position until a cancel AF trigger is received.<wbr/>
-
-            When the AF cancel trigger is activated,<wbr/> the algorithm
-            should transition back to INACTIVE and then act as if it
-            has just been started.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>In this mode,<wbr/> the AF algorithm modifies the lens
+position continually to attempt to provide a
+constantly-in-focus image stream.<wbr/></p>
+<p>The focusing behavior should be suitable for still image
+capture; typically this means focusing as fast as
+possible.<wbr/> When the AF trigger is not involved,<wbr/> the AF
+algorithm should start in INACTIVE state,<wbr/> and then
+transition into PASSIVE_<wbr/>SCAN and PASSIVE_<wbr/>FOCUSED states as
+appropriate as it attempts to maintain focus.<wbr/> When the AF
+trigger is activated,<wbr/> the algorithm should finish its
+PASSIVE_<wbr/>SCAN if active,<wbr/> and then transition into
+AF_<wbr/>FOCUSED or AF_<wbr/>NOT_<wbr/>FOCUSED as appropriate,<wbr/> and lock the
+lens position until a cancel AF trigger is received.<wbr/></p>
+<p>When the AF cancel trigger is activated,<wbr/> the algorithm
+should transition back to INACTIVE and then act as if it
+has just been started.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">EDOF</span>
-                    <span class="entry_type_enum_notes">Extended depth of field (digital focus).<wbr/> AF
-            trigger is ignored,<wbr/> AF state should always be
-            INACTIVE.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>Extended depth of field (digital focus).<wbr/> AF
+trigger is ignored,<wbr/> AF state should always be
+INACTIVE.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -1766,16 +1741,16 @@ used sections in the frame metadata</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">IDLE</span>
-                    <span class="entry_type_enum_notes">The trigger is idle.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>The trigger is idle.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">START</span>
-                    <span class="entry_type_enum_notes">Autofocus must trigger now.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>Autofocus must trigger now.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CANCEL</span>
-                    <span class="entry_type_enum_notes">Autofocus must return to initial
-              state,<wbr/> and cancel any active trigger.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>Autofocus must return to initial
+state,<wbr/> and cancel any active trigger.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -1830,15 +1805,15 @@ any active trigger,<wbr/> and return to initial AF state.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">Auto-whitebalance lock is disabled; the AWB
-            algorithm is free to update its parameters if in AUTO
-            mode.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>Auto-whitebalance lock is disabled; the AWB
+algorithm is free to update its parameters if in AUTO
+mode.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON</span>
-                    <span class="entry_type_enum_notes">Auto-whitebalance lock is enabled; the AWB
-            algorithm must not update the exposure and sensitivity
-            parameters while the lock is active</span>
+                    <span class="entry_type_enum_notes"><p>Auto-whitebalance lock is enabled; the AWB
+algorithm must not update the exposure and sensitivity
+parameters while the lock is active</p></span>
                   </li>
                 </ul>
 
@@ -1890,85 +1865,67 @@ setting</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the application-selected color transform matrix
-            (android.<wbr/>color<wbr/>Correction.<wbr/>transform) and gains
-            (android.<wbr/>color<wbr/>Correction.<wbr/>gains) are used by the camera
-            device for manual white balance control.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the application-selected color transform matrix
+(<a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>) and gains
+(<a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a>) are used by the camera
+device for manual white balance control.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is active;
-            the application's values for android.<wbr/>color<wbr/>Correction.<wbr/>transform
-            and android.<wbr/>color<wbr/>Correction.<wbr/>gains are ignored.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is active;
+the application's values for android.<wbr/>color<wbr/>Correction.<wbr/>transform
+and <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> are ignored.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">INCANDESCENT</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses incandescent light as the assumed scene
-            illumination for white balance.<wbr/> While the exact white balance
-            transforms are up to the camera device,<wbr/> they will approximately
-            match the CIE standard illuminant A.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses incandescent light as the assumed scene
+illumination for white balance.<wbr/> While the exact white balance
+transforms are up to the camera device,<wbr/> they will approximately
+match the CIE standard illuminant A.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FLUORESCENT</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses fluorescent light as the assumed scene
-            illumination for white balance.<wbr/> While the exact white balance
-            transforms are up to the camera device,<wbr/> they will approximately
-            match the CIE standard illuminant F2.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses fluorescent light as the assumed scene
+illumination for white balance.<wbr/> While the exact white balance
+transforms are up to the camera device,<wbr/> they will approximately
+match the CIE standard illuminant F2.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">WARM_FLUORESCENT</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses warm fluorescent light as the assumed scene
-            illumination for white balance.<wbr/> While the exact white balance
-            transforms are up to the camera device,<wbr/> they will approximately
-            match the CIE standard illuminant F4.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses warm fluorescent light as the assumed scene
+illumination for white balance.<wbr/> While the exact white balance
+transforms are up to the camera device,<wbr/> they will approximately
+match the CIE standard illuminant F4.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">DAYLIGHT</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses daylight light as the assumed scene
-            illumination for white balance.<wbr/> While the exact white balance
-            transforms are up to the camera device,<wbr/> they will approximately
-            match the CIE standard illuminant D65.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses daylight light as the assumed scene
+illumination for white balance.<wbr/> While the exact white balance
+transforms are up to the camera device,<wbr/> they will approximately
+match the CIE standard illuminant D65.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CLOUDY_DAYLIGHT</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses cloudy daylight light as the assumed scene
-            illumination for white balance.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses cloudy daylight light as the assumed scene
+illumination for white balance.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">TWILIGHT</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses twilight light as the assumed scene
-            illumination for white balance.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses twilight light as the assumed scene
+illumination for white balance.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SHADE</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses shade light as the assumed scene
-            illumination for white balance.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses shade light as the assumed scene
+illumination for white balance.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -2094,37 +2051,37 @@ used sections in the frame metadata</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">CUSTOM</span>
-                    <span class="entry_type_enum_notes">This request doesn't fall into the other
-            categories.<wbr/> Default to preview-like
-            behavior.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>This request doesn't fall into the other
+categories.<wbr/> Default to preview-like
+behavior.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PREVIEW</span>
-                    <span class="entry_type_enum_notes">This request is for a preview-like usecase.<wbr/> The
-            precapture trigger may be used to start off a metering
-            w/<wbr/>flash sequence</span>
+                    <span class="entry_type_enum_notes"><p>This request is for a preview-like usecase.<wbr/> The
+precapture trigger may be used to start off a metering
+w/<wbr/>flash sequence</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">STILL_CAPTURE</span>
-                    <span class="entry_type_enum_notes">This request is for a still capture-type
-            usecase.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>This request is for a still capture-type
+usecase.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">VIDEO_RECORD</span>
-                    <span class="entry_type_enum_notes">This request is for a video recording
-            usecase.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>This request is for a video recording
+usecase.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">VIDEO_SNAPSHOT</span>
-                    <span class="entry_type_enum_notes">This request is for a video snapshot (still
-            image while recording video) usecase</span>
+                    <span class="entry_type_enum_notes"><p>This request is for a video snapshot (still
+image while recording video) usecase</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
-                    <span class="entry_type_enum_notes">This request is for a ZSL usecase; the
-            application will stream full-resolution images and
-            reprocess one or several later for a final
-            capture</span>
+                    <span class="entry_type_enum_notes"><p>This request is for a ZSL usecase; the
+application will stream full-resolution images and
+reprocess one or several later for a final
+capture</p></span>
                   </li>
                 </ul>
 
@@ -2250,26 +2207,26 @@ Only used if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">Full application control of pipeline.<wbr/> All 3A
-            routines are disabled,<wbr/> no other settings in
-            android.<wbr/>control.<wbr/>* have any effect</span>
+                    <span class="entry_type_enum_notes"><p>Full application control of pipeline.<wbr/> All 3A
+routines are disabled,<wbr/> no other settings in
+android.<wbr/>control.<wbr/>* have any effect</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
-                    <span class="entry_type_enum_notes">Use settings for each individual 3A routine.<wbr/>
-            Manual control of capture parameters is disabled.<wbr/> All
-            controls in android.<wbr/>control.<wbr/>* besides sceneMode take
-            effect</span>
+                    <span class="entry_type_enum_notes"><p>Use settings for each individual 3A routine.<wbr/>
+Manual control of capture parameters is disabled.<wbr/> All
+controls in android.<wbr/>control.<wbr/>* besides sceneMode take
+effect</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">USE_SCENE_MODE</span>
-                    <span class="entry_type_enum_notes">Use specific scene mode.<wbr/> Enabling this disables
-            control.<wbr/>aeMode,<wbr/> control.<wbr/>awbMode and control.<wbr/>afMode
-            controls; the HAL must ignore those settings while
-            USE_<wbr/>SCENE_<wbr/>MODE is active (except for FACE_<wbr/>PRIORITY
-            scene mode).<wbr/> Other control entries are still active.<wbr/>
-            This setting can only be used if availableSceneModes !=
-            UNSUPPORTED</span>
+                    <span class="entry_type_enum_notes"><p>Use specific scene mode.<wbr/> Enabling this disables
+control.<wbr/>aeMode,<wbr/> control.<wbr/>awbMode and control.<wbr/>afMode
+controls; the HAL must ignore those settings while
+USE_<wbr/>SCENE_<wbr/>MODE is active (except for FACE_<wbr/>PRIORITY
+scene mode).<wbr/> Other control entries are still active.<wbr/>
+This setting can only be used if availableSceneModes !=
+UNSUPPORTED</p></span>
                   </li>
                 </ul>
 
@@ -2333,16 +2290,15 @@ as it wishes.<wbr/> The HAL scene mode 3A settings are provided by
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FACE_PRIORITY</span>
-                    <span class="entry_type_enum_notes">if face detection support exists Use face
-            detection data to drive 3A routines.<wbr/> If face detection
-            statistics are disabled,<wbr/> should still operate correctly
-            (but not return face detection statistics to the
-            framework).<wbr/>
-
-            Unlike the other scene modes,<wbr/> aeMode,<wbr/> awbMode,<wbr/> and afMode
-            remain active when FACE_<wbr/>PRIORITY is set.<wbr/> This is due to
-            compatibility concerns with the old camera
-            API</span>
+                    <span class="entry_type_enum_notes"><p>if face detection support exists Use face
+detection data to drive 3A routines.<wbr/> If face detection
+statistics are disabled,<wbr/> should still operate correctly
+(but not return face detection statistics to the
+framework).<wbr/></p>
+<p>Unlike the other scene modes,<wbr/> aeMode,<wbr/> awbMode,<wbr/> and afMode
+remain active when FACE_<wbr/>PRIORITY is set.<wbr/> This is due to
+compatibility concerns with the old camera
+API</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ACTION</span>
@@ -3164,61 +3120,51 @@ trigger</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">
-                The camera device's autoexposure routine is disabled;
-                the application-selected android.<wbr/>sensor.<wbr/>exposure<wbr/>Time,<wbr/>
-                android.<wbr/>sensor.<wbr/>sensitivity and
-                android.<wbr/>sensor.<wbr/>frame<wbr/>Duration are used by the camera
-                device,<wbr/> along with android.<wbr/>flash.<wbr/>* fields,<wbr/> if there's
-                a flash unit for this camera device.<wbr/>
-              </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's autoexposure routine is disabled;
+the application-selected <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>,<wbr/>
+<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> and
+<a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a> are used by the camera
+device,<wbr/> along with android.<wbr/>flash.<wbr/>* fields,<wbr/> if there's
+a flash unit for this camera device.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON</span>
-                    <span class="entry_type_enum_notes">
-                The camera device's autoexposure routine is active,<wbr/>
-                with no flash control.<wbr/> The application's values for
-                android.<wbr/>sensor.<wbr/>exposure<wbr/>Time,<wbr/>
-                android.<wbr/>sensor.<wbr/>sensitivity,<wbr/> and
-                android.<wbr/>sensor.<wbr/>frame<wbr/>Duration are ignored.<wbr/> The
-                application has control over the various
-                android.<wbr/>flash.<wbr/>* fields.<wbr/>
-              </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's autoexposure routine is active,<wbr/>
+with no flash control.<wbr/> The application's values for
+<a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>,<wbr/>
+<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>,<wbr/> and
+<a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a> are ignored.<wbr/> The
+application has control over the various
+android.<wbr/>flash.<wbr/>* fields.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON_AUTO_FLASH</span>
-                    <span class="entry_type_enum_notes">
-                Like ON,<wbr/> except that the camera device also controls
-                the camera's flash unit,<wbr/> firing it in low-light
-                conditions.<wbr/> The flash may be fired during a
-                precapture sequence (triggered by
-                android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger) and may be fired
-                for captures for which the
-                android.<wbr/>control.<wbr/>capture<wbr/>Intent field is set to
-                STILL_<wbr/>CAPTURE
-              </span>
+                    <span class="entry_type_enum_notes"><p>Like ON,<wbr/> except that the camera device also controls
+the camera's flash unit,<wbr/> firing it in low-light
+conditions.<wbr/> The flash may be fired during a
+precapture sequence (triggered by
+<a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>) and may be fired
+for captures for which the
+<a href="#controls_android.control.captureIntent">android.<wbr/>control.<wbr/>capture<wbr/>Intent</a> field is set to
+STILL_<wbr/>CAPTURE</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON_ALWAYS_FLASH</span>
-                    <span class="entry_type_enum_notes">
-                Like ON,<wbr/> except that the camera device also controls
-                the camera's flash unit,<wbr/> always firing it for still
-                captures.<wbr/> The flash may be fired during a precapture
-                sequence (triggered by
-                android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger) and will always
-                be fired for captures for which the
-                android.<wbr/>control.<wbr/>capture<wbr/>Intent field is set to
-                STILL_<wbr/>CAPTURE
-              </span>
+                    <span class="entry_type_enum_notes"><p>Like ON,<wbr/> except that the camera device also controls
+the camera's flash unit,<wbr/> always firing it for still
+captures.<wbr/> The flash may be fired during a precapture
+sequence (triggered by
+<a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>) and will always
+be fired for captures for which the
+<a href="#controls_android.control.captureIntent">android.<wbr/>control.<wbr/>capture<wbr/>Intent</a> field is set to
+STILL_<wbr/>CAPTURE</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON_AUTO_FLASH_REDEYE</span>
-                    <span class="entry_type_enum_notes">
-                Like ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/> but with automatic red eye
-                reduction.<wbr/> If deemed necessary by the camera device,<wbr/>
-                a red eye reduction flash will fire during the
-                precapture sequence.<wbr/>
-              </span>
+                    <span class="entry_type_enum_notes"><p>Like ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/> but with automatic red eye
+reduction.<wbr/> If deemed necessary by the camera device,<wbr/>
+a red eye reduction flash will fire during the
+precapture sequence.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -3347,38 +3293,38 @@ used sections in the frame metadata</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">INACTIVE</span>
-                    <span class="entry_type_enum_notes">AE is off.<wbr/>  When a camera device is opened,<wbr/> it starts in
-            this state.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>AE is off.<wbr/>  When a camera device is opened,<wbr/> it starts in
+this state.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SEARCHING</span>
-                    <span class="entry_type_enum_notes">AE doesn't yet have a good set of control values
-            for the current scene</span>
+                    <span class="entry_type_enum_notes"><p>AE doesn't yet have a good set of control values
+for the current scene</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CONVERGED</span>
-                    <span class="entry_type_enum_notes">AE has a good set of control values for the
-            current scene</span>
+                    <span class="entry_type_enum_notes"><p>AE has a good set of control values for the
+current scene</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">LOCKED</span>
-                    <span class="entry_type_enum_notes">AE has been locked (aeMode =
-            LOCKED)</span>
+                    <span class="entry_type_enum_notes"><p>AE has been locked (aeMode =
+LOCKED)</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FLASH_REQUIRED</span>
-                    <span class="entry_type_enum_notes">AE has a good set of control values,<wbr/> but flash
-            needs to be fired for good quality still
-            capture</span>
+                    <span class="entry_type_enum_notes"><p>AE has a good set of control values,<wbr/> but flash
+needs to be fired for good quality still
+capture</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PRECAPTURE</span>
-                    <span class="entry_type_enum_notes">AE has been asked to do a precapture sequence
-            (through the
-            trigger_<wbr/>action(CAMERA2_<wbr/>TRIGGER_<wbr/>PRECAPTURE_<wbr/>METERING)
-            call),<wbr/> and is currently executing it.<wbr/> Once PRECAPTURE
-            completes,<wbr/> AE will transition to CONVERGED or
-            FLASH_<wbr/>REQUIRED as appropriate</span>
+                    <span class="entry_type_enum_notes"><p>AE has been asked to do a precapture sequence
+(through the
+trigger_<wbr/>action(CAMERA2_<wbr/>TRIGGER_<wbr/>PRECAPTURE_<wbr/>METERING)
+call),<wbr/> and is currently executing it.<wbr/> Once PRECAPTURE
+completes,<wbr/> AE will transition to CONVERGED or
+FLASH_<wbr/>REQUIRED as appropriate</p></span>
                   </li>
                 </ul>
 
@@ -3426,83 +3372,75 @@ notification callback is registered.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">The auto-focus routine does not control the lens;
-            android.<wbr/>lens.<wbr/>focus<wbr/>Distance is controlled by the
-            application</span>
+                    <span class="entry_type_enum_notes"><p>The auto-focus routine does not control the lens;
+<a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a> is controlled by the
+application</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
-                    <span class="entry_type_enum_notes">
-            If lens is not fixed focus.<wbr/>
-
-            Use android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance to determine if lens
-            is fixed-focus.<wbr/> In this mode,<wbr/> the lens does not move unless
-            the autofocus trigger action is called.<wbr/> When that trigger
-            is activated,<wbr/> AF must transition to ACTIVE_<wbr/>SCAN,<wbr/> then to
-            the outcome of the scan (FOCUSED or NOT_<wbr/>FOCUSED).<wbr/>
-
-            Triggering AF_<wbr/>CANCEL resets the lens position to default,<wbr/>
-            and sets the AF state to INACTIVE.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>If lens is not fixed focus.<wbr/></p>
+<p>Use <a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> to determine if lens
+is fixed-focus.<wbr/> In this mode,<wbr/> the lens does not move unless
+the autofocus trigger action is called.<wbr/> When that trigger
+is activated,<wbr/> AF must transition to ACTIVE_<wbr/>SCAN,<wbr/> then to
+the outcome of the scan (FOCUSED or NOT_<wbr/>FOCUSED).<wbr/></p>
+<p>Triggering AF_<wbr/>CANCEL resets the lens position to default,<wbr/>
+and sets the AF state to INACTIVE.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">MACRO</span>
-                    <span class="entry_type_enum_notes">In this mode,<wbr/> the lens does not move unless the
-            autofocus trigger action is called.<wbr/>
-
-            When that trigger is activated,<wbr/> AF must transition to
-            ACTIVE_<wbr/>SCAN,<wbr/> then to the outcome of the scan (FOCUSED or
-            NOT_<wbr/>FOCUSED).<wbr/>  Triggering cancel AF resets the lens
-            position to default,<wbr/> and sets the AF state to
-            INACTIVE.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>In this mode,<wbr/> the lens does not move unless the
+autofocus trigger action is called.<wbr/></p>
+<p>When that trigger is activated,<wbr/> AF must transition to
+ACTIVE_<wbr/>SCAN,<wbr/> then to the outcome of the scan (FOCUSED or
+NOT_<wbr/>FOCUSED).<wbr/>  Triggering cancel AF resets the lens
+position to default,<wbr/> and sets the AF state to
+INACTIVE.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CONTINUOUS_VIDEO</span>
-                    <span class="entry_type_enum_notes">In this mode,<wbr/> the AF algorithm modifies the lens
-            position continually to attempt to provide a
-            constantly-in-focus image stream.<wbr/>
-
-            The focusing behavior should be suitable for good quality
-            video recording; typically this means slower focus
-            movement and no overshoots.<wbr/> When the AF trigger is not
-            involved,<wbr/> the AF algorithm should start in INACTIVE state,<wbr/>
-            and then transition into PASSIVE_<wbr/>SCAN and PASSIVE_<wbr/>FOCUSED
-            states as appropriate.<wbr/> When the AF trigger is activated,<wbr/>
-            the algorithm should immediately transition into
-            AF_<wbr/>FOCUSED or AF_<wbr/>NOT_<wbr/>FOCUSED as appropriate,<wbr/> and lock the
-            lens position until a cancel AF trigger is received.<wbr/>
-
-            Once cancel is received,<wbr/> the algorithm should transition
-            back to INACTIVE and resume passive scan.<wbr/> Note that this
-            behavior is not identical to CONTINUOUS_<wbr/>PICTURE,<wbr/> since an
-            ongoing PASSIVE_<wbr/>SCAN must immediately be
-            canceled.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>In this mode,<wbr/> the AF algorithm modifies the lens
+position continually to attempt to provide a
+constantly-in-focus image stream.<wbr/></p>
+<p>The focusing behavior should be suitable for good quality
+video recording; typically this means slower focus
+movement and no overshoots.<wbr/> When the AF trigger is not
+involved,<wbr/> the AF algorithm should start in INACTIVE state,<wbr/>
+and then transition into PASSIVE_<wbr/>SCAN and PASSIVE_<wbr/>FOCUSED
+states as appropriate.<wbr/> When the AF trigger is activated,<wbr/>
+the algorithm should immediately transition into
+AF_<wbr/>FOCUSED or AF_<wbr/>NOT_<wbr/>FOCUSED as appropriate,<wbr/> and lock the
+lens position until a cancel AF trigger is received.<wbr/></p>
+<p>Once cancel is received,<wbr/> the algorithm should transition
+back to INACTIVE and resume passive scan.<wbr/> Note that this
+behavior is not identical to CONTINUOUS_<wbr/>PICTURE,<wbr/> since an
+ongoing PASSIVE_<wbr/>SCAN must immediately be
+canceled.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CONTINUOUS_PICTURE</span>
-                    <span class="entry_type_enum_notes">In this mode,<wbr/> the AF algorithm modifies the lens
-            position continually to attempt to provide a
-            constantly-in-focus image stream.<wbr/>
-
-            The focusing behavior should be suitable for still image
-            capture; typically this means focusing as fast as
-            possible.<wbr/> When the AF trigger is not involved,<wbr/> the AF
-            algorithm should start in INACTIVE state,<wbr/> and then
-            transition into PASSIVE_<wbr/>SCAN and PASSIVE_<wbr/>FOCUSED states as
-            appropriate as it attempts to maintain focus.<wbr/> When the AF
-            trigger is activated,<wbr/> the algorithm should finish its
-            PASSIVE_<wbr/>SCAN if active,<wbr/> and then transition into
-            AF_<wbr/>FOCUSED or AF_<wbr/>NOT_<wbr/>FOCUSED as appropriate,<wbr/> and lock the
-            lens position until a cancel AF trigger is received.<wbr/>
-
-            When the AF cancel trigger is activated,<wbr/> the algorithm
-            should transition back to INACTIVE and then act as if it
-            has just been started.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>In this mode,<wbr/> the AF algorithm modifies the lens
+position continually to attempt to provide a
+constantly-in-focus image stream.<wbr/></p>
+<p>The focusing behavior should be suitable for still image
+capture; typically this means focusing as fast as
+possible.<wbr/> When the AF trigger is not involved,<wbr/> the AF
+algorithm should start in INACTIVE state,<wbr/> and then
+transition into PASSIVE_<wbr/>SCAN and PASSIVE_<wbr/>FOCUSED states as
+appropriate as it attempts to maintain focus.<wbr/> When the AF
+trigger is activated,<wbr/> the algorithm should finish its
+PASSIVE_<wbr/>SCAN if active,<wbr/> and then transition into
+AF_<wbr/>FOCUSED or AF_<wbr/>NOT_<wbr/>FOCUSED as appropriate,<wbr/> and lock the
+lens position until a cancel AF trigger is received.<wbr/></p>
+<p>When the AF cancel trigger is activated,<wbr/> the algorithm
+should transition back to INACTIVE and then act as if it
+has just been started.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">EDOF</span>
-                    <span class="entry_type_enum_notes">Extended depth of field (digital focus).<wbr/> AF
-            trigger is ignored,<wbr/> AF state should always be
-            INACTIVE.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>Extended depth of field (digital focus).<wbr/> AF
+trigger is ignored,<wbr/> AF state should always be
+INACTIVE.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -3617,45 +3555,45 @@ used sections in the frame metadata</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">INACTIVE</span>
-                    <span class="entry_type_enum_notes">AF off or has not yet tried to scan/<wbr/>been asked
-            to scan.<wbr/>  When a camera device is opened,<wbr/> it starts in
-            this state.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>AF off or has not yet tried to scan/<wbr/>been asked
+to scan.<wbr/>  When a camera device is opened,<wbr/> it starts in
+this state.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PASSIVE_SCAN</span>
-                    <span class="entry_type_enum_notes">if CONTINUOUS_<wbr/>* modes are supported.<wbr/> AF is
-            currently doing an AF scan initiated by a continuous
-            autofocus mode</span>
+                    <span class="entry_type_enum_notes"><p>if CONTINUOUS_<wbr/>* modes are supported.<wbr/> AF is
+currently doing an AF scan initiated by a continuous
+autofocus mode</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PASSIVE_FOCUSED</span>
-                    <span class="entry_type_enum_notes">if CONTINUOUS_<wbr/>* modes are supported.<wbr/> AF currently
-            believes it is in focus,<wbr/> but may restart scanning at
-            any time.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>if CONTINUOUS_<wbr/>* modes are supported.<wbr/> AF currently
+believes it is in focus,<wbr/> but may restart scanning at
+any time.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ACTIVE_SCAN</span>
-                    <span class="entry_type_enum_notes">if AUTO or MACRO modes are supported.<wbr/> AF is doing
-            an AF scan because it was triggered by AF
-            trigger</span>
+                    <span class="entry_type_enum_notes"><p>if AUTO or MACRO modes are supported.<wbr/> AF is doing
+an AF scan because it was triggered by AF
+trigger</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FOCUSED_LOCKED</span>
-                    <span class="entry_type_enum_notes">if any AF mode besides OFF is supported.<wbr/> AF
-            believes it is focused correctly and is
-            locked</span>
+                    <span class="entry_type_enum_notes"><p>if any AF mode besides OFF is supported.<wbr/> AF
+believes it is focused correctly and is
+locked</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">NOT_FOCUSED_LOCKED</span>
-                    <span class="entry_type_enum_notes">if any AF mode besides OFF is supported.<wbr/> AF has
-            failed to focus successfully and is
-            locked</span>
+                    <span class="entry_type_enum_notes"><p>if any AF mode besides OFF is supported.<wbr/> AF has
+failed to focus successfully and is
+locked</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PASSIVE_UNFOCUSED</span>
-                    <span class="entry_type_enum_notes">if CONTINUOUS_<wbr/>* modes are supported.<wbr/> AF finished a
-            passive scan without finding focus,<wbr/> and may restart
-            scanning at any time.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>if CONTINUOUS_<wbr/>* modes are supported.<wbr/> AF finished a
+passive scan without finding focus,<wbr/> and may restart
+scanning at any time.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -3746,85 +3684,67 @@ ignores the trigger</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the application-selected color transform matrix
-            (android.<wbr/>color<wbr/>Correction.<wbr/>transform) and gains
-            (android.<wbr/>color<wbr/>Correction.<wbr/>gains) are used by the camera
-            device for manual white balance control.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the application-selected color transform matrix
+(<a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>) and gains
+(<a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a>) are used by the camera
+device for manual white balance control.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is active;
-            the application's values for android.<wbr/>color<wbr/>Correction.<wbr/>transform
-            and android.<wbr/>color<wbr/>Correction.<wbr/>gains are ignored.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is active;
+the application's values for android.<wbr/>color<wbr/>Correction.<wbr/>transform
+and <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> are ignored.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">INCANDESCENT</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses incandescent light as the assumed scene
-            illumination for white balance.<wbr/> While the exact white balance
-            transforms are up to the camera device,<wbr/> they will approximately
-            match the CIE standard illuminant A.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses incandescent light as the assumed scene
+illumination for white balance.<wbr/> While the exact white balance
+transforms are up to the camera device,<wbr/> they will approximately
+match the CIE standard illuminant A.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FLUORESCENT</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses fluorescent light as the assumed scene
-            illumination for white balance.<wbr/> While the exact white balance
-            transforms are up to the camera device,<wbr/> they will approximately
-            match the CIE standard illuminant F2.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses fluorescent light as the assumed scene
+illumination for white balance.<wbr/> While the exact white balance
+transforms are up to the camera device,<wbr/> they will approximately
+match the CIE standard illuminant F2.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">WARM_FLUORESCENT</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses warm fluorescent light as the assumed scene
-            illumination for white balance.<wbr/> While the exact white balance
-            transforms are up to the camera device,<wbr/> they will approximately
-            match the CIE standard illuminant F4.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses warm fluorescent light as the assumed scene
+illumination for white balance.<wbr/> While the exact white balance
+transforms are up to the camera device,<wbr/> they will approximately
+match the CIE standard illuminant F4.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">DAYLIGHT</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses daylight light as the assumed scene
-            illumination for white balance.<wbr/> While the exact white balance
-            transforms are up to the camera device,<wbr/> they will approximately
-            match the CIE standard illuminant D65.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses daylight light as the assumed scene
+illumination for white balance.<wbr/> While the exact white balance
+transforms are up to the camera device,<wbr/> they will approximately
+match the CIE standard illuminant D65.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CLOUDY_DAYLIGHT</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses cloudy daylight light as the assumed scene
-            illumination for white balance.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses cloudy daylight light as the assumed scene
+illumination for white balance.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">TWILIGHT</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses twilight light as the assumed scene
-            illumination for white balance.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses twilight light as the assumed scene
+illumination for white balance.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SHADE</span>
-                    <span class="entry_type_enum_notes">
-            The camera device's auto white balance routine is disabled;
-            the camera device uses shade light as the assumed scene
-            illumination for white balance.<wbr/>
-            </span>
+                    <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is disabled;
+the camera device uses shade light as the assumed scene
+illumination for white balance.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -3950,23 +3870,23 @@ used sections in the frame metadata</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">INACTIVE</span>
-                    <span class="entry_type_enum_notes">AWB is not in auto mode.<wbr/>  When a camera device is opened,<wbr/> it
-            starts in this state.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>AWB is not in auto mode.<wbr/>  When a camera device is opened,<wbr/> it
+starts in this state.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SEARCHING</span>
-                    <span class="entry_type_enum_notes">AWB doesn't yet have a good set of control
-            values for the current scene</span>
+                    <span class="entry_type_enum_notes"><p>AWB doesn't yet have a good set of control
+values for the current scene</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CONVERGED</span>
-                    <span class="entry_type_enum_notes">AWB has a good set of control values for the
-            current scene</span>
+                    <span class="entry_type_enum_notes"><p>AWB has a good set of control values for the
+current scene</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">LOCKED</span>
-                    <span class="entry_type_enum_notes">AE has been locked (aeMode =
-            LOCKED)</span>
+                    <span class="entry_type_enum_notes"><p>AE has been locked (aeMode =
+LOCKED)</p></span>
                   </li>
                 </ul>
 
@@ -4014,26 +3934,26 @@ notification callback is registered.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">Full application control of pipeline.<wbr/> All 3A
-            routines are disabled,<wbr/> no other settings in
-            android.<wbr/>control.<wbr/>* have any effect</span>
+                    <span class="entry_type_enum_notes"><p>Full application control of pipeline.<wbr/> All 3A
+routines are disabled,<wbr/> no other settings in
+android.<wbr/>control.<wbr/>* have any effect</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
-                    <span class="entry_type_enum_notes">Use settings for each individual 3A routine.<wbr/>
-            Manual control of capture parameters is disabled.<wbr/> All
-            controls in android.<wbr/>control.<wbr/>* besides sceneMode take
-            effect</span>
+                    <span class="entry_type_enum_notes"><p>Use settings for each individual 3A routine.<wbr/>
+Manual control of capture parameters is disabled.<wbr/> All
+controls in android.<wbr/>control.<wbr/>* besides sceneMode take
+effect</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">USE_SCENE_MODE</span>
-                    <span class="entry_type_enum_notes">Use specific scene mode.<wbr/> Enabling this disables
-            control.<wbr/>aeMode,<wbr/> control.<wbr/>awbMode and control.<wbr/>afMode
-            controls; the HAL must ignore those settings while
-            USE_<wbr/>SCENE_<wbr/>MODE is active (except for FACE_<wbr/>PRIORITY
-            scene mode).<wbr/> Other control entries are still active.<wbr/>
-            This setting can only be used if availableSceneModes !=
-            UNSUPPORTED</span>
+                    <span class="entry_type_enum_notes"><p>Use specific scene mode.<wbr/> Enabling this disables
+control.<wbr/>aeMode,<wbr/> control.<wbr/>awbMode and control.<wbr/>afMode
+controls; the HAL must ignore those settings while
+USE_<wbr/>SCENE_<wbr/>MODE is active (except for FACE_<wbr/>PRIORITY
+scene mode).<wbr/> Other control entries are still active.<wbr/>
+This setting can only be used if availableSceneModes !=
+UNSUPPORTED</p></span>
                   </li>
                 </ul>
 
@@ -4125,13 +4045,13 @@ as it wishes.<wbr/> The HAL scene mode 3A settings are provided by
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Minimal or no slowdown of frame rate compared to
-            Bayer RAW output</span>
+                    <span class="entry_type_enum_notes"><p>Minimal or no slowdown of frame rate compared to
+Bayer RAW output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">High-quality may reduce output frame
-            rate</span>
+                    <span class="entry_type_enum_notes"><p>High-quality may reduce output frame
+rate</p></span>
                   </li>
                 </ul>
 
@@ -4205,17 +4125,17 @@ processing</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">No edge enhancement is applied</span>
+                    <span class="entry_type_enum_notes"><p>No edge enhancement is applied</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Must not slow down frame rate relative to sensor
-            output</span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to sensor
+output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">Frame rate may be reduced by high
-            quality</span>
+                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
+quality</p></span>
                   </li>
                 </ul>
 
@@ -4329,17 +4249,17 @@ applied to the images</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">No edge enhancement is applied</span>
+                    <span class="entry_type_enum_notes"><p>No edge enhancement is applied</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Must not slow down frame rate relative to sensor
-            output</span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to sensor
+output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">Frame rate may be reduced by high
-            quality</span>
+                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
+quality</p></span>
                   </li>
                 </ul>
 
@@ -4518,20 +4438,20 @@ duration).<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">Do not fire the flash for this
-            capture</span>
+                    <span class="entry_type_enum_notes"><p>Do not fire the flash for this
+capture</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SINGLE</span>
-                    <span class="entry_type_enum_notes">if android.<wbr/>flash.<wbr/>available is true Fire flash
-            for this capture based on firingPower,<wbr/>
-            firingTime.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Fire flash
+for this capture based on firingPower,<wbr/>
+firingTime.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">TORCH</span>
-                    <span class="entry_type_enum_notes">if android.<wbr/>flash.<wbr/>available is true Flash
-            continuously on,<wbr/> power set by
-            firingPower</span>
+                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Flash
+continuously on,<wbr/> power set by
+firingPower</p></span>
                   </li>
                 </ul>
 
@@ -4894,20 +4814,20 @@ duration).<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">Do not fire the flash for this
-            capture</span>
+                    <span class="entry_type_enum_notes"><p>Do not fire the flash for this
+capture</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SINGLE</span>
-                    <span class="entry_type_enum_notes">if android.<wbr/>flash.<wbr/>available is true Fire flash
-            for this capture based on firingPower,<wbr/>
-            firingTime.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Fire flash
+for this capture based on firingPower,<wbr/>
+firingTime.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">TORCH</span>
-                    <span class="entry_type_enum_notes">if android.<wbr/>flash.<wbr/>available is true Flash
-            continuously on,<wbr/> power set by
-            firingPower</span>
+                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Flash
+continuously on,<wbr/> power set by
+firingPower</p></span>
                   </li>
                 </ul>
 
@@ -4948,22 +4868,22 @@ duration).<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">UNAVAILABLE</span>
-                    <span class="entry_type_enum_notes">No flash on camera</span>
+                    <span class="entry_type_enum_notes"><p>No flash on camera</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CHARGING</span>
-                    <span class="entry_type_enum_notes">if android.<wbr/>flash.<wbr/>available is true Flash is
-            charging and cannot be fired</span>
+                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Flash is
+charging and cannot be fired</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">READY</span>
-                    <span class="entry_type_enum_notes">if android.<wbr/>flash.<wbr/>available is true Flash is
-            ready to fire</span>
+                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Flash is
+ready to fire</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FIRED</span>
-                    <span class="entry_type_enum_notes">if android.<wbr/>flash.<wbr/>available is true Flash fired
-            for this capture</span>
+                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Flash fired
+for this capture</p></span>
                   </li>
                 </ul>
 
@@ -5034,18 +4954,18 @@ unit</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">No geometric correction is
-            applied</span>
+                    <span class="entry_type_enum_notes"><p>No geometric correction is
+applied</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Must not slow down frame rate relative to raw
-            bayer output</span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to raw
+bayer output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">Frame rate may be reduced by high
-            quality</span>
+                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
+quality</p></span>
                   </li>
                 </ul>
 
@@ -5154,18 +5074,18 @@ applied to the images</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">No hot pixel correction can be
-            applied</span>
+                    <span class="entry_type_enum_notes"><p>No hot pixel correction can be
+applied</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Frame rate must not be reduced compared to raw
-            Bayer output</span>
+                    <span class="entry_type_enum_notes"><p>Frame rate must not be reduced compared to raw
+Bayer output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">Frame rate may be reduced by high
-            quality</span>
+                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
+quality</p></span>
                   </li>
                 </ul>
 
@@ -5307,18 +5227,18 @@ sensor</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">No hot pixel correction can be
-            applied</span>
+                    <span class="entry_type_enum_notes"><p>No hot pixel correction can be
+applied</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Frame rate must not be reduced compared to raw
-            Bayer output</span>
+                    <span class="entry_type_enum_notes"><p>Frame rate must not be reduced compared to raw
+Bayer output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">Frame rate may be reduced by high
-            quality</span>
+                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
+quality</p></span>
                   </li>
                 </ul>
 
@@ -7476,17 +7396,17 @@ enabled.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">No noise reduction is applied</span>
+                    <span class="entry_type_enum_notes"><p>No noise reduction is applied</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Must not slow down frame rate relative to sensor
-            output</span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to sensor
+output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">May slow down frame rate to provide highest
-            quality</span>
+                    <span class="entry_type_enum_notes"><p>May slow down frame rate to provide highest
+quality</p></span>
                   </li>
                 </ul>
 
@@ -7605,17 +7525,17 @@ applied to the images</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">No noise reduction is applied</span>
+                    <span class="entry_type_enum_notes"><p>No noise reduction is applied</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Must not slow down frame rate relative to sensor
-            output</span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to sensor
+output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">May slow down frame rate to provide highest
-            quality</span>
+                    <span class="entry_type_enum_notes"><p>May slow down frame rate to provide highest
+quality</p></span>
                   </li>
                 </ul>
 
@@ -7920,15 +7840,15 @@ consideration of future support.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">FINAL</span>
-                    <span class="entry_type_enum_notes">The last or only metadata result buffer
-            for this capture.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>The last or only metadata result buffer
+for this capture.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PARTIAL</span>
-                    <span class="entry_type_enum_notes">A partial buffer of result metadata for this
-            capture.<wbr/> More result buffers for this capture will be sent
-            by the HAL,<wbr/> the last of which will be marked
-            FINAL.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>A partial buffer of result metadata for this
+capture.<wbr/> More result buffers for this capture will be sent
+by the HAL,<wbr/> the last of which will be marked
+FINAL.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -8149,20 +8069,20 @@ REPROCESS.<wbr/> Ignored otherwise</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">NONE</span>
-                    <span class="entry_type_enum_notes">No metadata should be produced on output,<wbr/> except
-            for application-bound buffer data.<wbr/> If no
-            application-bound streams exist,<wbr/> no frame should be
-            placed in the output frame queue.<wbr/> If such streams
-            exist,<wbr/> a frame should be placed on the output queue
-            with null metadata but with the necessary output buffer
-            information.<wbr/> Timestamp information should still be
-            included with any output stream buffers</span>
+                    <span class="entry_type_enum_notes"><p>No metadata should be produced on output,<wbr/> except
+for application-bound buffer data.<wbr/> If no
+application-bound streams exist,<wbr/> no frame should be
+placed in the output frame queue.<wbr/> If such streams
+exist,<wbr/> a frame should be placed on the output queue
+with null metadata but with the necessary output buffer
+information.<wbr/> Timestamp information should still be
+included with any output stream buffers</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FULL</span>
-                    <span class="entry_type_enum_notes">All metadata should be produced.<wbr/> Statistics will
-            only be produced if they are separately
-            enabled</span>
+                    <span class="entry_type_enum_notes"><p>All metadata should be produced.<wbr/> Statistics will
+only be produced if they are separately
+enabled</p></span>
                   </li>
                 </ul>
 
@@ -8255,16 +8175,16 @@ and the lens and flash must operate as requested.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">CAPTURE</span>
-                    <span class="entry_type_enum_notes">Capture a new image from the imaging hardware,<wbr/>
-            and process it according to the
-            settings</span>
+                    <span class="entry_type_enum_notes"><p>Capture a new image from the imaging hardware,<wbr/>
+and process it according to the
+settings</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">REPROCESS</span>
-                    <span class="entry_type_enum_notes">Process previously captured data; the
-            android.<wbr/>request.<wbr/>input<wbr/>Stream parameter determines the
-            source reprocessing stream.<wbr/> TODO: Mark dynamic metadata
-            needed for reprocessing with [RP]</span>
+                    <span class="entry_type_enum_notes"><p>Process previously captured data; the
+android.<wbr/>request.<wbr/>input<wbr/>Stream parameter determines the
+source reprocessing stream.<wbr/> TODO: Mark dynamic metadata
+needed for reprocessing with [RP]</p></span>
                   </li>
                 </ul>
 
@@ -8536,20 +8456,20 @@ frame</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">NONE</span>
-                    <span class="entry_type_enum_notes">No metadata should be produced on output,<wbr/> except
-            for application-bound buffer data.<wbr/> If no
-            application-bound streams exist,<wbr/> no frame should be
-            placed in the output frame queue.<wbr/> If such streams
-            exist,<wbr/> a frame should be placed on the output queue
-            with null metadata but with the necessary output buffer
-            information.<wbr/> Timestamp information should still be
-            included with any output stream buffers</span>
+                    <span class="entry_type_enum_notes"><p>No metadata should be produced on output,<wbr/> except
+for application-bound buffer data.<wbr/> If no
+application-bound streams exist,<wbr/> no frame should be
+placed in the output frame queue.<wbr/> If such streams
+exist,<wbr/> a frame should be placed on the output queue
+with null metadata but with the necessary output buffer
+information.<wbr/> Timestamp information should still be
+included with any output stream buffers</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FULL</span>
-                    <span class="entry_type_enum_notes">All metadata should be produced.<wbr/> Statistics will
-            only be produced if they are separately
-            enabled</span>
+                    <span class="entry_type_enum_notes"><p>All metadata should be produced.<wbr/> Statistics will
+only be produced if they are separately
+enabled</p></span>
                   </li>
                 </ul>
 
@@ -8788,27 +8708,27 @@ respectively.<wbr/></p>
                   <li>
                     <span class="entry_type_enum_name">YV12</span>
                     <span class="entry_type_enum_value">0x32315659</span>
-                    <span class="entry_type_enum_notes">YCrCb 4:2:0 Planar</span>
+                    <span class="entry_type_enum_notes"><p>YCrCb 4:2:0 Planar</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">YCrCb_420_SP</span>
                     <span class="entry_type_enum_value">0x11</span>
-                    <span class="entry_type_enum_notes">NV21</span>
+                    <span class="entry_type_enum_notes"><p>NV21</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">IMPLEMENTATION_DEFINED</span>
                     <span class="entry_type_enum_value">0x22</span>
-                    <span class="entry_type_enum_notes">Hal Implementation Defined</span>
+                    <span class="entry_type_enum_notes"><p>Hal Implementation Defined</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">YCbCr_420_888</span>
                     <span class="entry_type_enum_value">0x23</span>
-                    <span class="entry_type_enum_notes">Flexible YUV420 Format</span>
+                    <span class="entry_type_enum_notes"><p>Flexible YUV420 Format</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">BLOB</span>
                     <span class="entry_type_enum_value">0x21</span>
-                    <span class="entry_type_enum_notes">JPEG</span>
+                    <span class="entry_type_enum_notes"><p>JPEG</p></span>
                   </li>
                 </ul>
 
@@ -9594,9 +9514,9 @@ pixelArraySize.<wbr/></p>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">RGB</span>
-                    <span class="entry_type_enum_notes">Sensor is not Bayer; output has 3 16-bit
-              values for each pixel,<wbr/> instead of just 1 16-bit value
-              per pixel.<wbr/></span>
+                    <span class="entry_type_enum_notes"><p>Sensor is not Bayer; output has 3 16-bit
+values for each pixel,<wbr/> instead of just 1 16-bit value
+per pixel.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -10384,7 +10304,7 @@ to bottom in the sensor's coordinate system</p>
                   <li>
                     <span class="entry_type_enum_name">TUNGSTEN</span>
                     <span class="entry_type_enum_value">3</span>
-                    <span class="entry_type_enum_notes">Incandescent light</span>
+                    <span class="entry_type_enum_notes"><p>Incandescent light</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FLASH</span>
@@ -10405,22 +10325,22 @@ to bottom in the sensor's coordinate system</p>
                   <li>
                     <span class="entry_type_enum_name">DAYLIGHT_FLUORESCENT</span>
                     <span class="entry_type_enum_value">12</span>
-                    <span class="entry_type_enum_notes">D 5700 - 7100K</span>
+                    <span class="entry_type_enum_notes"><p>D 5700 - 7100K</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">DAY_WHITE_FLUORESCENT</span>
                     <span class="entry_type_enum_value">13</span>
-                    <span class="entry_type_enum_notes">N 4600 - 5400K</span>
+                    <span class="entry_type_enum_notes"><p>N 4600 - 5400K</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">COOL_WHITE_FLUORESCENT</span>
                     <span class="entry_type_enum_value">14</span>
-                    <span class="entry_type_enum_notes">W 3900 - 4500K</span>
+                    <span class="entry_type_enum_notes"><p>W 3900 - 4500K</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">WHITE_FLUORESCENT</span>
                     <span class="entry_type_enum_value">15</span>
-                    <span class="entry_type_enum_notes">WW 3200 - 3700K</span>
+                    <span class="entry_type_enum_notes"><p>WW 3200 - 3700K</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">STANDARD_A</span>
@@ -10830,17 +10750,17 @@ somewhere close to it.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">No shading correction is applied</span>
+                    <span class="entry_type_enum_notes"><p>No shading correction is applied</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Must not slow down frame rate relative to raw
-            bayer output</span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to raw
+bayer output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">Frame rate may be reduced by high
-            quality</span>
+                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
+quality</p></span>
                   </li>
                 </ul>
 
@@ -10944,17 +10864,17 @@ applied to the images</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes">No shading correction is applied</span>
+                    <span class="entry_type_enum_notes"><p>No shading correction is applied</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Must not slow down frame rate relative to raw
-            bayer output</span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to raw
+bayer output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">Frame rate may be reduced by high
-            quality</span>
+                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
+quality</p></span>
                   </li>
                 </ul>
 
@@ -11028,13 +10948,13 @@ to the image data</p>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SIMPLE</span>
-                    <span class="entry_type_enum_notes">Optional Return rectangle and confidence
-            only</span>
+                    <span class="entry_type_enum_notes"><p>Optional Return rectangle and confidence
+only</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FULL</span>
-                    <span class="entry_type_enum_notes">Optional Return all face
-            metadata</span>
+                    <span class="entry_type_enum_notes"><p>Optional Return all face
+metadata</p></span>
                   </li>
                 </ul>
 
@@ -11520,13 +11440,13 @@ map</p>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SIMPLE</span>
-                    <span class="entry_type_enum_notes">Optional Return rectangle and confidence
-            only</span>
+                    <span class="entry_type_enum_notes"><p>Optional Return rectangle and confidence
+only</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FULL</span>
-                    <span class="entry_type_enum_notes">Optional Return all face
-            metadata</span>
+                    <span class="entry_type_enum_notes"><p>Optional Return all face
+metadata</p></span>
                   </li>
                 </ul>
 
@@ -12409,18 +12329,18 @@ for a few sample points would be: 0 -&gt; 0,<wbr/> 0.<wbr/>15 -&gt;
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">CONTRAST_CURVE</span>
-                    <span class="entry_type_enum_notes">Use the tone mapping curve specified in
-            android.<wbr/>tonemap.<wbr/>curve</span>
+                    <span class="entry_type_enum_notes"><p>Use the tone mapping curve specified in
+android.<wbr/>tonemap.<wbr/>curve</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Must not slow down frame rate relative to raw
-            bayer output</span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to raw
+bayer output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">Frame rate may be reduced by high
-            quality</span>
+                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
+quality</p></span>
                   </li>
                 </ul>
 
@@ -12706,18 +12626,18 @@ for a few sample points would be: 0 -&gt; 0,<wbr/> 0.<wbr/>15 -&gt;
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">CONTRAST_CURVE</span>
-                    <span class="entry_type_enum_notes">Use the tone mapping curve specified in
-            android.<wbr/>tonemap.<wbr/>curve</span>
+                    <span class="entry_type_enum_notes"><p>Use the tone mapping curve specified in
+android.<wbr/>tonemap.<wbr/>curve</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes">Must not slow down frame rate relative to raw
-            bayer output</span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to raw
+bayer output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes">Frame rate may be reduced by high
-            quality</span>
+                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
+quality</p></span>
                   </li>
                 </ul>
 
@@ -12942,7 +12862,7 @@ doesn't violate the above rules.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">TRANSMIT</span>
-                    <span class="entry_type_enum_notes">android.<wbr/>led.<wbr/>transmit control is used</span>
+                    <span class="entry_type_enum_notes"><p><a href="#controls_android.led.transmit">android.<wbr/>led.<wbr/>transmit</a> control is used</p></span>
                   </li>
                 </ul>
 

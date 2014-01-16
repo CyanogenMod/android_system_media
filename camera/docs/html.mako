@@ -60,6 +60,7 @@
     .entry_type_visibility { font-weight: bolder; padding-left:1em}
     .entry_type_enum_name { font-family: monospace; font-weight: bolder; }
     .entry_type_enum_notes:before { content:" - " }
+    .entry_type_enum_notes>p:first-child { display:inline; }
     .entry_type_enum_value:before { content:" = " }
     .entry_type_enum_value { font-family: monospace; }
     .entry ul { margin: 0 0 0 0; list-style-position: inside; padding-left: 0.5em; }
@@ -258,7 +259,7 @@ ${          insert_toc_body(kind)}\
                     <span class="entry_type_enum_value">${value.id}</span>
                   % endif
                   % if value.notes is not None:
-                    <span class="entry_type_enum_notes">${value.notes | wbr}</span>
+                    <span class="entry_type_enum_notes">${value.notes | md_html, linkify_tags(metadata), wbr}</span>
                   % endif
                   </li>
                   % endfor
