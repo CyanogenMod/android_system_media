@@ -6780,7 +6780,7 @@ pick from supported list</p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Lens optical zoom setting</p>
+              <p>The current lens focal length; used for optical zoom.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -6788,7 +6788,7 @@ pick from supported list</p>
             </td>
 
             <td class="entry_range">
-              <p>&gt; 0</p>
+              <p><a href="#static_android.lens.info.availableFocalLengths">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Focal<wbr/>Lengths</a></p>
             </td>
 
             <td class="entry_tags">
@@ -6803,7 +6803,15 @@ pick from supported list</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Will not be supported on most devices.<wbr/></p>
+              <p>This setting controls the physical focal length of the camera
+device's lens.<wbr/> Changing the focal length changes the field of
+view of the camera device,<wbr/> and is usually used for optical zoom.<wbr/></p>
+<p>Like <a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a> and <a href="#controls_android.lens.aperture">android.<wbr/>lens.<wbr/>aperture</a>,<wbr/> this
+setting won't be applied instantaneously,<wbr/> and it may take several
+frames before the lens can move to the requested focal length.<wbr/>
+While the focal length is still changing,<wbr/> <a href="#dynamic_android.lens.state">android.<wbr/>lens.<wbr/>state</a> will
+be set to MOVING.<wbr/></p>
+<p>This is expected not to be supported on most devices.<wbr/></p>
             </td>
           </tr>
 
@@ -7059,22 +7067,22 @@ light by two stops)</p>
                   n
                 </span>
               <span class="entry_type_visibility"> [public]</span>
-                <div class="entry_type_notes">the list of available focal lengths</div>
+                <div class="entry_type_notes">The list of available focal lengths</div>
 
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>If fitted with optical zoom,<wbr/> what focal
-lengths are available.<wbr/> If not,<wbr/> the static focal
-length</p>
+              <p>The available focal lengths for this device for use with
+<a href="#controls_android.lens.focalLength">android.<wbr/>lens.<wbr/>focal<wbr/>Length</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>&gt; 0</p>
+              <p>Each value in this list must be &gt; 0.<wbr/> This list must
+contain at least one value.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -7090,8 +7098,10 @@ length</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>If optical zoom not supported,<wbr/> only one value
-should be reported</p>
+              <p>If optical zoom is not supported,<wbr/> this will only report
+a single value corresponding to the static focal length of the
+device.<wbr/> Otherwise,<wbr/> this will report every focal length supported
+by the device.<wbr/></p>
             </td>
           </tr>
 
@@ -7671,7 +7681,7 @@ pick from supported list</p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Lens optical zoom setting</p>
+              <p>The current lens focal length; used for optical zoom.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -7679,7 +7689,7 @@ pick from supported list</p>
             </td>
 
             <td class="entry_range">
-              <p>&gt; 0</p>
+              <p><a href="#static_android.lens.info.availableFocalLengths">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Focal<wbr/>Lengths</a></p>
             </td>
 
             <td class="entry_tags">
@@ -7694,7 +7704,15 @@ pick from supported list</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Will not be supported on most devices.<wbr/></p>
+              <p>This setting controls the physical focal length of the camera
+device's lens.<wbr/> Changing the focal length changes the field of
+view of the camera device,<wbr/> and is usually used for optical zoom.<wbr/></p>
+<p>Like <a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a> and <a href="#controls_android.lens.aperture">android.<wbr/>lens.<wbr/>aperture</a>,<wbr/> this
+setting won't be applied instantaneously,<wbr/> and it may take several
+frames before the lens can move to the requested focal length.<wbr/>
+While the focal length is still changing,<wbr/> <a href="#dynamic_android.lens.state">android.<wbr/>lens.<wbr/>state</a> will
+be set to MOVING.<wbr/></p>
+<p>This is expected not to be supported on most devices.<wbr/></p>
             </td>
           </tr>
 

@@ -1656,10 +1656,24 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="V1" />
         </entry>
         <entry name="focalLength" type="float" visibility="public">
-          <description>Lens optical zoom setting</description>
+          <description>
+          The current lens focal length; used for optical zoom.
+          </description>
           <units>focal length in mm</units>
-          <range>&amp;gt; 0</range>
-          <details>Will not be supported on most devices.</details>
+          <range>android.lens.info.availableFocalLengths</range>
+          <details>
+          This setting controls the physical focal length of the camera
+          device's lens. Changing the focal length changes the field of
+          view of the camera device, and is usually used for optical zoom.
+
+          Like android.lens.focusDistance and android.lens.aperture, this
+          setting won't be applied instantaneously, and it may take several
+          frames before the lens can move to the requested focal length.
+          While the focal length is still changing, android.lens.state will
+          be set to MOVING.
+
+          This is expected not to be supported on most devices.
+          </details>
           <tag id="V1" />
         </entry>
         <entry name="focusDistance" type="float" visibility="public">
@@ -1717,17 +1731,25 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="V1" />
           </entry>
           <entry name="availableFocalLengths" type="float" visibility="public"
-          type_notes="the list of available focal lengths"
+          type_notes="The list of available focal lengths"
           container="array">
             <array>
               <size>n</size>
             </array>
-            <description>If fitted with optical zoom, what focal
-            lengths are available. If not, the static focal
-            length</description>
-            <range>&amp;gt; 0</range>
-            <details>If optical zoom not supported, only one value
-            should be reported</details>
+            <description>
+            The available focal lengths for this device for use with
+            android.lens.focalLength.
+            </description>
+            <range>
+            Each value in this list must be &amp;gt; 0. This list must
+            contain at least one value.
+            </range>
+            <details>
+            If optical zoom is not supported, this will only report
+            a single value corresponding to the static focal length of the
+            device. Otherwise, this will report every focal length supported
+            by the device.
+            </details>
             <tag id="BC" />
             <tag id="V1" />
           </entry>
