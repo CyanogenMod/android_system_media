@@ -7016,25 +7016,27 @@ to (0,<wbr/>minimum focus distance)</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
+                    <span class="entry_type_enum_notes"><p>Optical stabilization is unavailable.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optical stabilization is enabled.<wbr/></p></span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether optical image stabilization is
-enabled.<wbr/></p>
+              <p>Sets whether the camera device uses optical image stabilization (OIS)
+when capturing images.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>android.<wbr/>lens.<wbr/>available<wbr/>Optical<wbr/>Stabilization</p>
+              <p><a href="#static_android.lens.info.availableOpticalStabilization">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Optical<wbr/>Stabilization</a></p>
             </td>
 
             <td class="entry_tags">
@@ -7049,7 +7051,12 @@ enabled.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Will not be supported on most devices.<wbr/></p>
+              <p>OIS is used to compensate for motion blur due to small movements of
+the camera during capture.<wbr/> Unlike digital image stabilization,<wbr/> OIS makes
+use of mechanical elements to stabilize the camera sensor,<wbr/> and thus
+allows for longer exposure times before camera shake becomes
+apparent.<wbr/></p>
+<p>This is not expected to be supported on most devices.<wbr/></p>
             </td>
           </tr>
 
@@ -7247,7 +7254,7 @@ by the device.<wbr/></p>
         
                 
           <tr class="entry" id="static_android.lens.info.availableOpticalStabilization">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Optical<wbr/>Stabilization
             </td>
             <td class="entry_type">
@@ -7264,8 +7271,9 @@ by the device.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>List of supported optical image
-stabilization modes</p>
+              <p>List containing a subset of the optical image
+stabilization (OIS) modes specified in
+<a href="#controls_android.lens.opticalStabilizationMode">android.<wbr/>lens.<wbr/>optical<wbr/>Stabilization<wbr/>Mode</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -7280,6 +7288,15 @@ stabilization modes</p>
               </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>If OIS is not implemented for a given camera device,<wbr/> this should
+contain only OFF.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -7976,25 +7993,27 @@ fixed depth of field range</p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
+                    <span class="entry_type_enum_notes"><p>Optical stabilization is unavailable.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON</span>
                     <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optical stabilization is enabled.<wbr/></p></span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether optical image stabilization is
-enabled.<wbr/></p>
+              <p>Sets whether the camera device uses optical image stabilization (OIS)
+when capturing images.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>android.<wbr/>lens.<wbr/>available<wbr/>Optical<wbr/>Stabilization</p>
+              <p><a href="#static_android.lens.info.availableOpticalStabilization">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Optical<wbr/>Stabilization</a></p>
             </td>
 
             <td class="entry_tags">
@@ -8009,7 +8028,12 @@ enabled.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Will not be supported on most devices.<wbr/></p>
+              <p>OIS is used to compensate for motion blur due to small movements of
+the camera during capture.<wbr/> Unlike digital image stabilization,<wbr/> OIS makes
+use of mechanical elements to stabilize the camera sensor,<wbr/> and thus
+allows for longer exposure times before camera shake becomes
+apparent.<wbr/></p>
+<p>This is not expected to be supported on most devices.<wbr/></p>
             </td>
           </tr>
 
