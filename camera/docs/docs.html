@@ -666,6 +666,23 @@
         </li>
       </ul> <!-- toc_section -->
     </li>
+    <li>
+      <span class="toc_section_header"><a href="#section_sync">sync</a></span>
+      <ul class="toc_section">
+        <li>
+          <span class="toc_kind_header">dynamic</span>
+          <ul class="toc_section">
+            <li><a href="#dynamic_android.sync.frameNumber">android.sync.frameNumber</a></li>
+          </ul>
+        </li>
+        <li>
+          <span class="toc_kind_header">static</span>
+          <ul class="toc_section">
+            <li><a href="#static_android.sync.maxLatency">android.sync.maxLatency</a></li>
+          </ul>
+        </li>
+      </ul> <!-- toc_section -->
+    </li>
   </ul>
 
 
@@ -14920,6 +14937,307 @@ possible again.<wbr/></p>
       </tbody>
 
   <!-- end of section -->
+  <tr><td colspan="6" id="section_sync" class="section">sync</td></tr>
+
+
+      <tr><td colspan="6" class="kind">dynamic</td></tr>
+
+      <thead class="entries_header">
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="dynamic_android.sync.frameNumber">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>sync.<wbr/>frame<wbr/>Number
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">int64</span>
+
+              <span class="entry_type_visibility"> [hidden]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">CONVERGING</span>
+                    <span class="entry_type_enum_value">-1</span>
+                    <span class="entry_type_enum_notes"><p>The current result is not yet fully synchronized to any request.<wbr/>
+Synchronization is in progress,<wbr/> and reading metadata from this
+result may include a mix of data that have taken effect since the
+last synchronization time.<wbr/></p>
+<p>In some future result,<wbr/> within <a href="#static_android.sync.maxLatency">android.<wbr/>sync.<wbr/>max<wbr/>Latency</a> frames,<wbr/>
+this value will update to the actual frame number frame number
+the result is guaranteed to be synchronized to (as long as the
+request settings remain constant).<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">UNKNOWN</span>
+                    <span class="entry_type_enum_value">-2</span>
+                    <span class="entry_type_enum_notes"><p>The current result's synchronization status is unknown.<wbr/> The
+result may have already converged,<wbr/> or it may be in progress.<wbr/>
+Reading from this result may include some mix of settings from
+past requests.<wbr/></p>
+<p>After a settings change,<wbr/> the new settings will eventually all
+take effect for the output buffers and results.<wbr/> However,<wbr/> this
+value will not change when that happens.<wbr/> Altering settings
+rapidly may provide outcomes using mixes of settings from recent
+requests.<wbr/></p>
+<p>This value is intended primarily for backwards compatibility with
+the older camera implementations (for android.<wbr/>hardware.<wbr/>Camera).<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The frame number corresponding to the last request
+with which the output result (metadata + buffers) has been fully
+synchronized.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Either a non-negative value corresponding to a
+<code>frame_<wbr/>number</code>,<wbr/> or one of the two enums (CONVERGING /<wbr/> UNKNOWN).<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_LIMITED">LIMITED</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When a request is submitted to the camera device,<wbr/> there is usually a
+delay of several frames before the controls get applied.<wbr/> A camera
+device may either choose to account for this delay by implementing a
+pipeline and carefully submit well-timed atomic control updates,<wbr/> or
+it may start streaming control changes that span over several frame
+boundaries.<wbr/></p>
+<p>In the latter case,<wbr/> whenever a request's settings change relative to
+the previous submitted request,<wbr/> the full set of changes may take
+multiple frame durations to fully take effect.<wbr/> Some settings may
+take effect sooner (in less frame durations) than others.<wbr/></p>
+<p>While a set of control changes are being propagated,<wbr/> this value
+will be CONVERGING.<wbr/></p>
+<p>Once it is fully known that a set of control changes have been
+finished propagating,<wbr/> and the resulting updated control settings
+have been read back by the camera device,<wbr/> this value will be set
+to a non-negative frame number (corresponding to the request to
+which the results have synchronized to).<wbr/></p>
+<p>Older camera device implementations may not have a way to detect
+when all camera controls have been applied,<wbr/> and will always set this
+value to UNKNOWN.<wbr/></p>
+<p>FULL capability devices will always have this value set to the
+frame number of the request corresponding to this result.<wbr/></p>
+<p><em>Further details</em>:</p>
+<ul>
+<li>Whenever a request differs from the last request,<wbr/> any future
+results not yet returned may have this value set to CONVERGING (this
+could include any in-progress captures not yet returned by the camera
+device,<wbr/> for more details see pipeline considerations below).<wbr/></li>
+<li>Submitting a series of multiple requests that differ from the
+previous request (e.<wbr/>g.<wbr/> r1,<wbr/> r2,<wbr/> r3 s.<wbr/>t.<wbr/> r1 != r2 != r3)
+moves the new synchronization frame to the last non-repeating
+request (using the smallest frame number from the contiguous list of
+repeating requests).<wbr/></li>
+<li>Submitting the same request repeatedly will not change this value
+to CONVERGING,<wbr/> if it was already a non-negative value.<wbr/></li>
+<li>When this value changes to non-negative,<wbr/> that means that all of the
+metadata controls from the request have been applied,<wbr/> all of the
+metadata controls from the camera device have been read to the
+updated values (into the result),<wbr/> and all of the graphics buffers
+corresponding to this result are also synchronized to the request.<wbr/></li>
+</ul>
+<p><em>Pipeline considerations</em>:</p>
+<p>Submitting a request with updated controls relative to the previously
+submitted requests may also invalidate the synchronization state
+of all the results corresponding to currently in-flight requests.<wbr/></p>
+<p>In other words,<wbr/> results for this current request and up to
+<a href="#static_android.request.pipelineMaxDepth">android.<wbr/>request.<wbr/>pipeline<wbr/>Max<wbr/>Depth</a> prior requests may have their
+<a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> change to CONVERGING.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Using UNKNOWN here is illegal unless android.<wbr/>sync.<wbr/>max<wbr/>Latency
+is also UNKNOWN.<wbr/></p>
+<p>FULL capability devices should simply set this value to the
+<code>frame_<wbr/>number</code> of the request this result corresponds to.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+      <tr><td colspan="6" class="kind">static</td></tr>
+
+      <thead class="entries_header">
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="static_android.sync.maxLatency">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>sync.<wbr/>max<wbr/>Latency
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">PER_FRAME_CONTROL</span>
+                    <span class="entry_type_enum_value">0</span>
+                    <span class="entry_type_enum_notes"><p>Every frame has the requests immediately applied.<wbr/>
+(and furthermore for all results,<wbr/>
+<code><a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == <a href="#controls_android.request.frameCount">android.<wbr/>request.<wbr/>frame<wbr/>Count</a></code>)</p>
+<p>Changing controls over multiple requests one after another will
+produce results that have those controls applied atomically
+each frame.<wbr/></p>
+<p>All FULL capability devices will have this as their maxLatency.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">UNKNOWN</span>
+                    <span class="entry_type_enum_value">-1</span>
+                    <span class="entry_type_enum_notes"><p>Each new frame has some subset (potentially the entire set)
+of the past requests applied to the camera settings.<wbr/></p>
+<p>By submitting a series of identical requests,<wbr/> the camera device
+will eventually have the camera settings applied,<wbr/> but it is
+unknown when that exact point will be.<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The maximum number of frames that can occur after a request
+(different than the previous) has been submitted,<wbr/> and before the
+result's state becomes synchronized (by setting
+<a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> to a non-negative value).<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              number of processed requests
+            </td>
+
+            <td class="entry_range">
+              <p>&gt;= -1</p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_LIMITED">LIMITED</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This defines the maximum distance (in number of metadata results),<wbr/>
+between <a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> and the equivalent
+<a href="#controls_android.request.frameCount">android.<wbr/>request.<wbr/>frame<wbr/>Count</a>.<wbr/></p>
+<p>In other words this acts as an upper boundary for how many frames
+must occur before the camera device knows for a fact that the new
+submitted camera settings have been applied in outgoing frames.<wbr/></p>
+<p>For example if the distance was 2,<wbr/></p>
+<pre><code>initial request = X (repeating)
+request1 = X
+request2 = Y
+request3 = Y
+request4 = Y
+
+where requestN has frameNumber N,<wbr/> and the first of the repeating
+initial request's has frameNumber F (and F &lt; 1).<wbr/>
+
+initial result = X' + { <a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == F }
+result1 = X' + { <a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == F }
+result2 = X' + { <a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == CONVERGING }
+result3 = X' + { <a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == CONVERGING }
+result4 = X' + { <a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == 2 }
+
+where resultN has frameNumber N.<wbr/>
+</code></pre>
+<p>Since <code>result4</code> has a <code>frameNumber == 4</code> and
+<code><a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == 2</code>,<wbr/> the distance is clearly
+<code>4 - 2 = 2</code>.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Use <code>frame_<wbr/>count</code> from camera3_<wbr/>request_<wbr/>t instead of
+<a href="#controls_android.request.frameCount">android.<wbr/>request.<wbr/>frame<wbr/>Count</a>.<wbr/></p>
+<p>LIMITED devices are strongly encouraged to use a non-negative
+value.<wbr/> If UNKNOWN is used here then app developers do not have a way
+to know when sensor settings have been applied.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+
+  <!-- end of section -->
 <!-- </namespace> -->
   </table>
 
@@ -15103,6 +15421,15 @@ possible again.<wbr/></p>
           <li><a href="#dynamic_android.sensor.temperature">android.sensor.temperature</a> (dynamic)</li>
         </ul>
       </li> <!-- tag_FULL -->
+      <li id="tag_LIMITED">LIMITED - 
+      Entry assists with LIMITED device implementation. LIMITED devices
+      must implement all entries with this tag. Optional for FULL devices.
+    
+        <ul class="tags_entries">
+          <li><a href="#dynamic_android.sync.frameNumber">android.sync.frameNumber</a> (dynamic)</li>
+          <li><a href="#static_android.sync.maxLatency">android.sync.maxLatency</a> (static)</li>
+        </ul>
+      </li> <!-- tag_LIMITED -->
     </ul>
   </div>
 

@@ -60,6 +60,7 @@ typedef enum camera_metadata_section {
     ANDROID_LED,
     ANDROID_INFO,
     ANDROID_BLACK_LEVEL,
+    ANDROID_SYNC,
     ANDROID_SECTION_COUNT,
 
     VENDOR_SECTION = 0x8000
@@ -95,6 +96,7 @@ typedef enum camera_metadata_section_start {
     ANDROID_LED_START              = ANDROID_LED               << 16,
     ANDROID_INFO_START             = ANDROID_INFO              << 16,
     ANDROID_BLACK_LEVEL_START      = ANDROID_BLACK_LEVEL       << 16,
+    ANDROID_SYNC_START             = ANDROID_SYNC              << 16,
     VENDOR_SECTION_START           = VENDOR_SECTION            << 16
 } camera_metadata_section_start_t;
 
@@ -349,6 +351,11 @@ typedef enum camera_metadata_tag {
     ANDROID_BLACK_LEVEL_LOCK =                        // enum         | public
             ANDROID_BLACK_LEVEL_START,
     ANDROID_BLACK_LEVEL_END,
+
+    ANDROID_SYNC_FRAME_NUMBER =                       // enum         | hidden
+            ANDROID_SYNC_START,
+    ANDROID_SYNC_MAX_LATENCY,                         // enum         | public
+    ANDROID_SYNC_END,
 
 } camera_metadata_tag_t;
 
@@ -743,5 +750,18 @@ typedef enum camera_metadata_enum_android_black_level_lock {
     ANDROID_BLACK_LEVEL_LOCK_OFF,
     ANDROID_BLACK_LEVEL_LOCK_ON,
 } camera_metadata_enum_android_black_level_lock_t;
+
+
+// ANDROID_SYNC_FRAME_NUMBER
+typedef enum camera_metadata_enum_android_sync_frame_number {
+    ANDROID_SYNC_FRAME_NUMBER_CONVERGING                        = -1,
+    ANDROID_SYNC_FRAME_NUMBER_UNKNOWN                           = -2,
+} camera_metadata_enum_android_sync_frame_number_t;
+
+// ANDROID_SYNC_MAX_LATENCY
+typedef enum camera_metadata_enum_android_sync_max_latency {
+    ANDROID_SYNC_MAX_LATENCY_PER_FRAME_CONTROL                  = 0,
+    ANDROID_SYNC_MAX_LATENCY_UNKNOWN                            = -1,
+} camera_metadata_enum_android_sync_max_latency_t;
 
 

@@ -42,6 +42,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <tag id="FULL">
         Entry is required for full hardware level devices, and optional for other hardware levels
     </tag>
+    <tag id="LIMITED">
+      Entry assists with LIMITED device implementation. LIMITED devices
+      must implement all entries with this tag. Optional for FULL devices.
+    </tag>
   </tags>
 
   <types>
@@ -4027,6 +4031,194 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
         </clone>
       </dynamic>
+    </section>
+    <section name="sync">
+      <dynamic>
+        <entry name="frameNumber" type="int64" visibility="hidden" enum="true">
+          <enum>
+            <value id="-1">CONVERGING
+              <notes>
+              The current result is not yet fully synchronized to any request.
+              Synchronization is in progress, and reading metadata from this
+              result may include a mix of data that have taken effect since the
+              last synchronization time.
+
+              In some future result, within android.sync.maxLatency frames,
+              this value will update to the actual frame number frame number
+              the result is guaranteed to be synchronized to (as long as the
+              request settings remain constant).
+            </notes>
+            </value>
+            <value id="-2">UNKNOWN
+              <notes>
+              The current result's synchronization status is unknown. The
+              result may have already converged, or it may be in progress.
+              Reading from this result may include some mix of settings from
+              past requests.
+
+              After a settings change, the new settings will eventually all
+              take effect for the output buffers and results. However, this
+              value will not change when that happens. Altering settings
+              rapidly may provide outcomes using mixes of settings from recent
+              requests.
+
+              This value is intended primarily for backwards compatibility with
+              the older camera implementations (for android.hardware.Camera).
+            </notes>
+            </value>
+          </enum>
+          <description>The frame number corresponding to the last request
+          with which the output result (metadata + buffers) has been fully
+          synchronized.</description>
+          <range>Either a non-negative value corresponding to a
+          `frame_number`, or one of the two enums (CONVERGING / UNKNOWN).
+          </range>
+          <details>
+          When a request is submitted to the camera device, there is usually a
+          delay of several frames before the controls get applied. A camera
+          device may either choose to account for this delay by implementing a
+          pipeline and carefully submit well-timed atomic control updates, or
+          it may start streaming control changes that span over several frame
+          boundaries.
+
+          In the latter case, whenever a request's settings change relative to
+          the previous submitted request, the full set of changes may take
+          multiple frame durations to fully take effect. Some settings may
+          take effect sooner (in less frame durations) than others.
+
+          While a set of control changes are being propagated, this value
+          will be CONVERGING.
+
+          Once it is fully known that a set of control changes have been
+          finished propagating, and the resulting updated control settings
+          have been read back by the camera device, this value will be set
+          to a non-negative frame number (corresponding to the request to
+          which the results have synchronized to).
+
+          Older camera device implementations may not have a way to detect
+          when all camera controls have been applied, and will always set this
+          value to UNKNOWN.
+
+          FULL capability devices will always have this value set to the
+          frame number of the request corresponding to this result.
+
+          _Further details_:
+
+          * Whenever a request differs from the last request, any future
+          results not yet returned may have this value set to CONVERGING (this
+          could include any in-progress captures not yet returned by the camera
+          device, for more details see pipeline considerations below).
+          * Submitting a series of multiple requests that differ from the
+          previous request (e.g. r1, r2, r3 s.t. r1 != r2 != r3)
+          moves the new synchronization frame to the last non-repeating
+          request (using the smallest frame number from the contiguous list of
+          repeating requests).
+          * Submitting the same request repeatedly will not change this value
+          to CONVERGING, if it was already a non-negative value.
+          * When this value changes to non-negative, that means that all of the
+          metadata controls from the request have been applied, all of the
+          metadata controls from the camera device have been read to the
+          updated values (into the result), and all of the graphics buffers
+          corresponding to this result are also synchronized to the request.
+
+          _Pipeline considerations_:
+
+          Submitting a request with updated controls relative to the previously
+          submitted requests may also invalidate the synchronization state
+          of all the results corresponding to currently in-flight requests.
+
+          In other words, results for this current request and up to
+          android.request.pipelineMaxDepth prior requests may have their
+          android.sync.frameNumber change to CONVERGING.
+          </details>
+          <hal_details>
+          Using UNKNOWN here is illegal unless android.sync.maxLatency
+          is also UNKNOWN.
+
+          FULL capability devices should simply set this value to the
+          `frame_number` of the request this result corresponds to.
+          </hal_details>
+          <tag id="LIMITED" />
+        </entry>
+      </dynamic>
+      <static>
+        <entry name="maxLatency" type="int32" visibility="public" enum="true">
+          <enum>
+            <value id="0">PER_FRAME_CONTROL
+              <notes>
+              Every frame has the requests immediately applied.
+              (and furthermore for all results,
+              `android.sync.frameNumber == android.request.frameCount`)
+
+              Changing controls over multiple requests one after another will
+              produce results that have those controls applied atomically
+              each frame.
+
+              All FULL capability devices will have this as their maxLatency.
+              </notes>
+            </value>
+            <value id="-1">UNKNOWN
+              <notes>
+              Each new frame has some subset (potentially the entire set)
+              of the past requests applied to the camera settings.
+
+              By submitting a series of identical requests, the camera device
+              will eventually have the camera settings applied, but it is
+              unknown when that exact point will be.
+              </notes>
+            </value>
+          </enum>
+          <description>
+          The maximum number of frames that can occur after a request
+          (different than the previous) has been submitted, and before the
+          result's state becomes synchronized (by setting
+          android.sync.frameNumber to a non-negative value).
+          </description>
+          <units>number of processed requests</units>
+          <range>&amp;gt;= -1</range>
+          <details>
+          This defines the maximum distance (in number of metadata results),
+          between android.sync.frameNumber and the equivalent
+          android.request.frameCount.
+
+          In other words this acts as an upper boundary for how many frames
+          must occur before the camera device knows for a fact that the new
+          submitted camera settings have been applied in outgoing frames.
+
+          For example if the distance was 2,
+
+              initial request = X (repeating)
+              request1 = X
+              request2 = Y
+              request3 = Y
+              request4 = Y
+
+              where requestN has frameNumber N, and the first of the repeating
+              initial request's has frameNumber F (and F &lt; 1).
+
+              initial result = X' + { android.sync.frameNumber == F }
+              result1 = X' + { android.sync.frameNumber == F }
+              result2 = X' + { android.sync.frameNumber == CONVERGING }
+              result3 = X' + { android.sync.frameNumber == CONVERGING }
+              result4 = X' + { android.sync.frameNumber == 2 }
+
+              where resultN has frameNumber N.
+
+          Since `result4` has a `frameNumber == 4` and
+          `android.sync.frameNumber == 2`, the distance is clearly
+          `4 - 2 = 2`.
+          </details>
+          <hal_details>
+          Use `frame_count` from camera3_request_t instead of
+          android.request.frameCount.
+
+          LIMITED devices are strongly encouraged to use a non-negative
+          value. If UNKNOWN is used here then app developers do not have a way
+          to know when sensor settings have been applied.
+          </hal_details>
+          <tag id="LIMITED" />
+        </entry>
+      </static>
     </section>
   </namespace>
 </metadata>

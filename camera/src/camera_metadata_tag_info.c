@@ -56,6 +56,7 @@ const char *camera_metadata_section_names[ANDROID_SECTION_COUNT] = {
     [ANDROID_LED]                  = "android.led",
     [ANDROID_INFO]                 = "android.info",
     [ANDROID_BLACK_LEVEL]          = "android.blackLevel",
+    [ANDROID_SYNC]                 = "android.sync",
 };
 
 unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
@@ -109,6 +110,8 @@ unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
                                        ANDROID_INFO_END },
     [ANDROID_BLACK_LEVEL]          = { ANDROID_BLACK_LEVEL_START,
                                        ANDROID_BLACK_LEVEL_END },
+    [ANDROID_SYNC]                 = { ANDROID_SYNC_START,
+                                       ANDROID_SYNC_END },
 };
 
 static tag_info_t android_color_correction[ANDROID_COLOR_CORRECTION_END -
@@ -559,6 +562,14 @@ static tag_info_t android_black_level[ANDROID_BLACK_LEVEL_END -
     { "lock",                          TYPE_BYTE   },
 };
 
+static tag_info_t android_sync[ANDROID_SYNC_END -
+        ANDROID_SYNC_START] = {
+    [ ANDROID_SYNC_FRAME_NUMBER - ANDROID_SYNC_START ] =
+    { "frameNumber",                   TYPE_INT64  },
+    [ ANDROID_SYNC_MAX_LATENCY - ANDROID_SYNC_START ] =
+    { "maxLatency",                    TYPE_INT32  },
+};
+
 
 tag_info_t *tag_info[ANDROID_SECTION_COUNT] = {
     android_color_correction,
@@ -586,6 +597,7 @@ tag_info_t *tag_info[ANDROID_SECTION_COUNT] = {
     android_led,
     android_info,
     android_black_level,
+    android_sync,
 };
 
 int camera_metadata_enum_snprint(uint32_t tag,
@@ -2033,6 +2045,37 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     break;
                 case ANDROID_BLACK_LEVEL_LOCK_ON:
                     msg = "ON";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
+
+        case ANDROID_SYNC_FRAME_NUMBER: {
+            switch (value) {
+                case ANDROID_SYNC_FRAME_NUMBER_CONVERGING:
+                    msg = "CONVERGING";
+                    ret = 0;
+                    break;
+                case ANDROID_SYNC_FRAME_NUMBER_UNKNOWN:
+                    msg = "UNKNOWN";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
+        case ANDROID_SYNC_MAX_LATENCY: {
+            switch (value) {
+                case ANDROID_SYNC_MAX_LATENCY_PER_FRAME_CONTROL:
+                    msg = "PER_FRAME_CONTROL";
+                    ret = 0;
+                    break;
+                case ANDROID_SYNC_MAX_LATENCY_UNKNOWN:
+                    msg = "UNKNOWN";
                     ret = 0;
                     break;
                 default:
