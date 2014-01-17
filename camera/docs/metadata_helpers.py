@@ -793,9 +793,10 @@ def filter_tags(text, metadata, filter_function, summary_function = None):
       metadata: A Metadata instance, the root of the metadata properties tree
       filter_function: A Node->string function to apply to each node
         when found in text; the string returned replaces the tag name in text.
-      summary_function: A Node set->string function that is provided the set of
-        tag nodes found in text, and which must return a string that is then appended
-        to the end of the text.
+      summary_function: A Node list->string function that is provided the list of
+        unique tag nodes found in text, and which must return a string that is
+        then appended to the end of the text. The list is sorted alphabetically
+        by node name.
     """
 
     tag_set = set()
@@ -841,7 +842,7 @@ def filter_tags(text, metadata, filter_function, summary_function = None):
       text = re.sub(tag_match, filter_sub, text)
 
     if summary_function is not None:
-      return text + summary_function(tag_set)
+      return text + summary_function(sorted(tag_set, key=lambda x: x.name))
     else:
       return text
 
