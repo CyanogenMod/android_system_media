@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <cutils/compiler.h>
+#include <system/camera_vendor_tags.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -466,6 +467,8 @@ int get_camera_metadata_tag_type(uint32_t tag);
  * entries with vendor-specified tags and to use the
  * get_camera_metadata_section_name, _tag_name, and _tag_type methods with
  * vendor tags. Returns 0 on success.
+ *
+ * DEPRECATED - Please use vendor_tag_ops defined in camera_vendor_tags.h instead.
  */
 typedef struct vendor_tag_query_ops vendor_tag_query_ops_t;
 struct vendor_tag_query_ops {
@@ -512,6 +515,10 @@ struct vendor_tag_query_ops {
         uint32_t *tag_array);
 };
 
+/**
+ * DEPRECATED - Camera metadata will transition to using vendor_tag_ops defined in
+ *      camera_vendor_tags.h instead.
+ */
 ANDROID_API
 int set_camera_metadata_vendor_tag_ops(const vendor_tag_query_ops_t *query_ops);
 
