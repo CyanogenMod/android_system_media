@@ -2846,7 +2846,7 @@ list is supported</p>
         
                 
           <tr class="entry" id="static_android.control.availableSceneModes">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes
             </td>
             <td class="entry_type">
@@ -2857,22 +2857,24 @@ list is supported</p>
                   n
                 </span>
               <span class="entry_type_visibility"> [public]</span>
-                <div class="entry_type_notes">list of enums from android.<wbr/>control.<wbr/>scene<wbr/>Mode,<wbr/> plus UNSUPPORTED to indicate no scene modes are supported</div>
+                <div class="entry_type_notes">List of enums (android.<wbr/>control.<wbr/>scene<wbr/>Mode).<wbr/></div>
 
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>what subset of the scene mode enum list is
-supported.<wbr/></p>
+              <p>List containing a subset of scene modes
+specified in <a href="#controls_android.control.sceneMode">android.<wbr/>control.<wbr/>scene<wbr/>Mode</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>SCENE_<wbr/>MODE_<wbr/>FACE_<wbr/>PRIORITY must be supported if face
-detection is supported</p>
+              <p>Any subset of the enums specified in android.<wbr/>control.<wbr/>scene<wbr/>Mode
+not including DISABLED,<wbr/> or solely DISABLED if no
+scene modes are available.<wbr/> FACE_<wbr/>PRIORITY must be included
+if face detection is supported (i.<wbr/>e.<wbr/><code><a href="#static_android.statistics.info.maxFaceCount">android.<wbr/>statistics.<wbr/>info.<wbr/>max<wbr/>Face<wbr/>Count</a> &gt; 0</code>).<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -2881,6 +2883,18 @@ detection is supported</p>
               </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This list contains scene modes that can be set for the camera device.<wbr/>
+Only scene modes that have been fully implemented for the
+camera device may be included here.<wbr/> Implementations are not expected
+to be consistent across all devices.<wbr/> If no scene modes are supported
+by the camera device,<wbr/> this will be set to <code>[DISABLED]</code>.<wbr/></p>
+            </td>
           </tr>
 
 

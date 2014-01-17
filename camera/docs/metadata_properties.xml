@@ -992,15 +992,28 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="availableSceneModes" type="byte" visibility="public"
-               type_notes="list of enums from android.control.sceneMode, plus UNSUPPORTED to indicate no scene modes are supported"
+               type_notes="List of enums (android.control.sceneMode)."
                container="array">
           <array>
             <size>n</size>
           </array>
-          <description>what subset of the scene mode enum list is
-          supported.</description>
-          <range>SCENE_MODE_FACE_PRIORITY must be supported if face
-          detection is supported</range>
+          <description>
+          List containing a subset of scene modes
+          specified in android.control.sceneMode.
+          </description>
+          <range>
+          Any subset of the enums specified in android.control.sceneMode
+          not including DISABLED, or solely DISABLED if no
+          scene modes are available. FACE_PRIORITY must be included
+          if face detection is supported (i.e.`android.statistics.info.maxFaceCount &gt; 0`).
+          </range>
+          <details>
+          This list contains scene modes that can be set for the camera device.
+          Only scene modes that have been fully implemented for the
+          camera device may be included here. Implementations are not expected
+          to be consistent across all devices. If no scene modes are supported
+          by the camera device, this will be set to `[DISABLED]`.
+          </details>
           <tag id="BC" />
         </entry>
         <entry name="availableVideoStabilizationModes" type="byte"
