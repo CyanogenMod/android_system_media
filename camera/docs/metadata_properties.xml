@@ -1975,13 +1975,27 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="opticalStabilizationMode" type="byte" visibility="public"
         enum="true">
           <enum>
-            <value>OFF</value>
-            <value optional="true">ON</value>
+            <value>OFF
+              <notes>Optical stabilization is unavailable.</notes>
+            </value>
+            <value optional="true">ON
+              <notes>Optical stabilization is enabled.</notes>
+            </value>
           </enum>
-          <description>Whether optical image stabilization is
-          enabled.</description>
-          <range>android.lens.availableOpticalStabilization</range>
-          <details>Will not be supported on most devices.</details>
+          <description>
+          Sets whether the camera device uses optical image stabilization (OIS)
+          when capturing images.
+          </description>
+          <range>android.lens.info.availableOpticalStabilization</range>
+          <details>
+          OIS is used to compensate for motion blur due to small movements of
+          the camera during capture. Unlike digital image stabilization, OIS makes
+          use of mechanical elements to stabilize the camera sensor, and thus
+          allows for longer exposure times before camera shake becomes
+          apparent.
+
+          This is not expected to be supported on most devices.
+          </details>
           <tag id="V1" />
         </entry>
       </controls>
@@ -2050,8 +2064,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <array>
               <size>n</size>
             </array>
-            <description>List of supported optical image
-            stabilization modes</description>
+            <description>
+            List containing a subset of the optical image
+            stabilization (OIS) modes specified in
+            android.lens.opticalStabilizationMode.
+            </description>
+            <details>
+            If OIS is not implemented for a given camera device, this should
+            contain only OFF.
+            </details>
             <tag id="V1" />
           </entry>
           <entry name="geometricCorrectionMap" type="float"
