@@ -373,6 +373,8 @@ static tag_info_t android_request[ANDROID_REQUEST_END -
     { "pipelineDepth",                 TYPE_BYTE   },
     [ ANDROID_REQUEST_PIPELINE_MAX_DEPTH - ANDROID_REQUEST_START ] =
     { "pipelineMaxDepth",              TYPE_BYTE   },
+    [ ANDROID_REQUEST_PARTIAL_RESULT_COUNT - ANDROID_REQUEST_START ] =
+    { "partialResultCount",            TYPE_INT32  },
 };
 
 static tag_info_t android_scaler[ANDROID_SCALER_END -
@@ -1529,6 +1531,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_REQUEST_PIPELINE_MAX_DEPTH: {
+            break;
+        }
+        case ANDROID_REQUEST_PARTIAL_RESULT_COUNT: {
             break;
         }
 

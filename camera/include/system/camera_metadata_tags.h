@@ -250,6 +250,7 @@ typedef enum camera_metadata_tag {
     ANDROID_REQUEST_MAX_NUM_REPROCESS_STREAMS,        // int32[]      | system
     ANDROID_REQUEST_PIPELINE_DEPTH,                   // byte         | public
     ANDROID_REQUEST_PIPELINE_MAX_DEPTH,               // byte         | public
+    ANDROID_REQUEST_PARTIAL_RESULT_COUNT,             // int32        | public
     ANDROID_REQUEST_END,
 
     ANDROID_SCALER_CROP_REGION =                      // int32[]      | public

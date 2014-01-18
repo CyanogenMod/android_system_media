@@ -2519,6 +2519,24 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           This value should be 4 or less.
           </hal_details>
         </entry>
+        <entry name="partialResultCount" type="int32" visibility="public">
+          <description>Optional. Defaults to 1. Defines how many sub-components
+          a result will be composed of.
+          </description>
+          <range>&amp;gt;= 1</range>
+          <details>In order to combat the pipeline latency, partial results
+          may be delivered to the application layer from the camera device as
+          soon as they are available.
+
+          A value of 1 means that partial results are not supported.
+
+          A typical use case for this might be: after requesting an AF lock the
+          new AF state might be available 50% of the way through the pipeline.
+          The camera device could then immediately dispatch this state via a
+          partial result to the framework/application layer, and the rest of
+          the metadata via later partial results.
+          </details>
+        </entry>
       </static>
     </section>
     <section name="scaler">
