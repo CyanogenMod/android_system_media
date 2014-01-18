@@ -901,37 +901,131 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="sceneMode" type="byte" visibility="public" enum="true">
           <enum>
-            <value id="0">UNSUPPORTED</value>
+            <value id="0">DISABLED
+              <notes>
+              Indicates that no scene modes are set for a given capture request.
+              </notes>
+            </value>
             <value>FACE_PRIORITY
-            <notes>if face detection support exists Use face
-            detection data to drive 3A routines. If face detection
-            statistics are disabled, should still operate correctly
-            (but not return face detection statistics to the
-            framework).
+              <notes>If face detection support exists, use face
+              detection data for auto-focus, auto-white balance, and
+              auto-exposure routines. If face detection statistics are
+              disabled (i.e. android.statistics.faceDetectMode is set to OFF),
+              this should still operate correctly (but will not return
+              face detection statistics to the framework).
 
-            Unlike the other scene modes, aeMode, awbMode, and afMode
-            remain active when FACE_PRIORITY is set. This is due to
-            compatibility concerns with the old camera
-            API</notes></value>
-            <value optional="true">ACTION</value>
-            <value optional="true">PORTRAIT</value>
-            <value optional="true">LANDSCAPE</value>
-            <value optional="true">NIGHT</value>
-            <value optional="true">NIGHT_PORTRAIT</value>
-            <value optional="true">THEATRE</value>
-            <value optional="true">BEACH</value>
-            <value optional="true">SNOW</value>
-            <value optional="true">SUNSET</value>
-            <value optional="true">STEADYPHOTO</value>
-            <value optional="true">FIREWORKS</value>
-            <value optional="true">SPORTS</value>
-            <value optional="true">PARTY</value>
-            <value optional="true">CANDLELIGHT</value>
-            <value optional="true">BARCODE</value>
+              Unlike the other scene modes, android.control.aeMode,
+              android.control.awbMode, and android.control.afMode
+              remain active when FACE_PRIORITY is set.
+              </notes>
+            </value>
+            <value optional="true">ACTION
+              <notes>
+              Optimized for photos of quickly moving objects.
+              Similar to SPORTS.
+              </notes>
+            </value>
+            <value optional="true">PORTRAIT
+              <notes>
+              Optimized for still photos of people.
+              </notes>
+            </value>
+            <value optional="true">LANDSCAPE
+              <notes>
+              Optimized for photos of distant macroscopic objects.
+              </notes>
+            </value>
+            <value optional="true">NIGHT
+              <notes>
+              Optimized for low-light settings.
+              </notes>
+            </value>
+            <value optional="true">NIGHT_PORTRAIT
+              <notes>
+              Optimized for still photos of people in low-light
+              settings.
+              </notes>
+            </value>
+            <value optional="true">THEATRE
+              <notes>
+              Optimized for dim, indoor settings where flash must
+              remain off.
+              </notes>
+            </value>
+            <value optional="true">BEACH
+              <notes>
+              Optimized for bright, outdoor beach settings.
+              </notes>
+            </value>
+            <value optional="true">SNOW
+              <notes>
+              Optimized for bright, outdoor settings containing snow.
+              </notes>
+            </value>
+            <value optional="true">SUNSET
+              <notes>
+              Optimized for scenes of the setting sun.
+              </notes>
+            </value>
+            <value optional="true">STEADYPHOTO
+              <notes>
+              Optimized to avoid blurry photos due to small amounts of
+              device motion (for example: due to hand shake).
+              </notes>
+            </value>
+            <value optional="true">FIREWORKS
+              <notes>
+              Optimized for nighttime photos of fireworks.
+              </notes>
+            </value>
+            <value optional="true">SPORTS
+              <notes>
+              Optimized for photos of quickly moving people.
+              Similar to ACTION.
+              </notes>
+            </value>
+            <value optional="true">PARTY
+              <notes>
+              Optimized for dim, indoor settings with multiple moving
+              people.
+              </notes>
+            </value>
+            <value optional="true">CANDLELIGHT
+              <notes>
+              Optimized for dim settings where the main light source
+              is a flame.
+              </notes>
+            </value>
+            <value optional="true">BARCODE
+              <notes>
+              Optimized for accurately capturing a photo of barcode
+              for use by camera applications that wish to read the
+              barcode value.
+              </notes>
+            </value>
           </enum>
-          <description>Which scene mode is active when
-          android.control.mode = SCENE_MODE</description>
+          <description>
+          A camera mode optimized for conditions typical in a particular
+          capture setting.
+          </description>
           <range>android.control.availableSceneModes</range>
+          <details>
+          This is the mode that that is active when
+          `android.control.mode == USE_SCENE_MODE`. Aside from FACE_PRIORITY,
+          these modes will disable android.control.aeMode,
+          android.control.awbMode, and android.control.afMode while in use.
+
+          The interpretation and implementation of these scene modes is left
+          to the implementor of the camera device. Their behavior will not be
+          consistent across all devices, and any given device may only implement
+          a subset of these modes.
+          </details>
+          <hal_details>
+          HAL implementations that include scene modes are expected to provide
+          the per-scene settings to use for android.control.aeMode,
+          android.control.awbMode, and android.control.afMode in
+          android.control.sceneModeOverrides.
+          </hal_details>
           <tag id="BC" />
         </entry>
         <entry name="videoStabilizationMode" type="byte" visibility="public"

@@ -456,7 +456,7 @@ typedef enum camera_metadata_enum_android_control_mode {
 
 // ANDROID_CONTROL_SCENE_MODE
 typedef enum camera_metadata_enum_android_control_scene_mode {
-    ANDROID_CONTROL_SCENE_MODE_UNSUPPORTED                      = 0,
+    ANDROID_CONTROL_SCENE_MODE_DISABLED                         = 0,
     ANDROID_CONTROL_SCENE_MODE_FACE_PRIORITY,
     ANDROID_CONTROL_SCENE_MODE_ACTION,
     ANDROID_CONTROL_SCENE_MODE_PORTRAIT,
