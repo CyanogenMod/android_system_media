@@ -292,7 +292,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_INFO_WHITE_LEVEL,                  // int32        | system
     ANDROID_SENSOR_INFO_END,
 
-    ANDROID_SHADING_MODE =                            // enum         | system
+    ANDROID_SHADING_MODE =                            // enum         | hidden
             ANDROID_SHADING_START,
     ANDROID_SHADING_STRENGTH,                         // byte         | system
     ANDROID_SHADING_END,

@@ -3028,19 +3028,38 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="shading">
       <controls>
-        <entry name="mode" type="byte" enum="true">
+        <entry name="mode" type="byte" visibility="hidden" enum="true">
           <enum>
             <value>OFF
-            <notes>No shading correction is applied</notes></value>
+            <notes>No lens shading correction is applied</notes></value>
             <value>FAST
-            <notes>Must not slow down frame rate relative to raw
-            bayer output</notes></value>
+            <notes>Must not slow down frame rate relative to sensor raw output</notes></value>
             <value>HIGH_QUALITY
-            <notes>Frame rate may be reduced by high
-            quality</notes></value>
+            <notes>Frame rate may be reduced by high quality</notes></value>
           </enum>
           <description>Quality of lens shading correction applied
-          to the image data</description>
+          to the image data.</description>
+          <details>
+          When set to OFF mode, no lens shading correction will be applied by the
+          camera device, and an identity lens shading map data will be provided
+          if `android.statistics.lensShadingMapMode == ON`. For example, for lens
+          shading map with size specified as `android.lens.info.shadingMapSize = [ 4, 3 ]`,
+          the output android.statistics.lensShadingMap for this case will be an identity map
+          shown below:
+
+              [ 1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0,
+                  1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0,
+                  1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0, 1.0,   1.0, 1.0, 1.0, 1.0,
+                  1.0, 1.0, 1.0, 1.0,  1.0, 1.0, 1.0, 1.0 ]
+
+          When set to other modes, lens shading correction will be applied by the
+          camera device. Applications can request lens shading map data by setting
+          android.statistics.lensShadingMapMode to ON, and then the camera device will provide
+          lens shading map data in android.statistics.lensShadingMap, with size specified
+          by android.lens.info.shadingMapSize.
+          </details>
         </entry>
         <entry name="strength" type="byte">
           <description>Control the amount of shading correction
