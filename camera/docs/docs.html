@@ -12761,32 +12761,6 @@ generation</p>
             </td>
 
           </tr>
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>When switching to an application-defined contrast curve by setting
-<a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> to CONTRAST_<wbr/>CURVE,<wbr/> the curve is defined
-per-channel with a set of <code>(in,<wbr/> out)</code> points that specify the
-mapping from input high-bit-depth pixel value to the output
-low-bit-depth value.<wbr/>  Since the actual pixel ranges of both input
-and output may change depending on the camera pipeline,<wbr/> the values
-are specified by normalized floating-point numbers.<wbr/></p>
-<p>More-complex color mapping operations such as 3D color look-up
-tables,<wbr/> selective chroma enhancement,<wbr/> or other non-linear color
-transforms will be disabled when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is
-CONTRAST_<wbr/>CURVE.<wbr/></p>
-<p>When using either FAST or HIGH_<wbr/>QUALITY,<wbr/> the camera device will
-emit its own tonemap curve in <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a>,<wbr/>
-<a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a>,<wbr/> and <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>.<wbr/>
-These values are always available,<wbr/> and as close as possible to the
-actually used nonlinear/<wbr/>nonglobal transforms.<wbr/></p>
-<p>If a request is sent with TRANSFORM_<wbr/>MATRIX with the camera device's
-provided curve in FAST or HIGH_<wbr/>QUALITY,<wbr/> the image's tonemap will be
-roughly the same.<wbr/></p>
-            </td>
-          </tr>
 
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
@@ -13809,6 +13783,32 @@ sensor output.<wbr/></p></span>
             <td class="entry_tags">
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When switching to an application-defined contrast curve by setting
+<a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> to CONTRAST_<wbr/>CURVE,<wbr/> the curve is defined
+per-channel with a set of <code>(in,<wbr/> out)</code> points that specify the
+mapping from input high-bit-depth pixel value to the output
+low-bit-depth value.<wbr/>  Since the actual pixel ranges of both input
+and output may change depending on the camera pipeline,<wbr/> the values
+are specified by normalized floating-point numbers.<wbr/></p>
+<p>More-complex color mapping operations such as 3D color look-up
+tables,<wbr/> selective chroma enhancement,<wbr/> or other non-linear color
+transforms will be disabled when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is
+CONTRAST_<wbr/>CURVE.<wbr/></p>
+<p>When using either FAST or HIGH_<wbr/>QUALITY,<wbr/> the camera device will
+emit its own tonemap curve in <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a>,<wbr/>
+<a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a>,<wbr/> and <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>.<wbr/>
+These values are always available,<wbr/> and as close as possible to the
+actually used nonlinear/<wbr/>nonglobal transforms.<wbr/></p>
+<p>If a request is sent with TRANSFORM_<wbr/>MATRIX with the camera device's
+provided curve in FAST or HIGH_<wbr/>QUALITY,<wbr/> the image's tonemap will be
+roughly the same.<wbr/></p>
+            </td>
           </tr>
 
 
