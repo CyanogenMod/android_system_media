@@ -2527,16 +2527,33 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <array>
             <size>3</size>
           </array>
-          <description>How many output streams can be allocated at
-          the same time for each type of stream</description>
-          <units>The number of raw sensor streams; the number of
-          processed, uncompressed streams; and the number of
-          JPEG-compressed streams</units>
-          <range>&amp;gt;=1 for Raw and JPEG-compressed stream. &amp;gt;= 3
-          for processed, uncompressed streams</range>
-          <details>Video snapshot with preview callbacks requires 3
-          processed streams (preview, record, app callbacks) and
-          one JPEG stream (snapshot)</details>
+          <description>The maximum numbers of different types of output streams
+          that can be configured and used simultaneously by a camera device.
+          </description>
+          <range>
+          &amp;gt;= 1 for JPEG-compressed format streams.
+
+          &amp;gt;= 0 for Raw format streams.
+
+          &amp;gt;= 3 for processed, uncompressed format streams.
+          </range>
+          <details>
+          This is a 3 element tuple that contains the max number of output simultaneous
+          streams for raw sensor, processed (and uncompressed), and JPEG formats respectively.
+          For example, if max raw sensor format output stream number is 1, max YUV streams
+          number is 3, and max JPEG stream number is 2, then this tuple should be `(1, 3, 2)`.
+
+          This lists the upper bound of the number of output streams supported by
+          the camera device. Using more streams simultaneously may require more hardware and
+          CPU resources that will consume more power. The image format for a output stream can
+          be any supported format provided by android.scaler.availableFormats. The formats
+          defined in android.scaler.availableFormats can be catergorized into the 3 stream types
+          as below:
+
+          * JPEG-compressed format: BLOB.
+          * Raw formats: RAW_SENSOR and RAW_OPAQUE.
+          * processed, uncompressed formats: YCbCr_420_888, YCrCb_420_SP, YV12.
+          </details>
           <tag id="BC" />
         </entry>
         <entry name="maxNumReprocessStreams" type="int32" visibility="system"
@@ -2545,8 +2562,34 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>1</size>
           </array>
           <description>How many reprocessing streams of any type
-          can be allocated at the same time</description>
-          <range>&amp;gt;= 1</range>
+          can be allocated at the same time.</description>
+          <range>&amp;gt;= 0</range>
+          <details>
+          **Deprecated**. Only used by HAL2.x.
+
+          When set to 0, it means no reprocess stream is supported.
+          </details>
+          <tag id="HAL2" />
+        </entry>
+        <entry name="maxNumInputStreams" type="int32" visibility="public">
+          <description>
+          The maximum numbers of any type of input streams
+          that can be configured and used simultaneously by a camera device.
+          </description>
+          <range>
+          &amp;gt;= 0 for LIMITED mode device (`android.info.supportedHardwareLevel == LIMITED`).
+          &amp;gt;= 1 for FULL mode device (`android.info.supportedHardwareLevel == FULL`).
+          </range>
+          <details>When set to 0, it means no input stream is supported.
+
+          The image format for a input stream can be any supported format provided
+          by android.scaler.availableInputFormats. When using an input stream, there must be
+          at least one output stream configured to to receive the reprocessed images.
+
+          For example, for Zero Shutter Lag (ZSL) still capture use case, the input
+          stream image format will be RAW_OPAQUE, the associated output stream image format
+          should be JPEG.
+          </details>
         </entry>
       </static>
       <dynamic>

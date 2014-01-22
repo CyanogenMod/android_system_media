@@ -423,6 +423,7 @@
           <ul class="toc_section">
             <li><a href="#static_android.request.maxNumOutputStreams">android.request.maxNumOutputStreams</a></li>
             <li><a href="#static_android.request.maxNumReprocessStreams">android.request.maxNumReprocessStreams</a></li>
+            <li><a href="#static_android.request.maxNumInputStreams">android.request.maxNumInputStreams</a></li>
             <li><a href="#static_android.request.pipelineMaxDepth">android.request.pipelineMaxDepth</a></li>
             <li><a href="#static_android.request.partialResultCount">android.request.partialResultCount</a></li>
           </ul>
@@ -9164,19 +9165,17 @@ REPROCESS.<wbr/> For HAL3,<wbr/> this tag is redundant.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>How many output streams can be allocated at
-the same time for each type of stream</p>
+              <p>The maximum numbers of different types of output streams
+that can be configured and used simultaneously by a camera device.<wbr/></p>
             </td>
 
             <td class="entry_units">
-              The number of raw sensor streams; the number of
-          processed,<wbr/> uncompressed streams; and the number of
-          JPEG-compressed streams
             </td>
 
             <td class="entry_range">
-              <p>&gt;=1 for Raw and JPEG-compressed stream.<wbr/> &gt;= 3
-for processed,<wbr/> uncompressed streams</p>
+              <p>&gt;= 1 for JPEG-compressed format streams.<wbr/></p>
+<p>&gt;= 0 for Raw format streams.<wbr/></p>
+<p>&gt;= 3 for processed,<wbr/> uncompressed format streams.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -9191,9 +9190,21 @@ for processed,<wbr/> uncompressed streams</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Video snapshot with preview callbacks requires 3
-processed streams (preview,<wbr/> record,<wbr/> app callbacks) and
-one JPEG stream (snapshot)</p>
+              <p>This is a 3 element tuple that contains the max number of output simultaneous
+streams for raw sensor,<wbr/> processed (and uncompressed),<wbr/> and JPEG formats respectively.<wbr/>
+For example,<wbr/> if max raw sensor format output stream number is 1,<wbr/> max YUV streams
+number is 3,<wbr/> and max JPEG stream number is 2,<wbr/> then this tuple should be <code>(1,<wbr/> 3,<wbr/> 2)</code>.<wbr/></p>
+<p>This lists the upper bound of the number of output streams supported by
+the camera device.<wbr/> Using more streams simultaneously may require more hardware and
+CPU resources that will consume more power.<wbr/> The image format for a output stream can
+be any supported format provided by <a href="#static_android.scaler.availableFormats">android.<wbr/>scaler.<wbr/>available<wbr/>Formats</a>.<wbr/> The formats
+defined in <a href="#static_android.scaler.availableFormats">android.<wbr/>scaler.<wbr/>available<wbr/>Formats</a> can be catergorized into the 3 stream types
+as below:</p>
+<ul>
+<li>JPEG-compressed format: BLOB.<wbr/></li>
+<li>Raw formats: RAW_<wbr/>SENSOR and RAW_<wbr/>OPAQUE.<wbr/></li>
+<li>processed,<wbr/> uncompressed formats: YCb<wbr/>Cr_<wbr/>420_<wbr/>888,<wbr/> YCr<wbr/>Cb_<wbr/>420_<wbr/>SP,<wbr/> YV12.<wbr/></li>
+</ul>
             </td>
           </tr>
 
@@ -9203,7 +9214,7 @@ one JPEG stream (snapshot)</p>
         
                 
           <tr class="entry" id="static_android.request.maxNumReprocessStreams">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Reprocess<wbr/>Streams
             </td>
             <td class="entry_type">
@@ -9220,19 +9231,80 @@ one JPEG stream (snapshot)</p>
 
             <td class="entry_description">
               <p>How many reprocessing streams of any type
-can be allocated at the same time</p>
+can be allocated at the same time.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>&gt;= 1</p>
+              <p>&gt;= 0</p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_HAL2">HAL2</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p><strong>Deprecated</strong>.<wbr/> Only used by HAL2.<wbr/>x.<wbr/></p>
+<p>When set to 0,<wbr/> it means no reprocess stream is supported.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.request.maxNumInputStreams">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The maximum numbers of any type of input streams
+that can be configured and used simultaneously by a camera device.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>&gt;= 0 for LIMITED mode device (<code><a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == LIMITED</code>).<wbr/>
+&gt;= 1 for FULL mode device (<code><a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == FULL</code>).<wbr/></p>
             </td>
 
             <td class="entry_tags">
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When set to 0,<wbr/> it means no input stream is supported.<wbr/></p>
+<p>The image format for a input stream can be any supported format provided
+by android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Formats.<wbr/> When using an input stream,<wbr/> there must be
+at least one output stream configured to to receive the reprocessed images.<wbr/></p>
+<p>For example,<wbr/> for Zero Shutter Lag (ZSL) still capture use case,<wbr/> the input
+stream image format will be RAW_<wbr/>OPAQUE,<wbr/> the associated output stream image format
+should be JPEG.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -15626,6 +15698,7 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#controls_android.request.inputStreams">android.request.inputStreams</a> (controls)</li>
           <li><a href="#controls_android.request.outputStreams">android.request.outputStreams</a> (controls)</li>
           <li><a href="#controls_android.request.type">android.request.type</a> (controls)</li>
+          <li><a href="#static_android.request.maxNumReprocessStreams">android.request.maxNumReprocessStreams</a> (static)</li>
           <li><a href="#controls_android.blackLevel.lock">android.blackLevel.lock</a> (controls)</li>
         </ul>
       </li> <!-- tag_HAL2 -->

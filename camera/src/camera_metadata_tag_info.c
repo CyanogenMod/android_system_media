@@ -369,6 +369,8 @@ static tag_info_t android_request[ANDROID_REQUEST_END -
     { "maxNumOutputStreams",           TYPE_INT32  },
     [ ANDROID_REQUEST_MAX_NUM_REPROCESS_STREAMS - ANDROID_REQUEST_START ] =
     { "maxNumReprocessStreams",        TYPE_INT32  },
+    [ ANDROID_REQUEST_MAX_NUM_INPUT_STREAMS - ANDROID_REQUEST_START ] =
+    { "maxNumInputStreams",            TYPE_INT32  },
     [ ANDROID_REQUEST_PIPELINE_DEPTH - ANDROID_REQUEST_START ] =
     { "pipelineDepth",                 TYPE_BYTE   },
     [ ANDROID_REQUEST_PIPELINE_MAX_DEPTH - ANDROID_REQUEST_START ] =
@@ -1537,6 +1539,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_REQUEST_MAX_NUM_REPROCESS_STREAMS: {
+            break;
+        }
+        case ANDROID_REQUEST_MAX_NUM_INPUT_STREAMS: {
             break;
         }
         case ANDROID_REQUEST_PIPELINE_DEPTH: {
