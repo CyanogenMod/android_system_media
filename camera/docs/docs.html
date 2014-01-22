@@ -5195,7 +5195,7 @@ for this capture based on <a href="#controls_android.flash.firingPower">android.
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>This control is only effective when flash unit is available
-(<code><a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> != 0</code>).<wbr/></p>
+(<code><a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> == true</code>).<wbr/></p>
 <p>When this control is used,<wbr/> the <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> must be set to ON or OFF.<wbr/>
 Otherwise,<wbr/> the camera device auto-exposure related flash control (ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/>
 ON_<wbr/>ALWAYS_<wbr/>FLASH,<wbr/> or ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE) will override this control.<wbr/></p>
@@ -5587,7 +5587,7 @@ for this capture based on <a href="#controls_android.flash.firingPower">android.
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>This control is only effective when flash unit is available
-(<code><a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> != 0</code>).<wbr/></p>
+(<code><a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> == true</code>).<wbr/></p>
 <p>When this control is used,<wbr/> the <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> must be set to ON or OFF.<wbr/>
 Otherwise,<wbr/> the camera device auto-exposure related flash control (ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/>
 ON_<wbr/>ALWAYS_<wbr/>FLASH,<wbr/> or ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE) will override this control.<wbr/></p>
@@ -10058,7 +10058,7 @@ the HAL only has to list up to the maximum video size supported by the devices.<
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>For each available processed output size (defined in
+              <p>For each available raw output size (defined in
 <a href="#static_android.scaler.availableRawSizes">android.<wbr/>scaler.<wbr/>available<wbr/>Raw<wbr/>Sizes</a>),<wbr/> this property lists the minimum
 supportable frame duration for that size.<wbr/></p>
             </td>
@@ -10739,7 +10739,7 @@ sensor interconnect bus (such as CSI2) or memory.<wbr/></p>
 
                 
           <tr class="entry" id="static_android.sensor.info.activeArraySize">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size
             </td>
             <td class="entry_type">
@@ -10757,16 +10757,16 @@ sensor interconnect bus (such as CSI2) or memory.<wbr/></p>
 
             <td class="entry_description">
               <p>Area of raw data which corresponds to only
-active pixels; smaller or equal to
-pixelArraySize.<wbr/></p>
+active pixels.<wbr/></p>
             </td>
 
             <td class="entry_units">
-              xmin,<wbr/> ymin,<wbr/> width,<wbr/> height.<wbr/> Top left of full
-            pixel array is (0,<wbr/>0)
             </td>
 
             <td class="entry_range">
+              <p>This array contains <code>(xmin,<wbr/> ymin,<wbr/> width,<wbr/> height)</code>.<wbr/> The <code>(xmin,<wbr/> ymin)</code> must be
+&gt;= <code>(0,<wbr/>0)</code>.<wbr/> The <code>(width,<wbr/> height)</code> must be &lt;=
+<code><a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a></code>.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -10775,6 +10775,15 @@ pixelArraySize.<wbr/></p>
               </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>It is smaller or equal to
+sensor full pixel array,<wbr/> which could include the black calibration pixels.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -11043,7 +11052,7 @@ array</p>
 
             <td class="entry_description">
               <p>Dimensions of full pixel array,<wbr/> possibly
-including black calibration pixels</p>
+including black calibration pixels.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -11065,9 +11074,8 @@ including black calibration pixels</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Maximum output resolution for raw format must
-match this in
-android.<wbr/>scaler.<wbr/>info.<wbr/>available<wbr/>Sizes<wbr/>Per<wbr/>Format</p>
+              <p>The maximum output resolution for raw format in
+<a href="#static_android.scaler.availableRawSizes">android.<wbr/>scaler.<wbr/>available<wbr/>Raw<wbr/>Sizes</a> will be equal to this size.<wbr/></p>
             </td>
           </tr>
 
@@ -11485,7 +11493,7 @@ adaptation</p>
 
             <td class="entry_description">
               <p>Maximum sensitivity that is implemented
-purely through analog gain</p>
+purely through analog gain.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -11509,8 +11517,8 @@ purely through analog gain</p>
             <td class="entry_details" colspan="5">
               <p>For <a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> values less than or
 equal to this,<wbr/> all applied gain must be analog.<wbr/> For
-values above this,<wbr/> it can be a mix of analog and
-digital</p>
+values above this,<wbr/> the gain applied can be a mix of analog and
+digital.<wbr/></p>
             </td>
           </tr>
 

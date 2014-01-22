@@ -1623,7 +1623,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The desired mode for for the camera device's flash control.</description>
           <details>
           This control is only effective when flash unit is available
-          (`android.flash.info.available != 0`).
+          (`android.flash.info.available == true`).
 
           When this control is used, the android.control.aeMode must be set to ON or OFF.
           Otherwise, the camera device auto-exposure related flash control (ON_AUTO_FLASH,
@@ -2753,7 +2753,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>n</size>
           </array>
           <description>
-          For each available processed output size (defined in
+          For each available raw output size (defined in
           android.scaler.availableRawSizes), this property lists the minimum
           supportable frame duration for that size.
           </description>
@@ -2918,10 +2918,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               <size>4</size>
             </array>
             <description>Area of raw data which corresponds to only
-            active pixels; smaller or equal to
-            pixelArraySize.</description>
-            <units>xmin, ymin, width, height. Top left of full
-            pixel array is (0,0)</units>
+            active pixels.</description>
+            <range>This array contains `(xmin, ymin, width, height)`. The `(xmin, ymin)` must be
+            &amp;gt;= `(0,0)`. The `(width, height)` must be &amp;lt;=
+            `android.sensor.info.pixelArraySize`.
+            </range>
+            <details>It is smaller or equal to
+            sensor full pixel array, which could include the black calibration pixels.</details>
             <tag id="DNG" />
           </entry>
           <entry name="sensitivityRange" type="int32" visibility="public"
@@ -2993,10 +2996,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               <size>2</size>
             </array>
             <description>Dimensions of full pixel array, possibly
-            including black calibration pixels</description>
-            <details>Maximum output resolution for raw format must
-            match this in
-            android.scaler.info.availableSizesPerFormat</details>
+            including black calibration pixels.</description>
+            <details>The maximum output resolution for raw format in
+            android.scaler.availableRawSizes will be equal to this size.
+            </details>
             <tag id="DNG" />
             <tag id="BC" />
           </entry>
@@ -3096,11 +3099,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="maxAnalogSensitivity" type="int32" visibility="public"
         optional="true">
           <description>Maximum sensitivity that is implemented
-          purely through analog gain</description>
+          purely through analog gain.</description>
           <details>For android.sensor.sensitivity values less than or
           equal to this, all applied gain must be analog. For
-          values above this, it can be a mix of analog and
-          digital</details>
+          values above this, the gain applied can be a mix of analog and
+          digital.</details>
           <tag id="V1" />
           <tag id="FULL" />
         </entry>
