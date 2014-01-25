@@ -1638,18 +1638,23 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           When set to TORCH, the flash will be on continuously. This mode can be used
           for use cases such as preview, auto-focus assist, still capture, or video recording.
+
+          The flash status will be reported by android.flash.state in the capture result metadata.
           </details>
           <tag id="BC" />
         </entry>
       </controls>
       <static>
         <namespace name="info">
-          <entry name="available" type="byte" visibility="public">
-            <description>Whether this camera has a
-            flash</description>
-            <units>boolean (0 = false, otherwise true)</units>
+          <entry name="available" type="byte" visibility="public" enum="true" typedef="boolean">
+            <enum>
+              <value>FALSE</value>
+              <value>TRUE</value>
+            </enum>
+            <description>Whether this camera device has a
+            flash.</description>
             <details>If no flash, none of the flash controls do
-            anything. All other metadata should return 0</details>
+            anything. All other metadata should return 0.</details>
             <tag id="BC" />
           </entry>
           <entry name="chargeDuration" type="int64">
@@ -1688,17 +1693,22 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>UNAVAILABLE
             <notes>No flash on camera</notes></value>
             <value>CHARGING
-            <notes>if android.flash.available is true Flash is
+            <notes>if android.flash.info.available is true Flash is
             charging and cannot be fired</notes></value>
             <value>READY
-            <notes>if android.flash.available is true Flash is
+            <notes>if android.flash.info.available is true Flash is
             ready to fire</notes></value>
             <value>FIRED
-            <notes>if android.flash.available is true Flash fired
+            <notes>if android.flash.info.available is true Flash fired
             for this capture</notes></value>
           </enum>
           <description>Current state of the flash
-          unit</description>
+          unit.</description>
+          <details>
+          When the camera device doesn't have flash unit
+          (i.e. `android.flash.info.available == false`), this state will always be UNAVAILABLE.
+          Other states indicate the current flash status.
+          </details>
         </entry>
       </dynamic>
     </section>
@@ -1912,6 +1922,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           The requested aperture value may take several frames to reach the
           requested value; the camera device will report the current (intermediate)
           aperture size in capture result metadata while the aperture is changing.
+          While the aperture is still changing, android.lens.state will be set to MOVING.
 
           When this is supported and android.control.aeMode is one of
           the ON modes, this will be overridden by the camera device
@@ -1938,6 +1949,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           in no reduction of the incoming light, and setting this to 2 would
           mean that the filter is set to reduce incoming light by two stops
           (allowing 1/4 of the prior amount of light to the sensor).
+
+          It may take several frames before the lens filter density changes
+          to the requested value. While the filter density is still changing,
+          android.lens.state will be set to MOVING.
           </details>
           <tag id="V1" />
         </entry>
@@ -1954,7 +1969,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           Like android.lens.focusDistance and android.lens.aperture, this
           setting won't be applied instantaneously, and it may take several
-          frames before the lens can move to the requested focal length.
+          frames before the lens can change to the requested focal length.
           While the focal length is still changing, android.lens.state will
           be set to MOVING.
 
@@ -1967,8 +1982,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           measured from frontmost surface of the lens</description>
           <units>diopters (1/m)</units>
           <range>&amp;gt;= 0</range>
-          <details>0 = infinity focus. Used value should be clamped
-          to (0,minimum focus distance)</details>
+          <details>0 means infinity focus. Used value will be clamped
+          to [0, android.lens.info.minimumFocusDistance].
+
+          Like android.lens.focalLength, this setting won't be applied
+          instantaneously, and it may take several frames before the lens
+          can move to the requested focus distance. While the lens is still moving,
+          android.lens.state will be set to MOVING.
+          </details>
           <tag id="BC" />
           <tag id="V1" />
         </entry>
@@ -2008,7 +2029,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </array>
             <description>List of supported aperture
             values.</description>
-            <range>one entry required, &amp;&gt; 0</range>
+            <range>one entry required, &amp;gt; 0</range>
             <details>If the camera device doesn't support variable apertures,
             listed value will be the fixed aperture.
 
@@ -2216,10 +2237,43 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
         <entry name="state" type="byte" visibility="public" enum="true">
           <enum>
-            <value>STATIONARY</value>
-            <value>MOVING</value>
+            <value>STATIONARY
+              <notes>
+              The lens parameters (android.lens.focalLength, android.lens.focusDistance
+              android.lens.filterDensity and android.lens.aperture) are not changing.
+              </notes>
+            </value>
+            <value>MOVING
+              <notes>
+              Any of the lens parameters (android.lens.focalLength, android.lens.focusDistance
+              android.lens.filterDensity or android.lens.aperture) is changing.
+              </notes>
+            </value>
           </enum>
-          <description>Current lens status</description>
+          <description>Current lens status.</description>
+          <details>
+          For lens parameters android.lens.focalLength, android.lens.focusDistance,
+          android.lens.filterDensity and android.lens.aperture, when changes are requested,
+          they may take several frames to reach the requested values. This state indicates
+          the current status of the lens parameters.
+
+          When the state is STATIONARY, the lens parameters are not changing. This could be
+          either because the parameters are all fixed, or because the lens has had enough
+          time to reach the most recently-requested values.
+          If all these lens parameters are not changable for a camera device, as listed below:
+
+          * Fixed focus (`android.lens.info.minimumFocusDistance == 0`), which means
+          android.lens.focusDistance parameter will always be 0.
+          * Fixed focal length (android.lens.info.availableFocalLengths contains single value),
+          which means the optical zoom is not supported.
+          * No ND filter (android.lens.info.availableFilterDensities contains only 0).
+          * Fixed aperture (android.lens.info.availableApertures contains single value).
+
+          Then this state will always be STATIONARY.
+
+          When the state is MOVING, it indicates that at least one of the lens parameters
+          is changing.
+          </details>
           <tag id="V1" />
         </entry>
       </dynamic>

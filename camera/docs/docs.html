@@ -5206,6 +5206,7 @@ control should be used along with AE precapture metering sequence
 (<a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>),<wbr/> otherwise,<wbr/> the image may be incorrectly exposed.<wbr/></p>
 <p>When set to TORCH,<wbr/> the flash will be on continuously.<wbr/> This mode can be used
 for use cases such as preview,<wbr/> auto-focus assist,<wbr/> still capture,<wbr/> or video recording.<wbr/></p>
+<p>The flash status will be reported by <a href="#dynamic_android.flash.state">android.<wbr/>flash.<wbr/>state</a> in the capture result metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -5248,20 +5249,27 @@ for use cases such as preview,<wbr/> auto-focus assist,<wbr/> still capture,<wbr
               android.<wbr/>flash.<wbr/>info.<wbr/>available
             </td>
             <td class="entry_type">
-                <span class="entry_type_name">byte</span>
+                <span class="entry_type_name entry_type_name_enum">byte</span>
 
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as boolean]</span>
 
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">FALSE</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">TRUE</span>
+                  </li>
+                </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether this camera has a
-flash</p>
+              <p>Whether this camera device has a
+flash.<wbr/></p>
             </td>
 
             <td class="entry_units">
-              boolean (0 = false,<wbr/> otherwise true)
             </td>
 
             <td class="entry_range">
@@ -5280,7 +5288,7 @@ flash</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>If no flash,<wbr/> none of the flash controls do
-anything.<wbr/> All other metadata should return 0</p>
+anything.<wbr/> All other metadata should return 0.<wbr/></p>
             </td>
           </tr>
 
@@ -5598,6 +5606,7 @@ control should be used along with AE precapture metering sequence
 (<a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>),<wbr/> otherwise,<wbr/> the image may be incorrectly exposed.<wbr/></p>
 <p>When set to TORCH,<wbr/> the flash will be on continuously.<wbr/> This mode can be used
 for use cases such as preview,<wbr/> auto-focus assist,<wbr/> still capture,<wbr/> or video recording.<wbr/></p>
+<p>The flash status will be reported by <a href="#dynamic_android.flash.state">android.<wbr/>flash.<wbr/>state</a> in the capture result metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -5607,7 +5616,7 @@ for use cases such as preview,<wbr/> auto-focus assist,<wbr/> still capture,<wbr
         
                 
           <tr class="entry" id="dynamic_android.flash.state">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>flash.<wbr/>state
             </td>
             <td class="entry_type">
@@ -5622,17 +5631,17 @@ for use cases such as preview,<wbr/> auto-focus assist,<wbr/> still capture,<wbr
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CHARGING</span>
-                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Flash is
+                    <span class="entry_type_enum_notes"><p>if <a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> is true Flash is
 charging and cannot be fired</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">READY</span>
-                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Flash is
+                    <span class="entry_type_enum_notes"><p>if <a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> is true Flash is
 ready to fire</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FIRED</span>
-                    <span class="entry_type_enum_notes"><p>if android.<wbr/>flash.<wbr/>available is true Flash fired
+                    <span class="entry_type_enum_notes"><p>if <a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> is true Flash fired
 for this capture</p></span>
                   </li>
                 </ul>
@@ -5641,7 +5650,7 @@ for this capture</p></span>
 
             <td class="entry_description">
               <p>Current state of the flash
-unit</p>
+unit.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -5653,6 +5662,16 @@ unit</p>
             <td class="entry_tags">
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When the camera device doesn't have flash unit
+(i.<wbr/>e.<wbr/> <code><a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> == false</code>),<wbr/> this state will always be UNAVAILABLE.<wbr/>
+Other states indicate the current flash status.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -6910,7 +6929,8 @@ this can be set along with <a href="#controls_android.sensor.exposureTime">andro
 to achieve manual exposure control.<wbr/></p>
 <p>The requested aperture value may take several frames to reach the
 requested value; the camera device will report the current (intermediate)
-aperture size in capture result metadata while the aperture is changing.<wbr/></p>
+aperture size in capture result metadata while the aperture is changing.<wbr/>
+While the aperture is still changing,<wbr/> <a href="#dynamic_android.lens.state">android.<wbr/>lens.<wbr/>state</a> will be set to MOVING.<wbr/></p>
 <p>When this is supported and <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is one of
 the ON modes,<wbr/> this will be overridden by the camera device
 auto-exposure algorithm,<wbr/> the overridden values are then provided
@@ -6970,6 +6990,9 @@ hitting the sensor.<wbr/>  For example,<wbr/> setting this to 0 would result
 in no reduction of the incoming light,<wbr/> and setting this to 2 would
 mean that the filter is set to reduce incoming light by two stops
 (allowing 1/<wbr/>4 of the prior amount of light to the sensor).<wbr/></p>
+<p>It may take several frames before the lens filter density changes
+to the requested value.<wbr/> While the filter density is still changing,<wbr/>
+<a href="#dynamic_android.lens.state">android.<wbr/>lens.<wbr/>state</a> will be set to MOVING.<wbr/></p>
             </td>
           </tr>
 
@@ -7019,7 +7042,7 @@ device's lens.<wbr/> Changing the focal length changes the field of
 view of the camera device,<wbr/> and is usually used for optical zoom.<wbr/></p>
 <p>Like <a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a> and <a href="#controls_android.lens.aperture">android.<wbr/>lens.<wbr/>aperture</a>,<wbr/> this
 setting won't be applied instantaneously,<wbr/> and it may take several
-frames before the lens can move to the requested focal length.<wbr/>
+frames before the lens can change to the requested focal length.<wbr/>
 While the focal length is still changing,<wbr/> <a href="#dynamic_android.lens.state">android.<wbr/>lens.<wbr/>state</a> will
 be set to MOVING.<wbr/></p>
 <p>This is expected not to be supported on most devices.<wbr/></p>
@@ -7069,8 +7092,12 @@ measured from frontmost surface of the lens</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>0 = infinity focus.<wbr/> Used value should be clamped
-to (0,<wbr/>minimum focus distance)</p>
+              <p>0 means infinity focus.<wbr/> Used value will be clamped
+to [0,<wbr/> <a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a>].<wbr/></p>
+<p>Like <a href="#controls_android.lens.focalLength">android.<wbr/>lens.<wbr/>focal<wbr/>Length</a>,<wbr/> this setting won't be applied
+instantaneously,<wbr/> and it may take several frames before the lens
+can move to the requested focus distance.<wbr/> While the lens is still moving,<wbr/>
+<a href="#dynamic_android.lens.state">android.<wbr/>lens.<wbr/>state</a> will be set to MOVING.<wbr/></p>
             </td>
           </tr>
 
@@ -7194,7 +7221,7 @@ values.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              <p>one entry required,<wbr/> &amp;&gt; 0</p>
+              <p>one entry required,<wbr/> &gt; 0</p>
             </td>
 
             <td class="entry_tags">
@@ -7836,7 +7863,8 @@ this can be set along with <a href="#controls_android.sensor.exposureTime">andro
 to achieve manual exposure control.<wbr/></p>
 <p>The requested aperture value may take several frames to reach the
 requested value; the camera device will report the current (intermediate)
-aperture size in capture result metadata while the aperture is changing.<wbr/></p>
+aperture size in capture result metadata while the aperture is changing.<wbr/>
+While the aperture is still changing,<wbr/> <a href="#dynamic_android.lens.state">android.<wbr/>lens.<wbr/>state</a> will be set to MOVING.<wbr/></p>
 <p>When this is supported and <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is one of
 the ON modes,<wbr/> this will be overridden by the camera device
 auto-exposure algorithm,<wbr/> the overridden values are then provided
@@ -7896,6 +7924,9 @@ hitting the sensor.<wbr/>  For example,<wbr/> setting this to 0 would result
 in no reduction of the incoming light,<wbr/> and setting this to 2 would
 mean that the filter is set to reduce incoming light by two stops
 (allowing 1/<wbr/>4 of the prior amount of light to the sensor).<wbr/></p>
+<p>It may take several frames before the lens filter density changes
+to the requested value.<wbr/> While the filter density is still changing,<wbr/>
+<a href="#dynamic_android.lens.state">android.<wbr/>lens.<wbr/>state</a> will be set to MOVING.<wbr/></p>
             </td>
           </tr>
 
@@ -7945,7 +7976,7 @@ device's lens.<wbr/> Changing the focal length changes the field of
 view of the camera device,<wbr/> and is usually used for optical zoom.<wbr/></p>
 <p>Like <a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a> and <a href="#controls_android.lens.aperture">android.<wbr/>lens.<wbr/>aperture</a>,<wbr/> this
 setting won't be applied instantaneously,<wbr/> and it may take several
-frames before the lens can move to the requested focal length.<wbr/>
+frames before the lens can change to the requested focal length.<wbr/>
 While the focal length is still changing,<wbr/> <a href="#dynamic_android.lens.state">android.<wbr/>lens.<wbr/>state</a> will
 be set to MOVING.<wbr/></p>
 <p>This is expected not to be supported on most devices.<wbr/></p>
@@ -8118,7 +8149,7 @@ apparent.<wbr/></p>
         
                 
           <tr class="entry" id="dynamic_android.lens.state">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>lens.<wbr/>state
             </td>
             <td class="entry_type">
@@ -8129,16 +8160,20 @@ apparent.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">STATIONARY</span>
+                    <span class="entry_type_enum_notes"><p>The lens parameters (<a href="#controls_android.lens.focalLength">android.<wbr/>lens.<wbr/>focal<wbr/>Length</a>,<wbr/> android.<wbr/>lens.<wbr/>focus<wbr/>Distance
+android.<wbr/>lens.<wbr/>filter<wbr/>Density and <a href="#controls_android.lens.aperture">android.<wbr/>lens.<wbr/>aperture</a>) are not changing.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">MOVING</span>
+                    <span class="entry_type_enum_notes"><p>Any of the lens parameters (<a href="#controls_android.lens.focalLength">android.<wbr/>lens.<wbr/>focal<wbr/>Length</a>,<wbr/> android.<wbr/>lens.<wbr/>focus<wbr/>Distance
+android.<wbr/>lens.<wbr/>filter<wbr/>Density or <a href="#controls_android.lens.aperture">android.<wbr/>lens.<wbr/>aperture</a>) is changing.<wbr/></p></span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Current lens status</p>
+              <p>Current lens status.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -8153,6 +8188,32 @@ apparent.<wbr/></p>
               </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For lens parameters <a href="#controls_android.lens.focalLength">android.<wbr/>lens.<wbr/>focal<wbr/>Length</a>,<wbr/> <a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a>,<wbr/>
+<a href="#controls_android.lens.filterDensity">android.<wbr/>lens.<wbr/>filter<wbr/>Density</a> and <a href="#controls_android.lens.aperture">android.<wbr/>lens.<wbr/>aperture</a>,<wbr/> when changes are requested,<wbr/>
+they may take several frames to reach the requested values.<wbr/> This state indicates
+the current status of the lens parameters.<wbr/></p>
+<p>When the state is STATIONARY,<wbr/> the lens parameters are not changing.<wbr/> This could be
+either because the parameters are all fixed,<wbr/> or because the lens has had enough
+time to reach the most recently-requested values.<wbr/>
+If all these lens parameters are not changable for a camera device,<wbr/> as listed below:</p>
+<ul>
+<li>Fixed focus (<code><a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> == 0</code>),<wbr/> which means
+<a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a> parameter will always be 0.<wbr/></li>
+<li>Fixed focal length (<a href="#static_android.lens.info.availableFocalLengths">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Focal<wbr/>Lengths</a> contains single value),<wbr/>
+which means the optical zoom is not supported.<wbr/></li>
+<li>No ND filter (<a href="#static_android.lens.info.availableFilterDensities">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Filter<wbr/>Densities</a> contains only 0).<wbr/></li>
+<li>Fixed aperture (<a href="#static_android.lens.info.availableApertures">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Apertures</a> contains single value).<wbr/></li>
+</ul>
+<p>Then this state will always be STATIONARY.<wbr/></p>
+<p>When the state is MOVING,<wbr/> it indicates that at least one of the lens parameters
+is changing.<wbr/></p>
+            </td>
           </tr>
 
 

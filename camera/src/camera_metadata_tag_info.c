@@ -1249,6 +1249,18 @@ int camera_metadata_enum_snprint(uint32_t tag,
         }
 
         case ANDROID_FLASH_INFO_AVAILABLE: {
+            switch (value) {
+                case ANDROID_FLASH_INFO_AVAILABLE_FALSE:
+                    msg = "FALSE";
+                    ret = 0;
+                    break;
+                case ANDROID_FLASH_INFO_AVAILABLE_TRUE:
+                    msg = "TRUE";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
             break;
         }
         case ANDROID_FLASH_INFO_CHARGE_DURATION: {

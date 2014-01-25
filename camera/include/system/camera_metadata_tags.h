@@ -170,7 +170,7 @@ typedef enum camera_metadata_tag {
     ANDROID_FLASH_STATE,                              // enum         | public
     ANDROID_FLASH_END,
 
-    ANDROID_FLASH_INFO_AVAILABLE =                    // byte         | public
+    ANDROID_FLASH_INFO_AVAILABLE =                    // enum         | public
             ANDROID_FLASH_INFO_START,
     ANDROID_FLASH_INFO_CHARGE_DURATION,               // int64        | system
     ANDROID_FLASH_INFO_END,
@@ -554,6 +554,12 @@ typedef enum camera_metadata_enum_android_flash_state {
     ANDROID_FLASH_STATE_FIRED,
 } camera_metadata_enum_android_flash_state_t;
 
+
+// ANDROID_FLASH_INFO_AVAILABLE
+typedef enum camera_metadata_enum_android_flash_info_available {
+    ANDROID_FLASH_INFO_AVAILABLE_FALSE,
+    ANDROID_FLASH_INFO_AVAILABLE_TRUE,
+} camera_metadata_enum_android_flash_info_available_t;
 
 
 // ANDROID_GEOMETRIC_MODE
