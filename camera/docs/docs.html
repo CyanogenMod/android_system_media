@@ -8625,7 +8625,7 @@ camera service.<wbr/></p>
         
                 
           <tr class="entry" id="static_android.quirks.usePartialResult">
-            <td class="entry_name" rowspan="3">
+            <td class="entry_name" rowspan="5">
               android.<wbr/>quirks.<wbr/>use<wbr/>Partial<wbr/>Result
             </td>
             <td class="entry_type">
@@ -8646,6 +8646,7 @@ returned using multiple process_<wbr/>capture_<wbr/>result calls.<wbr/></p>
             </td>
 
             <td class="entry_range">
+              <p><strong>Deprecated</strong>.<wbr/> Do not use.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -8665,6 +8666,15 @@ consideration of future support.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Refer to <code>camera3_<wbr/>capture_<wbr/>result::partial_<wbr/>result</code>
+for information on how to implement partial results.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -8698,7 +8708,7 @@ consideration of future support.<wbr/></p>
 
                 
           <tr class="entry" id="dynamic_android.quirks.partialResult">
-            <td class="entry_name" rowspan="3">
+            <td class="entry_name" rowspan="5">
               android.<wbr/>quirks.<wbr/>partial<wbr/>Result
             </td>
             <td class="entry_type">
@@ -8734,7 +8744,7 @@ values.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              <p>Optional.<wbr/> Default value is FINAL.<wbr/></p>
+              <p><strong>Deprecated</strong>.<wbr/> Do not use.<wbr/> Optional.<wbr/> Default value is FINAL.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -8758,6 +8768,15 @@ only be used by the HAL if quirks.<wbr/>usePartialResult is set to 1.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Refer to <code>camera3_<wbr/>capture_<wbr/>result::partial_<wbr/>result</code>
+for information on how to implement partial results.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
