@@ -3014,21 +3014,38 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               <size>2</size>
             </array>
             <description>Range of valid exposure
-            times</description>
-            <range>Min &lt;= 100e3 (100 us), Max &amp;gt;= 30e9 (30
+            times used by android.sensor.exposureTime.</description>
+            <range>Min &lt;= 100e3 (100 us), Max &amp;gt;= 1e9 (1
             sec)</range>
+            <hal_details>The maximum of the range must be at least
+            1 second. It should be at least 30 seconds.</hal_details>
             <tag id="V1" />
           </entry>
           <entry name="maxFrameDuration" type="int64" visibility="public">
             <description>Maximum possible frame duration (minimum frame
-            rate)</description>
+            rate).</description>
             <units>nanoseconds</units>
             <range>&amp;gt;= 30e9</range>
-            <details>Minimum duration is a function of resolution,
-            processing settings. See
-            android.scaler.availableProcessedMinDurations
-            android.scaler.availableJpegMinDurations
-            android.scaler.availableRawMinDurations</details>
+            <details>The largest possible android.sensor.frameDuration
+            that will be accepted by the camera device. Attempting to use
+            frame durations beyond the maximum will result in the frame duration
+            being clipped to the maximum. See that control
+            for a full definition of frame durations.
+
+            Refer to
+            android.scaler.availableProcessedMinDurations,
+            android.scaler.availableJpegMinDurations, and
+            android.scaler.availableRawMinDurations for the minimum
+            frame duration values.
+            </details>
+            <hal_details>
+            This value must be at least 1 second. It should be at least 30
+            seconds (30e9 ns).
+
+            android.sensor.maxFrameDuration must be greater or equal to the
+            android.sensor.exposureTimeRange max value (since exposure time
+            overrides frame duration).
+            </hal_details>
             <tag id="BC" />
             <tag id="V1" />
           </entry>

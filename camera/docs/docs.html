@@ -10952,7 +10952,7 @@ the sensor,<wbr/> in reading order</p>
         
                 
           <tr class="entry" id="static_android.sensor.info.exposureTimeRange">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="3">
               android.<wbr/>sensor.<wbr/>info.<wbr/>exposure<wbr/>Time<wbr/>Range
             </td>
             <td class="entry_type">
@@ -10970,14 +10970,14 @@ the sensor,<wbr/> in reading order</p>
 
             <td class="entry_description">
               <p>Range of valid exposure
-times</p>
+times used by <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>Min &lt;= 100e3 (100 us),<wbr/> Max &gt;= 30e9 (30
+              <p>Min &lt;= 100e3 (100 us),<wbr/> Max &gt;= 1e9 (1
 sec)</p>
             </td>
 
@@ -10989,13 +10989,22 @@ sec)</p>
 
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The maximum of the range must be at least
+1 second.<wbr/> It should be at least 30 seconds.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
         
                 
           <tr class="entry" id="static_android.sensor.info.maxFrameDuration">
-            <td class="entry_name" rowspan="3">
+            <td class="entry_name" rowspan="5">
               android.<wbr/>sensor.<wbr/>info.<wbr/>max<wbr/>Frame<wbr/>Duration
             </td>
             <td class="entry_type">
@@ -11008,7 +11017,7 @@ sec)</p>
 
             <td class="entry_description">
               <p>Maximum possible frame duration (minimum frame
-rate)</p>
+rate).<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -11032,14 +11041,31 @@ rate)</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Minimum duration is a function of resolution,<wbr/>
-processing settings.<wbr/> See
-android.<wbr/>scaler.<wbr/>available<wbr/>Processed<wbr/>Min<wbr/>Durations
-android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Min<wbr/>Durations
-<a href="#static_android.scaler.availableRawMinDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Raw<wbr/>Min<wbr/>Durations</a></p>
+              <p>The largest possible android.<wbr/>sensor.<wbr/>frame<wbr/>Duration
+that will be accepted by the camera device.<wbr/> Attempting to use
+frame durations beyond the maximum will result in the frame duration
+being clipped to the maximum.<wbr/> See that control
+for a full definition of frame durations.<wbr/></p>
+<p>Refer to
+<a href="#static_android.scaler.availableProcessedMinDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Processed<wbr/>Min<wbr/>Durations</a>,<wbr/>
+<a href="#static_android.scaler.availableJpegMinDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Min<wbr/>Durations</a>,<wbr/> and
+<a href="#static_android.scaler.availableRawMinDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Raw<wbr/>Min<wbr/>Durations</a> for the minimum
+frame duration values.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This value must be at least 1 second.<wbr/> It should be at least 30
+seconds (30e9 ns).<wbr/></p>
+<p>android.<wbr/>sensor.<wbr/>max<wbr/>Frame<wbr/>Duration must be greater or equal to the
+android.<wbr/>sensor.<wbr/>exposure<wbr/>Time<wbr/>Range max value (since exposure time
+overrides frame duration).<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
