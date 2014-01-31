@@ -280,7 +280,6 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_FORWARD_MATRIX1,                   // rational[]   | system
     ANDROID_SENSOR_FORWARD_MATRIX2,                   // rational[]   | system
     ANDROID_SENSOR_MAX_ANALOG_SENSITIVITY,            // int32        | public
-    ANDROID_SENSOR_NOISE_MODEL_COEFFICIENTS,          // float[]      | system
     ANDROID_SENSOR_ORIENTATION,                       // int32        | public
     ANDROID_SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS,    // int32[]      | public
     ANDROID_SENSOR_REFERENCE_ILLUMINANT1,             // enum         | system

@@ -3363,24 +3363,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="V1" />
           <tag id="FULL" />
         </entry>
-        <entry name="noiseModelCoefficients" type="float"
-        type_notes="float constants A, B for the noise variance model"
-        container="array">
-          <array>
-            <size>2</size>
-          </array>
-          <description>Estimation of sensor noise
-          characteristics</description>
-          <units>var(raw pixel value) = electrons * (baseGainFactor
-          * iso/100)^2 + A * (baseGainFactor * iso/100)^2 +
-          B</units>
-          <details>A represents sensor read noise before analog
-          amplification; B represents noise from A/D conversion and
-          other circuits after amplification. Both noise sources
-          are assumed to be gaussian, independent, and not to vary
-          across the sensor</details>
-          <tag id="V1" />
-        </entry>
         <entry name="orientation" type="int32" visibility="public">
           <description>Clockwise angle through which the output
           image needs to be rotated to be upright on the device
