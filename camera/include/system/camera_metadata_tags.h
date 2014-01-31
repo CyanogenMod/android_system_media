@@ -271,7 +271,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_FRAME_DURATION,                    // int64        | public
     ANDROID_SENSOR_SENSITIVITY,                       // int32        | public
     ANDROID_SENSOR_BASE_GAIN_FACTOR,                  // rational     | public
-    ANDROID_SENSOR_BLACK_LEVEL_PATTERN,               // int32[]      | system
+    ANDROID_SENSOR_BLACK_LEVEL_PATTERN,               // int32[]      | public
     ANDROID_SENSOR_CALIBRATION_TRANSFORM1,            // rational[]   | system
     ANDROID_SENSOR_CALIBRATION_TRANSFORM2,            // rational[]   | system
     ANDROID_SENSOR_COLOR_TRANSFORM1,                  // rational[]   | system

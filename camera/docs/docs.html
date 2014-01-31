@@ -11386,22 +11386,22 @@ ISO=100</p>
                 <span class="entry_type_array">
                   4
                 </span>
-              <span class="entry_type_visibility"> [system]</span>
+              <span class="entry_type_visibility"> [public]</span>
                 <div class="entry_type_notes">2x2 raw count block</div>
 
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>A fixed black level offset for each of the
-Bayer mosaic channels</p>
+              <p>A fixed black level offset for each of the color filter arrangement
+(CFA) mosaic channels.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>&gt;= 0 each</p>
+              <p>&gt;= 0 for each.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -11416,8 +11416,10 @@ Bayer mosaic channels</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>As per DNG BlackLevelRepeatDim /<wbr/> BlackLevel
-tags</p>
+              <p>This tag specifies the zero light value for each of the CFA mosaic
+channels in the camera sensor.<wbr/></p>
+<p>The values are given in row-column scan order,<wbr/> with the first value
+corresponding to the element of the CFA in row=0,<wbr/> column=0.<wbr/></p>
             </td>
           </tr>
 

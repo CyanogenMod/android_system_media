@@ -3177,16 +3177,23 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="V1" />
           <tag id="FULL" />
         </entry>
-        <entry name="blackLevelPattern" type="int32"
+        <entry name="blackLevelPattern" type="int32" visibility="public"
         type_notes="2x2 raw count block" container="array">
           <array>
             <size>4</size>
           </array>
-          <description>A fixed black level offset for each of the
-          Bayer mosaic channels</description>
-          <range>&amp;gt;= 0 each</range>
-          <details>As per DNG BlackLevelRepeatDim / BlackLevel
-          tags</details>
+          <description>
+          A fixed black level offset for each of the color filter arrangement
+          (CFA) mosaic channels.
+          </description>
+          <range>&amp;gt;= 0 for each.</range>
+          <details>
+          This tag specifies the zero light value for each of the CFA mosaic
+          channels in the camera sensor.
+
+          The values are given in row-column scan order, with the first value
+          corresponding to the element of the CFA in row=0, column=0.
+          </details>
           <tag id="DNG" />
         </entry>
         <entry name="calibrationTransform1" type="rational"
