@@ -39,7 +39,6 @@ const char *camera_metadata_section_names[ANDROID_SECTION_COUNT] = {
     [ANDROID_FLASH_INFO]           = "android.flash.info",
     [ANDROID_GEOMETRIC]            = "android.geometric",
     [ANDROID_HOT_PIXEL]            = "android.hotPixel",
-    [ANDROID_HOT_PIXEL_INFO]       = "android.hotPixel.info",
     [ANDROID_JPEG]                 = "android.jpeg",
     [ANDROID_LENS]                 = "android.lens",
     [ANDROID_LENS_INFO]            = "android.lens.info",
@@ -76,8 +75,6 @@ unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
                                        ANDROID_GEOMETRIC_END },
     [ANDROID_HOT_PIXEL]            = { ANDROID_HOT_PIXEL_START,
                                        ANDROID_HOT_PIXEL_END },
-    [ANDROID_HOT_PIXEL_INFO]       = { ANDROID_HOT_PIXEL_INFO_START,
-                                       ANDROID_HOT_PIXEL_INFO_END },
     [ANDROID_JPEG]                 = { ANDROID_JPEG_START,
                                        ANDROID_JPEG_END },
     [ANDROID_LENS]                 = { ANDROID_LENS_START,
@@ -251,11 +248,7 @@ static tag_info_t android_hot_pixel[ANDROID_HOT_PIXEL_END -
         ANDROID_HOT_PIXEL_START] = {
     [ ANDROID_HOT_PIXEL_MODE - ANDROID_HOT_PIXEL_START ] =
     { "mode",                          TYPE_BYTE   },
-};
-
-static tag_info_t android_hot_pixel_info[ANDROID_HOT_PIXEL_INFO_END -
-        ANDROID_HOT_PIXEL_INFO_START] = {
-    [ ANDROID_HOT_PIXEL_INFO_MAP - ANDROID_HOT_PIXEL_INFO_START ] =
+    [ ANDROID_HOT_PIXEL_MAP - ANDROID_HOT_PIXEL_START ] =
     { "map",                           TYPE_INT32  },
 };
 
@@ -595,7 +588,6 @@ tag_info_t *tag_info[ANDROID_SECTION_COUNT] = {
     android_flash_info,
     android_geometric,
     android_hot_pixel,
-    android_hot_pixel_info,
     android_jpeg,
     android_lens,
     android_lens_info,
@@ -1326,8 +1318,7 @@ int camera_metadata_enum_snprint(uint32_t tag,
             }
             break;
         }
-
-        case ANDROID_HOT_PIXEL_INFO_MAP: {
+        case ANDROID_HOT_PIXEL_MAP: {
             break;
         }
 
