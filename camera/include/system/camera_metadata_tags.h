@@ -41,7 +41,6 @@ typedef enum camera_metadata_section {
     ANDROID_EDGE,
     ANDROID_FLASH,
     ANDROID_FLASH_INFO,
-    ANDROID_GEOMETRIC,
     ANDROID_HOT_PIXEL,
     ANDROID_JPEG,
     ANDROID_LENS,
@@ -76,7 +75,6 @@ typedef enum camera_metadata_section_start {
     ANDROID_EDGE_START             = ANDROID_EDGE              << 16,
     ANDROID_FLASH_START            = ANDROID_FLASH             << 16,
     ANDROID_FLASH_INFO_START       = ANDROID_FLASH_INFO        << 16,
-    ANDROID_GEOMETRIC_START        = ANDROID_GEOMETRIC         << 16,
     ANDROID_HOT_PIXEL_START        = ANDROID_HOT_PIXEL         << 16,
     ANDROID_JPEG_START             = ANDROID_JPEG              << 16,
     ANDROID_LENS_START             = ANDROID_LENS              << 16,
@@ -173,11 +171,6 @@ typedef enum camera_metadata_tag {
     ANDROID_FLASH_INFO_CHARGE_DURATION,               // int64        | system
     ANDROID_FLASH_INFO_END,
 
-    ANDROID_GEOMETRIC_MODE =                          // enum         | system
-            ANDROID_GEOMETRIC_START,
-    ANDROID_GEOMETRIC_STRENGTH,                       // byte         | system
-    ANDROID_GEOMETRIC_END,
-
     ANDROID_HOT_PIXEL_MODE =                          // enum         | public
             ANDROID_HOT_PIXEL_START,
     ANDROID_HOT_PIXEL_MAP,                            // int32[]      | public
@@ -214,8 +207,6 @@ typedef enum camera_metadata_tag {
     ANDROID_LENS_INFO_AVAILABLE_FILTER_DENSITIES,     // float[]      | public
     ANDROID_LENS_INFO_AVAILABLE_FOCAL_LENGTHS,        // float[]      | public
     ANDROID_LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION,// byte[]       | public
-    ANDROID_LENS_INFO_GEOMETRIC_CORRECTION_MAP,       // float[]      | system
-    ANDROID_LENS_INFO_GEOMETRIC_CORRECTION_MAP_SIZE,  // int32[]      | system
     ANDROID_LENS_INFO_HYPERFOCAL_DISTANCE,            // float        | public
     ANDROID_LENS_INFO_MINIMUM_FOCUS_DISTANCE,         // float        | public
     ANDROID_LENS_INFO_SHADING_MAP_SIZE,               // int32[]      | public
@@ -565,14 +556,6 @@ typedef enum camera_metadata_enum_android_flash_info_available {
     ANDROID_FLASH_INFO_AVAILABLE_FALSE,
     ANDROID_FLASH_INFO_AVAILABLE_TRUE,
 } camera_metadata_enum_android_flash_info_available_t;
-
-
-// ANDROID_GEOMETRIC_MODE
-typedef enum camera_metadata_enum_android_geometric_mode {
-    ANDROID_GEOMETRIC_MODE_OFF,
-    ANDROID_GEOMETRIC_MODE_FAST,
-    ANDROID_GEOMETRIC_MODE_HIGH_QUALITY,
-} camera_metadata_enum_android_geometric_mode_t;
 
 
 // ANDROID_HOT_PIXEL_MODE

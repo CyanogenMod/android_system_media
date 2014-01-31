@@ -1751,32 +1751,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </dynamic>
     </section>
-    <section name="geometric">
-      <controls>
-        <entry name="mode" type="byte" enum="true">
-          <enum>
-            <value>OFF
-            <notes>No geometric correction is
-            applied</notes></value>
-            <value>FAST
-            <notes>Must not slow down frame rate relative to raw
-            bayer output</notes></value>
-            <value>HIGH_QUALITY
-            <notes>Frame rate may be reduced by high
-            quality</notes></value>
-          </enum>
-          <description>Operating mode of geometric
-          correction</description>
-        </entry>
-        <entry name="strength" type="byte">
-          <description>Control the amount of shading correction
-          applied to the images</description>
-          <units>unitless: 1-10; 10 is full shading
-          compensation</units>
-          <tag id="ADV" />
-        </entry>
-      </controls>
-    </section>
     <section name="hotPixel">
       <controls>
         <entry name="mode" type="byte" visibility="public" enum="true">
@@ -2170,37 +2144,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             If OIS is not implemented for a given camera device, this should
             contain only OFF.
             </details>
-            <tag id="V1" />
-          </entry>
-          <entry name="geometricCorrectionMap" type="float"
-          type_notes="2D array of destination coordinate pairs for uniform grid points in source image, per color channel. Size in the range of 2x3x40x30"
-          container="array">
-            <array>
-              <size>2</size>
-              <size>3</size>
-              <size>n</size>
-              <size>m</size>
-            </array>
-            <description>A low-resolution map for correction of
-            geometric distortions and chromatic aberrations, per
-            color channel</description>
-            <range>N, M &amp;gt;= 2</range>
-            <details>[DNG wants a function instead]. What's easiest
-            for implementers? With an array size (M, N), entry (i,
-            j) provides the destination for pixel (i/(M-1) * width,
-            j/(N-1) * height). Data is row-major, with each array
-            entry being ( (X, Y)_r, (X, Y)_g, (X, Y)_b ) )</details>
-            <tag id="DNG" />
-          </entry>
-          <entry name="geometricCorrectionMapSize" type="int32"
-          type_notes="width and height of geometric correction map"
-          container="array" typedef="size">
-            <array>
-              <size>2</size>
-            </array>
-            <description>Dimensions of geometric correction
-            map</description>
-            <range>Both values &amp;gt;= 2</range>
             <tag id="V1" />
           </entry>
           <entry name="hyperfocalDistance" type="float" visibility="public" optional="true">
