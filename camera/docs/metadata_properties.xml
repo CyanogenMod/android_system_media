@@ -3287,71 +3287,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="DNG" />
         </entry>
-        <entry name="calibrationTransform1" type="rational"
-        type_notes="3x3 matrix in row-major-order"
-        container="array">
-          <array>
-            <size>9</size>
-          </array>
-          <description>Per-device calibration on top of color space
-          transform 1</description>
-          <tag id="DNG" />
-        </entry>
-        <entry name="calibrationTransform2" type="rational"
-        type_notes="3x3 matrix in row-major-order"
-        container="array">
-          <array>
-            <size>9</size>
-          </array>
-          <description>Per-device calibration on top of color space
-          transform 2</description>
-          <tag id="DNG" />
-        </entry>
-        <entry name="colorTransform1" type="rational"
-        type_notes="3x3 matrix in row-major-order"
-        container="array">
-          <array>
-            <size>9</size>
-          </array>
-          <description>Linear mapping from XYZ (D50) color space to
-          reference linear sensor color, for first reference
-          illuminant</description>
-          <details>Use as follows XYZ = inv(transform) * clip( (raw -
-          black level(raw) ) / ( white level - max black level) ).
-          At least in the simple case</details>
-          <tag id="DNG" />
-        </entry>
-        <entry name="colorTransform2" type="rational"
-        type_notes="3x3 matrix in row-major-order"
-        container="array">
-          <array>
-            <size>9</size>
-          </array>
-          <description>Linear mapping from XYZ (D50) color space to
-          reference linear sensor color, for second reference
-          illuminant</description>
-          <tag id="DNG" />
-        </entry>
-        <entry name="forwardMatrix1" type="rational"
-        type_notes="3x3 matrix in row-major-order"
-        container="array">
-          <array>
-            <size>9</size>
-          </array>
-          <description>Used by DNG for better WB
-          adaptation</description>
-          <tag id="DNG" />
-        </entry>
-        <entry name="forwardMatrix2" type="rational"
-        type_notes="3x3 matrix in row-major-order"
-        container="array">
-          <array>
-            <size>9</size>
-          </array>
-          <description>Used by DNG for better WB
-          adaptation</description>
-          <tag id="DNG" />
-        </entry>
         <entry name="maxAnalogSensitivity" type="int32" visibility="public"
         optional="true">
           <description>Maximum sensitivity that is implemented
@@ -3416,45 +3351,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="DNG" />
         </entry>
-        <entry name="referenceIlluminant1" type="byte" enum="true">
-          <enum>
-            <value id="1">DAYLIGHT</value>
-            <value id="2">FLUORESCENT</value>
-            <value id="3">TUNGSTEN
-            <notes>Incandescent light</notes></value>
-            <value id="4">FLASH</value>
-            <value id="9">FINE_WEATHER</value>
-            <value id="10">CLOUDY_WEATHER</value>
-            <value id="11">SHADE</value>
-            <value id="12">DAYLIGHT_FLUORESCENT
-            <notes>D 5700 - 7100K</notes></value>
-            <value id="13">DAY_WHITE_FLUORESCENT
-            <notes>N 4600 - 5400K</notes></value>
-            <value id="14">COOL_WHITE_FLUORESCENT
-            <notes>W 3900 - 4500K</notes></value>
-            <value id="15">WHITE_FLUORESCENT
-            <notes>WW 3200 - 3700K</notes></value>
-            <value id="17">STANDARD_A</value>
-            <value id="18">STANDARD_B</value>
-            <value id="19">STANDARD_C</value>
-            <value id="20">D55</value>
-            <value id="21">D65</value>
-            <value id="22">D75</value>
-            <value id="23">D50</value>
-            <value id="24">ISO_STUDIO_TUNGSTEN</value>
-          </enum>
-          <description>Light source used to define transform
-          1</description>
-          <details>[EXIF LightSource tag] Must all these be
-          supported? Need CCT for each!</details>
-          <tag id="DNG" />
-          <tag id="EXIF" />
-        </entry>
-        <entry name="referenceIlluminant2" type="byte">
-          <description>Light source used to define transform
-          2</description>
-          <units>Same as illuminant 1</units>
-        </entry>
       </static>
       <dynamic>
         <clone entry="android.sensor.exposureTime" kind="controls">
@@ -3484,6 +3380,104 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <units>celsius</units>
           <range>Optional. This value is missing if no temperature is available.</range>
           <tag id="FULL" />
+        </entry>
+        <entry name="referenceIlluminant" type="byte" enum="true">
+          <enum>
+            <value id="1">DAYLIGHT</value>
+            <value id="2">FLUORESCENT</value>
+            <value id="3">TUNGSTEN
+            <notes>Incandescent light</notes></value>
+            <value id="4">FLASH</value>
+            <value id="9">FINE_WEATHER</value>
+            <value id="10">CLOUDY_WEATHER</value>
+            <value id="11">SHADE</value>
+            <value id="12">DAYLIGHT_FLUORESCENT
+            <notes>D 5700 - 7100K</notes></value>
+            <value id="13">DAY_WHITE_FLUORESCENT
+            <notes>N 4600 - 5400K</notes></value>
+            <value id="14">COOL_WHITE_FLUORESCENT
+            <notes>W 3900 - 4500K</notes></value>
+            <value id="15">WHITE_FLUORESCENT
+            <notes>WW 3200 - 3700K</notes></value>
+            <value id="17">STANDARD_A</value>
+            <value id="18">STANDARD_B</value>
+            <value id="19">STANDARD_C</value>
+            <value id="20">D55</value>
+            <value id="21">D65</value>
+            <value id="22">D75</value>
+            <value id="23">D50</value>
+            <value id="24">ISO_STUDIO_TUNGSTEN</value>
+          </enum>
+          <description>
+          A reference illumination source roughly matching the current scene
+          illumination, which is used to describe the sensor color space
+          transformations.
+          </description>
+          <details>
+          The values in this tag correspond to the values defined for the
+          EXIF LightSource tag. These illuminants are standard light sources
+          that are often used for calibrating camera devices.
+          </details>
+          <tag id="DNG" />
+          <tag id="EXIF" />
+        </entry>
+        <entry name="calibrationTransform" type="rational"
+        visibility="public" optional="true"
+        type_notes="3x3 matrix in row-major-order" container="array">
+          <array>
+            <size>3</size>
+            <size>3</size>
+          </array>
+          <description>
+          A per-device calibration transform matrix to be applied after the
+          color space transform when rendering the raw image buffer.
+          </description>
+          <details>
+          This matrix is expressed as a 3x3 matrix in row-major-order, and
+          contains a per-device calibration transform that maps colors
+          from reference camera color space (i.e. the "golden module"
+          colorspace) into this camera device's linear native sensor color
+          space for the current scene illumination and white balance choice.
+          </details>
+          <tag id="DNG" />
+        </entry>
+        <entry name="colorTransform" type="rational"
+        visibility="public" optional="true"
+        type_notes="3x3 matrix in row-major-order" container="array">
+          <array>
+            <size>3</size>
+            <size>3</size>
+          </array>
+          <description>
+          A matrix that transforms color values from CIE XYZ color space to
+          reference camera color space when rendering the raw image buffer.
+          </description>
+          <details>
+          This matrix is expressed as a 3x3 matrix in row-major-order, and
+          contains a color transform matrix that maps colors from the CIE
+          XYZ color space to the reference camera raw color space (i.e. the
+          "golden module" colorspace) for the current scene illumination and
+          white balance choice.
+          </details>
+          <tag id="DNG" />
+        </entry>
+        <entry name="forwardMatrix" type="rational"
+        visibility="public" optional="true"
+        type_notes="3x3 matrix in row-major-order" container="array">
+          <array>
+            <size>3</size>
+            <size>3</size>
+          </array>
+          <description>
+          A matrix that transforms white balanced camera colors to the CIE XYZ
+          colorspace with a D50 whitepoint.
+          </description>
+          <details>
+          This matrix is expressed as a 3x3 matrix in row-major-order, and contains
+          a color transform matrix that maps a unit vector in the linear native
+          sensor color space to the D50 whitepoint in CIE XYZ color space.
+          </details>
+          <tag id="DNG" />
         </entry>
         <entry name="neutralColorPoint" type="rational" visibility="public"
         optional="true" container="array">
