@@ -13810,8 +13810,8 @@ regardless of the android.<wbr/>control.<wbr/>* current values.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>The HAL estimated scene illumination lighting
-frequency</p>
+              <p>The camera device estimated scene illumination lighting
+frequency.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -13829,8 +13829,18 @@ frequency</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Report NONE if there doesn't appear to be flickering
-illumination</p>
+              <p>Many light sources,<wbr/> such as most fluorescent lights,<wbr/> flicker at a rate
+that depends on the local utility power standards.<wbr/> This flicker must be
+accounted for by auto-exposure routines to avoid artifacts in captured images.<wbr/>
+The camera device uses this entry to tell the application what the scene
+illuminant frequency is.<wbr/></p>
+<p>When manual exposure control is enabled
+(<code><a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> == OFF</code> or <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == OFF</code>),<wbr/>
+the <a href="#controls_android.control.aeAntibandingMode">android.<wbr/>control.<wbr/>ae<wbr/>Antibanding<wbr/>Mode</a> doesn't do the antibanding,<wbr/> and the
+application can ensure it selects exposure times that do not cause banding
+issues by looking into this metadata field.<wbr/> See android.<wbr/>control.<wbr/>ae<wbr/>Antibanding<wbr/>Mode
+for more details.<wbr/></p>
+<p>Report NONE if there doesn't appear to be flickering illumination.<wbr/></p>
             </td>
           </tr>
 

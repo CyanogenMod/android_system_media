@@ -3776,10 +3776,24 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>50HZ</value>
             <value>60HZ</value>
           </enum>
-          <description>The HAL estimated scene illumination lighting
-          frequency</description>
-          <details>Report NONE if there doesn't appear to be flickering
-          illumination</details>
+          <description>The camera device estimated scene illumination lighting
+          frequency.</description>
+          <details>
+          Many light sources, such as most fluorescent lights, flicker at a rate
+          that depends on the local utility power standards. This flicker must be
+          accounted for by auto-exposure routines to avoid artifacts in captured images.
+          The camera device uses this entry to tell the application what the scene
+          illuminant frequency is.
+
+          When manual exposure control is enabled
+          (`android.control.aeMode == OFF` or `android.control.mode == OFF`),
+          the android.control.aeAntibandingMode doesn't do the antibanding, and the
+          application can ensure it selects exposure times that do not cause banding
+          issues by looking into this metadata field. See android.control.aeAntibandingMode
+          for more details.
+
+          Report NONE if there doesn't appear to be flickering illumination.
+          </details>
         </entry>
       </dynamic>
       <controls>
