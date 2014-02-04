@@ -1467,13 +1467,14 @@ CaptureResult.<wbr/></p>
 
             <td class="entry_description">
               <p>List of areas to use for
-metering</p>
+metering.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
+              <p><code>area_<wbr/>count &lt;= <a href="#static_android.control.maxRegions">android.<wbr/>control.<wbr/>max<wbr/>Regions</a>[0]</code></p>
             </td>
 
             <td class="entry_tags">
@@ -1489,7 +1490,7 @@ metering</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Each area is a rectangle plus weight: xmin,<wbr/> ymin,<wbr/>
-xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined inclusive of the
+xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined to be inclusive of the
 specified coordinates.<wbr/></p>
 <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
@@ -1501,7 +1502,7 @@ should be nonnegative.<wbr/></p>
 needs to be used by the HAL.<wbr/> If the metering region is
 outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
 should ignore the sections outside the region and output the
-used sections in the frame metadata</p>
+used sections in the frame metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -1762,13 +1763,14 @@ in result metadata.<wbr/></p>
 
             <td class="entry_description">
               <p>List of areas to use for focus
-estimation</p>
+estimation.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
+              <p><code>area_<wbr/>count &lt;= <a href="#static_android.control.maxRegions">android.<wbr/>control.<wbr/>max<wbr/>Regions</a>[2]</code></p>
             </td>
 
             <td class="entry_tags">
@@ -1784,7 +1786,7 @@ estimation</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Each area is a rectangle plus weight: xmin,<wbr/> ymin,<wbr/>
-xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined inclusive of the
+xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined to be inclusive of the
 specified coordinates.<wbr/></p>
 <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
@@ -1796,7 +1798,7 @@ should be nonnegative.<wbr/></p>
 needs to be used by the HAL.<wbr/> If the focusing region is
 outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
 should ignore the sections outside the region and output the
-used sections in the frame metadata</p>
+used sections in the frame metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -2071,13 +2073,14 @@ target for white balance adjustment.<wbr/></p>
 
             <td class="entry_description">
               <p>List of areas to use for illuminant
-estimation</p>
+estimation.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
+              <p><code>area_<wbr/>count &lt;= <a href="#static_android.control.maxRegions">android.<wbr/>control.<wbr/>max<wbr/>Regions</a>[1]</code></p>
             </td>
 
             <td class="entry_tags">
@@ -2094,7 +2097,7 @@ estimation</p>
             <td class="entry_details" colspan="5">
               <p>Only used in AUTO mode.<wbr/></p>
 <p>Each area is a rectangle plus weight: xmin,<wbr/> ymin,<wbr/>
-xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined inclusive of the
+xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined to be inclusive of the
 specified coordinates.<wbr/></p>
 <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
@@ -2106,7 +2109,7 @@ should be nonnegative.<wbr/></p>
 needs to be used by the HAL.<wbr/> If the metering region is
 outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
 should ignore the sections outside the region and output the
-used sections in the frame metadata</p>
+used sections in the frame metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -3442,13 +3445,14 @@ CaptureResult.<wbr/></p>
 
             <td class="entry_description">
               <p>List of areas to use for
-metering</p>
+metering.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
+              <p><code>area_<wbr/>count &lt;= <a href="#static_android.control.maxRegions">android.<wbr/>control.<wbr/>max<wbr/>Regions</a>[0]</code></p>
             </td>
 
             <td class="entry_tags">
@@ -3464,7 +3468,7 @@ metering</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Each area is a rectangle plus weight: xmin,<wbr/> ymin,<wbr/>
-xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined inclusive of the
+xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined to be inclusive of the
 specified coordinates.<wbr/></p>
 <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
@@ -3476,7 +3480,7 @@ should be nonnegative.<wbr/></p>
 needs to be used by the HAL.<wbr/> If the metering region is
 outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
 should ignore the sections outside the region and output the
-used sections in the frame metadata</p>
+used sections in the frame metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -3831,13 +3835,14 @@ in result metadata.<wbr/></p>
 
             <td class="entry_description">
               <p>List of areas to use for focus
-estimation</p>
+estimation.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
+              <p><code>area_<wbr/>count &lt;= <a href="#static_android.control.maxRegions">android.<wbr/>control.<wbr/>max<wbr/>Regions</a>[2]</code></p>
             </td>
 
             <td class="entry_tags">
@@ -3853,7 +3858,7 @@ estimation</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Each area is a rectangle plus weight: xmin,<wbr/> ymin,<wbr/>
-xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined inclusive of the
+xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined to be inclusive of the
 specified coordinates.<wbr/></p>
 <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
@@ -3865,7 +3870,7 @@ should be nonnegative.<wbr/></p>
 needs to be used by the HAL.<wbr/> If the focusing region is
 outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
 should ignore the sections outside the region and output the
-used sections in the frame metadata</p>
+used sections in the frame metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -4445,13 +4450,14 @@ target for white balance adjustment.<wbr/></p>
 
             <td class="entry_description">
               <p>List of areas to use for illuminant
-estimation</p>
+estimation.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
+              <p><code>area_<wbr/>count &lt;= <a href="#static_android.control.maxRegions">android.<wbr/>control.<wbr/>max<wbr/>Regions</a>[1]</code></p>
             </td>
 
             <td class="entry_tags">
@@ -4468,7 +4474,7 @@ estimation</p>
             <td class="entry_details" colspan="5">
               <p>Only used in AUTO mode.<wbr/></p>
 <p>Each area is a rectangle plus weight: xmin,<wbr/> ymin,<wbr/>
-xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined inclusive of the
+xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined to be inclusive of the
 specified coordinates.<wbr/></p>
 <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
@@ -4480,7 +4486,7 @@ should be nonnegative.<wbr/></p>
 needs to be used by the HAL.<wbr/> If the metering region is
 outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
 should ignore the sections outside the region and output the
-used sections in the frame metadata</p>
+used sections in the frame metadata.<wbr/></p>
             </td>
           </tr>
 
