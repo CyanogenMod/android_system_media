@@ -143,7 +143,7 @@ typedef enum camera_metadata_tag {
     ANDROID_CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES,
                                                       // byte[]       | public
     ANDROID_CONTROL_AWB_AVAILABLE_MODES,              // byte[]       | public
-    ANDROID_CONTROL_MAX_REGIONS,                      // int32        | public
+    ANDROID_CONTROL_MAX_REGIONS,                      // int32[]      | public
     ANDROID_CONTROL_SCENE_MODE_OVERRIDES,             // byte[]       | system
     ANDROID_CONTROL_AE_PRECAPTURE_ID,                 // int32        | hidden
     ANDROID_CONTROL_AE_STATE,                         // enum         | public
