@@ -2327,6 +2327,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           scale 'normalized' coordinates with respect to the crop
           region. This applies to metering input (a{e,f,wb}Region
           and output (face rectangles).</description>
+          <range>**Deprecated**. Do not use.</range>
           <details>Normalized coordinates refer to those in the
           (-1000,1000) range mentioned in the
           android.hardware.Camera API.
@@ -2340,6 +2341,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>If set to 1, then the camera service always
           switches to FOCUS_MODE_AUTO before issuing a AF
           trigger.</description>
+          <range>**Deprecated**. Do not use.</range>
           <details>HAL implementations should implement AF trigger
           modes for AUTO, MACRO, CONTINUOUS_FOCUS, and
           CONTINUOUS_PICTURE modes instead of using this flag. Does
@@ -2351,6 +2353,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           CAMERA2_PIXEL_FORMAT_ZSL instead of
           HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED for the zero
           shutter lag stream</description>
+          <range>**Deprecated**. Do not use.</range>
           <details>HAL implementations should use gralloc usage flags
           to determine that a stream will be used for
           zero-shutter-lag, instead of relying on an explicit
@@ -2425,7 +2428,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           frameCount value).
           </description>
           <units>incrementing integer</units>
-          <range>Any int</range>
+          <range>**Deprecated**. Do not use. Any int.</range>
         </entry>
         <entry name="id" type="int32" visibility="hidden">
           <description>An application-specified ID for the current
@@ -2443,8 +2446,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>List which camera reprocess stream is used
           for the source of reprocessing data.</description>
           <units>List of camera reprocess stream IDs</units>
-          <range>Typically, only one entry allowed, must be a valid
-          reprocess stream ID.
+          <range>**Deprecated**. Do not use.
+
+          Typically, only one entry allowed, must be a valid reprocess stream ID.
 
           If android.jpeg.needsThumbnail is set, then multiple
           reprocess streams may be included in a single request; they
@@ -2481,7 +2485,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Lists which camera output streams image data
           from this capture must be sent to</description>
           <units>List of camera stream IDs</units>
-          <range>List must only include streams that have been
+          <range>**Deprecated**. Do not use. List must only include streams that have been
           created</range>
           <details>If no output streams are listed, then the image
           data should simply be discarded. The image data must
