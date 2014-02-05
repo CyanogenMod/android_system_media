@@ -461,6 +461,7 @@
             <li><a href="#static_android.scaler.availableProcessedSizes">android.scaler.availableProcessedSizes</a></li>
             <li><a href="#static_android.scaler.availableRawMinDurations">android.scaler.availableRawMinDurations</a></li>
             <li><a href="#static_android.scaler.availableRawSizes">android.scaler.availableRawSizes</a></li>
+            <li><a href="#static_android.scaler.availableInputOutputFormatsMap">android.scaler.availableInputOutputFormatsMap</a></li>
           </ul>
         </li>
         <li>
@@ -10021,7 +10022,7 @@ performance guarantees.<wbr/></p></span>
 
             <td class="entry_description">
               <p>The list of image formats that are supported by this
-camera device.<wbr/></p>
+camera device for output streams.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -10443,6 +10444,138 @@ height</p>
 
           </tr>
 
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.scaler.availableInputOutputFormatsMap">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+              <span class="entry_type_visibility"> [public as imageFormat]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The mapping of image formats that are supported by this
+camera device for input streams,<wbr/> to their corresponding output formats.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>See <a href="#static_android.scaler.availableFormats">android.<wbr/>scaler.<wbr/>available<wbr/>Formats</a> for enum definitions.<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>All camera devices with at least 1
+android.<wbr/>request.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams will have at least one
+available input format.<wbr/></p>
+<p>The camera device will support the following map of formats,<wbr/>
+if its dependent capability is supported:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Input Format</th>
+<th align="left">Output Format</th>
+<th align="left">Capability</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">RAW_<wbr/>OPAQUE</td>
+<td align="left">JPEG</td>
+<td align="left">ZSL</td>
+</tr>
+<tr>
+<td align="left">RAW_<wbr/>OPAQUE</td>
+<td align="left">YUV_<wbr/>420_<wbr/>888</td>
+<td align="left">ZSL</td>
+</tr>
+<tr>
+<td align="left">RAW_<wbr/>OPAQUE</td>
+<td align="left">RAW16</td>
+<td align="left">DNG</td>
+</tr>
+<tr>
+<td align="left">RAW16</td>
+<td align="left">YUV_<wbr/>420_<wbr/>888</td>
+<td align="left">DNG</td>
+</tr>
+<tr>
+<td align="left">RAW16</td>
+<td align="left">JPEG</td>
+<td align="left">DNG</td>
+</tr>
+</tbody>
+</table>
+<p>For ZSL-capable camera devices,<wbr/> using the RAW_<wbr/>OPAQUE format
+as either input or output will never hurt maximum frame rate (i.<wbr/>e.<wbr/>
+android.<wbr/>scaler.<wbr/>available<wbr/>Stall<wbr/>Durations will not have RAW_<wbr/>OPAQUE).<wbr/></p>
+<p>Attempting to configure an input stream with output streams not
+listed as available in this map is not valid.<wbr/></p>
+<p>TODO: Add java type mapping for this property.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This value is encoded as a variable-size array-of-arrays.<wbr/>
+The inner array always contains <code>[format,<wbr/> length,<wbr/> ...<wbr/>]</code> where
+<code>...<wbr/></code> has <code>length</code> elements.<wbr/> An inner array is followed by another
+inner array if the total metadata entry size hasn't yet been exceeded.<wbr/></p>
+<p>A code sample to read/<wbr/>write this encoding (with a device that
+supports reprocessing RAW_<wbr/>OPAQUE to RAW16,<wbr/> YUV_<wbr/>420_<wbr/>888,<wbr/> and JPEG,<wbr/>
+and reprocessing RAW16 to YUV_<wbr/>420_<wbr/>888 and JPEG):</p>
+<pre><code>//<wbr/> reading
+int32_<wbr/>t* contents = &amp;entry.<wbr/>i32[0];
+for (size_<wbr/>t i = 0; i &lt; entry.<wbr/>count; ) {
+    int32_<wbr/>t format = contents[i++];
+    int32_<wbr/>t length = contents[i++];
+    int32_<wbr/>t output_<wbr/>formats[length];
+    memcpy(&amp;output_<wbr/>formats[0],<wbr/> &amp;contents[i],<wbr/>
+           length * sizeof(int32_<wbr/>t));
+    i += length;
+}
+
+//<wbr/> writing (static example,<wbr/> DNG+ZSL)
+int32_<wbr/>t[] contents = {
+  RAW_<wbr/>OPAQUE,<wbr/> 3,<wbr/> RAW16,<wbr/> YUV_<wbr/>420_<wbr/>888,<wbr/> BLOB,<wbr/>
+  RAW16,<wbr/> 2,<wbr/> YUV_<wbr/>420_<wbr/>888,<wbr/> BLOB,<wbr/>
+};
+update_<wbr/>camera_<wbr/>metadata_<wbr/>entry(metadata,<wbr/> index,<wbr/> &amp;contents[0],<wbr/>
+      sizeof(contents)/<wbr/>sizeof(contents[0]),<wbr/> &amp;updated_<wbr/>entry);
+</code></pre>
+<p>If the HAL claims to support any of the capabilities listed in the
+above details,<wbr/> then it must also support all the input-output
+combinations listed for that capability.<wbr/> It can optionally support
+additional formats if it so chooses.<wbr/></p>
+<p>Refer to <a href="#static_android.scaler.availableFormats">android.<wbr/>scaler.<wbr/>available<wbr/>Formats</a> for the enum values
+which correspond to HAL_<wbr/>PIXEL_<wbr/>FORMAT_<wbr/>* in
+system/<wbr/>core/<wbr/>include/<wbr/>system/<wbr/>graphics.<wbr/>h.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
