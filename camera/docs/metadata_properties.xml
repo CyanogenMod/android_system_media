@@ -176,16 +176,17 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>A color transform matrix to use to transform
           from sensor RGB color space to output linear sRGB color space
           </description>
-          <range>Output values are expected to be in the range
-          (0,1)</range>
-          <details>This matrix is either set by HAL when the request
+          <details>This matrix is either set by the camera device when the request
           android.colorCorrection.mode is not TRANSFORM_MATRIX, or
           directly by the application in the request when the
           android.colorCorrection.mode is TRANSFORM_MATRIX.
 
-          In the latter case, the HAL may round the matrix to account
-          for precision issues; the final rounded matrix should be
-          reported back in this matrix result metadata.</details>
+          In the latter case, the camera device may round the matrix to account
+          for precision issues; the final rounded matrix should be reported back
+          in this matrix result metadata. The transform should keep the magnitude
+          of the output color values within `[0, 1.0]` (assuming input color
+          values is within the normalized range `[0, 1.0]`), or clipping may occur.
+          </details>
         </entry>
         <entry name="gains" type="float" visibility="public"
                type_notes="A 1D array of floats for 4 color channel gains"
@@ -324,10 +325,20 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             while the lock is active</notes></value>
           </enum>
           <description>Whether AE is currently locked to its latest
-          calculated values</description>
+          calculated values.</description>
           <details>Note that even when AE is locked, the flash may be
-          fired if the AE mode is ON_AUTO_FLASH / ON_ALWAYS_FLASH /
-          ON_AUTO_FLASH_REDEYE.</details>
+          fired if the android.control.aeMode is ON_AUTO_FLASH / ON_ALWAYS_FLASH /
+          ON_AUTO_FLASH_REDEYE.
+
+          If AE precapture is triggered (see android.control.aePrecaptureTrigger)
+          when AE is already locked, the camera device will not change the exposure time
+          (android.sensor.exposureTime) and sensitivity (android.sensor.sensitivity)
+          parameters. The flash may be fired if the android.control.aeMode
+          is ON_AUTO_FLASH/ON_AUTO_FLASH_REDEYE and the scene is too dark. If the
+          android.control.aeMode is ON_ALWAYS_FLASH, the scene may become overexposed.
+
+          See android.control.aeState for AE lock related state transition details.
+          </details>
           <tag id="BC" />
         </entry>
         <entry name="aeMode" type="byte" visibility="public" enum="true">
