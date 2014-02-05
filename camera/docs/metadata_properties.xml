@@ -2790,25 +2790,59 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>n</size>
           </array>
           <enum>
-            <value optional="true" id="0x20">RAW_SENSOR
+            <value optional="true" id="0x20">RAW16
+              <notes>
+              RAW16 is a standard, cross-platform format for raw image
+              buffers with 16-bit pixels. Buffers of this format are typically
+              expected to have a Bayer Color Filter Array (CFA) layout, which
+              is given in android.sensor.info.colorFilterArrangement. Sensors
+              with CFAs that are not representable by a format in
+              android.sensor.info.colorFilterArrangement should not use this
+              format.
+
+              Buffers of this format will also follow the constraints given for
+              RAW_OPAQUE buffers, but with relaxed performance constraints.
+
+              See android.scaler.availableInputFormats for the full set of
+              performance guarantees.
+              </notes>
+            </value>
+            <value optional="true" id="0x24">RAW_OPAQUE
+              <notes>
+              RAW_OPAQUE is a format for raw image buffers coming from an
+              image sensor. The actual structure of buffers of this format is
+              platform-specific, but must follow several constraints:
+
+              1. No image post-processing operations may have been applied to
+              buffers of this type. These buffers contain raw image data coming
+              directly from the image sensor.
+              1. If a buffer of this format is passed to the camera device for
+              reprocessing, the resulting images will be identical to the images
+              produced if the buffer had come directly from the sensor and was
+              processed with the same settings.
+
+              The intended use for this format is to allow access to the native
+              raw format buffers coming directly from the camera sensor without
+              any additional conversions or decrease in framerate.
+
+              See android.scaler.availableInputFormats for the full set of
+              performance guarantees.
+              </notes>
             </value>
             <value optional="true" id="0x32315659">YV12
-                <notes>YCrCb 4:2:0 Planar</notes>
+              <notes>YCrCb 4:2:0 Planar</notes>
             </value>
             <value optional="true" id="0x11">YCrCb_420_SP
-                <notes>NV21</notes>
+              <notes>NV21</notes>
             </value>
-
             <value id="0x22">IMPLEMENTATION_DEFINED
-                <notes>System internal format, not application-accessible</notes>
+              <notes>System internal format, not application-accessible</notes>
             </value>
-
             <value id="0x23">YCbCr_420_888
-                <notes>Flexible YUV420 Format</notes>
+              <notes>Flexible YUV420 Format</notes>
             </value>
-
             <value id="0x21">BLOB
-                <notes>JPEG format</notes>
+              <notes>JPEG format</notes>
             </value>
           </enum>
           <description>The list of image formats that are supported by this
@@ -2833,6 +2867,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           The BLOB format must be supported by the HAL. This is used for the JPEG stream.
 
+          A RAW_OPAQUE buffer should contain only pixel data. It is strongly
+          recommended that any information used by the camera device when
+          processing images is fully expressed by the result metadata
+          for that image buffer.
           </hal_details>
           <tag id="BC" />
         </entry>
