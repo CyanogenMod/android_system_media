@@ -28,8 +28,14 @@ void audio_route_free(struct audio_route *ar);
 /* Apply an audio route path by name */
 int audio_route_apply_path(struct audio_route *ar, const char *name);
 
+/* Apply and update mixer with audio route path by name */
+int audio_route_apply_and_update_path(struct audio_route *ar, const char *name);
+
 /* Reset an audio route path by name */
 int audio_route_reset_path(struct audio_route *ar, const char *name);
+
+/* Reset and update mixer with audio route path by name */
+int audio_route_reset_and_update_path(struct audio_route *ar, const char *name);
 
 /* Reset the audio routes back to the initial state */
 void audio_route_reset(struct audio_route *ar);
