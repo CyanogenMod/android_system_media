@@ -1291,6 +1291,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="aePrecaptureId" type="int32" visibility="hidden">
           <description>The ID sent with the latest
           CAMERA2_TRIGGER_PRECAPTURE_METERING call</description>
+          <range>**Deprecated**. Do not use.</range>
           <details>Must be 0 if no
           CAMERA2_TRIGGER_PRECAPTURE_METERING trigger received yet
           by HAL. Always updated even if AE algorithm ignores the
@@ -1481,6 +1482,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="afTriggerId" type="int32" visibility="hidden">
           <description>The ID sent with the latest
           CAMERA2_TRIGGER_AUTOFOCUS call</description>
+          <range>**Deprecated**. Do not use.</range>
           <details>Must be 0 if no CAMERA2_TRIGGER_AUTOFOCUS trigger
           received yet by HAL. Always updated even if AF algorithm
           ignores the trigger</details>
