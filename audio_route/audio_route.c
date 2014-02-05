@@ -644,6 +644,77 @@ int audio_route_reset_path(struct audio_route *ar, const char *name)
     return 0;
 }
 
+/*
+ * Operates on the specified path .. controls will be updated in the
+ * order listed in the XML file
+ */
+static int audio_route_update_path(struct audio_route *ar, const char *name, bool reverse)
+{
+    struct mixer_path *path;
+    int32_t i, end;
+    unsigned int j;
+
+    if (!ar) {
+        ALOGE("invalid audio_route");
+        return -1;
+    }
+
+    path = path_get_by_name(ar, name);
+    if (!path) {
+        ALOGE("unable to find path '%s'", name);
+        return -1;
+    }
+
+    i = reverse ? (path->length - 1) : 0;
+    end = reverse ? -1 : (int32_t)path->length;
+
+    while (i != end) {
+        unsigned int ctl_index;
+        enum mixer_ctl_type type;
+
+        ctl_index = path->setting[i].ctl_index;
+
+        struct mixer_state * ms = &ar->mixer_state[ctl_index];
+
+        type = mixer_ctl_get_type(ms->ctl);
+        if ((type != MIXER_CTL_TYPE_BOOL) && (type != MIXER_CTL_TYPE_INT) &&
+            (type != MIXER_CTL_TYPE_ENUM)) {
+                continue;
+        }
+
+        /* if any value has changed, update the mixer */
+        for (j = 0; j < ms->num_values; j++) {
+            if (ms->old_value[j] != ms->new_value[j]) {
+                if (type == MIXER_CTL_TYPE_ENUM)
+                    mixer_ctl_set_value(ms->ctl, 0, ms->new_value[0]);
+                else
+                    mixer_ctl_set_array(ms->ctl, ms->new_value, ms->num_values);
+                memcpy(ms->old_value, ms->new_value, ms->num_values * sizeof(int));
+                break;
+            }
+        }
+
+        i = reverse ? (i - 1) : (i + 1);
+    }
+    return 0;
+}
+
+int audio_route_apply_and_update_path(struct audio_route *ar, const char *name)
+{
+    if (audio_route_apply_path(ar, name) < 0) {
+        return -1;
+    }
+    return audio_route_update_path(ar, name, false /*reverse*/);
+}
+
+int audio_route_reset_and_update_path(struct audio_route *ar, const char *name)
+{
+    if (audio_route_reset_path(ar, name) < 0) {
+        return -1;
+    }
+    return audio_route_update_path(ar, name, true /*reverse*/);
+}
+
 struct audio_route *audio_route_init(unsigned int card, const char *xml_path)
 {
     struct config_parse_state state;
