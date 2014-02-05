@@ -866,8 +866,6 @@ from sensor RGB color space to output linear sRGB color space</p>
             </td>
 
             <td class="entry_range">
-              <p>Output values are expected to be in the range
-(0,<wbr/>1)</p>
             </td>
 
             <td class="entry_tags">
@@ -879,13 +877,15 @@ from sensor RGB color space to output linear sRGB color space</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>This matrix is either set by HAL when the request
+              <p>This matrix is either set by the camera device when the request
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
 directly by the application in the request when the
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
-<p>In the latter case,<wbr/> the HAL may round the matrix to account
-for precision issues; the final rounded matrix should be
-reported back in this matrix result metadata.<wbr/></p>
+<p>In the latter case,<wbr/> the camera device may round the matrix to account
+for precision issues; the final rounded matrix should be reported back
+in this matrix result metadata.<wbr/> The transform should keep the magnitude
+of the output color values within <code>[0,<wbr/> 1.<wbr/>0]</code> (assuming input color
+values is within the normalized range <code>[0,<wbr/> 1.<wbr/>0]</code>),<wbr/> or clipping may occur.<wbr/></p>
             </td>
           </tr>
 
@@ -1005,8 +1005,6 @@ from sensor RGB color space to output linear sRGB color space</p>
             </td>
 
             <td class="entry_range">
-              <p>Output values are expected to be in the range
-(0,<wbr/>1)</p>
             </td>
 
             <td class="entry_tags">
@@ -1018,13 +1016,15 @@ from sensor RGB color space to output linear sRGB color space</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>This matrix is either set by HAL when the request
+              <p>This matrix is either set by the camera device when the request
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
 directly by the application in the request when the
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
-<p>In the latter case,<wbr/> the HAL may round the matrix to account
-for precision issues; the final rounded matrix should be
-reported back in this matrix result metadata.<wbr/></p>
+<p>In the latter case,<wbr/> the camera device may round the matrix to account
+for precision issues; the final rounded matrix should be reported back
+in this matrix result metadata.<wbr/> The transform should keep the magnitude
+of the output color values within <code>[0,<wbr/> 1.<wbr/>0]</code> (assuming input color
+values is within the normalized range <code>[0,<wbr/> 1.<wbr/>0]</code>),<wbr/> or clipping may occur.<wbr/></p>
             </td>
           </tr>
 
@@ -1306,7 +1306,7 @@ while the lock is active</p></span>
 
             <td class="entry_description">
               <p>Whether AE is currently locked to its latest
-calculated values</p>
+calculated values.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -1328,8 +1328,15 @@ calculated values</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Note that even when AE is locked,<wbr/> the flash may be
-fired if the AE mode is ON_<wbr/>AUTO_<wbr/>FLASH /<wbr/> ON_<wbr/>ALWAYS_<wbr/>FLASH /<wbr/>
+fired if the <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is ON_<wbr/>AUTO_<wbr/>FLASH /<wbr/> ON_<wbr/>ALWAYS_<wbr/>FLASH /<wbr/>
 ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE.<wbr/></p>
+<p>If AE precapture is triggered (see <a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>)
+when AE is already locked,<wbr/> the camera device will not change the exposure time
+(<a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>) and sensitivity (<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>)
+parameters.<wbr/> The flash may be fired if the android.<wbr/>control.<wbr/>ae<wbr/>Mode
+is ON_<wbr/>AUTO_<wbr/>FLASH/<wbr/>ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE and the scene is too dark.<wbr/> If the
+<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is ON_<wbr/>ALWAYS_<wbr/>FLASH,<wbr/> the scene may become overexposed.<wbr/></p>
+<p>See <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> for AE lock related state transition details.<wbr/></p>
             </td>
           </tr>
 
