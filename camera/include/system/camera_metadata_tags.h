@@ -468,6 +468,7 @@ typedef enum camera_metadata_enum_android_control_mode {
     ANDROID_CONTROL_MODE_OFF,
     ANDROID_CONTROL_MODE_AUTO,
     ANDROID_CONTROL_MODE_USE_SCENE_MODE,
+    ANDROID_CONTROL_MODE_OFF_KEEP_STATE,
 } camera_metadata_enum_android_control_mode_t;
 
 // ANDROID_CONTROL_SCENE_MODE

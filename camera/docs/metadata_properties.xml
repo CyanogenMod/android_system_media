@@ -635,14 +635,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             mode.</notes></value>
             <value>ON
             <notes>Auto-whitebalance lock is enabled; the AWB
-            algorithm must not update the exposure and sensitivity
-            parameters while the lock is active</notes></value>
+            algorithm must not update its parameters while the lock
+            is active.</notes></value>
           </enum>
           <description>Whether AWB is currently locked to its
-          latest calculated values</description>
+          latest calculated values.</description>
           <details>Note that AWB lock is only meaningful for AUTO
           mode; in other modes, AWB is already fixed to a specific
-          setting</details>
+          setting.</details>
           <tag id="BC" />
         </entry>
         <entry name="awbMode" type="byte" visibility="public" enum="true">
@@ -900,6 +900,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             scene mode). Other control entries are still active.
             This setting can only be used if availableSceneModes !=
             UNSUPPORTED</notes></value>
+            <value>OFF_KEEP_STATE
+            <notes>Same as OFF mode, except that this capture will not be
+            used by camera device background auto-exposure, auto-white balance and
+            auto-focus algorithms to update their statistics.</notes></value>
           </enum>
           <description>Overall mode of 3A control
           routines</description>
@@ -915,7 +919,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.control.* are mostly disabled, and the camera device implements
           one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
           as it wishes. The camera device scene mode 3A settings are provided by
-          android.control.sceneModeOverrides.</details>
+          android.control.sceneModeOverrides.
+
+          When set to OFF_KEEP_STATE, it is similar to OFF mode, the only difference
+          is that this frame will not be used by camera device background 3A statistics
+          update, as if this frame is never captured. This mode can be used in the scenario
+          where the application doesn't want a 3A manual control capture to affect
+          the subsequent auto 3A capture results.
+          </details>
           <tag id="BC" />
         </entry>
         <entry name="sceneMode" type="byte" visibility="public" enum="true">
