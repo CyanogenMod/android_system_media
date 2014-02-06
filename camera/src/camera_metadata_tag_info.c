@@ -327,6 +327,8 @@ static tag_info_t android_lens_info[ANDROID_LENS_INFO_END -
     { "minimumFocusDistance",          TYPE_FLOAT  },
     [ ANDROID_LENS_INFO_SHADING_MAP_SIZE - ANDROID_LENS_INFO_START ] =
     { "shadingMapSize",                TYPE_INT32  },
+    [ ANDROID_LENS_INFO_FOCUS_DISTANCE_CALIBRATION - ANDROID_LENS_INFO_START ] =
+    { "focusDistanceCalibration",      TYPE_BYTE   },
 };
 
 static tag_info_t android_noise_reduction[ANDROID_NOISE_REDUCTION_END -
@@ -1439,6 +1441,25 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_LENS_INFO_SHADING_MAP_SIZE: {
+            break;
+        }
+        case ANDROID_LENS_INFO_FOCUS_DISTANCE_CALIBRATION: {
+            switch (value) {
+                case ANDROID_LENS_INFO_FOCUS_DISTANCE_CALIBRATION_UNCALIBRATED:
+                    msg = "UNCALIBRATED";
+                    ret = 0;
+                    break;
+                case ANDROID_LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE:
+                    msg = "APPROXIMATE";
+                    ret = 0;
+                    break;
+                case ANDROID_LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED:
+                    msg = "CALIBRATED";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
             break;
         }
 

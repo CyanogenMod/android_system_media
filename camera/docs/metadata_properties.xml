@@ -2008,7 +2008,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="focusDistance" type="float" visibility="public">
           <description>Distance to plane of sharpest focus,
           measured from frontmost surface of the lens</description>
-          <units>diopters (1/m)</units>
+          <units>See android.lens.info.focusDistanceCalibration for details.</units>
           <range>&amp;gt;= 0</range>
           <details>0 means infinity focus. Used value will be clamped
           to [0, android.lens.info.minimumFocusDistance].
@@ -2155,22 +2155,23 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <range>Both values &amp;gt;= 2</range>
             <tag id="V1" />
           </entry>
-          <entry name="hyperfocalDistance" type="float" visibility="public">
-            <description>Hyperfocal distance for this lens; set to
-            0 if fixed focus</description>
-            <units>diopters</units>
+          <entry name="hyperfocalDistance" type="float" visibility="public" optional="true">
+            <description>Optional. Hyperfocal distance for this lens.</description>
+            <units>See android.lens.info.focusDistanceCalibration for details.</units>
             <range>&amp;gt;= 0</range>
-            <details>The hyperfocal distance is used for the old
-            API's 'fixed' setting</details>
-            <tag id="BC" />
+            <details>If the lens is fixed focus, the camera device will report 0.
+
+            If the lens is not fixed focus, the camera device will report this
+            field when android.lens.info.focusDistanceCalibration is APPROXIMATE or CALIBRATED.
+            </details>
           </entry>
           <entry name="minimumFocusDistance" type="float" visibility="public">
             <description>Shortest distance from frontmost surface
-            of the lens that can be focused correctly</description>
-            <units>diopters</units>
+            of the lens that can be focused correctly.</description>
+            <units>See android.lens.info.focusDistanceCalibration for details.</units>
             <range>&amp;gt;= 0</range>
             <details>If the lens is fixed-focus, this should be
-            0</details>
+            0.</details>
             <tag id="V1" />
           </entry>
           <entry name="shadingMapSize" type="int32" visibility="public"
@@ -2187,6 +2188,47 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </details>
             <tag id="V1" />
           </entry>
+          <entry name="focusDistanceCalibration" type="byte" visibility="public" enum="true">
+            <enum>
+              <value>UNCALIBRATED
+                <notes>
+                The lens focus distance is not accurate, and the units used for
+                android.lens.focusDistance do not correspond to any physical units.
+                Setting the lens to the same focus distance on separate occasions may
+                result in a different real focus distance, depending on factors such
+                as the orientation of the device, the age of the focusing mechanism,
+                and the device temperature. The focus distance value will still be
+                in the range of `[0, android.lens.info.minimumFocusDistance]`, where 0
+                represents the farthest focus.
+                </notes>
+              </value>
+              <value>APPROXIMATE
+                <notes>
+                The lens focus distance is measured in diopters. However, setting the lens
+                to the same focus distance on separate occasions may result in a
+                different real focus distance, depending on factors such as the
+                orientation of the device, the age of the focusing mechanism, and
+                the device temperature.
+                </notes>
+              </value>
+              <value>CALIBRATED
+                <notes>
+                The lens focus distance is measured in diopters. The lens mechanism is
+                calibrated so that setting the same focus distance is repeatable on
+                multiple occasions with good accuracy, and the focus distance corresponds
+                to the real physical distance to the plane of best focus.
+                </notes>
+              </value>
+            </enum>
+            <description>The lens focus distance calibration quality.</description>
+            <details>
+            The lens focus distance calibration quality determines the reliability of
+            focus related metadata entries, i.e. android.lens.focusDistance,
+            android.lens.focusRange, android.lens.info.hyperfocalDistance, and
+            android.lens.info.minimumFocusDistance.
+            </details>
+          <tag id="V1" />
+        </entry>
         </namespace>
         <entry name="facing" type="byte" visibility="public" enum="true">
           <enum>
@@ -2253,7 +2295,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The range of scene distances that are in
           sharp focus (depth of field)</description>
           <units>pair of focus distances in diopters: (near,
-          far)</units>
+          far), see android.lens.info.focusDistanceCalibration for details.</units>
           <range>&amp;gt;=0</range>
           <details>If variable focus not supported, can still report
           fixed depth of field range</details>
