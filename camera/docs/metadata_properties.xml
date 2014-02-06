@@ -2731,6 +2731,272 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           the metadata via later partial results.
           </details>
         </entry>
+        <entry name="availableCapabilities" type="byte" visibility="public"
+          enum="true">
+          <enum>
+            <value>BACKWARD_COMPATIBLE
+              <notes>The minimal set of capabilities that every camera
+                device (regardless of android.info.supportedHardwareLevel)
+                will support.
+
+                The full set of features supported by this capability makes
+                the camera2 api backwards compatible with the camera1
+                (android.hardware.Camera) API.
+
+                TODO: @hide this. Doesn't really mean anything except
+                act as a catch-all for all the 'base' functionality.
+              </notes>
+            </value>
+            <value>OPTIONAL
+              <notes>This is a catch-all capability to include all other
+              tags or functionality not encapsulated by one of the other
+              capabilities.
+
+              A typical example is all tags marked 'optional'.
+
+              TODO: @hide. We may not need this if we @hide all the optional
+              tags not belonging to a capability.
+              </notes>
+            </value>
+            <value>MANUAL_SENSOR
+              <notes>
+              The camera device can be manually controlled (3A algorithms such
+              as auto exposure, and auto focus can be
+              bypassed), this includes but is not limited to:
+
+              * Manual exposure control
+                  * android.sensor.exposureTime
+                  * android.sensor.info.exposureTimeRange
+              * Manual sensitivity control
+                  * android.sensor.sensitivity
+                  * android.sensor.info.sensitivityRange
+                  * android.sensor.baseGainFactor
+              * Manual lens control
+                  * android.lens.*
+              * Manual flash control
+                  * android.flash.*
+              * Manual black level locking
+                  * android.blackLevel.lock
+
+              If any of the above 3A algorithms are enabled, then the camera
+              device will accurately report the values applied by 3A in the
+              result.
+              </notes>
+            </value>
+            <value optional="true">GCAM
+              <notes>
+              TODO: This should be @hide
+
+              * Manual tonemap control
+                    * android.tonemap.curveBlue
+                    * android.tonemap.curveGreen
+                    * android.tonemap.curveRed
+                    * android.tonemap.mode
+                    * android.tonemap.maxCurvePoints
+              * Manual white balance control
+                  * android.colorCorrection.transform
+                  * android.colorCorrection.gains
+              * Lens shading map information
+                    * android.statistics.lensShadingMap
+                    * android.lens.info.shadingMapSize
+
+              If auto white balance is enabled, then the camera device
+              will accurately report the values applied by AWB in the result.
+
+              The camera device will also support everything in MANUAL_SENSOR
+              except manual lens control and manual flash control.
+              </notes>
+            </value>
+            <value>ZSL
+              <notes>
+              The camera device supports the Zero Shutter Lag use case.
+
+              * At least one input stream can be used.
+              * RAW_OPAQUE is supported as an output/input format
+              * Using RAW_OPAQUE does not cause a frame rate drop
+                relative to the sensor's maximum capture rate (at that
+                resolution).
+              * RAW_OPAQUE will be reprocessable into both YUV_420_888
+                and JPEG formats.
+              * The maximum available resolution for RAW_OPAQUE streams
+                (both input/output) will match the maximum available
+                resolution of JPEG streams.
+              </notes>
+            </value>
+            <value optional="true">DNG
+              <notes>
+              The camera device supports outputting RAW buffers that can be
+              saved offline into a DNG format. It can reprocess DNG
+              files (produced from the same camera device) back into YUV.
+
+              * At least one input stream can be used.
+              * RAW16 is supported as output/input format.
+              * RAW16 is reprocessable into both YUV_420_888 and JPEG
+                formats.
+              * The maximum available resolution for RAW16 streams (both
+                input/output) will match the value in
+                android.sensor.info.pixelArraySize.
+              * All DNG-related optional metadata entries are provided
+                by the camera device.
+              </notes>
+            </value>
+          </enum>
+          <description>List of capabilities that the camera device
+          advertises as fully supporting.</description>
+          <details>
+          A capability is a contract that the camera device makes in order
+          to be able to satisfy one or more use cases.
+
+          Listing a capability guarantees that the whole set of features
+          required to support a common use will all be available.
+
+          Using a subset of the functionality provided by an unsupported
+          capability may be possible on a specific camera device implementation;
+          to do this query each of android.request.availableRequestKeys,
+          android.request.availableResultKeys,
+          android.request.availableCharacteristicsKeys.
+
+          XX: Maybe these should go into android.info.supportedHardwareLevel
+          as a table instead?
+
+          The following capabilities are guaranteed to be available on
+          android.info.supportedHardwareLevel `==` FULL devices:
+
+          * MANUAL_SENSOR
+          * ZSL
+
+          Other capabilities may be available on either FULL or LIMITED
+          devices, but the app. should query this field to be sure.
+          </details>
+          <hal_details>
+          Additional constraint details per-capability will be available
+          in the Compatibility Test Suite.
+
+          BACKWARD_COMPATIBLE capability requirements are not explicitly listed.
+          Instead refer to "BC" tags and the camera CTS tests in the
+          android.hardware.cts package.
+
+          Listed controls that can be either request or result (e.g.
+          android.sensor.exposureTime) must be available both in the
+          request and the result in order to be considered to be
+          capability-compliant.
+
+          For example, if the HAL claims to support MANUAL control,
+          then exposure time must be configurable via the request _and_
+          the actual exposure applied must be available via
+          the result.
+          </hal_details>
+        </entry>
+        <entry name="availableRequestKeys" type="int32" visibility="hidden"
+          container="array">
+          <array>
+            <size>n</size>
+          </array>
+          <description>A list of all keys that the camera device has available
+          to use with CaptureRequest.</description>
+
+          <details>Attempting to set a key into a CaptureRequest that is not
+          listed here will result in an invalid request and will be rejected
+          by the camera device.
+
+          This field can be used to query the feature set of a camera device
+          at a more granular level than capabilities. This is especially
+          important for optional keys that are not listed under any capability
+          in android.request.availableCapabilities.
+
+          TODO: This should be used by #getAvailableCaptureRequestKeys.
+          </details>
+          <hal_details>
+          Vendor tags must not be listed here. Use the vendor tag metadata
+          extensions C api instead (refer to camera3.h for more details).
+
+          Setting/getting vendor tags will be checked against the metadata
+          vendor extensions API and not against this field.
+
+          The HAL must not consume any request tags that are not listed either
+          here or in the vendor tag list.
+
+          The public camera2 API will always make the vendor tags visible
+          via CameraCharacteristics#getAvailableCaptureRequestKeys.
+          </hal_details>
+        </entry>
+        <entry name="availableResultKeys" type="int32" visibility="hidden"
+          container="array">
+          <array>
+            <size>n</size>
+          </array>
+          <description>A list of all keys that the camera device has available
+          to use with CaptureResult.</description>
+
+          <details>Attempting to get a key from a CaptureResult that is not
+          listed here will always return a `null` value. Getting a key from
+          a CaptureResult that is listed here must never return a `null`
+          value.
+
+          The following keys may return `null` unless they are enabled:
+
+          * android.statistics.lensShadingMap (non-null iff android.statistics.lensShadingMapMode == ON)
+
+          (Those sometimes-null keys should nevertheless be listed here
+          if they are available.)
+
+          This field can be used to query the feature set of a camera device
+          at a more granular level than capabilities. This is especially
+          important for optional keys that are not listed under any capability
+          in android.request.availableCapabilities.
+
+          TODO: This should be used by #getAvailableCaptureResultKeys.
+          </details>
+          <hal_details>
+          Tags listed here must always have an entry in the result metadata,
+          even if that size is 0 elements. Only array-type tags (e.g. lists,
+          matrices, strings) are allowed to have 0 elements.
+
+          Vendor tags must not be listed here. Use the vendor tag metadata
+          extensions C api instead (refer to camera3.h for more details).
+
+          Setting/getting vendor tags will be checked against the metadata
+          vendor extensions API and not against this field.
+
+          The HAL must not produce any result tags that are not listed either
+          here or in the vendor tag list.
+
+          The public camera2 API will always make the vendor tags visible
+          via CameraCharacteristics#getAvailableCaptureResultKeys.
+          </hal_details>
+        </entry>
+        <entry name="availableCharacteristicsKeys" type="int32" visibility="hidden"
+          container="array">
+          <array>
+            <size>n</size>
+          </array>
+          <description>A list of all keys that the camera device has available
+          to use with CameraCharacteristics.</description>
+          <details>This entry follows the same rules as
+          android.request.availableResultKeys (except that it applies for
+          CameraCharacteristics instead of CaptureResult). See above for more
+          details.
+
+          TODO: This should be used by CameraCharacteristics#getKeys.
+          </details>
+          <hal_details>
+          Tags listed here must always have an entry in the static info metadata,
+          even if that size is 0 elements. Only array-type tags (e.g. lists,
+          matrices, strings) are allowed to have 0 elements.
+
+          Vendor tags must not be listed here. Use the vendor tag metadata
+          extensions C api instead (refer to camera3.h for more details).
+
+          Setting/getting vendor tags will be checked against the metadata
+          vendor extensions API and not against this field.
+
+          The HAL must not have any tags in its static info that are not listed
+          either here or in the vendor tag list.
+
+          The public camera2 API will always make the vendor tags visible
+          via CameraCharacteristics#getKeys.
+          </hal_details>
+        </entry>
       </static>
     </section>
     <section name="scaler">
@@ -4430,6 +4696,24 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>FULL</value>
           </enum>
           <description>
+          Generally classifies the overall set of the camera device functionality.
+          </description>
+          <range>Optional. Default value is LIMITED.</range>
+          <details>
+          Camera devices will come in two flavors: LIMITED and FULL.
+
+          A FULL device has the most support possible and will enable the
+          widest range of use cases such as:
+
+          * 30 FPS at maximum resolution (== sensor resolution)
+          * Per frame control
+          * Manual sensor control
+          * Zero Shutter Lag (ZSL)
+
+          A LIMITED device may have some or none of the above characteristics.
+          To find out more refer to android.request.availableCapabilities.
+          </details>
+          <hal_details>
           The camera 3 HAL device can implement one of two possible
           operational modes; limited and full. Full support is
           expected from new higher-end devices. Limited mode has
@@ -4439,8 +4723,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           limited, and they share the same essential operational flow.
 
           For full details refer to "S3. Operational Modes" in camera3.h
-          </description>
-          <range>Optional. Default value is LIMITED.</range>
+          </hal_details>
         </entry>
       </static>
     </section>

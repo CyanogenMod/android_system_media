@@ -427,6 +427,10 @@
             <li><a href="#static_android.request.maxNumInputStreams">android.request.maxNumInputStreams</a></li>
             <li><a href="#static_android.request.pipelineMaxDepth">android.request.pipelineMaxDepth</a></li>
             <li><a href="#static_android.request.partialResultCount">android.request.partialResultCount</a></li>
+            <li><a href="#static_android.request.availableCapabilities">android.request.availableCapabilities</a></li>
+            <li><a href="#static_android.request.availableRequestKeys">android.request.availableRequestKeys</a></li>
+            <li><a href="#static_android.request.availableResultKeys">android.request.availableResultKeys</a></li>
+            <li><a href="#static_android.request.availableCharacteristicsKeys">android.request.availableCharacteristicsKeys</a></li>
           </ul>
         </li>
         <li>
@@ -9529,6 +9533,415 @@ the metadata via later partial results.<wbr/></p>
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
         
+                
+          <tr class="entry" id="static_android.request.availableCapabilities">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>request.<wbr/>available<wbr/>Capabilities
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">BACKWARD_COMPATIBLE</span>
+                    <span class="entry_type_enum_notes"><p>The minimal set of capabilities that every camera
+device (regardless of <a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a>)
+will support.<wbr/></p>
+<p>The full set of features supported by this capability makes
+the camera2 api backwards compatible with the camera1
+(android.<wbr/>hardware.<wbr/>Camera) API.<wbr/></p>
+<p>TODO: @hide this.<wbr/> Doesn't really mean anything except
+act as a catch-all for all the 'base' functionality.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">OPTIONAL</span>
+                    <span class="entry_type_enum_notes"><p>This is a catch-all capability to include all other
+tags or functionality not encapsulated by one of the other
+capabilities.<wbr/></p>
+<p>A typical example is all tags marked 'optional'.<wbr/></p>
+<p>TODO: @hide.<wbr/> We may not need this if we @hide all the optional
+tags not belonging to a capability.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">MANUAL_SENSOR</span>
+                    <span class="entry_type_enum_notes"><p>The camera device can be manually controlled (3A algorithms such
+as auto exposure,<wbr/> and auto focus can be
+bypassed),<wbr/> this includes but is not limited to:</p>
+<ul>
+<li>Manual exposure control<ul>
+<li><a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a></li>
+<li><a href="#static_android.sensor.info.exposureTimeRange">android.<wbr/>sensor.<wbr/>info.<wbr/>exposure<wbr/>Time<wbr/>Range</a></li>
+</ul>
+</li>
+<li>Manual sensitivity control<ul>
+<li><a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a></li>
+<li><a href="#static_android.sensor.info.sensitivityRange">android.<wbr/>sensor.<wbr/>info.<wbr/>sensitivity<wbr/>Range</a></li>
+<li><a href="#static_android.sensor.baseGainFactor">android.<wbr/>sensor.<wbr/>base<wbr/>Gain<wbr/>Factor</a></li>
+</ul>
+</li>
+<li>Manual lens control<ul>
+<li>android.<wbr/>lens.<wbr/>*</li>
+</ul>
+</li>
+<li>Manual flash control<ul>
+<li>android.<wbr/>flash.<wbr/>*</li>
+</ul>
+</li>
+<li>Manual black level locking<ul>
+<li><a href="#controls_android.blackLevel.lock">android.<wbr/>black<wbr/>Level.<wbr/>lock</a></li>
+</ul>
+</li>
+</ul>
+<p>If any of the above 3A algorithms are enabled,<wbr/> then the camera
+device will accurately report the values applied by 3A in the
+result.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">GCAM</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>TODO: This should be @hide</p>
+<ul>
+<li>Manual tonemap control<ul>
+<li><a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a></li>
+<li><a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a></li>
+<li><a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a></li>
+<li><a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a></li>
+<li><a href="#static_android.tonemap.maxCurvePoints">android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points</a></li>
+</ul>
+</li>
+<li>Manual white balance control<ul>
+<li><a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a></li>
+<li><a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a></li>
+</ul>
+</li>
+<li>Lens shading map information<ul>
+<li><a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a></li>
+<li><a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a></li>
+</ul>
+</li>
+</ul>
+<p>If auto white balance is enabled,<wbr/> then the camera device
+will accurately report the values applied by AWB in the result.<wbr/></p>
+<p>The camera device will also support everything in MANUAL_<wbr/>SENSOR
+except manual lens control and manual flash control.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ZSL</span>
+                    <span class="entry_type_enum_notes"><p>The camera device supports the Zero Shutter Lag use case.<wbr/></p>
+<ul>
+<li>At least one input stream can be used.<wbr/></li>
+<li>RAW_<wbr/>OPAQUE is supported as an output/<wbr/>input format</li>
+<li>Using RAW_<wbr/>OPAQUE does not cause a frame rate drop
+  relative to the sensor's maximum capture rate (at that
+  resolution).<wbr/></li>
+<li>RAW_<wbr/>OPAQUE will be reprocessable into both YUV_<wbr/>420_<wbr/>888
+  and JPEG formats.<wbr/></li>
+<li>The maximum available resolution for RAW_<wbr/>OPAQUE streams
+  (both input/<wbr/>output) will match the maximum available
+  resolution of JPEG streams.<wbr/></li>
+</ul></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">DNG</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>The camera device supports outputting RAW buffers that can be
+saved offline into a DNG format.<wbr/> It can reprocess DNG
+files (produced from the same camera device) back into YUV.<wbr/></p>
+<ul>
+<li>At least one input stream can be used.<wbr/></li>
+<li>RAW16 is supported as output/<wbr/>input format.<wbr/></li>
+<li>RAW16 is reprocessable into both YUV_<wbr/>420_<wbr/>888 and JPEG
+  formats.<wbr/></li>
+<li>The maximum available resolution for RAW16 streams (both
+  input/<wbr/>output) will match the value in
+  <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>.<wbr/></li>
+<li>All DNG-related optional metadata entries are provided
+  by the camera device.<wbr/></li>
+</ul></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>List of capabilities that the camera device
+advertises as fully supporting.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>A capability is a contract that the camera device makes in order
+to be able to satisfy one or more use cases.<wbr/></p>
+<p>Listing a capability guarantees that the whole set of features
+required to support a common use will all be available.<wbr/></p>
+<p>Using a subset of the functionality provided by an unsupported
+capability may be possible on a specific camera device implementation;
+to do this query each of <a href="#static_android.request.availableRequestKeys">android.<wbr/>request.<wbr/>available<wbr/>Request<wbr/>Keys</a>,<wbr/>
+<a href="#static_android.request.availableResultKeys">android.<wbr/>request.<wbr/>available<wbr/>Result<wbr/>Keys</a>,<wbr/>
+<a href="#static_android.request.availableCharacteristicsKeys">android.<wbr/>request.<wbr/>available<wbr/>Characteristics<wbr/>Keys</a>.<wbr/></p>
+<p>XX: Maybe these should go into android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level
+as a table instead?</p>
+<p>The following capabilities are guaranteed to be available on
+<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> <code>==</code> FULL devices:</p>
+<ul>
+<li>MANUAL_<wbr/>SENSOR</li>
+<li>ZSL</li>
+</ul>
+<p>Other capabilities may be available on either FULL or LIMITED
+devices,<wbr/> but the app.<wbr/> should query this field to be sure.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Additional constraint details per-capability will be available
+in the Compatibility Test Suite.<wbr/></p>
+<p>BACKWARD_<wbr/>COMPATIBLE capability requirements are not explicitly listed.<wbr/>
+Instead refer to "BC" tags and the camera CTS tests in the
+android.<wbr/>hardware.<wbr/>cts package.<wbr/></p>
+<p>Listed controls that can be either request or result (e.<wbr/>g.<wbr/>
+<a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>) must be available both in the
+request and the result in order to be considered to be
+capability-compliant.<wbr/></p>
+<p>For example,<wbr/> if the HAL claims to support MANUAL control,<wbr/>
+then exposure time must be configurable via the request <em>and</em>
+the actual exposure applied must be available via
+the result.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.request.availableRequestKeys">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>request.<wbr/>available<wbr/>Request<wbr/>Keys
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+              <span class="entry_type_visibility"> [hidden]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A list of all keys that the camera device has available
+to use with CaptureRequest.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Attempting to set a key into a CaptureRequest that is not
+listed here will result in an invalid request and will be rejected
+by the camera device.<wbr/></p>
+<p>This field can be used to query the feature set of a camera device
+at a more granular level than capabilities.<wbr/> This is especially
+important for optional keys that are not listed under any capability
+in <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>.<wbr/></p>
+<p>TODO: This should be used by #getAvailableCaptureRequestKeys.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Vendor tags must not be listed here.<wbr/> Use the vendor tag metadata
+extensions C api instead (refer to camera3.<wbr/>h for more details).<wbr/></p>
+<p>Setting/<wbr/>getting vendor tags will be checked against the metadata
+vendor extensions API and not against this field.<wbr/></p>
+<p>The HAL must not consume any request tags that are not listed either
+here or in the vendor tag list.<wbr/></p>
+<p>The public camera2 API will always make the vendor tags visible
+via CameraCharacteristics#getAvailableCaptureRequestKeys.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.request.availableResultKeys">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>request.<wbr/>available<wbr/>Result<wbr/>Keys
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+              <span class="entry_type_visibility"> [hidden]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A list of all keys that the camera device has available
+to use with CaptureResult.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Attempting to get a key from a CaptureResult that is not
+listed here will always return a <code>null</code> value.<wbr/> Getting a key from
+a CaptureResult that is listed here must never return a <code>null</code>
+value.<wbr/></p>
+<p>The following keys may return <code>null</code> unless they are enabled:</p>
+<ul>
+<li><a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a> (non-null iff <a href="#controls_android.statistics.lensShadingMapMode">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map<wbr/>Mode</a> == ON)</li>
+</ul>
+<p>(Those sometimes-null keys should nevertheless be listed here
+if they are available.<wbr/>)</p>
+<p>This field can be used to query the feature set of a camera device
+at a more granular level than capabilities.<wbr/> This is especially
+important for optional keys that are not listed under any capability
+in <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>.<wbr/></p>
+<p>TODO: This should be used by #getAvailableCaptureResultKeys.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Tags listed here must always have an entry in the result metadata,<wbr/>
+even if that size is 0 elements.<wbr/> Only array-type tags (e.<wbr/>g.<wbr/> lists,<wbr/>
+matrices,<wbr/> strings) are allowed to have 0 elements.<wbr/></p>
+<p>Vendor tags must not be listed here.<wbr/> Use the vendor tag metadata
+extensions C api instead (refer to camera3.<wbr/>h for more details).<wbr/></p>
+<p>Setting/<wbr/>getting vendor tags will be checked against the metadata
+vendor extensions API and not against this field.<wbr/></p>
+<p>The HAL must not produce any result tags that are not listed either
+here or in the vendor tag list.<wbr/></p>
+<p>The public camera2 API will always make the vendor tags visible
+via CameraCharacteristics#getAvailableCaptureResultKeys.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.request.availableCharacteristicsKeys">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>request.<wbr/>available<wbr/>Characteristics<wbr/>Keys
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+              <span class="entry_type_visibility"> [hidden]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A list of all keys that the camera device has available
+to use with CameraCharacteristics.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This entry follows the same rules as
+<a href="#static_android.request.availableResultKeys">android.<wbr/>request.<wbr/>available<wbr/>Result<wbr/>Keys</a> (except that it applies for
+CameraCharacteristics instead of CaptureResult).<wbr/> See above for more
+details.<wbr/></p>
+<p>TODO: This should be used by CameraCharacteristics#getKeys.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Tags listed here must always have an entry in the static info metadata,<wbr/>
+even if that size is 0 elements.<wbr/> Only array-type tags (e.<wbr/>g.<wbr/> lists,<wbr/>
+matrices,<wbr/> strings) are allowed to have 0 elements.<wbr/></p>
+<p>Vendor tags must not be listed here.<wbr/> Use the vendor tag metadata
+extensions C api instead (refer to camera3.<wbr/>h for more details).<wbr/></p>
+<p>Setting/<wbr/>getting vendor tags will be checked against the metadata
+vendor extensions API and not against this field.<wbr/></p>
+<p>The HAL must not have any tags in its static info that are not listed
+either here or in the vendor tag list.<wbr/></p>
+<p>The public camera2 API will always make the vendor tags visible
+via CameraCharacteristics#getKeys.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
         
 
       <!-- end of kind -->
@@ -15446,7 +15859,7 @@ doesn't violate the above rules.<wbr/></p>
 
                 
           <tr class="entry" id="static_android.info.supportedHardwareLevel">
-            <td class="entry_name" rowspan="1">
+            <td class="entry_name" rowspan="5">
               android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level
             </td>
             <td class="entry_type">
@@ -15466,14 +15879,7 @@ doesn't violate the above rules.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>The camera 3 HAL device can implement one of two possible
-operational modes; limited and full.<wbr/> Full support is
-expected from new higher-end devices.<wbr/> Limited mode has
-hardware requirements roughly in line with those for a
-camera HAL device v1 implementation,<wbr/> and is expected from
-older or inexpensive devices.<wbr/> Full is a strict superset of
-limited,<wbr/> and they share the same essential operational flow.<wbr/></p>
-<p>For full details refer to "S3.<wbr/> Operational Modes" in camera3.<wbr/>h</p>
+              <p>Generally classifies the overall set of the camera device functionality.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -15487,7 +15893,40 @@ limited,<wbr/> and they share the same essential operational flow.<wbr/></p>
             </td>
 
           </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Camera devices will come in two flavors: LIMITED and FULL.<wbr/></p>
+<p>A FULL device has the most support possible and will enable the
+widest range of use cases such as:</p>
+<ul>
+<li>30 FPS at maximum resolution (== sensor resolution)</li>
+<li>Per frame control</li>
+<li>Manual sensor control</li>
+<li>Zero Shutter Lag (ZSL)</li>
+</ul>
+<p>A LIMITED device may have some or none of the above characteristics.<wbr/>
+To find out more refer to <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>.<wbr/></p>
+            </td>
+          </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The camera 3 HAL device can implement one of two possible
+operational modes; limited and full.<wbr/> Full support is
+expected from new higher-end devices.<wbr/> Limited mode has
+hardware requirements roughly in line with those for a
+camera HAL device v1 implementation,<wbr/> and is expected from
+older or inexpensive devices.<wbr/> Full is a strict superset of
+limited,<wbr/> and they share the same essential operational flow.<wbr/></p>
+<p>For full details refer to "S3.<wbr/> Operational Modes" in camera3.<wbr/>h</p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
