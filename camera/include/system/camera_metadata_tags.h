@@ -224,6 +224,7 @@ typedef enum camera_metadata_tag {
     ANDROID_LENS_INFO_HYPERFOCAL_DISTANCE,            // float        | public
     ANDROID_LENS_INFO_MINIMUM_FOCUS_DISTANCE,         // float        | public
     ANDROID_LENS_INFO_SHADING_MAP_SIZE,               // int32[]      | public
+    ANDROID_LENS_INFO_FOCUS_DISTANCE_CALIBRATION,     // enum         | public
     ANDROID_LENS_INFO_END,
 
     ANDROID_NOISE_REDUCTION_MODE =                    // enum         | public
@@ -600,6 +601,13 @@ typedef enum camera_metadata_enum_android_lens_state {
     ANDROID_LENS_STATE_MOVING,
 } camera_metadata_enum_android_lens_state_t;
 
+
+// ANDROID_LENS_INFO_FOCUS_DISTANCE_CALIBRATION
+typedef enum camera_metadata_enum_android_lens_info_focus_distance_calibration {
+    ANDROID_LENS_INFO_FOCUS_DISTANCE_CALIBRATION_UNCALIBRATED,
+    ANDROID_LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE,
+    ANDROID_LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED,
+} camera_metadata_enum_android_lens_info_focus_distance_calibration_t;
 
 
 // ANDROID_NOISE_REDUCTION_MODE

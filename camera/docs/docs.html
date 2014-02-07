@@ -346,6 +346,7 @@
             <li><a href="#static_android.lens.info.hyperfocalDistance">android.lens.info.hyperfocalDistance</a></li>
             <li><a href="#static_android.lens.info.minimumFocusDistance">android.lens.info.minimumFocusDistance</a></li>
             <li><a href="#static_android.lens.info.shadingMapSize">android.lens.info.shadingMapSize</a></li>
+            <li><a href="#static_android.lens.info.focusDistanceCalibration">android.lens.info.focusDistanceCalibration</a></li>
 
             <li><a href="#static_android.lens.facing">android.lens.facing</a></li>
             <li><a href="#static_android.lens.opticalAxisAngle">android.lens.opticalAxisAngle</a></li>
@@ -7098,7 +7099,7 @@ measured from frontmost surface of the lens</p>
             </td>
 
             <td class="entry_units">
-              diopters (1/<wbr/>m)
+              See android.<wbr/>lens.<wbr/>info.<wbr/>focus<wbr/>Distance<wbr/>Calibration for details.<wbr/>
             </td>
 
             <td class="entry_range">
@@ -7542,12 +7543,11 @@ map</p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Hyperfocal distance for this lens; set to
-0 if fixed focus</p>
+              <p>Optional.<wbr/> Hyperfocal distance for this lens.<wbr/></p>
             </td>
 
             <td class="entry_units">
-              diopters
+              See android.<wbr/>lens.<wbr/>info.<wbr/>focus<wbr/>Distance<wbr/>Calibration for details.<wbr/>
             </td>
 
             <td class="entry_range">
@@ -7555,9 +7555,6 @@ map</p>
             </td>
 
             <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_BC">BC</a></li>
-              </ul>
             </td>
 
           </tr>
@@ -7566,8 +7563,9 @@ map</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The hyperfocal distance is used for the old
-API's 'fixed' setting</p>
+              <p>If the lens is fixed focus,<wbr/> the camera device will report 0.<wbr/></p>
+<p>If the lens is not fixed focus,<wbr/> the camera device will report this
+field when <a href="#static_android.lens.info.focusDistanceCalibration">android.<wbr/>lens.<wbr/>info.<wbr/>focus<wbr/>Distance<wbr/>Calibration</a> is APPROXIMATE or CALIBRATED.<wbr/></p>
             </td>
           </tr>
 
@@ -7590,11 +7588,11 @@ API's 'fixed' setting</p>
 
             <td class="entry_description">
               <p>Shortest distance from frontmost surface
-of the lens that can be focused correctly</p>
+of the lens that can be focused correctly.<wbr/></p>
             </td>
 
             <td class="entry_units">
-              diopters
+              See android.<wbr/>lens.<wbr/>info.<wbr/>focus<wbr/>Distance<wbr/>Calibration for details.<wbr/>
             </td>
 
             <td class="entry_range">
@@ -7614,7 +7612,7 @@ of the lens that can be focused correctly</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>If the lens is fixed-focus,<wbr/> this should be
-0</p>
+0.<wbr/></p>
             </td>
           </tr>
 
@@ -7665,6 +7663,80 @@ of the lens that can be focused correctly</p>
             <td class="entry_details" colspan="5">
               <p>The map should be on the order of 30-40 rows and columns,<wbr/> and
 must be smaller than 64x64.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.lens.info.focusDistanceCalibration">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>lens.<wbr/>info.<wbr/>focus<wbr/>Distance<wbr/>Calibration
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">UNCALIBRATED</span>
+                    <span class="entry_type_enum_notes"><p>The lens focus distance is not accurate,<wbr/> and the units used for
+<a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a> do not correspond to any physical units.<wbr/>
+Setting the lens to the same focus distance on separate occasions may
+result in a different real focus distance,<wbr/> depending on factors such
+as the orientation of the device,<wbr/> the age of the focusing mechanism,<wbr/>
+and the device temperature.<wbr/> The focus distance value will still be
+in the range of <code>[0,<wbr/> <a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a>]</code>,<wbr/> where 0
+represents the farthest focus.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">APPROXIMATE</span>
+                    <span class="entry_type_enum_notes"><p>The lens focus distance is measured in diopters.<wbr/> However,<wbr/> setting the lens
+to the same focus distance on separate occasions may result in a
+different real focus distance,<wbr/> depending on factors such as the
+orientation of the device,<wbr/> the age of the focusing mechanism,<wbr/> and
+the device temperature.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">CALIBRATED</span>
+                    <span class="entry_type_enum_notes"><p>The lens focus distance is measured in diopters.<wbr/> The lens mechanism is
+calibrated so that setting the same focus distance is repeatable on
+multiple occasions with good accuracy,<wbr/> and the focus distance corresponds
+to the real physical distance to the plane of best focus.<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The lens focus distance calibration quality.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_V1">V1</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The lens focus distance calibration quality determines the reliability of
+focus related metadata entries,<wbr/> i.<wbr/>e.<wbr/> <a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a>,<wbr/>
+<a href="#dynamic_android.lens.focusRange">android.<wbr/>lens.<wbr/>focus<wbr/>Range</a>,<wbr/> <a href="#static_android.lens.info.hyperfocalDistance">android.<wbr/>lens.<wbr/>info.<wbr/>hyperfocal<wbr/>Distance</a>,<wbr/> and
+<a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a>.<wbr/></p>
             </td>
           </tr>
 
@@ -8032,7 +8104,7 @@ measured from frontmost surface of the lens</p>
             </td>
 
             <td class="entry_units">
-              diopters (1/<wbr/>m)
+              See android.<wbr/>lens.<wbr/>info.<wbr/>focus<wbr/>Distance<wbr/>Calibration for details.<wbr/>
             </td>
 
             <td class="entry_range">
@@ -8084,7 +8156,7 @@ sharp focus (depth of field)</p>
 
             <td class="entry_units">
               pair of focus distances in diopters: (near,<wbr/>
-          far)
+          far),<wbr/> see android.<wbr/>lens.<wbr/>info.<wbr/>focus<wbr/>Distance<wbr/>Calibration for details.<wbr/>
             </td>
 
             <td class="entry_range">
@@ -15645,7 +15717,6 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.jpeg.availableThumbnailSizes">android.jpeg.availableThumbnailSizes</a> (static)</li>
           <li><a href="#controls_android.lens.focusDistance">android.lens.focusDistance</a> (controls)</li>
           <li><a href="#static_android.lens.info.availableFocalLengths">android.lens.info.availableFocalLengths</a> (static)</li>
-          <li><a href="#static_android.lens.info.hyperfocalDistance">android.lens.info.hyperfocalDistance</a> (static)</li>
           <li><a href="#dynamic_android.lens.focusRange">android.lens.focusRange</a> (dynamic)</li>
           <li><a href="#static_android.request.maxNumOutputStreams">android.request.maxNumOutputStreams</a> (static)</li>
           <li><a href="#controls_android.scaler.cropRegion">android.scaler.cropRegion</a> (controls)</li>
@@ -15693,6 +15764,7 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.lens.info.geometricCorrectionMapSize">android.lens.info.geometricCorrectionMapSize</a> (static)</li>
           <li><a href="#static_android.lens.info.minimumFocusDistance">android.lens.info.minimumFocusDistance</a> (static)</li>
           <li><a href="#static_android.lens.info.shadingMapSize">android.lens.info.shadingMapSize</a> (static)</li>
+          <li><a href="#static_android.lens.info.focusDistanceCalibration">android.lens.info.focusDistanceCalibration</a> (static)</li>
           <li><a href="#static_android.lens.position">android.lens.position</a> (static)</li>
           <li><a href="#dynamic_android.lens.state">android.lens.state</a> (dynamic)</li>
           <li><a href="#controls_android.noiseReduction.mode">android.noiseReduction.mode</a> (controls)</li>
