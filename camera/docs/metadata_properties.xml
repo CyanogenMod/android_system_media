@@ -3363,6 +3363,21 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>Optional. This value is missing if no temperature is available.</range>
           <tag id="FULL" />
         </entry>
+        <entry name="neutralColorPoint" type="rational" visibility="public"
+        optional="true" container="array">
+          <array>
+            <size>3</size>
+          </array>
+          <description>
+          The estimated white balance at the time of capture.
+          </description>
+          <details>
+          The estimated white balance encoded as the RGB values of the
+          perfectly neutral color point in the linear native sensor color space.
+          The order of the values is R, G, B; where R is in the lowest index.
+          </details>
+          <tag id="DNG" />
+        </entry>
       </dynamic>
       <controls>
         <entry name="testPatternData" type="int32" visibility="public" optional="true" container="array">
