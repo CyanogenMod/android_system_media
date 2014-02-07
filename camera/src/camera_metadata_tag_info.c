@@ -447,6 +447,9 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     { "timestamp",                     TYPE_INT64  },
     [ ANDROID_SENSOR_TEMPERATURE - ANDROID_SENSOR_START ] =
     { "temperature",                   TYPE_FLOAT  },
+    [ ANDROID_SENSOR_NEUTRAL_COLOR_POINT - ANDROID_SENSOR_START ] =
+    { "neutralColorPoint",             TYPE_RATIONAL
+                },
     [ ANDROID_SENSOR_TEST_PATTERN_DATA - ANDROID_SENSOR_START ] =
     { "testPatternData",               TYPE_INT32  },
     [ ANDROID_SENSOR_TEST_PATTERN_MODE - ANDROID_SENSOR_START ] =
@@ -1742,6 +1745,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SENSOR_TEMPERATURE: {
+            break;
+        }
+        case ANDROID_SENSOR_NEUTRAL_COLOR_POINT: {
             break;
         }
         case ANDROID_SENSOR_TEST_PATTERN_DATA: {

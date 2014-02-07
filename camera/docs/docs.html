@@ -520,6 +520,7 @@
             <li><a href="#dynamic_android.sensor.sensitivity">android.sensor.sensitivity</a></li>
             <li><a href="#dynamic_android.sensor.timestamp">android.sensor.timestamp</a></li>
             <li><a href="#dynamic_android.sensor.temperature">android.sensor.temperature</a></li>
+            <li><a href="#dynamic_android.sensor.neutralColorPoint">android.sensor.neutralColorPoint</a></li>
             <li><a href="#dynamic_android.sensor.testPatternMode">android.sensor.testPatternMode</a></li>
           </ul>
         </li>
@@ -12371,6 +12372,55 @@ somewhere close to it.<wbr/></p>
            <!-- end of entry -->
         
                 
+          <tr class="entry" id="dynamic_android.sensor.neutralColorPoint">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>sensor.<wbr/>neutral<wbr/>Color<wbr/>Point
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">rational</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The estimated white balance at the time of capture.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DNG">DNG</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The estimated white balance encoded as the RGB values of the
+perfectly neutral color point in the linear native sensor color space.<wbr/>
+The order of the values is R,<wbr/> G,<wbr/> B; where R is in the lowest index.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
           <tr class="entry" id="dynamic_android.sensor.testPatternMode">
             <td class="entry_name" rowspan="5">
               android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Mode
@@ -15694,6 +15744,7 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.sensor.forwardMatrix1">android.sensor.forwardMatrix1</a> (static)</li>
           <li><a href="#static_android.sensor.forwardMatrix2">android.sensor.forwardMatrix2</a> (static)</li>
           <li><a href="#static_android.sensor.referenceIlluminant1">android.sensor.referenceIlluminant1</a> (static)</li>
+          <li><a href="#dynamic_android.sensor.neutralColorPoint">android.sensor.neutralColorPoint</a> (dynamic)</li>
           <li><a href="#controls_android.tonemap.curveRed">android.tonemap.curveRed</a> (controls)</li>
         </ul>
       </li> <!-- tag_DNG -->
