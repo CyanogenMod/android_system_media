@@ -413,6 +413,12 @@ static tag_info_t android_scaler[ANDROID_SCALER_END -
     [ ANDROID_SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP - ANDROID_SCALER_START ] =
     { "availableInputOutputFormatsMap",
                                         TYPE_INT32  },
+    [ ANDROID_SCALER_AVAILABLE_STREAM_CONFIGURATIONS - ANDROID_SCALER_START ] =
+    { "availableStreamConfigurations", TYPE_INT32  },
+    [ ANDROID_SCALER_AVAILABLE_MIN_FRAME_DURATIONS - ANDROID_SCALER_START ] =
+    { "availableMinFrameDurations",    TYPE_INT64  },
+    [ ANDROID_SCALER_AVAILABLE_STALL_DURATIONS - ANDROID_SCALER_START ] =
+    { "availableStallDurations",       TYPE_INT64  },
 };
 
 static tag_info_t android_sensor[ANDROID_SENSOR_END -
@@ -1699,6 +1705,27 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP: {
+            break;
+        }
+        case ANDROID_SCALER_AVAILABLE_STREAM_CONFIGURATIONS: {
+            switch (value) {
+                case ANDROID_SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT:
+                    msg = "OUTPUT";
+                    ret = 0;
+                    break;
+                case ANDROID_SCALER_AVAILABLE_STREAM_CONFIGURATIONS_INPUT:
+                    msg = "INPUT";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
+        case ANDROID_SCALER_AVAILABLE_MIN_FRAME_DURATIONS: {
+            break;
+        }
+        case ANDROID_SCALER_AVAILABLE_STALL_DURATIONS: {
             break;
         }
 
