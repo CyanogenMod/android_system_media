@@ -3354,6 +3354,30 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>0,90,180,270</range>
           <tag id="BC" />
         </entry>
+        <entry name="profileHueSatMapDimensions" type="int32"
+        visibility="public" optional="true"
+        type_notes="Number of samples for hue, saturation, and value"
+        container="array">
+          <array>
+            <size>3</size>
+          </array>
+          <description>
+          The number of input samples for each dimension of
+          android.sensor.profileHueSatMap.
+          </description>
+          <range>
+          Hue &amp;gt;= 1,
+          Saturation &amp;gt;= 2,
+          Value &amp;gt;= 1
+          </range>
+          <details>
+          The number of input samples for the hue, saturation, and value
+          dimension of android.sensor.profileHueSatMap. The order of the
+          dimensions given is hue, saturation, value; where hue is the 0th
+          element.
+          </details>
+          <tag id="DNG" />
+        </entry>
         <entry name="referenceIlluminant1" type="byte" enum="true">
           <enum>
             <value id="1">DAYLIGHT</value>
@@ -3435,6 +3459,62 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           The estimated white balance encoded as the RGB values of the
           perfectly neutral color point in the linear native sensor color space.
           The order of the values is R, G, B; where R is in the lowest index.
+          </details>
+          <tag id="DNG" />
+        </entry>
+        <entry name="profileHueSatMap" type="float"
+        visibility="public" optional="true"
+        type_notes="Mapping for hue, saturation, and value"
+        container="array">
+          <array>
+            <size>hue_samples</size>
+            <size>saturation_samples</size>
+            <size>value_samples</size>
+            <size>3</size>
+          </array>
+          <description>
+          A mapping containing a hue shift, saturation scale, and value scale
+          for each pixel.
+          </description>
+          <units>
+          Hue shift is given in degrees; saturation and value scale factors are
+          unitless.
+          </units>
+          <details>
+          hue_samples, saturation_samples, and value_samples are given in
+          android.sensor.profileHueSatMapDimensions.
+
+          Each entry of this map contains three floats corresponding to the
+          hue shift, saturation scale, and value scale, respectively; where the
+          hue shift has the lowest index. The map entries are stored in the tag
+          in nested loop order, with the value divisions in the outer loop, the
+          hue divisions in the middle loop, and the saturation divisions in the
+          inner loop. All zero input saturation entries are required to have a
+          value scale factor of 1.0.
+          </details>
+          <tag id="DNG" />
+        </entry>
+        <entry name="profileToneCurve" type="float"
+        visibility="public" optional="true"
+        type_notes="Samples defining a spline for a tone-mapping curve"
+        container="array">
+          <array>
+            <size>samples</size>
+            <size>2</size>
+          </array>
+          <description>
+          A list of x,y samples defining a tone-mapping curve for gamma adjustment.
+          </description>
+          <range>
+          Each sample has an input range of `[0, 1]` and an output range of
+          `[0, 1]`.  The first sample is required to be `(0, 0)`, and the last
+          sample is required to be `(1, 1)`.
+          </range>
+          <details>
+          This tag contains a default tone curve that can be applied while
+          processing the image as a starting point for user adjustments.
+          The curve is specified as a list of value pairs in linear gamma.
+          The curve is interpolated using a cubic spline.
           </details>
           <tag id="DNG" />
         </entry>

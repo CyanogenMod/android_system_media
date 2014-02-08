@@ -441,6 +441,8 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     { "noiseModelCoefficients",        TYPE_FLOAT  },
     [ ANDROID_SENSOR_ORIENTATION - ANDROID_SENSOR_START ] =
     { "orientation",                   TYPE_INT32  },
+    [ ANDROID_SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS - ANDROID_SENSOR_START ] =
+    { "profileHueSatMapDimensions",    TYPE_INT32  },
     [ ANDROID_SENSOR_REFERENCE_ILLUMINANT1 - ANDROID_SENSOR_START ] =
     { "referenceIlluminant1",          TYPE_BYTE   },
     [ ANDROID_SENSOR_REFERENCE_ILLUMINANT2 - ANDROID_SENSOR_START ] =
@@ -452,6 +454,10 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     [ ANDROID_SENSOR_NEUTRAL_COLOR_POINT - ANDROID_SENSOR_START ] =
     { "neutralColorPoint",             TYPE_RATIONAL
                 },
+    [ ANDROID_SENSOR_PROFILE_HUE_SAT_MAP - ANDROID_SENSOR_START ] =
+    { "profileHueSatMap",              TYPE_FLOAT  },
+    [ ANDROID_SENSOR_PROFILE_TONE_CURVE - ANDROID_SENSOR_START ] =
+    { "profileToneCurve",              TYPE_FLOAT  },
     [ ANDROID_SENSOR_TEST_PATTERN_DATA - ANDROID_SENSOR_START ] =
     { "testPatternData",               TYPE_INT32  },
     [ ANDROID_SENSOR_TEST_PATTERN_MODE - ANDROID_SENSOR_START ] =
@@ -1680,6 +1686,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
         case ANDROID_SENSOR_ORIENTATION: {
             break;
         }
+        case ANDROID_SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS: {
+            break;
+        }
         case ANDROID_SENSOR_REFERENCE_ILLUMINANT1: {
             switch (value) {
                 case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT:
@@ -1773,6 +1782,12 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SENSOR_NEUTRAL_COLOR_POINT: {
+            break;
+        }
+        case ANDROID_SENSOR_PROFILE_HUE_SAT_MAP: {
+            break;
+        }
+        case ANDROID_SENSOR_PROFILE_TONE_CURVE: {
             break;
         }
         case ANDROID_SENSOR_TEST_PATTERN_DATA: {

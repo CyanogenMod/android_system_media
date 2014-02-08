@@ -508,6 +508,7 @@
             <li><a href="#static_android.sensor.maxAnalogSensitivity">android.sensor.maxAnalogSensitivity</a></li>
             <li><a href="#static_android.sensor.noiseModelCoefficients">android.sensor.noiseModelCoefficients</a></li>
             <li><a href="#static_android.sensor.orientation">android.sensor.orientation</a></li>
+            <li><a href="#static_android.sensor.profileHueSatMapDimensions">android.sensor.profileHueSatMapDimensions</a></li>
             <li><a href="#static_android.sensor.referenceIlluminant1">android.sensor.referenceIlluminant1</a></li>
             <li><a href="#static_android.sensor.referenceIlluminant2">android.sensor.referenceIlluminant2</a></li>
             <li><a href="#static_android.sensor.availableTestPatternModes">android.sensor.availableTestPatternModes</a></li>
@@ -522,6 +523,8 @@
             <li><a href="#dynamic_android.sensor.timestamp">android.sensor.timestamp</a></li>
             <li><a href="#dynamic_android.sensor.temperature">android.sensor.temperature</a></li>
             <li><a href="#dynamic_android.sensor.neutralColorPoint">android.sensor.neutralColorPoint</a></li>
+            <li><a href="#dynamic_android.sensor.profileHueSatMap">android.sensor.profileHueSatMap</a></li>
+            <li><a href="#dynamic_android.sensor.profileToneCurve">android.sensor.profileToneCurve</a></li>
             <li><a href="#dynamic_android.sensor.testPatternMode">android.sensor.testPatternMode</a></li>
           </ul>
         </li>
@@ -11927,6 +11930,61 @@ to bottom in the sensor's coordinate system</p>
            <!-- end of entry -->
         
                 
+          <tr class="entry" id="static_android.sensor.profileHueSatMapDimensions">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>sensor.<wbr/>profile<wbr/>Hue<wbr/>Sat<wbr/>Map<wbr/>Dimensions
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">Number of samples for hue,<wbr/> saturation,<wbr/> and value</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The number of input samples for each dimension of
+<a href="#dynamic_android.sensor.profileHueSatMap">android.<wbr/>sensor.<wbr/>profile<wbr/>Hue<wbr/>Sat<wbr/>Map</a>.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Hue &gt;= 1,<wbr/>
+Saturation &gt;= 2,<wbr/>
+Value &gt;= 1</p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DNG">DNG</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The number of input samples for the hue,<wbr/> saturation,<wbr/> and value
+dimension of <a href="#dynamic_android.sensor.profileHueSatMap">android.<wbr/>sensor.<wbr/>profile<wbr/>Hue<wbr/>Sat<wbr/>Map</a>.<wbr/> The order of the
+dimensions given is hue,<wbr/> saturation,<wbr/> value; where hue is the 0th
+element.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
           <tr class="entry" id="static_android.sensor.referenceIlluminant1">
             <td class="entry_name" rowspan="3">
               android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant1
@@ -12507,6 +12565,121 @@ somewhere close to it.<wbr/></p>
               <p>The estimated white balance encoded as the RGB values of the
 perfectly neutral color point in the linear native sensor color space.<wbr/>
 The order of the values is R,<wbr/> G,<wbr/> B; where R is in the lowest index.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.sensor.profileHueSatMap">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>sensor.<wbr/>profile<wbr/>Hue<wbr/>Sat<wbr/>Map
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  hue_samples x saturation_samples x value_samples x 3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">Mapping for hue,<wbr/> saturation,<wbr/> and value</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A mapping containing a hue shift,<wbr/> saturation scale,<wbr/> and value scale
+for each pixel.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              
+          Hue shift is given in degrees; saturation and value scale factors are
+          unitless.<wbr/>
+          
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DNG">DNG</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>hue_<wbr/>samples,<wbr/> saturation_<wbr/>samples,<wbr/> and value_<wbr/>samples are given in
+<a href="#static_android.sensor.profileHueSatMapDimensions">android.<wbr/>sensor.<wbr/>profile<wbr/>Hue<wbr/>Sat<wbr/>Map<wbr/>Dimensions</a>.<wbr/></p>
+<p>Each entry of this map contains three floats corresponding to the
+hue shift,<wbr/> saturation scale,<wbr/> and value scale,<wbr/> respectively; where the
+hue shift has the lowest index.<wbr/> The map entries are stored in the tag
+in nested loop order,<wbr/> with the value divisions in the outer loop,<wbr/> the
+hue divisions in the middle loop,<wbr/> and the saturation divisions in the
+inner loop.<wbr/> All zero input saturation entries are required to have a
+value scale factor of 1.<wbr/>0.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.sensor.profileToneCurve">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>sensor.<wbr/>profile<wbr/>Tone<wbr/>Curve
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  samples x 2
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">Samples defining a spline for a tone-mapping curve</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A list of x,<wbr/>y samples defining a tone-mapping curve for gamma adjustment.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Each sample has an input range of <code>[0,<wbr/> 1]</code> and an output range of
+<code>[0,<wbr/> 1]</code>.<wbr/>  The first sample is required to be <code>(0,<wbr/> 0)</code>,<wbr/> and the last
+sample is required to be <code>(1,<wbr/> 1)</code>.<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DNG">DNG</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This tag contains a default tone curve that can be applied while
+processing the image as a starting point for user adjustments.<wbr/>
+The curve is specified as a list of value pairs in linear gamma.<wbr/>
+The curve is interpolated using a cubic spline.<wbr/></p>
             </td>
           </tr>
 
@@ -15837,8 +16010,11 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.sensor.colorTransform2">android.sensor.colorTransform2</a> (static)</li>
           <li><a href="#static_android.sensor.forwardMatrix1">android.sensor.forwardMatrix1</a> (static)</li>
           <li><a href="#static_android.sensor.forwardMatrix2">android.sensor.forwardMatrix2</a> (static)</li>
+          <li><a href="#static_android.sensor.profileHueSatMapDimensions">android.sensor.profileHueSatMapDimensions</a> (static)</li>
           <li><a href="#static_android.sensor.referenceIlluminant1">android.sensor.referenceIlluminant1</a> (static)</li>
           <li><a href="#dynamic_android.sensor.neutralColorPoint">android.sensor.neutralColorPoint</a> (dynamic)</li>
+          <li><a href="#dynamic_android.sensor.profileHueSatMap">android.sensor.profileHueSatMap</a> (dynamic)</li>
+          <li><a href="#dynamic_android.sensor.profileToneCurve">android.sensor.profileToneCurve</a> (dynamic)</li>
           <li><a href="#controls_android.tonemap.curveRed">android.tonemap.curveRed</a> (controls)</li>
         </ul>
       </li> <!-- tag_DNG -->
