@@ -1779,39 +1779,76 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="hotPixel">
       <controls>
-        <entry name="mode" type="byte" enum="true">
+        <entry name="mode" type="byte" visibility="public" enum="true">
           <enum>
             <value>OFF
-            <notes>No hot pixel correction can be
-            applied</notes></value>
+              <notes>
+              The frame rate must not be reduced relative to sensor raw output
+              for this option.
+
+              No hot pixel correction is applied.
+              </notes>
+            </value>
             <value>FAST
-            <notes>Frame rate must not be reduced compared to raw
-            Bayer output</notes></value>
+              <notes>
+              The frame rate must not be reduced relative to sensor raw output
+              for this option.
+
+              Hot pixel correction is applied.
+              </notes>
+            </value>
             <value>HIGH_QUALITY
-            <notes>Frame rate may be reduced by high
-            quality</notes></value>
+              <notes>
+              The frame rate may be reduced relative to sensor raw output
+              for this option.
+
+              A high-quality hot pixel correction is applied.
+              </notes>
+            </value>
           </enum>
-          <description>Set operational mode for hot pixel
-          correction</description>
+          <description>
+          Set operational mode for hot pixel correction.
+
+          Hotpixel correction interpolates out, or otherwise removes, pixels
+          that do not accurately encode the incoming light (i.e. pixels that
+          are stuck at an arbitrary value).
+          </description>
           <tag id="V1" />
         </entry>
       </controls>
-      <static>
-        <namespace name="info">
-          <entry name="map" type="int32"
-          type_notes="list of coordinates based on android.sensor.pixelArraySize"
-          container="array">
-            <array>
-              <size>2</size>
-              <size>n</size>
-            </array>
-            <description>Location of hot/defective pixels on
-            sensor</description>
-            <tag id="ADV" />
-          </entry>
-        </namespace>
-      </static>
       <dynamic>
+        <entry name="map" type="int32" visibility="public"
+        type_notes="list of coordinates based on android.sensor.pixelArraySize"
+        container="array">
+          <array>
+            <size>2</size>
+            <size>n</size>
+          </array>
+          <description>
+          List of `(x, y)` coordinates of hot/defective pixels on the
+          sensor, where `(x, y)` lies between `(0, 0)`, which is the top-left
+          of the pixel array, and the width,height of the pixel array given in
+          android.sensor.info.pixelArraySize.  This may include hot pixels
+          that lie outside of the active array bounds given by
+          android.sensor.activeArraySize.
+          </description>
+          <range>
+          n &lt;= number of pixels on the sensor.
+          The `(x, y)` coordinates must be bounded by
+          android.sensor.info.pixelArraySize.
+          </range>
+          <hal_details>
+          A hotpixel map contains the coordinates of pixels on the camera
+          sensor that do report valid values (usually due to defects in
+          the camera sensor). This includes pixels that are stuck at certain
+          values, or have a response that does not accuractly encode the
+          incoming light from the scene.
+
+          To avoid performance issues, there should be significantly fewer hot
+          pixels than actual pixels on the camera sensor.
+          </hal_details>
+          <tag id="ADV" />
+        </entry>
         <clone entry="android.hotPixel.mode" kind="controls">
           <tag id="V1" />
         </clone>
@@ -3581,16 +3618,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="V1" />
             <tag id="BC" />
           </entry>
-          <entry name="pixelArraySize" type="int32"
+          <entry name="pixelArraySize" type="int32" visibility="public"
           container="array" typedef="size">
             <array>
               <size>2</size>
             </array>
             <description>Dimensions of full pixel array, possibly
             including black calibration pixels.</description>
-            <details>The maximum output resolution for raw format in
-            android.scaler.availableRawSizes will be equal to this size.
-            </details>
+            <details>Maximum output resolution for raw format must
+            match this in
+            android.scaler.info.availableSizesPerFormat.</details>
             <tag id="DNG" />
             <tag id="BC" />
           </entry>

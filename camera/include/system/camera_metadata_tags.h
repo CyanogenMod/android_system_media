@@ -43,7 +43,6 @@ typedef enum camera_metadata_section {
     ANDROID_FLASH_INFO,
     ANDROID_GEOMETRIC,
     ANDROID_HOT_PIXEL,
-    ANDROID_HOT_PIXEL_INFO,
     ANDROID_JPEG,
     ANDROID_LENS,
     ANDROID_LENS_INFO,
@@ -79,7 +78,6 @@ typedef enum camera_metadata_section_start {
     ANDROID_FLASH_INFO_START       = ANDROID_FLASH_INFO        << 16,
     ANDROID_GEOMETRIC_START        = ANDROID_GEOMETRIC         << 16,
     ANDROID_HOT_PIXEL_START        = ANDROID_HOT_PIXEL         << 16,
-    ANDROID_HOT_PIXEL_INFO_START   = ANDROID_HOT_PIXEL_INFO    << 16,
     ANDROID_JPEG_START             = ANDROID_JPEG              << 16,
     ANDROID_LENS_START             = ANDROID_LENS              << 16,
     ANDROID_LENS_INFO_START        = ANDROID_LENS_INFO         << 16,
@@ -180,13 +178,10 @@ typedef enum camera_metadata_tag {
     ANDROID_GEOMETRIC_STRENGTH,                       // byte         | system
     ANDROID_GEOMETRIC_END,
 
-    ANDROID_HOT_PIXEL_MODE =                          // enum         | system
+    ANDROID_HOT_PIXEL_MODE =                          // enum         | public
             ANDROID_HOT_PIXEL_START,
+    ANDROID_HOT_PIXEL_MAP,                            // int32[]      | public
     ANDROID_HOT_PIXEL_END,
-
-    ANDROID_HOT_PIXEL_INFO_MAP =                      // int32[]      | system
-            ANDROID_HOT_PIXEL_INFO_START,
-    ANDROID_HOT_PIXEL_INFO_END,
 
     ANDROID_JPEG_GPS_COORDINATES =                    // double[]     | public
             ANDROID_JPEG_START,
@@ -303,7 +298,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_INFO_EXPOSURE_TIME_RANGE,          // int64[]      | public
     ANDROID_SENSOR_INFO_MAX_FRAME_DURATION,           // int64        | public
     ANDROID_SENSOR_INFO_PHYSICAL_SIZE,                // float[]      | public
-    ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE,             // int32[]      | system
+    ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE,             // int32[]      | public
     ANDROID_SENSOR_INFO_WHITE_LEVEL,                  // int32        | system
     ANDROID_SENSOR_INFO_END,
 
@@ -584,7 +579,6 @@ typedef enum camera_metadata_enum_android_hot_pixel_mode {
     ANDROID_HOT_PIXEL_MODE_FAST,
     ANDROID_HOT_PIXEL_MODE_HIGH_QUALITY,
 } camera_metadata_enum_android_hot_pixel_mode_t;
-
 
 
 
