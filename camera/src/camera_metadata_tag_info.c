@@ -379,6 +379,14 @@ static tag_info_t android_request[ANDROID_REQUEST_END -
     { "pipelineMaxDepth",              TYPE_BYTE   },
     [ ANDROID_REQUEST_PARTIAL_RESULT_COUNT - ANDROID_REQUEST_START ] =
     { "partialResultCount",            TYPE_INT32  },
+    [ ANDROID_REQUEST_AVAILABLE_CAPABILITIES - ANDROID_REQUEST_START ] =
+    { "availableCapabilities",         TYPE_BYTE   },
+    [ ANDROID_REQUEST_AVAILABLE_REQUEST_KEYS - ANDROID_REQUEST_START ] =
+    { "availableRequestKeys",          TYPE_INT32  },
+    [ ANDROID_REQUEST_AVAILABLE_RESULT_KEYS - ANDROID_REQUEST_START ] =
+    { "availableResultKeys",           TYPE_INT32  },
+    [ ANDROID_REQUEST_AVAILABLE_CHARACTERISTICS_KEYS - ANDROID_REQUEST_START ] =
+    { "availableCharacteristicsKeys",  TYPE_INT32  },
 };
 
 static tag_info_t android_scaler[ANDROID_SCALER_END -
@@ -1577,6 +1585,46 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_REQUEST_PARTIAL_RESULT_COUNT: {
+            break;
+        }
+        case ANDROID_REQUEST_AVAILABLE_CAPABILITIES: {
+            switch (value) {
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE:
+                    msg = "BACKWARD_COMPATIBLE";
+                    ret = 0;
+                    break;
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_OPTIONAL:
+                    msg = "OPTIONAL";
+                    ret = 0;
+                    break;
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR:
+                    msg = "MANUAL_SENSOR";
+                    ret = 0;
+                    break;
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_GCAM:
+                    msg = "GCAM";
+                    ret = 0;
+                    break;
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_ZSL:
+                    msg = "ZSL";
+                    ret = 0;
+                    break;
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_DNG:
+                    msg = "DNG";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
+        case ANDROID_REQUEST_AVAILABLE_REQUEST_KEYS: {
+            break;
+        }
+        case ANDROID_REQUEST_AVAILABLE_RESULT_KEYS: {
+            break;
+        }
+        case ANDROID_REQUEST_AVAILABLE_CHARACTERISTICS_KEYS: {
             break;
         }
 

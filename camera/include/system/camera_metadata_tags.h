@@ -253,6 +253,10 @@ typedef enum camera_metadata_tag {
     ANDROID_REQUEST_PIPELINE_DEPTH,                   // byte         | public
     ANDROID_REQUEST_PIPELINE_MAX_DEPTH,               // byte         | public
     ANDROID_REQUEST_PARTIAL_RESULT_COUNT,             // int32        | public
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES,           // enum         | public
+    ANDROID_REQUEST_AVAILABLE_REQUEST_KEYS,           // int32[]      | hidden
+    ANDROID_REQUEST_AVAILABLE_RESULT_KEYS,            // int32[]      | hidden
+    ANDROID_REQUEST_AVAILABLE_CHARACTERISTICS_KEYS,   // int32[]      | hidden
     ANDROID_REQUEST_END,
 
     ANDROID_SCALER_CROP_REGION =                      // int32[]      | public
@@ -637,6 +641,16 @@ typedef enum camera_metadata_enum_android_request_type {
     ANDROID_REQUEST_TYPE_CAPTURE,
     ANDROID_REQUEST_TYPE_REPROCESS,
 } camera_metadata_enum_android_request_type_t;
+
+// ANDROID_REQUEST_AVAILABLE_CAPABILITIES
+typedef enum camera_metadata_enum_android_request_available_capabilities {
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE,
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_OPTIONAL,
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR,
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_GCAM,
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_ZSL,
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_DNG,
+} camera_metadata_enum_android_request_available_capabilities_t;
 
 
 // ANDROID_SCALER_AVAILABLE_FORMATS
