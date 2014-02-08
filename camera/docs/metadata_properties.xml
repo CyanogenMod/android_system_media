@@ -1930,10 +1930,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           * The sizes will be sorted by increasing pixel area (width x height).
           If several resolutions have the same area, they will be sorted by increasing width.
           * The aspect ratio of the largest thumbnail size will be same as the
-          aspect ratio of largest size in android.scaler.availableJpegSizes.
+          aspect ratio of largest JPEG output size in android.scaler.availableStreamConfigurations.
           The largest size is defined as the size that has the largest pixel area
           in a given size list.
-          * Each size in android.scaler.availableJpegSizes will have at least
+          * Each output JPEG size in android.scaler.availableStreamConfigurations will have at least
           one corresponding size that has the same aspect ratio in availableThumbnailSizes,
           and vice versa.
           * All non (0, 0) sizes will have non-zero widths and heights.</details>
@@ -3186,6 +3186,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           for each resolution in android.scaler.availableJpegSizes.
           </description>
           <units>ns</units>
+          <range>**Deprecated**. Do not use. TODO: Remove property.</range>
           <details>
           This corresponds to the minimum steady-state frame duration when only
           that JPEG stream is active and captured in a burst, with all
@@ -3203,6 +3204,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>2</size>
           </array>
           <description>The JPEG resolutions that are supported by this camera device.</description>
+          <range>**Deprecated**. Do not use. TODO: Remove property.</range>
           <details>
           The resolutions are listed as `(width, height)` pairs. All camera devices will support
           sensor maximum resolution (defined by android.sensor.info.activeArraySize).
@@ -3230,9 +3232,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>For each available processed output size (defined in
           android.scaler.availableProcessedSizes), this property lists the
           minimum supportable frame duration for that size.
-
           </description>
           <units>ns</units>
+          <range>**Deprecated**. Do not use. TODO: Remove property.</range>
           <details>
           This should correspond to the frame duration when only that processed
           stream is active, with all processing (typically in android.*.mode)
@@ -3253,6 +3255,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           processed output streams, such as YV12, NV12, and
           platform opaque YUV/RGB streams to the GPU or video
           encoders.</description>
+          <range>**Deprecated**. Do not use. TODO: Remove property.</range>
           <details>
           The resolutions are listed as `(width, height)` pairs.
 
@@ -3293,6 +3296,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           supportable frame duration for that size.
           </description>
           <units>ns</units>
+          <range>**Deprecated**. Do not use. TODO: Remove property.</range>
           <details>
           Should correspond to the frame duration when only the raw stream is
           active.
@@ -3311,7 +3315,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The resolutions available for use with raw
           sensor output streams, listed as width,
           height</description>
-          <range>Must include: - sensor maximum resolution</range>
+          <range>**Deprecated**. Do not use. TODO: Remove property.
+          Must include: - sensor maximum resolution.</range>
         </entry>
       </static>
       <dynamic>
@@ -3393,6 +3398,203 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           system/core/include/system/graphics.h.
           </hal_details>
         </entry>
+        <entry name="availableStreamConfigurations" type="int32" visibility="public"
+          enum="true" container="array">
+          <array>
+            <size>n</size>
+            <size>4</size>
+          </array>
+          <enum>
+            <value>OUTPUT</value>
+            <value>INPUT</value>
+          </enum>
+          <description>The available stream configurations that this
+          camera device supports
+          (i.e. format, width, height, output/input stream).
+          </description>
+          <details>
+          The configurations are listed as `(format, width, height, input?)`
+          tuples.
+
+          All camera devices will support sensor maximum resolution (defined by
+          android.sensor.info.activeArraySize) for the JPEG format.
+
+          For a given use case, the actual maximum supported resolution
+          may be lower than what is listed here, depending on the destination
+          Surface for the image data. For example, for recording video,
+          the video encoder chosen may have a maximum size limit (e.g. 1080p)
+          smaller than what the camera (e.g. maximum resolution is 3264x2448)
+          can provide.
+
+          Please reference the documentation for the image data destination to
+          check if it limits the maximum size for image data.
+
+          Not all output formats may be supported in a configuration with
+          an input stream of a particular format. For more details, see
+          android.scaler.availableInputOutputFormatsMap.
+
+          The following table describes the minimum required output stream
+          configurations based on the hardware level
+          (android.info.supportedHardwareLevel):
+
+          Format         | Size                                         | Hardware Level | Notes
+          :-------------:|:--------------------------------------------:|:--------------:|:--------------:
+          JPEG           | android.sensor.info.activeArraySize          | Any            |
+          JPEG           | 1920x1080 (1080p)                            | Any            | if 1080p &lt;= activeArraySize
+          JPEG           | 1280x720 (720)                               | Any            | if 720p &lt;= activeArraySize
+          JPEG           | 640x480 (480p)                               | Any            | if 480p &lt;= activeArraySize
+          JPEG           | 320x240 (240p)                               | Any            | if 240p &lt;= activeArraySize
+          YUV_420_888    | all output sizes available for JPEG          | FULL           |
+          YUV_420_888    | all output sizes available for JPEG, up to the maximum video size | LIMITED        |
+          IMPLEMENTATION_DEFINED | same as YUV_420_888                  | Any            |
+
+          Refer to android.request.availableCapabilities for additional
+          mandatory stream configurations on a per-capability basis.
+          </details>
+          <hal_details>
+          It is recommended (but not mandatory) to also include half/quarter
+          of sensor maximum resolution for JPEG formats (regardless of hardware
+          level).
+
+          (The following is a rewording of the above required table):
+
+          The HAL must include sensor maximum resolution (defined by
+          android.sensor.info.activeArraySize).
+
+          For FULL capability devices (`android.info.supportedHardwareLevel == FULL`),
+          the HAL must include all YUV_420_888 sizes that have JPEG sizes listed
+          here as output streams.
+
+          It must also include each below resolution if it is smaller than or
+          equal to the sensor maximum resolution (for both YUV_420_888 and JPEG
+          formats), as output streams:
+
+          * 240p (320 x 240)
+          * 480p (640 x 480)
+          * 720p (1280 x 720)
+          * 1080p (1920 x 1080)
+
+          For LIMITED capability devices
+          (`android.info.supportedHardwareLevel == LIMITED`),
+          the HAL only has to list up to the maximum video size
+          supported by the device.
+
+          Regardless of hardware level, every output resolution available for
+          YUV_420_888 must also be available for IMPLEMENTATION_DEFINED.
+
+          This supercedes the following fields, which are now deprecated:
+
+          * availableFormats
+          * available[Processed,Raw,Jpeg]Sizes
+          </hal_details>
+        </entry>
+        <entry name="availableMinFrameDurations" type="int64" visibility="public"
+        container="array">
+          <array>
+            <size>4</size>
+            <size>n</size>
+          </array>
+          <description>This lists the minimum frame duration for each
+          format/size combination.
+          </description>
+          <units>(format, width, height, ns) x n</units>
+          <details>
+          This should correspond to the frame duration when only that
+          stream is active, with all processing (typically in android.*.mode)
+          set to either OFF or FAST.
+
+          When multiple streams are used in a request, the minimum frame
+          duration will be max(individual stream min durations).
+
+          The minimum frame duration of a stream (of a particular format, size)
+          is the same regardless of whether the stream is input or output.
+
+          See android.sensor.frameDuration and
+          android.scaler.availableStallDurations for more details about
+          calculating the max frame rate.
+          </details>
+          <tag id="BC" />
+        </entry>
+        <entry name="availableStallDurations" type="int64" visibility="public"
+        container="array">
+          <array>
+            <size>4</size>
+            <size>n</size>
+          </array>
+          <description>This lists the maximum stall duration for each
+          format/size combination.
+          </description>
+          <units>(format, width, height, ns) x n</units>
+          <details>
+          A stall duration is how much extra time would get added
+          to the normal minimum frame duration for a repeating request
+          that has streams with non-zero stall.
+
+          For example, consider JPEG captures which have the following
+          characteristics:
+
+          * JPEG streams act like processed YUV streams in requests for which
+          they are not included; in requests in which they are directly
+          referenced, they act as JPEG streams. This is because supporting a
+          JPEG stream requires the underlying YUV data to always be ready for
+          use by a JPEG encoder, but the encoder will only be used (and impact
+          frame duration) on requests that actually reference a JPEG stream.
+          * The JPEG processor can run concurrently to the rest of the camera
+          pipeline, but cannot process more than 1 capture at a time.
+
+          In other words, using a repeating YUV request would result
+          in a steady frame rate (let's say it's 30 FPS). If a single
+          JPEG request is submitted periodically, the frame rate will stay
+          at 30 FPS (as long as we wait for the previous JPEG to return each
+          time). If we try to submit a repeating YUV + JPEG request, then
+          the frame rate will drop from 30 FPS.
+
+          In general, submitting a new request with a non-0 stall time
+          stream will _not_ cause a frame rate drop unless there are still
+          outstanding buffers for that stream from previous requests.
+
+          Submitting a repeating request with streams (call this `S`)
+          is the same as setting the minimum frame duration from
+          the normal minimum frame duration corresponding to `S`, added with
+          the maximum stall duration for `S`.
+
+          If interleaving requests with and without a stall duration,
+          a request will stall by the maximum of the remaining times
+          for each can-stall stream with outstanding buffers.
+
+          This means that a stalling request will not have an exposure start
+          until the stall has completed.
+
+          This should correspond to the stall duration when only that stream is
+          active, with all processing (typically in android.*.mode) set to FAST
+          or OFF. Setting any of the processing modes to HIGH_QUALITY
+          effectively results in an indeterminate stall duration for all
+          streams in a request (the regular stall calculation rules are
+          ignored).
+
+          The following formats may always have a stall duration:
+
+          * JPEG
+          * RAW16
+
+          The following formats will never have a stall duration:
+
+          * YUV_420_888
+          * IMPLEMENTATION_DEFINED
+
+          All other formats may or may not have an allowed stall duration on
+          a per-capability basis; refer to android.request.availableCapabilities
+          for more details.
+
+          See android.sensor.frameDuration for more information about
+          calculating the max frame rate (absent stalls).
+          </details>
+          <hal_details>
+          If possible, it is recommended that all non-JPEG formats
+          (such as RAW16) should not have a stall duration.
+          </hal_details>
+          <tag id="BC" />
+        </entry>
       </static>
     </section>
     <section name="sensor">
@@ -3414,7 +3616,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           start of next frame exposure.</description>
           <units>nanoseconds</units>
           <range>See android.sensor.info.maxFrameDuration,
-          android.scaler.available*MinDurations. The duration
+          android.scaler.availableMinFrameDurations. The duration
           is capped to `max(duration, exposureTime + overhead)`.</range>
           <details>
           The maximum frame rate that can be supported by a camera subsystem is
@@ -3448,59 +3650,45 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           largest requested stream resolution.
           * Using more than one output stream in a request does not affect the
           frame duration.
-          * JPEG streams act like processed YUV streams in requests for which
-          they are not included; in requests in which they are directly
-          referenced, they act as JPEG streams. This is because supporting a
-          JPEG stream requires the underlying YUV data to always be ready for
-          use by a JPEG encoder, but the encoder will only be used (and impact
-          frame duration) on requests that actually reference a JPEG stream.
-          * The JPEG processor can run concurrently to the rest of the camera
-          pipeline, but cannot process more than 1 capture at a time.
+          * Certain format-streams may need to do additional background processing
+          before data is consumed/produced by that stream. These processors
+          can run concurrently to the rest of the camera pipeline, but
+          cannot process more than 1 capture at a time.
 
           The necessary information for the application, given the model above,
-          is provided via the android.scaler.available*MinDurations fields.
+          is provided via the android.scaler.availableMinFrameDurations field.
           These are used to determine the maximum frame rate / minimum frame
           duration that is possible for a given stream configuration.
 
           Specifically, the application can use the following rules to
-          determine the minimum frame duration it can request from the HAL
+          determine the minimum frame duration it can request from the camera
           device:
 
-          1. Given the application's currently configured set of output
-          streams, `S`, divide them into three sets: streams in a JPEG format
-          `SJ`, streams in a raw sensor format `SR`, and the rest ('processed')
-          `SP`.
-          1. For each subset of streams, find the largest resolution (by pixel
-          count) in the subset. This gives (at most) three resolutions `RJ`,
-          `RR`, and `RP`.
-          1. If `RJ` is greater than `RP`, set `RP` equal to `RJ`. If there is
-          no exact match for `RP == RJ` (in particular there isn't an available
-          processed resolution at the same size as `RJ`), then set `RP` equal
-          to the smallest processed resolution that is larger than `RJ`. If
-          there are no processed resolutions larger than `RJ`, then set `RJ` to
-          the processed resolution closest to `RJ`.
-          1. If `RP` is greater than `RR`, set `RR` equal to `RP`. If there is
-          no exact match for `RR == RP` (in particular there isn't an available
-          raw resolution at the same size as `RP`), then set `RR` equal to
-          or to the smallest raw resolution that is larger than `RP`. If
-          there are no raw resolutions larger than `RP`, then set `RR` to
-          the raw resolution closest to `RP`.
-          1. Look up the matching minimum frame durations in the property lists
-          android.scaler.availableJpegMinDurations,
-          android.scaler.availableRawMinDurations, and
-          android.scaler.availableProcessedMinDurations.  This gives three
-          minimum frame durations `FJ`, `FR`, and `FP`.
-          1. If a stream of requests do not use a JPEG stream, then the minimum
-          supported frame duration for each request is `max(FR, FP)`.
-          1. If a stream of requests all use the JPEG stream, then the minimum
-          supported frame duration for each request is `max(FR, FP, FJ)`.
-          1. If a mix of JPEG-using and non-JPEG-using requests is submitted by
-          the application, then the HAL will have to delay JPEG-using requests
-          whenever the JPEG encoder is still busy processing an older capture.
-          This will happen whenever a JPEG-using request starts capture less
-          than `FJ` _ns_ after a previous JPEG-using request. The minimum
-          supported frame duration will vary between the values calculated in
-          \#6 and \#7.
+          1. Let the set of currently configured input/output streams
+          be called `S`.
+          1. Find the minimum frame durations for each stream in `S`, by
+          looking it up in android.scaler.availableMinFrameDurations (with
+          its respective size/format). Let this set of frame durations be called
+          `F`.
+          1. For any given request `R`, the minimum frame duration allowed
+          for `R` is the maximum out of all values in `F`. Let the streams
+          used in `R` be called `S_r`.
+
+          If none of the streams in `S_r` have a stall time (listed in
+          android.scaler.availableStallDurations), then the frame duration in
+          `F` determines the steady state frame rate that the application will
+          get if it uses `R` as a repeating request. Let this special kind
+          of request be called `Rsimple`.
+
+          A repeating request `Rsimple` can be _occasionally_ interleaved
+          by a single capture of a new request `Rstall` (which has at least
+          one in-use stream with a non-0 stall time) and if `Rstall` has the
+          same minimum frame duration this will not cause a frame rate loss
+          if all buffers from the previous `Rstall` have already been
+          delivered.
+
+          For more details about stalling, see
+          android.scaler.availableStallDurations.
           </details>
           <tag id="V1" />
           <tag id="BC" />
@@ -3602,6 +3790,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             android.sensor.maxFrameDuration must be greater or equal to the
             android.sensor.exposureTimeRange max value (since exposure time
             overrides frame duration).
+
+            Available minimum frame durations for JPEG must be no greater
+            than that of the YUV_420_888/IMPLEMENTATION_DEFINED
+            minimum frame durations (for that respective size).
+
+            Since JPEG processing is considered offline and can take longer than
+            a single uncompressed capture, refer to
+            android.scaler.availableStallDurations
+            for details about encoding this scenario.
             </hal_details>
             <tag id="BC" />
             <tag id="V1" />
