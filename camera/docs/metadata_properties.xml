@@ -3220,7 +3220,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="FULL" />
         </entry>
         <entry name="blackLevelPattern" type="int32" visibility="public"
-        type_notes="2x2 raw count block" container="array">
+        optional="true" type_notes="2x2 raw count block" container="array">
           <array>
             <size>4</size>
           </array>
