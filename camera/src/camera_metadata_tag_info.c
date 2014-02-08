@@ -402,6 +402,9 @@ static tag_info_t android_scaler[ANDROID_SCALER_END -
     { "availableRawMinDurations",      TYPE_INT64  },
     [ ANDROID_SCALER_AVAILABLE_RAW_SIZES - ANDROID_SCALER_START ] =
     { "availableRawSizes",             TYPE_INT32  },
+    [ ANDROID_SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP - ANDROID_SCALER_START ] =
+    { "availableInputOutputFormatsMap",
+                                        TYPE_INT32  },
 };
 
 static tag_info_t android_sensor[ANDROID_SENSOR_END -
@@ -1634,6 +1637,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SCALER_AVAILABLE_RAW_SIZES: {
+            break;
+        }
+        case ANDROID_SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP: {
             break;
         }
 
