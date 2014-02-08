@@ -501,7 +501,6 @@
             <li><a href="#static_android.sensor.baseGainFactor">android.sensor.baseGainFactor</a></li>
             <li><a href="#static_android.sensor.blackLevelPattern">android.sensor.blackLevelPattern</a></li>
             <li><a href="#static_android.sensor.maxAnalogSensitivity">android.sensor.maxAnalogSensitivity</a></li>
-            <li><a href="#static_android.sensor.noiseModelCoefficients">android.sensor.noiseModelCoefficients</a></li>
             <li><a href="#static_android.sensor.orientation">android.sensor.orientation</a></li>
             <li><a href="#static_android.sensor.profileHueSatMapDimensions">android.sensor.profileHueSatMapDimensions</a></li>
             <li><a href="#static_android.sensor.availableTestPatternModes">android.sensor.availableTestPatternModes</a></li>
@@ -12483,62 +12482,6 @@ digital.<wbr/></p>
            <!-- end of entry -->
         
                 
-          <tr class="entry" id="static_android.sensor.noiseModelCoefficients">
-            <td class="entry_name" rowspan="3">
-              android.<wbr/>sensor.<wbr/>noise<wbr/>Model<wbr/>Coefficients
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name">float</span>
-                <span class="entry_type_container">x</span>
-
-                <span class="entry_type_array">
-                  2
-                </span>
-              <span class="entry_type_visibility"> [system]</span>
-                <div class="entry_type_notes">float constants A,<wbr/> B for the noise variance model</div>
-
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>Estimation of sensor noise
-characteristics</p>
-            </td>
-
-            <td class="entry_units">
-              var(raw pixel value) = electrons * (baseGainFactor
-          * iso/<wbr/>100)^2 + A * (baseGainFactor * iso/<wbr/>100)^2 +
-          B
-            </td>
-
-            <td class="entry_range">
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_V1">V1</a></li>
-              </ul>
-            </td>
-
-          </tr>
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>A represents sensor read noise before analog
-amplification; B represents noise from A/<wbr/>D conversion and
-other circuits after amplification.<wbr/> Both noise sources
-are assumed to be gaussian,<wbr/> independent,<wbr/> and not to vary
-across the sensor</p>
-            </td>
-          </tr>
-
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-                
           <tr class="entry" id="static_android.sensor.orientation">
             <td class="entry_name" rowspan="1">
               android.<wbr/>sensor.<wbr/>orientation
@@ -16760,7 +16703,6 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.sensor.info.physicalSize">android.sensor.info.physicalSize</a> (static)</li>
           <li><a href="#static_android.sensor.baseGainFactor">android.sensor.baseGainFactor</a> (static)</li>
           <li><a href="#static_android.sensor.maxAnalogSensitivity">android.sensor.maxAnalogSensitivity</a> (static)</li>
-          <li><a href="#static_android.sensor.noiseModelCoefficients">android.sensor.noiseModelCoefficients</a> (static)</li>
           <li><a href="#controls_android.statistics.histogramMode">android.statistics.histogramMode</a> (controls)</li>
           <li><a href="#controls_android.statistics.sharpnessMapMode">android.statistics.sharpnessMapMode</a> (controls)</li>
           <li><a href="#dynamic_android.statistics.histogram">android.statistics.histogram</a> (dynamic)</li>

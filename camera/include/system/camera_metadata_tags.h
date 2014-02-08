@@ -277,7 +277,6 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_BASE_GAIN_FACTOR,                  // rational     | public
     ANDROID_SENSOR_BLACK_LEVEL_PATTERN,               // int32[]      | public
     ANDROID_SENSOR_MAX_ANALOG_SENSITIVITY,            // int32        | public
-    ANDROID_SENSOR_NOISE_MODEL_COEFFICIENTS,          // float[]      | system
     ANDROID_SENSOR_ORIENTATION,                       // int32        | public
     ANDROID_SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS,    // int32[]      | public
     ANDROID_SENSOR_TIMESTAMP,                         // int64        | public

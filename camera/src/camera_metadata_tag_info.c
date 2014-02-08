@@ -429,8 +429,6 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     { "blackLevelPattern",             TYPE_INT32  },
     [ ANDROID_SENSOR_MAX_ANALOG_SENSITIVITY - ANDROID_SENSOR_START ] =
     { "maxAnalogSensitivity",          TYPE_INT32  },
-    [ ANDROID_SENSOR_NOISE_MODEL_COEFFICIENTS - ANDROID_SENSOR_START ] =
-    { "noiseModelCoefficients",        TYPE_FLOAT  },
     [ ANDROID_SENSOR_ORIENTATION - ANDROID_SENSOR_START ] =
     { "orientation",                   TYPE_INT32  },
     [ ANDROID_SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS - ANDROID_SENSOR_START ] =
@@ -1725,9 +1723,6 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SENSOR_MAX_ANALOG_SENSITIVITY: {
-            break;
-        }
-        case ANDROID_SENSOR_NOISE_MODEL_COEFFICIENTS: {
             break;
         }
         case ANDROID_SENSOR_ORIENTATION: {
