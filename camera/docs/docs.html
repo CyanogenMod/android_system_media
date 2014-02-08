@@ -1900,8 +1900,8 @@ mode.<wbr/></p></span>
                   <li>
                     <span class="entry_type_enum_name">ON</span>
                     <span class="entry_type_enum_notes"><p>Auto-whitebalance lock is enabled; the AWB
-algorithm must not update the exposure and sensitivity
-parameters while the lock is active</p></span>
+algorithm must not update its parameters while the lock
+is active.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -1909,7 +1909,7 @@ parameters while the lock is active</p></span>
 
             <td class="entry_description">
               <p>Whether AWB is currently locked to its
-latest calculated values</p>
+latest calculated values.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -1932,7 +1932,7 @@ latest calculated values</p>
             <td class="entry_details" colspan="5">
               <p>Note that AWB lock is only meaningful for AUTO
 mode; in other modes,<wbr/> AWB is already fixed to a specific
-setting</p>
+setting.<wbr/></p>
             </td>
           </tr>
 
@@ -2351,6 +2351,12 @@ scene mode).<wbr/> Other control entries are still active.<wbr/>
 This setting can only be used if availableSceneModes !=
 UNSUPPORTED</p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">OFF_KEEP_STATE</span>
+                    <span class="entry_type_enum_notes"><p>Same as OFF mode,<wbr/> except that this capture will not be
+used by camera device background auto-exposure,<wbr/> auto-white balance and
+auto-focus algorithms to update their statistics.<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -2389,6 +2395,11 @@ android.<wbr/>control.<wbr/>* are mostly disabled,<wbr/> and the camera device i
 one of the scene mode settings (such as ACTION,<wbr/> SUNSET,<wbr/> or PARTY)
 as it wishes.<wbr/> The camera device scene mode 3A settings are provided by
 <a href="#static_android.control.sceneModeOverrides">android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides</a>.<wbr/></p>
+<p>When set to OFF_<wbr/>KEEP_<wbr/>STATE,<wbr/> it is similar to OFF mode,<wbr/> the only difference
+is that this frame will not be used by camera device background 3A statistics
+update,<wbr/> as if this frame is never captured.<wbr/> This mode can be used in the scenario
+where the application doesn't want a 3A manual control capture to affect
+the subsequent auto 3A capture results.<wbr/></p>
             </td>
           </tr>
 
@@ -4700,6 +4711,12 @@ scene mode).<wbr/> Other control entries are still active.<wbr/>
 This setting can only be used if availableSceneModes !=
 UNSUPPORTED</p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">OFF_KEEP_STATE</span>
+                    <span class="entry_type_enum_notes"><p>Same as OFF mode,<wbr/> except that this capture will not be
+used by camera device background auto-exposure,<wbr/> auto-white balance and
+auto-focus algorithms to update their statistics.<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -4738,6 +4755,11 @@ android.<wbr/>control.<wbr/>* are mostly disabled,<wbr/> and the camera device i
 one of the scene mode settings (such as ACTION,<wbr/> SUNSET,<wbr/> or PARTY)
 as it wishes.<wbr/> The camera device scene mode 3A settings are provided by
 <a href="#static_android.control.sceneModeOverrides">android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides</a>.<wbr/></p>
+<p>When set to OFF_<wbr/>KEEP_<wbr/>STATE,<wbr/> it is similar to OFF mode,<wbr/> the only difference
+is that this frame will not be used by camera device background 3A statistics
+update,<wbr/> as if this frame is never captured.<wbr/> This mode can be used in the scenario
+where the application doesn't want a 3A manual control capture to affect
+the subsequent auto 3A capture results.<wbr/></p>
             </td>
           </tr>
 

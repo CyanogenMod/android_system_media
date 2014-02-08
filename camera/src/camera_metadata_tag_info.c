@@ -934,6 +934,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "USE_SCENE_MODE";
                     ret = 0;
                     break;
+                case ANDROID_CONTROL_MODE_OFF_KEEP_STATE:
+                    msg = "OFF_KEEP_STATE";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
