@@ -1593,8 +1593,12 @@ int camera_metadata_enum_snprint(uint32_t tag,
         }
         case ANDROID_SCALER_AVAILABLE_FORMATS: {
             switch (value) {
-                case ANDROID_SCALER_AVAILABLE_FORMATS_RAW_SENSOR:
-                    msg = "RAW_SENSOR";
+                case ANDROID_SCALER_AVAILABLE_FORMATS_RAW16:
+                    msg = "RAW16";
+                    ret = 0;
+                    break;
+                case ANDROID_SCALER_AVAILABLE_FORMATS_RAW_OPAQUE:
+                    msg = "RAW_OPAQUE";
                     ret = 0;
                     break;
                 case ANDROID_SCALER_AVAILABLE_FORMATS_YV12:

@@ -9951,9 +9951,42 @@ respectively.<wbr/></p>
 
                 <ul class="entry_type_enum">
                   <li>
-                    <span class="entry_type_enum_name">RAW_SENSOR</span>
+                    <span class="entry_type_enum_name">RAW16</span>
                     <span class="entry_type_enum_optional">optional</span>
                     <span class="entry_type_enum_value">0x20</span>
+                    <span class="entry_type_enum_notes"><p>RAW16 is a standard,<wbr/> cross-platform format for raw image
+buffers with 16-bit pixels.<wbr/> Buffers of this format are typically
+expected to have a Bayer Color Filter Array (CFA) layout,<wbr/> which
+is given in <a href="#static_android.sensor.info.colorFilterArrangement">android.<wbr/>sensor.<wbr/>info.<wbr/>color<wbr/>Filter<wbr/>Arrangement</a>.<wbr/> Sensors
+with CFAs that are not representable by a format in
+<a href="#static_android.sensor.info.colorFilterArrangement">android.<wbr/>sensor.<wbr/>info.<wbr/>color<wbr/>Filter<wbr/>Arrangement</a> should not use this
+format.<wbr/></p>
+<p>Buffers of this format will also follow the constraints given for
+RAW_<wbr/>OPAQUE buffers,<wbr/> but with relaxed performance constraints.<wbr/></p>
+<p>See android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Formats for the full set of
+performance guarantees.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">RAW_OPAQUE</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_value">0x24</span>
+                    <span class="entry_type_enum_notes"><p>RAW_<wbr/>OPAQUE is a format for raw image buffers coming from an
+image sensor.<wbr/> The actual structure of buffers of this format is
+platform-specific,<wbr/> but must follow several constraints:</p>
+<ol>
+<li>No image post-processing operations may have been applied to
+buffers of this type.<wbr/> These buffers contain raw image data coming
+directly from the image sensor.<wbr/></li>
+<li>If a buffer of this format is passed to the camera device for
+reprocessing,<wbr/> the resulting images will be identical to the images
+produced if the buffer had come directly from the sensor and was
+processed with the same settings.<wbr/></li>
+</ol>
+<p>The intended use for this format is to allow access to the native
+raw format buffers coming directly from the camera sensor without
+any additional conversions or decrease in framerate.<wbr/></p>
+<p>See android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Formats for the full set of
+performance guarantees.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">YV12</span>
@@ -10029,6 +10062,10 @@ need access the image data.<wbr/></p>
 <p>YCb<wbr/>Cr_<wbr/>420_<wbr/>888 format must be supported by the HAL.<wbr/> When an image stream
 needs CPU/<wbr/>application direct access,<wbr/> this format will be used.<wbr/></p>
 <p>The BLOB format must be supported by the HAL.<wbr/> This is used for the JPEG stream.<wbr/></p>
+<p>A RAW_<wbr/>OPAQUE buffer should contain only pixel data.<wbr/> It is strongly
+recommended that any information used by the camera device when
+processing images is fully expressed by the result metadata
+for that image buffer.<wbr/></p>
             </td>
           </tr>
 
