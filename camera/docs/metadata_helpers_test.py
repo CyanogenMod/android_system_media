@@ -130,6 +130,8 @@ If testOuter2.testSection2.testInner2.static1,
 then testOuter1.testSection1.
 dynamic1 will ensue. That should be avoided if testOuter2.testSection2.
 Barring issues, testOuter1.testSection1.dynamic1, and testOuter2.testSection2.control1.
+In the third instance of testOuter1.testSection1.control1
+we will take the other option.
 If the path foo/android.testOuter1.testSection1.control1/bar.txt exists, then oh well.
 '''
     def filter_test(node):
@@ -146,6 +148,8 @@ water landing, * will deploy.
 If *,
 then * will ensue. That should be avoided if testOuter2.testSection2.
 Barring issues, *, and *.
+In the third instance of *
+we will take the other option.
 If the path foo/android.testOuter1.testSection1.control1/bar.txt exists, then oh well.
 ****
 '''

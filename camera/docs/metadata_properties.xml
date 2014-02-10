@@ -1131,7 +1131,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>Maximum and minimum exposure compensation
           setting, in counts of
-          android.control.aeCompensationStepSize</description>
+          android.control.aeCompensationStep.</description>
           <range>At least (-2,2)/(exp compensation step
           size)</range>
           <tag id="BC" />
@@ -1830,7 +1830,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           of the pixel array, and the width,height of the pixel array given in
           android.sensor.info.pixelArraySize.  This may include hot pixels
           that lie outside of the active array bounds given by
-          android.sensor.activeArraySize.
+          android.sensor.info.activeArraySize.
           </description>
           <range>
           n &lt;= number of pixels on the sensor.
@@ -2357,13 +2357,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <enum>
             <value>STATIONARY
               <notes>
-              The lens parameters (android.lens.focalLength, android.lens.focusDistance
+              The lens parameters (android.lens.focalLength, android.lens.focusDistance,
               android.lens.filterDensity and android.lens.aperture) are not changing.
               </notes>
             </value>
             <value>MOVING
               <notes>
-              Any of the lens parameters (android.lens.focalLength, android.lens.focusDistance
+              Any of the lens parameters (android.lens.focalLength, android.lens.focusDistance,
               android.lens.filterDensity or android.lens.aperture) is changing.
               </notes>
             </value>
@@ -2411,7 +2411,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Mode of operation for the noise reduction
           algorithm</description>
-          <range>android.noiseReduction.availableModes</range>
           <details>Noise filtering control. OFF means no noise reduction
           will be applied by the HAL.
 
@@ -2563,10 +2562,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>**Deprecated**. Do not use.
 
           Typically, only one entry allowed, must be a valid reprocess stream ID.
-
-          If android.jpeg.needsThumbnail is set, then multiple
-          reprocess streams may be included in a single request; they
-          must be different scaled versions of the same image.</range>
+          </range>
           <details>Only meaningful when android.request.type ==
           REPROCESS. Ignored otherwise</details>
           <tag id="HAL2" />
@@ -2615,12 +2611,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             settings</notes></value>
             <value>REPROCESS
             <notes>Process previously captured data; the
-            android.request.inputStream parameter determines the
+            android.request.inputStreams parameter determines the
             source reprocessing stream. TODO: Mark dynamic metadata
             needed for reprocessing with [RP]</notes></value>
           </enum>
           <description>The type of the request; either CAPTURE or
-          REPROCESS. For HAL3, this tag is redundant.</description>
+          REPROCESS. For HAL3, this tag is redundant.
+          </description>
+          <range>**Deprecated**. Do not use.</range>
           <tag id="HAL2" />
         </entry>
       </controls>
@@ -2685,9 +2683,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </range>
           <details>When set to 0, it means no input stream is supported.
 
-          The image format for a input stream can be any supported format provided
-          by android.scaler.availableInputFormats. When using an input stream, there must be
-          at least one output stream configured to to receive the reprocessed images.
+          The image format for a input stream can be any supported
+          format provided by
+          android.scaler.availableInputOutputFormatsMap. When using an
+          input stream, there must be at least one output stream
+          configured to to receive the reprocessed images.
 
           For example, for Zero Shutter Lag (ZSL) still capture use case, the input
           stream image format will be RAW_OPAQUE, the associated output stream image format
@@ -3078,9 +3078,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             for raw output, where only a few fixed scales may be
             possible. The width and height of the crop region cannot
             be set to be smaller than floor( activeArraySize.width /
-            android.scaler.maxDigitalZoom ) and floor(
-            activeArraySize.height / android.scaler.maxDigitalZoom),
-            respectively.
+            android.scaler.availableMaxDigitalZoom ) and floor(
+            activeArraySize.height /
+            android.scaler.availableMaxDigitalZoom), respectively.
           </details>
           <tag id="BC" />
         </entry>
@@ -3106,8 +3106,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               Buffers of this format will also follow the constraints given for
               RAW_OPAQUE buffers, but with relaxed performance constraints.
 
-              See android.scaler.availableInputFormats for the full set of
-              performance guarantees.
+              See android.scaler.availableInputOutputFormatsMap for
+              the full set of performance guarantees.
               </notes>
             </value>
             <value optional="true" id="0x24">RAW_OPAQUE
@@ -3128,7 +3128,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               raw format buffers coming directly from the camera sensor without
               any additional conversions or decrease in framerate.
 
-              See android.scaler.availableInputFormats for the full set of
+              See android.scaler.availableInputOutputFormatsMap for the full set of
               performance guarantees.
               </notes>
             </value>
@@ -3336,7 +3336,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>See android.scaler.availableFormats for enum definitions.</range>
           <details>
           All camera devices with at least 1
-          android.request.request.maxNumInputStreams will have at least one
+          android.request.maxNumInputStreams will have at least one
           available input format.
 
           The camera device will support the following map of formats,
@@ -3787,9 +3787,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             This value must be at least 1 second. It should be at least 30
             seconds (30e9 ns).
 
-            android.sensor.maxFrameDuration must be greater or equal to the
-            android.sensor.exposureTimeRange max value (since exposure time
-            overrides frame duration).
+            android.sensor.info.maxFrameDuration must be greater or
+            equal to the android.sensor.info.exposureTimeRange max
+            value (since exposure time overrides frame duration).
 
             Available minimum frame durations for JPEG must be no greater
             than that of the YUV_420_888/IMPLEMENTATION_DEFINED
@@ -3824,7 +3824,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             including black calibration pixels.</description>
             <details>Maximum output resolution for raw format must
             match this in
-            android.scaler.info.availableSizesPerFormat.</details>
+            android.scaler.availableStreamConfigurations.</details>
             <tag id="DNG" />
             <tag id="BC" />
           </entry>
@@ -4272,7 +4272,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="availableTestPatternModes" type="byte" visibility="public"
           optional="true">
           <description>Optional. Defaults to [OFF]. Lists the supported test
-            pattern modes for android.test.patternMode.
+            pattern modes for android.sensor.testPatternMode.
           </description>
           <range>Must include OFF. All custom modes must be >= CUSTOM1</range>
         </entry>
@@ -4769,7 +4769,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <enum>
             <value>CONTRAST_CURVE
               <notes>Use the tone mapping curve specified in
-              android.tonemap.curve.
+              the android.tonemap.curve* entries.
 
               All color enhancement and tonemapping must be disabled, except
               for applying the tonemapping curve specified by

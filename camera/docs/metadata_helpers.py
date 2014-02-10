@@ -809,27 +809,56 @@ def filter_tags(text, metadata, filter_function, summary_function = None):
     for outer_namespace in metadata.outer_namespaces:
 
       tag_match = outer_namespace.name + \
-        r"\.([a-zA-Z0-9\n]+)\.([a-zA-Z0-9\n]+)(\.[a-zA-Z0-9\n]+)?[^/]"
+        r"\.([a-zA-Z0-9\n]+)\.([a-zA-Z0-9\n]+)(\.[a-zA-Z0-9\n]+)?([/]?)"
 
       def filter_sub(match):
         whole_match = match.group(0)
         section1 = match.group(1)
         section2 = match.group(2)
         section3 = match.group(3)
+        end_slash = match.group(4)
+
+        # Don't linkify things ending in slash (urls, for example)
+        if end_slash:
+          return whole_match
+
+        candidate = ""
 
         # First try a two-level match
-        candidate = "%s.%s.%s" % (outer_namespace.name, section1, section2)
+        candidate2 = "%s.%s.%s" % (outer_namespace.name, section1, section2)
         got_two_level = False
 
-        node = metadata.find_first(name_match(candidate.replace('\n','')))
+        node = metadata.find_first(name_match(candidate2.replace('\n','')))
+        if not node and '\n' in section2:
+          # Linefeeds are ambiguous - was the intent to add a space,
+          # or continue a lengthy name? Try the former now.
+          candidate2b = "%s.%s.%s" % (outer_namespace.name, section1, section2[:section2.find('\n')])
+          node = metadata.find_first(name_match(candidate2b))
+          if node:
+            candidate2 = candidate2b
 
         if node:
+          # Have two-level match
           got_two_level = True
+          candidate = candidate2
+        elif section3:
+          # Try three-level match
+          candidate3 = "%s%s" % (candidate2, section3)
+          node = metadata.find_first(name_match(candidate3.replace('\n','')))
 
-        # Then a three-level match
-        if not got_two_level and section3:
-          candidate = "%s%s" % (candidate, section3)
-          node = metadata.find_first(name_match(candidate.replace('\n','')))
+          if not node and '\n' in section3:
+            # Linefeeds are ambiguous - was the intent to add a space,
+            # or continue a lengthy name? Try the former now.
+            candidate3b = "%s%s" % (candidate2, section3[:section3.find('\n')])
+            node = metadata.find_first(name_match(candidate3b))
+            if node:
+              candidate3 = candidate3b
+
+          if node:
+            # Have 3-level match
+            candidate = candidate3
+
+        # Replace match with crossref or complain if a likely match couldn't be matched
 
         if node:
           tag_set.add(node)

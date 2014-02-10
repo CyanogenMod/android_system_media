@@ -1334,7 +1334,7 @@ ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE.<wbr/></p>
 <p>If AE precapture is triggered (see <a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>)
 when AE is already locked,<wbr/> the camera device will not change the exposure time
 (<a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>) and sensitivity (<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>)
-parameters.<wbr/> The flash may be fired if the android.<wbr/>control.<wbr/>ae<wbr/>Mode
+parameters.<wbr/> The flash may be fired if the <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>
 is ON_<wbr/>AUTO_<wbr/>FLASH/<wbr/>ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE and the scene is too dark.<wbr/> If the
 <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is ON_<wbr/>ALWAYS_<wbr/>FLASH,<wbr/> the scene may become overexposed.<wbr/></p>
 <p>See <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> for AE lock related state transition details.<wbr/></p>
@@ -1744,7 +1744,7 @@ mode it is set to</p>
             <td class="entry_details" colspan="5">
               <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO.<wbr/></p>
 <p>If the lens is controlled by the camera device auto-focus algorithm,<wbr/>
-the camera device will report the current AF status in android.<wbr/>control.<wbr/>af<wbr/>State
+the camera device will report the current AF status in <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a>
 in result metadata.<wbr/></p>
             </td>
           </tr>
@@ -1961,7 +1961,7 @@ device for manual white balance control.<wbr/></p></span>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
                     <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is active;
-the application's values for android.<wbr/>color<wbr/>Correction.<wbr/>transform
+the application's values for <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>
 and <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> are ignored.<wbr/></p></span>
                   </li>
                   <li>
@@ -2051,7 +2051,7 @@ routine is enabled,<wbr/> overriding the application's selected
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a>.<wbr/></p>
 <p>When set to the OFF mode,<wbr/> the camera device's auto white balance
 routine is disabled.<wbr/> The applicantion manually controls the white
-balance by <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>,<wbr/> android.<wbr/>color<wbr/>Correction.<wbr/>gains
+balance by <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>,<wbr/> <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a>
 and <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a>.<wbr/></p>
 <p>When set to any other modes,<wbr/> the camera device's auto white balance
 routine is disabled.<wbr/> The camera device uses each particular illumination
@@ -2431,7 +2431,7 @@ disabled (i.<wbr/>e.<wbr/> <a href="#controls_android.statistics.faceDetectMode"
 this should still operate correctly (but will not return
 face detection statistics to the framework).<wbr/></p>
 <p>Unlike the other scene modes,<wbr/> <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
-<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and android.<wbr/>control.<wbr/>af<wbr/>Mode
+<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>
 remain active when FACE_<wbr/>PRIORITY is set.<wbr/></p></span>
                   </li>
                   <li>
@@ -2818,7 +2818,7 @@ AE algorithm/<wbr/>hardware</p>
             <td class="entry_description">
               <p>Maximum and minimum exposure compensation
 setting,<wbr/> in counts of
-android.<wbr/>control.<wbr/>ae<wbr/>Compensation<wbr/>Step<wbr/>Size</p>
+<a href="#static_android.control.aeCompensationStep">android.<wbr/>control.<wbr/>ae<wbr/>Compensation<wbr/>Step</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -3018,7 +3018,7 @@ specified in <a href="#controls_android.control.sceneMode">android.<wbr/>control
             </td>
 
             <td class="entry_range">
-              <p>Any subset of the enums specified in android.<wbr/>control.<wbr/>scene<wbr/>Mode
+              <p>Any subset of the enums specified in <a href="#controls_android.control.sceneMode">android.<wbr/>control.<wbr/>scene<wbr/>Mode</a>
 not including DISABLED,<wbr/> or solely DISABLED if no
 scene modes are available.<wbr/> FACE_<wbr/>PRIORITY must be included
 if face detection is supported (i.<wbr/>e.<wbr/><code><a href="#static_android.statistics.info.maxFaceCount">android.<wbr/>statistics.<wbr/>info.<wbr/>max<wbr/>Face<wbr/>Count</a> &gt; 0</code>).<wbr/></p>
@@ -3245,7 +3245,7 @@ with 3 entries for each mode.<wbr/>  The overrides listed
 for FACE_<wbr/>PRIORITY are ignored,<wbr/> since for that
 mode the application-set <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
 <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> values are
-used instead,<wbr/> matching the behavior when android.<wbr/>control.<wbr/>mode
+used instead,<wbr/> matching the behavior when <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a>
 is set to AUTO.<wbr/> It is recommended that the FACE_<wbr/>PRIORITY
 overrides should be set to 0.<wbr/></p>
 <p>For example,<wbr/> if availableSceneModes contains
@@ -3837,7 +3837,7 @@ mode it is set to</p>
             <td class="entry_details" colspan="5">
               <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO.<wbr/></p>
 <p>If the lens is controlled by the camera device auto-focus algorithm,<wbr/>
-the camera device will report the current AF status in android.<wbr/>control.<wbr/>af<wbr/>State
+the camera device will report the current AF status in <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a>
 in result metadata.<wbr/></p>
             </td>
           </tr>
@@ -4360,7 +4360,7 @@ device for manual white balance control.<wbr/></p></span>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
                     <span class="entry_type_enum_notes"><p>The camera device's auto white balance routine is active;
-the application's values for android.<wbr/>color<wbr/>Correction.<wbr/>transform
+the application's values for <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>
 and <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> are ignored.<wbr/></p></span>
                   </li>
                   <li>
@@ -4450,7 +4450,7 @@ routine is enabled,<wbr/> overriding the application's selected
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a>.<wbr/></p>
 <p>When set to the OFF mode,<wbr/> the camera device's auto white balance
 routine is disabled.<wbr/> The applicantion manually controls the white
-balance by <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>,<wbr/> android.<wbr/>color<wbr/>Correction.<wbr/>gains
+balance by <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>,<wbr/> <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a>
 and <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a>.<wbr/></p>
 <p>When set to any other modes,<wbr/> the camera device's auto white balance
 routine is disabled.<wbr/> The camera device uses each particular illumination
@@ -5987,7 +5987,7 @@ sensor,<wbr/> where <code>(x,<wbr/> y)</code> lies between <code>(0,<wbr/> 0)</c
 of the pixel array,<wbr/> and the width,<wbr/>height of the pixel array given in
 <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>.<wbr/>  This may include hot pixels
 that lie outside of the active array bounds given by
-android.<wbr/>sensor.<wbr/>active<wbr/>Array<wbr/>Size.<wbr/></p>
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -6972,7 +6972,7 @@ have variable aperture lens.<wbr/> The aperture value can only be
 one of the values listed in <a href="#static_android.lens.info.availableApertures">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Apertures</a>.<wbr/></p>
 <p>When this is supported and <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is OFF,<wbr/>
 this can be set along with <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>,<wbr/>
-<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>,<wbr/> and android.<wbr/>sensor.<wbr/>frame<wbr/>Duration
+<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>,<wbr/> and <a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a>
 to achieve manual exposure control.<wbr/></p>
 <p>The requested aperture value may take several frames to reach the
 requested value; the camera device will report the current (intermediate)
@@ -7977,7 +7977,7 @@ have variable aperture lens.<wbr/> The aperture value can only be
 one of the values listed in <a href="#static_android.lens.info.availableApertures">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Apertures</a>.<wbr/></p>
 <p>When this is supported and <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is OFF,<wbr/>
 this can be set along with <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>,<wbr/>
-<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>,<wbr/> and android.<wbr/>sensor.<wbr/>frame<wbr/>Duration
+<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>,<wbr/> and <a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a>
 to achieve manual exposure control.<wbr/></p>
 <p>The requested aperture value may take several frames to reach the
 requested value; the camera device will report the current (intermediate)
@@ -8278,13 +8278,13 @@ apparent.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">STATIONARY</span>
-                    <span class="entry_type_enum_notes"><p>The lens parameters (<a href="#controls_android.lens.focalLength">android.<wbr/>lens.<wbr/>focal<wbr/>Length</a>,<wbr/> android.<wbr/>lens.<wbr/>focus<wbr/>Distance
-android.<wbr/>lens.<wbr/>filter<wbr/>Density and <a href="#controls_android.lens.aperture">android.<wbr/>lens.<wbr/>aperture</a>) are not changing.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>The lens parameters (<a href="#controls_android.lens.focalLength">android.<wbr/>lens.<wbr/>focal<wbr/>Length</a>,<wbr/> <a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a>,<wbr/>
+<a href="#controls_android.lens.filterDensity">android.<wbr/>lens.<wbr/>filter<wbr/>Density</a> and <a href="#controls_android.lens.aperture">android.<wbr/>lens.<wbr/>aperture</a>) are not changing.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">MOVING</span>
-                    <span class="entry_type_enum_notes"><p>Any of the lens parameters (<a href="#controls_android.lens.focalLength">android.<wbr/>lens.<wbr/>focal<wbr/>Length</a>,<wbr/> android.<wbr/>lens.<wbr/>focus<wbr/>Distance
-android.<wbr/>lens.<wbr/>filter<wbr/>Density or <a href="#controls_android.lens.aperture">android.<wbr/>lens.<wbr/>aperture</a>) is changing.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>Any of the lens parameters (<a href="#controls_android.lens.focalLength">android.<wbr/>lens.<wbr/>focal<wbr/>Length</a>,<wbr/> <a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a>,<wbr/>
+<a href="#controls_android.lens.filterDensity">android.<wbr/>lens.<wbr/>filter<wbr/>Density</a> or <a href="#controls_android.lens.aperture">android.<wbr/>lens.<wbr/>aperture</a>) is changing.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -8408,7 +8408,6 @@ algorithm</p>
             </td>
 
             <td class="entry_range">
-              <p>android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Modes</p>
             </td>
 
             <td class="entry_tags">
@@ -8537,7 +8536,6 @@ algorithm</p>
             </td>
 
             <td class="entry_range">
-              <p>android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Modes</p>
             </td>
 
             <td class="entry_tags">
@@ -9039,9 +9037,6 @@ for the source of reprocessing data.<wbr/></p>
             <td class="entry_range">
               <p><strong>Deprecated</strong>.<wbr/> Do not use.<wbr/></p>
 <p>Typically,<wbr/> only one entry allowed,<wbr/> must be a valid reprocess stream ID.<wbr/></p>
-<p>If android.<wbr/>jpeg.<wbr/>needs<wbr/>Thumbnail is set,<wbr/> then multiple
-reprocess streams may be included in a single request; they
-must be different scaled versions of the same image.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -9191,7 +9186,7 @@ settings</p></span>
                   <li>
                     <span class="entry_type_enum_name">REPROCESS</span>
                     <span class="entry_type_enum_notes"><p>Process previously captured data; the
-android.<wbr/>request.<wbr/>input<wbr/>Stream parameter determines the
+<a href="#controls_android.request.inputStreams">android.<wbr/>request.<wbr/>input<wbr/>Streams</a> parameter determines the
 source reprocessing stream.<wbr/> TODO: Mark dynamic metadata
 needed for reprocessing with [RP]</p></span>
                   </li>
@@ -9208,6 +9203,7 @@ REPROCESS.<wbr/> For HAL3,<wbr/> this tag is redundant.<wbr/></p>
             </td>
 
             <td class="entry_range">
+              <p><strong>Deprecated</strong>.<wbr/> Do not use.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -9400,9 +9396,11 @@ that can be configured and used simultaneously by a camera device.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>When set to 0,<wbr/> it means no input stream is supported.<wbr/></p>
-<p>The image format for a input stream can be any supported format provided
-by android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Formats.<wbr/> When using an input stream,<wbr/> there must be
-at least one output stream configured to to receive the reprocessed images.<wbr/></p>
+<p>The image format for a input stream can be any supported
+format provided by
+<a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a>.<wbr/> When using an
+input stream,<wbr/> there must be at least one output stream
+configured to to receive the reprocessed images.<wbr/></p>
 <p>For example,<wbr/> for Zero Shutter Lag (ZSL) still capture use case,<wbr/> the input
 stream image format will be RAW_<wbr/>OPAQUE,<wbr/> the associated output stream image format
 should be JPEG.<wbr/></p>
@@ -9684,7 +9682,7 @@ capability may be possible on a specific camera device implementation;
 to do this query each of <a href="#static_android.request.availableRequestKeys">android.<wbr/>request.<wbr/>available<wbr/>Request<wbr/>Keys</a>,<wbr/>
 <a href="#static_android.request.availableResultKeys">android.<wbr/>request.<wbr/>available<wbr/>Result<wbr/>Keys</a>,<wbr/>
 <a href="#static_android.request.availableCharacteristicsKeys">android.<wbr/>request.<wbr/>available<wbr/>Characteristics<wbr/>Keys</a>.<wbr/></p>
-<p>XX: Maybe these should go into android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level
+<p>XX: Maybe these should go into <a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a>
 as a table instead?</p>
 <p>The following capabilities are guaranteed to be available on
 <a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> <code>==</code> FULL devices:</p>
@@ -10302,9 +10300,9 @@ rounded to nearest larger supportable width,<wbr/> especially
 for raw output,<wbr/> where only a few fixed scales may be
 possible.<wbr/> The width and height of the crop region cannot
 be set to be smaller than floor( activeArraySize.<wbr/>width /<wbr/>
-android.<wbr/>scaler.<wbr/>max<wbr/>Digital<wbr/>Zoom ) and floor(
-activeArraySize.<wbr/>height /<wbr/> android.<wbr/>scaler.<wbr/>max<wbr/>Digital<wbr/>Zoom),<wbr/>
-respectively.<wbr/></p>
+<a href="#static_android.scaler.availableMaxDigitalZoom">android.<wbr/>scaler.<wbr/>available<wbr/>Max<wbr/>Digital<wbr/>Zoom</a> ) and floor(
+activeArraySize.<wbr/>height /<wbr/>
+<a href="#static_android.scaler.availableMaxDigitalZoom">android.<wbr/>scaler.<wbr/>available<wbr/>Max<wbr/>Digital<wbr/>Zoom</a>),<wbr/> respectively.<wbr/></p>
             </td>
           </tr>
 
@@ -10367,8 +10365,8 @@ with CFAs that are not representable by a format in
 format.<wbr/></p>
 <p>Buffers of this format will also follow the constraints given for
 RAW_<wbr/>OPAQUE buffers,<wbr/> but with relaxed performance constraints.<wbr/></p>
-<p>See android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Formats for the full set of
-performance guarantees.<wbr/></p></span>
+<p>See <a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> for
+the full set of performance guarantees.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">RAW_OPAQUE</span>
@@ -10389,7 +10387,7 @@ processed with the same settings.<wbr/></li>
 <p>The intended use for this format is to allow access to the native
 raw format buffers coming directly from the camera sensor without
 any additional conversions or decrease in framerate.<wbr/></p>
-<p>See android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Formats for the full set of
+<p>See <a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> for the full set of
 performance guarantees.<wbr/></p></span>
                   </li>
                   <li>
@@ -10745,7 +10743,7 @@ check if it limits the maximum size for image data.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>For FULL capability devices (<code><a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == FULL</code>),<wbr/>
-the HAL must include all JPEG sizes listed in android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Sizes
+the HAL must include all JPEG sizes listed in <a href="#static_android.scaler.availableJpegSizes">android.<wbr/>scaler.<wbr/>available<wbr/>Jpeg<wbr/>Sizes</a>
 and each below resolution if it is smaller than or equal to the sensor
 maximum resolution (if they are not listed in JPEG sizes already):</p>
 <ul>
@@ -10896,7 +10894,7 @@ camera device for input streams,<wbr/> to their corresponding output formats.<wb
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>All camera devices with at least 1
-android.<wbr/>request.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams will have at least one
+<a href="#static_android.request.maxNumInputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams</a> will have at least one
 available input format.<wbr/></p>
 <p>The camera device will support the following map of formats,<wbr/>
 if its dependent capability is supported:</p>
@@ -11307,7 +11305,7 @@ ignored).<wbr/></p>
 <li>IMPLEMENTATION_<wbr/>DEFINED</li>
 </ul>
 <p>All other formats may or may not have an allowed stall duration on
-a per-capability basis; refer to android.<wbr/>request.<wbr/>available<wbr/>Capabilities
+a per-capability basis; refer to <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
 for more details.<wbr/></p>
 <p>See <a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a> for more information about
 calculating the max frame rate (absent stalls).<wbr/></p>
@@ -11421,9 +11419,9 @@ rounded to nearest larger supportable width,<wbr/> especially
 for raw output,<wbr/> where only a few fixed scales may be
 possible.<wbr/> The width and height of the crop region cannot
 be set to be smaller than floor( activeArraySize.<wbr/>width /<wbr/>
-android.<wbr/>scaler.<wbr/>max<wbr/>Digital<wbr/>Zoom ) and floor(
-activeArraySize.<wbr/>height /<wbr/> android.<wbr/>scaler.<wbr/>max<wbr/>Digital<wbr/>Zoom),<wbr/>
-respectively.<wbr/></p>
+<a href="#static_android.scaler.availableMaxDigitalZoom">android.<wbr/>scaler.<wbr/>available<wbr/>Max<wbr/>Digital<wbr/>Zoom</a> ) and floor(
+activeArraySize.<wbr/>height /<wbr/>
+<a href="#static_android.scaler.availableMaxDigitalZoom">android.<wbr/>scaler.<wbr/>available<wbr/>Max<wbr/>Digital<wbr/>Zoom</a>),<wbr/> respectively.<wbr/></p>
             </td>
           </tr>
 
@@ -12157,7 +12155,7 @@ rate).<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The largest possible android.<wbr/>sensor.<wbr/>frame<wbr/>Duration
+              <p>The largest possible <a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a>
 that will be accepted by the camera device.<wbr/> Attempting to use
 frame durations beyond the maximum will result in the frame duration
 being clipped to the maximum.<wbr/> See that control
@@ -12177,15 +12175,15 @@ frame duration values.<wbr/></p>
             <td class="entry_details" colspan="5">
               <p>This value must be at least 1 second.<wbr/> It should be at least 30
 seconds (30e9 ns).<wbr/></p>
-<p>android.<wbr/>sensor.<wbr/>max<wbr/>Frame<wbr/>Duration must be greater or equal to the
-android.<wbr/>sensor.<wbr/>exposure<wbr/>Time<wbr/>Range max value (since exposure time
-overrides frame duration).<wbr/></p>
+<p><a href="#static_android.sensor.info.maxFrameDuration">android.<wbr/>sensor.<wbr/>info.<wbr/>max<wbr/>Frame<wbr/>Duration</a> must be greater or
+equal to the <a href="#static_android.sensor.info.exposureTimeRange">android.<wbr/>sensor.<wbr/>info.<wbr/>exposure<wbr/>Time<wbr/>Range</a> max
+value (since exposure time overrides frame duration).<wbr/></p>
 <p>Available minimum frame durations for JPEG must be no greater
 than that of the YUV_<wbr/>420_<wbr/>888/<wbr/>IMPLEMENTATION_<wbr/>DEFINED
 minimum frame durations (for that respective size).<wbr/></p>
 <p>Since JPEG processing is considered offline and can take longer than
 a single uncompressed capture,<wbr/> refer to
-android.<wbr/>scaler.<wbr/>available<wbr/>Stall<wbr/>Durations
+<a href="#static_android.scaler.availableStallDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stall<wbr/>Durations</a>
 for details about encoding this scenario.<wbr/></p>
             </td>
           </tr>
@@ -12286,7 +12284,7 @@ including black calibration pixels.<wbr/></p>
             <td class="entry_details" colspan="5">
               <p>Maximum output resolution for raw format must
 match this in
-android.<wbr/>scaler.<wbr/>info.<wbr/>available<wbr/>Sizes<wbr/>Per<wbr/>Format.<wbr/></p>
+<a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a>.<wbr/></p>
             </td>
           </tr>
 
@@ -12593,7 +12591,7 @@ element.<wbr/></p>
 
             <td class="entry_description">
               <p>Optional.<wbr/> Defaults to [OFF].<wbr/> Lists the supported test
-pattern modes for android.<wbr/>test.<wbr/>pattern<wbr/>Mode.<wbr/></p>
+pattern modes for <a href="#controls_android.sensor.testPatternMode">android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Mode</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -15003,7 +15001,7 @@ illuminant frequency is.<wbr/></p>
 (<code><a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> == OFF</code> or <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == OFF</code>),<wbr/>
 the <a href="#controls_android.control.aeAntibandingMode">android.<wbr/>control.<wbr/>ae<wbr/>Antibanding<wbr/>Mode</a> doesn't do the antibanding,<wbr/> and the
 application can ensure it selects exposure times that do not cause banding
-issues by looking into this metadata field.<wbr/> See android.<wbr/>control.<wbr/>ae<wbr/>Antibanding<wbr/>Mode
+issues by looking into this metadata field.<wbr/> See <a href="#controls_android.control.aeAntibandingMode">android.<wbr/>control.<wbr/>ae<wbr/>Antibanding<wbr/>Mode</a>
 for more details.<wbr/></p>
 <p>Report NONE if there doesn't appear to be flickering illumination.<wbr/></p>
             </td>
@@ -15259,7 +15257,7 @@ control points used as are available.<wbr/></p>
                   <li>
                     <span class="entry_type_enum_name">CONTRAST_CURVE</span>
                     <span class="entry_type_enum_notes"><p>Use the tone mapping curve specified in
-android.<wbr/>tonemap.<wbr/>curve.<wbr/></p>
+the android.<wbr/>tonemap.<wbr/>curve* entries.<wbr/></p>
 <p>All color enhancement and tonemapping must be disabled,<wbr/> except
 for applying the tonemapping curve specified by
 <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a>,<wbr/> <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>,<wbr/> or
@@ -15651,7 +15649,7 @@ control points used as are available.<wbr/></p>
                   <li>
                     <span class="entry_type_enum_name">CONTRAST_CURVE</span>
                     <span class="entry_type_enum_notes"><p>Use the tone mapping curve specified in
-android.<wbr/>tonemap.<wbr/>curve.<wbr/></p>
+the android.<wbr/>tonemap.<wbr/>curve* entries.<wbr/></p>
 <p>All color enhancement and tonemapping must be disabled,<wbr/> except
 for applying the tonemapping curve specified by
 <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a>,<wbr/> <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>,<wbr/> or
@@ -16432,7 +16430,7 @@ of all the results corresponding to currently in-flight requests.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Using UNKNOWN here is illegal unless android.<wbr/>sync.<wbr/>max<wbr/>Latency
+              <p>Using UNKNOWN here is illegal unless <a href="#static_android.sync.maxLatency">android.<wbr/>sync.<wbr/>max<wbr/>Latency</a>
 is also UNKNOWN.<wbr/></p>
 <p>FULL capability devices should simply set this value to the
 <code>frame_<wbr/>number</code> of the request this result corresponds to.<wbr/></p>
