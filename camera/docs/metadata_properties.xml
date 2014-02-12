@@ -2632,11 +2632,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           that can be configured and used simultaneously by a camera device.
           </description>
           <range>
-          &amp;gt;= 1 for JPEG-compressed format streams.
+          For JPEG-compressed format streams, &amp;gt;= 1.
 
-          &amp;gt;= 0 for Raw format streams.
+          For Raw format streams, &amp;gt;= 0.
 
-          &amp;gt;= 3 for processed, uncompressed format streams.
+          For processed, uncompressed format streams, &amp;gt;= 3
+          for FULL mode devices (`android.info.supportedHardwareLevel == FULL`);
+          &amp;gt;= 2 for LIMITED mode devices (`android.info.supportedHardwareLevel == LIMITED`).
           </range>
           <details>
           This is a 3 element tuple that contains the max number of output simultaneous
