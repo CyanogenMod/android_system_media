@@ -1327,10 +1327,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <enum>
             <value>INACTIVE
             <notes>AE is off or recently reset. When a camera device is opened, it starts in
-            this state.</notes></value>
+            this state. This is a transient state, the camera device may skip reporting
+            this state in capture result.</notes></value>
             <value>SEARCHING
             <notes>AE doesn't yet have a good set of control values
-            for the current scene.</notes></value>
+            for the current scene. This is a transient state, the camera device may skip
+            reporting this state in capture result.</notes></value>
             <value>CONVERGED
             <notes>AE has a good set of control values for the
             current scene.</notes></value>
@@ -1345,7 +1347,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             (through the android.control.aePrecaptureTrigger START),
             and is currently executing it. Once PRECAPTURE
             completes, AE will transition to CONVERGED or
-            FLASH_REQUIRED as appropriate.</notes></value>
+            FLASH_REQUIRED as appropriate. This is a transient state, the
+            camera device may skip reporting this state in capture result.</notes></value>
           </enum>
           <description>Current state of AE algorithm</description>
           <details>Switching between or enabling AE modes (android.control.aeMode) always
@@ -1386,6 +1389,22 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           PRECAPTURE     | Sequence done. android.control.aeLock is OFF | CONVERGED      | Ready for high-quality capture
           PRECAPTURE     | Sequence done. android.control.aeLock is ON  | LOCKED         | Ready for high-quality capture
           Any state      | android.control.aePrecaptureTrigger is START | PRECAPTURE     | Start AE precapture metering sequence
+
+          For the above table, the camera device may skip reporting any state changes that happen
+          without application intervention (i.e. mode switch, trigger, locking). Any state that
+          can be skipped in that manner is called a transient state.
+
+          For example, for above AE modes (AE_MODE_ON_*), in addition to the state transitions
+          listed in above table, it is also legal for the camera device to skip one or more
+          transient states between two results. See below table for examples:
+
+            State        | Transition Cause                                            | New State      | Notes
+          :-------------:|:-----------------------------------------------------------:|:--------------:|:-----------------:
+          INACTIVE       | Camera device finished AE scan                              | CONVERGED      | Values are already good, transient states are skipped by camera device.
+          Any state      | android.control.aePrecaptureTrigger is START, sequence done | FLASH_REQUIRED | Converged but too dark w/o flash after a precapture sequence, transient states are skipped by camera device.
+          Any state      | android.control.aePrecaptureTrigger is START, sequence done | CONVERGED      | Converged after a precapture sequence, transient states are skipped by camera device.
+          CONVERGED      | Camera device finished AE scan                              | FLASH_REQUIRED | Converged but too dark w/o flash after a new scan, transient states are skipped by camera device.
+          FLASH_REQUIRED | Camera device finished AE scan                              | CONVERGED      | Converged after a new scan, transient states are skipped by camera device.
           </details>
         </entry>
         <clone entry="android.control.afMode" kind="controls">
@@ -1397,33 +1416,38 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>INACTIVE
             <notes>AF off or has not yet tried to scan/been asked
             to scan.  When a camera device is opened, it starts in
-            this state.</notes></value>
+            this state. This is a transient state, the camera device may
+            skip reporting this state in capture result.</notes></value>
             <value>PASSIVE_SCAN
             <notes>if CONTINUOUS_* modes are supported. AF is
             currently doing an AF scan initiated by a continuous
-            autofocus mode</notes></value>
+            autofocus mode. This is a transient state, the camera device may
+            skip reporting this state in capture result.</notes></value>
             <value>PASSIVE_FOCUSED
             <notes>if CONTINUOUS_* modes are supported. AF currently
             believes it is in focus, but may restart scanning at
-            any time.</notes></value>
+            any time. This is a transient state, the camera device may skip
+            reporting this state in capture result.</notes></value>
             <value>ACTIVE_SCAN
             <notes>if AUTO or MACRO modes are supported. AF is doing
-            an AF scan because it was triggered by AF
-            trigger</notes></value>
+            an AF scan because it was triggered by AF trigger. This is a
+            transient state, the camera device may skip reporting
+            this state in capture result.</notes></value>
             <value>FOCUSED_LOCKED
             <notes>if any AF mode besides OFF is supported. AF
             believes it is focused correctly and is
-            locked</notes></value>
+            locked.</notes></value>
             <value>NOT_FOCUSED_LOCKED
             <notes>if any AF mode besides OFF is supported. AF has
             failed to focus successfully and is
-            locked</notes></value>
+            locked.</notes></value>
             <value>PASSIVE_UNFOCUSED
             <notes>if CONTINUOUS_* modes are supported. AF finished a
             passive scan without finding focus, and may restart
-            scanning at any time.</notes></value>
+            scanning at any time. This is a transient state, the camera
+            device may skip reporting this state in capture result.</notes></value>
           </enum>
-          <description>Current state of AF algorithm</description>
+          <description>Current state of AF algorithm.</description>
           <details>
           Switching between or enabling AF modes (android.control.afMode) always
           resets the AF state to INACTIVE. Similarly, switching between android.control.mode,
@@ -1459,6 +1483,22 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           NOT_FOCUSED_LOCKED | AF_CANCEL        | INACTIVE           | Cancel/reset AF
           NOT_FOCUSED_LOCKED | AF_TRIGGER       | ACTIVE_SCAN        | Start new sweep, Lens now moving
           Any state          | Mode change      | INACTIVE           |
+
+          For the above table, the camera device may skip reporting any state changes that happen
+          without application intervention (i.e. mode switch, trigger, locking). Any state that
+          can be skipped in that manner is called a transient state.
+
+          For example, for these AF modes (AF_MODE_AUTO and AF_MODE_MACRO), in addition to the
+          state transitions listed in above table, it is also legal for the camera device to skip
+          one or more transient states between two results. See below table for examples:
+
+            State            | Transition Cause | New State          | Notes
+          :-----------------:|:----------------:|:------------------:|:--------------:
+          INACTIVE           | AF_TRIGGER       | FOCUSED_LOCKED     | Focus is already good or good after a scan, lens is now locked.
+          INACTIVE           | AF_TRIGGER       | NOT_FOCUSED_LOCKED | Focus failed after a scan, lens is now locked.
+          FOCUSED_LOCKED     | AF_TRIGGER       | FOCUSED_LOCKED     | Focus is already good or good after a scan, lens is now locked.
+          NOT_FOCUSED_LOCKED | AF_TRIGGER       | FOCUSED_LOCKED     | Focus is good after a scan, lens is not locked.
+
 
           When android.control.afMode is AF_MODE_CONTINUOUS_VIDEO:
 
@@ -1499,6 +1539,18 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           FOCUSED_LOCKED     | AF_CANCEL                            | INACTIVE           | Restart AF scan
           NOT_FOCUSED_LOCKED | AF_TRIGGER                           | NOT_FOCUSED_LOCKED | No effect
           NOT_FOCUSED_LOCKED | AF_CANCEL                            | INACTIVE           | Restart AF scan
+
+          When switch between AF_MODE_CONTINUOUS_* (CAF modes) and AF_MODE_AUTO/AF_MODE_MACRO
+          (AUTO modes), the initial INACTIVE or PASSIVE_SCAN states may be skipped by the
+          camera device. When a trigger is included in a mode switch request, the trigger
+          will be evaluated in the context of the new mode in the request.
+          See below table for examples:
+
+            State      | Transition Cause                       | New State                                | Notes
+          :-----------:|:--------------------------------------:|:----------------------------------------:|:--------------:
+          any state    | CAF-->AUTO mode switch                 | INACTIVE                                 | Mode switch without trigger, initial state must be INACTIVE
+          any state    | CAF-->AUTO mode switch with AF_TRIGGER | trigger-reachable states from INACTIVE   | Mode switch with trigger, INACTIVE is skipped
+          any state    | AUTO-->CAF mode switch                 | passively reachable states from INACTIVE | Mode switch without trigger, passive transient state is skipped
           </details>
         </entry>
         <entry name="afTriggerId" type="int32" visibility="hidden">
@@ -1517,10 +1569,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <enum>
             <value>INACTIVE
             <notes>AWB is not in auto mode.  When a camera device is opened, it
-            starts in this state.</notes></value>
+            starts in this state. This is a transient state, the camera device may
+            skip reporting this state in capture result.</notes></value>
             <value>SEARCHING
             <notes>AWB doesn't yet have a good set of control
-            values for the current scene.</notes></value>
+            values for the current scene. This is a transient state, the camera device
+            may skip reporting this state in capture result.</notes></value>
             <value>CONVERGED
             <notes>AWB has a good set of control values for the
             current scene.</notes></value>
@@ -1561,7 +1615,19 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           CONVERGED      | Camera device initiates AWB scan | SEARCHING     | Values changing
           CONVERGED      | android.control.awbLock is ON    | LOCKED        | Values locked
           LOCKED         | android.control.awbLock is OFF   | SEARCHING     | Values not good after unlock
-          LOCKED         | android.control.awbLock is OFF   | CONVERGED     | Values good after unlock
+
+          For the above table, the camera device may skip reporting any state changes that happen
+          without application intervention (i.e. mode switch, trigger, locking). Any state that
+          can be skipped in that manner is called a transient state.
+
+          For example, for this AWB mode (AWB_MODE_AUTO), in addition to the state transitions
+          listed in above table, it is also legal for the camera device to skip one or more
+          transient states between two results. See below table for examples:
+
+            State        | Transition Cause                 | New State     | Notes
+          :-------------:|:--------------------------------:|:-------------:|:-----------------:
+          INACTIVE       | Camera device finished AWB scan  | CONVERGED     | Values are already good, transient states are skipped by camera device.
+          LOCKED         | android.control.awbLock is OFF   | CONVERGED     | Values good after unlock, transient states are skipped by camera device.
           </details>
         </entry>
         <clone entry="android.control.mode" kind="controls">

@@ -3519,12 +3519,14 @@ used sections in the frame metadata.<wbr/></p>
                   <li>
                     <span class="entry_type_enum_name">INACTIVE</span>
                     <span class="entry_type_enum_notes"><p>AE is off or recently reset.<wbr/> When a camera device is opened,<wbr/> it starts in
-this state.<wbr/></p></span>
+this state.<wbr/> This is a transient state,<wbr/> the camera device may skip reporting
+this state in capture result.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SEARCHING</span>
                     <span class="entry_type_enum_notes"><p>AE doesn't yet have a good set of control values
-for the current scene.<wbr/></p></span>
+for the current scene.<wbr/> This is a transient state,<wbr/> the camera device may skip
+reporting this state in capture result.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CONVERGED</span>
@@ -3547,7 +3549,8 @@ capture.<wbr/></p></span>
 (through the <a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a> START),<wbr/>
 and is currently executing it.<wbr/> Once PRECAPTURE
 completes,<wbr/> AE will transition to CONVERGED or
-FLASH_<wbr/>REQUIRED as appropriate.<wbr/></p></span>
+FLASH_<wbr/>REQUIRED as appropriate.<wbr/> This is a transient state,<wbr/> the
+camera device may skip reporting this state in capture result.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -3701,6 +3704,54 @@ be good to use.<wbr/></p>
 <td align="center"><a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a> is START</td>
 <td align="center">PRECAPTURE</td>
 <td align="center">Start AE precapture metering sequence</td>
+</tr>
+</tbody>
+</table>
+<p>For the above table,<wbr/> the camera device may skip reporting any state changes that happen
+without application intervention (i.<wbr/>e.<wbr/> mode switch,<wbr/> trigger,<wbr/> locking).<wbr/> Any state that
+can be skipped in that manner is called a transient state.<wbr/></p>
+<p>For example,<wbr/> for above AE modes (AE_<wbr/>MODE_<wbr/>ON_<wbr/>*),<wbr/> in addition to the state transitions
+listed in above table,<wbr/> it is also legal for the camera device to skip one or more
+transient states between two results.<wbr/> See below table for examples:</p>
+<table>
+<thead>
+<tr>
+<th align="center">State</th>
+<th align="center">Transition Cause</th>
+<th align="center">New State</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center">Camera device finished AE scan</td>
+<td align="center">CONVERGED</td>
+<td align="center">Values are already good,<wbr/> transient states are skipped by camera device.<wbr/></td>
+</tr>
+<tr>
+<td align="center">Any state</td>
+<td align="center"><a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a> is START,<wbr/> sequence done</td>
+<td align="center">FLASH_<wbr/>REQUIRED</td>
+<td align="center">Converged but too dark w/<wbr/>o flash after a precapture sequence,<wbr/> transient states are skipped by camera device.<wbr/></td>
+</tr>
+<tr>
+<td align="center">Any state</td>
+<td align="center"><a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a> is START,<wbr/> sequence done</td>
+<td align="center">CONVERGED</td>
+<td align="center">Converged after a precapture sequence,<wbr/> transient states are skipped by camera device.<wbr/></td>
+</tr>
+<tr>
+<td align="center">CONVERGED</td>
+<td align="center">Camera device finished AE scan</td>
+<td align="center">FLASH_<wbr/>REQUIRED</td>
+<td align="center">Converged but too dark w/<wbr/>o flash after a new scan,<wbr/> transient states are skipped by camera device.<wbr/></td>
+</tr>
+<tr>
+<td align="center">FLASH_<wbr/>REQUIRED</td>
+<td align="center">Camera device finished AE scan</td>
+<td align="center">CONVERGED</td>
+<td align="center">Converged after a new scan,<wbr/> transient states are skipped by camera device.<wbr/></td>
 </tr>
 </tbody>
 </table>
@@ -3910,50 +3961,55 @@ used sections in the frame metadata.<wbr/></p>
                     <span class="entry_type_enum_name">INACTIVE</span>
                     <span class="entry_type_enum_notes"><p>AF off or has not yet tried to scan/<wbr/>been asked
 to scan.<wbr/>  When a camera device is opened,<wbr/> it starts in
-this state.<wbr/></p></span>
+this state.<wbr/> This is a transient state,<wbr/> the camera device may
+skip reporting this state in capture result.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PASSIVE_SCAN</span>
                     <span class="entry_type_enum_notes"><p>if CONTINUOUS_<wbr/>* modes are supported.<wbr/> AF is
 currently doing an AF scan initiated by a continuous
-autofocus mode</p></span>
+autofocus mode.<wbr/> This is a transient state,<wbr/> the camera device may
+skip reporting this state in capture result.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PASSIVE_FOCUSED</span>
                     <span class="entry_type_enum_notes"><p>if CONTINUOUS_<wbr/>* modes are supported.<wbr/> AF currently
 believes it is in focus,<wbr/> but may restart scanning at
-any time.<wbr/></p></span>
+any time.<wbr/> This is a transient state,<wbr/> the camera device may skip
+reporting this state in capture result.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ACTIVE_SCAN</span>
                     <span class="entry_type_enum_notes"><p>if AUTO or MACRO modes are supported.<wbr/> AF is doing
-an AF scan because it was triggered by AF
-trigger</p></span>
+an AF scan because it was triggered by AF trigger.<wbr/> This is a
+transient state,<wbr/> the camera device may skip reporting
+this state in capture result.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FOCUSED_LOCKED</span>
                     <span class="entry_type_enum_notes"><p>if any AF mode besides OFF is supported.<wbr/> AF
 believes it is focused correctly and is
-locked</p></span>
+locked.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">NOT_FOCUSED_LOCKED</span>
                     <span class="entry_type_enum_notes"><p>if any AF mode besides OFF is supported.<wbr/> AF has
 failed to focus successfully and is
-locked</p></span>
+locked.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PASSIVE_UNFOCUSED</span>
                     <span class="entry_type_enum_notes"><p>if CONTINUOUS_<wbr/>* modes are supported.<wbr/> AF finished a
 passive scan without finding focus,<wbr/> and may restart
-scanning at any time.<wbr/></p></span>
+scanning at any time.<wbr/> This is a transient state,<wbr/> the camera
+device may skip reporting this state in capture result.<wbr/></p></span>
                   </li>
                 </ul>
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Current state of AF algorithm</p>
+              <p>Current state of AF algorithm.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -4065,6 +4121,48 @@ be sharp.<wbr/></p>
 <td align="center">Mode change</td>
 <td align="center">INACTIVE</td>
 <td align="center"></td>
+</tr>
+</tbody>
+</table>
+<p>For the above table,<wbr/> the camera device may skip reporting any state changes that happen
+without application intervention (i.<wbr/>e.<wbr/> mode switch,<wbr/> trigger,<wbr/> locking).<wbr/> Any state that
+can be skipped in that manner is called a transient state.<wbr/></p>
+<p>For example,<wbr/> for these AF modes (AF_<wbr/>MODE_<wbr/>AUTO and AF_<wbr/>MODE_<wbr/>MACRO),<wbr/> in addition to the
+state transitions listed in above table,<wbr/> it is also legal for the camera device to skip
+one or more transient states between two results.<wbr/> See below table for examples:</p>
+<table>
+<thead>
+<tr>
+<th align="center">State</th>
+<th align="center">Transition Cause</th>
+<th align="center">New State</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Focus is already good or good after a scan,<wbr/> lens is now locked.<wbr/></td>
+</tr>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Focus failed after a scan,<wbr/> lens is now locked.<wbr/></td>
+</tr>
+<tr>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Focus is already good or good after a scan,<wbr/> lens is now locked.<wbr/></td>
+</tr>
+<tr>
+<td align="center">NOT_<wbr/>FOCUSED_<wbr/>LOCKED</td>
+<td align="center">AF_<wbr/>TRIGGER</td>
+<td align="center">FOCUSED_<wbr/>LOCKED</td>
+<td align="center">Focus is good after a scan,<wbr/> lens is not locked.<wbr/></td>
 </tr>
 </tbody>
 </table>
@@ -4271,6 +4369,41 @@ be sharp.<wbr/></p>
 <td align="center">AF_<wbr/>CANCEL</td>
 <td align="center">INACTIVE</td>
 <td align="center">Restart AF scan</td>
+</tr>
+</tbody>
+</table>
+<p>When switch between AF_<wbr/>MODE_<wbr/>CONTINUOUS_<wbr/>* (CAF modes) and AF_<wbr/>MODE_<wbr/>AUTO/<wbr/>AF_<wbr/>MODE_<wbr/>MACRO
+(AUTO modes),<wbr/> the initial INACTIVE or PASSIVE_<wbr/>SCAN states may be skipped by the
+camera device.<wbr/> When a trigger is included in a mode switch request,<wbr/> the trigger
+will be evaluated in the context of the new mode in the request.<wbr/>
+See below table for examples:</p>
+<table>
+<thead>
+<tr>
+<th align="center">State</th>
+<th align="center">Transition Cause</th>
+<th align="center">New State</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">any state</td>
+<td align="center">CAF--&gt;AUTO mode switch</td>
+<td align="center">INACTIVE</td>
+<td align="center">Mode switch without trigger,<wbr/> initial state must be INACTIVE</td>
+</tr>
+<tr>
+<td align="center">any state</td>
+<td align="center">CAF--&gt;AUTO mode switch with AF_<wbr/>TRIGGER</td>
+<td align="center">trigger-reachable states from INACTIVE</td>
+<td align="center">Mode switch with trigger,<wbr/> INACTIVE is skipped</td>
+</tr>
+<tr>
+<td align="center">any state</td>
+<td align="center">AUTO--&gt;CAF mode switch</td>
+<td align="center">passively reachable states from INACTIVE</td>
+<td align="center">Mode switch without trigger,<wbr/> passive transient state is skipped</td>
 </tr>
 </tbody>
 </table>
@@ -4526,12 +4659,14 @@ used sections in the frame metadata.<wbr/></p>
                   <li>
                     <span class="entry_type_enum_name">INACTIVE</span>
                     <span class="entry_type_enum_notes"><p>AWB is not in auto mode.<wbr/>  When a camera device is opened,<wbr/> it
-starts in this state.<wbr/></p></span>
+starts in this state.<wbr/> This is a transient state,<wbr/> the camera device may
+skip reporting this state in capture result.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">SEARCHING</span>
                     <span class="entry_type_enum_notes"><p>AWB doesn't yet have a good set of control
-values for the current scene.<wbr/></p></span>
+values for the current scene.<wbr/> This is a transient state,<wbr/> the camera device
+may skip reporting this state in capture result.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CONVERGED</span>
@@ -4648,11 +4783,35 @@ be good to use.<wbr/></p>
 <td align="center">SEARCHING</td>
 <td align="center">Values not good after unlock</td>
 </tr>
+</tbody>
+</table>
+<p>For the above table,<wbr/> the camera device may skip reporting any state changes that happen
+without application intervention (i.<wbr/>e.<wbr/> mode switch,<wbr/> trigger,<wbr/> locking).<wbr/> Any state that
+can be skipped in that manner is called a transient state.<wbr/></p>
+<p>For example,<wbr/> for this AWB mode (AWB_<wbr/>MODE_<wbr/>AUTO),<wbr/> in addition to the state transitions
+listed in above table,<wbr/> it is also legal for the camera device to skip one or more
+transient states between two results.<wbr/> See below table for examples:</p>
+<table>
+<thead>
+<tr>
+<th align="center">State</th>
+<th align="center">Transition Cause</th>
+<th align="center">New State</th>
+<th align="center">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">INACTIVE</td>
+<td align="center">Camera device finished AWB scan</td>
+<td align="center">CONVERGED</td>
+<td align="center">Values are already good,<wbr/> transient states are skipped by camera device.<wbr/></td>
+</tr>
 <tr>
 <td align="center">LOCKED</td>
 <td align="center"><a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a> is OFF</td>
 <td align="center">CONVERGED</td>
-<td align="center">Values good after unlock</td>
+<td align="center">Values good after unlock,<wbr/> transient states are skipped by camera device.<wbr/></td>
 </tr>
 </tbody>
 </table>
