@@ -440,6 +440,8 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     { "profileHueSatMap",              TYPE_FLOAT  },
     [ ANDROID_SENSOR_PROFILE_TONE_CURVE - ANDROID_SENSOR_START ] =
     { "profileToneCurve",              TYPE_FLOAT  },
+    [ ANDROID_SENSOR_GREEN_SPLIT - ANDROID_SENSOR_START ] =
+    { "greenSplit",                    TYPE_FLOAT  },
     [ ANDROID_SENSOR_TEST_PATTERN_DATA - ANDROID_SENSOR_START ] =
     { "testPatternData",               TYPE_INT32  },
     [ ANDROID_SENSOR_TEST_PATTERN_MODE - ANDROID_SENSOR_START ] =
@@ -1791,6 +1793,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SENSOR_PROFILE_TONE_CURVE: {
+            break;
+        }
+        case ANDROID_SENSOR_GREEN_SPLIT: {
             break;
         }
         case ANDROID_SENSOR_TEST_PATTERN_DATA: {
