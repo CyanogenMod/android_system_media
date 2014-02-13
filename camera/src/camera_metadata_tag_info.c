@@ -37,7 +37,6 @@ const char *camera_metadata_section_names[ANDROID_SECTION_COUNT] = {
     [ANDROID_EDGE]                 = "android.edge",
     [ANDROID_FLASH]                = "android.flash",
     [ANDROID_FLASH_INFO]           = "android.flash.info",
-    [ANDROID_GEOMETRIC]            = "android.geometric",
     [ANDROID_HOT_PIXEL]            = "android.hotPixel",
     [ANDROID_JPEG]                 = "android.jpeg",
     [ANDROID_LENS]                 = "android.lens",
@@ -71,8 +70,6 @@ unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
                                        ANDROID_FLASH_END },
     [ANDROID_FLASH_INFO]           = { ANDROID_FLASH_INFO_START,
                                        ANDROID_FLASH_INFO_END },
-    [ANDROID_GEOMETRIC]            = { ANDROID_GEOMETRIC_START,
-                                       ANDROID_GEOMETRIC_END },
     [ANDROID_HOT_PIXEL]            = { ANDROID_HOT_PIXEL_START,
                                        ANDROID_HOT_PIXEL_END },
     [ANDROID_JPEG]                 = { ANDROID_JPEG_START,
@@ -236,14 +233,6 @@ static tag_info_t android_flash_info[ANDROID_FLASH_INFO_END -
     { "chargeDuration",                TYPE_INT64  },
 };
 
-static tag_info_t android_geometric[ANDROID_GEOMETRIC_END -
-        ANDROID_GEOMETRIC_START] = {
-    [ ANDROID_GEOMETRIC_MODE - ANDROID_GEOMETRIC_START ] =
-    { "mode",                          TYPE_BYTE   },
-    [ ANDROID_GEOMETRIC_STRENGTH - ANDROID_GEOMETRIC_START ] =
-    { "strength",                      TYPE_BYTE   },
-};
-
 static tag_info_t android_hot_pixel[ANDROID_HOT_PIXEL_END -
         ANDROID_HOT_PIXEL_START] = {
     [ ANDROID_HOT_PIXEL_MODE - ANDROID_HOT_PIXEL_START ] =
@@ -310,10 +299,6 @@ static tag_info_t android_lens_info[ANDROID_LENS_INFO_END -
     { "availableFocalLengths",         TYPE_FLOAT  },
     [ ANDROID_LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION - ANDROID_LENS_INFO_START ] =
     { "availableOpticalStabilization", TYPE_BYTE   },
-    [ ANDROID_LENS_INFO_GEOMETRIC_CORRECTION_MAP - ANDROID_LENS_INFO_START ] =
-    { "geometricCorrectionMap",        TYPE_FLOAT  },
-    [ ANDROID_LENS_INFO_GEOMETRIC_CORRECTION_MAP_SIZE - ANDROID_LENS_INFO_START ] =
-    { "geometricCorrectionMapSize",    TYPE_INT32  },
     [ ANDROID_LENS_INFO_HYPERFOCAL_DISTANCE - ANDROID_LENS_INFO_START ] =
     { "hyperfocalDistance",            TYPE_FLOAT  },
     [ ANDROID_LENS_INFO_MINIMUM_FOCUS_DISTANCE - ANDROID_LENS_INFO_START ] =
@@ -590,7 +575,6 @@ tag_info_t *tag_info[ANDROID_SECTION_COUNT] = {
     android_edge,
     android_flash,
     android_flash_info,
-    android_geometric,
     android_hot_pixel,
     android_jpeg,
     android_lens,
@@ -1280,29 +1264,6 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
 
-        case ANDROID_GEOMETRIC_MODE: {
-            switch (value) {
-                case ANDROID_GEOMETRIC_MODE_OFF:
-                    msg = "OFF";
-                    ret = 0;
-                    break;
-                case ANDROID_GEOMETRIC_MODE_FAST:
-                    msg = "FAST";
-                    ret = 0;
-                    break;
-                case ANDROID_GEOMETRIC_MODE_HIGH_QUALITY:
-                    msg = "HIGH_QUALITY";
-                    ret = 0;
-                    break;
-                default:
-                    msg = "error: enum value out of range";
-            }
-            break;
-        }
-        case ANDROID_GEOMETRIC_STRENGTH: {
-            break;
-        }
-
         case ANDROID_HOT_PIXEL_MODE: {
             switch (value) {
                 case ANDROID_HOT_PIXEL_MODE_OFF:
@@ -1434,12 +1395,6 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION: {
-            break;
-        }
-        case ANDROID_LENS_INFO_GEOMETRIC_CORRECTION_MAP: {
-            break;
-        }
-        case ANDROID_LENS_INFO_GEOMETRIC_CORRECTION_MAP_SIZE: {
             break;
         }
         case ANDROID_LENS_INFO_HYPERFOCAL_DISTANCE: {

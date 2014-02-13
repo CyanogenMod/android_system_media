@@ -247,18 +247,6 @@
       </ul> <!-- toc_section -->
     </li>
     <li>
-      <span class="toc_section_header"><a href="#section_geometric">geometric</a></span>
-      <ul class="toc_section">
-        <li>
-          <span class="toc_kind_header">controls</span>
-          <ul class="toc_section">
-            <li><a href="#controls_android.geometric.mode">android.geometric.mode</a></li>
-            <li><a href="#controls_android.geometric.strength">android.geometric.strength</a></li>
-          </ul>
-        </li>
-      </ul> <!-- toc_section -->
-    </li>
-    <li>
       <span class="toc_section_header"><a href="#section_hotPixel">hotPixel</a></span>
       <ul class="toc_section">
         <li>
@@ -334,8 +322,6 @@
             <li><a href="#static_android.lens.info.availableFilterDensities">android.lens.info.availableFilterDensities</a></li>
             <li><a href="#static_android.lens.info.availableFocalLengths">android.lens.info.availableFocalLengths</a></li>
             <li><a href="#static_android.lens.info.availableOpticalStabilization">android.lens.info.availableOpticalStabilization</a></li>
-            <li><a href="#static_android.lens.info.geometricCorrectionMap">android.lens.info.geometricCorrectionMap</a></li>
-            <li><a href="#static_android.lens.info.geometricCorrectionMapSize">android.lens.info.geometricCorrectionMapSize</a></li>
             <li><a href="#static_android.lens.info.hyperfocalDistance">android.lens.info.hyperfocalDistance</a></li>
             <li><a href="#static_android.lens.info.minimumFocusDistance">android.lens.info.minimumFocusDistance</a></li>
             <li><a href="#static_android.lens.info.shadingMapSize">android.lens.info.shadingMapSize</a></li>
@@ -5732,126 +5718,6 @@ Other states indicate the current flash status.<wbr/></p>
       </tbody>
 
   <!-- end of section -->
-  <tr><td colspan="6" id="section_geometric" class="section">geometric</td></tr>
-
-
-      <tr><td colspan="6" class="kind">controls</td></tr>
-
-      <thead class="entries_header">
-        <tr>
-          <th class="th_name">Property Name</th>
-          <th class="th_type">Type</th>
-          <th class="th_description">Description</th>
-          <th class="th_units">Units</th>
-          <th class="th_range">Range</th>
-          <th class="th_tags">Tags</th>
-        </tr>
-      </thead>
-
-      <tbody>
-
-        
-
-        
-
-        
-
-        
-
-                
-          <tr class="entry" id="controls_android.geometric.mode">
-            <td class="entry_name" rowspan="1">
-              android.<wbr/>geometric.<wbr/>mode
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name entry_type_name_enum">byte</span>
-
-              <span class="entry_type_visibility"> [system]</span>
-
-                <ul class="entry_type_enum">
-                  <li>
-                    <span class="entry_type_enum_name">OFF</span>
-                    <span class="entry_type_enum_notes"><p>No geometric correction is
-applied</p></span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">FAST</span>
-                    <span class="entry_type_enum_notes"><p>Must not slow down frame rate relative to raw
-bayer output</p></span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes"><p>Frame rate may be reduced by high
-quality</p></span>
-                  </li>
-                </ul>
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>Operating mode of geometric
-correction</p>
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-            </td>
-
-            <td class="entry_tags">
-            </td>
-
-          </tr>
-
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-                
-          <tr class="entry" id="controls_android.geometric.strength">
-            <td class="entry_name" rowspan="1">
-              android.<wbr/>geometric.<wbr/>strength
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name">byte</span>
-
-              <span class="entry_type_visibility"> [system]</span>
-
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>Control the amount of shading correction
-applied to the images</p>
-            </td>
-
-            <td class="entry_units">
-              unitless: 1-10; 10 is full shading
-          compensation
-            </td>
-
-            <td class="entry_range">
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_ADV">ADV</a></li>
-              </ul>
-            </td>
-
-          </tr>
-
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-        
-
-      <!-- end of kind -->
-      </tbody>
-
-  <!-- end of section -->
   <tr><td colspan="6" id="section_hotPixel" class="section">hotPixel</td></tr>
 
 
@@ -7446,103 +7312,6 @@ stabilization (OIS) modes specified in
               <p>If OIS is not implemented for a given camera device,<wbr/> this should
 contain only OFF.<wbr/></p>
             </td>
-          </tr>
-
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-                
-          <tr class="entry" id="static_android.lens.info.geometricCorrectionMap">
-            <td class="entry_name" rowspan="3">
-              android.<wbr/>lens.<wbr/>info.<wbr/>geometric<wbr/>Correction<wbr/>Map
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name">float</span>
-                <span class="entry_type_container">x</span>
-
-                <span class="entry_type_array">
-                  2 x 3 x n x m
-                </span>
-              <span class="entry_type_visibility"> [system]</span>
-                <div class="entry_type_notes">2D array of destination coordinate pairs for uniform grid points in source image,<wbr/> per color channel.<wbr/> Size in the range of 2x3x40x30</div>
-
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>A low-resolution map for correction of
-geometric distortions and chromatic aberrations,<wbr/> per
-color channel</p>
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-              <p>N,<wbr/> M &gt;= 2</p>
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
-              </ul>
-            </td>
-
-          </tr>
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>[DNG wants a function instead].<wbr/> What's easiest
-for implementers? With an array size (M,<wbr/> N),<wbr/> entry (i,<wbr/>
-j) provides the destination for pixel (i/<wbr/>(M-1) * width,<wbr/>
-j/<wbr/>(N-1) * height).<wbr/> Data is row-major,<wbr/> with each array
-entry being ( (X,<wbr/> Y)_<wbr/>r,<wbr/> (X,<wbr/> Y)_<wbr/>g,<wbr/> (X,<wbr/> Y)_<wbr/>b ) )</p>
-            </td>
-          </tr>
-
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-                
-          <tr class="entry" id="static_android.lens.info.geometricCorrectionMapSize">
-            <td class="entry_name" rowspan="1">
-              android.<wbr/>lens.<wbr/>info.<wbr/>geometric<wbr/>Correction<wbr/>Map<wbr/>Size
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name">int32</span>
-                <span class="entry_type_container">x</span>
-
-                <span class="entry_type_array">
-                  2
-                </span>
-              <span class="entry_type_visibility"> [system as size]</span>
-                <div class="entry_type_notes">width and height of geometric correction map</div>
-
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>Dimensions of geometric correction
-map</p>
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-              <p>Both values &gt;= 2</p>
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_V1">V1</a></li>
-              </ul>
-            </td>
-
           </tr>
 
 
@@ -16684,7 +16453,6 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.lens.info.availableFilterDensities">android.lens.info.availableFilterDensities</a> (static)</li>
           <li><a href="#static_android.lens.info.availableFocalLengths">android.lens.info.availableFocalLengths</a> (static)</li>
           <li><a href="#static_android.lens.info.availableOpticalStabilization">android.lens.info.availableOpticalStabilization</a> (static)</li>
-          <li><a href="#static_android.lens.info.geometricCorrectionMapSize">android.lens.info.geometricCorrectionMapSize</a> (static)</li>
           <li><a href="#static_android.lens.info.minimumFocusDistance">android.lens.info.minimumFocusDistance</a> (static)</li>
           <li><a href="#static_android.lens.info.shadingMapSize">android.lens.info.shadingMapSize</a> (static)</li>
           <li><a href="#static_android.lens.info.focusDistanceCalibration">android.lens.info.focusDistanceCalibration</a> (static)</li>
@@ -16715,7 +16483,6 @@ to know when sensor settings have been applied.<wbr/></p>
         <ul class="tags_entries">
           <li><a href="#static_android.flash.colorTemperature">android.flash.colorTemperature</a> (static)</li>
           <li><a href="#static_android.flash.maxEnergy">android.flash.maxEnergy</a> (static)</li>
-          <li><a href="#controls_android.geometric.strength">android.geometric.strength</a> (controls)</li>
           <li><a href="#dynamic_android.hotPixel.map">android.hotPixel.map</a> (dynamic)</li>
           <li><a href="#static_android.lens.opticalAxisAngle">android.lens.opticalAxisAngle</a> (static)</li>
           <li><a href="#controls_android.shading.strength">android.shading.strength</a> (controls)</li>
@@ -16725,7 +16492,6 @@ to know when sensor settings have been applied.<wbr/></p>
         Needed for DNG file support
     
         <ul class="tags_entries">
-          <li><a href="#static_android.lens.info.geometricCorrectionMap">android.lens.info.geometricCorrectionMap</a> (static)</li>
           <li><a href="#static_android.sensor.info.activeArraySize">android.sensor.info.activeArraySize</a> (static)</li>
           <li><a href="#static_android.sensor.info.colorFilterArrangement">android.sensor.info.colorFilterArrangement</a> (static)</li>
           <li><a href="#static_android.sensor.info.pixelArraySize">android.sensor.info.pixelArraySize</a> (static)</li>
