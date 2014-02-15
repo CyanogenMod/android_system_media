@@ -17,6 +17,7 @@ LOCAL_C_INCLUDES := \
 	external/gtest/include \
 	external/stlport/stlport \
 	system/media/camera/include \
+	system/media/private/camera/include
 
 LOCAL_SRC_FILES := \
 	camera_metadata_tests.cpp

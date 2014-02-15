@@ -37,7 +37,7 @@ struct vendor_tag_ops {
     /**
      * Get the number of vendor tags supported on this platform. Used to
      * calculate the size of buffer needed for holding the array of all tags
-     * returned by get_all_tags().
+     * returned by get_all_tags().  This must return -1 on error.
      */
     int (*get_tag_count)(const vendor_tag_ops_t *v);
 
@@ -56,8 +56,8 @@ struct vendor_tag_ops {
      * The naming convention for the vendor-specific section names should
      * follow a style similar to the Java package style.  For example,
      * CameraZoom Inc. must prefix their sections with "com.camerazoom."
-     * This must return NULL if the tag is outside the bounds of vendor-defined
-     * sections.
+     * This must return NULL if the tag is outside the bounds of
+     * vendor-defined sections.
      *
      * There may be different vendor-defined tag sections, for example the
      * phone maker, the chipset maker, and the camera module maker may each
@@ -81,8 +81,8 @@ struct vendor_tag_ops {
     /**
      * Get tag type for a vendor-specified entry tag. The type returned must be
      * a valid type defined in camera_metadata.h.  This method is only called
-     * for tags >= CAMERA_METADATA_VENDOR_TAG_BOUNDARY, and must return -1 if
-     * the tag is outside the bounds of the vendor-defined sections.
+     * for tags >= CAMERA_METADATA_VENDOR_TAG_BOUNDARY, and must return
+     * -1 if the tag is outside the bounds of the vendor-defined sections.
      */
     int (*get_tag_type)(const vendor_tag_ops_t *v, uint32_t tag);
 
