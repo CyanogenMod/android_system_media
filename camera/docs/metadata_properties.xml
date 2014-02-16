@@ -4650,7 +4650,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
               android.tonemap.curveRed =
                 [ P0in, P0out, P1in, P1out, P2in, P2out, P3in, P3out, ..., PNin, PNout ]
-              2 &amp;lt;= N &amp;lt;= android.tonemap.maxCurvePoints
+              2 &lt;= N &lt;= android.tonemap.maxCurvePoints
 
           These are sorted in order of increasing `Pin`; it is always
           guaranteed that input values 0.0 and 1.0 are included in the list to
