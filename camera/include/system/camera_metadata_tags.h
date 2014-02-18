@@ -272,7 +272,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS,    // int32[]      | public
     ANDROID_SENSOR_TIMESTAMP,                         // int64        | public
     ANDROID_SENSOR_TEMPERATURE,                       // float        | public
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT,              // enum         | system
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT,              // enum         | public
     ANDROID_SENSOR_CALIBRATION_TRANSFORM,             // rational[]   | public
     ANDROID_SENSOR_COLOR_TRANSFORM,                   // rational[]   | public
     ANDROID_SENSOR_FORWARD_MATRIX,                    // rational[]   | public

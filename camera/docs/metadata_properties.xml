@@ -1788,6 +1788,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           are stuck at an arbitrary value).
           </description>
           <tag id="V1" />
+          <tag id="DNG" />
         </entry>
       </controls>
       <dynamic>
@@ -1822,9 +1823,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           pixels than actual pixels on the camera sensor.
           </hal_details>
           <tag id="ADV" />
+          <tag id="DNG" />
         </entry>
         <clone entry="android.hotPixel.mode" kind="controls">
           <tag id="V1" />
+          <tag id="DNG" />
         </clone>
       </dynamic>
     </section>
@@ -3896,7 +3899,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>Optional. This value is missing if no temperature is available.</range>
           <tag id="FULL" />
         </entry>
-        <entry name="referenceIlluminant" type="byte" enum="true">
+        <entry name="referenceIlluminant" type="byte" visibility="public" enum="true">
           <enum>
             <value id="1">DAYLIGHT</value>
             <value id="2">FLUORESCENT</value>
@@ -4758,7 +4761,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           A typical use case of this would be a gamma-1/2.2 curve, with as many
           control points used as are available.
         </hal_details>
-          <tag id="DNG" />
         </entry>
         <entry name="mode" type="byte" visibility="public" enum="true">
           <enum>
