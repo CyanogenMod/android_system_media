@@ -12071,14 +12071,13 @@ match this in
             <td class="entry_type">
                 <span class="entry_type_name">int32</span>
 
-              <span class="entry_type_visibility"> [system]</span>
+              <span class="entry_type_visibility"> [public]</span>
 
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Maximum raw value output by
-sensor</p>
+              <p>Maximum raw value output by sensor.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -12100,8 +12099,15 @@ sensor</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Defines sensor bit depth (10-14 bits is
-expected)</p>
+              <p>This specifies the fully-saturated encoding level for the raw
+sample values from the sensor.<wbr/>  This is typically caused by the
+sensor becoming highly non-linear or clipping.<wbr/> The minimum for
+each channel is specified by the offset in the
+<a href="#static_android.sensor.blackLevelPattern">android.<wbr/>sensor.<wbr/>black<wbr/>Level<wbr/>Pattern</a> tag.<wbr/></p>
+<p>The white level is typically determined either by sensor bit depth
+(10-14 bits is expected),<wbr/> or by the point where the sensor response
+becomes too non-linear to be useful.<wbr/>  The default value for this is
+maximum representable value for a 16-bit raw sample (2^16 - 1).<wbr/></p>
             </td>
           </tr>
 
@@ -12192,7 +12198,8 @@ ISO=100</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>This tag specifies the zero light value for each of the CFA mosaic
-channels in the camera sensor.<wbr/></p>
+channels in the camera sensor.<wbr/>  The maximal value output by the
+sensor is represented by the value in <a href="#static_android.sensor.info.whiteLevel">android.<wbr/>sensor.<wbr/>info.<wbr/>white<wbr/>Level</a>.<wbr/></p>
 <p>The values are given in row-column scan order,<wbr/> with the first value
 corresponding to the element of the CFA in row=0,<wbr/> column=0.<wbr/></p>
             </td>

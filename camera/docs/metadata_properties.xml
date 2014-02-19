@@ -3773,12 +3773,23 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="DNG" />
             <tag id="BC" />
           </entry>
-          <entry name="whiteLevel" type="int32">
-            <description>Maximum raw value output by
-            sensor</description>
+          <entry name="whiteLevel" type="int32" visibility="public">
+            <description>
+            Maximum raw value output by sensor.
+            </description>
             <range>&amp;gt; 1024 (10-bit output)</range>
-            <details>Defines sensor bit depth (10-14 bits is
-            expected)</details>
+            <details>
+            This specifies the fully-saturated encoding level for the raw
+            sample values from the sensor.  This is typically caused by the
+            sensor becoming highly non-linear or clipping. The minimum for
+            each channel is specified by the offset in the
+            android.sensor.blackLevelPattern tag.
+
+            The white level is typically determined either by sensor bit depth
+            (10-14 bits is expected), or by the point where the sensor response
+            becomes too non-linear to be useful.  The default value for this is
+            maximum representable value for a 16-bit raw sample (2^16 - 1).
+            </details>
             <tag id="DNG" />
           </entry>
         </namespace>
@@ -3801,7 +3812,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>&amp;gt;= 0 for each.</range>
           <details>
           This tag specifies the zero light value for each of the CFA mosaic
-          channels in the camera sensor.
+          channels in the camera sensor.  The maximal value output by the
+          sensor is represented by the value in android.sensor.info.whiteLevel.
 
           The values are given in row-column scan order, with the first value
           corresponding to the element of the CFA in row=0, column=0.

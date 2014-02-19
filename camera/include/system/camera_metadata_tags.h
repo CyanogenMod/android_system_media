@@ -292,7 +292,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_INFO_MAX_FRAME_DURATION,           // int64        | public
     ANDROID_SENSOR_INFO_PHYSICAL_SIZE,                // float[]      | public
     ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE,             // int32[]      | public
-    ANDROID_SENSOR_INFO_WHITE_LEVEL,                  // int32        | system
+    ANDROID_SENSOR_INFO_WHITE_LEVEL,                  // int32        | public
     ANDROID_SENSOR_INFO_END,
 
     ANDROID_SHADING_MODE =                            // enum         | hidden
