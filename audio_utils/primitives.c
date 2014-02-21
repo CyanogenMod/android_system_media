@@ -87,3 +87,49 @@ void upmix_to_stereo_i16_from_mono_i16(int16_t *dst, const int16_t *src, size_t 
         dst += 2;
     }
 }
+
+size_t nonZeroMono32(const int32_t *samples, size_t count)
+{
+    size_t nonZero = 0;
+    while (count-- > 0) {
+        if (*samples++ != 0) {
+            nonZero++;
+        }
+    }
+    return nonZero;
+}
+
+size_t nonZeroMono16(const int16_t *samples, size_t count)
+{
+    size_t nonZero = 0;
+    while (count-- > 0) {
+        if (*samples++ != 0) {
+            nonZero++;
+        }
+    }
+    return nonZero;
+}
+
+size_t nonZeroStereo32(const int32_t *frames, size_t count)
+{
+    size_t nonZero = 0;
+    while (count-- > 0) {
+        if (frames[0] != 0 || frames[1] != 0) {
+            nonZero++;
+        }
+        frames += 2;
+    }
+    return nonZero;
+}
+
+size_t nonZeroStereo16(const int16_t *frames, size_t count)
+{
+    size_t nonZero = 0;
+    while (count-- > 0) {
+        if (frames[0] != 0 || frames[1] != 0) {
+            nonZero++;
+        }
+        frames += 2;
+    }
+    return nonZero;
+}
