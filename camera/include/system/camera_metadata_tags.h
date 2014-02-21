@@ -279,6 +279,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_NEUTRAL_COLOR_POINT,               // rational[]   | public
     ANDROID_SENSOR_PROFILE_HUE_SAT_MAP,               // float[]      | public
     ANDROID_SENSOR_PROFILE_TONE_CURVE,                // float[]      | public
+    ANDROID_SENSOR_GREEN_SPLIT,                       // float        | public
     ANDROID_SENSOR_TEST_PATTERN_DATA,                 // int32[]      | public
     ANDROID_SENSOR_TEST_PATTERN_MODE,                 // enum         | public
     ANDROID_SENSOR_AVAILABLE_TEST_PATTERN_MODES,      // byte         | public
