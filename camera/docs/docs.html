@@ -901,7 +901,7 @@ values is within the normalized range <code>[0,<wbr/> 1.<wbr/>0]</code>),<wbr/> 
 
             <td class="entry_description">
               <p>Gains applying to Bayer raw color channels for
-white-balance</p>
+white-balance.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -926,11 +926,11 @@ is the gain for green pixels on the odd rows.<wbr/> if a HAL
 does not support a separate gain for even/<wbr/>odd green channels,<wbr/>
 it should use the <code>G_<wbr/>even</code> value,<wbr/> and write <code>G_<wbr/>odd</code> equal to
 <code>G_<wbr/>even</code> in the output result metadata.<wbr/></p>
-<p>This array is either set by HAL when the request
+<p>This array is either set by the camera device when the request
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
 directly by the application in the request when the
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
-<p>The output should be the gains actually applied by the HAL to
+<p>The output should be the gains actually applied by the camera device to
 the current frame.<wbr/></p>
             </td>
           </tr>
@@ -1040,7 +1040,7 @@ values is within the normalized range <code>[0,<wbr/> 1.<wbr/>0]</code>),<wbr/> 
 
             <td class="entry_description">
               <p>Gains applying to Bayer raw color channels for
-white-balance</p>
+white-balance.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -1065,11 +1065,11 @@ is the gain for green pixels on the odd rows.<wbr/> if a HAL
 does not support a separate gain for even/<wbr/>odd green channels,<wbr/>
 it should use the <code>G_<wbr/>even</code> value,<wbr/> and write <code>G_<wbr/>odd</code> equal to
 <code>G_<wbr/>even</code> in the output result metadata.<wbr/></p>
-<p>This array is either set by HAL when the request
+<p>This array is either set by the camera device when the request
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
 directly by the application in the request when the
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
-<p>The output should be the gains actually applied by the HAL to
+<p>The output should be the gains actually applied by the camera device to
 the current frame.<wbr/></p>
             </td>
           </tr>
@@ -1495,9 +1495,9 @@ with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
-needs to be used by the HAL.<wbr/> If the metering region is
-outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
-should ignore the sections outside the region and output the
+needs to be used by the camera device.<wbr/> If the metering region is
+outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
+will ignore the sections outside the region and output the
 used sections in the frame metadata.<wbr/></p>
             </td>
           </tr>
@@ -1729,7 +1729,8 @@ mode it is set to</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO.<wbr/></p>
+              <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO and the lens is not fixed focus
+(i.<wbr/>e.<wbr/> <code><a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> &gt; 0</code>).<wbr/></p>
 <p>If the lens is controlled by the camera device auto-focus algorithm,<wbr/>
 the camera device will report the current AF status in <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a>
 in result metadata.<wbr/></p>
@@ -1791,9 +1792,9 @@ with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific focus area
-needs to be used by the HAL.<wbr/> If the focusing region is
-outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
-should ignore the sections outside the region and output the
+needs to be used by the camera device.<wbr/> If the focusing region is
+outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
+will ignore the sections outside the region and output the
 used sections in the frame metadata.<wbr/></p>
             </td>
           </tr>
@@ -2008,7 +2009,7 @@ illumination for white balance.<wbr/></p></span>
             <td class="entry_description">
               <p>Whether AWB is currently setting the color
 transform fields,<wbr/> and what its illumination target
-is</p>
+is.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -2037,7 +2038,7 @@ routine is enabled,<wbr/> overriding the application's selected
 <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>,<wbr/> <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> and
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a>.<wbr/></p>
 <p>When set to the OFF mode,<wbr/> the camera device's auto white balance
-routine is disabled.<wbr/> The applicantion manually controls the white
+routine is disabled.<wbr/> The application manually controls the white
 balance by <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>,<wbr/> <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a>
 and <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a>.<wbr/></p>
 <p>When set to any other modes,<wbr/> the camera device's auto white balance
@@ -2101,10 +2102,10 @@ with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
-<p>If all regions have 0 weight,<wbr/> then no specific metering area
-needs to be used by the HAL.<wbr/> If the metering region is
-outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
-should ignore the sections outside the region and output the
+<p>If all regions have 0 weight,<wbr/> then no specific auto-white balance (AWB) area
+needs to be used by the camera device.<wbr/> If the AWB region is
+outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
+will ignore the sections outside the region and output the
 used sections in the frame metadata.<wbr/></p>
             </td>
           </tr>
@@ -2331,7 +2332,7 @@ effect</p></span>
                     <span class="entry_type_enum_name">USE_SCENE_MODE</span>
                     <span class="entry_type_enum_notes"><p>Use specific scene mode.<wbr/> Enabling this disables
 control.<wbr/>aeMode,<wbr/> control.<wbr/>awbMode and control.<wbr/>afMode
-controls; the HAL must ignore those settings while
+controls; the camera device will ignore those settings while
 USE_<wbr/>SCENE_<wbr/>MODE is active (except for FACE_<wbr/>PRIORITY
 scene mode).<wbr/> Other control entries are still active.<wbr/>
 This setting can only be used if availableSceneModes !=
@@ -2349,7 +2350,7 @@ auto-focus algorithms to update their statistics.<wbr/></p></span>
 
             <td class="entry_description">
               <p>Overall mode of 3A control
-routines</p>
+routines.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -3494,9 +3495,9 @@ with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
-needs to be used by the HAL.<wbr/> If the metering region is
-outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
-should ignore the sections outside the region and output the
+needs to be used by the camera device.<wbr/> If the metering region is
+outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
+will ignore the sections outside the region and output the
 used sections in the frame metadata.<wbr/></p>
             </td>
           </tr>
@@ -3873,7 +3874,8 @@ mode it is set to</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO.<wbr/></p>
+              <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO and the lens is not fixed focus
+(i.<wbr/>e.<wbr/> <code><a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> &gt; 0</code>).<wbr/></p>
 <p>If the lens is controlled by the camera device auto-focus algorithm,<wbr/>
 the camera device will report the current AF status in <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a>
 in result metadata.<wbr/></p>
@@ -3935,9 +3937,9 @@ with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific focus area
-needs to be used by the HAL.<wbr/> If the focusing region is
-outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
-should ignore the sections outside the region and output the
+needs to be used by the camera device.<wbr/> If the focusing region is
+outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
+will ignore the sections outside the region and output the
 used sections in the frame metadata.<wbr/></p>
             </td>
           </tr>
@@ -4540,7 +4542,7 @@ illumination for white balance.<wbr/></p></span>
             <td class="entry_description">
               <p>Whether AWB is currently setting the color
 transform fields,<wbr/> and what its illumination target
-is</p>
+is.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -4569,7 +4571,7 @@ routine is enabled,<wbr/> overriding the application's selected
 <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>,<wbr/> <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> and
 <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a>.<wbr/></p>
 <p>When set to the OFF mode,<wbr/> the camera device's auto white balance
-routine is disabled.<wbr/> The applicantion manually controls the white
+routine is disabled.<wbr/> The application manually controls the white
 balance by <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>,<wbr/> <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a>
 and <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a>.<wbr/></p>
 <p>When set to any other modes,<wbr/> the camera device's auto white balance
@@ -4633,10 +4635,10 @@ with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
-<p>If all regions have 0 weight,<wbr/> then no specific metering area
-needs to be used by the HAL.<wbr/> If the metering region is
-outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the HAL
-should ignore the sections outside the region and output the
+<p>If all regions have 0 weight,<wbr/> then no specific auto-white balance (AWB) area
+needs to be used by the camera device.<wbr/> If the AWB region is
+outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
+will ignore the sections outside the region and output the
 used sections in the frame metadata.<wbr/></p>
             </td>
           </tr>
@@ -4850,7 +4852,7 @@ effect</p></span>
                     <span class="entry_type_enum_name">USE_SCENE_MODE</span>
                     <span class="entry_type_enum_notes"><p>Use specific scene mode.<wbr/> Enabling this disables
 control.<wbr/>aeMode,<wbr/> control.<wbr/>awbMode and control.<wbr/>afMode
-controls; the HAL must ignore those settings while
+controls; the camera device will ignore those settings while
 USE_<wbr/>SCENE_<wbr/>MODE is active (except for FACE_<wbr/>PRIORITY
 scene mode).<wbr/> Other control entries are still active.<wbr/>
 This setting can only be used if availableSceneModes !=
@@ -4868,7 +4870,7 @@ auto-focus algorithms to update their statistics.<wbr/></p></span>
 
             <td class="entry_description">
               <p>Overall mode of 3A control
-routines</p>
+routines.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -5055,7 +5057,7 @@ quality</p></span>
 
             <td class="entry_description">
               <p>Operation mode for edge
-enhancement</p>
+enhancement.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -5074,7 +5076,7 @@ enhancement</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Edge/<wbr/>sharpness/<wbr/>detail enhancement.<wbr/> OFF means no
-enhancement will be applied by the HAL.<wbr/></p>
+enhancement will be applied by the camera device.<wbr/></p>
 <p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined enhancement
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the
 camera device will use the highest-quality enhancement algorithms,<wbr/>
@@ -5179,7 +5181,7 @@ quality</p></span>
 
             <td class="entry_description">
               <p>Operation mode for edge
-enhancement</p>
+enhancement.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -5198,7 +5200,7 @@ enhancement</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Edge/<wbr/>sharpness/<wbr/>detail enhancement.<wbr/> OFF means no
-enhancement will be applied by the HAL.<wbr/></p>
+enhancement will be applied by the camera device.<wbr/></p>
 <p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined enhancement
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the
 camera device will use the highest-quality enhancement algorithms,<wbr/>
@@ -7585,7 +7587,7 @@ of the lens that can be focused correctly.<wbr/></p>
                   2
                 </span>
               <span class="entry_type_visibility"> [public as size]</span>
-                <div class="entry_type_notes">width and height of lens shading map provided by the HAL.<wbr/> (N x M)</div>
+                <div class="entry_type_notes">width and height (N,<wbr/> M) of lens shading map provided by the camera device.<wbr/></div>
 
 
             </td> <!-- entry_type -->
@@ -8355,7 +8357,7 @@ algorithm</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Noise filtering control.<wbr/> OFF means no noise reduction
-will be applied by the HAL.<wbr/></p>
+will be applied by the camera device.<wbr/></p>
 <p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined noise filtering
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the camera device
 will use the highest-quality noise filtering algorithms,<wbr/>
@@ -8483,7 +8485,7 @@ algorithm</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Noise filtering control.<wbr/> OFF means no noise reduction
-will be applied by the HAL.<wbr/></p>
+will be applied by the camera device.<wbr/></p>
 <p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined noise filtering
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the camera device
 will use the highest-quality noise filtering algorithms,<wbr/>
@@ -8777,7 +8779,7 @@ for this capture.<wbr/></p></span>
                     <span class="entry_type_enum_name">PARTIAL</span>
                     <span class="entry_type_enum_notes"><p>A partial buffer of result metadata for this
 capture.<wbr/> More result buffers for this capture will be sent
-by the HAL,<wbr/> the last of which will be marked
+by the camera device,<wbr/> the last of which will be marked
 FINAL.<wbr/></p></span>
                   </li>
                 </ul>
@@ -8815,7 +8817,7 @@ always be sent to the framework after the FINAL buffer for frame 2,<wbr/> and
 before the FINAL buffer for frame 4.<wbr/> PARTIAL buffers may be returned
 in any order relative to other frames,<wbr/> but all PARTIAL buffers for a given
 capture must arrive before the FINAL buffer for that capture.<wbr/> This entry may
-only be used by the HAL if quirks.<wbr/>usePartialResult is set to 1.<wbr/></p>
+only be used by the camera device if quirks.<wbr/>usePartialResult is set to 1.<wbr/></p>
             </td>
           </tr>
 
@@ -13993,8 +13995,8 @@ generation</p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether the HAL needs to output the lens
-shading map in output result metadata</p>
+              <p>Whether the camera device will output the lens
+shading map in output result metadata.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -14865,7 +14867,7 @@ image of a gray wall (using bicubic interpolation for visual quality) as capture
 
             <td class="entry_description">
               <p>The best-fit color channel gains calculated
-by the HAL's statistics units for the current output frame</p>
+by the camera device's statistics units for the current output frame.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -14919,8 +14921,8 @@ regardless of the android.<wbr/>control.<wbr/>* current values.<wbr/></p>
 
             <td class="entry_description">
               <p>The best-fit color transform matrix estimate
-calculated by the HAL's statistics units for the current
-output frame</p>
+calculated by the camera device's statistics units for the current
+output frame.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -14939,9 +14941,9 @@ output frame</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The HAL must provide the estimate from its
+              <p>The camera device will provide the estimate from its
 statistics unit on the white balance transforms to use
-for the next frame.<wbr/> These are the values the HAL believes
+for the next frame.<wbr/> These are the values the camera device believes
 are the best fit for the current output frame.<wbr/> This may
 be different than the transform used for this frame,<wbr/> since
 statistics processing on data from a new frame typically
