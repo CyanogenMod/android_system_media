@@ -101,6 +101,22 @@ void downmix_to_mono_i16_from_stereo_i16(int16_t *dst, const int16_t *src, size_
  */
 void upmix_to_stereo_i16_from_mono_i16(int16_t *dst, const int16_t *src, size_t count);
 
+/* Return the total number of non-zero 32-bit samples */
+size_t nonZeroMono32(const int32_t *samples, size_t count);
+
+/* Return the total number of non-zero 16-bit samples */
+size_t nonZeroMono16(const int16_t *samples, size_t count);
+
+/* Return the total number of non-zero stereo frames, where a frame is considered non-zero
+ * if either of its constituent 32-bit samples is non-zero
+ */
+size_t nonZeroStereo32(const int32_t *frames, size_t count);
+
+/* Return the total number of non-zero stereo frames, where a frame is considered non-zero
+ * if either of its constituent 16-bit samples is non-zero
+ */
+size_t nonZeroStereo16(const int16_t *frames, size_t count);
+
 /**
  * Clamp (aka hard limit or clip) a signed 32-bit sample to 16-bit range.
  */
