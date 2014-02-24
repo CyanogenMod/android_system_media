@@ -195,7 +195,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>4</size>
           </array>
           <description>Gains applying to Bayer raw color channels for
-          white-balance</description>
+          white-balance.</description>
           <details>The 4-channel white-balance gains are defined in
           the order of `[R G_even G_odd B]`, where `G_even` is the gain
           for green pixels on even rows of the output, and `G_odd`
@@ -204,12 +204,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           it should use the `G_even` value, and write `G_odd` equal to
           `G_even` in the output result metadata.
 
-          This array is either set by HAL when the request
+          This array is either set by the camera device when the request
           android.colorCorrection.mode is not TRANSFORM_MATRIX, or
           directly by the application in the request when the
           android.colorCorrection.mode is TRANSFORM_MATRIX.
 
-          The output should be the gains actually applied by the HAL to
+          The output should be the gains actually applied by the camera device to
           the current frame.</details>
         </entry>
       </controls>
@@ -447,9 +447,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           should be nonnegative.
 
           If all regions have 0 weight, then no specific metering area
-          needs to be used by the HAL. If the metering region is
-          outside the current android.scaler.cropRegion, the HAL
-          should ignore the sections outside the region and output the
+          needs to be used by the camera device. If the metering region is
+          outside the current android.scaler.cropRegion, the camera device
+          will ignore the sections outside the region and output the
           used sections in the frame metadata.</details>
           <tag id="BC" />
         </entry>
@@ -563,7 +563,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Whether AF is currently enabled, and what
           mode it is set to</description>
           <range>android.control.afAvailableModes</range>
-          <details>Only effective if android.control.mode = AUTO.
+          <details>Only effective if android.control.mode = AUTO and the lens is not fixed focus
+          (i.e. `android.lens.info.minimumFocusDistance &gt; 0`).
 
           If the lens is controlled by the camera device auto-focus algorithm,
           the camera device will report the current AF status in android.control.afState
@@ -591,9 +592,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           should be nonnegative.
 
           If all regions have 0 weight, then no specific focus area
-          needs to be used by the HAL. If the focusing region is
-          outside the current android.scaler.cropRegion, the HAL
-          should ignore the sections outside the region and output the
+          needs to be used by the camera device. If the focusing region is
+          outside the current android.scaler.cropRegion, the camera device
+          will ignore the sections outside the region and output the
           used sections in the frame metadata.</details>
           <tag id="BC" />
         </entry>
@@ -723,7 +724,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether AWB is currently setting the color
           transform fields, and what its illumination target
-          is</description>
+          is.</description>
           <range>android.control.awbAvailableModes</range>
           <details>
           This control is only effective if android.control.mode is AUTO.
@@ -734,7 +735,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.colorCorrection.mode.
 
           When set to the OFF mode, the camera device's auto white balance
-          routine is disabled. The applicantion manually controls the white
+          routine is disabled. The application manually controls the white
           balance by android.colorCorrection.transform, android.colorCorrection.gains
           and android.colorCorrection.mode.
 
@@ -767,10 +768,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           bottom-right pixel in the active pixel array. The weight
           should be nonnegative.
 
-          If all regions have 0 weight, then no specific metering area
-          needs to be used by the HAL. If the metering region is
-          outside the current android.scaler.cropRegion, the HAL
-          should ignore the sections outside the region and output the
+          If all regions have 0 weight, then no specific auto-white balance (AWB) area
+          needs to be used by the camera device. If the AWB region is
+          outside the current android.scaler.cropRegion, the camera device
+          will ignore the sections outside the region and output the
           used sections in the frame metadata.
           </details>
           <tag id="BC" />
@@ -895,7 +896,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>USE_SCENE_MODE
             <notes>Use specific scene mode. Enabling this disables
             control.aeMode, control.awbMode and control.afMode
-            controls; the HAL must ignore those settings while
+            controls; the camera device will ignore those settings while
             USE_SCENE_MODE is active (except for FACE_PRIORITY
             scene mode). Other control entries are still active.
             This setting can only be used if availableSceneModes !=
@@ -906,7 +907,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             auto-focus algorithms to update their statistics.</notes></value>
           </enum>
           <description>Overall mode of 3A control
-          routines</description>
+          routines.</description>
           <range>all must be supported</range>
           <details>High-level 3A control. When set to OFF, all 3A control
           by the camera device is disabled. The application must set the fields for
@@ -1665,9 +1666,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             quality</notes></value>
           </enum>
           <description>Operation mode for edge
-          enhancement</description>
+          enhancement.</description>
           <details>Edge/sharpness/detail enhancement. OFF means no
-          enhancement will be applied by the HAL.
+          enhancement will be applied by the camera device.
 
           FAST/HIGH_QUALITY both mean camera device determined enhancement
           will be applied. HIGH_QUALITY mode indicates that the
@@ -2235,7 +2236,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="V1" />
           </entry>
           <entry name="shadingMapSize" type="int32" visibility="public"
-                 type_notes="width and height of lens shading map provided by the HAL. (N x M)"
+                 type_notes="width and height (N, M) of lens shading map provided by the camera device."
                  container="array" typedef="size">
             <array>
               <size>2</size>
@@ -2424,7 +2425,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Mode of operation for the noise reduction
           algorithm</description>
           <details>Noise filtering control. OFF means no noise reduction
-          will be applied by the HAL.
+          will be applied by the camera device.
 
           FAST/HIGH_QUALITY both mean camera device determined noise filtering
           will be applied. HIGH_QUALITY mode indicates that the camera device
@@ -2516,7 +2517,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>PARTIAL
             <notes>A partial buffer of result metadata for this
             capture. More result buffers for this capture will be sent
-            by the HAL, the last of which will be marked
+            by the camera device, the last of which will be marked
             FINAL.</notes>
             </value>
           </enum>
@@ -2535,7 +2536,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           before the FINAL buffer for frame 4. PARTIAL buffers may be returned
           in any order relative to other frames, but all PARTIAL buffers for a given
           capture must arrive before the FINAL buffer for that capture. This entry may
-          only be used by the HAL if quirks.usePartialResult is set to 1.
+          only be used by the camera device if quirks.usePartialResult is set to 1.
           </details>
           <hal_details>
           Refer to `camera3_capture_result::partial_result`
@@ -4638,7 +4639,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>4</size>
           </array>
           <description>The best-fit color channel gains calculated
-          by the HAL's statistics units for the current output frame
+          by the camera device's statistics units for the current output frame.
           </description>
           <range>**Deprecated**. Do not use.</range>
           <details>
@@ -4664,12 +4665,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>3</size>
           </array>
           <description>The best-fit color transform matrix estimate
-          calculated by the HAL's statistics units for the current
-          output frame</description>
+          calculated by the camera device's statistics units for the current
+          output frame.</description>
           <range>**Deprecated**. Do not use.</range>
-          <details>The HAL must provide the estimate from its
+          <details>The camera device will provide the estimate from its
           statistics unit on the white balance transforms to use
-          for the next frame. These are the values the HAL believes
+          for the next frame. These are the values the camera device believes
           are the best fit for the current output frame. This may
           be different than the transform used for this frame, since
           statistics processing on data from a new frame typically
@@ -4715,8 +4716,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>OFF</value>
             <value>ON</value>
           </enum>
-          <description>Whether the HAL needs to output the lens
-          shading map in output result metadata</description>
+          <description>Whether the camera device will output the lens
+          shading map in output result metadata.</description>
           <details>When set to ON,
           android.statistics.lensShadingMap must be provided in
           the output result metadata.</details>
