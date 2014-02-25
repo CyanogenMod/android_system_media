@@ -70,7 +70,8 @@ void memcpy_to_u8_from_i16(uint8_t *dst, const int16_t *src, size_t count);
 void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count);
 
 /* Shrink and copy samples from single-precision floating-point to signed 16-bit.
- * Each float should be in the range -1.0 to 1.0.  Values outside that range are clamped.
+ * Each float should be in the range -1.0 to 1.0.  Values outside that range are clamped,
+ * refer to clamp16FromFloat().
  * Parameters:
  *  dst     Destination buffer
  *  src     Source buffer
@@ -109,6 +110,45 @@ static inline int16_t clamp16(int32_t sample)
     if ((sample>>15) ^ (sample>>31))
         sample = 0x7FFF ^ (sample>>31);
     return sample;
+}
+
+/*
+ * Convert a IEEE 754 single precision float [-1.0, 1.0) to int16_t [-32768, 32767]
+ * with clamping.  Note the open bound at 1.0, values within 1/65536 of 1.0 map
+ * to 32767 instead of 32768 (early clamping due to the smaller positive integer subrange).
+ *
+ * Values outside the range [-1.0, 1.0) are properly clamped to -32768 and 32767,
+ * including -Inf and +Inf. NaN will generally be treated either as -32768 or 32767,
+ * depending on the sign bit inside NaN (whose representation is not unique).
+ * Nevertheless, strictly speaking, NaN behavior should be considered undefined.
+ *
+ * Rounding of 0.5 lsb is to even (default for IEEE 754).
+ */
+static inline int16_t clamp16FromFloat(float f)
+{
+    /* Offset is used to expand the valid range of [-1.0, 1.0) into the 16 lsbs of the
+     * floating point significand. The normal shift is 3<<22, but the -15 offset
+     * is used to multiply by 32768.
+     */
+    static const float offset = (float)(3 << (22 - 15));
+    /* zero = (0x10f << 22) =  0x43c00000 (not directly used) */
+    static const int32_t limneg = (0x10f << 22) /*zero*/ - 32768; /* 0x43bf8000 */
+    static const int32_t limpos = (0x10f << 22) /*zero*/ + 32767; /* 0x43c07fff */
+
+    union {
+        float f;
+        int32_t i;
+    } u;
+
+    u.f = f + offset; /* recenter valid range */
+    /* Now the valid range is represented as integers between [limneg, limpos].
+     * Clamp using the fact that float representation (as an integer) is an ordered set.
+     */
+    if (u.i < limneg)
+        u.i = -32768;
+    else if (u.i > limpos)
+        u.i = 32767;
+    return u.i; /* Return lower 16 bits, the part of interest in the significand. */
 }
 
 /**
