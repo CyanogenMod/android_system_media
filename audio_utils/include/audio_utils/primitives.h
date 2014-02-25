@@ -82,6 +82,19 @@ void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count);
  */
 void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count);
 
+/* Copy samples from signed fixed-point 32-bit Q19.12 to single-precision floating-point.
+ * The nominal output float range is [-1.0, 1.0] if the fixed-point range is
+ * [0xf8000000, 0x07ffffff].  The full float range is [-16.0, 16.0].  Note the closed range
+ * at 1.0 and 16.0 is due to rounding on conversion to float.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ */
+void memcpy_to_float_from_q19_12(float *dst, const int32_t *src, size_t c);
+
 /* Downmix pairs of interleaved stereo input 16-bit samples to mono output 16-bit samples.
  * Parameters:
  *  dst     Destination buffer
