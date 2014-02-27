@@ -56,17 +56,7 @@ void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count)
 void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count)
 {
     while (count--) {
-        float f = *src++;
-        int16_t i;
-        if (f > 1.0) {
-            i = 32767;
-        } else if (f < -1.0) {
-            i = -32768;
-        } else {
-            // does not specifically handle NaN
-            i = f * 32767.0;
-        }
-        *dst++ = i;
+        *dst++ = clamp16FromFloat(*src++);
     }
 }
 
