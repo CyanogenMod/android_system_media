@@ -63,9 +63,8 @@ void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count)
 void memcpy_to_float_from_q19_12(float *dst, const int32_t *src, size_t c)
 {
     size_t i;
-    static const float scale = 1. / (32768. * 4096.);
     for (i = 0; i < c; ++i) {
-        *dst++ = *src++ * scale;
+        *dst++ = float_from_q19_12(*src++);
     }
 }
 

@@ -85,7 +85,7 @@ void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count);
 /* Copy samples from signed fixed-point 32-bit Q19.12 to single-precision floating-point.
  * The nominal output float range is [-1.0, 1.0] if the fixed-point range is
  * [0xf8000000, 0x07ffffff].  The full float range is [-16.0, 16.0].  Note the closed range
- * at 1.0 and 16.0 is due to rounding on conversion to float.
+ * at 1.0 and 16.0 is due to rounding on conversion to float. See float_from_q19_12() for details.
  * Parameters:
  *  dst     Destination buffer
  *  src     Source buffer
@@ -178,6 +178,32 @@ static inline int16_t clamp16FromFloat(float f)
     else if (u.i > limpos)
         u.i = 32767;
     return u.i; /* Return lower 16 bits, the part of interest in the significand. */
+}
+
+/*
+ * Convert a signed fixed-point 32-bit Q19.12 value to single-precision floating-point.
+ * The nominal output float range is [-1.0, 1.0] if the fixed-point range is
+ * [0xf8000000, 0x07ffffff].  The full float range is [-16.0, 16.0].
+ *
+ * Note the closed range at 1.0 and 16.0 is due to rounding on conversion to float.
+ * In more detail: if the fixed-point integer exceeds 24 bit significand of single
+ * precision floating point, the 0.5 lsb in the significand conversion will round
+ * towards even, as per IEEE 754 default.
+ */
+
+static inline float float_from_q19_12(int32_t ival)
+{
+    /* The scale factor is the reciprocal of the nominal 16 bit integer
+     * half-sided range (32768) multiplied by the 12 fractional bits (4096).
+     *
+     * Since the scale factor is a power of 2, the scaling is exact, and there
+     * is no rounding due to the multiplication - the bit pattern is preserved.
+     * However, there may be rounding due to the fixed-point to float conversion,
+     * as described above.
+     */
+    static const float scale = 1. / (32768. * 4096.);
+
+    return ival * scale;
 }
 
 /**
