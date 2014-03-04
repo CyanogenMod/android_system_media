@@ -4346,7 +4346,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="shading">
       <controls>
-        <entry name="mode" type="byte" visibility="hidden" enum="true">
+        <entry name="mode" type="byte" visibility="public" enum="true">
           <enum>
             <value>OFF
             <notes>No lens shading correction is applied</notes></value>
