@@ -1670,20 +1670,43 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <details>Edge/sharpness/detail enhancement. OFF means no
           enhancement will be applied by the camera device.
 
+          This must be set to one of the modes listed in android.edge.availableEdgeModes.
+
           FAST/HIGH_QUALITY both mean camera device determined enhancement
           will be applied. HIGH_QUALITY mode indicates that the
           camera device will use the highest-quality enhancement algorithms,
           even if it slows down capture rate. FAST means the camera device will
           not slow down capture rate when applying edge enhancement.</details>
+          <tag id="V1" />
         </entry>
         <entry name="strength" type="byte">
           <description>Control the amount of edge enhancement
           applied to the images</description>
           <units>1-10; 10 is maximum sharpening</units>
+          <tag id="V1" />
         </entry>
       </controls>
+      <static>
+        <entry name="availableEdgeModes" type="byte" visibility="public"
+        type_notes="list of enums" container="array">
+          <array>
+            <size>n</size>
+          </array>
+          <description>
+          The set of edge enhancement modes supported by this camera device.
+          </description>
+          <details>
+          This tag lists the valid modes for android.edge.mode.
+
+          Full-capability camera devices must always support OFF and FAST.
+          </details>
+          <tag id="V1" />
+        </entry>
+      </static>
       <dynamic>
-        <clone entry="android.edge.mode" kind="controls"></clone>
+        <clone entry="android.edge.mode" kind="controls">
+          <tag id="V1" />
+        </clone>
       </dynamic>
     </section>
     <section name="flash">
@@ -2425,6 +2448,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <details>Noise filtering control. OFF means no noise reduction
           will be applied by the camera device.
 
+          This must be set to a valid mode in
+          android.noiseReduction.availableNoiseReductionModes.
+
           FAST/HIGH_QUALITY both mean camera device determined noise filtering
           will be applied. HIGH_QUALITY mode indicates that the camera device
           will use the highest-quality noise filtering algorithms,
@@ -2439,8 +2465,26 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>1 - 10</range>
         </entry>
       </controls>
+      <static>
+        <entry name="availableNoiseReductionModes" type="byte" visibility="public"
+        type_notes="list of enums" container="array">
+          <array>
+            <size>n</size>
+          </array>
+          <description>
+          The set of noise reduction modes supported by this camera device.
+          </description>
+          <details>
+          This tag lists the valid modes for android.noiseReduction.mode.
+
+          Full-capability camera devices must laways support OFF and FAST.
+          </details>
+          <tag id="V1" />
+        </entry>
+      </static>
       <dynamic>
         <clone entry="android.noiseReduction.mode" kind="controls">
+          <tag id="V1" />
         </clone>
       </dynamic>
     </section>
@@ -4947,6 +4991,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           transforms will be disabled when android.tonemap.mode is
           CONTRAST_CURVE.
 
+          This must be set to a valid mode in
+          android.tonemap.availableToneMapModes.
+
           When using either FAST or HIGH_QUALITY, the camera device will
           emit its own tonemap curve in android.tonemap.curveRed,
           android.tonemap.curveGreen, and android.tonemap.curveBlue.
@@ -4978,6 +5025,21 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <hal_details>
           This value must be at least 64. This should be at least 128.
           </hal_details>
+        </entry>
+        <entry name="availableToneMapModes" type="byte" visibility="public"
+        type_notes="list of enums" container="array">
+          <array>
+            <size>n</size>
+          </array>
+          <description>
+          The set of tonemapping modes supported by this camera device.
+          </description>
+          <details>
+          This tag lists the valid modes for android.tonemap.mode.
+
+          Full-capability camera devices must always support CONTRAST_CURVE and
+          FAST.
+          </details>
         </entry>
       </static>
       <dynamic>

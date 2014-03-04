@@ -207,6 +207,8 @@ static tag_info_t android_edge[ANDROID_EDGE_END -
     { "mode",                          TYPE_BYTE   },
     [ ANDROID_EDGE_STRENGTH - ANDROID_EDGE_START ] =
     { "strength",                      TYPE_BYTE   },
+    [ ANDROID_EDGE_AVAILABLE_EDGE_MODES - ANDROID_EDGE_START ] =
+    { "availableEdgeModes",            TYPE_BYTE   },
 };
 
 static tag_info_t android_flash[ANDROID_FLASH_END -
@@ -315,6 +317,8 @@ static tag_info_t android_noise_reduction[ANDROID_NOISE_REDUCTION_END -
     { "mode",                          TYPE_BYTE   },
     [ ANDROID_NOISE_REDUCTION_STRENGTH - ANDROID_NOISE_REDUCTION_START ] =
     { "strength",                      TYPE_BYTE   },
+    [ ANDROID_NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES - ANDROID_NOISE_REDUCTION_START ] =
+    { "availableNoiseReductionModes",  TYPE_BYTE   },
 };
 
 static tag_info_t android_quirks[ANDROID_QUIRKS_END -
@@ -545,6 +549,8 @@ static tag_info_t android_tonemap[ANDROID_TONEMAP_END -
     { "mode",                          TYPE_BYTE   },
     [ ANDROID_TONEMAP_MAX_CURVE_POINTS - ANDROID_TONEMAP_START ] =
     { "maxCurvePoints",                TYPE_INT32  },
+    [ ANDROID_TONEMAP_AVAILABLE_TONE_MAP_MODES - ANDROID_TONEMAP_START ] =
+    { "availableToneMapModes",         TYPE_BYTE   },
 };
 
 static tag_info_t android_led[ANDROID_LED_END -
@@ -1197,6 +1203,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
         case ANDROID_EDGE_STRENGTH: {
             break;
         }
+        case ANDROID_EDGE_AVAILABLE_EDGE_MODES: {
+            break;
+        }
 
         case ANDROID_FLASH_FIRING_POWER: {
             break;
@@ -1454,6 +1463,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_NOISE_REDUCTION_STRENGTH: {
+            break;
+        }
+        case ANDROID_NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES: {
             break;
         }
 
@@ -2094,6 +2106,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_TONEMAP_MAX_CURVE_POINTS: {
+            break;
+        }
+        case ANDROID_TONEMAP_AVAILABLE_TONE_MAP_MODES: {
             break;
         }
 

@@ -206,6 +206,12 @@
           </ul>
         </li>
         <li>
+          <span class="toc_kind_header">static</span>
+          <ul class="toc_section">
+            <li><a href="#static_android.edge.availableEdgeModes">android.edge.availableEdgeModes</a></li>
+          </ul>
+        </li>
+        <li>
           <span class="toc_kind_header">dynamic</span>
           <ul class="toc_section">
             <li><a href="#dynamic_android.edge.mode">android.edge.mode</a></li>
@@ -359,6 +365,12 @@
           <ul class="toc_section">
             <li><a href="#controls_android.noiseReduction.mode">android.noiseReduction.mode</a></li>
             <li><a href="#controls_android.noiseReduction.strength">android.noiseReduction.strength</a></li>
+          </ul>
+        </li>
+        <li>
+          <span class="toc_kind_header">static</span>
+          <ul class="toc_section">
+            <li><a href="#static_android.noiseReduction.availableNoiseReductionModes">android.noiseReduction.availableNoiseReductionModes</a></li>
           </ul>
         </li>
         <li>
@@ -601,6 +613,7 @@
           <span class="toc_kind_header">static</span>
           <ul class="toc_section">
             <li><a href="#static_android.tonemap.maxCurvePoints">android.tonemap.maxCurvePoints</a></li>
+            <li><a href="#static_android.tonemap.availableToneMapModes">android.tonemap.availableToneMapModes</a></li>
           </ul>
         </li>
         <li>
@@ -5076,6 +5089,9 @@ enhancement.<wbr/></p>
             </td>
 
             <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_V1">V1</a></li>
+              </ul>
             </td>
 
           </tr>
@@ -5086,6 +5102,7 @@ enhancement.<wbr/></p>
             <td class="entry_details" colspan="5">
               <p>Edge/<wbr/>sharpness/<wbr/>detail enhancement.<wbr/> OFF means no
 enhancement will be applied by the camera device.<wbr/></p>
+<p>This must be set to one of the modes listed in <a href="#static_android.edge.availableEdgeModes">android.<wbr/>edge.<wbr/>available<wbr/>Edge<wbr/>Modes</a>.<wbr/></p>
 <p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined enhancement
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the
 camera device will use the highest-quality enhancement algorithms,<wbr/>
@@ -5124,8 +5141,87 @@ applied to the images</p>
             </td>
 
             <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_V1">V1</a></li>
+              </ul>
             </td>
 
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+      <tr><td colspan="6" class="kind">static</td></tr>
+
+      <thead class="entries_header">
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="static_android.edge.availableEdgeModes">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>edge.<wbr/>available<wbr/>Edge<wbr/>Modes
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">byte</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">list of enums</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The set of edge enhancement modes supported by this camera device.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_V1">V1</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This tag lists the valid modes for <a href="#controls_android.edge.mode">android.<wbr/>edge.<wbr/>mode</a>.<wbr/></p>
+<p>Full-capability camera devices must always support OFF and FAST.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -5200,6 +5296,9 @@ enhancement.<wbr/></p>
             </td>
 
             <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_V1">V1</a></li>
+              </ul>
             </td>
 
           </tr>
@@ -5210,6 +5309,7 @@ enhancement.<wbr/></p>
             <td class="entry_details" colspan="5">
               <p>Edge/<wbr/>sharpness/<wbr/>detail enhancement.<wbr/> OFF means no
 enhancement will be applied by the camera device.<wbr/></p>
+<p>This must be set to one of the modes listed in <a href="#static_android.edge.availableEdgeModes">android.<wbr/>edge.<wbr/>available<wbr/>Edge<wbr/>Modes</a>.<wbr/></p>
 <p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined enhancement
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the
 camera device will use the highest-quality enhancement algorithms,<wbr/>
@@ -8416,6 +8516,8 @@ algorithm</p>
             <td class="entry_details" colspan="5">
               <p>Noise filtering control.<wbr/> OFF means no noise reduction
 will be applied by the camera device.<wbr/></p>
+<p>This must be set to a valid mode in
+<a href="#static_android.noiseReduction.availableNoiseReductionModes">android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Noise<wbr/>Reduction<wbr/>Modes</a>.<wbr/></p>
 <p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined noise filtering
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the camera device
 will use the highest-quality noise filtering algorithms,<wbr/>
@@ -8457,6 +8559,82 @@ applied to the images</p>
             <td class="entry_tags">
             </td>
 
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+      <tr><td colspan="6" class="kind">static</td></tr>
+
+      <thead class="entries_header">
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="static_android.noiseReduction.availableNoiseReductionModes">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Noise<wbr/>Reduction<wbr/>Modes
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">byte</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">list of enums</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The set of noise reduction modes supported by this camera device.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_V1">V1</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This tag lists the valid modes for <a href="#controls_android.noiseReduction.mode">android.<wbr/>noise<wbr/>Reduction.<wbr/>mode</a>.<wbr/></p>
+<p>Full-capability camera devices must laways support OFF and FAST.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -8544,6 +8722,8 @@ algorithm</p>
             <td class="entry_details" colspan="5">
               <p>Noise filtering control.<wbr/> OFF means no noise reduction
 will be applied by the camera device.<wbr/></p>
+<p>This must be set to a valid mode in
+<a href="#static_android.noiseReduction.availableNoiseReductionModes">android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Noise<wbr/>Reduction<wbr/>Modes</a>.<wbr/></p>
 <p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined noise filtering
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the camera device
 will use the highest-quality noise filtering algorithms,<wbr/>
@@ -15607,6 +15787,8 @@ are specified by normalized floating-point numbers.<wbr/></p>
 tables,<wbr/> selective chroma enhancement,<wbr/> or other non-linear color
 transforms will be disabled when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is
 CONTRAST_<wbr/>CURVE.<wbr/></p>
+<p>This must be set to a valid mode in
+<a href="#static_android.tonemap.availableToneMapModes">android.<wbr/>tonemap.<wbr/>available<wbr/>Tone<wbr/>Map<wbr/>Modes</a>.<wbr/></p>
 <p>When using either FAST or HIGH_<wbr/>QUALITY,<wbr/> the camera device will
 emit its own tonemap curve in <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a>,<wbr/>
 <a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a>,<wbr/> and <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>.<wbr/>
@@ -15702,6 +15884,53 @@ hardware curves used as closely as possible when linearly interpolated.<wbr/></p
               <p>This value must be at least 64.<wbr/> This should be at least 128.<wbr/></p>
             </td>
           </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.tonemap.availableToneMapModes">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>tonemap.<wbr/>available<wbr/>Tone<wbr/>Map<wbr/>Modes
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">byte</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">list of enums</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The set of tonemapping modes supported by this camera device.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This tag lists the valid modes for <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a>.<wbr/></p>
+<p>Full-capability camera devices must always support CONTRAST_<wbr/>CURVE and
+FAST.<wbr/></p>
+            </td>
+          </tr>
+
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -15996,6 +16225,8 @@ are specified by normalized floating-point numbers.<wbr/></p>
 tables,<wbr/> selective chroma enhancement,<wbr/> or other non-linear color
 transforms will be disabled when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is
 CONTRAST_<wbr/>CURVE.<wbr/></p>
+<p>This must be set to a valid mode in
+<a href="#static_android.tonemap.availableToneMapModes">android.<wbr/>tonemap.<wbr/>available<wbr/>Tone<wbr/>Map<wbr/>Modes</a>.<wbr/></p>
 <p>When using either FAST or HIGH_<wbr/>QUALITY,<wbr/> the camera device will
 emit its own tonemap curve in <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a>,<wbr/>
 <a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a>,<wbr/> and <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>.<wbr/>
@@ -16966,6 +17197,9 @@ to know when sensor settings have been applied.<wbr/></p>
     
         <ul class="tags_entries">
           <li><a href="#controls_android.demosaic.mode">android.demosaic.mode</a> (controls)</li>
+          <li><a href="#controls_android.edge.mode">android.edge.mode</a> (controls)</li>
+          <li><a href="#controls_android.edge.strength">android.edge.strength</a> (controls)</li>
+          <li><a href="#static_android.edge.availableEdgeModes">android.edge.availableEdgeModes</a> (static)</li>
           <li><a href="#controls_android.flash.firingPower">android.flash.firingPower</a> (controls)</li>
           <li><a href="#controls_android.flash.firingTime">android.flash.firingTime</a> (controls)</li>
           <li><a href="#static_android.flash.info.chargeDuration">android.flash.info.chargeDuration</a> (static)</li>
@@ -16986,6 +17220,7 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.lens.position">android.lens.position</a> (static)</li>
           <li><a href="#dynamic_android.lens.state">android.lens.state</a> (dynamic)</li>
           <li><a href="#controls_android.noiseReduction.mode">android.noiseReduction.mode</a> (controls)</li>
+          <li><a href="#static_android.noiseReduction.availableNoiseReductionModes">android.noiseReduction.availableNoiseReductionModes</a> (static)</li>
           <li><a href="#controls_android.request.id">android.request.id</a> (controls)</li>
           <li><a href="#controls_android.sensor.exposureTime">android.sensor.exposureTime</a> (controls)</li>
           <li><a href="#controls_android.sensor.frameDuration">android.sensor.frameDuration</a> (controls)</li>
@@ -17003,10 +17238,12 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#dynamic_android.statistics.histogram">android.statistics.histogram</a> (dynamic)</li>
           <li><a href="#dynamic_android.statistics.sharpnessMap">android.statistics.sharpnessMap</a> (dynamic)</li>
           <li><a href="#dynamic_android.statistics.hotPixelMap">android.statistics.hotPixelMap</a> (dynamic)</li>
+          <li><a href="#dynamic_android.edge.mode">android.edge.mode</a> (dynamic)</li>
           <li><a href="#dynamic_android.hotPixel.mode">android.hotPixel.mode</a> (dynamic)</li>
           <li><a href="#dynamic_android.lens.aperture">android.lens.aperture</a> (dynamic)</li>
           <li><a href="#dynamic_android.lens.filterDensity">android.lens.filterDensity</a> (dynamic)</li>
           <li><a href="#dynamic_android.lens.opticalStabilizationMode">android.lens.opticalStabilizationMode</a> (dynamic)</li>
+          <li><a href="#dynamic_android.noiseReduction.mode">android.noiseReduction.mode</a> (dynamic)</li>
         </ul>
       </li> <!-- tag_V1 -->
       <li id="tag_ADV">ADV - None

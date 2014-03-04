@@ -155,6 +155,7 @@ typedef enum camera_metadata_tag {
     ANDROID_EDGE_MODE =                               // enum         | public
             ANDROID_EDGE_START,
     ANDROID_EDGE_STRENGTH,                            // byte         | system
+    ANDROID_EDGE_AVAILABLE_EDGE_MODES,                // byte[]       | public
     ANDROID_EDGE_END,
 
     ANDROID_FLASH_FIRING_POWER =                      // byte         | system
@@ -216,6 +217,8 @@ typedef enum camera_metadata_tag {
     ANDROID_NOISE_REDUCTION_MODE =                    // enum         | public
             ANDROID_NOISE_REDUCTION_START,
     ANDROID_NOISE_REDUCTION_STRENGTH,                 // byte         | system
+    ANDROID_NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES,
+                                                      // byte[]       | public
     ANDROID_NOISE_REDUCTION_END,
 
     ANDROID_QUIRKS_METERING_CROP_REGION =             // byte         | system
@@ -338,6 +341,7 @@ typedef enum camera_metadata_tag {
     ANDROID_TONEMAP_CURVE_RED,                        // float[]      | public
     ANDROID_TONEMAP_MODE,                             // enum         | public
     ANDROID_TONEMAP_MAX_CURVE_POINTS,                 // int32        | public
+    ANDROID_TONEMAP_AVAILABLE_TONE_MAP_MODES,         // byte[]       | public
     ANDROID_TONEMAP_END,
 
     ANDROID_LED_TRANSMIT =                            // enum         | hidden
