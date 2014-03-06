@@ -68,6 +68,65 @@ void memcpy_to_float_from_q19_12(float *dst, const int32_t *src, size_t c)
     }
 }
 
+void memcpy_to_float_from_i16(float *dst, const int16_t *src, size_t count)
+{
+    while (count--) {
+        *dst++ = float_from_i16(*src++);
+    }
+}
+
+void memcpy_to_float_from_p24(float *dst, const uint8_t *src, size_t count)
+{
+    while (count--) {
+        *dst++ = float_from_p24(src);
+        src += 3;
+    }
+}
+
+void memcpy_to_i16_from_p24(int16_t *dst, const uint8_t *src, size_t count)
+{
+    while (count--) {
+#ifdef HAVE_BIG_ENDIAN
+        *dst++ = src[1] | (src[0] << 8);
+#else
+        *dst++ = src[1] | (src[2] << 8);
+#endif
+        src += 3;
+    }
+}
+
+void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count)
+{
+    while (count--) {
+#ifdef HAVE_BIG_ENDIAN
+        *dst++ = *src >> 8;
+        *dst++ = *src++;
+        *dst++ = 0;
+#else
+        *dst++ = 0;
+        *dst++ = *src;
+        *dst++ = *src++ >> 8;
+#endif
+    }
+}
+
+void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count)
+{
+    while (count--) {
+        int32_t ival = clamp24_from_float(*src++);
+
+#ifdef HAVE_BIG_ENDIAN
+        *dst++ = ival >> 16;
+        *dst++ = ival >> 8;
+        *dst++ = ival;
+#else
+        *dst++ = ival;
+        *dst++ = ival >> 8;
+        *dst++ = ival >> 16;
+#endif
+    }
+}
+
 void downmix_to_mono_i16_from_stereo_i16(int16_t *dst, const int16_t *src, size_t count)
 {
     while (count--) {
