@@ -23,6 +23,12 @@
 
 __BEGIN_DECLS
 
+/* The memcpy_* conversion routines are designed to work in-place on same dst as src
+ * buffers only if the types shrink on copy, with the exception of memcpy_to_i16_from_u8().
+ * This allows the loops to go upwards for faster cache access (and may be more flexible
+ * for future optimization later).
+ */
+
 /**
  * Dither and clamp pairs of 32-bit input samples (sums) to 16-bit output samples (out).
  * Each 32-bit input sample is a signed fixed-point Q19.12.
@@ -94,6 +100,66 @@ void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count);
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
 void memcpy_to_float_from_q19_12(float *dst, const int32_t *src, size_t c);
+
+/* Copy samples from signed fixed-point 16 bit Q0.15 to single-precision floating-point.
+ * The output float range is [-1.0, 1.0) for the fixed-point range [0x8000, 0x7fff].
+ * No rounding is needed as the representation is exact.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must be completely separate.
+ */
+void memcpy_to_float_from_i16(float *dst, const int16_t *src, size_t count);
+
+/* Copy samples from signed fixed-point packed 24 bit Q0.23 to single-precision floating-point.
+ * The packed 24 bit input is stored in native endian format in a uint8_t byte array.
+ * The output float range is [-1.0, 1.0) for the fixed-point range [0x800000, 0x7fffff].
+ * No rounding is needed as the representation is exact.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must be completely separate.
+ */
+void memcpy_to_float_from_p24(float *dst, const uint8_t *src, size_t count);
+
+/* Copy samples from signed fixed-point packed 24 bit Q0.23 to signed fixed point 16 bit Q0.15.
+ * The packed 24 bit output is stored in native endian format in a uint8_t byte array.
+ * The data is truncated without rounding.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ */
+void memcpy_to_i16_from_p24(int16_t *dst, const uint8_t *src, size_t count);
+
+/* Copy samples from signed fixed point 16 bit Q0.15 to signed fixed-point packed 24 bit Q0.23.
+ * The packed 24 bit output is assumed to be a little-endian uint8_t byte array.
+ * The output data range is [0x800000, 0x7fff00] (not full).
+ * Nevertheless there is no DC offset on the output, if the input has no DC offset.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must be completely separate.
+ */
+void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count);
+
+/* Copy samples from single-precision floating-point to signed fixed-point packed 24 bit Q0.23.
+ * The packed 24 bit output is assumed to be a little-endian uint8_t byte array.
+ * The data is clamped and rounded to nearest, ties away from zero. See clamp24_from_float()
+ * for details.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ */
+void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count);
 
 /* Downmix pairs of interleaved stereo input 16-bit samples to mono output 16-bit samples.
  * Parameters:
@@ -180,8 +246,34 @@ static inline int16_t clamp16FromFloat(float f)
     return u.i; /* Return lower 16 bits, the part of interest in the significand. */
 }
 
-/*
- * Convert a signed fixed-point 32-bit Q19.12 value to single-precision floating-point.
+/* Convert a single-precision floating point value to a Q0.23 integer value, stored in a
+ * 32 bit signed integer (technically stored as Q8.23, but clamped to Q0.23).
+ *
+ * Rounds to nearest, ties away from 0.
+ *
+ * Values outside the range [-1.0, 1.0) are properly clamped to -8388608 and 8388607,
+ * including -Inf and +Inf. NaN values are considered undefined, and behavior may change
+ * depending on hardware and future implementation of this function.
+ */
+static inline int32_t clamp24_from_float(float f)
+{
+    static const float scale = (float)(1 << 23);
+    static const float limpos = 0x7fffff / scale;
+    static const float limneg = -0x800000 / scale;
+
+    if (f <= limneg) {
+        return -0x800000;
+    } else if (f >= limpos) {
+        return 0x7fffff;
+    }
+    f *= scale;
+    /* integer conversion is through truncation (though int to float is not).
+     * ensure that we round to nearest, ties away from 0.
+     */
+    return f > 0 ? f + 0.5 : f - 0.5;
+}
+
+/* Convert a signed fixed-point 32-bit Q19.12 value to single-precision floating-point.
  * The nominal output float range is [-1.0, 1.0] if the fixed-point range is
  * [0xf8000000, 0x07ffffff].  The full float range is [-16.0, 16.0].
  *
@@ -190,7 +282,6 @@ static inline int16_t clamp16FromFloat(float f)
  * precision floating point, the 0.5 lsb in the significand conversion will round
  * towards even, as per IEEE 754 default.
  */
-
 static inline float float_from_q19_12(int32_t ival)
 {
     /* The scale factor is the reciprocal of the nominal 16 bit integer
@@ -203,6 +294,62 @@ static inline float float_from_q19_12(int32_t ival)
      */
     static const float scale = 1. / (32768. * 4096.);
 
+    return ival * scale;
+}
+
+/* Convert a signed fixed-point 16-bit Q0.15 value to single-precision floating-point.
+ * The output float range is [-1.0, 1.0) for the fixed-point range
+ * [0x8000, 0x7fff].
+ *
+ * There is no rounding, the conversion and representation is exact.
+ */
+static inline float float_from_i16(int16_t ival)
+{
+    /* The scale factor is the reciprocal of the nominal 16 bit integer
+     * half-sided range (32768).
+     *
+     * Since the scale factor is a power of 2, the scaling is exact, and there
+     * is no rounding due to the multiplication - the bit pattern is preserved.
+     */
+    static const float scale = 1. / (float)(1UL << 15);
+
+    return ival * scale;
+}
+
+/* Convert a packed 24bit Q0.23 value stored little-endian in a uint8_t ptr
+ * to a signed fixed-point 32 bit integer Q0.31 value. The output Q0.31 range
+ * is [0x80000000, 0x7fffff00] for the fixed-point range [0x800000, 0x7fffff].
+ * Even though the output range is limited on the positive side, there is no
+ * DC offset on the output, if the input has no DC offset.
+ *
+ * Avoid relying on the limited output range, as future implementations may go
+ * to full range.
+ */
+static inline int32_t i32_from_p24(const uint8_t *packed24)
+{
+    /* convert to 32b */
+#ifdef HAVE_BIG_ENDIAN
+    return (packed24[2] << 8) | (packed24[1] << 16) | (packed24[0] << 24);
+#else
+#ifndef HAVE_LITTLE_ENDIAN
+    /* check to see if we really have one or the other android endian flags set. */
+#warning "Both HAVE_LITTLE_ENDIAN and HAVE_BIG_ENDIAN not defined, default to little endian"
+#endif
+    return (packed24[0] << 8) | (packed24[1] << 16) | (packed24[2] << 24);
+#endif
+}
+
+/* Convert a packed 24bit Q0.23 value stored native endian in a uint8_t ptr
+ * to single-precision floating-point. The output float range is [-1.0, 1.0)
+ * for the fixed-point range [0x800000, 0x7fffff].
+ *
+ * There is no rounding, the conversion and representation is exact.
+ */
+static inline float float_from_p24(const uint8_t *packed24)
+{
+    static const float scale = 1. / (float)(1UL << 31);
+
+    int32_t ival = i32_from_p24(packed24);
     return ival * scale;
 }
 
