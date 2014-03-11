@@ -348,8 +348,9 @@ sf_count_t sf_readf_short(SNDFILE *handle, short *ptr, sf_count_t desiredFrames)
             desiredFrames <= 0) {
         return 0;
     }
-    if (handle->remaining < (size_t) desiredFrames)
+    if (handle->remaining < (size_t) desiredFrames) {
         desiredFrames = handle->remaining;
+    }
     // does not check for numeric overflow
     size_t desiredBytes = desiredFrames * handle->bytesPerFrame;
     size_t actualBytes;
@@ -388,7 +389,42 @@ sf_count_t sf_readf_short(SNDFILE *handle, short *ptr, sf_count_t desiredFrames)
 
 sf_count_t sf_readf_float(SNDFILE *handle, float *ptr, sf_count_t desiredFrames)
 {
-    return 0;
+    if (handle == NULL || handle->mode != SFM_READ || ptr == NULL || !handle->remaining ||
+            desiredFrames <= 0) {
+        return 0;
+    }
+    if (handle->remaining < (size_t) desiredFrames) {
+        desiredFrames = handle->remaining;
+    }
+    // does not check for numeric overflow
+    size_t desiredBytes = desiredFrames * handle->bytesPerFrame;
+    size_t actualBytes;
+    unsigned format = handle->info.format & SF_FORMAT_SUBMASK;
+    actualBytes = fread(ptr, sizeof(char), desiredBytes, handle->stream);
+    size_t actualFrames = actualBytes / handle->bytesPerFrame;
+    handle->remaining -= actualFrames;
+    switch (format) {
+#if 0
+    case SF_FORMAT_PCM_U8:
+        memcpy_to_float_from_u8(ptr, (const unsigned char *) ptr,
+                actualFrames * handle->info.channels);
+        break;
+#endif
+    case SF_FORMAT_PCM_16:
+        memcpy_to_float_from_i16(ptr, (const short *) ptr, actualFrames * handle->info.channels);
+        break;
+#if 0
+    case SF_FORMAT_PCM_32:
+        memcpy_to_float_from_i32(ptr, (const int *) ptr, actualFrames * handle->info.channels);
+        break;
+#endif
+    case SF_FORMAT_FLOAT:
+        break;
+    default:
+        memset(ptr, 0, actualFrames * handle->info.channels * sizeof(float));
+        break;
+    }
+    return actualFrames;
 }
 
 sf_count_t sf_writef_short(SNDFILE *handle, const short *ptr, sf_count_t desiredFrames)
