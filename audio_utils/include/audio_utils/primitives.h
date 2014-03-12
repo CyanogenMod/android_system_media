@@ -161,6 +161,54 @@ void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count);
  */
 void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count);
 
+/* Copy samples from signed fixed point 16-bit Q0.15 to signed fixed-point 32-bit Q8.23.
+ * The output data range is [0xff800000, 0x007fff00] at intervals of 0x100.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must be completely separate.
+ */
+void memcpy_to_q8_23_from_i16(int32_t *dst, const int16_t *src, size_t count);
+
+/* Copy samples from single-precision floating-point to signed fixed-point 32-bit Q8.23.
+ * This copy will clamp the Q8.23 representation to [0xff800000, 0x007fffff] even though there
+ * are guard bits available. Fractional lsb is rounded to nearest, ties away from zero.
+ * See clamp24_from_float() for details.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ */
+void memcpy_to_q8_23_from_float_with_clamp(int32_t *dst, const float *src, size_t count);
+
+/* Copy samples from signed fixed-point 32-bit Q8.23 to signed fixed point 16-bit Q0.15.
+ * The data is clamped, and truncated without rounding.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ */
+void memcpy_to_i16_from_q8_23(int16_t *dst, const int32_t *src, size_t count);
+
+/* Copy samples from signed fixed-point 32-bit Q8.23 to single-precision floating-point.
+ * The nominal output float range is [-1.0, 1.0) for the fixed-point
+ * range [0xff800000, 0x007fffff]. The maximum output float range is [-256.0, 256.0).
+ * No rounding is needed as the representation is exact for nominal values.
+ * Rounding for overflow values is to nearest, ties to even.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ */
+void memcpy_to_float_from_q8_23(float *dst, const int32_t *src, size_t count);
+
 /* Copy samples from signed fixed point 16-bit Q0.15 to signed fixed-point 32-bit Q0.31.
  * The output data range is [0x80000000, 0x7fff0000] at intervals of 0x10000.
  * Parameters:
@@ -422,6 +470,20 @@ static inline float float_from_i32(int32_t ival)
 static inline float float_from_p24(const uint8_t *packed24)
 {
     return float_from_i32(i32_from_p24(packed24));
+}
+
+/* Convert a 24-bit Q8.23 value to single-precision floating-point.
+ * The nominal output float range is [-1.0, 1.0) for the fixed-point
+ * range [0xff800000, 0x007fffff].  The maximum float range is [-256.0, 256.0).
+ *
+ * There is no rounding in the nominal range, the conversion and representation
+ * is exact. For values outside the nominal range, rounding is to nearest, ties to even.
+ */
+static inline float float_from_q8_23(int32_t ival)
+{
+    static const float scale = 1. / (float)(1UL << 23);
+
+    return ival * scale;
 }
 
 /**
