@@ -161,6 +161,40 @@ void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count);
  */
 void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count);
 
+/* Copy samples from signed fixed point 16-bit Q0.15 to signed fixed-point 32-bit Q0.31.
+ * The output data range is [0x80000000, 0x7fff0000] at intervals of 0x10000.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must be completely separate.
+ */
+void memcpy_to_i32_from_i16(int32_t *dst, const int16_t *src, size_t count);
+
+/* Copy samples from single-precision floating-point to signed fixed-point 32-bit Q0.31.
+ * If rounding is needed on truncation, the fractional lsb is rounded to nearest,
+ * ties away from zero. See clamp32_from_float() for details.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ */
+void memcpy_to_i32_from_float(int32_t *dst, const float *src, size_t count);
+
+/* Copy samples from signed fixed-point 32-bit Q0.31 to single-precision floating-point.
+ * The float range is [-1.0, 1.0] for the fixed-point range [0x80000000, 0x7fffffff].
+ * Rounding is done according to float_from_i32().
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ */
+void memcpy_to_float_from_i32(float *dst, const int32_t *src, size_t count);
+
 /* Downmix pairs of interleaved stereo input 16-bit samples to mono output 16-bit samples.
  * Parameters:
  *  dst     Destination buffer
@@ -273,6 +307,31 @@ static inline int32_t clamp24_from_float(float f)
     return f > 0 ? f + 0.5 : f - 0.5;
 }
 
+/* Convert a single-precision floating point value to a Q0.31 integer value.
+ * Rounds to nearest, ties away from 0.
+ *
+ * Values outside the range [-1.0, 1.0) are properly clamped to -2147483648 and 2147483647,
+ * including -Inf and +Inf. NaN values are considered undefined, and behavior may change
+ * depending on hardware and future implementation of this function.
+ */
+static inline int32_t clamp32_from_float(float f)
+{
+    static const float scale = (float)(1UL << 31);
+    static const float limpos = 1.;
+    static const float limneg = -1.;
+
+    if (f <= limneg) {
+        return -0x80000000;
+    } else if (f >= limpos) {
+        return 0x7fffffff;
+    }
+    f *= scale;
+    /* integer conversion is through truncation (though int to float is not).
+     * ensure that we round to nearest, ties away from 0.
+     */
+    return f > 0 ? f + 0.5 : f - 0.5;
+}
+
 /* Convert a signed fixed-point 32-bit Q19.12 value to single-precision floating-point.
  * The nominal output float range is [-1.0, 1.0] if the fixed-point range is
  * [0xf8000000, 0x07ffffff].  The full float range is [-16.0, 16.0].
@@ -339,6 +398,21 @@ static inline int32_t i32_from_p24(const uint8_t *packed24)
 #endif
 }
 
+/* Convert a 32-bit Q0.31 value to single-precision floating-point.
+ * The output float range is [-1.0, 1.0] for the fixed-point range
+ * [0x80000000, 0x7fffffff].
+ *
+ * Rounding may occur in the least significant 8 bits for large fixed point
+ * values due to storage into the 24-bit floating-point significand.
+ * Rounding will be to nearest, ties to even.
+ */
+static inline float float_from_i32(int32_t ival)
+{
+    static const float scale = 1. / (float)(1UL << 31);
+
+    return ival * scale;
+}
+
 /* Convert a packed 24bit Q0.23 value stored native endian in a uint8_t ptr
  * to single-precision floating-point. The output float range is [-1.0, 1.0)
  * for the fixed-point range [0x800000, 0x7fffff].
@@ -347,10 +421,7 @@ static inline int32_t i32_from_p24(const uint8_t *packed24)
  */
 static inline float float_from_p24(const uint8_t *packed24)
 {
-    static const float scale = 1. / (float)(1UL << 31);
-
-    int32_t ival = i32_from_p24(packed24);
-    return ival * scale;
+    return float_from_i32(i32_from_p24(packed24));
 }
 
 /**

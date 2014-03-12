@@ -127,6 +127,27 @@ void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count)
     }
 }
 
+void memcpy_to_i32_from_i16(int32_t *dst, const int16_t *src, size_t count)
+{
+    while (count--) {
+        *dst++ = (int32_t)*src++ << 16;
+    }
+}
+
+void memcpy_to_i32_from_float(int32_t *dst, const float *src, size_t count)
+{
+    while (count--) {
+        *dst++ = clamp32_from_float(*src++);
+    }
+}
+
+void memcpy_to_float_from_i32(float *dst, const int32_t *src, size_t count)
+{
+    while (count--) {
+        *dst++ = float_from_i32(*src++);
+    }
+}
+
 void downmix_to_mono_i16_from_stereo_i16(int16_t *dst, const int16_t *src, size_t count)
 {
     while (count--) {
