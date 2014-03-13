@@ -20,5 +20,9 @@ LOCAL_CFLAGS += \
 	-fvisibility=hidden \
 	-std=c99
 
+ifneq ($(filter userdebug eng,$(TARGET_BUILD_VARIANT)),)
+    # Enable assert()
+    LOCAL_CFLAGS += -UNDEBUG -DLOG_NDEBUG=1
+endif
 
 include $(BUILD_SHARED_LIBRARY)
