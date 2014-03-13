@@ -24,6 +24,7 @@
 #include <algorithm>
 #include "gtest/gtest.h"
 #include "system/camera_metadata.h"
+#include "camera_metadata_hidden.h"
 
 #include "camera_metadata_tests_fake_vendor.h"
 
@@ -812,7 +813,7 @@ TEST(camera_metadata, vendor_tags) {
     EXPECT_NULL(get_camera_metadata_tag_name(FAKEVENDOR_SENSOR_SUPERMODE));
     EXPECT_EQ(-1, get_camera_metadata_tag_type(FAKEVENDOR_SENSOR_SUPERMODE));
 
-    set_camera_metadata_vendor_tag_ops(&fakevendor_query_ops);
+    set_camera_metadata_vendor_ops(&fakevendor_ops);
 
     result = add_camera_metadata_entry(m,
             FAKEVENDOR_SENSOR_SUPERMODE,
@@ -844,7 +845,7 @@ TEST(camera_metadata, vendor_tags) {
     EXPECT_NULL(get_camera_metadata_tag_name(FAKEVENDOR_SCALER_END));
     EXPECT_EQ(-1, get_camera_metadata_tag_type(FAKEVENDOR_SCALER_END));
 
-    set_camera_metadata_vendor_tag_ops(NULL);
+    set_camera_metadata_vendor_ops(NULL);
     // TODO: fix vendor ops. Then the below 3 validations should fail.
     EXPECT_EQ(OK, validate_camera_metadata_structure(m, NULL));
 

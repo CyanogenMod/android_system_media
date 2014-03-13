@@ -21,6 +21,9 @@
 #ifndef TESTING_CAMERA_METADATA_FAKEVENDOR_H
 #define TESTING_CAMERA_METADATA_FAKEVENDOR_H
 
+#include <system/camera_metadata.h>
+#include <system/camera_vendor_tags.h>
+
 enum vendor_extension_section {
     FAKEVENDOR_SENSOR = VENDOR_SECTION,
     FAKEVENDOR_SENSOR_INFO,
@@ -104,26 +107,26 @@ vendor_tag_info_t *fakevendor_tag_info[FAKEVENDOR_SECTION_COUNT] = {
     fakevendor_scaler
 };
 
-const char *get_fakevendor_section_name(const vendor_tag_query_ops_t *v,
+const char *get_fakevendor_section_name(const vendor_tag_ops_t *v,
         uint32_t tag);
-const char *get_fakevendor_tag_name(const vendor_tag_query_ops_t *v,
+const char *get_fakevendor_tag_name(const vendor_tag_ops_t *v,
         uint32_t tag);
-int get_fakevendor_tag_type(const vendor_tag_query_ops_t *v,
+int get_fakevendor_tag_type(const vendor_tag_ops_t *v,
         uint32_t tag);
-int get_fakevendor_tag_count(const vendor_tag_query_ops_t *v);
-void get_fakevendor_tags(const vendor_tag_query_ops_t *v, uint32_t *tag_array);
+int get_fakevendor_tag_count(const vendor_tag_ops_t *v);
+void get_fakevendor_tags(const vendor_tag_ops_t *v, uint32_t *tag_array);
 
-static const vendor_tag_query_ops_t fakevendor_query_ops = {
+static const vendor_tag_ops_t fakevendor_ops = {
+    get_fakevendor_tag_count,
+    get_fakevendor_tags,
     get_fakevendor_section_name,
     get_fakevendor_tag_name,
-    get_fakevendor_tag_type,
-    get_fakevendor_tag_count,
-    get_fakevendor_tags
+    get_fakevendor_tag_type
 };
 
-const char *get_fakevendor_section_name(const vendor_tag_query_ops_t *v,
+const char *get_fakevendor_section_name(const vendor_tag_ops_t *v,
         uint32_t tag) {
-    if (v != &fakevendor_query_ops) return NULL;
+    if (v != &fakevendor_ops) return NULL;
     int tag_section = (tag >> 16) - VENDOR_SECTION;
     if (tag_section < 0 ||
             tag_section >= FAKEVENDOR_SECTION_COUNT) return NULL;
@@ -131,9 +134,9 @@ const char *get_fakevendor_section_name(const vendor_tag_query_ops_t *v,
     return fakevendor_section_names[tag_section];
 }
 
-const char *get_fakevendor_tag_name(const vendor_tag_query_ops_t *v,
+const char *get_fakevendor_tag_name(const vendor_tag_ops_t *v,
         uint32_t tag) {
-    if (v != &fakevendor_query_ops) return NULL;
+    if (v != &fakevendor_ops) return NULL;
     int tag_section = (tag >> 16) - VENDOR_SECTION;
     if (tag_section < 0
             || tag_section >= FAKEVENDOR_SECTION_COUNT
@@ -142,9 +145,9 @@ const char *get_fakevendor_tag_name(const vendor_tag_query_ops_t *v,
     return fakevendor_tag_info[tag_section][tag_index].tag_name;
 }
 
-int get_fakevendor_tag_type(const vendor_tag_query_ops_t *v,
+int get_fakevendor_tag_type(const vendor_tag_ops_t *v,
         uint32_t tag) {
-    if (v != &fakevendor_query_ops) return -1;
+    if (v != &fakevendor_ops) return -1;
     int tag_section = (tag >> 16) - VENDOR_SECTION;
     if (tag_section < 0
             || tag_section >= FAKEVENDOR_SECTION_COUNT
@@ -153,12 +156,12 @@ int get_fakevendor_tag_type(const vendor_tag_query_ops_t *v,
     return fakevendor_tag_info[tag_section][tag_index].tag_type;
 }
 
-int get_fakevendor_tag_count(const vendor_tag_query_ops_t *v) {
+int get_fakevendor_tag_count(const vendor_tag_ops_t *v) {
     int section;
     unsigned int start, end;
     int count = 0;
 
-    if (v != &fakevendor_query_ops) return -1;
+    if (v != &fakevendor_ops) return -1;
     for (section = 0; section < FAKEVENDOR_SECTION_COUNT; section++) {
         start = fakevendor_section_bounds[section][0];
         end = fakevendor_section_bounds[section][1];
@@ -167,11 +170,11 @@ int get_fakevendor_tag_count(const vendor_tag_query_ops_t *v) {
     return count;
 }
 
-void get_fakevendor_tags(const vendor_tag_query_ops_t *v, uint32_t *tag_array) {
+void get_fakevendor_tags(const vendor_tag_ops_t *v, uint32_t *tag_array) {
     int section;
     unsigned int start, end, tag;
 
-    if (v != &fakevendor_query_ops || tag_array == NULL) return;
+    if (v != &fakevendor_ops || tag_array == NULL) return;
     for (section = 0; section < FAKEVENDOR_SECTION_COUNT; section++) {
         start = fakevendor_section_bounds[section][0];
         end = fakevendor_section_bounds[section][1];

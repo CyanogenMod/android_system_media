@@ -15,6 +15,7 @@
  */
 #define _GNU_SOURCE // for fdprintf
 #include <system/camera_metadata.h>
+#include <camera_metadata_hidden.h>
 
 #define LOG_TAG "camera_metadata"
 #include <cutils/log.h>
@@ -793,12 +794,12 @@ int get_camera_metadata_user_pointer(camera_metadata_t *dst, void** user) {
     return OK;
 }
 
-static const vendor_tag_query_ops_t *vendor_tag_ops = NULL;
+static const vendor_tag_ops_t *vendor_tag_ops = NULL;
 
 const char *get_camera_metadata_section_name(uint32_t tag) {
     uint32_t tag_section = tag >> 16;
     if (tag_section >= VENDOR_SECTION && vendor_tag_ops != NULL) {
-        return vendor_tag_ops->get_camera_vendor_section_name(
+        return vendor_tag_ops->get_section_name(
             vendor_tag_ops,
             tag);
     }
@@ -811,7 +812,7 @@ const char *get_camera_metadata_section_name(uint32_t tag) {
 const char *get_camera_metadata_tag_name(uint32_t tag) {
     uint32_t tag_section = tag >> 16;
     if (tag_section >= VENDOR_SECTION && vendor_tag_ops != NULL) {
-        return vendor_tag_ops->get_camera_vendor_tag_name(
+        return vendor_tag_ops->get_tag_name(
             vendor_tag_ops,
             tag);
     }
@@ -826,7 +827,7 @@ const char *get_camera_metadata_tag_name(uint32_t tag) {
 int get_camera_metadata_tag_type(uint32_t tag) {
     uint32_t tag_section = tag >> 16;
     if (tag_section >= VENDOR_SECTION && vendor_tag_ops != NULL) {
-        return vendor_tag_ops->get_camera_vendor_tag_type(
+        return vendor_tag_ops->get_tag_type(
             vendor_tag_ops,
             tag);
     }
@@ -838,8 +839,15 @@ int get_camera_metadata_tag_type(uint32_t tag) {
     return tag_info[tag_section][tag_index].tag_type;
 }
 
-int set_camera_metadata_vendor_tag_ops(const vendor_tag_query_ops_t *query_ops) {
-    vendor_tag_ops = query_ops;
+int set_camera_metadata_vendor_tag_ops(const vendor_tag_query_ops_t* ops) {
+    // **DEPRECATED**
+    ALOGE("%s: This function has been deprecated", __FUNCTION__);
+    return ERROR;
+}
+
+// Declared in system/media/private/camera/include/camera_metadata_hidden.h
+int set_camera_metadata_vendor_ops(const vendor_tag_ops_t* ops) {
+    vendor_tag_ops = ops;
     return OK;
 }
 

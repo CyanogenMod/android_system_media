@@ -6,7 +6,8 @@ LOCAL_SRC_FILES := \
 	camera_metadata.c
 
 LOCAL_C_INCLUDES:= \
-	system/media/camera/include
+	system/media/camera/include \
+	system/media/private/camera/include
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
