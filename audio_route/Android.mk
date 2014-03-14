@@ -9,4 +9,5 @@ LOCAL_MODULE := libaudioroute
 LOCAL_SHARED_LIBRARIES:= liblog libcutils libutils libexpat libtinyalsa
 LOCAL_MODULE_TAGS := optional
 LOCAL_PRELINK_MODULE := false
+LOCAL_32_BIT_ONLY := true
 include $(BUILD_SHARED_LIBRARY)
