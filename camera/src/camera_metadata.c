@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #define _GNU_SOURCE // for fdprintf
+#include <inttypes.h>
 #include <system/camera_metadata.h>
 #include <camera_metadata_hidden.h>
 
@@ -356,13 +357,13 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
      */
 
     if (expected_size != NULL && metadata->size > *expected_size) {
-        ALOGE("%s: Metadata size (%u) should be <= expected size (%u)",
+        ALOGE("%s: Metadata size (%zu) should be <= expected size (%zu)",
               __FUNCTION__, metadata->size, *expected_size);
         return ERROR;
     }
 
     if (metadata->entry_count > metadata->entry_capacity) {
-        ALOGE("%s: Entry count (%u) should be <= entry capacity (%u)",
+        ALOGE("%s: Entry count (%zu) should be <= entry capacity (%zu)",
               __FUNCTION__, metadata->entry_count, metadata->entry_capacity);
         return ERROR;
     }
@@ -371,7 +372,7 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
     if (entries_end < metadata->entries_start || // overflow check
         entries_end > metadata->data_start) {
 
-        ALOGE("%s: Entry start + capacity (%u) should be <= data start (%u)",
+        ALOGE("%s: Entry start + capacity (%zu) should be <= data start (%zu)",
                __FUNCTION__,
               (metadata->entries_start + metadata->entry_capacity),
               metadata->data_start);
@@ -382,7 +383,7 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
     if (data_end < metadata->data_start || // overflow check
         data_end > metadata->size) {
 
-        ALOGE("%s: Data start + capacity (%u) should be <= total size (%u)",
+        ALOGE("%s: Data start + capacity (%zu) should be <= total size (%zu)",
                __FUNCTION__,
               (metadata->data_start + metadata->data_capacity),
               metadata->size);
@@ -396,8 +397,8 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
     for (size_t i = 0; i < entry_count; ++i) {
 
         if ((uintptr_t)&entries[i] != ALIGN_TO(&entries[i], ENTRY_ALIGNMENT)) {
-            ALOGE("%s: Entry index %u had bad alignment (address %p),"
-                  " expected alignment %d",
+            ALOGE("%s: Entry index %zu had bad alignment (address %p),"
+                  " expected alignment %zu",
                   __FUNCTION__, i, &entries[i], ENTRY_ALIGNMENT);
             return ERROR;
         }
@@ -405,7 +406,7 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
         camera_metadata_buffer_entry_t entry = entries[i];
 
         if (entry.type >= NUM_TYPES) {
-            ALOGE("%s: Entry index %u had a bad type %d",
+            ALOGE("%s: Entry index %zu had a bad type %d",
                   __FUNCTION__, i, entry.type);
             return ERROR;
         }
@@ -415,7 +416,7 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
         uint32_t tag_section = entry.tag >> 16;
         int tag_type = get_camera_metadata_tag_type(entry.tag);
         if (tag_type != (int)entry.type && tag_section < VENDOR_SECTION) {
-            ALOGE("%s: Entry index %u had tag type %d, but the type was %d",
+            ALOGE("%s: Entry index %zu had tag type %d, but the type was %d",
                   __FUNCTION__, i, tag_type, entry.type);
             return ERROR;
         }
@@ -430,8 +431,8 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
                                                entry.data.offset);
 
             if ((uintptr_t)data != ALIGN_TO(data, DATA_ALIGNMENT)) {
-                ALOGE("%s: Entry index %u had bad data alignment (address %p),"
-                      " expected align %d, (tag name %s, data size %u)",
+                ALOGE("%s: Entry index %zu had bad data alignment (address %p),"
+                      " expected align %zu, (tag name %s, data size %zu)",
                       __FUNCTION__, i, data, DATA_ALIGNMENT,
                       get_camera_metadata_tag_name(entry.tag) ?: "unknown",
                       data_size);
@@ -442,16 +443,16 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
             if (data_entry_end < entry.data.offset || // overflow check
                 data_entry_end > metadata->data_capacity) {
 
-                ALOGE("%s: Entry index %u data ends (%u) beyond the capacity "
-                      "%u", __FUNCTION__, i, data_entry_end,
+                ALOGE("%s: Entry index %zu data ends (%zu) beyond the capacity "
+                      "%zu", __FUNCTION__, i, data_entry_end,
                       metadata->data_capacity);
                 return ERROR;
             }
 
         } else if (entry.count == 0) {
             if (entry.data.offset != 0) {
-                ALOGE("%s: Entry index %u had 0 items, but offset was non-0 "
-                     "(%u), tag name: %s", __FUNCTION__, i, entry.data.offset,
+                ALOGE("%s: Entry index %zu had 0 items, but offset was non-0 "
+                     "(%zu), tag name: %s", __FUNCTION__, i, entry.data.offset,
                         get_camera_metadata_tag_name(entry.tag) ?: "unknown");
                 return ERROR;
             }
@@ -872,8 +873,8 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
     }
     unsigned int i;
     fdprintf(fd,
-            "%*sDumping camera metadata array: %d / %d entries, "
-            "%d / %d bytes of extra data.\n", indentation, "",
+            "%*sDumping camera metadata array: %zu / %zu entries, "
+            "%zu / %zu bytes of extra data.\n", indentation, "",
             metadata->entry_count, metadata->entry_capacity,
             metadata->data_count, metadata->data_capacity);
     fdprintf(fd, "%*sVersion: %d, Flags: %08x\n",
@@ -897,7 +898,7 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
         } else {
             type_name = camera_metadata_type_names[entry->type];
         }
-        fdprintf(fd, "%*s%s.%s (%05x): %s[%d]\n",
+        fdprintf(fd, "%*s%s.%s (%05x): %s[%zu]\n",
              indentation + 2, "",
              tag_section,
              tag_name,
@@ -913,7 +914,7 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
         uint8_t *data_ptr;
         if ( type_size * entry->count > 4 ) {
             if (entry->data.offset >= metadata->data_count) {
-                ALOGE("%s: Malformed entry data offset: %d (max %d)",
+                ALOGE("%s: Malformed entry data offset: %zu (max %zu)",
                         __FUNCTION__,
                         entry->data.offset,
                         metadata->data_count);
@@ -979,7 +980,7 @@ static void print_data(int fd, const uint8_t *data_ptr, uint32_t tag,
                         == OK) {
                         fdprintf(fd, "%s ", value_string_tmp);
                     } else {
-                        fdprintf(fd, "%d ",
+                        fdprintf(fd, "%" PRId32 " ",
                                 *(int32_t*)(data_ptr + index));
                     }
                     break;
@@ -988,7 +989,7 @@ static void print_data(int fd, const uint8_t *data_ptr, uint32_t tag,
                             *(float*)(data_ptr + index));
                     break;
                 case TYPE_INT64:
-                    fdprintf(fd, "%lld ",
+                    fdprintf(fd, "%" PRId64 " ",
                             *(int64_t*)(data_ptr + index));
                     break;
                 case TYPE_DOUBLE:
