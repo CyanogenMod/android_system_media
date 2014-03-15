@@ -173,7 +173,7 @@ typedef enum camera_metadata_tag {
 
     ANDROID_HOT_PIXEL_MODE =                          // enum         | public
             ANDROID_HOT_PIXEL_START,
-    ANDROID_HOT_PIXEL_MAP,                            // int32[]      | public
+    ANDROID_HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES,      // byte[]       | public
     ANDROID_HOT_PIXEL_END,
 
     ANDROID_JPEG_GPS_COORDINATES =                    // double[]     | public
@@ -305,6 +305,7 @@ typedef enum camera_metadata_tag {
             ANDROID_STATISTICS_START,
     ANDROID_STATISTICS_HISTOGRAM_MODE,                // enum         | system
     ANDROID_STATISTICS_SHARPNESS_MAP_MODE,            // enum         | system
+    ANDROID_STATISTICS_HOT_PIXEL_MAP_MODE,            // enum         | public
     ANDROID_STATISTICS_FACE_IDS,                      // int32[]      | hidden
     ANDROID_STATISTICS_FACE_LANDMARKS,                // int32[]      | hidden
     ANDROID_STATISTICS_FACE_RECTANGLES,               // int32[]      | hidden
@@ -315,6 +316,7 @@ typedef enum camera_metadata_tag {
     ANDROID_STATISTICS_PREDICTED_COLOR_GAINS,         // float[]      | hidden
     ANDROID_STATISTICS_PREDICTED_COLOR_TRANSFORM,     // rational[]   | hidden
     ANDROID_STATISTICS_SCENE_FLICKER,                 // enum         | public
+    ANDROID_STATISTICS_HOT_PIXEL_MAP,                 // int32[]      | public
     ANDROID_STATISTICS_LENS_SHADING_MAP_MODE,         // enum         | public
     ANDROID_STATISTICS_END,
 
@@ -326,6 +328,8 @@ typedef enum camera_metadata_tag {
     ANDROID_STATISTICS_INFO_MAX_HISTOGRAM_COUNT,      // int32        | system
     ANDROID_STATISTICS_INFO_MAX_SHARPNESS_MAP_VALUE,  // int32        | system
     ANDROID_STATISTICS_INFO_SHARPNESS_MAP_SIZE,       // int32[]      | system
+    ANDROID_STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES,
+                                                      // byte[]       | public
     ANDROID_STATISTICS_INFO_END,
 
     ANDROID_TONEMAP_CURVE_BLUE =                      // float[]      | public
@@ -721,6 +725,12 @@ typedef enum camera_metadata_enum_android_statistics_sharpness_map_mode {
     ANDROID_STATISTICS_SHARPNESS_MAP_MODE_OFF,
     ANDROID_STATISTICS_SHARPNESS_MAP_MODE_ON,
 } camera_metadata_enum_android_statistics_sharpness_map_mode_t;
+
+// ANDROID_STATISTICS_HOT_PIXEL_MAP_MODE
+typedef enum camera_metadata_enum_android_statistics_hot_pixel_map_mode {
+    ANDROID_STATISTICS_HOT_PIXEL_MAP_MODE_OFF,
+    ANDROID_STATISTICS_HOT_PIXEL_MAP_MODE_ON,
+} camera_metadata_enum_android_statistics_hot_pixel_map_mode_t;
 
 // ANDROID_STATISTICS_SCENE_FLICKER
 typedef enum camera_metadata_enum_android_statistics_scene_flicker {

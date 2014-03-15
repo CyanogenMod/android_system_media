@@ -237,8 +237,8 @@ static tag_info_t android_hot_pixel[ANDROID_HOT_PIXEL_END -
         ANDROID_HOT_PIXEL_START] = {
     [ ANDROID_HOT_PIXEL_MODE - ANDROID_HOT_PIXEL_START ] =
     { "mode",                          TYPE_BYTE   },
-    [ ANDROID_HOT_PIXEL_MAP - ANDROID_HOT_PIXEL_START ] =
-    { "map",                           TYPE_INT32  },
+    [ ANDROID_HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES - ANDROID_HOT_PIXEL_START ] =
+    { "availableHotPixelModes",        TYPE_BYTE   },
 };
 
 static tag_info_t android_jpeg[ANDROID_JPEG_END -
@@ -486,6 +486,8 @@ static tag_info_t android_statistics[ANDROID_STATISTICS_END -
     { "histogramMode",                 TYPE_BYTE   },
     [ ANDROID_STATISTICS_SHARPNESS_MAP_MODE - ANDROID_STATISTICS_START ] =
     { "sharpnessMapMode",              TYPE_BYTE   },
+    [ ANDROID_STATISTICS_HOT_PIXEL_MAP_MODE - ANDROID_STATISTICS_START ] =
+    { "hotPixelMapMode",               TYPE_BYTE   },
     [ ANDROID_STATISTICS_FACE_IDS - ANDROID_STATISTICS_START ] =
     { "faceIds",                       TYPE_INT32  },
     [ ANDROID_STATISTICS_FACE_LANDMARKS - ANDROID_STATISTICS_START ] =
@@ -507,6 +509,8 @@ static tag_info_t android_statistics[ANDROID_STATISTICS_END -
                 },
     [ ANDROID_STATISTICS_SCENE_FLICKER - ANDROID_STATISTICS_START ] =
     { "sceneFlicker",                  TYPE_BYTE   },
+    [ ANDROID_STATISTICS_HOT_PIXEL_MAP - ANDROID_STATISTICS_START ] =
+    { "hotPixelMap",                   TYPE_INT32  },
     [ ANDROID_STATISTICS_LENS_SHADING_MAP_MODE - ANDROID_STATISTICS_START ] =
     { "lensShadingMapMode",            TYPE_BYTE   },
 };
@@ -525,6 +529,8 @@ static tag_info_t android_statistics_info[ANDROID_STATISTICS_INFO_END -
     { "maxSharpnessMapValue",          TYPE_INT32  },
     [ ANDROID_STATISTICS_INFO_SHARPNESS_MAP_SIZE - ANDROID_STATISTICS_INFO_START ] =
     { "sharpnessMapSize",              TYPE_INT32  },
+    [ ANDROID_STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES - ANDROID_STATISTICS_INFO_START ] =
+    { "availableHotPixelMapModes",     TYPE_BYTE   },
 };
 
 static tag_info_t android_tonemap[ANDROID_TONEMAP_END -
@@ -1285,7 +1291,7 @@ int camera_metadata_enum_snprint(uint32_t tag,
             }
             break;
         }
-        case ANDROID_HOT_PIXEL_MAP: {
+        case ANDROID_HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES: {
             break;
         }
 
@@ -1957,6 +1963,21 @@ int camera_metadata_enum_snprint(uint32_t tag,
             }
             break;
         }
+        case ANDROID_STATISTICS_HOT_PIXEL_MAP_MODE: {
+            switch (value) {
+                case ANDROID_STATISTICS_HOT_PIXEL_MAP_MODE_OFF:
+                    msg = "OFF";
+                    ret = 0;
+                    break;
+                case ANDROID_STATISTICS_HOT_PIXEL_MAP_MODE_ON:
+                    msg = "ON";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
         case ANDROID_STATISTICS_FACE_IDS: {
             break;
         }
@@ -2003,6 +2024,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             }
             break;
         }
+        case ANDROID_STATISTICS_HOT_PIXEL_MAP: {
+            break;
+        }
         case ANDROID_STATISTICS_LENS_SHADING_MAP_MODE: {
             switch (value) {
                 case ANDROID_STATISTICS_LENS_SHADING_MAP_MODE_OFF:
@@ -2035,6 +2059,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_STATISTICS_INFO_SHARPNESS_MAP_SIZE: {
+            break;
+        }
+        case ANDROID_STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES: {
             break;
         }
 

@@ -1109,7 +1109,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             flash units support ON_AUTO_FLASH and
             ON_ALWAYS_FLASH.
 
-            Full-capability camera devices always support OFF mode,
+            FULL mode camera devices always support OFF mode,
             which enables application control of camera exposure time,
             sensitivity, and frame duration.
           </details>
@@ -1238,7 +1238,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           All camera devices will support ON mode.
 
-          Full-capability camera devices will always support OFF mode,
+          FULL mode camera devices will always support OFF mode,
           which enables application control of white balance, by using
           android.colorCorrection.transform and android.colorCorrection.gains
           (android.colorCorrection.mode must be set to TRANSFORM_MATRIX).
@@ -1828,6 +1828,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               for this option.
 
               No hot pixel correction is applied.
+              The hotpixel map may be returned in android.statistics.hotPixelMap.
               </notes>
             </value>
             <value>FAST
@@ -1836,6 +1837,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               for this option.
 
               Hot pixel correction is applied.
+              The hotpixel map may be returned in android.statistics.hotPixelMap.
               </notes>
             </value>
             <value>HIGH_QUALITY
@@ -1844,54 +1846,50 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               for this option.
 
               A high-quality hot pixel correction is applied.
+              The hotpixel map may be returned in android.statistics.hotPixelMap.
               </notes>
             </value>
           </enum>
           <description>
           Set operational mode for hot pixel correction.
+          </description>
+          <details>
+          Valid modes for this camera device are listed in
+          android.hotPixel.availableHotPixelModes.
 
           Hotpixel correction interpolates out, or otherwise removes, pixels
           that do not accurately encode the incoming light (i.e. pixels that
           are stuck at an arbitrary value).
-          </description>
+          </details>
           <tag id="V1" />
           <tag id="DNG" />
         </entry>
       </controls>
-      <dynamic>
-        <entry name="map" type="int32" visibility="public"
-        type_notes="list of coordinates based on android.sensor.pixelArraySize"
-        container="array">
+      <static>
+        <entry name="availableHotPixelModes" type="byte" visibility="public"
+          type_notes="list of enums" container="array">
           <array>
-            <size>2</size>
             <size>n</size>
           </array>
           <description>
-          List of `(x, y)` coordinates of hot/defective pixels on the
-          sensor, where `(x, y)` lies between `(0, 0)`, which is the top-left
-          of the pixel array, and the width,height of the pixel array given in
-          android.sensor.info.pixelArraySize.  This may include hot pixels
-          that lie outside of the active array bounds given by
-          android.sensor.info.activeArraySize.
+          The set of hot pixel correction modes that are supported by this
+          camera device.
           </description>
-          <range>
-          n &lt;= number of pixels on the sensor.
-          The `(x, y)` coordinates must be bounded by
-          android.sensor.info.pixelArraySize.
-          </range>
-          <hal_details>
-          A hotpixel map contains the coordinates of pixels on the camera
-          sensor that do report valid values (usually due to defects in
-          the camera sensor). This includes pixels that are stuck at certain
-          values, or have a response that does not accuractly encode the
-          incoming light from the scene.
+          <details>
+          This tag lists valid modes for android.hotPixel.mode.
 
-          To avoid performance issues, there should be significantly fewer hot
+          FULL mode camera devices will always support FAST.
+          </details>
+          <hal_details>
+          To avoid performance issues, there will be significantly fewer hot
           pixels than actual pixels on the camera sensor.
           </hal_details>
           <tag id="ADV" />
+          <tag id="V1" />
           <tag id="DNG" />
         </entry>
+      </static>
+      <dynamic>
         <clone entry="android.hotPixel.mode" kind="controls">
           <tag id="V1" />
           <tag id="DNG" />
@@ -4432,6 +4430,24 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           generation</description>
           <tag id="V1" />
         </entry>
+        <entry name="hotPixelMapMode" type="byte" visibility="public" enum="true"
+        typedef="boolean">
+          <enum>
+            <value>OFF</value>
+            <value>ON</value>
+          </enum>
+          <description>
+          Operating mode for hotpixel map generation.
+          </description>
+          <details>
+          If set to ON, a hotpixel map is returned in android.statistics.hotPixelMap.
+          If set to OFF, no hotpixel map should be returned.
+
+          This must be set to a valid mode from android.statistics.info.availableHotPixelMapModes.
+          </details>
+          <tag id="V1" />
+          <tag id="DNG" />
+        </entry>
       </controls>
       <static>
         <namespace name="info">
@@ -4487,6 +4503,24 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>Dimensions of the sharpness
             map</description>
             <range>Must be at least 32 x 32</range>
+          </entry>
+          <entry name="availableHotPixelMapModes" type="byte" visibility="public"
+          type_notes="list of enums" container="array" typedef="boolean">
+            <array>
+              <size>n</size>
+            </array>
+            <description>
+            The set of hot pixel map output modes supported by this camera device.
+            </description>
+            <details>
+            This tag lists valid output modes for android.statistics.hotPixelMapMode.
+
+            If no hotpixel map is available for this camera device, this will contain
+            only OFF.  If the hotpixel map is available, this should include both
+            the ON and OFF options.
+            </details>
+            <tag id="V1" />
+            <tag id="DNG" />
           </entry>
         </namespace>
       </static>
@@ -4708,6 +4742,44 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           Report NONE if there doesn't appear to be flickering illumination.
           </details>
+        </entry>
+        <clone entry="android.statistics.hotPixelMapMode" kind="controls">
+        </clone>
+        <entry name="hotPixelMap" type="int32" visibility="public"
+        type_notes="list of coordinates based on android.sensor.pixelArraySize"
+        container="array">
+          <array>
+            <size>2</size>
+            <size>n</size>
+          </array>
+          <description>
+          List of `(x, y)` coordinates of hot/defective pixels on the sensor.
+          </description>
+          <range>
+          n &lt;= number of pixels on the sensor.
+          The `(x, y)` coordinates must be bounded by
+          android.sensor.info.pixelArraySize.
+          </range>
+          <details>
+          A coordinate `(x, y)` must lie between `(0, 0)`, and
+          `(width - 1, height - 1)` (inclusive), which are the top-left and
+          bottom-right of the pixel array, respectively. The width and
+          height dimensions are given in android.sensor.info.pixelArraySize.
+          This may include hot pixels that lie outside of the active array
+          bounds given by android.sensor.info.activeArraySize.
+          </details>
+          <hal_details>
+          A hotpixel map contains the coordinates of pixels on the camera
+          sensor that do report valid values (usually due to defects in
+          the camera sensor). This includes pixels that are stuck at certain
+          values, or have a response that does not accuractly encode the
+          incoming light from the scene.
+
+          To avoid performance issues, there should be significantly fewer hot
+          pixels than actual pixels on the camera sensor.
+          </hal_details>
+          <tag id="V1" />
+          <tag id="DNG" />
         </entry>
       </dynamic>
       <controls>
