@@ -31,16 +31,25 @@ __BEGIN_DECLS
  *  src_format Source buffer format
  *  count      Number of samples to copy
  *
- * Permitted format types for dst_format and src_format are as follows:
+ * Allowed format conversions are given by either case 1 or 2 below:
+ *
+ * 1) One of src_format or dst_format is AUDIO_FORMAT_PCM_16_BIT or
+ * AUDIO_FORMAT_PCM_FLOAT, and the other format type is one of:
+ *
  * AUDIO_FORMAT_PCM_16_BIT
- * AUDIO_FORMAT_PCM_24_BIT_PACKED
  * AUDIO_FORMAT_PCM_FLOAT
+ * AUDIO_FORMAT_PCM_24_BIT_PACKED
+ * AUDIO_FORMAT_PCM_32_BIT
+ * AUDIO_FORMAT_PCM_8_24_BIT
+ *
+ * 2) Both dst_format and src_format are identical and of the list given
+ * in (1). This is a straight copy.
  *
  * The destination and source buffers must be completely separate if the destination
  * format size is larger than the source format size. These routines call functions
  * in primitives.h, so descriptions of detailed behavior can be reviewed there.
  *
- * Logs a fatal error if dst or src format is not one of the permitted types.
+ * Logs a fatal error if dst or src format is not allowed by the conversion rules above.
  */
 void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
         void *src, audio_format_t src_format, size_t count);

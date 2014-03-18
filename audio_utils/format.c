@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-//#define LOG_NDEBUG 0
+/* #define LOG_NDEBUG 0 */
 #define LOG_TAG "audio_utils_format"
 
 #include <cutils/log.h>
@@ -22,13 +22,21 @@
 #include <audio_utils/format.h>
 
 void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
-        void *src, audio_format_t src_format, size_t count) {
-    if (dst_format == src_format
-            && (dst_format == AUDIO_FORMAT_PCM_16_BIT
-                    || dst_format == AUDIO_FORMAT_PCM_FLOAT
-                    || dst_format == AUDIO_FORMAT_PCM_24_BIT_PACKED)) {
-        memcpy(dst, src, count * audio_bytes_per_sample(dst_format));
-        return;
+        void *src, audio_format_t src_format, size_t count)
+{
+    /* default cases for error falls through to fatal log below. */
+    if (dst_format == src_format) {
+        switch (dst_format) {
+        case AUDIO_FORMAT_PCM_16_BIT:
+        case AUDIO_FORMAT_PCM_FLOAT:
+        case AUDIO_FORMAT_PCM_24_BIT_PACKED:
+        case AUDIO_FORMAT_PCM_32_BIT:
+        case AUDIO_FORMAT_PCM_8_24_BIT:
+            memcpy(dst, src, count * audio_bytes_per_sample(dst_format));
+            return;
+        default:
+            break;
+        }
     }
     switch (dst_format) {
     case AUDIO_FORMAT_PCM_16_BIT:
@@ -38,6 +46,12 @@ void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
             return;
         case AUDIO_FORMAT_PCM_24_BIT_PACKED:
             memcpy_to_i16_from_p24((int16_t*)dst, (uint8_t*)src, count);
+            return;
+        case AUDIO_FORMAT_PCM_32_BIT:
+            memcpy_to_i16_from_i32((int16_t*)dst, (int32_t*)src, count);
+            return;
+        case AUDIO_FORMAT_PCM_8_24_BIT:
+            memcpy_to_i16_from_q8_23((int16_t*)dst, (int32_t*)src, count);
             return;
         default:
             break;
@@ -51,6 +65,12 @@ void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
         case AUDIO_FORMAT_PCM_24_BIT_PACKED:
             memcpy_to_float_from_p24((float*)dst, (uint8_t*)src, count);
             return;
+        case AUDIO_FORMAT_PCM_32_BIT:
+            memcpy_to_float_from_i32((float*)dst, (int32_t*)src, count);
+            return;
+        case AUDIO_FORMAT_PCM_8_24_BIT:
+            memcpy_to_float_from_q8_23((float*)dst, (int32_t*)src, count);
+            return;
         default:
             break;
         }
@@ -62,6 +82,30 @@ void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
             return;
         case AUDIO_FORMAT_PCM_FLOAT:
             memcpy_to_p24_from_float((uint8_t*)dst, (float*)src, count);
+            return;
+        default:
+            break;
+        }
+        break;
+    case AUDIO_FORMAT_PCM_32_BIT:
+        switch (src_format) {
+        case AUDIO_FORMAT_PCM_16_BIT:
+            memcpy_to_i32_from_i16((int32_t*)dst, (int16_t*)src, count);
+            return;
+        case AUDIO_FORMAT_PCM_FLOAT:
+            memcpy_to_i32_from_float((int32_t*)dst, (float*)src, count);
+            return;
+        default:
+            break;
+        }
+        break;
+    case AUDIO_FORMAT_PCM_8_24_BIT:
+        switch (src_format) {
+        case AUDIO_FORMAT_PCM_16_BIT:
+            memcpy_to_q8_23_from_i16((int32_t*)dst, (int16_t*)src, count);
+            return;
+        case AUDIO_FORMAT_PCM_FLOAT:
+            memcpy_to_q8_23_from_float_with_clamp((int32_t*)dst, (float*)src, count);
             return;
         default:
             break;
