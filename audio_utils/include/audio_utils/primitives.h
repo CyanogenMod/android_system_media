@@ -77,7 +77,7 @@ void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count);
 
 /* Shrink and copy samples from single-precision floating-point to signed 16-bit.
  * Each float should be in the range -1.0 to 1.0.  Values outside that range are clamped,
- * refer to clamp16FromFloat().
+ * refer to clamp16_from_float().
  * Parameters:
  *  dst     Destination buffer
  *  src     Source buffer
@@ -301,7 +301,7 @@ static inline int16_t clamp16(int32_t sample)
  *
  * Rounding of 0.5 lsb is to even (default for IEEE 754).
  */
-static inline int16_t clamp16FromFloat(float f)
+static inline int16_t clamp16_from_float(float f)
 {
     /* Offset is used to expand the valid range of [-1.0, 1.0) into the 16 lsbs of the
      * floating point significand. The normal shift is 3<<22, but the -15 offset

@@ -56,7 +56,7 @@ void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count)
 void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count)
 {
     while (count--) {
-        *dst++ = clamp16FromFloat(*src++);
+        *dst++ = clamp16_from_float(*src++);
     }
 }
 
