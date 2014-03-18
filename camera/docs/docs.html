@@ -11471,8 +11471,6 @@ activeArraySize.<wbr/>height /<wbr/>
             <td class="entry_description">
               <p>Duration each pixel is exposed to
 light.<wbr/></p>
-<p>If the sensor can't expose this exact duration,<wbr/> it should shorten the
-duration exposed to the nearest possible value (rather than expose longer).<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -11495,7 +11493,8 @@ duration exposed to the nearest possible value (rather than expose longer).<wbr/
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>1/<wbr/>10000 - 30 sec range.<wbr/> No bulb mode</p>
+              <p>If the sensor can't expose this exact duration,<wbr/> it should shorten the
+duration exposed to the nearest possible value (rather than expose longer).<wbr/></p>
             </td>
           </tr>
 
@@ -12085,8 +12084,9 @@ times used by <a href="#controls_android.sensor.exposureTime">android.<wbr/>sens
             </td>
 
             <td class="entry_range">
-              <p>Min &lt;= 100e3 (100 us),<wbr/> Max &gt;= 1e9 (1
-sec)</p>
+              <p>Min &lt;= 100e3 (100 us).<wbr/> For FULL capability devices
+(<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == FULL),<wbr/> Max SHOULD be
+&gt;= 1e9 (1sec),<wbr/> MUST be &gt;= 100e6 (100ms)</p>
             </td>
 
             <td class="entry_tags">
@@ -12102,8 +12102,9 @@ sec)</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The maximum of the range must be at least
-1 second.<wbr/> It should be at least 30 seconds.<wbr/></p>
+              <p>For FULL capability devices (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == FULL),<wbr/>
+The maximum of the range SHOULD be at least
+1 second (1e9),<wbr/> MUST be at least 100ms.<wbr/></p>
             </td>
           </tr>
 
@@ -12133,7 +12134,9 @@ rate).<wbr/></p>
             </td>
 
             <td class="entry_range">
-              <p>&gt;= 30e9</p>
+              <p>For FULL capability devices
+(<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == FULL),<wbr/> Max SHOULD be
+&gt;= 1e9 (1sec),<wbr/> MUST be &gt;= 100e6 (100ms)</p>
             </td>
 
             <td class="entry_tags">
@@ -12167,8 +12170,9 @@ frame duration values.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>This value must be at least 1 second.<wbr/> It should be at least 30
-seconds (30e9 ns).<wbr/></p>
+              <p>For FULL capability devices (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == FULL),<wbr/>
+The maximum of the range SHOULD be at least
+1 second (1e9),<wbr/> MUST be at least 100ms (100e6).<wbr/></p>
 <p><a href="#static_android.sensor.info.maxFrameDuration">android.<wbr/>sensor.<wbr/>info.<wbr/>max<wbr/>Frame<wbr/>Duration</a> must be greater or
 equal to the <a href="#static_android.sensor.info.exposureTimeRange">android.<wbr/>sensor.<wbr/>info.<wbr/>exposure<wbr/>Time<wbr/>Range</a> max
 value (since exposure time overrides frame duration).<wbr/></p>
@@ -12654,8 +12658,6 @@ pattern modes for <a href="#controls_android.sensor.testPatternMode">android.<wb
             <td class="entry_description">
               <p>Duration each pixel is exposed to
 light.<wbr/></p>
-<p>If the sensor can't expose this exact duration,<wbr/> it should shorten the
-duration exposed to the nearest possible value (rather than expose longer).<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -12678,7 +12680,8 @@ duration exposed to the nearest possible value (rather than expose longer).<wbr/
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>1/<wbr/>10000 - 30 sec range.<wbr/> No bulb mode</p>
+              <p>If the sensor can't expose this exact duration,<wbr/> it should shorten the
+duration exposed to the nearest possible value (rather than expose longer).<wbr/></p>
             </td>
           </tr>
 
