@@ -32,7 +32,7 @@ static const int32_t lim24neg = -(1 << 23);
 
 inline void testClamp16(float f)
 {
-    int16_t ival = clamp16FromFloat(f / (1 << 15));
+    int16_t ival = clamp16_from_float(f / (1 << 15));
 
     // test clamping
     ALOGV("clamp16(%f) = %d\n", f, ival);
@@ -44,7 +44,7 @@ inline void testClamp16(float f)
 
     // if in range, make sure round trip clamp and conversion is correct.
     if (f < lim16pos - 1. && f > lim16neg + 1.) {
-        int ival2 = clamp16FromFloat(float_from_i16(ival));
+        int ival2 = clamp16_from_float(float_from_i16(ival));
         int diff = abs(ival - ival2);
         EXPECT_LE(diff, 1);
     }
