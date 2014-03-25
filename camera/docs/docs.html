@@ -5932,22 +5932,25 @@ for use cases such as preview,<wbr/> auto-focus assist,<wbr/> still capture,<wbr
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">UNAVAILABLE</span>
-                    <span class="entry_type_enum_notes"><p>No flash on camera</p></span>
+                    <span class="entry_type_enum_notes"><p>No flash on camera.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">CHARGING</span>
-                    <span class="entry_type_enum_notes"><p>if <a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> is true Flash is
-charging and cannot be fired</p></span>
+                    <span class="entry_type_enum_notes"><p>Flash is charging and cannot be fired.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">READY</span>
-                    <span class="entry_type_enum_notes"><p>if <a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> is true Flash is
-ready to fire</p></span>
+                    <span class="entry_type_enum_notes"><p>Flash is ready to fire.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">FIRED</span>
-                    <span class="entry_type_enum_notes"><p>if <a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> is true Flash fired
-for this capture</p></span>
+                    <span class="entry_type_enum_notes"><p>Flash fired for this capture.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">PARTIAL</span>
+                    <span class="entry_type_enum_notes"><p>Flash partially illuminated this frame.<wbr/> This is usually due to the next
+or previous frame having the flash fire,<wbr/> and the flash spilling into this capture
+due to hardware limitations.<wbr/></p></span>
                   </li>
                 </ul>
 

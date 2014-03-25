@@ -1256,6 +1256,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "FIRED";
                     ret = 0;
                     break;
+                case ANDROID_FLASH_STATE_PARTIAL:
+                    msg = "PARTIAL";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
