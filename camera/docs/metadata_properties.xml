@@ -1820,16 +1820,17 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="state" type="byte" visibility="public" enum="true">
           <enum>
             <value>UNAVAILABLE
-            <notes>No flash on camera</notes></value>
+            <notes>No flash on camera.</notes></value>
             <value>CHARGING
-            <notes>if android.flash.info.available is true Flash is
-            charging and cannot be fired</notes></value>
+            <notes>Flash is charging and cannot be fired.</notes></value>
             <value>READY
-            <notes>if android.flash.info.available is true Flash is
-            ready to fire</notes></value>
+            <notes>Flash is ready to fire.</notes></value>
             <value>FIRED
-            <notes>if android.flash.info.available is true Flash fired
-            for this capture</notes></value>
+            <notes>Flash fired for this capture.</notes></value>
+            <value>PARTIAL
+            <notes>Flash partially illuminated this frame. This is usually due to the next
+            or previous frame having the flash fire, and the flash spilling into this capture
+            due to hardware limitations.</notes></value>
           </enum>
           <description>Current state of the flash
           unit.</description>

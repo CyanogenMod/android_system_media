@@ -557,6 +557,7 @@ typedef enum camera_metadata_enum_android_flash_state {
     ANDROID_FLASH_STATE_CHARGING,
     ANDROID_FLASH_STATE_READY,
     ANDROID_FLASH_STATE_FIRED,
+    ANDROID_FLASH_STATE_PARTIAL,
 } camera_metadata_enum_android_flash_state_t;
 
 
