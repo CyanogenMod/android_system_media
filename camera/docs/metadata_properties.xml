@@ -3893,7 +3893,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>
             Maximum raw value output by sensor.
             </description>
-            <range>&amp;gt; 1024 (10-bit output)</range>
+            <range>&amp;gt; 255 (8-bit output)</range>
             <details>
             This specifies the fully-saturated encoding level for the raw
             sample values from the sensor.  This is typically caused by the
@@ -3902,10 +3902,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             android.sensor.blackLevelPattern tag.
 
             The white level is typically determined either by sensor bit depth
-            (10-14 bits is expected), or by the point where the sensor response
+            (8-14 bits is expected), or by the point where the sensor response
             becomes too non-linear to be useful.  The default value for this is
             maximum representable value for a 16-bit raw sample (2^16 - 1).
             </details>
+            <hal_details>
+            The full bit depth of the sensor must be available in the raw data,
+            so the value for linear sensors should not be significantly lower
+            than maximum raw value supported, i.e. 2^(sensor bits per pixel).
+            </hal_details>
             <tag id="DNG" />
           </entry>
         </namespace>
@@ -4195,8 +4200,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           The green split is calculated as follows:
 
-          1. A representative 5x5 pixel window W within the active
-          sensor array is chosen.
+          1. A 5x5 pixel (or larger) window W within the active sensor array is
+          chosen. The term 'pixel' here is taken to mean a group of 4 Bayer
+          mosaic channels (R, Gr, Gb, B).  The location and size of the window
+          chosen is implementation defined, and should be chosen to provide a
+          green split estimate that is both representative of the entire image
+          for this camera sensor, and can be calculated quickly.
           1. The arithmetic mean of the green channels from the red
           rows (mean_Gr) within W is computed.
           1. The arithmetic mean of the green channels from the blue
@@ -4217,6 +4226,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           * R &amp;gt; 1.20 will require strong software correction to produce
           a usuable image (&amp;gt;20% divergence).
           </details>
+          <hal_details>
+          The green split given may be a static value based on prior
+          characterization of the camera sensor using the green split
+          calculation method given here over a large, representative, sample
+          set of images.  Other methods of calculation that produce equivalent
+          results, and can be interpreted in the same manner, may be used.
+          </hal_details>
           <tag id="DNG" />
         </entry>
       </dynamic>
