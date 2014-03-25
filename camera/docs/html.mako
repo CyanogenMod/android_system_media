@@ -18,7 +18,7 @@
 <head>
   <!-- automatically generated from html.mako. do NOT edit directly -->
   <meta charset="utf-8" />
-  <title>Android Camera HAL3.0 Properties</title>
+  <title>Android Camera HAL3.2 Properties</title>
   <style type="text/css">
      body { background-color: #f7f7f7; font-family: Roboto, sans-serif;}
      h1 { color: #333333; }
@@ -129,7 +129,7 @@
 %>
 
 <body>
-  <h1>Android Camera HAL3.0 Properties</h1>
+  <h1>Android Camera HAL3.2 Properties</h1>
 \
 <%def name="insert_toc_body(node)">
   % for nested in node.namespaces:
