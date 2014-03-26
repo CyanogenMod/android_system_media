@@ -78,7 +78,7 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
     size_t actual;
     actual = fread(wav, sizeof(char), sizeof(wav), stream);
     if (actual < 12) {
-        fprintf(stderr, "actual %u < 44\n", actual);
+        fprintf(stderr, "actual %zu < 44\n", actual);
         goto close;
     }
     if (memcmp(wav, "RIFF", 4)) {
@@ -101,13 +101,13 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
         unsigned char chunk[8];
         actual = fread(chunk, sizeof(char), sizeof(chunk), stream);
         if (actual != sizeof(chunk)) {
-            fprintf(stderr, "actual %u != %u\n", actual, sizeof(chunk));
+            fprintf(stderr, "actual %zu != %zu\n", actual, sizeof(chunk));
             goto close;
         }
         remaining -= 8;
         unsigned chunkSize = little4u(&chunk[4]);
         if (chunkSize > remaining) {
-            fprintf(stderr, "chunkSize %u > remaining %u\n", chunkSize, remaining);
+            fprintf(stderr, "chunkSize %u > remaining %zu\n", chunkSize, remaining);
             goto close;
         }
         if (!memcmp(&chunk[0], "fmt ", 4)) {
@@ -122,7 +122,7 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
             unsigned char fmt[40];
             actual = fread(fmt, sizeof(char), 2, stream);
             if (actual != 2) {
-                fprintf(stderr, "actual %u != 2\n", actual);
+                fprintf(stderr, "actual %zu != 2\n", actual);
                 goto close;
             }
             unsigned format = little2u(&fmt[0]);
@@ -140,12 +140,12 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
                 goto close;
             }
             if (chunkSize < minSize) {
-                fprintf(stderr, "chunkSize %u < minSize %u\n", chunkSize, minSize);
+                fprintf(stderr, "chunkSize %u < minSize %zu\n", chunkSize, minSize);
                 goto close;
             }
             actual = fread(&fmt[2], sizeof(char), minSize - 2, stream);
             if (actual != minSize - 2) {
-                fprintf(stderr, "actual %u != %u\n", actual, minSize - 16);
+                fprintf(stderr, "actual %zu != %zu\n", actual, minSize - 16);
                 goto close;
             }
             if (chunkSize > minSize) {
@@ -215,7 +215,7 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
         remaining -= chunkSize;
     }
     if (remaining > 0) {
-        fprintf(stderr, "partial chunk at end of RIFF, remaining %u\n", remaining);
+        fprintf(stderr, "partial chunk at end of RIFF, remaining %zu\n", remaining);
         goto close;
     }
     if (!hadData) {
