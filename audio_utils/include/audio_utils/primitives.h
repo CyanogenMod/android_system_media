@@ -435,13 +435,12 @@ static inline float float_from_i16(int16_t ival)
 static inline int32_t i32_from_p24(const uint8_t *packed24)
 {
     /* convert to 32b */
-#ifdef HAVE_BIG_ENDIAN
+#if defined(HAVE_BIG_ENDIAN) == defined(HAVE_LITTLE_ENDIAN)
+    /* check to see if we have exactly one or the other android endian flags set. */
+#error "Either HAVE_LITTLE_ENDIAN or HAVE_BIG_ENDIAN must be defined"
+#elif defined(HAVE_BIG_ENDIAN)
     return (packed24[2] << 8) | (packed24[1] << 16) | (packed24[0] << 24);
-#else
-#ifndef HAVE_LITTLE_ENDIAN
-    /* check to see if we really have one or the other android endian flags set. */
-#warning "Both HAVE_LITTLE_ENDIAN and HAVE_BIG_ENDIAN not defined, default to little endian"
-#endif
+#else /* HAVE_LITTLE_ENDIAN */
     return (packed24[0] << 8) | (packed24[1] << 16) | (packed24[2] << 24);
 #endif
 }
