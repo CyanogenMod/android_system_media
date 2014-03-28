@@ -899,8 +899,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             controls; the camera device will ignore those settings while
             USE_SCENE_MODE is active (except for FACE_PRIORITY
             scene mode). Other control entries are still active.
-            This setting can only be used if availableSceneModes !=
-            UNSUPPORTED</notes></value>
+            This setting can only be used if scene mode is supported
+            (i.e. android.control.availableSceneModes contain some modes
+            other than DISABLED).
+            </notes></value>
             <value>OFF_KEEP_STATE
             <notes>Same as OFF mode, except that this capture will not be
             used by camera device background auto-exposure, auto-white balance and
@@ -4397,8 +4399,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
       </dynamic>
       <static>
-        <entry name="availableTestPatternModes" type="byte" visibility="public"
-          optional="true">
+        <entry name="availableTestPatternModes" type="int32" visibility="public" optional="true"
+          type_notes="list of enums" container="array">
+          <array>
+            <size>n</size>
+          </array>
           <description>Optional. Defaults to [OFF]. Lists the supported test
             pattern modes for android.sensor.testPatternMode.
           </description>

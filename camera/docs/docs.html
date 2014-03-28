@@ -2357,8 +2357,9 @@ control.<wbr/>aeMode,<wbr/> control.<wbr/>awbMode and control.<wbr/>afMode
 controls; the camera device will ignore those settings while
 USE_<wbr/>SCENE_<wbr/>MODE is active (except for FACE_<wbr/>PRIORITY
 scene mode).<wbr/> Other control entries are still active.<wbr/>
-This setting can only be used if availableSceneModes !=
-UNSUPPORTED</p></span>
+This setting can only be used if scene mode is supported
+(i.<wbr/>e.<wbr/> <a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a> contain some modes
+other than DISABLED).<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">OFF_KEEP_STATE</span>
@@ -4877,8 +4878,9 @@ control.<wbr/>aeMode,<wbr/> control.<wbr/>awbMode and control.<wbr/>afMode
 controls; the camera device will ignore those settings while
 USE_<wbr/>SCENE_<wbr/>MODE is active (except for FACE_<wbr/>PRIORITY
 scene mode).<wbr/> Other control entries are still active.<wbr/>
-This setting can only be used if availableSceneModes !=
-UNSUPPORTED</p></span>
+This setting can only be used if scene mode is supported
+(i.<wbr/>e.<wbr/> <a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a> contain some modes
+other than DISABLED).<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">OFF_KEEP_STATE</span>
@@ -12780,9 +12782,14 @@ element.<wbr/></p>
               android.<wbr/>sensor.<wbr/>available<wbr/>Test<wbr/>Pattern<wbr/>Modes
             </td>
             <td class="entry_type">
-                <span class="entry_type_name">byte</span>
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
 
+                <span class="entry_type_array">
+                  n
+                </span>
               <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">list of enums</div>
 
 
             </td> <!-- entry_type -->

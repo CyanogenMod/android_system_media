@@ -451,7 +451,7 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     [ ANDROID_SENSOR_TEST_PATTERN_MODE - ANDROID_SENSOR_START ] =
     { "testPatternMode",               TYPE_INT32  },
     [ ANDROID_SENSOR_AVAILABLE_TEST_PATTERN_MODES - ANDROID_SENSOR_START ] =
-    { "availableTestPatternModes",     TYPE_BYTE   },
+    { "availableTestPatternModes",     TYPE_INT32  },
 };
 
 static tag_info_t android_sensor_info[ANDROID_SENSOR_INFO_END -
