@@ -8,6 +8,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES:= \
 	fixedfft.cpp.arm \
 	format.c \
+	minifloat.c \
 	primitives.c \
 	resampler.c \
 	echo_reference.c
@@ -29,6 +30,7 @@ LOCAL_MODULE := libaudioutils
 LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := \
 	format.c \
+	minifloat.c \
 	primitives.c
 LOCAL_C_INCLUDES += \
 	$(call include-path-for, audio-utils)
