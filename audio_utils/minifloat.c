@@ -30,7 +30,7 @@
 #error EXPONENT_BITS and MANTISSA_BITS must sum to 16
 #endif
 
-uint16_t attenuation_from_float(float v)
+uint16_t gain_from_float(float v)
 {
     if (v <= 0.0f || isnan(v)) {
         return 0;
@@ -48,7 +48,7 @@ uint16_t attenuation_from_float(float v)
             (mantissa >> (1 - exp)) & MANTISSA_MAX;
 }
 
-float float_from_attenuation(uint16_t a)
+float float_from_gain(uint16_t a)
 {
     int mantissa = a & MANTISSA_MAX;
     int exponent = (a >> MANTISSA_BITS) & EXPONENT_MAX;

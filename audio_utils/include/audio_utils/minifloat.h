@@ -22,7 +22,7 @@
 
 __BEGIN_DECLS
 
-/* Convert a float to the internal representation used for attenuations.
+/* Convert a float to the internal representation used for gains.
  * The nominal range [0.0, 1.0], but the hard range is [0.0, 2.0).
  * Negative and underflow values are converted to 0.0,
  * and values larger than the hard maximum are truncated to the hard maximum.
@@ -30,16 +30,17 @@ __BEGIN_DECLS
  * Minifloats are ordered, and standard comparisons may be used between them
  * in the uint16_t representation.
  *
- * Details on internal representation of attenuations, based on mini-floats:
- * The nominal maximum is 1.0 and the hard maximum is 1 lsb less than 2.0.
+ * Details on internal representation of gains, based on mini-floats:
+ * The nominal maximum is 1.0 and the hard maximum is 1 ULP less than 2.0, or +6 dB.
+ * The minimum non-zero value is approximately 1.9e-6 or -114 dB.
  * Negative numbers, infinity, and NaN are not supported.
  * There are 13 significand bits specified, 1 implied hidden bit, 3 exponent bits,
  * and no sign bit.  Denormals are supported.
  */
-uint16_t attenuation_from_float(float f);
+uint16_t gain_from_float(float f);
 
-/* Convert the internal representation used for attenuation to float */
-float float_from_attenuation(uint16_t attenuation);
+/* Convert the internal representation used for gains to float */
+float float_from_gain(uint16_t gain);
 
 __END_DECLS
 
