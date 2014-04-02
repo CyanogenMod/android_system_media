@@ -31,8 +31,12 @@ __BEGIN_DECLS
 
 /**
  * Dither and clamp pairs of 32-bit input samples (sums) to 16-bit output samples (out).
- * Each 32-bit input sample is a signed fixed-point Q19.12.
- * The .12 fraction is dithered, and the integer portion is then clamped to Q15.
+ * Each 32-bit input sample can be viewed as a signed fixed-point Q19.12 of which the
+ * .12 fraction bits are dithered and the 19 integer bits are clamped to signed 16 bits.
+ * Alternatively the input can be viewed as Q4.27, of which the lowest .12 of the fraction
+ * is dithered and the remaining fraction is converted to the output Q.15, with clamping
+ * on the 4 integer guard bits.
+ *
  * For interleaved stereo, c is the number of sample pairs,
  * and out is an array of interleaved pairs of 16-bit samples per channel.
  * For mono, c is the number of samples / 2, and out is an array of 16-bit samples.
@@ -88,10 +92,10 @@ void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count);
  */
 void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count);
 
-/* Copy samples from signed fixed-point 32-bit Q19.12 to single-precision floating-point.
+/* Copy samples from signed fixed-point 32-bit Q4.27 to single-precision floating-point.
  * The nominal output float range is [-1.0, 1.0] if the fixed-point range is
  * [0xf8000000, 0x07ffffff].  The full float range is [-16.0, 16.0].  Note the closed range
- * at 1.0 and 16.0 is due to rounding on conversion to float. See float_from_q19_12() for details.
+ * at 1.0 and 16.0 is due to rounding on conversion to float. See float_from_q4_27() for details.
  * Parameters:
  *  dst     Destination buffer
  *  src     Source buffer
@@ -99,7 +103,7 @@ void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_float_from_q19_12(float *dst, const int32_t *src, size_t c);
+void memcpy_to_float_from_q4_27(float *dst, const int32_t *src, size_t c);
 
 /* Copy samples from signed fixed-point 16 bit Q0.15 to single-precision floating-point.
  * The output float range is [-1.0, 1.0) for the fixed-point range [0x8000, 0x7fff].
@@ -380,7 +384,7 @@ static inline int32_t clamp32_from_float(float f)
     return f > 0 ? f + 0.5 : f - 0.5;
 }
 
-/* Convert a signed fixed-point 32-bit Q19.12 value to single-precision floating-point.
+/* Convert a signed fixed-point 32-bit Q4.27 value to single-precision floating-point.
  * The nominal output float range is [-1.0, 1.0] if the fixed-point range is
  * [0xf8000000, 0x07ffffff].  The full float range is [-16.0, 16.0].
  *
@@ -389,17 +393,16 @@ static inline int32_t clamp32_from_float(float f)
  * precision floating point, the 0.5 lsb in the significand conversion will round
  * towards even, as per IEEE 754 default.
  */
-static inline float float_from_q19_12(int32_t ival)
+static inline float float_from_q4_27(int32_t ival)
 {
-    /* The scale factor is the reciprocal of the nominal 16 bit integer
-     * half-sided range (32768) multiplied by the 12 fractional bits (4096).
+    /* The scale factor is the reciprocal of the fractional bits.
      *
      * Since the scale factor is a power of 2, the scaling is exact, and there
      * is no rounding due to the multiplication - the bit pattern is preserved.
      * However, there may be rounding due to the fixed-point to float conversion,
      * as described above.
      */
-    static const float scale = 1. / (32768. * 4096.);
+    static const float scale = 1. / (float)(1UL << 27);
 
     return ival * scale;
 }
