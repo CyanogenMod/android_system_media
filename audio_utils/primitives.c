@@ -60,10 +60,9 @@ void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count)
     }
 }
 
-void memcpy_to_float_from_q4_27(float *dst, const int32_t *src, size_t c)
+void memcpy_to_float_from_q4_27(float *dst, const int32_t *src, size_t count)
 {
-    size_t i;
-    for (i = 0; i < c; ++i) {
+    while (count--) {
         *dst++ = float_from_q4_27(*src++);
     }
 }
@@ -138,6 +137,13 @@ void memcpy_to_q8_23_from_float_with_clamp(int32_t *dst, const float *src, size_
 {
     while (count--) {
         *dst++ = clamp24_from_float(*src++);
+    }
+}
+
+void memcpy_to_q4_27_from_float(int32_t *dst, const float *src, size_t count)
+{
+    while (count--) {
+        *dst++ = clampq4_27_from_float(*src++);
     }
 }
 

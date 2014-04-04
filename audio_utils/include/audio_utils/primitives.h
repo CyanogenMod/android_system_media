@@ -103,7 +103,7 @@ void memcpy_to_i16_from_float(int16_t *dst, const float *src, size_t count);
  * The destination and source buffers must either be completely separate (non-overlapping), or
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
-void memcpy_to_float_from_q4_27(float *dst, const int32_t *src, size_t c);
+void memcpy_to_float_from_q4_27(float *dst, const int32_t *src, size_t count);
 
 /* Copy samples from signed fixed-point 16 bit Q0.15 to single-precision floating-point.
  * The output float range is [-1.0, 1.0) for the fixed-point range [0x8000, 0x7fff].
@@ -187,6 +187,19 @@ void memcpy_to_q8_23_from_i16(int32_t *dst, const int16_t *src, size_t count);
  * they must both start at the same address.  Partially overlapping buffers are not supported.
  */
 void memcpy_to_q8_23_from_float_with_clamp(int32_t *dst, const float *src, size_t count);
+
+/* Copy samples from single-precision floating-point to signed fixed-point 32-bit Q4.27.
+ * The conversion will use the full available Q4.27 range, including guard bits.
+ * Fractional lsb is rounded to nearest, ties away from zero.
+ * See clampq4_27_from_float() for details.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ */
+void memcpy_to_q4_27_from_float(int32_t *dst, const float *src, size_t count);
 
 /* Copy samples from signed fixed-point 32-bit Q8.23 to signed fixed point 16-bit Q0.15.
  * The data is clamped, and truncated without rounding.
@@ -359,6 +372,31 @@ static inline int32_t clamp24_from_float(float f)
     return f > 0 ? f + 0.5 : f - 0.5;
 }
 
+/* Convert a single-precision floating point value to a Q4.27 integer value.
+ * Rounds to nearest, ties away from 0.
+ *
+ * Values outside the range [-16.0, 16.0) are properly clamped to -2147483648 and 2147483647,
+ * including -Inf and +Inf. NaN values are considered undefined, and behavior may change
+ * depending on hardware and future implementation of this function.
+ */
+static inline int32_t clampq4_27_from_float(float f)
+{
+    static const float scale = (float)(1UL << 27);
+    static const float limpos = 16.;
+    static const float limneg = -16.;
+
+    if (f <= limneg) {
+        return -0x80000000; /* or 0x80000000 */
+    } else if (f >= limpos) {
+        return 0x7fffffff;
+    }
+    f *= scale;
+    /* integer conversion is through truncation (though int to float is not).
+     * ensure that we round to nearest, ties away from 0.
+     */
+    return f > 0 ? f + 0.5 : f - 0.5;
+}
+
 /* Convert a single-precision floating point value to a Q0.31 integer value.
  * Rounds to nearest, ties away from 0.
  *
@@ -373,7 +411,7 @@ static inline int32_t clamp32_from_float(float f)
     static const float limneg = -1.;
 
     if (f <= limneg) {
-        return -0x80000000;
+        return -0x80000000; /* or 0x80000000 */
     } else if (f >= limpos) {
         return 0x7fffffff;
     }
