@@ -291,7 +291,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE =           // int32[]      | public
             ANDROID_SENSOR_INFO_START,
     ANDROID_SENSOR_INFO_SENSITIVITY_RANGE,            // int32[]      | public
-    ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT,     // enum         | system
+    ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT,     // enum         | public
     ANDROID_SENSOR_INFO_EXPOSURE_TIME_RANGE,          // int64[]      | public
     ANDROID_SENSOR_INFO_MAX_FRAME_DURATION,           // int64        | public
     ANDROID_SENSOR_INFO_PHYSICAL_SIZE,                // float[]      | public

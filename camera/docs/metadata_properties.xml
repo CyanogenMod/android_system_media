@@ -3795,7 +3795,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="BC" />
             <tag id="V1" />
           </entry>
-          <entry name="colorFilterArrangement" type="byte" enum="true">
+          <entry name="colorFilterArrangement" type="byte" visibility="public" enum="true">
             <enum>
               <value>RGGB</value>
               <value>GRBG</value>
@@ -4554,7 +4554,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <entry name="maxFaceCount" type="int32" visibility="public" >
             <description>Maximum number of simultaneously detectable
             faces</description>
-            <range>&amp;gt;= 4 if availableFaceDetectionModes lists
+            <range>&amp;gt;= 4 if android.statistics.info.availableFaceDetectModes lists
             modes besides OFF, otherwise 0</range>
           </entry>
           <entry name="maxHistogramCount" type="int32">
