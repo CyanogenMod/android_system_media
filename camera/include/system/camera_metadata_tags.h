@@ -449,6 +449,7 @@ typedef enum camera_metadata_enum_android_control_capture_intent {
     ANDROID_CONTROL_CAPTURE_INTENT_VIDEO_RECORD,
     ANDROID_CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT,
     ANDROID_CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG,
+    ANDROID_CONTROL_CAPTURE_INTENT_MANUAL,
 } camera_metadata_enum_android_control_capture_intent_t;
 
 // ANDROID_CONTROL_EFFECT_MODE

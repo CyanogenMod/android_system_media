@@ -2181,6 +2181,12 @@ application will stream full-resolution images and
 reprocess one or several later for a final
 capture</p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">MANUAL</span>
+                    <span class="entry_type_enum_notes"><p>This request is for manual capture use case where
+the applications want to directly control the capture parameters
+(e.<wbr/>g.<wbr/> <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>,<wbr/> <a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> etc.<wbr/>).<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -2196,7 +2202,7 @@ strategy.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              <p>All must be supported</p>
+              <p>All must be supported except for ZERO_<wbr/>SHUTTER_<wbr/>LAG and MANUAL.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -2211,8 +2217,11 @@ strategy.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>This control is only effective if <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF</code>
-and any 3A routine is active.<wbr/></p>
+              <p>This control (except for MANUAL) is only effective if
+<code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF</code> and any 3A routine is active.<wbr/></p>
+<p>ZERO_<wbr/>SHUTTER_<wbr/>LAG must be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
+contains ZSL.<wbr/> MANUAL must be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
+contains MANUAL_<wbr/>SENSOR.<wbr/></p>
             </td>
           </tr>
 

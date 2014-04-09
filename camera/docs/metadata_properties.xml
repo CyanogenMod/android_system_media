@@ -800,14 +800,23 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             application will stream full-resolution images and
             reprocess one or several later for a final
             capture</notes></value>
+            <value>MANUAL
+            <notes>This request is for manual capture use case where
+            the applications want to directly control the capture parameters
+            (e.g. android.sensor.exposureTime, android.sensor.sensitivity etc.).
+            </notes></value>
           </enum>
           <description>Information to the camera device 3A (auto-exposure,
           auto-focus, auto-white balance) routines about the purpose
           of this capture, to help the camera device to decide optimal 3A
           strategy.</description>
-          <range>All must be supported</range>
-          <details>This control is only effective if `android.control.mode != OFF`
-          and any 3A routine is active.</details>
+          <range>All must be supported except for ZERO_SHUTTER_LAG and MANUAL.</range>
+          <details>This control (except for MANUAL) is only effective if
+          `android.control.mode != OFF` and any 3A routine is active.
+
+          ZERO_SHUTTER_LAG must be supported if android.request.availableCapabilities
+          contains ZSL. MANUAL must be supported if android.request.availableCapabilities
+          contains MANUAL_SENSOR.</details>
           <tag id="BC" />
         </entry>
         <entry name="effectMode" type="byte" visibility="public" enum="true">

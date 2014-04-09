@@ -872,6 +872,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "ZERO_SHUTTER_LAG";
                     ret = 0;
                     break;
+                case ANDROID_CONTROL_CAPTURE_INTENT_MANUAL:
+                    msg = "MANUAL";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
