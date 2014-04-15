@@ -985,7 +985,7 @@ static void print_data(int fd, const uint8_t *data_ptr, uint32_t tag,
                     }
                     break;
                 case TYPE_FLOAT:
-                    fdprintf(fd, "%0.2f ",
+                    fdprintf(fd, "%0.8f ",
                             *(float*)(data_ptr + index));
                     break;
                 case TYPE_INT64:
@@ -993,7 +993,7 @@ static void print_data(int fd, const uint8_t *data_ptr, uint32_t tag,
                             *(int64_t*)(data_ptr + index));
                     break;
                 case TYPE_DOUBLE:
-                    fdprintf(fd, "%0.2f ",
+                    fdprintf(fd, "%0.8f ",
                             *(double*)(data_ptr + index));
                     break;
                 case TYPE_RATIONAL: {
