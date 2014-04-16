@@ -501,6 +501,14 @@
             <li><a href="#static_android.sensor.info.pixelArraySize">android.sensor.info.pixelArraySize</a></li>
             <li><a href="#static_android.sensor.info.whiteLevel">android.sensor.info.whiteLevel</a></li>
 
+            <li><a href="#static_android.sensor.referenceIlluminant1">android.sensor.referenceIlluminant1</a></li>
+            <li><a href="#static_android.sensor.referenceIlluminant2">android.sensor.referenceIlluminant2</a></li>
+            <li><a href="#static_android.sensor.calibrationTransform1">android.sensor.calibrationTransform1</a></li>
+            <li><a href="#static_android.sensor.calibrationTransform2">android.sensor.calibrationTransform2</a></li>
+            <li><a href="#static_android.sensor.colorTransform1">android.sensor.colorTransform1</a></li>
+            <li><a href="#static_android.sensor.colorTransform2">android.sensor.colorTransform2</a></li>
+            <li><a href="#static_android.sensor.forwardMatrix1">android.sensor.forwardMatrix1</a></li>
+            <li><a href="#static_android.sensor.forwardMatrix2">android.sensor.forwardMatrix2</a></li>
             <li><a href="#static_android.sensor.baseGainFactor">android.sensor.baseGainFactor</a></li>
             <li><a href="#static_android.sensor.blackLevelPattern">android.sensor.blackLevelPattern</a></li>
             <li><a href="#static_android.sensor.maxAnalogSensitivity">android.sensor.maxAnalogSensitivity</a></li>
@@ -517,10 +525,6 @@
             <li><a href="#dynamic_android.sensor.sensitivity">android.sensor.sensitivity</a></li>
             <li><a href="#dynamic_android.sensor.timestamp">android.sensor.timestamp</a></li>
             <li><a href="#dynamic_android.sensor.temperature">android.sensor.temperature</a></li>
-            <li><a href="#dynamic_android.sensor.referenceIlluminant">android.sensor.referenceIlluminant</a></li>
-            <li><a href="#dynamic_android.sensor.calibrationTransform">android.sensor.calibrationTransform</a></li>
-            <li><a href="#dynamic_android.sensor.colorTransform">android.sensor.colorTransform</a></li>
-            <li><a href="#dynamic_android.sensor.forwardMatrix">android.sensor.forwardMatrix</a></li>
             <li><a href="#dynamic_android.sensor.neutralColorPoint">android.sensor.neutralColorPoint</a></li>
             <li><a href="#dynamic_android.sensor.profileHueSatMap">android.sensor.profileHueSatMap</a></li>
             <li><a href="#dynamic_android.sensor.profileToneCurve">android.sensor.profileToneCurve</a></li>
@@ -12550,6 +12554,573 @@ than maximum raw value supported,<wbr/> i.<wbr/>e.<wbr/> 2^(sensor bits per pixe
         
 
                 
+          <tr class="entry" id="static_android.sensor.referenceIlluminant1">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant1
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">DAYLIGHT</span>
+                    <span class="entry_type_enum_value">1</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">FLUORESCENT</span>
+                    <span class="entry_type_enum_value">2</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">TUNGSTEN</span>
+                    <span class="entry_type_enum_value">3</span>
+                    <span class="entry_type_enum_notes"><p>Incandescent light</p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">FLASH</span>
+                    <span class="entry_type_enum_value">4</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">FINE_WEATHER</span>
+                    <span class="entry_type_enum_value">9</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">CLOUDY_WEATHER</span>
+                    <span class="entry_type_enum_value">10</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">SHADE</span>
+                    <span class="entry_type_enum_value">11</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">DAYLIGHT_FLUORESCENT</span>
+                    <span class="entry_type_enum_value">12</span>
+                    <span class="entry_type_enum_notes"><p>D 5700 - 7100K</p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">DAY_WHITE_FLUORESCENT</span>
+                    <span class="entry_type_enum_value">13</span>
+                    <span class="entry_type_enum_notes"><p>N 4600 - 5400K</p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">COOL_WHITE_FLUORESCENT</span>
+                    <span class="entry_type_enum_value">14</span>
+                    <span class="entry_type_enum_notes"><p>W 3900 - 4500K</p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">WHITE_FLUORESCENT</span>
+                    <span class="entry_type_enum_value">15</span>
+                    <span class="entry_type_enum_notes"><p>WW 3200 - 3700K</p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">STANDARD_A</span>
+                    <span class="entry_type_enum_value">17</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">STANDARD_B</span>
+                    <span class="entry_type_enum_value">18</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">STANDARD_C</span>
+                    <span class="entry_type_enum_value">19</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">D55</span>
+                    <span class="entry_type_enum_value">20</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">D65</span>
+                    <span class="entry_type_enum_value">21</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">D75</span>
+                    <span class="entry_type_enum_value">22</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">D50</span>
+                    <span class="entry_type_enum_value">23</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ISO_STUDIO_TUNGSTEN</span>
+                    <span class="entry_type_enum_value">24</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The standard reference illuminant used as the scene light source when
+calculating the <a href="#static_android.sensor.colorTransform1">android.<wbr/>sensor.<wbr/>color<wbr/>Transform1</a>,<wbr/>
+<a href="#static_android.sensor.calibrationTransform1">android.<wbr/>sensor.<wbr/>calibration<wbr/>Transform1</a>,<wbr/> and
+<a href="#static_android.sensor.forwardMatrix1">android.<wbr/>sensor.<wbr/>forward<wbr/>Matrix1</a> matrices.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DNG">DNG</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The values in this tag correspond to the values defined for the
+EXIF LightSource tag.<wbr/> These illuminants are standard light sources
+that are often used calibrating camera devices.<wbr/></p>
+<p>If this tag is present,<wbr/> then <a href="#static_android.sensor.colorTransform1">android.<wbr/>sensor.<wbr/>color<wbr/>Transform1</a>,<wbr/>
+<a href="#static_android.sensor.calibrationTransform1">android.<wbr/>sensor.<wbr/>calibration<wbr/>Transform1</a>,<wbr/> and
+<a href="#static_android.sensor.forwardMatrix1">android.<wbr/>sensor.<wbr/>forward<wbr/>Matrix1</a> will also be present.<wbr/></p>
+<p>Some devices may choose to provide a second set of calibration
+information for improved quality,<wbr/> including
+<a href="#static_android.sensor.referenceIlluminant2">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant2</a> and its corresponding matrices.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The first reference illuminant (<a href="#static_android.sensor.referenceIlluminant1">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant1</a>)
+and corresponding matrices must be present to support DNG output.<wbr/></p>
+<p>When producing raw images with a color profile that has only been
+calibrated against a single light source,<wbr/> it is valid to omit
+<a href="#static_android.sensor.referenceIlluminant2">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant2</a> along with the
+<a href="#static_android.sensor.colorTransform2">android.<wbr/>sensor.<wbr/>color<wbr/>Transform2</a>,<wbr/> <a href="#static_android.sensor.calibrationTransform2">android.<wbr/>sensor.<wbr/>calibration<wbr/>Transform2</a>,<wbr/>
+and <a href="#static_android.sensor.forwardMatrix2">android.<wbr/>sensor.<wbr/>forward<wbr/>Matrix2</a> matrices.<wbr/></p>
+<p>If only <a href="#static_android.sensor.referenceIlluminant1">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant1</a> is included,<wbr/> it should be
+chosen so that it is representative of typical scene lighting.<wbr/>  In
+general,<wbr/> D50 or DAYLIGHT will be chosen for this case.<wbr/></p>
+<p>If both <a href="#static_android.sensor.referenceIlluminant1">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant1</a> and
+<a href="#static_android.sensor.referenceIlluminant2">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant2</a> are included,<wbr/> they should be
+chosen to represent the typical range of scene lighting conditions.<wbr/>
+In general,<wbr/> low color temperature illuminant such as Standard-A will
+be chosen for the first reference illuminant and a higher color
+temperature illuminant such as D65 will be chosen for the second
+reference illuminant.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.sensor.referenceIlluminant2">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant2
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The standard reference illuminant used as the scene light source when
+calculating the <a href="#static_android.sensor.colorTransform2">android.<wbr/>sensor.<wbr/>color<wbr/>Transform2</a>,<wbr/>
+<a href="#static_android.sensor.calibrationTransform2">android.<wbr/>sensor.<wbr/>calibration<wbr/>Transform2</a>,<wbr/> and
+<a href="#static_android.sensor.forwardMatrix2">android.<wbr/>sensor.<wbr/>forward<wbr/>Matrix2</a> matrices.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DNG">DNG</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>See <a href="#static_android.sensor.referenceIlluminant1">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant1</a> for more details.<wbr/>
+Valid values for this are the same as those given for the first
+reference illuminant.<wbr/></p>
+<p>If this tag is present,<wbr/> then <a href="#static_android.sensor.colorTransform2">android.<wbr/>sensor.<wbr/>color<wbr/>Transform2</a>,<wbr/>
+<a href="#static_android.sensor.calibrationTransform2">android.<wbr/>sensor.<wbr/>calibration<wbr/>Transform2</a>,<wbr/> and
+<a href="#static_android.sensor.forwardMatrix2">android.<wbr/>sensor.<wbr/>forward<wbr/>Matrix2</a> will also be present.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.sensor.calibrationTransform1">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>sensor.<wbr/>calibration<wbr/>Transform1
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">rational</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  3 x 3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">3x3 matrix in row-major-order</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A per-device calibration transform matrix that maps from the
+reference sensor colorspace to the actual device sensor colorspace.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DNG">DNG</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This matrix is used to correct for per-device variations in the
+sensor colorspace,<wbr/> and is used for processing raw buffer data.<wbr/></p>
+<p>The matrix is expressed as a 3x3 matrix in row-major-order,<wbr/> and
+contains a per-device calibration transform that maps colors
+from reference sensor color space (i.<wbr/>e.<wbr/> the "golden module"
+colorspace) into this camera device's native sensor color
+space under the first reference illuminant
+(<a href="#static_android.sensor.referenceIlluminant1">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant1</a>).<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.sensor.calibrationTransform2">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>sensor.<wbr/>calibration<wbr/>Transform2
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">rational</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  3 x 3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">3x3 matrix in row-major-order</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A per-device calibration transform matrix that maps from the
+reference sensor colorspace to the actual device sensor colorspace
+(this is the colorspace of the raw buffer data).<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DNG">DNG</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This matrix is used to correct for per-device variations in the
+sensor colorspace,<wbr/> and is used for processing raw buffer data.<wbr/></p>
+<p>The matrix is expressed as a 3x3 matrix in row-major-order,<wbr/> and
+contains a per-device calibration transform that maps colors
+from reference sensor color space (i.<wbr/>e.<wbr/> the "golden module"
+colorspace) into this camera device's native sensor color
+space under the second reference illuminant
+(<a href="#static_android.sensor.referenceIlluminant2">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant2</a>).<wbr/></p>
+<p>This matrix will only be present if the second reference
+illuminant is present.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.sensor.colorTransform1">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>sensor.<wbr/>color<wbr/>Transform1
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">rational</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  3 x 3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">3x3 matrix in row-major-order</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A matrix that transforms color values from CIE XYZ color space to
+reference sensor color space.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DNG">DNG</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This matrix is used to convert from the standard CIE XYZ color
+space to the reference sensor colorspace,<wbr/> and is used when processing
+raw buffer data.<wbr/></p>
+<p>The matrix is expressed as a 3x3 matrix in row-major-order,<wbr/> and
+contains a color transform matrix that maps colors from the CIE
+XYZ color space to the reference sensor color space (i.<wbr/>e.<wbr/> the
+"golden module" colorspace) under the first reference illuminant
+(<a href="#static_android.sensor.referenceIlluminant1">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant1</a>).<wbr/></p>
+<p>The white points chosen in both the reference sensor color space
+and the CIE XYZ colorspace when calculating this transform will
+match the standard white point for the first reference illuminant
+(i.<wbr/>e.<wbr/> no chromatic adaptation will be applied by this transform).<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.sensor.colorTransform2">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>sensor.<wbr/>color<wbr/>Transform2
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">rational</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  3 x 3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">3x3 matrix in row-major-order</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A matrix that transforms color values from CIE XYZ color space to
+reference sensor color space.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DNG">DNG</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This matrix is used to convert from the standard CIE XYZ color
+space to the reference sensor colorspace,<wbr/> and is used when processing
+raw buffer data.<wbr/></p>
+<p>The matrix is expressed as a 3x3 matrix in row-major-order,<wbr/> and
+contains a color transform matrix that maps colors from the CIE
+XYZ color space to the reference sensor color space (i.<wbr/>e.<wbr/> the
+"golden module" colorspace) under the second reference illuminant
+(<a href="#static_android.sensor.referenceIlluminant2">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant2</a>).<wbr/></p>
+<p>The white points chosen in both the reference sensor color space
+and the CIE XYZ colorspace when calculating this transform will
+match the standard white point for the second reference illuminant
+(i.<wbr/>e.<wbr/> no chromatic adaptation will be applied by this transform).<wbr/></p>
+<p>This matrix will only be present if the second reference
+illuminant is present.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.sensor.forwardMatrix1">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>sensor.<wbr/>forward<wbr/>Matrix1
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">rational</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  3 x 3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">3x3 matrix in row-major-order</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A matrix that transforms white balanced camera colors from the reference
+sensor colorspace to the CIE XYZ colorspace with a D50 whitepoint.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DNG">DNG</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This matrix is used to convert to the standard CIE XYZ colorspace,<wbr/> and
+is used when processing raw buffer data.<wbr/></p>
+<p>This matrix is expressed as a 3x3 matrix in row-major-order,<wbr/> and contains
+a color transform matrix that maps white balanced colors from the
+reference sensor color space to the CIE XYZ color space with a D50 white
+point.<wbr/></p>
+<p>Under the first reference illuminant (<a href="#static_android.sensor.referenceIlluminant1">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant1</a>)
+this matrix is chosen so that the standard white point for this reference
+illuminant in the reference sensor colorspace is mapped to D50 in the
+CIE XYZ colorspace.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.sensor.forwardMatrix2">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>sensor.<wbr/>forward<wbr/>Matrix2
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">rational</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  3 x 3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+                <div class="entry_type_notes">3x3 matrix in row-major-order</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A matrix that transforms white balanced camera colors from the reference
+sensor colorspace to the CIE XYZ colorspace with a D50 whitepoint.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DNG">DNG</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This matrix is used to convert to the standard CIE XYZ colorspace,<wbr/> and
+is used when processing raw buffer data.<wbr/></p>
+<p>This matrix is expressed as a 3x3 matrix in row-major-order,<wbr/> and contains
+a color transform matrix that maps white balanced colors from the
+reference sensor color space to the CIE XYZ color space with a D50 white
+point.<wbr/></p>
+<p>Under the second reference illuminant (<a href="#static_android.sensor.referenceIlluminant2">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant2</a>)
+this matrix is chosen so that the standard white point for this reference
+illuminant in the reference sensor colorspace is mapped to D50 in the
+CIE XYZ colorspace.<wbr/></p>
+<p>This matrix will only be present if the second reference
+illuminant is present.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
           <tr class="entry" id="static_android.sensor.baseGainFactor">
             <td class="entry_name" rowspan="1">
               android.<wbr/>sensor.<wbr/>base<wbr/>Gain<wbr/>Factor
@@ -13149,294 +13720,6 @@ somewhere close to it.<wbr/></p>
            <!-- end of entry -->
         
                 
-          <tr class="entry" id="dynamic_android.sensor.referenceIlluminant">
-            <td class="entry_name" rowspan="3">
-              android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name entry_type_name_enum">byte</span>
-
-              <span class="entry_type_visibility"> [public]</span>
-
-                <ul class="entry_type_enum">
-                  <li>
-                    <span class="entry_type_enum_name">DAYLIGHT</span>
-                    <span class="entry_type_enum_value">1</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">FLUORESCENT</span>
-                    <span class="entry_type_enum_value">2</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">TUNGSTEN</span>
-                    <span class="entry_type_enum_value">3</span>
-                    <span class="entry_type_enum_notes"><p>Incandescent light</p></span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">FLASH</span>
-                    <span class="entry_type_enum_value">4</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">FINE_WEATHER</span>
-                    <span class="entry_type_enum_value">9</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">CLOUDY_WEATHER</span>
-                    <span class="entry_type_enum_value">10</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">SHADE</span>
-                    <span class="entry_type_enum_value">11</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">DAYLIGHT_FLUORESCENT</span>
-                    <span class="entry_type_enum_value">12</span>
-                    <span class="entry_type_enum_notes"><p>D 5700 - 7100K</p></span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">DAY_WHITE_FLUORESCENT</span>
-                    <span class="entry_type_enum_value">13</span>
-                    <span class="entry_type_enum_notes"><p>N 4600 - 5400K</p></span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">COOL_WHITE_FLUORESCENT</span>
-                    <span class="entry_type_enum_value">14</span>
-                    <span class="entry_type_enum_notes"><p>W 3900 - 4500K</p></span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">WHITE_FLUORESCENT</span>
-                    <span class="entry_type_enum_value">15</span>
-                    <span class="entry_type_enum_notes"><p>WW 3200 - 3700K</p></span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">STANDARD_A</span>
-                    <span class="entry_type_enum_value">17</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">STANDARD_B</span>
-                    <span class="entry_type_enum_value">18</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">STANDARD_C</span>
-                    <span class="entry_type_enum_value">19</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">D55</span>
-                    <span class="entry_type_enum_value">20</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">D65</span>
-                    <span class="entry_type_enum_value">21</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">D75</span>
-                    <span class="entry_type_enum_value">22</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">D50</span>
-                    <span class="entry_type_enum_value">23</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">ISO_STUDIO_TUNGSTEN</span>
-                    <span class="entry_type_enum_value">24</span>
-                  </li>
-                </ul>
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>A reference illumination source roughly matching the current scene
-illumination,<wbr/> which is used to describe the sensor color space
-transformations.<wbr/></p>
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
-                  <li><a href="#tag_EXIF">EXIF</a></li>
-              </ul>
-            </td>
-
-          </tr>
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>The values in this tag correspond to the values defined for the
-EXIF LightSource tag.<wbr/> These illuminants are standard light sources
-that are often used for calibrating camera devices.<wbr/></p>
-            </td>
-          </tr>
-
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-                
-          <tr class="entry" id="dynamic_android.sensor.calibrationTransform">
-            <td class="entry_name" rowspan="3">
-              android.<wbr/>sensor.<wbr/>calibration<wbr/>Transform
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name">rational</span>
-                <span class="entry_type_container">x</span>
-
-                <span class="entry_type_array">
-                  3 x 3
-                </span>
-              <span class="entry_type_visibility"> [public]</span>
-                <div class="entry_type_notes">3x3 matrix in row-major-order</div>
-
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>A per-device calibration transform matrix to be applied after the
-color space transform when rendering the raw image buffer.<wbr/></p>
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
-              </ul>
-            </td>
-
-          </tr>
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>This matrix is expressed as a 3x3 matrix in row-major-order,<wbr/> and
-contains a per-device calibration transform that maps colors
-from reference camera color space (i.<wbr/>e.<wbr/> the "golden module"
-colorspace) into this camera device's linear native sensor color
-space for the current scene illumination and white balance choice.<wbr/></p>
-            </td>
-          </tr>
-
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-                
-          <tr class="entry" id="dynamic_android.sensor.colorTransform">
-            <td class="entry_name" rowspan="3">
-              android.<wbr/>sensor.<wbr/>color<wbr/>Transform
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name">rational</span>
-                <span class="entry_type_container">x</span>
-
-                <span class="entry_type_array">
-                  3 x 3
-                </span>
-              <span class="entry_type_visibility"> [public]</span>
-                <div class="entry_type_notes">3x3 matrix in row-major-order</div>
-
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>A matrix that transforms color values from CIE XYZ color space to
-reference camera color space when rendering the raw image buffer.<wbr/></p>
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
-              </ul>
-            </td>
-
-          </tr>
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>This matrix is expressed as a 3x3 matrix in row-major-order,<wbr/> and
-contains a color transform matrix that maps colors from the CIE
-XYZ color space to the reference camera raw color space (i.<wbr/>e.<wbr/> the
-"golden module" colorspace) for the current scene illumination and
-white balance choice.<wbr/></p>
-            </td>
-          </tr>
-
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-                
-          <tr class="entry" id="dynamic_android.sensor.forwardMatrix">
-            <td class="entry_name" rowspan="3">
-              android.<wbr/>sensor.<wbr/>forward<wbr/>Matrix
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name">rational</span>
-                <span class="entry_type_container">x</span>
-
-                <span class="entry_type_array">
-                  3 x 3
-                </span>
-              <span class="entry_type_visibility"> [public]</span>
-                <div class="entry_type_notes">3x3 matrix in row-major-order</div>
-
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>A matrix that transforms white balanced camera colors to the CIE XYZ
-colorspace with a D50 whitepoint.<wbr/></p>
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
-              </ul>
-            </td>
-
-          </tr>
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>This matrix is expressed as a 3x3 matrix in row-major-order,<wbr/> and contains
-a color transform matrix that maps a unit vector in the linear native
-sensor color space to the D50 whitepoint in CIE XYZ color space.<wbr/></p>
-            </td>
-          </tr>
-
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-                
           <tr class="entry" id="dynamic_android.sensor.neutralColorPoint">
             <td class="entry_name" rowspan="3">
               android.<wbr/>sensor.<wbr/>neutral<wbr/>Color<wbr/>Point
@@ -13454,7 +13737,8 @@ sensor color space to the D50 whitepoint in CIE XYZ color space.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>The estimated white balance at the time of capture.<wbr/></p>
+              <p>The estimated camera neutral color in the native sensor colorspace at
+the time of capture.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -13475,9 +13759,12 @@ sensor color space to the D50 whitepoint in CIE XYZ color space.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The estimated white balance encoded as the RGB values of the
-perfectly neutral color point in the linear native sensor color space.<wbr/>
-The order of the values is R,<wbr/> G,<wbr/> B; where R is in the lowest index.<wbr/></p>
+              <p>This value gives the neutral color point encoded as an RGB value in the
+native sensor color space.<wbr/>  The neutral color point indicates the
+currently estimated white point of the scene illumination.<wbr/>  It can be
+used to interpolate between the provided color transforms when
+processing raw sensor data.<wbr/></p>
+<p>The order of the values is R,<wbr/> G,<wbr/> B; where R is in the lowest index.<wbr/></p>
             </td>
           </tr>
 
@@ -17313,12 +17600,16 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.sensor.info.colorFilterArrangement">android.sensor.info.colorFilterArrangement</a> (static)</li>
           <li><a href="#static_android.sensor.info.pixelArraySize">android.sensor.info.pixelArraySize</a> (static)</li>
           <li><a href="#static_android.sensor.info.whiteLevel">android.sensor.info.whiteLevel</a> (static)</li>
+          <li><a href="#static_android.sensor.referenceIlluminant1">android.sensor.referenceIlluminant1</a> (static)</li>
+          <li><a href="#static_android.sensor.referenceIlluminant2">android.sensor.referenceIlluminant2</a> (static)</li>
+          <li><a href="#static_android.sensor.calibrationTransform1">android.sensor.calibrationTransform1</a> (static)</li>
+          <li><a href="#static_android.sensor.calibrationTransform2">android.sensor.calibrationTransform2</a> (static)</li>
+          <li><a href="#static_android.sensor.colorTransform1">android.sensor.colorTransform1</a> (static)</li>
+          <li><a href="#static_android.sensor.colorTransform2">android.sensor.colorTransform2</a> (static)</li>
+          <li><a href="#static_android.sensor.forwardMatrix1">android.sensor.forwardMatrix1</a> (static)</li>
+          <li><a href="#static_android.sensor.forwardMatrix2">android.sensor.forwardMatrix2</a> (static)</li>
           <li><a href="#static_android.sensor.blackLevelPattern">android.sensor.blackLevelPattern</a> (static)</li>
           <li><a href="#static_android.sensor.profileHueSatMapDimensions">android.sensor.profileHueSatMapDimensions</a> (static)</li>
-          <li><a href="#dynamic_android.sensor.referenceIlluminant">android.sensor.referenceIlluminant</a> (dynamic)</li>
-          <li><a href="#dynamic_android.sensor.calibrationTransform">android.sensor.calibrationTransform</a> (dynamic)</li>
-          <li><a href="#dynamic_android.sensor.colorTransform">android.sensor.colorTransform</a> (dynamic)</li>
-          <li><a href="#dynamic_android.sensor.forwardMatrix">android.sensor.forwardMatrix</a> (dynamic)</li>
           <li><a href="#dynamic_android.sensor.neutralColorPoint">android.sensor.neutralColorPoint</a> (dynamic)</li>
           <li><a href="#dynamic_android.sensor.profileHueSatMap">android.sensor.profileHueSatMap</a> (dynamic)</li>
           <li><a href="#dynamic_android.sensor.profileToneCurve">android.sensor.profileToneCurve</a> (dynamic)</li>
@@ -17331,7 +17622,6 @@ to know when sensor settings have been applied.<wbr/></p>
       </li> <!-- tag_DNG -->
       <li id="tag_EXIF">EXIF - None
         <ul class="tags_entries">
-          <li><a href="#dynamic_android.sensor.referenceIlluminant">android.sensor.referenceIlluminant</a> (dynamic)</li>
         </ul>
       </li> <!-- tag_EXIF -->
       <li id="tag_HAL2">HAL2 - 

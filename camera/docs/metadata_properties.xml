@@ -3926,6 +3926,269 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="DNG" />
           </entry>
         </namespace>
+        <entry name="referenceIlluminant1" type="byte" visibility="public" enum="true">
+          <enum>
+            <value id="1">DAYLIGHT</value>
+            <value id="2">FLUORESCENT</value>
+            <value id="3">TUNGSTEN
+              <notes>Incandescent light</notes>
+            </value>
+            <value id="4">FLASH</value>
+            <value id="9">FINE_WEATHER</value>
+            <value id="10">CLOUDY_WEATHER</value>
+            <value id="11">SHADE</value>
+            <value id="12">DAYLIGHT_FLUORESCENT
+              <notes>D 5700 - 7100K</notes>
+            </value>
+            <value id="13">DAY_WHITE_FLUORESCENT
+              <notes>N 4600 - 5400K</notes>
+            </value>
+            <value id="14">COOL_WHITE_FLUORESCENT
+              <notes>W 3900 - 4500K</notes>
+            </value>
+            <value id="15">WHITE_FLUORESCENT
+              <notes>WW 3200 - 3700K</notes>
+            </value>
+            <value id="17">STANDARD_A</value>
+            <value id="18">STANDARD_B</value>
+            <value id="19">STANDARD_C</value>
+            <value id="20">D55</value>
+            <value id="21">D65</value>
+            <value id="22">D75</value>
+            <value id="23">D50</value>
+            <value id="24">ISO_STUDIO_TUNGSTEN</value>
+          </enum>
+          <description>
+          The standard reference illuminant used as the scene light source when
+          calculating the android.sensor.colorTransform1,
+          android.sensor.calibrationTransform1, and
+          android.sensor.forwardMatrix1 matrices.
+          </description>
+          <details>
+          The values in this tag correspond to the values defined for the
+          EXIF LightSource tag. These illuminants are standard light sources
+          that are often used calibrating camera devices.
+
+          If this tag is present, then android.sensor.colorTransform1,
+          android.sensor.calibrationTransform1, and
+          android.sensor.forwardMatrix1 will also be present.
+
+          Some devices may choose to provide a second set of calibration
+          information for improved quality, including
+          android.sensor.referenceIlluminant2 and its corresponding matrices.
+          </details>
+          <hal_details>
+          The first reference illuminant (android.sensor.referenceIlluminant1)
+          and corresponding matrices must be present to support DNG output.
+
+          When producing raw images with a color profile that has only been
+          calibrated against a single light source, it is valid to omit
+          android.sensor.referenceIlluminant2 along with the
+          android.sensor.colorTransform2, android.sensor.calibrationTransform2,
+          and android.sensor.forwardMatrix2 matrices.
+
+          If only android.sensor.referenceIlluminant1 is included, it should be
+          chosen so that it is representative of typical scene lighting.  In
+          general, D50 or DAYLIGHT will be chosen for this case.
+
+          If both android.sensor.referenceIlluminant1 and
+          android.sensor.referenceIlluminant2 are included, they should be
+          chosen to represent the typical range of scene lighting conditions.
+          In general, low color temperature illuminant such as Standard-A will
+          be chosen for the first reference illuminant and a higher color
+          temperature illuminant such as D65 will be chosen for the second
+          reference illuminant.
+          </hal_details>
+          <tag id="DNG" />
+        </entry>
+        <entry name="referenceIlluminant2" type="byte" visibility="public">
+          <description>
+          The standard reference illuminant used as the scene light source when
+          calculating the android.sensor.colorTransform2,
+          android.sensor.calibrationTransform2, and
+          android.sensor.forwardMatrix2 matrices.
+          </description>
+          <details>
+          See android.sensor.referenceIlluminant1 for more details.
+          Valid values for this are the same as those given for the first
+          reference illuminant.
+
+          If this tag is present, then android.sensor.colorTransform2,
+          android.sensor.calibrationTransform2, and
+          android.sensor.forwardMatrix2 will also be present.
+          </details>
+          <tag id="DNG" />
+        </entry>
+        <entry name="calibrationTransform1" type="rational"
+        visibility="public" optional="true"
+        type_notes="3x3 matrix in row-major-order" container="array">
+          <array>
+            <size>3</size>
+            <size>3</size>
+          </array>
+          <description>
+          A per-device calibration transform matrix that maps from the
+          reference sensor colorspace to the actual device sensor colorspace.
+          </description>
+          <details>
+          This matrix is used to correct for per-device variations in the
+          sensor colorspace, and is used for processing raw buffer data.
+
+          The matrix is expressed as a 3x3 matrix in row-major-order, and
+          contains a per-device calibration transform that maps colors
+          from reference sensor color space (i.e. the "golden module"
+          colorspace) into this camera device's native sensor color
+          space under the first reference illuminant
+          (android.sensor.referenceIlluminant1).
+          </details>
+          <tag id="DNG" />
+        </entry>
+        <entry name="calibrationTransform2" type="rational"
+        visibility="public" optional="true"
+        type_notes="3x3 matrix in row-major-order" container="array">
+          <array>
+            <size>3</size>
+            <size>3</size>
+          </array>
+          <description>
+          A per-device calibration transform matrix that maps from the
+          reference sensor colorspace to the actual device sensor colorspace
+          (this is the colorspace of the raw buffer data).
+          </description>
+          <details>
+          This matrix is used to correct for per-device variations in the
+          sensor colorspace, and is used for processing raw buffer data.
+
+          The matrix is expressed as a 3x3 matrix in row-major-order, and
+          contains a per-device calibration transform that maps colors
+          from reference sensor color space (i.e. the "golden module"
+          colorspace) into this camera device's native sensor color
+          space under the second reference illuminant
+          (android.sensor.referenceIlluminant2).
+
+          This matrix will only be present if the second reference
+          illuminant is present.
+          </details>
+          <tag id="DNG" />
+        </entry>
+        <entry name="colorTransform1" type="rational"
+        visibility="public" optional="true"
+        type_notes="3x3 matrix in row-major-order" container="array">
+          <array>
+            <size>3</size>
+            <size>3</size>
+          </array>
+          <description>
+          A matrix that transforms color values from CIE XYZ color space to
+          reference sensor color space.
+          </description>
+          <details>
+          This matrix is used to convert from the standard CIE XYZ color
+          space to the reference sensor colorspace, and is used when processing
+          raw buffer data.
+
+          The matrix is expressed as a 3x3 matrix in row-major-order, and
+          contains a color transform matrix that maps colors from the CIE
+          XYZ color space to the reference sensor color space (i.e. the
+          "golden module" colorspace) under the first reference illuminant
+          (android.sensor.referenceIlluminant1).
+
+          The white points chosen in both the reference sensor color space
+          and the CIE XYZ colorspace when calculating this transform will
+          match the standard white point for the first reference illuminant
+          (i.e. no chromatic adaptation will be applied by this transform).
+          </details>
+          <tag id="DNG" />
+        </entry>
+        <entry name="colorTransform2" type="rational"
+        visibility="public" optional="true"
+        type_notes="3x3 matrix in row-major-order" container="array">
+          <array>
+            <size>3</size>
+            <size>3</size>
+          </array>
+          <description>
+          A matrix that transforms color values from CIE XYZ color space to
+          reference sensor color space.
+          </description>
+          <details>
+          This matrix is used to convert from the standard CIE XYZ color
+          space to the reference sensor colorspace, and is used when processing
+          raw buffer data.
+
+          The matrix is expressed as a 3x3 matrix in row-major-order, and
+          contains a color transform matrix that maps colors from the CIE
+          XYZ color space to the reference sensor color space (i.e. the
+          "golden module" colorspace) under the second reference illuminant
+          (android.sensor.referenceIlluminant2).
+
+          The white points chosen in both the reference sensor color space
+          and the CIE XYZ colorspace when calculating this transform will
+          match the standard white point for the second reference illuminant
+          (i.e. no chromatic adaptation will be applied by this transform).
+
+          This matrix will only be present if the second reference
+          illuminant is present.
+          </details>
+          <tag id="DNG" />
+        </entry>
+        <entry name="forwardMatrix1" type="rational"
+        visibility="public" optional="true"
+        type_notes="3x3 matrix in row-major-order" container="array">
+          <array>
+            <size>3</size>
+            <size>3</size>
+          </array>
+          <description>
+          A matrix that transforms white balanced camera colors from the reference
+          sensor colorspace to the CIE XYZ colorspace with a D50 whitepoint.
+          </description>
+          <details>
+          This matrix is used to convert to the standard CIE XYZ colorspace, and
+          is used when processing raw buffer data.
+
+          This matrix is expressed as a 3x3 matrix in row-major-order, and contains
+          a color transform matrix that maps white balanced colors from the
+          reference sensor color space to the CIE XYZ color space with a D50 white
+          point.
+
+          Under the first reference illuminant (android.sensor.referenceIlluminant1)
+          this matrix is chosen so that the standard white point for this reference
+          illuminant in the reference sensor colorspace is mapped to D50 in the
+          CIE XYZ colorspace.
+          </details>
+          <tag id="DNG" />
+        </entry>
+        <entry name="forwardMatrix2" type="rational"
+        visibility="public" optional="true"
+        type_notes="3x3 matrix in row-major-order" container="array">
+          <array>
+            <size>3</size>
+            <size>3</size>
+          </array>
+          <description>
+          A matrix that transforms white balanced camera colors from the reference
+          sensor colorspace to the CIE XYZ colorspace with a D50 whitepoint.
+          </description>
+          <details>
+          This matrix is used to convert to the standard CIE XYZ colorspace, and
+          is used when processing raw buffer data.
+
+          This matrix is expressed as a 3x3 matrix in row-major-order, and contains
+          a color transform matrix that maps white balanced colors from the
+          reference sensor color space to the CIE XYZ color space with a D50 white
+          point.
+
+          Under the second reference illuminant (android.sensor.referenceIlluminant2)
+          this matrix is chosen so that the standard white point for this reference
+          illuminant in the reference sensor colorspace is mapped to D50 in the
+          CIE XYZ colorspace.
+
+          This matrix will only be present if the second reference
+          illuminant is present.
+          </details>
+          <tag id="DNG" />
+        </entry>
         <entry name="baseGainFactor" type="rational" visibility="public"
         optional="true">
           <description>Gain factor from electrons to raw units when
@@ -4029,115 +4292,22 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>Optional. This value is missing if no temperature is available.</range>
           <tag id="FULL" />
         </entry>
-        <entry name="referenceIlluminant" type="byte" visibility="public" enum="true">
-          <enum>
-            <value id="1">DAYLIGHT</value>
-            <value id="2">FLUORESCENT</value>
-            <value id="3">TUNGSTEN
-            <notes>Incandescent light</notes></value>
-            <value id="4">FLASH</value>
-            <value id="9">FINE_WEATHER</value>
-            <value id="10">CLOUDY_WEATHER</value>
-            <value id="11">SHADE</value>
-            <value id="12">DAYLIGHT_FLUORESCENT
-            <notes>D 5700 - 7100K</notes></value>
-            <value id="13">DAY_WHITE_FLUORESCENT
-            <notes>N 4600 - 5400K</notes></value>
-            <value id="14">COOL_WHITE_FLUORESCENT
-            <notes>W 3900 - 4500K</notes></value>
-            <value id="15">WHITE_FLUORESCENT
-            <notes>WW 3200 - 3700K</notes></value>
-            <value id="17">STANDARD_A</value>
-            <value id="18">STANDARD_B</value>
-            <value id="19">STANDARD_C</value>
-            <value id="20">D55</value>
-            <value id="21">D65</value>
-            <value id="22">D75</value>
-            <value id="23">D50</value>
-            <value id="24">ISO_STUDIO_TUNGSTEN</value>
-          </enum>
-          <description>
-          A reference illumination source roughly matching the current scene
-          illumination, which is used to describe the sensor color space
-          transformations.
-          </description>
-          <details>
-          The values in this tag correspond to the values defined for the
-          EXIF LightSource tag. These illuminants are standard light sources
-          that are often used for calibrating camera devices.
-          </details>
-          <tag id="DNG" />
-          <tag id="EXIF" />
-        </entry>
-        <entry name="calibrationTransform" type="rational"
-        visibility="public" optional="true"
-        type_notes="3x3 matrix in row-major-order" container="array">
-          <array>
-            <size>3</size>
-            <size>3</size>
-          </array>
-          <description>
-          A per-device calibration transform matrix to be applied after the
-          color space transform when rendering the raw image buffer.
-          </description>
-          <details>
-          This matrix is expressed as a 3x3 matrix in row-major-order, and
-          contains a per-device calibration transform that maps colors
-          from reference camera color space (i.e. the "golden module"
-          colorspace) into this camera device's linear native sensor color
-          space for the current scene illumination and white balance choice.
-          </details>
-          <tag id="DNG" />
-        </entry>
-        <entry name="colorTransform" type="rational"
-        visibility="public" optional="true"
-        type_notes="3x3 matrix in row-major-order" container="array">
-          <array>
-            <size>3</size>
-            <size>3</size>
-          </array>
-          <description>
-          A matrix that transforms color values from CIE XYZ color space to
-          reference camera color space when rendering the raw image buffer.
-          </description>
-          <details>
-          This matrix is expressed as a 3x3 matrix in row-major-order, and
-          contains a color transform matrix that maps colors from the CIE
-          XYZ color space to the reference camera raw color space (i.e. the
-          "golden module" colorspace) for the current scene illumination and
-          white balance choice.
-          </details>
-          <tag id="DNG" />
-        </entry>
-        <entry name="forwardMatrix" type="rational"
-        visibility="public" optional="true"
-        type_notes="3x3 matrix in row-major-order" container="array">
-          <array>
-            <size>3</size>
-            <size>3</size>
-          </array>
-          <description>
-          A matrix that transforms white balanced camera colors to the CIE XYZ
-          colorspace with a D50 whitepoint.
-          </description>
-          <details>
-          This matrix is expressed as a 3x3 matrix in row-major-order, and contains
-          a color transform matrix that maps a unit vector in the linear native
-          sensor color space to the D50 whitepoint in CIE XYZ color space.
-          </details>
-          <tag id="DNG" />
-        </entry>
         <entry name="neutralColorPoint" type="rational" visibility="public"
         optional="true" container="array">
           <array>
             <size>3</size>
           </array>
           <description>
-          The estimated white balance at the time of capture.
+          The estimated camera neutral color in the native sensor colorspace at
+          the time of capture.
           </description>
           <details>
-          The estimated white balance encoded as the RGB values of the
-          perfectly neutral color point in the linear native sensor color space.
+          This value gives the neutral color point encoded as an RGB value in the
+          native sensor color space.  The neutral color point indicates the
+          currently estimated white point of the scene illumination.  It can be
+          used to interpolate between the provided color transforms when
+          processing raw sensor data.
+
           The order of the values is R, G, B; where R is in the lowest index.
           </details>
           <tag id="DNG" />

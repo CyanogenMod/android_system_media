@@ -268,6 +268,14 @@ typedef enum camera_metadata_tag {
             ANDROID_SENSOR_START,
     ANDROID_SENSOR_FRAME_DURATION,                    // int64        | public
     ANDROID_SENSOR_SENSITIVITY,                       // int32        | public
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1,             // enum         | public
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT2,             // byte         | public
+    ANDROID_SENSOR_CALIBRATION_TRANSFORM1,            // rational[]   | public
+    ANDROID_SENSOR_CALIBRATION_TRANSFORM2,            // rational[]   | public
+    ANDROID_SENSOR_COLOR_TRANSFORM1,                  // rational[]   | public
+    ANDROID_SENSOR_COLOR_TRANSFORM2,                  // rational[]   | public
+    ANDROID_SENSOR_FORWARD_MATRIX1,                   // rational[]   | public
+    ANDROID_SENSOR_FORWARD_MATRIX2,                   // rational[]   | public
     ANDROID_SENSOR_BASE_GAIN_FACTOR,                  // rational     | public
     ANDROID_SENSOR_BLACK_LEVEL_PATTERN,               // int32[]      | public
     ANDROID_SENSOR_MAX_ANALOG_SENSITIVITY,            // int32        | public
@@ -275,10 +283,6 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS,    // int32[]      | public
     ANDROID_SENSOR_TIMESTAMP,                         // int64        | public
     ANDROID_SENSOR_TEMPERATURE,                       // float        | public
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT,              // enum         | public
-    ANDROID_SENSOR_CALIBRATION_TRANSFORM,             // rational[]   | public
-    ANDROID_SENSOR_COLOR_TRANSFORM,                   // rational[]   | public
-    ANDROID_SENSOR_FORWARD_MATRIX,                    // rational[]   | public
     ANDROID_SENSOR_NEUTRAL_COLOR_POINT,               // rational[]   | public
     ANDROID_SENSOR_PROFILE_HUE_SAT_MAP,               // float[]      | public
     ANDROID_SENSOR_PROFILE_TONE_CURVE,                // float[]      | public
@@ -661,28 +665,28 @@ typedef enum camera_metadata_enum_android_scaler_available_stream_configurations
 } camera_metadata_enum_android_scaler_available_stream_configurations_t;
 
 
-// ANDROID_SENSOR_REFERENCE_ILLUMINANT
-typedef enum camera_metadata_enum_android_sensor_reference_illuminant {
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_DAYLIGHT                = 1,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_FLUORESCENT             = 2,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_TUNGSTEN                = 3,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_FLASH                   = 4,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_FINE_WEATHER            = 9,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_CLOUDY_WEATHER          = 10,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_SHADE                   = 11,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_DAYLIGHT_FLUORESCENT    = 12,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_DAY_WHITE_FLUORESCENT   = 13,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_COOL_WHITE_FLUORESCENT  = 14,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_WHITE_FLUORESCENT       = 15,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_STANDARD_A              = 17,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_STANDARD_B              = 18,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_STANDARD_C              = 19,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_D55                     = 20,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_D65                     = 21,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_D75                     = 22,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_D50                     = 23,
-    ANDROID_SENSOR_REFERENCE_ILLUMINANT_ISO_STUDIO_TUNGSTEN     = 24,
-} camera_metadata_enum_android_sensor_reference_illuminant_t;
+// ANDROID_SENSOR_REFERENCE_ILLUMINANT1
+typedef enum camera_metadata_enum_android_sensor_reference_illuminant1 {
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT               = 1,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_FLUORESCENT            = 2,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_TUNGSTEN               = 3,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_FLASH                  = 4,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_FINE_WEATHER           = 9,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_CLOUDY_WEATHER         = 10,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_SHADE                  = 11,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT_FLUORESCENT   = 12,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_DAY_WHITE_FLUORESCENT  = 13,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_COOL_WHITE_FLUORESCENT = 14,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_WHITE_FLUORESCENT      = 15,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_STANDARD_A             = 17,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_STANDARD_B             = 18,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_STANDARD_C             = 19,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_D55                    = 20,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_D65                    = 21,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_D75                    = 22,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_D50                    = 23,
+    ANDROID_SENSOR_REFERENCE_ILLUMINANT1_ISO_STUDIO_TUNGSTEN    = 24,
+} camera_metadata_enum_android_sensor_reference_illuminant1_t;
 
 // ANDROID_SENSOR_TEST_PATTERN_MODE
 typedef enum camera_metadata_enum_android_sensor_test_pattern_mode {
