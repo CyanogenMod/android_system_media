@@ -411,6 +411,28 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     { "frameDuration",                 TYPE_INT64  },
     [ ANDROID_SENSOR_SENSITIVITY - ANDROID_SENSOR_START ] =
     { "sensitivity",                   TYPE_INT32  },
+    [ ANDROID_SENSOR_REFERENCE_ILLUMINANT1 - ANDROID_SENSOR_START ] =
+    { "referenceIlluminant1",          TYPE_BYTE   },
+    [ ANDROID_SENSOR_REFERENCE_ILLUMINANT2 - ANDROID_SENSOR_START ] =
+    { "referenceIlluminant2",          TYPE_BYTE   },
+    [ ANDROID_SENSOR_CALIBRATION_TRANSFORM1 - ANDROID_SENSOR_START ] =
+    { "calibrationTransform1",         TYPE_RATIONAL
+                },
+    [ ANDROID_SENSOR_CALIBRATION_TRANSFORM2 - ANDROID_SENSOR_START ] =
+    { "calibrationTransform2",         TYPE_RATIONAL
+                },
+    [ ANDROID_SENSOR_COLOR_TRANSFORM1 - ANDROID_SENSOR_START ] =
+    { "colorTransform1",               TYPE_RATIONAL
+                },
+    [ ANDROID_SENSOR_COLOR_TRANSFORM2 - ANDROID_SENSOR_START ] =
+    { "colorTransform2",               TYPE_RATIONAL
+                },
+    [ ANDROID_SENSOR_FORWARD_MATRIX1 - ANDROID_SENSOR_START ] =
+    { "forwardMatrix1",                TYPE_RATIONAL
+                },
+    [ ANDROID_SENSOR_FORWARD_MATRIX2 - ANDROID_SENSOR_START ] =
+    { "forwardMatrix2",                TYPE_RATIONAL
+                },
     [ ANDROID_SENSOR_BASE_GAIN_FACTOR - ANDROID_SENSOR_START ] =
     { "baseGainFactor",                TYPE_RATIONAL
                 },
@@ -426,17 +448,6 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     { "timestamp",                     TYPE_INT64  },
     [ ANDROID_SENSOR_TEMPERATURE - ANDROID_SENSOR_START ] =
     { "temperature",                   TYPE_FLOAT  },
-    [ ANDROID_SENSOR_REFERENCE_ILLUMINANT - ANDROID_SENSOR_START ] =
-    { "referenceIlluminant",           TYPE_BYTE   },
-    [ ANDROID_SENSOR_CALIBRATION_TRANSFORM - ANDROID_SENSOR_START ] =
-    { "calibrationTransform",          TYPE_RATIONAL
-                },
-    [ ANDROID_SENSOR_COLOR_TRANSFORM - ANDROID_SENSOR_START ] =
-    { "colorTransform",                TYPE_RATIONAL
-                },
-    [ ANDROID_SENSOR_FORWARD_MATRIX - ANDROID_SENSOR_START ] =
-    { "forwardMatrix",                 TYPE_RATIONAL
-                },
     [ ANDROID_SENSOR_NEUTRAL_COLOR_POINT - ANDROID_SENSOR_START ] =
     { "neutralColorPoint",             TYPE_RATIONAL
                 },
@@ -1699,6 +1710,110 @@ int camera_metadata_enum_snprint(uint32_t tag,
         case ANDROID_SENSOR_SENSITIVITY: {
             break;
         }
+        case ANDROID_SENSOR_REFERENCE_ILLUMINANT1: {
+            switch (value) {
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT:
+                    msg = "DAYLIGHT";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_FLUORESCENT:
+                    msg = "FLUORESCENT";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_TUNGSTEN:
+                    msg = "TUNGSTEN";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_FLASH:
+                    msg = "FLASH";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_FINE_WEATHER:
+                    msg = "FINE_WEATHER";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_CLOUDY_WEATHER:
+                    msg = "CLOUDY_WEATHER";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_SHADE:
+                    msg = "SHADE";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT_FLUORESCENT:
+                    msg = "DAYLIGHT_FLUORESCENT";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_DAY_WHITE_FLUORESCENT:
+                    msg = "DAY_WHITE_FLUORESCENT";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_COOL_WHITE_FLUORESCENT:
+                    msg = "COOL_WHITE_FLUORESCENT";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_WHITE_FLUORESCENT:
+                    msg = "WHITE_FLUORESCENT";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_STANDARD_A:
+                    msg = "STANDARD_A";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_STANDARD_B:
+                    msg = "STANDARD_B";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_STANDARD_C:
+                    msg = "STANDARD_C";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_D55:
+                    msg = "D55";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_D65:
+                    msg = "D65";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_D75:
+                    msg = "D75";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_D50:
+                    msg = "D50";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_REFERENCE_ILLUMINANT1_ISO_STUDIO_TUNGSTEN:
+                    msg = "ISO_STUDIO_TUNGSTEN";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
+        case ANDROID_SENSOR_REFERENCE_ILLUMINANT2: {
+            break;
+        }
+        case ANDROID_SENSOR_CALIBRATION_TRANSFORM1: {
+            break;
+        }
+        case ANDROID_SENSOR_CALIBRATION_TRANSFORM2: {
+            break;
+        }
+        case ANDROID_SENSOR_COLOR_TRANSFORM1: {
+            break;
+        }
+        case ANDROID_SENSOR_COLOR_TRANSFORM2: {
+            break;
+        }
+        case ANDROID_SENSOR_FORWARD_MATRIX1: {
+            break;
+        }
+        case ANDROID_SENSOR_FORWARD_MATRIX2: {
+            break;
+        }
         case ANDROID_SENSOR_BASE_GAIN_FACTOR: {
             break;
         }
@@ -1718,98 +1833,6 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SENSOR_TEMPERATURE: {
-            break;
-        }
-        case ANDROID_SENSOR_REFERENCE_ILLUMINANT: {
-            switch (value) {
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_DAYLIGHT:
-                    msg = "DAYLIGHT";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_FLUORESCENT:
-                    msg = "FLUORESCENT";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_TUNGSTEN:
-                    msg = "TUNGSTEN";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_FLASH:
-                    msg = "FLASH";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_FINE_WEATHER:
-                    msg = "FINE_WEATHER";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_CLOUDY_WEATHER:
-                    msg = "CLOUDY_WEATHER";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_SHADE:
-                    msg = "SHADE";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_DAYLIGHT_FLUORESCENT:
-                    msg = "DAYLIGHT_FLUORESCENT";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_DAY_WHITE_FLUORESCENT:
-                    msg = "DAY_WHITE_FLUORESCENT";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_COOL_WHITE_FLUORESCENT:
-                    msg = "COOL_WHITE_FLUORESCENT";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_WHITE_FLUORESCENT:
-                    msg = "WHITE_FLUORESCENT";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_STANDARD_A:
-                    msg = "STANDARD_A";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_STANDARD_B:
-                    msg = "STANDARD_B";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_STANDARD_C:
-                    msg = "STANDARD_C";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_D55:
-                    msg = "D55";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_D65:
-                    msg = "D65";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_D75:
-                    msg = "D75";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_D50:
-                    msg = "D50";
-                    ret = 0;
-                    break;
-                case ANDROID_SENSOR_REFERENCE_ILLUMINANT_ISO_STUDIO_TUNGSTEN:
-                    msg = "ISO_STUDIO_TUNGSTEN";
-                    ret = 0;
-                    break;
-                default:
-                    msg = "error: enum value out of range";
-            }
-            break;
-        }
-        case ANDROID_SENSOR_CALIBRATION_TRANSFORM: {
-            break;
-        }
-        case ANDROID_SENSOR_COLOR_TRANSFORM: {
-            break;
-        }
-        case ANDROID_SENSOR_FORWARD_MATRIX: {
             break;
         }
         case ANDROID_SENSOR_NEUTRAL_COLOR_POINT: {
