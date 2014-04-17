@@ -382,8 +382,8 @@ def jtype_unboxed(entry):
       java_type = typedef_name # already takes into account arrays
 
   if not java_type:
-    if not java_type and entry.enum:
-      # Always map enums to Java ints, unless there's a typedef override
+    if not java_type and entry.enum and metadata_type == 'byte':
+      # Always map byte enums to Java ints, unless there's a typedef override
       base_type = 'int'
 
     else:
