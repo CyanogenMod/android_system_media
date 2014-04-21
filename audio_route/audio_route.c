@@ -77,7 +77,7 @@ struct config_parse_state {
 
 /* path functions */
 
-bool is_supported_ctl_type(enum mixer_ctl_type type)
+static bool is_supported_ctl_type(enum mixer_ctl_type type)
 {
     switch (type) {
     case MIXER_CTL_TYPE_BOOL:
