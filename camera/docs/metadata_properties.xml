@@ -2699,30 +2699,33 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           that can be configured and used simultaneously by a camera device.
           </description>
           <range>
-          For JPEG-compressed format streams, &amp;gt;= 1.
+          For processed (and stalling) format streams, &amp;gt;= 1.
 
-          For Raw format streams, &amp;gt;= 0.
+          For Raw format (either stalling or non-stalling) streams, &amp;gt;= 0.
 
-          For processed, uncompressed format streams, &amp;gt;= 3
+          For processed (but not stalling) format streams, &amp;gt;= 3
           for FULL mode devices (`android.info.supportedHardwareLevel == FULL`);
           &amp;gt;= 2 for LIMITED mode devices (`android.info.supportedHardwareLevel == LIMITED`).
           </range>
           <details>
           This is a 3 element tuple that contains the max number of output simultaneous
-          streams for raw sensor, processed (and uncompressed), and JPEG formats respectively.
-          For example, if max raw sensor format output stream number is 1, max YUV streams
+          streams for raw sensor, processed (but not stalling), and processed (and stalling)
+          formats respectively. For example, assuming that JPEG is typically a processed and
+          stalling stream, if max raw sensor format output stream number is 1, max YUV streams
           number is 3, and max JPEG stream number is 2, then this tuple should be `(1, 3, 2)`.
 
           This lists the upper bound of the number of output streams supported by
           the camera device. Using more streams simultaneously may require more hardware and
           CPU resources that will consume more power. The image format for a output stream can
-          be any supported format provided by android.scaler.availableFormats. The formats
-          defined in android.scaler.availableFormats can be catergorized into the 3 stream types
-          as below:
+          be any supported format provided by android.scaler.availableStreamConfigurations.
+          The formats defined in android.scaler.availableStreamConfigurations can be catergorized
+          into the 3 stream types as below:
 
-          * JPEG-compressed format: BLOB.
-          * Raw formats: RAW_SENSOR and RAW_OPAQUE.
-          * processed, uncompressed formats: YCbCr_420_888, YCrCb_420_SP, YV12.
+          * Processed (but stalling): any non-RAW format with a stallDurations &amp;gt; 0.
+          Typically JPEG format (ImageFormat#JPEG).
+          * Raw formats: ImageFormat#RAW_SENSOR and ImageFormat#RAW_OPAQUE.
+          * Processed (but not-stalling): any non-RAW format without a stall duration.
+          Typically ImageFormat#YUV_420_888, ImageFormat#NV21, ImageFormat#YV12.
           </details>
           <tag id="BC" />
         </entry>
@@ -3219,6 +3222,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>The list of image formats that are supported by this
           camera device for output streams.</description>
+          <range>**Deprecated**. Do not use.</range>
           <details>
           All camera devices will support JPEG and YUV_420_888 formats.
 
@@ -3402,7 +3406,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The mapping of image formats that are supported by this
           camera device for input streams, to their corresponding output formats.
           </description>
-          <range>See android.scaler.availableFormats for enum definitions.</range>
           <details>
           All camera devices with at least 1
           android.request.maxNumInputStreams will have at least one
@@ -3429,6 +3432,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           TODO: Add java type mapping for this property.
           </details>
           <hal_details>
+          For the formats, see `system/core/include/system/graphics.h` for a definition
+          of the image format enumerations.
+
           This value is encoded as a variable-size array-of-arrays.
           The inner array always contains `[format, length, ...]` where
           `...` has `length` elements. An inner array is followed by another
