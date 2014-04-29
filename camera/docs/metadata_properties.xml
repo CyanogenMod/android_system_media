@@ -1071,7 +1071,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="videoStabilizationMode" type="byte" visibility="public"
-               enum="true" typedef="boolean">
+               enum="true">
           <enum>
             <value>OFF</value>
             <value>ON</value>
