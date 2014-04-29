@@ -9461,9 +9461,9 @@ that can be configured and used simultaneously by a camera device.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              <p>For JPEG-compressed format streams,<wbr/> &gt;= 1.<wbr/></p>
-<p>For Raw format streams,<wbr/> &gt;= 0.<wbr/></p>
-<p>For processed,<wbr/> uncompressed format streams,<wbr/> &gt;= 3
+              <p>For processed (and stalling) format streams,<wbr/> &gt;= 1.<wbr/></p>
+<p>For Raw format (either stalling or non-stalling) streams,<wbr/> &gt;= 0.<wbr/></p>
+<p>For processed (but not stalling) format streams,<wbr/> &gt;= 3
 for FULL mode devices (<code><a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == FULL</code>);
 &gt;= 2 for LIMITED mode devices (<code><a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == LIMITED</code>).<wbr/></p>
             </td>
@@ -9481,19 +9481,22 @@ for FULL mode devices (<code><a href="#static_android.info.supportedHardwareLeve
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>This is a 3 element tuple that contains the max number of output simultaneous
-streams for raw sensor,<wbr/> processed (and uncompressed),<wbr/> and JPEG formats respectively.<wbr/>
-For example,<wbr/> if max raw sensor format output stream number is 1,<wbr/> max YUV streams
+streams for raw sensor,<wbr/> processed (but not stalling),<wbr/> and processed (and stalling)
+formats respectively.<wbr/> For example,<wbr/> assuming that JPEG is typically a processed and
+stalling stream,<wbr/> if max raw sensor format output stream number is 1,<wbr/> max YUV streams
 number is 3,<wbr/> and max JPEG stream number is 2,<wbr/> then this tuple should be <code>(1,<wbr/> 3,<wbr/> 2)</code>.<wbr/></p>
 <p>This lists the upper bound of the number of output streams supported by
 the camera device.<wbr/> Using more streams simultaneously may require more hardware and
 CPU resources that will consume more power.<wbr/> The image format for a output stream can
-be any supported format provided by <a href="#static_android.scaler.availableFormats">android.<wbr/>scaler.<wbr/>available<wbr/>Formats</a>.<wbr/> The formats
-defined in <a href="#static_android.scaler.availableFormats">android.<wbr/>scaler.<wbr/>available<wbr/>Formats</a> can be catergorized into the 3 stream types
-as below:</p>
+be any supported format provided by <a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a>.<wbr/>
+The formats defined in <a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a> can be catergorized
+into the 3 stream types as below:</p>
 <ul>
-<li>JPEG-compressed format: BLOB.<wbr/></li>
-<li>Raw formats: RAW_<wbr/>SENSOR and RAW_<wbr/>OPAQUE.<wbr/></li>
-<li>processed,<wbr/> uncompressed formats: YCb<wbr/>Cr_<wbr/>420_<wbr/>888,<wbr/> YCr<wbr/>Cb_<wbr/>420_<wbr/>SP,<wbr/> YV12.<wbr/></li>
+<li>Processed (but stalling): any non-RAW format with a stallDurations &gt; 0.<wbr/>
+Typically JPEG format (ImageFormat#JPEG).<wbr/></li>
+<li>Raw formats: ImageFormat#RAW_<wbr/>SENSOR and ImageFormat#RAW_<wbr/>OPAQUE.<wbr/></li>
+<li>Processed (but not-stalling): any non-RAW format without a stall duration.<wbr/>
+Typically Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888,<wbr/> ImageFormat#NV21,<wbr/> ImageFormat#YV12.<wbr/></li>
 </ul>
             </td>
           </tr>
@@ -10622,6 +10625,7 @@ camera device for output streams.<wbr/></p>
             </td>
 
             <td class="entry_range">
+              <p><strong>Deprecated</strong>.<wbr/> Do not use.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -11073,7 +11077,6 @@ camera device for input streams,<wbr/> to their corresponding output formats.<wb
             </td>
 
             <td class="entry_range">
-              <p>See <a href="#static_android.scaler.availableFormats">android.<wbr/>scaler.<wbr/>available<wbr/>Formats</a> for enum definitions.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -11140,7 +11143,9 @@ listed as available in this map is not valid.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>This value is encoded as a variable-size array-of-arrays.<wbr/>
+              <p>For the formats,<wbr/> see <code>system/<wbr/>core/<wbr/>include/<wbr/>system/<wbr/>graphics.<wbr/>h</code> for a definition
+of the image format enumerations.<wbr/></p>
+<p>This value is encoded as a variable-size array-of-arrays.<wbr/>
 The inner array always contains <code>[format,<wbr/> length,<wbr/> ...<wbr/>]</code> where
 <code>...<wbr/></code> has <code>length</code> elements.<wbr/> An inner array is followed by another
 inner array if the total metadata entry size hasn't yet been exceeded.<wbr/></p>
