@@ -2252,9 +2252,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <entry name="hyperfocalDistance" type="float" visibility="public" optional="true">
             <description>Optional. Hyperfocal distance for this lens.</description>
             <units>See android.lens.info.focusDistanceCalibration for details.</units>
-            <range>&amp;gt;= 0</range>
-            <details>If the lens is fixed focus, the camera device will report 0.
-
+            <range>If lens is fixed focus, &amp;gt;= 0. If lens has focuser unit, the range is
+            `(0, android.lens.info.minimumFocusDistance]`</range>
+            <details>
             If the lens is not fixed focus, the camera device will report this
             field when android.lens.info.focusDistanceCalibration is APPROXIMATE or CALIBRATED.
             </details>
