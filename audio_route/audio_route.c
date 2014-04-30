@@ -410,7 +410,7 @@ static void start_tag(void *data, const XML_Char *tag_name,
         switch (mixer_ctl_get_type(ctl)) {
         case MIXER_CTL_TYPE_BOOL:
         case MIXER_CTL_TYPE_INT:
-            value = atoi((char *)attr_value);
+            value = (int) strtol((char *)attr_value, NULL, 0);
             break;
         case MIXER_CTL_TYPE_ENUM:
             value = mixer_enum_string_to_value(ctl, (char *)attr_value);
