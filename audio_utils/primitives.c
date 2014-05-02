@@ -126,6 +126,23 @@ void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count)
     }
 }
 
+void memcpy_to_p24_from_q8_23(uint8_t *dst, const int32_t *src, size_t count)
+{
+    while (count--) {
+        int32_t ival = clamp24_from_q8_23(*src++);
+
+#ifdef HAVE_BIG_ENDIAN
+        *dst++ = ival >> 16;
+        *dst++ = ival >> 8;
+        *dst++ = ival;
+#else
+        *dst++ = ival;
+        *dst++ = ival >> 8;
+        *dst++ = ival >> 16;
+#endif
+    }
+}
+
 void memcpy_to_q8_23_from_i16(int32_t *dst, const int16_t *src, size_t count)
 {
     while (count--) {

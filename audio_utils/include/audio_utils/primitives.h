@@ -165,6 +165,17 @@ void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count);
  */
 void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count);
 
+/* Copy samples from signed fixed-point 32-bit Q8.23 to signed fixed-point packed 24 bit Q0.23.
+ * The packed 24 bit output is assumed to be a little-endian uint8_t byte array.
+ * The data is clamped to the range is [0x800000, 0x7fffff].
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must be completely separate.
+ */
+void memcpy_to_p24_from_q8_23(uint8_t *dst, const int32_t *src, size_t count);
+
 /* Copy samples from signed fixed point 16-bit Q0.15 to signed fixed-point 32-bit Q8.23.
  * The output data range is [0xff800000, 0x007fff00] at intervals of 0x100.
  * Parameters:
@@ -370,6 +381,24 @@ static inline int32_t clamp24_from_float(float f)
      * ensure that we round to nearest, ties away from 0.
      */
     return f > 0 ? f + 0.5 : f - 0.5;
+}
+
+/* Convert a signed fixed-point 32-bit Q8.23 value to a Q0.23 integer value,
+ * stored in a 32-bit signed integer (technically stored as Q8.23, but clamped to Q0.23).
+ *
+ * Values outside the range [-0x800000, 0x7fffff] are clamped to that range.
+ */
+static inline int32_t clamp24_from_q8_23(int32_t ival)
+{
+    static const int32_t limpos = 0x7fffff;
+    static const int32_t limneg = -0x800000;
+    if (ival < limneg) {
+        return limneg;
+    } else if (ival > limpos) {
+        return limpos;
+    } else {
+        return ival;
+    }
 }
 
 /* Convert a single-precision floating point value to a Q4.27 integer value.
