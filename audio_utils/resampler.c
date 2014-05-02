@@ -156,7 +156,6 @@ int resampler_resample_from_input(struct resampler_itfe *resampler,
                                   size_t *outFrameCount)
 {
     struct resampler *rsmp = (struct resampler *)resampler;
-    spx_uint32_t inFrames, outFrames;
 
     if (rsmp == NULL || in == NULL || inFrameCount == NULL ||
             out == NULL || outFrameCount == NULL) {
@@ -171,19 +170,16 @@ int resampler_resample_from_input(struct resampler_itfe *resampler,
         speex_resampler_process_int(rsmp->speex_resampler,
                                     0,
                                     in,
-                                    &inFrames,
+                                    (spx_uint32_t *)inFrameCount,
                                     out,
-                                    &outFrames);
+                                    (spx_uint32_t *)outFrameCount);
     } else {
         speex_resampler_process_interleaved_int(rsmp->speex_resampler,
                                                 in,
-                                                &inFrames,
+                                                (spx_uint32_t *)inFrameCount,
                                                 out,
-                                                &outFrames);
+                                                (spx_uint32_t *)outFrameCount);
     }
-
-    *inFrameCount = inFrames;
-    *outFrameCount = outFrames;
 
     ALOGV("resampler_resample_from_input() DONE in %zu out %zu", *inFrameCount, *outFrameCount);
 
