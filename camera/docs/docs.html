@@ -116,6 +116,7 @@
         <li>
           <span class="toc_kind_header">dynamic</span>
           <ul class="toc_section">
+            <li><a href="#dynamic_android.colorCorrection.mode">android.colorCorrection.mode</a></li>
             <li><a href="#dynamic_android.colorCorrection.transform">android.colorCorrection.transform</a></li>
             <li><a href="#dynamic_android.colorCorrection.gains">android.colorCorrection.gains</a></li>
           </ul>
@@ -169,17 +170,28 @@
           <span class="toc_kind_header">dynamic</span>
           <ul class="toc_section">
             <li><a href="#dynamic_android.control.aePrecaptureId">android.control.aePrecaptureId</a></li>
+            <li><a href="#dynamic_android.control.aeAntibandingMode">android.control.aeAntibandingMode</a></li>
+            <li><a href="#dynamic_android.control.aeExposureCompensation">android.control.aeExposureCompensation</a></li>
+            <li><a href="#dynamic_android.control.aeLock">android.control.aeLock</a></li>
             <li><a href="#dynamic_android.control.aeMode">android.control.aeMode</a></li>
             <li><a href="#dynamic_android.control.aeRegions">android.control.aeRegions</a></li>
+            <li><a href="#dynamic_android.control.aeTargetFpsRange">android.control.aeTargetFpsRange</a></li>
+            <li><a href="#dynamic_android.control.aePrecaptureTrigger">android.control.aePrecaptureTrigger</a></li>
             <li><a href="#dynamic_android.control.aeState">android.control.aeState</a></li>
             <li><a href="#dynamic_android.control.afMode">android.control.afMode</a></li>
             <li><a href="#dynamic_android.control.afRegions">android.control.afRegions</a></li>
+            <li><a href="#dynamic_android.control.afTrigger">android.control.afTrigger</a></li>
             <li><a href="#dynamic_android.control.afState">android.control.afState</a></li>
             <li><a href="#dynamic_android.control.afTriggerId">android.control.afTriggerId</a></li>
+            <li><a href="#dynamic_android.control.awbLock">android.control.awbLock</a></li>
             <li><a href="#dynamic_android.control.awbMode">android.control.awbMode</a></li>
             <li><a href="#dynamic_android.control.awbRegions">android.control.awbRegions</a></li>
+            <li><a href="#dynamic_android.control.captureIntent">android.control.captureIntent</a></li>
             <li><a href="#dynamic_android.control.awbState">android.control.awbState</a></li>
+            <li><a href="#dynamic_android.control.effectMode">android.control.effectMode</a></li>
             <li><a href="#dynamic_android.control.mode">android.control.mode</a></li>
+            <li><a href="#dynamic_android.control.sceneMode">android.control.sceneMode</a></li>
+            <li><a href="#dynamic_android.control.videoStabilizationMode">android.control.videoStabilizationMode</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -529,6 +541,7 @@
             <li><a href="#dynamic_android.sensor.profileHueSatMap">android.sensor.profileHueSatMap</a></li>
             <li><a href="#dynamic_android.sensor.profileToneCurve">android.sensor.profileToneCurve</a></li>
             <li><a href="#dynamic_android.sensor.greenSplit">android.sensor.greenSplit</a></li>
+            <li><a href="#dynamic_android.sensor.testPatternData">android.sensor.testPatternData</a></li>
             <li><a href="#dynamic_android.sensor.testPatternMode">android.sensor.testPatternMode</a></li>
           </ul>
         </li>
@@ -597,6 +610,7 @@
             <li><a href="#dynamic_android.statistics.sceneFlicker">android.statistics.sceneFlicker</a></li>
             <li><a href="#dynamic_android.statistics.hotPixelMapMode">android.statistics.hotPixelMapMode</a></li>
             <li><a href="#dynamic_android.statistics.hotPixelMap">android.statistics.hotPixelMap</a></li>
+            <li><a href="#dynamic_android.statistics.lensShadingMapMode">android.statistics.lensShadingMapMode</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -992,6 +1006,116 @@ the current frame.<wbr/></p>
 
         
 
+                
+          <tr class="entry" id="dynamic_android.colorCorrection.mode">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>color<wbr/>Correction.<wbr/>mode
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">TRANSFORM_MATRIX</span>
+                    <span class="entry_type_enum_notes"><p>Use the <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a> matrix
+and <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> to do color conversion.<wbr/></p>
+<p>All advanced white balance adjustments (not specified
+by our white balance pipeline) must be disabled.<wbr/></p>
+<p>If AWB is enabled with <code><a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> != OFF</code>,<wbr/> then
+TRANSFORM_<wbr/>MATRIX is ignored.<wbr/> The camera device will override
+this value to either FAST or HIGH_<wbr/>QUALITY.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">FAST</span>
+                    <span class="entry_type_enum_notes"><p>Must not slow down capture rate relative to sensor raw
+output.<wbr/></p>
+<p>Advanced white balance adjustments above and beyond
+the specified white balance pipeline may be applied.<wbr/></p>
+<p>If AWB is enabled with <code><a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> != OFF</code>,<wbr/> then
+the camera device uses the last frame's AWB values
+(or defaults if AWB has never been run).<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">HIGH_QUALITY</span>
+                    <span class="entry_type_enum_notes"><p>Capture rate (relative to sensor raw output)
+may be reduced by high quality.<wbr/></p>
+<p>Advanced white balance adjustments above and beyond
+the specified white balance pipeline may be applied.<wbr/></p>
+<p>If AWB is enabled with <code><a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> != OFF</code>,<wbr/> then
+the camera device uses the last frame's AWB values
+(or defaults if AWB has never been run).<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The mode control selects how the image data is converted from the
+sensor's native color into linear sRGB color.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When auto-white balance is enabled with <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> this
+control is overridden by the AWB routine.<wbr/> When AWB is disabled,<wbr/> the
+application controls how the color mapping is performed.<wbr/></p>
+<p>We define the expected processing pipeline below.<wbr/> For consistency
+across devices,<wbr/> this is always the case with TRANSFORM_<wbr/>MATRIX.<wbr/></p>
+<p>When either FULL or HIGH_<wbr/>QUALITY is used,<wbr/> the camera device may
+do additional processing but <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> and
+<a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a> will still be provided by the
+camera device (in the results) and be roughly correct.<wbr/></p>
+<p>Switching to TRANSFORM_<wbr/>MATRIX and using the data provided from
+FAST or HIGH_<wbr/>QUALITY will yield a picture with the same white point
+as what was produced by the camera device in the earlier frame.<wbr/></p>
+<p>The expected processing pipeline is as follows:</p>
+<p><img alt="White balance processing pipeline" src="images/camera2/metadata/android.colorCorrection.mode/processing_pipeline.png"/></p>
+<p>The white balance is encoded by two values,<wbr/> a 4-channel white-balance
+gain vector (applied in the Bayer domain),<wbr/> and a 3x3 color transform
+matrix (applied after demosaic).<wbr/></p>
+<p>The 4-channel white-balance gains are defined as:</p>
+<pre><code><a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> = [ R G_<wbr/>even G_<wbr/>odd B ]
+</code></pre>
+<p>where <code>G_<wbr/>even</code> is the gain for green pixels on even rows of the
+output,<wbr/> and <code>G_<wbr/>odd</code> is the gain for green pixels on the odd rows.<wbr/>
+These may be identical for a given camera device implementation; if
+the camera device does not support a separate gain for even/<wbr/>odd green
+channels,<wbr/> it will use the <code>G_<wbr/>even</code> value,<wbr/> and write <code>G_<wbr/>odd</code> equal to
+<code>G_<wbr/>even</code> in the output result metadata.<wbr/></p>
+<p>The matrices for color transforms are defined as a 9-entry vector:</p>
+<pre><code><a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a> = [ I0 I1 I2 I3 I4 I5 I6 I7 I8 ]
+</code></pre>
+<p>which define a transform from input sensor colors,<wbr/> <code>P_<wbr/>in = [ r g b ]</code>,<wbr/>
+to output linear sRGB,<wbr/> <code>P_<wbr/>out = [ r' g' b' ]</code>,<wbr/></p>
+<p>with colors as follows:</p>
+<pre><code>r' = I0r + I1g + I2b
+g' = I3r + I4g + I5b
+b' = I6r + I7g + I8b
+</code></pre>
+<p>Both the input and output value ranges must match.<wbr/> Overflow/<wbr/>underflow
+values are clipped to fit within the range.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
                 
           <tr class="entry" id="dynamic_android.colorCorrection.transform">
             <td class="entry_name" rowspan="3">
@@ -3369,6 +3493,228 @@ trigger</p>
            <!-- end of entry -->
         
                 
+          <tr class="entry" id="dynamic_android.control.aeAntibandingMode">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>control.<wbr/>ae<wbr/>Antibanding<wbr/>Mode
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                    <span class="entry_type_enum_notes"><p>The camera device will not adjust exposure duration to
+avoid banding problems.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">50HZ</span>
+                    <span class="entry_type_enum_notes"><p>The camera device will adjust exposure duration to
+avoid banding problems with 50Hz illumination sources.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">60HZ</span>
+                    <span class="entry_type_enum_notes"><p>The camera device will adjust exposure duration to
+avoid banding problems with 60Hz illumination
+sources.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">AUTO</span>
+                    <span class="entry_type_enum_notes"><p>The camera device will automatically adapt its
+antibanding routine to the current illumination
+conditions.<wbr/> This is the default.<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The desired setting for the camera device's auto-exposure
+algorithm's antibanding compensation.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p><a href="#static_android.control.aeAvailableAntibandingModes">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Antibanding<wbr/>Modes</a></p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Some kinds of lighting fixtures,<wbr/> such as some fluorescent
+lights,<wbr/> flicker at the rate of the power supply frequency
+(60Hz or 50Hz,<wbr/> depending on country).<wbr/> While this is
+typically not noticeable to a person,<wbr/> it can be visible to
+a camera device.<wbr/> If a camera sets its exposure time to the
+wrong value,<wbr/> the flicker may become visible in the
+viewfinder as flicker or in a final captured image,<wbr/> as a
+set of variable-brightness bands across the image.<wbr/></p>
+<p>Therefore,<wbr/> the auto-exposure routines of camera devices
+include antibanding routines that ensure that the chosen
+exposure value will not cause such banding.<wbr/> The choice of
+exposure time depends on the rate of flicker,<wbr/> which the
+camera device can detect automatically,<wbr/> or the expected
+rate can be selected by the application using this
+control.<wbr/></p>
+<p>A given camera device may not support all of the possible
+options for the antibanding mode.<wbr/> The
+<a href="#static_android.control.aeAvailableAntibandingModes">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Antibanding<wbr/>Modes</a> key contains
+the available modes for a given camera device.<wbr/></p>
+<p>The default mode is AUTO,<wbr/> which must be supported by all
+camera devices.<wbr/></p>
+<p>If manual exposure control is enabled (by setting
+<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> or <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> to OFF),<wbr/>
+then this setting has no effect,<wbr/> and the application must
+ensure it selects exposure times that do not cause banding
+issues.<wbr/> The <a href="#dynamic_android.statistics.sceneFlicker">android.<wbr/>statistics.<wbr/>scene<wbr/>Flicker</a> key can assist
+the application in this.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For all capture request templates,<wbr/> this field must be set
+to AUTO.<wbr/>  AUTO is the only mode that must supported;
+OFF,<wbr/> 50HZ,<wbr/> 60HZ are all optional.<wbr/></p>
+<p>If manual exposure control is enabled (by setting
+<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> or <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> to OFF),<wbr/>
+then the exposure values provided by the application must not be
+adjusted for antibanding.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.control.aeExposureCompensation">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>control.<wbr/>ae<wbr/>Exposure<wbr/>Compensation
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Adjustment to AE target image
+brightness</p>
+            </td>
+
+            <td class="entry_units">
+              count of positive/<wbr/>negative EV steps
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For example,<wbr/> if EV step is 0.<wbr/>333,<wbr/> '6' will mean an
+exposure compensation of +2 EV; -3 will mean an exposure
+compensation of -1</p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.control.aeLock">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>control.<wbr/>ae<wbr/>Lock
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public as boolean]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                    <span class="entry_type_enum_notes"><p>Autoexposure lock is disabled; the AE algorithm
+is free to update its parameters.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON</span>
+                    <span class="entry_type_enum_notes"><p>Autoexposure lock is enabled; the AE algorithm
+must not update the exposure and sensitivity parameters
+while the lock is active</p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Whether AE is currently locked to its latest
+calculated values.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Note that even when AE is locked,<wbr/> the flash may be
+fired if the <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is ON_<wbr/>AUTO_<wbr/>FLASH /<wbr/> ON_<wbr/>ALWAYS_<wbr/>FLASH /<wbr/>
+ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE.<wbr/></p>
+<p>If AE precapture is triggered (see <a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>)
+when AE is already locked,<wbr/> the camera device will not change the exposure time
+(<a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>) and sensitivity (<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>)
+parameters.<wbr/> The flash may be fired if the <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>
+is ON_<wbr/>AUTO_<wbr/>FLASH/<wbr/>ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE and the scene is too dark.<wbr/> If the
+<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is ON_<wbr/>ALWAYS_<wbr/>FLASH,<wbr/> the scene may become overexposed.<wbr/></p>
+<p>See <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> for AE lock related state transition details.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
           <tr class="entry" id="dynamic_android.control.aeMode">
             <td class="entry_name" rowspan="3">
               android.<wbr/>control.<wbr/>ae<wbr/>Mode
@@ -3535,6 +3881,118 @@ needs to be used by the camera device.<wbr/> If the metering region is
 outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
 will ignore the sections outside the region and output the
 used sections in the frame metadata.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.control.aeTargetFpsRange">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>control.<wbr/>ae<wbr/>Target<wbr/>Fps<wbr/>Range
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  2
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Range over which fps can be adjusted to
+maintain exposure</p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p><a href="#static_android.control.aeAvailableTargetFpsRanges">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Target<wbr/>Fps<wbr/>Ranges</a></p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Only constrains AE algorithm,<wbr/> not manual control
+of <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.control.aePrecaptureTrigger">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">IDLE</span>
+                    <span class="entry_type_enum_notes"><p>The trigger is idle.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">START</span>
+                    <span class="entry_type_enum_notes"><p>The precapture metering sequence will be started
+by the camera device.<wbr/> The exact effect of the precapture
+trigger depends on the current AE mode and state.<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Whether the camera device will trigger a precapture
+metering sequence when it processes this request.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This entry is normally set to IDLE,<wbr/> or is not
+included at all in the request settings.<wbr/> When included and
+set to START,<wbr/> the camera device will trigger the autoexposure
+precapture metering sequence.<wbr/></p>
+<p>The effect of AE precapture trigger depends on the current
+AE mode and state; see <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> for AE precapture
+state transition details.<wbr/></p>
             </td>
           </tr>
 
@@ -3977,6 +4435,70 @@ needs to be used by the camera device.<wbr/> If the focusing region is
 outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
 will ignore the sections outside the region and output the
 used sections in the frame metadata.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.control.afTrigger">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>control.<wbr/>af<wbr/>Trigger
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">IDLE</span>
+                    <span class="entry_type_enum_notes"><p>The trigger is idle.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">START</span>
+                    <span class="entry_type_enum_notes"><p>Autofocus will trigger now.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">CANCEL</span>
+                    <span class="entry_type_enum_notes"><p>Autofocus will return to its initial
+state,<wbr/> and cancel any currently active trigger.<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Whether the camera device will trigger autofocus for this request.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This entry is normally set to IDLE,<wbr/> or is not
+included at all in the request settings.<wbr/></p>
+<p>When included and set to START,<wbr/> the camera device will trigger the
+autofocus algorithm.<wbr/> If autofocus is disabled,<wbr/> this trigger has no effect.<wbr/></p>
+<p>When set to CANCEL,<wbr/> the camera device will cancel any active trigger,<wbr/>
+and return to its initial AF state.<wbr/></p>
+<p>See <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a> for what that means for each AF mode.<wbr/></p>
             </td>
           </tr>
 
@@ -4497,6 +5019,66 @@ ignores the trigger</p>
            <!-- end of entry -->
         
                 
+          <tr class="entry" id="dynamic_android.control.awbLock">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>control.<wbr/>awb<wbr/>Lock
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public as boolean]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                    <span class="entry_type_enum_notes"><p>Auto-whitebalance lock is disabled; the AWB
+algorithm is free to update its parameters if in AUTO
+mode.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON</span>
+                    <span class="entry_type_enum_notes"><p>Auto-whitebalance lock is enabled; the AWB
+algorithm must not update its parameters while the lock
+is active.<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Whether AWB is currently locked to its
+latest calculated values.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Note that AWB lock is only meaningful for AUTO
+mode; in other modes,<wbr/> AWB is already fixed to a specific
+setting.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
           <tr class="entry" id="dynamic_android.control.awbMode">
             <td class="entry_name" rowspan="3">
               android.<wbr/>control.<wbr/>awb<wbr/>Mode
@@ -4684,6 +5266,99 @@ used sections in the frame metadata.<wbr/></p>
            <!-- end of entry -->
         
                 
+          <tr class="entry" id="dynamic_android.control.captureIntent">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>control.<wbr/>capture<wbr/>Intent
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">CUSTOM</span>
+                    <span class="entry_type_enum_notes"><p>This request doesn't fall into the other
+categories.<wbr/> Default to preview-like
+behavior.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">PREVIEW</span>
+                    <span class="entry_type_enum_notes"><p>This request is for a preview-like usecase.<wbr/> The
+precapture trigger may be used to start off a metering
+w/<wbr/>flash sequence</p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">STILL_CAPTURE</span>
+                    <span class="entry_type_enum_notes"><p>This request is for a still capture-type
+usecase.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">VIDEO_RECORD</span>
+                    <span class="entry_type_enum_notes"><p>This request is for a video recording
+usecase.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">VIDEO_SNAPSHOT</span>
+                    <span class="entry_type_enum_notes"><p>This request is for a video snapshot (still
+image while recording video) usecase</p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
+                    <span class="entry_type_enum_notes"><p>This request is for a ZSL usecase; the
+application will stream full-resolution images and
+reprocess one or several later for a final
+capture</p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">MANUAL</span>
+                    <span class="entry_type_enum_notes"><p>This request is for manual capture use case where
+the applications want to directly control the capture parameters
+(e.<wbr/>g.<wbr/> <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>,<wbr/> <a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> etc.<wbr/>).<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Information to the camera device 3A (auto-exposure,<wbr/>
+auto-focus,<wbr/> auto-white balance) routines about the purpose
+of this capture,<wbr/> to help the camera device to decide optimal 3A
+strategy.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>All must be supported except for ZERO_<wbr/>SHUTTER_<wbr/>LAG and MANUAL.<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This control (except for MANUAL) is only effective if
+<code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF</code> and any 3A routine is active.<wbr/></p>
+<p>ZERO_<wbr/>SHUTTER_<wbr/>LAG must be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
+contains ZSL.<wbr/> MANUAL must be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
+contains MANUAL_<wbr/>SENSOR.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
           <tr class="entry" id="dynamic_android.control.awbState">
             <td class="entry_name" rowspan="3">
               android.<wbr/>control.<wbr/>awb<wbr/>State
@@ -4861,6 +5536,112 @@ transient states between two results.<wbr/> See below table for examples:</p>
            <!-- end of entry -->
         
                 
+          <tr class="entry" id="dynamic_android.control.effectMode">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>control.<wbr/>effect<wbr/>Mode
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                    <span class="entry_type_enum_notes"><p>No color effect will be applied.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">MONO</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "monocolor" effect where the image is mapped into
+a single color.<wbr/>  This will typically be grayscale.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">NEGATIVE</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "photo-negative" effect where the image's colors
+are inverted.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">SOLARIZE</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "solarisation" effect (Sabattier effect) where the
+image is wholly or partially reversed in
+tone.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">SEPIA</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "sepia" effect where the image is mapped into warm
+gray,<wbr/> red,<wbr/> and brown tones.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">POSTERIZE</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "posterization" effect where the image uses
+discrete regions of tone rather than a continuous
+gradient of tones.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">WHITEBOARD</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "whiteboard" effect where the image is typically displayed
+as regions of white,<wbr/> with black or grey details.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">BLACKBOARD</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>A "blackboard" effect where the image is typically displayed
+as regions of black,<wbr/> with white or grey details.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">AQUA</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>An "aqua" effect where a blue hue is added to the image.<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A special color effect to apply.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p><a href="#static_android.control.availableEffects">android.<wbr/>control.<wbr/>available<wbr/>Effects</a></p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When this mode is set,<wbr/> a color effect will be applied
+to images produced by the camera device.<wbr/> The interpretation
+and implementation of these color effects is left to the
+implementor of the camera device,<wbr/> and should not be
+depended on to be consistent (or present) across all
+devices.<wbr/></p>
+<p>A color effect will only be applied if
+<a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
           <tr class="entry" id="dynamic_android.control.mode">
             <td class="entry_name" rowspan="3">
               android.<wbr/>control.<wbr/>mode
@@ -4944,6 +5725,226 @@ is that this frame will not be used by camera device background 3A statistics
 update,<wbr/> as if this frame is never captured.<wbr/> This mode can be used in the scenario
 where the application doesn't want a 3A manual control capture to affect
 the subsequent auto 3A capture results.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.control.sceneMode">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>control.<wbr/>scene<wbr/>Mode
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">DISABLED</span>
+                    <span class="entry_type_enum_value">0</span>
+                    <span class="entry_type_enum_notes"><p>Indicates that no scene modes are set for a given capture request.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">FACE_PRIORITY</span>
+                    <span class="entry_type_enum_notes"><p>If face detection support exists,<wbr/> use face
+detection data for auto-focus,<wbr/> auto-white balance,<wbr/> and
+auto-exposure routines.<wbr/> If face detection statistics are
+disabled (i.<wbr/>e.<wbr/> <a href="#controls_android.statistics.faceDetectMode">android.<wbr/>statistics.<wbr/>face<wbr/>Detect<wbr/>Mode</a> is set to OFF),<wbr/>
+this should still operate correctly (but will not return
+face detection statistics to the framework).<wbr/></p>
+<p>Unlike the other scene modes,<wbr/> <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>
+remain active when FACE_<wbr/>PRIORITY is set.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ACTION</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for photos of quickly moving objects.<wbr/>
+Similar to SPORTS.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">PORTRAIT</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for still photos of people.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">LANDSCAPE</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for photos of distant macroscopic objects.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">NIGHT</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for low-light settings.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">NIGHT_PORTRAIT</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for still photos of people in low-light
+settings.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">THEATRE</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for dim,<wbr/> indoor settings where flash must
+remain off.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">BEACH</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for bright,<wbr/> outdoor beach settings.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">SNOW</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for bright,<wbr/> outdoor settings containing snow.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">SUNSET</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for scenes of the setting sun.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">STEADYPHOTO</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized to avoid blurry photos due to small amounts of
+device motion (for example: due to hand shake).<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">FIREWORKS</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for nighttime photos of fireworks.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">SPORTS</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for photos of quickly moving people.<wbr/>
+Similar to ACTION.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">PARTY</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for dim,<wbr/> indoor settings with multiple moving
+people.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">CANDLELIGHT</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for dim settings where the main light source
+is a flame.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">BARCODE</span>
+                    <span class="entry_type_enum_optional">optional</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for accurately capturing a photo of barcode
+for use by camera applications that wish to read the
+barcode value.<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A camera mode optimized for conditions typical in a particular
+capture setting.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p><a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a></p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This is the mode that that is active when
+<code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == USE_<wbr/>SCENE_<wbr/>MODE</code>.<wbr/> Aside from FACE_<wbr/>PRIORITY,<wbr/>
+these modes will disable <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> while in use.<wbr/></p>
+<p>The interpretation and implementation of these scene modes is left
+to the implementor of the camera device.<wbr/> Their behavior will not be
+consistent across all devices,<wbr/> and any given device may only implement
+a subset of these modes.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>HAL implementations that include scene modes are expected to provide
+the per-scene settings to use for <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> in
+<a href="#static_android.control.sceneModeOverrides">android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides</a>.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.control.videoStabilizationMode">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>control.<wbr/>video<wbr/>Stabilization<wbr/>Mode
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Whether video stabilization is
+active</p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>If enabled,<wbr/> video stabilization can modify the
+<a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> to keep the video stream
+stabilized</p>
             </td>
           </tr>
 
@@ -13978,6 +14979,67 @@ results,<wbr/> and can be interpreted in the same manner,<wbr/> may be used.<wbr
            <!-- end of entry -->
         
                 
+          <tr class="entry" id="dynamic_android.sensor.testPatternData">
+            <td class="entry_name" rowspan="5">
+              android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Data
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>A pixel <code>[R,<wbr/> G_<wbr/>even,<wbr/> G_<wbr/>odd,<wbr/> B]</code> that supplies the test pattern
+when <a href="#controls_android.sensor.testPatternMode">android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Mode</a> is SOLID_<wbr/>COLOR.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Optional.<wbr/>
+Must be supported if <a href="#static_android.sensor.availableTestPatternModes">android.<wbr/>sensor.<wbr/>available<wbr/>Test<wbr/>Pattern<wbr/>Modes</a> contains
+SOLID_<wbr/>COLOR.<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Each color channel is treated as an unsigned 32-bit integer.<wbr/>
+The camera device then uses the most significant X bits
+that correspond to how many bits are in its Bayer raw sensor
+output.<wbr/></p>
+<p>For example,<wbr/> a sensor with RAW10 Bayer output would use the
+10 most significant bits from each color channel.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
           <tr class="entry" id="dynamic_android.sensor.testPatternMode">
             <td class="entry_name" rowspan="5">
               android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Mode
@@ -15828,6 +16890,57 @@ incoming light from the scene.<wbr/></p>
 pixels than actual pixels on the camera sensor.<wbr/></p>
             </td>
           </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.statistics.lensShadingMapMode">
+            <td class="entry_name" rowspan="3">
+              android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map<wbr/>Mode
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OFF</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">ON</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Whether the camera device will output the lens
+shading map in output result metadata.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When set to ON,<wbr/>
+<a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a> must be provided in
+the output result metadata.<wbr/></p>
+            </td>
+          </tr>
+
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->

@@ -214,6 +214,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </controls>
       <dynamic>
+        <clone entry="android.colorCorrection.mode" kind="controls">
+        </clone>
         <clone entry="android.colorCorrection.transform" kind="controls">
         </clone>
         <clone entry="android.colorCorrection.gains" kind="controls">
@@ -1331,9 +1333,19 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           by HAL. Always updated even if AE algorithm ignores the
           trigger</details>
         </entry>
+        <clone entry="android.control.aeAntibandingMode" kind="controls">
+        </clone>
+        <clone entry="android.control.aeExposureCompensation" kind="controls">
+        </clone>
+        <clone entry="android.control.aeLock" kind="controls">
+        </clone>
         <clone entry="android.control.aeMode" kind="controls">
         </clone>
         <clone entry="android.control.aeRegions" kind="controls">
+        </clone>
+        <clone entry="android.control.aeTargetFpsRange" kind="controls">
+        </clone>
+        <clone entry="android.control.aePrecaptureTrigger" kind="controls">
         </clone>
         <entry name="aeState" type="byte" visibility="public" enum="true">
           <enum>
@@ -1422,6 +1434,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <clone entry="android.control.afMode" kind="controls">
         </clone>
         <clone entry="android.control.afRegions" kind="controls">
+        </clone>
+        <clone entry="android.control.afTrigger" kind="controls">
         </clone>
         <entry name="afState" type="byte" visibility="public" enum="true">
           <enum>
@@ -1573,9 +1587,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           received yet by HAL. Always updated even if AF algorithm
           ignores the trigger</details>
         </entry>
+        <clone entry="android.control.awbLock" kind="controls">
+        </clone>
         <clone entry="android.control.awbMode" kind="controls">
         </clone>
         <clone entry="android.control.awbRegions" kind="controls">
+        </clone>
+        <clone entry="android.control.captureIntent" kind="controls">
         </clone>
         <entry name="awbState" type="byte" visibility="public" enum="true">
           <enum>
@@ -1642,7 +1660,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           LOCKED         | android.control.awbLock is OFF   | CONVERGED     | Values good after unlock, transient states are skipped by camera device.
           </details>
         </entry>
+        <clone entry="android.control.effectMode" kind="controls">
+        </clone>
         <clone entry="android.control.mode" kind="controls">
+        </clone>
+        <clone entry="android.control.sceneMode" kind="controls">
+        </clone>
+        <clone entry="android.control.videoStabilizationMode" kind="controls">
         </clone>
       </dynamic>
     </section>
@@ -4580,6 +4604,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </controls>
       <dynamic>
+        <clone entry="android.sensor.testPatternData" kind="controls">
+        </clone>
         <clone entry="android.sensor.testPatternMode" kind="controls">
         </clone>
       </dynamic>
@@ -5050,6 +5076,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           the output result metadata.</details>
         </entry>
       </controls>
+      <dynamic>
+        <clone entry="android.statistics.lensShadingMapMode" kind="controls">
+        </clone>
+      </dynamic>
     </section>
     <section name="tonemap">
       <controls>
