@@ -141,7 +141,7 @@ void memcpy_to_float_from_p24(float *dst, const uint8_t *src, size_t count);
 void memcpy_to_i16_from_p24(int16_t *dst, const uint8_t *src, size_t count);
 
 /* Copy samples from signed fixed point 16 bit Q0.15 to signed fixed-point packed 24 bit Q0.23.
- * The packed 24 bit output is assumed to be a little-endian uint8_t byte array.
+ * The packed 24 bit output is assumed to be a native-endian uint8_t byte array.
  * The output data range is [0x800000, 0x7fff00] (not full).
  * Nevertheless there is no DC offset on the output, if the input has no DC offset.
  * Parameters:
@@ -153,7 +153,7 @@ void memcpy_to_i16_from_p24(int16_t *dst, const uint8_t *src, size_t count);
 void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count);
 
 /* Copy samples from single-precision floating-point to signed fixed-point packed 24 bit Q0.23.
- * The packed 24 bit output is assumed to be a little-endian uint8_t byte array.
+ * The packed 24 bit output is assumed to be a native-endian uint8_t byte array.
  * The data is clamped and rounded to nearest, ties away from zero. See clamp24_from_float()
  * for details.
  * Parameters:
@@ -166,7 +166,7 @@ void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count);
 void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count);
 
 /* Copy samples from signed fixed-point 32-bit Q8.23 to signed fixed-point packed 24 bit Q0.23.
- * The packed 24 bit output is assumed to be a little-endian uint8_t byte array.
+ * The packed 24 bit output is assumed to be a native-endian uint8_t byte array.
  * The data is clamped to the range is [0x800000, 0x7fffff].
  * Parameters:
  *  dst     Destination buffer
@@ -493,7 +493,7 @@ static inline float float_from_i16(int16_t ival)
     return ival * scale;
 }
 
-/* Convert a packed 24bit Q0.23 value stored little-endian in a uint8_t ptr
+/* Convert a packed 24bit Q0.23 value stored native-endian in a uint8_t ptr
  * to a signed fixed-point 32 bit integer Q0.31 value. The output Q0.31 range
  * is [0x80000000, 0x7fffff00] for the fixed-point range [0x800000, 0x7fffff].
  * Even though the output range is limited on the positive side, there is no
