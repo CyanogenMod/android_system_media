@@ -1408,7 +1408,15 @@ brightness</p>
             <td class="entry_details" colspan="5">
               <p>For example,<wbr/> if EV step is 0.<wbr/>333,<wbr/> '6' will mean an
 exposure compensation of +2 EV; -3 will mean an exposure
-compensation of -1</p>
+compensation of -1 EV.<wbr/> Note that this control will only be effective
+if <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>!=</code> OFF.<wbr/> This control will take effect even when
+<a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> <code>==</code> true.<wbr/></p>
+<p>In the event of exposure compensation value being changed,<wbr/> camera device
+may take several frames to reach the newly requested exposure target.<wbr/>
+During that time,<wbr/> <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> field will be in the searching
+state.<wbr/> Once the new exposure target is reached,<wbr/> <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> will
+change from SEARCHING to either CONVERGED,<wbr/> LOCKED (if AE lock is enabled),<wbr/> or
+FLASH_<wbr/>REQUIRED (if the scene is too dark for still capture)</p>
             </td>
           </tr>
 
@@ -1436,7 +1444,9 @@ is free to update its parameters.<wbr/></p></span>
                     <span class="entry_type_enum_name">ON</span>
                     <span class="entry_type_enum_notes"><p>Autoexposure lock is enabled; the AE algorithm
 must not update the exposure and sensitivity parameters
-while the lock is active</p></span>
+while the lock is active.<wbr/> However,<wbr/>
+<a href="#controls_android.control.aeExposureCompensation">android.<wbr/>control.<wbr/>ae<wbr/>Exposure<wbr/>Compensation</a> setting changes will still
+take effect while auto-exposure is locked.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -1468,6 +1478,8 @@ calculated values.<wbr/></p>
               <p>Note that even when AE is locked,<wbr/> the flash may be
 fired if the <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is ON_<wbr/>AUTO_<wbr/>FLASH /<wbr/> ON_<wbr/>ALWAYS_<wbr/>FLASH /<wbr/>
 ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE.<wbr/></p>
+<p>When <a href="#controls_android.control.aeExposureCompensation">android.<wbr/>control.<wbr/>ae<wbr/>Exposure<wbr/>Compensation</a> is changed,<wbr/> even if the AE lock
+is ON,<wbr/> the camera device will still adjust its exposure value.<wbr/></p>
 <p>If AE precapture is triggered (see <a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>)
 when AE is already locked,<wbr/> the camera device will not change the exposure time
 (<a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>) and sensitivity (<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>)
@@ -3640,7 +3652,15 @@ brightness</p>
             <td class="entry_details" colspan="5">
               <p>For example,<wbr/> if EV step is 0.<wbr/>333,<wbr/> '6' will mean an
 exposure compensation of +2 EV; -3 will mean an exposure
-compensation of -1</p>
+compensation of -1 EV.<wbr/> Note that this control will only be effective
+if <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>!=</code> OFF.<wbr/> This control will take effect even when
+<a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> <code>==</code> true.<wbr/></p>
+<p>In the event of exposure compensation value being changed,<wbr/> camera device
+may take several frames to reach the newly requested exposure target.<wbr/>
+During that time,<wbr/> <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> field will be in the searching
+state.<wbr/> Once the new exposure target is reached,<wbr/> <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> will
+change from SEARCHING to either CONVERGED,<wbr/> LOCKED (if AE lock is enabled),<wbr/> or
+FLASH_<wbr/>REQUIRED (if the scene is too dark for still capture)</p>
             </td>
           </tr>
 
@@ -3668,7 +3688,9 @@ is free to update its parameters.<wbr/></p></span>
                     <span class="entry_type_enum_name">ON</span>
                     <span class="entry_type_enum_notes"><p>Autoexposure lock is enabled; the AE algorithm
 must not update the exposure and sensitivity parameters
-while the lock is active</p></span>
+while the lock is active.<wbr/> However,<wbr/>
+<a href="#controls_android.control.aeExposureCompensation">android.<wbr/>control.<wbr/>ae<wbr/>Exposure<wbr/>Compensation</a> setting changes will still
+take effect while auto-exposure is locked.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -3700,6 +3722,8 @@ calculated values.<wbr/></p>
               <p>Note that even when AE is locked,<wbr/> the flash may be
 fired if the <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is ON_<wbr/>AUTO_<wbr/>FLASH /<wbr/> ON_<wbr/>ALWAYS_<wbr/>FLASH /<wbr/>
 ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE.<wbr/></p>
+<p>When <a href="#controls_android.control.aeExposureCompensation">android.<wbr/>control.<wbr/>ae<wbr/>Exposure<wbr/>Compensation</a> is changed,<wbr/> even if the AE lock
+is ON,<wbr/> the camera device will still adjust its exposure value.<wbr/></p>
 <p>If AE precapture is triggered (see <a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>)
 when AE is already locked,<wbr/> the camera device will not change the exposure time
 (<a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>) and sensitivity (<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>)
