@@ -4269,7 +4269,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="profileHueSatMapDimensions" type="int32"
-        visibility="public" optional="true"
+        visibility="system" optional="true"
         type_notes="Number of samples for hue, saturation, and value"
         container="array">
           <array>
@@ -4343,7 +4343,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="DNG" />
         </entry>
         <entry name="profileHueSatMap" type="float"
-        visibility="public" optional="true"
+        visibility="system" optional="true"
         type_notes="Mapping for hue, saturation, and value"
         container="array">
           <array>
@@ -4375,7 +4375,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="DNG" />
         </entry>
         <entry name="profileToneCurve" type="float"
-        visibility="public" optional="true"
+        visibility="system" optional="true"
         type_notes="Samples defining a spline for a tone-mapping curve"
         container="array">
           <array>

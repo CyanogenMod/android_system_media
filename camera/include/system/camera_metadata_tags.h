@@ -280,12 +280,12 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_BLACK_LEVEL_PATTERN,               // int32[]      | public
     ANDROID_SENSOR_MAX_ANALOG_SENSITIVITY,            // int32        | public
     ANDROID_SENSOR_ORIENTATION,                       // int32        | public
-    ANDROID_SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS,    // int32[]      | public
+    ANDROID_SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS,    // int32[]      | system
     ANDROID_SENSOR_TIMESTAMP,                         // int64        | public
     ANDROID_SENSOR_TEMPERATURE,                       // float        | public
     ANDROID_SENSOR_NEUTRAL_COLOR_POINT,               // rational[]   | public
-    ANDROID_SENSOR_PROFILE_HUE_SAT_MAP,               // float[]      | public
-    ANDROID_SENSOR_PROFILE_TONE_CURVE,                // float[]      | public
+    ANDROID_SENSOR_PROFILE_HUE_SAT_MAP,               // float[]      | system
+    ANDROID_SENSOR_PROFILE_TONE_CURVE,                // float[]      | system
     ANDROID_SENSOR_GREEN_SPLIT,                       // float        | public
     ANDROID_SENSOR_TEST_PATTERN_DATA,                 // int32[]      | public
     ANDROID_SENSOR_TEST_PATTERN_MODE,                 // enum         | public
