@@ -152,8 +152,8 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
                 fseek(stream, (long) (chunkSize - minSize), SEEK_CUR);
             }
             unsigned channels = little2u(&fmt[2]);
-            if (channels != 1 && channels != 2) {
-                fprintf(stderr, "channels %u != 1 or 2\n", channels);
+            if (channels != 1 && channels != 2 && channels != 4 && channels != 6 && channels != 8) {
+                fprintf(stderr, "unsupported channels %u\n", channels);
                 goto close;
             }
             unsigned samplerate = little4u(&fmt[4]);
