@@ -63,10 +63,16 @@ ${concatenated_info | javadoc(metadata)}\
      * @see #${jenum_value(entry, value)}
     % endfor
   % endif
+  % if entry.deprecated:
+     * @deprecated
+  % endif
   % if entry.applied_visibility == 'hidden':
      * @hide
   % endif
      */
+  % if entry.deprecated:
+    @Deprecated
+  % endif
     public static final Key<${jtype_boxed(entry)}> ${entry.name | jkey_identifier} =
             new Key<${jtype_boxed(entry)}>("${entry.name}", ${jclass(entry)});
 </%def>\

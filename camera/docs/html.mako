@@ -35,6 +35,7 @@
     /* toc style */
     .toc_section_header { font-size:1.3em;  }
     .toc_kind_header { font-size:1.2em;  }
+    .toc_deprecated { text-decoration:line-through; }
 
     /* table column sizes */
     table { border-collapse:collapse; table-layout: fixed; width: 100%; word-wrap: break-word }
@@ -53,11 +54,14 @@
 
     /* Entry flair */
     .entry_name { color: #333333; padding-left:1.0em; font-size:1.1em; font-family: monospace; vertical-align:top; }
+    .entry_name_deprecated { text-decoration:line-through; }
 
     /* Entry type flair */
     .entry_type_name { font-size:1.1em; color: #669900; font-weight: bold;}
     .entry_type_name_enum:after { color: #669900; font-weight: bold; content:" (enum)" }
     .entry_type_visibility { font-weight: bolder; padding-left:1em}
+    .entry_type_synthetic { font-weight: bolder; color: #996600; }
+    .entry_type_deprecated { font-weight: bolder; color: #4D4D4D; }
     .entry_type_enum_name { font-family: monospace; font-weight: bolder; }
     .entry_type_enum_notes:before { content:" - " }
     .entry_type_enum_notes>p:first-child { display:inline; }
@@ -65,6 +69,7 @@
     .entry_type_enum_value { font-family: monospace; }
     .entry ul { margin: 0 0 0 0; list-style-position: inside; padding-left: 0.5em; }
     .entry ul li { padding: 0 0 0 0; margin: 0 0 0 0;}
+    .entry_range_deprecated { font-weight: bolder; }
 
     /* Entry tags flair */
     .entry_tags ul { list-style-type: none; }
@@ -136,7 +141,11 @@
 ${    insert_toc_body(nested)}
   % endfor
   % for entry in node.merged_entries:
-            <li>${html_anchor(entry)}</li>
+            <li
+    % if entry.deprecated:
+                class="toc_deprecated"
+    % endif
+            >${html_anchor(entry)}</li>
   % endfor
 </%def>
 
@@ -218,7 +227,11 @@ ${          insert_toc_body(kind)}\
 
         <%def name="insert_entry(prop)">
           <tr class="entry" id="${prop.kind}_${prop.name}">
-            <td class="entry_name" rowspan="${entry_cols(prop)}">
+            <td class="entry_name
+              % if prop.deprecated:
+                entry_name_deprecated
+              % endif
+             " rowspan="${entry_cols(prop)}">
               ${prop.name | wbr}
             </td>
             <td class="entry_type">
@@ -243,6 +256,15 @@ ${          insert_toc_body(kind)}\
                 </ul>
               % endif
               <span class="entry_type_visibility"> [${prop.applied_visibility}${" as %s" %prop.typedef.name if prop.typedef else ""}]</span>
+
+              % if prop.synthetic:
+              <span class="entry_type_synthetic">[synthetic] </span>
+              % endif
+
+              % if prop.deprecated:
+              <span class="entry_type_deprecated">[deprecated] </span>
+              % endif
+
               % if prop.type_notes is not None:
                 <div class="entry_type_notes">${prop.type_notes | wbr}</div>
               % endif
@@ -281,6 +303,9 @@ ${          insert_toc_body(kind)}\
             </td>
 
             <td class="entry_range">
+            % if prop.deprecated:
+              <p><span class="entry_range_deprecated">Deprecated</span>. Do not use.</p>
+            % endif
             % if prop.range is not None:
               ${prop.range | md_html, linkify_tags(metadata), wbr}
             % endif

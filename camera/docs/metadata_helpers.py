@@ -912,6 +912,18 @@ def filter_visibility(entries, visibilities):
   """
   return (e for e in entries if e.applied_visibility in visibilities)
 
+def remove_synthetic(entries):
+  """
+  Filter the given entries by removing those that are synthetic.
+
+  Args:
+    entries: An iterable of Entry nodes
+
+  Yields:
+    An iterable of Entry nodes
+  """
+  return (e for e in entries if not e.synthetic)
+
 def wbr(text):
   """
   Insert word break hints for the browser in the form of <wbr> HTML tags.

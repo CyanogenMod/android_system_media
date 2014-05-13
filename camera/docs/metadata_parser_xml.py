@@ -175,6 +175,16 @@ class MetadataParserXml:
     d['visibility'] = entry.get('visibility')
 
     #
+    # Synthetic ?
+    #
+    d['synthetic'] = entry.get('synthetic') == 'true'
+
+    #
+    # Deprecated ?
+    #
+    d['deprecated'] = entry.get('deprecated') == 'true'
+
+    #
     # Optional for non-full hardware level devices
     #
     d['optional'] = entry.get('optional') == 'true'

@@ -67,7 +67,7 @@ function binary_check()
 
     if [[ -n $pkg ]]
     then
-        echo "Missing $bin binary please install with '$(packager_install $pkg)'"
+        echo "Missing $bin binary; please install with '$(packager_install $pkg)'"
     fi
 
     retcode=1

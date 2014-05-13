@@ -89,6 +89,12 @@
           % if prop.visibility:
                 visibility="${prop.visibility}"
           % endif
+          % if prop.synthetic:
+                synthetic="true"
+          % endif
+          % if prop.deprecated:
+                deprecated="true"
+          % endif
           % if prop.optional:
                 optional="${str(prop.optional).lower()}"
           % endif

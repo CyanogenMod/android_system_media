@@ -141,10 +141,10 @@ typedef enum camera_metadata_tag {
     ANDROID_CONTROL_AWB_AVAILABLE_MODES,              // byte[]       | public
     ANDROID_CONTROL_MAX_REGIONS,                      // int32[]      | public
     ANDROID_CONTROL_SCENE_MODE_OVERRIDES,             // byte[]       | system
-    ANDROID_CONTROL_AE_PRECAPTURE_ID,                 // int32        | hidden
+    ANDROID_CONTROL_AE_PRECAPTURE_ID,                 // int32        | system
     ANDROID_CONTROL_AE_STATE,                         // enum         | public
     ANDROID_CONTROL_AF_STATE,                         // enum         | public
-    ANDROID_CONTROL_AF_TRIGGER_ID,                    // int32        | hidden
+    ANDROID_CONTROL_AF_TRIGGER_ID,                    // int32        | system
     ANDROID_CONTROL_AWB_STATE,                        // enum         | public
     ANDROID_CONTROL_END,
 
@@ -250,18 +250,18 @@ typedef enum camera_metadata_tag {
 
     ANDROID_SCALER_CROP_REGION =                      // int32[]      | public
             ANDROID_SCALER_START,
-    ANDROID_SCALER_AVAILABLE_FORMATS,                 // enum[]       | public
-    ANDROID_SCALER_AVAILABLE_JPEG_MIN_DURATIONS,      // int64[]      | public
-    ANDROID_SCALER_AVAILABLE_JPEG_SIZES,              // int32[]      | public
+    ANDROID_SCALER_AVAILABLE_FORMATS,                 // enum[]       | hidden
+    ANDROID_SCALER_AVAILABLE_JPEG_MIN_DURATIONS,      // int64[]      | hidden
+    ANDROID_SCALER_AVAILABLE_JPEG_SIZES,              // int32[]      | hidden
     ANDROID_SCALER_AVAILABLE_MAX_DIGITAL_ZOOM,        // float        | public
-    ANDROID_SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS, // int64[]      | public
-    ANDROID_SCALER_AVAILABLE_PROCESSED_SIZES,         // int32[]      | public
+    ANDROID_SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS, // int64[]      | hidden
+    ANDROID_SCALER_AVAILABLE_PROCESSED_SIZES,         // int32[]      | hidden
     ANDROID_SCALER_AVAILABLE_RAW_MIN_DURATIONS,       // int64[]      | system
     ANDROID_SCALER_AVAILABLE_RAW_SIZES,               // int32[]      | system
-    ANDROID_SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP,// int32[]      | public
-    ANDROID_SCALER_AVAILABLE_STREAM_CONFIGURATIONS,   // enum[]       | public
-    ANDROID_SCALER_AVAILABLE_MIN_FRAME_DURATIONS,     // int64[]      | public
-    ANDROID_SCALER_AVAILABLE_STALL_DURATIONS,         // int64[]      | public
+    ANDROID_SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP,// int32[]      | hidden
+    ANDROID_SCALER_AVAILABLE_STREAM_CONFIGURATIONS,   // enum[]       | hidden
+    ANDROID_SCALER_AVAILABLE_MIN_FRAME_DURATIONS,     // int64[]      | hidden
+    ANDROID_SCALER_AVAILABLE_STALL_DURATIONS,         // int64[]      | hidden
     ANDROID_SCALER_END,
 
     ANDROID_SENSOR_EXPOSURE_TIME =                    // int64        | public

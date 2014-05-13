@@ -64,6 +64,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <typedef name="imageFormat">
       <language name="java">int</language>
     </typedef>
+    <typedef name="streamConfigurationMap">
+      <language name="java">android.hardware.camera2.params.StreamConfigurationMap</language>
+    </typedef>
+    <typedef name="streamConfiguration">
+      <language name="java">android.hardware.camera2.params.StreamConfiguration</language>
+    </typedef>
+    <typedef name="streamConfigurationDuration">
+      <language name="java">android.hardware.camera2.params.StreamConfigurationDuration</language>
+    </typedef>
   </types>
 
   <namespace name="android">
@@ -1340,10 +1349,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </static>
       <dynamic>
-        <entry name="aePrecaptureId" type="int32" visibility="hidden">
+        <entry name="aePrecaptureId" type="int32" visibility="system" deprecated="true">
           <description>The ID sent with the latest
           CAMERA2_TRIGGER_PRECAPTURE_METERING call</description>
-          <range>**Deprecated**. Do not use.</range>
           <details>Must be 0 if no
           CAMERA2_TRIGGER_PRECAPTURE_METERING trigger received yet
           by HAL. Always updated even if AE algorithm ignores the
@@ -1595,10 +1603,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           any state    | AUTO-->CAF mode switch                 | passively reachable states from INACTIVE | Mode switch without trigger, passive transient state is skipped
           </details>
         </entry>
-        <entry name="afTriggerId" type="int32" visibility="hidden">
+        <entry name="afTriggerId" type="int32" visibility="system" deprecated="true">
           <description>The ID sent with the latest
           CAMERA2_TRIGGER_AUTOFOCUS call</description>
-          <range>**Deprecated**. Do not use.</range>
           <details>Must be 0 if no CAMERA2_TRIGGER_AUTOFOCUS trigger
           received yet by HAL. Always updated even if AF algorithm
           ignores the trigger</details>
@@ -2542,12 +2549,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="quirks">
       <static>
-        <entry name="meteringCropRegion" type="byte" visibility="system" optional="true">
+        <entry name="meteringCropRegion" type="byte" visibility="system" deprecated="true" optional="true">
           <description>If set to 1, the camera service does not
           scale 'normalized' coordinates with respect to the crop
           region. This applies to metering input (a{e,f,wb}Region
           and output (face rectangles).</description>
-          <range>**Deprecated**. Do not use.</range>
           <details>Normalized coordinates refer to those in the
           (-1000,1000) range mentioned in the
           android.hardware.Camera API.
@@ -2557,23 +2563,21 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           not need to be listed in static metadata. Support will be
           removed in future versions of camera service.</details>
         </entry>
-        <entry name="triggerAfWithAuto" type="byte" visibility="system" optional="true">
+        <entry name="triggerAfWithAuto" type="byte" visibility="system" deprecated="true" optional="true">
           <description>If set to 1, then the camera service always
           switches to FOCUS_MODE_AUTO before issuing a AF
           trigger.</description>
-          <range>**Deprecated**. Do not use.</range>
           <details>HAL implementations should implement AF trigger
           modes for AUTO, MACRO, CONTINUOUS_FOCUS, and
           CONTINUOUS_PICTURE modes instead of using this flag. Does
           not need to be listed in static metadata. Support will be
           removed in future versions of camera service</details>
         </entry>
-        <entry name="useZslFormat" type="byte" visibility="system" optional="true">
+        <entry name="useZslFormat" type="byte" visibility="system" deprecated="true" optional="true">
           <description>If set to 1, the camera service uses
           CAMERA2_PIXEL_FORMAT_ZSL instead of
           HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED for the zero
           shutter lag stream</description>
-          <range>**Deprecated**. Do not use.</range>
           <details>HAL implementations should use gralloc usage flags
           to determine that a stream will be used for
           zero-shutter-lag, instead of relying on an explicit
@@ -2581,13 +2585,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           metadata. Support will be removed in future versions of
           camera service.</details>
         </entry>
-        <entry name="usePartialResult" type="byte" visibility="hidden" optional="true">
+        <entry name="usePartialResult" type="byte" visibility="hidden" deprecated="true" optional="true">
           <description>
           If set to 1, the HAL will always split result
           metadata for a single capture into multiple buffers,
           returned using multiple process_capture_result calls.
           </description>
-          <range>**Deprecated**. Do not use.</range>
           <details>
           Does not need to be listed in static
           metadata. Support for partial results will be reworked in
@@ -2602,7 +2605,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </static>
       <dynamic>
-        <entry name="partialResult" type="byte" visibility="hidden" optional="true" enum="true" typedef="boolean">
+        <entry name="partialResult" type="byte" visibility="hidden" deprecated="true" optional="true" enum="true" typedef="boolean">
           <enum>
             <value>FINAL
             <notes>The last or only metadata result buffer
@@ -2620,7 +2623,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           final one for the capture, or only a partial that contains a
           subset of the full set of dynamic metadata
           values.</description>
-          <range>**Deprecated**. Do not use. Optional. Default value is FINAL.</range>
+          <range>Optional. Default value is FINAL.</range>
           <details>
           The entries in the result metadata buffers for a
           single capture may not overlap, except for this entry. The
@@ -2641,14 +2644,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="request">
       <controls>
-        <entry name="frameCount" type="int32" visibility="system">
+        <entry name="frameCount" type="int32" visibility="system" deprecated="true">
           <description>A frame counter set by the framework. Must
           be maintained unchanged in output frame. This value monotonically
           increases with every new result (that is, each new result has a unique
           frameCount value).
           </description>
           <units>incrementing integer</units>
-          <range>**Deprecated**. Do not use. Any int.</range>
+          <range>Any int.</range>
         </entry>
         <entry name="id" type="int32" visibility="hidden">
           <description>An application-specified ID for the current
@@ -2658,7 +2661,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>Any int</range>
           <tag id="V1" />
         </entry>
-        <entry name="inputStreams" type="int32" visibility="system"
+        <entry name="inputStreams" type="int32" visibility="system" deprecated="true"
                container="array">
           <array>
             <size>n</size>
@@ -2666,8 +2669,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>List which camera reprocess stream is used
           for the source of reprocessing data.</description>
           <units>List of camera reprocess stream IDs</units>
-          <range>**Deprecated**. Do not use.
-
+          <range>
           Typically, only one entry allowed, must be a valid reprocess stream ID.
           </range>
           <details>Only meaningful when android.request.type ==
@@ -2694,7 +2696,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>How much metadata to produce on
           output</description>
         </entry>
-        <entry name="outputStreams" type="int32" visibility="system"
+        <entry name="outputStreams" type="int32" visibility="system" deprecated="true"
                container="array">
           <array>
             <size>n</size>
@@ -2702,7 +2704,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Lists which camera output streams image data
           from this capture must be sent to</description>
           <units>List of camera stream IDs</units>
-          <range>**Deprecated**. Do not use. List must only include streams that have been
+          <range>List must only include streams that have been
           created</range>
           <details>If no output streams are listed, then the image
           data should simply be discarded. The image data must
@@ -2710,7 +2712,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           and the lens and flash must operate as requested.</details>
           <tag id="HAL2" />
         </entry>
-        <entry name="type" type="byte" visibility="system" enum="true">
+        <entry name="type" type="byte" visibility="system" deprecated="true" enum="true">
           <enum>
             <value>CAPTURE
             <notes>Capture a new image from the imaging hardware,
@@ -2725,7 +2727,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The type of the request; either CAPTURE or
           REPROCESS. For HAL3, this tag is redundant.
           </description>
-          <range>**Deprecated**. Do not use.</range>
           <tag id="HAL2" />
         </entry>
       </controls>
@@ -2770,7 +2771,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="maxNumReprocessStreams" type="int32" visibility="system"
-        container="array">
+        deprecated="true" container="array">
           <array>
             <size>1</size>
           </array>
@@ -2778,7 +2779,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           can be allocated at the same time.</description>
           <range>&amp;gt;= 0</range>
           <details>
-          **Deprecated**. Only used by HAL2.x.
+          Only used by HAL2.x.
 
           When set to 0, it means no reprocess stream is supported.
           </details>
@@ -3199,7 +3200,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </controls>
       <static>
         <entry name="availableFormats" type="int32"
-        visibility="public" enum="true"
+        visibility="hidden" deprecated="true" enum="true"
         container="array" typedef="imageFormat">
           <array>
             <size>n</size>
@@ -3262,7 +3263,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>The list of image formats that are supported by this
           camera device for output streams.</description>
-          <range>**Deprecated**. Do not use.</range>
           <details>
           All camera devices will support JPEG and YUV_420_888 formats.
 
@@ -3290,7 +3290,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </hal_details>
           <tag id="BC" />
         </entry>
-        <entry name="availableJpegMinDurations" type="int64" visibility="public"
+        <entry name="availableJpegMinDurations" type="int64" visibility="hidden" deprecated="true"
         container="array">
           <array>
             <size>n</size>
@@ -3299,7 +3299,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           for each resolution in android.scaler.availableJpegSizes.
           </description>
           <units>ns</units>
-          <range>**Deprecated**. Do not use. TODO: Remove property.</range>
+          <range>TODO: Remove property.</range>
           <details>
           This corresponds to the minimum steady-state frame duration when only
           that JPEG stream is active and captured in a burst, with all
@@ -3310,14 +3310,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           durations)</details>
           <tag id="BC" />
         </entry>
-        <entry name="availableJpegSizes" type="int32" visibility="public"
-        container="array" typedef="size">
+        <entry name="availableJpegSizes" type="int32" visibility="hidden"
+        deprecated="true" container="array" typedef="size">
           <array>
             <size>n</size>
             <size>2</size>
           </array>
           <description>The JPEG resolutions that are supported by this camera device.</description>
-          <range>**Deprecated**. Do not use. TODO: Remove property.</range>
+          <range>TODO: Remove property.</range>
           <details>
           The resolutions are listed as `(width, height)` pairs. All camera devices will support
           sensor maximum resolution (defined by android.sensor.info.activeArraySize).
@@ -3337,7 +3337,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>&amp;gt;=1</range>
           <tag id="BC" />
         </entry>
-        <entry name="availableProcessedMinDurations" type="int64" visibility="public"
+        <entry name="availableProcessedMinDurations" type="int64" visibility="hidden" deprecated="true"
         container="array">
           <array>
             <size>n</size>
@@ -3347,7 +3347,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           minimum supportable frame duration for that size.
           </description>
           <units>ns</units>
-          <range>**Deprecated**. Do not use. TODO: Remove property.</range>
+          <range>TODO: Remove property.</range>
           <details>
           This should correspond to the frame duration when only that processed
           stream is active, with all processing (typically in android.*.mode)
@@ -3358,8 +3358,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="BC" />
         </entry>
-        <entry name="availableProcessedSizes" type="int32" visibility="public"
-        container="array" typedef="size">
+        <entry name="availableProcessedSizes" type="int32" visibility="hidden"
+        deprecated="true" container="array" typedef="size">
           <array>
             <size>n</size>
             <size>2</size>
@@ -3368,7 +3368,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           processed output streams, such as YV12, NV12, and
           platform opaque YUV/RGB streams to the GPU or video
           encoders.</description>
-          <range>**Deprecated**. Do not use. TODO: Remove property.</range>
+          <range>TODO: Remove property.</range>
           <details>
           The resolutions are listed as `(width, height)` pairs.
 
@@ -3398,7 +3398,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </hal_details>
           <tag id="BC" />
         </entry>
-        <entry name="availableRawMinDurations" type="int64"
+        <entry name="availableRawMinDurations" type="int64" deprecated="true"
         container="array">
           <array>
             <size>n</size>
@@ -3409,7 +3409,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           supportable frame duration for that size.
           </description>
           <units>ns</units>
-          <range>**Deprecated**. Do not use. TODO: Remove property.</range>
+          <range>TODO: Remove property.</range>
           <details>
           Should correspond to the frame duration when only the raw stream is
           active.
@@ -3419,7 +3419,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           durations)</details>
           <tag id="BC" />
         </entry>
-        <entry name="availableRawSizes" type="int32"
+        <entry name="availableRawSizes" type="int32" deprecated="true"
         container="array" typedef="size">
           <array>
             <size>n</size>
@@ -3428,7 +3428,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The resolutions available for use with raw
           sensor output streams, listed as width,
           height</description>
-          <range>**Deprecated**. Do not use. TODO: Remove property.
+          <range>TODO: Remove property.
           Must include: - sensor maximum resolution.</range>
         </entry>
       </static>
@@ -3438,7 +3438,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </dynamic>
       <static>
         <entry name="availableInputOutputFormatsMap" type="int32"
-        visibility="public"
+        visibility="hidden"
         container="array" typedef="imageFormat">
           <array>
             <size>n</size>
@@ -3464,12 +3464,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           For ZSL-capable camera devices, using the RAW_OPAQUE format
           as either input or output will never hurt maximum frame rate (i.e.
-          android.scaler.availableStallDurations will not have RAW_OPAQUE).
+          StreamConfigurationMap#getOutputStallDuration(int,Size)
+          for a `format =` RAW_OPAQUE is always 0).
 
           Attempting to configure an input stream with output streams not
           listed as available in this map is not valid.
 
-          TODO: Add java type mapping for this property.
+          TODO: typedef to ReprocessFormatMap
           </details>
           <hal_details>
           For the formats, see `system/core/include/system/graphics.h` for a definition
@@ -3513,8 +3514,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           system/core/include/system/graphics.h.
           </hal_details>
         </entry>
-        <entry name="availableStreamConfigurations" type="int32" visibility="public"
-          enum="true" container="array">
+        <entry name="availableStreamConfigurations" type="int32" visibility="hidden"
+          enum="true" container="array"
+          typedef="streamConfiguration">
           <array>
             <size>n</size>
             <size>4</size>
@@ -3603,8 +3605,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           * available[Processed,Raw,Jpeg]Sizes
           </hal_details>
         </entry>
-        <entry name="availableMinFrameDurations" type="int64" visibility="public"
-        container="array">
+        <entry name="availableMinFrameDurations" type="int64" visibility="hidden"
+               container="array"
+               typedef="streamConfigurationDuration" >
           <array>
             <size>4</size>
             <size>n</size>
@@ -3627,11 +3630,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           See android.sensor.frameDuration and
           android.scaler.availableStallDurations for more details about
           calculating the max frame rate.
+
+          (Keep in sync with
+          StreamConfigurationMap#getOutputMinFrameDuration)
           </details>
           <tag id="BC" />
         </entry>
-        <entry name="availableStallDurations" type="int64" visibility="public"
-        container="array">
+        <entry name="availableStallDurations" type="int64" visibility="hidden"
+               container="array" typedef="streamConfigurationDuration">
           <array>
             <size>4</size>
             <size>n</size>
@@ -3703,12 +3709,97 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           See android.sensor.frameDuration for more information about
           calculating the max frame rate (absent stalls).
+
+          (Keep up to date with
+          StreamConfigurationMap#getOutputStallDuration(int, Size) )
           </details>
           <hal_details>
           If possible, it is recommended that all non-JPEG formats
           (such as RAW16) should not have a stall duration.
           </hal_details>
           <tag id="BC" />
+        </entry>
+        <entry name="streamConfigurationMap" type="int32" visibility="public" synthetic="true" typedef="streamConfigurationMap">
+          <description>The available stream configurations that this
+          camera device supports; also includes the minimum frame durations
+          and the stall durations for each format/size combination.
+          </description>
+          <details>
+          All camera devices will support sensor maximum resolution (defined by
+          android.sensor.info.activeArraySize) for the JPEG format.
+
+          For a given use case, the actual maximum supported resolution
+          may be lower than what is listed here, depending on the destination
+          Surface for the image data. For example, for recording video,
+          the video encoder chosen may have a maximum size limit (e.g. 1080p)
+          smaller than what the camera (e.g. maximum resolution is 3264x2448)
+          can provide.
+
+          Please reference the documentation for the image data destination to
+          check if it limits the maximum size for image data.
+
+          Not all output formats may be supported in a configuration with
+          an input stream of a particular format. For more details, see
+          android.scaler.availableInputOutputFormatsMap.
+
+          The following table describes the minimum required output stream
+          configurations based on the hardware level
+          (android.info.supportedHardwareLevel):
+
+          Format         | Size                                         | Hardware Level | Notes
+          :-------------:|:--------------------------------------------:|:--------------:|:--------------:
+          JPEG           | android.sensor.info.activeArraySize          | Any            |
+          JPEG           | 1920x1080 (1080p)                            | Any            | if 1080p &lt;= activeArraySize
+          JPEG           | 1280x720 (720)                               | Any            | if 720p &lt;= activeArraySize
+          JPEG           | 640x480 (480p)                               | Any            | if 480p &lt;= activeArraySize
+          JPEG           | 320x240 (240p)                               | Any            | if 240p &lt;= activeArraySize
+          YUV_420_888    | all output sizes available for JPEG          | FULL           |
+          YUV_420_888    | all output sizes available for JPEG, up to the maximum video size | LIMITED        |
+          IMPLEMENTATION_DEFINED | same as YUV_420_888                  | Any            |
+
+          Refer to android.request.availableCapabilities for additional
+          mandatory stream configurations on a per-capability basis.
+          </details>
+          <hal_details>
+          Do not set this property directly
+          (it is synthetic and will not be available at the HAL layer);
+          set the android.scaler.availableStreamConfigurations instead.
+
+          It is recommended (but not mandatory) to also include half/quarter
+          of sensor maximum resolution for JPEG formats (regardless of hardware
+          level).
+
+          (The following is a rewording of the above required table):
+
+          The HAL must include sensor maximum resolution (defined by
+          android.sensor.info.activeArraySize).
+
+          For FULL capability devices (`android.info.supportedHardwareLevel == FULL`),
+          the HAL must include all YUV_420_888 sizes that have JPEG sizes listed
+          here as output streams.
+
+          It must also include each below resolution if it is smaller than or
+          equal to the sensor maximum resolution (for both YUV_420_888 and JPEG
+          formats), as output streams:
+
+          * 240p (320 x 240)
+          * 480p (640 x 480)
+          * 720p (1280 x 720)
+          * 1080p (1920 x 1080)
+
+          For LIMITED capability devices
+          (`android.info.supportedHardwareLevel == LIMITED`),
+          the HAL only has to list up to the maximum video size
+          supported by the device.
+
+          Regardless of hardware level, every output resolution available for
+          YUV_420_888 must also be available for IMPLEMENTATION_DEFINED.
+
+          This supercedes the following fields, which are now deprecated:
+
+          * availableFormats
+          * available[Processed,Raw,Jpeg]Sizes
+          </hal_details>
         </entry>
       </static>
     </section>
@@ -3729,7 +3820,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           start of next frame exposure.</description>
           <units>nanoseconds</units>
           <range>See android.sensor.info.maxFrameDuration,
-          android.scaler.availableMinFrameDurations. The duration
+          android.scaler.streamConfigurationMap. The duration
           is capped to `max(duration, exposureTime + overhead)`.</range>
           <details>
           The maximum frame rate that can be supported by a camera subsystem is
@@ -3769,7 +3860,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           cannot process more than 1 capture at a time.
 
           The necessary information for the application, given the model above,
-          is provided via the android.scaler.availableMinFrameDurations field.
+          is provided via the android.scaler.streamConfigurationMap field
+          using StreamConfigurationMap#getOutputMinFrameDuration(int, Size).
           These are used to determine the maximum frame rate / minimum frame
           duration that is possible for a given stream configuration.
 
@@ -3780,7 +3872,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           1. Let the set of currently configured input/output streams
           be called `S`.
           1. Find the minimum frame durations for each stream in `S`, by
-          looking it up in android.scaler.availableMinFrameDurations (with
+          looking it up in android.scaler.streamConfigurationMap using
+          StreamConfigurationMap#getOutputMinFrameDuration(int, Size) (with
           its respective size/format). Let this set of frame durations be called
           `F`.
           1. For any given request `R`, the minimum frame duration allowed
@@ -3788,7 +3881,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           used in `R` be called `S_r`.
 
           If none of the streams in `S_r` have a stall time (listed in
-          android.scaler.availableStallDurations), then the frame duration in
+          StreamConfigurationMap#getOutputStallDuration(int,Size) using its
+          respective size/format), then the frame duration in
           `F` determines the steady state frame rate that the application will
           get if it uses `R` as a repeating request. Let this special kind
           of request be called `Rsimple`.
@@ -3801,8 +3895,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           delivered.
 
           For more details about stalling, see
-          android.scaler.availableStallDurations.
+          StreamConfigurationMap#getOutputStallDuration(int,Size).
           </details>
+          <hal_details>
+          For more details about stalling, see
+          android.scaler.availableStallDurations.
+          </hal_details>
           <tag id="V1" />
           <tag id="BC" />
         </entry>
@@ -3896,10 +3994,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             for a full definition of frame durations.
 
             Refer to
-            android.scaler.availableProcessedMinDurations,
-            android.scaler.availableJpegMinDurations, and
-            android.scaler.availableRawMinDurations for the minimum
-            frame duration values.
+            StreamConfigurationMap#getOutputMinFrameDuration(int,Size)
+            for the minimum frame duration values.
             </details>
             <hal_details>
             For FULL capability devices (android.info.supportedHardwareLevel == FULL),
@@ -4963,6 +5059,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="predictedColorGains" type="float"
                visibility="hidden"
+               deprecated="true"
                optional="true"
                type_notes="A 1D array of floats for 4 color channel gains"
                container="array">
@@ -4972,7 +5069,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The best-fit color channel gains calculated
           by the camera device's statistics units for the current output frame.
           </description>
-          <range>**Deprecated**. Do not use.</range>
           <details>
           This may be different than the gains used for this frame,
           since statistics processing on data from a new frame
@@ -4988,6 +5084,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="predictedColorTransform" type="rational"
                visibility="hidden"
+               deprecated="true"
                optional="true"
                type_notes="3x3 rational matrix in row-major order"
                container="array">
@@ -4998,7 +5095,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>The best-fit color transform matrix estimate
           calculated by the camera device's statistics units for the current
           output frame.</description>
-          <range>**Deprecated**. Do not use.</range>
           <details>The camera device will provide the estimate from its
           statistics unit on the white balance transforms to use
           for the next frame. These are the values the camera device believes

@@ -1018,6 +1018,15 @@ class Entry(Node):
                 public entries are visible in the Android SDK.
     applied_visibility: As visibility, but always valid, defaulting to 'system'
                         if no visibility is given for an entry.
+    synthetic: The C-level visibility of this entry ('false', 'true').
+               Synthetic entries will not be generated into the native metadata
+               list of entries (in C code). In general a synthetic entry is
+               glued together at the Java layer from multiple visibiltity=hidden
+               entries.
+    deprecated: Marks an entry as @Deprecated in the Java layer; if within an
+               unreleased version this needs to be removed altogether. If applied
+               to an entry from an older release, then this means the entry
+               should be ignored by newer code.
     optional: a bool representing the optional attribute, which denotes the entry
               is required for hardware level full devices, but optional for other
               hardware levels.  None if not present.
@@ -1072,6 +1081,10 @@ class Entry(Node):
       type_notes: A string with the notes for the type
       visibility: A string describing the visibility, eg 'system', 'hidden',
                   'public'
+      synthetic: A bool to mark whether this entry is visible only at the Java
+                 layer (True), or at both layers (False = default).
+      deprecated: A bool to mark whether this is @Deprecated at the Java layer
+                 (default = False).
       optional: A bool to mark whether optional for non-full hardware devices
       typedef: A string corresponding to a typedef's name attribute.
     """
@@ -1104,6 +1117,14 @@ class Entry(Node):
   @property
   def applied_visibility(self):
     return self._visibility or 'system'
+
+  @property
+  def synthetic(self):
+    return self._synthetic
+
+  @property
+  def deprecated(self):
+    return self._deprecated
 
   @property
   def optional(self):
@@ -1223,6 +1244,8 @@ class Entry(Node):
       self._enum = None
 
     self._visibility = kwargs.get('visibility')
+    self._synthetic = kwargs.get('synthetic', False)
+    self._deprecated = kwargs.get('deprecated', False)
     self._optional = kwargs.get('optional')
 
     self._property_keys = kwargs
@@ -1420,6 +1443,8 @@ class MergedEntry(Entry):
                     'type',
                     'type_notes',
                     'visibility',
+                    'synthetic',
+                    'deprecated',
                     'optional',
                     'typedef'
                    ]

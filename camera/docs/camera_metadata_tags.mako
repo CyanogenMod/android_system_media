@@ -75,7 +75,7 @@ typedef enum camera_metadata_section_start {
  */
 typedef enum camera_metadata_tag {
     % for sec in find_all_sections(metadata):
-      % for idx,entry in enumerate(find_unique_entries(sec)):
+      % for idx,entry in enumerate(remove_synthetic(find_unique_entries(sec))):
         % if idx == 0:
     ${entry.name + " = " | csym,ljust(50)}// ${annotated_type(entry) | ljust(12)} | ${entry.applied_visibility}
             ${path_name(find_parent_section(entry)) | csym}_START,
@@ -93,7 +93,7 @@ typedef enum camera_metadata_tag {
  */
 
 % for sec in find_all_sections(metadata):
-  % for entry in find_unique_entries(sec):
+  % for entry in remove_synthetic(find_unique_entries(sec)):
     % if entry.enum:
 // ${entry.name | csym}
 typedef enum camera_metadata_enum_${csym(entry.name).lower()} {

@@ -194,9 +194,25 @@
         <attribute name="visibility">
             <simpleType>
                 <restriction base="string">
-                    <enumeration value="system" />
-                    <enumeration value="hidden" />
-                    <enumeration value="public" />
+                    <enumeration value="system" /> <!-- do not expose to java -->
+                    <enumeration value="hidden" /> <!-- java as @hide -->
+                    <enumeration value="public" /> <!-- java as public SDK -->
+                </restriction>
+            </simpleType>
+        </attribute>
+        <attribute name="synthetic" default="false">
+            <simpleType>
+                <restriction base="string">
+                    <enumeration value="false" /> <!-- expose to C -->
+                    <enumeration value="true" /> <!-- do not expose to C -->
+                </restriction>
+            </simpleType>
+        </attribute>
+        <attribute name="deprecated" default="false">
+            <simpleType>
+                <restriction base="string">
+                    <enumeration value="false" /> <!-- normal -->
+                    <enumeration value="true" /> <!-- mark @Deprecated -->
                 </restriction>
             </simpleType>
         </attribute>

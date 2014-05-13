@@ -47,7 +47,7 @@ unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
 % for sec in find_all_sections(metadata):
 static tag_info_t ${path_name(sec) | csyml}[${path_name(sec) | csym}_END -
         ${path_name(sec) | csym}_START] = {
-  % for entry in find_unique_entries(sec):
+  % for entry in remove_synthetic(find_unique_entries(sec)):
     [ ${entry.name | csym} - ${path_name(sec) | csym}_START ] =
     { ${'"%s",' %(entry.name_short) | pad(40)} ${entry.type | ctype_enum,ljust(11)} },
   % endfor
@@ -70,7 +70,7 @@ int camera_metadata_enum_snprint(uint32_t tag,
 
     switch(tag) {
     % for sec in find_all_sections(metadata):
-      % for idx,entry in enumerate(find_unique_entries(sec)):
+      % for idx,entry in enumerate(remove_synthetic(find_unique_entries(sec))):
         case ${entry.name | csym}: {
           % if entry.enum:
             switch (value) {
