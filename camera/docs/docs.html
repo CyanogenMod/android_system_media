@@ -2014,8 +2014,12 @@ metering.<wbr/></p>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
-bottom-right pixel in the active pixel array.<wbr/> The weight
-should be nonnegative.<wbr/></p>
+bottom-right pixel in the active pixel array.<wbr/></p>
+<p>The weight must range from 0 to 1000,<wbr/> and represents a weight
+for every pixel in the area.<wbr/> This means that a large metering area
+with the same weight as a smaller area will have more effect in
+the metering result.<wbr/> Metering areas can partially overlap and the
+camera device will add the weights in the overlap region.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
 needs to be used by the camera device.<wbr/> If the metering region is
 outside the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
@@ -2337,8 +2341,12 @@ estimation.<wbr/></p>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
-bottom-right pixel in the active pixel array.<wbr/> The weight
-should be nonnegative.<wbr/></p>
+bottom-right pixel in the active pixel array.<wbr/></p>
+<p>The weight must range from 0 to 1000,<wbr/> and represents a weight
+for every pixel in the area.<wbr/> This means that a large metering area
+with the same weight as a smaller area will have more effect in
+the metering result.<wbr/> Metering areas can partially overlap and the
+camera device will add the weights in the overlap region.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
 needs to be used by the camera device.<wbr/> If the metering region is
 outside the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
@@ -2672,8 +2680,12 @@ estimation.<wbr/></p>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
-bottom-right pixel in the active pixel array.<wbr/> The weight
-should be nonnegative.<wbr/></p>
+bottom-right pixel in the active pixel array.<wbr/></p>
+<p>The weight must range from 0 to 1000,<wbr/> and represents a weight
+for every pixel in the area.<wbr/> This means that a large metering area
+with the same weight as a smaller area will have more effect in
+the metering result.<wbr/> Metering areas can partially overlap and the
+camera device will add the weights in the overlap region.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
 needs to be used by the camera device.<wbr/> If the metering region is
 outside the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
@@ -4570,8 +4582,12 @@ metering.<wbr/></p>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
-bottom-right pixel in the active pixel array.<wbr/> The weight
-should be nonnegative.<wbr/></p>
+bottom-right pixel in the active pixel array.<wbr/></p>
+<p>The weight must range from 0 to 1000,<wbr/> and represents a weight
+for every pixel in the area.<wbr/> This means that a large metering area
+with the same weight as a smaller area will have more effect in
+the metering result.<wbr/> Metering areas can partially overlap and the
+camera device will add the weights in the overlap region.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
 needs to be used by the camera device.<wbr/> If the metering region is
 outside the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
@@ -5154,8 +5170,12 @@ estimation.<wbr/></p>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
-bottom-right pixel in the active pixel array.<wbr/> The weight
-should be nonnegative.<wbr/></p>
+bottom-right pixel in the active pixel array.<wbr/></p>
+<p>The weight must range from 0 to 1000,<wbr/> and represents a weight
+for every pixel in the area.<wbr/> This means that a large metering area
+with the same weight as a smaller area will have more effect in
+the metering result.<wbr/> Metering areas can partially overlap and the
+camera device will add the weights in the overlap region.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
 needs to be used by the camera device.<wbr/> If the metering region is
 outside the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
@@ -6011,8 +6031,12 @@ estimation.<wbr/></p>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
-bottom-right pixel in the active pixel array.<wbr/> The weight
-should be nonnegative.<wbr/></p>
+bottom-right pixel in the active pixel array.<wbr/></p>
+<p>The weight must range from 0 to 1000,<wbr/> and represents a weight
+for every pixel in the area.<wbr/> This means that a large metering area
+with the same weight as a smaller area will have more effect in
+the metering result.<wbr/> Metering areas can partially overlap and the
+camera device will add the weights in the overlap region.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
 needs to be used by the camera device.<wbr/> If the metering region is
 outside the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
