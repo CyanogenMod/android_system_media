@@ -847,6 +847,8 @@
             <li
             ><a href="#dynamic_android.statistics.faceScores">android.statistics.faceScores</a></li>
             <li
+            ><a href="#dynamic_android.statistics.faces">android.statistics.faces</a></li>
+            <li
             ><a href="#dynamic_android.statistics.histogram">android.statistics.histogram</a></li>
             <li
             ><a href="#dynamic_android.statistics.histogramMode">android.statistics.histogramMode</a></li>
@@ -13569,9 +13571,6 @@ smaller than what the camera (e.<wbr/>g.<wbr/> maximum resolution is 3264x2448)
 can provide.<wbr/></p>
 <p>Please reference the documentation for the image data destination to
 check if it limits the maximum size for image data.<wbr/></p>
-<p>Not all output formats may be supported in a configuration with
-an input stream of a particular format.<wbr/> For more details,<wbr/> see
-<a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a>.<wbr/></p>
 <p>The following table describes the minimum required output stream
 configurations based on the hardware level
 (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a>):</p>
@@ -13648,6 +13647,9 @@ mandatory stream configurations on a per-capability basis.<wbr/></p>
               <p>Do not set this property directly
 (it is synthetic and will not be available at the HAL layer);
 set the <a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a> instead.<wbr/></p>
+<p>Not all output formats may be supported in a configuration with
+an input stream of a particular format.<wbr/> For more details,<wbr/> see
+<a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a>.<wbr/></p>
 <p>It is recommended (but not mandatory) to also include half/<wbr/>quarter
 of sensor maximum resolution for JPEG formats (regardless of hardware
 level).<wbr/></p>
@@ -17730,6 +17732,56 @@ detected faces</p>
             <td class="entry_details" colspan="5">
               <p>Only available if faceDetectMode != OFF.<wbr/> The value should be
 meaningful (for example,<wbr/> setting 100 at all times is illegal).<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.statistics.faces">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>statistics.<wbr/>faces
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+              <span class="entry_type_visibility"> [public as face]</span>
+
+              <span class="entry_type_synthetic">[synthetic] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>List of the faces detected through camera face detection
+in this result.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Only available if <a href="#controls_android.statistics.faceDetectMode">android.<wbr/>statistics.<wbr/>face<wbr/>Detect<wbr/>Mode</a> <code>!=</code> OFF.<wbr/></p>
             </td>
           </tr>
 

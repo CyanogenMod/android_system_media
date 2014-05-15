@@ -53,7 +53,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       <language name="java">android.graphics.Rect</language>
     </typedef>
     <typedef name="size">
-      <language name="java">android.hardware.camera2.Size</language>
+      <language name="java">android.util.Size</language>
     </typedef>
     <typedef name="string">
       <language name="java">String</language>
@@ -72,6 +72,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </typedef>
     <typedef name="streamConfigurationDuration">
       <language name="java">android.hardware.camera2.params.StreamConfigurationDuration</language>
+    </typedef>
+    <typedef name="face">
+      <language name="java">android.hardware.camera2.params.Face</language>
     </typedef>
   </types>
 
@@ -3738,10 +3741,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           Please reference the documentation for the image data destination to
           check if it limits the maximum size for image data.
 
-          Not all output formats may be supported in a configuration with
-          an input stream of a particular format. For more details, see
-          android.scaler.availableInputOutputFormatsMap.
-
           The following table describes the minimum required output stream
           configurations based on the hardware level
           (android.info.supportedHardwareLevel):
@@ -3764,6 +3763,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           Do not set this property directly
           (it is synthetic and will not be available at the HAL layer);
           set the android.scaler.availableStreamConfigurations instead.
+
+          Not all output formats may be supported in a configuration with
+          an input stream of a particular format. For more details, see
+          android.scaler.availableInputOutputFormatsMap.
 
           It is recommended (but not mandatory) to also include half/quarter
           of sensor maximum resolution for JPEG formats (regardless of hardware
@@ -4963,6 +4966,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <details>Only available if faceDetectMode != OFF. The value should be
           meaningful (for example, setting 100 at all times is illegal).</details>
           <tag id="BC" />
+        </entry>
+        <entry name="faces" type="int32" visibility="public" synthetic="true" container="array" typedef="face">
+          <array>
+            <size>n</size>
+          </array>
+          <description>List of the faces detected through camera face detection
+          in this result.</description>
+          <details>
+          Only available if android.statistics.faceDetectMode `!=` OFF.
+          </details>
         </entry>
         <entry name="histogram" type="int32"
         type_notes="count of pixels for each color channel that fall into each histogram bucket, scaled to be between 0 and maxHistogramCount"
