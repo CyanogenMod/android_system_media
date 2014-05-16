@@ -71,6 +71,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <typedef name="face">
       <language name="java">android.hardware.camera2.params.Face</language>
     </typedef>
+    <typedef name="meteringRectangle">
+      <language name="java">android.hardware.camera2.params.MeteringRectangle</language>
+    </typedef>
   </types>
 
   <namespace name="android">
@@ -452,7 +455,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="aeRegions" type="int32" visibility="public"
-               container="array">
+               container="array" typedef="meteringRectangle">
           <array>
             <size>5</size>
             <size>area_count</size>
@@ -460,22 +463,28 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>List of areas to use for
           metering.</description>
           <range>`area_count &lt;= android.control.maxRegions[0]`</range>
-          <details>Each area is a rectangle plus weight: xmin, ymin,
-          xmax, ymax, weight. The rectangle is defined to be inclusive of the
-          specified coordinates.
+          <details>
+              The coordinate system is based on the active pixel array,
+              with (0,0) being the top-left pixel in the active pixel array, and
+              (android.sensor.info.activeArraySize.width - 1,
+              android.sensor.info.activeArraySize.height - 1) being the
+              bottom-right pixel in the active pixel array. The weight
+              should be nonnegative.
 
-          The coordinate system is based on the active pixel array,
-          with (0,0) being the top-left pixel in the active pixel array, and
-          (android.sensor.info.activeArraySize.width - 1,
-          android.sensor.info.activeArraySize.height - 1) being the
-          bottom-right pixel in the active pixel array. The weight
-          should be nonnegative.
-
-          If all regions have 0 weight, then no specific metering area
-          needs to be used by the camera device. If the metering region is
-          outside the used android.scaler.cropRegion returned in capture result metadata,
-          the camera device will ignore the sections outside the region and output the
-          used sections in the result metadata.</details>
+              If all regions have 0 weight, then no specific metering area
+              needs to be used by the camera device. If the metering region is
+              outside the used android.scaler.cropRegion returned in capture result metadata,
+              the camera device will ignore the sections outside the region and output the
+              used sections in the result metadata.
+          </details>
+          <hal_details>
+              The HAL level representation of MeteringRectangle[] is a
+              int[5 * area_count].
+              Every five elements represent a metering region of
+              (xmin, ymin, xmax, ymax, weight).
+              The rectangle is defined to be inclusive on xmin and ymin, but
+              exclusive on xmax and ymax.
+          </hal_details>
           <tag id="BC" />
         </entry>
         <entry name="aeTargetFpsRange" type="int32" visibility="public"
@@ -597,7 +606,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="afRegions" type="int32" visibility="public"
-               container="array">
+               container="array" typedef="meteringRectangle">
           <array>
             <size>5</size>
             <size>area_count</size>
@@ -605,22 +614,28 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>List of areas to use for focus
           estimation.</description>
           <range>`area_count &lt;= android.control.maxRegions[2]`</range>
-          <details>Each area is a rectangle plus weight: xmin, ymin,
-          xmax, ymax, weight. The rectangle is defined to be inclusive of the
-          specified coordinates.
+          <details>
+              The coordinate system is based on the active pixel array,
+              with (0,0) being the top-left pixel in the active pixel array, and
+              (android.sensor.info.activeArraySize.width - 1,
+              android.sensor.info.activeArraySize.height - 1) being the
+              bottom-right pixel in the active pixel array. The weight
+              should be nonnegative.
 
-          The coordinate system is based on the active pixel array,
-          with (0,0) being the top-left pixel in the active pixel array, and
-          (android.sensor.info.activeArraySize.width - 1,
-          android.sensor.info.activeArraySize.height - 1) being the
-          bottom-right pixel in the active pixel array. The weight
-          should be nonnegative.
-
-          If all regions have 0 weight, then no specific focus area
-          needs to be used by the camera device. If the focusing region is
-          outside the the used android.scaler.cropRegion returned in capture
-          result metadata, the camera device will ignore the sections outside
-          the region and output the used sections in the result metadata.</details>
+              If all regions have 0 weight, then no specific metering area
+              needs to be used by the camera device. If the metering region is
+              outside the used android.scaler.cropRegion returned in capture result metadata,
+              the camera device will ignore the sections outside the region and output the
+              used sections in the result metadata.
+          </details>
+          <hal_details>
+              The HAL level representation of MeteringRectangle[] is a
+              int[5 * area_count].
+              Every five elements represent a metering region of
+              (xmin, ymin, xmax, ymax, weight).
+              The rectangle is defined to be inclusive on xmin and ymin, but
+              exclusive on xmax and ymax.
+          </hal_details>
           <tag id="BC" />
         </entry>
         <entry name="afTrigger" type="byte" visibility="public" enum="true">
@@ -771,7 +786,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="awbRegions" type="int32" visibility="public"
-               container="array">
+               container="array" typedef="meteringRectangle">
           <array>
             <size>5</size>
             <size>area_count</size>
@@ -779,25 +794,28 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>List of areas to use for illuminant
           estimation.</description>
           <range>`area_count &lt;= android.control.maxRegions[1]`</range>
-          <details>Only used in AUTO mode.
+          <details>
+              The coordinate system is based on the active pixel array,
+              with (0,0) being the top-left pixel in the active pixel array, and
+              (android.sensor.info.activeArraySize.width - 1,
+              android.sensor.info.activeArraySize.height - 1) being the
+              bottom-right pixel in the active pixel array. The weight
+              should be nonnegative.
 
-          Each area is a rectangle plus weight: xmin, ymin,
-          xmax, ymax, weight. The rectangle is defined to be inclusive of the
-          specified coordinates.
-
-          The coordinate system is based on the active pixel array,
-          with (0,0) being the top-left pixel in the active pixel array, and
-          (android.sensor.info.activeArraySize.width - 1,
-          android.sensor.info.activeArraySize.height - 1) being the
-          bottom-right pixel in the active pixel array. The weight
-          should be nonnegative.
-
-          If all regions have 0 weight, then no specific auto-white balance (AWB) area
-          needs to be used by the camera device. If the AWB region is
-          outside the the used android.scaler.cropRegion returned in capture result metadata,
-          the camera device will ignore the sections outside the region and output the
-          used sections in the result metadata.
+              If all regions have 0 weight, then no specific metering area
+              needs to be used by the camera device. If the metering region is
+              outside the used android.scaler.cropRegion returned in capture result metadata,
+              the camera device will ignore the sections outside the region and output the
+              used sections in the result metadata.
           </details>
+          <hal_details>
+              The HAL level representation of MeteringRectangle[] is a
+              int[5 * area_count].
+              Every five elements represent a metering region of
+              (xmin, ymin, xmax, ymax, weight).
+              The rectangle is defined to be inclusive on xmin and ymin, but
+              exclusive on xmax and ymax.
+          </hal_details>
           <tag id="BC" />
         </entry>
         <entry name="captureIntent" type="byte" visibility="public" enum="true">
