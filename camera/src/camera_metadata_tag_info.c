@@ -401,6 +401,8 @@ static tag_info_t android_scaler[ANDROID_SCALER_END -
     { "availableMinFrameDurations",    TYPE_INT64  },
     [ ANDROID_SCALER_AVAILABLE_STALL_DURATIONS - ANDROID_SCALER_START ] =
     { "availableStallDurations",       TYPE_INT64  },
+    [ ANDROID_SCALER_CROPPING_TYPE - ANDROID_SCALER_START ] =
+    { "croppingType",                  TYPE_BYTE   },
 };
 
 static tag_info_t android_sensor[ANDROID_SENSOR_END -
@@ -1698,6 +1700,21 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SCALER_AVAILABLE_STALL_DURATIONS: {
+            break;
+        }
+        case ANDROID_SCALER_CROPPING_TYPE: {
+            switch (value) {
+                case ANDROID_SCALER_CROPPING_TYPE_CENTER_ONLY:
+                    msg = "CENTER_ONLY";
+                    ret = 0;
+                    break;
+                case ANDROID_SCALER_CROPPING_TYPE_FREEFORM:
+                    msg = "FREEFORM";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
             break;
         }
 

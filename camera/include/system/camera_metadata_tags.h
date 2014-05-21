@@ -262,6 +262,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SCALER_AVAILABLE_STREAM_CONFIGURATIONS,   // enum[]       | hidden
     ANDROID_SCALER_AVAILABLE_MIN_FRAME_DURATIONS,     // int64[]      | hidden
     ANDROID_SCALER_AVAILABLE_STALL_DURATIONS,         // int64[]      | hidden
+    ANDROID_SCALER_CROPPING_TYPE,                     // enum         | public
     ANDROID_SCALER_END,
 
     ANDROID_SENSOR_EXPOSURE_TIME =                    // int64        | public
@@ -663,6 +664,12 @@ typedef enum camera_metadata_enum_android_scaler_available_stream_configurations
     ANDROID_SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT,
     ANDROID_SCALER_AVAILABLE_STREAM_CONFIGURATIONS_INPUT,
 } camera_metadata_enum_android_scaler_available_stream_configurations_t;
+
+// ANDROID_SCALER_CROPPING_TYPE
+typedef enum camera_metadata_enum_android_scaler_cropping_type {
+    ANDROID_SCALER_CROPPING_TYPE_CENTER_ONLY,
+    ANDROID_SCALER_CROPPING_TYPE_FREEFORM,
+} camera_metadata_enum_android_scaler_cropping_type_t;
 
 
 // ANDROID_SENSOR_REFERENCE_ILLUMINANT1
