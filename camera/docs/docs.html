@@ -16629,7 +16629,13 @@ shown below:</p>
 camera device.<wbr/> Applications can request lens shading map data by setting
 <a href="#controls_android.statistics.lensShadingMapMode">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map<wbr/>Mode</a> to ON,<wbr/> and then the camera device will provide
 lens shading map data in <a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a>,<wbr/> with size specified
-by <a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a>.<wbr/></p>
+by <a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a>; the returned shading map data will be the one
+applied by the camera device for this capture request.<wbr/></p>
+<p>The shading map data may depend on the AE and AWB statistics,<wbr/> therefore the reliability
+of the map data may be affected by the AE and AWB algorithms.<wbr/> When AE and AWB are in
+AUTO modes(<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>!=</code> OFF and <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> <code>!=</code> OFF),<wbr/>
+to get best results,<wbr/> it is recommended that the applications wait for the AE and AWB to
+be converged before using the returned shading map data.<wbr/></p>
             </td>
           </tr>
 
@@ -16774,7 +16780,13 @@ shown below:</p>
 camera device.<wbr/> Applications can request lens shading map data by setting
 <a href="#controls_android.statistics.lensShadingMapMode">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map<wbr/>Mode</a> to ON,<wbr/> and then the camera device will provide
 lens shading map data in <a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a>,<wbr/> with size specified
-by <a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a>.<wbr/></p>
+by <a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a>; the returned shading map data will be the one
+applied by the camera device for this capture request.<wbr/></p>
+<p>The shading map data may depend on the AE and AWB statistics,<wbr/> therefore the reliability
+of the map data may be affected by the AE and AWB algorithms.<wbr/> When AE and AWB are in
+AUTO modes(<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>!=</code> OFF and <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> <code>!=</code> OFF),<wbr/>
+to get best results,<wbr/> it is recommended that the applications wait for the AE and AWB to
+be converged before using the returned shading map data.<wbr/></p>
             </td>
           </tr>
 
@@ -17998,7 +18010,7 @@ generation</p>
                 
           <tr class="entry" id="dynamic_android.statistics.lensShadingMap">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map
             </td>
             <td class="entry_type">
@@ -18079,6 +18091,22 @@ image of a gray wall (using bicubic interpolation for visual quality) as capture
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The lens shading map calculation may depend on exposure and white balance statistics.<wbr/>
+When AE and AWB are in AUTO modes
+(<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>!=</code> OFF and <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> <code>!=</code> OFF),<wbr/> the HAL
+may have all the information it need to generate most accurate lens shading map.<wbr/> When
+AE or AWB are in manual mode
+(<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>==</code> OFF or <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> <code>==</code> OFF),<wbr/> the shading map
+may be adversely impacted by manual exposure or white balance parameters.<wbr/> To avoid
+generating unreliable shading map data,<wbr/> the HAL may choose to lock the shading map with
+the latest known good map generated when the AE and AWB are in AUTO modes.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -18781,7 +18809,7 @@ emit its own tonemap curve in <a href="#controls_android.tonemap.curveRed">andro
 <a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a>,<wbr/> and <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>.<wbr/>
 These values are always available,<wbr/> and as close as possible to the
 actually used nonlinear/<wbr/>nonglobal transforms.<wbr/></p>
-<p>If a request is sent with TRANSFORM_<wbr/>MATRIX with the camera device's
+<p>If a request is sent with CONTRAST_<wbr/>CURVE with the camera device's
 provided curve in FAST or HIGH_<wbr/>QUALITY,<wbr/> the image's tonemap will be
 roughly the same.<wbr/></p>
             </td>
@@ -19243,7 +19271,7 @@ emit its own tonemap curve in <a href="#controls_android.tonemap.curveRed">andro
 <a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a>,<wbr/> and <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>.<wbr/>
 These values are always available,<wbr/> and as close as possible to the
 actually used nonlinear/<wbr/>nonglobal transforms.<wbr/></p>
-<p>If a request is sent with TRANSFORM_<wbr/>MATRIX with the camera device's
+<p>If a request is sent with CONTRAST_<wbr/>CURVE with the camera device's
 provided curve in FAST or HIGH_<wbr/>QUALITY,<wbr/> the image's tonemap will be
 roughly the same.<wbr/></p>
             </td>
