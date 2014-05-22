@@ -1594,8 +1594,8 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "MANUAL_SENSOR";
                     ret = 0;
                     break;
-                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_GCAM:
-                    msg = "GCAM";
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING:
+                    msg = "MANUAL_POST_PROCESSING";
                     ret = 0;
                     break;
                 case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_ZSL:

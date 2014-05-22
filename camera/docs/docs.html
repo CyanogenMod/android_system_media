@@ -3290,6 +3290,9 @@ supported by this camera device.<wbr/></p>
             </td>
 
             <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
             </td>
 
           </tr>
@@ -3405,6 +3408,9 @@ AE algorithm/<wbr/>hardware</p>
             </td>
 
             <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
             </td>
 
           </tr>
@@ -8487,7 +8493,7 @@ thumbnail</p>
                 
           <tr class="entry" id="controls_android.jpeg.thumbnailSize">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>jpeg.<wbr/>thumbnail<wbr/>Size
             </td>
             <td class="entry_type">
@@ -8532,9 +8538,26 @@ thumbnail</p>
 but the captured JPEG will still be a valid image.<wbr/></p>
 <p>When a jpeg image capture is issued,<wbr/> the thumbnail size selected should have
 the same aspect ratio as the jpeg image.<wbr/></p>
+<p>If the thumbnail image aspect ratio differs from the JPEG primary image aspect
+ratio,<wbr/> the camera device creates the thumbnail by cropping it from the primary image.<wbr/>
+For example,<wbr/> if the primary image has 4:3 aspect ratio,<wbr/> the thumbnail image has
+16:9 aspect ratio,<wbr/> the primary image will be cropped vertically (letterbox) to
+generate the thumbnail image.<wbr/> The thumbnail image will always have a smaller Field
+Of View (FOV) than the primary image when aspect ratios differ.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL must not squeeze or stretch the downscaled primary image to generate thumbnail.<wbr/>
+The cropping must be done on the primary jpeg image rather than the sensor active array.<wbr/>
+The stream cropping rule specified by "S5.<wbr/> Cropping" in camera3.<wbr/>h doesn't apply to the
+thumbnail image cropping.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -9062,7 +9085,7 @@ thumbnail</p>
                 
           <tr class="entry" id="dynamic_android.jpeg.thumbnailSize">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>jpeg.<wbr/>thumbnail<wbr/>Size
             </td>
             <td class="entry_type">
@@ -9107,9 +9130,26 @@ thumbnail</p>
 but the captured JPEG will still be a valid image.<wbr/></p>
 <p>When a jpeg image capture is issued,<wbr/> the thumbnail size selected should have
 the same aspect ratio as the jpeg image.<wbr/></p>
+<p>If the thumbnail image aspect ratio differs from the JPEG primary image aspect
+ratio,<wbr/> the camera device creates the thumbnail by cropping it from the primary image.<wbr/>
+For example,<wbr/> if the primary image has 4:3 aspect ratio,<wbr/> the thumbnail image has
+16:9 aspect ratio,<wbr/> the primary image will be cropped vertically (letterbox) to
+generate the thumbnail image.<wbr/> The thumbnail image will always have a smaller Field
+Of View (FOV) than the primary image when aspect ratios differ.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL must not squeeze or stretch the downscaled primary image to generate thumbnail.<wbr/>
+The cropping must be done on the primary jpeg image rather than the sensor active array.<wbr/>
+The stream cropping rule specified by "S5.<wbr/> Cropping" in camera3.<wbr/>h doesn't apply to the
+thumbnail image cropping.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -12146,9 +12186,17 @@ tags not belonging to a capability.<wbr/></p></span>
                   <li>
                     <span class="entry_type_enum_name">MANUAL_SENSOR</span>
                     <span class="entry_type_enum_notes"><p>The camera device can be manually controlled (3A algorithms such
-as auto exposure,<wbr/> and auto focus can be
-bypassed),<wbr/> this includes but is not limited to:</p>
+as auto exposure,<wbr/> and auto focus can be bypassed).<wbr/>
+The camera device supports basic manual control of the sensor image
+acquisition related stages.<wbr/> This means the following controls are
+guaranteed to be supported:</p>
 <ul>
+<li>Manual frame duration control<ul>
+<li><a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a></li>
+<li><a href="#static_android.sensor.info.maxFrameDuration">android.<wbr/>sensor.<wbr/>info.<wbr/>max<wbr/>Frame<wbr/>Duration</a></li>
+<li><a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a></li>
+</ul>
+</li>
 <li>Manual exposure control<ul>
 <li><a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a></li>
 <li><a href="#static_android.sensor.info.exposureTimeRange">android.<wbr/>sensor.<wbr/>info.<wbr/>exposure<wbr/>Time<wbr/>Range</a></li>
@@ -12174,12 +12222,15 @@ bypassed),<wbr/> this includes but is not limited to:</p>
 </ul>
 <p>If any of the above 3A algorithms are enabled,<wbr/> then the camera
 device will accurately report the values applied by 3A in the
-result.<wbr/></p></span>
+result.<wbr/></p>
+<p>A given camera device may also support additional manual sensor controls,<wbr/>
+but this capability only covers the above list of controls.<wbr/></p></span>
                   </li>
                   <li>
-                    <span class="entry_type_enum_name">GCAM</span>
-                    <span class="entry_type_enum_optional">optional</span>
-                    <span class="entry_type_enum_notes"><p>TODO: This should be @hide</p>
+                    <span class="entry_type_enum_name">MANUAL_POST_PROCESSING</span>
+                    <span class="entry_type_enum_notes"><p>The camera device post-processing stages can be manually controlled.<wbr/>
+The camera device supports basic manual control of the image post-processing
+stages.<wbr/> This means the following controls are guaranteed to be supported:</p>
 <ul>
 <li>Manual tonemap control<ul>
 <li><a href="#controls_android.tonemap.curve">android.<wbr/>tonemap.<wbr/>curve</a></li>
@@ -12201,7 +12252,9 @@ result.<wbr/></p></span>
 <p>If auto white balance is enabled,<wbr/> then the camera device
 will accurately report the values applied by AWB in the result.<wbr/></p>
 <p>The camera device will also support everything in MANUAL_<wbr/>SENSOR
-except manual lens control and manual flash control.<wbr/></p></span>
+except manual lens control and manual flash control.<wbr/></p>
+<p>A given camera device may also support additional post-processing
+controls,<wbr/> but this capability only covers the above list of controls.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZSL</span>
@@ -12276,7 +12329,6 @@ as a table instead?</p>
 <a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> <code>==</code> FULL devices:</p>
 <ul>
 <li>MANUAL_<wbr/>SENSOR</li>
-<li>ZSL</li>
 </ul>
 <p>Other capabilities may be available on either FULL or LIMITED
 devices,<wbr/> but the app.<wbr/> should query this field to be sure.<wbr/></p>
@@ -13887,7 +13939,7 @@ format/<wbr/>size combination.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_BC">BC</a></li>
+                  <li><a href="#tag_V1">V1</a></li>
               </ul>
             </td>
 
@@ -13951,7 +14003,7 @@ format/<wbr/>size combination.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_BC">BC</a></li>
+                  <li><a href="#tag_V1">V1</a></li>
               </ul>
             </td>
 
@@ -14488,7 +14540,6 @@ is capped to <code>max(duration,<wbr/> exposureTime + overhead)</code>.<wbr/></p
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
-                  <li><a href="#tag_BC">BC</a></li>
               </ul>
             </td>
 
@@ -15140,7 +15191,6 @@ rate).<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_BC">BC</a></li>
                   <li><a href="#tag_V1">V1</a></li>
               </ul>
             </td>
@@ -16374,7 +16424,6 @@ is capped to <code>max(duration,<wbr/> exposureTime + overhead)</code>.<wbr/></p
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
-                  <li><a href="#tag_BC">BC</a></li>
               </ul>
             </td>
 
@@ -20462,10 +20511,10 @@ doesn't violate the above rules.<wbr/></p>
 <p>A FULL device has the most support possible and will enable the
 widest range of use cases such as:</p>
 <ul>
-<li>30 FPS at maximum resolution (== sensor resolution)</li>
-<li>Per frame control</li>
-<li>Manual sensor control</li>
-<li>Zero Shutter Lag (ZSL)</li>
+<li>30fps at maximum resolution (== sensor resolution) is preferred,<wbr/> more than 20fps is required.<wbr/></li>
+<li>Per frame control (<a href="#static_android.sync.maxLatency">android.<wbr/>sync.<wbr/>max<wbr/>Latency</a> <code>==</code> PER_<wbr/>FRAME_<wbr/>CONTROL)</li>
+<li>Manual sensor control (<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains MANUAL_<wbr/>SENSOR)</li>
+<li>Manual post-processing control (<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains MANUAL_<wbr/>POST_<wbr/>PROCESSING)</li>
 </ul>
 <p>A LIMITED device may have some or none of the above characteristics.<wbr/>
 To find out more refer to <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>.<wbr/></p>
@@ -20819,7 +20868,7 @@ synchronized.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_LIMITED">LIMITED</a></li>
+                  <li><a href="#tag_V1">V1</a></li>
               </ul>
             </td>
 
@@ -20978,7 +21027,7 @@ result's state becomes synchronized (by setting
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_LIMITED">LIMITED</a></li>
+                  <li><a href="#tag_V1">V1</a></li>
               </ul>
             </td>
 
@@ -21068,7 +21117,9 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#controls_android.control.mode">android.control.mode</a> (controls)</li>
           <li><a href="#controls_android.control.sceneMode">android.control.sceneMode</a> (controls)</li>
           <li><a href="#controls_android.control.videoStabilizationMode">android.control.videoStabilizationMode</a> (controls)</li>
+          <li><a href="#static_android.control.aeAvailableAntibandingModes">android.control.aeAvailableAntibandingModes</a> (static)</li>
           <li><a href="#static_android.control.aeAvailableModes">android.control.aeAvailableModes</a> (static)</li>
+          <li><a href="#static_android.control.aeAvailableTargetFpsRanges">android.control.aeAvailableTargetFpsRanges</a> (static)</li>
           <li><a href="#static_android.control.aeCompensationRange">android.control.aeCompensationRange</a> (static)</li>
           <li><a href="#static_android.control.aeCompensationStep">android.control.aeCompensationStep</a> (static)</li>
           <li><a href="#static_android.control.afAvailableModes">android.control.afAvailableModes</a> (static)</li>
@@ -21100,11 +21151,7 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.scaler.availableProcessedMinDurations">android.scaler.availableProcessedMinDurations</a> (static)</li>
           <li><a href="#static_android.scaler.availableProcessedSizes">android.scaler.availableProcessedSizes</a> (static)</li>
           <li><a href="#static_android.scaler.availableRawMinDurations">android.scaler.availableRawMinDurations</a> (static)</li>
-          <li><a href="#static_android.scaler.availableMinFrameDurations">android.scaler.availableMinFrameDurations</a> (static)</li>
-          <li><a href="#static_android.scaler.availableStallDurations">android.scaler.availableStallDurations</a> (static)</li>
-          <li><a href="#controls_android.sensor.frameDuration">android.sensor.frameDuration</a> (controls)</li>
           <li><a href="#static_android.sensor.info.sensitivityRange">android.sensor.info.sensitivityRange</a> (static)</li>
-          <li><a href="#static_android.sensor.info.maxFrameDuration">android.sensor.info.maxFrameDuration</a> (static)</li>
           <li><a href="#static_android.sensor.info.physicalSize">android.sensor.info.physicalSize</a> (static)</li>
           <li><a href="#static_android.sensor.info.pixelArraySize">android.sensor.info.pixelArraySize</a> (static)</li>
           <li><a href="#static_android.sensor.orientation">android.sensor.orientation</a> (static)</li>
@@ -21143,6 +21190,8 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#controls_android.noiseReduction.mode">android.noiseReduction.mode</a> (controls)</li>
           <li><a href="#static_android.noiseReduction.availableNoiseReductionModes">android.noiseReduction.availableNoiseReductionModes</a> (static)</li>
           <li><a href="#controls_android.request.id">android.request.id</a> (controls)</li>
+          <li><a href="#static_android.scaler.availableMinFrameDurations">android.scaler.availableMinFrameDurations</a> (static)</li>
+          <li><a href="#static_android.scaler.availableStallDurations">android.scaler.availableStallDurations</a> (static)</li>
           <li><a href="#controls_android.sensor.exposureTime">android.sensor.exposureTime</a> (controls)</li>
           <li><a href="#controls_android.sensor.frameDuration">android.sensor.frameDuration</a> (controls)</li>
           <li><a href="#controls_android.sensor.sensitivity">android.sensor.sensitivity</a> (controls)</li>
@@ -21154,6 +21203,8 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#controls_android.statistics.hotPixelMapMode">android.statistics.hotPixelMapMode</a> (controls)</li>
           <li><a href="#static_android.statistics.info.availableHotPixelMapModes">android.statistics.info.availableHotPixelMapModes</a> (static)</li>
           <li><a href="#dynamic_android.statistics.hotPixelMap">android.statistics.hotPixelMap</a> (dynamic)</li>
+          <li><a href="#dynamic_android.sync.frameNumber">android.sync.frameNumber</a> (dynamic)</li>
+          <li><a href="#static_android.sync.maxLatency">android.sync.maxLatency</a> (static)</li>
           <li><a href="#dynamic_android.edge.mode">android.edge.mode</a> (dynamic)</li>
           <li><a href="#dynamic_android.hotPixel.mode">android.hotPixel.mode</a> (dynamic)</li>
           <li><a href="#dynamic_android.lens.aperture">android.lens.aperture</a> (dynamic)</li>
@@ -21210,15 +21261,6 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.sensor.maxAnalogSensitivity">android.sensor.maxAnalogSensitivity</a> (static)</li>
         </ul>
       </li> <!-- tag_FULL -->
-      <li id="tag_LIMITED">LIMITED - 
-      Entry assists with LIMITED device implementation. LIMITED devices
-      must implement all entries with this tag. Optional for FULL devices.
-    
-        <ul class="tags_entries">
-          <li><a href="#dynamic_android.sync.frameNumber">android.sync.frameNumber</a> (dynamic)</li>
-          <li><a href="#static_android.sync.maxLatency">android.sync.maxLatency</a> (static)</li>
-        </ul>
-      </li> <!-- tag_LIMITED -->
       <li id="tag_FUTURE">FUTURE - 
         Entry is  under-specified and is not required for now. This is for book-keeping purpose,
         do not implement or use it, it may be revised for future.
