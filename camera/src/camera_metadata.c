@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define _GNU_SOURCE // for fdprintf
+
 #include <inttypes.h>
 #include <system/camera_metadata.h>
 #include <camera_metadata_hidden.h>
@@ -867,17 +867,17 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
         int verbosity,
         int indentation) {
     if (metadata == NULL) {
-        fdprintf(fd, "%*sDumping camera metadata array: Not allocated\n",
+        dprintf(fd, "%*sDumping camera metadata array: Not allocated\n",
                 indentation, "");
         return;
     }
     unsigned int i;
-    fdprintf(fd,
+    dprintf(fd,
             "%*sDumping camera metadata array: %zu / %zu entries, "
             "%zu / %zu bytes of extra data.\n", indentation, "",
             metadata->entry_count, metadata->entry_capacity,
             metadata->data_count, metadata->data_capacity);
-    fdprintf(fd, "%*sVersion: %d, Flags: %08x\n",
+    dprintf(fd, "%*sVersion: %d, Flags: %08x\n",
             indentation + 2, "",
             metadata->version, metadata->flags);
     camera_metadata_buffer_entry_t *entry = get_entries(metadata);
@@ -898,7 +898,7 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
         } else {
             type_name = camera_metadata_type_names[entry->type];
         }
-        fdprintf(fd, "%*s%s.%s (%05x): %s[%zu]\n",
+        dprintf(fd, "%*s%s.%s (%05x): %s[%zu]\n",
              indentation + 2, "",
              tag_section,
              tag_name,
@@ -951,7 +951,7 @@ static void print_data(int fd, const uint8_t *data_ptr, uint32_t tag,
     int index = 0;
     int j, k;
     for (j = 0; j < lines; j++) {
-        fdprintf(fd, "%*s[", indentation + 4, "");
+        dprintf(fd, "%*s[", indentation + 4, "");
         for (k = 0;
              k < values_per_line[type] && count > 0;
              k++, count--, index += type_size) {
@@ -964,9 +964,9 @@ static void print_data(int fd, const uint8_t *data_ptr, uint32_t tag,
                                                      value_string_tmp,
                                                      sizeof(value_string_tmp))
                         == OK) {
-                        fdprintf(fd, "%s ", value_string_tmp);
+                        dprintf(fd, "%s ", value_string_tmp);
                     } else {
-                        fdprintf(fd, "%hhu ",
+                        dprintf(fd, "%hhu ",
                                 *(data_ptr + index));
                     }
                     break;
@@ -978,35 +978,35 @@ static void print_data(int fd, const uint8_t *data_ptr, uint32_t tag,
                                                      value_string_tmp,
                                                      sizeof(value_string_tmp))
                         == OK) {
-                        fdprintf(fd, "%s ", value_string_tmp);
+                        dprintf(fd, "%s ", value_string_tmp);
                     } else {
-                        fdprintf(fd, "%" PRId32 " ",
+                        dprintf(fd, "%" PRId32 " ",
                                 *(int32_t*)(data_ptr + index));
                     }
                     break;
                 case TYPE_FLOAT:
-                    fdprintf(fd, "%0.8f ",
+                    dprintf(fd, "%0.8f ",
                             *(float*)(data_ptr + index));
                     break;
                 case TYPE_INT64:
-                    fdprintf(fd, "%" PRId64 " ",
+                    dprintf(fd, "%" PRId64 " ",
                             *(int64_t*)(data_ptr + index));
                     break;
                 case TYPE_DOUBLE:
-                    fdprintf(fd, "%0.8f ",
+                    dprintf(fd, "%0.8f ",
                             *(double*)(data_ptr + index));
                     break;
                 case TYPE_RATIONAL: {
                     int32_t numerator = *(int32_t*)(data_ptr + index);
                     int32_t denominator = *(int32_t*)(data_ptr + index + 4);
-                    fdprintf(fd, "(%d / %d) ",
+                    dprintf(fd, "(%d / %d) ",
                             numerator, denominator);
                     break;
                 }
                 default:
-                    fdprintf(fd, "??? ");
+                    dprintf(fd, "??? ");
             }
         }
-        fdprintf(fd, "]\n");
+        dprintf(fd, "]\n");
     }
 }
