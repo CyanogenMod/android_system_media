@@ -307,6 +307,76 @@ size_t nonZeroStereo32(const int32_t *frames, size_t count);
  */
 size_t nonZeroStereo16(const int16_t *frames, size_t count);
 
+/* Copy frames, selecting source samples based on a source channel mask to fit
+ * the destination channel mask. Unmatched channels in the destination channel mask
+ * are zero filled. Unmatched channels in the source channel mask are dropped.
+ * Channels present in the channel mask are represented by set bits in the
+ * uint32_t value and are matched without further interpretation.
+ * Parameters:
+ *  dst         Destination buffer
+ *  dst_mask    Bit mask corresponding to destination channels present
+ *  src         Source buffer
+ *  src_mask    Bit mask corresponding to source channels present
+ *  sample_size Size of each sample in bytes.  Must be 1, 2, 3, or 4.
+ *  count       Number of frames to copy
+ * The destination and source buffers must be completely separate (non-overlapping).
+ * If the sample size is not in range, the function will abort.
+ */
+void memcpy_by_channel_mask(void *dst, uint32_t dst_mask,
+        const void *src, uint32_t src_mask, size_t sample_size, size_t count);
+
+/* Copy frames, selecting source samples based on an index array (idxary).
+ * The idxary[] consists of dst_channels number of elements.
+ * The ith element if idxary[] corresponds the ith destination channel.
+ * A non-negative value is the channel index in the source frame.
+ * A negative index (-1) represents filling with 0.
+ *
+ * Example: Swapping L and R channels for stereo streams
+ * idxary[0] = 1;
+ * idxary[1] = 0;
+ *
+ * Example: Copying a mono source to the front center 5.1 channel
+ * idxary[0] = -1;
+ * idxary[1] = -1;
+ * idxary[2] = 0;
+ * idxary[3] = -1;
+ * idxary[4] = -1;
+ * idxary[5] = -1;
+ *
+ * This copy allows swizzling of channels or replication of channels.
+ *
+ * Parameters:
+ *  dst           Destination buffer
+ *  dst_channels  Number of destination channels per frame
+ *  src           Source buffer
+ *  src_channels  Number of source channels per frame
+ *  idxary        Array of indices representing channels in the source frame
+ *  sample_size   Size of each sample in bytes.  Must be 1, 2, 3, or 4.
+ *  count         Number of frames to copy
+ * The destination and source buffers must be completely separate (non-overlapping).
+ * If the sample size is not in range, the function will abort.
+ */
+void memcpy_by_index_array(void *dst, uint32_t dst_channels,
+        const void *src, uint32_t src_channels,
+        const int8_t *idxary, size_t sample_size, size_t count);
+
+/* Prepares an index array (idxary) from channel masks, which can be later
+ * used by memcpy_by_index_array(). Returns the number of array elements required.
+ * This may be greater than idxcount, so the return value should be checked
+ * if idxary size is less than 32. Note that idxary is a caller allocated array
+ * of at least as many channels as present in the dst_mask.
+ * Channels present in the channel mask are represented by set bits in the
+ * uint32_t value and are matched without further interpretation.
+ *
+ * Parameters:
+ *  idxary      Updated array of indices of channels in the src frame for the dst frame
+ *  idxcount    Number of caller allocated elements in idxary
+ *  dst_mask    Bit mask corresponding to destination channels present
+ *  src_mask    Bit mask corresponding to source channels present
+ */
+size_t memcpy_by_index_array_initialization(int8_t *idxary, size_t idxcount,
+        uint32_t dst_mask, uint32_t src_mask);
+
 /**
  * Clamp (aka hard limit or clip) a signed 32-bit sample to 16-bit range.
  */
