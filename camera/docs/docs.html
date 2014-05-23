@@ -12403,8 +12403,11 @@ maintain the stream's aspect ratio.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Any additional per-stream cropping must be done to
-maximize the final pixel area of the stream.<wbr/></p>
+              <p>The crop region is applied after the RAW to other color space (e.<wbr/>g.<wbr/> YUV)
+conversion.<wbr/> Since raw streams (e.<wbr/>g.<wbr/> RAW16) don't have the conversion stage,<wbr/>
+it is not croppable.<wbr/> The crop region will be ignored by raw streams.<wbr/></p>
+<p>For non-raw streams,<wbr/> any additional per-stream cropping will
+be done to maximize the final pixel area of the stream.<wbr/></p>
 <p>For example,<wbr/> if the crop region is set to a 4:3 aspect
 ratio,<wbr/> then 4:3 streams should use the exact crop
 region.<wbr/> 16:9 streams should further crop vertically
@@ -13764,8 +13767,11 @@ maintain the stream's aspect ratio.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Any additional per-stream cropping must be done to
-maximize the final pixel area of the stream.<wbr/></p>
+              <p>The crop region is applied after the RAW to other color space (e.<wbr/>g.<wbr/> YUV)
+conversion.<wbr/> Since raw streams (e.<wbr/>g.<wbr/> RAW16) don't have the conversion stage,<wbr/>
+it is not croppable.<wbr/> The crop region will be ignored by raw streams.<wbr/></p>
+<p>For non-raw streams,<wbr/> any additional per-stream cropping will
+be done to maximize the final pixel area of the stream.<wbr/></p>
 <p>For example,<wbr/> if the crop region is set to a 4:3 aspect
 ratio,<wbr/> then 4:3 streams should use the exact crop
 region.<wbr/> 16:9 streams should further crop vertically

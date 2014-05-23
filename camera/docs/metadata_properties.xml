@@ -3172,8 +3172,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           in pixels; (0,0) is top-left corner of
           android.sensor.activeArraySize</units>
           <details>
-            Any additional per-stream cropping must be done to
-            maximize the final pixel area of the stream.
+            The crop region is applied after the RAW to other color space (e.g. YUV)
+            conversion. Since raw streams (e.g. RAW16) don't have the conversion stage,
+            it is not croppable. The crop region will be ignored by raw streams.
+
+            For non-raw streams, any additional per-stream cropping will
+            be done to maximize the final pixel area of the stream.
 
             For example, if the crop region is set to a 4:3 aspect
             ratio, then 4:3 streams should use the exact crop
