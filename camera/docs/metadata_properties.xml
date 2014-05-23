@@ -18,23 +18,14 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata_properties.xsd">
 
   <tags>
-    <tag id="AWB">
-        Needed for auto white balance
-    </tag>
     <tag id="BC">
         Needed for backwards compatibility with old Java API
     </tag>
     <tag id="V1">
         New features for first camera 2 release (API1)
     </tag>
-    <tag id="ADV">
-      <!-- TODO: fill the tag description -->
-    </tag>
     <tag id="DNG">
         Needed for DNG file support
-    </tag>
-    <tag id="EXIF">
-      <!-- TODO: fill the tag description -->
     </tag>
     <tag id="HAL2">
         Entry is only used by camera device HAL 2.x
@@ -45,6 +36,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <tag id="LIMITED">
       Entry assists with LIMITED device implementation. LIMITED devices
       must implement all entries with this tag. Optional for FULL devices.
+    </tag>
+    <tag id="FUTURE">
+        Entry is  under-specified and is not required for now. This is for book-keeping purpose,
+        do not implement or use it, it may be revised for future.
     </tag>
   </tags>
 
@@ -774,7 +769,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           target for white balance adjustment.
           </details>
           <tag id="BC" />
-          <tag id="AWB" />
         </entry>
         <entry name="awbRegions" type="int32" visibility="public"
                container="array">
@@ -1709,7 +1703,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Controls the quality of the demosaicing
           processing</description>
-          <tag id="V1" />
+          <tag id="FUTURE" />
         </entry>
       </controls>
     </section>
@@ -1744,7 +1738,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Control the amount of edge enhancement
           applied to the images</description>
           <units>1-10; 10 is maximum sharpening</units>
-          <tag id="V1" />
+          <tag id="FUTURE" />
         </entry>
       </controls>
       <static>
@@ -1779,7 +1773,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <details>Power for snapshot may use a different scale than
           for torch mode. Only one entry for torch mode will be
           used</details>
-          <tag id="V1" />
+          <tag id="FUTURE" />
         </entry>
         <entry name="firingTime" type="int64">
           <description>Firing time of flash relative to start of
@@ -1788,7 +1782,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>0-(exposure time-flash duration)</range>
           <details>Clamped to (0, exposure time - flash
           duration).</details>
-          <tag id="V1" />
+          <tag id="FUTURE" />
         </entry>
         <entry name="mode" type="byte" visibility="public" enum="true">
           <enum>
@@ -1800,8 +1794,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>SINGLE
               <notes>
               If the flash is available and charged, fire flash
-              for this capture based on android.flash.firingPower and
-              android.flash.firingTime.
+              for this capture.
               </notes>
             </value>
             <value>TORCH
@@ -1854,7 +1847,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <range>0-1e9</range>
             <details>1 second too long/too short for recharge? Should
             this be power-dependent?</details>
-            <tag id="V1" />
+            <tag id="FUTURE" />
           </entry>
         </namespace>
         <entry name="colorTemperature" type="byte">
@@ -1862,14 +1855,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           flash</description>
           <units>pair of floats</units>
           <range>0-1 for both</range>
-          <tag id="ADV" />
+          <tag id="FUTURE" />
         </entry>
         <entry name="maxEnergy" type="byte">
           <description>Max energy output of the flash for a full
           power single flash</description>
           <units>lumen-seconds</units>
           <range>&amp;gt;= 0</range>
-          <tag id="ADV" />
+          <tag id="FUTURE" />
         </entry>
       </static>
       <dynamic>
@@ -1969,7 +1962,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           To avoid performance issues, there will be significantly fewer hot
           pixels than actual pixels on the camera sensor.
           </hal_details>
-          <tag id="ADV" />
           <tag id="V1" />
           <tag id="DNG" />
         </entry>
@@ -2099,6 +2091,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           has android.jpeg.size = 500000, then the output buffer from
           the JPEG stream will be 1000000 bytes, of which the first
           500000 make up the real data.</details>
+          <tag id="FUTURE" />
         </entry>
         <clone entry="android.jpeg.thumbnailQuality"
         kind="controls"></clone>
@@ -2404,7 +2397,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           Use FACING field to determine perpendicular outgoing
           direction</details>
-          <tag id="ADV" />
+          <tag id="FUTURE" />
         </entry>
         <entry name="position" type="float" container="array">
           <array>
@@ -2413,7 +2406,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>Coordinates of camera optical axis on
           device</description>
-          <tag id="V1" />
+          <tag id="FUTURE" />
         </entry>
       </static>
       <dynamic>
@@ -2525,6 +2518,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           applied to the images</description>
           <units>1-10; 10 is max noise reduction</units>
           <range>1 - 10</range>
+          <tag id="FUTURE" />
         </entry>
       </controls>
       <static>
@@ -2698,6 +2692,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>How much metadata to produce on
           output</description>
+          <tag id="FUTURE" />
         </entry>
         <entry name="outputStreams" type="int32" visibility="system" deprecated="true"
                container="array">
@@ -2923,7 +2918,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               * Manual sensitivity control
                   * android.sensor.sensitivity
                   * android.sensor.info.sensitivityRange
-                  * android.sensor.baseGainFactor
               * Manual lens control
                   * android.lens.*
               * Manual flash control
@@ -4367,12 +4361,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="DNG" />
         </entry>
-        <entry name="baseGainFactor" type="rational" visibility="public"
+        <entry name="baseGainFactor" type="rational"
         optional="true">
           <description>Gain factor from electrons to raw units when
           ISO=100</description>
-          <tag id="V1" />
-          <tag id="FULL" />
+          <tag id="FUTURE" />
         </entry>
         <entry name="blackLevelPattern" type="int32" visibility="public"
         optional="true" type_notes="2x2 raw count block" container="array">
@@ -4457,7 +4450,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           system</details>
           <tag id="BC" />
         </entry>
-        <entry name="temperature" type="float" visibility="public"
+        <entry name="temperature" type="float"
         optional="true">
           <description>The temperature of the sensor, sampled at the time
           exposure began for this frame.
@@ -4468,7 +4461,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           <units>celsius</units>
           <range>Optional. This value is missing if no temperature is available.</range>
-          <tag id="FULL" />
+          <tag id="FUTURE" />
         </entry>
         <entry name="neutralColorPoint" type="rational" visibility="public"
         optional="true" container="array">
@@ -4818,7 +4811,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           applied to the images</description>
           <units>unitless: 1-10; 10 is full shading
           compensation</units>
-          <tag id="ADV" />
+          <tag id="FUTURE" />
         </entry>
       </controls>
       <dynamic>
@@ -4855,7 +4848,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Operating mode for histogram
           generation</description>
-          <tag id="V1" />
+          <tag id="FUTURE" />
         </entry>
         <entry name="sharpnessMapMode" type="byte" enum="true" typedef="boolean">
           <enum>
@@ -4864,7 +4857,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Operating mode for sharpness map
           generation</description>
-          <tag id="V1" />
+          <tag id="FUTURE" />
         </entry>
         <entry name="hotPixelMapMode" type="byte" visibility="public" enum="true"
         typedef="boolean">
@@ -4916,20 +4909,24 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>Number of histogram buckets
             supported</description>
             <range>&amp;gt;= 64</range>
+            <tag id="FUTURE" />
           </entry>
           <entry name="maxFaceCount" type="int32" visibility="public" >
             <description>Maximum number of simultaneously detectable
             faces</description>
             <range>&amp;gt;= 4 if android.statistics.info.availableFaceDetectModes lists
             modes besides OFF, otherwise 0</range>
+            <tag id="BC" />
           </entry>
           <entry name="maxHistogramCount" type="int32">
             <description>Maximum value possible for a histogram
             bucket</description>
+            <tag id="FUTURE" />
           </entry>
           <entry name="maxSharpnessMapValue" type="int32">
             <description>Maximum value possible for a sharpness map
             region.</description>
+            <tag id="FUTURE" />
           </entry>
           <entry name="sharpnessMapSize" type="int32"
           type_notes="width x height" container="array" typedef="size">
@@ -4939,6 +4936,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>Dimensions of the sharpness
             map</description>
             <range>Must be at least 32 x 32</range>
+            <tag id="FUTURE" />
           </entry>
           <entry name="availableHotPixelMapModes" type="byte" visibility="public"
           type_notes="list of enums" container="array" typedef="boolean">
@@ -5030,7 +5028,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           (with w = android.sensor.info.whiteLevel) of [ k * w/N,
           (k + 1) * w / N ). If only a monochrome sharpness map is
           supported, all channels should have the same data</details>
-          <tag id="V1" />
+          <tag id="FUTURE" />
         </entry>
         <clone entry="android.statistics.histogramMode"
         kind="controls"></clone>
@@ -5046,7 +5044,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           sensor data</description>
           <details>If only a monochrome sharpness map is supported,
           all channels should have the same data</details>
-          <tag id="V1" />
+          <tag id="FUTURE" />
         </entry>
         <clone entry="android.statistics.sharpnessMapMode"
         kind="controls"></clone>
