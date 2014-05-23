@@ -4770,7 +4770,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           camera device. Applications can request lens shading map data by setting
           android.statistics.lensShadingMapMode to ON, and then the camera device will provide
           lens shading map data in android.statistics.lensShadingMap, with size specified
-          by android.lens.info.shadingMapSize.
+          by android.lens.info.shadingMapSize; the returned shading map data will be the one
+          applied by the camera device for this capture request.
+
+          The shading map data may depend on the AE and AWB statistics, therefore the reliability
+          of the map data may be affected by the AE and AWB algorithms. When AE and AWB are in
+          AUTO modes(android.control.aeMode `!=` OFF and android.control.awbMode `!=` OFF),
+          to get best results, it is recommended that the applications wait for the AE and AWB to
+          be converged before using the returned shading map data.
           </details>
         </entry>
         <entry name="strength" type="byte">
@@ -5069,6 +5076,17 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           ![Image of a uniform white wall (inverse shading map)](android.statistics.lensShadingMap/inv_shading.png)
           </details>
+          <hal_details>
+          The lens shading map calculation may depend on exposure and white balance statistics.
+          When AE and AWB are in AUTO modes
+          (android.control.aeMode `!=` OFF and android.control.awbMode `!=` OFF), the HAL
+          may have all the information it need to generate most accurate lens shading map. When
+          AE or AWB are in manual mode
+          (android.control.aeMode `==` OFF or android.control.awbMode `==` OFF), the shading map
+          may be adversely impacted by manual exposure or white balance parameters. To avoid
+          generating unreliable shading map data, the HAL may choose to lock the shading map with
+          the latest known good map generated when the AE and AWB are in AUTO modes.
+          </hal_details>
         </entry>
         <entry name="predictedColorGains" type="float"
                visibility="hidden"
@@ -5366,7 +5384,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           These values are always available, and as close as possible to the
           actually used nonlinear/nonglobal transforms.
 
-          If a request is sent with TRANSFORM_MATRIX with the camera device's
+          If a request is sent with CONTRAST_CURVE with the camera device's
           provided curve in FAST or HIGH_QUALITY, the image's tonemap will be
           roughly the same.</details>
         </entry>
