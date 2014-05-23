@@ -399,25 +399,32 @@ sf_count_t sf_readf_float(SNDFILE *handle, float *ptr, sf_count_t desiredFrames)
     // does not check for numeric overflow
     size_t desiredBytes = desiredFrames * handle->bytesPerFrame;
     size_t actualBytes;
+    void *temp = NULL;
     unsigned format = handle->info.format & SF_FORMAT_SUBMASK;
-    actualBytes = fread(ptr, sizeof(char), desiredBytes, handle->stream);
+    if (format == SF_FORMAT_PCM_16 || format == SF_FORMAT_PCM_U8) {
+        temp = malloc(desiredBytes);
+        actualBytes = fread(temp, sizeof(char), desiredBytes, handle->stream);
+    } else {
+        actualBytes = fread(ptr, sizeof(char), desiredBytes, handle->stream);
+    }
     size_t actualFrames = actualBytes / handle->bytesPerFrame;
     handle->remaining -= actualFrames;
     switch (format) {
-#if 0
     case SF_FORMAT_PCM_U8:
-        memcpy_to_float_from_u8(ptr, (const unsigned char *) ptr,
-                actualFrames * handle->info.channels);
-        break;
-#endif
-    case SF_FORMAT_PCM_16:
-        memcpy_to_float_from_i16(ptr, (const short *) ptr, actualFrames * handle->info.channels);
-        break;
 #if 0
+        // TODO - implement
+        memcpy_to_float_from_u8(ptr, (const unsigned char *) temp,
+                actualFrames * handle->info.channels);
+#endif
+        free(temp);
+        break;
+    case SF_FORMAT_PCM_16:
+        memcpy_to_float_from_i16(ptr, (const short *) temp, actualFrames * handle->info.channels);
+        free(temp);
+        break;
     case SF_FORMAT_PCM_32:
         memcpy_to_float_from_i32(ptr, (const int *) ptr, actualFrames * handle->info.channels);
         break;
-#endif
     case SF_FORMAT_FLOAT:
         break;
     default:
