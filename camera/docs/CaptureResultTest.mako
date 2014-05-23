@@ -20,8 +20,8 @@
      * modify the comment blocks at the start or end.
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~*/
 
-    private static List<CameraMetadata.Key<?>> getAllCaptureResultKeys() {
-        ArrayList<CameraMetadata.Key<?>> resultKeys = new ArrayList<CameraMetadata.Key<?>>();
+    private static List<CaptureResult.Key<?>> getAllCaptureResultKeys() {
+        ArrayList<CaptureResult.Key<?>> resultKeys = new ArrayList<CaptureResult.Key<?>>();
 % for sec in find_all_sections(metadata):
   % for entry in find_unique_entries(sec):
     % if entry.kind == 'dynamic' and entry.visibility == "public":
@@ -29,10 +29,6 @@
     % endif
   % endfor
 % endfor
-
-        // Add STATISTICS_FACES key separately here because it is not
-        // defined in metadata xml file.
-        resultKeys.add(CaptureResult.STATISTICS_FACES);
 
         return resultKeys;
     }

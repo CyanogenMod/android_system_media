@@ -28,7 +28,7 @@ package android.hardware.camera2.cts;
 import android.content.Context;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CameraMetadata.Key;
+import android.hardware.camera2.CameraCharacteristics.Key;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
