@@ -664,6 +664,8 @@
             ><a href="#static_android.scaler.availableStallDurations">android.scaler.availableStallDurations</a></li>
             <li
             ><a href="#static_android.scaler.streamConfigurationMap">android.scaler.streamConfigurationMap</a></li>
+            <li
+            ><a href="#static_android.scaler.croppingType">android.scaler.croppingType</a></li>
           </ul>
         </li>
         <li>
@@ -1981,9 +1983,9 @@ bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
 needs to be used by the camera device.<wbr/> If the metering region is
-outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
-will ignore the sections outside the region and output the
-used sections in the frame metadata.<wbr/></p>
+outside the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
+the camera device will ignore the sections outside the region and output the
+used sections in the result metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -2294,9 +2296,9 @@ bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific focus area
 needs to be used by the camera device.<wbr/> If the focusing region is
-outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
-will ignore the sections outside the region and output the
-used sections in the frame metadata.<wbr/></p>
+outside the the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture
+result metadata,<wbr/> the camera device will ignore the sections outside
+the region and output the used sections in the result metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -2621,9 +2623,9 @@ bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific auto-white balance (AWB) area
 needs to be used by the camera device.<wbr/> If the AWB region is
-outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
-will ignore the sections outside the region and output the
-used sections in the frame metadata.<wbr/></p>
+outside the the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
+the camera device will ignore the sections outside the region and output the
+used sections in the result metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -4351,9 +4353,9 @@ bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific metering area
 needs to be used by the camera device.<wbr/> If the metering region is
-outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
-will ignore the sections outside the region and output the
-used sections in the frame metadata.<wbr/></p>
+outside the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
+the camera device will ignore the sections outside the region and output the
+used sections in the result metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -4925,9 +4927,9 @@ bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific focus area
 needs to be used by the camera device.<wbr/> If the focusing region is
-outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
-will ignore the sections outside the region and output the
-used sections in the frame metadata.<wbr/></p>
+outside the the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture
+result metadata,<wbr/> the camera device will ignore the sections outside
+the region and output the used sections in the result metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -5774,9 +5776,9 @@ bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
 <p>If all regions have 0 weight,<wbr/> then no specific auto-white balance (AWB) area
 needs to be used by the camera device.<wbr/> If the AWB region is
-outside the current <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> the camera device
-will ignore the sections outside the region and output the
-used sections in the frame metadata.<wbr/></p>
+outside the the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
+the camera device will ignore the sections outside the region and output the
+used sections in the result metadata.<wbr/></p>
             </td>
           </tr>
 
@@ -13684,6 +13686,69 @@ YUV_<wbr/>420_<wbr/>888 must also be available for IMPLEMENTATION_<wbr/>DEFINED.
 </ul>
             </td>
           </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.scaler.croppingType">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>scaler.<wbr/>cropping<wbr/>Type
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">CENTER_ONLY</span>
+                    <span class="entry_type_enum_notes"><p>The camera device will only support centered crop regions.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">FREEFORM</span>
+                    <span class="entry_type_enum_notes"><p>The camera device will support arbitrarily chosen crop regions.<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The crop type that this camera device supports.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When passing a non-centered crop region (<a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>) to a camera
+device that only supports CENTER_<wbr/>ONLY cropping,<wbr/> the camera device will move the
+crop region to the center of the sensor active array (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>)
+and keep the crop region width and height unchanged.<wbr/> The camera device will return the
+final used crop region in metadata result <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>.<wbr/></p>
+<p>Camera devices that support FREEFORM cropping will support any crop region that
+is inside of the active array.<wbr/> The camera device will apply the same crop region and
+return the final used crop region in capture result metadata <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>.<wbr/></p>
+<p>FULL capability devices (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> <code>==</code> FULL) will support
+FREEFORM cropping.<wbr/></p>
+            </td>
+          </tr>
+
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
