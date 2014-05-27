@@ -74,6 +74,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <typedef name="meteringRectangle">
       <language name="java">android.hardware.camera2.params.MeteringRectangle</language>
     </typedef>
+    <typedef name="rangeFloat">
+      <language name="java">android.util.Range&lt;Float&gt;</language>
+    </typedef>
+    <typedef name="rangeInt">
+      <language name="java">android.util.Range&lt;Integer&gt;</language>
+    </typedef>
   </types>
 
   <namespace name="android">
@@ -488,7 +494,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="aeTargetFpsRange" type="int32" visibility="public"
-               container="array">
+               container="array" typedef="rangeInt">
           <array>
             <size>2</size>
           </array>
@@ -1170,7 +1176,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="aeAvailableTargetFpsRanges" type="int32" visibility="public"
                type_notes="list of pairs of frame rates"
-               container="array">
+               container="array" typedef="rangeInt">
           <array>
             <size>2</size>
             <size>n</size>
@@ -1179,7 +1185,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           AE algorithm/hardware</description>
         </entry>
         <entry name="aeCompensationRange" type="int32" visibility="public"
-               container="array">
+               container="array" typedef="rangeInt">
           <array>
             <size>2</size>
           </array>
@@ -1298,7 +1304,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="BC" />
         </entry>
-        <entry name="maxRegions" type="int32" visibility="public" container="array">
+        <entry name="maxRegions" type="int32" visibility="hidden" container="array">
           <array>
             <size>3</size>
           </array>
@@ -1314,6 +1320,50 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           this value must be &amp;gt;= 1 for AE and AF. The order of the elements is:
           `(AE, AWB, AF)`.</range>
           <tag id="BC" />
+        </entry>
+        <entry name="maxRegionsAe" type="int32" visibility="public" synthetic="true">
+          <description>
+          List of the maximum number of regions that can be used for metering in
+          auto-exposure (AE);
+          this corresponds to the the maximum number of elements in
+          android.control.aeRegions.
+          </description>
+          <range>
+          Value will be &amp;gt;= 0. For FULL-capability devices, this
+          value will be &amp;gt;= 1.
+          </range>
+          <hal_details>This entry is private to the framework. Fill in
+          maxRegions to have this entry be automatically populated.
+          </hal_details>
+        </entry>
+        <entry name="maxRegionsAwb" type="int32" visibility="public" synthetic="true">
+          <description>
+          List of the maximum number of regions that can be used for metering in
+          auto-white balance (AWB);
+          this corresponds to the the maximum number of elements in
+          android.control.awbRegions.
+          </description>
+          <range>
+          Value will be &amp;gt;= 0.
+          </range>
+          <hal_details>This entry is private to the framework. Fill in
+          maxRegions to have this entry be automatically populated.
+          </hal_details>
+        </entry>
+        <entry name="maxRegionsAf" type="int32" visibility="public" synthetic="true">
+          <description>
+          List of the maximum number of regions that can be used for metering in
+          auto-focus (AF);
+          this corresponds to the the maximum number of elements in
+          android.control.afRegions.
+          </description>
+          <range>
+          Value will be &amp;gt;= 0. For FULL-capability devices, this
+          value will be &amp;gt;= 1.
+          </range>
+          <hal_details>This entry is private to the framework. Fill in
+          maxRegions to have this entry be automatically populated.
+          </hal_details>
         </entry>
         <entry name="sceneModeOverrides" type="byte" visibility="system"
                container="array">
@@ -2443,7 +2493,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
         <entry name="focusRange" type="float" visibility="public"
         type_notes="Range of scene distances that are in focus"
-        container="array">
+        container="array" typedef="rangeFloat">
           <array>
             <size>2</size>
           </array>
@@ -2747,7 +2797,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </controls>
       <static>
-        <entry name="maxNumOutputStreams" type="int32" visibility="public"
+        <entry name="maxNumOutputStreams" type="int32" visibility="hidden"
         container="array">
           <array>
             <size>3</size>
@@ -2773,7 +2823,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           This lists the upper bound of the number of output streams supported by
           the camera device. Using more streams simultaneously may require more hardware and
-          CPU resources that will consume more power. The image format for a output stream can
+          CPU resources that will consume more power. The image format for an output stream can
           be any supported format provided by android.scaler.availableStreamConfigurations.
           The formats defined in android.scaler.availableStreamConfigurations can be catergorized
           into the 3 stream types as below:
@@ -2785,6 +2835,84 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           Typically ImageFormat#YUV_420_888, ImageFormat#NV21, ImageFormat#YV12.
           </details>
           <tag id="BC" />
+        </entry>
+        <entry name="maxNumOutputRaw" type="int32" visibility="public" synthetic="true">
+          <description>The maximum numbers of different types of output streams
+          that can be configured and used simultaneously by a camera device
+          for any `RAW` formats.
+          </description>
+          <range>
+          &amp;gt;= 0
+          </range>
+          <details>
+          This value contains the max number of output simultaneous
+          streams from the raw sensor.
+
+          This lists the upper bound of the number of output streams supported by
+          the camera device. Using more streams simultaneously may require more hardware and
+          CPU resources that will consume more power. The image format for this kind of an output stream can
+          be any `RAW` and supported format provided by android.scaler.streamConfigurationMap.
+
+          In particular, a `RAW` format is typically one of:
+
+          * ImageFormat#RAW_SENSOR
+          * Opaque `RAW`
+          </details>
+        </entry>
+        <entry name="maxNumOutputProc" type="int32" visibility="public" synthetic="true">
+          <description>The maximum numbers of different types of output streams
+          that can be configured and used simultaneously by a camera device
+          for any processed (but not-stalling) formats.
+          </description>
+          <range>
+          &amp;gt;= 3
+          for FULL mode devices (`android.info.supportedHardwareLevel == FULL`);
+          &amp;gt;= 2 for LIMITED mode devices (`android.info.supportedHardwareLevel == LIMITED`).
+          </range>
+          <details>
+          This value contains the max number of output simultaneous
+          streams for any processed (but not-stalling) formats.
+
+          This lists the upper bound of the number of output streams supported by
+          the camera device. Using more streams simultaneously may require more hardware and
+          CPU resources that will consume more power. The image format for this kind of an output stream can
+          be any non-`RAW` and supported format provided by android.scaler.streamConfigurationMap.
+
+          Processed (but not-stalling) is defined as any non-RAW format without a stall duration.
+          Typically:
+
+          * ImageFormat#YUV_420_888
+          * ImageFormat#NV21
+          * ImageFormat#YV12
+          * Implementation-defined formats, i.e. StreamConfiguration#isOutputSupportedFor(Class)
+
+          For full guarantees, query StreamConfigurationMap#getOutputStallDuration with
+          a processed format -- it will return 0 for a non-stalling stream.
+          </details>
+        </entry>
+        <entry name="maxNumOutputProcStalling" type="int32" visibility="public" synthetic="true">
+          <description>The maximum numbers of different types of output streams
+          that can be configured and used simultaneously by a camera device
+          for any processed (and stalling) formats.
+          </description>
+          <range>
+          &amp;gt;= 1
+          </range>
+          <details>
+          This value contains the max number of output simultaneous
+          streams for any processed (but not-stalling) formats.
+
+          This lists the upper bound of the number of output streams supported by
+          the camera device. Using more streams simultaneously may require more hardware and
+          CPU resources that will consume more power. The image format for this kind of an output stream can
+          be any non-`RAW` and supported format provided by android.scaler.streamConfigurationMap.
+
+          A processed and stalling format is defined as any non-RAW format with a stallDurations &amp;gt; 0.
+          Typically only the `JPEG` format (ImageFormat#JPEG)
+
+          For full guarantees, query StreamConfigurationMap#getOutputStallDuration with
+          a processed format -- it will return a non-0 value for a stalling stream.
+          </details>
         </entry>
         <entry name="maxNumReprocessStreams" type="int32" visibility="system"
         deprecated="true" container="array">

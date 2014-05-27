@@ -427,6 +427,27 @@ def jtype_boxed(entry):
   unboxed_type = jtype_unboxed(entry)
   return _jtype_box(unboxed_type)
 
+def _is_jtype_generic(entry):
+  """
+  Determine whether or not the Java type represented by the entry type
+  string and/or typedef is a Java generic.
+
+  For example, "Range<Integer>" would be considered a generic, whereas
+  a "MeteringRectangle" or a plain "Integer" would not be considered a generic.
+
+  Args:
+    entry: An instance of an Entry node
+
+  Returns:
+    True if it's a java generic, False otherwise.
+  """
+  if entry.typedef:
+    local_typedef = _jtypedef_type(entry)
+    if local_typedef:
+      match = re.search(r'<.*>', local_typedef)
+      return bool(match)
+  return False
+
 def _jtype_primitive(what):
   """
   Calculate the Java type from an entry type string.
@@ -471,6 +492,23 @@ def jclass(entry):
   """
 
   return "%s.class" %jtype_unboxed(entry)
+
+def jkey_type_token(entry):
+  """
+  Calculate the java type token compatible with a Key constructor.
+  This will be the Java Class<T> for non-generic classes, and a
+  TypeReference<T> for generic classes.
+
+  Args:
+    entry: An entry node
+
+  Returns:
+    The ClassName.class string, or 'new TypeReference<ClassName>() {{ }}' string
+  """
+  if _is_jtype_generic(entry):
+    return "new TypeReference<%s>() {{ }}" %(jtype_boxed(entry))
+  else:
+    return jclass(entry)
 
 def jidentifier(what):
   """

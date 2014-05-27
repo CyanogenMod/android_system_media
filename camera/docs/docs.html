@@ -204,6 +204,12 @@
             <li
             ><a href="#static_android.control.maxRegions">android.control.maxRegions</a></li>
             <li
+            ><a href="#static_android.control.maxRegionsAe">android.control.maxRegionsAe</a></li>
+            <li
+            ><a href="#static_android.control.maxRegionsAwb">android.control.maxRegionsAwb</a></li>
+            <li
+            ><a href="#static_android.control.maxRegionsAf">android.control.maxRegionsAf</a></li>
+            <li
             ><a href="#static_android.control.sceneModeOverrides">android.control.sceneModeOverrides</a></li>
           </ul>
         </li>
@@ -581,6 +587,12 @@
           <ul class="toc_section">
             <li
             ><a href="#static_android.request.maxNumOutputStreams">android.request.maxNumOutputStreams</a></li>
+            <li
+            ><a href="#static_android.request.maxNumOutputRaw">android.request.maxNumOutputRaw</a></li>
+            <li
+            ><a href="#static_android.request.maxNumOutputProc">android.request.maxNumOutputProc</a></li>
+            <li
+            ><a href="#static_android.request.maxNumOutputProcStalling">android.request.maxNumOutputProcStalling</a></li>
             <li
                 class="toc_deprecated"
             ><a href="#static_android.request.maxNumReprocessStreams">android.request.maxNumReprocessStreams</a></li>
@@ -2016,7 +2028,7 @@ exclusive on xmax and ymax.<wbr/></p>
                 <span class="entry_type_array">
                   2
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as rangeInt]</span>
 
 
 
@@ -3346,7 +3358,7 @@ sensitivity,<wbr/> and frame duration.<wbr/></p>
                 <span class="entry_type_array">
                   2 x n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as rangeInt]</span>
 
 
 
@@ -3388,7 +3400,7 @@ AE algorithm/<wbr/>hardware</p>
                 <span class="entry_type_array">
                   2
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as rangeInt]</span>
 
 
 
@@ -3763,7 +3775,7 @@ which enables application control of white balance,<wbr/> by using
                 <span class="entry_type_array">
                   3
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [hidden]</span>
 
 
 
@@ -3796,6 +3808,158 @@ this value must be &gt;= 1 for AE and AF.<wbr/> The order of the elements is:
 
           </tr>
 
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.control.maxRegionsAe">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>control.<wbr/>max<wbr/>Regions<wbr/>Ae
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+              <span class="entry_type_synthetic">[synthetic] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>List of the maximum number of regions that can be used for metering in
+auto-exposure (AE);
+this corresponds to the the maximum number of elements in
+<a href="#controls_android.control.aeRegions">android.<wbr/>control.<wbr/>ae<wbr/>Regions</a>.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Value will be &gt;= 0.<wbr/> For FULL-capability devices,<wbr/> this
+value will be &gt;= 1.<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This entry is private to the framework.<wbr/> Fill in
+maxRegions to have this entry be automatically populated.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.control.maxRegionsAwb">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>control.<wbr/>max<wbr/>Regions<wbr/>Awb
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+              <span class="entry_type_synthetic">[synthetic] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>List of the maximum number of regions that can be used for metering in
+auto-white balance (AWB);
+this corresponds to the the maximum number of elements in
+<a href="#controls_android.control.awbRegions">android.<wbr/>control.<wbr/>awb<wbr/>Regions</a>.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Value will be &gt;= 0.<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This entry is private to the framework.<wbr/> Fill in
+maxRegions to have this entry be automatically populated.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.control.maxRegionsAf">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>control.<wbr/>max<wbr/>Regions<wbr/>Af
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+              <span class="entry_type_synthetic">[synthetic] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>List of the maximum number of regions that can be used for metering in
+auto-focus (AF);
+this corresponds to the the maximum number of elements in
+<a href="#controls_android.control.afRegions">android.<wbr/>control.<wbr/>af<wbr/>Regions</a>.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Value will be &gt;= 0.<wbr/> For FULL-capability devices,<wbr/> this
+value will be &gt;= 1.<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This entry is private to the framework.<wbr/> Fill in
+maxRegions to have this entry be automatically populated.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -4414,7 +4578,7 @@ exclusive on xmax and ymax.<wbr/></p>
                 <span class="entry_type_array">
                   2
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as rangeInt]</span>
 
 
 
@@ -10100,7 +10264,7 @@ measured from frontmost surface of the lens</p>
                 <span class="entry_type_array">
                   2
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as rangeFloat]</span>
 
 
 
@@ -11373,7 +11537,7 @@ REPROCESS.<wbr/> For HAL3,<wbr/> this tag is redundant.<wbr/></p>
                 <span class="entry_type_array">
                   3
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [hidden]</span>
 
 
 
@@ -11416,7 +11580,7 @@ stalling stream,<wbr/> if max raw sensor format output stream number is 1,<wbr/>
 number is 3,<wbr/> and max JPEG stream number is 2,<wbr/> then this tuple should be <code>(1,<wbr/> 3,<wbr/> 2)</code>.<wbr/></p>
 <p>This lists the upper bound of the number of output streams supported by
 the camera device.<wbr/> Using more streams simultaneously may require more hardware and
-CPU resources that will consume more power.<wbr/> The image format for a output stream can
+CPU resources that will consume more power.<wbr/> The image format for an output stream can
 be any supported format provided by <a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a>.<wbr/>
 The formats defined in <a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a> can be catergorized
 into the 3 stream types as below:</p>
@@ -11427,6 +11591,186 @@ Typically JPEG format (ImageFormat#JPEG).<wbr/></li>
 <li>Processed (but not-stalling): any non-RAW format without a stall duration.<wbr/>
 Typically Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888,<wbr/> ImageFormat#NV21,<wbr/> ImageFormat#YV12.<wbr/></li>
 </ul>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.request.maxNumOutputRaw">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Output<wbr/>Raw
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+              <span class="entry_type_synthetic">[synthetic] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The maximum numbers of different types of output streams
+that can be configured and used simultaneously by a camera device
+for any <code>RAW</code> formats.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>&gt;= 0</p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This value contains the max number of output simultaneous
+streams from the raw sensor.<wbr/></p>
+<p>This lists the upper bound of the number of output streams supported by
+the camera device.<wbr/> Using more streams simultaneously may require more hardware and
+CPU resources that will consume more power.<wbr/> The image format for this kind of an output stream can
+be any <code>RAW</code> and supported format provided by <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a>.<wbr/></p>
+<p>In particular,<wbr/> a <code>RAW</code> format is typically one of:</p>
+<ul>
+<li>ImageFormat#RAW_<wbr/>SENSOR</li>
+<li>Opaque <code>RAW</code></li>
+</ul>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.request.maxNumOutputProc">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Output<wbr/>Proc
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+              <span class="entry_type_synthetic">[synthetic] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The maximum numbers of different types of output streams
+that can be configured and used simultaneously by a camera device
+for any processed (but not-stalling) formats.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>&gt;= 3
+for FULL mode devices (<code><a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == FULL</code>);
+&gt;= 2 for LIMITED mode devices (<code><a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == LIMITED</code>).<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This value contains the max number of output simultaneous
+streams for any processed (but not-stalling) formats.<wbr/></p>
+<p>This lists the upper bound of the number of output streams supported by
+the camera device.<wbr/> Using more streams simultaneously may require more hardware and
+CPU resources that will consume more power.<wbr/> The image format for this kind of an output stream can
+be any non-<code>RAW</code> and supported format provided by <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a>.<wbr/></p>
+<p>Processed (but not-stalling) is defined as any non-RAW format without a stall duration.<wbr/>
+Typically:</p>
+<ul>
+<li>Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</li>
+<li>ImageFormat#NV21</li>
+<li>ImageFormat#YV12</li>
+<li>Implementation-defined formats,<wbr/> i.<wbr/>e.<wbr/> StreamConfiguration#isOutputSupportedFor(Class)</li>
+</ul>
+<p>For full guarantees,<wbr/> query StreamConfigurationMap#getOutputStallDuration with
+a processed format -- it will return 0 for a non-stalling stream.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.request.maxNumOutputProcStalling">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Output<wbr/>Proc<wbr/>Stalling
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+              <span class="entry_type_synthetic">[synthetic] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The maximum numbers of different types of output streams
+that can be configured and used simultaneously by a camera device
+for any processed (and stalling) formats.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>&gt;= 1</p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This value contains the max number of output simultaneous
+streams for any processed (but not-stalling) formats.<wbr/></p>
+<p>This lists the upper bound of the number of output streams supported by
+the camera device.<wbr/> Using more streams simultaneously may require more hardware and
+CPU resources that will consume more power.<wbr/> The image format for this kind of an output stream can
+be any non-<code>RAW</code> and supported format provided by <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a>.<wbr/></p>
+<p>A processed and stalling format is defined as any non-RAW format with a stallDurations &gt; 0.<wbr/>
+Typically only the <code>JPEG</code> format (ImageFormat#JPEG)</p>
+<p>For full guarantees,<wbr/> query StreamConfigurationMap#getOutputStallDuration with
+a processed format -- it will return a non-0 value for a stalling stream.<wbr/></p>
             </td>
           </tr>
 

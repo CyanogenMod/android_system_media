@@ -33,7 +33,7 @@
 % for typedef in metadata.types:
   <typedef name="${typedef.name}">
     % for (language, klass) in typedef.languages.iteritems():
-      <language name="${language}">${klass}</language>
+      <language name="${language}">${klass | h}</language>
     % endfor
   </typedef>
 % endfor
