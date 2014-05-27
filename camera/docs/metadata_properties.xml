@@ -80,6 +80,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <typedef name="rangeInt">
       <language name="java">android.util.Range&lt;Integer&gt;</language>
     </typedef>
+    <typedef name="colorSpaceTransform">
+      <language name="java">android.hardware.camera2.params.ColorSpaceTransform</language>
+    </typedef>
+    <typedef name="rggbChannelVector">
+      <language name="java">android.hardware.camera2.params.RggbChannelVector</language>
+    </typedef>
+    <typedef name="enumList">
+      <language name="java">int</language>
+    </typedef>
   </types>
 
   <namespace name="android">
@@ -184,7 +193,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="transform" type="rational" visibility="public"
                type_notes="3x3 rational matrix in row-major order"
-               container="array">
+               container="array" typedef="colorSpaceTransform" >
           <array>
             <size>3</size>
             <size>3</size>
@@ -206,27 +215,32 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="gains" type="float" visibility="public"
                type_notes="A 1D array of floats for 4 color channel gains"
-               container="array">
+               container="array" typedef="rggbChannelVector" >
           <array>
             <size>4</size>
           </array>
           <description>Gains applying to Bayer raw color channels for
           white-balance.</description>
-          <details>The 4-channel white-balance gains are defined in
+          <details>
+          These per-channel gains are either set by the camera device
+          when the request android.colorCorrection.mode is not
+          TRANSFORM_MATRIX, or directly by the application in the
+          request when the android.colorCorrection.mode is
+          TRANSFORM_MATRIX.
+
+          The gains in the result metadata are the gains actually
+          applied by the camera device to the current frame.
+          </details>
+          <hal_details>
+          The 4-channel white-balance gains are defined in
           the order of `[R G_even G_odd B]`, where `G_even` is the gain
           for green pixels on even rows of the output, and `G_odd`
-          is the gain for green pixels on the odd rows. if a HAL
-          does not support a separate gain for even/odd green channels,
-          it should use the `G_even` value, and write `G_odd` equal to
-          `G_even` in the output result metadata.
+          is the gain for green pixels on the odd rows.
 
-          This array is either set by the camera device when the request
-          android.colorCorrection.mode is not TRANSFORM_MATRIX, or
-          directly by the application in the request when the
-          android.colorCorrection.mode is TRANSFORM_MATRIX.
-
-          The output should be the gains actually applied by the camera device to
-          the current frame.</details>
+          If a HAL does not support a separate gain for even/odd green
+          channels, it must use the `G_even` value, and write
+          `G_odd` equal to `G_even` in the output result metadata.
+          </hal_details>
         </entry>
       </controls>
       <dynamic>
@@ -1134,7 +1148,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </controls>
       <static>
         <entry name="aeAvailableAntibandingModes" type="byte" visibility="public"
-               type_notes="list of enums" container="array">
+               type_notes="list of enums" container="array" typedef="enumList" >
           <array>
             <size>n</size>
           </array>
@@ -1150,7 +1164,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
         </entry>
         <entry name="aeAvailableModes" type="byte" visibility="public"
-               type_notes="list of enums" container="array">
+               type_notes="list of enums" container="array" typedef="enumList">
           <array>
             <size>n</size>
           </array>
@@ -1203,7 +1217,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="afAvailableModes" type="byte" visibility="public"
-        type_notes="List of enums" container="array">
+        type_notes="List of enums" container="array" typedef="enumList">
           <array>
             <size>n</size>
           </array>
@@ -1221,7 +1235,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="availableEffects" type="byte" visibility="public"
-               type_notes="List of enums (android.control.effectMode)." container="array">
+               type_notes="List of enums (android.control.effectMode)." container="array"
+               typedef="enumList">
           <array>
             <size>n</size>
           </array>
@@ -1249,7 +1264,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="availableSceneModes" type="byte" visibility="public"
                type_notes="List of enums (android.control.sceneMode)."
-               container="array">
+               container="array" typedef="enumList">
           <array>
             <size>n</size>
           </array>
@@ -1273,7 +1288,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="availableVideoStabilizationModes" type="byte"
-               visibility="public" type_notes="List of enums." container="array">
+               visibility="public" type_notes="List of enums." container="array"
+               typedef="enumList">
           <array>
             <size>n</size>
           </array>
@@ -1284,7 +1300,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="awbAvailableModes" type="byte" visibility="public"
                type_notes="List of enums"
-               container="array">
+               container="array" typedef="enumList">
           <array>
             <size>n</size>
           </array>
@@ -1811,7 +1827,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </controls>
       <static>
         <entry name="availableEdgeModes" type="byte" visibility="public"
-        type_notes="list of enums" container="array">
+        type_notes="list of enums" container="array" typedef="enumList">
           <array>
             <size>n</size>
           </array>
@@ -2013,7 +2029,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </controls>
       <static>
         <entry name="availableHotPixelModes" type="byte" visibility="public"
-          type_notes="list of enums" container="array">
+          type_notes="list of enums" container="array" typedef="enumList">
           <array>
             <size>n</size>
           </array>
@@ -2345,7 +2361,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="V1" />
           </entry>
           <entry name="availableOpticalStabilization" type="byte"
-          visibility="public" type_notes="list of enums" container="array">
+          visibility="public" type_notes="list of enums" container="array"
+          typedef="enumList">
             <array>
               <size>n</size>
             </array>
@@ -2591,7 +2608,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </controls>
       <static>
         <entry name="availableNoiseReductionModes" type="byte" visibility="public"
-        type_notes="list of enums" container="array">
+        type_notes="list of enums" container="array" typedef="enumList">
           <array>
             <size>n</size>
           </array>
@@ -4339,7 +4356,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="calibrationTransform1" type="rational"
         visibility="public" optional="true"
-        type_notes="3x3 matrix in row-major-order" container="array">
+        type_notes="3x3 matrix in row-major-order" container="array"
+        typedef="colorSpaceTransform" >
           <array>
             <size>3</size>
             <size>3</size>
@@ -4363,7 +4381,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="calibrationTransform2" type="rational"
         visibility="public" optional="true"
-        type_notes="3x3 matrix in row-major-order" container="array">
+        type_notes="3x3 matrix in row-major-order" container="array"
+        typedef="colorSpaceTransform">
           <array>
             <size>3</size>
             <size>3</size>
@@ -4391,7 +4410,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="colorTransform1" type="rational"
         visibility="public" optional="true"
-        type_notes="3x3 matrix in row-major-order" container="array">
+        type_notes="3x3 matrix in row-major-order" container="array"
+        typedef="colorSpaceTransform" >
           <array>
             <size>3</size>
             <size>3</size>
@@ -4420,7 +4440,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="colorTransform2" type="rational"
         visibility="public" optional="true"
-        type_notes="3x3 matrix in row-major-order" container="array">
+        type_notes="3x3 matrix in row-major-order" container="array"
+        typedef="colorSpaceTransform" >
           <array>
             <size>3</size>
             <size>3</size>
@@ -4452,7 +4473,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="forwardMatrix1" type="rational"
         visibility="public" optional="true"
-        type_notes="3x3 matrix in row-major-order" container="array">
+        type_notes="3x3 matrix in row-major-order" container="array"
+        typedef="colorSpaceTransform" >
           <array>
             <size>3</size>
             <size>3</size>
@@ -4479,7 +4501,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <entry name="forwardMatrix2" type="rational"
         visibility="public" optional="true"
-        type_notes="3x3 matrix in row-major-order" container="array">
+        type_notes="3x3 matrix in row-major-order" container="array"
+        typedef="colorSpaceTransform" >
           <array>
             <size>3</size>
             <size>3</size>
@@ -5029,7 +5052,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <entry name="availableFaceDetectModes" type="byte"
                  visibility="public"
                  type_notes="List of enums from android.statistics.faceDetectMode"
-                 container="array">
+                 container="array"
+                 typedef="enumList">
             <array>
               <size>n</size>
             </array>
@@ -5588,7 +5612,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </hal_details>
         </entry>
         <entry name="availableToneMapModes" type="byte" visibility="public"
-        type_notes="list of enums" container="array">
+        type_notes="list of enums" container="array" typedef="enumList">
           <array>
             <size>n</size>
           </array>
@@ -5642,7 +5666,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </dynamic>
       <static>
         <entry name="availableLeds" type="byte" visibility="hidden" enum="true"
-               container="array">
+               container="array" >
           <array>
             <size>n</size>
           </array>
