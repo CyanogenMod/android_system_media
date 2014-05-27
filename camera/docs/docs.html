@@ -903,6 +903,8 @@
             <li
             ><a href="#controls_android.tonemap.curveRed">android.tonemap.curveRed</a></li>
             <li
+            ><a href="#controls_android.tonemap.curve">android.tonemap.curve</a></li>
+            <li
             ><a href="#controls_android.tonemap.mode">android.tonemap.mode</a></li>
           </ul>
         </li>
@@ -924,6 +926,8 @@
             ><a href="#dynamic_android.tonemap.curveGreen">android.tonemap.curveGreen</a></li>
             <li
             ><a href="#dynamic_android.tonemap.curveRed">android.tonemap.curveRed</a></li>
+            <li
+            ><a href="#dynamic_android.tonemap.curve">android.tonemap.curve</a></li>
             <li
             ><a href="#dynamic_android.tonemap.mode">android.tonemap.mode</a></li>
           </ul>
@@ -12098,9 +12102,7 @@ result.<wbr/></p></span>
                     <span class="entry_type_enum_notes"><p>TODO: This should be @hide</p>
 <ul>
 <li>Manual tonemap control<ul>
-<li><a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a></li>
-<li><a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a></li>
-<li><a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a></li>
+<li><a href="#controls_android.tonemap.curve">android.<wbr/>tonemap.<wbr/>curve</a></li>
 <li><a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a></li>
 <li><a href="#static_android.tonemap.maxCurvePoints">android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points</a></li>
 </ul>
@@ -15117,7 +15119,7 @@ for details about encoding this scenario.<wbr/></p>
                 <span class="entry_type_array">
                   2
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as sizeF]</span>
 
 
 
@@ -18883,7 +18885,7 @@ If set to OFF,<wbr/> no hotpixel map should be returned.<wbr/></p>
                 <span class="entry_type_array">
                   2 x n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as point]</span>
 
 
 
@@ -19045,7 +19047,7 @@ the output result metadata.<wbr/></p>
                 <span class="entry_type_array">
                   n x 2
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [hidden]</span>
 
 
 
@@ -19098,7 +19100,7 @@ CONTRAST_<wbr/>CURVE.<wbr/></p>
                 <span class="entry_type_array">
                   n x 2
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [hidden]</span>
 
 
 
@@ -19151,7 +19153,7 @@ CONTRAST_<wbr/>CURVE.<wbr/></p>
                 <span class="entry_type_array">
                   n x 2
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [hidden]</span>
 
 
 
@@ -19242,6 +19244,103 @@ control points used as are available.<wbr/></p>
            <!-- end of entry -->
         
                 
+          <tr class="entry" id="controls_android.tonemap.curve">
+            <td class="entry_name
+             " rowspan="5">
+              android.<wbr/>tonemap.<wbr/>curve
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+
+              <span class="entry_type_visibility"> [public as tonemapCurve]</span>
+
+              <span class="entry_type_synthetic">[synthetic] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Tonemapping /<wbr/> contrast /<wbr/> gamma curve to use when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a>
+is CONTRAST_<wbr/>CURVE.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The tonemapCurve consist of three curves for each of red,<wbr/> green,<wbr/> and blue
+channels respectively.<wbr/> The following example uses the red channel as an
+example.<wbr/> The same logic applies to green and blue channel.<wbr/>
+Each channel's curve is defined by an array of control points:</p>
+<pre><code>curveRed =
+  [ P0(in,<wbr/> out),<wbr/> P1(in,<wbr/> out),<wbr/> P2(in,<wbr/> out),<wbr/> P3(in,<wbr/> out),<wbr/> ...,<wbr/> PN(in,<wbr/> out) ]
+2 &lt;= N &lt;= <a href="#static_android.tonemap.maxCurvePoints">android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points</a></code></pre>
+<p>These are sorted in order of increasing <code>Pin</code>; it is always
+guaranteed that input values 0.<wbr/>0 and 1.<wbr/>0 are included in the list to
+define a complete mapping.<wbr/> For input values between control points,<wbr/>
+the camera device must linearly interpolate between the control
+points.<wbr/></p>
+<p>Each curve can have an independent number of points,<wbr/> and the number
+of points can be less than max (that is,<wbr/> the request doesn't have to
+always provide a curve with number of points equivalent to
+<a href="#static_android.tonemap.maxCurvePoints">android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points</a>).<wbr/></p>
+<p>A few examples,<wbr/> and their corresponding graphical mappings; these
+only specify the red channel and the precision is limited to 4
+digits,<wbr/> for conciseness.<wbr/></p>
+<p>Linear mapping:</p>
+<pre><code>curveRed = [ (0,<wbr/> 0),<wbr/> (1.<wbr/>0,<wbr/> 1.<wbr/>0) ]
+</code></pre>
+<p><img alt="Linear mapping curve" src="images/camera2/metadata/android.tonemap.curveRed/linear_tonemap.png"/></p>
+<p>Invert mapping:</p>
+<pre><code>curveRed = [ (0,<wbr/> 1.<wbr/>0),<wbr/> (1.<wbr/>0,<wbr/> 0) ]
+</code></pre>
+<p><img alt="Inverting mapping curve" src="images/camera2/metadata/android.tonemap.curveRed/inverse_tonemap.png"/></p>
+<p>Gamma 1/<wbr/>2.<wbr/>2 mapping,<wbr/> with 16 control points:</p>
+<pre><code>curveRed = [
+  (0.<wbr/>0000,<wbr/> 0.<wbr/>0000),<wbr/> (0.<wbr/>0667,<wbr/> 0.<wbr/>2920),<wbr/> (0.<wbr/>1333,<wbr/> 0.<wbr/>4002),<wbr/> (0.<wbr/>2000,<wbr/> 0.<wbr/>4812),<wbr/>
+  (0.<wbr/>2667,<wbr/> 0.<wbr/>5484),<wbr/> (0.<wbr/>3333,<wbr/> 0.<wbr/>6069),<wbr/> (0.<wbr/>4000,<wbr/> 0.<wbr/>6594),<wbr/> (0.<wbr/>4667,<wbr/> 0.<wbr/>7072),<wbr/>
+  (0.<wbr/>5333,<wbr/> 0.<wbr/>7515),<wbr/> (0.<wbr/>6000,<wbr/> 0.<wbr/>7928),<wbr/> (0.<wbr/>6667,<wbr/> 0.<wbr/>8317),<wbr/> (0.<wbr/>7333,<wbr/> 0.<wbr/>8685),<wbr/>
+  (0.<wbr/>8000,<wbr/> 0.<wbr/>9035),<wbr/> (0.<wbr/>8667,<wbr/> 0.<wbr/>9370),<wbr/> (0.<wbr/>9333,<wbr/> 0.<wbr/>9691),<wbr/> (1.<wbr/>0000,<wbr/> 1.<wbr/>0000) ]
+</code></pre>
+<p><img alt="Gamma = 1/2.2 tonemapping curve" src="images/camera2/metadata/android.tonemap.curveRed/gamma_tonemap.png"/></p>
+<p>Standard sRGB gamma mapping,<wbr/> per IEC 61966-2-1:1999,<wbr/> with 16 control points:</p>
+<pre><code>curveRed = [
+  (0.<wbr/>0000,<wbr/> 0.<wbr/>0000),<wbr/> (0.<wbr/>0667,<wbr/> 0.<wbr/>2864),<wbr/> (0.<wbr/>1333,<wbr/> 0.<wbr/>4007),<wbr/> (0.<wbr/>2000,<wbr/> 0.<wbr/>4845),<wbr/>
+  (0.<wbr/>2667,<wbr/> 0.<wbr/>5532),<wbr/> (0.<wbr/>3333,<wbr/> 0.<wbr/>6125),<wbr/> (0.<wbr/>4000,<wbr/> 0.<wbr/>6652),<wbr/> (0.<wbr/>4667,<wbr/> 0.<wbr/>7130),<wbr/>
+  (0.<wbr/>5333,<wbr/> 0.<wbr/>7569),<wbr/> (0.<wbr/>6000,<wbr/> 0.<wbr/>7977),<wbr/> (0.<wbr/>6667,<wbr/> 0.<wbr/>8360),<wbr/> (0.<wbr/>7333,<wbr/> 0.<wbr/>8721),<wbr/>
+  (0.<wbr/>8000,<wbr/> 0.<wbr/>9063),<wbr/> (0.<wbr/>8667,<wbr/> 0.<wbr/>9389),<wbr/> (0.<wbr/>9333,<wbr/> 0.<wbr/>9701),<wbr/> (1.<wbr/>0000,<wbr/> 1.<wbr/>0000) ]
+</code></pre>
+<p><img alt="sRGB tonemapping curve" src="images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png"/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This entry is created by the framework from the curveRed,<wbr/> curveGreen and
+curveBlue entries.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
           <tr class="entry" id="controls_android.tonemap.mode">
             <td class="entry_name
              " rowspan="3">
@@ -19259,11 +19358,10 @@ control points used as are available.<wbr/></p>
                   <li>
                     <span class="entry_type_enum_name">CONTRAST_CURVE</span>
                     <span class="entry_type_enum_notes"><p>Use the tone mapping curve specified in
-the android.<wbr/>tonemap.<wbr/>curve* entries.<wbr/></p>
+the <a href="#controls_android.tonemap.curve">android.<wbr/>tonemap.<wbr/>curve</a>* entries.<wbr/></p>
 <p>All color enhancement and tonemapping must be disabled,<wbr/> except
 for applying the tonemapping curve specified by
-<a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a>,<wbr/> <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>,<wbr/> or
-<a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a>.<wbr/></p>
+<a href="#controls_android.tonemap.curve">android.<wbr/>tonemap.<wbr/>curve</a>.<wbr/></p>
 <p>Must not slow down frame rate relative to raw
 sensor output.<wbr/></p></span>
                   </li>
@@ -19314,8 +19412,7 @@ CONTRAST_<wbr/>CURVE.<wbr/></p>
 <p>This must be set to a valid mode in
 <a href="#static_android.tonemap.availableToneMapModes">android.<wbr/>tonemap.<wbr/>available<wbr/>Tone<wbr/>Map<wbr/>Modes</a>.<wbr/></p>
 <p>When using either FAST or HIGH_<wbr/>QUALITY,<wbr/> the camera device will
-emit its own tonemap curve in <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a>,<wbr/>
-<a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a>,<wbr/> and <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>.<wbr/>
+emit its own tonemap curve in <a href="#controls_android.tonemap.curve">android.<wbr/>tonemap.<wbr/>curve</a>.<wbr/>
 These values are always available,<wbr/> and as close as possible to the
 actually used nonlinear/<wbr/>nonglobal transforms.<wbr/></p>
 <p>If a request is sent with CONTRAST_<wbr/>CURVE with the camera device's
@@ -19374,8 +19471,7 @@ roughly the same.<wbr/></p>
 
             <td class="entry_description">
               <p>Maximum number of supported points in the
-tonemap curve that can be used for <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a>,<wbr/> or
-<a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a>,<wbr/> or <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>.<wbr/></p>
+tonemap curve that can be used for <a href="#controls_android.tonemap.curve">android.<wbr/>tonemap.<wbr/>curve</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -19395,7 +19491,7 @@ tonemap curve that can be used for <a href="#controls_android.tonemap.curveRed">
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>If the actual number of points provided by the application (in
-android.<wbr/>tonemap.<wbr/>curve*)  is less than max,<wbr/> the camera device will
+<a href="#controls_android.tonemap.curve">android.<wbr/>tonemap.<wbr/>curve</a>*)  is less than max,<wbr/> the camera device will
 resample the curve to its internal representation,<wbr/> using linear
 interpolation.<wbr/></p>
 <p>The output curves in the result metadata may have a different number
@@ -19507,7 +19603,7 @@ FAST.<wbr/></p>
                 <span class="entry_type_array">
                   n x 2
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [hidden]</span>
 
 
 
@@ -19560,7 +19656,7 @@ CONTRAST_<wbr/>CURVE.<wbr/></p>
                 <span class="entry_type_array">
                   n x 2
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [hidden]</span>
 
 
 
@@ -19613,7 +19709,7 @@ CONTRAST_<wbr/>CURVE.<wbr/></p>
                 <span class="entry_type_array">
                   n x 2
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [hidden]</span>
 
 
 
@@ -19704,6 +19800,103 @@ control points used as are available.<wbr/></p>
            <!-- end of entry -->
         
                 
+          <tr class="entry" id="dynamic_android.tonemap.curve">
+            <td class="entry_name
+             " rowspan="5">
+              android.<wbr/>tonemap.<wbr/>curve
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+
+              <span class="entry_type_visibility"> [public as tonemapCurve]</span>
+
+              <span class="entry_type_synthetic">[synthetic] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Tonemapping /<wbr/> contrast /<wbr/> gamma curve to use when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a>
+is CONTRAST_<wbr/>CURVE.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The tonemapCurve consist of three curves for each of red,<wbr/> green,<wbr/> and blue
+channels respectively.<wbr/> The following example uses the red channel as an
+example.<wbr/> The same logic applies to green and blue channel.<wbr/>
+Each channel's curve is defined by an array of control points:</p>
+<pre><code>curveRed =
+  [ P0(in,<wbr/> out),<wbr/> P1(in,<wbr/> out),<wbr/> P2(in,<wbr/> out),<wbr/> P3(in,<wbr/> out),<wbr/> ...,<wbr/> PN(in,<wbr/> out) ]
+2 &lt;= N &lt;= <a href="#static_android.tonemap.maxCurvePoints">android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points</a></code></pre>
+<p>These are sorted in order of increasing <code>Pin</code>; it is always
+guaranteed that input values 0.<wbr/>0 and 1.<wbr/>0 are included in the list to
+define a complete mapping.<wbr/> For input values between control points,<wbr/>
+the camera device must linearly interpolate between the control
+points.<wbr/></p>
+<p>Each curve can have an independent number of points,<wbr/> and the number
+of points can be less than max (that is,<wbr/> the request doesn't have to
+always provide a curve with number of points equivalent to
+<a href="#static_android.tonemap.maxCurvePoints">android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points</a>).<wbr/></p>
+<p>A few examples,<wbr/> and their corresponding graphical mappings; these
+only specify the red channel and the precision is limited to 4
+digits,<wbr/> for conciseness.<wbr/></p>
+<p>Linear mapping:</p>
+<pre><code>curveRed = [ (0,<wbr/> 0),<wbr/> (1.<wbr/>0,<wbr/> 1.<wbr/>0) ]
+</code></pre>
+<p><img alt="Linear mapping curve" src="images/camera2/metadata/android.tonemap.curveRed/linear_tonemap.png"/></p>
+<p>Invert mapping:</p>
+<pre><code>curveRed = [ (0,<wbr/> 1.<wbr/>0),<wbr/> (1.<wbr/>0,<wbr/> 0) ]
+</code></pre>
+<p><img alt="Inverting mapping curve" src="images/camera2/metadata/android.tonemap.curveRed/inverse_tonemap.png"/></p>
+<p>Gamma 1/<wbr/>2.<wbr/>2 mapping,<wbr/> with 16 control points:</p>
+<pre><code>curveRed = [
+  (0.<wbr/>0000,<wbr/> 0.<wbr/>0000),<wbr/> (0.<wbr/>0667,<wbr/> 0.<wbr/>2920),<wbr/> (0.<wbr/>1333,<wbr/> 0.<wbr/>4002),<wbr/> (0.<wbr/>2000,<wbr/> 0.<wbr/>4812),<wbr/>
+  (0.<wbr/>2667,<wbr/> 0.<wbr/>5484),<wbr/> (0.<wbr/>3333,<wbr/> 0.<wbr/>6069),<wbr/> (0.<wbr/>4000,<wbr/> 0.<wbr/>6594),<wbr/> (0.<wbr/>4667,<wbr/> 0.<wbr/>7072),<wbr/>
+  (0.<wbr/>5333,<wbr/> 0.<wbr/>7515),<wbr/> (0.<wbr/>6000,<wbr/> 0.<wbr/>7928),<wbr/> (0.<wbr/>6667,<wbr/> 0.<wbr/>8317),<wbr/> (0.<wbr/>7333,<wbr/> 0.<wbr/>8685),<wbr/>
+  (0.<wbr/>8000,<wbr/> 0.<wbr/>9035),<wbr/> (0.<wbr/>8667,<wbr/> 0.<wbr/>9370),<wbr/> (0.<wbr/>9333,<wbr/> 0.<wbr/>9691),<wbr/> (1.<wbr/>0000,<wbr/> 1.<wbr/>0000) ]
+</code></pre>
+<p><img alt="Gamma = 1/2.2 tonemapping curve" src="images/camera2/metadata/android.tonemap.curveRed/gamma_tonemap.png"/></p>
+<p>Standard sRGB gamma mapping,<wbr/> per IEC 61966-2-1:1999,<wbr/> with 16 control points:</p>
+<pre><code>curveRed = [
+  (0.<wbr/>0000,<wbr/> 0.<wbr/>0000),<wbr/> (0.<wbr/>0667,<wbr/> 0.<wbr/>2864),<wbr/> (0.<wbr/>1333,<wbr/> 0.<wbr/>4007),<wbr/> (0.<wbr/>2000,<wbr/> 0.<wbr/>4845),<wbr/>
+  (0.<wbr/>2667,<wbr/> 0.<wbr/>5532),<wbr/> (0.<wbr/>3333,<wbr/> 0.<wbr/>6125),<wbr/> (0.<wbr/>4000,<wbr/> 0.<wbr/>6652),<wbr/> (0.<wbr/>4667,<wbr/> 0.<wbr/>7130),<wbr/>
+  (0.<wbr/>5333,<wbr/> 0.<wbr/>7569),<wbr/> (0.<wbr/>6000,<wbr/> 0.<wbr/>7977),<wbr/> (0.<wbr/>6667,<wbr/> 0.<wbr/>8360),<wbr/> (0.<wbr/>7333,<wbr/> 0.<wbr/>8721),<wbr/>
+  (0.<wbr/>8000,<wbr/> 0.<wbr/>9063),<wbr/> (0.<wbr/>8667,<wbr/> 0.<wbr/>9389),<wbr/> (0.<wbr/>9333,<wbr/> 0.<wbr/>9701),<wbr/> (1.<wbr/>0000,<wbr/> 1.<wbr/>0000) ]
+</code></pre>
+<p><img alt="sRGB tonemapping curve" src="images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png"/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This entry is created by the framework from the curveRed,<wbr/> curveGreen and
+curveBlue entries.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
           <tr class="entry" id="dynamic_android.tonemap.mode">
             <td class="entry_name
              " rowspan="3">
@@ -19721,11 +19914,10 @@ control points used as are available.<wbr/></p>
                   <li>
                     <span class="entry_type_enum_name">CONTRAST_CURVE</span>
                     <span class="entry_type_enum_notes"><p>Use the tone mapping curve specified in
-the android.<wbr/>tonemap.<wbr/>curve* entries.<wbr/></p>
+the <a href="#controls_android.tonemap.curve">android.<wbr/>tonemap.<wbr/>curve</a>* entries.<wbr/></p>
 <p>All color enhancement and tonemapping must be disabled,<wbr/> except
 for applying the tonemapping curve specified by
-<a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a>,<wbr/> <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>,<wbr/> or
-<a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a>.<wbr/></p>
+<a href="#controls_android.tonemap.curve">android.<wbr/>tonemap.<wbr/>curve</a>.<wbr/></p>
 <p>Must not slow down frame rate relative to raw
 sensor output.<wbr/></p></span>
                   </li>
@@ -19776,8 +19968,7 @@ CONTRAST_<wbr/>CURVE.<wbr/></p>
 <p>This must be set to a valid mode in
 <a href="#static_android.tonemap.availableToneMapModes">android.<wbr/>tonemap.<wbr/>available<wbr/>Tone<wbr/>Map<wbr/>Modes</a>.<wbr/></p>
 <p>When using either FAST or HIGH_<wbr/>QUALITY,<wbr/> the camera device will
-emit its own tonemap curve in <a href="#controls_android.tonemap.curveRed">android.<wbr/>tonemap.<wbr/>curve<wbr/>Red</a>,<wbr/>
-<a href="#controls_android.tonemap.curveGreen">android.<wbr/>tonemap.<wbr/>curve<wbr/>Green</a>,<wbr/> and <a href="#controls_android.tonemap.curveBlue">android.<wbr/>tonemap.<wbr/>curve<wbr/>Blue</a>.<wbr/>
+emit its own tonemap curve in <a href="#controls_android.tonemap.curve">android.<wbr/>tonemap.<wbr/>curve</a>.<wbr/>
 These values are always available,<wbr/> and as close as possible to the
 actually used nonlinear/<wbr/>nonglobal transforms.<wbr/></p>
 <p>If a request is sent with CONTRAST_<wbr/>CURVE with the camera device's
