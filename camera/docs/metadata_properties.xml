@@ -637,6 +637,31 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           If the lens is controlled by the camera device auto-focus algorithm,
           the camera device will report the current AF status in android.control.afState
           in result metadata.</details>
+          <hal_details>
+          When afMode is AUTO or MACRO, the lens must not move until an AF trigger is sent in a
+          request (android.control.afTrigger `==` START). After an AF trigger, the afState will end
+          up with either FOCUSED_LOCKED or NOT_FOCUSED_LOCKED state (see
+          android.control.afState for detailed state transitions), which indicates that the lens is
+          locked and will not move. If camera movement (e.g. tilting camera) causes the lens to move
+          after the lens is locked, the HAL must compensate this movement appropriately such that
+          the same focal plane remains in focus.
+
+          When afMode is one of the continuous auto focus modes, the HAL is free to start a AF
+          scan whenever it's not locked. When the lens is locked after an AF trigger
+          (see android.control.afState for detailed state transitions), the HAL should maintain the
+          same lock behavior as above.
+
+          When afMode is OFF, the application controls focus manually. The accuracy of the
+          focus distance control depends on the android.lens.info.focusDistanceCalibration.
+          However, the lens must not move regardless of the camera movement for any focus distance
+          manual control.
+
+          To put this in concrete terms, if the camera has lens elements which may move based on
+          camera orientation or motion (e.g. due to gravity), then the HAL must drive the lens to
+          remain in a fixed position invariant to the camera's orientation or motion, for example,
+          by using accelerometer measurements in the lens control logic. This is a typical issue
+          that will arise on camera modules with open-loop VCMs.
+          </hal_details>
           <tag id="BC" />
         </entry>
         <entry name="afRegions" type="int32" visibility="public"
