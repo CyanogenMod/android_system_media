@@ -80,6 +80,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <typedef name="rangeInt">
       <language name="java">android.util.Range&lt;Integer&gt;</language>
     </typedef>
+    <typedef name="rangeLong">
+      <language name="java">android.util.Range&lt;Long&gt;</language>
+    </typedef>
     <typedef name="colorSpaceTransform">
       <language name="java">android.hardware.camera2.params.ColorSpaceTransform</language>
     </typedef>
@@ -97,6 +100,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </typedef>
     <typedef name="tonemapCurve">
       <language name="java">android.hardware.camera2.params.TonemapCurve</language>
+    </typedef>
+    <typedef name="lensShadingMap">
+      <language name="java">android.hardware.camera2.params.LensShadingMap</language>
+    </typedef>
+    <typedef name="location">
+      <language name="java">android.location.Location</language>
     </typedef>
   </types>
 
@@ -2068,7 +2077,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="jpeg">
       <controls>
-        <entry name="gpsCoordinates" type="double" visibility="public"
+        <entry name="gpsLocation" type="byte" visibility="public" synthetic="true"
+        typedef="location">
+          <description>
+          A location object to use when generating image GPS metadata.
+          </description>
+        </entry>
+        <entry name="gpsCoordinates" type="double" visibility="hidden"
         type_notes="latitude, longitude, altitude. First two in degrees, the third in meters"
         container="array">
           <array>
@@ -2079,14 +2094,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <range>(-180 - 180], [-90,90], [-inf, inf]</range>
           <tag id="BC" />
         </entry>
-        <entry name="gpsProcessingMethod" type="byte" visibility="public"
+        <entry name="gpsProcessingMethod" type="byte" visibility="hidden"
                typedef="string">
           <description>32 characters describing GPS algorithm to
           include in EXIF</description>
           <units>UTF-8 null-terminated string</units>
           <tag id="BC" />
         </entry>
-        <entry name="gpsTimestamp" type="int64" visibility="public">
+        <entry name="gpsTimestamp" type="int64" visibility="hidden">
           <description>Time GPS fix was made to include in
           EXIF</description>
           <units>UTC in seconds since January 1, 1970</units>
@@ -2161,6 +2176,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </static>
       <dynamic>
+        <clone entry="android.jpeg.gpsLocation" kind="controls">
+        </clone>
         <clone entry="android.jpeg.gpsCoordinates" kind="controls">
         </clone>
         <clone entry="android.jpeg.gpsProcessingMethod"
@@ -2405,7 +2422,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             0.</details>
             <tag id="V1" />
           </entry>
-          <entry name="shadingMapSize" type="int32" visibility="public"
+          <entry name="shadingMapSize" type="int32" visibility="hidden"
                  type_notes="width and height (N, M) of lens shading map provided by the camera device."
                  container="array" typedef="size">
             <array>
@@ -4139,7 +4156,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </entry>
           <entry name="sensitivityRange" type="int32" visibility="public"
           type_notes="Range of supported sensitivities"
-          container="array">
+          container="array" typedef="rangeInt">
             <array>
               <size>2</size>
             </array>
@@ -4165,7 +4182,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="DNG" />
           </entry>
           <entry name="exposureTimeRange" type="int64" visibility="public"
-          type_notes="nanoseconds" container="array">
+          type_notes="nanoseconds" container="array" typedef="rangeLong">
             <array>
               <size>2</size>
             </array>
@@ -5225,7 +5242,59 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
         <clone entry="android.statistics.sharpnessMapMode"
         kind="controls"></clone>
-        <entry name="lensShadingMap" type="float" visibility="public"
+        <entry name="lensShadingCorrectionMap" type="byte" visibility="public" typedef="lensShadingMap">
+          <description>The shading map is a low-resolution floating-point map
+          that lists the coefficients used to correct for vignetting, for each
+          Bayer color channel.</description>
+          <range>Each gain factor is &amp;gt;= 1</range>
+          <details>The least shaded section of the image should have a gain factor
+          of 1; all other sections should have gains above 1.
+
+          When android.colorCorrection.mode = TRANSFORM_MATRIX, the map
+          must take into account the colorCorrection settings.
+
+          The shading map is for the entire active pixel array, and is not
+          affected by the crop region specified in the request. Each shading map
+          entry is the value of the shading compensation map over a specific
+          pixel on the sensor.  Specifically, with a (N x M) resolution shading
+          map, and an active pixel array size (W x H), shading map entry
+          (x,y) ϵ (0 ... N-1, 0 ... M-1) is the value of the shading map at
+          pixel ( ((W-1)/(N-1)) * x, ((H-1)/(M-1)) * y) for the four color channels.
+          The map is assumed to be bilinearly interpolated between the sample points.
+
+          The channel order is [R, Geven, Godd, B], where Geven is the green
+          channel for the even rows of a Bayer pattern, and Godd is the odd rows.
+          The shading map is stored in a fully interleaved format.
+
+          The shading map should have on the order of 30-40 rows and columns,
+          and must be smaller than 64x64.
+
+          As an example, given a very small map defined as:
+
+              width,height = [ 4, 3 ]
+              values =
+              [ 1.3, 1.2, 1.15, 1.2,  1.2, 1.2, 1.15, 1.2,
+                  1.1, 1.2, 1.2, 1.2,  1.3, 1.2, 1.3, 1.3,
+                1.2, 1.2, 1.25, 1.1,  1.1, 1.1, 1.1, 1.0,
+                  1.0, 1.0, 1.0, 1.0,  1.2, 1.3, 1.25, 1.2,
+                1.3, 1.2, 1.2, 1.3,   1.2, 1.15, 1.1, 1.2,
+                  1.2, 1.1, 1.0, 1.2,  1.3, 1.15, 1.2, 1.3 ]
+
+          The low-resolution scaling map images for each channel are
+          (displayed using nearest-neighbor interpolation):
+
+          ![Red lens shading map](android.statistics.lensShadingMap/red_shading.png)
+          ![Green (even rows) lens shading map](android.statistics.lensShadingMap/green_e_shading.png)
+          ![Green (odd rows) lens shading map](android.statistics.lensShadingMap/green_o_shading.png)
+          ![Blue lens shading map](android.statistics.lensShadingMap/blue_shading.png)
+
+          As a visualization only, inverting the full-color map to recover an
+          image of a gray wall (using bicubic interpolation for visual quality) as captured by the sensor gives:
+
+          ![Image of a uniform white wall (inverse shading map)](android.statistics.lensShadingMap/inv_shading.png)
+          </details>
+        </entry>
+        <entry name="lensShadingMap" type="float" visibility="hidden"
                type_notes="2D array of float gain factors per channel to correct lens shading"
                container="array">
           <array>

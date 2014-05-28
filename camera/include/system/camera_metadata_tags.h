@@ -177,10 +177,10 @@ typedef enum camera_metadata_tag {
     ANDROID_HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES,      // byte[]       | public
     ANDROID_HOT_PIXEL_END,
 
-    ANDROID_JPEG_GPS_COORDINATES =                    // double[]     | public
+    ANDROID_JPEG_GPS_COORDINATES =                    // double[]     | hidden
             ANDROID_JPEG_START,
-    ANDROID_JPEG_GPS_PROCESSING_METHOD,               // byte         | public
-    ANDROID_JPEG_GPS_TIMESTAMP,                       // int64        | public
+    ANDROID_JPEG_GPS_PROCESSING_METHOD,               // byte         | hidden
+    ANDROID_JPEG_GPS_TIMESTAMP,                       // int64        | hidden
     ANDROID_JPEG_ORIENTATION,                         // int32        | public
     ANDROID_JPEG_QUALITY,                             // byte         | public
     ANDROID_JPEG_THUMBNAIL_QUALITY,                   // byte         | public
@@ -210,7 +210,7 @@ typedef enum camera_metadata_tag {
     ANDROID_LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION,// byte[]       | public
     ANDROID_LENS_INFO_HYPERFOCAL_DISTANCE,            // float        | public
     ANDROID_LENS_INFO_MINIMUM_FOCUS_DISTANCE,         // float        | public
-    ANDROID_LENS_INFO_SHADING_MAP_SIZE,               // int32[]      | public
+    ANDROID_LENS_INFO_SHADING_MAP_SIZE,               // int32[]      | hidden
     ANDROID_LENS_INFO_FOCUS_DISTANCE_CALIBRATION,     // enum         | public
     ANDROID_LENS_INFO_END,
 
@@ -320,7 +320,8 @@ typedef enum camera_metadata_tag {
     ANDROID_STATISTICS_FACE_SCORES,                   // byte[]       | hidden
     ANDROID_STATISTICS_HISTOGRAM,                     // int32[]      | system
     ANDROID_STATISTICS_SHARPNESS_MAP,                 // int32[]      | system
-    ANDROID_STATISTICS_LENS_SHADING_MAP,              // float[]      | public
+    ANDROID_STATISTICS_LENS_SHADING_CORRECTION_MAP,   // byte         | public
+    ANDROID_STATISTICS_LENS_SHADING_MAP,              // float[]      | hidden
     ANDROID_STATISTICS_PREDICTED_COLOR_GAINS,         // float[]      | hidden
     ANDROID_STATISTICS_PREDICTED_COLOR_TRANSFORM,     // rational[]   | hidden
     ANDROID_STATISTICS_SCENE_FLICKER,                 // enum         | public
