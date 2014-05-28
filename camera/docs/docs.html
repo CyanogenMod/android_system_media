@@ -1930,7 +1930,7 @@ CaptureResult.<wbr/></p>
                 
           <tr class="entry" id="controls_android.control.aeRegions">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>control.<wbr/>ae<wbr/>Regions
             </td>
             <td class="entry_type">
@@ -1940,7 +1940,7 @@ CaptureResult.<wbr/></p>
                 <span class="entry_type_array">
                   5 x area_count
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as meteringRectangle]</span>
 
 
 
@@ -1972,10 +1972,7 @@ metering.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Each area is a rectangle plus weight: xmin,<wbr/> ymin,<wbr/>
-xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined to be inclusive of the
-specified coordinates.<wbr/></p>
-<p>The coordinate system is based on the active pixel array,<wbr/>
+              <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
@@ -1989,6 +1986,19 @@ used sections in the result metadata.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL level representation of MeteringRectangle[] is a
+int[5 * area_<wbr/>count].<wbr/>
+Every five elements represent a metering region of
+(xmin,<wbr/> ymin,<wbr/> xmax,<wbr/> ymax,<wbr/> weight).<wbr/>
+The rectangle is defined to be inclusive on xmin and ymin,<wbr/> but
+exclusive on xmax and ymax.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -2243,7 +2253,7 @@ in result metadata.<wbr/></p>
                 
           <tr class="entry" id="controls_android.control.afRegions">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>control.<wbr/>af<wbr/>Regions
             </td>
             <td class="entry_type">
@@ -2253,7 +2263,7 @@ in result metadata.<wbr/></p>
                 <span class="entry_type_array">
                   5 x area_count
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as meteringRectangle]</span>
 
 
 
@@ -2285,23 +2295,33 @@ estimation.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Each area is a rectangle plus weight: xmin,<wbr/> ymin,<wbr/>
-xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined to be inclusive of the
-specified coordinates.<wbr/></p>
-<p>The coordinate system is based on the active pixel array,<wbr/>
+              <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
-<p>If all regions have 0 weight,<wbr/> then no specific focus area
-needs to be used by the camera device.<wbr/> If the focusing region is
-outside the the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture
-result metadata,<wbr/> the camera device will ignore the sections outside
-the region and output the used sections in the result metadata.<wbr/></p>
+<p>If all regions have 0 weight,<wbr/> then no specific metering area
+needs to be used by the camera device.<wbr/> If the metering region is
+outside the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
+the camera device will ignore the sections outside the region and output the
+used sections in the result metadata.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL level representation of MeteringRectangle[] is a
+int[5 * area_<wbr/>count].<wbr/>
+Every five elements represent a metering region of
+(xmin,<wbr/> ymin,<wbr/> xmax,<wbr/> ymax,<wbr/> weight).<wbr/>
+The rectangle is defined to be inclusive on xmin and ymin,<wbr/> but
+exclusive on xmax and ymax.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -2568,7 +2588,7 @@ target for white balance adjustment.<wbr/></p>
                 
           <tr class="entry" id="controls_android.control.awbRegions">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>control.<wbr/>awb<wbr/>Regions
             </td>
             <td class="entry_type">
@@ -2578,7 +2598,7 @@ target for white balance adjustment.<wbr/></p>
                 <span class="entry_type_array">
                   5 x area_count
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as meteringRectangle]</span>
 
 
 
@@ -2610,24 +2630,33 @@ estimation.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only used in AUTO mode.<wbr/></p>
-<p>Each area is a rectangle plus weight: xmin,<wbr/> ymin,<wbr/>
-xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined to be inclusive of the
-specified coordinates.<wbr/></p>
-<p>The coordinate system is based on the active pixel array,<wbr/>
+              <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
-<p>If all regions have 0 weight,<wbr/> then no specific auto-white balance (AWB) area
-needs to be used by the camera device.<wbr/> If the AWB region is
-outside the the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
+<p>If all regions have 0 weight,<wbr/> then no specific metering area
+needs to be used by the camera device.<wbr/> If the metering region is
+outside the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
 the camera device will ignore the sections outside the region and output the
 used sections in the result metadata.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL level representation of MeteringRectangle[] is a
+int[5 * area_<wbr/>count].<wbr/>
+Every five elements represent a metering region of
+(xmin,<wbr/> ymin,<wbr/> xmax,<wbr/> ymax,<wbr/> weight).<wbr/>
+The rectangle is defined to be inclusive on xmin and ymin,<wbr/> but
+exclusive on xmax and ymax.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -4299,7 +4328,7 @@ CaptureResult.<wbr/></p>
                 
           <tr class="entry" id="dynamic_android.control.aeRegions">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>control.<wbr/>ae<wbr/>Regions
             </td>
             <td class="entry_type">
@@ -4309,7 +4338,7 @@ CaptureResult.<wbr/></p>
                 <span class="entry_type_array">
                   5 x area_count
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as meteringRectangle]</span>
 
 
 
@@ -4341,10 +4370,7 @@ metering.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Each area is a rectangle plus weight: xmin,<wbr/> ymin,<wbr/>
-xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined to be inclusive of the
-specified coordinates.<wbr/></p>
-<p>The coordinate system is based on the active pixel array,<wbr/>
+              <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
@@ -4358,6 +4384,19 @@ used sections in the result metadata.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL level representation of MeteringRectangle[] is a
+int[5 * area_<wbr/>count].<wbr/>
+Every five elements represent a metering region of
+(xmin,<wbr/> ymin,<wbr/> xmax,<wbr/> ymax,<wbr/> weight).<wbr/>
+The rectangle is defined to be inclusive on xmin and ymin,<wbr/> but
+exclusive on xmax and ymax.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -4873,7 +4912,7 @@ in result metadata.<wbr/></p>
                 
           <tr class="entry" id="dynamic_android.control.afRegions">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>control.<wbr/>af<wbr/>Regions
             </td>
             <td class="entry_type">
@@ -4883,7 +4922,7 @@ in result metadata.<wbr/></p>
                 <span class="entry_type_array">
                   5 x area_count
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as meteringRectangle]</span>
 
 
 
@@ -4915,23 +4954,33 @@ estimation.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Each area is a rectangle plus weight: xmin,<wbr/> ymin,<wbr/>
-xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined to be inclusive of the
-specified coordinates.<wbr/></p>
-<p>The coordinate system is based on the active pixel array,<wbr/>
+              <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
-<p>If all regions have 0 weight,<wbr/> then no specific focus area
-needs to be used by the camera device.<wbr/> If the focusing region is
-outside the the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture
-result metadata,<wbr/> the camera device will ignore the sections outside
-the region and output the used sections in the result metadata.<wbr/></p>
+<p>If all regions have 0 weight,<wbr/> then no specific metering area
+needs to be used by the camera device.<wbr/> If the metering region is
+outside the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
+the camera device will ignore the sections outside the region and output the
+used sections in the result metadata.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL level representation of MeteringRectangle[] is a
+int[5 * area_<wbr/>count].<wbr/>
+Every five elements represent a metering region of
+(xmin,<wbr/> ymin,<wbr/> xmax,<wbr/> ymax,<wbr/> weight).<wbr/>
+The rectangle is defined to be inclusive on xmin and ymin,<wbr/> but
+exclusive on xmax and ymax.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -5720,7 +5769,7 @@ target for white balance adjustment.<wbr/></p>
                 
           <tr class="entry" id="dynamic_android.control.awbRegions">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>control.<wbr/>awb<wbr/>Regions
             </td>
             <td class="entry_type">
@@ -5730,7 +5779,7 @@ target for white balance adjustment.<wbr/></p>
                 <span class="entry_type_array">
                   5 x area_count
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as meteringRectangle]</span>
 
 
 
@@ -5762,24 +5811,33 @@ estimation.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only used in AUTO mode.<wbr/></p>
-<p>Each area is a rectangle plus weight: xmin,<wbr/> ymin,<wbr/>
-xmax,<wbr/> ymax,<wbr/> weight.<wbr/> The rectangle is defined to be inclusive of the
-specified coordinates.<wbr/></p>
-<p>The coordinate system is based on the active pixel array,<wbr/>
+              <p>The coordinate system is based on the active pixel array,<wbr/>
 with (0,<wbr/>0) being the top-left pixel in the active pixel array,<wbr/> and
 (<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>width - 1,<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>height - 1) being the
 bottom-right pixel in the active pixel array.<wbr/> The weight
 should be nonnegative.<wbr/></p>
-<p>If all regions have 0 weight,<wbr/> then no specific auto-white balance (AWB) area
-needs to be used by the camera device.<wbr/> If the AWB region is
-outside the the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
+<p>If all regions have 0 weight,<wbr/> then no specific metering area
+needs to be used by the camera device.<wbr/> If the metering region is
+outside the used <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> returned in capture result metadata,<wbr/>
 the camera device will ignore the sections outside the region and output the
 used sections in the result metadata.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL level representation of MeteringRectangle[] is a
+int[5 * area_<wbr/>count].<wbr/>
+Every five elements represent a metering region of
+(xmin,<wbr/> ymin,<wbr/> xmax,<wbr/> ymax,<wbr/> weight).<wbr/>
+The rectangle is defined to be inclusive on xmin and ymin,<wbr/> but
+exclusive on xmax and ymax.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
