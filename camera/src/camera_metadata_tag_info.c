@@ -517,6 +517,8 @@ static tag_info_t android_statistics[ANDROID_STATISTICS_END -
     { "histogram",                     TYPE_INT32  },
     [ ANDROID_STATISTICS_SHARPNESS_MAP - ANDROID_STATISTICS_START ] =
     { "sharpnessMap",                  TYPE_INT32  },
+    [ ANDROID_STATISTICS_LENS_SHADING_CORRECTION_MAP - ANDROID_STATISTICS_START ] =
+    { "lensShadingCorrectionMap",      TYPE_BYTE   },
     [ ANDROID_STATISTICS_LENS_SHADING_MAP - ANDROID_STATISTICS_START ] =
     { "lensShadingMap",                TYPE_FLOAT  },
     [ ANDROID_STATISTICS_PREDICTED_COLOR_GAINS - ANDROID_STATISTICS_START ] =
@@ -2054,6 +2056,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_STATISTICS_SHARPNESS_MAP: {
+            break;
+        }
+        case ANDROID_STATISTICS_LENS_SHADING_CORRECTION_MAP: {
             break;
         }
         case ANDROID_STATISTICS_LENS_SHADING_MAP: {
