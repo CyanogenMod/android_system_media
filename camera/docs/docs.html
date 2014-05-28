@@ -1177,7 +1177,7 @@ values are clipped to fit within the range.<wbr/></p>
                 <span class="entry_type_array">
                   3 x 3
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
 
 
 
@@ -1225,7 +1225,7 @@ values is within the normalized range <code>[0,<wbr/> 1.<wbr/>0]</code>),<wbr/> 
                 
           <tr class="entry" id="controls_android.colorCorrection.gains">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>color<wbr/>Correction.<wbr/>gains
             </td>
             <td class="entry_type">
@@ -1235,7 +1235,7 @@ values is within the normalized range <code>[0,<wbr/> 1.<wbr/>0]</code>),<wbr/> 
                 <span class="entry_type_array">
                   4
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as rggbChannelVector]</span>
 
 
 
@@ -1264,22 +1264,30 @@ white-balance.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The 4-channel white-balance gains are defined in
-the order of <code>[R G_<wbr/>even G_<wbr/>odd B]</code>,<wbr/> where <code>G_<wbr/>even</code> is the gain
-for green pixels on even rows of the output,<wbr/> and <code>G_<wbr/>odd</code>
-is the gain for green pixels on the odd rows.<wbr/> if a HAL
-does not support a separate gain for even/<wbr/>odd green channels,<wbr/>
-it should use the <code>G_<wbr/>even</code> value,<wbr/> and write <code>G_<wbr/>odd</code> equal to
-<code>G_<wbr/>even</code> in the output result metadata.<wbr/></p>
-<p>This array is either set by the camera device when the request
-<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
-directly by the application in the request when the
-<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
-<p>The output should be the gains actually applied by the camera device to
-the current frame.<wbr/></p>
+              <p>These per-channel gains are either set by the camera device
+when the request <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not
+TRANSFORM_<wbr/>MATRIX,<wbr/> or directly by the application in the
+request when the <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is
+TRANSFORM_<wbr/>MATRIX.<wbr/></p>
+<p>The gains in the result metadata are the gains actually
+applied by the camera device to the current frame.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The 4-channel white-balance gains are defined in
+the order of <code>[R G_<wbr/>even G_<wbr/>odd B]</code>,<wbr/> where <code>G_<wbr/>even</code> is the gain
+for green pixels on even rows of the output,<wbr/> and <code>G_<wbr/>odd</code>
+is the gain for green pixels on the odd rows.<wbr/></p>
+<p>If a HAL does not support a separate gain for even/<wbr/>odd green
+channels,<wbr/> it must use the <code>G_<wbr/>even</code> value,<wbr/> and write
+<code>G_<wbr/>odd</code> equal to <code>G_<wbr/>even</code> in the output result metadata.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -1438,7 +1446,7 @@ values are clipped to fit within the range.<wbr/></p>
                 <span class="entry_type_array">
                   3 x 3
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
 
 
 
@@ -1486,7 +1494,7 @@ values is within the normalized range <code>[0,<wbr/> 1.<wbr/>0]</code>),<wbr/> 
                 
           <tr class="entry" id="dynamic_android.colorCorrection.gains">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>color<wbr/>Correction.<wbr/>gains
             </td>
             <td class="entry_type">
@@ -1496,7 +1504,7 @@ values is within the normalized range <code>[0,<wbr/> 1.<wbr/>0]</code>),<wbr/> 
                 <span class="entry_type_array">
                   4
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as rggbChannelVector]</span>
 
 
 
@@ -1525,22 +1533,30 @@ white-balance.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The 4-channel white-balance gains are defined in
-the order of <code>[R G_<wbr/>even G_<wbr/>odd B]</code>,<wbr/> where <code>G_<wbr/>even</code> is the gain
-for green pixels on even rows of the output,<wbr/> and <code>G_<wbr/>odd</code>
-is the gain for green pixels on the odd rows.<wbr/> if a HAL
-does not support a separate gain for even/<wbr/>odd green channels,<wbr/>
-it should use the <code>G_<wbr/>even</code> value,<wbr/> and write <code>G_<wbr/>odd</code> equal to
-<code>G_<wbr/>even</code> in the output result metadata.<wbr/></p>
-<p>This array is either set by the camera device when the request
-<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not TRANSFORM_<wbr/>MATRIX,<wbr/> or
-directly by the application in the request when the
-<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is TRANSFORM_<wbr/>MATRIX.<wbr/></p>
-<p>The output should be the gains actually applied by the camera device to
-the current frame.<wbr/></p>
+              <p>These per-channel gains are either set by the camera device
+when the request <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is not
+TRANSFORM_<wbr/>MATRIX,<wbr/> or directly by the application in the
+request when the <a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> is
+TRANSFORM_<wbr/>MATRIX.<wbr/></p>
+<p>The gains in the result metadata are the gains actually
+applied by the camera device to the current frame.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The 4-channel white-balance gains are defined in
+the order of <code>[R G_<wbr/>even G_<wbr/>odd B]</code>,<wbr/> where <code>G_<wbr/>even</code> is the gain
+for green pixels on even rows of the output,<wbr/> and <code>G_<wbr/>odd</code>
+is the gain for green pixels on the odd rows.<wbr/></p>
+<p>If a HAL does not support a separate gain for even/<wbr/>odd green
+channels,<wbr/> it must use the <code>G_<wbr/>even</code> value,<wbr/> and write
+<code>G_<wbr/>odd</code> equal to <code>G_<wbr/>even</code> in the output result metadata.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -3243,7 +3259,7 @@ stabilized</p>
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
@@ -3296,7 +3312,7 @@ for this camera device; they must include AUTO.<wbr/></p>
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
@@ -3488,7 +3504,7 @@ can be changed</p>
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
@@ -3546,7 +3562,7 @@ will support AUTO mode.<wbr/></p>
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
@@ -3609,7 +3625,7 @@ simply be set to OFF.<wbr/></p>
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
@@ -3670,7 +3686,7 @@ by the camera device,<wbr/> this will be set to <code>[DISABLED]</code>.<wbr/></
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
@@ -3716,7 +3732,7 @@ be supported</p>
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
@@ -6985,7 +7001,7 @@ applied to the images</p>
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
@@ -7976,7 +7992,7 @@ are stuck at an arbitrary value).<wbr/></p>
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
@@ -9563,7 +9579,7 @@ by the device.<wbr/></p>
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
@@ -10636,7 +10652,7 @@ applied to the images</p>
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
@@ -15499,7 +15515,7 @@ reference illuminant.<wbr/></p>
                 <span class="entry_type_array">
                   3 x 3
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
 
 
 
@@ -15559,7 +15575,7 @@ space under the first reference illuminant
                 <span class="entry_type_array">
                   3 x 3
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
 
 
 
@@ -15622,7 +15638,7 @@ illuminant is present.<wbr/></p>
                 <span class="entry_type_array">
                   3 x 3
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
 
 
 
@@ -15686,7 +15702,7 @@ match the standard white point for the first reference illuminant
                 <span class="entry_type_array">
                   3 x 3
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
 
 
 
@@ -15752,7 +15768,7 @@ illuminant is present.<wbr/></p>
                 <span class="entry_type_array">
                   3 x 3
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
 
 
 
@@ -15814,7 +15830,7 @@ CIE XYZ colorspace.<wbr/></p>
                 <span class="entry_type_array">
                   3 x 3
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
 
 
 
@@ -17622,7 +17638,7 @@ the output result metadata.<wbr/></p>
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
@@ -19413,7 +19429,7 @@ hardware curves used as closely as possible when linearly interpolated.<wbr/></p
                 <span class="entry_type_array">
                   n
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
 
 
 
