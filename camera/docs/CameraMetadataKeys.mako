@@ -74,7 +74,7 @@ ${concatenated_info | javadoc(metadata)}\
     @Deprecated
   % endif
     public static final Key<${jtype_boxed(entry)}> ${entry.name | jkey_identifier} =
-            new Key<${jtype_boxed(entry)}>("${entry.name}", ${jclass(entry)});
+            new Key<${jtype_boxed(entry)}>("${entry.name}", ${jkey_type_token(entry)});
 </%def>\
 ##
 ## Generate a list of only Static, Controls, or Dynamic properties.

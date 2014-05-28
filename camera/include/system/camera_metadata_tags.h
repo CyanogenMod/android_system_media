@@ -139,7 +139,7 @@ typedef enum camera_metadata_tag {
     ANDROID_CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES,
                                                       // byte[]       | public
     ANDROID_CONTROL_AWB_AVAILABLE_MODES,              // byte[]       | public
-    ANDROID_CONTROL_MAX_REGIONS,                      // int32[]      | public
+    ANDROID_CONTROL_MAX_REGIONS,                      // int32[]      | hidden
     ANDROID_CONTROL_SCENE_MODE_OVERRIDES,             // byte[]       | system
     ANDROID_CONTROL_AE_PRECAPTURE_ID,                 // int32        | system
     ANDROID_CONTROL_AE_STATE,                         // enum         | public
@@ -236,7 +236,7 @@ typedef enum camera_metadata_tag {
     ANDROID_REQUEST_METADATA_MODE,                    // enum         | system
     ANDROID_REQUEST_OUTPUT_STREAMS,                   // int32[]      | system
     ANDROID_REQUEST_TYPE,                             // enum         | system
-    ANDROID_REQUEST_MAX_NUM_OUTPUT_STREAMS,           // int32[]      | public
+    ANDROID_REQUEST_MAX_NUM_OUTPUT_STREAMS,           // int32[]      | hidden
     ANDROID_REQUEST_MAX_NUM_REPROCESS_STREAMS,        // int32[]      | system
     ANDROID_REQUEST_MAX_NUM_INPUT_STREAMS,            // int32        | public
     ANDROID_REQUEST_PIPELINE_DEPTH,                   // byte         | public
