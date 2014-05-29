@@ -2164,7 +2164,7 @@ state transition details.<wbr/></p>
                 
           <tr class="entry" id="controls_android.control.afMode">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>control.<wbr/>af<wbr/>Mode
             </td>
             <td class="entry_type">
@@ -2284,6 +2284,33 @@ in result metadata.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When afMode is AUTO or MACRO,<wbr/> the lens must not move until an AF trigger is sent in a
+request (<a href="#controls_android.control.afTrigger">android.<wbr/>control.<wbr/>af<wbr/>Trigger</a> <code>==</code> START).<wbr/> After an AF trigger,<wbr/> the afState will end
+up with either FOCUSED_<wbr/>LOCKED or NOT_<wbr/>FOCUSED_<wbr/>LOCKED state (see
+<a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a> for detailed state transitions),<wbr/> which indicates that the lens is
+locked and will not move.<wbr/> If camera movement (e.<wbr/>g.<wbr/> tilting camera) causes the lens to move
+after the lens is locked,<wbr/> the HAL must compensate this movement appropriately such that
+the same focal plane remains in focus.<wbr/></p>
+<p>When afMode is one of the continuous auto focus modes,<wbr/> the HAL is free to start a AF
+scan whenever it's not locked.<wbr/> When the lens is locked after an AF trigger
+(see <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a> for detailed state transitions),<wbr/> the HAL should maintain the
+same lock behavior as above.<wbr/></p>
+<p>When afMode is OFF,<wbr/> the application controls focus manually.<wbr/> The accuracy of the
+focus distance control depends on the <a href="#static_android.lens.info.focusDistanceCalibration">android.<wbr/>lens.<wbr/>info.<wbr/>focus<wbr/>Distance<wbr/>Calibration</a>.<wbr/>
+However,<wbr/> the lens must not move regardless of the camera movement for any focus distance
+manual control.<wbr/></p>
+<p>To put this in concrete terms,<wbr/> if the camera has lens elements which may move based on
+camera orientation or motion (e.<wbr/>g.<wbr/> due to gravity),<wbr/> then the HAL must drive the lens to
+remain in a fixed position invariant to the camera's orientation or motion,<wbr/> for example,<wbr/>
+by using accelerometer measurements in the lens control logic.<wbr/> This is a typical issue
+that will arise on camera modules with open-loop VCMs.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -4981,7 +5008,7 @@ transient states between two results.<wbr/> See below table for examples:</p>
                 
           <tr class="entry" id="dynamic_android.control.afMode">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>control.<wbr/>af<wbr/>Mode
             </td>
             <td class="entry_type">
@@ -5101,6 +5128,33 @@ in result metadata.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When afMode is AUTO or MACRO,<wbr/> the lens must not move until an AF trigger is sent in a
+request (<a href="#controls_android.control.afTrigger">android.<wbr/>control.<wbr/>af<wbr/>Trigger</a> <code>==</code> START).<wbr/> After an AF trigger,<wbr/> the afState will end
+up with either FOCUSED_<wbr/>LOCKED or NOT_<wbr/>FOCUSED_<wbr/>LOCKED state (see
+<a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a> for detailed state transitions),<wbr/> which indicates that the lens is
+locked and will not move.<wbr/> If camera movement (e.<wbr/>g.<wbr/> tilting camera) causes the lens to move
+after the lens is locked,<wbr/> the HAL must compensate this movement appropriately such that
+the same focal plane remains in focus.<wbr/></p>
+<p>When afMode is one of the continuous auto focus modes,<wbr/> the HAL is free to start a AF
+scan whenever it's not locked.<wbr/> When the lens is locked after an AF trigger
+(see <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a> for detailed state transitions),<wbr/> the HAL should maintain the
+same lock behavior as above.<wbr/></p>
+<p>When afMode is OFF,<wbr/> the application controls focus manually.<wbr/> The accuracy of the
+focus distance control depends on the <a href="#static_android.lens.info.focusDistanceCalibration">android.<wbr/>lens.<wbr/>info.<wbr/>focus<wbr/>Distance<wbr/>Calibration</a>.<wbr/>
+However,<wbr/> the lens must not move regardless of the camera movement for any focus distance
+manual control.<wbr/></p>
+<p>To put this in concrete terms,<wbr/> if the camera has lens elements which may move based on
+camera orientation or motion (e.<wbr/>g.<wbr/> due to gravity),<wbr/> then the HAL must drive the lens to
+remain in a fixed position invariant to the camera's orientation or motion,<wbr/> for example,<wbr/>
+by using accelerometer measurements in the lens control logic.<wbr/> This is a typical issue
+that will arise on camera modules with open-loop VCMs.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
