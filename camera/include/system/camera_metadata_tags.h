@@ -242,7 +242,7 @@ typedef enum camera_metadata_tag {
     ANDROID_REQUEST_PIPELINE_DEPTH,                   // byte         | public
     ANDROID_REQUEST_PIPELINE_MAX_DEPTH,               // byte         | public
     ANDROID_REQUEST_PARTIAL_RESULT_COUNT,             // int32        | public
-    ANDROID_REQUEST_AVAILABLE_CAPABILITIES,           // enum         | public
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES,           // enum[]       | public
     ANDROID_REQUEST_AVAILABLE_REQUEST_KEYS,           // int32[]      | hidden
     ANDROID_REQUEST_AVAILABLE_RESULT_KEYS,            // int32[]      | hidden
     ANDROID_REQUEST_AVAILABLE_CHARACTERISTICS_KEYS,   // int32[]      | hidden
