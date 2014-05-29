@@ -33,10 +33,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <tag id="FULL">
         Entry is required for full hardware level devices, and optional for other hardware levels
     </tag>
-    <tag id="LIMITED">
-      Entry assists with LIMITED device implementation. LIMITED devices
-      must implement all entries with this tag. Optional for FULL devices.
-    </tag>
     <tag id="FUTURE">
         Entry is  under-specified and is not required for now. This is for book-keeping purpose,
         do not implement or use it, it may be revised for future.
@@ -1180,6 +1176,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             valid anti-banding modes that the application may request
             for this camera device; they must include AUTO.
           </details>
+          <tag id="BC" />
         </entry>
         <entry name="aeAvailableModes" type="byte" visibility="public"
                type_notes="list of enums" container="array" typedef="enumList">
@@ -1215,6 +1212,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </array>
           <description>List of frame rate ranges supported by the
           AE algorithm/hardware</description>
+          <tag id="BC" />
         </entry>
         <entry name="aeCompensationRange" type="int32" visibility="public"
                container="array" typedef="rangeInt">
@@ -2138,7 +2136,21 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           but the captured JPEG will still be a valid image.
 
           When a jpeg image capture is issued, the thumbnail size selected should have
-          the same aspect ratio as the jpeg image.</details>
+          the same aspect ratio as the jpeg image.
+
+          If the thumbnail image aspect ratio differs from the JPEG primary image aspect
+          ratio, the camera device creates the thumbnail by cropping it from the primary image.
+          For example, if the primary image has 4:3 aspect ratio, the thumbnail image has
+          16:9 aspect ratio, the primary image will be cropped vertically (letterbox) to
+          generate the thumbnail image. The thumbnail image will always have a smaller Field
+          Of View (FOV) than the primary image when aspect ratios differ.
+          </details>
+          <hal_details>
+          The HAL must not squeeze or stretch the downscaled primary image to generate thumbnail.
+          The cropping must be done on the primary jpeg image rather than the sensor active array.
+          The stream cropping rule specified by "S5. Cropping" in camera3.h doesn't apply to the
+          thumbnail image cropping.
+          </hal_details>
           <tag id="BC" />
         </entry>
       </controls>
@@ -3098,9 +3110,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>MANUAL_SENSOR
               <notes>
               The camera device can be manually controlled (3A algorithms such
-              as auto exposure, and auto focus can be
-              bypassed), this includes but is not limited to:
+              as auto exposure, and auto focus can be bypassed).
+              The camera device supports basic manual control of the sensor image
+              acquisition related stages. This means the following controls are
+              guaranteed to be supported:
 
+              * Manual frame duration control
+                  * android.sensor.frameDuration
+                  * android.sensor.info.maxFrameDuration
+                  * android.scaler.streamConfigurationMap
               * Manual exposure control
                   * android.sensor.exposureTime
                   * android.sensor.info.exposureTimeRange
@@ -3117,11 +3135,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               If any of the above 3A algorithms are enabled, then the camera
               device will accurately report the values applied by 3A in the
               result.
+
+              A given camera device may also support additional manual sensor controls,
+              but this capability only covers the above list of controls.
               </notes>
             </value>
-            <value optional="true">GCAM
+            <value>MANUAL_POST_PROCESSING
               <notes>
-              TODO: This should be @hide
+              The camera device post-processing stages can be manually controlled.
+              The camera device supports basic manual control of the image post-processing
+              stages. This means the following controls are guaranteed to be supported:
 
               * Manual tonemap control
                     * android.tonemap.curve
@@ -3139,6 +3162,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
               The camera device will also support everything in MANUAL_SENSOR
               except manual lens control and manual flash control.
+
+              A given camera device may also support additional post-processing
+              controls, but this capability only covers the above list of controls.
               </notes>
             </value>
             <value>ZSL
@@ -3197,7 +3223,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.info.supportedHardwareLevel `==` FULL devices:
 
           * MANUAL_SENSOR
-          * ZSL
 
           Other capabilities may be available on either FULL or LIMITED
           devices, but the app. should query this field to be sure.
@@ -3822,7 +3847,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           (Keep in sync with
           StreamConfigurationMap#getOutputMinFrameDuration)
           </details>
-          <tag id="BC" />
+          <tag id="V1" />
         </entry>
         <entry name="availableStallDurations" type="int64" visibility="hidden"
                container="array" typedef="streamConfigurationDuration">
@@ -3905,7 +3930,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           If possible, it is recommended that all non-JPEG formats
           (such as RAW16) should not have a stall duration.
           </hal_details>
-          <tag id="BC" />
+          <tag id="V1" />
         </entry>
         <entry name="streamConfigurationMap" type="int32" visibility="public" synthetic="true" typedef="streamConfigurationMap">
           <description>The available stream configurations that this
@@ -4119,7 +4144,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.scaler.availableStallDurations.
           </hal_details>
           <tag id="V1" />
-          <tag id="BC" />
         </entry>
         <entry name="sensitivity" type="int32" visibility="public">
           <description>Gain applied to image data. Must be
@@ -4232,7 +4256,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             android.scaler.availableStallDurations
             for details about encoding this scenario.
             </hal_details>
-            <tag id="BC" />
             <tag id="V1" />
           </entry>
           <entry name="physicalSize" type="float" visibility="public"
@@ -5838,10 +5861,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           A FULL device has the most support possible and will enable the
           widest range of use cases such as:
 
-          * 30 FPS at maximum resolution (== sensor resolution)
-          * Per frame control
-          * Manual sensor control
-          * Zero Shutter Lag (ZSL)
+          * 30fps at maximum resolution (== sensor resolution) is preferred, more than 20fps is required.
+          * Per frame control (android.sync.maxLatency `==` PER_FRAME_CONTROL)
+          * Manual sensor control (android.request.availableCapabilities contains MANUAL_SENSOR)
+          * Manual post-processing control (android.request.availableCapabilities contains MANUAL_POST_PROCESSING)
 
           A LIMITED device may have some or none of the above characteristics.
           To find out more refer to android.request.availableCapabilities.
@@ -6037,7 +6060,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           FULL capability devices should simply set this value to the
           `frame_number` of the request this result corresponds to.
           </hal_details>
-          <tag id="LIMITED" />
+          <tag id="V1" />
         </entry>
       </dynamic>
       <static>
@@ -6115,7 +6138,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           value. If UNKNOWN is used here then app developers do not have a way
           to know when sensor settings have been applied.
           </hal_details>
-          <tag id="LIMITED" />
+          <tag id="V1" />
         </entry>
       </static>
     </section>
