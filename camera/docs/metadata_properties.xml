@@ -3106,7 +3106,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
         </entry>
         <entry name="availableCapabilities" type="byte" visibility="public"
-          enum="true">
+          enum="true" container="array">
+          <array>
+            <size>n</size>
+          </array>
           <enum>
             <value>BACKWARD_COMPATIBLE
               <notes>The minimal set of capabilities that every camera
