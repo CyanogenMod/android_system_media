@@ -40,6 +40,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
   </tags>
 
   <types>
+    <typedef name="pairFloatFloat">
+      <language name="java">android.util.Pair&lt;Float,Float&gt;</language>
+    </typedef>
     <typedef name="rectangle">
       <language name="java">android.graphics.Rect</language>
     </typedef>
@@ -2573,7 +2576,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
         <entry name="focusRange" type="float" visibility="public"
         type_notes="Range of scene distances that are in focus"
-        container="array" typedef="rangeFloat">
+        container="array" typedef="pairFloatFloat">
           <array>
             <size>2</size>
           </array>
