@@ -21,6 +21,8 @@
 #ifndef TESTING_CAMERA_METADATA_FAKEVENDOR_H
 #define TESTING_CAMERA_METADATA_FAKEVENDOR_H
 
+#include <stdint.h>
+
 #include <system/camera_metadata.h>
 #include <system/camera_vendor_tags.h>
 
@@ -70,11 +72,11 @@ const char *fakevendor_section_names[FAKEVENDOR_SECTION_COUNT] = {
     "com.fakevendor.scaler"
 };
 
-unsigned int fakevendor_section_bounds[FAKEVENDOR_SECTION_COUNT][2] = {
-    { FAKEVENDOR_SENSOR_START,          FAKEVENDOR_SENSOR_END },
-    { FAKEVENDOR_SENSOR_I_START,        FAKEVENDOR_SENSOR_I_END },
-    { FAKEVENDOR_COLORCORRECTION_START, FAKEVENDOR_COLORCORRECTION_END },
-    { FAKEVENDOR_SCALER_START,          FAKEVENDOR_SCALER_END}
+uint32_t fakevendor_section_bounds[FAKEVENDOR_SECTION_COUNT][2] = {
+    { (uint32_t) FAKEVENDOR_SENSOR_START,          (uint32_t) FAKEVENDOR_SENSOR_END },
+    { (uint32_t) FAKEVENDOR_SENSOR_I_START,        (uint32_t) FAKEVENDOR_SENSOR_I_END },
+    { (uint32_t) FAKEVENDOR_COLORCORRECTION_START, (uint32_t) FAKEVENDOR_COLORCORRECTION_END },
+    { (uint32_t) FAKEVENDOR_SCALER_START,          (uint32_t) FAKEVENDOR_SCALER_END}
 };
 
 vendor_tag_info_t fakevendor_sensor[FAKEVENDOR_SENSOR_END -
