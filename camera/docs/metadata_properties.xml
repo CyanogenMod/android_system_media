@@ -3269,6 +3269,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.info.supportedHardwareLevel `==` FULL devices:
 
           * MANUAL_SENSOR
+          * MANUAL_POST_PROCESSING
 
           Other capabilities may be available on either FULL or LIMITED
           devices, but the app. should query this field to be sure.
@@ -3792,9 +3793,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           The configurations are listed as `(format, width, height, input?)`
           tuples.
 
-          All camera devices will support sensor maximum resolution (defined by
-          android.sensor.info.activeArraySize) for the JPEG format.
-
           For a given use case, the actual maximum supported resolution
           may be lower than what is listed here, depending on the destination
           Surface for the image data. For example, for recording video,
@@ -3834,8 +3832,22 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           (The following is a rewording of the above required table):
 
-          The HAL must include sensor maximum resolution (defined by
-          android.sensor.info.activeArraySize).
+          For JPEG format, the sizes may be restricted by below conditions:
+
+          * The HAL may choose the aspect ratio of each Jpeg size to be one of well known ones
+          (e.g. 4:3, 16:9, 3:2 etc.). If the sensor maximum resolution
+          (defined by android.sensor.info.activeArraySize) has an aspect ratio other than these,
+          it does not have to be included in the supported JPEG sizes.
+          * Some hardware JPEG encoders may have pixel boundary alignment requirements, such as
+          the dimensions being a multiple of 16.
+
+          Therefore, the maximum JPEG size may be smaller than sensor maximum resolution.
+          However, the largest JPEG size must be as close as possible to the sensor maximum
+          resolution given above constraints. It is required that after aspect ratio adjustments,
+          additional size reduction due to other issues must be less than 3% in area. For example,
+          if the sensor maximum resolution is 3280x2464, if the maximum JPEG size has aspect
+          ratio 4:3, the JPEG encoder alignment requirement is 16, the maximum JPEG size will be
+          3264x2448.
 
           For FULL capability devices (`android.info.supportedHardwareLevel == FULL`),
           the HAL must include all YUV_420_888 sizes that have JPEG sizes listed
