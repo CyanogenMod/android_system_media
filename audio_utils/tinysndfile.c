@@ -506,7 +506,11 @@ sf_count_t sf_writef_short(SNDFILE *handle, const short *ptr, sf_count_t desired
             actualBytes = fwrite(handle->temp, sizeof(char), desiredBytes, handle->stream);
         }
         break;
-    case SF_FORMAT_FLOAT:   // transcoding from short to float not yet implemented
+    case SF_FORMAT_FLOAT:
+        handle->temp = realloc(handle->temp, desiredBytes);
+        memcpy_to_float_from_i16((float *) handle->temp, ptr, desiredFrames);
+        actualBytes = fwrite(handle->temp, sizeof(char), desiredBytes, handle->stream);
+        break;
     default:
         break;
     }
@@ -525,8 +529,12 @@ sf_count_t sf_writef_float(SNDFILE *handle, const float *ptr, sf_count_t desired
     case SF_FORMAT_FLOAT:
         actualBytes = fwrite(ptr, sizeof(char), desiredBytes, handle->stream);
         break;
-    case SF_FORMAT_PCM_U8:  // transcoding from float to byte/short not yet implemented
     case SF_FORMAT_PCM_16:
+        handle->temp = realloc(handle->temp, desiredBytes);
+        memcpy_to_i16_from_float((short *) handle->temp, ptr, desiredFrames);
+        actualBytes = fwrite(handle->temp, sizeof(char), desiredBytes, handle->stream);
+        break;
+    case SF_FORMAT_PCM_U8:  // transcoding from float to byte not yet implemented
     default:
         break;
     }
