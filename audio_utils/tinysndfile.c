@@ -286,14 +286,16 @@ static SNDFILE *sf_open_write(const char *path, SF_INFO *info)
     write4u(&wav[28], byteRate);
     wav[32] = blockAlignment;
     wav[34] = bitsPerSample;
+    size_t extra = 0;
     if (sub == SF_FORMAT_FLOAT) {
         memcpy(&wav[38], "fact", 4);
         wav[42] = 4;
         memcpy(&wav[50], "data", 4);
+        extra = 14;
     } else
         memcpy(&wav[36], "data", 4);
     // dataSize is initially zero
-    (void) fwrite(wav, sizeof(wav), 1, stream);
+    (void) fwrite(wav, 44 + extra, 1, stream);
     SNDFILE *handle = (SNDFILE *) malloc(sizeof(SNDFILE));
     handle->mode = SFM_WRITE;
     handle->temp = NULL;
