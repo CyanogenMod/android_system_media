@@ -3027,7 +3027,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="HAL2" />
         </entry>
-        <entry name="maxNumInputStreams" type="int32" visibility="public">
+        <entry name="maxNumInputStreams" type="int32" visibility="hidden">
           <description>
           The maximum numbers of any type of input streams
           that can be configured and used simultaneously by a camera device.
@@ -3227,6 +3227,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               * The maximum available resolution for RAW_OPAQUE streams
                 (both input/output) will match the maximum available
                 resolution of JPEG streams.
+
+                @hide this, TODO: remove it when input related APIs are ready.
               </notes>
             </value>
             <value optional="true">DNG
