@@ -3107,7 +3107,8 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/>  </p></span>
+frame rate of video recording.<wbr/><br/>
+</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -6760,7 +6761,8 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/>  </p></span>
+frame rate of video recording.<wbr/><br/>
+</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -17039,7 +17041,7 @@ ISO=100</p>
                 
           <tr class="entry" id="static_android.sensor.blackLevelPattern">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>sensor.<wbr/>black<wbr/>Level<wbr/>Pattern
             </td>
             <td class="entry_type">
@@ -17049,7 +17051,7 @@ ISO=100</p>
                 <span class="entry_type_array">
                   4
                 </span>
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [public as blackLevelPattern]</span>
 
 
 
@@ -17085,11 +17087,22 @@ ISO=100</p>
               <p>This tag specifies the zero light value for each of the CFA mosaic
 channels in the camera sensor.<wbr/>  The maximal value output by the
 sensor is represented by the value in <a href="#static_android.sensor.info.whiteLevel">android.<wbr/>sensor.<wbr/>info.<wbr/>white<wbr/>Level</a>.<wbr/></p>
-<p>The values are given in row-column scan order,<wbr/> with the first value
-corresponding to the element of the CFA in row=0,<wbr/> column=0.<wbr/></p>
+<p>The values are given in the same order as channels listed for the CFA
+layout tag (see <a href="#static_android.sensor.info.colorFilterArrangement">android.<wbr/>sensor.<wbr/>info.<wbr/>color<wbr/>Filter<wbr/>Arrangement</a>),<wbr/> i.<wbr/>e.<wbr/> the
+nth value given corresponds to the black level offset for the nth
+color channel listed in the CFA.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The values are given in row-column scan order,<wbr/> with the first value
+corresponding to the element of the CFA in row=0,<wbr/> column=0.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
