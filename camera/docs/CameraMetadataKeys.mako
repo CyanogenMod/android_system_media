@@ -60,7 +60,9 @@
 ${concatenated_info | javadoc(metadata)}\
   % if entry.enum and not (entry.typedef and entry.typedef.languages.get('java')):
     % for value in entry.enum.values:
+     % if not value.hidden:
      * @see #${jenum_value(entry, value)}
+     % endif
     % endfor
   % endif
   % if entry.deprecated:

@@ -944,13 +944,15 @@ class EnumValue(Node):
     name: A string,                 e.g. 'ON' or 'OFF'
     id: An optional numeric string, e.g. '0' or '0xFF'
     optional: A boolean
+    hidden: A boolean, True if the enum should be hidden.
     notes: A string describing the notes, or None.
     parent: An edge to the parent, always an Enum instance.
   """
-  def __init__(self, name, parent, id=None, optional=False, notes=None):
+  def __init__(self, name, parent, id=None, optional=False, hidden=False, notes=None):
     self._name = name                    # str, e.g. 'ON' or 'OFF'
     self._id = id                        # int, e.g. '0'
     self._optional = optional            # bool
+    self._hidden = hidden                # bool
     self._notes = notes                  # None or str
     self._parent = parent
 
@@ -961,6 +963,10 @@ class EnumValue(Node):
   @property
   def optional(self):
     return self._optional
+
+  @property
+  def hidden(self):
+    return self._hidden
 
   @property
   def notes(self):
@@ -979,9 +985,10 @@ class Enum(Node):
     has_values_with_id: A boolean representing if any of the children have a
         non-empty id property.
   """
-  def __init__(self, parent, values, ids={}, optionals=[], notes={}):
+  def __init__(self, parent, values, ids={}, optionals=[], hiddens=[], notes={}):
     self._values =                                                             \
-      [ EnumValue(val, self, ids.get(val), val in optionals, notes.get(val))   \
+      [ EnumValue(val, self, ids.get(val), val in optionals, val in hiddens,   \
+                  notes.get(val))                                              \
         for val in values ]
 
     self._parent = parent
@@ -1221,6 +1228,7 @@ class Entry(Node):
     # access these via the 'enum' prop
     enum_values = kwargs.get('enum_values')
     enum_optionals = kwargs.get('enum_optionals')
+    enum_hiddens = kwargs.get('enum_hiddens')
     enum_notes = kwargs.get('enum_notes')  # { value => notes }
     enum_ids = kwargs.get('enum_ids')  # { value => notes }
     self._tuple_values = kwargs.get('tuple_values')
@@ -1239,7 +1247,8 @@ class Entry(Node):
     self._typedef = None # Filled in by Metadata::_construct_types
 
     if kwargs.get('enum', False):
-      self._enum = Enum(self, enum_values, enum_ids, enum_optionals, enum_notes)
+      self._enum = Enum(self, enum_values, enum_ids, enum_optionals,
+                        enum_hiddens, enum_notes)
     else:
       self._enum = None
 

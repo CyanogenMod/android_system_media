@@ -133,6 +133,9 @@
                     % if value.optional:
                              optional="true"
                     % endif:
+                    % if value.hidden:
+                             hidden="true"
+                    % endif:
                     % if value.id is not None:
                              id="${value.id}"
                     % endif
