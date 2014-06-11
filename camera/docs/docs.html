@@ -1129,7 +1129,7 @@ sensor's native color into linear sRGB color.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>When auto-white balance is enabled with <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> this
+              <p>When auto-white balance (AWB) is enabled with <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> this
 control is overridden by the AWB routine.<wbr/> When AWB is disabled,<wbr/> the
 application controls how the color mapping is performed.<wbr/></p>
 <p>We define the expected processing pipeline below.<wbr/> For consistency
@@ -1198,7 +1198,7 @@ values are clipped to fit within the range.<wbr/></p>
 
             <td class="entry_description">
               <p>A color transform matrix to use to transform
-from sensor RGB color space to output linear sRGB color space</p>
+from sensor RGB color space to output linear sRGB color space.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -1398,7 +1398,7 @@ sensor's native color into linear sRGB color.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>When auto-white balance is enabled with <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> this
+              <p>When auto-white balance (AWB) is enabled with <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> this
 control is overridden by the AWB routine.<wbr/> When AWB is disabled,<wbr/> the
 application controls how the color mapping is performed.<wbr/></p>
 <p>We define the expected processing pipeline below.<wbr/> For consistency
@@ -1467,7 +1467,7 @@ values are clipped to fit within the range.<wbr/></p>
 
             <td class="entry_description">
               <p>A color transform matrix to use to transform
-from sensor RGB color space to output linear sRGB color space</p>
+from sensor RGB color space to output linear sRGB color space.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -1734,8 +1734,8 @@ adjusted for antibanding.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Adjustment to AE target image
-brightness</p>
+              <p>Adjustment to auto-exposure (AE) target image
+brightness.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -1743,6 +1743,7 @@ brightness</p>
             </td>
 
             <td class="entry_range">
+              <p><a href="#static_android.control.aeCompensationRange">android.<wbr/>control.<wbr/>ae<wbr/>Compensation<wbr/>Range</a></p>
             </td>
 
             <td class="entry_tags">
@@ -1757,11 +1758,15 @@ brightness</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>For example,<wbr/> if EV step is 0.<wbr/>333,<wbr/> '6' will mean an
-exposure compensation of +2 EV; -3 will mean an exposure
-compensation of -1 EV.<wbr/> Note that this control will only be effective
-if <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>!=</code> OFF.<wbr/> This control will take effect even when
-<a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> <code>== true</code>.<wbr/></p>
+              <p>The adjustment is measured as a count of steps,<wbr/> with the
+step size defined by <a href="#static_android.control.aeCompensationStep">android.<wbr/>control.<wbr/>ae<wbr/>Compensation<wbr/>Step</a> and the
+allowed range by <a href="#static_android.control.aeCompensationRange">android.<wbr/>control.<wbr/>ae<wbr/>Compensation<wbr/>Range</a>.<wbr/></p>
+<p>For example,<wbr/> if the exposure value (EV) step is 0.<wbr/>333,<wbr/> '6'
+will mean an exposure compensation of +2 EV; -3 will mean an
+exposure compensation of -1 EV.<wbr/> One EV represents a doubling
+of image brightness.<wbr/> Note that this control will only be
+effective if <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>!=</code> OFF.<wbr/> This control
+will take effect even when <a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> <code>== true</code>.<wbr/></p>
 <p>In the event of exposure compensation value being changed,<wbr/> camera device
 may take several frames to reach the newly requested exposure target.<wbr/>
 During that time,<wbr/> <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> field will be in the SEARCHING
@@ -1808,7 +1813,7 @@ will still take effect while auto-exposure is locked.<wbr/></p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether AE is currently locked to its latest
+              <p>Whether auto-exposure (AE) is currently locked to its latest
 calculated values.<wbr/></p>
             </td>
 
@@ -2068,7 +2073,7 @@ exclusive on xmax and ymax.<wbr/></p>
 
             <td class="entry_description">
               <p>Range over which fps can be adjusted to
-maintain exposure</p>
+maintain exposure.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -2090,8 +2095,8 @@ maintain exposure</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only constrains AE algorithm,<wbr/> not manual control
-of <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a></p>
+              <p>Only constrains auto-exposure (AE) algorithm,<wbr/> not
+manual control of <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a></p>
             </td>
           </tr>
 
@@ -2155,9 +2160,10 @@ metering sequence when it processes this request.<wbr/></p>
 included at all in the request settings.<wbr/> When included and
 set to START,<wbr/> the camera device will trigger the autoexposure
 precapture metering sequence.<wbr/></p>
-<p>The effect of AE precapture trigger depends on the current
-AE mode and state; see <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> for AE precapture
-state transition details.<wbr/></p>
+<p>The effect of auto-exposure (AE) precapture trigger depends
+on the current AE mode and state; see
+<a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> for AE precapture state transition
+details.<wbr/></p>
             </td>
           </tr>
 
@@ -2188,22 +2194,29 @@ application</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
-                    <span class="entry_type_enum_notes"><p>If lens is not fixed focus.<wbr/></p>
-<p>Use <a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> to determine if lens
-is fixed-focus.<wbr/> In this mode,<wbr/> the lens does not move unless
+                    <span class="entry_type_enum_notes"><p>Basic automatic focus mode.<wbr/></p>
+<p>In this mode,<wbr/> the lens does not move unless
 the autofocus trigger action is called.<wbr/> When that trigger
-is activated,<wbr/> AF must transition to ACTIVE_<wbr/>SCAN,<wbr/> then to
+is activated,<wbr/> AF will transition to ACTIVE_<wbr/>SCAN,<wbr/> then to
 the outcome of the scan (FOCUSED or NOT_<wbr/>FOCUSED).<wbr/></p>
+<p>Always supported if lens is not fixed focus.<wbr/></p>
+<p>Use <a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> to determine if lens
+is fixed-focus.<wbr/></p>
 <p>Triggering AF_<wbr/>CANCEL resets the lens position to default,<wbr/>
 and sets the AF state to INACTIVE.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">MACRO</span>
-                    <span class="entry_type_enum_notes"><p>In this mode,<wbr/> the lens does not move unless the
-autofocus trigger action is called.<wbr/></p>
-<p>When that trigger is activated,<wbr/> AF must transition to
+                    <span class="entry_type_enum_notes"><p>Close-up focusing mode.<wbr/></p>
+<p>In this mode,<wbr/> the lens does not move unless the
+autofocus trigger action is called.<wbr/> When that trigger is
+activated,<wbr/> AF will transition to ACTIVE_<wbr/>SCAN,<wbr/> then to
+the outcome of the scan (FOCUSED or NOT_<wbr/>FOCUSED).<wbr/> This
+mode is optimized for focusing on objects very close to
+the camera.<wbr/></p>
+<p>When that trigger is activated,<wbr/> AF will transition to
 ACTIVE_<wbr/>SCAN,<wbr/> then to the outcome of the scan (FOCUSED or
-NOT_<wbr/>FOCUSED).<wbr/>  Triggering cancel AF resets the lens
+NOT_<wbr/>FOCUSED).<wbr/> Triggering cancel AF resets the lens
 position to default,<wbr/> and sets the AF state to
 INACTIVE.<wbr/></p></span>
                   </li>
@@ -2257,8 +2270,8 @@ INACTIVE.<wbr/></p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether AF is currently enabled,<wbr/> and what
-mode it is set to</p>
+              <p>Whether auto-focus (AF) is currently enabled,<wbr/> and what
+mode it is set to.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -2499,7 +2512,7 @@ is active.<wbr/></p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether AWB is currently locked to its
+              <p>Whether auto-white balance (AWB) is currently locked to its
 latest calculated values.<wbr/></p>
             </td>
 
@@ -2615,7 +2628,7 @@ illumination for white balance.<wbr/></p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether AWB is currently setting the color
+              <p>Whether auto-white balance (AWB) is currently setting the color
 transform fields,<wbr/> and what its illumination target
 is.<wbr/></p>
             </td>
@@ -3237,7 +3250,7 @@ the per-scene settings to use for <a href="#controls_android.control.aeMode">and
 
             <td class="entry_description">
               <p>Whether video stabilization is
-active</p>
+active.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -3437,7 +3450,7 @@ sensitivity,<wbr/> and frame duration.<wbr/></p>
 
             <td class="entry_description">
               <p>List of frame rate ranges supported by the
-AE algorithm/<wbr/>hardware</p>
+auto-exposure (AE) algorithm/<wbr/>hardware</p>
             </td>
 
             <td class="entry_units">
@@ -3569,7 +3582,7 @@ can be changed</p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>List of AF modes that can be
+              <p>List of auto-focus (AF) modes that can be
 selected with <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>.<wbr/></p>
             </td>
 
@@ -4329,8 +4342,8 @@ adjusted for antibanding.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Adjustment to AE target image
-brightness</p>
+              <p>Adjustment to auto-exposure (AE) target image
+brightness.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -4338,6 +4351,7 @@ brightness</p>
             </td>
 
             <td class="entry_range">
+              <p><a href="#static_android.control.aeCompensationRange">android.<wbr/>control.<wbr/>ae<wbr/>Compensation<wbr/>Range</a></p>
             </td>
 
             <td class="entry_tags">
@@ -4352,11 +4366,15 @@ brightness</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>For example,<wbr/> if EV step is 0.<wbr/>333,<wbr/> '6' will mean an
-exposure compensation of +2 EV; -3 will mean an exposure
-compensation of -1 EV.<wbr/> Note that this control will only be effective
-if <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>!=</code> OFF.<wbr/> This control will take effect even when
-<a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> <code>== true</code>.<wbr/></p>
+              <p>The adjustment is measured as a count of steps,<wbr/> with the
+step size defined by <a href="#static_android.control.aeCompensationStep">android.<wbr/>control.<wbr/>ae<wbr/>Compensation<wbr/>Step</a> and the
+allowed range by <a href="#static_android.control.aeCompensationRange">android.<wbr/>control.<wbr/>ae<wbr/>Compensation<wbr/>Range</a>.<wbr/></p>
+<p>For example,<wbr/> if the exposure value (EV) step is 0.<wbr/>333,<wbr/> '6'
+will mean an exposure compensation of +2 EV; -3 will mean an
+exposure compensation of -1 EV.<wbr/> One EV represents a doubling
+of image brightness.<wbr/> Note that this control will only be
+effective if <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>!=</code> OFF.<wbr/> This control
+will take effect even when <a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a> <code>== true</code>.<wbr/></p>
 <p>In the event of exposure compensation value being changed,<wbr/> camera device
 may take several frames to reach the newly requested exposure target.<wbr/>
 During that time,<wbr/> <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> field will be in the SEARCHING
@@ -4403,7 +4421,7 @@ will still take effect while auto-exposure is locked.<wbr/></p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether AE is currently locked to its latest
+              <p>Whether auto-exposure (AE) is currently locked to its latest
 calculated values.<wbr/></p>
             </td>
 
@@ -4663,7 +4681,7 @@ exclusive on xmax and ymax.<wbr/></p>
 
             <td class="entry_description">
               <p>Range over which fps can be adjusted to
-maintain exposure</p>
+maintain exposure.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -4685,8 +4703,8 @@ maintain exposure</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Only constrains AE algorithm,<wbr/> not manual control
-of <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a></p>
+              <p>Only constrains auto-exposure (AE) algorithm,<wbr/> not
+manual control of <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a></p>
             </td>
           </tr>
 
@@ -4750,9 +4768,10 @@ metering sequence when it processes this request.<wbr/></p>
 included at all in the request settings.<wbr/> When included and
 set to START,<wbr/> the camera device will trigger the autoexposure
 precapture metering sequence.<wbr/></p>
-<p>The effect of AE precapture trigger depends on the current
-AE mode and state; see <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> for AE precapture
-state transition details.<wbr/></p>
+<p>The effect of auto-exposure (AE) precapture trigger depends
+on the current AE mode and state; see
+<a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> for AE precapture state transition
+details.<wbr/></p>
             </td>
           </tr>
 
@@ -4816,7 +4835,7 @@ camera device may skip reporting this state in capture result.<wbr/></p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Current state of AE algorithm</p>
+              <p>Current state of auto-exposure (AE) algorithm.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -5044,22 +5063,29 @@ application</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">AUTO</span>
-                    <span class="entry_type_enum_notes"><p>If lens is not fixed focus.<wbr/></p>
-<p>Use <a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> to determine if lens
-is fixed-focus.<wbr/> In this mode,<wbr/> the lens does not move unless
+                    <span class="entry_type_enum_notes"><p>Basic automatic focus mode.<wbr/></p>
+<p>In this mode,<wbr/> the lens does not move unless
 the autofocus trigger action is called.<wbr/> When that trigger
-is activated,<wbr/> AF must transition to ACTIVE_<wbr/>SCAN,<wbr/> then to
+is activated,<wbr/> AF will transition to ACTIVE_<wbr/>SCAN,<wbr/> then to
 the outcome of the scan (FOCUSED or NOT_<wbr/>FOCUSED).<wbr/></p>
+<p>Always supported if lens is not fixed focus.<wbr/></p>
+<p>Use <a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> to determine if lens
+is fixed-focus.<wbr/></p>
 <p>Triggering AF_<wbr/>CANCEL resets the lens position to default,<wbr/>
 and sets the AF state to INACTIVE.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">MACRO</span>
-                    <span class="entry_type_enum_notes"><p>In this mode,<wbr/> the lens does not move unless the
-autofocus trigger action is called.<wbr/></p>
-<p>When that trigger is activated,<wbr/> AF must transition to
+                    <span class="entry_type_enum_notes"><p>Close-up focusing mode.<wbr/></p>
+<p>In this mode,<wbr/> the lens does not move unless the
+autofocus trigger action is called.<wbr/> When that trigger is
+activated,<wbr/> AF will transition to ACTIVE_<wbr/>SCAN,<wbr/> then to
+the outcome of the scan (FOCUSED or NOT_<wbr/>FOCUSED).<wbr/> This
+mode is optimized for focusing on objects very close to
+the camera.<wbr/></p>
+<p>When that trigger is activated,<wbr/> AF will transition to
 ACTIVE_<wbr/>SCAN,<wbr/> then to the outcome of the scan (FOCUSED or
-NOT_<wbr/>FOCUSED).<wbr/>  Triggering cancel AF resets the lens
+NOT_<wbr/>FOCUSED).<wbr/> Triggering cancel AF resets the lens
 position to default,<wbr/> and sets the AF state to
 INACTIVE.<wbr/></p></span>
                   </li>
@@ -5113,8 +5139,8 @@ INACTIVE.<wbr/></p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether AF is currently enabled,<wbr/> and what
-mode it is set to</p>
+              <p>Whether auto-focus (AF) is currently enabled,<wbr/> and what
+mode it is set to.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -5390,7 +5416,7 @@ device may skip reporting this state in capture result.<wbr/></p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Current state of AF algorithm.<wbr/></p>
+              <p>Current state of auto-focus (AF) algorithm.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -5877,7 +5903,7 @@ is active.<wbr/></p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether AWB is currently locked to its
+              <p>Whether auto-white balance (AWB) is currently locked to its
 latest calculated values.<wbr/></p>
             </td>
 
@@ -5993,7 +6019,7 @@ illumination for white balance.<wbr/></p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Whether AWB is currently setting the color
+              <p>Whether auto-white balance (AWB) is currently setting the color
 transform fields,<wbr/> and what its illumination target
 is.<wbr/></p>
             </td>
@@ -6254,7 +6280,7 @@ current scene.<wbr/></p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Current state of AWB algorithm</p>
+              <p>Current state of auto-white balance (AWB) algorithm.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -6796,7 +6822,7 @@ the per-scene settings to use for <a href="#controls_android.control.aeMode">and
 
             <td class="entry_description">
               <p>Whether video stabilization is
-active</p>
+active.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -7429,7 +7455,7 @@ ON_<wbr/>ALWAYS_<wbr/>FLASH,<wbr/> or ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE) wi
 <p>When set to OFF,<wbr/> the camera device will not fire flash for this capture.<wbr/></p>
 <p>When set to SINGLE,<wbr/> the camera device will fire flash regardless of the camera
 device's auto-exposure routine's result.<wbr/> When used in still capture case,<wbr/> this
-control should be used along with AE precapture metering sequence
+control should be used along with auto-exposure (AE) precapture metering sequence
 (<a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>),<wbr/> otherwise,<wbr/> the image may be incorrectly exposed.<wbr/></p>
 <p>When set to TORCH,<wbr/> the flash will be on continuously.<wbr/> This mode can be used
 for use cases such as preview,<wbr/> auto-focus assist,<wbr/> still capture,<wbr/> or video recording.<wbr/></p>
@@ -7856,7 +7882,7 @@ ON_<wbr/>ALWAYS_<wbr/>FLASH,<wbr/> or ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE) wi
 <p>When set to OFF,<wbr/> the camera device will not fire flash for this capture.<wbr/></p>
 <p>When set to SINGLE,<wbr/> the camera device will fire flash regardless of the camera
 device's auto-exposure routine's result.<wbr/> When used in still capture case,<wbr/> this
-control should be used along with AE precapture metering sequence
+control should be used along with auto-exposure (AE) precapture metering sequence
 (<a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>),<wbr/> otherwise,<wbr/> the image may be incorrectly exposed.<wbr/></p>
 <p>When set to TORCH,<wbr/> the flash will be on continuously.<wbr/> This mode can be used
 for use cases such as preview,<wbr/> auto-focus assist,<wbr/> still capture,<wbr/> or video recording.<wbr/></p>
@@ -8497,7 +8523,7 @@ write</p>
 
             <td class="entry_description">
               <p>Compression quality of the final JPEG
-image</p>
+image.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -8590,7 +8616,7 @@ thumbnail</p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Resolution of embedded JPEG thumbnail</p>
+              <p>Resolution of embedded JPEG thumbnail.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -8689,7 +8715,7 @@ thumbnail image cropping.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Supported resolutions for the JPEG thumbnail</p>
+              <p>Supported resolutions for the JPEG thumbnail.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -9033,7 +9059,7 @@ write</p>
 
             <td class="entry_description">
               <p>Compression quality of the final JPEG
-image</p>
+image.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -9182,7 +9208,7 @@ thumbnail</p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Resolution of embedded JPEG thumbnail</p>
+              <p>Resolution of embedded JPEG thumbnail.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -9466,7 +9492,7 @@ be set to MOVING.<wbr/></p>
 
             <td class="entry_description">
               <p>Distance to plane of sharpest focus,<wbr/>
-measured from frontmost surface of the lens</p>
+measured from frontmost surface of the lens.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -10438,7 +10464,7 @@ be set to MOVING.<wbr/></p>
 
             <td class="entry_description">
               <p>Distance to plane of sharpest focus,<wbr/>
-measured from frontmost surface of the lens</p>
+measured from frontmost surface of the lens.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -10493,7 +10519,7 @@ measured from frontmost surface of the lens</p>
 
             <td class="entry_description">
               <p>The range of scene distances that are in
-sharp focus (depth of field)</p>
+sharp focus (depth of field).<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -10734,7 +10760,7 @@ quality</p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Mode of operation for the noise reduction
+              <p>Mode of operation for the noise reduction.<wbr/>
 algorithm</p>
             </td>
 
@@ -10955,7 +10981,7 @@ quality</p></span>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Mode of operation for the noise reduction
+              <p>Mode of operation for the noise reduction.<wbr/>
 algorithm</p>
             </td>
 
@@ -12214,11 +12240,12 @@ a result will be composed of.<wbr/></p>
 may be delivered to the application layer from the camera device as
 soon as they are available.<wbr/></p>
 <p>A value of 1 means that partial results are not supported.<wbr/></p>
-<p>A typical use case for this might be: after requesting an AF lock the
-new AF state might be available 50% of the way through the pipeline.<wbr/>
-The camera device could then immediately dispatch this state via a
-partial result to the framework/<wbr/>application layer,<wbr/> and the rest of
-the metadata via later partial results.<wbr/></p>
+<p>A typical use case for this might be: after requesting an
+auto-focus (AF) lock the new AF state might be available 50%
+of the way through the pipeline.<wbr/>  The camera device could
+then immediately dispatch this state via a partial result to
+the framework/<wbr/>application layer,<wbr/> and the rest of the
+metadata via later partial results.<wbr/></p>
             </td>
           </tr>
 
@@ -12367,8 +12394,9 @@ files (produced from the same camera device) back into YUV.<wbr/></p>
 <li>RAW16 is reprocessable into both YUV_<wbr/>420_<wbr/>888 and JPEG
   formats.<wbr/></li>
 <li>The maximum available resolution for RAW16 streams (both
-  input/<wbr/>output) will match the value in
-  <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>.<wbr/></li>
+  input/<wbr/>output) will match the either value in
+  <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a> or
+  <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></li>
 <li>All DNG-related optional metadata entries are provided
   by the camera device.<wbr/></li>
 </ul></span>
@@ -12998,7 +13026,7 @@ pipeline stages were actually used.<wbr/></p>
                 
           <tr class="entry" id="controls_android.scaler.cropRegion">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>scaler.<wbr/>crop<wbr/>Region
             </td>
             <td class="entry_type">
@@ -13017,19 +13045,13 @@ pipeline stages were actually used.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>(x,<wbr/> y,<wbr/> width,<wbr/> height).<wbr/></p>
-<p>A rectangle with the top-level corner of (x,<wbr/>y) and size
-(width,<wbr/> height).<wbr/> The region of the sensor that is used for
-output.<wbr/> Each stream must use this rectangle to produce its
-output,<wbr/> cropping to a smaller region if necessary to
-maintain the stream's aspect ratio.<wbr/></p>
-<p>HAL2.<wbr/>x uses only (x,<wbr/> y,<wbr/> width)</p>
+              <p>The region of the sensor to read out for this capture.<wbr/></p>
             </td>
 
             <td class="entry_units">
               (x,<wbr/>y) of top-left corner,<wbr/> width and height of region
           in pixels; (0,<wbr/>0) is top-left corner of
-          android.<wbr/>sensor.<wbr/>active<wbr/>Array<wbr/>Size
+          android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size
             </td>
 
             <td class="entry_range">
@@ -13047,34 +13069,54 @@ maintain the stream's aspect ratio.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The crop region is applied after the RAW to other color space (e.<wbr/>g.<wbr/> YUV)
-conversion.<wbr/> Since raw streams (e.<wbr/>g.<wbr/> RAW16) don't have the conversion stage,<wbr/>
-it is not croppable.<wbr/> The crop region will be ignored by raw streams.<wbr/></p>
+              <p>The crop region coordinate system is based off
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>,<wbr/> with <code>(0,<wbr/> 0)</code> being the
+top-left corner of the sensor active array.<wbr/></p>
+<p>Output streams use this rectangle to produce their output,<wbr/>
+cropping to a smaller region if necessary to maintain the
+stream's aspect ratio,<wbr/> then scaling the sensor input to
+match the output's configured resolution.<wbr/></p>
+<p>The crop region is applied after the RAW to other color
+space (e.<wbr/>g.<wbr/> YUV) conversion.<wbr/> Since raw streams
+(e.<wbr/>g.<wbr/> RAW16) don't have the conversion stage,<wbr/> they are not
+croppable.<wbr/> The crop region will be ignored by raw streams.<wbr/></p>
 <p>For non-raw streams,<wbr/> any additional per-stream cropping will
 be done to maximize the final pixel area of the stream.<wbr/></p>
 <p>For example,<wbr/> if the crop region is set to a 4:3 aspect
-ratio,<wbr/> then 4:3 streams should use the exact crop
-region.<wbr/> 16:9 streams should further crop vertically
+ratio,<wbr/> then 4:3 streams will use the exact crop
+region.<wbr/> 16:9 streams will further crop vertically
 (letterbox).<wbr/></p>
 <p>Conversely,<wbr/> if the crop region is set to a 16:9,<wbr/> then 4:3
-outputs should crop horizontally (pillarbox),<wbr/> and 16:9
-streams should match exactly.<wbr/> These additional crops must
+outputs will crop horizontally (pillarbox),<wbr/> and 16:9
+streams will match exactly.<wbr/> These additional crops will
 be centered within the crop region.<wbr/></p>
-<p>The output streams must maintain square pixels at all
+<p>The width and height of the crop region cannot
+be set to be smaller than
+<code>floor( activeArraySize.<wbr/>width /<wbr/> <a href="#static_android.scaler.availableMaxDigitalZoom">android.<wbr/>scaler.<wbr/>available<wbr/>Max<wbr/>Digital<wbr/>Zoom</a> )</code> and
+<code>floor( activeArraySize.<wbr/>height /<wbr/> <a href="#static_android.scaler.availableMaxDigitalZoom">android.<wbr/>scaler.<wbr/>available<wbr/>Max<wbr/>Digital<wbr/>Zoom</a> )</code>,<wbr/> respectively.<wbr/></p>
+<p>The camera device may adjust the crop region to account
+for rounding and other hardware requirements; the final
+crop region used will be included in the output capture
+result.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The output streams must maintain square pixels at all
 times,<wbr/> no matter what the relative aspect ratios of the
 crop region and the stream are.<wbr/>  Negative values for
 corner are allowed for raw output if full pixel array is
 larger than active pixel array.<wbr/> Width and height may be
 rounded to nearest larger supportable width,<wbr/> especially
 for raw output,<wbr/> where only a few fixed scales may be
-possible.<wbr/> The width and height of the crop region cannot
-be set to be smaller than floor( activeArraySize.<wbr/>width /<wbr/>
-<a href="#static_android.scaler.availableMaxDigitalZoom">android.<wbr/>scaler.<wbr/>available<wbr/>Max<wbr/>Digital<wbr/>Zoom</a> ) and floor(
-activeArraySize.<wbr/>height /<wbr/>
-<a href="#static_android.scaler.availableMaxDigitalZoom">android.<wbr/>scaler.<wbr/>available<wbr/>Max<wbr/>Digital<wbr/>Zoom</a>),<wbr/> respectively.<wbr/></p>
+possible.<wbr/></p>
+<p>HAL2.<wbr/>x uses only (x,<wbr/> y,<wbr/> width)</p>
             </td>
           </tr>
-
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -14437,7 +14479,7 @@ FREEFORM cropping.<wbr/></p>
                 
           <tr class="entry" id="dynamic_android.scaler.cropRegion">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>scaler.<wbr/>crop<wbr/>Region
             </td>
             <td class="entry_type">
@@ -14456,19 +14498,13 @@ FREEFORM cropping.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>(x,<wbr/> y,<wbr/> width,<wbr/> height).<wbr/></p>
-<p>A rectangle with the top-level corner of (x,<wbr/>y) and size
-(width,<wbr/> height).<wbr/> The region of the sensor that is used for
-output.<wbr/> Each stream must use this rectangle to produce its
-output,<wbr/> cropping to a smaller region if necessary to
-maintain the stream's aspect ratio.<wbr/></p>
-<p>HAL2.<wbr/>x uses only (x,<wbr/> y,<wbr/> width)</p>
+              <p>The region of the sensor to read out for this capture.<wbr/></p>
             </td>
 
             <td class="entry_units">
               (x,<wbr/>y) of top-left corner,<wbr/> width and height of region
           in pixels; (0,<wbr/>0) is top-left corner of
-          android.<wbr/>sensor.<wbr/>active<wbr/>Array<wbr/>Size
+          android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size
             </td>
 
             <td class="entry_range">
@@ -14486,34 +14522,54 @@ maintain the stream's aspect ratio.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The crop region is applied after the RAW to other color space (e.<wbr/>g.<wbr/> YUV)
-conversion.<wbr/> Since raw streams (e.<wbr/>g.<wbr/> RAW16) don't have the conversion stage,<wbr/>
-it is not croppable.<wbr/> The crop region will be ignored by raw streams.<wbr/></p>
+              <p>The crop region coordinate system is based off
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>,<wbr/> with <code>(0,<wbr/> 0)</code> being the
+top-left corner of the sensor active array.<wbr/></p>
+<p>Output streams use this rectangle to produce their output,<wbr/>
+cropping to a smaller region if necessary to maintain the
+stream's aspect ratio,<wbr/> then scaling the sensor input to
+match the output's configured resolution.<wbr/></p>
+<p>The crop region is applied after the RAW to other color
+space (e.<wbr/>g.<wbr/> YUV) conversion.<wbr/> Since raw streams
+(e.<wbr/>g.<wbr/> RAW16) don't have the conversion stage,<wbr/> they are not
+croppable.<wbr/> The crop region will be ignored by raw streams.<wbr/></p>
 <p>For non-raw streams,<wbr/> any additional per-stream cropping will
 be done to maximize the final pixel area of the stream.<wbr/></p>
 <p>For example,<wbr/> if the crop region is set to a 4:3 aspect
-ratio,<wbr/> then 4:3 streams should use the exact crop
-region.<wbr/> 16:9 streams should further crop vertically
+ratio,<wbr/> then 4:3 streams will use the exact crop
+region.<wbr/> 16:9 streams will further crop vertically
 (letterbox).<wbr/></p>
 <p>Conversely,<wbr/> if the crop region is set to a 16:9,<wbr/> then 4:3
-outputs should crop horizontally (pillarbox),<wbr/> and 16:9
-streams should match exactly.<wbr/> These additional crops must
+outputs will crop horizontally (pillarbox),<wbr/> and 16:9
+streams will match exactly.<wbr/> These additional crops will
 be centered within the crop region.<wbr/></p>
-<p>The output streams must maintain square pixels at all
+<p>The width and height of the crop region cannot
+be set to be smaller than
+<code>floor( activeArraySize.<wbr/>width /<wbr/> <a href="#static_android.scaler.availableMaxDigitalZoom">android.<wbr/>scaler.<wbr/>available<wbr/>Max<wbr/>Digital<wbr/>Zoom</a> )</code> and
+<code>floor( activeArraySize.<wbr/>height /<wbr/> <a href="#static_android.scaler.availableMaxDigitalZoom">android.<wbr/>scaler.<wbr/>available<wbr/>Max<wbr/>Digital<wbr/>Zoom</a> )</code>,<wbr/> respectively.<wbr/></p>
+<p>The camera device may adjust the crop region to account
+for rounding and other hardware requirements; the final
+crop region used will be included in the output capture
+result.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The output streams must maintain square pixels at all
 times,<wbr/> no matter what the relative aspect ratios of the
 crop region and the stream are.<wbr/>  Negative values for
 corner are allowed for raw output if full pixel array is
 larger than active pixel array.<wbr/> Width and height may be
 rounded to nearest larger supportable width,<wbr/> especially
 for raw output,<wbr/> where only a few fixed scales may be
-possible.<wbr/> The width and height of the crop region cannot
-be set to be smaller than floor( activeArraySize.<wbr/>width /<wbr/>
-<a href="#static_android.scaler.availableMaxDigitalZoom">android.<wbr/>scaler.<wbr/>available<wbr/>Max<wbr/>Digital<wbr/>Zoom</a> ) and floor(
-activeArraySize.<wbr/>height /<wbr/>
-<a href="#static_android.scaler.availableMaxDigitalZoom">android.<wbr/>scaler.<wbr/>available<wbr/>Max<wbr/>Digital<wbr/>Zoom</a>),<wbr/> respectively.<wbr/></p>
+possible.<wbr/></p>
+<p>HAL2.<wbr/>x uses only (x,<wbr/> y,<wbr/> width)</p>
             </td>
           </tr>
-
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -14733,7 +14789,7 @@ StreamConfigurationMap#getOutputStallDuration(int,<wbr/>Size).<wbr/></p>
                 
           <tr class="entry" id="controls_android.sensor.sensitivity">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>sensor.<wbr/>sensitivity
             </td>
             <td class="entry_type">
@@ -14748,11 +14804,8 @@ StreamConfigurationMap#getOutputStallDuration(int,<wbr/>Size).<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Gain applied to image data.<wbr/> Must be
-implemented through analog gain only if set to values
-below 'maximum analog sensitivity'.<wbr/></p>
-<p>If the sensor can't apply this exact gain,<wbr/> it should lessen the
-gain to the nearest possible value (rather than gain more).<wbr/></p>
+              <p>The amount of gain applied to sensor data
+before processing.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -14775,10 +14828,26 @@ gain to the nearest possible value (rather than gain more).<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>ISO 12232:2006 REI method</p>
+              <p>The sensitivity is the standard ISO sensitivity value,<wbr/>
+as defined in ISO 12232:2006.<wbr/></p>
+<p>The sensitivity must be within <a href="#static_android.sensor.info.sensitivityRange">android.<wbr/>sensor.<wbr/>info.<wbr/>sensitivity<wbr/>Range</a>,<wbr/> and
+if if it less than <a href="#static_android.sensor.maxAnalogSensitivity">android.<wbr/>sensor.<wbr/>max<wbr/>Analog<wbr/>Sensitivity</a>,<wbr/> the camera device
+is guaranteed to use only analog amplification for applying the gain.<wbr/></p>
+<p>If the camera device cannot apply the exact sensitivity
+requested,<wbr/> it will reduce the gain to the nearest supported
+value.<wbr/> The final sensitivity used will be available in the
+output capture result.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>ISO 12232:2006 REI method is acceptable.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -15091,7 +15160,7 @@ sensor full pixel array,<wbr/> which could include the black calibration pixels.
                 
           <tr class="entry" id="static_android.sensor.info.sensitivityRange">
             <td class="entry_name
-             " rowspan="1">
+             " rowspan="3">
               android.<wbr/>sensor.<wbr/>info.<wbr/>sensitivity<wbr/>Range
             </td>
             <td class="entry_type">
@@ -15111,7 +15180,7 @@ sensor full pixel array,<wbr/> which could include the black calibration pixels.
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Range of valid sensitivities</p>
+              <p>Range of valid sensitivities.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -15128,6 +15197,17 @@ sensor full pixel array,<wbr/> which could include the black calibration pixels.
               </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The minimum and maximum valid values for the
+<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> control.<wbr/></p>
+<p>The values are the standard ISO sensitivity values,<wbr/>
+as defined in ISO 12232:2006.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -15335,7 +15415,7 @@ for details about encoding this scenario.<wbr/></p>
                 
           <tr class="entry" id="static_android.sensor.info.physicalSize">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>sensor.<wbr/>info.<wbr/>physical<wbr/>Size
             </td>
             <td class="entry_type">
@@ -15356,7 +15436,7 @@ for details about encoding this scenario.<wbr/></p>
 
             <td class="entry_description">
               <p>The physical dimensions of the full pixel
-array</p>
+array.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -15378,10 +15458,19 @@ array</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Needed for FOV calculation for old API</p>
+              <p>This is the physical size of the sensor pixel
+array defined by <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Needed for FOV calculation for old API</p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -15431,9 +15520,13 @@ including black calibration pixels.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Maximum output resolution for raw format must
-match this in
-<a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a>.<wbr/></p>
+              <p>The pixel count of the full pixel array,<wbr/>
+which covers <a href="#static_android.sensor.info.physicalSize">android.<wbr/>sensor.<wbr/>info.<wbr/>physical<wbr/>Size</a> area.<wbr/></p>
+<p>If a camera device supports raw sensor formats,<wbr/> either this
+or <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> is the maximum output
+raw size listed in <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a>.<wbr/>
+If a size corresponding to pixelArraySize is listed,<wbr/> the resulting
+raw sensor image will include black pixels.<wbr/></p>
             </td>
           </tr>
 
@@ -16367,7 +16460,7 @@ element.<wbr/></p>
                 
           <tr class="entry" id="static_android.sensor.availableTestPatternModes">
             <td class="entry_name
-             " rowspan="1">
+             " rowspan="3">
               android.<wbr/>sensor.<wbr/>available<wbr/>Test<wbr/>Pattern<wbr/>Modes
             </td>
             <td class="entry_type">
@@ -16387,20 +16480,27 @@ element.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Optional.<wbr/> Defaults to [OFF].<wbr/> Lists the supported test
-pattern modes for <a href="#controls_android.sensor.testPatternMode">android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Mode</a>.<wbr/></p>
+              <p>Lists the supported sensor test pattern modes for <a href="#controls_android.sensor.testPatternMode">android.<wbr/>sensor.<wbr/>test<wbr/>Pattern<wbr/>Mode</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>Must include OFF.<wbr/> All custom modes must be &gt;= CUSTOM1</p>
+              <p>Always includes OFF if defined.<wbr/> All custom modes must be &gt;= CUSTOM1</p>
             </td>
 
             <td class="entry_tags">
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Optional.<wbr/> Defaults to [OFF].<wbr/></p>
+            </td>
           </tr>
 
 
@@ -16617,7 +16717,7 @@ StreamConfigurationMap#getOutputStallDuration(int,<wbr/>Size).<wbr/></p>
                 
           <tr class="entry" id="dynamic_android.sensor.sensitivity">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>sensor.<wbr/>sensitivity
             </td>
             <td class="entry_type">
@@ -16632,11 +16732,8 @@ StreamConfigurationMap#getOutputStallDuration(int,<wbr/>Size).<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Gain applied to image data.<wbr/> Must be
-implemented through analog gain only if set to values
-below 'maximum analog sensitivity'.<wbr/></p>
-<p>If the sensor can't apply this exact gain,<wbr/> it should lessen the
-gain to the nearest possible value (rather than gain more).<wbr/></p>
+              <p>The amount of gain applied to sensor data
+before processing.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -16659,10 +16756,26 @@ gain to the nearest possible value (rather than gain more).<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>ISO 12232:2006 REI method</p>
+              <p>The sensitivity is the standard ISO sensitivity value,<wbr/>
+as defined in ISO 12232:2006.<wbr/></p>
+<p>The sensitivity must be within <a href="#static_android.sensor.info.sensitivityRange">android.<wbr/>sensor.<wbr/>info.<wbr/>sensitivity<wbr/>Range</a>,<wbr/> and
+if if it less than <a href="#static_android.sensor.maxAnalogSensitivity">android.<wbr/>sensor.<wbr/>max<wbr/>Analog<wbr/>Sensitivity</a>,<wbr/> the camera device
+is guaranteed to use only analog amplification for applying the gain.<wbr/></p>
+<p>If the camera device cannot apply the exact sensitivity
+requested,<wbr/> it will reduce the gain to the nearest supported
+value.<wbr/> The final sensitivity used will be available in the
+output capture result.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>ISO 12232:2006 REI method is acceptable.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -16670,7 +16783,7 @@ gain to the nearest possible value (rather than gain more).<wbr/></p>
                 
           <tr class="entry" id="dynamic_android.sensor.timestamp">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>sensor.<wbr/>timestamp
             </td>
             <td class="entry_type">
@@ -16686,7 +16799,7 @@ gain to the nearest possible value (rather than gain more).<wbr/></p>
 
             <td class="entry_description">
               <p>Time at start of exposure of first
-row</p>
+row of the image sensor,<wbr/> in nanoseconds.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -16709,11 +16822,31 @@ row</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Monotonic,<wbr/> should be synced to other timestamps in
-system</p>
+              <p>The timestamps are also included in all image
+buffers produced for the same capture,<wbr/> and will be identical
+on all the outputs.<wbr/> The timestamps measure time since an
+unspecified starting point,<wbr/> and are monotonically
+increasing.<wbr/></p>
+<p>They can be compared with the timestamps for other captures
+from the same camera device,<wbr/> but are not guaranteed to be
+comparable to any other time source.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>All timestamps should be in reference to the kernel's
+CLOCK_<wbr/>BOOTTIME monotonic clock,<wbr/> which properly accounts for
+time spent asleep.<wbr/> This allows for synchronization with
+sensors that continue to operate while the system is
+otherwise asleep.<wbr/></p>
+<p>If not CLOCK_<wbr/>BOOTTIME,<wbr/> timestamps must be in reference to
+CLOCK_<wbr/>MONOTONIC.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -17352,7 +17485,7 @@ camera device.<wbr/> Applications can request lens shading map data by setting
 lens shading map data in <a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a>,<wbr/> with size specified
 by <a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a>; the returned shading map data will be the one
 applied by the camera device for this capture request.<wbr/></p>
-<p>The shading map data may depend on the AE and AWB statistics,<wbr/> therefore the reliability
+<p>The shading map data may depend on the auto-exposure (AE) and AWB statistics,<wbr/> therefore the reliability
 of the map data may be affected by the AE and AWB algorithms.<wbr/> When AE and AWB are in
 AUTO modes(<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>!=</code> OFF and <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> <code>!=</code> OFF),<wbr/>
 to get best results,<wbr/> it is recommended that the applications wait for the AE and AWB to
@@ -17503,7 +17636,7 @@ camera device.<wbr/> Applications can request lens shading map data by setting
 lens shading map data in <a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a>,<wbr/> with size specified
 by <a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a>; the returned shading map data will be the one
 applied by the camera device for this capture request.<wbr/></p>
-<p>The shading map data may depend on the AE and AWB statistics,<wbr/> therefore the reliability
+<p>The shading map data may depend on the auto-exposure (AE) and AWB statistics,<wbr/> therefore the reliability
 of the map data may be affected by the AE and AWB algorithms.<wbr/> When AE and AWB are in
 AUTO modes(<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>!=</code> OFF and <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> <code>!=</code> OFF),<wbr/>
 to get best results,<wbr/> it is recommended that the applications wait for the AE and AWB to
@@ -17581,7 +17714,7 @@ metadata</p></span>
 
             <td class="entry_description">
               <p>State of the face detector
-unit</p>
+unit.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -17876,7 +18009,7 @@ the output result metadata.<wbr/></p>
 
             <td class="entry_description">
               <p>Which face detection modes are available,<wbr/>
-if any</p>
+if any.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -18242,7 +18375,7 @@ metadata</p></span>
 
             <td class="entry_description">
               <p>State of the face detector
-unit</p>
+unit.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -18980,7 +19113,7 @@ typically completes after the transform has already been
 applied to that frame.<wbr/></p>
 <p>The 4 channel gains are defined in Bayer domain,<wbr/>
 see <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> for details.<wbr/></p>
-<p>This value should always be calculated by the AWB block,<wbr/>
+<p>This value should always be calculated by the auto-white balance (AWB) block,<wbr/>
 regardless of the android.<wbr/>control.<wbr/>* current values.<wbr/></p>
             </td>
           </tr>
@@ -19045,7 +19178,7 @@ completes after the transform has already been applied to
 that frame.<wbr/></p>
 <p>These estimates must be provided for all frames,<wbr/> even if
 capture settings and color transforms are set by the application.<wbr/></p>
-<p>This value should always be calculated by the AWB block,<wbr/>
+<p>This value should always be calculated by the auto-white balance (AWB) block,<wbr/>
 regardless of the android.<wbr/>control.<wbr/>* current values.<wbr/></p>
             </td>
           </tr>
