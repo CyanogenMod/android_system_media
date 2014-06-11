@@ -787,6 +787,8 @@
             ><a href="#dynamic_android.sensor.testPatternData">android.sensor.testPatternData</a></li>
             <li
             ><a href="#dynamic_android.sensor.testPatternMode">android.sensor.testPatternMode</a></li>
+            <li
+            ><a href="#dynamic_android.sensor.rollingShutterSkew">android.sensor.rollingShutterSkew</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -17014,7 +17016,7 @@ output capture result.<wbr/></p>
 
             <td class="entry_description">
               <p>Time at start of exposure of first
-row of the image sensor,<wbr/> in nanoseconds.<wbr/></p>
+row of the image sensor active array,<wbr/> in nanoseconds.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -17593,6 +17595,70 @@ would not actually affect it).<wbr/></p>
 with test patterns from on-device memory.<wbr/> In that case,<wbr/> it should be
 indistinguishable to the ISP whether the data came from the
 sensor interconnect bus (such as CSI2) or memory.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.sensor.rollingShutterSkew">
+            <td class="entry_name
+             " rowspan="5">
+              android.<wbr/>sensor.<wbr/>rolling<wbr/>Shutter<wbr/>Skew
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int64</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Duration between the start of first row exposure
+and the start of last row exposure.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              nanoseconds
+            </td>
+
+            <td class="entry_range">
+              <p>&gt;= 0 and &lt;
+StreamConfigurationMap#getOutputMinFrameDuration(int,<wbr/> Size).<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_V1">V1</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This is the exposure time skew (in the unit of nanosecond) between the first and
+last row exposure start times.<wbr/> The first row and the last row are the first
+and last rows inside of the <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></p>
+<p>For typical camera sensors that use rolling shutters,<wbr/> this is also equivalent
+to the frame readout time.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL must report <code>0</code> if the sensor is using global shutter,<wbr/> where all pixels begin
+exposure at the same time.<wbr/></p>
             </td>
           </tr>
 
@@ -21700,6 +21766,7 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.sensor.info.maxFrameDuration">android.sensor.info.maxFrameDuration</a> (static)</li>
           <li><a href="#static_android.sensor.info.physicalSize">android.sensor.info.physicalSize</a> (static)</li>
           <li><a href="#static_android.sensor.maxAnalogSensitivity">android.sensor.maxAnalogSensitivity</a> (static)</li>
+          <li><a href="#dynamic_android.sensor.rollingShutterSkew">android.sensor.rollingShutterSkew</a> (dynamic)</li>
           <li><a href="#controls_android.statistics.hotPixelMapMode">android.statistics.hotPixelMapMode</a> (controls)</li>
           <li><a href="#static_android.statistics.info.availableHotPixelMapModes">android.statistics.info.availableHotPixelMapModes</a> (static)</li>
           <li><a href="#dynamic_android.statistics.hotPixelMap">android.statistics.hotPixelMap</a> (dynamic)</li>

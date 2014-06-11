@@ -4961,7 +4961,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
         <entry name="timestamp" type="int64" visibility="public">
           <description>Time at start of exposure of first
-          row of the image sensor, in nanoseconds.</description>
+          row of the image sensor active array, in nanoseconds.</description>
           <units>nanoseconds</units>
           <range>&amp;gt; 0</range>
           <details>The timestamps are also included in all image
@@ -5301,6 +5301,28 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
         </entry>
       </static>
+      <dynamic>
+        <entry name="rollingShutterSkew" type="int64" visibility="public">
+          <description>Duration between the start of first row exposure
+          and the start of last row exposure.</description>
+          <units>nanoseconds</units>
+          <range> &amp;gt;= 0 and &amp;lt;
+          StreamConfigurationMap#getOutputMinFrameDuration(int, Size).</range>
+          <details>
+          This is the exposure time skew (in the unit of nanosecond) between the first and
+          last row exposure start times. The first row and the last row are the first
+          and last rows inside of the android.sensor.info.activeArraySize.
+
+          For typical camera sensors that use rolling shutters, this is also equivalent
+          to the frame readout time.
+          </details>
+          <hal_details>
+          The HAL must report `0` if the sensor is using global shutter, where all pixels begin
+          exposure at the same time.
+          </hal_details>
+          <tag id="V1" />
+        </entry>
+      </dynamic>
     </section>
     <section name="shading">
       <controls>

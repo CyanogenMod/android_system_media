@@ -291,6 +291,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_TEST_PATTERN_DATA,                 // int32[]      | public
     ANDROID_SENSOR_TEST_PATTERN_MODE,                 // enum         | public
     ANDROID_SENSOR_AVAILABLE_TEST_PATTERN_MODES,      // int32[]      | public
+    ANDROID_SENSOR_ROLLING_SHUTTER_SKEW,              // int64        | public
     ANDROID_SENSOR_END,
 
     ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE =           // int32[]      | public

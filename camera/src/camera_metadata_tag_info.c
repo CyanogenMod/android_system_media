@@ -465,6 +465,8 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     { "testPatternMode",               TYPE_INT32  },
     [ ANDROID_SENSOR_AVAILABLE_TEST_PATTERN_MODES - ANDROID_SENSOR_START ] =
     { "availableTestPatternModes",     TYPE_INT32  },
+    [ ANDROID_SENSOR_ROLLING_SHUTTER_SKEW - ANDROID_SENSOR_START ] =
+    { "rollingShutterSkew",            TYPE_INT64  },
 };
 
 static tag_info_t android_sensor_info[ANDROID_SENSOR_INFO_END -
@@ -1901,6 +1903,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SENSOR_AVAILABLE_TEST_PATTERN_MODES: {
+            break;
+        }
+        case ANDROID_SENSOR_ROLLING_SHUTTER_SKEW: {
             break;
         }
 
