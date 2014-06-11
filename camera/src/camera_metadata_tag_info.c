@@ -193,6 +193,9 @@ static tag_info_t android_control[ANDROID_CONTROL_END -
     { "afTriggerId",                   TYPE_INT32  },
     [ ANDROID_CONTROL_AWB_STATE - ANDROID_CONTROL_START ] =
     { "awbState",                      TYPE_BYTE   },
+    [ ANDROID_CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS - ANDROID_CONTROL_START ] =
+    { "availableHighSpeedVideoConfigurations",
+                                        TYPE_INT32  },
 };
 
 static tag_info_t android_demosaic[ANDROID_DEMOSAIC_END -
@@ -1036,6 +1039,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "BARCODE";
                     ret = 0;
                     break;
+                case ANDROID_CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO:
+                    msg = "HIGH_SPEED_VIDEO";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
@@ -1185,6 +1192,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
                 default:
                     msg = "error: enum value out of range";
             }
+            break;
+        }
+        case ANDROID_CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS: {
             break;
         }
 

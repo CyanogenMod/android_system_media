@@ -1309,6 +1309,71 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               barcode value.
               </notes>
             </value>
+            <value optional="true">HIGH_SPEED_VIDEO
+              <notes>
+              Optimized for high speed video recording (frame rate >=60fps) use case.
+
+              The supported high speed video sizes and fps ranges are specified in
+              android.control.availableHighSpeedVideoConfigurations. To get desired
+              output frame rates, the application is only allowed to select video size
+              and fps range combinations listed in this static metadata. The fps range
+              can be control via android.control.aeTargetFpsRange.
+
+              In this mode, the camera device will override aeMode, awbMode, and afMode to
+              ON, ON, and CONTINUOUS_VIDEO, respectively. All post-processing block mode
+              controls will be overridden to be FAST. Therefore, no manual control of capture
+              and post-processing parameters is possible. All other controls operate the
+              same as when android.control.mode == AUTO. This means that all other
+              android.control.* fields continue to work, such as
+
+              * android.control.aeTargetFpsRange
+              * android.control.aeExposureCompensation
+              * android.control.aeLock
+              * android.control.awbLock
+              * android.control.effectMode
+              * android.control.aeRegions
+              * android.control.afRegions
+              * android.control.awbRegions
+              * android.control.afTrigger
+              * android.control.aePrecaptureTrigger
+
+              Outside of android.control.*, the following controls will work:
+
+              * android.flash.mode (automatic flash for still capture will not work since aeMode is ON)
+              * android.lens.opticalStabilizationMode (if it is supported)
+              * android.scaler.cropRegion
+              * android.statistics.faceDetectMode
+
+              For high speed recording use case, the actual maximum supported frame rate may
+              be lower than what camera can output, depending on the destination Surfaces for
+              the image data. For example, if the destination surface is from video encoder,
+              the application need check if the video encoder is capable of supporting the
+              high frame rate for a given video size, or it will end up with lower recording
+              frame rate. If the destination surface is from preview window, the preview frame
+              rate will be bounded by the screen refresh rate.
+
+              The camera device will only support up to 2 output high speed streams
+              (processed non-stalling format defined in android.request.maxNumOutputStreams)
+              in this mode. This control will be effective only if all of below conditions are true:
+
+              * The application created no more than maxNumHighSpeedStreams processed non-stalling
+              format output streams, where maxNumHighSpeedStreams is calculated as
+              min(2, android.request.maxNumOutputStreams[Processed (but not-stalling)]).
+              * The stream sizes are selected from the sizes reported by
+              android.control.availableHighSpeedVideoConfigurations.
+              * No processed non-stalling or raw streams are configured.
+
+              When above conditions are NOT satistied, the controls of this mode and
+              android.control.aeTargetFpsRange will be ignored by the camera device,
+              the camera device will fall back to android.control.mode `==` AUTO,
+              and the returned capture result metadata will give the fps range choosen
+              by the camera device.
+
+              Switching into or out of this mode may trigger some camera ISP/sensor
+              reconfigurations, which may introduce extra latency. It is recommended that
+              the application avoids unnecessary scene mode switch as much as possible.
+              </notes>
+            </value>
           </enum>
           <description>
           A camera mode optimized for conditions typical in a particular
@@ -1333,6 +1398,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           the per-scene settings to use for android.control.aeMode,
           android.control.awbMode, and android.control.afMode in
           android.control.sceneModeOverrides.
+
+          For HIGH_SPEED_VIDEO mode, if it is included in android.control.availableSceneModes,
+          the HAL must list supported video size and fps range in
+          android.control.availableHighSpeedVideoConfigurations. For a given size, e.g.
+          1280x720, if the HAL has two different sensor configurations for normal streaming
+          mode and high speed streaming, when this scene mode is set/reset in a sequence of capture
+          requests, the HAL may have to switch between different sensor modes.
           </hal_details>
           <tag id="BC" />
         </entry>
@@ -2034,6 +2106,53 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <clone entry="android.control.videoStabilizationMode" kind="controls">
         </clone>
       </dynamic>
+      <static>
+        <entry name="availableHighSpeedVideoConfigurations" type="int32" visibility="hidden"
+               container="array">
+          <array>
+            <size>4</size>
+            <size>n</size>
+          </array>
+          <description>
+          List of available high speed video size and fps range configurations
+          supported by the camera device, in the format of (width, height, fps_min, fps_max).
+          </description>
+          <range>
+          For each configuration, the fps_max &amp;gt;= 60fps.
+          </range>
+          <details>
+          When HIGH_SPEED_VIDEO is supported in android.control.availableSceneModes,
+          this metadata will list the supported high speed video size and fps range
+          configurations. All the sizes listed in this configuration will be a subset
+          of the sizes reported by StreamConfigurationMap#getOutputSizes for processed
+          non-stalling formats.
+
+          For the high speed video use case, where the application will set
+          android.control.sceneMode to HIGH_SPEED_VIDEO in capture requests, the application must
+          select the video size and fps range from this metadata to configure the recording and
+          preview streams and setup the recording requests. For example, if the application intends
+          to do high speed recording, it can select the maximum size reported by this metadata to
+          configure output streams. Once the size is selected, application can filter this metadata
+          by selected size and get the supported fps ranges, and use these fps ranges to setup the
+          recording requests.
+
+          For normal video recording use case, where some application will NOT set
+          android.control.sceneMode to HIGH_SPEED_VIDEO in capture requests, the fps ranges
+          reported in this metadata must not be used to setup capture requests, or it will cause
+          request error.
+          </details>
+          <hal_details>
+          All the sizes listed in this configuration will be a subset of the sizes reported by
+          android.scaler.availableStreamConfigurations for processed non-stalling output formats.
+
+          Since the HIGH_SPEED_VIDEO mode may be turned on for preview view only case, the preview
+          fps is bounded by device refresh rate (e.g. 60fps). For a given resolution, it is
+          recommended that this list includes some fps ranges (e.g. [30, 60]) that is suitable
+          for preview only streaming case.
+          </hal_details>
+          <tag id="V1" />
+        </entry>
+      </static>
     </section>
     <section name="demosaic">
       <controls>

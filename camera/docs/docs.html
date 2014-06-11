@@ -211,6 +211,8 @@
             ><a href="#static_android.control.maxRegionsAf">android.control.maxRegionsAf</a></li>
             <li
             ><a href="#static_android.control.sceneModeOverrides">android.control.sceneModeOverrides</a></li>
+            <li
+            ><a href="#static_android.control.availableHighSpeedVideoConfigurations">android.control.availableHighSpeedVideoConfigurations</a></li>
           </ul>
         </li>
         <li>
@@ -3261,6 +3263,67 @@ is a flame.<wbr/></p></span>
 for use by camera applications that wish to read the
 barcode value.<wbr/></p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">HIGH_SPEED_VIDEO</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for high speed video recording (frame rate &gt;=60fps) use case.<wbr/></p>
+<p>The supported high speed video sizes and fps ranges are specified in
+<a href="#static_android.control.availableHighSpeedVideoConfigurations">android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations</a>.<wbr/> To get desired
+output frame rates,<wbr/> the application is only allowed to select video size
+and fps range combinations listed in this static metadata.<wbr/> The fps range
+can be control via <a href="#controls_android.control.aeTargetFpsRange">android.<wbr/>control.<wbr/>ae<wbr/>Target<wbr/>Fps<wbr/>Range</a>.<wbr/></p>
+<p>In this mode,<wbr/> the camera device will override aeMode,<wbr/> awbMode,<wbr/> and afMode to
+ON,<wbr/> ON,<wbr/> and CONTINUOUS_<wbr/>VIDEO,<wbr/> respectively.<wbr/> All post-processing block mode
+controls will be overridden to be FAST.<wbr/> Therefore,<wbr/> no manual control of capture
+and post-processing parameters is possible.<wbr/> All other controls operate the
+same as when <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == AUTO.<wbr/> This means that all other
+android.<wbr/>control.<wbr/>* fields continue to work,<wbr/> such as</p>
+<ul>
+<li><a href="#controls_android.control.aeTargetFpsRange">android.<wbr/>control.<wbr/>ae<wbr/>Target<wbr/>Fps<wbr/>Range</a></li>
+<li><a href="#controls_android.control.aeExposureCompensation">android.<wbr/>control.<wbr/>ae<wbr/>Exposure<wbr/>Compensation</a></li>
+<li><a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a></li>
+<li><a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a></li>
+<li><a href="#controls_android.control.effectMode">android.<wbr/>control.<wbr/>effect<wbr/>Mode</a></li>
+<li><a href="#controls_android.control.aeRegions">android.<wbr/>control.<wbr/>ae<wbr/>Regions</a></li>
+<li><a href="#controls_android.control.afRegions">android.<wbr/>control.<wbr/>af<wbr/>Regions</a></li>
+<li><a href="#controls_android.control.awbRegions">android.<wbr/>control.<wbr/>awb<wbr/>Regions</a></li>
+<li><a href="#controls_android.control.afTrigger">android.<wbr/>control.<wbr/>af<wbr/>Trigger</a></li>
+<li><a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a></li>
+</ul>
+<p>Outside of android.<wbr/>control.<wbr/>*,<wbr/> the following controls will work:</p>
+<ul>
+<li><a href="#controls_android.flash.mode">android.<wbr/>flash.<wbr/>mode</a> (automatic flash for still capture will not work since aeMode is ON)</li>
+<li><a href="#controls_android.lens.opticalStabilizationMode">android.<wbr/>lens.<wbr/>optical<wbr/>Stabilization<wbr/>Mode</a> (if it is supported)</li>
+<li><a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a></li>
+<li><a href="#controls_android.statistics.faceDetectMode">android.<wbr/>statistics.<wbr/>face<wbr/>Detect<wbr/>Mode</a></li>
+</ul>
+<p>For high speed recording use case,<wbr/> the actual maximum supported frame rate may
+be lower than what camera can output,<wbr/> depending on the destination Surfaces for
+the image data.<wbr/> For example,<wbr/> if the destination surface is from video encoder,<wbr/>
+the application need check if the video encoder is capable of supporting the
+high frame rate for a given video size,<wbr/> or it will end up with lower recording
+frame rate.<wbr/> If the destination surface is from preview window,<wbr/> the preview frame
+rate will be bounded by the screen refresh rate.<wbr/></p>
+<p>The camera device will only support up to 2 output high speed streams
+(processed non-stalling format defined in <a href="#static_android.request.maxNumOutputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Output<wbr/>Streams</a>)
+in this mode.<wbr/> This control will be effective only if all of below conditions are true:</p>
+<ul>
+<li>The application created no more than maxNumHighSpeedStreams processed non-stalling
+format output streams,<wbr/> where maxNumHighSpeedStreams is calculated as
+min(2,<wbr/> <a href="#static_android.request.maxNumOutputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Output<wbr/>Streams</a>[Processed (but not-stalling)]).<wbr/></li>
+<li>The stream sizes are selected from the sizes reported by
+<a href="#static_android.control.availableHighSpeedVideoConfigurations">android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations</a>.<wbr/></li>
+<li>No processed non-stalling or raw streams are configured.<wbr/></li>
+</ul>
+<p>When above conditions are NOT satistied,<wbr/> the controls of this mode and
+<a href="#controls_android.control.aeTargetFpsRange">android.<wbr/>control.<wbr/>ae<wbr/>Target<wbr/>Fps<wbr/>Range</a> will be ignored by the camera device,<wbr/>
+the camera device will fall back to <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> <code>==</code> AUTO,<wbr/>
+and the returned capture result metadata will give the fps range choosen
+by the camera device.<wbr/></p>
+<p>Switching into or out of this mode may trigger some camera ISP/<wbr/>sensor
+reconfigurations,<wbr/> which may introduce extra latency.<wbr/> It is recommended that
+the application avoids unnecessary scene mode switch as much as possible.<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -3311,6 +3374,12 @@ a subset of these modes.<wbr/></p>
 the per-scene settings to use for <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
 <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> in
 <a href="#static_android.control.sceneModeOverrides">android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides</a>.<wbr/></p>
+<p>For HIGH_<wbr/>SPEED_<wbr/>VIDEO mode,<wbr/> if it is included in <a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a>,<wbr/>
+the HAL must list supported video size and fps range in
+<a href="#static_android.control.availableHighSpeedVideoConfigurations">android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations</a>.<wbr/> For a given size,<wbr/> e.<wbr/>g.<wbr/>
+1280x720,<wbr/> if the HAL has two different sensor configurations for normal streaming
+mode and high speed streaming,<wbr/> when this scene mode is set/<wbr/>reset in a sequence of capture
+requests,<wbr/> the HAL may have to switch between different sensor modes.<wbr/></p>
             </td>
           </tr>
 
@@ -4232,6 +4301,88 @@ in the static metadata of the camera service.<wbr/>  The camera service will
 use these values to set <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
 <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> when using a scene
 mode other than FACE_<wbr/>PRIORITY.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.control.availableHighSpeedVideoConfigurations">
+            <td class="entry_name
+             " rowspan="5">
+              android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4 x n
+                </span>
+              <span class="entry_type_visibility"> [hidden]</span>
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>List of available high speed video size and fps range configurations
+supported by the camera device,<wbr/> in the format of (width,<wbr/> height,<wbr/> fps_<wbr/>min,<wbr/> fps_<wbr/>max).<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>For each configuration,<wbr/> the fps_<wbr/>max &gt;= 60fps.<wbr/></p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_V1">V1</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>When HIGH_<wbr/>SPEED_<wbr/>VIDEO is supported in <a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a>,<wbr/>
+this metadata will list the supported high speed video size and fps range
+configurations.<wbr/> All the sizes listed in this configuration will be a subset
+of the sizes reported by StreamConfigurationMap#getOutputSizes for processed
+non-stalling formats.<wbr/></p>
+<p>For the high speed video use case,<wbr/> where the application will set
+<a href="#controls_android.control.sceneMode">android.<wbr/>control.<wbr/>scene<wbr/>Mode</a> to HIGH_<wbr/>SPEED_<wbr/>VIDEO in capture requests,<wbr/> the application must
+select the video size and fps range from this metadata to configure the recording and
+preview streams and setup the recording requests.<wbr/> For example,<wbr/> if the application intends
+to do high speed recording,<wbr/> it can select the maximum size reported by this metadata to
+configure output streams.<wbr/> Once the size is selected,<wbr/> application can filter this metadata
+by selected size and get the supported fps ranges,<wbr/> and use these fps ranges to setup the
+recording requests.<wbr/></p>
+<p>For normal video recording use case,<wbr/> where some application will NOT set
+<a href="#controls_android.control.sceneMode">android.<wbr/>control.<wbr/>scene<wbr/>Mode</a> to HIGH_<wbr/>SPEED_<wbr/>VIDEO in capture requests,<wbr/> the fps ranges
+reported in this metadata must not be used to setup capture requests,<wbr/> or it will cause
+request error.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>All the sizes listed in this configuration will be a subset of the sizes reported by
+<a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a> for processed non-stalling output formats.<wbr/></p>
+<p>Since the HIGH_<wbr/>SPEED_<wbr/>VIDEO mode may be turned on for preview view only case,<wbr/> the preview
+fps is bounded by device refresh rate (e.<wbr/>g.<wbr/> 60fps).<wbr/> For a given resolution,<wbr/> it is
+recommended that this list includes some fps ranges (e.<wbr/>g.<wbr/> [30,<wbr/> 60]) that is suitable
+for preview only streaming case.<wbr/></p>
             </td>
           </tr>
 
@@ -6950,6 +7101,67 @@ is a flame.<wbr/></p></span>
 for use by camera applications that wish to read the
 barcode value.<wbr/></p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">HIGH_SPEED_VIDEO</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>Optimized for high speed video recording (frame rate &gt;=60fps) use case.<wbr/></p>
+<p>The supported high speed video sizes and fps ranges are specified in
+<a href="#static_android.control.availableHighSpeedVideoConfigurations">android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations</a>.<wbr/> To get desired
+output frame rates,<wbr/> the application is only allowed to select video size
+and fps range combinations listed in this static metadata.<wbr/> The fps range
+can be control via <a href="#controls_android.control.aeTargetFpsRange">android.<wbr/>control.<wbr/>ae<wbr/>Target<wbr/>Fps<wbr/>Range</a>.<wbr/></p>
+<p>In this mode,<wbr/> the camera device will override aeMode,<wbr/> awbMode,<wbr/> and afMode to
+ON,<wbr/> ON,<wbr/> and CONTINUOUS_<wbr/>VIDEO,<wbr/> respectively.<wbr/> All post-processing block mode
+controls will be overridden to be FAST.<wbr/> Therefore,<wbr/> no manual control of capture
+and post-processing parameters is possible.<wbr/> All other controls operate the
+same as when <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == AUTO.<wbr/> This means that all other
+android.<wbr/>control.<wbr/>* fields continue to work,<wbr/> such as</p>
+<ul>
+<li><a href="#controls_android.control.aeTargetFpsRange">android.<wbr/>control.<wbr/>ae<wbr/>Target<wbr/>Fps<wbr/>Range</a></li>
+<li><a href="#controls_android.control.aeExposureCompensation">android.<wbr/>control.<wbr/>ae<wbr/>Exposure<wbr/>Compensation</a></li>
+<li><a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a></li>
+<li><a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a></li>
+<li><a href="#controls_android.control.effectMode">android.<wbr/>control.<wbr/>effect<wbr/>Mode</a></li>
+<li><a href="#controls_android.control.aeRegions">android.<wbr/>control.<wbr/>ae<wbr/>Regions</a></li>
+<li><a href="#controls_android.control.afRegions">android.<wbr/>control.<wbr/>af<wbr/>Regions</a></li>
+<li><a href="#controls_android.control.awbRegions">android.<wbr/>control.<wbr/>awb<wbr/>Regions</a></li>
+<li><a href="#controls_android.control.afTrigger">android.<wbr/>control.<wbr/>af<wbr/>Trigger</a></li>
+<li><a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a></li>
+</ul>
+<p>Outside of android.<wbr/>control.<wbr/>*,<wbr/> the following controls will work:</p>
+<ul>
+<li><a href="#controls_android.flash.mode">android.<wbr/>flash.<wbr/>mode</a> (automatic flash for still capture will not work since aeMode is ON)</li>
+<li><a href="#controls_android.lens.opticalStabilizationMode">android.<wbr/>lens.<wbr/>optical<wbr/>Stabilization<wbr/>Mode</a> (if it is supported)</li>
+<li><a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a></li>
+<li><a href="#controls_android.statistics.faceDetectMode">android.<wbr/>statistics.<wbr/>face<wbr/>Detect<wbr/>Mode</a></li>
+</ul>
+<p>For high speed recording use case,<wbr/> the actual maximum supported frame rate may
+be lower than what camera can output,<wbr/> depending on the destination Surfaces for
+the image data.<wbr/> For example,<wbr/> if the destination surface is from video encoder,<wbr/>
+the application need check if the video encoder is capable of supporting the
+high frame rate for a given video size,<wbr/> or it will end up with lower recording
+frame rate.<wbr/> If the destination surface is from preview window,<wbr/> the preview frame
+rate will be bounded by the screen refresh rate.<wbr/></p>
+<p>The camera device will only support up to 2 output high speed streams
+(processed non-stalling format defined in <a href="#static_android.request.maxNumOutputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Output<wbr/>Streams</a>)
+in this mode.<wbr/> This control will be effective only if all of below conditions are true:</p>
+<ul>
+<li>The application created no more than maxNumHighSpeedStreams processed non-stalling
+format output streams,<wbr/> where maxNumHighSpeedStreams is calculated as
+min(2,<wbr/> <a href="#static_android.request.maxNumOutputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Output<wbr/>Streams</a>[Processed (but not-stalling)]).<wbr/></li>
+<li>The stream sizes are selected from the sizes reported by
+<a href="#static_android.control.availableHighSpeedVideoConfigurations">android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations</a>.<wbr/></li>
+<li>No processed non-stalling or raw streams are configured.<wbr/></li>
+</ul>
+<p>When above conditions are NOT satistied,<wbr/> the controls of this mode and
+<a href="#controls_android.control.aeTargetFpsRange">android.<wbr/>control.<wbr/>ae<wbr/>Target<wbr/>Fps<wbr/>Range</a> will be ignored by the camera device,<wbr/>
+the camera device will fall back to <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> <code>==</code> AUTO,<wbr/>
+and the returned capture result metadata will give the fps range choosen
+by the camera device.<wbr/></p>
+<p>Switching into or out of this mode may trigger some camera ISP/<wbr/>sensor
+reconfigurations,<wbr/> which may introduce extra latency.<wbr/> It is recommended that
+the application avoids unnecessary scene mode switch as much as possible.<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -7000,6 +7212,12 @@ a subset of these modes.<wbr/></p>
 the per-scene settings to use for <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
 <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> in
 <a href="#static_android.control.sceneModeOverrides">android.<wbr/>control.<wbr/>scene<wbr/>Mode<wbr/>Overrides</a>.<wbr/></p>
+<p>For HIGH_<wbr/>SPEED_<wbr/>VIDEO mode,<wbr/> if it is included in <a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a>,<wbr/>
+the HAL must list supported video size and fps range in
+<a href="#static_android.control.availableHighSpeedVideoConfigurations">android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations</a>.<wbr/> For a given size,<wbr/> e.<wbr/>g.<wbr/>
+1280x720,<wbr/> if the HAL has two different sensor configurations for normal streaming
+mode and high speed streaming,<wbr/> when this scene mode is set/<wbr/>reset in a sequence of capture
+requests,<wbr/> the HAL may have to switch between different sensor modes.<wbr/></p>
             </td>
           </tr>
 
@@ -21872,6 +22090,7 @@ to know when sensor settings have been applied.<wbr/></p>
         New features for first camera 2 release (API1)
     
         <ul class="tags_entries">
+          <li><a href="#static_android.control.availableHighSpeedVideoConfigurations">android.control.availableHighSpeedVideoConfigurations</a> (static)</li>
           <li><a href="#controls_android.edge.mode">android.edge.mode</a> (controls)</li>
           <li><a href="#static_android.edge.availableEdgeModes">android.edge.availableEdgeModes</a> (static)</li>
           <li><a href="#controls_android.hotPixel.mode">android.hotPixel.mode</a> (controls)</li>

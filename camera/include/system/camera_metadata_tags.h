@@ -146,6 +146,8 @@ typedef enum camera_metadata_tag {
     ANDROID_CONTROL_AF_STATE,                         // enum         | public
     ANDROID_CONTROL_AF_TRIGGER_ID,                    // int32        | system
     ANDROID_CONTROL_AWB_STATE,                        // enum         | public
+    ANDROID_CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS,
+                                                      // int32[]      | hidden
     ANDROID_CONTROL_END,
 
     ANDROID_DEMOSAIC_MODE =                           // enum         | system
@@ -500,6 +502,7 @@ typedef enum camera_metadata_enum_android_control_scene_mode {
     ANDROID_CONTROL_SCENE_MODE_PARTY,
     ANDROID_CONTROL_SCENE_MODE_CANDLELIGHT,
     ANDROID_CONTROL_SCENE_MODE_BARCODE,
+    ANDROID_CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO,
 } camera_metadata_enum_android_control_scene_mode_t;
 
 // ANDROID_CONTROL_VIDEO_STABILIZATION_MODE
