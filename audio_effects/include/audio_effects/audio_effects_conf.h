@@ -33,6 +33,8 @@
 #define UUID_TAG "uuid"
 
 #define PREPROCESSING_TAG "pre_processing"
+#define OUTPUT_SESSION_PROCESSING_TAG "output_session_processing"
+
 #define PARAM_TAG "param"
 #define VALUE_TAG "value"
 #define INT_TAG "int"
@@ -50,5 +52,17 @@
 #define VOICE_REC_SRC_TAG "voice_recognition"       // AUDIO_SOURCE_VOICE_RECOGNITION
 #define VOICE_COMM_SRC_TAG "voice_communication"    // AUDIO_SOURCE_VOICE_COMMUNICATION
 
+// audio_stream_type_t
+#define AUDIO_STREAM_DEFAULT_TAG "default"
+#define AUDIO_STREAM_VOICE_CALL_TAG "voice_call"
+#define AUDIO_STREAM_SYSTEM_TAG "system"
+#define AUDIO_STREAM_RING_TAG "ring"
+#define AUDIO_STREAM_MUSIC_TAG "music"
+#define AUDIO_STREAM_ALARM_TAG "alarm"
+#define AUDIO_STREAM_NOTIFICATION_TAG "notification"
+#define AUDIO_STREAM_BLUETOOTH_SCO_TAG "bluetooth_sco"
+#define AUDIO_STREAM_ENFORCED_AUDIBLE_TAG "enforced_audible"
+#define AUDIO_STREAM_DTMF_TAG "dtmf"
+#define AUDIO_STREAM_TTS_TAG "tts"
 
 #endif  // ANDROID_AUDIO_EFFECTS_CONF_H
