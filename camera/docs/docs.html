@@ -731,6 +731,8 @@
             ><a href="#static_android.sensor.info.pixelArraySize">android.sensor.info.pixelArraySize</a></li>
             <li
             ><a href="#static_android.sensor.info.whiteLevel">android.sensor.info.whiteLevel</a></li>
+            <li
+            ><a href="#static_android.sensor.info.timestampCalibration">android.sensor.info.timestampCalibration</a></li>
 
             <li
             ><a href="#static_android.sensor.referenceIlluminant1">android.sensor.referenceIlluminant1</a></li>
@@ -3366,8 +3368,15 @@ active.<wbr/></p>
               <p>Video stabilization automatically translates and scales images from the camera
 in order to stabilize motion between consecutive frames.<wbr/></p>
 <p>If enabled,<wbr/> video stabilization can modify the
-<a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> to keep the video stream
-stabilized</p>
+<a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> to keep the video stream stabilized.<wbr/></p>
+<p>Switching between different video stabilization modes may take several frames
+to initialize,<wbr/> the camera device will report the current mode in capture result
+metadata.<wbr/> For example,<wbr/> When "ON" mode is requested,<wbr/> the video stabilization modes
+in the first several capture results may still be "OFF",<wbr/> and it will become "ON"
+when the initialization is done.<wbr/></p>
+<p>If a camera device supports both this mode and OIS (<a href="#controls_android.lens.opticalStabilizationMode">android.<wbr/>lens.<wbr/>optical<wbr/>Stabilization<wbr/>Mode</a>),<wbr/>
+turning both modes on may produce undesirable interaction,<wbr/> so it is recommended not to
+enable both at the same time.<wbr/></p>
             </td>
           </tr>
 
@@ -7048,8 +7057,15 @@ active.<wbr/></p>
               <p>Video stabilization automatically translates and scales images from the camera
 in order to stabilize motion between consecutive frames.<wbr/></p>
 <p>If enabled,<wbr/> video stabilization can modify the
-<a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> to keep the video stream
-stabilized</p>
+<a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a> to keep the video stream stabilized.<wbr/></p>
+<p>Switching between different video stabilization modes may take several frames
+to initialize,<wbr/> the camera device will report the current mode in capture result
+metadata.<wbr/> For example,<wbr/> When "ON" mode is requested,<wbr/> the video stabilization modes
+in the first several capture results may still be "OFF",<wbr/> and it will become "ON"
+when the initialization is done.<wbr/></p>
+<p>If a camera device supports both this mode and OIS (<a href="#controls_android.lens.opticalStabilizationMode">android.<wbr/>lens.<wbr/>optical<wbr/>Stabilization<wbr/>Mode</a>),<wbr/>
+turning both modes on may produce undesirable interaction,<wbr/> so it is recommended not to
+enable both at the same time.<wbr/></p>
             </td>
           </tr>
 
@@ -9786,6 +9802,14 @@ stabilization (<a href="#controls_android.control.videoStabilizationMode">androi
 makes use of mechanical elements to stabilize the camera
 sensor,<wbr/> and thus allows for longer exposure times before
 camera shake becomes apparent.<wbr/></p>
+<p>Switching between different optical stabilization modes may take several
+frames to initialize,<wbr/> the camera device will report the current mode in
+capture result metadata.<wbr/> For example,<wbr/> When "ON" mode is requested,<wbr/> the
+optical stabilization modes in the first several capture results may still
+be "OFF",<wbr/> and it will become "ON" when the initialization is done.<wbr/></p>
+<p>If a camera device supports both OIS and EIS (<a href="#controls_android.control.videoStabilizationMode">android.<wbr/>control.<wbr/>video<wbr/>Stabilization<wbr/>Mode</a>),<wbr/>
+turning both modes on may produce undesirable interaction,<wbr/> so it is recommended not
+to enable both at the same time.<wbr/></p>
 <p>Not all devices will support OIS; see
 <a href="#static_android.lens.info.availableOpticalStabilization">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Optical<wbr/>Stabilization</a> for
 available controls.<wbr/></p>
@@ -10818,6 +10842,14 @@ stabilization (<a href="#controls_android.control.videoStabilizationMode">androi
 makes use of mechanical elements to stabilize the camera
 sensor,<wbr/> and thus allows for longer exposure times before
 camera shake becomes apparent.<wbr/></p>
+<p>Switching between different optical stabilization modes may take several
+frames to initialize,<wbr/> the camera device will report the current mode in
+capture result metadata.<wbr/> For example,<wbr/> When "ON" mode is requested,<wbr/> the
+optical stabilization modes in the first several capture results may still
+be "OFF",<wbr/> and it will become "ON" when the initialization is done.<wbr/></p>
+<p>If a camera device supports both OIS and EIS (<a href="#controls_android.control.videoStabilizationMode">android.<wbr/>control.<wbr/>video<wbr/>Stabilization<wbr/>Mode</a>),<wbr/>
+turning both modes on may produce undesirable interaction,<wbr/> so it is recommended not
+to enable both at the same time.<wbr/></p>
 <p>Not all devices will support OIS; see
 <a href="#static_android.lens.info.availableOpticalStabilization">android.<wbr/>lens.<wbr/>info.<wbr/>available<wbr/>Optical<wbr/>Stabilization</a> for
 available controls.<wbr/></p>
@@ -15815,6 +15847,71 @@ than maximum raw value supported,<wbr/> i.<wbr/>e.<wbr/> 2^(sensor bits per pixe
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
         
+                
+          <tr class="entry" id="static_android.sensor.info.timestampCalibration">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>sensor.<wbr/>info.<wbr/>timestamp<wbr/>Calibration
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">UNCALIBRATED</span>
+                    <span class="entry_type_enum_notes"><p>Timestamps from <a href="#dynamic_android.sensor.timestamp">android.<wbr/>sensor.<wbr/>timestamp</a> are in nanoseconds and monotonic,<wbr/>
+but can not be compared to timestamps from other subsystems
+(e.<wbr/>g.<wbr/> accelerometer,<wbr/> gyro etc.<wbr/>),<wbr/> or other instances of the same or different
+camera devices in the same system.<wbr/> Timestamps between streams and results for
+a single camera instance are comparable,<wbr/> and the timestamps for all buffers
+and the result metadata generated by a single capture are identical.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">CALIBRATED</span>
+                    <span class="entry_type_enum_notes"><p>Timestamps from <a href="#dynamic_android.sensor.timestamp">android.<wbr/>sensor.<wbr/>timestamp</a> are in the same timebase as
+android.<wbr/>os.<wbr/>System<wbr/>Clock#elapsed<wbr/>Realtime<wbr/>Nanos(),<wbr/>
+and they can be compared to other timestamps using that base.<wbr/></p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The sensor timestamp calibration quality.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_V1">V1</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The sensor timestamp calibration quality determines the reliability of
+<a href="#dynamic_android.sensor.timestamp">android.<wbr/>sensor.<wbr/>timestamp</a> provided by the camera device.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
         
         
 
@@ -17039,12 +17136,17 @@ row of the image sensor,<wbr/> in nanoseconds.<wbr/></p>
             <td class="entry_details" colspan="5">
               <p>The timestamps are also included in all image
 buffers produced for the same capture,<wbr/> and will be identical
-on all the outputs.<wbr/> The timestamps measure time since an
-unspecified starting point,<wbr/> and are monotonically
-increasing.<wbr/></p>
-<p>They can be compared with the timestamps for other captures
-from the same camera device,<wbr/> but are not guaranteed to be
-comparable to any other time source.<wbr/></p>
+on all the outputs.<wbr/></p>
+<p>When <a href="#static_android.sensor.info.timestampCalibration">android.<wbr/>sensor.<wbr/>info.<wbr/>timestamp<wbr/>Calibration</a> <code>==</code> UNCALIBRATED,<wbr/>
+the timestamps measure time since an unspecified starting point,<wbr/>
+and are monotonically increasing.<wbr/> They can be compared with the
+timestamps for other captures from the same camera device,<wbr/> but are
+not guaranteed to be comparable to any other time source.<wbr/></p>
+<p>When <a href="#static_android.sensor.info.timestampCalibration">android.<wbr/>sensor.<wbr/>info.<wbr/>timestamp<wbr/>Calibration</a> <code>==</code> CALIBRATED,<wbr/>
+the timestamps measure time in the same timebase as
+android.<wbr/>os.<wbr/>System<wbr/>Clock#elapsed<wbr/>Realtime<wbr/>Nanos(),<wbr/> and they can be
+compared to other timestamps from other subsystems that are using
+that base.<wbr/></p>
             </td>
           </tr>
 
@@ -17053,13 +17155,14 @@ comparable to any other time source.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>All timestamps should be in reference to the kernel's
+              <p>All timestamps must be in reference to the kernel's
 CLOCK_<wbr/>BOOTTIME monotonic clock,<wbr/> which properly accounts for
 time spent asleep.<wbr/> This allows for synchronization with
 sensors that continue to operate while the system is
 otherwise asleep.<wbr/></p>
-<p>If not CLOCK_<wbr/>BOOTTIME,<wbr/> timestamps must be in reference to
-CLOCK_<wbr/>MONOTONIC.<wbr/></p>
+<p>If <a href="#static_android.sensor.info.timestampCalibration">android.<wbr/>sensor.<wbr/>info.<wbr/>timestamp<wbr/>Calibration</a> <code>==</code> CALIBRATED,<wbr/>
+The timestamp must be synchronized with the timestamps from other
+sensor subsystems that are using the same timebase.<wbr/></p>
             </td>
           </tr>
 
@@ -21699,6 +21802,7 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.sensor.info.exposureTimeRange">android.sensor.info.exposureTimeRange</a> (static)</li>
           <li><a href="#static_android.sensor.info.maxFrameDuration">android.sensor.info.maxFrameDuration</a> (static)</li>
           <li><a href="#static_android.sensor.info.physicalSize">android.sensor.info.physicalSize</a> (static)</li>
+          <li><a href="#static_android.sensor.info.timestampCalibration">android.sensor.info.timestampCalibration</a> (static)</li>
           <li><a href="#static_android.sensor.maxAnalogSensitivity">android.sensor.maxAnalogSensitivity</a> (static)</li>
           <li><a href="#controls_android.statistics.hotPixelMapMode">android.statistics.hotPixelMapMode</a> (controls)</li>
           <li><a href="#static_android.statistics.info.availableHotPixelMapModes">android.statistics.info.availableHotPixelMapModes</a> (static)</li>
