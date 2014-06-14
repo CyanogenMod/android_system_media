@@ -78,10 +78,9 @@ public class CameraCharacteristicsTest extends AndroidTestCase {
 
                 assertNotNull("Invalid property: ${entry.name}",
                         props.get(CameraCharacteristics.${jkey_identifier(entry.name)}));
-
                 List<Key<?>> allKeys = props.getKeys();
                 assertNotNull(String.format("Can't get camera characteristics keys from: ID %s",
-                        ids[i], props));
+                        ids[i]), allKeys);
                 assertTrue("Key not in keys list: ${entry.name}", allKeys.contains(
                         CameraCharacteristics.${jkey_identifier(entry.name)}));
 
