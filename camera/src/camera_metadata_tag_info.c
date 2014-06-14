@@ -487,6 +487,8 @@ static tag_info_t android_sensor_info[ANDROID_SENSOR_INFO_END -
     { "pixelArraySize",                TYPE_INT32  },
     [ ANDROID_SENSOR_INFO_WHITE_LEVEL - ANDROID_SENSOR_INFO_START ] =
     { "whiteLevel",                    TYPE_INT32  },
+    [ ANDROID_SENSOR_INFO_TIMESTAMP_CALIBRATION - ANDROID_SENSOR_INFO_START ] =
+    { "timestampCalibration",          TYPE_BYTE   },
 };
 
 static tag_info_t android_shading[ANDROID_SHADING_END -
@@ -1955,6 +1957,21 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SENSOR_INFO_WHITE_LEVEL: {
+            break;
+        }
+        case ANDROID_SENSOR_INFO_TIMESTAMP_CALIBRATION: {
+            switch (value) {
+                case ANDROID_SENSOR_INFO_TIMESTAMP_CALIBRATION_UNCALIBRATED:
+                    msg = "UNCALIBRATED";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_INFO_TIMESTAMP_CALIBRATION_CALIBRATED:
+                    msg = "CALIBRATED";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
             break;
         }
 
