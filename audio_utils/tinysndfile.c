@@ -251,6 +251,10 @@ static SNDFILE *sf_open_write(const char *path, SF_INFO *info)
         return NULL;
     }
     FILE *stream = fopen(path, "w+b");
+    if (stream == NULL) {
+        fprintf(stderr, "fopen %s failed errno %d\n", path, errno);
+        return NULL;
+    }
     unsigned char wav[58];
     memset(wav, 0, sizeof(wav));
     memcpy(wav, "RIFF", 4);
@@ -508,7 +512,8 @@ sf_count_t sf_writef_short(SNDFILE *handle, const short *ptr, sf_count_t desired
         break;
     case SF_FORMAT_FLOAT:
         handle->temp = realloc(handle->temp, desiredBytes);
-        memcpy_to_float_from_i16((float *) handle->temp, ptr, desiredFrames);
+        memcpy_to_float_from_i16((float *) handle->temp, ptr,
+                desiredFrames * handle->info.channels);
         actualBytes = fwrite(handle->temp, sizeof(char), desiredBytes, handle->stream);
         break;
     default:
@@ -531,7 +536,8 @@ sf_count_t sf_writef_float(SNDFILE *handle, const float *ptr, sf_count_t desired
         break;
     case SF_FORMAT_PCM_16:
         handle->temp = realloc(handle->temp, desiredBytes);
-        memcpy_to_i16_from_float((short *) handle->temp, ptr, desiredFrames);
+        memcpy_to_i16_from_float((short *) handle->temp, ptr,
+                desiredFrames * handle->info.channels);
         actualBytes = fwrite(handle->temp, sizeof(char), desiredBytes, handle->stream);
         break;
     case SF_FORMAT_PCM_U8:  // transcoding from float to byte not yet implemented
