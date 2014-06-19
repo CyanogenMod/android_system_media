@@ -3391,7 +3391,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               * Manual frame duration control
                   * android.sensor.frameDuration
                   * android.sensor.info.maxFrameDuration
-                  * android.scaler.streamConfigurationMap
               * Manual exposure control
                   * android.sensor.exposureTime
                   * android.sensor.info.exposureTimeRange
@@ -3411,6 +3410,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
               A given camera device may also support additional manual sensor controls,
               but this capability only covers the above list of controls.
+
+              If this is supported, android.scaler.streamConfigurationMap will
+              additionally return a min frame duration that is greater than
+              zero for each supported size-format combination.
               </notes>
             </value>
             <value optional="true">MANUAL_POST_PROCESSING
@@ -3513,6 +3516,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           then exposure time must be configurable via the request _and_
           the actual exposure applied must be available via
           the result.
+
+          If MANUAL_SENSOR is omitted, the HAL may choose to omit the
+          android.scaler.availableMinFrameDurations static property entirely.
           </hal_details>
         </entry>
         <entry name="availableRequestKeys" type="int32" visibility="hidden"

@@ -12549,7 +12549,6 @@ guaranteed to be supported:</p>
 <li>Manual frame duration control<ul>
 <li><a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a></li>
 <li><a href="#static_android.sensor.info.maxFrameDuration">android.<wbr/>sensor.<wbr/>info.<wbr/>max<wbr/>Frame<wbr/>Duration</a></li>
-<li><a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a></li>
 </ul>
 </li>
 <li>Manual exposure control<ul>
@@ -12579,7 +12578,10 @@ guaranteed to be supported:</p>
 device will accurately report the values applied by 3A in the
 result.<wbr/></p>
 <p>A given camera device may also support additional manual sensor controls,<wbr/>
-but this capability only covers the above list of controls.<wbr/></p></span>
+but this capability only covers the above list of controls.<wbr/></p>
+<p>If this is supported,<wbr/> <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a> will
+additionally return a min frame duration that is greater than
+zero for each supported size-format combination.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">MANUAL_POST_PROCESSING</span>
@@ -12709,6 +12711,8 @@ capability-compliant.<wbr/></p>
 then exposure time must be configurable via the request <em>and</em>
 the actual exposure applied must be available via
 the result.<wbr/></p>
+<p>If MANUAL_<wbr/>SENSOR is omitted,<wbr/> the HAL may choose to omit the
+<a href="#static_android.scaler.availableMinFrameDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Min<wbr/>Frame<wbr/>Durations</a> static property entirely.<wbr/></p>
             </td>
           </tr>
 
