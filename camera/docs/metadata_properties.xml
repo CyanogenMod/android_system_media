@@ -2684,13 +2684,19 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             field when android.lens.info.focusDistanceCalibration is APPROXIMATE or CALIBRATED.
             </details>
           </entry>
-          <entry name="minimumFocusDistance" type="float" visibility="public">
+          <entry name="minimumFocusDistance" type="float" visibility="public" optional="true">
             <description>Shortest distance from frontmost surface
             of the lens that can be focused correctly.</description>
             <units>See android.lens.info.focusDistanceCalibration for details.</units>
             <range>&amp;gt;= 0</range>
             <details>If the lens is fixed-focus, this should be
             0.</details>
+            <hal_details>Mandatory for FULL devices; LIMITED devices
+            must always set this value to 0 for fixed-focus; and may omit
+            the minimum focus distance otherwise.
+
+            This field is also mandatory for all devices advertising
+            the MANUAL_SENSOR capability.</hal_details>
             <tag id="V1" />
           </entry>
           <entry name="shadingMapSize" type="int32" visibility="hidden"

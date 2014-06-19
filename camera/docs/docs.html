@@ -10128,7 +10128,7 @@ field when <a href="#static_android.lens.info.focusDistanceCalibration">android.
                 
           <tr class="entry" id="static_android.lens.info.minimumFocusDistance">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance
             </td>
             <td class="entry_type">
@@ -10172,6 +10172,18 @@ of the lens that can be focused correctly.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Mandatory for FULL devices; LIMITED devices
+must always set this value to 0 for fixed-focus; and may omit
+the minimum focus distance otherwise.<wbr/></p>
+<p>This field is also mandatory for all devices advertising
+the MANUAL_<wbr/>SENSOR capability.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
