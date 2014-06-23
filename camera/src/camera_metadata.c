@@ -28,19 +28,8 @@
 #define ERROR      1
 #define NOT_FOUND -ENOENT
 
-#define _Alignas(T) \
-    ({struct _AlignasStruct { char c; T field; };       \
-        offsetof(struct _AlignasStruct, field); })
-
-// Align entry buffers as the compiler would
-#define ENTRY_ALIGNMENT _Alignas(camera_metadata_buffer_entry_t)
-// Align data buffer to largest supported data type
-#define DATA_ALIGNMENT _Alignas(camera_metadata_data_t)
-
 #define ALIGN_TO(val, alignment) \
     (((uintptr_t)(val) + ((alignment) - 1)) & ~((alignment) - 1))
-
-typedef size_t uptrdiff_t;
 
 /**
  * A single metadata entry, storing an array of values of a given type. If the
@@ -48,16 +37,20 @@ typedef size_t uptrdiff_t;
  * array; otherwise, it can found in the parent's data array at index
  * data.offset.
  */
+#define ENTRY_ALIGNMENT ((size_t) 4)
 typedef struct camera_metadata_buffer_entry {
     uint32_t tag;
-    size_t   count;
+    uint32_t count;
     union {
-        size_t  offset;
-        uint8_t value[4];
+        uint32_t offset;
+        uint8_t  value[4];
     } data;
     uint8_t  type;
     uint8_t  reserved[3];
 } camera_metadata_buffer_entry_t;
+
+typedef uint32_t metadata_uptrdiff_t;
+typedef uint32_t metadata_size_t;
 
 /**
  * A packet of metadata. This is a list of entries, each of which may point to
@@ -93,18 +86,18 @@ typedef struct camera_metadata_buffer_entry {
  * In short, the entries and data are contiguous in memory after the metadata
  * header.
  */
+#define METADATA_ALIGNMENT ((size_t) 4)
 struct camera_metadata {
-    size_t                   size;
+    metadata_size_t          size;
     uint32_t                 version;
     uint32_t                 flags;
-    size_t                   entry_count;
-    size_t                   entry_capacity;
-    uptrdiff_t               entries_start; // Offset from camera_metadata
-    size_t                   data_count;
-    size_t                   data_capacity;
-    uptrdiff_t               data_start; // Offset from camera_metadata
-    void                    *user; // User set pointer, not copied with buffer
-    uint8_t                  reserved[0];
+    metadata_size_t          entry_count;
+    metadata_size_t          entry_capacity;
+    metadata_uptrdiff_t      entries_start; // Offset from camera_metadata
+    metadata_size_t          data_count;
+    metadata_size_t          data_capacity;
+    metadata_uptrdiff_t      data_start; // Offset from camera_metadata
+    uint8_t                  reserved[];
 };
 
 /**
@@ -113,6 +106,7 @@ struct camera_metadata {
  * non-pointer type description in order to figure out the largest alignment
  * requirement for data (DATA_ALIGNMENT).
  */
+#define DATA_ALIGNMENT ((size_t) 8)
 typedef union camera_metadata_data {
     uint8_t u8;
     int32_t i32;
@@ -121,6 +115,15 @@ typedef union camera_metadata_data {
     double  d;
     camera_metadata_rational_t r;
 } camera_metadata_data_t;
+
+/**
+ * The preferred alignment of a packet of camera metadata. In general,
+ * this is the lowest common multiple of the constituents of a metadata
+ * package, i.e, of DATA_ALIGNMENT and ENTRY_ALIGNMENT.
+ */
+#define MAX_ALIGNMENT(A, B) (((A) > (B)) ? (A) : (B))
+#define METADATA_PACKET_ALIGNMENT \
+    MAX_ALIGNMENT(MAX_ALIGNMENT(DATA_ALIGNMENT, METADATA_ALIGNMENT), ENTRY_ALIGNMENT);
 
 /** Versioning information */
 #define CURRENT_METADATA_VERSION 1
@@ -221,7 +224,6 @@ camera_metadata_t *place_camera_metadata(void *dst,
     size_t data_unaligned = (uint8_t*)(get_entries(metadata) +
             metadata->entry_capacity) - (uint8_t*)metadata;
     metadata->data_start = ALIGN_TO(data_unaligned, DATA_ALIGNMENT);
-    metadata->user = NULL;
 
     assert(validate_camera_metadata_structure(metadata, NULL) == OK);
     return metadata;
@@ -289,7 +291,6 @@ camera_metadata_t* copy_camera_metadata(void *dst, size_t dst_size,
             sizeof(camera_metadata_buffer_entry_t[metadata->entry_count]));
     memcpy(get_data(metadata), get_data(src),
             sizeof(uint8_t[metadata->data_count]));
-    metadata->user = NULL;
 
     assert(validate_camera_metadata_structure(metadata, NULL) == OK);
     return metadata;
@@ -304,21 +305,21 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
 
     // Check that the metadata pointer is well-aligned first.
     {
-        struct {
+        static const struct {
             const char *name;
             size_t alignment;
         } alignments[] = {
             {
                 .name = "camera_metadata",
-                .alignment = _Alignas(struct camera_metadata)
+                .alignment = METADATA_ALIGNMENT
             },
             {
                 .name = "camera_metadata_buffer_entry",
-                .alignment = _Alignas(struct camera_metadata_buffer_entry)
+                .alignment = ENTRY_ALIGNMENT
             },
             {
                 .name = "camera_metadata_data",
-                .alignment = _Alignas(union camera_metadata_data)
+                .alignment = DATA_ALIGNMENT
             },
         };
 
@@ -340,33 +341,38 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
      */
 
     if (expected_size != NULL && metadata->size > *expected_size) {
-        ALOGE("%s: Metadata size (%zu) should be <= expected size (%zu)",
+        ALOGE("%s: Metadata size (%" PRIu32 ") should be <= expected size (%zu)",
               __FUNCTION__, metadata->size, *expected_size);
         return ERROR;
     }
 
     if (metadata->entry_count > metadata->entry_capacity) {
-        ALOGE("%s: Entry count (%zu) should be <= entry capacity (%zu)",
+        ALOGE("%s: Entry count (%" PRIu32 ") should be <= entry capacity "
+              "(%" PRIu32 ")",
               __FUNCTION__, metadata->entry_count, metadata->entry_capacity);
         return ERROR;
     }
 
-    uptrdiff_t entries_end = metadata->entries_start + metadata->entry_capacity;
+    const metadata_uptrdiff_t entries_end =
+        metadata->entries_start + metadata->entry_capacity;
     if (entries_end < metadata->entries_start || // overflow check
         entries_end > metadata->data_start) {
 
-        ALOGE("%s: Entry start + capacity (%zu) should be <= data start (%zu)",
+        ALOGE("%s: Entry start + capacity (%" PRIu32 ") should be <= data start "
+              "(%" PRIu32 ")",
                __FUNCTION__,
               (metadata->entries_start + metadata->entry_capacity),
               metadata->data_start);
         return ERROR;
     }
 
-    uptrdiff_t data_end = metadata->data_start + metadata->data_capacity;
+    const metadata_uptrdiff_t data_end =
+        metadata->data_start + metadata->data_capacity;
     if (data_end < metadata->data_start || // overflow check
         data_end > metadata->size) {
 
-        ALOGE("%s: Data start + capacity (%zu) should be <= total size (%zu)",
+        ALOGE("%s: Data start + capacity (%" PRIu32 ") should be <= total size "
+              "(%" PRIu32 ")",
                __FUNCTION__,
               (metadata->data_start + metadata->data_capacity),
               metadata->size);
@@ -374,7 +380,7 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
     }
 
     // Validate each entry
-    size_t entry_count = metadata->entry_count;
+    const metadata_size_t entry_count = metadata->entry_count;
     camera_metadata_buffer_entry_t *entries = get_entries(metadata);
 
     for (size_t i = 0; i < entry_count; ++i) {
@@ -427,7 +433,7 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
                 data_entry_end > metadata->data_capacity) {
 
                 ALOGE("%s: Entry index %zu data ends (%zu) beyond the capacity "
-                      "%zu", __FUNCTION__, i, data_entry_end,
+                      "%" PRIu32, __FUNCTION__, i, data_entry_end,
                       metadata->data_capacity);
                 return ERROR;
             }
@@ -435,7 +441,7 @@ int validate_camera_metadata_structure(const camera_metadata_t *metadata,
         } else if (entry.count == 0) {
             if (entry.data.offset != 0) {
                 ALOGE("%s: Entry index %zu had 0 items, but offset was non-0 "
-                     "(%zu), tag name: %s", __FUNCTION__, i, entry.data.offset,
+                     "(%" PRIu32 "), tag name: %s", __FUNCTION__, i, entry.data.offset,
                         get_camera_metadata_tag_name(entry.tag) ?: "unknown");
                 return ERROR;
             }
@@ -759,18 +765,6 @@ int update_camera_metadata_entry(camera_metadata_t *dst,
     return OK;
 }
 
-int set_camera_metadata_user_pointer(camera_metadata_t *dst, void* user) {
-    if (dst == NULL) return ERROR;
-    dst->user = user;
-    return OK;
-}
-
-int get_camera_metadata_user_pointer(camera_metadata_t *dst, void** user) {
-    if (dst == NULL) return ERROR;
-    *user = dst->user;
-    return OK;
-}
-
 static const vendor_tag_query_ops_t *vendor_tag_ops = NULL;
 
 const char *get_camera_metadata_section_name(uint32_t tag) {
@@ -842,8 +836,8 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
     }
     unsigned int i;
     dprintf(fd,
-            "%*sDumping camera metadata array: %zu / %zu entries, "
-            "%zu / %zu bytes of extra data.\n", indentation, "",
+            "%*sDumping camera metadata array: %" PRIu32 " / %" PRIu32 " entries, "
+            "%" PRIu32 " / %" PRIu32 " bytes of extra data.\n", indentation, "",
             metadata->entry_count, metadata->entry_capacity,
             metadata->data_count, metadata->data_capacity);
     dprintf(fd, "%*sVersion: %d, Flags: %08x\n",
@@ -867,7 +861,7 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
         } else {
             type_name = camera_metadata_type_names[entry->type];
         }
-        dprintf(fd, "%*s%s.%s (%05x): %s[%zu]\n",
+        dprintf(fd, "%*s%s.%s (%05x): %s[%" PRIu32 "]\n",
              indentation + 2, "",
              tag_section,
              tag_name,
@@ -883,7 +877,7 @@ void dump_indented_camera_metadata(const camera_metadata_t *metadata,
         uint8_t *data_ptr;
         if ( type_size * entry->count > 4 ) {
             if (entry->data.offset >= metadata->data_count) {
-                ALOGE("%s: Malformed entry data offset: %zu (max %zu)",
+                ALOGE("%s: Malformed entry data offset: %" PRIu32 " (max %" PRIu32 ")",
                         __FUNCTION__,
                         entry->data.offset,
                         metadata->data_count);
