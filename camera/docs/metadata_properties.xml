@@ -3269,8 +3269,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           that can be configured and used simultaneously by a camera device.
           </description>
           <range>
-          &amp;gt;= 0 for LIMITED mode device (`android.info.supportedHardwareLevel == LIMITED`).
-          &amp;gt;= 1 for FULL mode device (`android.info.supportedHardwareLevel == FULL`).
+          0 or 1.
           </range>
           <details>When set to 0, it means no input stream is supported.
 
@@ -3435,7 +3434,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               * Manual white balance control
                   * android.colorCorrection.transform
                   * android.colorCorrection.gains
-              * Lens shading map information
+              * Manual lens shading map control
+                    * android.shading.mode
+                    * android.statistics.lensShadingMapMode
                     * android.statistics.lensShadingMap
                     * android.lens.info.shadingMapSize
 
@@ -4540,6 +4541,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <range>Min &lt;= 100e3 (100 us). For FULL capability devices
             (android.info.supportedHardwareLevel == FULL), Max SHOULD be
             &amp;gt;= 1e9 (1sec), MUST be &amp;gt;= 100e6 (100ms)</range>
+            <details>The min value will be &lt;= 100e3 (100 us). For FULL
+            capability devices (android.info.supportedHardwareLevel == FULL),
+            max will be &amp;gt;= 100e6 (100ms)</details>
             <hal_details>For FULL capability devices (android.info.supportedHardwareLevel == FULL),
             The maximum of the range SHOULD be at least
             1 second (1e9), MUST be at least 100ms.</hal_details>
@@ -4562,6 +4566,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             Refer to
             StreamConfigurationMap#getOutputMinFrameDuration(int,Size)
             for the minimum frame duration values.
+
+            For FULL capability devices (android.info.supportedHardwareLevel == FULL),
+            max will be &amp;gt;= 100e6 (100ms).
             </details>
             <hal_details>
             For FULL capability devices (android.info.supportedHardwareLevel == FULL),
@@ -6309,17 +6316,21 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>
           Generally classifies the overall set of the camera device functionality.
           </description>
-          <range>Optional. Default value is LIMITED.</range>
+          <range>Default value is LIMITED.</range>
           <details>
           Camera devices will come in two flavors: LIMITED and FULL.
 
-          A FULL device has the most support possible and will enable the
-          widest range of use cases such as:
+          A FULL device has the most support possible and will support below capabilities:
 
           * 30fps at maximum resolution (== sensor resolution) is preferred, more than 20fps is required.
           * Per frame control (android.sync.maxLatency `==` PER_FRAME_CONTROL)
           * Manual sensor control (android.request.availableCapabilities contains MANUAL_SENSOR)
           * Manual post-processing control (android.request.availableCapabilities contains MANUAL_POST_PROCESSING)
+          * Arbitrary cropping region (android.scaler.croppingType `==` FREEFORM)
+          * At least 3 processed (but not stalling) format output streams (android.request.maxNumOutputProc `&gt;=` 3)
+          * The required stream configuration defined in android.scaler.availableStreamConfigurations
+          * The required exposure time range defined in android.sensor.info.exposureTimeRange
+          * The required maxFrameDuration defined in android.sensor.info.maxFrameDuration
 
           A LIMITED device may have some or none of the above characteristics.
           To find out more refer to android.request.availableCapabilities.

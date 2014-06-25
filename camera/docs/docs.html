@@ -12362,8 +12362,7 @@ that can be configured and used simultaneously by a camera device.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              <p>&gt;= 0 for LIMITED mode device (<code><a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == LIMITED</code>).<wbr/>
-&gt;= 1 for FULL mode device (<code><a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == FULL</code>).<wbr/></p>
+              <p>0 or 1.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -12613,7 +12612,9 @@ stages.<wbr/> This means the following controls are guaranteed to be supported:<
 <li><a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a></li>
 </ul>
 </li>
-<li>Lens shading map information<ul>
+<li>Manual lens shading map control<ul>
+<li><a href="#controls_android.shading.mode">android.<wbr/>shading.<wbr/>mode</a></li>
+<li><a href="#controls_android.statistics.lensShadingMapMode">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map<wbr/>Mode</a></li>
 <li><a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a></li>
 <li><a href="#static_android.lens.info.shadingMapSize">android.<wbr/>lens.<wbr/>info.<wbr/>shading<wbr/>Map<wbr/>Size</a></li>
 </ul>
@@ -15543,7 +15544,7 @@ the sensor,<wbr/> in reading order.<wbr/></p>
                 
           <tr class="entry" id="static_android.sensor.info.exposureTimeRange">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>sensor.<wbr/>info.<wbr/>exposure<wbr/>Time<wbr/>Range
             </td>
             <td class="entry_type">
@@ -15582,6 +15583,16 @@ times used by <a href="#controls_android.sensor.exposureTime">android.<wbr/>sens
               </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The min value will be &lt;= 100e3 (100 us).<wbr/> For FULL
+capability devices (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == FULL),<wbr/>
+max will be &gt;= 100e6 (100ms)</p>
+            </td>
           </tr>
 
           <tr class="entries_header">
@@ -15650,6 +15661,8 @@ for a full definition of frame durations.<wbr/></p>
 <p>Refer to
 StreamConfigurationMap#getOutputMinFrameDuration(int,<wbr/>Size)
 for the minimum frame duration values.<wbr/></p>
+<p>For FULL capability devices (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> == FULL),<wbr/>
+max will be &gt;= 100e6 (100ms).<wbr/></p>
             </td>
           </tr>
 
@@ -21180,7 +21193,7 @@ applications.<wbr/></p></span>
             </td>
 
             <td class="entry_range">
-              <p>Optional.<wbr/> Default value is LIMITED.<wbr/></p>
+              <p>Default value is LIMITED.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -21193,13 +21206,17 @@ applications.<wbr/></p></span>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Camera devices will come in two flavors: LIMITED and FULL.<wbr/></p>
-<p>A FULL device has the most support possible and will enable the
-widest range of use cases such as:</p>
+<p>A FULL device has the most support possible and will support below capabilities:</p>
 <ul>
 <li>30fps at maximum resolution (== sensor resolution) is preferred,<wbr/> more than 20fps is required.<wbr/></li>
 <li>Per frame control (<a href="#static_android.sync.maxLatency">android.<wbr/>sync.<wbr/>max<wbr/>Latency</a> <code>==</code> PER_<wbr/>FRAME_<wbr/>CONTROL)</li>
 <li>Manual sensor control (<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains MANUAL_<wbr/>SENSOR)</li>
 <li>Manual post-processing control (<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains MANUAL_<wbr/>POST_<wbr/>PROCESSING)</li>
+<li>Arbitrary cropping region (<a href="#static_android.scaler.croppingType">android.<wbr/>scaler.<wbr/>cropping<wbr/>Type</a> <code>==</code> FREEFORM)</li>
+<li>At least 3 processed (but not stalling) format output streams (<a href="#static_android.request.maxNumOutputProc">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Output<wbr/>Proc</a> <code>&gt;=</code> 3)</li>
+<li>The required stream configuration defined in <a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a></li>
+<li>The required exposure time range defined in <a href="#static_android.sensor.info.exposureTimeRange">android.<wbr/>sensor.<wbr/>info.<wbr/>exposure<wbr/>Time<wbr/>Range</a></li>
+<li>The required maxFrameDuration defined in <a href="#static_android.sensor.info.maxFrameDuration">android.<wbr/>sensor.<wbr/>info.<wbr/>max<wbr/>Frame<wbr/>Duration</a></li>
 </ul>
 <p>A LIMITED device may have some or none of the above characteristics.<wbr/>
 To find out more refer to <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>.<wbr/></p>
