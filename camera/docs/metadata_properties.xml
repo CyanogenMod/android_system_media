@@ -3283,7 +3283,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           * Processed (but stalling): any non-RAW format with a stallDurations &amp;gt; 0.
           Typically JPEG format (ImageFormat#JPEG).
-          * Raw formats: ImageFormat#RAW_SENSOR and ImageFormat#RAW_OPAQUE.
+          * Raw formats: ImageFormat#RAW_SENSOR, ImageFormat#RAW10 and ImageFormat#RAW_OPAQUE.
           * Processed (but not-stalling): any non-RAW format without a stall duration.
           Typically ImageFormat#YUV_420_888, ImageFormat#NV21, ImageFormat#YV12.
           </details>
@@ -3309,6 +3309,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           In particular, a `RAW` format is typically one of:
 
           * ImageFormat#RAW_SENSOR
+          * ImageFormat#RAW10
           * Opaque `RAW`
           </details>
         </entry>
@@ -4337,13 +4338,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           The following formats may always have a stall duration:
 
-          * JPEG
-          * RAW16
+          * ImageFormat#JPEG
+          * ImageFormat#RAW_SENSOR
 
           The following formats will never have a stall duration:
 
-          * YUV_420_888
-          * IMPLEMENTATION_DEFINED
+          * ImageFormat#YUV_420_888
 
           All other formats may or may not have an allowed stall duration on
           a per-capability basis; refer to android.request.availableCapabilities
@@ -4357,7 +4357,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <hal_details>
           If possible, it is recommended that all non-JPEG formats
-          (such as RAW16) should not have a stall duration.
+          (such as RAW16) should not have a stall duration. RAW10, RAW_OPAQUE and
+          IMPLEMENTATION_DEFINED must not have stall durations.
           </hal_details>
           <tag id="V1" />
         </entry>

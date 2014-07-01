@@ -12306,7 +12306,7 @@ into the 3 stream types as below:</p>
 <ul>
 <li>Processed (but stalling): any non-RAW format with a stallDurations &gt; 0.<wbr/>
 Typically JPEG format (ImageFormat#JPEG).<wbr/></li>
-<li>Raw formats: ImageFormat#RAW_<wbr/>SENSOR and ImageFormat#RAW_<wbr/>OPAQUE.<wbr/></li>
+<li>Raw formats: ImageFormat#RAW_<wbr/>SENSOR,<wbr/> ImageFormat#RAW10 and ImageFormat#RAW_<wbr/>OPAQUE.<wbr/></li>
 <li>Processed (but not-stalling): any non-RAW format without a stall duration.<wbr/>
 Typically Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888,<wbr/> ImageFormat#NV21,<wbr/> ImageFormat#YV12.<wbr/></li>
 </ul>
@@ -12366,6 +12366,7 @@ be any <code>RAW</code> and supported format provided by <a href="#static_androi
 <p>In particular,<wbr/> a <code>RAW</code> format is typically one of:</p>
 <ul>
 <li>ImageFormat#RAW_<wbr/>SENSOR</li>
+<li>ImageFormat#RAW10</li>
 <li>Opaque <code>RAW</code></li>
 </ul>
             </td>
@@ -14675,13 +14676,12 @@ streams in a request (the regular stall calculation rules are
 ignored).<wbr/></p>
 <p>The following formats may always have a stall duration:</p>
 <ul>
-<li>JPEG</li>
-<li>RAW16</li>
+<li>ImageFormat#JPEG</li>
+<li>ImageFormat#RAW_<wbr/>SENSOR</li>
 </ul>
 <p>The following formats will never have a stall duration:</p>
 <ul>
-<li>YUV_<wbr/>420_<wbr/>888</li>
-<li>IMPLEMENTATION_<wbr/>DEFINED</li>
+<li>Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</li>
 </ul>
 <p>All other formats may or may not have an allowed stall duration on
 a per-capability basis; refer to <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
@@ -14699,7 +14699,8 @@ StreamConfigurationMap#getOutputStallDuration(int,<wbr/> Size) )</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>If possible,<wbr/> it is recommended that all non-JPEG formats
-(such as RAW16) should not have a stall duration.<wbr/></p>
+(such as RAW16) should not have a stall duration.<wbr/> RAW10,<wbr/> RAW_<wbr/>OPAQUE and
+IMPLEMENTATION_<wbr/>DEFINED must not have stall durations.<wbr/></p>
             </td>
           </tr>
 
