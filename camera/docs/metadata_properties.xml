@@ -6425,24 +6425,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="supportedHardwareLevel" type="byte" visibility="public"
                enum="true" >
           <enum>
-            <value>
-              LIMITED
-              <notes>
-              This camera device has only limited capabilities.
-              </notes>
-            </value>
-            <value>
-              FULL
-              <notes>
-              This camera device is capable of supporting advanced imaging applications.
-              </notes>
-            </value>
-            <value>
-              LEGACY
-              <notes>
-              This camera device is running in backward compatibility mode.
-              </notes>
-            </value>
+            <value>LIMITED
+            <notes>This camera device has only limited capabilities.
+            </notes></value>
+            <value>FULL
+            <notes>This camera device is capable of supporting advanced imaging
+            applications.</notes></value>
           </enum>
           <description>
           Generally classifies the overall set of the camera device functionality.
@@ -6465,9 +6453,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           A LIMITED device may have some or none of the above characteristics.
           To find out more refer to android.request.availableCapabilities.
-
-          A LEGACY device does not support per-frame control, manual sensor control, manual
-          post-processing, arbitrary cropping regions, and has relaxed performance constraints.
           </details>
           <hal_details>
           The camera 3 HAL device can implement one of two possible
