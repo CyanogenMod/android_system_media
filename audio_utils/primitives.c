@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <cutils/bitops.h> // for popcount()
 #include <audio_utils/primitives.h>
 
 void ditherAndClamp(int32_t* out, const int32_t *sums, size_t c)
@@ -261,4 +262,152 @@ size_t nonZeroStereo16(const int16_t *frames, size_t count)
         frames += 2;
     }
     return nonZero;
+}
+
+/* struct representation of 3 bytes for packed PCM 24 bit data */
+typedef struct {uint8_t c[3];} __attribute__((__packed__)) uint8x3_t;
+
+/*
+ * C macro to do channel mask copying independent of dst/src sample type.
+ * Don't pass in any expressions for the macro arguments here.
+ */
+#define copy_frame_by_mask(dst, dmask, src, smask, count, zero) \
+{ \
+    uint32_t bit, ormask; \
+    while (count--) { \
+        ormask = dmask | smask; \
+        while (ormask) { \
+            bit = ormask & -ormask; /* get lowest bit */ \
+            ormask ^= bit; /* remove lowest bit */ \
+            if (dmask & bit) { \
+                *dst++ = smask & bit ? *src++ : zero; \
+            } else { /* source channel only */ \
+                ++src; \
+            } \
+        } \
+    } \
+}
+
+void memcpy_by_channel_mask(void *dst, uint32_t dst_mask,
+        const void *src, uint32_t src_mask, size_t sample_size, size_t count)
+{
+#if 0
+    /* alternate way of handling memcpy_by_channel_mask by using the idxary */
+    int8_t idxary[32];
+    uint32_t src_channels = popcount(src_mask);
+    uint32_t dst_channels =
+            memcpy_by_index_array_initialization(idxary, 32, dst_mask, src_mask);
+
+    memcpy_by_idxary(dst, dst_channels, src, src_channels, idxary, sample_size, count);
+#else
+    if (dst_mask == src_mask) {
+        memcpy(dst, src, sample_size * popcount(dst_mask) * count);
+        return;
+    }
+    switch (sample_size) {
+    case 1: {
+        uint8_t *udst = (uint8_t*)dst;
+        const uint8_t *usrc = (const uint8_t*)src;
+
+        copy_frame_by_mask(udst, dst_mask, usrc, src_mask, count, 0);
+    } break;
+    case 2: {
+        uint16_t *udst = (uint16_t*)dst;
+        const uint16_t *usrc = (const uint16_t*)src;
+
+        copy_frame_by_mask(udst, dst_mask, usrc, src_mask, count, 0);
+    } break;
+    case 3: { /* could be slow.  use a struct to represent 3 bytes of data. */
+        uint8x3_t *udst = (uint8x3_t*)dst;
+        const uint8x3_t *usrc = (const uint8x3_t*)src;
+        static const uint8x3_t zero; /* tricky - we use this to zero out a sample */
+
+        copy_frame_by_mask(udst, dst_mask, usrc, src_mask, count, zero);
+    } break;
+    case 4: {
+        uint32_t *udst = (uint32_t*)dst;
+        const uint32_t *usrc = (const uint32_t*)src;
+
+        copy_frame_by_mask(udst, dst_mask, usrc, src_mask, count, 0);
+    } break;
+    default:
+        abort(); /* illegal value */
+        break;
+    }
+#endif
+}
+
+/*
+ * C macro to do copying by index array, to rearrange samples
+ * within a frame.  This is independent of src/dst sample type.
+ * Don't pass in any expressions for the macro arguments here.
+ */
+#define copy_frame_by_idx(dst, dst_channels, src, src_channels, idxary, count, zero) \
+{ \
+    unsigned i; \
+    int index; \
+    while (count--) { \
+        for (i = 0; i < dst_channels; ++i) { \
+            index = idxary[i]; \
+            *dst++ = index < 0 ? zero : src[index]; \
+        } \
+        src += src_channels; \
+    } \
+}
+
+void memcpy_by_index_array(void *dst, uint32_t dst_channels,
+        const void *src, uint32_t src_channels,
+        const int8_t *idxary, size_t sample_size, size_t count)
+{
+    switch (sample_size) {
+    case 1: {
+        uint8_t *udst = (uint8_t*)dst;
+        const uint8_t *usrc = (const uint8_t*)src;
+
+        copy_frame_by_idx(udst, dst_channels, usrc, src_channels, idxary, count, 0);
+    } break;
+    case 2: {
+        uint16_t *udst = (uint16_t*)dst;
+        const uint16_t *usrc = (const uint16_t*)src;
+
+        copy_frame_by_idx(udst, dst_channels, usrc, src_channels, idxary, count, 0);
+    } break;
+    case 3: { /* could be slow.  use a struct to represent 3 bytes of data. */
+        uint8x3_t *udst = (uint8x3_t*)dst;
+        const uint8x3_t *usrc = (const uint8x3_t*)src;
+        static const uint8x3_t zero;
+
+        copy_frame_by_idx(udst, dst_channels, usrc, src_channels, idxary, count, zero);
+    } break;
+    case 4: {
+        uint32_t *udst = (uint32_t*)dst;
+        const uint32_t *usrc = (const uint32_t*)src;
+
+        copy_frame_by_idx(udst, dst_channels, usrc, src_channels, idxary, count, 0);
+    } break;
+    default:
+        abort(); /* illegal value */
+        break;
+    }
+}
+
+size_t memcpy_by_index_array_initialization(int8_t *idxary, size_t idxcount,
+        uint32_t dst_mask, uint32_t src_mask)
+{
+    size_t n = 0;
+    int srcidx = 0;
+    uint32_t bit, ormask = src_mask | dst_mask;
+
+    while (ormask && n < idxcount) {
+        bit = ormask & -ormask;          /* get lowest bit */
+        ormask ^= bit;                   /* remove lowest bit */
+        if (src_mask & dst_mask & bit) { /* matching channel */
+            idxary[n++] = srcidx++;
+        } else if (src_mask & bit) {     /* source channel only */
+            ++srcidx;
+        } else {                         /* destination channel only */
+            idxary[n++] = -1;
+        }
+    }
+    return n + popcount(ormask & dst_mask);
 }
