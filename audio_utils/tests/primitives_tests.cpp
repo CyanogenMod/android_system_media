@@ -116,6 +116,31 @@ TEST(audio_utils_primitives, clamp_to_int) {
     res = clampq4_27_from_float(val.f);
     EXPECT_GE(res, (int32_t)0x80000000); // negative
     EXPECT_LE(res, (int32_t)0x80008000); // negative
+
+    // check u4_28_from_float and u4_12_from_float
+    uint32_t ures;
+    uint16_t ures16;
+    val.f = 16.;
+    ures = u4_28_from_float(val.f);
+    EXPECT_EQ(ures, 0xffffffff);
+    ures16 = u4_12_from_float(val.f);
+    EXPECT_EQ(ures16, 0xffff);
+
+    val.f = -1.;
+    ures = u4_28_from_float(val.f);
+    EXPECT_EQ(ures, 0);
+    ures16 = u4_12_from_float(val.f);
+    EXPECT_EQ(ures16, 0);
+
+    // check float_from_u4_28 and float_from_u4_12 (roundtrip)
+    for (uint32_t v = 0x100000; v <= 0xff000000; v += 0x100000) {
+        ures = u4_28_from_float(float_from_u4_28(v));
+        EXPECT_EQ(ures, v);
+    }
+    for (uint32_t v = 0; v <= 0xffff; ++v) { // uint32_t prevents overflow
+        ures16 = u4_12_from_float(float_from_u4_12(v));
+        EXPECT_EQ(ures16, v);
+    }
 }
 
 TEST(audio_utils_primitives, memcpy) {
