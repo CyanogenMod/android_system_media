@@ -544,6 +544,79 @@ static inline float float_from_q4_27(int32_t ival)
     return ival * scale;
 }
 
+/* Convert an unsigned fixed-point 32-bit U4.28 value to single-precision floating-point.
+ * The nominal output float range is [0.0, 1.0] if the fixed-point range is
+ * [0x00000000, 0x10000000].  The full float range is [0.0, 16.0].
+ *
+ * Note the closed range at 1.0 and 16.0 is due to rounding on conversion to float.
+ * In more detail: if the fixed-point integer exceeds 24 bit significand of single
+ * precision floating point, the 0.5 lsb in the significand conversion will round
+ * towards even, as per IEEE 754 default.
+ */
+static inline float float_from_u4_28(uint32_t uval)
+{
+    static const float scale = 1. / (float)(1UL << 28);
+
+    return uval * scale;
+}
+
+/* Convert an unsigned fixed-point 16-bit U4.12 value to single-precision floating-point.
+ * The nominal output float range is [0.0, 1.0] if the fixed-point range is
+ * [0x0000, 0x1000].  The full float range is [0.0, 16.0).
+ */
+static inline float float_from_u4_12(uint16_t uval)
+{
+    static const float scale = 1. / (float)(1UL << 12);
+
+    return uval * scale;
+}
+
+/* Convert a single-precision floating point value to a U4.28 integer value.
+ * Rounds to nearest, ties away from 0.
+ *
+ * Values outside the range [0, 16.0] are properly clamped to [0, 4294967295]
+ * including -Inf and +Inf. NaN values are considered undefined, and behavior may change
+ * depending on hardware and future implementation of this function.
+ */
+static inline uint32_t u4_28_from_float(float f)
+{
+    static const float scale = (float)(1 << 28);
+    static const float limpos = 0xffffffffUL / scale;
+
+    if (f <= 0.) {
+        return 0;
+    } else if (f >= limpos) {
+        return 0xffffffff;
+    }
+    /* integer conversion is through truncation (though int to float is not).
+     * ensure that we round to nearest, ties away from 0.
+     */
+    return f * scale + 0.5;
+}
+
+/* Convert a single-precision floating point value to a U4.12 integer value.
+ * Rounds to nearest, ties away from 0.
+ *
+ * Values outside the range [0, 16.0) are properly clamped to [0, 65535]
+ * including -Inf and +Inf. NaN values are considered undefined, and behavior may change
+ * depending on hardware and future implementation of this function.
+ */
+static inline uint16_t u4_12_from_float(float f)
+{
+    static const float scale = (float)(1 << 12);
+    static const float limpos = 0xffff / scale;
+
+    if (f <= 0.) {
+        return 0;
+    } else if (f >= limpos) {
+        return 0xffff;
+    }
+    /* integer conversion is through truncation (though int to float is not).
+     * ensure that we round to nearest, ties away from 0.
+     */
+    return f * scale + 0.5;
+}
+
 /* Convert a signed fixed-point 16-bit Q0.15 value to single-precision floating-point.
  * The output float range is [-1.0, 1.0) for the fixed-point range
  * [0x8000, 0x7fff].
