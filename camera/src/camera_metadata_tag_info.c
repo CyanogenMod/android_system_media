@@ -1600,10 +1600,6 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "BACKWARD_COMPATIBLE";
                     ret = 0;
                     break;
-                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_OPTIONAL:
-                    msg = "OPTIONAL";
-                    ret = 0;
-                    break;
                 case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR:
                     msg = "MANUAL_SENSOR";
                     ret = 0;
@@ -1612,12 +1608,12 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "MANUAL_POST_PROCESSING";
                     ret = 0;
                     break;
-                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_ZSL:
-                    msg = "ZSL";
-                    ret = 0;
-                    break;
                 case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_DNG:
                     msg = "DNG";
+                    ret = 0;
+                    break;
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_ZSL:
+                    msg = "ZSL";
                     ret = 0;
                     break;
                 default:
