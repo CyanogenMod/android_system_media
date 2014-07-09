@@ -107,6 +107,10 @@ typedef enum camera_metadata_tag {
             ANDROID_COLOR_CORRECTION_START,
     ANDROID_COLOR_CORRECTION_TRANSFORM,               // rational[]   | public
     ANDROID_COLOR_CORRECTION_GAINS,                   // float[]      | public
+    ANDROID_COLOR_CORRECTION_ABERRATION_CORRECTION_MODE,
+                                                      // enum         | public
+    ANDROID_COLOR_CORRECTION_AVAILABLE_ABERRATION_CORRECTION_MODES,
+                                                      // byte[]       | public
     ANDROID_COLOR_CORRECTION_END,
 
     ANDROID_CONTROL_AE_ANTIBANDING_MODE =             // enum         | public
@@ -384,6 +388,13 @@ typedef enum camera_metadata_enum_android_color_correction_mode {
     ANDROID_COLOR_CORRECTION_MODE_FAST,
     ANDROID_COLOR_CORRECTION_MODE_HIGH_QUALITY,
 } camera_metadata_enum_android_color_correction_mode_t;
+
+// ANDROID_COLOR_CORRECTION_ABERRATION_CORRECTION_MODE
+typedef enum camera_metadata_enum_android_color_correction_aberration_correction_mode {
+    ANDROID_COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_OFF,
+    ANDROID_COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_FAST,
+    ANDROID_COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_HIGH_QUALITY,
+} camera_metadata_enum_android_color_correction_aberration_correction_mode_t;
 
 
 // ANDROID_CONTROL_AE_ANTIBANDING_MODE

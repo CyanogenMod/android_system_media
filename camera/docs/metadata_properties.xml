@@ -260,6 +260,46 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           `G_odd` equal to `G_even` in the output result metadata.
           </hal_details>
         </entry>
+        <entry name="aberrationCorrectionMode" type="byte" visibility="public" enum="true">
+          <enum>
+            <value>OFF
+              <notes>
+                No aberration correction is applied.
+              </notes>
+            </value>
+            <value>FAST
+              <notes>
+                Aberration correction will not slow down capture rate
+                relative to sensor raw output.
+            </notes>
+            </value>
+            <value>HIGH_QUALITY
+              <notes>
+                Aberration correction operates at improved quality but reduced
+                capture rate (relative to sensor raw output).
+            </notes>
+            </value>
+          </enum>
+          <description>
+            Mode of operation for the chromatic aberration correction algorithm.
+          </description>
+          <details>
+            This must be set to a valid mode from
+            android.colorCorrection.availableAberrationCorrectionModes.
+
+            Chromatic (color) aberration is caused by the fact that different wavelengths of light
+            can not focus on the same point after exiting from the lens. This metadata defines
+            the high level control of chromatic aberration correction algorithm, which aims to
+            minimize the chromatic artifacts that may occur along the object boundaries in an
+            image.
+
+            FAST/HIGH_QUALITY both mean that camera device determined aberration
+            correction will be applied. HIGH_QUALITY mode indicates that the camera device will
+            use the highest-quality aberration correction algorithms, even if it slows down
+            capture rate. FAST means the camera device will not slow down capture rate when
+            applying aberration correction.
+          </details>
+        </entry>
       </controls>
       <dynamic>
         <clone entry="android.colorCorrection.mode" kind="controls">
@@ -268,7 +308,33 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
         <clone entry="android.colorCorrection.gains" kind="controls">
         </clone>
+        <clone entry="android.colorCorrection.aberrationCorrectionMode" kind="controls">
+        </clone>
       </dynamic>
+      <static>
+        <entry name="availableAberrationCorrectionModes" type="byte" visibility="public"
+        type_notes="list of enums" container="array" typedef="enumList">
+          <array>
+            <size>n</size>
+          </array>
+          <description>
+            The set of aberration correction modes supported by this camera device.
+          </description>
+          <range>
+            The subset of aberration correction mode from those specified in
+            android.colorCorrection.aberrationCorrectionMode.
+          </range>
+          <details>
+            This metadata lists the valid modes for android.colorCorrection.aberrationCorrectionMode.
+            If no aberration correction modes are available for a device, this list will solely include
+            OFF mode.
+
+            For FULL capability device (android.info.supportedHardwareLevel `==` FULL), OFF must be
+            included.
+          </details>
+          <tag id="V1" />
+        </entry>
+      </static>
     </section>
     <section name="control">
       <controls>
@@ -3559,6 +3625,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                     * android.statistics.lensShadingMapMode
                     * android.statistics.lensShadingMap
                     * android.lens.info.shadingMapSize
+              * Manual aberration correction control (if aberration correction is supported)
+                    * android.colorCorrection.aberrationCorrectionMode
+                    * android.colorCorrection.availableAberrationCorrectionModes
 
               If auto white balance is enabled, then the camera device
               will accurately report the values applied by AWB in the result.
