@@ -43,6 +43,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <typedef name="pairFloatFloat">
       <language name="java">android.util.Pair&lt;Float,Float&gt;</language>
     </typedef>
+    <typedef name="pairDoubleDouble">
+      <language name="java">android.util.Pair&lt;Double,Double&gt;</language>
+    </typedef>
     <typedef name="rectangle">
       <language name="java">android.graphics.Rect</language>
     </typedef>
@@ -5204,6 +5207,47 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           dimensions given is hue, saturation, value; where hue is the 0th
           element.
           </details>
+          <tag id="DNG" />
+        </entry>
+        <entry name="noiseProfile" type="double" visibility="public"
+        optional="true" type_notes="Pairs of noise model coefficients"
+        container="array" typedef="pairDoubleDouble">
+          <array>
+            <size>2</size>
+            <size>CFA Channels</size>
+          </array>
+          <description>
+          Noise model coefficients for each CFA mosaic channel.
+          </description>
+          <details>
+          This tag contains two noise model coefficients for each CFA channel
+          corresponding to the sensor amplification (S) and sensor readout
+          noise (O).  These are given as pairs of coefficients for each channel
+          in the same order as channels listed for the CFA layout tag
+          (see android.sensor.info.colorFilterArrangement).  This is
+          represented as an array of Pair&amp;lt;Double, Double&amp;gt;, where
+          the first member of the Pair at index n is the S coefficient and the
+          second member is the O coefficient for the nth color channel in the CFA.
+
+          These coefficients are used in a two parameter noise model to describe
+          the amount of noise present in the image for each CFA channel.  The
+          noise model used here is:
+
+          N(x) = sqrt(Sx + O)
+
+          Where x represents the recorded signal of a CFA channel normalized to
+          the range [0, 1], and S and O are the noise model coeffiecients for
+          that channel.
+
+          A more detailed description of the noise model can be found in the
+          Adobe DNG specification for the NoiseProfile tag.
+          </details>
+          <hal_details>
+          For a CFA layout of RGGB, the list of coefficients would be given as
+          an array of doubles S0,O0,S1,O1,..., where S0 and O0 are the coefficients
+          for the red channel, S1 and O1 are the coefficients for the first green
+          channel, etc.
+          </hal_details>
           <tag id="DNG" />
         </entry>
       </static>
