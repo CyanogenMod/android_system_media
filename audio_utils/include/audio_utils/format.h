@@ -52,7 +52,7 @@ __BEGIN_DECLS
  * Logs a fatal error if dst or src format is not allowed by the conversion rules above.
  */
 void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
-        void *src, audio_format_t src_format, size_t count);
+        const void *src, audio_format_t src_format, size_t count);
 
 __END_DECLS
 

@@ -22,7 +22,7 @@
 #include <audio_utils/format.h>
 
 void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
-        void *src, audio_format_t src_format, size_t count)
+        const void *src, audio_format_t src_format, size_t count)
 {
     /* default cases for error falls through to fatal log below. */
     if (dst_format == src_format) {
