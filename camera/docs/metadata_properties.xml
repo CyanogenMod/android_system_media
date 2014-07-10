@@ -3556,22 +3556,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>n</size>
           </array>
           <enum>
-            <value hidden="true">BACKWARD_COMPATIBLE
+            <value>BACKWARD_COMPATIBLE
               <notes>The minimal set of capabilities that every camera
                 device (regardless of android.info.supportedHardwareLevel)
-                will support.
+                supports.
 
-                The full set of features supported by this capability makes
-                the camera2 api backwards compatible with the camera1
-                (android.hardware.Camera) API.
-              </notes>
-            </value>
-            <value hidden="true">OPTIONAL
-              <notes>This is a catch-all capability to include all other
-              tags or functionality not encapsulated by one of the other
-              capabilities.
-
-              A typical example is all tags marked 'optional'.
+                This capability is listed by all devices, and
+                indicates that the camera device has a feature set
+                that's comparable to the baseline requirements for the
+                older android.hardware.Camera API.
               </notes>
             </value>
             <value optional="true">MANUAL_SENSOR
@@ -3639,6 +3632,20 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               controls, but this capability only covers the above list of controls.
               </notes>
             </value>
+            <value optional="true">DNG
+              <notes>
+              The camera device supports outputting RAW buffers that can be
+              saved offline into a DNG format.
+
+              * RAW_SENSOR is supported as an output format.
+              * The maximum available resolution for RAW_SENSOR streams
+                will match either the value in
+                android.sensor.info.pixelArraySize or
+                android.sensor.info.activeArraySize.
+              * All DNG-related optional metadata entries are provided
+                by the camera device.
+              </notes>
+            </value>
             <value optional="true" hidden="true">ZSL
               <notes>
               The camera device supports the Zero Shutter Lag use case.
@@ -3653,24 +3660,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               * The maximum available resolution for RAW_OPAQUE streams
                 (both input/output) will match the maximum available
                 resolution of JPEG streams.
-              </notes>
-            </value>
-            <value optional="true">DNG
-              <notes>
-              The camera device supports outputting RAW buffers that can be
-              saved offline into a DNG format. It can reprocess DNG
-              files (produced from the same camera device) back into YUV.
-
-              * At least one input stream can be used.
-              * RAW16 is supported as output/input format.
-              * RAW16 is reprocessable into both YUV_420_888 and JPEG
-                formats.
-              * The maximum available resolution for RAW16 streams (both
-                input/output) will match either the value in
-                android.sensor.info.pixelArraySize or
-                android.sensor.info.activeArraySize.
-              * All DNG-related optional metadata entries are provided
-                by the camera device.
               </notes>
             </value>
           </enum>
@@ -3702,9 +3691,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           Additional constraint details per-capability will be available
           in the Compatibility Test Suite.
 
-          BACKWARD_COMPATIBLE capability requirements are not explicitly listed.
+          Minimum baseline requirements required for the
+          BACKWARD_COMPATIBLE capability are not explicitly listed.
           Instead refer to "BC" tags and the camera CTS tests in the
-          android.hardware.cts package.
+          android.hardware.camera2.cts package.
 
           Listed controls that can be either request or result (e.g.
           android.sensor.exposureTime) must be available both in the

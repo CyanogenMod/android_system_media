@@ -3107,8 +3107,7 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/><br/>
-</p></span>
+frame rate of video recording.<wbr/>  </p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -6761,8 +6760,7 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/><br/>
-</p></span>
+frame rate of video recording.<wbr/>  </p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -12991,21 +12989,13 @@ partial results.<wbr/></p>
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">BACKWARD_COMPATIBLE</span>
-                    <span class="entry_type_enum_optional">[hidden]</span>
                     <span class="entry_type_enum_notes"><p>The minimal set of capabilities that every camera
 device (regardless of <a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a>)
-will support.<wbr/></p>
-<p>The full set of features supported by this capability makes
-the camera2 api backwards compatible with the camera1
-(android.<wbr/>hardware.<wbr/>Camera) API.<wbr/></p></span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">OPTIONAL</span>
-                    <span class="entry_type_enum_optional">[hidden]</span>
-                    <span class="entry_type_enum_notes"><p>This is a catch-all capability to include all other
-tags or functionality not encapsulated by one of the other
-capabilities.<wbr/></p>
-<p>A typical example is all tags marked 'optional'.<wbr/></p></span>
+supports.<wbr/></p>
+<p>This capability is listed by all devices,<wbr/> and
+indicates that the camera device has a feature set
+that's comparable to the baseline requirements for the
+older android.<wbr/>hardware.<wbr/>Camera API.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">MANUAL_SENSOR</span>
@@ -13090,6 +13080,21 @@ will accurately report the values applied by AWB in the result.<wbr/></p>
 controls,<wbr/> but this capability only covers the above list of controls.<wbr/></p></span>
                   </li>
                   <li>
+                    <span class="entry_type_enum_name">DNG</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>The camera device supports outputting RAW buffers that can be
+saved offline into a DNG format.<wbr/></p>
+<ul>
+<li>RAW_<wbr/>SENSOR is supported as an output format.<wbr/></li>
+<li>The maximum available resolution for RAW_<wbr/>SENSOR streams
+  will match either the value in
+  <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a> or
+  <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></li>
+<li>All DNG-related optional metadata entries are provided
+  by the camera device.<wbr/></li>
+</ul></span>
+                  </li>
+                  <li>
                     <span class="entry_type_enum_name">ZSL</span>
                     <span class="entry_type_enum_optional">[optional]</span>
                     <span class="entry_type_enum_optional">[hidden]</span>
@@ -13105,25 +13110,6 @@ controls,<wbr/> but this capability only covers the above list of controls.<wbr/
 <li>The maximum available resolution for RAW_<wbr/>OPAQUE streams
   (both input/<wbr/>output) will match the maximum available
   resolution of JPEG streams.<wbr/></li>
-</ul></span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">DNG</span>
-                    <span class="entry_type_enum_optional">[optional]</span>
-                    <span class="entry_type_enum_notes"><p>The camera device supports outputting RAW buffers that can be
-saved offline into a DNG format.<wbr/> It can reprocess DNG
-files (produced from the same camera device) back into YUV.<wbr/></p>
-<ul>
-<li>At least one input stream can be used.<wbr/></li>
-<li>RAW16 is supported as output/<wbr/>input format.<wbr/></li>
-<li>RAW16 is reprocessable into both YUV_<wbr/>420_<wbr/>888 and JPEG
-  formats.<wbr/></li>
-<li>The maximum available resolution for RAW16 streams (both
-  input/<wbr/>output) will match either the value in
-  <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a> or
-  <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></li>
-<li>All DNG-related optional metadata entries are provided
-  by the camera device.<wbr/></li>
 </ul></span>
                   </li>
                 </ul>
@@ -13177,9 +13163,10 @@ devices,<wbr/> but the application should query this field to be sure.<wbr/></p>
             <td class="entry_details" colspan="5">
               <p>Additional constraint details per-capability will be available
 in the Compatibility Test Suite.<wbr/></p>
-<p>BACKWARD_<wbr/>COMPATIBLE capability requirements are not explicitly listed.<wbr/>
+<p>Minimum baseline requirements required for the
+BACKWARD_<wbr/>COMPATIBLE capability are not explicitly listed.<wbr/>
 Instead refer to "BC" tags and the camera CTS tests in the
-android.<wbr/>hardware.<wbr/>cts package.<wbr/></p>
+android.<wbr/>hardware.<wbr/>camera2.<wbr/>cts package.<wbr/></p>
 <p>Listed controls that can be either request or result (e.<wbr/>g.<wbr/>
 <a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a>) must be available both in the
 request and the result in order to be considered to be
