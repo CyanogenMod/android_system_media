@@ -30,10 +30,31 @@ const effect_uuid_t * const SL_IID_VIRTUALIZER = &SL_IID_VIRTUALIZER_;
 #endif //OPENSL_ES_H_
 
 /* enumerated parameter settings for virtualizer effect */
+/* to keep in sync with frameworks/base/media/java/android/media/audiofx/Virtualizer.java */
 typedef enum
 {
     VIRTUALIZER_PARAM_STRENGTH_SUPPORTED,
-    VIRTUALIZER_PARAM_STRENGTH
+    VIRTUALIZER_PARAM_STRENGTH,
+    // used with EFFECT_CMD_GET_PARAM
+    // format:
+    //   parameters int32_t              VIRTUALIZER_PARAM_VIRTUAL_SPEAKER_ANGLES
+    //              audio_channel_mask_t input channel mask
+    //              audio_devices_t      audio output device
+    //   output     int32_t*             an array of length 2 * the number of channels in the mask
+    //                                       where entries are the succession of the channel mask
+    //                                       of each speaker (i.e. a single bit is selected in the
+    //                                       channel mask) followed by the angle value in degrees
+    //   status     int -EINVAL  if configuration is not supported or invalid or not forcing
+    //                   0       if configuration is supported and the mode is forced
+    VIRTUALIZER_PARAM_VIRTUAL_SPEAKER_ANGLES,
+    // used with EFFECT_CMD_SET_PARAM
+    // format:
+    //   parameters  int32_t           VIRTUALIZER_PARAM_FORCE_VIRTUALIZATION_MODE
+    //               audio_devices_t   audio output device
+    //   status      int -EINVAL   if the device is not supported or invalid
+    //                   0         if the device is supported and the mode is forced, or forcing
+    //                               was disabled for the AUDIO_DEVICE_NONE audio device.
+    VIRTUALIZER_PARAM_FORCE_VIRTUALIZATION_MODE
 } t_virtualizer_params;
 
 #if __cplusplus
