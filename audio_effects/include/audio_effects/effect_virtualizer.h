@@ -40,12 +40,18 @@ typedef enum
     //   parameters int32_t              VIRTUALIZER_PARAM_VIRTUAL_SPEAKER_ANGLES
     //              audio_channel_mask_t input channel mask
     //              audio_devices_t      audio output device
-    //   output     int32_t*             an array of length 2 * the number of channels in the mask
+    //   output     int32_t*             an array of length 3 * the number of channels in the mask
     //                                       where entries are the succession of the channel mask
     //                                       of each speaker (i.e. a single bit is selected in the
-    //                                       channel mask) followed by the angle value in degrees
+    //                                       channel mask) followed by the azimuth and the
+    //                                       elevation angles.
     //   status     int -EINVAL  if configuration is not supported or invalid or not forcing
     //                   0       if configuration is supported and the mode is forced
+    // notes:
+    // - all angles are expressed in degrees and are relative to the listener,
+    // - for azimuth: 0 is the direction the listener faces, 180 is behind the listener, and
+    //    -90 is to her/his left,
+    // - for elevation: 0 is the horizontal plane, +90 is above the listener, -90 is below.
     VIRTUALIZER_PARAM_VIRTUAL_SPEAKER_ANGLES,
     // used with EFFECT_CMD_SET_PARAM
     // format:
