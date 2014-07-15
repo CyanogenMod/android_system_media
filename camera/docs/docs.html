@@ -3107,8 +3107,7 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/><br/>
-</p></span>
+frame rate of video recording.<wbr/>  </p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -6761,8 +6760,7 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/><br/>
-</p></span>
+frame rate of video recording.<wbr/>  </p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -8727,7 +8725,7 @@ of reducing frame rate relative to sensor raw output.<wbr/></p>
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -8812,7 +8810,7 @@ camera device.<wbr/></p>
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -8918,7 +8916,7 @@ of reducing frame rate relative to sensor raw output.<wbr/></p>
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -13082,10 +13080,13 @@ will accurately report the values applied by AWB in the result.<wbr/></p>
 controls,<wbr/> but this capability only covers the above list of controls.<wbr/></p></span>
                   </li>
                   <li>
-                    <span class="entry_type_enum_name">DNG</span>
+                    <span class="entry_type_enum_name">RAW</span>
                     <span class="entry_type_enum_optional">[optional]</span>
-                    <span class="entry_type_enum_notes"><p>The camera device supports outputting RAW buffers that can be
-saved offline into a DNG format.<wbr/></p>
+                    <span class="entry_type_enum_notes"><p>The camera device supports outputting RAW buffers and
+metadata for interpreting them.<wbr/></p>
+<p>Devices supporting the RAW capability allow both for
+saving DNG files,<wbr/> and for direct application processing of
+raw sensor images.<wbr/></p>
 <ul>
 <li>RAW_<wbr/>SENSOR is supported as an output format.<wbr/></li>
 <li>The maximum available resolution for RAW_<wbr/>SENSOR streams
@@ -14505,17 +14506,17 @@ if its dependent capability is supported:</p>
 <tr>
 <td align="left">RAW_<wbr/>OPAQUE</td>
 <td align="left">RAW16</td>
-<td align="left">DNG</td>
+<td align="left">RAW</td>
 </tr>
 <tr>
 <td align="left">RAW16</td>
 <td align="left">YUV_<wbr/>420_<wbr/>888</td>
-<td align="left">DNG</td>
+<td align="left">RAW</td>
 </tr>
 <tr>
 <td align="left">RAW16</td>
 <td align="left">JPEG</td>
-<td align="left">DNG</td>
+<td align="left">RAW</td>
 </tr>
 </tbody>
 </table>
@@ -14554,7 +14555,7 @@ for (size_<wbr/>t i = 0; i &lt; entry.<wbr/>count; ) {
     i += length;
 }
 
-//<wbr/> writing (static example,<wbr/> DNG+ZSL)
+//<wbr/> writing (static example,<wbr/> RAW+ZSL)
 int32_<wbr/>t[] contents = {
   RAW_<wbr/>OPAQUE,<wbr/> 3,<wbr/> RAW16,<wbr/> YUV_<wbr/>420_<wbr/>888,<wbr/> BLOB,<wbr/>
   RAW16,<wbr/> 2,<wbr/> YUV_<wbr/>420_<wbr/>888,<wbr/> BLOB,<wbr/>
@@ -15857,7 +15858,7 @@ active pixels.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -15984,7 +15985,7 @@ the sensor,<wbr/> in reading order.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -16240,7 +16241,7 @@ including black calibration pixels.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
                   <li><a href="#tag_BC">BC</a></li>
               </ul>
             </td>
@@ -16295,7 +16296,7 @@ raw sensor image will include black pixels.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -16514,7 +16515,7 @@ calculating the <a href="#static_android.sensor.colorTransform1">android.<wbr/>s
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -16542,7 +16543,8 @@ information for improved quality,<wbr/> including
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>The first reference illuminant (<a href="#static_android.sensor.referenceIlluminant1">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant1</a>)
-and corresponding matrices must be present to support DNG output.<wbr/></p>
+and corresponding matrices must be present to support the RAW capability
+and DNG output.<wbr/></p>
 <p>When producing raw images with a color profile that has only been
 calibrated against a single light source,<wbr/> it is valid to omit
 <a href="#static_android.sensor.referenceIlluminant2">android.<wbr/>sensor.<wbr/>reference<wbr/>Illuminant2</a> along with the
@@ -16596,7 +16598,7 @@ calculating the <a href="#static_android.sensor.colorTransform2">android.<wbr/>s
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -16654,7 +16656,7 @@ reference sensor colorspace to the actual device sensor colorspace.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -16715,7 +16717,7 @@ reference sensor colorspace to the actual device sensor colorspace
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -16777,7 +16779,7 @@ reference sensor color space.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -16841,7 +16843,7 @@ reference sensor color space.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -16907,7 +16909,7 @@ sensor colorspace to the CIE XYZ colorspace with a D50 whitepoint.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -16969,7 +16971,7 @@ sensor colorspace to the CIE XYZ colorspace with a D50 whitepoint.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -17074,7 +17076,7 @@ ISO=100</p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -17243,7 +17245,7 @@ Value &gt;= 1</p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -17298,7 +17300,7 @@ element.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -17821,7 +17823,7 @@ the time of capture.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -17883,7 +17885,7 @@ for each pixel.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -17946,7 +17948,7 @@ sample is required to be <code>(1,<wbr/> 1)</code>.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -17997,7 +17999,7 @@ The curve is interpolated using a cubic spline.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -18854,7 +18856,7 @@ generation</p>
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -19264,7 +19266,7 @@ map</p>
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -20299,7 +20301,7 @@ into this metadata field.<wbr/> See
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -20357,7 +20359,7 @@ The <code>(x,<wbr/> y)</code> coordinates must be bounded by
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
-                  <li><a href="#tag_DNG">DNG</a></li>
+                  <li><a href="#tag_RAW">RAW</a></li>
               </ul>
             </td>
 
@@ -22467,8 +22469,8 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#dynamic_android.noiseReduction.mode">android.noiseReduction.mode</a> (dynamic)</li>
         </ul>
       </li> <!-- tag_V1 -->
-      <li id="tag_DNG">DNG - 
-        Needed for DNG file support
+      <li id="tag_RAW">RAW - 
+        Needed for useful RAW image processing and DNG file support
     
         <ul class="tags_entries">
           <li><a href="#controls_android.hotPixel.mode">android.hotPixel.mode</a> (controls)</li>
@@ -22497,7 +22499,7 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#dynamic_android.statistics.hotPixelMap">android.statistics.hotPixelMap</a> (dynamic)</li>
           <li><a href="#dynamic_android.hotPixel.mode">android.hotPixel.mode</a> (dynamic)</li>
         </ul>
-      </li> <!-- tag_DNG -->
+      </li> <!-- tag_RAW -->
       <li id="tag_HAL2">HAL2 - 
         Entry is only used by camera device HAL 2.x
     

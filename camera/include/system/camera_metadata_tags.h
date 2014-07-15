@@ -338,7 +338,7 @@ typedef enum camera_metadata_tag {
     ANDROID_STATISTICS_LENS_SHADING_MAP_MODE,         // enum         | public
     ANDROID_STATISTICS_END,
 
-    ANDROID_STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES = 
+    ANDROID_STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES =
                                                       // byte[]       | public
             ANDROID_STATISTICS_INFO_START,
     ANDROID_STATISTICS_INFO_HISTOGRAM_BUCKET_COUNT,   // int32        | system
@@ -660,7 +660,8 @@ typedef enum camera_metadata_enum_android_request_available_capabilities {
     ANDROID_REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE,
     ANDROID_REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR,
     ANDROID_REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING,
-    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_DNG,
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_DNG = 3, // temporary manual edit
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_RAW = 3,
     ANDROID_REQUEST_AVAILABLE_CAPABILITIES_ZSL,
 } camera_metadata_enum_android_request_available_capabilities_t;
 
@@ -833,5 +834,3 @@ typedef enum camera_metadata_enum_android_sync_max_latency {
     ANDROID_SYNC_MAX_LATENCY_PER_FRAME_CONTROL                  = 0,
     ANDROID_SYNC_MAX_LATENCY_UNKNOWN                            = -1,
 } camera_metadata_enum_android_sync_max_latency_t;
-
-
