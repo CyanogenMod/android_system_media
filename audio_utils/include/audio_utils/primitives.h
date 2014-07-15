@@ -277,7 +277,7 @@ void memcpy_to_float_from_i32(float *dst, const int32_t *src, size_t count);
  *  src     Source buffer
  *  count   Number of stereo frames to downmix
  * The destination and source buffers must be completely separate (non-overlapping).
- * The current implementation truncates the sum rather than dither, but this may change.
+ * The current implementation truncates the mean rather than dither, but this may change.
  */
 void downmix_to_mono_i16_from_stereo_i16(int16_t *dst, const int16_t *src, size_t count);
 
