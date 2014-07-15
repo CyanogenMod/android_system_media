@@ -112,6 +112,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <typedef name="location">
       <language name="java">android.location.Location</language>
     </typedef>
+    <typedef name="highSpeedVideoConfiguration">
+      <language name="java">android.hardware.camera2.params.HighSpeedVideoConfiguration</language>
+    </typedef>
   </types>
 
   <namespace name="android">
@@ -2180,7 +2183,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       </dynamic>
       <static>
         <entry name="availableHighSpeedVideoConfigurations" type="int32" visibility="hidden"
-               container="array">
+               container="array" typedef="highSpeedVideoConfiguration">
           <array>
             <size>4</size>
             <size>n</size>
@@ -2206,7 +2209,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           to do high speed recording, it can select the maximum size reported by this metadata to
           configure output streams. Once the size is selected, application can filter this metadata
           by selected size and get the supported fps ranges, and use these fps ranges to setup the
-          recording requests.
+          recording requests. Note that for the use case of multiple output streams, application
+          must select one unique size from this metadata to use. Otherwise a request error might
+          occur.
 
           For normal video recording use case, where some application will NOT set
           android.control.sceneMode to HIGH_SPEED_VIDEO in capture requests, the fps ranges
@@ -2216,6 +2221,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <hal_details>
           All the sizes listed in this configuration will be a subset of the sizes reported by
           android.scaler.availableStreamConfigurations for processed non-stalling output formats.
+          Note that for all high speed video configurations, HAL must be able to support a minimum
+          of two streams, though the application might choose to configure just one stream.
 
           Since the HIGH_SPEED_VIDEO mode may be turned on for preview view only case, the preview
           fps is bounded by device refresh rate (e.g. 60fps). For a given resolution, it is
