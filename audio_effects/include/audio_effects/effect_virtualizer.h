@@ -54,7 +54,15 @@ typedef enum
     //   status      int -EINVAL   if the device is not supported or invalid
     //                   0         if the device is supported and the mode is forced, or forcing
     //                               was disabled for the AUDIO_DEVICE_NONE audio device.
-    VIRTUALIZER_PARAM_FORCE_VIRTUALIZATION_MODE
+    VIRTUALIZER_PARAM_FORCE_VIRTUALIZATION_MODE,
+    // used with EFFECT_CMD_GET_PARAM
+    // format:
+    //   parameters int32_t              VIRTUALIZER_PARAM_VIRTUALIZATION_MODE
+    //   output     audio_device_t       audio device reflecting the current virtualization mode,
+    //                                   AUDIO_DEVICE_NONE when not virtualizing
+    //   status     int -EINVAL if an error occurred
+    //                  0       if the output value is successfully retrieved
+    VIRTUALIZER_PARAM_VIRTUALIZATION_MODE
 } t_virtualizer_params;
 
 #if __cplusplus
