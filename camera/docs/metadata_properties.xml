@@ -24,8 +24,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <tag id="V1">
         New features for first camera 2 release (API1)
     </tag>
-    <tag id="DNG">
-        Needed for DNG file support
+    <tag id="RAW">
+        Needed for useful RAW image processing and DNG file support
     </tag>
     <tag id="HAL2">
         Entry is only used by camera device HAL 2.x
@@ -2477,7 +2477,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           are stuck at an arbitrary value).
           </details>
           <tag id="V1" />
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
       </controls>
       <static>
@@ -2500,13 +2500,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           pixels than actual pixels on the camera sensor.
           </hal_details>
           <tag id="V1" />
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
       </static>
       <dynamic>
         <clone entry="android.hotPixel.mode" kind="controls">
           <tag id="V1" />
-          <tag id="DNG" />
+          <tag id="RAW" />
         </clone>
       </dynamic>
     </section>
@@ -3635,10 +3635,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               controls, but this capability only covers the above list of controls.
               </notes>
             </value>
-            <value optional="true">DNG
+            <value optional="true">RAW
               <notes>
-              The camera device supports outputting RAW buffers that can be
-              saved offline into a DNG format.
+              The camera device supports outputting RAW buffers and
+              metadata for interpreting them.
+
+              Devices supporting the RAW capability allow both for
+              saving DNG files, and for direct application processing of
+              raw sensor images.
 
               * RAW_SENSOR is supported as an output format.
               * The maximum available resolution for RAW_SENSOR streams
@@ -4155,9 +4159,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           :---------------|:-----------------|:----------
           RAW_OPAQUE      | JPEG             | ZSL
           RAW_OPAQUE      | YUV_420_888      | ZSL
-          RAW_OPAQUE      | RAW16            | DNG
-          RAW16           | YUV_420_888      | DNG
-          RAW16           | JPEG             | DNG
+          RAW_OPAQUE      | RAW16            | RAW
+          RAW16           | YUV_420_888      | RAW
+          RAW16           | JPEG             | RAW
 
           For ZSL-capable camera devices, using the RAW_OPAQUE format
           as either input or output will never hurt maximum frame rate (i.e.
@@ -4193,7 +4197,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                   i += length;
               }
 
-              // writing (static example, DNG+ZSL)
+              // writing (static example, RAW+ZSL)
               int32_t[] contents = {
                 RAW_OPAQUE, 3, RAW16, YUV_420_888, BLOB,
                 RAW16, 2, YUV_420_888, BLOB,
@@ -4679,7 +4683,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </range>
             <details>It is smaller or equal to
             sensor full pixel array, which could include the black calibration pixels.</details>
-            <tag id="DNG" />
+            <tag id="RAW" />
           </entry>
           <entry name="sensitivityRange" type="int32" visibility="public"
           type_notes="Range of supported sensitivities"
@@ -4714,7 +4718,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <description>The arrangement of color filters on sensor;
             represents the colors in the top-left 2x2 section of
             the sensor, in reading order.</description>
-            <tag id="DNG" />
+            <tag id="RAW" />
           </entry>
           <entry name="exposureTimeRange" type="int64" visibility="public"
           type_notes="nanoseconds" container="array" typedef="rangeLong">
@@ -4806,7 +4810,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             If a size corresponding to pixelArraySize is listed, the resulting
             raw sensor image will include black pixels.
             </details>
-            <tag id="DNG" />
+            <tag id="RAW" />
             <tag id="BC" />
           </entry>
           <entry name="whiteLevel" type="int32" visibility="public">
@@ -4831,7 +4835,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             so the value for linear sensors should not be significantly lower
             than maximum raw value supported, i.e. 2^(sensor bits per pixel).
             </hal_details>
-            <tag id="DNG" />
+            <tag id="RAW" />
           </entry>
           <entry name="timestampCalibration" type="byte" visibility="public" enum="true">
             <enum>
@@ -4914,7 +4918,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <hal_details>
           The first reference illuminant (android.sensor.referenceIlluminant1)
-          and corresponding matrices must be present to support DNG output.
+          and corresponding matrices must be present to support the RAW capability
+          and DNG output.
 
           When producing raw images with a color profile that has only been
           calibrated against a single light source, it is valid to omit
@@ -4934,7 +4939,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           temperature illuminant such as D65 will be chosen for the second
           reference illuminant.
           </hal_details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="referenceIlluminant2" type="byte" visibility="public">
           <description>
@@ -4952,7 +4957,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.sensor.calibrationTransform2, and
           android.sensor.forwardMatrix2 will also be present.
           </details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="calibrationTransform1" type="rational"
         visibility="public" optional="true"
@@ -4977,7 +4982,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           space under the first reference illuminant
           (android.sensor.referenceIlluminant1).
           </details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="calibrationTransform2" type="rational"
         visibility="public" optional="true"
@@ -5006,7 +5011,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           This matrix will only be present if the second reference
           illuminant is present.
           </details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="colorTransform1" type="rational"
         visibility="public" optional="true"
@@ -5036,7 +5041,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           match the standard white point for the first reference illuminant
           (i.e. no chromatic adaptation will be applied by this transform).
           </details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="colorTransform2" type="rational"
         visibility="public" optional="true"
@@ -5069,7 +5074,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           This matrix will only be present if the second reference
           illuminant is present.
           </details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="forwardMatrix1" type="rational"
         visibility="public" optional="true"
@@ -5097,7 +5102,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           illuminant in the reference sensor colorspace is mapped to D50 in the
           CIE XYZ colorspace.
           </details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="forwardMatrix2" type="rational"
         visibility="public" optional="true"
@@ -5128,7 +5133,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           This matrix will only be present if the second reference
           illuminant is present.
           </details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="baseGainFactor" type="rational"
         optional="true">
@@ -5161,7 +5166,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           The values are given in row-column scan order, with the first value
           corresponding to the element of the CFA in row=0, column=0.
           </hal_details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="maxAnalogSensitivity" type="int32" visibility="public"
         optional="true">
@@ -5207,7 +5212,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           dimensions given is hue, saturation, value; where hue is the 0th
           element.
           </details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="noiseProfile" type="double" visibility="public"
         optional="true" type_notes="Pairs of noise model coefficients"
@@ -5248,7 +5253,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           for the red channel, S1 and O1 are the coefficients for the first green
           channel, etc.
           </hal_details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
       </static>
       <dynamic>
@@ -5323,7 +5328,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           The order of the values is R, G, B; where R is in the lowest index.
           </details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="profileHueSatMap" type="float"
         visibility="system" optional="true"
@@ -5355,7 +5360,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           inner loop. All zero input saturation entries are required to have a
           value scale factor of 1.0.
           </details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="profileToneCurve" type="float"
         visibility="system" optional="true"
@@ -5379,7 +5384,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           The curve is specified as a list of value pairs in linear gamma.
           The curve is interpolated using a cubic spline.
           </details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
         <entry name="greenSplit" type="float" visibility="public" optional="true">
           <description>
@@ -5428,7 +5433,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           set of images.  Other methods of calculation that produce equivalent
           results, and can be interpreted in the same manner, may be used.
           </hal_details>
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
       </dynamic>
       <controls>
@@ -5760,7 +5765,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           This must be set to a valid mode from android.statistics.info.availableHotPixelMapModes.
           </details>
           <tag id="V1" />
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
       </controls>
       <static>
@@ -5840,7 +5845,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             the ON and OFF options.
             </details>
             <tag id="V1" />
-            <tag id="DNG" />
+            <tag id="RAW" />
           </entry>
         </namespace>
       </static>
@@ -6194,7 +6199,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           pixels than actual pixels on the camera sensor.
           </hal_details>
           <tag id="V1" />
-          <tag id="DNG" />
+          <tag id="RAW" />
         </entry>
       </dynamic>
       <controls>

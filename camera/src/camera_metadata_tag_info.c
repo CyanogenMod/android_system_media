@@ -1637,8 +1637,8 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "MANUAL_POST_PROCESSING";
                     ret = 0;
                     break;
-                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_DNG:
-                    msg = "DNG";
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_RAW:
+                    msg = "RAW";
                     ret = 0;
                     break;
                 case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_ZSL:
