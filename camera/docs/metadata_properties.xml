@@ -3532,7 +3532,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           This value should be 4 or less.
           </hal_details>
         </entry>
-        <entry name="partialResultCount" type="int32" visibility="public">
+        <entry name="partialResultCount" type="int32" visibility="public" optional="true">
           <description>Defines how many sub-components
           a result will be composed of.
           </description>
