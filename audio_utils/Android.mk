@@ -6,6 +6,7 @@ LOCAL_MODULE := libaudioutils
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES:= \
+	channels.c \
 	fixedfft.cpp.arm \
 	format.c \
 	minifloat.c \
@@ -29,6 +30,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libaudioutils
 LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := \
+	channels.c \
 	format.c \
 	minifloat.c \
 	primitives.c
