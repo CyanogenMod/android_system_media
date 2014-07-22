@@ -4560,7 +4560,7 @@ mode other than FACE_<wbr/>PRIORITY.<wbr/></p>
                 <span class="entry_type_array">
                   4 x n
                 </span>
-              <span class="entry_type_visibility"> [hidden]</span>
+              <span class="entry_type_visibility"> [hidden as highSpeedVideoConfiguration]</span>
 
 
 
@@ -4604,7 +4604,9 @@ preview streams and setup the recording requests.<wbr/> For example,<wbr/> if th
 to do high speed recording,<wbr/> it can select the maximum size reported by this metadata to
 configure output streams.<wbr/> Once the size is selected,<wbr/> application can filter this metadata
 by selected size and get the supported fps ranges,<wbr/> and use these fps ranges to setup the
-recording requests.<wbr/></p>
+recording requests.<wbr/> Note that for the use case of multiple output streams,<wbr/> application
+must select one unique size from this metadata to use.<wbr/> Otherwise a request error might
+occur.<wbr/></p>
 <p>For normal video recording use case,<wbr/> where some application will NOT set
 <a href="#controls_android.control.sceneMode">android.<wbr/>control.<wbr/>scene<wbr/>Mode</a> to HIGH_<wbr/>SPEED_<wbr/>VIDEO in capture requests,<wbr/> the fps ranges
 reported in this metadata must not be used to setup capture requests,<wbr/> or it will cause
@@ -4618,7 +4620,9 @@ request error.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>All the sizes listed in this configuration will be a subset of the sizes reported by
-<a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a> for processed non-stalling output formats.<wbr/></p>
+<a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a> for processed non-stalling output formats.<wbr/>
+Note that for all high speed video configurations,<wbr/> HAL must be able to support a minimum
+of two streams,<wbr/> though the application might choose to configure just one stream.<wbr/></p>
 <p>Since the HIGH_<wbr/>SPEED_<wbr/>VIDEO mode may be turned on for preview view only case,<wbr/> the preview
 fps is bounded by device refresh rate (e.<wbr/>g.<wbr/> 60fps).<wbr/> For a given resolution,<wbr/> it is
 recommended that this list includes some fps ranges (e.<wbr/>g.<wbr/> [30,<wbr/> 60]) that is suitable
