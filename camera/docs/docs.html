@@ -774,8 +774,6 @@
             <li
             ><a href="#static_android.sensor.profileHueSatMapDimensions">android.sensor.profileHueSatMapDimensions</a></li>
             <li
-            ><a href="#static_android.sensor.noiseProfile">android.sensor.noiseProfile</a></li>
-            <li
             ><a href="#static_android.sensor.availableTestPatternModes">android.sensor.availableTestPatternModes</a></li>
           </ul>
         </li>
@@ -794,6 +792,8 @@
             ><a href="#dynamic_android.sensor.temperature">android.sensor.temperature</a></li>
             <li
             ><a href="#dynamic_android.sensor.neutralColorPoint">android.sensor.neutralColorPoint</a></li>
+            <li
+            ><a href="#dynamic_android.sensor.noiseProfile">android.sensor.noiseProfile</a></li>
             <li
             ><a href="#dynamic_android.sensor.profileHueSatMap">android.sensor.profileHueSatMap</a></li>
             <li
@@ -17273,85 +17273,6 @@ element.<wbr/></p>
            <!-- end of entry -->
         
                 
-          <tr class="entry" id="static_android.sensor.noiseProfile">
-            <td class="entry_name
-             " rowspan="5">
-              android.<wbr/>sensor.<wbr/>noise<wbr/>Profile
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name">double</span>
-                <span class="entry_type_container">x</span>
-
-                <span class="entry_type_array">
-                  2 x CFA Channels
-                </span>
-              <span class="entry_type_visibility"> [public as pairDoubleDouble]</span>
-
-
-
-                <div class="entry_type_notes">Pairs of noise model coefficients</div>
-
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>Noise model coefficients for each CFA mosaic channel.<wbr/></p>
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_RAW">RAW</a></li>
-              </ul>
-            </td>
-
-          </tr>
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>This tag contains two noise model coefficients for each CFA channel
-corresponding to the sensor amplification (S) and sensor readout
-noise (O).<wbr/>  These are given as pairs of coefficients for each channel
-in the same order as channels listed for the CFA layout tag
-(see <a href="#static_android.sensor.info.colorFilterArrangement">android.<wbr/>sensor.<wbr/>info.<wbr/>color<wbr/>Filter<wbr/>Arrangement</a>).<wbr/>  This is
-represented as an array of Pair&lt;Double,<wbr/> Double&gt;,<wbr/> where
-the first member of the Pair at index n is the S coefficient and the
-second member is the O coefficient for the nth color channel in the CFA.<wbr/></p>
-<p>These coefficients are used in a two parameter noise model to describe
-the amount of noise present in the image for each CFA channel.<wbr/>  The
-noise model used here is:</p>
-<p>N(x) = sqrt(Sx + O)</p>
-<p>Where x represents the recorded signal of a CFA channel normalized to
-the range [0,<wbr/> 1],<wbr/> and S and O are the noise model coeffiecients for
-that channel.<wbr/></p>
-<p>A more detailed description of the noise model can be found in the
-Adobe DNG specification for the NoiseProfile tag.<wbr/></p>
-            </td>
-          </tr>
-
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">HAL Implementation Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>For a CFA layout of RGGB,<wbr/> the list of coefficients would be given as
-an array of doubles S0,<wbr/>O0,<wbr/>S1,<wbr/>O1,...,<wbr/> where S0 and O0 are the coefficients
-for the red channel,<wbr/> S1 and O1 are the coefficients for the first green
-channel,<wbr/> etc.<wbr/></p>
-            </td>
-          </tr>
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-                
           <tr class="entry" id="static_android.sensor.availableTestPatternModes">
             <td class="entry_name
              " rowspan="3">
@@ -17848,6 +17769,85 @@ processing raw sensor data.<wbr/></p>
             </td>
           </tr>
 
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.sensor.noiseProfile">
+            <td class="entry_name
+             " rowspan="5">
+              android.<wbr/>sensor.<wbr/>noise<wbr/>Profile
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">double</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  2 x CFA Channels
+                </span>
+              <span class="entry_type_visibility"> [public as pairDoubleDouble]</span>
+
+
+
+                <div class="entry_type_notes">Pairs of noise model coefficients</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Noise model coefficients for each CFA mosaic channel.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_RAW">RAW</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This tag contains two noise model coefficients for each CFA channel
+corresponding to the sensor amplification (S) and sensor readout
+noise (O).<wbr/>  These are given as pairs of coefficients for each channel
+in the same order as channels listed for the CFA layout tag
+(see <a href="#static_android.sensor.info.colorFilterArrangement">android.<wbr/>sensor.<wbr/>info.<wbr/>color<wbr/>Filter<wbr/>Arrangement</a>).<wbr/>  This is
+represented as an array of Pair&lt;Double,<wbr/> Double&gt;,<wbr/> where
+the first member of the Pair at index n is the S coefficient and the
+second member is the O coefficient for the nth color channel in the CFA.<wbr/></p>
+<p>These coefficients are used in a two parameter noise model to describe
+the amount of noise present in the image for each CFA channel.<wbr/>  The
+noise model used here is:</p>
+<p>N(x) = sqrt(Sx + O)</p>
+<p>Where x represents the recorded signal of a CFA channel normalized to
+the range [0,<wbr/> 1],<wbr/> and S and O are the noise model coeffiecients for
+that channel.<wbr/></p>
+<p>A more detailed description of the noise model can be found in the
+Adobe DNG specification for the NoiseProfile tag.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For a CFA layout of RGGB,<wbr/> the list of coefficients would be given as
+an array of doubles S0,<wbr/>O0,<wbr/>S1,<wbr/>O1,...,<wbr/> where S0 and O0 are the coefficients
+for the red channel,<wbr/> S1 and O1 are the coefficients for the first green
+channel,<wbr/> etc.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -22495,8 +22495,8 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#static_android.sensor.forwardMatrix2">android.sensor.forwardMatrix2</a> (static)</li>
           <li><a href="#static_android.sensor.blackLevelPattern">android.sensor.blackLevelPattern</a> (static)</li>
           <li><a href="#static_android.sensor.profileHueSatMapDimensions">android.sensor.profileHueSatMapDimensions</a> (static)</li>
-          <li><a href="#static_android.sensor.noiseProfile">android.sensor.noiseProfile</a> (static)</li>
           <li><a href="#dynamic_android.sensor.neutralColorPoint">android.sensor.neutralColorPoint</a> (dynamic)</li>
+          <li><a href="#dynamic_android.sensor.noiseProfile">android.sensor.noiseProfile</a> (dynamic)</li>
           <li><a href="#dynamic_android.sensor.profileHueSatMap">android.sensor.profileHueSatMap</a> (dynamic)</li>
           <li><a href="#dynamic_android.sensor.profileToneCurve">android.sensor.profileToneCurve</a> (dynamic)</li>
           <li><a href="#dynamic_android.sensor.greenSplit">android.sensor.greenSplit</a> (dynamic)</li>
