@@ -454,8 +454,6 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     { "orientation",                   TYPE_INT32  },
     [ ANDROID_SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS - ANDROID_SENSOR_START ] =
     { "profileHueSatMapDimensions",    TYPE_INT32  },
-    [ ANDROID_SENSOR_NOISE_PROFILE - ANDROID_SENSOR_START ] =
-    { "noiseProfile",                  TYPE_DOUBLE },
     [ ANDROID_SENSOR_TIMESTAMP - ANDROID_SENSOR_START ] =
     { "timestamp",                     TYPE_INT64  },
     [ ANDROID_SENSOR_TEMPERATURE - ANDROID_SENSOR_START ] =
@@ -463,6 +461,8 @@ static tag_info_t android_sensor[ANDROID_SENSOR_END -
     [ ANDROID_SENSOR_NEUTRAL_COLOR_POINT - ANDROID_SENSOR_START ] =
     { "neutralColorPoint",             TYPE_RATIONAL
                 },
+    [ ANDROID_SENSOR_NOISE_PROFILE - ANDROID_SENSOR_START ] =
+    { "noiseProfile",                  TYPE_DOUBLE },
     [ ANDROID_SENSOR_PROFILE_HUE_SAT_MAP - ANDROID_SENSOR_START ] =
     { "profileHueSatMap",              TYPE_FLOAT  },
     [ ANDROID_SENSOR_PROFILE_TONE_CURVE - ANDROID_SENSOR_START ] =
@@ -1887,9 +1887,6 @@ int camera_metadata_enum_snprint(uint32_t tag,
         case ANDROID_SENSOR_PROFILE_HUE_SAT_MAP_DIMENSIONS: {
             break;
         }
-        case ANDROID_SENSOR_NOISE_PROFILE: {
-            break;
-        }
         case ANDROID_SENSOR_TIMESTAMP: {
             break;
         }
@@ -1897,6 +1894,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SENSOR_NEUTRAL_COLOR_POINT: {
+            break;
+        }
+        case ANDROID_SENSOR_NOISE_PROFILE: {
             break;
         }
         case ANDROID_SENSOR_PROFILE_HUE_SAT_MAP: {
