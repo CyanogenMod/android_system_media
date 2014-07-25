@@ -3485,7 +3485,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </entry>
       </static>
       <dynamic>
-        <entry name="frameCount" type="int32" visibility="public">
+        <entry name="frameCount" type="int32" visibility="hidden" deprecated="true">
           <description>A frame counter set by the framework. This value monotonically
           increases with every new result (that is, each new result has a unique
           frameCount value).</description>
@@ -6799,7 +6799,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               Every frame has the requests immediately applied.
 
               Furthermore for all results,
-              `android.sync.frameNumber == android.request.frameCount`
+              `android.sync.frameNumber == CaptureResult#getFrameNumber()`
 
               Changing controls over multiple requests one after another will
               produce results that have those controls applied atomically
@@ -6816,6 +6816,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               By submitting a series of identical requests, the camera device
               will eventually have the camera settings applied, but it is
               unknown when that exact point will be.
+
+              All LEGACY capability devices will have this as their maxLatency.
               </notes>
             </value>
           </enum>
@@ -6830,7 +6832,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <details>
           This defines the maximum distance (in number of metadata results),
           between android.sync.frameNumber and the equivalent
-          android.request.frameCount.
+          frame number for that result.
 
           In other words this acts as an upper boundary for how many frames
           must occur before the camera device knows for a fact that the new
@@ -6861,7 +6863,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <hal_details>
           Use `frame_count` from camera3_request_t instead of
-          android.request.frameCount.
+          android.request.frameCount or `CaptureResult#getFrameNumber()`.
 
           LIMITED devices are strongly encouraged to use a non-negative
           value. If UNKNOWN is used here then app developers do not have a way

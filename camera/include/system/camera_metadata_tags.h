@@ -235,7 +235,7 @@ typedef enum camera_metadata_tag {
     ANDROID_QUIRKS_PARTIAL_RESULT,                    // enum         | hidden
     ANDROID_QUIRKS_END,
 
-    ANDROID_REQUEST_FRAME_COUNT =                     // int32        | public
+    ANDROID_REQUEST_FRAME_COUNT =                     // int32        | hidden
             ANDROID_REQUEST_START,
     ANDROID_REQUEST_ID,                               // int32        | hidden
     ANDROID_REQUEST_INPUT_STREAMS,                    // int32[]      | system

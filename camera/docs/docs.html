@@ -633,6 +633,7 @@
           <span class="toc_kind_header">dynamic</span>
           <ul class="toc_section">
             <li
+                class="toc_deprecated"
             ><a href="#dynamic_android.request.frameCount">android.request.frameCount</a></li>
             <li
             ><a href="#dynamic_android.request.id">android.request.id</a></li>
@@ -13442,15 +13443,17 @@ via CameraCharacteristics#getKeys.<wbr/></p>
                 
           <tr class="entry" id="dynamic_android.request.frameCount">
             <td class="entry_name
+                entry_name_deprecated
              " rowspan="3">
               android.<wbr/>request.<wbr/>frame<wbr/>Count
             </td>
             <td class="entry_type">
                 <span class="entry_type_name">int32</span>
 
-              <span class="entry_type_visibility"> [public]</span>
+              <span class="entry_type_visibility"> [hidden]</span>
 
 
+              <span class="entry_type_deprecated">[deprecated] </span>
 
 
 
@@ -13467,6 +13470,7 @@ frameCount value).<wbr/></p>
             </td>
 
             <td class="entry_range">
+              <p><span class="entry_range_deprecated">Deprecated</span>. Do not use.</p>
               <p>&gt; 0</p>
             </td>
 
@@ -22249,7 +22253,7 @@ is also UNKNOWN.<wbr/></p>
                     <span class="entry_type_enum_value">0</span>
                     <span class="entry_type_enum_notes"><p>Every frame has the requests immediately applied.<wbr/></p>
 <p>Furthermore for all results,<wbr/>
-<code><a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == <a href="#controls_android.request.frameCount">android.<wbr/>request.<wbr/>frame<wbr/>Count</a></code></p>
+<code><a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == CaptureResult#getFrameNumber()</code></p>
 <p>Changing controls over multiple requests one after another will
 produce results that have those controls applied atomically
 each frame.<wbr/></p>
@@ -22262,7 +22266,8 @@ each frame.<wbr/></p>
 of the past requests applied to the camera settings.<wbr/></p>
 <p>By submitting a series of identical requests,<wbr/> the camera device
 will eventually have the camera settings applied,<wbr/> but it is
-unknown when that exact point will be.<wbr/></p></span>
+unknown when that exact point will be.<wbr/></p>
+<p>All LEGACY capability devices will have this as their maxLatency.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -22297,7 +22302,7 @@ result's state becomes synchronized (by setting
             <td class="entry_details" colspan="5">
               <p>This defines the maximum distance (in number of metadata results),<wbr/>
 between <a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> and the equivalent
-<a href="#controls_android.request.frameCount">android.<wbr/>request.<wbr/>frame<wbr/>Count</a>.<wbr/></p>
+frame number for that result.<wbr/></p>
 <p>In other words this acts as an upper boundary for how many frames
 must occur before the camera device knows for a fact that the new
 submitted camera settings have been applied in outgoing frames.<wbr/></p>
@@ -22331,7 +22336,7 @@ where resultN has frameNumber N.<wbr/>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Use <code>frame_<wbr/>count</code> from camera3_<wbr/>request_<wbr/>t instead of
-<a href="#controls_android.request.frameCount">android.<wbr/>request.<wbr/>frame<wbr/>Count</a>.<wbr/></p>
+<a href="#controls_android.request.frameCount">android.<wbr/>request.<wbr/>frame<wbr/>Count</a> or <code>CaptureResult#getFrameNumber()</code>.<wbr/></p>
 <p>LIMITED devices are strongly encouraged to use a non-negative
 value.<wbr/> If UNKNOWN is used here then app developers do not have a way
 to know when sensor settings have been applied.<wbr/></p>
