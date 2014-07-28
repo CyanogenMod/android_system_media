@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-#include <cutils/bitops.h> // for popcount()
+#include <cutils/bitops.h>  /* for popcount() */
 #include <audio_utils/primitives.h>
+#include "private/private.h"
 
 void ditherAndClamp(int32_t* out, const int32_t *sums, size_t c)
 {
@@ -263,9 +264,6 @@ size_t nonZeroStereo16(const int16_t *frames, size_t count)
     }
     return nonZero;
 }
-
-/* struct representation of 3 bytes for packed PCM 24 bit data */
-typedef struct {uint8_t c[3];} __attribute__((__packed__)) uint8x3_t;
 
 /*
  * C macro to do channel mask copying independent of dst/src sample type.
