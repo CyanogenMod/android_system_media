@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 #include <audio_utils/primitives.h>
 #include <audio_utils/format.h>
+#include <audio_utils/channels.h>
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -396,4 +397,37 @@ TEST(audio_utils_primitives, memcpy_by_index_array) {
     delete[] u16ary;
     delete[] u24ref;
     delete[] u24ary;
+}
+
+TEST(audio_utils_channels, adjust_channels) {
+    uint16_t *u16ref = new uint16_t[65536];
+    uint16_t *u16expand = new uint16_t[65536*2];
+    uint16_t *u16ary = new uint16_t[65536];
+
+    // reference buffer always increases
+    for (size_t i = 0; i < 65536; ++i) {
+        u16ref[i] = i;
+    }
+
+    // expand channels from stereo to quad.
+    adjust_channels(u16ref /*in_buff*/, 2 /*in_channels*/,
+            u16expand /*out_buff*/, 4 /*out_channels*/,
+            sizeof(u16ref[0]) /*sample_size_in_bytes*/,
+            sizeof(u16ref[0])*65536 /*num_in_bytes*/);
+
+    // expanded buffer must increase (or be zero)
+    checkMonotoneOrZero(u16expand, 65536*2);
+
+    // contract channels back to stereo.
+    adjust_channels(u16expand /*in_buff*/, 4 /*in_channels*/,
+            u16ary /*out_buff*/, 2 /*out_channels*/,
+            sizeof(u16expand[0]) /*sample_size_in_bytes*/,
+            sizeof(u16expand[0])*65536*2 /*num_in_bytes*/);
+
+    // must be identical to original.
+    EXPECT_EQ(memcmp(u16ary, u16ref, sizeof(u16ref[0])*65536), 0);
+
+    delete[] u16ref;
+    delete[] u16expand;
+    delete[] u16ary;
 }

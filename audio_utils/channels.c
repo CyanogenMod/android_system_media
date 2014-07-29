@@ -15,191 +15,61 @@
  */
 
 #include <string.h>
-
 #include <audio_utils/channels.h>
+#include "private/private.h"
 
-#include <log/log.h>
-
-/*
- * Convert a buffer of N-channel, interleaved PCM16 samples to M-channel PCM16 channels
- * (where N < M).
- *   in_buff points to the buffer of PCM16 samples
- *   in_buff_channels Specifies the number of channels in the input buffer.
- *   out_buff points to the buffer to receive converted PCM16 samples.
- *   out_buff_channels Specifies the number of channels in the output buffer.
- *   num_in_bytes size of input buffer in BYTES
- * returns
- *   the number of BYTES of output data.
- * NOTE
- *   channels > N are filled with silence.
- *   The out and sums buffers must either be completely separate (non-overlapping), or
- *   they must both start at the same address. Partially overlapping buffers are not supported.
+/* Channel expands (adds zeroes to audio frame end) from an input buffer to an output buffer.
+ * See expand_channels() function below for parameter definitions.
+ *
+ * Move from back to front so that the conversion can be done in-place
+ * i.e. in_buff == out_buff
+ * NOTE: num_in_bytes must be a multiple of in_buff_channels * in_buff_sample_size.
  */
-static size_t expand_channels_16(const int16_t* in_buff, int in_buff_chans,
-                                 int16_t* out_buff, int out_buff_chans,
-                                 size_t num_in_bytes)
-{
-    /*
-     * Move from back to front so that the conversion can be done in-place
-     * i.e. in_buff == out_buff
-     * NOTE: num_in_samples * out_buff_channels must be an even multiple of in_buff_chans
-     */
-    size_t num_in_samples = num_in_bytes / sizeof(int16_t);
-
-    size_t num_out_samples = (num_in_samples * out_buff_chans) / in_buff_chans;
-
-    int16_t* dst_ptr = out_buff + num_out_samples - 1;
-    size_t src_index;
-    const int16_t* src_ptr = in_buff + num_in_samples - 1;
-    int num_zero_chans = out_buff_chans - in_buff_chans;
-    for (src_index = 0; src_index < num_in_samples; src_index += in_buff_chans) {
-        int dst_offset;
-        for (dst_offset = 0; dst_offset < num_zero_chans; dst_offset++) {
-            *dst_ptr-- = 0;
-        }
-        for (; dst_offset < out_buff_chans; dst_offset++) {
-            *dst_ptr-- = *src_ptr--;
-        }
-    }
-
-    /* return number of *bytes* generated */
-    return num_out_samples * sizeof(int16_t);
+#define EXPAND_CHANNELS(in_buff, in_buff_chans, out_buff, out_buff_chans, num_in_bytes, zero) \
+{ \
+    size_t num_in_samples = num_in_bytes / sizeof(*in_buff); \
+    size_t num_out_samples = (num_in_samples * out_buff_chans) / in_buff_chans; \
+    typeof(out_buff) dst_ptr = out_buff + num_out_samples - 1; \
+    size_t src_index; \
+    typeof(in_buff) src_ptr = in_buff + num_in_samples - 1; \
+    size_t num_zero_chans = out_buff_chans - in_buff_chans; \
+    for (src_index = 0; src_index < num_in_samples; src_index += in_buff_chans) { \
+        size_t dst_offset; \
+        for (dst_offset = 0; dst_offset < num_zero_chans; dst_offset++) { \
+            *dst_ptr-- = zero; \
+        } \
+        for (; dst_offset < out_buff_chans; dst_offset++) { \
+            *dst_ptr-- = *src_ptr--; \
+        } \
+    } \
+    /* return number of *bytes* generated */ \
+    return num_out_samples * sizeof(*out_buff); \
 }
 
-/*
- * Convert a buffer of N-channel, interleaved PCM16 samples to M-channel PCM16 channels
- * (where N > M).
- *   in_buff points to the buffer of PCM16 samples
- *   in_buff_channels Specifies the number of channels in the input buffer.
- *   out_buff points to the buffer to receive converted PCM16 samples.
- *   out_buff_channels Specifies the number of channels in the output buffer.
- *   num_in_bytes size of input buffer in BYTES
- * returns
- *   the number of BYTES of output data.
- * NOTE
- *   channels > M are thrown away.
- *   The out and sums buffers must either be completely separate (non-overlapping), or
- *   they must both start at the same address. Partially overlapping buffers are not supported.
+/* Channel contracts (removes from audio frame end) from an input buffer to an output buffer.
+ * See contract_channels() function below for parameter definitions.
+ *
+ * Move from front to back so that the conversion can be done in-place
+ * i.e. in_buff == out_buff
+ * NOTE: num_in_bytes must be a multiple of in_buff_channels * in_buff_sample_size.
  */
-static size_t contract_channels_16(const int16_t* in_buff, size_t in_buff_chans,
-                                   int16_t* out_buff, size_t out_buff_chans,
-                                   size_t num_in_bytes)
-{
-    /*
-     * Move from front to back so that the conversion can be done in-place
-     * i.e. in_buff == out_buff
-     * NOTE: num_in_samples * out_buff_channels must be an even multiple of in_buff_chans
-     */
-    size_t num_in_samples = num_in_bytes / sizeof(int16_t);
-
-    size_t num_out_samples = (num_in_samples * out_buff_chans) / in_buff_chans;
-
-    size_t num_skip_samples = in_buff_chans - out_buff_chans;
-
-    int16_t* dst_ptr = out_buff;
-    const int16_t* src_ptr = in_buff;
-    size_t src_index;
-    for (src_index = 0; src_index < num_in_samples; src_index += in_buff_chans) {
-        size_t dst_offset;
-        for (dst_offset = 0; dst_offset < out_buff_chans; dst_offset++) {
-            *dst_ptr++ = *src_ptr++;
-        }
-        src_ptr += num_skip_samples;
-    }
-
-    /* return number of *bytes* generated */
-    return num_out_samples * sizeof(int16_t);
-}
-
-/*
- * Convert a buffer of N-channel, interleaved PCM32 samples to M-channel PCM32 channels
- * (where N < M).
- *   in_buff points to the buffer of PCM32 samples
- *   in_buff_channels Specifies the number of channels in the input buffer.
- *   out_buff points to the buffer to receive converted PCM32 samples.
- *   out_buff_channels Specifies the number of channels in the output buffer.
- *   num_in_bytes size of input buffer in BYTES
- * returns
- *   the number of BYTES of output data.
- * NOTE
- *   channels > N are filled with silence.
- *   The out and sums buffers must either be completely separate (non-overlapping), or
- *   they must both start at the same address. Partially overlapping buffers are not supported.
- */
-static size_t expand_channels_32(const int32_t* in_buff, size_t in_buff_chans,
-                                 int32_t* out_buff, size_t out_buff_chans,
-                                 size_t num_in_bytes)
-{
-    /*
-     * Move from back to front so that the conversion can be done in-place
-     * i.e. in_buff == out_buff
-     * NOTE: num_in_samples * out_buff_channels must be an even multiple of in_buff_chans
-     */
-    size_t num_in_samples = num_in_bytes / sizeof(int32_t);
-
-    size_t num_out_samples = (num_in_samples * out_buff_chans) / in_buff_chans;
-
-    int32_t* dst_ptr = out_buff + num_out_samples - 1;
-    const int32_t* src_ptr = in_buff + num_in_samples - 1;
-    size_t num_zero_chans = out_buff_chans - in_buff_chans;
-    size_t src_index;
-    for (src_index = 0; src_index < num_in_samples; src_index += in_buff_chans) {
-        size_t dst_offset;
-        for (dst_offset = 0; dst_offset < num_zero_chans; dst_offset++) {
-            *dst_ptr-- = 0;
-        }
-        for (; dst_offset < out_buff_chans; dst_offset++) {
-            *dst_ptr-- = *src_ptr--;
-        }
-    }
-
-    /* return number of *bytes* generated */
-    return num_out_samples * sizeof(int32_t);
-}
-
-/*
- * Convert a buffer of N-channel, interleaved PCM32 samples to M-channel PCM32 channels
- * (where N > M).
- *   in_buff points to the buffer of PCM32 samples
- *   in_buff_channels Specifies the number of channels in the input buffer.
- *   out_buff points to the buffer to receive converted PCM16 samples.
- *   out_buff_channels Specifies the number of channels in the output buffer.
- *   num_in_bytes size of input buffer in BYTES
- * returns
- *   the number of BYTES of output data.
- * NOTE
- *   channels > M are thrown away.
- *   The out and sums buffers must either be completely separate (non-overlapping), or
- *   they must both start at the same address. Partially overlapping buffers are not supported.
- */
-static size_t contract_channels_32(const int32_t* in_buff, size_t in_buff_chans,
-                                   int32_t* out_buff, size_t out_buff_chans,
-                                   size_t num_in_bytes)
-{
-    /*
-     * Move from front to back so that the conversion can be done in-place
-     * i.e. in_buff == out_buff
-     * NOTE: num_in_samples * out_buff_channels must be an even multiple of in_buff_chans
-     */
-    size_t num_in_samples = num_in_bytes / sizeof(int32_t);
-
-    size_t num_out_samples = (num_in_samples * out_buff_chans) / in_buff_chans;
-
-    size_t num_skip_samples = in_buff_chans - out_buff_chans;
-
-    int32_t* dst_ptr = out_buff;
-    const int32_t* src_ptr = in_buff;
-    size_t src_index;
-    for (src_index = 0; src_index < num_in_samples; src_index += in_buff_chans) {
-        size_t dst_offset;
-        for (dst_offset = 0; dst_offset < out_buff_chans; dst_offset++) {
-            *dst_ptr++ = *src_ptr++;
-        }
-        src_ptr += num_skip_samples;
-    }
-
-    /* return number of *bytes* generated */
-    return num_out_samples * sizeof(int32_t);
+#define CONTRACT_CHANNELS(in_buff, in_buff_chans, out_buff, out_buff_chans, num_in_bytes) \
+{ \
+    size_t num_in_samples = num_in_bytes / sizeof(*in_buff); \
+    size_t num_out_samples = (num_in_samples * out_buff_chans) / in_buff_chans; \
+    size_t num_skip_samples = in_buff_chans - out_buff_chans; \
+    typeof(out_buff) dst_ptr = out_buff; \
+    typeof(in_buff) src_ptr = in_buff; \
+    size_t src_index; \
+    for (src_index = 0; src_index < num_in_samples; src_index += in_buff_chans) { \
+        size_t dst_offset; \
+        for (dst_offset = 0; dst_offset < out_buff_chans; dst_offset++) { \
+            *dst_ptr++ = *src_ptr++; \
+        } \
+        src_ptr += num_skip_samples; \
+    } \
+    /* return number of *bytes* generated */ \
+    return num_out_samples * sizeof(*out_buff); \
 }
 
 /*
@@ -223,21 +93,26 @@ static size_t contract_channels(const void* in_buff, size_t in_buff_chans,
                                 unsigned sample_size_in_bytes, size_t num_in_bytes)
 {
     switch (sample_size_in_bytes) {
+    case 1:
+        CONTRACT_CHANNELS((const uint8_t*)in_buff, in_buff_chans,
+                          (uint8_t*)out_buff, out_buff_chans,
+                          num_in_bytes);
+        // returns in macro
     case 2:
-        return contract_channels_16((const int16_t*)in_buff, in_buff_chans,
-                                    (int16_t*)out_buff, out_buff_chans,
-                                    num_in_bytes);
-
-    /* TODO - do this conversion when we have a device to test it with */
+        CONTRACT_CHANNELS((const int16_t*)in_buff, in_buff_chans,
+                          (int16_t*)out_buff, out_buff_chans,
+                          num_in_bytes);
+        // returns in macro
     case 3:
-        ALOGE("24-bit channel contraction not supported.");
-        return 0;
-
+        CONTRACT_CHANNELS((const uint8x3_t*)in_buff, in_buff_chans,
+                          (uint8x3_t*)out_buff, out_buff_chans,
+                          num_in_bytes);
+        // returns in macro
     case 4:
-        return contract_channels_32((const int32_t*)in_buff, in_buff_chans,
-                                    (int32_t*)out_buff, out_buff_chans,
-                                    num_in_bytes);
-
+        CONTRACT_CHANNELS((const int32_t*)in_buff, in_buff_chans,
+                          (int32_t*)out_buff, out_buff_chans,
+                          num_in_bytes);
+        // returns in macro
     default:
         return 0;
     }
@@ -263,22 +138,29 @@ static size_t expand_channels(const void* in_buff, size_t in_buff_chans,
                               void* out_buff, size_t out_buff_chans,
                               unsigned sample_size_in_bytes, size_t num_in_bytes)
 {
+    static const uint8x3_t packed24_zero; /* zero 24 bit sample */
+
     switch (sample_size_in_bytes) {
+    case 1:
+        EXPAND_CHANNELS((const uint8_t*)in_buff, in_buff_chans,
+                        (uint8_t*)out_buff, out_buff_chans,
+                        num_in_bytes, 0);
+        // returns in macro
     case 2:
-        return expand_channels_16((const int16_t*)in_buff, in_buff_chans,
-                                  (int16_t*)out_buff, out_buff_chans,
-                                  num_in_bytes);
-
-    /* TODO - do this conversion when we have a device to test it with */
+        EXPAND_CHANNELS((const int16_t*)in_buff, in_buff_chans,
+                        (int16_t*)out_buff, out_buff_chans,
+                        num_in_bytes, 0);
+        // returns in macro
     case 3:
-        ALOGE("24-bit channel expansion not supported.");
-        return 0;
-
+        EXPAND_CHANNELS((const uint8x3_t*)in_buff, in_buff_chans,
+                        (uint8x3_t*)out_buff, out_buff_chans,
+                        num_in_bytes, packed24_zero);
+        // returns in macro
     case 4:
-        return expand_channels_32((const int32_t*)in_buff, in_buff_chans,
-                                  (int32_t*)out_buff, out_buff_chans,
-                                  num_in_bytes);
-
+        EXPAND_CHANNELS((const int32_t*)in_buff, in_buff_chans,
+                        (int32_t*)out_buff, out_buff_chans,
+                        num_in_bytes, 0);
+        // returns in macro
     default:
         return 0;
     }
@@ -300,4 +182,3 @@ size_t adjust_channels(const void* in_buff, size_t in_buff_chans,
 
     return num_in_bytes;
 }
-

@@ -27,7 +27,7 @@ __BEGIN_DECLS
  *   in_buff_channels Specifies the number of channels in the input buffer.
  *   out_buff points to the buffer to receive converted samples.
  *   out_buff_channels Specifies the number of channels in the output buffer.
- *   sample_size_in_bytes Specifies the number of bytes per sample. Only 2 and 4 are
+ *   sample_size_in_bytes Specifies the number of bytes per sample. 1, 2, 3, 4 are
  *     currently valid.
  *   num_in_bytes size of input buffer in BYTES
  * returns
