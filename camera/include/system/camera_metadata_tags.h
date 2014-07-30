@@ -310,7 +310,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_INFO_PHYSICAL_SIZE,                // float[]      | public
     ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE,             // int32[]      | public
     ANDROID_SENSOR_INFO_WHITE_LEVEL,                  // int32        | public
-    ANDROID_SENSOR_INFO_TIMESTAMP_CALIBRATION,        // enum         | public
+    ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE,             // enum         | public
     ANDROID_SENSOR_INFO_END,
 
     ANDROID_SHADING_MODE =                            // enum         | public
@@ -732,11 +732,11 @@ typedef enum camera_metadata_enum_android_sensor_info_color_filter_arrangement {
     ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB,
 } camera_metadata_enum_android_sensor_info_color_filter_arrangement_t;
 
-// ANDROID_SENSOR_INFO_TIMESTAMP_CALIBRATION
-typedef enum camera_metadata_enum_android_sensor_info_timestamp_calibration {
-    ANDROID_SENSOR_INFO_TIMESTAMP_CALIBRATION_UNCALIBRATED,
-    ANDROID_SENSOR_INFO_TIMESTAMP_CALIBRATION_CALIBRATED,
-} camera_metadata_enum_android_sensor_info_timestamp_calibration_t;
+// ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE
+typedef enum camera_metadata_enum_android_sensor_info_timestamp_source {
+    ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN,
+    ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME,
+} camera_metadata_enum_android_sensor_info_timestamp_source_t;
 
 
 // ANDROID_SHADING_MODE

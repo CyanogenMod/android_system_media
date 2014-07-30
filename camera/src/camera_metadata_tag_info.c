@@ -497,8 +497,8 @@ static tag_info_t android_sensor_info[ANDROID_SENSOR_INFO_END -
     { "pixelArraySize",                TYPE_INT32  },
     [ ANDROID_SENSOR_INFO_WHITE_LEVEL - ANDROID_SENSOR_INFO_START ] =
     { "whiteLevel",                    TYPE_INT32  },
-    [ ANDROID_SENSOR_INFO_TIMESTAMP_CALIBRATION - ANDROID_SENSOR_INFO_START ] =
-    { "timestampCalibration",          TYPE_BYTE   },
+    [ ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE - ANDROID_SENSOR_INFO_START ] =
+    { "timestampSource",               TYPE_BYTE   },
 };
 
 static tag_info_t android_shading[ANDROID_SHADING_END -
@@ -1997,14 +1997,14 @@ int camera_metadata_enum_snprint(uint32_t tag,
         case ANDROID_SENSOR_INFO_WHITE_LEVEL: {
             break;
         }
-        case ANDROID_SENSOR_INFO_TIMESTAMP_CALIBRATION: {
+        case ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE: {
             switch (value) {
-                case ANDROID_SENSOR_INFO_TIMESTAMP_CALIBRATION_UNCALIBRATED:
-                    msg = "UNCALIBRATED";
+                case ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN:
+                    msg = "UNKNOWN";
                     ret = 0;
                     break;
-                case ANDROID_SENSOR_INFO_TIMESTAMP_CALIBRATION_CALIBRATED:
-                    msg = "CALIBRATED";
+                case ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME:
+                    msg = "REALTIME";
                     ret = 0;
                     break;
                 default:
