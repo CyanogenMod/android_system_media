@@ -67,3 +67,6 @@ LOCAL_C_INCLUDES += \
 #LOCAL_SHARED_LIBRARIES := libaudioutils
 
 include $(BUILD_HOST_STATIC_LIBRARY)
+
+include $(call all-makefiles-under,$(LOCAL_PATH))
+
