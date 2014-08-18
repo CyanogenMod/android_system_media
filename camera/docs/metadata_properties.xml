@@ -269,7 +269,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           `G_odd` equal to `G_even` in the output result metadata.
           </hal_details>
         </entry>
-        <entry name="aberrationCorrectionMode" type="byte" visibility="public" enum="true">
+        <entry name="aberrationMode" type="byte" visibility="public" enum="true">
           <enum>
             <value>OFF
               <notes>
@@ -294,7 +294,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </description>
           <details>
             This must be set to a valid mode from
-            android.colorCorrection.availableAberrationCorrectionModes.
+            android.colorCorrection.availableAberrationModes.
 
             Chromatic (color) aberration is caused by the fact that different wavelengths of light
             can not focus on the same point after exiting from the lens. This metadata defines
@@ -317,11 +317,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
         <clone entry="android.colorCorrection.gains" kind="controls">
         </clone>
-        <clone entry="android.colorCorrection.aberrationCorrectionMode" kind="controls">
+        <clone entry="android.colorCorrection.aberrationMode" kind="controls">
         </clone>
       </dynamic>
       <static>
-        <entry name="availableAberrationCorrectionModes" type="byte" visibility="public"
+        <entry name="availableAberrationModes" type="byte" visibility="public"
         type_notes="list of enums" container="array" typedef="enumList">
           <array>
             <size>n</size>
@@ -331,10 +331,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </description>
           <range>
             The subset of aberration correction mode from those specified in
-            android.colorCorrection.aberrationCorrectionMode.
+            android.colorCorrection.aberrationMode.
           </range>
           <details>
-            This metadata lists the valid modes for android.colorCorrection.aberrationCorrectionMode.
+            This metadata lists the valid modes for android.colorCorrection.aberrationMode.
             If no aberration correction modes are available for a device, this list will solely include
             OFF mode.
 
@@ -3632,8 +3632,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                     * android.statistics.lensShadingMap
                     * android.lens.info.shadingMapSize
               * Manual aberration correction control (if aberration correction is supported)
-                    * android.colorCorrection.aberrationCorrectionMode
-                    * android.colorCorrection.availableAberrationCorrectionModes
+                    * android.colorCorrection.aberrationMode
+                    * android.colorCorrection.availableAberrationModes
 
               If auto white balance is enabled, then the camera device
               will accurately report the values applied by AWB in the result.

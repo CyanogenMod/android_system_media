@@ -120,7 +120,7 @@
             <li
             ><a href="#controls_android.colorCorrection.gains">android.colorCorrection.gains</a></li>
             <li
-            ><a href="#controls_android.colorCorrection.aberrationCorrectionMode">android.colorCorrection.aberrationCorrectionMode</a></li>
+            ><a href="#controls_android.colorCorrection.aberrationMode">android.colorCorrection.aberrationMode</a></li>
           </ul>
         </li>
         <li>
@@ -133,14 +133,14 @@
             <li
             ><a href="#dynamic_android.colorCorrection.gains">android.colorCorrection.gains</a></li>
             <li
-            ><a href="#dynamic_android.colorCorrection.aberrationCorrectionMode">android.colorCorrection.aberrationCorrectionMode</a></li>
+            ><a href="#dynamic_android.colorCorrection.aberrationMode">android.colorCorrection.aberrationMode</a></li>
           </ul>
         </li>
         <li>
           <span class="toc_kind_header">static</span>
           <ul class="toc_section">
             <li
-            ><a href="#static_android.colorCorrection.availableAberrationCorrectionModes">android.colorCorrection.availableAberrationCorrectionModes</a></li>
+            ><a href="#static_android.colorCorrection.availableAberrationModes">android.colorCorrection.availableAberrationModes</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -1324,10 +1324,10 @@ channels,<wbr/> it must use the <code>G_<wbr/>even</code> value,<wbr/> and write
            <!-- end of entry -->
         
                 
-          <tr class="entry" id="controls_android.colorCorrection.aberrationCorrectionMode">
+          <tr class="entry" id="controls_android.colorCorrection.aberrationMode">
             <td class="entry_name
              " rowspan="3">
-              android.<wbr/>color<wbr/>Correction.<wbr/>aberration<wbr/>Correction<wbr/>Mode
+              android.<wbr/>color<wbr/>Correction.<wbr/>aberration<wbr/>Mode
             </td>
             <td class="entry_type">
                 <span class="entry_type_name entry_type_name_enum">byte</span>
@@ -1376,7 +1376,7 @@ capture rate (relative to sensor raw output).<wbr/></p></span>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>This must be set to a valid mode from
-<a href="#static_android.colorCorrection.availableAberrationCorrectionModes">android.<wbr/>color<wbr/>Correction.<wbr/>available<wbr/>Aberration<wbr/>Correction<wbr/>Modes</a>.<wbr/></p>
+<a href="#static_android.colorCorrection.availableAberrationModes">android.<wbr/>color<wbr/>Correction.<wbr/>available<wbr/>Aberration<wbr/>Modes</a>.<wbr/></p>
 <p>Chromatic (color) aberration is caused by the fact that different wavelengths of light
 can not focus on the same point after exiting from the lens.<wbr/> This metadata defines
 the high level control of chromatic aberration correction algorithm,<wbr/> which aims to
@@ -1665,10 +1665,10 @@ channels,<wbr/> it must use the <code>G_<wbr/>even</code> value,<wbr/> and write
            <!-- end of entry -->
         
                 
-          <tr class="entry" id="dynamic_android.colorCorrection.aberrationCorrectionMode">
+          <tr class="entry" id="dynamic_android.colorCorrection.aberrationMode">
             <td class="entry_name
              " rowspan="3">
-              android.<wbr/>color<wbr/>Correction.<wbr/>aberration<wbr/>Correction<wbr/>Mode
+              android.<wbr/>color<wbr/>Correction.<wbr/>aberration<wbr/>Mode
             </td>
             <td class="entry_type">
                 <span class="entry_type_name entry_type_name_enum">byte</span>
@@ -1717,7 +1717,7 @@ capture rate (relative to sensor raw output).<wbr/></p></span>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>This must be set to a valid mode from
-<a href="#static_android.colorCorrection.availableAberrationCorrectionModes">android.<wbr/>color<wbr/>Correction.<wbr/>available<wbr/>Aberration<wbr/>Correction<wbr/>Modes</a>.<wbr/></p>
+<a href="#static_android.colorCorrection.availableAberrationModes">android.<wbr/>color<wbr/>Correction.<wbr/>available<wbr/>Aberration<wbr/>Modes</a>.<wbr/></p>
 <p>Chromatic (color) aberration is caused by the fact that different wavelengths of light
 can not focus on the same point after exiting from the lens.<wbr/> This metadata defines
 the high level control of chromatic aberration correction algorithm,<wbr/> which aims to
@@ -1763,10 +1763,10 @@ applying aberration correction.<wbr/></p>
         
 
                 
-          <tr class="entry" id="static_android.colorCorrection.availableAberrationCorrectionModes">
+          <tr class="entry" id="static_android.colorCorrection.availableAberrationModes">
             <td class="entry_name
              " rowspan="3">
-              android.<wbr/>color<wbr/>Correction.<wbr/>available<wbr/>Aberration<wbr/>Correction<wbr/>Modes
+              android.<wbr/>color<wbr/>Correction.<wbr/>available<wbr/>Aberration<wbr/>Modes
             </td>
             <td class="entry_type">
                 <span class="entry_type_name">byte</span>
@@ -1793,7 +1793,7 @@ applying aberration correction.<wbr/></p>
 
             <td class="entry_range">
               <p>The subset of aberration correction mode from those specified in
-<a href="#controls_android.colorCorrection.aberrationCorrectionMode">android.<wbr/>color<wbr/>Correction.<wbr/>aberration<wbr/>Correction<wbr/>Mode</a>.<wbr/></p>
+<a href="#controls_android.colorCorrection.aberrationMode">android.<wbr/>color<wbr/>Correction.<wbr/>aberration<wbr/>Mode</a>.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -1808,7 +1808,7 @@ applying aberration correction.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>This metadata lists the valid modes for <a href="#controls_android.colorCorrection.aberrationCorrectionMode">android.<wbr/>color<wbr/>Correction.<wbr/>aberration<wbr/>Correction<wbr/>Mode</a>.<wbr/>
+              <p>This metadata lists the valid modes for <a href="#controls_android.colorCorrection.aberrationMode">android.<wbr/>color<wbr/>Correction.<wbr/>aberration<wbr/>Mode</a>.<wbr/>
 If no aberration correction modes are available for a device,<wbr/> this list will solely include
 OFF mode.<wbr/></p>
 <p>For FULL capability device (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> <code>==</code> FULL),<wbr/> OFF must be
@@ -3108,7 +3108,8 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/>  </p></span>
+frame rate of video recording.<wbr/><br/>
+</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -6765,7 +6766,8 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/>  </p></span>
+frame rate of video recording.<wbr/><br/>
+</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -13074,8 +13076,8 @@ stages.<wbr/> This means the following controls are guaranteed to be supported:<
 </ul>
 </li>
 <li>Manual aberration correction control (if aberration correction is supported)<ul>
-<li><a href="#controls_android.colorCorrection.aberrationCorrectionMode">android.<wbr/>color<wbr/>Correction.<wbr/>aberration<wbr/>Correction<wbr/>Mode</a></li>
-<li><a href="#static_android.colorCorrection.availableAberrationCorrectionModes">android.<wbr/>color<wbr/>Correction.<wbr/>available<wbr/>Aberration<wbr/>Correction<wbr/>Modes</a></li>
+<li><a href="#controls_android.colorCorrection.aberrationMode">android.<wbr/>color<wbr/>Correction.<wbr/>aberration<wbr/>Mode</a></li>
+<li><a href="#static_android.colorCorrection.availableAberrationModes">android.<wbr/>color<wbr/>Correction.<wbr/>available<wbr/>Aberration<wbr/>Modes</a></li>
 </ul>
 </li>
 </ul>
@@ -22433,7 +22435,7 @@ to know when sensor settings have been applied.<wbr/></p>
         New features for first camera 2 release (API1)
     
         <ul class="tags_entries">
-          <li><a href="#static_android.colorCorrection.availableAberrationCorrectionModes">android.colorCorrection.availableAberrationCorrectionModes</a> (static)</li>
+          <li><a href="#static_android.colorCorrection.availableAberrationModes">android.colorCorrection.availableAberrationModes</a> (static)</li>
           <li><a href="#static_android.control.availableHighSpeedVideoConfigurations">android.control.availableHighSpeedVideoConfigurations</a> (static)</li>
           <li><a href="#controls_android.edge.mode">android.edge.mode</a> (controls)</li>
           <li><a href="#static_android.edge.availableEdgeModes">android.edge.availableEdgeModes</a> (static)</li>
