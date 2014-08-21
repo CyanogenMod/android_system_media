@@ -3108,7 +3108,8 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/>  </p></span>
+frame rate of video recording.<wbr/><br/>
+</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -6765,7 +6766,8 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/>  </p></span>
+frame rate of video recording.<wbr/><br/>
+</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -10706,7 +10708,7 @@ must be smaller than 64x64.<wbr/></p>
                 
           <tr class="entry" id="static_android.lens.info.focusDistanceCalibration">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>lens.<wbr/>info.<wbr/>focus<wbr/>Distance<wbr/>Calibration
             </td>
             <td class="entry_type">
@@ -10781,6 +10783,20 @@ focus related metadata entries,<wbr/> i.<wbr/>e.<wbr/> <a href="#controls_androi
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For devices advertise APPROXIMATE quality or higher,<wbr/> diopters 0 (infinity
+focus) must work.<wbr/> When autofocus is disabled (<a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> == OFF)
+and the lens focus distance is set to 0 diopters
+(<a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a> == 0),<wbr/> the lens will move to focus at infinity
+and is stably focused at infinity even if the device tilts.<wbr/> It may take the
+lens some time to move; during the move the lens state should be MOVING and
+the output diopter value should be changing toward 0.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->

@@ -2957,6 +2957,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             android.lens.focusRange, android.lens.info.hyperfocalDistance, and
             android.lens.info.minimumFocusDistance.
             </details>
+            <hal_details>
+            For devices advertise APPROXIMATE quality or higher, diopters 0 (infinity
+            focus) must work. When autofocus is disabled (android.control.afMode == OFF)
+            and the lens focus distance is set to 0 diopters
+            (android.lens.focusDistance == 0), the lens will move to focus at infinity
+            and is stably focused at infinity even if the device tilts. It may take the
+            lens some time to move; during the move the lens state should be MOVING and
+            the output diopter value should be changing toward 0.
+            </hal_details>
           <tag id="V1" />
         </entry>
         </namespace>
