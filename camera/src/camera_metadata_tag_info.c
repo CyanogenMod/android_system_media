@@ -117,11 +117,10 @@ static tag_info_t android_color_correction[ANDROID_COLOR_CORRECTION_END -
                 },
     [ ANDROID_COLOR_CORRECTION_GAINS - ANDROID_COLOR_CORRECTION_START ] =
     { "gains",                         TYPE_FLOAT  },
-    [ ANDROID_COLOR_CORRECTION_ABERRATION_CORRECTION_MODE - ANDROID_COLOR_CORRECTION_START ] =
-    { "aberrationCorrectionMode",      TYPE_BYTE   },
-    [ ANDROID_COLOR_CORRECTION_AVAILABLE_ABERRATION_CORRECTION_MODES - ANDROID_COLOR_CORRECTION_START ] =
-    { "availableAberrationCorrectionModes",
-                                        TYPE_BYTE   },
+    [ ANDROID_COLOR_CORRECTION_ABERRATION_MODE - ANDROID_COLOR_CORRECTION_START ] =
+    { "aberrationMode",                TYPE_BYTE   },
+    [ ANDROID_COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES - ANDROID_COLOR_CORRECTION_START ] =
+    { "availableAberrationModes",      TYPE_BYTE   },
 };
 
 static tag_info_t android_control[ANDROID_CONTROL_END -
@@ -671,17 +670,17 @@ int camera_metadata_enum_snprint(uint32_t tag,
         case ANDROID_COLOR_CORRECTION_GAINS: {
             break;
         }
-        case ANDROID_COLOR_CORRECTION_ABERRATION_CORRECTION_MODE: {
+        case ANDROID_COLOR_CORRECTION_ABERRATION_MODE: {
             switch (value) {
-                case ANDROID_COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_OFF:
+                case ANDROID_COLOR_CORRECTION_ABERRATION_MODE_OFF:
                     msg = "OFF";
                     ret = 0;
                     break;
-                case ANDROID_COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_FAST:
+                case ANDROID_COLOR_CORRECTION_ABERRATION_MODE_FAST:
                     msg = "FAST";
                     ret = 0;
                     break;
-                case ANDROID_COLOR_CORRECTION_ABERRATION_CORRECTION_MODE_HIGH_QUALITY:
+                case ANDROID_COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY:
                     msg = "HIGH_QUALITY";
                     ret = 0;
                     break;
@@ -690,7 +689,7 @@ int camera_metadata_enum_snprint(uint32_t tag,
             }
             break;
         }
-        case ANDROID_COLOR_CORRECTION_AVAILABLE_ABERRATION_CORRECTION_MODES: {
+        case ANDROID_COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES: {
             break;
         }
 
