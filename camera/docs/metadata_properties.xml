@@ -1449,6 +1449,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               the application avoids unnecessary scene mode switch as much as possible.
               </notes>
             </value>
+            <value optional="true" hidden="true">HDR
+              <notes>
+              Turn on custom high dynamic range (HDR) mode.
+              </notes>
+            </value>
           </enum>
           <description>
           A camera mode optimized for conditions typical in a particular
