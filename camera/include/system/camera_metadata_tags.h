@@ -514,6 +514,7 @@ typedef enum camera_metadata_enum_android_control_scene_mode {
     ANDROID_CONTROL_SCENE_MODE_CANDLELIGHT,
     ANDROID_CONTROL_SCENE_MODE_BARCODE,
     ANDROID_CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO,
+    ANDROID_CONTROL_SCENE_MODE_HDR,
 } camera_metadata_enum_android_control_scene_mode_t;
 
 // ANDROID_CONTROL_VIDEO_STABILIZATION_MODE
