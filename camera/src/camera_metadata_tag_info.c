@@ -1071,6 +1071,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "HIGH_SPEED_VIDEO";
                     ret = 0;
                     break;
+                case ANDROID_CONTROL_SCENE_MODE_HDR:
+                    msg = "HDR";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
