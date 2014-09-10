@@ -583,7 +583,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="aeRegions" type="int32" visibility="public"
-               container="array" typedef="meteringRectangle">
+            optional="true" container="array" typedef="meteringRectangle">
           <array>
             <size>5</size>
             <size>area_count</size>
@@ -592,6 +592,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           metering.</description>
           <range>`area_count &lt;= android.control.maxRegions[0]`</range>
           <details>
+              Optional. Not available if android.control.maxRegionsAe is 0.
+              Otherwise will always be present.
+
               The coordinate system is based on the active pixel array,
               with (0,0) being the top-left pixel in the active pixel array, and
               (android.sensor.info.activeArraySize.width - 1,
@@ -791,7 +794,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="afRegions" type="int32" visibility="public"
-               container="array" typedef="meteringRectangle">
+               optional="true" container="array" typedef="meteringRectangle">
           <array>
             <size>5</size>
             <size>area_count</size>
@@ -800,6 +803,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           estimation.</description>
           <range>`area_count &lt;= android.control.maxRegions[2]`</range>
           <details>
+              Optional. Not available if android.control.maxRegionsAf is 0.
+              Otherwise will always be present.
+
               The coordinate system is based on the active pixel array,
               with (0,0) being the top-left pixel in the active pixel array, and
               (android.sensor.info.activeArraySize.width - 1,
@@ -1040,7 +1046,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <tag id="BC" />
         </entry>
         <entry name="awbRegions" type="int32" visibility="public"
-               container="array" typedef="meteringRectangle">
+               optional="true" container="array" typedef="meteringRectangle">
           <array>
             <size>5</size>
             <size>area_count</size>
@@ -1049,6 +1055,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           estimation.</description>
           <range>`area_count &lt;= android.control.maxRegions[1]`</range>
           <details>
+              Optional. Not available if android.control.maxRegionsAwb is 0.
+              Otherwise will always be present.
+
               The coordinate system is based on the active pixel array,
               with (0,0) being the top-left pixel in the active pixel array, and
               (android.sensor.info.activeArraySize.width - 1,
