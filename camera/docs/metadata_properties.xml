@@ -1615,9 +1615,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           given camera device. This entry lists the valid modes for
           android.control.afMode for this camera device.
 
-          All camera devices will support OFF mode, and all camera devices with
-          adjustable focuser units (`android.lens.info.minimumFocusDistance &gt; 0`)
-          will support AUTO mode.
+          All LIMITED and FULL mode camera devices will support OFF mode, and all
+          camera devices with adjustable focuser units
+          (`android.lens.info.minimumFocusDistance &gt; 0`) will support AUTO mode.
           </details>
           <tag id="BC" />
         </entry>
