@@ -4722,7 +4722,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               <size>2</size>
             </array>
             <description>Range of valid sensitivities.</description>
-            <range>Min &lt;= 100, Max &amp;gt;= 1600</range>
+            <range>Min &lt;= 100, Max &amp;gt;= 800</range>
             <details>
               The minimum and maximum valid values for the
               android.sensor.sensitivity control.
