@@ -97,6 +97,7 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
     size_t remaining = riffSize - 4;
     int hadFmt = 0;
     int hadData = 0;
+    long dataTell = 0L;
     while (remaining >= 8) {
         unsigned char chunk[8];
         actual = fread(chunk, sizeof(char), sizeof(chunk), stream);
@@ -198,6 +199,10 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
             }
             handle->remaining = chunkSize / handle->bytesPerFrame;
             handle->info.frames = handle->remaining;
+            dataTell = ftell(stream);
+            if (chunkSize > 0) {
+                fseek(stream, (long) chunkSize, SEEK_CUR);
+            }
             hadData = 1;
         } else if (!memcmp(&chunk[0], "fact", 4)) {
             // ignore fact
@@ -222,6 +227,7 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
         fprintf(stderr, "missing data\n");
         goto close;
     }
+    (void) fseek(stream, dataTell, SEEK_SET);
     *info = handle->info;
     return handle;
 
