@@ -180,6 +180,11 @@ class MetadataParserXml:
     d['synthetic'] = entry.get('synthetic') == 'true'
 
     #
+    # Hardware Level (one of limited, legacy, full)
+    #
+    d['hwlevel'] = entry.get('hwlevel')
+
+    #
     # Deprecated ?
     #
     d['deprecated'] = entry.get('deprecated') == 'true'
