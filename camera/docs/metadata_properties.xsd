@@ -225,6 +225,15 @@
             </simpleType>
         </attribute>
         <attribute name="typedef" type="string" />
+        <attribute name="hwlevel" default="full">
+            <simpleType>
+                <restriction base="string">
+                    <enumeration value="full" />
+                    <enumeration value="limited" />
+                    <enumeration value="legacy" />
+                </restriction>
+            </simpleType>
+        </attribute>
     </complexType>
 
     <complexType name="EnumType">

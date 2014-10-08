@@ -61,6 +61,7 @@
     .entry_type_name_enum:after { color: #669900; font-weight: bold; content:" (enum)" }
     .entry_type_visibility { font-weight: bolder; padding-left:1em}
     .entry_type_synthetic { font-weight: bolder; color: #996600; }
+    .entry_type_hwlevel { font-weight: bolder; color: #000066; }
     .entry_type_deprecated { font-weight: bolder; color: #4D4D4D; }
     .entry_type_enum_name { font-family: monospace; font-weight: bolder; }
     .entry_type_enum_notes:before { content:" - " }
@@ -259,6 +260,10 @@ ${          insert_toc_body(kind)}\
 
               % if prop.synthetic:
               <span class="entry_type_synthetic">[synthetic] </span>
+              % endif
+
+              % if prop.hwlevel:
+              <span class="entry_type_hwlevel">[${prop.hwlevel}] </span>
               % endif
 
               % if prop.deprecated:
