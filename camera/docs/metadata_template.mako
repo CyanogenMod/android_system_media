@@ -111,6 +111,10 @@
           % if prop.typedef is not None:
                 typedef="${prop.typedef.name}"
           % endif
+
+          % if prop.hwlevel:
+                hwlevel="${prop.hwlevel}"
+          % endif
             >
 
               % if prop.container == 'array':
