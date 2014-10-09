@@ -60,6 +60,7 @@
     .entry_type_name_enum:after { color: #669900; font-weight: bold; content:" (enum)" }
     .entry_type_visibility { font-weight: bolder; padding-left:1em}
     .entry_type_synthetic { font-weight: bolder; color: #996600; }
+    .entry_type_hwlevel { font-weight: bolder; color: #000066; }
     .entry_type_deprecated { font-weight: bolder; color: #4D4D4D; }
     .entry_type_enum_name { font-family: monospace; font-weight: bolder; }
     .entry_type_enum_notes:before { content:" - " }
@@ -1092,6 +1093,8 @@
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -1211,6 +1214,8 @@ values are clipped to fit within the range.<wbr/></p>
               <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
                 <div class="entry_type_notes">3x3 rational matrix in row-major order</div>
 
@@ -1268,6 +1273,8 @@ values is within the normalized range <code>[0,<wbr/> 1.<wbr/>0]</code>),<wbr/> 
                 </span>
               <span class="entry_type_visibility"> [public as rggbChannelVector]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
                 <div class="entry_type_notes">A 1D array of floats for 4 color channel gains</div>
@@ -1335,6 +1342,8 @@ channels,<wbr/> it must use the <code>G_<wbr/>even</code> value,<wbr/> and write
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -1387,6 +1396,7 @@ correction will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the cam
 use the highest-quality aberration correction algorithms,<wbr/> even if it slows down
 capture rate.<wbr/> FAST means the camera device will not slow down capture rate when
 applying aberration correction.<wbr/></p>
+<p>LEGACY devices will always be in FAST mode.<wbr/></p>
             </td>
           </tr>
 
@@ -1432,6 +1442,8 @@ applying aberration correction.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -1552,6 +1564,8 @@ values are clipped to fit within the range.<wbr/></p>
               <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
                 <div class="entry_type_notes">3x3 rational matrix in row-major order</div>
 
@@ -1609,6 +1623,8 @@ values is within the normalized range <code>[0,<wbr/> 1.<wbr/>0]</code>),<wbr/> 
                 </span>
               <span class="entry_type_visibility"> [public as rggbChannelVector]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
                 <div class="entry_type_notes">A 1D array of floats for 4 color channel gains</div>
@@ -1676,6 +1692,8 @@ channels,<wbr/> it must use the <code>G_<wbr/>even</code> value,<wbr/> and write
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -1728,6 +1746,7 @@ correction will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the cam
 use the highest-quality aberration correction algorithms,<wbr/> even if it slows down
 capture rate.<wbr/> FAST means the camera device will not slow down capture rate when
 applying aberration correction.<wbr/></p>
+<p>LEGACY devices will always be in FAST mode.<wbr/></p>
             </td>
           </tr>
 
@@ -1778,6 +1797,8 @@ applying aberration correction.<wbr/></p>
               <span class="entry_type_visibility"> [public as enumList]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
                 <div class="entry_type_notes">list of enums</div>
 
@@ -1813,6 +1834,7 @@ If no aberration correction modes are available for a device,<wbr/> this list wi
 OFF mode.<wbr/></p>
 <p>For FULL capability device (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> <code>==</code> FULL),<wbr/> OFF must be
 included.<wbr/></p>
+<p>LEGACY devices will always only support FAST mode.<wbr/></p>
             </td>
           </tr>
 
@@ -1863,6 +1885,8 @@ included.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -1977,6 +2001,8 @@ adjusted for antibanding.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -2041,6 +2067,8 @@ FLASH_<wbr/>REQUIRED (if the scene is too dark for still capture).<wbr/></p>
               <span class="entry_type_visibility"> [public as boolean]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -2055,7 +2083,9 @@ is free to update its parameters.<wbr/></p></span>
 must not update the exposure and sensitivity parameters
 while the lock is active.<wbr/></p>
 <p><a href="#controls_android.control.aeExposureCompensation">android.<wbr/>control.<wbr/>ae<wbr/>Exposure<wbr/>Compensation</a> setting changes
-will still take effect while auto-exposure is locked.<wbr/></p></span>
+will still take effect while auto-exposure is locked.<wbr/></p>
+<p>Some rare LEGACY devices may not support
+this,<wbr/> in which case the value will always be overridden to OFF.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -2115,6 +2145,8 @@ is ON_<wbr/>AUTO_<wbr/>FLASH/<wbr/>ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE and th
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -2125,7 +2157,9 @@ is ON_<wbr/>AUTO_<wbr/>FLASH/<wbr/>ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE and th
 <a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> and
 <a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a> are used by the camera
 device,<wbr/> along with android.<wbr/>flash.<wbr/>* fields,<wbr/> if there's
-a flash unit for this camera device.<wbr/></p></span>
+a flash unit for this camera device.<wbr/></p>
+<p>LEGACY devices do not support the OFF mode and will
+override attempts to use this value to ON.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON</span>
@@ -2240,6 +2274,7 @@ CaptureResult.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -2251,7 +2286,7 @@ metering.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              <p><code>area_<wbr/>count &lt;= <a href="#static_android.control.maxRegions">android.<wbr/>control.<wbr/>max<wbr/>Regions</a>[0]</code></p>
+              <p><code>area_<wbr/>count &lt;= <a href="#static_android.control.maxRegionsAe">android.<wbr/>control.<wbr/>max<wbr/>Regions<wbr/>Ae</a></code></p>
             </td>
 
             <td class="entry_tags">
@@ -2319,6 +2354,8 @@ exclusive on xmax and ymax.<wbr/></p>
               <span class="entry_type_visibility"> [public as rangeInt]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -2368,6 +2405,8 @@ manual control of <a href="#controls_android.sensor.exposureTime">android.<wbr/>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -2444,6 +2483,8 @@ details.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -2616,6 +2657,7 @@ that will arise on camera modules with open-loop VCMs.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -2691,6 +2733,8 @@ exclusive on xmax and ymax.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -2763,6 +2807,8 @@ and over again.<wbr/></p>
               <span class="entry_type_visibility"> [public as boolean]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -2808,6 +2854,7 @@ latest calculated values.<wbr/></p>
               <p>Note that AWB lock is only meaningful when
 <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> is in the AUTO mode; in other modes,<wbr/>
 AWB is already fixed to a specific setting.<wbr/></p>
+<p>Some LEGACY devices may not support ON; the value is then overridden to OFF.<wbr/></p>
             </td>
           </tr>
 
@@ -2826,6 +2873,8 @@ AWB is already fixed to a specific setting.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -3007,6 +3056,7 @@ adjustment.<wbr/> The application's values for
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -3082,6 +3132,8 @@ exclusive on xmax and ymax.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -3114,7 +3166,8 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/>  </p></span>
+frame rate of video recording.<wbr/><br/>
+</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -3183,6 +3236,8 @@ contains MANUAL_<wbr/>SENSOR.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -3295,6 +3350,8 @@ devices.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -3385,6 +3442,9 @@ is that this frame will not be used by camera device background 3A statistics
 update,<wbr/> as if this frame is never captured.<wbr/> This mode can be used in the scenario
 where the application doesn't want a 3A manual control capture to affect
 the subsequent auto 3A capture results.<wbr/></p>
+<p>LEGACY mode devices will only support AUTO and USE_<wbr/>SCENE_<wbr/>MODE modes.<wbr/>
+LIMITED mode devices will only support OFF and OFF_<wbr/>KEEP_<wbr/>STATE if they
+support the MANUAL_<wbr/>SENSOR capability.<wbr/></p>
             </td>
           </tr>
 
@@ -3403,6 +3463,8 @@ the subsequent auto 3A capture results.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -3574,7 +3636,9 @@ the application avoids unnecessary scene mode switch as much as possible.<wbr/><
                     <span class="entry_type_enum_name">HDR</span>
                     <span class="entry_type_enum_optional">[optional]</span>
                     <span class="entry_type_enum_optional">[hidden]</span>
-                    <span class="entry_type_enum_notes"><p>Turn on custom high dynamic range (HDR) mode.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>Turn on custom high dynamic range (HDR) mode.<wbr/></p>
+<p>This is intended for LEGACY mode devices only;
+HAL3+ camera devices should not implement this mode.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -3650,6 +3714,8 @@ requests,<wbr/> the HAL may have to switch between different sensor modes.<wbr/>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -3700,6 +3766,8 @@ when the initialization is done.<wbr/></p>
 <p>If a camera device supports both this mode and OIS (<a href="#controls_android.lens.opticalStabilizationMode">android.<wbr/>lens.<wbr/>optical<wbr/>Stabilization<wbr/>Mode</a>),<wbr/>
 turning both modes on may produce undesirable interaction,<wbr/> so it is recommended not to
 enable both at the same time.<wbr/></p>
+<p>Some LEGACY camera devices will not support changing video stabilization
+mode; in this case the value will always override to OFF.<wbr/></p>
             </td>
           </tr>
 
@@ -3749,6 +3817,8 @@ enable both at the same time.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [public as enumList]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
                 <div class="entry_type_notes">list of enums</div>
@@ -3806,6 +3876,8 @@ for this camera device; they must include AUTO.<wbr/></p>
               <span class="entry_type_visibility"> [public as enumList]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
                 <div class="entry_type_notes">list of enums</div>
 
@@ -3839,12 +3911,14 @@ camera device.<wbr/></p>
 given camera device,<wbr/> especially if no flash unit is
 available.<wbr/> This entry lists the valid modes for
 <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> for this camera device.<wbr/></p>
-<p>All camera devices support ON,<wbr/> and all camera devices with
-flash units support ON_<wbr/>AUTO_<wbr/>FLASH and
-ON_<wbr/>ALWAYS_<wbr/>FLASH.<wbr/></p>
+<p>All camera devices support ON,<wbr/> and all camera devices with flash
+units support ON_<wbr/>AUTO_<wbr/>FLASH and ON_<wbr/>ALWAYS_<wbr/>FLASH.<wbr/></p>
 <p>FULL mode camera devices always support OFF mode,<wbr/>
 which enables application control of camera exposure time,<wbr/>
 sensitivity,<wbr/> and frame duration.<wbr/></p>
+<p>LEGACY mode camera devices never support OFF mode.<wbr/>
+LIMITED mode devices support OFF if they support the MANUAL_<wbr/>SENSOR
+capability.<wbr/></p>
             </td>
           </tr>
 
@@ -3867,6 +3941,8 @@ sensitivity,<wbr/> and frame duration.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [public as rangeInt]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
                 <div class="entry_type_notes">list of pairs of frame rates</div>
@@ -3913,6 +3989,8 @@ auto-exposure (AE) algorithm/<wbr/>hardware</p>
               <span class="entry_type_visibility"> [public as rangeInt]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -3955,6 +4033,8 @@ size)</p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -4001,6 +4081,8 @@ can be changed</p>
               <span class="entry_type_visibility"> [public as enumList]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
                 <div class="entry_type_notes">List of enums</div>
 
@@ -4036,6 +4118,9 @@ given camera device.<wbr/> This entry lists the valid modes for
 <p>All LIMITED and FULL mode camera devices will support OFF mode,<wbr/> and all
 camera devices with adjustable focuser units
 (<code><a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> &gt; 0</code>) will support AUTO mode.<wbr/></p>
+<p>LEGACY devices will support OFF mode only if they support
+focusing to infinity (by also setting <a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a> to
+<code>0.<wbr/>0f</code>).<wbr/></p>
             </td>
           </tr>
 
@@ -4058,6 +4143,8 @@ camera devices with adjustable focuser units
                 </span>
               <span class="entry_type_visibility"> [public as enumList]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
                 <div class="entry_type_notes">List of enums (android.<wbr/>control.<wbr/>effect<wbr/>Mode).<wbr/></div>
@@ -4122,6 +4209,8 @@ simply be set to OFF.<wbr/></p>
               <span class="entry_type_visibility"> [public as enumList]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
                 <div class="entry_type_notes">List of enums (android.<wbr/>control.<wbr/>scene<wbr/>Mode).<wbr/></div>
 
@@ -4183,6 +4272,8 @@ by the camera device,<wbr/> this will be set to <code>[DISABLED]</code>.<wbr/></
               <span class="entry_type_visibility"> [public as enumList]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
                 <div class="entry_type_notes">List of enums.<wbr/></div>
 
@@ -4228,6 +4319,8 @@ be supported</p>
                 </span>
               <span class="entry_type_visibility"> [public as enumList]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
                 <div class="entry_type_notes">List of enums</div>
@@ -4288,6 +4381,8 @@ which enables application control of white balance,<wbr/> by using
               <span class="entry_type_visibility"> [hidden]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -4334,6 +4429,8 @@ this value must be &gt;= 1 for AE and AF.<wbr/> The order of the elements is:
               <span class="entry_type_visibility"> [public]</span>
 
               <span class="entry_type_synthetic">[synthetic] </span>
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -4386,6 +4483,8 @@ maxRegions to have this entry be automatically populated.<wbr/></p>
 
               <span class="entry_type_synthetic">[synthetic] </span>
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -4435,6 +4534,8 @@ maxRegions to have this entry be automatically populated.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
               <span class="entry_type_synthetic">[synthetic] </span>
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -4489,6 +4590,8 @@ maxRegions to have this entry be automatically populated.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [system]</span>
 
+
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -4574,6 +4677,8 @@ mode other than FACE_<wbr/>PRIORITY.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [hidden as highSpeedVideoConfiguration]</span>
 
+
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -4685,6 +4790,7 @@ for preview only streaming case.<wbr/></p>
               <span class="entry_type_visibility"> [system]</span>
 
 
+
               <span class="entry_type_deprecated">[deprecated] </span>
 
 
@@ -4734,6 +4840,8 @@ trigger</p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -4848,6 +4956,8 @@ adjusted for antibanding.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -4912,6 +5022,8 @@ FLASH_<wbr/>REQUIRED (if the scene is too dark for still capture).<wbr/></p>
               <span class="entry_type_visibility"> [public as boolean]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -4926,7 +5038,9 @@ is free to update its parameters.<wbr/></p></span>
 must not update the exposure and sensitivity parameters
 while the lock is active.<wbr/></p>
 <p><a href="#controls_android.control.aeExposureCompensation">android.<wbr/>control.<wbr/>ae<wbr/>Exposure<wbr/>Compensation</a> setting changes
-will still take effect while auto-exposure is locked.<wbr/></p></span>
+will still take effect while auto-exposure is locked.<wbr/></p>
+<p>Some rare LEGACY devices may not support
+this,<wbr/> in which case the value will always be overridden to OFF.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -4986,6 +5100,8 @@ is ON_<wbr/>AUTO_<wbr/>FLASH/<wbr/>ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE and th
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -4996,7 +5112,9 @@ is ON_<wbr/>AUTO_<wbr/>FLASH/<wbr/>ON_<wbr/>AUTO_<wbr/>FLASH_<wbr/>REDEYE and th
 <a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a> and
 <a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a> are used by the camera
 device,<wbr/> along with android.<wbr/>flash.<wbr/>* fields,<wbr/> if there's
-a flash unit for this camera device.<wbr/></p></span>
+a flash unit for this camera device.<wbr/></p>
+<p>LEGACY devices do not support the OFF mode and will
+override attempts to use this value to ON.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ON</span>
@@ -5111,6 +5229,7 @@ CaptureResult.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -5122,7 +5241,7 @@ metering.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              <p><code>area_<wbr/>count &lt;= <a href="#static_android.control.maxRegions">android.<wbr/>control.<wbr/>max<wbr/>Regions</a>[0]</code></p>
+              <p><code>area_<wbr/>count &lt;= <a href="#static_android.control.maxRegionsAe">android.<wbr/>control.<wbr/>max<wbr/>Regions<wbr/>Ae</a></code></p>
             </td>
 
             <td class="entry_tags">
@@ -5190,6 +5309,8 @@ exclusive on xmax and ymax.<wbr/></p>
               <span class="entry_type_visibility"> [public as rangeInt]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -5239,6 +5360,8 @@ manual control of <a href="#controls_android.sensor.exposureTime">android.<wbr/>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -5315,6 +5438,8 @@ details.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -5581,6 +5706,8 @@ transient states between two results.<wbr/> See below table for examples:</p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -5752,6 +5879,7 @@ that will arise on camera modules with open-loop VCMs.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -5827,6 +5955,8 @@ exclusive on xmax and ymax.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -5899,6 +6029,8 @@ and over again.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -5958,7 +6090,9 @@ a new AF trigger is sent to the camera device (<a href="#controls_android.contro
                     <span class="entry_type_enum_notes"><p>AF finished a passive scan without finding focus,<wbr/>
 and may restart scanning at any time.<wbr/></p>
 <p>Only used by CONTINUOUS_<wbr/>* AF modes.<wbr/> This is a transient state,<wbr/> the camera
-device may skip reporting this state in capture result.<wbr/></p></span>
+device may skip reporting this state in capture result.<wbr/></p>
+<p>LEGACY camera devices do not support this state.<wbr/> When a passive
+scan has finished,<wbr/> it will always go to PASSIVE_<wbr/>FOCUSED.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -6383,6 +6517,7 @@ See below table for examples:</p>
               <span class="entry_type_visibility"> [system]</span>
 
 
+
               <span class="entry_type_deprecated">[deprecated] </span>
 
 
@@ -6432,6 +6567,8 @@ ignores the trigger</p>
               <span class="entry_type_visibility"> [public as boolean]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -6477,6 +6614,7 @@ latest calculated values.<wbr/></p>
               <p>Note that AWB lock is only meaningful when
 <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> is in the AUTO mode; in other modes,<wbr/>
 AWB is already fixed to a specific setting.<wbr/></p>
+<p>Some LEGACY devices may not support ON; the value is then overridden to OFF.<wbr/></p>
             </td>
           </tr>
 
@@ -6495,6 +6633,8 @@ AWB is already fixed to a specific setting.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -6676,6 +6816,7 @@ adjustment.<wbr/> The application's values for
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -6751,6 +6892,8 @@ exclusive on xmax and ymax.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -6783,7 +6926,8 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/>  </p></span>
+frame rate of video recording.<wbr/><br/>
+</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -6852,6 +6996,8 @@ contains MANUAL_<wbr/>SENSOR.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -7037,6 +7183,8 @@ transient states between two results.<wbr/> See below table for examples:</p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -7148,6 +7296,8 @@ devices.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -7238,6 +7388,9 @@ is that this frame will not be used by camera device background 3A statistics
 update,<wbr/> as if this frame is never captured.<wbr/> This mode can be used in the scenario
 where the application doesn't want a 3A manual control capture to affect
 the subsequent auto 3A capture results.<wbr/></p>
+<p>LEGACY mode devices will only support AUTO and USE_<wbr/>SCENE_<wbr/>MODE modes.<wbr/>
+LIMITED mode devices will only support OFF and OFF_<wbr/>KEEP_<wbr/>STATE if they
+support the MANUAL_<wbr/>SENSOR capability.<wbr/></p>
             </td>
           </tr>
 
@@ -7256,6 +7409,8 @@ the subsequent auto 3A capture results.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -7427,7 +7582,9 @@ the application avoids unnecessary scene mode switch as much as possible.<wbr/><
                     <span class="entry_type_enum_name">HDR</span>
                     <span class="entry_type_enum_optional">[optional]</span>
                     <span class="entry_type_enum_optional">[hidden]</span>
-                    <span class="entry_type_enum_notes"><p>Turn on custom high dynamic range (HDR) mode.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>Turn on custom high dynamic range (HDR) mode.<wbr/></p>
+<p>This is intended for LEGACY mode devices only;
+HAL3+ camera devices should not implement this mode.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -7503,6 +7660,8 @@ requests,<wbr/> the HAL may have to switch between different sensor modes.<wbr/>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -7553,6 +7712,8 @@ when the initialization is done.<wbr/></p>
 <p>If a camera device supports both this mode and OIS (<a href="#controls_android.lens.opticalStabilizationMode">android.<wbr/>lens.<wbr/>optical<wbr/>Stabilization<wbr/>Mode</a>),<wbr/>
 turning both modes on may produce undesirable interaction,<wbr/> so it is recommended not to
 enable both at the same time.<wbr/></p>
+<p>Some LEGACY camera devices will not support changing video stabilization
+mode; in this case the value will always override to OFF.<wbr/></p>
             </td>
           </tr>
 
@@ -7602,6 +7763,7 @@ enable both at the same time.<wbr/></p>
                 <span class="entry_type_name entry_type_name_enum">byte</span>
 
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -7688,6 +7850,8 @@ processing.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -7761,6 +7925,7 @@ not slow down capture rate when applying edge enhancement.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -7829,6 +7994,8 @@ applied to the images</p>
                 </span>
               <span class="entry_type_visibility"> [public as enumList]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
                 <div class="entry_type_notes">list of enums</div>
@@ -7905,6 +8072,8 @@ applied to the images</p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -8011,6 +8180,7 @@ not slow down capture rate when applying edge enhancement.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -8057,6 +8227,7 @@ used</p>
                 <span class="entry_type_name">int64</span>
 
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -8109,6 +8280,8 @@ duration).<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -8213,6 +8386,8 @@ for use cases such as preview,<wbr/> auto-focus assist,<wbr/> still capture,<wbr
               <span class="entry_type_visibility"> [public as boolean]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -8273,6 +8448,7 @@ anything.<wbr/> All other metadata should return 0.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -8327,6 +8503,7 @@ this be power-dependent?</p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -8364,6 +8541,7 @@ flash</p>
                 <span class="entry_type_name">byte</span>
 
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -8438,6 +8616,7 @@ power single flash</p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -8484,6 +8663,7 @@ used</p>
                 <span class="entry_type_name">int64</span>
 
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -8536,6 +8716,8 @@ duration).<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -8611,6 +8793,8 @@ for use cases such as preview,<wbr/> auto-focus assist,<wbr/> still capture,<wbr
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[limited] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -8664,6 +8848,16 @@ unit.<wbr/></p>
               <p>When the camera device doesn't have flash unit
 (i.<wbr/>e.<wbr/> <code><a href="#static_android.flash.info.available">android.<wbr/>flash.<wbr/>info.<wbr/>available</a> == false</code>),<wbr/> this state will always be UNAVAILABLE.<wbr/>
 Other states indicate the current flash status.<wbr/></p>
+<p>In certain conditions,<wbr/> this will be available on LEGACY devices:</p>
+<ul>
+<li>Flash-less cameras always return UNAVAILABLE.<wbr/></li>
+<li>Using <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>==</code> ON_<wbr/>ALWAYS_<wbr/>FLASH
+   will always return FIRED.<wbr/></li>
+<li>Using <a href="#controls_android.flash.mode">android.<wbr/>flash.<wbr/>mode</a> <code>==</code> TORCH
+   will always return FIRED.<wbr/></li>
+</ul>
+<p>In all other conditions the state will not be available on
+LEGACY devices (i.<wbr/>e.<wbr/> it will be <code>null</code>).<wbr/></p>
             </td>
           </tr>
 
@@ -8713,6 +8907,7 @@ Other states indicate the current flash status.<wbr/></p>
                 <span class="entry_type_name entry_type_name_enum">byte</span>
 
               <span class="entry_type_visibility"> [public]</span>
+
 
 
 
@@ -8820,6 +9015,7 @@ are stuck at an arbitrary value).<wbr/></p>
 
 
 
+
                 <div class="entry_type_notes">list of enums</div>
 
 
@@ -8904,6 +9100,7 @@ pixels than actual pixels on the camera sensor.<wbr/></p>
                 <span class="entry_type_name entry_type_name_enum">byte</span>
 
               <span class="entry_type_visibility"> [public]</span>
+
 
 
 
@@ -9012,6 +9209,8 @@ are stuck at an arbitrary value).<wbr/></p>
 
               <span class="entry_type_synthetic">[synthetic] </span>
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -9051,6 +9250,8 @@ are stuck at an arbitrary value).<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [hidden]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
                 <div class="entry_type_notes">latitude,<wbr/> longitude,<wbr/> altitude.<wbr/> First two in degrees,<wbr/> the third in meters</div>
@@ -9094,6 +9295,8 @@ EXIF</p>
               <span class="entry_type_visibility"> [hidden as string]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -9134,6 +9337,8 @@ include in EXIF</p>
 
               <span class="entry_type_visibility"> [hidden]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -9176,6 +9381,8 @@ EXIF</p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -9217,6 +9424,8 @@ write</p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -9267,6 +9476,8 @@ image.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -9311,6 +9522,8 @@ thumbnail.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [public as size]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -9411,6 +9624,8 @@ thumbnail image cropping.<wbr/></p>
               <span class="entry_type_visibility"> [public as size]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -9470,6 +9685,7 @@ and vice versa.<wbr/></li>
                 <span class="entry_type_name">int32</span>
 
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -9548,6 +9764,8 @@ JPEG</p>
 
               <span class="entry_type_synthetic">[synthetic] </span>
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -9587,6 +9805,8 @@ JPEG</p>
                 </span>
               <span class="entry_type_visibility"> [hidden]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
                 <div class="entry_type_notes">latitude,<wbr/> longitude,<wbr/> altitude.<wbr/> First two in degrees,<wbr/> the third in meters</div>
@@ -9630,6 +9850,8 @@ EXIF</p>
               <span class="entry_type_visibility"> [hidden as string]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -9670,6 +9892,8 @@ include in EXIF</p>
 
               <span class="entry_type_visibility"> [hidden]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -9712,6 +9936,8 @@ EXIF</p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -9753,6 +9979,8 @@ write</p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -9801,6 +10029,7 @@ image.<wbr/></p>
                 <span class="entry_type_name">int32</span>
 
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -9859,6 +10088,8 @@ the JPEG stream will be 1000000 bytes,<wbr/> of which the first
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -9903,6 +10134,8 @@ thumbnail.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [public as size]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -10004,6 +10237,8 @@ thumbnail image cropping.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -10068,6 +10303,8 @@ back to the user in the corresponding result.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -10130,6 +10367,8 @@ to the requested value.<wbr/> While the filter density is still changing,<wbr/>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -10187,6 +10426,8 @@ be set to MOVING.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -10218,12 +10459,14 @@ measured from frontmost surface of the lens.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>0 means infinity focus.<wbr/> Used value will be clamped
-to [0,<wbr/> <a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a>].<wbr/></p>
+              <p><code>0.<wbr/>0f</code> means infinity focus.<wbr/> Used value will be clamped
+to <code>[0.<wbr/>0f,<wbr/> <a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a>]</code>.<wbr/></p>
 <p>Like <a href="#controls_android.lens.focalLength">android.<wbr/>lens.<wbr/>focal<wbr/>Length</a>,<wbr/> this setting won't be applied
 instantaneously,<wbr/> and it may take several frames before the lens
 can move to the requested focus distance.<wbr/> While the lens is still moving,<wbr/>
 <a href="#dynamic_android.lens.state">android.<wbr/>lens.<wbr/>state</a> will be set to MOVING.<wbr/></p>
+<p>LEGACY devices support at most setting this to <code>0.<wbr/>0f</code>
+for infinity focus.<wbr/></p>
             </td>
           </tr>
 
@@ -10242,6 +10485,8 @@ can move to the requested focus distance.<wbr/> While the lens is still moving,<
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -10352,6 +10597,8 @@ available controls.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -10408,6 +10655,8 @@ in this list will be sorted in ascending order.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -10463,6 +10712,8 @@ this camera device.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
                 <div class="entry_type_notes">The list of available focal lengths</div>
@@ -10523,6 +10774,8 @@ by the device.<wbr/></p>
               <span class="entry_type_visibility"> [public as enumList]</span>
 
 
+              <span class="entry_type_hwlevel">[limited] </span>
+
 
                 <div class="entry_type_notes">list of enums</div>
 
@@ -10574,6 +10827,8 @@ contain only OFF.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[limited] </span>
+
 
 
 
@@ -10621,6 +10876,8 @@ field when <a href="#static_android.lens.info.focusDistanceCalibration">android.
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -10689,6 +10946,8 @@ the MANUAL_<wbr/>SENSOR capability.<wbr/></p>
               <span class="entry_type_visibility"> [hidden as size]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
                 <div class="entry_type_notes">width and height (N,<wbr/> M) of lens shading map provided by the camera device.<wbr/></div>
 
@@ -10738,6 +10997,8 @@ must be smaller than 64x64.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -10838,6 +11099,8 @@ the output diopter value should be changing toward 0.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -10887,6 +11150,7 @@ device screen.<wbr/></p>
                   2
                 </span>
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -10950,6 +11214,7 @@ direction</p>
             system
                 </span>
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -11019,6 +11284,8 @@ device</p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -11083,6 +11350,8 @@ back to the user in the corresponding result.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -11145,6 +11414,8 @@ to the requested value.<wbr/> While the filter density is still changing,<wbr/>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -11202,6 +11473,8 @@ be set to MOVING.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -11256,6 +11529,8 @@ measured from frontmost surface of the lens.<wbr/></p>
               <span class="entry_type_visibility"> [public as pairFloatFloat]</span>
 
 
+              <span class="entry_type_hwlevel">[limited] </span>
+
 
                 <div class="entry_type_notes">Range of scene distances that are in focus</div>
 
@@ -11308,6 +11583,8 @@ fixed depth of field range</p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -11384,6 +11661,8 @@ available controls.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -11496,6 +11775,8 @@ is changing.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -11565,6 +11846,7 @@ slow down capture rate when applying noise filtering.<wbr/></p>
                 <span class="entry_type_name">byte</span>
 
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -11640,6 +11922,8 @@ applied to the images</p>
               <span class="entry_type_visibility"> [public as enumList]</span>
 
 
+              <span class="entry_type_hwlevel">[limited] </span>
+
 
                 <div class="entry_type_notes">list of enums</div>
 
@@ -11670,6 +11954,7 @@ applied to the images</p>
             <td class="entry_details" colspan="5">
               <p>This tag lists the valid modes for <a href="#controls_android.noiseReduction.mode">android.<wbr/>noise<wbr/>Reduction.<wbr/>mode</a>.<wbr/></p>
 <p>Full-capability camera devices must always support OFF and FAST.<wbr/></p>
+<p>Legacy-capability camera devices will only support FAST mode.<wbr/></p>
             </td>
           </tr>
 
@@ -11715,6 +12000,8 @@ applied to the images</p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -11820,6 +12107,7 @@ slow down capture rate when applying noise filtering.<wbr/></p>
               <span class="entry_type_visibility"> [system]</span>
 
 
+
               <span class="entry_type_deprecated">[deprecated] </span>
 
 
@@ -11876,6 +12164,7 @@ removed in future versions of camera service.<wbr/></p>
               <span class="entry_type_visibility"> [system]</span>
 
 
+
               <span class="entry_type_deprecated">[deprecated] </span>
 
 
@@ -11927,6 +12216,7 @@ removed in future versions of camera service</p>
                 <span class="entry_type_name">byte</span>
 
               <span class="entry_type_visibility"> [system]</span>
+
 
 
               <span class="entry_type_deprecated">[deprecated] </span>
@@ -11982,6 +12272,7 @@ camera service.<wbr/></p>
                 <span class="entry_type_name">byte</span>
 
               <span class="entry_type_visibility"> [hidden]</span>
+
 
 
               <span class="entry_type_deprecated">[deprecated] </span>
@@ -12071,6 +12362,7 @@ for information on how to implement partial results.<wbr/></p>
                 <span class="entry_type_name entry_type_name_enum">byte</span>
 
               <span class="entry_type_visibility"> [hidden as boolean]</span>
+
 
 
               <span class="entry_type_deprecated">[deprecated] </span>
@@ -12187,6 +12479,7 @@ for information on how to implement partial results.<wbr/></p>
               <span class="entry_type_visibility"> [system]</span>
 
 
+
               <span class="entry_type_deprecated">[deprecated] </span>
 
 
@@ -12228,6 +12521,7 @@ frameCount value).<wbr/></p>
                 <span class="entry_type_name">int32</span>
 
               <span class="entry_type_visibility"> [hidden]</span>
+
 
 
 
@@ -12276,6 +12570,7 @@ frame</p>
                   n
                 </span>
               <span class="entry_type_visibility"> [system]</span>
+
 
 
               <span class="entry_type_deprecated">[deprecated] </span>
@@ -12329,6 +12624,7 @@ REPROCESS.<wbr/> Ignored otherwise</p>
                 <span class="entry_type_name entry_type_name_enum">byte</span>
 
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -12395,6 +12691,7 @@ output</p>
               <span class="entry_type_visibility"> [system]</span>
 
 
+
               <span class="entry_type_deprecated">[deprecated] </span>
 
 
@@ -12450,6 +12747,7 @@ and the lens and flash must operate as requested.<wbr/></p>
                 <span class="entry_type_name entry_type_name_enum">byte</span>
 
               <span class="entry_type_visibility"> [system]</span>
+
 
 
               <span class="entry_type_deprecated">[deprecated] </span>
@@ -12540,6 +12838,8 @@ REPROCESS.<wbr/> For HAL3,<wbr/> this tag is redundant.<wbr/></p>
               <span class="entry_type_visibility"> [hidden]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -12611,6 +12911,8 @@ Typically Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888,<wbr/> ImageFormat#NV21,<wbr
 
               <span class="entry_type_synthetic">[synthetic] </span>
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -12650,6 +12952,8 @@ be any <code>RAW</code> and supported format provided by <a href="#static_androi
 <li>ImageFormat#RAW10</li>
 <li>Opaque <code>RAW</code></li>
 </ul>
+<p>LEGACY mode devices (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> <code>==</code> LEGACY)
+never support raw streams.<wbr/></p>
             </td>
           </tr>
 
@@ -12669,6 +12973,8 @@ be any <code>RAW</code> and supported format provided by <a href="#static_androi
               <span class="entry_type_visibility"> [public]</span>
 
               <span class="entry_type_synthetic">[synthetic] </span>
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -12715,6 +13021,7 @@ Typically:</p>
 </ul>
 <p>For full guarantees,<wbr/> query StreamConfigurationMap#getOutputStallDuration with
 a processed format -- it will return 0 for a non-stalling stream.<wbr/></p>
+<p>LEGACY devices will support up to 3 processing/<wbr/>non-stalling streams.<wbr/></p>
             </td>
           </tr>
 
@@ -12734,6 +13041,8 @@ a processed format -- it will return 0 for a non-stalling stream.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
               <span class="entry_type_synthetic">[synthetic] </span>
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -12772,6 +13081,7 @@ be any non-<code>RAW</code> and supported format provided by <a href="#static_an
 Typically only the <code>JPEG</code> format (ImageFormat#JPEG)</p>
 <p>For full guarantees,<wbr/> query StreamConfigurationMap#getOutputStallDuration with
 a processed format -- it will return a non-0 value for a stalling stream.<wbr/></p>
+<p>LEGACY devices will support up to 1 processing/<wbr/>stalling stream.<wbr/></p>
             </td>
           </tr>
 
@@ -12794,6 +13104,7 @@ a processed format -- it will return a non-0 value for a stalling stream.<wbr/><
                   1
                 </span>
               <span class="entry_type_visibility"> [system]</span>
+
 
 
               <span class="entry_type_deprecated">[deprecated] </span>
@@ -12848,6 +13159,8 @@ can be allocated at the same time.<wbr/></p>
               <span class="entry_type_visibility"> [hidden]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -12901,6 +13214,8 @@ should be JPEG.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -12969,6 +13284,7 @@ X frame intervals.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -13026,6 +13342,8 @@ partial results.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -13245,6 +13563,8 @@ the result.<wbr/></p>
               <span class="entry_type_visibility"> [hidden]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -13314,6 +13634,8 @@ via CameraCharacteristics#getAvailableCaptureRequestKeys.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [hidden]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -13394,6 +13716,8 @@ via CameraCharacteristics#getAvailableCaptureResultKeys.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [hidden]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -13489,6 +13813,7 @@ via CameraCharacteristics#getKeys.<wbr/></p>
               <span class="entry_type_visibility"> [hidden]</span>
 
 
+
               <span class="entry_type_deprecated">[deprecated] </span>
 
 
@@ -13542,6 +13867,7 @@ frameCount value).<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -13580,6 +13906,7 @@ frame</p>
                 <span class="entry_type_name entry_type_name_enum">byte</span>
 
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -13646,6 +13973,7 @@ output</p>
               <span class="entry_type_visibility"> [system]</span>
 
 
+
               <span class="entry_type_deprecated">[deprecated] </span>
 
 
@@ -13701,6 +14029,8 @@ and the lens and flash must operate as requested.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -13796,6 +14126,8 @@ pipeline stages were actually used.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [public as rectangle]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -13921,6 +14253,7 @@ possible.<wbr/></p>
                   n
                 </span>
               <span class="entry_type_visibility"> [hidden as imageFormat]</span>
+
 
 
               <span class="entry_type_deprecated">[deprecated] </span>
@@ -14069,6 +14402,7 @@ for that image buffer.<wbr/></p>
               <span class="entry_type_visibility"> [hidden]</span>
 
 
+
               <span class="entry_type_deprecated">[deprecated] </span>
 
 
@@ -14129,6 +14463,7 @@ durations)</p>
                   n x 2
                 </span>
               <span class="entry_type_visibility"> [hidden as size]</span>
+
 
 
               <span class="entry_type_deprecated">[deprecated] </span>
@@ -14192,6 +14527,8 @@ and should include half/<wbr/>quarter of sensor maximum resolution.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -14243,6 +14580,7 @@ allowed size by the camera device.<wbr/></p>
                   n
                 </span>
               <span class="entry_type_visibility"> [hidden]</span>
+
 
 
               <span class="entry_type_deprecated">[deprecated] </span>
@@ -14305,6 +14643,7 @@ be &gt;= max(individual stream min durations).<wbr/></p>
                   n x 2
                 </span>
               <span class="entry_type_visibility"> [hidden as size]</span>
+
 
 
               <span class="entry_type_deprecated">[deprecated] </span>
@@ -14392,6 +14731,7 @@ the HAL only has to list up to the maximum video size supported by the devices.<
               <span class="entry_type_visibility"> [system]</span>
 
 
+
               <span class="entry_type_deprecated">[deprecated] </span>
 
 
@@ -14454,6 +14794,7 @@ durations)</p>
               <span class="entry_type_visibility"> [system as size]</span>
 
 
+
               <span class="entry_type_deprecated">[deprecated] </span>
 
 
@@ -14499,6 +14840,8 @@ Must include: - sensor maximum resolution.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [hidden as imageFormat]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -14637,6 +14980,8 @@ system/<wbr/>core/<wbr/>include/<wbr/>system/<wbr/>graphics.<wbr/>h.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [hidden as streamConfiguration]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -14823,6 +15168,8 @@ YUV_<wbr/>420_<wbr/>888 must also be available for IMPLEMENTATION_<wbr/>DEFINED.
               <span class="entry_type_visibility"> [hidden as streamConfigurationDuration]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -14886,6 +15233,8 @@ StreamConfigurationMap#getOutputMinFrameDuration)</p>
                 </span>
               <span class="entry_type_visibility"> [hidden as streamConfigurationDuration]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -15000,6 +15349,8 @@ IMPLEMENTATION_<wbr/>DEFINED must not have stall durations.<wbr/></p>
               <span class="entry_type_visibility"> [public as streamConfigurationMap]</span>
 
               <span class="entry_type_synthetic">[synthetic] </span>
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -15163,6 +15514,8 @@ YUV_<wbr/>420_<wbr/>888 must also be available for IMPLEMENTATION_<wbr/>DEFINED.
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -15206,7 +15559,7 @@ final used crop region in metadata result <a href="#controls_android.scaler.crop
 is inside of the active array.<wbr/> The camera device will apply the same crop region and
 return the final used crop region in capture result metadata <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>.<wbr/></p>
 <p>FULL capability devices (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> <code>==</code> FULL) will support
-FREEFORM cropping.<wbr/></p>
+FREEFORM cropping.<wbr/> LEGACY capability devices will only support CENTER_<wbr/>ONLY cropping.<wbr/></p>
             </td>
           </tr>
 
@@ -15256,6 +15609,8 @@ FREEFORM cropping.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [public as rectangle]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -15383,6 +15738,8 @@ possible.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -15433,6 +15790,8 @@ duration exposed to the nearest possible value (rather than expose longer).<wbr/
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -15563,6 +15922,8 @@ StreamConfigurationMap#getOutputStallDuration(int,<wbr/>Size).<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -15636,6 +15997,7 @@ output capture result.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -15692,6 +16054,7 @@ output.<wbr/></p>
                 <span class="entry_type_name entry_type_name_enum">int32</span>
 
               <span class="entry_type_visibility"> [public]</span>
+
 
 
 
@@ -15882,6 +16245,8 @@ sensor interconnect bus (such as CSI2) or memory.<wbr/></p>
               <span class="entry_type_visibility"> [public as rectangle]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
                 <div class="entry_type_notes">Four ints defining the active pixel rectangle</div>
 
@@ -15939,6 +16304,8 @@ sensor full pixel array,<wbr/> which could include the black calibration pixels.
               <span class="entry_type_visibility"> [public as rangeInt]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
                 <div class="entry_type_notes">Range of supported sensitivities</div>
 
@@ -15991,6 +16358,8 @@ as defined in ISO 12232:2006.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -16057,6 +16426,8 @@ the sensor,<wbr/> in reading order.<wbr/></p>
               <span class="entry_type_visibility"> [public as rangeLong]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
                 <div class="entry_type_notes">nanoseconds</div>
 
@@ -16120,6 +16491,8 @@ The maximum of the range SHOULD be at least
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -16206,6 +16579,8 @@ for details about encoding this scenario.<wbr/></p>
               <span class="entry_type_visibility"> [public as sizeF]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
                 <div class="entry_type_notes">width x height in millimeters</div>
 
@@ -16269,6 +16644,8 @@ array defined by <a href="#static_android.sensor.info.pixelArraySize">android.<w
               <span class="entry_type_visibility"> [public as size]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -16322,6 +16699,7 @@ raw sensor image will include black pixels.<wbr/></p>
                 <span class="entry_type_name">int32</span>
 
               <span class="entry_type_visibility"> [public]</span>
+
 
 
 
@@ -16389,6 +16767,8 @@ than maximum raw value supported,<wbr/> i.<wbr/>e.<wbr/> 2^(sensor bits per pixe
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -16458,6 +16838,7 @@ can be compared against other system time sources/<wbr/>timestamps.<wbr/></p>
                 <span class="entry_type_name entry_type_name_enum">byte</span>
 
               <span class="entry_type_visibility"> [public]</span>
+
 
 
 
@@ -16629,6 +17010,7 @@ reference illuminant.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -16683,6 +17065,7 @@ reference illuminant.<wbr/></p>
                   3 x 3
                 </span>
               <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
+
 
 
 
@@ -16743,6 +17126,7 @@ space under the first reference illuminant
                   3 x 3
                 </span>
               <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
+
 
 
 
@@ -16809,6 +17193,7 @@ illuminant is present.<wbr/></p>
 
 
 
+
                 <div class="entry_type_notes">3x3 matrix in row-major-order</div>
 
 
@@ -16870,6 +17255,7 @@ match the standard white point for the first reference illuminant
                   3 x 3
                 </span>
               <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
+
 
 
 
@@ -16939,6 +17325,7 @@ illuminant is present.<wbr/></p>
 
 
 
+
                 <div class="entry_type_notes">3x3 matrix in row-major-order</div>
 
 
@@ -16998,6 +17385,7 @@ CIE XYZ colorspace.<wbr/></p>
                   3 x 3
                 </span>
               <span class="entry_type_visibility"> [public as colorSpaceTransform]</span>
+
 
 
 
@@ -17063,6 +17451,7 @@ illuminant is present.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -17102,6 +17491,7 @@ ISO=100</p>
                   4
                 </span>
               <span class="entry_type_visibility"> [public as blackLevelPattern]</span>
+
 
 
 
@@ -17169,6 +17559,8 @@ corresponding to the element of the CFA in row=0,<wbr/> column=0.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -17221,6 +17613,8 @@ digital.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -17269,6 +17663,7 @@ to bottom in the sensor's coordinate system</p>
                   3
                 </span>
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -17328,6 +17723,7 @@ element.<wbr/></p>
                   n
                 </span>
               <span class="entry_type_visibility"> [public]</span>
+
 
 
 
@@ -17403,6 +17799,8 @@ element.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -17453,6 +17851,8 @@ duration exposed to the nearest possible value (rather than expose longer).<wbr/
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -17583,6 +17983,8 @@ StreamConfigurationMap#getOutputStallDuration(int,<wbr/>Size).<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -17648,6 +18050,8 @@ output capture result.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -17729,6 +18133,7 @@ sensor subsystems that are using the same timebase.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -17772,6 +18177,7 @@ somewhere close to it.<wbr/></p>
                   3
                 </span>
               <span class="entry_type_visibility"> [public]</span>
+
 
 
 
@@ -17829,6 +18235,7 @@ processing raw sensor data.<wbr/></p>
                   2 x CFA Channels
                 </span>
               <span class="entry_type_visibility"> [public as pairDoubleDouble]</span>
+
 
 
 
@@ -17911,6 +18318,7 @@ channel,<wbr/> etc.<wbr/></p>
 
 
 
+
                 <div class="entry_type_notes">Mapping for hue,<wbr/> saturation,<wbr/> and value</div>
 
 
@@ -17976,6 +18384,7 @@ value scale factor of 1.<wbr/>0.<wbr/></p>
 
 
 
+
                 <div class="entry_type_notes">Samples defining a spline for a tone-mapping curve</div>
 
 
@@ -18027,6 +18436,7 @@ The curve is interpolated using a cubic spline.<wbr/></p>
                 <span class="entry_type_name">float</span>
 
               <span class="entry_type_visibility"> [public]</span>
+
 
 
 
@@ -18125,6 +18535,7 @@ results,<wbr/> and can be interpreted in the same manner,<wbr/> may be used.<wbr
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -18181,6 +18592,7 @@ output.<wbr/></p>
                 <span class="entry_type_name entry_type_name_enum">int32</span>
 
               <span class="entry_type_visibility"> [public]</span>
+
 
 
 
@@ -18338,6 +18750,8 @@ sensor interconnect bus (such as CSI2) or memory.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[limited] </span>
+
 
 
 
@@ -18434,6 +18848,8 @@ exposure at the same time.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -18521,6 +18937,7 @@ be converged before using the returned shading map data.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -18586,6 +19003,8 @@ applied to the images</p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -18703,6 +19122,8 @@ be converged before using the returned shading map data.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -18782,6 +19203,7 @@ fields.<wbr/> Value must be one of the
 
 
 
+
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
@@ -18830,6 +19252,7 @@ generation</p>
 
 
 
+
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
@@ -18874,6 +19297,7 @@ generation</p>
                 <span class="entry_type_name entry_type_name_enum">byte</span>
 
               <span class="entry_type_visibility"> [public as boolean]</span>
+
 
 
 
@@ -18936,6 +19360,8 @@ If set to OFF,<wbr/> no hotpixel map will be returned.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -18963,6 +19389,9 @@ shading map in output result metadata.<wbr/></p>
             </td>
 
             <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_RAW">RAW</a></li>
+              </ul>
             </td>
 
           </tr>
@@ -18974,6 +19403,7 @@ shading map in output result metadata.<wbr/></p>
               <p>When set to ON,<wbr/>
 <a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a> will be provided in
 the output result metadata.<wbr/></p>
+<p>Required for devices with the RAW capability.<wbr/></p>
             </td>
           </tr>
 
@@ -19025,6 +19455,8 @@ the output result metadata.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [public as enumList]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
                 <div class="entry_type_notes">List of enums from android.<wbr/>statistics.<wbr/>face<wbr/>Detect<wbr/>Mode</div>
@@ -19085,6 +19517,7 @@ for this camera device.<wbr/></p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -19123,6 +19556,8 @@ supported</p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -19137,8 +19572,9 @@ faces.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              <p>&gt;= 4 if <a href="#static_android.statistics.info.availableFaceDetectModes">android.<wbr/>statistics.<wbr/>info.<wbr/>available<wbr/>Face<wbr/>Detect<wbr/>Modes</a> lists
-modes besides OFF,<wbr/> otherwise 0</p>
+              <p>0 for cameras without available face detection; otherwise:
+<code>&gt;=4</code> for LIMITED or FULL hwlevel devices or
+<code>&gt;0</code> for LEGACY devices.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -19163,6 +19599,7 @@ modes besides OFF,<wbr/> otherwise 0</p>
                 <span class="entry_type_name">int32</span>
 
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -19208,6 +19645,7 @@ bucket</p>
 
 
 
+
             </td> <!-- entry_type -->
 
             <td class="entry_description">
@@ -19247,6 +19685,7 @@ region.<wbr/></p>
                   2
                 </span>
               <span class="entry_type_visibility"> [system as size]</span>
+
 
 
 
@@ -19296,6 +19735,7 @@ map</p>
 
 
 
+
                 <div class="entry_type_notes">list of enums</div>
 
 
@@ -19328,6 +19768,7 @@ map</p>
 <p>If no hotpixel map is available for this camera device,<wbr/> this will contain
 only OFF.<wbr/>  If the hotpixel map is available,<wbr/> this will include both
 the ON and OFF options.<wbr/></p>
+<p>Required on devices with the RAW capability.<wbr/></p>
             </td>
           </tr>
 
@@ -19376,6 +19817,8 @@ the ON and OFF options.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -19458,6 +19901,8 @@ fields.<wbr/> Value must be one of the
               <span class="entry_type_visibility"> [hidden]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -19511,6 +19956,8 @@ assigned a new ID.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [hidden]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
                 <div class="entry_type_notes">(leftEyeX,<wbr/> leftEyeY,<wbr/> rightEyeX,<wbr/> rightEyeY,<wbr/> mouthX,<wbr/> mouthY)</div>
@@ -19567,6 +20014,8 @@ faces.<wbr/></p>
               <span class="entry_type_visibility"> [hidden as rectangle]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
                 <div class="entry_type_notes">(xmin,<wbr/> ymin,<wbr/> xmax,<wbr/> ymax).<wbr/> (0,<wbr/>0) is top-left of active pixel area</div>
 
@@ -19621,6 +20070,8 @@ faces.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [hidden]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -19685,6 +20136,8 @@ all times is illegal).<wbr/></p>
 
               <span class="entry_type_synthetic">[synthetic] </span>
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
 
@@ -19732,6 +20185,7 @@ in this result.<wbr/></p>
                   n x 3
                 </span>
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -19788,6 +20242,7 @@ supported,<wbr/> all channels should have the same data</p>
 
 
 
+
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
@@ -19836,6 +20291,7 @@ generation</p>
                   n x m x 3
                 </span>
               <span class="entry_type_visibility"> [system]</span>
+
 
 
 
@@ -19890,6 +20346,7 @@ all channels should have the same data</p>
 
 
 
+
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
@@ -19935,6 +20392,8 @@ generation</p>
 
               <span class="entry_type_visibility"> [public as lensShadingMap]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -20021,6 +20480,8 @@ image of a gray wall (using bicubic interpolation for visual quality) as capture
                 </span>
               <span class="entry_type_visibility"> [hidden]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
                 <div class="entry_type_notes">2D array of float gain factors per channel to correct lens shading</div>
@@ -20127,6 +20588,7 @@ the latest known good map generated when the AE and AWB are in AUTO modes.<wbr/>
               <span class="entry_type_visibility"> [hidden]</span>
 
 
+
               <span class="entry_type_deprecated">[deprecated] </span>
 
                 <div class="entry_type_notes">A 1D array of floats for 4 color channel gains</div>
@@ -20185,6 +20647,7 @@ regardless of the android.<wbr/>control.<wbr/>* current values.<wbr/></p>
                   3 x 3
                 </span>
               <span class="entry_type_visibility"> [hidden]</span>
+
 
 
               <span class="entry_type_deprecated">[deprecated] </span>
@@ -20246,6 +20709,8 @@ regardless of the android.<wbr/>control.<wbr/>* current values.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -20323,6 +20788,7 @@ into this metadata field.<wbr/> See
 
 
 
+
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
@@ -20383,6 +20849,7 @@ If set to OFF,<wbr/> no hotpixel map will be returned.<wbr/></p>
                   2 x n
                 </span>
               <span class="entry_type_visibility"> [public as point]</span>
+
 
 
 
@@ -20456,6 +20923,8 @@ pixels than actual pixels on the camera sensor.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -20483,6 +20952,9 @@ shading map in output result metadata.<wbr/></p>
             </td>
 
             <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_RAW">RAW</a></li>
+              </ul>
             </td>
 
           </tr>
@@ -20494,6 +20966,7 @@ shading map in output result metadata.<wbr/></p>
               <p>When set to ON,<wbr/>
 <a href="#dynamic_android.statistics.lensShadingMap">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map</a> will be provided in
 the output result metadata.<wbr/></p>
+<p>Required for devices with the RAW capability.<wbr/></p>
             </td>
           </tr>
 
@@ -20549,6 +21022,8 @@ the output result metadata.<wbr/></p>
               <span class="entry_type_visibility"> [hidden]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
                 <div class="entry_type_notes">1D array of float pairs (P_<wbr/>IN,<wbr/> P_<wbr/>OUT).<wbr/> The maximum number of pairs is specified by android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points.<wbr/></div>
 
@@ -20602,6 +21077,8 @@ CONTRAST_<wbr/>CURVE.<wbr/></p>
               <span class="entry_type_visibility"> [hidden]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
                 <div class="entry_type_notes">1D array of float pairs (P_<wbr/>IN,<wbr/> P_<wbr/>OUT).<wbr/> The maximum number of pairs is specified by android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points.<wbr/></div>
 
@@ -20654,6 +21131,8 @@ CONTRAST_<wbr/>CURVE.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [hidden]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
                 <div class="entry_type_notes">1D array of float pairs (P_<wbr/>IN,<wbr/> P_<wbr/>OUT).<wbr/> The maximum number of pairs is specified by android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points.<wbr/></div>
@@ -20755,6 +21234,8 @@ control points used as are available.<wbr/></p>
 
               <span class="entry_type_synthetic">[synthetic] </span>
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -20850,6 +21331,8 @@ curveBlue entries.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -20963,6 +21446,8 @@ roughly the same.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -21026,6 +21511,8 @@ hardware curves used as closely as possible when linearly interpolated.<wbr/></p
                 </span>
               <span class="entry_type_visibility"> [public as enumList]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
                 <div class="entry_type_notes">list of enums</div>
@@ -21105,6 +21592,8 @@ FAST.<wbr/></p>
               <span class="entry_type_visibility"> [hidden]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
                 <div class="entry_type_notes">1D array of float pairs (P_<wbr/>IN,<wbr/> P_<wbr/>OUT).<wbr/> The maximum number of pairs is specified by android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points.<wbr/></div>
 
@@ -21158,6 +21647,8 @@ CONTRAST_<wbr/>CURVE.<wbr/></p>
               <span class="entry_type_visibility"> [hidden]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
                 <div class="entry_type_notes">1D array of float pairs (P_<wbr/>IN,<wbr/> P_<wbr/>OUT).<wbr/> The maximum number of pairs is specified by android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points.<wbr/></div>
 
@@ -21210,6 +21701,8 @@ CONTRAST_<wbr/>CURVE.<wbr/></p>
                 </span>
               <span class="entry_type_visibility"> [hidden]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
                 <div class="entry_type_notes">1D array of float pairs (P_<wbr/>IN,<wbr/> P_<wbr/>OUT).<wbr/> The maximum number of pairs is specified by android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points.<wbr/></div>
@@ -21311,6 +21804,8 @@ control points used as are available.<wbr/></p>
 
               <span class="entry_type_synthetic">[synthetic] </span>
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
 
@@ -21406,6 +21901,8 @@ curveBlue entries.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -21526,6 +22023,7 @@ roughly the same.<wbr/></p>
 
 
 
+
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">OFF</span>
@@ -21602,6 +22100,7 @@ doesn't violate the above rules.<wbr/></p>
                 <span class="entry_type_name entry_type_name_enum">byte</span>
 
               <span class="entry_type_visibility"> [hidden as boolean]</span>
+
 
 
 
@@ -21690,6 +22189,7 @@ doesn't violate the above rules.<wbr/></p>
 
 
 
+
                 <ul class="entry_type_enum">
                   <li>
                     <span class="entry_type_enum_name">TRANSMIT</span>
@@ -21762,6 +22262,8 @@ doesn't violate the above rules.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[legacy] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -21801,7 +22303,7 @@ doesn't violate the above rules.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Camera devices will come in two flavors: LIMITED and FULL.<wbr/></p>
+              <p>Camera devices will come in three flavors: LEGACY,<wbr/> LIMITED and FULL.<wbr/></p>
 <p>A FULL device has the most support possible and will support below capabilities:</p>
 <ul>
 <li>30fps at maximum resolution (== sensor resolution) is preferred,<wbr/> more than 20fps is required.<wbr/></li>
@@ -21818,6 +22320,8 @@ doesn't violate the above rules.<wbr/></p>
 To find out more refer to <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>.<wbr/></p>
 <p>A LEGACY device does not support per-frame control,<wbr/> manual sensor control,<wbr/> manual
 post-processing,<wbr/> arbitrary cropping regions,<wbr/> and has relaxed performance constraints.<wbr/></p>
+<p>Each higher level supports everything the lower level supports
+in this order: FULL <code>&gt;</code> LIMITED <code>&gt;</code> LEGACY.<wbr/></p>
             </td>
           </tr>
 
@@ -21834,6 +22338,9 @@ camera HAL device v1 implementation,<wbr/> and is expected from
 older or inexpensive devices.<wbr/> Full is a strict superset of
 limited,<wbr/> and they share the same essential operational flow.<wbr/></p>
 <p>For full details refer to "S3.<wbr/> Operational Modes" in camera3.<wbr/>h</p>
+<p>Camera HAL3+ must not implement LEGACY mode.<wbr/> It is there
+for backwards compatibility in the <code>android.<wbr/>hardware.<wbr/>camera2</code>
+user-facing API only.<wbr/></p>
             </td>
           </tr>
 
@@ -21883,6 +22390,8 @@ limited,<wbr/> and they share the same essential operational flow.<wbr/></p>
 
               <span class="entry_type_visibility"> [public as boolean]</span>
 
+
+              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -22014,6 +22523,8 @@ possible again.<wbr/></p>
               <span class="entry_type_visibility"> [public as boolean]</span>
 
 
+              <span class="entry_type_hwlevel">[full] </span>
+
 
 
                 <ul class="entry_type_enum">
@@ -22117,6 +22628,8 @@ possible again.<wbr/></p>
 
               <span class="entry_type_visibility"> [hidden]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -22282,6 +22795,8 @@ is also UNKNOWN.<wbr/></p>
 
               <span class="entry_type_visibility"> [public]</span>
 
+
+              <span class="entry_type_hwlevel">[legacy] </span>
 
 
 
@@ -22546,6 +23061,7 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#controls_android.statistics.hotPixelMapMode">android.statistics.hotPixelMapMode</a> (controls)</li>
           <li><a href="#static_android.statistics.info.availableHotPixelMapModes">android.statistics.info.availableHotPixelMapModes</a> (static)</li>
           <li><a href="#dynamic_android.statistics.hotPixelMap">android.statistics.hotPixelMap</a> (dynamic)</li>
+          <li><a href="#controls_android.statistics.lensShadingMapMode">android.statistics.lensShadingMapMode</a> (controls)</li>
           <li><a href="#dynamic_android.hotPixel.mode">android.hotPixel.mode</a> (dynamic)</li>
         </ul>
       </li> <!-- tag_RAW -->

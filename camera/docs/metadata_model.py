@@ -1030,6 +1030,10 @@ class Entry(Node):
                list of entries (in C code). In general a synthetic entry is
                glued together at the Java layer from multiple visibiltity=hidden
                entries.
+    hwlevel: The lowest hardware level at which the entry is guaranteed
+             to be supported by the camera device. All devices with higher
+             hwlevels will also include this entry. None means that the
+             entry is optional on any hardware level.
     deprecated: Marks an entry as @Deprecated in the Java layer; if within an
                unreleased version this needs to be removed altogether. If applied
                to an entry from an older release, then this means the entry
@@ -1090,6 +1094,7 @@ class Entry(Node):
                   'public'
       synthetic: A bool to mark whether this entry is visible only at the Java
                  layer (True), or at both layers (False = default).
+      hwlevel: A string of the HW level (one of 'legacy', 'limited', 'full')
       deprecated: A bool to mark whether this is @Deprecated at the Java layer
                  (default = False).
       optional: A bool to mark whether optional for non-full hardware devices
@@ -1130,9 +1135,14 @@ class Entry(Node):
     return self._synthetic
 
   @property
+  def hwlevel(self):
+    return self._hwlevel
+
+  @property
   def deprecated(self):
     return self._deprecated
 
+  # TODO: optional should just return hwlevel is None
   @property
   def optional(self):
     return self._optional
@@ -1254,6 +1264,7 @@ class Entry(Node):
 
     self._visibility = kwargs.get('visibility')
     self._synthetic = kwargs.get('synthetic', False)
+    self._hwlevel = kwargs.get('hwlevel')
     self._deprecated = kwargs.get('deprecated', False)
     self._optional = kwargs.get('optional')
 
@@ -1453,6 +1464,7 @@ class MergedEntry(Entry):
                     'type_notes',
                     'visibility',
                     'synthetic',
+                    'hwlevel',
                     'deprecated',
                     'optional',
                     'typedef'

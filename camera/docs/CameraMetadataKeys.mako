@@ -29,13 +29,20 @@
   ## Generate extra text blocks for the details field
   def generate_extra_detail(entry):
     def inner(text):
-      if entry.optional:
+      if entry.hwlevel != 'legacy': # covers any of (None, 'limited', 'full')
         text += '\n\n<b>Optional</b> - This value may be {@code null} on some devices.\n'
-      if any(tag.name == 'FULL' for tag in entry.tags):
+      if entry.hwlevel == 'full':
         text += \
           '\n<b>Full capability</b> - \n' + \
           'Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the\n' + \
           'android.info.supportedHardwareLevel key\n'
+      if entry.hwlevel == 'limited':
+        text += \
+          '\n<b>Limited capability</b> - \n' + \
+          'Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the\n' + \
+          'android.info.supportedHardwareLevel key\n'
+      if entry.hwlevel == 'legacy':
+        text += "\nThis key is available on all devices."
       return text
     return inner
 %>
