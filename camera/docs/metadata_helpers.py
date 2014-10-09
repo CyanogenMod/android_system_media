@@ -659,6 +659,46 @@ def jenum_value(enum_entry, enum_value):
   cname = csym(enum_entry.name)
   return cname[cname.find('_') + 1:] + '_' + enum_value.name
 
+def generate_extra_javadoc_detail(entry):
+  """
+  Returns a function to add extra details for an entry into a string for inclusion into
+  javadoc. Adds information about units, the list of enum values for this key, and the valid
+  range.
+  """
+  def inner(text):
+    if entry.units:
+      text += '\n\n<b>Units</b>: %s\n' % (dedent(entry.units))
+    if entry.enum and not (entry.typedef and entry.typedef.languages.get('java')):
+      text += '\n\n<b>Possible values:</b>\n<ul>\n'
+      for value in entry.enum.values:
+        if not value.hidden:
+          text += '  <li>{@link #%s %s}</li>\n' % ( jenum_value(entry, value ), value.name )
+      text += '</ul>\n'
+    if entry.range:
+      if entry.enum and not (entry.typedef and entry.typedef.languages.get('java')):
+        text += '\n\n<b>Available values for this device:</b><br>\n'
+      else:
+        text += '\n\n<b>Range of valid values:</b><br>\n'
+      text += '%s\n' % (dedent(entry.range))
+    if entry.hwlevel != 'legacy': # covers any of (None, 'limited', 'full')
+      text += '\n\n<b>Optional</b> - This value may be {@code null} on some devices.\n'
+    if entry.hwlevel == 'full':
+      text += \
+        '\n<b>Full capability</b> - \n' + \
+        'Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the\n' + \
+        'android.info.supportedHardwareLevel key\n'
+    if entry.hwlevel == 'limited':
+      text += \
+        '\n<b>Limited capability</b> - \n' + \
+        'Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the\n' + \
+        'android.info.supportedHardwareLevel key\n'
+    if entry.hwlevel == 'legacy':
+      text += "\nThis key is available on all devices."
+
+    return text
+  return inner
+
+
 def javadoc(metadata, indent = 4):
   """
   Returns a function to format a markdown syntax text block as a
@@ -733,7 +773,7 @@ def javadoc(metadata, indent = 4):
       # Indent each line
       # Add ' * ' to it for stylistic reasons
       # Strip right side of trailing whitespace
-      return (comment_prefix + line.lstrip()).rstrip()
+      return (comment_prefix + line).rstrip()
 
     # Process each line with above filter
     javatext = "\n".join(line_filter(i) for i in javatext.split("\n")) + "\n"

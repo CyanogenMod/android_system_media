@@ -24,28 +24,6 @@
      * modify the comment blocks at the start or end.
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~*/
 
-<%!
-  ##
-  ## Generate extra text blocks for the details field
-  def generate_extra_detail(entry):
-    def inner(text):
-      if entry.hwlevel != 'legacy': # covers any of (None, 'limited', 'full')
-        text += '\n\n<b>Optional</b> - This value may be {@code null} on some devices.\n'
-      if entry.hwlevel == 'full':
-        text += \
-          '\n<b>Full capability</b> - \n' + \
-          'Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the\n' + \
-          'android.info.supportedHardwareLevel key\n'
-      if entry.hwlevel == 'limited':
-        text += \
-          '\n<b>Limited capability</b> - \n' + \
-          'Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the\n' + \
-          'android.info.supportedHardwareLevel key\n'
-      if entry.hwlevel == 'legacy':
-        text += "\nThis key is available on all devices."
-      return text
-    return inner
-%>
 ##
 ## Generate a single key and docs
 <%def name="generate_key(entry)">\
@@ -59,7 +37,7 @@
     if entry.details:
         details = dedent(entry.details)
     # Unconditionally add extra information if necessary
-    extra_detail = generate_extra_detail(entry)("")
+    extra_detail = generate_extra_javadoc_detail(entry)("")
 
     concatenated_info = description + details + extra_detail
 %>\
