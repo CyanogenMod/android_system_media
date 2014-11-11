@@ -3230,7 +3230,8 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/>  </p></span>
+frame rate of video recording.<wbr/><br/>
+</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -7112,7 +7113,8 @@ use case.<wbr/></p></span>
 image while recording video) use case.<wbr/></p>
 <p>The camera device should take the highest-quality image
 possible (given the other settings) without disrupting the
-frame rate of video recording.<wbr/>  </p></span>
+frame rate of video recording.<wbr/><br/>
+</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
@@ -13750,6 +13752,32 @@ raw sensor images.<wbr/></p>
   (both input/<wbr/>output) will match the maximum available
   resolution of JPEG streams.<wbr/></li>
 </ul></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">READ_SENSOR_SETTINGS</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>The camera device supports accurately reporting the sensor settings for many of
+the sensor controls while the built-in 3A algorithm is running.<wbr/>  This allows
+reporting of sensor settings even when these settings cannot be manually changed.<wbr/></p>
+<p>The values reported for the following controls are guaranteed to be available
+in the CaptureResult,<wbr/> including when 3A is enabled:</p>
+<ul>
+<li>Exposure control<ul>
+<li><a href="#controls_android.sensor.exposureTime">android.<wbr/>sensor.<wbr/>exposure<wbr/>Time</a></li>
+</ul>
+</li>
+<li>Sensitivity control<ul>
+<li><a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a></li>
+</ul>
+</li>
+<li>Lens controls (if the lens is adjustable)<ul>
+<li><a href="#controls_android.lens.focusDistance">android.<wbr/>lens.<wbr/>focus<wbr/>Distance</a></li>
+<li><a href="#controls_android.lens.aperture">android.<wbr/>lens.<wbr/>aperture</a></li>
+</ul>
+</li>
+</ul>
+<p>This capability is a subset of the MANUAL_<wbr/>SENSOR control capability,<wbr/> and will
+always be included if the MANUAL_<wbr/>SENSOR capability is available.<wbr/></p></span>
                   </li>
                 </ul>
 

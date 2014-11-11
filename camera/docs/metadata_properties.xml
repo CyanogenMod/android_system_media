@@ -3941,6 +3941,27 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                 resolution of JPEG streams.
               </notes>
             </value>
+            <value optional="true">READ_SENSOR_SETTINGS
+              <notes>
+              The camera device supports accurately reporting the sensor settings for many of
+              the sensor controls while the built-in 3A algorithm is running.  This allows
+              reporting of sensor settings even when these settings cannot be manually changed.
+
+              The values reported for the following controls are guaranteed to be available
+              in the CaptureResult, including when 3A is enabled:
+
+              * Exposure control
+                  * android.sensor.exposureTime
+              * Sensitivity control
+                  * android.sensor.sensitivity
+              * Lens controls (if the lens is adjustable)
+                  * android.lens.focusDistance
+                  * android.lens.aperture
+
+              This capability is a subset of the MANUAL_SENSOR control capability, and will
+              always be included if the MANUAL_SENSOR capability is available.
+              </notes>
+            </value>
           </enum>
           <description>List of capabilities that this camera device
           advertises as fully supporting.</description>
