@@ -17,6 +17,7 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "audio_utils_primitives_tests"
 
+#include <math.h>
 #include <vector>
 #include <cutils/log.h>
 #include <gtest/gtest.h>
