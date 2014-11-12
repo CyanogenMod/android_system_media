@@ -524,6 +524,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                 device, along with android.flash.* fields, if there's
                 a flash unit for this camera device.
 
+                Note that auto-white balance (AWB) and auto-focus (AF)
+                behavior is device dependent when AE is in OFF mode.
+                To have consistent behavior across different devices,
+                it is recommended to either set AWB and AF to OFF mode
+                or lock AWB and AF before setting AE to OFF.
+                See android.control.awbMode, android.control.afMode,
+                android.control.awbLock, and android.control.afTrigger
+                for more details.
+
                 LEGACY devices do not support the OFF mode and will
                 override attempts to use this value to ON.
               </notes>
@@ -807,7 +816,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           mode it is set to.</description>
           <range>android.control.afAvailableModes</range>
           <details>Only effective if android.control.mode = AUTO and the lens is not fixed focus
-          (i.e. `android.lens.info.minimumFocusDistance &gt; 0`).
+          (i.e. `android.lens.info.minimumFocusDistance &gt; 0`). Also note that
+          when android.control.aeMode is OFF, the behavior of AF is device
+          dependent. It is recommended to lock AF by using android.control.afTrigger before
+          setting android.control.aeMode to OFF, or set AF mode to OFF when AE is OFF.
 
           If the lens is controlled by the camera device auto-focus algorithm,
           the camera device will report the current AF status in android.control.afState
@@ -1107,7 +1119,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           When set to the ON mode, the camera device's auto-white balance
           routine is enabled, overriding the application's selected
           android.colorCorrection.transform, android.colorCorrection.gains and
-          android.colorCorrection.mode.
+          android.colorCorrection.mode. Note that when android.control.aeMode
+          is OFF, the behavior of AWB is device dependent. It is recommened to
+          also set AWB mode to OFF or lock AWB by using android.control.awbLock before
+          setting AE mode to OFF.
 
           When set to the OFF mode, the camera device's auto-white balance
           routine is disabled. The application manually controls the white
