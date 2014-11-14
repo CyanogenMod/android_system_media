@@ -2175,6 +2175,14 @@ any flicker during the switch,<wbr/> the following procedure is recommended:</p>
 <a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a> are used by the camera
 device,<wbr/> along with android.<wbr/>flash.<wbr/>* fields,<wbr/> if there's
 a flash unit for this camera device.<wbr/></p>
+<p>Note that auto-white balance (AWB) and auto-focus (AF)
+behavior is device dependent when AE is in OFF mode.<wbr/>
+To have consistent behavior across different devices,<wbr/>
+it is recommended to either set AWB and AF to OFF mode
+or lock AWB and AF before setting AE to OFF.<wbr/>
+See <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a>,<wbr/> and <a href="#controls_android.control.afTrigger">android.<wbr/>control.<wbr/>af<wbr/>Trigger</a>
+for more details.<wbr/></p>
 <p>LEGACY devices do not support the OFF mode and will
 override attempts to use this value to ON.<wbr/></p></span>
                   </li>
@@ -2632,7 +2640,10 @@ mode it is set to.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO and the lens is not fixed focus
-(i.<wbr/>e.<wbr/> <code><a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> &gt; 0</code>).<wbr/></p>
+(i.<wbr/>e.<wbr/> <code><a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> &gt; 0</code>).<wbr/> Also note that
+when <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is OFF,<wbr/> the behavior of AF is device
+dependent.<wbr/> It is recommended to lock AF by using <a href="#controls_android.control.afTrigger">android.<wbr/>control.<wbr/>af<wbr/>Trigger</a> before
+setting <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> to OFF,<wbr/> or set AF mode to OFF when AE is OFF.<wbr/></p>
 <p>If the lens is controlled by the camera device auto-focus algorithm,<wbr/>
 the camera device will report the current AF status in <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a>
 in result metadata.<wbr/></p>
@@ -3073,7 +3084,10 @@ is.<wbr/></p>
 <p>When set to the ON mode,<wbr/> the camera device's auto-white balance
 routine is enabled,<wbr/> overriding the application's selected
 <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>,<wbr/> <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> and
-<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a>.<wbr/></p>
+<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a>.<wbr/> Note that when <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>
+is OFF,<wbr/> the behavior of AWB is device dependent.<wbr/> It is recommened to
+also set AWB mode to OFF or lock AWB by using <a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a> before
+setting AE mode to OFF.<wbr/></p>
 <p>When set to the OFF mode,<wbr/> the camera device's auto-white balance
 routine is disabled.<wbr/> The application manually controls the white
 balance by <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>,<wbr/> <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a>
@@ -5252,6 +5266,14 @@ any flicker during the switch,<wbr/> the following procedure is recommended:</p>
 <a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a> are used by the camera
 device,<wbr/> along with android.<wbr/>flash.<wbr/>* fields,<wbr/> if there's
 a flash unit for this camera device.<wbr/></p>
+<p>Note that auto-white balance (AWB) and auto-focus (AF)
+behavior is device dependent when AE is in OFF mode.<wbr/>
+To have consistent behavior across different devices,<wbr/>
+it is recommended to either set AWB and AF to OFF mode
+or lock AWB and AF before setting AE to OFF.<wbr/>
+See <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a>,<wbr/> and <a href="#controls_android.control.afTrigger">android.<wbr/>control.<wbr/>af<wbr/>Trigger</a>
+for more details.<wbr/></p>
 <p>LEGACY devices do not support the OFF mode and will
 override attempts to use this value to ON.<wbr/></p></span>
                   </li>
@@ -5976,7 +5998,10 @@ mode it is set to.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Only effective if <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> = AUTO and the lens is not fixed focus
-(i.<wbr/>e.<wbr/> <code><a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> &gt; 0</code>).<wbr/></p>
+(i.<wbr/>e.<wbr/> <code><a href="#static_android.lens.info.minimumFocusDistance">android.<wbr/>lens.<wbr/>info.<wbr/>minimum<wbr/>Focus<wbr/>Distance</a> &gt; 0</code>).<wbr/> Also note that
+when <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is OFF,<wbr/> the behavior of AF is device
+dependent.<wbr/> It is recommended to lock AF by using <a href="#controls_android.control.afTrigger">android.<wbr/>control.<wbr/>af<wbr/>Trigger</a> before
+setting <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> to OFF,<wbr/> or set AF mode to OFF when AE is OFF.<wbr/></p>
 <p>If the lens is controlled by the camera device auto-focus algorithm,<wbr/>
 the camera device will report the current AF status in <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a>
 in result metadata.<wbr/></p>
@@ -6955,7 +6980,10 @@ is.<wbr/></p>
 <p>When set to the ON mode,<wbr/> the camera device's auto-white balance
 routine is enabled,<wbr/> overriding the application's selected
 <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>,<wbr/> <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a> and
-<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a>.<wbr/></p>
+<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a>.<wbr/> Note that when <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>
+is OFF,<wbr/> the behavior of AWB is device dependent.<wbr/> It is recommened to
+also set AWB mode to OFF or lock AWB by using <a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a> before
+setting AE mode to OFF.<wbr/></p>
 <p>When set to the OFF mode,<wbr/> the camera device's auto-white balance
 routine is disabled.<wbr/> The application manually controls the white
 balance by <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a>,<wbr/> <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a>
