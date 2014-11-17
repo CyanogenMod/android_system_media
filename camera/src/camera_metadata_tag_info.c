@@ -1652,6 +1652,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "READ_SENSOR_SETTINGS";
                     ret = 0;
                     break;
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE:
+                    msg = "BURST_CAPTURE";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
