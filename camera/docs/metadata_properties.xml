@@ -3977,6 +3977,24 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               always be included if the MANUAL_SENSOR capability is available.
               </notes>
             </value>
+            <value optional="true">BURST_CAPTURE
+              <notes>
+              The camera device supports capturing maximum-resolution
+              images at &gt;= 20 frames per second, in at least the
+              uncompressed YUV format, when post-processing settings
+              are set to FAST.
+
+              More specifically, this means that a size matching the
+              camera device's active array size is listed as a
+              supported size for the YUV_420_888 format in
+              android.scaler.streamConfigurationMap, and the
+              minimum frame duration for that format and size is &lt;=
+              1/20 s.
+
+              In addition, the android.sync.maxLatency field is
+              guaranted to have a value between 0 and 4, inclusive.
+              </notes>
+            </value>
           </enum>
           <description>List of capabilities that this camera device
           advertises as fully supporting.</description>
@@ -6913,12 +6931,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           A FULL device will support below capabilities:
 
-          * 30fps at maximum resolution (== sensor resolution) is preferred, more than 20fps is required.
+          * 30fps operation at maximum resolution (== sensor resolution) is preferred, more than
+            20fps is required, for at least uncompressed YUV
+            output. (android.request.availableCapabilities contains BURST_CAPTURE)
           * Per frame control (android.sync.maxLatency `==` PER_FRAME_CONTROL)
           * Manual sensor control (android.request.availableCapabilities contains MANUAL_SENSOR)
-          * Manual post-processing control (android.request.availableCapabilities contains MANUAL_POST_PROCESSING)
+          * Manual post-processing control (android.request.availableCapabilities contains
+            MANUAL_POST_PROCESSING)
           * Arbitrary cropping region (android.scaler.croppingType `==` FREEFORM)
-          * At least 3 processed (but not stalling) format output streams (android.request.maxNumOutputProc `&gt;=` 3)
+          * At least 3 processed (but not stalling) format output streams
+            (android.request.maxNumOutputProc `&gt;=` 3)
           * The required stream configuration defined in android.scaler.availableStreamConfigurations
           * The required exposure time range defined in android.sensor.info.exposureTimeRange
           * The required maxFrameDuration defined in android.sensor.info.maxFrameDuration
