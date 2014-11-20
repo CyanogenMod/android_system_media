@@ -1730,6 +1730,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             `Min.exposure compensation * android.control.aeCompensationStep &lt;= -2 EV`
 
             `Max.exposure compensation * android.control.aeCompensationStep &gt;= 2 EV`
+
+            LEGACY devices may support a smaller range than this, including the range [0,0], which
+            indicates that changing the exposure compensation is not supported.
           </range>
           <tag id="BC" />
         </entry>
