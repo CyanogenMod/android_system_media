@@ -13815,9 +13815,14 @@ are set to FAST.<wbr/></p>
 <p>More specifically,<wbr/> this means that a size matching the
 camera device's active array size is listed as a
 supported size for the YUV_<wbr/>420_<wbr/>888 format in
-<a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a>,<wbr/> and the
-minimum frame duration for that format and size is &lt;=
-1/<wbr/>20 s.<wbr/></p>
+<a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a>,<wbr/> the minimum frame
+duration for that format and size is &lt;= 1/<wbr/>20 s,<wbr/> and
+the <a href="#static_android.control.aeAvailableTargetFpsRanges">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Target<wbr/>Fps<wbr/>Ranges</a> entry
+lists at least one FPS range where the minimum FPS is</p>
+<blockquote>
+<p>= 1 /<wbr/> minimumFrameDuration for the maximum-size
+YUV_<wbr/>420_<wbr/>888 format.<wbr/></p>
+</blockquote>
 <p>In addition,<wbr/> the <a href="#static_android.sync.maxLatency">android.<wbr/>sync.<wbr/>max<wbr/>Latency</a> field is
 guaranted to have a value between 0 and 4,<wbr/> inclusive.<wbr/></p></span>
                   </li>
