@@ -3987,9 +3987,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               More specifically, this means that a size matching the
               camera device's active array size is listed as a
               supported size for the YUV_420_888 format in
-              android.scaler.streamConfigurationMap, and the
-              minimum frame duration for that format and size is &lt;=
-              1/20 s.
+              android.scaler.streamConfigurationMap, the minimum frame
+              duration for that format and size is &lt;= 1/20 s, and
+              the android.control.aeAvailableTargetFpsRanges entry
+              lists at least one FPS range where the minimum FPS is
+              &gt;= 1 / minimumFrameDuration for the maximum-size
+              YUV_420_888 format.
 
               In addition, the android.sync.maxLatency field is
               guaranted to have a value between 0 and 4, inclusive.
