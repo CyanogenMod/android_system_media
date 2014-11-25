@@ -375,7 +375,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               <notes>
                 The camera device will automatically adapt its
                 antibanding routine to the current illumination
-                conditions. This is the default.
+                condition. This is the default mode if AUTO is
+                available on given camera device.
               </notes>
             </value>
           </enum>
@@ -409,8 +410,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             android.control.aeAvailableAntibandingModes key contains
             the available modes for a given camera device.
 
-            The default mode is AUTO, which is supported by all
-            camera devices.
+            AUTO mode is the default if it is available on given
+            camera device. When AUTO mode is not available, the
+            default will be either 50HZ or 60HZ, and both 50HZ
+            and 60HZ will be available.
 
             If manual exposure control is enabled (by setting
             android.control.aeMode or android.control.mode to OFF),
@@ -421,8 +424,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <hal_details>
             For all capture request templates, this field must be set
-            to AUTO.  AUTO is the only mode that must supported;
-            OFF, 50HZ, 60HZ are all optional.
+            to AUTO if AUTO mode is available. If AUTO is not available,
+            the default must be either 50HZ or 60HZ, and both 50HZ and
+            60HZ must be available.
 
             If manual exposure control is enabled (by setting
             android.control.aeMode or android.control.mode to OFF),
@@ -1665,8 +1669,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             supported by a given camera device. This field lists the
             valid anti-banding modes that the application may request
             for this camera device with the
-            android.control.aeAntibandingMode control. This list
-            always includes AUTO.
+            android.control.aeAntibandingMode control.
           </details>
           <tag id="BC" />
         </entry>
