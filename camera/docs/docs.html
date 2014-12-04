@@ -1913,7 +1913,8 @@ sources.<wbr/></p></span>
                     <span class="entry_type_enum_name">AUTO</span>
                     <span class="entry_type_enum_notes"><p>The camera device will automatically adapt its
 antibanding routine to the current illumination
-conditions.<wbr/> This is the default.<wbr/></p></span>
+condition.<wbr/> This is the default mode if AUTO is
+available on given camera device.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -1962,8 +1963,10 @@ control.<wbr/></p>
 options for the antibanding mode.<wbr/> The
 <a href="#static_android.control.aeAvailableAntibandingModes">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Antibanding<wbr/>Modes</a> key contains
 the available modes for a given camera device.<wbr/></p>
-<p>The default mode is AUTO,<wbr/> which is supported by all
-camera devices.<wbr/></p>
+<p>AUTO mode is the default if it is available on given
+camera device.<wbr/> When AUTO mode is not available,<wbr/> the
+default will be either 50HZ or 60HZ,<wbr/> and both 50HZ
+and 60HZ will be available.<wbr/></p>
 <p>If manual exposure control is enabled (by setting
 <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> or <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> to OFF),<wbr/>
 then this setting has no effect,<wbr/> and the application must
@@ -1979,8 +1982,9 @@ the application in this.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>For all capture request templates,<wbr/> this field must be set
-to AUTO.<wbr/>  AUTO is the only mode that must supported;
-OFF,<wbr/> 50HZ,<wbr/> 60HZ are all optional.<wbr/></p>
+to AUTO if AUTO mode is available.<wbr/> If AUTO is not available,<wbr/>
+the default must be either 50HZ or 60HZ,<wbr/> and both 50HZ and
+60HZ must be available.<wbr/></p>
 <p>If manual exposure control is enabled (by setting
 <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> or <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> to OFF),<wbr/>
 then the exposure values provided by the application must not be
@@ -3927,8 +3931,7 @@ supported by this camera device.<wbr/></p>
 supported by a given camera device.<wbr/> This field lists the
 valid anti-banding modes that the application may request
 for this camera device with the
-<a href="#controls_android.control.aeAntibandingMode">android.<wbr/>control.<wbr/>ae<wbr/>Antibanding<wbr/>Mode</a> control.<wbr/> This list
-always includes AUTO.<wbr/></p>
+<a href="#controls_android.control.aeAntibandingMode">android.<wbr/>control.<wbr/>ae<wbr/>Antibanding<wbr/>Mode</a> control.<wbr/></p>
             </td>
           </tr>
 
@@ -5006,7 +5009,8 @@ sources.<wbr/></p></span>
                     <span class="entry_type_enum_name">AUTO</span>
                     <span class="entry_type_enum_notes"><p>The camera device will automatically adapt its
 antibanding routine to the current illumination
-conditions.<wbr/> This is the default.<wbr/></p></span>
+condition.<wbr/> This is the default mode if AUTO is
+available on given camera device.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -5055,8 +5059,10 @@ control.<wbr/></p>
 options for the antibanding mode.<wbr/> The
 <a href="#static_android.control.aeAvailableAntibandingModes">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Antibanding<wbr/>Modes</a> key contains
 the available modes for a given camera device.<wbr/></p>
-<p>The default mode is AUTO,<wbr/> which is supported by all
-camera devices.<wbr/></p>
+<p>AUTO mode is the default if it is available on given
+camera device.<wbr/> When AUTO mode is not available,<wbr/> the
+default will be either 50HZ or 60HZ,<wbr/> and both 50HZ
+and 60HZ will be available.<wbr/></p>
 <p>If manual exposure control is enabled (by setting
 <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> or <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> to OFF),<wbr/>
 then this setting has no effect,<wbr/> and the application must
@@ -5072,8 +5078,9 @@ the application in this.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>For all capture request templates,<wbr/> this field must be set
-to AUTO.<wbr/>  AUTO is the only mode that must supported;
-OFF,<wbr/> 50HZ,<wbr/> 60HZ are all optional.<wbr/></p>
+to AUTO if AUTO mode is available.<wbr/> If AUTO is not available,<wbr/>
+the default must be either 50HZ or 60HZ,<wbr/> and both 50HZ and
+60HZ must be available.<wbr/></p>
 <p>If manual exposure control is enabled (by setting
 <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> or <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> to OFF),<wbr/>
 then the exposure values provided by the application must not be
