@@ -3713,10 +3713,38 @@ the application avoids unnecessary scene mode switch as much as possible.<wbr/><
                   <li>
                     <span class="entry_type_enum_name">HDR</span>
                     <span class="entry_type_enum_optional">[optional]</span>
-                    <span class="entry_type_enum_optional">[hidden]</span>
-                    <span class="entry_type_enum_notes"><p>Turn on custom high dynamic range (HDR) mode.<wbr/></p>
-<p>This is intended for LEGACY mode devices only;
-HAL3+ camera devices should not implement this mode.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>Turn on a device-specific high dynamic range (HDR) mode.<wbr/></p>
+<p>In this scene mode,<wbr/> the camera device captures images
+that keep a larger range of scene illumination levels
+visible in the final image.<wbr/> For example,<wbr/> when taking a
+picture of a object in front of a bright window,<wbr/> both
+the object and the scene through the window may be
+visible when using HDR mode,<wbr/> while in normal AUTO mode,<wbr/>
+one or the other may be poorly exposed.<wbr/> As a tradeoff,<wbr/>
+HDR mode generally takes much longer to capture a single
+image,<wbr/> has no user control,<wbr/> and may have other artifacts
+depending on the HDR method used.<wbr/></p>
+<p>Therefore,<wbr/> HDR captures operate at a much slower rate
+than regular captures.<wbr/></p>
+<p>In this mode,<wbr/> on LIMITED or FULL devices,<wbr/> when a request
+is made with a <a href="#controls_android.control.captureIntent">android.<wbr/>control.<wbr/>capture<wbr/>Intent</a> of
+STILL_<wbr/>CAPTURE,<wbr/> the camera device will capture an image
+using a high dynamic range capture technique.<wbr/>  On LEGACY
+devices,<wbr/> captures that target a JPEG-format output will
+be captured with HDR,<wbr/> and the capture intent is not
+relevant.<wbr/></p>
+<p>The HDR capture may involve the device capturing a burst
+of images internally and combining them into one,<wbr/> or it
+may involve the device using specialized high dynamic
+range capture hardware.<wbr/> In all cases,<wbr/> a single image is
+produced in response to a capture request submitted
+while in HDR mode.<wbr/></p>
+<p>Since substantial post-processing is generally needed to
+produce an HDR image,<wbr/> only YUV and JPEG outputs are
+supported for LIMITED/<wbr/>FULL device HDR captures,<wbr/> and only
+JPEG outputs are supported for LEGACY HDR
+captures.<wbr/> Using a RAW output for HDR capture is not
+supported.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -7800,10 +7828,38 @@ the application avoids unnecessary scene mode switch as much as possible.<wbr/><
                   <li>
                     <span class="entry_type_enum_name">HDR</span>
                     <span class="entry_type_enum_optional">[optional]</span>
-                    <span class="entry_type_enum_optional">[hidden]</span>
-                    <span class="entry_type_enum_notes"><p>Turn on custom high dynamic range (HDR) mode.<wbr/></p>
-<p>This is intended for LEGACY mode devices only;
-HAL3+ camera devices should not implement this mode.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>Turn on a device-specific high dynamic range (HDR) mode.<wbr/></p>
+<p>In this scene mode,<wbr/> the camera device captures images
+that keep a larger range of scene illumination levels
+visible in the final image.<wbr/> For example,<wbr/> when taking a
+picture of a object in front of a bright window,<wbr/> both
+the object and the scene through the window may be
+visible when using HDR mode,<wbr/> while in normal AUTO mode,<wbr/>
+one or the other may be poorly exposed.<wbr/> As a tradeoff,<wbr/>
+HDR mode generally takes much longer to capture a single
+image,<wbr/> has no user control,<wbr/> and may have other artifacts
+depending on the HDR method used.<wbr/></p>
+<p>Therefore,<wbr/> HDR captures operate at a much slower rate
+than regular captures.<wbr/></p>
+<p>In this mode,<wbr/> on LIMITED or FULL devices,<wbr/> when a request
+is made with a <a href="#controls_android.control.captureIntent">android.<wbr/>control.<wbr/>capture<wbr/>Intent</a> of
+STILL_<wbr/>CAPTURE,<wbr/> the camera device will capture an image
+using a high dynamic range capture technique.<wbr/>  On LEGACY
+devices,<wbr/> captures that target a JPEG-format output will
+be captured with HDR,<wbr/> and the capture intent is not
+relevant.<wbr/></p>
+<p>The HDR capture may involve the device capturing a burst
+of images internally and combining them into one,<wbr/> or it
+may involve the device using specialized high dynamic
+range capture hardware.<wbr/> In all cases,<wbr/> a single image is
+produced in response to a capture request submitted
+while in HDR mode.<wbr/></p>
+<p>Since substantial post-processing is generally needed to
+produce an HDR image,<wbr/> only YUV and JPEG outputs are
+supported for LIMITED/<wbr/>FULL device HDR captures,<wbr/> and only
+JPEG outputs are supported for LEGACY HDR
+captures.<wbr/> Using a RAW output for HDR capture is not
+supported.<wbr/></p></span>
                   </li>
                 </ul>
 
