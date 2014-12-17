@@ -164,7 +164,7 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
             // ignore byte rate
             // ignore block alignment
             unsigned bitsPerSample = little2u(&fmt[14]);
-            if (bitsPerSample != 8 && bitsPerSample != 16 && bitsPerSample != 32) {
+            if (bitsPerSample != 8 && bitsPerSample != 16 && bitsPerSample != 24 && bitsPerSample != 32) {
                 fprintf(stderr, "bitsPerSample %u != 8 or 16 or 32\n", bitsPerSample);
                 goto close;
             }
