@@ -12,6 +12,7 @@ LOCAL_SRC_FILES:= \
 	minifloat.c \
 	primitives.c \
 	resampler.c \
+	roundup.c \
 	echo_reference.c
 
 LOCAL_C_INCLUDES += $(call include-path-for, speex)
