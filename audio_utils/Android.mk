@@ -7,6 +7,7 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES:= \
 	channels.c \
+	fifo.c \
 	fixedfft.cpp.arm \
 	format.c \
 	minifloat.c \
