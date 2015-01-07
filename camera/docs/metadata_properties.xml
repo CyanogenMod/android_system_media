@@ -336,10 +336,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <details>
             This key lists the valid modes for android.colorCorrection.aberrationMode.  If no
             aberration correction modes are available for a device, this list will solely include
-            OFF mode.
+            OFF mode. All camera devices will support either OFF or FAST mode.
 
-            For FULL capability device (android.info.supportedHardwareLevel `==` FULL), OFF is
-            always included.
+            Camera devices that support the MANUAL_POST_PROCESSING capability will always list
+            OFF mode. This includes all FULL level devices.
 
             LEGACY devices will always only support FAST mode.
           </details>
