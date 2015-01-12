@@ -3293,6 +3293,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <notes>
               The camera device faces the opposite direction as the device's screen.
             </notes></value>
+            <value>EXTERNAL
+            <notes>
+              The camera device is an external camera, and has no fixed facing relative to the
+              device's screen.
+            </notes></value>
           </enum>
           <description>Direction the camera faces relative to
           device screen.</description>
