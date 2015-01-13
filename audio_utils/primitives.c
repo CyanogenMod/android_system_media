@@ -48,6 +48,13 @@ void memcpy_to_u8_from_i16(uint8_t *dst, const int16_t *src, size_t count)
     }
 }
 
+void memcpy_to_u8_from_float(uint8_t *dst, const float *src, size_t count)
+{
+    while (count--) {
+        *dst++ = clamp8_from_float(*src++);
+    }
+}
+
 void memcpy_to_i16_from_i32(int16_t *dst, const int32_t *src, size_t count)
 {
     while (count--) {
@@ -73,6 +80,13 @@ void memcpy_to_float_from_i16(float *dst, const int16_t *src, size_t count)
 {
     while (count--) {
         *dst++ = float_from_i16(*src++);
+    }
+}
+
+void memcpy_to_float_from_u8(float *dst, const uint8_t *src, size_t count)
+{
+    while (count--) {
+        *dst++ = float_from_u8(*src++);
     }
 }
 
