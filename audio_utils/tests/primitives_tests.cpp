@@ -27,10 +27,33 @@
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
+static const int32_t lim8pos = 255;
+static const int32_t lim8neg = 0;
 static const int32_t lim16pos = (1 << 15) - 1;
 static const int32_t lim16neg = -(1 << 15);
 static const int32_t lim24pos = (1 << 23) - 1;
 static const int32_t lim24neg = -(1 << 23);
+
+inline void testClamp8(float f)
+{
+    // f is in native u8 scaling to test rounding
+    uint8_t uval = clamp8_from_float((f - 128) / (1 << 7));
+
+    // test clamping
+    ALOGV("clamp8_from_float(%f) = %u\n", f, uval);
+    if (f > lim8pos) {
+        EXPECT_EQ(lim8pos, uval);
+    } else if (f < lim8neg) {
+        EXPECT_EQ(lim8neg, uval);
+    }
+
+    // if in range, make sure round trip clamp and conversion is correct.
+    if (f < lim8pos - 1. && f > lim8neg + 1.) {
+        uint8_t uval2 = clamp8_from_float(float_from_u8(uval));
+        int diff = abs(uval - uval2);
+        EXPECT_LE(diff, 1);
+    }
+}
 
 inline void testClamp16(float f)
 {
@@ -90,6 +113,9 @@ TEST(audio_utils_primitives, clamp_to_int) {
             INFINITY, NAN };
 
     for (size_t i = 0; i < ARRAY_SIZE(testArray); ++i) {
+        testClamp8(testArray[i]);
+    }
+    for (size_t i = 0; i < ARRAY_SIZE(testArray); ++i) {
         testClamp16(testArray[i]);
     }
     for (size_t i = 0; i < ARRAY_SIZE(testArray); ++i) {
@@ -143,6 +169,10 @@ TEST(audio_utils_primitives, clamp_to_int) {
         ures16 = u4_12_from_float(float_from_u4_12(v));
         EXPECT_EQ(ures16, v);
     }
+
+    // check infinity
+    EXPECT_EQ(0, clamp8_from_float(-INFINITY));
+    EXPECT_EQ(255, clamp8_from_float(INFINITY));
 }
 
 TEST(audio_utils_primitives, memcpy) {
@@ -241,6 +271,21 @@ TEST(audio_utils_primitives, memcpy) {
     // at the end, our i16ary must be the same. (Monotone should be equivalent to this)
     EXPECT_EQ(0, memcmp(i16ary, i16ref, 65536*sizeof(i16ary[0])));
 
+    // test round-trip for u8 and float.
+    uint8_t *u8ref = new uint8_t[256];
+    uint8_t *u8ary = new uint8_t[256];
+
+    for (unsigned i = 0; i < 256; ++i) {
+        u8ref[i] = i;
+    }
+
+    memcpy_to_float_from_u8(fary, u8ref, 256);
+    memcpy_to_u8_from_float(u8ary, fary, 256);
+
+    EXPECT_EQ(0, memcmp(u8ary, u8ref, 256 * sizeof(u8ary[0])));
+
+    delete[] u8ref;
+    delete[] u8ary;
     delete[] i16ref;
     delete[] i16ary;
     delete[] i32ary;
