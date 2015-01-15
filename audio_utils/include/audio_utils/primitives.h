@@ -68,6 +68,17 @@ void memcpy_to_i16_from_u8(int16_t *dst, const uint8_t *src, size_t count);
  */
 void memcpy_to_u8_from_i16(uint8_t *dst, const int16_t *src, size_t count);
 
+/* Copy samples from float to unsigned 8-bit offset by 0x80.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ * The conversion is done by truncation, without dithering, so it loses resolution.
+ */
+void memcpy_to_u8_from_float(uint8_t *dst, const float *src, size_t count);
+
 /* Shrink and copy samples from signed 32-bit fixed-point Q0.31 to signed 16-bit Q0.15.
  * Parameters:
  *  dst     Destination buffer
@@ -115,6 +126,17 @@ void memcpy_to_float_from_q4_27(float *dst, const int32_t *src, size_t count);
  * The destination and source buffers must be completely separate.
  */
 void memcpy_to_float_from_i16(float *dst, const int16_t *src, size_t count);
+
+/* Copy samples from unsigned fixed-point 8 bit to single-precision floating-point.
+ * The output float range is [-1.0, 1.0) for the fixed-point range [0x00, 0xFF].
+ * No rounding is needed as the representation is exact.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must be completely separate.
+ */
+void memcpy_to_float_from_u8(float *dst, const uint8_t *src, size_t count);
 
 /* Copy samples from signed fixed-point packed 24 bit Q0.23 to single-precision floating-point.
  * The packed 24 bit input is stored in native endian format in a uint8_t byte array.
@@ -426,6 +448,45 @@ static inline int16_t clamp16_from_float(float f)
     return u.i; /* Return lower 16 bits, the part of interest in the significand. */
 }
 
+/*
+ * Convert a IEEE 754 single precision float [-1.0, 1.0) to uint8_t [0, 0xff]
+ * with clamping.  Note the open bound at 1.0, values within 1/128 of 1.0 map
+ * to 255 instead of 256 (early clamping due to the smaller positive integer subrange).
+ *
+ * Values outside the range [-1.0, 1.0) are properly clamped to 0 and 255,
+ * including -Inf and +Inf. NaN will generally be treated either as 0 or 255,
+ * depending on the sign bit inside NaN (whose representation is not unique).
+ * Nevertheless, strictly speaking, NaN behavior should be considered undefined.
+ *
+ * Rounding of 0.5 lsb is to even (default for IEEE 754).
+ */
+static inline uint8_t clamp8_from_float(float f)
+{
+    /* Offset is used to expand the valid range of [-1.0, 1.0) into the 16 lsbs of the
+     * floating point significand. The normal shift is 3<<22, but the -7 offset
+     * is used to multiply by 128.
+     */
+    static const float offset = (float)((3 << (22 - 7)) + 1 /* to cancel -1.0 */);
+    /* zero = (0x11f << 22) =  0x47c00000 */
+    static const int32_t limneg = (0x11f << 22) /*zero*/;
+    static const int32_t limpos = (0x11f << 22) /*zero*/ + 255; /* 0x47c000ff */
+
+    union {
+        float f;
+        int32_t i;
+    } u;
+
+    u.f = f + offset; /* recenter valid range */
+    /* Now the valid range is represented as integers between [limneg, limpos].
+     * Clamp using the fact that float representation (as an integer) is an ordered set.
+     */
+    if (u.i < limneg)
+        return 0;
+    if (u.i > limpos)
+        return 255;
+    return u.i; /* Return lower 8 bits, the part of interest in the significand. */
+}
+
 /* Convert a single-precision floating point value to a Q0.23 integer value, stored in a
  * 32 bit signed integer (technically stored as Q8.23, but clamped to Q0.23).
  *
@@ -634,6 +695,17 @@ static inline float float_from_i16(int16_t ival)
     static const float scale = 1. / (float)(1UL << 15);
 
     return ival * scale;
+}
+
+/* Convert an unsigned fixed-point 8-bit U0.8 value to single-precision floating-point.
+ * The nominal output float range is [-1.0, 1.0) if the fixed-point range is
+ * [0x00, 0xff].
+ */
+static inline float float_from_u8(uint8_t uval)
+{
+    static const float scale = 1. / (float)(1UL << 7);
+
+    return ((int)uval - 128) * scale;
 }
 
 /* Convert a packed 24bit Q0.23 value stored native-endian in a uint8_t ptr

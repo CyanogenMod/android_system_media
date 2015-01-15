@@ -29,6 +29,7 @@ void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
         switch (dst_format) {
         case AUDIO_FORMAT_PCM_16_BIT:
         case AUDIO_FORMAT_PCM_FLOAT:
+        case AUDIO_FORMAT_PCM_8_BIT:
         case AUDIO_FORMAT_PCM_24_BIT_PACKED:
         case AUDIO_FORMAT_PCM_32_BIT:
         case AUDIO_FORMAT_PCM_8_24_BIT:
@@ -43,6 +44,9 @@ void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
         switch (src_format) {
         case AUDIO_FORMAT_PCM_FLOAT:
             memcpy_to_i16_from_float((int16_t*)dst, (float*)src, count);
+            return;
+        case AUDIO_FORMAT_PCM_8_BIT:
+            memcpy_to_i16_from_u8((int16_t*)dst, (uint8_t*)src, count);
             return;
         case AUDIO_FORMAT_PCM_24_BIT_PACKED:
             memcpy_to_i16_from_p24((int16_t*)dst, (uint8_t*)src, count);
@@ -62,6 +66,9 @@ void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
         case AUDIO_FORMAT_PCM_16_BIT:
             memcpy_to_float_from_i16((float*)dst, (int16_t*)src, count);
             return;
+        case AUDIO_FORMAT_PCM_8_BIT:
+            memcpy_to_float_from_u8((float*)dst, (uint8_t*)src, count);
+            return;
         case AUDIO_FORMAT_PCM_24_BIT_PACKED:
             memcpy_to_float_from_p24((float*)dst, (uint8_t*)src, count);
             return;
@@ -70,6 +77,18 @@ void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
             return;
         case AUDIO_FORMAT_PCM_8_24_BIT:
             memcpy_to_float_from_q8_23((float*)dst, (int32_t*)src, count);
+            return;
+        default:
+            break;
+        }
+        break;
+    case AUDIO_FORMAT_PCM_8_BIT:
+        switch (src_format) {
+        case AUDIO_FORMAT_PCM_16_BIT:
+            memcpy_to_u8_from_i16((uint8_t*)dst, (int16_t*)src, count);
+            return;
+        case AUDIO_FORMAT_PCM_FLOAT:
+            memcpy_to_u8_from_float((uint8_t*)dst, (float*)src, count);
             return;
         default:
             break;
