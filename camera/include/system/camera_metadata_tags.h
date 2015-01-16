@@ -59,6 +59,7 @@ typedef enum camera_metadata_section {
     ANDROID_INFO,
     ANDROID_BLACK_LEVEL,
     ANDROID_SYNC,
+    ANDROID_REPROCESS,
     ANDROID_SECTION_COUNT,
 
     VENDOR_SECTION = 0x8000
@@ -93,6 +94,7 @@ typedef enum camera_metadata_section_start {
     ANDROID_INFO_START             = ANDROID_INFO              << 16,
     ANDROID_BLACK_LEVEL_START      = ANDROID_BLACK_LEVEL       << 16,
     ANDROID_SYNC_START             = ANDROID_SYNC              << 16,
+    ANDROID_REPROCESS_START        = ANDROID_REPROCESS         << 16,
     VENDOR_SECTION_START           = VENDOR_SECTION            << 16
 } camera_metadata_section_start_t;
 
@@ -243,7 +245,7 @@ typedef enum camera_metadata_tag {
     ANDROID_REQUEST_TYPE,                             // enum         | system
     ANDROID_REQUEST_MAX_NUM_OUTPUT_STREAMS,           // int32[]      | hidden
     ANDROID_REQUEST_MAX_NUM_REPROCESS_STREAMS,        // int32[]      | system
-    ANDROID_REQUEST_MAX_NUM_INPUT_STREAMS,            // int32        | hidden
+    ANDROID_REQUEST_MAX_NUM_INPUT_STREAMS,            // int32        | public
     ANDROID_REQUEST_PIPELINE_DEPTH,                   // byte         | public
     ANDROID_REQUEST_PIPELINE_MAX_DEPTH,               // byte         | public
     ANDROID_REQUEST_PARTIAL_RESULT_COUNT,             // int32        | public
@@ -375,6 +377,10 @@ typedef enum camera_metadata_tag {
             ANDROID_SYNC_START,
     ANDROID_SYNC_MAX_LATENCY,                         // enum         | public
     ANDROID_SYNC_END,
+
+    ANDROID_REPROCESS_EFFECTIVE_EXPOSURE_FACTOR =     // float        | public
+            ANDROID_REPROCESS_START,
+    ANDROID_REPROCESS_END,
 
 } camera_metadata_tag_t;
 
@@ -634,6 +640,7 @@ typedef enum camera_metadata_enum_android_noise_reduction_mode {
     ANDROID_NOISE_REDUCTION_MODE_OFF,
     ANDROID_NOISE_REDUCTION_MODE_FAST,
     ANDROID_NOISE_REDUCTION_MODE_HIGH_QUALITY,
+    ANDROID_NOISE_REDUCTION_MODE_MINIMAL,
 } camera_metadata_enum_android_noise_reduction_mode_t;
 
 
@@ -662,9 +669,10 @@ typedef enum camera_metadata_enum_android_request_available_capabilities {
     ANDROID_REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR,
     ANDROID_REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING,
     ANDROID_REQUEST_AVAILABLE_CAPABILITIES_RAW,
-    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_ZSL,
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING,
     ANDROID_REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS,
     ANDROID_REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE,
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING,
 } camera_metadata_enum_android_request_available_capabilities_t;
 
 
@@ -836,5 +844,6 @@ typedef enum camera_metadata_enum_android_sync_max_latency {
     ANDROID_SYNC_MAX_LATENCY_PER_FRAME_CONTROL                  = 0,
     ANDROID_SYNC_MAX_LATENCY_UNKNOWN                            = -1,
 } camera_metadata_enum_android_sync_max_latency_t;
+
 
 
