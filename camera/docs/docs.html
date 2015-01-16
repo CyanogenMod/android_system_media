@@ -1037,6 +1037,25 @@
         </li>
       </ul> <!-- toc_section -->
     </li>
+    <li>
+      <span class="toc_section_header"><a href="#section_reprocess">reprocess</a></span>
+      <ul class="toc_section">
+        <li>
+          <span class="toc_kind_header">controls</span>
+          <ul class="toc_section">
+            <li
+            ><a href="#controls_android.reprocess.effectiveExposureFactor">android.reprocess.effectiveExposureFactor</a></li>
+          </ul>
+        </li>
+        <li>
+          <span class="toc_kind_header">dynamic</span>
+          <ul class="toc_section">
+            <li
+            ><a href="#dynamic_android.reprocess.effectiveExposureFactor">android.reprocess.effectiveExposureFactor</a></li>
+          </ul>
+        </li>
+      </ul> <!-- toc_section -->
+    </li>
   </ul>
 
 
@@ -3296,7 +3315,7 @@ strategy.<wbr/></p>
               <p>This control (except for MANUAL) is only effective if
 <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF</code> and any 3A routine is active.<wbr/></p>
 <p>ZERO_<wbr/>SHUTTER_<wbr/>LAG will be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
-contains ZSL.<wbr/> MANUAL will be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
+contains OPAQUE_<wbr/>REPROCESSING.<wbr/> MANUAL will be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
 contains MANUAL_<wbr/>SENSOR.<wbr/> Other intent values are always supported.<wbr/></p>
             </td>
           </tr>
@@ -7225,7 +7244,7 @@ strategy.<wbr/></p>
               <p>This control (except for MANUAL) is only effective if
 <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF</code> and any 3A routine is active.<wbr/></p>
 <p>ZERO_<wbr/>SHUTTER_<wbr/>LAG will be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
-contains ZSL.<wbr/> MANUAL will be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
+contains OPAQUE_<wbr/>REPROCESSING.<wbr/> MANUAL will be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
 contains MANUAL_<wbr/>SENSOR.<wbr/> Other intent values are always supported.<wbr/></p>
             </td>
           </tr>
@@ -8115,7 +8134,7 @@ processing.<wbr/></p>
                 
           <tr class="entry" id="controls_android.edge.mode">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>edge.<wbr/>mode
             </td>
             <td class="entry_type">
@@ -8177,9 +8196,23 @@ will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the
 camera device will use the highest-quality enhancement algorithms,<wbr/>
 even if it slows down capture rate.<wbr/> FAST means the camera device will
 not slow down capture rate when applying edge enhancement.<wbr/></p>
+<p>For YUV_<wbr/>REPROCESSING,<wbr/> these FAST/<wbr/>HIGH_<wbr/>QUALITY modes both mean that the camera
+device will apply FAST/<wbr/>HIGH_<wbr/>QUALITY YUV-domain edge enhancement,<wbr/> respectively.<wbr/>
+The camera device may adjust its internal noise reduction parameters for best
+image quality based on the <a href="#controls_android.reprocess.effectiveExposureFactor">android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor</a>,<wbr/> if it is set.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For YUV_<wbr/>REPROCESSING The HAL can use <a href="#controls_android.reprocess.effectiveExposureFactor">android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor</a> to
+adjust the internal edge enhancement reduction parameters appropriately to get the best
+quality images.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -8339,7 +8372,7 @@ device.<wbr/></p>
                 
           <tr class="entry" id="dynamic_android.edge.mode">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>edge.<wbr/>mode
             </td>
             <td class="entry_type">
@@ -8401,9 +8434,23 @@ will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the
 camera device will use the highest-quality enhancement algorithms,<wbr/>
 even if it slows down capture rate.<wbr/> FAST means the camera device will
 not slow down capture rate when applying edge enhancement.<wbr/></p>
+<p>For YUV_<wbr/>REPROCESSING,<wbr/> these FAST/<wbr/>HIGH_<wbr/>QUALITY modes both mean that the camera
+device will apply FAST/<wbr/>HIGH_<wbr/>QUALITY YUV-domain edge enhancement,<wbr/> respectively.<wbr/>
+The camera device may adjust its internal noise reduction parameters for best
+image quality based on the <a href="#controls_android.reprocess.effectiveExposureFactor">android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor</a>,<wbr/> if it is set.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For YUV_<wbr/>REPROCESSING The HAL can use <a href="#controls_android.reprocess.effectiveExposureFactor">android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor</a> to
+adjust the internal edge enhancement reduction parameters appropriately to get the best
+quality images.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -12138,7 +12185,7 @@ is changing.<wbr/></p>
                 
           <tr class="entry" id="controls_android.noiseReduction.mode">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>noise<wbr/>Reduction.<wbr/>mode
             </td>
             <td class="entry_type">
@@ -12165,6 +12212,12 @@ output.<wbr/></p></span>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
                     <span class="entry_type_enum_notes"><p>High-quality noise reduction is applied,<wbr/> at the cost of reducing frame rate
 relative to sensor output.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">MINIMAL</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>MINIMAL noise reduction is applied without reducing frame rate relative to
+sensor output.<wbr/> </p></span>
                   </li>
                 </ul>
 
@@ -12194,16 +12247,35 @@ relative to sensor output.<wbr/></p></span>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>The noise reduction algorithm attempts to improve image quality by removing
-excessive noise added by the capture process,<wbr/> especially in dark conditions.<wbr/>
-OFF means no noise reduction will be applied by the camera device.<wbr/></p>
+excessive noise added by the capture process,<wbr/> especially in dark conditions.<wbr/></p>
+<p>OFF means no noise reduction will be applied by the camera device,<wbr/> for both raw and
+YUV domain.<wbr/></p>
+<p>MINIMAL means that only sensor raw domain basic noise reduction is enabled ,<wbr/>to remove
+demosaicing or other processing artifacts.<wbr/> For YUV_<wbr/>REPROCESSING,<wbr/> MINIMAL is same as OFF.<wbr/>
+This mode is optional,<wbr/> may not be support by all devices.<wbr/> The application should check
+<a href="#static_android.noiseReduction.availableNoiseReductionModes">android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Noise<wbr/>Reduction<wbr/>Modes</a> before using it.<wbr/></p>
 <p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined noise filtering
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the camera device
 will use the highest-quality noise filtering algorithms,<wbr/>
 even if it slows down capture rate.<wbr/> FAST means the camera device will not
 slow down capture rate when applying noise filtering.<wbr/></p>
+<p>For YUV_<wbr/>REPROCESSING,<wbr/> these FAST/<wbr/>HIGH_<wbr/>QUALITY modes both mean that the camera device
+will apply FAST/<wbr/>HIGH_<wbr/>QUALITY YUV domain noise reduction,<wbr/> respectively.<wbr/> The camera device
+may adjust the noise reduction parameters for best image quality based on the
+<a href="#controls_android.reprocess.effectiveExposureFactor">android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor</a> if it is set.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For YUV_<wbr/>REPROCESSING The HAL can use <a href="#controls_android.reprocess.effectiveExposureFactor">android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor</a> to
+adjust the internal noise reduction parameters appropriately to get the best quality
+images.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -12365,7 +12437,7 @@ by this camera device.<wbr/></p>
                 
           <tr class="entry" id="dynamic_android.noiseReduction.mode">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>noise<wbr/>Reduction.<wbr/>mode
             </td>
             <td class="entry_type">
@@ -12392,6 +12464,12 @@ output.<wbr/></p></span>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
                     <span class="entry_type_enum_notes"><p>High-quality noise reduction is applied,<wbr/> at the cost of reducing frame rate
 relative to sensor output.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">MINIMAL</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>MINIMAL noise reduction is applied without reducing frame rate relative to
+sensor output.<wbr/> </p></span>
                   </li>
                 </ul>
 
@@ -12421,16 +12499,35 @@ relative to sensor output.<wbr/></p></span>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>The noise reduction algorithm attempts to improve image quality by removing
-excessive noise added by the capture process,<wbr/> especially in dark conditions.<wbr/>
-OFF means no noise reduction will be applied by the camera device.<wbr/></p>
+excessive noise added by the capture process,<wbr/> especially in dark conditions.<wbr/></p>
+<p>OFF means no noise reduction will be applied by the camera device,<wbr/> for both raw and
+YUV domain.<wbr/></p>
+<p>MINIMAL means that only sensor raw domain basic noise reduction is enabled ,<wbr/>to remove
+demosaicing or other processing artifacts.<wbr/> For YUV_<wbr/>REPROCESSING,<wbr/> MINIMAL is same as OFF.<wbr/>
+This mode is optional,<wbr/> may not be support by all devices.<wbr/> The application should check
+<a href="#static_android.noiseReduction.availableNoiseReductionModes">android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Noise<wbr/>Reduction<wbr/>Modes</a> before using it.<wbr/></p>
 <p>FAST/<wbr/>HIGH_<wbr/>QUALITY both mean camera device determined noise filtering
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the camera device
 will use the highest-quality noise filtering algorithms,<wbr/>
 even if it slows down capture rate.<wbr/> FAST means the camera device will not
 slow down capture rate when applying noise filtering.<wbr/></p>
+<p>For YUV_<wbr/>REPROCESSING,<wbr/> these FAST/<wbr/>HIGH_<wbr/>QUALITY modes both mean that the camera device
+will apply FAST/<wbr/>HIGH_<wbr/>QUALITY YUV domain noise reduction,<wbr/> respectively.<wbr/> The camera device
+may adjust the noise reduction parameters for best image quality based on the
+<a href="#controls_android.reprocess.effectiveExposureFactor">android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor</a> if it is set.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For YUV_<wbr/>REPROCESSING The HAL can use <a href="#controls_android.reprocess.effectiveExposureFactor">android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor</a> to
+adjust the internal noise reduction parameters appropriately to get the best quality
+images.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -13523,13 +13620,13 @@ can be allocated at the same time.<wbr/></p>
                 
           <tr class="entry" id="static_android.request.maxNumInputStreams">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams
             </td>
             <td class="entry_type">
                 <span class="entry_type_name">int32</span>
 
-              <span class="entry_type_visibility"> [hidden]</span>
+              <span class="entry_type_visibility"> [public]</span>
 
 
               <span class="entry_type_hwlevel">[full] </span>
@@ -13566,12 +13663,24 @@ format provided by
 <a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a>.<wbr/> When using an
 input stream,<wbr/> there must be at least one output stream
 configured to to receive the reprocessed images.<wbr/></p>
+<p>When an input stream and some output streams are used in a reprocessing request,<wbr/>
+only the input buffer will be used to produce these output stream buffers,<wbr/> and a
+new sensor image will not be captured.<wbr/></p>
 <p>For example,<wbr/> for Zero Shutter Lag (ZSL) still capture use case,<wbr/> the input
-stream image format will be RAW_<wbr/>OPAQUE,<wbr/> the associated output stream image format
+stream image format will be OPAQUE,<wbr/> the associated output stream image format
 should be JPEG.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For the reprocessing flow and controls,<wbr/> see
+hardware/<wbr/>libhardware/<wbr/>include/<wbr/>hardware/<wbr/>camera3.<wbr/>h Section 10 for more details.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -13832,21 +13941,34 @@ raw sensor images.<wbr/></p>
 </ul></span>
                   </li>
                   <li>
-                    <span class="entry_type_enum_name">ZSL</span>
+                    <span class="entry_type_enum_name">OPAQUE_REPROCESSING</span>
                     <span class="entry_type_enum_optional">[optional]</span>
-                    <span class="entry_type_enum_optional">[hidden]</span>
-                    <span class="entry_type_enum_notes"><p>The camera device supports the Zero Shutter Lag use case.<wbr/></p>
+                    <span class="entry_type_enum_notes"><p>The camera device supports the Zero Shutter Lag reprocessing use case.<wbr/></p>
 <ul>
-<li>At least one input stream can be used.<wbr/></li>
-<li>RAW_<wbr/>OPAQUE is supported as an output/<wbr/>input format</li>
-<li>Using RAW_<wbr/>OPAQUE does not cause a frame rate drop
+<li>One input stream is supported,<wbr/> that is,<wbr/> <code><a href="#static_android.request.maxNumInputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams</a> == 1</code>.<wbr/></li>
+<li>OPAQUE is supported as an output/<wbr/>input format,<wbr/> that is,<wbr/>
+  StreamConfigurationMap#getOutputSizes(klass) and
+  StreamConfigurationMap#getInputSizes(klass) return non empty Size[] and have common
+  sizes,<wbr/> where klass is android.<wbr/>media.<wbr/>Opaque<wbr/>Image<wbr/>Ring<wbr/>Buffer<wbr/>Queue.<wbr/>class.<wbr/> See
+  <a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> for detailed information about
+  OPAQUE format.<wbr/></li>
+<li><a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> has the required map entries.<wbr/></li>
+<li>Using OPAQUE does not cause a frame rate drop
   relative to the sensor's maximum capture rate (at that
-  resolution).<wbr/></li>
-<li>RAW_<wbr/>OPAQUE will be reprocessable into both YUV_<wbr/>420_<wbr/>888
+  resolution),<wbr/> see <a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> for more details.<wbr/></li>
+<li>OPAQUE will be reprocessable into both YUV_<wbr/>420_<wbr/>888
   and JPEG formats.<wbr/></li>
-<li>The maximum available resolution for RAW_<wbr/>OPAQUE streams
+<li>The maximum available resolution for OPAQUE streams
   (both input/<wbr/>output) will match the maximum available
   resolution of JPEG streams.<wbr/></li>
+<li>Only below controls are effective for reprocessing requests and
+  will be present in capture results,<wbr/> other controls in reprocess
+  requests will be ignored by the camera device.<wbr/><ul>
+<li>android.<wbr/>jpeg.<wbr/>*</li>
+<li><a href="#controls_android.noiseReduction.mode">android.<wbr/>noise<wbr/>Reduction.<wbr/>mode</a></li>
+<li><a href="#controls_android.edge.mode">android.<wbr/>edge.<wbr/>mode</a></li>
+</ul>
+</li>
 </ul></span>
                   </li>
                   <li>
@@ -13895,6 +14017,39 @@ YUV_<wbr/>420_<wbr/>888 format.<wbr/></p>
 </blockquote>
 <p>In addition,<wbr/> the <a href="#static_android.sync.maxLatency">android.<wbr/>sync.<wbr/>max<wbr/>Latency</a> field is
 guaranted to have a value between 0 and 4,<wbr/> inclusive.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">YUV_REPROCESSING</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>The camera device supports the YUV420_<wbr/>888 reprocessing use case,<wbr/> similar as
+OPAQUE_<wbr/>REPROCESSING,<wbr/> This capability requires the camera device to support the
+following:</p>
+<ul>
+<li>One input stream is supported,<wbr/> that is,<wbr/> <code><a href="#static_android.request.maxNumInputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams</a> == 1</code>.<wbr/></li>
+<li>YUV420_<wbr/>888 is supported as a common format for both input and output,<wbr/> that is,<wbr/>
+  StreamConfigurationMap#getOutputSizes(YUV420_<wbr/>888) and
+  StreamConfigurationMap#getInputSizes(YUV420_<wbr/>888) return non empty Size[] and have
+  common sizes.<wbr/></li>
+<li><a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> has the required map entries.<wbr/></li>
+<li>Using YUV420_<wbr/>888 does not cause a frame rate drop
+  relative to the sensor's maximum capture rate (at that
+  resolution),<wbr/> see <a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> for more details.<wbr/></li>
+<li>YUV420_<wbr/>888 will be reprocessable into both YUV_<wbr/>420_<wbr/>888
+  and JPEG formats.<wbr/></li>
+<li>The maximum available resolution for YUV420_<wbr/>888 streams
+  (both input/<wbr/>output) will match the maximum available
+  resolution of JPEG streams.<wbr/></li>
+<li>Only the below controls are effective for reprocessing requests and will be
+  present in capture results.<wbr/> The reprocess requests are from the original capture
+  results that are assocaited with the intermidate YUV420_<wbr/>888 output buffers.<wbr/>
+  All other controls in the reprocess requests will be ignored by the camera device.<wbr/><ul>
+<li>android.<wbr/>jpeg.<wbr/>*</li>
+<li><a href="#controls_android.noiseReduction.mode">android.<wbr/>noise<wbr/>Reduction.<wbr/>mode</a></li>
+<li><a href="#controls_android.edge.mode">android.<wbr/>edge.<wbr/>mode</a></li>
+<li><a href="#controls_android.reprocess.effectiveExposureFactor">android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor</a></li>
+</ul>
+</li>
+</ul></span>
                   </li>
                 </ul>
 
@@ -13961,6 +14116,8 @@ the actual exposure applied must be available via
 the result.<wbr/></p>
 <p>If MANUAL_<wbr/>SENSOR is omitted,<wbr/> the HAL may choose to omit the
 <a href="#static_android.scaler.availableMinFrameDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Min<wbr/>Frame<wbr/>Durations</a> static property entirely.<wbr/></p>
+<p>For OPAQUE_<wbr/>REPROCESSING and YUV_<wbr/>REPROCESSING capabilities,<wbr/> see
+hardware/<wbr/>libhardware/<wbr/>include/<wbr/>hardware/<wbr/>camera3.<wbr/>h Section 10 for more information.<wbr/></p>
             </td>
           </tr>
 
@@ -15264,7 +15421,6 @@ height</p>
               <span class="entry_type_visibility"> [hidden as imageFormat]</span>
 
 
-              <span class="entry_type_hwlevel">[full] </span>
 
 
 
@@ -15295,7 +15451,7 @@ camera device for input streams,<wbr/> to their corresponding output formats.<wb
 <a href="#static_android.request.maxNumInputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams</a> will have at least one
 available input format.<wbr/></p>
 <p>The camera device will support the following map of formats,<wbr/>
-if its dependent capability is supported:</p>
+if its dependent capability (<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>) is supported:</p>
 <table>
 <thead>
 <tr>
@@ -15306,36 +15462,35 @@ if its dependent capability is supported:</p>
 </thead>
 <tbody>
 <tr>
-<td align="left">RAW_<wbr/>OPAQUE</td>
+<td align="left">OPAQUE</td>
 <td align="left">JPEG</td>
-<td align="left">ZSL</td>
+<td align="left">OPAQUE_<wbr/>REPROCESSING</td>
 </tr>
 <tr>
-<td align="left">RAW_<wbr/>OPAQUE</td>
+<td align="left">OPAQUE</td>
 <td align="left">YUV_<wbr/>420_<wbr/>888</td>
-<td align="left">ZSL</td>
+<td align="left">OPAQUE_<wbr/>REPROCESSING</td>
 </tr>
 <tr>
-<td align="left">RAW_<wbr/>OPAQUE</td>
-<td align="left">RAW16</td>
-<td align="left">RAW</td>
-</tr>
-<tr>
-<td align="left">RAW16</td>
 <td align="left">YUV_<wbr/>420_<wbr/>888</td>
-<td align="left">RAW</td>
-</tr>
-<tr>
-<td align="left">RAW16</td>
 <td align="left">JPEG</td>
-<td align="left">RAW</td>
+<td align="left">YUV_<wbr/>REPROCESSING</td>
+</tr>
+<tr>
+<td align="left">YUV_<wbr/>420_<wbr/>888</td>
+<td align="left">YUV_<wbr/>420_<wbr/>888</td>
+<td align="left">YUV_<wbr/>REPROCESSING</td>
 </tr>
 </tbody>
 </table>
-<p>For ZSL-capable camera devices,<wbr/> using the RAW_<wbr/>OPAQUE format
+<p>OPAQUE refers to a device-internal format that is not directly application-visible.<wbr/>
+An OPAQUE input or output surface can be acquired by
+OpaqueImageRingBufferQueue#getInputSurface() or
+OpaqueImageRingBufferQueue#getOutputSurface().<wbr/>
+For a OPAQUE_<wbr/>REPROCESSING-capable camera device,<wbr/> using the OPAQUE format
 as either input or output will never hurt maximum frame rate (i.<wbr/>e.<wbr/>
-Stream<wbr/>Configuration<wbr/>Map#get<wbr/>Output<wbr/>Stall<wbr/>Duration(int,<wbr/>Size)
-for a <code>format =</code> RAW_<wbr/>OPAQUE is always 0).<wbr/></p>
+Stream<wbr/>Configuration<wbr/>Map#get<wbr/>Output<wbr/>Stall<wbr/>Duration(klass,<wbr/>Size) is always 0),<wbr/>
+where klass is android.<wbr/>media.<wbr/>Opaque<wbr/>Image<wbr/>Ring<wbr/>Buffer<wbr/>Queue.<wbr/>class.<wbr/></p>
 <p>Attempting to configure an input stream with output streams not
 listed as available in this map is not valid.<wbr/></p>
 <p>TODO: typedef to ReprocessFormatMap</p>
@@ -15348,14 +15503,18 @@ listed as available in this map is not valid.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>For the formats,<wbr/> see <code>system/<wbr/>core/<wbr/>include/<wbr/>system/<wbr/>graphics.<wbr/>h</code> for a definition
-of the image format enumerations.<wbr/></p>
+of the image format enumerations.<wbr/> The OPAQUE format refers to the IMPLEMENTATION_<wbr/>DEFINED
+format.<wbr/> The HAL could determine the actual format by using the gralloc usage flags.<wbr/>
+For ZSL use case in particular,<wbr/> the HAL could choose appropriate format (partially
+processed YUV or RAW based format) by checking the format and GRALLOC_<wbr/>USAGE_<wbr/>HW_<wbr/>CAMERA_<wbr/>ZSL.<wbr/>
+See camera3.<wbr/>h for more details.<wbr/></p>
 <p>This value is encoded as a variable-size array-of-arrays.<wbr/>
 The inner array always contains <code>[format,<wbr/> length,<wbr/> ...<wbr/>]</code> where
 <code>...<wbr/></code> has <code>length</code> elements.<wbr/> An inner array is followed by another
 inner array if the total metadata entry size hasn't yet been exceeded.<wbr/></p>
 <p>A code sample to read/<wbr/>write this encoding (with a device that
-supports reprocessing RAW_<wbr/>OPAQUE to RAW16,<wbr/> YUV_<wbr/>420_<wbr/>888,<wbr/> and JPEG,<wbr/>
-and reprocessing RAW16 to YUV_<wbr/>420_<wbr/>888 and JPEG):</p>
+supports reprocessing IMPLEMENTATION_<wbr/>DEFINED to YUV_<wbr/>420_<wbr/>888,<wbr/> and JPEG,<wbr/>
+and reprocessing YUV_<wbr/>420_<wbr/>888 to YUV_<wbr/>420_<wbr/>888 and JPEG):</p>
 <pre><code>//<wbr/> reading
 int32_<wbr/>t* contents = &amp;entry.<wbr/>i32[0];
 for (size_<wbr/>t i = 0; i &lt; entry.<wbr/>count; ) {
@@ -15367,10 +15526,10 @@ for (size_<wbr/>t i = 0; i &lt; entry.<wbr/>count; ) {
     i += length;
 }
 
-//<wbr/> writing (static example,<wbr/> RAW+ZSL)
+//<wbr/> writing (static example,<wbr/> OPAQUE_<wbr/>REPROCESSING + YUV_<wbr/>REPROCESSING)
 int32_<wbr/>t[] contents = {
-  RAW_<wbr/>OPAQUE,<wbr/> 3,<wbr/> RAW16,<wbr/> YUV_<wbr/>420_<wbr/>888,<wbr/> BLOB,<wbr/>
-  RAW16,<wbr/> 2,<wbr/> YUV_<wbr/>420_<wbr/>888,<wbr/> BLOB,<wbr/>
+  IMPLEMENTATION_<wbr/>DEFINED,<wbr/> 2,<wbr/> YUV_<wbr/>420_<wbr/>888,<wbr/> BLOB,<wbr/>
+  YUV_<wbr/>420_<wbr/>888,<wbr/> 2,<wbr/> YUV_<wbr/>420_<wbr/>888,<wbr/> BLOB,<wbr/>
 };
 update_<wbr/>camera_<wbr/>metadata_<wbr/>entry(metadata,<wbr/> index,<wbr/> &amp;contents[0],<wbr/>
       sizeof(contents)/<wbr/>sizeof(contents[0]),<wbr/> &amp;updated_<wbr/>entry);
@@ -15379,9 +15538,6 @@ update_<wbr/>camera_<wbr/>metadata_<wbr/>entry(metadata,<wbr/> index,<wbr/> &amp
 above details,<wbr/> then it must also support all the input-output
 combinations listed for that capability.<wbr/> It can optionally support
 additional formats if it so chooses.<wbr/></p>
-<p>Refer to <a href="#static_android.scaler.availableFormats">android.<wbr/>scaler.<wbr/>available<wbr/>Formats</a> for the enum values
-which correspond to HAL_<wbr/>PIXEL_<wbr/>FORMAT_<wbr/>* in
-system/<wbr/>core/<wbr/>include/<wbr/>system/<wbr/>graphics.<wbr/>h.<wbr/></p>
             </td>
           </tr>
 
@@ -23352,6 +23508,225 @@ to know when sensor settings have been applied.<wbr/></p>
       </tbody>
 
   <!-- end of section -->
+  <tr><td colspan="6" id="section_reprocess" class="section">reprocess</td></tr>
+
+
+      <tr><td colspan="6" class="kind">controls</td></tr>
+
+      <thead class="entries_header">
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="controls_android.reprocess.effectiveExposureFactor">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The amount of exposure time increase factor applied to the original output
+frame by the application processing before sending for reprocessing.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              Relative exposure time increase factor.<wbr/>
+            </td>
+
+            <td class="entry_range">
+              <p>&gt;= 1.<wbr/>0</p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_V1">V1</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This is optional,<wbr/> and will be supported if the camera device supports YUV_<wbr/>REPROCESSING
+capability (<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains YUV_<wbr/>REPROCESSING).<wbr/></p>
+<p>For some YUV reprocessing use cases,<wbr/> the application may choose to filter the original
+output frames to effectively reduce the noise to the same level as a frame that was
+captured with longer exposure time.<wbr/> To be more specific,<wbr/> assuming the original captured
+images were captured with a sensitivity of S and an exposure time of T,<wbr/> the model in
+the camera device is that the amount of noise in the image would be approximately what
+would be expected if the original capture parameters had been a sensitivity of
+S/<wbr/>effectiveExposureFactor and an exposure time of T*effectiveExposureFactor,<wbr/> rather
+than S and T respectively.<wbr/> If the captured images were processed by the application
+before being sent for reprocessing,<wbr/> then the application may have used image processing
+algorithms and/<wbr/>or multi-frame image fusion to reduce the noise in the
+application-processed images (input images).<wbr/> By using the effectiveExposureFactor
+control,<wbr/> the application can communicate to the camera device the actual noise level
+improvement in the application-processed image.<wbr/> With this information,<wbr/> the camera
+device can select appropriate noise reduction and edge enhancement parameters to avoid
+excessive noise reduction (<a href="#controls_android.noiseReduction.mode">android.<wbr/>noise<wbr/>Reduction.<wbr/>mode</a>) and insufficient edge
+enhancement (<a href="#controls_android.edge.mode">android.<wbr/>edge.<wbr/>mode</a>) being applied to the reprocessed frames.<wbr/></p>
+<p>For example,<wbr/> for multi-frame image fusion use case,<wbr/> the application may fuse
+multiple output frames together to a final frame for reprocessing.<wbr/> When N image are
+fused into 1 image for reprocessing,<wbr/> the exposure time increase factor could be up to
+square root of N (based on a simple photon shot noise model).<wbr/> The camera device will
+adjust the reprocessing noise reduction and edge enhancement parameters accordingly to
+produce the best quality images.<wbr/></p>
+<p>This is relative factor,<wbr/> 1.<wbr/>0 indicates the application hasn't processed the input
+buffer in a way that affects its effective exposure time.<wbr/></p>
+<p>This control is only effective for YUV reprocessing capture request.<wbr/> For noise
+reduction reprocessing,<wbr/> it is only effective when <code><a href="#controls_android.noiseReduction.mode">android.<wbr/>noise<wbr/>Reduction.<wbr/>mode</a> != OFF</code>.<wbr/>
+Similarly,<wbr/> for edge enhancement reprocessing,<wbr/> it is only effective when
+<code><a href="#controls_android.edge.mode">android.<wbr/>edge.<wbr/>mode</a> != OFF</code>.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+      <tr><td colspan="6" class="kind">dynamic</td></tr>
+
+      <thead class="entries_header">
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="dynamic_android.reprocess.effectiveExposureFactor">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The amount of exposure time increase factor applied to the original output
+frame by the application processing before sending for reprocessing.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              Relative exposure time increase factor.<wbr/>
+            </td>
+
+            <td class="entry_range">
+              <p>&gt;= 1.<wbr/>0</p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_V1">V1</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This is optional,<wbr/> and will be supported if the camera device supports YUV_<wbr/>REPROCESSING
+capability (<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains YUV_<wbr/>REPROCESSING).<wbr/></p>
+<p>For some YUV reprocessing use cases,<wbr/> the application may choose to filter the original
+output frames to effectively reduce the noise to the same level as a frame that was
+captured with longer exposure time.<wbr/> To be more specific,<wbr/> assuming the original captured
+images were captured with a sensitivity of S and an exposure time of T,<wbr/> the model in
+the camera device is that the amount of noise in the image would be approximately what
+would be expected if the original capture parameters had been a sensitivity of
+S/<wbr/>effectiveExposureFactor and an exposure time of T*effectiveExposureFactor,<wbr/> rather
+than S and T respectively.<wbr/> If the captured images were processed by the application
+before being sent for reprocessing,<wbr/> then the application may have used image processing
+algorithms and/<wbr/>or multi-frame image fusion to reduce the noise in the
+application-processed images (input images).<wbr/> By using the effectiveExposureFactor
+control,<wbr/> the application can communicate to the camera device the actual noise level
+improvement in the application-processed image.<wbr/> With this information,<wbr/> the camera
+device can select appropriate noise reduction and edge enhancement parameters to avoid
+excessive noise reduction (<a href="#controls_android.noiseReduction.mode">android.<wbr/>noise<wbr/>Reduction.<wbr/>mode</a>) and insufficient edge
+enhancement (<a href="#controls_android.edge.mode">android.<wbr/>edge.<wbr/>mode</a>) being applied to the reprocessed frames.<wbr/></p>
+<p>For example,<wbr/> for multi-frame image fusion use case,<wbr/> the application may fuse
+multiple output frames together to a final frame for reprocessing.<wbr/> When N image are
+fused into 1 image for reprocessing,<wbr/> the exposure time increase factor could be up to
+square root of N (based on a simple photon shot noise model).<wbr/> The camera device will
+adjust the reprocessing noise reduction and edge enhancement parameters accordingly to
+produce the best quality images.<wbr/></p>
+<p>This is relative factor,<wbr/> 1.<wbr/>0 indicates the application hasn't processed the input
+buffer in a way that affects its effective exposure time.<wbr/></p>
+<p>This control is only effective for YUV reprocessing capture request.<wbr/> For noise
+reduction reprocessing,<wbr/> it is only effective when <code><a href="#controls_android.noiseReduction.mode">android.<wbr/>noise<wbr/>Reduction.<wbr/>mode</a> != OFF</code>.<wbr/>
+Similarly,<wbr/> for edge enhancement reprocessing,<wbr/> it is only effective when
+<code><a href="#controls_android.edge.mode">android.<wbr/>edge.<wbr/>mode</a> != OFF</code>.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+
+  <!-- end of section -->
 <!-- </namespace> -->
   </table>
 
@@ -23472,6 +23847,7 @@ to know when sensor settings have been applied.<wbr/></p>
           <li><a href="#dynamic_android.statistics.hotPixelMap">android.statistics.hotPixelMap</a> (dynamic)</li>
           <li><a href="#dynamic_android.sync.frameNumber">android.sync.frameNumber</a> (dynamic)</li>
           <li><a href="#static_android.sync.maxLatency">android.sync.maxLatency</a> (static)</li>
+          <li><a href="#controls_android.reprocess.effectiveExposureFactor">android.reprocess.effectiveExposureFactor</a> (controls)</li>
           <li><a href="#dynamic_android.edge.mode">android.edge.mode</a> (dynamic)</li>
           <li><a href="#dynamic_android.hotPixel.mode">android.hotPixel.mode</a> (dynamic)</li>
           <li><a href="#dynamic_android.lens.aperture">android.lens.aperture</a> (dynamic)</li>
