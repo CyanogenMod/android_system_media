@@ -611,6 +611,7 @@ typedef enum camera_metadata_enum_android_lens_optical_stabilization_mode {
 typedef enum camera_metadata_enum_android_lens_facing {
     ANDROID_LENS_FACING_FRONT,
     ANDROID_LENS_FACING_BACK,
+    ANDROID_LENS_FACING_EXTERNAL,
 } camera_metadata_enum_android_lens_facing_t;
 
 // ANDROID_LENS_STATE
