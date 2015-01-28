@@ -239,6 +239,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           in this matrix result metadata. The transform should keep the magnitude
           of the output color values within `[0, 1.0]` (assuming input color
           values is within the normalized range `[0, 1.0]`), or clipping may occur.
+
+          The valid range of each matrix element varies on different devices, but
+          values within [-1.5, 3.0] are guaranteed not to be clipped.
           </details>
         </entry>
         <entry name="gains" type="float" visibility="public"
@@ -259,6 +262,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           The gains in the result metadata are the gains actually
           applied by the camera device to the current frame.
+
+          The valid range of gains varies on different devices, but gains
+          between [1.0, 3.0] are guaranteed not to be clipped. Even if a given
+          device allows gains below 1.0, this is usually not recommended because
+          this can create color artifacts.
           </details>
           <hal_details>
           The 4-channel white-balance gains are defined in
@@ -1358,7 +1366,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             Manual control of capture parameters is disabled. All
             controls in android.control.* besides sceneMode take
             effect.</notes></value>
-            <value>USE_SCENE_MODE
+            <value optional="true">USE_SCENE_MODE
             <notes>Use a specific scene mode.
 
             Enabling this disables control.aeMode, control.awbMode and
@@ -1368,7 +1376,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             active.  This setting can only be used if scene mode is
             supported (i.e. android.control.availableSceneModes
             contain some modes other than DISABLED).</notes></value>
-            <value>OFF_KEEP_STATE
+            <value optional="true">OFF_KEEP_STATE
             <notes>Same as OFF mode, except that this capture will not be
             used by camera device background auto-exposure, auto-white balance and
             auto-focus algorithms (3A) to update their statistics.
@@ -1382,6 +1390,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Overall mode of 3A (auto-exposure, auto-white-balance, auto-focus) control
           routines.</description>
+          <range>android.control.availableModes</range>
           <details>
           This is a top-level 3A control switch. When set to OFF, all 3A control
           by the camera device is disabled. The application must set the fields for
@@ -1401,11 +1410,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           update, as if this frame is never captured. This mode can be used in the scenario
           where the application doesn't want a 3A manual control capture to affect
           the subsequent auto 3A capture results.
-
-          LEGACY mode devices will only support AUTO and USE_SCENE_MODE modes.
-          LIMITED mode devices will only support OFF and OFF_KEEP_STATE if they
-          support the MANUAL_SENSOR and MANUAL_POST_PROCSESING capabilities.
-          FULL mode devices will always support OFF and OFF_KEEP_STATE.
           </details>
           <tag id="BC" />
         </entry>
@@ -1803,6 +1807,18 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </hal_details>
           <tag id="BC" />
         </entry>
+        <entry name="aeLockAvailable" type="byte" visibility="public" enum="true"
+               typedef="boolean" hwlevel="legacy">
+          <enum>
+            <value>FALSE</value>
+            <value>TRUE</value>
+          </enum>
+          <description>Whether the camera device supports android.control.aeLock</description>
+          <details>
+          LIMITED or FULL devices will always list `true`
+          </details>
+          <tag id="BC"/>
+        </entry>
         <entry name="afAvailableModes" type="byte" visibility="public"
                type_notes="List of enums" container="array" typedef="enumList"
                hwlevel="legacy">
@@ -1854,6 +1870,23 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           as auto-exposure, white balance, or focus.
           </details>
           <tag id="BC" />
+        </entry>
+        <entry name="availableModes" type="byte" visibility="public"
+            type_notes="List of enums (android.control.mode)." container="array"
+            typedef="enumList" hwlevel="legacy">
+          <array>
+            <size>n</size>
+          </array>
+          <description>
+          List of control modes for android.control.mode that are supported by this camera
+          device.
+          </description>
+          <range>Any value listed in android.control.mode</range>
+          <details>
+              This list contains control modes that can be set for the camera device.
+              LEGACY mode devices will always support AUTO mode. LIMITED and FULL
+              devices will always support OFF, AUTO modes.
+          </details>
         </entry>
         <entry name="availableSceneModes" type="byte" visibility="public"
                type_notes="List of enums (android.control.sceneMode)."
@@ -1922,6 +1955,18 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           mode camera devices.
           </details>
           <tag id="BC" />
+          </entry>
+        <entry name="awbLockAvailable" type="byte" visibility="public" enum="true"
+               typedef="boolean" hwlevel="legacy">
+          <enum>
+            <value>FALSE</value>
+            <value>TRUE</value>
+          </enum>
+          <description>Whether the camera device supports android.control.awbLock</description>
+          <details>
+          LIMITED or FULL devices will always list `true`
+          </details>
+          <tag id="BC"/>
         </entry>
         <entry name="maxRegions" type="int32" visibility="hidden"
                container="array" hwlevel="legacy">
