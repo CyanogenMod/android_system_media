@@ -17,6 +17,7 @@
 
 
 #include <stdint.h>
+#include <string.h>
 
 #define LOG_TAG "AudioSPDIF"
 #include <utils/Log.h>
