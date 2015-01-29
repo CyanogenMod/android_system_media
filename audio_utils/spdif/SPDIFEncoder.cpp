@@ -17,6 +17,7 @@
 
 
 #include <stdint.h>
+#include <string.h>
 
 #define LOG_TAG "AudioHardwareTungsten"
 #include <utils/Log.h>
