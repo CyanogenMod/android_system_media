@@ -17,6 +17,8 @@
 
 #define LOG_TAG "AudioHardwareTungsten"
 
+#include <string.h>
+
 #include <utils/Log.h>
 #include <audio_utils/spdif/FrameScanner.h>
 
