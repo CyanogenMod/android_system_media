@@ -17,6 +17,8 @@
 
 #define LOG_TAG "AudioSPDIF"
 
+#include <string.h>
+
 #include <utils/Log.h>
 #include <audio_utils/spdif/FrameScanner.h>
 
