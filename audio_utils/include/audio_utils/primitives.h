@@ -390,6 +390,9 @@ void memcpy_by_index_array(void *dst, uint32_t dst_channels,
  * Channels present in the channel mask are represented by set bits in the
  * uint32_t value and are matched without further interpretation.
  *
+ * This function is typically used for converting audio data with different
+ * channel position masks.
+ *
  * Parameters:
  *  idxary      Updated array of indices of channels in the src frame for the dst frame
  *  idxcount    Number of caller allocated elements in idxary
@@ -397,6 +400,24 @@ void memcpy_by_index_array(void *dst, uint32_t dst_channels,
  *  src_mask    Bit mask corresponding to source channels present
  */
 size_t memcpy_by_index_array_initialization(int8_t *idxary, size_t idxcount,
+        uint32_t dst_mask, uint32_t src_mask);
+
+/* Prepares an index array (idxary) from channel masks, which can be later
+ * used by memcpy_by_index_array(). Returns the number of array elements required.
+ *
+ * For a source channel index mask, the source channels will map to the destination
+ * channels as if counting the set bits in dst_mask in order from lsb to msb
+ * (zero bits are ignored). The ith bit of the src_mask corresponds to the
+ * ith SET bit of dst_mask and the ith destination channel.  Hence, a zero ith
+ * bit of the src_mask indicates that the ith destination channel plays silence.
+ *
+ * Parameters:
+ *  idxary      Updated array of indices of channels in the src frame for the dst frame
+ *  idxcount    Number of caller allocated elements in idxary
+ *  dst_mask    Bit mask corresponding to destination channels present
+ *  src_mask    Bit mask corresponding to source channels present
+ */
+size_t memcpy_by_index_array_initialization_src_index(int8_t *idxary, size_t idxcount,
         uint32_t dst_mask, uint32_t src_mask);
 
 /**

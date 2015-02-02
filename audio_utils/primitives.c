@@ -423,3 +423,25 @@ size_t memcpy_by_index_array_initialization(int8_t *idxary, size_t idxcount,
     }
     return n + popcount(ormask & dst_mask);
 }
+
+size_t memcpy_by_index_array_initialization_src_index(int8_t *idxary, size_t idxcount,
+        uint32_t dst_mask, uint32_t src_mask) {
+    size_t dst_count = popcount(dst_mask);
+    if (idxcount == 0) {
+        return dst_count;
+    }
+    if (dst_count > idxcount) {
+        dst_count = idxcount;
+    }
+
+    size_t src_idx, dst_idx;
+    for (src_idx = 0, dst_idx = 0; dst_idx < dst_count; ++dst_idx) {
+        if (src_mask & 1) {
+            idxary[dst_idx] = src_idx++;
+        } else {
+            idxary[dst_idx] = -1;
+        }
+        src_mask >>= 1;
+    }
+    return dst_idx;
+}
