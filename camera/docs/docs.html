@@ -204,15 +204,21 @@
             <li
             ><a href="#static_android.control.aeCompensationStep">android.control.aeCompensationStep</a></li>
             <li
+            ><a href="#static_android.control.aeLockAvailable">android.control.aeLockAvailable</a></li>
+            <li
             ><a href="#static_android.control.afAvailableModes">android.control.afAvailableModes</a></li>
             <li
             ><a href="#static_android.control.availableEffects">android.control.availableEffects</a></li>
+            <li
+            ><a href="#static_android.control.availableModes">android.control.availableModes</a></li>
             <li
             ><a href="#static_android.control.availableSceneModes">android.control.availableSceneModes</a></li>
             <li
             ><a href="#static_android.control.availableVideoStabilizationModes">android.control.availableVideoStabilizationModes</a></li>
             <li
             ><a href="#static_android.control.awbAvailableModes">android.control.awbAvailableModes</a></li>
+            <li
+            ><a href="#static_android.control.awbLockAvailable">android.control.awbLockAvailable</a></li>
             <li
             ><a href="#static_android.control.maxRegions">android.control.maxRegions</a></li>
             <li
@@ -1271,6 +1277,8 @@ for precision issues; the final rounded matrix should be reported back
 in this matrix result metadata.<wbr/> The transform should keep the magnitude
 of the output color values within <code>[0,<wbr/> 1.<wbr/>0]</code> (assuming input color
 values is within the normalized range <code>[0,<wbr/> 1.<wbr/>0]</code>),<wbr/> or clipping may occur.<wbr/></p>
+<p>The valid range of each matrix element varies on different devices,<wbr/> but
+values within [-1.<wbr/>5,<wbr/> 3.<wbr/>0] are guaranteed not to be clipped.<wbr/></p>
             </td>
           </tr>
 
@@ -1330,6 +1338,10 @@ request when the <a href="#controls_android.colorCorrection.mode">android.<wbr/>
 TRANSFORM_<wbr/>MATRIX.<wbr/></p>
 <p>The gains in the result metadata are the gains actually
 applied by the camera device to the current frame.<wbr/></p>
+<p>The valid range of gains varies on different devices,<wbr/> but gains
+between [1.<wbr/>0,<wbr/> 3.<wbr/>0] are guaranteed not to be clipped.<wbr/> Even if a given
+device allows gains below 1.<wbr/>0,<wbr/> this is usually not recommended because
+this can create color artifacts.<wbr/></p>
             </td>
           </tr>
 
@@ -1622,6 +1634,8 @@ for precision issues; the final rounded matrix should be reported back
 in this matrix result metadata.<wbr/> The transform should keep the magnitude
 of the output color values within <code>[0,<wbr/> 1.<wbr/>0]</code> (assuming input color
 values is within the normalized range <code>[0,<wbr/> 1.<wbr/>0]</code>),<wbr/> or clipping may occur.<wbr/></p>
+<p>The valid range of each matrix element varies on different devices,<wbr/> but
+values within [-1.<wbr/>5,<wbr/> 3.<wbr/>0] are guaranteed not to be clipped.<wbr/></p>
             </td>
           </tr>
 
@@ -1681,6 +1695,10 @@ request when the <a href="#controls_android.colorCorrection.mode">android.<wbr/>
 TRANSFORM_<wbr/>MATRIX.<wbr/></p>
 <p>The gains in the result metadata are the gains actually
 applied by the camera device to the current frame.<wbr/></p>
+<p>The valid range of gains varies on different devices,<wbr/> but gains
+between [1.<wbr/>0,<wbr/> 3.<wbr/>0] are guaranteed not to be clipped.<wbr/> Even if a given
+device allows gains below 1.<wbr/>0,<wbr/> this is usually not recommended because
+this can create color artifacts.<wbr/></p>
             </td>
           </tr>
 
@@ -3476,6 +3494,7 @@ effect.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">USE_SCENE_MODE</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
                     <span class="entry_type_enum_notes"><p>Use a specific scene mode.<wbr/></p>
 <p>Enabling this disables control.<wbr/>aeMode,<wbr/> control.<wbr/>awbMode and
 control.<wbr/>afMode controls; the camera device will ignore
@@ -3487,6 +3506,7 @@ contain some modes other than DISABLED).<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">OFF_KEEP_STATE</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
                     <span class="entry_type_enum_notes"><p>Same as OFF mode,<wbr/> except that this capture will not be
 used by camera device background auto-exposure,<wbr/> auto-white balance and
 auto-focus algorithms (3A) to update their statistics.<wbr/></p>
@@ -3509,6 +3529,7 @@ routines.<wbr/></p>
             </td>
 
             <td class="entry_range">
+              <p><a href="#static_android.control.availableModes">android.<wbr/>control.<wbr/>available<wbr/>Modes</a></p>
             </td>
 
             <td class="entry_tags">
@@ -3538,10 +3559,6 @@ is that this frame will not be used by camera device background 3A statistics
 update,<wbr/> as if this frame is never captured.<wbr/> This mode can be used in the scenario
 where the application doesn't want a 3A manual control capture to affect
 the subsequent auto 3A capture results.<wbr/></p>
-<p>LEGACY mode devices will only support AUTO and USE_<wbr/>SCENE_<wbr/>MODE modes.<wbr/>
-LIMITED mode devices will only support OFF and OFF_<wbr/>KEEP_<wbr/>STATE if they
-support the MANUAL_<wbr/>SENSOR and MANUAL_<wbr/>POST_<wbr/>PROCSESING capabilities.<wbr/>
-FULL mode devices will always support OFF and OFF_<wbr/>KEEP_<wbr/>STATE.<wbr/></p>
             </td>
           </tr>
 
@@ -4225,6 +4242,63 @@ of two.<wbr/> +1 EV doubles the image brightness,<wbr/> while -1 EV halves the i
            <!-- end of entry -->
         
                 
+          <tr class="entry" id="static_android.control.aeLockAvailable">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>control.<wbr/>ae<wbr/>Lock<wbr/>Available
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public as boolean]</span>
+
+
+              <span class="entry_type_hwlevel">[legacy] </span>
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">FALSE</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">TRUE</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Whether the camera device supports <a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>LIMITED or FULL devices will always list <code>true</code></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
           <tr class="entry" id="static_android.control.afAvailableModes">
             <td class="entry_name
              " rowspan="3">
@@ -4345,6 +4419,61 @@ OFF.<wbr/></p>
 <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF.<wbr/>  OFF is always included in this list.<wbr/></p>
 <p>This control has no effect on the operation of other control routines such
 as auto-exposure,<wbr/> white balance,<wbr/> or focus.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.control.availableModes">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>control.<wbr/>available<wbr/>Modes
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">byte</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
+
+
+              <span class="entry_type_hwlevel">[legacy] </span>
+
+
+                <div class="entry_type_notes">List of enums (android.<wbr/>control.<wbr/>mode).<wbr/></div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>List of control modes for <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> that are supported by this camera
+device.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Any value listed in <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This list contains control modes that can be set for the camera device.<wbr/>
+LEGACY mode devices will always support AUTO mode.<wbr/> LIMITED and FULL
+devices will always support OFF,<wbr/> AUTO modes.<wbr/></p>
             </td>
           </tr>
 
@@ -4528,6 +4657,63 @@ given camera device.<wbr/> This entry lists the valid modes for
 mode,<wbr/> which enables application control of white balance,<wbr/> by using
 <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a> and <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a>(<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> must be set to TRANSFORM_<wbr/>MATRIX).<wbr/> This includes all FULL
 mode camera devices.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.control.awbLockAvailable">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>control.<wbr/>awb<wbr/>Lock<wbr/>Available
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public as boolean]</span>
+
+
+              <span class="entry_type_hwlevel">[legacy] </span>
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">FALSE</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">TRUE</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Whether the camera device supports <a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>LIMITED or FULL devices will always list <code>true</code></p>
             </td>
           </tr>
 
@@ -7591,6 +7777,7 @@ effect.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">USE_SCENE_MODE</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
                     <span class="entry_type_enum_notes"><p>Use a specific scene mode.<wbr/></p>
 <p>Enabling this disables control.<wbr/>aeMode,<wbr/> control.<wbr/>awbMode and
 control.<wbr/>afMode controls; the camera device will ignore
@@ -7602,6 +7789,7 @@ contain some modes other than DISABLED).<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">OFF_KEEP_STATE</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
                     <span class="entry_type_enum_notes"><p>Same as OFF mode,<wbr/> except that this capture will not be
 used by camera device background auto-exposure,<wbr/> auto-white balance and
 auto-focus algorithms (3A) to update their statistics.<wbr/></p>
@@ -7624,6 +7812,7 @@ routines.<wbr/></p>
             </td>
 
             <td class="entry_range">
+              <p><a href="#static_android.control.availableModes">android.<wbr/>control.<wbr/>available<wbr/>Modes</a></p>
             </td>
 
             <td class="entry_tags">
@@ -7653,10 +7842,6 @@ is that this frame will not be used by camera device background 3A statistics
 update,<wbr/> as if this frame is never captured.<wbr/> This mode can be used in the scenario
 where the application doesn't want a 3A manual control capture to affect
 the subsequent auto 3A capture results.<wbr/></p>
-<p>LEGACY mode devices will only support AUTO and USE_<wbr/>SCENE_<wbr/>MODE modes.<wbr/>
-LIMITED mode devices will only support OFF and OFF_<wbr/>KEEP_<wbr/>STATE if they
-support the MANUAL_<wbr/>SENSOR and MANUAL_<wbr/>POST_<wbr/>PROCSESING capabilities.<wbr/>
-FULL mode devices will always support OFF and OFF_<wbr/>KEEP_<wbr/>STATE.<wbr/></p>
             </td>
           </tr>
 
@@ -23760,11 +23945,13 @@ Similarly,<wbr/> for edge enhancement reprocessing,<wbr/> it is only effective w
           <li><a href="#static_android.control.aeAvailableTargetFpsRanges">android.control.aeAvailableTargetFpsRanges</a> (static)</li>
           <li><a href="#static_android.control.aeCompensationRange">android.control.aeCompensationRange</a> (static)</li>
           <li><a href="#static_android.control.aeCompensationStep">android.control.aeCompensationStep</a> (static)</li>
+          <li><a href="#static_android.control.aeLockAvailable">android.control.aeLockAvailable</a> (static)</li>
           <li><a href="#static_android.control.afAvailableModes">android.control.afAvailableModes</a> (static)</li>
           <li><a href="#static_android.control.availableEffects">android.control.availableEffects</a> (static)</li>
           <li><a href="#static_android.control.availableSceneModes">android.control.availableSceneModes</a> (static)</li>
           <li><a href="#static_android.control.availableVideoStabilizationModes">android.control.availableVideoStabilizationModes</a> (static)</li>
           <li><a href="#static_android.control.awbAvailableModes">android.control.awbAvailableModes</a> (static)</li>
+          <li><a href="#static_android.control.awbLockAvailable">android.control.awbLockAvailable</a> (static)</li>
           <li><a href="#static_android.control.maxRegions">android.control.maxRegions</a> (static)</li>
           <li><a href="#static_android.control.sceneModeOverrides">android.control.sceneModeOverrides</a> (static)</li>
           <li><a href="#controls_android.flash.mode">android.flash.mode</a> (controls)</li>
