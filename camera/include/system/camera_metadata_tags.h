@@ -315,11 +315,13 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_INFO_PIXEL_ARRAY_SIZE,             // int32[]      | public
     ANDROID_SENSOR_INFO_WHITE_LEVEL,                  // int32        | public
     ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE,             // enum         | public
+    ANDROID_SENSOR_INFO_LENS_SHADING_APPLIED,         // enum         | public
     ANDROID_SENSOR_INFO_END,
 
     ANDROID_SHADING_MODE =                            // enum         | public
             ANDROID_SHADING_START,
     ANDROID_SHADING_STRENGTH,                         // byte         | system
+    ANDROID_SHADING_AVAILABLE_MODES,                  // byte[]       | public
     ANDROID_SHADING_END,
 
     ANDROID_STATISTICS_FACE_DETECT_MODE =             // enum         | public
@@ -351,6 +353,8 @@ typedef enum camera_metadata_tag {
     ANDROID_STATISTICS_INFO_MAX_SHARPNESS_MAP_VALUE,  // int32        | system
     ANDROID_STATISTICS_INFO_SHARPNESS_MAP_SIZE,       // int32[]      | system
     ANDROID_STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES,
+                                                      // byte[]       | public
+    ANDROID_STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES,
                                                       // byte[]       | public
     ANDROID_STATISTICS_INFO_END,
 
@@ -766,6 +770,12 @@ typedef enum camera_metadata_enum_android_sensor_info_timestamp_source {
     ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN,
     ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME,
 } camera_metadata_enum_android_sensor_info_timestamp_source_t;
+
+// ANDROID_SENSOR_INFO_LENS_SHADING_APPLIED
+typedef enum camera_metadata_enum_android_sensor_info_lens_shading_applied {
+    ANDROID_SENSOR_INFO_LENS_SHADING_APPLIED_FALSE,
+    ANDROID_SENSOR_INFO_LENS_SHADING_APPLIED_TRUE,
+} camera_metadata_enum_android_sensor_info_lens_shading_applied_t;
 
 
 // ANDROID_SHADING_MODE

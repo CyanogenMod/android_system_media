@@ -507,6 +507,8 @@ static tag_info_t android_sensor_info[ANDROID_SENSOR_INFO_END -
     { "whiteLevel",                    TYPE_INT32  },
     [ ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE - ANDROID_SENSOR_INFO_START ] =
     { "timestampSource",               TYPE_BYTE   },
+    [ ANDROID_SENSOR_INFO_LENS_SHADING_APPLIED - ANDROID_SENSOR_INFO_START ] =
+    { "lensShadingApplied",            TYPE_BYTE   },
 };
 
 static tag_info_t android_shading[ANDROID_SHADING_END -
@@ -515,6 +517,8 @@ static tag_info_t android_shading[ANDROID_SHADING_END -
     { "mode",                          TYPE_BYTE   },
     [ ANDROID_SHADING_STRENGTH - ANDROID_SHADING_START ] =
     { "strength",                      TYPE_BYTE   },
+    [ ANDROID_SHADING_AVAILABLE_MODES - ANDROID_SHADING_START ] =
+    { "availableModes",                TYPE_BYTE   },
 };
 
 static tag_info_t android_statistics[ANDROID_STATISTICS_END -
@@ -572,6 +576,8 @@ static tag_info_t android_statistics_info[ANDROID_STATISTICS_INFO_END -
     { "sharpnessMapSize",              TYPE_INT32  },
     [ ANDROID_STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES - ANDROID_STATISTICS_INFO_START ] =
     { "availableHotPixelMapModes",     TYPE_BYTE   },
+    [ ANDROID_STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES - ANDROID_STATISTICS_INFO_START ] =
+    { "availableLensShadingMapModes",  TYPE_BYTE   },
 };
 
 static tag_info_t android_tonemap[ANDROID_TONEMAP_END -
@@ -2092,6 +2098,21 @@ int camera_metadata_enum_snprint(uint32_t tag,
             }
             break;
         }
+        case ANDROID_SENSOR_INFO_LENS_SHADING_APPLIED: {
+            switch (value) {
+                case ANDROID_SENSOR_INFO_LENS_SHADING_APPLIED_FALSE:
+                    msg = "FALSE";
+                    ret = 0;
+                    break;
+                case ANDROID_SENSOR_INFO_LENS_SHADING_APPLIED_TRUE:
+                    msg = "TRUE";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
 
         case ANDROID_SHADING_MODE: {
             switch (value) {
@@ -2113,6 +2134,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_SHADING_STRENGTH: {
+            break;
+        }
+        case ANDROID_SHADING_AVAILABLE_MODES: {
             break;
         }
 
@@ -2267,6 +2291,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES: {
+            break;
+        }
+        case ANDROID_STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES: {
             break;
         }
 
