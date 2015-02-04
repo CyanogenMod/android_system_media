@@ -754,6 +754,8 @@
             ><a href="#static_android.sensor.info.whiteLevel">android.sensor.info.whiteLevel</a></li>
             <li
             ><a href="#static_android.sensor.info.timestampSource">android.sensor.info.timestampSource</a></li>
+            <li
+            ><a href="#static_android.sensor.info.lensShadingApplied">android.sensor.info.lensShadingApplied</a></li>
 
             <li
             ><a href="#static_android.sensor.referenceIlluminant1">android.sensor.referenceIlluminant1</a></li>
@@ -837,6 +839,13 @@
             ><a href="#dynamic_android.shading.mode">android.shading.mode</a></li>
           </ul>
         </li>
+        <li>
+          <span class="toc_kind_header">static</span>
+          <ul class="toc_section">
+            <li
+            ><a href="#static_android.shading.availableModes">android.shading.availableModes</a></li>
+          </ul>
+        </li>
       </ul> <!-- toc_section -->
     </li>
     <li>
@@ -875,6 +884,8 @@
             ><a href="#static_android.statistics.info.sharpnessMapSize">android.statistics.info.sharpnessMapSize</a></li>
             <li
             ><a href="#static_android.statistics.info.availableHotPixelMapModes">android.statistics.info.availableHotPixelMapModes</a></li>
+            <li
+            ><a href="#static_android.statistics.info.availableLensShadingMapModes">android.statistics.info.availableLensShadingMapModes</a></li>
 
           </ul>
         </li>
@@ -17599,6 +17610,65 @@ can be compared against other system time sources/<wbr/>timestamps.<wbr/></p>
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
         
+                
+          <tr class="entry" id="static_android.sensor.info.lensShadingApplied">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>sensor.<wbr/>info.<wbr/>lens<wbr/>Shading<wbr/>Applied
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public as boolean]</span>
+
+
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">FALSE</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">TRUE</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Whether the RAW images output from this camera device are subject to
+lens shading correction.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>If TRUE,<wbr/> all images produced by the camera device in the RAW image formats will
+have lens shading correction already applied to it.<wbr/> If FALSE,<wbr/> the images will
+not be adjusted for lens shading correction.<wbr/>
+See <a href="#static_android.request.maxNumOutputRaw">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Output<wbr/>Raw</a> for a list of RAW image formats.<wbr/></p>
+<p>This key will be <code>null</code> for all devices do not report this information.<wbr/>
+Devices with RAW capability will always report this information in this key.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
         
         
 
@@ -19671,6 +19741,7 @@ to the image data.<wbr/></p>
             </td>
 
             <td class="entry_range">
+              <p><a href="#static_android.shading.availableModes">android.<wbr/>shading.<wbr/>available<wbr/>Modes</a></p>
             </td>
 
             <td class="entry_tags">
@@ -19826,6 +19897,7 @@ to the image data.<wbr/></p>
             </td>
 
             <td class="entry_range">
+              <p><a href="#static_android.shading.availableModes">android.<wbr/>shading.<wbr/>available<wbr/>Modes</a></p>
             </td>
 
             <td class="entry_tags">
@@ -19860,6 +19932,88 @@ the reliability of the map data may be affected by the AE and AWB algorithms.<wb
 AWB are in AUTO modes(<a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> <code>!=</code> OFF and <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> <code>!=</code>
 OFF),<wbr/> to get best results,<wbr/> it is recommended that the applications wait for the AE and AWB
 to be converged before using the returned shading map data.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+      <tr><td colspan="6" class="kind">static</td></tr>
+
+      <thead class="entries_header">
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="static_android.shading.availableModes">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>shading.<wbr/>available<wbr/>Modes
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">byte</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
+
+
+              <span class="entry_type_hwlevel">[legacy] </span>
+
+
+                <div class="entry_type_notes">List of enums (android.<wbr/>shading.<wbr/>mode).<wbr/></div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>List of lens shading modes for <a href="#controls_android.shading.mode">android.<wbr/>shading.<wbr/>mode</a> that are supported by this camera device.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Any value listed in <a href="#controls_android.shading.mode">android.<wbr/>shading.<wbr/>mode</a></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This list contains lens shading modes that can be set for the camera device.<wbr/>
+Camera devices that support the MANUAL_<wbr/>POST_<wbr/>PROCESSING capability will always
+list OFF and FAST mode.<wbr/> This includes all FULL level devices.<wbr/>
+LEGACY devices will always only support FAST mode.<wbr/></p>
             </td>
           </tr>
 
@@ -20179,6 +20333,7 @@ shading map in output result metadata.<wbr/></p>
             </td>
 
             <td class="entry_range">
+              <p><a href="#static_android.statistics.info.availableLensShadingMapModes">android.<wbr/>statistics.<wbr/>info.<wbr/>available<wbr/>Lens<wbr/>Shading<wbr/>Map<wbr/>Modes</a></p>
             </td>
 
             <td class="entry_tags">
@@ -20553,6 +20708,61 @@ supported by this camera device.<wbr/></p>
               <p>If no hotpixel map output is available for this camera device,<wbr/> this will contain only
 <code>false</code>.<wbr/></p>
 <p>ON is always supported on devices with the RAW capability.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.statistics.info.availableLensShadingMapModes">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>statistics.<wbr/>info.<wbr/>available<wbr/>Lens<wbr/>Shading<wbr/>Map<wbr/>Modes
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">byte</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+                <div class="entry_type_notes">list of enums</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>List of lens shading map output modes for <a href="#controls_android.statistics.lensShadingMapMode">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map<wbr/>Mode</a> that
+are supported by this camera device.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Any value listed in <a href="#controls_android.statistics.lensShadingMapMode">android.<wbr/>statistics.<wbr/>lens<wbr/>Shading<wbr/>Map<wbr/>Mode</a></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>If no lens shading map output is available for this camera device,<wbr/> this key will
+contain only OFF.<wbr/></p>
+<p>ON is always supported on devices with the RAW capability.<wbr/>
+LEGACY mode devices will always only support OFF.<wbr/></p>
             </td>
           </tr>
 
@@ -21280,7 +21490,7 @@ image of a gray wall (using bicubic interpolation for visual quality) as capture
             <td class="entry_description">
               <p>The shading map is a low-resolution floating-point map
 that lists the coefficients used to correct for vignetting,<wbr/> for each
-Bayer color channel.<wbr/></p>
+Bayer color channel of RAW image data.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -21334,8 +21544,20 @@ and must be smaller than 64x64.<wbr/></p>
 <img alt="Green (odd rows) lens shading map" src="images/camera2/metadata/android.statistics.lensShadingMap/green_o_shading.png"/>
 <img alt="Blue lens shading map" src="images/camera2/metadata/android.statistics.lensShadingMap/blue_shading.png"/></p>
 <p>As a visualization only,<wbr/> inverting the full-color map to recover an
-image of a gray wall (using bicubic interpolation for visual quality) as captured by the sensor gives:</p>
+image of a gray wall (using bicubic interpolation for visual quality)
+as captured by the sensor gives:</p>
 <p><img alt="Image of a uniform white wall (inverse shading map)" src="images/camera2/metadata/android.statistics.lensShadingMap/inv_shading.png"/></p>
+<p>Note that the RAW image data might be subject to lens shading
+correction not reported on this map.<wbr/> Query
+<a href="#static_android.sensor.info.lensShadingApplied">android.<wbr/>sensor.<wbr/>info.<wbr/>lens<wbr/>Shading<wbr/>Applied</a> to see if RAW image data has subject
+to lens shading correction.<wbr/> If <a href="#static_android.sensor.info.lensShadingApplied">android.<wbr/>sensor.<wbr/>info.<wbr/>lens<wbr/>Shading<wbr/>Applied</a>
+is TRUE,<wbr/> the RAW image data is subject to partial or full lens shading
+correction.<wbr/> In the case full lens shading correction is applied to RAW
+images,<wbr/> the gain factor map reported in this key will contain all 1.<wbr/>0 gains.<wbr/>
+In other words,<wbr/> the map reported in this key is the remaining lens shading
+that needs to be applied on the RAW image to get images without lens shading
+artifacts.<wbr/> See <a href="#static_android.request.maxNumOutputRaw">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Output<wbr/>Raw</a> for a list of RAW image
+formats.<wbr/></p>
             </td>
           </tr>
 
@@ -21737,6 +21959,7 @@ shading map in output result metadata.<wbr/></p>
             </td>
 
             <td class="entry_range">
+              <p><a href="#static_android.statistics.info.availableLensShadingMapModes">android.<wbr/>statistics.<wbr/>info.<wbr/>available<wbr/>Lens<wbr/>Shading<wbr/>Map<wbr/>Modes</a></p>
             </td>
 
             <td class="entry_tags">
