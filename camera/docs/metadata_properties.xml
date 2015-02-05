@@ -506,6 +506,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           parameters. The flash may be fired if the android.control.aeMode
           is ON_AUTO_FLASH/ON_AUTO_FLASH_REDEYE and the scene is too dark. If the
           android.control.aeMode is ON_ALWAYS_FLASH, the scene may become overexposed.
+          Similarly, AE precapture trigger CANCEL has no effect when AE is already locked.
+
+          When an AE precapture sequence is triggered, AE unlock will not be able to unlock
+          the AE if AE is locked by the camera device internally during precapture metering
+          sequence In other words, submitting requests with AE unlock has no effect for an
+          ongoing precapture metering sequence. Otherwise, the precapture metering sequence
+          will never succeed in a sequence of preview requests where AE lock is always set
+          to `false`.
 
           Since the camera device has a pipeline of in-flight requests, the settings that
           get locked do not necessarily correspond to the settings that were present in the
@@ -708,6 +716,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               The exact effect of the precapture trigger depends on
               the current AE mode and state.</notes>
             </value>
+            <value>CANCEL
+              <notes>The camera device will cancel any currently active or completed
+              precapture metering sequence, the auto-exposure routine will return to its
+              initial state.</notes>
+            </value>
           </enum>
           <description>Whether the camera device will trigger a precapture
           metering sequence when it processes this request.</description>
@@ -715,6 +728,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           included at all in the request settings. When included and
           set to START, the camera device will trigger the auto-exposure (AE)
           precapture metering sequence.
+
+          When set to CANCEL, the camera device will cancel any active
+          precapture metering trigger, and return to its initial AE state.
+          If a precapture metering sequence is already completed, and the camera
+          device has implicitly locked the AE for subsequent still capture, the
+          CANCEL trigger will unlock the AE and return to its initial AE state.
 
           The precapture sequence should be triggered before starting a
           high-quality still capture for final metering decisions to
@@ -733,7 +752,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           submitted. To ensure that the AE routine restarts normal scan, the application should
           submit a request with `android.control.aeLock == true`, followed by a request
           with `android.control.aeLock == false`, if the application decides not to submit a
-          still capture request after the precapture sequence completes.
+          still capture request after the precapture sequence completes. Alternatively, for
+          API level 23 or newer devices, the CANCEL can be used to unlock the camera device
+          internally locked AE if the application doesn't submit a still capture request after
+          the AE precapture trigger. Note that, the CANCEL was added in API level 23, and must not
+          be used in devices that have earlier API levels.
 
           The exact effect of auto-exposure (AE) precapture trigger
           depends on the current AE mode and state; see
@@ -2135,7 +2158,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             and is currently executing it.
 
             Precapture can be triggered through setting
-            android.control.aePrecaptureTrigger to START.
+            android.control.aePrecaptureTrigger to START. Currently
+            active and completed (if it causes camera device internal AE lock) precapture
+            metering sequence can be canceled through setting
+            android.control.aePrecaptureTrigger to CANCEL.
 
             Once PRECAPTURE completes, AE will transition to CONVERGED
             or FLASH_REQUIRED as appropriate. This is a transient
@@ -2180,7 +2206,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           LOCKED         | android.control.aeLock is OFF                | FLASH_REQUIRED | Exposure good, but too dark
           PRECAPTURE     | Sequence done. android.control.aeLock is OFF | CONVERGED      | Ready for high-quality capture
           PRECAPTURE     | Sequence done. android.control.aeLock is ON  | LOCKED         | Ready for high-quality capture
-          Any state      | android.control.aePrecaptureTrigger is START | PRECAPTURE     | Start AE precapture metering sequence
+          LOCKED         | aeLock is ON and aePrecaptureTrigger is START | LOCKED        | Precapture trigger is ignored when AE is already locked
+          LOCKED         | aeLock is ON and aePrecaptureTrigger is CANCEL| LOCKED        | Precapture trigger is ignored when AE is already locked
+          Any state (excluding LOCKED) | android.control.aePrecaptureTrigger is START | PRECAPTURE     | Start AE precapture metering sequence
+          Any state (excluding LOCKED) | android.control.aePrecaptureTrigger is CANCEL| INACTIVE       | Currently active precapture metering sequence is canceled
 
           For the above table, the camera device may skip reporting any state changes that happen
           without application intervention (i.e. mode switch, trigger, locking). Any state that
@@ -2193,8 +2222,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             State        | Transition Cause                                            | New State      | Notes
           :-------------:|:-----------------------------------------------------------:|:--------------:|:-----------------:
           INACTIVE       | Camera device finished AE scan                              | CONVERGED      | Values are already good, transient states are skipped by camera device.
-          Any state      | android.control.aePrecaptureTrigger is START, sequence done | FLASH_REQUIRED | Converged but too dark w/o flash after a precapture sequence, transient states are skipped by camera device.
-          Any state      | android.control.aePrecaptureTrigger is START, sequence done | CONVERGED      | Converged after a precapture sequence, transient states are skipped by camera device.
+          Any state (excluding LOCKED) | android.control.aePrecaptureTrigger is START, sequence done | FLASH_REQUIRED | Converged but too dark w/o flash after a precapture sequence, transient states are skipped by camera device.
+          Any state (excluding LOCKED) | android.control.aePrecaptureTrigger is START, sequence done | CONVERGED      | Converged after a precapture sequence, transient states are skipped by camera device.
+          Any state (excluding LOCKED) | android.control.aePrecaptureTrigger is CANCEL, converged    | FLASH_REQUIRED | Converged but too dark w/o flash after a precapture sequence is canceled, transient states are skipped by camera device.
+          Any state (excluding LOCKED) | android.control.aePrecaptureTrigger is CANCEL, converged    | CONVERGED      | Converged after a precapture sequenceis canceled, transient states are skipped by camera device.
           CONVERGED      | Camera device finished AE scan                              | FLASH_REQUIRED | Converged but too dark w/o flash after a new scan, transient states are skipped by camera device.
           FLASH_REQUIRED | Camera device finished AE scan                              | CONVERGED      | Converged after a new scan, transient states are skipped by camera device.
           </details>

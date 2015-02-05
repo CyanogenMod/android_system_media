@@ -793,6 +793,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "START";
                     ret = 0;
                     break;
+                case ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL:
+                    msg = "CANCEL";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
