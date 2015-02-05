@@ -939,6 +939,10 @@
             ><a href="#controls_android.tonemap.curve">android.tonemap.curve</a></li>
             <li
             ><a href="#controls_android.tonemap.mode">android.tonemap.mode</a></li>
+            <li
+            ><a href="#controls_android.tonemap.gamma">android.tonemap.gamma</a></li>
+            <li
+            ><a href="#controls_android.tonemap.presetCurve">android.tonemap.presetCurve</a></li>
           </ul>
         </li>
         <li>
@@ -963,6 +967,10 @@
             ><a href="#dynamic_android.tonemap.curve">android.tonemap.curve</a></li>
             <li
             ><a href="#dynamic_android.tonemap.mode">android.tonemap.mode</a></li>
+            <li
+            ><a href="#dynamic_android.tonemap.gamma">android.tonemap.gamma</a></li>
+            <li
+            ><a href="#dynamic_android.tonemap.presetCurve">android.tonemap.presetCurve</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -14096,13 +14104,19 @@ zero for each supported size-format combination.<wbr/></p></span>
 The camera device supports basic manual control of the image post-processing
 stages.<wbr/> This means the following controls are guaranteed to be supported:</p>
 <ul>
-<li>Manual tonemap control<ul>
+<li>
+<p>Manual tonemap control</p>
+<ul>
 <li><a href="#controls_android.tonemap.curve">android.<wbr/>tonemap.<wbr/>curve</a></li>
 <li><a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a></li>
 <li><a href="#static_android.tonemap.maxCurvePoints">android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points</a></li>
+<li><a href="#controls_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a></li>
+<li><a href="#controls_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a></li>
 </ul>
 </li>
-<li>Manual white balance control<ul>
+<li>
+<p>Manual white balance control</p>
+<ul>
 <li><a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a></li>
 <li><a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a></li>
 </ul>
@@ -22157,6 +22171,23 @@ reducing frame rate compared to raw sensor output.<wbr/></p></span>
                     <span class="entry_type_enum_notes"><p>High-quality gamma mapping and color enhancement will be applied,<wbr/> at
 the cost of reduced frame rate compared to raw sensor output.<wbr/></p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">GAMMA_VALUE</span>
+                    <span class="entry_type_enum_notes"><p>Use the gamma value specified in <a href="#controls_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a> to peform
+tonemapping.<wbr/></p>
+<p>All color enhancement and tonemapping must be disabled,<wbr/> except
+for applying the tonemapping curve specified by <a href="#controls_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a>.<wbr/></p>
+<p>Must not slow down frame rate relative to raw sensor output.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">PRESET_CURVE</span>
+                    <span class="entry_type_enum_notes"><p>Use the preset tonemapping curve specified in
+<a href="#controls_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a> to peform tonemapping.<wbr/></p>
+<p>All color enhancement and tonemapping must be disabled,<wbr/> except
+for applying the tonemapping curve specified by
+<a href="#controls_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a>.<wbr/></p>
+<p>Must not slow down frame rate relative to raw sensor output.<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -22199,6 +22230,123 @@ actually used nonlinear/<wbr/>nonglobal transforms.<wbr/></p>
 <p>If a request is sent with CONTRAST_<wbr/>CURVE with the camera device's
 provided curve in FAST or HIGH_<wbr/>QUALITY,<wbr/> the image's tonemap will be
 roughly the same.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="controls_android.tonemap.gamma">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>tonemap.<wbr/>gamma
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Tonemapping curve to use when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is
+GAMMA_<wbr/>VALUE</p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The tonemap curve will be defined the following formula:
+* OUT = pow(IN,<wbr/> 1.<wbr/>0 /<wbr/> gamma)
+where IN and OUT is the input pixel value scaled to range [0.<wbr/>0,<wbr/> 1.<wbr/>0],<wbr/>
+pow is the power function and gamma is the gamma value specified by this
+key.<wbr/></p>
+<p>The same curve will be applied to all color channels.<wbr/> The camera device
+may clip the input gamma value to its supported range.<wbr/> The actual applied
+value will be returned in capture result.<wbr/></p>
+<p>The valid range of gamma value varies on different devices,<wbr/> but values
+within [1.<wbr/>0,<wbr/> 5.<wbr/>0] are guaranteed not to be clipped.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="controls_android.tonemap.presetCurve">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">SRGB</span>
+                    <span class="entry_type_enum_notes"><p>Tonemapping curve is defined by sRGB</p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">REC709</span>
+                    <span class="entry_type_enum_notes"><p>Tonemapping curve is defined by ITU-R BT.<wbr/>709</p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Tonemapping curve to use when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is
+PRESET_<wbr/>CURVE</p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The tonemap curve will be defined by specified standard.<wbr/></p>
+<p>sRGB (approximated by 16 control points):</p>
+<p><img alt="sRGB tonemapping curve" src="images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png"/></p>
+<p>Rec.<wbr/> 709 (approximated by 16 control points):</p>
+<p><img alt="Rec. 709 tonemapping curve" src="images/camera2/metadata/android.tonemap.curveRed/rec709_tonemap.png"/></p>
+<p>Note that above figures show a 16 control points approximation of preset
+curves.<wbr/> Camera devices may apply a different approximation to the curve.<wbr/></p>
             </td>
           </tr>
 
@@ -22338,8 +22486,13 @@ device.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Camera devices that support the MANUAL_<wbr/>POST_<wbr/>PROCESSING capability will always list
-CONTRAST_<wbr/>CURVE and FAST.<wbr/> This includes all FULL level devices.<wbr/></p>
+              <p>Camera devices that support the MANUAL_<wbr/>POST_<wbr/>PROCESSING capability will always contain
+at least one of below mode combinations:</p>
+<ul>
+<li>CONTRAST_<wbr/>CURVE and FAST</li>
+<li>GAMMA_<wbr/>VALUE,<wbr/> PRESET_<wbr/>CURVE,<wbr/> and FAST</li>
+</ul>
+<p>This includes all FULL level devices.<wbr/></p>
             </td>
           </tr>
 
@@ -22721,6 +22874,23 @@ reducing frame rate compared to raw sensor output.<wbr/></p></span>
                     <span class="entry_type_enum_notes"><p>High-quality gamma mapping and color enhancement will be applied,<wbr/> at
 the cost of reduced frame rate compared to raw sensor output.<wbr/></p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">GAMMA_VALUE</span>
+                    <span class="entry_type_enum_notes"><p>Use the gamma value specified in <a href="#controls_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a> to peform
+tonemapping.<wbr/></p>
+<p>All color enhancement and tonemapping must be disabled,<wbr/> except
+for applying the tonemapping curve specified by <a href="#controls_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a>.<wbr/></p>
+<p>Must not slow down frame rate relative to raw sensor output.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">PRESET_CURVE</span>
+                    <span class="entry_type_enum_notes"><p>Use the preset tonemapping curve specified in
+<a href="#controls_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a> to peform tonemapping.<wbr/></p>
+<p>All color enhancement and tonemapping must be disabled,<wbr/> except
+for applying the tonemapping curve specified by
+<a href="#controls_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a>.<wbr/></p>
+<p>Must not slow down frame rate relative to raw sensor output.<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -22763,6 +22933,123 @@ actually used nonlinear/<wbr/>nonglobal transforms.<wbr/></p>
 <p>If a request is sent with CONTRAST_<wbr/>CURVE with the camera device's
 provided curve in FAST or HIGH_<wbr/>QUALITY,<wbr/> the image's tonemap will be
 roughly the same.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.tonemap.gamma">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>tonemap.<wbr/>gamma
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Tonemapping curve to use when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is
+GAMMA_<wbr/>VALUE</p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The tonemap curve will be defined the following formula:
+* OUT = pow(IN,<wbr/> 1.<wbr/>0 /<wbr/> gamma)
+where IN and OUT is the input pixel value scaled to range [0.<wbr/>0,<wbr/> 1.<wbr/>0],<wbr/>
+pow is the power function and gamma is the gamma value specified by this
+key.<wbr/></p>
+<p>The same curve will be applied to all color channels.<wbr/> The camera device
+may clip the input gamma value to its supported range.<wbr/> The actual applied
+value will be returned in capture result.<wbr/></p>
+<p>The valid range of gamma value varies on different devices,<wbr/> but values
+within [1.<wbr/>0,<wbr/> 5.<wbr/>0] are guaranteed not to be clipped.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.tonemap.presetCurve">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">SRGB</span>
+                    <span class="entry_type_enum_notes"><p>Tonemapping curve is defined by sRGB</p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">REC709</span>
+                    <span class="entry_type_enum_notes"><p>Tonemapping curve is defined by ITU-R BT.<wbr/>709</p></span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Tonemapping curve to use when <a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a> is
+PRESET_<wbr/>CURVE</p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The tonemap curve will be defined by specified standard.<wbr/></p>
+<p>sRGB (approximated by 16 control points):</p>
+<p><img alt="sRGB tonemapping curve" src="images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png"/></p>
+<p>Rec.<wbr/> 709 (approximated by 16 control points):</p>
+<p><img alt="Rec. 709 tonemapping curve" src="images/camera2/metadata/android.tonemap.curveRed/rec709_tonemap.png"/></p>
+<p>Note that above figures show a 16 control points approximation of preset
+curves.<wbr/> Camera devices may apply a different approximation to the curve.<wbr/></p>
             </td>
           </tr>
 

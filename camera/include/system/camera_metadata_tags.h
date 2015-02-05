@@ -359,6 +359,8 @@ typedef enum camera_metadata_tag {
     ANDROID_TONEMAP_CURVE_GREEN,                      // float[]      | hidden
     ANDROID_TONEMAP_CURVE_RED,                        // float[]      | hidden
     ANDROID_TONEMAP_MODE,                             // enum         | public
+    ANDROID_TONEMAP_GAMMA,                            // float        | public
+    ANDROID_TONEMAP_PRESET_CURVE,                     // enum         | public
     ANDROID_TONEMAP_MAX_CURVE_POINTS,                 // int32        | public
     ANDROID_TONEMAP_AVAILABLE_TONE_MAP_MODES,         // byte[]       | public
     ANDROID_TONEMAP_END,
@@ -818,7 +820,15 @@ typedef enum camera_metadata_enum_android_tonemap_mode {
     ANDROID_TONEMAP_MODE_CONTRAST_CURVE,
     ANDROID_TONEMAP_MODE_FAST,
     ANDROID_TONEMAP_MODE_HIGH_QUALITY,
+    ANDROID_TONEMAP_MODE_GAMMA_VALUE,
+    ANDROID_TONEMAP_MODE_PRESET_CURVE,
 } camera_metadata_enum_android_tonemap_mode_t;
+
+// ANDROID_TONEMAP_PRESET_CURVE
+typedef enum camera_metadata_enum_android_tonemap_preset_curve {
+    ANDROID_TONEMAP_PRESET_CURVE_SRGB,
+    ANDROID_TONEMAP_PRESET_CURVE_REC709,
+} camera_metadata_enum_android_tonemap_preset_curve_t;
 
 
 // ANDROID_LED_TRANSMIT
