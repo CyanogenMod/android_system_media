@@ -435,6 +435,7 @@ typedef enum camera_metadata_enum_android_control_ae_mode {
 typedef enum camera_metadata_enum_android_control_ae_precapture_trigger {
     ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER_IDLE,
     ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER_START,
+    ANDROID_CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL,
 } camera_metadata_enum_android_control_ae_precapture_trigger_t;
 
 // ANDROID_CONTROL_AF_MODE
