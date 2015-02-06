@@ -1767,12 +1767,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.control.aeExposureCompensation, in counts of android.control.aeCompensationStep,
           that are supported by this camera device.</description>
           <range>
+            Range [0,0] indicates that exposure compensation is not supported.
+
+            For LIMITED and FULL devices, range must follow below requirements if exposure
+            compensation is supported (`range != [0, 0]`):
+
             `Min.exposure compensation * android.control.aeCompensationStep &lt;= -2 EV`
 
             `Max.exposure compensation * android.control.aeCompensationStep &gt;= 2 EV`
 
-            LEGACY devices may support a smaller range than this, including the range [0,0], which
-            indicates that changing the exposure compensation is not supported.
+            LEGACY devices may support a smaller range than this.
           </range>
           <tag id="BC" />
         </entry>
