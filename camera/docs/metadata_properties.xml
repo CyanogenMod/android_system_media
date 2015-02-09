@@ -3415,38 +3415,70 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>Direction the camera faces relative to
           device screen.</description>
         </entry>
-        <entry name="opticalAxisAngle" type="float"
-        type_notes="degrees. First defines the angle of separation between the perpendicular to the screen and the camera optical axis. The second then defines the clockwise rotation of the optical axis from native device up."
-        container="array">
+        <entry name="poseRotation" type="float" visibility="public"
+               container="array">
           <array>
-            <size>2</size>
+            <size>4</size>
           </array>
-          <description>Relative angle of camera optical axis to the
-          perpendicular axis from the display</description>
-          <range>[0-90) for first angle, [0-360) for second</range>
-          <details>Examples:
+          <description>
+            The orientation of the camera relative to the sensor
+            coordinate system.
+          </description>
+          <units>
+            Quarternion coefficients
+          </units>
+          <details>
+            The four coefficients that describe the quarternion
+            rotation from the Android sensor coordinate system to a
+            camera-aligned coordinate system where the X-axis is
+            aligned with the long side of the image sensor, the Y-axis
+            is aligned with the short side of the image sensor, and
+            the Z-axis is aligned with the optical axis of the sensor.
 
-          (0,0) means that the camera optical axis
-          is perpendicular to the display surface;
+            To convert from the quarternion coefficients `(x,y,z,w)`
+            to the axis of rotation `(a_x, a_y, a_z)` and rotation
+            amount `theta`, the following formulas can be used:
 
-          (45,0) means that the camera points 45 degrees up when
-          device is held upright;
+                 theta = 2 * acos(w)
+                a_x = x / sin(theta/2)
+                a_y = y / sin(theta/2)
+                a_z = z / sin(theta/2)
 
-          (45,90) means the camera points 45 degrees to the right when
-          the device is held upright.
+            To create a 3x3 rotation matrix that applies the rotation
+            defined by this quarternion, the following matrix can be
+            used:
 
-          Use FACING field to determine perpendicular outgoing
-          direction</details>
-          <tag id="FUTURE" />
+                R = [ 1 - 2y^2 - 2z^2,       2xy - 2zw,       2xz + 2yw,
+                           2xy + 2zw, 1 - 2x^2 - 2z^2,       2yz - 2xw,
+                           2xz - 2yw,       2yz + 2xw, 1 - 2x^2 - 2y^2 ]
+
+             This matrix can then be used to apply the rotation to a
+             column vector point with
+
+               `p' = Rp`
+
+             where `p` is in the device sensor coordinate system, and
+             `p'` is in the camera-oriented coordinate system.
+          </details>
+          <tag id="DEPTH" />
         </entry>
-        <entry name="position" type="float" container="array">
+        <entry name="poseTranslation" type="float" visibility="public"
+               container="array">
           <array>
-            <size>3, location in mm, in the sensor coordinate
-            system</size>
+            <size>3</size>
           </array>
-          <description>Coordinates of camera optical axis on
-          device</description>
-          <tag id="FUTURE" />
+          <description>Position of the camera optical center.</description>
+          <units>Meters</units>
+          <details>
+            As measured in the device sensor coordinate system, the
+            position of the camera device's optical center, as a
+            three-dimensional vector `(x,y,z)`.
+
+            To transform a world position to a camera-device centered
+            coordinate system, the position must be translated by this
+            vector and then rotated by android.lens.poseRotation.
+          </details>
+          <tag id="DEPTH" />
         </entry>
       </static>
       <dynamic>
@@ -3525,7 +3557,99 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
           <tag id="V1" />
         </entry>
+        <clone entry="android.lens.poseRotation" kind="static">
+        </clone>
+        <clone entry="android.lens.poseTranslation" kind="static">
+        </clone>
+        <clone entry="android.lens.intrinsicCalibration" kind="static">
+        </clone>
+        <clone entry="android.lens.radialDistortion" kind="static">
+        </clone>
       </dynamic>
+      <static>
+        <entry name="intrinsicCalibration" type="float" visibility="public"
+               container="array">
+          <array>
+            <size>5</size>
+          </array>
+          <description>
+            The parameters for this camera device's intrinsic
+            calibration.
+          </description>
+          <units>
+            Pixels in the android.sensor.activeArraySize coordinate
+            system.
+          </units>
+          <details>
+            The five calibration parameters that describe the
+            transform from camera-centric 3D coordinates to sensor
+            pixel coordinates:
+
+                [f_x, f_y, c_x, c_y, s]
+
+            Where `f_x` and `f_y` are the horizontal and vertical
+            focal lengths, `[c_x, c_y]` is the position of the optical
+            axis, and `s` is a skew parameter for the sensor plane not
+            being aligned with the lens plane.
+
+            These are typically used within a transformation matrix K:
+
+                K = [ f_x,   s, c_x,
+                       0, f_y, c_y,
+                       0    0,   1 ]
+
+            which can then be combined with the camera pose rotation
+            `R` and translation `t` (android.lens.poseRotation and
+            android.lens.poseTranslation, respective) to calculate the
+            complete transform from world coordinates to pixel
+            coordinates:
+
+                P = [ K 0   * [ R t
+                     0 1 ]     0 1 ]
+
+            and with `p_w` being a point in the world coordinate system
+            and `p_s` being a point in the camera active pixel array
+            coordinate system, and with the mapping including the
+            homogeneous division by z:
+
+                 p_h = (x_h, y_h, z_h) = P p_w
+                p_s = p_h / z_h
+
+            so `[x_s, y_s]` is the pixel coordinates of the world
+            point, `z_s = 1`, and `w_s` is a measurement of disparity
+            (depth) in pixel coordinates.
+          </details>
+          <tag id="DEPTH" />
+        </entry>
+        <entry name="radialDistortion" type="float" visibility="public"
+               container="array">
+          <array>
+            <size>3</size>
+          </array>
+          <description>
+            The correction coefficients to correct for this camera device's
+            radial lens distortion.
+          </description>
+          <units>
+            Coefficients for a 6th-degree even radial polynomial.
+          </units>
+          <details>
+            Three cofficients `[kappa_1, kappa_2, kappa_3]` that
+            can be used to correct the lens's radial geometric
+            distortion with the mapping equations:
+
+                 x_c = x_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 )
+                y_c = y_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 )
+
+            where `[x_i, y_i]` are normalized coordinates with `(0,0)`
+            at the lens optical center, and `[-1, 1]` are the edges of
+            the active pixel array; and where `[x_c, y_c]` are the
+            corrected normalized coordinates with radial distortion
+            removed; and `r^2 = x_i^2 + y_i^2`.
+          </details>
+          <tag id="DEPTH" />
+        </entry>
+      </static>
     </section>
     <section name="noiseReduction">
       <controls>

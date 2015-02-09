@@ -300,14 +300,18 @@ static tag_info_t android_lens[ANDROID_LENS_END -
     { "opticalStabilizationMode",      TYPE_BYTE   },
     [ ANDROID_LENS_FACING - ANDROID_LENS_START ] =
     { "facing",                        TYPE_BYTE   },
-    [ ANDROID_LENS_OPTICAL_AXIS_ANGLE - ANDROID_LENS_START ] =
-    { "opticalAxisAngle",              TYPE_FLOAT  },
-    [ ANDROID_LENS_POSITION - ANDROID_LENS_START ] =
-    { "position",                      TYPE_FLOAT  },
+    [ ANDROID_LENS_POSE_ROTATION - ANDROID_LENS_START ] =
+    { "poseRotation",                  TYPE_FLOAT  },
+    [ ANDROID_LENS_POSE_TRANSLATION - ANDROID_LENS_START ] =
+    { "poseTranslation",               TYPE_FLOAT  },
     [ ANDROID_LENS_FOCUS_RANGE - ANDROID_LENS_START ] =
     { "focusRange",                    TYPE_FLOAT  },
     [ ANDROID_LENS_STATE - ANDROID_LENS_START ] =
     { "state",                         TYPE_BYTE   },
+    [ ANDROID_LENS_INTRINSIC_CALIBRATION - ANDROID_LENS_START ] =
+    { "intrinsicCalibration",          TYPE_FLOAT  },
+    [ ANDROID_LENS_RADIAL_DISTORTION - ANDROID_LENS_START ] =
+    { "radialDistortion",              TYPE_FLOAT  },
 };
 
 static tag_info_t android_lens_info[ANDROID_LENS_INFO_END -
@@ -1531,10 +1535,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
             }
             break;
         }
-        case ANDROID_LENS_OPTICAL_AXIS_ANGLE: {
+        case ANDROID_LENS_POSE_ROTATION: {
             break;
         }
-        case ANDROID_LENS_POSITION: {
+        case ANDROID_LENS_POSE_TRANSLATION: {
             break;
         }
         case ANDROID_LENS_FOCUS_RANGE: {
@@ -1553,6 +1557,12 @@ int camera_metadata_enum_snprint(uint32_t tag,
                 default:
                     msg = "error: enum value out of range";
             }
+            break;
+        }
+        case ANDROID_LENS_INTRINSIC_CALIBRATION: {
+            break;
+        }
+        case ANDROID_LENS_RADIAL_DISTORTION: {
             break;
         }
 
