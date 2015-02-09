@@ -498,9 +498,13 @@
             <li
             ><a href="#static_android.lens.facing">android.lens.facing</a></li>
             <li
-            ><a href="#static_android.lens.opticalAxisAngle">android.lens.opticalAxisAngle</a></li>
+            ><a href="#static_android.lens.poseRotation">android.lens.poseRotation</a></li>
             <li
-            ><a href="#static_android.lens.position">android.lens.position</a></li>
+            ><a href="#static_android.lens.poseTranslation">android.lens.poseTranslation</a></li>
+            <li
+            ><a href="#static_android.lens.intrinsicCalibration">android.lens.intrinsicCalibration</a></li>
+            <li
+            ><a href="#static_android.lens.radialDistortion">android.lens.radialDistortion</a></li>
           </ul>
         </li>
         <li>
@@ -520,6 +524,14 @@
             ><a href="#dynamic_android.lens.opticalStabilizationMode">android.lens.opticalStabilizationMode</a></li>
             <li
             ><a href="#dynamic_android.lens.state">android.lens.state</a></li>
+            <li
+            ><a href="#dynamic_android.lens.poseRotation">android.lens.poseRotation</a></li>
+            <li
+            ><a href="#dynamic_android.lens.poseTranslation">android.lens.poseTranslation</a></li>
+            <li
+            ><a href="#dynamic_android.lens.intrinsicCalibration">android.lens.intrinsicCalibration</a></li>
+            <li
+            ><a href="#dynamic_android.lens.radialDistortion">android.lens.radialDistortion</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -11876,43 +11888,44 @@ device screen.<wbr/></p>
            <!-- end of entry -->
         
                 
-          <tr class="entry" id="static_android.lens.opticalAxisAngle">
+          <tr class="entry" id="static_android.lens.poseRotation">
             <td class="entry_name
              " rowspan="3">
-              android.<wbr/>lens.<wbr/>optical<wbr/>Axis<wbr/>Angle
+              android.<wbr/>lens.<wbr/>pose<wbr/>Rotation
             </td>
             <td class="entry_type">
                 <span class="entry_type_name">float</span>
                 <span class="entry_type_container">x</span>
 
                 <span class="entry_type_array">
-                  2
+                  4
                 </span>
-              <span class="entry_type_visibility"> [system]</span>
+              <span class="entry_type_visibility"> [public]</span>
 
 
 
 
-                <div class="entry_type_notes">degrees.<wbr/> First defines the angle of separation between the perpendicular to the screen and the camera optical axis.<wbr/> The second then defines the clockwise rotation of the optical axis from native device up.<wbr/></div>
 
 
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Relative angle of camera optical axis to the
-perpendicular axis from the display</p>
+              <p>The orientation of the camera relative to the sensor
+coordinate system.<wbr/></p>
             </td>
 
             <td class="entry_units">
+              
+            Quarternion coefficients
+          
             </td>
 
             <td class="entry_range">
-              <p>[0-90) for first angle,<wbr/> [0-360) for second</p>
             </td>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_FUTURE">FUTURE</a></li>
+                  <li><a href="#tag_DEPTH">DEPTH</a></li>
               </ul>
             </td>
 
@@ -11922,15 +11935,32 @@ perpendicular axis from the display</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Examples:</p>
-<p>(0,<wbr/>0) means that the camera optical axis
-is perpendicular to the display surface;</p>
-<p>(45,<wbr/>0) means that the camera points 45 degrees up when
-device is held upright;</p>
-<p>(45,<wbr/>90) means the camera points 45 degrees to the right when
-the device is held upright.<wbr/></p>
-<p>Use FACING field to determine perpendicular outgoing
-direction</p>
+              <p>The four coefficients that describe the quarternion
+rotation from the Android sensor coordinate system to a
+camera-aligned coordinate system where the X-axis is
+aligned with the long side of the image sensor,<wbr/> the Y-axis
+is aligned with the short side of the image sensor,<wbr/> and
+the Z-axis is aligned with the optical axis of the sensor.<wbr/></p>
+<p>To convert from the quarternion coefficients <code>(x,<wbr/>y,<wbr/>z,<wbr/>w)</code>
+to the axis of rotation <code>(a_<wbr/>x,<wbr/> a_<wbr/>y,<wbr/> a_<wbr/>z)</code> and rotation
+amount <code>theta</code>,<wbr/> the following formulas can be used:</p>
+<pre><code> theta = 2 * acos(w)
+a_<wbr/>x = x /<wbr/> sin(theta/<wbr/>2)
+a_<wbr/>y = y /<wbr/> sin(theta/<wbr/>2)
+a_<wbr/>z = z /<wbr/> sin(theta/<wbr/>2)
+</code></pre>
+<p>To create a 3x3 rotation matrix that applies the rotation
+defined by this quarternion,<wbr/> the following matrix can be
+used:</p>
+<pre><code>R = [ 1 - 2y^2 - 2z^2,<wbr/>       2xy - 2zw,<wbr/>       2xz + 2yw,<wbr/>
+           2xy + 2zw,<wbr/> 1 - 2x^2 - 2z^2,<wbr/>       2yz - 2xw,<wbr/>
+           2xz - 2yw,<wbr/>       2yz + 2xw,<wbr/> 1 - 2x^2 - 2y^2 ]
+</code></pre>
+<p>This matrix can then be used to apply the rotation to a
+ column vector point with</p>
+<p><code>p' = Rp</code></p>
+<p>where <code>p</code> is in the device sensor coordinate system,<wbr/> and
+ <code>p'</code> is in the camera-oriented coordinate system.<wbr/></p>
             </td>
           </tr>
 
@@ -11939,20 +11969,19 @@ direction</p>
            <!-- end of entry -->
         
                 
-          <tr class="entry" id="static_android.lens.position">
+          <tr class="entry" id="static_android.lens.poseTranslation">
             <td class="entry_name
-             " rowspan="1">
-              android.<wbr/>lens.<wbr/>position
+             " rowspan="3">
+              android.<wbr/>lens.<wbr/>pose<wbr/>Translation
             </td>
             <td class="entry_type">
                 <span class="entry_type_name">float</span>
                 <span class="entry_type_container">x</span>
 
                 <span class="entry_type_array">
-                  3, location in mm, in the sensor coordinate
-            system
+                  3
                 </span>
-              <span class="entry_type_visibility"> [system]</span>
+              <span class="entry_type_visibility"> [public]</span>
 
 
 
@@ -11962,11 +11991,11 @@ direction</p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>Coordinates of camera optical axis on
-device</p>
+              <p>Position of the camera optical center.<wbr/></p>
             </td>
 
             <td class="entry_units">
+              Meters
             </td>
 
             <td class="entry_range">
@@ -11974,10 +12003,177 @@ device</p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_FUTURE">FUTURE</a></li>
+                  <li><a href="#tag_DEPTH">DEPTH</a></li>
               </ul>
             </td>
 
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>As measured in the device sensor coordinate system,<wbr/> the
+position of the camera device's optical center,<wbr/> as a
+three-dimensional vector <code>(x,<wbr/>y,<wbr/>z)</code>.<wbr/></p>
+<p>To transform a world position to a camera-device centered
+coordinate system,<wbr/> the position must be translated by this
+vector and then rotated by <a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a>.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.lens.intrinsicCalibration">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  5
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The parameters for this camera device's intrinsic
+calibration.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              
+            Pixels in the android.<wbr/>sensor.<wbr/>active<wbr/>Array<wbr/>Size coordinate
+            system.<wbr/>
+          
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DEPTH">DEPTH</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The five calibration parameters that describe the
+transform from camera-centric 3D coordinates to sensor
+pixel coordinates:</p>
+<pre><code>[f_<wbr/>x,<wbr/> f_<wbr/>y,<wbr/> c_<wbr/>x,<wbr/> c_<wbr/>y,<wbr/> s]
+</code></pre>
+<p>Where <code>f_<wbr/>x</code> and <code>f_<wbr/>y</code> are the horizontal and vertical
+focal lengths,<wbr/> <code>[c_<wbr/>x,<wbr/> c_<wbr/>y]</code> is the position of the optical
+axis,<wbr/> and <code>s</code> is a skew parameter for the sensor plane not
+being aligned with the lens plane.<wbr/></p>
+<p>These are typically used within a transformation matrix K:</p>
+<pre><code>K = [ f_<wbr/>x,<wbr/>   s,<wbr/> c_<wbr/>x,<wbr/>
+       0,<wbr/> f_<wbr/>y,<wbr/> c_<wbr/>y,<wbr/>
+       0    0,<wbr/>   1 ]
+</code></pre>
+<p>which can then be combined with the camera pose rotation
+<code>R</code> and translation <code>t</code> (<a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a> and
+<a href="#static_android.lens.poseTranslation">android.<wbr/>lens.<wbr/>pose<wbr/>Translation</a>,<wbr/> respective) to calculate the
+complete transform from world coordinates to pixel
+coordinates:</p>
+<pre><code>P = [ K 0   * [ R t
+     0 1 ]     0 1 ]
+</code></pre>
+<p>and with <code>p_<wbr/>w</code> being a point in the world coordinate system
+and <code>p_<wbr/>s</code> being a point in the camera active pixel array
+coordinate system,<wbr/> and with the mapping including the
+homogeneous division by z:</p>
+<pre><code> p_<wbr/>h = (x_<wbr/>h,<wbr/> y_<wbr/>h,<wbr/> z_<wbr/>h) = P p_<wbr/>w
+p_<wbr/>s = p_<wbr/>h /<wbr/> z_<wbr/>h
+</code></pre>
+<p>so <code>[x_<wbr/>s,<wbr/> y_<wbr/>s]</code> is the pixel coordinates of the world
+point,<wbr/> <code>z_<wbr/>s = 1</code>,<wbr/> and <code>w_<wbr/>s</code> is a measurement of disparity
+(depth) in pixel coordinates.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.lens.radialDistortion">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>lens.<wbr/>radial<wbr/>Distortion
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The correction coefficients to correct for this camera device's
+radial lens distortion.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              
+            Coefficients for a 6th-degree even radial polynomial.<wbr/>
+          
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DEPTH">DEPTH</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Three cofficients <code>[kappa_<wbr/>1,<wbr/> kappa_<wbr/>2,<wbr/> kappa_<wbr/>3]</code> that
+can be used to correct the lens's radial geometric
+distortion with the mapping equations:</p>
+<pre><code> x_<wbr/>c = x_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 )
+y_<wbr/>c = y_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 )
+</code></pre>
+<p>where <code>[x_<wbr/>i,<wbr/> y_<wbr/>i]</code> are normalized coordinates with <code>(0,<wbr/>0)</code>
+at the lens optical center,<wbr/> and <code>[-1,<wbr/> 1]</code> are the edges of
+the active pixel array; and where <code>[x_<wbr/>c,<wbr/> y_<wbr/>c]</code> are the
+corrected normalized coordinates with radial distortion
+removed; and <code>r^2 = x_<wbr/>i^2 + y_<wbr/>i^2</code>.<wbr/></p>
+            </td>
           </tr>
 
 
@@ -12460,6 +12656,299 @@ which means the optical zoom is not supported.<wbr/></li>
 <p>Then this state will always be STATIONARY.<wbr/></p>
 <p>When the state is MOVING,<wbr/> it indicates that at least one of the lens parameters
 is changing.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.lens.poseRotation">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>lens.<wbr/>pose<wbr/>Rotation
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The orientation of the camera relative to the sensor
+coordinate system.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              
+            Quarternion coefficients
+          
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DEPTH">DEPTH</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The four coefficients that describe the quarternion
+rotation from the Android sensor coordinate system to a
+camera-aligned coordinate system where the X-axis is
+aligned with the long side of the image sensor,<wbr/> the Y-axis
+is aligned with the short side of the image sensor,<wbr/> and
+the Z-axis is aligned with the optical axis of the sensor.<wbr/></p>
+<p>To convert from the quarternion coefficients <code>(x,<wbr/>y,<wbr/>z,<wbr/>w)</code>
+to the axis of rotation <code>(a_<wbr/>x,<wbr/> a_<wbr/>y,<wbr/> a_<wbr/>z)</code> and rotation
+amount <code>theta</code>,<wbr/> the following formulas can be used:</p>
+<pre><code> theta = 2 * acos(w)
+a_<wbr/>x = x /<wbr/> sin(theta/<wbr/>2)
+a_<wbr/>y = y /<wbr/> sin(theta/<wbr/>2)
+a_<wbr/>z = z /<wbr/> sin(theta/<wbr/>2)
+</code></pre>
+<p>To create a 3x3 rotation matrix that applies the rotation
+defined by this quarternion,<wbr/> the following matrix can be
+used:</p>
+<pre><code>R = [ 1 - 2y^2 - 2z^2,<wbr/>       2xy - 2zw,<wbr/>       2xz + 2yw,<wbr/>
+           2xy + 2zw,<wbr/> 1 - 2x^2 - 2z^2,<wbr/>       2yz - 2xw,<wbr/>
+           2xz - 2yw,<wbr/>       2yz + 2xw,<wbr/> 1 - 2x^2 - 2y^2 ]
+</code></pre>
+<p>This matrix can then be used to apply the rotation to a
+ column vector point with</p>
+<p><code>p' = Rp</code></p>
+<p>where <code>p</code> is in the device sensor coordinate system,<wbr/> and
+ <code>p'</code> is in the camera-oriented coordinate system.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.lens.poseTranslation">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>lens.<wbr/>pose<wbr/>Translation
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Position of the camera optical center.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              Meters
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DEPTH">DEPTH</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>As measured in the device sensor coordinate system,<wbr/> the
+position of the camera device's optical center,<wbr/> as a
+three-dimensional vector <code>(x,<wbr/>y,<wbr/>z)</code>.<wbr/></p>
+<p>To transform a world position to a camera-device centered
+coordinate system,<wbr/> the position must be translated by this
+vector and then rotated by <a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a>.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.lens.intrinsicCalibration">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  5
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The parameters for this camera device's intrinsic
+calibration.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              
+            Pixels in the android.<wbr/>sensor.<wbr/>active<wbr/>Array<wbr/>Size coordinate
+            system.<wbr/>
+          
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DEPTH">DEPTH</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The five calibration parameters that describe the
+transform from camera-centric 3D coordinates to sensor
+pixel coordinates:</p>
+<pre><code>[f_<wbr/>x,<wbr/> f_<wbr/>y,<wbr/> c_<wbr/>x,<wbr/> c_<wbr/>y,<wbr/> s]
+</code></pre>
+<p>Where <code>f_<wbr/>x</code> and <code>f_<wbr/>y</code> are the horizontal and vertical
+focal lengths,<wbr/> <code>[c_<wbr/>x,<wbr/> c_<wbr/>y]</code> is the position of the optical
+axis,<wbr/> and <code>s</code> is a skew parameter for the sensor plane not
+being aligned with the lens plane.<wbr/></p>
+<p>These are typically used within a transformation matrix K:</p>
+<pre><code>K = [ f_<wbr/>x,<wbr/>   s,<wbr/> c_<wbr/>x,<wbr/>
+       0,<wbr/> f_<wbr/>y,<wbr/> c_<wbr/>y,<wbr/>
+       0    0,<wbr/>   1 ]
+</code></pre>
+<p>which can then be combined with the camera pose rotation
+<code>R</code> and translation <code>t</code> (<a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a> and
+<a href="#static_android.lens.poseTranslation">android.<wbr/>lens.<wbr/>pose<wbr/>Translation</a>,<wbr/> respective) to calculate the
+complete transform from world coordinates to pixel
+coordinates:</p>
+<pre><code>P = [ K 0   * [ R t
+     0 1 ]     0 1 ]
+</code></pre>
+<p>and with <code>p_<wbr/>w</code> being a point in the world coordinate system
+and <code>p_<wbr/>s</code> being a point in the camera active pixel array
+coordinate system,<wbr/> and with the mapping including the
+homogeneous division by z:</p>
+<pre><code> p_<wbr/>h = (x_<wbr/>h,<wbr/> y_<wbr/>h,<wbr/> z_<wbr/>h) = P p_<wbr/>w
+p_<wbr/>s = p_<wbr/>h /<wbr/> z_<wbr/>h
+</code></pre>
+<p>so <code>[x_<wbr/>s,<wbr/> y_<wbr/>s]</code> is the pixel coordinates of the world
+point,<wbr/> <code>z_<wbr/>s = 1</code>,<wbr/> and <code>w_<wbr/>s</code> is a measurement of disparity
+(depth) in pixel coordinates.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="dynamic_android.lens.radialDistortion">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>lens.<wbr/>radial<wbr/>Distortion
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">float</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  3
+                </span>
+              <span class="entry_type_visibility"> [public]</span>
+
+
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The correction coefficients to correct for this camera device's
+radial lens distortion.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              
+            Coefficients for a 6th-degree even radial polynomial.<wbr/>
+          
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DEPTH">DEPTH</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>Three cofficients <code>[kappa_<wbr/>1,<wbr/> kappa_<wbr/>2,<wbr/> kappa_<wbr/>3]</code> that
+can be used to correct the lens's radial geometric
+distortion with the mapping equations:</p>
+<pre><code> x_<wbr/>c = x_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 )
+y_<wbr/>c = y_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 )
+</code></pre>
+<p>where <code>[x_<wbr/>i,<wbr/> y_<wbr/>i]</code> are normalized coordinates with <code>(0,<wbr/>0)</code>
+at the lens optical center,<wbr/> and <code>[-1,<wbr/> 1]</code> are the edges of
+the active pixel array; and where <code>[x_<wbr/>c,<wbr/> y_<wbr/>c]</code> are the
+corrected normalized coordinates with radial distortion
+removed; and <code>r^2 = x_<wbr/>i^2 + y_<wbr/>i^2</code>.<wbr/></p>
             </td>
           </tr>
 
@@ -25007,6 +25496,10 @@ duration.<wbr/></p>
         Entry is required for the depth capability.
     
         <ul class="tags_entries">
+          <li><a href="#static_android.lens.poseRotation">android.lens.poseRotation</a> (static)</li>
+          <li><a href="#static_android.lens.poseTranslation">android.lens.poseTranslation</a> (static)</li>
+          <li><a href="#static_android.lens.intrinsicCalibration">android.lens.intrinsicCalibration</a> (static)</li>
+          <li><a href="#static_android.lens.radialDistortion">android.lens.radialDistortion</a> (static)</li>
           <li><a href="#static_android.depth.maxDepthSamples">android.depth.maxDepthSamples</a> (static)</li>
           <li><a href="#static_android.depth.availableDepthStreamConfigurations">android.depth.availableDepthStreamConfigurations</a> (static)</li>
           <li><a href="#static_android.depth.availableDepthMinFrameDurations">android.depth.availableDepthMinFrameDurations</a> (static)</li>
@@ -25026,8 +25519,6 @@ duration.<wbr/></p>
           <li><a href="#static_android.flash.colorTemperature">android.flash.colorTemperature</a> (static)</li>
           <li><a href="#static_android.flash.maxEnergy">android.flash.maxEnergy</a> (static)</li>
           <li><a href="#dynamic_android.jpeg.size">android.jpeg.size</a> (dynamic)</li>
-          <li><a href="#static_android.lens.opticalAxisAngle">android.lens.opticalAxisAngle</a> (static)</li>
-          <li><a href="#static_android.lens.position">android.lens.position</a> (static)</li>
           <li><a href="#controls_android.noiseReduction.strength">android.noiseReduction.strength</a> (controls)</li>
           <li><a href="#controls_android.request.metadataMode">android.request.metadataMode</a> (controls)</li>
           <li><a href="#static_android.sensor.baseGainFactor">android.sensor.baseGainFactor</a> (static)</li>
