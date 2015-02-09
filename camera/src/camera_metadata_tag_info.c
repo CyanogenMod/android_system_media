@@ -584,6 +584,10 @@ static tag_info_t android_tonemap[ANDROID_TONEMAP_END -
     { "curveRed",                      TYPE_FLOAT  },
     [ ANDROID_TONEMAP_MODE - ANDROID_TONEMAP_START ] =
     { "mode",                          TYPE_BYTE   },
+    [ ANDROID_TONEMAP_GAMMA - ANDROID_TONEMAP_START ] =
+    { "gamma",                         TYPE_FLOAT  },
+    [ ANDROID_TONEMAP_PRESET_CURVE - ANDROID_TONEMAP_START ] =
+    { "presetCurve",                   TYPE_BYTE   },
     [ ANDROID_TONEMAP_MAX_CURVE_POINTS - ANDROID_TONEMAP_START ] =
     { "maxCurvePoints",                TYPE_INT32  },
     [ ANDROID_TONEMAP_AVAILABLE_TONE_MAP_MODES - ANDROID_TONEMAP_START ] =
@@ -2287,6 +2291,32 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     break;
                 case ANDROID_TONEMAP_MODE_HIGH_QUALITY:
                     msg = "HIGH_QUALITY";
+                    ret = 0;
+                    break;
+                case ANDROID_TONEMAP_MODE_GAMMA_VALUE:
+                    msg = "GAMMA_VALUE";
+                    ret = 0;
+                    break;
+                case ANDROID_TONEMAP_MODE_PRESET_CURVE:
+                    msg = "PRESET_CURVE";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
+        case ANDROID_TONEMAP_GAMMA: {
+            break;
+        }
+        case ANDROID_TONEMAP_PRESET_CURVE: {
+            switch (value) {
+                case ANDROID_TONEMAP_PRESET_CURVE_SRGB:
+                    msg = "SRGB";
+                    ret = 0;
+                    break;
+                case ANDROID_TONEMAP_PRESET_CURVE_REC709:
+                    msg = "REC709";
                     ret = 0;
                     break;
                 default:

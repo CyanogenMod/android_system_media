@@ -4072,9 +4072,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               stages. This means the following controls are guaranteed to be supported:
 
               * Manual tonemap control
-                    * android.tonemap.curve
-                    * android.tonemap.mode
-                    * android.tonemap.maxCurvePoints
+                  * android.tonemap.curve
+                  * android.tonemap.mode
+                  * android.tonemap.maxCurvePoints
+                  * android.tonemap.gamma
+                  * android.tonemap.presetCurve
+
               * Manual white balance control
                   * android.colorCorrection.transform
                   * android.colorCorrection.gains
@@ -7002,6 +7005,29 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               the cost of reduced frame rate compared to raw sensor output.
               </notes>
             </value>
+            <value>GAMMA_VALUE
+              <notes>
+              Use the gamma value specified in android.tonemap.gamma to peform
+              tonemapping.
+
+              All color enhancement and tonemapping must be disabled, except
+              for applying the tonemapping curve specified by android.tonemap.gamma.
+
+              Must not slow down frame rate relative to raw sensor output.
+              </notes>
+            </value>
+            <value>PRESET_CURVE
+              <notes>
+              Use the preset tonemapping curve specified in
+              android.tonemap.presetCurve to peform tonemapping.
+
+              All color enhancement and tonemapping must be disabled, except
+              for applying the tonemapping curve specified by
+              android.tonemap.presetCurve.
+
+              Must not slow down frame rate relative to raw sensor output.
+              </notes>
+            </value>
           </enum>
           <description>High-level global contrast/gamma/tonemapping control.
           </description>
@@ -7028,6 +7054,52 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           If a request is sent with CONTRAST_CURVE with the camera device's
           provided curve in FAST or HIGH_QUALITY, the image's tonemap will be
           roughly the same.</details>
+        </entry>
+        <entry name="gamma" type="float" visibility="public">
+          <description> Tonemapping curve to use when android.tonemap.mode is
+          GAMMA_VALUE
+          </description>
+          <details>
+          The tonemap curve will be defined the following formula:
+          * OUT = pow(IN, 1.0 / gamma)
+          where IN and OUT is the input pixel value scaled to range [0.0, 1.0],
+          pow is the power function and gamma is the gamma value specified by this
+          key.
+
+          The same curve will be applied to all color channels. The camera device
+          may clip the input gamma value to its supported range. The actual applied
+          value will be returned in capture result.
+
+          The valid range of gamma value varies on different devices, but values
+          within [1.0, 5.0] are guaranteed not to be clipped.
+          </details>
+        </entry>
+        <entry name="presetCurve" type="byte" visibility="public" enum="true">
+          <enum>
+            <value>SRGB
+              <notes>Tonemapping curve is defined by sRGB</notes>
+            </value>
+            <value>REC709
+              <notes>Tonemapping curve is defined by ITU-R BT.709</notes>
+            </value>
+          </enum>
+          <description> Tonemapping curve to use when android.tonemap.mode is
+          PRESET_CURVE
+          </description>
+          <details>
+          The tonemap curve will be defined by specified standard.
+
+          sRGB (approximated by 16 control points):
+
+          ![sRGB tonemapping curve](android.tonemap.curveRed/srgb_tonemap.png)
+
+          Rec. 709 (approximated by 16 control points):
+
+          ![Rec. 709 tonemapping curve](android.tonemap.curveRed/rec709_tonemap.png)
+
+          Note that above figures show a 16 control points approximation of preset
+          curves. Camera devices may apply a different approximation to the curve.
+          </details>
         </entry>
       </controls>
       <static>
@@ -7060,8 +7132,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </description>
           <range>Any value listed in android.tonemap.mode</range>
           <details>
-          Camera devices that support the MANUAL_POST_PROCESSING capability will always list
-          CONTRAST_CURVE and FAST. This includes all FULL level devices.
+          Camera devices that support the MANUAL_POST_PROCESSING capability will always contain
+          at least one of below mode combinations:
+
+          * CONTRAST_CURVE and FAST
+          * GAMMA_VALUE, PRESET_CURVE, and FAST
+
+          This includes all FULL level devices.
           </details>
         </entry>
       </static>
@@ -7075,6 +7152,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <clone entry="android.tonemap.curve" kind="controls">
         </clone>
         <clone entry="android.tonemap.mode" kind="controls">
+        </clone>
+        <clone entry="android.tonemap.gamma" kind="controls">
+        </clone>
+        <clone entry="android.tonemap.presetCurve" kind="controls">
         </clone>
       </dynamic>
     </section>
