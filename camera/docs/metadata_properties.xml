@@ -1830,18 +1830,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </hal_details>
           <tag id="BC" />
         </entry>
-        <entry name="aeLockAvailable" type="byte" visibility="public" enum="true"
-               typedef="boolean" hwlevel="legacy">
-          <enum>
-            <value>FALSE</value>
-            <value>TRUE</value>
-          </enum>
-          <description>Whether the camera device supports android.control.aeLock</description>
-          <details>
-          LIMITED or FULL devices will always list `true`
-          </details>
-          <tag id="BC"/>
-        </entry>
         <entry name="afAvailableModes" type="byte" visibility="public"
                type_notes="List of enums" container="array" typedef="enumList"
                hwlevel="legacy">
@@ -1893,23 +1881,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           as auto-exposure, white balance, or focus.
           </details>
           <tag id="BC" />
-        </entry>
-        <entry name="availableModes" type="byte" visibility="public"
-            type_notes="List of enums (android.control.mode)." container="array"
-            typedef="enumList" hwlevel="legacy">
-          <array>
-            <size>n</size>
-          </array>
-          <description>
-          List of control modes for android.control.mode that are supported by this camera
-          device.
-          </description>
-          <range>Any value listed in android.control.mode</range>
-          <details>
-              This list contains control modes that can be set for the camera device.
-              LEGACY mode devices will always support AUTO mode. LIMITED and FULL
-              devices will always support OFF, AUTO modes.
-          </details>
         </entry>
         <entry name="availableSceneModes" type="byte" visibility="public"
                type_notes="List of enums (android.control.sceneMode)."
@@ -1978,18 +1949,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           mode camera devices.
           </details>
           <tag id="BC" />
-          </entry>
-        <entry name="awbLockAvailable" type="byte" visibility="public" enum="true"
-               typedef="boolean" hwlevel="legacy">
-          <enum>
-            <value>FALSE</value>
-            <value>TRUE</value>
-          </enum>
-          <description>Whether the camera device supports android.control.awbLock</description>
-          <details>
-          LIMITED or FULL devices will always list `true`
-          </details>
-          <tag id="BC"/>
         </entry>
         <entry name="maxRegions" type="int32" visibility="hidden"
                container="array" hwlevel="legacy">
@@ -2549,6 +2508,47 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           for preview only streaming case.
           </hal_details>
           <tag id="V1" />
+        </entry>
+        <entry name="aeLockAvailable" type="byte" visibility="public" enum="true"
+               typedef="boolean" hwlevel="legacy">
+          <enum>
+            <value>FALSE</value>
+            <value>TRUE</value>
+          </enum>
+          <description>Whether the camera device supports android.control.aeLock</description>
+          <details>
+          LIMITED or FULL devices will always list `true`
+          </details>
+          <tag id="BC"/>
+        </entry>
+        <entry name="awbLockAvailable" type="byte" visibility="public" enum="true"
+               typedef="boolean" hwlevel="legacy">
+          <enum>
+            <value>FALSE</value>
+            <value>TRUE</value>
+          </enum>
+          <description>Whether the camera device supports android.control.awbLock</description>
+          <details>
+          LIMITED or FULL devices will always list `true`
+          </details>
+          <tag id="BC"/>
+        </entry>
+        <entry name="availableModes" type="byte" visibility="public"
+            type_notes="List of enums (android.control.mode)." container="array"
+            typedef="enumList" hwlevel="legacy">
+          <array>
+            <size>n</size>
+          </array>
+          <description>
+          List of control modes for android.control.mode that are supported by this camera
+          device.
+          </description>
+          <range>Any value listed in android.control.mode</range>
+          <details>
+              This list contains control modes that can be set for the camera device.
+              LEGACY mode devices will always support AUTO mode. LIMITED and FULL
+              devices will always support OFF, AUTO modes.
+          </details>
         </entry>
       </static>
     </section>
@@ -7125,52 +7125,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           provided curve in FAST or HIGH_QUALITY, the image's tonemap will be
           roughly the same.</details>
         </entry>
-        <entry name="gamma" type="float" visibility="public">
-          <description> Tonemapping curve to use when android.tonemap.mode is
-          GAMMA_VALUE
-          </description>
-          <details>
-          The tonemap curve will be defined the following formula:
-          * OUT = pow(IN, 1.0 / gamma)
-          where IN and OUT is the input pixel value scaled to range [0.0, 1.0],
-          pow is the power function and gamma is the gamma value specified by this
-          key.
-
-          The same curve will be applied to all color channels. The camera device
-          may clip the input gamma value to its supported range. The actual applied
-          value will be returned in capture result.
-
-          The valid range of gamma value varies on different devices, but values
-          within [1.0, 5.0] are guaranteed not to be clipped.
-          </details>
-        </entry>
-        <entry name="presetCurve" type="byte" visibility="public" enum="true">
-          <enum>
-            <value>SRGB
-              <notes>Tonemapping curve is defined by sRGB</notes>
-            </value>
-            <value>REC709
-              <notes>Tonemapping curve is defined by ITU-R BT.709</notes>
-            </value>
-          </enum>
-          <description> Tonemapping curve to use when android.tonemap.mode is
-          PRESET_CURVE
-          </description>
-          <details>
-          The tonemap curve will be defined by specified standard.
-
-          sRGB (approximated by 16 control points):
-
-          ![sRGB tonemapping curve](android.tonemap.curveRed/srgb_tonemap.png)
-
-          Rec. 709 (approximated by 16 control points):
-
-          ![Rec. 709 tonemapping curve](android.tonemap.curveRed/rec709_tonemap.png)
-
-          Note that above figures show a 16 control points approximation of preset
-          curves. Camera devices may apply a different approximation to the curve.
-          </details>
-        </entry>
       </controls>
       <static>
         <entry name="maxCurvePoints" type="int32" visibility="public"
@@ -7228,6 +7182,54 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <clone entry="android.tonemap.presetCurve" kind="controls">
         </clone>
       </dynamic>
+      <controls>
+        <entry name="gamma" type="float" visibility="public">
+          <description> Tonemapping curve to use when android.tonemap.mode is
+          GAMMA_VALUE
+          </description>
+          <details>
+          The tonemap curve will be defined the following formula:
+          * OUT = pow(IN, 1.0 / gamma)
+          where IN and OUT is the input pixel value scaled to range [0.0, 1.0],
+          pow is the power function and gamma is the gamma value specified by this
+          key.
+
+          The same curve will be applied to all color channels. The camera device
+          may clip the input gamma value to its supported range. The actual applied
+          value will be returned in capture result.
+
+          The valid range of gamma value varies on different devices, but values
+          within [1.0, 5.0] are guaranteed not to be clipped.
+          </details>
+        </entry>
+        <entry name="presetCurve" type="byte" visibility="public" enum="true">
+          <enum>
+            <value>SRGB
+              <notes>Tonemapping curve is defined by sRGB</notes>
+            </value>
+            <value>REC709
+              <notes>Tonemapping curve is defined by ITU-R BT.709</notes>
+            </value>
+          </enum>
+          <description> Tonemapping curve to use when android.tonemap.mode is
+          PRESET_CURVE
+          </description>
+          <details>
+          The tonemap curve will be defined by specified standard.
+
+          sRGB (approximated by 16 control points):
+
+          ![sRGB tonemapping curve](android.tonemap.curveRed/srgb_tonemap.png)
+
+          Rec. 709 (approximated by 16 control points):
+
+          ![Rec. 709 tonemapping curve](android.tonemap.curveRed/rec709_tonemap.png)
+
+          Note that above figures show a 16 control points approximation of preset
+          curves. Camera devices may apply a different approximation to the curve.
+          </details>
+        </entry>
+      </controls>
     </section>
     <section name="led">
       <controls>

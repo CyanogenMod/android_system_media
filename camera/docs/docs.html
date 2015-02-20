@@ -204,21 +204,15 @@
             <li
             ><a href="#static_android.control.aeCompensationStep">android.control.aeCompensationStep</a></li>
             <li
-            ><a href="#static_android.control.aeLockAvailable">android.control.aeLockAvailable</a></li>
-            <li
             ><a href="#static_android.control.afAvailableModes">android.control.afAvailableModes</a></li>
             <li
             ><a href="#static_android.control.availableEffects">android.control.availableEffects</a></li>
-            <li
-            ><a href="#static_android.control.availableModes">android.control.availableModes</a></li>
             <li
             ><a href="#static_android.control.availableSceneModes">android.control.availableSceneModes</a></li>
             <li
             ><a href="#static_android.control.availableVideoStabilizationModes">android.control.availableVideoStabilizationModes</a></li>
             <li
             ><a href="#static_android.control.awbAvailableModes">android.control.awbAvailableModes</a></li>
-            <li
-            ><a href="#static_android.control.awbLockAvailable">android.control.awbLockAvailable</a></li>
             <li
             ><a href="#static_android.control.maxRegions">android.control.maxRegions</a></li>
             <li
@@ -231,6 +225,12 @@
             ><a href="#static_android.control.sceneModeOverrides">android.control.sceneModeOverrides</a></li>
             <li
             ><a href="#static_android.control.availableHighSpeedVideoConfigurations">android.control.availableHighSpeedVideoConfigurations</a></li>
+            <li
+            ><a href="#static_android.control.aeLockAvailable">android.control.aeLockAvailable</a></li>
+            <li
+            ><a href="#static_android.control.awbLockAvailable">android.control.awbLockAvailable</a></li>
+            <li
+            ><a href="#static_android.control.availableModes">android.control.availableModes</a></li>
           </ul>
         </li>
         <li>
@@ -4293,63 +4293,6 @@ of two.<wbr/> +1 EV doubles the image brightness,<wbr/> while -1 EV halves the i
            <!-- end of entry -->
         
                 
-          <tr class="entry" id="static_android.control.aeLockAvailable">
-            <td class="entry_name
-             " rowspan="3">
-              android.<wbr/>control.<wbr/>ae<wbr/>Lock<wbr/>Available
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name entry_type_name_enum">byte</span>
-
-              <span class="entry_type_visibility"> [public as boolean]</span>
-
-
-              <span class="entry_type_hwlevel">[legacy] </span>
-
-
-
-                <ul class="entry_type_enum">
-                  <li>
-                    <span class="entry_type_enum_name">FALSE</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">TRUE</span>
-                  </li>
-                </ul>
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>Whether the camera device supports <a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a></p>
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_BC">BC</a></li>
-              </ul>
-            </td>
-
-          </tr>
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>LIMITED or FULL devices will always list <code>true</code></p>
-            </td>
-          </tr>
-
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-                
           <tr class="entry" id="static_android.control.afAvailableModes">
             <td class="entry_name
              " rowspan="3">
@@ -4470,61 +4413,6 @@ OFF.<wbr/></p>
 <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF.<wbr/>  OFF is always included in this list.<wbr/></p>
 <p>This control has no effect on the operation of other control routines such
 as auto-exposure,<wbr/> white balance,<wbr/> or focus.<wbr/></p>
-            </td>
-          </tr>
-
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-                
-          <tr class="entry" id="static_android.control.availableModes">
-            <td class="entry_name
-             " rowspan="3">
-              android.<wbr/>control.<wbr/>available<wbr/>Modes
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name">byte</span>
-                <span class="entry_type_container">x</span>
-
-                <span class="entry_type_array">
-                  n
-                </span>
-              <span class="entry_type_visibility"> [public as enumList]</span>
-
-
-              <span class="entry_type_hwlevel">[legacy] </span>
-
-
-                <div class="entry_type_notes">List of enums (android.<wbr/>control.<wbr/>mode).<wbr/></div>
-
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>List of control modes for <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> that are supported by this camera
-device.<wbr/></p>
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-              <p>Any value listed in <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a></p>
-            </td>
-
-            <td class="entry_tags">
-            </td>
-
-          </tr>
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>This list contains control modes that can be set for the camera device.<wbr/>
-LEGACY mode devices will always support AUTO mode.<wbr/> LIMITED and FULL
-devices will always support OFF,<wbr/> AUTO modes.<wbr/></p>
             </td>
           </tr>
 
@@ -4708,63 +4596,6 @@ given camera device.<wbr/> This entry lists the valid modes for
 mode,<wbr/> which enables application control of white balance,<wbr/> by using
 <a href="#controls_android.colorCorrection.transform">android.<wbr/>color<wbr/>Correction.<wbr/>transform</a> and <a href="#controls_android.colorCorrection.gains">android.<wbr/>color<wbr/>Correction.<wbr/>gains</a>(<a href="#controls_android.colorCorrection.mode">android.<wbr/>color<wbr/>Correction.<wbr/>mode</a> must be set to TRANSFORM_<wbr/>MATRIX).<wbr/> This includes all FULL
 mode camera devices.<wbr/></p>
-            </td>
-          </tr>
-
-
-          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
-           <!-- end of entry -->
-        
-                
-          <tr class="entry" id="static_android.control.awbLockAvailable">
-            <td class="entry_name
-             " rowspan="3">
-              android.<wbr/>control.<wbr/>awb<wbr/>Lock<wbr/>Available
-            </td>
-            <td class="entry_type">
-                <span class="entry_type_name entry_type_name_enum">byte</span>
-
-              <span class="entry_type_visibility"> [public as boolean]</span>
-
-
-              <span class="entry_type_hwlevel">[legacy] </span>
-
-
-
-                <ul class="entry_type_enum">
-                  <li>
-                    <span class="entry_type_enum_name">FALSE</span>
-                  </li>
-                  <li>
-                    <span class="entry_type_enum_name">TRUE</span>
-                  </li>
-                </ul>
-
-            </td> <!-- entry_type -->
-
-            <td class="entry_description">
-              <p>Whether the camera device supports <a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a></p>
-            </td>
-
-            <td class="entry_units">
-            </td>
-
-            <td class="entry_range">
-            </td>
-
-            <td class="entry_tags">
-              <ul class="entry_tags">
-                  <li><a href="#tag_BC">BC</a></li>
-              </ul>
-            </td>
-
-          </tr>
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>LIMITED or FULL devices will always list <code>true</code></p>
             </td>
           </tr>
 
@@ -5173,6 +5004,175 @@ recommended that this list includes some fps ranges (e.<wbr/>g.<wbr/> [30,<wbr/>
 for preview only streaming case.<wbr/></p>
             </td>
           </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.control.aeLockAvailable">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>control.<wbr/>ae<wbr/>Lock<wbr/>Available
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public as boolean]</span>
+
+
+              <span class="entry_type_hwlevel">[legacy] </span>
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">FALSE</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">TRUE</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Whether the camera device supports <a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>LIMITED or FULL devices will always list <code>true</code></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.control.awbLockAvailable">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>control.<wbr/>awb<wbr/>Lock<wbr/>Available
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public as boolean]</span>
+
+
+              <span class="entry_type_hwlevel">[legacy] </span>
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">FALSE</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">TRUE</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Whether the camera device supports <a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_BC">BC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>LIMITED or FULL devices will always list <code>true</code></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.control.availableModes">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>control.<wbr/>available<wbr/>Modes
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">byte</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n
+                </span>
+              <span class="entry_type_visibility"> [public as enumList]</span>
+
+
+              <span class="entry_type_hwlevel">[legacy] </span>
+
+
+                <div class="entry_type_notes">List of enums (android.<wbr/>control.<wbr/>mode).<wbr/></div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>List of control modes for <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> that are supported by this camera
+device.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+              <p>Any value listed in <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a></p>
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This list contains control modes that can be set for the camera device.<wbr/>
+LEGACY mode devices will always support AUTO mode.<wbr/> LIMITED and FULL
+devices will always support OFF,<wbr/> AUTO modes.<wbr/></p>
+            </td>
+          </tr>
+
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -14198,8 +14198,8 @@ stages.<wbr/> This means the following controls are guaranteed to be supported:<
 <li><a href="#controls_android.tonemap.curve">android.<wbr/>tonemap.<wbr/>curve</a></li>
 <li><a href="#controls_android.tonemap.mode">android.<wbr/>tonemap.<wbr/>mode</a></li>
 <li><a href="#static_android.tonemap.maxCurvePoints">android.<wbr/>tonemap.<wbr/>max<wbr/>Curve<wbr/>Points</a></li>
-<li><a href="#controls_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a></li>
-<li><a href="#controls_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a></li>
+<li><a href="#dynamic_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a></li>
+<li><a href="#dynamic_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a></li>
 </ul>
 </li>
 <li>
@@ -22473,19 +22473,19 @@ the cost of reduced frame rate compared to raw sensor output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">GAMMA_VALUE</span>
-                    <span class="entry_type_enum_notes"><p>Use the gamma value specified in <a href="#controls_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a> to peform
+                    <span class="entry_type_enum_notes"><p>Use the gamma value specified in <a href="#dynamic_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a> to peform
 tonemapping.<wbr/></p>
 <p>All color enhancement and tonemapping must be disabled,<wbr/> except
-for applying the tonemapping curve specified by <a href="#controls_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a>.<wbr/></p>
+for applying the tonemapping curve specified by <a href="#dynamic_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a>.<wbr/></p>
 <p>Must not slow down frame rate relative to raw sensor output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PRESET_CURVE</span>
                     <span class="entry_type_enum_notes"><p>Use the preset tonemapping curve specified in
-<a href="#controls_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a> to peform tonemapping.<wbr/></p>
+<a href="#dynamic_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a> to peform tonemapping.<wbr/></p>
 <p>All color enhancement and tonemapping must be disabled,<wbr/> except
 for applying the tonemapping curve specified by
-<a href="#controls_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a>.<wbr/></p>
+<a href="#dynamic_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a>.<wbr/></p>
 <p>Must not slow down frame rate relative to raw sensor output.<wbr/></p></span>
                   </li>
                 </ul>
@@ -23176,19 +23176,19 @@ the cost of reduced frame rate compared to raw sensor output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">GAMMA_VALUE</span>
-                    <span class="entry_type_enum_notes"><p>Use the gamma value specified in <a href="#controls_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a> to peform
+                    <span class="entry_type_enum_notes"><p>Use the gamma value specified in <a href="#dynamic_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a> to peform
 tonemapping.<wbr/></p>
 <p>All color enhancement and tonemapping must be disabled,<wbr/> except
-for applying the tonemapping curve specified by <a href="#controls_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a>.<wbr/></p>
+for applying the tonemapping curve specified by <a href="#dynamic_android.tonemap.gamma">android.<wbr/>tonemap.<wbr/>gamma</a>.<wbr/></p>
 <p>Must not slow down frame rate relative to raw sensor output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">PRESET_CURVE</span>
                     <span class="entry_type_enum_notes"><p>Use the preset tonemapping curve specified in
-<a href="#controls_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a> to peform tonemapping.<wbr/></p>
+<a href="#dynamic_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a> to peform tonemapping.<wbr/></p>
 <p>All color enhancement and tonemapping must be disabled,<wbr/> except
 for applying the tonemapping curve specified by
-<a href="#controls_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a>.<wbr/></p>
+<a href="#dynamic_android.tonemap.presetCurve">android.<wbr/>tonemap.<wbr/>preset<wbr/>Curve</a>.<wbr/></p>
 <p>Must not slow down frame rate relative to raw sensor output.<wbr/></p></span>
                   </li>
                 </ul>
@@ -24550,15 +24550,15 @@ Similarly,<wbr/> for edge enhancement reprocessing,<wbr/> it is only effective w
           <li><a href="#static_android.control.aeAvailableTargetFpsRanges">android.control.aeAvailableTargetFpsRanges</a> (static)</li>
           <li><a href="#static_android.control.aeCompensationRange">android.control.aeCompensationRange</a> (static)</li>
           <li><a href="#static_android.control.aeCompensationStep">android.control.aeCompensationStep</a> (static)</li>
-          <li><a href="#static_android.control.aeLockAvailable">android.control.aeLockAvailable</a> (static)</li>
           <li><a href="#static_android.control.afAvailableModes">android.control.afAvailableModes</a> (static)</li>
           <li><a href="#static_android.control.availableEffects">android.control.availableEffects</a> (static)</li>
           <li><a href="#static_android.control.availableSceneModes">android.control.availableSceneModes</a> (static)</li>
           <li><a href="#static_android.control.availableVideoStabilizationModes">android.control.availableVideoStabilizationModes</a> (static)</li>
           <li><a href="#static_android.control.awbAvailableModes">android.control.awbAvailableModes</a> (static)</li>
-          <li><a href="#static_android.control.awbLockAvailable">android.control.awbLockAvailable</a> (static)</li>
           <li><a href="#static_android.control.maxRegions">android.control.maxRegions</a> (static)</li>
           <li><a href="#static_android.control.sceneModeOverrides">android.control.sceneModeOverrides</a> (static)</li>
+          <li><a href="#static_android.control.aeLockAvailable">android.control.aeLockAvailable</a> (static)</li>
+          <li><a href="#static_android.control.awbLockAvailable">android.control.awbLockAvailable</a> (static)</li>
           <li><a href="#controls_android.flash.mode">android.flash.mode</a> (controls)</li>
           <li><a href="#static_android.flash.info.available">android.flash.info.available</a> (static)</li>
           <li><a href="#controls_android.jpeg.gpsCoordinates">android.jpeg.gpsCoordinates</a> (controls)</li>

@@ -175,14 +175,10 @@ static tag_info_t android_control[ANDROID_CONTROL_END -
     [ ANDROID_CONTROL_AE_COMPENSATION_STEP - ANDROID_CONTROL_START ] =
     { "aeCompensationStep",            TYPE_RATIONAL
                 },
-    [ ANDROID_CONTROL_AE_LOCK_AVAILABLE - ANDROID_CONTROL_START ] =
-    { "aeLockAvailable",               TYPE_BYTE   },
     [ ANDROID_CONTROL_AF_AVAILABLE_MODES - ANDROID_CONTROL_START ] =
     { "afAvailableModes",              TYPE_BYTE   },
     [ ANDROID_CONTROL_AVAILABLE_EFFECTS - ANDROID_CONTROL_START ] =
     { "availableEffects",              TYPE_BYTE   },
-    [ ANDROID_CONTROL_AVAILABLE_MODES - ANDROID_CONTROL_START ] =
-    { "availableModes",                TYPE_BYTE   },
     [ ANDROID_CONTROL_AVAILABLE_SCENE_MODES - ANDROID_CONTROL_START ] =
     { "availableSceneModes",           TYPE_BYTE   },
     [ ANDROID_CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES - ANDROID_CONTROL_START ] =
@@ -190,8 +186,6 @@ static tag_info_t android_control[ANDROID_CONTROL_END -
                                         TYPE_BYTE   },
     [ ANDROID_CONTROL_AWB_AVAILABLE_MODES - ANDROID_CONTROL_START ] =
     { "awbAvailableModes",             TYPE_BYTE   },
-    [ ANDROID_CONTROL_AWB_LOCK_AVAILABLE - ANDROID_CONTROL_START ] =
-    { "awbLockAvailable",              TYPE_BYTE   },
     [ ANDROID_CONTROL_MAX_REGIONS - ANDROID_CONTROL_START ] =
     { "maxRegions",                    TYPE_INT32  },
     [ ANDROID_CONTROL_SCENE_MODE_OVERRIDES - ANDROID_CONTROL_START ] =
@@ -209,6 +203,12 @@ static tag_info_t android_control[ANDROID_CONTROL_END -
     [ ANDROID_CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS - ANDROID_CONTROL_START ] =
     { "availableHighSpeedVideoConfigurations",
                                         TYPE_INT32  },
+    [ ANDROID_CONTROL_AE_LOCK_AVAILABLE - ANDROID_CONTROL_START ] =
+    { "aeLockAvailable",               TYPE_BYTE   },
+    [ ANDROID_CONTROL_AWB_LOCK_AVAILABLE - ANDROID_CONTROL_START ] =
+    { "awbLockAvailable",              TYPE_BYTE   },
+    [ ANDROID_CONTROL_AVAILABLE_MODES - ANDROID_CONTROL_START ] =
+    { "availableModes",                TYPE_BYTE   },
 };
 
 static tag_info_t android_demosaic[ANDROID_DEMOSAIC_END -
@@ -590,14 +590,14 @@ static tag_info_t android_tonemap[ANDROID_TONEMAP_END -
     { "curveRed",                      TYPE_FLOAT  },
     [ ANDROID_TONEMAP_MODE - ANDROID_TONEMAP_START ] =
     { "mode",                          TYPE_BYTE   },
-    [ ANDROID_TONEMAP_GAMMA - ANDROID_TONEMAP_START ] =
-    { "gamma",                         TYPE_FLOAT  },
-    [ ANDROID_TONEMAP_PRESET_CURVE - ANDROID_TONEMAP_START ] =
-    { "presetCurve",                   TYPE_BYTE   },
     [ ANDROID_TONEMAP_MAX_CURVE_POINTS - ANDROID_TONEMAP_START ] =
     { "maxCurvePoints",                TYPE_INT32  },
     [ ANDROID_TONEMAP_AVAILABLE_TONE_MAP_MODES - ANDROID_TONEMAP_START ] =
     { "availableToneMapModes",         TYPE_BYTE   },
+    [ ANDROID_TONEMAP_GAMMA - ANDROID_TONEMAP_START ] =
+    { "gamma",                         TYPE_FLOAT  },
+    [ ANDROID_TONEMAP_PRESET_CURVE - ANDROID_TONEMAP_START ] =
+    { "presetCurve",                   TYPE_BYTE   },
 };
 
 static tag_info_t android_led[ANDROID_LED_END -
@@ -1140,28 +1140,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
         case ANDROID_CONTROL_AE_COMPENSATION_STEP: {
             break;
         }
-        case ANDROID_CONTROL_AE_LOCK_AVAILABLE: {
-            switch (value) {
-                case ANDROID_CONTROL_AE_LOCK_AVAILABLE_FALSE:
-                    msg = "FALSE";
-                    ret = 0;
-                    break;
-                case ANDROID_CONTROL_AE_LOCK_AVAILABLE_TRUE:
-                    msg = "TRUE";
-                    ret = 0;
-                    break;
-                default:
-                    msg = "error: enum value out of range";
-            }
-            break;
-        }
         case ANDROID_CONTROL_AF_AVAILABLE_MODES: {
             break;
         }
         case ANDROID_CONTROL_AVAILABLE_EFFECTS: {
-            break;
-        }
-        case ANDROID_CONTROL_AVAILABLE_MODES: {
             break;
         }
         case ANDROID_CONTROL_AVAILABLE_SCENE_MODES: {
@@ -1171,21 +1153,6 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_CONTROL_AWB_AVAILABLE_MODES: {
-            break;
-        }
-        case ANDROID_CONTROL_AWB_LOCK_AVAILABLE: {
-            switch (value) {
-                case ANDROID_CONTROL_AWB_LOCK_AVAILABLE_FALSE:
-                    msg = "FALSE";
-                    ret = 0;
-                    break;
-                case ANDROID_CONTROL_AWB_LOCK_AVAILABLE_TRUE:
-                    msg = "TRUE";
-                    ret = 0;
-                    break;
-                default:
-                    msg = "error: enum value out of range";
-            }
             break;
         }
         case ANDROID_CONTROL_MAX_REGIONS: {
@@ -1290,6 +1257,39 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS: {
+            break;
+        }
+        case ANDROID_CONTROL_AE_LOCK_AVAILABLE: {
+            switch (value) {
+                case ANDROID_CONTROL_AE_LOCK_AVAILABLE_FALSE:
+                    msg = "FALSE";
+                    ret = 0;
+                    break;
+                case ANDROID_CONTROL_AE_LOCK_AVAILABLE_TRUE:
+                    msg = "TRUE";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
+        case ANDROID_CONTROL_AWB_LOCK_AVAILABLE: {
+            switch (value) {
+                case ANDROID_CONTROL_AWB_LOCK_AVAILABLE_FALSE:
+                    msg = "FALSE";
+                    ret = 0;
+                    break;
+                case ANDROID_CONTROL_AWB_LOCK_AVAILABLE_TRUE:
+                    msg = "TRUE";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
+        case ANDROID_CONTROL_AVAILABLE_MODES: {
             break;
         }
 
@@ -2333,6 +2333,12 @@ int camera_metadata_enum_snprint(uint32_t tag,
             }
             break;
         }
+        case ANDROID_TONEMAP_MAX_CURVE_POINTS: {
+            break;
+        }
+        case ANDROID_TONEMAP_AVAILABLE_TONE_MAP_MODES: {
+            break;
+        }
         case ANDROID_TONEMAP_GAMMA: {
             break;
         }
@@ -2349,12 +2355,6 @@ int camera_metadata_enum_snprint(uint32_t tag,
                 default:
                     msg = "error: enum value out of range";
             }
-            break;
-        }
-        case ANDROID_TONEMAP_MAX_CURVE_POINTS: {
-            break;
-        }
-        case ANDROID_TONEMAP_AVAILABLE_TONE_MAP_MODES: {
             break;
         }
 
