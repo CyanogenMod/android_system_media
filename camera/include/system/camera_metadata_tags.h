@@ -138,15 +138,12 @@ typedef enum camera_metadata_tag {
     ANDROID_CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES,   // int32[]      | public
     ANDROID_CONTROL_AE_COMPENSATION_RANGE,            // int32[]      | public
     ANDROID_CONTROL_AE_COMPENSATION_STEP,             // rational     | public
-    ANDROID_CONTROL_AE_LOCK_AVAILABLE,                // enum         | public
     ANDROID_CONTROL_AF_AVAILABLE_MODES,               // byte[]       | public
     ANDROID_CONTROL_AVAILABLE_EFFECTS,                // byte[]       | public
-    ANDROID_CONTROL_AVAILABLE_MODES,                  // byte[]       | public
     ANDROID_CONTROL_AVAILABLE_SCENE_MODES,            // byte[]       | public
     ANDROID_CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES,
                                                       // byte[]       | public
     ANDROID_CONTROL_AWB_AVAILABLE_MODES,              // byte[]       | public
-    ANDROID_CONTROL_AWB_LOCK_AVAILABLE,               // enum         | public
     ANDROID_CONTROL_MAX_REGIONS,                      // int32[]      | hidden
     ANDROID_CONTROL_SCENE_MODE_OVERRIDES,             // byte[]       | system
     ANDROID_CONTROL_AE_PRECAPTURE_ID,                 // int32        | system
@@ -156,6 +153,9 @@ typedef enum camera_metadata_tag {
     ANDROID_CONTROL_AWB_STATE,                        // enum         | public
     ANDROID_CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS,
                                                       // int32[]      | hidden
+    ANDROID_CONTROL_AE_LOCK_AVAILABLE,                // enum         | public
+    ANDROID_CONTROL_AWB_LOCK_AVAILABLE,               // enum         | public
+    ANDROID_CONTROL_AVAILABLE_MODES,                  // byte[]       | public
     ANDROID_CONTROL_END,
 
     ANDROID_DEMOSAIC_MODE =                           // enum         | system
@@ -363,10 +363,10 @@ typedef enum camera_metadata_tag {
     ANDROID_TONEMAP_CURVE_GREEN,                      // float[]      | hidden
     ANDROID_TONEMAP_CURVE_RED,                        // float[]      | hidden
     ANDROID_TONEMAP_MODE,                             // enum         | public
-    ANDROID_TONEMAP_GAMMA,                            // float        | public
-    ANDROID_TONEMAP_PRESET_CURVE,                     // enum         | public
     ANDROID_TONEMAP_MAX_CURVE_POINTS,                 // int32        | public
     ANDROID_TONEMAP_AVAILABLE_TONE_MAP_MODES,         // byte[]       | public
+    ANDROID_TONEMAP_GAMMA,                            // float        | public
+    ANDROID_TONEMAP_PRESET_CURVE,                     // enum         | public
     ANDROID_TONEMAP_END,
 
     ANDROID_LED_TRANSMIT =                            // enum         | hidden
@@ -539,18 +539,6 @@ typedef enum camera_metadata_enum_android_control_video_stabilization_mode {
     ANDROID_CONTROL_VIDEO_STABILIZATION_MODE_ON,
 } camera_metadata_enum_android_control_video_stabilization_mode_t;
 
-// ANDROID_CONTROL_AE_LOCK_AVAILABLE
-typedef enum camera_metadata_enum_android_control_ae_lock_available {
-    ANDROID_CONTROL_AE_LOCK_AVAILABLE_FALSE,
-    ANDROID_CONTROL_AE_LOCK_AVAILABLE_TRUE,
-} camera_metadata_enum_android_control_ae_lock_available_t;
-
-// ANDROID_CONTROL_AWB_LOCK_AVAILABLE
-typedef enum camera_metadata_enum_android_control_awb_lock_available {
-    ANDROID_CONTROL_AWB_LOCK_AVAILABLE_FALSE,
-    ANDROID_CONTROL_AWB_LOCK_AVAILABLE_TRUE,
-} camera_metadata_enum_android_control_awb_lock_available_t;
-
 // ANDROID_CONTROL_AE_STATE
 typedef enum camera_metadata_enum_android_control_ae_state {
     ANDROID_CONTROL_AE_STATE_INACTIVE,
@@ -579,6 +567,18 @@ typedef enum camera_metadata_enum_android_control_awb_state {
     ANDROID_CONTROL_AWB_STATE_CONVERGED,
     ANDROID_CONTROL_AWB_STATE_LOCKED,
 } camera_metadata_enum_android_control_awb_state_t;
+
+// ANDROID_CONTROL_AE_LOCK_AVAILABLE
+typedef enum camera_metadata_enum_android_control_ae_lock_available {
+    ANDROID_CONTROL_AE_LOCK_AVAILABLE_FALSE,
+    ANDROID_CONTROL_AE_LOCK_AVAILABLE_TRUE,
+} camera_metadata_enum_android_control_ae_lock_available_t;
+
+// ANDROID_CONTROL_AWB_LOCK_AVAILABLE
+typedef enum camera_metadata_enum_android_control_awb_lock_available {
+    ANDROID_CONTROL_AWB_LOCK_AVAILABLE_FALSE,
+    ANDROID_CONTROL_AWB_LOCK_AVAILABLE_TRUE,
+} camera_metadata_enum_android_control_awb_lock_available_t;
 
 
 // ANDROID_DEMOSAIC_MODE
