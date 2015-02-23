@@ -60,6 +60,7 @@ typedef enum camera_metadata_section {
     ANDROID_BLACK_LEVEL,
     ANDROID_SYNC,
     ANDROID_REPROCESS,
+    ANDROID_DEPTH,
     ANDROID_SECTION_COUNT,
 
     VENDOR_SECTION = 0x8000
@@ -95,6 +96,7 @@ typedef enum camera_metadata_section_start {
     ANDROID_BLACK_LEVEL_START      = ANDROID_BLACK_LEVEL       << 16,
     ANDROID_SYNC_START             = ANDROID_SYNC              << 16,
     ANDROID_REPROCESS_START        = ANDROID_REPROCESS         << 16,
+    ANDROID_DEPTH_START            = ANDROID_DEPTH             << 16,
     VENDOR_SECTION_START           = VENDOR_SECTION            << 16
 } camera_metadata_section_start_t;
 
@@ -390,6 +392,14 @@ typedef enum camera_metadata_tag {
     ANDROID_REPROCESS_EFFECTIVE_EXPOSURE_FACTOR =     // float        | public
             ANDROID_REPROCESS_START,
     ANDROID_REPROCESS_END,
+
+    ANDROID_DEPTH_MAX_DEPTH_SAMPLES =                 // int32        | system
+            ANDROID_DEPTH_START,
+    ANDROID_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS,
+                                                      // enum[]       | hidden
+    ANDROID_DEPTH_AVAILABLE_DEPTH_MIN_FRAME_DURATIONS,// int64[]      | hidden
+    ANDROID_DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS,    // int64[]      | hidden
+    ANDROID_DEPTH_END,
 
 } camera_metadata_tag_t;
 
@@ -881,5 +891,12 @@ typedef enum camera_metadata_enum_android_sync_max_latency {
     ANDROID_SYNC_MAX_LATENCY_UNKNOWN                            = -1,
 } camera_metadata_enum_android_sync_max_latency_t;
 
+
+
+// ANDROID_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS
+typedef enum camera_metadata_enum_android_depth_available_depth_stream_configurations {
+    ANDROID_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS_OUTPUT,
+    ANDROID_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS_INPUT,
+} camera_metadata_enum_android_depth_available_depth_stream_configurations_t;
 
 

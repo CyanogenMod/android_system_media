@@ -1081,6 +1081,24 @@
         </li>
       </ul> <!-- toc_section -->
     </li>
+    <li>
+      <span class="toc_section_header"><a href="#section_depth">depth</a></span>
+      <ul class="toc_section">
+        <li>
+          <span class="toc_kind_header">static</span>
+          <ul class="toc_section">
+            <li
+            ><a href="#static_android.depth.maxDepthSamples">android.depth.maxDepthSamples</a></li>
+            <li
+            ><a href="#static_android.depth.availableDepthStreamConfigurations">android.depth.availableDepthStreamConfigurations</a></li>
+            <li
+            ><a href="#static_android.depth.availableDepthMinFrameDurations">android.depth.availableDepthMinFrameDurations</a></li>
+            <li
+            ><a href="#static_android.depth.availableDepthStallDurations">android.depth.availableDepthStallDurations</a></li>
+          </ul>
+        </li>
+      </ul> <!-- toc_section -->
+    </li>
   </ul>
 
 
@@ -24517,6 +24535,293 @@ Similarly,<wbr/> for edge enhancement reprocessing,<wbr/> it is only effective w
       </tbody>
 
   <!-- end of section -->
+  <tr><td colspan="6" id="section_depth" class="section">depth</td></tr>
+
+
+      <tr><td colspan="6" class="kind">static</td></tr>
+
+      <thead class="entries_header">
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="static_android.depth.maxDepthSamples">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>depth.<wbr/>max<wbr/>Depth<wbr/>Samples
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+
+              <span class="entry_type_visibility"> [system]</span>
+
+
+              <span class="entry_type_hwlevel">[limited] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Maximum number of points that a depth point cloud may contain.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DEPTH">DEPTH</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>If a camera device supports outputting depth range data in the form of a depth
+point cloud (Image<wbr/>Format#DEPTH_<wbr/>POINT_<wbr/>CLOUD),<wbr/> this is the maximum number of points
+an output buffer may contain.<wbr/></p>
+<p>Any given buffer may contain between 0 and maxDepthSamples points,<wbr/> inclusive.<wbr/>
+If output in the depth point cloud format is not supported,<wbr/> this entry will
+not be defined.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.depth.availableDepthStreamConfigurations">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>depth.<wbr/>available<wbr/>Depth<wbr/>Stream<wbr/>Configurations
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  n x 4
+                </span>
+              <span class="entry_type_visibility"> [hidden as streamConfiguration]</span>
+
+
+              <span class="entry_type_hwlevel">[limited] </span>
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">OUTPUT</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">INPUT</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The available depth dataspace stream
+configurations that this camera device supports
+(i.<wbr/>e.<wbr/> format,<wbr/> width,<wbr/> height,<wbr/> output/<wbr/>input stream).<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DEPTH">DEPTH</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>These are output stream configurations for use with
+dataSpace HAL_<wbr/>DATASPACE_<wbr/>DEPTH.<wbr/> The configurations are
+listed as <code>(format,<wbr/> width,<wbr/> height,<wbr/> input?)</code> tuples.<wbr/></p>
+<p>Only devices that support depth output for at least
+the HAL_<wbr/>PIXEL_<wbr/>FORMAT_<wbr/>Y16 dense depth map may include
+this entry.<wbr/></p>
+<p>A device that also supports the HAL_<wbr/>PIXEL_<wbr/>FORMAT_<wbr/>BLOB
+sparse depth point cloud must report a single entry for
+the format in this list as <code>(HAL_<wbr/>PIXEL_<wbr/>FORMAT_<wbr/>BLOB,<wbr/>
+<a href="#static_android.depth.maxDepthSamples">android.<wbr/>depth.<wbr/>max<wbr/>Depth<wbr/>Samples</a>,<wbr/> 1,<wbr/> OUTPUT)</code> in addition to
+the entries for HAL_<wbr/>PIXEL_<wbr/>FORMAT_<wbr/>Y16.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.depth.availableDepthMinFrameDurations">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>depth.<wbr/>available<wbr/>Depth<wbr/>Min<wbr/>Frame<wbr/>Durations
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int64</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4 x n
+                </span>
+              <span class="entry_type_visibility"> [hidden as streamConfigurationDuration]</span>
+
+
+              <span class="entry_type_hwlevel">[limited] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>This lists the minimum frame duration for each
+format/<wbr/>size combination for depth output formats.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              (format,<wbr/> width,<wbr/> height,<wbr/> ns) x n
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DEPTH">DEPTH</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This should correspond to the frame duration when only that
+stream is active,<wbr/> with all processing (typically in android.<wbr/>*.<wbr/>mode)
+set to either OFF or FAST.<wbr/></p>
+<p>When multiple streams are used in a request,<wbr/> the minimum frame
+duration will be max(individual stream min durations).<wbr/></p>
+<p>The minimum frame duration of a stream (of a particular format,<wbr/> size)
+is the same regardless of whether the stream is input or output.<wbr/></p>
+<p>See <a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a> and
+<a href="#static_android.scaler.availableStallDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stall<wbr/>Durations</a> for more details about
+calculating the max frame rate.<wbr/></p>
+<p>(Keep in sync with
+StreamConfigurationMap#getOutputMinFrameDuration)</p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.depth.availableDepthStallDurations">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>depth.<wbr/>available<wbr/>Depth<wbr/>Stall<wbr/>Durations
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int64</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4 x n
+                </span>
+              <span class="entry_type_visibility"> [hidden as streamConfigurationDuration]</span>
+
+
+              <span class="entry_type_hwlevel">[limited] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>This lists the maximum stall duration for each
+format/<wbr/>size combination for depth streams.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              (format,<wbr/> width,<wbr/> height,<wbr/> ns) x n
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_DEPTH">DEPTH</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>A stall duration is how much extra time would get added
+to the normal minimum frame duration for a repeating request
+that has streams with non-zero stall.<wbr/></p>
+<p>This functions similarly to
+<a href="#static_android.scaler.availableStallDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stall<wbr/>Durations</a> for depth
+streams.<wbr/></p>
+<p>All depth output stream formats may have a nonzero stall
+duration.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+
+  <!-- end of section -->
 <!-- </namespace> -->
   </table>
 
@@ -24698,6 +25003,16 @@ Similarly,<wbr/> for edge enhancement reprocessing,<wbr/> it is only effective w
           <li><a href="#static_android.sensor.maxAnalogSensitivity">android.sensor.maxAnalogSensitivity</a> (static)</li>
         </ul>
       </li> <!-- tag_FULL -->
+      <li id="tag_DEPTH">DEPTH - 
+        Entry is required for the depth capability.
+    
+        <ul class="tags_entries">
+          <li><a href="#static_android.depth.maxDepthSamples">android.depth.maxDepthSamples</a> (static)</li>
+          <li><a href="#static_android.depth.availableDepthStreamConfigurations">android.depth.availableDepthStreamConfigurations</a> (static)</li>
+          <li><a href="#static_android.depth.availableDepthMinFrameDurations">android.depth.availableDepthMinFrameDurations</a> (static)</li>
+          <li><a href="#static_android.depth.availableDepthStallDurations">android.depth.availableDepthStallDurations</a> (static)</li>
+        </ul>
+      </li> <!-- tag_DEPTH -->
       <li id="tag_FUTURE">FUTURE - 
         Entry is  under-specified and is not required for now. This is for book-keeping purpose,
         do not implement or use it, it may be revised for future.
