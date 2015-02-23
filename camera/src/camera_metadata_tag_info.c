@@ -56,6 +56,7 @@ const char *camera_metadata_section_names[ANDROID_SECTION_COUNT] = {
     [ANDROID_BLACK_LEVEL]          = "android.blackLevel",
     [ANDROID_SYNC]                 = "android.sync",
     [ANDROID_REPROCESS]            = "android.reprocess",
+    [ANDROID_DEPTH]                = "android.depth",
 };
 
 unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
@@ -109,6 +110,8 @@ unsigned int camera_metadata_section_bounds[ANDROID_SECTION_COUNT][2] = {
                                        ANDROID_SYNC_END },
     [ANDROID_REPROCESS]            = { ANDROID_REPROCESS_START,
                                        ANDROID_REPROCESS_END },
+    [ANDROID_DEPTH]                = { ANDROID_DEPTH_START,
+                                       ANDROID_DEPTH_END },
 };
 
 static tag_info_t android_color_correction[ANDROID_COLOR_CORRECTION_END -
@@ -634,6 +637,20 @@ static tag_info_t android_reprocess[ANDROID_REPROCESS_END -
     { "effectiveExposureFactor",       TYPE_FLOAT  },
 };
 
+static tag_info_t android_depth[ANDROID_DEPTH_END -
+        ANDROID_DEPTH_START] = {
+    [ ANDROID_DEPTH_MAX_DEPTH_SAMPLES - ANDROID_DEPTH_START ] =
+    { "maxDepthSamples",               TYPE_INT32  },
+    [ ANDROID_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS - ANDROID_DEPTH_START ] =
+    { "availableDepthStreamConfigurations",
+                                        TYPE_INT32  },
+    [ ANDROID_DEPTH_AVAILABLE_DEPTH_MIN_FRAME_DURATIONS - ANDROID_DEPTH_START ] =
+    { "availableDepthMinFrameDurations",
+                                        TYPE_INT64  },
+    [ ANDROID_DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS - ANDROID_DEPTH_START ] =
+    { "availableDepthStallDurations",  TYPE_INT64  },
+};
+
 
 tag_info_t *tag_info[ANDROID_SECTION_COUNT] = {
     android_color_correction,
@@ -661,6 +678,7 @@ tag_info_t *tag_info[ANDROID_SECTION_COUNT] = {
     android_black_level,
     android_sync,
     android_reprocess,
+    android_depth,
 };
 
 int camera_metadata_enum_snprint(uint32_t tag,
@@ -2453,6 +2471,31 @@ int camera_metadata_enum_snprint(uint32_t tag,
         }
 
         case ANDROID_REPROCESS_EFFECTIVE_EXPOSURE_FACTOR: {
+            break;
+        }
+
+        case ANDROID_DEPTH_MAX_DEPTH_SAMPLES: {
+            break;
+        }
+        case ANDROID_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS: {
+            switch (value) {
+                case ANDROID_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS_OUTPUT:
+                    msg = "OUTPUT";
+                    ret = 0;
+                    break;
+                case ANDROID_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS_INPUT:
+                    msg = "INPUT";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
+            break;
+        }
+        case ANDROID_DEPTH_AVAILABLE_DEPTH_MIN_FRAME_DURATIONS: {
+            break;
+        }
+        case ANDROID_DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS: {
             break;
         }
 

@@ -33,6 +33,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <tag id="FULL">
         Entry is required for full hardware level devices, and optional for other hardware levels
     </tag>
+    <tag id="DEPTH">
+        Entry is required for the depth capability.
+    </tag>
     <tag id="FUTURE">
         Entry is  under-specified and is not required for now. This is for book-keeping purpose,
         do not implement or use it, it may be revised for future.
@@ -7675,6 +7678,111 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
       <clone entry="android.reprocess.effectiveExposureFactor" kind="controls">
       </clone>
       </dynamic>
+    </section>
+    <section name="depth">
+      <static>
+        <entry name="maxDepthSamples" type="int32" visibility="system" hwlevel="limited">
+          <description>Maximum number of points that a depth point cloud may contain.
+          </description>
+          <details>
+            If a camera device supports outputting depth range data in the form of a depth
+            point cloud (ImageFormat#DEPTH_POINT_CLOUD), this is the maximum number of points
+            an output buffer may contain.
+
+            Any given buffer may contain between 0 and maxDepthSamples points, inclusive.
+            If output in the depth point cloud format is not supported, this entry will
+            not be defined.
+          </details>
+          <tag id="DEPTH" />
+        </entry>
+        <entry name="availableDepthStreamConfigurations" type="int32" visibility="hidden"
+          enum="true" container="array"
+          typedef="streamConfiguration" hwlevel="limited">
+          <array>
+            <size>n</size>
+            <size>4</size>
+          </array>
+          <enum>
+            <value>OUTPUT</value>
+            <value>INPUT</value>
+          </enum>
+          <description>The available depth dataspace stream
+          configurations that this camera device supports
+          (i.e. format, width, height, output/input stream).
+          </description>
+          <details>
+            These are output stream configurations for use with
+            dataSpace HAL_DATASPACE_DEPTH. The configurations are
+            listed as `(format, width, height, input?)` tuples.
+
+            Only devices that support depth output for at least
+            the HAL_PIXEL_FORMAT_Y16 dense depth map may include
+            this entry.
+
+            A device that also supports the HAL_PIXEL_FORMAT_BLOB
+            sparse depth point cloud must report a single entry for
+            the format in this list as `(HAL_PIXEL_FORMAT_BLOB,
+            android.depth.maxDepthSamples, 1, OUTPUT)` in addition to
+            the entries for HAL_PIXEL_FORMAT_Y16.
+          </details>
+          <tag id="DEPTH" />
+        </entry>
+        <entry name="availableDepthMinFrameDurations" type="int64" visibility="hidden"
+               container="array"
+               typedef="streamConfigurationDuration" hwlevel="limited">
+          <array>
+            <size>4</size>
+            <size>n</size>
+          </array>
+          <description>This lists the minimum frame duration for each
+          format/size combination for depth output formats.
+          </description>
+          <units>(format, width, height, ns) x n</units>
+          <details>
+          This should correspond to the frame duration when only that
+          stream is active, with all processing (typically in android.*.mode)
+          set to either OFF or FAST.
+
+          When multiple streams are used in a request, the minimum frame
+          duration will be max(individual stream min durations).
+
+          The minimum frame duration of a stream (of a particular format, size)
+          is the same regardless of whether the stream is input or output.
+
+          See android.sensor.frameDuration and
+          android.scaler.availableStallDurations for more details about
+          calculating the max frame rate.
+
+          (Keep in sync with
+          StreamConfigurationMap#getOutputMinFrameDuration)
+          </details>
+          <tag id="DEPTH" />
+        </entry>
+        <entry name="availableDepthStallDurations" type="int64" visibility="hidden"
+               container="array" typedef="streamConfigurationDuration" hwlevel="limited">
+          <array>
+            <size>4</size>
+            <size>n</size>
+          </array>
+          <description>This lists the maximum stall duration for each
+          format/size combination for depth streams.
+          </description>
+          <units>(format, width, height, ns) x n</units>
+          <details>
+          A stall duration is how much extra time would get added
+          to the normal minimum frame duration for a repeating request
+          that has streams with non-zero stall.
+
+          This functions similarly to
+          android.scaler.availableStallDurations for depth
+          streams.
+
+          All depth output stream formats may have a nonzero stall
+          duration.
+          </details>
+          <tag id="DEPTH" />
+        </entry>
+      </static>
     </section>
   </namespace>
 </metadata>
