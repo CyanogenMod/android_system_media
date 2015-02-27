@@ -430,6 +430,27 @@ size_t memcpy_by_index_array_initialization(int8_t *idxary, size_t idxcount,
 size_t memcpy_by_index_array_initialization_src_index(int8_t *idxary, size_t idxcount,
         uint32_t dst_mask, uint32_t src_mask);
 
+/* Prepares an index array (idxary) from channel mask bits, which can be later
+ * used by memcpy_by_index_array(). Returns the number of array elements required.
+ *
+ * This initialization is for a destination channel index mask from a positional
+ * source mask.
+ *
+ * For an destination channel index mask, the input channels will map
+ * to the destination channels, with the ith SET bit in the source bits corresponding
+ * to the ith bit in the destination bits. If there is a zero bit in the middle
+ * of set destination bits (unlikely), the corresponding source channel will
+ * be dropped.
+ *
+ * Parameters:
+ *  idxary      Updated array of indices of channels in the src frame for the dst frame
+ *  idxcount    Number of caller allocated elements in idxary
+ *  dst_mask    Bit mask corresponding to destination channels present
+ *  src_mask    Bit mask corresponding to source channels present
+ */
+size_t memcpy_by_index_array_initialization_dst_index(int8_t *idxary, size_t idxcount,
+        uint32_t dst_mask, uint32_t src_mask);
+
 /**
  * Clamp (aka hard limit or clip) a signed 32-bit sample to 16-bit range.
  */
