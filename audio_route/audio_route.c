@@ -429,6 +429,11 @@ static void start_tag(void *data, const XML_Char *tag_name,
             } else {
                 /* nested path */
                 struct mixer_path *sub_path = path_get_by_name(ar, attr_name);
+                if (sub_path == NULL) {
+                    ALOGE("Path '%s' doesn't exist - skipping", attr_name);
+                    goto done;
+                }
+
                 path_add_path(ar, state->path, sub_path);
             }
         }
