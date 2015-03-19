@@ -14039,8 +14039,7 @@ that can be configured and used simultaneously by a camera device.<wbr/></p>
             <td class="entry_details" colspan="5">
               <p>When set to 0,<wbr/> it means no input stream is supported.<wbr/></p>
 <p>The image format for a input stream can be any supported
-format provided by
-<a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a>.<wbr/> When using an
+format returned by StreamConfigurationMap#getInputFormats.<wbr/> When using an
 input stream,<wbr/> there must be at least one output stream
 configured to to receive the reprocessed images.<wbr/></p>
 <p>When an input stream and some output streams are used in a reprocessing request,<wbr/>
@@ -14332,17 +14331,18 @@ raw sensor images.<wbr/></p>
                     <span class="entry_type_enum_notes"><p>The camera device supports the Zero Shutter Lag reprocessing use case.<wbr/></p>
 <ul>
 <li>One input stream is supported,<wbr/> that is,<wbr/> <code><a href="#static_android.request.maxNumInputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams</a> == 1</code>.<wbr/></li>
-<li>OPAQUE is supported as an output/<wbr/>input format,<wbr/> that is,<wbr/>
-  StreamConfigurationMap#getOutputSizes(klass) and
-  StreamConfigurationMap#getInputSizes(klass) return non empty Size[] and have common
-  sizes,<wbr/> where klass is android.<wbr/>media.<wbr/>Opaque<wbr/>Image<wbr/>Ring<wbr/>Buffer<wbr/>Queue.<wbr/>class.<wbr/> See
-  <a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> for detailed information about
-  OPAQUE format.<wbr/></li>
-<li><a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> has the required map entries.<wbr/></li>
-<li>Using OPAQUE does not cause a frame rate drop
+<li>ImageFormat#PRIVATE is supported as an output/<wbr/>input format,<wbr/> that is,<wbr/>
+  ImageFormat#PRIVATE is included in the lists of formats returned by
+  StreamConfigurationMap#getInputFormats and
+  StreamConfigurationMap#getOutputFormats.<wbr/></li>
+<li>StreamConfigurationMap#getValidOutputFormatsForInput returns non empty int[] for
+  each supported input format returned by StreamConfigurationMap#getInputFormats.<wbr/></li>
+<li>Each size returned by StreamConfigurationMap#getInputSizes(ImageFormat#PRIVATE)
+  is also included in StreamConfigurationMap#getOutputSizes(ImageFormat#PRIVATE)</li>
+<li>Using ImageFormat#PRIVATE does not cause a frame rate drop
   relative to the sensor's maximum capture rate (at that
-  resolution),<wbr/> see <a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> for more details.<wbr/></li>
-<li>OPAQUE will be reprocessable into both YUV_<wbr/>420_<wbr/>888
+  resolution).<wbr/></li>
+<li>ImageFormat#PRIVATE will be reprocessable into both YUV_<wbr/>420_<wbr/>888
   and JPEG formats.<wbr/></li>
 <li>The maximum available resolution for OPAQUE streams
   (both input/<wbr/>output) will match the maximum available
@@ -14407,27 +14407,29 @@ guaranted to have a value between 0 and 4,<wbr/> inclusive.<wbr/></p></span>
                   <li>
                     <span class="entry_type_enum_name">YUV_REPROCESSING</span>
                     <span class="entry_type_enum_optional">[optional]</span>
-                    <span class="entry_type_enum_notes"><p>The camera device supports the YUV420_<wbr/>888 reprocessing use case,<wbr/> similar as
+                    <span class="entry_type_enum_notes"><p>The camera device supports the YUV_<wbr/>420_<wbr/>888 reprocessing use case,<wbr/> similar as
 OPAQUE_<wbr/>REPROCESSING,<wbr/> This capability requires the camera device to support the
 following:</p>
 <ul>
 <li>One input stream is supported,<wbr/> that is,<wbr/> <code><a href="#static_android.request.maxNumInputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams</a> == 1</code>.<wbr/></li>
-<li>YUV420_<wbr/>888 is supported as a common format for both input and output,<wbr/> that is,<wbr/>
-  StreamConfigurationMap#getOutputSizes(YUV420_<wbr/>888) and
-  StreamConfigurationMap#getInputSizes(YUV420_<wbr/>888) return non empty Size[] and have
-  common sizes.<wbr/></li>
-<li><a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> has the required map entries.<wbr/></li>
-<li>Using YUV420_<wbr/>888 does not cause a frame rate drop
-  relative to the sensor's maximum capture rate (at that
-  resolution),<wbr/> see <a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> for more details.<wbr/></li>
-<li>YUV420_<wbr/>888 will be reprocessable into both YUV_<wbr/>420_<wbr/>888
+<li>YUV_<wbr/>420_<wbr/>888 is supported as an output/<wbr/>input format,<wbr/> that is,<wbr/>
+  YUV_<wbr/>420_<wbr/>888 is included in the lists of formats returned by
+  StreamConfigurationMap#getInputFormats and
+  StreamConfigurationMap#getOutputFormats.<wbr/></li>
+<li>StreamConfigurationMap#getValidOutputFormatsForInput returns non empty int[] for
+  each supported input format returned by StreamConfigurationMap#getInputFormats.<wbr/></li>
+<li>Each size returned by Stream<wbr/>Configuration<wbr/>Map#get<wbr/>Input<wbr/>Sizes(YUV_<wbr/>420_<wbr/>888)
+  is also included in Stream<wbr/>Configuration<wbr/>Map#get<wbr/>Output<wbr/>Sizes(YUV_<wbr/>420_<wbr/>888)</li>
+<li>Using YUV_<wbr/>420_<wbr/>888 does not cause a frame rate drop
+  relative to the sensor's maximum capture rate (at that resolution).<wbr/></li>
+<li>YUV_<wbr/>420_<wbr/>888 will be reprocessable into both YUV_<wbr/>420_<wbr/>888
   and JPEG formats.<wbr/></li>
-<li>The maximum available resolution for YUV420_<wbr/>888 streams
+<li>The maximum available resolution for YUV_<wbr/>420_<wbr/>888 streams
   (both input/<wbr/>output) will match the maximum available
   resolution of JPEG streams.<wbr/></li>
 <li>Only the below controls are effective for reprocessing requests and will be
   present in capture results.<wbr/> The reprocess requests are from the original capture
-  results that are assocaited with the intermidate YUV420_<wbr/>888 output buffers.<wbr/>
+  results that are assocaited with the intermidate YUV_<wbr/>420_<wbr/>888 output buffers.<wbr/>
   All other controls in the reprocess requests will be ignored by the camera device.<wbr/><ul>
 <li>android.<wbr/>jpeg.<wbr/>*</li>
 <li><a href="#controls_android.noiseReduction.mode">android.<wbr/>noise<wbr/>Reduction.<wbr/>mode</a></li>
@@ -15799,12 +15801,8 @@ height</p>
             </td>
             <td class="entry_type">
                 <span class="entry_type_name">int32</span>
-                <span class="entry_type_container">x</span>
 
-                <span class="entry_type_array">
-                  n
-                </span>
-              <span class="entry_type_visibility"> [hidden as imageFormat]</span>
+              <span class="entry_type_visibility"> [hidden as reprocessFormatsMap]</span>
 
 
 
@@ -15848,12 +15846,12 @@ if its dependent capability (<a href="#static_android.request.availableCapabilit
 </thead>
 <tbody>
 <tr>
-<td align="left">OPAQUE</td>
+<td align="left">PRIVATE (ImageFormat#PRIVATE)</td>
 <td align="left">JPEG</td>
 <td align="left">OPAQUE_<wbr/>REPROCESSING</td>
 </tr>
 <tr>
-<td align="left">OPAQUE</td>
+<td align="left">PRIVATE</td>
 <td align="left">YUV_<wbr/>420_<wbr/>888</td>
 <td align="left">OPAQUE_<wbr/>REPROCESSING</td>
 </tr>
@@ -15869,17 +15867,15 @@ if its dependent capability (<a href="#static_android.request.availableCapabilit
 </tr>
 </tbody>
 </table>
-<p>OPAQUE refers to a device-internal format that is not directly application-visible.<wbr/>
-An OPAQUE input or output surface can be acquired by
-OpaqueImageRingBufferQueue#getInputSurface() or
-OpaqueImageRingBufferQueue#getOutputSurface().<wbr/>
-For a OPAQUE_<wbr/>REPROCESSING-capable camera device,<wbr/> using the OPAQUE format
+<p>PRIVATE refers to a device-internal format that is not directly application-visible.<wbr/>
+A PRIVATE input surface can be acquired by
+ImageReader.<wbr/>newOpaqueInstance(width,<wbr/> height,<wbr/> maxImages).<wbr/>
+For a OPAQUE_<wbr/>REPROCESSING-capable camera device,<wbr/> using the PRIVATE format
 as either input or output will never hurt maximum frame rate (i.<wbr/>e.<wbr/>
-Stream<wbr/>Configuration<wbr/>Map#get<wbr/>Output<wbr/>Stall<wbr/>Duration(klass,<wbr/>Size) is always 0),<wbr/>
-where klass is android.<wbr/>media.<wbr/>Opaque<wbr/>Image<wbr/>Ring<wbr/>Buffer<wbr/>Queue.<wbr/>class.<wbr/></p>
+Stream<wbr/>Configuration<wbr/>Map#get<wbr/>Output<wbr/>Stall<wbr/>Duration(format,<wbr/> size) is always 0),<wbr/>
+where format is ImageFormat#PRIVATE.<wbr/></p>
 <p>Attempting to configure an input stream with output streams not
 listed as available in this map is not valid.<wbr/></p>
-<p>TODO: typedef to ReprocessFormatMap</p>
             </td>
           </tr>
 
@@ -15889,8 +15885,9 @@ listed as available in this map is not valid.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>For the formats,<wbr/> see <code>system/<wbr/>core/<wbr/>include/<wbr/>system/<wbr/>graphics.<wbr/>h</code> for a definition
-of the image format enumerations.<wbr/> The OPAQUE format refers to the IMPLEMENTATION_<wbr/>DEFINED
-format.<wbr/> The HAL could determine the actual format by using the gralloc usage flags.<wbr/>
+of the image format enumerations.<wbr/> The PRIVATE format refers to the
+HAL_<wbr/>PIXEL_<wbr/>FORMAT_<wbr/>IMPLEMENTATION_<wbr/>DEFINED format.<wbr/> The HAL could determine
+the actual format by using the gralloc usage flags.<wbr/>
 For ZSL use case in particular,<wbr/> the HAL could choose appropriate format (partially
 processed YUV or RAW based format) by checking the format and GRALLOC_<wbr/>USAGE_<wbr/>HW_<wbr/>CAMERA_<wbr/>ZSL.<wbr/>
 See camera3.<wbr/>h for more details.<wbr/></p>
