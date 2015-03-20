@@ -13674,7 +13674,8 @@ into the 3 stream types as below:</p>
 <ul>
 <li>Processed (but stalling): any non-RAW format with a stallDurations &gt; 0.<wbr/>
 Typically JPEG format (ImageFormat#JPEG).<wbr/></li>
-<li>Raw formats: ImageFormat#RAW_<wbr/>SENSOR,<wbr/> ImageFormat#RAW10 and ImageFormat#RAW_<wbr/>OPAQUE.<wbr/></li>
+<li>Raw formats: ImageFormat#RAW_<wbr/>SENSOR,<wbr/> ImageFormat#RAW10,<wbr/> ImageFormat#RAW12,<wbr/>
+and ImageFormat#RAW_<wbr/>OPAQUE.<wbr/></li>
 <li>Processed (but not-stalling): any non-RAW format without a stall duration.<wbr/>
 Typically Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888,<wbr/> ImageFormat#NV21,<wbr/> ImageFormat#YV12.<wbr/></li>
 </ul>
@@ -13737,6 +13738,7 @@ be any <code>RAW</code> and supported format provided by <a href="#static_androi
 <ul>
 <li>ImageFormat#RAW_<wbr/>SENSOR</li>
 <li>ImageFormat#RAW10</li>
+<li>ImageFormat#RAW12</li>
 <li>Opaque <code>RAW</code></li>
 </ul>
 <p>LEGACY mode devices (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> <code>==</code> LEGACY)
@@ -16231,8 +16233,8 @@ StreamConfigurationMap#getOutputStallDuration(int,<wbr/> Size) )</p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>If possible,<wbr/> it is recommended that all non-JPEG formats
-(such as RAW16) should not have a stall duration.<wbr/> RAW10,<wbr/> RAW_<wbr/>OPAQUE and
-IMPLEMENTATION_<wbr/>DEFINED must not have stall durations.<wbr/></p>
+(such as RAW16) should not have a stall duration.<wbr/> RAW10,<wbr/> RAW12,<wbr/> RAW_<wbr/>OPAQUE
+and IMPLEMENTATION_<wbr/>DEFINED must not have stall durations.<wbr/></p>
             </td>
           </tr>
 
