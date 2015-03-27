@@ -2910,7 +2910,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           upright.
 
           Camera devices may either encode this value into the JPEG EXIF header, or
-          rotate the image data to match this orientation.
+          rotate the image data to match this orientation. When the image data is rotated,
+          the thumbnail data will also be rotated.
 
           Note that this orientation is relative to the orientation of the camera sensor, given
           by android.sensor.orientation.
