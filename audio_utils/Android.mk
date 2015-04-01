@@ -73,5 +73,20 @@ LOCAL_C_INCLUDES += \
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libfifo
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_SRC_FILES := \
+	fifo.c \
+	primitives.c \
+	roundup.c
+
+LOCAL_C_INCLUDES += \
+	$(call include-path-for, audio-utils)
+
+include $(BUILD_STATIC_LIBRARY)
+
 include $(call all-makefiles-under,$(LOCAL_PATH))
 
