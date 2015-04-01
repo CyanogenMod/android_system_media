@@ -54,7 +54,7 @@ LOCAL_SRC_FILES := \
 LOCAL_C_INCLUDES += \
 	$(call include-path-for, audio-utils)
 
-#LOCAL_SHARED_LIBRARIES := libaudioutils
+LOCAL_CFLAGS := -UHAVE_STDERR
 
 include $(BUILD_STATIC_LIBRARY)
 
