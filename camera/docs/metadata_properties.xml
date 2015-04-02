@@ -151,8 +151,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </value>
             <value>HIGH_QUALITY
               <notes>Color correction processing operates at improved
-              quality but reduced capture rate (relative to sensor raw
-              output).
+              quality but the capture rate might be reduced (relative to sensor
+              raw output rate)
 
               Advanced white balance adjustments above and beyond
               the specified white balance pipeline may be applied.
@@ -220,6 +220,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           Both the input and output value ranges must match. Overflow/underflow
           values are clipped to fit within the range.
           </details>
+          <hal_details>
+          HAL must support both FAST and HIGH_QUALITY if color correction control is available
+          on the camera device, but the underlying implementation can be the same for both modes.
+          That is, if the highest quality implementation on the camera device does not slow down
+          capture rate, then FAST and HIGH_QUALITY should generate the same output.
+          </hal_details>
         </entry>
         <entry name="transform" type="rational" visibility="public"
                type_notes="3x3 rational matrix in row-major order"
@@ -297,8 +303,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </value>
             <value>HIGH_QUALITY
               <notes>
-                Aberration correction operates at improved quality but reduced
-                capture rate (relative to sensor raw output).
+                Aberration correction operates at improved quality but the capture rate might be
+                reduced (relative to sensor raw output rate)
             </notes>
             </value>
           </enum>
@@ -354,6 +360,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
             LEGACY devices will always only support FAST mode.
           </details>
+          <hal_details>
+            HAL must support both FAST and HIGH_QUALITY if chromatic aberration control is available
+            on the camera device, but the underlying implementation can be the same for both modes.
+            That is, if the highest quality implementation on the camera device does not slow down
+            capture rate, then FAST and HIGH_QUALITY will generate the same output.
+          </hal_details>
           <tag id="V1" />
         </entry>
       </static>
@@ -2563,7 +2575,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <notes>Minimal or no slowdown of frame rate compared to
             Bayer RAW output.</notes></value>
             <value>HIGH_QUALITY
-            <notes>Improved processing quality but the frame rate is slowed down
+            <notes>Improved processing quality but the frame rate might be slowed down
             relative to raw output.</notes></value>
           </enum>
           <description>Controls the quality of the demosaicing
@@ -2582,7 +2594,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <notes>Apply edge enhancement at a quality level that does not slow down frame rate relative to sensor
             output</notes></value>
             <value>HIGH_QUALITY
-            <notes>Apply high-quality edge enhancement, at a cost of reducing output frame rate.
+            <notes>Apply high-quality edge enhancement, at a cost of possibly reduced output frame rate.
             </notes></value>
           </enum>
           <description>Operation mode for edge
@@ -2631,6 +2643,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <details>
           Full-capability camera devices must always support OFF; all devices will list FAST.
           </details>
+          <hal_details>
+          HAL must support both FAST and HIGH_QUALITY if edge enhancement control is available
+          on the camera device, but the underlying implementation can be the same for both modes.
+          That is, if the highest quality implementation on the camera device does not slow down
+          capture rate, then FAST and HIGH_QUALITY will generate the same output.
+          </hal_details>
           <tag id="V1" />
         </entry>
       </static>
@@ -2815,7 +2833,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>HIGH_QUALITY
               <notes>
               High-quality hot pixel correction is applied, at a cost
-              of reducing frame rate relative to sensor raw output.
+              of possibly reduced frame rate relative to sensor raw output.
 
               The hotpixel map may be returned in android.statistics.hotPixelMap.
               </notes>
@@ -2851,6 +2869,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <hal_details>
           To avoid performance issues, there will be significantly fewer hot
           pixels than actual pixels on the camera sensor.
+          HAL must support both FAST and HIGH_QUALITY if hot pixel correction control is available
+          on the camera device, but the underlying implementation can be the same for both modes.
+          That is, if the highest quality implementation on the camera device does not slow down
+          capture rate, then FAST and HIGH_QUALITY will generate the same output.
           </hal_details>
           <tag id="V1" />
           <tag id="RAW" />
@@ -3515,8 +3537,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <notes>Noise reduction is applied without reducing frame rate relative to sensor
             output.</notes></value>
             <value>HIGH_QUALITY
-            <notes>High-quality noise reduction is applied, at the cost of reducing frame rate
-            relative to sensor output.</notes></value>
+            <notes>High-quality noise reduction is applied, at the cost of possibly reduced frame
+            rate relative to sensor output.</notes></value>
             <value optional="true">MINIMAL
             <notes>MINIMAL noise reduction is applied without reducing frame rate relative to
             sensor output. </notes></value>
@@ -3576,6 +3598,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           Legacy-capability camera devices will only support FAST mode.
           </details>
+          <hal_details>
+          HAL must support both FAST and HIGH_QUALITY if noise reduction control is available
+          on the camera device, but the underlying implementation can be the same for both modes.
+          That is, if the highest quality implementation on the camera device does not slow down
+          capture rate, then FAST and HIGH_QUALITY will generate the same output.
+          </hal_details>
           <tag id="V1" />
         </entry>
       </static>
@@ -6262,7 +6290,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             frame rate relative to sensor raw output</notes></value>
             <value>HIGH_QUALITY
             <notes>Apply high-quality lens shading correction, at the
-            cost of reduced frame rate.</notes></value>
+            cost of possibly reduced frame rate.</notes></value>
           </enum>
           <description>Quality of lens shading correction applied
           to the image data.</description>
@@ -6324,6 +6352,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               list OFF and FAST mode. This includes all FULL level devices.
               LEGACY devices will always only support FAST mode.
           </details>
+          <hal_details>
+            HAL must support both FAST and HIGH_QUALITY if lens shading correction control is
+            available on the camera device, but the underlying implementation can be the same for
+            both modes. That is, if the highest quality implementation on the camera device does not
+            slow down capture rate, then FAST and HIGH_QUALITY will generate the same output.
+          </hal_details>
         </entry>
       </static>
     </section>
@@ -7078,7 +7112,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value>HIGH_QUALITY
               <notes>
               High-quality gamma mapping and color enhancement will be applied, at
-              the cost of reduced frame rate compared to raw sensor output.
+              the cost of possibly reduced frame rate compared to raw sensor output.
               </notes>
             </value>
             <value>GAMMA_VALUE
@@ -7165,11 +7199,17 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           Camera devices that support the MANUAL_POST_PROCESSING capability will always contain
           at least one of below mode combinations:
 
-          * CONTRAST_CURVE and FAST
-          * GAMMA_VALUE, PRESET_CURVE, and FAST
+          * CONTRAST_CURVE, FAST and HIGH_QUALITY
+          * GAMMA_VALUE, PRESET_CURVE, FAST and HIGH_QUALITY
 
           This includes all FULL level devices.
           </details>
+          <hal_details>
+            HAL must support both FAST and HIGH_QUALITY if automatic tonemap control is available
+            on the camera device, but the underlying implementation can be the same for both modes.
+            That is, if the highest quality implementation on the camera device does not slow down
+            capture rate, then FAST and HIGH_QUALITY will generate the same output.
+          </hal_details>
         </entry>
       </static>
       <dynamic>
