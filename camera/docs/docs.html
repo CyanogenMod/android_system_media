@@ -5108,7 +5108,8 @@ for preview only streaming case.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>LIMITED or FULL devices will always list <code>true</code></p>
+              <p>Devices with MANUAL_<wbr/>SENSOR capability or BURST_<wbr/>CAPTURE capability will always
+list <code>true</code>.<wbr/> This includes FULL devices.<wbr/></p>
             </td>
           </tr>
 
@@ -5165,7 +5166,8 @@ for preview only streaming case.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>LIMITED or FULL devices will always list <code>true</code></p>
+              <p>Devices with MANUAL_<wbr/>POST_<wbr/>PROCESSING capability or BURST_<wbr/>CAPTURE capability will
+always list <code>true</code>.<wbr/> This includes FULL devices.<wbr/></p>
             </td>
           </tr>
 
@@ -14256,6 +14258,10 @@ guaranteed to be supported:</p>
 <li><a href="#controls_android.blackLevel.lock">android.<wbr/>black<wbr/>Level.<wbr/>lock</a></li>
 </ul>
 </li>
+<li>Auto exposure lock<ul>
+<li><a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a></li>
+</ul>
+</li>
 </ul>
 <p>If any of the above 3A algorithms are enabled,<wbr/> then the camera
 device will accurately report the values applied by 3A in the
@@ -14300,6 +14306,10 @@ stages.<wbr/> This means the following controls are guaranteed to be supported:<
 <li>Manual aberration correction control (if aberration correction is supported)<ul>
 <li><a href="#controls_android.colorCorrection.aberrationMode">android.<wbr/>color<wbr/>Correction.<wbr/>aberration<wbr/>Mode</a></li>
 <li><a href="#static_android.colorCorrection.availableAberrationModes">android.<wbr/>color<wbr/>Correction.<wbr/>available<wbr/>Aberration<wbr/>Modes</a></li>
+</ul>
+</li>
+<li>Auto white balance lock<ul>
+<li><a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a></li>
 </ul>
 </li>
 </ul>
@@ -14402,7 +14412,11 @@ lists at least one FPS range where the minimum FPS is</p>
 YUV_<wbr/>420_<wbr/>888 format.<wbr/></p>
 </blockquote>
 <p>In addition,<wbr/> the <a href="#static_android.sync.maxLatency">android.<wbr/>sync.<wbr/>max<wbr/>Latency</a> field is
-guaranted to have a value between 0 and 4,<wbr/> inclusive.<wbr/></p></span>
+guaranted to have a value between 0 and 4,<wbr/> inclusive.<wbr/>
+<a href="#static_android.control.aeLockAvailable">android.<wbr/>control.<wbr/>ae<wbr/>Lock<wbr/>Available</a> and
+<a href="#static_android.control.awbLockAvailable">android.<wbr/>control.<wbr/>awb<wbr/>Lock<wbr/>Available</a> are also guaranteed
+to be <code>true</code> so burst capture with these two locks ON
+yields consistent image output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">YUV_REPROCESSING</span>
