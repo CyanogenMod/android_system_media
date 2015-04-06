@@ -1146,7 +1146,7 @@
                 
           <tr class="entry" id="controls_android.colorCorrection.mode">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>color<wbr/>Correction.<wbr/>mode
             </td>
             <td class="entry_type">
@@ -1183,8 +1183,8 @@ the camera device uses the last frame's AWB values
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
                     <span class="entry_type_enum_notes"><p>Color correction processing operates at improved
-quality but reduced capture rate (relative to sensor raw
-output).<wbr/></p>
+quality but the capture rate might be reduced (relative to sensor
+raw output rate)</p>
 <p>Advanced white balance adjustments above and beyond
 the specified white balance pipeline may be applied.<wbr/></p>
 <p>If AWB is enabled with <code><a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> != OFF</code>,<wbr/> then
@@ -1256,6 +1256,17 @@ values are clipped to fit within the range.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>HAL must support both FAST and HIGH_<wbr/>QUALITY if color correction control is available
+on the camera device,<wbr/> but the underlying implementation can be the same for both modes.<wbr/>
+That is,<wbr/> if the highest quality implementation on the camera device does not slow down
+capture rate,<wbr/> then FAST and HIGH_<wbr/>QUALITY should generate the same output.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -1428,8 +1439,8 @@ relative to sensor raw output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes"><p>Aberration correction operates at improved quality but reduced
-capture rate (relative to sensor raw output).<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>Aberration correction operates at improved quality but the capture rate might be
+reduced (relative to sensor raw output rate)</p></span>
                   </li>
                 </ul>
 
@@ -1503,7 +1514,7 @@ applying aberration correction.<wbr/></p>
                 
           <tr class="entry" id="dynamic_android.colorCorrection.mode">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>color<wbr/>Correction.<wbr/>mode
             </td>
             <td class="entry_type">
@@ -1540,8 +1551,8 @@ the camera device uses the last frame's AWB values
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
                     <span class="entry_type_enum_notes"><p>Color correction processing operates at improved
-quality but reduced capture rate (relative to sensor raw
-output).<wbr/></p>
+quality but the capture rate might be reduced (relative to sensor
+raw output rate)</p>
 <p>Advanced white balance adjustments above and beyond
 the specified white balance pipeline may be applied.<wbr/></p>
 <p>If AWB is enabled with <code><a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a> != OFF</code>,<wbr/> then
@@ -1613,6 +1624,17 @@ values are clipped to fit within the range.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>HAL must support both FAST and HIGH_<wbr/>QUALITY if color correction control is available
+on the camera device,<wbr/> but the underlying implementation can be the same for both modes.<wbr/>
+That is,<wbr/> if the highest quality implementation on the camera device does not slow down
+capture rate,<wbr/> then FAST and HIGH_<wbr/>QUALITY should generate the same output.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -1785,8 +1807,8 @@ relative to sensor raw output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes"><p>Aberration correction operates at improved quality but reduced
-capture rate (relative to sensor raw output).<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>Aberration correction operates at improved quality but the capture rate might be
+reduced (relative to sensor raw output rate)</p></span>
                   </li>
                 </ul>
 
@@ -1860,7 +1882,7 @@ applying aberration correction.<wbr/></p>
                 
           <tr class="entry" id="static_android.colorCorrection.availableAberrationModes">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>color<wbr/>Correction.<wbr/>available<wbr/>Aberration<wbr/>Modes
             </td>
             <td class="entry_type">
@@ -1914,6 +1936,17 @@ OFF mode.<wbr/> This includes all FULL level devices.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>HAL must support both FAST and HIGH_<wbr/>QUALITY if chromatic aberration control is available
+on the camera device,<wbr/> but the underlying implementation can be the same for both modes.<wbr/>
+That is,<wbr/> if the highest quality implementation on the camera device does not slow down
+capture rate,<wbr/> then FAST and HIGH_<wbr/>QUALITY will generate the same output.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -8386,7 +8419,7 @@ Bayer RAW output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes"><p>Improved processing quality but the frame rate is slowed down
+                    <span class="entry_type_enum_notes"><p>Improved processing quality but the frame rate might be slowed down
 relative to raw output.<wbr/></p></span>
                   </li>
                 </ul>
@@ -8476,7 +8509,7 @@ output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes"><p>Apply high-quality edge enhancement,<wbr/> at a cost of reducing output frame rate.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>Apply high-quality edge enhancement,<wbr/> at a cost of possibly reduced output frame rate.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -8606,7 +8639,7 @@ applied to the images</p>
                 
           <tr class="entry" id="static_android.edge.availableEdgeModes">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>edge.<wbr/>available<wbr/>Edge<wbr/>Modes
             </td>
             <td class="entry_type">
@@ -8655,6 +8688,17 @@ device.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>HAL must support both FAST and HIGH_<wbr/>QUALITY if edge enhancement control is available
+on the camera device,<wbr/> but the underlying implementation can be the same for both modes.<wbr/>
+That is,<wbr/> if the highest quality implementation on the camera device does not slow down
+capture rate,<wbr/> then FAST and HIGH_<wbr/>QUALITY will generate the same output.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -8714,7 +8758,7 @@ output</p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes"><p>Apply high-quality edge enhancement,<wbr/> at a cost of reducing output frame rate.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>Apply high-quality edge enhancement,<wbr/> at a cost of possibly reduced output frame rate.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -9569,7 +9613,7 @@ rate relative to sensor raw output.<wbr/></p>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
                     <span class="entry_type_enum_notes"><p>High-quality hot pixel correction is applied,<wbr/> at a cost
-of reducing frame rate relative to sensor raw output.<wbr/></p>
+of possibly reduced frame rate relative to sensor raw output.<wbr/></p>
 <p>The hotpixel map may be returned in <a href="#dynamic_android.statistics.hotPixelMap">android.<wbr/>statistics.<wbr/>hot<wbr/>Pixel<wbr/>Map</a>.<wbr/></p></span>
                   </li>
                 </ul>
@@ -9695,7 +9739,11 @@ camera device.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>To avoid performance issues,<wbr/> there will be significantly fewer hot
-pixels than actual pixels on the camera sensor.<wbr/></p>
+pixels than actual pixels on the camera sensor.<wbr/>
+HAL must support both FAST and HIGH_<wbr/>QUALITY if hot pixel correction control is available
+on the camera device,<wbr/> but the underlying implementation can be the same for both modes.<wbr/>
+That is,<wbr/> if the highest quality implementation on the camera device does not slow down
+capture rate,<wbr/> then FAST and HIGH_<wbr/>QUALITY will generate the same output.<wbr/></p>
             </td>
           </tr>
 
@@ -9761,7 +9809,7 @@ rate relative to sensor raw output.<wbr/></p>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
                     <span class="entry_type_enum_notes"><p>High-quality hot pixel correction is applied,<wbr/> at a cost
-of reducing frame rate relative to sensor raw output.<wbr/></p>
+of possibly reduced frame rate relative to sensor raw output.<wbr/></p>
 <p>The hotpixel map may be returned in <a href="#dynamic_android.statistics.hotPixelMap">android.<wbr/>statistics.<wbr/>hot<wbr/>Pixel<wbr/>Map</a>.<wbr/></p></span>
                   </li>
                 </ul>
@@ -12529,8 +12577,8 @@ output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes"><p>High-quality noise reduction is applied,<wbr/> at the cost of reducing frame rate
-relative to sensor output.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>High-quality noise reduction is applied,<wbr/> at the cost of possibly reduced frame
+rate relative to sensor output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">MINIMAL</span>
@@ -12672,7 +12720,7 @@ applied to the images</p>
                 
           <tr class="entry" id="static_android.noiseReduction.availableNoiseReductionModes">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Noise<wbr/>Reduction<wbr/>Modes
             </td>
             <td class="entry_type">
@@ -12722,6 +12770,17 @@ by this camera device.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>HAL must support both FAST and HIGH_<wbr/>QUALITY if noise reduction control is available
+on the camera device,<wbr/> but the underlying implementation can be the same for both modes.<wbr/>
+That is,<wbr/> if the highest quality implementation on the camera device does not slow down
+capture rate,<wbr/> then FAST and HIGH_<wbr/>QUALITY will generate the same output.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -12781,8 +12840,8 @@ output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
-                    <span class="entry_type_enum_notes"><p>High-quality noise reduction is applied,<wbr/> at the cost of reducing frame rate
-relative to sensor output.<wbr/></p></span>
+                    <span class="entry_type_enum_notes"><p>High-quality noise reduction is applied,<wbr/> at the cost of possibly reduced frame
+rate relative to sensor output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">MINIMAL</span>
@@ -19855,7 +19914,7 @@ frame rate relative to sensor raw output</p></span>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
                     <span class="entry_type_enum_notes"><p>Apply high-quality lens shading correction,<wbr/> at the
-cost of reduced frame rate.<wbr/></p></span>
+cost of possibly reduced frame rate.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -20011,7 +20070,7 @@ frame rate relative to sensor raw output</p></span>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
                     <span class="entry_type_enum_notes"><p>Apply high-quality lens shading correction,<wbr/> at the
-cost of reduced frame rate.<wbr/></p></span>
+cost of possibly reduced frame rate.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -20098,7 +20157,7 @@ to be converged before using the returned shading map data.<wbr/></p>
                 
           <tr class="entry" id="static_android.shading.availableModes">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>shading.<wbr/>available<wbr/>Modes
             </td>
             <td class="entry_type">
@@ -20146,6 +20205,17 @@ LEGACY devices will always only support FAST mode.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>HAL must support both FAST and HIGH_<wbr/>QUALITY if lens shading correction control is
+available on the camera device,<wbr/> but the underlying implementation can be the same for
+both modes.<wbr/> That is,<wbr/> if the highest quality implementation on the camera device does not
+slow down capture rate,<wbr/> then FAST and HIGH_<wbr/>QUALITY will generate the same output.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -22491,7 +22561,7 @@ reducing frame rate compared to raw sensor output.<wbr/></p></span>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
                     <span class="entry_type_enum_notes"><p>High-quality gamma mapping and color enhancement will be applied,<wbr/> at
-the cost of reduced frame rate compared to raw sensor output.<wbr/></p></span>
+the cost of possibly reduced frame rate compared to raw sensor output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">GAMMA_VALUE</span>
@@ -22766,7 +22836,7 @@ hardware curves used as closely as possible when linearly interpolated.<wbr/></p
                 
           <tr class="entry" id="static_android.tonemap.availableToneMapModes">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>tonemap.<wbr/>available<wbr/>Tone<wbr/>Map<wbr/>Modes
             </td>
             <td class="entry_type">
@@ -22811,13 +22881,24 @@ device.<wbr/></p>
               <p>Camera devices that support the MANUAL_<wbr/>POST_<wbr/>PROCESSING capability will always contain
 at least one of below mode combinations:</p>
 <ul>
-<li>CONTRAST_<wbr/>CURVE and FAST</li>
-<li>GAMMA_<wbr/>VALUE,<wbr/> PRESET_<wbr/>CURVE,<wbr/> and FAST</li>
+<li>CONTRAST_<wbr/>CURVE,<wbr/> FAST and HIGH_<wbr/>QUALITY</li>
+<li>GAMMA_<wbr/>VALUE,<wbr/> PRESET_<wbr/>CURVE,<wbr/> FAST and HIGH_<wbr/>QUALITY</li>
 </ul>
 <p>This includes all FULL level devices.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>HAL must support both FAST and HIGH_<wbr/>QUALITY if automatic tonemap control is available
+on the camera device,<wbr/> but the underlying implementation can be the same for both modes.<wbr/>
+That is,<wbr/> if the highest quality implementation on the camera device does not slow down
+capture rate,<wbr/> then FAST and HIGH_<wbr/>QUALITY will generate the same output.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -23194,7 +23275,7 @@ reducing frame rate compared to raw sensor output.<wbr/></p></span>
                   <li>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
                     <span class="entry_type_enum_notes"><p>High-quality gamma mapping and color enhancement will be applied,<wbr/> at
-the cost of reduced frame rate compared to raw sensor output.<wbr/></p></span>
+the cost of possibly reduced frame rate compared to raw sensor output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">GAMMA_VALUE</span>
