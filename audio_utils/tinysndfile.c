@@ -16,7 +16,9 @@
 
 #include <audio_utils/sndfile.h>
 #include <audio_utils/primitives.h>
+#ifdef HAVE_STDERR
 #include <stdio.h>
+#endif
 #include <string.h>
 #include <errno.h>
 
@@ -63,7 +65,9 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
 {
     FILE *stream = fopen(path, "rb");
     if (stream == NULL) {
+#ifdef HAVE_STDERR
         fprintf(stderr, "fopen %s failed errno %d\n", path, errno);
+#endif
         return NULL;
     }
 
@@ -78,20 +82,28 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
     size_t actual;
     actual = fread(wav, sizeof(char), sizeof(wav), stream);
     if (actual < 12) {
+#ifdef HAVE_STDERR
         fprintf(stderr, "actual %zu < 44\n", actual);
+#endif
         goto close;
     }
     if (memcmp(wav, "RIFF", 4)) {
+#ifdef HAVE_STDERR
         fprintf(stderr, "wav != RIFF\n");
+#endif
         goto close;
     }
     unsigned riffSize = little4u(&wav[4]);
     if (riffSize < 4) {
+#ifdef HAVE_STDERR
         fprintf(stderr, "riffSize %u < 4\n", riffSize);
+#endif
         goto close;
     }
     if (memcmp(&wav[8], "WAVE", 4)) {
+#ifdef HAVE_STDERR
         fprintf(stderr, "missing WAVE\n");
+#endif
         goto close;
     }
     size_t remaining = riffSize - 4;
@@ -102,28 +114,38 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
         unsigned char chunk[8];
         actual = fread(chunk, sizeof(char), sizeof(chunk), stream);
         if (actual != sizeof(chunk)) {
+#ifdef HAVE_STDERR
             fprintf(stderr, "actual %zu != %zu\n", actual, sizeof(chunk));
+#endif
             goto close;
         }
         remaining -= 8;
         unsigned chunkSize = little4u(&chunk[4]);
         if (chunkSize > remaining) {
+#ifdef HAVE_STDERR
             fprintf(stderr, "chunkSize %u > remaining %zu\n", chunkSize, remaining);
+#endif
             goto close;
         }
         if (!memcmp(&chunk[0], "fmt ", 4)) {
             if (hadFmt) {
+#ifdef HAVE_STDERR
                 fprintf(stderr, "multiple fmt\n");
+#endif
                 goto close;
             }
             if (chunkSize < 2) {
+#ifdef HAVE_STDERR
                 fprintf(stderr, "chunkSize %u < 2\n", chunkSize);
+#endif
                 goto close;
             }
             unsigned char fmt[40];
             actual = fread(fmt, sizeof(char), 2, stream);
             if (actual != 2) {
+#ifdef HAVE_STDERR
                 fprintf(stderr, "actual %zu != 2\n", actual);
+#endif
                 goto close;
             }
             unsigned format = little2u(&fmt[0]);
@@ -137,16 +159,22 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
                 minSize = 40;
                 break;
             default:
+#ifdef HAVE_STDERR
                 fprintf(stderr, "unsupported format %u\n", format);
+#endif
                 goto close;
             }
             if (chunkSize < minSize) {
+#ifdef HAVE_STDERR
                 fprintf(stderr, "chunkSize %u < minSize %zu\n", chunkSize, minSize);
+#endif
                 goto close;
             }
             actual = fread(&fmt[2], sizeof(char), minSize - 2, stream);
             if (actual != minSize - 2) {
+#ifdef HAVE_STDERR
                 fprintf(stderr, "actual %zu != %zu\n", actual, minSize - 16);
+#endif
                 goto close;
             }
             if (chunkSize > minSize) {
@@ -154,19 +182,25 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
             }
             unsigned channels = little2u(&fmt[2]);
             if (channels != 1 && channels != 2 && channels != 4 && channels != 6 && channels != 8) {
+#ifdef HAVE_STDERR
                 fprintf(stderr, "unsupported channels %u\n", channels);
+#endif
                 goto close;
             }
             unsigned samplerate = little4u(&fmt[4]);
             if (samplerate == 0) {
+#ifdef HAVE_STDERR
                 fprintf(stderr, "samplerate %u == 0\n", samplerate);
+#endif
                 goto close;
             }
             // ignore byte rate
             // ignore block alignment
             unsigned bitsPerSample = little2u(&fmt[14]);
             if (bitsPerSample != 8 && bitsPerSample != 16 && bitsPerSample != 32) {
+#ifdef HAVE_STDERR
                 fprintf(stderr, "bitsPerSample %u != 8 or 16 or 32\n", bitsPerSample);
+#endif
                 goto close;
             }
             unsigned bytesPerFrame = (bitsPerSample >> 3) * channels;
@@ -190,11 +224,15 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
             hadFmt = 1;
         } else if (!memcmp(&chunk[0], "data", 4)) {
             if (!hadFmt) {
+#ifdef HAVE_STDERR
                 fprintf(stderr, "data not preceded by fmt\n");
+#endif
                 goto close;
             }
             if (hadData) {
+#ifdef HAVE_STDERR
                 fprintf(stderr, "multiple data\n");
+#endif
                 goto close;
             }
             handle->remaining = chunkSize / handle->bytesPerFrame;
@@ -211,8 +249,10 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
             }
         } else {
             // ignore unknown chunk
+#ifdef HAVE_STDERR
             fprintf(stderr, "ignoring unknown chunk %c%c%c%c\n",
                     chunk[0], chunk[1], chunk[2], chunk[3]);
+#endif
             if (chunkSize > 0) {
                 fseek(stream, (long) chunkSize, SEEK_CUR);
             }
@@ -220,11 +260,15 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
         remaining -= chunkSize;
     }
     if (remaining > 0) {
+#ifdef HAVE_STDERR
         fprintf(stderr, "partial chunk at end of RIFF, remaining %zu\n", remaining);
+#endif
         goto close;
     }
     if (!hadData) {
+#ifdef HAVE_STDERR
         fprintf(stderr, "missing data\n");
+#endif
         goto close;
     }
     (void) fseek(stream, dataTell, SEEK_SET);
@@ -258,7 +302,9 @@ static SNDFILE *sf_open_write(const char *path, SF_INFO *info)
     }
     FILE *stream = fopen(path, "w+b");
     if (stream == NULL) {
+#ifdef HAVE_STDERR
         fprintf(stderr, "fopen %s failed errno %d\n", path, errno);
+#endif
         return NULL;
     }
     unsigned char wav[58];
@@ -319,7 +365,9 @@ static SNDFILE *sf_open_write(const char *path, SF_INFO *info)
 SNDFILE *sf_open(const char *path, int mode, SF_INFO *info)
 {
     if (path == NULL || info == NULL) {
+#ifdef HAVE_STDERR
         fprintf(stderr, "path=%p info=%p\n", path, info);
+#endif
         return NULL;
     }
     switch (mode) {
@@ -328,7 +376,9 @@ SNDFILE *sf_open(const char *path, int mode, SF_INFO *info)
     case SFM_WRITE:
         return sf_open_write(path, info);
     default:
+#ifdef HAVE_STDERR
         fprintf(stderr, "mode=%d\n", mode);
+#endif
         return NULL;
     }
 }

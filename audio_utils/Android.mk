@@ -54,7 +54,7 @@ LOCAL_SRC_FILES := \
 LOCAL_C_INCLUDES += \
 	$(call include-path-for, audio-utils)
 
-#LOCAL_SHARED_LIBRARIES := libaudioutils
+LOCAL_CFLAGS := -UHAVE_STDERR
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -72,6 +72,21 @@ LOCAL_C_INCLUDES += \
 #LOCAL_SHARED_LIBRARIES := libaudioutils
 
 include $(BUILD_HOST_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libfifo
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_SRC_FILES := \
+	fifo.c \
+	primitives.c \
+	roundup.c
+
+LOCAL_C_INCLUDES += \
+	$(call include-path-for, audio-utils)
+
+include $(BUILD_STATIC_LIBRARY)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
 
