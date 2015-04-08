@@ -110,7 +110,7 @@ void profile_decache(alsa_device_profile* profile) {
  */
 static unsigned int round_to_16_mult(unsigned int size)
 {
-    return (size + 15) & ~15;   // 0xFFFFFFF0;
+    return (size + 15) & ~15;   /* 0xFFFFFFF0; */
 }
 
 /*
@@ -132,7 +132,6 @@ unsigned profile_calc_min_period_size(alsa_device_profile* profile, unsigned sam
 
 unsigned int profile_get_period_size(alsa_device_profile* profile, unsigned sample_rate)
 {
-    // return profile->default_config.period_size;
     unsigned int period_size = profile_calc_min_period_size(profile, sample_rate);
     ALOGV("profile_get_period_size(rate:%d) = %d", sample_rate, period_size);
     return period_size;
@@ -391,20 +390,32 @@ bool profile_read_device_info(alsa_device_profile* profile)
 
 char * profile_get_sample_rate_strs(alsa_device_profile* profile)
 {
+    /* if we assume that rate strings are about 5 characters (48000 is 5), plus ~1 for a
+     * delimiter "|" this buffer has room for about 22 rate strings which seems like
+     * way too much, but it's a stack variable so only temporary.
+     */
     char buffer[128];
     buffer[0] = '\0';
-    int buffSize = ARRAY_SIZE(buffer);
+    size_t buffSize = ARRAY_SIZE(buffer);
+    size_t curStrLen = 0;
 
     char numBuffer[32];
 
-    int numEntries = 0;
-    unsigned index;
+    size_t numEntries = 0;
+    size_t index;
     for (index = 0; profile->sample_rates[index] != 0; index++) {
-        if (numEntries++ != 0) {
-            strncat(buffer, "|", buffSize);
-        }
         snprintf(numBuffer, sizeof(numBuffer), "%u", profile->sample_rates[index]);
-        strncat(buffer, numBuffer, buffSize);
+        // account for both the null, and potentially the bar.
+        if (buffSize - curStrLen < strlen(numBuffer) + (numEntries != 0 ? 2 : 1)) {
+            /* we don't have room for another, so bail at this point rather than
+             * return a malformed rate string
+             */
+            break;
+        }
+        if (numEntries++ != 0) {
+            strlcat(buffer, "|", buffSize);
+        }
+        curStrLen = strlcat(buffer, numBuffer, buffSize);
     }
 
     return strdup(buffer);
@@ -417,17 +428,30 @@ char * profile_get_format_strs(alsa_device_profile* profile)
         return strdup("AUDIO_FORMAT_PCM_16_BIT");
     }
 
-    char buffer[128];
+    /* if we assume that format strings are about 24 characters (AUDIO_FORMAT_PCM_16_BIT is 23),
+     * plus ~1 for a delimiter "|" this buffer has room for about 10 format strings which seems
+     *  like way too much, but it's a stack variable so only temporary.
+     */
+    char buffer[256];
     buffer[0] = '\0';
-    int buffSize = ARRAY_SIZE(buffer);
+    size_t buffSize = ARRAY_SIZE(buffer);
+    size_t curStrLen = 0;
 
-    int numEntries = 0;
-    unsigned index = 0;
+    size_t numEntries = 0;
+    size_t index = 0;
     for (index = 0; profile->formats[index] != PCM_FORMAT_INVALID; index++) {
-        if (numEntries++ != 0) {
-            strncat(buffer, "|", buffSize);
+        // account for both the null, and potentially the bar.
+        if (buffSize - curStrLen < strlen(format_string_map[profile->formats[index]])
+                                   + (numEntries != 0 ? 2 : 1)) {
+            /* we don't have room for another, so bail at this point rather than
+             * return a malformed rate string
+             */
+            break;
         }
-        strncat(buffer, format_string_map[profile->formats[index]], buffSize);
+        if (numEntries++ != 0) {
+            strlcat(buffer, "|", buffSize);
+        }
+        curStrLen = strlcat(buffer, format_string_map[profile->formats[index]], buffSize);
     }
 
     return strdup(buffer);
@@ -444,7 +468,7 @@ char * profile_get_channel_count_strs(alsa_device_profile* profile)
         /* 5 */ /* "AUDIO_CHANNEL_OUT_QUAD|AUDIO_CHANNEL_OUT_FRONT_CENTER" */ NULL,
         /* 6 */"AUDIO_CHANNEL_OUT_5POINT1",
         /* 7 */ /* "AUDIO_CHANNEL_OUT_5POINT1|AUDIO_CHANNEL_OUT_BACK_CENTER" */ NULL,
-        /* 8 */"AUDIO_CHANNEL_OUT_7POINT1",
+        /* 8 */ "AUDIO_CHANNEL_OUT_7POINT1",
         /* channel counts greater than this not considered */
     };
 
@@ -457,41 +481,47 @@ char * profile_get_channel_count_strs(alsa_device_profile* profile)
 
     const bool isOutProfile = profile->direction == PCM_OUT;
 
-    const char * const * const names_array = isOutProfile ? out_chans_strs : in_chans_strs;
-    const size_t names_size = isOutProfile ? ARRAY_SIZE(out_chans_strs)
-            : ARRAY_SIZE(in_chans_strs);
+    const char * const * const chans_strs = isOutProfile ? out_chans_strs : in_chans_strs;
+    const size_t chans_strs_size =
+            isOutProfile ? ARRAY_SIZE(out_chans_strs) : ARRAY_SIZE(in_chans_strs);
 
+    /*
+     * If we assume each channel string is 24 chars ("AUDIO_CHANNEL_OUT_7POINT1" is 25) + 1 for,
+     * the "|" delimiter, then we have room for about 10 strings (which is more than we
+     * currently support).
+     */
     char buffer[256]; /* caution, may need to be expanded */
     buffer[0] = '\0';
-    const int buffer_size = ARRAY_SIZE(buffer);
-    int num_entries = 0;
+    size_t buffSize = ARRAY_SIZE(buffer);
+    size_t curStrLen = 0;
+
     /* We currently support MONO and STEREO, and always report STEREO but some (many)
      * USB Audio Devices may only announce support for MONO (a headset mic for example), or
      * The total number of output channels. SO, if the device itself doesn't explicitly
      * support STEREO, append to the channel config strings we are generating.
      */
-    bool stereo_present = false;
-    unsigned index;
+    // Always support stereo
+    curStrLen = strlcat(buffer, chans_strs[2], buffSize);
+
+    size_t index;
     unsigned channel_count;
-
-    for (index = 0; (channel_count = profile->channel_counts[index]) != 0; index++) {
-        stereo_present = stereo_present || channel_count == 2;
-        if (channel_count < names_size && names_array[channel_count] != NULL) {
-            if (num_entries++ != 0) {
-                strncat(buffer, "|", buffer_size);
+    for (index = 0;
+         (channel_count = profile->channel_counts[index]) != 0
+                 && channel_count < chans_strs_size
+                 && chans_strs[channel_count] != NULL;
+         index++) {
+        if (channel_count != 2) {
+            // account for the '|' and the '\0'
+            if (buffSize - curStrLen < strlen(chans_strs[channel_count]) + 2) {
+                /* we don't have room for another, so bail at this point rather than
+                 * return a malformed rate string
+                 */
+                break;
             }
-            strncat(buffer, names_array[channel_count], buffer_size);
-        }
-    }
 
-    /* emulated modes:
-     * always expose stereo as we can emulate it for PCM_OUT
-     */
-    if (!stereo_present) {
-        if (num_entries++ != 0) {
-            strncat(buffer, "|", buffer_size);
+            strlcat(buffer, "|", buffSize);
+            curStrLen = strlcat(buffer, chans_strs[channel_count], buffSize);
         }
-        strncat(buffer, names_array[2], buffer_size); /* stereo */
     }
 
     return strdup(buffer);
