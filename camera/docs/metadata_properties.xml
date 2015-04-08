@@ -118,6 +118,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <typedef name="highSpeedVideoConfiguration">
       <language name="java">android.hardware.camera2.params.HighSpeedVideoConfiguration</language>
     </typedef>
+    <typedef name="reprocessFormatsMap">
+      <language name="java">android.hardware.camera2.params.ReprocessFormatsMap</language>
+    </typedef>
   </types>
 
   <namespace name="android">
@@ -3951,8 +3954,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <details>When set to 0, it means no input stream is supported.
 
           The image format for a input stream can be any supported
-          format provided by
-          android.scaler.availableInputOutputFormatsMap. When using an
+          format returned by StreamConfigurationMap#getInputFormats. When using an
           input stream, there must be at least one output stream
           configured to to receive the reprocessed images.
 
@@ -4154,17 +4156,18 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               The camera device supports the Zero Shutter Lag reprocessing use case.
 
               * One input stream is supported, that is, `android.request.maxNumInputStreams == 1`.
-              * OPAQUE is supported as an output/input format, that is,
-                StreamConfigurationMap#getOutputSizes(klass) and
-                StreamConfigurationMap#getInputSizes(klass) return non empty Size[] and have common
-                sizes, where klass is android.media.OpaqueImageRingBufferQueue.class. See
-                android.scaler.availableInputOutputFormatsMap for detailed information about
-                OPAQUE format.
-              * android.scaler.availableInputOutputFormatsMap has the required map entries.
-              * Using OPAQUE does not cause a frame rate drop
+              * ImageFormat#PRIVATE is supported as an output/input format, that is,
+                ImageFormat#PRIVATE is included in the lists of formats returned by
+                StreamConfigurationMap#getInputFormats and
+                StreamConfigurationMap#getOutputFormats.
+              * StreamConfigurationMap#getValidOutputFormatsForInput returns non empty int[] for
+                each supported input format returned by StreamConfigurationMap#getInputFormats.
+              * Each size returned by StreamConfigurationMap#getInputSizes(ImageFormat#PRIVATE)
+                is also included in StreamConfigurationMap#getOutputSizes(ImageFormat#PRIVATE)
+              * Using ImageFormat#PRIVATE does not cause a frame rate drop
                 relative to the sensor's maximum capture rate (at that
-                resolution), see android.scaler.availableInputOutputFormatsMap for more details.
-              * OPAQUE will be reprocessable into both YUV_420_888
+                resolution).
+              * ImageFormat#PRIVATE will be reprocessable into both YUV_420_888
                 and JPEG formats.
               * The maximum available resolution for OPAQUE streams
                 (both input/output) will match the maximum available
@@ -4221,27 +4224,29 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </value>
             <value optional="true">YUV_REPROCESSING
               <notes>
-              The camera device supports the YUV420_888 reprocessing use case, similar as
+              The camera device supports the YUV_420_888 reprocessing use case, similar as
               OPAQUE_REPROCESSING, This capability requires the camera device to support the
               following:
 
               * One input stream is supported, that is, `android.request.maxNumInputStreams == 1`.
-              * YUV420_888 is supported as a common format for both input and output, that is,
-                StreamConfigurationMap#getOutputSizes(YUV420_888) and
-                StreamConfigurationMap#getInputSizes(YUV420_888) return non empty Size[] and have
-                common sizes.
-              * android.scaler.availableInputOutputFormatsMap has the required map entries.
-              * Using YUV420_888 does not cause a frame rate drop
-                relative to the sensor's maximum capture rate (at that
-                resolution), see android.scaler.availableInputOutputFormatsMap for more details.
-              * YUV420_888 will be reprocessable into both YUV_420_888
+              * YUV_420_888 is supported as an output/input format, that is,
+                YUV_420_888 is included in the lists of formats returned by
+                StreamConfigurationMap#getInputFormats and
+                StreamConfigurationMap#getOutputFormats.
+              * StreamConfigurationMap#getValidOutputFormatsForInput returns non empty int[] for
+                each supported input format returned by StreamConfigurationMap#getInputFormats.
+              * Each size returned by StreamConfigurationMap#getInputSizes(YUV_420_888)
+                is also included in StreamConfigurationMap#getOutputSizes(YUV_420_888)
+              * Using YUV_420_888 does not cause a frame rate drop
+                relative to the sensor's maximum capture rate (at that resolution).
+              * YUV_420_888 will be reprocessable into both YUV_420_888
                 and JPEG formats.
-              * The maximum available resolution for YUV420_888 streams
+              * The maximum available resolution for YUV_420_888 streams
                 (both input/output) will match the maximum available
                 resolution of JPEG streams.
               * Only the below controls are effective for reprocessing requests and will be
                 present in capture results. The reprocess requests are from the original capture
-                results that are assocaited with the intermidate YUV420_888 output buffers.
+                results that are assocaited with the intermidate YUV_420_888 output buffers.
                 All other controls in the reprocess requests will be ignored by the camera device.
                     * android.jpeg.*
                     * android.noiseReduction.mode
@@ -4720,12 +4725,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
       </dynamic>
       <static>
-        <entry name="availableInputOutputFormatsMap" type="int32"
-        visibility="hidden"
-        container="array" typedef="imageFormat">
-          <array>
-            <size>n</size>
-          </array>
+        <entry name="availableInputOutputFormatsMap" type="int32" visibility="hidden"
+          typedef="reprocessFormatsMap">
           <description>The mapping of image formats that are supported by this
           camera device for input streams, to their corresponding output formats.
           </description>
@@ -4737,31 +4738,29 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           The camera device will support the following map of formats,
           if its dependent capability (android.request.availableCapabilities) is supported:
 
-            Input Format  | Output Format    | Capability
-          :---------------|:-----------------|:----------
-          OPAQUE          | JPEG             | OPAQUE_REPROCESSING
-          OPAQUE          | YUV_420_888      | OPAQUE_REPROCESSING
-          YUV_420_888     | JPEG             | YUV_REPROCESSING
-          YUV_420_888     | YUV_420_888      | YUV_REPROCESSING
+            Input Format                | Output Format    | Capability
+          :-----------------------------|:-----------------|:----------
+          PRIVATE (ImageFormat#PRIVATE) | JPEG             | OPAQUE_REPROCESSING
+          PRIVATE                       | YUV_420_888      | OPAQUE_REPROCESSING
+          YUV_420_888                   | JPEG             | YUV_REPROCESSING
+          YUV_420_888                   | YUV_420_888      | YUV_REPROCESSING
 
-          OPAQUE refers to a device-internal format that is not directly application-visible.
-          An OPAQUE input or output surface can be acquired by
-          OpaqueImageRingBufferQueue#getInputSurface() or
-          OpaqueImageRingBufferQueue#getOutputSurface().
-          For a OPAQUE_REPROCESSING-capable camera device, using the OPAQUE format
+          PRIVATE refers to a device-internal format that is not directly application-visible.
+          A PRIVATE input surface can be acquired by
+          ImageReader.newOpaqueInstance(width, height, maxImages).
+          For a OPAQUE_REPROCESSING-capable camera device, using the PRIVATE format
           as either input or output will never hurt maximum frame rate (i.e.
-          StreamConfigurationMap#getOutputStallDuration(klass,Size) is always 0),
-          where klass is android.media.OpaqueImageRingBufferQueue.class.
+          StreamConfigurationMap#getOutputStallDuration(format, size) is always 0),
+          where format is ImageFormat#PRIVATE.
 
           Attempting to configure an input stream with output streams not
           listed as available in this map is not valid.
-
-          TODO: typedef to ReprocessFormatMap
           </details>
           <hal_details>
           For the formats, see `system/core/include/system/graphics.h` for a definition
-          of the image format enumerations. The OPAQUE format refers to the IMPLEMENTATION_DEFINED
-          format. The HAL could determine the actual format by using the gralloc usage flags.
+          of the image format enumerations. The PRIVATE format refers to the
+          HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED format. The HAL could determine
+          the actual format by using the gralloc usage flags.
           For ZSL use case in particular, the HAL could choose appropriate format (partially
           processed YUV or RAW based format) by checking the format and GRALLOC_USAGE_HW_CAMERA_ZSL.
           See camera3.h for more details.

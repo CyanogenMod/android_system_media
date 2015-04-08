@@ -270,7 +270,7 @@ typedef enum camera_metadata_tag {
     ANDROID_SCALER_AVAILABLE_PROCESSED_SIZES,         // int32[]      | hidden
     ANDROID_SCALER_AVAILABLE_RAW_MIN_DURATIONS,       // int64[]      | system
     ANDROID_SCALER_AVAILABLE_RAW_SIZES,               // int32[]      | system
-    ANDROID_SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP,// int32[]      | hidden
+    ANDROID_SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP,// int32        | hidden
     ANDROID_SCALER_AVAILABLE_STREAM_CONFIGURATIONS,   // enum[]       | hidden
     ANDROID_SCALER_AVAILABLE_MIN_FRAME_DURATIONS,     // int64[]      | hidden
     ANDROID_SCALER_AVAILABLE_STALL_DURATIONS,         // int64[]      | hidden
