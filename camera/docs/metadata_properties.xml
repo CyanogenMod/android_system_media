@@ -2535,7 +2535,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether the camera device supports android.control.aeLock</description>
           <details>
-          LIMITED or FULL devices will always list `true`
+              Devices with MANUAL_SENSOR capability or BURST_CAPTURE capability will always
+              list `true`. This includes FULL devices.
           </details>
           <tag id="BC"/>
         </entry>
@@ -2547,7 +2548,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </enum>
           <description>Whether the camera device supports android.control.awbLock</description>
           <details>
-          LIMITED or FULL devices will always list `true`
+              Devices with MANUAL_POST_PROCESSING capability or BURST_CAPTURE capability will
+              always list `true`. This includes FULL devices.
           </details>
           <tag id="BC"/>
         </entry>
@@ -4212,6 +4214,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                   * android.flash.*
               * Manual black level locking
                   * android.blackLevel.lock
+              * Auto exposure lock
+                  * android.control.aeLock
 
               If any of the above 3A algorithms are enabled, then the camera
               device will accurately report the values applied by 3A in the
@@ -4249,6 +4253,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               * Manual aberration correction control (if aberration correction is supported)
                     * android.colorCorrection.aberrationMode
                     * android.colorCorrection.availableAberrationModes
+              * Auto white balance lock
+                    * android.control.awbLock
 
               If auto white balance is enabled, then the camera device
               will accurately report the values applied by AWB in the result.
@@ -4344,6 +4350,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
               In addition, the android.sync.maxLatency field is
               guaranted to have a value between 0 and 4, inclusive.
+              android.control.aeLockAvailable and
+              android.control.awbLockAvailable are also guaranteed
+              to be `true` so burst capture with these two locks ON
+              yields consistent image output.
+
               </notes>
             </value>
             <value optional="true">YUV_REPROCESSING
