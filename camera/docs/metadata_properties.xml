@@ -3582,7 +3582,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             calibration.
           </description>
           <units>
-            Pixels in the android.sensor.activeArraySize coordinate
+            Pixels in the android.sensor.info.activeArraySize coordinate
             system.
           </units>
           <details>
@@ -4185,10 +4185,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                 device (regardless of android.info.supportedHardwareLevel)
                 supports.
 
-                This capability is listed by all devices, and
+                This capability is listed by all normal devices, and
                 indicates that the camera device has a feature set
                 that's comparable to the baseline requirements for the
                 older android.hardware.Camera API.
+
+                Devices with the DEPTH_OUTPUT capability might not list this
+                capability, indicating that they support only depth measurement,
+                not standard color output.
               </notes>
             </value>
             <value optional="true">MANUAL_SENSOR
@@ -4394,6 +4398,36 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                     * android.reprocess.effectiveExposureFactor
               </notes>
             </value>
+            <value optional="true">DEPTH_OUTPUT
+              <notes>
+              The camera device can produce depth measurements from its field of view.
+
+              This capability requires the camera device to support the following:
+
+              * DEPTH16 is supported as an output format.
+              * DEPTH_POINT_CLOUD is optionally supported as an output format.
+              * This camera device, and all camera devices with the same android.lens.info.facing,
+                will list the following calibration entries in both CameraCharacteristics and
+                CaptureResults:
+                  - android.lens.poseTranslation
+                  - android.lens.poseRotation
+                  - android.lens.intrinsicCalibration
+                  - android.lens.radialDistortion
+              * The android.depth.depthIsExclusive entry is listed by this device.
+              * A LIMITED camera with only the DEPTH_OUTPUT capability does not have to support
+                normal YUV_420_888, JPEG, and PRIV-format outputs. It only has to support the DEPTH16
+                format.
+
+              Generally, depth output operates at a slower frame rate than standard color capture,
+              so the DEPTH16 and DEPTH_POINT_CLOUD formats will commonly have a stall duration that
+              should be accounted for (see
+              android.hardware.camera2.StreamConfigurationMap#getOutputStallDuration).  On a device
+              that supports both depth and color-based output, to enable smooth preview, using a
+              repeating burst is recommended, where a depth-output target is only included once
+              every N frames, where N is the ratio between preview output rate and depth output
+              rate, including depth stall time.
+              </notes>
+            </value>
           </enum>
           <description>List of capabilities that this camera device
           advertises as fully supporting.</description>
@@ -4443,6 +4477,15 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           For OPAQUE_REPROCESSING and YUV_REPROCESSING capabilities, see
           hardware/libhardware/include/hardware/camera3.h Section 10 for more information.
+
+          For DEPTH_OUTPUT, the depth-format keys
+          android.depth.availableDepthStreamConfigurations,
+          android.depth.availableDepthMinFrameDurations,
+          android.depth.availableDepthStallDurations must be available, in
+          addition to the other keys explicitly mentioned in the DEPTH_OUTPUT
+          enum notes. The entry android.depth.maxDepthSamples must be available
+          if the DEPTH_POINT_CLOUD format is supported (HAL pixel format BLOB, dataspace
+          DEPTH).
           </hal_details>
         </entry>
         <entry name="availableRequestKeys" type="int32" visibility="hidden"
@@ -7981,6 +8024,28 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           duration.
           </details>
           <tag id="DEPTH" />
+        </entry>
+        <entry name="depthIsExclusive" type="byte" visibility="public"
+               enum="true" typedef="boolean" hwlevel="limited">
+          <enum>
+            <value>FALSE</value>
+            <value>TRUE</value>
+          </enum>
+          <description>Indicates whether a capture request may target both a
+          DEPTH16 / DEPTH_POINT_CLOUD output, and normal color outputs (such as
+          YUV_420_888, JPEG, or RAW) simultaneously.
+          </description>
+          <details>
+          If TRUE, including both depth and color outputs in a single
+          capture request is not supported. An application must interleave color
+          and depth requests.  If FALSE, a single request can target both types
+          of output.
+
+          Typically, this restriction exists on camera devices that
+          need to emit a specific pattern or wavelength of light to
+          measure depth values, which causes the color image to be
+          corrupted during depth measurement.
+          </details>
         </entry>
       </static>
     </section>

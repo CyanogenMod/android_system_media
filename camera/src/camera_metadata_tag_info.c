@@ -653,6 +653,8 @@ static tag_info_t android_depth[ANDROID_DEPTH_END -
                                         TYPE_INT64  },
     [ ANDROID_DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS - ANDROID_DEPTH_START ] =
     { "availableDepthStallDurations",  TYPE_INT64  },
+    [ ANDROID_DEPTH_DEPTH_IS_EXCLUSIVE - ANDROID_DEPTH_START ] =
+    { "depthIsExclusive",              TYPE_BYTE   },
 };
 
 
@@ -1759,6 +1761,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "YUV_REPROCESSING";
                     ret = 0;
                     break;
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT:
+                    msg = "DEPTH_OUTPUT";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
@@ -2510,6 +2516,21 @@ int camera_metadata_enum_snprint(uint32_t tag,
             break;
         }
         case ANDROID_DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS: {
+            break;
+        }
+        case ANDROID_DEPTH_DEPTH_IS_EXCLUSIVE: {
+            switch (value) {
+                case ANDROID_DEPTH_DEPTH_IS_EXCLUSIVE_FALSE:
+                    msg = "FALSE";
+                    ret = 0;
+                    break;
+                case ANDROID_DEPTH_DEPTH_IS_EXCLUSIVE_TRUE:
+                    msg = "TRUE";
+                    ret = 0;
+                    break;
+                default:
+                    msg = "error: enum value out of range";
+            }
             break;
         }
 

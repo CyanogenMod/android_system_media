@@ -401,6 +401,7 @@ typedef enum camera_metadata_tag {
                                                       // enum[]       | hidden
     ANDROID_DEPTH_AVAILABLE_DEPTH_MIN_FRAME_DURATIONS,// int64[]      | hidden
     ANDROID_DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS,    // int64[]      | hidden
+    ANDROID_DEPTH_DEPTH_IS_EXCLUSIVE,                 // enum         | public
     ANDROID_DEPTH_END,
 
 } camera_metadata_tag_t;
@@ -707,6 +708,7 @@ typedef enum camera_metadata_enum_android_request_available_capabilities {
     ANDROID_REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS,
     ANDROID_REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE,
     ANDROID_REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING,
+    ANDROID_REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT,
 } camera_metadata_enum_android_request_available_capabilities_t;
 
 
@@ -901,5 +903,11 @@ typedef enum camera_metadata_enum_android_depth_available_depth_stream_configura
     ANDROID_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS_OUTPUT,
     ANDROID_DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS_INPUT,
 } camera_metadata_enum_android_depth_available_depth_stream_configurations_t;
+
+// ANDROID_DEPTH_DEPTH_IS_EXCLUSIVE
+typedef enum camera_metadata_enum_android_depth_depth_is_exclusive {
+    ANDROID_DEPTH_DEPTH_IS_EXCLUSIVE_FALSE,
+    ANDROID_DEPTH_DEPTH_IS_EXCLUSIVE_TRUE,
+} camera_metadata_enum_android_depth_depth_is_exclusive_t;
 
 

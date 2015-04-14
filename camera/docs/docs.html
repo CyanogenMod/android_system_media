@@ -1107,6 +1107,8 @@
             ><a href="#static_android.depth.availableDepthMinFrameDurations">android.depth.availableDepthMinFrameDurations</a></li>
             <li
             ><a href="#static_android.depth.availableDepthStallDurations">android.depth.availableDepthStallDurations</a></li>
+            <li
+            ><a href="#static_android.depth.depthIsExclusive">android.depth.depthIsExclusive</a></li>
           </ul>
         </li>
       </ul> <!-- toc_section -->
@@ -12107,7 +12109,7 @@ calibration.<wbr/></p>
 
             <td class="entry_units">
               
-            Pixels in the android.<wbr/>sensor.<wbr/>active<wbr/>Array<wbr/>Size coordinate
+            Pixels in the android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size coordinate
             system.<wbr/>
           
             </td>
@@ -12883,7 +12885,7 @@ calibration.<wbr/></p>
 
             <td class="entry_units">
               
-            Pixels in the android.<wbr/>sensor.<wbr/>active<wbr/>Array<wbr/>Size coordinate
+            Pixels in the android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size coordinate
             system.<wbr/>
           
             </td>
@@ -14705,10 +14707,13 @@ partial results.<wbr/></p>
                     <span class="entry_type_enum_notes"><p>The minimal set of capabilities that every camera
 device (regardless of <a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a>)
 supports.<wbr/></p>
-<p>This capability is listed by all devices,<wbr/> and
+<p>This capability is listed by all normal devices,<wbr/> and
 indicates that the camera device has a feature set
 that's comparable to the baseline requirements for the
-older android.<wbr/>hardware.<wbr/>Camera API.<wbr/></p></span>
+older android.<wbr/>hardware.<wbr/>Camera API.<wbr/></p>
+<p>Devices with the DEPTH_<wbr/>OUTPUT capability might not list this
+capability,<wbr/> indicating that they support only depth measurement,<wbr/>
+not standard color output.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">MANUAL_SENSOR</span>
@@ -14947,6 +14952,37 @@ following:</p>
 </li>
 </ul></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">DEPTH_OUTPUT</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>The camera device can produce depth measurements from its field of view.<wbr/></p>
+<p>This capability requires the camera device to support the following:</p>
+<ul>
+<li>DEPTH16 is supported as an output format.<wbr/></li>
+<li>DEPTH_<wbr/>POINT_<wbr/>CLOUD is optionally supported as an output format.<wbr/></li>
+<li>This camera device,<wbr/> and all camera devices with the same android.<wbr/>lens.<wbr/>info.<wbr/>facing,<wbr/>
+  will list the following calibration entries in both CameraCharacteristics and
+  CaptureResults:<ul>
+<li><a href="#static_android.lens.poseTranslation">android.<wbr/>lens.<wbr/>pose<wbr/>Translation</a></li>
+<li><a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a></li>
+<li><a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a></li>
+<li><a href="#dynamic_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a></li>
+</ul>
+</li>
+<li>The <a href="#static_android.depth.depthIsExclusive">android.<wbr/>depth.<wbr/>depth<wbr/>Is<wbr/>Exclusive</a> entry is listed by this device.<wbr/></li>
+<li>A LIMITED camera with only the DEPTH_<wbr/>OUTPUT capability does not have to support
+  normal YUV_<wbr/>420_<wbr/>888,<wbr/> JPEG,<wbr/> and PRIV-format outputs.<wbr/> It only has to support the DEPTH16
+  format.<wbr/></li>
+</ul>
+<p>Generally,<wbr/> depth output operates at a slower frame rate than standard color capture,<wbr/>
+so the DEPTH16 and DEPTH_<wbr/>POINT_<wbr/>CLOUD formats will commonly have a stall duration that
+should be accounted for (see
+android.<wbr/>hardware.<wbr/>camera2.<wbr/>Stream<wbr/>Configuration<wbr/>Map#get<wbr/>Output<wbr/>Stall<wbr/>Duration).<wbr/>  On a device
+that supports both depth and color-based output,<wbr/> to enable smooth preview,<wbr/> using a
+repeating burst is recommended,<wbr/> where a depth-output target is only included once
+every N frames,<wbr/> where N is the ratio between preview output rate and depth output
+rate,<wbr/> including depth stall time.<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -15014,6 +15050,14 @@ the result.<wbr/></p>
 <a href="#static_android.scaler.availableMinFrameDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Min<wbr/>Frame<wbr/>Durations</a> static property entirely.<wbr/></p>
 <p>For OPAQUE_<wbr/>REPROCESSING and YUV_<wbr/>REPROCESSING capabilities,<wbr/> see
 hardware/<wbr/>libhardware/<wbr/>include/<wbr/>hardware/<wbr/>camera3.<wbr/>h Section 10 for more information.<wbr/></p>
+<p>For DEPTH_<wbr/>OUTPUT,<wbr/> the depth-format keys
+<a href="#static_android.depth.availableDepthStreamConfigurations">android.<wbr/>depth.<wbr/>available<wbr/>Depth<wbr/>Stream<wbr/>Configurations</a>,<wbr/>
+<a href="#static_android.depth.availableDepthMinFrameDurations">android.<wbr/>depth.<wbr/>available<wbr/>Depth<wbr/>Min<wbr/>Frame<wbr/>Durations</a>,<wbr/>
+<a href="#static_android.depth.availableDepthStallDurations">android.<wbr/>depth.<wbr/>available<wbr/>Depth<wbr/>Stall<wbr/>Durations</a> must be available,<wbr/> in
+addition to the other keys explicitly mentioned in the DEPTH_<wbr/>OUTPUT
+enum notes.<wbr/> The entry <a href="#static_android.depth.maxDepthSamples">android.<wbr/>depth.<wbr/>max<wbr/>Depth<wbr/>Samples</a> must be available
+if the DEPTH_<wbr/>POINT_<wbr/>CLOUD format is supported (HAL pixel format BLOB,<wbr/> dataspace
+DEPTH).<wbr/></p>
             </td>
           </tr>
 
@@ -25415,6 +25459,69 @@ that has streams with non-zero stall.<wbr/></p>
 streams.<wbr/></p>
 <p>All depth output stream formats may have a nonzero stall
 duration.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.depth.depthIsExclusive">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>depth.<wbr/>depth<wbr/>Is<wbr/>Exclusive
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name entry_type_name_enum">byte</span>
+
+              <span class="entry_type_visibility"> [public as boolean]</span>
+
+
+              <span class="entry_type_hwlevel">[limited] </span>
+
+
+
+                <ul class="entry_type_enum">
+                  <li>
+                    <span class="entry_type_enum_name">FALSE</span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">TRUE</span>
+                  </li>
+                </ul>
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>Indicates whether a capture request may target both a
+DEPTH16 /<wbr/> DEPTH_<wbr/>POINT_<wbr/>CLOUD output,<wbr/> and normal color outputs (such as
+YUV_<wbr/>420_<wbr/>888,<wbr/> JPEG,<wbr/> or RAW) simultaneously.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>If TRUE,<wbr/> including both depth and color outputs in a single
+capture request is not supported.<wbr/> An application must interleave color
+and depth requests.<wbr/>  If FALSE,<wbr/> a single request can target both types
+of output.<wbr/></p>
+<p>Typically,<wbr/> this restriction exists on camera devices that
+need to emit a specific pattern or wavelength of light to
+measure depth values,<wbr/> which causes the color image to be
+corrupted during depth measurement.<wbr/></p>
             </td>
           </tr>
 
