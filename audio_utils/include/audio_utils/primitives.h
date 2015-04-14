@@ -221,6 +221,16 @@ void memcpy_to_q8_23_from_i16(int32_t *dst, const int16_t *src, size_t count);
  */
 void memcpy_to_q8_23_from_float_with_clamp(int32_t *dst, const float *src, size_t count);
 
+/* Copy samples from signed fixed point packed 24-bit Q0.23 to signed fixed-point 32-bit Q8.23.
+ * The output data range is [0xff800000, 0x007fffff].
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must be completely separate.
+ */
+void memcpy_to_q8_23_from_p24(int32_t *dst, const uint8_t *src, size_t count);
+
 /* Copy samples from single-precision floating-point to signed fixed-point 32-bit Q4.27.
  * The conversion will use the full available Q4.27 range, including guard bits.
  * Fractional lsb is rounded to nearest, ties away from zero.
