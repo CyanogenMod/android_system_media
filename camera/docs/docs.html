@@ -14905,7 +14905,12 @@ guaranted to have a value between 0 and 4,<wbr/> inclusive.<wbr/>
 <a href="#static_android.control.aeLockAvailable">android.<wbr/>control.<wbr/>ae<wbr/>Lock<wbr/>Available</a> and
 <a href="#static_android.control.awbLockAvailable">android.<wbr/>control.<wbr/>awb<wbr/>Lock<wbr/>Available</a> are also guaranteed
 to be <code>true</code> so burst capture with these two locks ON
-yields consistent image output.<wbr/></p></span>
+yields consistent image output.<wbr/></p>
+<p>On a camera device that reports the HIGH_<wbr/>RESOLUTION hardware
+level,<wbr/> meaning the device supports very large capture sizes,<wbr/>
+BURST_<wbr/>CAPTURE means that at least 8-megapixel images can be
+captured at <code>&gt;=</code> 20 fps,<wbr/> and maximum-resolution images can be
+captured at <code>&gt;=</code> 10 fps.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">YUV_REPROCESSING</span>
@@ -24262,6 +24267,11 @@ doesn't violate the above rules.<wbr/></p>
                     <span class="entry_type_enum_name">LEGACY</span>
                     <span class="entry_type_enum_notes"><p>This camera device is running in backward compatibility mode.<wbr/></p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">HIGH_RESOLUTION</span>
+                    <span class="entry_type_enum_notes"><p>This camera device is capable of supporting advanced imaging applications at full rate,<wbr/>
+and additional high-resolution outputs at lower rates.<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -24318,6 +24328,17 @@ queried separately.<wbr/> These include:</p>
 post-processing,<wbr/> arbitrary cropping regions,<wbr/> and has relaxed performance constraints.<wbr/></p>
 <p>Each higher level supports everything the lower level supports
 in this order: FULL <code>&gt;</code> LIMITED <code>&gt;</code> LEGACY.<wbr/></p>
+<p>A HIGH_<wbr/>RESOLUTION device is equivalent to a FULL device,<wbr/> except that:</p>
+<ul>
+<li>At least one output resolution of 8 megapixels or higher in uncompressed YUV is
+  supported at <code>&gt;=</code> 20 fps.<wbr/></li>
+<li>Maximum-size (sensor resolution) uncompressed YUV is supported  at <code>&gt;=</code> 10
+  fps.<wbr/></li>
+<li>For devices that list the RAW capability and support either RAW10 or RAW12 output,<wbr/>
+  maximum-resolution RAW10 or RAW12 capture will operate at least at the rate of
+  maximum-resolution YUV capture,<wbr/> and at least one supported output resolution of
+  8 megapixels or higher in RAW10 or RAW12 is supported <code>&gt;=</code> 20 fps.<wbr/></li>
+</ul>
             </td>
           </tr>
 

@@ -4355,6 +4355,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               to be `true` so burst capture with these two locks ON
               yields consistent image output.
 
+              On a camera device that reports the HIGH_RESOLUTION hardware
+              level, meaning the device supports very large capture sizes,
+              BURST_CAPTURE means that at least 8-megapixel images can be
+              captured at `&gt;=` 20 fps, and maximum-resolution images can be
+              captured at `&gt;=` 10 fps.
               </notes>
             </value>
             <value optional="true">YUV_REPROCESSING
@@ -7477,6 +7482,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               This camera device is running in backward compatibility mode.
               </notes>
             </value>
+            <value>
+              HIGH_RESOLUTION
+              <notes>
+              This camera device is capable of supporting advanced imaging applications at full rate,
+              and additional high-resolution outputs at lower rates.
+              </notes>
+            </value>
           </enum>
           <description>
           Generally classifies the overall set of the camera device functionality.
@@ -7518,6 +7530,17 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           Each higher level supports everything the lower level supports
           in this order: FULL `&gt;` LIMITED `&gt;` LEGACY.
+
+          A HIGH_RESOLUTION device is equivalent to a FULL device, except that:
+
+          * At least one output resolution of 8 megapixels or higher in uncompressed YUV is
+            supported at `&gt;=` 20 fps.
+          * Maximum-size (sensor resolution) uncompressed YUV is supported  at `&gt;=` 10
+            fps.
+          * For devices that list the RAW capability and support either RAW10 or RAW12 output,
+            maximum-resolution RAW10 or RAW12 capture will operate at least at the rate of
+            maximum-resolution YUV capture, and at least one supported output resolution of
+            8 megapixels or higher in RAW10 or RAW12 is supported `&gt;=` 20 fps.
           </details>
           <hal_details>
           The camera 3 HAL device can implement one of two possible
