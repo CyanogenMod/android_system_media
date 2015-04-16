@@ -5040,10 +5040,9 @@ supported by the camera device,<wbr/> in the format of (width,<wbr/> height,<wbr
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>When HIGH_<wbr/>SPEED_<wbr/>VIDEO is supported in <a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a>,<wbr/>
-this metadata will list the supported high speed video size and fps range
-configurations.<wbr/> All the sizes listed in this configuration will be a subset
-of the sizes reported by StreamConfigurationMap#getOutputSizes for processed
+              <p>When HIGH_<wbr/>SPEED_<wbr/>VIDEO is supported in <a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a>,<wbr/> this metadata
+will list the supported high speed video size and fps range configurations.<wbr/> All the sizes
+listed in this configuration will be a subset of the sizes reported by <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputSizes">StreamConfigurationMap#getOutputSizes</a> for processed
 non-stalling formats.<wbr/></p>
 <p>For the high speed video use case,<wbr/> where the application will set
 <a href="#controls_android.control.sceneMode">android.<wbr/>control.<wbr/>scene<wbr/>Mode</a> to HIGH_<wbr/>SPEED_<wbr/>VIDEO in capture requests,<wbr/> the application must
@@ -14242,11 +14241,12 @@ The formats defined in <a href="#static_android.scaler.availableStreamConfigurat
 into the 3 stream types as below:</p>
 <ul>
 <li>Processed (but stalling): any non-RAW format with a stallDurations &gt; 0.<wbr/>
-Typically JPEG format (ImageFormat#JPEG).<wbr/></li>
-<li>Raw formats: ImageFormat#RAW_<wbr/>SENSOR,<wbr/> ImageFormat#RAW10,<wbr/> ImageFormat#RAW12,<wbr/>
-and ImageFormat#RAW_<wbr/>OPAQUE.<wbr/></li>
+  Typically <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">JPEG format</a>.<wbr/></li>
+<li>Raw formats: <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#RAW_SENSOR">RAW_<wbr/>SENSOR</a>,<wbr/> <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#RAW10">RAW10</a>,<wbr/> or <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#RAW12">RAW12</a>.<wbr/></li>
 <li>Processed (but not-stalling): any non-RAW format without a stall duration.<wbr/>
-Typically Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888,<wbr/> ImageFormat#NV21,<wbr/> ImageFormat#YV12.<wbr/></li>
+  Typically <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">YUV_<wbr/>420_<wbr/>888</a>,<wbr/>
+  <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#NV21">NV21</a>,<wbr/> or
+  <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YV12">YV12</a>.<wbr/></li>
 </ul>
             </td>
           </tr>
@@ -14305,10 +14305,9 @@ CPU resources that will consume more power.<wbr/> The image format for this kind
 be any <code>RAW</code> and supported format provided by <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a>.<wbr/></p>
 <p>In particular,<wbr/> a <code>RAW</code> format is typically one of:</p>
 <ul>
-<li>ImageFormat#RAW_<wbr/>SENSOR</li>
-<li>ImageFormat#RAW10</li>
-<li>ImageFormat#RAW12</li>
-<li>Opaque <code>RAW</code></li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#RAW_SENSOR">RAW_<wbr/>SENSOR</a></li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#RAW10">RAW10</a></li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#RAW12">RAW12</a></li>
 </ul>
 <p>LEGACY mode devices (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> <code>==</code> LEGACY)
 never support raw streams.<wbr/></p>
@@ -14372,13 +14371,13 @@ be any non-<code>RAW</code> and supported format provided by <a href="#static_an
 <p>Processed (but not-stalling) is defined as any non-RAW format without a stall duration.<wbr/>
 Typically:</p>
 <ul>
-<li>Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</li>
-<li>ImageFormat#NV21</li>
-<li>ImageFormat#YV12</li>
-<li>Implementation-defined formats,<wbr/> i.<wbr/>e.<wbr/> StreamConfiguration#isOutputSupportedFor(Class)</li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">YUV_<wbr/>420_<wbr/>888</a></li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#NV21">NV21</a></li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YV12">YV12</a></li>
+<li>Implementation-defined formats,<wbr/> i.<wbr/>e.<wbr/> <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#isOutputSupportedFor(Class)">StreamConfigurationMap#isOutputSupportedFor(Class)</a></li>
 </ul>
-<p>For full guarantees,<wbr/> query StreamConfigurationMap#getOutputStallDuration with
-a processed format -- it will return 0 for a non-stalling stream.<wbr/></p>
+<p>For full guarantees,<wbr/> query <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputStallDuration">StreamConfigurationMap#getOutputStallDuration</a> with a
+processed format -- it will return 0 for a non-stalling stream.<wbr/></p>
 <p>LEGACY devices will support at least 2 processing/<wbr/>non-stalling streams.<wbr/></p>
             </td>
           </tr>
@@ -14435,10 +14434,11 @@ streams for any processed (but not-stalling) formats.<wbr/></p>
 the camera device.<wbr/> Using more streams simultaneously may require more hardware and
 CPU resources that will consume more power.<wbr/> The image format for this kind of an output stream can
 be any non-<code>RAW</code> and supported format provided by <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a>.<wbr/></p>
-<p>A processed and stalling format is defined as any non-RAW format with a stallDurations &gt; 0.<wbr/>
-Typically only the <code>JPEG</code> format (ImageFormat#JPEG) is a stalling format.<wbr/></p>
-<p>For full guarantees,<wbr/> query StreamConfigurationMap#getOutputStallDuration with
-a processed format -- it will return a non-0 value for a stalling stream.<wbr/></p>
+<p>A processed and stalling format is defined as any non-RAW format with a stallDurations
+&gt; 0.<wbr/>  Typically only the <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">JPEG format</a> is a
+stalling format.<wbr/></p>
+<p>For full guarantees,<wbr/> query <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputStallDuration">StreamConfigurationMap#getOutputStallDuration</a> with a
+processed format -- it will return a non-0 value for a stalling stream.<wbr/></p>
 <p>LEGACY devices will support up to 1 processing/<wbr/>stalling stream.<wbr/></p>
             </td>
           </tr>
@@ -14549,10 +14549,9 @@ that can be configured and used simultaneously by a camera device.<wbr/></p>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>When set to 0,<wbr/> it means no input stream is supported.<wbr/></p>
-<p>The image format for a input stream can be any supported
-format returned by StreamConfigurationMap#getInputFormats.<wbr/> When using an
-input stream,<wbr/> there must be at least one output stream
-configured to to receive the reprocessed images.<wbr/></p>
+<p>The image format for a input stream can be any supported format returned by <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getInputFormats">StreamConfigurationMap#getInputFormats</a>.<wbr/> When using an
+input stream,<wbr/> there must be at least one output stream configured to to receive the
+reprocessed images.<wbr/></p>
 <p>When an input stream and some output streams are used in a reprocessing request,<wbr/>
 only the input buffer will be used to produce these output stream buffers,<wbr/> and a
 new sensor image will not be captured.<wbr/></p>
@@ -14853,19 +14852,17 @@ raw sensor images.<wbr/></p>
                     <span class="entry_type_enum_notes"><p>The camera device supports the Zero Shutter Lag reprocessing use case.<wbr/></p>
 <ul>
 <li>One input stream is supported,<wbr/> that is,<wbr/> <code><a href="#static_android.request.maxNumInputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams</a> == 1</code>.<wbr/></li>
-<li>ImageFormat#PRIVATE is supported as an output/<wbr/>input format,<wbr/> that is,<wbr/>
-  ImageFormat#PRIVATE is included in the lists of formats returned by
-  StreamConfigurationMap#getInputFormats and
-  StreamConfigurationMap#getOutputFormats.<wbr/></li>
-<li>StreamConfigurationMap#getValidOutputFormatsForInput returns non empty int[] for
-  each supported input format returned by StreamConfigurationMap#getInputFormats.<wbr/></li>
-<li>Each size returned by StreamConfigurationMap#getInputSizes(ImageFormat#PRIVATE)
-  is also included in StreamConfigurationMap#getOutputSizes(ImageFormat#PRIVATE)</li>
-<li>Using ImageFormat#PRIVATE does not cause a frame rate drop
-  relative to the sensor's maximum capture rate (at that
-  resolution).<wbr/></li>
-<li>ImageFormat#PRIVATE will be reprocessable into both YUV_<wbr/>420_<wbr/>888
-  and JPEG formats.<wbr/></li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#PRIVATE">ImageFormat#PRIVATE</a> is supported as an output/<wbr/>input format,<wbr/>
+  that is,<wbr/> <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#PRIVATE">ImageFormat#PRIVATE</a> is included in the lists of
+  formats returned by <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getInputFormats">StreamConfigurationMap#getInputFormats</a> and <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputFormats">StreamConfigurationMap#getOutputFormats</a>.<wbr/></li>
+<li><a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getValidOutputFormatsForInput">StreamConfigurationMap#getValidOutputFormatsForInput</a>
+  returns non empty int[] for each supported input format returned by <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getInputFormats">StreamConfigurationMap#getInputFormats</a>.<wbr/></li>
+<li>Each size returned by <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getInputSizes">getInputSizes(ImageFormat.<wbr/>PRIVATE)</a> is also included in <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputSizes">getOutputSizes(ImageFormat.<wbr/>PRIVATE)</a></li>
+<li>Using <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#PRIVATE">ImageFormat#PRIVATE</a> does not cause a frame rate drop
+  relative to the sensor's maximum capture rate (at that resolution).<wbr/></li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#PRIVATE">ImageFormat#PRIVATE</a> will be reprocessable into both
+  <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a> and
+  <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a> formats.<wbr/></li>
 <li>The maximum available resolution for OPAQUE streams
   (both input/<wbr/>output) will match the maximum available
   resolution of JPEG streams.<wbr/></li>
@@ -14944,26 +14941,25 @@ OPAQUE_<wbr/>REPROCESSING,<wbr/> This capability requires the camera device to s
 following:</p>
 <ul>
 <li>One input stream is supported,<wbr/> that is,<wbr/> <code><a href="#static_android.request.maxNumInputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams</a> == 1</code>.<wbr/></li>
-<li>YUV_<wbr/>420_<wbr/>888 is supported as an output/<wbr/>input format,<wbr/> that is,<wbr/>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a> is supported as an output/<wbr/>input format,<wbr/> that is,<wbr/>
   YUV_<wbr/>420_<wbr/>888 is included in the lists of formats returned by
-  StreamConfigurationMap#getInputFormats and
-  StreamConfigurationMap#getOutputFormats.<wbr/></li>
-<li>StreamConfigurationMap#getValidOutputFormatsForInput returns non empty int[] for
-  each supported input format returned by StreamConfigurationMap#getInputFormats.<wbr/></li>
-<li>Each size returned by Stream<wbr/>Configuration<wbr/>Map#get<wbr/>Input<wbr/>Sizes(YUV_<wbr/>420_<wbr/>888)
-  is also included in Stream<wbr/>Configuration<wbr/>Map#get<wbr/>Output<wbr/>Sizes(YUV_<wbr/>420_<wbr/>888)</li>
-<li>Using YUV_<wbr/>420_<wbr/>888 does not cause a frame rate drop
+  <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getInputFormats">StreamConfigurationMap#getInputFormats</a> and
+  <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputFormats">StreamConfigurationMap#getOutputFormats</a>.<wbr/></li>
+<li><a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getValidOutputFormatsForInput">StreamConfigurationMap#getValidOutputFormatsForInput</a>
+  returns non-empty int[] for each supported input format returned by <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getInputFormats">StreamConfigurationMap#getInputFormats</a>.<wbr/></li>
+<li>Each size returned by <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getInputSizes">get<wbr/>Input<wbr/>Sizes(YUV_<wbr/>420_<wbr/>888)</a> is also included in <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputSizes">get<wbr/>Output<wbr/>Sizes(YUV_<wbr/>420_<wbr/>888)</a></li>
+<li>Using <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a> does not cause a frame rate drop
   relative to the sensor's maximum capture rate (at that resolution).<wbr/></li>
-<li>YUV_<wbr/>420_<wbr/>888 will be reprocessable into both YUV_<wbr/>420_<wbr/>888
-  and JPEG formats.<wbr/></li>
-<li>The maximum available resolution for YUV_<wbr/>420_<wbr/>888 streams
-  (both input/<wbr/>output) will match the maximum available
-  resolution of JPEG streams.<wbr/></li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a> will be reprocessable into both
+  <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a> and <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a> formats.<wbr/></li>
+<li>The maximum available resolution for <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a> streams (both input/<wbr/>output) will match the
+  maximum available resolution of <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a> streams.<wbr/></li>
 <li>Static metadata <a href="#static_android.reprocess.maxCaptureStall">android.<wbr/>reprocess.<wbr/>max<wbr/>Capture<wbr/>Stall</a>.<wbr/></li>
-<li>Only the below controls are effective for reprocessing requests and will be
-  present in capture results.<wbr/> The reprocess requests are from the original capture
-  results that are assocaited with the intermidate YUV_<wbr/>420_<wbr/>888 output buffers.<wbr/>
-  All other controls in the reprocess requests will be ignored by the camera device.<wbr/><ul>
+<li>Only the below controls are effective for reprocessing requests and will be present
+  in capture results.<wbr/> The reprocess requests are from the original capture results that
+  are associated with the intermediate <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a>
+  output buffers.<wbr/>  All other controls in the reprocess requests will be ignored by the
+  camera device.<wbr/><ul>
 <li>android.<wbr/>jpeg.<wbr/>*</li>
 <li><a href="#controls_android.noiseReduction.mode">android.<wbr/>noise<wbr/>Reduction.<wbr/>mode</a></li>
 <li><a href="#controls_android.edge.mode">android.<wbr/>edge.<wbr/>mode</a></li>
@@ -14978,11 +14974,13 @@ following:</p>
                     <span class="entry_type_enum_notes"><p>The camera device can produce depth measurements from its field of view.<wbr/></p>
 <p>This capability requires the camera device to support the following:</p>
 <ul>
-<li>DEPTH16 is supported as an output format.<wbr/></li>
-<li>DEPTH_<wbr/>POINT_<wbr/>CLOUD is optionally supported as an output format.<wbr/></li>
-<li>This camera device,<wbr/> and all camera devices with the same android.<wbr/>lens.<wbr/>info.<wbr/>facing,<wbr/>
-  will list the following calibration entries in both CameraCharacteristics and
-  CaptureResults:<ul>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#DEPTH16">ImageFormat#DEPTH16</a> is supported as an output format.<wbr/></li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#DEPTH_POINT_CLOUD">Image<wbr/>Format#DEPTH_<wbr/>POINT_<wbr/>CLOUD</a> is optionally supported as an
+  output format.<wbr/></li>
+<li>This camera device,<wbr/> and all camera devices with the same <a href="#static_android.lens.facing">android.<wbr/>lens.<wbr/>facing</a>,<wbr/>
+  will list the following calibration entries in both
+  <a href="https://developer.android.com/reference/android/hardware/camera2/CameraCharacteristics.html">CameraCharacteristics</a> and
+  <a href="https://developer.android.com/reference/android/hardware/camera2/CaptureResult.html">CaptureResult</a>:<ul>
 <li><a href="#static_android.lens.poseTranslation">android.<wbr/>lens.<wbr/>pose<wbr/>Translation</a></li>
 <li><a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a></li>
 <li><a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a></li>
@@ -14997,10 +14995,10 @@ following:</p>
 <p>Generally,<wbr/> depth output operates at a slower frame rate than standard color capture,<wbr/>
 so the DEPTH16 and DEPTH_<wbr/>POINT_<wbr/>CLOUD formats will commonly have a stall duration that
 should be accounted for (see
-android.<wbr/>hardware.<wbr/>camera2.<wbr/>Stream<wbr/>Configuration<wbr/>Map#get<wbr/>Output<wbr/>Stall<wbr/>Duration).<wbr/>  On a device
-that supports both depth and color-based output,<wbr/> to enable smooth preview,<wbr/> using a
-repeating burst is recommended,<wbr/> where a depth-output target is only included once
-every N frames,<wbr/> where N is the ratio between preview output rate and depth output
+<a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputStallDuration">StreamConfigurationMap#getOutputStallDuration</a>).<wbr/>
+On a device that supports both depth and color-based output,<wbr/> to enable smooth preview,<wbr/>
+using a repeating burst is recommended,<wbr/> where a depth-output target is only included
+once every N frames,<wbr/> where N is the ratio between preview output rate and depth output
 rate,<wbr/> including depth stall time.<wbr/></p></span>
                   </li>
                 </ul>
@@ -15114,7 +15112,7 @@ DEPTH).<wbr/></p>
 
             <td class="entry_description">
               <p>A list of all keys that the camera device has available
-to use with CaptureRequest.<wbr/></p>
+to use with <a href="https://developer.android.com/reference/android/hardware/camera2/CaptureRequest.html">CaptureRequest</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -15154,7 +15152,8 @@ vendor extensions API and not against this field.<wbr/></p>
 <p>The HAL must not consume any request tags that are not listed either
 here or in the vendor tag list.<wbr/></p>
 <p>The public camera2 API will always make the vendor tags visible
-via CameraCharacteristics#getAvailableCaptureRequestKeys.<wbr/></p>
+via
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraCharacteristics.html#getAvailableCaptureRequestKeys">CameraCharacteristics#getAvailableCaptureRequestKeys</a>.<wbr/></p>
             </td>
           </tr>
 
@@ -15186,7 +15185,7 @@ via CameraCharacteristics#getAvailableCaptureRequestKeys.<wbr/></p>
 
             <td class="entry_description">
               <p>A list of all keys that the camera device has available
-to use with CaptureResult.<wbr/></p>
+to use with <a href="https://developer.android.com/reference/android/hardware/camera2/CaptureResult.html">CaptureResult</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -15235,8 +15234,7 @@ extensions C api instead (refer to camera3.<wbr/>h for more details).<wbr/></p>
 vendor extensions API and not against this field.<wbr/></p>
 <p>The HAL must not produce any result tags that are not listed either
 here or in the vendor tag list.<wbr/></p>
-<p>The public camera2 API will always make the vendor tags visible
-via CameraCharacteristics#getAvailableCaptureResultKeys.<wbr/></p>
+<p>The public camera2 API will always make the vendor tags visible via <a href="https://developer.android.com/reference/android/hardware/camera2/CameraCharacteristics.html#getAvailableCaptureResultKeys">CameraCharacteristics#getAvailableCaptureResultKeys</a>.<wbr/></p>
             </td>
           </tr>
 
@@ -15268,7 +15266,7 @@ via CameraCharacteristics#getAvailableCaptureResultKeys.<wbr/></p>
 
             <td class="entry_description">
               <p>A list of all keys that the camera device has available
-to use with CameraCharacteristics.<wbr/></p>
+to use with <a href="https://developer.android.com/reference/android/hardware/camera2/CameraCharacteristics.html">CameraCharacteristics</a>.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -15308,7 +15306,7 @@ vendor extensions API and not against this field.<wbr/></p>
 <p>The HAL must not have any tags in its static info that are not listed
 either here or in the vendor tag list.<wbr/></p>
 <p>The public camera2 API will always make the vendor tags visible
-via CameraCharacteristics#getKeys.<wbr/></p>
+via <a href="https://developer.android.com/reference/android/hardware/camera2/CameraCharacteristics.html#getKeys">CameraCharacteristics#getKeys</a>.<wbr/></p>
             </td>
           </tr>
 
@@ -16426,34 +16424,31 @@ if its dependent capability (<a href="#static_android.request.availableCapabilit
 </thead>
 <tbody>
 <tr>
-<td align="left">PRIVATE (ImageFormat#PRIVATE)</td>
-<td align="left">JPEG</td>
+<td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#PRIVATE">ImageFormat#PRIVATE</a></td>
+<td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a></td>
 <td align="left">OPAQUE_<wbr/>REPROCESSING</td>
 </tr>
 <tr>
-<td align="left">PRIVATE</td>
-<td align="left">YUV_<wbr/>420_<wbr/>888</td>
+<td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#PRIVATE">ImageFormat#PRIVATE</a></td>
+<td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a></td>
 <td align="left">OPAQUE_<wbr/>REPROCESSING</td>
 </tr>
 <tr>
-<td align="left">YUV_<wbr/>420_<wbr/>888</td>
-<td align="left">JPEG</td>
+<td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a></td>
+<td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a></td>
 <td align="left">YUV_<wbr/>REPROCESSING</td>
 </tr>
 <tr>
-<td align="left">YUV_<wbr/>420_<wbr/>888</td>
-<td align="left">YUV_<wbr/>420_<wbr/>888</td>
+<td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a></td>
+<td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a></td>
 <td align="left">YUV_<wbr/>REPROCESSING</td>
 </tr>
 </tbody>
 </table>
-<p>PRIVATE refers to a device-internal format that is not directly application-visible.<wbr/>
-A PRIVATE input surface can be acquired by
-ImageReader.<wbr/>newOpaqueInstance(width,<wbr/> height,<wbr/> maxImages).<wbr/>
-For a OPAQUE_<wbr/>REPROCESSING-capable camera device,<wbr/> using the PRIVATE format
-as either input or output will never hurt maximum frame rate (i.<wbr/>e.<wbr/>
-Stream<wbr/>Configuration<wbr/>Map#get<wbr/>Output<wbr/>Stall<wbr/>Duration(format,<wbr/> size) is always 0),<wbr/>
-where format is ImageFormat#PRIVATE.<wbr/></p>
+<p>PRIVATE refers to a device-internal format that is not directly application-visible.<wbr/>  A
+PRIVATE input surface can be acquired by <a href="https://developer.android.com/reference/android/media/ImageReader.html#newOpaqueInstance">ImageReader#newOpaqueInstance</a>.<wbr/></p>
+<p>For a OPAQUE_<wbr/>REPROCESSING-capable camera device,<wbr/> using the PRIVATE format as either input
+or output will never hurt maximum frame rate (i.<wbr/>e.<wbr/>  <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputStallDuration">getOutputStallDuration(ImageFormat.<wbr/>PRIVATE,<wbr/> size)</a> is always 0),<wbr/></p>
 <p>Attempting to configure an input stream with output streams not
 listed as available in this map is not valid.<wbr/></p>
             </td>
@@ -16752,7 +16747,7 @@ is the same regardless of whether the stream is input or output.<wbr/></p>
 <a href="#static_android.scaler.availableStallDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stall<wbr/>Durations</a> for more details about
 calculating the max frame rate.<wbr/></p>
 <p>(Keep in sync with
-StreamConfigurationMap#getOutputMinFrameDuration)</p>
+<a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputMinFrameDuration">StreamConfigurationMap#getOutputMinFrameDuration</a>)</p>
             </td>
           </tr>
 
@@ -16848,12 +16843,13 @@ streams in a request (the regular stall calculation rules are
 ignored).<wbr/></p>
 <p>The following formats may always have a stall duration:</p>
 <ul>
-<li>ImageFormat#JPEG</li>
-<li>ImageFormat#RAW_<wbr/>SENSOR</li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a></li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#RAW_SENSOR">ImageFormat#RAW_<wbr/>SENSOR</a></li>
 </ul>
 <p>The following formats will never have a stall duration:</p>
 <ul>
-<li>Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a></li>
+<li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#RAW10">ImageFormat#RAW10</a></li>
 </ul>
 <p>All other formats may or may not have an allowed stall duration on
 a per-capability basis; refer to <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
@@ -16861,7 +16857,7 @@ for more details.<wbr/></p>
 <p>See <a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a> for more information about
 calculating the max frame rate (absent stalls).<wbr/></p>
 <p>(Keep up to date with
-StreamConfigurationMap#getOutputStallDuration(int,<wbr/> Size) )</p>
+<a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputStallDuration">StreamConfigurationMap#getOutputStallDuration</a> )</p>
             </td>
           </tr>
 
@@ -16944,57 +16940,57 @@ configurations based on the hardware level
 </thead>
 <tbody>
 <tr>
-<td align="center">JPEG</td>
+<td align="center"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a></td>
 <td align="center"><a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a></td>
 <td align="center">Any</td>
 <td align="center"></td>
 </tr>
 <tr>
-<td align="center">JPEG</td>
+<td align="center"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a></td>
 <td align="center">1920x1080 (1080p)</td>
 <td align="center">Any</td>
 <td align="center">if 1080p &lt;= activeArraySize</td>
 </tr>
 <tr>
-<td align="center">JPEG</td>
+<td align="center"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a></td>
 <td align="center">1280x720 (720)</td>
 <td align="center">Any</td>
 <td align="center">if 720p &lt;= activeArraySize</td>
 </tr>
 <tr>
-<td align="center">JPEG</td>
+<td align="center"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a></td>
 <td align="center">640x480 (480p)</td>
 <td align="center">Any</td>
 <td align="center">if 480p &lt;= activeArraySize</td>
 </tr>
 <tr>
-<td align="center">JPEG</td>
+<td align="center"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a></td>
 <td align="center">320x240 (240p)</td>
 <td align="center">Any</td>
 <td align="center">if 240p &lt;= activeArraySize</td>
 </tr>
 <tr>
-<td align="center">YUV_<wbr/>420_<wbr/>888</td>
+<td align="center"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a></td>
 <td align="center">all output sizes available for JPEG</td>
 <td align="center">FULL</td>
 <td align="center"></td>
 </tr>
 <tr>
-<td align="center">YUV_<wbr/>420_<wbr/>888</td>
+<td align="center"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a></td>
 <td align="center">all output sizes available for JPEG,<wbr/> up to the maximum video size</td>
 <td align="center">LIMITED</td>
 <td align="center"></td>
 </tr>
 <tr>
-<td align="center">IMPLEMENTATION_<wbr/>DEFINED</td>
+<td align="center"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#PRIVATE">ImageFormat#PRIVATE</a></td>
 <td align="center">same as YUV_<wbr/>420_<wbr/>888</td>
 <td align="center">Any</td>
 <td align="center"></td>
 </tr>
 </tbody>
 </table>
-<p>Refer to <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> for additional
-mandatory stream configurations on a per-capability basis.<wbr/></p>
+<p>Refer to <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> and <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createCaptureSession">CameraDevice#createCaptureSession</a> for additional mandatory
+stream configurations on a per-capability basis.<wbr/></p>
             </td>
           </tr>
 
@@ -17406,8 +17402,8 @@ can run concurrently to the rest of the camera pipeline,<wbr/> but
 cannot process more than 1 capture at a time.<wbr/></li>
 </ul>
 <p>The necessary information for the application,<wbr/> given the model above,<wbr/>
-is provided via the <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a> field
-using StreamConfigurationMap#getOutputMinFrameDuration(int,<wbr/> Size).<wbr/>
+is provided via the <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a> field using
+<a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputMinFrameDuration">StreamConfigurationMap#getOutputMinFrameDuration</a>.<wbr/>
 These are used to determine the maximum frame rate /<wbr/> minimum frame
 duration that is possible for a given stream configuration.<wbr/></p>
 <p>Specifically,<wbr/> the application can use the following rules to
@@ -17416,21 +17412,19 @@ device:</p>
 <ol>
 <li>Let the set of currently configured input/<wbr/>output streams
 be called <code>S</code>.<wbr/></li>
-<li>Find the minimum frame durations for each stream in <code>S</code>,<wbr/> by
-looking it up in <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a> using
-StreamConfigurationMap#getOutputMinFrameDuration(int,<wbr/> Size) (with
-its respective size/<wbr/>format).<wbr/> Let this set of frame durations be called
-<code>F</code>.<wbr/></li>
+<li>Find the minimum frame durations for each stream in <code>S</code>,<wbr/> by looking
+it up in <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a> using <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputMinFrameDuration">StreamConfigurationMap#getOutputMinFrameDuration</a>
+(with its respective size/<wbr/>format).<wbr/> Let this set of frame durations be
+called <code>F</code>.<wbr/></li>
 <li>For any given request <code>R</code>,<wbr/> the minimum frame duration allowed
 for <code>R</code> is the maximum out of all values in <code>F</code>.<wbr/> Let the streams
 used in <code>R</code> be called <code>S_<wbr/>r</code>.<wbr/></li>
 </ol>
-<p>If none of the streams in <code>S_<wbr/>r</code> have a stall time (listed in
-StreamConfigurationMap#getOutputStallDuration(int,<wbr/>Size) using its
-respective size/<wbr/>format),<wbr/> then the frame duration in
-<code>F</code> determines the steady state frame rate that the application will
-get if it uses <code>R</code> as a repeating request.<wbr/> Let this special kind
-of request be called <code>Rsimple</code>.<wbr/></p>
+<p>If none of the streams in <code>S_<wbr/>r</code> have a stall time (listed in <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputStallDuration">StreamConfigurationMap#getOutputStallDuration</a>
+using its respective size/<wbr/>format),<wbr/> then the frame duration in <code>F</code>
+determines the steady state frame rate that the application will get
+if it uses <code>R</code> as a repeating request.<wbr/> Let this special kind of
+request be called <code>Rsimple</code>.<wbr/></p>
 <p>A repeating request <code>Rsimple</code> can be <em>occasionally</em> interleaved
 by a single capture of a new request <code>Rstall</code> (which has at least
 one in-use stream with a non-0 stall time) and if <code>Rstall</code> has the
@@ -17438,7 +17432,7 @@ same minimum frame duration this will not cause a frame rate loss
 if all buffers from the previous <code>Rstall</code> have already been
 delivered.<wbr/></p>
 <p>For more details about stalling,<wbr/> see
-StreamConfigurationMap#getOutputStallDuration(int,<wbr/>Size).<wbr/></p>
+<a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputStallDuration">StreamConfigurationMap#getOutputStallDuration</a>.<wbr/></p>
 <p>This control is only effective if <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> or <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> is set to
 OFF; otherwise the auto-exposure algorithm will override this value.<wbr/></p>
             </td>
@@ -18079,8 +18073,8 @@ The maximum of the range SHOULD be at least 1 second (1e9),<wbr/> MUST be at lea
               <p>Attempting to use frame durations beyond the maximum will result in the frame
 duration being clipped to the maximum.<wbr/> See that control for a full definition of frame
 durations.<wbr/></p>
-<p>Refer to StreamConfigurationMap#getOutputMinFrameDuration(int,<wbr/>Size) for the minimum
-frame duration values.<wbr/></p>
+<p>Refer to <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputMinFrameDuration">StreamConfigurationMap#getOutputMinFrameDuration</a>
+for the minimum frame duration values.<wbr/></p>
             </td>
           </tr>
 
@@ -18335,7 +18329,7 @@ and the result metadata generated by a single capture are identical.<wbr/></p></
                   <li>
                     <span class="entry_type_enum_name">REALTIME</span>
                     <span class="entry_type_enum_notes"><p>Timestamps from <a href="#dynamic_android.sensor.timestamp">android.<wbr/>sensor.<wbr/>timestamp</a> are in the same timebase as
-android.<wbr/>os.<wbr/>System<wbr/>Clock#elapsed<wbr/>Realtime<wbr/>Nanos(),<wbr/>
+<a href="https://developer.android.com/reference/android/os/SystemClock.html#elapsedRealtimeNanos">SystemClock#elapsedRealtimeNanos</a>,<wbr/>
 and they can be compared to other timestamps using that base.<wbr/></p></span>
                   </li>
                 </ul>
@@ -19548,8 +19542,8 @@ can run concurrently to the rest of the camera pipeline,<wbr/> but
 cannot process more than 1 capture at a time.<wbr/></li>
 </ul>
 <p>The necessary information for the application,<wbr/> given the model above,<wbr/>
-is provided via the <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a> field
-using StreamConfigurationMap#getOutputMinFrameDuration(int,<wbr/> Size).<wbr/>
+is provided via the <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a> field using
+<a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputMinFrameDuration">StreamConfigurationMap#getOutputMinFrameDuration</a>.<wbr/>
 These are used to determine the maximum frame rate /<wbr/> minimum frame
 duration that is possible for a given stream configuration.<wbr/></p>
 <p>Specifically,<wbr/> the application can use the following rules to
@@ -19558,21 +19552,19 @@ device:</p>
 <ol>
 <li>Let the set of currently configured input/<wbr/>output streams
 be called <code>S</code>.<wbr/></li>
-<li>Find the minimum frame durations for each stream in <code>S</code>,<wbr/> by
-looking it up in <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a> using
-StreamConfigurationMap#getOutputMinFrameDuration(int,<wbr/> Size) (with
-its respective size/<wbr/>format).<wbr/> Let this set of frame durations be called
-<code>F</code>.<wbr/></li>
+<li>Find the minimum frame durations for each stream in <code>S</code>,<wbr/> by looking
+it up in <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a> using <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputMinFrameDuration">StreamConfigurationMap#getOutputMinFrameDuration</a>
+(with its respective size/<wbr/>format).<wbr/> Let this set of frame durations be
+called <code>F</code>.<wbr/></li>
 <li>For any given request <code>R</code>,<wbr/> the minimum frame duration allowed
 for <code>R</code> is the maximum out of all values in <code>F</code>.<wbr/> Let the streams
 used in <code>R</code> be called <code>S_<wbr/>r</code>.<wbr/></li>
 </ol>
-<p>If none of the streams in <code>S_<wbr/>r</code> have a stall time (listed in
-StreamConfigurationMap#getOutputStallDuration(int,<wbr/>Size) using its
-respective size/<wbr/>format),<wbr/> then the frame duration in
-<code>F</code> determines the steady state frame rate that the application will
-get if it uses <code>R</code> as a repeating request.<wbr/> Let this special kind
-of request be called <code>Rsimple</code>.<wbr/></p>
+<p>If none of the streams in <code>S_<wbr/>r</code> have a stall time (listed in <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputStallDuration">StreamConfigurationMap#getOutputStallDuration</a>
+using its respective size/<wbr/>format),<wbr/> then the frame duration in <code>F</code>
+determines the steady state frame rate that the application will get
+if it uses <code>R</code> as a repeating request.<wbr/> Let this special kind of
+request be called <code>Rsimple</code>.<wbr/></p>
 <p>A repeating request <code>Rsimple</code> can be <em>occasionally</em> interleaved
 by a single capture of a new request <code>Rstall</code> (which has at least
 one in-use stream with a non-0 stall time) and if <code>Rstall</code> has the
@@ -19580,7 +19572,7 @@ same minimum frame duration this will not cause a frame rate loss
 if all buffers from the previous <code>Rstall</code> have already been
 delivered.<wbr/></p>
 <p>For more details about stalling,<wbr/> see
-StreamConfigurationMap#getOutputStallDuration(int,<wbr/>Size).<wbr/></p>
+<a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputStallDuration">StreamConfigurationMap#getOutputStallDuration</a>.<wbr/></p>
 <p>This control is only effective if <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> or <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> is set to
 OFF; otherwise the auto-exposure algorithm will override this value.<wbr/></p>
             </td>
@@ -19719,11 +19711,10 @@ the timestamps measure time since an unspecified starting point,<wbr/>
 and are monotonically increasing.<wbr/> They can be compared with the
 timestamps for other captures from the same camera device,<wbr/> but are
 not guaranteed to be comparable to any other time source.<wbr/></p>
-<p>When <a href="#static_android.sensor.info.timestampSource">android.<wbr/>sensor.<wbr/>info.<wbr/>timestamp<wbr/>Source</a> <code>==</code> REALTIME,<wbr/>
-the timestamps measure time in the same timebase as
-android.<wbr/>os.<wbr/>System<wbr/>Clock#elapsed<wbr/>Realtime<wbr/>Nanos(),<wbr/> and they can be
-compared to other timestamps from other subsystems that are using
-that base.<wbr/></p>
+<p>When <a href="#static_android.sensor.info.timestampSource">android.<wbr/>sensor.<wbr/>info.<wbr/>timestamp<wbr/>Source</a> <code>==</code> REALTIME,<wbr/> the
+timestamps measure time in the same timebase as <a href="https://developer.android.com/reference/android/os/SystemClock.html#elapsedRealtimeNanos">SystemClock#elapsedRealtimeNanos</a>,<wbr/> and they can
+be compared to other timestamps from other subsystems that
+are using that base.<wbr/></p>
             </td>
           </tr>
 
@@ -20393,7 +20384,7 @@ and the start of last row exposure.<wbr/></p>
 
             <td class="entry_range">
               <p>&gt;= 0 and &lt;
-StreamConfigurationMap#getOutputMinFrameDuration(int,<wbr/> Size).<wbr/></p>
+<a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputMinFrameDuration">StreamConfigurationMap#getOutputMinFrameDuration</a>.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -24895,7 +24886,7 @@ is also UNKNOWN.<wbr/></p>
                     <span class="entry_type_enum_value">0</span>
                     <span class="entry_type_enum_notes"><p>Every frame has the requests immediately applied.<wbr/></p>
 <p>Furthermore for all results,<wbr/>
-<code><a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == CaptureResult#getFrameNumber()</code></p>
+<code><a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == <a href="https://developer.android.com/reference/android/hardware/camera2/CaptureResult.html#getFrameNumber">CaptureResult#getFrameNumber</a></code></p>
 <p>Changing controls over multiple requests one after another will
 produce results that have those controls applied atomically
 each frame.<wbr/></p>
@@ -24978,7 +24969,8 @@ where resultN has frameNumber N.<wbr/>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>Use <code>frame_<wbr/>count</code> from camera3_<wbr/>request_<wbr/>t instead of
-<a href="#controls_android.request.frameCount">android.<wbr/>request.<wbr/>frame<wbr/>Count</a> or <code>CaptureResult#getFrameNumber()</code>.<wbr/></p>
+<a href="#controls_android.request.frameCount">android.<wbr/>request.<wbr/>frame<wbr/>Count</a> or
+<code>@link{android.<wbr/>hardware.<wbr/>camera2.<wbr/>Capture<wbr/>Result#get<wbr/>Frame<wbr/>Number}</code>.<wbr/></p>
 <p>LIMITED devices are strongly encouraged to use a non-negative
 value.<wbr/> If UNKNOWN is used here then app developers do not have a way
 to know when sensor settings have been applied.<wbr/></p>
@@ -25377,9 +25369,9 @@ YUV_<wbr/>REPROCESSING).<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>If a camera device supports outputting depth range data in the form of a depth
-point cloud (Image<wbr/>Format#DEPTH_<wbr/>POINT_<wbr/>CLOUD),<wbr/> this is the maximum number of points
-an output buffer may contain.<wbr/></p>
+              <p>If a camera device supports outputting depth range data in the form of a depth point
+cloud (<a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#DEPTH_POINT_CLOUD">Image<wbr/>Format#DEPTH_<wbr/>POINT_<wbr/>CLOUD</a>),<wbr/> this is the maximum
+number of points an output buffer may contain.<wbr/></p>
 <p>Any given buffer may contain between 0 and maxDepthSamples points,<wbr/> inclusive.<wbr/>
 If output in the depth point cloud format is not supported,<wbr/> this entry will
 not be defined.<wbr/></p>
@@ -25520,8 +25512,7 @@ is the same regardless of whether the stream is input or output.<wbr/></p>
 <p>See <a href="#controls_android.sensor.frameDuration">android.<wbr/>sensor.<wbr/>frame<wbr/>Duration</a> and
 <a href="#static_android.scaler.availableStallDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stall<wbr/>Durations</a> for more details about
 calculating the max frame rate.<wbr/></p>
-<p>(Keep in sync with
-StreamConfigurationMap#getOutputMinFrameDuration)</p>
+<p>(Keep in sync with <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputMinFrameDuration">StreamConfigurationMap#getOutputMinFrameDuration</a>)</p>
             </td>
           </tr>
 
