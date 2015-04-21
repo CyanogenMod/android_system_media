@@ -476,6 +476,21 @@ typedef enum {
     // 3 is reserved for future use
 } audio_channel_representation_t;
 
+/* The channel index masks defined here are the canonical masks for 1 to 8 channel
+ * endpoints and apply to both source and sink.
+ */
+enum {
+    AUDIO_CHANNEL_INDEX_HDR  = AUDIO_CHANNEL_REPRESENTATION_INDEX << AUDIO_CHANNEL_COUNT_MAX,
+    AUDIO_CHANNEL_INDEX_MASK_1 =  AUDIO_CHANNEL_INDEX_HDR | (1 << 1) - 1,
+    AUDIO_CHANNEL_INDEX_MASK_2 =  AUDIO_CHANNEL_INDEX_HDR | (1 << 2) - 1,
+    AUDIO_CHANNEL_INDEX_MASK_3 =  AUDIO_CHANNEL_INDEX_HDR | (1 << 3) - 1,
+    AUDIO_CHANNEL_INDEX_MASK_4 =  AUDIO_CHANNEL_INDEX_HDR | (1 << 4) - 1,
+    AUDIO_CHANNEL_INDEX_MASK_5 =  AUDIO_CHANNEL_INDEX_HDR | (1 << 5) - 1,
+    AUDIO_CHANNEL_INDEX_MASK_6 =  AUDIO_CHANNEL_INDEX_HDR | (1 << 6) - 1,
+    AUDIO_CHANNEL_INDEX_MASK_7 =  AUDIO_CHANNEL_INDEX_HDR | (1 << 7) - 1,
+    AUDIO_CHANNEL_INDEX_MASK_8 =  AUDIO_CHANNEL_INDEX_HDR | (1 << 8) - 1,
+};
+
 /* The return value is undefined if the channel mask is invalid. */
 static inline uint32_t audio_channel_mask_get_bits(audio_channel_mask_t channel)
 {
@@ -1249,6 +1264,7 @@ static inline audio_channel_mask_t audio_channel_out_mask_from_count(uint32_t ch
 
 /* Derive an input channel mask for position assignment from a channel count.
  * Currently handles only mono and stereo.
+ * TODO: consider switching to index channels when > 2
  * Returns the matching channel mask,
  * or AUDIO_CHANNEL_NONE if the channel count is zero,
  * or AUDIO_CHANNEL_INVALID if the channel count exceeds that of the
