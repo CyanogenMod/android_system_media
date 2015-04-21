@@ -140,3 +140,43 @@ void memcpy_by_audio_format(void *dst, audio_format_t dst_format,
     LOG_ALWAYS_FATAL("invalid src format %#x for dst format %#x",
             src_format, dst_format);
 }
+
+size_t memcpy_by_index_array_initialization_from_channel_mask(int8_t *idxary, size_t arysize,
+        audio_channel_mask_t dst_channel_mask, audio_channel_mask_t src_channel_mask)
+{
+    const audio_channel_representation_t src_representation =
+            audio_channel_mask_get_representation(src_channel_mask);
+    const audio_channel_representation_t dst_representation =
+            audio_channel_mask_get_representation(dst_channel_mask);
+    const uint32_t src_bits = audio_channel_mask_get_bits(src_channel_mask);
+    const uint32_t dst_bits = audio_channel_mask_get_bits(dst_channel_mask);
+
+    switch (src_representation) {
+    case AUDIO_CHANNEL_REPRESENTATION_POSITION:
+        switch (dst_representation) {
+        case AUDIO_CHANNEL_REPRESENTATION_POSITION:
+            return memcpy_by_index_array_initialization(idxary, arysize,
+                    dst_bits, src_bits);
+        case AUDIO_CHANNEL_REPRESENTATION_INDEX:
+            return memcpy_by_index_array_initialization_dst_index(idxary, arysize,
+                    dst_bits, src_bits);
+        default:
+            return 0;
+        }
+        break;
+    case AUDIO_CHANNEL_REPRESENTATION_INDEX:
+        switch (dst_representation) {
+        case AUDIO_CHANNEL_REPRESENTATION_POSITION:
+            return memcpy_by_index_array_initialization_src_index(idxary, arysize,
+                    dst_bits, src_bits);
+        case AUDIO_CHANNEL_REPRESENTATION_INDEX:
+            return memcpy_by_index_array_initialization(idxary, arysize,
+                    dst_bits, src_bits);
+        default:
+            return 0;
+        }
+        break;
+    default:
+        return 0;
+    }
+}
