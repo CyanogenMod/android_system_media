@@ -245,6 +245,24 @@ void upmix_to_stereo_i16_from_mono_i16(int16_t *dst, const int16_t *src, size_t 
     }
 }
 
+void downmix_to_mono_float_from_stereo_float(float *dst, const float *src, size_t frames)
+{
+    while (frames--) {
+        *dst++ = (src[0] + src[1]) * 0.5;
+        src += 2;
+    }
+}
+
+void upmix_to_stereo_float_from_mono_float(float *dst, const float *src, size_t frames)
+{
+    while (frames--) {
+        float temp = *src++;
+        dst[0] = temp;
+        dst[1] = temp;
+        dst += 2;
+    }
+}
+
 size_t nonZeroMono32(const int32_t *samples, size_t count)
 {
     size_t nonZero = 0;

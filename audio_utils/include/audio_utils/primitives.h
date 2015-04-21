@@ -323,6 +323,27 @@ void downmix_to_mono_i16_from_stereo_i16(int16_t *dst, const int16_t *src, size_
  */
 void upmix_to_stereo_i16_from_mono_i16(int16_t *dst, const int16_t *src, size_t count);
 
+/* Downmix pairs of interleaved stereo input float samples to mono output float samples
+ * by averaging the stereo pair together.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of stereo frames to downmix
+ * The destination and source buffers must be completely separate (non-overlapping),
+ * or they must both start at the same address.
+ */
+void downmix_to_mono_float_from_stereo_float(float *dst, const float *src, size_t count);
+
+/* Upmix mono input float samples to pairs of interleaved stereo output float samples by
+ * duplicating.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of mono samples to upmix
+ * The destination and source buffers must be completely separate (non-overlapping).
+ */
+void upmix_to_stereo_float_from_mono_float(float *dst, const float *src, size_t count);
+
 /* Return the total number of non-zero 32-bit samples */
 size_t nonZeroMono32(const int32_t *samples, size_t count);
 
