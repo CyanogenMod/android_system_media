@@ -56,7 +56,7 @@ extern int8_t const pcm_format_value_map[50];
 
 /* sort these highest -> lowest (to default to best quality) */
 static const unsigned std_sample_rates[] =
-    {48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000};
+    {/*96000,*/ 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000};
 
 static void profile_reset(alsa_device_profile* profile)
 {
@@ -423,11 +423,6 @@ char * profile_get_sample_rate_strs(alsa_device_profile* profile)
 
 char * profile_get_format_strs(alsa_device_profile* profile)
 {
-    /* TODO remove this hack when we have support for input in non PCM16 formats */
-    if (profile->direction == PCM_IN) {
-        return strdup("AUDIO_FORMAT_PCM_16_BIT");
-    }
-
     /* if we assume that format strings are about 24 characters (AUDIO_FORMAT_PCM_16_BIT is 23),
      * plus ~1 for a delimiter "|" this buffer has room for about 10 format strings which seems
      *  like way too much, but it's a stack variable so only temporary.
@@ -479,6 +474,18 @@ char * profile_get_channel_count_strs(alsa_device_profile* profile)
         /* channel counts greater than this not considered */
     };
 
+    static const char * const index_chans_strs[] = {
+        /* 0 */"AUDIO_CHANNEL_NONE", /* will never be taken as this is a terminator */
+        /* 1 */"AUDIO_CHANNEL_INDEX_MASK_1",
+        /* 2 */"AUDIO_CHANNEL_INDEX_MASK_2",
+        /* 3 */"AUDIO_CHANNEL_INDEX_MASK_3",
+        /* 4 */"AUDIO_CHANNEL_INDEX_MASK_4",
+        /* 5 */"AUDIO_CHANNEL_INDEX_MASK_5",
+        /* 6 */"AUDIO_CHANNEL_INDEX_MASK_6",
+        /* 7 */"AUDIO_CHANNEL_INDEX_MASK_7",
+        /* 8 */"AUDIO_CHANNEL_INDEX_MASK_8",
+    };
+
     const bool isOutProfile = profile->direction == PCM_OUT;
 
     const char * const * const chans_strs = isOutProfile ? out_chans_strs : in_chans_strs;
@@ -486,11 +493,10 @@ char * profile_get_channel_count_strs(alsa_device_profile* profile)
             isOutProfile ? ARRAY_SIZE(out_chans_strs) : ARRAY_SIZE(in_chans_strs);
 
     /*
-     * If we assume each channel string is 24 chars ("AUDIO_CHANNEL_OUT_7POINT1" is 25) + 1 for,
-     * the "|" delimiter, then we have room for about 10 strings (which is more than we
-     * currently support).
+     * If we assume each channel string is 26 chars ("AUDIO_CHANNEL_INDEX_MASK_8" is 26) + 1 for,
+     * the "|" delimiter, then we allocate room for 16 strings.
      */
-    char buffer[256]; /* caution, may need to be expanded */
+    char buffer[27 * 16 + 1]; /* caution, may need to be expanded */
     buffer[0] = '\0';
     size_t buffSize = ARRAY_SIZE(buffer);
     size_t curStrLen = 0;
@@ -506,11 +512,11 @@ char * profile_get_channel_count_strs(alsa_device_profile* profile)
     size_t index;
     unsigned channel_count;
     for (index = 0;
-         (channel_count = profile->channel_counts[index]) != 0
-                 && channel_count < chans_strs_size
-                 && chans_strs[channel_count] != NULL;
+         (channel_count = profile->channel_counts[index]) != 0;
          index++) {
-        if (channel_count != 2) {
+        if (channel_count < chans_strs_size
+                && chans_strs[channel_count] != NULL
+                && channel_count != 2 /* stereo already supported */) {
             // account for the '|' and the '\0'
             if (buffSize - curStrLen < strlen(chans_strs[channel_count]) + 2) {
                 /* we don't have room for another, so bail at this point rather than
@@ -521,6 +527,20 @@ char * profile_get_channel_count_strs(alsa_device_profile* profile)
 
             strlcat(buffer, "|", buffSize);
             curStrLen = strlcat(buffer, chans_strs[channel_count], buffSize);
+        }
+        // for input allow channel index masks.
+        // TODO: allow for output as well?
+        if (!isOutProfile) {
+            // account for the '|' and the '\0'
+             if (buffSize - curStrLen < strlen(index_chans_strs[channel_count]) + 2) {
+                 /* we don't have room for another, so bail at this point rather than
+                  * return a malformed rate string
+                  */
+                 break;
+             }
+
+             strlcat(buffer, "|", buffSize);
+             curStrLen = strlcat(buffer, index_chans_strs[channel_count], buffSize);
         }
     }
 
