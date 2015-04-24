@@ -726,7 +726,11 @@ typedef enum {
     AUDIO_OUTPUT_FLAG_COMPRESS_OFFLOAD = 0x10,  // offload playback of compressed
                                                 // streams to hardware codec
     AUDIO_OUTPUT_FLAG_NON_BLOCKING = 0x20, // use non-blocking write
-    AUDIO_OUTPUT_FLAG_HW_AV_SYNC = 0x40 // output uses a hardware A/V synchronization source
+    AUDIO_OUTPUT_FLAG_HW_AV_SYNC = 0x40, // output uses a hardware A/V synchronization source
+    AUDIO_OUTPUT_FLAG_TTS = 0x80 // output for streams transmitted through speaker
+                                 // at a sample rate high enough to accommodate
+                                 // lower-range ultrasonic playback
+
 } audio_output_flags_t;
 
 /* The audio input flags are analogous to audio output flags.
