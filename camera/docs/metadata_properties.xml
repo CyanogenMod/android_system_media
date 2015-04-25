@@ -36,6 +36,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     <tag id="DEPTH">
         Entry is required for the depth capability.
     </tag>
+    <tag id="REPROC">
+        Entry is required for the YUV or Opaque reprocessing capability.
+    </tag>
     <tag id="FUTURE">
         Entry is  under-specified and is not required for now. This is for book-keeping purpose,
         do not implement or use it, it may be revised for future.
@@ -1305,8 +1308,9 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           `android.control.mode != OFF` and any 3A routine is active.
 
           ZERO_SHUTTER_LAG will be supported if android.request.availableCapabilities
-          contains OPAQUE_REPROCESSING. MANUAL will be supported if android.request.availableCapabilities
-          contains MANUAL_SENSOR. Other intent values are always supported.
+          contains OPAQUE_REPROCESSING or YUV_REPROCESSING. MANUAL will be supported if
+          android.request.availableCapabilities contains MANUAL_SENSOR. Other intent values are
+          always supported.
           </details>
           <tag id="BC" />
         </entry>
@@ -2625,6 +2629,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           quality images.
           </hal_details>
           <tag id="V1" />
+          <tag id="REPROC" />
         </entry>
         <entry name="strength" type="byte">
           <description>Control the amount of edge enhancement
@@ -2655,11 +2660,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           capture rate, then FAST and HIGH_QUALITY will generate the same output.
           </hal_details>
           <tag id="V1" />
+          <tag id="REPROC" />
         </entry>
       </static>
       <dynamic>
         <clone entry="android.edge.mode" kind="controls">
           <tag id="V1" />
+          <tag id="REPROC" />
         </clone>
       </dynamic>
     </section>
@@ -3702,6 +3709,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           images.
           </hal_details>
           <tag id="V1" />
+          <tag id="REPROC" />
         </entry>
         <entry name="strength" type="byte">
           <description>Control the amount of noise reduction
@@ -3734,11 +3742,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           capture rate, then FAST and HIGH_QUALITY will generate the same output.
           </hal_details>
           <tag id="V1" />
+          <tag id="REPROC" />
         </entry>
       </static>
       <dynamic>
         <clone entry="android.noiseReduction.mode" kind="controls">
           <tag id="V1" />
+          <tag id="REPROC" />
         </clone>
       </dynamic>
     </section>
@@ -4096,6 +4106,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           For the reprocessing flow and controls, see
           hardware/libhardware/include/hardware/camera3.h Section 10 for more details.
           </hal_details>
+          <tag id="REPROC" />
         </entry>
       </static>
       <dynamic>
@@ -4306,6 +4317,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               * The maximum available resolution for OPAQUE streams
                 (both input/output) will match the maximum available
                 resolution of JPEG streams.
+              * Static metadata android.reprocess.maxCaptureStall.
               * Only below controls are effective for reprocessing requests and
                 will be present in capture results, other controls in reprocess
                 requests will be ignored by the camera device.
@@ -4388,6 +4400,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               * The maximum available resolution for YUV_420_888 streams
                 (both input/output) will match the maximum available
                 resolution of JPEG streams.
+              * Static metadata android.reprocess.maxCaptureStall.
               * Only the below controls are effective for reprocessing requests and will be
                 present in capture results. The reprocess requests are from the original capture
                 results that are assocaited with the intermidate YUV_420_888 output buffers.
@@ -4981,6 +4994,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           combinations listed for that capability. It can optionally support
           additional formats if it so chooses.
           </hal_details>
+          <tag id="REPROC" />
         </entry>
         <entry name="availableStreamConfigurations" type="int32" visibility="hidden"
           enum="true" container="array"
@@ -5122,7 +5136,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>n</size>
           </array>
           <description>This lists the maximum stall duration for each
-          format/size combination.
+          output format/size combination.
           </description>
           <units>(format, width, height, ns) x n</units>
           <details>
@@ -7871,7 +7885,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
     </section>
     <section name="reprocess">
       <controls>
-        <entry name="effectiveExposureFactor" type="float" visibility="public">
+        <entry name="effectiveExposureFactor" type="float" visibility="public" hwlevel="limited">
             <description>
             The amount of exposure time increase factor applied to the original output
             frame by the application processing before sending for reprocessing.
@@ -7914,13 +7928,46 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             Similarly, for edge enhancement reprocessing, it is only effective when
             `android.edge.mode != OFF`.
             </details>
-          <tag id="V1" />
+          <tag id="REPROC" />
         </entry>
       </controls>
       <dynamic>
       <clone entry="android.reprocess.effectiveExposureFactor" kind="controls">
       </clone>
       </dynamic>
+      <static>
+        <entry name="maxCaptureStall" type="int32" visibility="public" hwlevel="limited">
+          <description>
+          The maximal camera capture pipeline stall (in unit of frame count) introduced by a
+          reprocess capture request.
+          </description>
+          <units>Number of frames.</units>
+          <range> &amp;lt;= 4</range>
+          <details>
+          The key describes the maximal interference that one reprocess (input) request
+          can introduce to the camera simultaneous streaming of regular (output) capture
+          requests, including repeating requests.
+
+          When a reprocessing capture request is submitted while a camera output repeating request
+          (e.g. preview) is being served by the camera device, it may preempt the camera capture
+          pipeline for at least one frame duration so that the camera device is unable to process
+          the following capture request in time for the next sensor start of exposure boundary.
+          When this happens, the application may observe a capture time gap (longer than one frame
+          duration) between adjacent capture output frames, which usually exhibits as preview
+          glitch if the repeating request output targets include a preview surface. This key gives
+          the worst-case number of frame stall introduced by one reprocess request with any kind of
+          formats/sizes combination.
+
+          If this key reports 0, it means a reprocess request doesn't introduce any glitch to the
+          ongoing camera repeating request outputs, as if this reprocess request is never issued.
+
+          This key is supported if the camera device supports OPAQUE or YUV reprocessing (
+          i.e. android.request.availableCapabilities contains OPAQUE_REPROCESSING or
+          YUV_REPROCESSING).
+          </details>
+          <tag id="REPROC" />
+        </entry>
+      </static>
     </section>
     <section name="depth">
       <static>
@@ -8008,7 +8055,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <size>n</size>
           </array>
           <description>This lists the maximum stall duration for each
-          format/size combination for depth streams.
+          output format/size combination for depth streams.
           </description>
           <units>(format, width, height, ns) x n</units>
           <details>

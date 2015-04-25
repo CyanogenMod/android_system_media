@@ -639,6 +639,8 @@ static tag_info_t android_reprocess[ANDROID_REPROCESS_END -
         ANDROID_REPROCESS_START] = {
     [ ANDROID_REPROCESS_EFFECTIVE_EXPOSURE_FACTOR - ANDROID_REPROCESS_START ] =
     { "effectiveExposureFactor",       TYPE_FLOAT  },
+    [ ANDROID_REPROCESS_MAX_CAPTURE_STALL - ANDROID_REPROCESS_START ] =
+    { "maxCaptureStall",               TYPE_INT32  },
 };
 
 static tag_info_t android_depth[ANDROID_DEPTH_END -
@@ -2491,6 +2493,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
         }
 
         case ANDROID_REPROCESS_EFFECTIVE_EXPOSURE_FACTOR: {
+            break;
+        }
+        case ANDROID_REPROCESS_MAX_CAPTURE_STALL: {
             break;
         }
 

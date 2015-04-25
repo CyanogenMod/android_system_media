@@ -393,6 +393,7 @@ typedef enum camera_metadata_tag {
 
     ANDROID_REPROCESS_EFFECTIVE_EXPOSURE_FACTOR =     // float        | public
             ANDROID_REPROCESS_START,
+    ANDROID_REPROCESS_MAX_CAPTURE_STALL,              // int32        | public
     ANDROID_REPROCESS_END,
 
     ANDROID_DEPTH_MAX_DEPTH_SAMPLES =                 // int32        | system

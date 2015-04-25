@@ -1091,6 +1091,13 @@
             ><a href="#dynamic_android.reprocess.effectiveExposureFactor">android.reprocess.effectiveExposureFactor</a></li>
           </ul>
         </li>
+        <li>
+          <span class="toc_kind_header">static</span>
+          <ul class="toc_section">
+            <li
+            ><a href="#static_android.reprocess.maxCaptureStall">android.reprocess.maxCaptureStall</a></li>
+          </ul>
+        </li>
       </ul> <!-- toc_section -->
     </li>
     <li>
@@ -3447,8 +3454,9 @@ strategy.<wbr/></p>
               <p>This control (except for MANUAL) is only effective if
 <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF</code> and any 3A routine is active.<wbr/></p>
 <p>ZERO_<wbr/>SHUTTER_<wbr/>LAG will be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
-contains OPAQUE_<wbr/>REPROCESSING.<wbr/> MANUAL will be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
-contains MANUAL_<wbr/>SENSOR.<wbr/> Other intent values are always supported.<wbr/></p>
+contains OPAQUE_<wbr/>REPROCESSING or YUV_<wbr/>REPROCESSING.<wbr/> MANUAL will be supported if
+<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains MANUAL_<wbr/>SENSOR.<wbr/> Other intent values are
+always supported.<wbr/></p>
             </td>
           </tr>
 
@@ -7611,8 +7619,9 @@ strategy.<wbr/></p>
               <p>This control (except for MANUAL) is only effective if
 <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF</code> and any 3A routine is active.<wbr/></p>
 <p>ZERO_<wbr/>SHUTTER_<wbr/>LAG will be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
-contains OPAQUE_<wbr/>REPROCESSING.<wbr/> MANUAL will be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
-contains MANUAL_<wbr/>SENSOR.<wbr/> Other intent values are always supported.<wbr/></p>
+contains OPAQUE_<wbr/>REPROCESSING or YUV_<wbr/>REPROCESSING.<wbr/> MANUAL will be supported if
+<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains MANUAL_<wbr/>SENSOR.<wbr/> Other intent values are
+always supported.<wbr/></p>
             </td>
           </tr>
 
@@ -8546,6 +8555,7 @@ enhancement.<wbr/></p>
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
+                  <li><a href="#tag_REPROC">REPROC</a></li>
               </ul>
             </td>
 
@@ -8691,6 +8701,7 @@ device.<wbr/></p>
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
+                  <li><a href="#tag_REPROC">REPROC</a></li>
               </ul>
             </td>
 
@@ -8795,6 +8806,7 @@ enhancement.<wbr/></p>
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
+                  <li><a href="#tag_REPROC">REPROC</a></li>
               </ul>
             </td>
 
@@ -13097,6 +13109,7 @@ sensor output.<wbr/> </p></span>
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
+                  <li><a href="#tag_REPROC">REPROC</a></li>
               </ul>
             </td>
 
@@ -13249,6 +13262,7 @@ by this camera device.<wbr/></p>
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
+                  <li><a href="#tag_REPROC">REPROC</a></li>
               </ul>
             </td>
 
@@ -13360,6 +13374,7 @@ sensor output.<wbr/> </p></span>
             <td class="entry_tags">
               <ul class="entry_tags">
                   <li><a href="#tag_V1">V1</a></li>
+                  <li><a href="#tag_REPROC">REPROC</a></li>
               </ul>
             </td>
 
@@ -14522,6 +14537,9 @@ that can be configured and used simultaneously by a camera device.<wbr/></p>
             </td>
 
             <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_REPROC">REPROC</a></li>
+              </ul>
             </td>
 
           </tr>
@@ -14851,6 +14869,7 @@ raw sensor images.<wbr/></p>
 <li>The maximum available resolution for OPAQUE streams
   (both input/<wbr/>output) will match the maximum available
   resolution of JPEG streams.<wbr/></li>
+<li>Static metadata <a href="#static_android.reprocess.maxCaptureStall">android.<wbr/>reprocess.<wbr/>max<wbr/>Capture<wbr/>Stall</a>.<wbr/></li>
 <li>Only below controls are effective for reprocessing requests and
   will be present in capture results,<wbr/> other controls in reprocess
   requests will be ignored by the camera device.<wbr/><ul>
@@ -14940,6 +14959,7 @@ following:</p>
 <li>The maximum available resolution for YUV_<wbr/>420_<wbr/>888 streams
   (both input/<wbr/>output) will match the maximum available
   resolution of JPEG streams.<wbr/></li>
+<li>Static metadata <a href="#static_android.reprocess.maxCaptureStall">android.<wbr/>reprocess.<wbr/>max<wbr/>Capture<wbr/>Stall</a>.<wbr/></li>
 <li>Only the below controls are effective for reprocessing requests and will be
   present in capture results.<wbr/> The reprocess requests are from the original capture
   results that are assocaited with the intermidate YUV_<wbr/>420_<wbr/>888 output buffers.<wbr/>
@@ -16375,6 +16395,9 @@ camera device for input streams,<wbr/> to their corresponding output formats.<wb
             </td>
 
             <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_REPROC">REPROC</a></li>
+              </ul>
             </td>
 
           </tr>
@@ -16757,7 +16780,7 @@ StreamConfigurationMap#getOutputMinFrameDuration)</p>
 
             <td class="entry_description">
               <p>This lists the maximum stall duration for each
-format/<wbr/>size combination.<wbr/></p>
+output format/<wbr/>size combination.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -25004,6 +25027,7 @@ to know when sensor settings have been applied.<wbr/></p>
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -25025,7 +25049,7 @@ frame by the application processing before sending for reprocessing.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_V1">V1</a></li>
+                  <li><a href="#tag_REPROC">REPROC</a></li>
               </ul>
             </td>
 
@@ -25111,6 +25135,7 @@ Similarly,<wbr/> for edge enhancement reprocessing,<wbr/> it is only effective w
               <span class="entry_type_visibility"> [public]</span>
 
 
+              <span class="entry_type_hwlevel">[limited] </span>
 
 
 
@@ -25132,7 +25157,7 @@ frame by the application processing before sending for reprocessing.<wbr/></p>
 
             <td class="entry_tags">
               <ul class="entry_tags">
-                  <li><a href="#tag_V1">V1</a></li>
+                  <li><a href="#tag_REPROC">REPROC</a></li>
               </ul>
             </td>
 
@@ -25172,6 +25197,101 @@ buffer in a way that affects its effective exposure time.<wbr/></p>
 reduction reprocessing,<wbr/> it is only effective when <code><a href="#controls_android.noiseReduction.mode">android.<wbr/>noise<wbr/>Reduction.<wbr/>mode</a> != OFF</code>.<wbr/>
 Similarly,<wbr/> for edge enhancement reprocessing,<wbr/> it is only effective when
 <code><a href="#controls_android.edge.mode">android.<wbr/>edge.<wbr/>mode</a> != OFF</code>.<wbr/></p>
+            </td>
+          </tr>
+
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+        
+
+      <!-- end of kind -->
+      </tbody>
+      <tr><td colspan="6" class="kind">static</td></tr>
+
+      <thead class="entries_header">
+        <tr>
+          <th class="th_name">Property Name</th>
+          <th class="th_type">Type</th>
+          <th class="th_description">Description</th>
+          <th class="th_units">Units</th>
+          <th class="th_range">Range</th>
+          <th class="th_tags">Tags</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        
+
+        
+
+        
+
+        
+
+                
+          <tr class="entry" id="static_android.reprocess.maxCaptureStall">
+            <td class="entry_name
+             " rowspan="3">
+              android.<wbr/>reprocess.<wbr/>max<wbr/>Capture<wbr/>Stall
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+
+              <span class="entry_type_visibility"> [public]</span>
+
+
+              <span class="entry_type_hwlevel">[limited] </span>
+
+
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The maximal camera capture pipeline stall (in unit of frame count) introduced by a
+reprocess capture request.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              Number of frames.<wbr/>
+            </td>
+
+            <td class="entry_range">
+              <p>&lt;= 4</p>
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_REPROC">REPROC</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The key describes the maximal interference that one reprocess (input) request
+can introduce to the camera simultaneous streaming of regular (output) capture
+requests,<wbr/> including repeating requests.<wbr/></p>
+<p>When a reprocessing capture request is submitted while a camera output repeating request
+(e.<wbr/>g.<wbr/> preview) is being served by the camera device,<wbr/> it may preempt the camera capture
+pipeline for at least one frame duration so that the camera device is unable to process
+the following capture request in time for the next sensor start of exposure boundary.<wbr/>
+When this happens,<wbr/> the application may observe a capture time gap (longer than one frame
+duration) between adjacent capture output frames,<wbr/> which usually exhibits as preview
+glitch if the repeating request output targets include a preview surface.<wbr/> This key gives
+the worst-case number of frame stall introduced by one reprocess request with any kind of
+formats/<wbr/>sizes combination.<wbr/></p>
+<p>If this key reports 0,<wbr/> it means a reprocess request doesn't introduce any glitch to the
+ongoing camera repeating request outputs,<wbr/> as if this reprocess request is never issued.<wbr/></p>
+<p>This key is supported if the camera device supports OPAQUE or YUV reprocessing (
+i.<wbr/>e.<wbr/> <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains OPAQUE_<wbr/>REPROCESSING or
+YUV_<wbr/>REPROCESSING).<wbr/></p>
             </td>
           </tr>
 
@@ -25429,7 +25549,7 @@ StreamConfigurationMap#getOutputMinFrameDuration)</p>
 
             <td class="entry_description">
               <p>This lists the maximum stall duration for each
-format/<wbr/>size combination for depth streams.<wbr/></p>
+output format/<wbr/>size combination for depth streams.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -25657,7 +25777,6 @@ corrupted during depth measurement.<wbr/></p>
           <li><a href="#dynamic_android.statistics.hotPixelMap">android.statistics.hotPixelMap</a> (dynamic)</li>
           <li><a href="#dynamic_android.sync.frameNumber">android.sync.frameNumber</a> (dynamic)</li>
           <li><a href="#static_android.sync.maxLatency">android.sync.maxLatency</a> (static)</li>
-          <li><a href="#controls_android.reprocess.effectiveExposureFactor">android.reprocess.effectiveExposureFactor</a> (controls)</li>
           <li><a href="#dynamic_android.edge.mode">android.edge.mode</a> (dynamic)</li>
           <li><a href="#dynamic_android.hotPixel.mode">android.hotPixel.mode</a> (dynamic)</li>
           <li><a href="#dynamic_android.lens.aperture">android.lens.aperture</a> (dynamic)</li>
@@ -25730,6 +25849,22 @@ corrupted during depth measurement.<wbr/></p>
           <li><a href="#static_android.depth.availableDepthStallDurations">android.depth.availableDepthStallDurations</a> (static)</li>
         </ul>
       </li> <!-- tag_DEPTH -->
+      <li id="tag_REPROC">REPROC - 
+        Entry is required for the YUV or Opaque reprocessing capability.
+    
+        <ul class="tags_entries">
+          <li><a href="#controls_android.edge.mode">android.edge.mode</a> (controls)</li>
+          <li><a href="#static_android.edge.availableEdgeModes">android.edge.availableEdgeModes</a> (static)</li>
+          <li><a href="#controls_android.noiseReduction.mode">android.noiseReduction.mode</a> (controls)</li>
+          <li><a href="#static_android.noiseReduction.availableNoiseReductionModes">android.noiseReduction.availableNoiseReductionModes</a> (static)</li>
+          <li><a href="#static_android.request.maxNumInputStreams">android.request.maxNumInputStreams</a> (static)</li>
+          <li><a href="#static_android.scaler.availableInputOutputFormatsMap">android.scaler.availableInputOutputFormatsMap</a> (static)</li>
+          <li><a href="#controls_android.reprocess.effectiveExposureFactor">android.reprocess.effectiveExposureFactor</a> (controls)</li>
+          <li><a href="#static_android.reprocess.maxCaptureStall">android.reprocess.maxCaptureStall</a> (static)</li>
+          <li><a href="#dynamic_android.edge.mode">android.edge.mode</a> (dynamic)</li>
+          <li><a href="#dynamic_android.noiseReduction.mode">android.noiseReduction.mode</a> (dynamic)</li>
+        </ul>
+      </li> <!-- tag_REPROC -->
       <li id="tag_FUTURE">FUTURE - 
         Entry is  under-specified and is not required for now. This is for book-keeping purpose,
         do not implement or use it, it may be revised for future.
