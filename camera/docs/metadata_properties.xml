@@ -4491,6 +4491,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           For OPAQUE_REPROCESSING and YUV_REPROCESSING capabilities, see
           hardware/libhardware/include/hardware/camera3.h Section 10 for more information.
 
+          Devices that support the MANUAL_SENSOR capability must support the
+          CAMERA3_TEMPLATE_MANUAL template defined in camera3.h.
+
+          Devices that support the OPAQUE_REPROCESSING capability or the
+          YUV_REPROCESSING capability must support the
+          CAMERA3_TEMPLATE_ZERO_SHUTTER_LAG template defined in camera3.h.
+
           For DEPTH_OUTPUT, the depth-format keys
           android.depth.availableDepthStreamConfigurations,
           android.depth.availableDepthMinFrameDurations,
