@@ -88,7 +88,6 @@ bool DTSFrameScanner::parseHeader()
     uint32_t fsize = parser.readBits(14);
     uint32_t amode = parser.readBits(6);
     uint32_t sfreq = parser.readBits(4);
-    uint32_t rate = parser.readBits(5);
     // make sure we did not read past collected data
     ALOG_ASSERT((mSyncLength + ((parser.getBitCursor() + 7) >> 3))
             <= mHeaderLength);
@@ -107,9 +106,9 @@ bool DTSFrameScanner::parseHeader()
         return false;
     }
 
-    int32_t sampleRate = kDTSSampleRateTable[rate];
+    int32_t sampleRate = kDTSSampleRateTable[sfreq];
     if (sampleRate < 0) {
-        ALOGE("DTSFrameScanner: ERROR - invalid sampleRate = %d", sampleRate);
+        ALOGE("DTSFrameScanner: ERROR - invalid sampleRate[%u] = %d", sfreq, sampleRate);
         return false;
     }
     mSampleRate = (uint32_t) sampleRate;
