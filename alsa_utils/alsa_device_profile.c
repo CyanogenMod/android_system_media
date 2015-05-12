@@ -54,27 +54,26 @@ static const unsigned const format_byte_size_map[] = {
 
 extern int8_t const pcm_format_value_map[50];
 
-/* sort these highest -> lowest (to default to best quality) */
+/* Sort these in terms of preference (best first).
+   192 kHz is not first because it requires significant resources for possibly worse
+   quality and driver instability (depends on device).
+   The order here determines the default sample rate for the device.
+   AudioPolicyManager may not respect this ordering when picking sample rates.
+   Update MAX_PROFILE_SAMPLE_RATES after changing the array size.
+
+   TODO: remove 32000, 22050, 12000, 11025?  Each sample rate check
+   requires opening the device which may cause pops. */
 static const unsigned std_sample_rates[] =
-    {/*96000,*/ 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000};
+    {96000, 88200, 192000, 176400, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000};
 
 static void profile_reset(alsa_device_profile* profile)
 {
     profile->card = profile->device = -1;
 
-    /* Fill the attribute arrays with invalid values */
-    size_t index;
-    for (index = 0; index < ARRAY_SIZE(profile->formats); index++) {
-        profile->formats[index] = PCM_FORMAT_INVALID;
-    }
-
-    for (index = 0; index < ARRAY_SIZE(profile->sample_rates); index++) {
-        profile->sample_rates[index] = 0;
-    }
-
-    for (index = 0; index < ARRAY_SIZE(profile->channel_counts); index++) {
-        profile->channel_counts[index] = 0;
-    }
+    /* terminate the attribute arrays with invalid values */
+    profile->formats[0] = PCM_FORMAT_INVALID;
+    profile->sample_rates[0] = 0;
+    profile->channel_counts[0] = 0;
 
     profile->min_period_size = profile->max_period_size = 0;
     profile->min_channel_count = profile->max_channel_count = DEFAULT_CHANNEL_COUNT;
@@ -238,7 +237,7 @@ static unsigned profile_enum_sample_rates(alsa_device_profile* profile, unsigned
             profile->sample_rates[num_entries++] = std_sample_rates[index];
         }
     }
-
+    profile->sample_rates[num_entries] = 0; /* terminate */
     return num_entries; /* return # of supported rates */
 }
 
@@ -265,7 +264,7 @@ static unsigned profile_enum_sample_formats(alsa_device_profile* profile, struct
                     profile->formats[num_written++] = format;
                     if (num_written == ARRAY_SIZE(profile->formats) - 1) {
                         /* leave at least one PCM_FORMAT_INVALID at the end */
-                        return num_written;
+                        goto end;
                     }
                 }
             }
@@ -273,7 +272,8 @@ static unsigned profile_enum_sample_formats(alsa_device_profile* profile, struct
             table_index++;
         }
     }
-
+end:
+    profile->formats[num_written] = PCM_FORMAT_INVALID;
     return num_written;
 }
 
@@ -295,7 +295,7 @@ static unsigned profile_enum_channel_counts(alsa_device_profile* profile, unsign
             profile->channel_counts[num_counts++] = std_channel_counts[index];
         }
     }
-
+    profile->channel_counts[num_counts] = 0;
     return num_counts; /* return # of supported counts */
 }
 
