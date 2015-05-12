@@ -528,20 +528,18 @@ char * profile_get_channel_count_strs(alsa_device_profile* profile)
             strlcat(buffer, "|", buffSize);
             curStrLen = strlcat(buffer, chans_strs[channel_count], buffSize);
         }
-        // for input allow channel index masks.
-        // TODO: allow for output as well?
-        if (!isOutProfile) {
-            // account for the '|' and the '\0'
-             if (buffSize - curStrLen < strlen(index_chans_strs[channel_count]) + 2) {
-                 /* we don't have room for another, so bail at this point rather than
-                  * return a malformed rate string
-                  */
-                 break;
-             }
 
-             strlcat(buffer, "|", buffSize);
-             curStrLen = strlcat(buffer, index_chans_strs[channel_count], buffSize);
-        }
+        // handle channel index masks for both input and output
+        // +2 to account for the '|' and the '\0'
+         if (buffSize - curStrLen < strlen(index_chans_strs[channel_count]) + 2) {
+             /* we don't have room for another, so bail at this point rather than
+              * return a malformed rate string
+              */
+             break;
+         }
+
+         strlcat(buffer, "|", buffSize);
+         curStrLen = strlcat(buffer, index_chans_strs[channel_count], buffSize);
     }
 
     return strdup(buffer);
