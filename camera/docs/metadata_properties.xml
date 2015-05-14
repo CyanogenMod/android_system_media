@@ -7451,10 +7451,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         </clone>
         <clone entry="android.tonemap.mode" kind="controls">
         </clone>
-        <clone entry="android.tonemap.gamma" kind="controls">
-        </clone>
-        <clone entry="android.tonemap.presetCurve" kind="controls">
-        </clone>
       </dynamic>
       <controls>
         <entry name="gamma" type="float" visibility="public">
@@ -7504,6 +7500,12 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           </details>
         </entry>
       </controls>
+      <dynamic>
+        <clone entry="android.tonemap.gamma" kind="controls">
+        </clone>
+        <clone entry="android.tonemap.presetCurve" kind="controls">
+        </clone>
+      </dynamic>
     </section>
     <section name="led">
       <controls>
