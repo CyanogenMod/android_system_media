@@ -37,7 +37,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         Entry is required for the depth capability.
     </tag>
     <tag id="REPROC">
-        Entry is required for the YUV or Opaque reprocessing capability.
+        Entry is required for the YUV or PRIVATE reprocessing capability.
     </tag>
     <tag id="FUTURE">
         Entry is  under-specified and is not required for now. This is for book-keeping purpose,
@@ -1308,7 +1308,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           `android.control.mode != OFF` and any 3A routine is active.
 
           ZERO_SHUTTER_LAG will be supported if android.request.availableCapabilities
-          contains OPAQUE_REPROCESSING or YUV_REPROCESSING. MANUAL will be supported if
+          contains PRIVATE_REPROCESSING or YUV_REPROCESSING. MANUAL will be supported if
           android.request.availableCapabilities contains MANUAL_SENSOR. Other intent values are
           always supported.
           </details>
@@ -4105,7 +4105,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           new sensor image will not be captured.
 
           For example, for Zero Shutter Lag (ZSL) still capture use case, the input
-          stream image format will be OPAQUE, the associated output stream image format
+          stream image format will be PRIVATE, the associated output stream image format
           should be JPEG.
           </details>
           <hal_details>
@@ -4302,7 +4302,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                 by the camera device.
               </notes>
             </value>
-            <value optional="true">OPAQUE_REPROCESSING
+            <value optional="true">PRIVATE_REPROCESSING
               <notes>
               The camera device supports the Zero Shutter Lag reprocessing use case.
 
@@ -4325,7 +4325,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               * {@link android.graphics.ImageFormat#PRIVATE} will be reprocessable into both
                 {@link android.graphics.ImageFormat#YUV_420_888} and
                 {@link android.graphics.ImageFormat#JPEG} formats.
-              * The maximum available resolution for OPAQUE streams
+              * The maximum available resolution for PRIVATE streams
                 (both input/output) will match the maximum available
                 resolution of JPEG streams.
               * Static metadata android.reprocess.maxCaptureStall.
@@ -4392,7 +4392,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <value optional="true">YUV_REPROCESSING
               <notes>
               The camera device supports the YUV_420_888 reprocessing use case, similar as
-              OPAQUE_REPROCESSING, This capability requires the camera device to support the
+              PRIVATE_REPROCESSING, This capability requires the camera device to support the
               following:
 
               * One input stream is supported, that is, `android.request.maxNumInputStreams == 1`.
@@ -4508,13 +4508,13 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           If MANUAL_SENSOR is omitted, the HAL may choose to omit the
           android.scaler.availableMinFrameDurations static property entirely.
 
-          For OPAQUE_REPROCESSING and YUV_REPROCESSING capabilities, see
+          For PRIVATE_REPROCESSING and YUV_REPROCESSING capabilities, see
           hardware/libhardware/include/hardware/camera3.h Section 10 for more information.
 
           Devices that support the MANUAL_SENSOR capability must support the
           CAMERA3_TEMPLATE_MANUAL template defined in camera3.h.
 
-          Devices that support the OPAQUE_REPROCESSING capability or the
+          Devices that support the PRIVATE_REPROCESSING capability or the
           YUV_REPROCESSING capability must support the
           CAMERA3_TEMPLATE_ZERO_SHUTTER_LAG template defined in camera3.h.
 
@@ -4964,15 +4964,16 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
             Input Format                                    | Output Format                                     | Capability
           :-------------------------------------------------|:--------------------------------------------------|:----------
-          {@link android.graphics.ImageFormat#PRIVATE}      | {@link android.graphics.ImageFormat#JPEG}         | OPAQUE_REPROCESSING
-          {@link android.graphics.ImageFormat#PRIVATE}      | {@link android.graphics.ImageFormat#YUV_420_888}  | OPAQUE_REPROCESSING
+          {@link android.graphics.ImageFormat#PRIVATE}      | {@link android.graphics.ImageFormat#JPEG}         | PRIVATE_REPROCESSING
+          {@link android.graphics.ImageFormat#PRIVATE}      | {@link android.graphics.ImageFormat#YUV_420_888}  | PRIVATE_REPROCESSING
           {@link android.graphics.ImageFormat#YUV_420_888}  | {@link android.graphics.ImageFormat#JPEG}         | YUV_REPROCESSING
           {@link android.graphics.ImageFormat#YUV_420_888}  | {@link android.graphics.ImageFormat#YUV_420_888}  | YUV_REPROCESSING
 
           PRIVATE refers to a device-internal format that is not directly application-visible.  A
-          PRIVATE input surface can be acquired by {@link android.media.ImageReader#newOpaqueInstance}.
+          PRIVATE input surface can be acquired by {@link android.media.ImageReader#newInstance}
+          with {@link android.graphics.ImageFormat#PRIVATE} as the format.
 
-          For a OPAQUE_REPROCESSING-capable camera device, using the PRIVATE format as either input
+          For a PRIVATE_REPROCESSING-capable camera device, using the PRIVATE format as either input
           or output will never hurt maximum frame rate (i.e.  {@link
           android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration
           getOutputStallDuration(ImageFormat.PRIVATE, size)} is always 0),
@@ -5009,7 +5010,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
                   i += length;
               }
 
-              // writing (static example, OPAQUE_REPROCESSING + YUV_REPROCESSING)
+              // writing (static example, PRIVATE_REPROCESSING + YUV_REPROCESSING)
               int32_t[] contents = {
                 IMPLEMENTATION_DEFINED, 2, YUV_420_888, BLOB,
                 YUV_420_888, 2, YUV_420_888, BLOB,
@@ -7993,8 +7994,8 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           If this key reports 0, it means a reprocess request doesn't introduce any glitch to the
           ongoing camera repeating request outputs, as if this reprocess request is never issued.
 
-          This key is supported if the camera device supports OPAQUE or YUV reprocessing (
-          i.e. android.request.availableCapabilities contains OPAQUE_REPROCESSING or
+          This key is supported if the camera device supports PRIVATE or YUV reprocessing (
+          i.e. android.request.availableCapabilities contains PRIVATE_REPROCESSING or
           YUV_REPROCESSING).
           </details>
           <tag id="REPROC" />

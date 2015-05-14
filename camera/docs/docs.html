@@ -3454,7 +3454,7 @@ strategy.<wbr/></p>
               <p>This control (except for MANUAL) is only effective if
 <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF</code> and any 3A routine is active.<wbr/></p>
 <p>ZERO_<wbr/>SHUTTER_<wbr/>LAG will be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
-contains OPAQUE_<wbr/>REPROCESSING or YUV_<wbr/>REPROCESSING.<wbr/> MANUAL will be supported if
+contains PRIVATE_<wbr/>REPROCESSING or YUV_<wbr/>REPROCESSING.<wbr/> MANUAL will be supported if
 <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains MANUAL_<wbr/>SENSOR.<wbr/> Other intent values are
 always supported.<wbr/></p>
             </td>
@@ -7618,7 +7618,7 @@ strategy.<wbr/></p>
               <p>This control (except for MANUAL) is only effective if
 <code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> != OFF</code> and any 3A routine is active.<wbr/></p>
 <p>ZERO_<wbr/>SHUTTER_<wbr/>LAG will be supported if <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>
-contains OPAQUE_<wbr/>REPROCESSING or YUV_<wbr/>REPROCESSING.<wbr/> MANUAL will be supported if
+contains PRIVATE_<wbr/>REPROCESSING or YUV_<wbr/>REPROCESSING.<wbr/> MANUAL will be supported if
 <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains MANUAL_<wbr/>SENSOR.<wbr/> Other intent values are
 always supported.<wbr/></p>
             </td>
@@ -14556,7 +14556,7 @@ reprocessed images.<wbr/></p>
 only the input buffer will be used to produce these output stream buffers,<wbr/> and a
 new sensor image will not be captured.<wbr/></p>
 <p>For example,<wbr/> for Zero Shutter Lag (ZSL) still capture use case,<wbr/> the input
-stream image format will be OPAQUE,<wbr/> the associated output stream image format
+stream image format will be PRIVATE,<wbr/> the associated output stream image format
 should be JPEG.<wbr/></p>
             </td>
           </tr>
@@ -14847,7 +14847,7 @@ raw sensor images.<wbr/></p>
 </ul></span>
                   </li>
                   <li>
-                    <span class="entry_type_enum_name">OPAQUE_REPROCESSING</span>
+                    <span class="entry_type_enum_name">PRIVATE_REPROCESSING</span>
                     <span class="entry_type_enum_optional">[optional]</span>
                     <span class="entry_type_enum_notes"><p>The camera device supports the Zero Shutter Lag reprocessing use case.<wbr/></p>
 <ul>
@@ -14863,7 +14863,7 @@ raw sensor images.<wbr/></p>
 <li><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#PRIVATE">ImageFormat#PRIVATE</a> will be reprocessable into both
   <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a> and
   <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a> formats.<wbr/></li>
-<li>The maximum available resolution for OPAQUE streams
+<li>The maximum available resolution for PRIVATE streams
   (both input/<wbr/>output) will match the maximum available
   resolution of JPEG streams.<wbr/></li>
 <li>Static metadata <a href="#static_android.reprocess.maxCaptureStall">android.<wbr/>reprocess.<wbr/>max<wbr/>Capture<wbr/>Stall</a>.<wbr/></li>
@@ -14937,7 +14937,7 @@ captured at <code>&gt;=</code> 10 fps.<wbr/></p></span>
                     <span class="entry_type_enum_name">YUV_REPROCESSING</span>
                     <span class="entry_type_enum_optional">[optional]</span>
                     <span class="entry_type_enum_notes"><p>The camera device supports the YUV_<wbr/>420_<wbr/>888 reprocessing use case,<wbr/> similar as
-OPAQUE_<wbr/>REPROCESSING,<wbr/> This capability requires the camera device to support the
+PRIVATE_<wbr/>REPROCESSING,<wbr/> This capability requires the camera device to support the
 following:</p>
 <ul>
 <li>One input stream is supported,<wbr/> that is,<wbr/> <code><a href="#static_android.request.maxNumInputStreams">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Input<wbr/>Streams</a> == 1</code>.<wbr/></li>
@@ -15066,11 +15066,11 @@ the actual exposure applied must be available via
 the result.<wbr/></p>
 <p>If MANUAL_<wbr/>SENSOR is omitted,<wbr/> the HAL may choose to omit the
 <a href="#static_android.scaler.availableMinFrameDurations">android.<wbr/>scaler.<wbr/>available<wbr/>Min<wbr/>Frame<wbr/>Durations</a> static property entirely.<wbr/></p>
-<p>For OPAQUE_<wbr/>REPROCESSING and YUV_<wbr/>REPROCESSING capabilities,<wbr/> see
+<p>For PRIVATE_<wbr/>REPROCESSING and YUV_<wbr/>REPROCESSING capabilities,<wbr/> see
 hardware/<wbr/>libhardware/<wbr/>include/<wbr/>hardware/<wbr/>camera3.<wbr/>h Section 10 for more information.<wbr/></p>
 <p>Devices that support the MANUAL_<wbr/>SENSOR capability must support the
 CAMERA3_<wbr/>TEMPLATE_<wbr/>MANUAL template defined in camera3.<wbr/>h.<wbr/></p>
-<p>Devices that support the OPAQUE_<wbr/>REPROCESSING capability or the
+<p>Devices that support the PRIVATE_<wbr/>REPROCESSING capability or the
 YUV_<wbr/>REPROCESSING capability must support the
 CAMERA3_<wbr/>TEMPLATE_<wbr/>ZERO_<wbr/>SHUTTER_<wbr/>LAG template defined in camera3.<wbr/>h.<wbr/></p>
 <p>For DEPTH_<wbr/>OUTPUT,<wbr/> the depth-format keys
@@ -16426,12 +16426,12 @@ if its dependent capability (<a href="#static_android.request.availableCapabilit
 <tr>
 <td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#PRIVATE">ImageFormat#PRIVATE</a></td>
 <td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#JPEG">ImageFormat#JPEG</a></td>
-<td align="left">OPAQUE_<wbr/>REPROCESSING</td>
+<td align="left">PRIVATE_<wbr/>REPROCESSING</td>
 </tr>
 <tr>
 <td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#PRIVATE">ImageFormat#PRIVATE</a></td>
 <td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a></td>
-<td align="left">OPAQUE_<wbr/>REPROCESSING</td>
+<td align="left">PRIVATE_<wbr/>REPROCESSING</td>
 </tr>
 <tr>
 <td align="left"><a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#YUV_420_888">Image<wbr/>Format#YUV_<wbr/>420_<wbr/>888</a></td>
@@ -16446,8 +16446,9 @@ if its dependent capability (<a href="#static_android.request.availableCapabilit
 </tbody>
 </table>
 <p>PRIVATE refers to a device-internal format that is not directly application-visible.<wbr/>  A
-PRIVATE input surface can be acquired by <a href="https://developer.android.com/reference/android/media/ImageReader.html#newOpaqueInstance">ImageReader#newOpaqueInstance</a>.<wbr/></p>
-<p>For a OPAQUE_<wbr/>REPROCESSING-capable camera device,<wbr/> using the PRIVATE format as either input
+PRIVATE input surface can be acquired by <a href="https://developer.android.com/reference/android/media/ImageReader.html#newInstance">ImageReader#newInstance</a>
+with <a href="https://developer.android.com/reference/android/graphics/ImageFormat.html#PRIVATE">ImageFormat#PRIVATE</a> as the format.<wbr/></p>
+<p>For a PRIVATE_<wbr/>REPROCESSING-capable camera device,<wbr/> using the PRIVATE format as either input
 or output will never hurt maximum frame rate (i.<wbr/>e.<wbr/>  <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputStallDuration">getOutputStallDuration(ImageFormat.<wbr/>PRIVATE,<wbr/> size)</a> is always 0),<wbr/></p>
 <p>Attempting to configure an input stream with output streams not
 listed as available in this map is not valid.<wbr/></p>
@@ -16484,7 +16485,7 @@ for (size_<wbr/>t i = 0; i &lt; entry.<wbr/>count; ) {
     i += length;
 }
 
-//<wbr/> writing (static example,<wbr/> OPAQUE_<wbr/>REPROCESSING + YUV_<wbr/>REPROCESSING)
+//<wbr/> writing (static example,<wbr/> PRIVATE_<wbr/>REPROCESSING + YUV_<wbr/>REPROCESSING)
 int32_<wbr/>t[] contents = {
   IMPLEMENTATION_<wbr/>DEFINED,<wbr/> 2,<wbr/> YUV_<wbr/>420_<wbr/>888,<wbr/> BLOB,<wbr/>
   YUV_<wbr/>420_<wbr/>888,<wbr/> 2,<wbr/> YUV_<wbr/>420_<wbr/>888,<wbr/> BLOB,<wbr/>
@@ -25286,8 +25287,8 @@ the worst-case number of frame stall introduced by one reprocess request with an
 formats/<wbr/>sizes combination.<wbr/></p>
 <p>If this key reports 0,<wbr/> it means a reprocess request doesn't introduce any glitch to the
 ongoing camera repeating request outputs,<wbr/> as if this reprocess request is never issued.<wbr/></p>
-<p>This key is supported if the camera device supports OPAQUE or YUV reprocessing (
-i.<wbr/>e.<wbr/> <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains OPAQUE_<wbr/>REPROCESSING or
+<p>This key is supported if the camera device supports PRIVATE or YUV reprocessing (
+i.<wbr/>e.<wbr/> <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains PRIVATE_<wbr/>REPROCESSING or
 YUV_<wbr/>REPROCESSING).<wbr/></p>
             </td>
           </tr>
@@ -25846,7 +25847,7 @@ corrupted during depth measurement.<wbr/></p>
         </ul>
       </li> <!-- tag_DEPTH -->
       <li id="tag_REPROC">REPROC - 
-        Entry is required for the YUV or Opaque reprocessing capability.
+        Entry is required for the YUV or PRIVATE reprocessing capability.
     
         <ul class="tags_entries">
           <li><a href="#controls_android.edge.mode">android.edge.mode</a> (controls)</li>

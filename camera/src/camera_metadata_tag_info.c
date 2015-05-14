@@ -1747,8 +1747,8 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "RAW";
                     ret = 0;
                     break;
-                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING:
-                    msg = "OPAQUE_REPROCESSING";
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING:
+                    msg = "PRIVATE_REPROCESSING";
                     ret = 0;
                     break;
                 case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS:
