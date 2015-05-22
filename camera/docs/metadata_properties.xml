@@ -1806,8 +1806,25 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           this camera device.</description>
           <units>Frames per second (FPS)</units>
           <details>
-          For devices at the LIMITED level or above, this list will include at least (30, 30) for
-          constant-framerate recording.
+          For devices at the LEGACY level or above:
+
+          * This list will always include (30, 30).
+          * Also, for constant-framerate recording, for each normal
+          {@link android.media.CamcorderProfile CamcorderProfile} that has
+          {@link android.media.CamcorderProfile#quality quality} in
+          the range [{@link android.media.CamcorderProfile#QUALITY_LOW QUALITY_LOW},
+          {@link android.media.CamcorderProfile#QUALITY_2160P QUALITY_2160P}], if the profile is
+          supported by the device and has
+          {@link android.media.CamcorderProfile#videoFrameRate videoFrameRate} `x`, this list will
+          always include (`x`,`x`).
+          * For preview streaming use case, this list will always include (`min`, `max`) where
+          `min` &lt;= 15 and `max` &gt;= 30.
+
+          For devices at the LIMITED level or above:
+
+          * For YUV_420_888 burst capture use case, this list will always include (`min`, `max`)
+          and (`max`, `max`) where `min` &lt;= 15 and `max` = the maximum output frame rate of the
+          maximum YUV_420_888 output size.
           </details>
           <tag id="BC" />
         </entry>
