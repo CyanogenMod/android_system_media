@@ -6733,7 +6733,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             <tag id="RAW" />
           </entry>
           <entry name="availableLensShadingMapModes" type="byte" visibility="public"
-                 type_notes="list of enums" container="array">
+                 type_notes="list of enums" container="array" typedef="enumList">
             <array>
               <size>n</size>
             </array>
