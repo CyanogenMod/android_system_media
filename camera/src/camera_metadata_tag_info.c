@@ -1767,6 +1767,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "DEPTH_OUTPUT";
                     ret = 0;
                     break;
+                case ANDROID_REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO:
+                    msg = "CONSTRAINED_HIGH_SPEED_VIDEO";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
@@ -2548,4 +2552,4 @@ int camera_metadata_enum_snprint(uint32_t tag,
 }
 
 
-#define CAMERA_METADATA_ENUM_STRING_MAX_SIZE 24
+#define CAMERA_METADATA_ENUM_STRING_MAX_SIZE 29

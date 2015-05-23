@@ -299,11 +299,14 @@ ${          insert_toc_body(kind)}\
                   % for value in prop.enum.values:
                   <li>
                     <span class="entry_type_enum_name">${value.name}</span>
+                  % if value.deprecated:
+                    <span class="entry_type_enum_deprecated">[deprecated]</span>
+                  % endif:
                   % if value.optional:
                     <span class="entry_type_enum_optional">[optional]</span>
                   % endif:
                   % if value.hidden:
-                    <span class="entry_type_enum_optional">[hidden]</span>
+                    <span class="entry_type_enum_hidden">[hidden]</span>
                   % endif:
                   % if value.id is not None:
                     <span class="entry_type_enum_value">${value.id}</span>

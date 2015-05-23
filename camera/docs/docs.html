@@ -3809,8 +3809,13 @@ barcode value.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_SPEED_VIDEO</span>
+                    <span class="entry_type_enum_deprecated">[deprecated]</span>
                     <span class="entry_type_enum_optional">[optional]</span>
-                    <span class="entry_type_enum_notes"><p>Optimized for high speed video recording (frame rate &gt;=60fps) use case.<wbr/></p>
+                    <span class="entry_type_enum_notes"><p>This is deprecated,<wbr/> please use
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedCaptureSession">CameraDevice#createConstrainedHighSpeedCaptureSession</a>
+and <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedRequestList">CameraDevice#createConstrainedHighSpeedRequestList</a>
+for high speed video recording.<wbr/></p>
+<p>Optimized for high speed video recording (frame rate &gt;=60fps) use case.<wbr/></p>
 <p>The supported high speed video sizes and fps ranges are specified in
 <a href="#static_android.control.availableHighSpeedVideoConfigurations">android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations</a>.<wbr/> To get desired
 output frame rates,<wbr/> the application is only allowed to select video size
@@ -3958,7 +3963,10 @@ the HAL must list supported video size and fps range in
 <a href="#static_android.control.availableHighSpeedVideoConfigurations">android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations</a>.<wbr/> For a given size,<wbr/> e.<wbr/>g.<wbr/>
 1280x720,<wbr/> if the HAL has two different sensor configurations for normal streaming
 mode and high speed streaming,<wbr/> when this scene mode is set/<wbr/>reset in a sequence of capture
-requests,<wbr/> the HAL may have to switch between different sensor modes.<wbr/></p>
+requests,<wbr/> the HAL may have to switch between different sensor modes.<wbr/>
+This mode is deprecated in HAL3.<wbr/>3,<wbr/> to support high speed video recording,<wbr/> please implement
+<a href="#static_android.control.availableHighSpeedVideoConfigurations">android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations</a> and CONSTRAINED_<wbr/>HIGH_<wbr/>SPEED_<wbr/>VIDEO
+capbility defined in <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>.<wbr/></p>
             </td>
           </tr>
 
@@ -5022,7 +5030,7 @@ mode other than FACE_<wbr/>PRIORITY.<wbr/></p>
                 <span class="entry_type_container">x</span>
 
                 <span class="entry_type_array">
-                  4 x n
+                  5 x n
                 </span>
               <span class="entry_type_visibility"> [hidden as highSpeedVideoConfiguration]</span>
 
@@ -5035,15 +5043,15 @@ mode other than FACE_<wbr/>PRIORITY.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>List of available high speed video size and fps range configurations
-supported by the camera device,<wbr/> in the format of (width,<wbr/> height,<wbr/> fps_<wbr/>min,<wbr/> fps_<wbr/>max).<wbr/></p>
+              <p>List of available high speed video size,<wbr/> fps range and max batch size configurations
+supported by the camera device,<wbr/> in the format of (width,<wbr/> height,<wbr/> fps_<wbr/>min,<wbr/> fps_<wbr/>max,<wbr/> batch_<wbr/>size_<wbr/>max).<wbr/></p>
             </td>
 
             <td class="entry_units">
             </td>
 
             <td class="entry_range">
-              <p>For each configuration,<wbr/> the fps_<wbr/>max &gt;= 60fps.<wbr/></p>
+              <p>For each configuration,<wbr/> the fps_<wbr/>max &gt;= 120fps.<wbr/></p>
             </td>
 
             <td class="entry_tags">
@@ -5058,24 +5066,45 @@ supported by the camera device,<wbr/> in the format of (width,<wbr/> height,<wbr
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>When HIGH_<wbr/>SPEED_<wbr/>VIDEO is supported in <a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a>,<wbr/> this metadata
-will list the supported high speed video size and fps range configurations.<wbr/> All the sizes
-listed in this configuration will be a subset of the sizes reported by <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputSizes">StreamConfigurationMap#getOutputSizes</a> for processed
-non-stalling formats.<wbr/></p>
-<p>For the high speed video use case,<wbr/> where the application will set
-<a href="#controls_android.control.sceneMode">android.<wbr/>control.<wbr/>scene<wbr/>Mode</a> to HIGH_<wbr/>SPEED_<wbr/>VIDEO in capture requests,<wbr/> the application must
+              <p>When CONSTRAINED_<wbr/>HIGH_<wbr/>SPEED_<wbr/>VIDEO is supported in android.<wbr/>control.<wbr/>available<wbr/>Capabilities,<wbr/>
+this metadata will list the supported high speed video size,<wbr/> fps range and max batch size
+configurations.<wbr/> All the sizes listed in this configuration will be a subset of the sizes
+reported by <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getOutputSizes">StreamConfigurationMap#getOutputSizes</a>
+for processed non-stalling formats.<wbr/></p>
+<p>For the high speed video use case,<wbr/> the application must
 select the video size and fps range from this metadata to configure the recording and
 preview streams and setup the recording requests.<wbr/> For example,<wbr/> if the application intends
 to do high speed recording,<wbr/> it can select the maximum size reported by this metadata to
 configure output streams.<wbr/> Once the size is selected,<wbr/> application can filter this metadata
 by selected size and get the supported fps ranges,<wbr/> and use these fps ranges to setup the
 recording requests.<wbr/> Note that for the use case of multiple output streams,<wbr/> application
-must select one unique size from this metadata to use.<wbr/> Otherwise a request error might
-occur.<wbr/></p>
-<p>For normal video recording use case,<wbr/> where some application will NOT set
-<a href="#controls_android.control.sceneMode">android.<wbr/>control.<wbr/>scene<wbr/>Mode</a> to HIGH_<wbr/>SPEED_<wbr/>VIDEO in capture requests,<wbr/> the fps ranges
-reported in this metadata must not be used to setup capture requests,<wbr/> or it will cause
-request error.<wbr/></p>
+must select one unique size from this metadata to use (e.<wbr/>g.,<wbr/> preview and recording streams
+must have the same size).<wbr/> Otherwise,<wbr/> the high speed capture session creation will fail.<wbr/></p>
+<p>The min and max fps will be multiple times of 30fps.<wbr/></p>
+<p>High speed video streaming extends significant performance pressue to camera hardware,<wbr/>
+to achieve efficient high speed streaming,<wbr/> the camera device may have to aggregate
+multiple frames together and send to camera device for processing where the request
+controls are same for all the frames in this batch.<wbr/> Max batch size indicates
+the max possible number of frames the camera device will group together for this high
+speed stream configuration.<wbr/> This max batch size will be used to generate a high speed
+recording request list by
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedRequestList">CameraDevice#createConstrainedHighSpeedRequestList</a>.<wbr/>
+The max batch size for each configuration will satisfy below conditions:</p>
+<ul>
+<li>Each max batch size will be a divisor of its corresponding fps_<wbr/>max /<wbr/> 30.<wbr/> For example,<wbr/>
+if max_<wbr/>fps is 300,<wbr/> max batch size will only be 1,<wbr/> 2,<wbr/> 5,<wbr/> or 10.<wbr/></li>
+<li>The camera device may choose smaller internal batch size for each configuration,<wbr/> but
+the actual batch size will be a divisor of max batch size.<wbr/> For example,<wbr/> if the max batch
+size is 8,<wbr/> the actual batch size used by camera device will only be 1,<wbr/> 2,<wbr/> 4,<wbr/> or 8.<wbr/></li>
+<li>The max batch size in each configuration entry must be no larger than 32.<wbr/></li>
+</ul>
+<p>The camera device doesn't have to support batch mode to achieve high speed video recording,<wbr/>
+in such case,<wbr/> batch_<wbr/>size_<wbr/>max will be reported as 1 in each configuration entry.<wbr/></p>
+<p>This fps ranges in this configuration list can only be used to create requests
+that are submitted to a high speed camera capture session created by
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedCaptureSession">CameraDevice#createConstrainedHighSpeedCaptureSession</a>.<wbr/>
+The fps ranges reported in this metadata must not be used to setup capture requests for
+normal capture session,<wbr/> or it will cause request error.<wbr/></p>
             </td>
           </tr>
 
@@ -5088,10 +5117,19 @@ request error.<wbr/></p>
 <a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a> for processed non-stalling output formats.<wbr/>
 Note that for all high speed video configurations,<wbr/> HAL must be able to support a minimum
 of two streams,<wbr/> though the application might choose to configure just one stream.<wbr/></p>
-<p>Since the HIGH_<wbr/>SPEED_<wbr/>VIDEO mode may be turned on for preview view only case,<wbr/> the preview
-fps is bounded by device refresh rate (e.<wbr/>g.<wbr/> 60fps).<wbr/> For a given resolution,<wbr/> it is
-recommended that this list includes some fps ranges (e.<wbr/>g.<wbr/> [30,<wbr/> 60]) that is suitable
-for preview only streaming case.<wbr/></p>
+<p>The HAL may support multiple sensor modes for high speed outputs,<wbr/> for example,<wbr/> 120fps
+sensor mode and 120fps recording,<wbr/> 240fps sensor mode for 240fps recording.<wbr/> The application
+usually starts preview first,<wbr/> then starts recording.<wbr/> To avoid sensor mode switch caused
+stutter when starting recording as much as possible,<wbr/> the application may want to ensure
+the same sensor mode is used for preview and recording.<wbr/> Therefore,<wbr/> The HAL must advertise
+the variable fps range [30,<wbr/> fps_<wbr/>max] for each fixed fps range in this configuration list.<wbr/>
+For example,<wbr/> if the HAL advertises [120,<wbr/> 120] and [240,<wbr/> 240],<wbr/> the HAL must also advertise
+[30,<wbr/> 120] and [30,<wbr/> 240] for each configuration.<wbr/> In doing so,<wbr/> if the application intends to
+do 120fps recording,<wbr/> it can select [30,<wbr/> 120] to start preview,<wbr/> and [120,<wbr/> 120] to start
+recording.<wbr/> For these variable fps ranges,<wbr/> it's up to the HAL to decide the actual fps
+values that are suitable for smooth preview streaming.<wbr/> If the HAL sees different max_<wbr/>fps
+values that fall into different sensor modes in a sequence of requests,<wbr/> the HAL must
+switch the sensor mode as quick as possible to minimize the mode switch caused stutter.<wbr/></p>
             </td>
           </tr>
 
@@ -8177,8 +8215,13 @@ barcode value.<wbr/></p></span>
                   </li>
                   <li>
                     <span class="entry_type_enum_name">HIGH_SPEED_VIDEO</span>
+                    <span class="entry_type_enum_deprecated">[deprecated]</span>
                     <span class="entry_type_enum_optional">[optional]</span>
-                    <span class="entry_type_enum_notes"><p>Optimized for high speed video recording (frame rate &gt;=60fps) use case.<wbr/></p>
+                    <span class="entry_type_enum_notes"><p>This is deprecated,<wbr/> please use
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedCaptureSession">CameraDevice#createConstrainedHighSpeedCaptureSession</a>
+and <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedRequestList">CameraDevice#createConstrainedHighSpeedRequestList</a>
+for high speed video recording.<wbr/></p>
+<p>Optimized for high speed video recording (frame rate &gt;=60fps) use case.<wbr/></p>
 <p>The supported high speed video sizes and fps ranges are specified in
 <a href="#static_android.control.availableHighSpeedVideoConfigurations">android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations</a>.<wbr/> To get desired
 output frame rates,<wbr/> the application is only allowed to select video size
@@ -8326,7 +8369,10 @@ the HAL must list supported video size and fps range in
 <a href="#static_android.control.availableHighSpeedVideoConfigurations">android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations</a>.<wbr/> For a given size,<wbr/> e.<wbr/>g.<wbr/>
 1280x720,<wbr/> if the HAL has two different sensor configurations for normal streaming
 mode and high speed streaming,<wbr/> when this scene mode is set/<wbr/>reset in a sequence of capture
-requests,<wbr/> the HAL may have to switch between different sensor modes.<wbr/></p>
+requests,<wbr/> the HAL may have to switch between different sensor modes.<wbr/>
+This mode is deprecated in HAL3.<wbr/>3,<wbr/> to support high speed video recording,<wbr/> please implement
+<a href="#static_android.control.availableHighSpeedVideoConfigurations">android.<wbr/>control.<wbr/>available<wbr/>High<wbr/>Speed<wbr/>Video<wbr/>Configurations</a> and CONSTRAINED_<wbr/>HIGH_<wbr/>SPEED_<wbr/>VIDEO
+capbility defined in <a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a>.<wbr/></p>
             </td>
           </tr>
 
@@ -14672,7 +14718,8 @@ depth (specified by <a href="#dynamic_android.request.pipelineDepth">android.<wb
 the max pipeline depth.<wbr/></p>
 <p>A pipeline depth of X stages is equivalent to a pipeline latency of
 X frame intervals.<wbr/></p>
-<p>This value will be 8 or less.<wbr/></p>
+<p>This value will normally be 8 or less,<wbr/> however,<wbr/> for high speed capture session,<wbr/>
+the max pipeline depth will be up to 8 x size of high speed capture request list.<wbr/></p>
             </td>
           </tr>
 
@@ -14681,7 +14728,8 @@ X frame intervals.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>This value should be 4 or less.<wbr/></p>
+              <p>This value should be 4 or less,<wbr/> expect for the high speed recording session,<wbr/> where the
+max batch sizes may be larger than 1.<wbr/></p>
             </td>
           </tr>
 
@@ -15048,6 +15096,82 @@ On a device that supports both depth and color-based output,<wbr/> to enable smo
 using a repeating burst is recommended,<wbr/> where a depth-output target is only included
 once every N frames,<wbr/> where N is the ratio between preview output rate and depth output
 rate,<wbr/> including depth stall time.<wbr/></p></span>
+                  </li>
+                  <li>
+                    <span class="entry_type_enum_name">CONSTRAINED_HIGH_SPEED_VIDEO</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>The device supports constrained high speed video recording (frame rate &gt;=120fps)
+use case.<wbr/> The camera device will support high speed capture session created by
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedCaptureSession">CameraDevice#createConstrainedHighSpeedCaptureSession</a>,<wbr/> which
+only accepts high speed request list created by
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedRequestList">CameraDevice#createConstrainedHighSpeedRequestList</a>.<wbr/></p>
+<p>A camera device can still support high speed video streaming by advertising the high speed
+FPS ranges in <a href="#static_android.control.aeAvailableTargetFpsRanges">android.<wbr/>control.<wbr/>ae<wbr/>Available<wbr/>Target<wbr/>Fps<wbr/>Ranges</a>.<wbr/> For this case,<wbr/> all normal
+capture request per frame control and synchronization requirements will apply to
+the high speed fps ranges,<wbr/> the same as all other fps ranges.<wbr/> This capability describes
+the capability of a specialized operating mode with many limitations (see below),<wbr/> which
+is only targeted at high speed video recording.<wbr/></p>
+<p>The supported high speed video sizes and fps ranges are specified in
+<a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getHighSpeedVideoFpsRanges">StreamConfigurationMap#getHighSpeedVideoFpsRanges</a>.<wbr/>
+To get desired output frame rates,<wbr/> the application is only allowed to select video size
+and FPS range combinations provided by
+<a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getHighSpeedVideoSizes">StreamConfigurationMap#getHighSpeedVideoSizes</a>.<wbr/>
+The fps range can be controlled via <a href="#controls_android.control.aeTargetFpsRange">android.<wbr/>control.<wbr/>ae<wbr/>Target<wbr/>Fps<wbr/>Range</a>.<wbr/></p>
+<p>In this capability,<wbr/> the camera device will override aeMode,<wbr/> awbMode,<wbr/> and afMode to
+ON,<wbr/> ON,<wbr/> and CONTINUOUS_<wbr/>VIDEO,<wbr/> respectively.<wbr/> All post-processing block mode
+controls will be overridden to be FAST.<wbr/> Therefore,<wbr/> no manual control of capture
+and post-processing parameters is possible.<wbr/> All other controls operate the
+same as when <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == AUTO.<wbr/> This means that all other
+android.<wbr/>control.<wbr/>* fields continue to work,<wbr/> such as</p>
+<ul>
+<li><a href="#controls_android.control.aeTargetFpsRange">android.<wbr/>control.<wbr/>ae<wbr/>Target<wbr/>Fps<wbr/>Range</a></li>
+<li><a href="#controls_android.control.aeExposureCompensation">android.<wbr/>control.<wbr/>ae<wbr/>Exposure<wbr/>Compensation</a></li>
+<li><a href="#controls_android.control.aeLock">android.<wbr/>control.<wbr/>ae<wbr/>Lock</a></li>
+<li><a href="#controls_android.control.awbLock">android.<wbr/>control.<wbr/>awb<wbr/>Lock</a></li>
+<li><a href="#controls_android.control.effectMode">android.<wbr/>control.<wbr/>effect<wbr/>Mode</a></li>
+<li><a href="#controls_android.control.aeRegions">android.<wbr/>control.<wbr/>ae<wbr/>Regions</a></li>
+<li><a href="#controls_android.control.afRegions">android.<wbr/>control.<wbr/>af<wbr/>Regions</a></li>
+<li><a href="#controls_android.control.awbRegions">android.<wbr/>control.<wbr/>awb<wbr/>Regions</a></li>
+<li><a href="#controls_android.control.afTrigger">android.<wbr/>control.<wbr/>af<wbr/>Trigger</a></li>
+<li><a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a></li>
+</ul>
+<p>Outside of android.<wbr/>control.<wbr/>*,<wbr/> the following controls will work:</p>
+<ul>
+<li><a href="#controls_android.flash.mode">android.<wbr/>flash.<wbr/>mode</a> (TORCH mode only,<wbr/> automatic flash for still capture will not
+work since aeMode is ON)</li>
+<li><a href="#controls_android.lens.opticalStabilizationMode">android.<wbr/>lens.<wbr/>optical<wbr/>Stabilization<wbr/>Mode</a> (if it is supported)</li>
+<li><a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a></li>
+<li><a href="#controls_android.statistics.faceDetectMode">android.<wbr/>statistics.<wbr/>face<wbr/>Detect<wbr/>Mode</a> (if it is supported)</li>
+</ul>
+<p>For high speed recording use case,<wbr/> the actual maximum supported frame rate may
+be lower than what camera can output,<wbr/> depending on the destination Surfaces for
+the image data.<wbr/> For example,<wbr/> if the destination surface is from video encoder,<wbr/>
+the application need check if the video encoder is capable of supporting the
+high frame rate for a given video size,<wbr/> or it will end up with lower recording
+frame rate.<wbr/> If the destination surface is from preview window,<wbr/> the actual preview frame
+rate will be bounded by the screen refresh rate.<wbr/></p>
+<p>The camera device will only support up to 2 high speed simultaneous output surfaces
+(preview and recording surfaces)
+in this mode.<wbr/> Above controls will be effective only if all of below conditions are true:</p>
+<ul>
+<li>The application creates a camera capture session with no more than 2 surfaces via
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedCaptureSession">CameraDevice#createConstrainedHighSpeedCaptureSession</a>.<wbr/> The
+targeted surfaces must be preview surface (either from
+<a href="https://developer.android.com/reference/android/view/SurfaceView.html">SurfaceView</a> or <a href="https://developer.android.com/reference/android/graphics/SurfaceTexture.html">SurfaceTexture</a>) or
+recording surface(either from <a href="https://developer.android.com/reference/android/media/MediaRecorder.html#getSurface">MediaRecorder#getSurface</a> or
+<a href="https://developer.android.com/reference/android/media/MediaCodec.html#createInputSurface">MediaCodec#createInputSurface</a>).<wbr/></li>
+<li>The stream sizes are selected from the sizes reported by
+<a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getHighSpeedVideoSizes">StreamConfigurationMap#getHighSpeedVideoSizes</a>.<wbr/></li>
+<li>The FPS ranges are selected from
+<a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getHighSpeedVideoFpsRanges">StreamConfigurationMap#getHighSpeedVideoFpsRanges</a>.<wbr/></li>
+</ul>
+<p>When above conditions are NOT satistied,<wbr/> the
+<a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedCaptureSession">CameraDevice#createConstrainedHighSpeedCaptureSession</a>
+and <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createConstrainedHighSpeedRequestList">CameraDevice#createConstrainedHighSpeedRequestList</a> will fail.<wbr/></p>
+<p>Switching to a FPS range that has different maximum FPS may trigger some camera device
+reconfigurations,<wbr/> which may introduce extra latency.<wbr/> It is recommended that
+the application avoids unnecessary maximum target FPS changes as much as possible
+during high speed streaming.<wbr/></p></span>
                   </li>
                 </ul>
 
@@ -15792,6 +15916,37 @@ larger than active pixel array.<wbr/> Width and height may be
 rounded to nearest larger supportable width,<wbr/> especially
 for raw output,<wbr/> where only a few fixed scales may be
 possible.<wbr/></p>
+<p>For a set of output streams configured,<wbr/> if the sensor output is cropped to a smaller
+size than active array size,<wbr/> the HAL need follow below cropping rules:</p>
+<ul>
+<li>
+<p>The HAL need handle the cropRegion as if the sensor crop size is the effective active
+array size.<wbr/>More specifically,<wbr/> the HAL must transform the request cropRegion from
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> to the sensor cropped pixel area size in this way:</p>
+<ol>
+<li>Translate the requested cropRegion w.<wbr/>r.<wbr/>t.,<wbr/> the left top corner of the sensor
+cropped pixel area by (tx,<wbr/> ty),<wbr/>
+where <code>tx = sensorCrop.<wbr/>top * (sensorCrop.<wbr/>height /<wbr/> activeArraySize.<wbr/>height)</code>
+and <code>tx = sensorCrop.<wbr/>left * (sensorCrop.<wbr/>width /<wbr/> activeArraySize.<wbr/>width)</code>.<wbr/> The
+(sensorCrop.<wbr/>top,<wbr/> sensorCrop.<wbr/>left) is the coordinate based off the
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></li>
+<li>Scale the width and height of requested cropRegion with scaling factor of
+sensor<wbr/>Crop.<wbr/>width/<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>width and sensor<wbr/>Crop.<wbr/>height/<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>height
+respectively.<wbr/>
+Once this new cropRegion is calculated,<wbr/> the HAL must use this region to crop the image
+with regard to the sensor crop size (effective active array size).<wbr/> The HAL still need
+follow the general cropping rule for this new cropRegion and effective active
+array size.<wbr/></li>
+</ol>
+</li>
+<li>
+<p>The HAL must report the cropRegion with regard to <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>
+The HAL need convert the new cropRegion generated above w.<wbr/>r.<wbr/>t.,<wbr/> full active array size.<wbr/>
+The reported cropRegion may be slightly different with the requested cropRegion since
+the HAL may adjust the crop region to account for rounding,<wbr/> conversion error,<wbr/> or other
+hardware limitations.<wbr/></p>
+</li>
+</ul>
 <p>HAL2.<wbr/>x uses only (x,<wbr/> y,<wbr/> width)</p>
             </td>
           </tr>
@@ -17274,6 +17429,37 @@ larger than active pixel array.<wbr/> Width and height may be
 rounded to nearest larger supportable width,<wbr/> especially
 for raw output,<wbr/> where only a few fixed scales may be
 possible.<wbr/></p>
+<p>For a set of output streams configured,<wbr/> if the sensor output is cropped to a smaller
+size than active array size,<wbr/> the HAL need follow below cropping rules:</p>
+<ul>
+<li>
+<p>The HAL need handle the cropRegion as if the sensor crop size is the effective active
+array size.<wbr/>More specifically,<wbr/> the HAL must transform the request cropRegion from
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> to the sensor cropped pixel area size in this way:</p>
+<ol>
+<li>Translate the requested cropRegion w.<wbr/>r.<wbr/>t.,<wbr/> the left top corner of the sensor
+cropped pixel area by (tx,<wbr/> ty),<wbr/>
+where <code>tx = sensorCrop.<wbr/>top * (sensorCrop.<wbr/>height /<wbr/> activeArraySize.<wbr/>height)</code>
+and <code>tx = sensorCrop.<wbr/>left * (sensorCrop.<wbr/>width /<wbr/> activeArraySize.<wbr/>width)</code>.<wbr/> The
+(sensorCrop.<wbr/>top,<wbr/> sensorCrop.<wbr/>left) is the coordinate based off the
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></li>
+<li>Scale the width and height of requested cropRegion with scaling factor of
+sensor<wbr/>Crop.<wbr/>width/<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>width and sensor<wbr/>Crop.<wbr/>height/<wbr/>active<wbr/>Array<wbr/>Size.<wbr/>height
+respectively.<wbr/>
+Once this new cropRegion is calculated,<wbr/> the HAL must use this region to crop the image
+with regard to the sensor crop size (effective active array size).<wbr/> The HAL still need
+follow the general cropping rule for this new cropRegion and effective active
+array size.<wbr/></li>
+</ol>
+</li>
+<li>
+<p>The HAL must report the cropRegion with regard to <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/>
+The HAL need convert the new cropRegion generated above w.<wbr/>r.<wbr/>t.,<wbr/> full active array size.<wbr/>
+The reported cropRegion may be slightly different with the requested cropRegion since
+the HAL may adjust the crop region to account for rounding,<wbr/> conversion error,<wbr/> or other
+hardware limitations.<wbr/></p>
+</li>
+</ul>
 <p>HAL2.<wbr/>x uses only (x,<wbr/> y,<wbr/> width)</p>
             </td>
           </tr>
