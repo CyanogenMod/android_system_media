@@ -53,6 +53,7 @@ typedef struct SNDFILE_ SNDFILE;
 #define SF_FORMAT_PCM_U8    4
 #define SF_FORMAT_FLOAT     6
 #define SF_FORMAT_PCM_32    8
+#define SF_FORMAT_PCM_24    10
 
 // Open stream
 SNDFILE *sf_open(const char *path, int mode, SF_INFO *info);

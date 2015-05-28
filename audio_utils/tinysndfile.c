@@ -197,9 +197,10 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
             // ignore byte rate
             // ignore block alignment
             unsigned bitsPerSample = little2u(&fmt[14]);
-            if (bitsPerSample != 8 && bitsPerSample != 16 && bitsPerSample != 32) {
+            if (bitsPerSample != 8 && bitsPerSample != 16 && bitsPerSample != 24 &&
+                    bitsPerSample != 32) {
 #ifdef HAVE_STDERR
-                fprintf(stderr, "bitsPerSample %u != 8 or 16 or 32\n", bitsPerSample);
+                fprintf(stderr, "bitsPerSample %u != 8 or 16 or 24 or 32\n", bitsPerSample);
 #endif
                 goto close;
             }
@@ -213,6 +214,9 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
                 break;
             case 16:
                 handle->info.format |= SF_FORMAT_PCM_16;
+                break;
+            case 24:
+                handle->info.format |= SF_FORMAT_PCM_24;
                 break;
             case 32:
                 if (format == WAVE_FORMAT_IEEE_FLOAT)
@@ -296,7 +300,8 @@ static SNDFILE *sf_open_write(const char *path, SF_INFO *info)
             (info->samplerate > 0) &&
             (info->channels > 0 && info->channels <= 8) &&
             ((info->format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) &&
-            (sub == SF_FORMAT_PCM_16 || sub == SF_FORMAT_PCM_U8 || sub == SF_FORMAT_FLOAT)
+            (sub == SF_FORMAT_PCM_16 || sub == SF_FORMAT_PCM_U8 || sub == SF_FORMAT_FLOAT ||
+                sub == SF_FORMAT_PCM_24)
           )) {
         return NULL;
     }
@@ -332,6 +337,9 @@ static SNDFILE *sf_open_write(const char *path, SF_INFO *info)
         break;
     case SF_FORMAT_FLOAT:
         bitsPerSample = 32;
+        break;
+    case SF_FORMAT_PCM_24:
+        bitsPerSample = 24;
         break;
     default:    // not reachable
         bitsPerSample = 0;
@@ -418,7 +426,7 @@ sf_count_t sf_readf_short(SNDFILE *handle, short *ptr, sf_count_t desiredFrames)
     size_t actualBytes;
     void *temp = NULL;
     unsigned format = handle->info.format & SF_FORMAT_SUBMASK;
-    if (format == SF_FORMAT_PCM_32 || format == SF_FORMAT_FLOAT) {
+    if (format == SF_FORMAT_PCM_32 || format == SF_FORMAT_FLOAT || format == SF_FORMAT_PCM_24) {
         temp = malloc(desiredBytes);
         actualBytes = fread(temp, sizeof(char), desiredBytes, handle->stream);
     } else {
@@ -442,6 +450,10 @@ sf_count_t sf_readf_short(SNDFILE *handle, short *ptr, sf_count_t desiredFrames)
         memcpy_to_i16_from_float(ptr, (const float *) temp, actualFrames * handle->info.channels);
         free(temp);
         break;
+    case SF_FORMAT_PCM_24:
+        memcpy_to_i16_from_p24(ptr, (const uint8_t *) temp, actualFrames * handle->info.channels);
+        free(temp);
+        break;
     default:
         memset(ptr, 0, actualFrames * handle->info.channels * sizeof(short));
         break;
@@ -463,7 +475,7 @@ sf_count_t sf_readf_float(SNDFILE *handle, float *ptr, sf_count_t desiredFrames)
     size_t actualBytes;
     void *temp = NULL;
     unsigned format = handle->info.format & SF_FORMAT_SUBMASK;
-    if (format == SF_FORMAT_PCM_16 || format == SF_FORMAT_PCM_U8) {
+    if (format == SF_FORMAT_PCM_16 || format == SF_FORMAT_PCM_U8 || format == SF_FORMAT_PCM_24) {
         temp = malloc(desiredBytes);
         actualBytes = fread(temp, sizeof(char), desiredBytes, handle->stream);
     } else {
@@ -489,6 +501,10 @@ sf_count_t sf_readf_float(SNDFILE *handle, float *ptr, sf_count_t desiredFrames)
         break;
     case SF_FORMAT_FLOAT:
         break;
+    case SF_FORMAT_PCM_24:
+        memcpy_to_float_from_p24(ptr, (const uint8_t *) temp, actualFrames * handle->info.channels);
+        free(temp);
+        break;
     default:
         memset(ptr, 0, actualFrames * handle->info.channels * sizeof(float));
         break;
@@ -510,7 +526,7 @@ sf_count_t sf_readf_int(SNDFILE *handle, int *ptr, sf_count_t desiredFrames)
     void *temp = NULL;
     unsigned format = handle->info.format & SF_FORMAT_SUBMASK;
     size_t actualBytes;
-    if (format == SF_FORMAT_PCM_16 || format == SF_FORMAT_PCM_U8) {
+    if (format == SF_FORMAT_PCM_16 || format == SF_FORMAT_PCM_U8 || format == SF_FORMAT_PCM_24) {
         temp = malloc(desiredBytes);
         actualBytes = fread(temp, sizeof(char), desiredBytes, handle->stream);
     } else {
@@ -535,6 +551,10 @@ sf_count_t sf_readf_int(SNDFILE *handle, int *ptr, sf_count_t desiredFrames)
         break;
     case SF_FORMAT_FLOAT:
         memcpy_to_i32_from_float(ptr, (const float *) ptr, actualFrames * handle->info.channels);
+        break;
+    case SF_FORMAT_PCM_24:
+        memcpy_to_i32_from_p24(ptr, (const uint8_t *) temp, actualFrames * handle->info.channels);
+        free(temp);
         break;
     default:
         memset(ptr, 0, actualFrames * handle->info.channels * sizeof(int));
