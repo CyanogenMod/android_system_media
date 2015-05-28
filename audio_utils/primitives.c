@@ -110,6 +110,18 @@ void memcpy_to_i16_from_p24(int16_t *dst, const uint8_t *src, size_t count)
     }
 }
 
+void memcpy_to_i32_from_p24(int32_t *dst, const uint8_t *src, size_t count)
+{
+    while (count--) {
+#ifdef HAVE_BIG_ENDIAN
+        *dst++ = (src[2] << 8) | (src[1] << 16) | (src[0] << 24);
+#else
+        *dst++ = (src[0] << 8) | (src[1] << 16) | (src[2] << 24);
+#endif
+        src += 3;
+    }
+}
+
 void memcpy_to_p24_from_i16(uint8_t *dst, const int16_t *src, size_t count)
 {
     while (count--) {
