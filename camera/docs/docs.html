@@ -12208,7 +12208,7 @@ point,<wbr/> <code>z_<wbr/>s = 1</code>,<wbr/> and <code>w_<wbr/>s</code> is a m
                 <span class="entry_type_container">x</span>
 
                 <span class="entry_type_array">
-                  3
+                  5
                 </span>
               <span class="entry_type_visibility"> [public]</span>
 
@@ -12221,12 +12221,12 @@ point,<wbr/> <code>z_<wbr/>s = 1</code>,<wbr/> and <code>w_<wbr/>s</code> is a m
 
             <td class="entry_description">
               <p>The correction coefficients to correct for this camera device's
-radial lens distortion.<wbr/></p>
+radial and tangential lens distortion.<wbr/></p>
             </td>
 
             <td class="entry_units">
               
-            Coefficients for a 6th-degree even radial polynomial.<wbr/>
+            Unitless coefficients.<wbr/>
           
             </td>
 
@@ -12245,17 +12245,32 @@ radial lens distortion.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Three cofficients <code>[kappa_<wbr/>1,<wbr/> kappa_<wbr/>2,<wbr/> kappa_<wbr/>3]</code> that
-can be used to correct the lens's radial geometric
-distortion with the mapping equations:</p>
-<pre><code> x_<wbr/>c = x_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 )
-y_<wbr/>c = y_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 )
+              <p>Three radial distortion coefficients <code>[kappa_<wbr/>1,<wbr/> kappa_<wbr/>2,<wbr/>
+kappa_<wbr/>3]</code> and two tangential distortion coefficients
+<code>[kappa_<wbr/>4,<wbr/> kappa_<wbr/>5]</code> that can be used to correct the
+lens's geometric distortion with the mapping equations:</p>
+<pre><code> x_<wbr/>c = x_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 ) +
+       kappa_<wbr/>4 * (2 * x_<wbr/>i * y_<wbr/>i) + kappa_<wbr/>5 * ( r^2 + 2 * x_<wbr/>i^2 )
+ y_<wbr/>c = y_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 ) +
+       kappa_<wbr/>5 * (2 * x_<wbr/>i * y_<wbr/>i) + kappa_<wbr/>4 * ( r^2 + 2 * y_<wbr/>i^2 )
 </code></pre>
-<p>where <code>[x_<wbr/>i,<wbr/> y_<wbr/>i]</code> are normalized coordinates with <code>(0,<wbr/>0)</code>
-at the lens optical center,<wbr/> and <code>[-1,<wbr/> 1]</code> are the edges of
-the active pixel array; and where <code>[x_<wbr/>c,<wbr/> y_<wbr/>c]</code> are the
-corrected normalized coordinates with radial distortion
-removed; and <code>r^2 = x_<wbr/>i^2 + y_<wbr/>i^2</code>.<wbr/></p>
+<p>Here,<wbr/> <code>[x_<wbr/>c,<wbr/> y_<wbr/>c]</code> are the coordinates to sample in the
+input image that correspond to the pixel values in the
+corrected image at the coordinate <code>[x_<wbr/>i,<wbr/> y_<wbr/>i]</code>:</p>
+<pre><code> correctedImage(x_<wbr/>i,<wbr/> y_<wbr/>i) = sample_<wbr/>at(x_<wbr/>c,<wbr/> y_<wbr/>c,<wbr/> inputImage)
+</code></pre>
+<p>The pixel coordinates are defined in a normalized
+coordinate system related to the
+<a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a> calibration fields.<wbr/>
+Both <code>[x_<wbr/>i,<wbr/> y_<wbr/>i]</code> and <code>[x_<wbr/>c,<wbr/> y_<wbr/>c]</code> have <code>(0,<wbr/>0)</code> at the
+lens optical center <code>[c_<wbr/>x,<wbr/> c_<wbr/>y]</code>.<wbr/> The maximum magnitudes
+of both x and y coordinates are normalized to be 1 at the
+edge further from the optical center,<wbr/> so the range
+for both dimensions is <code>-1 &lt;= x &lt;= 1</code>.<wbr/></p>
+<p>Finally,<wbr/> <code>r</code> represents the radial distance from the
+optical center,<wbr/> <code>r^2 = x_<wbr/>i^2 + y_<wbr/>i^2</code>,<wbr/> and its magnitude
+is therefore no larger than <code>|<wbr/>r|<wbr/> &lt;= sqrt(2)</code>.<wbr/></p>
+<p>The distortion model used is the Brown-Conrady model.<wbr/></p>
             </td>
           </tr>
 
@@ -12984,7 +12999,7 @@ point,<wbr/> <code>z_<wbr/>s = 1</code>,<wbr/> and <code>w_<wbr/>s</code> is a m
                 <span class="entry_type_container">x</span>
 
                 <span class="entry_type_array">
-                  3
+                  5
                 </span>
               <span class="entry_type_visibility"> [public]</span>
 
@@ -12997,12 +13012,12 @@ point,<wbr/> <code>z_<wbr/>s = 1</code>,<wbr/> and <code>w_<wbr/>s</code> is a m
 
             <td class="entry_description">
               <p>The correction coefficients to correct for this camera device's
-radial lens distortion.<wbr/></p>
+radial and tangential lens distortion.<wbr/></p>
             </td>
 
             <td class="entry_units">
               
-            Coefficients for a 6th-degree even radial polynomial.<wbr/>
+            Unitless coefficients.<wbr/>
           
             </td>
 
@@ -13021,17 +13036,32 @@ radial lens distortion.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Three cofficients <code>[kappa_<wbr/>1,<wbr/> kappa_<wbr/>2,<wbr/> kappa_<wbr/>3]</code> that
-can be used to correct the lens's radial geometric
-distortion with the mapping equations:</p>
-<pre><code> x_<wbr/>c = x_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 )
-y_<wbr/>c = y_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 )
+              <p>Three radial distortion coefficients <code>[kappa_<wbr/>1,<wbr/> kappa_<wbr/>2,<wbr/>
+kappa_<wbr/>3]</code> and two tangential distortion coefficients
+<code>[kappa_<wbr/>4,<wbr/> kappa_<wbr/>5]</code> that can be used to correct the
+lens's geometric distortion with the mapping equations:</p>
+<pre><code> x_<wbr/>c = x_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 ) +
+       kappa_<wbr/>4 * (2 * x_<wbr/>i * y_<wbr/>i) + kappa_<wbr/>5 * ( r^2 + 2 * x_<wbr/>i^2 )
+ y_<wbr/>c = y_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 ) +
+       kappa_<wbr/>5 * (2 * x_<wbr/>i * y_<wbr/>i) + kappa_<wbr/>4 * ( r^2 + 2 * y_<wbr/>i^2 )
 </code></pre>
-<p>where <code>[x_<wbr/>i,<wbr/> y_<wbr/>i]</code> are normalized coordinates with <code>(0,<wbr/>0)</code>
-at the lens optical center,<wbr/> and <code>[-1,<wbr/> 1]</code> are the edges of
-the active pixel array; and where <code>[x_<wbr/>c,<wbr/> y_<wbr/>c]</code> are the
-corrected normalized coordinates with radial distortion
-removed; and <code>r^2 = x_<wbr/>i^2 + y_<wbr/>i^2</code>.<wbr/></p>
+<p>Here,<wbr/> <code>[x_<wbr/>c,<wbr/> y_<wbr/>c]</code> are the coordinates to sample in the
+input image that correspond to the pixel values in the
+corrected image at the coordinate <code>[x_<wbr/>i,<wbr/> y_<wbr/>i]</code>:</p>
+<pre><code> correctedImage(x_<wbr/>i,<wbr/> y_<wbr/>i) = sample_<wbr/>at(x_<wbr/>c,<wbr/> y_<wbr/>c,<wbr/> inputImage)
+</code></pre>
+<p>The pixel coordinates are defined in a normalized
+coordinate system related to the
+<a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a> calibration fields.<wbr/>
+Both <code>[x_<wbr/>i,<wbr/> y_<wbr/>i]</code> and <code>[x_<wbr/>c,<wbr/> y_<wbr/>c]</code> have <code>(0,<wbr/>0)</code> at the
+lens optical center <code>[c_<wbr/>x,<wbr/> c_<wbr/>y]</code>.<wbr/> The maximum magnitudes
+of both x and y coordinates are normalized to be 1 at the
+edge further from the optical center,<wbr/> so the range
+for both dimensions is <code>-1 &lt;= x &lt;= 1</code>.<wbr/></p>
+<p>Finally,<wbr/> <code>r</code> represents the radial distance from the
+optical center,<wbr/> <code>r^2 = x_<wbr/>i^2 + y_<wbr/>i^2</code>,<wbr/> and its magnitude
+is therefore no larger than <code>|<wbr/>r|<wbr/> &lt;= sqrt(2)</code>.<wbr/></p>
+<p>The distortion model used is the Brown-Conrady model.<wbr/></p>
             </td>
           </tr>
 
