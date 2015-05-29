@@ -209,6 +209,19 @@ void memcpy_to_p24_from_float(uint8_t *dst, const float *src, size_t count);
  */
 void memcpy_to_p24_from_q8_23(uint8_t *dst, const int32_t *src, size_t count);
 
+/* Shrink and copy samples from signed 32-bit fixed-point Q0.31
+ * to signed fixed-point packed 24 bit Q0.23.
+ * The packed 24 bit output is assumed to be a native-endian uint8_t byte array.
+ * Parameters:
+ *  dst     Destination buffer
+ *  src     Source buffer
+ *  count   Number of samples to copy
+ * The destination and source buffers must either be completely separate (non-overlapping), or
+ * they must both start at the same address.  Partially overlapping buffers are not supported.
+ * The conversion is done by truncation, without dithering, so it loses resolution.
+ */
+void memcpy_to_p24_from_i32(uint8_t *dst, const int32_t *src, size_t count);
+
 /* Copy samples from signed fixed point 16-bit Q0.15 to signed fixed-point 32-bit Q8.23.
  * The output data range is [0xff800000, 0x007fff00] at intervals of 0x100.
  * Parameters:
