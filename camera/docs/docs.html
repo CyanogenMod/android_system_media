@@ -19734,6 +19734,10 @@ not guaranteed to be comparable to any other time source.<wbr/></p>
 timestamps measure time in the same timebase as <a href="https://developer.android.com/reference/android/os/SystemClock.html#elapsedRealtimeNanos">SystemClock#elapsedRealtimeNanos</a>,<wbr/> and they can
 be compared to other timestamps from other subsystems that
 are using that base.<wbr/></p>
+<p>For reprocessing,<wbr/> the timestamp will match the start of exposure of
+the input image,<wbr/> i.<wbr/>e.<wbr/> <a href="https://developer.android.com/reference/CaptureResult.html#SENSOR_TIMESTAMP">the
+timestamp</a> in the TotalCaptureResult that was used to create the
+reprocess capture request.<wbr/></p>
             </td>
           </tr>
 
@@ -19750,6 +19754,9 @@ otherwise asleep.<wbr/></p>
 <p>If <a href="#static_android.sensor.info.timestampSource">android.<wbr/>sensor.<wbr/>info.<wbr/>timestamp<wbr/>Source</a> <code>==</code> REALTIME,<wbr/>
 The timestamp must be synchronized with the timestamps from other
 sensor subsystems that are using the same timebase.<wbr/></p>
+<p>For reprocessing,<wbr/> the input image's start of exposure can be looked up
+with <a href="#dynamic_android.sensor.timestamp">android.<wbr/>sensor.<wbr/>timestamp</a> from the metadata included in the
+capture request.<wbr/></p>
             </td>
           </tr>
 
