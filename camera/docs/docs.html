@@ -12096,12 +12096,33 @@ used:</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>As measured in the device sensor coordinate system,<wbr/> the
-position of the camera device's optical center,<wbr/> as a
-three-dimensional vector <code>(x,<wbr/>y,<wbr/>z)</code>.<wbr/></p>
-<p>To transform a world position to a camera-device centered
-coordinate system,<wbr/> the position must be translated by this
-vector and then rotated by <a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a>.<wbr/></p>
+              <p>The position of the camera device's lens optical center,<wbr/>
+as a three-dimensional vector <code>(x,<wbr/>y,<wbr/>z)</code>,<wbr/> relative to the
+optical center of the largest camera device facing in the
+same direction as this camera,<wbr/> in the <a href="https://developer.android.com/reference/android/hardware/SensorEvent.html">Android sensor coordinate
+axes</a>.<wbr/> Note that only the axis definitions are shared with
+the sensor coordinate system,<wbr/> but not the origin.<wbr/></p>
+<p>If this device is the largest or only camera device with a
+given facing,<wbr/> then this position will be <code>(0,<wbr/> 0,<wbr/> 0)</code>; a
+camera device with a lens optical center located 3 cm from
+the main sensor along the +X axis (to the right from the
+user's perspective) will report <code>(0.<wbr/>03,<wbr/> 0,<wbr/> 0)</code>.<wbr/></p>
+<p>To transform a pixel coordinates between two cameras
+facing the same direction,<wbr/> first the source camera
+<a href="#dynamic_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a> must be corrected for.<wbr/>  Then
+the source camera <a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a> needs
+to be applied,<wbr/> followed by the <a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a>
+of the source camera,<wbr/> the translation of the source camera
+relative to the destination camera,<wbr/> the
+<a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a> of the destination camera,<wbr/> and
+finally the inverse of <a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a>
+of the destination camera.<wbr/> This obtains a
+radial-distortion-free coordinate in the destination
+camera pixel coordinates.<wbr/></p>
+<p>To compare this against a real image from the destination
+camera,<wbr/> the destination camera image then needs to be
+corrected for radial distortion before comparison or
+sampling.<wbr/></p>
             </td>
           </tr>
 
@@ -12887,12 +12908,33 @@ used:</p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>As measured in the device sensor coordinate system,<wbr/> the
-position of the camera device's optical center,<wbr/> as a
-three-dimensional vector <code>(x,<wbr/>y,<wbr/>z)</code>.<wbr/></p>
-<p>To transform a world position to a camera-device centered
-coordinate system,<wbr/> the position must be translated by this
-vector and then rotated by <a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a>.<wbr/></p>
+              <p>The position of the camera device's lens optical center,<wbr/>
+as a three-dimensional vector <code>(x,<wbr/>y,<wbr/>z)</code>,<wbr/> relative to the
+optical center of the largest camera device facing in the
+same direction as this camera,<wbr/> in the <a href="https://developer.android.com/reference/android/hardware/SensorEvent.html">Android sensor coordinate
+axes</a>.<wbr/> Note that only the axis definitions are shared with
+the sensor coordinate system,<wbr/> but not the origin.<wbr/></p>
+<p>If this device is the largest or only camera device with a
+given facing,<wbr/> then this position will be <code>(0,<wbr/> 0,<wbr/> 0)</code>; a
+camera device with a lens optical center located 3 cm from
+the main sensor along the +X axis (to the right from the
+user's perspective) will report <code>(0.<wbr/>03,<wbr/> 0,<wbr/> 0)</code>.<wbr/></p>
+<p>To transform a pixel coordinates between two cameras
+facing the same direction,<wbr/> first the source camera
+<a href="#dynamic_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a> must be corrected for.<wbr/>  Then
+the source camera <a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a> needs
+to be applied,<wbr/> followed by the <a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a>
+of the source camera,<wbr/> the translation of the source camera
+relative to the destination camera,<wbr/> the
+<a href="#static_android.lens.poseRotation">android.<wbr/>lens.<wbr/>pose<wbr/>Rotation</a> of the destination camera,<wbr/> and
+finally the inverse of <a href="#dynamic_android.lens.intrinsicCalibration">android.<wbr/>lens.<wbr/>intrinsic<wbr/>Calibration</a>
+of the destination camera.<wbr/> This obtains a
+radial-distortion-free coordinate in the destination
+camera pixel coordinates.<wbr/></p>
+<p>To compare this against a real image from the destination
+camera,<wbr/> the destination camera image then needs to be
+corrected for radial distortion before comparison or
+sampling.<wbr/></p>
             </td>
           </tr>
 
