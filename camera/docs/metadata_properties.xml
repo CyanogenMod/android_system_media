@@ -3653,28 +3653,46 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="radialDistortion" type="float" visibility="public"
                container="array">
           <array>
-            <size>3</size>
+            <size>5</size>
           </array>
           <description>
             The correction coefficients to correct for this camera device's
-            radial lens distortion.
+            radial and tangential lens distortion.
           </description>
           <units>
-            Coefficients for a 6th-degree even radial polynomial.
+            Unitless coefficients.
           </units>
           <details>
-            Three cofficients `[kappa_1, kappa_2, kappa_3]` that
-            can be used to correct the lens's radial geometric
-            distortion with the mapping equations:
+            Three radial distortion coefficients `[kappa_1, kappa_2,
+            kappa_3]` and two tangential distortion coefficients
+            `[kappa_4, kappa_5]` that can be used to correct the
+            lens's geometric distortion with the mapping equations:
 
-                 x_c = x_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 )
-                y_c = y_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 )
+                 x_c = x_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
+                       kappa_4 * (2 * x_i * y_i) + kappa_5 * ( r^2 + 2 * x_i^2 )
+                 y_c = y_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
+                       kappa_5 * (2 * x_i * y_i) + kappa_4 * ( r^2 + 2 * y_i^2 )
 
-            where `[x_i, y_i]` are normalized coordinates with `(0,0)`
-            at the lens optical center, and `[-1, 1]` are the edges of
-            the active pixel array; and where `[x_c, y_c]` are the
-            corrected normalized coordinates with radial distortion
-            removed; and `r^2 = x_i^2 + y_i^2`.
+            Here, `[x_c, y_c]` are the coordinates to sample in the
+            input image that correspond to the pixel values in the
+            corrected image at the coordinate `[x_i, y_i]`:
+
+                 correctedImage(x_i, y_i) = sample_at(x_c, y_c, inputImage)
+
+            The pixel coordinates are defined in a normalized
+            coordinate system related to the
+            android.lens.intrinsicCalibration calibration fields.
+            Both `[x_i, y_i]` and `[x_c, y_c]` have `(0,0)` at the
+            lens optical center `[c_x, c_y]`. The maximum magnitudes
+            of both x and y coordinates are normalized to be 1 at the
+            edge further from the optical center, so the range
+            for both dimensions is `-1 &lt;= x &lt;= 1`.
+
+            Finally, `r` represents the radial distance from the
+            optical center, `r^2 = x_i^2 + y_i^2`, and its magnitude
+            is therefore no larger than `|r| &lt;= sqrt(2)`.
+
+            The distortion model used is the Brown-Conrady model.
           </details>
           <tag id="DEPTH" />
         </entry>
