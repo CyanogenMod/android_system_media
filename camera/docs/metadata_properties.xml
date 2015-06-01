@@ -6127,6 +6127,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           android.os.SystemClock#elapsedRealtimeNanos}, and they can
           be compared to other timestamps from other subsystems that
           are using that base.
+
+          For reprocessing, the timestamp will match the start of exposure of
+          the input image, i.e. {@link CaptureResult#SENSOR_TIMESTAMP the
+          timestamp} in the TotalCaptureResult that was used to create the
+          reprocess capture request.
           </details>
           <hal_details>
           All timestamps must be in reference to the kernel's
@@ -6138,6 +6143,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           If android.sensor.info.timestampSource `==` REALTIME,
           The timestamp must be synchronized with the timestamps from other
           sensor subsystems that are using the same timebase.
+
+          For reprocessing, the input image's start of exposure can be looked up
+          with android.sensor.timestamp from the metadata included in the
+          capture request.
           </hal_details>
           <tag id="BC" />
         </entry>
