@@ -181,6 +181,7 @@ static SNDFILE *sf_open_read(const char *path, SF_INFO *info)
                 fseek(stream, (long) (chunkSize - minSize), SEEK_CUR);
             }
             unsigned channels = little2u(&fmt[2]);
+            // FIXME FCC_8
             if (channels != 1 && channels != 2 && channels != 4 && channels != 6 && channels != 8) {
 #ifdef HAVE_STDERR
                 fprintf(stderr, "unsupported channels %u\n", channels);
@@ -298,6 +299,7 @@ static SNDFILE *sf_open_write(const char *path, SF_INFO *info)
     int sub = info->format & SF_FORMAT_SUBMASK;
     if (!(
             (info->samplerate > 0) &&
+            // FIXME FCC_8
             (info->channels > 0 && info->channels <= 8) &&
             ((info->format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) &&
             (sub == SF_FORMAT_PCM_16 || sub == SF_FORMAT_PCM_U8 || sub == SF_FORMAT_FLOAT ||
