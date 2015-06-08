@@ -1289,9 +1289,8 @@ static inline audio_channel_mask_t audio_channel_out_mask_from_count(uint32_t ch
             AUDIO_CHANNEL_REPRESENTATION_POSITION, bits);
 }
 
-/* Derive an input channel mask for position assignment from a channel count.
- * Currently handles only mono and stereo.
- * TODO: consider switching to index channels when > 2
+/* Derive a default input channel mask from a channel count.
+ * Assumes a position mask for mono and stereo, or an index mask for channel counts > 2.
  * Returns the matching channel mask,
  * or AUDIO_CHANNEL_NONE if the channel count is zero,
  * or AUDIO_CHANNEL_INVALID if the channel count exceeds that of the
@@ -1309,6 +1308,14 @@ static inline audio_channel_mask_t audio_channel_in_mask_from_count(uint32_t cha
     case 2:
         bits = AUDIO_CHANNEL_IN_STEREO;
         break;
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+        // FIXME FCC_8
+        return audio_channel_mask_for_index_assignment_from_count(channel_count);
     default:
         return AUDIO_CHANNEL_INVALID;
     }
