@@ -1223,6 +1223,25 @@ static inline uint32_t audio_channel_count_from_out_mask(audio_channel_mask_t ch
     }
 }
 
+/* Derive a channel mask for index assignment from a channel count.
+ * Returns the matching channel mask,
+ * or AUDIO_CHANNEL_NONE if the channel count is zero,
+ * or AUDIO_CHANNEL_INVALID if the channel count exceeds AUDIO_CHANNEL_COUNT_MAX.
+ */
+static inline audio_channel_mask_t audio_channel_mask_for_index_assignment_from_count(
+        uint32_t channel_count)
+{
+    if (channel_count == 0) {
+        return AUDIO_CHANNEL_NONE;
+    }
+    if (channel_count > AUDIO_CHANNEL_COUNT_MAX) {
+        return AUDIO_CHANNEL_INVALID;
+    }
+    uint32_t bits = (1 << channel_count) - 1;
+    return audio_channel_mask_from_representation_and_bits(
+            AUDIO_CHANNEL_REPRESENTATION_INDEX, bits);
+}
+
 /* Derive an output channel mask for position assignment from a channel count.
  * This is to be used when the content channel mask is unknown. The 1, 2, 4, 5, 6, 7 and 8 channel
  * cases are mapped to the standard game/home-theater layouts, but note that 4 is mapped to quad,
@@ -1295,25 +1314,6 @@ static inline audio_channel_mask_t audio_channel_in_mask_from_count(uint32_t cha
     }
     return audio_channel_mask_from_representation_and_bits(
             AUDIO_CHANNEL_REPRESENTATION_POSITION, bits);
-}
-
-/* Derive a channel mask for index assignment from a channel count.
- * Returns the matching channel mask,
- * or AUDIO_CHANNEL_NONE if the channel count is zero,
- * or AUDIO_CHANNEL_INVALID if the channel count exceeds AUDIO_CHANNEL_COUNT_MAX.
- */
-static inline audio_channel_mask_t audio_channel_mask_for_index_assignment_from_count(
-        uint32_t channel_count)
-{
-    if (channel_count == 0) {
-        return AUDIO_CHANNEL_NONE;
-    }
-    if (channel_count > AUDIO_CHANNEL_COUNT_MAX) {
-        return AUDIO_CHANNEL_INVALID;
-    }
-    uint32_t bits = (1 << channel_count) - 1;
-    return audio_channel_mask_from_representation_and_bits(
-            AUDIO_CHANNEL_REPRESENTATION_INDEX, bits);
 }
 
 static inline bool audio_is_valid_format(audio_format_t format)
