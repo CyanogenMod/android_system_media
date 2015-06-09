@@ -491,6 +491,7 @@ enum {
     AUDIO_CHANNEL_INDEX_MASK_6 =  AUDIO_CHANNEL_INDEX_HDR | (1 << 6) - 1,
     AUDIO_CHANNEL_INDEX_MASK_7 =  AUDIO_CHANNEL_INDEX_HDR | (1 << 7) - 1,
     AUDIO_CHANNEL_INDEX_MASK_8 =  AUDIO_CHANNEL_INDEX_HDR | (1 << 8) - 1,
+    // FIXME FCC_8
 };
 
 /* The return value is undefined if the channel mask is invalid. */
@@ -858,6 +859,8 @@ struct audio_gain_config  {
     audio_gain_mode_t    mode;              /* mode requested for this command */
     audio_channel_mask_t channel_mask;      /* channels which gain value follows.
                                                N/A in joint mode */
+
+    // note this "8" is not FCC_8, so it won't need to be changed for > 8 channels
     int                  values[sizeof(audio_channel_mask_t) * 8]; /* gain values in millibels
                                                for each channel ordered from LSb to MSb in
                                                channel mask. The number of values is 1 in joint
@@ -1263,6 +1266,7 @@ static inline audio_channel_mask_t audio_channel_out_mask_from_count(uint32_t ch
     case 8:
         bits = AUDIO_CHANNEL_OUT_7POINT1;
         break;
+    // FIXME FCC_8
     default:
         return AUDIO_CHANNEL_INVALID;
     }
