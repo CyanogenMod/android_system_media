@@ -16059,6 +16059,17 @@ CFAs that are not representable by a format in
 use this format.<wbr/></p>
 <p>Buffers of this format will also follow the constraints given for
 RAW_<wbr/>OPAQUE buffers,<wbr/> but with relaxed performance constraints.<wbr/></p>
+<p>This format is intended to give users access to the full contents
+of the buffers coming directly from the image sensor prior to any
+cropping or scaling operations,<wbr/> and all coordinate systems for
+metadata used for this format are relative to the size of the
+active region of the image sensor before any geometric distortion
+correction has been applied (i.<wbr/>e.<wbr/>
+android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size).<wbr/> Supported
+dimensions for this format are limited to the full dimensions of
+the sensor (e.<wbr/>g.<wbr/> either <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a> or
+android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size will be the
+only supported output size).<wbr/></p>
 <p>See <a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> for
 the full set of performance guarantees.<wbr/></p></span>
                   </li>

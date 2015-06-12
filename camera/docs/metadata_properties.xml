@@ -4930,6 +4930,18 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               Buffers of this format will also follow the constraints given for
               RAW_OPAQUE buffers, but with relaxed performance constraints.
 
+              This format is intended to give users access to the full contents
+              of the buffers coming directly from the image sensor prior to any
+              cropping or scaling operations, and all coordinate systems for
+              metadata used for this format are relative to the size of the
+              active region of the image sensor before any geometric distortion
+              correction has been applied (i.e.
+              android.sensor.info.preCorrectionActiveArraySize). Supported
+              dimensions for this format are limited to the full dimensions of
+              the sensor (e.g. either android.sensor.info.pixelArraySize or
+              android.sensor.info.preCorrectionActiveArraySize will be the
+              only supported output size).
+
               See android.scaler.availableInputOutputFormatsMap for
               the full set of performance guarantees.
               </notes>
