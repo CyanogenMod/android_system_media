@@ -280,7 +280,8 @@ end:
 static unsigned profile_enum_channel_counts(alsa_device_profile* profile, unsigned min,
         unsigned max)
 {
-    static const unsigned std_channel_counts[] = {8, 4, 2, 1};
+    /* modify alsa_device_profile.h if you change the std_channel_counts[] array. */
+    static const unsigned std_channel_counts[] = {8, 7, 6, 5, 4, 3, 2, 1};
 
     unsigned num_counts = 0;
     unsigned index;
@@ -454,6 +455,8 @@ char * profile_get_format_strs(alsa_device_profile* profile)
 
 char * profile_get_channel_count_strs(alsa_device_profile* profile)
 {
+    // FIXME implicit fixed channel count assumption here (FCC_8).
+    // we use only the canonical even number channel position masks.
     static const char * const out_chans_strs[] = {
         /* 0 */"AUDIO_CHANNEL_NONE", /* will never be taken as this is a terminator */
         /* 1 */"AUDIO_CHANNEL_OUT_MONO",
@@ -463,7 +466,7 @@ char * profile_get_channel_count_strs(alsa_device_profile* profile)
         /* 5 */ /* "AUDIO_CHANNEL_OUT_QUAD|AUDIO_CHANNEL_OUT_FRONT_CENTER" */ NULL,
         /* 6 */"AUDIO_CHANNEL_OUT_5POINT1",
         /* 7 */ /* "AUDIO_CHANNEL_OUT_5POINT1|AUDIO_CHANNEL_OUT_BACK_CENTER" */ NULL,
-        /* 8 */ "AUDIO_CHANNEL_OUT_7POINT1",
+        /* 8 */"AUDIO_CHANNEL_OUT_7POINT1",
         /* channel counts greater than this not considered */
     };
 
@@ -505,6 +508,9 @@ char * profile_get_channel_count_strs(alsa_device_profile* profile)
      * USB Audio Devices may only announce support for MONO (a headset mic for example), or
      * The total number of output channels. SO, if the device itself doesn't explicitly
      * support STEREO, append to the channel config strings we are generating.
+     *
+     * The MONO and STEREO positional channel masks are provided for legacy compatibility.
+     * For multichannel (n > 2) we only expose channel index masks.
      */
     // Always support stereo
     curStrLen = strlcat(buffer, chans_strs[2], buffSize);
@@ -514,9 +520,11 @@ char * profile_get_channel_count_strs(alsa_device_profile* profile)
     for (index = 0;
          (channel_count = profile->channel_counts[index]) != 0;
          index++) {
+
+        /* we only show positional information for mono (stereo handled already) */
         if (channel_count < chans_strs_size
                 && chans_strs[channel_count] != NULL
-                && channel_count != 2 /* stereo already supported */) {
+                && channel_count < 2 /* positional only for fewer than 2 channels */) {
             // account for the '|' and the '\0'
             if (buffSize - curStrLen < strlen(chans_strs[channel_count]) + 2) {
                 /* we don't have room for another, so bail at this point rather than
