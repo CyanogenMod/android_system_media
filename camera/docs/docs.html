@@ -12275,7 +12275,7 @@ point,<wbr/> <code>z_<wbr/>s = 1</code>,<wbr/> and <code>w_<wbr/>s</code> is a m
                 <span class="entry_type_container">x</span>
 
                 <span class="entry_type_array">
-                  5
+                  6
                 </span>
               <span class="entry_type_visibility"> [public]</span>
 
@@ -12312,13 +12312,13 @@ radial and tangential lens distortion.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Three radial distortion coefficients <code>[kappa_<wbr/>1,<wbr/> kappa_<wbr/>2,<wbr/>
+              <p>Four radial distortion coefficients <code>[kappa_<wbr/>0,<wbr/> kappa_<wbr/>1,<wbr/> kappa_<wbr/>2,<wbr/>
 kappa_<wbr/>3]</code> and two tangential distortion coefficients
 <code>[kappa_<wbr/>4,<wbr/> kappa_<wbr/>5]</code> that can be used to correct the
 lens's geometric distortion with the mapping equations:</p>
-<pre><code> x_<wbr/>c = x_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 ) +
+<pre><code> x_<wbr/>c = x_<wbr/>i * ( kappa_<wbr/>0 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 ) +
        kappa_<wbr/>4 * (2 * x_<wbr/>i * y_<wbr/>i) + kappa_<wbr/>5 * ( r^2 + 2 * x_<wbr/>i^2 )
- y_<wbr/>c = y_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 ) +
+ y_<wbr/>c = y_<wbr/>i * ( kappa_<wbr/>0 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 ) +
        kappa_<wbr/>5 * (2 * x_<wbr/>i * y_<wbr/>i) + kappa_<wbr/>4 * ( r^2 + 2 * y_<wbr/>i^2 )
 </code></pre>
 <p>Here,<wbr/> <code>[x_<wbr/>c,<wbr/> y_<wbr/>c]</code> are the coordinates to sample in the
@@ -13087,7 +13087,7 @@ point,<wbr/> <code>z_<wbr/>s = 1</code>,<wbr/> and <code>w_<wbr/>s</code> is a m
                 <span class="entry_type_container">x</span>
 
                 <span class="entry_type_array">
-                  5
+                  6
                 </span>
               <span class="entry_type_visibility"> [public]</span>
 
@@ -13124,13 +13124,13 @@ radial and tangential lens distortion.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>Three radial distortion coefficients <code>[kappa_<wbr/>1,<wbr/> kappa_<wbr/>2,<wbr/>
+              <p>Four radial distortion coefficients <code>[kappa_<wbr/>0,<wbr/> kappa_<wbr/>1,<wbr/> kappa_<wbr/>2,<wbr/>
 kappa_<wbr/>3]</code> and two tangential distortion coefficients
 <code>[kappa_<wbr/>4,<wbr/> kappa_<wbr/>5]</code> that can be used to correct the
 lens's geometric distortion with the mapping equations:</p>
-<pre><code> x_<wbr/>c = x_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 ) +
+<pre><code> x_<wbr/>c = x_<wbr/>i * ( kappa_<wbr/>0 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 ) +
        kappa_<wbr/>4 * (2 * x_<wbr/>i * y_<wbr/>i) + kappa_<wbr/>5 * ( r^2 + 2 * x_<wbr/>i^2 )
- y_<wbr/>c = y_<wbr/>i * ( 1 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 ) +
+ y_<wbr/>c = y_<wbr/>i * ( kappa_<wbr/>0 + kappa_<wbr/>1 * r^2 + kappa_<wbr/>2 * r^4 + kappa_<wbr/>3 * r^6 ) +
        kappa_<wbr/>5 * (2 * x_<wbr/>i * y_<wbr/>i) + kappa_<wbr/>4 * ( r^2 + 2 * y_<wbr/>i^2 )
 </code></pre>
 <p>Here,<wbr/> <code>[x_<wbr/>c,<wbr/> y_<wbr/>c]</code> are the coordinates to sample in the

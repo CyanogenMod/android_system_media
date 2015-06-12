@@ -3716,7 +3716,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
         <entry name="radialDistortion" type="float" visibility="public"
                container="array">
           <array>
-            <size>5</size>
+            <size>6</size>
           </array>
           <description>
             The correction coefficients to correct for this camera device's
@@ -3726,14 +3726,14 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             Unitless coefficients.
           </units>
           <details>
-            Three radial distortion coefficients `[kappa_1, kappa_2,
+            Four radial distortion coefficients `[kappa_0, kappa_1, kappa_2,
             kappa_3]` and two tangential distortion coefficients
             `[kappa_4, kappa_5]` that can be used to correct the
             lens's geometric distortion with the mapping equations:
 
-                 x_c = x_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
+                 x_c = x_i * ( kappa_0 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
                        kappa_4 * (2 * x_i * y_i) + kappa_5 * ( r^2 + 2 * x_i^2 )
-                 y_c = y_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
+                 y_c = y_i * ( kappa_0 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
                        kappa_5 * (2 * x_i * y_i) + kappa_4 * ( r^2 + 2 * y_i^2 )
 
             Here, `[x_c, y_c]` are the coordinates to sample in the
