@@ -498,6 +498,8 @@ static tag_info_t android_sensor_info[ANDROID_SENSOR_INFO_END -
         ANDROID_SENSOR_INFO_START] = {
     [ ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE - ANDROID_SENSOR_INFO_START ] =
     { "activeArraySize",               TYPE_INT32  },
+    [ ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE - ANDROID_SENSOR_INFO_START ] =
+    { "preCorrectionActiveArraySize",  TYPE_INT32  },
     [ ANDROID_SENSOR_INFO_SENSITIVITY_RANGE - ANDROID_SENSOR_INFO_START ] =
     { "sensitivityRange",              TYPE_INT32  },
     [ ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT - ANDROID_SENSOR_INFO_START ] =
@@ -2076,6 +2078,9 @@ int camera_metadata_enum_snprint(uint32_t tag,
         }
 
         case ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE: {
+            break;
+        }
+        case ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE: {
             break;
         }
         case ANDROID_SENSOR_INFO_SENSITIVITY_RANGE: {

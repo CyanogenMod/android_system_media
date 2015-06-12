@@ -751,6 +751,8 @@
             <li
             ><a href="#static_android.sensor.info.activeArraySize">android.sensor.info.activeArraySize</a></li>
             <li
+            ><a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.sensor.info.preCorrectionActiveArraySize</a></li>
+            <li
             ><a href="#static_android.sensor.info.sensitivityRange">android.sensor.info.sensitivityRange</a></li>
             <li
             ><a href="#static_android.sensor.info.colorFilterArrangement">android.sensor.info.colorFilterArrangement</a></li>
@@ -18069,8 +18071,8 @@ sensor interconnect bus (such as CSI2) or memory.<wbr/></p>
             </td> <!-- entry_type -->
 
             <td class="entry_description">
-              <p>The area of the image sensor which corresponds to
-active pixels.<wbr/></p>
+              <p>The area of the image sensor which corresponds to active pixels after any geometric
+distortion correction has been applied.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -18078,7 +18080,6 @@ active pixels.<wbr/></p>
             </td>
 
             <td class="entry_range">
-              
             </td>
 
             <td class="entry_tags">
@@ -18093,16 +18094,134 @@ active pixels.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>This is the region of the sensor that actually receives light from the scene.<wbr/>
-Therefore,<wbr/> the size of this region determines the maximum field of view and the maximum
-number of pixels that an image from this sensor can contain.<wbr/></p>
-<p>The rectangle is defined in terms of the full pixel array; (0,<wbr/>0) is the top-left of the
-full pixel array,<wbr/> and the size of the full pixel array is given by
+              <p>This is the rectangle representing the size of the active region of the sensor (i.<wbr/>e.<wbr/>
+the region that actually receives light from the scene) after any geometric correction
+has been applied,<wbr/> and should be treated as the maximum size in pixels of any of the
+image output formats aside from the raw formats.<wbr/></p>
+<p>This rectangle is defined relative to the full pixel array; (0,<wbr/>0) is the top-left of
+the full pixel array,<wbr/> and the size of the full pixel array is given by
 <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>.<wbr/></p>
-<p>Most other keys listing pixel coordinates have their coordinate systems based on the
-active array,<wbr/> with <code>(0,<wbr/> 0)</code> being the top-left of the active array rectangle.<wbr/></p>
+<p>The coordinate system for most other keys that list pixel coordinates,<wbr/> including
+<a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>,<wbr/> is defined relative to the active array rectangle given in
+this field,<wbr/> with <code>(0,<wbr/> 0)</code> being the top-left of this rectangle.<wbr/></p>
 <p>The active array may be smaller than the full pixel array,<wbr/> since the full array may
-include black calibration pixels or other inactive regions.<wbr/></p>
+include black calibration pixels or other inactive regions,<wbr/> and geometric correction
+resulting in scaling or cropping may have been applied.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This array contains <code>(xmin,<wbr/> ymin,<wbr/> width,<wbr/> height)</code>.<wbr/> The <code>(xmin,<wbr/> ymin)</code> must be
+&gt;= <code>(0,<wbr/>0)</code>.<wbr/>
+The <code>(width,<wbr/> height)</code> must be &lt;= <code><a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a></code>.<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
+           <!-- end of entry -->
+        
+                
+          <tr class="entry" id="static_android.sensor.info.preCorrectionActiveArraySize">
+            <td class="entry_name
+             " rowspan="5">
+              android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size
+            </td>
+            <td class="entry_type">
+                <span class="entry_type_name">int32</span>
+                <span class="entry_type_container">x</span>
+
+                <span class="entry_type_array">
+                  4
+                </span>
+              <span class="entry_type_visibility"> [public as rectangle]</span>
+
+
+              <span class="entry_type_hwlevel">[legacy] </span>
+
+
+                <div class="entry_type_notes">Four ints defining the active pixel rectangle</div>
+
+
+            </td> <!-- entry_type -->
+
+            <td class="entry_description">
+              <p>The area of the image sensor which corresponds to active pixels prior to the
+application of any geometric distortion correction.<wbr/></p>
+            </td>
+
+            <td class="entry_units">
+              Pixel coordinates on the image sensor
+            </td>
+
+            <td class="entry_range">
+            </td>
+
+            <td class="entry_tags">
+              <ul class="entry_tags">
+                  <li><a href="#tag_RAW">RAW</a></li>
+              </ul>
+            </td>
+
+          </tr>
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>This is the rectangle representing the size of the active region of the sensor (i.<wbr/>e.<wbr/>
+the region that actually receives light from the scene) before any geometric correction
+has been applied,<wbr/> and should be treated as the active region rectangle for any of the
+raw formats.<wbr/>  All metadata associated with raw processing (e.<wbr/>g.<wbr/> the lens shading
+correction map,<wbr/> and radial distortion fields) treats the top,<wbr/> left of this rectangle as
+the origin,<wbr/> (0,<wbr/>0).<wbr/></p>
+<p>The size of this region determines the maximum field of view and the maximum number of
+pixels that an image from this sensor can contain,<wbr/> prior to the application of
+geometric distortion correction.<wbr/> The effective maximum pixel dimensions of a
+post-distortion-corrected image is given by the <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>
+field,<wbr/> and the effective maximum field of view for a post-distortion-corrected image
+can be calculated by applying the geometric distortion correction fields to this
+rectangle,<wbr/> and cropping to the rectangle given in <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></p>
+<p>E.<wbr/>g.<wbr/> to calculate position of a pixel,<wbr/> (x,<wbr/>y),<wbr/> in a processed YUV output image with the
+dimensions in <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> given the position of a pixel,<wbr/>
+(x',<wbr/> y'),<wbr/> in the raw pixel array with dimensions give in
+<a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>:</p>
+<ol>
+<li>Choose a pixel (x',<wbr/> y') within the active array region of the raw buffer given in
+android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Corrected<wbr/>Active<wbr/>Array<wbr/>Size,<wbr/> otherwise this pixel is considered
+to be outside of the FOV,<wbr/> and will not be shown in the processed output image.<wbr/></li>
+<li>Apply geometric distortion correction to get the post-distortion pixel coordinate,<wbr/>
+(x_<wbr/>i,<wbr/> y_<wbr/>i).<wbr/> When applying geometric correction metadata,<wbr/> note that metadata for raw
+buffers is defined relative to the top,<wbr/> left of the
+android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Corrected<wbr/>Active<wbr/>Array<wbr/>Size rectangle.<wbr/></li>
+<li>If the resulting corrected pixel coordinate is within the region given in
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>,<wbr/> then the position of this pixel in the
+processed output image buffer is <code>(x_<wbr/>i - activeArray.<wbr/>left,<wbr/> y_<wbr/>i - activeArray.<wbr/>top)</code>,<wbr/>
+when the top,<wbr/> left coordinate of that buffer is treated as (0,<wbr/> 0).<wbr/></li>
+</ol>
+<p>Thus,<wbr/> for pixel x',<wbr/>y' = (25,<wbr/> 25) on a sensor where <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>
+is (100,<wbr/>100),<wbr/> android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Corrected<wbr/>Active<wbr/>Array<wbr/>Size is (10,<wbr/> 10,<wbr/> 100,<wbr/> 100),<wbr/>
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> is (20,<wbr/> 20,<wbr/> 80,<wbr/> 80),<wbr/> and the geometric distortion
+correction doesn't change the pixel coordinate,<wbr/> the resulting pixel selected in
+pixel coordinates would be x,<wbr/>y = (25,<wbr/> 25) relative to the top,<wbr/>left of the raw buffer
+with dimensions given in <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>,<wbr/> and would be (5,<wbr/> 5)
+relative to the top,<wbr/>left of post-processed YUV output buffer with dimensions given in
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></p>
+<p>The currently supported fields that correct for geometric distortion are:</p>
+<ol>
+<li><a href="#dynamic_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a>.<wbr/></li>
+</ol>
+<p>If all of the geometric distortion fields are no-ops,<wbr/> this rectangle will be the same
+as the post-distortion-corrected rectangle given in
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></p>
+<p>This rectangle is defined relative to the full pixel array; (0,<wbr/>0) is the top-left of
+the full pixel array,<wbr/> and the size of the full pixel array is given by
+<a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>.<wbr/></p>
+<p>The pre-correction active array may be smaller than the full pixel array,<wbr/> since the
+full array may include black calibration pixels or other inactive regions.<wbr/></p>
             </td>
           </tr>
 
@@ -18493,16 +18612,18 @@ including black calibration pixels.<wbr/></p>
           </tr>
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
-              <p>The pixel count of the full pixel array,<wbr/>
-which covers <a href="#static_android.sensor.info.physicalSize">android.<wbr/>sensor.<wbr/>info.<wbr/>physical<wbr/>Size</a> area.<wbr/></p>
-<p>If a camera device supports raw sensor formats,<wbr/> either this
-or <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> is the maximum output
-raw size listed in <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a>.<wbr/>
-If a size corresponding to pixelArraySize is listed,<wbr/> the resulting
-raw sensor image will include black pixels.<wbr/></p>
+              <p>The pixel count of the full pixel array of the image sensor,<wbr/> which covers
+<a href="#static_android.sensor.info.physicalSize">android.<wbr/>sensor.<wbr/>info.<wbr/>physical<wbr/>Size</a> area.<wbr/>  This represents the full pixel dimensions of
+the raw buffers produced by this sensor.<wbr/></p>
+<p>If a camera device supports raw sensor formats,<wbr/> either this or
+<a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size</a> is the maximum dimensions for the raw
+output formats listed in <a href="#static_android.scaler.streamConfigurationMap">android.<wbr/>scaler.<wbr/>stream<wbr/>Configuration<wbr/>Map</a> (this depends on
+whether or not the image sensor returns buffers containing pixels that are not
+part of the active array region for blacklevel calibration or other purposes).<wbr/></p>
 <p>Some parts of the full pixel array may not receive light from the scene,<wbr/>
-or are otherwise inactive.<wbr/>  The <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> key
-defines the rectangle of active pixels that actually forms an image.<wbr/></p>
+or be otherwise inactive.<wbr/>  The <a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size</a> key
+defines the rectangle of active pixels that will be included in processed image
+formats.<wbr/></p>
             </td>
           </tr>
 
@@ -26072,6 +26193,7 @@ corrupted during depth measurement.<wbr/></p>
           <li><a href="#controls_android.hotPixel.mode">android.hotPixel.mode</a> (controls)</li>
           <li><a href="#static_android.hotPixel.availableHotPixelModes">android.hotPixel.availableHotPixelModes</a> (static)</li>
           <li><a href="#static_android.sensor.info.activeArraySize">android.sensor.info.activeArraySize</a> (static)</li>
+          <li><a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.sensor.info.preCorrectionActiveArraySize</a> (static)</li>
           <li><a href="#static_android.sensor.info.colorFilterArrangement">android.sensor.info.colorFilterArrangement</a> (static)</li>
           <li><a href="#static_android.sensor.info.pixelArraySize">android.sensor.info.pixelArraySize</a> (static)</li>
           <li><a href="#static_android.sensor.info.whiteLevel">android.sensor.info.whiteLevel</a> (static)</li>
