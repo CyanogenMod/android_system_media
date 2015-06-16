@@ -12207,8 +12207,9 @@ calibration.<wbr/></p>
 
             <td class="entry_units">
               
-            Pixels in the android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size coordinate
-            system.<wbr/>
+            Pixels in the
+            android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size
+            coordinate system.<wbr/>
           
             </td>
 
@@ -12259,6 +12260,18 @@ p_<wbr/>s = p_<wbr/>h /<wbr/> z_<wbr/>h
 <p>so <code>[x_<wbr/>s,<wbr/> y_<wbr/>s]</code> is the pixel coordinates of the world
 point,<wbr/> <code>z_<wbr/>s = 1</code>,<wbr/> and <code>w_<wbr/>s</code> is a measurement of disparity
 (depth) in pixel coordinates.<wbr/></p>
+<p>Note that the coordinate system for this transform is the
+<a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size</a> system,<wbr/>
+where <code>(0,<wbr/>0)</code> is the top-left of the
+preCorrectionActiveArraySize rectangle.<wbr/> Once the pose and
+intrinsic calibration transforms have been applied to a
+world point,<wbr/> then the <a href="#dynamic_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a>
+transform needs to be applied,<wbr/> and the result adjusted to
+be in the <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> coordinate
+system (where <code>(0,<wbr/> 0)</code> is the top-left of the
+activeArraySize rectangle),<wbr/> to determine the final pixel
+coordinate of the world point for processed (non-RAW)
+output buffers.<wbr/></p>
             </td>
           </tr>
 
@@ -13019,8 +13032,9 @@ calibration.<wbr/></p>
 
             <td class="entry_units">
               
-            Pixels in the android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size coordinate
-            system.<wbr/>
+            Pixels in the
+            android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size
+            coordinate system.<wbr/>
           
             </td>
 
@@ -13071,6 +13085,18 @@ p_<wbr/>s = p_<wbr/>h /<wbr/> z_<wbr/>h
 <p>so <code>[x_<wbr/>s,<wbr/> y_<wbr/>s]</code> is the pixel coordinates of the world
 point,<wbr/> <code>z_<wbr/>s = 1</code>,<wbr/> and <code>w_<wbr/>s</code> is a measurement of disparity
 (depth) in pixel coordinates.<wbr/></p>
+<p>Note that the coordinate system for this transform is the
+<a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size</a> system,<wbr/>
+where <code>(0,<wbr/>0)</code> is the top-left of the
+preCorrectionActiveArraySize rectangle.<wbr/> Once the pose and
+intrinsic calibration transforms have been applied to a
+world point,<wbr/> then the <a href="#dynamic_android.lens.radialDistortion">android.<wbr/>lens.<wbr/>radial<wbr/>Distortion</a>
+transform needs to be applied,<wbr/> and the result adjusted to
+be in the <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> coordinate
+system (where <code>(0,<wbr/> 0)</code> is the top-left of the
+activeArraySize rectangle),<wbr/> to determine the final pixel
+coordinate of the world point for processed (non-RAW)
+output buffers.<wbr/></p>
             </td>
           </tr>
 
@@ -16067,10 +16093,10 @@ cropping or scaling operations,<wbr/> and all coordinate systems for
 metadata used for this format are relative to the size of the
 active region of the image sensor before any geometric distortion
 correction has been applied (i.<wbr/>e.<wbr/>
-android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size).<wbr/> Supported
+<a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size</a>).<wbr/> Supported
 dimensions for this format are limited to the full dimensions of
 the sensor (e.<wbr/>g.<wbr/> either <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a> or
-android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size will be the
+<a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size</a> will be the
 only supported output size).<wbr/></p>
 <p>See <a href="#static_android.scaler.availableInputOutputFormatsMap">android.<wbr/>scaler.<wbr/>available<wbr/>Input<wbr/>Output<wbr/>Formats<wbr/>Map</a> for
 the full set of performance guarantees.<wbr/></p></span>
@@ -18202,19 +18228,19 @@ dimensions in <a href="#static_android.sensor.info.activeArraySize">android.<wbr
 <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>:</p>
 <ol>
 <li>Choose a pixel (x',<wbr/> y') within the active array region of the raw buffer given in
-android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Corrected<wbr/>Active<wbr/>Array<wbr/>Size,<wbr/> otherwise this pixel is considered
+<a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size</a>,<wbr/> otherwise this pixel is considered
 to be outside of the FOV,<wbr/> and will not be shown in the processed output image.<wbr/></li>
 <li>Apply geometric distortion correction to get the post-distortion pixel coordinate,<wbr/>
 (x_<wbr/>i,<wbr/> y_<wbr/>i).<wbr/> When applying geometric correction metadata,<wbr/> note that metadata for raw
 buffers is defined relative to the top,<wbr/> left of the
-android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Corrected<wbr/>Active<wbr/>Array<wbr/>Size rectangle.<wbr/></li>
+<a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size</a> rectangle.<wbr/></li>
 <li>If the resulting corrected pixel coordinate is within the region given in
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>,<wbr/> then the position of this pixel in the
 processed output image buffer is <code>(x_<wbr/>i - activeArray.<wbr/>left,<wbr/> y_<wbr/>i - activeArray.<wbr/>top)</code>,<wbr/>
 when the top,<wbr/> left coordinate of that buffer is treated as (0,<wbr/> 0).<wbr/></li>
 </ol>
 <p>Thus,<wbr/> for pixel x',<wbr/>y' = (25,<wbr/> 25) on a sensor where <a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a>
-is (100,<wbr/>100),<wbr/> android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Corrected<wbr/>Active<wbr/>Array<wbr/>Size is (10,<wbr/> 10,<wbr/> 100,<wbr/> 100),<wbr/>
+is (100,<wbr/>100),<wbr/> <a href="#static_android.sensor.info.preCorrectionActiveArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pre<wbr/>Correction<wbr/>Active<wbr/>Array<wbr/>Size</a> is (10,<wbr/> 10,<wbr/> 100,<wbr/> 100),<wbr/>
 <a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a> is (20,<wbr/> 20,<wbr/> 80,<wbr/> 80),<wbr/> and the geometric distortion
 correction doesn't change the pixel coordinate,<wbr/> the resulting pixel selected in
 pixel coordinates would be x,<wbr/>y = (25,<wbr/> 25) relative to the top,<wbr/>left of the raw buffer
