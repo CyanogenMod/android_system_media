@@ -3623,9 +3623,9 @@ effect.<wbr/></p></span>
 <p>Enabling this disables control.<wbr/>aeMode,<wbr/> control.<wbr/>awbMode and
 control.<wbr/>afMode controls; the camera device will ignore
 those settings while USE_<wbr/>SCENE_<wbr/>MODE is active (except for
-FACE_<wbr/>PRIORITY scene mode).<wbr/> Other control entries are still
-active.<wbr/>  This setting can only be used if scene mode is
-supported (i.<wbr/>e.<wbr/> <a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a>
+FACE_<wbr/>PRIORITY scene mode).<wbr/> Other control entries are still active.<wbr/>
+This setting can only be used if scene mode is supported (i.<wbr/>e.<wbr/> 
+<a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a>
 contain some modes other than DISABLED).<wbr/></p></span>
                   </li>
                   <li>
@@ -3911,6 +3911,32 @@ JPEG outputs are supported for LEGACY HDR
 captures.<wbr/> Using a RAW output for HDR capture is not
 supported.<wbr/></p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">FACE_PRIORITY_LOW_LIGHT</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_hidden">[hidden]</span>
+                    <span class="entry_type_enum_notes"><p>Same as FACE_<wbr/>PRIORITY scene mode,<wbr/> except that the camera
+device will choose higher sensivity values (<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>)
+under low light conditions.<wbr/></p>
+<p>The camera device may be tuned to expose the images in a reduced
+sensitivity range to produce the best quality images.<wbr/> For example,<wbr/>
+if the <a href="#static_android.sensor.info.sensitivityRange">android.<wbr/>sensor.<wbr/>info.<wbr/>sensitivity<wbr/>Range</a> gives range of [100,<wbr/> 1600],<wbr/>
+the camera device auto-exposure routine tuning process may limit the actual
+exposure sensivity range to [100,<wbr/> 1200] to ensure that the noise level isn't
+exessive to compromise the image quality.<wbr/> Under this situation,<wbr/> the image under
+low light may be under-exposed when the sensor max exposure time (bounded by the
+<a href="#controls_android.control.aeTargetFpsRange">android.<wbr/>control.<wbr/>ae<wbr/>Target<wbr/>Fps<wbr/>Range</a> when <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is one of the
+ON_<wbr/>* modes) and effecitve max sensitivity are reached.<wbr/> This scene mode allows the
+camera device auto-exposure routine to increase the sensitivity up to the max
+sensitivity specified by <a href="#static_android.sensor.info.sensitivityRange">android.<wbr/>sensor.<wbr/>info.<wbr/>sensitivity<wbr/>Range</a> when the scene is too
+dark and the max exposure time is reached.<wbr/> The captured images may be noisier
+compared with the images captured in normal FACE_<wbr/>PRIORITY mode,<wbr/> therefore,<wbr/> it is
+recommended that the application only use this scene mode when it is capable of
+reducing the noise level of the captured images.<wbr/></p>
+<p>Unlike the other scene modes,<wbr/> <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>
+remain active when FACE_<wbr/>PRIORITY_<wbr/>LOW_<wbr/>LIGHT is set.<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -3941,9 +3967,9 @@ supported.<wbr/></p></span>
               <p>Scene modes are custom camera modes optimized for a certain set of conditions and
 capture settings.<wbr/></p>
 <p>This is the mode that that is active when
-<code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == USE_<wbr/>SCENE_<wbr/>MODE</code>.<wbr/> Aside from FACE_<wbr/>PRIORITY,<wbr/>
-these modes will disable <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
-<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> while in use.<wbr/></p>
+<code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == USE_<wbr/>SCENE_<wbr/>MODE</code>.<wbr/> Aside from FACE_<wbr/>PRIORITY,<wbr/> these modes will
+disable <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/> <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>
+while in use.<wbr/></p>
 <p>The interpretation and implementation of these scene modes is left
 to the implementor of the camera device.<wbr/> Their behavior will not be
 consistent across all devices,<wbr/> and any given device may only implement
@@ -4991,12 +5017,12 @@ and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wb
 that scene mode.<wbr/></p>
 <p>The order of this list matches that of availableSceneModes,<wbr/>
 with 3 entries for each mode.<wbr/>  The overrides listed
-for FACE_<wbr/>PRIORITY are ignored,<wbr/> since for that
-mode the application-set <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
+for FACE_<wbr/>PRIORITY and FACE_<wbr/>PRIORITY_<wbr/>LOW_<wbr/>LIGHT (if supported) are ignored,<wbr/>
+since for that mode the application-set <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
 <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> values are
 used instead,<wbr/> matching the behavior when <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a>
-is set to AUTO.<wbr/> It is recommended that the FACE_<wbr/>PRIORITY
-overrides should be set to 0.<wbr/></p>
+is set to AUTO.<wbr/> It is recommended that the FACE_<wbr/>PRIORITY and
+FACE_<wbr/>PRIORITY_<wbr/>LOW_<wbr/>LIGHT (if supported) overrides should be set to 0.<wbr/></p>
 <p>For example,<wbr/> if availableSceneModes contains
 <code>(FACE_<wbr/>PRIORITY,<wbr/> ACTION,<wbr/> NIGHT)</code>,<wbr/>  then the camera framework
 expects sceneModeOverrides to have 9 entries formatted like:
@@ -5014,7 +5040,7 @@ ON_<wbr/>AUTO_<wbr/>FLASH,<wbr/> INCANDESCENT,<wbr/> AUTO)</code>.<wbr/></p>
 in the static metadata of the camera service.<wbr/>  The camera service will
 use these values to set <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
 <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> when using a scene
-mode other than FACE_<wbr/>PRIORITY.<wbr/></p>
+mode other than FACE_<wbr/>PRIORITY and FACE_<wbr/>PRIORITY_<wbr/>LOW_<wbr/>LIGHT (if supported).<wbr/></p>
             </td>
           </tr>
 
@@ -8029,9 +8055,9 @@ effect.<wbr/></p></span>
 <p>Enabling this disables control.<wbr/>aeMode,<wbr/> control.<wbr/>awbMode and
 control.<wbr/>afMode controls; the camera device will ignore
 those settings while USE_<wbr/>SCENE_<wbr/>MODE is active (except for
-FACE_<wbr/>PRIORITY scene mode).<wbr/> Other control entries are still
-active.<wbr/>  This setting can only be used if scene mode is
-supported (i.<wbr/>e.<wbr/> <a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a>
+FACE_<wbr/>PRIORITY scene mode).<wbr/> Other control entries are still active.<wbr/>
+This setting can only be used if scene mode is supported (i.<wbr/>e.<wbr/> 
+<a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a>
 contain some modes other than DISABLED).<wbr/></p></span>
                   </li>
                   <li>
@@ -8317,6 +8343,32 @@ JPEG outputs are supported for LEGACY HDR
 captures.<wbr/> Using a RAW output for HDR capture is not
 supported.<wbr/></p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">FACE_PRIORITY_LOW_LIGHT</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_hidden">[hidden]</span>
+                    <span class="entry_type_enum_notes"><p>Same as FACE_<wbr/>PRIORITY scene mode,<wbr/> except that the camera
+device will choose higher sensivity values (<a href="#controls_android.sensor.sensitivity">android.<wbr/>sensor.<wbr/>sensitivity</a>)
+under low light conditions.<wbr/></p>
+<p>The camera device may be tuned to expose the images in a reduced
+sensitivity range to produce the best quality images.<wbr/> For example,<wbr/>
+if the <a href="#static_android.sensor.info.sensitivityRange">android.<wbr/>sensor.<wbr/>info.<wbr/>sensitivity<wbr/>Range</a> gives range of [100,<wbr/> 1600],<wbr/>
+the camera device auto-exposure routine tuning process may limit the actual
+exposure sensivity range to [100,<wbr/> 1200] to ensure that the noise level isn't
+exessive to compromise the image quality.<wbr/> Under this situation,<wbr/> the image under
+low light may be under-exposed when the sensor max exposure time (bounded by the
+<a href="#controls_android.control.aeTargetFpsRange">android.<wbr/>control.<wbr/>ae<wbr/>Target<wbr/>Fps<wbr/>Range</a> when <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a> is one of the
+ON_<wbr/>* modes) and effecitve max sensitivity are reached.<wbr/> This scene mode allows the
+camera device auto-exposure routine to increase the sensitivity up to the max
+sensitivity specified by <a href="#static_android.sensor.info.sensitivityRange">android.<wbr/>sensor.<wbr/>info.<wbr/>sensitivity<wbr/>Range</a> when the scene is too
+dark and the max exposure time is reached.<wbr/> The captured images may be noisier
+compared with the images captured in normal FACE_<wbr/>PRIORITY mode,<wbr/> therefore,<wbr/> it is
+recommended that the application only use this scene mode when it is capable of
+reducing the noise level of the captured images.<wbr/></p>
+<p>Unlike the other scene modes,<wbr/> <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
+<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>
+remain active when FACE_<wbr/>PRIORITY_<wbr/>LOW_<wbr/>LIGHT is set.<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -8347,9 +8399,9 @@ supported.<wbr/></p></span>
               <p>Scene modes are custom camera modes optimized for a certain set of conditions and
 capture settings.<wbr/></p>
 <p>This is the mode that that is active when
-<code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == USE_<wbr/>SCENE_<wbr/>MODE</code>.<wbr/> Aside from FACE_<wbr/>PRIORITY,<wbr/>
-these modes will disable <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/>
-<a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a> while in use.<wbr/></p>
+<code><a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == USE_<wbr/>SCENE_<wbr/>MODE</code>.<wbr/> Aside from FACE_<wbr/>PRIORITY,<wbr/> these modes will
+disable <a href="#controls_android.control.aeMode">android.<wbr/>control.<wbr/>ae<wbr/>Mode</a>,<wbr/> <a href="#controls_android.control.awbMode">android.<wbr/>control.<wbr/>awb<wbr/>Mode</a>,<wbr/> and <a href="#controls_android.control.afMode">android.<wbr/>control.<wbr/>af<wbr/>Mode</a>
+while in use.<wbr/></p>
 <p>The interpretation and implementation of these scene modes is left
 to the implementor of the camera device.<wbr/> Their behavior will not be
 consistent across all devices,<wbr/> and any given device may only implement
@@ -15188,7 +15240,7 @@ and FPS range combinations provided by
 <a href="https://developer.android.com/reference/android/hardware/camera2/params/StreamConfigurationMap.html#getHighSpeedVideoSizes">StreamConfigurationMap#getHighSpeedVideoSizes</a>.<wbr/>
 The fps range can be controlled via <a href="#controls_android.control.aeTargetFpsRange">android.<wbr/>control.<wbr/>ae<wbr/>Target<wbr/>Fps<wbr/>Range</a>.<wbr/></p>
 <p>In this capability,<wbr/> the camera device will override aeMode,<wbr/> awbMode,<wbr/> and afMode to
-ON,<wbr/> ON,<wbr/> and CONTINUOUS_<wbr/>VIDEO,<wbr/> respectively.<wbr/> All post-processing block mode
+ON,<wbr/> AUTO,<wbr/> and CONTINUOUS_<wbr/>VIDEO,<wbr/> respectively.<wbr/> All post-processing block mode
 controls will be overridden to be FAST.<wbr/> Therefore,<wbr/> no manual control of capture
 and post-processing parameters is possible.<wbr/> All other controls operate the
 same as when <a href="#controls_android.control.mode">android.<wbr/>control.<wbr/>mode</a> == AUTO.<wbr/> This means that all other
