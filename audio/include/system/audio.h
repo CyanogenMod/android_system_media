@@ -648,7 +648,6 @@ enum {
                                  AUDIO_DEVICE_OUT_BLUETOOTH_SCO_CARKIT),
     AUDIO_DEVICE_OUT_ALL_USB  = (AUDIO_DEVICE_OUT_USB_ACCESSORY |
                                  AUDIO_DEVICE_OUT_USB_DEVICE),
-
     /* input devices */
     AUDIO_DEVICE_IN_COMMUNICATION         = AUDIO_DEVICE_BIT_IN | 0x1,
     AUDIO_DEVICE_IN_AMBIENT               = AUDIO_DEVICE_BIT_IN | 0x2,
@@ -1409,6 +1408,20 @@ static inline char *audio_device_address_to_parameter(audio_devices_t device, co
     return strdup(param);
 }
 
+static inline bool audio_device_is_digital(audio_devices_t device) {
+    if ((device & AUDIO_DEVICE_BIT_IN) != 0) {
+        // input
+        return (device & (AUDIO_DEVICE_IN_ALL_USB |
+                          AUDIO_DEVICE_IN_HDMI |
+                          AUDIO_DEVICE_IN_SPDIF)) != 0;
+    } else {
+        // output
+        return (device & (AUDIO_DEVICE_OUT_ALL_USB |
+                          AUDIO_DEVICE_OUT_HDMI |
+                          AUDIO_DEVICE_OUT_HDMI_ARC |
+                          AUDIO_DEVICE_OUT_SPDIF)) != 0;
+    }
+}
 
 __END_DECLS
 
