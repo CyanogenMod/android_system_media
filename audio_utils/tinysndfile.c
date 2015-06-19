@@ -303,7 +303,7 @@ static SNDFILE *sf_open_write(const char *path, SF_INFO *info)
             (info->channels > 0 && info->channels <= 8) &&
             ((info->format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) &&
             (sub == SF_FORMAT_PCM_16 || sub == SF_FORMAT_PCM_U8 || sub == SF_FORMAT_FLOAT ||
-                sub == SF_FORMAT_PCM_24)
+                sub == SF_FORMAT_PCM_24 || sub == SF_FORMAT_PCM_32)
           )) {
         return NULL;
     }
@@ -342,6 +342,9 @@ static SNDFILE *sf_open_write(const char *path, SF_INFO *info)
         break;
     case SF_FORMAT_PCM_24:
         bitsPerSample = 24;
+        break;
+    case SF_FORMAT_PCM_32:
+        bitsPerSample = 32;
         break;
     default:    // not reachable
         bitsPerSample = 0;
@@ -620,6 +623,24 @@ sf_count_t sf_writef_float(SNDFILE *handle, const float *ptr, sf_count_t desired
         break;
     case SF_FORMAT_PCM_U8:  // transcoding from float to byte not yet implemented
     default:
+        break;
+    }
+    size_t actualFrames = actualBytes / handle->bytesPerFrame;
+    handle->remaining += actualFrames;
+    return actualFrames;
+}
+
+sf_count_t sf_writef_int(SNDFILE *handle, const int *ptr, sf_count_t desiredFrames)
+{
+    if (handle == NULL || handle->mode != SFM_WRITE || ptr == NULL || desiredFrames <= 0)
+        return 0;
+    size_t desiredBytes = desiredFrames * handle->bytesPerFrame;
+    size_t actualBytes = 0;
+    switch (handle->info.format & SF_FORMAT_SUBMASK) {
+    case SF_FORMAT_PCM_32:
+        actualBytes = fwrite(ptr, sizeof(char), desiredBytes, handle->stream);
+        break;
+    default:    // transcoding from other formats not yet implemented
         break;
     }
     size_t actualFrames = actualBytes / handle->bytesPerFrame;
