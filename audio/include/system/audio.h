@@ -728,10 +728,12 @@ typedef enum {
     AUDIO_OUTPUT_FLAG_COMPRESS_OFFLOAD = 0x10,  // offload playback of compressed
                                                 // streams to hardware codec
     AUDIO_OUTPUT_FLAG_NON_BLOCKING = 0x20, // use non-blocking write
-    AUDIO_OUTPUT_FLAG_HW_AV_SYNC = 0x40, // output uses a hardware A/V synchronization source
-    AUDIO_OUTPUT_FLAG_TTS = 0x80 // output for streams transmitted through speaker
-                                 // at a sample rate high enough to accommodate
-                                 // lower-range ultrasonic playback
+    AUDIO_OUTPUT_FLAG_HW_AV_SYNC = 0x40,   // output uses a hardware A/V synchronization source
+    AUDIO_OUTPUT_FLAG_TTS = 0x80,          // output for streams transmitted through speaker
+                                           // at a sample rate high enough to accommodate
+                                           // lower-range ultrasonic playback
+    AUDIO_OUTPUT_FLAG_RAW = 0x100,         // minimize signal processing
+    AUDIO_OUTPUT_FLAG_SYNC = 0x200,        // synchronize I/O streams
 
 } audio_output_flags_t;
 
@@ -744,6 +746,9 @@ typedef enum {
     AUDIO_INPUT_FLAG_NONE       = 0x0,  // no attributes
     AUDIO_INPUT_FLAG_FAST       = 0x1,  // prefer an input that supports "fast tracks"
     AUDIO_INPUT_FLAG_HW_HOTWORD = 0x2,  // prefer an input that captures from hw hotword source
+    AUDIO_INPUT_FLAG_RAW        = 0x4,  // minimize signal processing
+    AUDIO_INPUT_FLAG_SYNC       = 0x8,  // synchronize I/O streams
+
 } audio_input_flags_t;
 
 /* Additional information about compressed streams offloaded to
