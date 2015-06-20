@@ -75,6 +75,12 @@ public:
      */
     static bool isFormatSupported(audio_format_t format);
 
+    /**
+     * Discard any data in the buffer. Reset frame scanners.
+     * This should be called when seeking to a new position in the stream.
+     */
+    void reset();
+
 protected:
     void   clearBurstBuffer();
     void   writeBurstBufferShorts(const uint16_t* buffer, size_t numBytes);

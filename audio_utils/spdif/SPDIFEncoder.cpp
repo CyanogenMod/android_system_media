@@ -104,7 +104,7 @@ void SPDIFEncoder::writeBurstBufferShorts(const uint16_t *buffer, size_t numShor
     size_t bytesToWrite = numShorts * sizeof(uint16_t);
     if ((mByteCursor + bytesToWrite) > mBurstBufferSizeBytes) {
         ALOGE("SPDIFEncoder: Burst buffer overflow!\n");
-        clearBurstBuffer();
+        reset();
         return;
     }
     memcpy(&mBurstBuffer[mByteCursor >> 1], buffer, bytesToWrite);
@@ -160,6 +160,17 @@ void SPDIFEncoder::sendZeroPad()
     }
 }
 
+void SPDIFEncoder::reset()
+{
+    ALOGV("SPDIFEncoder: reset()");
+    clearBurstBuffer();
+    if (mFramer != NULL) {
+        mFramer->resetBurst();
+    }
+    mPayloadBytesPending = 0;
+    mScanning = true;
+}
+
 void SPDIFEncoder::flushBurstBuffer()
 {
     const int preambleSize = 4 * sizeof(uint16_t);
@@ -171,8 +182,7 @@ void SPDIFEncoder::flushBurstBuffer()
         sendZeroPad();
         writeOutput(mBurstBuffer, mByteCursor);
     }
-    clearBurstBuffer();
-    mFramer->resetBurst();
+    reset();
 }
 
 void SPDIFEncoder::clearBurstBuffer()
