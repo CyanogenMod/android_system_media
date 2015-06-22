@@ -10386,6 +10386,18 @@ For example,<wbr/> if the primary image has 4:3 aspect ratio,<wbr/> the thumbnai
 16:9 aspect ratio,<wbr/> the primary image will be cropped vertically (letterbox) to
 generate the thumbnail image.<wbr/> The thumbnail image will always have a smaller Field
 Of View (FOV) than the primary image when aspect ratios differ.<wbr/></p>
+<p>When an <a href="#controls_android.jpeg.orientation">android.<wbr/>jpeg.<wbr/>orientation</a> of non-zero degree is requested,<wbr/>
+the camera device will handle thumbnail rotation in one of the following ways:</p>
+<ul>
+<li>Set the <a href="https://developer.android.com/reference/android/media/ExifInterface.html#TAG_ORIENTATION">EXIF orientation flag</a>
+  and keep jpeg and thumbnail image data unrotated.<wbr/></li>
+<li>Rotate the jpeg and thumbnail image data and not set
+  <a href="https://developer.android.com/reference/android/media/ExifInterface.html#TAG_ORIENTATION">EXIF orientation flag</a>.<wbr/> In this
+  case,<wbr/> LIMITED or FULL hardware level devices will report rotated thumnail size in
+  capture result,<wbr/> so the width and height will be interchanged if 90 or 270 degree
+  orientation is requested.<wbr/> LEGACY device will always report unrotated thumbnail
+  size.<wbr/></li>
+</ul>
             </td>
           </tr>
 
@@ -11043,6 +11055,18 @@ For example,<wbr/> if the primary image has 4:3 aspect ratio,<wbr/> the thumbnai
 16:9 aspect ratio,<wbr/> the primary image will be cropped vertically (letterbox) to
 generate the thumbnail image.<wbr/> The thumbnail image will always have a smaller Field
 Of View (FOV) than the primary image when aspect ratios differ.<wbr/></p>
+<p>When an <a href="#controls_android.jpeg.orientation">android.<wbr/>jpeg.<wbr/>orientation</a> of non-zero degree is requested,<wbr/>
+the camera device will handle thumbnail rotation in one of the following ways:</p>
+<ul>
+<li>Set the <a href="https://developer.android.com/reference/android/media/ExifInterface.html#TAG_ORIENTATION">EXIF orientation flag</a>
+  and keep jpeg and thumbnail image data unrotated.<wbr/></li>
+<li>Rotate the jpeg and thumbnail image data and not set
+  <a href="https://developer.android.com/reference/android/media/ExifInterface.html#TAG_ORIENTATION">EXIF orientation flag</a>.<wbr/> In this
+  case,<wbr/> LIMITED or FULL hardware level devices will report rotated thumnail size in
+  capture result,<wbr/> so the width and height will be interchanged if 90 or 270 degree
+  orientation is requested.<wbr/> LEGACY device will always report unrotated thumbnail
+  size.<wbr/></li>
+</ul>
             </td>
           </tr>
 

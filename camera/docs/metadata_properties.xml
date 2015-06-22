@@ -3061,6 +3061,18 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           16:9 aspect ratio, the primary image will be cropped vertically (letterbox) to
           generate the thumbnail image. The thumbnail image will always have a smaller Field
           Of View (FOV) than the primary image when aspect ratios differ.
+
+          When an android.jpeg.orientation of non-zero degree is requested,
+          the camera device will handle thumbnail rotation in one of the following ways:
+
+          * Set the {@link android.media.ExifInterface#TAG_ORIENTATION EXIF orientation flag}
+            and keep jpeg and thumbnail image data unrotated.
+          * Rotate the jpeg and thumbnail image data and not set
+            {@link android.media.ExifInterface#TAG_ORIENTATION EXIF orientation flag}. In this
+            case, LIMITED or FULL hardware level devices will report rotated thumnail size in
+            capture result, so the width and height will be interchanged if 90 or 270 degree
+            orientation is requested. LEGACY device will always report unrotated thumbnail
+            size.
           </details>
           <hal_details>
           The HAL must not squeeze or stretch the downscaled primary image to generate thumbnail.
