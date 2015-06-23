@@ -4500,33 +4500,39 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             </value>
             <value optional="true">BURST_CAPTURE
               <notes>
-              The camera device supports capturing maximum-resolution
-              images at &gt;= 20 frames per second, in at least the
-              uncompressed YUV format, when post-processing settings
-              are set to FAST.
+              The camera device supports capturing high-resolution images at &gt;= 20 frames per
+              second, in at least the uncompressed YUV format, when post-processing settings are set
+              to FAST. Additionally, maximum-resolution images can be captured at &gt;= 10 frames
+              per second.  Here, 'high resolution' means at least 8 megapixels, or the maximum
+              resolution of the device, whichever is smaller.
 
-              More specifically, this means that a size matching the
-              camera device's active array size is listed as a
-              supported size for the YUV_420_888 format in
-              android.scaler.streamConfigurationMap, the minimum frame
-              duration for that format and size is &lt;= 1/20 s, and
-              the android.control.aeAvailableTargetFpsRanges entry
-              lists at least one FPS range where the minimum FPS is
-              &gt;= 1 / minimumFrameDuration for the maximum-size
-              YUV_420_888 format.
+              More specifically, this means that a size matching the camera device's active array
+              size is listed as a supported size for the {@link
+              android.graphics.ImageFormat#YUV_420_888} format in either {@link
+              android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes} or {@link
+              android.hardware.camera2.params.StreamConfigurationMap#getHighResolutionOutputSizes},
+              with a minimum frame duration for that format and size of either &lt;= 1/20 s, or
+              &lt;= 1/10 s, respectively; and the android.control.aeAvailableTargetFpsRanges entry
+              lists at least one FPS range where the minimum FPS is &gt;= 1 / minimumFrameDuration
+              for the maximum-size YUV_420_888 format.  If that maximum size is listed in {@link
+              android.hardware.camera2.params.StreamConfigurationMap#getHighResolutionOutputSizes},
+              then the list of resolutions for YUV_420_888 from {@link
+              android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes} contains at
+              least one resolution &gt;= 8 megapixels, with a minimum frame duration of &lt;= 1/20
+              s.
 
-              In addition, the android.sync.maxLatency field is
-              guaranted to have a value between 0 and 4, inclusive.
-              android.control.aeLockAvailable and
-              android.control.awbLockAvailable are also guaranteed
-              to be `true` so burst capture with these two locks ON
-              yields consistent image output.
+              If the device supports the {@link android.graphics.ImageFormat#RAW10}, {@link
+              android.graphics.ImageFormat#RAW12}, then those can also be captured at the same rate
+              as the maximum-size YUV_420_888 resolution is.
 
-              On a camera device that reports the HIGH_RESOLUTION hardware
-              level, meaning the device supports very large capture sizes,
-              BURST_CAPTURE means that at least 8-megapixel images can be
-              captured at `&gt;=` 20 fps, and maximum-resolution images can be
-              captured at `&gt;=` 10 fps.
+              If the device supports the PRIVATE_REPROCESSING capability, then the same guarantees
+              as for the YUV_420_888 format also apply to the {@link
+              android.graphics.ImageFormat#PRIVATE} format.
+
+              In addition, the android.sync.maxLatency field is guaranted to have a value between 0
+              and 4, inclusive. android.control.aeLockAvailable and android.control.awbLockAvailable
+              are also guaranteed to be `true` so burst capture with these two locks ON yields
+              consistent image output.
               </notes>
             </value>
             <value optional="true">YUV_REPROCESSING
@@ -7920,13 +7926,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               This camera device is running in backward compatibility mode.
               </notes>
             </value>
-            <value>
-              HIGH_RESOLUTION
-              <notes>
-              This camera device is capable of supporting advanced imaging applications at full rate,
-              and additional high-resolution outputs at lower rates.
-              </notes>
-            </value>
           </enum>
           <description>
           Generally classifies the overall set of the camera device functionality.
@@ -7936,9 +7935,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           A FULL device will support below capabilities:
 
-          * 30fps operation at maximum resolution (== sensor resolution) is preferred, more than
-            20fps is required, for at least uncompressed YUV
-            output. (android.request.availableCapabilities contains BURST_CAPTURE)
+          * BURST_CAPTURE capability (android.request.availableCapabilities contains BURST_CAPTURE)
           * Per frame control (android.sync.maxLatency `==` PER_FRAME_CONTROL)
           * Manual sensor control (android.request.availableCapabilities contains MANUAL_SENSOR)
           * Manual post-processing control (android.request.availableCapabilities contains
@@ -7946,7 +7943,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           * Arbitrary cropping region (android.scaler.croppingType `==` FREEFORM)
           * At least 3 processed (but not stalling) format output streams
             (android.request.maxNumOutputProc `&gt;=` 3)
-          * The required stream configuration defined in android.scaler.availableStreamConfigurations
+          * The required stream configurations defined in android.scaler.availableStreamConfigurations
           * The required exposure time range defined in android.sensor.info.exposureTimeRange
           * The required maxFrameDuration defined in android.sensor.info.maxFrameDuration
 
@@ -7968,17 +7965,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           Each higher level supports everything the lower level supports
           in this order: FULL `&gt;` LIMITED `&gt;` LEGACY.
-
-          A HIGH_RESOLUTION device is equivalent to a FULL device, except that:
-
-          * At least one output resolution of 8 megapixels or higher in uncompressed YUV is
-            supported at `&gt;=` 20 fps.
-          * Maximum-size (sensor resolution) uncompressed YUV is supported  at `&gt;=` 10
-            fps.
-          * For devices that list the RAW capability and support either RAW10 or RAW12 output,
-            maximum-resolution RAW10 or RAW12 capture will operate at least at the rate of
-            maximum-resolution YUV capture, and at least one supported output resolution of
-            8 megapixels or higher in RAW10 or RAW12 is supported `&gt;=` 20 fps.
           </details>
           <hal_details>
           The camera 3 HAL device can implement one of two possible
