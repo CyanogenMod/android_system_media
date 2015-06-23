@@ -18322,6 +18322,9 @@ full array may include black calibration pixels or other inactive regions.<wbr/>
               <p>This array contains <code>(xmin,<wbr/> ymin,<wbr/> width,<wbr/> height)</code>.<wbr/> The <code>(xmin,<wbr/> ymin)</code> must be
 &gt;= <code>(0,<wbr/>0)</code>.<wbr/>
 The <code>(width,<wbr/> height)</code> must be &lt;= <code><a href="#static_android.sensor.info.pixelArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>pixel<wbr/>Array<wbr/>Size</a></code>.<wbr/></p>
+<p>If omitted by the HAL implementation,<wbr/> the camera framework will assume that this is
+the same as the post-correction active array region given in
+<a href="#static_android.sensor.info.activeArraySize">android.<wbr/>sensor.<wbr/>info.<wbr/>active<wbr/>Array<wbr/>Size</a>.<wbr/></p>
             </td>
           </tr>
 
