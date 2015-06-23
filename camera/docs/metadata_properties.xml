@@ -2547,7 +2547,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           For each configuration, the fps_max &amp;gt;= 120fps.
           </range>
           <details>
-          When CONSTRAINED_HIGH_SPEED_VIDEO is supported in android.control.availableCapabilities,
+          When CONSTRAINED_HIGH_SPEED_VIDEO is supported in android.request.availableCapabilities,
           this metadata will list the supported high speed video size, fps range and max batch size
           configurations. All the sizes listed in this configuration will be a subset of the sizes
           reported by {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes}
