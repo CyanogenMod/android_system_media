@@ -2574,7 +2574,7 @@ manual control of <a href="#controls_android.sensor.exposureTime">android.<wbr/>
                 
           <tr class="entry" id="controls_android.control.aePrecaptureTrigger">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger
             </td>
             <td class="entry_type">
@@ -2669,9 +2669,30 @@ details.<wbr/></p>
 capturing a high-resolution JPEG image will automatically trigger a
 precapture sequence before the high-resolution capture,<wbr/> including
 potentially firing a pre-capture flash.<wbr/></p>
+<p>Using the precapture trigger and the auto-focus trigger <a href="#controls_android.control.afTrigger">android.<wbr/>control.<wbr/>af<wbr/>Trigger</a>
+simultaneously is allowed.<wbr/> However,<wbr/> since these triggers often require cooperation between
+the auto-focus and auto-exposure routines (for example,<wbr/> the may need to be enabled for a
+focus sweep),<wbr/> the camera device may delay acting on a later trigger until the previous
+trigger has been fully handled.<wbr/> This may lead to longer intervals between the trigger and
+changes to <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> indicating the start of the precapture sequence,<wbr/> for
+example.<wbr/></p>
+<p>If both the precapture and the auto-focus trigger are activated on the same request,<wbr/> then
+the camera device will complete them in the optimal order for that device.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL must support triggering the AE precapture trigger while an AF trigger is active
+(and vice versa),<wbr/> or at the same time as the AF trigger.<wbr/>  It is acceptable for the HAL to
+treat these as two consecutive triggers,<wbr/> for example handling the AF trigger and then the
+AE trigger.<wbr/>  Or the HAL may choose to optimize the case with both triggers fired at once,<wbr/>
+to minimize the latency for converging both focus and exposure/<wbr/>flash usage.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -2939,7 +2960,7 @@ exclusive on xmax and ymax.<wbr/></p>
                 
           <tr class="entry" id="controls_android.control.afTrigger">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>control.<wbr/>af<wbr/>Trigger
             </td>
             <td class="entry_type">
@@ -3003,9 +3024,27 @@ single capture,<wbr/> and then return it to IDLE (or not set at all).<wbr/> Spec
 START for multiple captures in a row means restarting the AF operation over
 and over again.<wbr/></p>
 <p>See <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a> for what the trigger means for each AF mode.<wbr/></p>
+<p>Using the autofocus trigger and the precapture trigger <a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>
+simultaneously is allowed.<wbr/> However,<wbr/> since these triggers often require cooperation between
+the auto-focus and auto-exposure routines (for example,<wbr/> the may need to be enabled for a
+focus sweep),<wbr/> the camera device may delay acting on a later trigger until the previous
+trigger has been fully handled.<wbr/> This may lead to longer intervals between the trigger and
+changes to <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a>,<wbr/> for example.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL must support triggering the AF trigger while an AE precapture trigger is active
+(and vice versa),<wbr/> or at the same time as the AE trigger.<wbr/>  It is acceptable for the HAL to
+treat these as two consecutive triggers,<wbr/> for example handling the AF trigger and then the
+AE trigger.<wbr/>  Or the HAL may choose to optimize the case with both triggers fired at once,<wbr/>
+to minimize the latency for converging both focus and exposure/<wbr/>flash usage.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -3624,7 +3663,7 @@ effect.<wbr/></p></span>
 control.<wbr/>afMode controls; the camera device will ignore
 those settings while USE_<wbr/>SCENE_<wbr/>MODE is active (except for
 FACE_<wbr/>PRIORITY scene mode).<wbr/> Other control entries are still active.<wbr/>
-This setting can only be used if scene mode is supported (i.<wbr/>e.<wbr/> 
+This setting can only be used if scene mode is supported (i.<wbr/>e.<wbr/>
 <a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a>
 contain some modes other than DISABLED).<wbr/></p></span>
                   </li>
@@ -5982,7 +6021,7 @@ manual control of <a href="#controls_android.sensor.exposureTime">android.<wbr/>
                 
           <tr class="entry" id="dynamic_android.control.aePrecaptureTrigger">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger
             </td>
             <td class="entry_type">
@@ -6077,9 +6116,30 @@ details.<wbr/></p>
 capturing a high-resolution JPEG image will automatically trigger a
 precapture sequence before the high-resolution capture,<wbr/> including
 potentially firing a pre-capture flash.<wbr/></p>
+<p>Using the precapture trigger and the auto-focus trigger <a href="#controls_android.control.afTrigger">android.<wbr/>control.<wbr/>af<wbr/>Trigger</a>
+simultaneously is allowed.<wbr/> However,<wbr/> since these triggers often require cooperation between
+the auto-focus and auto-exposure routines (for example,<wbr/> the may need to be enabled for a
+focus sweep),<wbr/> the camera device may delay acting on a later trigger until the previous
+trigger has been fully handled.<wbr/> This may lead to longer intervals between the trigger and
+changes to <a href="#dynamic_android.control.aeState">android.<wbr/>control.<wbr/>ae<wbr/>State</a> indicating the start of the precapture sequence,<wbr/> for
+example.<wbr/></p>
+<p>If both the precapture and the auto-focus trigger are activated on the same request,<wbr/> then
+the camera device will complete them in the optimal order for that device.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL must support triggering the AE precapture trigger while an AF trigger is active
+(and vice versa),<wbr/> or at the same time as the AF trigger.<wbr/>  It is acceptable for the HAL to
+treat these as two consecutive triggers,<wbr/> for example handling the AF trigger and then the
+AE trigger.<wbr/>  Or the HAL may choose to optimize the case with both triggers fired at once,<wbr/>
+to minimize the latency for converging both focus and exposure/<wbr/>flash usage.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -6647,7 +6707,7 @@ exclusive on xmax and ymax.<wbr/></p>
                 
           <tr class="entry" id="dynamic_android.control.afTrigger">
             <td class="entry_name
-             " rowspan="3">
+             " rowspan="5">
               android.<wbr/>control.<wbr/>af<wbr/>Trigger
             </td>
             <td class="entry_type">
@@ -6711,9 +6771,27 @@ single capture,<wbr/> and then return it to IDLE (or not set at all).<wbr/> Spec
 START for multiple captures in a row means restarting the AF operation over
 and over again.<wbr/></p>
 <p>See <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a> for what the trigger means for each AF mode.<wbr/></p>
+<p>Using the autofocus trigger and the precapture trigger <a href="#controls_android.control.aePrecaptureTrigger">android.<wbr/>control.<wbr/>ae<wbr/>Precapture<wbr/>Trigger</a>
+simultaneously is allowed.<wbr/> However,<wbr/> since these triggers often require cooperation between
+the auto-focus and auto-exposure routines (for example,<wbr/> the may need to be enabled for a
+focus sweep),<wbr/> the camera device may delay acting on a later trigger until the previous
+trigger has been fully handled.<wbr/> This may lead to longer intervals between the trigger and
+changes to <a href="#dynamic_android.control.afState">android.<wbr/>control.<wbr/>af<wbr/>State</a>,<wbr/> for example.<wbr/></p>
             </td>
           </tr>
 
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>The HAL must support triggering the AF trigger while an AE precapture trigger is active
+(and vice versa),<wbr/> or at the same time as the AE trigger.<wbr/>  It is acceptable for the HAL to
+treat these as two consecutive triggers,<wbr/> for example handling the AF trigger and then the
+AE trigger.<wbr/>  Or the HAL may choose to optimize the case with both triggers fired at once,<wbr/>
+to minimize the latency for converging both focus and exposure/<wbr/>flash usage.<wbr/></p>
+            </td>
+          </tr>
 
           <tr class="entry_spacer"><td class="entry_spacer" colspan="6"></td></tr>
            <!-- end of entry -->
@@ -8056,7 +8134,7 @@ effect.<wbr/></p></span>
 control.<wbr/>afMode controls; the camera device will ignore
 those settings while USE_<wbr/>SCENE_<wbr/>MODE is active (except for
 FACE_<wbr/>PRIORITY scene mode).<wbr/> Other control entries are still active.<wbr/>
-This setting can only be used if scene mode is supported (i.<wbr/>e.<wbr/> 
+This setting can only be used if scene mode is supported (i.<wbr/>e.<wbr/>
 <a href="#static_android.control.availableSceneModes">android.<wbr/>control.<wbr/>available<wbr/>Scene<wbr/>Modes</a>
 contain some modes other than DISABLED).<wbr/></p></span>
                   </li>
