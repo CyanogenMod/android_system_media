@@ -5875,6 +5875,10 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
             This array contains `(xmin, ymin, width, height)`. The `(xmin, ymin)` must be
             &amp;gt;= `(0,0)`.
             The `(width, height)` must be &amp;lt;= `android.sensor.info.pixelArraySize`.
+
+            If omitted by the HAL implementation, the camera framework will assume that this is
+            the same as the post-correction active array region given in
+            android.sensor.info.activeArraySize.
             </hal_details>
             <tag id="RAW" />
           </entry>
