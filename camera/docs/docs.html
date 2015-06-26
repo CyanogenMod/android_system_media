@@ -25327,8 +25327,6 @@ is also UNKNOWN.<wbr/></p>
                     <span class="entry_type_enum_name">PER_FRAME_CONTROL</span>
                     <span class="entry_type_enum_value">0</span>
                     <span class="entry_type_enum_notes"><p>Every frame has the requests immediately applied.<wbr/></p>
-<p>Furthermore for all results,<wbr/>
-<code><a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == <a href="https://developer.android.com/reference/android/hardware/camera2/CaptureResult.html#getFrameNumber">CaptureResult#getFrameNumber</a></code></p>
 <p>Changing controls over multiple requests one after another will
 produce results that have those controls applied atomically
 each frame.<wbr/></p>
@@ -25351,8 +25349,7 @@ unknown when that exact point will be.<wbr/></p>
             <td class="entry_description">
               <p>The maximum number of frames that can occur after a request
 (different than the previous) has been submitted,<wbr/> and before the
-result's state becomes synchronized (by setting
-<a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> to a non-negative value).<wbr/></p>
+result's state becomes synchronized.<wbr/></p>
             </td>
 
             <td class="entry_units">
@@ -25376,12 +25373,20 @@ result's state becomes synchronized (by setting
           <tr class="entry_cont">
             <td class="entry_details" colspan="5">
               <p>This defines the maximum distance (in number of metadata results),<wbr/>
-between <a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> and the equivalent
-frame number for that result.<wbr/></p>
+between the frame number of the request that has new controls to apply
+and the frame number of the result that has all the controls applied.<wbr/></p>
 <p>In other words this acts as an upper boundary for how many frames
 must occur before the camera device knows for a fact that the new
 submitted camera settings have been applied in outgoing frames.<wbr/></p>
-<p>For example if the distance was 2,<wbr/></p>
+            </td>
+          </tr>
+
+          <tr class="entries_header">
+            <th class="th_details" colspan="5">HAL Implementation Details</th>
+          </tr>
+          <tr class="entry_cont">
+            <td class="entry_details" colspan="5">
+              <p>For example if maxLatency was 2,<wbr/></p>
 <pre><code>initial request = X (repeating)
 request1 = X
 request2 = Y
@@ -25402,15 +25407,7 @@ where resultN has frameNumber N.<wbr/>
 <p>Since <code>result4</code> has a <code>frameNumber == 4</code> and
 <code><a href="#dynamic_android.sync.frameNumber">android.<wbr/>sync.<wbr/>frame<wbr/>Number</a> == 2</code>,<wbr/> the distance is clearly
 <code>4 - 2 = 2</code>.<wbr/></p>
-            </td>
-          </tr>
-
-          <tr class="entries_header">
-            <th class="th_details" colspan="5">HAL Implementation Details</th>
-          </tr>
-          <tr class="entry_cont">
-            <td class="entry_details" colspan="5">
-              <p>Use <code>frame_<wbr/>count</code> from camera3_<wbr/>request_<wbr/>t instead of
+<p>Use <code>frame_<wbr/>count</code> from camera3_<wbr/>request_<wbr/>t instead of
 <a href="#controls_android.request.frameCount">android.<wbr/>request.<wbr/>frame<wbr/>Count</a> or
 <code>@link{android.<wbr/>hardware.<wbr/>camera2.<wbr/>Capture<wbr/>Result#get<wbr/>Frame<wbr/>Number}</code>.<wbr/></p>
 <p>LIMITED devices are strongly encouraged to use a non-negative
