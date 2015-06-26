@@ -8223,9 +8223,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
               <notes>
               Every frame has the requests immediately applied.
 
-              Furthermore for all results,
-              `android.sync.frameNumber == {@link android.hardware.camera2.CaptureResult#getFrameNumber}`
-
               Changing controls over multiple requests one after another will
               produce results that have those controls applied atomically
               each frame.
@@ -8249,21 +8246,21 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           <description>
           The maximum number of frames that can occur after a request
           (different than the previous) has been submitted, and before the
-          result's state becomes synchronized (by setting
-          android.sync.frameNumber to a non-negative value).
+          result's state becomes synchronized.
           </description>
           <units>Frame counts</units>
           <range>A positive value, PER_FRAME_CONTROL, or UNKNOWN.</range>
           <details>
           This defines the maximum distance (in number of metadata results),
-          between android.sync.frameNumber and the equivalent
-          frame number for that result.
+          between the frame number of the request that has new controls to apply
+          and the frame number of the result that has all the controls applied.
 
           In other words this acts as an upper boundary for how many frames
           must occur before the camera device knows for a fact that the new
           submitted camera settings have been applied in outgoing frames.
-
-          For example if the distance was 2,
+          </details>
+          <hal_details>
+          For example if maxLatency was 2,
 
               initial request = X (repeating)
               request1 = X
@@ -8285,8 +8282,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           Since `result4` has a `frameNumber == 4` and
           `android.sync.frameNumber == 2`, the distance is clearly
           `4 - 2 = 2`.
-          </details>
-          <hal_details>
+
           Use `frame_count` from camera3_request_t instead of
           android.request.frameCount or
           `@link{android.hardware.camera2.CaptureResult#getFrameNumber}`.
