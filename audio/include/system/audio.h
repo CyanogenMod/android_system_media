@@ -615,6 +615,7 @@ enum {
     AUDIO_DEVICE_OUT_AUX_LINE                  = 0x200000,
     /* limited-output speaker device for acoustic safety */
     AUDIO_DEVICE_OUT_SPEAKER_SAFE              = 0x400000,
+    AUDIO_DEVICE_OUT_IP                        = 0x800000,
     AUDIO_DEVICE_OUT_DEFAULT                   = AUDIO_DEVICE_BIT_DEFAULT,
     AUDIO_DEVICE_OUT_ALL      = (AUDIO_DEVICE_OUT_EARPIECE |
                                  AUDIO_DEVICE_OUT_SPEAKER |
@@ -639,6 +640,7 @@ enum {
                                  AUDIO_DEVICE_OUT_FM |
                                  AUDIO_DEVICE_OUT_AUX_LINE |
                                  AUDIO_DEVICE_OUT_SPEAKER_SAFE |
+                                 AUDIO_DEVICE_OUT_IP |
                                  AUDIO_DEVICE_OUT_DEFAULT),
     AUDIO_DEVICE_OUT_ALL_A2DP = (AUDIO_DEVICE_OUT_BLUETOOTH_A2DP |
                                  AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
@@ -675,6 +677,7 @@ enum {
     AUDIO_DEVICE_IN_SPDIF                 = AUDIO_DEVICE_BIT_IN | 0x10000,
     AUDIO_DEVICE_IN_BLUETOOTH_A2DP        = AUDIO_DEVICE_BIT_IN | 0x20000,
     AUDIO_DEVICE_IN_LOOPBACK              = AUDIO_DEVICE_BIT_IN | 0x40000,
+    AUDIO_DEVICE_IN_IP                    = AUDIO_DEVICE_BIT_IN | 0x80000,
     AUDIO_DEVICE_IN_DEFAULT               = AUDIO_DEVICE_BIT_IN | AUDIO_DEVICE_BIT_DEFAULT,
 
     AUDIO_DEVICE_IN_ALL     = (AUDIO_DEVICE_IN_COMMUNICATION |
@@ -696,6 +699,7 @@ enum {
                                AUDIO_DEVICE_IN_SPDIF |
                                AUDIO_DEVICE_IN_BLUETOOTH_A2DP |
                                AUDIO_DEVICE_IN_LOOPBACK |
+                               AUDIO_DEVICE_IN_IP |
                                AUDIO_DEVICE_IN_DEFAULT),
     AUDIO_DEVICE_IN_ALL_SCO = AUDIO_DEVICE_IN_BLUETOOTH_SCO_HEADSET,
     AUDIO_DEVICE_IN_ALL_USB  = (AUDIO_DEVICE_IN_USB_ACCESSORY |
@@ -1413,13 +1417,15 @@ static inline bool audio_device_is_digital(audio_devices_t device) {
         // input
         return (device & (AUDIO_DEVICE_IN_ALL_USB |
                           AUDIO_DEVICE_IN_HDMI |
-                          AUDIO_DEVICE_IN_SPDIF)) != 0;
+                          AUDIO_DEVICE_IN_SPDIF |
+                          AUDIO_DEVICE_IN_IP)) != 0;
     } else {
         // output
         return (device & (AUDIO_DEVICE_OUT_ALL_USB |
                           AUDIO_DEVICE_OUT_HDMI |
                           AUDIO_DEVICE_OUT_HDMI_ARC |
-                          AUDIO_DEVICE_OUT_SPDIF)) != 0;
+                          AUDIO_DEVICE_OUT_SPDIF |
+                          AUDIO_DEVICE_OUT_IP)) != 0;
     }
 }
 
