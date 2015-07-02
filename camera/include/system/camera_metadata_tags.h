@@ -311,8 +311,6 @@ typedef enum camera_metadata_tag {
 
     ANDROID_SENSOR_INFO_ACTIVE_ARRAY_SIZE =           // int32[]      | public
             ANDROID_SENSOR_INFO_START,
-    ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE,
-                                                      // int32[]      | public
     ANDROID_SENSOR_INFO_SENSITIVITY_RANGE,            // int32[]      | public
     ANDROID_SENSOR_INFO_COLOR_FILTER_ARRANGEMENT,     // enum         | public
     ANDROID_SENSOR_INFO_EXPOSURE_TIME_RANGE,          // int64[]      | public
@@ -322,6 +320,8 @@ typedef enum camera_metadata_tag {
     ANDROID_SENSOR_INFO_WHITE_LEVEL,                  // int32        | public
     ANDROID_SENSOR_INFO_TIMESTAMP_SOURCE,             // enum         | public
     ANDROID_SENSOR_INFO_LENS_SHADING_APPLIED,         // enum         | public
+    ANDROID_SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE,
+                                                      // int32[]      | public
     ANDROID_SENSOR_INFO_END,
 
     ANDROID_SHADING_MODE =                            // enum         | public
