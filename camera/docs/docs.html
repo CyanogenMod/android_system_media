@@ -17531,8 +17531,7 @@ final used crop region in metadata result <a href="#controls_android.scaler.crop
 <p>Camera devices that support FREEFORM cropping will support any crop region that
 is inside of the active array.<wbr/> The camera device will apply the same crop region and
 return the final used crop region in capture result metadata <a href="#controls_android.scaler.cropRegion">android.<wbr/>scaler.<wbr/>crop<wbr/>Region</a>.<wbr/></p>
-<p>FULL capability devices (<a href="#static_android.info.supportedHardwareLevel">android.<wbr/>info.<wbr/>supported<wbr/>Hardware<wbr/>Level</a> <code>==</code> FULL) will support
-FREEFORM cropping.<wbr/> LEGACY capability devices will only support CENTER_<wbr/>ONLY cropping.<wbr/></p>
+<p>LEGACY capability devices will only support CENTER_<wbr/>ONLY cropping.<wbr/></p>
             </td>
           </tr>
 
@@ -24956,7 +24955,6 @@ doesn't violate the above rules.<wbr/></p>
 <li>Manual sensor control (<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains MANUAL_<wbr/>SENSOR)</li>
 <li>Manual post-processing control (<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> contains
   MANUAL_<wbr/>POST_<wbr/>PROCESSING)</li>
-<li>Arbitrary cropping region (<a href="#static_android.scaler.croppingType">android.<wbr/>scaler.<wbr/>cropping<wbr/>Type</a> <code>==</code> FREEFORM)</li>
 <li>At least 3 processed (but not stalling) format output streams
   (<a href="#static_android.request.maxNumOutputProc">android.<wbr/>request.<wbr/>max<wbr/>Num<wbr/>Output<wbr/>Proc</a> <code>&gt;=</code> 3)</li>
 <li>The required stream configurations defined in <a href="#static_android.scaler.availableStreamConfigurations">android.<wbr/>scaler.<wbr/>available<wbr/>Stream<wbr/>Configurations</a></li>
@@ -24979,6 +24977,10 @@ queried separately.<wbr/> These include:</p>
 post-processing,<wbr/> arbitrary cropping regions,<wbr/> and has relaxed performance constraints.<wbr/></p>
 <p>Each higher level supports everything the lower level supports
 in this order: FULL <code>&gt;</code> LIMITED <code>&gt;</code> LEGACY.<wbr/></p>
+<p>Note:
+Pre-API level 23,<wbr/> FULL devices also supported arbitrary cropping region
+(<a href="#static_android.scaler.croppingType">android.<wbr/>scaler.<wbr/>cropping<wbr/>Type</a> <code>==</code> FREEFORM); this requirement was relaxed in API level 23,<wbr/>
+and FULL devices may only support CENTERED cropping.<wbr/></p>
             </td>
           </tr>
 
