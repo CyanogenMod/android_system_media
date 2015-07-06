@@ -5662,8 +5662,7 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           is inside of the active array. The camera device will apply the same crop region and
           return the final used crop region in capture result metadata android.scaler.cropRegion.
 
-          FULL capability devices (android.info.supportedHardwareLevel `==` FULL) will support
-          FREEFORM cropping. LEGACY capability devices will only support CENTER_ONLY cropping.
+          LEGACY capability devices will only support CENTER_ONLY cropping.
           </details>
         </entry>
       </static>
@@ -7987,7 +7986,6 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
           * Manual sensor control (android.request.availableCapabilities contains MANUAL_SENSOR)
           * Manual post-processing control (android.request.availableCapabilities contains
             MANUAL_POST_PROCESSING)
-          * Arbitrary cropping region (android.scaler.croppingType `==` FREEFORM)
           * At least 3 processed (but not stalling) format output streams
             (android.request.maxNumOutputProc `&gt;=` 3)
           * The required stream configurations defined in android.scaler.availableStreamConfigurations
@@ -8012,6 +8010,11 @@ xsi:schemaLocation="http://schemas.android.com/service/camera/metadata/ metadata
 
           Each higher level supports everything the lower level supports
           in this order: FULL `&gt;` LIMITED `&gt;` LEGACY.
+
+          Note:
+          Pre-API level 23, FULL devices also supported arbitrary cropping region
+          (android.scaler.croppingType `==` FREEFORM); this requirement was relaxed in API level 23,
+          and FULL devices may only support CENTERED cropping.
           </details>
           <hal_details>
           The camera 3 HAL device can implement one of two possible
