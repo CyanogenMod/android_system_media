@@ -610,6 +610,7 @@ typedef enum camera_metadata_enum_android_edge_mode {
     ANDROID_EDGE_MODE_OFF,
     ANDROID_EDGE_MODE_FAST,
     ANDROID_EDGE_MODE_HIGH_QUALITY,
+    ANDROID_EDGE_MODE_ZERO_SHUTTER_LAG,
 } camera_metadata_enum_android_edge_mode_t;
 
 
@@ -680,6 +681,7 @@ typedef enum camera_metadata_enum_android_noise_reduction_mode {
     ANDROID_NOISE_REDUCTION_MODE_FAST,
     ANDROID_NOISE_REDUCTION_MODE_HIGH_QUALITY,
     ANDROID_NOISE_REDUCTION_MODE_MINIMAL,
+    ANDROID_NOISE_REDUCTION_MODE_ZERO_SHUTTER_LAG,
 } camera_metadata_enum_android_noise_reduction_mode_t;
 
 
