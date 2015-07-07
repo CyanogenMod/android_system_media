@@ -8731,6 +8731,27 @@ output</p></span>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
                     <span class="entry_type_enum_notes"><p>Apply high-quality edge enhancement,<wbr/> at a cost of possibly reduced output frame rate.<wbr/></p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>Edge enhancement is applied at different levels for different output streams,<wbr/>
+based on resolution.<wbr/> Streams at maximum recording resolution (see <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createCaptureSession">CameraDevice#createCaptureSession</a>) or below have
+edge enhancement applied,<wbr/> while higher-resolution streams have no edge enhancement
+applied.<wbr/> The level of edge enhancement for low-resolution streams is tuned so that
+frame rate is not impacted,<wbr/> and the quality is equal to or better than FAST (since it
+is only applied to lower-resolution outputs,<wbr/> quality may improve from FAST).<wbr/></p>
+<p>This mode is intended to be used by applications operating in a zero-shutter-lag mode
+with YUV or PRIVATE reprocessing,<wbr/> where the application continuously captures
+high-resolution intermediate buffers into a circular buffer,<wbr/> from which a final image is
+produced via reprocessing when a user takes a picture.<wbr/>  For such a use case,<wbr/> the
+high-resolution buffers must not have edge enhancement applied to maximize efficiency of
+preview and to avoid double-applying enhancement when reprocessed,<wbr/> while low-resolution
+buffers (used for recording or preview,<wbr/> generally) need edge enhancement applied for
+reasonable preview quality.<wbr/></p>
+<p>This mode is guaranteed to be supported by devices that support either the
+YUV_<wbr/>REPROCESSING or PRIVATE_<wbr/>REPROCESSING capabilities
+(<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> lists either of those capabilities).<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -8766,7 +8787,14 @@ no enhancement will be applied by the camera device.<wbr/></p>
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the
 camera device will use the highest-quality enhancement algorithms,<wbr/>
 even if it slows down capture rate.<wbr/> FAST means the camera device will
-not slow down capture rate when applying edge enhancement.<wbr/></p>
+not slow down capture rate when applying edge enhancement.<wbr/> Every output stream will
+have a similar amount of enhancement applied.<wbr/></p>
+<p>ZERO_<wbr/>SHUTTER_<wbr/>LAG is meant to be used by applications that maintain a continuous circular
+buffer of high-resolution images during preview and reprocess image(s) from that buffer
+into a final capture when triggered by the user.<wbr/> In this mode,<wbr/> the camera device applies
+edge enhancement to low-resolution streams (below maximum recording resolution) to
+maximize preview quality,<wbr/> but does not apply edge enhancement to high-resolution streams,<wbr/>
+since those will be reprocessed later if necessary.<wbr/></p>
 <p>For YUV_<wbr/>REPROCESSING,<wbr/> these FAST/<wbr/>HIGH_<wbr/>QUALITY modes both mean that the camera
 device will apply FAST/<wbr/>HIGH_<wbr/>QUALITY YUV-domain edge enhancement,<wbr/> respectively.<wbr/>
 The camera device may adjust its internal noise reduction parameters for best
@@ -8982,6 +9010,27 @@ output</p></span>
                     <span class="entry_type_enum_name">HIGH_QUALITY</span>
                     <span class="entry_type_enum_notes"><p>Apply high-quality edge enhancement,<wbr/> at a cost of possibly reduced output frame rate.<wbr/></p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>Edge enhancement is applied at different levels for different output streams,<wbr/>
+based on resolution.<wbr/> Streams at maximum recording resolution (see <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createCaptureSession">CameraDevice#createCaptureSession</a>) or below have
+edge enhancement applied,<wbr/> while higher-resolution streams have no edge enhancement
+applied.<wbr/> The level of edge enhancement for low-resolution streams is tuned so that
+frame rate is not impacted,<wbr/> and the quality is equal to or better than FAST (since it
+is only applied to lower-resolution outputs,<wbr/> quality may improve from FAST).<wbr/></p>
+<p>This mode is intended to be used by applications operating in a zero-shutter-lag mode
+with YUV or PRIVATE reprocessing,<wbr/> where the application continuously captures
+high-resolution intermediate buffers into a circular buffer,<wbr/> from which a final image is
+produced via reprocessing when a user takes a picture.<wbr/>  For such a use case,<wbr/> the
+high-resolution buffers must not have edge enhancement applied to maximize efficiency of
+preview and to avoid double-applying enhancement when reprocessed,<wbr/> while low-resolution
+buffers (used for recording or preview,<wbr/> generally) need edge enhancement applied for
+reasonable preview quality.<wbr/></p>
+<p>This mode is guaranteed to be supported by devices that support either the
+YUV_<wbr/>REPROCESSING or PRIVATE_<wbr/>REPROCESSING capabilities
+(<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> lists either of those capabilities).<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -9017,7 +9066,14 @@ no enhancement will be applied by the camera device.<wbr/></p>
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the
 camera device will use the highest-quality enhancement algorithms,<wbr/>
 even if it slows down capture rate.<wbr/> FAST means the camera device will
-not slow down capture rate when applying edge enhancement.<wbr/></p>
+not slow down capture rate when applying edge enhancement.<wbr/> Every output stream will
+have a similar amount of enhancement applied.<wbr/></p>
+<p>ZERO_<wbr/>SHUTTER_<wbr/>LAG is meant to be used by applications that maintain a continuous circular
+buffer of high-resolution images during preview and reprocess image(s) from that buffer
+into a final capture when triggered by the user.<wbr/> In this mode,<wbr/> the camera device applies
+edge enhancement to low-resolution streams (below maximum recording resolution) to
+maximize preview quality,<wbr/> but does not apply edge enhancement to high-resolution streams,<wbr/>
+since those will be reprocessed later if necessary.<wbr/></p>
 <p>For YUV_<wbr/>REPROCESSING,<wbr/> these FAST/<wbr/>HIGH_<wbr/>QUALITY modes both mean that the camera
 device will apply FAST/<wbr/>HIGH_<wbr/>QUALITY YUV-domain edge enhancement,<wbr/> respectively.<wbr/>
 The camera device may adjust its internal noise reduction parameters for best
@@ -13408,6 +13464,28 @@ rate relative to sensor output.<wbr/></p></span>
                     <span class="entry_type_enum_notes"><p>MINIMAL noise reduction is applied without reducing frame rate relative to
 sensor output.<wbr/> </p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>Noise reduction is applied at different levels for different output streams,<wbr/>
+based on resolution.<wbr/> Streams at maximum recording resolution (see <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createCaptureSession">CameraDevice#createCaptureSession</a>) or below have noise
+reduction applied,<wbr/> while higher-resolution streams have MINIMAL (if supported) or no
+noise reduction applied (if MINIMAL is not supported.<wbr/>) The degree of noise reduction
+for low-resolution streams is tuned so that frame rate is not impacted,<wbr/> and the quality
+is equal to or better than FAST (since it is only applied to lower-resolution outputs,<wbr/>
+quality may improve from FAST).<wbr/></p>
+<p>This mode is intended to be used by applications operating in a zero-shutter-lag mode
+with YUV or PRIVATE reprocessing,<wbr/> where the application continuously captures
+high-resolution intermediate buffers into a circular buffer,<wbr/> from which a final image is
+produced via reprocessing when a user takes a picture.<wbr/>  For such a use case,<wbr/> the
+high-resolution buffers must not have noise reduction applied to maximize efficiency of
+preview and to avoid over-applying noise filtering when reprocessing,<wbr/> while
+low-resolution buffers (used for recording or preview,<wbr/> generally) need noise reduction
+applied for reasonable preview quality.<wbr/></p>
+<p>This mode is guaranteed to be supported by devices that support either the
+YUV_<wbr/>REPROCESSING or PRIVATE_<wbr/>REPROCESSING capabilities
+(<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> lists either of those capabilities).<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -13448,7 +13526,14 @@ This mode is optional,<wbr/> may not be support by all devices.<wbr/> The applic
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the camera device
 will use the highest-quality noise filtering algorithms,<wbr/>
 even if it slows down capture rate.<wbr/> FAST means the camera device will not
-slow down capture rate when applying noise filtering.<wbr/></p>
+slow down capture rate when applying noise filtering.<wbr/> Every output stream will
+have a similar amount of enhancement applied.<wbr/></p>
+<p>ZERO_<wbr/>SHUTTER_<wbr/>LAG is meant to be used by applications that maintain a continuous circular
+buffer of high-resolution images during preview and reprocess image(s) from that buffer
+into a final capture when triggered by the user.<wbr/> In this mode,<wbr/> the camera device applies
+noise reduction to low-resolution streams (below maximum recording resolution) to maximize
+preview quality,<wbr/> but does not apply noise reduction to high-resolution streams,<wbr/> since
+those will be reprocessed later if necessary.<wbr/></p>
 <p>For YUV_<wbr/>REPROCESSING,<wbr/> these FAST/<wbr/>HIGH_<wbr/>QUALITY modes both mean that the camera device
 will apply FAST/<wbr/>HIGH_<wbr/>QUALITY YUV domain noise reduction,<wbr/> respectively.<wbr/> The camera device
 may adjust the noise reduction parameters for best image quality based on the
@@ -13673,6 +13758,28 @@ rate relative to sensor output.<wbr/></p></span>
                     <span class="entry_type_enum_notes"><p>MINIMAL noise reduction is applied without reducing frame rate relative to
 sensor output.<wbr/> </p></span>
                   </li>
+                  <li>
+                    <span class="entry_type_enum_name">ZERO_SHUTTER_LAG</span>
+                    <span class="entry_type_enum_optional">[optional]</span>
+                    <span class="entry_type_enum_notes"><p>Noise reduction is applied at different levels for different output streams,<wbr/>
+based on resolution.<wbr/> Streams at maximum recording resolution (see <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice.html#createCaptureSession">CameraDevice#createCaptureSession</a>) or below have noise
+reduction applied,<wbr/> while higher-resolution streams have MINIMAL (if supported) or no
+noise reduction applied (if MINIMAL is not supported.<wbr/>) The degree of noise reduction
+for low-resolution streams is tuned so that frame rate is not impacted,<wbr/> and the quality
+is equal to or better than FAST (since it is only applied to lower-resolution outputs,<wbr/>
+quality may improve from FAST).<wbr/></p>
+<p>This mode is intended to be used by applications operating in a zero-shutter-lag mode
+with YUV or PRIVATE reprocessing,<wbr/> where the application continuously captures
+high-resolution intermediate buffers into a circular buffer,<wbr/> from which a final image is
+produced via reprocessing when a user takes a picture.<wbr/>  For such a use case,<wbr/> the
+high-resolution buffers must not have noise reduction applied to maximize efficiency of
+preview and to avoid over-applying noise filtering when reprocessing,<wbr/> while
+low-resolution buffers (used for recording or preview,<wbr/> generally) need noise reduction
+applied for reasonable preview quality.<wbr/></p>
+<p>This mode is guaranteed to be supported by devices that support either the
+YUV_<wbr/>REPROCESSING or PRIVATE_<wbr/>REPROCESSING capabilities
+(<a href="#static_android.request.availableCapabilities">android.<wbr/>request.<wbr/>available<wbr/>Capabilities</a> lists either of those capabilities).<wbr/></p></span>
+                  </li>
                 </ul>
 
             </td> <!-- entry_type -->
@@ -13713,7 +13820,14 @@ This mode is optional,<wbr/> may not be support by all devices.<wbr/> The applic
 will be applied.<wbr/> HIGH_<wbr/>QUALITY mode indicates that the camera device
 will use the highest-quality noise filtering algorithms,<wbr/>
 even if it slows down capture rate.<wbr/> FAST means the camera device will not
-slow down capture rate when applying noise filtering.<wbr/></p>
+slow down capture rate when applying noise filtering.<wbr/> Every output stream will
+have a similar amount of enhancement applied.<wbr/></p>
+<p>ZERO_<wbr/>SHUTTER_<wbr/>LAG is meant to be used by applications that maintain a continuous circular
+buffer of high-resolution images during preview and reprocess image(s) from that buffer
+into a final capture when triggered by the user.<wbr/> In this mode,<wbr/> the camera device applies
+noise reduction to low-resolution streams (below maximum recording resolution) to maximize
+preview quality,<wbr/> but does not apply noise reduction to high-resolution streams,<wbr/> since
+those will be reprocessed later if necessary.<wbr/></p>
 <p>For YUV_<wbr/>REPROCESSING,<wbr/> these FAST/<wbr/>HIGH_<wbr/>QUALITY modes both mean that the camera device
 will apply FAST/<wbr/>HIGH_<wbr/>QUALITY YUV domain noise reduction,<wbr/> respectively.<wbr/> The camera device
 may adjust the noise reduction parameters for best image quality based on the
@@ -15195,6 +15309,8 @@ raw sensor images.<wbr/></p>
 <li><a href="#controls_android.edge.mode">android.<wbr/>edge.<wbr/>mode</a></li>
 </ul>
 </li>
+<li><a href="#static_android.noiseReduction.availableNoiseReductionModes">android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Noise<wbr/>Reduction<wbr/>Modes</a> and
+  <a href="#static_android.edge.availableEdgeModes">android.<wbr/>edge.<wbr/>available<wbr/>Edge<wbr/>Modes</a> will both list ZERO_<wbr/>SHUTTER_<wbr/>LAG as a supported mode.<wbr/></li>
 </ul></span>
                   </li>
                   <li>
@@ -15282,6 +15398,8 @@ following:</p>
 <li><a href="#controls_android.reprocess.effectiveExposureFactor">android.<wbr/>reprocess.<wbr/>effective<wbr/>Exposure<wbr/>Factor</a></li>
 </ul>
 </li>
+<li><a href="#static_android.noiseReduction.availableNoiseReductionModes">android.<wbr/>noise<wbr/>Reduction.<wbr/>available<wbr/>Noise<wbr/>Reduction<wbr/>Modes</a> and
+  <a href="#static_android.edge.availableEdgeModes">android.<wbr/>edge.<wbr/>available<wbr/>Edge<wbr/>Modes</a> will both list ZERO_<wbr/>SHUTTER_<wbr/>LAG as a supported mode.<wbr/></li>
 </ul></span>
                   </li>
                   <li>

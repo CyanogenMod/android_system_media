@@ -1355,6 +1355,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     msg = "HIGH_QUALITY";
                     ret = 0;
                     break;
+                case ANDROID_EDGE_MODE_ZERO_SHUTTER_LAG:
+                    msg = "ZERO_SHUTTER_LAG";
+                    ret = 0;
+                    break;
                 default:
                     msg = "error: enum value out of range";
             }
@@ -1633,6 +1637,10 @@ int camera_metadata_enum_snprint(uint32_t tag,
                     break;
                 case ANDROID_NOISE_REDUCTION_MODE_MINIMAL:
                     msg = "MINIMAL";
+                    ret = 0;
+                    break;
+                case ANDROID_NOISE_REDUCTION_MODE_ZERO_SHUTTER_LAG:
+                    msg = "ZERO_SHUTTER_LAG";
                     ret = 0;
                     break;
                 default:
